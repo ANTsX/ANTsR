@@ -1,0 +1,17 @@
+Package: Ritk
+Type: Package
+Title: Interface between ITK library and R
+Version: 1.0
+Date: 2012-02-01
+Author: Shrinidhi KL
+Maintainer: Shrinidhi KL <FAKEID@NOWHERE.COM>
+Description: Expose ITK library routines to R through the use of Rcpp package.
+	     Provide a set of convenient routines for R to use the ITK C++
+	     library without having to write C++ code to use the highly
+	     templated ITK library. The set of functions provided will offer
+	     a subset of functionalities offered by ITK itself to work with 
+	     images.
+License: GPL (>=2)
+LazyLoad: yes
+Depends: Rcpp (>= 0.9.7.2)
+LinkingTo: Rcpp
