@@ -1,1 +1,0 @@
-/home/shrik/spinner/Ritk/Ritk/src/CMakeFiles/Ritk.dir
