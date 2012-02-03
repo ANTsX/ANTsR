@@ -1988,6 +1988,7 @@ void InitializeCommandLineOptions( itk::ants::CommandLineParser *parser )
 }
 
 RcppExport SEXP antsRegistration( SEXP r_args )
+try
 {
   // put the arguments coming from R into standard (argc,argv) format;
   // arguments coming from R don't have the command name as first, argument, so add it manually;
@@ -2024,12 +2025,12 @@ RcppExport SEXP antsRegistration( SEXP r_args )
   if( argc < 2 || parser->Convert<bool>( parser->GetOption( "help" )->GetValue() ) )
     {
     parser->PrintMenu( std::cout, 5, false );
-    exit( EXIT_FAILURE );
+    return Rcpp::wrap( EXIT_FAILURE );
     }
   else if( parser->Convert<bool>( parser->GetOption( 'h' )->GetValue() ) )
     {
     parser->PrintMenu( std::cout, 5, true );
-    exit( EXIT_FAILURE );
+    return Rcpp::wrap( EXIT_FAILURE );
     }
 
   // Get dimensionality
@@ -2043,7 +2044,7 @@ RcppExport SEXP antsRegistration( SEXP r_args )
   else
     {
     std::cerr << "Image dimensionality not specified.  See command line option --dimensionality" << std::endl;
-    exit( EXIT_FAILURE );
+    return Rcpp::wrap( EXIT_FAILURE );
     }
 
   std::cout << std::endl << "Running antsRegistration for " << dimension << "-dimensional images." << std::endl << std::endl;
@@ -2058,7 +2059,7 @@ RcppExport SEXP antsRegistration( SEXP r_args )
      break;
    default:
       std::cerr << "Unsupported dimension" << std::endl;
-      exit( EXIT_FAILURE );
+      return Rcpp::wrap( EXIT_FAILURE ) ;
    }
 
   // cleanup of argv
@@ -2068,5 +2069,10 @@ RcppExport SEXP antsRegistration( SEXP r_args )
     }
   delete[] argv ;
 
-  return Rcpp::wrap( "antsRegistraiton: success" ) ;
+  return Rcpp::wrap( EXIT_SUCCESS ) ;
 }
+ catch( const std::exception& exc )
+   {
+     std::cerr<< exc.what() << std::endl ;
+     return Rcpp::wrap( EXIT_FAILURE ) ;
+   }
