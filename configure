@@ -1,3 +1,8 @@
 #!/bin/bash
+# retrieve Rcpp and R include and link directories
+RCPP_INCLUDE_DIR=`Rscript -e 'Rcpp:::CxxFlags()'`
+RCPP_LIB_DIR=`Rscript -e 'Rcpp:::LdFlags()'`
+R_INCLUDE_DIR=`R CMD config --cppflags`
+R_LIB_DIR=`R CMD config --ldflags`
 cd ./src
-cmake -D ITK_DIR=$ITK_DIR RCPP_INCLUDE_DIRS=$RCPP_INCLUDE_DIRS RCPP_LIB_DIRS=$RCPP_LIB_DIRS R_INCLUDE_DIRS=$R_INCLUDE_DIRS R_LIB_DIRS=$R_LIB_DIRS .
+cmake -D ITK_DIR=$ITK_DIR -D RCPP_INCLUDE_DIR=$RCPP_INCLUDE_DIR -D RCPP_LIB_DIR=$RCPP_LIB_DIR -D R_INCLUDE_DIR=$R_INCLUDE_DIR -D R_LIB_DIR=$R_LIB_DIR .

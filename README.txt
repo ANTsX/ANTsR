@@ -5,7 +5,7 @@ Usage:
 Clone or Pull Ritk from this repository.
 
 Install the package using the command:
-$ R CMD INSTALL --configure-vars="ITK_DIR=<path-to-itk-build> RCPP_INLCUDE_DIRS=<path-to-rcpp-include> RCPP_LIB_DIRS=<path-to-rcpp-libs> R_INCLUDE_DIRS=<path-to-r-include> R_LIB_DIRS=<path-to-r-libs>" Ritk/
+$ R CMD INSTALL --configure-vars="ITK_DIR=<path-to-itk-build>" Ritk/
 
 The installed package can be used in R as follows:
 load the package
