@@ -4,8 +4,11 @@ Description: R package providing ITK features in R
 Usage:
 Clone or Pull Ritk from this repository.
 
-Install the package using the command:
+If you have an ITK build ready to use, install the package using the command:
 $ R CMD INSTALL --configure-vars="ITK_DIR=<path-to-itk-build>" Ritk/
+
+If you don't have an ITK build, install the package using the command:
+$ R CMD INSTALL Ritk/
 
 The installed package can be used in R as follows:
 load the package

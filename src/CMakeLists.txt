@@ -1,24 +1,29 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(Ritk)
+project(Ritk_SuperBuild)
+include( ExternalProject )
 
-# find and itk library; create shared object that interacts with it and link against it
-find_package(ITK REQUIRED)
-include( ${ITK_USE_FILE} )
+if( NOT ITK_DIR )
+  ExternalProject_Add( ITK
+    TMP_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/tmp 
+    STAMP_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/stamp
+    DOWNLOAD_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK
+    GIT_REPOSITORY git://itk.org/ITK.git 
+    GIT_TAG 93dbbda7a71e18a8bf747657c79dbaa9b27a7092 # using this commit because it antsRegistration works fine with it
+    SOURCE_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK
+    CMAKE_ARGS -D ITK_BUILD_ALL_MODULES=ON -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=ON
+    BINARY_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK-build
+    INSTALL_COMMAND "" ) # have to include a blank install command or it will try to install into standard dirs
+  set( ITK_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK-build )
+endif( NOT ITK_DIR )
 
-# headers supplied with the package
-include_directories( ${Ritk_SOURCE_DIR}/include )
 
-# extract the paths from the variables supplied for rcpp and r include and lib
-string( REGEX REPLACE "^ *-I *(.*) *" "\\1" RCPP_INCLUDE_DIR ${RCPP_INCLUDE_DIR} )
-string( REGEX REPLACE "^ *-L *(.*) *" "\\1" RCPP_LIB_DIR ${RCPP_LIB_DIR} )
-string( REGEX REPLACE "^ *-I *(.*) *" "\\1" R_INCLUDE_DIR ${R_INCLUDE_DIR} )
-string( REGEX REPLACE "^ *-L *(.*) *" "\\1" R_LIB_DIR ${R_LIB_DIR} )
-
-# R and Rcpp include and link directories
-include_directories( ${RCPP_INCLUDE_DIR} ${R_INCLUDE_DIR} )
-link_directories( ${RCPP_LIB_DIR} ${R_LIB_DIR} )
-
-add_library( Ritk SHARED ${Ritk_SOURCE_DIR}/src/antsRegistration.cxx ${Ritk_SOURCE_DIR}/src/antsCommandLineParser.cxx ${Ritk_SOURCE_DIR}/src/antsCommandLineOption.cxx )
-target_link_libraries( Ritk Rcpp R ${ITK_LIBRARIES} )
-set_target_properties( Ritk PROPERTIES INSTALL_RPATH_USE_PATH TRUE PREFIX "" )
+ExternalProject_Add( Ritk 
+  #  DEPENDS ITK
+  TMP_DIR ${Ritk_SuperBuild_SOURCE_DIR}/Ritk/tmp
+  STAMP_DIR ${Ritk_SuperBuild_SOURCE_DIR}/Ritk/stamp
+  SOURCE_DIR ${Ritk_SuperBuild_SOURCE_DIR}/Ritk/Ritk
+  CMAKE_ARGS -D ITK_DIR=${ITK_DIR} -D RCPP_INCLUDE_DIR=${RCPP_INCLUDE_DIR} -D RCPP_LIB_DIR=${RCPP_LIB_DIR}
+             -D R_INCLUDE_DIR=${R_INCLUDE_DIR} -D R_LIB_DIR=${R_LIB_DIR} -D CMAKE_INSTALL_PREFIX=${Ritk_SuperBuild_SOURCE_DIR}
+  BINARY_DIR ${Ritk_SuperBuild_SOURCE_DIR}/Ritk/Ritk-build 
+  INSTALL_DIR "" )
