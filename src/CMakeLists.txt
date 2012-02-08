@@ -11,7 +11,7 @@ if( NOT ITK_DIR )
     GIT_REPOSITORY git://itk.org/ITK.git 
     GIT_TAG 93dbbda7a71e18a8bf747657c79dbaa9b27a7092 # using this commit because it antsRegistration works fine with it
     SOURCE_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK
-    CMAKE_ARGS -D ITK_BUILD_ALL_MODULES=ON -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=ON
+    CMAKE_ARGS -D ITK_BUILD_ALL_MODULES=ON -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=ON -D BUILD_TESTING=OFF
     BINARY_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK-build
     INSTALL_COMMAND "" ) # have to include a blank install command or it will try to install into standard dirs
   set( ITK_DIR ${Ritk_SuperBuild_SOURCE_DIR}/ITK/ITK-build )
