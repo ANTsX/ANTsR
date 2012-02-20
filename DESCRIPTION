@@ -13,5 +13,5 @@ Description: Expose ITK library routines to R through the use of Rcpp package.
 	     images.
 License: GPL (>=2)
 LazyLoad: yes
-Depends: Rcpp (>= 0.9.7.2)
+Depends: Rcpp (>= 0.9.7.2) , signal , timeSeries , mFilter , MASS
 LinkingTo: Rcpp
