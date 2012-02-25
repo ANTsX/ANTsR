@@ -1,4 +1,4 @@
-antsr_resting_state_corr_eigenmat <- function( ... )
+antsr_resting_state_corr_eigenanat <- function( ... )
 {
 #!/usr/bin/env Rscript
 Args = c( ... ) ;
