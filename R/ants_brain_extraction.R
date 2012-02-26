@@ -39,5 +39,5 @@ ants_brain_extraction <- function( img = "" )
 	ImageMath( 3 , bm_img , "ME" , bm_img , 1 ) ;
 	ImageMath( 3 , bm_img , "GetLargestComponent" , bm_img ) ;
 	ImageMath( 3 , bm_img , "MD" , bm_img , 1 ) ;
-	# ImageMath( 3 , bm_img , "ME" , bm_img , 1 ) ;
+	ImageMath( 3 , bm_img , "ME" , bm_img , 1 ) ;
 }

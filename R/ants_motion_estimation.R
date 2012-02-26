@@ -34,9 +34,9 @@ ants_motion_estimation <- function( img = "" )
 	antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( filename , moco_img , avg_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avg_img , img , 1 , 32 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 ) ;
 
 	# non-rigid
-	avgnr_img = paste( filename , "_avgnr" , extension , sep = "" ) ;
-	antsMotionCorr( "-d" , 3 , "-a" , img , "-o" , avgnr_img ) ;
+#	avgnr_img = paste( filename , "_avgnr" , extension , sep = "" ) ;
+#	antsMotionCorr( "-d" , 3 , "-a" , img , "-o" , avgnr_img ) ;
 
-	moconr_img = paste( filename , "_moconr" , extension , sep = "" ) ;
-	antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( filename , moconr_img , avgnr_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avgnr_img , img , 1 , 20 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 , "-m" , paste( "CC[" , paste( avgnr_img , img , 1 , 2 , sep = "," ) , "]" , sep = "" ) , "-t" , "GaussianDisplacementField[0.15,3,0.5]" , "-i" , 10 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 10 ) ;
+#	moconr_img = paste( filename , "_moconr" , extension , sep = "" ) ;
+#	antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( filename , moconr_img , avgnr_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avgnr_img , img , 1 , 20 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 , "-m" , paste( "CC[" , paste( avgnr_img , img , 1 , 2 , sep = "," ) , "]" , sep = "" ) , "-t" , "GaussianDisplacementField[0.15,3,0.5]" , "-i" , 10 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 10 ) ;
 }
