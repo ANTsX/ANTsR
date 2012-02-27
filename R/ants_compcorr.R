@@ -3,19 +3,25 @@ ants_compcorr <- function( moco_img = "" , bm_img = "" , avg_img = "" , mocopara
 	if( nchar( moco_img ) == 0 )
 	{
 		print( " please set a valid moco image " ) ;
-		print( " usage : ants_compcorr <moco-image> <brain-mask-image> <average-image> <analysishome> " ) ;
+		print( " usage : ants_compcorr( <moco-image> , <brain-mask-image> , <average-image> , <mocoparams-csv> ) " ) ;
 		return ;
 	}
 	if( nchar( bm_img ) == 0 )
 	{
 		print( " please set a valid brain-mask image " ) ;
-		print( " usage : ants_compcorr <moco-image> <brain-mask-image> <average-image> <analysishome> " ) ;
+		print( " usage : ants_compcorr( <moco-image> , <brain-mask-image> , <average-image> , <mocoparams-csv> ) " ) ;
 		return ;
 	}
 	if( nchar( avg_img ) == 0 )
 	{
 		print( " please set a valid average image " ) ;
-		print( " usage : ants_compcorr <moco-image> <brain-mask-image> <average-image> <analysishome> " ) ;
+		print( " usage : ants_compcorr( <moco-image> , <brain-mask-image> , <average-image> , <mocoparams-csv> ) " ) ;
+		return ;
+	}
+	if( nchar( mocoparams_csv ) == 0 )
+	{
+		print( " please set a valid Moco-params csv file " ) ;
+		print( " usage : ants_compcorr_group( <moco-image> , <brain-mask-image> , <cortmask-image> , <mocoparams-csv> , <dosvd> ) " ) ;
 		return ;
 	}
 
@@ -57,6 +63,6 @@ ants_compcorr <- function( moco_img = "" , bm_img = "" , avg_img = "" , mocopara
 	sccan( "--sparse-svd" , paste( "[" , paste( filt_csv , cortmask_img , -0.15 , sep = "," ) , "]" , sep = "" ) , "-n" , 40 , "-i" , 40 , "--PClusterThresh" , 50 , "-o" , RSF_Networks_img ) ;
 	
 	ea_rsf = paste( filename , "_ea_rsf" , sep = "" ) ;
-	RSF_NetworksprojectionsView1ve_csv = paste( filename , "_RSF_NetworksprojectionsView1vec" , ".csv" , sep = "" ) ;
+	RSF_NetworksprojectionsView1vec_csv = paste( filename , "_RSF_NetworksprojectionsView1vec" , ".csv" , sep = "" ) ;
 	antsr_resting_state_corr_eigenanat( ea_rsf , RSF_NetworksprojectionsView1vec_csv , RSF_NetworksprojectionsView1vec_csv , compcorr_csv, mocoparams_csv ) ;
 }
