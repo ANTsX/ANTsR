@@ -1,3 +1,3 @@
 ResampleImage <- function(...){
-	.Call( "ResampleImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ResampleImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

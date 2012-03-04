@@ -1,3 +1,3 @@
 MemoryTest <- function(...){
-	.Call( "MemoryTest", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "MemoryTest", c(...) , PACKAGE = "ANTsR" ) ;
 }

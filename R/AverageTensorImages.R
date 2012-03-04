@@ -1,3 +1,3 @@
 AverageTensorImages <- function(...){
-	.Call( "AverageTensorImages", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "AverageTensorImages", c(...) , PACKAGE = "ANTsR" ) ;
 }

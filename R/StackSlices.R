@@ -1,3 +1,3 @@
 StackSlices <- function(...){
-	.Call( "StackSlices", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "StackSlices", c(...) , PACKAGE = "ANTsR" ) ;
 }

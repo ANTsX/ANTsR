@@ -1,3 +1,3 @@
 SmoothImage <- function(...){
-	.Call( "SmoothImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "SmoothImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

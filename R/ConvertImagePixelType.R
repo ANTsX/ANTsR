@@ -1,3 +1,3 @@
 ConvertImagePixelType <- function(...){
-	.Call( "ConvertImagePixelType", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ConvertImagePixelType", c(...) , PACKAGE = "ANTsR" ) ;
 }

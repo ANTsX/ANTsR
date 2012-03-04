@@ -1,3 +1,3 @@
 AtroposMin <- function(...){
-	.Call( "AtroposMin", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "AtroposMin", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,3 +1,3 @@
 ExtractSliceFromImage <- function(...){
-	.Call( "ExtractSliceFromImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ExtractSliceFromImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,4 +1,4 @@
 ANTSIntegrateVelocityField <- function(...){
-	.Call( "ANTSIntegrateVelocityField", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ANTSIntegrateVelocityField", c(...) , PACKAGE = "ANTsR" ) ;
 }
 

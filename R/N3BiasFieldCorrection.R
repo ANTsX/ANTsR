@@ -1,3 +1,3 @@
 N3BiasFieldCorrection <- function(...){
-	.Call( "N3BiasFieldCorrection", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "N3BiasFieldCorrection", c(...) , PACKAGE = "ANTsR" ) ;
 }

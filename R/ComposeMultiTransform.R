@@ -1,3 +1,3 @@
 ComposeMultiTransform <- function(...){
-	.Call( "ComposeMultiTransform", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ComposeMultiTransform", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,3 +1,3 @@
 SetOrigin <- function(...){
-	.Call( "SetOrigin", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "SetOrigin", c(...) , PACKAGE = "ANTsR" ) ;
 }

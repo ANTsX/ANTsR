@@ -1,3 +1,3 @@
 PrintHeader <- function(...){
-	.Call( "PrintHeader", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "PrintHeader", c(...) , PACKAGE = "ANTsR" ) ;
 }

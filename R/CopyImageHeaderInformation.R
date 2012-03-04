@@ -1,3 +1,3 @@
 CopyImageHeaderInformation <- function(...){
-	.Call( "CopyImageHeaderInformation", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "CopyImageHeaderInformation", c(...) , PACKAGE = "ANTsR" ) ;
 }

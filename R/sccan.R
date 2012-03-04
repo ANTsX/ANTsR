@@ -1,3 +1,3 @@
 sccan <- function(...){
-	.Call( "sccan", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "sccan", c(...) , PACKAGE = "ANTsR" ) ;
 }

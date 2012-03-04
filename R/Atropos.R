@@ -1,3 +1,3 @@
 Atropos <- function(...){
-	.Call( "Atropos", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "Atropos", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,3 +1,3 @@
 ImageSetStatistics <- function(...){
-	.Call( "ImageSetStatistics", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ImageSetStatistics", c(...) , PACKAGE = "ANTsR" ) ;
 }

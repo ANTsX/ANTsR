@@ -1,3 +1,3 @@
 PermuteFlipImageOrientationAxes <- function(...){
-	.Call( "PermuteFlipImageOrientationAxes", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "PermuteFlipImageOrientationAxes", c(...) , PACKAGE = "ANTsR" ) ;
 }

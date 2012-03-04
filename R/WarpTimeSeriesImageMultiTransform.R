@@ -1,3 +1,3 @@
 WarpTimeSeriesImageMultiTransform <- function(...){
-	.Call( "WarpTimeSeriesImageMultiTransform", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "WarpTimeSeriesImageMultiTransform", c(...) , PACKAGE = "ANTsR" ) ;
 }

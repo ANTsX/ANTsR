@@ -1,3 +1,3 @@
 SetDirectionByMatrix <- function(...){
-	.Call( "SetDirectionByMatrix", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "SetDirectionByMatrix", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,3 +1,3 @@
 ResetDirection <- function(...){
-	.Call( "ResetDirection", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ResetDirection", c(...) , PACKAGE = "ANTsR" ) ;
 }

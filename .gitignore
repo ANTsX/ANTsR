@@ -1,18 +1,18 @@
 # ignore all the backup files created by editors
 *~
 
-# things to ignore in directory Ritk/src
+# things to ignore in directory ANTsR/src
 src/CMakeCache.txt
 src/CMakeFiles/
 src/cmake_install.cmake
 src/Makefile
-src/Ritk-prefix/
-src/Ritk.so
+src/ANTsR-prefix/
+src/ANTsR.so
 src/ITK/
 src/ITK-prefix/
 
-# things to ignore in Ritk/src/Ritk
-src/Ritk/Ritk-build/
-src/Ritk/Ritk-build-dev/
-src/Ritk/stamp/
-src/Ritk/tmp/
+# things to ignore in ANTsR/src/ANTsR
+src/ANTsR/ANTsR-build/
+src/ANTsR/ANTsR-build-dev/
+src/ANTsR/stamp/
+src/ANTsR/tmp/

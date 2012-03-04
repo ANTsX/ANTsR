@@ -1,4 +1,4 @@
 antsRegistration <- function(...){
-	.Call( "antsRegistration", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "antsRegistration", c(...) , PACKAGE = "ANTsR" ) ;
 }
 

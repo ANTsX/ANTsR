@@ -1,3 +1,3 @@
 AverageAffineTransform <- function(...){
-	.Call( "AverageAffineTransform", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "AverageAffineTransform", c(...) , PACKAGE = "ANTsR" ) ;
 }

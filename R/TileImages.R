@@ -1,3 +1,3 @@
 TileImages <- function(...){
-	.Call( "TileImages", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "TileImages", c(...) , PACKAGE = "ANTsR" ) ;
 }

@@ -1,3 +1,3 @@
 ConvertToJpg <- function(...){
-	.Call( "ConvertToJpg", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ConvertToJpg", c(...) , PACKAGE = "ANTsR" ) ;
 }

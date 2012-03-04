@@ -1,3 +1,3 @@
 CreateImage <- function(...){
-	.Call( "CreateImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "CreateImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

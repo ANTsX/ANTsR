@@ -1,3 +1,3 @@
 ExtractRegionFromImageByMask <- function(...){
-	.Call( "ExtractRegionFromImageByMask", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ExtractRegionFromImageByMask", c(...) , PACKAGE = "ANTsR" ) ;
 }

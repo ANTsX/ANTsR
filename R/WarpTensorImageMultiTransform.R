@@ -1,3 +1,3 @@
 WarpTensorImageMultiTransform <- function(...){
-	.Call( "WarpTensorImageMultiTransform", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "WarpTensorImageMultiTransform", c(...) , PACKAGE = "ANTsR" ) ;
 }

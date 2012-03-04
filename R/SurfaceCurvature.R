@@ -1,3 +1,3 @@
 SurfaceCurvature <- function(...){
-	.Call( "SurfaceCurvature", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "SurfaceCurvature", c(...) , PACKAGE = "ANTsR" ) ;
 }

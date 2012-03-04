@@ -1,3 +1,3 @@
 ClusterImageStatistics <- function(...){
-	.Call( "ClusterImageStatistics", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ClusterImageStatistics", c(...) , PACKAGE = "ANTsR" ) ;
 }

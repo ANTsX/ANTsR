@@ -1,4 +1,4 @@
 ANTSIntegrateVectorField <- function(...){
-	.Call( "ANTSIntegrateVectorField", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ANTSIntegrateVectorField", c(...) , PACKAGE = "ANTsR" ) ;
 }
 

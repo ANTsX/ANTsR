@@ -1,3 +1,3 @@
 PasteImageIntoImage <- function(...){
-	.Call( "PasteImageIntoImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "PasteImageIntoImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

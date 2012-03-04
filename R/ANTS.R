@@ -1,3 +1,3 @@
 ANTS <- function(...){
-	.Call( "ANTS", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ANTS", c(...) , PACKAGE = "ANTsR" ) ;
 }

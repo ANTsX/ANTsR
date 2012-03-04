@@ -1,3 +1,3 @@
 ANTSJacobian <- function(...){
-	.Call( "ANTSJacobian", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "ANTSJacobian", c(...) , PACKAGE = "ANTsR" ) ;
 }

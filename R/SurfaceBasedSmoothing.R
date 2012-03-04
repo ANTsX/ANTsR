@@ -1,3 +1,3 @@
 SurfaceBasedSmoothing <- function(...){
-	.Call( "SurfaceBasedSmoothing", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "SurfaceBasedSmoothing", c(...) , PACKAGE = "ANTsR" ) ;
 }

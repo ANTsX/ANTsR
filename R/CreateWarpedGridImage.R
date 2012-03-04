@@ -1,3 +1,3 @@
 CreateWarpedGridImage <- function(...){
-	.Call( "CreateWarpedGridImage", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "CreateWarpedGridImage", c(...) , PACKAGE = "ANTsR" ) ;
 }

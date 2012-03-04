@@ -1,3 +1,3 @@
 LabelOverlapMeasures <- function(...){
-	.Call( "LabelOverlapMeasures", c(...) , PACKAGE = "Ritk" ) ;
+	.Call( "LabelOverlapMeasures", c(...) , PACKAGE = "ANTsR" ) ;
 }
