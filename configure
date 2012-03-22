@@ -6,7 +6,7 @@ R_INCLUDE_DIR=`R CMD config --cppflags`
 R_LIB_DIR=`R CMD config --ldflags`
 
 cd ./src
-# ITK_DIR=set-by-the-user-from-command-line
+# ANTS_DIR=set-by-the-user-from-command-line
 cmake -D ANTS_DIR:PATH="$ANTS_DIR" -D RCPP_INCLUDE_DIR:PATH="$RCPP_INCLUDE_DIR" -D RCPP_LIB_DIR:PATH="$RCPP_LIB_DIR" -D R_INCLUDE_DIR:PATH="$R_INCLUDE_DIR" -D R_LIB_DIR:PATH="$R_LIB_DIR" .
 
 # use make -j on Linux and Mac if user provides MAKE_JOBS; behavior not defined on other platforms
