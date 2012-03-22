@@ -35,7 +35,7 @@ endforeach( loop_var )
 
 # ANTS
 include_directories( ${ANTS_DIR}/include )
-link_directories( ${ANTS_DIR}/ANTS/ANTS-build )
+link_directories( ${ANTS_DIR}/lib )
 
 add_library( ANTsR MODULE 
   ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx

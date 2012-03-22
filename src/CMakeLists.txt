@@ -10,16 +10,17 @@ if( NOT ANTS_DIR )
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     GIT_REPOSITORY git://advants.git.sourceforge.net/gitroot/advants/advants
     GIT_TAG de649cee94a0970b4ed774bab86a698a30bba86b
-    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src/ANTS
+    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src/advants/ANTS
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release -D BUILD_SHARED_LIBS=ON -D BUILD_TESTING=OFF
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" ) # have to include a blank install command or it will try to install into standard dirs
   set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )
+  set( ANTsR_DEPENDSON_ANTS ANTS ) # set when we need to download ANTS; not set otherwise
 endif( NOT ANTS_DIR )
 
 
 ExternalProject_Add( ANTsR 
-  #  DEPENDS ITK
+  DEPENDS ${ANTsR_DEPENDSON_ANTS}
   TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/tmp
   STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/stamp
   SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/ANTsR-src
