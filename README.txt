@@ -2,13 +2,21 @@ Project: ANTsR
 Author: Shrinidhi KL
 Description: R package providing ITK features in R
 Usage:
-Clone or Pull ANTsR from this repository.
+Clone or Pull ANTsR from this repository as follows:
 
-If you have an ITK-build that contains shared and loadable ITK libraries, install the package using the command:
-$ R CMD INSTALL --configure-vars="ITK_DIR=<path-to-itk-build>" ANTsR/
+      $ git clone https://shrinidhikl@github.com/shrinidhikl/ANTsR.git
 
-If you don't have an ITK build, install the package using the command:
-$ R CMD INSTALL ANTsR/
+Install the package as follows:
+
+      $ R CMD INSTALL [--configure-vars="ANTS_DIR=<path-to-ANTS-build>"] [--configure-vars="MAKE_JOBS=<number-of-jobs>"] ANTsR/
+
+In order to provide the optional ANTS_DIR, make sure you have built the ANTS sources from the repository:
+git://advants.git.sourceforge.net/gitroot/advants/advants
+with the commit tag:
+0ca76d70dc8c69ee5d44506eb15169355838ecfd
+Other versions of ANTS have not been tested.
+
+A general rule of thumb for MAKE_JOBS is to provide a number equal to the number of hardware execution threads on your computer.
 
 The installed package can be used in R as follows:
 Load the package
