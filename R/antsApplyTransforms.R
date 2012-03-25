@@ -1,3 +1,3 @@
 antsApplyTransforms <- function(...){
-	.Call( "antsApplyTransforms", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "antsApplyTransforms", c(...) ) ;
 }

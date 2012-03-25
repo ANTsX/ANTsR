@@ -1,4 +1,4 @@
 StudentsTestOnImages <- function(...){
-	.Call( "StudentsTestOnImages", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "StudentsTestOnImages", c(...) ) ;
 }
 

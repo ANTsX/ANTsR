@@ -1,4 +1,4 @@
 CreateDisplacementField <- function(...){
-	.Call( "CreateDisplacementField", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "CreateDisplacementField", c(...) ) ;
 }
 

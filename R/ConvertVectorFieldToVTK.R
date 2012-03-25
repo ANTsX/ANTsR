@@ -1,4 +1,4 @@
 ConvertVectorFieldToVTK <- function(...){
-	.Call( "ConvertVectorFieldToVTK", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ConvertVectorFieldToVTK", c(...) ) ;
 }
 

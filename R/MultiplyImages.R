@@ -1,3 +1,3 @@
 MultiplyImages <- function(...){
-	.Call( "MultiplyImages", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "MultiplyImages", c(...) ) ;
 }

@@ -1,3 +1,3 @@
 AverageImages <- function(...){
-	.Call( "AverageImages", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "AverageImages", c(...) ) ;
 }

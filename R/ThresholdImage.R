@@ -1,3 +1,3 @@
 ThresholdImage <- function(...){
-	.Call( "ThresholdImage", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ThresholdImage", c(...) ) ;
 }

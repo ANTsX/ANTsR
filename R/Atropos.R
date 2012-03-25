@@ -1,3 +1,3 @@
 Atropos <- function(...){
-	.Call( "Atropos", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "Atropos", c(...) ) ;
 }

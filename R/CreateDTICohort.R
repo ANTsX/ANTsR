@@ -1,3 +1,3 @@
 CreateDTICohort <- function(...){
-	.Call( "CreateDTICohort", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "CreateDTICohort", c(...) ) ;
 }

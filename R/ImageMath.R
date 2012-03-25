@@ -1,3 +1,3 @@
 ImageMath <- function(...){
-	.Call( "ImageMath", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ImageMath", c(...) ) ;
 }

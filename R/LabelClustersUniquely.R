@@ -1,3 +1,3 @@
 LabelClustersUniquely <- function(...){
-	.Call( "LabelClustersUniquely", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "LabelClustersUniquely", c(...) ) ;
 }

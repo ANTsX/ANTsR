@@ -1,3 +1,3 @@
 SurfaceCurvature <- function(...){
-	.Call( "SurfaceCurvature", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "SurfaceCurvature", c(...) ) ;
 }

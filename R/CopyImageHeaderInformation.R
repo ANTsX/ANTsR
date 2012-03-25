@@ -1,3 +1,3 @@
 CopyImageHeaderInformation <- function(...){
-	.Call( "CopyImageHeaderInformation", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "CopyImageHeaderInformation", c(...) ) ;
 }

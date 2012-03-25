@@ -1,3 +1,3 @@
 antsMotionCorr <- function(...){
-	.Call( "antsMotionCorr", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "antsMotionCorr", c(...) ) ;
 }

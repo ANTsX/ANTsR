@@ -1,3 +1,3 @@
 ResampleImageBySpacing <- function(...){
-	.Call( "ResampleImageBySpacing", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ResampleImageBySpacing", c(...) ) ;
 }

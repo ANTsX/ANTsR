@@ -1,3 +1,3 @@
 KellyKapowski <- function(...){
-	.Call( "KellyKapowski", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "KellyKapowski", c(...) ) ;
 }

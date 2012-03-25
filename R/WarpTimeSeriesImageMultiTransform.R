@@ -1,3 +1,3 @@
 WarpTimeSeriesImageMultiTransform <- function(...){
-	.Call( "WarpTimeSeriesImageMultiTransform", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "WarpTimeSeriesImageMultiTransform", c(...) ) ;
 }

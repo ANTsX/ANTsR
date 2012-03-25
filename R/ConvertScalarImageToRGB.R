@@ -1,3 +1,3 @@
 ConvertScalarImageToRGB <- function(...){
-	.Call( "ConvertScalarImageToRGB", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ConvertScalarImageToRGB", c(...) ) ;
 }

@@ -1,4 +1,4 @@
 WarpVTKPolyDataMultiTransform <- function(...){
-	.Call( "WarpVTKPolyDataMultiTransform", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "WarpVTKPolyDataMultiTransform", c(...) ) ;
 }
 

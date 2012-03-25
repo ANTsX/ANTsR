@@ -1,4 +1,4 @@
 ComputeSimilarityMetric <- function(...){
-	.Call( "ComputeSimilarityMetric", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ComputeSimilarityMetric", c(...) ) ;
 }
 

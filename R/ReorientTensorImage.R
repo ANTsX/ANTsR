@@ -1,3 +1,3 @@
 ReorientTensorImage <- function(...){
-	.Call( "ReorientTensorImage", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "ReorientTensorImage", c(...) ) ;
 }

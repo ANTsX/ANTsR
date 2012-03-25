@@ -1,3 +1,3 @@
 SetSpacing <- function(...){
-	.Call( "SetSpacing", c(...) , PACKAGE = "ANTsR" ) ;
+	.Call( "SetSpacing", c(...) ) ;
 }
