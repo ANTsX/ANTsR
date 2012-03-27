@@ -60,7 +60,7 @@ ants_compcorr <- function( moco_img = "" , bm_img = "" , avg_img = "" , mocopara
 	RSF_Networks_img = paste( filename , "_RSF_Networks" , extension , sep = "" ) ;
 	antsr_frequency_filter( csv , filt_csv , 1.5 , 0.03 , 0.10 , compcorr_csv ) ;
 	
-	sccan( "--sparse-svd" , paste( "[" , paste( filt_csv , cortmask_img , -0.15 , sep = "," ) , "]" , sep = "" ) , "-n" , 40 , "-i" , 40 , "--PClusterThresh" , 50 , "-o" , RSF_Networks_img ) ;
+	sccan( "--svd" , paste( "sparse[" , paste( filt_csv , cortmask_img , -0.15 , sep = "," ) , "]" , sep = "" ) , "-n" , 40 , "-i" , 40 , "--PClusterThresh" , 50 , "-o" , RSF_Networks_img ) ;
 	
 	ea_rsf = paste( filename , "_ea_rsf" , sep = "" ) ;
 	RSF_NetworksprojectionsView1vec_csv = paste( filename , "_RSF_NetworksprojectionsView1vec" , ".csv" , sep = "" ) ;
