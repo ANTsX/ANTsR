@@ -1,2 +1,2 @@
 Sweave( system.file( "demo/pipeline.Rnw" , package = "ANTsR" ) ) ;
-tools::texi2pdf( "pipeline.tex" ) ;
+tools::texi2dvi( "pipeline.tex" , pdf=TRUE ) ;
