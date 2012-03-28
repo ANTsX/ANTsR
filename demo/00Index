@@ -1,0 +1,1 @@
+create_vignette Creates a pdf vignette of the pipeline { Motion Estimation -> Brain Extaction -> CompCorr }
