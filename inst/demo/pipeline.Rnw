@@ -12,15 +12,14 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This is an example of the fMRI processing pipeline that can be created using ANTsR package. The following pipeline involves \emph{Motion Estimation}, \emph{Brain Extraction}, \emph{CompCorr}. ANTsR package contains scripts named \emph{ants\_motion\_estimation}, \emph{ants\_brain\_extraction}, \emph{ants\_compcorr} that perform these operations. This document shows the output of these operations on an example data.
+This is an example of the fMRI processing pipeline that can be created using ANTsR package. The following pipeline involves \emph{Motion Estimation}, \emph{Brain Extraction} and \emph{CompCorr}. ANTsR package contains scripts named \emph{ants\_motion\_estimation}, \emph{ants\_brain\_extraction}, \emph{ants\_compcorr} that perform these operations. This document shows the output of these operations on an example data.
 \end{abstract}
 
 Load the library
 
-<<>>=
+<<echo=FALSE>>=
 
-	library(ANTsR)
-
+library(ANTsR)
 @ 
 
 \section{Motion Estimation}
@@ -32,7 +31,6 @@ img = system.file( "demo/data/KKI2009-01-fMRI.nii" , package = "ANTsR" )
 avg_img = "KKI2009-01-fMRI_avg.nii"
 moco_img = "KKI2009-01-fMRI_moco.nii"
 antsMotionCorr( "-d" , 3 , "-a" , img , "-o" , avg_img ) 
-
 @ 
 
 Perform rigid registration.
@@ -40,7 +38,6 @@ Perform rigid registration.
 <<>>= 
 
 antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( "KKI2009-01-fMRI" , moco_img , avg_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avg_img , img , 1 , 32 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 ) 
-
 @ 
 
 Motion corrected image and the average image have been written on to the disk. Read the images using the the package \emph{oro.nifti} as follows.
@@ -55,7 +52,6 @@ avg_img = readNIfTI( "KKI2009-01-fMRI_avg.nii" )
 avg_img
 moco_img = readNIfTI( "KKI2009-01-fMRI_moco.nii" )
 moco_img
-
 @
 
 Display the orthographic view of the images at an intant of time. Figure \vref{img} , figure \vref{avg_img} and figure \vref{moco_img} show the command and its result.
@@ -65,7 +61,6 @@ Display the orthographic view of the images at an intant of time. Figure \vref{i
 <<fig=TRUE>>= 
 
 orthographic( img , w = 1 )
-
 @
 
 \caption{original image at time w = 1}
@@ -77,7 +72,6 @@ orthographic( img , w = 1 )
 <<fig=TRUE>>= 
 
 orthographic( avg_img , w = 1 )
-
 @
 
 \caption{average image at time w = 1}
@@ -89,7 +83,6 @@ orthographic( avg_img , w = 1 )
 <<fig=TRUE>>= 
 
 orthographic( moco_img , w = 1 )
-
 @
 
 \caption{motion-corrected image at time w = 1}
@@ -102,7 +95,6 @@ Motion estimation step also writes the metric results into a csv file which can 
 <<fig=TRUE>>=
 
 plot( read.csv( "KKI2009-01-fMRIMOCOparams.csv" )$MetricPost , type = "l" , main = "Motion Estimation: Metric Results" , xlab = "time" , ylab = "metric" ) 
-
 @
 
 \caption{plot of the metric results}
@@ -116,7 +108,6 @@ Set the average and the brainmask image.
 
 avg_img = "KKI2009-01-fMRI_avg.nii" 
 bm_img = "KKI2009-01-fMRI_avg_brainmask.nii" 
-
 @ 
 
 Use the ANTsR programs \emph{ThresholdImage} and \emph{ImageMath} to perform brain-extraction on the average image as follows.
@@ -129,7 +120,6 @@ ImageMath( 3 , bm_img , "ME" , bm_img , 1 )
 ImageMath( 3 , bm_img , "GetLargestComponent" , bm_img ) 
 ImageMath( 3 , bm_img , "MD" , bm_img , 1 ) 
 ImageMath( 3 , bm_img , "ME" , bm_img , 1 ) 
-
 @
 
 The brain-extraction step writes the brainmask image to the disk. Read it and display it as shown in figure \vref{bm_img}.
@@ -138,7 +128,6 @@ The brain-extraction step writes the brainmask image to the disk. Read it and di
 
 bm_img = readNIfTI( "KKI2009-01-fMRI_avg_brainmask.nii" )
 bm_img
-
 @
 
 \begin{figure}
@@ -147,7 +136,6 @@ bm_img
 <<fig=TRUE>>=
 
 orthographic( bm_img , w = 1 )
-
 @
 
 \caption{brainmask image at time w=1}
@@ -173,7 +161,6 @@ filt_csv = "KKI2009-01-fMRI_moco_filt.csv"
 RSF_Networks_img = "KKI2009-01-fMRI_moco_RSF_Networks.nii" 
 ea_rsf = "KKI2009-01-fMRI_moco_ea_rsf" 
 RSF_NetworksprojectionsView1vec_csv = "KKI2009-01-fMRI_moco_RSF_NetworksprojectionsView1vec.csv" 
-
 @
 
 Peform \emph{compcorr} using the following commands.
@@ -190,7 +177,6 @@ Atropos( "-d" , 3 , "-a" , avg_img , "-a" , compcorr_variance_img , "-m" , "[0.3
 ThresholdImage( 3 , seg_img , cortmask_img , 2 , 2 ) 
 sccan( "--timeseriesimage-to-matrix" , paste( "[" , paste( moco_img , cortmask_img , 0.0 , 0.0 , sep = "," ) , "]" , sep = "" ) , "-o" , csv ) 
 antsr_frequency_filter( csv , filt_csv , 1.5 , 0.03 , 0.10 , compcorr_csv ) 	
-
 @
 
 \end{document}
