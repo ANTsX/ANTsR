@@ -1,12 +1,13 @@
 Package: ANTsR
 Type: Package
-Title: ANTs in R
+Title: ANTs <--> R
 Version: 1.0
 Date: 2012-02-01
-Author: Shrinidhi KL, Brian Avants
-Maintainer: Shrinidhi KL, Brian Avants <FAKEID@NOWHERE.COM>
+Author: Shrinidhi KL, Brian Avants, ANTS-developers
+Maintainer: Shrinidhi KL <FAKEID@NOWHERE.COM>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)
 LazyLoad: yes
 Depends: Rcpp (>= 0.9.7.2) , signal , timeSeries , mFilter , MASS
+Suggests: oro.nifti , XML , bitops
 LinkingTo: Rcpp
