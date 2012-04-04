@@ -9,7 +9,7 @@ if( NOT ANTS_DIR )
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     GIT_REPOSITORY git://advants.git.sourceforge.net/gitroot/advants/advants
-    GIT_TAG 1737ebe04530a2ac4bd7399db06abf616e10a577
+    GIT_TAG 9bbc57e5d8caf52b68b02f28acf46fb45b15e5b1
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
