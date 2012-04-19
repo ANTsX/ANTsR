@@ -1,3 +1,3 @@
 PermuteFlipImageOrientationAxes <- function(...){
-	.Call( "PermuteFlipImageOrientationAxes", c(...) ) ;
+	.Call( "PermuteFlipImageOrientationAxes", as.character( c(...) ) ) ;
 }

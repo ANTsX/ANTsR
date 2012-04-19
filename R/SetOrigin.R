@@ -1,3 +1,3 @@
 SetOrigin <- function(...){
-	.Call( "SetOrigin", c(...) ) ;
+	.Call( "SetOrigin", as.character( c(...) ) ) ;
 }

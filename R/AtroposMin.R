@@ -1,3 +1,3 @@
 AtroposMin <- function(...){
-	.Call( "AtroposMin", c(...) ) ;
+	.Call( "AtroposMin", as.character( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 N4BiasFieldCorrection <- function(...){
-	.Call( "N4BiasFieldCorrection", c(...) ) ;
+	.Call( "N4BiasFieldCorrection", as.character( c(...) ) ) ;
 }

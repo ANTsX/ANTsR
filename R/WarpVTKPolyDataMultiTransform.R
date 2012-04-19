@@ -1,4 +1,4 @@
 WarpVTKPolyDataMultiTransform <- function(...){
-	.Call( "WarpVTKPolyDataMultiTransform", c(...) ) ;
+	.Call( "WarpVTKPolyDataMultiTransform", as.character( c(...) ) ) ;
 }
 

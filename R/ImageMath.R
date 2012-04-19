@@ -1,3 +1,3 @@
 ImageMath <- function(...){
-	.Call( "ImageMath", c(...) ) ;
+	.Call( "ImageMath", as.character( c(...) ) ) ;
 }

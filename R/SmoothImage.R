@@ -1,3 +1,3 @@
 SmoothImage <- function(...){
-	.Call( "SmoothImage", c(...) ) ;
+	.Call( "SmoothImage", as.character( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 ConvertScalarImageToRGB <- function(...){
-	.Call( "ConvertScalarImageToRGB", c(...) ) ;
+	.Call( "ConvertScalarImageToRGB", as.character( c(...) ) ) ;
 }

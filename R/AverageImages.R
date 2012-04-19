@@ -1,3 +1,3 @@
 AverageImages <- function(...){
-	.Call( "AverageImages", c(...) ) ;
+	.Call( "AverageImages", as.character( c(...) ) ) ;
 }

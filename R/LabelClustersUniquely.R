@@ -1,3 +1,3 @@
 LabelClustersUniquely <- function(...){
-	.Call( "LabelClustersUniquely", c(...) ) ;
+	.Call( "LabelClustersUniquely", as.character( c(...) ) ) ;
 }

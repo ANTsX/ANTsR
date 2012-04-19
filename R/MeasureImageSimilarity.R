@@ -1,3 +1,3 @@
 MeasureImageSimilarity <- function(...){
-	.Call( "MeasureImageSimilarity", c(...) ) ;
+	.Call( "MeasureImageSimilarity", as.character( c(...) ) ) ;
 }

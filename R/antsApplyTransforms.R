@@ -1,3 +1,3 @@
 antsApplyTransforms <- function(...){
-	.Call( "antsApplyTransforms", c(...) ) ;
+	.Call( "antsApplyTransforms", as.character( c(...) ) ) ;
 }

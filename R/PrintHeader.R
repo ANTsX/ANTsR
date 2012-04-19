@@ -1,3 +1,3 @@
 PrintHeader <- function(...){
-	.Call( "PrintHeader", c(...) ) ;
+	.Call( "PrintHeader", as.character( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 CreateImage <- function(...){
-	.Call( "CreateImage", c(...) ) ;
+	.Call( "CreateImage", as.character( c(...) ) ) ;
 }

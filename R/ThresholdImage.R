@@ -1,3 +1,3 @@
 ThresholdImage <- function(...){
-	.Call( "ThresholdImage", c(...) ) ;
+	.Call( "ThresholdImage", as.character( c(...) ) ) ;
 }

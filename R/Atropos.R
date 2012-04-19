@@ -1,3 +1,3 @@
 Atropos <- function(...){
-	.Call( "Atropos", c(...) ) ;
+	.Call( "Atropos", as.character( c(...) ) ) ;
 }

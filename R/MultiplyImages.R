@@ -1,3 +1,3 @@
 MultiplyImages <- function(...){
-	.Call( "MultiplyImages", c(...) ) ;
+	.Call( "MultiplyImages", as.character( c(...) ) ) ;
 }

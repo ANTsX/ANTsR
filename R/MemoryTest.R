@@ -1,3 +1,3 @@
 MemoryTest <- function(...){
-	.Call( "MemoryTest", c(...) ) ;
+	.Call( "MemoryTest", as.character( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 ANTSJacobian <- function(...){
-	.Call( "ANTSJacobian", c(...) ) ;
+	.Call( "ANTSJacobian", as.character( c(...) ) ) ;
 }

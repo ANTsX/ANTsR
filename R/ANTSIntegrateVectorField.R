@@ -1,4 +1,4 @@
 ANTSIntegrateVectorField <- function(...){
-	.Call( "ANTSIntegrateVectorField", c(...) ) ;
+	.Call( "ANTSIntegrateVectorField", as.character( c(...) ) ) ;
 }
 

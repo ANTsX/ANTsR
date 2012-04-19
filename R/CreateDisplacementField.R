@@ -1,4 +1,4 @@
 CreateDisplacementField <- function(...){
-	.Call( "CreateDisplacementField", c(...) ) ;
+	.Call( "CreateDisplacementField", as.character( c(...) ) ) ;
 }
 

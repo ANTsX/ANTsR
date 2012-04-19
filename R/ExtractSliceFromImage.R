@@ -1,3 +1,3 @@
 ExtractSliceFromImage <- function(...){
-	.Call( "ExtractSliceFromImage", c(...) ) ;
+	.Call( "ExtractSliceFromImage", as.character( c(...) ) ) ;
 }

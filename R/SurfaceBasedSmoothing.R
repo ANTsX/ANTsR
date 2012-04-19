@@ -1,3 +1,3 @@
 SurfaceBasedSmoothing <- function(...){
-	.Call( "SurfaceBasedSmoothing", c(...) ) ;
+	.Call( "SurfaceBasedSmoothing", as.character( c(...) ) ) ;
 }

@@ -1,4 +1,4 @@
 antsRegistration <- function(...){
-	.Call( "antsRegistration", c(...) ) ;
+	.Call( "antsRegistration", as.character( c(...) ) ) ;
 }
 

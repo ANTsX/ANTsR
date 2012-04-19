@@ -2,7 +2,7 @@ antsr_frequency_filter <- function( ... )
 {
 #!/usr/bin/env Rscript
 #Args <- commandArgs()
-Args <- c(...) ;
+Args <- as.character( c(...) ) ;
 library("signal")
 library("timeSeries")
 library("mFilter")

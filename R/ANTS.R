@@ -1,3 +1,3 @@
 ANTS <- function(...){
-	.Call( "ANTS", c(...) ) ;
+	.Call( "ANTS", as.character( c(...) ) ) ;
 }

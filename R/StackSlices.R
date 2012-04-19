@@ -1,3 +1,3 @@
 StackSlices <- function(...){
-	.Call( "StackSlices", c(...) ) ;
+	.Call( "StackSlices", as.character( c(...) ) ) ;
 }

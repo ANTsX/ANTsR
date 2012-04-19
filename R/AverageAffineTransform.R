@@ -1,3 +1,3 @@
 AverageAffineTransform <- function(...){
-	.Call( "AverageAffineTransform", c(...) ) ;
+	.Call( "AverageAffineTransform", as.character( c(...) ) ) ;
 }

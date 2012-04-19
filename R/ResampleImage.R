@@ -1,3 +1,3 @@
 ResampleImage <- function(...){
-	.Call( "ResampleImage", c(...) ) ;
+	.Call( "ResampleImage", as.character( c(...) ) ) ;
 }

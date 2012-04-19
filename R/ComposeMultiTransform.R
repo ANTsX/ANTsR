@@ -1,3 +1,3 @@
 ComposeMultiTransform <- function(...){
-	.Call( "ComposeMultiTransform", c(...) ) ;
+	.Call( "ComposeMultiTransform", as.character( c(...) ) ) ;
 }

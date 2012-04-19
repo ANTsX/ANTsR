@@ -1,3 +1,3 @@
 ConvertToJpg <- function(...){
-	.Call( "ConvertToJpg", c(...) ) ;
+	.Call( "ConvertToJpg", as.character( c(...) ) ) ;
 }

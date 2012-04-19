@@ -1,3 +1,3 @@
 ReorientTensorImage <- function(...){
-	.Call( "ReorientTensorImage", c(...) ) ;
+	.Call( "ReorientTensorImage", as.character( c(...) ) ) ;
 }

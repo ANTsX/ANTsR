@@ -1,4 +1,4 @@
 ConvertVectorFieldToVTK <- function(...){
-	.Call( "ConvertVectorFieldToVTK", c(...) ) ;
+	.Call( "ConvertVectorFieldToVTK", as.character( c(...) ) ) ;
 }
 

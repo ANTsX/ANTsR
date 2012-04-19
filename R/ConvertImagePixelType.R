@@ -1,3 +1,3 @@
 ConvertImagePixelType <- function(...){
-	.Call( "ConvertImagePixelType", c(...) ) ;
+	.Call( "ConvertImagePixelType", as.character( c(...) ) ) ;
 }

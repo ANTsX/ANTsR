@@ -1,3 +1,3 @@
 CopyImageHeaderInformation <- function(...){
-	.Call( "CopyImageHeaderInformation", c(...) ) ;
+	.Call( "CopyImageHeaderInformation", as.character( c(...) ) ) ;
 }

@@ -1,4 +1,4 @@
 TensorDerivedImage <- function(...){
-	.Call( "TensorDerivedImage", c(...) ) ;
+	.Call( "TensorDerivedImage", as.character( c(...) ) ) ;
 }
 

@@ -1,3 +1,3 @@
 ImageSetStatistics <- function(...){
-	.Call( "ImageSetStatistics", c(...) ) ;
+	.Call( "ImageSetStatistics", as.character( c(...) ) ) ;
 }

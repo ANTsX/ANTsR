@@ -1,3 +1,3 @@
 LaplacianThickness <- function(...){
-	.Call( "LaplacianThickness", c(...) ) ;
+	.Call( "LaplacianThickness", as.character( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 TileImages <- function(...){
-	.Call( "TileImages", c(...) ) ;
+	.Call( "TileImages", as.character( c(...) ) ) ;
 }

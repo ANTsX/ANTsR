@@ -1,3 +1,3 @@
 MeasureMinMaxMean <- function(...){
-	.Call( "MeasureMinMaxMean", c(...) ) ;
+	.Call( "MeasureMinMaxMean", as.character( c(...) ) ) ;
 }

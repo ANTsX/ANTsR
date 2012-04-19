@@ -1,3 +1,3 @@
 PasteImageIntoImage <- function(...){
-	.Call( "PasteImageIntoImage", c(...) ) ;
+	.Call( "PasteImageIntoImage", as.character( c(...) ) ) ;
 }

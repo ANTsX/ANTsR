@@ -1,4 +1,4 @@
 ANTSIntegrateVelocityField <- function(...){
-	.Call( "ANTSIntegrateVelocityField", c(...) ) ;
+	.Call( "ANTSIntegrateVelocityField", as.character( c(...) ) ) ;
 }
 

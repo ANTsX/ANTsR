@@ -1,3 +1,3 @@
 ExtractRegionFromImageByMask <- function(...){
-	.Call( "ExtractRegionFromImageByMask", c(...) ) ;
+	.Call( "ExtractRegionFromImageByMask", as.character( c(...) ) ) ;
 }

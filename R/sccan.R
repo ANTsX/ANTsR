@@ -1,3 +1,3 @@
 sccan <- function(...){
-	.Call( "sccan", c(...) ) ;
+	.Call( "sccan", as.character( c(...) ) ) ;
 }

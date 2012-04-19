@@ -1,4 +1,4 @@
 GetMeshAndTopology <- function(...){
-	.Call( "GetMeshAndTopology", c(...) ) ;
+	.Call( "GetMeshAndTopology", as.character( c(...) ) ) ;
 }
 

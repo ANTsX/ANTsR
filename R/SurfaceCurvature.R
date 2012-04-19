@@ -1,3 +1,3 @@
 SurfaceCurvature <- function(...){
-	.Call( "SurfaceCurvature", c(...) ) ;
+	.Call( "SurfaceCurvature", as.character( c(...) ) ) ;
 }

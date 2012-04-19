@@ -1,3 +1,3 @@
 ResetDirection <- function(...){
-	.Call( "ResetDirection", c(...) ) ;
+	.Call( "ResetDirection", as.character( c(...) ) ) ;
 }

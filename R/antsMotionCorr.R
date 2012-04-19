@@ -1,3 +1,3 @@
 antsMotionCorr <- function(...){
-	.Call( "antsMotionCorr", c(...) ) ;
+	.Call( "antsMotionCorr", as.character( c(...) ) ) ;
 }

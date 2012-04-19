@@ -1,3 +1,3 @@
 WarpTimeSeriesImageMultiTransform <- function(...){
-	.Call( "WarpTimeSeriesImageMultiTransform", c(...) ) ;
+	.Call( "WarpTimeSeriesImageMultiTransform", as.character( c(...) ) ) ;
 }
