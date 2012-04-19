@@ -8,15 +8,7 @@ Clone or Pull ANTsR from this repository as follows:
 
 Install the package as follows:
 
-      $ R CMD INSTALL [--configure-vars="ANTS_DIR=<path-to-ANTS-build>"] [--configure-vars="MAKE_JOBS=<number-of-jobs>"] ANTsR/
-
-In order to provide the optional ANTS_DIR, make sure you have built the ANTS sources from the repository:
-git://advants.git.sourceforge.net/gitroot/advants/advants
-with the commit tag:
-0ca76d70dc8c69ee5d44506eb15169355838ecfd
-Other versions of ANTS have not been tested.
-
-A general rule of thumb for MAKE_JOBS is to provide a number equal to the number of hardware execution threads on your computer.
+      $ R CMD INSTALL [--configure-vars="ITK_DIR=<path-to-ITK-build>"] [--configure-vars="ANTS_DIR=<path-to-ANTS-build>"] ANTsR/
 
 The installed package can be used in R as follows:
 Load the package
