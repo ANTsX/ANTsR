@@ -24,7 +24,7 @@ if( NOT ANTS_DIR )
 endif( NOT ANTS_DIR )
 
 if( NOT ITK_DIR )
-  set( ITK_DIR ${ANTS_DIR}/ITKv4_build )
+  set( ITK_DIR ${ANTS_DIR}/ITKv4-build )
 endif( NOT ITK_DIR )
 
 ExternalProject_Add( ANTsR 
