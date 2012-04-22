@@ -1,3 +1,3 @@
 sccan <- function(...){
-	.Call( "sccan", as.character( c(...) ) ) ;
+	.Call( "sccan", int_antsProcessArguments( c(...) ) ) ;
 }

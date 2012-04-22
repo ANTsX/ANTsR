@@ -1,3 +1,3 @@
 ImageMath <- function(...){
-	.Call( "ImageMath", as.character( c(...) ) ) ;
+	.Call( "ImageMath", int_antsProcessArguments( c(...) ) ) ;
 }

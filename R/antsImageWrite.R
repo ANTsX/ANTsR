@@ -1,3 +1,3 @@
-antsImageWrite <- function( image , filename , pixeltype , dimension ){
-	.Call( "antsImageWrite", image , filename , pixeltype , dimension ) ;
+antsImageWrite <- function( image , filename ){
+	.Call( "antsImageWrite", image , filename ) ;
 }

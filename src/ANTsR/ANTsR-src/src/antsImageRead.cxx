@@ -1,4 +1,5 @@
 
+#include<typeinfo>
 #include<vector>
 #include<string>
 #include<Rcpp.h>
@@ -19,6 +20,32 @@ namespace ants
     image_reader->SetFileName( filename.c_str() ) ;
     image_reader->Update();
     return image_reader->GetOutput() ;
+  }
+
+  template< class ImagePointerType >
+  void printImageInfo( ImagePointerType image , std::string PixelType , std::ostream& os )
+  {
+    os << "PixelType: " << PixelType << "\n" ;
+    os << "Dimension: " << image->ImageDimension << "\n" ;
+    os << "Extent:    [ " ;
+    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
+      {
+	os << image->GetLargestPossibleRegion().GetSize()[i] << " , " ;
+      }
+    os << image->GetLargestPossibleRegion().GetSize()[ image->ImageDimension - 1 ] << " ]\n" ;
+    os << "Origin:    [ " ;
+    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
+      {
+	os << image->GetOrigin()[0] << " , " ;
+      }
+    os << image->GetOrigin()[ image->ImageDimension - 1 ] << " ]\n" ;
+    os << "Spacing:   [ " ;
+    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
+      {
+	os << image->GetSpacing()[0] << " , " ;
+      }
+    os << image->GetSpacing()[ image->ImageDimension - 1 ] << " ]" << std::endl ;
+    return ;    
   }
   
 } // namespace ants
@@ -45,8 +72,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'double' | Dimension: '4'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "double" ) ;
+      image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 3 && pixeltype == "double" )
     {
@@ -55,8 +86,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'double' | Dimension: '3'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "double" ) ;
+      image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 2 && pixeltype == "double" )
     {
@@ -65,8 +100,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'double' | Dimension: '2'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "double" ) ;
+      image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension  == 4 && pixeltype == "float" )
     {
@@ -75,8 +114,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'float' | Dimension: '4'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "float" ) ;
+      image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 3 && pixeltype == "float" )
     {
@@ -85,8 +128,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'float' | Dimension: '3'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "float" ) ;
+      image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 2 && pixeltype == "float" )
     {
@@ -95,8 +142,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'float' | Dimension: '2'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "float" ) ;
+      image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 4 && pixeltype == "unsigned int" )
     {
@@ -105,8 +156,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'unsigned int' | Dimension: '4'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
+      image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 3 && pixeltype == "unsigned int" )
     {
@@ -115,8 +170,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'unsigned int' | Dimension: '3'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
+      image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else if( dimension == 2 && pixeltype == "unsigned int" )
     {
@@ -125,8 +184,12 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      Rcpp::Rcout << "Done reading image. PixelType: 'unsigned int' | Dimension: '2'" << std::endl ;
-      return xptr ;
+      Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+      image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
+      image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "pointer" ) = xptr ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      return image_r ;
     }
   else
     {

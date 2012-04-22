@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project(ANTsR)
 
 # set debug build flags
-set( CMAKE_CXX_FLAGS_DEBUG "-g -Wall" CACHE STRING "Debug flags" )
-set( CMAKE_C_FLAGS_DEBUG "-g -Wall" CACHE STRING "Debug flags" )
+set( CMAKE_CXX_FLAGS_DEBUG "-g -Wall" CACHE STRING "Debug flags" FORCE )
+set( CMAKE_C_FLAGS_DEBUG "-g -Wall" CACHE STRING "Debug flags" FORCE )
 
 # check if any of the following required directories are not set; 
 if( NOT R_INCLUDE_DIR )
@@ -333,3 +333,8 @@ install( TARGETS RantsImageWrite DESTINATION . )
 add_library( RantsImage MODULE ${ANTsR_SOURCE_DIR}/src/antsImage.cxx )
 target_link_libraries( RantsImage ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
 install( TARGETS RantsImage DESTINATION . )
+
+add_library( RantsImageClone MODULE ${ANTsR_SOURCE_DIR}/src/antsImageClone.cxx )
+target_link_libraries( RantsImageClone ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
+install( TARGETS RantsImageClone DESTINATION . )
+

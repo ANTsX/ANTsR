@@ -1,3 +1,3 @@
 antsMotionCorr <- function(...){
-	.Call( "antsMotionCorr", as.character( c(...) ) ) ;
+	.Call( "antsMotionCorr", int_antsProcessArguments( c(...) ) ) ;
 }

@@ -1,3 +1,3 @@
 Atropos <- function(...){
-	.Call( "Atropos", as.character( c(...) ) ) ;
+	.Call( "Atropos", int_antsProcessArguments( c(...) ) ) ;
 }

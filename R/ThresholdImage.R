@@ -1,3 +1,3 @@
 ThresholdImage <- function(...){
-	.Call( "ThresholdImage", as.character( c(...) ) ) ;
+	.Call( "ThresholdImage", int_antsProcessArguments( c(...) ) ) ;
 }

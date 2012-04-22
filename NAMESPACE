@@ -1,3 +1,4 @@
+useDynLib(libRantsImageClone)
 useDynLib(libRantsApplyTransforms)
 useDynLib(libRantsImage)
 useDynLib(libRantsImageRead)
