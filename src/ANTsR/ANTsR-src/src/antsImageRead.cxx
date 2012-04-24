@@ -1,5 +1,4 @@
 
-#include<typeinfo>
 #include<vector>
 #include<string>
 #include<Rcpp.h>
@@ -23,28 +22,13 @@ namespace ants
   }
 
   template< class ImagePointerType >
-  void printImageInfo( ImagePointerType image , std::string PixelType , std::ostream& os )
+  void printImageInfo( ImagePointerType image , std::ostream& os )
   {
-    os << "PixelType: " << PixelType << "\n" ;
-    os << "Dimension: " << image->ImageDimension << "\n" ;
-    os << "Extent:    [ " ;
-    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
-      {
-	os << image->GetLargestPossibleRegion().GetSize()[i] << " , " ;
-      }
-    os << image->GetLargestPossibleRegion().GetSize()[ image->ImageDimension - 1 ] << " ]\n" ;
-    os << "Origin:    [ " ;
-    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
-      {
-	os << image->GetOrigin()[0] << " , " ;
-      }
-    os << image->GetOrigin()[ image->ImageDimension - 1 ] << " ]\n" ;
-    os << "Spacing:   [ " ;
-    for( int i = 0 ; i < image->ImageDimension - 1 ; ++i )
-      {
-	os << image->GetSpacing()[0] << " , " ;
-      }
-    os << image->GetSpacing()[ image->ImageDimension - 1 ] << " ]" << std::endl ;
+    os << "Origin: " << image->GetOrigin() << "\n" ;
+    os << "Spacing: " << image->GetSpacing() << "\n" ;
+    os << "LargestPossibleRegion: " << image->GetLargestPossibleRegion() ;
+    os << "BufferedRegion: " << image->GetBufferedRegion() ;
+    os << "RequestedRegion: " << image->GetRequestedRegion() ;
     return ;    
   }
   
@@ -76,7 +60,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 4 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 3 && pixeltype == "double" )
@@ -90,7 +74,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 3 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 2 && pixeltype == "double" )
@@ -104,7 +88,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 2 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "double" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension  == 4 && pixeltype == "float" )
@@ -118,7 +102,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 4 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 3 && pixeltype == "float" )
@@ -132,7 +116,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 3 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 2 && pixeltype == "float" )
@@ -146,7 +130,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 2 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "float" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 4 && pixeltype == "unsigned int" )
@@ -160,7 +144,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 4 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 3 && pixeltype == "unsigned int" )
@@ -174,7 +158,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 3 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else if( dimension == 2 && pixeltype == "unsigned int" )
@@ -188,7 +172,7 @@ try
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 2 ;
       image_r.slot( "pointer" ) = xptr ;
-      ants::printImageInfo( ( *ptr_ptr_image ) , "unsigned int" , Rcpp::Rcout ) ;
+      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
     }
   else
