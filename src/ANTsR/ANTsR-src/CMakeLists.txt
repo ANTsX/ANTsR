@@ -342,3 +342,6 @@ add_library( RantsBinaryThresholdImageFilter MODULE ${ANTsR_SOURCE_DIR}/src/ants
 target_link_libraries( RantsBinaryThresholdImageFilter ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
 install( TARGETS RantsBinaryThresholdImageFilter DESTINATION . )
 
+add_library( RantsThresholdImageFilter MODULE ${ANTsR_SOURCE_DIR}/src/antsThresholdImageFilter.cxx )
+target_link_libraries( RantsThresholdImageFilter ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
+install( TARGETS RantsThresholdImageFilter DESTINATION . )

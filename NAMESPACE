@@ -1,3 +1,4 @@
+useDynLib(libRantsThresholdImageFilter)
 useDynLib(libRantsBinaryThresholdImageFilter)
 useDynLib(libRantsImageClone)
 useDynLib(libRantsApplyTransforms)

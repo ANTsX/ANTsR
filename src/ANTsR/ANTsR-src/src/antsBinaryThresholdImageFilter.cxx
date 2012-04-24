@@ -7,10 +7,10 @@
 #include "itkBinaryThresholdImageFilter.h"
 
 RcppExport SEXP antsBinaryThresholdImageFilter_New( SEXP r_inputimage_pixeltype , 
-						SEXP r_inputimage_dimension , 
-						SEXP r_outputimage_pixeltype , 
-						SEXP r_outputimage_dimension 
-						)
+						    SEXP r_inputimage_dimension , 
+						    SEXP r_outputimage_pixeltype , 
+						    SEXP r_outputimage_dimension 
+						    )
 try
 {
   if( r_inputimage_pixeltype == NULL || r_inputimage_dimension == NULL || r_outputimage_pixeltype == NULL || r_outputimage_dimension == NULL )
@@ -25,7 +25,6 @@ try
   std::string outputimage_pixeltype = Rcpp::as< std::string >( r_outputimage_pixeltype ) ;
   unsigned int outputimage_dimension = Rcpp::as< unsigned int >( r_outputimage_dimension ) ;
 
-  // read the image using the above info
   if( inputimage_pixeltype == "double" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -74,6 +73,7 @@ try
 	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
 	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
 	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
 	  filter_r.slot( "pointer" ) = xptr ;
 	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "float" ) ;
 	  filter_r.slot( "inputimage_dimension" ) = 4 ;
@@ -99,7 +99,9 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_SetInput( SEXP r_filter , SEXP r_image )
+RcppExport SEXP antsBinaryThresholdImageFilter_SetInput( SEXP r_filter , 
+							 SEXP r_image 
+							 )
 try
 {
   if( r_filter == NULL || r_image == NULL )
@@ -174,7 +176,8 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_GetOutput( SEXP r_filter )
+RcppExport SEXP antsBinaryThresholdImageFilter_GetOutput( SEXP r_filter 
+							  )
 try
 {
   if( r_filter == NULL )
@@ -247,7 +250,8 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_Update( SEXP r_filter )
+RcppExport SEXP antsBinaryThresholdImageFilter_Update( SEXP r_filter 
+						       )
 try
 {
   if( r_filter == NULL )
@@ -313,7 +317,9 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_SetOutsideValue( SEXP r_filter , SEXP r_outsidevalue )
+RcppExport SEXP antsBinaryThresholdImageFilter_SetOutsideValue( SEXP r_filter , 
+								SEXP r_outsidevalue 
+								)
 try
 {
   if( r_filter == NULL || r_outsidevalue == NULL )
@@ -377,7 +383,9 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_SetInsideValue( SEXP r_filter , SEXP r_insidevalue )
+RcppExport SEXP antsBinaryThresholdImageFilter_SetInsideValue( SEXP r_filter , 
+							       SEXP r_insidevalue 
+							       )
 try
 {
   if( r_filter == NULL || r_insidevalue == NULL )
@@ -441,7 +449,9 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_SetLowerThreshold( SEXP r_filter , SEXP r_lowerthreshold )
+RcppExport SEXP antsBinaryThresholdImageFilter_SetLowerThreshold( SEXP r_filter , 
+								  SEXP r_lowerthreshold 
+								  )
 try
 {
   if( r_filter == NULL || r_lowerthreshold == NULL )
@@ -505,7 +515,9 @@ try
      return Rcpp::wrap( 1 ) ;
    }
 
-RcppExport SEXP antsBinaryThresholdImageFilter_SetUpperThreshold( SEXP r_filter , SEXP r_upperthreshold )
+RcppExport SEXP antsBinaryThresholdImageFilter_SetUpperThreshold( SEXP r_filter , 
+								  SEXP r_upperthreshold 
+								  )
 try
 {
   if( r_filter == NULL || r_upperthreshold == NULL )
