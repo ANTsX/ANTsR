@@ -351,7 +351,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< typename OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
 	}
     }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
@@ -371,7 +371,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< typename OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
 	}
     }
 
@@ -417,7 +417,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetInsideValue( Rcpp::as< typename OutputImageType::PixelType >( r_insidevalue ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
 	}
     }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
@@ -437,7 +437,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetInsideValue( Rcpp::as< typename OutputImageType::PixelType >( r_insidevalue ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
 	}
     }
 
@@ -483,7 +483,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< typename InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
 	}
     }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
@@ -503,7 +503,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< typename InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
 	}
     }
 
@@ -549,7 +549,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetUpperThreshold( Rcpp::as< typename InputImageType::PixelType >( r_upperthreshold ) ) ;
+	  ( *filter_xptr )->SetUpperThreshold( Rcpp::as< InputImageType::PixelType >( r_upperthreshold ) ) ;
 	}
     }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
@@ -569,7 +569,7 @@ try
 	  typedef FilterType::Pointer FilterPointerType ;
 
 	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
-	  ( *filter_xptr )->SetUpperThreshold( Rcpp::as< typename InputImageType::PixelType >( r_upperthreshold ) ) ;
+	  ( *filter_xptr )->SetUpperThreshold( Rcpp::as< InputImageType::PixelType >( r_upperthreshold ) ) ;
 	}
     }
 
