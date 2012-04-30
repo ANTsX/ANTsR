@@ -345,3 +345,11 @@ install( TARGETS RantsBinaryThresholdImageFilter DESTINATION . )
 add_library( RantsThresholdImageFilter MODULE ${ANTsR_SOURCE_DIR}/src/antsThresholdImageFilter.cxx )
 target_link_libraries( RantsThresholdImageFilter ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
 install( TARGETS RantsThresholdImageFilter DESTINATION . )
+
+add_library( RantsImageList MODULE ${ANTsR_SOURCE_DIR}/src/antsImageList.cxx )
+target_link_libraries( RantsImageList ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
+install( TARGETS RantsImageList DESTINATION . )
+
+add_library( RantsMatrix MODULE ${ANTsR_SOURCE_DIR}/src/antsMatrix.cxx )
+target_link_libraries( RantsMatrix ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
+install( TARGETS RantsMatrix DESTINATION . )

@@ -166,6 +166,56 @@ try
 	  return Rcpp::wrap( 1 ) ;
 	}
     }
+  else if( pixeltype == "unsigned char" )
+    {
+      if( dimension == 4 )
+	{
+	  const int ImageDimension = 4 ;
+	  typedef unsigned char PixelType ;
+	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
+	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
+	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
+	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
+	  image_r.slot( "dimension" ) = 4 ;
+	  image_r.slot( "pointer" ) = xptr ;
+	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '4'" << std::endl ;
+	  return image_r ;
+	}
+      else if( dimension == 3 )
+	{
+	  const int ImageDimension = 3 ;
+	  typedef unsigned char PixelType ;
+	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
+	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
+	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
+	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
+	  image_r.slot( "dimension" ) = 3 ;
+	  image_r.slot( "pointer" ) = xptr ;
+	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '3'" << std::endl ;
+	  return image_r ;
+	}
+      else if( dimension == 2 )
+	{
+	  const int ImageDimension = 2 ;
+	  typedef unsigned char PixelType ;
+	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
+	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
+	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
+	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
+	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
+	  image_r.slot( "dimension" ) = 3 ;
+	  image_r.slot( "pointer" ) = xptr ;
+	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '2'" << std::endl ;
+	  return image_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
   else
     {
       Rcpp::Rcout << "Unsupported PixelType" << std::endl ;

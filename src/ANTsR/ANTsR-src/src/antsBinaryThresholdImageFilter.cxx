@@ -56,6 +56,68 @@ try
 	  return Rcpp::wrap( 1 ) ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "double" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 3 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "double" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 3 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "double" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 2 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "double" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 2 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -79,6 +141,254 @@ try
 	  filter_r.slot( "inputimage_dimension" ) = 4 ;
 	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "float" ) ;
 	  filter_r.slot( "outputimage_dimension" ) = 4 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "float" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 3 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "float" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 3 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "float" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 2 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "float" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 2 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 4 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 4 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 3 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 3 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 2 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned int" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 2 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 4 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 4 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 3 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 3 ;
+	  return filter_r ;
+	}
+      else
+	{
+	  Rcpp::Rcout << "Unsupported Dimension or PixelType for output-image" << std::endl ;
+	  return Rcpp::wrap( 1 ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+	  FilterPointerType* filter_ptr_ptr = new FilterPointerType( FilterType::New() ) ;
+	  Rcpp::XPtr< FilterPointerType > xptr( filter_ptr_ptr , true ) ;
+	  Rcpp::S4 filter_r( std::string( "antsBinaryThresholdImageFilter" ) ) ;
+	  filter_r.slot( "filter" ) = std::string( "antsBinaryThresholdImageFilter" ) ;
+	  filter_r.slot( "pointer" ) = xptr ;
+	  filter_r.slot( "inputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "inputimage_dimension" ) = 2 ;
+	  filter_r.slot( "outputimage_pixeltype" ) = std::string( "unsigned char" ) ;
+	  filter_r.slot( "outputimage_dimension" ) = 2 ;
 	  return filter_r ;
 	}
       else
@@ -146,6 +456,48 @@ try
 	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -157,6 +509,174 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  Rcpp::XPtr< InputImagePointerType > image_xptr( static_cast< SEXP >( image.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 
 	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
@@ -218,6 +738,52 @@ try
 	  outputimage.slot( "pointer" ) = outputimage_xptr ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -229,6 +795,190 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  OutputImagePointerType* outputimage_ptr_ptr = new OutputImagePointerType( ( *filter_xptr )->GetOutput() ) ;
+	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
+	  outputimage.slot( "pointer" ) = outputimage_xptr ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 	  typedef OutputImageType::Pointer OutputImagePointerType ;
 
@@ -287,6 +1037,48 @@ try
 	  ( *filter_xptr )->Update() ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -298,6 +1090,174 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+	  typedef OutputImageType::Pointer OutputImagePointerType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->Update() ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 	  typedef OutputImageType::Pointer OutputImagePointerType ;
 
@@ -354,6 +1314,46 @@ try
 	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -365,6 +1365,166 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetOutsideValue( Rcpp::as< OutputImageType::PixelType >( r_outsidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 
 	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
@@ -420,6 +1580,46 @@ try
 	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -431,6 +1631,166 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetInsideValue( Rcpp::as< OutputImageType::PixelType >( r_insidevalue ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 
 	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
@@ -486,6 +1846,46 @@ try
 	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
 	}
     }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "double" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef double InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "double" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef double OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
   else if( inputimage_pixeltype == "float" && inputimage_dimension == 4 )
     {
       const int InputImageDimension = 4 ;
@@ -497,6 +1897,166 @@ try
 	{
 	  const int OutputImageDimension = 4 ;
 	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "float" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef float InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "float" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef float OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned int" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned int InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned int" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned int OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 4 )
+    {
+      const int InputImageDimension = 4 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 4 )
+	{
+	  const int OutputImageDimension = 4 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 3 )
+    {
+      const int InputImageDimension = 3 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 3 )
+	{
+	  const int OutputImageDimension = 3 ;
+	  typedef unsigned char OutputImagePixelType ;
+	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
+
+	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;
+	  typedef FilterType::Pointer FilterPointerType ;
+
+	  Rcpp::XPtr< FilterPointerType > filter_xptr( static_cast< SEXP >( filter.slot( "pointer" ) ) ) ;
+	  ( *filter_xptr )->SetLowerThreshold( Rcpp::as< InputImageType::PixelType >( r_lowerthreshold ) ) ;
+	}
+    }
+  else if( inputimage_pixeltype == "unsigned char" && inputimage_dimension == 2 )
+    {
+      const int InputImageDimension = 2 ;
+      typedef unsigned char InputImagePixelType ;
+      typedef itk::Image< InputImagePixelType , InputImageDimension > InputImageType ;
+      typedef InputImageType::Pointer InputImagePointerType ;
+
+      if( outputimage_pixeltype == "unsigned char" && outputimage_dimension == 2 )
+	{
+	  const int OutputImageDimension = 2 ;
+	  typedef unsigned char OutputImagePixelType ;
 	  typedef itk::Image< OutputImagePixelType , OutputImageDimension > OutputImageType ;
 
 	  typedef itk::BinaryThresholdImageFilter< InputImageType , OutputImageType >  FilterType ;

@@ -1,28 +1,44 @@
 setGeneric( name = "int_antsExtractXptrAsString" , 
-	    def = function( image ) standardGeneric( "int_antsExtractXptrAsString" ) 
+	    def = function( object ) standardGeneric( "int_antsExtractXptrAsString" ) 
 	    )
 
 setMethod( f = "int_antsExtractXptrAsString" ,
 	   signature = c( "antsImage" ) ,
-	   definition = function( image )
+	   definition = function( object )
 	   	      	{
-			  return( as.character( c( image@pointer ) ) ) 
+			  return( as.character( c( object@pointer ) ) ) 
+			}
+	   )
+
+setMethod( f = "int_antsExtractXptrAsString" ,
+	   signature = c( "antsImageList" ) ,
+	   definition = function( object )
+	   	      	{
+			  return( paste( as.character( c( object@pointer ) ) , "%" , sep = "" )  )
+			}
+	   )
+
+setMethod( f = "int_antsExtractXptrAsString" ,
+	   signature = c( "antsMatrix" ) ,
+	   definition = function( object )
+	   	      	{
+			  return( as.character( c( object@pointer ) ) ) 
 			}
 	   )
 
 setMethod( f = "int_antsExtractXptrAsString" ,
 	   signature = c( "numeric" ) ,
-	   definition = function( image )
+	   definition = function( object )
 	   	      	{
-			  return( image )
+			  return( object )
 			}
 	   )
 
 setMethod( f = "int_antsExtractXptrAsString" ,
 	   signature = c( "character" ) ,
-	   definition = function( image )
+	   definition = function( object )
 	   	      	{
-			  return( image )
+			  return( object )
 			}
 	   )
 

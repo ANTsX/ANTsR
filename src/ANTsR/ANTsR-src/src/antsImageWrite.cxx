@@ -138,6 +138,39 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '2'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
+  else if( pixeltype == "unsigned char" && dimension == 4 )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned char PixelType ;
+      typedef itk::Image< PixelType , ImageDimension > ImageType ;
+      typedef ImageType::Pointer ImagePointerType ;
+      Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
+      ants::antsImageWrite< ImageType >( *xptr , filename ) ;
+      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '4'." << std::endl ;
+      return Rcpp::wrap( 0 ) ;
+    }
+  else if( pixeltype == "unsigned char" && dimension == 3 )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned char PixelType ;
+      typedef itk::Image< PixelType , ImageDimension > ImageType ;
+      typedef ImageType::Pointer ImagePointerType ;
+      Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
+      ants::antsImageWrite< ImageType >( *xptr , filename ) ;
+      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '3'." << std::endl ;
+      return Rcpp::wrap( 0 ) ;
+    }
+  else if( pixeltype == "unsigned char" && dimension == 2 )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned char PixelType ;
+      typedef itk::Image< PixelType , ImageDimension > ImageType ;
+      typedef ImageType::Pointer ImagePointerType ;
+      Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
+      ants::antsImageWrite< ImageType >( *xptr , filename ) ;
+      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '2'." << std::endl ;
+      return Rcpp::wrap( 0 ) ;
+    }
   else
     {
       Rcpp::Rcout << "Usupported PixelType or Dimension" << std::endl ;
