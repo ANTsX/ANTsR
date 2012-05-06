@@ -473,6 +473,159 @@ setMethod( f = "[<-" ,
 			}
 	   )
 
+antsSetPixels <- function( x , 
+	  	     	   i = NA , 
+		           j = NA , 
+		           k = NA , 
+		           l = NA ,
+			   value
+		           )
+{
+print( "setpixels" )
+print(i)
+print(j)
+print(k)
+print(l)
+print(value)
+lst = NULL
+if( length( i ) !=1 || !is.na( i ) )
+{
+  if( is.null( i ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( i ) == "integer" || class( i ) == "numeric" )
+  {
+    lst = c( lst , list( i ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( j ) !=1 || !is.na( j ) )
+{
+  if( is.null( j ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( j ) == "integer" || class( j ) == "numeric" )
+  {
+    lst = c( lst , list( j ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( k ) != 1 || !is.na( k ) )
+{
+  if( is.null( k ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( k ) == "integer" || class( k ) == "numeric" )
+  {
+    lst = c( lst , list( k ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( l ) != 1 || !is.na( l ) )
+{
+  if( is.null( l ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( l ) == "integer" || class( l ) == "numeric" )
+  {
+    lst = c( lst , list( l ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+return( .Call( "antsImage_SetPixels" , x , lst , value ) )
+}
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "NULL" ,
+		      value = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  ... ,
+				  value
+		       		  )
+	     	        {
+			  return( antsSetPixels( x , i , j , ... , value = value ) )
+	     		}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "numeric" ,
+		      j = "numeric" ,
+		      value = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  ... ,
+				  value
+		       		  )
+	     	        {
+			  return( antsSetPixels( x , i , j , ... , value = value ) )
+	     		}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "numeric" ,
+		      j = "NULL" ,
+		      value = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  ... ,
+				  value
+		       		  )
+	     	        {
+			  return( antsSetPixels( x , i , j , ... , value = value ) )
+	     		}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "numeric" ,
+		      value = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  ... ,
+				  value
+		       		  )
+	     	        {
+			  return( antsSetPixels( x , i , j , ... , value = value ) )
+	     		}
+	   )
+
 setGeneric( name = "as.antsImage" ,
 	    def = function( object , ... ) standardGeneric( "as.antsImage" )
 	    )
