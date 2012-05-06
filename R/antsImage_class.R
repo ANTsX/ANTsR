@@ -1,8 +1,14 @@
-# this file defines the S4 classes 'antsImage' and 'antsImageList'
+# this file defines the S4 classes related to 'antsImage' and their associated methods
+
+setClass( Class = "antsRegion" ,
+	  representation( index = "integer" ,
+	  		  size = "integer"
+	  		  )
+	  )
 
 setClass( Class = "antsImage" , 
 	  representation( pixeltype = "character" , # C++ type used to represent a pixel of image pointed to by 'pointer'
-	  		  dimension = "numeric" , # dimension of the image pointerd to by 'pointer'
+	  		  dimension = "integer" , # dimension of the image pointerd to by 'pointer'
 			  pointer = "externalptr" # pointer to the actual image of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 			  ) 
 	  )
@@ -15,17 +21,719 @@ setMethod( f = "initialize" ,
 				  dimension 
 				  )
 	   	       {
-			 .Call( "antsImage", 
-			 	pixeltype , 
-				dimension 
-				)
+			 return( .Call( "antsImage", pixeltype , dimension ) )
 	   	       }
 	   )
 
+setMethod( f = "as.numeric" ,
+	   signature( x = "antsImage"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  mask = logical() ,
+				  region = new( "antsRegion" , index = integer() , size = integer() )
+				  )
+			{
+			  if( typeof( mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			}
+           )
+
+setMethod( f = "as.matrix" ,
+	   signature( x = "antsImage"
+	   	      ) ,
+           definition = function( x ,
+	   	      		  mask = logical() ,
+				  region = new( "antsRegion" , index = integer() , size = integer() )
+				  )
+			{
+			  if( typeof( mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			}
+
+	   )
+
+setMethod( f = "as.array" ,
+	   signature( x = "antsImage"
+	   	      ) ,
+           definition = function( x ,
+	   	      		  mask = logical() ,
+				  region = new( "antsRegion" , index = integer() , size = integer() )
+				  )
+			{
+			  if( typeof( mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			}
+
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "logical"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i 
+				  )
+			{
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "array"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i 
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "matrix"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i 
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "list"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i 
+				  )
+			{
+			  if( typeof( i$mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  if( class( i$region ) != "antsRegion" )
+			  {
+			    print( "'region' provided is not of class 'antsRegion'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , i$mask , i$region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "logical" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j
+				  )
+			{
+			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "array" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "matrix" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			}
+	   )
+
+antsGetPixels <- function( x , 
+	  	     	   i = NA , 
+		           j = NA , 
+		           k = NA , 
+		           l = NA 
+		           )
+{
+lst = NULL
+if( length( i ) !=1 || !is.na( i ) )
+{
+  if( is.null( i ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( i ) == "integer" || class( i ) == "numeric" )
+  {
+    lst = c( lst , list( i ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( j ) !=1 || !is.na( j ) )
+{
+  if( is.null( j ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( j ) == "integer" || class( j ) == "numeric" )
+  {
+    lst = c( lst , list( j ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( k ) != 1 || !is.na( k ) )
+{
+  if( is.null( k ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( k ) == "integer" || class( k ) == "numeric" )
+  {
+    lst = c( lst , list( k ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+
+if( length( l ) != 1 || !is.na( l ) )
+{
+  if( is.null( l ) )
+  {
+    lst = c( lst , list( integer(0) ) )
+  }
+  else if( class( l ) == "integer" || class( l ) == "numeric" )
+  {
+    lst = c( lst , list( l ) )
+  }
+  else
+  {
+    print( "indices must be of class 'integer' or 'numeric'" )
+    return()
+  }
+}
+return( .Call( "antsImage_GetPixels" , x , lst ) )
+}
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "NULL"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  k = NA ,
+				  l = NA
+		       		  )
+	     	        {
+			  return( antsGetPixels( x , i , j , k , l ) )
+	     		}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "numeric" ,
+		      j = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  k = NA ,
+				  l = NA
+		       		  )
+	     	        {
+			  return( antsGetPixels( x , i , j , k , l ) )
+	     		}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "numeric" ,
+		      j = "NULL"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  k = NA ,
+				  l = NA
+		       		  )
+	     	        {
+			  return( antsGetPixels( x , i , j , k , l ) )
+	     		}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "numeric"
+		      ) ,
+	   definition = function( x ,
+	   	        	  i ,
+		       		  j ,
+				  k = NA ,
+				  l = NA
+		       		  )
+	     	        {
+			  return( antsGetPixels( x , i , j , k , l ) )
+	     		}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "logical"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  value 
+				  )
+			{
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "array"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  value
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "matrix"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  value
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "list"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  value
+				  )
+			{
+			  if( typeof( i$mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  if( class( i$region ) != "antsRegion" )
+			  {
+			    print( "'region' provided is not of class 'antsRegion'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_SetRegion" , x , i$mask , i$region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "logical" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j ,
+				  value
+				  )
+			{
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "array" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j ,
+				  value
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "matrix" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j ,
+				  value
+				  )
+			{
+			  if( typeof( i ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical'" )
+			    return()
+			  }
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			}
+	   )
+
+setGeneric( name = "as.antsImage" ,
+	    def = function( object , ... ) standardGeneric( "as.antsImage" )
+	    )
+
+setMethod( f = "as.antsImage" ,
+	   signature( object = "matrix" 
+	   	      ) ,
+	   definition = function( object , 
+	   	      		  pixeltype = "double" , 
+				  spacing = as.numeric( seq.int( from = 1 , 
+				  	    			 by = 0 , 
+								 length.out = length( attributes( vect )$dim ) 
+								 ) 
+							) , 
+				  origin = as.numeric( seq.int( from = 0 , 
+				  	    			 by = 0 , 
+								 length.out = length( attributes( vect )$dim ) 
+								 ) 
+							)
+				  )
+	   	      	{
+			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin ) )
+	   		}
+	   )
+
+setMethod( f = "as.antsImage" ,
+	   signature( object = "array" 
+	   	      ) ,
+	   definition = function( object , 
+	   	      		  pixeltype = "double" , 
+				  spacing = as.numeric( seq.int( from = 1 , 
+				  	    			 by = 0 , 
+								 length.out = length( attributes( vect )$dim ) 
+								 ) 
+							) , 
+				  origin = as.numeric( seq.int( from = 0 , 
+				  	    			 by = 0 , 
+								 length.out = length( attributes( vect )$dim ) 
+								 ) 
+							)
+				  )
+	   	      	{
+			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin ) )
+	   		}
+	   )
+
+setMethod( f = "==" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = "=="
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+setMethod( f = "!=" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = "!="
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+setMethod( f = "<=" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = "<="
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+setMethod( f = ">=" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = ">="
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+setMethod( f = "<" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = "<"
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+setMethod( f = ">" ,
+	   signature( e1 = "antsImage" 
+	   	      ) ,
+	   definition = function( e1 , 
+	   	      		  e2 
+				  )
+	   	      	{
+			  operator = ">"
+			  if( class( e2 ) == "list" )
+			  {
+			    if( length( e2$value ) != 1 )
+			    {
+			      print( "length of value must be 1" )
+			      return()
+			    }
+			    if( class( e2$region ) != "antsRegion" )
+			    {
+			      print( "region argument not of class 'antsRegion'" )
+			      return()
+			    }
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			  }
+			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
+			  {
+			    region = new( "antsRegion" , index = integer() , size = integer() )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			  }
+			  else
+			  {
+			    print( "rhs must be a scalar or a list( <scalar> , <antsRegion> )" )
+			    return()
+			  }
+			}
+	   )
+
+###################################################################################################
 
 setClass( Class = "antsImageList" ,
 	  representation( pixeltype = "character" ,
-	  		  dimension = "numeric" ,
+	  		  dimension = "integer" ,
 			  pointer = "externalptr"
 
 	  		  )

@@ -1,3 +1,4 @@
+useDynLib(libRantsPermuteAxesImageFilter)
 useDynLib(libRantsThresholdImageFilter)
 useDynLib(libRantsBinaryThresholdImageFilter)
 useDynLib(libRantsImageClone)

@@ -687,6 +687,11 @@ try
 	  ( *filter_xptr )->SetInput( ( *image_xptr ) ) ;
 	}
     }
+  else
+    {
+      Rcpp::Rcout << "unsupported PixelType or Dimension for filter" << std::endl ;
+      return Rcpp::wrap( 1 ) ;
+    }
 
   return Rcpp::wrap( 0 ) ;
 }
@@ -990,6 +995,11 @@ try
 	  Rcpp::XPtr< OutputImagePointerType > outputimage_xptr( outputimage_ptr_ptr , true ) ;
 	  outputimage.slot( "pointer" ) = outputimage_xptr ;
 	}
+    }
+  else
+    {
+      Rcpp::Rcout << "unsupported PixelType or Dimension for filter" << std::endl ;
+      return Rcpp::wrap( 1 ) ;
     }
 
   return outputimage ;

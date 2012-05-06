@@ -74,6 +74,13 @@ setGeneric( name = "antsThresholdOutside" ,
 			    standardGeneric( "antsThresholdOutside" )
 	    )
 
+setGeneric( name = "antsSetOrder" ,
+	    def = function( filter , 
+	    	  	    ... 
+			    ) 
+			    standardGeneric( "antsSetOrder" )
+	    )
+
 ############################# antsBinaryThresholdImageFilter
 
 setClass( Class = "antsBinaryThresholdImageFilter" , 
@@ -253,5 +260,73 @@ setMethod( f = "antsThresholdOutside" ,
 	   definition = function( filter , lower , upper )
 	   	      	{
 			  .Call( "antsThresholdImageFilter_ThresholdOutside" , filter , lower , upper )
+			}
+	   )
+
+############################# antsPermuteAxesImageFiter
+
+setClass( Class = "antsPermuteAxesImageFilter" , 
+	  representation( inputimage_pixeltype = "character" , # C++ type used to represent pixels of the input image to the filter
+	  		  inputimage_dimension = "numeric" , # dimension of the input image to the filter
+			  pointer = "externalptr" , # pointer to the underlying C++ filter
+			  filter = "character" # name of the filter; same as the itk filter name
+			  ) ,
+	  contains = "antsFilter"
+	  )
+
+setMethod( f = "initialize" ,
+	   signature( .Object = "antsPermuteAxesImageFilter"
+		      ) ,
+	   definition = function( .Object , 
+	   	      		  inputimage_pixeltype , 
+				  inputimage_dimension
+				  )
+	   	       {
+		         .Call( "antsPermuteAxesImageFilter_New" , 
+			 	inputimage_pixeltype , 
+				inputimage_dimension
+				)
+	   	       }
+	   )
+
+setMethod( f = "antsSetInput" ,
+	   signature( filter = "antsPermuteAxesImageFilter" , 
+	   	      image = "antsImage" 
+		      ) ,
+	   definition = function( filter , 
+	   	      		  image 
+				  )
+	   	      	{
+			  .Call( "antsPermuteAxesImageFilter_SetInput" , filter , image )
+			}
+	   )
+
+setMethod( f = "antsGetOutput" ,
+	   signature( filter = "antsPermuteAxesImageFilter" 
+	   	      ) ,
+	   definition = function( filter )
+	   	      	{
+			  .Call( "antsPermuteAxesImageFilter_GetOutput" , filter )
+			}
+	   )
+
+setMethod( f = "antsUpdate" ,
+	   signature( filter = "antsPermuteAxesImageFilter" 
+	   	      ) ,
+	   definition = function( filter )
+	   	      	{
+			  .Call( "antsPermuteAxesImageFilter_Update" , filter )
+			}
+	   )
+
+setMethod( f = "antsSetOrder" ,
+	   signature( filter = "antsPermuteAxesImageFilter" ) ,
+	   definition = function( filter , order )
+	   	      	{
+			  if( typeof( order ) != "integer" )
+			  {
+			    print( "'order' provided is not of type 'integer'" )
+			  }
+			  .Call( "antsPermuteAxesImageFilter_SetOrder" , filter , order )
 			}
 	   )

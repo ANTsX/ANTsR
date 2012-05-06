@@ -346,6 +346,10 @@ add_library( RantsThresholdImageFilter MODULE ${ANTsR_SOURCE_DIR}/src/antsThresh
 target_link_libraries( RantsThresholdImageFilter ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
 install( TARGETS RantsThresholdImageFilter DESTINATION . )
 
+add_library( RantsPermuteAxesImageFilter MODULE ${ANTsR_SOURCE_DIR}/src/antsPermuteAxesImageFilter.cxx )
+target_link_libraries( RantsPermuteAxesImageFilter ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
+install( TARGETS RantsPermuteAxesImageFilter DESTINATION . )
+
 add_library( RantsImageList MODULE ${ANTsR_SOURCE_DIR}/src/antsImageList.cxx )
 target_link_libraries( RantsImageList ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
 install( TARGETS RantsImageList DESTINATION . )
