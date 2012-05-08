@@ -47,7 +47,151 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
   out_image.slot( "pixeltype" ) = out_pixeltype ;
   out_image.slot( "dimension" ) = dimension ;
 
-  if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
+  if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef double InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
     {
       const int ImageDimension = 4 ;
       typedef float InPixelType ;
@@ -79,6 +223,38 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
     }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
   else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
     {
       const int ImageDimension = 3 ;
@@ -95,6 +271,134 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
     }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef float InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
     {
       const int ImageDimension = 3 ;
@@ -103,6 +407,214 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       typedef InImageType::Pointer InImagePointerType ;
 
       typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned int InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned char OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef double OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef float OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 4 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 3 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
+      typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
+      typedef OutImageType::Pointer OutImagePointerType ;
+
+      Rcpp::XPtr< InImagePointerType > in_image_xptr( static_cast< SEXP >( in_image.slot( "pointer" ) ) ) ;
+      OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
+      Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
+      out_image.slot( "pointer" ) = out_image_xptr ;
+    }
+  else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
+    {
+      const int ImageDimension = 2 ;
+      typedef unsigned char InPixelType ;
+      typedef itk::Image< InPixelType , ImageDimension > InImageType ;
+      typedef InImageType::Pointer InImagePointerType ;
+
+      typedef unsigned int OutPixelType ;
       typedef itk::Image< OutPixelType , ImageDimension > OutImageType ;
       typedef OutImageType::Pointer OutImagePointerType ;
 

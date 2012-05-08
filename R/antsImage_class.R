@@ -1,8 +1,8 @@
 # this file defines the S4 classes related to 'antsImage' and their associated methods
 
 setClass( Class = "antsRegion" ,
-	  representation( index = "integer" ,
-	  		  size = "integer"
+	  representation( index = "numeric" ,
+	  		  size = "numeric"
 	  		  )
 	  )
 
@@ -80,6 +80,20 @@ setMethod( f = "as.array" ,
 
 setMethod( f = "[" ,
 	   signature( x = "antsImage" ,
+	   	      i = "NULL"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i 
+				  )
+			{
+			  mask = logical(0)
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
 	   	      i = "logical"
 	   	      ) ,
 	   definition = function( x ,
@@ -135,9 +149,13 @@ setMethod( f = "[" ,
 	   	      		  i 
 				  )
 			{
-			  if( typeof( i$mask ) != "logical" )
+			  if( class( i$mask ) == "NULL" )
 			  {
-			    print( "'mask' provided is not of type 'logical'" )
+			    i$mask = logical(0)
+			  }
+			  else if( typeof( i$mask ) != "logical" )
+			  {
+			    print( "'mask' provided is not of type 'logical' or 'NULL'" )
 			    return()
 			  }
 			  if( class( i$region ) != "antsRegion" )
@@ -146,6 +164,21 @@ setMethod( f = "[" ,
 			    return()
 			  }
 			  return( .Call( "antsImage_GetVector" , x , i$mask , i$region ) )
+			}
+	   )
+
+setMethod( f = "[" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j
+				  )
+			{
+			  mask = logical(0)
+			  return( .Call( "antsImage_GetVector" , x , mask , j ) )
 			}
 	   )
 
@@ -345,6 +378,21 @@ setMethod( f = "[" ,
 
 setMethod( f = "[<-" ,
 	   signature( x = "antsImage" ,
+	   	      i = "NULL"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  value 
+				  )
+			{
+			  mask = logical(0)
+			  region = new( "antsRegion" , index = integer() , size = integer() )
+			  return( .Call( "antsImage_SetRegion" , x , mask , region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
 	   	      i = "logical"
 	   	      ) ,
 	   definition = function( x ,
@@ -404,7 +452,11 @@ setMethod( f = "[<-" ,
 				  value
 				  )
 			{
-			  if( typeof( i$mask ) != "logical" )
+			  if( class( i$mask ) == "NULL" )
+			  {
+			    i$mask = logical(0)
+			  }
+			  else if( typeof( i$mask ) != "logical" )
 			  {
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
@@ -415,6 +467,22 @@ setMethod( f = "[<-" ,
 			    return()
 			  }
 			  return( .Call( "antsImage_SetRegion" , x , i$mask , i$region , value ) )
+			}
+	   )
+
+setMethod( f = "[<-" ,
+	   signature( x = "antsImage" ,
+	   	      i = "NULL" ,
+		      j = "antsRegion"
+	   	      ) ,
+	   definition = function( x ,
+	   	      		  i ,
+				  j ,
+				  value
+				  )
+			{
+			  mask = logical(0)
+			  return( .Call( "antsImage_SetRegion" , x , mask , j , value ) )
 			}
 	   )
 
@@ -481,12 +549,6 @@ antsSetPixels <- function( x ,
 			   value
 		           )
 {
-print( "setpixels" )
-print(i)
-print(j)
-print(k)
-print(l)
-print(value)
 lst = NULL
 if( length( i ) !=1 || !is.na( i ) )
 {

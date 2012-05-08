@@ -250,7 +250,7 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
       else if( indexvector.size() != (int)Dimension || sizevector.size() != (int)Dimension )
 	{
 	  Rcpp::Rcout << "antsRegion provided has dimensions incompatible with the image" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
       else
 	{
@@ -266,7 +266,7 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
 	  if( !image->GetLargestPossibleRegion().IsInside( region ) )
 	    {
 	      Rcpp::Rcout << "'region' is not inside the image" << std::endl ;
-	      return Rcpp::wrap( 1 ) ;
+	      return Rcpp::wrap( NA_REAL ) ;
 	    }
 	}
       itk::ImageRegionConstIterator< ImageType > image_iter( image , region ) ;
@@ -290,7 +290,7 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
 	  if( mask.size() != numberofpixelsperslice && mask.size() != (int)region.GetNumberOfPixels() )
 	    {
 	      Rcpp::Rcout << "Length of mask vector does not match image-region dimensions" << std::endl ;
-	      return Rcpp::wrap( 1 ) ;
+	      return Rcpp::wrap( NA_REAL ) ;
 	    }
 	  Rcpp::LogicalVector::iterator mask_iter = mask.begin() ;
 	  unsigned int ind = 0 ;
@@ -315,7 +315,7 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
   else
     {
       Rcpp::Rcout << "Empty Image" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 
@@ -325,7 +325,7 @@ try
   if( r_antsimage == NULL || r_mask == NULL || r_antsregion == NULL )
     {
       Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 
   Rcpp::S4 antsimage( r_antsimage ) ;
@@ -364,7 +364,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "float" )
@@ -399,7 +399,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned int" )
@@ -434,7 +434,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned char" )
@@ -469,19 +469,19 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else
     {
       Rcpp::Rcout << "Unsupported PixelType" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 catch( const std::exception& exc )
   {
     Rcpp::Rcout<< exc.what() << std::endl ;
-    return Rcpp::wrap( 1 ) ;
+    return Rcpp::wrap( NA_REAL ) ;
   }
 
 
@@ -497,7 +497,7 @@ SEXP antsImage_GetPixels( typename itk::Image< PixelType , Dimension >::Pointer 
       if( list_coordinates.size() != Dimension )
 	{
 	  Rcpp::Rcout << "indices do not match the image in dimensions" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
       for( int i = 0 ; i < list_coordinates.size() ; ++i )
 	{
@@ -542,7 +542,7 @@ SEXP antsImage_GetPixels( typename itk::Image< PixelType , Dimension >::Pointer 
   else
     {
       Rcpp::Rcout << "Empty Image" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 
@@ -1274,7 +1274,7 @@ try
   if( r_vector == NULL || r_pixeltype == NULL || r_spacing == NULL || r_origin == NULL )
     {
       Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 
   std::string pixeltype = Rcpp::as< std::string >( r_pixeltype ) ;
@@ -1285,7 +1285,7 @@ try
   if( spacing.size() != vector_dim.size() || origin.size() != vector_dim.size() )
     {
       Rcpp::Rcout << "spacing or origin is incompatible with the vector" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 
   if( pixeltype == "double" )
@@ -1335,7 +1335,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "float" )
@@ -1385,7 +1385,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned int" )
@@ -1435,7 +1435,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned char" )
@@ -1485,19 +1485,19 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else
     {
       Rcpp::Rcout << "Unsupported PixelType" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 catch( const std::exception& exc )
   {
     Rcpp::Rcout<< exc.what() << std::endl ;
-    return Rcpp::wrap( 1 ) ;
+    return Rcpp::wrap( NA_REAL ) ;
   }
 
 
@@ -1519,7 +1519,7 @@ SEXP antsImage_RelationalOperators( typename itk::Image< PixelType , Dimension >
       else if( indexvector.size() != (int)Dimension || sizevector.size() != (int)Dimension )
 	{
 	  Rcpp::Rcout << "antsRegion provided has dimensions incompatible with the image" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
       else
 	{
@@ -1582,7 +1582,7 @@ SEXP antsImage_RelationalOperators( typename itk::Image< PixelType , Dimension >
       else
 	{
 	  Rcpp::Rcout << "unsupported operator" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
       Rcpp::IntegerVector dims( Dimension ) ;
       for( unsigned int i = 0 ; i < Dimension ; ++i )
@@ -1595,7 +1595,7 @@ SEXP antsImage_RelationalOperators( typename itk::Image< PixelType , Dimension >
   else
     {
       Rcpp::Rcout << "Empty Image" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 
@@ -1605,7 +1605,7 @@ try
   if( r_antsimage == NULL || r_value == NULL || r_antsregion == NULL )
     {
       Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 
   Rcpp::S4 antsimage( r_antsimage ) ;
@@ -1644,7 +1644,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "float" )
@@ -1679,7 +1679,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned int" )
@@ -1714,7 +1714,7 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else if( pixeltype == "unsigned char" )
@@ -1749,17 +1749,17 @@ try
       else
 	{
 	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
+	  return Rcpp::wrap( NA_REAL ) ;
 	}
     }
   else
     {
       Rcpp::Rcout << "Unsupported PixelType" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+      return Rcpp::wrap( NA_REAL ) ;
     }
 }
 catch( const std::exception& exc )
   {
     Rcpp::Rcout<< exc.what() << std::endl ;
-    return Rcpp::wrap( 1 ) ;
+    return Rcpp::wrap( NA_REAL ) ;
   }

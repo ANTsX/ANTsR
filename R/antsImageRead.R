@@ -1,4 +1,4 @@
-antsImageRead <- function( filename , pixeltype , dimension  )
+antsImageRead <- function( filename , pixeltype , dimension )
 {
   img = .Call( "antsImageRead", filename , pixeltype , dimension )
   filter = new( "antsPermuteAxesImageFilter" , inputimage_pixeltype = pixeltype , inputimage_dimension = dimension )
