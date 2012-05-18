@@ -194,7 +194,7 @@ try
       antsMatrixType* ptr_matrix = new antsMatrixType ;
       Rcpp::List list( r_list ) ;
       ptr_matrix->first = Rcpp::as< std::vector< std::string > >( list.names() ) ;
-      if( ptr_matrix->second.set_size( list.size() , ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() ) == 0 )
+      if( ptr_matrix->second.set_size( ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() , list.size() ) == 0 )
 	{
 	  Rcpp::Rcout << "Failed to set number of rows and columns" << std::endl ;
 	  return Rcpp::wrap( 1 ) ;
@@ -220,7 +220,7 @@ try
       antsMatrixType* ptr_matrix = new antsMatrixType ;
       Rcpp::List list( r_list ) ;
       ptr_matrix->first = Rcpp::as< std::vector< std::string > >( list.names() ) ;
-      if( ptr_matrix->second.set_size( list.size() , ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() ) == 0 )
+      if( ptr_matrix->second.set_size( ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() , list.size() ) == 0 )
 	{
 	  Rcpp::Rcout << "Failed to set number of rows and columns" << std::endl ;
 	  return Rcpp::wrap( 1 ) ;
@@ -246,7 +246,7 @@ try
       antsMatrixType* ptr_matrix = new antsMatrixType ;
       Rcpp::List list( r_list ) ;
       ptr_matrix->first = Rcpp::as< std::vector< std::string > >( list.names() ) ;
-      if( ptr_matrix->second.set_size( list.size() , ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() ) == 0 )
+      if( ptr_matrix->second.set_size( ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() , list.size() ) == 0 )
 	{
 	  Rcpp::Rcout << "Failed to set number of rows and columns" << std::endl ;
 	  return Rcpp::wrap( 1 ) ;
@@ -272,7 +272,7 @@ try
       antsMatrixType* ptr_matrix = new antsMatrixType ;
       Rcpp::List list( r_list ) ;
       ptr_matrix->first = Rcpp::as< std::vector< std::string > >( list.names() ) ;
-      if( ptr_matrix->second.set_size( list.size() , ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() ) == 0 )
+      if( ptr_matrix->second.set_size( ( Rcpp::as< std::vector< ElementType > >( list[0] ) ).size() , list.size() ) == 0 )
 	{
 	  Rcpp::Rcout << "Failed to set number of rows and columns" << std::endl ;
 	  return Rcpp::wrap( 1 ) ;
