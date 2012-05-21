@@ -14,7 +14,7 @@ if( NOT ITK_DIR )
     TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/tmp 
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
-    GIT_REPOSITORY git://itk.org/ITK.git
+    GIT_REPOSITORY http://itk.org/ITK.git # using http instead of git so ITK can be donwload behind a firewall
     GIT_TAG 30d81c6631a6b14316c1ecfe59a4c83acb439a35
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
