@@ -1019,7 +1019,7 @@ catch( const std::exception& exc )
 
 
 template< class PixelType , unsigned int Dimension >
-bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer origimage , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
+bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer& origimage , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
   typedef typename ImageType::Pointer ImagePointerType ;
@@ -1042,7 +1042,7 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer 
       ImagePointerType image = permuteaxesfilter->GetOutput() ;
       permuteaxesfilter->Update() ;
 
-     typename ImageType::RegionType region ;
+      typename ImageType::RegionType region ;
       Rcpp::S4 antsregion( r_antsregion ) ;
       Rcpp::IntegerVector indexvector( antsregion.slot( "index" ) ) ;
       Rcpp::IntegerVector sizevector( antsregion.slot( "size" ) ) ;
@@ -1068,68 +1068,85 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer 
 	  region.SetIndex( index ) ;
 	}
       itk::ImageRegionIterator< ImageType > image_iter( image , region ) ;
-      Rcpp::NumericVector value( r_value ) ;
-      if( value.size() == 1 || value.size() == (int)region.GetNumberOfPixels() )
+      Rcpp::LogicalVector mask( r_mask ) ;
+      int numberofpixelsperslice = region.GetSize(0) ;
+      for( unsigned int i = 1 ; i < Dimension-1 ; ++i )
 	{
-	  Rcpp::LogicalVector mask( r_mask ) ;
-	  if( mask.size() == 0 )
+	  numberofpixelsperslice *= region.GetSize(i) ;
+	}
+      if( mask.size() != 0 && mask.size() != numberofpixelsperslice && mask.size() != (int)region.GetNumberOfPixels() )
+	{
+	  Rcpp::Rcout << "Length of 'mask' vector does not match image-region dimensions" << std::endl ;
+	  return 1 ;
+	}
+      Rcpp::NumericVector value( r_value ) ;
+      if( value.size() != 1 && value.size() != (int)region.GetNumberOfPixels() && value.size() != std::count( mask.begin() , mask.end() , 1 ) )
+	{
+	  Rcpp::Rcout << "Length of 'value' vector does not match image-region dimensions" << std::endl ;
+	  return 1 ;
+	}
+
+      if( mask.size() == 0 )
+	{
+	  if( value.size() == 1 )
 	    {
-	      if( value.size() == 1 )
+	      for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
 		{
-		  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
-		    {
-		      image_iter.Set( value[0] ) ;
-		    }
+		  image_iter.Set( value[0] ) ;
 		}
-	      else
+	    }
+	  else if( value.size() != (int)region.GetNumberOfPixels() )
+	    {
+	      unsigned int value_ind = 0 ;
+	      for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
 		{
-		  unsigned int value_ind = 0 ;
-		  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
-		    {
-		      image_iter.Set( value[value_ind++] ) ;
-		    }
+		  image_iter.Set( value[value_ind++] ) ;
 		}
 	    }
 	  else
 	    {
-	      int numberofpixelsperslice = region.GetSize(0) ;
-	      for( unsigned int i = 1 ; i < Dimension-1 ; ++i )
-		{
-		  numberofpixelsperslice *= region.GetSize(i) ;
-		}
-	      if( mask.size() != numberofpixelsperslice && mask.size() != (int)region.GetNumberOfPixels() )
-		{
-		  Rcpp::Rcout << "Length of mask vector does not match image-region dimensions" << std::endl ;
-		  return 1 ;
-		}
-	      Rcpp::LogicalVector::iterator mask_iter = mask.begin() ;
-	      if( value.size() == 1 )
-		{
-		  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter , ++mask_iter )
-		    {
-		      if( mask_iter == mask.end() )
-			mask_iter = mask.begin() ;
-		      if( *mask_iter == 1 )
-			image_iter.Set( value[0] ) ;
-		    }
-		}
-	      else
-		{
-		  unsigned int value_ind = 0 ;
-		  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter , ++mask_iter )
-		    {
-		      if( mask_iter == mask.end() )
-			mask_iter = mask.begin() ;
-		      if( *mask_iter == 1 )
-			image_iter.Set( value[value_ind++] ) ;
-		    }
-		}
+	      Rcpp::Rcout << "Length of 'value' vector does not match image dimensions" << std::endl ;
+	      return 1 ;
 	    }
 	}
       else
 	{
-	  Rcpp::Rcout << "'value' has length incompatible with image-region" << std::endl ;
-	  return 1 ;
+	  Rcpp::LogicalVector::iterator mask_iter = mask.begin() ;
+	  if( value.size() == 1 )
+	    {
+	      for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter , ++mask_iter )
+		{
+		  if( mask_iter == mask.end() )
+		    mask_iter = mask.begin() ;
+		  if( *mask_iter == 1 )
+		    image_iter.Set( value[0] ) ;
+		}
+	    }
+	  else if( value.size() == (int)region.GetNumberOfPixels() )
+	    {
+	      image_iter.GoToBegin() ;
+	      for( unsigned long value_ind = 0 ; (int)value_ind < value.size() ; ++image_iter , ++mask_iter , ++value_ind )
+		{
+		  if( mask_iter == mask.end() )
+		    mask_iter = mask.begin() ;
+		  if( *mask_iter == 1 )
+		    image_iter.Set( value[value_ind] ) ;
+		}
+	    }
+	  else
+	    {
+	      unsigned long value_ind = 0 ;
+	      for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter , ++mask_iter )
+		{
+		  if( mask_iter == mask.end() )
+		    {
+		      mask_iter = mask.begin() ;
+		      value_ind = 0 ;
+		    }
+		  if( *mask_iter == 1 )
+		    image_iter.Set( value[value_ind++] ) ;
+		}
+	    }
 	}
       permuteaxesfilter->SetInput( image ) ;
       origimage = permuteaxesfilter->GetOutput() ;
