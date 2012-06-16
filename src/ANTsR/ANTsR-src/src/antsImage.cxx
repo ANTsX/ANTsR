@@ -1148,7 +1148,16 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer&
 		}
 	    }
 	}
+
+      permuteaxesfilter = PermuteAxesFilterType::New() ;
       permuteaxesfilter->SetInput( image ) ;
+      permuteaxesfilterorder[0] = 1 ;
+      permuteaxesfilterorder[1] = 0 ;
+      for( unsigned int i = 2 ; i < Dimension ; ++i )
+	{
+	  permuteaxesfilterorder[i] = i ;
+	}
+      permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
       origimage = permuteaxesfilter->GetOutput() ;
       permuteaxesfilter->Update() ;
     }
