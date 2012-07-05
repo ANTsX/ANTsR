@@ -288,14 +288,13 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
 	    }
 	}
       itk::ImageRegionConstIterator< ImageType > image_iter( image , region ) ;
-      Rcpp::NumericVector vector_r( region.GetNumberOfPixels() ) ;
+      Rcpp::NumericVector vector_r ;
       Rcpp::LogicalVector mask( r_mask ) ;
       if( mask.size() == 0 )
 	{
-	  unsigned int ind = 0 ;
 	  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
 	    {
-	      vector_r[ind++] = image_iter.Get() ;
+	      vector_r.push_back(image_iter.Get() ) ;
 	    }
 	}
       else
@@ -311,13 +310,12 @@ SEXP antsImage_GetVector( typename itk::Image< PixelType , Dimension >::Pointer 
 	      return Rcpp::wrap( NA_REAL ) ;
 	    }
 	  Rcpp::LogicalVector::iterator mask_iter = mask.begin() ;
-	  unsigned int ind = 0 ;
 	  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter , ++mask_iter )
 	    {
 	      if( mask_iter == mask.end() )
 		mask_iter = mask.begin() ;
 	      if( *mask_iter == TRUE )
-		vector_r[ind++] = image_iter.Get() ;
+		vector_r.push_back( image_iter.Get() ) ;
 	      // else
 	      // 	vector_r[ind++] = NA_REAL ;
 	    }
