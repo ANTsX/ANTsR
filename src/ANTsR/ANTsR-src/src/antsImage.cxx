@@ -1019,7 +1019,7 @@ catch( const std::exception& exc )
 
 
 template< class PixelType , unsigned int Dimension >
-bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer& origimage , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
+bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer& image , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
   typedef typename ImageType::Pointer ImagePointerType ;
@@ -1027,20 +1027,20 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer&
   typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
   typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
 
-  if( origimage.IsNotNull() )
+  if( image.IsNotNull() )
     {
-      PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
-      permuteaxesfilter->SetInput( origimage ) ;
-      PermuteAxesFilterOrderType permuteaxesfilterorder ;
-      permuteaxesfilterorder[0] = 1 ;
-      permuteaxesfilterorder[1] = 0 ;
-      for( unsigned int i = 2 ; i < Dimension ; ++i )
-	{
-	  permuteaxesfilterorder[i] = i ;
-	}
-      permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-      ImagePointerType image = permuteaxesfilter->GetOutput() ;
-      permuteaxesfilter->Update() ;
+      // PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
+      // permuteaxesfilter->SetInput( origimage ) ;
+      // PermuteAxesFilterOrderType permuteaxesfilterorder ;
+      // permuteaxesfilterorder[0] = 1 ;
+      // permuteaxesfilterorder[1] = 0 ;
+      // for( unsigned int i = 2 ; i < Dimension ; ++i )
+      // 	{
+      // 	  permuteaxesfilterorder[i] = i ;
+      // 	}
+      // permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
+      // ImagePointerType image = permuteaxesfilter->GetOutput() ;
+      // permuteaxesfilter->Update() ;
 
       typename ImageType::RegionType region ;
       Rcpp::S4 antsregion( r_antsregion ) ;
@@ -1149,17 +1149,17 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer&
 	    }
 	}
 
-      permuteaxesfilter = PermuteAxesFilterType::New() ;
-      permuteaxesfilter->SetInput( image ) ;
-      permuteaxesfilterorder[0] = 1 ;
-      permuteaxesfilterorder[1] = 0 ;
-      for( unsigned int i = 2 ; i < Dimension ; ++i )
-	{
-	  permuteaxesfilterorder[i] = i ;
-	}
-      permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-      origimage = permuteaxesfilter->GetOutput() ;
-      permuteaxesfilter->Update() ;
+      // permuteaxesfilter = PermuteAxesFilterType::New() ;
+      // permuteaxesfilter->SetInput( image ) ;
+      // permuteaxesfilterorder[0] = 1 ;
+      // permuteaxesfilterorder[1] = 0 ;
+      // for( unsigned int i = 2 ; i < Dimension ; ++i )
+      // 	{
+      // 	  permuteaxesfilterorder[i] = i ;
+      // 	}
+      // permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
+      // origimage = permuteaxesfilter->GetOutput() ;
+      // permuteaxesfilter->Update() ;
     }
   else
     {
