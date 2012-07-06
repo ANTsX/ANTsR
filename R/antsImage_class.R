@@ -25,6 +25,15 @@ setMethod( f = "initialize" ,
 	   	       }
 	   )
 
+setMethod( f = "dim" ,
+	   signature( x = "antsImage"
+	   	      ) ,
+	   definition = function( x )
+	   	      	{
+			  return( .Call( "antsImage_dim" , x ) )
+			}
+	   )
+
 setMethod( f = "as.numeric" ,
 	   signature( x = "antsImage"
 	   	      ) ,
