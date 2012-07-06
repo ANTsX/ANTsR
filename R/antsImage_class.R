@@ -47,7 +47,7 @@ setMethod( f = "as.numeric" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region ) )
 			}
            )
 
@@ -64,7 +64,7 @@ setMethod( f = "as.matrix" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region ) )
 			}
 
 	   )
@@ -82,7 +82,7 @@ setMethod( f = "as.array" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region ) )
 			}
 
 	   )
