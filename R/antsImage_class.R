@@ -64,6 +64,11 @@ setMethod( f = "as.matrix" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
+			  if( x@dimension != 2 )
+			  {
+			    print( "image dimension must be 2" )
+			    return()
+			  }
 			  return( .Call( "antsImage_asVector" , x , mask , region ) )
 			}
 
@@ -97,7 +102,7 @@ setMethod( f = "[" ,
 			{
 			  mask = logical(0)
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_GetVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region ) )
 			}
 	   )
 
@@ -110,7 +115,7 @@ setMethod( f = "[" ,
 				  )
 			{
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region ) )
 			}
 	   )
 
@@ -128,7 +133,7 @@ setMethod( f = "[" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region ) )
 			}
 	   )
 
@@ -146,7 +151,7 @@ setMethod( f = "[" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_GetVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region ) )
 			}
 	   )
 
@@ -172,7 +177,7 @@ setMethod( f = "[" ,
 			    print( "'region' provided is not of class 'antsRegion'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , i$mask , i$region ) )
+			  return( .Call( "antsImage_asVector" , x , i$mask , i$region ) )
 			}
 	   )
 
@@ -187,7 +192,7 @@ setMethod( f = "[" ,
 				  )
 			{
 			  mask = logical(0)
-			  return( .Call( "antsImage_GetVector" , x , mask , j ) )
+			  return( .Call( "antsImage_asVector" , x , mask , j ) )
 			}
 	   )
 
@@ -201,7 +206,7 @@ setMethod( f = "[" ,
 				  j
 				  )
 			{
-			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j ) )
 			}
 	   )
 
@@ -220,7 +225,7 @@ setMethod( f = "[" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j ) )
 			}
 	   )
 
@@ -239,7 +244,7 @@ setMethod( f = "[" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_GetVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j ) )
 			}
 	   )
 
