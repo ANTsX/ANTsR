@@ -22,7 +22,7 @@
 cbf_casl1 <- function( aslimg_filename , m0img_filename )
 {
 	img <- as.array( antsImageRead(  aslimg_filename , "double" , 4 ) )
-	m0 <- as.array( antsImageRead( m1img_filename , "double" , 3 ) )
+	m0 <- as.array( antsImageRead( m0img_filename , "double" , 3 ) )
 
 	# number of terms in the integration of finite-difference
 	numdiffs <- floor( dim( img )[ length(dim(img)) ] / 2 )
