@@ -31,7 +31,7 @@ cbf_casl1 <- function( aslimg_filename , m0img_filename )
 	controlimg <- img[ , , , seq( 2 , by = 2 , length.out = numdiffs ) ]
 
 	m0 <- rep( m0 , numdiffs )
-	dim( m0 ) <- dim( effperf )
+	dim( m0 ) <- dim( controlimg )
 	efftcbf <- ( controlimg - labelimg ) / m0
 
 	lambda <- 0.9

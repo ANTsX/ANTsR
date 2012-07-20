@@ -47,7 +47,7 @@ setMethod( f = "as.numeric" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( aperm( .Call( "antsImage_asVector" , x , mask , region ) , c( 2 , 1 , 3:x@dimension ) ) )
 			}
            )
 
@@ -69,7 +69,7 @@ setMethod( f = "as.matrix" ,
 			    print( "image dimension must be 2" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( aperm( .Call( "antsImage_asVector" , x , mask , region ) , c( 2 , 1 , 3:x@dimension ) ) )
 			}
 
 	   )
@@ -87,7 +87,7 @@ setMethod( f = "as.array" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( aperm( .Call( "antsImage_asVector" , x , mask , region ) , c( 2 , 1 , 3:x@dimension ) ) )
 			}
 
 	   )

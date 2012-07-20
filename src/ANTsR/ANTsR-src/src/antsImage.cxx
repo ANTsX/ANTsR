@@ -412,7 +412,7 @@ catch( const std::exception& exc )
 
 
 template< class PixelType , unsigned int Dimension >
-SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer origimage , SEXP r_mask , SEXP r_antsregion )
+SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer image , SEXP r_mask , SEXP r_antsregion )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
   typedef typename ImageType::Pointer ImagePointerType ;
@@ -420,28 +420,8 @@ SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer o
   typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
   typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
 
-  if( origimage.IsNotNull() )
+  if( image.IsNotNull() )
     {
-      Rcpp::LogicalVector mask( r_mask ) ;
-      ImagePointerType image = origimage ;
-      if( mask.size() == 0 )
-	{
-	  // permute the x-axis and y-axis of the original image so that when iterating over the image, we go over 
-	  // column1, column2, column3, ... so on of the original image instead of row1, row2, row3, ... so on
-	  PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
-	  permuteaxesfilter->SetInput( origimage ) ;
-	  PermuteAxesFilterOrderType permuteaxesfilterorder ;
-	  permuteaxesfilterorder[0] = 1 ;
-	  permuteaxesfilterorder[1] = 0 ;
-	  for( unsigned int i = 2 ; i < Dimension ; ++i )
-	    {
-	      permuteaxesfilterorder[i] = i ;
-	    }
-	  permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-	  image = permuteaxesfilter->GetOutput() ;
-	  permuteaxesfilter->Update() ;
-	}
-
       typename ImageType::RegionType region ;
       Rcpp::S4 antsregion( r_antsregion ) ;
       Rcpp::IntegerVector indexvector( antsregion.slot( "index" ) ) ;
@@ -474,6 +454,7 @@ SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer o
 	}
       itk::ImageRegionConstIterator< ImageType > image_iter( image , region ) ;
 
+      Rcpp::LogicalVector mask( r_mask ) ;
       if( mask.size() == 0 )
 	{
 	  Rcpp::NumericVector vector_r( region.GetNumberOfPixels() ) ;
