@@ -12,9 +12,14 @@ Calculate CBF from an ASL image using CASL or PASL.
 }
 
 \usage{
+# ASLtbx
 cbf_casl1( aslimg_filename , m0img_filename )
 cbf_casl2( aslimg_filename )
 cbf_pasl( aslimg_filename , m0img_filename )
+# Chen 2011 paper
+cbf_casl3( aslimg_filename )
+cbf_pasl2( aslimg_filename , m0img_filename )
+cbf_pcasl1( aslimg_filename )
 }
 
 \arguments{
@@ -29,6 +34,8 @@ Name of the 3D M0 image file.
 
 \details{
 In all of the scripts, the cbf calculate is of dimensions [ x , y , z , t ] \cr
+
+ASLtbx \cr 
 ----------------------------------------------------------------------------
 
 CBF calculation using CASL1. \cr
@@ -130,7 +137,7 @@ CBF calculation using PASL. \cr
 # Select M0 Image: m0.nii \cr
 # Draw ROI for calculating CBF: yes \cr
 # Label Efficiency: 0.95 \cr
-for every voxel in the cbf image. \cr
+for every voxel in the cbf image, \cr
 cbf <- ( 6000 * 1000 * lambda * effperf ) /
        ( 2 * m0 * exp( -TI / bloodt1 ) * TI1 * labeff * qTI ) \cr
 where, \cr
@@ -144,7 +151,58 @@ TI1 <- 700 \cr
 TI <- TI1 + delaytime + (slice-1) * slicetime \cr
 bloodt1 <- 1664 \cr
 labeff <- 0.95 \cr
-qTI <- 0.85
+qTI <- 0.85 \cr
+----------------------------------------------------------------------------
+
+Chen 2011 paper \cr
+----------------------------------------------------------------------------
+
+CBF calculation for CASL. \cr
+for every voxel in the cbf image, \cr
+cbf <- ( lambda * deltaM ) / 
+       ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) ) \cr
+where, \cr
+lamda <- 0.9
+control <- control voxel value -- ASL image at t = 2 , 4 , 6 , ... , even times \cr
+label <- label voxel value -- ASL image at t = 1 , 3 , 5 , ... , odd times \cr
+deltaM <- control - label \cr
+alpha <- 0.68 \cr
+M0 <- mean( control ) \cr
+T1b <- 1664 \cr
+omega <- 1 \cr
+tau <- 2 \cr
+----------------------------------------------------------------------------
+
+CBF calculation for pCASL. \cr
+for every voxel in the cbf image, \cr
+cbf <- ( lambda * deltaM ) / 
+       ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) ) \cr
+where, \cr
+lambda <- 0.9
+control <- control voxel value -- ASL image at t = 2 , 4 , 6 , ... , even times \cr
+label <- label voxel value -- ASL image at t = 1 , 3 , 5 , ... , odd times \cr
+deltaM <- control - label \cr
+alpha <- 0.85 \cr
+M0 <- mean( control ) \cr
+T1b <- 1664 \cr
+omega <- 1 \cr
+tau <- 1.5 \cr
+----------------------------------------------------------------------------
+
+CBF calculation for PASL. \cr
+for every voxel in the cbf image, \cr
+cbf <- ( lambda * deltaM ) / 
+       ( 2 * alpha * M0 * TI1 * exp( -TI2 / T1b ) ) \cr
+where, \cr
+lambda <- 0.9 \cr
+control <- control voxel value -- ASL image at t = 2 , 4 , 6 , ... , even times \cr
+label <- label voxel value -- ASL image at t = 1 , 3 , 5 , ... , odd times \cr
+deltaM <- control - label \cr
+alpha <- 0.95 \cr
+M0 <- equilibrium magnetization from M0 acquisition (input image) \cr
+TI1 <- 700 \cr
+TI2 <- 1700 \cr
+T1b <- 1664
 }
 
 \value{
