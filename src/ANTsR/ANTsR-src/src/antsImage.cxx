@@ -236,9 +236,7 @@ template< typename ImageType >
 Rcpp::IntegerVector antsImage_dim( typename ImageType::Pointer image )
 {
   Rcpp::IntegerVector dim_r( ImageType::ImageDimension ) ;
-  dim_r[0] = image->GetLargestPossibleRegion().GetSize(1) ;
-  dim_r[1] = image->GetLargestPossibleRegion().GetSize(0) ;
-  for( unsigned int i = 2 ; i < ImageType::ImageDimension ; ++i )
+  for( unsigned int i = 0 ; i < ImageType::ImageDimension ; ++i )
     {
       dim_r[i] = image->GetLargestPossibleRegion().GetSize(i) ;
     }
