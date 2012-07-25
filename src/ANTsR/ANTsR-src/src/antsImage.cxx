@@ -1496,19 +1496,7 @@ typename ImageType::Pointer antsImage_asantsImage( Rcpp::NumericVector& vector ,
       image_iter.Set( static_cast< typename ImageType::PixelType >( vector[vector_ind++] ) ) ;
     }
   
-  PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
-  permuteaxesfilter->SetInput( image ) ;
-  PermuteAxesFilterOrderType permuteaxesfilterorder ;
-  permuteaxesfilterorder[0] = 1 ;
-  permuteaxesfilterorder[1] = 0 ;
-  for( unsigned int i = 2 ; i < ImageType::ImageDimension ; ++i )
-    {
-      permuteaxesfilterorder[i] = i ;
-    }
-  permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-  ImagePointerType axespermutedimage = permuteaxesfilter->GetOutput() ;
-  permuteaxesfilter->Update() ;
-  return axespermutedimage ;
+  return image ;
 }
 
 RcppExport SEXP antsImage_asantsImage( SEXP r_vector , SEXP r_pixeltype , SEXP r_spacing , SEXP r_origin )
