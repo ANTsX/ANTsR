@@ -20,7 +20,7 @@
 # Draw ROI for calculating CBF: yes
 # Label Efficiency: 0.95
 # --------------------------------------------------------------------------------------
-cbf_pasl <- function( aslimg_filename , m0img_filename )
+cbf_pasl_ASLtbx <- function( aslimg_filename , m0img_filename )
 {
 	img <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
 	m0 <- as.array( antsImageRead( m0img_filename , "double" , 3 ) )

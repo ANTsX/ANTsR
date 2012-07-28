@@ -19,7 +19,7 @@
 # Use Additionally acquired M0 Image for CASL: no
 # Label Efficiency: 0.68
 # --------------------------------------------------------------------------------------
-cbf_casl2 <- function( aslimg_filename )
+cbf_casl2_ASLtbx <- function( aslimg_filename )
 {
 	img <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
 

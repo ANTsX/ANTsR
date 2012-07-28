@@ -13,14 +13,16 @@ Calculate CBF from an ASL image using CASL or PASL.
 
 \usage{
 # ASLtbx
-cbf_casl1( aslimg_filename , m0img_filename )
-cbf_casl2( aslimg_filename )
-cbf_pasl( aslimg_filename , m0img_filename )
+cbf_casl1_ASLtbx( aslimg_filename , m0img_filename )
+cbf_casl2_ASLtbx( aslimg_filename )
+cbf_pasl_ASLtbx( aslimg_filename , m0img_filename )
 # Chen 2011 paper
-cbf_casl3( aslimg_filename )
-cbf_pasl2( aslimg_filename , m0img_filename )
-cbf_pcasl1( aslimg_filename )
-}
+cbf_casl_Chen2011( aslimg_filename )
+cbf_pasl_Chen2011( aslimg_filename , m0img_filename )
+cbf_pcasl_Chen2011( aslimg_filename )
+# Wang 2012 paper
+cbf_casl_Wang2012( aslimg_filename , Xvar , Xideal = NULL , c = NULL )
+} 
 
 \arguments{
 \item{aslimg_filename}{
@@ -30,15 +32,27 @@ Name of the 4D ASL image file.
 \item{m0img_filename}{
 Name of the 3D M0 image file.
 }
+
+\item{Xvar}{
+Matrix or vector. For an image of size 64 * 64 * 18 * 116, Xvar can be a vector of length 116 or a matrix of size 116 * (64*64*18)
+}
+
+\item{Xideal}{
+Matrix or vector or unspecified. For an image of size 64 * 64 * 18 * 116, Xideal can be a vector of length 116 or a matrix of size 116 * (64*64*18) or left unspecified to use the version from Wang2012 paper.
+}
+
+\item{c}{
+Matrix or numeric scalar or unspecified. For an image of size 64 * 64 * 18 * 116, c can be a matrix of size 64 * 64 * 18 or a scalar or left unspecified to use the version from Wang2012 paper.
+}
 }
 
 \details{
 In all of the scripts, the cbf calculate is of dimensions [ x , y , z , t ] \cr
 
-ASLtbx \cr 
+ASLtbx( https://cfn.upenn.edu/~zewang/ASLtbx.php ) \cr 
 ----------------------------------------------------------------------------
 
-CBF calculation using CASL1. \cr
+CBF calculation using 'cbf_casl1_ASLtbx'. \cr
 # Following are the parameters used in the ASLtbx \cr
 # First image: label \cr
 # Subtraction Method: simple subtraction \cr
@@ -77,7 +91,7 @@ omega <- delaytime + (slice-1) * slicetime \cr
 labeltime <- 2000 \cr
 ----------------------------------------------------------------------------
 
-CBF calculation using CASL2. \cr
+CBF calculation using 'cbf_casl2_ASLtbx'. \cr
 # Following are the parameters used in ASLtbx \cr
 # First image: label \cr
 # Subtraction Method: simple subtraction \cr
@@ -115,7 +129,7 @@ omega <- delaytime + (slice-1) * slicetime \cr
 labeltime <- 2000 \cr
 ----------------------------------------------------------------------------
 
-CBF calculation using PASL. \cr
+CBF calculation using cbf_pasl_ASLtbx. \cr
 # Following are the parameters used in the ASLtbx \cr
 # First image: label \cr
 # Subtraction Method: simple subtraction \cr
@@ -154,7 +168,9 @@ labeff <- 0.95 \cr
 qTI <- 0.85 \cr
 ----------------------------------------------------------------------------
 
-Chen 2011 paper \cr
+'Test–Retest Reliability of Arterial Spin Labeling With Common Labeling Strategies' \cr
+Yufen Chen, PhD, Danny J.J. Wang, PhD and John A. Detre, MD \cr
+JOURNAL OF MAGNETIC RESONANCE IMAGING 33:940–949 (2011) \cr
 ----------------------------------------------------------------------------
 
 CBF calculation for CASL. \cr
@@ -202,7 +218,31 @@ alpha <- 0.95 \cr
 M0 <- equilibrium magnetization from M0 acquisition (input image) \cr
 TI1 <- 700 \cr
 TI2 <- 1700 \cr
-T1b <- 1664
+T1b <- 1664 \cr
+----------------------------------------------------------------------------
+
+'Improving cerebral blood flow quantification for arterial spin labeled perfusion MRI by removing residual motion artifacts and global signal fluctuations' \cr
+Wang \cr
+Magnetic Resonance Imaging xx (2012) xxx – xxx \cr
+----------------------------------------------------------------------------
+
+CBF calculation for CASL. \cr
+for every voxel in the cbf image, \cr
+cbf <- ( Bideal * lambda * R1a * exp( w * R1a ) ) / 
+       ( 2 * c * alpha * ( 1 - exp( -tau * R1a ) ) ) \cr
+where, \cr
+Xideal <- ideal label and control signals in the time series \cr
+Xvar <- represents variations in Xideal in the time series (provide by user) \cr
+Y <- voxel time series \cr
+Bideal <- fitting coefficient for Xideal under a general linear model ( Y ~ Xideal + Xvar ) \cr
+lamda <- 0.9 # stolen \cr
+T1a <- 1.6 # stolen \cr
+R1a <- 1 / T1a \cr
+w <- 1 \cr
+alpha <- 0.95 \cr
+tau <- 2 \cr
+c <- mean( Y ) or value provided by user \cr
+----------------------------------------------------------------------------
 }
 
 \value{

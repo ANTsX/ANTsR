@@ -1,6 +1,6 @@
 # chen 2011 paper PASL
 # --------------------------------------------------------------------------------------
-cbf_pasl2 <- function( aslimg_filename , m0img_filename )
+cbf_pasl_Chen2011 <- function( aslimg_filename , m0img_filename )
 {
 	img <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
 	M0 <- as.array( antsImageRead( m0img_filename , "double" , 3 ) )

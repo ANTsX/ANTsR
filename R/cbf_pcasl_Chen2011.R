@@ -1,6 +1,6 @@
-# chen 2011 paper CASL
+# chen 2011 paper pCASL
 # --------------------------------------------------------------------------------------
-cbf_casl3 <- function( aslimg_filename )
+cbf_pcasl_Chen2011 <- function( aslimg_filename )
 {
 	img <- as.array( antsImageRead(  aslimg_filename , "double" , 4 ) )
 
@@ -11,7 +11,7 @@ cbf_casl3 <- function( aslimg_filename )
 
 	lambda <- 0.9
 	deltaM <- ( controlimg - labelimg )
-	alpha <- 0.68
+	alpha <- 0.85
 
 	M0 <- array( 0 , dim(controlimg)[1:3] )	
 	for( x in 1:(dim(M0)[1]) )
@@ -25,7 +25,7 @@ cbf_casl3 <- function( aslimg_filename )
 
 	T1b <- 1664
 	omega <- 1
-	tau <- 2
+	tau <- 1.5
 
 	cbf <- ( lambda * deltaM ) / ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
 

@@ -1,14 +1,18 @@
 # Wang 2012 paper CASL ; paper does not mention the parameters so using them form the reference [25] mentioned in the paper
 # --------------------------------------------------------------------------------------
-cbf_casl_Wang2012 <- function( aslimg_filename , Xvar )
+cbf_casl_Wang2012 <- function( aslimg_filename , Xvar , Xideal = NULL , c = NULL )
 {
 	Y <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
 	dimY <- dim( Y )
 	dim( Y ) <- c( dimY[1]*dimY[2]*dimY[3] , dimY[4] )
 	Y <- t( Y )
 
-	Xideal <- c( -0.5 , 0.5 )
-	Xideal <- rep( Xideal , length.out = dimY[4] )
+	if( is.null( Xideal ) )
+	{
+		Xideal <- c( -0.5 , 0.5 )
+		Xideal <- rep( Xideal , length.out = dimY[4] )
+	}
+
 	cbfmodel <- lm( Y ~ Xideal + Xvar )
 	Bideal <- (cbfmodel$coefficients)[ 2 , ]
 	dim( Bideal ) <- dimY[1:3]
@@ -19,8 +23,16 @@ cbf_casl_Wang2012 <- function( aslimg_filename , Xvar )
 	w <- 1
 	alpha <- 0.95     # stolen
 	tau <- 2
-	c <- colMeans( Y )
-	dim( c ) <- dimY[1:3]
+
+	if( is.null( c ) )
+	{
+		c <- colMeans( Y )
+		dim( c ) <- dimY[1:3]
+	}
+	if( is.character( c ) )
+	{
+		c <- as.array( antsImageRead( c , "double" , 3 ) )
+	}
 
 	cbf <- ( Bideal * lambda * R1a * exp( w * R1a ) ) / ( 2 * c * alpha * ( 1 - exp( -tau * R1a ) ) )
 
