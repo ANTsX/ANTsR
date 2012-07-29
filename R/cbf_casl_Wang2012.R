@@ -11,6 +11,19 @@ cbf_casl_Wang2012 <- function( aslimg_filename , Xvar , Xideal = NULL , c = NULL
 	{
 		Xideal <- c( -0.5 , 0.5 )
 		Xideal <- rep( Xideal , length.out = dimY[4] )
+	}else
+	{
+		if( length(Xideal) != dimY[4] )
+		{
+		    print( "Xideal has length incompatible with ASL image" )
+		    return( NULL )
+		}
+	}
+
+	if( dim( Xvar )[1] != dimY[4] )
+	{
+		print( "Xvar has rows incompatible with ASL image" )
+		return( NULL )
 	}
 
 	cbfmodel <- lm( Y ~ Xideal + Xvar )
