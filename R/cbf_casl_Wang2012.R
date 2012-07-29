@@ -1,6 +1,6 @@
 # Wang 2012 paper CASL ; paper does not mention the parameters so using them form the reference [25] mentioned in the paper
 # --------------------------------------------------------------------------------------
-cbf_casl_Wang2012 <- function( aslimg_filename , Xvar , Xideal = NULL , c = NULL )
+cbf_casl_Wang2012 <- function( aslimg_filename , Xvar = NULL , Xideal = NULL , c = NULL )
 {
 	Y <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
 	dimY <- dim( Y )
@@ -20,13 +20,19 @@ cbf_casl_Wang2012 <- function( aslimg_filename , Xvar , Xideal = NULL , c = NULL
 		}
 	}
 
-	if( dim( Xvar )[1] != dimY[4] )
+	if( !is.null(Xvar) && dim( Xvar )[1] != dimY[4] )
 	{
 		print( "Xvar has rows incompatible with ASL image" )
 		return( NULL )
 	}
 
-	cbfmodel <- lm( Y ~ Xideal + Xvar )
+	if( is.null(Xvar) )
+	{
+		cbfmodel <- lm( Y ~ Xideal )
+	}else
+	{
+		cbfmodel <- lm( Y ~ Xideal + Xvar )
+	}
 	Bideal <- (cbfmodel$coefficients)[ 2 , ]
 	dim( Bideal ) <- dimY[1:3]
 

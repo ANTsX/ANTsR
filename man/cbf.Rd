@@ -21,7 +21,7 @@ cbf_casl_Chen2011( aslimg_filename )
 cbf_pasl_Chen2011( aslimg_filename , m0img_filename )
 cbf_pcasl_Chen2011( aslimg_filename )
 # Wang 2012 paper
-cbf_casl_Wang2012( aslimg_filename , Xvar , Xideal = NULL , c = NULL )
+cbf_casl_Wang2012( aslimg_filename , Xvar = NULL , Xideal = NULL , c = NULL )
 } 
 
 \arguments{
@@ -34,7 +34,7 @@ Name of the 3D M0 image file.
 }
 
 \item{Xvar}{
-Matrix or vector. For an image of size 64 * 64 * 18 * 116, Xvar can be a vector of length 116 or a matrix of size 116 * (64*64*18)
+Matrix or vector or unspecified. For an image of size 64 * 64 * 18 * 116, Xvar can be a vector of length 116 or a matrix of size 116 * (64*64*18) or unspecified to not use in the general linear model.
 }
 
 \item{Xideal}{
