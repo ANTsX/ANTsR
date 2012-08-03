@@ -8,7 +8,7 @@ Clone or Pull ANTsR from this repository as follows:
 
 Install the package as follows:
 
-      $ R CMD INSTALL [--configure-vars="ITK_DIR=<path-to-ITK-build>"] [--configure-vars="ANTS_DIR=<path-to-ANTS-build>"] ANTsR/
+      $ R CMD INSTALL ANTsR
 
 The installed package can be used in R as follows:
 Load the package
