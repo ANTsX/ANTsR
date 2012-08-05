@@ -20,7 +20,7 @@ mat <- t( mat )
 xideal<-( rep(c(0,1),dim(moco_img)[4])[1:dim(moco_img)[4]]-0.5  ) # control minus tag
 
 # get nuisance variables : motion, compcor, etc
-motionparams <- as.data.frame( moco_params ) )
+motionparams <- as.data.frame( moco_params ) 
 motionnuis<-t(motionparams)[2:ncol( motionparams ) , ] # matrix elements
 globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
 nuis<-t( rbind(globalsignal, motionnuis )  )
