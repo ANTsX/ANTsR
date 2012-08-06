@@ -1,4 +1,4 @@
-perfussionregression <- function( mask_img , mat , xideal , nuis , dorobust = FALSE )
+perfusionregression <- function( mask_img , mat , xideal , nuis , dorobust = FALSE )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
@@ -13,11 +13,12 @@ cbfi[ mask_img == 1 ]<-betaideal
 if ( dorobust )
   {
   pckg = try(require(robust))
-  if(!pckg) {
+  if(!pckg) 
+    {
     cat("Installing 'robust' from CRAN\n")
     getPckg("robust")
     require("robust")
-  }
+    }
   # robust procedure Yohai, V.J. (1987) High breakdown-point and high efficiency estimates for regression.  _The Annals of Statistics_ *15*, 642-65
   print("begin robust regression") ;
   ctl<-lmrob.control( "KS2011", max.it = 1000 )
