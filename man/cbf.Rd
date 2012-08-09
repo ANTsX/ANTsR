@@ -21,10 +21,20 @@ cbf_casl_Chen2011( aslimg_filename )
 cbf_pasl_Chen2011( aslimg_filename , m0img_filename )
 cbf_pcasl_Chen2011( aslimg_filename )
 # Wang 2012 paper
-cbf_casl_Wang2012( aslimg_filename , Xvar = NULL , Xideal = NULL , c = NULL )
+cbf_casl_Wang2012( aslimg_filename , Xvar = NULL , Xideal = NULL , c =
+NULL )
+# update a give CBF estimate using PASL/CASL
+compute_cbf( cbf , img , method = 0 , labelfirst = 1 )
+# compute robust cbf
+cbf_robust( asl_img )
 } 
 
 \arguments{
+
+\item{aslimg}{
+Name of the 4D ASL image file. 
+}
+  
 \item{aslimg_filename}{
 Name of the 4D ASL image file. 
 }
@@ -44,6 +54,23 @@ Matrix or vector or unspecified. For an image of size 64 * 64 * 18 * 116, Xideal
 \item{c}{
 Matrix or numeric scalar or unspecified. For an image of size 64 * 64 * 18 * 116, c can be a matrix of size 64 * 64 * 18 or a scalar or left unspecified to use the version from Wang2012 paper.
 }
+
+\item{cbf}{
+Existing CBF esitmate to be updated.
+}
+
+\item{method}{
+Can be 0 or 1. 0 -- Chen2011 CASL; 1 -- Chen2011 PASL;
+}
+
+\item{img}{
+ASL image if 'method' = 0 . M0 image if 'method' = 1 .
+}
+
+\item{labelfirst}{
+Boolean indicating if label is first in every time-series voxel.
+}
+
 }
 
 \details{
@@ -246,7 +273,10 @@ c <- mean( Y ) or value provided by user \cr
 }
 
 \value{
-cbf -- 4D array of cbf values with extent of the last dimension equal to number of terms in the finite difference
+cbf -- 4D array of cbf values with extent of the last dimension equal to
+number of terms in the finite difference ; in case of 'compute_cbf',
+resulting array is of same dimensions as input 'cbf'. In case of
+'cbf_robust', resulting array is 3D representing mean cbf.
 }
 
 \author{
@@ -257,5 +287,9 @@ Shrinidhi KL
 \dontrun{
 cbf <- cbf_casl1( "asl.nii" , "m0.nii" )cbf <- cbf_casl2( "asl.nii" )
 cbf <- cbf_pasl( "asl.nii" , "m0.nii" )
+# updating existing cbf estimate using CASL; method = 0 , labefirst = 1
+cbf <- compute_cbf( cbf , asl_img )
+# comput robust cbf of an asl image
+cbf <- cbf_robust( "asl.nii" )
 }
 }

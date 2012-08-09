@@ -46,6 +46,11 @@ get_mask <- function( img , thresh_lo , thresh_hi )
 {
 if( is.character( img ) )
 {
+  if( length(img) != 1 )
+    {
+      print( "'img' should be only one filename" )
+      return( NULL )
+    }
   img <- antsImageRead( img , "float" , 3 )
 }else if( class( img ) == "antsImage" )
 {

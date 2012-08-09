@@ -45,6 +45,11 @@ motion_correction <- function( img )
 {
 if( is.character( img ) )
 {
+  if( length( img ) != 1 )
+    {
+      print( "'img' should be only one filename" )
+      return( NULL )
+    }
   img <- antsImageRead( img , "float" , 4 )
 }else if( class( img ) == "antsImage" )
 {
