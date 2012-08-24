@@ -1,4 +1,4 @@
-get_perfusion_predictors <- function( mat , moco_params , xideal = NULL , labelfirst = 1 , ncompcorparameters = 4 )
+get_perfusion_predictors <- function( mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 4 )
 {
 if( is.null( xideal ) )
 {
@@ -15,7 +15,7 @@ if( is.null( xideal ) )
   return( NULL )
 }
 # get nuisance variables : motion, compcor, etc
-motionparams <- as.data.frame( moco_params ) 
+# motionparams <- as.data.frame( moco_params ) 
 motionnuis<-t(motionparams)[2:ncol( motionparams ) , ] # matrix elements
 globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
 nuis<-t( rbind(globalsignal, motionnuis )  )

@@ -62,7 +62,7 @@ if( is.character( cbf ) )
   cbf <- antsImageRead( cbf , "float" , 4 )
 }else if( class( cbf ) == "antsImage" )
 {
-  if( img@dimension != 3 ) 
+  if( cbf@dimension != 3 ) 
   {
     print( "'cbf' must have dimension '3'" )
     return( NULL )
