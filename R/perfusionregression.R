@@ -26,18 +26,26 @@ if ( dorobust )
   rbetaideal<-rep(0,ncol(mat))
   vox<-1
   ct<-0
+  skip<-20
+  visitvals<-((1:(ncol(mat)/skip))*skip)
   cbfform<-formula(  mat[,vox] ~   xideal + nuis )
-  while ( vox < ncol( mat ) ) {
+  cl<-makeForkCluster(nnodes = getOption("mc.cores", 2L))
+  registerDoParallel(cl,cores=getOption("mc.cores", 2L))
+  ptime <- system.time({
+  rgw<-foreach(vox=visitvals,.combine="+",.init=regweights,.verbose=F) %dopar% {
     mycbfmodel<-lmrob( cbfform , control = ctl ) # try(...,silent=T) 
     rbetaideal[vox]<-mycbfmodel$coeff[2]
-    regweights<-regweights+mycbfmodel$weights
-    if ( vox %% 4000 == 0 ) print(paste("robust regression:",vox/ncol(mat)*100,"%"))
-    vox<-vox+1
-    ct<-ct+1
-    } 
+    if ( vox %% 2 == 0 ) print(paste("robust regression:",vox/ncol(mat)*100,"%",ct))
+    # regweights<-regweights+
+    mycbfmodel$weights
+    }
+  })
+  regweights<-(rgw/length(visitvals))
+  print(paste("donewithrobreg",length(visitvals)))
+  print(regweights)
+  print(paste(ptime))
   # now use the weights in a weighted regression
-  regweights<-regweights / ct
-  regweights[ regweights < 0.5 ]<-0 # hard thresholding 
+  regweights[ regweights < 0.999995 ]<-0 # hard thresholding 
   cbfform<-formula(  mat ~   xideal + nuis )
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-(mycbfmodel$coeff)[2,]

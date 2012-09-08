@@ -68,7 +68,7 @@ avg_img = new( "antsImage" , "float" , 3 )
 antsMotionCorr( list( d = 3 , a = img , o = avg_img ) )
 moco_img = new( "antsImage" , "float" , 4 )
 moco_params = new( "antsMatrix" , "double" )
-antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , avg_img , img , 1 , 32 , "regular" , 0.05 ) , t = "Affine[1]" , i = 50 , u = 1 , e = 1 , s = 1 , f = 1 , n = 10 , l = 0 ) )
+antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , avg_img , img , 1 , 32 , "regular" , 0.08 ) , t = "Affine[1]" , i = 50 , u = 1 , e = 1 , s = 1 , f = 1 , n = 10 , l = 0 ) )
 
 return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
 }
