@@ -274,9 +274,9 @@ install( TARGETS Rsccan DESTINATION . )
 #target_link_libraries(RSetSpacing ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SetSpacing )
 #install( TARGETS RSetSpacing DESTINATION . )
 
-#add_library(RSmoothImage MODULE ${ANTsR_SOURCE_DIR}/src/SmoothImage.cxx)
-#target_link_libraries(RSmoothImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SmoothImage )
-#install( TARGETS RSmoothImage DESTINATION . )
+add_library(RSmoothImage MODULE ${ANTsR_SOURCE_DIR}/src/SmoothImage.cxx)
+target_link_libraries(RSmoothImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SmoothImage )
+install( TARGETS RSmoothImage DESTINATION . )
 
 #add_library(RStackSlices MODULE ${ANTsR_SOURCE_DIR}/src/StackSlices.cxx)
 #target_link_libraries(RStackSlices ${RCPP_LIB_DIR} ${R_LIB_DIR} l_StackSlices )
