@@ -713,12 +713,12 @@ setMethod( f = "as.antsImage" ,
 	   	      		  pixeltype = "double" , 
 				  spacing = as.numeric( seq.int( from = 1 , 
 				  	    			 by = 0 , 
-								 length.out = length( attributes( vect )$dim ) 
+								 length.out = length(dim( object ))
 								 ) 
 							) , 
 				  origin = as.numeric( seq.int( from = 0 , 
 				  	    			 by = 0 , 
-								 length.out = length( attributes( vect )$dim ) 
+								 length.out = length(dim( object )) 
 								 ) 
 							)
 				  )
@@ -734,12 +734,12 @@ setMethod( f = "as.antsImage" ,
 	   	      		  pixeltype = "double" , 
 				  spacing = as.numeric( seq.int( from = 1 , 
 				  	    			 by = 0 , 
-								 length.out = length( attributes( vect )$dim ) 
+								 length.out = length(dim( object )) 
 								 ) 
 							) , 
 				  origin = as.numeric( seq.int( from = 0 , 
 				  	    			 by = 0 , 
-								 length.out = length( attributes( vect )$dim ) 
+								 length.out = length(dim( object )) 
 								 ) 
 							)
 				  )

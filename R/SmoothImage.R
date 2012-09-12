@@ -1,3 +1,3 @@
 SmoothImage <- function(...){
-	.Call( "SmoothImage", as.character( c(...) ) ) ;
+  .Call( "SmoothImage", int_antsProcessArguments( c(...) ) ) ;
 }

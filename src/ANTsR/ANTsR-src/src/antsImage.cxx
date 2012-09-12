@@ -236,9 +236,7 @@ template< typename ImageType >
 Rcpp::IntegerVector antsImage_dim( typename ImageType::Pointer image )
 {
   Rcpp::IntegerVector dim_r( ImageType::ImageDimension ) ;
-  dim_r[0] = image->GetLargestPossibleRegion().GetSize(1) ;
-  dim_r[1] = image->GetLargestPossibleRegion().GetSize(0) ;
-  for( unsigned int i = 2 ; i < ImageType::ImageDimension ; ++i )
+  for( unsigned int i = 0 ; i < ImageType::ImageDimension ; ++i )
     {
       dim_r[i] = image->GetLargestPossibleRegion().GetSize(i) ;
     }
@@ -412,7 +410,7 @@ catch( const std::exception& exc )
 
 
 template< class PixelType , unsigned int Dimension >
-SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer origimage , SEXP r_mask , SEXP r_antsregion )
+SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer image , SEXP r_mask , SEXP r_antsregion )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
   typedef typename ImageType::Pointer ImagePointerType ;
@@ -420,28 +418,8 @@ SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer o
   typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
   typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
 
-  if( origimage.IsNotNull() )
+  if( image.IsNotNull() )
     {
-      Rcpp::LogicalVector mask( r_mask ) ;
-      ImagePointerType image = origimage ;
-      if( mask.size() == 0 )
-	{
-	  // permute the x-axis and y-axis of the original image so that when iterating over the image, we go over 
-	  // column1, column2, column3, ... so on of the original image instead of row1, row2, row3, ... so on
-	  PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
-	  permuteaxesfilter->SetInput( origimage ) ;
-	  PermuteAxesFilterOrderType permuteaxesfilterorder ;
-	  permuteaxesfilterorder[0] = 1 ;
-	  permuteaxesfilterorder[1] = 0 ;
-	  for( unsigned int i = 2 ; i < Dimension ; ++i )
-	    {
-	      permuteaxesfilterorder[i] = i ;
-	    }
-	  permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-	  image = permuteaxesfilter->GetOutput() ;
-	  permuteaxesfilter->Update() ;
-	}
-
       typename ImageType::RegionType region ;
       Rcpp::S4 antsregion( r_antsregion ) ;
       Rcpp::IntegerVector indexvector( antsregion.slot( "index" ) ) ;
@@ -474,6 +452,7 @@ SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer o
 	}
       itk::ImageRegionConstIterator< ImageType > image_iter( image , region ) ;
 
+      Rcpp::LogicalVector mask( r_mask ) ;
       if( mask.size() == 0 )
 	{
 	  Rcpp::NumericVector vector_r( region.GetNumberOfPixels() ) ;
@@ -1517,19 +1496,7 @@ typename ImageType::Pointer antsImage_asantsImage( Rcpp::NumericVector& vector ,
       image_iter.Set( static_cast< typename ImageType::PixelType >( vector[vector_ind++] ) ) ;
     }
   
-  PermuteAxesFilterPointerType permuteaxesfilter = PermuteAxesFilterType::New() ;
-  permuteaxesfilter->SetInput( image ) ;
-  PermuteAxesFilterOrderType permuteaxesfilterorder ;
-  permuteaxesfilterorder[0] = 1 ;
-  permuteaxesfilterorder[1] = 0 ;
-  for( unsigned int i = 2 ; i < ImageType::ImageDimension ; ++i )
-    {
-      permuteaxesfilterorder[i] = i ;
-    }
-  permuteaxesfilter->SetOrder( permuteaxesfilterorder ) ;
-  ImagePointerType axespermutedimage = permuteaxesfilter->GetOutput() ;
-  permuteaxesfilter->Update() ;
-  return axespermutedimage ;
+  return image ;
 }
 
 RcppExport SEXP antsImage_asantsImage( SEXP r_vector , SEXP r_pixeltype , SEXP r_spacing , SEXP r_origin )
