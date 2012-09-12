@@ -1,5 +1,5 @@
 Project: ANTsR
-Author: Shrinidhi KL
+Author: Shrinidhi KL,  Avants BB 
 Description: R package providing ITK features in R
 Usage:
 Clone or Pull ANTsR from this repository as follows:
