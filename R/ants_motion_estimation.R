@@ -41,7 +41,7 @@ ants_motion_estimation <- function( img = "" )
 #	antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( filename , moconr_img , avgnr_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avgnr_img , img , 1 , 20 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 , "-m" , paste( "CC[" , paste( avgnr_img , img , 1 , 2 , sep = "," ) , "]" , sep = "" ) , "-t" , "GaussianDisplacementField[0.15,3,0.5]" , "-i" , 10 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 10 ) ;
 }
 
-motion_correction <- function( img )
+motion_correction <- function( img, fixed )
 {
 if( is.character( img ) )
 {
@@ -64,11 +64,45 @@ if( is.character( img ) )
   return( NULL )
 }
 
+if ( missing( fixed ) )
+{
+  fixed <- new( "antsImage" , "float" , 3 )
+  antsMotionCorr( list( d = 3 , a = img , o = fixed ) )
+} else
+{
+  if ( is.character( fixed ) )
+    {
+      if ( length( fixed ) != 1 )
+        {
+          print ( "'fixed' should be only one filename" )
+          return( NULL )
+        }
+      fixed <- antsImageRead( fixed, "float", 3 )
+    } else if ( class( fixed ) == "antsImage" )
+      {
+        if ( fixed@pixeltype != "float" || fixed@dimension != 3 )
+          {
+            print( "'fixed' must have pixeltype 'float' and dimension '3'" )
+            return( NULL )
+          }
+      }
+    else
+      {
+        print( "'fixed' must be a filename or an 'antsImage'" )
+        return( NULL )
+      }
+}
+
+n <- dim(img)[4]
+if ( n > 10 )
+  {
+  n <- 10
+  }
+
 avg_img = new( "antsImage" , "float" , 3 )
-antsMotionCorr( list( d = 3 , a = img , o = avg_img ) )
 moco_img = new( "antsImage" , "float" , 4 )
 moco_params = new( "antsMatrix" , "double" )
-antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , avg_img , img , 1 , 32 , "regular" , 0.08 ) , t = "Affine[1]" , i = 50 , u = 1 , e = 1 , s = 1 , f = 1 , n = 10 , l = 0 ) )
+antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.08 ) , t = "Affine[1]" , i = 50 , u = 1 , e = 1 , s = 1 , f = 1 , n = n, l = 0 ) )
 
 return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
 }
