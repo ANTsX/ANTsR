@@ -8,8 +8,6 @@ cbf_pasl_robust <- function( asl_img, m0img, labelfirst=0, robust=TRUE, lambda=0
   moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 500 , thresh_hi = 1e9 )
 
   mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
-
-  print ( str(moco_results$moco_params) )
   
   motionparams <- as.data.frame( moco_results$moco_params )
 
