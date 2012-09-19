@@ -1,4 +1,4 @@
-get_perfusion_predictors <- function( mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 4 )
+get_perfusion_predictors <- function( mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 )
 {
 if( is.null( xideal ) )
 {
@@ -17,8 +17,12 @@ if( is.null( xideal ) )
 # get nuisance variables : motion, compcor, etc
 # motionparams <- as.data.frame( moco_params ) 
 motionnuis<-t(motionparams)[2:ncol( motionparams ) , ] # matrix elements
+metricnuis<-motionnuis[1,]
+matrixnuis<-sqrt( motionnuis[2,]*motionnuis[2,] +  motionnuis[3,]*motionnuis[3,] + motionnuis[4,]*motionnuis[4,] + motionnuis[5,]*motionnuis[5,] +  motionnuis[6,]*motionnuis[6,] + motionnuis[7,]*motionnuis[7,] + motionnuis[8,]*motionnuis[8,] +  motionnuis[9,]*motionnuis[9,] + motionnuis[10,]*motionnuis[10,] )
+matrixnuis<-sqrt(  motionnuis[3,]*motionnuis[3,] + motionnuis[4,]*motionnuis[4,] + motionnuis[5,]*motionnuis[5,] + motionnuis[7,]*motionnuis[7,] + motionnuis[8,]*motionnuis[8,] +  motionnuis[9,]*motionnuis[9,]  )
+transnuis<-sqrt( motionnuis[11,]*motionnuis[11,] +  motionnuis[12,]*motionnuis[12,] + motionnuis[13,]*motionnuis[13,]  )
 globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
-nuis<-t( rbind(globalsignal, motionnuis )  )
+nuis<-t( rbind(globalsignal, metricnuis, transnuis , matrixnuis )  )
 
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)

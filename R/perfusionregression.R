@@ -27,31 +27,43 @@ if ( dorobust )
   vox<-1
   ct<-0
   skip<-20
-  visitvals<-((1:(ncol(mat)/skip))*skip)
-  cbfform<-formula(  mat[,vox] ~   xideal + nuis )
-  cl<-makeForkCluster(nnodes = getOption("mc.cores", 2L))
-  registerDoParallel(cl,cores=getOption("mc.cores", 2L))
+  visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
+  print( dim(nuis) )
+  cbfform<-formula(  mat[,vox] ~   xideal + nuis  )
+  mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
+  print( paste( "nodes:" , mynodes ) )
+#  cl<-makeForkCluster( nnodes = mynodes )
+#  registerDoParallel( cl , cores = mynodes ) 
+  rgw<-regweights
+  myct<-0
   ptime <- system.time({
-  rgw<-foreach(vox=visitvals,.combine="+",.init=regweights,.verbose=F) %dopar% {
-    mycbfmodel<-lmrob( cbfform , control = ctl ) # try(...,silent=T) 
+#  rgw<-foreach(vox=visitvals,.combine="+",.init=regweights,.verbose=F) %dopar% {
+  for ( vox in visitvals ) {
+    try(  mycbfmodel<-lmrob( cbfform , control = ctl ) , silent=T )
     rbetaideal[vox]<-mycbfmodel$coeff[2]
-    if ( vox %% 2 == 0 ) print(paste("robust regression:",vox/ncol(mat)*100,"%",ct))
-    # regweights<-regweights+
-    mycbfmodel$weights
+    if ( ! is.null(   mycbfmodel$weights ) )
+      {
+      rgw<-rgw + mycbfmodel$weights
+      myct<-myct+1 
+      }
     }
   })
-  regweights<-(rgw/length(visitvals))
-  print(paste("donewithrobreg",length(visitvals)))
+  regweights<-(rgw/myct)
+  print(paste("donewithrobreg",myct))
   print(regweights)
   print(paste(ptime))
   # now use the weights in a weighted regression
-  regweights[ regweights < 0.999995 ]<-0 # hard thresholding 
+  indstozero<-which( regweights < ( 0.999995*max(regweights ) ) )
+  if ( length(which) < 10 ) 
+    {
+    indstozero<-which( regweights < ( 0.95 * max(regweights ) ) )
+    }
+  regweights[ indstozero ]<-0 # hard thresholding 
+  print(regweights)
   cbfform<-formula(  mat ~   xideal + nuis )
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-(mycbfmodel$coeff)[2,]
   cbfi[ mask_img == 1 ]<-betaideal  # robust results
   }
-# antsImageWrite(cbfi,"cbfregression.nii")
-
 return( cbfi )
 }
