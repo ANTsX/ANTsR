@@ -3,7 +3,13 @@ perfusionregression <- function( mask_img , mat , xideal , nuis , dorobust = FAL
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
 print("standard regression")
-cbfform<-formula(  mat ~   xideal + nuis )
+cbfform<-formula(  mat ~   xideal )
+rcbfform<-formula(  mat[,vox] ~   xideal )
+if ( ! is.null( nuis ) )
+  {
+  cbfform<-formula(  mat ~   xideal + nuis )
+  rcbfform<-formula(  mat[,vox] ~   xideal + nuis )
+  }
 mycbfmodel<-lm( cbfform  ) # standard regression
 betaideal<-(mycbfmodel$coeff)[2,]
 cbfi <- antsImageClone( mask_img )
@@ -29,7 +35,6 @@ if ( dorobust )
   skip<-20
   visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
   print( dim(nuis) )
-  cbfform<-formula(  mat[,vox] ~   xideal + nuis  )
   mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
   print( paste( "nodes:" , mynodes ) )
 #  cl<-makeForkCluster( nnodes = mynodes )
@@ -39,7 +44,7 @@ if ( dorobust )
   ptime <- system.time({
 #  rgw<-foreach(vox=visitvals,.combine="+",.init=regweights,.verbose=F) %dopar% {
   for ( vox in visitvals ) {
-    try(  mycbfmodel<-lmrob( cbfform , control = ctl ) , silent=T )
+    try(  mycbfmodel<-lmrob( rcbfform , control = ctl ) , silent=T )
     rbetaideal[vox]<-mycbfmodel$coeff[2]
     if ( ! is.null(   mycbfmodel$weights ) )
       {
@@ -53,14 +58,13 @@ if ( dorobust )
   print(regweights)
   print(paste(ptime))
   # now use the weights in a weighted regression
-  indstozero<-which( regweights < ( 0.999995*max(regweights ) ) )
-  if ( length(which) < 10 ) 
+  indstozero<-which( regweights < ( 0.99*max(regweights ) ) )
+  if ( length( indstozero ) < 10 ) 
     {
     indstozero<-which( regweights < ( 0.95 * max(regweights ) ) )
     }
   regweights[ indstozero ]<-0 # hard thresholding 
   print(regweights)
-  cbfform<-formula(  mat ~   xideal + nuis )
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-(mycbfmodel$coeff)[2,]
   cbfi[ mask_img == 1 ]<-betaideal  # robust results

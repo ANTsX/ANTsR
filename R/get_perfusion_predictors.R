@@ -7,7 +7,7 @@ if( is.null( xideal ) )
   xideal<-( rep(c(1,0),dim(mat)[1])[1:dim(mat)[1]]-0.5 ) # control minus tag
   }else
   {
-  xideal<-( rep(c(0,1),dim(mat)[1])[1:dim(mat)[1]]-0.5 ) # control minus tag
+  xideal<-( rep(c(0,1),dim(mat)[1])[1:dim(mat)[1]]-0.5 ) # tag minus control
   }
 }else if( length( xideal ) != dim(mat)[1] )
 {
@@ -23,6 +23,13 @@ matrixnuis<-sqrt(  motionnuis[3,]*motionnuis[3,] + motionnuis[4,]*motionnuis[4,]
 transnuis<-sqrt( motionnuis[11,]*motionnuis[11,] +  motionnuis[12,]*motionnuis[12,] + motionnuis[13,]*motionnuis[13,]  )
 globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
 nuis<-t( rbind(globalsignal, metricnuis, transnuis , matrixnuis )  )
+
+# here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top 3 components
+msvd<-svd( t( motionnuis[ 2:nrow( motionnuis ) ,  ] ) )
+nsvdcomp<-3
+motionnuis<-( msvd$u[,1:nsvdcomp] )
+print( paste( ' % var of motion ' , (  sum( msvd$d[1:nsvdcomp] )/  sum( msvd$d ) ) ) )
+nuis<-t( rbind(globalsignal, metricnuis, t(motionnuis) )  )
 
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)
