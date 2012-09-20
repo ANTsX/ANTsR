@@ -8,6 +8,6 @@ Maintainer: Shrinidhi KL <FAKEID@NOWHERE.COM>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)
 LazyLoad: yes
-Depends: Rcpp (>= 0.9.7.2) , signal , parallel , timeSeries , mFilter , MASS , doParallel
+Depends: Rcpp (>= 0.9.7.2) , signal , parallel , timeSeries , mFilter , MASS , doParallel, robust 
 Suggests: oro.nifti , XML , bitops
 LinkingTo: Rcpp
