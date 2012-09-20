@@ -58,10 +58,14 @@ if ( dorobust )
   print(regweights)
   print(paste(ptime))
   # now use the weights in a weighted regression
-  indstozero<-which( regweights < ( 0.99*max(regweights ) ) )
-  if ( length( indstozero ) < 10 ) 
+  indstozero<-which( regweights < ( 0.975 * max(regweights ) ) )
+  if ( length( indstozero ) < 20 ) 
     {
     indstozero<-which( regweights < ( 0.95 * max(regweights ) ) )
+    }
+  if ( length( indstozero ) < 20 ) 
+    {
+    indstozero<-which( regweights < ( 0.50 * max(regweights ) ) )
     }
   regweights[ indstozero ]<-0 # hard thresholding 
   print(regweights)
