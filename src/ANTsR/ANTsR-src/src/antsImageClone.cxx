@@ -8,7 +8,7 @@
 #include "itkImageFileWriter.h"
 
 namespace ants
-{
+{ 
 
   template< class InImageType , class OutImageType >
   typename OutImageType::Pointer antsImageClone( typename InImageType::Pointer in_image )
@@ -17,6 +17,7 @@ namespace ants
     out_image->SetRegions( in_image->GetLargestPossibleRegion() ) ;
     out_image->SetSpacing( in_image->GetSpacing() ) ;
     out_image->SetOrigin( in_image->GetOrigin() ) ;
+    out_image->CopyInformation( in_image );
     out_image->Allocate() ;
 
     itk::ImageRegionConstIterator< InImageType > in_iterator( in_image , in_image->GetLargestPossibleRegion() ) ;
