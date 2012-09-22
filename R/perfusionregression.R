@@ -1,4 +1,4 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis , dorobust = FALSE )
+perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0 )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
@@ -13,10 +13,11 @@ if ( ! is.null( nuis ) )
 mycbfmodel<-lm( cbfform  ) # standard regression
 betaideal<-(mycbfmodel$coeff)[2,]
 cbfi <- antsImageClone( mask_img )
-cbfi[ mask_img == 1 ]<-betaideal
-#antsImageWrite(cbfi,"cbfbasic.nii")
+m0vals <-m0[ mask_img == 1 ]
+m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
+cbfi[ mask_img == 1 ] <- betaideal / m0vals
 
-if ( dorobust )
+if ( dorobust > 0 )
   {
   pckg = try(require(robust))
   if(!pckg) 
@@ -26,7 +27,8 @@ if ( dorobust )
     require("robust")
     }
   # robust procedure Yohai, V.J. (1987) High breakdown-point and high efficiency estimates for regression.  _The Annals of Statistics_ *15*, 642-65
-  print("begin robust regression") ;
+  if ( dorobust > 1 ) { print("dorobust too large, setting to 0.95"); dorobust <- 0.95; }
+  print(paste("begin robust regression:",dorobust*100,"%"))
   ctl<-lmrob.control( "KS2011", max.it = 1000 )
   regweights<-rep(0,nrow(mat))
   rbetaideal<-rep(0,ncol(mat))
@@ -58,20 +60,21 @@ if ( dorobust )
   print(regweights)
   print(paste(ptime))
   # now use the weights in a weighted regression
-  indstozero<-which( regweights < ( 0.975 * max(regweights ) ) )
+  indstozero<-which( regweights < ( dorobust * max(regweights ) ) )
   if ( length( indstozero ) < 20 ) 
     {
-    indstozero<-which( regweights < ( 0.95 * max(regweights ) ) )
+    indstozero<-which( regweights < ( 0.95 * dorobust * max(regweights ) ) )
     }
   if ( length( indstozero ) < 20 ) 
     {
-    indstozero<-which( regweights < ( 0.50 * max(regweights ) ) )
+    indstozero<-which( regweights < ( 0.50 * dorobust * max(regweights ) ) )
     }
   regweights[ indstozero ]<-0 # hard thresholding 
   print(regweights)
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-(mycbfmodel$coeff)[2,]
-  cbfi[ mask_img == 1 ]<-betaideal  # robust results
+  cbfi[ mask_img == 1 ] <- betaideal / m0vals # robust results
+  print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
   }
 return( cbfi )
 }

@@ -2,23 +2,38 @@ require(doParallel)
 # image is in the ANTsR directory on mnt build avants 
 asl_img<-'asl.nii.gz'
 asl_img<-"JJ_asl_PEDS021.nii.gz"
+# aslimg<-antsImageRead(asl,'float',4)
+# mk<-antsImageRead("out.nii.gz",'float',3)
+# moco_mask_img <- get_mask( mk , thresh_lo = 500 , thresh_hi = 1e9 )
+# aslimg<-antsImageRead("out.nii.gz",'float',4)
 
 
 
 asl<-"20100810_113600ep2dpcaslPHC1500msP2s002a001.nii.gz"
 asl<-"20100812_070450ep2dpcaslUIPHCs021a001.nii.gz"
+asl<-"110058_20100301_0009_MoCo.nii.gz" # Murray
+asl<-"JJ_asl_PEDS021b.nii.gz"
 moco_results <- motion_correction( asl )
-moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 500 , thresh_hi = 1e9 )
-mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
+moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 800 , thresh_hi = 1e9 )
+aslimg<-moco_results$moco_img
+aslimg<-antsImageRead(asl,'float',4)
+mat <- timeseries2matrix( aslimg , moco_mask_img )
 motionparams<-as.data.frame( moco_results$moco_params )
-predictors <- get_perfusion_predictors( mat , motionparams)
-cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis )
+predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
+
+m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
+m0<-antsImageClone( moco_mask_img )
+m0[ moco_mask_img == 1 ]<-m0vals
+cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
+cbfr <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , 0.966 )
+antsImageWrite(cbf,"/tmp/cbf2.nii.gz")
+antsImageWrite(cbfr,"/tmp/cbfr2.nii.gz")
+#
+#
 # look at the results --- this is currently what we can use in a study
 # if we control for global mean perfusion --- it's a relative measure 
-antsImageWrite(cbf,"cbf.nii.gz") 
-                                        # can also do robust cbf
-cbfr <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , TRUE )
-antsImageWrite(cbfr,"cbfr.nii.gz") 
+# can also do robust cbf
+
 
 # network analysis
 # draw the roi in label 2 on the mask

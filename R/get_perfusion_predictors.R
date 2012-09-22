@@ -18,11 +18,7 @@ if( is.null( xideal ) )
 # motionparams <- as.data.frame( moco_params ) 
 motionnuis<-t(motionparams)[2:ncol( motionparams ) , ] # matrix elements
 metricnuis<-motionnuis[1,]
-matrixnuis<-sqrt( motionnuis[2,]*motionnuis[2,] +  motionnuis[3,]*motionnuis[3,] + motionnuis[4,]*motionnuis[4,] + motionnuis[5,]*motionnuis[5,] +  motionnuis[6,]*motionnuis[6,] + motionnuis[7,]*motionnuis[7,] + motionnuis[8,]*motionnuis[8,] +  motionnuis[9,]*motionnuis[9,] + motionnuis[10,]*motionnuis[10,] )
-matrixnuis<-sqrt(  motionnuis[3,]*motionnuis[3,] + motionnuis[4,]*motionnuis[4,] + motionnuis[5,]*motionnuis[5,] + motionnuis[7,]*motionnuis[7,] + motionnuis[8,]*motionnuis[8,] +  motionnuis[9,]*motionnuis[9,]  )
-transnuis<-sqrt( motionnuis[11,]*motionnuis[11,] +  motionnuis[12,]*motionnuis[12,] + motionnuis[13,]*motionnuis[13,]  )
 globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
-nuis<-t( rbind(globalsignal, metricnuis, transnuis , matrixnuis )  )
 
 # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top 3 components
 msvd<-svd( t( motionnuis[ 2:nrow( motionnuis ) ,  ] ) )
@@ -34,7 +30,7 @@ nuis<-t( rbind(globalsignal, metricnuis, t(motionnuis) )  )
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)
 tvhist<-hist(temporalvar , breaks = 20, plot=FALSE)
-percvar<-0.015 # percentage of high variance data to use
+percvar<-0.03 # percentage of high variance data to use
 thresh<-tvhist$mids[  cumsum( rev( tvhist$counts / sum(tvhist$counts) > percvar ) ) == T ]
 wh<-( temporalvar > thresh )
 highvarmat<-mat[,wh]
