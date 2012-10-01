@@ -1,10 +1,10 @@
 #!/bin/bash
 # retrieve Rcpp and R include and link directories
 # R_DIR=(set by the user from command line)
-RCPP_INCLUDE_DIR=`${R_DIR}/Rscript -e 'Rcpp:::CxxFlags()'`
-RCPP_LIB_DIR=`${R_DIR}/Rscript -e 'Rcpp:::LdFlags()'`
-R_INCLUDE_DIR=`${R_DIR}/R CMD config --cppflags`
-R_LIB_DIR=`${R_DIR}/R CMD config --ldflags`
+RCPP_INCLUDE_DIR=`${R_DIR}Rscript -e 'Rcpp:::CxxFlags()'`
+RCPP_LIB_DIR=`${R_DIR}Rscript -e 'Rcpp:::LdFlags()'`
+R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
+R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
 
 cd ./src
 # ANTS_DIR=(set by the user from command line)
