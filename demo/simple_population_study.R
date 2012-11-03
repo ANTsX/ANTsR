@@ -37,8 +37,7 @@ antsImageWrite(betaimg,paste(pre,'_beta.nii.gz',sep=''))
 pimg<-antsImageClone(mask)
 pimg[ logmask ]<-1-pvals # write out 1 minus p to allow display of bright values 
 antsImageWrite(pimg,paste(pre,'_pvals.nii.gz',sep=''))
-print('done')
 qimg<-antsImageClone(mask)
-qimg[ logmask ]<-1-p.adjust(pvals,method="BH")
+qimg[ logmask ]<-1-p.adjust(pvals,method="BH") # BH corrected p-values
 antsImageWrite(qimg,paste(pre,'_qvals.nii.gz',sep=''))
 print('done')

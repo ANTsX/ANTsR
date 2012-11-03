@@ -7,27 +7,32 @@ asl_img<-"JJ_asl_PEDS021.nii.gz"
 # moco_mask_img <- get_mask( mk , thresh_lo = 500 , thresh_hi = 1e9 )
 # aslimg<-antsImageRead("out.nii.gz",'float',4)
 
-
-
 asl<-"20100810_113600ep2dpcaslPHC1500msP2s002a001.nii.gz"
 asl<-"20100812_070450ep2dpcaslUIPHCs021a001.nii.gz"
 asl<-"110058_20100301_0009_MoCo.nii.gz" # Murray
 asl<-"JJ_asl_PEDS021b.nii.gz"
-moco_results <- motion_correction( asl )
-moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 800 , thresh_hi = 1e9 )
-aslimg<-moco_results$moco_img
-aslimg<-antsImageRead(asl,'float',4)
-mat <- timeseries2matrix( aslimg , moco_mask_img )
-motionparams<-as.data.frame( moco_results$moco_params )
-predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
 
-m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
-m0<-antsImageClone( moco_mask_img )
-m0[ moco_mask_img == 1 ]<-m0vals
-cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
-cbfr <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , 0.966 )
-antsImageWrite(cbf,"/tmp/cbf2.nii.gz")
-antsImageWrite(cbfr,"/tmp/cbfr2.nii.gz")
+for ( asl in c("103487_20060308_0007_ep2d_casl_UI_1500ms.nii.gz","111338_20060830_0006_ep2d_casl_UI_1500ms.nii.gz","110284_20060425_0009_ep2d_casl_UI_1500ms.nii.gz") )
+  {
+  pre<-substr(asl,1,6)
+  moco_results <- motion_correction( asl )
+  moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 800 , thresh_hi = 1e9 )
+  antsImageWrite(moco_mask_img,paste(pre,"mask.nii.gz",sep=''))
+  aslimg<-moco_results$moco_img
+  # aslimg<-antsImageRead(asl,'float',4)
+  saslimg<-antsImageClone(aslimg)
+  SmoothImage(4,aslimg,1,saslimg)
+  mat <- timeseries2matrix( saslimg , moco_mask_img )
+  motionparams<-as.data.frame( moco_results$moco_params )
+  predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
+  m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
+  m0<-antsImageClone( moco_mask_img )
+  m0[ moco_mask_img == 1 ]<-m0vals
+  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
+  cbfr <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , 0.96 )
+  antsImageWrite(cbf,paste(pre,"cbf.nii.gz",sep=''))
+  antsImageWrite(cbfr,paste(pre,"cbfr.nii.gz",sep=''))
+  }
 #
 #
 # look at the results --- this is currently what we can use in a study

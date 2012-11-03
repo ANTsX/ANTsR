@@ -15,7 +15,8 @@ betaideal<-(mycbfmodel$coeff)[2,]
 cbfi <- antsImageClone( mask_img )
 m0vals <-m0[ mask_img == 1 ]
 m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
-cbfi[ mask_img == 1 ] <- betaideal / m0vals
+factor<-1.e4
+cbfi[ mask_img == 1 ] <- betaideal / m0vals * factor
 
 if ( dorobust > 0 )
   {
@@ -61,19 +62,23 @@ if ( dorobust > 0 )
   print(paste(ptime))
   # now use the weights in a weighted regression
   indstozero<-which( regweights < ( dorobust * max(regweights ) ) )
-  if ( length( indstozero ) < 20 ) 
+  keepinds<-which( regweights > ( dorobust * max(regweights ) ) )
+  print( paste(  "dorobust ", dorobust , " i2z ", length(indstozero) ))
+  if ( length( keepinds ) < 20 ) 
     {
     indstozero<-which( regweights < ( 0.95 * dorobust * max(regweights ) ) )
+    keepinds<-which( regweights > (  0.95 * dorobust * max(regweights ) ) )
     }
-  if ( length( indstozero ) < 20 ) 
+  if ( length( keepinds ) < 20 ) 
     {
     indstozero<-which( regweights < ( 0.50 * dorobust * max(regweights ) ) )
+    keepinds<-which( regweights > (  0.5 * dorobust * max(regweights ) ) )
     }
   regweights[ indstozero ]<-0 # hard thresholding 
   print(regweights)
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
-  betaideal<-(mycbfmodel$coeff)[2,]
-  cbfi[ mask_img == 1 ] <- betaideal / m0vals # robust results
+  betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+  cbfi[ mask_img == 1 ] <- betaideal  # robust results
   print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
   }
 return( cbfi )
