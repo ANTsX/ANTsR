@@ -17,7 +17,8 @@ namespace ants
     out_image->SetRegions( in_image->GetLargestPossibleRegion() ) ;
     out_image->SetSpacing( in_image->GetSpacing() ) ;
     out_image->SetOrigin( in_image->GetOrigin() ) ;
-    out_image->CopyInformation( in_image );
+    out_image->SetDirection( in_image->GetDirection() );
+    //out_image->CopyInformation( in_image );
     out_image->Allocate() ;
 
     itk::ImageRegionConstIterator< InImageType > in_iterator( in_image , in_image->GetLargestPossibleRegion() ) ;
