@@ -2,7 +2,7 @@
 
 setClass( Class = "antsMatrix" , 
 	  representation( elementtype = "character" , # C++ type used to represent an element of the matrix
-			  pointer = "externalptr" # pointer to the actual image of C++ type 'itk::image< pixeltype , dimension >::Pointer'
+			  pointer = "externalptr"     # pointer to the actual image of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 			  ) 
 	  )
 
@@ -23,8 +23,8 @@ setMethod( f = "as.data.frame" ,
 	   signature( x = "antsMatrix" ) ,
 	   definition = function( x )
 	   	      	{
-			  lst = .Call( "antsMatrix_asList" , x )
-			names(lst)[ 1 : (length(lst)-1) ] <- lst[[ length(lst) ]]
+			lst = .Call( "antsMatrix_asList" , x )
+			names(lst)[ 1 : (length(lst)-1) ] <- lst[ length(lst) ]
 			lst[[ length(lst) ]] <- NULL
 			return( as.data.frame(lst) )
 			}
@@ -35,7 +35,7 @@ setMethod( f = "as.list" ,
 	   definition = function( x )
 	   	      {
 			lst = .Call( "antsMatrix_asList" , x )
-			names(lst)[ 1 : (length(lst)-1) ] <- lst[[ length(lst) ]]
+			names(lst)[ 1 : (length(lst)-1) ] <- lst[ length(lst) ]
 			lst[[ length(lst) ]] <- NULL
 			return( lst )
 	   	      }
@@ -60,3 +60,40 @@ setMethod( f = "as.antsMatrix" ,
 			  return( .Call( "antsMatrix_asantsMatrix" , as.list( object ) , elementtype ) )
 			}
 	   )
+
+setMethod( f = "as.list" ,
+	   signature( x = "antsMatrix" ) ,
+	   definition = function( x )
+	   	      {
+			lst = .Call( "antsMatrix_asList" , x )
+			names(lst)[ 1 : (length(lst)-1) ] <- lst[ length(lst) ]
+			lst[[ length(lst) ]] <- NULL
+			return( lst )
+	   	      }
+	   )
+
+as.list.antsMatrix <-
+      function(x, row.names=NULL, optional = FALSE, ...)
+  {
+    lst = .Call( "antsMatrix_asList" , x )
+    names(lst)[ 1 : (length(lst)) ] <- lst[ length(lst) ]
+    lst[[ length(lst) ]] <- NULL
+    return(lst)
+  }
+
+setAs("antsMatrix", "list", function(from) {
+      as.list.antsMatrix(from)
+  })
+
+as.data.frame.antsMatrix <-
+      function(x, row.names=NULL, optional = FALSE, ...)
+  {
+    lst = .Call( "antsMatrix_asList" , x )
+    names(lst)[ 1 : (length(lst)) ] <- lst[ length(lst) ]
+    lst[[ length(lst) ]] <- NULL
+    as.data.frame(lst)
+  }
+
+setAs("antsMatrix", "data.frame", function(from) {
+      as.data.frame.antsMatrix(from)
+  })
