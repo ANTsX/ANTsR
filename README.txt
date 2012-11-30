@@ -4,7 +4,7 @@ Description: R package providing ITK features in R
 Usage:
 Clone or Pull ANTsR from this repository as follows:
 
-      $ git clone https://shrinidhikl@github.com/shrinidhikl/ANTsR.git
+      $ git clone https://github.com/stnava/ANTsR.git
 
 Install the package as follows:
 
