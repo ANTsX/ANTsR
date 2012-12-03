@@ -25,11 +25,13 @@ msvd<-svd( t( motionnuis[ 2:nrow( motionnuis ) ,  ] ) )
 nsvdcomp<-3
 motionnuis<-( msvd$u[,1:nsvdcomp] )
 print( paste( ' % var of motion ' , (  sum( msvd$d[1:nsvdcomp] )/  sum( msvd$d ) ) ) )
-nuis<-t( rbind(globalsignal, metricnuis, t(motionnuis) )  )
-
+motionnuis<-t(motionnuis)
+motnames<-paste("motion",c(1:nrow(motionnuis)),sep='')
+nuis<-t( rbind(globalsignal, metricnuis, (motionnuis) )  )
+colnames(nuis)<-c("globalsignal","metricnuis",motnames)
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)
-tvhist<-hist(temporalvar , breaks = 20, plot=FALSE)
+tvhist<-hist(temporalvar , breaks = 100, plot=T)
 percvar<-0.03 # percentage of high variance data to use
 thresh<-tvhist$mids[  cumsum( rev( tvhist$counts / sum(tvhist$counts) > percvar ) ) == T ]
 wh<-( temporalvar > thresh )
@@ -39,8 +41,9 @@ compcorrsvd<-svd( highvarmat %*% t( highvarmat ) )
 if( ncompcorparameters > 0 )
   {
   compcorr<-t( compcorrsvd$u[1:ncompcorparameters, ] )
+  compcorrnames<-paste("compcorr",c(1:ncol(compcorr)),sep='')
   nuis<-cbind(nuis,compcorr)
+  colnames(nuis)<-c("globalsignal","metricnuis",motnames,compcorrnames)
   }
-
 return( list( xideal = xideal , nuis = nuis ) )
 }

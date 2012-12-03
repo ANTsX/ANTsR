@@ -75,5 +75,6 @@ ThresholdImage( 3 , img , mask_img , thresh_lo , thresh_hi )
 ImageMath( 3 , mask_img , "ME" , mask_img , 2 )
 ImageMath( 3 , mask_img , "GetLargestComponent" , mask_img )
 ImageMath( 3 , mask_img , "MD" , mask_img , 1 )
+ImageMath( 3 , mask_img , "FillHoles" , mask_img  )
 return( mask_img )
 }
