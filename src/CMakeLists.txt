@@ -38,7 +38,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY https://advants.svn.sourceforge.net/svnroot/advants/branches/image_passing
 #    SVN_REVISION -r 1547
     GIT_REPOSITORY http://github.com/stnava/ANTS.git 
-    GIT_TAG 1b3f5589ccd7a95ec8d2d21b064c0fa51f49c92d
+    GIT_TAG 952c5c18d84a283e088690c227196dbd3c2fb801
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
