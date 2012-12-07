@@ -15,7 +15,7 @@ if( NOT ITK_DIR )
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
     GIT_REPOSITORY http://itk.org/ITK.git # using http instead of git so ITK can be donwload behind a firewall
-    GIT_TAG 2a5f945a6313e6d304a32f0a2567a0a127f39722
+    GIT_TAG e9861608b83f48ff67015f552fd86f9611ed3af6
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
@@ -38,7 +38,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY https://advants.svn.sourceforge.net/svnroot/advants/branches/image_passing
 #    SVN_REVISION -r 1547
     GIT_REPOSITORY http://github.com/stnava/ANTS.git 
-    GIT_TAG e852bfe484a7485583fb886ae1b84a2df4a37dcc
+    GIT_TAG 1b3f5589ccd7a95ec8d2d21b064c0fa51f49c92d
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
