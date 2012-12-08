@@ -8,6 +8,10 @@ if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE "Release" CACHE STRING "Project build-type" )
 endif( NOT CMAKE_BUILD_TYPE )
 
+#   we have to define NDEBUG due to a possible bug in itkMacro.h --- we
+#   require   return static_cast<TTarget>(x); to be implemented rather 
+#   than the dynamic_cast
+
 # if 'ITK_DIR' is not specified by user, superbuild ITK
 if( NOT ITK_DIR )
   ExternalProject_Add( ITK
@@ -22,6 +26,7 @@ if( NOT ITK_DIR )
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D BUILD_EXAMPLES=OFF # reduces build time
+   #cmakedefine NDEBUG 
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-build
     INSTALL_COMMAND "" )
   set( ITK_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-build )
@@ -46,6 +51,7 @@ if( NOT ANTS_DIR )
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D USE_SYSTEM_ITK=ON # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
 	       -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
+  #cmakedefine NDEBUG 
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" )
   set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )
@@ -66,5 +72,6 @@ ExternalProject_Add( ANTsR
 	     -D R_LIB_DIR=${R_LIB_DIR} # R library directory
 	     -D CMAKE_INSTALL_PREFIX=${ANTsR_SuperBuild_SOURCE_DIR} # all the targets are to be installed to current directory so R can find and load them
 	     -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by the user
+  #cmakedefine NDEBUG 
   BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/ANTsR-build 
   INSTALL_DIR "" ) 
