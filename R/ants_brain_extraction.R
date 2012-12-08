@@ -54,11 +54,15 @@ if( is.character( img ) )
   img <- antsImageRead( img , "float" , 3 )
 }else if( class( img ) == "antsImage" )
 {
-  if( img@pixeltype != "float" || img@dimension != 3 ) 
+  if(  img@dimension != 3 ) 
   {
     print( "'img' must have pixeltype 'float' and dimension '3'" )
     return( NULL )
   }
+  if( img@pixeltype != "float" )
+    {
+    img<-antsImageClone(img, 'float')
+    }
 }else
 {
   print( "'img' must be a filename or an 'antsImage'" )

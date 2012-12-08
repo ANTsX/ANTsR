@@ -31,10 +31,17 @@ nuis<-t( rbind(globalsignal, metricnuis, (motionnuis) )  )
 colnames(nuis)<-c("globalsignal","metricnuis",motnames)
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)
-tvhist<-hist(temporalvar , breaks = 100, plot=T)
-percvar<-0.03 # percentage of high variance data to use
-thresh<-tvhist$mids[  cumsum( rev( tvhist$counts / sum(tvhist$counts) > percvar ) ) == T ]
+tvhist<-hist(temporalvar , breaks = c("FD"), plot=T)
+percvar<-0.975 # percentage of high variance data to use
+# get total counts
+totalcounts<-sum(tvhist$counts)
+wh<-( cumsum( tvhist$counts ) < ( totalcounts * percvar ) )
+thresh<-max( tvhist$mids[wh] ) 
+# cumulativesum<-rev( cumsum( tvhist$counts / totalcounts ) )
+# thresh<-max( tvhist$mids[  ( cumulativesum > percvar ) ] )
 wh<-( temporalvar > thresh )
+wh2<-( temporalvar <= thresh )
+print( paste( percvar , sum( wh ) , sum(wh2 ) ) )
 highvarmat<-mat[,wh]
 compcorrsvd<-svd( highvarmat %*% t( highvarmat ) )
 # ncompcorparameters<-4

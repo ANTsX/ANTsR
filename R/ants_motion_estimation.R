@@ -50,12 +50,16 @@ if( is.character( img ) )
       print( "'img' should be only one filename" )
       return( NULL )
     }
-  img <- antsImageRead( img , "float" , 4 )
+  img <- antsImageRead( img , "double" , 4 )
 }else if( class( img ) == "antsImage" )
 {
-  if( img@pixeltype != "float" || img@dimension != 4 ) 
+  if( img@pixeltype != "float" & img@pixeltype != "double" )
+    {
+    print( "'img' must have pixeltype 'float' or 'double' " )
+    }
+  if( img@dimension != 4 ) 
   {
-    print( "'img' must have pixeltype 'float' and dimension '4'" )
+    print( "'img' must have pixeltype 'float/double' and dimension '4'" )
     return( NULL )  
   }
 }else
@@ -66,7 +70,7 @@ if( is.character( img ) )
 
 if ( missing( fixed ) )
 {
-  fixed <- new( "antsImage" , "float" , 3 )
+  fixed <- new( "antsImage" , "double" , 3 )
   antsMotionCorr( list( d = 3 , a = img , o = fixed ) )
 } else
 {
@@ -77,12 +81,13 @@ if ( missing( fixed ) )
           print ( "'fixed' should be only one filename" )
           return( NULL )
         }
-      fixed <- antsImageRead( fixed, "float", 3 )
+      fixed <- antsImageRead( fixed, "double", 3 )
     } else if ( class( fixed ) == "antsImage" )
       {
-        if ( fixed@pixeltype != "float" || fixed@dimension != 3 )
+#        if ( fixed@pixeltype != "float" || fixed@dimension != 3 )
+        if (  fixed@dimension != 3 )
           {
-            print( "'fixed' must have pixeltype 'float' and dimension '3'" )
+            print( "'fixed' must have pixeltype 'float/double' and dimension '3'" )
             return( NULL )
           }
       }
@@ -99,10 +104,10 @@ if ( n > 10 )
   n <- 10
   }
 
-avg_img = new( "antsImage" , "float" , 3 )
-moco_img = new( "antsImage" , "float" , 4 )
+avg_img = new( "antsImage" , "double" , 3 )
+moco_img = new( "antsImage" , "double" , 4 )
 moco_params = new( "antsMatrix" , "double" )
-antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.08 ) , t = "Affine[1]" , i = 50 , u = 0 , e = 1 , s = 1 , f = 1 , n = n, l = 0 ) )
+antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 0 , e = 1 , s = 1 , f = 1 , n = n, l = 1 ) )
 
 return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
 }
