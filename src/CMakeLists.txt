@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 2.8.7)
-
 project(ANTsR_SuperBuild)
 include( ExternalProject )
-
 # if 'CMAKE_BUILD_TYPE' is not specified by user, assume 'Release'
 if( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE "Release" CACHE STRING "Project build-type" )
+  set( CMAKE_BUILD_TYPE Release )
 endif( NOT CMAKE_BUILD_TYPE )
 
 #   we have to define NDEBUG due to a possible bug in itkMacro.h --- we
@@ -22,7 +20,7 @@ if( NOT ITK_DIR )
     GIT_TAG e9861608b83f48ff67015f552fd86f9611ed3af6  # Dec 6 
 #    GIT_TAG 2a5f945a6313e6d304a32f0a2567a0a127f39722 # Jul 24, 2012
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release # build type set by user
+    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D BUILD_EXAMPLES=OFF # reduces build time
@@ -46,7 +44,7 @@ if( NOT ANTS_DIR )
     GIT_REPOSITORY http://github.com/stnava/ANTS.git 
     GIT_TAG 8531b00c7765ef1e25e13b7965c219d05b0f68ab  # most recent
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release # build type set by user
+    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D USE_SYSTEM_ITK=ON # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
@@ -75,3 +73,6 @@ ExternalProject_Add( ANTsR
   #cmakedefine NDEBUG 
   BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/ANTsR-build 
   INSTALL_DIR "" ) 
+
+message("CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+message("CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
