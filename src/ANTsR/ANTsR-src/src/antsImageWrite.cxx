@@ -5,6 +5,7 @@
 #include <Rcpp.h>
 
 #include "itkImageFileWriter.h"
+#include "itkCastImageFilter.h"
 #include "itkImage.h"
 
 namespace ants
@@ -19,7 +20,17 @@ namespace ants
     typename ImageWriterType::Pointer image_writer = ImageWriterType::New() ;
     image_writer->SetFileName( filename.c_str() ) ;
     image_writer->SetInput( image );
-    image_writer->Write() ;
+    try
+      {
+      image_writer->Write();
+      }    
+    catch( itk::ExceptionObject & e )
+      {
+      Rcpp::Rcout << "Exception caught during reference file writing " << std::endl;
+      Rcpp::Rcout << e << std::endl;
+      return 1;
+      }
+
     return 0 ;
   }
 
