@@ -10,6 +10,10 @@ Install the package as follows:
 
       $ R CMD INSTALL ANTsR
 
+NOTE: If you see errors like "Undefined symbols for architecture x86_64" use
+
+      $ R --arch=x86_64 CMD INSTALL  ANTsR
+
 The installed package can be used in R as follows:
 Load the package
 > library( ANTsR )
