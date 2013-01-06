@@ -1,0 +1,9 @@
+this directory should contain only Makefile, README and source
+
+unless you already built the website in which case it will also 
+
+contain a build directory.
+
+then to build the html, type:
+
+make html
