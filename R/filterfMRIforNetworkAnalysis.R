@@ -1,7 +1,7 @@
-aslFilterForNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" )
+filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" )
 {
   pixtype<-"double"
-  myusage<-"usage: aslFilterForNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, outputprefix = NULL )"
+  myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, outputprefix = NULL )"
   if ( nargs() == 0 )
     {
     print(myusage)
