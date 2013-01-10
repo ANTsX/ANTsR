@@ -6,12 +6,13 @@
 ANTsR : Advanced Normalization Tools with R
 ==================================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 1
 
    ANTsRGettingStarted.rst 
+
+   ANTsRfunctions.rst 
+
         
 Indices and tables
 ==================

@@ -12,7 +12,7 @@ convertRd2rst<- function( infile , outfile="")
   Rd <- parse_Rd(infile)
   tags <- tools:::RdTags(Rd)
   myfn<-Rd[[which(tags == "\\name")]][[1]]
-  myfn<-paste("function: ",myfn,"\n")
+  myfn<-paste(myfn,"\n")
   cat(rstheader,file=outfile,append = FALSE)
   cat(myfn,file=outfile,append = TRUE)
   cat(rstheader,file=outfile,append = TRUE)
