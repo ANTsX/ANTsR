@@ -44,7 +44,6 @@ in myres, you have:
 names(myres)
 [1] "filteredTimeSeries" "mask"               "temporalvar"
 
-where the filteredTimeSeries is the frequency filtered BOLD (if FALSE
-is set) or CBF ( if TRUE is set ) time series.
+where the filteredTimeSeries is the frequency filtered BOLD, ASLCBF or ASLBOLD matrix.
 }
 }
