@@ -1,7 +1,7 @@
-aslFilterForNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork=TRUE, maskThresh = 500 , pre="" )
+aslFilterForNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" )
 {
   pixtype<-"double"
-  myusage<-"usage: aslFilterForNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=TRUE , maskThresh=500, outputprefix = NULL )"
+  myusage<-"usage: aslFilterForNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, outputprefix = NULL )"
   if ( nargs() == 0 )
     {
     print(myusage)
@@ -62,40 +62,38 @@ moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = maskThresh, t
 mat <- timeseries2matrix( asl , moco_mask_img )
 motionparams<-as.data.frame( moco_results$moco_params )
 predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
-m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
-m0<-antsImageClone( moco_mask_img )
-m0[ moco_mask_img == 0 ]<-0
-m0[ moco_mask_img == 1 ]<-m0vals
-cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
+# m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
+# m0<-antsImageClone( moco_mask_img )
+# m0[ moco_mask_img == 0 ]<-0
+# m0[ moco_mask_img == 1 ]<-m0vals
+# cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
 if ( nchar(pre) > 1 ) {
   antsImageWrite(moco_mask_img,paste(pre,"mask.nii.gz",sep='')) 
   antsImageWrite(moco_results$moco_avg_img,paste(pre,"avg.nii.gz",sep=''))
-  antsImageWrite(cbf,paste(pre,"cbf.nii.gz",sep=''))
+#  antsImageWrite(cbf,paste(pre,"cbf.nii.gz",sep=''))
 }
 # network analysis
 mask<-moco_mask_img
-wb<-( mask > 0 )
-nwb<-( mask < 1 )
-wbvec<-mask[ wb ]
-wbvec[]<-1
+wb<-( mask > 0 ) # whole brain
 ogmat <- timeseries2matrix( moco_results$moco_img , wb  )
 motionparamsandcompcorr<-predictors$nuis
 ogmat<-residuals( lm( ogmat ~ motionparamsandcompcorr ))
 gmat <-ogmat # 
 leftinds<-shift(c(1:nrow(gmat)),1)
 rightinds<-shift(c(1:nrow(gmat)),-1)
-if ( cbfnetwork ) {
+if ( cbfnetwork == "ASLCBF" ) {
   # surround subtraction for cbf networks 
   gmat<-ogmat - 0.5 * ( ogmat[leftinds,] + ogmat[rightinds,] )
   taginds<-c(1:(nrow(gmat)/2))*2
   controlinds<-taginds-1
   gmat[controlinds,]<-gmat[controlinds,]*(-1) # ok! done w/asl specific stuff
+  plot( apply( gmat[controlinds,],1, mean) , type='l')
 }
-if ( ! cbfnetwork ) {
+if ( cbfnetwork == "ASLBOLD" ) {
   # surround addition for bold networks 
   gmat<-ogmat + 0.5 * ( ogmat[leftinds,] + ogmat[rightinds,] )
+  plot( apply( gmat[controlinds,],1, mean) , type='l')
 }
-plot( apply( gmat[controlinds,],1, mean) , type='l')
 voxLo=round((1/freqLo)) # remove anything below this (high-pass)
 voxHi=round((1/freqHi))   # keep anything above this
 myTimeSeries<-ts(gmat,frequency=1.0/tr)
