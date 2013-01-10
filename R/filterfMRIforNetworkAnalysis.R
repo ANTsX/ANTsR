@@ -7,6 +7,24 @@ filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbf
     print(myusage)
     return(NULL)
     }
+if ( ! is.numeric( tr ) | missing( tr ) )
+  {
+  print("TR parameter is missing or not numeric type - is typically between 2 and 4 , depending on your fMRI acquisition")
+  print(myusage)
+  return(NULL)
+  }
+if ( ! is.numeric( maskThresh ) )
+  {
+  print("maskThresh is not numeric type")
+  print(myusage)
+  return(NULL)
+  }
+if ( ! is.numeric( freqLo ) | ! is.numeric( freqHi ) )
+  {
+  print("freqLo/Hi is not numeric type")
+  print(myusage)
+  return(NULL)
+  }
 if( is.character( asl ) )
 {
   if( length( asl ) != 1 )
@@ -30,12 +48,6 @@ if( is.character( asl ) )
 {
   print( "'asl' must be a filename or an 'antsImage'" )
   return( NULL )
-}
-if ( missing( tr ) )
-{
-  print("Missing tr argument")
-  print(myusage)
-  return( NULL ) 
 }
 # if ( missing( pre ) )
 # {
