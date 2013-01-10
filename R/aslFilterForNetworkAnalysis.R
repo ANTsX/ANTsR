@@ -1,7 +1,7 @@
-aslFilterForNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork=TRUE , pre="" )
+aslFilterForNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork=TRUE, maskThresh = 500 , pre="" )
 {
   pixtype<-"double"
-  myusage<-"usage: aslFilterForNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=TRUE , outputprefix = NULL )"
+  myusage<-"usage: aslFilterForNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=TRUE , maskThresh=500, outputprefix = NULL )"
   if ( nargs() == 0 )
     {
     print(myusage)
@@ -58,7 +58,7 @@ if ( n != 4 )
   return( NULL ) 
   }
 moco_results <- motion_correction( asl )
-moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 500 , thresh_hi = 1e9 )
+moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = maskThresh, thresh_hi = 1e9 )
 mat <- timeseries2matrix( asl , moco_mask_img )
 motionparams<-as.data.frame( moco_results$moco_params )
 predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )

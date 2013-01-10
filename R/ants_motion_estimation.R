@@ -53,13 +53,13 @@ if( is.character( img ) )
   img <- antsImageRead( img , "double" , 4 )
 }else if( class( img ) == "antsImage" )
 {
-  if( img@pixeltype != "float" & img@pixeltype != "double" )
+  if( img@pixeltype != "double" )
     {
-    print( "'img' must have pixeltype 'float' or 'double' " )
+    print( "'img' must have pixeltype  'double' " )
     }
   if( img@dimension != 4 ) 
   {
-    print( "'img' must have pixeltype 'float/double' and dimension '4'" )
+    print( "'img' must have pixeltype 'double' and dimension '4'" )
     return( NULL )  
   }
 }else
@@ -84,10 +84,9 @@ if ( missing( fixed ) )
       fixed <- antsImageRead( fixed, "double", 3 )
     } else if ( class( fixed ) == "antsImage" )
       {
-#        if ( fixed@pixeltype != "float" || fixed@dimension != 3 )
         if (  fixed@dimension != 3 )
           {
-            print( "'fixed' must have pixeltype 'float/double' and dimension '3'" )
+            print( "'fixed' must have pixeltype 'double' and dimension '3'" )
             return( NULL )
           }
       }
@@ -103,11 +102,10 @@ if ( n > 10 )
   {
   n <- 10
   }
-
 avg_img = new( "antsImage" , "double" , 3 )
 moco_img = new( "antsImage" , "double" , 4 )
 moco_params = new( "antsMatrix" , "double" )
-antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 0 , e = 1 , s = 1 , f = 1 , n = n, l = 1 ) )
+antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
 
 return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
 }
