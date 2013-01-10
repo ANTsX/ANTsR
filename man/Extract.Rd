@@ -6,7 +6,7 @@ Extract/Replace regions an antsImage
 }
 
 \description{
-Set of methods extract a \code{numeric vector} from an \code{antsImage}. Set of methods to replace the pixels in an \code{antsImage} using a \code{numeric vector}
+Set of methods to extract a \code{numeric vector} from an \code{antsImage}. Set of methods to replace the pixels in an \code{antsImage} using a \code{numeric vector}.
 }
 
 \usage{

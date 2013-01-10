@@ -20,9 +20,23 @@ convertRd2rst<- function( infile , outfile="")
   mytitle<-Rd[[which(tags == "\\title")]][[2]][1]
   mytitle<-paste("purpose: ","\n\n",mytitle,"\n")
   cat(mytitle,file=outfile,append = TRUE)
-  mydescription<-Rd[[which(tags == "\\description")]][[2]][1]
-  mydescription<-paste("description: ","\n\n",mydescription,"\n")
-  cat(mydescription,file=outfile,append = TRUE)
+  dlength<-length( Rd[[which(tags == "\\description")]] )
+  if ( dlength == 2 )
+    {
+    mydescription<-Rd[[which(tags == "\\description")]][[2]][1]
+    mydescription<-paste("description: ","\n\n",mydescription,"\n")
+    cat(mydescription,file=outfile,append = TRUE)
+    }
+  if ( dlength > 2 )
+    {
+    basedescription<-Rd[[which(tags == "\\description")]]
+    mydescription<-basedescription[[2]][1]
+    for ( i in c(3:(dlength)) ) {
+      mydescription<-paste(mydescription,basedescription[[i]][[1]][1])
+    }
+    mydescription<-paste("description: ","\n\n",mydescription,"\n\n")
+    cat(mydescription,file=outfile,append = TRUE)
+    }
   myusage<-Rd[[which(tags == "\\usage")]][[2]][1]
   myusage<-paste("usage: ","\n\n",myusage,"\n")
   cat(myusage,file=outfile,append = TRUE)
