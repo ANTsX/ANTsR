@@ -1,9 +1,13 @@
-this directory should contain only Makefile, README and source
-
-unless you already built the website in which case it will also 
-
-contain a build directory.
-
-then to build the html, type:
-
+# this directory should contain only Makefile, README and source
+#
+# unless you already built the website in which case it will also 
+#
+# contain a build directory.
+#
+# if you want to convert Rd files to rst, then do ( from this dir) 
+# 
+./scripts/convertRd2rst.sh 
+# 
+# then to build the html, type:
+# 
 make html
