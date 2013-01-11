@@ -18,6 +18,8 @@ img >= value
 img < value
 img > value
 
+  or use lists
+
 img == lst
 img != lst
 img <= lst
