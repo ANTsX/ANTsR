@@ -19,7 +19,7 @@ cd $ANTsRdoc
 make html
 git checkout gh-pages
 cd ..
-cp -r html/build/html/* .
+cp -r doc/build/html/* .
 git commit -a -m "WIP: website update"
 git branch
 git push origin gh-pages
