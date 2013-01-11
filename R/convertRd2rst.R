@@ -37,7 +37,13 @@ convertRd2rst<- function( infile , outfile="")
     mydescription<-paste("description: ","\n\n",mydescription,"\n\n")
     cat(mydescription,file=outfile,append = TRUE)
     }
-  myusage<-Rd[[which(tags == "\\usage")]][[2]][1]
+  baseusage<-Rd[[which(tags == "\\usage")]]
+  dlength<-length( baseusage )
+  myusage<-baseusage[[2]][1]
+  for ( i in c(3:(dlength)) ) {
+    myusage<-paste(myusage,baseusage[[i]][[1]][1])
+  }
+  print( baseusage )
   myusage<-paste("usage: ","\n\n",myusage,"\n")
   cat(myusage,file=outfile,append = TRUE)
   # FIXME - need to parse arguments and loop over all 
