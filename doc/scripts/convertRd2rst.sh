@@ -3,5 +3,7 @@ for x in ../man/*Rd ; do
   y=${x%.Rd}
   y=` basename $y `
   onm=./source/Rd_${y}.rst 
-  ./scripts/convertRd2rst.R $x $onm
+  if [[ ! -s ${onm} ]] ; then 
+    ./scripts/convertRd2rst.R $x $onm
+  fi 
 done
