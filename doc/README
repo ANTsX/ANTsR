@@ -18,9 +18,9 @@ cd $ANTsRdoc
 # 
 make html
 git checkout gh-pages
-cd ..
+cd .. 
 cp -r doc/build/html/* .
+# git add *html _images/*
 git commit -a -m "WIP: website update"
-git branch
 git push origin gh-pages
 git checkout master
