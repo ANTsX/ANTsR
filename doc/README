@@ -6,9 +6,13 @@
 #
 # if you want to convert Rd files to rst, then do ( from this dir) 
 # 
-cd /Users/stnava/code/temp/antsr/ANTsR/html
+ANTsRdoc=/Users/stnava/code/temp/antsr/ANTsR/doc
+cd $ANTsRdoc
 git checkout master 
-./scripts/convertRd2rst.sh 
+./scripts/convertRd2rst.sh
+cd source 
+../scripts/convertRrst2rst.R 
+cd $ANTsRdoc
 # 
 # then to build the html, type:
 # 
