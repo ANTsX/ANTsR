@@ -13,10 +13,7 @@ ANTsR : Advanced Normalization Tools with R
 
    ANTsRfunctions.rst 
 
-        
-Indices and tables
-==================
-
-* :ref:`genindex`
+   
 * :ref:`search`
+.. * :ref:`genindex`
 
