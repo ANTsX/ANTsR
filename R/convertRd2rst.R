@@ -43,7 +43,7 @@ convertRd2rst<- function( infile , outfile="")
   dlength<-length( baseexamples[[2]] )
   myexamples<-baseexamples[[2]][[1]][1]
   for ( i in c(2:(dlength)) ) {
-    myexamples<-paste(myexamples,baseexamples[[2]][[i]][1])
+    myexamples<-paste(myexamples,"\n",baseexamples[[2]][[i]][1])
   }
   myexamples<-paste("examples: ","\n",myexamples,"\n")
   cat(myexamples,file=outfile,append = TRUE)
