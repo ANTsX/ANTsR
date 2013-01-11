@@ -34,7 +34,7 @@ convertRd2rst<- function( infile , outfile="")
   dlength<-length( baseusage )
   myusage<-baseusage[[2]][1]
   for ( i in c(3:(dlength)) ) {
-    myusage<-paste(myusage,baseusage[[i]][[1]][1])
+    myusage<-paste(myusage,"\n",baseusage[[i]][[1]][1])
   }
   myusage<-paste("usage: ","\n\n",myusage,"\n")
   cat(myusage,file=outfile,append = TRUE)
