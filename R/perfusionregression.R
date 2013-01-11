@@ -1,7 +1,18 @@
 perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0 )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
-
+myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0 )"
+if ( nargs() == 0 )
+  {
+  print(myusage)
+  return(NULL)
+  }
+if ( missing( mat ) | missing( xideal ) | missing( nuis ) | missing( m0 ) )
+  {
+  print("Missing one or more input parameter(s).")
+  print(myusage)
+  return(NULL)
+  }
 print("standard regression")
 cbfform<-formula(  mat ~   xideal )
 rcbfform<-formula(  mat[,vox] ~   xideal )

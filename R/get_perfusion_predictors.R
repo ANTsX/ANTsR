@@ -1,5 +1,17 @@
 get_perfusion_predictors <- function( mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 )
 {
+myusage<-"usage: get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
+if ( nargs() == 0 )
+  {
+  print(myusage)
+  return(NULL)
+  }
+if ( missing( mat ) | missing( motionparams )  )
+  {
+  print("Missing one or more input parameter(s).")
+  print(myusage)
+  return(NULL)
+  }
 if( is.null( xideal ) )
 {
   if( !labelfirst )
