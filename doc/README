@@ -14,7 +14,7 @@ cd source
 ../scripts/convertRrst2rst.R 
 cd $ANTsRdoc
 # 
-# then to build the html, type:
+# then to build the html, type: 
 # 
 make html
 git checkout gh-pages
