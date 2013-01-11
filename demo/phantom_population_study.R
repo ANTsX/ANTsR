@@ -1,17 +1,12 @@
 library(ANTsR)
-# We assume a bunch of data has been normalized to a template and now
-# you want to do a statistical study.
-# Note that the procedure for a first level fMRI study , a 2nd level
-# fMRI study or a morphometry / volumetry / correlation study is very similar.
-# Also, 2D and 3D are equally easy though not equally fast.
-#
 mydim<-2
 outpre<-"TEST"
 pre<-""
 glb<-glob2rx(paste(pre,"phantom*bian.nii.gz",sep='')) # get the images
 fnl<-list.files(path='./',pattern=glb,full.names=T,recursive=T)
 print(fnl)
-maskfn<-"phantomtemplate.jpg" # get the mask , should be in same space as image 
+maskfn<-"phantomtemplate.jpg" 
+# get the mask , should be in same space as image 
 glb<-glob2rx(paste(pre,maskfn,sep='')) # get the images
 maskfn<-list.files(path='./',pattern=glb,full.names=T,recursive=T)
 mask<-antsImageRead(maskfn,'float',mydim)

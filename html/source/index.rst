@@ -11,9 +11,10 @@ ANTsR : Advanced Normalization Tools with R
 
    ANTsRGettingStarted.rst 
 
-   ANTsRfunctions.rst 
+   ANTsRdemo.rst 
 
-   
+   ANTsRfunctions.rst 
+  
 * :ref:`search`
 .. * :ref:`genindex`
 
