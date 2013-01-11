@@ -85,7 +85,7 @@ for( i in 1:numberOfForegroundVoxels )
   results <- summary( lm( testFormula ) )
   tValues[i] <- results$coef[2,3]
   pValues[i] <- results$coef[2,4]
-  if( i %% 100 )
+  if( i %% 50 == 0 )
     {
     setTxtProgressBar( progress, i )
     }
