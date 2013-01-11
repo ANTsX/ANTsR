@@ -16,5 +16,3 @@ ANTsR : Advanced Normalization Tools with R
    ANTsRfunctions.rst 
 
 * :ref:`search`
-.. * :ref:`genindex`
-
