@@ -8,7 +8,7 @@
 # 
 cd /Users/stnava/code/temp/antsr/ANTsR/html
 git checkout master 
-# ./scripts/convertRd2rst.sh 
+./scripts/convertRd2rst.sh 
 # 
 # then to build the html, type:
 # 
