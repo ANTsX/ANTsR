@@ -33,6 +33,8 @@ displaySlice<-function( myantsimage , functional=NA, color="red", axis=1, slices
   }
   cat(format("Example: in 2D \n", width=40, justify = c("left")))
   ex<-paste(" displaySlice(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
+  cat(format("Example: in 3D \n", width=40, justify = c("left")))
+  ex<-paste(" displaySlice(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
   ex<-format(ex, width=length(ex), justify = c("left"))
   cat("\n")
   cat(ex)
