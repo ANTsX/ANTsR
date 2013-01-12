@@ -24,6 +24,8 @@ See the full man pages for each function below from within R via ?functionname
 
    Rd_antsImageWrite.rst
 
+   Rd_plotANTsImage.rst
+
    Rd_antsMotionCorr.rst
 
    Rd_as.antsImage.rst
