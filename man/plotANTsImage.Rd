@@ -37,5 +37,9 @@ Avants BB
 
 \examples{
 \dontrun{
+# in 2D
+  plotANTsImage(myantsimage=img,functional=funcimg,threshold="50x150",color="red",axis=1)
+# in 3D
+  plotANTsImage(myantsimage=img,functional=img,threshold="50x150",slices="10x20x3",color="red",axis=0)
 }
 }
