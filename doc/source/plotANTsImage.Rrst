@@ -1,0 +1,23 @@
+Demonstrate plotANTsImage
+=========================
+
+First, I read an image.  I smooth it as well to create a pseudo-functional image.
+
+.. {r setup}
+fn<-"../../demo/example_images/phantomtemplate.jpg"
+img<-antsImageRead(fn,'double',2)
+simg<-antsImageClone(img)
+SmoothImage(2,img,3,simg)
+.. ..
+
+On to display
+-------------
+
+Now I will overlay color on the background and display it. 
+
+.. {r plotANTsImage, out.width='720px', fig.cap='ANTsR image plot'}
+plotANTsImage(myantsimage=img,functional=simg,threshold="50x150",color="red",axis=1)
+.. ..
+
+
+

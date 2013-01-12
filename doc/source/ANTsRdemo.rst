@@ -11,3 +11,6 @@ See the ANTsR/demo folder for the full source of these examples.
    Rd_phantom_population_study.rst
    
    phantom_population_study.rst
+
+   plotANTsImage.rst 
+
