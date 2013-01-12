@@ -46,3 +46,11 @@ qdata<-data.frame(qvals)
 m <- ggplot(qdata, aes(x=qvals))
 m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white") + geom_density(alpha=.2, fill="#FF6666") 
 .. ..
+
+
+Finally, test the output for correctness.
+
+.. {r testcorrectness}
+if (  isucceeded ) print("SUCCESS") 
+if ( !isucceeded ) print("FAILURE") 
+.. .. 

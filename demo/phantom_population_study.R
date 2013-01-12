@@ -59,4 +59,8 @@ qvals<-p.adjust(pvals,method="BH")
 sigct<-sum( c( qvals < 0.05 ) )
 qimg[ logmask ]<-1-qvals
 antsImageWrite(qimg,paste(outpre,'_qvals.nii.gz',sep=''))
-print(paste('done',sigct/sum(logmask)*100,"% significant"))
+teststat<-round( sigct/sum(logmask)*100 )
+print(paste('done',teststat,"% significant"))
+isucceeded<-FALSE
+if ( teststat == 60 )
+  isucceeded<-TRUE
