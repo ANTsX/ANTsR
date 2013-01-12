@@ -16,7 +16,6 @@ plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slice
 # ............................................. #
   spec=matrix(spec,ncol=5,byrow=TRUE)
 # get the options
-  opt = getopt(spec)
 
   if ( missing(myantsimage) ) {
   #print a friendly message and exit with a non-zero error code
@@ -43,12 +42,6 @@ plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slice
 
 
   imagedim<-length(dim(myantsimage))
-  pckg = try(require(getopt))
-  if(!pckg) {
-    cat("Installing 'getopt' from CRAN\n")
-    getPckg("getopt")
-    require("getopt")
-  }
   pckg = try(require(pixmap))
   if(!pckg) {
     cat("Installing 'pixmap' from CRAN\n")
@@ -67,7 +60,6 @@ plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slice
     getPckg("rgl")
     require("rgl")
   }
-  library(getopt)
   library(utils)
   library('misc3d') ; library('rgl') ; library('pixmap')
   read.img <- function(x,dim=2) {
