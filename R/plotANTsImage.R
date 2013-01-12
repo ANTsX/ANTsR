@@ -1,6 +1,6 @@
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
-displaySlice<-function( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" , threshold="1x0", quality=NA )
+plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" , threshold="1x0", quality=NA )
 {
   spec = c( 
     'verbose', 'v', 2, "integer" ," verbose output ",
@@ -21,7 +21,7 @@ displaySlice<-function( myantsimage , functional=NA, color="red", axis=1, slices
   if ( missing(myantsimage) ) {
   #print a friendly message and exit with a non-zero error code
   cat("\n")
-  self<-"displaySlice"
+  self<-"plotANTsImage"
   cat(paste(self,"\n"))
   for ( x in 1:nrow(spec) ) {
     cat("\n")
@@ -32,9 +32,9 @@ displaySlice<-function( myantsimage , functional=NA, color="red", axis=1, slices
     cat(format(hlist, width=40, justify = c("left")))
   }
   cat(format("Example: in 2D \n", width=40, justify = c("left")))
-  ex<-paste(" displaySlice(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
+  ex<-paste(" plotANTsImage(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
   cat(format("Example: in 3D \n", width=40, justify = c("left")))
-  ex<-paste(" displaySlice(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
+  ex<-paste(" plotANTsImage(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
   ex<-format(ex, width=length(ex), justify = c("left"))
   cat("\n")
   cat(ex)
