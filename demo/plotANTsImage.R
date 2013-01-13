@@ -8,6 +8,6 @@ plotANTsImage(myantsimage=img)
 
 simg<-antsImageClone(img)
 SmoothImage(2,img,3,simg)
-plotANTsImage(myantsimage=img,functional=simg,threshold="35x150",color="red",axis=1)
+plotANTsImage(myantsimage=img,functional=simg,threshold="150x260",color="red",axis=1)
 
 

@@ -17,6 +17,8 @@ cd $ANTsRdoc
 # then to build the html, type: 
 # 
 make html
+git commit -a -m "WIP: prepping for website update"
+exit
 git checkout gh-pages
 cd .. 
 cp -r doc/build/html/* .

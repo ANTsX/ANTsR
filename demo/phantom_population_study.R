@@ -1,32 +1,62 @@
 
 
-opts_chunk$set(echo=FALSE)
+library(knitr)
+library(ANTsR)
 
 
 
-options(replace.assign=TRUE,width=70)
-# do not use the sourcecode directive
-render_rst(strict=TRUE)
-
-# global chunk options
-knit_hooks$set(par=function(before, options, envir){if (before) par(mar=c(4,4,.1,.1),cex.lab=.95,cex.axis=.9,mgp=c(2,.7,0),tcl=-.3)})
-opts_chunk$set(echo=TRUE,fig.path='figs/antsr-',  fig.width=8, fig.height=8, fig.align='center', fig.show='hold', par=TRUE, cache=FALSE )
-read_chunk('../../demo/phantom_population_study.R')
-# cache.path='cache/hw8-',  dev='tikz',
-
-
-
-opts_chunk$set(echo=TRUE,verbose=FALSE)
-
-
-
-
-
-
-image(as.array(antsImageRead(maskfn,'float',mydim)))
+mydim <- 2
+#' define prefix for output files
+outpre <- "TEST"
+#' get the images
+glb <- glob2rx(paste("phantom*bian.nii.gz", sep = ""))
+fnl <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
+maskfn <- "phantomtemplate.jpg"
+#' get the mask , should be in same space as image
+glb <- glob2rx(paste(maskfn, sep = ""))
+maskfn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
+mask <- antsImageRead(maskfn, "float", mydim)
+#' get regions of mask according to logical comparisons
+logmask <- (mask > 120 & mask < 130)
+notlogmask <- (!logmask)
+#' make sure it holds zeroes
+mask[notlogmask] <- 0
 
 
 
+image(as.array(antsImageRead(maskfn, "float", mydim)))
+plotANTsImage(myantsimage=mask)
+
+
+
+#' count voxels and create matrix to hold image data
+nvox <- sum(c(logmask))
+mat <- matrix(length(fnl) * nvox, nrow = length(fnl), ncol = nvox)
+for (i in 1:length(fnl)) {
+    i1 <- antsImageRead(fnl[i], "float", mydim)
+    vec <- i1[logmask]
+    mat[i, ] <- vec
+}
+#' identify your predictors and use in regression
+predictor <- c(rep(2, 4), rep(1, 4))
+#' the regression for your study
+testformula <- (vox ~ 1 + predictor)
+betavals <- rep(NA, nvox)
+pvals <- rep(NA, nvox)
+ntst <- 1
+#' there are better/faster ways but this is simple
+while (ntst < (nvox + 1)) {
+    vox <- mat[, ntst]
+    summarymodel <- summary(lm(testformula))
+    #' get the t-vals for this predictor and write to an image
+    betavals[ntst] <- summarymodel$coef[2, 3]
+    #' get the beta for this predictor and write to an image
+    pvals[ntst] <- summarymodel$coef[2, 4]
+    ntst <- ntst + 1
+}
+betaimg <- antsImageClone(mask)
+betaimg[logmask] <- betavals
+antsImageWrite(betaimg, paste(outpre, "_beta.nii.gz", sep = ""))
 
 
 
