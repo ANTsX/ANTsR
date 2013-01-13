@@ -1,6 +1,7 @@
 
 
-pixtype<-"double"
+library(ANTsR)
+pixtype<-"double" # needed for call to antsMotionCorr
 fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
 glb <- glob2rx(paste(fn, sep = ""))
 fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
@@ -14,7 +15,7 @@ plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
 
 
 
-myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",moreaccurate=FALSE,maskThresh=100000)
+myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=100000)
 # check if the mask is ok
 plotANTsImage(myantsimage=avg,functional=myres$mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
 # The mask looks fine ( does not have to be perfect ) so we proceed.
@@ -76,5 +77,30 @@ data<-data.frame( time = c(1:nrow( myres$filteredTimeSeries ) )*4 , v1 = myres$f
 p1<-( ggplot( data , aes( x = time , y = v1 ) ) + geom_line()  + ggtitle("Time series @ voxel 1") )
 p2<-( ggplot( data , aes( x = time , y = v2 ) ) + geom_line()  + ggtitle("Time series @ voxel 2") )
 multiplot( p1, p2, cols=1) # function stolen from the internet
+
+
+
+mysvd <- svd(myres$filteredTimeSeries)
+# let's make the v eigenvectors sparse , otherwise they are totally uncorrelated
+nevecs <- 10
+vecs <- mysvd$v[, 1:nevecs]
+thresh <- 0.005  # just an example
+for (i in c(1:nevecs)) {
+    vecs[, i] <- (vecs[, i] * (vecs[, i] > thresh))
+    vecimg <- antsImageClone(myres$mask, "float")
+    mask <- antsImageClone(myres$mask, "float")
+    vecimg[(myres$mask > 0)] <- vecs[, i]
+    ImageMath("3", vecimg, "ClusterThresholdVariate", vecimg, mask, "100")
+    vecs[, i] <- vecimg[(myres$mask > 0)]
+}
+tobecorrelated <- (myres$filteredTimeSeries %*% vecs)
+#' visualize the resulting correlations
+image(cor(tobecorrelated))
+
+
+
+isucceed<-FALSE
+if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
+print( isucceed )
 
 
