@@ -117,5 +117,5 @@ if ( moreaccurate == TRUE ) {
 if ( moreaccurate == FALSE ) {
 antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.02 ) , t = "Affine[0.1]" , i = 3 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
 }
-return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
+return( list( moco_img = antsImageClone( moco_img, "float" ) , moco_params = moco_params , moco_avg_img =  antsImageClone( avg_img, "float") ) )
 }
