@@ -19,7 +19,7 @@ Now use a overlay color on the background and display it.
 .. {r plotANTsImageOverlay, out.width='720px', fig.cap='ANTsR image plot with overlay',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
 simg<-antsImageClone(img)
 SmoothImage(2,img,3,simg)
-plotANTsImage(myantsimage=img,functional=simg,threshold="35x150",color="red",axis=1)
+plotANTsImage(myantsimage=img,functional=simg,threshold="150x260",color="red",axis=1)
 .. ..
 
 
