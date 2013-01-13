@@ -10,6 +10,7 @@ ofn<-(Args[7])
 myrrst<-c("phantom_population_study.Rrst","plotANTsImage.Rrst")
 for ( myfn in myrrst ) {
   rstfn<-sub('.Rrst','.rst',myfn)
-  print(paste(myfn,'2',rstfn))
   knit(myfn,rstfn)
+  rstfn<-paste("../../demo/",sub('.Rrst','.R',myfn),sep='')
+  knit(myfn,rstfn,tangle=TRUE)
 }
