@@ -1,4 +1,4 @@
-antsImageRead <- function( filename , pixeltype , dimension )
+antsImageRead <- function( filename , dimension , pixeltype = "float" )
 {
 	if( class( filename ) != "character" || length( filename ) != 1 )
 	{

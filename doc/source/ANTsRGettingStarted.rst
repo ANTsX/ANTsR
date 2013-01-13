@@ -14,7 +14,20 @@ NOTE: If you see errors like "Undefined symbols for architecture x86_64" use
 
       $ R --arch=x86_64 CMD INSTALL  ANTsR
 
-The installed package can be used in R as follows:
+The installation may fail if ANTsR dependencies are not installed.
+These are listed in:
+
+      $  ANTsR/DESCRIPTION
+
+which will include: 
+
+      Depends: Rcpp (>= 0.9.7.2) , methods, signal , parallel , timeSeries , mFilter , MASS , doParallel, robust, magic, knitr, pixmap, rgl, misc3d
+
+In R, you can do:   
+    
+     R>  install.packages( 'signal', dependencies=TRUE ) 
+
+Once installation is successful, the ANTsR package can be used in R as follows:
 
 Load the package
 
@@ -26,15 +39,11 @@ List the available functions in the namespace ANTsR
 
 Use any function in the namespace by providing arguments exactly same as you provide to their command-line version.
 
-For example, call the antsRegistration routine
+For example, call the antsImageRead routine
 
-> ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-i", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
-
+>  antsimage<-antsImageRead( "r16slice.nii.gz", 2 )
 
 .. image:: _static/ANTSWarpImageMultiTransform.png
   :width: 600 px
-
-
-
 
 
