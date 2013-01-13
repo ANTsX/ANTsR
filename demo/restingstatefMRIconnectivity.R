@@ -1,11 +1,12 @@
 
 
+pixtype<-"double"
 fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
 glb <- glob2rx(paste(fn, sep = ""))
 fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
-img<-antsImageRead(fn,'double',4)
+img<-antsImageRead(fn,4,pixtype)
 #' get the average to look at it in 3D
-avg <- new( "antsImage" , "double" , 3 )
+avg <- new( "antsImage" , dimension = 3 , pixeltype=img@pixeltype  )
 antsMotionCorr( list( d = 3 , a = img , o = avg ) )
 #' look at the header to determine slices to display 
 ImageMath('4','na','PH',img)

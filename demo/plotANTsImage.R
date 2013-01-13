@@ -1,7 +1,7 @@
 
 
 fn<-"../../demo/example_images/phantomtemplate.jpg"
-img<-antsImageRead(fn,'float',2)
+img<-antsImageRead(fn,2)
 plotANTsImage(myantsimage=img)
 
 

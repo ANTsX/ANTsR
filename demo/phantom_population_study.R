@@ -15,7 +15,7 @@ maskfn <- "phantomtemplate.jpg"
 #' get the mask , should be in same space as image
 glb <- glob2rx(paste(maskfn, sep = ""))
 maskfn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
-mask <- antsImageRead(maskfn, "float", mydim)
+mask <- antsImageRead(maskfn, mydim)
 #' get regions of mask according to logical comparisons
 logmask <- (mask > 120 & mask < 130)
 notlogmask <- (!logmask)
@@ -27,8 +27,8 @@ ImageMath('2',mask,"FillHoles",mask)
 
 
 
-# image(as.array(antsImageRead(maskfn, "float", mydim))) # alternative approach
-plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim))
+# image(as.array(antsImageRead(maskfn,  mydim))) # alternative approach
+plotANTsImage(myantsimage=antsImageRead(maskfn, mydim))
 plotANTsImage(myantsimage=mask)
 
 
@@ -37,7 +37,7 @@ plotANTsImage(myantsimage=mask)
 nvox <- sum(c(logmask))
 mat <- matrix(length(fnl) * nvox, nrow = length(fnl), ncol = nvox)
 for (i in 1:length(fnl)) {
-    i1 <- antsImageRead(fnl[i], "float", mydim)
+    i1 <- antsImageRead(fnl[i], mydim)
     vec <- i1[logmask]
     mat[i, ] <- vec
 }
@@ -75,7 +75,7 @@ m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white
 
 
 
-plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
+plotANTsImage(myantsimage=antsImageRead(maskfn, mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
 
 
 
