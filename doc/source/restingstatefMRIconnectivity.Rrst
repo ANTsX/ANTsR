@@ -124,8 +124,10 @@ Now you can reduce your fMRI data to relatively simple measurements of connectiv
 
 ToDo: add gray matter mask and anatomical labels.
 
-.. {r simplesparsesvd, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='hide',message=FALSE}
+.. {r testrestingstatefMRIconnectivity, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='hide',message=FALSE}
 isucceed<-FALSE
 if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
 print( isucceed )
 .. .. 
+
+ 
