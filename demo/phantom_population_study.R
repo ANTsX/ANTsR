@@ -60,6 +60,10 @@ antsImageWrite(betaimg, paste(outpre, "_beta.nii.gz", sep = ""))
 
 
 
+qvals<-p.adjust(pvals,method="BH")
+sigct<-round( sum( qvals < 0.05 ) / sum( logmask ) * 100 )
+isucceed<-FALSE
+if ( sigct == 60 ) isucceed<-TRUE
 library(ggplot2)
 qdata<-data.frame(qvals)
 m <- ggplot(qdata, aes(x=qvals))
@@ -67,7 +71,7 @@ m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white
 
 
 
-if (  isucceeded ) print("SUCCESS") 
-if ( !isucceeded ) print("FAILURE") 
+if (  isucceed ) print("SUCCESS") 
+if ( !isucceed ) print("FAILURE") 
 
 
