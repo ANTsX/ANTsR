@@ -20,11 +20,15 @@ mask <- antsImageRead(maskfn, "float", mydim)
 logmask <- (mask > 120 & mask < 130)
 notlogmask <- (!logmask)
 #' make sure it holds zeroes
+mask[logmask]    <- 1
 mask[notlogmask] <- 0
+# fill holes
+ImageMath('2',mask,"FillHoles",mask)
 
 
 
-image(as.array(antsImageRead(maskfn, "float", mydim)))
+# image(as.array(antsImageRead(maskfn, "float", mydim))) # alternative approach
+plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim))
 plotANTsImage(myantsimage=mask)
 
 
@@ -68,6 +72,10 @@ library(ggplot2)
 qdata<-data.frame(qvals)
 m <- ggplot(qdata, aes(x=qvals))
 m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white") + geom_density(alpha=.2, fill="#FF6666") 
+
+
+
+plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
 
 
 

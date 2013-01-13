@@ -28,13 +28,17 @@ mask <- antsImageRead(maskfn, "float", mydim)
 logmask <- (mask > 120 & mask < 130)
 notlogmask <- (!logmask)
 #' make sure it holds zeroes
+mask[logmask]    <- 1
 mask[notlogmask] <- 0
+# fill holes
+ImageMath('2',mask,"FillHoles",mask)
 .. .. 
 
-Take a quick look at the input mask / template image using two approaches.
+Take a quick look at the input template and mask.
 
 .. {r step3,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-image(as.array(antsImageRead(maskfn, "float", mydim)))
+# image(as.array(antsImageRead(maskfn, "float", mydim))) # alternative approach
+plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim))
 plotANTsImage(myantsimage=mask)
 .. .. 
 
@@ -87,6 +91,11 @@ m <- ggplot(qdata, aes(x=qvals))
 m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white") + geom_density(alpha=.2, fill="#FF6666") 
 .. ..
 
+Overlay the beta-image on the template to see areas with high t-statistic ( greater than 2 , less than 6 ).
+
+.. {r step5,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+plotANTsImage(myantsimage=antsImageRead(maskfn, "float", mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
+.. ..
 
 Finally, test the output for correctness.
 
