@@ -1,9 +1,5 @@
-Tips for functional MRI and resting state analysis
-==================================================
 
-First take a quick look at your data.
 
-.. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
 glb <- glob2rx(paste(fn, sep = ""))
 fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
@@ -14,23 +10,16 @@ antsMotionCorr( list( d = 3 , a = img , o = avg ) )
 #' look at the header to determine slices to display 
 ImageMath('4','na','PH',img)
 plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
-.. ..
 
-The data looks ok so now convert the rsf image to a frequency filtered matrix.  
 
-This involves motion correction which, with default settings, can be time consuming (because we are being careful).  Here, we speed things up by setting moreaccurate=:r:`FALSE` (not recommended).
 
-We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
-
-.. {r fmriprocess, out.width='720px', fig.cap='ANTsR preprocessing, including frequency filtering, for fMRI',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",moreaccurate=FALSE,maskThresh=100000)
 # check if the mask is ok
 plotANTsImage(myantsimage=avg,functional=myres$mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
 # The mask looks fine ( does not have to be perfect ) so we proceed.
-.. .. 
 
 
-.. {r stealmultiplot, out.width='720px',echo=FALSE,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+
 # Multiple plot function
 #
 # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
@@ -76,13 +65,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     }
   }
 }
-.. .. 
 
-The stage above factored out what many consider to be the major signals in fMRI that are not due to natural resting-state fluctuations in brain activity.  
 
-A network analysis may now be performed on the results of the above processing.  The key output is myres$filteredTimeSeries.  Let's look at sample voxels' time series using basic plotting.
 
-.. {r plotsamplevoxels, out.width='720px', fig.cap='ANTsR sample voxels',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 library(ggplot2)
 samplevox1<-round( ncol(myres$filteredTimeSeries)/2 )
 samplevox2<-round( ncol(myres$filteredTimeSeries)/3 )
@@ -90,6 +75,5 @@ data<-data.frame( time = c(1:nrow( myres$filteredTimeSeries ) )*4 , v1 = myres$f
 p1<-( ggplot( data , aes( x = time , y = v1 ) ) + geom_line()  + ggtitle("Time series @ voxel 1") )
 p2<-( ggplot( data , aes( x = time , y = v2 ) ) + geom_line()  + ggtitle("Time series @ voxel 2") )
 multiplot( p1, p2, cols=1) # function stolen from the internet
-.. ..
 
-That's good --- check a separate page for example network analyses.  In brief, a network analysis will compute correlations between voxels such as these.  
+
