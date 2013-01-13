@@ -6,22 +6,33 @@
 #
 # if you want to convert Rd files to rst, then do ( from this dir) 
 # 
+###############################################
+function mysafetest {
+    "$@"
+    status=$?
+    if [ $status -ne 0 ]; then
+        echo "error with $1"
+	exit 
+    fi
+    return $status
+}
+###############################################
 ANTsRdoc=/Users/stnava/code/temp/antsr/ANTsR/doc
-cd $ANTsRdoc
-git checkout master 
-./scripts/convertRd2rst.sh
-cd source 
-../scripts/convertRrst2rst.R 
-cd $ANTsRdoc
+mysafetest cd $ANTsRdoc
+mysafetest git checkout master
+mysafetest ./scripts/convertRd2rst.sh
+mysafetest cd source 
+mysafetest ../scripts/convertRrst2rst.R 
+mysafetest cd $ANTsRdoc
 # 
 # then to build the html, type: 
 # 
-make html
-git commit -a -m "WIP: prepping for website update"
-git checkout gh-pages
-cd .. 
-cp -r doc/build/html/* .
-git add *html _sources/* _images/*
-git commit -a -m "WIP: website update"
-git push origin gh-pages
-git checkout master
+mysafetest make html
+mysafetest git commit -a -m "WIP: prepping for website update"
+mysafetest git checkout gh-pages
+mysafetest cd .. 
+mysafetest cp -r doc/build/html/* .
+mysafetest git add *html _sources/* _images/*
+mysafetest git commit -a -m "WIP: website update"
+mysafetest git push origin gh-pages
+mysafetest git checkout master
