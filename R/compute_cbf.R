@@ -43,7 +43,7 @@ pasl_Chen2011 <- function( cbf , m0img , labelfirst )
 
 if( is.character( img ) )
 {
-  img <- antsImageRead( img , "float" , 4 )
+  img <- antsImageRead( img ,  4 )
 }else if( class( img ) == "antsImage" )
 {
   if( img@dimension != 4 ) 
@@ -59,7 +59,7 @@ if( is.character( img ) )
 
 if( is.character( cbf ) )
 {
-  cbf <- antsImageRead( cbf , "float" , 4 )
+  cbf <- antsImageRead( cbf , 4 )
 }else if( class( cbf ) == "antsImage" )
 {
   if( cbf@dimension != 3 ) 

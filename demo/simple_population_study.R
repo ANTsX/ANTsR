@@ -6,7 +6,7 @@ fnl<-list.files(path='./',pattern=glb,full.names=T,recursive=T)
 print(fnl)
 pre<-"TEST"
 maskfn<-"./example_images/phantomtemplate.jpg" # get the mask , should be in same space as image
-mask<-antsImageRead(maskfn,'float',mydim)
+mask<-antsImageRead(maskfn,mydim)
 logmask<-( mask > 120 & mask < 130 )  # get the parts of the mask > 0
 notlogmask<-( ! logmask )  # get the parts of the mask > 0
 mask[ notlogmask ]<-0 # make sure it holds zeroes
@@ -14,7 +14,7 @@ nvox<-sum( c( logmask ) ) # count voxels
 mat<-matrix( length(fnl) * nvox , nrow = length(fnl), ncol = nvox  )
 for ( i in 1:length(fnl) )  # create the matrix
   {
-  i1<-antsImageRead(fnl[i],'float',mydim)
+  i1<-antsImageRead(fnl[i],mydim)
   vec<-i1[ logmask ]
   mat[ i, ]<-vec
   }

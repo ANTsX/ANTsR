@@ -46,7 +46,7 @@ cat( "******* Conducting simple voxel-based analysis (controls = ", numberOfCont
 # Read the mask and place the masked voxels in the images in a matrix
 
 cat( "Reading mask file ", maskFileName, "\n\n", sep = '' )
-mask <- antsImageRead( maskFileName, 'unsigned int', dimensionality )
+mask <- antsImageRead( maskFileName, dimensionality , pixeltype = 'unsigned int' )
 numberOfForegroundVoxels <- sum( c( as.array( mask ) ) )
 
 dataMatrix <- matrix( data = NA, nrow = numberOfControls+numberOfExperimentals,
@@ -65,7 +65,7 @@ for( i in seq( 1, length( allFileNames ) ) )
     cat( "Reading experimental image ", allFileNames[i], " (", i - numberOfControls,
       " of ", numberOfExperimentals, ").\n", sep = '' )
     }
-  subjectImage <- antsImageRead( allFileNames[i], 'float', dimensionality )
+  subjectImage <- antsImageRead( allFileNames[i], dimensionality )
   dataMatrix[i,] <- as.array( subjectImage[mask != 0] )
   }
 

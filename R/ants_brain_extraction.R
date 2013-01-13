@@ -51,7 +51,7 @@ if( is.character( img ) )
       print( "'img' should be only one filename" )
       return( NULL )
     }
-  img <- antsImageRead( img , "float" , 3 )
+  img <- antsImageRead( img , 3 )
 }else if( class( img ) == "antsImage" )
 {
   if(  img@dimension != 3 ) 

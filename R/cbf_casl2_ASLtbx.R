@@ -21,7 +21,7 @@
 # --------------------------------------------------------------------------------------
 cbf_casl2_ASLtbx <- function( aslimg_filename )
 {
-	img <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
+	img <- as.array( antsImageRead( aslimg_filename , 4 ) )
 
 	# number of terms in the integration of finite-difference
 	numdiffs <- floor( dim( img )[ length(dim(img)) ] / 2 )

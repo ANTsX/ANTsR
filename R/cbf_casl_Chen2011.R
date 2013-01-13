@@ -2,7 +2,7 @@
 # --------------------------------------------------------------------------------------
 cbf_casl_Chen2011 <- function( aslimg_filename )
 {
-	img <- as.array( antsImageRead(  aslimg_filename , "double" , 4 ) )
+	img <- as.array( antsImageRead(  aslimg_filename ,  4, "double" ) )
 
 	numdiffs <- floor( dim(img)[4] / 2 )
 

@@ -17,8 +17,8 @@ setMethod( f = "initialize" ,
 	   signature( .Object = "antsImage"
 		      ) ,
 	   definition = function( .Object , 
-	   	      		  pixeltype , 
-				  dimension 
+	   	      		  pixeltype = "float" , 
+				  dimension = 3
 				  )
 	   	       {
 			 return( .Call( "antsImage", pixeltype , dimension ) )
@@ -972,8 +972,8 @@ setMethod( f = "initialize" ,
 	   signature( .Object = "antsImageList"
 		      ) ,
 	   definition = function( .Object , 
-	   	      		  pixeltype , 
-				  dimension 
+	   	      		  pixeltype = "float" , 
+				  dimension = 3 
 				  )
 	   	       {
 			 .Call( "antsImageList", 

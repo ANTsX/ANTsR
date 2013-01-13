@@ -35,7 +35,7 @@ Shrinidhi KL
 
 \examples{
 \dontrun{
-img <- antsImageRead( "input.nii" , "float" , 4 )
+img <- antsImageRead( "input.nii" , 4 )
 mask <- array( 1 , dim(img)[1:3] )
 # set some values of mask to FALSE ...
 

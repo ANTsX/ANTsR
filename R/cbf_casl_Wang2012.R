@@ -2,7 +2,7 @@
 # --------------------------------------------------------------------------------------
 cbf_casl_Wang2012 <- function( aslimg_filename , Xvar = NULL , Xideal = NULL , c = NULL )
 {
-	Y <- as.array( antsImageRead( aslimg_filename , "double" , 4 ) )
+	Y <- as.array( antsImageRead( aslimg_filename , 4, "double" ) )
 	dimY <- dim( Y )
 	dim( Y ) <- c( dimY[1]*dimY[2]*dimY[3] , dimY[4] )
 	Y <- t( Y )
@@ -50,7 +50,7 @@ cbf_casl_Wang2012 <- function( aslimg_filename , Xvar = NULL , Xideal = NULL , c
 	}
 	if( is.character( c ) )
 	{
-		c <- as.array( antsImageRead( c , "double" , 3 ) )
+		c <- as.array( antsImageRead( c ,  3 ,  "double" ) )
 	}
 
 	cbf <- ( Bideal * lambda * R1a * exp( w * R1a ) ) / ( 2 * c * alpha * ( 1 - exp( -tau * R1a ) ) )

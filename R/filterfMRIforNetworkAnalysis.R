@@ -32,12 +32,13 @@ if( is.character( asl ) )
       print( "'asl' should be only one filename" )
       return( NULL )
     }
-  asl <- antsImageRead( asl , "double" , 4 )
+  asl <- antsImageRead( asl ,  4 , "double" )
 } else if( class( asl ) == "antsImage" )
 {
   if( asl@pixeltype != "double" )
     {
     print( "'asl' must have pixeltype  'double' " )
+    asl<-antsImageClone( asl , 'double' )
     }
   if( asl@dimension != 4 ) 
   {

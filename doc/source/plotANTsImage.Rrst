@@ -5,7 +5,7 @@ First, read an image. Then display with a simple command.
 
 .. {r plotANTsImage, out.width='720px', fig.cap='ANTsR image plot',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
 fn<-"../../demo/example_images/phantomtemplate.jpg"
-img<-antsImageRead(fn,'float',2)
+img<-antsImageRead(fn,2)
 plotANTsImage(myantsimage=img)
 .. ..
 

@@ -8,7 +8,7 @@ demog<-read.csv(mycsv)
 glb<-paste("*jacnorm*.nii.gz",sep='')
 fnl<-list.files(path="./jacsmooth/", pattern = glob2rx(glb),full.names = T)
 mfn<-"/Volumes/LaCie/MurrayLong/templates/labels/sub_mask.nii.gz"
-mask<-antsImageRead(mfn,'float',3)
+mask<-antsImageRead(mfn, dimension = 3)
 maskv<-( mask == 1 )
 nmatcol<-sum(maskv)
 mydata<-matrix( rep(0,length(fnl)*nmatcol),ncol=nmatcol,nrow=length(fnl))
@@ -22,7 +22,7 @@ duration<-rep(0,length(fnl))
 tauabeta<-rep(NA,length(fnl))
 for ( x in c(1:length(fnl)) )
   {
-  img<-antsImageRead(fnl[x],'float',3)
+  img<-antsImageRead(fnl[x], dimension=3)
   vecimg<-img[ maskv ]
   mydata[x,]<-vecimg
   subjid[x]<-substr(fnl[x],14,19)

@@ -2,10 +2,6 @@ require(doParallel)
 # image is in the ANTsR directory on mnt build avants 
 asl_img<-'asl.nii.gz'
 asl_img<-"JJ_asl_PEDS021.nii.gz"
-# aslimg<-antsImageRead(asl,'float',4)
-# mk<-antsImageRead("out.nii.gz",'float',3)
-# moco_mask_img <- get_mask( mk , thresh_lo = 500 , thresh_hi = 1e9 )
-# aslimg<-antsImageRead("out.nii.gz",'float',4)
 
 asl<-"20100810_113600ep2dpcaslPHC1500msP2s002a001.nii.gz"
 asl<-"20100812_070450ep2dpcaslUIPHCs021a001.nii.gz"
@@ -19,7 +15,6 @@ for ( asl in c("103487_20060308_0007_ep2d_casl_UI_1500ms.nii.gz","111338_2006083
   moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 800 , thresh_hi = 1e9 )
   antsImageWrite(moco_mask_img,paste(pre,"mask.nii.gz",sep=''))
   aslimg<-moco_results$moco_img
-  # aslimg<-antsImageRead(asl,'float',4)
   saslimg<-antsImageClone(aslimg)
   SmoothImage(4,aslimg,1,saslimg)
   mat <- timeseries2matrix( saslimg , moco_mask_img )
@@ -42,7 +37,7 @@ for ( asl in c("103487_20060308_0007_ep2d_casl_UI_1500ms.nii.gz","111338_2006083
 
 # network analysis
 # draw the roi in label 2 on the mask
-mask<-antsImageRead('021seg.nii.gz','float',3)
+mask<-antsImageRead('021seg.nii.gz', 3)
 wb<-( mask > 1 )
 nwb<-( mask <= 1 )
 wbvec<-mask[ wb ]
@@ -71,7 +66,7 @@ antsImageWrite(mask  ,'021_beta.nii.gz')
 # finally, try to convert to 'true' cbf values - not verified for all asl
 # types!  this assumes CASL 
 dd<-( moco_mask_img  > 0 )
-mm<-antsImageRead("../m0.nii.gz",'float',3)
+mm<-antsImageRead("../m0.nii.gz", 3)
 cbf2<-cbf[ dd ]*(-1) # tag-label difference from assumptions above 
 # M0 <- 0.025 # rowMeans( controlimg ) --- can be a better way
 lambda <- 0.9

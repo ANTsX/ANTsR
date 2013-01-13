@@ -40,7 +40,7 @@ cat( "******* Conducting simple ROI analysis (controls = ", numberOfControls,
 # Read the mask and place the masked voxels in the images in a matrix
 
 cat( "Reading ROI labels file ", roiLabelsFileName, "\n\n", sep = '' )
-roiLabelsMask <- antsImageRead( roiLabelsFileName, 'unsigned int', dimensionality )
+roiLabelsMask <- antsImageRead( roiLabelsFileName,  dimensionality , 'unsigned int' )
 roiLabels <- sort( unique( c( as.array( roiLabelsMask ) ) ) )
 roiLabels <- roiLabels[which( roiLabels != 0 )]
 
@@ -64,7 +64,7 @@ for( i in seq( 1, length( allFileNames ) ) )
     cat( "Reading experimental image ", allFileNames[i], " (", i - numberOfControls,
       " of ", numberOfExperimentals, ").\n", sep = '' )
     }
-  subjectImage <- antsImageRead( allFileNames[i], 'float', dimensionality )
+  subjectImage <- antsImageRead( allFileNames[i], dimensionality )
   dataMatrix[i,] <- as.array( subjectImage[roiLabelsMask != 0] )
   }
 

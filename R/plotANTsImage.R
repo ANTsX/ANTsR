@@ -63,7 +63,7 @@ plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slice
   library(utils)
   library('misc3d') ; library('rgl') ; library('pixmap')
   read.img <- function(x,dim=2) {
-    img<-antsImageRead(x,'double',dim)
+    img<-antsImageRead(x,dim)
     img<-as.array(img);
   }
 #

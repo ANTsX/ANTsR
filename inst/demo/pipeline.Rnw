@@ -27,14 +27,14 @@ Read the input image into an R object.
 
 <<>>= 
 
-img = antsImageRead( system.file( "demo/data/KKI2009-01-fMRI.nii" , package = "ANTsR" ) , "float" , 4 )
+img = antsImageRead( system.file( "demo/data/KKI2009-01-fMRI.nii.gz" , package = "ANTsR" ) , 4 )
 @
 
 Create a buffer to hold the average image.
 
 <<>>=
 
-avg_img = new( "antsImage" , "float" , 3 )
+avg_img = new( "antsImage" , dimension = 3, pixeltype="float" )
 @ 
 
 Compute the average image by using `antsMotionCorr'. After the below command, the object `avg\_img' will hold the resulting average image. `antsMotionCorr' accepts a named list of arguments as shown.
@@ -48,7 +48,7 @@ To perform motion correction, create a buffer for the motion corrected image and
 
 <<>>=
 
-moco_img = new( "antsImage" , "float" , 4 )
+moco_img = new( "antsImage" , pixeltype = "float" , dimension = 4 )
 moco_params = new( "antsMatrix" , "double" )
 @
 
@@ -127,7 +127,7 @@ Create a buffer to hold the brainmask image.
 
 <<>>= 
 
-bm_img = new( "antsImage" , "float" , 3 )
+bm_img = new( "antsImage" ,  3 )
 @ 
 
 Perform brain-extraction using the average image computed above as follows.
@@ -168,8 +168,8 @@ Create buffer to hold compcorr corrected and comcorr variance images.
 
 <<>>= 
 
-compcorr_corr_img = new( "antsImage" , "float" , 4 )
-compcorr_var_img = new( "antsImage" , "float" , 3 )
+compcorr_corr_img = new( "antsImage" ,  4 )
+compcorr_var_img = new( "antsImage" ,  3 )
 @
 
 Peform \emph{compcorr} using the following commands.
@@ -188,7 +188,7 @@ The next command `Atropos' requires its input mask image to be of pixeltype `uns
 <<>>=
 
 bm_img_uint = antsImageClone( bm_img , "unsigned int" )
-seg_img_uint = new( "antsImage" , "unsigned int" , 3 )
+seg_img_uint = new( "antsImage" , pixeltype = "unsigned int" , dimension = 3 )
 @
 
 Perform Atropos segmentation as follows.
@@ -202,7 +202,7 @@ The following commands exercise other options to `Atropos'.
 
 <<>>=
 
-prob_img_list = new( "antsImageList" , "float" , 3 )
+prob_img_list = new( "antsImageList" , pixeltype = "float" , dimension = 3 )
 Atropos( list( d = 3 , a = avg_img , a = compcorr_var_img , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) )
 Atropos( list( d = 3 , a = avg_img , a = compcorr_var_img , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = list( name = "priorprobabilityimages" , 3 , prob_img_list , 0 ) , x = bm_img_uint ) )
 @
@@ -212,7 +212,7 @@ Rest of `compcorr' using `sccan'.
 <<>>=
 
 seg_img_float = antsImageClone( seg_img_uint , "float" )
-cortmask_img = new( "antsImage" , "float" , 3 )
+cortmask_img = new( "antsImage" , pixeltype = "float" , dimension = 3 )
 ThresholdImage( 3 , seg_img_float , cortmask_img , 2 , 2 )
 cortmask_img_double = antsImageClone( cortmask_img , "double" )
 moco_img_double = antsImageClone( moco_img , "double" )
@@ -223,7 +223,7 @@ filt_mat_df = as.data.frame( filt_mat_df )
 filt_mat = as.antsMatrix( filt_mat_df , "double" )
 mat1 = new( "antsMatrix" , "double" )
 mat2 = new( "antsMatrix" , "double" )
-imglist = new( "antsImageList" , "double" , 3 )
+imglist = new( "antsImageList" , pixeltype = "double" , dimension = 3 )
 sccan( list( svd = list( name = "sparse" , filt_mat , cortmask_img_double , -0.15 ) , n = 40 , i = 40 , PClusterThresh = 50 , o = list( mat1 , imglist , mat2 ) ) )
 @
 

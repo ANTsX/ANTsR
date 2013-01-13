@@ -10,7 +10,7 @@ cbf_pasl_robust <- function( asl_img, m0img, labelfirst=0, robust=TRUE, lambda=0
   deltaM <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis, moco_results_m0$moco_avg_img, robust )
 
   # Return cbf in mL/100g/min
-  cbf <- new( "antsImage", "float", 3 )
+  cbf <- new( "antsImage", dimension = 3, pixeltype = "float" )
   ImageMath( 3, cbf, "/", deltaM, moco_results_m0$moco_avg_img )
   scale <- 540000.0*lambda / 700.0*( 2 * alpha * TI1 * exp( -TI2 / T1b ) )
   ImageMath( 3, cbf, "m", cbf, scale  )

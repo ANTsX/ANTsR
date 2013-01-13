@@ -10,7 +10,7 @@ Read an image file into an S4 object of class 'antsImage'.
 }
 
 \usage{
-antsImageRead( filename , pixletype , dimension )
+antsImageRead( filename ,  dimension = 3 , pixeltype = "float" )
 }
 
 \arguments{
@@ -39,6 +39,8 @@ Shrinidhi KL
 \examples{
 \dontrun{
 # read an image from a file named 'imagefile.nii' into an image of pixeltype 'double' and dimensions '4'
-img <- antsImageRead( "imagefile.nii" , "double" , 4 )
+img <- antsImageRead( "imagefile.nii" , dimension = 3  )
+img <- antsImageRead( "imagefile.nii" , dimension = 2  )
+img <- antsImageRead( "imagefile.nii" , dimension = 4 , pixeltype =  "double" )
 }
 }

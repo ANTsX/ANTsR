@@ -2,7 +2,7 @@ getMask = function(maskFile) {
 
   # Returns a boolean mask vector that can be used to convert images to / from matrices
 
-  mask_image = antsImageRead(maskFile, "float", 3)
+  mask_image = antsImageRead(maskFile,  3)
 
   mask = mask_image > 0
 
@@ -31,7 +31,7 @@ readVoxelData = function(imageListFile, mask) {
   dataMatrix = matrix(nrow = numImages, ncol = numVoxels)
 
   for (i in 1:numImages) {
-    image = antsImageRead(paste(inputDir, "/", imageList[i], sep = ""), "float", 3)
+    image = antsImageRead(paste(inputDir, "/", imageList[i], sep = ""),  3)
 
     dataMatrix[i,] = as.numeric(image, mask)  
   }

@@ -50,7 +50,7 @@ if( is.character( img ) )
       print( "'img' should be only one filename" )
       return( NULL )
     }
-  img <- antsImageRead( img , "double" , 4 )
+  img <- antsImageRead( img , dimension = 4 , "double"  )
 }else if( class( img ) == "antsImage" )
 {
   if( img@pixeltype != "double" )
@@ -82,7 +82,7 @@ if ( missing( fixed ) )
           print ( "'fixed' should be only one filename" )
           return( NULL )
         }
-      fixed <- antsImageRead( fixed, "double", 3 )
+      fixed <- antsImageRead( fixed, dimension = 3, "double" )
     } else if ( class( fixed ) == "antsImage" )
       {
         if( fixed@pixeltype != "double" )
