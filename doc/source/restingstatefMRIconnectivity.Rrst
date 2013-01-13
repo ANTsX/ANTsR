@@ -4,7 +4,8 @@ Tips for functional MRI and resting state analysis
 First take a quick look at your data.
 
 .. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
-pixtype<-"double"
+library(ANTsR)
+pixtype<-"double" # needed for call to antsMotionCorr
 fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
 glb <- glob2rx(paste(fn, sep = ""))
 fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
@@ -24,7 +25,7 @@ This involves motion correction which, with default settings, can be time consum
 We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
 
 .. {r fmriprocess, out.width='720px', fig.cap='ANTsR preprocessing, including frequency filtering, for fMRI',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
-myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",moreaccurate=FALSE,maskThresh=100000)
+myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=100000)
 # check if the mask is ok
 plotANTsImage(myantsimage=avg,functional=myres$mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
 # The mask looks fine ( does not have to be perfect ) so we proceed.
@@ -94,3 +95,37 @@ multiplot( p1, p2, cols=1) # function stolen from the internet
 .. ..
 
 That's good --- check a separate page for example network analyses.  In brief, a network analysis will compute correlations between voxels such as these.  
+
+Let’s simulate a standard rsf network analysis by extracting some data-driven “ROIs” and show the resulting correlation matrix.
+
+
+.. {r simplesparsesvd, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+mysvd <- svd(myres$filteredTimeSeries)
+# let's make the v eigenvectors sparse , otherwise they are totally uncorrelated
+nevecs <- 10
+vecs <- mysvd$v[, 1:nevecs]
+thresh <- 0.005  # just an example
+for (i in c(1:nevecs)) {
+    vecs[, i] <- (vecs[, i] * (vecs[, i] > thresh))
+    vecimg <- antsImageClone(myres$mask, "float")
+    mask <- antsImageClone(myres$mask, "float")
+    vecimg[(myres$mask > 0)] <- vecs[, i]
+    ImageMath("3", vecimg, "ClusterThresholdVariate", vecimg, mask, "100")
+    vecs[, i] <- vecimg[(myres$mask > 0)]
+}
+tobecorrelated <- (myres$filteredTimeSeries %*% vecs)
+#' visualize the resulting correlations
+image(cor(tobecorrelated))
+.. ..
+
+The correlation matrix is the most frequently used basis of rsf-MRI analysis.
+
+Now you can reduce your fMRI data to relatively simple measurements of connectivity. Congratulations!
+
+ToDo: add gray matter mask and anatomical labels.
+
+.. {r simplesparsesvd, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='hide',message=FALSE}
+isucceed<-FALSE
+if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
+print( isucceed )
+.. .. 

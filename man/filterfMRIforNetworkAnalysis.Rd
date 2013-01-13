@@ -10,7 +10,7 @@ This function works for either raw BOLD time-series data, ASL-based BOLD time-se
 }
 
 \usage{
-filterfMRIforNetworkAnalysis( asl_antsr_image_or_filename, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c("BOLD", "ASLBOLD", "ASLCBF") , maskThresh=500, outputprefix = NULL )
+filterfMRIforNetworkAnalysis( asl_antsr_image_or_filename, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c("BOLD", "ASLBOLD", "ASLCBF") , maskThresh=500, smoother = 0, outputprefix = NULL )
 }
 
 \arguments{
@@ -20,6 +20,7 @@ filterfMRIforNetworkAnalysis( asl_antsr_image_or_filename, tr, freqLo=0.01, freq
 \item{freqHi = <value>}{The higher frequency limit, e.g. 0.1 in band-pass filter}
 \item{cbfnetwork = "ASLCBF"}{A string dictating whether to do nothing special (standard BOLD) or get CBF (ASLCBF) or BOLD (ASLBOLD) signal from ASL}
 \item{maskThresh = <value>}{A thresholding value for the mask ... may need to be adjusted up or down for your data although the mask does not need to be perfect.}
+\item{smoother = <value>}{A smoothing parameter for space and time.}
 \item{outputprefix = <string>}{ filename prefix - if defined , this function will write out some sanity checking images.}
 }
 
@@ -37,7 +38,7 @@ Avants BB
 
 \examples{
 \dontrun{
-myres<-filterfMRIforNetworkAnalysis("s3_date3_asl.nii.gz",tr=4,0.01,0.1,"ASLCBF","processing/test")
+myres<-filterfMRIforNetworkAnalysis("s3_date3_asl.nii.gz",tr=4,0.01,0.1,"ASLCBF",smoother=1,"processing/test")
 
 in myres, you have:
 

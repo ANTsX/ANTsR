@@ -1,7 +1,7 @@
-filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" , moreaccurate = TRUE )
-{
-  pixtype<-"double"
-  myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, outputprefix = NULL )"
+filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , smoother = 0, pre="" , moreaccurate = TRUE )
+{ 
+  pixtype<-"float"
+  myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, smoother = 0 , outputprefix = NULL )"
   if ( nargs() == 0 )
     {
     print(myusage)
@@ -32,17 +32,17 @@ if( is.character( asl ) )
       print( "'asl' should be only one filename" )
       return( NULL )
     }
-  asl <- antsImageRead( asl ,  4 , "double" )
+  asl <- antsImageRead( asl ,  4  )
 } else if( class( asl ) == "antsImage" )
 {
-  if( asl@pixeltype != "double" )
+  if( asl@pixeltype != pixtype )
     {
-    print( "'asl' must have pixeltype  'double' " )
-    asl<-antsImageClone( asl , 'double' )
+    print(paste( "'asl' must have pixeltype  ",pixtype ))
+    asl<-antsImageClone( asl , pixtype )
     }
   if( asl@dimension != 4 ) 
   {
-    print( "'asl' must have pixeltype 'double' and dimension '4'" )
+    print(paste( "'asl' must have pixeltype ",pixtype," and dimension '4'" ))
     return( NULL )  
   }
 }else
@@ -72,7 +72,7 @@ if ( n != 4 )
   }
 moco_results <- motion_correction( asl , moreaccurate = moreaccurate )
 moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = maskThresh, thresh_hi = 1e9 )
-mat <- timeseries2matrix( asl , moco_mask_img )
+mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
 motionparams<-as.data.frame( moco_results$moco_params )
 predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
 # m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
@@ -88,10 +88,14 @@ if ( nchar(pre) > 1 ) {
 # network analysis
 mask<-moco_mask_img
 wb<-( mask > 0 ) # whole brain
+if ( smoother > 0 )
+  {
+  SmoothImage(4,moco_results$moco_img,smoother,moco_results$moco_img)
+  }
 ogmat <- timeseries2matrix( moco_results$moco_img , wb  )
 motionparamsandcompcorr<-predictors$nuis
 ogmat<-residuals( lm( ogmat ~ motionparamsandcompcorr ))
-gmat <-ogmat # 
+gmat <-ogmat #  
 leftinds<-shift(c(1:nrow(gmat)),1)
 rightinds<-shift(c(1:nrow(gmat)),-1)
 if ( cbfnetwork == "ASLCBF" ) {
