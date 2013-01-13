@@ -1,0 +1,26 @@
+Tips for functional MRI and resting state analysis
+==================================================
+
+First take a quick look at your data.
+
+.. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+fn<-"../../demo/example_images/phantomtemplate.jpg"
+img<-antsImageRead(fn,'float',2)
+plotANTsImage(myantsimage=img)
+.. ..
+
+Show an overlay
+---------------
+
+Next, create an artificial functional image by smoothing the background image.
+
+Now use a overlay color on the background and display it. 
+
+.. {r plotANTsImageOverlay, out.width='720px', fig.cap='ANTsR image plot with overlay',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+simg<-antsImageClone(img)
+SmoothImage(2,img,3,simg)
+plotANTsImage(myantsimage=img,functional=simg,threshold="150x260",color="red",axis=1)
+.. ..
+
+
+
