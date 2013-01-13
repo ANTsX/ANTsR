@@ -76,12 +76,10 @@ testFormula <- ( values ~ 1 + predictor )
 
 tValues <- rep( NA, length( roiLabels ) )
 pValues <- rep( NA, length( roiLabels ) )
-rowLabels <- c();
 
 cat( "\nTesting...\n" );
 for( i in 1:length( roiLabels ) )
   {
-  rowLabels <- append( rowLabels, c( paste( "Label.", roiLabels[i], sep = '' ) ) );
   values <- rowMeans( dataMatrix[,which( roiLabelsMask == roiLabels[i] )], na.rm = TRUE );
   results <- summary( lm( testFormula ) )
   tValues[i] <- results$coef[2,3]
