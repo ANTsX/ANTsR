@@ -129,3 +129,5 @@ isucceed<-FALSE
 if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
 print( isucceed )
 .. .. 
+
+ 
