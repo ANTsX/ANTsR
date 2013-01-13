@@ -4,23 +4,26 @@ Tips for functional MRI and resting state analysis
 First take a quick look at your data.
 
 .. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-fn<-"../../demo/example_images/phantomtemplate.jpg"
-img<-antsImageRead(fn,'float',2)
-plotANTsImage(myantsimage=img)
+fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
+glb <- glob2rx(paste(fn, sep = ""))
+fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
+img<-antsImageRead(fn,'double',4)
+#' get the average to look at it in 3D
+avg <- new( "antsImage" , "double" , 3 )
+antsMotionCorr( list( d = 3 , a = img , o = avg ) )
+#' look at the header to determine slices to display 
+ImageMath('4','na','PH',img)
+plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
 .. ..
 
-Show an overlay
----------------
+The data looks ok so now convert the rsf image to a frequency filtered matrix.  
 
-Next, create an artificial functional image by smoothing the background image.
+This involves motion correction which, with default settings, can be time consuming (because we are being careful).  Here, we speed things up by setting :r:`moreaccurate=FALSE` (not recommended).
 
-Now use a overlay color on the background and display it. 
+We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
 
-.. {r plotANTsImageOverlay, out.width='720px', fig.cap='ANTsR image plot with overlay',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-simg<-antsImageClone(img)
-SmoothImage(2,img,3,simg)
-plotANTsImage(myantsimage=img,functional=simg,threshold="150x260",color="red",axis=1)
-.. ..
-
-
-
+.. {r fmriprocess, out.width='720px', fig.cap='ANTsR preprocessing, including frequency filtering, for fMRI',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.11,cbfnetwork="BOLD",moreaccurate=FALSE,maskThresh=800)
+# check if the mask is ok
+plotANTsImage(myantsimage=avg,functional=myres$mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
+.. .. 

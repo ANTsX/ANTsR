@@ -47,10 +47,16 @@ See the full man pages for each function below from within R via ?functionname
    Rd_perfusionregression.rst
 
    Rd_timeseriesimage2matrix.rst
+
+   Rd_phantom_population_study.rst
+
+   Rd_simple_roi_analysis.rst
    
-..   Rd_Atropos.rst
+   Rd_simple_voxel_based_analysis.rst
+
+   Rd_Atropos.rst
    
-..   Rd_N3BiasFieldCorrection.rst
+   Rd_N3BiasFieldCorrection.rst
 
 ..   Rd_cbf.rst
    

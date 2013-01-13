@@ -1,4 +1,4 @@
-filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" )
+filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , pre="" , moreaccurate = TRUE )
 {
   pixtype<-"double"
   myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, outputprefix = NULL )"
@@ -69,7 +69,7 @@ if ( n != 4 )
   print("input image must have dimension 4 ")
   return( NULL ) 
   }
-moco_results <- motion_correction( asl )
+moco_results <- motion_correction( asl , moreaccurate = moreaccurate )
 moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = maskThresh, thresh_hi = 1e9 )
 mat <- timeseries2matrix( asl , moco_mask_img )
 motionparams<-as.data.frame( moco_results$moco_params )

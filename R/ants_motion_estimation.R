@@ -41,7 +41,7 @@ ants_motion_estimation <- function( img = "" )
 #	antsMotionCorr( "-d" , 3 , "-o" , paste( "[" , paste( filename , moconr_img , avgnr_img , sep = "," ) , "]" , sep = "" ) , "-m" , paste( "MI[" , paste( avgnr_img , img , 1 , 20 , 50 , sep = "," ) , "]" , sep = "" ) , "-t" , "Rigid[0.01]" , "-i" , 25 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 25 , "-m" , paste( "CC[" , paste( avgnr_img , img , 1 , 2 , sep = "," ) , "]" , sep = "" ) , "-t" , "GaussianDisplacementField[0.15,3,0.5]" , "-i" , 10 , "-u" , 1 , "-e" , 1 , "-s" , 0 , "-f" , 1 , "-n" , 10 ) ;
 }
 
-motion_correction <- function( img, fixed )
+motion_correction <- function( img, fixed , moreaccurate = TRUE )
 {
 if( is.character( img ) )
 {
@@ -56,6 +56,7 @@ if( is.character( img ) )
   if( img@pixeltype != "double" )
     {
     print( "'img' must have pixeltype  'double' " )
+    img<-antsImageClone(img,"double")
     }
   if( img@dimension != 4 ) 
   {
@@ -84,6 +85,11 @@ if ( missing( fixed ) )
       fixed <- antsImageRead( fixed, "double", 3 )
     } else if ( class( fixed ) == "antsImage" )
       {
+        if( fixed@pixeltype != "double" )
+          {
+            print( "'fixed' must have pixeltype  'double' " )
+            fixed<-antsImageClone(fixed,"double")
+          }
         if (  fixed@dimension != 3 )
           {
             print( "'fixed' must have pixeltype 'double' and dimension '3'" )
@@ -105,7 +111,11 @@ if ( n > 10 )
 avg_img = new( "antsImage" , "double" , 3 )
 moco_img = new( "antsImage" , "double" , 4 )
 moco_params = new( "antsMatrix" , "double" )
-antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
-
+if ( moreaccurate == TRUE ) {
+  antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
+}
+if ( moreaccurate == FALSE ) {
+antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.02 ) , t = "Affine[0.1]" , i = 3 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
+}
 return( list( moco_img = moco_img , moco_params = moco_params , moco_avg_img = avg_img ) )
 }

@@ -7,7 +7,7 @@ self<-Args[4]
 self<-substring(self,8,nchar(as.character(self)))
 fn<-(Args[6])
 ofn<-(Args[7])
-myrrst<-c("phantom_population_study.Rrst","plotANTsImage.Rrst")
+myrrst<-c("phantom_population_study.Rrst","plotANTsImage.Rrst","restingstatefMRIconnectivity.Rrst")
 for ( myfn in myrrst ) {
   rstfn<-sub('.Rrst','.rst',myfn)
   knit(myfn,rstfn)
