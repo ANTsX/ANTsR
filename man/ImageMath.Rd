@@ -15,14 +15,8 @@ See section 'Arguments' for details. Number and type of arguments vary depending
 }
 
 \arguments{
-\item{imageDimension 2|3}{
-Number of dimensions of the input image
-}
-
-\item{outputImage}{
-Result image
-}
-
+\item{imageDimension 2|3}{Number of dimensions of the input image}
+\item{outputImage}{result image}
 \item{operator}{
 Must be one of the operators listed below.\cr
 Mathematical Operations:
@@ -137,7 +131,7 @@ Shrinidhi KL
 
 \examples{
 \dontrun{
-ImageMath( 3 , "input_img.nii" , "output_img.nii" , 2 , 3 )
-ImageMath( 3 , "input_img.nii" , "output_img.nii" , "Otsu" , 3 )
+ImageMath( 3 , "output_img.nii" , "D", "input_img.nii" , 1 )
+ImageMath( 3 , "output_img.nii" , "MD", "input_img.nii" , 1 )
 }
 }
