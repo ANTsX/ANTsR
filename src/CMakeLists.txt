@@ -42,7 +42,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY https://advants.svn.sourceforge.net/svnroot/advants/branches/image_passing
 #    SVN_REVISION -r 1547
     GIT_REPOSITORY http://github.com/stnava/ANTS.git 
-    GIT_TAG 5164b6146ef57596155a02605a0dce502e96f131
+    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
 #    GIT_TAG 6e530c1cb5a81d0aeaf519137ff76c2d6e80c468 
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
