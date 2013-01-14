@@ -46,9 +46,9 @@ link_directories( ${ANTS_DIR}/lib )
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
 # ANTsR targets
-#add_library(RantsApplyTransforms MODULE ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx)
-#target_link_libraries(RantsApplyTransforms ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsApplyTransforms )
-#install( TARGETS RantsApplyTransforms DESTINATION . )
+add_library(RantsApplyTransforms MODULE ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx)
+target_link_libraries(RantsApplyTransforms ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsApplyTransforms )
+install( TARGETS RantsApplyTransforms DESTINATION . )
 
 #add_library(RANTS MODULE ${ANTsR_SOURCE_DIR}/src/ANTS.cxx)
 #target_link_libraries(RANTS ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTS )
