@@ -101,6 +101,7 @@ image(cor(tobecorrelated))
 
 isucceed<-FALSE
 if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
-print( isucceed )
+if (  isucceed ) print("SUCCESS")
+if ( !isucceed ) print("FAILURE")
 
 
