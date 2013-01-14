@@ -70,9 +70,9 @@ add_library(RantsMotionCorr MODULE ${ANTsR_SOURCE_DIR}/src/antsMotionCorr.cxx)
 target_link_libraries(RantsMotionCorr ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsMotionCorr )
 install( TARGETS RantsMotionCorr DESTINATION . )
 
-#add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
-#target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
-#install( TARGETS RantsRegistration DESTINATION . )
+add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
+target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
+install( TARGETS RantsRegistration DESTINATION . )
 
 #add_library(RANTSUseDeformationFieldToGetAffineTransform MODULE ${ANTsR_SOURCE_DIR}/src/ANTSUseDeformationFieldToGetAffineTransform.cxx)
 #target_link_libraries(RANTSUseDeformationFieldToGetAffineTransform ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTSUseDeformationFieldToGetAffineTransform )
