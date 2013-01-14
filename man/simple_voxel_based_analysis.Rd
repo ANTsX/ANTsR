@@ -10,7 +10,8 @@ Student's t-test performed at each voxel within a specified mask region to deter
 }
 
 \usage{
-simple_voxel_based_analysis
+simple_voxel_based_analysis( dimensionality = 3, controlFileNames = c(),
+  experimentalFileNames = c(), maskFileName = "", outputPrefix = "./ANTsR_" )
 }
 
 \arguments{
@@ -20,28 +21,21 @@ To be defined in the script:
   Dimension of images.
 }
 
-\item{inputPath}{
-  Location of experimental and control files.
+\item{controlFileNames}{
+  List of image files comprising the control group.
 }
 
-\item{controlsFileNamePrefix}{
-  Prefix of control image file names.
-}
-
-\item{experimentalsFileNamePrefix}{
-  Prefix of experimental image file names.
+\item{experimentalFileNames}{
+  List of image files comprising the experimental group.
 }
 
 \item{maskFileName}{
   File name of mask defining the region over which testing is performed (foreground voxel != 0, background voxel = 0)
 }
 
-\item{outputPath}{
-  Path where result files should be written (t-statistic image and 1 - p-value image).
-}
-
 \item{outputPrefix}{
-  Prefix to prepend to the resulting image file names.
+  Output directory and prefix to prepend to the resulting image file names (t-value
+  image, "one minus" p-value image, and "one minus" (false discovery rate) corrected p-value image.
 }
 
 }
@@ -56,6 +50,17 @@ Tustison NJ
 
 \examples{
 \dontrun{
-  simple_voxel_based_analysis
+# Get the image files
+controlFileNames <- list.files( path = "./example_images/", pattern =
+  glob2rx( "phantomtemplate_CONTROL*" ), full.names = TRUE, recursive = FALSE )
+experimentalFileNames <- list.files( path = "./example_images/", pattern =
+  glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = FALSE )
+
+outputPath <- "./test_output/"
+prefix <- "ANTsR_"
+
+simple_voxel_based_analysis( dimensionality = 2, controlFileNames,
+  experimentalFileNames, maskFileName = "./example_images/phantomtemplate_mask.nii.gz",
+  outputPrefix = paste( outputPath, prefix, sep = '' ) );
 }
 }

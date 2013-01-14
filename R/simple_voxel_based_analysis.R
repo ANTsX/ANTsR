@@ -1,33 +1,10 @@
-library( ANTsR )
-
-################################################################################
-#
-# User variables to change
-#
-# Notes:
-#   * the control and experimental images are expected to be found in \code{inputPath}
-#   * Mask is assumed to be defined by background voxels = 0, foreground voxels != 0
-#
-
-dimensionality <- 2
-inputPath <- "./example_images/"
-controlsFileNamePrefix <- "phantomtemplate_CONTROL"
-experimentalsFileNamePrefix <- "phantomtemplate_EXP"
-maskFileName <- paste( inputPath, "phantomtemplate_mask.nii.gz", sep = '' )
-outputPath <- "./test_output/"
-outputPrefix <- "ANTsR_"
-
-################################################################################
-
-# Get the image files
-controlsFileNames <- list.files( path = inputPath, pattern =
-  glob2rx( paste( controlsFileNamePrefix, "*", sep = '' ) ), full.names = TRUE, recursive = FALSE )
-experimentalsFileNames <- list.files( path = inputPath, pattern =
-  glob2rx( paste( experimentalsFileNamePrefix, "*", sep='' ) ), full.names = TRUE, recursive = FALSE )
+simple_voxel_based_analysis <- function( dimensionality = 3, controlFileNames = c(),
+  experimentalFileNames = c(), maskFileName = "", outputPrefix = "./ANTsR_" )
+{
 
 # Check to see if there are more than one image per group
-numberOfControls <- length( controlsFileNames )
-numberOfExperimentals <- length( experimentalsFileNames )
+numberOfControls <- length( controlFileNames )
+numberOfExperimentals <- length( experimentalFileNames )
 
 if( numberOfControls < 2 )
   {
@@ -52,7 +29,7 @@ numberOfForegroundVoxels <- sum( c( as.array( mask ) ) )
 dataMatrix <- matrix( data = NA, nrow = numberOfControls+numberOfExperimentals,
   ncol = numberOfForegroundVoxels )
 
-allFileNames <- c( controlsFileNames, experimentalsFileNames )
+allFileNames <- c( controlFileNames, experimentalFileNames )
 for( i in seq( 1, length( allFileNames ) ) )
   {
   if( i <= numberOfControls )
@@ -91,9 +68,9 @@ for( i in 1:numberOfForegroundVoxels )
     }
   }
 close( progress );
-cat( "Done.\n", sep = '' );
+cat( "Done.\n", sep = '' )
 
-cat( "\nWriting output.\n" );
+cat( "\nWriting output.\n" )
 
 tImage <- antsImageClone( mask, "float" )
 pImage <- antsImageClone( mask, "float" )
@@ -101,10 +78,14 @@ qImage <- antsImageClone( mask, "float" )
 
 tImage[mask != 0] <- tValues
 pImage[mask != 0] <- 1.0 - pValues
-qImage[mask != 0] <- 1.0 - p.adjust( pValues, method = "fdr" );
+qImage[mask != 0] <- 1.0 - p.adjust( pValues, method = "fdr" )
+
+outputPath <- dirname( outputPrefix )
+filePrefix <- basename( outputPrefix )
 
 dir.create( outputPath, showWarnings = TRUE, recursive = TRUE )
 
-antsImageWrite( tImage, paste( outputPath, '/', outputPrefix, 'tValues.nii.gz', sep = '' ) )
-antsImageWrite( pImage, paste( outputPath, '/', outputPrefix, '1minuspValues.nii.gz', sep = '' ) )
-antsImageWrite( qImage, paste( outputPath, '/', outputPrefix, '1minuspValues_corrected.nii.gz', sep = '' ) )
+antsImageWrite( tImage, paste( outputPath, '/', filePrefix, 'tValues.nii.gz', sep = '' ) )
+antsImageWrite( pImage, paste( outputPath, '/', filePrefix, '1minuspValues.nii.gz', sep = '' ) )
+antsImageWrite( qImage, paste( outputPath, '/', filePrefix, '1minuspValues_corrected.nii.gz', sep = '' ) )
+}
