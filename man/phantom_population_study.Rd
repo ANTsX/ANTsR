@@ -24,5 +24,7 @@ Avants BB
 }
 
 \examples{
+\dontrun{
 source('demo/phantom_population_study.R')
+}
 }
