@@ -1,5 +1,5 @@
-simple_roi_analysis <- function( dimensionality = 3, inputPath = "./", controlsFileNamePrefix = "CONTROL",
-  experimentalsFileNamePrefix = "EXP", roiLabelsFileName = "" )
+simple_roi_analysis <- function( dimensionality = 3, controlFileNames = c(),
+  experimentalFileNames = c(), roiLabelsFileName = "" )
 {
 
 	# check if called with no arguments and print usage
@@ -9,15 +9,9 @@ simple_roi_analysis <- function( dimensionality = 3, inputPath = "./", controlsF
 		 return;
   	}
 
-# Get the image files
-controlsFileNames <- list.files( path = inputPath, pattern =
-  glob2rx( paste( controlsFileNamePrefix, "*", sep = '' ) ), full.names = TRUE, recursive = FALSE )
-experimentalsFileNames <- list.files( path = inputPath, pattern =
-  glob2rx( paste( experimentalsFileNamePrefix, "*", sep='' ) ), full.names = TRUE, recursive = FALSE )
-
 # Check to see if there are more than one image per group
-numberOfControls <- length( controlsFileNames )
-numberOfExperimentals <- length( experimentalsFileNames )
+numberOfControls <- length( controlFileNames )
+numberOfExperimentals <- length( experimentalFileNames )
 
 if( numberOfControls < 2 )
   {
@@ -40,7 +34,7 @@ cat( "******* Conducting simple ROI analysis (controls = ", numberOfControls,
 # Read the mask and place the masked voxels in the images in a matrix
 
 cat( "Reading ROI labels file ", roiLabelsFileName, "\n\n", sep = '' )
-roiLabelsMask <- antsImageRead( roiLabelsFileName,  dimensionality , 'unsigned int' )
+roiLabelsMask <- antsImageRead( roiLabelsFileName, dimensionality, 'unsigned int' )
 roiLabels <- sort( unique( c( as.array( roiLabelsMask ) ) ) )
 roiLabels <- roiLabels[which( roiLabels != 0 )]
 
@@ -51,7 +45,7 @@ numberOfForegroundVoxels <- length( roiLabelsMask[roiLabelsMask != 0] )
 dataMatrix <- matrix( data = NA, nrow = numberOfControls+numberOfExperimentals,
   ncol = numberOfForegroundVoxels )
 
-allFileNames <- c( controlsFileNames, experimentalsFileNames )
+allFileNames <- c( controlFileNames, experimentalFileNames )
 for( i in seq( 1, length( allFileNames ) ) )
   {
   if( i <= numberOfControls )
@@ -64,7 +58,8 @@ for( i in seq( 1, length( allFileNames ) ) )
     cat( "Reading experimental image ", allFileNames[i], " (", i - numberOfControls,
       " of ", numberOfExperimentals, ").\n", sep = '' )
     }
-  subjectImage <- antsImageRead( allFileNames[i], dimensionality )
+
+  subjectImage <- antsImageRead( allFileNames[i], dimensionality, 'float' )
   dataMatrix[i,] <- as.array( subjectImage[roiLabelsMask != 0] )
   }
 

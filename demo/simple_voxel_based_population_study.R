@@ -6,5 +6,9 @@ controlFileNames <- list.files( path = "./example_images/", pattern =
 experimentalFileNames <- list.files( path = "./example_images/", pattern =
   glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = FALSE )
 
-roiResults <- simple_roi_analysis( dimensionality = 2, controlFileNames,
-  experimentalFileNames, roiLabelsFileName = "./example_images/phantomtemplate_roi_labels.nii.gz" )
+outputPath <- "./test_output/"
+prefix <- "ANTsR_"
+
+simple_voxel_based_analysis( dimensionality = 2, controlFileNames,
+  experimentalFileNames, maskFileName = "./example_images/phantomtemplate_mask.nii.gz",
+  outputPrefix = paste( outputPath, prefix, sep = '' ) );

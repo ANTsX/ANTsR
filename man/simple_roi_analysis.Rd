@@ -10,26 +10,21 @@ Student's t-test performed for each labeled region within a specified mask to de
 }
 
 \usage{
-simple_roi_analysis
+roiResults <- simple_roi_analysis( dimensionality = 3, controlFileNames = c(),
+  experimentalFileNames = c(), roiLabelsFileName = "" )
 }
 
 \arguments{
-To be defined in the script:
-
 \item{dimensionality}{
   Dimension of images.
 }
 
-\item{inputPath}{
-  Location of experimental and control files.
+\item{controlFileNames}{
+  List of image files comprising the control group.
 }
 
-\item{controlsFileNamePrefix}{
-  Prefix of control image file names.
-}
-
-\item{experimentalsFileNamePrefix}{
-  Prefix of experimental image file names.
+\item{experimentalFileNames}{
+  List of image files comprising the experimental group.
 }
 
 \item{roiLabelsFileName}{
@@ -39,7 +34,7 @@ To be defined in the script:
 }
 
 \value{
-None.
+list consisting of unique roi labels, t-values, and p-values.
 }
 
 \author{
@@ -48,6 +43,13 @@ Tustison NJ
 
 \examples{
 \dontrun{
-  simple_roi_analysis
+# Get the image files
+controlFileNames <- list.files( path = "./example_images/", pattern =
+  glob2rx( "phantomtemplate_CONTROL*" ), full.names = TRUE, recursive = FALSE )
+experimentalFileNames <- list.files( path = "./example_images/", pattern =
+  glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = FALSE )
+
+roiResults <- simple_roi_analysis( dimensionality = 2, controlFileNames,
+  experimentalFileNames, roiLabelsFileName = "./example_images/phantomtemplate_roi_labels.nii.gz" )
 }
 }
