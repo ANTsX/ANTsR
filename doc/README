@@ -1,3 +1,4 @@
+#!/bin/bash
 # this directory should contain only Makefile, README and source
 #
 # unless you already built the website in which case it will also 
@@ -6,6 +7,23 @@
 #
 # if you want to convert Rd files to rst, then do ( from this dir) 
 # 
+option=$1
+if [[ ${#option} -eq 0  ]] ; then 
+  echo usage: ./README option 
+  echo   where option is 0 , 1  or 2 
+  echo     0 ----  compile html, no pushes 
+  echo     1 ----  compile html, push updated demo scripts to master  
+  echo     2 ----  compile html, push updated demo scripts to master and push website to gh-pages   
+  exit
+fi 
+if [[ ${option} -lt 0  ]] ||  [[ ${option} -gt 2  ]] ; then 
+  echo usage: ./README option 
+  echo   where option is 0 , 1  or 2 
+  echo     0 ----  compile html, no commit, no pushes 
+  echo     1 ----  compile html, commit, push updated demo scripts to master  
+  echo     2 ----  compile html, commit, push updated demo scripts to master and push website to gh-pages   
+  exit
+fi 
 ###############################################
 function mysafetest {
     "$@"
@@ -28,7 +46,10 @@ mysafetest cd $ANTsRdoc
 # then to build the html, type: 
 # 
 mysafetest make html
+if [[ $option -eq 0 ]] ; then exit ; fi 
 mysafetest git commit -a -m "WIP: prepping for website update"
+mysafetest git push origin master
+if [[ $option -eq 1 ]] ; then exit ; fi 
 mysafetest git checkout gh-pages
 mysafetest cd .. 
 mysafetest cp -r doc/build/html/* .
