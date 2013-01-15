@@ -10,51 +10,30 @@ endif( NOT CMAKE_BUILD_TYPE )
 #   require   return static_cast<TTarget>(x); to be implemented rather 
 #   than the dynamic_cast
 
-# if 'ITK_DIR' is not specified by user, superbuild ITK
-if( NOT ITK_DIR )
-  ExternalProject_Add( ITK
-    TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/tmp 
-    STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/stamp
-    DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
-    GIT_REPOSITORY http://itk.org/ITK.git # using http instead of git so ITK can be donwload behind a firewall
-    GIT_TAG e9861608b83f48ff67015f552fd86f9611ed3af6  # Dec 6 
-#    GIT_TAG 2a5f945a6313e6d304a32f0a2567a0a127f39722 # Jul 24, 2012
-    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-src
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
-               -D BUILD_SHARED_LIBS=ON # R requires shared objects
-	       -D BUILD_TESTING=OFF # reduces build time
-	       -D BUILD_EXAMPLES=OFF # reduces build time
-   #cmakedefine NDEBUG 
-    BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-build
-    INSTALL_COMMAND "" )
-  set( ITK_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ITK/ITK-build )
-  set( ANTsR_DEPENDSON_ITK ITK ) # set when ITK is superbuilt so that ITK is superbuilt prior to ANTsR
-  set( ANTS_DEPENDSON_ITK ITK ) # set when ITK is superbuilt so that ITK is superbuilt prior to ANTS
-endif( NOT ITK_DIR )
-
 # if 'ANTS_DIR' is not specified by user, superbuild ANTS
 if( NOT ANTS_DIR )
   ExternalProject_Add( ANTS
-    DEPENDS ${ANTS_DEPENDSON_ITK} # has the value 'ITK' when ITK is superbuilt; is not set otherwise
+#    DEPENDS ${ANTS_DEPENDSON_ITK} # has the value 'ITK' when ITK is superbuilt; is not set otherwise
     TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/tmp 
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
-#    SVN_REPOSITORY https://advants.svn.sourceforge.net/svnroot/advants/branches/image_passing
-#    SVN_REVISION -r 1547
-    GIT_REPOSITORY http://github.com/stnava/ANTS.git 
-    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
-#    GIT_TAG 6e530c1cb5a81d0aeaf519137ff76c2d6e80c468 
-    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
-    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
+    SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
+    SVN_REVISION -r 1714
+#    GIT_REPOSITORY http://github.com/stnava/ANTS.git 
+#    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
+   SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
+   CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
-	       -D USE_SYSTEM_ITK=ON # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
-	       -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
+	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
+#	       -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
   #cmakedefine NDEBUG 
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" )
   set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )
+  set( ITK_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build/ITKv4-build )
   set( ANTsR_DEPENDSON_ANTS ANTS ) # set when ANTS is superbuilt so that ANTS is superbuilt prior to ANTsR
+  set( ANTS_INC ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src/Examples/include )
 endif( NOT ANTS_DIR )
 
 # main project itself is superbuilt
@@ -64,6 +43,7 @@ ExternalProject_Add( ANTsR
   STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/stamp
   SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/ANTsR-src
   CMAKE_ARGS -D ANTS_DIR=${ANTS_DIR} # user specified ANTS-build directory or ANTS-build superbuilt from above
+             -D ANTS_INC=${ANTS_INC}  # ANTS include directory 
              -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
 	     -D RCPP_INCLUDE_DIR=${RCPP_INCLUDE_DIR} # Rcpp include directory
 	     -D RCPP_LIB_DIR=${RCPP_LIB_DIR} # Rcpp library directory

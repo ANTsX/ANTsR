@@ -38,8 +38,14 @@ endforeach( loop_var )
 find_package( ITK REQUIRED )
 include( ${ITK_USE_FILE} )
 
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#   message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
+
 # ANTS ; ANTS_DIR is set by caller
 include_directories( ${ANTS_DIR}/include )
+include_directories( ${ANTS_INC} )
 link_directories( ${ANTS_DIR}/lib )
 
 # all targets must have rpath installed so R can find the dependencies when loading them
