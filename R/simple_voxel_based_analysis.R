@@ -1,24 +1,71 @@
-simple_voxel_based_analysis <- function( dimensionality = 3, controlFileNames = c(),
-  experimentalFileNames = c(), maskFileName = "", outputPrefix = "./ANTsR_" )
+simple_voxel_based_analysis <- function( dimensionality = 3, imageFileNames = c(), predictors,
+  formula, testType = c( "lm", "student.t", "wilcox" ), maskFileName = "", outputPrefix = "./ANTsR" )
 {
 
-# Check to see if there are more than one image per group
-numberOfControls <- length( controlFileNames )
-numberOfExperimentals <- length( experimentalFileNames )
+## Check input variables
 
-if( numberOfControls < 2 )
+if( missing( testType ) )
   {
-  cat( "The number of control files is less than 2.\n", sep = "" )
-  return;
+  stop( "'testType' missing" )
   }
-if( numberOfExperimentals < 2 )
+testType <- match.arg( testType, c( "lm", "student.t", "wilcox" ) )
+
+if( testType == "lm" )
   {
-  cat( "The number of experimental files is less than 2.\n", sep = "" )
-  return;
+  if( missing( formula ) )
+    {
+    stop( "A formula must be specified for testType = 'lm'." )
+    }
+  if( missing( predictors ) )
+    {
+    stop( "'predictors' missing" )
+    }
+  if( !is.data.frame( predictors ) )
+    {
+    stop( "Expected data frame for 'predictors' with 'lm' testing." );
+    }
+  }
+else
+  {
+  if( missing( predictors ) )
+    {
+    stop( "'predictors' missing" )
+    }
+  if( is.vector( predictors ) || ( is.matrix( predictors ) && ncol( predictors ) == 1 ) )
+    {
+    predictors <- as.data.frame( predictors )
+    }
+  colnames( predictors ) <- c( "diagnosis" )
+  formula <- as.formula( response ~ 1 + diagnosis )
+  }
+predictorNames <- colnames( predictors )
+
+# Check to make sure that the predictor data frame has the same variable names
+#   as the formula.
+responseVariableName <- all.vars( formula )[attr( terms( formula ), "response" )]
+variables <- attr( terms( formula ), "variables" )
+tmp <- c();
+for( i in 3:length( variables ) )
+  {
+  tmp <- append( tmp, variables[[i]] );
+  }
+variables <- tmp
+
+if( !all( variables %in% predictorNames ) )
+  {
+  stop( "The predictor column names and formula names do not match." );
   }
 
-cat( "******* Conducting simple voxel-based analysis (controls = ", numberOfControls,
-  ", experimentals = ", numberOfExperimentals, "). *******\n\n", sep = '' )
+numberOfImages <- length( imageFileNames )
+if( numberOfImages != nrow( predictors ) )
+  {
+  stop( "The number of predictor values does not match the number of images.\n" )
+  }
+
+## Do the actual data prep and testing
+
+cat( "******* Conducting ", testType, " voxel-based analysis (number of images = ",
+  numberOfImages, "). *******\n\n", sep = '' )
 
 # Read the mask and place the masked voxels in the images in a matrix
 
@@ -26,30 +73,26 @@ cat( "Reading mask file ", maskFileName, "\n\n", sep = '' )
 mask <- antsImageRead( maskFileName, dimensionality , pixeltype = 'unsigned int' )
 numberOfForegroundVoxels <- sum( c( as.array( mask ) ) )
 
-dataMatrix <- matrix( data = NA, nrow = numberOfControls+numberOfExperimentals,
-  ncol = numberOfForegroundVoxels )
+dataMatrix <- matrix( data = NA, nrow = numberOfImages, ncol = numberOfForegroundVoxels )
 
-allFileNames <- c( controlFileNames, experimentalFileNames )
-for( i in seq( 1, length( allFileNames ) ) )
+for( i in 1:length( imageFileNames ) )
   {
-  if( i <= numberOfControls )
+  predictorString <- paste( predictorNames[1], '=', predictors[i,1], sep = '' )
+  if( ncol( predictors ) >= 2 )
     {
-    cat( "Reading control image ", allFileNames[i], " (", i, " of ",
-      numberOfControls, ").\n", sep = '' )
+    for( j in 2:ncol( predictors ) )
+      {
+      predictorString <- paste( predictorString, ', ', predictorNames[j], '=', predictors[i,j], sep = '' )
+      }
     }
-  else
-    {
-    cat( "Reading experimental image ", allFileNames[i], " (", i - numberOfControls,
-      " of ", numberOfExperimentals, ").\n", sep = '' )
-    }
-  subjectImage <- antsImageRead( allFileNames[i], dimensionality )
+
+  cat( "Reading image ", imageFileNames[i], " (", i, " of ", numberOfImages, ", ",
+    predictorString, ").\n", sep = '' )
+  subjectImage <- antsImageRead( imageFileNames[i], dimensionality )
   dataMatrix[i,] <- as.array( subjectImage[mask != 0] )
   }
 
 # Perform the t-testing.  Monitor progress.
-predictor <- c( rep( 1, numberOfControls ), rep( -1, numberOfExperimentals ) )
-testFormula <- ( values ~ 1 + predictor )
-
 tValues<-rep( NA, numberOfForegroundVoxels )
 pValues<-rep( NA, numberOfForegroundVoxels )
 
@@ -58,10 +101,44 @@ cat( "\nTesting...\n" );
 progress <- txtProgressBar( min = 0, max = numberOfForegroundVoxels, style = 3 )
 for( i in 1:numberOfForegroundVoxels )
   {
-  values <- dataMatrix[,i]
-  results <- summary( lm( testFormula ) )
-  tValues[i] <- results$coef[2,3]
-  pValues[i] <- results$coef[2,4]
+  testData <- cbind( dataMatrix[,i], predictors );
+  colnames( testData ) <- c( responseVariableName, predictorNames );
+
+  if( testType == "student.t" )
+    {
+    testResults <- try( t.test( formula = formula, data = testData ) )
+    if( inherits( testResults, "try-error" ) )
+      {
+      tValues[i] <- NA
+      pValues[i] <- NA
+      }
+    else
+      {
+      tValues[i] <- testResults$statistic
+      pValues[i] <- testResults$p.value
+      }
+    }
+  else if( testType == "wilcox" )
+    {
+    testResults <- try( wilcox.test( formula = formula, data = testData ) )
+    if( inherits( testResults, "try-error" ) )
+      {
+      tValues[i] <- NA
+      pValues[i] <- NA
+      }
+    else
+      {
+      tValues[i] <- testResults$statistic
+      pValues[i] <- testResults$p.value
+      }
+    }
+  else  # if( testType == "lm" )
+    {
+    testResults <- summary( lm( formula = formula, data = testData ) )
+    tValues[i] <- testResults$coef[2,3]
+    pValues[i] <- testResults$coef[2,4]
+    }
+
   if( i %% 50 == 0 )
     {
     setTxtProgressBar( progress, i )
@@ -70,7 +147,14 @@ for( i in 1:numberOfForegroundVoxels )
 close( progress );
 cat( "Done.\n", sep = '' )
 
-cat( "\nWriting output.\n" )
+if( testType == 'lm' )
+  {
+  cat( "\nWriting output on predictor = ", predictorNames[1], ".\n", sep = '' )
+  }
+else
+  {
+  cat( "\nWriting output.\n" )
+  }
 
 tImage <- antsImageClone( mask, "float" )
 pImage <- antsImageClone( mask, "float" )
