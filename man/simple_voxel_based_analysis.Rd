@@ -10,8 +10,8 @@ Student's t-test performed at each voxel within a specified mask region to deter
 }
 
 \usage{
-simple_voxel_based_analysis( dimensionality = 3, controlFileNames = c(),
-  experimentalFileNames = c(), maskFileName = "", outputPrefix = "./ANTsR_" )
+simple_voxel_based_analysis <- function( dimensionality = 3, imageFileNames = c(), predictors,
+  formula, testType = c( "lm", "student.t", "wilcox" ), maskFileName = "", outputPrefix = "./ANTsR" )
 }
 
 \arguments{
