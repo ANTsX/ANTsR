@@ -38,17 +38,23 @@ endforeach( loop_var )
 find_package( ITK REQUIRED )
 include( ${ITK_USE_FILE} )
 
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#   message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
+
 # ANTS ; ANTS_DIR is set by caller
 include_directories( ${ANTS_DIR}/include )
+include_directories( ${ANTS_INC} )
 link_directories( ${ANTS_DIR}/lib )
 
 # all targets must have rpath installed so R can find the dependencies when loading them
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
 # ANTsR targets
-#add_library(RantsApplyTransforms MODULE ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx)
-#target_link_libraries(RantsApplyTransforms ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsApplyTransforms )
-#install( TARGETS RantsApplyTransforms DESTINATION . )
+add_library(RantsApplyTransforms MODULE ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx)
+target_link_libraries(RantsApplyTransforms ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsApplyTransforms )
+install( TARGETS RantsApplyTransforms DESTINATION . )
 
 #add_library(RANTS MODULE ${ANTsR_SOURCE_DIR}/src/ANTS.cxx)
 #target_link_libraries(RANTS ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTS )
@@ -70,9 +76,9 @@ add_library(RantsMotionCorr MODULE ${ANTsR_SOURCE_DIR}/src/antsMotionCorr.cxx)
 target_link_libraries(RantsMotionCorr ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsMotionCorr )
 install( TARGETS RantsMotionCorr DESTINATION . )
 
-#add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
-#target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
-#install( TARGETS RantsRegistration DESTINATION . )
+add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
+target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
+install( TARGETS RantsRegistration DESTINATION . )
 
 #add_library(RANTSUseDeformationFieldToGetAffineTransform MODULE ${ANTsR_SOURCE_DIR}/src/ANTSUseDeformationFieldToGetAffineTransform.cxx)
 #target_link_libraries(RANTSUseDeformationFieldToGetAffineTransform ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTSUseDeformationFieldToGetAffineTransform )
