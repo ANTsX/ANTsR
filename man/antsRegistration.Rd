@@ -14,10 +14,6 @@ antsRegistration( fixed , moving , typeofTransform = c("Rigid","Affine","SyN"), 
 }
 
 \arguments{
-\item{imageDimension 2|3|4}{
-Number of dimensions of the input image
-}
-
 \item{fixed}{
 fixed image to which we register the moving image.
 }
@@ -50,8 +46,13 @@ Shrinidhi KL, Avants BB
 # will give the full form of help
 antsRegistration( "-h")
 # example 1 - simplified
-antsRegistration(fixed=img1,moving=img2,typeofTransform="Affine",outprefix="./test")
+antsRegistration(fixed=img1,moving=img2,
+  typeofTransform="Affine",outprefix="./test")
 # example 2 - full 
-antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1","-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
+antsRegistration( "-d", "2", "-m", 
+  "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]",
+  "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", 
+  "3x2x1x0", "-f", "4x3x2x1","-u", "1", "-o", 
+  "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 }
 }
