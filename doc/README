@@ -48,7 +48,7 @@ mysafetest cd $ANTsRdoc
 mysafetest make html
 if [[ $option -eq 0 ]] ; then exit ; fi 
 mysafetest git commit -a -m "WIP: prepping for website update"
-mysafetest git push origin master
+git push origin master
 if [[ $option -eq 1 ]] ; then exit ; fi 
 mysafetest git checkout gh-pages
 mysafetest cd .. 
