@@ -10,7 +10,7 @@ Register a pair of images either through the full or simplified interface.  Uses
 }
 
 \usage{
-antsRegistration( fixed , moving , typeofTransform = c("Rigid","Affine","SyN"),  outputPrefix="./antsRegOut")
+antsRegistration( fixed , moving , typeofTransform = c("Rigid","Affine","SyN"),  outprefix="./antsRegOut")
 }
 
 \arguments{
@@ -26,14 +26,14 @@ moving image to be mapped to fixed space.
 Either a one stage rigid/affine mapping or a 2-stage affine+syn mapping.  Mutual information metric by default.
 }
 
-\item{outPrefix}{
+\item{outprefix}{
 output will be named with this prefix.
 }
 
 }
 
 \value{
-0 -- Success\cr
+outputs a list containing warped images and transforms.
 1 -- Failure
 }
 
@@ -45,10 +45,13 @@ Shrinidhi KL, Avants BB
 \dontrun{
 # will give the full form of help
 antsRegistration( "-h")
-# example 1 - simplified
-antsRegistration(fixed=img1,moving=img2,
+# example 1 - simplified, uses antsImages for I/O
+antsRegOut<-antsRegistration(fixed=img1,moving=img2,
   typeofTransform="Affine",outprefix="./test")
-# example 2 - full 
+# example 2
+  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"),  outprefix="./Z")
+  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms)
+# example 3 - full access, only uses file-based I/O 
 antsRegistration( "-d", "2", "-m", 
   "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]",
   "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", 

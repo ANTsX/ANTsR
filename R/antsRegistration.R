@@ -1,6 +1,6 @@
 antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outprefix="", ... ){
   numargs<-nargs()
-  if ( numargs < 2 )
+  if ( numargs < 2 | missing(fixed) | missing(moving) | missing( typeofTransform ) | missing( outprefix) )
     {
     cat("for simplified mode: \n")
     cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"SyN\"),  outputPrefix=\"./antsRegOut\" \n")
@@ -15,6 +15,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
   if ( ! is.character(fixed) ) {
     if ( fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage" )
       {
+      inpixeltype<-fixed@pixeltype
       ttexists <- FALSE
       if ( typeofTransform == "Rigid"  |
            typeofTransform == "Affine" |
@@ -25,25 +26,36 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
       if ( ttexists  )
         {
         cat("use simple parameterization \n")
-        ffn<-paste(outprefix,antsrmakeRandomString(),".nii.gz",sep='')
-        mfn<-paste(outprefix,antsrmakeRandomString(),".nii.gz",sep='')
-        antsImageWrite(fixed,ffn)
-        antsImageWrite(moving,mfn) #
+        moving<-antsImageClone(moving,"double")
+        fixed<-antsImageClone(fixed,"double")
+        warpedfixout<-antsImageClone(moving);
+        warpedmovout<-antsImageClone(fixed);
+        f<-substr( int_antsProcessArguments( list( fixed )  ) , 11 , 21 )
+        m<-substr( int_antsProcessArguments( list( moving ) ) , 11 , 21 )
+        wfo<-substr( int_antsProcessArguments( list( warpedfixout ) ) , 11 , 21 )
+        wmo<-substr( int_antsProcessArguments( list( warpedmovout ) ) , 11 , 21 )
         if ( typeofTransform == "SyN"  ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",ffn,",",mfn,",1]",sep=''),"-m",paste("mattes[",ffn,",",mfn,",1,32,regular,0.2]",sep=''),"-t","Affine[0.25]","-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-m",paste("mattes[",ffn,",",mfn,",1,32]",sep=''),"-t",paste(typeofTransform,"[0.25,3,0]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o", paste("[",outprefix,",",outprefix,".nii.gz,",outprefix,"inv.nii.gz]",sep=''))
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Affine[0.25]","-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-m",paste("mattes[",f,",",m,",1,32]",sep=''),"-t",paste(typeofTransform,"[0.25,3,0]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o", paste("[",outprefix,",",wmo,",",wfo,"]",sep=''))
+        fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
+        invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
         }
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",ffn,",",mfn,",1]",sep=''),"-m",paste("mattes[",ffn,",",mfn,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o", paste("[",outprefix,",",outprefix,".nii.gz,",outprefix,"inv.nii.gz]",sep=''))
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
+        fwdtransforms<-c( paste(outprefix,"0GenericAffine.mat") )
+        invtransforms<-c( paste(outprefix,"0GenericAffine.mat") )
         }
         .Call( "antsRegistration", int_antsProcessArguments( c(args) ) ) ;
-        unlink(ffn) 
-        unlink(mfn) 
-        return(0)
+#        unlink(ffn) 
+#        unlink(mfn)
+#        outvar<-basename(outprefix)
+#        outpath<-dirname(outprefix)
+#        txlist<-list.files( path = outpath, pattern =  glob2rx( paste(outvar,"*",sep='') ), full.names = TRUE, recursive = FALSE )
+        return( list( warpedmovout=antsImageClone(warpedmovout,inpixeltype), warpedfixout=antsImageClone(warpedfixout,inpixeltype), fwdtransforms=fwdtransforms, invtransforms=invtransforms  ) )
         }
       if ( ! ttexists  ) cat("Problem in arg list \n see usage by calling antsRegistration() w/o arguments \n")
     }
     return(0)
-    }
+  }
   .Call( "antsRegistration", int_antsProcessArguments( c(args) ) ) ;
 }
 

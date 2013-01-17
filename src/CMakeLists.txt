@@ -18,7 +18,7 @@ if( NOT ANTS_DIR )
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
-    SVN_REVISION -r 1714
+    SVN_REVISION -r 1739
 #    GIT_REPOSITORY http://github.com/stnava/ANTS.git 
 #    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
@@ -26,8 +26,7 @@ if( NOT ANTS_DIR )
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
-#	       -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
-  #cmakedefine NDEBUG 
+ #cmakedefine NDEBUG 
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" )
   set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )
@@ -44,7 +43,7 @@ ExternalProject_Add( ANTsR
   SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTsR/ANTsR-src
   CMAKE_ARGS -D ANTS_DIR=${ANTS_DIR} # user specified ANTS-build directory or ANTS-build superbuilt from above
              -D ANTS_INC=${ANTS_INC}  # ANTS include directory 
-             -D ITK_DIR=${ITK_DIR} # user specified ITK-build directory or ITK-build superbuilt from above
+             -D ITK_DIR=${ITK_DIR} # ANTS ITK-build directory
 	     -D RCPP_INCLUDE_DIR=${RCPP_INCLUDE_DIR} # Rcpp include directory
 	     -D RCPP_LIB_DIR=${RCPP_LIB_DIR} # Rcpp library directory
              -D R_INCLUDE_DIR=${R_INCLUDE_DIR} # R include directory
