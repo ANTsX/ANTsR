@@ -58,9 +58,11 @@ See the full man pages for each function below from within R via ?functionname
    
    Rd_N3BiasFieldCorrection.rst
 
-   Rd_SmoothImage.rst 
+   Rd_SmoothImage.rst
 
    Rd_antsRegistration.rst
+
+   Rd_antsApplyTransforms.rst
 
 ..   Rd_cbf.rst
    
