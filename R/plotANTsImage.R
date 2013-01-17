@@ -145,8 +145,12 @@ if ( is.na(functional) )
   thresh<-"1.e9x1.e9"
 }
 # .................................................
-img<-as.array(myantsimage) # the background/template image 
+img<-as.array(myantsimage) # the background/template image
 labimg<-as.array(functional) # the label image 
+if ( imagedim == 2 ) {
+  img<-rotate90.matrix( img ) 
+  labimg<-rotate90.matrix( labimg ) 
+}
 perms<-c(1,2,3)
 axis<-as.numeric(axis)
 if ( axis == 1 ) { print("axis-1") ; perms<-c(2,3,1) }
