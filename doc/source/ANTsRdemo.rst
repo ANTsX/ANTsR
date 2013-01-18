@@ -14,3 +14,6 @@ See the ANTsR/demo folder for the full source of these examples.
 
    restingstatefMRIconnectivity.rst
 
+   networkanalysisfMRI.rst
+
+   antsSegmentation.rst 
