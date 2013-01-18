@@ -51,8 +51,10 @@ if( is.character( img ) )
       return( NULL )
     }
   img <- antsImageRead( img , dimension = 4 , "double"  )
+  inpixeltype<-img@pixeltype
 }else if( class( img ) == "antsImage" )
 {
+  inpixeltype<-img@pixeltype
   if( img@pixeltype != "double" )
     {
     print( "'img' must have pixeltype  'double' " )
@@ -117,5 +119,5 @@ if ( moreaccurate == TRUE ) {
 if ( moreaccurate == FALSE ) {
 antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.02 ) , t = "Affine[0.1]" , i = 3 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )
 }
-return( list( moco_img = antsImageClone( moco_img, "float" ) , moco_params = moco_params , moco_avg_img =  antsImageClone( avg_img, "float") ) )
+return( list( moco_img = antsImageClone( moco_img, inpixeltype ) , moco_params = moco_params , moco_avg_img =  antsImageClone( avg_img, inpixeltype ) ) )
 }

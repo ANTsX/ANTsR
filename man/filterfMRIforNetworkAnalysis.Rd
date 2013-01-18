@@ -38,7 +38,8 @@ Avants BB
 
 \examples{
 \dontrun{
-myres<-filterfMRIforNetworkAnalysis("s3_date3_asl.nii.gz",tr=4,0.01,0.1,"ASLCBF",smoother=1,"processing/test")
+
+myres<-filterfMRIforNetworkAnalysis("s3_date3_asl.nii.gz",tr=4,0.01,0.1,"ASLCBF",smoother=1,"test")
 
 in myres, you have:
 
