@@ -13,9 +13,9 @@ getANTsRData<- function( fileid )
                   KK="http://placid.nlm.nih.gov/download?items=10766",
                   ADNI="http://placid.nlm.nih.gov/download?folders=238"
             )
-  myext<-"nii.gz"
-  if ( fileid == "ADNI" ) myext<-"zip"
-  tfn<-tempfile( pattern = "antsr", tmpdir = tempdir(), fileext = myext )
+  myext<-".nii.gz"
+  if ( fileid == "ADNI" ) myext<-".zip"
+  tfn<-tempfile( pattern = "antsr", tmpdir = tempdir(), fileext = myext ) 
   download.file(myurl, tfn )
   if ( fileid == "ADNI" ) return( tfn )
   # could use md5sum 
