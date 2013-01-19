@@ -6,8 +6,8 @@ Date: 2012-02-01
 Author: Shrinidhi KL, Brian Avants, ANTS-developers
 Maintainer: Shrinidhi KL <FAKEID@NOWHERE.COM>
 Description: Package provides access to ANTs routines in R
-License: GPL (>=2)
+License: GPL ( > 1)
 LazyLoad: yes
-Depends: Rcpp (>= 0.9.7.2) , methods, signal , parallel , timeSeries , mFilter , MASS , doParallel, robust, magic, knitr, pixmap, rgl, misc3d
+Depends: Rcpp ( > 0.9.7.1 ) , methods, signal , parallel , timeSeries , mFilter , MASS , doParallel, robust, magic, knitr, pixmap, rgl, misc3d
 Suggests: XML , bitops
 LinkingTo: Rcpp
