@@ -2,10 +2,35 @@
 Getting started with ANTsR
 =========================
 
-User Method: from within R
-==================
+Brief Introduction to using ANTs in R
+---------------------------------------------
 
-R
+Once installation is successful, the ANTsR package can be used in R as follows:
+
+Load the package
+
+> library( ANTsR )
+
+List the available functions in the namespace ANTsR
+
+> ANTsR::<double-tab>
+
+Use any function in the core ANTS namespace by providing arguments
+almost exactly as in the command-line version.
+
+For example, call the antsImageRead routine and some standard ANTs functions.
+
+   antsimage<-antsImageRead( "r16slice.nii.gz", 2 )
+
+   imgn3<-antsImageClone(antsimage)
+
+   N3BiasFieldCorrection(list(antsimage@dimension,img,imgn3,'4'))
+
+   Atropos( list( d = 2 , a = imgn3 , m = "[0.2,1x1]" , o =  seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = mask) )
+
+
+User Installation Method: from within R
+---------------------------------------------
 
 install.packages('devtools')
 
@@ -14,8 +39,8 @@ library( devtools )
 install_github('ANTsR','stnava')
 
 
-Developer Method: from command line
-=========================
+Developer Installation Method: from command line
+---------------------------------------------
 
 Clone or Pull ANTsR from this repository as follows:
 
@@ -42,21 +67,7 @@ In R, you can do:
     
      R>  install.packages( 'signal', dependencies=TRUE ) 
 
-Once installation is successful, the ANTsR package can be used in R as follows:
-
-Load the package
-
-> library( ANTsR )
-
-List the available functions in the namespace ANTsR
-
-> ANTsR::<double-tab>
-
-Use any function in the namespace by providing arguments exactly same as you provide to their command-line version.
-
-For example, call the antsImageRead routine
-
->  antsimage<-antsImageRead( "r16slice.nii.gz", 2 )
+to get packages.
 
 .. image:: _static/ANTSWarpImageMultiTransform.png
   :width: 600 px
