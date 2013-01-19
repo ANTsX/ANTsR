@@ -6,9 +6,7 @@ First take a quick look at your data.
 .. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 library(ANTsR)
 pixtype<-"double" # needed for call to antsMotionCorr
-fn<-"KKI2009-01-fMRI.nii.gz" # 4D image 
-glb <- glob2rx(paste(fn, sep = ""))
-fn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)[1]
+fn<-getANTsRData("KK") # 4D image 
 img<-antsImageRead(fn,4,pixtype)
 #' get the average to look at it in 3D
 avg <- new( "antsImage" , dimension = 3 , pixeltype=img@pixeltype  )
