@@ -1,12 +1,17 @@
 antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outprefix="", ... ){
   numargs<-nargs()
-  if ( numargs < 2 | missing(fixed) | missing(moving) | missing( typeofTransform ) | missing( outprefix) )
+  if ( numargs == 1 & typeof(fixed) == "list" )
+    {
+    .Call( "antsRegistration", int_antsProcessArguments( c(fixed) ) )
+    return( 0 )
+    }
+  if ( numargs < 1 | missing(fixed) | missing(moving) | missing( typeofTransform ) | missing( outprefix) )
     {
     cat("for simplified mode: \n")
     cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"SyN\"),  outputPrefix=\"./antsRegOut\" \n")
     cat("")
     cat("For full mode: use standard ants call , e.g. : \n")
-    cat(" ANTsR::antsRegistration( \"-d\", \"2\", \"-m\", \"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", \"-t\", \"affine[1.0]\", \"-c\", \"2100x1200x1200x0\", \"-s\", \"3x2x1x0\", \"-f\", \"4x3x2x1\",\"-u\", \"1\", \"-o\", \"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) \n")
+    cat(" ANTsR::antsRegistration( list( d=2,m=\"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", t=\"affine[1.0]\", c=\"2100x1200x1200x0\",  s=\"3x2x1x0\", f=\"4x3x2x1\", u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n")
     cat("full help: \n")
     .Call( "antsRegistration", int_antsProcessArguments( c( list("--help")) ) );
     return(0);

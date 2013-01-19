@@ -59,10 +59,6 @@ antsRegOut<-antsRegistration(fixed=img1,moving=img2,
   plotANTsImage(fi) 
   plotANTsImage(mywarpedimage) 
 # example 3 - full access, only uses file-based I/O 
-antsRegistration( "-d", "2", "-m", 
-  "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]",
-  "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", 
-  "3x2x1x0", "-f", "4x3x2x1","-u", "1", "-o", 
-  "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
+  antsRegistration( list( d=2,m="mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", t="affine[1.0]", c="2100x1200x1200x0",  s="3x2x1x0", f="4x3x2x1", u="1", o="[xtest,xtest.nii.gz,xtest_inv.nii.gz]" ) )
 }
 }

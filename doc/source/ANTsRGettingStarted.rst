@@ -32,7 +32,7 @@ For example, call the antsImageRead routine and some standard ANTs functions.
 User Installation Method: from within R
 ---------------------------------------------
 
-install.packages('devtools')
+install.packages(c('devtools','MASS','Rcpp','methods','signal','parallel','timeSeries','mFilter','MASS','robust','magic','knitr','pixmap','rgl','misc3d','lme4'))
 
 library( devtools )
 
@@ -41,6 +41,8 @@ install_github('ANTsR','stnava')
 
 Developer Installation Method: from command line
 ---------------------------------------------
+
+See the libraries listed above and install them.
 
 Clone or Pull ANTsR from this repository as follows:
 
