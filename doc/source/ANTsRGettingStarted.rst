@@ -2,6 +2,21 @@
 Getting started with ANTsR
 =========================
 
+User Method: from within R
+==================
+
+R
+
+install.packages('devtools')
+
+library( devtools )
+
+install_github('ANTsR','stnava')
+
+
+Developer Method: from command line
+=========================
+
 Clone or Pull ANTsR from this repository as follows:
 
       $ git clone https://github.com/stnava/ANTsR.git
