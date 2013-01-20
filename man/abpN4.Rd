@@ -10,7 +10,8 @@ Truncate outlier intensities and bias correct with N4 with or without mask and w
 }
 
 \usage{
-abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 )  , mask = NA , weightimg=NA, usen3 = FALSE )
+abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 )  ,
+   mask = NA , weightimg=NA, usen3 = FALSE )
 }
 
 \arguments{

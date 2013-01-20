@@ -148,8 +148,8 @@ if ( is.na(functional) )
 img<-as.array(myantsimage) # the background/template image
 labimg<-as.array(functional) # the label image 
 if ( imagedim == 2 ) {
-  img<-rotate90.matrix( img ) 
-  labimg<-rotate90.matrix( labimg ) 
+  img<-rotate270.matrix( img ) 
+  labimg<-rotate270.matrix( labimg ) 
 }
 perms<-c(1,2,3)
 axis<-as.numeric(axis)
