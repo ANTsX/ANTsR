@@ -18,7 +18,7 @@ if( NOT ANTS_DIR )
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
-    SVN_REVISION -r 1744
+    SVN_REVISION -r 1745
 #    GIT_REPOSITORY http://github.com/stnava/ANTS.git 
 #    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
