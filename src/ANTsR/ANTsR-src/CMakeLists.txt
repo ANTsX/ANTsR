@@ -232,9 +232,9 @@ add_library(RN3BiasFieldCorrection MODULE ${ANTsR_SOURCE_DIR}/src/N3BiasFieldCor
 target_link_libraries(RN3BiasFieldCorrection ${RCPP_LIB_DIR} ${R_LIB_DIR} l_N3BiasFieldCorrection )
 install( TARGETS RN3BiasFieldCorrection DESTINATION . )
 
-#add_library(RN4BiasFieldCorrection MODULE ${ANTsR_SOURCE_DIR}/src/N4BiasFieldCorrection.cxx)
-#target_link_libraries(RN4BiasFieldCorrection ${RCPP_LIB_DIR} ${R_LIB_DIR} l_N4BiasFieldCorrection )
-#install( TARGETS RN4BiasFieldCorrection DESTINATION . )
+add_library(RN4BiasFieldCorrection MODULE ${ANTsR_SOURCE_DIR}/src/N4BiasFieldCorrection.cxx)
+target_link_libraries(RN4BiasFieldCorrection ${RCPP_LIB_DIR} ${R_LIB_DIR} l_N4BiasFieldCorrection )
+install( TARGETS RN4BiasFieldCorrection DESTINATION . )
 
 #add_library(RPasteImageIntoImage MODULE ${ANTsR_SOURCE_DIR}/src/PasteImageIntoImage.cxx)
 #target_link_libraries(RPasteImageIntoImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_PasteImageIntoImage )

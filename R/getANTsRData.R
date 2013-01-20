@@ -11,13 +11,18 @@ getANTsRData<- function( fileid )
                   r16="http://placid.nlm.nih.gov/download?items=10764",
                   r64="http://placid.nlm.nih.gov/download?items=10765",
                   KK="http://placid.nlm.nih.gov/download?items=10766",
-                  ADNI="http://placid.nlm.nih.gov/download?folders=238"
+                  ADNI="http://placid.nlm.nih.gov/download?folders=238",
+                  K1="http://www.nitrc.org/frs/downloadlink.php/2201"
             )
   myext<-".nii.gz"
-  if ( fileid == "ADNI" ) myext<-".zip"
-  tfn<-tempfile( pattern = "antsr", tmpdir = tempdir(), fileext = myext ) 
+  if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
+  tdir<-tempdir()
+  tfn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = myext ) 
   download.file(myurl, tfn )
-  if ( fileid == "ADNI" ) return( tfn )
+  if ( fileid == "ADNI" | fileid == "K1"  ) {
+    unzip( tfn )
+    return( tfn ) 
+  }
   # could use md5sum 
   mymd5<-switch( fileid ,
                   r16="37aaa33029410941bf4affff0479fa18",
