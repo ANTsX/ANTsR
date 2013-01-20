@@ -6,11 +6,11 @@ N4 with previously set parameters based on ants brain processing strategies.
 }
 
 \description{
-Truncate outlier intensities and bias correct with N4
+Truncate outlier intensities and bias correct with N4 with or without mask and weight images. 
 }
 
 \usage{
-abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 )  , mask = NA , usen3 = FALSE )
+abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 )  , mask = NA , weightimg=NA, usen3 = FALSE )
 }
 
 \arguments{
@@ -24,6 +24,10 @@ Params to TruncateImageIntensity in ImageMath
 
 \item{mask}{
 optional antsImage mask
+}
+
+\item{weightimage}{
+optional antsImage weighting
 }
 
 \item{usen3}{
