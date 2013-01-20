@@ -1,16 +1,23 @@
-
 #include<vector>
 #include<string>
 #include<Rcpp.h>
 #include "ants.h"
+#include "antsr.h"
 
 RcppExport SEXP antsApplyTransforms( SEXP r_args )
 try
 {
-  return Rcpp::wrap( ants::antsApplyTransforms( Rcpp::as< std::vector<std::string> >( r_args ) , &Rcpp::Rcout ) ) ;
+  std::vector< std::string > args = Rcpp::as< std::vector< std::string > >( r_args ) ;
+  std::transform( args.begin() , args.end() , args.begin() , process_pointers ) ;
+  if( insert_commas( args , args.begin() ) )
+    {
+      return Rcpp::wrap( 1 ) ;
+    }
+  return Rcpp::wrap( ants::antsApplyTransforms( args , &Rcpp::Rcout ) ) ;
 }
  catch( const std::exception& exc )
    {
      Rcpp::Rcout<< exc.what() << std::endl ;
-     return Rcpp::wrap( EXIT_FAILURE ) ;
+     return Rcpp::wrap( 1 ) ;
    }
+

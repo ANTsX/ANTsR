@@ -26,15 +26,15 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         fixed<-antsImageClone(fixed,"double")
         moving<-antsImageClone(moving,"double")
         warpedmovout<-antsImageClone(fixed);
-        f<-substr( int_antsProcessArguments( list( fixed )  ) , 11 , 21 )
-        m<-substr( int_antsProcessArguments( list( moving ) ) , 11 , 21 )
-        wmo<-substr( int_antsProcessArguments( list( warpedmovout ) ) , 11 , 21 )
+        f<-fixed
+        m<-moving
+        wmo<-warpedmovout
         mytx<-list()
         for ( i in c(1:length(transformlist)) ) 
           {
           mytx<-list( mytx,"-t",transformlist[ i ])
           }
-        args<-list("-d",as.character(fixed@dimension),"-i",m,"-o",wmo,"-r",f,"-n",interpolator,unlist( mytx ))
+        args<-list( d=fixed@dimension, i=m, o=wmo, r=f, n=interpolator,unlist( mytx ))
         .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
         return( antsImageClone(warpedmovout,inpixeltype) )
         }

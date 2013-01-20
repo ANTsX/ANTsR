@@ -49,11 +49,10 @@ antsRegistration( "-h")
 antsRegOut<-antsRegistration(fixed=img1,moving=img2,
   typeofTransform="Affine",outprefix="./test")
 # example 2
-  fn1<-list.files(path="../../", pattern = glob2rx("r16slice.nii.gz", trim.head=TRUE),full.names = T,recursive=T)
-  fn2<-list.files(path="../../", pattern = glob2rx("r64slice.nii.gz", trim.head=TRUE),full.names = T,recursive=T)
-  fi<-antsImageRead(fn1[1],2)
-  mi<-antsImageRead(fn2[1],2)
-  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"),  outprefix="/tmp/Z")
+  fi<-antsImageRead( getANTsRData('r16') ,2)
+  mi<-antsImageRead( getANTsRData('r64') ,2)
+  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"),
+    outprefix=paste(tempdir(),"/Z",sep=''))
   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms)
   par(mfrow=c(1,2))
   plotANTsImage(fi) 
