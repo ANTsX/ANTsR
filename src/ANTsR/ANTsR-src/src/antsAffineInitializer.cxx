@@ -5,7 +5,7 @@
 #include "ants.h"
 #include "antsr.h"
 
-RcppExport SEXP antsRegistration( SEXP r_args )
+RcppExport SEXP antsAffineInitializer( SEXP r_args )
 try
 {
   std::vector< std::string > args = Rcpp::as< std::vector< std::string > >( r_args ) ;
@@ -14,7 +14,7 @@ try
     {
       return Rcpp::wrap( 1 ) ;
     }
-  return Rcpp::wrap( ants::antsRegistration( args , &Rcpp::Rcout ) ) ;
+  return Rcpp::wrap( ants::antsAffineInitializer( args , &Rcpp::Rcout ) ) ;
 }
  catch( const std::exception& exc )
    {

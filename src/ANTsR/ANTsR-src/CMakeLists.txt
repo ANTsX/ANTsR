@@ -80,9 +80,9 @@ add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cx
 target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
 install( TARGETS RantsRegistration DESTINATION . )
 
-#add_library(RANTSUseDeformationFieldToGetAffineTransform MODULE ${ANTsR_SOURCE_DIR}/src/ANTSUseDeformationFieldToGetAffineTransform.cxx)
-#target_link_libraries(RANTSUseDeformationFieldToGetAffineTransform ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTSUseDeformationFieldToGetAffineTransform )
-#install( TARGETS RANTSUseDeformationFieldToGetAffineTransform DESTINATION . )
+add_library(RantsAffineInitializer MODULE ${ANTsR_SOURCE_DIR}/src/antsAffineInitializer.cxx)
+target_link_libraries(RantsAffineInitializer ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsAffineInitializer )
+install( TARGETS RantsAffineInitializer DESTINATION . )
 
 #add_library(RANTSUseLandmarkImagesToGetAffineTransform MODULE ${ANTsR_SOURCE_DIR}/src/ANTSUseLandmarkImagesToGetAffineTransform.cxx)
 #target_link_libraries(RANTSUseLandmarkImagesToGetAffineTransform ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ANTSUseLandmarkImagesToGetAffineTransform )

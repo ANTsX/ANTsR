@@ -35,10 +35,10 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
         fixed<-antsImageClone(fixed,"double")
         warpedfixout<-antsImageClone(moving);
         warpedmovout<-antsImageClone(fixed);
-        f<-substr( int_antsProcessArguments( list( fixed )  ) , 11 , 21 )
-        m<-substr( int_antsProcessArguments( list( moving ) ) , 11 , 21 )
-        wfo<-substr( int_antsProcessArguments( list( warpedfixout ) ) , 11 , 21 )
-        wmo<-substr( int_antsProcessArguments( list( warpedmovout ) ) , 11 , 21 )
+        f<-fixed
+        m<-moving
+        wfo<-warpedfixout
+        wmo<-warpedmovout 
         if ( typeofTransform == "SyN"  ) {
         args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Affine[0.25]","-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-m",paste("mattes[",f,",",m,",1,32]",sep=''),"-t",paste(typeofTransform,"[0.25,3,0]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o", paste("[",outprefix,",",wmo,",",wfo,"]",sep=''))
         fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
