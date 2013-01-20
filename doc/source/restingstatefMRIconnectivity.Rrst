@@ -14,6 +14,11 @@ antsMotionCorr( list( d = 3 , a = img , o = avg ) )
 #' look at the header to determine slices to display 
 ImageMath('4','na','PH',img)
 plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
+maskThresh <- 100000
+mask <- get_mask( avg , maskThresh , 1e9 )
+# check if the mask is ok
+plotANTsImage(myantsimage=avg,functional=mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
+# The mask looks fine ( does not have to be perfect ) so we proceed.
 .. ..
 
 The data looks ok so now convert the rsf image to a frequency filtered matrix.  
@@ -23,10 +28,7 @@ This involves motion correction which, with default settings, can be time consum
 We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
 
 .. {r fmriprocess, out.width='720px', fig.cap='ANTsR preprocessing, including frequency filtering, for fMRI',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
-myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=100000)
-# check if the mask is ok
-plotANTsImage(myantsimage=avg,functional=myres$mask,slices="12x33x3",axis=3,threshold="0.5x1.5")
-# The mask looks fine ( does not have to be perfect ) so we proceed.
+myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=maskThresh)
 .. .. 
 
 
