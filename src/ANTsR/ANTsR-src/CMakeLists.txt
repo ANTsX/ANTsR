@@ -188,9 +188,9 @@ install( TARGETS RImageMath DESTINATION . )
 #target_link_libraries(RImageSetStatistics ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ImageSetStatistics )
 #install( TARGETS RImageSetStatistics DESTINATION . )
 
-#add_library(RKellyKapowski MODULE ${ANTsR_SOURCE_DIR}/src/KellyKapowski.cxx)
-#target_link_libraries(RKellyKapowski ${RCPP_LIB_DIR} ${R_LIB_DIR} l_KellyKapowski )
-#install( TARGETS RKellyKapowski DESTINATION . )
+add_library(RKellyKapowski MODULE ${ANTsR_SOURCE_DIR}/src/KellyKapowski.cxx)
+target_link_libraries(RKellyKapowski ${RCPP_LIB_DIR} ${R_LIB_DIR} l_KellyKapowski )
+install( TARGETS RKellyKapowski DESTINATION . )
 
 #add_library(RKellySlater MODULE ${ANTsR_SOURCE_DIR}/src/KellySlater.cxx)
 #target_link_libraries(RKellySlater ${RCPP_LIB_DIR} ${R_LIB_DIR} l_KellySlater )

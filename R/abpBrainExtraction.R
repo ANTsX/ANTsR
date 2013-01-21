@@ -17,7 +17,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ANTS_MAX_ITERATIONS<-"100x100x70x20"
   ANTS_TRANSFORMATION<-"SyN[0.1,3,0]"
   ANTS_LINEAR_METRIC_PARAMS<-"1,32,Regular,0.25"
-  ANTS_LINEAR_CONVERGENCE<-"[1000x1000x1000x1000,1e-8,15]"
+  ANTS_LINEAR_CONVERGENCE<-"[1000x1000x1000x1000,1e-7,15]"
   ANTS_METRIC<-"CC"
   ANTS_METRIC_PARAMS<-"1,4"
   # ANTs parameters end
@@ -60,15 +60,17 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
       m=paste("mattes[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
         ANTS_LINEAR_METRIC_PARAMS,"]",sep='') ,
       c=ANTS_LINEAR_CONVERGENCE ,t="Affine[0.1]" ,f="8x4x2x1", s="4x2x1x0",
-      m=paste("CC[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
-        "0.5,4]",sep=''),
-#      m=paste("CC[",antsrGetPointerName(lapt),",",antsrGetPointerName(lapi),",",
-#        "0.5,4]",sep=''), FIXME
-      c="[50x10x0,1e-9,15]",t="SyN[0.1,3,0]",f="4x2x1",s="2x1x0")
+      m=paste("mattes[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
+        "0.5,32]",sep=''),
+#      m=paste("CC[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
+#        "0.5,4]",sep=''),
+      m=paste("mattes[",antsrGetPointerName(antsImageClone(lapt,"double")),",",antsrGetPointerName(antsImageClone(lapi,"double")),",",
+        "0.5,32]",sep=''),
+      c="[50x30x0,1e-9,15]",t="SyN[0.1,3,0]",f="4x2x1",s="2x1x0")
   antsRegistration( antsregparams )
   tx<-paste(EXTRACTION_WARP_OUTPUT_PREFIX,c("1InverseWarp.nii.gz","0GenericAffine.mat"),sep='')
-  temmaskwarped<-antsImageClone( img, "double" )
-  aatparams<-list( d=img@dimension, i=antsImageClone(temmask,'double'), o=temmaskwarped, r=dimg, n="Gaussian", t=paste("[",tx[2],",1]",sep=''), t=tx[1])
+  temmaskwarped<-antsImageClone( img )
+  aatparams<-list( d=img@dimension, i=temmask, o=temmaskwarped, r=img, n="Gaussian", t=paste("[",tx[2],",1]",sep=''), t=tx[1])
   antsApplyTransforms( aatparams )
   ftemmaskwarped<-antsImageClone( temmaskwarped, "float" )
   ThresholdImage(img@dimension,ftemmaskwarped,ftemmaskwarped,0.5,1)
