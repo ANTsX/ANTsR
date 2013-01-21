@@ -1,5 +1,10 @@
 antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",interpolator="Linear", ... ){
   numargs<-nargs()
+  if ( typeof( fixed ) == "list" )
+    {
+    .Call( "antsApplyTransforms", int_antsProcessArguments( c(fixed) ) ) ;
+    return(0);
+    }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
     {
     cat(" warpedimg<-antsApplyTransforms( fixed=img1 , moving=img2 , transformlist=list(\"my0GenericAffine.mat\",\"my1Warp.nii.gz\") ) ")

@@ -252,9 +252,9 @@ install( TARGETS RN4BiasFieldCorrection DESTINATION . )
 #target_link_libraries(RReorientTensorImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ReorientTensorImage )
 #install( TARGETS RReorientTensorImage DESTINATION . )
 
-#add_library(RResampleImageBySpacing MODULE ${ANTsR_SOURCE_DIR}/src/ResampleImageBySpacing.cxx)
-#target_link_libraries(RResampleImageBySpacing ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ResampleImageBySpacing )
-#install( TARGETS RResampleImageBySpacing DESTINATION . )
+add_library(RResampleImageBySpacing MODULE ${ANTsR_SOURCE_DIR}/src/ResampleImageBySpacing.cxx)
+target_link_libraries(RResampleImageBySpacing ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ResampleImageBySpacing )
+install( TARGETS RResampleImageBySpacing DESTINATION . )
 
 #add_library(RResampleImage MODULE ${ANTsR_SOURCE_DIR}/src/ResampleImage.cxx)
 #target_link_libraries(RResampleImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ResampleImage )

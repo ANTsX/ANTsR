@@ -1,3 +1,3 @@
 ResampleImageBySpacing <- function(...){
-	.Call( "ResampleImageBySpacing", as.character( c(...) ) ) ;
+	.Call( "ResampleImageBySpacing",int_antsProcessArguments( c(...) ) ) ;
 }

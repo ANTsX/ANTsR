@@ -1,88 +1,115 @@
-abpBrainExtraction <- function( img = NA, intensityTruncation=c( 0.025, 0.975, 256 ), mask=NA, weightimg=NA, usen3=FALSE )
+abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA )
 {
-# should take in a data frame to organize input data!
-#BA    TMP_FILES=( $EXTRACTION_MASK_PRIOR_WARPED $EXTRACTION_WARP $EXTRACTION_INVERSE_WARP $EXTRACTION_MATRIX_OFFSET $EXTRACTION_TMP $EXTRACTION_MASK_TMP $EXTRACTION_GM $EXTRACTION_CSF $EXTRACTION_SEGMENTATION $EXTRACTION_INITIAL_AFFINE $EXTRACTION_INITIAL_AFFINE_MOVING $EXTRACTION_INITIAL_AFFINE_FIXED $EXTRACTION_LAPLACIAN $EXTRACTION_TEMPLATE_LAPLACIAN )
-#BA
-#BA    ## Step 1 ##
-#BA    if [[ ! -f ${EXTRACTION_WARP} ]];
-#BA      then
+  if ( missing( img ) | missing( tem ) | missing( temmask ) )
+    {
+    cat('usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) \n')
+    cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")
+    return(NULL)
+    }
+  if  ( missing( tempriors ) ) { tempriors<-3 ; npriors<-3 }  else  {  npriors<-length( tempriors ) }
 
-#BA      logCmd ${ANTSPATH}/ResampleImageBySpacing 3 ${EXTRACTION_TEMPLATE} ${EXTRACTION_INITIAL_AFFINE_FIXED} 4 4 4 1
-#BA      logCmd ${ANTSPATH}/ResampleImageBySpacing 3 ${N4_CORRECTED_IMAGES[0]} ${EXTRACTION_INITIAL_AFFINE_MOVING} 4 4 4 1
+  # file I/O - all stored in temp dir 
+  tdir<-tempdir()
+  initafffn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_InitialAff.mat" )
+  EXTRACTION_WARP_OUTPUT_PREFIX<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_PriorMap")
 
-#BA      logCmd ${ANTSPATH}/ImageMath 3 ${EXTRACTION_LAPLACIAN} Laplacian ${N4_CORRECTED_IMAGES[0]} 1.5 1
-#BA      logCmd ${ANTSPATH}/ImageMath 3 ${EXTRACTION_TEMPLATE_LAPLACIAN} Laplacian ${EXTRACTION_TEMPLATE} 1.5 1
+  # ANTs parameters begin
+  ANTS_MAX_ITERATIONS<-"100x100x70x20"
+  ANTS_TRANSFORMATION<-"SyN[0.1,3,0]"
+  ANTS_LINEAR_METRIC_PARAMS<-"1,32,Regular,0.25"
+  ANTS_LINEAR_CONVERGENCE<-"[1000x1000x1000x1000,1e-8,15]"
+  ANTS_METRIC<-"CC"
+  ANTS_METRIC_PARAMS<-"1,4"
+  # ANTs parameters end
 
-#BA      exe_initial_align="${ANTSPATH}/antsAffineInitializer ${DIMENSION} ${EXTRACTION_INITIAL_AFFINE_FIXED} ${EXTRACTION_INITIAL_AFFINE_MOVING} ${EXTRACTION_INITIAL_AFFINE} 15 0.1 0 10"
-#BA      if [[ -f ${EXTRACTION_REGISTRATION_MASK} ]];
-#BA        then
-#BA        exe_initial_align="${exe_initial_align} ${EXTRACTION_REGISTRATION_MASK}"
-#BA        fi
-#BA      logCmd $exe_initial_align
+  # Atropos params
+  ATROPOS_BRAIN_EXTRACTION_INITIALIZATION<-"kmeans[3]"
+  ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD<-"Gaussian"
+  ATROPOS_BRAIN_EXTRACTION_CONVERGENCE<-"[3,0.0001]"
+  ATROPOS_BRAIN_EXTRACTION_MRF<-paste("[0.2,1x1x1]")
+  if ( img@dimension == 2 ) ATROPOS_BRAIN_EXTRACTION_MRF<-paste("[0.2,1x1]")
 
-#BA      basecall="${ANTS} -d ${DIMENSION} -u 1 -w [0.025,0.975] -o ${EXTRACTION_WARP_OUTPUT_PREFIX} -r ${EXTRACTION_INITIAL_AFFINE} -z 1"
-#BA      if [[ -f ${EXTRACTION_REGISTRATION_MASK} ]];
-#BA        then
-#BA        basecall="${basecall} -x [${EXTRACTION_REGISTRATION_MASK}]"
-#BA        fi
-#BA      stage1="-m MI[${EXTRACTION_TEMPLATE},${N4_CORRECTED_IMAGES[0]},${ANTS_LINEAR_METRIC_PARAMS}] -c ${ANTS_LINEAR_CONVERGENCE} -t Rigid[0.1] -f 8x4x2x1 -s 4x2x1x0";
-#BA      stage2="-m MI[${EXTRACTION_TEMPLATE},${N4_CORRECTED_IMAGES[0]},${ANTS_LINEAR_METRIC_PARAMS}] -c ${ANTS_LINEAR_CONVERGENCE} -t Affine[0.1] -f 8x4x2x1 -s 4x2x1x0";
-#BA      stage3=" -m CC[${EXTRACTION_TEMPLATE},${N4_CORRECTED_IMAGES[0]},0.5,4] -m CC[${EXTRACTION_TEMPLATE_LAPLACIAN},${EXTRACTION_LAPLACIAN},0.5,4] -c [50x10x0,1e-9,15] -t SyN[0.1,3,0] -f 4x2x1 -s 2x1x0";
+  ATROPOS_SEGMENTATION_INITIALIZATION<-"PriorProbabilityImages"
+  ATROPOS_SEGMENTATION_PRIOR_WEIGHT<-0.0
+  ATROPOS_SEGMENTATION_LIKELIHOOD<-"Gaussian"
+  ATROPOS_SEGMENTATION_CONVERGENCE<-"[12,0.0001]"
+  ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION<-"Socrates"
+  ATROPOS_SEGMENTATION_MRF<-"[0.11,1x1x1]";
+  if ( img@dimension == 2 ) ATROPOS_SEGMENTATION_MRF<-paste("[0.11,1x1]")
+  # Atropos params end
+  
+  imgsmall<-antsImageClone(img)
+  ResampleImageBySpacing(img@dimension,img,imgsmall,as.character(rep(4,img@dimension)),1)
+  temsmall<-antsImageClone(tem)
+  ResampleImageBySpacing(tem@dimension,tem,temsmall,as.character(rep(4,tem@dimension)),1)
+# careful initialization of affine mapping , result stored in initafffn
+  antsAffineInitializer(img@dimension,temsmall,imgsmall,initafffn,15,0.1,0,10)
+  # FIXME - should add mask in above call 
 
-#BA      exe_brain_extraction_1="${basecall} ${stage1} ${stage2} ${stage3}"
-#BA      logCmd $exe_brain_extraction_1
-#BA      fi
-
-#BA    ## Step 2 ##
-#BA    exe_brain_extraction_2="${WARP} -d ${DIMENSION} -i ${EXTRACTION_PRIOR} -o ${EXTRACTION_MASK_PRIOR_WARPED} -r ${ANATOMICAL_IMAGES[0]} -n Gaussian -t [${EXTRACTION_MATRIX_OFFSET},1] -t ${EXTRACTION_INVERSE_WARP}"
-#BA    logCmd $exe_brain_extraction_2
-
-#BA    ## superstep 1b ##
-#BA    logCmd ${ANTSPATH}ThresholdImage ${DIMENSION} ${EXTRACTION_MASK_PRIOR_WARPED} ${EXTRACTION_MASK_PRIOR_WARPED} 0.5 1 1 0
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} MD ${EXTRACTION_MASK_PRIOR_WARPED} 2
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} GetLargestComponent ${EXTRACTION_MASK_TMP}
-
-#BA    ## superstep 6 ##
-
-#BA    ATROPOS_ANATOMICAL_IMAGES_COMMAND_LINE='';
-#BA    for (( i = 0; i < ${#ANATOMICAL_IMAGES[@]}; i++ ))
-#BA      do
-#BA      ATROPOS_ANATOMICAL_IMAGES_COMMAND_LINE="${ATROPOS_ANATOMICAL_IMAGES_COMMAND_LINE} -a ${N4_CORRECTED_IMAGES[$i]}";
-#BA      done
-
-#BA    exe_brain_extraction_3="${ATROPOS} -d ${DIMENSION} -o ${EXTRACTION_SEGMENTATION} ${ATROPOS_ANATOMICAL_IMAGES_COMMAND_LINE} -x ${EXTRACTION_MASK_TMP} -i ${ATROPOS_BRAIN_EXTRACTION_INITIALIZATION} -c ${ATROPOS_BRAIN_EXTRACTION_CONVERGENCE} -m ${ATROPOS_BRAIN_EXTRACTION_MRF} -k ${ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD}"
-#BA    logCmd $exe_brain_extraction_3
-
-#BA    logCmd ${ANTSPATH}/ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_WM} 3 3 1 0
-#BA    logCmd ${ANTSPATH}/ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_GM} 2 2 1 0
-#BA    logCmd ${ANTSPATH}/ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_CSF} 1 1 1 0
-
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_WM} GetLargestComponent ${EXTRACTION_WM}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_GM} GetLargestComponent ${EXTRACTION_GM}
-
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_TMP} FillHoles ${EXTRACTION_GM} 2
-#BA    logCmd ${ANTSPATH}MultiplyImages ${DIMENSION} ${EXTRACTION_GM} ${EXTRACTION_TMP} ${EXTRACTION_GM}
-
-#BA    logCmd ${ANTSPATH}MultiplyImages ${DIMENSION} ${EXTRACTION_WM} 3 ${EXTRACTION_WM}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_TMP} ME ${EXTRACTION_CSF} 10
-
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_GM} addtozero ${EXTRACTION_GM} ${EXTRACTION_TMP}
-#BA    logCmd ${ANTSPATH}MultiplyImages ${DIMENSION} ${EXTRACTION_GM} 2 ${EXTRACTION_GM}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_WM} ${EXTRACTION_GM}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_SEGMENTATION} addtozero ${EXTRACTION_SEGMENTATION} ${EXTRACTION_CSF}
-
-#BA    ## superstep 7 ##
-#BA    logCmd ${ANTSPATH}ThresholdImage ${DIMENSION} ${EXTRACTION_SEGMENTATION} ${EXTRACTION_MASK_TMP} 2 3
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} ME ${EXTRACTION_MASK_TMP} 2
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} GetLargestComponent ${EXTRACTION_MASK_TMP}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} MD ${EXTRACTION_MASK_TMP} 4
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} FillHoles ${EXTRACTION_MASK_TMP} 2
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} addtozero ${EXTRACTION_MASK_TMP} ${EXTRACTION_MASK_PRIOR_WARPED}
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} MD ${EXTRACTION_MASK_TMP} 5
-#BA    logCmd ${ANTSPATH}ImageMath ${DIMENSION} ${EXTRACTION_MASK_TMP} ME ${EXTRACTION_MASK_TMP} 5
-
-#BA    cp ${EXTRACTION_MASK_TMP} ${EXTRACTION_MASK}
-
-#BA    logCmd ${ANTSPATH}/MultiplyImages ${DIMENSION} ${EXTRACTION_MASK} ${N4_CORRECTED_IMAGES[0]} ${EXTRACTION_BRAIN}
-
+  # get laplacian images 
+  lapi<-antsImageClone( img )
+  ImageMath(img@dimension,lapi,"Laplacian",img,1.5,1)
+  lapt<-antsImageClone( tem )
+  ImageMath(tem@dimension,lapt,"Laplacian",tem,1.5,1)
+  # FIXME should add mask to below via -x option
+  print( EXTRACTION_WARP_OUTPUT_PREFIX )
+  dtem<-antsImageClone( tem, 'double')
+  dimg<-antsImageClone( img, 'double')
+  antsregparams<-list(  d=img@dimension, u=1,  o=EXTRACTION_WARP_OUTPUT_PREFIX,
+                      r=initafffn, z=1 ,  w="[0.025,0.975]",
+      m=paste("mattes[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
+        ANTS_LINEAR_METRIC_PARAMS,"]",sep='') ,
+      c=ANTS_LINEAR_CONVERGENCE ,t="Affine[0.1]" ,f="8x4x2x1", s="4x2x1x0",
+      m=paste("CC[",antsrGetPointerName(dtem),",",antsrGetPointerName(dimg),",",
+        "0.5,4]",sep=''),
+#      m=paste("CC[",antsrGetPointerName(lapt),",",antsrGetPointerName(lapi),",",
+#        "0.5,4]",sep=''), FIXME
+      c="[50x10x0,1e-9,15]",t="SyN[0.1,3,0]",f="4x2x1",s="2x1x0")
+  antsRegistration( antsregparams )
+  tx<-paste(EXTRACTION_WARP_OUTPUT_PREFIX,c("1InverseWarp.nii.gz","0GenericAffine.mat"),sep='')
+  temmaskwarped<-antsImageClone( img, "double" )
+  aatparams<-list( d=img@dimension, i=antsImageClone(temmask,'double'), o=temmaskwarped, r=dimg, n="Gaussian", t=paste("[",tx[2],",1]",sep=''), t=tx[1])
+  antsApplyTransforms( aatparams )
+  ftemmaskwarped<-antsImageClone( temmaskwarped, "float" )
+  ThresholdImage(img@dimension,ftemmaskwarped,ftemmaskwarped,0.5,1)
+  tmp<-antsImageClone(ftemmaskwarped)
+  ImageMath(img@dimension,tmp,"MD",ftemmaskwarped,2)
+  ImageMath(img@dimension,tmp,"GetLargestComponent",tmp,2)
+  ImageMath(img@dimension,tmp,"FillHoles",tmp)
+  seg<-antsImageClone( img , "unsigned int")
+  atroparams<-list( d=img@dimension, a=img,  m=ATROPOS_BRAIN_EXTRACTION_MRF, o=seg,  x=antsImageClone(tmp,"unsigned int"), i=ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c=ATROPOS_BRAIN_EXTRACTION_CONVERGENCE, k=ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD )
+  print( atroparams )
+  Atropos( atroparams )
+  seg<-antsImageClone( seg, 'float') 
+  segwm<-antsImageClone(img) 
+  ThresholdImage(img@dimension,seg,segwm,3,3)
+  seggm<-antsImageClone(img) 
+  ThresholdImage(img@dimension,seg,seggm,2,2)
+  segcsf<-antsImageClone(img) 
+  ThresholdImage(img@dimension,seg,segcsf,1,1)
+  ImageMath(img@dimension,segwm,"GetLargestComponent",segwm)
+  ImageMath(img@dimension,segwm,"GetLargestComponent",segwm)
+  tmp<-antsImageClone( img )
+  ImageMath(img@dimension,tmp,"FillHoles",seggm)
+  ImageMath(img@dimension,seggm,"m",seggm,tmp)  
+  ImageMath(img@dimension,segwm,"m",segwm,3)  
+  ImageMath(img@dimension,tmp,"ME",segcsf,10)  
+  ImageMath(img@dimension,seggm,"addtozero",seggm,tmp)  
+  ImageMath(img@dimension,seggm,"m",seggm,2)  
+  finalseg<-antsImageClone( img )
+  ImageMath(img@dimension,finalseg,"m",finalseg,0)  
+  ImageMath(img@dimension,finalseg,"addtozero",seggm,segwm)  
+  ImageMath(img@dimension,finalseg,"addtozero",finalseg,segcsf)
+                                        # BA - finalseg looks good! could stop here
+  ThresholdImage(img@dimension,finalseg,tmp,2,3)
+  ImageMath(img@dimension,tmp,"ME",tmp,2)  
+  ImageMath(img@dimension,tmp,"GetLargestComponent",tmp,2)  
+  ImageMath(img@dimension,tmp,"MD",tmp,4)  
+  ImageMath(img@dimension,tmp,"FillHoles",tmp)  
+  ImageMath(img@dimension,tmp,"addtozero",tmp, antsImageClone( temmaskwarped, "float" ) )  
+  ImageMath(img@dimension,tmp,"MD",tmp,5)  
+  ImageMath(img@dimension,tmp,"ME",tmp,5)
+  brain<-antsImageClone(img)
+  ImageMath(img@dimension,brain,"m",brain,tmp)  
+  return( list( brain=brain, bmask=tmp ) )
 }
