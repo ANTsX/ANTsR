@@ -109,6 +109,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ImageMath(img@dimension,tmp,"addtozero",tmp, antsImageClone( temmaskwarped, "float" ) )  
   ImageMath(img@dimension,tmp,"MD",tmp,5)  
   ImageMath(img@dimension,tmp,"ME",tmp,5)
+#  FIXME - steps above should all be checked again ...
   brain<-antsImageClone(img)
   ImageMath(img@dimension,brain,"m",brain,tmp)  
   return( list( brain=brain, bmask=tmp ) )
