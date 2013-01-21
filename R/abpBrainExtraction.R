@@ -2,7 +2,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
 {
   if ( missing( img ) | missing( tem ) | missing( temmask ) )
     {
-    cat('usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) \n')
+    cat('usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) ) \n')
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")
     return(NULL)
     }
