@@ -18,7 +18,7 @@ if( NOT ANTS_DIR )
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
-    SVN_REVISION -r 1776
+    SVN_REVISION -r 1778
 #    GIT_REPOSITORY http://github.com/stnava/ANTS.git 
 #    GIT_TAG  19207c855df5258eacd1ec3e6d3abb100fcc93da
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
@@ -26,7 +26,7 @@ if( NOT ANTS_DIR )
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
- #cmakedefine NDEBUG 
+ # cmakedefine NDEBUG 
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" )
   set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )

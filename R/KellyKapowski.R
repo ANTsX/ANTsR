@@ -10,7 +10,7 @@ KellyKapowski <- function( kkargs=NA )
       myentry<-kkargs[[i]]
       if ( names(kkargs)[i] == "s" & class( myentry )[1] == "antsImage" )
         {
-#        kkargs[[i]]<-antsImageClone( kkargs[[i]] , "unsigned int" )
+        kkargs[[i]]<-antsImageClone( kkargs[[i]] , "unsigned int" )
         }
     }
   .Call( "KellyKapowski", int_antsProcessArguments( c(kkargs) ) ) ;
