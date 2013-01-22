@@ -46,7 +46,10 @@ Shrinidhi KL, Avants BB
 # will give the full form of help
 antsApplyTransforms( "-h")
 # example 1 - simplified
-deformedimage<-antsApplyTransforms(fixed=img1,moving=img2,
-  transformlist=list(rev(c("my0GenericAffine.mat","my1Warp.nii.gz")))
+mywarpedimage<-antsApplyTransforms(fixed=fixed,moving=moving,transformlist=mytx$fwdtransforms)
+mywarpedimage<-antsApplyTransforms(fixed=moving,moving=fixed,transformlist=mytx$invtransforms)
+# full access via listing the inputs in standard ANTs format 
+antsApplyTransforms( list( d=as.character(mi@dimension), i=moving,o=outimg,r=fixed,t=mytx$inv[1],sep='') ) ) 
+antsApplyTransforms( list( d=as.character(mi@dimension), i=fixed,o=outimg,r=moving,t=paste("[",mytx$inv[1],",1]",sep='') ) ) 
 }
 }

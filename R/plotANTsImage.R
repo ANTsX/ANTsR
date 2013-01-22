@@ -234,6 +234,7 @@ mag<-quality
 x <- pixmapGrey(bigslice, nrow=nrow(bigslice))
 # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
 # plot(dd)
+par(mar=c(0,0,0,0) + 0.0)   # set margins to zero ! less wasted space
 plot(x)
 if ( threshold[1] > threshold[2] )
   {

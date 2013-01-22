@@ -28,8 +28,8 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
       if ( ttexists  )
         {
         inpixeltype<-fixed@pixeltype
-        fixed<-antsImageClone(fixed,"double")
-        moving<-antsImageClone(moving,"double")
+        fixed<-antsImageClone(fixed)
+        moving<-antsImageClone(moving)
         warpedmovout<-antsImageClone(fixed);
         f<-fixed
         m<-moving
@@ -37,9 +37,18 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         mytx<-list()
         for ( i in c(1:length(transformlist)) ) 
           {
-          mytx<-list( mytx,"-t",transformlist[ i ])
+          ismat<-FALSE
+          if ( i == 1 ) {
+            if ( length( grep( ".mat",transformlist[ i ])) == 1 )
+              {
+              ismat <- TRUE
+              print("treating this as an inverse transform")
+              }
+          }
+          if ( !ismat ) mytx<-list( mytx,"-t",transformlist[ i ]) else mytx<-list( mytx,"-t",paste("[",transformlist[ i ],",1]",sep='') )
           }
         args<-list( d=fixed@dimension, i=m, o=wmo, r=f, n=interpolator,unlist( mytx ))
+        print(args)
         .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
