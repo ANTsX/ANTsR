@@ -68,6 +68,8 @@ See the full man pages for each function below from within R via ?functionname
 
    Rd_abpN4.rst
 
+   Rd_KellyKapowski.rst
+
 ..   Rd_cbf.rst
    
 ..   Rd_sccan.rst

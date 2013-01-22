@@ -1,6 +1,6 @@
-=========================
-Getting started with ANTsR
-=========================
+==================================================
+ Getting started with ANTsR
+==================================================
 
 Brief Introduction to using ANTs in R
 ---------------------------------------------
@@ -40,7 +40,7 @@ install_github('ANTsR','stnava')
 
 
 Developer Installation Method: from command line
----------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
 
 See the libraries listed above and install them.
 

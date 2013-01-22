@@ -50,6 +50,5 @@ if ( !isucceed ) print("FAILURE")
 
 .. raw:: latex
 
-..    \bibliographystyle{plain}
-..    \bibliography{antsr}
-
+    \bibliographystyle{plain}
+    \bibliography{antsr}
