@@ -1,7 +1,7 @@
 .. role:: raw-tex(raw)
     :format: latex html
 
-A simple kmeans segmentation approach.
+ANTs segmentation approaches.
 ==================================================
 
 We typically use bias correction and tissues priors but in some cases k-means can do the job.
@@ -26,7 +26,7 @@ plotANTsImage(segs$probabilityimages[[3]])
 countgm<-sum( segs$segmentation == 2 )/sum( mask == 1 )
 .. ..
 
-Next, use the probability images to resegment the input image based on spatial priors and its gradient.
+Use the probability images to resegment the input image based on spatial priors and its gradient in addition to its raw intensity.
 
 .. {r segprior, out.width='512px', fig.cap='Prior-based segmentation',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 # get the image gradient and, for fun , do a multivariate segmentation
@@ -43,9 +43,11 @@ countgm2<-sum( segs$segmentation == 2 )/sum( mask == 1 )
 
 .. {r testSegmentation, out.width='512px', fig.cap='ANTsR basic kmeans segmentation',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
 isucceed<-FALSE
-if ( round( countgm*100 ) == 40 &  round( countgm2*100 ) == 40 ) isucceed<-TRUE
+val1<-round( countgm*100 )
+val2<-round( countgm2*100 )
+if ( val1 == 40 &  val2 == 40 ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
-if ( !isucceed ) print("FAILURE")
+if ( !isucceed ) print(paste("FAILURE",val1,val2))
 .. .. 
 
 .. raw:: latex
