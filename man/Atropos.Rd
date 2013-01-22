@@ -6,7 +6,7 @@ FMM Segmentation
 }
 
 \description{
-A finite mixture modeling (FMM) segmentation approach with possibilities for specifying prior constraints. These prior constraints include the specification of a prior label image, prior probability images (one for each class), and/or an MRF prior to enforce spatial smoothing of the labels. Similar algorithms include FAST and SPM. 
+A finite mixture modeling (FMM) segmentation approach with possibilities for specifying prior constraints. These prior constraints include the specification of a prior label image, prior probability images (one for each class), and/or an MRF prior to enforce spatial smoothing of the labels. Similar algorithms include FAST and SPM.  Atropos can also perform multivariate segmentation if you pass a list of images in: e.g. a=c(img1,img2). 
 }
 
 \usage{
@@ -19,7 +19,7 @@ See sections: Arguments, Examples for details. Number and type of arguments depe
 \item{d -or- "image-dimensionality" = <value>}{
 This option forces the image to be treated as a specified-dimensional image. If not specified, Atropos tries to infer the dimensionality from the first input image. Allowed values: 2, 3, 4.
 }
-\item{a -or- "intensity-image" = list( <intensityImage>, <adaptiveSmoothingWeight>)}{
+\item{a -or- "intensity-image" = c( <intensityImage1>, <intensityImage2>, etc)}{
 One or more scalar images is specified for segmentation using the -a/--intensity-image option. For segmentation scenarios with no prior information, the first scalar image encountered on the command line is used to order labelings such that the class with the smallest intensity signature is class '1' through class 'N' which represents the voxels with the largest intensity values. The optional adaptive smoothing weight parameter is applicable only when using prior label or probability images. This scalar parameter is to be specified between [0,1] which smooths each labeled region separately and modulates the intensity measurement at each voxel in each intensity image between the original intensity and its smoothed counterpart. The smoothness parameters are governed by the -b/--bspline option. 
 }
 \item{b -or- bspline = list( <numberOfLevels=6>, <initialMeshResolution=1x1x...>, <splineOrder=3>)}{
@@ -112,13 +112,15 @@ The propagation of each prior label can be controlled by the lambda and boundary
 }
 
 \author{
-Shrinidhi KL
+Shrinidhi KL, B Avants
 }
 
 \examples{
 \dontrun{
-Atropos( list( d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) )
-Atropos( list( d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) )
-Atropos( list( d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = list( name = "priorprobabilityimages" , 3 , prob_img_list , 0 ) , x = bm_img_uint ) )
+segs1<-Atropos( d = img@dimension, a = imgn3, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask) 
+segs2<-Atropos( d = img@dimension, a = c(imggrad,imgn3), m = "[0.2,1x1]",c = "[5,0]",  i = segs$probabilityimages, x = mask) 
+Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) 
+Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) 
+Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = list( name = "priorprobabilityimages" , 3 , prob_img_list , 0 ) , x = bm_img_uint ) 
 }
 }
