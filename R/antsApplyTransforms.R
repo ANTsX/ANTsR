@@ -50,6 +50,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         args<-list( d=fixed@dimension, i=m, o=wmo, r=f, n=interpolator,unlist( mytx ))
         print(args)
         .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
+        gc() # trigger garbage collection
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
       if ( ! ttexists  ) cat("Problem in arg list \n see usage by calling antsApplyTransforms() w/o arguments \n")
@@ -57,4 +58,5 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
     return(0)
   }
   .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
+  gc() # trigger garbage collection
 }

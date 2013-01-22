@@ -1,7 +1,7 @@
-getANTsRData<- function( fileid )
+getANTsRData<- function( fileid , usefixedlocation = TRUE)
 {
   library(tools)
-  myusage<-"usage: getANTsRData(fileid = whatever )"
+  myusage<-"usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
   if ( missing( fileid )  )
     {
     print(myusage)
@@ -12,13 +12,19 @@ getANTsRData<- function( fileid )
                   r64="http://placid.nlm.nih.gov/download?items=10765",
                   KK="http://placid.nlm.nih.gov/download?items=10766",
                   ADNI="http://placid.nlm.nih.gov/download?folders=238",
-                  K1="http://www.nitrc.org/frs/downloadlink.php/2201"
+                  K1="http://www.nitrc.org/frs/downloadlink.php/2201",
+                  BT="http://placid.nlm.nih.gov/download?items=10767",
+                  AB="http://placid.nlm.nih.gov/download?items=10753"
             )
   myext<-".nii.gz"
   if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
-  tdir<-tempdir()
-  tfn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = myext ) 
-  download.file(myurl, tfn )
+  tdir<-tempdir() # for temporary storage
+  tfn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = myext ) # for temporary storage
+  if ( usefixedlocation == TRUE ) {
+    tdir<-system.file(package='ANTsR') # for a fixed location 
+    tfn<-paste(tdir,"/html/",fileid,myext,sep='') # for a fixed location
+  }
+  if ( !file.exists(tfn) ) download.file(myurl, tfn )
   if ( fileid == "ADNI" | fileid == "K1"  ) {
     unzip( tfn )
     return( tfn ) 
@@ -27,7 +33,9 @@ getANTsRData<- function( fileid )
   mymd5<-switch( fileid ,
                   r16="37aaa33029410941bf4affff0479fa18",
                   r64="8a629ee7ea32013c76af5b05f880b5c6",
-                  KK="397a773658558812e91c03bbb29334bb"
+                  KK="397a773658558812e91c03bbb29334bb",
+                  BT="eb1f8ee2bba81fb80fed77fb459600f0",
+                  AB="d38b04c445772db6e4ef3d2f34787d67"
             )
   if ( md5sum( tfn ) != mymd5 ) { print("checksum failure"); return(NULL) }
   return( tfn )

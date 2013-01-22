@@ -82,7 +82,8 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   atroparams<-list( d=img@dimension, a=img,  m=ATROPOS_BRAIN_EXTRACTION_MRF, o=seg,  x=antsImageClone(tmp,"unsigned int"), i=ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c=ATROPOS_BRAIN_EXTRACTION_CONVERGENCE, k=ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD )
   print( atroparams )
   Atropos( atroparams )
-  seg<-antsImageClone( seg, 'float') 
+  fseg<-antsImageClone( seg, 'float')
+  seg<-fseg
   segwm<-antsImageClone(img) 
   ThresholdImage(img@dimension,seg,segwm,3,3)
   seggm<-antsImageClone(img) 

@@ -55,6 +55,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
 #        outvar<-basename(outprefix)
 #        outpath<-dirname(outprefix)
 #        txlist<-list.files( path = outpath, pattern =  glob2rx( paste(outvar,"*",sep='') ), full.names = TRUE, recursive = FALSE )
+        gc() # trigger garbage collection
         return( list( warpedmovout=antsImageClone(warpedmovout,inpixeltype), warpedfixout=antsImageClone(warpedfixout,inpixeltype), fwdtransforms=fwdtransforms, invtransforms=invtransforms  ) )
         }
       if ( ! ttexists  ) cat("Problem in arg list \n see usage by calling antsRegistration() w/o arguments \n")
@@ -62,6 +63,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
     return(0)
   }
   .Call( "antsRegistration", int_antsProcessArguments( c(args) ) ) ;
+  gc() # trigger garbage collection
 }
 
 ###############################################################

@@ -1,0 +1,48 @@
+.. role:: raw-tex(raw)
+    :format: latex html
+
+Time series registration and transformation.
+==================================================
+
+Register a BOLD image to a BOLD template and apply the resulting mapping. 
+
+.. {r reg4D, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+bfn <- getANTsRData("AB")
+tem<-antsImageRead(bfn, 3)
+ResampleImageBySpacing(list(3,tem,tem,2,2,2))
+dtem<-antsImageClone(tem,'double')
+tem<-dtem
+tfn <- getANTsRData("KK")
+img <- antsImageRead(tfn, 4,"double")
+avg <- new("antsImage", dimension = 3, pixeltype = "double")
+antsMotionCorr(list(d = 3, a = img, o = avg))
+mytx<-antsRegistration(fixed=tem , moving=avg , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=''))
+# use full access to antsApplyTx
+inimg<-antsImageClone(avg,"float")
+outimg<-new("antsImage", dimension = 3, pixeltype = "float")
+antsApplyTransforms( list( d=3,i=inimg,o=outimg,r=antsImageClone(tem,'float'),t=mytx$fwd[1],t=mytx$fwd[2] ))
+par(mfrow=c(2,1))
+plotANTsImage( tem,slices="40x60x5",axis=1)
+plotANTsImage( outimg,slices="40x60x5",axis=1)
+inimg<-antsImageClone(img,"float")
+out4Dimg<-new("antsImage", dimension = 4, pixeltype = "float")
+antsApplyTransforms( list(d=3,e=3,i=inimg,o=out4Dimg,r=antsImageClone(tem,'float'),t=mytx$fwd[1],t=mytx$fwd[2]))
+avgtx <- new("antsImage", dimension = 3, pixeltype = "double")
+antsMotionCorr(list(d = 3, a = antsImageClone(out4Dimg,'double'), o = avgtx))
+par(mfrow=c(2,1))
+plotANTsImage( outimg,slices="40x60x5",axis=1)
+favg<-antsImageClone(avgtx,'float')
+plotANTsImage( favg,slices="40x60x5",axis=1)
+.. .. 
+
+.. {r reg4Dtest, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
+isucceed<-FALSE
+# if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
+if (  isucceed ) print("SUCCESS")
+if ( !isucceed ) print("FAILURE")
+.. .. 
+
+.. raw:: latex
+
+    \bibliographystyle{plain}
+    \bibliography{antsr}

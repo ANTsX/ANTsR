@@ -17,3 +17,5 @@ See the ANTsR/demo folder for the full source of these examples.
    networkanalysisfMRI.rst
 
    antsSegmentation.rst 
+
+   transformTimeSeries.rst 
