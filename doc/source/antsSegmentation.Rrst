@@ -33,6 +33,7 @@ Use the probability images to resegment the input image based on spatial priors 
 imggrad<-antsImageClone( imgn3 )
 ImageMath(img@dimension,imggrad,'Laplacian',imgn3)
 segs<-Atropos( d = img@dimension, a = c(imgn3,imggrad), m = "[0.2,1x1]",c = "[5,0]",  i = segs$probabilityimages, x = mask) 
+par(mfrow = c(2, 2))
 plotANTsImage(segs$segmentation)
 plotANTsImage(segs$probabilityimages[[1]])
 plotANTsImage(segs$probabilityimages[[2]])
