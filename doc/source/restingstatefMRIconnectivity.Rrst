@@ -13,6 +13,7 @@ avg <- new( "antsImage" , dimension = 3 , pixeltype=img@pixeltype  )
 antsMotionCorr( list( d = 3 , a = img , o = avg ) )
 #' look at the header to determine slices to display 
 ImageMath('4','na','PH',img)
+par(mfrow=c(2,1))
 plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
 maskThresh <- 100000
 mask <- get_mask( avg , maskThresh , 1e9 )
@@ -127,7 +128,7 @@ ToDo: add gray matter mask and anatomical labels.
 .. {r testrestingstatefMRIconnectivity, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
 isucceed<-FALSE
 testval<-round(mean(cor(tobecorrelated))*100)
-refval<-22
+refval<-12
 if ( testval == refval ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
 if ( !isucceed ) print(paste("FAILURE: ",testval," vs refval ", refval ))
