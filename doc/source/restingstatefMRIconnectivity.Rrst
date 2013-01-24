@@ -5,9 +5,8 @@ First take a quick look at your data.
 
 .. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
 library(ANTsR)
-pixtype<-"double" # needed for call to antsMotionCorr
 fn<-getANTsRData("KK") # 4D image 
-img<-antsImageRead(fn,4,pixtype)
+img<-antsImageRead(fn,4)
 #' get the average to look at it in 3D
 avg <- new( "antsImage" , dimension = 3 , pixeltype=img@pixeltype  )
 antsMotionCorr( list( d = 3 , a = img , o = avg ) )
@@ -133,4 +132,3 @@ if ( testval == refval ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
 if ( !isucceed ) print(paste("FAILURE: ",testval," vs refval ", refval ))
 .. .. 
-

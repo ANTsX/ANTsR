@@ -50,19 +50,19 @@ if( is.character( img ) )
       print( "'img' should be only one filename" )
       return( NULL )
     }
-  img <- antsImageRead( img , dimension = 4 , "double"  )
+  img <- antsImageRead( img , dimension = 4 , "float"  )
   inpixeltype<-img@pixeltype
 }else if( class( img ) == "antsImage" )
 {
   inpixeltype<-img@pixeltype
-  if( img@pixeltype != "double" )
+  if( img@pixeltype != "float" )
     {
-    print( "'img' must have pixeltype  'double' " )
-    img<-antsImageClone(img,"double")
+    print( "'img' must have pixeltype  'float' " )
+    img<-antsImageClone(img,"float")
     }
   if( img@dimension != 4 ) 
   {
-    print( "'img' must have pixeltype 'double' and dimension '4'" )
+    print( "'img' must have pixeltype 'float' and dimension '4'" )
     return( NULL )  
   }
 }else
@@ -73,7 +73,7 @@ if( is.character( img ) )
 
 if ( missing( fixed ) )
 {
-  fixed <- new( "antsImage" , "double" , 3 )
+  fixed <- new( "antsImage" , "float" , 3 )
   antsMotionCorr( list( d = 3 , a = img , o = fixed ) )
 } else
 {
@@ -84,17 +84,17 @@ if ( missing( fixed ) )
           print ( "'fixed' should be only one filename" )
           return( NULL )
         }
-      fixed <- antsImageRead( fixed, dimension = 3, "double" )
+      fixed <- antsImageRead( fixed, dimension = 3, "float" )
     } else if ( class( fixed ) == "antsImage" )
       {
-        if( fixed@pixeltype != "double" )
+        if( fixed@pixeltype != "float" )
           {
-            print( "'fixed' must have pixeltype  'double' " )
-            fixed<-antsImageClone(fixed,"double")
+            print( "'fixed' must have pixeltype  'float' " )
+            fixed<-antsImageClone(fixed,"float")
           }
         if (  fixed@dimension != 3 )
           {
-            print( "'fixed' must have pixeltype 'double' and dimension '3'" )
+            print( "'fixed' must have pixeltype 'float' and dimension '3'" )
             return( NULL )
           }
       }
@@ -110,8 +110,8 @@ if ( n > 10 )
   {
   n <- 10
   }
-avg_img = new( "antsImage" , "double" , 3 )
-moco_img = new( "antsImage" , "double" , 4 )
+avg_img = new( "antsImage" , "float" , 3 )
+moco_img = new( "antsImage" , "float" , 4 )
 moco_params = new( "antsMatrix" , "double" )
 if ( moreaccurate == TRUE ) {
   antsMotionCorr( list( d = 3 , o = list( moco_params , moco_img , avg_img ) , m = list( name = "MI" , fixed , img , 1 , 32 , "regular" , 0.1 ) , t = "Affine[0.1]" , i = 20 , u = 1 , e = 1 , s = 0 , f = 1 , n = n, l = 1 ) )

@@ -20,7 +20,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
  #   SVN_REVISION -r 1781
     GIT_REPOSITORY git://github.com/stnava/ANTs.git
-    GIT_TAG  4d82befef7010103266d564c3a7033e65e770525
+    GIT_TAG  5d4bd9d8ce7ed91187911eb359cd9f01851f041e
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
