@@ -46,7 +46,7 @@ See the libraries listed above and install them.
 
 Clone or Pull ANTsR from this repository as follows:
 
-      $ git clone https://github.com/stnava/ANTsR.git
+      $ git clone git@github.com:stnava/ANTsR.git
 
 Install the package as follows:
 
