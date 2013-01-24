@@ -14,7 +14,7 @@ tfn <- getANTsRData("KK")
 img <- antsImageRead(tfn, 4 )
 avg <- new("antsImage", dimension = 3, pixeltype = "float")
 antsMotionCorr(list(d = 3, a = img, o = avg))
-mytx<-antsRegistration(fixed=tem , moving=avg , typeofTransform = c("Affine"), outprefix=paste(tempdir(),"/Z",sep=''))
+mytx<-antsRegistration(fixed=tem , moving=avg , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=''))
 # use full access to antsApplyTx
 outimg<-new("antsImage", dimension = 3, pixeltype = "float")
 antsApplyTransforms( list( d=3,i=avg,o=outimg,r=tem,t=mytx$fwd[1],t=mytx$fwd[2] ))
@@ -27,8 +27,7 @@ avgtx <- new("antsImage", dimension = 3, pixeltype = "float")
 antsMotionCorr(list(d = 3, a = out4Dimg, o = avgtx))
 # par(mfrow=c(2,1))
 # plotANTsImage( outimg,slices="40x60x5",axis=1)
-# favg<-antsImageClone(avgtx,'float')
-# plotANTsImage( favg,slices="40x60x5",axis=1)
+# plotANTsImage( avgtx,slices="40x60x5",axis=1)
 .. .. 
 
 .. {r reg4Dtest, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
