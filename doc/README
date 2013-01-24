@@ -37,23 +37,25 @@ function mysafetest {
 ###############################################
 ANTsRdoc=/Users/stnava/code/gitANTs/ANTsRDoc/ANTsR/doc
 mysafetest cd $ANTsRdoc
-mysafetest git checkout master
-mysafetest ./scripts/convertRd2rst.sh
-mysafetest cd source 
-mysafetest ../scripts/convertRrst2rst.R 
-mysafetest cd $ANTsRdoc
-# 
-# then to build the html, type: 
-# 
-mysafetest make html
-if [[ $option -eq 0 ]] ; then exit ; fi 
+if [[ $option -eq 0 ]] ; then 
+  mysafetest git checkout master
+  mysafetest ./scripts/convertRd2rst.sh
+  mysafetest cd source 
+  mysafetest ../scripts/convertRrst2rst.R 
+  mysafetest cd $ANTsRdoc
+  # then build the html
+  mysafetest make html
+  exit 
+fi
 mysafetest git commit -a -m "WIP: prepping for website update"
 git push origin master
 if [[ $option -eq 1 ]] ; then exit ; fi 
-mysafetest git checkout gh-pages
+git push origin --delete  gh-pages
+mysafetest git checkout --orphan gh-pages
+mysafetest git rm -rf .
 mysafetest cd .. 
 mysafetest cp -r doc/build/html/* .
-mysafetest git add *html _sources/* _images/*
+mysafetest git add *html _sources/* _images/* _static/* 
 mysafetest git commit -a -m "WIP: website update"
 mysafetest git push origin gh-pages
 mysafetest git checkout master
