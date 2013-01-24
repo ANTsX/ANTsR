@@ -50,10 +50,11 @@ fi
 mysafetest git commit -a -m "WIP: prepping for website update"
 git push origin master
 if [[ $option -eq 1 ]] ; then exit ; fi 
-git push origin --delete  gh-pages
+git branch -D gh-pages
+git push origin --delete  gh-pages # run this every once in a while 
 mysafetest git checkout --orphan gh-pages
-mysafetest git rm -rf .
 mysafetest cd .. 
+mysafetest git rm -rf .
 mysafetest cp -r doc/build/html/* .
 mysafetest git add *html _sources/* _images/* _static/* 
 mysafetest git commit -a -m "WIP: website update"
