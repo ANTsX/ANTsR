@@ -25,9 +25,9 @@ out4Dimg<-new("antsImage", dimension = 4, pixeltype = "float")
 antsApplyTransforms( list(d=3,e=3,i=img,o=out4Dimg,r=tem,t=mytx$fwd[1],t=mytx$fwd[2]))
 avgtx <- new("antsImage", dimension = 3, pixeltype = "float")
 antsMotionCorr(list(d = 3, a = out4Dimg, o = avgtx))
-# par(mfrow=c(2,1))
-# plotANTsImage( outimg,slices="40x60x5",axis=1)
-# plotANTsImage( avgtx,slices="40x60x5",axis=1)
+ par(mfrow=c(2,1))
+ plotANTsImage( outimg,slices="40x60x5",axis=1)
+ plotANTsImage( avgtx,slices="40x60x5",axis=1)
 .. .. 
 
 .. {r reg4Dtest, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
