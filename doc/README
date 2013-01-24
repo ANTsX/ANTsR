@@ -35,7 +35,7 @@ function mysafetest {
     return $status
 }
 ###############################################
-ANTsRdoc=/Users/stnava/code/temp/antsr/ANTsR/doc
+ANTsRdoc=/Users/stnava/code/gitANTs/ANTsRDoc/ANTsR/doc
 mysafetest cd $ANTsRdoc
 mysafetest git checkout master
 mysafetest ./scripts/convertRd2rst.sh

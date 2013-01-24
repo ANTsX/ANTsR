@@ -127,7 +127,7 @@ ToDo: add gray matter mask and anatomical labels.
 .. {r testrestingstatefMRIconnectivity, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
 isucceed<-FALSE
 testval<-round(mean(cor(tobecorrelated))*100)
-refval<-12
+refval<-22
 if ( testval == refval ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
 if ( !isucceed ) print(paste("FAILURE: ",testval," vs refval ", refval ))
