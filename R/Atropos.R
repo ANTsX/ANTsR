@@ -1,5 +1,10 @@
 Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", ... )
 {
+  if ( typeof(d) == "list" )
+    {
+    .Call( "Atropos", int_antsProcessArguments(  d ) )
+    return(0)
+    }
   if ( missing( d ) | missing( a )  | missing( x )  )
     {
     print("Input error - check params & usage")
