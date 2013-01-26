@@ -1,4 +1,4 @@
-Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", ... )
+Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", priorweight=0.5, ... )
 {
   if ( typeof(d) == "list" )
     {
@@ -28,7 +28,7 @@ Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", ... )
       antsImageWrite( i[[ct]] , tempfn )
       ct<-ct+1
       }
-    i<-paste("PriorProbabilityImages[",length(i),",",probs,",0.1]",sep='')
+    i<-paste("PriorProbabilityImages[",length(i),",",probs,",",priorweight,"]",sep='')
     print(i)
     }
   if ( typeof( a ) == "list" )  outimg<-antsImageClone( a[[1]] , "unsigned int" ) else outimg<-antsImageClone( a , "unsigned int" )
