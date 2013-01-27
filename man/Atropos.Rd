@@ -123,7 +123,7 @@ Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1
 Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) 
 Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = list( name = "priorprobabilityimages" , 3 , prob_img_list , 0 ) , x = bm_img_uint ) 
 # a simplified interface using recent segmentation features 
-  ksegs <- Atropos(d = img@dimension, a = img, m = "[0.1,1x1]", c = "[40,-1]",
-    i = list( prior1, prior2, prior3) , x = mask, priorweight=0.5 , p="Wittgenstein[1,5,0.9,0.1]" )
+  ksegs <- Atropos(d = img@dimension, a = img, m = "[0.1,1x1]", c = "[40,0]",
+    i = list( prior1, prior2, prior3) , x = mask, priorweight=0.5 , p="Wittgenstein[1]" )
 }
 }
