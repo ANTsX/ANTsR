@@ -8,8 +8,12 @@
 
 labels2matrix <- function( img, mask )
 {
-  logmask <- (mask == 1)
-  vec <- img[logmask]
+  if ( length(img) != length(mask) )
+    {
+    stop( "image and mask must be same size" )
+    }
+  
+  vec <- subset(img, mask==1)
 
   nLabels <- max(vec) + 1
   nVoxels <- length(vec)
