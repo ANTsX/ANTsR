@@ -6,7 +6,7 @@ ANTs segmentation approaches.
 
 We typically use bias correction and tissues priors but in some cases k-means can do the job.
 
-.. {r segment, out.width='512px', fig.cap='Basic kmeans segmentation',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r segment, out.width="512px", fig.cap="Basic kmeans segmentation",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(ANTsR)
 tfn <- getANTsRData("r16")
 img <- antsImageRead(tfn, 2, "float")
@@ -28,10 +28,10 @@ countgm<-sum( segs$segmentation == 2 )/sum( mask == 1 )
 
 Use the probability images to resegment the input image based on spatial priors and its gradient in addition to its raw intensity.
 
-.. {r segprior, out.width='512px', fig.cap='Prior-based segmentation',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r segprior, out.width="512px", fig.cap="Prior-based segmentation",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 # get the image gradient and, for fun , do a multivariate segmentation
 imggrad<-antsImageClone( imgn3 )
-ImageMath(img@dimension,imggrad,'Laplacian',imgn3)
+ImageMath(img@dimension,imggrad,"Laplacian",imgn3)
 segs<-Atropos( d = img@dimension, a = c(imgn3,imggrad), m = "[0.2,1x1]",c = "[5,0]",  i = segs$probabilityimages, x = mask) 
 par(mfrow = c(2, 2))
 plotANTsImage(segs$segmentation)
@@ -42,7 +42,7 @@ countgm2<-sum( segs$segmentation == 2 )/sum( mask == 1 )
 .. ..
 
 
-.. {r testSegmentation, out.width='512px', fig.cap='ANTsR basic kmeans segmentation',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
+.. {r testSegmentation, out.width="512px", fig.cap="ANTsR basic kmeans segmentation",eval=TRUE,echo=FALSE,warning=FALSE,results="markup",message=FALSE}
 isucceed<-FALSE
 val1<-round( countgm*100 )
 val2<-round( countgm2*100 )

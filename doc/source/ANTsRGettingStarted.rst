@@ -24,7 +24,7 @@ For example, call the antsImageRead routine and some standard ANTs functions.
 
    imgn3<-antsImageClone(antsimage)
 
-   N3BiasFieldCorrection(list(antsimage@dimension,img,imgn3,'4'))
+   N3BiasFieldCorrection(list(antsimage@dimension,img,imgn3,"4"))
 
    Atropos( list( d = 2 , a = imgn3 , m = "[0.2,1x1]" , o =  seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = mask) )
 
@@ -32,11 +32,11 @@ For example, call the antsImageRead routine and some standard ANTs functions.
 User Installation Method: from within R
 ---------------------------------------------
 
-install.packages(c('devtools','MASS','Rcpp','methods','signal','parallel','timeSeries','mFilter','MASS','robust','magic','knitr','pixmap','rgl','misc3d','lme4'))
+install.packages(c("devtools","MASS","Rcpp","methods","signal","parallel","timeSeries","mFilter","MASS","robust","magic","knitr","pixmap","rgl","misc3d","lme4"))
 
 library( devtools )
 
-install_github('ANTsR','stnava')
+install_github("ANTsR","stnava")
 
 
 Developer Installation Method: from command line
@@ -67,7 +67,7 @@ which will include:
 
 In R, you can do:   
     
-     R>  install.packages( 'signal', dependencies=TRUE ) 
+     R>  install.packages( "signal", dependencies=TRUE ) 
 
 to get packages.
 

@@ -3,15 +3,15 @@ Tips for functional MRI and resting state analysis
 
 First take a quick look at your data.
 
-.. {r plotANTsfImage, out.width='720px', fig.cap='ANTsR fMRI plot',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r plotANTsfImage, out.width="720px", fig.cap="ANTsR fMRI plot",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(ANTsR)
 fn<-getANTsRData("KK") # 4D image 
 img<-antsImageRead(fn,4)
-#' get the average to look at it in 3D
+#" get the average to look at it in 3D
 avg <- new( "antsImage" , dimension = 3 , pixeltype=img@pixeltype  )
 antsMotionCorr( list( d = 3 , a = img , o = avg ) )
-#' look at the header to determine slices to display 
-ImageMath('4','na','PH',img)
+#" look at the header to determine slices to display 
+ImageMath("4","na","PH",img)
 par(mfrow=c(2,1))
 plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
 maskThresh <- 100000
@@ -27,17 +27,17 @@ This involves motion correction which, with default settings, can be time consum
 
 We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
 
-.. {r fmriprocess, out.width='720px', fig.cap='ANTsR preprocessing, including frequency filtering, for fMRI',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r fmriprocess, out.width="720px", fig.cap="ANTsR preprocessing, including frequency filtering, for fMRI",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=maskThresh)
 .. .. 
 
 
-.. {r stealmultiplot, out.width='720px',echo=FALSE,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r stealmultiplot, out.width="720px",echo=FALSE,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 # Multiple plot function
 #
 # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
 # - cols:   Number of columns in layout
-# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+# - layout: A matrix specifying the layout. If present, "cols" is ignored.
 #
 # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
 # then plot 1 will go in the upper left, 2 will go in the upper right, and
@@ -51,7 +51,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
   numPlots = length(plots)
 
-  # If layout is NULL, then use 'cols' to determine layout
+  # If layout is NULL, then use "cols" to determine layout
   if (is.null(layout)) {
     # Make the panel
     # ncol: Number of columns of plots
@@ -82,9 +82,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 The stage above factored out what many consider to be the major signals in fMRI that are not due to natural resting-state fluctuations in brain activity.  
 
-A network analysis may now be performed on the results of the above processing.  The key output is myres$filteredTimeSeries.  Let's look at sample voxels' time series using basic plotting.
+A network analysis may now be performed on the results of the above processing.  The key output is myres$filteredTimeSeries.  Let"s look at sample voxels" time series using basic plotting.
 
-.. {r plotsamplevoxels, out.width='720px', fig.cap='ANTsR sample voxels',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r plotsamplevoxels, out.width="720px", fig.cap="ANTsR sample voxels",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(ggplot2)
 samplevox1<-round( ncol(myres$filteredTimeSeries)/2 )
 samplevox2<-round( ncol(myres$filteredTimeSeries)/3 )
@@ -94,14 +94,14 @@ p2<-( ggplot( data , aes( x = time , y = v2 ) ) + geom_line()  + ggtitle("Time s
 multiplot( p1, p2, cols=1) # function stolen from the internet
 .. ..
 
-That's good --- check a separate page for example network analyses.  In brief, a network analysis will compute correlations between voxels such as these.  
+That"s good --- check a separate page for example network analyses.  In brief, a network analysis will compute correlations between voxels such as these.  
 
 Let’s simulate a standard rsf network analysis by extracting some data-driven “ROIs” and show the resulting correlation matrix.
 
 
-.. {r simplesparsesvd, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r simplesparsesvd, out.width="720px", fig.cap="ANTsR rsfmri correlations from simple sparse svd",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 mysvd <- svd(myres$filteredTimeSeries)
-# let's make the v eigenvectors sparse , otherwise they are totally uncorrelated
+# let"s make the v eigenvectors sparse , otherwise they are totally uncorrelated
 nevecs <- 10
 vecs <- mysvd$v[, 1:nevecs]
 thresh <- 0.005  # just an example
@@ -114,7 +114,7 @@ for (i in c(1:nevecs)) {
     vecs[, i] <- vecimg[(myres$mask > 0)]
 }
 tobecorrelated <- (myres$filteredTimeSeries %*% vecs)
-#' visualize the resulting correlations
+#" visualize the resulting correlations
 image(cor(tobecorrelated))
 .. ..
 
@@ -124,7 +124,7 @@ Now you can reduce your fMRI data to relatively simple measurements of connectiv
 
 ToDo: add gray matter mask and anatomical labels.
 
-.. {r testrestingstatefMRIconnectivity, out.width='720px', fig.cap='ANTsR rsfmri correlations from simple sparse svd',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
+.. {r testrestingstatefMRIconnectivity, out.width="720px", fig.cap="ANTsR rsfmri correlations from simple sparse svd",eval=TRUE,echo=FALSE,warning=FALSE,results="markup",message=FALSE}
 isucceed<-FALSE
 testval<-round(mean(cor(tobecorrelated))*100)
 refval<-22

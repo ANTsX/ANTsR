@@ -24,12 +24,12 @@ dots, e.g.
 .. {r rst-example}
 .. 1+1
 .. set.seed(123); rnorm(10)
-.. warning('do not forget the space after ..!')
+.. warning("do not forget the space after ..!")
 .. ..
 
 Here is a plot:
 
-.. {r rst-plot, out.width='360px', fig.cap='A ggplot2 example'}
+.. {r rst-plot, out.width="360px", fig.cap="A ggplot2 example"}
 library(ggplot2)
 qplot(hp, mpg, data=mtcars) + geom_smooth()
 .. ..

@@ -3,7 +3,7 @@ Demonstrate plotANTsImage
 
 First, read an image. Then display with a simple command.
 
-.. {r plotANTsImage, out.width='720px', fig.cap='ANTsR image plot',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r plotANTsImage, out.width="720px", fig.cap="ANTsR image plot",eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 fn<-"../../demo/example_images/phantomtemplate.jpg"
 img<-antsImageRead(fn,2)
 plotANTsImage(myantsimage=img)
@@ -16,7 +16,7 @@ Next, create an artificial functional image by smoothing the background image.
 
 Now use a overlay color on the background and display it. 
 
-.. {r plotANTsImageOverlay, out.width='720px', fig.cap='ANTsR image plot with overlay',eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r plotANTsImageOverlay, out.width="720px", fig.cap="ANTsR image plot with overlay",eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 simg<-antsImageClone(img)
 SmoothImage(2,img,3,simg)
 plotANTsImage(myantsimage=img,functional=simg,threshold="150x260",color="red",axis=1)

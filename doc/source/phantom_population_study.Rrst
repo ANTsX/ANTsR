@@ -5,38 +5,38 @@ This example shows how to run a basic linear regression study across a populatio
 
 First, load libraries.
 
-.. {r step1,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r step1,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(knitr)
 library(ANTsR)
 .. ..
 
 Next declare dimensionality and get your pre-processed data.
 
-.. {r step2,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r step2,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 mydim <- 2
-#' define prefix for output files
+#" define prefix for output files
 outpre <- "TEST"
-#' get the images
+#" get the images
 glb <- glob2rx(paste("phantom*bian.nii.gz", sep = ""))
 fnl <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
 maskfn <- "phantomtemplate.jpg"
-#' get the mask , should be in same space as image
+#" get the mask , should be in same space as image
 glb <- glob2rx(paste(maskfn, sep = ""))
 maskfn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
 mask <- antsImageRead(maskfn, mydim)
-#' get regions of mask according to logical comparisons
+#" get regions of mask according to logical comparisons
 logmask <- (mask > 120 & mask < 130)
 notlogmask <- (!logmask)
-#' make sure it holds zeroes
+#" make sure it holds zeroes
 mask[logmask]    <- 1
 mask[notlogmask] <- 0
 # fill holes
-ImageMath('2',mask,"FillHoles",mask)
+ImageMath("2",mask,"FillHoles",mask)
 .. .. 
 
 Take a quick look at the input template and mask.
 
-.. {r step3,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r step3,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 # image(as.array(antsImageRead(maskfn,  mydim))) # alternative approach
 plotANTsImage(myantsimage=antsImageRead(maskfn, mydim))
 plotANTsImage(myantsimage=mask)
@@ -46,8 +46,8 @@ Now collect the results in a matrix and do the statistics.
 
 We also write out a few results using antsImageWrite.
 
-.. {r step4,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-#' count voxels and create matrix to hold image data
+.. {r step4,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
+#" count voxels and create matrix to hold image data
 nvox <- sum(c(logmask))
 mat <- matrix(length(fnl) * nvox, nrow = length(fnl), ncol = nvox)
 for (i in 1:length(fnl)) {
@@ -55,20 +55,20 @@ for (i in 1:length(fnl)) {
     vec <- i1[logmask]
     mat[i, ] <- vec
 }
-#' identify your predictors and use in regression
+#" identify your predictors and use in regression
 predictor <- c(rep(2, 4), rep(1, 4))
-#' the regression for your study
+#" the regression for your study
 testformula <- (vox ~ 1 + predictor)
 betavals <- rep(NA, nvox)
 pvals <- rep(NA, nvox)
 ntst <- 1
-#' there are better/faster ways but this is simple
+#" there are better/faster ways but this is simple
 while (ntst < (nvox + 1)) {
     vox <- mat[, ntst]
     summarymodel <- summary(lm(testformula))
-    #' get the t-vals for this predictor and write to an image
+    #" get the t-vals for this predictor and write to an image
     betavals[ntst] <- summarymodel$coef[2, 3]
-    #' get the beta for this predictor and write to an image
+    #" get the beta for this predictor and write to an image
     pvals[ntst] <- summarymodel$coef[2, 4]
     ntst <- ntst + 1
 }
@@ -78,9 +78,9 @@ antsImageWrite(betaimg, paste(outpre, "_beta.nii.gz", sep = ""))
 .. ..
 
 
-Now let's visualize the histogram of the corrected p-values ( the q-values ).
+Now let"s visualize the histogram of the corrected p-values ( the q-values ).
 
-.. {r rst-plot, out.width='720px', fig.cap='Histogram of q-values'}
+.. {r rst-plot, out.width="720px", fig.cap="Histogram of q-values"}
 qvals<-p.adjust(pvals,method="BH")
 sigct<-round( sum( qvals < 0.05 ) / sum( logmask ) * 100 )
 isucceed<-FALSE
@@ -93,7 +93,7 @@ m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white
 
 Overlay the beta-image on the template to see areas with high t-statistic ( greater than 2 , less than 6 ).
 
-.. {r step5,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r step5,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
 plotANTsImage(myantsimage=antsImageRead(maskfn, mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
 .. ..
 
