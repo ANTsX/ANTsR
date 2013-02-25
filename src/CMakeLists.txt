@@ -19,10 +19,11 @@ if( NOT ANTS_DIR )
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
 #    SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
  #   SVN_REVISION -r 1781
-    GIT_REPOSITORY http://github.com/stnava/ANTs.git
-    GIT_TAG  5d4bd9d8ce7ed91187911eb359cd9f01851f041e
+   GIT_REPOSITORY http://github.com/stnava/ANTs.git
+   GIT_TAG  5c0855f61e81520e4ab4c7ea502bd803985c55be  
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
+               -D COPY_SCRIPT_FILES_TO_BIN_DIR=ON # for useful things like buildtemplateparallel
                -D BUILD_SHARED_LIBS=ON # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
 	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'

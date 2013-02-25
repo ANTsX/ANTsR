@@ -18,6 +18,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ANTS_TRANSFORMATION<-"SyN[0.1,3,0]"
   ANTS_LINEAR_METRIC_PARAMS<-"1,32,Regular,0.25"
   ANTS_LINEAR_CONVERGENCE<-"[1000x1000x1000x1000,1e-7,15]"
+  ANTS_LINEAR_CONVERGENCEFAST<-"[1000x1000x0x0,1e-7,10]"
   ANTS_METRIC<-"CC"
   ANTS_METRIC_PARAMS<-"1,4"
   # ANTs parameters end
@@ -70,26 +71,25 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   antsRegistration( antsregparams )
   tx<-paste(EXTRACTION_WARP_OUTPUT_PREFIX,c("1InverseWarp.nii.gz","0GenericAffine.mat"),sep='')
   temmaskwarped<-antsImageClone( img )
-  aatparams<-list( d=img@dimension, i=temmask, o=temmaskwarped, r=img, n="Gaussian", t=paste("[",tx[2],",1]",sep=''), t=tx[1])
+  aatparams<-list( d=img@dimension, i=temmask, o=temmaskwarped, n="Gaussian", r=img, t=paste("[",tx[2],",1]",sep=''), t=tx[1])
   antsApplyTransforms( aatparams )
-  ftemmaskwarped<-antsImageClone( temmaskwarped, "float" )
-  ThresholdImage(img@dimension,ftemmaskwarped,ftemmaskwarped,0.5,1)
-  tmp<-antsImageClone(ftemmaskwarped)
-  ImageMath(img@dimension,tmp,"MD",ftemmaskwarped,2)
+  ThresholdImage(img@dimension,temmaskwarped,temmaskwarped,0.5,1)
+  tmp<-antsImageClone(temmaskwarped)
+  ImageMath(img@dimension,tmp,"MD",temmaskwarped,2)
   ImageMath(img@dimension,tmp,"GetLargestComponent",tmp,2)
   ImageMath(img@dimension,tmp,"FillHoles",tmp)
+  gc()
   seg<-antsImageClone( img , "unsigned int")
-  atroparams<-list( d=img@dimension, a=img,  m=ATROPOS_BRAIN_EXTRACTION_MRF, o=seg,  x=antsImageClone(tmp,"unsigned int"), i=ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c=ATROPOS_BRAIN_EXTRACTION_CONVERGENCE, k=ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD )
-  print( atroparams )
+  tmpi<-antsImageClone(tmp,"unsigned int")
+  atroparams<-list( d=img@dimension, a=img,  m=ATROPOS_BRAIN_EXTRACTION_MRF, o=seg,  x=tmpi, i=ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c=ATROPOS_BRAIN_EXTRACTION_CONVERGENCE, k=ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD )
   Atropos( atroparams )
   fseg<-antsImageClone( seg, 'float')
-  seg<-fseg
   segwm<-antsImageClone(img) 
-  ThresholdImage(img@dimension,seg,segwm,3,3)
+  ThresholdImage(img@dimension,fseg,segwm,3,3)
   seggm<-antsImageClone(img) 
-  ThresholdImage(img@dimension,seg,seggm,2,2)
+  ThresholdImage(img@dimension,fseg,seggm,2,2)
   segcsf<-antsImageClone(img) 
-  ThresholdImage(img@dimension,seg,segcsf,1,1)
+  ThresholdImage(img@dimension,fseg,segcsf,1,1)
   ImageMath(img@dimension,segwm,"GetLargestComponent",segwm)
   ImageMath(img@dimension,segwm,"GetLargestComponent",segwm)
   tmp<-antsImageClone( img )
@@ -114,6 +114,9 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ImageMath(img@dimension,tmp,"ME",tmp,5)
 #  FIXME - steps above should all be checked again ...
   brain<-antsImageClone(img)
-  ImageMath(img@dimension,brain,"m",brain,tmp)  
-  return( list( brain=brain, bmask=tmp ) )
+  ImageMath(img@dimension,brain,"m",brain,tmp)
+  outprefix<-EXTRACTION_WARP_OUTPUT_PREFIX
+  fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
+  invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
+  return( list( brain=brain, bmask=tmp , kmeansseg=seg, fwdtransforms=fwdtransforms, invtransforms=invtransforms ) )
 }

@@ -43,6 +43,7 @@ Tustison N, Avants BB
 
 \examples{
 \dontrun{
+# short example first
 fn<-getANTsRData('r16')
 img<-antsImageRead(fn,2)
 tf<-getANTsRData('r64')
@@ -51,5 +52,36 @@ temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ]<-1 
 temmask[ tem  <= 20 ]<-0 
 bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
+
+# more complete example
+idim<-2
+fn<-getANTsRData('r16')
+img<-antsImageRead(fn,idim)
+tf<-getANTsRData('r64')
+atem<-antsImageRead(tf,idim)
+temmask<-antsImageClone( atem )
+temmask[ atem > 20 ]<-1
+temmask[ atem <= 20 ]<-0
+tsegs <- Atropos(d = idim, a = atem, m = "[0.2,1x1]", c = "[5,0]", i ="kmeans[3]", x = temmask)
+acsf<-tsegs$probabilityimages[[1]]
+agm<-tsegs$probabilityimages[[2]]
+awm<-tsegs$probabilityimages[[3]]
+abm<-temmask
+kk<-abpN4(img)
+kkbm<-abpBrainExtraction(img=kk,tem=atem,temmask=abm)
+kcsf<-antsApplyTransforms(fixed=kk,moving=acsf,transformlist=kkbm$invtransforms)
+kgm<-antsApplyTransforms(fixed=kk,moving=agm,transformlist=kkbm$invtransforms)
+kwm<-antsApplyTransforms(fixed=kk,moving=awm,transformlist=kkbm$invtransforms)
+plotANTsImage(kk,slices='40x120x20',functional=kwm,thresh='0.5x1')
+for ( its in 1:3 ) {
+  kk<-abpN4( img , weight = kwm , mask = kkbm$bmask )
+  ksegs <- Atropos(d = kk@dimension, a = kk, m = "[0.1,1x1]", c = "[5,0]",
+    i = list( kcsf, kgm, kwm) , x = kkbm$bmask )
+  kcsf<-ksegs$probabilityimages[[1]]
+  kgm<-ksegs$probabilityimages[[2]]
+  kwm<-ksegs$probabilityimages[[3]]
+  plotANTsImage(kk,slices='40x120x20',functional=kwm,thresh='0.5x1')
+}
+
 }
 }
