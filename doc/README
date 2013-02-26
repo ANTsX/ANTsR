@@ -46,7 +46,7 @@ if [[ $option -eq 0 ]] ; then
   # then build the html
   mysafetest make html
   exit 
-fi
+fi 
 mysafetest git commit -a -m "WIP: prepping for website update"
 git push origin master
 if [[ $option -eq 1 ]] ; then exit ; fi 
@@ -56,7 +56,9 @@ mysafetest git checkout --orphan gh-pages
 mysafetest cd .. 
 mysafetest git rm -rf .
 mysafetest cp -r doc/build/html/* .
+echo " " > .nojekyll
 mysafetest git add *html _sources/* _images/* _static/* *js *inv 
 mysafetest git commit -a -m "WIP: website update"
 mysafetest git push origin gh-pages
 mysafetest git checkout master
+echo dont forget the .nojekyll file!
