@@ -8,8 +8,10 @@ self<-substring(self,8,nchar(as.character(self)))
 fn<-(Args[6])
 ofn<-(Args[7])
 # 
-myrrst<-c("phantom_population_study.Rrst","plotANTsImage.Rrst","antsSegmentation.Rrst","networkanalysisfMRI.Rrst","restingstatefMRIconnectivity.Rrst","transformTimeSeries.Rrst")
+# myrrst<-c("phantom_population_study.Rrst","plotANTsImage.Rrst","antsSegmentation.Rrst","networkanalysisfMRI.Rrst","restingstatefMRIconnectivity.Rrst","transformTimeSeries.Rrst")
+myrrst<-list.files(path = ".","*.Rrst")
 for ( myfn in myrrst ) {
+  print(paste('knit',myfn))
   rstfn<-sub('.Rrst','.rst',myfn)
   knit(myfn,rstfn)
   rstfn<-paste("../../demo/",sub('.Rrst','.R',myfn),sep='')

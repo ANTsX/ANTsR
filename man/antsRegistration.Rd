@@ -46,13 +46,11 @@ Shrinidhi KL, Avants BB
 # will give the full form of help
 antsRegistration( "-h")
 # example 1 - simplified, uses antsImages for I/O
-antsRegOut<-antsRegistration(fixed=img1,moving=img2,
-  typeofTransform="Affine",outprefix="./test")
+antsRegOut<-antsRegistration(fixed=img1,moving=img2,typeofTransform="Affine",outprefix="./test")
 # example 2
   fi<-antsImageRead( getANTsRData('r16') ,2)
   mi<-antsImageRead( getANTsRData('r64') ,2)
-  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"),
-    outprefix=paste(tempdir(),"/Z",sep=''))
+  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=''))
   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms)
   par(mfrow=c(1,2))
   plotANTsImage(fi) 

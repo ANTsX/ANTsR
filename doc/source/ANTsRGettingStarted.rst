@@ -20,23 +20,32 @@ almost exactly as in the command-line version.
 
 For example, call the antsImageRead routine and some standard ANTs functions.
 
-   antsimage<-antsImageRead( "r16slice.nii.gz", 2 )
 
-   imgn3<-antsImageClone(antsimage)
+.. sourcecode:: r
+    
 
-   N3BiasFieldCorrection(list(antsimage@dimension,img,imgn3,"4"))
+    tfn <- getANTsRData("r16")  # download example data
+    antsimage <- antsImageRead(tfn, 2)
+    imgn3 <- antsImageClone(antsimage)
+    N3BiasFieldCorrection(list(antsimage@dimension, antsimage, imgn3, "4"))
 
-   Atropos( list( d = 2 , a = imgn3 , m = "[0.2,1x1]" , o =  seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = mask) )
+
 
 
 User Installation Method: from within R
 ---------------------------------------------
 
-install.packages(c("devtools","MASS","Rcpp","methods","signal","parallel","timeSeries","mFilter","MASS","robust","magic","knitr","pixmap","rgl","misc3d","lme4"))
 
-library( devtools )
+.. sourcecode:: r
+    
 
-install_github("ANTsR","stnava")
+    install.packages(c("devtools", "MASS", "Rcpp", "methods", "signal", "parallel", 
+        "timeSeries", "mFilter", "MASS", "robust", "magic", "knitr", "pixmap", "rgl", 
+        "misc3d", "lme4"))
+    library(devtools)
+    install_github("ANTsR", "stnava")  # all this will take some time
+
+
 
 
 Developer Installation Method: from command line
