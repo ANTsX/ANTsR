@@ -46,7 +46,7 @@ if [[ $option -eq 0 ]] ; then
   # then build the html
   mysafetest make html
   exit 
-fi
+fi 
 mysafetest git commit -a -m "WIP: prepping for website update"
 git push origin master
 if [[ $option -eq 1 ]] ; then exit ; fi 
