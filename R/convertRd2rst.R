@@ -45,7 +45,6 @@ convertRd2rst<- function( infile , outfile="")
 
   baseexamples<-Rd[[which(tags == "\\examples")]]
   myrrsthd<-paste(".. {r ",myfnr,",eval=FALSE,warning=FALSE,results=\"hide\",message=FALSE,echo=TRUE,results=\"hide\"} \n ")
-  cat(myrrsthd,file=outfile,append = TRUE)
  
   dlength<-length( baseexamples[[2]] )
   myexamples<-baseexamples[[2]][[1]][1]
@@ -54,7 +53,7 @@ convertRd2rst<- function( infile , outfile="")
     myexamples<-paste(myexamples,"\n",baseexamples[[2]][[i]][1])
   }
   } 
-  myexamples<-paste("examples: ","\n",myexamples,"\n")
+  myexamples<-paste("examples: \n",myrrsthd,"\n",myexamples,"\n")
   cat(myexamples,file=outfile,append = TRUE)
   cat(".. ..\n",file=outfile,append = TRUE)
   # FIXME - need to parse arguments and loop over all 
