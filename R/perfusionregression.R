@@ -89,6 +89,7 @@ if ( dorobust > 0 )
   print(regweights)
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+  if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
   cbfi[ mask_img == 1 ] <- betaideal  # robust results
   print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
   }
