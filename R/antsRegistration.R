@@ -86,8 +86,10 @@ antsrmakeRandomString <- function(n=1, mylength=12)
 
 antsrGetPointerName<-function( img )
   {
-  if ( Sys.info()["sysname"] == "Linux" ) endofpointer<-20
-  if ( Sys.info()["sysname"] == "Darwin" ) endofpointer<-21
-  pname<- substr( int_antsProcessArguments( list( img )  ) , 11 , endofpointer )
-  return( pname  )
+#  if ( Sys.info()["sysname"] == "Linux" ) endofpointer<-20
+#  if ( Sys.info()["sysname"] == "Darwin" ) endofpointer<-21
+#  pname<- substr( int_antsProcessArguments( list( img )  ) , 11 , endofpointer )
+  splitptrname<-strsplit( int_antsProcessArguments(list( img )) ," " )[[1]][2]
+  pname<-strsplit( splitptrname , ">" )
+  return( pname[[1]]  )
   }
