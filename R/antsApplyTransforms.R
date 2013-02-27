@@ -2,7 +2,14 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
-    .Call( "antsApplyTransforms", int_antsProcessArguments( c(fixed) ) ) ;
+    if ( Sys.info()["sysname"] == "Linux" )
+      {
+      mycmd<-antsrParseListToString(fixed )
+      system( paste("antsApplyTransforms ", mycmd$mystr ) )
+      return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
+      }
+    if ( Sys.info()["sysname"] == "Darwin" )
+      .Call( "antsApplyTransforms", int_antsProcessArguments( c(fixed) ) ) ;
     return(0);
     }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
@@ -58,10 +65,17 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs2[1:(jj-1)]<-myargs[1:(jj-1)]
 	myargs2[jj:(length(myargs)-1)]<-myargs[(jj+1):(length(myargs))]
 	myargs<-myargs2
-	print(myargs)
         }
         } }
-        .Call( "antsApplyTransforms", myargs )
+        print(myargs)
+        if ( Sys.info()["sysname"] == "Darwin" )
+          {
+          mycmd<-antsrParseListToString2( args,outimg, outdim )
+          system( paste("antsApplyTransforms ", mycmd$mystr ) )
+          return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
+          }
+        if ( Sys.info()["sysname"] == "Darwin" )
+          .Call( "antsApplyTransforms", myargs )
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -69,6 +83,68 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
     }
     return(0)
   }
-  .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
+  if ( Sys.info()["sysname"] == "Linux" )
+    {
+    mycmd<-antsrParseListToString(  c(args) )
+    system( paste("antsApplyTransforms ", mycmd$mystr ) )
+    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
+    }
+  if ( Sys.info()["sysname"] == "Darwin" )
+    .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
   gc() # trigger garbage collection
 }
+
+
+antsrParseListToString  <- function( mylist , outimg=NA, outdim=NA )
+  {
+  mystr<-""
+  len<-length(mylist)
+  outimg<-""
+  outdim<-11
+  for ( x in 1:len )
+    {
+    if ( class( mylist[[x]] )[1] == "antsImage" )
+      {
+      tfn<-paste(tempdir(),'img',x,'.nii.gz',sep='')
+      antsImageWrite( mylist[[x]] , tfn )
+      mystr<-paste( mystr, tfn )
+      outdim<-mylist[[x]]@dimension
+      if ( typeof( mylist[[x-1]] ) == "character" )
+        {
+        if (  mylist[[x-1]] == "-o" ) outimg<-tfn
+        }
+      if ( typeof( mylist[[x-1]] ) != "S4" ) 
+        if ( mylist[[x-1]] == "-o" ) outimg<-tfn 
+      } else mystr<-paste( mystr, toString(mylist[[x]]) )
+    }
+  mystr<-sub(',',' ',mystr)
+  mystr<-sub(' - ',' ',mystr)
+  mystr<-sub('-t,','-t ',mystr)
+  mystr<-sub(', ',' ',mystr)
+  return( list(mystr=mystr, outimg=outimg, outdim=outdim ) ) 
+  }
+
+antsrParseListToString2  <- function( mylist , outimg=NA, outdim=NA )
+  {
+  mystr<-""
+  outimg<-""
+  outdim<-11
+  len<-length(mylist)
+  for ( x in 1:len )
+    {
+    mystr<-paste(mystr," -",names(mylist)[x]," ",sep='')
+    if ( class( mylist[[x]] )[1] == "antsImage" )
+      {
+      tfn<-paste(tempdir(),'img',x,'.nii.gz',sep='')
+      antsImageWrite( mylist[[x]] , tfn )
+      mystr<-paste( mystr, tfn )
+      outdim<-mylist[[x]]@dimension
+      if ( names(mylist)[x] == "o" ) outimg<-tfn 
+      } else mystr<-paste( mystr, toString(mylist[[x]]) )
+    }
+  mystr<-sub(',',' ',mystr)
+  mystr<-sub(' - ',' ',mystr)
+  mystr<-sub('-t,','-t ',mystr)
+  mystr<-sub(', ',' ',mystr)
+  return( list(mystr=mystr, outimg=outimg, outdim=outdim ) ) 
+  }
