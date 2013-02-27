@@ -47,10 +47,22 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
           }
           if ( !ismat ) mytx<-list( mytx,"-t",transformlist[ i ]) else mytx<-list( mytx,"-t",paste("[",transformlist[ i ],",1]",sep='') )
           }
-        args<-list( d=fixed@dimension, i=m, o=wmo, r=f, n=interpolator,unlist( mytx ))
-        print(args)
-        .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
-        gc() # trigger garbage collection
+        args<-list( d=fixed@dimension, i=m, o=wmo, r=f, n=interpolator, unlist( mytx ))
+	myargs<-int_antsProcessArguments( c(args) )
+	for ( jj in c(1:length(myargs)) )
+	{
+	if ( !is.na( myargs[jj] ) ) {
+        if ( myargs[jj] == "-" )
+	{
+	myargs2<-rep(NA,(length(myargs)-1))
+	myargs2[1:(jj-1)]<-myargs[1:(jj-1)]
+	myargs2[jj:(length(myargs)-1)]<-myargs[(jj+1):(length(myargs))]
+	myargs<-myargs2
+	print(myargs)
+        }
+        } }
+        .Call( "antsApplyTransforms", myargs )
+        gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
       if ( ! ttexists  ) cat("Problem in arg list \n see usage by calling antsApplyTransforms() w/o arguments \n")
