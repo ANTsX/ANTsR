@@ -2,13 +2,13 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
-    if ( Sys.info()["sysname"] == "Linux" )
+    if ( Sys.info()["sysname"] == "XXX" )
       {
       mycmd<-antsrParseListToString(fixed )
       system( paste("antsApplyTransforms ", mycmd$mystr ) )
       return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
       }
-    if ( Sys.info()["sysname"] == "Darwin" )
+    if ( Sys.info()["sysname"] != "XXX" )
       .Call( "antsApplyTransforms", int_antsProcessArguments( c(fixed) ) ) ;
     return(0);
     }
@@ -67,14 +67,13 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs<-myargs2
         }
         } }
-        print(myargs)
-        if ( Sys.info()["sysname"] == "Linux" )
+        if ( Sys.info()["sysname"] == "XXX" )
           {
           mycmd<-antsrParseListToString2( args,outimg, outdim )
           system( paste("antsApplyTransforms ", mycmd$mystr ) )
           return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
           }
-        if ( Sys.info()["sysname"] == "Darwin" )
+        if ( Sys.info()["sysname"] != "XXX" )
           .Call( "antsApplyTransforms", myargs )
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
@@ -83,13 +82,13 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
     }
     return(0)
   }
-  if ( Sys.info()["sysname"] == "Linux" )
+  if ( Sys.info()["sysname"] == "XXX" )
     {
     mycmd<-antsrParseListToString(  c(args) )
     system( paste("antsApplyTransforms ", mycmd$mystr ) )
     return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
     }
-  if ( Sys.info()["sysname"] == "Darwin" )
+  if ( Sys.info()["sysname"] != "XXX" )
     .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
   gc() # trigger garbage collection
 }
