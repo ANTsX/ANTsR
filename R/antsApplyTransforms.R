@@ -68,7 +68,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         }
         } }
         print(myargs)
-        if ( Sys.info()["sysname"] == "Darwin" )
+        if ( Sys.info()["sysname"] == "Linux" )
           {
           mycmd<-antsrParseListToString2( args,outimg, outdim )
           system( paste("antsApplyTransforms ", mycmd$mystr ) )
