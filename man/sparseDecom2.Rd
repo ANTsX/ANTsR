@@ -10,7 +10,7 @@ Decomposes two matrices into paired sparse eigenevectors to maximize canonical c
 }
 
 \usage{
-sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  )
+sparseDecom2( inmatrix=c(NA,NA),  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  )
 }
 
 \arguments{
