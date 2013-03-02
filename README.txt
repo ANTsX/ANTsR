@@ -14,6 +14,15 @@ NOTE: If you see errors like "Undefined symbols for architecture x86_64" use
 
       $ R --arch=x86_64 CMD INSTALL  ANTsR
 
+
+R Dependencies:
+
+You will probably have to install R packages that ANTsR requires. For example:
+
+> install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), repos = "http://lib.stat.cmu.edu/R/CRAN/", dependencies = TRUE);
+
+
+
 The installed package can be used in R as follows:
 Load the package
 > library( ANTsR )

@@ -2,7 +2,7 @@ cbf_robust <- function( asl_img )
 {
   moco_results <- motion_correction( asl_img )
 
-  moco_mask_img <- get_mask( moco_results$moco_avg_img , thresh_lo = 500 , thresh_hi = 1e9 )
+  moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = 500 , highThresh = 1e9, cleanup = TRUE)
 
   mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
 
