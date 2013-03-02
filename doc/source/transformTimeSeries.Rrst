@@ -6,7 +6,7 @@ Time series registration and transformation.
 
 Register a BOLD image to a BOLD template and apply the resulting mapping. 
 
-.. {r reg4D, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r reg4D, out.width="720px", fig.cap="Mapping between BOLD image and template",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 bfn <- getANTsRData("AB")
 tem<-antsImageRead(bfn, 3)
 ResampleImageBySpacing(list(3,tem,tem,2,2,2))
@@ -14,7 +14,7 @@ tfn <- getANTsRData("KK")
 img <- antsImageRead(tfn, 4 )
 avg <- new("antsImage", dimension = 3, pixeltype = "float")
 antsMotionCorr(list(d = 3, a = img, o = avg))
-mytx<-antsRegistration(fixed=tem , moving=avg , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=''))
+mytx<-antsRegistration(fixed=tem , moving=avg , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=""))
 # use full access to antsApplyTx
 outimg<-new("antsImage", dimension = 3, pixeltype = "float")
 antsApplyTransforms( list( d=3,i=avg,o=outimg,r=tem,t=mytx$fwd[1],t=mytx$fwd[2] ))
@@ -30,7 +30,7 @@ antsMotionCorr(list(d = 3, a = out4Dimg, o = avgtx))
  plotANTsImage( avgtx,slices="40x60x5",axis=1)
 .. .. 
 
-.. {r reg4Dtest, out.width='720px', fig.cap='Mapping between BOLD image and template',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
+.. {r reg4Dtest, out.width="720px", fig.cap="Mapping between BOLD image and template",eval=TRUE,echo=FALSE,warning=FALSE,results="markup",message=FALSE}
 isucceed<-FALSE
 # if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")

@@ -22,12 +22,15 @@ if ( ! is.null( nuis ) )
   rcbfform<-formula(  mat[,vox] ~   xideal + nuis )
   }
 mycbfmodel<-lm( cbfform  ) # standard regression
-betaideal<-(mycbfmodel$coeff)[2,]
 cbfi <- antsImageClone( mask_img )
 m0vals <-m0[ mask_img == 1 ]
 m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
 factor<-1.e4
-cbfi[ mask_img == 1 ] <- betaideal / m0vals * factor
+betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
+cbfi[ mask_img == 1 ] <- betaideal  # standard results
+
+
 
 if ( dorobust > 0 )
   {
@@ -89,6 +92,7 @@ if ( dorobust > 0 )
   print(regweights)
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
   betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+  if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
   cbfi[ mask_img == 1 ] <- betaideal  # robust results
   print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
   }

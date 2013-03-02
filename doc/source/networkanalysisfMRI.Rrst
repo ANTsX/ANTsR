@@ -4,14 +4,14 @@
 Basic network analysis for BOLD or ASL fMRI
 ==================================================
 
-Let's start with network analysis from a pre-defined set of regions, here defined by the AAL label set.  The basic ideas of network analysis are similar to :raw-tex:`\cite{Hosseini2012}` which also lists a variety of rsf-connectivity tools that may interest you (if you use Matlab or Python).
+Let"s start with network analysis from a pre-defined set of regions, here defined by the AAL label set.  The basic ideas of network analysis are similar to :raw-tex:`\cite{Hosseini2012}` which also lists a variety of rsf-connectivity tools that may interest you (if you use Matlab or Python).
 
-.. {r getData, out.width='720px', fig.cap='Example data',eval=TRUE,echo=TRUE,warning=FALSE,results='hide',message=FALSE}
+.. {r getData, out.width="720px", fig.cap="Example data",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(ANTsR)
-tfn<-getANTsRData('r16')
+tfn<-getANTsRData("r16")
 .. ..
 
-.. {r testBasicNetwork, out.width='720px', fig.cap='ANTsR basic network analysis test',eval=TRUE,echo=FALSE,warning=FALSE,results='markup',message=FALSE}
+.. {r testBasicNetwork, out.width="720px", fig.cap="ANTsR basic network analysis test",eval=TRUE,echo=FALSE,warning=FALSE,results="markup",message=FALSE}
 isucceed<-FALSE
 # if ( round(mean(cor(tobecorrelated))*100) == 22 ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
