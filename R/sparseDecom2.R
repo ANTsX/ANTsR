@@ -34,7 +34,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
   print(scca)
   system(scca)
   mydecomp<-read.csv(decomp[1])
-  if ( !is.na(inmask[[2]]) )
+  if ( !is.na(inmask[[1]]) )
     {
     glb<-paste("scca*View1vec*.nii.gz",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)

@@ -2,7 +2,7 @@
 \alias{lappend}
 
 \title{
-Simle list append tool
+Simple list append tool
 }
 
 \description{
@@ -30,7 +30,7 @@ outputs the appended list
 }
 
 \author{
-Avants BB
+Avants BB, the internet
 }
 
 \examples{
