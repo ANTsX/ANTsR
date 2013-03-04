@@ -1,4 +1,4 @@
-sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 )
+sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA )
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -6,7 +6,7 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
     return(0);
     }
-  statdir<-paste(tempdir(),"/",sep='')
+  if ( is.na(statdir) ) statdir<-paste(tempdir(),"/",sep='')
   outfn<-paste(statdir,'spca.nii.gz',sep='')
   decomp<-paste(statdir,'spcaprojectionsView1vec.csv',sep='')
   matname<-paste(statdir,'spcamatrix.mha',sep='')
