@@ -1,4 +1,4 @@
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE )
+renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1)
   {
   if ( missing(surfimg) )
     {
@@ -13,7 +13,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   if ( missing( funcimg ) )
     {  cat("just the surface\n")
     surf<-as.array( surfimg )
-    brain <- contour3d(  surf , level = c(surfval), alpha = 1,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
+    brain <- contour3d(  surf , level = c(surfval), alpha = alphasurf,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
     # each point has an ID, 3 points make a triangle , the points are laid out as
     # c( x1 , y1, z1, x2, y2, z2 , ... , xn, yn, zn )
     # indices are just numbers
@@ -23,33 +23,33 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
     return(list(brain))
     }
   if ( smoothfval > 0 ) {
-    SmoothImage(3,funcimg,smoothfval,funcimg)
+    for ( i in 1:length(funcimg) ) {
+      fimg<-antsImageClone( funcimg[[i]] )
+      SmoothImage(3,fimg,smoothfval,fimg)
+      funcimg[[i]]<-fimg
+    }
   }
   if ( missing( basefval ) )
     { # just threshold at mean > 0 
-    basefval<-mean( funcimg[ funcimg > 0 ] )
+    basefval<-mean( funcimg[[1]][ funcimg[[1]] > 0 ] )
     }
-  if ( missing( offsetfval ) ) offsetfval<-sd( funcimg[ funcimg > basefval ] )
+  if ( missing( offsetfval ) ) offsetfval<-sd( funcimg[[1]][ funcimg[[1]] > basefval ] )
   print(paste("will render baseval:",basefval,"offsetval:",offsetfval))
-  blobi<-as.array( funcimg )
   surf<-as.array( surfimg )
-  print("get substrate contour")
-  brain <- contour3d(  surf , level = c(surfval), alpha = 1,draw=FALSE,smooth=1,material="metal",depth=0.2,color="white")
-  print("get function contour1")
-  blob <- contour3d(  surf , level = c(surfval), mask=( blobi > (basefval+offsetfval) ), alpha= 1, draw=FALSE,smooth=1,material="metal",depth=0.5,color="red")
-  print("get function contour2")
-  blob1 <- contour3d(  surf , level = c(surfval), mask=( blobi > (basefval)), alpha= 1, draw=FALSE,smooth=1,material="metal",depth=0.5,color="yellow")
-  if ( blobrender ) 
+  brain <- contour3d(  surf , level = c(surfval), alpha = alphasurf,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
+  mycol<-c("red","blue","green","violet","yellow","tomato1","turquoise1","steelblue2","rosybrown2","skyblue4","orange4","maroon","gold","darkseagreen","burlywood","azure","darkorchid2","indianred4","navy")
+  mylist<-list(brain)
+  for ( i in 1:length(funcimg) )
     {
-    print("prep render")
-    lev<-c(basefval,basefval+offsetfval,basefval+offsetfval*2)
-    blob2 <- contour3d( blobi , level = lev , alpha = c(0.3,0.6,0.9), draw= FALSE,smooth=1,color=heat.colors(n=length(lev)))
-    drawScene.rgl(list(blob2,blob,blob1,brain))
-    return ( list(blob2,blob,blob1,brain) )
+    func<-as.array( funcimg[[i]] )
+    blob <- contour3d(  func , level = c(surfval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
+    mylist<-lappend(mylist,blob)
     }
-  drawScene.rgl(list(blob,blob1,brain)) # surface render 
-# movie3d(spin3d(),duration=10)
-  return( list(blob,blob1,brain) ) 
+  par3d(windowRect = c(0, 0, 500, 500)) # make the window large
+  par3d(zoom = 1.1) # larger values make the image smaller
+  drawScene.rgl(mylist) # surface render 
+  movie3d(spin3d(),duration=10,dir='./')
+  return( mylist ) 
 }
 
 
