@@ -233,15 +233,15 @@ for ( ind in 1:length(functional) )
 
   mncl<-min(labimg)
   mxcl<-max(labimg)
+  print("threshold")
+  print(threshold)
+  print(paste('min/max of image',mncl,mxcl))
   temp<-labimg
   temp<-(temp-mncl)/(mxcl-mncl)*(nlevels-1)
   labimg<-temp
   mncl<-min(labimg)
   mxcl<-max(labimg)
   threshold[1:2]<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
-  print("threshold")
-  print(threshold)
-  print(paste('min/max of image',min(labimg),max(labimg)))
   if ( axis != 2 & imagedim > 2 ) labslice<-rotate90.matrix(labimg[,,slices[1]])
   if ( axis == 2  & imagedim > 2 ) labslice<-flip.matrix(labimg[,,slices[1]])
   if ( imagedim > 2 ) labslice<-mirror.matrix(labslice) else slice<-img
