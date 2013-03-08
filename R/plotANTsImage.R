@@ -1,6 +1,6 @@
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
-plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" , threshold="1x0", quality=NA )
+plotANTsImage<-function( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" , threshold="1x0", quality=NA , outname=NA)
 {
   spec = c( 
     'verbose', 'v', 2, "integer" ," verbose output ",
@@ -141,15 +141,12 @@ if ( is.na(myantsimage)  )
 if ( is.na(functional) ) 
 {
   print(paste("functional image file",functional,"does not exist. no overlay will be produced."))
-  functional<-myantsimage
   thresh<-"1.e9x1.e9"
 }
 # .................................................
 img<-as.array(myantsimage) # the background/template image
-labimg<-as.array(functional) # the label image 
 if ( imagedim == 2 ) {
   img<-rotate270.matrix( img ) 
-  labimg<-rotate270.matrix( labimg ) 
 }
 perms<-c(1,2,3)
 axis<-as.numeric(axis)
@@ -158,17 +155,6 @@ if ( axis == 2 ) { print("axis-2") ; perms<-c(3,1,2) }
 if ( axis == 3 ) { print("axis-3") ; perms<-c(1,2,3) }
 # now label the results
 if ( imagedim == 3 )   img<-aperm(img   ,c(perms),resize=T)
-if ( imagedim == 3 )labimg<-aperm(labimg,c(perms),resize=T)
-# labimg[]<-rank(c(labimg))
-#
-# check sizes
-dimcheck<-F
-for ( x in c(1:imagedim)) 
-  if ( dim(img)[x] != dim(labimg)[x] )
-    {
-    print("mask and label image do not match---exiting")
-    return(NULL)
-    }
 slicesin<-c(as.numeric(unlist(strsplit(slices,"x"))))
 threshold<-c(as.numeric(unlist(strsplit(threshold,"x"))))
 print(paste('threshold at ',threshold[1],' and ',threshold[2],'you chose these slices :'))
@@ -194,29 +180,18 @@ if ( imagedim > 2 ) slice<-mirror.matrix(slice) else slice<-img
 slicerow<-nrow(slice)
 slicecol<-ncol(slice)
 bigslice<-matrix(0,nrow=slicerow*winrows,ncol=(slicecol*wincols))
-biglab<-matrix(0,nrow=slicerow*winrows,ncol=(slicecol*wincols))
 rowsl<-0
 # convert to 0 255 
 nlevels<-2^8
-mncl<-min(labimg)
-mxcl<-max(labimg)
-temp<-labimg
-temp<-(temp-mncl)/(mxcl-mncl)*(nlevels-1)
-labimg<-temp
 for ( sl in c(0:(length(slices)-1)) ) {
   if ( sl < dim(img)[imagedim] ) {
   if ( axis != 2 & imagedim > 2)slice<-rotate90.matrix(img[,,slices[sl+1]])
   if ( axis == 2 & imagedim > 2)slice<-flip.matrix(img[,,slices[sl+1]])
-  if ( axis != 2 & imagedim > 2)labslice<-rotate90.matrix(labimg[,,slices[sl+1]])
-  if ( axis == 2 & imagedim > 2)labslice<-flip.matrix(labimg[,,slices[sl+1]])
   if ( imagedim > 2 ) {
     slice<-mirror.matrix(slice)
-    labslice<-mirror.matrix(labslice)
   } else { 
     slice<-img
-    labslice<-labimg
   }
-  maskslice<-(labslice > 0)
   locsl<-(sl %% (wincols))+1
   if (locsl==1) rowsl<-rowsl+1
   xl<-((locsl-1)*slicecol+1)
@@ -224,63 +199,113 @@ for ( sl in c(0:(length(slices)-1)) ) {
   yl<-(rowsl-1)*slicerow+1
   ys<-c(yl:(yl+slicerow-1))
   bigslice[ys,xs]<-slice 
-  biglab[ys,xs]<-labslice 
   }
 }
 # pdf(paste(output,'.pdf',sep=''))
 # onm<-paste(output,'.jpg',sep='')
 mag<-quality
-# jpeg(onm,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="black")
+if ( !is.na(outname) ) jpeg(outname,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="black")
 x <- pixmapGrey(bigslice, nrow=nrow(bigslice))
 # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
 # plot(dd)
 par(mar=c(0,0,0,0) + 0.0)   # set margins to zero ! less wasted space
 plot(x)
-if ( threshold[1] > threshold[2] )
+if ( threshold[1] > threshold[2] | is.na(functional) )
   {
+  if ( !is.na(outname) ) dev.off()
   return(0);
   }
-overlaycolors<-sort( c((unique(c(labimg)))))
-threshold[1:2]<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
-print(threshold)
-overlaycolors<-c(0:nlevels)
-minind<-0
-mindiff<-1.e9
-maxind<-0
-maxdiff<-1.e9
-for ( i in c(1:length(overlaycolors)) ) 
-{
-  diff<-abs(overlaycolors[i] - threshold[1] )
-  if ( diff < mindiff )
-  {   
-    minind<-i
-    mindiff<-diff 
+for ( ind in 1:length(functional) )
+  {
+  biglab<-matrix(0,nrow=slicerow*winrows,ncol=(slicecol*wincols))
+  labimg<-as.array(functional[[ind]]) # the label image
+  # check sizes
+  for ( x in c(1:imagedim)) 
+  if ( dim(img)[x] != dim(labimg)[x] )
+    {
+    print("mask and label image do not match---exiting")
+    return(NULL)
+    }
+  if ( imagedim == 2 ) {
+    labimg<-rotate270.matrix( labimg ) 
   }
-  diff<-abs(overlaycolors[i] - threshold[2] )
-  if ( diff < maxdiff )
-  {   
-    maxind<-i
-    maxdiff<-diff 
+  if ( imagedim == 3 )labimg<-aperm(labimg,c(perms),resize=T)
+
+  mncl<-min(labimg)
+  mxcl<-max(labimg)
+  temp<-labimg
+  temp<-(temp-mncl)/(mxcl-mncl)*(nlevels-1)
+  labimg<-temp
+  mncl<-min(labimg)
+  mxcl<-max(labimg)
+  threshold[1:2]<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
+  print("threshold")
+  print(threshold)
+  print(paste('min/max of image',min(labimg),max(labimg)))
+  if ( axis != 2 & imagedim > 2 ) labslice<-rotate90.matrix(labimg[,,slices[1]])
+  if ( axis == 2  & imagedim > 2 ) labslice<-flip.matrix(labimg[,,slices[1]])
+  if ( imagedim > 2 ) labslice<-mirror.matrix(labslice) else slice<-img
+  slicerow<-nrow(slice)
+  slicecol<-ncol(slice)
+  bigslice<-matrix(0,nrow=slicerow*winrows,ncol=(slicecol*wincols))
+  rowsl<-0
+  for ( sl in c(0:(length(slices)-1)) ) {
+    if ( sl < dim(img)[imagedim] ) {
+      if ( axis != 2 & imagedim > 2) labslice<-rotate90.matrix(labimg[,,slices[sl+1]])
+      if ( axis == 2 & imagedim > 2) labslice<-flip.matrix(labimg[,,slices[sl+1]])
+      if ( imagedim > 2 ) {
+        labslice<-mirror.matrix(labslice)
+      } else { 
+        labslice<-labimg
+      }
+      maskslice<-(labslice > 0)
+      locsl<-(sl %% (wincols))+1
+      if (locsl==1) rowsl<-rowsl+1
+      xl<-((locsl-1)*slicecol+1)
+      xs<-c(xl:(xl+slicecol-1))
+      yl<-(rowsl-1)*slicerow+1
+      ys<-c(yl:(yl+slicerow-1))
+      biglab[ys,xs]<-labslice 
+    }
   }
-}
-if ( minind > 1) minind<-minind-1 
-heatvals<-heat.colors(nlevels,alpha=0.5)  
-heatvals<-rainbow(nlevels,alpha=0.5) 
-colorfun<-colorRampPalette(c('gray60',color),interpolate = c("spline"), space = "Lab")
-colorfun<-colorRampPalette(c('black',color),interpolate = c("spline"), space = "Lab")
-heatvals<-colorfun(nlevels)
-if ( threshold[1] > 1 ) heatvals[1: ( threshold[1]-1) ]<-NA
-if ( threshold[2] < (nlevels-1) ) {
-  upper<-c( (threshold[2]+1):nlevels )
-  heatvals[upper]<-NA
-}
-plot(pixmapIndexed(biglab,col=heatvals),add=TRUE)
+  overlaycolors<-sort( c((unique(c(labimg)))))
+  overlaycolors<-c(0:nlevels)
+  minind<-0
+  mindiff<-1.e9
+  maxind<-0
+  maxdiff<-1.e9
+  for ( i in c(1:length(overlaycolors)) ) 
+    {
+    diff<-abs(overlaycolors[i] - threshold[1] )
+    if ( diff < mindiff )
+      {   
+      minind<-i
+      mindiff<-diff 
+      }
+    diff<-abs(overlaycolors[i] - threshold[2] )
+    if ( diff < maxdiff )
+      {   
+      maxind<-i
+      maxdiff<-diff 
+      }
+  }
+  if ( minind > 1) minind<-minind-1 
+  heatvals<-heat.colors(nlevels,alpha=0.5)  
+  heatvals<-rainbow(nlevels,alpha=0.5) 
+  colorfun<-colorRampPalette(c('gray60',color),interpolate = c("spline"), space = "Lab")
+print(color[ind])
+  colorfun<-colorRampPalette(c('black',color[ind]),interpolate = c("spline"), space = "Lab")
+  heatvals<-colorfun(nlevels)
+  if ( threshold[1] > 1 ) heatvals[1: ( threshold[1]-1) ]<-NA
+  if ( threshold[2] < (nlevels-1) ) {
+    upper<-c( (threshold[2]+1):nlevels )
+    heatvals[upper]<-NA
+  }
+  plot(pixmapIndexed(biglab,col=heatvals),add=TRUE)
+  }
+print(outname)
 # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0
 # print('try rgb')
 # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
-# plot(dd,add=TRUE)
-# plot(dd)
-# dev.off()
-# print(paste('wrote',onm))
-# warnings()
+if ( !is.na(outname) ) dev.off()
 }

@@ -10,7 +10,7 @@ Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g. fun
 }
 
 \usage{
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE )
+renderSurfaceFunction<-function( surfimg, funcimg=list(overlayimage1,overlayimage2,etc), surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE )
 }
 
 \arguments{
@@ -20,7 +20,7 @@ Input image to use as rendering substrate.
 
 #  surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE
 \item{funcimg}{
-Input image to use as functional overlay.
+Input list of images to use as functional overlays.
 }
 
 \item{surfval}{
@@ -39,6 +39,7 @@ intensity level that defines upper threshold for functional image
 \item{blobrender}{
   render a blob as opposed to a surface patch
 }
+
 
 }
 

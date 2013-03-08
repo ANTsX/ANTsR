@@ -29,7 +29,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     } else mfn[2]<-NA
   scca<-paste("sccan --scca two-view[",matname[1],",",matname[2],",",
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
-              "] --l1 1 -i ",its," --PClusterThresh ",cthresh[1]," -p ", perms,
+              "] --l1 0.05 -i ",its," --PClusterThresh ",cthresh[1]," -p ", perms,
               " --QClusterThresh ",cthresh[2]," -n ",nvecs," -o ",outfn,sep='') # must have ANTSPATH in system
   print(scca)
   system(scca)

@@ -1,4 +1,4 @@
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1)
+renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./")
   {
   if ( missing(surfimg) )
     {
@@ -41,14 +41,20 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   mylist<-list(brain)
   for ( i in 1:length(funcimg) )
     {
+      print( i ) 
     func<-as.array( funcimg[[i]] )
     blob <- contour3d(  func , level = c(surfval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
     mylist<-lappend(mylist,blob)
     }
+  print( paste("list length" , length( mylist )))
+#    s<-scene3d()
+#  s$par3d$windowRect <- c(0, 0, 500, 500) # make the window large 1.5*s$par3d$windowRect
+#  s$par3d$zoom = 1.1 # larger values make the image smaller
+  drawScene.rgl(mylist) # surface render 
   par3d(windowRect = c(0, 0, 500, 500)) # make the window large
   par3d(zoom = 1.1) # larger values make the image smaller
   drawScene.rgl(mylist) # surface render 
-  movie3d(spin3d(),duration=10,dir='./')
+  movie3d(spin3d(),duration=10,dir=outdir,clean=F)
   return( mylist ) 
 }
 

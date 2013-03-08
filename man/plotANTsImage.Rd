@@ -15,12 +15,14 @@ plotANTsImage( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" 
 
 \arguments{
 \item{myantsimage}{the reference image on which to overlay }
-\item{color = <string>}{the color for the overlay , e.g "blue"}
-\item{functional}{ the image to use as overlay }
+\item{color = <string>}{the color for the overlay , e.g c("blue","red") length of this list should match the image list}
+\item{functional}{ list of the images to use as overlays }
 \item{axis  = <value>}{character ... the axis to slice (1 , 2 or  3)  }
 \item{slices = <string>}{ character, the slices to overlay written as 10x20x3 where 10x20 is the range and 3 is the increment, for multislice display}
-\item{threshold = <string>}{ character, we overlay values above/below this threshold : of form LOxHI }
+\item{threshold = <string>}{ character, we overlay values above/below this threshold : of form LOxHI 
+}
 \item{quality = <value>}{integer quality magnification factor 1 => large (e.g. 10) }
+\item{outname="figx.jpg"}{output name if you want to write the result to a file}
 }
 
 \value{
