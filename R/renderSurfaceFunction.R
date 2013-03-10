@@ -1,5 +1,9 @@
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./")
+renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol )
   {
+  if ( missing( mycol ) )
+    {
+    mycol<-rainbow(length(funcimg))
+    }
   if ( missing(surfimg) )
     {
     cat('Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ')
@@ -29,22 +33,22 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
       funcimg[[i]]<-fimg
     }
   }
-  if ( missing( basefval ) )
-    { # just threshold at mean > 0 
-    basefval<-mean( funcimg[[1]][ funcimg[[1]] > 0 ] )
-    }
-  if ( missing( offsetfval ) ) offsetfval<-sd( funcimg[[1]][ funcimg[[1]] > basefval ] )
-  print(paste("will render baseval:",basefval,"offsetval:",offsetfval))
   surf<-as.array( surfimg )
   brain <- contour3d(  surf , level = c(surfval), alpha = alphasurf,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
-  mycol<-c("red","blue","green","violet","yellow","tomato1","turquoise1","steelblue2","rosybrown2","skyblue4","orange4","maroon","gold","darkseagreen","burlywood","azure","darkorchid2","indianred4","navy")
   mylist<-list(brain)
   for ( i in 1:length(funcimg) )
     {
-      print( i ) 
-    func<-as.array( funcimg[[i]] )
-    blob <- contour3d(  func , level = c(surfval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
-    mylist<-lappend(mylist,blob)
+      func<-as.array( funcimg[[i]] )
+      vals<-abs( funcimg[[i]][ funcimg[[i]] > 0 ] )
+      if ( missing( basefval ) )
+        { # just threshold at mean > 0
+          usefval<-mean(vals)
+          print(usefval)
+        } else usefval<-basefval
+      if ( missing( offsetfval ) ) offsetfval<-sd( vals[ vals > usefval ] )
+      print( paste( i , usefval )  )
+      blob <- contour3d(  func , level = c(usefval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
+      mylist<-lappend(mylist,blob)
     }
   print( paste("list length" , length( mylist )))
 #    s<-scene3d()
@@ -54,7 +58,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   par3d(windowRect = c(0, 0, 500, 500)) # make the window large
   par3d(zoom = 1.1) # larger values make the image smaller
   drawScene.rgl(mylist) # surface render 
-  movie3d(spin3d(),duration=10,dir=outdir,clean=F)
+  movie3d(spin3d(),duration=10,dir=outdir, movie=outfn,clean=F)
   return( mylist ) 
 }
 

@@ -241,7 +241,7 @@ for ( ind in 1:length(functional) )
   labimg<-temp
   mncl<-min(labimg)
   mxcl<-max(labimg)
-  threshold[1:2]<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
+  locthresh<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
   if ( axis != 2 & imagedim > 2 ) labslice<-rotate90.matrix(labimg[,,slices[1]])
   if ( axis == 2  & imagedim > 2 ) labslice<-flip.matrix(labimg[,,slices[1]])
   if ( imagedim > 2 ) labslice<-mirror.matrix(labslice) else slice<-img
@@ -276,13 +276,13 @@ for ( ind in 1:length(functional) )
   maxdiff<-1.e9
   for ( i in c(1:length(overlaycolors)) ) 
     {
-    diff<-abs(overlaycolors[i] - threshold[1] )
+    diff<-abs(overlaycolors[i] - locthresh[1] )
     if ( diff < mindiff )
       {   
       minind<-i
       mindiff<-diff 
       }
-    diff<-abs(overlaycolors[i] - threshold[2] )
+    diff<-abs(overlaycolors[i] - locthresh[2] )
     if ( diff < maxdiff )
       {   
       maxind<-i
@@ -296,9 +296,9 @@ for ( ind in 1:length(functional) )
 print(color[ind])
   colorfun<-colorRampPalette(c('black',color[ind]),interpolate = c("spline"), space = "Lab")
   heatvals<-colorfun(nlevels)
-  if ( threshold[1] > 1 ) heatvals[1: ( threshold[1]-1) ]<-NA
-  if ( threshold[2] < (nlevels-1) ) {
-    upper<-c( (threshold[2]+1):nlevels )
+  if ( locthresh[1] > 1 ) heatvals[1: ( locthresh[1]-1) ]<-NA
+  if ( locthresh[2] < (nlevels-1) ) {
+    upper<-c( (locthresh[2]+1):nlevels )
     heatvals[upper]<-NA
   }
   plot(pixmapIndexed(biglab,col=heatvals),add=TRUE)
