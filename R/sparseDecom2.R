@@ -1,4 +1,4 @@
-sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , its=5 , cthresh=c(250,250) , statdir = NA , perms=0 )
+sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , its=5 , cthresh=c(250,250) , statdir = NA , perms=0, uselong=0 )
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -30,7 +30,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
   scca<-paste("sccan --scca two-view[",matname[1],",",matname[2],",",
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
               "] --l1 0.05 -i ",its," --PClusterThresh ",cthresh[1]," -p ", perms,
-              " --QClusterThresh ",cthresh[2]," -n ",nvecs," -o ",outfn,sep='') # must have ANTSPATH in system
+              " --QClusterThresh ",cthresh[2]," -n ",nvecs," -o ",outfn," -g ",uselong,sep='') # must have ANTSPATH in system
   print(scca)
   system(scca)
   mydecomp<-read.csv(decomp[1])
@@ -69,5 +69,12 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     glb<-paste("scca*_Variate_View2vec.csv",sep='')
     fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
     }
-  return( list( projections=mydecomp,projections2=mydecomp2, eig1=fnl, eig2=fnl2 ) )
+  pvals<-NA
+  pvfn<-paste(statdir,'scca_pvalues.csv',sep='')
+  if ( file.exists( pvfn ) )
+    {
+    pvals<-read.csv( pvfn,header=F)
+    pvals<-as.numeric(pvals)[2:(length(pvals)-1)]
+    }
+  return( list( projections=mydecomp,projections2=mydecomp2, eig1=fnl, eig2=fnl2 , pvals=pvals ) )
 }
