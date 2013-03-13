@@ -69,12 +69,11 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     glb<-paste("scca*_Variate_View2vec.csv",sep='')
     fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
     }
-  pvals<-NA
-  pvfn<-paste(statdir,'scca_pvalues.csv',sep='')
+  pvfn<-paste(statdir,'scca_summary.csv',sep='')
+  ccasummary<-NA
   if ( file.exists( pvfn ) )
     {
-    pvals<-read.csv( pvfn,header=F)
-    pvals<-as.numeric(pvals)[2:(length(pvals)-1)]
+    ccasummary<-read.csv( pvfn )
     }
-  return( list( projections=mydecomp,projections2=mydecomp2, eig1=fnl, eig2=fnl2 , pvals=pvals ) )
+  return( list( projections=mydecomp,projections2=mydecomp2, eig1=fnl, eig2=fnl2 , ccasummary=ccasummary ) )
 }
