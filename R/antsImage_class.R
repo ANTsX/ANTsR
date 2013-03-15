@@ -336,6 +336,11 @@ antsGetOrigin <- function( x )
   return( .Call( "antsImage_GetOrigin" , x ) )
 }
 
+antsGetDirection <- function( x )
+{
+  return( .Call( "antsImage_GetDirection", x ) )
+}
+
 setMethod( f = "[" ,
 	   signature( x = "antsImage" ,
 	   	      i = "NULL" ,
