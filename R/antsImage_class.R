@@ -331,9 +331,43 @@ antsGetSpacing <- function( x )
   return( .Call( "antsImage_GetSpacing" , x ) )
 }
 
+antsSetSpacing <- function( x, spacing )
+{
+  if ( class(spacing) != "numeric" )
+    {
+    print( "spacing must be of class 'numeric'" )
+    return()
+  }
+  
+  if ( length(spacing) != length(dim(x)) )
+    {
+    print( "spacing must be of same dimensions as image" )
+    return()
+    }
+  
+  return( .Call( "antsImage_SetSpacing", x, spacing ) )
+}
+
 antsGetOrigin <- function( x )
 {
   return( .Call( "antsImage_GetOrigin" , x ) )
+}
+
+antsSetOrigin <- function( x, spacing )
+{
+  if ( class(spacing) != "numeric" )
+    {
+    print( "spacing must be of class 'numeric'" )
+    return()
+  }
+  
+  if ( length(spacing) != length(dim(x)) )
+    {
+    print( "spacing must be of same dimensions as image" )
+    return()
+    }
+  
+  return( .Call( "antsImage_SetOrigin", x, spacing ) )
 }
 
 antsGetDirection <- function( x )
