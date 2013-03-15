@@ -2179,10 +2179,8 @@ SEXP antsImage_SetDirection( typename itk::Image< PixelType , Dimension >::Point
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
   typedef typename ImageType::Pointer ImagePointerType ;
- 
-  Rcpp::Rcout << "force matrix" << std::endl;
+
   Rcpp::NumericMatrix direction( r_direction );
-  Rcpp::Rcout << "check size" << std::endl;
 
   if ( (direction.nrow() != Dimension) || (direction.ncol() != Dimension) )
     {
