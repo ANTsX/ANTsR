@@ -326,6 +326,16 @@ if( length( l ) != 1 || !is.na( l ) )
 return( .Call( "antsImage_GetPixels" , x , lst ) )
 }
 
+antsGetSpacing <- function( x )
+{
+  return( .Call( "antsImage_GetSpacing" , x ) )
+}
+
+antsGetOrigin <- function( x )
+{
+  return( .Call( "antsImage_GetOrigin" , x ) )
+}
+
 setMethod( f = "[" ,
 	   signature( x = "antsImage" ,
 	   	      i = "NULL" ,
