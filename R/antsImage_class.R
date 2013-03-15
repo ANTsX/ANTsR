@@ -392,6 +392,19 @@ antsSetDirection <- function( x, direction )
   
   return( .Call( "antsImage_SetDirection", x, direction ) )
 }
+
+antsTransformIndexToPhysicalPoint <- function( x, index )
+{
+
+  return( .Call("antsImage_TransformIndexToPhysicalPoint", x, index ) )
+}
+
+antsTransformPhysicalPointToIndex <- function( x, point )
+{
+
+  return( .Call("antsImage_TransformPhysicalPointToIndex", x, point ) )
+}
+
 setMethod( f = "[" ,
 	   signature( x = "antsImage" ,
 	   	      i = "NULL" ,
