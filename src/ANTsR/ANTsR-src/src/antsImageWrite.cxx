@@ -22,7 +22,7 @@ namespace ants
     image_writer->SetInput( image );
     try
       {
-      image_writer->Write();
+      image_writer->Update();
       }    
     catch( itk::ExceptionObject & e )
       {
@@ -30,7 +30,6 @@ namespace ants
       Rcpp::Rcout << e << std::endl;
       return 1;
       }
-
     return 0 ;
   }
 
