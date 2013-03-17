@@ -326,6 +326,85 @@ if( length( l ) != 1 || !is.na( l ) )
 return( .Call( "antsImage_GetPixels" , x , lst ) )
 }
 
+antsGetSpacing <- function( x )
+{
+  return( .Call( "antsImage_GetSpacing" , x ) )
+}
+
+antsSetSpacing <- function( x, spacing )
+{
+  if ( class(spacing) != "numeric" )
+    {
+    print( "spacing must be of class 'numeric'" )
+    return()
+  }
+  
+  if ( length(spacing) != length(dim(x)) )
+    {
+    print( "spacing must be of same dimensions as image" )
+    return()
+    }
+  
+  return( .Call( "antsImage_SetSpacing", x, spacing ) )
+}
+
+antsGetOrigin <- function( x )
+{
+  return( .Call( "antsImage_GetOrigin" , x ) )
+}
+
+antsSetOrigin <- function( x, origin )
+{
+  if ( class(origin) != "numeric" )
+    {
+    print( "spacing must be of class 'numeric'" )
+    return()
+  }
+  
+  if ( length(origin) != length(dim(x)) )
+    {
+    print( "spacing must be of same dimensions as image" )
+    return()
+    }
+  
+  return( .Call( "antsImage_SetOrigin", x, origin ) )
+}
+
+antsGetDirection <- function( x )
+{
+  return( .Call( "antsImage_GetDirection", x ) )
+}
+
+antsSetDirection <- function( x, direction )
+{
+  if ( class(direction) != "matrix" )
+    {
+    print( "direction must be of class 'matrix'" )
+    return()
+  }
+  
+  if ( (dim(direction)[1] != length(dim(x)) ) ||
+       (dim(direction)[2] != length(dim(x)) ) )
+    {
+    print( "direction matrix must be of size imagedim * imagedim" )
+    return()
+    }
+  
+  return( .Call( "antsImage_SetDirection", x, direction ) )
+}
+
+antsTransformIndexToPhysicalPoint <- function( x, index )
+{
+
+  return( .Call("antsImage_TransformIndexToPhysicalPoint", x, index ) )
+}
+
+antsTransformPhysicalPointToIndex <- function( x, point )
+{
+
+  return( .Call("antsImage_TransformPhysicalPointToIndex", x, point ) )
+}
+
 setMethod( f = "[" ,
 	   signature( x = "antsImage" ,
 	   	      i = "NULL" ,
