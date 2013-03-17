@@ -9,7 +9,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
       return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
       }
     if ( Sys.info()["sysname"] != "XXX" )
-      .Call( "antsApplyTransforms", int_antsProcessArguments( c(fixed) ) ) ;
+      .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1) ) ) ;
     return(0);
     }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
@@ -74,7 +74,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
           return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
           }
         if ( Sys.info()["sysname"] != "XXX" )
-          .Call( "antsApplyTransforms", myargs )
+          .Call("antsApplyTransforms", c(myargs,"-z",1) )
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -89,7 +89,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
     return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
     }
   if ( Sys.info()["sysname"] != "XXX" )
-    .Call( "antsApplyTransforms", int_antsProcessArguments( c(args) ) ) ;
+    .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1) ) ) ;
   gc() # trigger garbage collection
 }
 
