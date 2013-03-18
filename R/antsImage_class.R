@@ -328,16 +328,28 @@ return( .Call( "antsImage_GetPixels" , x , lst ) )
 
 antsGetSpacing <- function( x )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
+  
   return( .Call( "antsImage_GetSpacing" , x ) )
 }
 
 antsSetSpacing <- function( x, spacing )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
+  
   if ( class(spacing) != "numeric" )
     {
     print( "spacing must be of class 'numeric'" )
     return()
-  }
+    }
   
   if ( length(spacing) != length(dim(x)) )
     {
@@ -350,11 +362,21 @@ antsSetSpacing <- function( x, spacing )
 
 antsGetOrigin <- function( x )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
   return( .Call( "antsImage_GetOrigin" , x ) )
 }
 
 antsSetOrigin <- function( x, origin )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
   if ( class(origin) != "numeric" )
     {
     print( "spacing must be of class 'numeric'" )
@@ -372,11 +394,21 @@ antsSetOrigin <- function( x, origin )
 
 antsGetDirection <- function( x )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
   return( .Call( "antsImage_GetDirection", x ) )
 }
 
 antsSetDirection <- function( x, direction )
 {
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    } 
   if ( class(direction) != "matrix" )
     {
     print( "direction must be of class 'matrix'" )
@@ -395,13 +427,31 @@ antsSetDirection <- function( x, direction )
 
 antsTransformIndexToPhysicalPoint <- function( x, index )
 {
-
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    }
+  if ( class(spacing) != "numeric" )
+    {
+    print( "index must be of class 'numeric'" )
+    return()
+    }
   return( .Call("antsImage_TransformIndexToPhysicalPoint", x, index ) )
 }
 
 antsTransformPhysicalPointToIndex <- function( x, point )
 {
-
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    }
+  if ( class(spacing) != "numeric" )
+    {
+    print( "point must be of class 'numeric'" )
+    return()
+    }
   return( .Call("antsImage_TransformPhysicalPointToIndex", x, point ) )
 }
 
