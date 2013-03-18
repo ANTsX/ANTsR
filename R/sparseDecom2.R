@@ -27,12 +27,11 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     dim2<-as.numeric(m2@dimension)
     antsImageWrite( inmask[[2]], mfn[2] )
     } else mfn[2]<-NA
-  scca<-paste("sccan --scca two-view[",matname[1],",",matname[2],",",
+  args<-list("--scca",paste("two-view[",matname[1],",",matname[2],",",
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
-              "] --l1 0.05 -i ",its," --PClusterThresh ",cthresh[1]," -p ", perms,
-              " --QClusterThresh ",cthresh[2]," -n ",nvecs," -o ",outfn," -g ",uselong,sep='') # must have ANTSPATH in system
-  print(scca)
-  system(scca)
+              "]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
+              "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong )
+  .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
   mydecomp<-read.csv(decomp[1])
   if ( !is.na(inmask[[1]]) )
     {

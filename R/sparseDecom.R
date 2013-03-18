@@ -17,9 +17,8 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     mfn<-paste(statdir,'spcamask.nii.gz',sep='')
     antsImageWrite( inmask, mfn )
     } 
-  spca<-paste("sccan --svd recon[",matname,",",mfn,",",sparseness,"] --l1 1 -i ",its," --PClusterThresh ",cthresh," -n ",nvecs," -o ",outfn,sep='') # must have ANTSPATH in system
-  print(spca)
-  system(spca)
+  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn)
+  .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
   mydecomp<-read.csv(decomp)
   if ( !is.na(inmask) )
     {
