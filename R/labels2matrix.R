@@ -13,14 +13,11 @@ labels2matrix <- function( img, mask )
     stop( "image and mask must be same size" )
     }
   
-  vec <- subset(img, mask==1)
+  vec <- subset(img, mask>0)
+  nLabels <- max(vec)
+  labels <- matrix(0, nrow=length(vec), ncol=nLabels)
 
-  nLabels <- max(vec) + 1
-  nVoxels <- length(vec)
-  
-  labels <- matrix(0, nrow=nVoxels, ncol=nLabels)
-
-  for (i in 0:nLabels )
+  for (i in 1:nLabels )
     {
     labels[,i] <- ( vec == i )
     }
