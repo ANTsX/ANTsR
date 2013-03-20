@@ -432,7 +432,7 @@ antsTransformIndexToPhysicalPoint <- function( x, index )
     print( "Input must be of class 'antsImage'");
     return()
     }
-  if ( class(spacing) != "numeric" )
+  if ( class(index) != "numeric" )
     {
     print( "index must be of class 'numeric'" )
     return()
@@ -447,7 +447,7 @@ antsTransformPhysicalPointToIndex <- function( x, point )
     print( "Input must be of class 'antsImage'");
     return()
     }
-  if ( class(spacing) != "numeric" )
+  if ( class(point) != "numeric" )
     {
     print( "point must be of class 'numeric'" )
     return()
