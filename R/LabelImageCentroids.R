@@ -41,6 +41,6 @@ LabelImageCentroids <- function( img, Physical=FALSE )
       }
     }
 
-  return (centroids)
+  return (list(labels=mylabels,centroids=centroids))
 
 }
