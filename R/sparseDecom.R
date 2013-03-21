@@ -24,11 +24,19 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     {
     glb<-paste("spca*View1vec*.nii.gz",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnll<-list()
+    for ( i in 1:length(fnl) )
+      {
+      img<-antsImageRead( fnl[i] , dim[1] )
+      fnll<-lappend( fnll, img )
+      }
+    fnl<-fnll
     }
   if ( is.na(inmask) )
     {
     glb<-paste("spca*_Variate_View1vec.csv",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-read.csv(fnl)
     }
   return( list( projections=mydecomp, eigenanatomyimages=fnl ) )
 }

@@ -62,11 +62,13 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     {
     glb<-paste("*scca*_Variate_View1vec.csv",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-read.csv(fnl)
     }
   if ( is.na(inmask[[2]]) )
     {
     glb<-paste("scca*_Variate_View2vec.csv",sep='')
     fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl2<-read.csv(fnl2)
     }
   pvfn<-paste(statdir,'scca_summary.csv',sep='')
   ccasummary<-NA
