@@ -1,4 +1,4 @@
-sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA )
+sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA, z=0 )
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -17,7 +17,7 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     mfn<-paste(statdir,'spcamask.nii.gz',sep='')
     antsImageWrite( inmask, mfn )
     } 
-  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn)
+  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z)
   .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
   mydecomp<-read.csv(decomp)
   if ( !is.na(inmask) )
