@@ -446,7 +446,7 @@ antsTransformIndexToPhysicalPoint <- function( x, index )
   imgdim <- length(dim(x))
   if ( dim(index)[2] != imgdim )
     {
-    print( paste("Index array must be of size N x",imgdim) );
+    print( paste("Index matrix must be of size N x",imgdim) );
     return()
     }
   
@@ -460,11 +460,24 @@ antsTransformPhysicalPointToIndex <- function( x, point )
     print( "Input must be of class 'antsImage'");
     return()
     }
-  if ( class(point) != "numeric" )
+  if (( class(point) != "numeric" ) && (class(point) != "matrix" ) )
     {
-    print( "point must be of class 'numeric'" )
+    print( "point must be of class 'numeric' or 'matrix'" )
     return()
     }
+
+  if ( class(point) == "numeric" )
+    {
+    point <- t(as.matrix(point))
+    }
+
+  imgdim <- length(dim(x))
+  if ( dim(point)[2] != imgdim )
+    {
+    print( paste("Point matrix must be of size N x",imgdim) );
+    return()
+    }
+  
   return( .Call("antsImage_TransformPhysicalPointToIndex", x, point ) )
 }
 
