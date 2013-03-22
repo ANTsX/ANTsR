@@ -1,8 +1,8 @@
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol )
+renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol, physical=FALSE )
   {
   if ( missing( mycol ) )
     {
-    mycol<-rainbow(length(funcimg))
+    mycol<-rainbow(length(surfimg))
     }
   if ( missing(surfimg) )
     {
@@ -23,6 +23,15 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
     # indices are just numbers
 #    vertices<-c(  
 #        brain <-  subdivision3d(brain)
+ 
+    if (physical == TRUE )
+      {
+      brain$v1 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v1)
+      brain$v2 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v2)
+      brain$v3 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v3)
+      
+      }
+       
     drawScene.rgl(list(brain))
     return(list(brain))
     }

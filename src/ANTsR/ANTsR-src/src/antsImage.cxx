@@ -2387,40 +2387,41 @@ SEXP antsImage_TransformIndexToPhysicalPoint( typename itk::Image< PixelType , D
   typedef typename PointType::CoordRepType CoordRepType;
   typedef typename itk::ContinuousIndex<CoordRepType, Dimension> IndexType;
 
-  Rcpp::NumericVector index( r_index ) ;
+  Rcpp::NumericMatrix indices( r_index );
+  if ( indices.ncol() != Dimension )
+    {
+    Rcpp::Rcout << "index matrix must be of size N * ImageDimension" << std::endl;
+    return Rcpp::wrap(1);
+    }
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::Rcout << "must pass a valid antsImage";
+    return Rcpp::wrap(1);
+    }
+
+  unsigned long N = indices.nrow();
+  Rcpp::NumericMatrix points( N, Dimension ) ;
+
   IndexType itkindex;
   PointType itkpoint;
-  Rcpp::NumericVector point( Dimension ) ;
-  
-  if( index.size() != Dimension )
-    {
-    Rcpp::Rcout << "index does not match the image in dimensions" << std::endl;
-    return Rcpp::wrap(1);
-    }
-  for( int i = 0 ; i < index.size() ; ++i )
-    {
-    itkindex[i] = static_cast<CoordRepType>( index[i] - 1.0 );
-    }
 
-  if( image.IsNotNull() )
+  for( unsigned int j = 0; j < N; j++)
     {
-    image->TransformContinuousIndexToPhysicalPoint( itkindex, itkpoint );
     
-    for ( int i = 0; i < Dimension; i++ )
+    for( unsigned int i = 0; i < Dimension; i++ )
       {
-      point[i] = itkpoint[i];
+      itkindex[i] = static_cast<CoordRepType>( indices(j,i) - 1.0 );
       }
 
-    Rcpp::IntegerVector dims( 1 ) ;
-    dims[0] = Dimension ;
-    point.attr( "dim" ) = dims ;
-    return point;
+    image->TransformContinuousIndexToPhysicalPoint( itkindex, itkpoint );
+
+    for ( int i = 0; i < Dimension; i++ )
+      {
+      points(j,i) = itkpoint[i];
+      }
     }
-  else
-    {
-    Rcpp::Rcout << "Empty Image" << std::endl ;
-    return Rcpp::wrap(1);
-    }
+   
+  return points;
 }
 
 RcppExport SEXP antsImage_TransformIndexToPhysicalPoint( SEXP r_antsimage, SEXP r_index )
