@@ -1,4 +1,4 @@
-sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA )
+sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA, z=0 )
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -17,19 +17,31 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     mfn<-paste(statdir,'spcamask.nii.gz',sep='')
     antsImageWrite( inmask, mfn )
     } 
-  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn)
+  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z)
   .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
   mydecomp<-read.csv(decomp)
   if ( !is.na(inmask) )
     {
     glb<-paste("spca*View1vec*.nii.gz",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnll<-list()
+    for ( i in 1:length(fnl) )
+      {
+      img<-antsImageRead( fnl[i] , dim[1] )
+      fnll<-lappend( fnll, img )
+      }
+    fnl<-fnll
     }
   if ( is.na(inmask) )
     {
     glb<-paste("spca*_Variate_View1vec.csv",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-read.csv(fnl)
     }
-  return( list( projections=mydecomp, eigenanatomyimages=fnl ) )
+
+  glb<-paste("spca_Umatrix_View1vec.csv",sep='')
+  fnu<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+  fnu<-read.csv(fnu)
+  return( list( projections=mydecomp, eigenanatomyimages=fnl, umatrix=fnu ) )
 }
 

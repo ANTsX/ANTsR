@@ -1,4 +1,4 @@
-sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , its=5 , cthresh=c(250,250) , statdir = NA , perms=0, uselong=0 )
+sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , its=5 , cthresh=c(250,250) , statdir = NA , perms=0, uselong=0 , z=0)
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -30,7 +30,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
   args<-list("--scca",paste("two-view[",matname[1],",",matname[2],",",
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
               "]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
-              "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong )
+              "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong,"-z",z )
   .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
   mydecomp<-read.csv(decomp[1])
   if ( !is.na(inmask[[1]]) )
@@ -62,11 +62,13 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     {
     glb<-paste("*scca*_Variate_View1vec.csv",sep='')
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-read.csv(fnl)
     }
   if ( is.na(inmask[[2]]) )
     {
     glb<-paste("scca*_Variate_View2vec.csv",sep='')
     fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl2<-read.csv(fnl2)
     }
   pvfn<-paste(statdir,'scca_summary.csv',sep='')
   ccasummary<-NA
