@@ -38,6 +38,10 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
     fnl<-read.csv(fnl)
     }
-  return( list( projections=mydecomp, eigenanatomyimages=fnl ) )
+
+  glb<-paste("spca_Umatrix_View1vec.csv",sep='')
+  fnu<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+  fnu<-read.csv(fnu)
+  return( list( projections=mydecomp, eigenanatomyimages=fnl, umatrix=fnu ) )
 }
 
