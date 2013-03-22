@@ -29,7 +29,6 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
       brain$v1 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v1)
       brain$v2 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v2)
       brain$v3 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v3)
-      
       }
        
     drawScene.rgl(list(brain))
@@ -44,6 +43,12 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   }
   surf<-as.array( surfimg )
   brain <- contour3d(  surf , level = c(surfval), alpha = alphasurf,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
+  if (physical == TRUE )
+    {
+    brain$v1 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v1)
+    brain$v2 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v2)
+    brain$v3 <-  antsTransformIndexToPhysicalPoint(surfimg, brain$v3)
+    }
   mylist<-list(brain)
   for ( i in 1:length(funcimg) )
     {
@@ -57,10 +62,15 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
       if ( missing( offsetfval ) ) offsetfval<-sd( vals[ vals > usefval ] )
       print( paste( i , usefval )  )
       blob <- contour3d(  func , level = c(usefval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
+      if (physical == TRUE )
+        {
+        blob$v1 <-  antsTransformIndexToPhysicalPoint(funcimg, blob$v1)
+        blob$v2 <-  antsTransformIndexToPhysicalPoint(funcimg, blob$v2)
+        blob$v3 <-  antsTransformIndexToPhysicalPoint(funcimg, blob$v3)
+        }
       mylist<-lappend(mylist,blob)
     }
-  print( paste("list length" , length( mylist )))
-#    s<-scene3d()
+#  s<-scene3d()
 #  s$par3d$windowRect <- c(0, 0, 500, 500) # make the window large 1.5*s$par3d$windowRect
 #  s$par3d$zoom = 1.1 # larger values make the image smaller
   drawScene.rgl(mylist) # surface render 
