@@ -1,4 +1,4 @@
-renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol, physical=FALSE )
+renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol, physical=TRUE )
   {
   if ( missing( mycol ) )
     {
