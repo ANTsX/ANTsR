@@ -1,4 +1,4 @@
-LabelImageCentroids <- function( img, Physical=FALSE )
+LabelImageCentroids <- function( img, physical=FALSE, convex=TRUE )
 {  
 
   # Get centroids of labels
@@ -13,27 +13,63 @@ LabelImageCentroids <- function( img, Physical=FALSE )
   zcoords <- rep(c(1:d[3]), each=(d[1]*d[2]) )
   
   labels <- as.array(img)
-  mylabels<-unique( labels[ labels > 0 ] )
+  mylabels<-sort(unique( labels[ labels > 0 ] ))
   nLabels = length(mylabels)
   labelVerts <- rep(0,nLabels)
   xc <- rep(0.0,nLabels)
   yc <- rep(0.0,nLabels)
   zc <- rep(0.0,nLabels)
   progress <- txtProgressBar( min = 0, max = length(mylabels), style = 3 )
-  for ( i in mylabels )
-    {
-    idx <- (labels == i)
-    xc[i] <- mean( subset(xcoords, idx) )
-    yc[i] <- mean( subset(ycoords, idx) )
-    zc[i] <- mean( subset(zcoords, idx) )
-    if( i %% 50 == 0 )
-      {
-      setTxtProgressBar( progress, i )
-      }
-    }
-  centroids <- cbind(xc,yc,zc)  
 
-  if ( Physical == TRUE )
+  if ( convex == TRUE )
+    {
+      for ( i in mylabels )
+        {
+          #print( i )
+          idx <- (labels == i)
+          xc[i] <- mean( subset(xcoords, idx) )
+          yc[i] <- mean( subset(ycoords, idx) )
+          zc[i] <- mean( subset(zcoords, idx) )
+          if( i %% 20 == 0 )
+            {
+              setTxtProgressBar( progress, i )
+            }
+        }
+    }
+  else
+    {
+      for ( i in mylabels )
+        {
+          idx <- (labels == i)
+          xci <- subset(xcoords, idx)
+          yci <- subset(ycoords, idx)
+          zci <- subset(zcoords, idx)
+          dist <- rep( 0, length(xci) )
+          
+          for ( j in c(1:length(xci)) )
+            {
+            dist[j] <- mean( sqrt( (xci[j]-xci)^2 + (yci[j]-yci)^2 + (zci[j]-zci)^2 ) )
+            }
+          
+          mid <- which( dist == min(dist), arr.ind=TRUE )
+          xc[i] <- xci[mid]
+          yc[i] <- yci[mid]
+          zc[i] <- zci[mid]
+          if( i %% 20 == 0 )
+            {
+              setTxtProgressBar( progress, i )
+            }
+          
+        }
+      
+    }
+  setTxtProgressBar( progress, nLabels )
+  close(progress)
+
+  
+  centroids <- cbind(xc,yc,zc)  
+      
+  if ( physical == TRUE )
     {
     for ( i in c(1:nLabels) )
       {
