@@ -57,7 +57,7 @@ Clone or Pull ANTsR from this repository as follows:
 
       $ git clone git@github.com:stnava/ANTsR.git
 
-Install the package as follows:
+From the parent directory of the new ANTsR directory, install the package as follows:
 
       $ R CMD INSTALL ANTsR
 
