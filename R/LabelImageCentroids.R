@@ -1,3 +1,13 @@
+# LabelImageCentroids.R
+# Inputs
+#  img - ants image of labels (ints)
+#  physical - return centroid in physical space instead of voxel space
+#  convex - if TRUE, return centroid, if FALSE return point
+#           with min average distance to other points with same label
+# Returns a list with
+#  labels <- array of label values
+#  centroids <- coordinates of label centroids
+
 LabelImageCentroids <- function( img, physical=FALSE, convex=TRUE )
 {  
 
