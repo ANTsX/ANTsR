@@ -23,8 +23,8 @@ LabelImageCentroids <- function( img, physical=FALSE, convex=TRUE )
   zcoords <- rep(c(1:d[3]), each=(d[1]*d[2]) )
   
   labels <- as.array(img)
-  mylabels<-sort(unique( labels[ labels > 0 ] ))
-  nLabels = length(mylabels)
+  mylabels <- sort(unique( labels[ labels > 0 ] ))
+  nLabels <- length(mylabels)
   labelVerts <- rep(0,nLabels)
   xc <- rep(0.0,nLabels)
   yc <- rep(0.0,nLabels)
@@ -75,8 +75,6 @@ LabelImageCentroids <- function( img, physical=FALSE, convex=TRUE )
     }
   setTxtProgressBar( progress, nLabels )
   close(progress)
-
-  
   centroids <- cbind(xc,yc,zc)  
       
   if ( physical == TRUE )
