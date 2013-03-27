@@ -57,7 +57,7 @@ mysafetest cd ..
 mysafetest git rm -rf .
 mysafetest cp -r doc/build/html/* .
 echo " " > .nojekyll
-mysafetest git add *html _sources/* _images/* _static/* *js *inv 
+mysafetest git add *html _sources/* _images/* _static/* *js *inv .nojekyll 
 mysafetest git commit -a -m "WIP: website update"
 mysafetest git push origin gh-pages
 mysafetest git checkout master
