@@ -36,6 +36,12 @@ User Installation Method: from within R
 ---------------------------------------------
 
 
+We depend on CMake_.
+
+.. _CMake: http://www.cmake.org/cmake/resources/software.html
+
+If you have CMake installed, then open R and do:
+
 .. sourcecode:: r
     
 
@@ -51,7 +57,7 @@ User Installation Method: from within R
 Developer Installation Method: from command line
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-See the libraries listed above and install them.
+See the libraries and CMake_ listed above and install them.
 
 Clone or Pull ANTsR from this repository as follows:
 

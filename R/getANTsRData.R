@@ -1,4 +1,4 @@
-getANTsRData<- function( fileid , usefixedlocation = TRUE)
+getANTsRData<- function( fileid , usefixedlocation = FALSE)
 {
   library(tools)
   myusage<-"usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"

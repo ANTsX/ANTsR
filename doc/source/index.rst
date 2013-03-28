@@ -15,4 +15,6 @@ ANTsR : Advanced Normalization Tools with R
 
    ANTsRfunctions.rst 
 
+   ANTsRstyleGuide.rst
+
 * :ref:`search`
