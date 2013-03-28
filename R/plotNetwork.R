@@ -1,6 +1,20 @@
 # getNetwork
-plotNetwork <- function( network, mask, labels, N=100, scaling=c(0,0)  )
+plotNetwork <- function( network, mask, centroids, N=100, scaling=c(0,0)  )
 {
+
+  nLabels <- dim(centroids$centroids)[1]
+  network <- as.array(network)
+  
+  if ( length(dim(network)) != 2 ) {
+    stop( "network must have exactly 2 dimensions" )
+  }
+  if ( (dim(network)[1] != dim(centroids$centroids)[1]) ||
+       (dim(network)[2] != dim(centroids$centroids)[1]) )
+    {
+      stop( "network and centroids must have matching sizes" )
+    }
+
+  
   open3d()
   rgl.bg(color="black")
 
@@ -13,46 +27,51 @@ plotNetwork <- function( network, mask, labels, N=100, scaling=c(0,0)  )
   mesh<-getvertices( brain )
   nSurfaceVerts <- dim(mesh$vertices)[1]
 
-  print( "get centroids" )
+  #print( "get centroids" )
   
   # Get centroids of labels
-  d <- dim(labels)
-  xcoords <- rep(c(1:d[1]), d[2]*d[3] )
-  ycoords <- rep(c(1:d[2]), each=d[1], d[3] )
-  zcoords <- rep(c(1:d[3]), each=(d[1]*d[2]) )
+  #d <- dim(labels)
+  #xcoords <- rep(c(1:d[1]), d[2]*d[3] )
+  #ycoords <- rep(c(1:d[2]), each=d[1], d[3] )
+  #zcoords <- rep(c(1:d[3]), each=(d[1]*d[2]) )
   
-  labels <- as.array(labels)
-  nLabels = max(labels)
-  labelVerts <- rep(0,nLabels)
-  xc <- rep(0,nLabels)
-  yc <- rep(0,nLabels)
-  zc <- rep(0,nLabels)
+  #labels <- as.array(labels)
+  #nLabels = max(labels)
+  #labelVerts <- rep(0,nLabels)
+  #xc <- rep(0,nLabels)
+  #yc <- rep(0,nLabels)
+  #zc <- rep(0,nLabels)
   
-  for ( i in c(1:nLabels) )
-    {
-    idx <- (labels == i)
-    xc[i] <- mean( subset(xcoords, idx) )
-    yc[i] <- mean( subset(ycoords, idx) )
-    zc[i] <- mean( subset(zcoords, idx) )
-    }
+  #for ( i in c(1:nLabels) )
+  #  {
+  #  idx <- (labels == i)
+  #  xc[i] <- mean( subset(xcoords, idx) )
+  #  yc[i] <- mean( subset(ycoords, idx) )
+  #  zc[i] <- mean( subset(zcoords, idx) )
+  #  }
 
-  xc <- dim(labels)[1] - xc + 1
-  centroids <- cbind(xc,yc,zc)
-  print( centroids[1,] )
-  mesh$vertices <- rbind( mesh$vertices, centroids )
+  #xc <- dim(labels)[1] - xc + 1
+  #centroids <- cbind(xc,yc,zc)
+
+
+  mesh$vertices <- rbind( mesh$vertices, centroids$centroids )
   labelVerts <- c( 1:nLabels )+nSurfaceVerts
 
   spheres3d( mesh$vertices[labelVerts, ] , col='blue',type='s',radius=3)
   #dd<-triangles3d( mesh$vertices[1:nSurfaceVerts,], col='white',alpha=0.4)
 
-  network <- abs(network)
   up <- upper.tri(network)
   thresh <- sort( network[up], decreasing=TRUE )[N+1]
   edgemat <-  (up * (network > thresh))
   edges <- which( (up * (network > thresh)) == 1 )
 
+  print ( "extracted edges" )
+  
+  
   edgelocations <- c()
   edgeweights <- c()
+  print( dim(edgemat) )
+        
   for ( i in c(1:nLabels) )
     {
     for ( j in c(i:nLabels) )
@@ -64,7 +83,8 @@ plotNetwork <- function( network, mask, labels, N=100, scaling=c(0,0)  )
         }
       }
     }
-  if ( scaling[2] == 0  )
+  print( "finding edge values" )
+  if ( (scaling[1] == scaling[2] ) )
     {
     scaling[1] <- min( edgeweights )
     scaling[2] <- max( edgeweights ) 
@@ -73,6 +93,7 @@ plotNetwork <- function( network, mask, labels, N=100, scaling=c(0,0)  )
   edgeweights <- edgeweights - scaling[1]
   edgeweights <- edgeweights / scaling[2]
   
+  
   edgeweights <- 1+(edgeweights * N)
   heat <- heat.colors(N+1)
   colors <- heat
@@ -80,6 +101,8 @@ plotNetwork <- function( network, mask, labels, N=100, scaling=c(0,0)  )
     {
     colors[i] <- heat[floor(edgeweights[i])]
     }
+  print( "edge colors determined" )
+  
   segments3d( mesh$vertices[edgelocations,], col=rep(colors,each=2), lwd=7)
   mat <- diag(4)
   mat[4,4] <- 0.75
