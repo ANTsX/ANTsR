@@ -21,6 +21,12 @@ plotNetwork <- function( network, mask, centroids, N=100, scaling=c(0,0)  )
   #brain<-renderSurfaceFunction( mask, surfval=0.25 )
   surf<-as.array( mask )
   brain <- contour3d(  surf , level = c(0.5), alpha = 0.3,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
+
+  # convert to physical space
+  brain$v1 <- antsTransformIndexToPhysicalPoint( mask, brain$v1 )
+  brain$v2 <- antsTransformIndexToPhysicalPoint( mask, brain$v2 )
+  brain$v3 <- antsTransformIndexToPhysicalPoint( mask, brain$v3 )
+  
   drawScene.rgl(list(brain))
   par3d(windowRect=c(100,100,600,600))
   
