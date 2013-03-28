@@ -79,10 +79,7 @@ LabelImageCentroids <- function( img, physical=FALSE, convex=TRUE )
       
   if ( physical == TRUE )
     {
-    for ( i in c(1:nLabels) )
-      {
-      centroids[i,] <- antsTransformIndexToPhysicalPoint(img, centroids[i,])
-      }
+     centroids <- antsTransformIndexToPhysicalPoint(img, centroids)
     }
 
   return (list(labels=mylabels,centroids=centroids))
