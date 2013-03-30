@@ -2,7 +2,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   {
   if ( missing( mycol ) )
     {
-    mycol<-rainbow(length(surfimg))
+    mycol<-rainbow(length(funcimg))
     }
   if ( missing(surfimg) )
     {
