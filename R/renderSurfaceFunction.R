@@ -64,9 +64,9 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
       blob <- contour3d(  func , level = c(usefval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
       if (physical == TRUE )
         {
-        blob$v1 <-  antsTransformIndexToPhysicalPoint(surfimg, blob$v1)
-        blob$v2 <-  antsTransformIndexToPhysicalPoint(surfimg, blob$v2)
-        blob$v3 <-  antsTransformIndexToPhysicalPoint(surfimg, blob$v3)
+        blob$v1 <-  antsTransformIndexToPhysicalPoint( funcimg[[i]], blob$v1) 
+        blob$v2 <-  antsTransformIndexToPhysicalPoint( funcimg[[i]], blob$v2) 
+        blob$v3 <-  antsTransformIndexToPhysicalPoint( funcimg[[i]], blob$v3) 
         }
       mylist<-lappend(mylist,blob)
     }
