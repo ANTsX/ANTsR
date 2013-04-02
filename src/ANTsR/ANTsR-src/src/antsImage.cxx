@@ -238,6 +238,12 @@ catch( const std::exception& exc )
 template< typename ImageType >
 Rcpp::IntegerVector antsImage_dim( typename ImageType::Pointer image )
 {
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::Rcout << "Image not yet allocated" << std::endl;
+    return Rcpp::wrap( 1 );
+    }
+
   Rcpp::IntegerVector dim_r( ImageType::ImageDimension ) ;
   for( unsigned int i = 0 ; i < ImageType::ImageDimension ; ++i )
     {
