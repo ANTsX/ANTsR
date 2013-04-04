@@ -14,7 +14,8 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   ADNI="http://placid.nlm.nih.gov/download?folders=238",
                   K1="http://www.nitrc.org/frs/downloadlink.php/2201",
                   BT="http://placid.nlm.nih.gov/download?items=10767",
-                  AB="http://placid.nlm.nih.gov/download?items=10753"
+                  AB="http://placid.nlm.nih.gov/download?items=10753",
+                  ch2="http://placid.nlm.nih.gov/download?items=10778"
             )
   myext<-".nii.gz"
   if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
@@ -35,7 +36,8 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   r64="8a629ee7ea32013c76af5b05f880b5c6",
                   KK="397a773658558812e91c03bbb29334bb",
                   BT="eb1f8ee2bba81fb80fed77fb459600f0",
-                  AB="d38b04c445772db6e4ef3d2f34787d67"
+                  AB="d38b04c445772db6e4ef3d2f34787d67",
+                  ch2="501c45361cf92dadd007bee55f02e053"
             )
   if ( md5sum( tfn ) != mymd5 ) { print("checksum failure"); return(NULL) }
   return( tfn )
