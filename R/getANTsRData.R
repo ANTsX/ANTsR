@@ -15,7 +15,9 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   K1="http://www.nitrc.org/frs/downloadlink.php/2201",
                   BT="http://placid.nlm.nih.gov/download?items=10767",
                   AB="http://placid.nlm.nih.gov/download?items=10753",
-                  ch2="http://placid.nlm.nih.gov/download?items=10778"
+                  ch2="http://placid.nlm.nih.gov/download?items=10778",
+                  ch2b="http://placid.nlm.nih.gov/download?items=10780",
+                  mni="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz"
             )
   myext<-".nii.gz"
   if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
@@ -30,6 +32,9 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
     unzip( tfn )
     return( tfn ) 
   }
+  if ( fileid == "mni"  ) {
+    return( tfn ) 
+  }
   # could use md5sum 
   mymd5<-switch( fileid ,
                   r16="37aaa33029410941bf4affff0479fa18",
@@ -37,7 +42,8 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   KK="397a773658558812e91c03bbb29334bb",
                   BT="eb1f8ee2bba81fb80fed77fb459600f0",
                   AB="d38b04c445772db6e4ef3d2f34787d67",
-                  ch2="501c45361cf92dadd007bee55f02e053"
+                  ch2="501c45361cf92dadd007bee55f02e053",
+                  ch2b="5db6c10eb8aeabc663d10e010860465f"
             )
   if ( md5sum( tfn ) != mymd5 ) { print("checksum failure"); return(NULL) }
   return( tfn )
