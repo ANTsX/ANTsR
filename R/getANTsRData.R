@@ -17,7 +17,8 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   AB="http://placid.nlm.nih.gov/download?items=10753",
                   ch2="http://placid.nlm.nih.gov/download?items=10778",
                   ch2b="http://placid.nlm.nih.gov/download?items=10780",
-                  mni="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz"
+                  mni="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz",
+                  mnib="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz"
             )
   myext<-".nii.gz"
   if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
@@ -32,7 +33,7 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
     unzip( tfn )
     return( tfn ) 
   }
-  if ( fileid == "mni"  ) {
+  if ( fileid == "mni" |  fileid == "mnib"  ) {
     return( tfn ) 
   }
   # could use md5sum 

@@ -53,7 +53,10 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   mypoints<-cbind( mypoints, templateLab = templateLab )
   for ( i in 1:nrow(mypoints) )
     {
-#    templateLab[i]<-getValueAtPoint( filab, c( mypoints[i,1:imagedim] ) )
+    if ( imagedim == 2) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints[i,1] ,mypoints[i,2],"1") 
+    if ( imagedim == 3) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints[i,1] ,mypoints[i,2], mypoints[i,3],"1") 
+    myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) ) )
+    templateLab[i]<-myval[1]# getValueAtPoint( filab, c( mypoints[i,1:imagedim] ) )
     }
   if ( convertToTal & imagedim == 3 )
     {
@@ -62,8 +65,9 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       {
       talpoints[i,1:3]<-mni2tal( talpoints[i,1:3] )
       }
+    return( list( templatepoints=mypoints, talpoints=talpoints , myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
     }
-  return( list( templatepoints=mypoints, talpoints=talpoints , myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
+  return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
   }
 
 
