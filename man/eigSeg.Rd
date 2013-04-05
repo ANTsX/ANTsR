@@ -19,7 +19,7 @@ eigsegimage<-eigSeg( mask, imageList  )
 }
 
 \item{imageList}{
- list containing antsImages.
+ list containing antsImages or filenames pointing to antsImages.
 }
 
 
@@ -36,7 +36,8 @@ Avants BB
 \examples{
 \dontrun{
 mylist<-list(image1,image2)
-# 
+# both approaches below are ok 
 myseg<-eigSeg( mask, mylist ) 
+myseg<-eigSeg( mask, c("a.nii.gz","b.nii.gz")  ) 
 }
 }

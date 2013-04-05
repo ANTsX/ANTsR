@@ -32,7 +32,7 @@ imageListToMatrix(imageList, mask)
 } 
 
 \author{
-  Cook PA
+  Cook PA, Avants B
 }
 
 \examples{
