@@ -45,7 +45,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         for ( i in c(1:length(transformlist)) ) 
           {
           ismat<-FALSE
-          if ( i == 1 ) {
+          if ( i == 1 & length(transformlist) > 1 ) {
             if ( length( grep( ".mat",transformlist[ i ])) == 1 )
               {
               ismat <- TRUE

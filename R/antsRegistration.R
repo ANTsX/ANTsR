@@ -45,7 +45,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
         }
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Translation[0.25]","-c","2100x1200","-s","4x3","-f", "6x4" ,"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x10","-s","3x2x1x0","-f", "6x4x2x1" ,"-u","1","-z","1","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
         fwdtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         }
