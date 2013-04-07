@@ -34,6 +34,14 @@ setMethod( f = "dim" ,
 			}
 	   )
 
+#setMethod(f = "is.na",
+#          signature( x = "antsImage" ),
+#          definition = function( x )
+#          {
+#            
+#          }
+
+
 setMethod( f = "as.numeric" ,
 	   signature( x = "antsImage"
 	   	      ) ,
@@ -423,6 +431,41 @@ antsSetDirection <- function( x, direction )
     }
   
   return( .Call( "antsImage_SetDirection", x, direction ) )
+}
+
+getValueAtPoint <- function( x, point )
+{
+  if ( class(x)[1] != "antsImage")
+    {
+    print( "Input must be of class 'antsImage'");
+    return()
+    }
+  if ( (class(point) != "numeric" ) )
+    {
+    print( "point must be of class 'numeric'" )
+    return()
+    }
+      
+  idx <- floor(antsTransformPhysicalPointToIndex( x, point ))
+
+  dims <- length(idx)
+
+  value <- NA
+  if ( dims == 2 )
+    {
+    value <- antsGetPixels( x, i=idx[1], j=idx[2] )
+    }
+  else if ( dims == 3 )
+    {
+    value <- antsGetPixels( x, i=idx[1], j=idx[2], k=idx[3] )
+    }
+  else if ( dims == 4 )
+    {
+    value <- antsGetPixels( x, i=idx[1], j=idx[2], k=idx[3], l=idx[4] )
+    }
+
+  return ( value[[1]] )
+  
 }
 
 antsTransformIndexToPhysicalPoint <- function( x, index )
