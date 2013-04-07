@@ -1,5 +1,6 @@
-peigenanat<-function( X , sparam=0.1, k = 5 , its = 100 , gradparam = 1.e-2 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
+peigenanat<-function( Xin , sparam=0.1, k = 5 , its = 100 , gradparam = 1 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
 {
+X<-Xin-min(Xin)
 print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",sparam))
 if ( missing( v ) )  v<-t( replicate( ncol(X) , rnorm(k)) )
 u <- matrix( rep(0, ncol(v)*nrow(X) ), nrow=nrow(X), ncol=ncol(v) ,byrow=T )
@@ -14,14 +15,26 @@ if ( ! missing( prior )  )
   {
   v <- v + t(X) %*% ( X %*% ( prior - v ) ) * pgradparam
   }
-v<-sparsify( v, sparam, mask )
-if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v) ) ) )
-if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v) ), "Prior",norm( prior - v) ))
+v<-sparsifyv( v, sparam, mask )
+if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ) ) )
+if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ), "Prior",norm( prior - v, "F") ))
 }
-return( list( u=u, v=v ) )
+recon<-X
+for ( a in 1:nrow(X) )
+  {
+  mdl<-lm(   X[a,] ~  v   )
+  usol<-coefficients(mdl)
+  u[a, ]<-usol[2:(ncol(u)+1)]
+  recon[a,]<-predict( mdl )
+  }
+rr<-norm(X - recon, "F" )
+matpfrobnorm<-norm( X , "F" )
+varx<-( 1.0 - ( rr * rr ) / ( matpfrobnorm * matpfrobnorm ) )
+print( paste( varx , distance2( X , u %*% t(v)  ) ))
+return( list( u=u, v=v , recon=recon ) )
 }
 
-sparsify<-function( v, sparam, mask = NA )
+sparsifyv<-function( v, sparam, mask = NA )
   {
   if ( sparam >= 1 ) return( v )
   b<-round( sparam * nrow(v) )
@@ -30,7 +43,7 @@ sparsify<-function( v, sparam, mask = NA )
   for ( i in 1:ncol(v) )
     {
     sparsev<-v[,i]
-#    sparsev<-sparsev-min(sparsev)
+    sparsev<-sparsev-min(sparsev)
     ord<-rev( order( sparsev ) )
     sparsev[ ord[b:length(ord) ]]<-0
     if ( ! is.na( mask ) ) {
