@@ -18,8 +18,9 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   ch2="http://placid.nlm.nih.gov/download?items=10778",
                   ch2b="http://placid.nlm.nih.gov/download?items=10780",   # brodmann 
                   ch2a="http://placid.nlm.nih.gov/download?items=10784", # aal
-                  mni="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz",
-                  mnib="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz"
+                  mni="http://placid.nlm.nih.gov/download?items=10785",
+                  mnib="http://placid.nlm.nih.gov/download?items=10787", # brodmann 
+                  mnia="http://placid.nlm.nih.gov/download?items=10786"  # aal 
             )
   myext<-".nii.gz"
   if ( fileid == "ADNI" | fileid == "K1"  ) myext<-".zip"
@@ -32,9 +33,6 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
   if ( !file.exists(tfn) ) download.file(myurl, tfn )
   if ( fileid == "ADNI" | fileid == "K1"  ) {
     unzip( tfn )
-    return( tfn ) 
-  }
-  if ( fileid == "mni" |  fileid == "mnib"  ) {
     return( tfn ) 
   }
   # could use md5sum 

@@ -34,11 +34,12 @@
 \dontrun{
  tem<-antsImageRead('templates/template_brain.nii.gz',3)
  temlab<-antsImageRead('temp.nii.gz',3)
- # try getANTsRData('ch2') & getANTsRData('ch2b') if you have www access
- mych2<-list( antsImageRead(getANTsRData('ch2'),3), 
-              antsImageRead(getANTsRData('ch2b'),3) )
+ # try getANTsRData if you have www access
+ mymni<-list( antsImageRead(getANTsRData('mni'),3), 
+ 	      antsImageRead(getANTsRData('mnib'),3), 
+              antsImageRead(getANTsRData('mnia'),3) )
  mytem<-list(tem,temlab)
- coords<-getTemplateCoordinates( mytem , mych2 , convertToTal = TRUE )
+ coords<-getTemplateCoordinates( mytem , mymni , convertToTal = TRUE )
  plotANTsImage( coords$myImageInTemplateSpace,slices="100x100x1")
 }
 }
