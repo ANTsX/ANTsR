@@ -219,18 +219,19 @@ for ( ind in 1:length(functional) )
   {
   biglab<-matrix(0,nrow=slicerow*winrows,ncol=(slicecol*wincols))
   labimg<-as.array(functional[[ind]]) # the label image
-  # check sizes
-  for ( x in c(1:imagedim)) 
-  if ( dim(img)[x] != dim(labimg)[x] )
-    {
-    print("mask and label image do not match---exiting")
-    return(NULL)
-    }
   if ( imagedim == 2 ) {
     labimg<-rotate270.matrix( labimg ) 
   }
   if ( imagedim == 3 )labimg<-aperm(labimg,c(perms),resize=T)
-
+  # check sizes
+  for ( x in c(1:imagedim)) 
+  if ( dim(img)[x] != dim(labimg)[x] )
+    {
+    print( paste("img",dim(img) ) )
+    print( paste("lab",dim(labimg) ) )
+    print("mask and label image do not match---exiting")
+    return(NULL)
+    }
   mncl<-min(labimg)
   mxcl<-max(labimg)
   print("threshold")
