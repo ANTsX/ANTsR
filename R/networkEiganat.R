@@ -1,4 +1,4 @@
-peigenanat<-function( Xin , sparam=0.1, k = 5 , its = 100 , gradparam = 1 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
+networkEiganat<-function( Xin , sparam=0.1, k = 5 , its = 100 , gradparam = 1 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
 {
 X<-Xin-min(Xin)
 print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",sparam))
