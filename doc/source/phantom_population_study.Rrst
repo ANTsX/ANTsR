@@ -94,7 +94,7 @@ m + geom_histogram(aes(y = ..density..),binwidth=0.05,colour="black",fill="white
 Overlay the beta-image on the template to see areas with high t-statistic ( greater than 2 , less than 6 ).
 
 .. {r step5,eval=TRUE,warning=FALSE,results="hide",message=FALSE}
-plotANTsImage(myantsimage=antsImageRead(maskfn, mydim),functional=betaimg,threshold="2x6",color="red",axis=1)
+plotANTsImage(myantsimage=antsImageRead(maskfn, mydim),functional=list(betaimg),threshold="2x6",color="red",axis=1)
 .. ..
 
 Finally, test the output for correctness.
