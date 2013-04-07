@@ -15,7 +15,7 @@ ImageMath("4","na","PH",img)
 par(mfrow=c(2,1))
 plotANTsImage(myantsimage=avg,slices="12x33x3",axis=3)
 maskThresh <- 100000
-mask <- getMask( avg , maskThresh , 1e9 )
+mask <- getMask( avg , maskThresh , 1e9, cleanup=TRUE )
 # check if the mask is ok
 plotANTsImage(myantsimage=avg,functional=list(mask),slices="12x33x3",axis=3,threshold="0.5x1.5")
 # The mask looks fine ( does not have to be perfect ) so we proceed.
