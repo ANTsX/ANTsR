@@ -45,7 +45,7 @@ If you have CMake installed, then open R and do:
 .. sourcecode:: r
     
 
-    install.packages(c("devtools", "MASS", "Rcpp", "methods", "signal", "parallel", 
+    install.packages(c("devtools", "Rcpp", "methods", "signal", "parallel", 
         "timeSeries", "mFilter", "MASS", "robust", "magic", "knitr", "pixmap", "rgl", 
         "misc3d", "lme4"))
     library(devtools)

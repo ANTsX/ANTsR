@@ -70,6 +70,24 @@ See the full man pages for each function below from within R via ?functionname
 
    Rd_KellyKapowski.rst
 
+   Rd_getTemplateCoordinates.rst 
+
+   Rd_eigSeg.rst
+
+   Rd_getMask.rst
+
+   Rd_imageListToMatrix.rst 
+
+   Rd_renderSurfaceFunction.rst
+
+   Rd_sparseDecom.rst
+
+   Rd_sparseDecom2.rst
+
+   Rd_matrixToImages.rst 
+
+   Rd_lappend.rst
+
 ..   Rd_cbf.rst
    
 ..   Rd_sccan.rst
