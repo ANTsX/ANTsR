@@ -30,7 +30,7 @@ for ( a in 1:nrow(X) )
 rr<-norm(X - recon, "F" )
 matpfrobnorm<-norm( X , "F" )
 varx<-( 1.0 - ( rr * rr ) / ( matpfrobnorm * matpfrobnorm ) )
-print( paste( varx , distance2( X , u %*% t(v)  ) ))
+print( paste( varx  ) )
 return( list( u=u, v=v , recon=recon ) )
 }
 
