@@ -17,7 +17,7 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   AB="http://placid.nlm.nih.gov/download?items=10753",
                   ch2="http://placid.nlm.nih.gov/download?items=10778",
                   ch2b="http://placid.nlm.nih.gov/download?items=10780",   # brodmann 
-                  ch2a="http://placid.nlm.nih.gov/download?folders=10781", # aal
+                  ch2a="http://placid.nlm.nih.gov/download?items=10784", # aal
                   mni="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz",
                   mnib="http://mindboggle.info/data/templates/MNI152_T1_1mm_brain.nii.gz"
             )
@@ -47,7 +47,8 @@ getANTsRData<- function( fileid , usefixedlocation = FALSE)
                   ch2="501c45361cf92dadd007bee55f02e053",
                   ch2b="5db6c10eb8aeabc663d10e010860465f",
                   ch2a="caf2d979a7d9c86f515a5bc447856e7c"
-            )
-  if ( md5sum( tfn ) != mymd5 ) { print("checksum failure"); return(NULL) }
+                )
+  if ( ! is.null( mymd5 ) ) 
+    if ( md5sum( tfn ) != mymd5 ) { print("checksum failure"); return(NULL) }
   return( tfn )
 }
