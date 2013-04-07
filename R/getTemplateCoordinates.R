@@ -59,7 +59,9 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) ) )
       templateLab[i]<-myval[1]
       }
-    mypoints<-cbind( mypoints, templateLab = templateLab )
+    if ( mylab == 2 ) mypoints<-cbind( mypoints, Brodmann = templateLab )
+    if ( mylab == 3 ) mypoints<-cbind( mypoints, AAL = templateLab )
+    if ( mylab > 3 ) mypoints<-cbind( mypoints, templateLab = templateLab )
     }
   if ( convertToTal & imagedim == 3 )
     {
@@ -70,5 +72,8 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       }
     return( list( templatepoints=mypoints, talpoints=talpoints , myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
     }
+  mypoints$x<-round(mypoints$x*100)/100
+  mypoints$y<-round(mypoints$y*100)/100
+  mypoints$z<-round(mypoints$z*100)/100
   return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
   }
