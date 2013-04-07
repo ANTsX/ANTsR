@@ -39,10 +39,12 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
     if ( class(filab)[[1]] != "antsImage" )
     {
     print( "  class(filab)[[1]] != antsImage " )
+    return(1)
     }
     if ( class(milab)[[1]] != "antsImage" )
     {
     print( "  class(milab)[[1]] != antsImage " )
+    return(1)
     }
     # now we know the (e.g. MNI) coordinate of each labeled region in the original image
     # we want, next, to identify the 'Brodmann' label for each of these regions
