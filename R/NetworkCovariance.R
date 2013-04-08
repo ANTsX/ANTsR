@@ -2,7 +2,7 @@
 # From - van Wijk, B.C.M., Stam, C.J., Daffertshofer, A.: Comparing brain networks of
 # different size and connectivity density using graph theory. PLoS One 5(10) (2010) e13701
 
-NetworkCovariance <- function( n1, n2 )
+networkCovariance <- function( n1, n2 )
 {
   if ( sum(abs( dim(n1) - dim(n2) ) ) != 0 )
     {
