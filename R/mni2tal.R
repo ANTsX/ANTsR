@@ -1,11 +1,16 @@
-mni2tal <- function( x = 0 )
+mni2tal <- function( xin = 0 )
   {
-  if ( nargs() == 0 | length(x) != 3 )
+  if ( nargs() == 0 | length(xin) != 3 )
     {
     print("Usage:  talPoint<-mni2tal( mniPoint ) ")
     print("mni2tal for converting from ch2/mni space to tal - very approximate")
     return(1)
     }
+  x<-xin
+#  The input image is in RAS coordinates but we use ITK which returns LPS coordinates.
+#  So we need to flip the coordinates such that L => R and  P => A to get RAS (MNI) coordinates
+  x[1]<-x[1] * ( -1 ) # flip X
+  x[2]<-x[2] * ( -1 ) # flip Y 
   xout<-x
   if ( x[3] >= 0 )
     {

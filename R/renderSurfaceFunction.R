@@ -77,7 +77,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   par3d(windowRect = c(0, 0, 500, 500)) # make the window large
   par3d(zoom = 1.1) # larger values make the image smaller
   drawScene.rgl(mylist) # surface render 
-  movie3d(spin3d(),duration=10,dir=outdir, movie=outfn,clean=F)
+  movie3d(spin3d(),duration=15,dir=outdir, movie=outfn,clean=F)
   return( mylist ) 
 }
 

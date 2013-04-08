@@ -2,6 +2,12 @@ networkEiganat<-function( Xin , sparam=0.1, k = 5 , its = 100 , gradparam = 1 , 
 {
 X<-Xin-min(Xin)
 print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",sparam))
+############################
+# gradient 1               #
+#   U^T ( X - U V^T )      #
+# gradient 2               #
+#   X^T ( X * ( P - V ) )  #
+############################
 if ( missing( v ) )  v<-t( replicate( ncol(X) , rnorm(k)) )
 u <- matrix( rep(0, ncol(v)*nrow(X) ), nrow=nrow(X), ncol=ncol(v) ,byrow=T )
 for ( jj in 1:its ) {

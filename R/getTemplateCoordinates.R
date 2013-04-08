@@ -31,7 +31,7 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   milab<-imagePairToBeLabeled[[2]]
   mywarpedLimage<-antsApplyTransforms(fixed=fi,moving=milab,transformlist=mytx$fwdtransforms, interpolator=c("NearestNeighbor") )
   pointfile<-paste(outprefix,"coords.csv",sep='')
-  ImageMath( milab@dimension , pointfile , "LabelStats", mywarpedLimage , 1 )
+  ImageMath( milab@dimension , pointfile , "LabelStats", mywarpedLimage, mywarpedLimage , 1 )
   mypoints<-read.csv(pointfile)
   for ( mylab in 2:length(templatePairWithLabels) )
     {
@@ -65,15 +65,17 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
     }
   if ( convertToTal & imagedim == 3 )
     {
-    talpoints<-mypoints
-    for ( i in 1:nrow(talpoints) )
+    for ( i in 1:nrow(mypoints) )
       {
-      talpoints[i,1:3]<-mni2tal( c( talpoints$x[i], talpoints$y[i] ,talpoints$z[i] ) )
-      }
-    return( list( templatepoints=mypoints, talpoints=talpoints , myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
+      talpt<-mni2tal( c( mypoints$x[i], mypoints$y[i] , mypoints$z[i] ) )
+      mypoints$x[i]<-talpt[1]
+      mypoints$y[i]<-talpt[2]
+      mypoints$z[i]<-talpt[3]
+      } 
     }
-  mypoints$x<-round(mypoints$x*100)/100
-  mypoints$y<-round(mypoints$y*100)/100
-  mypoints$z<-round(mypoints$z*100)/100
+  scl<-1.0
+  mypoints$x<-round(mypoints$x*scl)/scl
+  mypoints$y<-round(mypoints$y*scl)/scl
+  mypoints$z<-round(mypoints$z*scl)/scl
   return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
-  }
+}
