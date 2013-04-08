@@ -3,7 +3,7 @@
 # n1 - network matrix
 # n2 - network matrix
 # 
-NetworkOverlap <- function( n1, n2 )
+networkOverlap <- function( n1, n2 )
 {
  
   intersect <- sum( n1[upper.tri(n1)] * n2[upper.tri(n2)] )
