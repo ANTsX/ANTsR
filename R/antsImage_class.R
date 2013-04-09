@@ -34,13 +34,17 @@ setMethod( f = "dim" ,
 			}
 	   )
 
-#setMethod(f = "is.na",
-#          signature( x = "antsImage" ),
-#          definition = function( x )
-#          {
-#            
-#          }
-
+setMethod(f = "is.na",
+          signature( x = "antsImage" ),
+          definition = function( x )
+          {
+            val <- .Call( "antsImage_isna", x )
+            if (val > 0) {
+              return (TRUE)
+            }
+            return (FALSE)
+          }
+         )
 
 setMethod( f = "as.numeric" ,
 	   signature( x = "antsImage"
