@@ -27,7 +27,7 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     fnll<-list()
     for ( i in 1:length(fnl) )
       {
-      img<-antsImageRead( fnl[i] , dim[1] )
+      img<-antsImageRead( fnl[i], length(dim(inmask)) )
       fnll<-lappend( fnll, img )
       }
     fnl<-fnll
