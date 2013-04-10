@@ -2,14 +2,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
-    if ( Sys.info()["sysname"] == "XXX" )
-      {
-      mycmd<-antsrParseListToString(fixed )
-      system( paste("antsApplyTransforms ", mycmd$mystr ) )
-      return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
-      }
-    if ( Sys.info()["sysname"] != "XXX" )
-      .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1) ) ) ;
+    .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1) ) ) ;
     return(0);
     }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
@@ -67,14 +60,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs<-myargs2
         }
         } }
-        if ( Sys.info()["sysname"] == "XXX" )
-          {
-          mycmd<-antsrParseListToString2( args,outimg, outdim )
-          system( paste("antsApplyTransforms ", mycmd$mystr ) )
-          return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
-          }
-        if ( Sys.info()["sysname"] != "XXX" )
-          .Call("antsApplyTransforms", c(myargs,"-z",1) )
+        .Call("antsApplyTransforms", c(myargs,"-z",1) )
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -82,14 +68,13 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
     }
     return(0)
   }
-  if ( Sys.info()["sysname"] == "XXX" )
-    {
-    mycmd<-antsrParseListToString(  c(args) )
-    system( paste("antsApplyTransforms ", mycmd$mystr ) )
-    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
-    }
-  if ( Sys.info()["sysname"] != "XXX" )
-    .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1) ) ) ;
+#  if ( Sys.info()["sysname"] == "XXX" )
+#    {
+#    mycmd<-antsrParseListToString(  c(args) )
+#    system( paste("antsApplyTransforms ", mycmd$mystr ) )
+#    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
+#    }
+  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1) ) ) ;
   gc() # trigger garbage collection
 }
 

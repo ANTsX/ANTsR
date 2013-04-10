@@ -3,7 +3,7 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   if ( nargs() == 0 | length(imagePairToBeLabeled) < 2
       | length(templatePairWithLabels) < 2 )
     {
-    print( args( getTalairachCoordinates  ) )
+    print( args( getTemplateCoordinates  ) )
     print( " imagePairToBeLabeled <-list( myBrain, myBrainBlobs ) ")
     print( " templatePairWithLabels <-list( ch2orMNI_Brain, ch2orMNI_BrodmannLabels ) ")
     print( " labelnames <-c(\"HippocampusL\",\"HippocampusR\") ")
