@@ -1,7 +1,9 @@
 \name{matrixToImages}
 \alias{matrixToImages}
 
-\title{Convert rows of a matrix to images}
+\title{
+Convert rows of a matrix to images
+}
 
 \description{
   Unmasks rows of a matrix and writes as images.

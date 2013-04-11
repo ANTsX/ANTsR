@@ -1,7 +1,9 @@
 \name{imageListToMatrix}
 \alias{imageListToMatrix}
 
-\title{Read Images into a Matrix}
+\title{
+Read Images into a Matrix
+}
 
 \description{
   Read images into rows of a matrix.

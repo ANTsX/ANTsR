@@ -1,7 +1,9 @@
 \name{getMask}
 \alias{getMask}
 
-\title{Get Mask}
+\title{
+Get Mask
+}
 
 \description{
   Get a binary mask image from the given image after thresholding.

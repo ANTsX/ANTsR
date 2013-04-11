@@ -1,7 +1,9 @@
 \name{getTemplateCoordinates}
 \alias{getTemplateCoordinates}
 
-\title{Define an anatomical coordinate system in a new image based on a template}
+\title{
+Define an anatomical coordinate system in a new image based on a template
+}
 
 \description{
  This function will provide a mapping that labels an input image and its blobs.
