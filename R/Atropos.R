@@ -2,13 +2,13 @@ Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", priorwei
 {
   if ( typeof(d) == "list" )
     {
-    .Call( "Atropos", int_antsProcessArguments(  d ) )
+    .Call( "Atropos", int_antsProcessArguments(  d ) , PACKAGE="libRAtropos" )
     return(0)
     }
   if ( missing( d ) | missing( a )  | missing( x )  )
     {
     print("Input error - check params & usage")
-    .Call( "Atropos", int_antsProcessArguments( c(list("-h")) ) )
+    .Call( "Atropos", int_antsProcessArguments( c(list("-h")) ) , PACKAGE="libRAtropos" )
     return(NULL)
     }
   # define the output temp files 
@@ -39,7 +39,7 @@ Atropos <- function(  d, a, x, i="kmeans[3]", m="[0.2,1x1]", c="[5,0]", priorwei
   if ( length(a) == 2 )  myargs<-list( d=d, a=a[[1]], a=a[[2]], m=m, o=outs, c=c, m=m, i=i, x=mymask, ... )
   if ( length(a) == 3 )  myargs<-list( d=d, a=a[[1]], a=a[[2]], a=a[[3]], m=m, o=outs, c=c, m=m, i=i, x=mymask, ... )
   if ( length(a) > 3 )  { myargs<-list( d=d, a=a[[1]], a=a[[2]], a=a[[3]], m=m, o=outs, c=c, m=m, i=i, x=mymask, ... ) ; print( " more than 3 input images not really supported, using first 3 ") }
-  .Call( "Atropos", int_antsProcessArguments( c(myargs) ) ) ;
+  .Call( "Atropos", int_antsProcessArguments( c(myargs) ), PACKAGE="libRAtropos"  ) ;
   probsout <- list.files( path = tdir, pattern =
        glob2rx( searchpattern ), full.names = TRUE, recursive = FALSE )
   pimg<-antsImageRead( probsout[1] , mydim )

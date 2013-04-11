@@ -296,9 +296,9 @@ install( TARGETS RSmoothImage DESTINATION . )
 #target_link_libraries(RSurfaceBasedSmoothing ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SurfaceBasedSmoothing )
 #install( TARGETS RSurfaceBasedSmoothing DESTINATION . )
 
-#add_library(RSurfaceCurvature MODULE ${ANTsR_SOURCE_DIR}/src/SurfaceCurvature.cxx)
-#target_link_libraries(RSurfaceCurvature ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SurfaceCurvature )
-#install( TARGETS RSurfaceCurvature DESTINATION . )
+add_library(RSurfaceCurvature MODULE ${ANTsR_SOURCE_DIR}/src/SurfaceCurvature.cxx)
+target_link_libraries(RSurfaceCurvature ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SurfaceCurvature )
+install( TARGETS RSurfaceCurvature DESTINATION . )
 
 #add_library(RTensorDerivedImage MODULE ${ANTsR_SOURCE_DIR}/src/TensorDerivedImage.cxx)
 #target_link_libraries(RTensorDerivedImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_TensorDerivedImage )

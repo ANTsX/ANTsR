@@ -21,7 +21,7 @@ setMethod( f = "initialize" ,
 				  dimension = 3
 				  )
 	   	       {
-			 return( .Call( "antsImage", pixeltype , dimension ) )
+			 return( .Call( "antsImage", pixeltype , dimension, PACKAGE="libRantsImage" ) )
 	   	       }
 	   )
 
@@ -30,7 +30,7 @@ setMethod( f = "dim" ,
 	   	      ) ,
 	   definition = function( x )
 	   	      	{
-			  return( .Call( "antsImage_dim" , x ) )
+			  return( .Call( "antsImage_dim" , x, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -38,7 +38,7 @@ setMethod(f = "is.na",
           signature( x = "antsImage" ),
           definition = function( x )
           {
-            val <- .Call( "antsImage_isna", x )
+            val <- .Call( "antsImage_isna", x, PACKAGE="libRantsImage" )
             if (val > 0) {
               return (TRUE)
             }
@@ -59,7 +59,7 @@ setMethod( f = "as.numeric" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region, PACKAGE="libRantsImage" ) )
 			}
            )
 
@@ -81,7 +81,7 @@ setMethod( f = "as.matrix" ,
 			    print( "image dimension must be 2" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region, PACKAGE="libRantsImage" ) )
 			}
 
 	   )
@@ -99,7 +99,7 @@ setMethod( f = "as.array" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region , PACKAGE="libRantsImage") )
 			}
 
 	   )
@@ -114,7 +114,7 @@ setMethod( f = "[" ,
 			{
 			  mask = logical(0)
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_asVector" , x , mask , region ) )
+			  return( .Call( "antsImage_asVector" , x , mask , region , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -127,7 +127,7 @@ setMethod( f = "[" ,
 				  )
 			{
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_asVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -145,7 +145,7 @@ setMethod( f = "[" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_asVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -163,7 +163,7 @@ setMethod( f = "[" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_asVector" , x , i , region ) )
+			  return( .Call( "antsImage_asVector" , x , i , region , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -189,7 +189,7 @@ setMethod( f = "[" ,
 			    print( "'region' provided is not of class 'antsRegion'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , i$mask , i$region ) )
+			  return( .Call( "antsImage_asVector" , x , i$mask , i$region , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -204,7 +204,7 @@ setMethod( f = "[" ,
 				  )
 			{
 			  mask = logical(0)
-			  return( .Call( "antsImage_asVector" , x , mask , j ) )
+			  return( .Call( "antsImage_asVector" , x , mask , j , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -218,7 +218,7 @@ setMethod( f = "[" ,
 				  j
 				  )
 			{
-			  return( .Call( "antsImage_asVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -237,7 +237,7 @@ setMethod( f = "[" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -256,7 +256,7 @@ setMethod( f = "[" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_asVector" , x , i , j ) )
+			  return( .Call( "antsImage_asVector" , x , i , j , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -335,7 +335,7 @@ if( length( l ) != 1 || !is.na( l ) )
     return()
   }
 }
-return( .Call( "antsImage_GetPixels" , x , lst ) )
+return( .Call( "antsImage_GetPixels" , x , lst , PACKAGE="libRantsImage") )
 }
 
 antsGetSpacing <- function( x )
@@ -346,7 +346,7 @@ antsGetSpacing <- function( x )
     return()
     } 
   
-  return( .Call( "antsImage_GetSpacing" , x ) )
+  return( .Call( "antsImage_GetSpacing" , x , PACKAGE="libRantsImage") )
 }
 
 antsSetSpacing <- function( x, spacing )
@@ -369,7 +369,7 @@ antsSetSpacing <- function( x, spacing )
     return()
     }
   
-  return( .Call( "antsImage_SetSpacing", x, spacing ) )
+  return( .Call( "antsImage_SetSpacing", x, spacing, PACKAGE="libRantsImage" ) )
 }
 
 antsGetOrigin <- function( x )
@@ -379,7 +379,7 @@ antsGetOrigin <- function( x )
     print( "Input must be of class 'antsImage'");
     return()
     } 
-  return( .Call( "antsImage_GetOrigin" , x ) )
+  return( .Call( "antsImage_GetOrigin" , x , PACKAGE="libRantsImage") )
 }
 
 antsSetOrigin <- function( x, origin )
@@ -401,7 +401,7 @@ antsSetOrigin <- function( x, origin )
     return()
     }
   
-  return( .Call( "antsImage_SetOrigin", x, origin ) )
+  return( .Call( "antsImage_SetOrigin", x, origin, PACKAGE="libRantsImage" ) )
 }
 
 antsGetDirection <- function( x )
@@ -411,7 +411,7 @@ antsGetDirection <- function( x )
     print( "Input must be of class 'antsImage'");
     return()
     } 
-  return( .Call( "antsImage_GetDirection", x ) )
+  return( .Call( "antsImage_GetDirection", x, PACKAGE="libRantsImage" ) )
 }
 
 antsSetDirection <- function( x, direction )
@@ -434,7 +434,7 @@ antsSetDirection <- function( x, direction )
     return()
     }
   
-  return( .Call( "antsImage_SetDirection", x, direction ) )
+  return( .Call( "antsImage_SetDirection", x, direction, PACKAGE="libRantsImage" ) )
 }
 
 getValueAtPoint <- function( x, point )
@@ -497,7 +497,7 @@ antsTransformIndexToPhysicalPoint <- function( x, index )
     return()
     }
   
-  return( .Call("antsImage_TransformIndexToPhysicalPoint", x, index ) )
+  return( .Call("antsImage_TransformIndexToPhysicalPoint", x, index, PACKAGE="libRantsImage" ) )
 }
 
 antsTransformPhysicalPointToIndex <- function( x, point )
@@ -525,7 +525,7 @@ antsTransformPhysicalPointToIndex <- function( x, point )
     return()
     }
   
-  return( .Call("antsImage_TransformPhysicalPointToIndex", x, point ) )
+  return( .Call("antsImage_TransformPhysicalPointToIndex", x, point , PACKAGE="libRantsImage") )
 }
 
 setMethod( f = "[" ,
@@ -603,7 +603,7 @@ setMethod( f = "[<-" ,
 			{
 			  mask = logical(0)
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_SetRegion" , x , mask , region , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , mask , region , value , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -617,7 +617,7 @@ setMethod( f = "[<-" ,
 				  )
 			{
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -636,7 +636,7 @@ setMethod( f = "[<-" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -655,7 +655,7 @@ setMethod( f = "[<-" ,
 			    return()
 			  }
 			  region = new( "antsRegion" , index = integer() , size = integer() )
-			  return( .Call( "antsImage_SetRegion" , x , i , region , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , region , value, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -682,7 +682,7 @@ setMethod( f = "[<-" ,
 			    print( "'region' provided is not of class 'antsRegion'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_SetRegion" , x , i$mask , i$region , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i$mask , i$region , value, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -698,7 +698,7 @@ setMethod( f = "[<-" ,
 				  )
 			{
 			  mask = logical(0)
-			  return( .Call( "antsImage_SetRegion" , x , mask , j , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , mask , j , value, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -713,7 +713,7 @@ setMethod( f = "[<-" ,
 				  value
 				  )
 			{
-			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -733,7 +733,7 @@ setMethod( f = "[<-" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value , PACKAGE="libRantsImage") )
 			}
 	   )
 
@@ -753,7 +753,7 @@ setMethod( f = "[<-" ,
 			    print( "'mask' provided is not of type 'logical'" )
 			    return()
 			  }
-			  return( .Call( "antsImage_SetRegion" , x , i , j , value ) )
+			  return( .Call( "antsImage_SetRegion" , x , i , j , value, PACKAGE="libRantsImage" ) )
 			}
 	   )
 
@@ -833,7 +833,7 @@ if( length( l ) != 1 || !is.na( l ) )
     return()
   }
 }
-return( .Call( "antsImage_SetPixels" , x , lst , value ) )
+return( .Call( "antsImage_SetPixels" , x , lst , value, PACKAGE="libRantsImage" ) )
 }
 
 setMethod( f = "[<-" ,
@@ -925,7 +925,7 @@ setMethod( f = "as.antsImage" ,
 							)
 				  )
 	   	      	{
-			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin ) )
+			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin , PACKAGE="libRantsImage") )
 	   		}
 	   )
 
@@ -946,7 +946,7 @@ setMethod( f = "as.antsImage" ,
 							)
 				  )
 	   	      	{
-			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin ) )
+			  return( .Call( "antsImage_asantsImage" , object , pixeltype , spacing , origin, PACKAGE="libRantsImage" ) )
 	   		}
 	   )
 
@@ -970,12 +970,12 @@ setMethod( f = "==" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else
 			  {
@@ -1005,12 +1005,12 @@ setMethod( f = "!=" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else
 			  {
@@ -1040,12 +1040,12 @@ setMethod( f = "<=" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else
 			  {
@@ -1075,12 +1075,12 @@ setMethod( f = ">=" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator , PACKAGE="libRantsImage") )
 			  }
 			  else
 			  {
@@ -1110,12 +1110,12 @@ setMethod( f = "<" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator, PACKAGE="libRantsImage" ) )
 			  }
 			  else
 			  {
@@ -1145,12 +1145,12 @@ setMethod( f = ">" ,
 			      print( "region argument not of class 'antsRegion'" )
 			      return()
 			    }
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2$value , e2$region , operator , PACKAGE="libRantsImage") )
 			  }
 			  else if( class(e2) == "numeric" && length( e2 ) == 1 )
 			  {
 			    region = new( "antsRegion" , index = integer() , size = integer() )
-			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator ) )
+			    return( .Call( "antsImage_RelationalOperators" , e1 , e2 , region , operator , PACKAGE="libRantsImage") )
 			  }
 			  else
 			  {
@@ -1180,7 +1180,7 @@ setMethod( f = "initialize" ,
 	   	       {
 			 .Call( "antsImageList", 
 			 	pixeltype , 
-				dimension 
+				dimension , PACKAGE="libRantsImageList"
 				)
 	   	       }
 	   )
@@ -1189,6 +1189,6 @@ setMethod( f = "as.list" ,
 	   signature( x = "antsImageList" ) ,
 	   definition = function( x )
 	   	      {
-			return( .Call( "antsImageList_asList" , x ) )
+			return( .Call( "antsImageList_asList" , x, PACKAGE="libRantsImageList" ) )
 	   	      }
 	   )

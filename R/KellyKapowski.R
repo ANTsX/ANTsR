@@ -11,5 +11,5 @@ KellyKapowski <- function(  d=NA, s=NA, g=NA, w=NA, c="[45,0.0,10]", r=0.025, m=
     }
 #               KellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
   kkargs<-list( d=d, s=s, g=g, w=w, c=10, r=0.5, m=1, outimg=outimg )
-  .Call( "KellyKapowski", int_antsProcessArguments( c(kkargs) ) ) ;
+  .Call( "KellyKapowski", int_antsProcessArguments( c(kkargs) ), PACKAGE = "libRKellyKapowski" ) ;
 }

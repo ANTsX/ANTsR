@@ -1,3 +1,3 @@
 SurfaceCurvature <- function(...){
-	.Call( "SurfaceCurvature", as.character( c(...) ) ) ;
+  .Call( "SurfaceCurvature", int_antsProcessArguments( c(...) ), PACKAGE="libRSurfaceCurvature"  ) ;
 }

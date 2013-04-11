@@ -1,3 +1,3 @@
 ThresholdImage <- function(...){
-	.Call( "ThresholdImage", int_antsProcessArguments( c(...) ) ) ;
+	.Call( "ThresholdImage", int_antsProcessArguments( c(...) ) , PACKAGE = "libRThresholdImage" ) ;
 }

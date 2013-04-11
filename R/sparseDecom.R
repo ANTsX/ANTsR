@@ -18,7 +18,7 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     antsImageWrite( inmask, mfn )
     } 
   args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z)
-  .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
+  .Call( "sccan", int_antsProcessArguments( c(args) ) , PACKAGE = "libRsccan" ) ;
   mydecomp<-read.csv(decomp)
   if ( !is.na(inmask) )
     {

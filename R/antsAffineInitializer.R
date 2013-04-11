@@ -1,3 +1,3 @@
 antsAffineInitializer <- function(...){
-	.Call( "antsAffineInitializer", int_antsProcessArguments( c(...) ) ) ;
+	.Call( "antsAffineInitializer", int_antsProcessArguments( c(...) ), PACKAGE = "libRantsAffineInitializer" ) ;
 }

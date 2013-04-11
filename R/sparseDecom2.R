@@ -31,7 +31,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
               "]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
               "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong,"-z",z )
-  .Call( "sccan", int_antsProcessArguments( c(args) ) ) ;
+  .Call( "sccan", int_antsProcessArguments( c(args) ) , PACKAGE = "libRsccan" ) ;
   mydecomp<-read.csv(decomp[1])
   if ( !is.na(inmask[[1]]) )
     {

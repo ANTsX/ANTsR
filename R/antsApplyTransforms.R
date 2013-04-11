@@ -2,17 +2,17 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
-    .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1) ) ) ;
+    .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1) ) , PACKAGE="libRantsApplyTransforms") ;
     return(0);
     }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
     {
     cat(" warpedimg<-antsApplyTransforms( fixed=img1 , moving=img2 , transformlist=list(\"my0GenericAffine.mat\",\"my1Warp.nii.gz\") ) ")
     cat("\n\n")
-    cat("For full mode: use standard ants call as in antsRegistration full mode ... \n\n")
+    cat("For full mode: use standard ants call as in antsApplyTransforms full mode ... \n\n")
     cat(" antsApplyTransforms(\"-d\",\"2\",\"-i\",\"r64slice.nii.gz\",\"-o\",\"temp.nii.gz\",\"-r\",\"r16slice.nii.gz\",\"-t\",\"./Z0GenericAffine.mat\") \n")
     cat("for full help: \n")
-    cat("use .Call( \"antsApplyTransforms\", int_antsProcessArguments( c(list(\"--help\")) ) );
+    cat("use .Call( \"antsApplyTransforms\", int_antsProcessArguments( c(list(\"--help\")) ), PACKAGE=\"libRantsApplyTransforms\" );
 \n");
     return(0);
     }
@@ -60,7 +60,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs<-myargs2
         }
         } }
-        .Call("antsApplyTransforms", c(myargs,"-z",1) )
+        .Call("antsApplyTransforms", c(myargs,"-z",1) , PACKAGE="libRantsApplyTransforms")
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -74,7 +74,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 #    system( paste("antsApplyTransforms ", mycmd$mystr ) )
 #    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
 #    }
-  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1) ) ) ;
+  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1) ), PACKAGE="libRantsApplyTransforms" ) ;
   gc() # trigger garbage collection
 }
 
