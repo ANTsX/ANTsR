@@ -1,3 +1,3 @@
 N4BiasFieldCorrection <- function(...){
-	.Call( "N4BiasFieldCorrection", int_antsProcessArguments(c(...)) , package = "libRN4BiasFieldCorrection" )
+	.Call( "N4BiasFieldCorrection", int_antsProcessArguments(c(...)) , PACKAGE = "libRN4BiasFieldCorrection"  )
       }

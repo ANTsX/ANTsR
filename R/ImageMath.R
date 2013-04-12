@@ -1,3 +1,3 @@
 ImageMath <- function(...){
-	.Call( "ImageMath", int_antsProcessArguments( c(...) ) , package = "libRImageMath" ) ;
+	.Call( "ImageMath", int_antsProcessArguments( c(...) ) , PACKAGE = "libRImageMath" ) ;
 }
