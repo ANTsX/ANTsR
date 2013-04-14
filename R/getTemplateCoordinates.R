@@ -56,7 +56,7 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       {
       if ( imagedim == 2) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i],"1") 
       if ( imagedim == 3) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i], mypoints$z[i],"1") 
-      myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) , PACKAGE="libRantsImageMath") )
+      myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) , PACKAGE="libRImageMath") )
       templateLab[i]<-myval[1]
       }
     if ( mylab == 2 ) mypoints<-cbind( mypoints, Brodmann = templateLab )
