@@ -23,13 +23,11 @@ maskfn <- "phantomtemplate.jpg"
 #" get the mask , should be in same space as image
 glb <- glob2rx(paste(maskfn, sep = ""))
 maskfn <- list.files(path = "../../", pattern = glb, full.names = T, recursive = T)
-mask <- antsImageRead(maskfn, mydim)
+mask <- antsImageRead(maskfn[1], mydim)
 #" get regions of mask according to logical comparisons
-logmask <- (mask > 120 & mask < 130)
+mask<-getMask(mask,120,130)
+logmask<-mask > 0
 notlogmask <- (!logmask)
-#" make sure it holds zeroes
-mask[logmask]    <- 1
-mask[notlogmask] <- 0
 # fill holes
 ImageMath("2",mask,"FillHoles",mask)
 .. .. 
@@ -56,7 +54,7 @@ for (i in 1:length(fnl)) {
     mat[i, ] <- vec
 }
 #" identify your predictors and use in regression
-predictor <- c(rep(2, 4), rep(1, 4))
+predictor <- c(rep(2, nrow(mat)/2 ), rep(1, nrow(mat)/2 ))
 #" the regression for your study
 testformula <- (vox ~ 1 + predictor)
 betavals <- rep(NA, nvox)
