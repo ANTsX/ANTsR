@@ -45,15 +45,14 @@ return( list( u=t(u), v=t(v) , recon=recon ) )
 sparsifyv<-function( v, sparam, mask = NA )
   {
   if ( sparam >= 1 ) return( v )
-  b<-round( abs( sparam ) * nrow(v) )
+  b<-round(  abs( as.numeric(sparam) ) * nrow(v) )
   if ( b < 1 ) b <-1
-  if ( b > ncol(v) ) b<-ncol(v)
+  if ( b > nrow(v) ) b<-nrow(v)
   for ( i in 1:ncol(v) )
     {
-    sparsev<-v[,i]
-#    sparsev<-sparsev-min(sparsev)
+    sparsev<-(v[,i])
     ord<-rev( order( sparsev ) )
-    sparsev[ ord[b:length(ord) ]]<-0
+    sparsev[ ord[(b):length(ord) ]]<-0
     if ( ! is.na( mask ) ) {
       vecimg<-antsImageClone( mask )
       vecimg[ mask > 0 ]<-sparsev
