@@ -36,7 +36,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
   if ( !is.na(inmask[[1]]) )
     {
     glb<-paste("scca*View1vec*.nii.gz",sep='')
-    fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)[1:nvecs]
     fnll<-list()
     for ( i in 1:length(fnl) )
       {
@@ -49,7 +49,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
   if ( !is.na(inmask[[2]]) )
     {
     glb<-paste("scca*View2vec*.nii.gz",sep='')
-    fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl2<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)[1:nvecs]
     fnll2<-list()
     for ( i in 1:length(fnl2) )
       {

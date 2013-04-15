@@ -23,7 +23,7 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
   if ( !is.na(inmask) )
     {
     glb<-paste("spca*View1vec*.nii.gz",sep='')
-    fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)
+    fnl<-list.files(path=statdir, pattern = glob2rx(glb),full.names = T,recursive = T)[1:nvecs]
     fnll<-list()
     for ( i in 1:length(fnl) )
       {
