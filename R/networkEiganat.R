@@ -1,4 +1,4 @@
-networkEiganat<-function( Xin , sparam=0.1, k = 5 , its = 100 , gradparam = 1 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
+networkEiganat<-function( Xin , sparam=c(0.1,0.1), k = 5 , its = 100 , gradparam = 1 , mask = NA , v, prior, pgradparam = 1.e-2  ) 
 {
 X<-Xin-min(Xin)
 print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",sparam))
@@ -14,6 +14,7 @@ for ( jj in 1:its ) {
 for ( a in 1:nrow(X) )
   {
   usol<-coefficients(lm(   X[a,] ~  v   ))
+  usol<-sparsifyv( as.matrix(usol), sparam[1] )
   u[a, ]<-usol[2:(ncol(u)+1)]
   }
 v <- v + t( t( u ) %*% ( X  - u %*% t(v)  ) ) * gradparam
@@ -21,7 +22,7 @@ if ( ! missing( prior )  )
   {
   v <- v + t(X) %*% ( X %*% ( prior - v ) ) * pgradparam
   }
-v<-sparsifyv( v, sparam, mask )
+v<-sparsifyv( v, sparam[2], mask )
 if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ) ) )
 if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ), "Prior",norm( prior - v, "F") ))
 }
@@ -30,6 +31,7 @@ for ( a in 1:nrow(X) )
   {
   mdl<-lm(   X[a,] ~  v   )
   usol<-coefficients(mdl)
+  usol<-sparsifyv( as.matrix(usol), sparam[1] )
   u[a, ]<-usol[2:(ncol(u)+1)]
   recon[a,]<-predict( mdl )
   }
@@ -53,9 +55,9 @@ sparsifyv<-function( v, sparam, mask = NA )
     ord<-rev( order( sparsev ) )
     sparsev[ ord[b:length(ord) ]]<-0
     if ( ! is.na( mask ) ) {
-      vecimg<-anstImageClone( mask )
+      vecimg<-antsImageClone( mask )
       vecimg[ mask > 0 ]<-sparsev
-      ImageMath( mask@dimension, vecimg,"ClusterThresholdVariate",vecimg,100)
+   #   ImageMath( mask@dimension, vecimg,"ClusterThresholdVariate",vecimg,100)
     }
     v[,i] <- sparsev
     }
