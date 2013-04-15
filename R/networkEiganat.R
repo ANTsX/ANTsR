@@ -14,9 +14,9 @@ for ( jj in 1:its ) {
 for ( a in 1:nrow(X) )
   {
   usol<-coefficients(lm(   X[a,] ~  v   ))
-  usol<-sparsifyv( as.matrix(usol), sparam[1] )
   u[a, ]<-usol[2:(ncol(u)+1)]
   }
+u<-sparsifyv( u, sparam[1] )
 v <- v + t( t( u ) %*% ( X  - u %*% t(v)  ) ) * gradparam
 if ( ! missing( prior )  )
   {
@@ -31,15 +31,15 @@ for ( a in 1:nrow(X) )
   {
   mdl<-lm(   X[a,] ~  v   )
   usol<-coefficients(mdl)
-  usol<-sparsifyv( as.matrix(usol), sparam[1] )
   u[a, ]<-usol[2:(ncol(u)+1)]
   recon[a,]<-predict( mdl )
   }
+u<-sparsifyv( u, sparam[1] )
 rr<-norm(X - recon, "F" )
 matpfrobnorm<-norm( X , "F" )
 varx<-( 1.0 - ( rr * rr ) / ( matpfrobnorm * matpfrobnorm ) )
 print( paste( varx  ) )
-return( list( u=u, v=v , recon=recon ) )
+return( list( u=t(u), v=t(v) , recon=recon ) )
 }
 
 sparsifyv<-function( v, sparam, mask = NA )
