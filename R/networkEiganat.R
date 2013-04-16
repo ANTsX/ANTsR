@@ -49,7 +49,10 @@ sparsifyv<-function( v, sparam, mask = NA )
   for ( i in 1:ncol(v) )
     {
     sparsev<-(v[,i])
-    if ( sparam > 0 ) sparsev<-( sparsev - min( sparsev ) ) 
+    if ( sparam > 0 & max(sparsev) > 0 )
+      sparsev[ sparsev < 0 ]<-0
+    if ( sparam > 0 & max(sparsev) < 0 )
+      sparsev<-sparsev*(-1)
     ord<-rev( order( sparsev ) )
     sparsev[ ord[(b):length(ord) ]]<-0
     if ( ! is.na( mask ) ) {
