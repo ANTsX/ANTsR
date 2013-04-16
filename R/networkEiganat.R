@@ -11,9 +11,9 @@ print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",spar
 ############################
 if ( missing( v ) )
   {
-  v<- t( whiten(replicate( ncol(X) , rnorm(k)) ) )
+  v<- t( (replicate( ncol(X) , rnorm(k)) ) )
   }
-# v<-sparsifyv( v, sparam[2], mask )
+v<-sparsifyv( v, sparam[2], mask )
 u <- ( X %*% v ) 
 for ( jj in 1:its ) {
   for ( a in 1:nrow(X) )
