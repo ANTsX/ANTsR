@@ -5,41 +5,39 @@ print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=",spar
 ############################
 # gradient 1               #
 #   U^T ( X - U V^T )      #
+#       ( X - U V^T ) V    #
 # gradient 2               #
 #   X^T ( X * ( P - V ) )  #
 ############################
-if ( missing( v ) )  v<-t( replicate( ncol(X) , rnorm(k)) )
-u <- matrix( rep(0, ncol(v)*nrow(X) ), nrow=nrow(X), ncol=ncol(v) ,byrow=T )
+if ( missing( v ) )
+  {
+  v<-whiten( t( replicate( ncol(X) , rnorm(k)) ) )
+  }
+# v<-sparsifyv( v, sparam[2], mask )
+u <- ( X %*% v ) 
 for ( jj in 1:its ) {
-for ( a in 1:nrow(X) )
-  {
-  usol<-coefficients(lm(   X[a,] ~  v   ))
-  u[a, ]<-usol[2:(ncol(u)+1)]
-  }
-u<-sparsifyv( u, sparam[1] )
-v <- v + t( t( u ) %*% ( X  - u %*% t(v)  ) ) * gradparam
-if ( ! missing( prior )  )
-  {
-  v <- v + t(X) %*% ( X %*% ( prior - v ) ) * pgradparam
-  }
-v<-sparsifyv( v, sparam[2], mask )
-if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ) ) )
-if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ), "Prior",norm( prior - v, "F") ))
+  for ( a in 1:nrow(X) )
+    {
+    tt<-c(u[a, ])
+    if ( jj == 1 ) tt<-c(u[a, ] *1.e-9)
+    usol<-conjGradS( A=v , x_k=tt , b_in=c(X[a,]), sp=sparam[1] )
+    u[a, ]<-usol 
+    }
+  v <- v + t( t( u ) %*% ( X  - u %*% t(v)  ) ) * gradparam
+  if ( ! missing( prior )  )
+    {
+    v <- v + t(X) %*% ( X %*% ( prior - v ) ) * pgradparam
+    }
+  v<-sparsifyv( v, sparam[2], mask )
+  if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ) ) )
+  if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ), "Prior",norm( prior - v, "F") ))
 }
-recon<-X
 for ( a in 1:nrow(X) )
   {
-  mdl<-lm(   X[a,] ~  v   )
-  usol<-coefficients(mdl)
-  u[a, ]<-usol[2:(ncol(u)+1)]
-  recon[a,]<-predict( mdl )
+  usol<-conjGradS( A=v , x_k=c(u[a, ]) , b_in=c(X[a,]), sp=sparam[1] )
+  u[a, ]<-usol 
   }
-u<-sparsifyv( u, sparam[1] )
-rr<-norm(X - recon, "F" )
-matpfrobnorm<-norm( X , "F" )
-varx<-( 1.0 - ( rr * rr ) / ( matpfrobnorm * matpfrobnorm ) )
-print( paste( varx  ) )
-return( list( u=t(u), v=t(v) , recon=recon ) )
+return( list( u=t(u), v=t(v) ) )
 }
 
 sparsifyv<-function( v, sparam, mask = NA )
@@ -51,6 +49,7 @@ sparsifyv<-function( v, sparam, mask = NA )
   for ( i in 1:ncol(v) )
     {
     sparsev<-(v[,i])
+    if ( sparam > 0 ) sparsev<-( sparsev - min( sparsev ) ) 
     ord<-rev( order( sparsev ) )
     sparsev[ ord[(b):length(ord) ]]<-0
     if ( ! is.na( mask ) ) {
