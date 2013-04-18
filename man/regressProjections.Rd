@@ -45,7 +45,6 @@ Kandel BM
 }
 
 \examples{
-\dontrun{
 # generate simulated outcome
 nsubjects <- 100
 x1 <- seq(1, 10, length.out=nsubjects) + rnorm(nsubjects, sd=2)
@@ -80,5 +79,4 @@ demog.test  <- demog[-rows.train, ]
 
 result <- regressProjections(input.train, input.test, demog.train, demog.test, 
                              eigenvectors, mask, "outcome")
-}
 }

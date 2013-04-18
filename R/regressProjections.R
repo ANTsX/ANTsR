@@ -1,7 +1,7 @@
 regressProjections <- function(input.train, input.test, demog.train, demog.test, eigenvectors, mask, outcome, covariates = "1", method = "optimal" )
 {
-  input.train <- decostand(as.matrix(input.train), method = "standardize", MARGIN = 2) 
-  input.test  <- decostand(as.matrix(input.test), method = "standardize", MARGIN = 2)
+  input.train <- scale(as.matrix(input.train))
+  input.test  <- scale(as.matrix(input.test))
   input.train[is.nan(input.train)] <- 0
   input.test[is.nan(input.test)]   <- 0
   projections.train <- matrix(rep(0, length(eigenvectors) * nrow(demog.train)), 
