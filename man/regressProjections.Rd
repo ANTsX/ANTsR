@@ -46,14 +46,39 @@ Kandel BM
 
 \examples{
 \dontrun{
-fileNames = c("eigvec1.nii.gz", "eigvec2.nii.gz") 
-input.train <- antsImageRead('train.mha', dim=2, 'float')
-input.test <- antsImageRead('test.mha', dim=2, 'float')
-demog.train <- read.csv('demogtrain.csv')
-demog.test <- read.csv('demogtest.csv')
-mask <- antsImageRead('mask.nii.gz', dim=3, 'float')
-outcome <- "age"
-result <- regressProjections( input.train, input.test, demog.train, demog.test,
-             vector.names=fileNames, mask, outcome, method='all')
+# generate simulated outcome
+nsubjects <- 10
+x1 <- seq(1, 10, length.out=nsubjects) + rnorm(nsubjects, sd=2)
+x2 <- seq(25, 15, length.out=nsubjects) + rnorm(nsubjects, sd=2)
+outcome <- 3 * x1 + 4 * x2 + rnorm(nsubjects, sd=1)
+
+# generate simulated images with outcome predicted 
+# by sparse subset of voxels
+voxel.1 <- 3 * x1 + rnorm(nsubjects, sd=2)
+voxel.2 <- rnorm(nsubjects, sd=2)
+voxel.3 <- 2 * x2 + rnorm(nsubjects, sd=2)
+voxel.4 <- rnorm(nsubjects, sd=3)
+input <- cbind(voxel.1, voxel.2, voxel.3, voxel.4)
+
+# simulate eigenvectors and mask
+eigvec.1 <- as.antsImage(matrix(c(1,0,0,0), nrow=2))
+eigvec.2 <- as.antsImage(matrix(c(0,1,0,0), nrow=2))
+eigvec.3 <- as.antsImage(matrix(c(0,0,1,0), nrow=2))
+eigvec.4 <- as.antsImage(matrix(c(0,0,0,1), nrow=2))
+eigenvectors <- list(eigvec.1, eigvec.2, eigvec.3, eigvec.4)
+mask     <- as.antsImage(matrix(c(1,1,1,1), nrow=2))
+
+# generate sample demographics that do not explain outcome
+age <- runif(nsubjects, 50, 75)
+demog <- data.frame(outcome=outcome, age=age)
+# randomly divide data into training and testing 
+rows.train <- sample(1:nrow(demog), floor(nrow(demog)*2/3), replace=FALSE)
+input.train <- input[rows.train, ]
+input.test <- input[-rows.train, ]
+demog.train <- demog[rows.train, ]
+demog.test <- demog[-rows.train, ]
+
+result <- regressProjections(input.train, input.test, demog.train, demog.test, 
+                             eigenvectors, mask, "outcome")
 }
 }
