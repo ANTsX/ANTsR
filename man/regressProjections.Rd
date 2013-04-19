@@ -7,7 +7,7 @@
 
 \usage{
   regressProjections(input.train, input.test, demog.train, demog.test, 
-              eigenvectors, mask, outcome, covariates="1", method="optimal")
+           eigenvectors, mask, outcome, covariates="1", method="optimal", ...)
 }
 
 \arguments{
@@ -21,6 +21,7 @@
   \item{covariates}{List of names of covariates to be used for the prediction.  All names must be present in \code{demog.train} and \code{demog.test}.}
   \item{method}{Method for selecting eigenvectors.  Can be either \code{"all"} (uses all eigenvectors in \code{vector.names}) or \code{"optimal"} (uses
   BIC stepwise model selection to select eigenvectors.}
+  \item{...}{Additional arguments for input to \code{glm}.  Example input would be \code{family=binomial} for classification instead of regression.}
 }
 
 \details{
