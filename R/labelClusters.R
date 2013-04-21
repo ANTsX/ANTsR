@@ -10,6 +10,11 @@ labelClusters <- function( x , minClusterSize = 50 , minThresh = 1.e-6 , maxThre
   clust<-antsImageClone( x )
   ThresholdImage(dim,x,clust, minThresh, maxThresh)
   LabelClustersUniquely(dim,clust,clust,minClusterSize)
+  labs<-unique( clust[ clust > 0 ] )
+  for ( i in 1:length(labs) )
+    {
+    clust[ clust == labs[i] ]<-i 
+    }
   return(clust)
   }
 
