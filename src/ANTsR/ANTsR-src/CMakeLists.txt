@@ -196,9 +196,9 @@ install( TARGETS RKellyKapowski DESTINATION . )
 #target_link_libraries(RKellySlater ${RCPP_LIB_DIR} ${R_LIB_DIR} l_KellySlater )
 #install( TARGETS RKellySlater DESTINATION . )
 
-#add_library(RLabelClustersUniquely MODULE ${ANTsR_SOURCE_DIR}/src/LabelClustersUniquely.cxx)
-#target_link_libraries(RLabelClustersUniquely ${RCPP_LIB_DIR} ${R_LIB_DIR} l_LabelClustersUniquely )
-#install( TARGETS RLabelClustersUniquely DESTINATION . )
+add_library(RLabelClustersUniquely MODULE ${ANTsR_SOURCE_DIR}/src/LabelClustersUniquely.cxx)
+target_link_libraries(RLabelClustersUniquely ${RCPP_LIB_DIR} ${R_LIB_DIR} l_LabelClustersUniquely )
+install( TARGETS RLabelClustersUniquely DESTINATION . )
 
 #add_library(RLabelGeometryMeasures MODULE ${ANTsR_SOURCE_DIR}/src/LabelGeometryMeasures.cxx)
 #target_link_libraries(RLabelGeometryMeasures ${RCPP_LIB_DIR} ${R_LIB_DIR} l_LabelGeometryMeasures )

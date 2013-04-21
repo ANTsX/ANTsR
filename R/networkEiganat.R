@@ -13,7 +13,7 @@ if ( missing( v ) )
   {
   v<- t( (replicate( ncol(X) , rnorm(k)) ) )
   }
-v<-sparsifyv( v, sparam[2], mask )
+v<-sparsify( v, sparam[2], mask )
 u <- ( X %*% v ) 
 for ( jj in 1:its ) {
   for ( a in 1:nrow(X) )
@@ -28,7 +28,7 @@ for ( jj in 1:its ) {
     {
     v <- v + t(X) %*% ( X %*% ( prior - v ) ) * pgradparam
     }
-  v<-sparsifyv( v, sparam[2], mask )
+  v<-sparsify( v, sparam[2], mask )
   if (  missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ) ) )
   if ( ! missing(prior) ) print( paste("Data",norm(X - u %*% t(v), "F" ), "Prior",norm( prior - v, "F") ))
 }
@@ -40,28 +40,36 @@ for ( a in 1:nrow(X) )
 return( list( u=t(u), v=t(v) ) )
 }
 
+sparsify<-function( v , sparam, mask = NA )
+{
+  vpos<-sparsifyv( v, sparam, mask )
+  vneg<-sparsifyv( v*(-1) , sparam, mask )
+  if ( norm(vneg) > norm(vpos) ) return( vneg )
+  return( vpos )
+}
+
 sparsifyv<-function( v, sparam, mask = NA )
   {
-  if ( sparam >= 1 ) return( v )
+  if ( abs( sparam ) >= 1 ) return( v )
   b<-round(  abs( as.numeric(sparam) ) * nrow(v) )
   if ( b < 1 ) b <-1
   if ( b > nrow(v) ) b<-nrow(v)
   for ( i in 1:ncol(v) )
     {
-    sparsev<-(v[,i])
-    if ( sparam > 0 & max(sparsev) > 0 )
-      sparsev[ sparsev < 0 ]<-0
-    if ( sparam > 0 & max(sparsev) < 0 )
-      sparsev<-sparsev*(-1)
-    ord<-rev( order( sparsev ) )
+    sparsev<-c(v[,i])
+    ord<-order( sparsev )
+    ord<-rev( ord )
     sparsev[ ord[(b):length(ord) ]]<-0
-    if ( ! is.na( mask ) ) {
+    if ( ! is.na( mask ) & FALSE ) {
       vecimg<-antsImageClone( mask )
       vecimg[ mask > 0 ]<-sparsev
-   #   ImageMath( mask@dimension, vecimg,"ClusterThresholdVariate",vecimg,100)
+      temp<-antsImageClone( mask )
+    # SmoothImage(3,vecimg,0.5,temp)
+      ImageMath( mask@dimension, temp,"ClusterThresholdVariate",vecimg,mask,100)
+      sparsev<-c( vecimg[ mask > 0 ] )
     }
     v[,i] <- sparsev
-    }
-  return(v)
   }
+  return(v)
+}
 
