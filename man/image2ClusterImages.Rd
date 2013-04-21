@@ -2,11 +2,11 @@
 \alias{image2ClusterImages}
 
 \title{
-Simple labelClustering function.
+ Converts an image to several independent images.
 }
 
 \description{
- This will give a unique ID to each connected component 1 through N of size > minClusterSize 
+ Produces a unique image for each connected component 1 through N of size > minClusterSize 
 }
 
 \usage{
@@ -20,7 +20,7 @@ clust<-image2ClusterImages( img , minClusterSize = 50 , minThresh = 1.e-6 , maxT
 }
 
 \value{
-labeled cluster image is output
+the original image broken into a list of cluster images is the output
 }
 
 \author{
@@ -29,6 +29,6 @@ Avants BB
 
 \examples{
 \dontrun{
-outimage<-image2ClusterImages( img ) 
+imageclusterlist<-image2ClusterImages( img ) 
 }
 }
