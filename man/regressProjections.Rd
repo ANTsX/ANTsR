@@ -7,7 +7,8 @@
 
 \usage{
   regressProjections(input.train, input.test, demog.train, demog.test, 
-           eigenvectors, mask, outcome, covariates="1", method="optimal", ...)
+           eigenvectors, mask, outcome, covariates="1", model.function=glm, 
+	   which.eigenvectors="all", ...)
 }
 
 \arguments{
@@ -19,9 +20,13 @@
   \item{mask}{Mask image of type \code{antsImage}.}
   \item{outcome}{Name of outcome variable to be predicted.  Must be present in \code{demog.train} and \code{demog.test}.}
   \item{covariates}{List of names of covariates to be used for the prediction.  All names must be present in \code{demog.train} and \code{demog.test}.}
-  \item{method}{Method for selecting eigenvectors.  Can be either \code{"all"} (uses all eigenvectors in \code{vector.names}) or \code{"optimal"} (uses
-  BIC stepwise model selection to select eigenvectors.}
-  \item{...}{Additional arguments for input to \code{glm}.  Example input would be \code{family=binomial} for classification instead of regression.}
+  \item{model.function}{Modeling function for predicting outcome from input data.  Can be any function that has \code{formula} and \code{data} arguments and a
+  \code{predict} method.  Defaults to \code{glm}, but svm, randomForest, etc. will also work (assuming necessary libraries are loaded).}
+  \item{which.eigenvectors}{Method for selecting eigenvectors.  Can be either \code{"all"} (uses all eigenvectors in \code{vector.names}) or
+  \code{"optimal"} (uses BIC stepwise model selection to select eigenvectors).  \code{"optimal"} only works for \code{model.function} arguments that
+  include an \code{extractAIC} method and a \code{coefficients} attribute.}
+  \item{...}{Additional arguments for input to \code{model.function}.  Example input would be \code{family=binomial} for classification instead of
+  regression when using \code{glm}.}
 }
 
 \details{
@@ -42,7 +47,7 @@ A list of diagnostic and statistical information generated from the prediction, 
 }
 
 \author{
-Kandel BM
+Kandel BM and Avants B
 }
 
 \examples{
