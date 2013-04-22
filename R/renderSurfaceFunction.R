@@ -2,8 +2,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   {
   if ( missing(surfimg) )
     {
-    cat('Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ')
-    return(NULL)
+    stop('Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ')
     }
   smoothsval <- rep(smoothsval, length.out=length(surfimg))
   for (i in 1:length(surfimg)){
