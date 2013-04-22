@@ -1,5 +1,5 @@
 lappend <- function(lst, obj) {
-  if ( typeof(list) == "list"  & typeof( obj ) != "list" )
+  if ( typeof( obj ) != "list" )
     {
     lst[[length(lst)+1]] <- obj
     return(lst)

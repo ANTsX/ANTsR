@@ -1,81 +1,53 @@
-getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE )
+getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE )
+  ########################################################################################################
+  # this function is similar to getTemplateCoordinates
+  # however we need to get the coordinates for each of the entries in imageSetToBeLabeled
+  # where coordinates come from each subcomponent of the image in imageSetToBeLabeled
+  # pseudo-code:
+  #  1. transform template to talairach
+  #  2. label the multivariate component image by its generic Talairach position i.e. L/R, S/I, A/P
+  #     --- information needed for this is given by getTemplateCoordinates
+  #  3. split each image into its sub components via image2ClusterImages
+  #  4. get coordinates for each sub-component image
+  #  5. append these coordinates under the output from step 2
+  #  6. return something e.g. a table ....
+  ########################################################################################################
   {
-  if ( nargs() == 0 | length(imagePairToBeLabeled) < 2
-      | length(templatePairWithLabels) < 2 )
+  myout<-NA
+  talregions<-rep(NA,length(imageSetToBeLabeledIn)-1)
+  for ( x in 2:length(imageSetToBeLabeledIn) )
     {
-    print( args( getTemplateCoordinates  ) )
-    print( " imagePairToBeLabeled <-list( myBrain, myBrainBlobs ) ")
-    print( " templatePairWithLabels <-list( ch2orMNI_Brain, ch2orMNI_BrodmannLabels ) ")
-    print( " labelnames <-c(\"HippocampusL\",\"HippocampusR\") ")
-    return(1)
-    }
-  fi<-templatePairWithLabels[[1]]
-  mi<-imagePairToBeLabeled[[1]]
-  if ( class(fi)[[1]] != "antsImage" )
-    {
-    print( "  class(fi)[[1]] != antsImage " )
-    }
-  if ( class(mi)[[1]] != "antsImage" )
-    {
-    print( "  class(mi)[[1]] != antsImage " )
-    }
-  imagedim<-mi@dimension
-  if ( is.na( outprefix ) )
-    {
-    outprefix<-paste(tempdir(),"/Z",sep='')
-    }
-  txfn<-paste(outprefix,"0GenericAffine.mat",sep='')
-  if ( ! file.exists( txfn ) )
-    mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("Affine"), outprefix=outprefix )  else mytx<-list(fwdtransforms=txfn )
-  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms, interpolator=c("Linear") )
-  milab<-imagePairToBeLabeled[[2]]
-  mywarpedLimage<-antsApplyTransforms(fixed=fi,moving=milab,transformlist=mytx$fwdtransforms, interpolator=c("NearestNeighbor") )
-  pointfile<-paste(outprefix,"coords.csv",sep='')
-  ImageMath( milab@dimension , pointfile , "LabelStats", mywarpedLimage, mywarpedLimage , 1 )
-  mypoints<-read.csv(pointfile)
-  for ( mylab in 2:length(templatePairWithLabels) )
-    {
-    filab<-templatePairWithLabels[[mylab]]
-    if ( class(filab)[[1]] != "antsImage" )
-    {
-    print( "  class(filab)[[1]] != antsImage " )
-    return(1)
-    }
-    if ( class(milab)[[1]] != "antsImage" )
-    {
-    print( "  class(milab)[[1]] != antsImage " )
-    return(1)
-    }
-    # now we know the (e.g. MNI) coordinate of each labeled region in the original image
-    # we want, next, to identify the 'Brodmann' label for each of these regions
-    # for instance, you might have found 2 blobs, blob1 and blob2 with labels 1 and 2
-    # you know want to know if these are at Brodmann area 21 or 22 or whatever
-    # so we iterate through the point list and index the filab image ( template labels )
-    templateLab<-rep( NA, nrow( mypoints ) ) 
-    for ( i in 1:nrow(mypoints) )
+    img<-imageSetToBeLabeledIn[[x]]
+    imageSetToBeLabeled<-list( img )
+    threshimg<-antsImageClone( img )
+    thresh<-1.0 / length( as.array(threshimg) )
+    ImageMath( threshimg@dimension, threshimg,"abs",threshimg )
+    threshimg[ threshimg > (.Machine$double.eps*2) ]<-1
+    imageSetToBeLabeled2<-lappend( imageSetToBeLabeled , threshimg  ) 
+    temp<-getTemplateCoordinates(  imageSetToBeLabeled2, templateWithLabels , labelnames  , outprefix, convertToTal )
+    talRegion<-""
+    if ( temp$templatepoints$x < 0 ) talRegion<-paste(talRegion,"L",sep='') else talRegion<-paste(talRegion,"R",sep='')
+    if ( temp$templatepoints$y > 0 ) talRegion<-paste(talRegion,"A",sep='') else talRegion<-paste(talRegion,"P",sep='')
+    if ( temp$templatepoints$z < 0 ) talRegion<-paste(talRegion,"S",sep='') else talRegion<-paste(talRegion,"I",sep='')
+    talregions[x-1]<-talRegion
+    clust<-image2ClusterImages( img )
+    clust<-eigSeg( threshimg, clust )
+    imageSetToBeLabeled2<-lappend( imageSetToBeLabeled , clust  ) 
+    temp2<-getTemplateCoordinates(  imageSetToBeLabeled2, templateWithLabels , labelnames  , outprefix, convertToTal )
+    if ( x == 2 )
       {
-      if ( imagedim == 2) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i],"1") 
-      if ( imagedim == 3) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i], mypoints$z[i],"1") 
-      myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) , PACKAGE="libRImageMath") )
-      templateLab[i]<-myval[1]
+      myout<-data.frame( NetworkID="N1_omnibus",temp$templatepoints)
+      subnet<-data.frame( NetworkID=rep("N1_node",nrow(temp2$templatepoints) ), temp2$templatepoints)
+      myout<-rbind(myout,subnet)
+      } else {
+      pre<-paste("N",x-1,sep='')
+      mynextout<-data.frame( NetworkID=paste(pre,"_omnibus",sep=''),temp$templatepoints)
+      subnet<-data.frame( NetworkID=rep(paste(pre,"_node",sep=''),nrow(temp2$templatepoints) ), temp2$templatepoints)
+      myout<-rbind(myout,mynextout)
+      myout<-rbind(myout,subnet)
       }
-    if ( mylab == 2 ) mypoints<-cbind( mypoints, Brodmann = templateLab )
-    if ( mylab == 3 ) mypoints<-cbind( mypoints, AAL = templateLab )
-    if ( mylab > 3 ) mypoints<-cbind( mypoints, templateLab = templateLab )
-    }
-  if ( convertToTal & imagedim == 3 )
-    {
-    for ( i in 1:nrow(mypoints) )
-      {
-      talpt<-mni2tal( c( mypoints$x[i], mypoints$y[i] , mypoints$z[i] ) )
-      mypoints$x[i]<-talpt[1]
-      mypoints$y[i]<-talpt[2]
-      mypoints$z[i]<-talpt[3]
-      } 
-    }
-  scl<-1.0
-  mypoints$x<-round(mypoints$x*scl)/scl
-  mypoints$y<-round(mypoints$y*scl)/scl
-  mypoints$z<-round(mypoints$z*scl)/scl
-  return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
+  }
+  return( myout )
 }
+
+

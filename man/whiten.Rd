@@ -31,4 +31,3 @@ Avants BB
 mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
 wmat<-whiten( mat ) 
 }
-}
