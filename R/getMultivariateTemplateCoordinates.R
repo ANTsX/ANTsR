@@ -1,4 +1,4 @@
-getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE,  pvals = NA , threshparam = 1 , clustparam = 250 )
+getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE,  pvals = NA , threshparam = 1 , clustparam = 250, identifier  )
   ########################################################################################################
   # this function is similar to getTemplateCoordinates
   # however we need to get the coordinates for each of the entries in imageSetToBeLabeled
@@ -13,6 +13,10 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
   #  6. return something e.g. a table ....
   ########################################################################################################
   {
+  if ( missing( identifier ) )
+    {
+    identifier<-c( 1:( length( imageSetToBeLabeledIn ) - 1 ) )
+    }
   if ( is.na( pvals[1] ) )
     {
     pvals<-rep( NA, length(imageSetToBeLabeledIn)-1 )
@@ -41,17 +45,15 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
     if ( temp$templatepoints$z < 0 ) talRegion<-paste(talRegion,"S",sep='') else talRegion<-paste(talRegion,"I",sep='')
     talregions[x-1]<-talRegion
     clust<-labelClusters( threshimg, clustparam  )
-    print(paste("MAX",max( clust[ threshimg > 0 ] ) ))
-    antsImageWrite(clust, paste('temp',x,'.nii.gz',sep=''))
     imageSetToBeLabeled<-lappend( list(mytemplate) , clust  ) 
     temp2<-getTemplateCoordinates(  imageSetToBeLabeled, templateWithLabels , labelnames  , outprefix, convertToTal )
     if ( x == 2 )
       {
-      myout<-data.frame( NetworkID="N1_omnibus",temp$templatepoints, pval = pvals[x-1] )
-      subnet<-data.frame( NetworkID=rep("N1_node",nrow(temp2$templatepoints) ), temp2$templatepoints,  pval=rep(NA,nrow(temp2$templatepoints)) )
+      myout<-data.frame( NetworkID=paste("N",identifier[1],"_omnibus",sep=''),temp$templatepoints, pval = pvals[x-1] )
+      subnet<-data.frame( NetworkID=rep(paste("N",identifier[1],"_node",sep=''),nrow(temp2$templatepoints) ), temp2$templatepoints,  pval=rep(NA,nrow(temp2$templatepoints)) )
       myout<-rbind(myout,subnet)
       } else {
-      pre<-paste("N",x-1,sep='')
+      pre<-paste("N",identifier[x-1],sep='')
       mynextout<-data.frame( NetworkID=paste(pre,"_omnibus",sep=''),temp$templatepoints, pval = pvals[x-1] )
       subnet<-data.frame( NetworkID=rep(paste(pre,"_node",sep=''),nrow(temp2$templatepoints) ), temp2$templatepoints,  pval=rep(NA,nrow(temp2$templatepoints)) )
       myout<-rbind(myout,mynextout)
