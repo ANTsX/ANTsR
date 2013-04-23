@@ -19,6 +19,9 @@ Label multivariate components by an anatomical coordinate system.
   \item{imageSetToBeLabeledIn}{
   a template paired with (most likely) the output of a multivariate sparse decomposition or (alternatively) could be just a statistical map with zeroes in non-interesting areas
   }
+  \item{pvals}{
+  the already computed pvalue for each component
+  }
 }
 \details{
   TBN
@@ -43,7 +46,7 @@ Label multivariate components by an anatomical coordinate system.
  	      antsImageRead(getANTsRData('mnib'),3), 
               antsImageRead(getANTsRData('mnia'),3) )
  mytem<-list(tem,temlab,temlab2)
- mynetworkdescriptor<-getMultivariateTemplateCoordinates(  mytem, mych2 , convertToTal = TRUE )
+ mynetworkdescriptor<-getMultivariateTemplateCoordinates(  mytem, mych2 , convertToTal = TRUE , pvals=c(0.01,0.05) )
 # output looks like 
 #     NetworkID   x   y   z t label Brodmann AAL
 # 1  N1_omnibus  -7   7  11 0     1        0  71
