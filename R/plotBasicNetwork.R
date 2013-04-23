@@ -1,23 +1,14 @@
-plotBasicNetwork <- function( mask , centroids  )
+plotBasicNetwork <- function( centroids , brain  )
 {
-  if ( missing( mask ) | missing( centroids ) )
+  if ( missing( centroids ) | missing( brain ) )
     {
     print( args( plotBasicNetwork ) )
     return(1)
     }
-       
   nLabels <- nrow(centroids)
-  open3d()
   rgl.bg(color="white")
-  surf<-as.array( mask )
-  brain <- contour3d(  surf , level = c(0.5), alpha = 0.1,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
-  # convert to physical space
-  brain$v1 <- antsTransformIndexToPhysicalPoint( mask, brain$v1 )
-  brain$v2 <- antsTransformIndexToPhysicalPoint( mask, brain$v2 )
-  brain$v3 <- antsTransformIndexToPhysicalPoint( mask, brain$v3 )
-  drawScene.rgl(list(brain))
   par3d(windowRect=c(100,100,600,600))  
-  mesh<-getvertices( brain )
+  mesh<-getvertices( brain[[1]] )
   nSurfaceVerts <- dim(mesh$vertices)[1]
   mesh$vertices <- rbind( mesh$vertices,as.matrix( centroids ) )
   labelVerts <- c( 1:nrow(centroids) )+nSurfaceVerts

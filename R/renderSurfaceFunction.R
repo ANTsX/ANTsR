@@ -1,9 +1,5 @@
 renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE , alphasurf=1 , alphafunc=1, outdir="./", outfn="movie", mycol, physical=TRUE )
   {
-  if ( missing( mycol ) )
-    {
-    mycol<-rainbow(length(funcimg))
-    }
   if ( missing(surfimg) )
     {
     cat('Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ')
@@ -33,7 +29,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
        
     drawScene.rgl(list(brain))
     return(list(brain))
-    }
+     }
   if ( smoothfval > 0 ) {
     for ( i in 1:length(funcimg) ) {
       fimg<-antsImageClone( funcimg[[i]] )
@@ -41,6 +37,10 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
       funcimg[[i]]<-fimg
     }
   }
+  if ( missing( mycol ) )
+    {
+    mycol<-rainbow(length(funcimg))
+    }
   surf<-as.array( surfimg )
   brain <- contour3d(  surf , level = c(surfval), alpha = alphasurf,draw=FALSE,smooth=1,material="metal",depth=0.6,color="white")
   if (physical == TRUE )
