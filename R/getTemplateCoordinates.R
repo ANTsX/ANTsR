@@ -77,5 +77,14 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   mypoints$x<-round(mypoints$x*scl)/scl
   mypoints$y<-round(mypoints$y*scl)/scl
   mypoints$z<-round(mypoints$z*scl)/scl
+  data("aal", package="ANTsR")
+  aalnames<-rep("", nrow(mypoints)  )
+  for ( i in 1:nrow(mypoints) ) 
+    {
+    aalnum<-as.character(mypoints$AAL[i])
+    aalname<-as.character(aal$label_name[as.numeric(aalnum)])
+    if ( length( aalname ) > 0 ) aalnames[i]<-aalname
+    }
+  mypoints$AAL<-aalnames
   return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
 }
