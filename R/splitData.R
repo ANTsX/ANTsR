@@ -21,7 +21,7 @@ splitData <- function(data.source, ratio, return.rows = FALSE){
     }
     return(mylist)
   } else if (!split.cv){
-    subjects.in <- sample(nsubjects, ratio * nsubjects, replace=FALSE)
+    subjects.in <- sort(sample(nsubjects, ratio * nsubjects, replace=FALSE))
     data.in <- data.source[subjects.in, ]
     data.out <- data.source[-subjects.in, ]
     mylist <- list("data.in"=data.in, "data.out"=data.out) 
