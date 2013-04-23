@@ -19,10 +19,10 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
     }
   myout<-NA
   talregions<-rep(NA,length(imageSetToBeLabeledIn)-1)
+  mytemplate<-imageSetToBeLabeledIn[[1]]
   for ( x in 2:length(imageSetToBeLabeledIn) )
     {
     img<-imageSetToBeLabeledIn[[x]]
-    imageSetToBeLabeled<-list( img )
     threshimg<-antsImageClone( img )
     thresh<-1.0 / length( as.array(threshimg) )
     ImageMath( threshimg@dimension, threshimg,"abs",threshimg )
@@ -33,8 +33,8 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
     if ( threshval < (.Machine$double.eps*2) ) threshval <- (.Machine$double.eps*2)
     threshimg[ threshimg > threshval ]<-1
     threshimg[ threshimg <= threshval ]<-0
-    imageSetToBeLabeled2<-lappend( imageSetToBeLabeled , threshimg  ) 
-    temp<-getTemplateCoordinates(  imageSetToBeLabeled2, templateWithLabels , labelnames  , outprefix, convertToTal )
+    imageSetToBeLabeled<-lappend( list(mytemplate) , threshimg  ) 
+    temp<-getTemplateCoordinates(  imageSetToBeLabeled, templateWithLabels , labelnames  , outprefix, convertToTal )
     talRegion<-""
     if ( temp$templatepoints$x < 0 ) talRegion<-paste(talRegion,"L",sep='') else talRegion<-paste(talRegion,"R",sep='')
     if ( temp$templatepoints$y > 0 ) talRegion<-paste(talRegion,"A",sep='') else talRegion<-paste(talRegion,"P",sep='')
@@ -42,8 +42,8 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
     talregions[x-1]<-talRegion
     clust<-image2ClusterImages( img )
     clust<-eigSeg( threshimg, clust )
-    imageSetToBeLabeled2<-lappend( imageSetToBeLabeled , clust  ) 
-    temp2<-getTemplateCoordinates(  imageSetToBeLabeled2, templateWithLabels , labelnames  , outprefix, convertToTal )
+    imageSetToBeLabeled<-lappend( list(mytemplate) , clust  ) 
+    temp2<-getTemplateCoordinates(  imageSetToBeLabeled, templateWithLabels , labelnames  , outprefix, convertToTal )
     if ( x == 2 )
       {
       myout<-data.frame( NetworkID="N1_omnibus",temp$templatepoints, pval = pvals[x-1] )
@@ -57,7 +57,7 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
       myout<-rbind(myout,subnet)
       }
   }
-  return( myout )
+  return( list( networks=myout , myLabelsInTemplateSpace=temp$myLabelsInTemplateSpace,  myImageInTemplateSpace=temp$myImageInTemplateSpace) )
 }
 
 
