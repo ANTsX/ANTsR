@@ -1,4 +1,4 @@
-getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE,  pvals = NA )
+getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateWithLabels , labelnames = NA , outprefix = NA , convertToTal = FALSE,  pvals = NA , threshparam = 1 , clustparam = 250 )
   ########################################################################################################
   # this function is similar to getTemplateCoordinates
   # however we need to get the coordinates for each of the entries in imageSetToBeLabeled
@@ -29,7 +29,7 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
 #    threshimg[ threshimg > (.Machine$double.eps*2) ]<-1
     meanval<-mean( threshimg[ threshimg > (.Machine$double.eps*2) ] )
     sdval<-sd( threshimg[ threshimg > (.Machine$double.eps*2) ] )
-    threshval<-(meanval-sdval*2)
+    threshval<-( meanval - sdval * threshparam )
     if ( threshval < (.Machine$double.eps*2) ) threshval <- (.Machine$double.eps*2)
     threshimg[ threshimg > threshval ]<-1
     threshimg[ threshimg <= threshval ]<-0
@@ -40,8 +40,9 @@ getMultivariateTemplateCoordinates <- function( imageSetToBeLabeledIn, templateW
     if ( temp$templatepoints$y > 0 ) talRegion<-paste(talRegion,"A",sep='') else talRegion<-paste(talRegion,"P",sep='')
     if ( temp$templatepoints$z < 0 ) talRegion<-paste(talRegion,"S",sep='') else talRegion<-paste(talRegion,"I",sep='')
     talregions[x-1]<-talRegion
-    clust<-image2ClusterImages( img )
-    clust<-eigSeg( threshimg, clust )
+    clust<-labelClusters( threshimg, clustparam  )
+    print(paste("MAX",max( clust[ threshimg > 0 ] ) ))
+    antsImageWrite(clust, paste('temp',x,'.nii.gz',sep=''))
     imageSetToBeLabeled<-lappend( list(mytemplate) , clust  ) 
     temp2<-getTemplateCoordinates(  imageSetToBeLabeled, templateWithLabels , labelnames  , outprefix, convertToTal )
     if ( x == 2 )

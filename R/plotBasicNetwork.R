@@ -6,7 +6,7 @@ plotBasicNetwork <- function( centroids , brain  )
     return(1)
     }
   nLabels <- nrow(centroids)
-  rgl.bg(color="white")
+  rgl.bg(color="white") 
   par3d(windowRect=c(100,100,600,600))  
   mesh<-getvertices( brain[[1]] )
   nSurfaceVerts <- dim(mesh$vertices)[1]
