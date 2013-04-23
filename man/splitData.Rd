@@ -2,10 +2,11 @@
 \alias{splitData}
 \title{Split data for testing and training}
 \description{Split data into testing and training sets for cross-validation.}
-\usage{splitData(data.source, ratio)}
+\usage{splitData(data.source, ratio, return.rows = FALSE)}
 \arguments{
   \item{data.source}{Data frame or matrix of input data to be split.}
   \item{ratio}{If greater than one, number of folds to split data into.  Otherwise, proportion of rows in training data.  See \code{Value}.}
+  \item{return.rows}{If \code{TRUE}, row numbers of testing and training data are also returned.}
 }
 \value{
   A list containing the input data, split into testing and training sets.  If \code{ratio} is greater than one, returns a list with \code{ratio} entries,
