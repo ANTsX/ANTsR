@@ -12,7 +12,7 @@
   each with 1/\code{ratio} of the input data in the testing set (\code{data.out}) and the rest in the training set (\code{data.in}).  Otherwise, returns a
   list with one split of the data, with \code{ratio} of the input data in the testing set and the rest in the training set. 
 }
-\author{ Kandel BM and Avants B }
+\author{Kandel BM and Avants B}
 
 \examples{
 n <- 30
