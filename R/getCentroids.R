@@ -32,6 +32,6 @@ getCentroids <- function( img , clustparam = 250 , threshparam = 1, outprefix = 
   mypoints$y<-round(mypoints$y*scl)/scl
   mypoints$z<-round(mypoints$z*scl)/scl
   centroids<-as.matrix( data.frame( x = mypoints$x,  y = mypoints$y ,  z = mypoints$z ) )
-  return( centroids )
+  return( list( centroids=centroids, clustimg=clust ) )
   ##########################
 }
