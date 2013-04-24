@@ -1,15 +1,15 @@
 library( ANTsR )
 
 # Get the image files
-controlFileNames <- list.files( path = "./example_images/", pattern =
+controlFileNames <- list.files( path = "../../example_images/", pattern =
   glob2rx( "phantomtemplate_CONTROL*" ), full.names = TRUE, recursive = FALSE )
-experimentalFileNames <- list.files( path = "./example_images/", pattern =
+experimentalFileNames <- list.files( path = "../..//example_images/", pattern =
   glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = FALSE )
 
 images <- c( controlFileNames, experimentalFileNames )
 diagnosis <- c( rep( 1, length( controlFileNames ) ), rep( 0, length( experimentalFileNames ) ) )
 age <- runif( length( diagnosis ), 25, 30 )
-outputPath <- "./test_output/"
+outputPath <- "../../test_output/"
 
 prefix <- "ANTsR_t.test_"
 simple_voxel_based_analysis( dimensionality = 2, imageFileNames = images,

@@ -52,10 +52,3 @@ timg <- antsImageRead( paste0( outputPath, prefix, 'tValues.nii.gz' ), 2 )
 plotANTsImage( myantsimage = antsImageRead( mask, 2 ),
   functional = list( timg ), threshold="0x1", color = "red", axis = 1 )
 .. ..
-
-Finally, test the output for correctness.
-
-.. {r testcorrectness}
-if (  isucceed ) print("SUCCESS")
-if ( !isucceed ) print("FAILURE")
-.. ..
