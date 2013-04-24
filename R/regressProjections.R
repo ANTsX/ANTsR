@@ -62,18 +62,49 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
   } else stop("which.eigenvectors must be either 'optimal' or 'all'.")
   
   # perform predictions
-  outcome.predicted.train <- predict(model.train, newdata = demog.train)
-  error.train             <- mean(abs(outcome.predicted.train - demog.train[, outcome] ), na.rm=T )
-  corcoeff.train          <- cor.test(outcome.predicted.train, demog.train[, outcome ] )$estimate
-  pvalue.train            <- cor.test(outcome.predicted.train, demog.train[, outcome ] )$p.value
-  outcome.predicted.test <- predict(model.train, newdata = demog.test)
-  error.test             <- mean(abs(outcome.predicted.test - demog.test[, outcome] ), na.rm=T)
-  corcoeff.test          <- cor.test(outcome.predicted.test, demog.test[, outcome ] )$estimate
-  pvalue.test            <- cor.test(outcome.predicted.test, demog.test[, outcome ] )$p.value
-  stats <- data.frame(error.train = error.train, corcoeff.train = corcoeff.train, 
-                      pvalue.train = pvalue.train, 
-		      error.test = error.test, corcoeff.test = corcoeff.test, 
-		      pvalue.test = pvalue.test)
+  outcome.real.train <- demog.train[, outcome]
+  outcome.real.test <- demog.test[, outcome]
+  if (class(outcome.real.train) == "numeric"){
+    outcome.predicted.train <- predict(model.train, newdata = demog.train)
+    outcome.predicted.test <- predict(model.train, newdata = demog.test)
+    error.train    <- mean(abs(outcome.predicted.train - outcome.real.train ), na.rm=T )
+    corcoeff.train <- cor.test(outcome.predicted.train, outcome.real.train )$estimate
+    pvalue.train   <- cor.test(outcome.predicted.train, outcome.real.train )$p.value
+    error.test     <- mean(abs(outcome.predicted.test - outcome.real.test), na.rm=T)
+    corcoeff.test  <- cor.test(outcome.predicted.test, outcome.real.test )$estimate
+    pvalue.test    <- cor.test(outcome.predicted.test, outcome.real.test )$p.value
+    stats <- data.frame(error.train = error.train, corcoeff.train = corcoeff.train, 
+                        pvalue.train = pvalue.train, 
+    		        error.test = error.test, corcoeff.test = corcoeff.test, 
+		        pvalue.test = pvalue.test)
+  } else if (class(outcome.real.train) == "factor") {
+    outcome.predicted.train.prob <- predict(model.train, newdata=demog.train, type="response")
+    outcome.predicted.train <- outcome.predicted.train.prob
+    outcome.predicted.train[outcome.predicted.train.prob <= 0.5] <- levels(demog.train[, outcome])[1]
+    outcome.predicted.train[outcome.predicted.train.prob > 0.5]  <- levels(demog.train[, outcome])[2]
+    outcome.predicted.train <- as.factor(outcome.predicted.train)
+    outcome.predicted.test.prob <- predict(model.train, newdata=demog.test, type="response")
+    outcome.predicted.test <- outcome.predicted.test.prob
+    outcome.predicted.test[outcome.predicted.test.prob <= 0.5] <- levels(demog.train[, outcome])[1]
+    outcome.predicted.test[outcome.predicted.test.prob > 0.5]  <- levels(demog.train[, outcome])[2]
+    outcome.predicted.test <- as.factor(outcome.predicted.test)
+    misclassification.rate.train <- length(
+      outcome.predicted.train[outcome.predicted.train != outcome.real.train]) / length(outcome.predicted.train)
+    myglm.train <- glm(outcome.real.train ~ outcome.predicted.train, family="binomial")
+    pvalue.train <- data.frame(p.values=coefficients(summary(myglm.train))[,"Pr(>|z|)"])["outcome.predicted.train",]
+    myglm.test <- glm(outcome.real.test ~ outcome.predicted.test, family="binomial")
+    pvalue.test <- data.frame(p.values=coefficients(summary(myglm.test))[,"Pr(>|z|)"])["outcome.predicted.test",]
+    misclassification.rate.test <- length(
+      outcome.predicted.test[outcome.predicted.test != outcome.real.test]) / length(outcome.predicted.test)
+    stats <- data.frame(misclassification.rate.train=misclassification.rate.train, 
+			pvalue.train=pvalue.train, 
+			misclassification.rate.test=misclassification.rate.test, 
+			pvalue.test=pvalue.test)
+    # FIXME -- add ROC analysis.
+  }  else {
+    warning("Predicted outcome is neither numeric nor factor--no stats output.")
+    stats <- NULL
+  }
   outcome.comparison <- data.frame(predicted = outcome.predicted.test, 
                                    real = demog.test[, outcome ] )
   

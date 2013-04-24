@@ -37,7 +37,8 @@ the eigenvectors.
 
 \value{
 A list of diagnostic and statistical information generated from the prediction, including: 
-  \code{stats}: Mean squared error, correlation coefficients, and p-value of prediction for training and testing data.
+  \code{stats}: Statistics on computed fits.  For numeric outcomes, mean squared error, correlation coefficients, and p-value of prediction for training
+  and testing data.  For factor outcomes, misclassification rate and p-value of classification model.
   \code{outcome.comparison}: Data frame comparing real vs. predicted values for testing data. 
   \code{eigenvectors}: List of eigenvectors retained in model building. 
 }
