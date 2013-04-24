@@ -1,4 +1,5 @@
-Tutorial population study using the script simple_voxel_based_analysis.R
+=========================
+Population study using simple_voxel_based_analysis.R
 =========================
 
 This example shows how to run a basic linear regression study across a population of image measurements.
@@ -6,48 +7,51 @@ This example shows how to run a basic linear regression study across a populatio
 Load libraries.
 
 .. {r step1,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-library(knitr)
-library(ANTsR)
+library( knitr )
+library( ANTsR )
 .. ..
 
 Define the normalized image cohort and image mask.
 
 .. {r step2,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-
 controlFileNames <- list.files( path = "../../", pattern =
   glob2rx( "phantomtemplate_CONTROL*" ), full.names = TRUE, recursive = TRUE )
 experimentalFileNames <- list.files( path = "../../", pattern =
   glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = TRUE )
 images <- c( controlFileNames, experimentalFileNames )
 mask <- '../../demo/example_images/phantomtemplate_mask.nii.gz'
+.. ..
 
 Assign cohort (diagnosis) predictor and assign a random age to simulated images.
 
 .. {r step3,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-
 diagnosis <- c( rep( 1, length( controlFileNames ) ), rep( 0, length( experimentalFileNames ) ) )
 age <- runif( length( diagnosis ), 25, 30 )
+.. ..
 
 Specify output path for statistical maps.
 
 .. {r step4,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-
 outputPath <- "../../test_output/"
+.. ..
 
 Perform a simple voxelwise t-test.
 
 .. {r step5,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-
 prefix <- "ANTsR_t.test_"
 simple_voxel_based_analysis( dimensionality = 2, imageFileNames = images,
   predictors = data.frame( diagnosis ),
   maskFileName = mask,
-  outputPrefix = paste( outputPath, prefix, sep = '' ), testType = 'student.t' )
+  outputPrefix = paste0( outputPath, prefix ), testType = 'student.t' )
+.. ..
 
-Overlay the beta-image on the template to see areas with high t-statistic ( greater than 2 , less than 6 ).
+Plot the results.
 
-.. {r step5,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
-plotANTsImage( myantsimage = antsImageRead( maskfn, 2 ), functional = betaimg, threshold="2x6", color = "red", axis = 1 )
+.. {r step6,eval=TRUE,warning=FALSE,results='hide',message=FALSE}
+timg <- antsImageRead( paste0( outputPath, prefix, 'tValues.nii.gz' ), 2 )
+plotANTsImage( myantsimage = antsImageRead( mask, 2 ),
+  functional = list( timg ), threshold="0x1", color = "red", axis = 1 )
+.. ..
 
 Finally, test the output for correctness.
 

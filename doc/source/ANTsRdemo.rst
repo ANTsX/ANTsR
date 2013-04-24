@@ -20,4 +20,4 @@ See the ANTsR/demo folder for the full source of these examples.
 
    transformTimeSeries.rst
 
-   simple_voxel_based_analysis.rst
+   simple_voxel_based_population_study.rst
