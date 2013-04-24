@@ -96,9 +96,9 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
     pvalue.test <- data.frame(p.values=coefficients(summary(myglm.test))[,"Pr(>|z|)"])["outcome.predicted.test",]
     misclassification.rate.test <- length(
       outcome.predicted.test[outcome.predicted.test != outcome.real.test]) / length(outcome.predicted.test)
-    stats <- data.frame(misclassification.rate.train=misclassification.rate.train, 
+    stats <- data.frame(error.train=misclassification.rate.train, 
 			pvalue.train=pvalue.train, 
-			misclassification.rate.test=misclassification.rate.test, 
+			error.test=misclassification.rate.test, 
 			pvalue.test=pvalue.test)
     # FIXME -- add ROC analysis.
   }  else {
