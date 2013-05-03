@@ -29,6 +29,7 @@ Avants BB
 
 \examples{
 \dontrun{
+img<-antsImageRead( getANTsRData('mnib'), 3 )
 outimage<-labelClusters( img ) 
 }
 }
