@@ -46,7 +46,7 @@ Label multivariate components by an anatomical coordinate system.
  	      antsImageRead(getANTsRData('mnib'),3), 
               antsImageRead(getANTsRData('mnia'),3) )
  mytem<-list(tem,temlab,temlab2)
- mynetworkdescriptor<-getMultivariateTemplateCoordinates(  mytem, mych2 , convertToTal = TRUE , pvals=c(0.01,0.05) )
+ mynetworkdescriptor<-getMultivariateTemplateCoordinates(  mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )
 # output looks like 
 #     NetworkID   x   y   z t label Brodmann AAL
 # 1  N1_omnibus  -7   7  11 0     1        0  71
