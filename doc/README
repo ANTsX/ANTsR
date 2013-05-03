@@ -1,63 +1,65 @@
 #!/bin/bash
 # this directory should contain only Makefile, README and source
 #
-# unless you already built the website in which case it will also 
+# unless you already built the website in which case it will also
 #
 # contain a build directory.
 #
-# if you want to convert Rd files to rst, then do ( from this dir) 
-# 
+# if you want to convert Rd files to rst, then do ( from this dir)
+#
 option=$1
-if [[ ${#option} -eq 0  ]] ; then 
-  echo usage: ./README option 
-  echo   where option is 0 , 1  or 2 
-  echo     0 ----  compile html, no pushes 
-  echo     1 ----  compile html, push updated demo scripts to master  
-  echo     2 ----  compile html, push updated demo scripts to master and push website to gh-pages   
+if [[ ${#option} -eq 0  ]] ; then
+  echo usage: ./README option
+  echo   where option is 0 , 1  or 2
+  echo     0 ----  compile html, no pushes
+  echo     1 ----  compile html, push updated demo scripts to master
+  echo     2 ----  compile html, push updated demo scripts to master and push website to gh-pages
   exit
-fi 
-if [[ ${option} -lt 0  ]] ||  [[ ${option} -gt 2  ]] ; then 
-  echo usage: ./README option 
-  echo   where option is 0 , 1  or 2 
-  echo     0 ----  compile html, no commit, no pushes 
-  echo     1 ----  compile html, commit, push updated demo scripts to master  
-  echo     2 ----  compile html, commit, push updated demo scripts to master and push website to gh-pages   
+fi
+if [[ ${option} -lt 0  ]] ||  [[ ${option} -gt 2  ]] ; then
+  echo usage: ./README option
+  echo   where option is 0 , 1  or 2
+  echo     0 ----  compile html, no commit, no pushes
+  echo     1 ----  compile html, commit, push updated demo scripts to master
+  echo     2 ----  compile html, commit, push updated demo scripts to master and push website to gh-pages
   exit
-fi 
+fi
 ###############################################
 function mysafetest {
     "$@"
     status=$?
     if [ $status -ne 0 ]; then
         echo "error with $1"
-	exit 
+	exit
     fi
     return $status
 }
 ###############################################
-ANTsRdoc=/Users/stnava/code/gitANTs/ANTsRDoc/ANTsR/doc
+# ANTsRdoc=/Users/stnava/code/gitANTs/ANTsRDoc/ANTsR/doc
+ANTsRdoc=/Users/ntustison/Pkg/ANTsR/doc
+
 mysafetest cd $ANTsRdoc
-if [[ $option -eq 0 ]] ; then 
+if [[ $option -eq 0 ]] ; then
   mysafetest git checkout master
   mysafetest ./scripts/convertRd2rst.sh
-  mysafetest cd source 
-  mysafetest ../scripts/convertRrst2rst.R 
+  mysafetest cd source
+  mysafetest ../scripts/convertRrst2rst.R
   mysafetest cd $ANTsRdoc
   # then build the html
   mysafetest make html
-  exit 
-fi 
+  exit
+fi
 mysafetest git commit -a -m "WIP: prepping for website update"
 git push origin master
-if [[ $option -eq 1 ]] ; then exit ; fi 
+if [[ $option -eq 1 ]] ; then exit ; fi
 git branch -D gh-pages
-git push origin --delete  gh-pages # run this every once in a while 
+git push origin --delete  gh-pages # run this every once in a while
 mysafetest git checkout --orphan gh-pages
-mysafetest cd .. 
+mysafetest cd ..
 mysafetest git rm -rf .
 mysafetest cp -r doc/build/html/* .
 echo " " > .nojekyll
-mysafetest git add *html _sources/* _images/* _static/* *js *inv .nojekyll 
+mysafetest git add *html _sources/* _images/* _static/* *js *inv .nojekyll
 mysafetest git commit -a -m "WIP: website update"
 mysafetest git push origin gh-pages
 mysafetest git checkout master
