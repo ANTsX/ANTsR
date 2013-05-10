@@ -49,11 +49,9 @@ if ( dorobust > 0 )
   rbetaideal<-rep(0,ncol(mat))
   vox<-1
   ct<-0
-  skip<-20
+  skip<-100
   visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
-  print( dim(nuis) )
   mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
-  print( paste( "nodes:" , mynodes ) )
 #  cl<-makeForkCluster( nnodes = mynodes )
 #  registerDoParallel( cl , cores = mynodes ) 
   rgw<-regweights
@@ -63,9 +61,9 @@ if ( dorobust > 0 )
   for ( vox in visitvals ) {
     try(  mycbfmodel<-lmrob( rcbfform , control = ctl ) , silent=T )
     rbetaideal[vox]<-mycbfmodel$coeff[2]
-    if ( ! is.null(   mycbfmodel$weights ) )
+    if ( ! is.null(   mycbfmodel$rweights ) )
       {
-      rgw<-rgw + mycbfmodel$weights
+      rgw<-rgw + mycbfmodel$rweights
       myct<-myct+1 
       }
     }
