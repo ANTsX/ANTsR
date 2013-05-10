@@ -1,7 +1,7 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0 )
+perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
-myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0 )"
+myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20 )"
 if ( nargs() == 0 )
   {
   print(myusage)
@@ -49,11 +49,8 @@ if ( dorobust > 0 )
   rbetaideal<-rep(0,ncol(mat))
   vox<-1
   ct<-0
-  skip<-20
   visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
-  print( dim(nuis) )
   mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
-  print( paste( "nodes:" , mynodes ) )
 #  cl<-makeForkCluster( nnodes = mynodes )
 #  registerDoParallel( cl , cores = mynodes ) 
   rgw<-regweights
@@ -63,9 +60,9 @@ if ( dorobust > 0 )
   for ( vox in visitvals ) {
     try(  mycbfmodel<-lmrob( rcbfform , control = ctl ) , silent=T )
     rbetaideal[vox]<-mycbfmodel$coeff[2]
-    if ( ! is.null(   mycbfmodel$weights ) )
+    if ( ! is.null(   mycbfmodel$rweights ) )
       {
-      rgw<-rgw + mycbfmodel$weights
+      rgw<-rgw + mycbfmodel$rweights
       myct<-myct+1 
       }
     }

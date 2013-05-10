@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0 , m0 = NA )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0 , m0 = NA , skip = 20)
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion ) 
@@ -54,7 +54,7 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     }
   moco_results <- motion_correction( asl , moreaccurate = moreaccurate )
   moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = maskThresh, highThresh = 1e9, cleanup = TRUE )
-  mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
+  mat <- timeseries2matrix( moco_results$moco_img, moco_mask_img )
   motionparams<-as.data.frame( moco_results$moco_params )
   predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
   if ( is.na( m0 ) )
@@ -65,6 +65,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
-  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust )
+  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
   return( cbf )
 }
