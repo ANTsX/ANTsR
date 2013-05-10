@@ -1,7 +1,7 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0 )
+perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
-myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0 )"
+myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20 )"
 if ( nargs() == 0 )
   {
   print(myusage)
@@ -49,7 +49,6 @@ if ( dorobust > 0 )
   rbetaideal<-rep(0,ncol(mat))
   vox<-1
   ct<-0
-  skip<-100
   visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
   mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
 #  cl<-makeForkCluster( nnodes = mynodes )

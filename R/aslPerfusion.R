@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0 , m0 = NA )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0 , m0 = NA , skip = 20)
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion ) 
@@ -65,6 +65,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
-  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust )
+  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
   return( cbf )
 }
