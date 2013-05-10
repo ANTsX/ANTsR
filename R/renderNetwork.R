@@ -2,21 +2,21 @@
 renderNetwork <- function( network, locations, scaling=c(0,0)  )
 {
 
-  nLabels <- dim(locations)[1]
+  nLabels <- dim(locations$vertices)[1]
   network <- as.array(network)
   
   if ( length(dim(network)) != 2 ) {
     stop( "network must have exactly 2 dimensions" )
   }
-  if ( (dim(network)[1] != dim(locations)[1]) ||
-       (dim(network)[2] != dim(locations)[1]) )
+  if ( (dim(network)[1] != dim(locations$vertices)[1]) ||
+       (dim(network)[2] != dim(locations$vertices)[1]) )
     {
       stop( "network and centroids must have matching sizes" )
     }
 
-  mesh <- list( vertices=locations )
+  #mesh <- list( vertices=locations )
   labelVerts <- c( 1:nLabels )
-  spheres3d( mesh$vertices[labelVerts, ], col='blue',type='s',radius=3)
+  spheres3d( locations$vertices[labelVerts, ], col='blue',type='s',radius=3)
   
   edgelocations <- c()
   edgeweights <- c()
@@ -51,5 +51,5 @@ renderNetwork <- function( network, locations, scaling=c(0,0)  )
     }
   #print( "edge colors determined" )
   
-  segments3d( mesh$vertices[edgelocations,], col=rep(colors,each=2), lwd=7)
+  segments3d( locations$vertices[edgelocations,], col=rep(colors,each=2), lwd=7)
 }
