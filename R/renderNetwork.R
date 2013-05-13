@@ -1,5 +1,5 @@
 # renderNetwork
-renderNetwork <- function( network, locations, scaling=c(0,0), lwd=2, radius=3, edgecolors=0 )
+renderNetwork <- function( network, locations, scaling=c(0,0), lwd=2, radius=3, edgecolors=0, nodecolors='blue', nodetype='s' )
 {
 
   nLabels <- dim(locations$vertices)[1]
@@ -14,7 +14,7 @@ renderNetwork <- function( network, locations, scaling=c(0,0), lwd=2, radius=3, 
   } 
 
   labelVerts <- c( 1:nLabels )
-  spheres3d( locations$vertices[labelVerts, ], col='blue',type='s',radius=radius)
+  spheres3d( locations$vertices[labelVerts, ], color=nodecolors, type=nodetype, radius=radius)
   
   edgelocations <- c()
   edgeweights <- c()
@@ -40,15 +40,16 @@ renderNetwork <- function( network, locations, scaling=c(0,0), lwd=2, radius=3, 
     
     edgeweights <- edgeweights - scaling[1]
     edgeweights <- edgeweights / scaling[2]
+    edgeweights <- edgeweights * 0.75 # prevent "wrapping" of colors
     
-    edgeweights <- 1+(edgeweights * 255)
-    colormap <- topo.colors(256)
+    edgeweights <- 1+(edgeweights * 511)
+    #colormap <- topo.colors(512)
+    colormap <- rainbow(512)
     edgecolors <- edgeweights  
     for ( i in c(1:length(edgeweights) ) ) {
       edgecolors[i] <- colormap[floor(edgeweights[i])]
     }
   }
-  
   
   segments3d( locations$vertices[edgelocations,], col=rep(edgecolors,each=2), lwd=lwd)
 }
