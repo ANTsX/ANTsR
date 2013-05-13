@@ -1,5 +1,5 @@
 # renderNetwork
-renderNetwork <- function( network, locations, scaling=c(0,0)  )
+renderNetwork <- function( network, locations, scaling=c(0,0), lwd=2, radius=3, edgecolors=0 )
 {
 
   nLabels <- dim(locations$vertices)[1]
@@ -9,14 +9,12 @@ renderNetwork <- function( network, locations, scaling=c(0,0)  )
     stop( "network must have exactly 2 dimensions" )
   }
   if ( (dim(network)[1] != dim(locations$vertices)[1]) ||
-       (dim(network)[2] != dim(locations$vertices)[1]) )
-    {
-      stop( "network and centroids must have matching sizes" )
-    }
+       (dim(network)[2] != dim(locations$vertices)[1]) ) {
+    stop( "network and centroids must have matching sizes" )
+  } 
 
-  #mesh <- list( vertices=locations )
   labelVerts <- c( 1:nLabels )
-  spheres3d( locations$vertices[labelVerts, ], col='blue',type='s',radius=3)
+  spheres3d( locations$vertices[labelVerts, ], col='blue',type='s',radius=radius)
   
   edgelocations <- c()
   edgeweights <- c()
@@ -33,23 +31,24 @@ renderNetwork <- function( network, locations, scaling=c(0,0)  )
       }
     }
 
-  if ( (scaling[1] == scaling[2] ) )
-    {
-    scaling[1] <- min( edgeweights )
-    scaling[2] <- max( edgeweights ) 
+  if ( (length(edgecolors) == 1 ) && (edgecolors[1] == 0) ) {
+    if ( (scaling[1] == scaling[2] ) )
+      {
+        scaling[1] <- min( edgeweights )
+        scaling[2] <- max( edgeweights ) - min(edgeweights)
+      }
+    
+    edgeweights <- edgeweights - scaling[1]
+    edgeweights <- edgeweights / scaling[2]
+    
+    edgeweights <- 1+(edgeweights * 255)
+    colormap <- topo.colors(256)
+    edgecolors <- edgeweights  
+    for ( i in c(1:length(edgeweights) ) ) {
+      edgecolors[i] <- colormap[floor(edgeweights[i])]
     }
+  }
   
-  edgeweights <- edgeweights - scaling[1]
-  edgeweights <- edgeweights / scaling[2]
   
-  edgeweights <- 1+(edgeweights * nLabels)
-  heat <- heat.colors(nLabels+1)
-  colors <- heat
-  for ( i in c(1:length(edgeweights) ) )
-    {
-    colors[i] <- heat[floor(edgeweights[i])]
-    }
-  #print( "edge colors determined" )
-  
-  segments3d( locations$vertices[edgelocations,], col=rep(colors,each=2), lwd=7)
+  segments3d( locations$vertices[edgelocations,], col=rep(edgecolors,each=2), lwd=lwd)
 }
