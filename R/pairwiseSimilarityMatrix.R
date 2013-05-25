@@ -14,14 +14,12 @@ pairwiseSimilarityMatrix <- function( dim , myFileList )
           toutfn<-paste(tempdir(),"/Z",sep='')
           sink( toutfn ) 
           mytx<-antsRegistration(fixed=i1 , moving=i2 , typeofTransform = c("Affine"), outprefix=toutfn )
-          sink()
-          sink( toutfn ) 
           mywarpedimage<-antsApplyTransforms(fixed=i1,moving=i2,transformlist=mytx$fwdtransforms)
-          sink()
+          sink(NULL)
           metric<-capture.output(ImageMath(dim,"j","PearsonCorrelation",i1,mywarpedimage))[1]
           mymat[ct,ct2]<-as.numeric( metric )
           tct<-tct+1
-          print( paste( 100 * tct / (fnl*fnl) , "%" ) )
+          print( paste( 100 * tct / (fnl*fnl) , "%") )
           }
         }
       }
