@@ -22,7 +22,7 @@ renderImageLabels<-function( labelsimg, surfval=0.5, smoothsval = 0, alphasurf=1
 intensity level that defines isosurface 
 }
 
-\time{smoothsval}{
+\item{smoothsval}{
 sigma for smoothing of each extracted label image
 }
 
