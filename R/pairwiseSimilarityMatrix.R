@@ -1,4 +1,4 @@
-pairwiseSimilarityMatrix <- function( dim , myFileList )
+pairwiseSimilarityMatrix <- function( dim , myFileList, nclusters = NA )
   {
     fnl<-length( myFileList )
     mymat<- matrix( rep( NA, fnl*fnl) , nrow = fnl, ncol = fnl )
@@ -23,5 +23,12 @@ pairwiseSimilarityMatrix <- function( dim , myFileList )
           }
         }
       }
-    return( mymat )
+    clusters<-rep( NA, fnl ) 
+    if ( ! is.na( nclusters ) )
+      {
+      library( cluster )
+      pamx <- pam( mymat , nclusters )
+      clusters<-summary(pamx)$clustering
+      }
+    return( list(rawMatrix=mymat, symmMatrix= 0.5*(mymat+t(mymat)), clusters=clusters ) )
   }
