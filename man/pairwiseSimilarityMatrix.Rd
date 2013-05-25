@@ -6,11 +6,11 @@ Simple pairwiseSimilarityMatrix function for images
 }
 
 \description{
-PairwiseSimilarityMatrix contains the NImages x NImages matrix of PearsonCorrelation values after an affine registration is performed.
+PairwiseSimilarityMatrix contains the NImages x NImages matrix of c("PearsonCorrelation","Mattes") or any Image Metric values available in ImageMath.  Similarity is computed after an affine registration is performed.  You can also cluster the images via the similarity measurement.  In fact, dissimilarity is returned in the matrix.
 }
 
 \usage{
-wmat<-pairwiseSimilarityMatrix( dim, myFileList  )
+wmat<-pairwiseSimilarityMatrix( dim , myFileList, metrictype="PearsonCorrelation", nclusters = NA  )
 }
 
 \arguments{
@@ -24,7 +24,7 @@ wmat<-pairwiseSimilarityMatrix( dim, myFileList  )
 }
 
 \value{
-similarity matrix is output
+raw similarity matrix is output, symmetrized matrix and clustering (optional) in a list
 }
 
 \author{
@@ -32,5 +32,5 @@ Avants BB
 }
 
 \examples{
-  simmat<-pairwiseSimilarityMatrix( imagefilelist ) 
+  simdata<-pairwiseSimilarityMatrix( 3, imagefilelist, nclusters = 5 ) 
 }
