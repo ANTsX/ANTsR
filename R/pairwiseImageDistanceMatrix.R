@@ -1,4 +1,4 @@
-pairwiseSimilarityMatrix <- function( dim , myFileList, metrictype="PearsonCorrelation", nclusters = NA )
+pairwiseImageDistanceMatrix <- function( dim , myFileList, metrictype="PearsonCorrelation", nclusters = NA )
   {
     fnl<-length( myFileList )
     mymat<- matrix( rep( NA, fnl*fnl) , nrow = fnl, ncol = fnl )
