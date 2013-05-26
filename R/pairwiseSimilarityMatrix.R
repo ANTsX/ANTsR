@@ -27,13 +27,21 @@ pairwiseSimilarityMatrix <- function( dim , myFileList, metrictype="PearsonCorre
       {
       mymat<-mymat * ( -1.0 ) # make a dissimilarity matrix
       }
-    mymat <- mymat - min(mymat) # make min zero 
+    mymat <-   mymat - min( mymat, na.rm = T ) # make min zero
+    symat <- ( mymat +   t( mymat ) ) * 0.5 # make symmetric 
     clusters<-rep( NA, fnl ) 
+    clusterrep<-rep(NA,nclusters)
     if ( ! is.na( nclusters ) )
       {
       library( cluster )
-      pamx <- pam( (mymat+t(mymat))*(0.5) , nclusters ) # make symmetric 
+      pamx <- pam( symat , nclusters ) 
       clusters<-summary(pamx)$clustering
+      for ( nc in 1:nclusters )
+        {
+        wc<-c( 1:nclusters )[ clusters == nc ]
+        means<-apply( symat[ , wc], MARGIN=2, mean , na.rm=T)
+        clusterrep[nc]<-wc[ which.min( means ) ]
+        }
       }
-    return( list(rawMatrix=mymat, symmMatrix= 0.5*(mymat+t(mymat)), clusters=clusters ) )
+    return( list(rawMatrix=mymat, symmMatrix= symat, clusters=clusters, representatives=myFileList[ clusterrep ] ) )
   }
