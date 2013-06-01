@@ -66,6 +66,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
-  cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
-  return( cbf )
+  perfusion <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
+  return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img ) )
 }
