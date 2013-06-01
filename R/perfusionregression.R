@@ -25,7 +25,7 @@ mycbfmodel<-lm( cbfform  ) # standard regression
 cbfi <- antsImageClone( mask_img )
 m0vals <-m0[ mask_img == 1 ]
 m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
-factor<-1.e4
+factor<-1.0
 betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
 if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
 cbfi[ mask_img == 1 ] <- betaideal  # standard results
