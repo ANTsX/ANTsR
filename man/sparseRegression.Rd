@@ -43,7 +43,6 @@ Medical Imaging, 2013.
 }
 \author{
 Kandel BM, Avants BB. 
-%%  ~~who you are~~
 }
 \note{
 %%  ~~further notes~~
@@ -63,5 +62,18 @@ demog <- data.frame(outcome=outcome)
 input[, 40:60] <- 30 + outcome + rnorm(length(input[, 40:60]))
 mymask <- as.antsImage(array(rep(1, 125), dim=c(5,5,5)))
 myregression <- sparseRegression(input, demog, "outcome", mymask, 
-    sparseness=0.05, nvecs=10, its=3)
+    sparseness=0.05, nvecs=5, its=3)
+
+# visualization of results
+sample <- rep(0, 125)
+sample[40:60] <-1 
+signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
+signal.img[signal.img >= 0 ] <- sample
+plotANTsImage( signal.img, axis=2, slices="1x5x1")
+readline("Visual representation of signal source; press any key to continue.")
+for ( i in 1:5) {
+  plotANTsImage(myregression$eigenanatomyimages[[i]], axis=2, slices="1x5x1")
+  readline(paste("Eigenvector ", i, ". Press any key to continue.", sep=''))
+}
+
 }
