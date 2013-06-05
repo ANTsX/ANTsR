@@ -66,6 +66,13 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
+  
+  # Get average tagged image
+  m1vals <- apply(  mat[c(1:(nrow(mat)/2))*2-1,] , 2 , mean ) # for T C T C , JJ data
+  m1 <- antsImageClone( moco_mask_img )
+  m1[ moco_mask_img == 0 ]<-0
+  m1[ moco_mask_img == 1 ]<-m1vals
+  
   perfusion <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
-  return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0 ) )
+  return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
 }
