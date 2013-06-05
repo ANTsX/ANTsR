@@ -55,25 +55,38 @@ Kandel BM, Avants BB.
 }
 \examples{
 require(ANTsR)
-nsubj <- 100
+nsubj <- 1000
+prop.train <- 1/2
+subj.train <- sample(1:nsubj, prop.train*nsubj, replace=F)
 input <- t(replicate(nsubj, rnorm(125)))
-outcome <- 1:nsubj
+outcome <- seq(1, 5, length.out=nsubj)
 demog <- data.frame(outcome=outcome)
-input[, 40:60] <- 30 + outcome + rnorm(length(input[, 40:60]))
+input[, 40:60] <- 30 + outcome + rnorm(length(input[, 40:60]), sd=2)
+input.train <- input[subj.train, ]
+input.test <- input[-subj.train, ]
+demog.train <- data.frame(outcome=demog[subj.train, ])
+demog.test <- data.frame(outcome=demog[-subj.train, ])
 mymask <- as.antsImage(array(rep(1, 125), dim=c(5,5,5)))
-myregression <- sparseRegression(input, demog, "outcome", mymask, 
-    sparseness=0.05, nvecs=5, its=3)
-
+myregression <- sparseRegression(input.train, demog.train, "outcome", mymask, 
+    sparseness=0.05, nvecs=5, its=3, cthresh=250)
 # visualization of results
 sample <- rep(0, 125)
 sample[40:60] <-1 
 signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
 signal.img[signal.img >= 0 ] <- sample
-plotANTsImage( signal.img, axis=2, slices="1x5x1")
-readline("Visual representation of signal source; press any key to continue.")
-for ( i in 1:5) {
-  plotANTsImage(myregression$eigenanatomyimages[[i]], axis=2, slices="1x5x1")
-  readline(paste("Eigenvector ", i, ". Press any key to continue.", sep=''))
+plotANTsImage( signal.img, axis=2, slices="1x5x1") # actual source of signal
+# compare against first learned regression vector
+myimgs <- list()
+for( i in 1:5){
+  myarray <- as.array(myregression$eigenanatomyimages[[ i ]])
+  myarray <- myarray / max(abs(myarray)) # normalize for visualization
+  myimgs[[ i ]] <- antsImageClone(myregression$eigenanatomyimages[[ i ]])
+  myimgs[[ i ]][mymask > 0] <- myarray
 }
+plotANTsImage(myimgs[[1]], axis=2, slices="1x5x1") 
+# use learned eigenvectors for prediction
+result <- regressProjections(input.train, input.test, demog.train, 
+    demog.test, myregression$eigenanatomyimages, mymask, "outcome")
+plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 
 }
