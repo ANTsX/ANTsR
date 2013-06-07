@@ -67,5 +67,12 @@ quantifyCBF <- function( perfusion, mask, parameters )
   cbfimg[ (mask < 1 ) ] <- 0
   cbfimg[ (mask == 1) ] <- cbf[ (mask == 1) ]
   
-  return( list(meancbf=cbfimg) )
+  library(extremevalues)
+  cbfvals<-cbfimg[ (mask == 1) ]
+  K <- getOutliers(cbfvals,method="I",distribution="normal",FLim=c(0.05,0.95))
+  kcbf<-antsImageClone( cbfimg )
+  kcbf[ cbfimg < K$yMin ]<-0
+  kcbf[ cbfimg > K$yMax ]<-K$yMax
+
+  return( list(meancbf=cbfimg, kmeancbf=kcbf) )
 }
