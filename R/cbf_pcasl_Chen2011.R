@@ -1,13 +1,16 @@
 # chen 2011 paper pCASL
 # --------------------------------------------------------------------------------------
-cbf_pcasl_Chen2011 <- function( aslimg_filename )
+cbf_pcasl_Chen2011 <- function( motionCorrectedImage , mask )
 {
-  img <- antsImageRead(  aslimg_filename ,  4 , "double" )
+    #  img <- antsImageRead(  aslimg_filename ,  4 , "double" )
   
-  moco_results <- motion_correction( img )
+    #  moco_results <- motion_correction( img )
 
-  img <- as.array( moco_results$moco_img )
-  
+    #  img <- as.array( moco_results$moco_img )
+
+  img <- as.array( motionCorrectedImage )
+
+    
   numdiffs <- floor( dim(img)[4] / 2 )
   
   labelimg <- img[ , , , seq( 2 , by = 2 , length.out = numdiffs ) ]
@@ -47,9 +50,9 @@ cbf_pcasl_Chen2011 <- function( aslimg_filename )
   meancbf <- antsImageClone(moco_results$moco_avg_img)
   meancbf[!is.nan(meanvalues)] <- meanvalues[!is.nan(meanvalues)]
 
-  mask <- antsImageClone(moco_results$moco_avg_img)
-  mask[mask < 500] <- 0
-  mask[mask > 0] <- 1
+    #  mask <- antsImageClone(moco_results$moco_avg_img)
+    #  mask[mask < 500] <- 0
+    #  mask[mask > 0] <- 1
   
   #for( x in 1:(dim(meancbf)[1]) )
   #  for( y in 1:(dim(meancbf)[2]) )

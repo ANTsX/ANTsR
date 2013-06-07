@@ -48,8 +48,8 @@ quantifyCBF <- function( perfusion, mask, parameters )
   }
 
   unitsConversion = 5400.0
-  #  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
-  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
+  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
+  #  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
   cbf[ is.nan(cbf) ] <- 0
 
   # Get mean from time-series data

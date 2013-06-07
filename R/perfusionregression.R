@@ -1,4 +1,4 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20  )
+perfusionregression <- function( mask_img , mat , xideal , nuis = NA , m0, dorobust = 0, skip = 20  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20 )"
@@ -16,7 +16,7 @@ if ( missing( mat ) | missing( xideal ) | missing( nuis ) | missing( m0 ) )
 print("standard regression")
 cbfform<-formula(  mat ~   xideal )
 rcbfform<-formula(  mat[,vox] ~   xideal )
-if ( ! is.null( nuis ) )
+if ( ! is.na( nuis ) )
   {
   cbfform<-formula(  mat ~   xideal + nuis )
   rcbfform<-formula(  mat[,vox] ~   xideal + nuis )
@@ -26,7 +26,7 @@ cbfi <- antsImageClone( mask_img )
 m0vals <-m0[ mask_img == 1 ]
 m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
 factor<-1.0
-betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+betaideal<-( (mycbfmodel$coeff)[2,] * factor )
 if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
 cbfi[ mask_img == 1 ] <- betaideal  # standard results
 

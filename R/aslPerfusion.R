@@ -72,7 +72,7 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   m1 <- antsImageClone( moco_mask_img )
   m1[ moco_mask_img == 0 ]<-0
   m1[ moco_mask_img == 1 ]<-m1vals
-  
-  perfusion <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 , dorobust = dorobust , skip = skip )
+  print( colnames(predictors$nuis) )
+  perfusion <- perfusionregression( mask_img = moco_mask_img, mat = mat , xideal = predictors$xideal , nuis = predictors$nuis , m0 = m0, dorobust = dorobust , skip = skip )
   return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
 }
