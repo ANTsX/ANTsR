@@ -29,11 +29,13 @@ quantifyCBF <- function( perfusion, mask, parameters )
   }
 
   alpha <- 0.85
+  # ASLtbx says 0.68 for 3T and 0.71 for 1.5T
   if ( ! is.null(parameters$alpha) ) {
     alpha <- parameters$alpha
   }
 
-  T1b <- 0.67 # 1/sec
+  T1b <- 0.67 # 1/sec as per ASLtbx for 3T
+  # ASLtbx suggests 0.83 for 1.5T
   if ( ! is.null(parameters$T1blood) ) {
     T1b <- parameters$T1blood
   }
