@@ -15,13 +15,14 @@ quantifyCBF <- function( perfusion, mask, parameters )
     stop( "Only pcasl supported for now. pasl and casl in development" );
   }
 
-  if (  is.null(parameters$m0) ) {
-    stop( "Must pass in an M0 image: mean of the control images" );
-  }
+  #if (  is.null(parameters$m0) ) {
+  #  stop( "Must pass in an M0 image: mean of the control images" );
+  #}
 
-  M0 <- as.array(parameters$m0)
-  deltaM <- as.array(perfusion)
-
+  #M0 <- as.array(parameters$m0)
+  #deltaM <- as.array(perfusion)
+  perf <- as.array(perfusion)
+  
   lambda <- 0.9
   if ( ! is.null(parameters$lambda) ) {
     lambda <- parameters$lambda
@@ -32,7 +33,7 @@ quantifyCBF <- function( perfusion, mask, parameters )
     alpha <- parameters$alpha
   }
 
-  T1b <- 1664
+  T1b <- 0.67 # 1/sec
   if ( ! is.null(parameters$T1blood) ) {
     T1b <- parameters$T1blood
   }
@@ -47,9 +48,9 @@ quantifyCBF <- function( perfusion, mask, parameters )
     tau <- parameters$tau
   }
 
-  unitsConversion = 5400.0
-  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * M0 * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
-  #  cbf <- unitsConversion * ( lambda * deltaM ) / ( 2 * alpha * T1b * ( exp( -omega / T1b ) - exp( -( tau + omega ) / T1b ) ) )
+  scaling <- 60*100*( lambda * T1b ) / ( 2 * alpha * ( exp( -omega * T1b ) - exp( -( tau + omega ) * T1b ) ) )
+  cbf <- scaling*perf
+  
   cbf[ is.nan(cbf) ] <- 0
 
   # Get mean from time-series data
