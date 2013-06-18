@@ -56,8 +56,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = maskThresh, highThresh = 1e9, cleanup = TRUE )
   if ( ! is.na(mask) ) moco_mask_img <- mask
   mat <- timeseries2matrix( moco_results$moco_img, moco_mask_img )
-  motionparams<-as.data.frame( moco_results$moco_params )
-  predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
   if ( is.na( m0 ) )
     {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
@@ -66,6 +64,9 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
+  motionparams<-as.data.frame( moco_results$moco_params )
+  predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
+#  mat <- antsr_frequency_filter( mat , freqHi = 0.1 , freqLo = 0.01, tr = 4 )
   
   # Get average tagged image
   m1vals <- apply(  mat[c(1:(nrow(mat)/2))*2-1,] , 2 , mean ) # for T C T C , JJ data
@@ -73,6 +74,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   m1[ moco_mask_img == 0 ]<-0
   m1[ moco_mask_img == 1 ]<-m1vals
   print( colnames(predictors$nuis) )
-  perfusion <- perfusionregression( mask_img = moco_mask_img, mat = mat , xideal = predictors$xideal , nuis = predictors$nuis , m0 = m0, dorobust = dorobust , skip = skip )
+  perfusion <- perfusionregression( mask_img = moco_mask_img, mat = mat , xideal = predictors$xideal , nuis = predictors$nuis , dorobust = dorobust , skip = skip )
   return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
 }

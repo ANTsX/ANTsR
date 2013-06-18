@@ -2,7 +2,7 @@
 # 
 # chen 2011 paper pCASL
 # --------------------------------------------------------------------------------------
-quantifyCBF <- function( perfusion, mask, parameters )
+quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
 {
 
   # FIXME - for now assuming mean perfusion image passed in, not time-course
@@ -15,11 +15,11 @@ quantifyCBF <- function( perfusion, mask, parameters )
     stop( "Only pcasl supported for now. pasl and casl in development" );
   }
 
-  #if (  is.null(parameters$m0) ) {
-  #  stop( "Must pass in an M0 image: mean of the control images" );
-  #}
+  if (  is.null(parameters$m0) ) {
+   stop( "Must pass in an M0 image: mean of the control images or externally acquired m0" );
+   }
 
-  #M0 <- as.array(parameters$m0)
+  M0 <- as.array(parameters$m0)
   #deltaM <- as.array(perfusion)
   perf <- as.array(perfusion)
   
@@ -50,7 +50,7 @@ quantifyCBF <- function( perfusion, mask, parameters )
     tau <- parameters$tau
   }
 
-  scaling <- 60*100*( lambda * T1b ) / ( 2 * alpha * ( exp( -omega * T1b ) - exp( -( tau + omega ) * T1b ) ) )
+  scaling <- 60*100*( lambda * T1b ) / ( 2 * alpha * M0 * ( exp( -omega * T1b ) - exp( -( tau + omega ) * T1b ) ) )
   cbf <- scaling*perf
   
   cbf[ is.nan(cbf) ] <- 0
@@ -72,7 +72,7 @@ quantifyCBF <- function( perfusion, mask, parameters )
   
   library(extremevalues)
   cbfvals<-cbfimg[ (mask == 1) ]
-  K <- getOutliers(cbfvals,method="I",distribution="normal",FLim=c(0.05,0.95))
+  K <- getOutliers(cbfvals,method="I",distribution="normal",FLim=c( outlierValue , 1 - outlierValue ))
   kcbf<-antsImageClone( cbfimg )
   kcbf[ cbfimg < K$yMin ]<-0
   kcbf[ cbfimg > K$yMax ]<-K$yMax

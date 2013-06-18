@@ -1,13 +1,13 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis = NA , m0, dorobust = 0, skip = 20  )
+perfusionregression <- function( mask_img , mat , xideal , nuis = NA , dorobust = 0, skip = 20  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
-myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis , m0, dorobust = 0, skip = 20 )"
+myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
 if ( nargs() == 0 )
   {
   print(myusage)
   return(NULL)
   }
-if ( missing( mat ) | missing( xideal ) | missing( nuis ) | missing( m0 ) )
+if ( missing( mat ) | missing( xideal ) | missing( nuis ) )
   {
   print("Missing one or more input parameter(s).")
   print(myusage)
@@ -23,13 +23,9 @@ if ( ! is.na( nuis ) )
   }
 mycbfmodel<-lm( cbfform  ) # standard regression
 cbfi <- antsImageClone( mask_img )
-m0vals <-m0[ mask_img == 1 ]
-m0vals[ m0vals ==  0] <- mean( m0vals , na.rm = T)
-factor<-1.0
-betaideal<-( (mycbfmodel$coeff)[2,] * factor )
+betaideal<-( (mycbfmodel$coeff)[2,] )
 if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
 cbfi[ mask_img == 1 ] <- betaideal  # standard results
-
 
 
 if ( dorobust > 0 )
@@ -88,10 +84,13 @@ if ( dorobust > 0 )
   regweights[ indstozero ]<-0 # hard thresholding 
   print(regweights)
   mycbfmodel<-lm( cbfform , weights = regweights ) # standard weighted regression
-  betaideal<-( (mycbfmodel$coeff)[2,] * factor ) / m0vals
+  betaideal<-( (mycbfmodel$coeff)[2,] ) 
   if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
   cbfi[ mask_img == 1 ] <- betaideal  # robust results
   print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
   }
 return( cbfi )
 }
+#
+# y = x beta + c  =>   y - c  =  x beta 
+#
