@@ -1,12 +1,24 @@
 partialVolumeCorrection <- function(img, img.gm, img.wm, mask=NULL, proportion=0.4){
-  #  WIP -- the following does not appear to work, possibly due to a bug in ImageMath. 
-  #  It may be platform-dependent.
-  img.corrected <- antsImageClone(img)
-  img.denominator <- antsImageClone(img.gm)
-  denom.wm <- antsImageClone(img.wm)
-  ImageMath(img@dimension, denom.wm, 'm', img.wm, '0.4')
-  ImageMath(img@dimension, img.denominator, '+', img.gm, denom.wm)
-  ImageMath(img@dimension, img.corrected, "/", img, img.denominator)
-  if(!is.null(mask)) img.corrected <- maskImage(img.corrected, mask) 
-  img.corrected
+  if(class(img)[1] == "antsImage") { 
+    if(is.null(mask)){
+      mask <- antsImageClone(img)
+      mask[img != 0] <- 1
+    }
+    values.img <- img[mask > 0]
+    values.gm <- img.gm[mask > 0]
+    values.wm <- img.wm[mask > 0]
+  } else if (is.numeric(img)) {
+    values.img <- img
+    values.gm <- img.gm
+    values.wm <- img.wm
+  } else stop("Input image must be either antsImage or numeric.")
+
+  values.corrected <- values.img / (values.gm + 0.4 * values.wm)
+  if(is.numeric(img)) {
+    return(values.corrected)
+  } else{
+    img.corrected <- antsImageClone(img)
+    img.corrected[mask > 0] <- values.corrected
+    return(img.corrected)
+  }
 }

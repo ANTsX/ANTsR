@@ -13,7 +13,8 @@ partialVolumeCorrection(image, image.gm, image.wm, mask=NULL, proportion=0.4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{image}{Low-resolution image to be corrected.}
+  \item{image}{Low-resolution image to be corrected.  All input images can be either of type
+  antsImage or numeric vectors (if numeric vectors, the mask is ignored).}
   \item{image.gm}{Gray matter probability image for partial volume correction.}
   \item{image.wm}{White matter probability image for partial volume correction.}
   \item{mask}{Brain mask for image.}
@@ -58,11 +59,7 @@ percent.gm <- matrix(seq(0.1, 1, by=0.1), nrow=2)
 percent.wm <- -percent.gm + 1
 activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5) + 
                   rnorm(n=length(percent.wm), mean=activity.wm, sd=5)
-img <- as.antsImage(as.array(activity.obs))
-img.gm <- as.antsImage(as.array(percent.gm))
-img.wm <- as.antsImage(as.array(percent.wm))
-activity.corrected <- partialVolumeCorrection(img, img.gm, img.wm)
-print(as.array(activity.corrected))
+activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
