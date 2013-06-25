@@ -19,51 +19,51 @@ quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
    stop( "Must pass in an M0 image: mean of the control images or externally acquired m0" );
    }
 
-  M0 <- as.array(parameters$m0)
-  #deltaM <- as.array(perfusion)
-  perf <- as.array(perfusion)
+  if ( parameters$sequence == "pcasl" ) {
+    M0 <- as.array(parameters$m0)
+    perf <- as.array(perfusion)
   
-  lambda <- 0.9
-  if ( ! is.null(parameters$lambda) ) {
-    lambda <- parameters$lambda
-  }
-
-  alpha <- 0.85
-  # ASLtbx says 0.68 for 3T and 0.71 for 1.5T
-  if ( ! is.null(parameters$alpha) ) {
-    alpha <- parameters$alpha
-  }
-
-  T1b <- 0.67 # 1/sec as per ASLtbx for 3T
-  # ASLtbx suggests 0.83 for 1.5T
-  if ( ! is.null(parameters$T1blood) ) {
-    T1b <- parameters$T1blood
-  }
-
-  omega <- 1
-  if ( ! is.null(parameters$omega) ) {
-    omega <- parameters$omega
+    lambda <- 0.9
+    if ( ! is.null(parameters$lambda) ) {
+      lambda <- parameters$lambda
     }
 
-  tau <- 1.5
-  if ( ! is.null(parameters$tau) ) {
-    tau <- parameters$tau
+    alpha <- 0.85    # ASLtbx says 0.68 for 3T and 0.71 for 1.5T
+    if ( ! is.null(parameters$alpha) ) {
+      alpha <- parameters$alpha
+    }
+    
+    T1b <- 0.67 # 1/sec as per ASLtbx for 3T, ASLtbx suggests 0.83 for 1.5T
+    if ( ! is.null(parameters$T1blood) ) {
+      T1b <- parameters$T1blood
+    }
+
+    # delay time
+    omega <- 1
+    if ( ! is.null(parameters$omega) ) {
+      omega <- parameters$omega
+    }
+
+    # slice delay time
+    slicetime <- 0.0505   # 50.5 ms value from ASLtbx
+    if ( ! is.null(parameters$slicetime) ) {
+      slicetime <- parameters$slicetime
+    }
+    
+    tau <- 1.5
+    if ( ! is.null(parameters$tau) ) {
+      tau <- parameters$tau
+    }
+
+    sliceTimeMat <- rep(c(1:dim(M0)[3]), each=dim(M0)[1]*dim(M0)[2] )
+    dim(sliceTimeMat) <- dim(M0)
+    omegaMat <- slicetime * sliceTimeMat + omega
+    
+    cbf <- perf*60*100*( lambda * T1b ) / ( 2 * alpha * M0 * ( exp( -omegaMat * T1b ) - exp( -( tau + omegaMat ) * T1b ) ) )
+
   }
 
-  scaling <- 60*100*( lambda * T1b ) / ( 2 * alpha * M0 * ( exp( -omega * T1b ) - exp( -( tau + omega ) * T1b ) ) )
-  cbf <- scaling*perf
-  
   cbf[ is.nan(cbf) ] <- 0
-
-  # Get mean from time-series data
-  #meanvalues <- array( 0 , dim(M0)[1:3] )
-  # Fix this using apply
-  #for( x in 1:(dim(M0)[1]) )
-  #  for( y in 1:(dim(M0)[2]) )
-  #    for( z in 1:(dim(M0)[3]) )
-  #      {
-  #       meanvalues[ x , y , z ] <- 5400.0*mean( cbf[ x , y , z , ] )
-  #      }
   cbf[ (mask < 1) ] <- 0
 
   cbfimg <- antsImageClone( mask )
