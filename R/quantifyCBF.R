@@ -69,7 +69,10 @@ quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
   cbfimg <- antsImageClone( mask )
   cbfimg[ (mask < 1 ) ] <- 0
   cbfimg[ (mask == 1) ] <- cbf[ (mask == 1) ]
-  
+  pckg = try(require(extremevalues))
+  if(!pckg) {
+    getPckg("extremevalues")
+  }
   library(extremevalues)
   cbfvals<-cbfimg[ (mask == 1) ]
   K <- getOutliers(cbfvals,method="I",distribution="normal",FLim=c( outlierValue , 1 - outlierValue ))
