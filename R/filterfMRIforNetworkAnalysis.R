@@ -62,11 +62,12 @@ if ( ulabels[1] == 0 ) ulabels<-ulabels[2:length(ulabels)]
 labelvec<-labels[ mask == 1 ]
 labmat<-matrix(data = rep(NA,length(ulabels)*nrow(filteredTimeSeries)),  nrow = length(ulabels) )
 ct<-1
+nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
   {
   dd<-labelvec == mylab
-  submat<- filteredTimeSeries[ , dd ] 
-  myavg<-apply( submat, MARGIN=1, FUN=mean )
+  submat<- filteredTimeSeries[ , dd ]
+  if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
   labmat[ ct, ]<-myavg
   ct<-ct+1
   }
@@ -109,7 +110,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
   g1 <- graph.adjacency( adjacencyMatrix, mode = c( "undirected" ), weighted=TRUE )
 #
   edgeWeights<-E(g1)$weight
-  print( paste( "Graph-Density:",graph.density( bb$graph$mygraph ) ) )
+  print( paste( "Graph-Density:",graph.density( g1 ) ) )
   gmetric1 <- closeness( g1, normalized = T, weights = edgeWeights )
   gmetric2 <- page.rank( g1 , weights = edgeWeights )$vector #  
   gmetric3 <- degree( g1 )
