@@ -1,4 +1,4 @@
-filterfMRIforNetworkAnalysis<- function( asl, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", maskThresh = 500 , smoother = 0, pre="" , moreaccurate = TRUE )
+filterfMRIforNetworkAnalysis<- function( aslmat, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", mask = NA , labels = NA,  pre="" , graphdensity =  0.5 , moreaccurate = TRUE )
 { 
   pixtype<-"float"
   myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, smoother = 0 , outputprefix = NULL )"
@@ -13,107 +13,41 @@ if ( ! is.numeric( tr ) | missing( tr ) )
   print(myusage)
   return(NULL)
   }
-if ( ! is.numeric( maskThresh ) )
-  {
-  print("maskThresh is not numeric type")
-  print(myusage)
-  return(NULL)
-  }
 if ( ! is.numeric( freqLo ) | ! is.numeric( freqHi ) )
   {
   print("freqLo/Hi is not numeric type")
   print(myusage)
   return(NULL)
   }
-if( is.character( asl ) )
-{
-  if( length( asl ) != 1 )
-    {
-      print( "'asl' should be only one filename" )
-      return( NULL )
-    }
-  asl <- antsImageRead( asl ,  4  )
-} else if( class( asl ) == "antsImage" )
-{
-  if( asl@pixeltype != pixtype )
-    {
-    print(paste( "'asl' must have pixeltype  ",pixtype ))
-    asl<-antsImageClone( asl , pixtype )
-    }
-  if( asl@dimension != 4 ) 
+if ( missing( aslmat ) )
   {
-    print(paste( "'asl' must have pixeltype ",pixtype," and dimension '4'" ))
-    return( NULL )  
-  }
-}else
-{
-  print( "'asl' must be a filename or an 'antsImage'" )
-  return( NULL )
-}
-# if ( missing( pre ) )
-# {
-#   print("Missing output-prefix argument")
-#   print(myusage)
-#   return( NULL ) 
-# }
-if ( missing( asl ) )
-{
   print("Missing first (image) parameter")
   print(myusage)
   return( NULL ) 
-}
+  }
 freqLo<-freqLo*tr
 freqHi<-freqHi*tr
-n <- length(dim(asl))
-if ( n != 4 )
-  {
-  print("input image must have dimension 4 ")
-  return( NULL ) 
-  }
-moco_results <- motion_correction( asl , moreaccurate = moreaccurate )
-moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = maskThresh, highThresh = 1e9, cleanup = TRUE )
-mat <- timeseries2matrix( moco_results$moco_img , moco_mask_img )
-motionparams<-as.data.frame( moco_results$moco_params )
-predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
-# m0vals <- apply( mat[c(1:(nrow(mat)/2))*2,] , 2 , mean ) # for T C T C , JJ data
-# m0<-antsImageClone( moco_mask_img )
-# m0[ moco_mask_img == 0 ]<-0
-# m0[ moco_mask_img == 1 ]<-m0vals
-# cbf <- perfusionregression( moco_mask_img, mat , predictors$xideal , predictors$nuis , m0 )
-if ( nchar(pre) > 1 ) {
-  antsImageWrite(moco_mask_img,paste(pre,"mask.nii.gz",sep='')) 
-  antsImageWrite(moco_results$moco_avg_img,paste(pre,"avg.nii.gz",sep=''))
-#  antsImageWrite(cbf,paste(pre,"cbf.nii.gz",sep=''))
-}
 # network analysis
-mask<-moco_mask_img
 wb<-( mask > 0 ) # whole brain
-if ( smoother > 0 )
-  {
-  SmoothImage(4,moco_results$moco_img,smoother,moco_results$moco_img)
-  }
-ogmat <- timeseries2matrix( moco_results$moco_img , wb  )
-motionparamsandcompcorr<-predictors$nuis
-ogmat<-residuals( lm( ogmat ~ motionparamsandcompcorr ))
-gmat <-ogmat #  
-leftinds<-shift(c(1:nrow(gmat)),1)
-rightinds<-shift(c(1:nrow(gmat)),-1)
+leftinds<-shift(c(1:nrow(aslmat)),1)
+rightinds<-shift(c(1:nrow(aslmat)),-1)
+oaslmat<-aslmat
 if ( cbfnetwork == "ASLCBF" ) {
   # surround subtraction for cbf networks 
-  gmat<-ogmat - 0.5 * ( ogmat[leftinds,] + ogmat[rightinds,] )
-  taginds<-c(1:(nrow(gmat)/2))*2
+  aslmat<-oaslmat - 0.5 * ( oaslmat[leftinds,] + oaslmat[rightinds,] )
+  taginds<-c(1:(nrow(aslmat)/2))*2
   controlinds<-taginds-1
-  gmat[controlinds,]<-gmat[controlinds,]*(-1) # ok! done w/asl specific stuff
-  plot( apply( gmat[controlinds,],1, mean) , type='l')
+  aslmat[controlinds,]<-aslmat[controlinds,]*(-1) # ok! done w/asl specific stuff
+  plot( apply( aslmat[controlinds,],1, mean) , type='l') # should be (+) everywhere
 }
 if ( cbfnetwork == "ASLBOLD" ) {
   # surround addition for bold networks 
-  gmat<-ogmat + 0.5 * ( ogmat[leftinds,] + ogmat[rightinds,] )
-  plot( apply( gmat[controlinds,],1, mean) , type='l')
+  aslmat<-oaslmat + 0.5 * ( oaslmat[leftinds,] + oaslmat[rightinds,] )
+#  plot( apply( aslmat[controlinds,],1, mean) , type='l')
 }
 voxLo=round((1/freqLo)) # remove anything below this (high-pass)
 voxHi=round((1/freqHi))   # keep anything above this
-myTimeSeries<-ts(gmat,frequency=1.0/tr)
+myTimeSeries<-ts(aslmat,frequency=1.0/tr)
 filteredTimeSeries<-residuals(cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T, root=TRUE))
 vox<-round( ncol( filteredTimeSeries ) * 0.5 )#  a test voxel
 spec.pgram( filteredTimeSeries[,vox], taper=0, fast=FALSE, detrend=F,demean=F, log="n")
@@ -122,5 +56,125 @@ wh<-which( temporalvar == 0 )
 for ( x in wh ) {
   filteredTimeSeries[,x]<-sample( filteredTimeSeries , nrow(filteredTimeSeries ) )
 }
-return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar ) )
+# do some network thing here
+ulabels<-sort( unique( labels[ mask ==  1 ] ) )
+if ( ulabels[1] == 0 ) ulabels<-ulabels[2:length(ulabels)]
+labelvec<-labels[ mask == 1 ]
+labmat<-matrix(data = rep(NA,length(ulabels)*nrow(filteredTimeSeries)),  nrow = length(ulabels) )
+ct<-1
+for ( mylab in ulabels )
+  {
+  dd<-labelvec == mylab
+  submat<- filteredTimeSeries[ , dd ] 
+  myavg<-apply( submat, MARGIN=1, FUN=mean )
+  labmat[ ct, ]<-myavg
+  ct<-ct+1
+  }
+  gmet<-makeGraph( cor( labmat ) , graphdensity = graphdensity )
+return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar , network = labmat, graph = gmet ) )
 }
+
+
+makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
+  {
+  pckg = try(require(igraph))
+  if(!pckg) {
+    getPckg("igraph")
+  }
+  library(igraph)
+
+  correlationThreshold <- 0.000001
+
+  numberOfNeighbors <- nrow( myrsfnetworkcorrs )
+  if( numberOfNeighbors == 0 )
+    {
+    return( 0 )
+    }
+
+  myrsfnetworkcorrs[ myrsfnetworkcorrs == 1 ]<-0
+  myrsfnetworkcorrs[ myrsfnetworkcorrs < 0 ]<-0
+  adjmat <- 1 / myrsfnetworkcorrs
+  npossibleedges <- nrow(adjmat) * ( nrow(adjmat) -1 ) 
+  ndesirededges <- npossibleedges * graphdensity
+  if ( graphdensity < 1 )
+    {
+      myord<-rev( order( adjmat ) )
+      whichnodestoZero<-round( (1-graphdensity) * length( adjmat ) )
+      adjmat[ myord[ 1:whichnodestoZero ]  ]<-0
+#      print( paste(  " 0'd ",whichnodestoZero," of ",  length( adjmat ) ) )
+    }
+  adjmat[ adjmat == Inf ]<-0
+  adjacencyMatrix <- as.matrix( adjmat ,
+    nrow = numberOfNeighbors, ncol = nnumberOfNeighbors )
+  g1 <- graph.adjacency( adjacencyMatrix, mode = c( "undirected" ), weighted=TRUE )
+#
+  edgeWeights<-E(g1)$weight
+  print( paste( "Graph-Density:",graph.density( bb$graph$mygraph ) ) )
+  gmetric1 <- closeness( g1, normalized = T, weights = edgeWeights )
+  gmetric2 <- page.rank( g1 , weights = edgeWeights )$vector #  
+  gmetric3 <- degree( g1 )
+  gmetric4 <- betweenness( g1, normalized = F, weights = edgeWeights ) # 
+  gmetric5 <- transitivity( g1,  isolates = c( "zero" ), type=c("local") ) #, weights = 1/edgeWeights )
+  mycommunity<-fastgreedy.community( g1 )
+  walktrapcomm<- walktrap.community( g1 )
+  return( list( mygraph=g1, closeness=gmetric1, pagerank=gmetric2, degree=gmetric3, betweeness=gmetric4, localtransitivity=gmetric5, community=mycommunity ,  walktrapcomm=walktrapcomm ) )
+  }
+
+
+
+clique.community <- function(graph, k) {
+   clq <- cliques(graph, min=k, max=k)
+   edges <- c()
+   for (i in seq_along(clq)) {
+     for (j in seq_along(clq)) {
+       if ( length(unique(c(clq[[i]], clq[[j]]))) == k+1 ) {
+         edges <- c(edges, c(i,j)-1)
+       }
+     }
+   }
+   clq.graph <- simplify(graph(edges))
+   V(clq.graph)$name <- seq_len(vcount(clq.graph))
+   comps <- decompose.graph(clq.graph)
+
+   lapply(comps, function(x) {
+     unique(unlist(clq[ V(x)$name ]))
+   })
+}
+
+
+largeScaleCommunity <- function(g,mode="all"){
+ cat("Assigning initial communities...\n")
+    V(g)$group <- V(g)$name
+    ## random order in which vertices will be processed
+    cat("Generating random order...\n")
+    order <- sample(vcount(g), vcount(g))
+    t <- 0
+    done <- FALSE
+  
+    while (!done) {
+      t <- t + 1
+      cat("round: ", t, "\n")
+      ## change to FALSE whenever a node changes groups
+      done <- TRUE
+
+      for(i in order) {
+        ## get the neighbor group frequencies:
+        group.freq <- table(V(g)[neighbors(g, i, mode = mode)]$group)
+        ## pick one of the most frequent:
+        new.group <- sample(names(group.freq)[group.freq == max(group.freq)], 1)
+        if (done) {
+          ## we are only done if new group is the same as old group
+          done <- (new.group == V(g)[i]$group)
+        }
+        V(g)[i]$group <- new.group
+      }
+    }
+
+    cat("Creating community-object...\n")
+    comms <- list(membership = as.numeric(V(g)$group),
+                  vcount = vcount(g),
+                  algorithm = "LPA",
+                  names = V(g)$name)
+    class(comms) <- "communities"
+    return(comms)
+  }
