@@ -118,7 +118,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
   gmetric5 <- transitivity( g1,  isolates = c( "zero" ), type=c("local") ) #, weights = 1/edgeWeights )
   mycommunity<-fastgreedy.community( g1 )
   walktrapcomm<- walktrap.community( g1 )
-  return( list( mygraph=g1, closeness=gmetric1, pagerank=gmetric2, degree=gmetric3, betweeness=gmetric4, localtransitivity=gmetric5, community=mycommunity ,  walktrapcomm=walktrapcomm ) )
+  return( list( mygraph=g1, closeness=gmetric1, pagerank=gmetric2, degree=gmetric3, betweeness=gmetric4, localtransitivity=gmetric5, community=mycommunity ,  walktrapcomm=walktrapcomm, adjacencyMatrix = adjacencyMatrix ) )
   }
 
 
