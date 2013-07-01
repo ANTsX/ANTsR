@@ -110,7 +110,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
   g1 <- graph.adjacency( adjacencyMatrix, mode = c( "undirected" ), weighted=TRUE )
 #
   edgeWeights<-E(g1)$weight
-  print( paste( "Graph-Density:",graph.density( g1 ) ) )
+#  print( paste( "Graph-Density:",graph.density( g1 ) ) )
   gmetric1 <- closeness( g1, normalized = T, weights = edgeWeights )
   gmetric2 <- page.rank( g1 , weights = edgeWeights )$vector #  
   gmetric3 <- degree( g1 )
