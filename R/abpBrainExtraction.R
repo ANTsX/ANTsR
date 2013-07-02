@@ -1,4 +1,4 @@
-abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA )
+abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA , tdir = NA )
 {
   if ( missing( img ) | missing( tem ) | missing( temmask ) )
     {
@@ -9,7 +9,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   if  ( missing( tempriors ) ) { tempriors<-3 ; npriors<-3 }  else  {  npriors<-length( tempriors ) }
 
   # file I/O - all stored in temp dir 
-  tdir<-tempdir()
+  if ( is.na( tdir ) ) tdir<-tempdir()
   initafffn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_InitialAff.mat" )
   EXTRACTION_WARP_OUTPUT_PREFIX<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_PriorMap")
 
