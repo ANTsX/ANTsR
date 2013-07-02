@@ -30,7 +30,8 @@ if( is.null( xideal ) )
 # motionparams <- as.data.frame( moco_params ) 
 motionnuis<-t(motionparams)[2:ncol( motionparams ) , ] # matrix elements
 metricnuis<-motionnuis[1,]
-globalsignal<-residuals( lm( rowMeans(mat) ~ xideal ) )
+globalsignal<-rowMeans(mat)
+globalsignalASL<-residuals( lm( globalsignal ~ xideal ) )
 
 # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top 3 components
 msvd<-svd( t( motionnuis[ 2:nrow( motionnuis ) ,  ] ) )
@@ -39,8 +40,8 @@ motionnuis<-( msvd$u[,1:nsvdcomp] )
 print( paste( ' % var of motion ' , (  sum( msvd$d[1:nsvdcomp] )/  sum( msvd$d ) ) ) )
 motionnuis<-t(motionnuis)
 motnames<-paste("motion",c(1:nrow(motionnuis)),sep='')
-nuis<-t( rbind(globalsignal, metricnuis, (motionnuis) )  )
-colnames(nuis)<-c("globalsignal","metricnuis",motnames)
+nuis<-t( rbind( metricnuis, (motionnuis) )  )
+colnames(nuis)<-c( "metricnuis",motnames)
 # compute temporal variance of each column and apply CompCor
 temporalvar<-apply(mat, 2, var)
 tvhist<-hist(temporalvar , breaks = c("FD"), plot=T)
@@ -62,7 +63,7 @@ if( ncompcorparameters > 0 )
   compcorr<-t( compcorrsvd$u[1:ncompcorparameters, ] )
   compcorrnames<-paste("compcorr",c(1:ncol(compcorr)),sep='')
   nuis<-cbind(nuis,compcorr)
-  colnames(nuis)<-c("globalsignal","metricnuis",motnames,compcorrnames)
+  colnames(nuis)<-c("metricnuis",motnames,compcorrnames)
   }
-return( list( xideal = xideal , nuis = nuis ) )
+return( list( xideal = xideal , nuis = nuis , globalsignal = globalsignal, globalsignalASL = globalsignalASL ) )
 }

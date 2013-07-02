@@ -1,7 +1,7 @@
-filterfMRIforNetworkAnalysis<- function( aslmat, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", mask = NA , labels = NA,  pre="" , graphdensity =  0.5 , moreaccurate = TRUE )
+filterfMRIforNetworkAnalysis<- function( aslmat, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", mask = NA , labels = NA,   graphdensity =  0.5  )
 { 
   pixtype<-"float"
-  myusage<-"usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , maskThresh=500, smoother = 0 , outputprefix = NULL )"
+  myusage<-"usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
   if ( nargs() == 0 )
     {
     print(myusage)
