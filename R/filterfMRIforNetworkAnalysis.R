@@ -71,8 +71,9 @@ for ( mylab in ulabels )
   labmat[ ct, ]<-myavg
   ct<-ct+1
   }
-  gmet<-makeGraph( cor( labmat ) , graphdensity = graphdensity )
-return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar , network = labmat, graph = gmet ) )
+  cormat<-cor( t(labmat), t( labmat ) )
+  gmet<-makeGraph( cormat , graphdensity = graphdensity )
+return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar , network = labmat, graph = gmet, corrmat = cormat ) )
 }
 
 
