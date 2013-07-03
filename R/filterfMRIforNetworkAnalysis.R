@@ -93,8 +93,8 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
     return( 0 )
     }
 
-  myrsfnetworkcorrs[ myrsfnetworkcorrs == 1 ]<-0
-  myrsfnetworkcorrs[ myrsfnetworkcorrs < 0 ]<-0
+  myrsfnetworkcorrs[ myrsfnetworkcorrs >= (1-correlationThreshold) ]<-0
+  myrsfnetworkcorrs[ myrsfnetworkcorrs < correlationThreshold ]<-0
   adjmat <- 1 / myrsfnetworkcorrs
   npossibleedges <- nrow(adjmat) * ( nrow(adjmat) -1 ) 
   ndesirededges <- npossibleedges * graphdensity
