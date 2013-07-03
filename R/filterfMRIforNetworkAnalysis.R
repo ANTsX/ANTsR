@@ -57,19 +57,19 @@ for ( x in wh ) {
   filteredTimeSeries[,x]<-sample( filteredTimeSeries , nrow(filteredTimeSeries ) )
 }
 # do some network thing here
-ulabels<-sort( unique( labels[ mask ==  1 ] ) )
+oulabels<-sort( unique( labels[ labels > 0 ] ) )
+whvec<-(  mask ==  1  )
+ulabels<-sort( unique( labels[ whvec ] ) )
 if ( ulabels[1] == 0 ) ulabels<-ulabels[2:length(ulabels)]
-labelvec<-labels[ mask == 1 ]
-labmat<-matrix(data = rep(NA,length(ulabels)*nrow(filteredTimeSeries)),  nrow = length(ulabels) )
-ct<-1
+labelvec<-labels[ whvec ]
+labmat<-matrix(data = rep(NA,length(oulabels)*nrow(filteredTimeSeries)),  nrow = length(oulabels) )
 nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
   {
   dd<-labelvec == mylab
   submat<- filteredTimeSeries[ , dd ]
   if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
-  labmat[ ct, ]<-myavg
-  ct<-ct+1
+  labmat[ mylab, ]<-myavg
   }
   cormat<-cor( t(labmat), t( labmat ) )
   gmet<-makeGraph( cormat , graphdensity = graphdensity )
