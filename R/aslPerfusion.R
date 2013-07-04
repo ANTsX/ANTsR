@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0 , m0 = NA , skip = 20, mask = NA )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA )
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion )
