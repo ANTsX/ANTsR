@@ -1,4 +1,4 @@
-filterfMRIforNetworkAnalysis<- function( aslmat, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", mask = NA , labels = NA,   graphdensity =  0.5  )
+filterfMRIforNetworkAnalysis<- function( aslmat, tr , freqLo=0.01 , freqHi=0.1, cbfnetwork="ASLCBF", mask = NA , labels = NA,   graphdensity =  0.5 , seg = NA )
 { 
   pixtype<-"float"
   myusage<-"usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
@@ -66,8 +66,9 @@ labmat<-matrix(data = rep(NA,length(oulabels)*nrow(filteredTimeSeries)),  nrow =
 nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
   {
-  dd<-labelvec == mylab
+  if ( ! is.na( seg ) )  dd<-( labelvec == mylab & seg == 2 ) else dd<-labelvec == mylab
   submat<- filteredTimeSeries[ , dd ]
+#  if  ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat 
   if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
   labmat[ mylab, ]<-myavg
   }
