@@ -62,11 +62,12 @@ whvec<-(  mask ==  1  )
 ulabels<-sort( unique( labels[ whvec ] ) )
 if ( ulabels[1] == 0 ) ulabels<-ulabels[2:length(ulabels)]
 labelvec<-labels[ whvec ]
+segvec<-seg[ whvec ]
 labmat<-matrix(data = rep(NA,length(oulabels)*nrow(filteredTimeSeries)),  nrow = length(oulabels) )
 nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
   {
-  if ( ! is.na( seg ) )  dd<-( labelvec == mylab & seg == 2 ) else dd<-labelvec == mylab
+  if ( ! is.na( seg ) )  dd<-( labelvec == mylab & segvec == 2 ) else dd<-labelvec == mylab
   submat<- filteredTimeSeries[ , dd ]
 #  if  ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat 
   if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
