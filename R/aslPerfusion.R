@@ -81,6 +81,9 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   # Get perfusion time series
   perfusionTimeSeries = new("antsImage", "float", 4)
   ImageMath( 4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction",  moco_results$moco_img, "sinc" )
+
+  perfusionTimeSeries[ !is.finite(as.array(perfusionTimeSeries)) ] <- 0
+  perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ] <- -1.0 *perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ]
   
   return( list( perfusion = perfusion , perfusionTimeSeries=perfusionTimeSeries, aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
 }
