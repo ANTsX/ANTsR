@@ -77,5 +77,10 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   mynuis<-as.data.frame( as.data.frame( predictors$nuis[,2:7] ) ) 
   print( colnames( mynuis ) )
   perfusion <- perfusionregression( mask_img = moco_mask_img, mat = mat , xideal = predictors$xideal , nuis = as.matrix( mynuis ) , dorobust = dorobust , skip = skip )
-  return( list( perfusion = perfusion , aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
+
+  # Get perfusion time series
+  perfusionTimeSeries = new("antsImage", "float", 4)
+  ImageMath( 4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction",  moco_results$moco_img, "sinc" )
+  
+  return( list( perfusion = perfusion , perfusionTimeSeries=perfusionTimeSeries, aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
 }
