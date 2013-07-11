@@ -5,14 +5,12 @@
 quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
 {
 
-  # FIXME - for now assuming mean perfusion image passed in, not time-course
-  
   if ( is.null(parameters$sequence) ) {
     stop( "Parameter list must specify a sequence type: pasl, pcasl, or casl" )
   }
 
-  if ( parameters$sequence != "pcasl" ) {
-    stop( "Only pcasl supported for now. pasl and casl in development" );
+  if ( ( parameters$sequence != "pcasl" ) && ( parameters$sequence != "pasl" ) ) {
+    stop( "Only pcasl and pasl supported for now. casl in development" );
   }
 
   if (  is.null(parameters$m0) ) {
@@ -74,7 +72,8 @@ quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
       dim(M0) <- dim(perfusion)
     }
     omegaMat <- slicetime * sliceTimeMat + omega
-   
+
+    # 60 for seconds to minutes, 100 for 100g (standard units)
     cbf <- perf*60*100*( lambda * T1b ) / ( 2 * alpha * M0 * ( exp( -omegaMat * T1b ) - exp( -( tau + omegaMat ) * T1b ) ) )
     cbf[ !is.finite(cbf) ] <- 0  
     
@@ -87,7 +86,100 @@ quantifyCBF <- function( perfusion, mask, parameters , outlierValue = 0.02 )
     }
     
   }
- 
+  else if ( parameters$sequence == "pasl" ) {
+
+    print( "PASL" )
+    M0 <- as.array(parameters$m0)
+    perf <- as.array(perfusion)
+
+    # From Chen 2011
+    TI1 <- 700
+    if ( ! is.null(parameters$TI1) ) {
+      TI1 <- parameters$TI1
+    }
+
+    # From Chen 2011
+    TI2 <- 1700
+    if ( ! is.null(parameters$TI2) ) {
+      TI2 <- parameters$TI2
+    }
+    
+    # From Chen 2011
+    lambda <- 0.9
+    if ( ! is.null(parameters$lambda) ) {
+      lambda <- parameters$lambda
+    }
+
+    # From Chen 2011
+    alpha <- 0.95    # ASLtbx says 0.68 for 3T and 0.71 for 1.5T
+    if ( ! is.null(parameters$alpha) ) {
+      alpha <- parameters$alpha
+    }
+    
+    T1b <- 1150 # msec as per ASLtbx for 3T, ASLtbx suggests 0.83 for 1.5T
+    if ( ! is.null(parameters$T1blood) ) {
+      T1b <- parameters$T1blood
+    }
+
+    # slice delay time
+    slicetime <- 45   # from ASLtbx
+    if ( ! is.null(parameters$slicetime) ) {
+      slicetime <- parameters$slicetime
+    }
+
+    A <- 1.06
+    if ( ! is.null(parameters$A) ) {
+      A <- parameters$A
+    }
+
+    T2wm <- 40
+    if ( ! is.null(parameters$T2wm) ) {
+      T2wm <- parameters$T2wm
+    }
+
+    T2b <- 80
+    if ( ! is.null(parameters$T2b) ) {
+      T2b <- parameters$T2b
+    }
+
+    TE <- 20
+    if ( ! is.null(parameters$TE) ) {
+      TE <- parameters$TE
+    }
+    
+    delaytime <- 800 # from ASLtbx
+    if ( ! is.null(parameters$delaytime) ) {
+      delaytime <- parameters$delaytime
+    }
+
+    sliceTimeMat <- rep(c(1:dim(M0)[3]), each=dim(M0)[1]*dim(M0)[2] )
+    dim(sliceTimeMat) <- dim(M0)
+
+    # Expand for time-series
+    if ( hasTime ) {
+      sliceTimeMat <- rep( as.array(sliceTimeMat), nTimePoints )
+      dim(sliceTimeMat) <- dim(perfusion)
+      M0 <- rep( as.array(M0), nTimePoints )
+      dim(M0) <- dim(perfusion)
+    }
+    TI <- slicetime * sliceTimeMat + delaytime + TI1
+
+    Aprim <- A*exp( ((1.0/T2wm) - (1.0/T2b)*TE ))   
+    cbf <- (3000*1000*perf) / ( Aprim * M0 * exp(-TI / T1b) * TI1 * alpha )
+    cbf[ !is.finite(cbf) ] <- 0
+     
+    if ( hasTime ) {
+      meancbf <- apply( cbf, c(1,2,3), mean )
+      dim(meancbf) <- dim(mask)
+    }
+    else {
+      meancbf <- cbf
+    }
+        
+  }
+
+
+  
   # apply mask to cbf time series
   if ( hasTime ) {
     timecbfimg <- antsImageClone( perfusion )
