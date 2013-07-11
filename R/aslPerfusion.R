@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA, interpolation="linear" )
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion )
@@ -80,7 +80,7 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
 
   # Get perfusion time series
   perfusionTimeSeries = new("antsImage", "float", 4)
-  ImageMath( 4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction",  moco_results$moco_img, "sinc" )
+  ImageMath( 4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction",  moco_results$moco_img, interpolation )
 
   perfusionTimeSeries[ !is.finite(as.array(perfusionTimeSeries)) ] <- 0
   perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ] <- -1.0 *perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ]
