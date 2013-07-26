@@ -57,7 +57,6 @@ wh2<-( temporalvar <= thresh )
 print( paste( percvar , sum( wh ) , sum(wh2 ) ) )
 highvarmat<-mat[,wh]
 compcorrsvd<-svd( highvarmat %*% t( highvarmat ) )
-# ncompcorparameters<-4
 if( ncompcorparameters > 0 )
   {
   compcorr<-t( compcorrsvd$u[1:ncompcorparameters, ] )

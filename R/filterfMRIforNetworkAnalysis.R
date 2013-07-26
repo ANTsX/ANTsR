@@ -48,7 +48,7 @@ if ( cbfnetwork == "ASLBOLD" ) {
 voxLo=round((1/freqLo)) # remove anything below this (high-pass)
 voxHi=round((1/freqHi))   # keep anything above this
 myTimeSeries<-ts(aslmat,frequency=1.0/tr)
-filteredTimeSeries<-residuals(cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T, root=TRUE))
+filteredTimeSeries<-residuals( cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T, root=TRUE) )
 vox<-round( ncol( filteredTimeSeries ) * 0.5 )#  a test voxel
 spec.pgram( filteredTimeSeries[,vox], taper=0, fast=FALSE, detrend=F,demean=F, log="n")
 temporalvar<-apply(filteredTimeSeries, 2, var)
@@ -62,7 +62,7 @@ whvec<-(  mask ==  1  )
 ulabels<-sort( unique( labels[ whvec ] ) )
 if ( ulabels[1] == 0 ) ulabels<-ulabels[2:length(ulabels)]
 labelvec<-labels[ whvec ]
-segvec<-seg[ whvec ]
+if ( ! is.na( seg ) ) segvec<-seg[ whvec ] else segvec<-NA
 labmat<-matrix(data = rep(NA,length(oulabels)*nrow(filteredTimeSeries)),  nrow = length(oulabels) )
 nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
