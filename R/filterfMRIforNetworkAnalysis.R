@@ -108,6 +108,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
 #      print( paste(  " 0'd ",whichnodestoZero," of ",  length( adjmat ) ) )
     }
   adjmat[ adjmat == Inf ]<-0
+  adjmat[ adjmat > 0 ]<-adjmat[ adjmat > 0 ] - 1
   adjacencyMatrix <- as.matrix( adjmat ,
     nrow = numberOfNeighbors, ncol = nnumberOfNeighbors )
   g1 <- graph.adjacency( adjacencyMatrix, mode = c( "undirected" ), weighted=TRUE )
