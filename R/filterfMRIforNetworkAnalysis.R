@@ -115,6 +115,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
 #
   edgeWeights<-E(g1)$weight
 #  print( paste( "Graph-Density:",graph.density( g1 ) ) )
+  gmetric0 <- alpha.centrality( g1 )
   gmetric1 <- closeness( g1, normalized = T, weights = edgeWeights )
   gmetric2 <- page.rank( g1 , weights = edgeWeights )$vector #  
   gmetric3 <- degree( g1 )
@@ -122,7 +123,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
   gmetric5 <- transitivity( g1,  isolates = c( "zero" ), type=c("local") ) #, weights = 1/edgeWeights )
   mycommunity<-fastgreedy.community( g1 )
   walktrapcomm<- walktrap.community( g1 )
-  return( list( mygraph=g1, closeness=gmetric1, pagerank=gmetric2, degree=gmetric3, betweeness=gmetric4, localtransitivity=gmetric5, community=mycommunity ,  walktrapcomm=walktrapcomm, adjacencyMatrix = adjacencyMatrix ) )
+  return( list( mygraph=g1, centrality = gmetric0, closeness=gmetric1, pagerank=gmetric2, degree=gmetric3, betweeness=gmetric4, localtransitivity=gmetric5, community=mycommunity ,  walktrapcomm=walktrapcomm, adjacencyMatrix = adjacencyMatrix ) )
   }
 
 
