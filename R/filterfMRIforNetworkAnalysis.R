@@ -71,7 +71,7 @@ for ( mylab in ulabels )
   submat<- filteredTimeSeries[ , dd ]
 #  if  ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat 
   if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
-  labmat[ mylab, ]<-myavg
+  if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg  else labmat[ mylab, ]<-NA
   }
   cormat<-cor( t(labmat), t( labmat ) )
   gmet<-makeGraph( cormat , graphdensity = graphdensity )
@@ -115,7 +115,7 @@ makeGraph <- function( myrsfnetworkcorrs , graphdensity = 1 )
 #
   edgeWeights<-E(g1)$weight
 #  print( paste( "Graph-Density:",graph.density( g1 ) ) )
-  gmetric0 <- alpha.centrality( g1 )
+  gmetric0 <- evcent( g1 )$vector
   gmetric1 <- closeness( g1, normalized = T, weights = edgeWeights )
   gmetric2 <- page.rank( g1 , weights = edgeWeights )$vector #  
   gmetric3 <- degree( g1 )

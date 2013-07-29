@@ -85,5 +85,5 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   perfusionTimeSeries[ !is.finite(as.array(perfusionTimeSeries)) ] <- 0
   perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ] <- -1.0 *perfusionTimeSeries[ is.finite(as.array(perfusionTimeSeries)) ]
   
-  return( list( perfusion = perfusion , perfusionTimeSeries=perfusionTimeSeries, aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 ) )
+  return( list( perfusion = perfusion , perfusionTimeSeries=perfusionTimeSeries, aslTimeSeries=mat,  xideal=predictors$xideal , nuisancevariables = predictors$nuis , mask =  moco_mask_img, m0=m0, m1=m1 , globalsignal = predictors$globalsignalASL) )
 }
