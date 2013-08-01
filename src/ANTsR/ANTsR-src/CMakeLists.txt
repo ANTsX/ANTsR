@@ -77,7 +77,9 @@ target_link_libraries(RantsMotionCorr ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsMotionC
 install( TARGETS RantsMotionCorr DESTINATION . )
 
 add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
-target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
+target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR}
+l_antsRegistration itkdouble-conversion-4.5.1
+itkdouble-conversion-4.5  itkdouble-conversion-4.4  itkdouble-conversion-4.4.1 )
 install( TARGETS RantsRegistration DESTINATION . )
 
 add_library(RantsAffineInitializer MODULE ${ANTsR_SOURCE_DIR}/src/antsAffineInitializer.cxx)
