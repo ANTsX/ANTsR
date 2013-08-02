@@ -28,9 +28,9 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
       if ( ttexists  )
         {
         inpixeltype<-fixed@pixeltype
-        fixed<-antsImageClone(fixed)
-        moving<-antsImageClone(moving)
-        warpedmovout<-antsImageClone(fixed);
+        fixed<-antsImageClone(fixed,'double')
+        moving<-antsImageClone(moving,'double')
+        warpedmovout<-antsImageClone(fixed,'double');
         f<-fixed
         m<-moving
         wmo<-warpedmovout
