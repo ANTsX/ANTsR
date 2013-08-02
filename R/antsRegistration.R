@@ -49,7 +49,6 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
         fwdtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         }
-print( args )
         .Call( "antsRegistration", int_antsProcessArguments( c(args) ) , PACKAGE="libRantsRegistration") ;
 #        unlink(ffn) 
 #        unlink(mfn)
