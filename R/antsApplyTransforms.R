@@ -2,7 +2,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
-    .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1,"--float",1) ) , PACKAGE="libRantsApplyTransforms") ;
+    .Call("antsApplyTransforms", int_antsProcessArguments( c(fixed,"-z",1,"--float",0) ) , PACKAGE="libRantsApplyTransforms") ;
     return(0);
     }
   if (  missing(fixed) | missing(moving) | missing( transformlist ) )
@@ -60,7 +60,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs<-myargs2
         }
         } }
-        .Call("antsApplyTransforms", c(myargs,"-z",1,"--float",1) , PACKAGE="libRantsApplyTransforms")
+        .Call("antsApplyTransforms", c(myargs,"-z",1,"--float",0) , PACKAGE="libRantsApplyTransforms")
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -74,7 +74,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 #    system( paste("antsApplyTransforms ", mycmd$mystr ) )
 #    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
 #    }
-  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1,"--float",1) ), PACKAGE="libRantsApplyTransforms" ) ;
+  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1,"--float",0) ), PACKAGE="libRantsApplyTransforms" ) ;
   gc() # trigger garbage collection
 }
 

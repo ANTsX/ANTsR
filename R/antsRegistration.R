@@ -31,8 +31,8 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
       if ( ttexists  )
         {
         cat("use simple parameterization \n")
-#        moving<-antsImageClone(moving,"double")
-#        fixed<-antsImageClone(fixed,"double")
+        moving<-antsImageClone(moving,"double")
+        fixed<-antsImageClone(fixed,"double")
         warpedfixout<-antsImageClone(moving);
         warpedmovout<-antsImageClone(fixed);
         f<-antsrGetPointerName( fixed )  
@@ -40,15 +40,16 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
         wfo<-antsrGetPointerName( warpedfixout )
         wmo<-antsrGetPointerName( warpedmovout )
         if ( typeofTransform == "SyN"  ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Affine[0.25]","-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-m",paste("mattes[",f,",",m,",1,32]",sep=''),"-t",paste(typeofTransform,"[0.25,3,0]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","--float","1","-o", paste("[",outprefix,",",wmo,",",wfo,"]",sep=''))
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Affine[0.25]","-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-m",paste("mattes[",f,",",m,",1,32]",sep=''),"-t",paste(typeofTransform,"[0.25,3,0]",sep=''),"-c","2100x1200x1200x0","-s","3x2x1x0","-f", "4x3x2x1" ,"-u","1","-z","1","--float","0","-o", paste("[",outprefix,",",wmo,",",wfo,"]",sep=''))
         fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
         }
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Translation[0.25]","-c","2100x1200","-s","4x3","-f", "6x4" ,"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x10","-s","3x2x1x0","-f", "6x4x2x1" ,"-u","1","-z","1","--float","1","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Translation[0.25]","-c","2100x1200","-s","4x3","-f", "6x4" ,"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x10","-s","3x2x1x0","-f", "6x4x2x1" ,"-u","1","-z","1","--float","0","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
         fwdtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         }
+print( args )
         .Call( "antsRegistration", int_antsProcessArguments( c(args) ) , PACKAGE="libRantsRegistration") ;
 #        unlink(ffn) 
 #        unlink(mfn)
