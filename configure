@@ -30,5 +30,5 @@ RHOME=`R RHOME`
 DYLIB_EXT=`R CMD config DYLIB_EXT`
 mylibpath=`R CMD config LIBnn `
 for x  in ${RLDPATH}/*${DYLIB_EXT} ; do
-  cp $x  ${RHOME}/${mylibpath}/
+  ln -s $x  ${RHOME}/${mylibpath}/
 done
