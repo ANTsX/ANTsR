@@ -2,7 +2,8 @@ joinEigenanatomy <- function( datamatrix, mask, list_of_eanat_images , graphdens
   {
   if ( nargs() == 0 )
     {
-    print("Usage:  x_joined<-joinEigenanatomy( datamatrix, list_of_eanat_images , gdensity = 0.65  ) ")
+    print("Usage: ")
+    print( args( joinEigenanatomy ) )
     return(1)
     }
   pckg = try(require(igraph))
