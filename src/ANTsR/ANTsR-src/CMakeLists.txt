@@ -54,147 +54,84 @@ link_directories( ${ANTS_DIR}/lib )
 # ANTsR targets
 add_library(RantsApplyTransforms MODULE ${ANTsR_SOURCE_DIR}/src/antsApplyTransforms.cxx)
 target_link_libraries(RantsApplyTransforms ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsApplyTransforms )
-install( TARGETS RantsApplyTransforms     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsApplyTransforms    DESTINATION  .  )
 
 add_library(RantsMotionCorr MODULE ${ANTsR_SOURCE_DIR}/src/antsMotionCorr.cxx)
 target_link_libraries(RantsMotionCorr ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsMotionCorr )
-install( TARGETS RantsMotionCorr     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsMotionCorr    DESTINATION  .  )
 
 add_library(RantsRegistration MODULE ${ANTsR_SOURCE_DIR}/src/antsRegistration.cxx)
 target_link_libraries(RantsRegistration ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsRegistration )
-install( TARGETS RantsRegistration     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsRegistration    DESTINATION  .  )
 
 add_library(RantsAffineInitializer MODULE ${ANTsR_SOURCE_DIR}/src/antsAffineInitializer.cxx)
 target_link_libraries(RantsAffineInitializer ${RCPP_LIB_DIR} ${R_LIB_DIR} l_antsAffineInitializer )
-install( TARGETS RantsAffineInitializer     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsAffineInitializer    DESTINATION  .  )
 
 add_library(RAtropos MODULE ${ANTsR_SOURCE_DIR}/src/Atropos.cxx)
 target_link_libraries(RAtropos ${RCPP_LIB_DIR} ${R_LIB_DIR} l_Atropos )
-install( TARGETS RAtropos     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RAtropos    DESTINATION  .  )
 
 add_library(RImageMath MODULE ${ANTsR_SOURCE_DIR}/src/ImageMath.cxx)
 target_link_libraries(RImageMath ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ImageMath )
-install( TARGETS RImageMath     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RImageMath    DESTINATION  .  )
 
 add_library(RKellyKapowski MODULE ${ANTsR_SOURCE_DIR}/src/KellyKapowski.cxx)
 target_link_libraries(RKellyKapowski ${RCPP_LIB_DIR} ${R_LIB_DIR} l_KellyKapowski )
-install( TARGETS RKellyKapowski     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RKellyKapowski    DESTINATION  .  )
 
 add_library(RLabelClustersUniquely MODULE ${ANTsR_SOURCE_DIR}/src/LabelClustersUniquely.cxx)
 target_link_libraries(RLabelClustersUniquely ${RCPP_LIB_DIR} ${R_LIB_DIR} l_LabelClustersUniquely )
-install( TARGETS RLabelClustersUniquely     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RLabelClustersUniquely    DESTINATION  .  )
 
 add_library(RN3BiasFieldCorrection MODULE ${ANTsR_SOURCE_DIR}/src/N3BiasFieldCorrection.cxx)
 target_link_libraries(RN3BiasFieldCorrection ${RCPP_LIB_DIR} ${R_LIB_DIR} l_N3BiasFieldCorrection )
-install( TARGETS RN3BiasFieldCorrection     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RN3BiasFieldCorrection    DESTINATION  .  )
 
 add_library(RN4BiasFieldCorrection MODULE ${ANTsR_SOURCE_DIR}/src/N4BiasFieldCorrection.cxx)
 target_link_libraries(RN4BiasFieldCorrection ${RCPP_LIB_DIR} ${R_LIB_DIR} l_N4BiasFieldCorrection )
-install( TARGETS RN4BiasFieldCorrection     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RN4BiasFieldCorrection    DESTINATION  .  )
 
 add_library(RResampleImageBySpacing MODULE ${ANTsR_SOURCE_DIR}/src/ResampleImageBySpacing.cxx)
 target_link_libraries(RResampleImageBySpacing ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ResampleImageBySpacing )
-install( TARGETS RResampleImageBySpacing     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RResampleImageBySpacing    DESTINATION  .  )
 
 add_library(Rsccan MODULE ${ANTsR_SOURCE_DIR}/src/sccan.cxx)
 target_link_libraries(Rsccan ${RCPP_LIB_DIR} ${R_LIB_DIR} l_sccan )
-install( TARGETS Rsccan     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS Rsccan    DESTINATION  .  )
 
 add_library(RSmoothImage MODULE ${ANTsR_SOURCE_DIR}/src/SmoothImage.cxx)
 target_link_libraries(RSmoothImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SmoothImage )
-install( TARGETS RSmoothImage     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RSmoothImage    DESTINATION  .  )
 
 add_library(RSurfaceCurvature MODULE ${ANTsR_SOURCE_DIR}/src/SurfaceCurvature.cxx)
 target_link_libraries(RSurfaceCurvature ${RCPP_LIB_DIR} ${R_LIB_DIR} l_SurfaceCurvature )
-install( TARGETS RSurfaceCurvature     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RSurfaceCurvature    DESTINATION  .  )
 
 add_library(RThresholdImage MODULE ${ANTsR_SOURCE_DIR}/src/ThresholdImage.cxx)
 target_link_libraries(RThresholdImage ${RCPP_LIB_DIR} ${R_LIB_DIR} l_ThresholdImage )
-install( TARGETS RThresholdImage     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RThresholdImage    DESTINATION  .  )
 
 add_library( RantsImageRead MODULE ${ANTsR_SOURCE_DIR}/src/antsImageRead.cxx )
 target_link_libraries( RantsImageRead ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsImageRead     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsImageRead    DESTINATION  .  )
 
 add_library( RantsImageWrite MODULE ${ANTsR_SOURCE_DIR}/src/antsImageWrite.cxx )
 target_link_libraries( RantsImageWrite ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsImageWrite     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsImageWrite    DESTINATION  .  )
 
 add_library( RantsImage MODULE ${ANTsR_SOURCE_DIR}/src/antsImage.cxx )
 target_link_libraries( RantsImage ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsImage     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsImage    DESTINATION  .  )
 
 add_library( RantsImageClone MODULE ${ANTsR_SOURCE_DIR}/src/antsImageClone.cxx )
 target_link_libraries( RantsImageClone ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsImageClone     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsImageClone    DESTINATION  .  )
 
 add_library( RantsImageList MODULE ${ANTsR_SOURCE_DIR}/src/antsImageList.cxx )
 target_link_libraries( RantsImageList ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsImageList     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsImageList    DESTINATION  .  )
 
 add_library( RantsMatrix MODULE ${ANTsR_SOURCE_DIR}/src/antsMatrix.cxx )
 target_link_libraries( RantsMatrix ${RCPP_LIB_DIR} ${R_LIB_DIR} ${ITK_LIBRARIES} )
-install( TARGETS RantsMatrix     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
+install( TARGETS RantsMatrix    DESTINATION  .  )
