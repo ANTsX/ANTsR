@@ -18,7 +18,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ANTS_TRANSFORMATION<-"SyN[0.1,3,0]"
   ANTS_LINEAR_METRIC_PARAMS<-"1,32,Regular,0.25"
   ANTS_LINEAR_CONVERGENCE<-"[1000x1000x1000x1000,1e-7,15]"
-  ANTS_LINEAR_CONVERGENCEFAST<-"[1000x1000x0x0,1e-7,10]"
+  ANTS_LINEAR_CONVERGENCEFAST<-"[10x0x0x0,1e-7,10]"
   ANTS_METRIC<-"CC"
   ANTS_METRIC_PARAMS<-"1,4"
   # ANTs parameters end
@@ -72,7 +72,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   tx<-paste(EXTRACTION_WARP_OUTPUT_PREFIX,c("1InverseWarp.nii.gz","0GenericAffine.mat"),sep='')
   temmaskwarped<-antsImageClone( img )
   aatparams<-list( d=img@dimension, i=temmask, o=temmaskwarped, n="Gaussian", r=img, t=paste("[",tx[2],",1]",sep=''), t=tx[1])
-  antsApplyTransforms( aatparams )
+  .Call("antsApplyTransforms", c(aatparams,"-z",1,"--float",0) , PACKAGE="libRantsApplyTransforms")
   ThresholdImage(img@dimension,temmaskwarped,temmaskwarped,0.5,1)
   tmp<-antsImageClone(temmaskwarped)
   ImageMath(img@dimension,tmp,"MD",temmaskwarped,2)
