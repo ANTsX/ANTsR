@@ -8,11 +8,17 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
     }
   if  ( missing( tempriors ) ) { tempriors<-3 ; npriors<-3 }  else  {  npriors<-length( tempriors ) }
 
-  # file I/O - all stored in temp dir 
-  if ( is.na( tdir ) ) tdir<-tempdir()
-  initafffn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_InitialAff.mat" )
-  EXTRACTION_WARP_OUTPUT_PREFIX<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_PriorMap")
-
+  # file I/O - all stored in temp dir
+  if ( is.na( tdir ) )
+    {
+    tdir<-tempdir()
+    initafffn<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_InitialAff.mat" )
+    EXTRACTION_WARP_OUTPUT_PREFIX<-tempfile( pattern = "antsr", tmpdir = tdir, fileext = "_PriorMap")
+    } else {
+      initafffn<-paste( tdir,"antsr", "_InitialAff.mat" ,sep='')
+      EXTRACTION_WARP_OUTPUT_PREFIX<-paste( tdir,"antsr", "_PriorMap" ,sep='')
+    }
+  print( initafffn )
   # ANTs parameters begin
   ANTS_MAX_ITERATIONS<-"100x100x70x20"
   ANTS_TRANSFORMATION<-"SyN[0.1,3,0]"
@@ -28,8 +34,6 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD<-"Gaussian"
   ATROPOS_BRAIN_EXTRACTION_CONVERGENCE<-"[3,0.0001]"
   ATROPOS_BRAIN_EXTRACTION_MRF<-paste("[0.2,1x1x1]")
-  if ( img@dimension == 2 ) ATROPOS_BRAIN_EXTRACTION_MRF<-paste("[0.2,1x1]")
-
   ATROPOS_SEGMENTATION_INITIALIZATION<-"PriorProbabilityImages"
   ATROPOS_SEGMENTATION_PRIOR_WEIGHT<-0.0
   ATROPOS_SEGMENTATION_LIKELIHOOD<-"Gaussian"
@@ -44,7 +48,7 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
   temsmall<-antsImageClone(tem)
   ResampleImageBySpacing(tem@dimension,tem,temsmall,as.character(rep(4,tem@dimension)),1)
 # careful initialization of affine mapping , result stored in initafffn
-  antsAffineInitializer(img@dimension,temsmall,imgsmall,initafffn,15,0.1,0,10)
+  if ( ! file.exists( initafffn )  )antsAffineInitializer(img@dimension,temsmall,imgsmall,initafffn,15,0.1,0,10)
   # FIXME - should add mask in above call 
 
   # get laplacian images 
@@ -68,11 +72,11 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
       m=paste("mattes[",antsrGetPointerName(antsImageClone(lapt,"double")),",",antsrGetPointerName(antsImageClone(lapi,"double")),",",
         "0.5,32]",sep=''),
       c="[50x30x0,1e-9,15]",t="SyN[0.1,3,0]",f="4x2x1",s="2x1x0")
-  antsRegistration( antsregparams )
-  tx<-paste(EXTRACTION_WARP_OUTPUT_PREFIX,c("1InverseWarp.nii.gz","0GenericAffine.mat"),sep='')
-  temmaskwarped<-antsImageClone( img )
-  aatparams<-list( d=img@dimension, i=temmask, o=temmaskwarped, n="Gaussian", r=img, t=paste("[",tx[2],",1]",sep=''), t=tx[1])
-  .Call("antsApplyTransforms", c(aatparams,"-z",1,"--float",0) , PACKAGE="libRantsApplyTransforms")
+  outprefix<-EXTRACTION_WARP_OUTPUT_PREFIX
+  fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
+  invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
+  if ( ! file.exists( invtransforms[1] )  ) antsRegistration( antsregparams )
+  temmaskwarped<- antsApplyTransforms( img, temmask, transformlist=invtransforms, interpolator=c("NearestNeighbor") )
   ThresholdImage(img@dimension,temmaskwarped,temmaskwarped,0.5,1)
   tmp<-antsImageClone(temmaskwarped)
   ImageMath(img@dimension,tmp,"MD",temmaskwarped,2)
@@ -115,8 +119,5 @@ abpBrainExtraction <- function( img = NA,  tem = NA , temmask=NA , tempriors=NA 
 #  FIXME - steps above should all be checked again ...
   brain<-antsImageClone(img)
   ImageMath(img@dimension,brain,"m",brain,tmp)
-  outprefix<-EXTRACTION_WARP_OUTPUT_PREFIX
-  fwdtransforms<-c( paste(outprefix,"1Warp.nii.gz",sep=''), paste(outprefix,"0GenericAffine.mat",sep='') )
-  invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
-  return( list( brain=brain, bmask=tmp , kmeansseg=seg, fwdtransforms=fwdtransforms, invtransforms=invtransforms ) )
+  return( list( brain=brain, bmask=tmp , kmeansseg=seg, fwdtransforms=fwdtransforms, invtransforms=invtransforms, temmaskwarped = temmaskwarped ) )
 }
