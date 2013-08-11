@@ -34,15 +34,26 @@ Define an anatomical coordinate system in a new image based on a template
 
 \examples{
 \dontrun{
- tem<-antsImageRead('templates/template_brain.nii.gz',3)
- temlab<-antsImageRead('temp.nii.gz',3)
- # try getANTsRData if you have www access
- mymni<-list( antsImageRead(getANTsRData('mni'),3), 
- 	      antsImageRead(getANTsRData('mnib'),3), 
-              antsImageRead(getANTsRData('mnia'),3) )
- mytem<-list(tem,temlab)
- coords<-getTemplateCoordinates( mytem , mymni , convertToTal = TRUE )
- plotANTsImage( coords$myImageInTemplateSpace,slices="100x100x1")
+#
+# ch2bet is available in chris rorden's mricron 
+#  but you can do something with any other image 
+#  e.g. a statistical image 
+#
+  tem<-antsImageRead('ch2bet.nii.gz',3)
+  clust <- antsImageClone( tem )  
+  clust[ tem < 80 ]<- 0
+  clust[ tem > 90 ]<- 0
+  clust[  tem > 80 & tem < 90 ]<- 1
+  ImageMath(3, clust,"ME",clust,1)  # erosion 
+  clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
+  if ( ! exists("mymni") ) {
+  # try getANTsRData if you have www access
+    mymni<-list( antsImageRead(getANTsRData('mni'),3), 
+                 antsImageRead(getANTsRData('mnib'),3), 
+                 antsImageRead(getANTsRData('mnia'),3) )
+  }
+  template_cluster_pair<-list(tem,clust)
+  gcoords<-getTemplateCoordinates( template_cluster_pair , mymni , convertToTal = TRUE )
 }
 }
 \keyword{Talairach, Template, Coordinates}
