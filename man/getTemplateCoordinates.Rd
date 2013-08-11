@@ -54,6 +54,12 @@ Define an anatomical coordinate system in a new image based on a template
   }
   template_cluster_pair<-list(tem,clust)
   gcoords<-getTemplateCoordinates( template_cluster_pair , mymni , convertToTal = TRUE )
+# output will be like 
+# > gcoords$templatepoints
+#     x   y   z t label Brodmann                 AAL
+# 1  -12  13  -3 0     1        0           Caudate_R
+# 2   13  16   5 0     2        0           Caudate_L
+#
 }
 }
 \keyword{Talairach, Template, Coordinates}
