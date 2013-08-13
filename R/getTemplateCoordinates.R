@@ -73,6 +73,15 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       mypoints$z[i]<-talpt[3]
       } 
     }
+  if ( ! convertToTal & imagedim == 3 ) # assume MNI 
+    {
+    for ( i in 1:nrow(mypoints) )
+      {
+      mypoints$x[i]<-mypoints$x[i] * ( -1 ) # 
+      mypoints$y[i]<-mypoints$y[i] * ( -1 ) # due to ITK coordinates being LPS whereas MNI are RAS 
+      mypoints$z[i]<-mypoints$z[i]
+      } 
+    }
   scl<-1.0
   mypoints$x<-round(mypoints$x*scl)/scl
   mypoints$y<-round(mypoints$y*scl)/scl
