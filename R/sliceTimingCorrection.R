@@ -5,7 +5,7 @@ tr <- antsGetSpacing(fmri)[length(dim(fmri))]
 
 if ( is.na(sliceTime) ) 
 {
-  sliceTime <- tr / ( dim(fmri)[length(dim(fmri))-1]+1 )
+  sliceTime <- tr / ( dim(fmri)[length(dim(fmri))-1] )
   print( paste( "Assuming a slice timing of", sliceTime ) )
 }
 
