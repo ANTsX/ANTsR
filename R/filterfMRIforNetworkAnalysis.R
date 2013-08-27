@@ -67,11 +67,31 @@ labmat<-matrix(data = rep(NA,length(oulabels)*nrow(filteredTimeSeries)),  nrow =
 nrowts<-nrow( filteredTimeSeries )
 for ( mylab in ulabels )
   {
-  if ( ! is.na( seg ) )  dd<-( labelvec == mylab & segvec == 2 ) else dd<-labelvec == mylab
+  if ( ! is.na( seg ) ) {
+    dd<-( labelvec == mylab & segvec == 2 )
+  }
+  else {
+    dd<-labelvec == mylab
+  }
+  
   submat<- filteredTimeSeries[ , dd ]
-#  if  ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat 
-  if ( length( c( submat ) ) > nrowts ) myavg<-apply( submat, MARGIN=1, FUN=mean ) else myavg<-submat
-  if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg  else labmat[ mylab, ]<-NA
+#  if  ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat
+  
+  if ( length( c( submat ) ) > nrowts ) {
+    myavg<-apply( submat, MARGIN=1, FUN=mean )
+  }
+  else {
+    myavg<-submat
+  }
+  
+  if ( length(myavg) > 0 ) {
+    labmat[ which(ulabels == mylab), ]<-myavg
+  }
+  else {
+    labmat[ which(ulabels == mylab), ]<-NA
+  }
+  
+  #if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg  else labmat[ mylab, ]<-NA
   }
   cormat<-cor( t(labmat), t( labmat ) )
   gmet<-makeGraph( cormat , graphdensity = graphdensity )
