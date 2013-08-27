@@ -1,0 +1,12 @@
+label_num;label_name
+1;CorpusCallosum
+2;Corticospinal_Tract_R
+3;Inf_Fronto_Occipital_R
+4;Inf_Longitudinal_Fasciculus_R
+5;Sup_Longitudinal_Fasciculus_R
+6;Uncinate_Fasciculus_R
+7;Corticospinal_Tract_L
+8;Inf_Fronto_Occipital_L
+9;Inf_Longitudinal_Fasciculus_L
+10;Sup_Longitudinal_Fasciculus_L
+11;Uncinate_Fasciculus_L
