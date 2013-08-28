@@ -30,7 +30,6 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms, interpolator=c("Linear") )
   milab<-imagePairToBeLabeled[[2]]
   mywarpedLimage<-antsApplyTransforms(fixed=fi,moving=milab,transformlist=mytx$fwdtransforms, interpolator=c("NearestNeighbor") )
-  print(paste("MaxLabel",max( mywarpedLimage[ mywarpedLimage > 0 ] ) ) )
   pointfile<-paste(outprefix,"coords.csv",sep='')
   ImageMath( milab@dimension , pointfile , "LabelStats", mywarpedLimage, mywarpedLimage , 1 )
   mypoints<-read.csv(pointfile)
