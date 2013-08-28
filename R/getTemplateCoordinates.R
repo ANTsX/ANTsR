@@ -30,6 +30,7 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms, interpolator=c("Linear") )
   milab<-imagePairToBeLabeled[[2]]
   mywarpedLimage<-antsApplyTransforms(fixed=fi,moving=milab,transformlist=mytx$fwdtransforms, interpolator=c("NearestNeighbor") )
+  print(paste("MaxLabel",max( mywarpedLimage[ mywarpedLimage > 0 ] ) ) )
   pointfile<-paste(outprefix,"coords.csv",sep='')
   ImageMath( milab@dimension , pointfile , "LabelStats", mywarpedLimage, mywarpedLimage , 1 )
   mypoints<-read.csv(pointfile)
@@ -60,7 +61,8 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
       templateLab[i]<-myval[1]
       }
     if ( mylab == 2 ) mypoints<-cbind( mypoints, Brodmann = templateLab )
-    if ( mylab == 3 ) mypoints<-cbind( mypoints, AAL = templateLab )
+    if ( mylab == 3 & max( filab[ filab > 0 ] ) == 11 ) mypoints<-cbind( mypoints, Tracts = templateLab ) 
+    if ( mylab == 3 & max( filab[ filab > 0 ] ) != 11 )  mypoints<-cbind( mypoints, AAL = templateLab )
     if ( mylab > 3 ) mypoints<-cbind( mypoints, templateLab = templateLab )
     }
   if ( convertToTal & imagedim == 3 )
@@ -86,14 +88,29 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
   mypoints$x<-round(mypoints$x*scl)/scl
   mypoints$y<-round(mypoints$y*scl)/scl
   mypoints$z<-round(mypoints$z*scl)/scl
-  data("aal", package="ANTsR")
-  aalnames<-rep("", nrow(mypoints)  )
-  for ( i in 1:nrow(mypoints) ) 
+  if ( max( filab[ filab > 0 ] ) == 11 )
     {
-    aalnum<-as.character(mypoints$AAL[i])
-    aalname<-as.character(aal$label_name[as.numeric(aalnum)])
-    if ( length( aalname ) > 0 ) aalnames[i]<-aalname
+    data("tracts", package="ANTsR")
+    tractnames<-rep("", nrow(mypoints)  )
+    for ( i in 1:nrow(mypoints) ) 
+      {
+      tractnum<-as.character(mypoints$Tracts[i])
+      tractname<-as.character(tracts$label_name[as.numeric(tractnum)])
+      if ( length( tractname ) > 0 ) tractnames[i]<-tractname
+      }
+    mypoints$Tracts<-tractnames
     }
-  mypoints$AAL<-aalnames
+  if ( max( filab[ filab > 0 ] ) != 11 )
+    {
+    data("aal", package="ANTsR")
+    aalnames<-rep("", nrow(mypoints)  )
+    for ( i in 1:nrow(mypoints) ) 
+      {
+      aalnum<-as.character(mypoints$AAL[i])
+      aalname<-as.character(aal$label_name[as.numeric(aalnum)])
+      if ( length( aalname ) > 0 ) aalnames[i]<-aalname
+      }
+    mypoints$AAL<-aalnames
+    }
   return( list( templatepoints=mypoints, myLabelsInTemplateSpace=mywarpedLimage,  myImageInTemplateSpace=mywarpedimage ) )
 }

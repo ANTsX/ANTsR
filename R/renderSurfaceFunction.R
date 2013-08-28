@@ -13,7 +13,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
     }
   }
   surfval <- rep(surfval, length.out=length(surfimg))
-  alphasurf <- rep(alphasurf, length.out=length(surfimg))
+  if ( length( alphasurf ) != length( surfimg ) ) alphasurf <- rep(alphasurf, length.out=length(surfimg))
   mylist <- list()
   if ( missing( funcimg ) ){  
     cat("No functional images--only plotting surface images.\n")
@@ -47,7 +47,7 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
   if (missing(mycol)){
     mycol<-rainbow(length(funcimg))
   }
-  alphafunc <- rep(alphafunc, length.out=length(funcimg))
+  if ( length( alphafunc ) != length( funcimg ) ) alphafunc <- rep(alphafunc, length.out=length(funcimg))
   for (i in 1:length(surfimg)){
     surf <- as.array(surfimg[[i]])
     brain <- contour3d(surf, level=c(surfval[i]), alpha=alphasurf[i],
@@ -70,8 +70,8 @@ renderSurfaceFunction<-function( surfimg, funcimg, surfval=0.5, basefval , offse
           print(usefval)
         } else usefval<-basefval
       if ( missing( offsetfval ) ) offsetfval<-sd( vals[ vals > usefval ] )
-      print( paste( i , usefval )  )
-      blob <- contour3d(  func , level = c(usefval), alpha = alphafunc,draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
+      print( paste( i , usefval, alphafunc[i] )  )
+      blob <- contour3d(  func , level = c(usefval), alpha = alphafunc[i],draw=FALSE,smooth=1,material="metal",depth=0.6,color=mycol[[i]])
       if (physical == TRUE )
         {
         blob$v1 <-  antsTransformIndexToPhysicalPoint( funcimg[[i]], blob$v1) 
