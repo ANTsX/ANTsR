@@ -3,8 +3,12 @@
 \title{
 Split data for testing and training
 }
-\description{Split data into testing and training sets for cross-validation.}
-\usage{splitData(data.source, ratio, return.rows = FALSE)}
+\description{
+Split data into testing and training sets for cross-validation.
+}
+\usage{
+splitData(data.source, ratio, return.rows = FALSE)
+}
 \arguments{
   \item{data.source}{Data frame or matrix of input data to be split.}
   \item{ratio}{If greater than one, number of folds to split data into.  Otherwise, proportion of rows in training data.  See \code{Value}.}

@@ -3,7 +3,9 @@
 \title{
 Cross-validation method for eigenanatomy decompositions.
 }
-\description{ Perform cross-validation on an image set using eigencomponents to predict an outcome variable.}
+\description{
+  Perform cross-validation on an image set using eigencomponents to predict an outcome variable.
+}
 \usage{
   cvEigenanatomy(demog, images, outcome, ratio=10, mask=NA, 
     sparseness=0.01, nvecs=50, its=5, cthresh=250, ...)

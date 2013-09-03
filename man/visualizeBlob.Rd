@@ -5,7 +5,8 @@
 Visualize cortical blob
 }
 
-\description{Visualize a cortical blob on a white matter segmentation of a template.
+\description{
+Visualize a cortical blob on a white matter segmentation of a template.
 }
 
 \usage{

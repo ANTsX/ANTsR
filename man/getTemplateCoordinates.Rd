@@ -12,6 +12,7 @@ Define an anatomical coordinate system in a new image based on a template
 }
 
 \usage{
+wcoords<-getTemplateCoordinates( list(bindtem,clust) , mymni , convertToTal = TRUE, outprefix = "/tmp/Q" )
 }
 
 \arguments{
@@ -60,6 +61,8 @@ Define an anatomical coordinate system in a new image based on a template
 # 1  -12  13  -3 0     1        0           Caudate_R
 # 2   13  16   5 0     2        0           Caudate_L
 #
+# can also use a white matter label set ...
+# 
 }
 }
 \keyword{Talairach, Template, Coordinates}

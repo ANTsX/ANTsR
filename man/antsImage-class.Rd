@@ -90,6 +90,11 @@ Objects can be created by calls of the form \code{new("antsImage", pixeltype, di
     \item{[<-}{\code{signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric")}: Set a \code{numeric vector} of pixels using given index vectors}
     }
 }
+
+\usage{
+img[ mask >  0]
+}
+
 \author{
 Shrinidhi KL
 }
