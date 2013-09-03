@@ -22,8 +22,10 @@ splitData(data.source, ratio, return.rows = FALSE)
 \author{Kandel BM and Avants B}
 
 \examples{
-n <- 30
-ratio <- 2/3
-data.source <- data.frame(value=1:n)
-out <- splitData(data.source, ratio)
+\dontrun{
+  n <- 30
+  ratio <- 2/3
+  data.source <- data.frame(value=1:n)
+  out <- splitData(data.source, ratio)
+}
 }

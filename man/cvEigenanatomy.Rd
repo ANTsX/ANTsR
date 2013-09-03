@@ -28,6 +28,7 @@ Cross-validation method for eigenanatomy decompositions.
 \author{ Kandel BM and Avants B }
 
 \examples{
+\dontrun{
 # generate simulated outcome
 nsubjects <- 100
 x1 <- seq(1, 10, length.out=nsubjects) + rnorm(nsubjects, sd=2)
@@ -46,4 +47,5 @@ age <- runif(nsubjects, 50, 75)
 demog <- data.frame(outcome=outcome, age=age)
 result <- cvEigenanatomy(demog, input, "outcome", ratio=5, mask, 
             sparseness=0.25, nvecs=4) 
+}
 }

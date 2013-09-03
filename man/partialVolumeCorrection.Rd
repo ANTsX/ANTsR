@@ -53,6 +53,7 @@ Kandel BM
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
+\dontrun{
 activity.gm <- 10
 activity.wm <- activity.gm * 0.4
 percent.gm <- matrix(seq(0.1, 1, by=0.1), nrow=2)
@@ -60,6 +61,7 @@ percent.wm <- -percent.gm + 1
 activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5) + 
                   rnorm(n=length(percent.wm), mean=activity.wm, sd=5)
 activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
