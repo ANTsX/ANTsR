@@ -9,6 +9,7 @@ convertRd2rst<- function( infile , outfile="")
     return(NULL)
     }
   rstheader<-"=========================\n"
+  print(paste("Process:",infile))
   Rd <- parse_Rd(infile)
   tags <- tools:::RdTags(Rd)
   myfnr<-Rd[[which(tags == "\\name")]][[1]]

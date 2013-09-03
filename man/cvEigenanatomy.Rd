@@ -1,6 +1,8 @@
 \name{cvEigenanatomy}
 \alias{cvEigenanatomy}
-\title{Cross-validation method for eigenanatomy decompositions.}
+\title{
+Cross-validation method for eigenanatomy decompositions.
+}
 \description{ Perform cross-validation on an image set using eigencomponents to predict an outcome variable.}
 \usage{
   cvEigenanatomy(demog, images, outcome, ratio=10, mask=NA, 

@@ -1,6 +1,8 @@
 \name{splitData}
 \alias{splitData}
-\title{Split data for testing and training}
+\title{
+Split data for testing and training
+}
 \description{Split data into testing and training sets for cross-validation.}
 \usage{splitData(data.source, ratio, return.rows = FALSE)}
 \arguments{

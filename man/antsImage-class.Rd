@@ -36,7 +36,9 @@
 \alias{[,antsImage,numeric,NULL-method}
 \alias{[,antsImage,numeric,numeric-method}
 
-\title{Class \code{"antsImage"}}
+\title{
+Class \code{"antsImage"}
+}
 \description{
 Encapsultates the external pointer to the underlying image along with details used to identify the 'type' of the image on C++ side.
 }

@@ -204,12 +204,12 @@ for ( sl in c(0:(length(slices)-1)) ) {
 # pdf(paste(output,'.pdf',sep=''))
 # onm<-paste(output,'.jpg',sep='')
 mag<-quality
-if ( !is.na(outname) ) jpeg(outname,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="black")
-x <- pixmapGrey(bigslice, nrow=nrow(bigslice))
+if ( !is.na(outname) ) jpeg(outname,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="white")
+x <- pixmapGrey(bigslice, nrow=nrow(bigslice) )
 # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
 # plot(dd)
 par(mar=c(0,0,0,0) + 0.0)   # set margins to zero ! less wasted space
-plot(x)
+plot(x,bg='white')
 if ( threshold[1] > threshold[2] | is.na(functional) )
   {
   if ( !is.na(outname) ) dev.off()
@@ -295,7 +295,7 @@ for ( ind in 1:length(functional) )
   heatvals<-rainbow(nlevels,alpha=0.5) 
   colorfun<-colorRampPalette(c('gray60',color),interpolate = c("spline"), space = "Lab")
 print(color[ind])
-  colorfun<-colorRampPalette(c('black',color[ind]),interpolate = c("spline"), space = "Lab")
+  colorfun<-colorRampPalette(c('white',color[ind]),interpolate = c("spline"), space = "Lab")
   heatvals<-colorfun(nlevels)
   if ( locthresh[1] > 1 ) heatvals[1: ( locthresh[1]-1) ]<-NA
   if ( locthresh[2] < (nlevels-1) ) {

@@ -18,7 +18,7 @@ visualizeBlob <- function(template, blob, outname='wmBlob', dim=3){
   } else stop("Blob must be file name or antsImage.")
   
   mymask <- getMask(template)
-  myseg <- Atropos(d=dim, a=template, m="[0.25,1x1x1]", c="[25,0]", 
+  myseg <- Atropos(d=dim, a=template, m="[0.25,1x1x1]", c="[2,0]", 
     x=mymask, i="kmeans[3]")
   wm <- antsImageClone(maskImage(myseg$segmentation, myseg$segmentation, 3), 'float')
   glassbrain <- antsImageClone(mymask)

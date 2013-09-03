@@ -1,6 +1,8 @@
 \name{regressProjections}
 \alias{regressProjections}
-\title{Regression on image set projection}
+\title{
+Regression on image set projection
+}
 \description{
   Perform regression on a training set of images, projected onto (provided) eigenvectors, and test on testing images.
 }

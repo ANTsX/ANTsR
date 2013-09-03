@@ -1,7 +1,9 @@
 \name{mni2tal}
 \alias{mni2tal}
 
-\title{Brett's mni2tal}
+\title{
+Brett's mni2tal
+}
 
 \description{
   mni2tal for converting from ch2/mni space to tal - very approximate.  

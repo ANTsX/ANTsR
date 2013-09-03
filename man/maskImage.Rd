@@ -1,6 +1,8 @@
 \name{maskImage}
 \alias{maskImage}
-\title{Mask input image by mask image.}
+\title{
+Mask input image by mask image.
+}
 \description{
   Mask an input image by a mask image.  If the mask image has multiple labels, it is possible to specify which label to mask at.
 }

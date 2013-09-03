@@ -1,7 +1,8 @@
 \name{visualizeBlob}
 \alias{visualizeBlob}
 
-\title{Visualize cortical blob
+\title{
+Visualize cortical blob
 }
 
 \description{Visualize a cortical blob on a white matter segmentation of a template.
