@@ -3,7 +3,9 @@
 \title{
 Measure Min Max Mean
 }
-\description{Measure min, max, and mean of image.}
+\description{
+Measure min, max, and mean of image.
+}
 \usage{
 MeasureMinMaxMean(image)
 }
