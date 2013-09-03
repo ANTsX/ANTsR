@@ -237,11 +237,9 @@ for ( ind in 1:length(functional) )
   print("threshold")
   print(threshold)
   print(paste('min/max of image',mncl,mxcl))
-  temp<-labimg
+  temp<-labimg 
   temp<-(temp-mncl)/(mxcl-mncl)*(nlevels-1)
   labimg<-temp
-  mncl<-min(labimg)
-  mxcl<-max(labimg)
   locthresh<-round( ( threshold[1:2]-mncl)/(mxcl-mncl)*(nlevels-1))
   if ( axis != 2 & imagedim > 2 ) labslice<-rotate90.matrix(labimg[,,slices[1]])
   if ( axis == 2  & imagedim > 2 ) labslice<-flip.matrix(labimg[,,slices[1]])
