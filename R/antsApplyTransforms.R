@@ -1,4 +1,4 @@
-antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",interpolator="Linear", ... ){
+antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",interpolator="Linear",imagetype=0, ... ){
   numargs<-nargs()
   if ( typeof( fixed ) == "list" )
     {
@@ -30,7 +30,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
         inpixeltype<-fixed@pixeltype
         fixed<-antsImageClone(fixed,'double')
         moving<-antsImageClone(moving,'double')
-        warpedmovout<-antsImageClone(fixed,'double');
+        warpedmovout<-antsImageClone(moving,'double');
         f<-fixed
         m<-moving
         wmo<-warpedmovout
@@ -60,7 +60,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 	myargs<-myargs2
         }
         } }
-        .Call("antsApplyTransforms", c(myargs,"-z",1,"--float",0) , PACKAGE="libRantsApplyTransforms")
+        .Call("antsApplyTransforms", c(myargs,"-z",1,"--float",0,"-e",imagetype) , PACKAGE="libRantsApplyTransforms")
         gc()
         return( antsImageClone(warpedmovout,inpixeltype) )
         }
@@ -74,7 +74,7 @@ antsApplyTransforms <- function( fixed = NA, moving = NA, transformlist="",inter
 #    system( paste("antsApplyTransforms ", mycmd$mystr ) )
 #    return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim) ) )
 #    }
-  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1,"--float",0) ), PACKAGE="libRantsApplyTransforms" ) ;
+  .Call("antsApplyTransforms", int_antsProcessArguments( c(args,"-z",1,"--float",0,"-e",imagetype) ), PACKAGE="libRantsApplyTransforms" ) ;
   gc() # trigger garbage collection
 }
 

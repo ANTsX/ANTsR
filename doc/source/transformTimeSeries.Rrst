@@ -20,8 +20,8 @@ outimg<-antsApplyTransforms( fixed=tem,moving=avg,transformlist=mytx$fwdtransfor
 par(mfrow=c(2,1))
 plotANTsImage( tem,slices="40x60x5",axis=1) 
 plotANTsImage( outimg,slices="40x60x5",axis=1)
-out4Dimg<-new("antsImage", dimension = 4, pixeltype = "float")
-antsApplyTransforms( list(d=3,e=3,i=img,o=out4Dimg,r=tem,t=mytx$fwd[1],t=mytx$fwd[2]))
+# imagetype 3 is the 4D image ...
+out4Dimg<-antsApplyTransforms( fixed=tem,moving=img,transformlist=mytx$fwdtransforms,imagetype=3 )
 avgtx <- new("antsImage", dimension = 3, pixeltype = "float")
 antsMotionCorr(list(d = 3, a = out4Dimg, o = avgtx))
  par(mfrow=c(2,1))
