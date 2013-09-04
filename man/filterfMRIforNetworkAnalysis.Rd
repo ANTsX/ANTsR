@@ -38,14 +38,7 @@ Avants BB
 
 \examples{
 \dontrun{
-
-myres<-filterfMRIforNetworkAnalysis("s3_date3_asl.nii.gz",tr=4,0.01,0.1,"ASLCBF",smoother=1,"test")
-
-in myres, you have:
-
-names(myres)
-[1] "filteredTimeSeries" "mask"               "temporalvar"
-
-where the filteredTimeSeries is the frequency filtered BOLD, ASLCBF or ASLBOLD matrix.
+fmat<-timeseries2matrix( img, mask )
+myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
 }
 }

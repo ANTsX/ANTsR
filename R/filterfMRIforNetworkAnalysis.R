@@ -56,6 +56,7 @@ wh<-which( temporalvar == 0 )
 for ( x in wh ) {
   filteredTimeSeries[,x]<-sample( filteredTimeSeries , nrow(filteredTimeSeries ) )
 }
+if ( ! is.na( labels )  ) {
 # do some network thing here
 oulabels<-sort( unique( labels[ labels > 0 ] ) )
 whvec<-(  mask ==  1  )
@@ -96,6 +97,10 @@ for ( mylab in ulabels )
   cormat<-cor( t(labmat), t( labmat ) )
   gmet<-makeGraph( cormat , graphdensity = graphdensity )
 return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar , network = labmat, graph = gmet, corrmat = cormat ) )
+} else {
+return( list( filteredTimeSeries = filteredTimeSeries , mask = mask, temporalvar = temporalvar  ) )
+}
+  
 }
 
 

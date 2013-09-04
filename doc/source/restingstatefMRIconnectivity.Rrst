@@ -28,7 +28,8 @@ This involves motion correction which, with default settings, can be time consum
 We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See :r:`?filterfMRIforNetworkAnalysis` .
 
 .. {r fmriprocess, out.width="720px", fig.cap="ANTsR preprocessing, including frequency filtering, for fMRI",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
-myres<-filterfMRIforNetworkAnalysis(img,tr=4,0.03,0.09,cbfnetwork="BOLD",smoother=1,moreaccurate=FALSE,maskThresh=maskThresh)
+fmat<-timeseries2matrix( img, mask )
+myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
 .. .. 
 
 
