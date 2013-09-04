@@ -8,7 +8,7 @@ Let"s start with network analysis from a pre-defined set of regions, here define
 
 .. {r getData, out.width="720px", fig.cap="Example data",eval=TRUE,echo=TRUE,warning=FALSE,results="hide",message=FALSE}
 library(ANTsR)
-tfn<-getANTsRData("r16")
+# 
 .. ..
 
 .. {r testBasicNetwork, out.width="720px", fig.cap="ANTsR basic network analysis test",eval=TRUE,echo=FALSE,warning=FALSE,results="markup",message=FALSE}

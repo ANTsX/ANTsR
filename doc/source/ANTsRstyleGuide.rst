@@ -212,7 +212,9 @@ The function documentation should use the following sections, in order::
 
   \name{functionName}
   \alias{functionName}
-  \title {Function Title}
+  \title {
+  Function Title
+  }
 
   \description{
     Short description of function.
@@ -252,7 +254,9 @@ The function documentation should use the following sections, in order::
   }
 
   \examples{
+  \dontrun{
     % Examples, see Rd developer guide link below
+  }
   } 
 
 

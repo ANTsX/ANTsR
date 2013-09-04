@@ -46,7 +46,7 @@ countgm2<-sum( segs$segmentation == 2 )/sum( mask == 1 )
 isucceed<-FALSE
 val1<-round( countgm*100 )
 val2<-round( countgm2*100 )
-if ( val1 == 40 &  val2 == 39 ) isucceed<-TRUE
+if ( ( abs( val1 - 40 ) < 2 ) &   ( abs( val2 - 39 ) < 2 ) ) isucceed<-TRUE
 if (  isucceed ) print("SUCCESS")
 if ( !isucceed ) print(paste("FAILURE",val1,val2))
 .. .. 
