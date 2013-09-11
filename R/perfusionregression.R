@@ -1,4 +1,4 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis = NA , dorobust = 0, skip = 20  )
+perfusionregression <- function( mask_img , mat , xideal , nuis = NA , dorobust = 0, skip = 20, checkmeansignal=TRUE  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
@@ -13,13 +13,14 @@ if ( missing( mat ) | missing( xideal ) | missing( nuis ) )
   print(myusage)
   return(NULL)
   }
+usemat <- mat
 print("standard regression")
-cbfform<-formula(  mat ~   xideal )
-rcbfform<-formula(  mat[,vox] ~   xideal )
+cbfform<-formula(  usemat ~   xideal )
+rcbfform<-formula(  usemat[,vox] ~   xideal )
 if ( ! is.na( nuis ) )
   {
-  cbfform<-formula(  mat ~   xideal + nuis )
-  rcbfform<-formula(  mat[,vox] ~   xideal + nuis )
+  cbfform<-formula(  usemat ~   xideal + nuis )
+  rcbfform<-formula(  usemat[,vox] ~   xideal + nuis )
   }
 mycbfmodel<-lm( cbfform  ) # standard regression
 cbfi <- antsImageClone( mask_img )
@@ -30,6 +31,16 @@ cbfi[ mask_img == 1 ] <- betaideal  # standard results
 
 if ( dorobust > 0 )
   {
+  if ( checkmeansignal ) {
+    print("Check the mean signal to eliminate frames with high drop out rate")
+    imgmeans<-apply(usemat,FUN=mean,MARGIN=1)
+    usemat<-subset( usemat , imgmeans > 100 )
+    nuis<-subset( nuis , imgmeans > 100 )
+    xideal<-subset( xideal , imgmeans > 100 )
+    print(dim(usemat))
+    imgmeans<-apply(usemat,FUN=mean,MARGIN=1)
+    print(imgmeans)
+  }
   pckg = try(require(robust))
   if(!pckg) 
     {
@@ -41,11 +52,12 @@ if ( dorobust > 0 )
   if ( dorobust > 1 ) { print("dorobust too large, setting to 0.95"); dorobust <- 0.95; }
   print(paste("begin robust regression:",dorobust*100,"%"))
   ctl<-lmrob.control( "KS2011", max.it = 1000 )
-  regweights<-rep(0,nrow(mat))
-  rbetaideal<-rep(0,ncol(mat))
+  regweights<-rep(0,nrow(usemat))
+  rbetaideal<-rep(0,ncol(usemat))
+  robvals <- usemat * 0
   vox<-1
   ct<-0
-  visitvals<-( skip:floor( (ncol(mat)-1) / skip ) ) * skip
+  visitvals<-( skip:floor( (ncol(usemat)-1) / skip ) ) * skip
   mynodes<-round( detectCores() / 2 ) # round( getOption("mc.cores", 2L) / 2 )
 #  cl<-makeForkCluster( nnodes = mynodes )
 #  registerDoParallel( cl , cores = mynodes ) 
@@ -60,13 +72,17 @@ if ( dorobust > 0 )
       {
       rgw<-rgw + mycbfmodel$rweights
       myct<-myct+1 
+      robvals[ , myct ] <-  mycbfmodel$rweights
       }
     }
   })
+  print( rgw ) 
   regweights<-(rgw/myct)
+  if ( is.na( mean(regweights) ) ) regweights[]<-1 
   print(paste("donewithrobreg",myct))
   print(regweights)
   print(paste(ptime))
+  # check if the robustness selects the blank part of the time series 
   # now use the weights in a weighted regression
   indstozero<-which( regweights < ( dorobust * max(regweights ) ) )
   keepinds<-which( regweights > ( dorobust * max(regweights ) ) )
@@ -87,7 +103,7 @@ if ( dorobust > 0 )
   betaideal<-( (mycbfmodel$coeff)[2,] ) 
   if ( mean(betaideal) < 0 ) betaideal<-( betaideal ) * (-1)
   cbfi[ mask_img == 1 ] <- betaideal  # robust results
-  print(paste("Rejected",length( indstozero ) / nrow( mat ) * 100 ," % " ))
+  print(paste("Rejected",length( indstozero ) / nrow( usemat ) * 100 ," % " ))
   }
 return( cbfi )
 }
