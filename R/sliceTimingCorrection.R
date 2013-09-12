@@ -1,4 +1,4 @@
-sliceTimingCorrection <- function( fmri, sliceTime=NA )
+sliceTimingCorrection <- function( fmri, sliceTime=NA, interpolation="sinc", sincRadius=4, bsplineOrder=3 )
 
 {
 tr <- antsGetSpacing(fmri)[length(dim(fmri))]
@@ -10,6 +10,22 @@ if ( is.na(sliceTime) )
 }
 
 corrected <- antsImageClone(fmri)
-ImageMath( 4, corrected, "SliceTimingCorrection", fmri, sliceTime, "sinc" )
+
+
+if ( interpolation == "sinc" ) {
+  ImageMath( 4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, sincRadius )
+}
+else if ( interpolation == "bspline" ) {
+  ImageMath( 4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, bsplineOrder )
+}
+else if ( interpolation == "linear" ) {
+  ImageMath( 4, corrected, "SliceTimingCorrection", fmri, sliceTime )
+
+}
+else {
+  warning( "Invalid interpolation type, options are: linear, sinc, and bspline" );
+  return (NA)
+}
+
 return( corrected )
 }
