@@ -204,9 +204,8 @@ for ( sl in c(0:(length(slices)-1)) ) {
 # pdf(paste(output,'.pdf',sep=''))
 # onm<-paste(output,'.jpg',sep='')
 mag<-quality
-if ( !is.na(outname) ) jpeg(outname,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="white")
 pixperinch<-96
-dev.new(height=nrow(bigslice)/pixperinch, width=ncol(bigslice)/pixperinch )
+if ( !is.na(outname) ) jpeg(outname,width = ncol(bigslice)*mag, height = nrow(bigslice)*mag, units = "px",quality=75,bg="white") else dev.new(height=nrow(bigslice)/pixperinch, width=ncol(bigslice)/pixperinch )
 x <- pixmapGrey(bigslice, nrow=nrow(bigslice), ncol=ncol(bigslice) )
 # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
 # plot(dd)
