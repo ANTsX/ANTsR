@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA, interpolation="linear" )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA, interpolation="linear" ,  checkmeansignal = TRUE )
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion )
@@ -56,6 +56,13 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
   moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = maskThresh, highThresh = 1e9, cleanup = TRUE )
   if ( ! is.na(mask) ) moco_mask_img <- mask
   mat <- timeseries2matrix( moco_results$moco_img, moco_mask_img )
+  if ( checkmeansignal ) {
+    print("Check the mean signal to eliminate frames with high drop out rate")
+    imgmeans<-apply( mat,FUN=mean,MARGIN=1)
+    mat<-subset( mat , imgmeans > 100 )
+    imgmeans<-apply( mat,FUN=mean,MARGIN=1)
+    print(imgmeans)
+  }
   if ( is.na( m0 ) )
     {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
