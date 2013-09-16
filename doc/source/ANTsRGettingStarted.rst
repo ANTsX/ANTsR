@@ -5,6 +5,10 @@
 Brief Introduction to using ANTs in R
 ---------------------------------------------
 
+There is a general tutorial here ANTsR-Tutorial_ .
+
+.. _ANTsR-Tutorial:  http://sourceforge.net/projects/advants/files/ANTS/ANTS_Latest/antsr.pdf/download
+
 Once installation is successful, the ANTsR package can be used in R as follows:
 
 Load the package
