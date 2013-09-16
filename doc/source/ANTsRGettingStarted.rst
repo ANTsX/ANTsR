@@ -32,59 +32,21 @@ For example, call the antsImageRead routine and some standard ANTs functions.
 
 
 
-User Installation Method: from within R
+Installation Method: OSX and LINUX variants
 ---------------------------------------------
 
+We created an install script ( ANTsR-Install-Script_ ) that uses Homebrew_ or apt-get (on LINUX)
 
-We depend on CMake_.
+.. _Homebrew: http://brew.sh/
 
-.. _CMake: http://www.cmake.org/cmake/resources/software.html
+to install CMake, git, R, wget ( on osx ) and ANTsR package dependencies.   
 
-If you have CMake installed, then open R and do:
+.. _ANTsR-Install-Script:  https://raw.github.com/stnava/RMI/master/stnava/install_anstr_packages.sh
 
-.. sourcecode:: r
-    
-
-    install.packages(c("devtools", "Rcpp", "methods", "signal", "parallel", 
-        "timeSeries", "mFilter", "MASS", "robust", "magic", "knitr", "pixmap", "rgl", 
-        "misc3d", "lme4"))
-    library(devtools)
-    install_github("ANTsR", "stnava")  # all this will take some time
-
-
-
-
-Developer Installation Method: from command line
----------------------------------------------------------------------------------------------------------------------------------------
-
-See the libraries and CMake_ listed above and install them.
-
-Clone or Pull ANTsR from this repository as follows:
-
-      $ git clone git@github.com:stnava/ANTsR.git
-
-From the parent directory of the new ANTsR directory, install the package as follows:
-
-      $ R CMD INSTALL ANTsR
-
-NOTE: If you see errors like "Undefined symbols for architecture x86_64" use
+NOTE: If you see errors like "Undefined symbols for architecture
+x86_64" , edit the script to use 
 
       $ R --arch=x86_64 CMD INSTALL  ANTsR
-
-The installation may fail if ANTsR dependencies are not installed.
-These are listed in:
-
-      $  ANTsR/DESCRIPTION
-
-which will include: 
-
-      Depends: Rcpp (>= 0.9.7.2) , methods, signal , parallel , timeSeries , mFilter , MASS , doParallel, robust, magic, knitr, pixmap, rgl, misc3d
-
-In R, you can do:   
-    
-     R>  install.packages( "signal", dependencies=TRUE ) 
-
-to get packages.
 
 .. image:: _static/ANTSWarpImageMultiTransform.png
   :width: 600 px
