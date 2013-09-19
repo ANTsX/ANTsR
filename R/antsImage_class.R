@@ -421,19 +421,17 @@ antsSetDirection <- function( x, direction )
     print( "Input must be of class 'antsImage'");
     return()
     } 
-  if ( (class(direction) != "matrix" ) || (class(direction) != "array" ))
+  if ( (class(direction) != "matrix" ) & (class(direction) != "array" ))
     {
     print( "direction must be of class 'matrix' or 'array'" )
     return()
-  }
-  
+    }
   if ( (dim(direction)[1] != length(dim(x)) ) ||
        (dim(direction)[2] != length(dim(x)) ) )
     {
     print( "direction matrix must be of size imagedim * imagedim" )
     return()
     }
-  
   return( .Call( "antsImage_SetDirection", x, direction, PACKAGE="libRantsImage" ) )
 }
 
