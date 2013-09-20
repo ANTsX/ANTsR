@@ -8,7 +8,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
   if ( numargs < 1 | missing(fixed) | missing(moving) | missing( typeofTransform ) | missing( outprefix) )
     {
     cat("for simplified mode: \n")
-    cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"SyN\"),  outputPrefix=\"./antsRegOut\" \n")
+    cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"AffineFast\",\"SyN\"),  outputPrefix=\"./antsRegOut\" \n")
     cat("")
     cat("For full mode: use standard ants call , e.g. : \n")
     cat(" ANTsR::antsRegistration( list( d=2,m=\"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", t=\"affine[1.0]\", c=\"2100x1200x1200x0\",  s=\"3x2x1x0\", f=\"4x3x2x1\", u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n")
@@ -17,6 +17,12 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
     return(0);
     }
   args <- list(fixed,moving,typeofTransform,outprefix,...)
+  myiterations<-"2100x1200x1200x10"
+  if (  typeofTransform == "AffineFast" )
+    {
+    typeofTransform <- "Affine" 
+    myiterations<-"2100x1200x100x0"
+    }
   if ( ! is.character(fixed) ) {
     if ( fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage" )
       {
@@ -45,7 +51,7 @@ antsRegistration <- function( fixed = NA, moving = NA, typeofTransform="",outpre
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep=''), paste(outprefix,"1InverseWarp.nii.gz",sep='') )
         }
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" ) {
-        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Translation[0.25]","-c","2100x1200","-s","4x3","-f", "6x4" ,"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c","2100x1200x1200x10","-s","3x2x1x0","-f", "6x4x2x1" ,"-u","1","-z","1","--float","0","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
+        args<-list("-d",as.character(fixed@dimension),"-r",paste("[",f,",",m,",1]",sep=''),"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t","Translation[0.25]","-c","2100x1200","-s","4x3","-f", "6x4" ,"-m",paste("mattes[",f,",",m,",1,32,regular,0.2]",sep=''),"-t",paste(typeofTransform,"[0.25]",sep=''),"-c",myiterations,"-s","3x2x1x0","-f", "6x4x2x1" ,"-u","1","-z","1","--float","0","-o",  paste("[",outprefix,",",wmo,",",wfo,"]",sep='') )
         fwdtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         invtransforms<-c( paste(outprefix,"0GenericAffine.mat",sep='') )
         }
