@@ -51,13 +51,12 @@ getTemplateCoordinates <- function( imagePairToBeLabeled, templatePairWithLabels
     # for instance, you might have found 2 blobs, blob1 and blob2 with labels 1 and 2
     # you know want to know if these are at Brodmann area 21 or 22 or whatever
     # so we iterate through the point list and index the filab image ( template labels )
-    templateLab<-rep( NA, nrow( mypoints ) ) 
+    templateLab<-rep( NA, nrow( mypoints ) )
     for ( i in 1:nrow(mypoints) )
       {
-      if ( imagedim == 2) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i],"1") 
-      if ( imagedim == 3) myargs<-list( imagedim , "NA", "SetOrGetPixel",filab,"Get",mypoints$x[i] ,mypoints$y[i], mypoints$z[i],"1") 
-      myval<-capture.output(  .Call( "ImageMath", int_antsProcessArguments( c(myargs) ) , PACKAGE="libRImageMath") )
-      templateLab[i]<-myval[1]
+      if ( imagedim == 2 ) mypoint<-as.numeric( c( mypoints$x[i] ,mypoints$y[i]  ) )
+      if ( imagedim == 3 ) mypoint<-as.numeric( c( mypoints$x[i] ,mypoints$y[i], mypoints$z[i] ) )
+      templateLab[i]<-getValueAtPoint( filab , mypoint )
       }
     if ( mylab == 2 ) mypoints<-cbind( mypoints, Brodmann = templateLab )
     if ( mylab == 3 & max( filab[ filab > 0 ] ) == 11 ) mypoints<-cbind( mypoints, Tracts = templateLab ) 
