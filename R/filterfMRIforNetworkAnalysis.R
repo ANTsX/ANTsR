@@ -38,7 +38,7 @@ if ( cbfnetwork == "ASLCBF" ) {
   taginds<-c(1:(nrow(aslmat)/2))*2
   controlinds<-taginds-1
   aslmat[controlinds,]<-aslmat[controlinds,]*(-1) # ok! done w/asl specific stuff
-  plot( apply( aslmat[controlinds,],1, mean) , type='l') # should be (+) everywhere
+#  plot( apply( aslmat[controlinds,],1, mean) , type='l') # should be (+) everywhere
 }
 if ( cbfnetwork == "ASLBOLD" ) {
   # surround addition for bold networks 
