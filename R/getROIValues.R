@@ -7,6 +7,7 @@ getROIValues <- function( valueImage, roiImage, maskImage ) {
   uvals<-sort( unique( roiImage[ maskImage == 1 ] ) )
   roivals<-rep(NA,length(uvals))
   roivolumes <- rep(NA, length(uvals))
+  roisds <- rep(NA, length(uvals))
   pb <- txtProgressBar( min = 0, max = length(uvals), style = 3 )
   for ( x in 1:length(uvals) ){
     setTxtProgressBar( pb , x )
@@ -14,9 +15,10 @@ getROIValues <- function( valueImage, roiImage, maskImage ) {
     if ( sum( inds ) > 0 ) {
       roivals[x]<-mean( valueImage[ inds ] )
       roivolumes[x] <- length(inds[inds==T])
+      roisds[x] <- sd(valueImage[inds])
     }
   }
-  return( list( roiValues = uvals,  roiMeans = roivals, roiVolumes = roivolumes ) )
+  return( list( roiValues = uvals,  roiMeans = roivals, roiVolumes = roivolumes, roiSDs = roisds ) )
 }
 
 

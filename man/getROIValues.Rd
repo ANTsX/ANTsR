@@ -30,8 +30,9 @@ wmat<-getROIValue( valueImage, ROIImage, maskImage  )
 \value{
 A list with components: 
    \code{roiValues}, the (number) labels of each ROI;
-   \code{roiMeans}, the mean value of each ROI; and
-   \code{roiVolumes}, the volume (in voxels) of each ROI.
+   \code{roiMeans}, the mean value of each ROI; 
+   \code{roiVolumes}, the volume (in voxels) of each ROI; and
+   \code{roiSDs}, the standard deviation of each ROI.
 }
 \author{
 Avants BB
