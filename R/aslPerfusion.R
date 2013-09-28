@@ -72,8 +72,8 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 1 ]<-m0vals
     }
   motionparams<-as.data.frame( moco_results$moco_params )
+#  mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
-#  mat <- antsr_frequency_filter( mat , freqHi = 0.1 , freqLo = 0.01, tr = 4 )
   
   # Get average tagged image
   m1vals <- apply(  mat[c(1:(nrow(mat)/2))*2-1,] , 2 , mean ) # for T C T C , JJ data
