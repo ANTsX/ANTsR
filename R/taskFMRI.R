@@ -22,20 +22,20 @@ taskFMRI <- function( mat , hrf, myvars )
 # functional MR image analysis Bullmore 1996            #
 ############################################
   residsig <- apply( residmat, FUN=mean, MARGIN=1 ) 
-  arcoefs<-ar( residsig, FALSE, 1 )$ar  # use something similar to  SPM's  autoregression estimate
+  arcoefs<-ar( residsig, FALSE, 2 )$ar  # use something similar to  SPM's  autoregression estimate
   print( arcoefs )
   mat1 <- ashift(mat,c(1,0))
   mat1[1,] <- mat[1, ]
   mat2 <- ashift(mat,c(2,0))
   mat2[1,] <- mat[1, ]
   mat2[2,] <- mat[2, ]
-  amat <- mat - mat1 * arcoefs[1] # - mat2 * arcoefs[2] 
+  amat <- mat - mat1 * arcoefs[1]  - mat2 * arcoefs[2] 
   mat1 <- ashift(desmat,c(1,0))
   mat1[1,] <- desmat[1, ]
   mat2 <- ashift(desmat,c(2,0))
   mat2[1,] <- desmat[1, ]
   mat2[2,] <- desmat[2, ]
-  adesmat <- desmat - mat1 * arcoefs[1] # - mat2 *  arcoefs[2] 
+  adesmat <- desmat - mat1 * arcoefs[1]  - mat2 *  arcoefs[2] 
   #
   # new regression 
   amat<-residuals( lm( amat ~ globsig + motion1 + motion2 + motion3 + compcorr1
