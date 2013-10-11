@@ -1,4 +1,4 @@
-taskFMRI <- function( mat , hrf, myvars , residualizedesignmatrix = FALSE, myformula="globalsignal + motion1 +   
+taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesignmatrix = FALSE, myformula="globalsignal + motion1 +   
       motion2 + motion3 + compcorr1 + compcorr2 + compcorr3"  )
   {
   if ( nargs() == 0 )
@@ -24,31 +24,38 @@ taskFMRI <- function( mat , hrf, myvars , residualizedesignmatrix = FALSE, myfor
   myformhrf<-as.formula( paste( "amat ~  hrf + ", myformula ) )
   myformNOhrf<-as.formula( paste( "amat ~ 1 + ", myformula ) )
   print( myformhrf )
+  if ( correctautocorr )
+  {
   for ( i in 1:5 ) {
   residmat<-residuals( lm( myformhrf , 
       data = data.frame( adesmat )  )  )
   residsig <- apply( residmat, FUN=mean, MARGIN=1 ) 
   arcoefs<-ar( residsig, FALSE, 2 )$ar  # use something similar to  SPM's  autoregression estimate
+  if ( abs( arcoefs[1] ) > 0.05 ) {
   print( arcoefs )
   mat1 <- ashift(amat,c(1,0))
   mat1[1,] <- amat[1, ]
   mat2 <- ashift(amat,c(2,0))
   mat2[1,] <- amat[1, ]
   mat2[2,] <- amat[2, ]
-  amat <- amat - mat1 * arcoefs[1]  - mat2 * arcoefs[2] 
+  if ( length( arcoefs ) == 2 )  amat <- amat - mat1 * arcoefs[1]  - mat2 * arcoefs[2] 
+  if ( length( arcoefs ) == 1 )  amat <- amat - mat1 * arcoefs[1]   
   mat1 <- ashift(adesmat,c(1,0))
   mat1[1,] <- adesmat[1, ]
   mat2 <- ashift(adesmat,c(2,0))
   mat2[1,] <- adesmat[1, ]
   mat2[2,] <- adesmat[2, ]
-  adesmat <- adesmat - mat1 * arcoefs[1]  - mat2 *  arcoefs[2]
+  if ( length( arcoefs ) == 2 )  adesmat <- adesmat - mat1 * arcoefs[1]  - mat2 *  arcoefs[2]
+  if ( length( arcoefs ) == 1 )  adesmat <- adesmat - mat1 * arcoefs[1] 
+  } # if gt 0.05
   }
   #
   # new regression 
   amat<-residuals( lm( myformNOhrf, data = data.frame( adesmat )  ) )
   residsig <- apply( amat, FUN=mean, MARGIN=1 ) 
-  arcoefs<-ar( residsig, FALSE, 2 )$ar  # use something similar to  SPM's  autoregression estimate
-  print(paste("final arcoefs", arcoefs[1], arcoefs[2] ) )
+  arcoefs<-ar( residsig, FALSE, length(arcoefs) )$ar  # use something similar to  SPM's  autoregression estimate
+  print(paste("final arcoefs", arcoefs ) )
+  }
   progress <- txtProgressBar(min = 0, max = ncol(mat),      style = 3)
   for ( i in 1:ncol(amat) ) {
     vox<-amat[ , i ]
@@ -60,5 +67,5 @@ taskFMRI <- function( mat , hrf, myvars , residualizedesignmatrix = FALSE, myfor
     }
   close(progress)
   betas[ is.na( betas ) ] <- 0
-  return( list( beta = betas , fmrimat=amat ) )
+  return( list( beta = betas , fmrimat=amat , adesmat = adesmat ) )
   }
