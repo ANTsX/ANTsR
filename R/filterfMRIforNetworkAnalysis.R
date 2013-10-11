@@ -48,7 +48,16 @@ if ( cbfnetwork == "ASLBOLD" ) {
 voxLo=round((1/freqLo)) # remove anything below this (high-pass)
 voxHi=round((1/freqHi))   # keep anything above this
 myTimeSeries<-ts(aslmat,frequency=1.0/tr)
-filteredTimeSeries<-residuals( cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=FALSE, root=FALSE, type=c("trigonometric") ) )
+if ( nrow( myTimeSeries ) %% 2 > 0 )
+  {
+  firsttime<-myTimeSeries[1,]
+  myTimeSeries<-myTimeSeries[2:nrow(myTimeSeries),]
+  filteredTimeSeries<-residuals( cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=FALSE, root=FALSE, type=c("trigonometric") ) )
+  filteredTimeSeries<-rbind( firsttime, filteredTimeSeries )
+  filteredTimeSeries<-ts(filteredTimeSeries,frequency=1.0/tr)
+  } else {
+  filteredTimeSeries<-residuals( cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=FALSE, root=FALSE, type=c("trigonometric") ) )
+  } 
 vox<-round( ncol( filteredTimeSeries ) * 0.5 )#  a test voxel
 spec.pgram( filteredTimeSeries[,vox], taper=0, fast=FALSE, detrend=F,demean=F, log="n")
 temporalvar<-apply(filteredTimeSeries, 2, var)
