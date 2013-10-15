@@ -10,7 +10,7 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   mask<-myvars$mask 
   nuis<-( myvars$nuisancevariables )
   betas<-rep(NA, ncol( mat ) )
-  desmat<-cbind( myvars$globalsignal, nuis )
+  desmat<-as.matrix( cbind( myvars$globalsignal, nuis ) )
   if ( residualizedesignmatrix ) desmat<-residuals(lm(desmat~hrf))
   desmat<-cbind( hrf, desmat )
   colnames( desmat )<-c("hrf","globalsignal",colnames(nuis))
@@ -60,7 +60,7 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   for ( i in 1:ncol(amat) ) {
     vox<-amat[ , i ]
 #    mdl<-lmrob( vox ~  hrf, data = data.frame( adesmat )  )
-    mdl<-lm( vox ~  hrf , data = data.frame( adesmat )  ) 
+    mdl<-lm( vox ~  hrf , data = data.frame( desmat )  ) 
     betas[i]<-coefficients(summary(mdl))[2,3] # probably better way
 #    betas[i]<-cor.test( vox , hrf )$est  
     setTxtProgressBar(progress, i)
