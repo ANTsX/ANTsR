@@ -26,11 +26,12 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   print( myformhrf )
   if ( correctautocorr )
   {
-  for ( i in 1:5 ) {
+  for ( i in 1:11 ) {
   residmat<-residuals( lm( myformhrf , 
       data = data.frame( adesmat )  )  )
   residsig <- apply( residmat, FUN=mean, MARGIN=1 ) 
   arcoefs<-ar( residsig, FALSE, 2 )$ar  # use something similar to  SPM's  autoregression estimate
+  if ( i == 1 ) initialarcoefs <- arcoefs
   if ( abs( arcoefs[1] ) > 0.05 ) {
   print( arcoefs )
   mat1 <- ashift(amat,c(1,0))
@@ -55,6 +56,7 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   residsig <- apply( amat, FUN=mean, MARGIN=1 ) 
   arcoefs<-ar( residsig, FALSE, length(arcoefs) )$ar  # use something similar to  SPM's  autoregression estimate
   print(paste("final arcoefs", arcoefs ) )
+  print(paste("initi arcoefs",initialarcoefs ) )
   }
   progress <- txtProgressBar(min = 0, max = ncol(mat),      style = 3)
   for ( i in 1:ncol(amat) ) {
