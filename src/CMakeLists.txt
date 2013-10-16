@@ -20,7 +20,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
  #   SVN_REVISION -r 1781
    GIT_REPOSITORY http://github.com/stnava/ANTs.git
-   GIT_TAG 45f8ce3b9c8b1a95b3e4ede9ef2d15aaa56cbc06
+   GIT_TAG 6c255b2b3bbde1d5864c0b7df8e30a86bb46b32e
 #   GIT_TAG 798024a0bed4fe58fb9c9e2509c52c4ace8999e9
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
