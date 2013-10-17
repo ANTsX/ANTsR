@@ -1,4 +1,4 @@
-perfusionregression <- function( mask_img , mat , xideal , nuis = NA , dorobust = 0, skip = 20, checkmeansignal=TRUE  )
+perfusionregression <- function( mask_img , mat , xideal , nuis = NA , dorobust = 0, skip = 20  )
 {
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 myusage<-"usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
@@ -31,16 +31,6 @@ cbfi[ mask_img == 1 ] <- betaideal  # standard results
 
 if ( dorobust > 0 )
   {
-  if ( checkmeansignal ) {
-    print("Check the mean signal to eliminate frames with high drop out rate")
-    imgmeans<-apply(usemat,FUN=mean,MARGIN=1)
-    usemat<-subset( usemat , imgmeans > 100 )
-    nuis<-subset( nuis , imgmeans > 100 )
-    xideal<-subset( xideal , imgmeans > 100 )
-    print(dim(usemat))
-    imgmeans<-apply(usemat,FUN=mean,MARGIN=1)
-    print(imgmeans)
-  }
   pckg = try(require(robust))
   if(!pckg) 
     {

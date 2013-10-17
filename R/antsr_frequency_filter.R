@@ -46,7 +46,7 @@ antsr_frequency_filter <- function( values , tr , freqLo , freqHi , nuis = NA )
       myTimeSeries<-residuals(lm(myTimeSeries~1+as.matrix(nuis)))
     }
   myTimeSeries<-ts(myTimeSeries,frequency=1/tr)
-  filteredTimeSeries<-residuals(cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T,type="t"))
+  filteredTimeSeries<-residuals( cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=FALSE, root=FALSE, type=c("trigonometric") ) )
   # fn<-(gsub('.csv','VisualizeTimeSeriesFiltering.pdf',valuesOut))
   # print(paste("writing out reference filtering result",fn))
   # pdf(fn)
