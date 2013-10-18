@@ -12,11 +12,7 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   betas<-rep(NA, ncol( mat ) )
   desmat<-as.matrix( cbind( myvars$globalsignal, nuis ) )
   if ( residualizedesignmatrix ) desmat<-residuals(lm(desmat~hrf))
-  print("butt")
-  print(colnames(desmat))
-  print("butt2")
   desmat<-cbind( hrf, desmat )
-  print(colnames(desmat))
   colnames( desmat )<-c(colnames(hrf),"globalsignal",colnames(nuis))
   print( colnames( desmat ) )
 ############################################
