@@ -13,7 +13,7 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   desmat<-as.matrix( cbind( myvars$globalsignal, nuis ) )
   if ( residualizedesignmatrix ) desmat<-residuals(lm(desmat~hrf))
   desmat<-cbind( hrf, desmat )
-  colnames( desmat )<-c("hrf","globalsignal",colnames(nuis))
+  colnames( desmat )<-c(colnames(hrf),"globalsignal",colnames(nuis))
   print( colnames( desmat ) )
 ############################################
 # Statistical methods of estimation and inference for  #
