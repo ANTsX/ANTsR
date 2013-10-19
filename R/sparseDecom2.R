@@ -27,9 +27,8 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     dim2<-as.numeric(m2@dimension)
     antsImageWrite( inmask[[2]], mfn[2] )
     } else mfn[2]<-NA
-  args<-list("--scca",paste("two-view[",matname[1],",",matname[2],",",
-              mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
-              "]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
+  args<-list("--scca",paste("two-view[",matname[1],",",matname[2],",", 
+              mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],"]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
               "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong,"-z",z,"-s",smooth,"-r",robust,"-c",mycoption)
 
   if ( length(initializationList) > 0 )
@@ -51,7 +50,7 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
               mfn[1],",",mfn[2],",",sparseness[1],",",sparseness[2],
               "]",sep=''),"--l1","0.05","-i",its,"--PClusterThresh",cthresh[1],"-p", perms,
               "--QClusterThresh",cthresh[2],"-n",nvecs,"-o",outfn,"-g",uselong,"-z",z,"-s",smooth,"-r",robust,"-c",mycoption,
-               "--mask",mfn[2],"--initialization",initlistfn)
+               "--mask",mfn[1],"--initialization",initlistfn)
     if ( length(initializationList2) > 0 )
       {
         ct<-1
