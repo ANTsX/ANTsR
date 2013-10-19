@@ -20,7 +20,7 @@ if( NOT ANTS_DIR )
 #    SVN_REPOSITORY http://svn.code.sf.net/p/advants/svn/trunk 
  #   SVN_REVISION -r 1781
    GIT_REPOSITORY http://github.com/stnava/ANTs.git
-   GIT_TAG b151d1f4482c804298082199bb568eca04e17e62
+   GIT_TAG a374540ffeb1a97b0e456ad7f94705dca116d235
 #   GIT_TAG 6c255b2b3bbde1d5864c0b7df8e30a86bb46b32e
 #   GIT_TAG 798024a0bed4fe58fb9c9e2509c52c4ace8999e9
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
