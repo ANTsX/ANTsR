@@ -15,10 +15,10 @@ taskFMRI <- function( mat , hrf, myvars , correctautocorr=FALSE, residualizedesi
   desmat<-cbind( hrf, desmat )
   colnames( desmat )<-c(colnames(hrf),"globalsignal",colnames(nuis))
   print( colnames( desmat ) )
-############################################
-# Statistical methods of estimation and inference for  #
-# functional MR image analysis Bullmore 1996            #
-############################################
+#######################################################
+# Statistical methods of estimation and inference for #
+# functional MR image analysis Bullmore 1996          #
+#######################################################
   amat <- mat
   adesmat <- desmat
   myformhrf<-as.formula( paste( "amat ~  hrf + ", myformula ) )

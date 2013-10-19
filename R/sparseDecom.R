@@ -1,4 +1,4 @@
-sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA, z=0 , smooth=0)
+sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , its=5 , cthresh=250 , statdir = NA, z=0 , smooth=0, initializationList = list() )
 {
   numargs<-nargs()
   if ( numargs < 1 | missing(inmatrix) )
@@ -17,7 +17,25 @@ sparseDecom <- function( inmatrix=NA,  inmask=NA , sparseness=0.01, nvecs=50 , i
     mfn<-paste(statdir,'spcamask.nii.gz',sep='')
     antsImageWrite( inmask, mfn )
     } 
-  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z,"-s",smooth,"-c",1)
+  args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z,"-s",smooth,"-c",1,"--mask",inmask)
+  if ( length(initializationList) > 0 )
+    {
+    ct<-1
+    outfns<-c()
+    for ( img in initializationList )
+      {
+        outfn<-paste(statdir,'init',ct,'.nii.gz',sep='')
+        outfns<-c(outfns,outfn)
+        antsImageWrite( img, outfn )
+        ct<-ct+1
+      }
+    initlistfn<-paste(statdir,'init.txt',sep='')
+    fileConn<-file(initlistfn)
+    writeLines(outfns, fileConn)
+    close(fileConn)
+    args<-list("--svd",paste("recon[",matname,",",mfn,",",sparseness,"]",sep=''),"--l1",1,"-i",its,"--PClusterThresh",cthresh,"-n",nvecs,"-o",outfn,"-z",z,"-s",smooth,"-c",1,"--mask",mfn,"--initialization",initlistfn)
+    print( initlistfn )
+    }
   .Call( "sccan", int_antsProcessArguments( c(args) ) , PACKAGE = "libRsccan" ) ;
   mydecomp<-read.csv(decomp)
   if ( !is.na(inmask) )
