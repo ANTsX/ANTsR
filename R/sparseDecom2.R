@@ -37,9 +37,9 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
     outfns<-c()
     for ( img in initializationList )
       {
-        outfn<-paste(statdir,'init',ct,'.nii.gz',sep='')
-        outfns<-c(outfns,outfn)
-        antsImageWrite( img, outfn )
+        tempfn<-paste(statdir,'init',ct,'.nii.gz',sep='')
+        outfns<-c(outfns,tempfn)
+        antsImageWrite( img, tempfn )
         ct<-ct+1
       }
     initlistfn<-paste(statdir,'init.txt',sep='')
@@ -57,9 +57,9 @@ sparseDecom2 <- function( inmatrix,  inmask=c(NA,NA) , sparseness=c(0.01,0.01) ,
         outfns<-c()
         for ( img in initializationList2 )
           {
-            outfn<-paste(statdir,'init2_',ct,'.nii.gz',sep='')
-            outfns<-c(outfns,outfn)
-            antsImageWrite( img, outfn )
+            tempfn<-paste(statdir,'init2_',ct,'.nii.gz',sep='')
+            outfns<-c(outfns,tempfn)
+            antsImageWrite( img, tempfn )
             ct<-ct+1
           }
         initlistfn2<-paste(statdir,'init2.txt',sep='')
