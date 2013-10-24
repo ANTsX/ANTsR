@@ -1,4 +1,4 @@
-temporalwhiten <- function( x, myord=2 )
+temporalwhiten <- function( mat, myord=2 )
   {
   if ( nargs() == 0 )
     {
