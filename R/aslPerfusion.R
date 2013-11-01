@@ -1,4 +1,4 @@
-aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA, interpolation="linear" ,  checkmeansignal = TRUE )
+aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust = 0.92 , m0 = NA , skip = 20, mask = NA, interpolation="linear" ,  checkmeansignal = 100 )
 { 
   pixtype<-"float"
   myusage<-args( aslPerfusion )
@@ -53,13 +53,15 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
       return( NULL ) 
     }
   moco_results <- motion_correction( asl , moreaccurate = moreaccurate )
+  motionparams<-as.data.frame( moco_results$moco_params )
   moco_mask_img <- getMask( moco_results$moco_avg_img , lowThresh = maskThresh, highThresh = 1e9, cleanup = TRUE )
   if ( ! is.na(mask) ) moco_mask_img <- mask
   mat <- timeseries2matrix( moco_results$moco_img, moco_mask_img )
-  if ( checkmeansignal ) {
+  if ( checkmeansignal > 0 ) {
     print("Check the mean signal to eliminate frames with high drop out rate")
     imgmeans<-apply( mat,FUN=mean,MARGIN=1)
-    mat<-subset( mat , imgmeans > 100 )
+    mat<-subset( mat , imgmeans > checkmeansignal )
+    motionparams<-subset( motionparams, imgmeans > checkmeansignal )
     imgmeans<-apply( mat,FUN=mean,MARGIN=1)
     print(imgmeans)
   }
@@ -71,7 +73,6 @@ aslPerfusion<- function( asl, maskThresh = 500 , moreaccurate = TRUE , dorobust 
     m0[ moco_mask_img == 0 ]<-0
     m0[ moco_mask_img == 1 ]<-m0vals
     }
-  motionparams<-as.data.frame( moco_results$moco_params )
 #  mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- get_perfusion_predictors( mat , motionparams, NULL, 1, 3 )
   
