@@ -34,6 +34,42 @@ setMethod( f = "dim" ,
 			}
 	   )
 
+setMethod( f = "min" ,
+          signature( x = "antsImage"
+                    ) ,
+          definition = function( x )
+          {
+            return( min(as.array(x)) )
+          }
+          )
+
+setMethod( f = "max" ,
+          signature( x = "antsImage"
+                    ) ,
+          definition = function( x )
+          {
+            return( max(as.array(x)) )
+          }
+          )
+
+setMethod( f = "var" ,
+          signature( x = "antsImage"
+                    ) ,
+          definition = function( x )
+          {
+            return( var(as.array(x)) )
+          }
+          )
+
+setMethod( f = "mean" ,
+          signature( x = "antsImage"
+                    ) ,
+          definition = function( x )
+          {
+            return( mean(as.array(x)) )
+          }
+          )
+
 setMethod(f = "is.na",
           signature( x = "antsImage" ),
           definition = function( x )
