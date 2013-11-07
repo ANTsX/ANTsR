@@ -40,17 +40,18 @@ for ( a in 1:nrow(X) )
 return( list( u=t(u), v=t(v) ) )
 }
 
-sparsify<-function( v , sparam, mask = NA )
+sparsify<-function( v , sparam, mask = NA , clustval = 0)
 {
   vpos<-sparsifyv( v, sparam, mask )
   vneg<-sparsifyv( v*(-1) , sparam, mask )
   if ( norm(vneg) > norm(vpos) ) return( vneg )
   return( vpos )
 }
-
-sparsifyv<-function( v, sparam, mask = NA )
+ 
+sparsifyv<-function( vin, sparam, mask = NA , clustval = 0)
   {
-  if ( abs( sparam ) >= 1 ) return( v )
+  if ( abs( sparam ) >= 1 ) return( vin )
+  if ( nrow(vin) < ncol( vin ) ) v<-t(vin) else v <- vin
   b<-round(  abs( as.numeric(sparam) ) * nrow(v) )
   if ( b < 1 ) b <-1
   if ( b > nrow(v) ) b<-nrow(v)
@@ -65,7 +66,7 @@ sparsifyv<-function( v, sparam, mask = NA )
       vecimg[ mask > 0 ]<-sparsev
       temp<-antsImageClone( mask )
     # SmoothImage(3,vecimg,0.5,temp)
-      ImageMath( mask@dimension, temp,"ClusterThresholdVariate",vecimg,mask,100)
+      ImageMath( mask@dimension, temp,"ClusterThresholdVariate",vecimg,mask,clustval)
       sparsev<-c( vecimg[ mask > 0 ] )
     }
     v[,i] <- sparsev
