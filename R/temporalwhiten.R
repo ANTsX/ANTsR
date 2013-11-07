@@ -9,7 +9,8 @@ temporalwhiten <- function( mat, myord=2 )
   for ( i in 1:ncol(mat) )
     {
     gsig<-mat[,i]
-    arval<-ar(gsig,FALSE,2)$ar
+    arval<-rep(0,myord)
+    try ( arval<-ar(gsig,FALSE,myord)$ar )
     omat[,i]<-shift(gsig,1)*arval[1]+shift(gsig,2)*arval[2]
     }
   return( omat )
