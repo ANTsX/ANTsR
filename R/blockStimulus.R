@@ -10,7 +10,7 @@ blockStimulus <- function(scans=1 ,onsets=c(1) ,durations=c(1), rt=3)
     durations<-rep( durations[1] , length(onsets) )
   for ( stim in 1:length(onsets) )
     {
-    stimulus[ onsets[stim]:(onsets[stim]+durations[stim]) ] <- 1
+    stimulus[ onsets[stim]:(onsets[stim]+durations[stim]-1) ] <- 1
     }
   return( stimulus )
 }
