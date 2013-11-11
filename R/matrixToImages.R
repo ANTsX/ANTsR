@@ -18,20 +18,15 @@ matrixToImages = function(dataMatrix, mask ) {
     stop("Number of masked voxels do not match data")
   }
 
-  # Get a blank image with the correct header
-  img = new("antsImage", "float", 3)
-  ImageMath(3, img, "m", mask, "0.0")
-
   imagelist<-list()
   for (i in 1:numImages) {
 
-    img[img > 0] <- 0
-
-    img[mask > 0] <- dataMatrix[i,]
-
+    img <- antsImageClone( mask )
+    vec <- dataMatrix[i,]
+    img[mask <= 0 ] <- 0
+    img[mask > 0  ] <- vec
     imagelist<-lappend( imagelist , img )
 #    antsImageWrite( img, paste(outputRoot, sprintf("%03d.nii.gz", i), sep = "") ) 
-
   }
   return( imagelist )
 }

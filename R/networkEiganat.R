@@ -40,8 +40,12 @@ for ( a in 1:nrow(X) )
 return( list( u=t(u), v=t(v) ) )
 }
 
-sparsify<-function( v , sparam, mask = NA , clustval = 0)
+sparsify<-function( vin , sparam, mask = NA , clustval = 0)
 {
+  v<-vin
+  if ( class(v)[[1]][1] == "antsImage" & !is.na(mask) )
+    v<-as.matrix( vin[ mask > 1.e-5 ] )
+  v<-as.matrix( v )
   vpos<-sparsifyv( v, sparam, mask )
   vneg<-sparsifyv( v*(-1) , sparam, mask )
   if ( norm(vneg) > norm(vpos) ) return( vneg )
