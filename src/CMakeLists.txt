@@ -21,7 +21,7 @@ if( NOT ANTS_DIR )
  #   SVN_REVISION -r 1781
    #Use https instead of http for more reliable access to github
    GIT_REPOSITORY https://github.com/stnava/ANTs.git
-   GIT_TAG 4082015d845799f4a14987f84fd27df7c300726d
+   GIT_TAG e24d282baa96a81371f6f8ce3292020ca5d36f3b
    SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
    CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D COPY_SCRIPT_FILES_TO_BIN_DIR=ON # for useful things like buildtemplateparallel
