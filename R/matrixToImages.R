@@ -1,4 +1,4 @@
-matrixToImages = function(dataMatrix, mask, outputRoot) {
+matrixToImages = function(dataMatrix, mask ) {
   #
   # Writes rows of a matrix to 3D images.
   #
@@ -22,14 +22,16 @@ matrixToImages = function(dataMatrix, mask, outputRoot) {
   img = new("antsImage", "float", 3)
   ImageMath(3, img, "m", mask, "0.0")
 
+  imagelist<-list()
   for (i in 1:numImages) {
 
     img[img > 0] <- 0
 
     img[mask > 0] <- dataMatrix[i,]
 
-    antsImageWrite( img, paste(outputRoot, sprintf("%03d.nii.gz", i), sep = "") ) 
+    imagelist<-lappend( imagelist , img )
+#    antsImageWrite( img, paste(outputRoot, sprintf("%03d.nii.gz", i), sep = "") ) 
 
   }
-
+  return( imagelist )
 }
