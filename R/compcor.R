@@ -44,7 +44,7 @@ compcor <- function( fmri, ncompcor=4, variance_extreme=0.975,  mask=NA ,  useim
   compcorrsvd<-svd( highvarmat  )
   if( ncompcor > 0 )
   {
-  compcorr<-t( compcorrsvd$u[1:ncompcor, ] )
+  compcorr<-( compcorrsvd$u[,1:ncompcor ] )
   compcorrnames<-paste("compcorr",c(1:ncol(compcorr)),sep='')
   nuis<-compcorr
   colnames(nuis)<-c(compcorrnames)
