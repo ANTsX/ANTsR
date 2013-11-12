@@ -6,8 +6,9 @@ fastwhiten <- function( x , mynu=NA )
     return(1)
     }
   library(irlba)
-  if ( is.na(mynu) ) svdx<-irlba( x %*% t(x) ) else  svdx<-irlba( x %*% t(x) , nu=mynu , nv=mynu )
+  if ( is.na(mynu) ) svdx<-irlba( x ) else  svdx<-irlba( x  , nu=mynu , nv=1 )
   dd<-(svdx$d)^(-1/2)
-  xw<-( (svdx$u %*% diag(dd) ) %*% t(svdx$v) ) %*% x
+  xw<-( (svdx$u %*% diag(dd) ) %*% t(svdx$u) ) %*% x
   return(xw) 
   }
+
