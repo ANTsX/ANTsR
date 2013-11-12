@@ -41,7 +41,7 @@ compcor <- function( fmri, ncompcor=4, variance_extreme=0.975,  mask=NA ,  useim
   wh<-( temporalvar > thresh )
   wh2<-( temporalvar <= thresh )
   highvarmat<-mat[,wh]
-  compcorrsvd<-svd( highvarmat %*% t( highvarmat ) )
+  compcorrsvd<-svd( highvarmat  )
   if( ncompcor > 0 )
   {
   compcorr<-t( compcorrsvd$u[1:ncompcor, ] )
