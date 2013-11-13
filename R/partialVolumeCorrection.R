@@ -1,6 +1,6 @@
-partialVolumeCorrection <- function(img, img.gm, img.wm, mask=NULL, proportion=0.4){
-  if(class(img)[1] == "antsImage") { 
-    if(is.null(mask)){
+partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion = 0.4) {
+  if (class(img)[1] == "antsImage") {
+    if (is.null(mask)) {
       mask <- antsImageClone(img)
       mask[img != 0] <- 1
     }
@@ -12,15 +12,14 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask=NULL, proportion=0
     values.gm <- img.gm
     values.wm <- img.wm
   } else stop("Input image must be either antsImage or numeric.")
-
-  values.corrected <- values.img / (values.gm + 0.4 * values.wm)
-  values.corrected[(values.gm + values.wm) < 0.25] <- 
-    values.img[(values.gm + values.wm) < 0.25] # numerical stability
-  if(is.numeric(img)) {
+  
+  values.corrected <- values.img/(values.gm + 0.4 * values.wm)
+  values.corrected[(values.gm + values.wm) < 0.25] <- values.img[(values.gm + values.wm) < 0.25]  # numerical stability
+  if (is.numeric(img)) {
     return(values.corrected)
-  } else{
+  } else {
     img.corrected <- antsImageClone(img)
     img.corrected[mask > 0] <- values.corrected
     return(img.corrected)
   }
-}
+} 

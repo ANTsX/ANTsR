@@ -1,3 +1,3 @@
-WarpTensorImageMultiTransform <- function(...){
-	.Call( "WarpTensorImageMultiTransform", as.character( c(...) ) ) ;
-}
+WarpTensorImageMultiTransform <- function(...) {
+  .Call("WarpTensorImageMultiTransform", as.character(c(...)))
+} 

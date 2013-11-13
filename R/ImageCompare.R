@@ -1,3 +1,3 @@
-ImageCompare <- function(...){
-	.Call( "ImageCompare", as.character( c(...) ) ) ;
-}
+ImageCompare <- function(...) {
+  .Call("ImageCompare", as.character(c(...)))
+} 

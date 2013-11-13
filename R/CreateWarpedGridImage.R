@@ -1,3 +1,3 @@
-CreateWarpedGridImage <- function(...){
-	.Call( "CreateWarpedGridImage", as.character( c(...) ) ) ;
-}
+CreateWarpedGridImage <- function(...) {
+  .Call("CreateWarpedGridImage", as.character(c(...)))
+} 

@@ -1,3 +1,3 @@
-LabelClustersUniquely <- function(...){
-	.Call( "LabelClustersUniquely", int_antsProcessArguments( c(...) ) , PACKAGE = "libRLabelClustersUniquely" ) ;
-}
+LabelClustersUniquely <- function(...) {
+  .Call("LabelClustersUniquely", int_antsProcessArguments(c(...)), PACKAGE = "libRLabelClustersUniquely")
+} 

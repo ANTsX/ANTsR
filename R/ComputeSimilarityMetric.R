@@ -1,4 +1,3 @@
-ComputeSimilarityMetric <- function(...){
-	.Call( "ComputeSimilarityMetric", as.character( c(...) ) ) ;
-}
-
+ComputeSimilarityMetric <- function(...) {
+  .Call("ComputeSimilarityMetric", as.character(c(...)))
+} 

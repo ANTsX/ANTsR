@@ -1,3 +1,3 @@
-AverageTensorImages <- function(...){
-	.Call( "AverageTensorImages", as.character( c(...) ) ) ;
-}
+AverageTensorImages <- function(...) {
+  .Call("AverageTensorImages", as.character(c(...)))
+} 

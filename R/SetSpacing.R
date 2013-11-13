@@ -1,3 +1,3 @@
-SetSpacing <- function(...){
-	.Call( "SetSpacing", as.character( c(...) ) ) ;
-}
+SetSpacing <- function(...) {
+  .Call("SetSpacing", as.character(c(...)))
+} 

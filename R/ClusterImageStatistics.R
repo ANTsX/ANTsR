@@ -1,3 +1,3 @@
-ClusterImageStatistics <- function(...){
-	.Call( "ClusterImageStatistics", as.character( c(...) ) ) ;
-}
+ClusterImageStatistics <- function(...) {
+  .Call("ClusterImageStatistics", as.character(c(...)))
+} 

@@ -1,3 +1,3 @@
-LabelGeometryMeasures <- function(...){
-	.Call( "LabelGeometryMeasures", as.character( c(...) ) ) ;
-}
+LabelGeometryMeasures <- function(...) {
+  .Call("LabelGeometryMeasures", as.character(c(...)))
+} 

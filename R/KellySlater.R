@@ -1,3 +1,3 @@
-KellySlater <- function(...){
-	.Call( "KellySlater", as.character( c(...) ) ) ;
-}
+KellySlater <- function(...) {
+  .Call("KellySlater", as.character(c(...)))
+} 

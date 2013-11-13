@@ -1,3 +1,3 @@
-CreateDTICohort <- function(...){
-	.Call( "CreateDTICohort", as.character( c(...) ) ) ;
-}
+CreateDTICohort <- function(...) {
+  .Call("CreateDTICohort", as.character(c(...)))
+} 

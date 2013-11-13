@@ -1,3 +1,3 @@
-MemoryTest <- function(...){
-	.Call( "MemoryTest", as.character( c(...) ) ) ;
-}
+MemoryTest <- function(...) {
+  .Call("MemoryTest", as.character(c(...)))
+} 

@@ -1,3 +1,3 @@
-LabelOverlapMeasures <- function(...){
-	.Call( "LabelOverlapMeasures", as.character( c(...) ) ) ;
-}
+LabelOverlapMeasures <- function(...) {
+  .Call("LabelOverlapMeasures", as.character(c(...)))
+} 

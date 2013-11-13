@@ -1,4 +1,3 @@
-StudentsTestOnImages <- function(...){
-	.Call( "StudentsTestOnImages", as.character( c(...) ) ) ;
-}
-
+StudentsTestOnImages <- function(...) {
+  .Call("StudentsTestOnImages", as.character(c(...)))
+} 

@@ -1,3 +1,3 @@
-SetDirectionByMatrix <- function(...){
-	.Call( "SetDirectionByMatrix", as.character( c(...) ) ) ;
-}
+SetDirectionByMatrix <- function(...) {
+  .Call("SetDirectionByMatrix", as.character(c(...)))
+} 

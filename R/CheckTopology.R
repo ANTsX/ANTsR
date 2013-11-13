@@ -1,3 +1,3 @@
-CheckTopology <- function(...){
-	.Call( "CheckTopology", as.character( c(...) ) ) ;
-}
+CheckTopology <- function(...) {
+  .Call("CheckTopology", as.character(c(...)))
+} 
