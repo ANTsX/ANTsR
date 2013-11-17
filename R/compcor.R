@@ -38,8 +38,8 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   if ( fastsvd )
     {
       library(irlba)
-      compcorrsvd <- irlba(highvarmat, nu = ncompcor, nv = 1)
-    }  else compcorrsvd <- svd(highvarmat)
+      compcorrsvd <- irlba(highvarmat, nu = ncompcor, nv = 0 )
+    }  else compcorrsvd <- svd( highvarmat , nu = ncompcor, nv = 0 )
   if (ncompcor > 0) {
     compcorr <- (compcorrsvd$u[, 1:ncompcor])
     compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
