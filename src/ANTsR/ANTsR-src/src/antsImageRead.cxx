@@ -12,11 +12,20 @@ namespace ants
   template< class PixelType , int ImageDimension >
   typename itk::Image< PixelType , ImageDimension >::Pointer antsImageRead( std::string filename // image to read
 									    ) 
-  {
+  { 
     typedef itk::Image< PixelType , ImageDimension > ImageType ;
     typedef itk::ImageFileReader< ImageType >    ImageReaderType ;
     typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
     image_reader->SetFileName( filename.c_str() ) ;
+    try
+      {
+      image_reader->Update();
+      }
+    catch( itk::ExceptionObject & e )
+      {
+      Rcpp::Rcout << "Exception caught during reference file reading " << e << std::endl;
+      return NULL;
+      }
     return image_reader->GetOutput() ;
   }
 
@@ -123,10 +132,8 @@ try
       const int ImageDimension = 2 ;
       typedef float PixelType ;
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-      ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
-      Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-      //      ImagePointerType ptr_ptr_image = ants::antsImageRead< PixelType , ImageDimension >( filename );
-      //      Rcpp::XPtr< ImagePointerType > xptr( &ptr_ptr_image , true ) ;
+      ImagePointerType ptr_ptr_image = ants::antsImageRead< PixelType , ImageDimension >( filename );
+      Rcpp::XPtr< ImagePointerType > xptr( &ptr_ptr_image , true ) ;
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 2 ;
