@@ -17,7 +17,6 @@ namespace ants
     typedef itk::ImageFileReader< ImageType >    ImageReaderType ;
     typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
     image_reader->SetFileName( filename.c_str() ) ;
-    image_reader->Update();
     return image_reader->GetOutput() ;
   }
 
@@ -126,6 +125,8 @@ try
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
       ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
       Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
+      //      ImagePointerType ptr_ptr_image = ants::antsImageRead< PixelType , ImageDimension >( filename );
+      //      Rcpp::XPtr< ImagePointerType > xptr( &ptr_ptr_image , true ) ;
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 2 ;
