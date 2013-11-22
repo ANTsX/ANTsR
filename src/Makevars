@@ -1,1 +1,1 @@
-PKG_LIBS=${PWD}/src/ANTS/ANTS-build/lib
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" ${PWD}/src/ANTS/ANTS-build/lib`
