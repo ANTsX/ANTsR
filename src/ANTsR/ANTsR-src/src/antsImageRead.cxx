@@ -129,16 +129,15 @@ try
     }
   else if( dimension == 2 && pixeltype == "float" )
     {
-      const int ImageDimension = 2 ;
+      const int ImageDimension = 2;
       typedef float PixelType ;
       typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-      ImagePointerType ptr_ptr_image = ants::antsImageRead< PixelType , ImageDimension >( filename );
-      Rcpp::XPtr< ImagePointerType > xptr( &ptr_ptr_image , true ) ;
+      ImagePointerType* ptr_ptr_image = new ImagePointerType( ants::antsImageRead< PixelType , ImageDimension >( filename ) ) ;
+      Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-      image_r.slot( "dimension" ) = 2 ;
-      image_r.slot( "pointer" ) = xptr ;
-//      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
+      image_r.slot( "dimension" ) = 2;
+      image_r.slot( "pointer" ) = xptr;
       return image_r ;
     }
   else if( dimension == 4 && pixeltype == "unsigned int" )
