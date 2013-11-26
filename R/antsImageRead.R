@@ -11,6 +11,6 @@ antsImageRead <- function(filename, dimension, pixeltype = "float") {
     print("'dimension' argument must be of class 'numeric' and have length 1")
     return(NULL)
   }
-  rval <- (.Call("antsImageRead", filename, pixeltype, dimension, PACKAGE = "itkImageR"))
+  rval <- (.Call("antsImageRead", filename, pixeltype, dimension, PACKAGE = "ANTsR"))
   return(rval)
 } 

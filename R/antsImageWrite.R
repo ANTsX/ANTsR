@@ -3,5 +3,5 @@ antsImageWrite <- function(image, filename) {
     print("'image' argument provided is not of class 'antsImage'")
     return(NULL)
   }
-  return(.Call("antsImageWrite", image, filename, PACKAGE = "itkImageR"))
+  return(.Call("antsImageWrite", image, filename, PACKAGE = "ANTsR"))
 } 

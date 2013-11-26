@@ -6,5 +6,5 @@ SmoothImage <- function(...) {
   }
   args <- list(...)
   newargs <- list(args[[1]], args[[4]], "G", args[[2]], args[[3]])
-  .Call("ImageMath", int_antsProcessArguments(c(newargs)), PACKAGE = "itkImageR")
+  .Call("ImageMath", int_antsProcessArguments(c(newargs)), PACKAGE = "ANTsR")
 } 

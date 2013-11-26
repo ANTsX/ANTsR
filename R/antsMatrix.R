@@ -6,18 +6,18 @@
 setClass(Class = "antsMatrix", representation(elementtype = "character", pointer = "externalptr"))
 
 setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(.Object, elementtype) {
-  .Call("antsMatrix", elementtype, PACKAGE = "itkImageR")
+  .Call("antsMatrix", elementtype, PACKAGE = "ANTsR")
 })
 
 setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = function(x) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "itkImageR")
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
   return(as.data.frame(lst))
 })
 
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "itkImageR")
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
   return(lst)
@@ -26,22 +26,22 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 setGeneric(name = "as.antsMatrix", def = function(object, ...) standardGeneric("as.antsMatrix"))
 
 setMethod(f = "as.antsMatrix", signature(object = "list"), definition = function(object, elementtype) {
-  return(.Call("antsMatrix_asantsMatrix", object, elementtype, PACKAGE = "itkImageR"))
+  return(.Call("antsMatrix_asantsMatrix", object, elementtype, PACKAGE = "ANTsR"))
 })
 
 setMethod(f = "as.antsMatrix", signature(object = "data.frame"), definition = function(object, elementtype) {
-  return(.Call("antsMatrix_asantsMatrix", as.list(object), elementtype, PACKAGE = "itkImageR"))
+  return(.Call("antsMatrix_asantsMatrix", as.list(object), elementtype, PACKAGE = "ANTsR"))
 })
 
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "itkImageR")
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
   return(lst)
 })
 
 as.list.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "itkImageR")
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst))] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
   return(lst)
@@ -52,7 +52,7 @@ setAs("antsMatrix", "list", function(from) {
 })
 
 as.data.frame.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "itkImageR")
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst))] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
   as.data.frame(lst)
