@@ -1,4 +1,4 @@
-useDynLib(itkImageR)
+useDynLib(ANTsR)
 S3method(as.data.frame, antsMatrix)
 S3method(as.list, antsMatrix, antsImageRead)
 exportMethods(coerce)
