@@ -1,7 +1,7 @@
 antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outprefix = "", ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
-    .Call("antsRegistration", int_antsProcessArguments(c(fixed)), PACKAGE = "libRantsRegistration")
+    .Call("antsRegistration", int_antsProcessArguments(c(fixed)), PACKAGE = "itkImageR")
     return(0)
   }
   if (numargs < 1 | missing(fixed) | missing(moving) | missing(typeofTransform) | missing(outprefix)) {
@@ -11,7 +11,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
     cat("For full mode: use standard ants call , e.g. : \n")
     cat(" ANTsR::antsRegistration( list( d=2,m=\"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", t=\"affine[1.0]\", c=\"2100x1200x1200x0\",  s=\"3x2x1x0\", f=\"4x3x2x1\", u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n")
     cat("full help: \n")
-    .Call("antsRegistration", int_antsProcessArguments(c(list("--help"))), PACKAGE = "libRantsRegistration")
+    .Call("antsRegistration", int_antsProcessArguments(c(list("--help"))), PACKAGE = "itkImageR")
     return(0)
   }
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
@@ -59,7 +59,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
         }
-        .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "libRantsRegistration")
+        .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "itkImageR")
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix) txlist<-list.files( path =
         # outpath, pattern = glob2rx( paste(outvar,'*',sep='') ), full.names = TRUE, recursive = FALSE )
         gc()  # trigger garbage collection
@@ -71,7 +71,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
     }
     return(0)
   }
-  .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "libRantsRegistration")
+  .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "itkImageR")
   gc()  # trigger garbage collection
 }
 

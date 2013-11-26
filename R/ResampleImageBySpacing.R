@@ -1,3 +1,3 @@
 ResampleImageBySpacing <- function(...) {
-  .Call("ResampleImageBySpacing", int_antsProcessArguments(c(...)), PACKAGE = "libRResampleImageBySpacing")
+  .Call("ResampleImageBySpacing", int_antsProcessArguments(c(...)), PACKAGE = "itkImageR")
 } 

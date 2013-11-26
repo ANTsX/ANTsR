@@ -2,7 +2,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
   ...) {
   numargs <- nargs()
   if (typeof(fixed) == "list") {
-    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float", 0)), PACKAGE = "libRantsApplyTransforms")
+    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float", 0)), PACKAGE = "itkImageR")
     return(0)
   }
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
@@ -11,7 +11,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
     cat("For full mode: use standard ants call as in antsApplyTransforms full mode ... \n\n")
     cat(" antsApplyTransforms(\"-d\",\"2\",\"-i\",\"r64slice.nii.gz\",\"-o\",\"temp.nii.gz\",\"-r\",\"r16slice.nii.gz\",\"-t\",\"./Z0GenericAffine.mat\") \n")
     cat("for full help: \n")
-    cat("use .Call( \"antsApplyTransforms\", int_antsProcessArguments( c(list(\"--help\")) ), PACKAGE=\"libRantsApplyTransforms\" );\n\n")
+    cat("use .Call( \"antsApplyTransforms\", int_antsProcessArguments( c(list(\"--help\")) ), PACKAGE=\"itkImageR\" );\n\n")
     return(0)
   }
   args <- list(fixed, moving, transformlist, interpolator, ...)
@@ -54,7 +54,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
           }
           }
         }
-        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e", imagetype), PACKAGE = "libRantsApplyTransforms")
+        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e", imagetype), PACKAGE = "itkImageR")
         gc()
         return(antsImageClone(warpedmovout, inpixeltype))
       }
@@ -66,7 +66,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
   # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-antsrParseListToString( c(args) ) system(
   # paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim)
   # ) ) }
-  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float", 0, "-e", imagetype)), PACKAGE = "libRantsApplyTransforms")
+  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float", 0, "-e", imagetype)), PACKAGE = "itkImageR")
   gc()  # trigger garbage collection
 }
 

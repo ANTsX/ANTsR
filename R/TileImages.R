@@ -1,3 +1,3 @@
 TileImages <- function(...) {
-  .Call("TileImages", as.character(c(...)), PACKAGE = "libRTileImages")
+  .Call("TileImages", as.character(c(...)), PACKAGE = "itkImageR")
 } 

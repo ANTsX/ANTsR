@@ -21,7 +21,7 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
   }
   args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",", demog.name, "]", sep = ""), 
     "--l1", 1, "-i", its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth)
-  .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "libRsccan")
+  .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "itkImageR")
   mydecomp <- read.csv(decomp)
   if (!is.na(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
