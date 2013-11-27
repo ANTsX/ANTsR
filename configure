@@ -30,4 +30,8 @@ echo " if you get an error such as Cannot load library or library not found -- t
 echo " add the line below to your .bash_profile file which is in your home directory "
 echo " create the file if you don't have it "
 echo " export R_LD_LIBRARY_PATH=${R_LD_LIBRARY_PATH}:${RLDPATH} "
+echo "          ******* on UBUNTU and possibly other LINUX variants *******           "
+echo "   see http://stackoverflow.com/questions/9151491/extending-default-lib-search-path-in-ubuntu "
+echo "   or you can cp the *.so to  /usr/lib/                                         "
 echo " (*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*)(*) "
+
