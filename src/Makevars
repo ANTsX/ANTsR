@@ -17,5 +17,5 @@ libone=${myrootantsbin}lib/libl_Atropos${DYLIB_EXT} ${myrootantsbin}lib/libl_Atr
 #  mylib=`find ${myrootantsbin}lib/ -name "*${nm}*${DYLIB_EXT}"` 
 #  libone="${libone} $mylib"
 # done
-libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `
+libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `:${myrootantsbin}lib/
 PKG_LIBS = ${libone} ${libtwo}
