@@ -12,7 +12,8 @@ PKG_CPPFLAGS=-I${myrootantsbin}/ANTS-build/ITKIOFactoryRegistration -I${myrootit
 DYLIB_EXT=`R CMD config DYLIB_EXT`
 libone=`find ./ANTS/ANTS-build/lib/ -name "*${DYLIB_EXT}"`
 libone=${myrootantsbin}lib/libl_Atropos${DYLIB_EXT} ${myrootantsbin}lib/libl_AtroposMin${DYLIB_EXT} ${myrootantsbin}lib/libl_ImageMath${DYLIB_EXT} ${myrootantsbin}lib/libl_ThresholdImage${DYLIB_EXT} ${myrootantsbin}lib/libl_TileImages${DYLIB_EXT} ${myrootantsbin}lib/libl_antsAffineInitializer${DYLIB_EXT} ${myrootantsbin}lib/libl_antsApplyTransforms${DYLIB_EXT} ${myrootantsbin}lib/libl_antsApplyTransformsToPoints${DYLIB_EXT} ${myrootantsbin}lib/libl_antsMotionCorr${DYLIB_EXT} ${myrootantsbin}lib/libl_antsRegistration${DYLIB_EXT} ${myrootantsbin}lib/libl_sccan${DYLIB_EXT}
-ifeq (uname,"Linux")
+myarch=$(uname)
+ifeq (myarch,"Linux")
 	libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `:${myrootantsbin}lib/
 else 
 	libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `
