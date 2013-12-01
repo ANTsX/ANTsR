@@ -1,5 +1,5 @@
 sparseDecom <- function(inmatrix = NA, inmask = NA, sparseness = 0.01, nvecs = 50, its = 5, cthresh = 250, statdir = NA, 
-  z = 0, smooth = 0, initializationList = list(), mycoption = 1) {
+  z = 0, smooth = 0, initializationList = list(), mycoption = 0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
