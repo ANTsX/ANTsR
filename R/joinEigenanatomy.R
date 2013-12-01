@@ -40,7 +40,7 @@ joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphden
     newdecom[ cl, ]<-tempvec
   }
   decom2 <- newdecom
-  newelist<-list()
+  newelist<-decom2
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
