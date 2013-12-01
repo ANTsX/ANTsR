@@ -12,7 +12,7 @@ sparseDecom <- function(inmatrix = NA, inmask = NA, sparseness = 0.01, nvecs = 5
   matname <- paste(statdir, "spcamatrix.mha", sep = "")
   antsImageWrite(as.antsImage(inmatrix), matname)
   mfn <- NA
-  if (!is.na(inmask)) {
+  if ( class(inmask)[[1]][1] == "antsImage" ) {
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(inmask, mfn)
   }
@@ -39,7 +39,7 @@ sparseDecom <- function(inmatrix = NA, inmask = NA, sparseness = 0.01, nvecs = 5
   }
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
-  if (!is.na(inmask)) {
+  if ( class(inmask)[[1]][1] == "antsImage" ) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)[1:nvecs]
     fnll <- list()
@@ -49,7 +49,7 @@ sparseDecom <- function(inmatrix = NA, inmask = NA, sparseness = 0.01, nvecs = 5
     }
     fnl <- fnll
   }
-  if (is.na(inmask)) {
+  if ( class(inmask)[[1]][1] != "antsImage" ) {
     glb <- paste("spca*_Variate_View1vec.csv", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
     fnl <- read.csv(fnl)
