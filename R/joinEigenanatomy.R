@@ -1,4 +1,4 @@
-joinEigenanatomy <- function(datamatrix, mask, list_of_eanat_images, graphdensity = 0.65) {
+joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphdensity = 0.65) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
@@ -9,10 +9,11 @@ joinEigenanatomy <- function(datamatrix, mask, list_of_eanat_images, graphdensit
     getPckg("igraph")
   }
   library(igraph)
-  decom2 <- imageListToMatrix(list_of_eanat_images, mask)
+  if ( !is.na( mask ) ) decom2 <- imageListToMatrix(list_of_eanat_images, mask) else decom2<-t(list_of_eanat_images)
   myproj <- datamatrix %*% t(decom2)
   gg <- makeGraph(cor(myproj), graphdensity)
   communitymembership <- gg$walktrapcomm$membership
+  if ( !is.na( mask ) ) { 
   newelist <- list()
   for (cl in 1:max(communitymembership)) {
     newe <- antsImageClone(mydecom$eigenanatomyimages[[1]])
@@ -26,6 +27,21 @@ joinEigenanatomy <- function(datamatrix, mask, list_of_eanat_images, graphdensit
     newelist <- lappend(newelist, newe)
   }
   decom2 <- imageListToMatrix(newelist, mask)
+  }
+
+  if ( is.na( mask ) ) { 
+  newdecom<-matrix( rep(0,ncol(datamatrix) * max(communitymembership) ), nrow=max(communitymembership) )
+  for (cl in 1:max(communitymembership)) {
+    vec<-rep( 0, ncol(datamatrix) )
+    ntosum<-sum( communitymembership == cl )
+    tempmat <- decom2[communitymembership == cl,]
+    if ( ntosum > 1 ) tempvec<-apply( tempmat, FUN=sum, MARGIN=2 ) else tempvec<-tempmat
+    tempvec<-tempvec/sum(abs(tempvec))
+    newdecom[ cl, ]<-tempvec
+  }
+  decom2 <- newdecom
+  newelist<-decom2
+  }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
   return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership))
