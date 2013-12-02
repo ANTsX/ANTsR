@@ -1,5 +1,5 @@
-\name{lmInference}
-\alias{lmInference}
+\name{bigLMStats}
+\alias{bigLMStats}
 \title{
 Efficiently compute basic statistical inference from regressions with multiple outcomes
 }
@@ -8,7 +8,7 @@ Efficiently compute basic statistical inference from regressions with multiple o
 }
 
 \usage{
-  lmInference(mylm) 
+  bigLMStats(mylm) 
 }
 
 \arguments{
@@ -41,7 +41,7 @@ lm1 <- lm(y1~x)
 lm2 <- lm(y2~x)
 mylm <- lm(y ~ x)
 
-myest <- lmInference(mylm)
+myest <- bigLMStats(mylm)
 print(paste('R beta estimates for first outcome is', summary(lm1)$coefficients[-1,1],
             'and for second outcome is', summary(lm2)$coefficients[-1,1]))
 print(paste('and our estimate is', as.numeric(myest$beta[,1]), as.numeric(myest$beta[,2])))
