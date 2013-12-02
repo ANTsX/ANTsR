@@ -1,4 +1,4 @@
-lmInference <- function(mylm) {
+bigLMStats <- function(mylm) {
   beta <- mylm$coefficients[-1, ]
   myresponse <- model.response(model.frame(mylm))
   X <- model.matrix(mylm)
