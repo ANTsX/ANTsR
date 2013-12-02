@@ -5,26 +5,33 @@ RCPP_INCLUDE_DIR=`${R_DIR}Rscript -e 'Rcpp:::CxxFlags()'`
 RCPP_LIB_DIR=`${R_DIR}Rscript -e 'Rcpp:::LdFlags()'`
 R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
 R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
+DYLIB_EXT=`R CMD config DYLIB_EXT`
 cd ./src
 cmake  -D ANTS_DIR:PATH="$ANTS_DIR" -D ITK_DIR:PATH="$ITK_DIR" -D RCPP_INCLUDE_DIR:PATH="$RCPP_INCLUDE_DIR" -D RCPP_LIB_DIR:PATH="$RCPP_LIB_DIR" -D R_INCLUDE_DIR:PATH="$R_INCLUDE_DIR" -D R_LIB_DIR:PATH="$R_LIB_DIR" -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  .
 make -j 2 # $ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS 
 rm Makefile
 RLDPATH=${PWD}/ANTS/ANTS-build/lib/
+if [[ ${#R_LIBS_USER} -gt 0 ]] ; then 
+  RLDPATH=`echo $R_LIBS_USER | cut -d ':' -f 1`ANTsR/libs/
+  mkdir -p $RLDPATH
+  cp ${PWD}/ANTS/ANTS-build/lib/*${DYLIB_EXT} $RLDPATH 
+fi 
 # this solution came from http://stackoverflow.com/questions/5522126/dyld-not-able-to-load-dylibs
 # a possible linux solution https://blogs.oracle.com/dipol/entry/dynamic_libraries_rpath_and_mac
-if [[ uname -eq "Darwin" ]] ; then 
+# if [[ uname -eq "Darwin" ]] ; then 
+if [[ uname -eq "Darwin" ]] && [[  ${#R_LIBS_USER} -eq 0 ]] ; then 
   echo Change Library Paths
-  itklibs=`find ./ANTS/ANTS-build/lib/ -name "lib[itk,ITK]*.dylib"`
-  antslibs=`find ./ANTS/ANTS-build/lib/ -name "libl_*.dylib"`
+  itklibs=`find ${RLDPATH} -name "lib[itk,ITK]*${DYLIB_EXT}"`
+  antslibs=`find ${RLDPATH} -name "libl_*${DYLIB_EXT}"`
   for x in ${antslibs} ; do
       echo $x 
       for y in ${itklibs} ; do
 	  ymod=`basename $y`
 	  install_name_tool -change ${ymod} ${RLDPATH}${ymod} ${x} 
-      done
-#      otool -L $x 
+      done  
   done
 fi
+# otool -L $x 
 echo " (*)(*)(*)(*)(*)(*) PLEASE DONT IGNORE THE FOLLOWING MESSAGE (*)(*)(*)(*)(*)(*) "
 echo " if you get an error such as Cannot load library or library not found -- then please do this: "
 echo " add the line below to your .bash_profile file which is in your home directory "
