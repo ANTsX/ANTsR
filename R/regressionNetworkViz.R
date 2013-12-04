@@ -1,4 +1,4 @@
-regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9  ) {
+regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9, zoom = F  ) {
   if (nargs() == 0) {
     return(1)
   }
@@ -56,12 +56,12 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
   if ( whichviz == "Sankey" ) {
     d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source",
            Target = "target", Value = "value", NodeID = "name",
-           fontsize = 12, nodeWidth = 30, width = 700,file=outfile)
+           fontsize = 12, nodeWidth = 30, width = 700,file=outfile, zoom = zoom )
   } else {
     d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, 
                Source = "source", Target = "target", 
                Value = "value", NodeID = "name", 
-               Group = "group", width = 550, height = 400, zoom=F,
+               Group = "group", width = 550, height = 400, zoom=zoom ,
                opacity = 0.9,file=outfile)
   }
   return( list( mynodes=JJNodes, mylinks=JJLinks ) )
