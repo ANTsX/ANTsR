@@ -6,11 +6,12 @@ Visualize a regression result by a d3 network visualization.
 }
 
 \description{
-Use either a force directed graph or a Sankey graph to show relationships between predictors and outcome variables.  
+Use either a force directed graph or a Sankey graph to show relationships between predictors and outcome variables. 
+ correlateMyOutcomes should correspond to the outcome variables ... 
 }
 
 \usage{
-regressionNetworkViz( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp2.html") 
+regressionNetworkViz( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp2.html", correlateMyOutcomes = brainpreds) 
 }
 
 \arguments{

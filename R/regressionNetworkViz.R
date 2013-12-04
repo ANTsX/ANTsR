@@ -1,4 +1,4 @@
-regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", verbose=FALSE ) {
+regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9  ) {
   if (nargs() == 0) {
     return(1)
   }
@@ -25,8 +25,32 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
         {
           jjsources<-c( jjsources, rep( i-1, length( myselection ) ) )
           jjtargets<-c( jjtargets, myselection-1+length(demognames) )
-          jjvalues<-c( jjvalues, mylm$beta.pval[i,myselection] )
+          if ( logvals )
+            jjvalues<-c( jjvalues, abs( log ( mylm$beta.pval[i,myselection] ) ) )
+          else 
+            jjvalues<-c( jjvalues, ( 1 - mylm$beta.pval[i,myselection] ) * 10 )
         }
+    }
+  if ( ! is.na( correlateMyOutcomes ) )
+    {
+      if ( ncol(correlateMyOutcomes) == nrow(correlateMyOutcomes) )
+      {
+      mycor<-( correlateMyOutcomes )
+      for ( i in 1:nrow( mycor ) )
+        {
+          myselection<-which( mycor[i,] > corthresh )
+          myselection <- myselection[ myselection > i ] 
+          if ( length( myselection ) > 0 )
+            {
+              jjsources<-c( jjsources, rep( i-1+length(demognames), length( myselection ) ) )
+              jjtargets<-c( jjtargets, myselection-1+length(demognames) )
+              if ( logvals )
+                jjvalues<-c( jjvalues, abs( log ( 1 - mycor[i,myselection] ) ) )
+              else 
+                jjvalues<-c( jjvalues, ( mycor[i,myselection] ) * 10 )
+            }
+        }
+      } # if it's a correlation matrix 
     }
   JJLinks<-data.frame(source=jjsources,target=jjtargets,value=jjvalues)
   if ( whichviz == "Sankey" ) {
@@ -40,4 +64,5 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
                Group = "group", width = 550, height = 400, zoom=F,
                opacity = 0.9,file=outfile)
   }
+  return( list( mynodes=JJNodes, mylinks=JJLinks ) )
 } 
