@@ -2,6 +2,10 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
   if (nargs() == 0) {
     return(1)
   }
+  pckg <- try(require(d3Network))
+  if (!pckg) {
+    getPckg("d3Network")
+  }
   library(d3Network)
   demognames<-rownames(mylm$beta.pval)
   jjnames<-c(demognames,colnames(mylm$beta.pval))
