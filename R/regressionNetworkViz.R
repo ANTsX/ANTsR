@@ -56,7 +56,7 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
   if ( whichviz == "Sankey" ) {
     d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source",
            Target = "target", Value = "value", NodeID = "name",
-           fontsize = 12, nodeWidth = 30, width = 700,file=outfile, zoom = zoom )
+           fontsize = 12, nodeWidth = 30, width = 700,file=outfile)
   } else {
     d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, 
                Source = "source", Target = "target", 
