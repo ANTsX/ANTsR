@@ -1,4 +1,4 @@
-regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9, zoom = F  ) {
+regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", mygroup = 0 , logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9, zoom = F  ) {
   if (nargs() == 0) {
     return(1)
   }
@@ -9,7 +9,8 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
   library(d3Network)
   demognames<-rownames(mylm$beta.pval)
   jjnames<-c(demognames,colnames(mylm$beta.pval))
-  mygroup<-c(rep(1,length(demognames)),rep(2,ncol(mylm$beta.pval)))
+  if ( length( mygroup ) == 1 )
+    mygroup<-c(rep(1,length(demognames)),rep(2,ncol(mylm$beta.pval)))
   JJNodes<-data.frame( name=jjnames, group=mygroup )
   jjsources<-c()
   jjtargets<-c()
