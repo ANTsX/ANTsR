@@ -11,15 +11,10 @@ cmake  -D ANTS_DIR:PATH="$ANTS_DIR" -D ITK_DIR:PATH="$ITK_DIR" -D RCPP_INCLUDE_D
 make -j 2 # $ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS 
 rm Makefile
 RLDPATH=${PWD}/ANTS/ANTS-build/lib/
-if [[ ${#R_LIBS_USER} -gt 0 ]] ; then 
-  RLDPATH=`echo $R_LIBS_USER | cut -d ':' -f 1`ANTsR/libs/
-  mkdir -p $RLDPATH
-  cp ${PWD}/ANTS/ANTS-build/lib/*${DYLIB_EXT} $RLDPATH 
-fi 
 # this solution came from http://stackoverflow.com/questions/5522126/dyld-not-able-to-load-dylibs
 # a possible linux solution https://blogs.oracle.com/dipol/entry/dynamic_libraries_rpath_and_mac
 # if [[ uname -eq "Darwin" ]] ; then 
-if [[ uname -eq "Darwin" ]] && [[  ${#R_LIBS_USER} -eq 0 ]] ; then 
+if [[ uname -eq "Darwin" ]]  ; then 
   echo Change Library Paths
   itklibs=`find ${RLDPATH} -name "lib[itk,ITK]*${DYLIB_EXT}"`
   antslibs=`find ${RLDPATH} -name "libl_*${DYLIB_EXT}"`
@@ -31,6 +26,12 @@ if [[ uname -eq "Darwin" ]] && [[  ${#R_LIBS_USER} -eq 0 ]] ; then
       done  
   done
 fi
+if [[ ${#R_LIBS_USER} -gt 0 ]] ; then 
+  echo DO THE COPYING 
+  RLDPATH=`echo $R_LIBS_USER | cut -d ':' -f 1`ANTsR/libs/
+  mkdir -p $RLDPATH
+  cp ${PWD}/ANTS/ANTS-build/lib/*${DYLIB_EXT} $RLDPATH 
+fi 
 # otool -L $x 
 echo " (*)(*)(*)(*)(*)(*) PLEASE DONT IGNORE THE FOLLOWING MESSAGE (*)(*)(*)(*)(*)(*) "
 echo " if you get an error such as Cannot load library or library not found -- then please do this: "
