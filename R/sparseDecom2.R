@@ -58,7 +58,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
         ct <- ct + 1
       }
       initlistfn2 <- paste(statdir, "init2.txt", sep = "")
-      fileConn <- file(initlistfn)
+      fileConn <- file(initlistfn2)
       writeLines(outfns, fileConn)
       close(fileConn)
       args <- list("--scca", paste("two-view[", matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
