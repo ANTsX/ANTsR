@@ -46,7 +46,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     vec1[ mysd1 > 0 ]  <- vec1[ mysd1 > 0 ] /  mysd1[ mysd1 > 0 ]
     cca1out[ nv, ] <- vec1
     bootmat<-bootccalist1[[nv]]
-    myav2 <- apply(bootmat,FUN=mean,MARGIN=2)
+    vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
     mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
     vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
     cca2out[ nv, ] <- vec2
