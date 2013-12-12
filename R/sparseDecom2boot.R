@@ -46,22 +46,23 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
     mysd1 <- apply(bootmat,FUN=sd,MARGIN=2)
     vec1[ mysd1 > 0 ]  <- vec1[ mysd1 > 0 ] /  mysd1[ mysd1 > 0 ]
-    cca1out[ , nv ] <- vec1
+    cca1out[ , nv ] <-  sparsify( vec1 , sparseness[1] )
     bootmat<-bootccalist2[[nv]]
     vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
     mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
     vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
-    cca2out[ , nv ] <- vec2
+    cca2out[ , nv ] <- sparsify( vec2 , sparseness[2] )
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
-  if ( length(dim(myres$eig1)) == 2 ) locmask<-c( fakemask1, fakemask2 ) else locmask <- inmask
+  usefakemask<-( length(dim(myres$eig1)) == 2 )
+  if ( usefakemask ) locmask<-c( fakemask1, fakemask2 ) else locmask <- inmask
 
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
   ###
-  if ( length(dim(myres$eig1)) == 2 ) {
-    myres$eig1<-imageListToMatrix( myres$eig1 , fakemask1 ) 
-    myres$eig2<-imageListToMatrix( myres$eig2 , fakemask2 ) 
+  if ( usefakemask ) {
+    myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
+    myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
   }
 #  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
