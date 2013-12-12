@@ -12,7 +12,7 @@ matrixToImages <- function(dataMatrix, mask) {
   numVoxelsInMask <- length(which(mask > 0))
   
   if (numVoxelsInMatrix != numVoxelsInMask) {
-    stop("Number of masked voxels do not match data")
+    stop(paste("Number of masked voxels",numVoxelsInMask," do not match data",numVoxelsInMatrix))
   }
   
   imagelist <- list()
