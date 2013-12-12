@@ -1,5 +1,5 @@
-sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 50, its = 5, cthresh = c(250, 
-  250), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), 
+sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 50, its = 5, cthresh = c(0, 
+  0), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), 
   initializationList2 = list(), ell1 = 0.05, nboot = 10, nsamp=0.9 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
@@ -35,8 +35,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       cca1out<-cca1out+cca1
       cca2out<-cca2out+cca2
       for ( nv in 1:nvecs ) {
-        bootccalist1[[nv]][boots,]<-cca1[nv,]
-        bootccalist2[[nv]][boots,]<-cca2[nv,]
+        bootccalist1[[nv]][boots,]<-abs(cca1[nv,])
+        bootccalist2[[nv]][boots,]<-abs(cca2[nv,])
       }
     }
   for ( nv in 1:nvecs ) {
@@ -51,13 +51,13 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
     cca2out[ nv, ] <- vec2
   }
-  
-  print("Get Final Results")
-  if ( length(dim(myres$eig1)) == 2 )
-    return( list( bootcca1=cca1out*(1.0/nboot) , bootcca2=cca2out*(1.0/nboot) ) ) 
+  fakemask1<-makeImage( c(ncol(mat1),1,1) , 1 )
+  fakemask2<-makeImage( c(ncol(mat2),1,1) , 1 )
+  if ( length(dim(myres$eig1)) == 2 ) inmask<-c( fakemask1, fakemask2 ) 
+#  return( list( bootcca1=cca1out*(1.0/nboot) , bootcca2=cca2out*(1.0/nboot) ) ) 
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = inmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages(cca1out,inmask[[1]]), initializationList2 = matrixToImages(cca2out,inmask[[2]]), ell1 = ell1 )
   ###
-  print("Got Final Results")
+#  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
-        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary ) )
+        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2 ) )
 }
