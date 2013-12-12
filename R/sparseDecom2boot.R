@@ -59,6 +59,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
 
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
   ###
+  if ( length(dim(myres$eig1)) == 2 ) {
+    myres$eig1<-imageListToMatrix( myres$eig1 , fakemask1 ) 
+    myres$eig2<-imageListToMatrix( myres$eig2 , fakemask2 ) 
+  }
 #  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
         eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2 ) )
