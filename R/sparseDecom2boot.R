@@ -43,14 +43,20 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
   for ( nv in 1:nvecs ) {
     bootmat<-bootccalist1[[nv]]
-    vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
-    mysd1 <- apply(bootmat,FUN=sd,MARGIN=2)
-    vec1[ mysd1 > 0 ]  <- vec1[ mysd1 > 0 ] /  mysd1[ mysd1 > 0 ]
+#    vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
+#    mysd1 <- apply(bootmat,FUN=sd,MARGIN=2)
+#    vec1[ mysd1 > 0 ]  <- vec1[ mysd1 > 0 ]  /  mysd1[ mysd1 > 0 ]
+    vec1  <- apply(bootmat,FUN=t.test,MARGIN=2)
+    vec1 <- as.numeric( do.call(rbind, vec1)[,1] )
+    vec1[ is.na( vec1 ) ]<-0
     cca1out[ , nv ] <-  sparsify( vec1 , sparseness[1] )
     bootmat<-bootccalist2[[nv]]
-    vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
-    mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
-    vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
+#    vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
+#    mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
+#    vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
+    vec2  <- apply(bootmat,FUN=t.test,MARGIN=2)
+    vec2 <- as.numeric( do.call(rbind, vec2)[,1] )
+    vec2[ is.na( vec2 ) ]<-0
     cca2out[ , nv ] <- sparsify( vec2 , sparseness[2] )
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
