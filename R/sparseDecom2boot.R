@@ -29,13 +29,53 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       submat2 <-mat2[mysample,]
       sublist<-list(submat1,submat2)
       print(paste("boot",boots,"sample",mysize))
-      myres <- sparseDecom2( inmatrix = sublist, inmask = mymask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = initializationList, initializationList2 = initializationList2, ell1 = ell1 )
+      ( myres <- sparseDecom2( inmatrix = sublist, inmask = mymask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = initializationList, initializationList2 = initializationList2, ell1 = ell1 ) )
+      myressum<-abs(diag(cor(myres$projections,myres$projections2)))
+      print( myressum )
       if ( length(dim(myres$eig1)) == 0 ) cca1<-imageListToMatrix( myres$eig1 , mymask[[1]] ) 
       if ( length(dim(myres$eig1)) == 2 ) cca1<-( myres$eig1 ) 
       if ( length(dim(myres$eig1)) == 0 ) cca2<-imageListToMatrix( myres$eig2 , mymask[[2]]  ) 
       if ( length(dim(myres$eig1)) == 2 ) cca2<-( myres$eig2 )
-      cca1out<-cca1out+cca1
-      cca2out<-cca2out+cca2
+      if ( boots > 1 & TRUE  )
+        {
+          cca1copy<-cca1
+          mymult<-matrix( rep(0,ncol(cca1)*ncol(cca1)) , ncol=ncol(cca1) )
+          for ( j in 1:ncol(cca1out) ) {
+          for ( k in 1:ncol(cca1) ) {
+            temp1<-abs( cca1out[,j] )
+            temp2<-abs( cca1[,k] )
+            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
+            }
+          }
+          for ( ct in 1:(ncol(cca1)) )
+            {
+              arrind<-which( mymult == max(mymult) , arr.ind=T)
+              cca1copy[,arrind[1]]<-cca1[,arrind[2]]
+              mymult[arrind[1],]<-0
+              mymult[,arrind[2]]<-0
+            }
+          cca1<-cca1copy
+          ######nextview######
+          cca2copy<-cca2
+          mymult<-matrix( rep(0,ncol(cca2)*ncol(cca2)) , ncol=ncol(cca2) )
+          for ( j in 1:ncol(cca2out) ) {
+          for ( k in 1:ncol(cca2) ) {
+            temp1<-abs( cca2out[,j] )
+            temp2<-abs( cca2[,k] )
+            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
+            }
+          }
+          for ( ct in 1:(ncol(cca2)) )
+            {
+              arrind<-which( mymult == max(mymult) , arr.ind=T)
+              cca2copy[,arrind[1]]<-cca2[,arrind[2]]
+              mymult[arrind[1],]<-0
+              mymult[,arrind[2]]<-0
+            }
+          cca2<-cca2copy
+        }
+      cca1out<-cca1out+(cca1) # *myressum
+      cca2out<-cca2out+(cca2) # *myressum
       for ( nv in 1:nvecs ) {
         bootccalist1[[nv]][boots,]<-abs(cca1[,nv])
         bootccalist2[[nv]][boots,]<-abs(cca2[,nv])
@@ -43,20 +83,32 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
   for ( nv in 1:nvecs ) {
     bootmat<-bootccalist1[[nv]]
-#    vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
+    vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
 #    mysd1 <- apply(bootmat,FUN=sd,MARGIN=2)
 #    vec1[ mysd1 > 0 ]  <- vec1[ mysd1 > 0 ]  /  mysd1[ mysd1 > 0 ]
-    vec1  <- apply(bootmat,FUN=t.test,MARGIN=2)
-    vec1 <- as.numeric( do.call(rbind, vec1)[,1] )
+#    vec1  <- apply(bootmat,FUN=t.test,MARGIN=2)
+#    vec1 <- as.numeric( do.call(rbind, vec1)[,1] )
     vec1[ is.na( vec1 ) ]<-0
+    if ( nv > 1 )
+        for ( j in 1:(nv-1) )
+            {
+            prevec <- cca1out[ , j ]
+            vec1[ prevec > 0 ] <- 0 
+            }
     cca1out[ , nv ] <-  sparsify( vec1 , sparseness[1] )
     bootmat<-bootccalist2[[nv]]
-#    vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
+    vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
 #    mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
 #    vec2[ mysd2 > 0 ]  <- vec2[ mysd2 > 0 ] /  mysd2[ mysd2 > 0 ] 
-    vec2  <- apply(bootmat,FUN=t.test,MARGIN=2)
-    vec2 <- as.numeric( do.call(rbind, vec2)[,1] )
+#    vec2  <- apply(bootmat,FUN=t.test,MARGIN=2)
+#    vec2 <- as.numeric( do.call(rbind, vec2)[,1] )
     vec2[ is.na( vec2 ) ]<-0
+    if ( nv > 1 )
+        for ( j in 1:(nv-1) )
+            {
+            prevec <- cca2out[ , j ]
+            vec2[ prevec > 0 ] <- 0 
+            }
     cca2out[ , nv ] <- sparsify( vec2 , sparseness[2] )
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
@@ -72,5 +124,5 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   }
 #  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
-        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2 ) )
+        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = abs(diag(cor(myres$projections,myres$projections2))) , bootccalist1=bootccalist1 , bootccalist2=bootccalist2 ) )
 }
