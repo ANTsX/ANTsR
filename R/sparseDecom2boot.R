@@ -44,7 +44,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
           for ( k in 1:ncol(cca1) ) {
             temp1<-abs( cca1out[,j] )
             temp2<-abs( cca1[,k] )
-            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
+            mymult[j,k]<-sum( abs( temp1/mean(temp1) - temp2/mean(temp2) ) )
             }
           }
           for ( ct in 1:(ncol(cca1)) )
@@ -62,7 +62,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
           for ( k in 1:ncol(cca2) ) {
             temp1<-abs( cca2out[,j] )
             temp2<-abs( cca2[,k] )
-            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
+            mymult[j,k]<-sum( abs( temp1/mean(temp1) - temp2/mean(temp2) ) )
+#            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
             }
           }
           for ( ct in 1:(ncol(cca2)) )
@@ -89,13 +90,13 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
 #    vec1  <- apply(bootmat,FUN=t.test,MARGIN=2)
 #    vec1 <- as.numeric( do.call(rbind, vec1)[,1] )
     vec1[ is.na( vec1 ) ]<-0
-    if ( nv > 1 )
+    if ( ( nv > 1 ) & ( abs( sparseness[1] * nvecs ) < 1)   )
         for ( j in 1:(nv-1) )
             {
             prevec <- cca1out[ , j ]
             vec1[ prevec > 0 ] <- 0 
             }
-    cca1out[ , nv ] <-  sparsify( vec1 , sparseness[1] )
+    cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
     bootmat<-bootccalist2[[nv]]
     vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
 #    mysd2 <- apply(bootmat,FUN=sd,MARGIN=2)
@@ -103,13 +104,13 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
 #    vec2  <- apply(bootmat,FUN=t.test,MARGIN=2)
 #    vec2 <- as.numeric( do.call(rbind, vec2)[,1] )
     vec2[ is.na( vec2 ) ]<-0
-    if ( nv > 1 )
+    if ( ( nv > 1 ) & ( abs( sparseness[2] * nvecs ) < 1 )   )
         for ( j in 1:(nv-1) )
             {
             prevec <- cca2out[ , j ]
             vec2[ prevec > 0 ] <- 0 
             }
-    cca2out[ , nv ] <- sparsify( vec2 , sparseness[2] )
+    cca2out[ , nv ] <- sparsify( vec2 , abs( sparseness[2] ) )
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
