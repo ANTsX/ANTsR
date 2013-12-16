@@ -98,7 +98,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             vec1[ prevec > 0 ] <- 0 
             }
         cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
-      } else cca1out[ , nv ] <-  vec1
+      } else {
+          cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
+      }
     ### now vec 2 ### 
     bootmat<-bootccalist2[[nv]]
     vec2 <- apply(bootmat,FUN=mean,MARGIN=2)
@@ -115,7 +117,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             vec2[ prevec > 0 ] <- 0 
             }
         cca2out[ , nv ] <-  sparsify( vec2 , abs( sparseness[2] ) )
-      } else cca2out[ , nv ] <-  vec2
+      } else {
+          cca2out[ , nv ] <-  sparsify( vec2 , abs( sparseness[2] ) )
+      }
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
