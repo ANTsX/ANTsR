@@ -36,7 +36,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       if ( length(dim(myres$eig1)) == 2 ) cca1<-( myres$eig1 ) 
       if ( length(dim(myres$eig1)) == 0 ) cca2<-imageListToMatrix( myres$eig2 , mymask[[2]]  ) 
       if ( length(dim(myres$eig1)) == 2 ) cca2<-( myres$eig2 )
-      if ( boots > 1 & FALSE  )
+      if ( boots > 1 & TRUE  )
         {
           cca1copy<-cca1
           mymult<-matrix( rep(0,ncol(cca1)*ncol(cca1)) , ncol=ncol(cca1) )
@@ -75,8 +75,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             }
           cca2<-cca2copy
         }
-      cca1out<-cca1out+(cca1) # *myressum
-      cca2out<-cca2out+(cca2) # *myressum
+      cca1out<-cca1out+(cca1) * myressum
+      cca2out<-cca2out+(cca2) * myressum
       for ( nv in 1:nvecs ) {
         bootccalist1[[nv]][boots,]<-abs(cca1[,nv])
         bootccalist2[[nv]][boots,]<-abs(cca2[,nv])
