@@ -20,7 +20,7 @@ fi
 # this solution came from http://stackoverflow.com/questions/5522126/dyld-not-able-to-load-dylibs
 # a possible linux solution https://blogs.oracle.com/dipol/entry/dynamic_libraries_rpath_and_mac
 # if [[ uname -eq "Darwin" ]] ; then 
-if [[ uname -eq "Darwin" ]]  ; then 
+if [[ uname == "Darwin" ]]  ; then 
   echo Change Library Paths
   itklibs=`find ${RLDPATH} -name "lib[itk,ITK]*${DYLIB_EXT}"`
   antslibs=`find ${RLDPATH} -name "libl_*${DYLIB_EXT}"`
