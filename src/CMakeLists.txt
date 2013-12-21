@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(ANTsR_SuperBuild)
 include( ExternalProject )
-# if 'CMAKE_BUILD_TYPE' is not specified by user, assume 'Release'
+# if 'CMAKE_BUILD_TYPE' is not specified by user, assume RelWithDebInfo
 if( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE Release )
+  set( CMAKE_BUILD_TYPE RelWithDebInfo )
 endif( NOT CMAKE_BUILD_TYPE )
 
 #   we have to define NDEBUG due to a possible bug in itkMacro.h --- we
