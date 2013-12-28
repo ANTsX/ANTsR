@@ -11,8 +11,4 @@ PKG_CPPFLAGS=-I${myrootantsbin}/ANTS-build/ITKIOFactoryRegistration -I${myrootit
 libants=`find ${myrootantslib} -name "lib*.a"`
 myarch  := $(shell uname)
 libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `
-PKG_LIBS = ${libtwo} ${libants} ${libants} ${libants} ${libants} ${libtwo} 
-
-
-
-
+PKG_LIBS = ${libtwo} ${libants} ${libants} ${libants} ${libants} ${libtwo} ${libants} ${libants} ${libants} ${libants} ${libtwo} 
