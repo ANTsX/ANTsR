@@ -34,6 +34,7 @@ Avants BB
 }
 
 \examples{
+\dontrun{
 # read the fmri image in and maybe do slice timing correction 
 #  fmri<-antsImageRead( fn[2] , 4 )
 #  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline')
@@ -43,4 +44,5 @@ Avants BB
   blockfing = c(0, 36, 72, 108,144)
   hrf <- hemodynamicRF( scans=dim(fmri)[4] , onsets=blockfing , durations=rep(  12,  length( blockfing ) ) ,  rt=2.5 )
   activationBeta<-taskFMRI(  fmriMatrix , hrf , myvars )
+}
 }
