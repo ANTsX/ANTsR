@@ -34,6 +34,7 @@ Avants BB
 }
 
 \examples{
+\dontrun{
 # set moreaccurate=T for final results 
 dd<-getfMRInuisanceVariables( bold, maskThresh=100 , moreaccurate=F )
 tsResid<-residuals( lm( dd$matrixTimeSeries ~ dd$globalsignal + dd$nuisancevariables ))
@@ -44,5 +45,5 @@ ee<-getfMRInuisanceVariables( pcasl, mask = pcaslmask , moreaccurate=F )
 tsResid<-residuals( lm( ee$matrixTimeSeries ~ ee$globalsignalASL + ee$nuisancevariables ))
 myASLnetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4, mask=ee$mask ,cbfnetwork = "ASLCBF", labels = aal2asl , graphdensity = 0.25 )
 # use colnames( dd$nuisancevariables ) to see nuisance variables 
-
+}
 }
