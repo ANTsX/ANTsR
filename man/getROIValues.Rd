@@ -1,5 +1,5 @@
-\name{getROIValue}
-\alias{getROIValue}
+\name{getROIValues}
+\alias{getROIValues}
 
 \title{
 Compute mean value in each ROI label.
@@ -10,7 +10,7 @@ Computes the mean value in each label of an ROI after masking with MaskImage
 }
 
 \usage{
-wmat<-getROIValue( valueImage, ROIImage, maskImage  )
+wmat<-getROIValues( valueImage, ROIImage, maskImage  )
 }
 
 \arguments{
@@ -39,5 +39,5 @@ Avants BB
 }
 
 \examples{
-vals<-getROIValue( image, aal, mask  ) 
+vals<-getROIValues( image, aal, mask  ) 
 }

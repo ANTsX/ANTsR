@@ -28,10 +28,12 @@ Avants BB
 }
 
 \examples{
+\dontrun{
 mat<-replicate(400, rnorm(600)) 
 print(mean(abs(cor(mat))))
 wmat<-fastwhiten( scale( mat ) ) 
 print(mean(abs(cor(wmat))))
 wmat<-fastwhiten( scale( mat ), 20 ) 
 print(mean(abs(cor(wmat))))
+}
 }
