@@ -54,7 +54,7 @@ Kandel BM, Avants BB.
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-require(ANTsR)
+\dontrun{
 nsubj <- 1000
 prop.train <- 1/2
 subj.train <- sample(1:nsubj, prop.train*nsubj, replace=F)
@@ -88,5 +88,5 @@ plotANTsImage(myimgs[[1]], axis=2, slices="1x5x1")
 result <- regressProjections(input.train, input.test, demog.train, 
     demog.test, myregression$eigenanatomyimages, mymask, "outcome")
 plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
-
+}
 }
