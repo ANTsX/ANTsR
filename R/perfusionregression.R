@@ -47,7 +47,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     vox <- 1
     ct <- 0
     visitvals <- (skip:floor((ncol(usemat) - 1)/skip)) * skip
-    mynodes <- round(detectCores()/2)  # round( getOption('mc.cores', 2L) / 2 )
+    #mynodes <- round(detectCores()/2)  # round( getOption('mc.cores', 2L) / 2 )
     # cl<-makeForkCluster( nnodes = mynodes ) registerDoParallel( cl , cores = mynodes )
     rgw <- regweights
     myct <- 0
