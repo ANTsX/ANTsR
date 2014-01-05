@@ -1,6 +1,8 @@
 \name{blockStimulus}
 \alias{blockStimulus}
-\title{Block stimulus model for FMRI Data }
+\title{
+Block stimulus model for FMRI Data
+}
 \description{
   Create the block BOLD stimulus for a given task indicator function. Current units in terms of volumes.  Sort of a bug, should be in TR. 
 }
