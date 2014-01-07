@@ -39,8 +39,10 @@ an osx binary for ANTsR:
 
 https://dl.dropboxusercontent.com/u/9717050/ANTsR_osx_1.0.tgz
 
-a redhat linux binary:  
+linux binaries:  
 
 https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-redhat-linux-gnu.tar.gz
+
+https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz
 
 ubuntu binaries also available ...
