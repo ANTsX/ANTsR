@@ -1,4 +1,4 @@
-regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", mygroup = 0 , logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9, zoom = F  ) {
+regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp.html", mygroup = 0 , logvals=TRUE, verbose=FALSE, correlateMyOutcomes = NA, corthresh = 0.9, zoom = F , doFDR = TRUE ) {
   if (nargs() == 0) {
     return(1)
   }
@@ -21,9 +21,12 @@ regressionNetworkViz <- function( mylm , sigthresh=0.05, whichviz="Sankey", outf
         print(demognames[i])
         print(mylm$beta.pval[i,])
       }
-      myselection<-which( mylm$beta.pval[i,] < sigthresh )
+      locpv <- mylm$beta.pval[i,]
+      if ( doFDR ) locpv <- p.adjust( locpv , method="BH" )
+      myselection<-which( locpv < sigthresh )
       if ( length( myselection ) > 0 )
         {
+          print( paste("VIZ",row.names(mylm$beta.pval)[i] , min( locpv )  ) )
           jjsources<-c( jjsources, rep( i-1, length( myselection ) ) )
           jjtargets<-c( jjtargets, myselection-1+length(demognames) )
           if ( logvals )

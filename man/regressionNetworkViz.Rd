@@ -11,7 +11,7 @@ Use either a force directed graph or a Sankey graph to show relationships betwee
 }
 
 \usage{
-regressionNetworkViz( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp2.html", correlateMyOutcomes = brainpreds) 
+regressionNetworkViz( mylm , sigthresh=0.05, whichviz="Sankey", outfile="temp2.html", correlateMyOutcomes = brainpreds , doFDR=TRUE ) 
 }
 
 \arguments{
