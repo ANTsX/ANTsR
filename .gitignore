@@ -1,6 +1,7 @@
 # ignore all the backup files created by editors
 *~
 *.so
+*.o 
 
 # things to ignore in directory ANTsR/src
 src/CMakeCache.txt
@@ -12,6 +13,30 @@ src/ANTsR.so
 src/ITK/
 src/ITK-prefix/
 src/ANTS/
+src/Atropos.o
+src/ImageMath.o
+src/KellyKapowski.o
+src/N3BiasFieldCorrection.o
+src/N4BiasFieldCorrection.o
+src/ThresholdImage.o
+src/TileImages.o
+src/antsAffineInitializer.o
+src/antsApplyTransforms.o
+src/antsBinaryThresholdImageFilter.o
+src/antsImage.o
+src/antsImageClone.o
+src/antsImageList.o
+src/antsImageRead.o
+src/antsImageWrite.o
+src/antsMatrix.o
+src/antsMotionCorr.o
+src/antsPermuteAxesImageFilter.o
+src/antsRegistration.o
+src/antsThresholdImageFilter.o
+src/itkImageR.o
+src/sccan.o
+src/symbols.rds
+
 
 # things to ignore in ANTsR/src/ANTsR
 src/ANTsR/ANTsR-build/
