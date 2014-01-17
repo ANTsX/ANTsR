@@ -1,4 +1,4 @@
-joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphdensity = 0.65) {
+joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphdensity = 0.65 ) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
@@ -44,5 +44,5 @@ joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphden
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
-  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership))
+  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership , graph=gg ))
 } 
