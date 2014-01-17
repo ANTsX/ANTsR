@@ -16,9 +16,9 @@ joinEigenanatomy <- function(datamatrix, mask=NA, list_of_eanat_images, graphden
   if ( !is.na( mask ) ) { 
   newelist <- list()
   for (cl in 1:max(communitymembership)) {
-    newe <- antsImageClone(mydecom$eigenanatomyimages[[1]])
+    newe <- antsImageClone(list_of_eanat_images[[1]])
     newe[mask > 0] <- 0
-    templist <- mydecom$eigenanatomyimages[communitymembership == cl]
+    templist <- list_of_eanat_images[communitymembership == cl]
     for (eimg in templist) {
       newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask > 0])
       print(sum(newe > 0)/sum(mask > 0))
