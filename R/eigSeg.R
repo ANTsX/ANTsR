@@ -21,7 +21,7 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages=TRUE ) {
         for ( i in 1:length(imgList) )
           {
           img<-imgList[[i]]
-          img[ maskseg != i ]<-0
+          img[ maskseg != as.numeric(i) ]<-0
           imgList[[i]]<-img
           }
       }
