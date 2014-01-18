@@ -1,11 +1,14 @@
-sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 50, its = 5, cthresh = c(250, 
-  250), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), 
+sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), 
   initializationList2 = list(), ell1 = 0.05) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
     cat(" each input should be a list with 2 entries e.g. sparseness=c(0.01,0.02) \n")
     return(0)
+  }
+  if ( length( cthresh ) < 2  ) {
+      cat("You should set a length=2 cthresh value even if it is c(0,0)\n")
+      return(0)
   }
   post <- c(1, 2)
   if (is.na(statdir)) 
@@ -16,12 +19,12 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   matname <- paste(statdir, "sccamatrix", post, ".mha", sep = "")
   antsImageWrite(as.antsImage(inmatrix[[1]]), matname[1])
   antsImageWrite(as.antsImage(inmatrix[[2]]), matname[2])
-  if (!is.na(inmask[[1]])) {
+  if ( class( inmask[[1]] )[[1]] == "antsImage" ) {
     m1 <- inmask[[1]]
     dim <- as.numeric(m1@dimension)
     antsImageWrite(inmask[[1]], mfn[1])
   } else mfn[1] <- NA
-  if (!is.na(inmask[[2]])) {
+  if ( class( inmask[[2]] )[[1]] == "antsImage" ) {
     m2 <- inmask[[2]]
     dim2 <- as.numeric(m2@dimension)
     antsImageWrite(inmask[[2]], mfn[2])
