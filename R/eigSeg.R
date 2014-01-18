@@ -1,4 +1,4 @@
-eigSeg <- function(mask = NA, imgList = NA) {
+eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages=TRUE ) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)
@@ -16,6 +16,15 @@ eigSeg <- function(mask = NA, imgList = NA) {
     maskseg[maskvox] <- (segids * (segmax > 1e-09))
     print(max(segmax))
     print(max(segids))
+    if ( applySegmentationToImages  )
+      {
+        for ( i in 1:length(imgList) )
+          {
+          img<-imgList[[i]]
+          img[ maskseg != i ]<-0
+          imgList[[i]]<-img
+          }
+      }
     return(maskseg)
   } else print("No images in list")
 } 

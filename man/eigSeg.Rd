@@ -10,7 +10,7 @@ Segment a mask into regions based on the max value in an image list.   At a give
 }
 
 \usage{
-eigsegimage<-eigSeg( mask, imageList  )
+eigsegimage<-eigSeg( mask, imageList , applySegmentationToImages )
 }
 
 \arguments{
@@ -20,6 +20,10 @@ eigsegimage<-eigSeg( mask, imageList  )
 
 \item{imageList}{
  list containing antsImages or filenames pointing to antsImages.
+}
+
+\item{applySegmentationToImages}{
+ boolean determines if original image list is modified by the segmentation.
 }
 
 

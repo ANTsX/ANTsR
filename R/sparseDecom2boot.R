@@ -133,8 +133,15 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
   usefakemask<-( length(dim(myres$eig1)) == 2 )
   if ( usefakemask ) locmask <- c( fakemask1, fakemask2 ) else locmask <- inmask
-  cca1outAuto<-t( matrixSeg( t(cca1outAuto ) ) )
-  cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
+  if ( usefakemask ) {
+      cca1outAuto<-t( matrixSeg( t(cca1outAuto ) ) )
+      cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
+  } else {
+      cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
+      cca2outAuto<-matrixToImages( t(cca2outAuto),locmask[[2]])
+      autoseg1<-eigSeg(locmask[[1]],cca1outAuto, TRUE )
+      autoseg2<-eigSeg(locmask[[2]],cca2outAuto, TRUE )
+  }
 ####################################################################################
 ####################################################################################
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
