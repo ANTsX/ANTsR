@@ -141,7 +141,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
     autoseg1<-eigSeg(locmask[[1]],cca1outAuto, TRUE )
     }
-  if ( usefakemask[1] )
+  if ( usefakemask[2] )
     {
     locmask[[2]]<-fakemask2
     cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
