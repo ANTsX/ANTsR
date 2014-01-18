@@ -34,10 +34,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       ( myres <- sparseDecom2( inmatrix = sublist, inmask = mymask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = initializationList, initializationList2 = initializationList2, ell1 = ell1 ) )
       myressum<-abs(diag(cor(myres$projections,myres$projections2)))
       print( myressum )
-      if ( length(dim(myres$eig1)) == 0 ) cca1<-imageListToMatrix( myres$eig1 , mymask[[1]] ) 
+      if ( length(dim(myres$eig1)) == 0 ) cca1<-t( imageListToMatrix( myres$eig1 , mymask[[1]] )  )
       if ( length(dim(myres$eig1)) == 2 ) cca1<-( myres$eig1 ) 
-      if ( length(dim(myres$eig1)) == 0 ) cca2<-imageListToMatrix( myres$eig2 , mymask[[2]]  ) 
-      if ( length(dim(myres$eig1)) == 2 ) cca2<-( myres$eig2 )
+      if ( length(dim(myres$eig2)) == 0 ) cca2<-t( imageListToMatrix( myres$eig2 , mymask[[2]]  ) )
+      if ( length(dim(myres$eig2)) == 2 ) cca2<-( myres$eig2 )
       if ( boots > 1 & TRUE  )
         {
           cca1copy<-cca1
