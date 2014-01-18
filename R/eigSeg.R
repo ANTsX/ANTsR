@@ -19,3 +19,12 @@ eigSeg <- function(mask = NA, imgList = NA) {
     return(maskseg)
   } else print("No images in list")
 } 
+
+
+matrixSeg <- function(  mydatamatrix ) {
+  segids <- apply(abs(mydatamatrix), 2, which.max)
+  segmax <- apply(abs(mydatamatrix), 2, max)
+  binmat<-mydatamatrix*0
+  for ( i in 1:ncol(binmat) ) binmat[segids[i],i]<-1
+  return(mydatamatrix*binmat)
+} 

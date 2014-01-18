@@ -13,6 +13,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   mymask <- inmask
   cca1out<-0
   cca2out<-0
+  cca1outAuto<-0
+  cca2outAuto<-0
   bootccalist1<-list()
   bootccalist2<-list()
   for ( i in 1:nvecs )
@@ -82,6 +84,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
         bootccalist2[[nv]][boots,]<-abs(cca2[,nv])
       }
   }
+  cca1outAuto<-cca1out
+  cca2outAuto<-cca2out
   for ( nv in 1:nvecs ) {
     bootmat<-bootccalist1[[nv]]
     vec1  <- apply(bootmat,FUN=mean,MARGIN=2)
@@ -98,8 +102,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             vec1[ prevec > 0 ] <- 0 
             }
         cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
+        cca1outAuto[ , nv ] <-  vec1 
       } else {
-          cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
+        cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness[1] ) )
+        cca1outAuto[ , nv ] <-  vec1 
       }
     ### now vec 2 ### 
     bootmat<-bootccalist2[[nv]]
@@ -117,14 +123,19 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             vec2[ prevec > 0 ] <- 0 
             }
         cca2out[ , nv ] <-  sparsify( vec2 , abs( sparseness[2] ) )
+        cca2outAuto[ , nv ] <-  vec2
       } else {
-          cca2out[ , nv ] <-  sparsify( vec2 , abs( sparseness[2] ) )
+        cca2out[ , nv ] <-  sparsify( vec2 , abs( sparseness[2] ) )
+        cca2outAuto[ , nv ] <-  vec2 
       }
   }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
   usefakemask<-( length(dim(myres$eig1)) == 2 )
   if ( usefakemask ) locmask <- c( fakemask1, fakemask2 ) else locmask <- inmask
+  cca1outAuto<-t( matrixSeg( t(cca1outAuto ) ) )
+  cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
+####################################################################################
 ####################################################################################
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
   ###
@@ -134,5 +145,5 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   }
 #  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
-        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = abs(diag(cor(myres$projections,myres$projections2))) , bootccalist1=bootccalist1 , bootccalist2=bootccalist2 ) )
+        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = abs(diag(cor(myres$projections,myres$projections2))) , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=cca1outAuto, cca2outAuto=cca2outAuto ) )
 }
