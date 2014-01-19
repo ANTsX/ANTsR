@@ -129,6 +129,13 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
         cca2outAuto[ , nv ] <-  vec2 
       }
   }
+  for ( i in 1:ncol(cca1outAuto) )
+    {
+    mynorm<-sqrt(sum( cca1outAuto[,i] * cca1outAuto[,i] ))
+    if ( mynorm > 0 ) cca1outAuto[,i]<-cca1outAuto[,i]/mynorm
+    mynorm<-sqrt(sum( cca2outAuto[,i] * cca2outAuto[,i] ))
+    if ( mynorm > 0 ) cca2outAuto[,i]<-cca2outAuto[,i]/mynorm
+    }
   fakemask1<-makeImage( c(1,1,ncol(mat1)) , 1 )
   fakemask2<-makeImage( c(1,1,ncol(mat2)) , 1 )
   usefakemask<-c( ( length(dim(myres$eig1)) == 2 ), ( length(dim(myres$eig2)) == 2 ) )
@@ -136,26 +143,32 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   if ( usefakemask[1] )
     {
     locmask[[1]]<-fakemask1
-    cca1outAuto<-t( matrixSeg( t(cca1outAuto ) ) )
+    cca1outAuto<-matrixSeg( t(cca1outAuto )  )
+    cca1out<-cca1outAuto
     } else {
     cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
     autoseg1<-eigSeg(locmask[[1]],cca1outAuto, TRUE )
+    cca1outAuto<-t( imageListToMatrix(cca1outAuto,locmask[[1]]) )
+    cca1out<-cca1outAuto
     }
   if ( usefakemask[2] )
     {
     locmask[[2]]<-fakemask2
     cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
+    cca2out<-cca2outAuto
     } else {
     cca2outAuto<-matrixToImages( t(cca2outAuto),locmask[[2]])
     autoseg2<-eigSeg(locmask[[2]],cca2outAuto, TRUE )
+    cca2outAuto<-t( imageListToMatrix(cca2outAuto,locmask[[2]]) )
+    cca2out<-cca2outAuto
     }
 ####################################################################################
 ####################################################################################
+  print("Get Final Results")
   myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
   ###
   if ( usefakemask[1] ) myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
-#  print("Got Final Results")
   return( list( projections = myres$projections, projections2 = myres$projections2, 
         eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = abs(diag(cor(myres$projections,myres$projections2))) , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=cca1outAuto, cca2outAuto=cca2outAuto ) )
 }
