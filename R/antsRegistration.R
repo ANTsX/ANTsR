@@ -51,8 +51,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
         }
         if (typeofTransform == "Rigid" | typeofTransform == "Affine") {
           args <- list("-d", as.character(fixed@dimension), "-r", paste("[", f, ",", m, ",1]", sep = ""), 
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""), "-t", "Translation[0.25]", 
-          "-c", "2100x1200", "-s", "4x3", "-f", "6x4", "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", 
+           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", 
             sep = ""), "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations, "-s", "3x2x1x0", 
           "-f", "6x4x2x1", "-u", "1", "-z", "1", "--float", "0", "-o", paste("[", outprefix, ",", wmo, 
             ",", wfo, "]", sep = ""))

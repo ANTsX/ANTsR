@@ -9,7 +9,7 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
         i2 <- antsImageRead(myFileList[ct2], dim)
         toutfn <- paste(tempdir(), "/Z", sep = "")
         sink(toutfn)
-        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("Affine"), outprefix = toutfn)
+        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"), outprefix = toutfn)
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
         sink(NULL)
         metric <- capture.output(ImageMath(dim, "j", metrictype, i1, mywarpedimage))[1]
