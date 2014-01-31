@@ -20,6 +20,7 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
   } else {
     img.corrected <- antsImageClone(img)
     img.corrected[mask > 0] <- values.corrected
+    img.corrected[mask == 0] <- 0
     return(img.corrected)
   }
 } 
