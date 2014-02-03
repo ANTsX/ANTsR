@@ -5,7 +5,7 @@
 Impute NA's on data frame.  
 }
 \description{
-Imputes NA's on data frame (column-wise), using a user-specified function (mean is default).
+Imputes NA's on data frame (column-wise), using a user-specified function (mean is default).  also works on a vector.
 }
 \usage{
 antsrimpute(mydat, FUN=mean, ...)
