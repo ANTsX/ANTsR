@@ -18,7 +18,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
   myiterations <- "2100x1200x1200x10"
   if (typeofTransform == "AffineFast") {
     typeofTransform <- "Affine"
-    myiterations <- "2100x1200x100x0"
+    myiterations <- "2100x1200x0x0"
   }
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {

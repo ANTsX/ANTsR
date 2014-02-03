@@ -1,5 +1,5 @@
-\name{impute}
-\alias{impute}
+\name{antsrimpute}
+\alias{antsrimpute}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Impute NA's on data frame.  
@@ -8,7 +8,7 @@ Impute NA's on data frame.
 Imputes NA's on data frame (column-wise), using a user-specified function (mean is default).
 }
 \usage{
-impute(mydat, FUN=mean, ...)
+antsrimpute(mydat, FUN=mean, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,8 +43,8 @@ Kandel BM, Avants BB
 }
 \examples{
 mydat <- data.frame(A=c(1,2,4,5), B=c(1,NA,4,5))
-mean.impute <- impute(mydat)
-median.impute <- impute(mydat, median)
+mean.impute <- antsrimpute(mydat)
+median.impute <- antsrimpute(mydat, median)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
