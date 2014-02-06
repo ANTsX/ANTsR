@@ -105,7 +105,8 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
 #      graphdensity<-1
       if ( TRUE ) { # go with inv cov mat 
         cormat<-glasso( cormat, useglasso )$wi
-        myinds<-( abs( cormat ) < 1.e-4 ) 
+        myinds<-( abs( cormat ) < 1.e-4 )
+        cormat[ !myinds ]<-0
         cormat[  myinds ]<-cormat[ myinds ]*(-1)
       } else {
         glassomat<-glasso( cormat, useglasso )
