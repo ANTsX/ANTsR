@@ -1,5 +1,5 @@
 filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA, 
-  labels = NA, graphdensity = 0.5, seg = NA) {
+  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA ) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
   if (nargs() == 0) {
@@ -99,6 +99,13 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       # if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg else labmat[ mylab, ]<-NA
     }
     cormat <- cor(t(labmat), t(labmat))
+    if ( !is.na(useglasso) )
+    if ( useglasso > 0 ) # treat useglasso as rho
+      {
+      cormat<-glasso( cormat, useglasso )$wi
+      cormat<-cormat*(-1)
+      diag(cormat)<-rep(1,ncol(cormat))
+      }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
       graph = gmet, corrmat = cormat))
