@@ -102,19 +102,18 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     if ( !is.na(useglasso) )
     if ( useglasso > 0 ) # treat useglasso as rho
       {
-      graphdensity<-1
-      if ( FALSE ) { # go with inv cov mat 
+#      graphdensity<-1
+      if ( TRUE ) { # go with inv cov mat 
         cormat<-glasso( cormat, useglasso )$wi
-        cormat[ cormat > 0  ]<-0
-        myinds<-( cormat < 0 ) 
+        myinds<-( abs( cormat ) < 1.e-4 ) 
         cormat[  myinds ]<-cormat[ myinds ]*(-1)
       } else {
         glassomat<-glasso( cormat, useglasso )
         cormat<-glassomat$w
         cormat[ glassomat$wi == 0 ]<-0
-        rgdens<-( 0.5*sum(cormat>0&cormat<1)/ (0.5*ncol(cormat)*(ncol(cormat)-1)) )
-        print(paste("Use Glasso",useglasso,"density",rgdens))
       }
+      rgdens<-( 0.5*sum(cormat>0&cormat<1)/ (0.5*ncol(cormat)*(ncol(cormat)-1)) )
+      print(paste("Use Glasso",useglasso,"density",rgdens))
       diag(cormat)<-rep(1,ncol(cormat))
       }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
