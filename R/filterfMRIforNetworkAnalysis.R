@@ -98,28 +98,35 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       
       # if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg else labmat[ mylab, ]<-NA
     }
-    cormat <- cor(t(labmat), t(labmat))
+    ocormat <- cor(t(labmat), t(labmat))
+    cormat<-ocormat
+    pcormat<-solve( cormat+(diag(ncol(cormat))+0.001) )
+    diagmag<-sqrt( diag(pcormat) %o% diag(pcormat) )*(-1)
+    pcormat<-pcormat/diagmag
+    diag(pcormat)<-1
     if ( !is.na(useglasso) )
     if ( useglasso > 0 ) # treat useglasso as rho
       {
 #      graphdensity<-1
       if ( TRUE ) { # go with inv cov mat 
         cormat<-glasso( cormat, useglasso )$wi
+        diagmag<-sqrt( diag(cormat) %o% diag(cormat) )*(-1)
+        cormat<-cormat/diagmag
         myinds<-( abs( cormat ) < 1.e-4 )
-        cormat[ !myinds ]<-0
-        cormat[  myinds ]<-cormat[ myinds ]*(-1)
+        cormat[ myinds ]<-0
       } else {
         glassomat<-glasso( cormat, useglasso )
         cormat<-glassomat$w
         cormat[ glassomat$wi == 0 ]<-0
       }
+      diag(cormat)<-1
       rgdens<-( 0.5*sum(cormat>0&cormat<1)/ (0.5*ncol(cormat)*(ncol(cormat)-1)) )
       print(paste("Use Glasso",useglasso,"density",rgdens))
-      diag(cormat)<-rep(1,ncol(cormat))
+      pcormat<-cormat
       }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
-      graph = gmet, corrmat = cormat))
+      graph = gmet, corrmat = ocormat, adjustedcorrmat=pcormat ))
   } else {
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar))
   }
