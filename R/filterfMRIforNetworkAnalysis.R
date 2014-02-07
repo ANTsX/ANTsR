@@ -1,5 +1,5 @@
 filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA, 
-  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, motionin=NA ) {
+  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA ) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
   if (nargs() == 0) {
@@ -100,10 +100,10 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     }
     nbrainregions<-length(oulabels)
     ocormat <- cor(t(labmat), t(labmat))
-    if ( ! is.na( motionin ) )
+    if ( ! is.na( nuisancein ) )
         {
         tlabmat<-t(labmat)
-        tlabmat<-cbind( tlabmat, motionin )
+        tlabmat<-cbind( tlabmat, nuisancein )
         ocormat<-cor( tlabmat, tlabmat )
         }
     cormat<-ocormat
@@ -131,7 +131,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       print(paste("Use Glasso",useglasso,"density",rgdens))
       pcormat<-cormat
       }
-    if ( ! is.na( motionin ) ) cormat<-pcormat[1:nbrainregions,1:nbrainregions]
+    if ( ! is.na( nuisancein ) ) cormat<-pcormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
       graph = gmet, corrmat = ocormat, partialcorrmat=pcormat ))
