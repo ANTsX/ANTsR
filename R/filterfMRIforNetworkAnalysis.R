@@ -103,7 +103,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     if ( ! is.na( nuisancein ) )
         {
         tlabmat<-t(labmat)
-        tlabmat<-cbind( tlabmat, nuisancein )
+#        tlabmat<-cbind( tlabmat, nuisancein )
         ocormat<-cor( tlabmat, tlabmat )
         }
     cormat<-ocormat

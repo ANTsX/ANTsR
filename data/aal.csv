@@ -5,8 +5,8 @@ label_num;label_name;unknown;isdmn;issalience;left;right;frontal;parietal;tempor
 4;Frontal_Sup_R;2102;0;0;0;1;1;0;0;0;0;0;1;0
 5;Frontal_Sup_Orb_L;2111;0;0;1;0;1;0;0;0;0;0;1;0
 6;Frontal_Sup_Orb_R;2112;0;0;0;1;1;0;0;0;0;0;1;0
-7;Frontal_Mid_L;2201;0;0;1;0;1;0;0;0;0;0;1;0
-8;Frontal_Mid_R;2202;0;0;0;1;1;0;0;0;0;0;1;0
+7;Frontal_Mid_L;2201;0;2;1;0;1;0;0;0;0;0;1;0
+8;Frontal_Mid_R;2202;0;2;0;1;1;0;0;0;0;0;1;0
 9;Frontal_Mid_Orb_L;2211;1;0;1;0;1;0;0;0;0;0;1;0
 10;Frontal_Mid_Orb_R;2212;1;0;0;1;1;0;0;0;0;0;1;0
 11;Frontal_Inf_Oper_L;2301;0;0;1;0;1;0;0;0;0;0;1;0
