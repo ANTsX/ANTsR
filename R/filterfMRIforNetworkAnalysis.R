@@ -125,6 +125,8 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       }
     if ( ! is.na( nuisancein ) ) pcormat<-pcormat[1:nbrainregions,1:nbrainregions]
     if ( ! is.na( nuisancein ) ) gcormat<-pcormat[1:nbrainregions,1:nbrainregions]
+    if ( ! is.na( nuisancein ) ) cormat<-cormat[1:nbrainregions,1:nbrainregions]
+    if ( ! is.na( nuisancein ) ) ocormat<-ocormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
       graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat ))
