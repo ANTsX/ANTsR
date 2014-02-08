@@ -98,10 +98,20 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       # if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg else labmat[ mylab, ]<-NA
     }
     nbrainregions<-length(oulabels)
-    ocormat <- cor(t(labmat), t(labmat))
+    tlabmat<-t(labmat)
+    ocormat <- cor(tlabmat, tlabmat)
+    rcormat<-ocormat
+    for ( i in 1:nrow(rcormat) ) {
+        for ( j in i:nrow(rcormat) ) {
+            if ( i != j ) {
+            a<-scale(tlabmat[,i])
+            b<-scale(tlabmat[,j])
+            rcormat[i,j]<-rcormat[j,i]<-as.numeric(coefficients(rlm(a~b)))[2]
+            }
+        }
+    }
     if ( ! is.na( nuisancein ) )
         {
-        tlabmat<-t(labmat)
         tlabmat<-cbind( tlabmat, nuisancein )
         ocormat<-cor( tlabmat, tlabmat )
         }
@@ -129,7 +139,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     if ( ! is.na( nuisancein ) ) ocormat<-ocormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
-      graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat ))
+      graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat,rcormat=rcormat ))
   } else {
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar))
   }  
