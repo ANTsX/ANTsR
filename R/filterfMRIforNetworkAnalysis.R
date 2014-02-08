@@ -95,7 +95,6 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       } else {
         labmat[which(ulabels == mylab), ] <- NA
       }
-      
       # if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg else labmat[ mylab, ]<-NA
     }
     nbrainregions<-length(oulabels)
@@ -103,42 +102,35 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     if ( ! is.na( nuisancein ) )
         {
         tlabmat<-t(labmat)
-#        tlabmat<-cbind( tlabmat, nuisancein )
+        tlabmat<-cbind( tlabmat, nuisancein )
         ocormat<-cor( tlabmat, tlabmat )
         }
     cormat<-ocormat
-    pcormat<-solve( cormat+(diag(ncol(cormat))+0.001) )
+    pcormat<-solve( cormat+(diag(ncol(cormat))+0.01) )
     diagmag<-sqrt( diag(pcormat) %o% diag(pcormat) )*(-1)
     pcormat<-pcormat/diagmag
     diag(pcormat)<-1
+    gcormat<-pcormat
     if ( !is.na(useglasso) )
     if ( useglasso > 0 ) # treat useglasso as rho
       {
-#      graphdensity<-1
-      if ( TRUE ) { # go with inv cov mat 
-        cormat<-glasso( cormat, useglasso )$wi
-        diagmag<-sqrt( diag(cormat) %o% diag(cormat) )*(-1)
-        cormat<-cormat/diagmag
-        myinds<-( abs( cormat ) < 1.e-4 )
-        cormat[ myinds ]<-0
-      } else {
-        glassomat<-glasso( cormat, useglasso )
-        cormat<-glassomat$w
-        cormat[ glassomat$wi == 0 ]<-0
-      }
-      diag(cormat)<-1
-      rgdens<-( 0.5*sum(cormat>0&cormat<1)/ (0.5*ncol(cormat)*(ncol(cormat)-1)) )
+      gcormat<-glasso( cormat, useglasso )$wi
+      diagmag<-sqrt( diag(gcormat) %o% diag(gcormat) )*(-1)
+      gcormat<-gcormat/diagmag
+      myinds<-( abs( gcormat ) < 1.e-4 )
+      gcormat[ myinds ]<-0
+      diag(gcormat)<-1
+      rgdens<-( 0.5*sum(gcormat>0&gcormat<1)/ (0.5*ncol(gcormat)*(ncol(gcormat)-1)) )
       print(paste("Use Glasso",useglasso,"density",rgdens))
-      pcormat<-cormat
       }
-    if ( ! is.na( nuisancein ) ) cormat<-pcormat[1:nbrainregions,1:nbrainregions]
+    if ( ! is.na( nuisancein ) ) pcormat<-pcormat[1:nbrainregions,1:nbrainregions]
+    if ( ! is.na( nuisancein ) ) gcormat<-pcormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
-    return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
-      graph = gmet, corrmat = ocormat, partialcorrmat=pcormat ))
+    return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
+      graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat ))
   } else {
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar))
-  }
-  
+  }  
 }
 
 
