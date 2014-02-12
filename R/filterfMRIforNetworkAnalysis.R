@@ -180,10 +180,10 @@ makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1) {
   # print( paste( 'Graph-Density:',graph.density( g1 ) ) )
   gmetric0 <- evcent(g1)$vector
   gmetric1 <- closeness(g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- page.rank(g1, weights = edgeWeights)$vector  #  
+  gmetric2 <- page.rank(g1)$vector  #  
   gmetric3 <- degree(g1)
   gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  # 
-  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("local"))  #, weights = 1/edgeWeights )
+  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat"))  #, weights = 1/edgeWeights )
   mycommunity <- fastgreedy.community(g1)
   walktrapcomm <- walktrap.community(g1)
   return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3, 
