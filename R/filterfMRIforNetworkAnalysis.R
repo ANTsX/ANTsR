@@ -1,5 +1,5 @@
 filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA, 
-  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA ) {
+  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA, usesvd = FALSE  ) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
   if (nargs() == 0) {
@@ -83,9 +83,14 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       
       submat <- filteredTimeSeries[, dd]
       # if ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat
-      
+
       if (length(c(submat)) > nrowts) {
         myavg <- apply(submat, MARGIN = 1, FUN = mean)
+        if ( usesvd )
+            {
+                eanat<-svd( submat )
+                myavg<-eanat$u[,1]
+            }
       } else {
         myavg <- submat
       }
@@ -182,12 +187,13 @@ makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1) {
   gmetric1 <- closeness(g1, normalized = T, weights = edgeWeights)
   gmetric2 <- page.rank(g1)$vector  #  
   gmetric3 <- degree(g1)
-  gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  # 
-  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat"))  #, weights = 1/edgeWeights )
+  gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  #
+  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat") )
+  gmetric6<-graph.strength(g1)
   mycommunity <- fastgreedy.community(g1)
   walktrapcomm <- walktrap.community(g1)
   return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3, 
-    betweeness = gmetric4, localtransitivity = gmetric5, community = mycommunity, walktrapcomm = walktrapcomm, 
+    betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6, community = mycommunity, walktrapcomm = walktrapcomm, 
     adjacencyMatrix = adjacencyMatrix))
 }
 
