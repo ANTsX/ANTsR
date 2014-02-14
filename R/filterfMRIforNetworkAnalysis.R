@@ -21,6 +21,13 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     print(myusage)
     return(NULL)
   }
+  if ( usesvd ) {
+  pckg <- try(require(irlba))
+  if (!pckg) {
+    getPckg("irlba")
+  }
+  library(irlba)
+  }
   freqLo <- freqLo * tr
   freqHi <- freqHi * tr
   # network analysis
@@ -88,7 +95,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
         myavg <- apply(submat, MARGIN = 1, FUN = mean)
         if ( usesvd )
             {
-                eanat<-svd( submat )
+                eanat<-irlba(submat, nu = 1, nv = 0, maxit=50 )
                 myavg<-eanat$u[,1]
             }
       } else {
