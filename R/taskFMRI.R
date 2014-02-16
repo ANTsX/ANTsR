@@ -72,7 +72,7 @@ taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesig
 
 
 
-arCorrection <- function( boldmatin , loops = 10, armethod="burg" )
+arCorrection <- function( boldmatin , loops = 3, armethod="burg" )
 {
   boldmat<-boldmatin
   for ( i in 1:loops ) {
