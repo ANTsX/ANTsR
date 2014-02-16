@@ -23,7 +23,7 @@ taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesig
     for (i in 1:11) {
       residmat <- residuals(lm(myformhrf, data = data.frame(adesmat)))
       residsig <- apply(residmat, FUN = mean, MARGIN = 1)
-      arcoefs <- ar(residsig, FALSE, 2)$ar  # use something similar to  SPM's  autoregression estimate
+      arcoefs <- ar(residsig, FALSE, 2,method="burg")$ar  # use something similar to  SPM's  autoregression estimate
       if (i == 1) 
         initialarcoefs <- arcoefs
       if (abs(arcoefs[1]) > 0.05) 
@@ -52,7 +52,7 @@ taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesig
     # new regression
     amat <- residuals(lm(myformNOhrf, data = data.frame(adesmat)))
     residsig <- apply(amat, FUN = mean, MARGIN = 1)
-    arcoefs <- ar(residsig, FALSE, length(arcoefs))$ar  # use something similar to  SPM's  autoregression estimate
+    arcoefs <- ar(residsig, FALSE, length(arcoefs),method="burg")$ar  # use something similar to  SPM's  autoregression estimate
     print(paste("final arcoefs", arcoefs))
     print(paste("initi arcoefs", initialarcoefs))
   }
@@ -69,3 +69,33 @@ taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesig
   betas[is.na(betas)] <- 0
   return(list(beta = betas, fmrimat = amat, adesmat = adesmat))
 } 
+
+
+
+arCorrection <- function( boldmatin , loops = 10, armethod="burg" )
+{
+  boldmat<-boldmatin
+  for ( i in 1:loops ) {
+    arcoefs <- ar(boldmat, FALSE, 2, method=armethod )$ar  # use something similar to  SPM's  autoregression estimate
+    if (i == 1) initialarcoefs <- arcoefs
+    if (abs(arcoefs[1]) > 0.05) 
+      {
+      mat1 <- ashift(boldmat, c(1, 0))
+      mat1[1, ] <- boldmat[1, ]
+      mat2 <- ashift(boldmat, c(2, 0))
+      mat2[1, ] <- boldmat[1, ]
+      mat2[2, ] <- boldmat[2, ]
+      if (length(arcoefs) == 2) 
+          boldmat <- boldmat - mat1 * arcoefs[1] - mat2 * arcoefs[2]
+      if (length(arcoefs) == 1) 
+          boldmat <- boldmat - mat1 * arcoefs[1]
+      }
+    }
+    # new regression
+  arcoefs <- ar(boldmat, FALSE, length(arcoefs), method=armethod )$ar  # use something similar to  SPM's  autoregression estimate
+  if ( mean(abs(sum(arcoefs))) >  mean(abs(sum(initialarcoefs))) ) {
+    print(paste("final arcoefs", arcoefs))
+    print(paste("initi arcoefs", initialarcoefs))
+  }
+  return( list( outmat=boldmat ,  initcoefs=initialarcoefs, arcoefs=arcoefs ) )
+}
