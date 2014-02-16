@@ -35,6 +35,7 @@ src/antsRegistration.o
 src/antsThresholdImageFilter.o
 src/itkImageR.o
 src/sccan.o
+src/LabelClustersUniquely.o
 src/symbols.rds
 
 
