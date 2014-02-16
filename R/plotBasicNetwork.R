@@ -15,7 +15,7 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
   edgelocations <- c()
   edgeweights <- c()
   for (i in c(1:nLabels)) {
-    for (j in c(i:nLabels)) {
+    for (j in c(1:nLabels)) {
       if ( is.na( weights ) ) edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
        else if ( weights[i,j] > 0 &  weights[i,j] < Inf ) {
            edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
@@ -30,15 +30,17 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
 
   if ((length(edgecolors) == 1) && (edgecolors[1] == 0)) {
     if ((scaling[1] == scaling[2])) {
-      scaling[1] <- min(edgeweights)
+      scaling[1] <- min(edgeweights) 
       scaling[2] <- max(edgeweights) - min(edgeweights)
+      if ( scaling[2] == 0 ) scaling[2]<-1
     }
+    print( scaling )
     
-    edgeweights <- edgeweights - scaling[1]
+    edgeweights <- edgeweights - scaling[1] + 1
     edgeweights <- edgeweights/scaling[2]
     edgeweights <- edgeweights * 0.75  # prevent 'wrapping' of colors
     
-    edgeweights <- 1 + (edgeweights * 511)
+    edgeweights <- (edgeweights * 511)
     # colormap <- topo.colors(512)
     colormap <- rainbow(512)
     edgecolors <- edgeweights
