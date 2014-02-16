@@ -159,7 +159,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
 }
 
 
-makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1) {
+makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1, getEfficiency = FALSE ) {
   pckg <- try(require(igraph))
   if (!pckg) {
     getPckg("igraph")
@@ -190,6 +190,12 @@ makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1) {
   g1 <- graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
   # 
   edgeWeights <- E(g1)$weight
+  # compute local efficiency
+  if ( getEfficiency ) {
+      mysps<-shortest.paths(g1)
+      mysps[ mysps == Inf ] <- 2.0 * max( adjacencyMatrix )
+      myspsa<-apply( mysps ,FUN=mean,MARGIN=2,na.rm=T)
+  } else myspsa<-NA
   # print( paste( 'Graph-Density:',graph.density( g1 ) ) )
   gmetric0 <- evcent(g1)$vector
   gmetric1 <- closeness(g1, normalized = T, weights = edgeWeights)
@@ -197,11 +203,13 @@ makeGraph <- function(myrsfnetworkcorrs, graphdensity = 1) {
   gmetric3 <- degree(g1)
   gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  #
   gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat") )
-  gmetric6<-graph.strength(g1)
+  gmetric6 <- graph.strength(g1)
+  gmetric7 <- centralization.degree( g1 )$res
+  gmetric8 <- myspsa
   mycommunity <- fastgreedy.community(g1)
   walktrapcomm <- walktrap.community(g1)
   return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3, 
-    betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6, community = mycommunity, walktrapcomm = walktrapcomm, 
+    betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6, degcent = gmetric7, effinv = myspsa , community = mycommunity, walktrapcomm = walktrapcomm, 
     adjacencyMatrix = adjacencyMatrix))
 }
 
