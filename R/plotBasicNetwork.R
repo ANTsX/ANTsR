@@ -40,9 +40,10 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
     edgeweights <- edgeweights/scaling[2]
     edgeweights <- edgeweights * 0.75  # prevent 'wrapping' of colors
     
-    edgeweights <- (edgeweights * 511)
+    edgeweights <- (edgeweights * 300 )
     # colormap <- topo.colors(512)
     colormap <- rainbow(512)
+    colormap <- heat.colors(512, alpha = 1)
     edgecolors <- edgeweights
     for (i in c(1:length(edgeweights))) {
       edgecolors[i] <- colormap[floor(edgeweights[i])]
