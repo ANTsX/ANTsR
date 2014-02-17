@@ -28,8 +28,19 @@ setMethod(f = "var", signature(x = "antsImage"), definition = function(x) {
   return(var(as.array(x)))
 })
 
-setMethod(f = "mean", signature(x = "antsImage"), definition = function(x) {
-  return(mean(as.array(x)))
+setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical() ) {
+  if ( typeof(mask) != "logical" ) {
+    print("'mask' provided is not of type 'logical'")
+    return()
+  }
+
+  if ( length(mask) == 0 ) {
+    return(mean(as.array(x)))
+  } 
+  else {
+    return(mean(as.array(x)[mask]))
+  }
+
 })
 
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
