@@ -34,19 +34,19 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
       scaling[2] <- max(edgeweights) - min(edgeweights)
       if ( scaling[2] == 0 ) scaling[2]<-1
     }
-    print( scaling )
     
     edgeweights <- edgeweights - scaling[1] + 1
     edgeweights <- edgeweights/scaling[2]
     edgeweights <- edgeweights * 0.75  # prevent 'wrapping' of colors
-    
-    edgeweights <- (edgeweights * 300 )
+    edgeweights <- (edgeweights * 400 )
     # colormap <- topo.colors(512)
     colormap <- rainbow(512)
     colormap <- heat.colors(512, alpha = 1)
     edgecolors <- edgeweights
     for (i in c(1:length(edgeweights))) {
-      edgecolors[i] <- colormap[floor(edgeweights[i])]
+      colind<-floor(edgeweights[i])
+      if ( colind < 1 ) colind<-1
+      edgecolors[i] <- colormap[colind]
     }
   }
   segments3d(mesh$vertices[edgelocations, ], col = rep(edgecolors, each = 2), lwd = lwd)
