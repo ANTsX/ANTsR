@@ -1,5 +1,5 @@
 aslPerfusion <- function(asl, maskThresh = 500, moreaccurate = TRUE, dorobust = 0.92, m0 = NA, skip = 20, mask = NA, 
-  interpolation = "linear", checkmeansignal = 100) {
+  interpolation = "linear", checkmeansignal = 100, moco_results=NULL) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -40,7 +40,7 @@ aslPerfusion <- function(asl, maskThresh = 500, moreaccurate = TRUE, dorobust = 
     print("input image must have dimension 4 ")
     return(NULL)
   }
-  moco_results <- motion_correction(asl, moreaccurate = moreaccurate)
+  if(is.null(moco_results)) moco_results <- motion_correction(asl, moreaccurate = moreaccurate)
   motionparams <- as.data.frame(moco_results$moco_params)
   moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09, cleanup = TRUE)
   if (!is.na(mask)) 
@@ -82,6 +82,7 @@ aslPerfusion <- function(asl, maskThresh = 500, moreaccurate = TRUE, dorobust = 
   perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))] <- 0
   perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))] <- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
   
-  return(list(perfusion = perfusion, perfusionTimeSeries = perfusionTimeSeries, aslTimeSeries = mat, xideal = predictors$xideal, 
-    nuisancevariables = predictors$nuis, mask = moco_mask_img, m0 = m0, m1 = m1, globalsignal = predictors$globalsignalASL))
+  return(list(perfusion = perfusion$cbfi, perfusionTimeSeries = perfusionTimeSeries, aslTimeSeries = mat, xideal = predictors$xideal, 
+    nuisancevariables = predictors$nuis, mask = moco_mask_img, m0 = m0, m1 = m1, globalsignal = predictors$globalsignalASL, 
+    indstozero=perfusion$indstozero))
 } 

@@ -25,7 +25,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     betaideal <- (betaideal) * (-1)
   cbfi[mask_img == 1] <- betaideal  # standard results
   
-  
+  indstozero <- NULL
   if (dorobust > 0) {
     pckg <- try(require(robust))
     if (!pckg) {
@@ -92,6 +92,6 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     cbfi[mask_img == 1] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(usemat) * 100, " % "))
   }
-  return(cbfi)
+  return(list(cbfi=cbfi, indstozero=indstozero))
 }
 # y = x beta + c => y - c = x beta 
