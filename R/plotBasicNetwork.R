@@ -16,7 +16,6 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
     radiusw<-rep(0,nrow(centroids))
     gg<-which( apply( weights, FUN=mean, MARGIN=1 , na.rm=T ) > 0 |
                apply( weights, FUN=mean, MARGIN=2 , na.rm=T ) > 0    )
-    print( gg )
     radiusw[gg]<-radius
     radius<-radiusw
     }
