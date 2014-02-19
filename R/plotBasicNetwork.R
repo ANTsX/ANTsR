@@ -1,5 +1,5 @@
 plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nodecolors = "blue", 
-  nodetype = "s" , scaling = c(0, 0), lwd = 2, radius = 3 ) {
+  nodetype = "s" , scaling = c(0, 0), lwd = 2, radius = 3, showOnlyConnectedNodes = TRUE ) {
   if (missing(centroids) | missing(brain)) {
     print(args(plotBasicNetwork))
     return(1)
@@ -11,6 +11,15 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
   nSurfaceVerts <- dim(mesh$vertices)[1]
   mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
   labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts
+  if ( !is.na(weights) & showOnlyConnectedNodes )
+    {
+    radiusw<-rep(0,nrow(centroids))
+    gg<-which( apply( weights, FUN=mean, MARGIN=1 , na.rm=T ) > 0 |
+               apply( weights, FUN=mean, MARGIN=2 , na.rm=T ) > 0    )
+    print( gg )
+    radiusw[gg]<-radius
+    radius<-radiusw
+    }
   spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)  
   edgelocations <- c()
   edgeweights <- c()
