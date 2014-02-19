@@ -16,7 +16,10 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
     radiusw<-rep(0,nrow(centroids))
     gg<-which( apply( weights, FUN=mean, MARGIN=1 , na.rm=T ) > 0 |
                apply( weights, FUN=mean, MARGIN=2 , na.rm=T ) > 0    )
-    radiusw[gg]<-radius
+    radiusscale<-as.numeric( apply( weights, FUN=sum, MARGIN=1 , na.rm=T ) +
+                             apply( weights, FUN=sum, MARGIN=2 , na.rm=T ) )
+    radiusscale <- ( radiusscale/max(radiusscale) )
+    radiusw<-( radius * radiusscale )
     radius<-radiusw
     }
   spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)  
