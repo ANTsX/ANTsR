@@ -1,4 +1,4 @@
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20) {
+perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20, regweights=NULL) {
   getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
@@ -26,7 +26,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
   cbfi[mask_img == 1] <- betaideal  # standard results
   
   indstozero <- NULL
-  if (dorobust > 0) {
+  if (dorobust > 0 & is.null(regweights)) {
     pckg <- try(require(robust))
     if (!pckg) {
       cat("Installing 'robust' from CRAN\n")
@@ -91,7 +91,13 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       betaideal <- (betaideal) * (-1)
     cbfi[mask_img == 1] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(usemat) * 100, " % "))
+  } else if(dorobust>0 & !is.null(regweights)){
+    mycbfmodel <- lm(cbfform, weights = regweights)  # standard weighted regression
+    betaideal <- ((mycbfmodel$coeff)[2, ])
+    if (mean(betaideal) < 0)
+    betaideal <- (betaideal) * (-1)
+    cbfi[mask_img == 1] <- betaideal  # robust results
   }
-  return(list(cbfi=cbfi, indstozero=indstozero))
+  return(list(cbfi=cbfi, indstozero=indstozero, regweights=regweights))
 }
 # y = x beta + c => y - c = x beta 
