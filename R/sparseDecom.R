@@ -21,16 +21,16 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     inmask)
   if (length(initializationList) > 0) {
     ct <- 1
-    outfns <- c()
+    initfns <- c()
     for (img in initializationList) {
-      outfn <- paste(statdir, "init", ct, ".nii.gz", sep = "")
-      outfns <- c(outfns, outfn)
-      antsImageWrite(img, outfn)
+      initfn <- paste(statdir, "init", ct, ".nii.gz", sep = "")
+      initfns <- c(initfns, initfn)
+      antsImageWrite(img, initfn)
       ct <- ct + 1
     }
     initlistfn <- paste(statdir, "init.txt", sep = "")
     fileConn <- file(initlistfn)
-    writeLines(outfns, fileConn)
+    writeLines(initfns, fileConn)
     close(fileConn)
     args <- list("--svd", paste("recon[", matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", 1, "-i", 
       its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, 
@@ -39,6 +39,9 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
   }
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
+  glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
+  fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
+  fnu <- read.csv(fnu)
   if ( class(inmask)[[1]][1] == "antsImage" ) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)[1:nvecs]
@@ -54,9 +57,6 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
     fnl <- read.csv(fnl)
   }
-  
-  glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
-  fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
-  fnu <- read.csv(fnu)
   return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu))
+  
 } 
