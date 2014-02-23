@@ -90,15 +90,16 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
     cca1outAuto<-matrixSeg( t(cca1outAuto )  )
     cca1out<-cca1outAuto
     } else {
-    cca1outAuto<-matrixToImages( t(cca1outAuto),locmask )
-    autoseg1<-eigSeg(locmask ,cca1outAuto, TRUE )
-    cca1outAuto<-t( imageListToMatrix( cca1outAuto, locmask ) )
-    cca1out<-cca1outAuto
+        cca1outAuto<-matrixToImages( t(cca1outAuto),locmask )
+        autoseg1<-eigSeg(locmask ,cca1outAuto, TRUE )
+        cca1outAuto<-t( imageListToMatrix( cca1outAuto, locmask ) )
+        cca1out<-t( cca1outAuto )
     }
 ####################################################################################
 ####################################################################################
-  finalinit <- matrixToImages( cca1out,locmask )
   print(paste("Get Final Results",statdir))
+  finalinit <- matrixToImages( cca1out,locmask )
+          print("D")
   myres <- sparseDecom( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, 
   z = z, smooth = smooth, initializationList = finalinit, mycoption = mycoption )
   ###
