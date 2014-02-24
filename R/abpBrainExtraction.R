@@ -25,7 +25,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ANTS_MAX_ITERATIONS <- "100x100x70x20"
   ANTS_TRANSFORMATION <- "SyN[0.1,3,0]"
   ANTS_LINEAR_METRIC_PARAMS <- "1,32,Regular,0.25"
-  ANTS_LINEAR_CONVERGENCE <- "[1000x1000x1000x1000,1e-7,15]"
+  ANTS_LINEAR_CONVERGENCE <- "[1000x1000x1000x10,1e-7,15]"
   ANTS_LINEAR_CONVERGENCEFAST <- "[10x0x0x0,1e-7,10]"
   ANTS_METRIC <- "CC"
   ANTS_METRIC_PARAMS <- "1,4"
@@ -93,30 +93,35 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   segcsf <- antsImageClone(img)
   ThresholdImage(img@dimension, fseg, segcsf, 1, 1)
   ImageMath(img@dimension, segwm, "GetLargestComponent", segwm)
-  ImageMath(img@dimension, segwm, "GetLargestComponent", segwm)
-  tmp <- antsImageClone(img)
-  ImageMath(img@dimension, tmp, "FillHoles", seggm)
-  ImageMath(img@dimension, seggm, "m", seggm, tmp)
-  ImageMath(img@dimension, segwm, "m", segwm, 3)
+  ImageMath(img@dimension, seggm, "GetLargestComponent", seggm)
+  ImageMath(img@dimension, seggm, "FillHoles", seggm)
+  segwm[ segwm > 0.5  ]<-3
+  tmp <- antsImageClone(segcsf)
   ImageMath(img@dimension, tmp, "ME", segcsf, 10)
-  ImageMath(img@dimension, seggm, "addtozero", seggm, tmp)
-  ImageMath(img@dimension, seggm, "m", seggm, 2)
+  seggm[ seggm < 0.5 & tmp > 0.5 ]<-2
+  seggm[ seggm > 0.5  ]<-2
   finalseg <- antsImageClone(img)
-  ImageMath(img@dimension, finalseg, "m", finalseg, 0)
-  ImageMath(img@dimension, finalseg, "addtozero", seggm, segwm)
-  ImageMath(img@dimension, finalseg, "addtozero", finalseg, segcsf)
+  finalseg[ finalseg > 0 ]<-0
+  finalseg[ seggm > 0.5 ]<-2
+  finalseg[ segwm > 0.5 & seggm < 0.5 ]<-3
+  finalseg[ segcsf > 0.5 & seggm < 0.5 & segwm < 0.5 ]<-1
   # BA - finalseg looks good! could stop here
   ThresholdImage(img@dimension, finalseg, tmp, 2, 3)
   ImageMath(img@dimension, tmp, "ME", tmp, 2)
   ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
   ImageMath(img@dimension, tmp, "MD", tmp, 4)
   ImageMath(img@dimension, tmp, "FillHoles", tmp)
-  ImageMath(img@dimension, tmp, "addtozero", tmp, antsImageClone(temmaskwarped, "float"))
+  ImageMath(img@dimension, tmp, "addtozero", tmp, antsImageClone(temmaskwarped, "float") )
   ImageMath(img@dimension, tmp, "MD", tmp, 5)
   ImageMath(img@dimension, tmp, "ME", tmp, 5)
+  ImageMath(img@dimension, tmp, "Neg", tmp, 5)
+  tmp2<-antsImageClone(tmp)
+  ImageMath(img@dimension, tmp2, "FillHoles", tmp)
   # FIXME - steps above should all be checked again ...
+  finalseg[ tmp2 == 1 ]<-2
+  finalseg[ tmp == 1 ]<-1
   brain <- antsImageClone(img)
-  ImageMath(img@dimension, brain, "m", brain, tmp)
-  return(list(brain = brain, bmask = tmp, kmeansseg = seg, fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
+  brain[ finalseg < 0.5 ]<-0
+  return(list(brain = brain, bmask = finalseg, kmeansseg = seg, fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
     temmaskwarped = temmaskwarped))
 } 
