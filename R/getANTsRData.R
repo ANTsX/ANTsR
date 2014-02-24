@@ -14,10 +14,11 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     AB = "http://placid.nlm.nih.gov/download?items=10753", ch2 = "http://placid.nlm.nih.gov/download?items=10778", 
     ch2b = "http://placid.nlm.nih.gov/download?items=10780", ch2a = "http://placid.nlm.nih.gov/download?items=10784", 
     mni = "http://placid.nlm.nih.gov/download?items=10785", mnib = "http://placid.nlm.nih.gov/download?items=10787", 
-    mnia = "http://placid.nlm.nih.gov/download?items=10786", mnit = "http://placid.nlm.nih.gov/download?items=11660")
+    mnia = "http://placid.nlm.nih.gov/download?items=10786", mnit = "http://placid.nlm.nih.gov/download?items=11660",
+    nki  = "http://files.figshare.com/1363201/NKI.zip")
   
   myext <- ".nii.gz"
-  if (fileid == "ADNI" | fileid == "K1") 
+  if (fileid == "ADNI" | fileid == "K1"  | fileid == "nki" ) 
     myext <- ".zip"
   tdir <- tempdir()  # for temporary storage
   tfn <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = myext)  # for temporary storage
@@ -27,9 +28,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   }
   if (!file.exists(tfn)) 
     download.file(myurl, tfn)
-  if (fileid == "ADNI" | fileid == "K1") {
-    unzip(tfn)
-    return(tfn)
+  if (fileid == "ADNI" | fileid == "K1"  | fileid == "nki" ) {
+      return(tfn)
   }
   # could use md5sum
   mymd5 <- switch(fileid, r16 = "37aaa33029410941bf4affff0479fa18", r64 = "8a629ee7ea32013c76af5b05f880b5c6", 
