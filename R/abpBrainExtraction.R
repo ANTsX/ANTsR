@@ -118,10 +118,38 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   tmp2<-antsImageClone(tmp)
   ImageMath(img@dimension, tmp2, "FillHoles", tmp)
   # FIXME - steps above should all be checked again ...
-  finalseg[ tmp2 == 1 ]<-2
-  finalseg[ tmp == 1 ]<-1
+  finalseg2 <- antsImageClone( finalseg )
+  finalseg2[ tmp2 == 1 ]<-2
+  finalseg2[ tmp == 1 ]<-1
+  ImageMath(img@dimension, finalseg2, "FillHoles", finalseg2 )
+  dseg<-antsImageClone( finalseg2 )
+  dseg[ finalseg2 < 1.5 ]<-0
+  dseg[ finalseg2 >= 1.5 ]<-1
+  ImageMath(3,dseg,"FillHoles",dseg)
+  ImageMath(3,dseg,"MaurerDistance",dseg)
+  droundmax <- 20
+  bseg<-antsImageClone(finalseg2)
+  dsearchvals <- c(1:100)/100 * droundmax - 0.5*droundmax
+  mindval<-min( dseg )
+  loval<-mindval
+  distmeans<-rep(0,length(dsearchvals))
+  ct<-1
+  for ( dval in ( dsearchvals ) )
+    {
+    loval<-( dval - 1.5 )
+    dsegt<-antsImageClone(dseg)
+    dsegt[ dsegt >= loval & dsegt < dval ] <- 1
+    distmeans[ct]<- mean( img[ dsegt == 1 ] )
+#    print( paste( dval, distmeans[ct] ) )
+    ct<-ct+1
+    }
+  localmin<-which.min(distmeans)
+  dthresh<-dsearchvals[localmin]
+  bmask<-antsImageClone( finalseg2 )
+  ThresholdImage(3,dseg,bmask,mindval,dthresh)
   brain <- antsImageClone(img)
-  brain[ finalseg < 0.5 ]<-0
-  return(list(brain = brain, bmask = finalseg, kmeansseg = seg, fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
-    temmaskwarped = temmaskwarped))
+  brain[ bmask < 0.5 ]<-0
+  return(list(brain = brain, bmask = finalseg, kmeansseg = seg,
+              fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
+              temmaskwarped = temmaskwarped))
 } 
