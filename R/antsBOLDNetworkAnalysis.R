@@ -137,6 +137,6 @@ antsBOLDNetworkAnalysis <- function( bold = NA, mask = NA, labels = NA, motion =
     myc<-c( matmag, tranmag, matsd, transd , mydeg, mypr, mycent, mytrans, myclose , mybtwn, mytimes, meanFD, meanDVARS )
     outmat<-matrix(myc,nrow=1)
     colnames(outmat)<-names(myc)
-    return( list( subjectSummary=outmat, mynetwork=mynetwork ) )
+    return( list( subjectSummary=outmat, mynetwork=mynetwork, boldmask = aalmask  ) )
 ##################################################
 }
