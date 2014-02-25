@@ -143,5 +143,5 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   brain[ bmask < 0.5 ]<-0
   return(list(brain = brain, bmask = finalseg2, kmeansseg = seg,
               fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
-              temmaskwarped = temmaskwarped))
+              temmaskwarped = temmaskwarped, distmeans=distmeans, dsearchvals=dsearchvals ) )
 } 
