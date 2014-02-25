@@ -134,7 +134,7 @@ antsBOLDNetworkAnalysis <- function( bold = NA, mask = NA, labels = NA, motion =
     names(meanFD)<-"meanFD"
     meanDVARS<-mean(DVARS) 
     names(meanDVARS)<-"meanDVARS"
-    myc<-c( matmag, tranmag, matsd, transd, reproval , mydeg, mypr, mycent, mytrans, myclose , mybtwn, reproval2, mytimes, meanFD, meanDVARS )
+    myc<-c( matmag, tranmag, matsd, transd , mydeg, mypr, mycent, mytrans, myclose , mybtwn, mytimes, meanFD, meanDVARS )
     outmat<-matrix(myc,nrow=1)
     colnames(outmat)<-names(myc)
     return( list( subjectSummary=outmat, mynetwork ) )
