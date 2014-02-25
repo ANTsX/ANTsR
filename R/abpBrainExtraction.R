@@ -111,24 +111,17 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
   ImageMath(img@dimension, tmp, "MD", tmp, 4)
   ImageMath(img@dimension, tmp, "FillHoles", tmp)
-  ImageMath(img@dimension, tmp, "addtozero", tmp, antsImageClone(temmaskwarped, "float") )
+  tmp[ tmp > 0 | temmaskwarped > 0.25 ]<-1
   ImageMath(img@dimension, tmp, "MD", tmp, 5)
   ImageMath(img@dimension, tmp, "ME", tmp, 5)
-  ImageMath(img@dimension, tmp, "Neg", tmp, 5)
   tmp2<-antsImageClone(tmp)
   ImageMath(img@dimension, tmp2, "FillHoles", tmp)
   # FIXME - steps above should all be checked again ...
-  finalseg2 <- antsImageClone( finalseg )
-  finalseg2[ tmp2 == 1 ]<-2
-  finalseg2[ tmp == 1 ]<-1
-  ImageMath(img@dimension, finalseg2, "FillHoles", finalseg2 )
+  finalseg2 <- antsImageClone( tmp2 )
   dseg<-antsImageClone( finalseg2 )
-  dseg[ finalseg2 < 1.5 ]<-0
-  dseg[ finalseg2 >= 1.5 ]<-1
-  ImageMath(3,dseg,"FillHoles",dseg)
+  ImageMath(3,dseg,"ME",dseg,5)
   ImageMath(3,dseg,"MaurerDistance",dseg)
   droundmax <- 20
-  bseg<-antsImageClone(finalseg2)
   dsearchvals <- c(1:100)/100 * droundmax - 0.5*droundmax
   mindval<-min( dseg )
   loval<-mindval
@@ -140,7 +133,6 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
     dsegt<-antsImageClone(dseg)
     dsegt[ dsegt >= loval & dsegt < dval ] <- 1
     distmeans[ct]<- mean( img[ dsegt == 1 ] )
-#    print( paste( dval, distmeans[ct] ) )
     ct<-ct+1
     }
   localmin<-which.min(distmeans)
