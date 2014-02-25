@@ -141,7 +141,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ThresholdImage(3,dseg,bmask,mindval,dthresh)
   brain <- antsImageClone(img)
   brain[ bmask < 0.5 ]<-0
-  return(list(brain = brain, bmask = finalseg, kmeansseg = seg,
+  return(list(brain = brain, bmask = finalseg2, kmeansseg = seg,
               fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
               temmaskwarped = temmaskwarped))
 } 
