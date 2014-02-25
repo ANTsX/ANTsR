@@ -1,5 +1,5 @@
 sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50, its = 5, cthresh = 250, statdir = NA, 
-  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 ) {
+  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 , doseg = FALSE ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print( args( sparseDecomboot ) ) 
@@ -87,11 +87,12 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
   if ( usefakemask )
     {
     locmask<-fakemask1
-    cca1outAuto<-matrixSeg( t(cca1outAuto )  )
+    if ( doseg ) cca1outAuto<-matrixSeg( t(cca1outAuto )  )
+      else cca1outAuto<-t(cca1outAuto ) 
     cca1out<-cca1outAuto
     } else {
         cca1outAuto<-matrixToImages( t(cca1outAuto),locmask )
-        autoseg1<-eigSeg(locmask ,cca1outAuto, TRUE )
+        autoseg1<-eigSeg(locmask ,cca1outAuto, doseg )
         cca1outAuto<-t( imageListToMatrix( cca1outAuto, locmask ) )
         cca1out<-t( cca1outAuto )
     }
