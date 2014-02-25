@@ -66,7 +66,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   dimg <- antsImageClone(img, "double")
   antsregparams <- list(d = img@dimension, u = 1, o = EXTRACTION_WARP_OUTPUT_PREFIX, r = initafffn, z = 1, w = "[0.025,0.975]", 
     m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt, "double")), ",", antsrGetPointerName(antsImageClone(lapi, 
-      "double")), ",", "0.5,32]", sep = ""), c = "[50x30x0,1e-9,15]", t = "SyN[0.1,3,0]", f = "4x2x1", s = "2x1x0")
+      "double")), ",", "0.5,32]", sep = ""), c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]", f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX
   fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""), paste(outprefix, "0GenericAffine.mat", sep = ""))
   invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""), paste(outprefix, "1InverseWarp.nii.gz", 
@@ -140,7 +140,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   bmask<-antsImageClone( finalseg2 )
   ThresholdImage(3,dseg,bmask,mindval,dthresh)
   brain <- antsImageClone(img)
-  brain[ bmask < 0.5 ]<-0
+  brain[ finalseg2 < 0.5 ]<-0
   return(list(brain = brain, bmask = finalseg2, kmeansseg = seg,
               fwdtransforms = fwdtransforms, invtransforms = invtransforms, 
               temmaskwarped = temmaskwarped, distmeans=distmeans, dsearchvals=dsearchvals ) )
