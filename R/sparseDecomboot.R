@@ -1,5 +1,5 @@
 sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50, its = 5, cthresh = 250, statdir = NA, 
-  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 , doseg = TRUE ) {
+  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 , robust=0, doseg = TRUE ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print( args( sparseDecomboot ) ) 
@@ -25,7 +25,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
       submat1 <-mat1[mysample,]
       print(paste("boot",boots,"sample",mysize))
       myres <- sparseDecom( inmatrix = submat1, inmask = mymask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, 
-  z = z, smooth = smooth, initializationList = initializationList, mycoption = mycoption )
+  z = z, smooth = smooth, initializationList = initializationList, mycoption = mycoption, robust=robust )
       if ( length(dim(myres$eigenanatomyimages)) == 0 ) cca1<-t( imageListToMatrix( myres$eigenanatomyimages , mymask )  )
       if ( length(dim(myres$eigenanatomyimages)) == 2 ) cca1<-( myres$eigenanatomyimages )
       if ( boots > 1 & TRUE  )
@@ -104,7 +104,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
   print(paste("Get Final Results",statdir))
   finalinit <- matrixToImages( cca1out,locmask )
   myres <- sparseDecom( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, 
-  z = z, smooth = smooth, initializationList = finalinit, mycoption = mycoption )
+  z = z, smooth = smooth, initializationList = finalinit, mycoption = mycoption, robust=robust )
   ###
   if ( usefakemask ) myres$eigenanatomyimages<-t( imageListToMatrix( myres$eigenanatomyimages , fakemask1 )  )
   return( list( projections = myres$projections,  
