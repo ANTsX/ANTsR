@@ -24,7 +24,7 @@ antsBOLDNetworkAnalysis <- function( bold = NA, mask = NA, labels = NA, motion =
     mytimes<-dim(bold)[4]
     aalm<-labels
     aalmask<-antsImageClone( aalm )
-    mylog<-( aalm >= threshLo & aalm <= threshHi )
+    mylog<-( aalm >= threshLo & aalm <= threshHi & mask > 0.5  )
     aalmask[ mylog ]<-1
     aalmask[!mylog ]<-0
     aalm[!mylog]<-0
