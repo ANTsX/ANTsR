@@ -1,5 +1,5 @@
 sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50, its = 5, cthresh = 250, statdir = NA, 
-  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 , doseg = FALSE ) {
+  z = 0, smooth = 0, initializationList = list(), mycoption = 0, nboot = 10, nsamp=0.9 , doseg = TRUE ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print( args( sparseDecomboot ) ) 
@@ -31,6 +31,8 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
       if ( boots > 1 & TRUE  )
         {
           cca1copy<-cca1
+          # compute the "closest" eigenvector and store the difference
+          # in a difference matrix called mymult 
           mymult<-matrix( rep(0,ncol(cca1)*ncol(cca1)) , ncol=ncol(cca1) )
           for ( j in 1:ncol(cca1out) ) {
           for ( k in 1:ncol(cca1) ) {
@@ -39,6 +41,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
             mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
             }
           }
+          # find the best match and reorder appropriately 
           for ( ct in 1:(ncol(cca1)) )
             {
               arrind<-which( mymult == min(mymult) , arr.ind=T)
@@ -64,11 +67,11 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
     vec1[ is.na( vec1 ) ]<-0
     if ( ( nv > 1 ) & ( abs( sparseness * nvecs ) < 1) & TRUE  )
       {
-        for ( j in 1:(nv-1) )
-            {
-            prevec <- cca1out[ , j ]
-            vec1[ prevec > 0 ] <- 0 
-            }
+#        for ( j in 1:(nv-1) )
+#            {
+#            prevec <- cca1out[ , j ]
+#            vec1[ prevec > 0 ] <- 0 
+#            }
         cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness ) )
         cca1outAuto[ , nv ] <-  vec1 
       } else {
@@ -100,7 +103,6 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
 ####################################################################################
   print(paste("Get Final Results",statdir))
   finalinit <- matrixToImages( cca1out,locmask )
-          print("D")
   myres <- sparseDecom( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, 
   z = z, smooth = smooth, initializationList = finalinit, mycoption = mycoption )
   ###
