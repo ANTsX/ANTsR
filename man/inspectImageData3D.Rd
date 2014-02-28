@@ -28,5 +28,13 @@ Avants BB
 }
 
 \examples{
-summat<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) ) 
+\dontrun{
+mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) ) 
+library(fpc)
+library(DMwR)
+pamres <- pamk(mm) 
+plot(pamres$pamobject)
+outlier.scores <- lofactor( mm, k=5)
+outliers <- order(outlier.scores, decreasing=T)[1:5]
+}
 }
