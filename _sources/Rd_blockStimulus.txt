@@ -1,0 +1,27 @@
+=========================
+blockStimulus 
+=========================
+
+purpose:  
+
+ Block stimulus model for FMRI Data
+ 
+description:  
+
+   Create the block BOLD stimulus for a given task indicator function. Current units in terms of volumes.  Sort of a bug, should be in TR. 
+ 
+
+usage:  
+
+   blockStimulus(scans = 1, onsets = c(1), durations = c(1), tr=2.5 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # Example 1
+    
+
+
+

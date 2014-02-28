@@ -1,0 +1,29 @@
+=========================
+sparseDecomboot 
+=========================
+
+purpose:  
+
+ Convenience wrapper for eigenanatomy decomposition.
+ 
+description:  
+
+ Decomposes a matrix into sparse eigenevectors to maximize explained variance.
+ 
+
+usage:  
+
+ sparseDecomboot( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250  , nboot = 20, nsamp = 0.9 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat <- replicate(100, rnorm(20))
+    
+    mydecom <- sparseDecomboot(mat)
+    
+
+
+

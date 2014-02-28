@@ -1,0 +1,29 @@
+=========================
+getMask 
+=========================
+
+purpose:  
+
+ Get Mask
+ 
+description:  
+
+   Get a binary mask image from the given image after thresholding.
+ 
+
+usage:  
+
+ getMask( img = NULL, lowThresh = 1, highThresh = Inf, cleanup = FALSE )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # input_img.nii is a 3D image
+    
+    mask_img <- get_mask("input_img.nii", 500, 1e+09)
+    
+
+
+

@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Time series registration and transformation. &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="next" title="Population study using simple_voxel_based_analysis.R" href="simple_voxel_based_population_study.html" />
+    <link rel="prev" title="ANTs segmentation approaches." href="antsSegmentation.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Time series registration and transformation.</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="antsSegmentation.html">ANTs segmentation approaches.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="simple_voxel_based_population_study.html">Population study using simple_voxel_based_analysis.R</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="time-series-registration-and-transformation">
+<h1>Time series registration and transformation.<a class="headerlink" href="#time-series-registration-and-transformation" title="Permalink to this headline">¶</a></h1>
+<p>Register a BOLD image to a BOLD template and apply the resulting mapping.</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="kr">if</span> <span class="p">(</span><span class="kc">FALSE</span><span class="p">)</span> <span class="p">{</span>
+    bfn <span class="o">&lt;-</span> getANTsRData<span class="p">(</span><span class="s">&quot;AB&quot;</span><span class="p">)</span>
+    tem <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>bfn<span class="p">,</span> <span class="m">3</span><span class="p">)</span>
+    ResampleImageBySpacing<span class="p">(</span>list<span class="p">(</span><span class="m">3</span><span class="p">,</span> tem<span class="p">,</span> tem<span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">2</span><span class="p">))</span>
+    tfn <span class="o">&lt;-</span> getANTsRData<span class="p">(</span><span class="s">&quot;KK&quot;</span><span class="p">)</span>
+    img <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>tfn<span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+    avg <span class="o">&lt;-</span> new<span class="p">(</span><span class="s">&quot;antsImage&quot;</span><span class="p">,</span> dimension <span class="o">=</span> <span class="m">3</span><span class="p">,</span> pixeltype <span class="o">=</span> <span class="s">&quot;float&quot;</span><span class="p">)</span>
+    antsMotionCorr<span class="p">(</span>list<span class="p">(</span>d <span class="o">=</span> <span class="m">3</span><span class="p">,</span> a <span class="o">=</span> img<span class="p">,</span> o <span class="o">=</span> avg<span class="p">))</span>
+    mytx <span class="o">&lt;-</span> antsRegistration<span class="p">(</span>fixed <span class="o">=</span> tem<span class="p">,</span> moving <span class="o">=</span> avg<span class="p">,</span> typeofTransform <span class="o">=</span> c<span class="p">(</span><span class="s">&quot;SyN&quot;</span><span class="p">),</span>
+        outprefix <span class="o">=</span> paste<span class="p">(</span>tempdir<span class="p">(),</span> <span class="s">&quot;/Z&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+    <span class="c1"># use full access to antsApplyTx</span>
+    outimg <span class="o">&lt;-</span> antsApplyTransforms<span class="p">(</span>fixed <span class="o">=</span> tem<span class="p">,</span> moving <span class="o">=</span> avg<span class="p">,</span> transformlist <span class="o">=</span> mytx<span class="o">$</span>fwdtransforms<span class="p">)</span>
+    par<span class="p">(</span>mfrow <span class="o">=</span> c<span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">))</span>
+    plotANTsImage<span class="p">(</span>tem<span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;40x60x5&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+    plotANTsImage<span class="p">(</span>outimg<span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;40x60x5&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+    <span class="c1"># imagetype 3 is the 4D image ...</span>
+    out4Dimg <span class="o">&lt;-</span> antsApplyTransforms<span class="p">(</span>fixed <span class="o">=</span> tem<span class="p">,</span> moving <span class="o">=</span> img<span class="p">,</span> transformlist <span class="o">=</span> mytx<span class="o">$</span>fwdtransforms<span class="p">,</span>
+        imagetype <span class="o">=</span> <span class="m">3</span><span class="p">)</span>
+    avgtx <span class="o">&lt;-</span> new<span class="p">(</span><span class="s">&quot;antsImage&quot;</span><span class="p">,</span> dimension <span class="o">=</span> <span class="m">3</span><span class="p">,</span> pixeltype <span class="o">=</span> <span class="s">&quot;float&quot;</span><span class="p">)</span>
+    antsMotionCorr<span class="p">(</span>list<span class="p">(</span>d <span class="o">=</span> <span class="m">3</span><span class="p">,</span> a <span class="o">=</span> out4Dimg<span class="p">,</span> o <span class="o">=</span> avgtx<span class="p">))</span>
+    par<span class="p">(</span>mfrow <span class="o">=</span> c<span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">))</span>
+    plotANTsImage<span class="p">(</span>outimg<span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;40x60x5&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+    plotANTsImage<span class="p">(</span>avgtx<span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;40x60x5&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">## [1] &quot;SUCCESS&quot;</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="antsSegmentation.html">ANTs segmentation approaches.</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="simple_voxel_based_population_study.html">Population study using simple_voxel_based_analysis.R</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

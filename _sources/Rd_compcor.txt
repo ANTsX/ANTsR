@@ -1,0 +1,27 @@
+=========================
+compcor 
+=========================
+
+purpose:  
+
+ Simple compcor function.
+ 
+description:  
+
+ Compcors the input matrix using SVD and returns the result.
+ 
+
+usage:  
+
+ compcorr_nuisance<-compcor( fmri, mask,  ncompcor=4, variance_extreme=0.975 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat <- matrix(c(rep(1, 100), rep(0, 200)), ncol = 50)
+    
+
+
+

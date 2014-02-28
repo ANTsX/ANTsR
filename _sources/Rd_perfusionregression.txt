@@ -1,0 +1,29 @@
+=========================
+perfusionregression 
+=========================
+
+purpose:  
+
+ Perfusion Regression
+ 
+description:  
+
+ Estimate CBF using standard regression and optionally robust regression.
+ 
+
+usage:  
+
+ perfusionregression( mask_img , mat , xideal , nuis , m0, dorobust = 0 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # predictors -- result of calling 'get_perfusion_predictors'
+    
+    cbf <- perfusionregression(mask_img, mat, predictors$xideal, predictors$nuis)
+    
+
+
+

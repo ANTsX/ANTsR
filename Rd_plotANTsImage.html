@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>plotANTsImage &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="plotBasicNetwork" href="Rd_plotBasicNetwork.html" />
+    <link rel="prev" title="phantom_population_study" href="Rd_phantom_population_study.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>plotANTsImage</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_phantom_population_study.html">phantom_population_study</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_plotBasicNetwork.html">plotBasicNetwork</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="plotantsimage">
+<h1>plotANTsImage<a class="headerlink" href="#plotantsimage" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Plotting an image slice or multi-slice with optional color overlay.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>This is a plotting utility for antsImage types with a background and color overlay option.  Useful for displaying statistical results overlaid on a background image.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>plotANTsImage( myantsimage , functional=NA, color=&#8221;red&#8221;, axis=1, slices=&#8221;1x1x1&#8221; , threshold=&#8221;1x0&#8221;, quality=NA )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1"># in 2D</span>
+
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> img<span class="p">,</span> functional <span class="o">=</span> funcimg<span class="p">,</span> threshold <span class="o">=</span> <span class="s">&quot;50x150&quot;</span><span class="p">,</span>
+    color <span class="o">=</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+
+<span class="c1"># in 3D</span>
+
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> img<span class="p">,</span> functional <span class="o">=</span> img<span class="p">,</span> threshold <span class="o">=</span> <span class="s">&quot;50x150&quot;</span><span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;10x20x3&quot;</span><span class="p">,</span>
+    color <span class="o">=</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_phantom_population_study.html">phantom_population_study</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_plotBasicNetwork.html">plotBasicNetwork</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

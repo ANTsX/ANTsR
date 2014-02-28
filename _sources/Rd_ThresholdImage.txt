@@ -1,0 +1,31 @@
+=========================
+ThresholdImage 
+=========================
+
+purpose:  
+
+ Theshold Image
+ 
+description:  
+
+ Perform thresholding on the given image
+ 
+
+usage:  
+
+ ThresholdImage( "<imageDimension>" , "<inputImage>" , "<outputImage>" , "<thresh-low>" , "<thresh-high>" , "<inside-value>" , "<outside-value>" )
+ 
+ ThresholdImage( "<imageDimension>" , "<inputImage>" , "<outputImage>" , "Otsu" , "<number-of-thresholds>" )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    ThresholdImage(3, "input_img.nii", "output_img.nii", 2, 3)
+    
+    ThresholdImage(3, "input_img.nii", "output_img.nii", "Otsu", 3)
+    
+
+
+

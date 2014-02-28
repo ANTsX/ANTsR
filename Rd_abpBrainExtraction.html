@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>abpBrainExtraction &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="abpN4" href="Rd_abpN4.html" />
+    <link rel="prev" title="ThresholdImage" href="Rd_ThresholdImage.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>abpBrainExtraction</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_ThresholdImage.html">ThresholdImage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_abpN4.html">abpN4</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="abpbrainextraction">
+<h1>abpBrainExtraction<a class="headerlink" href="#abpbrainextraction" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>An ants-based brain extraction script.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Brain extraction based on mapping a template image and its mask to the input image.  Should be preceded by abpN4.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1"># short example first</span>
+
+fn<span class="o">&lt;-</span>getANTsRData<span class="p">(</span><span class="s">&#39;r16&#39;</span><span class="p">)</span>
+
+img<span class="o">&lt;-</span>antsImageRead<span class="p">(</span>fn<span class="p">,</span><span class="m">2</span><span class="p">)</span>
+
+tf<span class="o">&lt;-</span>getANTsRData<span class="p">(</span><span class="s">&#39;r64&#39;</span><span class="p">)</span>
+
+tem<span class="o">&lt;-</span>antsImageRead<span class="p">(</span>tf<span class="p">,</span><span class="m">2</span><span class="p">)</span>
+
+temmask<span class="o">&lt;-</span>antsImageClone<span class="p">(</span> tem <span class="p">)</span>
+
+temmask<span class="p">[</span> tem  <span class="o">&gt;</span> <span class="m">20</span> <span class="p">]</span><span class="o">&lt;-</span><span class="m">1</span>
+
+temmask<span class="p">[</span> tem  <span class="o">&lt;=</span> <span class="m">20</span> <span class="p">]</span><span class="o">&lt;-</span><span class="m">0</span>
+
+bm<span class="o">&lt;-</span>abpBrainExtraction<span class="p">(</span>img<span class="o">=</span>img<span class="p">,</span>tem<span class="o">=</span>tem<span class="p">,</span>temmask<span class="o">=</span>temmask<span class="p">)</span>
+
+
+
+<span class="c1"># more complete example</span>
+
+idim<span class="o">&lt;-</span><span class="m">2</span>
+
+fn<span class="o">&lt;-</span>getANTsRData<span class="p">(</span><span class="s">&#39;r16&#39;</span><span class="p">)</span>
+
+img<span class="o">&lt;-</span>antsImageRead<span class="p">(</span>fn<span class="p">,</span>idim<span class="p">)</span>
+
+tf<span class="o">&lt;-</span>getANTsRData<span class="p">(</span><span class="s">&#39;r64&#39;</span><span class="p">)</span>
+
+atem<span class="o">&lt;-</span>antsImageRead<span class="p">(</span>tf<span class="p">,</span>idim<span class="p">)</span>
+
+temmask<span class="o">&lt;-</span>antsImageClone<span class="p">(</span> atem <span class="p">)</span>
+
+temmask<span class="p">[</span> atem <span class="o">&gt;</span> <span class="m">20</span> <span class="p">]</span><span class="o">&lt;-</span><span class="m">1</span>
+
+temmask<span class="p">[</span> atem <span class="o">&lt;=</span> <span class="m">20</span> <span class="p">]</span><span class="o">&lt;-</span><span class="m">0</span>
+
+tsegs <span class="o">&lt;-</span> Atropos<span class="p">(</span>d <span class="o">=</span> idim<span class="p">,</span> a <span class="o">=</span> atem<span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.2,1x1]&quot;</span><span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span><span class="p">,</span> i <span class="o">=</span><span class="s">&quot;kmeans[3]&quot;</span><span class="p">,</span> x <span class="o">=</span> temmask<span class="p">)</span>
+
+acsf<span class="o">&lt;-</span>tsegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+
+agm<span class="o">&lt;-</span>tsegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">2</span><span class="p">]]</span>
+
+awm<span class="o">&lt;-</span>tsegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">3</span><span class="p">]]</span>
+
+abm<span class="o">&lt;-</span>temmask
+
+kk<span class="o">&lt;-</span>abpN4<span class="p">(</span>img<span class="p">)</span>
+
+kkbm<span class="o">&lt;-</span>abpBrainExtraction<span class="p">(</span>img<span class="o">=</span>kk<span class="p">,</span>tem<span class="o">=</span>atem<span class="p">,</span>temmask<span class="o">=</span>abm<span class="p">)</span>
+
+kcsf<span class="o">&lt;-</span>antsApplyTransforms<span class="p">(</span>fixed<span class="o">=</span>kk<span class="p">,</span>moving<span class="o">=</span>acsf<span class="p">,</span>transformlist<span class="o">=</span>kkbm<span class="o">$</span>invtransforms<span class="p">)</span>
+
+kgm<span class="o">&lt;-</span>antsApplyTransforms<span class="p">(</span>fixed<span class="o">=</span>kk<span class="p">,</span>moving<span class="o">=</span>agm<span class="p">,</span>transformlist<span class="o">=</span>kkbm<span class="o">$</span>invtransforms<span class="p">)</span>
+
+kwm<span class="o">&lt;-</span>antsApplyTransforms<span class="p">(</span>fixed<span class="o">=</span>kk<span class="p">,</span>moving<span class="o">=</span>awm<span class="p">,</span>transformlist<span class="o">=</span>kkbm<span class="o">$</span>invtransforms<span class="p">)</span>
+
+plotANTsImage<span class="p">(</span>kk<span class="p">,</span>slices<span class="o">=</span><span class="s">&#39;40x120x20&#39;</span><span class="p">,</span>functional<span class="o">=</span>kwm<span class="p">,</span>thresh<span class="o">=</span><span class="s">&#39;0.5x1&#39;</span><span class="p">)</span>
+
+<span class="kr">for</span> <span class="p">(</span> its <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">3</span> <span class="p">)</span> <span class="p">{</span>
+
+  kk<span class="o">&lt;-</span>abpN4<span class="p">(</span> img <span class="p">,</span> weight <span class="o">=</span> kwm <span class="p">,</span> mask <span class="o">=</span> kkbm<span class="o">$</span>bmask <span class="p">)</span>
+
+  ksegs <span class="o">&lt;-</span> Atropos<span class="p">(</span>d <span class="o">=</span> kk<span class="o">@</span>dimension<span class="p">,</span> a <span class="o">=</span> kk<span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.1,1x1]&quot;</span><span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span><span class="p">,</span>
+
+    i <span class="o">=</span> list<span class="p">(</span> kcsf<span class="p">,</span> kgm<span class="p">,</span> kwm<span class="p">)</span> <span class="p">,</span> x <span class="o">=</span> kkbm<span class="o">$</span>bmask <span class="p">)</span>
+
+  kcsf<span class="o">&lt;-</span>ksegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+
+  kgm<span class="o">&lt;-</span>ksegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">2</span><span class="p">]]</span>
+
+  kwm<span class="o">&lt;-</span>ksegs<span class="o">$</span>probabilityimages<span class="p">[[</span><span class="m">3</span><span class="p">]]</span>
+
+  plotANTsImage<span class="p">(</span>kk<span class="p">,</span>slices<span class="o">=</span><span class="s">&#39;40x120x20&#39;</span><span class="p">,</span>functional<span class="o">=</span>kwm<span class="p">,</span>thresh<span class="o">=</span><span class="s">&#39;0.5x1&#39;</span><span class="p">)</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_ThresholdImage.html">ThresholdImage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_abpN4.html">abpN4</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

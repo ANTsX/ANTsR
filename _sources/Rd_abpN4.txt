@@ -1,0 +1,33 @@
+=========================
+abpN4 
+=========================
+
+purpose:  
+
+ N4 with previously set parameters based on ants brain processing strategies. 
+ 
+description:  
+
+ Truncate outlier intensities and bias correct with N4 with or without mask and weight images. 
+ 
+
+usage:  
+
+ abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 )  ,
+ 
+    mask = NA , weightimg=NA, usen3 = FALSE )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    fn <- getANTsRData("r16")
+    
+    img <- antsImageRead(fn, 2)
+    
+    img2 <- abpN4(img)
+    
+
+
+

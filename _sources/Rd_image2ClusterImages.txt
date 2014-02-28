@@ -1,0 +1,27 @@
+=========================
+image2ClusterImages 
+=========================
+
+purpose:  
+
+  Converts an image to several independent images.
+ 
+description:  
+
+  Produces a unique image for each connected component 1 through N of size > minClusterSize 
+ 
+
+usage:  
+
+ clust<-image2ClusterImages( img , minClusterSize = 50 , minThresh = 1.e-6 , maxThresh = 1 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    imageclusterlist <- image2ClusterImages(img)
+    
+
+
+

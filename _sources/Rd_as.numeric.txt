@@ -1,0 +1,32 @@
+=========================
+as.numeric 
+=========================
+
+purpose:  
+
+ antsImage to numeric vector
+ 
+description:  
+
+ Convert/coerce an  antsImage  object to a  numeric vector . More precisely, extract a  numeric vector  from an  antsImage .
+ 
+
+usage:  
+
+ as.numeric( x [, mask] [, region] )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # extract a vector from an image 'img' of class 'antsImage' by considering
+    # only the region starting at index (1,1,1) with size (10,10,10)
+    
+    reg = new("antsRegion", index = c(1, 1, 1), size = c(10, 10, 10))
+    
+    vect = as.numeric(img, region = reg)
+    
+
+
+

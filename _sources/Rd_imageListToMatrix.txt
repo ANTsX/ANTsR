@@ -1,0 +1,44 @@
+=========================
+imageListToMatrix 
+=========================
+
+purpose:  
+
+ Read Images into a Matrix
+ 
+description:  
+
+   Read images into rows of a matrix.
+ 
+
+usage:  
+
+ imageListToMatrix(imageList, mask)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    imageFNList <- list.files("./", pattern = glob2rx("testView*.nii.gz"), full.names = TRUE)
+    
+    
+    
+    imageList <- list()
+    
+    for (fn in imageFNList) 
+    imageList <- lappend(imageList, antsImageRead(fn, 3))
+    
+    
+    
+    mask <- antsImageRead("/mnt/data/masks/brainmask.nii.gz", 3)
+    
+    
+    
+    mat <- imageListToMatrix(imageList, mask)
+    
+    
+    
+
+
+

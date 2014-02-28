@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started with ANTsR &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="prev" title="ANTsR : Advanced Normalization Tools with R" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Getting started with ANTsR</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">ANTsR : Advanced Normalization Tools with R</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ANTsRdemo.html">ANTsR Demonstrations</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="getting-started-with-antsr">
+<h1>Getting started with ANTsR<a class="headerlink" href="#getting-started-with-antsr" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brief-introduction-to-using-ants-in-r">
+<h2>Brief Introduction to using ANTs in R<a class="headerlink" href="#brief-introduction-to-using-ants-in-r" title="Permalink to this headline">¶</a></h2>
+<p>There is a general tutorial here <a class="reference external" href="http://sourceforge.net/projects/advants/files/ANTS/ANTS_Latest/antsr.pdf/download">ANTsR-Tutorial</a> .</p>
+<p>Once installation is successful, the ANTsR package can be used in R as follows:</p>
+<p>Load the package</p>
+<p>&gt; library( ANTsR )</p>
+<p>List the available functions in the namespace ANTsR</p>
+<p>&gt; ANTsR::&lt;double-tab&gt;</p>
+<p>Use any function in the core ANTS namespace by providing arguments
+almost exactly as in the command-line version.</p>
+<p>For example, call the antsImageRead routine and some standard ANTs functions.</p>
+<div class="highlight-r"><div class="highlight"><pre>tfn <span class="o">&lt;-</span> getANTsRData<span class="p">(</span><span class="s">&quot;r16&quot;</span><span class="p">)</span>  <span class="c1"># download example data</span>
+antsimage <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>tfn<span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+imgn3 <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>antsimage<span class="p">)</span>
+N3BiasFieldCorrection<span class="p">(</span>list<span class="p">(</span>antsimage<span class="o">@</span>dimension<span class="p">,</span> antsimage<span class="p">,</span> imgn3<span class="p">,</span> <span class="s">&quot;4&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installation-method-osx-and-linux-variants">
+<h2>Installation Method: OSX and LINUX variants<a class="headerlink" href="#installation-method-osx-and-linux-variants" title="Permalink to this headline">¶</a></h2>
+<p>We created an install script ( <a class="reference external" href="https://raw.github.com/stnava/RMI/master/stnava/install_anstr_packages.sh">ANTsR-Install-Script</a> ) that uses <a class="reference external" href="http://brew.sh/">Homebrew</a> or apt-get (on LINUX)</p>
+<p>to install CMake, git, R, wget ( on osx ) and ANTsR package dependencies.</p>
+<p>NOTE: If you see errors like &#8220;Undefined symbols for architecture
+x86_64&#8221; , edit the script to use</p>
+<blockquote>
+<div>$ R &#8211;arch=x86_64 CMD INSTALL  ANTsR</div></blockquote>
+<a class="reference internal image-reference" href="_images/ANTSWarpImageMultiTransform.png"><img alt="_images/ANTSWarpImageMultiTransform.png" src="_images/ANTSWarpImageMultiTransform.png" style="width: 600px;" /></a>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">ANTsR : Advanced Normalization Tools with R</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ANTsRdemo.html">ANTsR Demonstrations</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

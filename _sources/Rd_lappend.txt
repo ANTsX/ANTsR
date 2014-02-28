@@ -1,0 +1,33 @@
+=========================
+lappend 
+=========================
+
+purpose:  
+
+ Simple list append tool
+ 
+description:  
+
+ Append an item to a list , creating a new list or combine two lists
+ 
+
+usage:  
+
+ mynewlist<-lappend( mylist, myitem  )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat <- replicate(100, rnorm(20))
+    
+    mat2 <- replicate(100, rnorm(20))
+    
+    mylist <- list(mat)
+    
+    mylist <- lappend(mylist, mat2)
+    
+
+
+

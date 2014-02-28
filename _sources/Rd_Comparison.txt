@@ -1,0 +1,68 @@
+=========================
+Comparison 
+=========================
+
+purpose:  
+
+ Relational operators for antsImage
+ 
+description:  
+
+ Relational operators to compare pixel values of an  antsImage  with a scalar value within a given  antsRegion .
+ 
+
+usage:  
+
+ img == value
+ 
+ img != value
+ 
+ img <= value
+ 
+ img >= value
+ 
+ img < value
+ 
+ img > value
+ 
+ 
+ 
+   or use lists
+ 
+ 
+ 
+ img == lst
+ 
+ img != lst
+ 
+ img <= lst
+ 
+ img >= lst
+ 
+ img < lst
+ 
+ img > lst
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # compare all the values in the region starting at index 'c(1,1,1)' with
+    # size 'c(10,10,10)' with value '20' ;
+    
+    # here the logical vector 'vect' will have dimensions '10*10*10'
+    
+    reg = new("antsRegion", index = c(1, 1, 1), size = c(10, 10, 10))
+    
+    vect = (img = list(value = 20, region = reg))
+    
+    # compare all the pixels in the image with value '30' ;
+    
+    # here the logical vector 'vect' will have dimensions of the image
+    
+    vect = (img == 30)
+    
+
+
+

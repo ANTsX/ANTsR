@@ -1,0 +1,27 @@
+=========================
+KellyKapowski 
+=========================
+
+purpose:  
+
+ Compute cortical thickness using the DiReCT algorithm.
+ 
+description:  
+
+ Diffeomorphic registration-based cortical thickness based on probabilistic segmentation of an image.  This is an optimization algorithm.
+ 
+
+usage:  
+
+ KellyKapowski( d=3, s=simg, g=gimg, w=wimg, c="[45,0.0,10]", r=0.5, m=1, o=oimg )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    KellyKapowski(d = 3, s = simg, g = gimg, w = wimg, c = 45, r = 0.5, m = 1, o = oimg)
+    
+
+
+

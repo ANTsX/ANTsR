@@ -1,0 +1,27 @@
+=========================
+maskImage 
+=========================
+
+purpose:  
+
+ Mask input image by mask image.
+ 
+description:  
+
+   Mask an input image by a mask image.  If the mask image has multiple labels, it is possible to specify which label(s) to mask at.
+ 
+
+usage:  
+
+   maskImage(img.in, img.mask, level=1, binarize = FALSE )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    myimg <- antsImageRead(getANTsRData("ch2"), 3)
+    
+
+
+

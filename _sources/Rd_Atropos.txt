@@ -1,0 +1,48 @@
+=========================
+Atropos 
+=========================
+
+purpose:  
+
+ FMM Segmentation
+ 
+description:  
+
+ A finite mixture modeling (FMM) segmentation approach with possibilities for specifying prior constraints. These prior constraints include the specification of a prior label image, prior probability images (one for each class), and/or an MRF prior to enforce spatial smoothing of the labels. Similar algorithms include FAST and SPM.  Atropos can also perform multivariate segmentation if you pass a list of images in: e.g. a=c(img1,img2). 
+ 
+
+usage:  
+
+ Atropos( <list of named arguments> )
+ 
+ <list of named arguments> -- an R list of name-value pairs as described in the section 'Arguments'
+ 
+ See sections: Arguments, Examples for details. Number and type of arguments depend on options.
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+     
+    
+    
+    segs1<-Atropos( d = img@dimension, a = imgn3, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask) 
+    
+    segs2<-Atropos( d = img@dimension, a = c(imggrad,imgn3), m = "[0.2,1x1]",c = "[5,0]",  i = segs$probabilityimages, x = mask) 
+    
+    Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = seg_img_uint , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) 
+    
+    Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = "kmeans[3]" , x = bm_img_uint ) 
+    
+    Atropos(  d = 3 , a = avg_img_float , a = compcorr_var_img_float , m = "[0.3,1x1x1]" , o = list( seg_img_uint , prob_img_list ) , c = "[5,0]" , i = list( name = "priorprobabilityimages" , 3 , prob_img_list , 0 ) , x = bm_img_uint ) 
+    
+    # a simplified interface using recent segmentation features 
+    
+      ksegs <- Atropos(d = img@dimension, a = img, m = "[0.1,1x1]", c = "[40,0]",
+    
+        i = list( prior1, prior2, prior3) , x = mask, priorweight=0.5 , p="Wittgenstein[1]" )
+    
+
+
+

@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial population study &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="next" title="Demonstrate plotANTsImage" href="plotANTsImage.html" />
+    <link rel="prev" title="ANTsR Demonstrations" href="ANTsRdemo.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Tutorial population study</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="ANTsRdemo.html">ANTsR Demonstrations</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="plotANTsImage.html">Demonstrate plotANTsImage</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="tutorial-population-study">
+<h1>Tutorial population study<a class="headerlink" href="#tutorial-population-study" title="Permalink to this headline">¶</a></h1>
+<p>This example shows how to run a basic linear regression study across a population of image measurements.</p>
+<p>First, load libraries.</p>
+<div class="highlight-r"><div class="highlight"><pre>library<span class="p">(</span>knitr<span class="p">)</span>
+library<span class="p">(</span>ANTsR<span class="p">)</span>
+</pre></div>
+</div>
+<p>Next declare dimensionality and get your pre-processed data.</p>
+<div class="highlight-r"><div class="highlight"><pre>mydim <span class="o">&lt;-</span> <span class="m">2</span>
+<span class="c1">#&#39; define prefix for output files</span>
+outpre <span class="o">&lt;-</span> <span class="s">&quot;TEST&quot;</span>
+<span class="c1">#&#39; get the images</span>
+glb <span class="o">&lt;-</span> glob2rx<span class="p">(</span>paste<span class="p">(</span><span class="s">&quot;phantom*bian.nii.gz&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+fnl <span class="o">&lt;-</span> list.files<span class="p">(</span>path <span class="o">=</span> <span class="s">&quot;../../&quot;</span><span class="p">,</span> pattern <span class="o">=</span> glb<span class="p">,</span> full.names <span class="o">=</span> <span class="k-Variable">T</span><span class="p">,</span> recursive <span class="o">=</span> <span class="k-Variable">T</span><span class="p">)</span>
+maskfn <span class="o">&lt;-</span> <span class="s">&quot;phantomtemplate.jpg&quot;</span>
+<span class="c1">#&#39; get the mask , should be in same space as image</span>
+glb <span class="o">&lt;-</span> glob2rx<span class="p">(</span>paste<span class="p">(</span>maskfn<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+maskfn <span class="o">&lt;-</span> list.files<span class="p">(</span>path <span class="o">=</span> <span class="s">&quot;../../&quot;</span><span class="p">,</span> pattern <span class="o">=</span> glb<span class="p">,</span> full.names <span class="o">=</span> <span class="k-Variable">T</span><span class="p">,</span> recursive <span class="o">=</span> <span class="k-Variable">T</span><span class="p">)</span>
+mask <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>maskfn<span class="p">[</span><span class="m">1</span><span class="p">],</span> mydim<span class="p">)</span>
+<span class="c1">#&#39; get regions of mask according to logical comparisons</span>
+mask <span class="o">&lt;-</span> getMask<span class="p">(</span>mask<span class="p">,</span> <span class="m">120</span><span class="p">,</span> <span class="m">130</span><span class="p">)</span>
+logmask <span class="o">&lt;-</span> mask <span class="o">&gt;</span> <span class="m">0</span>
+notlogmask <span class="o">&lt;-</span> <span class="p">(</span><span class="o">!</span>logmask<span class="p">)</span>
+<span class="c1"># fill holes</span>
+ImageMath<span class="p">(</span><span class="s">&quot;2&quot;</span><span class="p">,</span> mask<span class="p">,</span> <span class="s">&quot;FillHoles&quot;</span><span class="p">,</span> mask<span class="p">)</span>
+</pre></div>
+</div>
+<p>Take a quick look at the input template and mask.</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1"># image(as.array(antsImageRead(maskfn, mydim))) # alternative approach</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> antsImageRead<span class="p">(</span>maskfn<span class="p">,</span> mydim<span class="p">))</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> mask<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now collect the results in a matrix and do the statistics.</p>
+<p>We also write out a few results using antsImageWrite.</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1">#&#39; count voxels and create matrix to hold image data</span>
+nvox <span class="o">&lt;-</span> sum<span class="p">(</span>c<span class="p">(</span>logmask<span class="p">))</span>
+mat <span class="o">&lt;-</span> matrix<span class="p">(</span>length<span class="p">(</span>fnl<span class="p">)</span> <span class="o">*</span> nvox<span class="p">,</span> nrow <span class="o">=</span> length<span class="p">(</span>fnl<span class="p">),</span> ncol <span class="o">=</span> nvox<span class="p">)</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span>length<span class="p">(</span>fnl<span class="p">))</span> <span class="p">{</span>
+    i1 <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>fnl<span class="p">[</span>i<span class="p">],</span> mydim<span class="p">)</span>
+    vec <span class="o">&lt;-</span> i1<span class="p">[</span>logmask<span class="p">]</span>
+    mat<span class="p">[</span>i<span class="p">,</span> <span class="p">]</span> <span class="o">&lt;-</span> vec
+<span class="p">}</span>
+<span class="c1">#&#39; identify your predictors and use in regression</span>
+predictor <span class="o">&lt;-</span> c<span class="p">(</span>rep<span class="p">(</span><span class="m">2</span><span class="p">,</span> nrow<span class="p">(</span>mat<span class="p">)</span><span class="o">/</span><span class="m">2</span><span class="p">),</span> rep<span class="p">(</span><span class="m">1</span><span class="p">,</span> nrow<span class="p">(</span>mat<span class="p">)</span><span class="o">/</span><span class="m">2</span><span class="p">))</span>
+<span class="c1">#&#39; the regression for your study</span>
+testformula <span class="o">&lt;-</span> <span class="p">(</span>vox <span class="o">~</span> <span class="m">1</span> <span class="o">+</span> predictor<span class="p">)</span>
+betavals <span class="o">&lt;-</span> rep<span class="p">(</span><span class="kc">NA</span><span class="p">,</span> nvox<span class="p">)</span>
+pvals <span class="o">&lt;-</span> rep<span class="p">(</span><span class="kc">NA</span><span class="p">,</span> nvox<span class="p">)</span>
+ntst <span class="o">&lt;-</span> <span class="m">1</span>
+<span class="c1">#&#39; there are better/faster ways but this is simple</span>
+<span class="kr">while</span> <span class="p">(</span>ntst <span class="o">&lt;</span> <span class="p">(</span>nvox <span class="o">+</span> <span class="m">1</span><span class="p">))</span> <span class="p">{</span>
+    vox <span class="o">&lt;-</span> mat<span class="p">[,</span> ntst<span class="p">]</span>
+    summarymodel <span class="o">&lt;-</span> summary<span class="p">(</span>lm<span class="p">(</span>testformula<span class="p">))</span>
+    <span class="c1">#&#39; get the t-vals for this predictor and write to an image</span>
+    betavals<span class="p">[</span>ntst<span class="p">]</span> <span class="o">&lt;-</span> summarymodel<span class="o">$</span>coef<span class="p">[</span><span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">]</span>
+    <span class="c1">#&#39; get the beta for this predictor and write to an image</span>
+    pvals<span class="p">[</span>ntst<span class="p">]</span> <span class="o">&lt;-</span> summarymodel<span class="o">$</span>coef<span class="p">[</span><span class="m">2</span><span class="p">,</span> <span class="m">4</span><span class="p">]</span>
+    ntst <span class="o">&lt;-</span> ntst <span class="o">+</span> <span class="m">1</span>
+<span class="p">}</span>
+betaimg <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>mask<span class="p">)</span>
+betaimg<span class="p">[</span>logmask<span class="p">]</span> <span class="o">&lt;-</span> betavals
+antsImageWrite<span class="p">(</span>betaimg<span class="p">,</span> paste<span class="p">(</span>outpre<span class="p">,</span> <span class="s">&quot;_beta.nii.gz&quot;</span><span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now let&#8221;s visualize the histogram of the corrected p-values ( the q-values ).</p>
+<div class="highlight-r"><div class="highlight"><pre>qvals <span class="o">&lt;-</span> p.adjust<span class="p">(</span>pvals<span class="p">,</span> method <span class="o">=</span> <span class="s">&quot;BH&quot;</span><span class="p">)</span>
+sigct <span class="o">&lt;-</span> round<span class="p">(</span>sum<span class="p">(</span>qvals <span class="o">&lt;</span> <span class="m">0.05</span><span class="p">)</span><span class="o">/</span>sum<span class="p">(</span>logmask<span class="p">)</span> <span class="o">*</span> <span class="m">100</span><span class="p">)</span>
+isucceed <span class="o">&lt;-</span> <span class="kc">FALSE</span>
+<span class="kr">if</span> <span class="p">(</span>sigct <span class="o">==</span> <span class="m">60</span><span class="p">)</span> isucceed <span class="o">&lt;-</span> <span class="kc">TRUE</span>
+library<span class="p">(</span>ggplot2<span class="p">)</span>
+qdata <span class="o">&lt;-</span> data.frame<span class="p">(</span>qvals<span class="p">)</span>
+m <span class="o">&lt;-</span> ggplot<span class="p">(</span>qdata<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> qvals<span class="p">))</span>
+m <span class="o">+</span> geom_histogram<span class="p">(</span>aes<span class="p">(</span>y <span class="o">=</span> ..density..<span class="p">),</span> binwidth <span class="o">=</span> <span class="m">0.05</span><span class="p">,</span> colour <span class="o">=</span> <span class="s">&quot;black&quot;</span><span class="p">,</span>
+    fill <span class="o">=</span> <span class="s">&quot;white&quot;</span><span class="p">)</span> <span class="o">+</span> geom_density<span class="p">(</span>alpha <span class="o">=</span> <span class="m">0.2</span><span class="p">,</span> fill <span class="o">=</span> <span class="s">&quot;#FF6666&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/rst-plot.png"><img alt="Histogram of q-values" src="_images/rst-plot.png" style="width: 720px;" /></a>
+<p class="caption">Histogram of q-values</p>
+</div>
+<p>Overlay the beta-image on the template to see areas with high t-statistic ( greater than 2 , less than 6 ).</p>
+<div class="highlight-r"><div class="highlight"><pre>plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> antsImageRead<span class="p">(</span>maskfn<span class="p">,</span> mydim<span class="p">),</span> functional <span class="o">=</span> list<span class="p">(</span>betaimg<span class="p">),</span>
+    threshold <span class="o">=</span> <span class="s">&quot;2x6&quot;</span><span class="p">,</span> color <span class="o">=</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, test the output for correctness.</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="kr">if</span> <span class="p">(</span>isucceed<span class="p">)</span> print<span class="p">(</span><span class="s">&quot;SUCCESS&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">## [1] &quot;SUCCESS&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-r"><div class="highlight"><pre><span class="kr">if</span> <span class="p">(</span><span class="o">!</span>isucceed<span class="p">)</span> print<span class="p">(</span><span class="s">&quot;FAILURE&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="ANTsRdemo.html">ANTsR Demonstrations</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="plotANTsImage.html">Demonstrate plotANTsImage</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

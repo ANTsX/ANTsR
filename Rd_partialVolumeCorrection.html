@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>partialVolumeCorrection &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="perfusionregression" href="Rd_perfusionregression.html" />
+    <link rel="prev" title="pairwiseImageDistanceMatrix" href="Rd_pairwiseImageDistanceMatrix.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>partialVolumeCorrection</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_pairwiseImageDistanceMatrix.html">pairwiseImageDistanceMatrix</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_perfusionregression.html">perfusionregression</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="partialvolumecorrection">
+<h1>partialVolumeCorrection<a class="headerlink" href="#partialvolumecorrection" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Perform partial volume correction for ASL images.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>This function performs a partial volume correction for ASL images by dividing the observed CBF by the gray matter and white matter probabilities, as described in Johnson et al., Radiology 2005:
+CBF_corrected = CBF_observed / (GM_prob + 0.4 * WM_prob)</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>partialVolumeCorrection(image, image.gm, image.wm, mask=NULL, proportion=0.4)</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>activity.gm <span class="o">&lt;-</span> <span class="m">10</span>
+
+activity.wm <span class="o">&lt;-</span> activity.gm <span class="o">*</span> <span class="m">0.4</span>
+
+percent.gm <span class="o">&lt;-</span> matrix<span class="p">(</span>seq<span class="p">(</span><span class="m">0.1</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span> by <span class="o">=</span> <span class="m">0.1</span><span class="p">),</span> nrow <span class="o">=</span> <span class="m">2</span><span class="p">)</span>
+
+percent.wm <span class="o">&lt;-</span> <span class="o">-</span>percent.gm <span class="o">+</span> <span class="m">1</span>
+
+activity.obs <span class="o">&lt;-</span> percent.gm <span class="o">*</span> rnorm<span class="p">(</span>n <span class="o">=</span> length<span class="p">(</span>percent.gm<span class="p">),</span> mean <span class="o">=</span> activity.gm<span class="p">,</span>
+    sd <span class="o">=</span> <span class="m">5</span><span class="p">)</span> <span class="o">+</span>
+rnorm<span class="p">(</span>n <span class="o">=</span> length<span class="p">(</span>percent.wm<span class="p">),</span> mean <span class="o">=</span> activity.wm<span class="p">,</span> sd <span class="o">=</span> <span class="m">5</span><span class="p">)</span>
+
+activity.corrected <span class="o">&lt;-</span> partialVolumeCorrection<span class="p">(</span>activity.obs<span class="p">,</span> percent.gm<span class="p">,</span> percent.wm<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_pairwiseImageDistanceMatrix.html">pairwiseImageDistanceMatrix</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_perfusionregression.html">perfusionregression</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

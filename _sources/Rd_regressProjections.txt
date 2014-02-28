@@ -1,0 +1,31 @@
+=========================
+regressProjections 
+=========================
+
+purpose:  
+
+ Regression on image set projection
+ 
+description:  
+
+   Perform regression on a training set of images, projected onto (provided) eigenvectors, and test on testing images.
+ 
+
+usage:  
+
+   regressProjections(input.train, input.test, demog.train, demog.test, 
+ 
+            eigenvectors, mask, outcome, covariates="1", model.function=glm, 
+ 
+ 	   which.eigenvectors="all", ...)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # generate simulated outcome
+    
+
+
+

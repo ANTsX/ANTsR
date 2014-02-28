@@ -1,0 +1,33 @@
+=========================
+splitData 
+=========================
+
+purpose:  
+
+ Split data for testing and training
+ 
+description:  
+
+ Split data into testing and training sets for cross-validation.
+ 
+
+usage:  
+
+ splitData(data.source, ratio, return.rows = FALSE)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    n <- 30
+    
+    ratio <- 2/3
+    
+    data.source <- data.frame(value = 1:n)
+    
+    out <- splitData(data.source, ratio)
+    
+
+
+

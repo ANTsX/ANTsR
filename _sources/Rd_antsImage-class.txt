@@ -1,0 +1,26 @@
+=========================
+antsImage-class 
+=========================
+
+purpose:  
+
+ Class  
+description:  
+
+ Encapsultates the external pointer to the underlying image along with details used to identify the 'type' of the image on C++ side.
+ 
+
+usage:  
+
+ img[ mask >  0]
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    showClass("antsImage")
+    
+
+
+

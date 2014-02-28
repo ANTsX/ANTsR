@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Demonstrate plotANTsImage &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="next" title="Tips for functional MRI and resting state analysis" href="restingstatefMRIconnectivity.html" />
+    <link rel="prev" title="Tutorial population study" href="phantom_population_study.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Demonstrate plotANTsImage</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="phantom_population_study.html">Tutorial population study</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="restingstatefMRIconnectivity.html">Tips for functional MRI and resting state analysis</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="demonstrate-plotantsimage">
+<h1>Demonstrate plotANTsImage<a class="headerlink" href="#demonstrate-plotantsimage" title="Permalink to this headline">¶</a></h1>
+<p>First, read an image. Then display with a simple command.</p>
+<div class="highlight-r"><div class="highlight"><pre>fn <span class="o">&lt;-</span> <span class="s">&quot;../../demo/example_images/phantomtemplate.jpg&quot;</span>
+img <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>fn<span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> img<span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="show-an-overlay">
+<h2>Show an overlay<a class="headerlink" href="#show-an-overlay" title="Permalink to this headline">¶</a></h2>
+<p>Next, create an artificial functional image by smoothing the background image.</p>
+<p>Now use a overlay color on the background and display it.</p>
+<div class="highlight-r"><div class="highlight"><pre>simg <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>img<span class="p">)</span>
+SmoothImage<span class="p">(</span><span class="m">2</span><span class="p">,</span> img<span class="p">,</span> <span class="m">3</span><span class="p">,</span> simg<span class="p">)</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> img<span class="p">,</span> functional <span class="o">=</span> list<span class="p">(</span>simg<span class="p">),</span> threshold <span class="o">=</span> <span class="s">&quot;150x260&quot;</span><span class="p">,</span>
+    color <span class="o">=</span> <span class="s">&quot;red&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="phantom_population_study.html">Tutorial population study</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="restingstatefMRIconnectivity.html">Tips for functional MRI and resting state analysis</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

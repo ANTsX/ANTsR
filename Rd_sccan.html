@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sccan &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="simple_roi_analysis" href="Rd_simple_roi_analysis.html" />
+    <link rel="prev" title="renderSurfaceFunction" href="Rd_renderSurfaceFunction.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>sccan</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_renderSurfaceFunction.html">renderSurfaceFunction</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_simple_roi_analysis.html">simple_roi_analysis</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="sccan">
+<h1>sccan<a class="headerlink" href="#sccan" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Sparse Statistical Analysis</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>A tool for sparse statistical analysis on images : scca, pscca (with options), mscca. Can also convert an imagelist/mask pair to a binary matrix image.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div><p>sccan( &lt;list of named arguments&gt; )</p>
+<p>&lt;list of named arguments&gt; &#8211; an R list of name-value pairs as described in the section &#8216;Arguments&#8217;</p>
+<p>See sections: Arguments, Examples for details. Number and type of arguments depend on options.</p>
+</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>sccan<span class="p">(</span>list<span class="p">(</span><span class="sb">`timeseriesimage-to-matrix`</span> <span class="o">=</span> list<span class="p">(</span>moco_img_double<span class="p">,</span> cortmask_img_double<span class="p">,</span>
+    <span class="m">0</span><span class="p">,</span> <span class="m">0</span><span class="p">),</span> o <span class="o">=</span> mat<span class="p">))</span>
+
+sccan<span class="p">(</span>list<span class="p">(</span>svd <span class="o">=</span> list<span class="p">(</span>name <span class="o">=</span> <span class="s">&quot;sparse&quot;</span><span class="p">,</span> filt_mat<span class="p">,</span> cortmask_img_double<span class="p">,</span> <span class="m">-0.15</span><span class="p">),</span>
+    n <span class="o">=</span> <span class="m">40</span><span class="p">,</span> i <span class="o">=</span> <span class="m">40</span><span class="p">,</span> PClusterThresh <span class="o">=</span> <span class="m">50</span><span class="p">,</span> o <span class="o">=</span> list<span class="p">(</span>mat1<span class="p">,</span> imglist<span class="p">,</span> mat2<span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_renderSurfaceFunction.html">renderSurfaceFunction</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_simple_roi_analysis.html">simple_roi_analysis</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sparseRegression &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="splitData" href="Rd_splitData.html" />
+    <link rel="prev" title="sparseDecom2" href="Rd_sparseDecom2.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>sparseRegression</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_sparseDecom2.html">sparseDecom2</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_splitData.html">splitData</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="sparseregression">
+<h1>sparseRegression<a class="headerlink" href="#sparseregression" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Sparse regression on input images.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Compute a sparse, spatially coherent regression from a set of input images (with mask) to an outcome variable.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div><p>sparseRegression(inmatrix, demog, outcome, mask=NA, sparseness=0.05, nvecs=50,</p>
+<blockquote>
+<div>its=5, cthresh=250, statdir=NA, z=0, smooth=0)</div></blockquote>
+</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>nsubj <span class="o">&lt;-</span> <span class="m">1000</span>
+
+prop.train <span class="o">&lt;-</span> <span class="m">1</span><span class="o">/</span><span class="m">2</span>
+
+subj.train <span class="o">&lt;-</span> sample<span class="p">(</span><span class="m">1</span><span class="o">:</span>nsubj<span class="p">,</span> prop.train<span class="o">*</span>nsubj<span class="p">,</span> replace<span class="o">=</span><span class="k-Variable">F</span><span class="p">)</span>
+
+input <span class="o">&lt;-</span> t<span class="p">(</span>replicate<span class="p">(</span>nsubj<span class="p">,</span> rnorm<span class="p">(</span><span class="m">125</span><span class="p">)))</span>
+
+outcome <span class="o">&lt;-</span> seq<span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> length.out<span class="o">=</span>nsubj<span class="p">)</span>
+
+demog <span class="o">&lt;-</span> data.frame<span class="p">(</span>outcome<span class="o">=</span>outcome<span class="p">)</span>
+
+input<span class="p">[,</span> <span class="m">40</span><span class="o">:</span><span class="m">60</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="m">30</span> <span class="o">+</span> outcome <span class="o">+</span> rnorm<span class="p">(</span>length<span class="p">(</span>input<span class="p">[,</span> <span class="m">40</span><span class="o">:</span><span class="m">60</span><span class="p">]),</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+input.train <span class="o">&lt;-</span> input<span class="p">[</span>subj.train<span class="p">,</span> <span class="p">]</span>
+
+input.test <span class="o">&lt;-</span> input<span class="p">[</span><span class="o">-</span>subj.train<span class="p">,</span> <span class="p">]</span>
+
+demog.train <span class="o">&lt;-</span> data.frame<span class="p">(</span>outcome<span class="o">=</span>demog<span class="p">[</span>subj.train<span class="p">,</span> <span class="p">])</span>
+
+demog.test <span class="o">&lt;-</span> data.frame<span class="p">(</span>outcome<span class="o">=</span>demog<span class="p">[</span><span class="o">-</span>subj.train<span class="p">,</span> <span class="p">])</span>
+
+mymask <span class="o">&lt;-</span> as.antsImage<span class="p">(</span>array<span class="p">(</span>rep<span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">125</span><span class="p">),</span> dim<span class="o">=</span>c<span class="p">(</span><span class="m">5</span><span class="p">,</span><span class="m">5</span><span class="p">,</span><span class="m">5</span><span class="p">)))</span>
+
+myregression <span class="o">&lt;-</span> sparseRegression<span class="p">(</span>input.train<span class="p">,</span> demog.train<span class="p">,</span> <span class="s">&quot;outcome&quot;</span><span class="p">,</span> mymask<span class="p">,</span>
+
+    sparseness<span class="o">=</span><span class="m">0.05</span><span class="p">,</span> nvecs<span class="o">=</span><span class="m">5</span><span class="p">,</span> its<span class="o">=</span><span class="m">3</span><span class="p">,</span> cthresh<span class="o">=</span><span class="m">250</span><span class="p">)</span>
+
+<span class="c1"># visualization of results</span>
+
+sample <span class="o">&lt;-</span> rep<span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">125</span><span class="p">)</span>
+
+sample<span class="p">[</span><span class="m">40</span><span class="o">:</span><span class="m">60</span><span class="p">]</span> <span class="o">&lt;-</span><span class="m">1</span>
+
+signal.img <span class="o">&lt;-</span> as.antsImage<span class="p">(</span>array<span class="p">(</span>rep<span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="m">125</span><span class="p">),</span> dim<span class="o">=</span>c<span class="p">(</span><span class="m">5</span><span class="p">,</span> <span class="m">5</span><span class="p">,</span> <span class="m">5</span><span class="p">)))</span>
+
+signal.img<span class="p">[</span>signal.img <span class="o">&gt;=</span> <span class="m">0</span> <span class="p">]</span> <span class="o">&lt;-</span> sample
+
+plotANTsImage<span class="p">(</span> signal.img<span class="p">,</span> axis<span class="o">=</span><span class="m">2</span><span class="p">,</span> slices<span class="o">=</span><span class="s">&quot;1x5x1&quot;</span><span class="p">)</span> <span class="c1"># actual source of signal</span>
+
+<span class="c1"># compare against first learned regression vector</span>
+
+myimgs <span class="o">&lt;-</span> list<span class="p">()</span>
+
+<span class="kr">for</span><span class="p">(</span> i <span class="kr">in</span> <span class="m">1</span><span class="o">:</span><span class="m">5</span><span class="p">){</span>
+
+  myarray <span class="o">&lt;-</span> as.array<span class="p">(</span>myregression<span class="o">$</span>eigenanatomyimages<span class="p">[[</span> i <span class="p">]])</span>
+
+  myarray <span class="o">&lt;-</span> myarray <span class="o">/</span> max<span class="p">(</span>abs<span class="p">(</span>myarray<span class="p">))</span> <span class="c1"># normalize for visualization</span>
+
+  myimgs<span class="p">[[</span> i <span class="p">]]</span> <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>myregression<span class="o">$</span>eigenanatomyimages<span class="p">[[</span> i <span class="p">]])</span>
+
+  myimgs<span class="p">[[</span> i <span class="p">]][</span>mymask <span class="o">&gt;</span> <span class="m">0</span><span class="p">]</span> <span class="o">&lt;-</span> myarray
+
+<span class="p">}</span>
+
+plotANTsImage<span class="p">(</span>myimgs<span class="p">[[</span><span class="m">1</span><span class="p">]],</span> axis<span class="o">=</span><span class="m">2</span><span class="p">,</span> slices<span class="o">=</span><span class="s">&quot;1x5x1&quot;</span><span class="p">)</span>
+
+<span class="c1"># use learned eigenvectors for prediction</span>
+
+result <span class="o">&lt;-</span> regressProjections<span class="p">(</span>input.train<span class="p">,</span> input.test<span class="p">,</span> demog.train<span class="p">,</span>
+
+    demog.test<span class="p">,</span> myregression<span class="o">$</span>eigenanatomyimages<span class="p">,</span> mymask<span class="p">,</span> <span class="s">&quot;outcome&quot;</span><span class="p">)</span>
+
+plot<span class="p">(</span>result<span class="o">$</span>outcome.comparison<span class="o">$</span>real<span class="p">,</span> result<span class="o">$</span>outcome.comparison<span class="o">$</span>predicted<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_sparseDecom2.html">sparseDecom2</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_splitData.html">splitData</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

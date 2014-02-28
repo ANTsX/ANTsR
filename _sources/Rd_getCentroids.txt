@@ -1,0 +1,27 @@
+=========================
+getCentroids 
+=========================
+
+purpose:  
+
+ Convert an image to the geometric centroids of its signal
+ 
+description:  
+
+ Reduces a variate/statistical/network image to a set of centroids describing the center of each stand-alone non-zero component in the image.
+ 
+
+usage:  
+
+ centroids<-getCentroids(  img  )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    getCentroids(f, clustparam = 250, threshparam = 0)
+    
+
+
+

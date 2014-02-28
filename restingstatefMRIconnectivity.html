@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tips for functional MRI and resting state analysis &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="next" title="Basic network analysis for BOLD or ASL fMRI" href="networkanalysisfMRI.html" />
+    <link rel="prev" title="Demonstrate plotANTsImage" href="plotANTsImage.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Tips for functional MRI and resting state analysis</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="plotANTsImage.html">Demonstrate plotANTsImage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="networkanalysisfMRI.html">Basic network analysis for BOLD or ASL fMRI</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="tips-for-functional-mri-and-resting-state-analysis">
+<h1>Tips for functional MRI and resting state analysis<a class="headerlink" href="#tips-for-functional-mri-and-resting-state-analysis" title="Permalink to this headline">¶</a></h1>
+<p>First take a quick look at your data.</p>
+<div class="highlight-r"><div class="highlight"><pre>library<span class="p">(</span>ANTsR<span class="p">)</span>
+fn <span class="o">&lt;-</span> getANTsRData<span class="p">(</span><span class="s">&quot;KK&quot;</span><span class="p">)</span>  <span class="c1"># 4D image</span>
+img <span class="o">&lt;-</span> antsImageRead<span class="p">(</span>fn<span class="p">,</span> <span class="m">4</span><span class="p">)</span>
+<span class="c1">#&#39; get the average to look at it in 3D</span>
+avg <span class="o">&lt;-</span> new<span class="p">(</span><span class="s">&quot;antsImage&quot;</span><span class="p">,</span> dimension <span class="o">=</span> <span class="m">3</span><span class="p">,</span> pixeltype <span class="o">=</span> img<span class="o">@</span>pixeltype<span class="p">)</span>
+antsMotionCorr<span class="p">(</span>list<span class="p">(</span>d <span class="o">=</span> <span class="m">3</span><span class="p">,</span> a <span class="o">=</span> img<span class="p">,</span> o <span class="o">=</span> avg<span class="p">))</span>
+<span class="c1">#&#39; look at the header to determine slices to display</span>
+ImageMath<span class="p">(</span><span class="s">&quot;4&quot;</span><span class="p">,</span> <span class="s">&quot;na&quot;</span><span class="p">,</span> <span class="s">&quot;PH&quot;</span><span class="p">,</span> img<span class="p">)</span>
+par<span class="p">(</span>mfrow <span class="o">=</span> c<span class="p">(</span><span class="m">2</span><span class="p">,</span> <span class="m">1</span><span class="p">))</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> avg<span class="p">,</span> slices <span class="o">=</span> <span class="s">&quot;12x33x3&quot;</span><span class="p">,</span> axis <span class="o">=</span> <span class="m">3</span><span class="p">)</span>
+maskThresh <span class="o">&lt;-</span> <span class="m">1e+05</span>
+mask <span class="o">&lt;-</span> getMask<span class="p">(</span>avg<span class="p">,</span> maskThresh<span class="p">,</span> <span class="m">1e+09</span><span class="p">,</span> cleanup <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<span class="c1"># check if the mask is ok</span>
+plotANTsImage<span class="p">(</span>myantsimage <span class="o">=</span> avg<span class="p">,</span> functional <span class="o">=</span> list<span class="p">(</span>mask<span class="p">),</span> slices <span class="o">=</span> <span class="s">&quot;12x33x3&quot;</span><span class="p">,</span>
+    axis <span class="o">=</span> <span class="m">3</span><span class="p">,</span> threshold <span class="o">=</span> <span class="s">&quot;0.5x1.5&quot;</span><span class="p">)</span>
+<span class="c1"># The mask looks fine ( does not have to be perfect ) so we proceed.</span>
+</pre></div>
+</div>
+<p>The data looks ok so now convert the rsf image to a frequency filtered matrix.</p>
+<p>This involves motion correction which, with default settings, can be time consuming (because we are being careful).  Here, we speed things up by setting moreaccurate=FALSE (not recommended).</p>
+<p>We also estimate a brain mask and nuisance pararmeters including global signal, physiological and motion confounds.  See /Users/stnava/code/RLibs/ANTsR/help/filterfMRIforNetworkAnalysis .</p>
+<div class="highlight-r"><div class="highlight"><pre>fmat <span class="o">&lt;-</span> timeseries2matrix<span class="p">(</span>img<span class="p">,</span> mask<span class="p">)</span>
+myres <span class="o">&lt;-</span> filterfMRIforNetworkAnalysis<span class="p">(</span>fmat<span class="p">,</span> tr <span class="o">=</span> <span class="m">4</span><span class="p">,</span> <span class="m">0.01</span><span class="p">,</span> <span class="m">0.1</span><span class="p">,</span> cbfnetwork <span class="o">=</span> <span class="s">&quot;BOLD&quot;</span><span class="p">,</span>
+    mask <span class="o">=</span> mask<span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/fmriprocess.png"><img alt="ANTsR preprocessing, including frequency filtering, for fMRI" src="_images/fmriprocess.png" style="width: 720px;" /></a>
+<p class="caption">ANTsR preprocessing, including frequency filtering, for fMRI</p>
+</div>
+<p>The stage above factored out what many consider to be the major signals in fMRI that are not due to natural resting-state fluctuations in brain activity.</p>
+<p>A network analysis may now be performed on the results of the above processing.  The key output is myres$filteredTimeSeries.  Let&#8221;s look at sample voxels&#8221; time series using basic plotting.</p>
+<div class="highlight-r"><div class="highlight"><pre>library<span class="p">(</span>ggplot2<span class="p">)</span>
+samplevox1 <span class="o">&lt;-</span> round<span class="p">(</span>ncol<span class="p">(</span>myres<span class="o">$</span>filteredTimeSeries<span class="p">)</span><span class="o">/</span><span class="m">2</span><span class="p">)</span>
+samplevox2 <span class="o">&lt;-</span> round<span class="p">(</span>ncol<span class="p">(</span>myres<span class="o">$</span>filteredTimeSeries<span class="p">)</span><span class="o">/</span><span class="m">3</span><span class="p">)</span>
+data <span class="o">&lt;-</span> data.frame<span class="p">(</span>time <span class="o">=</span> c<span class="p">(</span><span class="m">1</span><span class="o">:</span>nrow<span class="p">(</span>myres<span class="o">$</span>filteredTimeSeries<span class="p">))</span> <span class="o">*</span> <span class="m">4</span><span class="p">,</span> v1 <span class="o">=</span> myres<span class="o">$</span>filteredTimeSeries<span class="p">[,</span>
+    samplevox1<span class="p">],</span> v2 <span class="o">=</span> myres<span class="o">$</span>filteredTimeSeries<span class="p">[,</span> samplevox2<span class="p">])</span>
+p1 <span class="o">&lt;-</span> <span class="p">(</span>ggplot<span class="p">(</span>data<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> time<span class="p">,</span> y <span class="o">=</span> v1<span class="p">))</span> <span class="o">+</span> geom_line<span class="p">()</span> <span class="o">+</span> ggtitle<span class="p">(</span><span class="s">&quot;Time series @ voxel 1&quot;</span><span class="p">))</span>
+p2 <span class="o">&lt;-</span> <span class="p">(</span>ggplot<span class="p">(</span>data<span class="p">,</span> aes<span class="p">(</span>x <span class="o">=</span> time<span class="p">,</span> y <span class="o">=</span> v2<span class="p">))</span> <span class="o">+</span> geom_line<span class="p">()</span> <span class="o">+</span> ggtitle<span class="p">(</span><span class="s">&quot;Time series @ voxel 2&quot;</span><span class="p">))</span>
+multiplot<span class="p">(</span>p1<span class="p">,</span> p2<span class="p">,</span> cols <span class="o">=</span> <span class="m">1</span><span class="p">)</span>  <span class="c1"># function stolen from the internet</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/plotsamplevoxels.png"><img alt="ANTsR sample voxels" src="_images/plotsamplevoxels.png" style="width: 720px;" /></a>
+<p class="caption">ANTsR sample voxels</p>
+</div>
+<p>That&#8221;s good &#8212; check a separate page for example network analyses.  In brief, a network analysis will compute correlations between voxels such as these.</p>
+<p>Let’s simulate a standard rsf network analysis by extracting some data-driven “ROIs” and show the resulting correlation matrix.</p>
+<div class="highlight-r"><div class="highlight"><pre>mysvd <span class="o">&lt;-</span> svd<span class="p">(</span>myres<span class="o">$</span>filteredTimeSeries<span class="p">)</span>
+<span class="c1"># let&#39;s make the v eigenvectors sparse , otherwise they are totally</span>
+<span class="c1"># uncorrelated</span>
+nevecs <span class="o">&lt;-</span> <span class="m">10</span>
+vecs <span class="o">&lt;-</span> mysvd<span class="o">$</span>v<span class="p">[,</span> <span class="m">1</span><span class="o">:</span>nevecs<span class="p">]</span>
+thresh <span class="o">&lt;-</span> <span class="m">0.005</span>  <span class="c1"># just an example</span>
+<span class="kr">for</span> <span class="p">(</span>i <span class="kr">in</span> c<span class="p">(</span><span class="m">1</span><span class="o">:</span>nevecs<span class="p">))</span> <span class="p">{</span>
+    vecs<span class="p">[,</span> i<span class="p">]</span> <span class="o">&lt;-</span> <span class="p">(</span>vecs<span class="p">[,</span> i<span class="p">]</span> <span class="o">*</span> <span class="p">(</span>vecs<span class="p">[,</span> i<span class="p">]</span> <span class="o">&gt;</span> thresh<span class="p">))</span>
+    vecimg <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>myres<span class="o">$</span>mask<span class="p">,</span> <span class="s">&quot;float&quot;</span><span class="p">)</span>
+    mask <span class="o">&lt;-</span> antsImageClone<span class="p">(</span>myres<span class="o">$</span>mask<span class="p">,</span> <span class="s">&quot;float&quot;</span><span class="p">)</span>
+    vecimg<span class="p">[(</span>myres<span class="o">$</span>mask <span class="o">&gt;</span> <span class="m">0</span><span class="p">)]</span> <span class="o">&lt;-</span> vecs<span class="p">[,</span> i<span class="p">]</span>
+    ImageMath<span class="p">(</span><span class="s">&quot;3&quot;</span><span class="p">,</span> vecimg<span class="p">,</span> <span class="s">&quot;ClusterThresholdVariate&quot;</span><span class="p">,</span> vecimg<span class="p">,</span> mask<span class="p">,</span> <span class="s">&quot;100&quot;</span><span class="p">)</span>
+    vecs<span class="p">[,</span> i<span class="p">]</span> <span class="o">&lt;-</span> vecimg<span class="p">[(</span>myres<span class="o">$</span>mask <span class="o">&gt;</span> <span class="m">0</span><span class="p">)]</span>
+<span class="p">}</span>
+tobecorrelated <span class="o">&lt;-</span> <span class="p">(</span>myres<span class="o">$</span>filteredTimeSeries <span class="o">%*%</span> vecs<span class="p">)</span>
+<span class="c1">#&#39; visualize the resulting correlations</span>
+image<span class="p">(</span>cor<span class="p">(</span>tobecorrelated<span class="p">))</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/simplesparsesvd.png"><img alt="ANTsR rsfmri correlations from simple sparse svd" src="_images/simplesparsesvd.png" style="width: 720px;" /></a>
+<p class="caption">ANTsR rsfmri correlations from simple sparse svd</p>
+</div>
+<p>The correlation matrix is the most frequently used basis of rsf-MRI analysis.</p>
+<p>Now you can reduce your fMRI data to relatively simple measurements of connectivity. Congratulations!</p>
+<p>ToDo: add gray matter mask and anatomical labels.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">## [1] &quot;FAILURE:  17  vs refval  22&quot;</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="plotANTsImage.html">Demonstrate plotANTsImage</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="networkanalysisfMRI.html">Basic network analysis for BOLD or ASL fMRI</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

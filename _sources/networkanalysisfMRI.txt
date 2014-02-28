@@ -1,0 +1,30 @@
+.. role:: raw-tex(raw)
+    :format: latex html
+
+Basic network analysis for BOLD or ASL fMRI
+==================================================
+
+Let"s start with network analysis from a pre-defined set of regions, here defined by the AAL label set.  The basic ideas of network analysis are similar to :raw-tex:`\cite{Hosseini2012}` which also lists a variety of rsf-connectivity tools that may interest you (if you use Matlab or Python).
+
+
+.. sourcecode:: r
+    
+
+    library(ANTsR)
+    # 
+
+
+
+
+
+::
+
+    ## [1] "FAILURE"
+
+
+
+
+.. raw:: latex
+
+    \bibliographystyle{plain}
+    \bibliography{antsr}

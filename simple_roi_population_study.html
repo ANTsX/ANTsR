@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Population ROI study using simple_roi_analysis.R &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Demonstrations" href="ANTsRdemo.html" />
+    <link rel="next" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="prev" title="Population study using simple_voxel_based_analysis.R" href="simple_voxel_based_population_study.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Population ROI study using simple_roi_analysis.R</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="simple_voxel_based_population_study.html">Population study using simple_voxel_based_analysis.R</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ANTsRfunctions.html">ANTsR Functions</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="population-roi-study-using-simple-roi-analysis-r">
+<h1>Population ROI study using simple_roi_analysis.R<a class="headerlink" href="#population-roi-study-using-simple-roi-analysis-r" title="Permalink to this headline">¶</a></h1>
+<p>This example shows how to run a basic linear regression study across a population of image measurements.</p>
+<p>Load libraries.</p>
+<div class="highlight-r"><div class="highlight"><pre>library<span class="p">(</span>knitr<span class="p">)</span>
+library<span class="p">(</span>ANTsR<span class="p">)</span>
+</pre></div>
+</div>
+<p>Define the normalized image cohort and image mask.</p>
+<div class="highlight-r"><div class="highlight"><pre>controlFileNames <span class="o">&lt;-</span> list.files<span class="p">(</span>path <span class="o">=</span> <span class="s">&quot;../../demo/example_images/&quot;</span><span class="p">,</span> pattern <span class="o">=</span> glob2rx<span class="p">(</span><span class="s">&quot;phantomtemplate_CONTROL*&quot;</span><span class="p">),</span>
+    full.names <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> recursive <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+experimentalFileNames <span class="o">&lt;-</span> list.files<span class="p">(</span>path <span class="o">=</span> <span class="s">&quot;../../demo/example_images/&quot;</span><span class="p">,</span> pattern <span class="o">=</span> glob2rx<span class="p">(</span><span class="s">&quot;phantomtemplate_EXP*&quot;</span><span class="p">),</span>
+    full.names <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> recursive <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+images <span class="o">&lt;-</span> c<span class="p">(</span>controlFileNames<span class="p">,</span> experimentalFileNames<span class="p">)</span>
+</pre></div>
+</div>
+<p>Assign cohort (diagnosis) predictor and assign a random age to simulated images.</p>
+<div class="highlight-r"><div class="highlight"><pre>diagnosis <span class="o">&lt;-</span> c<span class="p">(</span>rep<span class="p">(</span><span class="m">1</span><span class="p">,</span> length<span class="p">(</span>controlFileNames<span class="p">)),</span> rep<span class="p">(</span><span class="m">0</span><span class="p">,</span> length<span class="p">(</span>experimentalFileNames<span class="p">)))</span>
+age <span class="o">&lt;-</span> runif<span class="p">(</span>length<span class="p">(</span>diagnosis<span class="p">),</span> <span class="m">25</span><span class="p">,</span> <span class="m">30</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Perform a simple t-test.</p>
+<div class="highlight-r"><div class="highlight"><pre>roiResults.ttest <span class="o">&lt;-</span> simple_roi_analysis<span class="p">(</span>dimensionality <span class="o">=</span> <span class="m">2</span><span class="p">,</span> imageFileNames <span class="o">=</span> images<span class="p">,</span>
+    predictors <span class="o">=</span> data.frame<span class="p">(</span>diagnosis<span class="p">),</span> roiLabelsFileName <span class="o">=</span> <span class="s">&quot;../../demo/example_images/phantomtemplate_roi_labels.nii.gz&quot;</span><span class="p">,</span>
+    testType <span class="o">=</span> <span class="s">&quot;student.t&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Perform a simple non-parametric test.</p>
+<div class="highlight-r"><div class="highlight"><pre>roiResults.wilcox <span class="o">&lt;-</span> simple_roi_analysis<span class="p">(</span>dimensionality <span class="o">=</span> <span class="m">2</span><span class="p">,</span> imageFileNames <span class="o">=</span> images<span class="p">,</span>
+    predictors <span class="o">=</span> data.frame<span class="p">(</span>diagnosis<span class="p">),</span> roiLabelsFileName <span class="o">=</span> <span class="s">&quot;../../demo/example_images/phantomtemplate_roi_labels.nii.gz&quot;</span><span class="p">,</span>
+    testType <span class="o">=</span> <span class="s">&quot;wilcox&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Perform a simple regression.</p>
+<div class="highlight-r"><div class="highlight"><pre>roiResults.lm <span class="o">&lt;-</span> simple_roi_analysis<span class="p">(</span>dimensionality <span class="o">=</span> <span class="m">2</span><span class="p">,</span> imageFileNames <span class="o">=</span> images<span class="p">,</span>
+    predictors <span class="o">=</span> data.frame<span class="p">(</span>cbind<span class="p">(</span>diagnosis<span class="p">,</span> age<span class="p">)),</span> formula <span class="o">=</span> as.formula<span class="p">(</span>value <span class="o">~</span>
+        <span class="m">1</span> <span class="o">+</span> diagnosis <span class="o">+</span> age<span class="p">),</span> roiLabelsFileName <span class="o">=</span> <span class="s">&quot;../../demo/example_images/phantomtemplate_roi_labels.nii.gz&quot;</span><span class="p">,</span>
+    testType <span class="o">=</span> <span class="s">&quot;lm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, test the output for correctness.</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="kr">if</span> <span class="p">(</span>isucceed<span class="p">)</span> print<span class="p">(</span><span class="s">&quot;SUCCESS&quot;</span><span class="p">)</span>
+<span class="kr">if</span> <span class="p">(</span><span class="o">!</span>isucceed<span class="p">)</span> print<span class="p">(</span><span class="s">&quot;FAILURE&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">## [1] &quot;FAILURE&quot;</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="simple_voxel_based_population_study.html">Population study using simple_voxel_based_analysis.R</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="ANTsRfunctions.html">ANTsR Functions</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

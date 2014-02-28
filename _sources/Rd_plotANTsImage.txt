@@ -1,0 +1,35 @@
+=========================
+plotANTsImage 
+=========================
+
+purpose:  
+
+ Plotting an image slice or multi-slice with optional color overlay.
+ 
+description:  
+
+ This is a plotting utility for antsImage types with a background and color overlay option.  Useful for displaying statistical results overlaid on a background image.
+ 
+
+usage:  
+
+ plotANTsImage( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" , threshold="1x0", quality=NA )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # in 2D
+    
+    plotANTsImage(myantsimage = img, functional = funcimg, threshold = "50x150", 
+        color = "red", axis = 1)
+    
+    # in 3D
+    
+    plotANTsImage(myantsimage = img, functional = img, threshold = "50x150", slices = "10x20x3", 
+        color = "red", axis = 0)
+    
+
+
+

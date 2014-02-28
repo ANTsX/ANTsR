@@ -1,0 +1,37 @@
+=========================
+perfusion-predictors 
+=========================
+
+purpose:  
+
+ Get perfusion predictors
+ 
+description:  
+
+ Get the predictors for perfusion regression from time-series voxels and motion-parameters.
+ 
+
+usage:  
+
+ get_perfusion_predictors( mat , moco_params , xideal = NULL , labelfirst = 1 , ncompcorparameters = 4 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # mat -- matrix with each column being a time-series voxel
+    
+    # moco_results -- result of calling 'motion_correction'
+    
+    # moco_results$moco_params -- motion-correction parameters
+    
+    predictors <- get_perfusion_predictors(mat, moco_results$moco_params)
+    
+    predictors$xideal
+    
+    predictors$nuis
+    
+
+
+

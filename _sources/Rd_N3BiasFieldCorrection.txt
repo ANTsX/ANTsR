@@ -1,0 +1,27 @@
+=========================
+N3BiasFieldCorrection 
+=========================
+
+purpose:  
+
+ Bias Field Correction
+ 
+description:  
+
+ Perform Bias Field Correction on the given image
+ 
+
+usage:  
+
+ N3BiasFieldCorrection( "<imageDimension>" , "<inputImage>" , "<outputImage>" [, "<shrinkFactor>"] [, "<maskImage>"] [, "<numberOfIterations>"] [, "<numberOfFittingLevels>"] [, "<outputBiasField>"])
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    N3BiasFieldCorrection(3, "input_img.nii", "output_img.nii", 2)
+    
+
+
+

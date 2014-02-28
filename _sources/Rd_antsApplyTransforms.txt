@@ -1,0 +1,44 @@
+=========================
+antsApplyTransforms 
+=========================
+
+purpose:  
+
+ A simplified (or full) interface to antsApplyTransforms.
+ 
+description:  
+
+ Apply a transform list to map an image from one domain to another.
+ 
+
+usage:  
+
+ myoutputimg<-antsApplyTransforms( fixed=imgf , moving=imgm , transformlist=txlist , interpolator=c("Linear","NearestNeighbor","MultiLabel") , imagetype = 0 )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+     
+    
+    
+    # will give the full form of help
+    
+    antsApplyTransforms( "-h")
+    
+    # example 1 - simplified
+    
+    mywarpedimage<-antsApplyTransforms(fixed=fixed,moving=moving,transformlist=mytx$fwdtransforms)
+    
+    mywarpedimage<-antsApplyTransforms(fixed=moving,moving=fixed,transformlist=mytx$invtransforms)
+    
+    # full access via listing the inputs in standard ANTs format 
+    
+    antsApplyTransforms( list( d=as.character(mi@dimension), i=moving,o=outimg,r=fixed,t=mytx$inv[1],sep='') ) ) 
+    
+    antsApplyTransforms( list( d=as.character(mi@dimension), i=fixed,o=outimg,r=moving,t=paste("[",mytx$inv[1],",1]",sep='') ) ) 
+    
+
+
+

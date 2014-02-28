@@ -1,0 +1,29 @@
+=========================
+MeasureMinMaxMean 
+=========================
+
+purpose:  
+
+ Measure Min Max Mean
+ 
+description:  
+
+ Measure min, max, and mean of image.
+ 
+
+usage:  
+
+ MeasureMinMaxMean(image)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    myimg <- as.antsImage(array(rnorm(1000), dim = c(10, 10, 10)))
+    
+    MeasureMinMaxMean(myimg)
+    
+
+
+

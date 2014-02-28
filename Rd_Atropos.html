@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Atropos &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="Comparison" href="Rd_Comparison.html" />
+    <link rel="prev" title="ANTsR Functions" href="ANTsRfunctions.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>Atropos</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="ANTsRfunctions.html">ANTsR Functions</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_Comparison.html">Comparison</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="atropos">
+<h1>Atropos<a class="headerlink" href="#atropos" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>FMM Segmentation</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>A finite mixture modeling (FMM) segmentation approach with possibilities for specifying prior constraints. These prior constraints include the specification of a prior label image, prior probability images (one for each class), and/or an MRF prior to enforce spatial smoothing of the labels. Similar algorithms include FAST and SPM.  Atropos can also perform multivariate segmentation if you pass a list of images in: e.g. a=c(img1,img2).</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div><p>Atropos( &lt;list of named arguments&gt; )</p>
+<p>&lt;list of named arguments&gt; &#8211; an R list of name-value pairs as described in the section &#8216;Arguments&#8217;</p>
+<p>See sections: Arguments, Examples for details. Number and type of arguments depend on options.</p>
+</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>segs1<span class="o">&lt;-</span>Atropos<span class="p">(</span> d <span class="o">=</span> img<span class="o">@</span>dimension<span class="p">,</span> a <span class="o">=</span> imgn3<span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.2,1x1]&quot;</span><span class="p">,</span>c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span><span class="p">,</span>  i <span class="o">=</span> <span class="s">&quot;kmeans[3]&quot;</span><span class="p">,</span> x <span class="o">=</span> mask<span class="p">)</span>
+
+segs2<span class="o">&lt;-</span>Atropos<span class="p">(</span> d <span class="o">=</span> img<span class="o">@</span>dimension<span class="p">,</span> a <span class="o">=</span> c<span class="p">(</span>imggrad<span class="p">,</span>imgn3<span class="p">),</span> m <span class="o">=</span> <span class="s">&quot;[0.2,1x1]&quot;</span><span class="p">,</span>c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span><span class="p">,</span>  i <span class="o">=</span> segs<span class="o">$</span>probabilityimages<span class="p">,</span> x <span class="o">=</span> mask<span class="p">)</span>
+
+Atropos<span class="p">(</span>  d <span class="o">=</span> <span class="m">3</span> <span class="p">,</span> a <span class="o">=</span> avg_img_float <span class="p">,</span> a <span class="o">=</span> compcorr_var_img_float <span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.3,1x1x1]&quot;</span> <span class="p">,</span> o <span class="o">=</span> seg_img_uint <span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span> <span class="p">,</span> i <span class="o">=</span> <span class="s">&quot;kmeans[3]&quot;</span> <span class="p">,</span> x <span class="o">=</span> bm_img_uint <span class="p">)</span>
+
+Atropos<span class="p">(</span>  d <span class="o">=</span> <span class="m">3</span> <span class="p">,</span> a <span class="o">=</span> avg_img_float <span class="p">,</span> a <span class="o">=</span> compcorr_var_img_float <span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.3,1x1x1]&quot;</span> <span class="p">,</span> o <span class="o">=</span> list<span class="p">(</span> seg_img_uint <span class="p">,</span> prob_img_list <span class="p">)</span> <span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span> <span class="p">,</span> i <span class="o">=</span> <span class="s">&quot;kmeans[3]&quot;</span> <span class="p">,</span> x <span class="o">=</span> bm_img_uint <span class="p">)</span>
+
+Atropos<span class="p">(</span>  d <span class="o">=</span> <span class="m">3</span> <span class="p">,</span> a <span class="o">=</span> avg_img_float <span class="p">,</span> a <span class="o">=</span> compcorr_var_img_float <span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.3,1x1x1]&quot;</span> <span class="p">,</span> o <span class="o">=</span> list<span class="p">(</span> seg_img_uint <span class="p">,</span> prob_img_list <span class="p">)</span> <span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[5,0]&quot;</span> <span class="p">,</span> i <span class="o">=</span> list<span class="p">(</span> name <span class="o">=</span> <span class="s">&quot;priorprobabilityimages&quot;</span> <span class="p">,</span> <span class="m">3</span> <span class="p">,</span> prob_img_list <span class="p">,</span> <span class="m">0</span> <span class="p">)</span> <span class="p">,</span> x <span class="o">=</span> bm_img_uint <span class="p">)</span>
+
+<span class="c1"># a simplified interface using recent segmentation features</span>
+
+  ksegs <span class="o">&lt;-</span> Atropos<span class="p">(</span>d <span class="o">=</span> img<span class="o">@</span>dimension<span class="p">,</span> a <span class="o">=</span> img<span class="p">,</span> m <span class="o">=</span> <span class="s">&quot;[0.1,1x1]&quot;</span><span class="p">,</span> c <span class="o">=</span> <span class="s">&quot;[40,0]&quot;</span><span class="p">,</span>
+
+    i <span class="o">=</span> list<span class="p">(</span> prior1<span class="p">,</span> prior2<span class="p">,</span> prior3<span class="p">)</span> <span class="p">,</span> x <span class="o">=</span> mask<span class="p">,</span> priorweight<span class="o">=</span><span class="m">0.5</span> <span class="p">,</span> p<span class="o">=</span><span class="s">&quot;Wittgenstein[1]&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="ANTsRfunctions.html">ANTsR Functions</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_Comparison.html">Comparison</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

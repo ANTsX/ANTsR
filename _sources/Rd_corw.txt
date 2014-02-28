@@ -1,0 +1,27 @@
+=========================
+corw 
+=========================
+
+purpose:  
+
+ produces a correlation matrix via weighted correlation.
+ 
+description:  
+
+ Uses weighted regression to compute pairwise correlation matrix on input matrix - by columns.
+ 
+
+usage:  
+
+ wmat<-corw( mat  )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat <- matrix(c(rep(1, 100), rep(0, 20)), ncol = 10)
+    
+
+
+

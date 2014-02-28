@@ -1,0 +1,35 @@
+=========================
+sccan 
+=========================
+
+purpose:  
+
+ Sparse Statistical Analysis
+ 
+description:  
+
+ A tool for sparse statistical analysis on images : scca, pscca (with options), mscca. Can also convert an imagelist/mask pair to a binary matrix image.
+ 
+
+usage:  
+
+ sccan( <list of named arguments> )
+ 
+ <list of named arguments> -- an R list of name-value pairs as described in the section 'Arguments'
+ 
+ See sections: Arguments, Examples for details. Number and type of arguments depend on options.
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    sccan(list(`timeseriesimage-to-matrix` = list(moco_img_double, cortmask_img_double, 
+        0, 0), o = mat))
+    
+    sccan(list(svd = list(name = "sparse", filt_mat, cortmask_img_double, -0.15), 
+        n = 40, i = 40, PClusterThresh = 50, o = list(mat1, imglist, mat2)))
+    
+
+
+

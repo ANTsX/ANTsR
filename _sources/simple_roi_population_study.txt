@@ -1,0 +1,95 @@
+=========================
+Population ROI study using simple_roi_analysis.R
+=========================
+
+This example shows how to run a basic linear regression study across a population of image measurements.
+
+Load libraries.
+
+
+.. sourcecode:: r
+    
+
+    library(knitr)
+    library(ANTsR)
+
+
+
+Define the normalized image cohort and image mask.
+
+
+.. sourcecode:: r
+    
+
+    controlFileNames <- list.files(path = "../../demo/example_images/", pattern = glob2rx("phantomtemplate_CONTROL*"), 
+        full.names = TRUE, recursive = FALSE)
+    experimentalFileNames <- list.files(path = "../../demo/example_images/", pattern = glob2rx("phantomtemplate_EXP*"), 
+        full.names = TRUE, recursive = FALSE)
+    images <- c(controlFileNames, experimentalFileNames)
+
+
+
+Assign cohort (diagnosis) predictor and assign a random age to simulated images.
+
+
+.. sourcecode:: r
+    
+
+    diagnosis <- c(rep(1, length(controlFileNames)), rep(0, length(experimentalFileNames)))
+    age <- runif(length(diagnosis), 25, 30)
+
+
+
+Perform a simple t-test.
+
+
+.. sourcecode:: r
+    
+
+    roiResults.ttest <- simple_roi_analysis(dimensionality = 2, imageFileNames = images, 
+        predictors = data.frame(diagnosis), roiLabelsFileName = "../../demo/example_images/phantomtemplate_roi_labels.nii.gz", 
+        testType = "student.t")
+
+
+
+Perform a simple non-parametric test.
+
+
+.. sourcecode:: r
+    
+
+    roiResults.wilcox <- simple_roi_analysis(dimensionality = 2, imageFileNames = images, 
+        predictors = data.frame(diagnosis), roiLabelsFileName = "../../demo/example_images/phantomtemplate_roi_labels.nii.gz", 
+        testType = "wilcox")
+
+
+
+Perform a simple regression.
+
+
+.. sourcecode:: r
+    
+
+    roiResults.lm <- simple_roi_analysis(dimensionality = 2, imageFileNames = images, 
+        predictors = data.frame(cbind(diagnosis, age)), formula = as.formula(value ~ 
+            1 + diagnosis + age), roiLabelsFileName = "../../demo/example_images/phantomtemplate_roi_labels.nii.gz", 
+        testType = "lm")
+
+
+
+Finally, test the output for correctness.
+
+
+.. sourcecode:: r
+    
+
+    if (isucceed) print("SUCCESS")
+    if (!isucceed) print("FAILURE")
+
+
+::
+
+    ## [1] "FAILURE"
+
+
+

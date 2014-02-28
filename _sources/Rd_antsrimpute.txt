@@ -1,0 +1,27 @@
+=========================
+antsrimpute 
+=========================
+
+purpose:  
+
+ Impute NA's on data frame.  
+ 
+description:  
+
+ Imputes NA's on data frame (column-wise), using a user-specified function (mean is default).  also works on a vector.
+ 
+
+usage:  
+
+ antsrimpute(mydat, FUN=mean, ...)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mydat <- data.frame(A = c(1, 2, 4, 5), B = c(1, NA, 4, 5))
+    
+
+
+

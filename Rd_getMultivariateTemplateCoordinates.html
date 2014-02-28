@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>getMultivariateTemplateCoordinates &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="getROIValues" href="Rd_getROIValues.html" />
+    <link rel="prev" title="getMask" href="Rd_getMask.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>getMultivariateTemplateCoordinates</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_getMask.html">getMask</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_getROIValues.html">getROIValues</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="getmultivariatetemplatecoordinates">
+<h1>getMultivariateTemplateCoordinates<a class="headerlink" href="#getmultivariatetemplatecoordinates" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Label multivariate components by an anatomical coordinate system.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div><p>This function will provide a mapping that labels the list of input images and each of their blobs.</p>
+<p>Uses getTemplateCoordinates as a sub-routine.</p>
+</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>outputnetwork&lt;-getMultivariateTemplateCoordinates( list(template,component1,component2) , list(mniimage,mnilabel1,mnilabel2) , convertToTal = TRUE )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre> tem<span class="o">&lt;-</span>antsImageRead<span class="p">(</span><span class="s">&#39;templates/template_brain.nii.gz&#39;</span><span class="p">,</span><span class="m">3</span><span class="p">)</span>
+
+ temlab<span class="o">&lt;-</span>antsImageRead<span class="p">(</span><span class="s">&#39;temp.nii.gz&#39;</span><span class="p">,</span><span class="m">3</span><span class="p">)</span>
+
+ temlab2<span class="o">&lt;-</span>antsImageRead<span class="p">(</span><span class="s">&#39;temp2.nii.gz&#39;</span><span class="p">,</span><span class="m">3</span><span class="p">)</span>
+
+ <span class="c1"># try getANTsRData if you have www access</span>
+
+ mymni<span class="o">&lt;-</span>list<span class="p">(</span> antsImageRead<span class="p">(</span>getANTsRData<span class="p">(</span><span class="s">&#39;mni&#39;</span><span class="p">),</span><span class="m">3</span><span class="p">),</span>
+
+          antsImageRead<span class="p">(</span>getANTsRData<span class="p">(</span><span class="s">&#39;mnib&#39;</span><span class="p">),</span><span class="m">3</span><span class="p">),</span>
+
+              antsImageRead<span class="p">(</span>getANTsRData<span class="p">(</span><span class="s">&#39;mnia&#39;</span><span class="p">),</span><span class="m">3</span><span class="p">)</span> <span class="p">)</span>
+
+ mytem<span class="o">&lt;-</span>list<span class="p">(</span>tem<span class="p">,</span>temlab<span class="p">,</span>temlab2<span class="p">)</span>
+
+ mynetworkdescriptor<span class="o">&lt;-</span>getMultivariateTemplateCoordinates<span class="p">(</span>  mytem<span class="p">,</span> mymni <span class="p">,</span> convertToTal <span class="o">=</span> <span class="kc">TRUE</span> <span class="p">,</span> pvals<span class="o">=</span>c<span class="p">(</span><span class="m">0.01</span><span class="p">,</span><span class="m">0.05</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c1"># output looks like</span>
+
+<span class="c1">#     NetworkID   x   y   z t label Brodmann AAL</span>
+
+<span class="c1"># 1  N1_omnibus  -7   7  11 0     1        0  71</span>
+
+<span class="c1"># 2     N1_node  50 -12 -21 0     1       20  90</span>
+
+<span class="c1"># 3     N1_node -29  22   5 0     2       48  29</span>
+
+<span class="c1"># 4     N1_node  25 -17  36 0     3        0   0</span>
+
+<span class="c1"># 5     N1_node -25   4  39 0     4        0   0</span>
+
+<span class="c1"># 6  N2_omnibus   7   1   3 0     1        0   0</span>
+
+<span class="c1"># 7     N2_node  42 -14 -26 0     1       20  56</span>
+
+<span class="c1"># 8     N2_node  20   7  -8 0     2       48  74</span>
+
+<span class="c1"># 9     N2_node  -2  33 -10 0     3       11  31</span>
+
+<span class="c1"># 10    N2_node -41 -34  23 0     4       48  17</span>
+
+<span class="c1"># 11    N2_node  50 -37  24 0     5       41  82</span>
+
+<span class="c1"># 12    N2_node -24  30  24 0     6       48   0</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_getMask.html">getMask</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_getROIValues.html">getROIValues</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

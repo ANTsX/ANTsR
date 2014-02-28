@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>getfMRInuisanceVariables &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="image2ClusterImages" href="Rd_image2ClusterImages.html" />
+    <link rel="prev" title="perfusion-predictors" href="Rd_get_perfusion_predictors.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>getfMRInuisanceVariables</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_get_perfusion_predictors.html">perfusion-predictors</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_image2ClusterImages.html">image2ClusterImages</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="getfmrinuisancevariables">
+<h1>getfMRInuisanceVariables<a class="headerlink" href="#getfmrinuisancevariables" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Extract generic fMRI nuisance variables for ASL or BOLD</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Will motion correct, run compcorr and estimate global signal. Outputs a list with the time series data matrix (time by voxels), motion and other nuisance variables, global signal (for BOLD or ASL), the mask and the average time series image.  Meant to be used before filterfMRIforNetworkAnalysis or any other results-oriented processing.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>output&lt;-getfMRInuisanceVariables( boldImageOrFileName, maskThresh=100 , moreaccurate=T, mask = myfMRImask )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1"># set moreaccurate=T for final results</span>
+
+dd <span class="o">&lt;-</span> getfMRInuisanceVariables<span class="p">(</span>bold<span class="p">,</span> maskThresh <span class="o">=</span> <span class="m">100</span><span class="p">,</span> moreaccurate <span class="o">=</span> <span class="k-Variable">F</span><span class="p">)</span>
+
+tsResid <span class="o">&lt;-</span> residuals<span class="p">(</span>lm<span class="p">(</span>dd<span class="o">$</span>matrixTimeSeries <span class="o">~</span> dd<span class="o">$</span>globalsignal <span class="o">+</span> dd<span class="o">$</span>nuisancevariables<span class="p">))</span>
+
+mynetwork <span class="o">&lt;-</span> filterfMRIforNetworkAnalysis<span class="p">(</span>tsResid<span class="p">,</span> tr <span class="o">=</span> <span class="m">4</span><span class="p">,</span> mask <span class="o">=</span> dd<span class="o">$</span>mask<span class="p">,</span> cbfnetwork <span class="o">=</span> <span class="s">&quot;BOLD&quot;</span><span class="p">,</span>
+    labels <span class="o">=</span> aalImageLabels<span class="p">,</span> graphdensity <span class="o">=</span> <span class="m">0.25</span><span class="p">)</span>
+
+<span class="c1"># use colnames( dd$nuisancevariables ) to see nuisance variables</span>
+
+
+
+ee <span class="o">&lt;-</span> getfMRInuisanceVariables<span class="p">(</span>pcasl<span class="p">,</span> mask <span class="o">=</span> pcaslmask<span class="p">,</span> moreaccurate <span class="o">=</span> <span class="k-Variable">F</span><span class="p">)</span>
+
+tsResid <span class="o">&lt;-</span> residuals<span class="p">(</span>lm<span class="p">(</span>ee<span class="o">$</span>matrixTimeSeries <span class="o">~</span> ee<span class="o">$</span>globalsignalASL <span class="o">+</span> ee<span class="o">$</span>nuisancevariables<span class="p">))</span>
+
+myASLnetwork <span class="o">&lt;-</span> filterfMRIforNetworkAnalysis<span class="p">(</span>tsResid<span class="p">,</span> tr <span class="o">=</span> <span class="m">4</span><span class="p">,</span> mask <span class="o">=</span> ee<span class="o">$</span>mask<span class="p">,</span>
+    cbfnetwork <span class="o">=</span> <span class="s">&quot;ASLCBF&quot;</span><span class="p">,</span> labels <span class="o">=</span> aal2asl<span class="p">,</span> graphdensity <span class="o">=</span> <span class="m">0.25</span><span class="p">)</span>
+
+<span class="c1"># use colnames( dd$nuisancevariables ) to see nuisance variables</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_get_perfusion_predictors.html">perfusion-predictors</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_image2ClusterImages.html">image2ClusterImages</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

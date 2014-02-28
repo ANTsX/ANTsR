@@ -1,0 +1,29 @@
+=========================
+renderNetwork 
+=========================
+
+purpose:  
+
+ 3D surface-based rendering of image ROI-based networks
+ 
+description:  
+
+ Will use rgl to render a spatial graph  
+ 
+
+usage:  
+
+ renderNetwork<-function( network, locations, scaling=c(0,0), lwd=2, radius=3, edgecolors=0, nodecolors='blue', nodetype='s' )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    renderNetwork(network, locations)
+    
+    renderNetwork(network, locations, lwd = 3, edgecolors = heat.colors(100))
+    
+
+
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cvEigenanatomy &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="eigSeg" href="Rd_eigSeg.html" />
+    <link rel="prev" title="corw" href="Rd_corw.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>cvEigenanatomy</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_corw.html">corw</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_eigSeg.html">eigSeg</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="cveigenanatomy">
+<h1>cvEigenanatomy<a class="headerlink" href="#cveigenanatomy" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Cross-validation method for eigenanatomy decompositions.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Perform cross-validation on an image set using eigencomponents to predict an outcome variable.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div><p>cvEigenanatomy(demog, images, outcome, ratio=10, mask=NA,</p>
+<blockquote>
+<div>sparseness=0.01, nvecs=50, its=5, cthresh=250, ...)</div></blockquote>
+</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre><span class="c1"># generate simulated outcome</span>
+
+nsubjects <span class="o">&lt;-</span> <span class="m">100</span>
+
+x1 <span class="o">&lt;-</span> seq<span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> length.out<span class="o">=</span>nsubjects<span class="p">)</span> <span class="o">+</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+x2 <span class="o">&lt;-</span> seq<span class="p">(</span><span class="m">25</span><span class="p">,</span> <span class="m">15</span><span class="p">,</span> length.out<span class="o">=</span>nsubjects<span class="p">)</span> <span class="o">+</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+outcome <span class="o">&lt;-</span> <span class="m">3</span> <span class="o">*</span> x1 <span class="o">+</span> <span class="m">4</span> <span class="o">*</span> x2 <span class="o">+</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">1</span><span class="p">)</span>
+
+<span class="c1"># generate simulated images with outcome predicted</span>
+
+<span class="c1"># by sparse subset of voxels</span>
+
+voxel.1 <span class="o">&lt;-</span> <span class="m">3</span> <span class="o">*</span> x1 <span class="o">+</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+voxel.2 <span class="o">&lt;-</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+voxel.3 <span class="o">&lt;-</span> <span class="m">2</span> <span class="o">*</span> x2 <span class="o">+</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">2</span><span class="p">)</span>
+
+voxel.4 <span class="o">&lt;-</span> rnorm<span class="p">(</span>nsubjects<span class="p">,</span> sd<span class="o">=</span><span class="m">3</span><span class="p">)</span>
+
+input   <span class="o">&lt;-</span> cbind<span class="p">(</span>voxel.1<span class="p">,</span> voxel.2<span class="p">,</span> voxel.3<span class="p">,</span> voxel.4<span class="p">)</span>
+
+mask    <span class="o">&lt;-</span> as.antsImage<span class="p">(</span>matrix<span class="p">(</span>c<span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">),</span> nrow<span class="o">=</span><span class="m">2</span><span class="p">))</span>
+
+<span class="c1"># generate sample demographics that do not explain outcome</span>
+
+age <span class="o">&lt;-</span> runif<span class="p">(</span>nsubjects<span class="p">,</span> <span class="m">50</span><span class="p">,</span> <span class="m">75</span><span class="p">)</span>
+
+demog <span class="o">&lt;-</span> data.frame<span class="p">(</span>outcome<span class="o">=</span>outcome<span class="p">,</span> age<span class="o">=</span>age<span class="p">)</span>
+
+result <span class="o">&lt;-</span> cvEigenanatomy<span class="p">(</span>demog<span class="p">,</span> input<span class="p">,</span> <span class="s">&quot;outcome&quot;</span><span class="p">,</span> ratio<span class="o">=</span><span class="m">5</span><span class="p">,</span> mask<span class="p">,</span>
+
+            sparseness<span class="o">=</span><span class="m">0.25</span><span class="p">,</span> nvecs<span class="o">=</span><span class="m">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_corw.html">corw</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_eigSeg.html">eigSeg</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

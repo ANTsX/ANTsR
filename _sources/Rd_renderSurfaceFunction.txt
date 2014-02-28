@@ -1,0 +1,29 @@
+=========================
+renderSurfaceFunction 
+=========================
+
+purpose:  
+
+ 3D surface-based rendering of volume images.
+ 
+description:  
+
+ Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g. functional).  
+ 
+
+usage:  
+
+ renderSurfaceFunction<-function( surfimg, funcimg=list(overlayimage1,overlayimage2,etc), surfval=0.5, basefval , offsetfval , smoothsval = 0, smoothfval = 0, blobrender = TRUE )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    renderSurfaceFunction(simg)
+    
+    renderSurfaceFunction(simg, fimg, basefval = 0.2, blobrender = FALSE)
+    
+
+
+

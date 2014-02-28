@@ -1,0 +1,27 @@
+=========================
+matrixToImages 
+=========================
+
+purpose:  
+
+ Convert rows of a matrix to images
+ 
+description:  
+
+   Unmasks rows of a matrix and writes as images.
+ 
+
+usage:  
+
+ matrixToImages(dataMatrix, mask, outputRoot)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat = matrixToImages(aMat, mask, "aMat_")
+    
+
+
+

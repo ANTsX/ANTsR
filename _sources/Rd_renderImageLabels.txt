@@ -1,0 +1,29 @@
+=========================
+renderImageLabels 
+=========================
+
+purpose:  
+
+ 3D surface-based rendering of image segmentation labels
+ 
+description:  
+
+ Will use rgl to render surfaces
+ 
+
+usage:  
+
+ renderImageLabels<-function( labelsimg, surfval=0.5, smoothsval = 0, alphasurf=1, physical=TRUE, color=c() )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    renderImageLabels(labels)
+    
+    renderImageLabels(labels, smoothsval = 0.5, alphasurf = 0.3, color = snapColors(100))
+    
+
+
+

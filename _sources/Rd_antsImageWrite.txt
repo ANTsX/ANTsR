@@ -1,0 +1,29 @@
+=========================
+antsImageWrite 
+=========================
+
+purpose:  
+
+ Image Write
+ 
+description:  
+
+ Write an image object of S4 class 'antsImage' to a file.
+ 
+
+usage:  
+
+ antsImageWrite( image , filename )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # write an image 'img' of class 'antsImage' to a file named 'imagefile.nii'
+    
+    antsImageWrite(img, "imagefile.nii")
+    
+
+
+

@@ -1,0 +1,27 @@
+=========================
+makeImage 
+=========================
+
+purpose:  
+
+ Simple makeImage function.
+ 
+description:  
+
+ Make an image with given size and voxel value.
+ 
+
+usage:  
+
+ img<-makeImage( c(2,10) , 1   )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    outimg <- makeImage(c(2, 10), 1)
+    
+
+
+

@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sparseDecom2boot &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>sparseDecom2boot</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="sparsedecom2boot">
+<h1>sparseDecom2boot<a class="headerlink" href="#sparsedecom2boot" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Convenience wrapper for 2-view eigenanatomy decomposition w/bootstrap initialization.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Decomposes two matrices into paired sparse eigenevectors to maximize canonical correlation.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>sparseDecom2boot( inmatrix=c(NA,NA),  inmask=c(NA,NA) , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5 , nboot = 20, nsamp = 0.9  )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>mat <span class="o">&lt;-</span> replicate<span class="p">(</span><span class="m">100</span><span class="p">,</span> rnorm<span class="p">(</span><span class="m">20</span><span class="p">))</span>
+
+mat2 <span class="o">&lt;-</span> replicate<span class="p">(</span><span class="m">100</span><span class="p">,</span> rnorm<span class="p">(</span><span class="m">20</span><span class="p">))</span>
+
+mydecom <span class="o">&lt;-</span> sparseDecom2boot<span class="p">(</span>inmatrix <span class="o">=</span> list<span class="p">(</span>mat<span class="p">,</span> mat2<span class="p">),</span> sparseness <span class="o">=</span> c<span class="p">(</span><span class="m">0.1</span><span class="p">,</span>
+    <span class="m">0.3</span><span class="p">),</span> nvecs <span class="o">=</span> <span class="m">3</span><span class="p">,</span> its <span class="o">=</span> <span class="m">3</span><span class="p">,</span> perms <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+
+wt <span class="o">&lt;-</span> <span class="m">0.666</span>
+
+mat3 <span class="o">&lt;-</span> mat <span class="o">*</span> wt <span class="o">+</span> mat2 <span class="o">*</span> <span class="p">(</span><span class="m">1</span> <span class="o">-</span> wt<span class="p">)</span>
+
+mydecom <span class="o">&lt;-</span> sparseDecom2boot<span class="p">(</span>inmatrix <span class="o">=</span> list<span class="p">(</span>mat<span class="p">,</span> mat3<span class="p">),</span> sparseness <span class="o">=</span> c<span class="p">(</span><span class="m">0.2</span><span class="p">,</span>
+    <span class="m">0.2</span><span class="p">),</span> nvecs <span class="o">=</span> <span class="m">5</span><span class="p">,</span> its <span class="o">=</span> <span class="m">10</span><span class="p">,</span> perms <span class="o">=</span> <span class="m">200</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

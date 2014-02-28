@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>make3ViewPNG &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="maskImage" href="Rd_maskImage.html" />
+    <link rel="prev" title="lappend" href="Rd_lappend.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>make3ViewPNG</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_lappend.html">lappend</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_maskImage.html">maskImage</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="make3viewpng">
+<h1>make3ViewPNG<a class="headerlink" href="#make3viewpng" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Rotate an existing 3d window into different views.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>The make3ViewPNG function rotates the existing viewport according to 3 different rotation matrices passed in by the user.  The output of these 3 views is munged together along the left/right edge and written to a png file.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>make3ViewPNG( rotationView1 , rotationView2 , rotationView3, fnprefix )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>brain <span class="o">&lt;-</span> renderSurfaceFunction<span class="p">(</span>surfimg <span class="o">=</span> list<span class="p">(</span>bm<span class="p">),</span> alphasurf <span class="o">=</span> <span class="m">0.1</span><span class="p">,</span> smoothsval <span class="o">=</span> <span class="m">1.5</span><span class="p">,</span>
+    smoothfval <span class="o">=</span> <span class="m">1</span><span class="p">,</span> funcimg <span class="o">=</span> list<span class="p">(</span>cnt<span class="o">$</span>clustimg<span class="p">),</span> alphafunc <span class="o">=</span> <span class="m">0.2</span><span class="p">)</span>
+
+plotBasicNetwork<span class="p">(</span>centroids <span class="o">=</span> cnt<span class="o">$</span>centroids<span class="p">,</span> brain<span class="p">)</span>
+
+make3ViewPNG<span class="p">(</span>rid<span class="p">,</span> id<span class="p">,</span> rid2<span class="p">,</span> paste<span class="p">(</span><span class="s">&quot;figure/network&quot;</span><span class="p">,</span> i<span class="p">,</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_lappend.html">lappend</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_maskImage.html">maskImage</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

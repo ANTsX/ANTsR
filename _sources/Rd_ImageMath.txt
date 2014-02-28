@@ -1,0 +1,31 @@
+=========================
+ImageMath 
+=========================
+
+purpose:  
+
+ Image Math
+ 
+description:  
+
+ Perform math-operations on the given image
+ 
+
+usage:  
+
+ ImageMath( "<ImageDimension>" , "<OutputImage>" , "<operator>" , "<Image1.ext>" [, "<Image2.ext>"] )
+ 
+ See section 'Arguments' for details. Number and type of arguments vary depending on 'operator' used.
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    ImageMath(3, "output_img.nii", "D", "input_img.nii", 1)
+    
+    ImageMath(3, "output_img.nii", "MD", "input_img.nii", 1)
+    
+
+
+

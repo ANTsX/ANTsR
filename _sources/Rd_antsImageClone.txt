@@ -1,0 +1,30 @@
+=========================
+antsImageClone 
+=========================
+
+purpose:  
+
+ Image Clone
+ 
+description:  
+
+ Clone an image object of S4 class 'antsImage'.
+ 
+
+usage:  
+
+ antsImageClone( in_image , out_pixeltype )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # clone an image 'img' of class 'antsImage' to an image of pixeltype
+    # 'double'
+    
+    antsImageCone(img, "double")
+    
+
+
+

@@ -1,0 +1,21 @@
+=========================
+bigLMStats 
+=========================
+
+purpose:  
+
+ Efficiently compute basic statistical inference from regressions with multiple outcomes
+ 
+description:  
+
+   This function simplifies calculating p-values from linear models in which there are many outcome variables, such as in voxel-wise regressions.  To perform such an analysis in R, you can concatenate the outcome variables column-wise into an n by p matrix  y , where there are n subjects and p outcomes (see  Examples ).  Calling  lm(y~x)  calculates the coefficients, but statistical inference is not provided.  This function provides basic statistical inference efficiently.
+ 
+
+usage:  
+
+   bigLMStats(mylm) 
+ 
+examples: 
+
+
+

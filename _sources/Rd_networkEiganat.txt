@@ -1,0 +1,29 @@
+=========================
+networkEiganat 
+=========================
+
+purpose:  
+
+ Convenience wrapper for eigenanatomy decomposition.
+ 
+description:  
+
+ Decomposes a matrix into sparse eigenevectors to maximize explained variance.
+ 
+
+usage:  
+
+ networkEiganat( Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01)
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mat <- replicate(100, rnorm(20))
+    
+    mydecom <- networkEiganat(mat)
+    
+
+
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>regressionNetworkViz &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>regressionNetworkViz</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="regressionnetworkviz">
+<h1>regressionNetworkViz<a class="headerlink" href="#regressionnetworkviz" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>Visualize a regression result by a d3 network visualization.</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Use either a force directed graph or a Sankey graph to show relationships between predictors and outcome variables.</dt>
+<dd>correlateMyOutcomes should correspond to the outcome variables ...</dd>
+</dl>
+</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div>regressionNetworkViz( mylm , sigthresh=0.05, whichviz=&#8221;Sankey&#8221;, outfile=&#8221;temp2.html&#8221;, correlateMyOutcomes = brainpreds , doFDR=TRUE )</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>colnames<span class="p">(</span>brainpreds<span class="p">)</span> <span class="o">&lt;-</span> paste<span class="p">(</span><span class="s">&quot;Vox&quot;</span><span class="p">,</span> c<span class="p">(</span><span class="m">1</span><span class="o">:</span>ncol<span class="p">(</span>brainpreds<span class="p">)),</span> sep <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+colnames<span class="p">(</span>mylm<span class="o">$</span>beta.pval<span class="p">)</span> <span class="o">&lt;-</span> colnames<span class="p">(</span>brainpreds<span class="p">)</span>
+
+demognames <span class="o">&lt;-</span> rownames<span class="p">(</span>mylm<span class="o">$</span>beta.pval<span class="p">)</span>
+
+regressionNetworkViz<span class="p">(</span>mylm<span class="p">,</span> sigthresh <span class="o">=</span> <span class="m">0.05</span><span class="p">,</span> outfile <span class="o">=</span> <span class="s">&quot;temp2.html&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        <a class="uplink" href="index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

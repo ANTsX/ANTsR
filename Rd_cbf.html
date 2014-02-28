@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CBF &mdash; ANTsR 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ANTsR 0.0.0 documentation" href="index.html" />
+    <link rel="up" title="ANTsR Functions" href="ANTsRfunctions.html" />
+    <link rel="next" title="corw" href="Rd_corw.html" />
+    <link rel="prev" title="aslPerfusion" href="Rd_aslPerfusion.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
+</div>
+
+
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>ANTsR 0.0.0 documentation</span></a></h1>
+        <h2 class="heading"><span>CBF</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_aslPerfusion.html">aslPerfusion</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_corw.html">corw</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="cbf">
+<h1>CBF<a class="headerlink" href="#cbf" title="Permalink to this headline">¶</a></h1>
+<p>purpose:</p>
+<blockquote>
+<div>CBF Computation</div></blockquote>
+<p>description:</p>
+<blockquote>
+<div>Calculate CBF from an ASL image using CASL or PASL.</div></blockquote>
+<p>usage:</p>
+<blockquote>
+<div><p># ASLtbx</p>
+<p>cbf_casl1_ASLtbx( aslimg_filename , m0img_filename )</p>
+<p>cbf_casl2_ASLtbx( aslimg_filename )</p>
+<p>cbf_pasl_ASLtbx( aslimg_filename , m0img_filename )</p>
+<p># Chen 2011 paper</p>
+<p>cbf_casl_Chen2011( aslimg_filename )</p>
+<p>cbf_pasl_Chen2011( aslimg_filename , m0img_filename )</p>
+<p>cbf_pcasl_Chen2011( aslimg_filename )</p>
+<p># Wang 2012 paper</p>
+<p>cbf_casl_Wang2012( aslimg_filename , Xvar = NULL , Xideal = NULL , c =</p>
+<p>NULL )</p>
+<p># update a give CBF estimate using PASL/CASL</p>
+<p>compute_cbf( cbf , img , method = 0 , labelfirst = 1 )</p>
+<p># compute robust cbf</p>
+<p>cbf_robust( asl_img )</p>
+</div></blockquote>
+<p>examples:</p>
+<div class="highlight-r"><div class="highlight"><pre>cbf <span class="o">&lt;-</span> cbf_casl1<span class="p">(</span> <span class="s">&quot;asl.nii&quot;</span> <span class="p">,</span> <span class="s">&quot;m0.nii&quot;</span> <span class="p">)</span>cbf <span class="o">&lt;-</span> cbf_casl2<span class="p">(</span> <span class="s">&quot;asl.nii&quot;</span> <span class="p">)</span>
+
+cbf <span class="o">&lt;-</span> cbf_pasl<span class="p">(</span> <span class="s">&quot;asl.nii&quot;</span> <span class="p">,</span> <span class="s">&quot;m0.nii&quot;</span> <span class="p">)</span>
+
+<span class="c1"># updating existing cbf estimate using CASL; method = 0 , labefirst = 1</span>
+
+cbf <span class="o">&lt;-</span> compute_cbf<span class="p">(</span> cbf <span class="p">,</span> asl_img <span class="p">)</span>
+
+<span class="c1"># comput robust cbf of an asl image</span>
+
+cbf <span class="o">&lt;-</span> cbf_robust<span class="p">(</span> <span class="s">&quot;asl.nii&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="Rd_aslPerfusion.html">aslPerfusion</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Rd_corw.html">corw</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, ants-dev-team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>

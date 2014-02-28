@@ -1,0 +1,67 @@
+.. role:: raw-tex(raw)
+    :format: latex html
+
+ANTs segmentation approaches.
+==================================================
+
+We typically use bias correction and tissues priors but in some cases k-means can do the job.
+
+
+.. sourcecode:: r
+    
+
+    library(ANTsR)
+    tfn <- getANTsRData("r16")
+    img <- antsImageRead(tfn, 2, "float")
+    imgn3 <- antsImageClone(img)
+    N3BiasFieldCorrection(list(img@dimension, img, imgn3, "4"))
+    N3BiasFieldCorrection(list(img@dimension, imgn3, imgn3, "2"))
+    mask <- antsImageClone(img, "unsigned int")
+    mask[img > 10] <- 1
+    mask[img <= 10] <- 0
+    segs <- Atropos(d = 2, a = imgn3, m = "[0.2,1x1]", c = "[5,0]", i = "kmeans[3]", 
+        x = mask)
+    par(mfrow = c(2, 2))
+    # plotANTsImage(imgn3)
+    plotANTsImage(segs$segmentation)
+    plotANTsImage(segs$probabilityimages[[1]])
+    plotANTsImage(segs$probabilityimages[[2]])
+    plotANTsImage(segs$probabilityimages[[3]])
+    countgm <- sum(segs$segmentation == 2)/sum(mask == 1)
+
+
+
+Use the probability images to resegment the input image based on spatial priors and its gradient in addition to its raw intensity.
+
+
+.. sourcecode:: r
+    
+
+    # get the image gradient and, for fun , do a multivariate segmentation
+    imggrad <- antsImageClone(imgn3)
+    ImageMath(img@dimension, imggrad, "Laplacian", imgn3)
+    segs <- Atropos(d = img@dimension, a = c(imgn3, imggrad), m = "[0.2,1x1]", c = "[5,0]", 
+        i = segs$probabilityimages, x = mask)
+    par(mfrow = c(2, 2))
+    plotANTsImage(segs$segmentation)
+    plotANTsImage(segs$probabilityimages[[1]])
+    plotANTsImage(segs$probabilityimages[[2]])
+    plotANTsImage(segs$probabilityimages[[3]])
+    countgm2 <- sum(segs$segmentation == 2)/sum(mask == 1)
+
+
+
+
+
+
+::
+
+    ## [1] "FAILURE 41 41"
+
+
+
+
+.. raw:: latex
+
+    \bibliographystyle{plain}
+    \bibliography{antsr}

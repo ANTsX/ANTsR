@@ -1,0 +1,27 @@
+=========================
+SmoothImage 
+=========================
+
+purpose:  
+
+ Smooth an image
+ 
+description:  
+
+ Perform smoothing on the given image with a given sigma
+ 
+
+usage:  
+
+ SmoothImage( "<imageDimension>" , "<inputImage>" , "Sigma" , "<outputimage>")
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    SmoothImage(3, "input_img.nii", 1, "output_img.nii")
+    
+
+
+

@@ -1,0 +1,31 @@
+=========================
+mni2tal 
+=========================
+
+purpose:  
+
+ Brett's mni2tal
+ 
+description:  
+
+   mni2tal for converting from ch2/mni space to tal - very approximate.  
+ 
+   see http://bioimagesuite.yale.edu/mni2tal/501_95733_More %20Accurate%20Talairach%20Coordinates%20SLIDES.pdf 
+ 
+   http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach
+ 
+
+usage:  
+
+  talCoord<-mni2tal( x = c( 10,12,14) ) 
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    mni2tal(c(10, 12, 14))
+    
+
+
+

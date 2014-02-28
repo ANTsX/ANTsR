@@ -1,0 +1,68 @@
+=========================
+CBF 
+=========================
+
+purpose:  
+
+ CBF Computation
+ 
+description:  
+
+ Calculate CBF from an ASL image using CASL or PASL.
+ 
+
+usage:  
+
+ # ASLtbx
+ 
+ cbf_casl1_ASLtbx( aslimg_filename , m0img_filename )
+ 
+ cbf_casl2_ASLtbx( aslimg_filename )
+ 
+ cbf_pasl_ASLtbx( aslimg_filename , m0img_filename )
+ 
+ # Chen 2011 paper
+ 
+ cbf_casl_Chen2011( aslimg_filename )
+ 
+ cbf_pasl_Chen2011( aslimg_filename , m0img_filename )
+ 
+ cbf_pcasl_Chen2011( aslimg_filename )
+ 
+ # Wang 2012 paper
+ 
+ cbf_casl_Wang2012( aslimg_filename , Xvar = NULL , Xideal = NULL , c =
+ 
+ NULL )
+ 
+ # update a give CBF estimate using PASL/CASL
+ 
+ compute_cbf( cbf , img , method = 0 , labelfirst = 1 )
+ 
+ # compute robust cbf
+ 
+ cbf_robust( asl_img )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+     
+    
+    
+    cbf <- cbf_casl1( "asl.nii" , "m0.nii" )cbf <- cbf_casl2( "asl.nii" )
+    
+    cbf <- cbf_pasl( "asl.nii" , "m0.nii" )
+    
+    # updating existing cbf estimate using CASL; method = 0 , labefirst = 1
+    
+    cbf <- compute_cbf( cbf , asl_img )
+    
+    # comput robust cbf of an asl image
+    
+    cbf <- cbf_robust( "asl.nii" )
+    
+
+
+

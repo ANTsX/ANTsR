@@ -1,0 +1,32 @@
+=========================
+as.antsImage 
+=========================
+
+purpose:  
+
+ numeric matrix/array to antsImage
+ 
+description:  
+
+ Create an  antsImage  object from a  numeric matrix  or  numeric array .
+ 
+
+usage:  
+
+ as.antsImage( object [, pixeltype] [, spacing] [, origin] )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # create an image from a numeric array with details as shown ; here the
+    # image pixeltype is assumed to be 'double'
+    
+    arr = array(c(1:1000), dim = c(10, 10, 10))
+    
+    img = as.antsImage(arr, spacing = c(1.2, 1.2, 2), origin = c(0, 0, 0))
+    
+
+
+

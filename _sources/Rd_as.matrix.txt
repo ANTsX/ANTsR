@@ -1,0 +1,32 @@
+=========================
+as.matrix 
+=========================
+
+purpose:  
+
+ antsImage to numeric matrix
+ 
+description:  
+
+ Convert/coerce an  antsImage  object to a  numeric matrix . More precisely, extract a  numeric vector  from an  antsImage .
+ 
+
+usage:  
+
+ as.matrix( x [, mask] [, region] )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    # extract a vector from an image 'img' of class 'antsImage' by considering
+    # only the region starting at index (1,1,1) with size (10,10,10)
+    
+    reg = new("antsRegion", index = c(1, 1, 1), size = c(10, 10, 10))
+    
+    vect = as.matrix(img, region = reg)
+    
+
+
+

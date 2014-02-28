@@ -1,0 +1,30 @@
+=========================
+filterfMRIforNetworkAnalysis 
+=========================
+
+purpose:  
+
+ Basic pre-processing for BOLD or ASL-based network analysis.
+ 
+description:  
+
+ This function works for either raw BOLD time-series data, ASL-based BOLD time-series data or ASL-based CBF time series data.  In all 3 cases, this function performs motion-correction, factoring out motion and compcor nuisance paramters, frequency filtering and masking.  The output contains the filtered time series (matrix form), the mask and a vector of temporal signal variance. Some ASL MR sequences allow network analysis of either BOLD or ASL signal.  See "Implementation of Quantitative Perfusion Imaging Techniques for Functional Brain Mapping using Pulsed Arterial Spin Labeling" by Wong et al, 1997 for an overview.  This function employs "surround" techniques for deriving either CBF or BOLD signal from the input ASL.  This is a WIP.
+ 
+
+usage:  
+
+ filterfMRIforNetworkAnalysis( asl_antsr_image_or_filename, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c("BOLD", "ASLBOLD", "ASLCBF") , maskThresh=500, smoother = 0, outputprefix = NULL )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    fmat <- timeseries2matrix(img, mask)
+    
+    myres <- filterfMRIforNetworkAnalysis(fmat, tr = 4, 0.01, 0.1, cbfnetwork = "BOLD", 
+        mask = mask)
+    
+
+
+

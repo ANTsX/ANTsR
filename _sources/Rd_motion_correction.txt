@@ -1,0 +1,39 @@
+=========================
+Motion-Correction 
+=========================
+
+purpose:  
+
+ Motion Correction
+ 
+description:  
+
+ Perform motion-correction on the given image
+ 
+
+usage:  
+
+ motion_correction( img )
+ 
+examples: 
+
+.. sourcecode:: r
+    
+
+    moco_results <- motion_correction("input_img.nii")
+    
+    # motion-corrected image
+    
+    moco_results$moco_img
+    
+    # motion-correction parameters
+    
+    moco_results$moco_params
+    
+    # average image
+    
+    moco_results$moco_avg_img
+    
+
+
+
