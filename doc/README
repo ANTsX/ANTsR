@@ -35,9 +35,7 @@ function mysafetest {
     return $status
 }
 ###############################################
-ANTsRdoc=/Users/stnava/code/gitANTs/ANTsRDoc/ANTsR/doc
-# ANTsRdoc=/Users/ntustison/Pkg/ANTsR/doc
-
+ANTsRdoc=/Users/stnava/code/ANTsR_Doc/ANTsR/doc
 mysafetest cd $ANTsRdoc
 if [[ $option -eq 0 ]] ; then
   mysafetest git checkout master
