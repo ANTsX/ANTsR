@@ -285,8 +285,9 @@ getValueAtPoint <- function(x, point) {
     print("point must be of class 'numeric'")
     return()
   }
-  
-  idx <- floor(antsTransformPhysicalPointToIndex(x, point))
+
+  idx<-as.numeric( antsTransformPhysicalPointToIndex(x, point) )
+  idx <- floor(idx)
   
   dims <- length(idx)
   
