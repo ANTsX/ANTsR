@@ -142,9 +142,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   locmask <- inmask
   if ( usefakemask[1] )
     {
-    locmask[[1]]<-fakemask1
     cca1outAuto<-matrixSeg( t(cca1outAuto )  )
     cca1out<-cca1outAuto
+#    locmask[[1]]<-fakemask1
     } else {
     cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
     autoseg1<-eigSeg(locmask[[1]],cca1outAuto, TRUE )
@@ -153,9 +153,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
   if ( usefakemask[2] )
     {
-    locmask[[2]]<-fakemask2
-    cca2outAuto<-t( matrixSeg( t(cca2outAuto ) ) )
+    cca2outAuto<-matrixSeg( t(cca2outAuto )  )
     cca2out<-cca2outAuto
+#    locmask[[2]]<-fakemask2
     } else {
     cca2outAuto<-matrixToImages( t(cca2outAuto),locmask[[2]])
     autoseg2<-eigSeg(locmask[[2]],cca2outAuto, TRUE )
@@ -164,8 +164,14 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
 ####################################################################################
 ####################################################################################
+  if ( usefakemask[1] ) init1<-matrixToImages( (cca1out),fakemask1) else init1<-matrixToImages( t(cca1out),locmask[[1]])
+  if ( usefakemask[2] ) init2<-matrixToImages( (cca2out),fakemask2) else init2<-matrixToImages( t(cca2out),locmask[[2]])
   print("Get Final Results")
-  myres<-sparseDecom2( inmatrix = inmatrix, inmask = locmask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = matrixToImages( t(cca1out),locmask[[1]]), initializationList2 = matrixToImages( t(cca2out),locmask[[2]]), ell1 = ell1 )
+  if (!usefakemask[1] & !usefakemask[2] ) maskinit<-locmask
+  if ( usefakemask[1] &  usefakemask[2] ) maskinit<-c(fakemask1,fakemask2)
+  if ( usefakemask[1] & !usefakemask[2] ) maskinit<-c(fakemask1,locmask[[2]])
+  if (!usefakemask[1] &  usefakemask[2] ) maskinit<-c(locmask[[1]],fakemask2)
+  myres<-sparseDecom2( inmatrix = inmatrix, inmask = maskinit, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = init1, initializationList2 = init2, ell1 = ell1 )
   ###
   if ( usefakemask[1] ) myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
