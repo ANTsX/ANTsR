@@ -171,7 +171,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   if ( usefakemask[1] &  usefakemask[2] ) maskinit<-c(fakemask1,fakemask2)
   if ( usefakemask[1] & !usefakemask[2] ) maskinit<-c(fakemask1,locmask[[2]])
   if (!usefakemask[1] &  usefakemask[2] ) maskinit<-c(locmask[[1]],fakemask2)
-  myres<-sparseDecom2( inmatrix = inmatrix, inmask = maskinit, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = init1, initializationList2 = init2, ell1 = ell1 )
+  myres<-sparseDecom2( inmatrix = inmatrix, inmask = maskinit, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = perms, uselong = uselong , z = z, smooth = smooth, robust = robust, mycoption = mycoption, initializationList = init1, initializationList2 = init2, ell1 = ell1 )
   ###
   if ( usefakemask[1] ) myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
