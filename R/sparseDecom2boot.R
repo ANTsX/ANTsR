@@ -24,9 +24,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       makemat <-  matrix( rep(0,nboot*ncol(mat2)), ncol=ncol(mat2) ) 
       bootccalist2<-lappend( bootccalist2 , makemat )
     }
+  if (  nsamp >= 0.999999999  ) doreplace<-TRUE else doreplace<-FALSE
   for ( boots in 1:nboot )
     {
-      mysample<-sample(1:nsubj,size=mysize)
+      mysample<-sample(1:nsubj,size=mysize, replace = doreplace )
       submat1 <-mat1[mysample,]
       submat2 <-mat2[mysample,]
       sublist<-list(submat1,submat2)

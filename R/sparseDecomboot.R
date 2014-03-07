@@ -19,9 +19,10 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
       makemat<-matrix( rep(0,nboot*ncol(mat1)), ncol=ncol(mat1) )
       bootccalist1<-lappend( bootccalist1 , makemat )
     }
+  if (  nsamp >= 0.999999999  ) doreplace<-TRUE else doreplace<-FALSE
   for ( boots in 1:nboot )
     {
-      mysample<-sample(1:nsubj,size=mysize)
+      mysample<-sample(1:nsubj,size=mysize, replace = doreplace )
       submat1 <-mat1[mysample,]
       print(paste("boot",boots,"sample",mysize))
       myres <- sparseDecom( inmatrix = submat1, inmask = mymask, sparseness = sparseness, nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, 
