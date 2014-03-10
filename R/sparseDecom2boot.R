@@ -1,6 +1,6 @@
 sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 50, its = 5, cthresh = c(0, 
   0), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), 
-  initializationList2 = list(), ell1 = 0.05, nboot = 10, nsamp=0.9 ) {
+  initializationList2 = list(), ell1 = 0.05, nboot = 10, nsamp=0.9 , doseg = TRUE ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print( args( sparseDecom2boot ) ) 
@@ -143,23 +143,25 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   locmask <- inmask
   if ( usefakemask[1] )
     {
-    cca1outAuto<-matrixSeg( t(cca1outAuto )  )
-    cca1out<-cca1outAuto
-#    locmask[[1]]<-fakemask1
+      if ( doseg ) {
+        cca1outAuto<-matrixSeg( t(cca1outAuto )  )
+        cca1out<-cca1outAuto
+      } else cca1out<-t(cca1outAuto )
     } else {
     cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
-    autoseg1<-eigSeg(locmask[[1]],cca1outAuto, TRUE )
+    autoseg1<-eigSeg(locmask[[1]],cca1outAuto, doseg )
     cca1outAuto<-t( imageListToMatrix(cca1outAuto,locmask[[1]]) )
     cca1out<-cca1outAuto
     }
   if ( usefakemask[2] )
     {
-    cca2outAuto<-matrixSeg( t(cca2outAuto )  )
-    cca2out<-cca2outAuto
-#    locmask[[2]]<-fakemask2
+      if ( doseg ) {
+        cca2outAuto<-matrixSeg( t(cca2outAuto )  )
+        cca2out<-cca2outAuto
+      } else cca2out<-t(cca2outAuto )
     } else {
     cca2outAuto<-matrixToImages( t(cca2outAuto),locmask[[2]])
-    autoseg2<-eigSeg(locmask[[2]],cca2outAuto, TRUE )
+    autoseg2<-eigSeg(locmask[[2]],cca2outAuto, doseg )
     cca2outAuto<-t( imageListToMatrix(cca2outAuto,locmask[[2]]) )
     cca2out<-cca2outAuto
     }
