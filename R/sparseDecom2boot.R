@@ -48,6 +48,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             temp1<-abs( cca1out[,j] )
             temp2<-abs( cca1[,k] )
             mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
+#            mymult[j,k]<-( -1.0 * cor( temp1, temp2 ) )
             }
           }
           for ( ct in 1:(ncol(cca1)) )
@@ -66,7 +67,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
             temp1<-abs( cca2out[,j] )
             temp2<-abs( cca2[,k] )
             mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
-#            mymult[j,k]<-sum( temp1/mean(temp1) * temp2/mean(temp2) )
+#            mymult[j,k]<-( -1.0 * cor( temp1, temp2 ) )
             }
           }
           for ( ct in 1:(ncol(cca2)) )
@@ -81,8 +82,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
       cca1out<-cca1out+(cca1) * myressum
       cca2out<-cca2out+(cca2) * myressum
       for ( nv in 1:nvecs ) {
-        bootccalist1[[nv]][boots,]<-abs(cca1[,nv])
-        bootccalist2[[nv]][boots,]<-abs(cca2[,nv])
+        if ( sparseness[1] > 0 ) bootccalist1[[nv]][boots,]<-abs(cca1[,nv]) else bootccalist1[[nv]][boots,]<-(cca1[,nv])
+        if ( sparseness[2] > 0 ) bootccalist2[[nv]][boots,]<-abs(cca2[,nv]) else bootccalist2[[nv]][boots,]<-(cca2[,nv])
       }
   }
   cca1outAuto<-cca1out
