@@ -61,7 +61,23 @@ for ( nvecs in 1:2 ) {
 }
 ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
   sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1, cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
-
-
+### now SNPs ###
+library(randomForest)
+library(BGLR)
+data(mice)
+snps<-mice.X
+numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
+nfolds<-6
+train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
+train<-( train < 4 )
+snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ), numericalpheno[train,] ), nvecs=10, sparseness=c( 0.001, 0.75 ), its=11, ell1=0.005 )
+for ( j in 1:4) {
+traindf<-data.frame( bmi=numericalpheno[ train,j] , snpse=as.matrix( snps[train, ] ) %*% as.matrix( snpd$eig1 ) )
+testdf <-data.frame( bmi=numericalpheno[!train,j] , snpse=as.matrix( snps[!train,] ) %*% as.matrix( snpd$eig1 ) )
+myrf<-randomForest( bmi ~ . , data=traindf )
+preddf<-predict(myrf, newdata=testdf )
+print( cor.test(preddf, testdf$bmi ) )
+plot( preddf, testdf$bmi )
+}
 }
 }

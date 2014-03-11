@@ -53,5 +53,23 @@ myrf<-randomForest( lclass ~ . ,   data=traindf )
 predlymp<-predict(myrf, newdata=testdf)
 print(paste("N-errors:",sum(abs( testdf$lclass != predlymp ) )," non-zero ",sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 # compare to http://arxiv.org/pdf/0707.0701v2.pdf 
+# now SNPs
+library(randomForest)
+library(BGLR)
+data(mice)
+snps<-mice.X
+numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
+nfolds<-6
+train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
+train<-( train < 4 )
+snpd<-sparseDecomboot( as.matrix( snps[train,] ), nvecs=20 , sparseness=( 0.001), z=0.5 )
+projmat<-as.matrix( snpd$eig ) 
+traindf<-data.frame( bmi=numericalpheno[train,1] , snpse=as.matrix( snps[train, ]  ) %*% projmat )
+testdf <-data.frame( bmi=numericalpheno[!train,1] , snpse=as.matrix( snps[!train, ] ) %*% projmat )
+myrf<-randomForest( bmi ~ . , data=traindf )
+preddf<-predict(myrf, newdata=testdf )
+cor.test(preddf, testdf$bmi )
+plot(preddf, testdf$bmi )
+}
 }
 }
