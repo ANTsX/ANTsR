@@ -1,4 +1,4 @@
-cawhiten<-function (Xin, n.comp , verbose=FALSE ) 
+icawhiten<-function (Xin, n.comp , verbose=FALSE ) 
 {
 # from the fastICA library
     X<-t(Xin)
