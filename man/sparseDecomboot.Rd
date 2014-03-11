@@ -48,5 +48,17 @@ Avants BB
 \dontrun{
 mat<-replicate(100, rnorm(20)) 
 mydecom<-sparseDecomboot( mat ) 
+# for prediction
+library(spls)
+library(randomForest)
+data(lymphoma)
+training<-sample( rep(c(TRUE,FALSE),31)  )
+sp<-0.02 ; myz<-0
+ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=5 , sparseness=( sp ), mycoption=1, z=myz , nsamp=1, nboot=50 ) # NMF style
+traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]), eig = lymphoma$x[training,]  %*% as.matrix(ldd$eigenanatomyimages ))
+testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]), eig = lymphoma$x[!training,] %*% as.matrix(ldd$eigenanatomyimages ))
+myrf<-randomForest( lclass ~ . ,   data=traindf )
+predlymp<-predict(myrf, newdata=testdf)
+print(paste("N-errors:",sum(abs( testdf$lclass != predlymp ) )," non-zero ",sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 }
 }
