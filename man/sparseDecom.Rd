@@ -72,4 +72,4 @@ cor.test(preddf, testdf$bmi )
 plot(preddf, testdf$bmi )
 }
 }
-}
+
