@@ -144,10 +144,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   locmask <- inmask
   if ( usefakemask[1] )
     {
-      if ( doseg ) {
-        cca1outAuto<-matrixSeg( t(cca1outAuto )  )
-        cca1out<-cca1outAuto
-      } else cca1out<-t(cca1outAuto )
+      if ( doseg ) cca1outAuto<-matrixSeg( t(cca1outAuto )  )
+      if ( dim( cca1outAuto )[2] != nvecs ) cca1outAuto<-t( cca1outAuto )
+      cca1out<-(cca1outAuto )
     } else {
     cca1outAuto<-matrixToImages( t(cca1outAuto),locmask[[1]])
     autoseg1<-eigSeg(locmask[[1]],cca1outAuto, doseg )
@@ -156,10 +155,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
   if ( usefakemask[2] )
     {
-      if ( doseg ) {
-        cca2outAuto<-matrixSeg( t(cca2outAuto )  )
-        cca2out<-cca2outAuto
-      } else cca2out<-t(cca2outAuto )
+      if ( doseg ) cca2outAuto<-matrixSeg( t(cca2outAuto )  )
+      if ( dim( cca2outAuto )[2] != nvecs ) cca2outAuto<-t( cca2outAuto )
+      cca2out<-(cca2outAuto )
     } else {
     cca2outAuto<-matrixToImages( t(cca2outAuto),locmask[[2]])
     autoseg2<-eigSeg(locmask[[2]],cca2outAuto, doseg )
@@ -168,8 +166,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     }
 ####################################################################################
 ####################################################################################
-  if ( usefakemask[1] ) init1<-matrixToImages( (cca1out),fakemask1) else init1<-matrixToImages( t(cca1out),locmask[[1]])
-  if ( usefakemask[2] ) init2<-matrixToImages( (cca2out),fakemask2) else init2<-matrixToImages( t(cca2out),locmask[[2]])
+  if ( usefakemask[1] ) init1<-matrixToImages( t(cca1out),fakemask1) else init1<-matrixToImages( t(cca1out),locmask[[1]])
+  if ( usefakemask[2] ) init2<-matrixToImages( t(cca2out),fakemask2) else init2<-matrixToImages( t(cca2out),locmask[[2]])
   print("Get Final Results")
   if (!usefakemask[1] & !usefakemask[2] ) maskinit<-locmask
   if ( usefakemask[1] &  usefakemask[2] ) maskinit<-c(fakemask1,fakemask2)
@@ -180,5 +178,5 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   if ( usefakemask[1] ) myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
   return( list( projections = myres$projections, projections2 = myres$projections2, 
-        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=t(cca1outAuto), cca2outAuto=t(cca2outAuto) ) )
+        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=(cca1outAuto), cca2outAuto=(cca2outAuto) ) )
 }
