@@ -180,5 +180,5 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   if ( usefakemask[1] ) myres$eig1<-t( imageListToMatrix( myres$eig1 , fakemask1 )  )
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
   return( list( projections = myres$projections, projections2 = myres$projections2, 
-        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=cca1outAuto, cca2outAuto=cca2outAuto ) )
+        eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=t(cca1outAuto), cca2outAuto=t(cca2outAuto) ) )
 }
