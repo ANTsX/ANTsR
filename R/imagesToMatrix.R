@@ -14,7 +14,7 @@ imagesToMatrix <- function(imageList, mask) {
     image <- antsImageRead(imageList[i], length(maskDims) )
     
     if ((sum(dim(image) - dim(mask)) != 0)) {
-      stop(paste("Dimensions of image", image, "do not match mask"))
+      stop(paste("Dimensions of image", imageList[i], "do not match mask"))
     }
     
     # Have to convert mask to a boolean because as.numeric in antsImage won't accept an antsImage as a mask
