@@ -47,7 +47,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
           for ( k in 1:ncol(cca1) ) {
             temp1<-abs( cca1out[,j] )
             temp2<-abs( cca1[,k] )
-            mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
+            mymult[j,k]<-cosineDist( temp1,temp2 )
+#                sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
 #            mymult[j,k]<-( -1.0 * cor( temp1, temp2 ) )
             }
           }
@@ -66,7 +67,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
           for ( k in 1:ncol(cca2) ) {
             temp1<-abs( cca2out[,j] )
             temp2<-abs( cca2[,k] )
-            mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
+             mymult[j,k]<-cosineDist( temp1,temp2 )           
+#            mymult[j,k]<-sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
 #            mymult[j,k]<-( -1.0 * cor( temp1, temp2 ) )
             }
           }
@@ -179,4 +181,11 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   if ( usefakemask[2] ) myres$eig2<-t( imageListToMatrix( myres$eig2 , fakemask2 )  )
   return( list( projections = myres$projections, projections2 = myres$projections2, 
         eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary , bootccalist1=bootccalist1 , bootccalist2=bootccalist2,   cca1outAuto=(cca1outAuto), cca2outAuto=(cca2outAuto) ) )
+}
+
+
+cosineDist <- function(xin,yin){
+  x<-t(as.matrix(xin))
+  y<-t(as.matrix(yin))
+  return( as.numeric(1 - x%*%t(y)/(sqrt(rowSums(x^2) %*% t(rowSums(y^2)))) ) )
 }
