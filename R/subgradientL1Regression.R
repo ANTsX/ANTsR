@@ -1,4 +1,4 @@
-subgradientL1Regression <- function( y, x, s=0.01, percentvals=0.1 , nits=100, betas=NA ) {
+subgradientL1Regression <- function( y, x, s=0.01, percentvals=0.1 , nits=100, betas=NA , sparval = NA ) {
   if (nargs() == 0) {
     print("Usage:  betas<-subgradientL1Regression( y ,  x) ")
     print("Needs to be checked more carefully")
@@ -18,7 +18,9 @@ subgradientL1Regression <- function( y, x, s=0.01, percentvals=0.1 , nits=100, b
     subgrad<-rep(0,ncol(x))
     subgrad[mysamp]<-t(x[,mysamp]) %*% as.matrix( delt )
     tk<-s/sqrt(sum( subgrad * subgrad ) )
-    betas<-( betas-tk*subgrad )
+    betas<-betas-tk*subgrad
+    if ( !is.na(sparval) ) betas<-sparsify( betas , sparval )
+    resultcorr<-cor.test( y,  x %*% betas )$est
     }
   resultcorr<-cor.test( y,  x %*% betas )$est
   return( list( betas=betas,  deltmag=deltmag, resultcorr=resultcorr  ) )

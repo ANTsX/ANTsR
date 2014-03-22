@@ -64,8 +64,10 @@ train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
 snpd<-sparseDecom( as.matrix( snps[train,] ), nvecs=20 , sparseness=( 0.001), z=0.5 )
 projmat<-as.matrix( snpd$eig ) 
-traindf<-data.frame( bmi=numericalpheno[train,1] , snpse=as.matrix( snps[train, ]  ) %*% projmat )
-testdf <-data.frame( bmi=numericalpheno[!train,1] , snpse=as.matrix( snps[!train, ] ) %*% projmat )
+snpse<-as.matrix( snps[train, ]  ) %*% projmat 
+traindf<-data.frame( bmi=numericalpheno[train,2] , snpse=snpse)
+snpse<-as.matrix( snps[!train, ]  ) %*% projmat 
+testdf <-data.frame( bmi=numericalpheno[!train,2] , snpse=snpse )
 myrf<-randomForest( bmi ~ . , data=traindf )
 preddf<-predict(myrf, newdata=testdf )
 cor.test(preddf, testdf$bmi )
