@@ -1,4 +1,4 @@
-quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=T, traitvecin=NA ) {
+quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=T, traitvecin=NA, trainvec=NA ) {
   if (nargs() == 0) {
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)
@@ -24,10 +24,18 @@ quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=
       qsnps[t2,y]<-f2
       qsnps[t3,y]<-f3
       }
-    if ( replaceWithF & !is.na( traitvec ) ) {
+    if ( replaceWithF & !is.na( traitvec ) & is.na( trainvec ) ) {
       qsnps[t1,y]<-mean( traitvec[t1] )
       qsnps[t2,y]<-mean( traitvec[t2] )
       qsnps[t3,y]<-mean( traitvec[t3] )
+      }
+    if ( replaceWithF & !is.na( traitvec ) & !is.na( trainvec ) ) {
+      t1tr<-which( temp == 0 & trainvec )
+      t2tr<-which( temp == 1 & trainvec )
+      t3tr<-which( temp == 2 & trainvec )
+      qsnps[t1,y]<-mean( traitvec[t1tr] )
+      qsnps[t2,y]<-mean( traitvec[t2tr] )
+      qsnps[t3,y]<-mean( traitvec[t3tr] )
       }
     }
   qsnps<-qsnps[,okrow]
