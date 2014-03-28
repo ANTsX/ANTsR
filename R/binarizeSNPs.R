@@ -18,7 +18,7 @@ binarizeSNPs <- function(snps) {
   binsnps[,inds2][ww] <-0
   binsnps[,inds2][!ww]<-1
   osnps <- data.frame(binsnps)
-  names(osnps)[inds1] <- paste(names(binsnpsdf),".1",sep='')
-  names(osnps)[inds2] <- paste(names(binsnpsdf),".2",sep='')
+  names(osnps)[inds1] <- paste(names(snps),".1",sep='')
+  names(osnps)[inds2] <- paste(names(snps),".2",sep='')
   return(osnps)
 } 
