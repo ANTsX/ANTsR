@@ -15,14 +15,14 @@ quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=
     f1<-length( t1  ) / length( temp )
     f2<-length( t2  ) / length( temp )
     f3<-length( t3  ) / length( temp )
+    if ( f1 < freqthresh ) okrow[y]<-FALSE
+    if ( f2 < freqthresh ) okrow[y]<-FALSE
+    if ( f3 < freqthresh ) okrow[y]<-FALSE
     if ( replaceWithF ) {
-      if ( f1 < freqthresh ) okrow[y]<-FALSE
-      if ( f2 < freqthresh ) okrow[y]<-FALSE
-      if ( f3 < freqthresh ) okrow[y]<-FALSE
-    }
-    qsnps[t1,y]<-f1
-    qsnps[t2,y]<-f2
-    qsnps[t3,y]<-f3
+      qsnps[t1,y]<-f1
+      qsnps[t2,y]<-f2
+      qsnps[t3,y]<-f3
+      }
     }
   qsnps<-qsnps[,okrow]
   if ( shiftit ) {
