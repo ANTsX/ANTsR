@@ -1,10 +1,11 @@
-quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=T ) {
+quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=T, traitvecin=NA ) {
   if (nargs() == 0) {
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)
   }
   qsnps<-snps
   okrow<-rep(FALSE,ncol(qsnps))
+  traitvec<-as.numeric( traitvecin )
   for ( y in 2:ncol(qsnps) ) # or dd for ADNI_SNPS
     {
     temp<-snps[,y]
@@ -18,10 +19,15 @@ quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=
     if ( f1 < freqthresh ) okrow[y]<-FALSE
     if ( f2 < freqthresh ) okrow[y]<-FALSE
     if ( f3 < freqthresh ) okrow[y]<-FALSE
-    if ( replaceWithF ) {
+    if ( replaceWithF & is.na( traitvec ) ) {
       qsnps[t1,y]<-f1
       qsnps[t2,y]<-f2
       qsnps[t3,y]<-f3
+      }
+    if ( replaceWithF & !is.na( traitvec ) ) {
+      qsnps[t1,y]<-mean( traitvec[t1] )
+      qsnps[t2,y]<-mean( traitvec[t2] )
+      qsnps[t3,y]<-mean( traitvec[t3] )
       }
     }
   qsnps<-qsnps[,okrow]
