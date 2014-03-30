@@ -61,11 +61,11 @@ sparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
     ord <- order(sparsev)
     ord <- rev(ord)
     sparsev[ord[(b):length(ord)]] <- 0
-    if (!is.na(mask) & FALSE) {
+    if ( !is.na(mask) ) {
       vecimg <- antsImageClone(mask)
       vecimg[mask > 0] <- sparsev
       temp <- antsImageClone(mask)
-      # SmoothImage(3,vecimg,0.5,temp)
+      SmoothImage(mask@dimension,vecimg,0.5,temp)
       ImageMath(mask@dimension, temp, "ClusterThresholdVariate", vecimg, mask, clustval)
       sparsev <- c(vecimg[mask > 0])
     }
