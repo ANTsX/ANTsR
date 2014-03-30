@@ -11,7 +11,7 @@ subgradientL1Regression <- function( y, x, s=0.01, percentvals=0.1 , nits=100, b
   selectvals<-1:nvals
   deltmag<-rep(0,nits)
   for ( i in 1:nits ) {
-    mysamp<-sample( 1:ncol(x) )[selectvals]
+    mysamp<-sort( sample( 1:ncol(x) , size=nvals ) )
     delt<-( c(x[,mysamp] %*% betas[mysamp]) - y )
     deltmag[i]<-sqrt(sum( delt * delt ) )
     delt<-sign(  delt )
