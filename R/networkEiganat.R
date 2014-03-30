@@ -1,11 +1,14 @@
-networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, verbose=F) {
-  X <- Xin - min(Xin)
+networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F) {
+  X <- Xin
+  if ( doscale ) X <- scale( X ) 
+  if ( domin ) X <- X - min( X )
+  if ( downsample &  ( k*2 < nrow(Xin) ) ) X<-icawhiten( X, k*2 )
   print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(k))))
   }
-  v <- eanatsparsify(v, sparam[2], mask)
+  v <- eanatsparsify(v, sparam[2], mask, clustval=clustval )
   u <- (X %*% v)
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
@@ -19,7 +22,7 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
-    v <- eanatsparsify(v, sparam[2], mask)
+    v <- eanatsparsify(v, sparam[2], mask, clustval=clustval)
     if ( verbose ) {
     if (missing(prior)) 
       print(paste("Data", norm(X - u %*% t(v), "F")))
@@ -39,8 +42,8 @@ eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0) {
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask)) 
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
-  vpos <- eanatsparsifyv(v, sparam, mask)
-  vneg <- eanatsparsifyv(v * (-1), sparam, mask)
+  vpos <- eanatsparsifyv(v, sparam, mask, clustval=clustval)
+  vneg <- eanatsparsifyv(v * (-1), sparam, mask, clustval=clustval)
   if (norm(vneg) > norm(vpos)) 
     return(vneg)
   return(vpos)
@@ -60,14 +63,14 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
     sparsev <- c(v[, i])
     ord <- order(sparsev)
     ord <- rev(ord)
-    sparsev[ord[(b):length(ord)]] <- 0
+    sparsev[ord[(b):length(ord)]] <- 0  # L0 penalty
     if ( !is.na(mask) ) {
       vecimg <- antsImageClone(mask)
       vecimg[mask > 0] <- sparsev
-      temp <- antsImageClone(mask)
-      SmoothImage(mask@dimension,vecimg,0.5,temp)
+      temp<-antsImageClone( mask )
+      SmoothImage(mask@dimension,vecimg,1,temp)
       ImageMath(mask@dimension, temp, "ClusterThresholdVariate", vecimg, mask, clustval)
-      sparsev <- c(vecimg[mask > 0])
+      sparsev <- c(temp[mask > 0.5 ])
     }
     v[, i] <- sparsev
   }
