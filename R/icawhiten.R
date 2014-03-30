@@ -18,7 +18,6 @@ icawhiten<-function (Xin, n.comp , verbose=FALSE )
         X <- t(X)
         if (verbose) 
             message("Whitening")
-    print(dim(X))
         V <- X %*% t(X)/n
         s <- La.svd(V)
         D <- diag(c(1/sqrt(s$d)))

@@ -1,8 +1,12 @@
-networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F) {
+networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F, dowhite=F) {
   X <- Xin
   if ( doscale ) X <- scale( X ) 
   if ( domin ) X <- X - min( X )
-  if ( downsample &  ( k*2 < nrow(Xin) ) ) X<-icawhiten( X, k*2 )
+  if ( dowhite    &  ( k*2 < nrow(Xin) ) ) X<-icawhiten( X, k*2 )
+  if ( downsample &  ( k < nrow(Xin) )   ) X<-lowrankr( X, k )
+  fnorm<-norm(X,"F")
+  if ( verbose ) print(paste('fNormOfX',fnorm))
+  if ( verbose ) print(dim(X))
   print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
@@ -24,17 +28,41 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
     }
     v <- eanatsparsify(v, sparam[2], mask, clustval=clustval)
     if ( verbose ) {
-    if (missing(prior)) 
-      print(paste("Data", norm(X - u %*% t(v), "F")))
-    if (!missing(prior)) 
-      print(paste("Data", norm(X - u %*% t(v), "F"), "Prior", norm(prior - v, "F")))
+      myrecon<-(u %*% t(v))
+      b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
+      if (missing(prior)) 
+        print(paste("Data", ( norm(X - (myrecon+b), "F")/fnorm )   ))
+      if (!missing(prior)) 
+        print(paste("Data", norm(X - (u %*% t(v)), "F")/fnorm, "Prior", norm(prior - v, "F")))
     }
   }
   for (a in 1:nrow(X)) {
     usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparam[1])
     u[a, ] <- usol
   }
-  return(list(u = t(u), v = t(v)))
+  myrecon<-(u %*% t(v))
+  b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
+  return(list(u = t(u), v = t(v), X=X, myrecon=(myrecon+b) ))
+}
+
+
+lowrankr <- function(A,k=2) {    
+  p <- ncol(A)
+  s <- svd(A,nu=k,nv=0)
+  K <- t(s$u)
+  X1 <- K %*% A
+  return( X1 )
+}
+
+
+lowrank <- function(A,k=1) {
+    #Calculates the SVD
+    sing <- svd(A,nu=k,nv=k)
+    u<-as.matrix(sing$u[, 1:k])
+    v<-as.matrix(sing$v[, 1:k])
+    d<-as.matrix(diag(sing$d)[1:k, 1:k])
+    #Create the new approximated matrix
+    return(u%*%d%*%t(v))
 }
 
 eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0) {
