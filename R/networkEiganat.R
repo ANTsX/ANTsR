@@ -19,7 +19,9 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
       tt <- c(u[a, ])
       if (jj == 1) 
         tt <- c(u[a, ] * 1e-08 )
-      usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparam[1])
+      if ( abs(sparam[1]) < 1 )
+          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparam[1])
+      else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
       u[a, ] <- usol
     }
     v <- v + t(t(u) %*% (X - u %*% t(v))) * gradparam
@@ -42,7 +44,15 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
   }
   myrecon<-(u %*% t(v))
   b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
-  return(list(u = t(u), v = t(v), X=X, myrecon=(myrecon+b) ))
+  imglist<-list()
+  if ( ! is.na(mask) ) {
+    for ( j in 1:ncol(v) ) {
+      img<-antsImageClone(mask)
+      img[mask>0.5]<-v[,j]
+      imglist<-lappend(imglist,img)
+    }
+  }
+  return(list(u = t(u), v = t(v), X=X, myrecon=(myrecon+b), imglist=imglist ))
 }
 
 
