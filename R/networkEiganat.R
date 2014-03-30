@@ -5,7 +5,7 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(k))))
   }
-  v <- sparsify(v, sparam[2], mask)
+  v <- eanatsparsify(v, sparam[2], mask)
   u <- (X %*% v)
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
@@ -19,7 +19,7 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
-    v <- sparsify(v, sparam[2], mask)
+    v <- eanatsparsify(v, sparam[2], mask)
     if ( verbose ) {
     if (missing(prior)) 
       print(paste("Data", norm(X - u %*% t(v), "F")))
@@ -34,19 +34,19 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
   return(list(u = t(u), v = t(v)))
 }
 
-sparsify <- function(vin, sparam, mask = NA, clustval = 0) {
+eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0) {
   v <- vin
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask)) 
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
-  vpos <- sparsifyv(v, sparam, mask)
-  vneg <- sparsifyv(v * (-1), sparam, mask)
+  vpos <- eanatsparsifyv(v, sparam, mask)
+  vneg <- eanatsparsifyv(v * (-1), sparam, mask)
   if (norm(vneg) > norm(vpos)) 
     return(vneg)
   return(vpos)
 }
 
-sparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
+eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
   if (abs(sparam) >= 1) 
     return(vin)
   if (nrow(vin) < ncol(vin)) 
