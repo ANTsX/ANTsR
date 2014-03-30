@@ -13,7 +13,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(nvecs))))
   }
-  v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
+#  v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
   u <- (X %*% v)
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
@@ -29,7 +29,9 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
+    print( v )
     v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval)
+    print( v )
     if ( verbose ) {
       myrecon<-(u %*% t(v))
       b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
@@ -96,13 +98,14 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
   if (nrow(vin) < ncol(vin)) 
     v <- t(vin) else v <- vin
   b <- round(abs(as.numeric(sparam)) * nrow(v))
-  if (b < 1) 
-    b <- 1
+  if (b < 2) 
+    b <- 2
   if (b > nrow(v)) 
     b <- nrow(v)
   for (i in 1:ncol(v)) {
     sparsev <- c(v[, i])
-    ord <- order(sparsev)
+    if ( sparam < 0 ) ord <- order(abs(sparsev))
+    else ord <- order(sparsev)
     ord <- rev(ord)
     sparsev[ord[(b):length(ord)]] <- 0  # L0 penalty
     if ( !is.na(mask) ) {
