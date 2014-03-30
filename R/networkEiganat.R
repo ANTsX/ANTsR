@@ -1,6 +1,6 @@
-networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01) {
+networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, verbose=F) {
   X <- Xin - min(Xin)
-  print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V )=", sparam))
+  print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(k))))
@@ -11,7 +11,7 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
       if (jj == 1) 
-        tt <- c(u[a, ] * 1e-09)
+        tt <- c(u[a, ] * 1e-08 )
       usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparam[1])
       u[a, ] <- usol
     }
@@ -20,10 +20,12 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
     v <- sparsify(v, sparam[2], mask)
+    if ( verbose ) {
     if (missing(prior)) 
       print(paste("Data", norm(X - u %*% t(v), "F")))
     if (!missing(prior)) 
       print(paste("Data", norm(X - u %*% t(v), "F"), "Prior", norm(prior - v, "F")))
+    }
   }
   for (a in 1:nrow(X)) {
     usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparam[1])
