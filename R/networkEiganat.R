@@ -1,26 +1,26 @@
-networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F, dowhite=F) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F, dowhite=F) {
   X <- Xin
   if ( doscale ) X <- scale( X ) 
   if ( domin ) X <- X - min( X )
-  if ( dowhite    &  ( k*2 < nrow(Xin) ) ) X<-icawhiten( X, k*2 )
-  if ( downsample &  ( k < nrow(Xin) )   ) X<-lowrankr( X, k )
+  if ( dowhite    &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, nvecs*2 )
+  if ( downsample &  ( nvecs < nrow(Xin) )   ) X<-lowrankr( X, nvecs )
   fnorm<-norm(X,"F")
   if ( verbose ) print(paste('fNormOfX',fnorm))
   if ( verbose ) print(dim(X))
   print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
-    v <- t((replicate(ncol(X), rnorm(k))))
+    v <- t((replicate(ncol(X), rnorm(nvecs))))
   }
-  v <- eanatsparsify(v, sparam[2], mask, clustval=clustval )
+  v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
   u <- (X %*% v)
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
       if (jj == 1) 
         tt <- c(u[a, ] * 1e-08 )
-      if ( abs(sparam[1]) < 1 )
-          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparam[1])
+      if ( abs(sparseness[1]) < 1 )
+          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
       else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
       u[a, ] <- usol
     }
@@ -28,18 +28,20 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
-    v <- eanatsparsify(v, sparam[2], mask, clustval=clustval)
+    v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval)
     if ( verbose ) {
       myrecon<-(u %*% t(v))
       b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
       if (missing(prior)) 
-        print(paste("Data", ( norm(X - (myrecon+b), "F")/fnorm )   ))
+        print(paste(jj,"Data", ( norm(X - (myrecon+b), "F")/fnorm )   ))
       if (!missing(prior)) 
         print(paste("Data", norm(X - (u %*% t(v)), "F")/fnorm, "Prior", norm(prior - v, "F")))
     }
   }
   for (a in 1:nrow(X)) {
-    usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparam[1])
+    if ( abs(sparseness[1]) < 1 )
+        usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparseness[1])
+    else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
     u[a, ] <- usol
   }
   myrecon<-(u %*% t(v))
@@ -52,7 +54,7 @@ networkEiganat <- function(Xin, sparam = c(0.1, 0.1), k = 5, its = 100, gradpara
       imglist<-lappend(imglist,img)
     }
   }
-  return(list(u = t(u), v = t(v), X=X, myrecon=(myrecon+b), imglist=imglist ))
+  return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), imglist=imglist ))
 }
 
 
