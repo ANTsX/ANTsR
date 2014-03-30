@@ -7,7 +7,8 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
   fnorm<-norm(X,"F")
   if ( verbose ) print(paste('fNormOfX',fnorm))
   if ( verbose ) print(dim(X))
-  print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
+  if ( verbose )
+      print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(nvecs))))
