@@ -30,7 +30,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
     }
     myrecon<-(u %*% t(v))
     b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
-    v <- v + t(t(u) %*% (X - myrecon )) * gradparam + b
+    v <- v + t(t(u) %*% (X - myrecon )) * gradparam 
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
