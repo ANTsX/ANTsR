@@ -19,7 +19,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
   }
   v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
   u <- (X %*% v)
-  if ( timeme ) time1<-( Sys.time() )
+  time1<-( Sys.time() )
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
@@ -58,8 +58,8 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
       imglist<-lappend(imglist,img)
     }
   }
-  if ( timeme ) print( Sys.time()  - time1 )
-  return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), eigenanatomyimages=imglist ))
+  mytime<-( Sys.time()  - time1 )
+  return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), eigenanatomyimages=imglist, computationtime=mytime ))
 }
 
 
