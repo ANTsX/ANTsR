@@ -39,6 +39,24 @@ Avants BB
 \examples{
 \dontrun{
 mat<-replicate(100, rnorm(20)) 
-mydecom<-networkEiganat( mat ) 
+mydecom<-networkEiganat( mat, nvecs=5 ) 
+library(randomForest)
+library(BGLR)
+data(mice)
+snps<-quantifySNPs( mice.X )
+numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
+nfolds<-6
+train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
+train<-( train < 4 )
+snpd<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.005 ) , downsample=50, verbose=T, its=20, domin=F )
+projmat<-as.matrix( snpd$v ) 
+snpse<-as.matrix( snps[train, ]  ) %*% projmat 
+traindf<-data.frame( bmi=numericalpheno[train,2] , snpse=snpse)
+snpse<-as.matrix( snps[!train, ]  ) %*% projmat 
+testdf <-data.frame( bmi=numericalpheno[!train,2] , snpse=snpse )
+myrf<-randomForest( bmi ~ . , data=traindf )
+preddf<-predict(myrf, newdata=testdf )
+cor.test(preddf, testdf$bmi )
+plot(preddf, testdf$bmi )
 }
 }
