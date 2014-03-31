@@ -1,4 +1,4 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=F, verbose=F, dowhite=0) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0) {
   X <- Xin
   if ( doscale ) X <- scale( X ) 
   if ( domin ) X <- X - min( X )
