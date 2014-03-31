@@ -55,7 +55,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
       imglist<-lappend(imglist,img)
     }
   }
-  return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), imglist=imglist ))
+  return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), eigenanatomyimages=imglist ))
 }
 
 
