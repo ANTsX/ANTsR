@@ -23,21 +23,19 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
-      if (jj == 1) 
-        tt <- c(u[a, ] * 1e-08 )
       if ( abs(sparseness[1]) < 1 )
           usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
       else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
       u[a, ] <- usol
     }
-    v <- v + t(t(u) %*% (X - u %*% t(v))) * gradparam
+    myrecon<-(u %*% t(v))
+    b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
+    v <- v + t(t(u) %*% (X - myrecon )) * gradparam + b
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
     v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval)
     if ( verbose ) {
-      myrecon<-(u %*% t(v))
-      b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
       if (missing(prior)) 
         print(paste(jj,"Data", ( norm(X - (myrecon+b), "F")/fnorm )   ))
       if (!missing(prior)) 
