@@ -13,7 +13,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
   if (missing(v)) {
     v <- t((replicate(ncol(X), rnorm(nvecs))))
   }
-#  v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
+  v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
   u <- (X %*% v)
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
