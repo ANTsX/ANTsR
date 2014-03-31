@@ -1,20 +1,25 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T ) {
   X <- Xin
-  if ( doscale ) X <- scale( X ) 
-  if ( domin ) X <- X - min( X )
   if ( dowhite  > 0  &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, dowhite )
   if ( downsample > 0 &  ( nvecs < nrow(Xin) )  ) X<-lowrankRowMatrix( X, downsample )
+  if ( doscale ) X <- scale( X ) 
+  if ( domin ) X <- X - min( X )
   fnorm<-norm(X,"F")
   if ( verbose ) print(paste('fNormOfX',fnorm))
   if ( verbose ) print(dim(X))
   if ( verbose )
-      print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell1( V ) + ell1(U)"))
+      print(paste("Implements: ||  X - U V ||  +   || XP -  XV ||^2 + ell0( V ) + ell0(U)"))
   ############################ gradient 1 # U^T ( X - U V^T ) # ( X - U V^T ) V # gradient 2 # X^T ( X * ( P - V ) ) #
   if (missing(v)) {
-    v <- t((replicate(ncol(X), rnorm(nvecs))))
+     v <- t((replicate(ncol(X), rnorm(nvecs))))
+     v <- svd( Xin , nu=0, nv=nvecs)$v
+#    v <- X %*% v
+#    v <- v %*% ( X )
+#    v <-t( lowrankRowMatrix( t( v ) , nvecs ) )
   }
   v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval )
   u <- (X %*% v)
+  if ( timeme ) time1<-( Sys.time() )
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
@@ -55,6 +60,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
       imglist<-lappend(imglist,img)
     }
   }
+  if ( timeme ) print( Sys.time()  - time1 )
   return(list(u = (u), v = (v), X=X, myrecon=(myrecon+b), eigenanatomyimages=imglist ))
 }
 
