@@ -28,7 +28,7 @@ conjGradS <- function(A_in = NA, x_k = NA, b_in = NA, maxits = 1000, sp = -10, c
     iprk <- sum(r_k * r_k)
     alpha_k <- iprk/alpha_denom
     x_k1 <- c(x_k) + c(p_k) * alpha_k  # this adds the scaled residual to the current solution
-    x_k1 <- c(sparsifyv(as.matrix(x_k1), sp))
+    x_k1 <- c(eanatsparsifyv(as.matrix(x_k1), sp))
     temp <- At %*% (A %*% as.matrix(x_k1))
     r_k1 <- b - c(temp)
     approxerr <- norm(r_k1)
