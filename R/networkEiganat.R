@@ -1,9 +1,9 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=T, doscale=T, domin=F, verbose=F, dowhite=F) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=F, verbose=F, dowhite=0) {
   X <- Xin
   if ( doscale ) X <- scale( X ) 
   if ( domin ) X <- X - min( X )
-  if ( dowhite    &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, nvecs*2 )
-  if ( downsample &  ( nvecs < nrow(Xin) )   ) X<-lowrankr( X, nvecs )
+  if ( dowhite  > 0  &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, dowhite )
+  if ( downsample > 0 &  ( nvecs < nrow(Xin) )  ) X<-lowrankRowMatrix( X, downsample )
   fnorm<-norm(X,"F")
   if ( verbose ) print(paste('fNormOfX',fnorm))
   if ( verbose ) print(dim(X))
@@ -59,7 +59,8 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 100, 
 }
 
 
-lowrankr <- function(A,k=2) {    
+lowrankRowMatrix <- function(A,k=2) {
+  if ( k > nrow(A) ) return( A )
   p <- ncol(A)
   s <- svd(A,nu=k,nv=0)
   K <- t(s$u)
