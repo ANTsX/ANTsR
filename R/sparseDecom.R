@@ -36,7 +36,9 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
       its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r",robust, "--mask", mfn, "--initialization", initlistfn)
     print(initlistfn)
   }
+  time1<-( Sys.time() )
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+  time2<-( Sys.time() )
   mydecomp <- read.csv(decomp)
   glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
@@ -56,6 +58,6 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
     fnl <- read.csv(fnl)
   }
-  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu))
+  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu, computationtime=(time2-time1) ))
   
 } 

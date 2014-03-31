@@ -1,4 +1,4 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 20, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T ) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 1, mask = NA, v, prior, pgradparam = 0.01, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T, addb=T ) {
   X <- Xin
   if ( dowhite  > 0  &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, dowhite )
   if ( downsample > 0 &  ( nvecs < nrow(Xin) )  ) X<-lowrankRowMatrix( X, downsample )
@@ -23,13 +23,19 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 20, g
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
-      usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
-#      else usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
+      if ( abs(sparseness[1]) < 1 )
+          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
+      else usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
+#      print(paste(jj,a,mean(usol)))
       u[a, ] <- usol
+    }
+    if ( is.na( norm( u ) ) ) {
+        if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
+        u <- (X %*% v)
     }
     myrecon<-(u %*% t(v))
     b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
-    myrecon<-myrecon+b
+    if ( addb ) myrecon<-myrecon+b
     v <- v + t(t(u) %*% (X - myrecon )) * gradparam 
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
@@ -37,15 +43,15 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 20, g
     v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval)
     if ( verbose ) {
       if (missing(prior)) 
-        print(paste(jj,"Data", ( norm(X - (myrecon+b), "F")/fnorm )   ))
+        print(paste(jj,"Data", ( norm(X - (myrecon), "F")/fnorm )   ))
       if (!missing(prior)) 
-        print(paste("Data", norm(X - (u %*% t(v)), "F")/fnorm, "Prior", norm(prior - v, "F")))
+        print(paste("Data", norm(X - (myrecon), "F")/fnorm, "Prior", norm(prior - v, "F")))
     }
   }
   for (a in 1:nrow(X)) {
-#    if ( abs(sparseness[1]) < 1 )
+    if ( abs(sparseness[1]) < 1 )
         usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparseness[1])
-#    else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
+    else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
     u[a, ] <- usol
   }
   myrecon<-(u %*% t(v))
@@ -101,8 +107,8 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
   if (nrow(vin) < ncol(vin)) 
     v <- t(vin) else v <- vin
   b <- round(abs(as.numeric(sparam)) * nrow(v))
-  if (b < 2) 
-    b <- 2
+  if (b < 3) 
+    b <- 3
   if (b > nrow(v)) 
     b <- nrow(v)
   for (i in 1:ncol(v)) {
