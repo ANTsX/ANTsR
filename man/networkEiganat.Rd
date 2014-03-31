@@ -48,11 +48,13 @@ numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
+projmat<-as.matrix( snpd$v ) 
+snpdE<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),40) , nvecs=40 , sparseness=( -0.001) )
 snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=10, verbose=T, its=20, gradparam=10 )
 snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=0, verbose=T, its=20, gradparam=10 )
 snpd<-snpdSlow
 snpd<-snpdFast
-projmat<-as.matrix( snpd$v ) 
+projmat<-as.matrix( snpd$eig ) 
 snpse<-as.matrix( snps[train, ]  ) %*% projmat 
 traindf<-data.frame( bmi=numericalpheno[train,2] , snpse=snpse)
 snpse<-as.matrix( snps[!train, ]  ) %*% projmat 

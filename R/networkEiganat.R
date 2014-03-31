@@ -23,13 +23,13 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 20, g
   for (jj in 1:its) {
     for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
-      if ( abs(sparseness[1]) < 1 )
-          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
-      else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
+      usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
+#      else usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
       u[a, ] <- usol
     }
     myrecon<-(u %*% t(v))
     b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
+    myrecon<-myrecon+b
     v <- v + t(t(u) %*% (X - myrecon )) * gradparam 
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
@@ -43,9 +43,9 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 20, g
     }
   }
   for (a in 1:nrow(X)) {
-    if ( abs(sparseness[1]) < 1 )
+#    if ( abs(sparseness[1]) < 1 )
         usol <- conjGradS(A = v, x_k = c(u[a, ]), b_in = c(X[a, ]), sp = sparseness[1])
-    else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
+#    else usol<-coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)]
     u[a, ] <- usol
   }
   myrecon<-(u %*% t(v))
