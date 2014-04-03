@@ -37,8 +37,10 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
           usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
       u[a, ] <- usol
     }
-    u<-whiten(u)
-    u <- eanatsparsify( u, sparseness[1] , verbose = F )
+    if ( abs(sparseness[1]) < 1 ) {
+        u<-whiten(u)
+        u <- eanatsparsify( u, sparseness[1] , verbose = F )
+    }
     if ( is.na( norm( u ) ) ) {
         if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
         u <- t(X %*% v)
