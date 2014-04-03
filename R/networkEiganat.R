@@ -1,4 +1,4 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 0.1, mask = NA, v, prior, pgradparam = 0.1, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T, addb=T ) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 0.1, mask = NA, v, prior, pgradparam = 0.1, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T, addb=T , useregression = T ) {
   X <- Xin/norm(Xin,"F")
   if ( dowhite  > 0  &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, dowhite )
   if ( downsample > 0 &  ( nvecs < nrow(Xin) )  ) X<-lowrankRowMatrix( X, downsample )
@@ -18,10 +18,6 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
   u <- (X %*% v)
   time1<-( Sys.time() )
   for (jj in 1:its) {
-    if ( is.na( norm( u ) ) ) {
-        if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
-        u <- t(X %*% v)
-    }
     myrecon<-(u %*% t(v))
     b<-apply(X,FUN=mean,MARGIN=1)-apply(myrecon,FUN=mean,MARGIN=1)
     if ( addb ) myrecon<-myrecon+b
@@ -30,10 +26,24 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
     v <- eanatsparsify(v, sparseness[2], mask, clustval=clustval)
-    uupdate<-t( t(v)  %*% t(X - myrecon ))
-    u <- u + uupdate * gradparam 
-    u <- eanatsparsify( u, sparseness[1] )
-    if ( verbose ) {
+   if ( ! useregression ) {  
+     uupdate<-t( t(v)  %*% t(X - myrecon ))
+     u <- u + uupdate * gradparam 
+   }
+   if ( useregression )
+     for (a in 1:nrow(X)) {
+      tt <- c(u[a, ])
+      if ( abs(sparseness[1]) < 1 )
+          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
+      else usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
+      u[a, ] <- usol
+    }
+    if ( is.na( norm( u ) ) ) {
+        if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
+        u <- t(X %*% v)
+    }
+   u <- eanatsparsify( u, sparseness[1] )
+   if ( verbose ) {
       if (missing(prior)) 
         print(paste(jj,"Data", ( norm(X - (myrecon), "F")/fnorm )   ))
       if (!missing(prior)) 
@@ -99,7 +109,7 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
     b <- nrow(v)
   for (i in 1:ncol(v)) {
     sparsev <- c(v[, i])
-    if ( sparam < 0 ) ord <- order(abs(sparsev))
+    if ( sparam < 0 ) ord <- order((sparsev))
     else ord <- order(sparsev)
     ord <- rev(ord)
     sparsev[ord[(b):length(ord)]] <- 0  # L0 penalty
