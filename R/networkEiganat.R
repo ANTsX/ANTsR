@@ -29,16 +29,16 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
    if ( ! useregression ) {  
      uupdate<-t( t(v)  %*% t(X - myrecon ))
      u <- u + uupdate * gradparam 
-     u <- eanatsparsify( u, sparseness[1] )
    }
    if ( useregression )
      for (a in 1:nrow(X)) {
       tt <- c(u[a, ])
-      if ( abs(sparseness[1]) < 1 )
-          usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1])
-      else usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
+# if ( abs(sparseness[1]) < 1 ) usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a, ]), sp = sparseness[1]) else
+          usol<-as.numeric( coefficients(  lm( c(X[a, ]) ~ v ) )[2:(ncol(v)+1)] )
       u[a, ] <- usol
     }
+    u<-whiten(u)
+    u <- eanatsparsify( u, sparseness[1] , verbose = F )
     if ( is.na( norm( u ) ) ) {
         if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
         u <- t(X %*% v)
@@ -85,22 +85,17 @@ lowrank <- function(A,k=1) {
     return(u%*%d%*%t(v))
 }
 
-eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0) {
+eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = F ) {
   if (abs(sparam) >= 1) return(vin)
   v <- vin
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask)) 
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
-  vpos <- eanatsparsifyv(v, sparam, mask, clustval=clustval)
-  vneg <- eanatsparsifyv(v * (-1), sparam, mask, clustval=clustval)
-  if ( is.na(vneg) ) vneg<-0
-  if ( is.na(vpos) ) vpos<-0
-  if (norm(vneg) > norm(vpos)) 
-    return(vneg)
+  vpos <- eanatsparsifyv(v, sparam, mask, clustval=clustval, verbose=verbose )
   return(vpos)
 }
 
-eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
+eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = F ) {
   if (abs(sparam) >= 1) 
     return(vin)
   if (nrow(vin) < ncol(vin)) 
@@ -112,10 +107,15 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
     b <- nrow(v)
   for (i in 1:ncol(v)) {
     sparsev <- c(v[, i])
-    if ( sparam < 0 ) ord <- order(abs(sparsev)) # FIXME _ unsigned?
-    else ord <- order(sparsev)
+    if ( verbose ) print( paste( " sparam ", sparam ) )
+    if ( sparam <  0  ) ord <- order(abs(sparsev))
+        else {
+          sparsev[ sparsev < 0 ]<-0
+          ord <- order(sparsev)
+        }
     ord <- rev(ord)
     sparsev[ord[(b):length(ord)]] <- 0  # L0 penalty
+    if ( verbose ) print( paste( sparsev ) )
     if ( !is.na(mask) ) {
       vecimg <- antsImageClone(mask)
       vecimg[mask > 0] <- sparsev
