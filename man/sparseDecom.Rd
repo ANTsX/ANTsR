@@ -57,17 +57,18 @@ print(paste("N-errors:",sum(abs( testdf$lclass != predlymp ) )," non-zero ",sum(
 library(randomForest)
 library(BGLR)
 data(mice)
-snps<-mice.X
+snps<-quantifySNPs( mice.X, shiftit =T )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
-snpd<-sparseDecom( as.matrix( snps[train,] ), nvecs=20 , sparseness=( 0.001), z=0.5 )
+lrmat<-lowrankRowMatrix( as.matrix( snps[train,] ) ,  50 )
+snpd<-sparseDecom( lrmat, nvecs=20 , sparseness=( 0.001), z=-1 )
 projmat<-as.matrix( snpd$eig ) 
 snpse<-as.matrix( snps[train, ]  ) %*% projmat 
-traindf<-data.frame( bmi=numericalpheno[train,2] , snpse=snpse)
+traindf<-data.frame( bmi=numericalpheno[train,3] , snpse=snpse)
 snpse<-as.matrix( snps[!train, ]  ) %*% projmat 
-testdf <-data.frame( bmi=numericalpheno[!train,2] , snpse=snpse )
+testdf <-data.frame( bmi=numericalpheno[!train,3] , snpse=snpse )
 myrf<-randomForest( bmi ~ . , data=traindf )
 preddf<-predict(myrf, newdata=testdf )
 cor.test(preddf, testdf$bmi )

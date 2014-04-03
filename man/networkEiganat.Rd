@@ -45,24 +45,44 @@ library(BGLR)
 data(mice)
 snps<-quantifySNPs( mice.X )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
+numericalpheno<-residuals( lm( numericalpheno ~ as.factor(mice.pheno$Litter) ) )
+phind<-3
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
-projmat<-as.matrix( snpd$v ) 
-snpdE<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),40) , nvecs=40 , sparseness=( -0.001) )
-projmat<-as.matrix( snpdE$eig ) 
-snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=40 , sparseness=c( 1, -0.001 ) , downsample=45, verbose=T, its=20, gradparam=10 )
+lowr<-lowrankRowMatrix(as.matrix( snps[train,] ),900)
+snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
+snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),100) , nvecs=20 , sparseness=( -0.001) )
+projmat<-as.matrix( snpdS$eig ) 
+projmat<-as.matrix( snpdF$eig ) 
+snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=45, verbose=T, its=20, gradparam=10 )
 snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=0, verbose=T, its=20, gradparam=10 )
 snpd<-snpdSlow
 snpd<-snpdFast
 projmat<-as.matrix( snpd$v ) 
+snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),10) , nvecs=20 , sparseness=( -0.001) )
+projmat<-as.matrix( snpdS$eig ) 
 snpse<-as.matrix( snps[train, ]  ) %*% projmat 
-traindf<-data.frame( bmi=numericalpheno[train,2] , snpse=snpse)
+traindf<-data.frame( bmi=numericalpheno[train,phind] , snpse=snpse)
 snpse<-as.matrix( snps[!train, ]  ) %*% projmat 
-testdf <-data.frame( bmi=numericalpheno[!train,2] , snpse=snpse )
-myrf<-randomForest( bmi ~ . , data=traindf )
+testdf <-data.frame( bmi=numericalpheno[!train,phind] , snpse=snpse )
+myrf<-glm( bmi ~ . , data=traindf )
 preddf<-predict(myrf, newdata=testdf )
 cor.test(preddf, testdf$bmi )
-plot(preddf, testdf$bmi )
+library(visreg)
+mydf<-data.frame( PredictedBMIfromSNPs=preddf, RealBMI=testdf$bmi )
+mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf) 
+visreg(mymdl)
+###########
+# vs glmnet #
+###########
+library(glmnet)
+kk<-glmnet(y=numericalpheno[train,phind],x=snps[train,] )
+ff<-predict(kk,newx=snps[!train,])
+cor.test(ff[,25],numericalpheno[!train,phind])
+mydf<-data.frame( PredictedBMIfromSNPs=ff[,25], RealBMI=testdf$bmi )
+mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf) 
+visreg(mymdl)
+###########
 }
 }
