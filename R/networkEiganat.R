@@ -1,4 +1,4 @@
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 0.1, mask = NA, v, prior, pgradparam = 0.1, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T, addb=T , useregression = T ) {
+networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 1, mask = NA, v, prior, pgradparam = 0.1, clustval=0, downsample=0, doscale=T, domin=T, verbose=F, dowhite=0, timeme=T, addb=T , useregression = T ) {
   X <- Xin/norm(Xin,"F")
   if ( dowhite  > 0  &  ( nvecs*2 < nrow(Xin) ) ) X<-icawhiten( X, dowhite )
   if ( downsample > 0 &  ( nvecs < nrow(Xin) )  ) X<-lowrankRowMatrix( X, downsample )
@@ -29,6 +29,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
    if ( ! useregression ) {  
      uupdate<-t( t(v)  %*% t(X - myrecon ))
      u <- u + uupdate * gradparam 
+     u <- eanatsparsify( u, sparseness[1] )
    }
    if ( useregression )
      for (a in 1:nrow(X)) {
@@ -42,7 +43,6 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
         if ( verbose ) print(paste("Warning: nan u-norm, resetting u. Advisable to decrease sparseness"))
         u <- t(X %*% v)
     }
-   u <- eanatsparsify( u, sparseness[1] )
    if ( verbose ) {
       if (missing(prior)) 
         print(paste(jj,"Data", ( norm(X - (myrecon), "F")/fnorm )   ))
@@ -86,12 +86,15 @@ lowrank <- function(A,k=1) {
 }
 
 eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0) {
+  if (abs(sparam) >= 1) return(vin)
   v <- vin
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask)) 
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
   vpos <- eanatsparsifyv(v, sparam, mask, clustval=clustval)
   vneg <- eanatsparsifyv(v * (-1), sparam, mask, clustval=clustval)
+  if ( is.na(vneg) ) vneg<-0
+  if ( is.na(vpos) ) vpos<-0
   if (norm(vneg) > norm(vpos)) 
     return(vneg)
   return(vpos)
@@ -109,7 +112,7 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0) {
     b <- nrow(v)
   for (i in 1:ncol(v)) {
     sparsev <- c(v[, i])
-    if ( sparam < 0 ) ord <- order((sparsev))
+    if ( sparam < 0 ) ord <- order(abs(sparsev)) # FIXME _ unsigned?
     else ord <- order(sparsev)
     ord <- rev(ord)
     sparsev[ord[(b):length(ord)]] <- 0  # L0 penalty
