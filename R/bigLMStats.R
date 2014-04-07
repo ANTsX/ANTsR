@@ -1,4 +1,4 @@
-bigLMStats <- function(mylm) {
+bigLMStats <- function(mylm, lambda = 0.0 ) {
   beta <- mylm$coefficients[-1, ]
   myresponse <- model.response(model.frame(mylm))
   X <- model.matrix(mylm)
@@ -14,7 +14,7 @@ bigLMStats <- function(mylm) {
     fstat <- msm / mse    
   }
   pval.model <- pf(fstat, dfr, dfe, lower.tail=F)
-  XtXinv <- solve(t(X) %*% X)
+  XtXinv <- solve( t(X) %*% X + diag( ncol(X) ) * lambda )
   if(dim(X)[2] > 2){
     mycoefs <- diag(XtXinv[2:dim(X)[2], 2:dim(X)[2]])
   } else {

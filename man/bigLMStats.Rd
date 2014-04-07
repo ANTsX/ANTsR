@@ -8,7 +8,7 @@ Efficiently compute basic statistical inference from regressions with multiple o
 }
 
 \usage{
-  bigLMStats(mylm) 
+  bigLMStats(mylm, lambda ) 
 }
 
 \arguments{
