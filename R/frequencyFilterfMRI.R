@@ -1,4 +1,4 @@
-frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 ) {
+frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 , opt="trig" ) {
   pixtype <- "float"
   if (nargs() == 0) {
     print(myusage)
@@ -24,6 +24,12 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 ) {
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
   voxHi <- round((1/freqHi))  # keep anything above this
   myTimeSeries <- ts(boldmat, frequency = 1/tr)
+  if ( opt != "trig") {
+    bf <- butter(2, c( freqLo, freqHi ), type="pass")
+    filteredTimeSeries <- matrix( signal::filter(bf, myTimeSeries) , nrow=nrow(myTimeSeries) )
+    return( filteredTimeSeries )
+  }
+  if ( opt == "trig" ) {
   if (nrow(myTimeSeries)%%2 > 0) {
     firsttime <- myTimeSeries[1, ]
     myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
@@ -41,4 +47,5 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 ) {
     filteredTimeSeries[, x] <- sample(filteredTimeSeries, nrow(filteredTimeSeries))
   }
   return(filteredTimeSeries)
+  }
 }
