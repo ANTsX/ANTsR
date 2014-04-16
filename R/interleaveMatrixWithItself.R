@@ -10,6 +10,7 @@ interleaveMatrixWithItself <- function(x,n=1) {
   for ( i in 1:ncol(x) )
     {
     xi[,j:(j+n-1)]<-x[,i]
+    j<-j+n
     }
   return(xi)
 } 
