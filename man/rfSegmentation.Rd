@@ -34,12 +34,10 @@ Tustison NJ, Avants BB
 library(randomForest)
 img<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask( img )
-ImageMath(img@dimension,mask,"ME",mask,35)
 segs<-Atropos( d = img@dimension, a = img, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)
-imgg<-antsImageClone(img)
-ImageMath( img@dimension, imgg, "Laplacian", img )
-fimgs<-list(img,imgg)
-rfsegs<-rfSegmentation( segs$segmentation,  fimgs ) 
+fimgs<-lappend( img, segs$probabilityimages )
+rfsegs<-rfSegmentation( segs$segmentation, fimgs , verbose=TRUE ) 
+plotANTsImage( rfsegs$segmentation )
 # now use in atropos w/priors 
 # segs2<-Atropos( d = img@dimension, a = fimgs, m = "[0.2,1x1]",c = "[5,0]",  i = rfsegs$probabilityimages, x = mask) 
 }

@@ -6,12 +6,14 @@ rfSegmentation <- function( labelimg, featureimages, ntrees=100, verbose=FALSE )
   mask<-antsImageClone( labelimg )
   mask<-getMask( mask )
   labels<-as.factor( labelimg[ mask == 1 ] )
-  fmat<-imageListToMatrix( featureimages , mask )
+  fmat<-t( imageListToMatrix( featureimages , mask ) )
   mydf<-data.frame( labels = labels , fmat )
   myrf<-randomForest( labels ~ . , data=mydf , ntree = ntrees , type = "classification", importance = TRUE, na.action = na.omit , do.trace=verbose )
   if ( verbose ) print( myrf )
-  # FIXME make probabilityimages
-  probabilityimages<-0
-  myout<-list( segs=predict(myrf), probabilityimages = probabilityimages )
+  probabilityimages<-predict(myrf, type = "prob" )
+  probabilityimages<-matrixToImages( t( probabilityimages ), mask )
+  segs<-antsImageClone( mask )
+  segs[ mask == 1 ]<-predict( myrf )
+  myout<-list( segmentation=segs, probabilityimages = probabilityimages )
   return( myout )
 } 
