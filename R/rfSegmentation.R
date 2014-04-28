@@ -14,6 +14,6 @@ rfSegmentation <- function( labelimg, featureimages, ntrees=100, verbose=FALSE )
   probabilityimages<-matrixToImages( t( probabilityimages ), mask )
   segs<-antsImageClone( mask )
   segs[ mask == 1 ]<-predict( myrf )
-  myout<-list( segmentation=segs, probabilityimages = probabilityimages )
+  myout<-list( segmentation=segs, probabilityimages = probabilityimages,  rfModel=myrf )
   return( myout )
 } 
