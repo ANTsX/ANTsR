@@ -3,7 +3,8 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
     print("Usage:  x_subjectDataToGroupDataFrameed<-subjectDataToGroupDataFrame( x, 1 ) ")
     return(1)
   }
-  data1<-read.csv( csvlist[1] )
+  inds<-which( ! is.na( csvlist ) )
+  data1<-read.csv( csvlist[inds[1]] )
   if ( ! is.numeric(usecol) ) mycol<-which( colnames(data1) == usecol ) else mycol<-usecol
   if ( is.na(mycol) ) { print(paste("poorly chosen column name",mycol)); return; }
   if ( is.na( mycolname ) ) mycolname<-colnames(data1)[mycol]
@@ -11,7 +12,7 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
   if ( ! is.na( datarownames ) ) rownames(data1) <- datarownames
   mycolnames<-paste(mycolname,rownames(data1),sep='')
   mat<-matrix( rep(NA,ncl*length(csvlist) ) , nrow=length(csvlist) )
-  for ( i in 1:length(csvlist) )
+  for ( i in inds )
     {
     data1<-read.csv( csvlist[i] )
     mat[i,]<-data1[,mycol]
