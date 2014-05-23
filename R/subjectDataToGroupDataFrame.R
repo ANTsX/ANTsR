@@ -9,7 +9,8 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
   if ( is.na(mycol) ) { print(paste("poorly chosen column name",mycol)); return; }
   if ( is.na( mycolname ) ) mycolname<-colnames(data1)[mycol]
   ncl<-nrow(data1)
-  if ( ! is.na( datarownames ) ) rownames(data1) <- datarownames
+  if ( length( datarownames ) > 1 )
+    if ( length( datarownames ) == length( rownames(data1) ) ) rownames(data1) <- datarownames
   mycolnames<-paste(mycolname,rownames(data1),sep='')
   mat<-matrix( rep(NA,ncl*length(csvlist) ) , nrow=length(csvlist) )
   for ( i in inds )
@@ -19,6 +20,6 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
     }
   mydf<-data.frame( mat )
   colnames( mydf )<-mycolnames
-  rownames( mydf )<-csvlist
+  if ( length(unique(csvlist)) == nrow(mydf) )rownames( mydf )<-csvlist
   return( mydf )
 } 
