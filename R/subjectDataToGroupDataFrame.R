@@ -15,11 +15,12 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
   mat<-matrix( rep(NA,ncl*length(csvlist) ) , nrow=length(csvlist) )
   for ( i in inds )
     {
-    data1<-read.csv( csvlist[i] )
+    data2<-read.csv( csvlist[i] )
+    if ( nrow( data2 ) != nrow( data1 ) ) print( paste("Warning---",csvlist[i],"has a different # of rows") )
     mat[i,]<-data1[,mycol]
     }
   mydf<-data.frame( mat )
   colnames( mydf )<-mycolnames
-  if ( length(unique(csvlist)) == nrow(mydf) )rownames( mydf )<-csvlist
+  if ( length(unique(csvlist)) == nrow(mydf) ) rownames( mydf )<-csvlist
   return( mydf )
 } 
