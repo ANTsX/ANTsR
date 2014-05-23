@@ -16,8 +16,10 @@ subjectDataToGroupDataFrame <- function( csvlist, usecol, mycolname=NA, datarown
   for ( i in inds )
     {
     data2<-read.csv( csvlist[i] )
-    if ( nrow( data2 ) != nrow( data1 ) ) print( paste("Warning---",csvlist[i],"has a different # of rows") )
-    mat[i,]<-data2[,mycol]
+    addto<-TRUE
+    if ( nrow( data2 ) != nrow( data1 ) ) print( paste("Warning---",csvlist[i],"has a different # of rows") ) addto<-FALSE
+    if ( ncol( data2 ) != ncol( data1 ) ) print( paste("Warning---",csvlist[i],"has a different # of cols") ) addto<-FALSE
+    if ( addto == TRUE ) mat[i,]<-data2[,mycol]
     }
   mydf<-data.frame( mat )
   colnames( mydf )<-mycolnames
