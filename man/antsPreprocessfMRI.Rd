@@ -11,11 +11,16 @@ band-pass filtering, and spatial smoothing.
 }
 
 \usage{
-antsPreprocessfMRI <- function( boldImage, maskImage = NA, maskingThreshold = 100,
-  initialNuisanceVariables = NA, doCompCor = TRUE, doMotionCorrection = TRUE,
+antsPreprocessfMRI <- function( boldImage,
+  maskImage = NA, maskingThreshold = 100,
+  initialNuisanceVariables = NA,
+  doCompCor = TRUE,
+  doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
-  spatialSmoothingParameter = 0.0, spatialSmoothingNumberOfIterations = 5,
-  frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1 )
+  spatialSmoothingParameter = 0.0,
+  spatialSmoothingNumberOfIterations = 5,
+  frequencyLowThreshold = 0.01,
+  frequencyHighThreshold = 0.1 )
 }
 
 \arguments{
@@ -35,7 +40,7 @@ antsPreprocessfMRI <- function( boldImage, maskImage = NA, maskingThreshold = 10
 }
 
 \value{
-Output is the "clean" fMRI bold image.
+Output is the "clean" fMRI bold image and mask.
 }
 
 \author{
@@ -45,6 +50,8 @@ Tustison NJ
 \examples{
 \dontrun{
 boldImage <- antsImageRead( "fmri.nii.gz", dim = 4, pixeltype = "float" )
-cleanBoldImage <- antsPreprocessfMRI( boldImage )
+cleanfMRI <- antsPreprocessfMRI( boldImage )
+cleanBoldImage <- cleanfMRI$cleanBoldImage
+maskImage <- cleanfMRI$maskImage
 }
 }
