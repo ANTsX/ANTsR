@@ -1,5 +1,3 @@
-library( ANTsR )
-
 antsPreprocessfMRI <- function( boldImage,
   maskImage = NA, maskingThreshold = 100,
   initialNuisanceVariables = NA, doCompCor = TRUE,
