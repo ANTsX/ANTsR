@@ -1,14 +1,23 @@
-matrix2timeseries <- function(img, mask, mat) {
-  if ( length(dim(img)) != 4 )
-      {
-      print("This function is for 4D images")
-      return(img)
-      }
-  logmask <- (mask == 1)
-  newimga<-as.array( img )
-  newimga<-newimga*0
-  for ( i in 1:dim(img)[4] ) newimga[,,,i][logmask]<-boldmat[i,]
-  newimg<-as.antsImage(newimga)
-  antsCopyImageInfo( img, newimg )
-  return( newimg )
-} 
+matrix2timeseries <- function( referenceImage, maskImage, timeSeriesMatrix )
+{
+  if( length( dim( referenceImage ) ) != 4 )
+    {
+    cat( "This function is for 4D images.  Returning reference image.\n" )
+    return( referenceImage )
+    }
+  indexMask <- ( maskImage == 1 )
+  newImageArray <- as.array( referenceImage )
+
+  # set everything to zero so that only non-zero mask elements are non-zero
+  newImageArray <- newImageArray * 0;
+
+  for( i in 1:dim( referenceImage )[4] )
+    {
+    newImageArray[, , , i][indexMask] <- timeSeriesMatrix[i,]
+    }
+
+  newImage <- as.antsImage( newImageArray )
+  antsCopyImageInfo( referenceImage, newImage )
+
+  return( newImage )
+}
