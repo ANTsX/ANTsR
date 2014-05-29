@@ -1,6 +1,6 @@
 antsPreprocessfMRI <- function( boldImage,
   maskImage = NA, maskingThreshold = 100,
-  initialNuisanceVariables = NA, doCompCor = TRUE,
+  initialNuisanceVariables = NA, doCompCor = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   spatialSmoothingParameter = 0.0, spatialSmoothingNumberOfIterations = 5,
   frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1 )
@@ -36,9 +36,9 @@ if( is.na( maskImage ) )
   }
 averageImage[maskImage == 0] <- 0
 
-if( doCompCor )
+if( doCompCor > 0 )
   {
-  compcorNuisanceVariables <- compcor( boldImage, maskImage, ncompcor = 6, variance_extreme = 0.975 )
+  compcorNuisanceVariables <- compcor( boldImage, maskImage, ncompcor = doCompCor, variance_extreme = 0.975 )
   if( dim( nuisanceVariables )[1] > 0 )
     {
     nuisanceVariables <- cbind( nuisanceVariables, compcorNuisanceVariables )

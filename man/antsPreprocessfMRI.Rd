@@ -14,7 +14,7 @@ band-pass filtering, and spatial smoothing.
 antsPreprocessfMRI <- function( boldImage,
   maskImage = NA, maskingThreshold = 100,
   initialNuisanceVariables = NA,
-  doCompCor = TRUE,
+  doCompCor = 6,
   doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
   spatialSmoothingParameter = 0.0,
@@ -29,6 +29,7 @@ antsPreprocessfMRI <- function( boldImage,
 \item{maskingThreshold}{If mask image is not specified, a mask image is created using
                         the specified threshold.}
 \item{initialNuisanceVariables}{Optional initial nuisance variables.}
+\item{doCompCor}{Numer of compcor nuisance components e.g. 6.}
 \item{useMotionCorrectedImage}{Boolean indicating whether or not the motion corrected
                                image should be used in the rest of the pipeline.  This is
                                off by default to avoid additional interpolation.}
