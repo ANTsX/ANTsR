@@ -87,7 +87,7 @@ if ( frequencyLowThreshold != frequencyHighThreshold )
   {
   boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
     freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
-  } else
+  } else {
   boldResidualsFiltered <- boldResiduals
   }
 
