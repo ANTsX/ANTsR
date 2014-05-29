@@ -55,6 +55,11 @@ boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
 boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
                            freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
 
+DVARS<-rep(0,nrow(boldResidualsFiltered))
+for ( i in 2:nrow(boldResidualsFiltered) ) {
+    DVARS[i]<-sqrt( mean( ( boldResidualsFiltered[i,] - boldResidualsFiltered[i-1,] )^2 ) )
+}
+
 cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldResidualsFiltered )
 
 # anisotropically smooth the images, if desired
@@ -65,5 +70,5 @@ if( spatialSmoothingParameter > 0.0 & spatialSmoothingNumberOfIterations > 0 )
     spatialSmoothingParameter, spatialSmoothingNumberOfIterations )
   }
 
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS=DVARS ) )
 }
