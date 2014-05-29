@@ -12,9 +12,10 @@ band-pass filtering, and spatial smoothing.
 
 \usage{
 antsPreprocessfMRI <- function( boldImage,
-  maskImage = NA, maskingThreshold = 0.75,
+  maskImage = NA,
+  maskingThreshold = 0.75,
   initialNuisanceVariables = NA,
-  doCompCor = 6,
+  numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
   spatialSmoothingParameter = 0.0,
@@ -27,10 +28,12 @@ antsPreprocessfMRI <- function( boldImage,
 \item{boldImage}{4-D ANTs image fMRI data.}
 \item{maskImage}{3-D ANTs image defining the region of interest.}
 \item{maskingThreshold}{If mask image is not specified, a mask image is created using
-                        the specified threshold which is in terms of the mean of the 
+                        the specified threshold which is in terms of the mean of the
 			average image ie 0.8 means threshold at 0.8 of the mean.}
 \item{initialNuisanceVariables}{Optional initial nuisance variables.}
-\item{doCompCor}{Numer of compcor nuisance components e.g. 6.}
+\item{numberOfCompCorComponents}{Numer of CompCor nuisance components (default = 6).}
+\item{doMotionCorrection}{Booelan indicating whether motion correction should be performed
+                          and used in nuisance regression.}
 \item{useMotionCorrectedImage}{Boolean indicating whether or not the motion corrected
                                image should be used in the rest of the pipeline.  This is
                                off by default to avoid additional interpolation.}
@@ -42,7 +45,12 @@ antsPreprocessfMRI <- function( boldImage,
 }
 
 \value{
-Output is the "clean" fMRI bold image and mask.
+Output is the "clean" fMRI bold image and mask.  Quality assurance output includes
+the framewise displacement (FD) and DVARS.  "DVARS is the root mean squared (RMS) change in
+BOLD signal from volume to volume (D referring to temporal derivative of time courses
+and VARS referring to RMS variance over voxels.)" --- Power et. al 2012, Spurious but
+systematic correlations in functional connectivity MRI networks arise from subject motion.
+Neuroimage 59, 2142-2154.
 }
 
 \author{
@@ -55,5 +63,7 @@ boldImage <- antsImageRead( "fmri.nii.gz", dim = 4, pixeltype = "float" )
 cleanfMRI <- antsPreprocessfMRI( boldImage )
 cleanBoldImage <- cleanfMRI$cleanBoldImage
 maskImage <- cleanfMRI$maskImage
+framewiseDisplacement <- cleanfMRI$FD
+dtRMS <- cleanfMRI$DVARS
 }
 }
