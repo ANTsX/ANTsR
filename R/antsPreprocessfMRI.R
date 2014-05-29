@@ -7,7 +7,6 @@ antsPreprocessfMRI <- function( boldImage,
 {
 
 # compute nuisance variables
-
 if( ! is.na( initialNuisanceVariables ) )
   {
   nuisanceVariables <- matrix( NA, nrow = 0, ncol = 0 )
@@ -15,12 +14,23 @@ if( ! is.na( initialNuisanceVariables ) )
   nuisanceVariables <- initialNuisanceVariables
   }
 
+ntp<-dim( boldImage )[4]
+templateFD<-rep(0, ntp )
 if( doMotionCorrection )
   {
   motionCorrectionResults <- motion_correction( boldImage, moreaccurate = TRUE )
   motionCorrectionParameters <- motionCorrectionResults$moco_params
   nuisanceVariables <- as.matrix( motionCorrectionParameters )[,2:ncol( motionCorrectionParameters )]
-
+  for ( i in 2:nrow(motionCorrectionParameters) ) {
+    mparams1<-c( motionCorrectionParameters[i,3:14] )
+    tmat1<-matrix( as.numeric(mparams1[1:9]), ncol = 3, nrow = 3)
+    mparams2<-c( motionCorrectionParameters[i-1,3:14] )
+    tmat2<-matrix( as.numeric(mparams2[1:9]), ncol = 3, nrow = 3)
+    pt<-t( matrix(  rep(10,3), nrow=1) )
+    newpt1<-data.matrix(tmat1) %*%  data.matrix( pt )+as.numeric(mparams1[10:12])
+    newpt2<-data.matrix(tmat2) %*%  data.matrix( pt )+as.numeric(mparams1[10:12])
+    templateFD[i]<-sum(abs(newpt2-newpt1))
+  }
   if( useMotionCorrectedImage )
     {
     boldImage <- motionCorrectionResults$moco_img
@@ -71,5 +81,5 @@ if( spatialSmoothingParameter > 0.0 & spatialSmoothingNumberOfIterations > 0 )
     spatialSmoothingParameter, spatialSmoothingNumberOfIterations )
   }
 
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS=DVARS ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS=DVARS, templateFD=templateFD ) )
 }
