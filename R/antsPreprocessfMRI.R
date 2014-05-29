@@ -7,7 +7,7 @@ antsPreprocessfMRI <- function( boldImage,
 {
 
 # compute nuisance variables
-if( ! is.na( initialNuisanceVariables ) )
+if( is.na( initialNuisanceVariables ) )
   {
   nuisanceVariables <- matrix( NA, nrow = 0, ncol = 0 )
   } else {
