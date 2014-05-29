@@ -1,4 +1,4 @@
-compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE) {
+compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE, randomSamples=1 ) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)

@@ -10,7 +10,7 @@ Compcors the input matrix using SVD and returns the result.
 }
 
 \usage{
-compcorr_nuisance<-compcor( fmri, mask,  ncompcor=4, variance_extreme=0.975 )
+compcorr_nuisance<-compcor( fmri, mask,  ncompcor=4, variance_extreme=0.975, randomSamples=1 )
 }
 
 \arguments{
