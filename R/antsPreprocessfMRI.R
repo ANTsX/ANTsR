@@ -83,9 +83,13 @@ if( numberOfCompCorComponents > 0 )
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
 boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
-if ( freqLo != freqHi )
+if ( frequencyLowThreshold != frequencyHighThreshold )
+  {
   boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
-                           freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" ) else boldResidualsFiltered<-boldResiduals
+    freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
+  } else
+  boldResidualsFiltered <- boldResiduals
+  }
 
 # For quality assurance measures, we calculate the temporal derivative
 # of the RMS variance over voxels (DVARS as in
