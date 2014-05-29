@@ -3,7 +3,7 @@ antsPreprocessfMRI <- function( boldImage,
   initialNuisanceVariables = NA, doCompCor = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   spatialSmoothingParameter = 0.0, spatialSmoothingNumberOfIterations = 5,
-  frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1 )
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA )
 {
 
 # compute nuisance variables
@@ -62,7 +62,8 @@ if( doCompCor > 0 )
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
 boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
-if ( freqLo != freqHi )
+if ( ! is.na( frequencyHighThreshold ) & !is.na( frequencyHighThreshold ) )
+if ( frequencyLowThreshold != frequencyHighThreshold )
   boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
                            freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" ) else boldResidualsFiltered<-boldResiduals
 
