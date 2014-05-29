@@ -60,7 +60,7 @@ antsMotionCorr( list( d = 3, a = boldImage, o = averageImage ) )
 
 if( is.na( maskImage ) )
   {
-  maskImage <- getMask( averageImage, mean( averageImage ) * maskingThreshold , Inf, TRUE )
+  maskImage <- getMask( averageImage, mean( averageImage ) * maskingMeanRatioThreshold , Inf, TRUE )
   }
 averageImage[maskImage == 0] <- 0
 
