@@ -62,8 +62,9 @@ if( doCompCor > 0 )
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
 boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
-boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
-                           freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
+if ( freqLo != freqHi )
+  boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
+                           freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" ) else boldResidualsFiltered<-boldResiduals
 
 DVARS<-rep(0,nrow(boldResidualsFiltered))
 for ( i in 2:nrow(boldResidualsFiltered) ) {
