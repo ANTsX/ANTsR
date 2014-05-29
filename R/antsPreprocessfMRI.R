@@ -25,7 +25,7 @@ if( doMotionCorrection )
   {
   motionCorrectionResults <- motion_correction( boldImage, moreaccurate = TRUE )
   motionCorrectionParameters <- motionCorrectionResults$moco_params
-  nuisanceVariables <- as.matrix( motionCorrectionParameters )[, 2:numberOfTimePoints]
+  nuisanceVariables <- as.matrix( motionCorrectionParameters )[, 2:ncol( motionCorrectionParameters )]
   for( i in 2:numberOfTimePoints )
     {
     motionCorrectionParametersAtTime1 <- c( motionCorrectionParameters[i, 3:14] )
