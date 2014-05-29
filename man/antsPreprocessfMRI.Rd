@@ -12,7 +12,7 @@ band-pass filtering, and spatial smoothing.
 
 \usage{
 antsPreprocessfMRI <- function( boldImage,
-  maskImage = NA, maskingThreshold = 100,
+  maskImage = NA, maskingThreshold = 0.75,
   initialNuisanceVariables = NA,
   doCompCor = 6,
   doMotionCorrection = TRUE,
@@ -27,7 +27,8 @@ antsPreprocessfMRI <- function( boldImage,
 \item{boldImage}{4-D ANTs image fMRI data.}
 \item{maskImage}{3-D ANTs image defining the region of interest.}
 \item{maskingThreshold}{If mask image is not specified, a mask image is created using
-                        the specified threshold.}
+                        the specified threshold which is in terms of the mean of the 
+			average image ie 0.8 means threshold at 0.8 of the mean.}
 \item{initialNuisanceVariables}{Optional initial nuisance variables.}
 \item{doCompCor}{Numer of compcor nuisance components e.g. 6.}
 \item{useMotionCorrectedImage}{Boolean indicating whether or not the motion corrected

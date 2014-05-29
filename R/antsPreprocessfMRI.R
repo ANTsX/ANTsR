@@ -1,5 +1,5 @@
 antsPreprocessfMRI <- function( boldImage,
-  maskImage = NA, maskingThreshold = 100,
+  maskImage = NA, maskingThreshold = 0.75,
   initialNuisanceVariables = NA, doCompCor = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   spatialSmoothingParameter = 0.0, spatialSmoothingNumberOfIterations = 5,
@@ -32,7 +32,7 @@ antsMotionCorr( list( d = 3, a = boldImage, o = averageImage ) )
 
 if( is.na( maskImage ) )
   {
-  maskImage <- getMask( averageImage, maskingThreshold, Inf, FALSE )
+  maskImage <- getMask( averageImage, mean( averageImage ) * maskingThreshold , Inf, FALSE )
   }
 averageImage[maskImage == 0] <- 0
 
