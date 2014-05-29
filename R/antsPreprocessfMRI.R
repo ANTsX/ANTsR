@@ -59,6 +59,7 @@ DVARS<-rep(0,nrow(boldResidualsFiltered))
 for ( i in 2:nrow(boldResidualsFiltered) ) {
     DVARS[i]<-sqrt( mean( ( boldResidualsFiltered[i,] - boldResidualsFiltered[i-1,] )^2 ) )
 }
+DVARS[1]<-mean(DVARS)
 
 cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldResidualsFiltered )
 
