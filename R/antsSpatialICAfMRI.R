@@ -24,7 +24,7 @@ for( i in 1:numberOfBoldImages )
   {
   cat( "Processing bold image ", i, " (out of ", numberOfBoldImages, ").\n", sep = "" )
 
-  fmri <- antsPreprocessfMRI( boldImage,  maskImage = maskImage,
+  fmri <- antsPreprocessfMRI( boldImage[[i]],  maskImage = maskImage,
                               useMotionCorrectedImage = TRUE,
                               frequencyLowThreshold = frequencyLowThreshold,
                               frequencyHighThreshold = frequencyHighThreshold )
