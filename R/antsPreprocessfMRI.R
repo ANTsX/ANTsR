@@ -83,13 +83,12 @@ if( numberOfCompCorComponents > 0 )
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
 boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
-if ( ! is.na( frequencyHighThreshold ) & !is.na( frequencyHighThreshold ) )
-if ( frequencyLowThreshold != frequencyHighThreshold )
+boldResidualsFiltered <- boldResiduals
+if( ! is.na( frequencyHighThreshold ) & !is.na( frequencyHighThreshold ) &
+  ( frequencyLowThreshold != frequencyHighThreshold ) )
   {
   boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
     freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
-  } else {
-  boldResidualsFiltered <- boldResiduals
   }
 
 # For quality assurance measures, we calculate the temporal derivative
@@ -97,9 +96,10 @@ if ( frequencyLowThreshold != frequencyHighThreshold )
 # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
 
 DVARS <- rep( 0, nrow( boldResidualsFiltered ) )
-for ( i in 2:nrow( boldResidualsFiltered ) ) {
-    DVARS[i] <- sqrt( mean( ( boldResidualsFiltered[i,] - boldResidualsFiltered[i-1,] )^2 ) )
-}
+for( i in 2:nrow( boldResidualsFiltered ) )
+  {
+  DVARS[i] <- sqrt( mean( ( boldResidualsFiltered[i,] - boldResidualsFiltered[i-1,] )^2 ) )
+  }
 DVARS[1] <- mean( DVARS )
 
 # Convert the cleaned matrix back to a 4-D image
