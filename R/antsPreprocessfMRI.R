@@ -111,20 +111,20 @@ cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldResidualsFiltered
 
 if( spatialSmoothingType == "gaussian" )
   {
-  if( length( spatialSmoothingParameter ) == 1 )
+  if( length( spatialSmoothingParameters ) == 1 )
     {
-    sigmaVector <- paste0( spatialSmoothingParameter[1], 'x',
-      spatialSmoothingParameter[1], 'x', spatialSmoothingParameter[1], 'x0' );
+    sigmaVector <- paste0( spatialSmoothingParameters[1], 'x',
+      spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' );
     ImageMath( 4, cleanBoldImage, "G", cleanBoldImage, sigmaVector )
     } else {
     cat( "Error:  expecting a single scalar parameter.  See help.\n" )
     return
     }
   } else if( spatialSmoothingType == "perona-malik" ) {
-  if( length( spatialSmoothingParameter ) == 1 )
+  if( length( spatialSmoothingParameters ) == 1 )
     {
     ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
-      spatialSmoothingParameter[1], spatialSmoothingParameter[2] )
+      spatialSmoothingParameters[1], spatialSmoothingParameters[2] )
     } else {
     cat( "Error:  expecting a two element vector.  See help.\n" )
     return
