@@ -18,8 +18,8 @@ antsPreprocessfMRI <- function( boldImage,
   numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
-  spatialSmoothingParameter = 0.0,
-  spatialSmoothingNumberOfIterations = 5,
+  spatialSmoothingType = c( "none", "gaussian", "perona-malik" ),
+  spatialSmoothingParameters = 0.0,
   frequencyLowThreshold = 0.01,
   frequencyHighThreshold = 0.1 )
 }
@@ -37,9 +37,12 @@ antsPreprocessfMRI <- function( boldImage,
 \item{useMotionCorrectedImage}{Boolean indicating whether or not the motion corrected
                                image should be used in the rest of the pipeline.  This is
                                off by default to avoid additional interpolation.}
-\item{spatialSmoothingParameter}{Conductance value for anisotropic smoothing.  Typical values
-                                 range from 0.5 to 2.0.}
-\item{spatialSmoothingNumberOfIterations}{Number of iterations for anisotropic smoothing.}
+\item{spatialSmoothingType}{Either "none", "gaussian" (isotropic) or "perona-malik" (anisotropic)
+                            smoothing.}
+\item{spatialSmoothingParameters}{For gaussian smoothing, this is a single scalar designating
+                                  the smoothing sigma (in mm).  For perona-malik, a vector
+                                  needs to be specified with the conductance parameter and the
+                                  number of iterations, e.g. c( 0.25, 5 ).}
 \item{frequencyLowThreshold}{Lower threshold for bandpass filtering.}
 \item{frequencyHighThreshold}{Upper threshold for bandpass filtering.}
 }

@@ -2,7 +2,8 @@ antsPreprocessfMRI <- function( boldImage,
   maskImage = NA, maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables = NA, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
-  spatialSmoothingParameter = 0.0, spatialSmoothingNumberOfIterations = 5,
+  spatialSmoothingType = "none",
+  spatialSmoothingParameters = 0.0,
   frequencyLowThreshold = NA, frequencyHighThreshold = NA )
 {
 
@@ -108,10 +109,29 @@ cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldResidualsFiltered
 
 # anisotropically smooth the 4-D image, if desired
 
-if( spatialSmoothingParameter > 0.0 & spatialSmoothingNumberOfIterations > 0 )
+if( spatialSmoothingType == "gaussian" )
   {
-  ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
-    spatialSmoothingParameter, spatialSmoothingNumberOfIterations )
+  if( length( spatialSmoothingParameter ) == 1 )
+    {
+    sigmaVector <- paste0( spatialSmoothingParameter[1], 'x',
+      spatialSmoothingParameter[1], 'x', spatialSmoothingParameter[1], 'x0' );
+    ImageMath( 4, cleanBoldImage, "G", cleanBoldImage, sigmaVector )
+    } else {
+    cat( "Error:  expecting a single scalar parameter.  See help.\n" )
+    return
+    }
+  } else if( spatialSmoothingType == "perona-malik" ) {
+  if( length( spatialSmoothingParameter ) == 1 )
+    {
+    ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
+      spatialSmoothingParameter[1], spatialSmoothingParameter[2] )
+    } else {
+    cat( "Error:  expecting a two element vector.  See help.\n" )
+    return
+    }
+  } else if( spatialSmoothingType != "none" ) {
+  cat( "Error:  unrecognized smoothing option.  See help.\n" )
+  return
   }
 
 return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement ) )
