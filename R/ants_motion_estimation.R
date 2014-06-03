@@ -40,7 +40,7 @@ ants_motion_estimation <- function(img = "") {
   # '-e' , 1 , '-s' , 0 , '-f' , 1 , '-n' , 10 ) ;
 }
 
-motion_correction <- function(img, fixed, moreaccurate = TRUE) {
+motion_correction <- function(img, fixed=NA, moreaccurate = TRUE) {
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")
@@ -63,7 +63,7 @@ motion_correction <- function(img, fixed, moreaccurate = TRUE) {
     return(NULL)
   }
   
-  if (missing(fixed)) {
+  if ( is.na(fixed) ) {
     fixed <- new("antsImage", "float", 3)
     antsMotionCorr(list(d = 3, a = img, o = fixed))
   } else {

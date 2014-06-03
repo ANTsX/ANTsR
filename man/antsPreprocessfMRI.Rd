@@ -11,7 +11,8 @@ band-pass filtering, and spatial smoothing.
 }
 
 \usage{
-antsPreprocessfMRI <- function( boldImage,
+antsPreprocessfMRI <- function( boldImage, 
+  meanBoldFixedImageForMotionCorrection=NA,
   maskImage = NA,
   maskingThreshold = 0.75,
   initialNuisanceVariables = NA,
@@ -26,6 +27,7 @@ antsPreprocessfMRI <- function( boldImage,
 
 \arguments{
 \item{boldImage}{4-D ANTs image fMRI data.}
+\item{meanBoldFixedImageForMotionCorrection}{optional target fixed image for motion correction}
 \item{maskImage}{3-D ANTs image defining the region of interest.}
 \item{maskingThreshold}{If mask image is not specified, a mask image is created using
                         the specified threshold which is in terms of the mean of the
