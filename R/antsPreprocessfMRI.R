@@ -9,12 +9,7 @@ antsPreprocessfMRI <- function( boldImage, meanBoldFixedImageForMotionCorrection
 
 # compute nuisance variables
 
-if( is.na( initialNuisanceVariables ) )
-  {
-  nuisanceVariables <- matrix( NA, nrow = 0, ncol = 0 )
-  } else {
-  nuisanceVariables <- initialNuisanceVariables
-  }
+nuisanceVariables <- initialNuisanceVariables
 
 numberOfTimePoints <- dim( boldImage )[4]
 
@@ -83,9 +78,15 @@ if( numberOfCompCorComponents > 0 )
 # http://blogs.discovermagazine.com/neuroskeptic/2013/06/12/when-cleaning-fmri-data-is-a-nuisance/
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
-boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
+
+if( is.na( nuisanceVariables[1] ) )
+  {
+  boldResiduals <- boldMatrix
+  } else {
+  boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
+  }
 boldResidualsFiltered <- boldResiduals
-if( ! is.na( frequencyHighThreshold ) & !is.na( frequencyHighThreshold ) &
+if( ! is.na( frequencyHighThreshold ) & ! is.na( frequencyHighThreshold ) &
   ( frequencyLowThreshold != frequencyHighThreshold ) )
   {
   boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
@@ -114,14 +115,14 @@ if( spatialSmoothingType == "gaussian" )
   if( length( spatialSmoothingParameters ) == 1 )
     {
     sigmaVector <- paste0( spatialSmoothingParameters[1], 'x',
-      spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' );
+      spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' )
     ImageMath( 4, cleanBoldImage, "G", cleanBoldImage, sigmaVector )
     } else {
     cat( "Error:  expecting a single scalar parameter.  See help.\n" )
     return
     }
   } else if( spatialSmoothingType == "perona-malik" ) {
-  if( length( spatialSmoothingParameters ) == 1 )
+  if( length( spatialSmoothingParameters ) == 2 )
     {
     ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
       spatialSmoothingParameters[1], spatialSmoothingParameters[2] )
