@@ -5,6 +5,8 @@ antsSpatialICAfMRI <- function( boldImages, maskImage = NA, numberOfICAComponent
                                 normalizeComponentImages = TRUE )
 {
 
+cat( "Need to fix.  Each individual subject needs to be centered/whitened, not the collection.\n" )
+
 numberOfBoldImages <- length( boldImages )
 
 # We calculate the mean and max framewise displacements for
