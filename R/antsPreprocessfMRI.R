@@ -3,10 +3,10 @@ antsPreprocessfMRI <- function( boldImage,
   maskImage = NA, maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables = NA, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
+  motionCorrectionAccuracyLevel = 1,
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA
   spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0.0,
-  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
-                               motionCorrectionAccuracyLevel = 1 )
+  spatialSmoothingParameters = 0.0  )
 {
 
 # compute nuisance variables
@@ -82,7 +82,7 @@ if( numberOfCompCorComponents > 0 )
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
 # replace boldMatrix in place with residualized version
 if( ! is.na( nuisanceVariables[1] ) )
-  {  
+  {
   print( colnames( nuisanceVariables ) )
   boldMatrix <- residuals( lm( boldMatrix ~ scale( nuisanceVariables ) ) )
   }
@@ -106,7 +106,7 @@ for( i in 2:nrow( boldMatrix ) )
 DVARS[1] <- mean( DVARS )
 
 # Convert the cleaned matrix back to a 4-D image
-globalSignal   <- apply( boldMatrix, FUN=mean, MARGIN=2 )
+globalSignal   <- apply( boldMatrix, FUN = mean, MARGIN = 2 )
 cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldMatrix )
 
 # anisotropically smooth the 4-D image, if desired
