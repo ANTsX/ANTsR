@@ -23,7 +23,7 @@ antsPreprocessfMRI <- function( boldImage,
   spatialSmoothingParameters = 0.0,
   frequencyLowThreshold = 0.01,
   frequencyHighThreshold = 0.1,
-  accuracyLevel = 1 )
+  motionCorrectionAccuracyLevel = 1 )
 }
 
 \arguments{
@@ -48,7 +48,7 @@ antsPreprocessfMRI <- function( boldImage,
                                   number of iterations, e.g. c( 0.25, 5 ).}
 \item{frequencyLowThreshold}{Lower threshold for bandpass filtering.}
 \item{frequencyHighThreshold}{Upper threshold for bandpass filtering.}
-\item{accuracyLevel}{0 (fast/debug parameters), 1 (intrasession parameters) or 2 (intersession/intersubect parameters).}
+\item{motionCorrectionAccuracyLevel}{for motion correcting registration, 0 (fast/debug parameters), 1 (intrasession parameters) or 2 (intersession/intersubect parameters).}
 }
 
 \value{
