@@ -135,6 +135,8 @@ if( spatialSmoothingType == "gaussian" )
   cat( "Error:  unrecognized smoothing option.  See help.\n" )
   return
   }
-
+#####################################################################
+#####################################################################
+antsMotionCorr( list( d = 3, a = cleanBoldImage, o = averageImage ) )
 return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement, averageImage = averageImage ) )
 }
