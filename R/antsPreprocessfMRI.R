@@ -23,7 +23,7 @@ if( doMotionCorrection )
   {
   motionCorrectionResults <- motion_correction( boldImage, fixed = meanBoldFixedImageForMotionCorrection, moreaccurate = accuracyLevel )
   motionCorrectionParameters <- motionCorrectionResults$moco_params
-  nuisanceVariables <- as.matrix( motionCorrectionParameters )[, 2:ncol( motionCorrectionParameters )]
+  nuisanceVariables <- as.matrix( motionCorrectionParameters )[, 3:ncol( motionCorrectionParameters )]
   for( i in 2:numberOfTimePoints )
     {
     motionCorrectionParametersAtTime1 <- c( motionCorrectionParameters[i, 3:14] )
@@ -49,6 +49,7 @@ if( doMotionCorrection )
     {
     boldImage <- motionCorrectionResults$moco_img
     }
+#  nuisanceVariables<-framewiseDisplacement
   }
 
 averageImage <- new( "antsImage", "float", 3 )
@@ -84,7 +85,8 @@ if( is.na( nuisanceVariables[1] ) )
   {
   boldResiduals <- boldMatrix
   } else {
-  boldResiduals <- residuals( lm( boldMatrix ~ 1 + nuisanceVariables ) )
+  print( colnames( nuisanceVariables ) )
+  boldResiduals <- residuals( lm( boldMatrix ~ scale( nuisanceVariables ) ) )
   }
 boldResidualsFiltered <- boldResiduals
 if( ! is.na( frequencyHighThreshold ) & ! is.na( frequencyHighThreshold ) &
@@ -137,6 +139,5 @@ if( spatialSmoothingType == "gaussian" )
   }
 #####################################################################
 #####################################################################
-antsMotionCorr( list( d = 3, a = cleanBoldImage, o = averageImage ) )
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement, averageImage = averageImage ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement ) )
 }
