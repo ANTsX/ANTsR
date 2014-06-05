@@ -5,7 +5,8 @@ antsPreprocessfMRI <- function( boldImage,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   spatialSmoothingType = "none",
   spatialSmoothingParameters = 0.0,
-  frequencyLowThreshold = NA, frequencyHighThreshold = NA )
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
+                               accuracyLevel = 1 )
 {
 
 # compute nuisance variables
@@ -20,7 +21,7 @@ numberOfTimePoints <- dim( boldImage )[4]
 framewiseDisplacement <- rep( 0, numberOfTimePoints )
 if( doMotionCorrection )
   {
-  motionCorrectionResults <- motion_correction( boldImage, fixed = meanBoldFixedImageForMotionCorrection, moreaccurate = TRUE )
+  motionCorrectionResults <- motion_correction( boldImage, fixed = meanBoldFixedImageForMotionCorrection, moreaccurate = accuracyLevel )
   motionCorrectionParameters <- motionCorrectionResults$moco_params
   nuisanceVariables <- as.matrix( motionCorrectionParameters )[, 2:ncol( motionCorrectionParameters )]
   for( i in 2:numberOfTimePoints )
