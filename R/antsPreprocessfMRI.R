@@ -53,7 +53,6 @@ if( doMotionCorrection )
 
 averageImage <- new( "antsImage", "float", 3 )
 antsMotionCorr( list( d = 3, a = boldImage, o = averageImage ) )
-
 # Calculate the mask, if not supplied.
 
 if( is.na( maskImage ) )
@@ -137,5 +136,5 @@ if( spatialSmoothingType == "gaussian" )
   return
   }
 
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement, averageImage = averageImage ) )
 }

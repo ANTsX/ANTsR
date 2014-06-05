@@ -109,6 +109,6 @@ motion_correction <- function(img, fixed=NA, moreaccurate = 1 ) {
   }
   moco_params <- as.data.frame( moco_params )
   names( moco_params )<-c("MetricPre","MetricPost","MOCOparam0","MOCOparam1","MOCOparam2","MOCOparam3","MOCOparam4","MOCOparam5","MOCOparam6","MOCOparam7","MOCOparam8","MOCOparam9","MOCOparam10","MOCOparam11")
-  return(list(moco_img = antsImageClone(moco_img, inpixeltype), moco_params = moco_params, moco_avg_img = antsImageClone(avg_img, 
+  return(list(moco_img = moco_img, moco_params = moco_params, moco_avg_img = antsImageClone(avg_img, 
     inpixeltype)))
 } 
