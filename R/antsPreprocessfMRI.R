@@ -80,19 +80,17 @@ if( numberOfCompCorComponents > 0 )
 # http://blogs.discovermagazine.com/neuroskeptic/2013/06/12/when-cleaning-fmri-data-is-a-nuisance/
 
 boldMatrix <- timeseries2matrix( boldImage, maskImage )
-
-if( is.na( nuisanceVariables[1] ) )
-  {
-  boldResiduals <- boldMatrix
-  } else {
+# replace boldMatrix in place with residualized version
+if( ! is.na( nuisanceVariables[1] ) )
+  {  
   print( colnames( nuisanceVariables ) )
-  boldResiduals <- residuals( lm( boldMatrix ~ scale( nuisanceVariables ) ) )
+  boldMatrix <- residuals( lm( boldMatrix ~ scale( nuisanceVariables ) ) )
   }
-boldResidualsFiltered <- boldResiduals
+# replace boldMatrix in place with frequency filtered version
 if( ! is.na( frequencyHighThreshold ) & ! is.na( frequencyHighThreshold ) &
   ( frequencyLowThreshold != frequencyHighThreshold ) )
   {
-  boldResidualsFiltered <- frequencyFilterfMRI( boldResiduals, tr = antsGetSpacing( boldImage )[4],
+  boldMatrix <- frequencyFilterfMRI( boldMatrix, tr = antsGetSpacing( boldImage )[4],
     freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
   }
 
@@ -100,16 +98,16 @@ if( ! is.na( frequencyHighThreshold ) & ! is.na( frequencyHighThreshold ) &
 # of the RMS variance over voxels (DVARS as in
 # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
 
-DVARS <- rep( 0, nrow( boldResidualsFiltered ) )
-for( i in 2:nrow( boldResidualsFiltered ) )
+DVARS <- rep( 0, nrow( boldMatrix ) )
+for( i in 2:nrow( boldMatrix ) )
   {
-  DVARS[i] <- sqrt( mean( ( boldResidualsFiltered[i,] - boldResidualsFiltered[i-1,] )^2 ) )
+  DVARS[i] <- sqrt( mean( ( boldMatrix[i,] - boldMatrix[i-1,] )^2 ) )
   }
 DVARS[1] <- mean( DVARS )
 
 # Convert the cleaned matrix back to a 4-D image
-
-cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldResidualsFiltered )
+globalSignal   <- apply( boldMatrix, FUN=mean, MARGIN=2 )
+cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldMatrix )
 
 # anisotropically smooth the 4-D image, if desired
 
@@ -139,5 +137,5 @@ if( spatialSmoothingType == "gaussian" )
   }
 #####################################################################
 #####################################################################
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement, globalSignal = globalSignal ) )
 }
