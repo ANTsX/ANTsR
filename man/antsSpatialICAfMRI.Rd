@@ -6,8 +6,8 @@ Perform spatial ICA on fMRI bold data.
 }
 
 \description{
-Perform spatial ICA on group or individual fMRI data.  Preprocessing is incorporated
-into this function (cf antsPreprocessfMRI.R).
+Perform spatial ICA on group or individual fMRI data.  Preprocessing should be performed
+ prior to calling this function (cf antsPreprocessfMRI.R).
 }
 
 \usage{
@@ -19,11 +19,7 @@ antsSpatialICAfMRI <- function( boldImages,
 
 \arguments{
 \item{boldImages}{a list of 4-D ANTs image fMRI data.}
-\item{maskImage}{3-D ANTs image defining the region of interest.  If not specified,
-                 one is automatically calculated.}
 \item{numberOfICAComponents}{Number of estimated observers (components).}
-\item{frequencyLowThreshold}{Lower threshold for bandpass filtering.}
-\item{frequencyHighThreshold}{Upper threshold for bandpass filtering.}
 \item{normalizeComponentImages}{Boolean to specify whether each component vector element
                                 is normalized to its z-score.}
 }
@@ -41,17 +37,7 @@ antsSpatialICAfMRI <- function( boldImages,
 
   S	= estimated source matrix
 
-
- We also include the list of component images, mask image, and the following
- QA numbers (cf antsPreprocessingfMRI.R):
-
-  maxDVARS = vector where each element is the maximum DVARS from each bold image
-
-  meanDVARS = vector where each element is the mean DVARS from each bold image
-
-  maxFD = vector where each element is the maximum framewise displacement from each bold image
-
-  meanFD = vector where each element is the mean framewise displacement from each bold image
+  and the component images.
 }
 
 \author{
@@ -66,7 +52,13 @@ boldImages[[2]] <- antsImageRead( "subject2.nii.gz", dim = 4, pixeltype = "float
 boldImages[[3]] <- antsImageRead( "subject3.nii.gz", dim = 4, pixeltype = "float" )
 boldImages[[4]] <- antsImageRead( "subject4.nii.gz", dim = 4, pixeltype = "float" )
 
-icaResults <- antsSpatialICAfMRI( boldImages, numberOfICAComponents = 20 )
+cleanBoldImages <- list()
+for( i in 1:length( boldImages[[1]] ) )
+  {
+  cleanBoldImages[[i]] <- antsPreprocessfMRI( boldImages[[i]] )
+  }
+
+icaResults <- antsSpatialICAfMRI( cleanBoldImages, numberOfICAComponents = 20 )
 componentImages <- icaResults$componentImages
 
 # write out the component images

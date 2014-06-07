@@ -1,51 +1,37 @@
 library( fastICA )
 
-antsSpatialICAfMRI <- function( boldImages, maskImage = NA, numberOfICAComponents = 40,
-                                frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
+antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20
                                 normalizeComponentImages = TRUE )
 {
 
-cat( "Need to fix.  Each individual subject needs to be centered/whitened, not the collection.\n" )
-
 numberOfBoldImages <- length( boldImages )
 
-# We calculate the mean and max framewise displacements for
-# each bold image.  These values can then be inspected for
-# quality control purposes.
-
-maxFramewiseDisplacements <- rep( 0, numberOfBoldImages )
-meanFramewiseDisplacements <- rep( 0, numberOfBoldImages )
-maxDVARS <- rep( 0, numberOfBoldImages )
-meanDVARS <- rep( 0, numberOfBoldImages )
-
-# Process each bold image.  Group ICA is performed by concatenating the time series of
-# the bold images (similar to MELODIC---http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/MELODIC).
-# Other possible group approaches are described in http://www.ncbi.nlm.nih.gov/pubmed/19059344
+# Group ICA is performed by concatenating the time series of the bold images
+# (similar to MELODIC---http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/MELODIC).
+# Other possible group approaches are described in
+# http://www.ncbi.nlm.nih.gov/pubmed/19059344
 
 for( i in 1:numberOfBoldImages )
   {
-  cat( "Processing bold image ", i, " (out of ", numberOfBoldImages, ").\n", sep = "" )
+  # if there's only 1 bold image, then it will be whitened in the fastICA function call
 
-  fmri <- antsPreprocessfMRI( boldImages[[i]],  maskImage = maskImage,
-                              useMotionCorrectedImage = TRUE,
-                              frequencyLowThreshold = frequencyLowThreshold,
-                              frequencyHighThreshold = frequencyHighThreshold )
-  maxDVARS[i] <- max( fmri$DVARS )
-  meanDVARS[i] <- mean( fmri$DVARS )
-  maxFramewiseDisplacements[i] <- max( fmri$FD )
-  meanFramewiseDisplacements[i] <- mean( fmri$FD )
+  subjectBoldMatrix <- timeseries2matrix( fmri$cleanBoldImage, mask )
+  if( numberOfBoldImages > 1 )
+    {
+    subjectBoldMatrix <- t( icawhiten( t( subjectBoldMatrix ), numberOfICAComponents ) )
+    }
 
   if( i == 1 )
     {
-    groupBoldMatrix <- timeseries2matrix( fmri$cleanBoldImage, mask )
+    groupBoldMatrix <- subjectBoldMatrix
     }
   else
     {
-    groupBoldMatrix <- rbind( groupBoldMatrix, timeseries2matrix( fmri$cleanBoldImage, mask ) )
+    groupBoldMatrix <- rbind( groupBoldMatrix, subjectBoldMatrix )
     }
   }
 
-# Preprocessing in the fastICA algorithm includes centering and whitening
+# taken from the fastICA package
 
 icaResults <- fastICA( X = t( groupBoldMatrix ), n.comp = numberOfICAComponents,
         alg.typ = c( "parallel" ),
@@ -81,8 +67,6 @@ for( i in 1:numberOfICAComponents )
 
 return( list( X = icaResults$X, K = icaResults$K, W = icaResults$W,
               A = icaResults$A, S = icaResults$S,
-              componentImages = componentImages, maskImage = maskImage,
-              maxDVARS = maxDVARS, meanDVARS = meanDVARS,
-              maxFD = maxFramewiseDisplacements, meanFD = meanFramewiseDisplacements ) )
+              componentImages = componentImages )
 }
 
