@@ -67,6 +67,6 @@ for( i in 1:numberOfICAComponents )
 
 return( list( X = icaResults$X, K = icaResults$K, W = icaResults$W,
               A = icaResults$A, S = icaResults$S,
-              componentImages = componentImages )
+              componentImages = componentImages ) )
 }
 
