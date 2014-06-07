@@ -4,7 +4,7 @@ antsPreprocessfMRI <- function( boldImage,
   initialNuisanceVariables = NA, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1,
-  frequencyLowThreshold = NA, frequencyHighThreshold = NA
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
   spatialSmoothingParameters = 0.0 )
 {
