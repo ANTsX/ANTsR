@@ -15,7 +15,7 @@ for( i in 1:numberOfBoldImages )
   {
   # if there's only 1 bold image, then it will be whitened in the fastICA function call
 
-  subjectBoldMatrix <- timeseries2matrix( fmri$cleanBoldImage, mask )
+  subjectBoldMatrix <- timeseries2matrix( boldImages[[i]], mask )
   if( numberOfBoldImages > 1 )
     {
     subjectBoldMatrix <- t( icawhiten( t( subjectBoldMatrix ), numberOfICAComponents ) )
