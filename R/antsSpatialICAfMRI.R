@@ -1,6 +1,6 @@
 library( fastICA )
 
-antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20
+antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20,
                                 normalizeComponentImages = TRUE )
 {
 
