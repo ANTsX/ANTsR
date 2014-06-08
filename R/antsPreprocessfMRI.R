@@ -1,9 +1,9 @@
 antsPreprocessfMRI <- function( boldImage,
-  meanBoldFixedImageForMotionCorrection = NA,
   maskImage = NA, maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables = NA, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1,
+  meanBoldFixedImageForMotionCorrection = NA,
   frequencyLowThreshold = NA, frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
   spatialSmoothingParameters = 0.0 )

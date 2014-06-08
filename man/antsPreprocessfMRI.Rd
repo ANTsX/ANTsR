@@ -12,7 +12,6 @@ band-pass filtering, and spatial smoothing.
 
 \usage{
 antsPreprocessfMRI <- function( boldImage,
-  meanBoldFixedImageForMotionCorrection = NA,
   maskImage = NA,
   maskingThreshold = 0.75,
   initialNuisanceVariables = NA,
@@ -20,6 +19,7 @@ antsPreprocessfMRI <- function( boldImage,
   doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1,
+  meanBoldFixedImageForMotionCorrection = NA,
   spatialSmoothingType = c( "none", "gaussian", "perona-malik" ),
   spatialSmoothingParameters = 0.0,
   frequencyLowThreshold = 0.01,
