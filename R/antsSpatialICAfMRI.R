@@ -1,8 +1,13 @@
 library( fastICA )
 
 antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20,
-                                normalizeComponentImages = TRUE )
+                                normalizeComponentImages = TRUE, maskImage = NA )
 {
+
+if( is.na( maskImage ) )
+  {
+  stop( 'No mask image specified. \n\n' )
+  }
 
 numberOfBoldImages <- length( boldImages )
 
@@ -15,7 +20,7 @@ for( i in 1:numberOfBoldImages )
   {
   # if there's only 1 bold image, then it will be whitened in the fastICA function call
 
-  subjectBoldMatrix <- timeseries2matrix( boldImages[[i]], mask )
+  subjectBoldMatrix <- timeseries2matrix( boldImages[[i]], maskImage )
   if( numberOfBoldImages > 1 )
     {
     subjectBoldMatrix <- t( icawhiten( t( subjectBoldMatrix ), numberOfICAComponents ) )
@@ -49,8 +54,8 @@ for( i in 1:numberOfICAComponents )
     {
     componentVector <- scale( componentVector )
     }
-  componentImages[[i]] <- antsImageClone( mask, "float" )
-  componentImages[[i]][mask != 0] <- componentVector
+  componentImages[[i]] <- antsImageClone( maskImage, "float" )
+  componentImages[[i]][maskImage != 0] <- componentVector
   }
 
 #    standard ICA output items from the fastICA algorithm

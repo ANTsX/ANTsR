@@ -11,10 +11,8 @@ Perform spatial ICA on group or individual fMRI data.  Preprocessing should be p
 }
 
 \usage{
-antsSpatialICAfMRI <- function( boldImages,
-  maskImage = NA, numberOfICAComponents = 40,
-  frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
-  normalizeComponentImages = TRUE )
+antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20,
+  normalizeComponentImages = TRUE, maskImage = NA )
 }
 
 \arguments{
@@ -22,6 +20,7 @@ antsSpatialICAfMRI <- function( boldImages,
 \item{numberOfICAComponents}{Number of estimated observers (components).}
 \item{normalizeComponentImages}{Boolean to specify whether each component vector element
                                 is normalized to its z-score.}
+\item{maskImage}{A 3-D ANTs image defining the region of interest.}
 }
 
 \value{
@@ -52,13 +51,20 @@ boldImages[[2]] <- antsImageRead( "subject2.nii.gz", dim = 4, pixeltype = "float
 boldImages[[3]] <- antsImageRead( "subject3.nii.gz", dim = 4, pixeltype = "float" )
 boldImages[[4]] <- antsImageRead( "subject4.nii.gz", dim = 4, pixeltype = "float" )
 
+maskImage <- NA
+
 cleanBoldImages <- list()
 for( i in 1:length( boldImages[[1]] ) )
   {
-  cleanBoldImages[[i]] <- antsPreprocessfMRI( boldImages[[i]] )
+  fmri <- antsPreprocessfMRI( boldImages[[i]] )
+  if( i == 1 )
+    {
+    maskImage <- fmri$maskImage
+    }
+  cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }
 
-icaResults <- antsSpatialICAfMRI( cleanBoldImages, numberOfICAComponents = 20 )
+icaResults <- antsSpatialICAfMRI( cleanBoldImages, numberOfICAComponents = 20, cleanBoldImages[[i]] )
 componentImages <- icaResults$componentImages
 
 # write out the component images
