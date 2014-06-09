@@ -23,7 +23,7 @@ for( i in 1:numberOfBoldImages )
   subjectBoldMatrix <- timeseries2matrix( boldImages[[i]], maskImage )
   if( numberOfBoldImages > 1 )
     {
-    subjectBoldMatrix <- icawhiten( subjectBoldMatrix, numberOfICAComponents )
+    subjectBoldMatrix <- whiten( subjectBoldMatrix )
     }
 
   if( i == 1 )
