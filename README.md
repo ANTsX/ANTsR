@@ -4,6 +4,8 @@ An R package providing ITK features in R.
 Authors: Shrinidhi KL,  Avants BB 
 
 ## Installation
+see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
+
 ### From source
 First, clone the repository:
 ```sh
@@ -33,6 +35,7 @@ You will probably have to install the R packages that ANTsR requires. For exampl
 ```
 install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), dependencies = TRUE);
 ```
+These dependencies are subject to change until development is stable.
 
 ## Usage
 Load the package:
@@ -44,7 +47,9 @@ List the available functions in the namespace ANTsR:
 ANTsR::<double-tab>
 ```
 
-One can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.
+Call help on a function via ?functionName
+
+Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.
 
 For example, to call the antsRegistration routine:
 ```
