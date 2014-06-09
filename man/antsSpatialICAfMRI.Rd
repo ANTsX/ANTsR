@@ -11,16 +11,16 @@ Perform spatial ICA on group or individual fMRI data.  Preprocessing should be p
 }
 
 \usage{
-antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20,
-  normalizeComponentImages = TRUE, maskImage = NA )
+antsSpatialICAfMRI <- function( boldImages, maskImage = NA, numberOfICAComponents = 20,
+  normalizeComponentImages = TRUE )
 }
 
 \arguments{
 \item{boldImages}{a list of 4-D ANTs image fMRI data.}
+\item{maskImage}{A 3-D ANTs image defining the region of interest.  This must be specified.}
 \item{numberOfICAComponents}{Number of estimated observers (components).}
 \item{normalizeComponentImages}{Boolean to specify whether each component vector element
                                 is normalized to its z-score.}
-\item{maskImage}{A 3-D ANTs image defining the region of interest.}
 }
 
 \value{

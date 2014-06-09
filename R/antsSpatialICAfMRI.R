@@ -1,7 +1,7 @@
 library( fastICA )
 
-antsSpatialICAfMRI <- function( boldImages, numberOfICAComponents = 20,
-                                normalizeComponentImages = TRUE, maskImage = NA )
+antsSpatialICAfMRI <- function( boldImages, maskImage = NA, numberOfICAComponents = 20,
+                                normalizeComponentImages = TRUE )
 {
 
 if( is.na( maskImage ) )
@@ -23,7 +23,7 @@ for( i in 1:numberOfBoldImages )
   subjectBoldMatrix <- timeseries2matrix( boldImages[[i]], maskImage )
   if( numberOfBoldImages > 1 )
     {
-    subjectBoldMatrix <- t( icawhiten( t( subjectBoldMatrix ), numberOfICAComponents ) )
+    subjectBoldMatrix <- icawhiten( subjectBoldMatrix, numberOfICAComponents )
     }
 
   if( i == 1 )
