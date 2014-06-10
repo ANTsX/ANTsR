@@ -17,6 +17,12 @@ wmat<-whiten( mat  )
 \item{mat}{
   input matrix
 }
+\item{k}{
+  rank to use 
+}
+\item{reducex}{
+  reduce the input matrix to k-size subspace
+}
 }
 
 \value{
@@ -30,4 +36,5 @@ Avants BB
 \examples{
 mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
 wmat<-whiten( mat ) 
+wmat2<-whiten( mat, 2, TRUE ) 
 }
