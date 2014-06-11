@@ -10,7 +10,7 @@ PlotPrettyGraph given inputs from the makeGraph function.  adapted from http://i
 }
 
 \usage{
-plotPrettyGraph( graphObject, adjacencyMatrix, graphMetricValue  )
+plotPrettyGraph( graphObject, adjacencyMatrix, graphMetricValue, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen" )
 }
 
 \arguments{
@@ -22,6 +22,21 @@ plotPrettyGraph( graphObject, adjacencyMatrix, graphMetricValue  )
 }
 \item{graphMetricValue}{
   igraph node-level graph value e.g. degree, page.rank, etc
+}
+\item{pngfn}{
+  filename for output png
+}
+\item{scaleText}{
+  relative size of text to vertices
+}
+\item{vertexSize}{
+  cex size of vertices
+}
+\item{figScale}{
+  the figure will be of square size 2^figScale in pixels
+}
+\item{layoutmode}{
+  see gplot.layout in sna package
 }
 }
 

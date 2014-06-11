@@ -1,4 +1,4 @@
-plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "kamadakawai") {
+plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen") {
 # adapted from http://is-r.tumblr.com/
 doInstall <- FALSE
 toInstall <- c("sna", "igraph")
