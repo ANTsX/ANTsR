@@ -1,4 +1,4 @@
-plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen") {
+plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
 # adapted from http://is-r.tumblr.com/
 doInstall <- FALSE
 toInstall <- c("sna", "igraph")
@@ -8,9 +8,12 @@ as.matrix(sort(functionToPlot))
 # Now, to make the prettiest graph we can:
 png( pngfn , h = 2^figScale, w = 2^figScale ) # , type = "cairo-png")
 par(mai = c(0, 0, 0, 0))
-functionToPlotColor <- hsv(0, 1, (functionToPlot - min(functionToPlot)) /
-                       (max(functionToPlot) - min(functionToPlot)))
-functionToPlotScaler <- functionToPlot/max(abs(functionToPlot)) * 0.5 + 1/2
+frange<-(functionToPlot - min(functionToPlot)) /
+                       (max(functionToPlot) - min(functionToPlot))
+alpharange<-( frange*2 )
+alpharange[ alpharange > 1 ]<-1
+functionToPlotColor <- hsv( hueval , 1, frange, alpha=alpharange )
+functionToPlotScaler <- abs(functionToPlot)/max(abs(functionToPlot)) * 0.5 + 1/2
 if ( is.na( vertexSize ) ) vertexSize <- functionToPlotScaler
 prettyPlot <- gplot(dat = adjacencyMatrix,
                     label = rownames(adjacencyMatrix),
@@ -28,6 +31,6 @@ prettyPlot <- gplot(dat = adjacencyMatrix,
                     label.col = functionToPlotColor,
                     vertex.col = functionToPlotColor,
                     label.border = "#ffffff00",  # To hide borders
-                    vertex.border = "#ffffff00")  # To hide borders
+                    vertex.border = "#ffffff00" )  # To hide borders
 dev.off()
 }
