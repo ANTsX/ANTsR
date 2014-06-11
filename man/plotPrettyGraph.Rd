@@ -50,7 +50,8 @@ Avants BB, Christopher DeSante and David Sparks
 
 \examples{
 data("bold_correlation_matrix",package="ANTsR")
-gg<-makeGraph( data.matrix(bold_correlation_matrix), 0.1 )
+dmat<-data.matrix(bold_correlation_matrix)
+gg<-makeGraph( dmat, 0.1 )
 rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
 plotPrettyGraph( gg$mygraph, gg$adjacencyMatrix, gg$degree , figScale=12 , scaleText=5 )
 }
