@@ -1,4 +1,4 @@
-plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 ) {
+plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "kamadakawai") {
 # adapted from http://is-r.tumblr.com/
 doInstall <- FALSE
 toInstall <- c("sna", "igraph")
@@ -14,7 +14,7 @@ functionToPlotScaler <- functionToPlot/max(abs(functionToPlot)) * 0.5 + 1/2
 if ( is.na( vertexSize ) ) vertexSize <- functionToPlotScaler
 prettyPlot <- gplot(dat = adjacencyMatrix,
                     label = rownames(adjacencyMatrix),
-                    mode = "kamadakawai",
+                    mode = layoutmode,
                     pad = 0,
                     label.pad = 1,
                     boxed.labels = TRUE,
