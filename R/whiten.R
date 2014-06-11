@@ -5,7 +5,7 @@ whiten <- function( x , k = NA, reducex = FALSE ) {
   }
   if ( is.na( k ) )
     {
-    svdx <- svd(x %*% t(x))
+    svdx <- svd( scale( x %*% t(x) ) )
     dd <- (svdx$d)^(-1/2)
     xw <- ((svdx$u %*% diag(dd)) %*% t(svdx$v)) %*% x
     }
@@ -13,7 +13,7 @@ whiten <- function( x , k = NA, reducex = FALSE ) {
     {
     n<-nrow( x )
     p<-ncol( x ) 
-    svdx <- svd( x %*% t(x) , nu = min( n , p , k ), nv = min( n , p , k ) )
+    svdx <- svd( scale( x %*% t(x) ) , nu = min( n , p , k ), nv = min( n , p , k ) )
     dd <-diag( ( (svdx$d)^(-1/2) )[1:k] )
     xw <- (svdx$u %*% dd ) %*% t(svdx$v)
     xw <- ( xw ) %*% x 
