@@ -49,7 +49,6 @@ if( doMotionCorrection )
     {
     boldImage <- motionCorrectionResults$moco_img
     }
-#  nuisanceVariables<-framewiseDisplacement
   }
 
 averageImage <- new( "antsImage", "float", 3 )
@@ -62,9 +61,14 @@ if( is.na( maskImage ) )
   }
 averageImage[maskImage == 0] <- 0
 
+# do nuisance regression then bandpass filtering
+# http://blogs.discovermagazine.com/neuroskeptic/2013/06/12/when-cleaning-fmri-data-is-a-nuisance/
+boldMatrix <- timeseries2matrix( boldImage, maskImage )
+DVARS <- computeDVARS( boldMatrix )
+
+
 # Calculate CompCor nuisance variables
 #  http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2214855/
-
 if( numberOfCompCorComponents > 0 )
   {
   compCorNuisanceVariables <- compcor( boldImage, maskImage, ncompcor = numberOfCompCorComponents, variance_extreme = 0.975 )
@@ -76,10 +80,7 @@ if( numberOfCompCorComponents > 0 )
     }
   }
 
-# do nuisance regression then bandpass filtering
-# http://blogs.discovermagazine.com/neuroskeptic/2013/06/12/when-cleaning-fmri-data-is-a-nuisance/
 
-boldMatrix <- timeseries2matrix( boldImage, maskImage )
 # replace boldMatrix in place with residualized version
 if( ! is.na( nuisanceVariables[1] ) )
   {
@@ -93,17 +94,7 @@ if( ! is.na( frequencyHighThreshold ) & ! is.na( frequencyHighThreshold ) &
   boldMatrix <- frequencyFilterfMRI( boldMatrix, tr = antsGetSpacing( boldImage )[4],
     freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig" )
   }
-
-# For quality assurance measures, we calculate the temporal derivative
-# of the RMS variance over voxels (DVARS as in
-# http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
-
-DVARS <- rep( 0, nrow( boldMatrix ) )
-for( i in 2:nrow( boldMatrix ) )
-  {
-  DVARS[i] <- sqrt( mean( ( boldMatrix[i,] - boldMatrix[i-1,] )^2 ) )
-  }
-DVARS[1] <- mean( DVARS )
+DVARSpostCleaning <- computeDVARS( boldMatrix )
 
 # Convert the cleaned matrix back to a 4-D image
 globalSignal   <- apply( boldMatrix, FUN = mean, MARGIN = 2 )
@@ -137,5 +128,20 @@ if( spatialSmoothingType == "gaussian" )
   }
 #####################################################################
 #####################################################################
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, FD = framewiseDisplacement, globalSignal = globalSignal ) )
+return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
+}
+
+
+computeDVARS<-function( boldMatrix )
+{
+# For quality assurance measures, we calculate the temporal derivative
+# of the RMS variance over voxels (DVARS as in
+# http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
+  DVARS <- rep( 0, nrow( boldMatrix ) )
+  for( i in 2:nrow( boldMatrix ) )
+    {
+    DVARS[i] <- sqrt( mean( ( boldMatrix[i,] - boldMatrix[i-1,] )^2 ) )
+    }
+  DVARS[1] <- mean( DVARS )
+  return( DVARS )
 }
