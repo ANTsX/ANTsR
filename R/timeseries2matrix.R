@@ -11,13 +11,13 @@ timeseries2matrix <- function(img, mask) {
     logmask <- (mask == labs[1] )
     mat <- img[logmask]
     dim(mat) <- c(sum(logmask), dim(img)[length(dim(img))])
-    mat<-apply(mat,FUN=mean,MARGIN=1)
+    mat<-matrix( apply(mat,FUN=mean,MARGIN=2) , ncol = 1 )
     for ( i in 2:length(labs) )
       {
       logmask <- (mask == labs[i] )
       newmat <- img[logmask]
       dim(newmat) <- c(sum(logmask), dim(img)[length(dim(img))])
-      newmat<-apply(newmat,FUN=mean,MARGIN=1)
+      newmat<-matrix( apply(newmat,FUN=mean,MARGIN=2) , ncol=1 )
       mat<-cbind(mat,newmat)
       }
     colnames(mat)<-paste("L",labs)
