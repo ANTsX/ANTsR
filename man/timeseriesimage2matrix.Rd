@@ -22,6 +22,8 @@ Input image of type 'antsImage' or R array.
   of voxels in the mask may be either equal to that of input image 'img'
   or equal to number of voxels in one time unit of input image 'img'. In
   the second case, the mask is reused for every time unit of the 'img'.
+  A mask of n-labels will cause the function to return a matrix containing
+  the mean time series within each label.
   }
 }
 
