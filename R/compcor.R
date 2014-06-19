@@ -1,4 +1,4 @@
-compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE, randomSamples=1 ) {
+compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE, randomSamples=1 , returnv = FALSE, returnhighvarmat = FALSE ) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
@@ -35,6 +35,7 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   wh <- (temporalvar > thresh)
   wh2 <- (temporalvar <= thresh)
   highvarmat <- mat[, wh]
+  if ( returnhighvarmat ) return( highvarmat )
   if ( fastsvd )
     {
       library(irlba)
@@ -46,5 +47,5 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     nuis <- compcorr
     colnames(nuis) <- c(compcorrnames)
   }
-  return(nuis)
+  if ( ! returnv ) return(nuis) else return( nuis %*% highvarmat )
 } 
