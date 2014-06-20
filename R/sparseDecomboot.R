@@ -74,10 +74,10 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
 #            prevec <- cca1out[ , j ]
 #            vec1[ prevec > 0 ] <- 0 
 #            }
-        cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness ) )
+        cca1out[ , nv ] <-  eanatsparsify( vec1 , abs( sparseness ) )
         cca1outAuto[ , nv ] <-  vec1 
       } else {
-        cca1out[ , nv ] <-  sparsify( vec1 , abs( sparseness ) )
+        cca1out[ , nv ] <-  eanatsparsify( vec1 , abs( sparseness ) )
         cca1outAuto[ , nv ] <-  vec1 
       }
   }

@@ -19,7 +19,7 @@ subgradientL1Regression <- function( y, x, s=0.01, percentvals=0.1 , nits=100, b
     subgrad[mysamp]<-t(x[,mysamp]) %*% as.matrix( delt )
     tk<-s/sqrt(sum( subgrad * subgrad ) )
     betas<-betas-tk*subgrad
-    if ( !is.na(sparval) ) betas<-sparsify( betas , sparval )
+    if ( !is.na(sparval) ) betas<-eanatsparsify( betas , sparval )
     resultcorr<-cor.test( y,  x %*% betas )$est
     }
   resultcorr<-cor.test( y,  x %*% betas )$est
