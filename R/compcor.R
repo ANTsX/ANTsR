@@ -35,23 +35,34 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   }  
   highvarmat <- mat[, highvarmatinds ]
   if ( returnhighvarmatinds ) return( highvarmatinds )
-  if ( fastsvd )
+  if ( ! returnv  )
     {
+    if ( fastsvd )
+      {
       library(irlba)
       compcorrsvd <- irlba(highvarmat, nu = ncompcor, nv = 0 )
-    }  else compcorrsvd <- svd( highvarmat , nu = ncompcor, nv = 0 )
-  if (ncompcor > 0) {
-    compcorr <- (compcorrsvd$u[, 1:ncompcor])
-    compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
-    nuis <- compcorr
-    colnames(nuis) <- c(compcorrnames)
-  }
-  if ( ! returnv ) return(nuis) else {
-      vnuis<- t(nuis) %*% highvarmat
-      for ( i in 1:nrow(vnuis) ) {
-        vec<-vnuis[i,]
-        vnuis[i,]<-vec/sum(sqrt(vec*vec))
-      }
-      return( vnuis )
-  }
+      }  else compcorrsvd <- svd( highvarmat , nu = ncompcor, nv = 0 )
+    if (ncompcor > 0) {
+        compcorr <- (compcorrsvd$u[, 1:ncompcor])
+        compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
+        nuis <- compcorr
+        colnames(nuis) <- c(compcorrnames)
+    }
+    return( nuis )
+    }
+    if ( returnv  )
+    {
+    if ( fastsvd )
+      {
+      library(irlba)
+      compcorrsvd <- irlba(highvarmat, nu = 0, nv = ncompcor )
+      }  else compcorrsvd <- svd( highvarmat , nu = 0, nv = ncompcor )
+    if (ncompcor > 0) {
+        compcorr <- (compcorrsvd$v[, 1:ncompcor])
+        compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
+        nuis <- compcorr
+        colnames(nuis) <- c(compcorrnames)
+    }
+    return( nuis )
+    }
 } 
