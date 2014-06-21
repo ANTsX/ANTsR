@@ -1,4 +1,4 @@
-compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE, randomSamples=1 , returnv = FALSE, returnhighvarmat = FALSE ) {
+compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd=FALSE, useimagemath = FALSE, randomSamples=1 , returnv = FALSE, returnhighvarmatinds = FALSE, highvarmatinds = NA ) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
@@ -23,19 +23,18 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   if (class(fmri)[1] == "matrix") {
     mat <- fmri
   }
-  temporalvar <- apply(mat, 2, var)
-  tvhist <- hist(temporalvar, breaks = c("FD"), plot = T)
-  percvar <- variance_extreme  # percentage of high variance data to use
+  if ( is.na(highvarmatinds) ) {
+    temporalvar <- apply(mat, 2, var)
+    tvhist <- hist(temporalvar, breaks = c("FD"), plot = T)
+    percvar <- variance_extreme  # percentage of high variance data to use
   # get total counts
-  totalcounts <- sum(tvhist$counts)
-  wh <- (cumsum(tvhist$counts) < (totalcounts * percvar))
-  thresh <- max(tvhist$mids[wh])
-  # cumulativesum<-rev( cumsum( tvhist$counts / totalcounts ) ) thresh<-max( tvhist$mids[ ( cumulativesum >
-  # percvar ) ] )
-  wh <- (temporalvar > thresh)
-  wh2 <- (temporalvar <= thresh)
-  highvarmat <- mat[, wh]
-  if ( returnhighvarmat ) return( highvarmat )
+    totalcounts <- sum(tvhist$counts)
+    wh <- (cumsum(tvhist$counts) < (totalcounts * percvar))
+    thresh <- max(tvhist$mids[wh])
+    highvarmatinds <- which( temporalvar > thresh )
+  }  
+  highvarmat <- mat[, highvarmatinds ]
+  if ( returnhighvarmatinds ) return( highvarmatinds )
   if ( fastsvd )
     {
       library(irlba)
