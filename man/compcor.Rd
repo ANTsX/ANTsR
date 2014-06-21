@@ -34,6 +34,6 @@ Avants BB
 }
 
 \examples{
-mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
+mat <- matrix( rnorm(50000) ,ncol=500)
 compcorrdf<-compcor( mat ) 
 }
