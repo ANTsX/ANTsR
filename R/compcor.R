@@ -46,5 +46,12 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     nuis <- compcorr
     colnames(nuis) <- c(compcorrnames)
   }
-  if ( ! returnv ) return(nuis) else return( t(nuis) %*% highvarmat )
+  if ( ! returnv ) return(nuis) else {
+      vnuis<- t(nuis) %*% highvarmat
+      for ( i in 1:nrow(vnuis) ) {
+        vec<-vnuis[i,]
+        vnuis[i,]<-vec/sum(sqrt(vec*vec))
+      }
+      return( vnuis )
+  }
 } 
