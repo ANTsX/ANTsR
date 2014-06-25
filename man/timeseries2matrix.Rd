@@ -1,5 +1,5 @@
-\name{timeseriesimage2matrix}
-\alias{timeseriesimage2matrix}
+\name{timeseries2matrix}
+\alias{timeseries2matrix}
 
 \title{
 Time-series image to matrix
@@ -10,7 +10,7 @@ Extract a matrix from a time-series image after applying a mask.
 }
 
 \usage{
-timeseriesimage2matrix( img , mask )
+timeseries2matrix( img , mask )
 }
 
 \arguments{
@@ -36,11 +36,8 @@ Shrinidhi KL
 }
 
 \examples{
-\dontrun{
-img <- antsImageRead( "input.nii" , 4 )
+img <- makeImage( c(10,10,10,5) , 0 )
+# or use antsImageRead ...
 mask <- array( 1 , dim(img)[1:3] )
-# set some values of mask to FALSE ...
-
-mat <- timeseriesimage2matrix( img , mask )
-}
+mat <- timeseries2matrix( img , mask )
 }
