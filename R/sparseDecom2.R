@@ -19,17 +19,20 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   matname <- paste(statdir, "sccamatrix", post, ".mha", sep = "")
   antsImageWrite(as.antsImage(inmatrix[[1]]), matname[1])
   antsImageWrite(as.antsImage(inmatrix[[2]]), matname[2])
+  sccaname<-"two-view["
   if ( class( inmask[[1]] )[[1]] == "antsImage" ) {
     m1 <- inmask[[1]]
     dim <- as.numeric(m1@dimension)
+    if ( dim[1] == 4 ) sccaname<-"dynsccan[" 
     antsImageWrite(inmask[[1]], mfn[1])
   } else mfn[1] <- NA
   if ( class( inmask[[2]] )[[1]] == "antsImage" ) {
     m2 <- inmask[[2]]
     dim2 <- as.numeric(m2@dimension)
+    if ( dim2[1] == 4 ) sccaname<-"dynsccan[" 
     antsImageWrite(inmask[[2]], mfn[2])
   } else mfn[2] <- NA
-  args <- list("--scca", paste("two-view[", matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", sparseness[1], 
+  args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", sparseness[1], 
     ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, 
     "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth, "-r", 
     robust, "-c", mycoption)
@@ -47,7 +50,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     fileConn <- file(initlistfn)
     writeLines(outfns, fileConn)
     close(fileConn)
-    args <- list("--scca", paste("two-view[", matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
+    args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
       sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], 
       "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", 
       smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], "--initialization", initlistfn)
@@ -64,7 +67,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
       fileConn <- file(initlistfn2)
       writeLines(outfns, fileConn)
       close(fileConn)
-      args <- list("--scca", paste("two-view[", matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
+      args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
         sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", 
         cthresh[1], "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, 
         "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], "--initialization", initlistfn, 
