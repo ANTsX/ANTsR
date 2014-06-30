@@ -16,7 +16,10 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(inmask, mfn)
   }
-  args <- list("--svd", paste("recon[", matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", ell1, "-i", 
+  sccaname<-"recon[" 
+  if ( inmask@dimension == 4 ) sccaname<-"recon4d[" 
+
+  args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", ell1, "-i", 
     its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", 
     inmask,"-r",robust)
   if (length(initializationList) > 0) {
@@ -32,7 +35,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     fileConn <- file(initlistfn)
     writeLines(initfns, fileConn)
     close(fileConn)
-    args <- list("--svd", paste("recon[", matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", 1, "-i", 
+    args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", 1, "-i", 
       its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r",robust, "--mask", mfn, "--initialization", initlistfn)
     print(initlistfn)
   }
