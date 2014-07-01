@@ -13,12 +13,12 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
   antsImageWrite(as.antsImage(inmatrix), matname)
   mfn <- NA
   if ( class(inmask)[[1]][1] == "antsImage" ) {
+    maskdim<-inmask@dimension
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(inmask, mfn)
   }
   sccaname<-"recon[" 
-  if ( inmask@dimension == 4 ) sccaname<-"recon4d[" 
-
+  if ( maskdim == 4 ) sccaname<-"recon4d[" 
   args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]", sep = ""), "--l1", ell1, "-i", 
     its, "--PClusterThresh", cthresh, "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", 
     inmask,"-r",robust)
