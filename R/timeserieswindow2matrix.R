@@ -41,7 +41,7 @@ timeserieswindow2matrix <- function( timeseriesmatrix , mask, eventlist, timewin
   for ( i in eventlist ) {
     maxrow<-i+(timewindow-1)
     if ( maxrow > nrow(timeseriesmatrix) ) maxrow<-nrow(timeseriesmatrix)
-    locmat<-as.numeric( timeseriesmatrix[ i:maxrow, ] )
+    locmat<-as.numeric( t( timeseriesmatrix[ i:maxrow, ] ) )
     if ( length(locmat) == nvox4dmask ) outmat[ct,]<-locmat 
     ct<-ct+1
   }

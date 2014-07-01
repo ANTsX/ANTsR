@@ -12,6 +12,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
   matname <- paste(statdir, "spcamatrix.mha", sep = "")
   antsImageWrite(as.antsImage(inmatrix), matname)
   mfn <- NA
+  maskdim<-0
   if ( class(inmask)[[1]][1] == "antsImage" ) {
     maskdim<-inmask@dimension
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
