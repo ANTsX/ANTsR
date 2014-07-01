@@ -1,4 +1,4 @@
-timeserieswindow2matrix <- function( timeseriesmatrix , mask, eventlist, timewindow, zeropadvalue=5, spacing=NA )
+timeserieswindow2matrix <- function( timeseriesmatrix , mask, eventlist, timewindow, zeropadvalue=0, spacing=NA )
 {
   if ( length(dim(timeseriesmatrix)) != 2 )
     {
