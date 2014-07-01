@@ -98,7 +98,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     fnl2 <- fnll2
   }
   if (is.na(inmask[[1]])) {
-    glb <- paste("*scca*_Variate_View1vec.csv", sep = "")
+    glb <- paste("scca*_Variate_View1vec.csv", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
     fnl <- read.csv(fnl)
   }
