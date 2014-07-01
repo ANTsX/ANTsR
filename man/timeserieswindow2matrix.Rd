@@ -49,6 +49,7 @@ mat<-timeseries2matrix( img, mask )
 mat <- timeserieswindow2matrix( mat , mask, c(1, 4, 5 ), 2, 0 )
 print( dim(mat$eventmatrix) )
 print( dim(mat$mask4d) )
+
 ##### another approach 
 dim4<-c( 20, 30, 10, 100 )
 i1<-10:15
@@ -76,7 +77,7 @@ print(   emask[31:40] )
 ttt<-timeserieswindow2matrix( mat, msk, c(20,40,60,70) , 6, 0 )
 tte<-ttt$eventmatrix
 eanat<-sparseDecom(  tte, ttt$mask4d, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-eanat2<-sparseDecom( tte,          0, sparseness=-0.9,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+eanat2<-sparseDecom( tte,          0, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
 enomask<-eanat2$eigenanatomyimages[,1]
 # back to timematrix 
 tmat<-matrix( enomask,  nrow=6 )
