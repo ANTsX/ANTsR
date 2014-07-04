@@ -10,7 +10,7 @@ sparseDecom2def <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0
   eig2<-basecca$eig2[,1]
   for ( j in 2:nvecs ) {
     inmat1r<-as.matrix( residuals( lm( inmatrix[[1]] ~  deflatemat1 ) ) )
-    inmat2r<-inmatrix[[2]] # as.matrix( residuals( lm( inmatrix[[2]] ~  deflatemat2 ) ) )
+    inmat2r<-as.matrix( residuals( lm( inmatrix[[2]] ~  deflatemat2 ) ) )
     basecca<-sparseDecom2( inmatrix=list(inmat1r,inmat2r), inmask=inmask, sparseness=sparseness, nvecs=2, its=its, cthresh=cthresh, statdir=statdir, perms=perms, uselong=uselong, z=z, smooth=smooth, robust=robust, mycoption=mycoption,  initializationList=initializationList, initializationList2=initializationList2, ell1=ell1 )
     deflatemat1[,j]<-basecca$projections[,1]
     deflatemat2[,j]<-basecca$projections2[,1]
