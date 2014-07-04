@@ -20,7 +20,7 @@ sparseDecom2def <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0
     eig1<-cbind(eig1,basecca$eig1[,1])
     eig2<-cbind(eig1,basecca$eig2[,1])
   }
-  projections<-inmatrix[[1]] %*% as.matrix(eig1)
-  projections2<-inmatrix[[2]] %*% as.matrix(eig2)
+#  projections<-inmatrix[[1]] %*% as.matrix(eig1)
+#  projections2<-inmatrix[[2]] %*% as.matrix(eig2)
   return(list( eig1 = eig1, eig2=eig2, projections=projections, projections2=projections2 ) )
 } 
