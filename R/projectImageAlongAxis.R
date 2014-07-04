@@ -7,7 +7,7 @@ projectImageAlongAxis <- function( imageND, referenceImageNDminus1, projtype=0, 
   if ( is.na(axis) ) axis<-( imageND@dimension-1 )
   if ( axis >= imageND@dimension ) axis<-( imageND@dimension-1 )
   downimg<-antsImageClone( referenceImageNDminus1 )
-  ImageMath( imageND@dimension, downimg, "Project",imageND,projtype,axis)
+  ImageMath( imageND@dimension, downimg, "Project",imageND,axis,projtype)
   antsCopyImageInfo(referenceImageNDminus1,downimg)
   return( downimg )
 } 
