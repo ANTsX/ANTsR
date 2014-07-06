@@ -28,6 +28,10 @@ setMethod(f = "var", signature(x = "antsImage"), definition = function(x) {
   return(var(as.array(x)))
 })
 
+setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
+  return(sd(as.array(x)))
+})
+
 setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical() ) {
   if ( typeof(mask) != "logical" ) {
     print("'mask' provided is not of type 'logical'")
