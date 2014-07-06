@@ -67,11 +67,12 @@ library(BGLR)
 data(mice)
 snps<-mice.X
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
+numericalpheno<-residuals( lm( numericalpheno ~ as.factor(mice.pheno$Litter) ) )
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
-snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ), numericalpheno[train,] ), nvecs=10, sparseness=c( 0.001, 0.75 ), its=2, ell1=0.005 )
-for ( j in 1:4) {
+snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ), numericalpheno[train,] ), nvecs=20, sparseness=c( 0.001, -0.5 ), its=3, ell1=0.1 , z=-1 )
+for ( j in 3:3) {
 traindf<-data.frame( bmi=numericalpheno[ train,j] , 
    snpse=as.matrix( snps[train, ] ) %*% as.matrix( snpd$eig1 ) )
 testdf <-data.frame( bmi=numericalpheno[!train,j] , 
