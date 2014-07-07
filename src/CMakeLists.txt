@@ -14,7 +14,7 @@ ExternalProject_Add( ANTS
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     GIT_REPOSITORY https://github.com/stnava/ANTs.git
-    GIT_TAG 990eda54373201690ed14fb90e522ea2e963d763
+    GIT_TAG 928b2be98e7a8e6532694f368770921230ffe3fd
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D COPY_SCRIPT_FILES_TO_BIN_DIR=ON # for useful things like buildtemplateparallel
