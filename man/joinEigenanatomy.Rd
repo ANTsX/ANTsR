@@ -42,5 +42,11 @@ Avants BB
 }
 
 \examples{
-print("Not yet") 
+# if you dont have images 
+mat<-replicate(100, rnorm(20)) 
+mydecom<-sparseDecom( mat ) 
+kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
+print(dim( mydecom$eigenanatomyimages ) )
+print(dim( t(kk$fusedlist ) ) )
+# something similar may be done with images 
 }
