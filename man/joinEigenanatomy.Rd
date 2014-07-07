@@ -28,13 +28,13 @@ wmat<-joinEigenanatomy( datamatrix, mask , listEanatImages , gdensity = 0.65  )
 }
 
 \item{gdensity}{
-  target graph density 
+  target graph density or densities to search over
 }
 
 }
 
 \value{
-matrix is output
+  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership , graph=gg, bestdensity=graphdensity ))
 }
 
 \author{
@@ -46,6 +46,8 @@ Avants BB
 mat<-replicate(100, rnorm(20)) 
 mydecom<-sparseDecom( mat ) 
 kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
+# or select optimal parameter from a list
+kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
 print(dim( mydecom$eigenanatomyimages ) )
 print(dim( t(kk$fusedlist ) ) )
 # something similar may be done with images 
