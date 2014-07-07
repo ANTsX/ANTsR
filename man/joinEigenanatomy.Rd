@@ -49,4 +49,11 @@ kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
 print(dim( mydecom$eigenanatomyimages ) )
 print(dim( t(kk$fusedlist ) ) )
 # something similar may be done with images 
+mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
+mydecom<-sparseDecom( mat, inmask=mask ) 
+kki<-joinEigenanatomy( mat, mask=mask, mydecom$eigenanatomyimages , 0.1 )
+print(length( mydecom$eigenanatomyimages ) )
+print(length( kki$fusedlist ) )
+mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist , 
+  sparseness=0, nvecs=length(kki$fusedlist) ) 
 }
