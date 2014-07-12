@@ -6,8 +6,16 @@ sparseDecom2def <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0
   deflatemat2<-matrix(  rep(0, nrow(inmatrix[[2]])*nvecs ) , nrow=nrow(inmatrix[[2]]) )
   deflatemat1[,1]<-basecca$projections[,1]
   deflatemat2[,1]<-basecca$projections2[,1]
+  if ( typeof(basecca$eig1[[1]]) != "double" )  {
+      basecca$eig1<-imageListToMatrix( basecca$eig1, inmask[[1]] )
+  }
+  if ( typeof(basecca$eig2[[1]]) != "double" )  {
+      basecca$eig2<-imageListToMatrix( basecca$eig2, inmask[[2]] )
+  }
   eig1<-basecca$eig1[,1]
   eig2<-basecca$eig2[,1]
+    print(dim(as.matrix(eig1)))
+
   for ( j in 2:nvecs ) {
     inmat1r<-as.matrix( residuals( lm( inmatrix[[1]] ~  deflatemat1 ) ) )
     inmat2r<-as.matrix( residuals( lm( inmatrix[[2]] ~  deflatemat2 ) ) )
@@ -15,12 +23,17 @@ sparseDecom2def <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0
     deflatemat1[,j]<-basecca$projections[,1]
     deflatemat2[,j]<-basecca$projections2[,1]
     if ( typeof(basecca$eig1[[1]]) != "double" )  {
-      print("...")
+        basecca$eig1<-imageListToMatrix( basecca$eig1, inmask[[1]] )
+    }
+    if ( typeof(basecca$eig2[[1]]) != "double" )  {
+      basecca$eig2<-imageListToMatrix( basecca$eig2, inmask[[2]] )
     }
     eig1<-cbind(eig1,basecca$eig1[,1])
     eig2<-cbind(eig1,basecca$eig2[,1])
   }
-#  projections<-inmatrix[[1]] %*% as.matrix(eig1)
-#  projections2<-inmatrix[[2]] %*% as.matrix(eig2)
+  print(dim(inmatrix[[1]]))
+  print(dim(as.matrix(eig1)))
+  projections<-inmatrix[[1]] %*% t(as.matrix(eig1))
+  projections2<-inmatrix[[2]] %*% t(as.matrix(eig2))
   return(list( eig1 = eig1, eig2=eig2, projections=projections, projections2=projections2 ) )
 } 
