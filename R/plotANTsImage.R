@@ -1,7 +1,7 @@
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
 plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1, slices = "1x1x1", threshold = "1x0", 
-  quality = NA, outname = NA) {
+  quality = NA, outname = NA, alpha=0.5) {
   spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical", " print the help ", 
     "myantsimage", "b", 2, "character", " the reference image on which to overlay ", "color", "c", 1, "character", 
     " the color for the overlay ", "functional", "f", 1, "character", " the image to use as overlay ", "axis", 
@@ -155,8 +155,8 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
     img <- aperm(img, c(perms), resize = T)
   slicesin <- c(as.numeric(unlist(strsplit(slices, "x"))))
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
-  print(paste("threshold at ", threshold[1], " and ", threshold[2], "you chose these slices :"))
-  print(slicesin)
+  # print(paste("threshold at ", threshold[1], " and ", threshold[2], "you chose these slices :"))
+  # print(slicesin)
   if (slicesin[1] > dim(img)[imagedim] | slicesin[2] > dim(img)[imagedim]) {
     print("slices do not fit in image dimensions ---exiting")
     print(paste("slices1 ", slicesin[1], "slices2", slicesin[2], "dim-to-slice", dim(img)[imagedim]))
@@ -245,9 +245,9 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
     }
     mncl <- min(labimg)
     mxcl <- max(labimg)
-    print("threshold")
-    print(threshold)
-    print(paste("min/max of image", mncl, mxcl))
+    # print("threshold")
+    # print(threshold)
+    # print(paste("min/max of image", mncl, mxcl))
     temp <- labimg
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
     labimg <- temp
@@ -304,10 +304,10 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
     }
     if (minind > 1) 
       minind <- minind - 1
-    heatvals <- heat.colors(nlevels, alpha = 0.5)
-    heatvals <- rainbow(nlevels, alpha = 0.5)
+    heatvals <- heat.colors(nlevels, alpha = alpha )
+    heatvals <- rainbow(nlevels, alpha = alpha )
     colorfun <- colorRampPalette(c("gray60", color), interpolate = c("spline"), space = "Lab")
-    print(color[ind])
+    # print(color[ind])
     colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"), space = "Lab")
     heatvals <- colorfun(nlevels)
     if (locthresh[1] > 1) 
@@ -316,9 +316,10 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
       upper <- c((locthresh[2] + 1):nlevels)
       heatvals[upper] <- NA
     }
+#    heatvals[1:(length(heatvals)-50 ) ]<-NA
     plot(pixmapIndexed(biglab, col = heatvals), add = TRUE)
   }
-  print(outname)
+  print(paste('outname',outname))
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname)) 
