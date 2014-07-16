@@ -43,7 +43,7 @@ if( doMotionCorrection )
     transformedPointAtTime2 <- data.matrix( rotationMatrixAtTime2 ) %*% samplePoint + translationAtTime2
     framewiseDisplacement[i] <- sum( abs( transformedPointAtTime2 - transformedPointAtTime1 ) )
     }
-  framewiseDisplacement[0] <- mean( framewiseDisplacement[2:numberOfTimePoints] )
+  framewiseDisplacement[1] <- mean( framewiseDisplacement[2:numberOfTimePoints] )
 
   if( useMotionCorrectedImage )
     {
