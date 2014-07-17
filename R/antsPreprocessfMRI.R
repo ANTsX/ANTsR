@@ -107,13 +107,14 @@ cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldMatrix )
 
 # anisotropically smooth the 4-D image, if desired
 
+smoothCleanBoldImage <- antsImageClone( cleanBoldImage, "float" );
 if( spatialSmoothingType == "gaussian" )
   {
   if( length( spatialSmoothingParameters ) == 1 )
     {
     sigmaVector <- paste0( spatialSmoothingParameters[1], 'x',
       spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' )
-    ImageMath( 4, cleanBoldImage, "G", cleanBoldImage, sigmaVector )
+    ImageMath( 4, smoothCleanBoldImage, "G", cleanBoldImage, sigmaVector )
     } else {
     cat( "Error:  expecting a single scalar parameter.  See help.\n" )
     return
@@ -121,7 +122,7 @@ if( spatialSmoothingType == "gaussian" )
   } else if( spatialSmoothingType == "perona-malik" ) {
   if( length( spatialSmoothingParameters ) == 2 )
     {
-    ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
+    ImageMath( 4, smoothCleanBoldImage, "PeronaMalik", cleanBoldImage,
       spatialSmoothingParameters[1], spatialSmoothingParameters[2] )
     } else {
     cat( "Error:  expecting a two element vector.  See help.\n" )
@@ -133,7 +134,8 @@ if( spatialSmoothingType == "gaussian" )
   }
 #####################################################################
 #####################################################################
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
+return( list( cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,
+  DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
 }
 
 
