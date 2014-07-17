@@ -49,6 +49,12 @@ if( doMotionCorrection )
     {
     boldImage <- motionCorrectionResults$moco_img
     }
+  } else {
+  if( useMotionCorrectedImage )
+    {
+    cat( "Warning:  if motion correction is not performed then the motion corrected image is unavailable for use.\n" )
+    useMotionCorrectedImage <- FALSE
+    }
   }
 
 averageImage <- new( "antsImage", "float", 3 )
@@ -72,14 +78,13 @@ DVARS <- computeDVARS( boldMatrix )
 if( numberOfCompCorComponents > 0 )
   {
   compCorNuisanceVariables <- compcor( boldImage, maskImage, ncompcor = numberOfCompCorComponents, variance_extreme = 0.975 )
-  if( dim( nuisanceVariables )[1] > 0 )
+  if( is.na( nuisanceVariables ) || is.null( dim( nuisanceVariables ) ) )
     {
-    nuisanceVariables <- cbind( nuisanceVariables, compCorNuisanceVariables )
-    } else {
     nuisanceVariables <- compCorNuisanceVariables
+    } else {
+    nuisanceVariables <- cbind( nuisanceVariables, compCorNuisanceVariables )
     }
   }
-
 
 # replace boldMatrix in place with residualized version
 if( ! is.na( nuisanceVariables[1] ) )
