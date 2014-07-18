@@ -114,7 +114,7 @@ if( spatialSmoothingType == "gaussian" )
     {
     sigmaVector <- paste0( spatialSmoothingParameters[1], 'x',
       spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' )
-    ImageMath( 4, smoothCleanBoldImage, "G", cleanBoldImage, sigmaVector )
+    ImageMath( 4, smoothCleanBoldImage, 'G', smoothCleanBoldImage, sigmaVector )
     } else {
     cat( "Error:  expecting a single scalar parameter.  See help.\n" )
     return
