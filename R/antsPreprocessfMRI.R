@@ -43,11 +43,17 @@ if( doMotionCorrection )
     transformedPointAtTime2 <- data.matrix( rotationMatrixAtTime2 ) %*% samplePoint + translationAtTime2
     framewiseDisplacement[i] <- sum( abs( transformedPointAtTime2 - transformedPointAtTime1 ) )
     }
-  framewiseDisplacement[0] <- mean( framewiseDisplacement[2:numberOfTimePoints] )
+  framewiseDisplacement[1] <- mean( framewiseDisplacement[2:numberOfTimePoints] )
 
   if( useMotionCorrectedImage )
     {
     boldImage <- motionCorrectionResults$moco_img
+    }
+  } else {
+  if( useMotionCorrectedImage )
+    {
+    cat( "Warning:  if motion correction is not performed then the motion corrected image is unavailable for use.\n" )
+    useMotionCorrectedImage <- FALSE
     }
   }
 
@@ -72,14 +78,13 @@ DVARS <- computeDVARS( boldMatrix )
 if( numberOfCompCorComponents > 0 )
   {
   compCorNuisanceVariables <- compcor( boldImage, maskImage, ncompcor = numberOfCompCorComponents, variance_extreme = 0.975 )
-  if( dim( nuisanceVariables )[1] > 0 )
+  if( is.na( nuisanceVariables ) || is.null( dim( nuisanceVariables ) ) )
     {
-    nuisanceVariables <- cbind( nuisanceVariables, compCorNuisanceVariables )
-    } else {
     nuisanceVariables <- compCorNuisanceVariables
+    } else {
+    nuisanceVariables <- cbind( nuisanceVariables, compCorNuisanceVariables )
     }
   }
-
 
 # replace boldMatrix in place with residualized version
 if( ! is.na( nuisanceVariables[1] ) )
@@ -102,13 +107,14 @@ cleanBoldImage <- matrix2timeseries( boldImage, maskImage, boldMatrix )
 
 # anisotropically smooth the 4-D image, if desired
 
+smoothCleanBoldImage <- antsImageClone( cleanBoldImage, "float" );
 if( spatialSmoothingType == "gaussian" )
   {
   if( length( spatialSmoothingParameters ) == 1 )
     {
     sigmaVector <- paste0( spatialSmoothingParameters[1], 'x',
       spatialSmoothingParameters[1], 'x', spatialSmoothingParameters[1], 'x0' )
-    ImageMath( 4, cleanBoldImage, "G", cleanBoldImage, sigmaVector )
+    ImageMath( 4, smoothCleanBoldImage, 'G', smoothCleanBoldImage, sigmaVector )
     } else {
     cat( "Error:  expecting a single scalar parameter.  See help.\n" )
     return
@@ -116,7 +122,7 @@ if( spatialSmoothingType == "gaussian" )
   } else if( spatialSmoothingType == "perona-malik" ) {
   if( length( spatialSmoothingParameters ) == 2 )
     {
-    ImageMath( 4, cleanBoldImage, "PeronaMalik", cleanBoldImage,
+    ImageMath( 4, smoothCleanBoldImage, "PeronaMalik", cleanBoldImage,
       spatialSmoothingParameters[1], spatialSmoothingParameters[2] )
     } else {
     cat( "Error:  expecting a two element vector.  See help.\n" )
@@ -128,7 +134,8 @@ if( spatialSmoothingType == "gaussian" )
   }
 #####################################################################
 #####################################################################
-return( list( cleanBoldImage = cleanBoldImage, maskImage = maskImage, DVARS = DVARS, DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
+return( list( cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,
+  DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
 }
 
 
