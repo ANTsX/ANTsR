@@ -35,15 +35,16 @@ Avants BB
 
 \examples{
 mat<-t(replicate(3, rnorm(100)) )
+for ( i in 1:nrow(mat) ) mat[i, abs(mat[i,]) < 1 ]<-0
 initdf<-initializeEigenanatomy( mat ) 
 dmat<-replicate(100, rnorm(20)) 
 eanat<-sparseDecom( dmat, inmask=initdf$mask, 
-  sparseness=-0.1, smooth=0,
+  sparseness=0, smooth=0,
   initializationList=initdf$initlist, cthresh=0,
   nvecs=length(initdf$initlist) )
 initdf2<-initializeEigenanatomy( mat, nreps=2 ) 
 eanat<-sparseDecom( dmat, inmask=initdf$mask, 
-  sparseness=-0.1, smooth=0, z=-0.5,
-  initializationList=initdf$initlist, cthresh=0,
-  nvecs=length(initdf$initlist) )
+  sparseness=0, smooth=0, z=-0.5,
+  initializationList=initdf2$initlist, cthresh=0,
+  nvecs=length(initdf2$initlist) )
 }
