@@ -6,9 +6,17 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     cat(" each input should be a list with 2 entries e.g. sparseness=c(0.01,0.02) \n")
     return(0)
   }
+  if ( is.na(inmask[1]) & length(initializationList) > 0  ) {
+    cat("You should set pass a mask in mask slot 1 if you are using initializationList\n")
+    return(0)
+  }
+  if ( is.na(inmask[2]) & length(initializationList2) > 0  ) {
+    cat("You should set pass a mask in mask slot 2 if you are using initializationList2\n")
+    return(0)
+  }
   if ( length( cthresh ) < 2  ) {
-      cat("You should set a length=2 cthresh value even if it is c(0,0)\n")
-      return(0)
+    cat("You should set a length=2 cthresh value even if it is c(0,0)\n")
+    return(0)
   }
   post <- c(1, 2)
   if (is.na(statdir)) 
