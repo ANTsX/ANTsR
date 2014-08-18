@@ -25,7 +25,7 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   }
   if ( is.na(highvarmatinds) ) {
     temporalvar <- apply(mat, 2, var)
-    tvhist <- hist(temporalvar, breaks = c("FD"), plot = T)
+    tvhist <- hist(temporalvar, breaks = c("FD"), plot = F)
     percvar <- variance_extreme  # percentage of high variance data to use
   # get total counts
     totalcounts <- sum(tvhist$counts)
