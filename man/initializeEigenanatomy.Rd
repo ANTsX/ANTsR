@@ -47,6 +47,13 @@ eanat<-sparseDecom( dmat, inmask=initdf$mask,
   sparseness=0, smooth=0, z=-0.5,
   initializationList=initdf2$initlist, cthresh=0,
   nvecs=length(initdf2$initlist) )
+# now a regression
+eanatMatrix<-imageListToMatrix(  eanat$eigenanatomyimages, initdf$mask )
+# "averages" loosely speaking anyway
+myEigenanatomyRegionAverages<-mat %*% t( eanatMatrix )
+dependentvariable<-rnorm( nrow(dmat) )
+summary(lm( dependentvariable ~ myEigenanatomyRegionAverages ))
+
 dmat2<-replicate(30, rnorm(20)) 
 eanat<-sparseDecom2( list(dmat,dmat2), inmask=c(initdf$mask,NA), 
   sparseness=c(-0.1,-0.1 ), smooth=0,
