@@ -43,7 +43,7 @@ for ( i in 1:max(aalimg) )
 maskvec<-boldmask > 0 & aalimg == as.numeric(dmnlabels[whichregion])
 boldmask[ maskvec ]<-0
 timeselect<-10:dim(bold)[4]
-if ( ! exists("moco") ) moco<-motion_correction(bold,moreaccurate=0)$moco_params[,]
+if ( ! exists("moco") ) moco<-motion_correction(bold,moreaccurate=0)$moco_params[timeselect,]
 boldmat<-timeseries2matrix(bold,boldmask)
 boldmat<-boldmat[timeselect,]
 aalimg[aalimg > 0 ]<-1
