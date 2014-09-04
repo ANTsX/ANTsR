@@ -1,4 +1,5 @@
-rsfDenoise <- function( boldmatrix, targety, motionparams=NA, selectionthresh=0.25, maxnoisepreds=1:12, debug=FALSE, polydegree=6 , crossvalidationgroups=4, tr=1 )
+rsfDenoise <- function( boldmatrix, targety, motionparams=NA, selectionthresh=0.1, maxnoisepreds=1:12, debug=FALSE,
+                       polydegree=6 , crossvalidationgroups=4, tr=1, scalemat=F )
 {
 nvox<-ncol(boldmatrix)
 groups<-crossvalidationgroups
@@ -73,7 +74,7 @@ if ( all( noisepool==FALSE ) )
   print("zero voxels meet your pvalthresh - try decreasing the value")
   return(NA)
   } else print(paste("Noise pool has nvoxels=",sum(noisepool)))
-svdboldmat<-scale(svdboldmat)
+if ( scalemat ) svdboldmat<-scale(svdboldmat)
 noiseu<-svd( svdboldmat[,noisepool], nv=0, nu=max(maxnoisepreds) )$u
 R2summary<-rep(0,length(maxnoisepreds))
 ct<-1
