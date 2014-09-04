@@ -1,28 +1,22 @@
 \name{rsfDenoise}
 \alias{rsfDenoise}
-
 \title{
 WIP: data-driven denoising for resting state fMRI
 }
-
 \description{
 Uses a target function to denoise resting bold data
 }
-
 \usage{
 wmat<-rsfDenoise( mat  )
 }
-
 \arguments{
 \item{mat}{
   input bold matrix
 }
 }
-
 \value{
 matrix is output
 }
-
 \author{
 Avants BB
 }
@@ -37,9 +31,12 @@ dmnlabels<-aal$label_num[aal$isdmn>0]
 aalvec<-aalimg > 0 
 whichregion<-3
 for ( i in 1:max(aalimg) )
-    if ( ! ( i %in% dmnlabels[whichregion] ) ) {
-        aalimg[ aalimg == as.numeric(i) ]<-0
+  {
+  if ( ! ( i %in% dmnlabels[whichregion] ) ) 
+    {
+    aalimg[ aalimg == as.numeric(i) ]<-0
     }
+  }
 maskvec<-boldmask > 0 & aalimg == as.numeric(dmnlabels[whichregion])
 boldmask[ maskvec ]<-0
 timeselect<-10:dim(bold)[4]
