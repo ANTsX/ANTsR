@@ -3,6 +3,12 @@ An R package providing ITK features in R.
 
 Authors: Shrinidhi KL,  Avants BB 
 
+## easiest approach ( from within R )
+library( devtools )
+install_github("stnava/ANTsR") 
+
+# assumes you have cmake installed / accessible in your environment
+
 ## Installation
 see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
 
