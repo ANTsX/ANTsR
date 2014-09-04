@@ -42,16 +42,21 @@ for ( i in 1:max(aalimg) )
     }
 maskvec<-boldmask > 0 & aalimg == as.numeric(dmnlabels[whichregion])
 boldmask[ maskvec ]<-0
-if ( ! exists("moco") ) moco<-motion_correction(bold,moreaccurate=0)$moco_params
+timeselect<-10:dim(bold)[4]
+if ( ! exists("moco") ) moco<-motion_correction(bold,moreaccurate=0)$moco_params[,]
 boldmat<-timeseries2matrix(bold,boldmask)
+boldmat<-boldmat[timeselect,]
 aalimg[aalimg > 0 ]<-1
-dmnmat<-matrix( rowMeans(timeseries2matrix(bold,aalimg)) ,ncol=1)
+dmnvec<-rowMeans(timeseries2matrix(bold,aalimg))[timeselect]
+dmnvec<-(stl(ts(dmnvec, frequency = 4),"per")$time.series)[,2]
+dmnmat<-matrix( dmnvec, ncol=1)
 dnz<-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,
                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
 print(paste("Best number of noise regressors",dnz$n))
 # now recompute the matrix using the full mask
 boldmask<-antsImageRead("meanboldmask.nii.gz",3)
 boldmat<-timeseries2matrix(bold,boldmask)
+boldmat<-boldmat[timeselect,]
 mdl<-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )
 betas<-mdl$beta.t[1,]
 }
