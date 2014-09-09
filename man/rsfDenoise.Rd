@@ -37,15 +37,20 @@ for ( i in 1:max(aalimg) )
     aalimg[ aalimg == as.numeric(i) ]<-0
     }
   }
-maskvec<-boldmask > 0 & aalimg == as.numeric(dmnlabels[whichregion])
+maskvec<-boldmask > 0 & aalimg == whichregion
 boldmask[ maskvec ]<-0
 timeselect<-10:dim(bold)[4]
-if ( ! exists("moco") ) moco<-motion_correction(bold,moreaccurate=0)$moco_params[timeselect,]
+if ( ! exists("moco") ) {
+  moco<-motion_correction(bold,moreaccurate=1)
+  moco<-as.matrix( moco$moco_params )[timeselect,3:ncol(moco$moco_params)]
+}
 boldmat<-timeseries2matrix(bold,boldmask)
 boldmat<-boldmat[timeselect,]
 aalimg[aalimg > 0 ]<-1
 dmnvec<-rowMeans(timeseries2matrix(bold,aalimg))[timeselect]
 dmnvec<-(stl(ts(dmnvec, frequency = 4),"per")$time.series)[,2]
+dmnvec2<-(stl(ts(dmnvec, frequency = 100),"per")$time.series)[,2]
+dmnvec<-ts(as.numeric(dmnvec)-as.numeric(dmnvec2))
 dmnmat<-matrix( dmnvec, ncol=1)
 dnz<-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,
                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
