@@ -6,11 +6,11 @@ Smooth an image
 }
 
 \description{
-Perform smoothing on the given image with a given sigma
+Perform smoothing on the given image with a given sigma, defined in physical space units
 }
 
 \usage{
-SmoothImage( "<imageDimension>" , "<inputImage>" , "Sigma" , "<outputimage>")
+SmoothImage( "<imageDimension>" , "<inputImage>" , "SigmaVector" , "<outputimage>")
 }
 
 \arguments{
@@ -24,7 +24,7 @@ Input image to operate on
 
 
 \item{Sigma}{
-Smoothing factor
+Smoothing factor in format 1.1x1.5x0.5 for a 3D image
 }
 
 \item{outputImage}{
@@ -44,6 +44,9 @@ Shrinidhi KL, Avants BB
 
 \examples{
 \dontrun{
-SmoothImage( 3 , "input_img.nii" ,1, "output_img.nii")
+# different ways you might smooth images of different dimensionality
+SmoothImage( 2 , img ,"1.2x1.5", img)
+SmoothImage( 3 , img ,"1x0x1", img)
+SmoothImage( 4 , img ,"1x2x1x0", img)
 }
 }
