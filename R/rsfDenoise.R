@@ -1,5 +1,5 @@
 rsfDenoise <- function( boldmatrix, targety, motionparams=NA, selectionthresh=0.1, maxnoisepreds=1:12, debug=FALSE,
-                       polydegree=6 , crossvalidationgroups=4, tr=1, scalemat=F )
+                       polydegree=4 , crossvalidationgroups=4, tr=1, scalemat=F )
 {
 nvox<-ncol(boldmatrix)
 groups<-crossvalidationgroups
@@ -40,7 +40,7 @@ crossvalidatedR2<-function( residmatIn, targety, groups , howmuchnoise=0, noiseu
       mydf<-data.frame( mydf, p[selector,] )
     predmat<-predict(mylm1,newdata=mydf)
     realmat<-residmat[selector,]
-    for ( v in 1:nvox ) R2[k,v]<-100*( 1 -  sum( ( predmat[,v] - realmat[,v] )^2 ) / sum(  (mean(realmat[,v]) - realmat[,v] )^2 )  )
+    for ( v in 1:nvox ) R2[k,v]<-100*( 1 - sum( ( predmat[,v] - realmat[,v] )^2 ) / sum(  (mean(realmat[,v]) - realmat[,v] )^2 )  )
     }
   return(R2)
 }
@@ -82,7 +82,7 @@ for ( i in maxnoisepreds )
   {
   svdboldmat<-residuals(lm(rawboldmat~0+p+noiseu[,1:i]))
   R2<-crossvalidatedR2(  svdboldmat, targety, groups , noiseu=NA, howmuchnoise=i, p=NA  )
-  R2<-apply(R2,FUN=min,MARGIN=2)
+  R2<-apply(R2,FUN=mean,MARGIN=2)
   if ( ct == 1 ) R2perNoiseLevel<-R2 else R2perNoiseLevel<-cbind(R2perNoiseLevel,R2)
   if ( debug ) print(paste("Noise pool has nvoxels=",sum(noisepool)))
   R2summary[ct]<-mean(R2)
