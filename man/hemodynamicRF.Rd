@@ -1,6 +1,5 @@
 \name{hemodynamicRF}
 \alias{hemodynamicRF}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Linear Model for FMRI Data }
 \description{
   Create the expected BOLD response for a given task indicator function.
@@ -63,6 +62,29 @@
 \examples{
   # Example 1
   hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2)
+  # Take a look - contributed by Jeff Phillips (
+  scans<-32
+  on<-c(1)
+  dur<-c(3)
+  rt<-0.5
+  cc<-0.35
+  a1<-4
+  a2<-3
+  b1<-0.9
+  b2<-0.9
+  nlev<-max(length(cc),length(a1),length(a2),length(b1),length(b2))
+  mat<-matrix(NA,nrow=nlev,ncol=scans)
+  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
+  for (i in 1:nlev) {
+    hrf<-ts( hemodynamicRF(scans=scans, onsets=on, durations=dur, 
+      rt=rt,cc=cc[min(i,length(cc))],a1=a1[min(i,length(a1))],
+      a2=a2[min(i,length(a2))],b1=b1[min(i,length(b1))], b2=b2[min(i,length(b2))]))
+    plot(hrf)
+    Sys.sleep(1)
+    mat[i,]<-hrf-hrf[1]
+  }
+  matplot(seq(rt,scans*rt,by=rt),t(mat),'l',lwd=1,col=cscale)
+  legend(x='topleft',legend=cc,text.col=cscale)
 }
 \keyword{ regression }% at least one, from doc/KEYWORDS
 \keyword{ design }% __ONLY ONE__ keyword per line
