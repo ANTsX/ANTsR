@@ -24,7 +24,14 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 , opt=
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
   voxHi <- round((1/freqHi))  # keep anything above this
   myTimeSeries <- ts(boldmat, frequency = 1/tr)
-  if ( opt != "trig") {
+
+  if( opt == "winsor" )
+    {
+    filteredTimeSeries <- data.frame( stl( ts( winsor( boldmat, 0.01 ), frequency = tr ), "per" )$time.series )
+    return( filteredTimeSeries$trend )
+    }
+
+  if ( opt == "butt") {
     bf <- butter(2, c( freqLo, freqHi ), type="pass")
     filteredTimeSeries <- matrix( signal::filter(bf, myTimeSeries) , nrow=nrow(myTimeSeries) )
     return( filteredTimeSeries )
@@ -33,12 +40,12 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 , opt=
   if (nrow(myTimeSeries)%%2 > 0) {
     firsttime <- myTimeSeries[1, ]
     myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
-    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE, 
+    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE,
       type = c("trigonometric")))
     filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
     filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
   } else {
-    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE, 
+    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE,
       type = c("trigonometric")))
   }
   temporalvar <- apply(filteredTimeSeries, 2, var)
@@ -48,4 +55,6 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 , opt=
   }
   return(filteredTimeSeries)
   }
+
+
 }
