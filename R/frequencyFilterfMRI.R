@@ -24,13 +24,19 @@ frequencyFilterfMRI <- function( boldmat, tr, freqLo = 0.01, freqHi = 0.1 , opt=
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
   voxHi <- round((1/freqHi))  # keep anything above this
   myTimeSeries <- ts(boldmat, frequency = 1/tr)
-
-  if( opt == "winsor" )
+  if( opt == "stl" )
     {
-    filteredTimeSeries <- data.frame( stl( ts( winsor( boldmat, 0.01 ), frequency = tr ), "per" )$time.series )
-    return( filteredTimeSeries$trend )
+    trendfrequencyL<-1/freqLo
+    trendfrequencyH<-1/freqHi
+    for ( i in 1:ncol(boldmat) ) {
+      if (!is.na(trendfrequencyH)) boldmat[,i]<-data.frame(stl( ts( boldmat[,i],frequency=trendfrequencyH)  , "per" )$time.series)$trend
+      if (!is.na(trendfrequencyL)) {
+          temp<-data.frame(stl( ts(        boldmat[,i]          ,frequency=trendfrequencyL) , "per" )$time.series)$trend
+          boldmat[,i]<-boldmat[,i]-temp
+      }
+      }
+    return( boldmat )
     }
-
   if ( opt == "butt") {
     bf <- butter(2, c( freqLo, freqHi ), type="pass")
     filteredTimeSeries <- matrix( signal::filter(bf, myTimeSeries) , nrow=nrow(myTimeSeries) )
