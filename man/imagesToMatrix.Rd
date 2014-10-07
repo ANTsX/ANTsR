@@ -38,14 +38,18 @@ imagesToMatrix(imageList, mask)
 }
 
 \examples{
-\dontrun{
 
-  imageList = list.files("/mnt/data/brains", pattern = "\\.nii\\.gz$", full.names = TRUE)
+# make some simulated images and convert them to a matrix
 
-  mask = getMask("/mnt/data/masks/brainmask.nii.gz")
-
+  n <- 8
+  tdir<-tempdir()
+  for ( i in 1:n ) {
+    simimg<-as.antsImage( replicate(64, rnorm(64) ) )
+    antsImageWrite( simimg, paste(tdir,"/image",i,".mha",sep=''))
+  }
+  imageList = list.files(tdir, pattern = "\\.mha", full.names = TRUE)
+  mask = getMask( antsImageRead( imageList[1] , 2 ) )
   mat = imagesToMatrix(imageList, mask)
-
-}
+  print(dim(mat))
 
 }
