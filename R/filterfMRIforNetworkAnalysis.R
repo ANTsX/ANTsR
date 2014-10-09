@@ -1,4 +1,4 @@
-filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA, 
+filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA,
   labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA, usesvd = FALSE , robustcorr = FALSE  ) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
@@ -51,17 +51,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
   voxHi <- round((1/freqHi))  # keep anything above this
   myTimeSeries <- ts(aslmat, frequency = 1/tr)
-  if (nrow(myTimeSeries)%%2 > 0) {
-    firsttime <- myTimeSeries[1, ]
-    myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
-    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE, 
-      type = c("trigonometric")))
-    filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
-    filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
-  } else {
-    filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = FALSE, root = FALSE, 
-      type = c("trigonometric")))
-  }
+  filteredTimeSeries<-frequencyFilterfMRI( aslmat, tr=tr, freqLo=freqLo, freqHi=freqHi, opt='trig')
   vox <- round(ncol(filteredTimeSeries) * 0.5)  #  a test voxel
   spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, log = "n")
   temporalvar <- apply(filteredTimeSeries, 2, var)
@@ -74,10 +64,10 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     oulabels <- sort(unique(labels[labels > 0]))
     whvec <- (mask == 1)
     ulabels <- sort(unique(labels[whvec]))
-    if (ulabels[1] == 0) 
+    if (ulabels[1] == 0)
       ulabels <- ulabels[2:length(ulabels)]
     labelvec <- labels[whvec]
-    if (!is.na(seg)) 
+    if (!is.na(seg))
       segvec <- seg[whvec] else segvec <- NA
     labmat <- matrix(data = rep(NA, length(oulabels) * nrow(filteredTimeSeries)), nrow = length(oulabels))
     nrowts <- nrow(filteredTimeSeries)
@@ -87,7 +77,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       } else {
         dd <- labelvec == mylab
       }
-      
+
       submat <- filteredTimeSeries[, dd]
       # if ( length( c( submat ) ) > nrowts ) myavg<-svd( submat )$u[,1] else myavg<-submat
 
@@ -101,7 +91,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
       } else {
         myavg <- submat
       }
-      
+
       if (length(myavg) > 0) {
         labmat[which(ulabels == mylab), ] <- myavg
       } else {
@@ -113,7 +103,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     tlabmat<-t(labmat)
     ocormat <- cor(tlabmat, tlabmat)
     rcormat<-ocormat
-    if ( robustcorr ) 
+    if ( robustcorr )
     for ( i in 1:nrow(rcormat) ) {
         for ( j in i:nrow(rcormat) ) {
             if ( i != j ) {
@@ -151,10 +141,9 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     if ( ! is.na( nuisancein ) ) cormat<-cormat[1:nbrainregions,1:nbrainregions]
     if ( ! is.na( nuisancein ) ) ocormat<-ocormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
-    return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat, 
+    return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat,
       graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat,rcormat=rcormat ))
   } else {
     return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar))
-  }  
+  }
 }
-
