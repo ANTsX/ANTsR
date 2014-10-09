@@ -1,5 +1,6 @@
-rsfDenoise <- function( boldmatrix, targety, motionparams=NA, selectionthresh=0.1, maxnoisepreds=1:12, debug=FALSE,
-                       polydegree=4 , crossvalidationgroups=4, tr=1, scalemat=F )
+rsfDenoise <- function( boldmatrix, targety, motionparams=NA, selectionthresh=0.1,
+  maxnoisepreds=1:12, debug=FALSE, polydegree=4 , crossvalidationgroups=4, tr=1,
+  scalemat=F, noisepoolfun=max )
 {
 nvox<-ncol(boldmatrix)
 groups<-crossvalidationgroups
@@ -10,32 +11,28 @@ if ( length(groups) == 1 ) {
   for ( k in 1:kfolds ) groups<-c(groups,rep(k,grouplength))
 }
 
+
 getnoisepool<-function( x, frac = selectionthresh ) {
   xord<-sort(x)
   l<-round(length(x)*frac)
   val<-xord[l]
-  return( x < val )
+  return( x < val & x < 0 )
 }
 
 crossvalidatedR2<-function( residmatIn, targety, groups , howmuchnoise=0, noiseu=NA, p=NA ) {
   residmat<-residmatIn
-#  if ( ! all( is.na(noiseu) ) ) residmat<-residuals(lm(residmatIn~noiseu[,1:howmuchnoise]+0))
   nvox<-ncol(residmat)
-  kfo<-max(groups)
-  R2<-matrix(rep(0, nvox * kfo ),nrow=kfo)
-  for ( k in 1:kfo )
+  kfo<-unique( groups )
+  R2<-matrix(rep(0, nvox * length(kfo) ), nrow=length(kfo) )
+  for ( k in kfo )
     {
     selector <- groups!=k
     mydf<-data.frame( targety[selector] )
-#    if ( ! all( is.na(noiseu) ) )
-#      mydf<-data.frame( mydf, noiseu[selector,1:i] )  
     if ( ! all( is.na(p) ) )
       mydf<-data.frame( mydf, p[selector,] )
     mylm1<-lm( residmat[selector,]   ~  . , data=mydf )
     selector <- groups==k
     mydf<-data.frame( targety[selector] )
-#    if ( ! all( is.na(noiseu) ) )
-#      mydf<-data.frame( mydf, noiseu[selector,1:i] )  
     if ( ! all( is.na(p) ) )
       mydf<-data.frame( mydf, p[selector,] )
     predmat<-predict(mylm1,newdata=mydf)
@@ -56,25 +53,26 @@ crossvalidatedR2<-function( residmatIn, targety, groups , howmuchnoise=0, noiseu
 timevals<-NA
 if ( all(is.na(timevals)) ) timevals<-1:nrow(boldmatrix)
 p<-stats::poly( timevals ,degree=polydegree )
-p<-cbind( data.matrix(motionparams) , p ) 
+p<-cbind( data.matrix(motionparams) , p )
 rawboldmat<-data.matrix(boldmatrix)
 svdboldmat<-residuals(lm(rawboldmat~0+p))
 if (debug) print('lm')
 ################### now redo some work w/new hrf
 R2base<-crossvalidatedR2(  svdboldmat, targety, groups , p=NA )
-R2base<-apply(R2base,FUN=min,MARGIN=2)
+R2base<-apply(R2base,FUN=noisepoolfun,MARGIN=2)
 noisepool<-getnoisepool( R2base )
 if ( all( noisepool==TRUE ) )
   {
   print("all voxels meet your pvalthresh - try increasing the value")
   return(NA)
-  } 
+  }
 if ( all( noisepool==FALSE ) )
   {
   print("zero voxels meet your pvalthresh - try decreasing the value")
   return(NA)
   } else print(paste("Noise pool has nvoxels=",sum(noisepool)))
 if ( scalemat ) svdboldmat<-scale(svdboldmat)
+##### should the denoising be done per group / run ?
 noiseu<-svd( svdboldmat[,noisepool], nv=0, nu=max(maxnoisepreds) )$u
 R2summary<-rep(0,length(maxnoisepreds))
 ct<-1
@@ -82,10 +80,10 @@ for ( i in maxnoisepreds )
   {
   svdboldmat<-residuals(lm(rawboldmat~0+p+noiseu[,1:i]))
   R2<-crossvalidatedR2(  svdboldmat, targety, groups , noiseu=NA, howmuchnoise=i, p=NA  )
-  R2<-apply(R2,FUN=mean,MARGIN=2)
-  if ( ct == 1 ) R2perNoiseLevel<-R2 else R2perNoiseLevel<-cbind(R2perNoiseLevel,R2)
-  if ( debug ) print(paste("Noise pool has nvoxels=",sum(noisepool)))
-  R2summary[ct]<-mean(R2)
+  R2max<-apply(R2,FUN=max,MARGIN=2)
+  if ( ct == 1 ) R2perNoiseLevel<-R2max else R2perNoiseLevel<-cbind(R2perNoiseLevel,R2max)
+  R2pos<-R2max[ R2max > 0 ]
+  R2summary[ct]<-median(R2pos)
   print(paste("NoiseU:",i,"MeanRSqrd",  R2summary[ct] ))
   ct<-ct+1
   }
