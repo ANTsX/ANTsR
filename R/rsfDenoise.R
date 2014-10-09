@@ -90,5 +90,5 @@ for ( i in maxnoisepreds )
 scl<-0.95
 if (max(R2summary)<0) scl<-1.05
 bestn<-maxnoisepreds[which( R2summary > scl*max(R2summary) )[1]]
-return(list( n=bestn, R2atBestN=R2summary[bestn], noisepool=noisepool, R2base=R2base, R2final=R2perNoiseLevel, noiseu=noiseu[,1:bestn], polys=p ))
+return(list( n=bestn, R2atBestN=R2summary[bestn], noisepool=noisepool, R2base=R2base, R2final=R2perNoiseLevel, noiseu=noiseu, polys=p ))
 }
