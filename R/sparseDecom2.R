@@ -1,5 +1,5 @@
 sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), nvecs = 3, its = 2, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 0, initializationList = list(), 
-  initializationList2 = list(), ell1 = 0.05) {
+  initializationList2 = list(), ell1 = 0.05, priorWeight = 0.0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
@@ -43,7 +43,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", sparseness[1], 
     ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, 
     "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth, "-r", 
-    robust, "-c", mycoption)
+    robust, "-c", mycoption, "--prior-weight", priorWeight)
   
   if (length(initializationList) > 0) {
     ct <- 1
@@ -61,7 +61,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], ",", mfn[2], ",", 
       sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], 
       "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", 
-      smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], "--initialization", initlistfn)
+      smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], "--initialization", initlistfn, "--prior-weight", priorWeight)
     if (length(initializationList2) > 0) {
       ct <- 1
       outfns <- c()
@@ -79,7 +79,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
         sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", 
         cthresh[1], "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, 
         "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], "--initialization", initlistfn, 
-        "--mask2", mfn[2], "--initialization2", initlistfn2)
+        "--mask2", mfn[2], "--initialization2", initlistfn2,"--prior-weight", priorWeight)
     }
   }
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
