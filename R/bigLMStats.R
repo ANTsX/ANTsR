@@ -1,5 +1,7 @@
 bigLMStats <- function(mylm, lambda = 0.0 ) {
-  beta <- mylm$coefficients[-1, ]
+  veccoef<-FALSE
+  if ( is.null( dim( mylm$coefficients ) ) )  veccoef<-TRUE
+  if ( veccoef ) beta <- mylm$coefficients[-1] else beta <- mylm$coefficients[-1, ]
   myresponse <- model.response(model.frame(mylm))
   X <- model.matrix(mylm)
   dfr <- dim(X)[2] - 1
@@ -27,7 +29,8 @@ bigLMStats <- function(mylm, lambda = 0.0 ) {
     beta.std <- t(sqrt( as.vector(colSums((mylm$residuals)^2) / 
                        mylm$df.residual) %o% mycoefs))
   }
-  beta.t <- mylm$coefficients[-1, ] / beta.std
+  if ( veccoef ) beta.t <- mylm$coefficients[-1] / beta.std  
+  if (!veccoef ) beta.t <- mylm$coefficients[-1, ] / beta.std  
   beta.pval <- 2*pt(-abs(beta.t),df=mylm$df.residual)
   list(fstat=fstat, pval.model=pval.model, 
        beta=beta, beta.std=beta.std, beta.t=beta.t, beta.pval=beta.pval)
