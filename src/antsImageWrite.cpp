@@ -43,6 +43,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
       return Rcpp::wrap( 1 ) ;
     }
+  bool verbose = false;
   std::string filename = Rcpp::as< std::string >( r_filename ) ;
   Rcpp::S4 r_image( r_img ) ;
   std::string pixeltype = Rcpp::as< std::string >( r_image.slot( "pixeltype" ) ) ;
@@ -57,7 +58,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '4'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '4'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "double" && dimension == 3 )
@@ -68,7 +69,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '3'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '3'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "double" && dimension == 2 )
@@ -79,7 +80,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '2'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'double' | Dimension: '2'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "float" && dimension == 4 )
@@ -90,7 +91,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '4'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '4'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "float" && dimension == 3 )
@@ -101,7 +102,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '3'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '3'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "float" && dimension == 2 )
@@ -112,7 +113,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '2'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'float' | Dimension: '2'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned int" && dimension == 4 )
@@ -123,7 +124,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '4'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '4'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned int" && dimension == 3 )
@@ -134,7 +135,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '3'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '3'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned int" && dimension == 2 )
@@ -145,7 +146,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '2'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned int' | Dimension: '2'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned char" && dimension == 4 )
@@ -156,7 +157,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '4'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '4'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned char" && dimension == 3 )
@@ -167,7 +168,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '3'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '3'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else if( pixeltype == "unsigned char" && dimension == 2 )
@@ -178,7 +179,7 @@ RcppExport SEXP antsImageWrite( SEXP r_img , SEXP r_filename )
       typedef ImageType::Pointer ImagePointerType ;
       Rcpp::XPtr< ImagePointerType > xptr( static_cast< SEXP >( r_image.slot( "pointer" ) ) ) ;
       ants::antsImageWrite< ImageType >( *xptr , filename ) ;
-      Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '2'." << std::endl ;
+      if ( verbose ) Rcpp::Rcout << "Done writing image. PixelType: 'unsigned char' | Dimension: '2'." << std::endl ;
       return Rcpp::wrap( 0 ) ;
     }
   else
