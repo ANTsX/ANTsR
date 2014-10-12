@@ -62,11 +62,11 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
     if (missing(basefval)) {
       # just threshold at mean > 0
       usefval <- mean(vals)
-      print(usefval)
+#      print(usefval)
     } else usefval <- basefval
     if (missing(offsetfval)) 
       offsetfval <- sd(vals[vals > usefval])
-    print(paste(i, usefval, alphafunc[i]))
+#    print(paste(i, usefval, alphafunc[i]))
     blob <- contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE, smooth = 1, material = "metal", 
       depth = 0.6, color = mycol[[i]])
     if (physical == TRUE) {
