@@ -139,15 +139,12 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
   perms <- c(1, 2, 3)
   axis <- as.numeric(axis)
   if (axis == 1) {
-    print("axis-1")
     perms <- c(2, 3, 1)
   }
   if (axis == 2) {
-    print("axis-2")
     perms <- c(3, 1, 2)
   }
   if (axis == 3) {
-    print("axis-3")
     perms <- c(1, 2, 3)
   }
   # now label the results
@@ -215,9 +212,9 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
   # pdf(paste(output,'.pdf',sep='')) onm<-paste(output,'.jpg',sep='')
   mag <- quality
   pixperinch <- 96
-  if (!is.na(outname)) 
-    jpeg(outname, width = ncol(bigslice) * mag, height = nrow(bigslice) * mag, units = "px", quality = 75, 
-      bg = "white") else dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
+  if (!is.na(outname))
+   suppressMessages( jpeg(outname, width = ncol(bigslice) * mag, height = nrow(bigslice) * mag, units = "px", quality = 75, 
+      bg = "white") ) else dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch) 
   x <- pixmapGrey(bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
@@ -273,7 +270,6 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
         } else {
           labslice <- labimg
         }
-        maskslice <- (labslice > 0)
         locsl <- (sl%%(wincols)) + 1
         if (locsl == 1) 
           rowsl <- rowsl + 1
@@ -317,9 +313,8 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
       heatvals[upper] <- NA
     }
 #    heatvals[1:(length(heatvals)-50 ) ]<-NA
-    plot(pixmapIndexed(biglab, col = heatvals), add = TRUE)
+    if ( min(biglab) != max(biglab) ) plot(pixmapIndexed(biglab, col = heatvals), add = TRUE)
   }
-  print(paste('outname',outname))
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname)) 
