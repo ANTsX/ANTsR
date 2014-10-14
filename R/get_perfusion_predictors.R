@@ -38,7 +38,7 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
     pcompcorr <-compcor( mat,  ncompcorparameters )
     if ( useDenoiser )
       {
-      rmat<-data.matrix( residuals( lm( mat ~ motionnuis ) ) )
+      rmat<-data.matrix( residuals( lm( mat ~ t(motionnuis) ) ) )
       dnz<-aslDenoiseR( rmat, xideal, motionparams=NA, selectionthresh=0.2,
         maxnoisepreds=(1:(ncompcorparameters*2)), polydegree=4 , crossvalidationgroups=6,
         scalemat=F, noisepoolfun=max )
