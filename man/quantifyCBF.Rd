@@ -37,8 +37,8 @@ Avants BB, Kandel B, Duda JT
   \dontrun{
   asl<-antsImageRead("PEDS012_20131101_pcasl_1.nii.gz",4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
-  pcasl.processing <- aslPerfusion( asl, moreaccurate=F, interpolation="linear",
-    dorobust=0.95, useDenoiser=TRUE )
+  pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
+    dorobust=0.95, useDenoiser=1:6 )
 # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )
