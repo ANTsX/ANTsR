@@ -24,7 +24,7 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
   metricnuis <- motionnuis[1, ]
   globalsignal <- rowMeans(mat)
   globalsignalASL <- residuals(lm(globalsignal ~ xideal))
-  
+
   # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top 3 components
   msvd <- svd(t(motionnuis[2:nrow(motionnuis), ]))
   nsvdcomp <- 3
@@ -34,26 +34,15 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
   motnames <- paste("motion", c(1:nrow(motionnuis)), sep = "")
   nuis <- t(rbind(metricnuis, (motionnuis)))
   colnames(nuis) <- c("metricnuis", motnames)
-  # compute temporal variance of each column and apply CompCor
-  temporalvar <- apply(mat, 2, var)
-  tvhist <- hist(temporalvar, breaks = c("FD"), plot = T)
-  percvar <- 0.975  # percentage of high variance data to use
-  # get total counts
-  totalcounts <- sum(tvhist$counts)
-  wh <- (cumsum(tvhist$counts) < (totalcounts * percvar))
-  thresh <- max(tvhist$mids[wh])
-  # cumulativesum<-rev( cumsum( tvhist$counts / totalcounts ) ) thresh<-max( tvhist$mids[ ( cumulativesum >
-  # percvar ) ] )
-  wh <- (temporalvar > thresh)
-  wh2 <- (temporalvar <= thresh)
-  print(paste(percvar, sum(wh), sum(wh2)))
-  highvarmat <- mat[, wh]
-  compcorrsvd <- svd(highvarmat %*% t(highvarmat))
   if (ncompcorparameters > 0) {
-    compcorr <- t(compcorrsvd$u[1:ncompcorparameters, ])
-    compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
-    nuis <- cbind(nuis, compcorr)
+    pcompcorr <-compcor( mat,  ncompcorparameters )
+    dnz<-aslDenoiseR( mat, xideal, motionparams=NA, selectionthresh=0.1,
+      maxnoisepreds=ncompcorparameters, polydegree=4 , crossvalidationgroups=6,
+      scalemat=F, noisepoolfun=max )
+    pcompcorr<-dnz$noiseu
+    compcorrnames <- paste("compcorr", c(1:ncol(pcompcorr)), sep = "")
+    nuis <- cbind(nuis, pcompcorr)
     colnames(nuis) <- c("metricnuis", motnames, compcorrnames)
   }
   return(list(xideal = xideal, nuis = nuis, globalsignal = globalsignal, globalsignalASL = globalsignalASL))
-} 
+}

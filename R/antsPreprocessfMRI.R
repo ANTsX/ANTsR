@@ -6,7 +6,7 @@ antsPreprocessfMRI <- function( boldImage,
   meanBoldFixedImageForMotionCorrection = NA,
   frequencyLowThreshold = NA, frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0.0 )
+  spatialSmoothingParameters = 0.0, residualizeMatrix = FALSE )
 {
 
 # compute nuisance variables
@@ -87,7 +87,7 @@ if( numberOfCompCorComponents > 0 )
   }
 
 # replace boldMatrix in place with residualized version
-if( ! is.na( nuisanceVariables[1] ) )
+if( ! is.na( nuisanceVariables[1] ) & residualizeMatrix )
   {
   print( colnames( nuisanceVariables ) )
   boldMatrix <- residuals( lm( boldMatrix ~ scale( nuisanceVariables ) ) )
@@ -135,7 +135,8 @@ if( spatialSmoothingType == "gaussian" )
 #####################################################################
 #####################################################################
 return( list( cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,
-  DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal ) )
+  DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal,
+  nuisanceVariables=nuisanceVariables ) )
 }
 
 
