@@ -1,4 +1,5 @@
-get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirst = 1, ncompcorparameters = 3, useDenoiser=FALSE ) {
+get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirst = 1,
+     ncompcorparameters = 3, useDenoiser=NA ) {
   myusage <- "usage: get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
   if (nargs() == 0) {
     print(myusage)
@@ -36,11 +37,11 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
   colnames(nuis) <- c("metricnuis", motnames)
   if (ncompcorparameters > 0) {
     pcompcorr <-compcor( mat,  ncompcorparameters )
-    if ( useDenoiser )
+    if ( !(all(is.na(useDenoiser))) )
       {
       rmat<-data.matrix( residuals( lm( mat ~ t(motionnuis) ) ) )
       dnz<-aslDenoiseR( rmat, xideal, motionparams=NA, selectionthresh=0.2,
-        maxnoisepreds=(1:(ncompcorparameters*2)), polydegree=4 , crossvalidationgroups=6,
+        maxnoisepreds=useDenoiser, polydegree=4 , crossvalidationgroups=6,
         scalemat=F, noisepoolfun=max )
       pcompcorr<-dnz$noiseu
       }

@@ -39,6 +39,7 @@ Avants BB, Kandel B, Duda JT
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   pcasl.processing <- aslPerfusion( asl, moreaccurate=F, interpolation="linear",
     dorobust=0.95, useDenoiser=TRUE )
+# user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )
   meancbf <- cbf$kmeancbf

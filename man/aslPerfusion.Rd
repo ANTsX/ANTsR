@@ -10,12 +10,12 @@ This function will estimate perfusion from an ASL time series using a (robust) r
 }
 
 \usage{
-aslPerfusion( asl_antsr_image_or_filename, maskThresh=500,  moreaccurate = TRUE , dorobust = 0 )
+aslPerfusion( asl_antsr_image_or_filename, maskThresh=0.75,  moreaccurate = TRUE , dorobust = 0 )
 }
 
 \arguments{
 \item{asl_antsr_image_or_filename}{The filename to an antsr image or pointer to an antsr image}
-\item{maskThresh = <value>}{A thresholding value for the mask ... may need to be adjusted up or down for your data although the mask does not need to be perfect.}
+\item{maskThresh = <value>}{A thresholding value for the mask as a fraction of the mean value of the image ... may need to be adjusted up or down for your data although the mask does not need to be perfect.}
 \item{dorobust = <value in 0 to 1>}{Controls whether you use a robust regression when estimating perfusion values}
 }
 

@@ -1,5 +1,5 @@
-aslPerfusion <- function(asl, maskThresh = 500, moreaccurate = TRUE, dorobust = 0.92, m0 = NA, skip = 20, mask = NA,
-  interpolation = "linear", checkmeansignal = 100, moco_results=NULL, regweights=NULL, useDenoiser=FALSE ) {
+aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust = 0.92, m0 = NA, skip = 20, mask = NA,
+  interpolation = "linear", checkmeansignal = 100, moco_results=NULL, regweights=NULL, useDenoiser=NA ) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -42,7 +42,9 @@ aslPerfusion <- function(asl, maskThresh = 500, moreaccurate = TRUE, dorobust = 
   }
   if(is.null(moco_results)) moco_results <- motion_correction(asl, moreaccurate = moreaccurate)
   motionparams <- as.data.frame(moco_results$moco_params)
-  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09, cleanup = TRUE)
+  moco_mask_img <- getMask(moco_results$moco_avg_img,
+    lowThresh = mean(moco_results$moco_avg_img)*maskThresh,
+    highThresh = Inf, cleanup = TRUE)
   if (!is.na(mask))
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
