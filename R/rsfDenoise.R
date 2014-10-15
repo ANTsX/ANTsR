@@ -9,6 +9,7 @@ if ( length(groups) == 1 ) {
   groups<-c()
   grouplength<-round(nrow(boldmatrix)/kfolds)-1
   for ( k in 1:kfolds ) groups<-c(groups,rep(k,grouplength))
+  groups<-c( rep(1,nrow(boldmatrix)-length(groups)) , groups)
 }
 
 
@@ -53,7 +54,7 @@ crossvalidatedR2<-function( residmatIn, targety, groups , howmuchnoise=0, noiseu
 timevals<-NA
 if ( all(is.na(timevals)) ) timevals<-1:nrow(boldmatrix)
 p<-stats::poly( timevals ,degree=polydegree )
-p<-cbind( data.matrix(motionparams) , p )
+if ( !all(is.na(motionparams)) ) p<-cbind( data.matrix(motionparams) , p )
 rawboldmat<-data.matrix(boldmatrix)
 svdboldmat<-residuals(lm(rawboldmat~0+p))
 if (debug) print('lm')
