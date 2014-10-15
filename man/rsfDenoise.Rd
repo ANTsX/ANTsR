@@ -23,16 +23,43 @@ Avants BB
 
 \examples{
 \dontrun{
+# simplest approach - load the bold & a mask, then denoise
+bold<-antsImageRead("bold.nii.gz",4)
+avgbold<-getAverageOfTimeSeries(bold)
+boldmask<-getMask( avgbold, lowThresh=mean(avgbold), cleanup=TRUE )
+roimask<-antsImageRead("roi.nii.gz",3)
+timeselect<-10:(dim(bold)[4]-10)
+# can do this if you like its approach
+cleanfMRI <- antsPreprocessfMRI( bold, maskImage=boldmask,
+  frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
+  spatialSmoothingType = "gaussian", spatialSmoothingParameters = c(2,2,2,4),
+  residualizeMatrix=TRUE, numberOfCompCorComponents=2 )
+boldmat<-timeseries2matrix( cleanfMRI$cleanBoldImage, cleanfMRI$maskImage )
+roimat<-timeseries2matrix( cleanfMRI$cleanBoldImage, roimask )
+roimean<-rowMeans( roimat ) # svd instead?
+roimat<-matrix( roimean, ncol=1)
+dnz<-rsfDenoise( boldmat[timeselect,] , roimat[timeselect,1], motionparams=NA,
+  polydegree=1, crossvalidationgroups = 8, maxnoisepreds=1:3, debug=F )
+# might iterate over above to further refine noise variables
+mdl<-bigLMStats( lm( boldmat[timeselect,] ~ roimean[timeselect] +
+   dnz$polys + dnz$noiseu[,1:3]  ), 0.001 )
+betas<-mdl$beta.t[1,]
+sum(betas[betas > 3])
+betaimg<-antsImageClone( boldmask )
+betaimg[ boldmask == 1 ]<-betas
+antsImageWrite( betaimg, 'betas2.nii.gz' )
+
+# more complex
 bold<-antsImageRead("bold.nii.gz",4)
 boldmask<-antsImageRead("meanboldmask.nii.gz",3)
 aalimg<-antsImageRead("meanboldAALmask.nii.gz",3)
 data("aal",package='ANTsR')
 dmnlabels<-aal$label_num[aal$isdmn>0]
-aalvec<-aalimg > 0 
+aalvec<-aalimg > 0
 whichregion<-3
 for ( i in 1:max(aalimg) )
   {
-  if ( ! ( i %in% dmnlabels[whichregion] ) ) 
+  if ( ! ( i %in% dmnlabels[whichregion] ) )
     {
     aalimg[ aalimg == as.numeric(i) ]<-0
     }
