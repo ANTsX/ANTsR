@@ -6,7 +6,7 @@ antsPreprocessfMRI <- function( boldImage,
   meanBoldFixedImageForMotionCorrection = NA,
   frequencyLowThreshold = NA, frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0.0, residualizeMatrix = FALSE )
+  spatialSmoothingParameters = 0.0, residualizeMatrix = TRUE )
 {
 
 # compute nuisance variables
