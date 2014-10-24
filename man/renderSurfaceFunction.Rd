@@ -6,7 +6,7 @@
 }
 
 \description{
-Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g. functional).  
+Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g. functional).
 }
 
 \usage{
@@ -24,16 +24,16 @@ Input list of images to use as functional overlays.
 }
 
 \item{surfval}{
-intensity level that defines isosurface 
+intensity level that defines isosurface
 }
 
 \item{basefval}{
-intensity level that defines lower threshold for functional image 
+intensity level that defines lower threshold for functional image
 }
 
 
 \item{offsetfval}{
-intensity level that defines upper threshold for functional image 
+intensity level that defines upper threshold for functional image
 }
 
 \item{blobrender}{
@@ -54,7 +54,7 @@ Avants B, Kandel B
 
 \seealso{
   \code{\link{plotBasicNetwork}}
-} 
+}
 
 \examples{
        mnit<-getANTsRData("mni")
@@ -62,9 +62,7 @@ Avants B, Kandel B
        mnia<-getANTsRData("mnia")
        mnia<-antsImageRead(mnia,3)
        ThresholdImage(3,mnit,mnit,1,max(mnit))
-       ImageMath(3,mnit,"FillHoles",mnit)
-       cnt<-getCentroids( mnia, clustparam = 50 )
-       aalcnt<-cnt$centroids[1:90,]
-       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
+       ThresholdImage(3,mnia,mnia,1,2)
+#       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
        brain<-renderSurfaceFunction( surfimg =list( mnit ) , list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 }
