@@ -302,10 +302,17 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
       minind <- minind - 1
     heatvals <- heat.colors(nlevels, alpha = alpha )
     heatvals <- rainbow(nlevels, alpha = alpha )
-    colorfun <- colorRampPalette(c("gray60", color), interpolate = c("spline"), space = "Lab")
-    # print(color[ind])
-    colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"), space = "Lab")
+    if ( color[ind] != 'jet')
+      colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"), space = "Lab")
+    if ( color[ind] == 'jet')
+    { # print("use jet")
+    colorfun<-
+    colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
+                  "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"),
+                  interpolate = c("spline"), space = "Lab")
+    }
     heatvals <- colorfun(nlevels)
+    print(heatvals)
     if (locthresh[1] > 1)
       heatvals[1:(locthresh[1] - 1)] <- NA
     if (locthresh[2] < (nlevels - 1)) {
