@@ -19,7 +19,7 @@ plotANTsImage( myantsimage , functional=NA, color="red", axis=1, slices="1x1x1" 
 \item{functional}{ list of the images to use as overlays }
 \item{axis  = <value>}{character ... the axis to slice (1 , 2 or  3)  }
 \item{slices = <string>}{ character, the slices to overlay written as 10x20x3 where 10x20 is the range and 3 is the increment, for multislice display}
-\item{threshold = <string>}{ character, we overlay values above/below this threshold : of form LOxHI 
+\item{threshold = <string>}{ character, we overlay values above/below this threshold : of form LOxHI
 }
 \item{quality = <value>}{integer quality magnification factor 1 => large (e.g. 10) }
 \item{outname="figx.jpg"}{output name if you want to write the result to a file}
@@ -38,10 +38,19 @@ Avants BB
 }
 
 \examples{
-\dontrun{
-# in 2D
-  plotANTsImage(myantsimage=img,functional=funcimg,threshold="50x150",color="red",axis=1)
-# in 3D
-  plotANTsImage(myantsimage=img,functional=img,threshold="50x150",slices="10x20x3",color="red",axis=0)
-}
+  mnit<-getANTsRData("mni")
+  mnit<-antsImageRead(mnit,3)
+  mniafn<-getANTsRData("mnia")
+  mnia<-antsImageRead(mniafn,3)
+  ThresholdImage(3,mnia,mnia,22,25)
+  SmoothImage(3,mnia,1.5,mnia)
+  mnia2<-antsImageRead(mniafn,3)
+  ThresholdImage(3,mnia2,mnia2,1,4)
+  SmoothImage(3,mnia2,1.5,mnia2)
+  plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+   threshold = "0.25x1", axis=0,color=c('red','blue') )
+  ofn<-paste(tempfile(),'.png',sep='')
+  # write directly to a file
+  plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+   threshold = "0.25x1", axis=0,color=c('red','blue'), outname = ofn )
 }
