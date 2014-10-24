@@ -52,9 +52,19 @@ intensity level that defines upper threshold for functional image
 Avants B, Kandel B
 }
 
+\seealso{
+  \code{\link{plotBasicNetwork}}
+} 
+
 \examples{
-\dontrun{
-renderSurfaceFunction(simg)
-renderSurfaceFunction(simg,fimg,basefval=0.2,blobrender=FALSE)
-}
+       mnit<-getANTsRData("mni")
+       mnit<-antsImageRead(mnit,3)
+       mnia<-getANTsRData("mnia")
+       mnia<-antsImageRead(mnia,3)
+       ThresholdImage(3,mnit,mnit,1,max(mnit))
+       ImageMath(3,mnit,"FillHoles",mnit)
+       cnt<-getCentroids( mnia, clustparam = 50 )
+       aalcnt<-cnt$centroids[1:90,]
+       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
+       brain<-renderSurfaceFunction( surfimg =list( mnit ) , list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 }
