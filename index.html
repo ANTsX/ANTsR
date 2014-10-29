@@ -1,84 +1,124 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ANTsR : Advanced Normalization Tools with R &mdash; ANTsR 0.0.0 documentation</title>
-    
-    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ANTsR 0.0.0 documentation" href="#" />
-    <link rel="next" title="Getting started with ANTsR" href="ANTsRGettingStarted.html" /> 
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Antsr by stnava</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Antsr</h1>
+        <p>...</p>
+        <p class="view"><a href="https://github.com/stnava/ANTsR">View the Project on GitHub <small>stnava/ANTsR</small></a></p>
+        <ul>
+          <li><a href="https://github.com/stnava/ANTsR/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/stnava/ANTsR/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/stnava/ANTsR">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="antsr" class="anchor" href="#antsr"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
-<a href="#"><img src="_static/ANTsRLogo.png" border="0" alt="sampledoc"/></a>
-</div>
+<p>An R package providing ITK features in R.</p>
 
+<p>Authors: Shrinidhi KL,  Avants BB </p>
 
-      <div class="header"><h1 class="heading"><a href="#">
-          <span>ANTsR 0.0.0 documentation</span></a></h1>
-        <h2 class="heading"><span>ANTsR : Advanced Normalization Tools with R</span></h2>
-      </div>
-      <div class="topnav">
-      
-        <p>
-        <a class="uplink" href="#">Contents</a>
-        &#160;&#160;::&#160;&#160;
-        <a href="ANTsRGettingStarted.html">Getting started with ANTsR</a>&#160;&#160;»
-        </p>
+<h2>
+<a name="easiest-approach--from-within-r-" class="anchor" href="#easiest-approach--from-within-r-"><span class="octicon octicon-link"></span></a>easiest approach ( from within R )</h2>
 
-      </div>
-      <div class="content">
-        
-        
-  <div class="section" id="antsr-advanced-normalization-tools-with-r">
-<h1>ANTsR : Advanced Normalization Tools with R<a class="headerlink" href="#antsr-advanced-normalization-tools-with-r" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+<pre><code>library( devtools )
+install_github("stnava/ANTsR") 
+</code></pre>
+
+<p>this assumes you have <a href="http://www.cmake.org/download/">cmake</a> installed / accessible in your environment</p>
+
+<p>windows users should see <a href="https://github.com/talgalili/installr">https://github.com/talgalili/installr</a> for assistance in setting up their environment for building (must have a compiler too) </p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>see <a href="http://stnava.github.io/software/2014/01/08/antsr/">install from source</a></p>
+
+<h3>
+<a name="from-source" class="anchor" href="#from-source"><span class="octicon octicon-link"></span></a>From source</h3>
+
+<p>First, clone the repository:</p>
+
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>git clone https://github.com/stnava/ANTsR.git
+</pre></div>
+
+<p>Install the package as follows:</p>
+
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>R CMD INSTALL ANTsR
+</pre></div>
+
+<p>NOTE: If you see errors like "<code>Undefined symbols for architecture x86_64</code>" use:</p>
+
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>R --arch<span class="o">=</span>x86_64 CMD INSTALL ANTsR
+</pre></div>
+
+<h3>
+<a name="binaries" class="anchor" href="#binaries"><span class="octicon octicon-link"></span></a>Binaries</h3>
+
+<p>These are still under development; use at your own discretion.</p>
+
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ANTsRGettingStarted.html">Getting started with ANTsR</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ANTsRdemo.html">ANTsR Demonstrations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ANTsRfunctions.html">ANTsR Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ANTsRstyleGuide.html">Style guide for ANTsR</a></li>
+<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_osx_1.0.tgz">Mac OS X</a></li>
+<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-redhat-linux-gnu.tar.gz">RHEL</a></li>
+<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Other Linux</a></li>
 </ul>
-</div>
-<ul class="simple">
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
-</div>
 
+<h3>
+<a name="r-dependencies" class="anchor" href="#r-dependencies"><span class="octicon octicon-link"></span></a>R dependencies</h3>
 
-      </div>
-      <div class="bottomnav">
-      
-        <p>
-        <a class="uplink" href="#">Contents</a>
-        &#160;&#160;::&#160;&#160;
-        <a href="ANTsRGettingStarted.html">Getting started with ANTsR</a>&#160;&#160;»
-        </p>
+<p>You will probably have to install the R packages that ANTsR requires. For example:</p>
 
-      </div>
+<pre><code>install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), dependencies = TRUE);
+</code></pre>
 
-    <div class="footer">
-        &copy; Copyright 2013, ants-dev-team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+<p>These dependencies are subject to change until development is stable.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Load the package:</p>
+
+<pre><code>library(ANTsR)
+</code></pre>
+
+<p>List the available functions in the namespace ANTsR:</p>
+
+<pre><code>ANTsR::&lt;double-tab&gt;
+</code></pre>
+
+<p>Call help on a function via ?functionName</p>
+
+<p>Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.</p>
+
+<p>For example, to call the antsRegistration routine:</p>
+
+<pre><code>ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1","-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
+
+ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
+</code></pre>
+      </section>
     </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/stnava">stnava</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
   </body>
 </html>
