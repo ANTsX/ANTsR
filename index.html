@@ -30,28 +30,25 @@
         <h1>
 <a name="antsr" class="anchor" href="#antsr"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<p>An R package providing ITK features in R.</p>
+<p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> and <a href="www.itk.org">ITK</a> features in R.</p>
 
-<p>Authors: Shrinidhi KL,  Avants BB </p>
+<p>Authors: Shrinidhi KL,  Avants BB</p>
 
 <h2>
-<a name="easiest-approach--from-within-r-" class="anchor" href="#easiest-approach--from-within-r-"><span class="octicon octicon-link"></span></a>easiest approach ( from within R )</h2>
+<a name="easiest-installation-approach--from-within-r-" class="anchor" href="#easiest-installation-approach--from-within-r-"><span class="octicon octicon-link"></span></a>easiest installation approach ( from within R )</h2>
 
 <pre><code>library( devtools )
-install_github("stnava/ANTsR") 
+install_github("stnava/ANTsR")
 </code></pre>
 
 <p>this assumes you have <a href="http://www.cmake.org/download/">cmake</a> installed / accessible in your environment</p>
 
-<p>windows users should see <a href="https://github.com/talgalili/installr">https://github.com/talgalili/installr</a> for assistance in setting up their environment for building (must have a compiler too) </p>
+<p>windows users should see <a href="https://github.com/talgalili/installr">https://github.com/talgalili/installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
 <h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a name="installation-from-source" class="anchor" href="#installation-from-source"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
 <p>see <a href="http://stnava.github.io/software/2014/01/08/antsr/">install from source</a></p>
-
-<h3>
-<a name="from-source" class="anchor" href="#from-source"><span class="octicon octicon-link"></span></a>From source</h3>
 
 <p>First, clone the repository:</p>
 
@@ -61,11 +58,6 @@ install_github("stnava/ANTsR")
 <p>Install the package as follows:</p>
 
 <div class="highlight highlight-sh"><pre><span class="nv">$ </span>R CMD INSTALL ANTsR
-</pre></div>
-
-<p>NOTE: If you see errors like "<code>Undefined symbols for architecture x86_64</code>" use:</p>
-
-<div class="highlight highlight-sh"><pre><span class="nv">$ </span>R --arch<span class="o">=</span>x86_64 CMD INSTALL ANTsR
 </pre></div>
 
 <h3>
@@ -82,7 +74,7 @@ install_github("stnava/ANTsR")
 <h3>
 <a name="r-dependencies" class="anchor" href="#r-dependencies"><span class="octicon octicon-link"></span></a>R dependencies</h3>
 
-<p>You will probably have to install the R packages that ANTsR requires. For example:</p>
+<p>You may need to install R packages that ANTsR requires. For example:</p>
 
 <pre><code>install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), dependencies = TRUE);
 </code></pre>
@@ -103,6 +95,102 @@ install_github("stnava/ANTsR")
 </code></pre>
 
 <p>Call help on a function via ?functionName</p>
+
+<h2>
+<a name="reading-and-indexing-images-and-image-sets" class="anchor" href="#reading-and-indexing-images-and-image-sets"><span class="octicon octicon-link"></span></a>Reading and indexing images and image sets</h2>
+
+<p>If nothing else, ANTsR makes it easy to read and write medical images
+and to map them into a format compatible with R.</p>
+
+<p><strong>Read and write an image</strong></p>
+
+<pre><code>img&lt;-antsImageRead('filename.nii.gz',dimension)
+antsImageWrite(img,'filename.nii.gz')
+</code></pre>
+
+<p><strong>Index an image with a label</strong></p>
+
+<pre><code>gaussimg&lt;-array( data=rnorm(125), dim=c(5,5,5))
+arrayimg&lt;-array( data=(1:125), dim=c(5,5,5))
+img&lt;-as.antsImage( arrayimg )
+print( max(img) )
+print( mean(img[ img &gt; 50  ]))
+print( max(img[ img &gt;= 50 &amp; img &lt;= 99  ]))
+print( mean( gaussimg[ img &gt;= 50 &amp; img &lt;= 99  ]) )
+</code></pre>
+
+<p><strong>Convert a 4D image to a matrix</strong></p>
+
+<pre><code>gaussimg&lt;-array( data=rnorm(125*10), dim=c(5,5,5,10))
+gaussimg&lt;-as.antsImage(gaussimg)
+print(dim(gaussimg))
+mask&lt;-getAverageOfTimeSeries( gaussimg )
+voxelselect &lt;- mask &lt; 0
+mask[ voxelselect  ]&lt;-0
+mask[ !voxelselect  ]&lt;-1
+gmat&lt;-timeseries2matrix( gaussimg, mask )
+print(dim(gmat))
+</code></pre>
+
+<p><strong>Convert a list of images to a matrix</strong></p>
+
+<pre><code>nimages&lt;-100
+ilist&lt;-list()
+for ( i in 1:nimages )
+{
+  simimg&lt;-array( data=rnorm(2500), dim=c(50,50))
+  simimg&lt;-as.antsImage( simimg )
+  ilist[i]&lt;-simimg
+}
+# get a mask from the first image
+mask&lt;-getMask( ilist[[1]],
+  lowThresh=mean(ilist[[1]]), cleanup=TRUE )
+mat&lt;-imageListToMatrix( ilist, mask )
+print(dim(mat))
+</code></pre>
+
+<p><strong>Do fast statistics on a big matrix</strong></p>
+
+<pre><code>mat&lt;-imageListToMatrix( ilist, mask )
+age&lt;-rnorm( nrow(mat) ) # simulated age
+gender&lt;-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
+# this creates "real" but noisy effects to detect
+mat&lt;-mat*(age^2+rnorm(nrow(mat)))
+mdl&lt;-lm( mat ~ age + gender )
+mdli&lt;-bigLMStats( mdl, 1.e-4 )
+print(names(mdli))
+print(rownames(mdli$beta.t))
+print(paste("age",min(p.adjust(mdli$beta.pval[1,]))))
+print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
+</code></pre>
+
+<p><strong>Eigenanatomy &amp; SCCAN</strong></p>
+
+<pre><code>?sparseDecom
+?sparseDecom2
+?initializeEigenanatomy
+</code></pre>
+
+<p><strong>Other useful tools</strong></p>
+
+<pre><code>?antsPreprocessfMRI
+?aslPerfusion
+?computeDVARS
+?getROIValues
+?hemodynamicRF
+?inspectImageData3D
+?makeGraph
+?matrixToImages
+?plotANTsImage
+?antsRegistration
+?plotPrettyGraph
+?plotBasicNetwork
+?getTemplateCoordinates
+?antsSet*
+</code></pre>
+
+<h2>
+<a name="direct-access-to-ants-tools" class="anchor" href="#direct-access-to-ants-tools"><span class="octicon octicon-link"></span></a>Direct access to ANTs tools</h2>
 
 <p>Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.</p>
 
