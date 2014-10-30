@@ -53,7 +53,7 @@ ANTsR::<double-tab>
 
 Call help on a function via ?functionName
 
-## Reading and indexing images and image sets
+## Overview of ANTsR functionality and useful tools
 
 If nothing else, ANTsR makes it easy to read and write medical images
 and to map them into a format compatible with R.
