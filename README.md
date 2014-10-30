@@ -59,10 +59,17 @@ via  `args(functionName)`
 If nothing else, ANTsR makes it easy to read and write medical images
 and to map them into a format compatible with R.
 
-**Read and write an image**
+**Read, write, access an image**
 ```
-img<-antsImageRead('filename.nii.gz',dimension)
-antsImageWrite(img,'filename.nii.gz')
+mnifilename<-getANTsRData("mni")
+dimension<-3
+img<-antsImageRead(mnifilename,dimension)
+antsImageWrite(img,mnifilename)
+antsGetSpacing(img)
+antsGetDirection(img)
+antsGetOrigin(img)
+print(antsGetPixels(img,50,60,44))
+print(max(img))
 ```
 
 **Index an image with a label**
