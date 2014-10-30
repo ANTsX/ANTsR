@@ -1,5 +1,5 @@
 # ANTsR
-An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](www.itk.org) features in R.
+An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
 
 Authors: Shrinidhi KL,  Avants BB
 
