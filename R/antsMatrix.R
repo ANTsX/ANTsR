@@ -1,11 +1,12 @@
 # this file defines the class 'antsMatrix' and its associated methods
 
-# C++ type used to represent an element of the matrix pointer to the actual image of C++ type 'itk::image<
-# pixeltype , dimension >::Pointer'
+# C++ type used to represent an element of the matrix pointer to the actual image
+# of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 
 setClass(Class = "antsMatrix", representation(elementtype = "character", pointer = "externalptr"))
 
-setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(.Object, elementtype) {
+setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(.Object, 
+  elementtype) {
   .Call("antsMatrix", elementtype, PACKAGE = "ANTsR")
 })
 
@@ -25,11 +26,13 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 
 setGeneric(name = "as.antsMatrix", def = function(object, ...) standardGeneric("as.antsMatrix"))
 
-setMethod(f = "as.antsMatrix", signature(object = "list"), definition = function(object, elementtype) {
+setMethod(f = "as.antsMatrix", signature(object = "list"), definition = function(object, 
+  elementtype) {
   return(.Call("antsMatrix_asantsMatrix", object, elementtype, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "as.antsMatrix", signature(object = "data.frame"), definition = function(object, elementtype) {
+setMethod(f = "as.antsMatrix", signature(object = "data.frame"), definition = function(object, 
+  elementtype) {
   return(.Call("antsMatrix_asantsMatrix", as.list(object), elementtype, PACKAGE = "ANTsR"))
 })
 

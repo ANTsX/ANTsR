@@ -1,4 +1,5 @@
-ants_compcorr_group <- function(moco_img = "", bm_img = "", cortmask_img = "", mocoparams_csv = "", dosvd = 0) {
+ants_compcorr_group <- function(moco_img = "", bm_img = "", cortmask_img = "", mocoparams_csv = "", 
+  dosvd = 0) {
   if (nchar(moco_img) == 0) {
     print(" please set a valid moco image ")
     print(" usage : ants_compcorr_group( <moco-image> , <brain-mask-image> , <cortmask-image> , <mocoparams-csv> , <dosvd> ) ")
@@ -33,8 +34,8 @@ ants_compcorr_group <- function(moco_img = "", bm_img = "", cortmask_img = "", m
   ImageMath(4, compcorr_img, "CompCorrAuto", moco_img, bm_img, 3)
   
   csv <- paste(filename, ".csv", sep = "")
-  sccan("--timeseriesimage-to-matrix", paste("[", paste(moco_img, cortmask_img, 3, 0, sep = ","), "]", sep = ""), 
-    "-o", csv)
+  sccan("--timeseriesimage-to-matrix", paste("[", paste(moco_img, cortmask_img, 
+    3, 0, sep = ","), "]", sep = ""), "-o", csv)
   
   compcorr_csv <- paste(filename, "_compcorr_compcorr", ".csv", sep = "")
   filt_csv <- paste(filename, "_filt", ".csv", sep = "")
@@ -42,12 +43,13 @@ ants_compcorr_group <- function(moco_img = "", bm_img = "", cortmask_img = "", m
   
   if (dosvd == 1) {
     RSF_Networks_img <- paste(filename, "_RSF_Networks", extension, sep = "")
-    sccan("--sparse-svd", paste("[", paste(filt_csv, cortmask_img, -0.05, sep = ","), "]", sep = ""), "-n", 
-      40, "-i", 40, "--PClusterThresh", 100, "-o", RSF_Networks_img)
+    sccan("--sparse-svd", paste("[", paste(filt_csv, cortmask_img, -0.05, sep = ","), 
+      "]", sep = ""), "-n", 40, "-i", 40, "--PClusterThresh", 100, "-o", RSF_Networks_img)
     
     ea_rsf <- paste(filename, "_ea_rsf", sep = "")
-    RSF_NetworksprojectionsView1vec_csv <- paste(filename, "_RSF_NetworksprojectionsView1vec", ".csv", sep = "")
-    antsr_resting_state_corr_eigenanat(ea_rsf, RSF_NetworksprojectionsView1vec_csv, RSF_NetworksprojectionsView1vec_csv, 
-      compcorr_csv, mocoparams_csv)
+    RSF_NetworksprojectionsView1vec_csv <- paste(filename, "_RSF_NetworksprojectionsView1vec", 
+      ".csv", sep = "")
+    antsr_resting_state_corr_eigenanat(ea_rsf, RSF_NetworksprojectionsView1vec_csv, 
+      RSF_NetworksprojectionsView1vec_csv, compcorr_csv, mocoparams_csv)
   }
 } 

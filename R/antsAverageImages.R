@@ -1,6 +1,7 @@
-# antsAverageImages calculate the mean of a list of antsImages imageList: can contain anything that be cast
-# via as.array() refernce: must be an antsImage as the header info is used normalze=FALSE: divide each inputs
-# by its mean before averaging returns: antsImage
+# antsAverageImages calculate the mean of a list of antsImages imageList: can
+# contain anything that be cast via as.array() refernce: must be an antsImage as
+# the header info is used normalze=FALSE: divide each inputs by its mean before
+# averaging returns: antsImage
 
 antsAverageImages <- function(imageList, reference, normalize = FALSE) {
   

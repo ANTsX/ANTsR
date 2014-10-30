@@ -18,10 +18,12 @@ getNetwork <- function(tmat, mask, labels, timeStep = 1) {
     corimg[i, i] <- 0
   }
   
-  # view all average time series plot in a single window labelID <- rep( 1:max(as.array(labels)),
-  # each=dim(tmat)[1] ) times <- rep( timeStep*c(0:(dim(regions)[1]-1)), dim(regions)[2] ) dat <- data.frame(
-  # signal=as.vector(regions), time=times, id=factor(as.vector(labelID)) ) ggplot( data=dat, aes(x=time,
-  # y=signal, group=id, colour=id) ) + geom_line() + ylab('regional cbf') + xlab( 'time (ms)' )
+  # view all average time series plot in a single window labelID <- rep(
+  # 1:max(as.array(labels)), each=dim(tmat)[1] ) times <- rep(
+  # timeStep*c(0:(dim(regions)[1]-1)), dim(regions)[2] ) dat <- data.frame(
+  # signal=as.vector(regions), time=times, id=factor(as.vector(labelID)) ) ggplot(
+  # data=dat, aes(x=time, y=signal, group=id, colour=id) ) + geom_line() +
+  # ylab('regional cbf') + xlab( 'time (ms)' )
   
   return(corimg)
 } 

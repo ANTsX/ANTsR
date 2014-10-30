@@ -1,4 +1,5 @@
-sliceTimingCorrection <- function(fmri, sliceTime = NA, interpolation = "sinc", sincRadius = 4, bsplineOrder = 3) {
+sliceTimingCorrection <- function(fmri, sliceTime = NA, interpolation = "sinc", sincRadius = 4, 
+  bsplineOrder = 3) {
   tr <- antsGetSpacing(fmri)[length(dim(fmri))]
   
   if (is.na(sliceTime)) {
@@ -10,9 +11,11 @@ sliceTimingCorrection <- function(fmri, sliceTime = NA, interpolation = "sinc", 
   
   
   if (interpolation == "sinc") {
-    ImageMath(4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, sincRadius)
+    ImageMath(4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, 
+      sincRadius)
   } else if (interpolation == "bspline") {
-    ImageMath(4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, bsplineOrder)
+    ImageMath(4, corrected, "SliceTimingCorrection", fmri, sliceTime, interpolation, 
+      bsplineOrder)
   } else if (interpolation == "linear") {
     ImageMath(4, corrected, "SliceTimingCorrection", fmri, sliceTime)
     

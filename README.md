@@ -1,22 +1,21 @@
 # ANTsR
-An R package providing ITK features in R.
+An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](www.itk.org) features in R.
 
-Authors: Shrinidhi KL,  Avants BB 
+Authors: Shrinidhi KL,  Avants BB
 
-## easiest approach ( from within R )
+## easiest installation approach ( from within R )
 ```
 library( devtools )
-install_github("stnava/ANTsR") 
+install_github("stnava/ANTsR")
 ```
 
 this assumes you have [cmake](http://www.cmake.org/download/) installed / accessible in your environment
 
-windows users should see https://github.com/talgalili/installr for assistance in setting up their environment for building (must have a compiler too) 
+windows users should see https://github.com/talgalili/installr for assistance in setting up their environment for building (must have a compiler too)
 
-## Installation
+## Installation from source
 see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
 
-### From source
 First, clone the repository:
 ```sh
 $ git clone https://github.com/stnava/ANTsR.git
@@ -25,11 +24,6 @@ $ git clone https://github.com/stnava/ANTsR.git
 Install the package as follows:
 ```sh
 $ R CMD INSTALL ANTsR
-```
-
-NOTE: If you see errors like "``Undefined symbols for architecture x86_64``" use:
-```sh
-$ R --arch=x86_64 CMD INSTALL ANTsR
 ```
 
 ### Binaries
@@ -41,7 +35,7 @@ These are still under development; use at your own discretion.
 
 
 ### R dependencies
-You will probably have to install the R packages that ANTsR requires. For example:
+You may need to install R packages that ANTsR requires. For example:
 ```
 install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), dependencies = TRUE);
 ```
@@ -58,6 +52,100 @@ ANTsR::<double-tab>
 ```
 
 Call help on a function via ?functionName
+
+## Reading and indexing images and image sets
+
+If nothing else, ANTsR makes it easy to read and write medical images
+and to map them into a format compatible with R.
+
+**Read and write an image**
+```
+img<-antsImageRead('filename.nii.gz',dimension)
+antsImageWrite(img,'filename.nii.gz')
+```
+
+**Index an image with a label**
+```
+gaussimg<-array( data=rnorm(125), dim=c(5,5,5))
+arrayimg<-array( data=(1:125), dim=c(5,5,5))
+img<-as.antsImage( arrayimg )
+print( max(img) )
+print( mean(img[ img > 50  ]))
+print( max(img[ img >= 50 & img <= 99  ]))
+print( mean( gaussimg[ img >= 50 & img <= 99  ]) )
+```
+
+**Convert a 4D image to a matrix**
+```
+gaussimg<-array( data=rnorm(125*10), dim=c(5,5,5,10))
+gaussimg<-as.antsImage(gaussimg)
+print(dim(gaussimg))
+mask<-getAverageOfTimeSeries( gaussimg )
+voxelselect <- mask < 0
+mask[ voxelselect  ]<-0
+mask[ !voxelselect  ]<-1
+gmat<-timeseries2matrix( gaussimg, mask )
+print(dim(gmat))
+```
+
+**Convert a list of images to a matrix**
+```
+nimages<-100
+ilist<-list()
+for ( i in 1:nimages )
+{
+  simimg<-array( data=rnorm(2500), dim=c(50,50))
+  simimg<-as.antsImage( simimg )
+  ilist[i]<-simimg
+}
+# get a mask from the first image
+mask<-getMask( ilist[[1]],
+  lowThresh=mean(ilist[[1]]), cleanup=TRUE )
+mat<-imageListToMatrix( ilist, mask )
+print(dim(mat))
+```
+
+**Do fast statistics on a big matrix**
+```
+mat<-imageListToMatrix( ilist, mask )
+age<-rnorm( nrow(mat) ) # simulated age
+gender<-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
+# this creates "real" but noisy effects to detect
+mat<-mat*(age^2+rnorm(nrow(mat)))
+mdl<-lm( mat ~ age + gender )
+mdli<-bigLMStats( mdl, 1.e-4 )
+print(names(mdli))
+print(rownames(mdli$beta.t))
+print(paste("age",min(p.adjust(mdli$beta.pval[1,]))))
+print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
+```
+
+**Eigenanatomy & SCCAN**
+```
+?sparseDecom
+?sparseDecom2
+?initializeEigenanatomy
+```
+
+**Other useful tools**
+```
+?antsPreprocessfMRI
+?aslPerfusion
+?computeDVARS
+?getROIValues
+?hemodynamicRF
+?inspectImageData3D
+?makeGraph
+?matrixToImages
+?plotANTsImage
+?antsRegistration
+?plotPrettyGraph
+?plotBasicNetwork
+?getTemplateCoordinates
+?antsSet*
+```
+
+## Direct access to ANTs tools
 
 Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.
 

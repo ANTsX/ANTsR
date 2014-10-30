@@ -11,7 +11,8 @@ Perform spatial ICA on group or individual fMRI data.  Preprocessing should be p
 }
 
 \usage{
-antsSpatialICAfMRI <- function( boldImages, maskImage = NA, numberOfICAComponents = 20,
+antsSpatialICAfMRI <- function( boldImages,
+  maskImage = NA, numberOfICAComponents = 20,
   normalizeComponentImages = TRUE )
 }
 
@@ -64,7 +65,8 @@ for( i in 1:length( boldImages[[1]] ) )
   cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }
 
-icaResults <- antsSpatialICAfMRI( cleanBoldImages, numberOfICAComponents = 20, cleanBoldImages[[i]] )
+icaResults <- antsSpatialICAfMRI( cleanBoldImages,
+  numberOfICAComponents = 20, cleanBoldImages[[i]] )
 componentImages <- icaResults$componentImages
 
 # write out the component images

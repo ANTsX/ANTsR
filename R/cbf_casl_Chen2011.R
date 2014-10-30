@@ -1,4 +1,5 @@
-# chen 2011 paper CASL --------------------------------------------------------------------------------------
+# chen 2011 paper CASL
+# --------------------------------------------------------------------------------------
 cbf_casl_Chen2011 <- function(aslimg_filename) {
   img <- as.array(antsImageRead(aslimg_filename, 4, "double"))
   
@@ -22,7 +23,8 @@ cbf_casl_Chen2011 <- function(aslimg_filename) {
   omega <- 1
   tau <- 2
   
-  cbf <- (lambda * deltaM)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + omega)/T1b)))
+  cbf <- (lambda * deltaM)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + 
+    omega)/T1b)))
   
   return(cbf)
 } 

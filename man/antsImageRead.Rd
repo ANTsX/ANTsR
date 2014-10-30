@@ -15,7 +15,7 @@ antsImageRead( filename ,  dimension = 3 , pixeltype = "float" )
 
 \arguments{
 \item{filename}{
-Name of the file to read the image from. 
+Name of the file to read the image from.
 }
 
 \item{pixeltype}{
@@ -38,7 +38,6 @@ Shrinidhi KL
 
 \examples{
 \dontrun{
-# read an image from a file named 'imagefile.nii' into an image of pixeltype 'double' and dimensions '4'
 img <- antsImageRead( "imagefile.nii" , dimension = 3  )
 img <- antsImageRead( "imagefile.nii" , dimension = 2  )
 img <- antsImageRead( "imagefile.nii" , dimension = 4 , pixeltype =  "double" )

@@ -1,5 +1,6 @@
-renderImageLabels <- function(labelsimg, surfval = 0.5, smoothsval = 0, blobrender = TRUE, alphasurf = 1, alphafunc = 1, 
-  outdir = "./", outfn = NA, physical = TRUE, color = c(), labels = FALSE) {
+renderImageLabels <- function(labelsimg, surfval = 0.5, smoothsval = 0, blobrender = TRUE, 
+  alphasurf = 1, alphafunc = 1, outdir = "./", outfn = NA, physical = TRUE, color = c(), 
+  labels = FALSE) {
   if (missing(labelsimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ")
   }
@@ -24,7 +25,8 @@ renderImageLabels <- function(labelsimg, surfval = 0.5, smoothsval = 0, blobrend
     print(sum(as.array(limg)))
     
     surf <- as.array(limg)
-    brain <- contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE, smooth = 1, color = colors[i])
+    brain <- contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE, 
+      smooth = 1, color = colors[i])
     
     print("convert points")
     if (physical == TRUE) {

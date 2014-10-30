@@ -1,12 +1,15 @@
 mergeLabels <- function(dataMatrix, pca, corrThresh, maxExtent, colName = "variate") {
-  # Fuses regions of a PCA decomposition if the projections are highly correlated.  dataMatrix is the voxel data
-  # of dimension (subjects, voxels), pca should be a matrix with dims (voxels, eigenvectors) corrThresh =
-  # minimum correlation for merge maxExtent = maximum fused component size, in voxels colname = optional name
-  # for columns of returned PCA, cols will be named colName000, colName001, etc Returns the fused PCA matrix
+  # Fuses regions of a PCA decomposition if the projections are highly correlated.
+  # dataMatrix is the voxel data of dimension (subjects, voxels), pca should be a
+  # matrix with dims (voxels, eigenvectors) corrThresh = minimum correlation for
+  # merge maxExtent = maximum fused component size, in voxels colname = optional
+  # name for columns of returned PCA, cols will be named colName000, colName001,
+  # etc Returns the fused PCA matrix
   
   numProj <- dim(pca)[2]
   
-  # Normalize PCA vectors, this will be done continuously through the label fusion process
+  # Normalize PCA vectors, this will be done continuously through the label fusion
+  # process
   for (i in 1:numProj) {
     pca[, i] <- pca[, i]/sum(pca[, i])
   }
@@ -40,7 +43,8 @@ mergeLabels <- function(dataMatrix, pca, corrThresh, maxExtent, colName = "varia
       
       mergedExtent <- length(which(fusedPCA[, p1] | fusedPCA[, p2]))
       
-      print(paste("Merged extent ", mergedExtent, " correlation ", correlation[mergeIndex], sep = ""))
+      print(paste("Merged extent ", mergedExtent, " correlation ", correlation[mergeIndex], 
+        sep = ""))
       
       if (mergedExtent <<- maxExtent) {
         foundRegions <- TRUE

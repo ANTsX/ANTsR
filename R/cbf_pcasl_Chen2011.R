@@ -1,4 +1,5 @@
-# chen 2011 paper pCASL --------------------------------------------------------------------------------------
+# chen 2011 paper pCASL
+# --------------------------------------------------------------------------------------
 cbf_pcasl_Chen2011 <- function(motionCorrectedImage, mask) {
   # img <- antsImageRead( aslimg_filename , 4 , 'double' )
   
@@ -30,7 +31,8 @@ cbf_pcasl_Chen2011 <- function(motionCorrectedImage, mask) {
   omega <- 1
   tau <- 1.5
   
-  cbf <- (lambda * deltaM)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + omega)/T1b)))
+  cbf <- (lambda * deltaM)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + 
+    omega)/T1b)))
   cbf[is.nan(cbf)] <- 0
   
   meanvalues <- array(0, dim(controlimg)[1:3])
@@ -42,10 +44,12 @@ cbf_pcasl_Chen2011 <- function(motionCorrectedImage, mask) {
   meancbf <- antsImageClone(moco_results$moco_avg_img)
   meancbf[!is.nan(meanvalues)] <- meanvalues[!is.nan(meanvalues)]
   
-  # mask <- antsImageClone(moco_results$moco_avg_img) mask[mask < 500] <- 0 mask[mask > 0] <- 1
+  # mask <- antsImageClone(moco_results$moco_avg_img) mask[mask < 500] <- 0
+  # mask[mask > 0] <- 1
   
-  # for( x in 1:(dim(meancbf)[1]) ) for( y in 1:(dim(meancbf)[2]) ) for( z in 1:(dim(meancbf)[3]) ) { val <-
-  # meancbf[x,y,z] * mask[x,y,z] meancbf[ x , y , z ] <- val }
+  # for( x in 1:(dim(meancbf)[1]) ) for( y in 1:(dim(meancbf)[2]) ) for( z in
+  # 1:(dim(meancbf)[3]) ) { val <- meancbf[x,y,z] * mask[x,y,z] meancbf[ x , y , z
+  # ] <- val }
   meancbf[(mask < 1)] <- 0
   
   return(meancbf)

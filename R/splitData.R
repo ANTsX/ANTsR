@@ -15,8 +15,8 @@ splitData <- function(data.source, ratio, return.rows = FALSE) {
       data.out <- data.source[subjects.out, ]
       mylist[[paste("fold", i, sep = "")]] <- list(data.in = data.in, data.out = data.out)
       if (return.rows) {
-        mylist[[paste("fold", i, sep = "")]] <- list(data.in = data.in, data.out = data.out, rows.in = subjects.in, 
-          rows.out = subjects.out)
+        mylist[[paste("fold", i, sep = "")]] <- list(data.in = data.in, data.out = data.out, 
+          rows.in = subjects.in, rows.out = subjects.out)
       }
     }
     return(mylist)
@@ -26,7 +26,8 @@ splitData <- function(data.source, ratio, return.rows = FALSE) {
     data.out <- data.source[-subjects.in, ]
     mylist <- list(data.in = data.in, data.out = data.out)
     if (return.rows) 
-      mylist <- list(data.in = data.in, data.out = data.out, rows.in = subjects.in, rows.out = (1:nsubjects)[-subjects.in])
+      mylist <- list(data.in = data.in, data.out = data.out, rows.in = subjects.in, 
+        rows.out = (1:nsubjects)[-subjects.in])
     return(mylist)
   }
 } 

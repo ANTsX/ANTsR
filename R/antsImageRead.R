@@ -7,7 +7,8 @@ antsImageRead <- function(filename, dimension, pixeltype = "float") {
     print("'pixeltype' argument must be of class 'character' and have length 1")
     return(NULL)
   }
-  if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) != 1) {
+  if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) != 
+    1) {
     print("'dimension' argument must be of class 'numeric' and have length 1")
     return(NULL)
   }

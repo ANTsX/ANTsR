@@ -71,8 +71,8 @@ quantifyCBF <- function(perfusion, mask, parameters, outlierValue = 0.02) {
     omegaMat <- slicetime * sliceTimeMat + omega
     
     # 60 for seconds to minutes, 100 for 100g (standard units)
-    cbf <- perf * 60 * 100 * (lambda * T1b)/(2 * alpha * M0 * (exp(-omegaMat * T1b) - exp(-(tau + omegaMat) * 
-      T1b)))
+    cbf <- perf * 60 * 100 * (lambda * T1b)/(2 * alpha * M0 * (exp(-omegaMat * 
+      T1b) - exp(-(tau + omegaMat) * T1b)))
     cbf[!is.finite(cbf)] <- 0
     
     if (hasTime) {
@@ -196,7 +196,8 @@ quantifyCBF <- function(perfusion, mask, parameters, outlierValue = 0.02) {
   }
   library(extremevalues)
   cbfvals <- meancbfimg[(mask == 1)]
-  K <- getOutliers(cbfvals, method = "I", distribution = "normal", FLim = c(outlierValue, 1 - outlierValue))
+  K <- getOutliers(cbfvals, method = "I", distribution = "normal", FLim = c(outlierValue, 
+    1 - outlierValue))
   kcbf <- antsImageClone(meancbfimg)
   kcbf[meancbfimg < K$yMin] <- 0
   kcbf[meancbfimg > K$yMax] <- K$yMax

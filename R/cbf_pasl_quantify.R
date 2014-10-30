@@ -1,4 +1,5 @@
-cbf_pasl_quantify <- function(ratioM, lambda = 0.9, alpha = 0.95, TI1 = 700, TI2 = 1700, T1blood = 1664, sliceTime = 45) {
+cbf_pasl_quantify <- function(ratioM, lambda = 0.9, alpha = 0.95, TI1 = 700, TI2 = 1700, 
+  T1blood = 1664, sliceTime = 45) {
   
   sliceTimeImg <- new("antsImage", "float", 3)
   ImageMath(3, sliceTimeImg, "m", ratioM, 0)

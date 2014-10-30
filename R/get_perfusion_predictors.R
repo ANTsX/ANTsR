@@ -1,5 +1,5 @@
-get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirst = 1,
-     ncompcorparameters = 3, useDenoiser=NA ) {
+get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirst = 1, 
+  ncompcorparameters = 3, useDenoiser = NA) {
   myusage <- "usage: get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
   if (nargs() == 0) {
     print(myusage)
@@ -20,13 +20,15 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
     print("'xideal' must have length equal to dim(mat)[1]")
     return(NULL)
   }
-  # get nuisance variables : motion, compcor, etc motionparams <- as.data.frame( moco_params )
+  # get nuisance variables : motion, compcor, etc motionparams <- as.data.frame(
+  # moco_params )
   motionnuis <- t(motionparams)[2:ncol(motionparams), ]  # matrix elements
   metricnuis <- motionnuis[1, ]
   globalsignal <- rowMeans(mat)
   globalsignalASL <- residuals(lm(globalsignal ~ xideal))
-
-  # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top 3 components
+  
+  # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top
+  # 3 components
   msvd <- svd(t(motionnuis[2:nrow(motionnuis), ]))
   nsvdcomp <- 3
   motionnuis <- (msvd$u[, 1:nsvdcomp])
@@ -36,19 +38,18 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
   nuis <- t(rbind(metricnuis, (motionnuis)))
   colnames(nuis) <- c("metricnuis", motnames)
   if (ncompcorparameters > 0) {
-    pcompcorr <-compcor( mat,  ncompcorparameters )
-    if ( !(all(is.na(useDenoiser))) )
-      {
+    pcompcorr <- compcor(mat, ncompcorparameters)
+    if (!(all(is.na(useDenoiser)))) {
       # include t(motionnuis) if you want to model motion
-      DVARS <- computeDVARS( mat )
-      dnz<-aslDenoiseR( mat, xideal, motionparams=DVARS, selectionthresh=0.1,
-        maxnoisepreds=useDenoiser, polydegree=4, crossvalidationgroups=6,
-        scalemat=F, noisepoolfun=max )
-      pcompcorr<-dnz$noiseu
-      }
+      DVARS <- computeDVARS(mat)
+      dnz <- aslDenoiseR(mat, xideal, motionparams = DVARS, selectionthresh = 0.1, 
+        maxnoisepreds = useDenoiser, polydegree = 4, crossvalidationgroups = 6, 
+        scalemat = F, noisepoolfun = max)
+      pcompcorr <- dnz$noiseu
+    }
     compcorrnames <- paste("compcorr", c(1:ncol(pcompcorr)), sep = "")
     nuis <- cbind(nuis, pcompcorr)
     colnames(nuis) <- c("metricnuis", motnames, compcorrnames)
   }
   return(list(xideal = xideal, nuis = nuis, globalsignal = globalsignal, globalsignalASL = globalsignalASL))
-}
+} 

@@ -1,5 +1,6 @@
-# Wang 2012 paper CASL ; paper does not mention the parameters so using them form the reference [25] mentioned
-# in the paper --------------------------------------------------------------------------------------
+# Wang 2012 paper CASL ; paper does not mention the parameters so using them form
+# the reference [25] mentioned in the paper
+# --------------------------------------------------------------------------------------
 cbf_casl_Wang2012 <- function(aslimg_filename, Xvar = NULL, Xideal = NULL, c = NULL) {
   Y <- as.array(antsImageRead(aslimg_filename, 4, "double"))
   dimY <- dim(Y)
@@ -44,7 +45,8 @@ cbf_casl_Wang2012 <- function(aslimg_filename, Xvar = NULL, Xideal = NULL, c = N
     c <- as.array(antsImageRead(c, 3, "double"))
   }
   
-  cbf <- (Bideal * lambda * R1a * exp(w * R1a))/(2 * c * alpha * (1 - exp(-tau * R1a)))
+  cbf <- (Bideal * lambda * R1a * exp(w * R1a))/(2 * c * alpha * (1 - exp(-tau * 
+    R1a)))
   
   return(cbf)
 } 

@@ -1,6 +1,7 @@
-KellyKapowski <- function(d = NA, s = NA, g = NA, w = NA, c = "[45,0.0,10]", r = 0.025, m = 1.5, outimg = outimg, 
-  ...) {
-  if (missing(d) | missing(s) | missing(g) | missing(w) | missing(c) | missing(r) | missing(m) | missing(outimg)) {
+KellyKapowski <- function(d = NA, s = NA, g = NA, w = NA, c = "[45,0.0,10]", r = 0.025, 
+  m = 1.5, outimg = outimg, ...) {
+  if (missing(d) | missing(s) | missing(g) | missing(w) | missing(c) | missing(r) | 
+    missing(m) | missing(outimg)) {
     print("Input error - check params & usage")
     return(NULL)
   }

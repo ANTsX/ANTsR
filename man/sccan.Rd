@@ -11,13 +11,15 @@ A tool for sparse statistical analysis on images : scca, pscca (with options), m
 
 \usage{
 sccan( <list of named arguments> )
-<list of named arguments> -- an R list of name-value pairs as described in the section 'Arguments'
-See sections: Arguments, Examples for details. Number and type of arguments depend on options.
+<list of named arguments> -- an R list of name-value pairs
+as described in the section 'Arguments'
+See sections: Arguments, Examples for details.
+Number and type of arguments depend on options.
 }
 
 \arguments{
 \item{o -or- output = <outputImage>}{
-Output dependent on which option is called. 
+Output dependent on which option is called.
 }
 \item{p -or- "n_permutations" = <value>}{
 Number of permutations to use in scca. Default: 500.
@@ -44,16 +46,16 @@ Number of permutations to use in scca. Default: 0.
 Choices for pscca: "PQ", "PminusRQ", "PQminusR", "PminusRQminusR"
 }
 \item{"imageset-to-matrix" = list(<list.txt>, <mask.nii.gz>)}{
-takes a list of image files names (one per line) and converts it to a 2D matrix image in binary or csv format depending on the filetype used to define the output. 
+takes a list of image files names (one per line) and converts it to a 2D matrix image in binary or csv format depending on the filetype used to define the output.
 }
 \item{"timeseriesimage-to-matrix" = list(<four_d_image.nii.gz>, <three_d_mask.nii.gz>, <optional-spatial-smoothing-param-in-spacing-units-default-zero>, <optional-temporal-smoothing-param-in-time-series-units-default-zero>)}{
-takes a timeseries (4D) image and converts it to a 2D matrix csv format as output. 
+takes a timeseries (4D) image and converts it to a 2D matrix csv format as output.
 }
 \item{"vector-to-image" = list(<vector.csv>, <three_d_mask.nii.gz>, <which-row-or-col>)}{
-converts the 1st column vector in a csv file back to an image --- currently needs the csv file to have > 1 columns. if the number of entries in the column does not equal the number of entries in the mask but the number of rows does equal the number of entries in the mask, then it will convert the row vector to an image. 
+converts the 1st column vector in a csv file back to an image --- currently needs the csv file to have > 1 columns. if the number of entries in the column does not equal the number of entries in the mask but the number of rows does equal the number of entries in the mask, then it will convert the row vector to an image.
 }
 \item{"imageset-to-projections" = list(<list_projections.txt>, <list_images.txt>, <bool do-average-not-real-projection>)}{
-takes a list of image and projection files names (one per line) and writes them to a csv file --- basically computing X*Y (matrices). 
+takes a list of image and projection files names (one per line) and writes them to a csv file --- basically computing X*Y (matrices).
 }
 \item{scca =
 \itemize{
@@ -62,7 +64,7 @@ takes a list of image and projection files names (one per line) and writes them 
 \item{list( name = partial, <matrix-view1.mhd>, <matrix-view2.mhd>, <matrix-view3.mhd>, <mask1>, <mask2>, <mask3>, <FracNonZero1>, <FracNonZero2>, <FracNonZero3>)}
 }
 }{
-Matrix-based scca operations for 2 and 3 views.For all these options, the FracNonZero terms set the fraction of variables to use in the estimate. E.g. if one sets 0.5 then half of the variables will have non-zero values. If the FracNonZero is (+) then the weight vectors must be positive. If they are negative, weights can be (+) or (-). partial does partial scca for 2 views while partialing out the 3rd view. 
+Matrix-based scca operations for 2 and 3 views.For all these options, the FracNonZero terms set the fraction of variables to use in the estimate. E.g. if one sets 0.5 then half of the variables will have non-zero values. If the FracNonZero is (+) then the weight vectors must be positive. If they are negative, weights can be (+) or (-). partial does partial scca for 2 views while partialing out the 3rd view.
 }
 \item{svd =
 \itemize{

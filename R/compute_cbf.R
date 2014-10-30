@@ -18,7 +18,8 @@ compute_cbf <- function(cbf, img, method = 0, labelfirst = 1) {
     omega <- 1
     tau <- 2
     
-    cbf <- (lambda * cbf)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + omega)/T1b)))
+    cbf <- (lambda * cbf)/(2 * alpha * M0 * T1b * (exp(-omega/T1b) - exp(-(tau + 
+      omega)/T1b)))
     
     return(cbf)
   }

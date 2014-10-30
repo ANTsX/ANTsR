@@ -1,14 +1,17 @@
-# this file defines the S4 classes related to 'antsImage' and their associated methods
+# this file defines the S4 classes related to 'antsImage' and their associated
+# methods
 
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
-# C++ type used to represent a pixel of image pointed to by 'pointer' dimension of the image pointerd to by
-# 'pointer' pointer to the actual image of C++ type 'itk::image< pixeltype , dimension >::Pointer'
+# C++ type used to represent a pixel of image pointed to by 'pointer' dimension
+# of the image pointerd to by 'pointer' pointer to the actual image of C++ type
+# 'itk::image< pixeltype , dimension >::Pointer'
 
-setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer", pointer = "externalptr"))
+setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer", 
+  pointer = "externalptr"))
 
-setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object, pixeltype = "float", 
-  dimension = 3) {
+setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object, 
+  pixeltype = "float", dimension = 3) {
   return(.Call("antsImage", pixeltype, dimension, PACKAGE = "ANTsR"))
 })
 
@@ -32,19 +35,18 @@ setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
   return(sd(as.array(x)))
 })
 
-setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical() ) {
-  if ( typeof(mask) != "logical" ) {
+setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical()) {
+  if (typeof(mask) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
   }
-
-  if ( length(mask) == 0 ) {
+  
+  if (length(mask) == 0) {
     return(mean(as.array(x)))
-  } 
-  else {
+  } else {
     return(mean(as.array(x)[mask]))
   }
-
+  
 })
 
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
@@ -55,8 +57,8 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   return(FALSE)
 })
 
-setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x, mask = logical(), region = new("antsRegion", 
-  index = integer(), size = integer())) {
+setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x, 
+  mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -64,8 +66,8 @@ setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "as.matrix", signature(x = "antsImage"), definition = function(x, mask = logical(), region = new("antsRegion", 
-  index = integer(), size = integer())) {
+setMethod(f = "as.matrix", signature(x = "antsImage"), definition = function(x, mask = logical(), 
+  region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -77,8 +79,8 @@ setMethod(f = "as.matrix", signature(x = "antsImage"), definition = function(x, 
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "as.array", signature(x = "antsImage"), definition = function(x, mask = logical(), region = new("antsRegion", 
-  index = integer(), size = integer())) {
+setMethod(f = "as.array", signature(x = "antsImage"), definition = function(x, mask = logical(), 
+  region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -86,18 +88,21 @@ setMethod(f = "as.array", signature(x = "antsImage"), definition = function(x, m
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "NULL"), definition = function(x, i) {
+setMethod(f = "[", signature(x = "antsImage", i = "NULL"), definition = function(x, 
+  i) {
   mask <- logical(0)
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "logical"), definition = function(x, i) {
+setMethod(f = "[", signature(x = "antsImage", i = "logical"), definition = function(x, 
+  i) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "array"), definition = function(x, i) {
+setMethod(f = "[", signature(x = "antsImage", i = "array"), definition = function(x, 
+  i) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -106,7 +111,8 @@ setMethod(f = "[", signature(x = "antsImage", i = "array"), definition = functio
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "matrix"), definition = function(x, i) {
+setMethod(f = "[", signature(x = "antsImage", i = "matrix"), definition = function(x, 
+  i) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -115,7 +121,8 @@ setMethod(f = "[", signature(x = "antsImage", i = "matrix"), definition = functi
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "list"), definition = function(x, i) {
+setMethod(f = "[", signature(x = "antsImage", i = "list"), definition = function(x, 
+  i) {
   if (class(i$mask) == "NULL") {
     i$mask <- logical(0)
   } else if (typeof(i$mask) != "logical") {
@@ -129,16 +136,19 @@ setMethod(f = "[", signature(x = "antsImage", i = "list"), definition = function
   return(.Call("antsImage_asVector", x, i$mask, i$region, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x, i, j) {
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x, 
+  i, j) {
   mask <- logical(0)
   return(.Call("antsImage_asVector", x, mask, j, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "logical", j = "antsRegion"), definition = function(x, i, j) {
+setMethod(f = "[", signature(x = "antsImage", i = "logical", j = "antsRegion"), definition = function(x, 
+  i, j) {
   return(.Call("antsImage_asVector", x, i, j, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "array", j = "antsRegion"), definition = function(x, i, j) {
+setMethod(f = "[", signature(x = "antsImage", i = "array", j = "antsRegion"), definition = function(x, 
+  i, j) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -146,7 +156,8 @@ setMethod(f = "[", signature(x = "antsImage", i = "array", j = "antsRegion"), de
   return(.Call("antsImage_asVector", x, i, j, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "matrix", j = "antsRegion"), definition = function(x, i, j) {
+setMethod(f = "[", signature(x = "antsImage", i = "matrix", j = "antsRegion"), definition = function(x, 
+  i, j) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -289,8 +300,8 @@ getValueAtPoint <- function(x, point) {
     print("point must be of class 'numeric'")
     return()
   }
-
-  idx<-as.numeric( antsTransformPhysicalPointToIndex(x, point) )
+  
+  idx <- as.numeric(antsTransformPhysicalPointToIndex(x, point))
   idx <- floor(idx)
   
   dims <- length(idx)
@@ -354,38 +365,41 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
   return(.Call("antsImage_TransformPhysicalPointToIndex", x, point, PACKAGE = "ANTsR"))
 }
 
-setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"), definition = function(x, i, j, k = NA, 
-  l = NA) {
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"), definition = function(x, 
+  i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "numeric"), definition = function(x, i, j, k = NA, 
-  l = NA) {
+setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "numeric"), definition = function(x, 
+  i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"), definition = function(x, i, j, k = NA, 
-  l = NA) {
+setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"), definition = function(x, 
+  i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"), definition = function(x, i, j, k = NA, 
-  l = NA) {
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"), definition = function(x, 
+  i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"), definition = function(x, i, value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"), definition = function(x, 
+  i, value) {
   mask <- logical(0)
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, mask, region, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "logical"), definition = function(x, i, value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "logical"), definition = function(x, 
+  i, value) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "array"), definition = function(x, i, value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "array"), definition = function(x, 
+  i, value) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -394,7 +408,8 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array"), definition = funct
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"), definition = function(x, i, value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"), definition = function(x, 
+  i, value) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -403,7 +418,8 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"), definition = func
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "list"), definition = function(x, i, value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "list"), definition = function(x, 
+  i, value) {
   if (class(i$mask) == "NULL") {
     i$mask <- logical(0)
   } else if (typeof(i$mask) != "logical") {
@@ -417,19 +433,19 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "list"), definition = functi
   return(.Call("antsImage_SetRegion", x, i$mask, i$region, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x, i, j, 
-  value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x, 
+  i, j, value) {
   mask <- logical(0)
   return(.Call("antsImage_SetRegion", x, mask, j, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "logical", j = "antsRegion"), definition = function(x, i, 
-  j, value) {
-  return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "logical", j = "antsRegion"), 
+  definition = function(x, i, j, value) {
+    return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
+  })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"), definition = function(x, i, j, 
-  value) {
+setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"), definition = function(x, 
+  i, j, value) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
     return()
@@ -437,14 +453,14 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"), 
   return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"), definition = function(x, i, j, 
-  value) {
-  if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
-  }
-  return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"), 
+  definition = function(x, i, j, value) {
+    if (typeof(i) != "logical") {
+      print("'mask' provided is not of type 'logical'")
+      return()
+    }
+    return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
+  })
 
 antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   lst <- NULL
@@ -494,37 +510,37 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   return(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
 }
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"), definition = function(x, 
-  i, j, ..., value) {
-  return(antsSetPixels(x, i, j, ..., value = value))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"), 
+  definition = function(x, i, j, ..., value) {
+    return(antsSetPixels(x, i, j, ..., value = value))
+  })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"), definition = function(x, 
-  i, j, ..., value) {
-  return(antsSetPixels(x, i, j, ..., value = value))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"), 
+  definition = function(x, i, j, ..., value) {
+    return(antsSetPixels(x, i, j, ..., value = value))
+  })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"), definition = function(x, 
-  i, j, ..., value) {
-  return(antsSetPixels(x, i, j, ..., value = value))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"), 
+  definition = function(x, i, j, ..., value) {
+    return(antsSetPixels(x, i, j, ..., value = value))
+  })
 
-setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"), definition = function(x, 
-  i, j, ..., value) {
-  return(antsSetPixels(x, i, j, ..., value = value))
-})
+setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"), 
+  definition = function(x, i, j, ..., value) {
+    return(antsSetPixels(x, i, j, ..., value = value))
+  })
 
 setGeneric(name = "as.antsImage", def = function(object, ...) standardGeneric("as.antsImage"))
 
-setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object, pixeltype = "double", 
-  spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))), origin = as.numeric(seq.int(from = 0, 
-    by = 0, length.out = length(dim(object))))) {
+setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object, 
+  pixeltype = "double", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))), 
+  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
 })
 
-setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object, pixeltype = "double", 
-  spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))), origin = as.numeric(seq.int(from = 0, 
-    by = 0, length.out = length(dim(object))))) {
+setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object, 
+  pixeltype = "double", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))), 
+  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
 })
 
@@ -539,7 +555,8 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -560,7 +577,8 @@ setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -581,7 +599,8 @@ setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -602,7 +621,8 @@ setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -623,7 +643,8 @@ setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -644,7 +665,8 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
       print("region argument not of class 'antsRegion'")
       return()
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator, 
+      PACKAGE = "ANTsR"))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
@@ -656,10 +678,11 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
 
 ################################################################################################### 
 
-setClass(Class = "antsImageList", representation(pixeltype = "character", dimension = "integer", pointer = "externalptr"))
+setClass(Class = "antsImageList", representation(pixeltype = "character", dimension = "integer", 
+  pointer = "externalptr"))
 
-setMethod(f = "initialize", signature(.Object = "antsImageList"), definition = function(.Object, pixeltype = "float", 
-  dimension = 3) {
+setMethod(f = "initialize", signature(.Object = "antsImageList"), definition = function(.Object, 
+  pixeltype = "float", dimension = 3) {
   .Call("antsImageList", pixeltype, dimension, PACKAGE = "ANTsR")
 })
 

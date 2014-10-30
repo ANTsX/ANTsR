@@ -12,14 +12,14 @@ getCentroids <- function(img, clustparam = 250, threshparam = NA, outprefix = NA
   }
   pointfile <- paste(outprefix, "coords.csv", sep = "")
   clust <- NA
-  if ( ! is.na( threshparam ) ) {
+  if (!is.na(threshparam)) {
     threshimg <- antsImageClone(img)
     ImageMath(threshimg@dimension, threshimg, "abs", threshimg)
     meanval <- mean(threshimg[threshimg > (.Machine$double.eps * 2)])
     sdval <- sd(threshimg[threshimg > (.Machine$double.eps * 2)])
     threshval <- (meanval - sdval * threshparam)
     if (threshval < (.Machine$double.eps * 2)) 
-        threshval <- (.Machine$double.eps * 2)
+      threshval <- (.Machine$double.eps * 2)
     threshimg[threshimg > threshval] <- 1
     threshimg[threshimg <= threshval] <- 0
     clust <- labelClusters(threshimg, clustparam)

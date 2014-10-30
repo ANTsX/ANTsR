@@ -1,5 +1,6 @@
-simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c(), predictors, formula, testType = c("lm", 
-  "student.t", "wilcox"), maskFileName = "", outputPrefix = "./ANTsR") {
+simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c(), 
+  predictors, formula, testType = c("lm", "student.t", "wilcox"), maskFileName = "", 
+  outputPrefix = "./ANTsR") {
   
   ## Check input variables
   
@@ -22,7 +23,8 @@ simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c()
     if (missing(predictors)) {
       stop("'predictors' missing")
     }
-    if (is.vector(predictors) || (is.matrix(predictors) && ncol(predictors) == 1)) {
+    if (is.vector(predictors) || (is.matrix(predictors) && ncol(predictors) == 
+      1)) {
       predictors <- as.data.frame(predictors)
     }
     colnames(predictors) <- c("diagnosis")
@@ -30,7 +32,8 @@ simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c()
   }
   predictorNames <- colnames(predictors)
   
-  # Check to make sure that the predictor data frame has the same variable names as the formula.
+  # Check to make sure that the predictor data frame has the same variable names as
+  # the formula.
   responseVariableName <- all.vars(formula)[attr(terms(formula), "response")]
   variables <- attr(terms(formula), "variables")
   tmp <- c()
@@ -50,8 +53,8 @@ simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c()
   
   ## Do the actual data prep and testing
   
-  cat("******* Conducting ", testType, " voxel-based analysis (number of images = ", numberOfImages, "). *******\n\n", 
-    sep = "")
+  cat("******* Conducting ", testType, " voxel-based analysis (number of images = ", 
+    numberOfImages, "). *******\n\n", sep = "")
   
   # Read the mask and place the masked voxels in the images in a matrix
   
@@ -65,12 +68,13 @@ simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c()
     predictorString <- paste(predictorNames[1], "=", predictors[i, 1], sep = "")
     if (ncol(predictors) >= 2) {
       for (j in 2:ncol(predictors)) {
-        predictorString <- paste(predictorString, ", ", predictorNames[j], "=", predictors[i, j], sep = "")
+        predictorString <- paste(predictorString, ", ", predictorNames[j], 
+          "=", predictors[i, j], sep = "")
       }
     }
     
-    cat("Reading image ", imageFileNames[i], " (", i, " of ", numberOfImages, ", ", predictorString, ").\n", 
-      sep = "")
+    cat("Reading image ", imageFileNames[i], " (", i, " of ", numberOfImages, 
+      ", ", predictorString, ").\n", sep = "")
     subjectImage <- antsImageRead(imageFileNames[i], dimensionality)
     dataMatrix[i, ] <- as.array(subjectImage[mask != 0])
   }
@@ -138,6 +142,8 @@ simple_voxel_based_analysis <- function(dimensionality = 3, imageFileNames = c()
   dir.create(outputPath, showWarnings = TRUE, recursive = TRUE)
   
   antsImageWrite(tImage, paste(outputPath, "/", filePrefix, "tValues.nii.gz", sep = ""))
-  antsImageWrite(pImage, paste(outputPath, "/", filePrefix, "1minuspValues.nii.gz", sep = ""))
-  antsImageWrite(qImage, paste(outputPath, "/", filePrefix, "1minuspValues_corrected.nii.gz", sep = ""))
+  antsImageWrite(pImage, paste(outputPath, "/", filePrefix, "1minuspValues.nii.gz", 
+    sep = ""))
+  antsImageWrite(qImage, paste(outputPath, "/", filePrefix, "1minuspValues_corrected.nii.gz", 
+    sep = ""))
 } 

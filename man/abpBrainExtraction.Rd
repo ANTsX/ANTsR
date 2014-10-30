@@ -10,7 +10,8 @@ Brain extraction based on mapping a template image and its mask to the input ima
 }
 
 \usage{
-abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) )
+abpBrainExtraction( img=imgToBExtract, tem = template,
+   temmask = mask, tempriors=c(img1,img2,...,imgN) )
 }
 
 \arguments{
@@ -49,8 +50,8 @@ img<-antsImageRead(fn,2)
 tf<-getANTsRData('r64')
 tem<-antsImageRead(tf,2)
 temmask<-antsImageClone( tem )
-temmask[ tem  > 20 ]<-1 
-temmask[ tem  <= 20 ]<-0 
+temmask[ tem  > 20 ]<-1
+temmask[ tem  <= 20 ]<-0
 bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 
 # more complete example
@@ -62,7 +63,8 @@ atem<-antsImageRead(tf,idim)
 temmask<-antsImageClone( atem )
 temmask[ atem > 20 ]<-1
 temmask[ atem <= 20 ]<-0
-tsegs <- Atropos(d = idim, a = atem, m = "[0.2,1x1]", c = "[5,0]", i ="kmeans[3]", x = temmask)
+tsegs <- Atropos(d = idim, a = atem, m = "[0.2,1x1]",
+  c = "[5,0]", i ="kmeans[3]", x = temmask)
 acsf<-tsegs$probabilityimages[[1]]
 agm<-tsegs$probabilityimages[[2]]
 awm<-tsegs$probabilityimages[[3]]
@@ -75,8 +77,8 @@ kwm<-antsApplyTransforms(fixed=kk,moving=awm,transformlist=kkbm$invtransforms)
 plotANTsImage(kk,slices='40x120x20',functional=kwm,thresh='0.5x1')
 for ( its in 1:3 ) {
   kk<-abpN4( img , weight = kwm , mask = kkbm$bmask )
-  ksegs <- Atropos(d = kk@dimension, a = kk, m = "[0.1,1x1]", c = "[5,0]",
-    i = list( kcsf, kgm, kwm) , x = kkbm$bmask )
+  ksegs <- Atropos(d = kk@dimension, a = kk, m = "[0.1,1x1]",
+    c = "[5,0]", i = list( kcsf, kgm, kwm) , x = kkbm$bmask )
   kcsf<-ksegs$probabilityimages[[1]]
   kgm<-ksegs$probabilityimages[[2]]
   kwm<-ksegs$probabilityimages[[3]]

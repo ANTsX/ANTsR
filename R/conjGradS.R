@@ -1,7 +1,8 @@
 conjGradS <- function(A_in = NA, x_k = NA, b_in = NA, maxits = 1000, sp = -10, convcrit = 0) {
-  # This will use the normal equations */ Based on Golub CONJUGATE G R A D I E N T A N D LANCZOS HISTORY
-  # http://www.matematicas.unam.mx/gfgf/cg2010/HISTORY-conjugategradient.pdf minimize the following error : \|
-  # A^T*A * vec_i - b \| + sparseness_penalty
+  # This will use the normal equations */ Based on Golub CONJUGATE G R A D I E N T
+  # A N D LANCZOS HISTORY
+  # http://www.matematicas.unam.mx/gfgf/cg2010/HISTORY-conjugategradient.pdf
+  # minimize the following error : \| A^T*A * vec_i - b \| + sparseness_penalty
   A <- A_in  #decostand( A_in , method='standardize',MARGIN=2)
   # A<-decostand( A_in , method='standardize',MARGIN=2)
   At <- t(A)

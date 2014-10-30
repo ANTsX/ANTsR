@@ -1,6 +1,7 @@
-getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels, labelnames = NA, outprefix = NA, 
-  convertToTal = FALSE) {
-  if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) < 2) {
+getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels, 
+  labelnames = NA, outprefix = NA, convertToTal = FALSE) {
+  if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) < 
+    2) {
     print(args(getTemplateCoordinates))
     print(" imagePairToBeLabeled <-list( myBrain, myBrainBlobs ) ")
     print(" templatePairWithLabels <-list( ch2orMNI_Brain, ch2orMNI_BrodmannLabels ) ")
@@ -21,12 +22,16 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
   }
   txfn <- paste(outprefix, "0GenericAffine.mat", sep = "")
   if (!file.exists(txfn)) 
-    mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("Affine"), outprefix = outprefix) else mytx <- list(fwdtransforms = txfn)
-  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi, transformlist = mytx$fwdtransforms, interpolator = c("Linear"))
+    mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("Affine"), 
+      outprefix = outprefix) else mytx <- list(fwdtransforms = txfn)
+  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi, transformlist = mytx$fwdtransforms, 
+    interpolator = c("Linear"))
   milab <- imagePairToBeLabeled[[2]]
-  mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms, interpolator = c("NearestNeighbor"))
+  mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms, 
+    interpolator = c("NearestNeighbor"))
   pointfile <- paste(outprefix, "coords.csv", sep = "")
-  ImageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage, 1)
+  ImageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage, 
+    1)
   mypoints <- read.csv(pointfile)
   for (mylab in 2:length(templatePairWithLabels)) {
     filab <- templatePairWithLabels[[mylab]]
@@ -38,9 +43,10 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
       print("  class(milab)[[1]] != antsImage ")
       return(1)
     }
-    # now we know the (e.g. MNI) coordinate of each labeled region in the original image we want, next, to
-    # identify the 'Brodmann' label for each of these regions for instance, you might have found 2 blobs, blob1
-    # and blob2 with labels 1 and 2 you know want to know if these are at Brodmann area 21 or 22 or whatever so we
+    # now we know the (e.g. MNI) coordinate of each labeled region in the original
+    # image we want, next, to identify the 'Brodmann' label for each of these regions
+    # for instance, you might have found 2 blobs, blob1 and blob2 with labels 1 and 2
+    # you know want to know if these are at Brodmann area 21 or 22 or whatever so we
     # iterate through the point list and index the filab image ( template labels )
     templateLab <- rep(NA, nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
@@ -102,5 +108,6 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
     }
     mypoints$AAL <- aalnames
   }
-  return(list(templatepoints = mypoints, myLabelsInTemplateSpace = mywarpedLimage, myImageInTemplateSpace = mywarpedimage))
+  return(list(templatepoints = mypoints, myLabelsInTemplateSpace = mywarpedLimage, 
+    myImageInTemplateSpace = mywarpedimage))
 } 

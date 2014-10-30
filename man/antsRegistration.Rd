@@ -10,7 +10,9 @@ Register a pair of images either through the full or simplified interface.  Uses
 }
 
 \usage{
-antsRegistration( fixed , moving , typeofTransform = c("Rigid","Affine","SyN"),  outprefix="./antsRegOut")
+antsRegistration( fixed , moving ,
+  typeofTransform = c("Rigid","Affine","SyN"),
+  outprefix="./antsRegOut")
 }
 
 \arguments{
@@ -23,7 +25,9 @@ moving image to be mapped to fixed space.
 }
 
 \item{typeofTransform}{
-Either a one stage rigid/affine mapping or a 2-stage affine+syn mapping.  Mutual information metric by default.
+Either a one stage rigid/affine mapping or a
+2-stage affine+syn mapping.  Mutual
+information metric by default.
 }
 
 \item{outprefix}{
@@ -46,16 +50,25 @@ Shrinidhi KL, Avants BB
 # will give the full form of help
 antsRegistration( "-h")
 # example 1 - simplified, uses antsImages for I/O
-antsRegOut<-antsRegistration(fixed=img1,moving=img2,typeofTransform="Affine",outprefix="./test")
+antsRegOut<-antsRegistration(fixed=img1,moving=img2,
+  typeofTransform="Affine",outprefix="./test")
 # example 2
   fi<-antsImageRead( getANTsRData('r16') ,2)
   mi<-antsImageRead( getANTsRData('r64') ,2)
-  mytx<-antsRegistration(fixed=fi , moving=mi , typeofTransform = c("SyN"), outprefix=paste(tempdir(),"/Z",sep=''))
-  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,transformlist=mytx$fwdtransforms)
+  mytx<-antsRegistration(fixed=fi , moving=mi ,
+    typeofTransform = c("SyN"),
+    outprefix=paste(tempdir(),"/Z",sep=''))
+  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
+    transformlist=mytx$fwdtransforms)
   par(mfrow=c(1,2))
-  plotANTsImage(fi) 
-  plotANTsImage(mywarpedimage) 
-# example 3 - full access, only uses file-based I/O 
-  antsRegistration( list( d=2,m="mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", t="affine[1.0]", c="2100x1200x1200x0",  s="3x2x1x0", f="4x3x2x1", u="1", o="[xtest,xtest.nii.gz,xtest_inv.nii.gz]" ) )
+  plotANTsImage(fi)
+  plotANTsImage(mywarpedimage)
+# example 3 - full access, only uses file-based I/O
+  antsRegistration(
+    list( d=2,m="mi[r16slice.nii.gz,
+    r64slice.nii.gz,1,20,Regular,0.05]",
+  t="affine[1.0]", c="2100x1200x1200x0",
+  s="3x2x1x0", f="4x3x2x1", u="1",
+  o="[xtest,xtest.nii.gz,xtest_inv.nii.gz]" ) )
 }
 }

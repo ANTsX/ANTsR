@@ -5,8 +5,9 @@ mni2tal <- function(xin = 0) {
     return(1)
   }
   x <- xin
-  # The input image is in RAS coordinates but we use ITK which returns LPS coordinates.  So we need to flip the
-  # coordinates such that L => R and P => A to get RAS (MNI) coordinates
+  # The input image is in RAS coordinates but we use ITK which returns LPS
+  # coordinates.  So we need to flip the coordinates such that L => R and P => A to
+  # get RAS (MNI) coordinates
   x[1] <- x[1] * (-1)  # flip X
   x[2] <- x[2] * (-1)  # flip Y 
   xout <- x

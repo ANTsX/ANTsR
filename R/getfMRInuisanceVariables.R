@@ -1,4 +1,5 @@
-getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE, mask = NA) {
+getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE, 
+  mask = NA) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -40,13 +41,15 @@ getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE
     return(NULL)
   }
   moco_results <- motion_correction(fmri, moreaccurate = moreaccurate)
-  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09, cleanup = TRUE)
+  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09, 
+    cleanup = TRUE)
   if (!is.na(mask)) 
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   motionparams <- as.data.frame(moco_results$moco_params)
   predictors <- get_perfusion_predictors(mat, motionparams, NULL, 1, 3)
   globalsignal <- predictors$globalsignal
-  return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img, avgImage = moco_results$moco_avg_img, 
-    globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL, moco_img = moco_results$moco_img))
+  return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img, 
+    avgImage = moco_results$moco_avg_img, globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL, 
+    moco_img = moco_results$moco_img))
 } 

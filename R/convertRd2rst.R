@@ -55,7 +55,8 @@ convertRd2rst <- function(infile, outfile = "") {
   myexamples <- paste("examples: \n", myrrsthd, "\n", myexamples, "\n")
   cat(myexamples, file = outfile, append = TRUE)
   cat(".. ..\n", file = outfile, append = TRUE)
-  # FIXME - need to parse arguments and loop over all myarguments<-Rd[[which(tags == '\\arguments')]][[2]][1]
-  # myarguments<-paste('arguments: ',myarguments) cat(myarguments,file=outfile,append = TRUE)
+  # FIXME - need to parse arguments and loop over all myarguments<-Rd[[which(tags
+  # == '\\arguments')]][[2]][1] myarguments<-paste('arguments: ',myarguments)
+  # cat(myarguments,file=outfile,append = TRUE)
   cat("\n", file = outfile, append = TRUE)
 } 

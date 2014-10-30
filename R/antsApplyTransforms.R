@@ -1,8 +1,9 @@
-antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", interpolator = "Linear", imagetype = 0, 
-  ...) {
+antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", interpolator = "Linear", 
+  imagetype = 0, ...) {
   numargs <- nargs()
   if (typeof(fixed) == "list") {
-    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float", 0)), PACKAGE = "ANTsR")
+    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float", 
+      0)), PACKAGE = "ANTsR")
     return(0)
   }
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
@@ -40,9 +41,11 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
           }
           }
           if (!ismat) 
-          mytx <- list(mytx, "-t", transformlist[i]) else mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]", sep = ""))
+          mytx <- list(mytx, "-t", transformlist[i]) else mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]", 
+          sep = ""))
         }
-        args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator, unlist(mytx))
+        args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator, 
+          unlist(mytx))
         myargs <- int_antsProcessArguments(c(args))
         for (jj in c(1:length(myargs))) {
           if (!is.na(myargs[jj])) {
@@ -54,7 +57,8 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
           }
           }
         }
-        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e", imagetype), PACKAGE = "ANTsR")
+        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e", 
+          imagetype), PACKAGE = "ANTsR")
         gc()
         return(antsImageClone(warpedmovout, inpixeltype))
       }
@@ -63,10 +67,11 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
     }
     return(0)
   }
-  # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-antsrParseListToString( c(args) ) system(
-  # paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead( mycmd$outimg, as.numeric(mycmd$outdim)
-  # ) ) }
-  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float", 0, "-e", imagetype)), PACKAGE = "ANTsR")
+  # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-antsrParseListToString( c(args)
+  # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
+  # mycmd$outimg, as.numeric(mycmd$outdim) ) ) }
+  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float", 
+    0, "-e", imagetype)), PACKAGE = "ANTsR")
   gc()  # trigger garbage collection
 }
 

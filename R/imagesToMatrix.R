@@ -1,6 +1,7 @@
 imagesToMatrix <- function(imageList, mask) {
-  # imageList is a character array containing absolute paths to images.  Mask is a mask image from getMask()
-  # Returns matrix of dimension (numImages, numVoxelsInMask)
+  # imageList is a character array containing absolute paths to images.  Mask is a
+  # mask image from getMask() Returns matrix of dimension (numImages,
+  # numVoxelsInMask)
   
   numImages <- length(imageList)
   
@@ -11,14 +12,15 @@ imagesToMatrix <- function(imageList, mask) {
   maskDims <- dim(mask)
   
   for (i in 1:numImages) {
-    image <- antsImageRead(imageList[i], length(maskDims) )
+    image <- antsImageRead(imageList[i], length(maskDims))
     
     if ((sum(dim(image) - dim(mask)) != 0)) {
       stop(paste("Dimensions of image", imageList[i], "do not match mask"))
     }
     
-    # Have to convert mask to a boolean because as.numeric in antsImage won't accept an antsImage as a mask
-    dataMatrix[i, ] <- as.numeric( image[ mask > 0 ] )
+    # Have to convert mask to a boolean because as.numeric in antsImage won't accept
+    # an antsImage as a mask
+    dataMatrix[i, ] <- as.numeric(image[mask > 0])
   }
   
   return(dataMatrix)

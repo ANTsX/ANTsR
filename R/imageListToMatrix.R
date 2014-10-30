@@ -1,6 +1,6 @@
 imageListToMatrix <- function(imageList, mask) {
-  # imageList is a list containing images.  Mask is a mask image Returns matrix of dimension (numImages,
-  # numVoxelsInMask)
+  # imageList is a list containing images.  Mask is a mask image Returns matrix of
+  # dimension (numImages, numVoxelsInMask)
   
   numImages <- length(imageList)
   
@@ -15,7 +15,8 @@ imageListToMatrix <- function(imageList, mask) {
       stop(paste("Dimensions of image", image, "do not match mask"))
     }
     
-    # Have to convert mask to a boolean because as.numeric in antsImage won't accept an antsImage as a mask
+    # Have to convert mask to a boolean because as.numeric in antsImage won't accept
+    # an antsImage as a mask
     dataMatrix[i, ] <- as.numeric(image, mask > 0)
   }
   

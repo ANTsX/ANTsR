@@ -1,5 +1,5 @@
-filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, freqHi = 0.1, smoother = 0, pre = "", 
-  moreaccurate = TRUE) {
+filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, freqHi = 0.1, 
+  smoother = 0, pre = "", moreaccurate = TRUE) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\"), smoother = 0 , outputprefix = NULL )"
   
@@ -115,11 +115,13 @@ filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, fre
   voxHi <- round((1/freqHi))  # keep anything above this
   
   myTimeSeries <- ts(gmat, frequency = 1/tr)
-  filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, drift = T, root = TRUE))
+  filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, 
+    drift = T, root = TRUE))
   
   vox <- round(ncol(filteredTimeSeries) * 0.5)  #  a test voxel
   
-  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, log = "n")
+  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, 
+    log = "n")
   temporalvar <- apply(filteredTimeSeries, 2, var)
   
   wh <- which(temporalvar == 0)

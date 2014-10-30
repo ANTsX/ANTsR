@@ -1,5 +1,6 @@
-# NewtorkCorrelation.R From - van Wijk, B.C.M., Stam, C.J., Daffertshofer, A.: Comparing brain networks of
-# different size and connectivity density using graph theory. PLoS One 5(10) (2010) e13701
+# NewtorkCorrelation.R From - van Wijk, B.C.M., Stam, C.J., Daffertshofer, A.:
+# Comparing brain networks of different size and connectivity density using graph
+# theory. PLoS One 5(10) (2010) e13701
 
 networkCorrelation <- function(n1, n2) {
   

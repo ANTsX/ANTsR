@@ -1,4 +1,5 @@
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20, regweights=NULL) {
+perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20, 
+  regweights = NULL) {
   getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
@@ -33,8 +34,8 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       getPckg("robust")
       require("robust")
     }
-    # robust procedure Yohai, V.J. (1987) High breakdown-point and high efficiency estimates for regression.  _The
-    # Annals of Statistics_ *15*, 642-65
+    # robust procedure Yohai, V.J. (1987) High breakdown-point and high efficiency
+    # estimates for regression.  _The Annals of Statistics_ *15*, 642-65
     if (dorobust > 1) {
       print("dorobust too large, setting to 0.95")
       dorobust <- 0.95
@@ -47,8 +48,9 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     vox <- 1
     ct <- 0
     visitvals <- (skip:floor((ncol(usemat) - 1)/skip)) * skip
-    #mynodes <- round(detectCores()/2)  # round( getOption('mc.cores', 2L) / 2 )
-    # cl<-makeForkCluster( nnodes = mynodes ) registerDoParallel( cl , cores = mynodes )
+    # mynodes <- round(detectCores()/2) # round( getOption('mc.cores', 2L) / 2 )
+    # cl<-makeForkCluster( nnodes = mynodes ) registerDoParallel( cl , cores =
+    # mynodes )
     rgw <- regweights
     myct <- 0
     ptime <- system.time({
@@ -70,8 +72,8 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     print(paste("donewithrobreg", myct))
     print(regweights)
     print(paste(ptime))
-    # check if the robustness selects the blank part of the time series now use the weights in a weighted
-    # regression
+    # check if the robustness selects the blank part of the time series now use the
+    # weights in a weighted regression
     indstozero <- which(regweights < (dorobust * max(regweights)))
     keepinds <- which(regweights > (dorobust * max(regweights)))
     print(paste("dorobust ", dorobust, " i2z ", length(indstozero)))
@@ -91,13 +93,13 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       betaideal <- (betaideal) * (-1)
     cbfi[mask_img == 1] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(usemat) * 100, " % "))
-  } else if(dorobust>0 & !is.null(regweights)){
+  } else if (dorobust > 0 & !is.null(regweights)) {
     mycbfmodel <- lm(cbfform, weights = regweights)  # standard weighted regression
     betaideal <- ((mycbfmodel$coeff)[2, ])
-    if (mean(betaideal) < 0)
-    betaideal <- (betaideal) * (-1)
+    if (mean(betaideal) < 0) 
+      betaideal <- (betaideal) * (-1)
     cbfi[mask_img == 1] <- betaideal  # robust results
   }
-  return(list(cbfi=cbfi, indstozero=indstozero, regweights=regweights))
+  return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
 }
 # y = x beta + c => y - c = x beta 

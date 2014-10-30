@@ -1,15 +1,14 @@
-makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FALSE ) {
+makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FALSE) {
   pckg <- try(require(igraph))
   if (!pckg) {
     getPckg("igraph")
   }
   library(igraph)
-  myrsfnetworkcorrs<-myrsfnetworkcorrsin
-  if ( typeof( myrsfnetworkcorrs ) == "list" )
-    {
-    myrsfnetworkcorrs<-data.matrix( myrsfnetworkcorrsin )
-    }
-  diag( myrsfnetworkcorrs ) <- 0 
+  myrsfnetworkcorrs <- myrsfnetworkcorrsin
+  if (typeof(myrsfnetworkcorrs) == "list") {
+    myrsfnetworkcorrs <- data.matrix(myrsfnetworkcorrsin)
+  }
+  diag(myrsfnetworkcorrs) <- 0
   correlationThreshold <- 1e-06
   
   numberOfNeighbors <- nrow(myrsfnetworkcorrs)
@@ -32,24 +31,25 @@ makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FAL
   # 
   edgeWeights <- E(g1)$weight
   # compute local efficiency
-  if ( getEfficiency ) {
-      mysps<-igraph::shortest.paths(g1)
-      mysps[ mysps == Inf ] <- 2.0 * max( adjacencyMatrix )
-      myspsa<-apply( mysps ,FUN=mean,MARGIN=2,na.rm=T)
-  } else myspsa<-NA
+  if (getEfficiency) {
+    mysps <- igraph::shortest.paths(g1)
+    mysps[mysps == Inf] <- 2 * max(adjacencyMatrix)
+    myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
+  } else myspsa <- NA
   gmetric0 <- igraph::evcent(g1)$vector
   gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
   gmetric2 <- igraph::page.rank(g1)$vector  #  
   gmetric3 <- igraph::degree(g1)
   gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)  #
-  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat") )
+  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"))
   gmetric6 <- igraph::graph.strength(g1)
-  gmetric7 <- igraph::centralization.degree( g1 )$res
+  gmetric7 <- igraph::centralization.degree(g1)$res
   gmetric8 <- myspsa
   mycommunity <- fastgreedy.community(g1)
   walktrapcomm <- walktrap.community(g1)
-  return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3, 
-    betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6, degcent = gmetric7, effinv = myspsa , community = mycommunity, walktrapcomm = walktrapcomm, 
+  return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2, 
+    degree = gmetric3, betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6, 
+    degcent = gmetric7, effinv = myspsa, community = mycommunity, walktrapcomm = walktrapcomm, 
     adjacencyMatrix = adjacencyMatrix))
 }
 
@@ -94,7 +94,8 @@ largeScaleCommunity <- function(g, mode = "all") {
       ## get the neighbor group frequencies:
       group.freq <- table(V(g)[neighbors(g, i, mode = mode)]$group)
       ## pick one of the most frequent:
-      new.group <- sample(names(group.freq)[group.freq == max(group.freq)], 1)
+      new.group <- sample(names(group.freq)[group.freq == max(group.freq)], 
+        1)
       if (done) {
         ## we are only done if new group is the same as old group
         done <- (new.group == V(g)[i]$group)
@@ -104,8 +105,9 @@ largeScaleCommunity <- function(g, mode = "all") {
   }
   
   cat("Creating community-object...\n")
-  comms <- list(membership = as.numeric(V(g)$group), vcount = vcount(g), algorithm = "LPA", names = V(g)$name)
+  comms <- list(membership = as.numeric(V(g)$group), vcount = vcount(g), algorithm = "LPA", 
+    names = V(g)$name)
   class(comms) <- "communities"
   return(comms)
-} 
-
+}
+ 

@@ -17,8 +17,8 @@ plotNetwork <- function(network, mask, centroids, N = 100, scaling = c(0, 0)) {
   
   # brain<-renderSurfaceFunction( mask, surfval=0.25 )
   surf <- as.array(mask)
-  brain <- contour3d(surf, level = c(0.5), alpha = 0.3, draw = FALSE, smooth = 1, material = "metal", depth = 0.6, 
-    color = "white")
+  brain <- contour3d(surf, level = c(0.5), alpha = 0.3, draw = FALSE, smooth = 1, 
+    material = "metal", depth = 0.6, color = "white")
   
   # convert to physical space
   brain$v1 <- antsTransformIndexToPhysicalPoint(mask, brain$v1)
@@ -33,14 +33,16 @@ plotNetwork <- function(network, mask, centroids, N = 100, scaling = c(0, 0)) {
   
   # print( 'get centroids' )
   
-  # Get centroids of labels d <- dim(labels) xcoords <- rep(c(1:d[1]), d[2]*d[3] ) ycoords <- rep(c(1:d[2]),
-  # each=d[1], d[3] ) zcoords <- rep(c(1:d[3]), each=(d[1]*d[2]) )
+  # Get centroids of labels d <- dim(labels) xcoords <- rep(c(1:d[1]), d[2]*d[3] )
+  # ycoords <- rep(c(1:d[2]), each=d[1], d[3] ) zcoords <- rep(c(1:d[3]),
+  # each=(d[1]*d[2]) )
   
-  # labels <- as.array(labels) nLabels = max(labels) labelVerts <- rep(0,nLabels) xc <- rep(0,nLabels) yc <-
-  # rep(0,nLabels) zc <- rep(0,nLabels)
+  # labels <- as.array(labels) nLabels = max(labels) labelVerts <- rep(0,nLabels)
+  # xc <- rep(0,nLabels) yc <- rep(0,nLabels) zc <- rep(0,nLabels)
   
-  # for ( i in c(1:nLabels) ) { idx <- (labels == i) xc[i] <- mean( subset(xcoords, idx) ) yc[i] <- mean(
-  # subset(ycoords, idx) ) zc[i] <- mean( subset(zcoords, idx) ) }
+  # for ( i in c(1:nLabels) ) { idx <- (labels == i) xc[i] <- mean( subset(xcoords,
+  # idx) ) yc[i] <- mean( subset(ycoords, idx) ) zc[i] <- mean( subset(zcoords,
+  # idx) ) }
   
   # xc <- dim(labels)[1] - xc + 1 centroids <- cbind(xc,yc,zc)
   
@@ -95,9 +97,11 @@ plotNetwork <- function(network, mask, centroids, N = 100, scaling = c(0, 0)) {
   par3d(userMatrix = mat)
   
   
-  # view all average time series plot in a single window labelID <- rep( 0:max(as.array(labels)),
-  # each=dim(tmat)[1] ) times <- rep( timeStep*c(0:(dim(regions)[1]-1)), dim(regions)[2] ) dat <- data.frame(
-  # signal=as.vector(regions), time=times, id=factor(as.vector(labelID)) ) ggplot( data=dat, aes(x=time,
-  # y=signal, group=id, colour=id) ) + geom_line() + ylab('regional cbf') + xlab( 'time (ms)' )
+  # view all average time series plot in a single window labelID <- rep(
+  # 0:max(as.array(labels)), each=dim(tmat)[1] ) times <- rep(
+  # timeStep*c(0:(dim(regions)[1]-1)), dim(regions)[2] ) dat <- data.frame(
+  # signal=as.vector(regions), time=times, id=factor(as.vector(labelID)) ) ggplot(
+  # data=dat, aes(x=time, y=signal, group=id, colour=id) ) + geom_line() +
+  # ylab('regional cbf') + xlab( 'time (ms)' )
   
 } 

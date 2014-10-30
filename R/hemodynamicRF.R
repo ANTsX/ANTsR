@@ -1,5 +1,5 @@
-hemodynamicRF <- function(scans = 1, onsets = c(1), durations = c(1), rt = 3, times = NULL, mean = TRUE, a1 = 6, 
-  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+hemodynamicRF <- function(scans = 1, onsets = c(1), durations = c(1), rt = 3, times = NULL, 
+  mean = TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
   
   mygamma <- function(x, a1, a2, b1, b2, c) {
     d1 <- a1 * b1
@@ -37,7 +37,8 @@ hemodynamicRF <- function(scans = 1, onsets = c(1), durations = c(1), rt = 3, ti
   }
   stimulus <- c(rep(0, 20 * scale), stimulus, rep(0, 20 * scale))
   # just fill with zeros to avoid bounding effects in convolve
-  hrf <- convolve(stimulus, mygamma(((40 * scale) + scans):1, a1, a2, b1/rt, b2/rt, cc))/scale
+  hrf <- convolve(stimulus, mygamma(((40 * scale) + scans):1, a1, a2, b1/rt, b2/rt, 
+    cc))/scale
   hrf <- hrf[-(1:(20 * scale))][1:scans]
   hrf <- hrf[unique((scale:scans)%/%scale) * scale]
   

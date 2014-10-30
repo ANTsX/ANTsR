@@ -1,4 +1,5 @@
-pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation", nclusters = NA) {
+pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation", 
+  nclusters = NA) {
   fnl <- length(myFileList)
   mymat <- matrix(rep(NA, fnl * fnl), nrow = fnl, ncol = fnl)
   tct <- 0
@@ -7,22 +8,22 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
       if (ct != ct2) {
         i1 <- antsImageRead(myFileList[ct], dim)
         i2 <- antsImageRead(myFileList[ct2], dim)
-        toutfn<-paste(tempdir(),"Z",sep="/")
-        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"), outprefix = toutfn)
+        toutfn <- paste(tempdir(), "Z", sep = "/")
+        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"), 
+          outprefix = toutfn)
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
-        # broken !!
-#        metric <- capture.output(ImageMath(dim, "j", metrictype, i1, mywarpedimage))[1]
-        wh<-( mywarpedimage > 0 &  i1 > 0 )
-        if ( metrictype == "PearsonCorrelation" )
-            {
-                metric<-abs( cor.test( i1[wh],  mywarpedimage[wh]  )$est  )
-            } else {
-                metric<-mean( abs( i1[wh] - mywarpedimage[wh]  ) )
-            }
+        # broken !!  metric <- capture.output(ImageMath(dim, 'j', metrictype, i1,
+        # mywarpedimage))[1]
+        wh <- (mywarpedimage > 0 & i1 > 0)
+        if (metrictype == "PearsonCorrelation") {
+          metric <- abs(cor.test(i1[wh], mywarpedimage[wh])$est)
+        } else {
+          metric <- mean(abs(i1[wh] - mywarpedimage[wh]))
+        }
         mymat[ct, ct2] <- (as.numeric(metric))
         tct <- tct + 1
         print(paste(100 * tct/(fnl * fnl), "%"))
-        print( mymat )
+        print(mymat)
       }
     }
   }
@@ -39,12 +40,10 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
     clusters <- summary(pamx)$clustering
     for (nc in 1:nclusters) {
       wc <- c(1:fnl)[clusters == nc]
-      if ( length( dim(symat[, wc]) ) > 0 )
-        {
+      if (length(dim(symat[, wc])) > 0) {
         means <- apply(symat[, wc], MARGIN = 2, mean, na.rm = T)
         clusterrep[nc] <- wc[which.min(means)]
-        }
-      else clusterrep[nc] <- which( clusters == nc )
+      } else clusterrep[nc] <- which(clusters == nc)
     }
     return(list(rawMatrix = mymat, symmMatrix = symat, clusters = clusters, representatives = myFileList[clusterrep]))
   }

@@ -1,5 +1,5 @@
-simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predictors, formula, testType = c("lm", 
-  "student.t", "wilcox"), roiLabelsFileName = "") {
+simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predictors, 
+  formula, testType = c("lm", "student.t", "wilcox"), roiLabelsFileName = "") {
   
   ## Check input variables
   
@@ -22,7 +22,8 @@ simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predic
     if (missing(predictors)) {
       stop("'predictors' missing")
     }
-    if (is.vector(predictors) || (is.matrix(predictors) && ncol(predictors) == 1)) {
+    if (is.vector(predictors) || (is.matrix(predictors) && ncol(predictors) == 
+      1)) {
       predictors <- as.data.frame(predictors)
     }
     colnames(predictors) <- c("diagnosis")
@@ -30,7 +31,8 @@ simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predic
   }
   predictorNames <- colnames(predictors)
   
-  # Check to make sure that the predictor data frame has the same variable names as the formula.
+  # Check to make sure that the predictor data frame has the same variable names as
+  # the formula.
   responseVariableName <- all.vars(formula)[attr(terms(formula), "response")]
   variables <- attr(terms(formula), "variables")
   tmp <- c()
@@ -50,8 +52,8 @@ simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predic
   
   ## Do the actual data prep and testing
   
-  cat("******* Conducting ", testType, " ROI analysis (number of images = ", numberOfImages, "). *******\n\n", 
-    sep = "")
+  cat("******* Conducting ", testType, " ROI analysis (number of images = ", numberOfImages, 
+    "). *******\n\n", sep = "")
   
   # Read the mask and place the masked voxels in the images in a matrix
   
@@ -70,12 +72,13 @@ simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predic
     predictorString <- paste(predictorNames[1], "=", predictors[i, 1], sep = "")
     if (ncol(predictors) >= 2) {
       for (j in 2:ncol(predictors)) {
-        predictorString <- paste(predictorString, ", ", predictorNames[j], "=", predictors[i, j], sep = "")
+        predictorString <- paste(predictorString, ", ", predictorNames[j], 
+          "=", predictors[i, j], sep = "")
       }
     }
     
-    cat("Reading image ", imageFileNames[i], " (", i, " of ", numberOfImages, ", ", predictorString, ").\n", 
-      sep = "")
+    cat("Reading image ", imageFileNames[i], " (", i, " of ", numberOfImages, 
+      ", ", predictorString, ").\n", sep = "")
     subjectImage <- antsImageRead(imageFileNames[i], dimensionality)
     dataMatrix[i, ] <- as.array(subjectImage[roiLabelsMask != 0])
   }
@@ -91,7 +94,8 @@ simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predic
   for (i in 1:length(roiLabels)) {
     values <- rowMeans(dataMatrix[, which(roiLabelsMask == roiLabels[i])], na.rm = TRUE)
     
-    testData <- cbind(rowMeans(dataMatrix[, which(roiLabelsMask == roiLabels[i])], na.rm = TRUE), predictors)
+    testData <- cbind(rowMeans(dataMatrix[, which(roiLabelsMask == roiLabels[i])], 
+      na.rm = TRUE), predictors)
     colnames(testData) <- c(responseVariableName, predictorNames)
     
     if (testType == "student.t") {

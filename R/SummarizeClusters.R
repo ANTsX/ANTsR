@@ -1,6 +1,7 @@
-# SummarizeClusters.R - print out anatomical labels of ROIs labels - array of labels sets (images) labelinfo -
-# array of label names data frames clusters - array of ROI images pvalues - significance values ( or other )
-# associated with ROIs
+# SummarizeClusters.R - print out anatomical labels of ROIs labels - array of
+# labels sets (images) labelinfo - array of label names data frames clusters -
+# array of ROI images pvalues - significance values ( or other ) associated with
+# ROIs
 SummarizeClusters <- function(labels, labelinfo, clusters, pvalues) {
   nSets <- length(labels)
   nClusters <- length(clusters)
@@ -56,9 +57,11 @@ SummarizeClusters <- function(labels, labelinfo, clusters, pvalues) {
           regionStr <- paste(regionStr, ": ")
         }
         
-        regionStr <- paste(regionStr, as.character(partialnames[m]), " (", partialvalues[m], ")", sep = "")
+        regionStr <- paste(regionStr, as.character(partialnames[m]), " (", 
+          partialvalues[m], ")", sep = "")
       }
-      print(paste("Labelset ", i, ", Cluster ", j, ", ", pvalues[j], ", ", regionStr, ", ", cent, sep = ""))
+      print(paste("Labelset ", i, ", Cluster ", j, ", ", pvalues[j], ", ", 
+        regionStr, ", ", cent, sep = ""))
       
       # print( paste( ' Cluster ', j, ',', regionString ) )
     }

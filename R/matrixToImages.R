@@ -1,6 +1,6 @@
 matrixToImages <- function(dataMatrix, mask) {
-  # Writes rows of a matrix to 3D images.  mask should be an antsImage of the correct dimensions and physical
-  # space
+  # Writes rows of a matrix to 3D images.  mask should be an antsImage of the
+  # correct dimensions and physical space
   if (!is(mask, "antsImage")) {
     stop("Mask must be an antsImage")
   }
@@ -12,7 +12,8 @@ matrixToImages <- function(dataMatrix, mask) {
   numVoxelsInMask <- length(which(mask > 0))
   
   if (numVoxelsInMatrix != numVoxelsInMask) {
-    stop(paste("Number of masked voxels",numVoxelsInMask," do not match data",numVoxelsInMatrix))
+    stop(paste("Number of masked voxels", numVoxelsInMask, " do not match data", 
+      numVoxelsInMatrix))
   }
   
   imagelist <- list()

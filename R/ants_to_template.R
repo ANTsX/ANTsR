@@ -1,4 +1,5 @@
-ants_to_template <- function(dim = 0, fixed_img = "", moving_img = "", timeseries_img = "", max_iterations = "30x90x20") {
+ants_to_template <- function(dim = 0, fixed_img = "", moving_img = "", timeseries_img = "", 
+  max_iterations = "30x90x20") {
   if (dim == 0) {
     print(" Problem with specified image-dimension ")
     print(" USAGE ::  ")
@@ -64,12 +65,13 @@ ants_to_template <- function(dim = 0, fixed_img = "", moving_img = "", timeserie
     extension <- paste("", split_img[2], split_img[3], sep = ".")
   }
   
-  ANTS(dim, "-m", paste("CC[", paste(fixed_img, moving_img, 1, 3, sep = ","), "]", sep = ""), "-t", "SyN[0.25]", 
-    "-r", "Gauss[3,0]", "-o", filename, "--use-Histogram-Matching", "-i", max_iterations, "--number-of-affine-iterations", 
-    "10000x10000x1000")
+  ANTS(dim, "-m", paste("CC[", paste(fixed_img, moving_img, 1, 3, sep = ","), "]", 
+    sep = ""), "-t", "SyN[0.25]", "-r", "Gauss[3,0]", "-o", filename, "--use-Histogram-Matching", 
+    "-i", max_iterations, "--number-of-affine-iterations", "10000x10000x1000")
   
   deformed_img <- paste(filename, "deformed", extension, sep = "")
   warp_img <- paste(filename, "Warp", extension, sep = "")
   affine_txt <- paste(filename, "Affine", ".txt", sep = "")
-  WarpTimeSeriesImageMultiTransform(4, moving_img, deformed_img, warp_img, affine_txt, "-R", fixed_img)
+  WarpTimeSeriesImageMultiTransform(4, moving_img, deformed_img, warp_img, affine_txt, 
+    "-R", fixed_img)
 } 

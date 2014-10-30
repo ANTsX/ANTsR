@@ -39,25 +39,26 @@ ants_compcorr <- function(moco_img = "", bm_img = "", avg_img = "", mocoparams_c
   
   compcorr_variance_img <- paste(filename, "_compcorr_variance", extension, sep = "")
   seg_img <- paste(filename, "_seg", extension, sep = "")
-  Atropos("-d", 3, "-a", avg_img, "-a", compcorr_variance_img, "-m", "[0.3,1x1x1]", "-o", seg_img, "-c", "[5,0]", 
-    "-i", "kmeans[3]", "-x", bm_img)
+  Atropos("-d", 3, "-a", avg_img, "-a", compcorr_variance_img, "-m", "[0.3,1x1x1]", 
+    "-o", seg_img, "-c", "[5,0]", "-i", "kmeans[3]", "-x", bm_img)
   
   cortmask_img <- paste(filename, "_cortmask", extension, sep = "")
   ThresholdImage(3, seg_img, cortmask_img, 2, 2)
   csv <- paste(filename, ".csv", sep = "")
-  sccan("--timeseriesimage-to-matrix", paste("[", paste(moco_img, cortmask_img, 0, 0, sep = ","), "]", sep = ""), 
-    "-o", csv)
+  sccan("--timeseriesimage-to-matrix", paste("[", paste(moco_img, cortmask_img, 
+    0, 0, sep = ","), "]", sep = ""), "-o", csv)
   
   compcorr_csv <- paste(filename, "_compcorr_compcorr", ".csv", sep = "")
   filt_csv <- paste(filename, "_filt", ".csv", sep = "")
   RSF_Networks_img <- paste(filename, "_RSF_Networks", extension, sep = "")
   antsr_frequency_filter(csv, filt_csv, 1.5, 0.03, 0.1, compcorr_csv)
   
-  sccan("--svd", paste("sparse[", paste(filt_csv, cortmask_img, -0.15, sep = ","), "]", sep = ""), "-n", 40, 
-    "-i", 40, "--PClusterThresh", 50, "-o", RSF_Networks_img)
+  sccan("--svd", paste("sparse[", paste(filt_csv, cortmask_img, -0.15, sep = ","), 
+    "]", sep = ""), "-n", 40, "-i", 40, "--PClusterThresh", 50, "-o", RSF_Networks_img)
   
   ea_rsf <- paste(filename, "_ea_rsf", sep = "")
-  RSF_NetworksprojectionsView1vec_csv <- paste(filename, "_RSF_NetworksprojectionsView1vec", ".csv", sep = "")
-  antsr_resting_state_corr_eigenanat(ea_rsf, RSF_NetworksprojectionsView1vec_csv, RSF_NetworksprojectionsView1vec_csv, 
-    compcorr_csv, mocoparams_csv)
+  RSF_NetworksprojectionsView1vec_csv <- paste(filename, "_RSF_NetworksprojectionsView1vec", 
+    ".csv", sep = "")
+  antsr_resting_state_corr_eigenanat(ea_rsf, RSF_NetworksprojectionsView1vec_csv, 
+    RSF_NetworksprojectionsView1vec_csv, compcorr_csv, mocoparams_csv)
 } 

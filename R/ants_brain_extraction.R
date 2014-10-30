@@ -22,8 +22,8 @@ ants_brain_extraction <- function(img = "") {
   
   bm_img <- paste(filename, "_brainmask", extension, sep = "")
   
-  # N3BiasFieldCorrection( 3 , img , img , 2 ) ; for( x in 1:3 ) { N3BiasFieldCorrection( 3 , img , img , 1 ) ;
-  # }
+  # N3BiasFieldCorrection( 3 , img , img , 2 ) ; for( x in 1:3 ) {
+  # N3BiasFieldCorrection( 3 , img , img , 1 ) ; }
   
   ThresholdImage(3, img, bm_img, "Otsu", 3)
   ThresholdImage(3, bm_img, bm_img, 2, 3)

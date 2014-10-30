@@ -1,7 +1,8 @@
 antsr_resting_state_corr_eigenanat <- function(...) {
   # !/usr/bin/env Rscript
   Args <- c(...)
-  # Args <- commandArgs() library('signal') library('timeSeries') print(paste('length of args ',length(Args)))
+  # Args <- commandArgs() library('signal') library('timeSeries')
+  # print(paste('length of args ',length(Args)))
   if (length(Args) < 3) {
     fnm <- Args[4]
     fnm <- substring(fnm, 8, nchar(as.character(fnm)))

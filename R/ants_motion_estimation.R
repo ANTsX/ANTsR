@@ -25,22 +25,25 @@ ants_motion_estimation <- function(img = "") {
   antsMotionCorr("-d", 3, "-a", img, "-o", avg_img)
   
   moco_img <- paste(filename, "_moco", extension, sep = "")
-  antsMotionCorr("-d", 3, "-o", paste("[", paste(filename, moco_img, avg_img, sep = ","), "]", sep = ""), "-m", 
-    paste("MI[", paste(avg_img, img, 1, 32, 50, sep = ","), "]", sep = ""), "-t", "Rigid[0.01]", "-i", 25, 
-    "-u", 1, "-e", 1, "-s", 0, "-f", 1, "-n", 25)
+  antsMotionCorr("-d", 3, "-o", paste("[", paste(filename, moco_img, avg_img, sep = ","), 
+    "]", sep = ""), "-m", paste("MI[", paste(avg_img, img, 1, 32, 50, sep = ","), 
+    "]", sep = ""), "-t", "Rigid[0.01]", "-i", 25, "-u", 1, "-e", 1, "-s", 0, 
+    "-f", 1, "-n", 25)
   
-  # non-rigid avgnr_img = paste( filename , '_avgnr' , extension , sep = '' ) ; antsMotionCorr( '-d' , 3 , '-a'
-  # , img , '-o' , avgnr_img ) ;
+  # non-rigid avgnr_img = paste( filename , '_avgnr' , extension , sep = '' ) ;
+  # antsMotionCorr( '-d' , 3 , '-a' , img , '-o' , avgnr_img ) ;
   
-  # moconr_img = paste( filename , '_moconr' , extension , sep = '' ) ; antsMotionCorr( '-d' , 3 , '-o' , paste(
-  # '[' , paste( filename , moconr_img , avgnr_img , sep = ',' ) , ']' , sep = '' ) , '-m' , paste( 'MI[' ,
-  # paste( avgnr_img , img , 1 , 20 , 50 , sep = ',' ) , ']' , sep = '' ) , '-t' , 'Rigid[0.01]' , '-i' , 25 ,
-  # '-u' , 1 , '-e' , 1 , '-s' , 0 , '-f' , 1 , '-n' , 25 , '-m' , paste( 'CC[' , paste( avgnr_img , img , 1 , 2
-  # , sep = ',' ) , ']' , sep = '' ) , '-t' , 'GaussianDisplacementField[0.15,3,0.5]' , '-i' , 10 , '-u' , 1 ,
-  # '-e' , 1 , '-s' , 0 , '-f' , 1 , '-n' , 10 ) ;
+  # moconr_img = paste( filename , '_moconr' , extension , sep = '' ) ;
+  # antsMotionCorr( '-d' , 3 , '-o' , paste( '[' , paste( filename , moconr_img ,
+  # avgnr_img , sep = ',' ) , ']' , sep = '' ) , '-m' , paste( 'MI[' , paste(
+  # avgnr_img , img , 1 , 20 , 50 , sep = ',' ) , ']' , sep = '' ) , '-t' ,
+  # 'Rigid[0.01]' , '-i' , 25 , '-u' , 1 , '-e' , 1 , '-s' , 0 , '-f' , 1 , '-n' ,
+  # 25 , '-m' , paste( 'CC[' , paste( avgnr_img , img , 1 , 2 , sep = ',' ) , ']' ,
+  # sep = '' ) , '-t' , 'GaussianDisplacementField[0.15,3,0.5]' , '-i' , 10 , '-u'
+  # , 1 , '-e' , 1 , '-s' , 0 , '-f' , 1 , '-n' , 10 ) ;
 }
 
-motion_correction <- function(img, fixed=NA, moreaccurate = 1 ) {
+motion_correction <- function(img, fixed = NA, moreaccurate = 1) {
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")
@@ -63,7 +66,7 @@ motion_correction <- function(img, fixed=NA, moreaccurate = 1 ) {
     return(NULL)
   }
   
-  if ( is.na(fixed) ) {
+  if (is.na(fixed)) {
     fixed <- new("antsImage", "float", 3)
     antsMotionCorr(list(d = 3, a = img, o = fixed))
   } else {
@@ -95,20 +98,25 @@ motion_correction <- function(img, fixed=NA, moreaccurate = 1 ) {
   avg_img <- new("antsImage", "float", 3)
   moco_img <- new("antsImage", "float", 4)
   moco_params <- new("antsMatrix", "double")
-  if (moreaccurate == 2 ) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", fixed, img, 
-      1, 32, "regular", 0.1), t = "Affine[0.1]", i = "100x50x20", u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1))
+  if (moreaccurate == 2) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", 
+      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = "100x50x20", 
+      u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1))
   }
-  if (moreaccurate == 1 ) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", fixed, img, 
-      1, 32, "regular", 0.1), t = "Affine[0.1]", i = 20, u = 1, e = 1, s = 0, f = 1, n = n, l = 1))
+  if (moreaccurate == 1) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", 
+      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = 20, u = 1, 
+      e = 1, s = 0, f = 1, n = n, l = 1))
   }
-  if (moreaccurate == 0 ) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", fixed, img, 
-      1, 32, "regular", 0.02), t = "Affine[0.1]", i = 3, u = 1, e = 1, s = 0, f = 1, n = n, l = 1))
+  if (moreaccurate == 0) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI", 
+      fixed, img, 1, 32, "regular", 0.02), t = "Affine[0.1]", i = 3, u = 1, 
+      e = 1, s = 0, f = 1, n = n, l = 1))
   }
-  moco_params <- as.data.frame( moco_params )
-  names( moco_params )<-c("MetricPre","MetricPost","MOCOparam0","MOCOparam1","MOCOparam2","MOCOparam3","MOCOparam4","MOCOparam5","MOCOparam6","MOCOparam7","MOCOparam8","MOCOparam9","MOCOparam10","MOCOparam11")
+  moco_params <- as.data.frame(moco_params)
+  names(moco_params) <- c("MetricPre", "MetricPost", "MOCOparam0", "MOCOparam1", 
+    "MOCOparam2", "MOCOparam3", "MOCOparam4", "MOCOparam5", "MOCOparam6", "MOCOparam7", 
+    "MOCOparam8", "MOCOparam9", "MOCOparam10", "MOCOparam11")
   return(list(moco_img = moco_img, moco_params = moco_params, moco_avg_img = antsImageClone(avg_img, 
     inpixeltype)))
 } 

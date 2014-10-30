@@ -1,7 +1,8 @@
 getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = FALSE) {
-  # Binarizes a mask between specified thresholds Input can be a file name or an antsImage, if it is not
-  # specified, a file chooser is launched. Works on 3D images only If cleanup == TRUE, small and
-  # weakly-connected elements are removed by erosion, and then holes are filled.  Returns: a binary antsImage
+  # Binarizes a mask between specified thresholds Input can be a file name or an
+  # antsImage, if it is not specified, a file chooser is launched. Works on 3D
+  # images only If cleanup == TRUE, small and weakly-connected elements are removed
+  # by erosion, and then holes are filled.  Returns: a binary antsImage
   
   if (is.character(img)) {
     if (length(img) != 1) {
@@ -16,8 +17,8 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = FALSE
     img <- file.choose()
   }
   
-  if ((!is.numeric(lowThresh)) || (!is.numeric(highThresh)) || length(lowThresh) > 1 || length(highThresh) > 
-    1) {
+  if ((!is.numeric(lowThresh)) || (!is.numeric(highThresh)) || length(lowThresh) > 
+    1 || length(highThresh) > 1) {
     stop("'lowthresh' and 'highthresh' must be numeric scalars")
   }
   

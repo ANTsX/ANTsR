@@ -1,6 +1,6 @@
 # renderNetwork
-renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius = 3, edgecolors = 0, nodecolors = "blue", 
-  nodetype = "s") {
+renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius = 3, 
+  edgecolors = 0, nodecolors = "blue", nodetype = "s") {
   
   nLabels <- dim(locations$vertices)[1]
   network <- as.array(network)
@@ -13,7 +13,8 @@ renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius
   }
   
   labelVerts <- c(1:nLabels)
-  spheres3d(locations$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
+  spheres3d(locations$vertices[labelVerts, ], color = nodecolors, type = nodetype, 
+    radius = radius)
   
   edgelocations <- c()
   edgeweights <- c()
@@ -46,5 +47,6 @@ renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius
     }
   }
   
-  segments3d(locations$vertices[edgelocations, ], col = rep(edgecolors, each = 2), lwd = lwd)
+  segments3d(locations$vertices[edgelocations, ], col = rep(edgecolors, each = 2), 
+    lwd = lwd)
 } 
