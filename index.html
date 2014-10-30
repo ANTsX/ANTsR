@@ -94,7 +94,8 @@ install_github("stnava/ANTsR")
 <pre><code>ANTsR::&lt;double-tab&gt;
 </code></pre>
 
-<p>Call help on a function via ?functionName</p>
+<p>Call help on a function via ?functionName or see function arguments
+via  <code>args(functionName)</code></p>
 
 <h2>
 <a name="overview-of-antsr-functionality-and-useful-tools" class="anchor" href="#overview-of-antsr-functionality-and-useful-tools"><span class="octicon octicon-link"></span></a>Overview of ANTsR functionality and useful tools</h2>
@@ -102,10 +103,17 @@ install_github("stnava/ANTsR")
 <p>If nothing else, ANTsR makes it easy to read and write medical images
 and to map them into a format compatible with R.</p>
 
-<p><strong>Read and write an image</strong></p>
+<p><strong>Read, write, access an image</strong></p>
 
-<pre><code>img&lt;-antsImageRead('filename.nii.gz',dimension)
-antsImageWrite(img,'filename.nii.gz')
+<pre><code>mnifilename&lt;-getANTsRData("mni")
+dimension&lt;-3
+img&lt;-antsImageRead(mnifilename,dimension)
+antsImageWrite(img,mnifilename)
+antsGetSpacing(img)
+antsGetDirection(img)
+antsGetOrigin(img)
+print(antsGetPixels(img,50,60,44))
+print(max(img))
 </code></pre>
 
 <p><strong>Index an image with a label</strong></p>
