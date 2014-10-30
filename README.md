@@ -96,6 +96,7 @@ for ( i in 1:nimages )
 {
   simimg<-array( data=rnorm(2500), dim=c(50,50))
   simimg<-as.antsImage( simimg )
+  SmoothImage(simimg,1.5,simimg)
   ilist[i]<-simimg
 }
 # get a mask from the first image
@@ -120,6 +121,14 @@ print(paste("age",min(p.adjust(mdli$beta.pval[1,]))))
 print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
 ```
 
+
+**Write out a statistical map**
+```
+agebetas<-antsImageClone( mask )
+agebetas[ mask == 1 ]<-mdli$beta.t[1,]
+antsImageWrite( agebetas, 'agebetas.nii.gz' )
+```
+
 **Eigenanatomy & SCCAN**
 ```
 ?sparseDecom
@@ -129,6 +138,9 @@ print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
 
 **Other useful tools**
 ```
+?ImageMath
+?ThresholdImage
+# ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
 ?antsPreprocessfMRI
 ?aslPerfusion
 ?computeDVARS
