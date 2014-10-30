@@ -51,7 +51,8 @@ List the available functions in the namespace ANTsR:
 ANTsR::<double-tab>
 ```
 
-Call help on a function via ?functionName
+Call help on a function via ?functionName or see function arguments
+via  `args(functionName)`
 
 ## Overview of ANTsR functionality and useful tools
 
