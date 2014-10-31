@@ -143,6 +143,7 @@ antsImageWrite( agebetas, 'agebetas.nii.gz' )
 ?sparseDecom2
 ?initializeEigenanatomy
 ```
+See [sccan tutorial](http://stnava.github.io/sccanTutorial/)
 
 **Other useful tools**
 ```
