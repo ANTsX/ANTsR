@@ -23,17 +23,17 @@ bayesianlm <- function( X, y, priorMean, priorPrecision, priorIntercept = 0) {
   } else {
     mycoefs <- XtXinv[2, 2]
   }
-  if (is.vector(myresiduals)) {
-    beta.std <- sqrt(sum((myresiduals)^2)/dfr * mycoefs)
+  if ( veccoef ) {
+    beta.std <- sqrt(sum((myresiduals)^2)/dfe * mycoefs)
   } else {
-    beta.std <- t(sqrt(as.vector(colSums((myresiduals)^2)/dfr) %o%
+    beta.std <- t(sqrt(as.vector(colSums((myresiduals)^2)/dfe) %o%
       mycoefs))
   }
   if (veccoef)
     beta.t <- mu_n[-1]/beta.std
   if (!veccoef)
     beta.t <- mu_n[-1, ]/beta.std
-  beta.pval <- 2 * pt(-abs(beta.t), df = dfr)
+  beta.pval <- 2 * pt(-abs(beta.t), df = dfe )
   list( beta = beta, beta.std = beta.std,
     beta.t = beta.t, beta.pval = beta.pval)
 }

@@ -46,6 +46,15 @@ Avants BB
   aslmat<-timeseries2matrix(asl,aslmask)
   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
   dv<-computeDVARS(aslmat)
+  # do some comparison with a single y, no priors
+  y<-rowMeans(aslmat)
+  perfmodel<-lm( y ~ tc + dv ) # standard model
+  tlm<-bigLMStats( perfmodel )
+  X<-model.matrix( perfmodel )
+  blm<-bayesianlm(  X, y )
+  print( tlm$beta.t )
+  print( blm$beta.t )
+
   # do some bayesian learning based on the data
   perfmodel<-lm( aslmat ~ tc + dv ) # standard model
   X<-model.matrix( perfmodel )
@@ -53,12 +62,20 @@ Avants BB
   prior  <- rowMeans( perfmodel$coefficients  )
   invcov <- solve( cov( t( perfmodel$coefficients ) ) )
   bayesianperfusion<-rep(0,ncol(aslmat))
+  bayesianperfusionloc<-rep(0,ncol(aslmat))
   for ( i in 1:ncol(aslmat) )
     {
-    blm<-bayesianlm(  X, aslmat[,i], prior, invcov )
+    blm<-bayesianlm(  X, aslmat[,i], prior, invcov*100 )
     bayesianperfusion[i]<-blm$beta.t[1]
+    localprior<-(perfmodel$coefficients[,i])
+    blm<-bayesianlm(  X, aslmat[,i], localprior, invcov*100 )
+    bayesianperfusionloc[i]<-blm$beta.t[1]
     }
   perfimg<-antsImageClone(aslmask)
-  perfimg[ aslmask == 1 ]<-bayesianperfusion
+  basicperf<-bigLMStats( perfmodel )$beta.t[1,]
+  perfimg[ aslmask == 1 ]<-basicperf
   antsImageWrite(perfimg,'perf.nii.gz')
+  perfimg[ aslmask == 1 ]<-bayesianperfusion
+  antsImageWrite(perfimg,'perf_bayes.nii.gz')
+  print( cor.test(basicperf, perfimg[ aslmask == 1 ] ) )
 }
