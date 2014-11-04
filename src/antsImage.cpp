@@ -1003,6 +1003,61 @@ try
       return Rcpp::wrap( NA_REAL );
       }
     }
+  else if ( pixeltype == "unsigned int")
+    {
+    typedef unsigned int PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+  else if ( pixeltype == "unsigned char")
+    {
+    typedef unsigned char PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+
   else
     {
     Rcpp::Rcout << "Unsupported pixel type: " << pixeltype << std::endl;
