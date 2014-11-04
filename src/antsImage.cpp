@@ -8,7 +8,7 @@
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkContinuousIndex.h"
-#include "itkNeighborhood.h"
+#include "itkNeighborhoodIterator.h"
 #include "itkPermuteAxesImageFilter.h"
 #include "vnl/vnl_matrix.h"
 #include "vnl/vnl_vector.h"
@@ -860,6 +860,240 @@ catch( const std::exception& exc )
     Rcpp::Rcout<< exc.what() << std::endl ;
     return Rcpp::wrap( NA_REAL ) ;
   }
+
+template< class PixelType , unsigned int Dimension >
+SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension >::Pointer image ,
+                                      typename itk::Image< PixelType , Dimension >::Pointer mask,
+                                      SEXP r_radius )
+{
+
+  typedef itk::Image<PixelType, Dimension> ImageType;
+  typedef typename ImageType::RegionType   RegionType;
+
+  Rcpp::NumericVector radius( r_radius ) ;
+
+  typename itk::NeighborhoodIterator<ImageType>::SizeType nSize;
+
+  unsigned long maxSize = 1;
+  for ( unsigned int i=0; i<Dimension; i++ )
+    {
+    maxSize *= ( 1 + 2*radius[i] );
+    nSize[i] = radius[i];
+    }
+
+  std::vector<double> pixelList;
+  pixelList.reserve(maxSize);
+
+  itk::ImageRegionIteratorWithIndex<ImageType> it( mask, mask->GetLargestPossibleRegion() ) ;
+  itk::NeighborhoodIterator<ImageType> nit( nSize, image, image->GetLargestPossibleRegion() ) ;
+
+  unsigned long nVoxels = 0;
+  while( !it.IsAtEnd() )
+    {
+    if ( it.Value() > 0 )
+      {
+      //Rcpp::Rcout << it.GetIndex() << " " << it.Value() << std::endl;
+      //pixelList.push_back( it.Value() );
+      ++nVoxels;
+      }
+    ++it;
+    }
+
+  Rcpp::NumericMatrix matrix(maxSize, nVoxels);
+
+  unsigned int col = 0;
+  it.GoToBegin();
+  while( !it.IsAtEnd() )
+    {
+    if ( it.Value() > 0 )
+      {
+
+      for ( unsigned int row=0; row < nit.Size(); row++ )
+        {
+        matrix(row,col) = nit.GetPixel(row);
+        }
+
+      ++col;
+      }
+    ++it;
+    ++nit;
+    }
+
+  //Rcpp::NumericVector pixels( pixelList.begin(), pixelList.end() );
+  return matrix;
+
+
+}
+
+RcppExport SEXP antsImage_GetNeighborhoodMatrix( SEXP r_antsimage, SEXP r_maskimage, SEXP r_radius )
+try
+{
+  if ( r_antsimage == NULL )
+    {
+    Rcpp::Rcout << "Unspecified Argument" << std::endl ;
+    return Rcpp::wrap( 1 ) ;
+    }
+
+  if ( r_maskimage == NULL )
+    {
+    Rcpp::Rcout << "Unspecified Argument" << std::endl ;
+    return Rcpp::wrap( 1 ) ;
+    }
+
+  Rcpp::S4 antsimage( r_antsimage ) ;
+  Rcpp::S4 maskimage( r_maskimage ) ;
+
+  std::string pixeltype = Rcpp::as< std::string >( antsimage.slot( "pixeltype" ) ) ;
+  unsigned int dimension = Rcpp::as< int >( antsimage.slot( "dimension" ) ) ;
+
+  Rcpp::NumericVector radius( r_radius ) ;
+
+  if ( radius.size() != dimension )
+    {
+    Rcpp::Rcout << "Radius must have same dimension as image" << std::endl ;
+    return Rcpp::wrap( NA_REAL );
+    }
+
+  unsigned long maxSize = 1;
+  for ( unsigned int i=0; i<dimension; i++ )
+    {
+    maxSize *= ( 1 + 2*radius[i] );
+    }
+
+  std::vector<double> pixelList;
+
+  if ( pixeltype == "double")
+    {
+    typedef double PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 4>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 3>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 2>( *itkImage, *itkMask, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+  else if ( pixeltype == "float")
+    {
+    typedef float PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 4>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 3>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 2>( *itkImage, *itkMask, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+  else if ( pixeltype == "unsigned int")
+    {
+    typedef unsigned int PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 4>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 3>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 2>( *itkImage, *itkMask, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+  else if ( pixeltype == "unsigned char")
+    {
+    typedef unsigned char PixelType;
+    if( dimension == 4 )
+      {
+      typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 4>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 3 )
+      {
+      typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 3>( *itkImage, *itkMask, r_radius );
+      }
+    else if( dimension == 2 )
+      {
+      typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
+      Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
+      Rcpp::XPtr< ImagePointerType > itkMask( static_cast< SEXP >( maskimage.slot( "pointer" ) ) ) ;
+      return antsImage_GetNeighborhoodMatrix<PixelType, 2>( *itkImage, *itkMask, r_radius );
+      }
+    else
+      {
+      Rcpp::Rcout << "Unsupported image dimnesion: " << dimension << std::endl;
+      return Rcpp::wrap( NA_REAL );
+      }
+    }
+
+  else
+    {
+    Rcpp::Rcout << "Unsupported pixel type: " << pixeltype << std::endl;
+    return Rcpp::wrap( NA_REAL );
+    }
+}
+catch( const std::exception& exc )
+{
+  Rcpp::Rcout<< exc.what() << std::endl ;
+  return Rcpp::wrap( 1 ) ;
+}
 
 
 template< class PixelType , unsigned int Dimension >

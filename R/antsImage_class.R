@@ -311,6 +311,26 @@ antsGetNeighborhood <- function(x, center, radius) {
   return(.Call("antsImage_GetNeighborhood", x, center, radius))
 }
 
+antsGetNeighborhoodMatrix <- function(image, mask, radius) {
+
+  if (class(image)[1] != "antsImage") {
+    print("Input must be of class 'antsImage'")
+    return()
+  }
+
+  if ((class(mask) != "antsImage")) {
+    print("center must be of class 'antsImage'")
+    return()
+  }
+
+  if ((class(radius) != "numeric")) {
+    print("radius must be of class 'numeric'")
+    return()
+  }
+
+  return(.Call("antsImage_GetNeighborhoodMatrix", image, mask, radius))
+}
+
 getValueAtPoint <- function(x, point) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
