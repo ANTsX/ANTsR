@@ -31,14 +31,12 @@ aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
 aslmat<-timeseries2matrix(asl,aslmask)
 tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
-dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
-  maxnoisepreds=c(2,4,6,8), debug=FALSE, polydegree=4,
-  crossvalidationgroups=6 )
+dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.25,
+  maxnoisepreds=c(1:8), debug=FALSE, polydegree=4,
+  crossvalidationgroups=10 )
 nzimg<-antsImageClone(aslmask)
-nzimg[ aslmask == 1 ]<-dnz$R2final[,1]
-antsImageWrite(nzimg,'nzimg1.nii.gz')
-nzimg[ aslmask == 1 ]<-dnz$R2final[,2]
-antsImageWrite(nzimg,'nzimg2.nii.gz')
+nzimg[ aslmask == 1 ]<-dnz$R2final[,dnz$n]
+antsImageWrite(nzimg,'nzimg.nii.gz')
 # a classic regression approach to estimating perfusion
 # not recommended, but shows the basic idea.
 # see ?quantifyCBF for a better approach

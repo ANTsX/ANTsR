@@ -1,5 +1,5 @@
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20, 
-  regweights = NULL) {
+perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20,
+  selectionValsForRegweights = NULL) {
   getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
@@ -22,12 +22,12 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
   mycbfmodel <- lm(cbfform)  # standard regression
   cbfi <- antsImageClone(mask_img)
   betaideal <- ((mycbfmodel$coeff)[2, ])
-  if (mean(betaideal) < 0) 
+  if (mean(betaideal) < 0)
     betaideal <- (betaideal) * (-1)
   cbfi[mask_img == 1] <- betaideal  # standard results
-  
+
   indstozero <- NULL
-  if (dorobust > 0 & is.null(regweights)) {
+  if (dorobust > 0 ) {
     pckg <- try(require(robust))
     if (!pckg) {
       cat("Installing 'robust' from CRAN\n")
@@ -55,19 +55,30 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     myct <- 0
     ptime <- system.time({
       # rgw<-foreach(vox=visitvals,.combine='+',.init=regweights,.verbose=F) %dopar% {
+      if ( !all(is.na(selectionValsForRegweights))) {
+        vissel<-selectionValsForRegweights[visitvals]
+        visselThresh<-0.8 * max(vissel)
+      } else {
+        visselThresh<-0
+        vissel<-rep(100,length(visitvals))
+      }
+      thisct<-1
       for (vox in visitvals) {
         try(mycbfmodel <- lmrob(rcbfform, control = ctl), silent = T)
         rbetaideal[vox] <- mycbfmodel$coeff[2]
-        if (!is.null(mycbfmodel$rweights)) {
+        if ( !is.null(mycbfmodel$rweights) &
+              vissel[thisct] > visselThresh ) {
           rgw <- rgw + mycbfmodel$rweights
           myct <- myct + 1
           robvals[, myct] <- mycbfmodel$rweights
         }
+        thisct<-thisct+1
       }
+      print(paste("thisct",thisct))
     })
     print(rgw)
     regweights <- (rgw/myct)
-    if (is.na(mean(regweights))) 
+    if (is.na(mean(regweights)))
       regweights[] <- 1
     print(paste("donewithrobreg", myct))
     print(regweights)
@@ -85,21 +96,21 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       indstozero <- which(regweights < (0.5 * dorobust * max(regweights)))
       keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
     }
-    regweights[indstozero] <- 0  # hard thresholding 
+    regweights[indstozero] <- 0  # hard thresholding
     print(regweights)
     mycbfmodel <- lm(cbfform, weights = regweights)  # standard weighted regression
     betaideal <- ((mycbfmodel$coeff)[2, ])
-    if (mean(betaideal) < 0) 
+    if (mean(betaideal) < 0)
       betaideal <- (betaideal) * (-1)
     cbfi[mask_img == 1] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(usemat) * 100, " % "))
-  } else if (dorobust > 0 & !is.null(regweights)) {
+  } else if (dorobust > 0 ) {
     mycbfmodel <- lm(cbfform, weights = regweights)  # standard weighted regression
     betaideal <- ((mycbfmodel$coeff)[2, ])
-    if (mean(betaideal) < 0) 
+    if (mean(betaideal) < 0)
       betaideal <- (betaideal) * (-1)
     cbfi[mask_img == 1] <- betaideal  # robust results
   }
   return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
 }
-# y = x beta + c => y - c = x beta 
+# y = x beta + c => y - c = x beta
