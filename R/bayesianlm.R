@@ -35,5 +35,5 @@ bayesianlm <- function( X, y, priorMean, priorPrecision, priorIntercept = 0) {
     beta.t <- mu_n[-1, ]/beta.std
   beta.pval <- 2 * pt(-abs(beta.t), df = dfe )
   list( beta = beta, beta.std = beta.std,
-    beta.t = beta.t, beta.pval = beta.pval)
+    beta.t = beta.t, beta.pval = beta.pval, fitted.values=preds )
 }
