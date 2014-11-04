@@ -7,7 +7,8 @@ Simple bayesian regression function.
 
 \description{
 Take a prior mean and precision matrix for the regression solution
-and uses them to solve for the regression parameters.  See Wikipedia.
+and uses them to solve for the regression parameters.  The Bayesian
+model, here, is on the multivariate distribution of the parameters.
 }
 
 \usage{
