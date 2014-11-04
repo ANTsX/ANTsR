@@ -46,11 +46,12 @@ Avants BB
   aslmat<-timeseries2matrix(asl,aslmask)
   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
   dv<-computeDVARS(aslmat)
-  y<-rowMeans(aslmat)
+  # do some bayesian learning based on the data
+  perfmodel<-lm( aslmat ~ tc + dv ) # standard model
   X<-model.matrix( perfmodel )
   perfmodel<-lm( aslmat ~ tc + dv )
-  prior<-rnorm(ncol(X))
-  invcov <- diag(ncol(X)) * 1.e-2
+  prior  <- rowMeans( perfmodel$coefficients  )
+  invcov <- solve( cov( t( perfmodel$coefficients ) ) )
   bayesianperfusion<-rep(0,ncol(aslmat))
   for ( i in 1:ncol(aslmat) )
     {
