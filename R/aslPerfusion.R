@@ -1,6 +1,6 @@
 aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust = 0.92,
   m0 = NA, skip = 20, mask = NA, interpolation = "linear", checkmeansignal = 100,
-  moco_results = NULL, regweights = NULL, useDenoiser = NA) {
+  moco_results = NULL, regweights = NULL, useDenoiser = NA, useBayesian=F) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -50,12 +50,11 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   if (checkmeansignal > 0) {
-    print("Check the mean signal to eliminate frames with high drop out rate")
+#    print("Check the mean signal to eliminate frames with high drop out rate")
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
     mat <- subset(mat, imgmeans > checkmeansignal)
     motionparams <- subset(motionparams, imgmeans > checkmeansignal)
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
-    print(imgmeans)
   }
   if (is.na(m0)) {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
@@ -75,11 +74,36 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
   mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:7]))
   print(colnames(mynuis))
-  perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
-    xideal = predictors$xideal,
-    nuis = as.matrix(mynuis), dorobust = dorobust,
-    skip = skip, selectionValsForRegweights = predictors$dnz )
-
+  if ( ! useBayesian ) {
+    perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
+      xideal = predictors$xideal,
+      nuis = as.matrix(mynuis), dorobust = dorobust,
+      skip = skip, selectionValsForRegweights = predictors$dnz )
+  } else {
+    perfmodel<-lm( mat ~ predictors$xideal + as.matrix(mynuis) )
+    X<-model.matrix( perfmodel )
+    bayesianperfusionloc<-rep(0,ncol(mat))
+    smoothcoeffmat<-perfmodel$coefficients
+    for ( i in 1:nrow(smoothcoeffmat) )
+      {
+      temp<-antsImageClone( moco_mask_img )
+      temp[ moco_mask_img == 1 ] <- smoothcoeffmat[i,]
+      SmoothImage(3,temp,5,temp)
+      smoothcoeffmat[i,]<-temp[ moco_mask_img==1 ]
+      }
+    prior  <- rowMeans( smoothcoeffmat  )
+    invcov <- solve( cov( t( smoothcoeffmat ) ) )
+    for ( i in 1:ncol(mat) )
+      {
+      localprior<-(smoothcoeffmat[,i])
+      blm<-bayesianlm(  X, mat[,i], localprior, invcov*100 )
+      bayesianperfusionloc[i]<-blm$beta.t[1]
+      }
+    pimg<-antsImageClone( moco_mask_img )
+    pimg[moco_mask_img==1]<-bayesianperfusionloc
+    perfusion<-list( cbfi=pimg,
+      indstozero = NA, regweights =NA )
+  }
   # Get perfusion time series
   perfusionTimeSeries <- new("antsImage", "float", 4)
   ImageMath(4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
