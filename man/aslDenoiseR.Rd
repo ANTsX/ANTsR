@@ -31,9 +31,9 @@ aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
 aslmat<-timeseries2matrix(asl,aslmask)
 tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
-dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.25,
+dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.2,
   maxnoisepreds=c(1:8), debug=FALSE, polydegree=4,
-  crossvalidationgroups=10 )
+  crossvalidationgroups=6 )
 nzimg<-antsImageClone(aslmask)
 nzimg[ aslmask == 1 ]<-dnz$R2final[,dnz$n]
 antsImageWrite(nzimg,'nzimg.nii.gz')
