@@ -96,7 +96,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,6.0,temp)
+      SmoothImage(3,temp,10.0,temp)
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
     invcov <- solve( cov( t( smoothcoeffmat ) ) )
