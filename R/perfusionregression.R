@@ -101,17 +101,16 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,useBayesian,temp)
+      SmoothImage(3,temp,6.0,temp)
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
-    prior  <- rowMeans( smoothcoeffmat  )
     invcov <- solve( cov( t( smoothcoeffmat ) ) )
     betaideal<-rep(0,ncol(mat))
     blmX<-model.matrix( mycbfmodel )
     for ( v in 1:ncol(mat) )
       {
       prior<-(smoothcoeffmat[,v])
-      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*10,
+      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*useBayesian,
         regweights=regweights )
       betaideal[v]<-blm$beta[1]
       }
