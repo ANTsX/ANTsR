@@ -93,8 +93,26 @@ perfusionregression <- function(mask_img, mat, xideal,
       keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
     }
     regweights[indstozero] <- 0  # hard thresholding
-    robvals[indstozero,]<-0 # check if this is a good idea ....
+    # robvals[indstozero,]<-0 # check if this is a good idea ....
     print(regweights)
+    if ( skip == 1 )
+    {
+    for ( v in 1:ncol(mat) )
+      {
+      regweights<-robvals[,v]
+      indstozero <- which(regweights < (dorobust * max(regweights)))
+      keepinds <- which(regweights > (dorobust * max(regweights)))
+      if (length(keepinds) < 20) {
+        indstozero <- which(regweights < (0.95 * dorobust * max(regweights)))
+        keepinds <- which(regweights > (0.95 * dorobust * max(regweights)))
+      }
+      if (length(keepinds) < 20) {
+        indstozero <- which(regweights < (0.5 * dorobust * max(regweights)))
+        keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
+      }
+      robvals[indstozero,v]<-0
+      }
+    }
     # standard weighted regression
     if ( dorobust >= 1 | dorobust <= 0 )
       mycbfmodel <- lm( cbfform )
