@@ -59,34 +59,37 @@ Avants BB
   perfmodel<-lm( aslmat ~ tc + dv ) # standard model
   X<-model.matrix( perfmodel )
   perfmodel<-lm( aslmat ~ tc + dv )
-  bayesianperfusion<-rep(0,ncol(aslmat))
   bayesianperfusionloc<-rep(0,ncol(aslmat))
   smoothcoeffmat<-perfmodel$coefficients
+  nmatimgs<-list()
   for ( i in 1:nrow(smoothcoeffmat) )
     {
     temp<-antsImageClone( aslmask )
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
-    SmoothImage(3,temp,10,temp)
+    SmoothImage(3,temp,3.5,temp)
+    nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,rep(1,3))
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
   prior  <- rowMeans( smoothcoeffmat  )
   invcov <- solve( cov( t( smoothcoeffmat ) ) )
-  blm2<-bayesianlm(  X, y, prior, invcov*1000 )
+  blm2<-bayesianlm(  X, y, prior, invcov*100 )
   print( blm2$beta.p )
   for ( i in 1:ncol(aslmat) )
     {
-    blm<-bayesianlm(  X, aslmat[,i], prior, invcov*1000 )
-    bayesianperfusion[i]<-blm$beta[1]
+    parammat<-nmatimgs[[1]][,i]
+    for ( k in 2:length(nmatimgs))
+      parammat<-cbind( parammat, nmatimgs[[k]][,i] )
+    locinvcov<-solve( cov( parammat ) )
     localprior<-(smoothcoeffmat[,i])
-    blm<-bayesianlm(  X, aslmat[,i], localprior, invcov*1000 )
+    blm<-bayesianlm(  X, aslmat[,i], localprior, locinvcov*100 )
     bayesianperfusionloc[i]<-blm$beta[1]
     }
   perfimg<-antsImageClone(aslmask)
   basicperf<-bigLMStats( perfmodel )$beta[1,]
   perfimg[ aslmask == 1 ]<-basicperf
   antsImageWrite(perfimg,'perf.nii.gz')
-  perfimg[ aslmask == 1 ]<-bayesianperfusion
+  perfimg[ aslmask == 1 ]<-bayesianperfusionloc
   antsImageWrite(perfimg,'perf_bayes.nii.gz')
   print( cor.test(basicperf, perfimg[ aslmask == 1 ] ) )
 }
