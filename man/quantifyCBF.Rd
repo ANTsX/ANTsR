@@ -35,18 +35,21 @@ Avants BB, Kandel B, Duda JT
 
 \examples{
   \dontrun{
-  asl<-antsImageRead("PEDS012_20131101_pcasl_1.nii.gz",4)
+  fn<-"PEDS012_20131101_pcasl_1.nii.gz"
+  asl<-antsImageRead(fn,4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
-  pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
-    dorobust=0.9, useDenoiser=2:10, skip=5 )
+  pcasl.bayesian <- aslPerfusion( asl, interpolation="linear",
+    dorobust=0.95, useDenoiser=NA, skip=1, useBayesian=100,
+    moreaccurate=0 )
 # user might compare to useDenoiser=FALSE
-  pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
-  cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )
+  pcasl.parameters <- list( sequence="pcasl", m0=pcasl.bayesian$m0 )
+  cbf <- quantifyCBF( pcasl.bayesian$perfusion, pcasl.bayesian$mask,
+     pcasl.parameters )
   meancbf <- cbf$kmeancbf
-  print(mean(meancbf[ pcasl.processing$mask==1 ]))
+  print(mean(meancbf[ pcasl.bayesian$mask==1 ]))
   antsImageWrite( meancbf , 'temp.nii.gz')
   pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
-    dorobust=0.95, useDenoiser=NA, skip=5  )
+    dorobust=0.98, useDenoiser=NA, skip=5,  useBayesian=0 )
   # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )

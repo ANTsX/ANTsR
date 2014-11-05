@@ -1,6 +1,6 @@
-aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust = 0.92,
+aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = 1, dorobust = 0.92,
   m0 = NA, skip = 20, mask = NA, interpolation = "linear", checkmeansignal = 100,
-  moco_results = NULL, regweights = NULL, useDenoiser = NA) {
+  moco_results = NULL, regweights = NULL, useDenoiser = NA, useBayesian=0) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -50,12 +50,11 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   if (checkmeansignal > 0) {
-    print("Check the mean signal to eliminate frames with high drop out rate")
+#    print("Check the mean signal to eliminate frames with high drop out rate")
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
     mat <- subset(mat, imgmeans > checkmeansignal)
     motionparams <- subset(motionparams, imgmeans > checkmeansignal)
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
-    print(imgmeans)
   }
   if (is.na(m0)) {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
@@ -73,23 +72,26 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
   m1[moco_mask_img == 0] <- 0
   m1[moco_mask_img == 1] <- m1vals
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
-  mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:7]))
-  print(colnames(mynuis))
+  nn<-ncol(predictors$nuis)
+  mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:nn]))
   perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
-    xideal = predictors$xideal,
-    nuis = as.matrix(mynuis), dorobust = dorobust,
-    skip = skip, selectionValsForRegweights = predictors$dnz )
-
+      xideal = predictors$xideal,
+      nuis = as.matrix(mynuis), dorobust = dorobust,
+      skip = skip, selectionValsForRegweights = predictors$dnz,
+      useBayesian=useBayesian )
   # Get perfusion time series
   perfusionTimeSeries <- new("antsImage", "float", 4)
-  ImageMath(4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
+  ImageMath(4, perfusionTimeSeries,
+    "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
     interpolation)
-
-  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))] <- 0
-  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))] <- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
-
-  return(list(perfusion = perfusion$cbfi, perfusionTimeSeries = perfusionTimeSeries,
-    aslTimeSeries = mat, xideal = predictors$xideal, nuisancevariables = predictors$nuis,
-    mask = moco_mask_img, m0 = m0, m1 = m1, globalsignal = predictors$globalsignalASL,
-    indstozero = perfusion$indstozero, regweights = perfusion$regweights))
+  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
+  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
+  return(list(perfusion = perfusion$cbfi,
+    perfusionTimeSeries = perfusionTimeSeries,
+    aslTimeSeries = mat, xideal = predictors$xideal,
+    nuisancevariables = predictors$nuis,
+    mask = moco_mask_img, m0 = m0, m1 = m1,
+    globalsignal = predictors$globalsignalASL,
+    indstozero = perfusion$indstozero,
+    regweights = perfusion$regweights))
 }
