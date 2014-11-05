@@ -328,6 +328,12 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius) {
     return()
   }
 
+  if ( (prod(radius*2+1)*sum(as.array(mask))) > (2^31-1) )
+    {
+    print( "Requested matrix size is too large for Rcpp")
+    return( NA )
+    }
+
   return(.Call("antsImage_GetNeighborhoodMatrix", image, mask, radius))
 }
 

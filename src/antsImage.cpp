@@ -892,14 +892,14 @@ SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension
     {
     if ( it.Value() > 0 )
       {
-      //Rcpp::Rcout << it.GetIndex() << " " << it.Value() << std::endl;
-      //pixelList.push_back( it.Value() );
       ++nVoxels;
       }
     ++it;
     }
 
+  //Rcpp::Rcout << "Allocating matrix of size: " << maxSize << " x " << nVoxels << std::endl;
   Rcpp::NumericMatrix matrix(maxSize, nVoxels);
+  //Rcpp::Rcout << "Filling the matrix" << std::endl;
 
   unsigned int col = 0;
   it.GoToBegin();
@@ -919,7 +919,6 @@ SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension
     ++nit;
     }
 
-  //Rcpp::NumericVector pixels( pixelList.begin(), pixelList.end() );
   return matrix;
 
 
@@ -953,14 +952,6 @@ try
     Rcpp::Rcout << "Radius must have same dimension as image" << std::endl ;
     return Rcpp::wrap( NA_REAL );
     }
-
-  unsigned long maxSize = 1;
-  for ( unsigned int i=0; i<dimension; i++ )
-    {
-    maxSize *= ( 1 + 2*radius[i] );
-    }
-
-  std::vector<double> pixelList;
 
   if ( pixeltype == "double")
     {
