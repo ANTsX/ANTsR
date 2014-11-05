@@ -99,10 +99,10 @@ perfusionregression <- function(mask_img, mat, xideal,
     smoothcoeffmat<-mycbfmodel$coefficients
     for ( i in 1:nrow(smoothcoeffmat) )
       {
-      temp<-antsImageClone( aslmask )
-      temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
+      temp<-antsImageClone( mask_img )
+      temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
       SmoothImageMath(3,temp,10,temp)
-      smoothcoeffmat[i,]<-temp[ aslmask==1 ]
+      smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
     prior  <- rowMeans( smoothcoeffmat  )
     invcov <- solve( cov( t( smoothcoeffmat ) ) )
