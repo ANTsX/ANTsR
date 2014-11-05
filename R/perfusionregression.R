@@ -43,6 +43,9 @@ perfusionregression <- function(mask_img, mat, xideal,
   vox <- 1
   ct <- 0
   visitvals <- (skip:floor((ncol(mat) - 1)/skip)) * skip
+  if ( skip == 1 ) {
+    visitvals<-1:ncol(mat)
+  }
   rgw <- regweights
   myct <- 0
     if ( !all(is.na(selectionValsForRegweights))) {
@@ -65,6 +68,14 @@ perfusionregression <- function(mask_img, mat, xideal,
         robvals[, myct] <- mycbfmodel$rweights
         }
       thisct<-thisct+1
+      }
+    if ( skip == 1 )
+    for ( i in 1:nrow(robvals) )
+      {
+      temp<-antsImageClone( mask_img )
+      temp[ mask_img == 1 ] <- robvals[i,]
+      SmoothImage(3,temp,5.0,temp)
+      robvals[i,]<-temp[ mask_img==1 ]
       }
     regweights <- (rgw/myct)
     if ( is.na(mean(regweights)) ) regweights[] <- 1
@@ -111,6 +122,7 @@ perfusionregression <- function(mask_img, mat, xideal,
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
       locinvcov<-solve( cov( parammat ) )
       prior<-(smoothcoeffmat[,v])
+      if ( skip == 1 ) regweights<-robvals[,v]
       blm<-bayesianlm(  blmX, mat[,v], prior, invcov*useBayesian,
         regweights=regweights )
       betaideal[v]<-blm$beta[1]
