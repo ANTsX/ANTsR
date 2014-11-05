@@ -20,7 +20,6 @@ perfusionregression <- function(mask_img, mat, xideal,
     print(myusage)
     return(NULL)
   }
-  print("standard regression")
   cbfform <- formula(mat ~ xideal)
   rcbfform <- formula(mat[, vox] ~ xideal)
   if (!is.na(nuis)) {
@@ -37,11 +36,6 @@ perfusionregression <- function(mask_img, mat, xideal,
   # robust procedure Yohai, V.J. (1987)
   # High breakdown-point and high efficiency
   # estimates for regression.  _The Annals of Statistics_ *15*, 642-65
-  if (dorobust > 1) {
-    print("dorobust too large, setting to 0.95")
-    dorobust <- 0.95
-  }
-  print(paste("begin robust regression:", dorobust * 100, "%"))
   ctl <- lmrob.control("KS2011", max.it = 1000)
   regweights <- rep(0, nrow(mat))
   rbetaideal <- rep(0, ncol(mat))
@@ -72,7 +66,6 @@ perfusionregression <- function(mask_img, mat, xideal,
         }
       thisct<-thisct+1
       }
-    print(rgw)
     regweights <- (rgw/myct)
     if ( is.na(mean(regweights)) ) regweights[] <- 1
     # check if the robustness selects the blank part
@@ -80,7 +73,6 @@ perfusionregression <- function(mask_img, mat, xideal,
     # now use the weights in a weighted regression
     indstozero <- which(regweights < (dorobust * max(regweights)))
     keepinds <- which(regweights > (dorobust * max(regweights)))
-    print(paste("dorobust ", dorobust, " i2z ", length(indstozero)))
     if (length(keepinds) < 20) {
       indstozero <- which(regweights < (0.95 * dorobust * max(regweights)))
       keepinds <- which(regweights > (0.95 * dorobust * max(regweights)))
@@ -92,7 +84,10 @@ perfusionregression <- function(mask_img, mat, xideal,
     regweights[indstozero] <- 0  # hard thresholding
     print(regweights)
     # standard weighted regression
-    mycbfmodel <- lm(cbfform, weights = regweights)
+    if ( dorobust >= 1 | dorobust <= 0 )
+      mycbfmodel <- lm( cbfform )
+    if ( dorobust < 1 & dorobust > 0 )
+      mycbfmodel <- lm(cbfform, weights = regweights)
     betaideal <- ((mycbfmodel$coeff)[2, ])
     if ( useBayesian > 0 )
     {
