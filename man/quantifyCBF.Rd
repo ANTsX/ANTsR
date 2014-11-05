@@ -39,16 +39,15 @@ Avants BB, Kandel B, Duda JT
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   pcasl.bayesian <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
     dorobust=0.9, useDenoiser=2:10, skip=5, useBayesian=T )
-  pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
-     dorobust=0.9, useDenoiser=2:10, skip=5, useBayesian=F )
 # user might compare to useDenoiser=FALSE
-  pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
-  cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )
+  pcasl.parameters <- list( sequence="pcasl", m0=pcasl.bayesian$m0 )
+  cbf <- quantifyCBF( pcasl.bayesian$perfusion, pcasl.bayesian$mask,
+     pcasl.parameters )
   meancbf <- cbf$kmeancbf
-  print(mean(meancbf[ pcasl.processing$mask==1 ]))
+  print(mean(meancbf[ pcasl.bayesian$mask==1 ]))
   antsImageWrite( meancbf , 'temp.nii.gz')
   pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
-    dorobust=0.95, useDenoiser=NA, skip=5  )
+    dorobust=0.9, useDenoiser=2:10, skip=5,  useBayesian=F )
   # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )

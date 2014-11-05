@@ -12,7 +12,7 @@ model, here, is on the multivariate distribution of the parameters.
 }
 
 \usage{
-bsol<-bayesianlm( X, y, priorMean, precisionMatrix  )
+bsol<-bayesianlm( X, y, priorMean, precisionMatrix, weights )
 }
 
 \arguments{
@@ -72,21 +72,21 @@ Avants BB
     }
   prior  <- rowMeans( smoothcoeffmat  )
   invcov <- solve( cov( t( smoothcoeffmat ) ) )
-  blm<-bayesianlm(  X, y, prior, invcov )
-  print( blm$beta.p )
+  blm2<-bayesianlm(  X, y, prior, invcov*1000 )
+  print( blm2$beta.p )
   for ( i in 1:ncol(aslmat) )
     {
-    blm<-bayesianlm(  X, aslmat[,i], prior, invcov*100 )
-    bayesianperfusion[i]<-blm$beta.t[1]
+    blm<-bayesianlm(  X, aslmat[,i], prior, invcov*1000 )
+    bayesianperfusion[i]<-blm$beta[1]
     localprior<-(smoothcoeffmat[,i])
-    blm<-bayesianlm(  X, aslmat[,i], localprior, invcov*100 )
-    bayesianperfusionloc[i]<-blm$beta.t[1]
+    blm<-bayesianlm(  X, aslmat[,i], localprior, invcov*1000 )
+    bayesianperfusionloc[i]<-blm$beta[1]
     }
   perfimg<-antsImageClone(aslmask)
-  basicperf<-bigLMStats( perfmodel )$beta.t[1,]
+  basicperf<-bigLMStats( perfmodel )$beta[1,]
   perfimg[ aslmask == 1 ]<-basicperf
   antsImageWrite(perfimg,'perf.nii.gz')
-  perfimg[ aslmask == 1 ]<-bayesianperfusionloc
+  perfimg[ aslmask == 1 ]<-bayesianperfusion
   antsImageWrite(perfimg,'perf_bayes.nii.gz')
   print( cor.test(basicperf, perfimg[ aslmask == 1 ] ) )
 }

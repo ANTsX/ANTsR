@@ -74,46 +74,24 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
   mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:7]))
   print(colnames(mynuis))
-  if ( ! useBayesian ) {
-    perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
+  perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
       xideal = predictors$xideal,
       nuis = as.matrix(mynuis), dorobust = dorobust,
-      skip = skip, selectionValsForRegweights = predictors$dnz )
-  } else {
-    perfmodel<-lm( mat ~ predictors$xideal + as.matrix(mynuis) )
-    X<-model.matrix( perfmodel )
-    bayesianperfusionloc<-rep(0,ncol(mat))
-    smoothcoeffmat<-perfmodel$coefficients
-    for ( i in 1:nrow(smoothcoeffmat) )
-      {
-      temp<-antsImageClone( moco_mask_img )
-      temp[ moco_mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,5,temp)
-      smoothcoeffmat[i,]<-temp[ moco_mask_img==1 ]
-      }
-    prior  <- rowMeans( smoothcoeffmat  )
-    invcov <- solve( cov( t( smoothcoeffmat ) ) )
-    for ( i in 1:ncol(mat) )
-      {
-      localprior<-(smoothcoeffmat[,i])
-      blm<-bayesianlm(  X, mat[,i], localprior, invcov*100 )
-      bayesianperfusionloc[i]<-blm$beta.t[1]
-      }
-    pimg<-antsImageClone( moco_mask_img )
-    pimg[moco_mask_img==1]<-bayesianperfusionloc
-    perfusion<-list( cbfi=pimg,
-      indstozero = NA, regweights =NA )
-  }
+      skip = skip, selectionValsForRegweights = predictors$dnz,
+      useBayesian=useBayesian )
   # Get perfusion time series
   perfusionTimeSeries <- new("antsImage", "float", 4)
-  ImageMath(4, perfusionTimeSeries, "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
+  ImageMath(4, perfusionTimeSeries,
+    "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
     interpolation)
-
-  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))] <- 0
-  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))] <- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
-
-  return(list(perfusion = perfusion$cbfi, perfusionTimeSeries = perfusionTimeSeries,
-    aslTimeSeries = mat, xideal = predictors$xideal, nuisancevariables = predictors$nuis,
-    mask = moco_mask_img, m0 = m0, m1 = m1, globalsignal = predictors$globalsignalASL,
-    indstozero = perfusion$indstozero, regweights = perfusion$regweights))
+  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
+  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
+  return(list(perfusion = perfusion$cbfi,
+    perfusionTimeSeries = perfusionTimeSeries,
+    aslTimeSeries = mat, xideal = predictors$xideal,
+    nuisancevariables = predictors$nuis,
+    mask = moco_mask_img, m0 = m0, m1 = m1,
+    globalsignal = predictors$globalsignalASL,
+    indstozero = perfusion$indstozero,
+    regweights = perfusion$regweights))
 }
