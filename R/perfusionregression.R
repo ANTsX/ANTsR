@@ -1,7 +1,7 @@
 perfusionregression <- function(mask_img, mat, xideal,
   nuis = NA, dorobust = 0, skip = 20,
   selectionValsForRegweights = NULL,
-  useBayesian=FALSE )
+  useBayesian=0 )
   {
   getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
@@ -94,14 +94,14 @@ perfusionregression <- function(mask_img, mat, xideal,
     # standard weighted regression
     mycbfmodel <- lm(cbfform, weights = regweights)
     betaideal <- ((mycbfmodel$coeff)[2, ])
-    if ( useBayesian )
+    if ( useBayesian > 0 )
     {
     smoothcoeffmat<-mycbfmodel$coefficients
     for ( i in 1:nrow(smoothcoeffmat) )
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,10,temp)
+      SmoothImage(3,temp,useBayesian,temp)
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
     prior  <- rowMeans( smoothcoeffmat  )
@@ -111,7 +111,7 @@ perfusionregression <- function(mask_img, mat, xideal,
     for ( v in 1:ncol(mat) )
       {
       prior<-(smoothcoeffmat[,v])
-      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*100,
+      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*10,
         regweights=regweights )
       betaideal[v]<-blm$beta[1]
       }

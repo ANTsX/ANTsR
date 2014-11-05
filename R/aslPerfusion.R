@@ -1,6 +1,6 @@
 aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust = 0.92,
   m0 = NA, skip = 20, mask = NA, interpolation = "linear", checkmeansignal = 100,
-  moco_results = NULL, regweights = NULL, useDenoiser = NA, useBayesian=F) {
+  moco_results = NULL, regweights = NULL, useDenoiser = NA, useBayesian=0) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
