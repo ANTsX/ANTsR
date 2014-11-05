@@ -110,7 +110,8 @@ perfusionregression <- function(mask_img, mat, xideal,
     blmX<-model.matrix( mycbfmodel )
     for ( v in 1:ncol(mat) )
       {
-      blm<-bayesianlm(  blmX, mat[,v], prior, invcov,
+      prior<-(smoothcoeffmat[,v])
+      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*100,
         regweights=regweights )
       betaideal[v]<-blm$beta[1]
       }

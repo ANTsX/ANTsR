@@ -42,7 +42,7 @@ antsImageWrite(nzimg,'nzimg.nii.gz')
 # see ?quantifyCBF for a better approach
 perfmodel<-lm( aslmat ~ tc + dnz$noiseu + dv )
 perfimg<-antsImageClone(aslmask)
-perfimg[ aslmask == 1 ]<-bigLMStats( perfmodel )$beta.t[1,]
+perfimg[ aslmask == 1 ]<-bigLMStats( perfmodel )$beta[1,]
 antsImageWrite(perfimg,'perf.nii.gz')
 }
 }
