@@ -99,16 +99,16 @@ perfusionregression <- function(mask_img, mat, xideal,
     {
     for ( v in 1:ncol(mat) )
       {
-      regweights<-robvals[,v]
-      indstozero <- which(regweights < (dorobust * max(regweights)))
-      keepinds <- which(regweights > (dorobust * max(regweights)))
+      rwloc<-robvals[,v]
+      indstozero <- which(rwloc < (dorobust * max(rwloc)))
+      keepinds <- which(rwloc > (dorobust * max(rwloc)))
       if (length(keepinds) < 20) {
-        indstozero <- which(regweights < (0.95 * dorobust * max(regweights)))
-        keepinds <- which(regweights > (0.95 * dorobust * max(regweights)))
+        indstozero <- which(rwloc < (0.95 * dorobust * max(rwloc)))
+        keepinds <- which(rwloc > (0.95 * dorobust * max(rwloc)))
       }
       if (length(keepinds) < 20) {
-        indstozero <- which(regweights < (0.5 * dorobust * max(regweights)))
-        keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
+        indstozero <- which(rwloc < (0.5 * dorobust * max(rwloc)))
+        keepinds <- which(rwloc > (0.5 * dorobust * max(rwloc)))
       }
       robvals[indstozero,v]<-0
       }
