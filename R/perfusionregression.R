@@ -101,7 +101,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImageMath(3,temp,10,temp)
+      SmoothImage(3,temp,10,temp)
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
     prior  <- rowMeans( smoothcoeffmat  )

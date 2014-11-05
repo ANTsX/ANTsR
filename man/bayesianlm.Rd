@@ -67,7 +67,7 @@ Avants BB
     temp<-antsImageClone( aslmask )
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
-    SmoothImageMath(3,temp,10,temp)
+    SmoothImage(3,temp,10,temp)
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
   prior  <- rowMeans( smoothcoeffmat  )
