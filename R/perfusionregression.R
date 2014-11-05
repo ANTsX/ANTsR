@@ -74,7 +74,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- robvals[i,]
-      SmoothImage(3,temp,5.0,temp)
+      SmoothImage(3,temp,10.0,temp)
       robvals[i,]<-temp[ mask_img==1 ]
       }
     regweights <- (rgw/myct)
@@ -93,6 +93,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
     }
     regweights[indstozero] <- 0  # hard thresholding
+    robvals[indstozero,]<-0 # check if this is a good idea ....
     print(regweights)
     # standard weighted regression
     if ( dorobust >= 1 | dorobust <= 0 )
@@ -108,7 +109,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,2.0,temp)
+      SmoothImage(3,temp,1.0,temp)
       nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,mask_img,rep(1,3))
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }

@@ -48,7 +48,8 @@ get_perfusion_predictors <- function(mat, motionparams, xideal = NULL, labelfirs
         maxnoisepreds = useDenoiser, polydegree = 4, crossvalidationgroups = 6,
         scalemat = F, noisepoolfun = max)
       pcompcorr <- dnz$noiseu
-      dnz<-dnz$R2final[,dnz$n]
+      if ( is.null(dim(dnz$R2final)) )
+        dnz<-dnz$R2final[,dnz$n] else dnz<-dnz$R2final
     }
     compcorrnames <- paste("compcorr", c(1:ncol(pcompcorr)), sep = "")
     nuis <- cbind(nuis, pcompcorr)
