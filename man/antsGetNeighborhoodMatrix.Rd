@@ -38,11 +38,12 @@ Duda JT
 
 \examples{
 \dontrun{
-img <- antsImageRead( filename, 3 )
-mask <- antsImageClone(img)
-mask[ mask < 1 ] = 0
-mask[ mask > 0 ] = 1
-matrix <- antsGetNeighborhood(img, mask, radius)
+mnit<-getANTsRData("mni")
+mnit<-antsImageRead(mnit,3)
+mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+center <- dim(mnit)/2
+radius <- rep(5,mnit@dimension)
+mat<-antsGetNeighborhoodMatrix(mnit,center,radius)
 }
 
 }

@@ -38,10 +38,11 @@ Duda JT
 
 \examples{
 \dontrun{
-img <- antsImageRead( filename, 3 )
-center <- dim(img)/2
-radius <- rep(2, length(dim(img)))
-values <- antsGetNeighborhood(img, center, radius)
+mnit<-getANTsRData("mni")
+mnit<-antsImageRead(mnit,3)
+center <- dim(mnit)/2
+radius <- rep(5,mnit@dimension)
+mat<-antsGetNeighborhood(mnit,center,radius)
 }
 
 }
