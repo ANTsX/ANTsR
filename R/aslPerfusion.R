@@ -72,7 +72,8 @@ aslPerfusion <- function(asl, maskThresh = 0.75, moreaccurate = TRUE, dorobust =
   m1[moco_mask_img == 0] <- 0
   m1[moco_mask_img == 1] <- m1vals
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
-  mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:7]))
+  nn<-ncol(predictors$nuis)
+  mynuis <- as.data.frame(as.data.frame(predictors$nuis[, 2:nn]))
   print(colnames(mynuis))
   perfusion <- perfusionregression(mask_img = moco_mask_img, mat = mat,
       xideal = predictors$xideal,
