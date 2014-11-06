@@ -139,11 +139,15 @@ perfusionregression <- function(mask_img, mat, xideal,
       parammat<-nmatimgs[[1]][,v]
       for ( k in 2:length(nmatimgs))
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
-      ridge<-diag(ncol(parammat))*1.e-4
-      locinvcov<-solve( cov( parammat ) + ridge )
+      ridge<-diag(length(nmatimgs))*1.e-4
+      pcov<-cov( parammat )
+      locinvcov<-try( solve( pcov + ridge ) )
+      if ( typeof(locinvcov)=='character')
+        locinvcov<-invcov
       prior<-(smoothcoeffmat[,v])
       if ( skip == 1 ) regweights<-robvals[,v]
-      blm<-bayesianlm(  blmX, mat[,v], prior, invcov*useBayesian,
+      blm<-bayesianlm(  blmX, mat[,v], prior,
+        locinvcov*useBayesian,
         regweights=regweights )
       betaideal[v]<-blm$beta[1]
       }
