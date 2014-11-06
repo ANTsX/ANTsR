@@ -39,8 +39,8 @@ Avants BB, Kandel B, Duda JT
   asl<-antsImageRead(fn,4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   pcasl.bayesian <- aslPerfusion( asl, interpolation="linear",
-    dorobust=0.95, useDenoiser=NA, skip=1, useBayesian=100,
-    moreaccurate=0 )
+    dorobust=0.9, useDenoiser=1:16, skip=10, useBayesian=0,
+    moreaccurate=1 )
 # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.bayesian$m0 )
   cbf <- quantifyCBF( pcasl.bayesian$perfusion, pcasl.bayesian$mask,
@@ -48,8 +48,9 @@ Avants BB, Kandel B, Duda JT
   meancbf <- cbf$kmeancbf
   print(mean(meancbf[ pcasl.bayesian$mask==1 ]))
   antsImageWrite( meancbf , 'temp.nii.gz')
-  pcasl.processing <- aslPerfusion( asl, moreaccurate=T, interpolation="linear",
-    dorobust=0.98, useDenoiser=NA, skip=5,  useBayesian=0 )
+  pcasl.processing <- aslPerfusion( asl, moreaccurate=0,
+    interpolation="linear",
+    dorobust=0.95, useDenoiser=NA, skip=5,  useBayesian=0 )
   # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )

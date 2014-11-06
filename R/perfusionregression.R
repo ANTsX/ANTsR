@@ -32,6 +32,14 @@ perfusionregression <- function(mask_img, mat, xideal,
   if (mean(betaideal) < 0)
     betaideal <- (betaideal) * (-1)
   cbfi[mask_img == 1] <- betaideal  # standard results
+  if ( dorobust == 0 )
+  {
+    return(
+      list( cbfi = cbfi,
+      indstozero = NA,
+      regweights = NA)
+      )
+  }
   indstozero <- NULL
   # robust procedure Yohai, V.J. (1987)
   # High breakdown-point and high efficiency
