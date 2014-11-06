@@ -15,5 +15,7 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   newImageArray<-newImageArray[,,,1:nrow(timeSeriesMatrix)]
   newImage <- as.antsImage(newImageArray)
   antsCopyImageInfo(referenceImage, newImage)
+  newImage<-antsImageClone( newImage,
+    out_pixeltype = referenceImage@pixeltype)
   return(newImage)
 }
