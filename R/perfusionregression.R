@@ -82,7 +82,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- robvals[i,]
-      SmoothImage(3,temp,5.0,temp)
+      SmoothImage(3,temp,10.0,temp)
       robvals[i,]<-temp[ mask_img==1 ]
       }
     regweights <- (rgw/myct)
@@ -147,7 +147,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       parammat<-nmatimgs[[1]][,v]
       for ( k in 2:length(nmatimgs))
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
-      ridge<-diag(length(nmatimgs))*1.e-4
+      ridge<-diag(length(nmatimgs))*1.e-6
       pcov<-cov( parammat )
       locinvcov<-try( solve( pcov + ridge ) )
       if ( typeof(locinvcov)=='character')
