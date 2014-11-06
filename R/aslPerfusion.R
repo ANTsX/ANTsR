@@ -91,15 +91,18 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
   # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- get_perfusion_predictors(mat,
     motionparams, NULL, 1, 3, useDenoiser)
-  if ( verbose ) print( colnames(predictors) )
+  if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
-  mynuis <- as.data.frame( predictors$nuis,
+  mynuis <- data.frame( predictors$nuis,
     predictors$motion )
-  if ( verbose ) print( colnames(mynuis) )
+  if ( verbose ) {
+    cat("Nuisance variables\n")
+    print( colnames(mynuis) )
+  }
   perfusion <- perfusionregression(mask_img = moco_mask_img,
       mat = mat,
       xideal = predictors$xideal,
-      nuis = as.matrix(mynuis), dorobust = dorobust,
+      nuis = data.matrix(mynuis), dorobust = dorobust,
       skip = skip, selectionValsForRegweights = predictors$dnz,
       useBayesian=useBayesian )
   # Get perfusion time series
