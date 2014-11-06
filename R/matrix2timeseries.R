@@ -12,9 +12,8 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   for (i in 1:nrow(timeSeriesMatrix)) {
     newImageArray[, , , i][indexMask] <- timeSeriesMatrix[i, ]
   }
-
+  newImageArray<-newImageArray[,,,1:nrow(timeSeriesMatrix)]
   newImage <- as.antsImage(newImageArray)
   antsCopyImageInfo(referenceImage, newImage)
-
   return(newImage)
 }
