@@ -10,7 +10,7 @@ Summarize neighborhoods for voxels in an antsImage.
 }
 
 \usage{
-antsGetNeighborhood( image, mask, radius )
+antsGetNeighborhood( image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA" )
 }
 
 \arguments{
@@ -19,17 +19,31 @@ Image object of S4 class 'antsImage' to get values from.
 }
 
 \item{mask}{
-Image object of S4 class 'antsImage' indicating which voxels to examine
+Image object of S4 class 'antsImage' indicating which voxels to examine. Each voxel > 0
+will be used as the center of a neighborhood
 }
 
 \item{radius}{
 array of values for neighborhood radius (in voxels)
 }
 
+\item{physical.coordinates}{}
+a logical indicating if voxel indices and offsets should be in voxel or physical coordinates
 }
 
+\item{boundary.condition}{
+a string indicating how to handle voxels in a neighborhood, but not in the mask
+"NA" - fill value with NA
+"image" - use image value even if not in mask
+"mean" - use mean of all non-NA values for that neighborhood
+}
+
+
 \value{
-matrix of pixel values where the number of rows is the size of the neighborhood and there is a column for each voxel
+list containing three matrices:
+ values: matrix of pixel values where the number of rows is the size of the neighborhood and there is a column for each voxel
+ indices: matrix providing the center coordinates for each neighborhood
+ offsets: matrix providing the offsets from center for each voxel in a neighborhood
 }
 
 \author{
@@ -42,8 +56,8 @@ mnit<-getANTsRData("mni")
 mnit<-antsImageRead(mnit,3)
 mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 center <- dim(mnit)/2
-radius <- rep(5,mnit@dimension)
-mat<-antsGetNeighborhoodMatrix(mnit,center,radius)
+radius <- rep(2,mnit@dimension)
+mat<-antsGetNeighborhoodMatrix(mnit,mask,radius)
 }
 
 }
