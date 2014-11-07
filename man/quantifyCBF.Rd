@@ -39,8 +39,8 @@ Avants BB, Kandel B, Duda JT
   asl<-antsImageRead(fn,4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   pcasl.bayesian <- aslPerfusion( asl, interpolation="linear",
-    dorobust=0.9, useDenoiser=4:8, skip=10, useBayesian=0,
-    moreaccurate=1 )
+        dorobust=0.95, useDenoiser=2:16, skip=1, useBayesian=1,
+        moreaccurate=1, verbose=F )
 # user might compare to useDenoiser=FALSE
   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.bayesian$m0 )
   cbf <- quantifyCBF( pcasl.bayesian$perfusion, pcasl.bayesian$mask,
