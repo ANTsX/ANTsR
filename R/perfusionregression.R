@@ -147,7 +147,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       parammat<-nmatimgs[[1]][,v]
       for ( k in 2:length(nmatimgs))
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
-      ridge<-diag(length(nmatimgs))*1.e-6
+      ridge<-invcov*1.e0 # add global covariance to local cov
       pcov<-cov( parammat )
       locinvcov<-try( solve( pcov + ridge ) )
       if ( typeof(locinvcov)=='character')
