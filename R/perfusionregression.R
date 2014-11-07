@@ -136,7 +136,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
       SmoothImage(3,temp,1.0,temp)
-      nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,mask_img,rep(1,3))
+      nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,mask_img,rep(1,3))$values
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
       }
     invcov <- solve( cov( t( smoothcoeffmat ) ) )
