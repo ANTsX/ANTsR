@@ -68,7 +68,8 @@ Avants BB
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
     SmoothImage(3,temp,3.5,temp)
-    nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,rep(1,3))
+    nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
+      rep(1,3), boundary.condition = "mean")
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
   prior  <- rowMeans( smoothcoeffmat  )
