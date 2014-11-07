@@ -291,7 +291,7 @@ antsSetDirection <- function(x, direction) {
   return(.Call("antsImage_SetDirection", x, direction, PACKAGE = "ANTsR"))
 }
 
-antsGetNeighborhood <- function(x, center, radius) {
+antsGetNeighborhood <- function(x, center, radius, physical.coordinates=FALSE) {
 
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -308,10 +308,10 @@ antsGetNeighborhood <- function(x, center, radius) {
     return()
   }
 
-  return(.Call("antsImage_GetNeighborhood", x, center, radius))
+  return(.Call("antsImage_GetNeighborhood", x, center, radius, physical.coordinates))
 }
 
-antsGetNeighborhoodMatrix <- function(image, mask, radius) {
+antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA") {
 
   if (class(image)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -334,7 +334,18 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius) {
     return( NA )
     }
 
-  return(.Call("antsImage_GetNeighborhoodMatrix", image, mask, radius))
+  boundary = 0
+  if ( boundary.condition == "image")
+    {
+    boundary = 1
+    }
+  if ( boundary.condition == "mean" )
+    {
+    boundary = 2
+    }
+
+  return( .Call("antsImage_GetNeighborhoodMatrix", image, mask, radius, physical.coordinates, boundary ))
+
 }
 
 getValueAtPoint <- function(x, point) {

@@ -26,10 +26,16 @@ array of indices for neighborhood center
 array of values for neighborhood radius (in voxels)
 }
 
+\item{physical.coordinates}{}
+a logical indicating if voxel indices and offsets should be in voxel or physical coordinates
+}
+
 }
 
 \value{
-array of pixel values in neighborhood
+list containing three matrices:
+values: matrix of pixel values where the number of rows is the size of the neighborhood and there is a column for each voxel
+indices: matrix providing the coordinates for each value
 }
 
 \author{
