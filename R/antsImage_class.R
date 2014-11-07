@@ -311,7 +311,7 @@ antsGetNeighborhood <- function(x, center, radius, physical.coordinates=FALSE) {
   return(.Call("antsImage_GetNeighborhood", x, center, radius, physical.coordinates))
 }
 
-antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA") {
+antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA", spatial.info=FALSE) {
 
   if (class(image)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -344,7 +344,7 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates=
     boundary = 2
     }
 
-  return( .Call("antsImage_GetNeighborhoodMatrix", image, mask, radius, physical.coordinates, boundary ))
+  return( .Call("antsImage_GetNeighborhoodMatrix", image, mask, radius, physical.coordinates, boundary, spatial.info ))
 
 }
 

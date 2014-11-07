@@ -10,7 +10,7 @@ Summarize neighborhoods for voxels in an antsImage.
 }
 
 \usage{
-antsGetNeighborhood( image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA" )
+antsGetNeighborhood( image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA", spatial.info=FALSE )
 }
 
 \arguments{
@@ -38,10 +38,19 @@ a string indicating how to handle voxels in a neighborhood, but not in the mask
 "mean" - use mean of all non-NA values for that neighborhood
 }
 
+\item{spatial.info}{
+a boolean indicating of voxel locations and neighborhood offsets should be returned along with pixel values.
+}
+
+
 }
 
 \value{
-list containing three matrices:
+
+if spatial.info is false:
+a matrix of pixel values where the number of rows is the size of the neighborhood and there is a column for each voxel
+
+if spatial.info is true, a list containing three matrices:
  values: matrix of pixel values where the number of rows is the size of the neighborhood and there is a column for each voxel
  indices: matrix providing the center coordinates for each neighborhood
  offsets: matrix providing the offsets from center for each voxel in a neighborhood
