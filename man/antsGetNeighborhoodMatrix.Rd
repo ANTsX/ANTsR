@@ -27,7 +27,7 @@ will be used as the center of a neighborhood
 array of values for neighborhood radius (in voxels)
 }
 
-\item{physical.coordinates}{}
+\item{physical.coordinates}{
 a logical indicating if voxel indices and offsets should be in voxel or physical coordinates
 }
 
@@ -38,6 +38,7 @@ a string indicating how to handle voxels in a neighborhood, but not in the mask
 "mean" - use mean of all non-NA values for that neighborhood
 }
 
+}
 
 \value{
 list containing three matrices:
