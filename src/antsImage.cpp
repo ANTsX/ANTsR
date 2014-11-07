@@ -953,22 +953,29 @@ SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension
         IndexType idx = it.GetIndex() + nit.GetOffset(row);
 
         // check boundary conditions
-        if ( mask->GetPixel(idx) > 0 ) // fully within boundaries
+        if ( mask->GetRequestedRegion().IsInside(idx) )
           {
-          matrix(row,col) = nit.GetPixel(row);
-          mean += nit.GetPixel(row);
-          ++count;
-          }
-        else
-          {
-          if ( boundary == 1 )
+          if ( mask->GetPixel(idx) > 0 ) // fully within boundaries
             {
-            matrix(row,col)  = nit.GetPixel(row);
+            matrix(row,col) = nit.GetPixel(row);
+            mean += nit.GetPixel(row);
+            ++count;
             }
           else
             {
-            matrix(row,col) = NA_REAL;
+            if ( boundary == 1 )
+              {
+              matrix(row,col)  = nit.GetPixel(row);
+              }
+            else
+              {
+              matrix(row,col) = NA_REAL;
+              }
             }
+          }
+        else
+          {
+          matrix(row,col) = NA_REAL;
           }
         }
 
