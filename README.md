@@ -137,6 +137,21 @@ agebetas[ mask == 1 ]<-mdli$beta.t[1,]
 antsImageWrite( agebetas, 'agebetas.nii.gz' )
 ```
 
+**Neighborhood operations
+
+```
+mnit<-getANTsRData("mni")
+mnit<-antsImageRead(mnit,3)
+ResampleImageBySpacing(3,mnit,mnit,4,4,4)
+mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+radius <- rep(2,mnit@dimension)
+mat<-antsGetNeighborhoodMatrix(mnit,mask,radius,
+  physical.coordinates = FALSE,
+  boundary.condition = "mean" )
+eanat<-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
+eseg<-eigSeg(mask,eanat$eig,F)
+```
+
 **Eigenanatomy & SCCAN**
 ```
 ?sparseDecom
