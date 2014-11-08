@@ -188,11 +188,17 @@ radius &lt;- rep(2,mnit@dimension)
 mat&lt;-antsGetNeighborhoodMatrix(mnit,mask,radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
-eanat&lt;-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
-eseg&lt;-eigSeg(mask,eanat$eig,F)
 </code></pre>
 
 <p><strong>Eigenanatomy &amp; SCCAN</strong></p>
+
+<pre><code># assume you ran the neighborhood example above
+eanat&lt;-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
+eseg&lt;-eigSeg(mask,eanat$eig,F)
+jeanat&lt;-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
+# see our paper in the journal "methods"
+eseg2&lt;-eigSeg(mask,jeanat$fused,F)
+</code></pre>
 
 <pre><code>?sparseDecom
 ?sparseDecom2
