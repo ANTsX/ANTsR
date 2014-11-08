@@ -28,14 +28,14 @@
       </header>
       <section>
         <h1>
-<a name="antsr" class="anchor" href="#antsr"><span class="octicon octicon-link"></span></a>ANTsR</h1>
+<a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
 <p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> and <a href="https://github.com/InsightSoftwareConsortium/ITK">ITK</a> features in R.</p>
 
 <p>Authors: Shrinidhi KL,  Avants BB</p>
 
 <h2>
-<a name="easiest-installation-approach--from-within-r-" class="anchor" href="#easiest-installation-approach--from-within-r-"><span class="octicon octicon-link"></span></a>easiest installation approach ( from within R )</h2>
+<a id="easiest-installation-approach--from-within-r-" class="anchor" href="#easiest-installation-approach--from-within-r-" aria-hidden="true"><span class="octicon octicon-link"></span></a>easiest installation approach ( from within R )</h2>
 
 <pre><code>library( devtools )
 install_github("stnava/ANTsR")
@@ -46,22 +46,20 @@ install_github("stnava/ANTsR")
 <p>windows users should see <a href="https://github.com/talgalili/installr">https://github.com/talgalili/installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
 <h2>
-<a name="installation-from-source" class="anchor" href="#installation-from-source"><span class="octicon octicon-link"></span></a>Installation from source</h2>
+<a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
 <p>see <a href="http://stnava.github.io/software/2014/01/08/antsr/">install from source</a></p>
 
 <p>First, clone the repository:</p>
 
-<div class="highlight highlight-sh"><pre><span class="nv">$ </span>git clone https://github.com/stnava/ANTsR.git
-</pre></div>
+<div class="highlight highlight-sh"><pre>$ git clone https://github.com/stnava/ANTsR.git</pre></div>
 
 <p>Install the package as follows:</p>
 
-<div class="highlight highlight-sh"><pre><span class="nv">$ </span>R CMD INSTALL ANTsR
-</pre></div>
+<div class="highlight highlight-sh"><pre>$ R CMD INSTALL ANTsR</pre></div>
 
 <h3>
-<a name="binaries" class="anchor" href="#binaries"><span class="octicon octicon-link"></span></a>Binaries</h3>
+<a id="binaries" class="anchor" href="#binaries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Binaries</h3>
 
 <p>These are still under development; use at your own discretion.</p>
 
@@ -72,7 +70,7 @@ install_github("stnava/ANTsR")
 </ul>
 
 <h3>
-<a name="r-dependencies" class="anchor" href="#r-dependencies"><span class="octicon octicon-link"></span></a>R dependencies</h3>
+<a id="r-dependencies" class="anchor" href="#r-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>R dependencies</h3>
 
 <p>You may need to install R packages that ANTsR requires. For example:</p>
 
@@ -82,7 +80,7 @@ install_github("stnava/ANTsR")
 <p>These dependencies are subject to change until development is stable.</p>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>Load the package:</p>
 
@@ -98,7 +96,7 @@ install_github("stnava/ANTsR")
 via  <code>args(functionName)</code></p>
 
 <h2>
-<a name="overview-of-antsr-functionality-and-useful-tools" class="anchor" href="#overview-of-antsr-functionality-and-useful-tools"><span class="octicon octicon-link"></span></a>Overview of ANTsR functionality and useful tools</h2>
+<a id="overview-of-antsr-functionality-and-useful-tools" class="anchor" href="#overview-of-antsr-functionality-and-useful-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview of ANTsR functionality and useful tools</h2>
 
 <p>If nothing else, ANTsR makes it easy to read and write medical images
 and to map them into a format compatible with R.</p>
@@ -180,6 +178,20 @@ agebetas[ mask == 1 ]&lt;-mdli$beta.t[1,]
 antsImageWrite( agebetas, 'agebetas.nii.gz' )
 </code></pre>
 
+<p>**Neighborhood operations</p>
+
+<pre><code>mnit&lt;-getANTsRData("mni")
+mnit&lt;-antsImageRead(mnit,3)
+ResampleImageBySpacing(3,mnit,mnit,4,4,4)
+mask&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+radius &lt;- rep(2,mnit@dimension)
+mat&lt;-antsGetNeighborhoodMatrix(mnit,mask,radius,
+  physical.coordinates = FALSE,
+  boundary.condition = "mean" )
+eanat&lt;-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
+eseg&lt;-eigSeg(mask,eanat$eig,F)
+</code></pre>
+
 <p><strong>Eigenanatomy &amp; SCCAN</strong></p>
 
 <pre><code>?sparseDecom
@@ -214,7 +226,7 @@ antsImageWrite( agebetas, 'agebetas.nii.gz' )
 github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
 
 <h2>
-<a name="direct-access-to-ants-tools" class="anchor" href="#direct-access-to-ants-tools"><span class="octicon octicon-link"></span></a>Direct access to ANTs tools</h2>
+<a id="direct-access-to-ants-tools" class="anchor" href="#direct-access-to-ants-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Direct access to ANTs tools</h2>
 
 <p>Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.</p>
 
