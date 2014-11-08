@@ -158,7 +158,7 @@ eanat<-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
 eseg<-eigSeg(mask,eanat$eig,F)
 jeanat<-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
 # see our paper in the journal "methods"
-eseg2<-eigSeg(mask,jeanat$fused,F)
+eseg2<-eigSeg(mask,jeanat$fusedlist,F)
 ```
 
 ```
