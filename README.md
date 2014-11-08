@@ -137,7 +137,7 @@ agebetas[ mask == 1 ]<-mdli$beta.t[1,]
 antsImageWrite( agebetas, 'agebetas.nii.gz' )
 ```
 
-**Neighborhood operations
+**Neighborhood operations**
 
 ```
 mnit<-getANTsRData("mni")
