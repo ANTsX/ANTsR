@@ -189,6 +189,8 @@ ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
 for more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
 github site [github RKRNS](https://github.com/stnava/RKRNS).
 
+A good visualization alternative is [antsSurf](https://github.com/stnava/antsSurf).
+
 ## Direct access to ANTs tools
 
 Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.
