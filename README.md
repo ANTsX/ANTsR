@@ -164,7 +164,7 @@ See [sccan tutorial](http://stnava.github.io/sccanTutorial/)
 ```
 ?ImageMath
 ?ThresholdImage
-# ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
+?quantifyCBF
 ?antsPreprocessfMRI
 ?aslPerfusion
 ?computeDVARS
@@ -179,6 +179,11 @@ See [sccan tutorial](http://stnava.github.io/sccanTutorial/)
 ?plotBasicNetwork
 ?getTemplateCoordinates
 ?antsSet*
+```
+
+All of `ImageMath` from ANTs is accessible too
+```
+ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
 ```
 
 for more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
