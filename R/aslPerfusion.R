@@ -58,6 +58,11 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
       print("Check the mean signal to eliminate frames with high drop out rate")
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
     if ( verbose ) plot(ts(imgmeans))
+    if ( sum( imgmeans > checkmeansignal ) < (nrow(mat)/2) )
+    {
+    print("imgmeans suggests data is likely bad - return NA")
+    return(NA)
+    }
     mat <- subset(mat, imgmeans > checkmeansignal)
     motionparams <- subset(motionparams, imgmeans > checkmeansignal)
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
