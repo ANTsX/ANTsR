@@ -54,8 +54,7 @@ get_perfusion_predictors <- function(mat,
 #        scalemat = F, noisepoolfun = max)
       dnz<-aslDenoiseR( mat, xideal, # motionparams=DVARS,
         selectionthresh=0.1,
-        maxnoisepreds=useDenoiser, debug=FALSE, polydegree=4,
-        crossvalidationgroups=6 )
+        maxnoisepreds=useDenoiser, debug=FALSE, polydegree=4 )
       denoisingParams <- dnz$noiseu
       dnz<-dnz$R2final
     }
