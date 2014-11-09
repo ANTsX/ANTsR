@@ -36,9 +36,12 @@ aslDenoiseR <- function(boldmatrix, targety, motionparams = NA, selectionthresh 
         mydf <- data.frame(mydf, p[selector, ])
       predmat <- predict(mylm1, newdata = mydf)
       realmat <- residmat[selector, ]
-      sum1<-sum((predmat[, v] - realmat[,v])^2,na.rm=T)
-      sum2<-sum((mean(realmat[, v],na.rm=T)- realmat[, v])^2, na.rm=T)
-      for (v in 1:nvox) R2[k, v] <- 100 * (1 - sum1/sum2 )
+      for (v in 1:nvox)
+        {
+        sum1<-sum((predmat[, v] - realmat[,v])^2,na.rm=T)
+        sum2<-sum((mean(realmat[, v],na.rm=T)- realmat[, v])^2, na.rm=T)
+        R2[k, v] <- 100 * (1 - sum1/sum2 )
+        }
     }
     return(R2)
   }
