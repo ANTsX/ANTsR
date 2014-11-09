@@ -88,9 +88,10 @@ aslDenoiseR <- function(boldmatrix, targety, motionparams = NA, selectionthresh 
     ct <- ct + 1
   }
   scl <- 0.95
-  if (max(R2summary) < 0)
+  if (max(R2summary, na.rm=T) < 0)
     scl <- 1.05
-  bestn <- maxnoisepreds[which(R2summary > scl * max(R2summary))[1]]
+  mxt<-scl * max(R2summary , na.rm=T )
+  bestn <- maxnoisepreds[which(R2summary > mxt )[1]]
   if ( ct == 2 ) R2final<-R2perNoiseLevel
   if ( ct > 2 ) R2final<-R2perNoiseLevel[,bestn-min(maxnoisepreds)+1]
   return(list(n = bestn, R2atBestN = R2summary[bestn],
