@@ -93,6 +93,15 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     m1[moco_mask_img == 0] <- 0
     m1[moco_mask_img == 1] <- m1vals
   }
+  # Get perfusion time series
+  perfusionTimeSeries <- antsImageClone(moco_results$moco_img)
+  # new("antsImage", "float", 4)
+#  ImageMath(4, perfusionTimeSeries,
+#    "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
+#    interpolation)
+  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
+  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
+
   # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- get_perfusion_predictors(mat,
     motionparams, NULL, 1, 3, useDenoiser)
@@ -110,13 +119,6 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
       nuis = data.matrix(mynuis), dorobust = dorobust,
       skip = skip, selectionValsForRegweights = predictors$dnz,
       useBayesian=useBayesian )
-  # Get perfusion time series
-  perfusionTimeSeries <- new("antsImage", "float", 4)
-  ImageMath(4, perfusionTimeSeries,
-    "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
-    interpolation)
-  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
-  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
   return(list(perfusion = perfusion$cbfi,
     perfusionTimeSeries = perfusionTimeSeries,
     aslTimeSeries = mat, xideal = predictors$xideal,
