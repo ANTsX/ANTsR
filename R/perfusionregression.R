@@ -82,7 +82,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- robvals[i,]
-      SmoothImage(3,temp,2.0,temp)
+      SmoothImage(3,temp,3.0,temp)
       robvals[i,]<-temp[ mask_img==1 ]
       }
     regweights <- (rgw/myct)
@@ -135,7 +135,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,2.0,temp)
+      SmoothImage(3,temp,3.0,temp)
       nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,mask_img,
         rep(1,3), boundary.condition = "mean")
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
@@ -150,7 +150,8 @@ perfusionregression <- function(mask_img, mat, xideal,
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
       ridge<-invcov*1.e0 # add global covariance to local cov
       pcov<-cov( parammat )
-      locinvcov<-try( solve( pcov + ridge*0.0 ) )
+      locinvcov<-tryCatch( solve( pcov ) ,
+       error = function(e) solve( invcov ) )
       if ( typeof(locinvcov)=='character')
         locinvcov<-invcov
       prior<-(smoothcoeffmat[,v])
