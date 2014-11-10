@@ -82,7 +82,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- robvals[i,]
-      SmoothImage(3,temp,2.0,temp)
+      SmoothImage(3,temp,1.0,temp)
       robvals[i,]<-temp[ mask_img==1 ]
       }
     regweights <- (rgw/myct)
@@ -135,7 +135,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       {
       temp<-antsImageClone( mask_img )
       temp[ mask_img == 1 ] <- smoothcoeffmat[i,]
-      SmoothImage(3,temp,2.0,temp)
+      SmoothImage(3,temp,1.0,temp)
       nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,mask_img,
         rep(1,3), boundary.condition = "mean")
       smoothcoeffmat[i,]<-temp[ mask_img==1 ]
@@ -163,7 +163,7 @@ perfusionregression <- function(mask_img, mat, xideal,
       }
     }
     if ( mean(betaideal) < 0) betaideal <- (betaideal) * (-1)
-    cbfi[mask_img == 1] <- betaideal  # robust results
+    cbfi[ mask_img == 1 ] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(mat) * 100, " % "))
   return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
 }
