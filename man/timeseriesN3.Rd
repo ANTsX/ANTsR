@@ -35,6 +35,6 @@ Avants BB
 
 \examples{
   bold<-makeImage( c(10,10,10,4), rnorm(4000) )
-  mask<-getMask(bold)
+  mask<-getMask( getAverageOfTimeSeries( bold ) )
   boldn3<-timeseriesN3( bold, mask, c(4,2) )
 }

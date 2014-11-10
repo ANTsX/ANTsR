@@ -6,6 +6,7 @@ timeseriesN3 <- function( boldimg, mask,
     return( NA )
   }
   mat<-timeseries2matrix( boldimg, mask )
+  print("B")
   for ( i in 1:nrow(mat) )
     {
     perf<-makeImage( mask , mat[i,] )
