@@ -28,16 +28,26 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     trendfrequencyL <- 1/freqLo
     trendfrequencyH <- 1/freqHi
     for (i in 1:ncol(boldmat)) {
-      if (!is.na(trendfrequencyH)) 
-        boldmat[, i] <- data.frame(stl(ts(boldmat[, i], frequency = trendfrequencyH), 
+      if (!is.na(trendfrequencyH))
+        boldmat[, i] <- data.frame(stl(ts(boldmat[, i], frequency = trendfrequencyH),
           "per")$time.series)$trend
       if (!is.na(trendfrequencyL)) {
-        temp <- data.frame(stl(ts(boldmat[, i], frequency = trendfrequencyL), 
+        temp <- data.frame(stl(ts(boldmat[, i], frequency = trendfrequencyL),
           "per")$time.series)$trend
         boldmat[, i] <- boldmat[, i] - temp
       }
     }
     return(boldmat)
+  }
+  if (opt == "wav") {
+    library(wmtsa)
+    dnz<-myTimeSeries*0
+    for ( i in 1:ncol(myTimeSeries) ) {
+      dnz[,i]<-wavShrink(myTimeSeries[,i], thresh.fun="adaptive"
+       , thresh.scale=0.1 )
+      }
+    filteredTimeSeries<-ts(myTimeSeries-dnz)
+    return(filteredTimeSeries)
   }
   if (opt == "butt") {
     bf <- butter(2, c(freqLo, freqHi), type = "pass")
@@ -48,12 +58,12 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     if (nrow(myTimeSeries)%%2 > 0) {
       firsttime <- myTimeSeries[1, ]
       myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
-      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, 
+      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
       filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
       filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
     } else {
-      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo, 
+      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
     }
     temporalvar <- apply(filteredTimeSeries, 2, var)
@@ -63,6 +73,6 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     }
     return(filteredTimeSeries)
   }
-  
-  
-} 
+
+
+}

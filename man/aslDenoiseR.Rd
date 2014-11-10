@@ -28,14 +28,14 @@ asl<-antsImageRead(fn,4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
 tr<-antsGetSpacing(asl)[4]
 aslmean<-getAverageOfTimeSeries( asl )
-aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
+aslmask<-getMask(aslmean,lowThresh=mean(aslmean)*0.5,cleanup=TRUE)
 aslmat<-timeseries2matrix(asl,aslmask)
 tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
-clustasl<-sample( clusterTimeSeries( asl, aslmask, 4 ) )
+clustasl<-clusterTimeSeries( aslmat, 4 )
 dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
   maxnoisepreds=c(1:16), debug=FALSE, polydegree=4,
-  crossvalidationgroups=clustasl$clusters )
+  crossvalidationgroups=sample(clustasl$clusters) )
 nzimg<-antsImageClone(aslmask)
 nzimg[ aslmask == 1 ]<-dnz$R2final
 antsImageWrite(nzimg,'nzimg.nii.gz')

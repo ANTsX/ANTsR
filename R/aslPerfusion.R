@@ -52,27 +52,13 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     maskThresh, highThresh = Inf, cleanup = TRUE)
   if (!is.na(mask))
     moco_mask_img <- mask
-  mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
-  if (checkmeansignal > 0) {
-    if ( verbose )
-      print("Check the mean signal to eliminate frames with high drop out rate")
-    imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
-    if ( verbose ) plot(ts(imgmeans))
-    if ( sum( imgmeans > checkmeansignal ) < (nrow(mat)/2) )
-    {
-    print("imgmeans suggests data is likely bad - return NA")
-    return(NA)
-    }
-    mat <- subset(mat, imgmeans > checkmeansignal)
-    motionparams <- subset(motionparams, imgmeans > checkmeansignal)
-    imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
-  }
+  mat<-timeseries2matrix( asl, moco_mask_img )
   if (is.na(m0)) {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
-    ctllabs<-c(1:(nrow(mat)/2)) * 2 # TC - jj data
+    ctllabs<-c(1:(dim(asl)[4]/2)) * 2 # TC - jj data
     taglabs<-ctllabs-1
-    mvals2 <- apply(mat[ctllabs, ], 2, mean)
-    mvals1 <- apply(mat[taglabs, ], 2, mean)
+    mvals2 <- apply(mat[ctllabs, ], 2, median)
+    mvals1 <- apply(mat[taglabs, ], 2, median)
     if (verbose) print(paste("Mean-1st-label",mean(mvals1)))
     if (verbose) print(paste("Mean-2nd-label",mean(mvals2)))
     # mean control should exceed mean tag
@@ -88,27 +74,51 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     m0 <- antsImageClone(moco_mask_img)
     m0[moco_mask_img == 0] <- 0
     m0[moco_mask_img == 1] <- m0vals
+    N3BiasFieldCorrection(3,m0,m0,4)
+    N3BiasFieldCorrection(3,m0,m0,2)
     # Get average tagged image
     m1 <- antsImageClone(moco_mask_img)
     m1[moco_mask_img == 0] <- 0
     m1[moco_mask_img == 1] <- m1vals
   }
+  moco_mask_img <- getMask( m0, lowThresh = mean(m0) *
+    maskThresh, highThresh = Inf, cleanup = TRUE)
+  if (!is.na(mask))
+    moco_mask_img <- mask
+  mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
+  # mat <- timeseries2matrix( asl, moco_mask_img)
+  if (checkmeansignal > 0) {
+    if ( verbose )
+      print("Check the mean signal to eliminate frames with high drop out rate")
+    imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
+    if ( verbose ) plot(ts(imgmeans))
+    if ( sum( imgmeans > checkmeansignal ) < (nrow(mat)/2) )
+    {
+    print("imgmeans suggests data is likely bad - return NA")
+    return(NA)
+    }
+    mat <- subset(mat, imgmeans > checkmeansignal)
+    motionparams <- subset(motionparams, imgmeans > checkmeansignal)
+    imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
+  }
   # Get perfusion time series
-  perfusionTimeSeries <- antsImageClone(moco_results$moco_img)
-  # new("antsImage", "float", 4)
-#  ImageMath(4, perfusionTimeSeries,
-#    "TimeSeriesInterpolationSubtraction", moco_results$moco_img,
-#    interpolation)
+  perfusionTimeSeries <- #antsImageClone(moco_results$moco_img)
+    new("antsImage", "float", 4)
+  ImageMath(4, perfusionTimeSeries,
+    "TimeSeriesInterpolationSubtraction", asl,
+    interpolation)
   perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
   perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
 
   # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
-  predictors <- get_perfusion_predictors(mat,
-    motionparams, NULL, 1, 3, useDenoiser)
+  predictors <- get_perfusion_predictors( mat,
+    motionparams, NULL, 1, 3, useDenoiser )
   if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
   mynuis <- data.frame( predictors$nuis,
     predictors$motion )
+  if ( !all(is.na(useDenoiser)))
+    mynuis <- data.frame( predictors$nuis )
   if ( verbose ) {
     cat("Nuisance variables\n")
     print( colnames(mynuis) )

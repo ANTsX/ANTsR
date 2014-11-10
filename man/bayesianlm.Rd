@@ -39,8 +39,9 @@ Avants BB
 }
 
 \examples{
-  asl<-antsImageRead("PEDS012_20131101_pcasl_1.nii.gz",4)
-  # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
+  fn<-"PEDS012_20131101_pcasl_1.nii.gz"
+# image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
+  asl<-antsImageRead(fn,4)
   tr<-antsGetSpacing(asl)[4]
   aslmean<-getAverageOfTimeSeries( asl )
   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
@@ -67,7 +68,7 @@ Avants BB
     temp<-antsImageClone( aslmask )
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
-    SmoothImage(3,temp,3.5,temp)
+#    SmoothImage(3,temp,1.5,temp)
     nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
       rep(1,3), boundary.condition = "mean")
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
@@ -83,7 +84,7 @@ Avants BB
       parammat<-cbind( parammat, nmatimgs[[k]][,i] )
     locinvcov<-solve( cov( parammat ) )
     localprior<-(smoothcoeffmat[,i])
-    blm<-bayesianlm(  X, aslmat[,i], localprior, locinvcov*100 )
+    blm<-bayesianlm(  X, aslmat[,i], localprior, locinvcov*1000 )
     bayesianperfusionloc[i]<-blm$beta[1]
     }
   perfimg<-antsImageClone(aslmask)

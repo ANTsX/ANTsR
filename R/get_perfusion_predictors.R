@@ -42,7 +42,7 @@ get_perfusion_predictors <- function(mat,
   nuis <- t( motionnuis )
   colnames(nuis) <- motnames
   dnz<-NA
-  if (ncompcorparameters > 0) {
+  if (ncompcorparameters > 0 | !(all(is.na(useDenoiser))) ) {
     denoisingParams <- compcor(mat, ncompcorparameters)
     if (!(all(is.na(useDenoiser)))) {
       # include t(motionnuis) if you want to model motion
@@ -59,9 +59,13 @@ get_perfusion_predictors <- function(mat,
       denoisingParams <- dnz$noiseu
       dnz<-dnz$R2final
     }
-    compcorrnames <- paste("denoisingParams", c(1:ncol(denoisingParams)), sep = "")
-    colnames(denoisingParams) <- c(compcorrnames)
-  }
+    if ( exists("denoisingParams") )
+      {
+      compcorrnames <- paste("denoisingParams",
+        c(1:ncol(denoisingParams)), sep = "")
+      colnames(denoisingParams) <- c(compcorrnames)
+      }
+  } else denoisingParams<-NA
   return( list(xideal = xideal, nuis = denoisingParams,
     motion = t( motionnuis ),
     globalsignal = globalsignal,
