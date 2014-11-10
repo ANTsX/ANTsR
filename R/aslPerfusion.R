@@ -3,7 +3,8 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
   m0 = NA, skip = 20, mask = NA,
   interpolation = "linear", checkmeansignal = 100,
   moco_results = NULL, regweights = NULL,
-  useDenoiser = NA, useBayesian=0, verbose=FALSE) {
+  useDenoiser = NA, useBayesian=0, verbose=FALSE,
+  ncompcor=0, N3=FALSE ) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -53,6 +54,17 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
   if (!is.na(mask))
     moco_mask_img <- mask
   mat<-timeseries2matrix( asl, moco_mask_img )
+  if ( N3 )
+    {
+    for ( i in 1:nrow(mat) )
+      {
+      perf<-makeImage( moco_mask_img , mat[i,] )
+      N3BiasFieldCorrection(3,perf,perf,4)
+      N3BiasFieldCorrection(3,perf,perf,2)
+      mat[i,]<-perf[ moco_mask_img == 1 ]
+      }
+    asl<-matrix2timeseries( asl, aslmask, mat )
+    }
   if (is.na(m0)) {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
     ctllabs<-c(1:(dim(asl)[4]/2)) * 2 # TC - jj data
@@ -112,7 +124,7 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
 
   # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- get_perfusion_predictors( mat,
-    motionparams, NULL, 1, 3, useDenoiser )
+    motionparams, NULL, 1, ncompcor, useDenoiser )
   if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
   mynuis <- data.frame( predictors$nuis,
