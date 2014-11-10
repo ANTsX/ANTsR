@@ -56,14 +56,7 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
   mat<-timeseries2matrix( asl, moco_mask_img )
   if ( N3 )
     {
-    for ( i in 1:nrow(mat) )
-      {
-      perf<-makeImage( moco_mask_img , mat[i,] )
-      N3BiasFieldCorrection(3,perf,perf,4)
-      N3BiasFieldCorrection(3,perf,perf,2)
-      mat[i,]<-perf[ moco_mask_img == 1 ]
-      }
-    asl<-matrix2timeseries( asl, moco_mask_img, mat )
+    asl<-timeseriesn3( asl, moco_mask_img )
     }
   if (is.na(m0)) {
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")

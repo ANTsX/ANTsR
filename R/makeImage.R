@@ -19,7 +19,9 @@ makeImage <- function(imagesize, voxval = 1) {
   if ( class(imagesize)[[1]] == "antsImage")
   {
   img<-antsImageClone( imagesize )
-  img[ imagesize > 0 ]<-voxval
+  sel <-( imagesize > 0 )
+  if ( length(voxval) == sum(sel) )
+    img[ sel ]<-voxval
   return( img )
   }
 }
