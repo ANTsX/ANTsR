@@ -12,7 +12,9 @@ Efficiently compute basic statistical inference from regressions with multiple o
 }
 
 \arguments{
-  \item{mylm}{Object of class \code{lm}.}
+  \item{mylm}{Object of class \code{lm}.
+  \item{lambda}{Value of ridge penalty for inverting ill-conditioned matrices.}
+  \item{includeIntercept}{Whether or not to include p-values for intercept term in result.}}
 
 }
 
