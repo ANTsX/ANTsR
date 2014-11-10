@@ -57,8 +57,8 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
     ctllabs<-c(1:(dim(asl)[4]/2)) * 2 # TC - jj data
     taglabs<-ctllabs-1
-    mvals2 <- apply(mat[ctllabs, ], 2, median)
-    mvals1 <- apply(mat[taglabs, ], 2, median)
+    mvals2 <- apply(mat[ctllabs, ], 2, mean)
+    mvals1 <- apply(mat[taglabs, ], 2, mean)
     if (verbose) print(paste("Mean-1st-label",mean(mvals1)))
     if (verbose) print(paste("Mean-2nd-label",mean(mvals2)))
     # mean control should exceed mean tag
