@@ -86,8 +86,6 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     m1[moco_mask_img == 0] <- 0
     m1[moco_mask_img == 1] <- m1vals
   }
-  moco_mask_img <- getMask( m0, lowThresh = mean(m0) *
-    maskThresh, highThresh = Inf, cleanup = TRUE)
   if (!is.na(mask))
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
