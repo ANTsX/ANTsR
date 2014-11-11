@@ -118,10 +118,10 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     motionparams, NULL, 1, ncompcor, useDenoiser )
   if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
-  mynuis <- data.frame( predictors$nuis,
-    predictors$motion )
-  if ( !all(is.na(useDenoiser)))
-    mynuis <- data.frame( predictors$nuis )
+  mynuis <- data.frame( predictors$nuis, predictors$motion )
+#    motionparams[,3:ncol(motionparams)] )
+#  if ( !all(is.na(useDenoiser)))
+#    mynuis <- data.frame( predictors$nuis )
   if ( verbose ) {
     cat("Nuisance variables\n")
     print( colnames(mynuis) )

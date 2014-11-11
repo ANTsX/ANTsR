@@ -53,9 +53,9 @@ get_perfusion_predictors <- function(mat,
 #        maxnoisepreds = useDenoiser, polydegree = 8,
 #        crossvalidationgroups = 6,
 #        scalemat = F, noisepoolfun = max)
-      clustasl<-4 # sample(clusterTimeSeries( mat,  6 )$clusters)
+      clustasl<-10 # sample(clusterTimeSeries( mat,  6 )$clusters)
       dnz<-aslDenoiseR( mat, xideal, # motionparams=DVARS,
-        selectionthresh=0.1, crossvalidationgroups=clustasl,
+        selectionthresh=0.5, crossvalidationgroups=clustasl,
         maxnoisepreds=useDenoiser, debug=FALSE, polydegree=4 )
       denoisingParams <- dnz$noiseu
       dnz<-dnz$R2final
