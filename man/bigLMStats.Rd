@@ -8,21 +8,21 @@ Efficiently compute basic statistical inference from regressions with multiple o
 }
 
 \usage{
-  bigLMStats(mylm, lambda ) 
+  bigLMStats(mylm, lambda )
 }
 
 \arguments{
-  \item{mylm}{Object of class \code{lm}.
+  \item{mylm}{Object of class \code{lm}.}
   \item{lambda}{Value of ridge penalty for inverting ill-conditioned matrices.}
-  \item{includeIntercept}{Whether or not to include p-values for intercept term in result.}}
-
+  \item{includeIntercept}{Whether or not to include p-values for intercept term in result.}
 }
 
 
-\value{ A list containing objects: 
+
+\value{ A list containing objects:
   \item{fstat}{F-statistic of whole model (one value per outcome).}
   \item{pval.model}{p-value of model (one value per outcome).}
-  \item{beta}{Values of coefficients (one value per predictor per outcome).} 
+  \item{beta}{Values of coefficients (one value per predictor per outcome).}
   \item{beta.std}{Standard error of coefficients.}
   \item{beta.t}{T-statistic of coefficients.}
   \item{beta.pval}{p-value of coefficients.}
@@ -47,7 +47,7 @@ myest <- bigLMStats(mylm)
 print(paste('R beta estimates for first outcome is', summary(lm1)$coefficients[-1,1],
             'and for second outcome is', summary(lm2)$coefficients[-1,1]))
 print(paste('and our estimate is', as.numeric(myest$beta[,1]), as.numeric(myest$beta[,2])))
-print(paste('R std error estimate for first outcome is', summary(lm1)$coefficients[-1,2], 
+print(paste('R std error estimate for first outcome is', summary(lm1)$coefficients[-1,2],
             'and for second outcome is', summary(lm2)$coefficients[-1,2],
             'and our estimate is', myest$beta.std[,1], myest$beta.std[,2]))
 print(paste('R t value estimate for first outcome is', summary(lm1)$coefficients[-1,3],
