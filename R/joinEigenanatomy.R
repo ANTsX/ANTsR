@@ -1,4 +1,6 @@
-joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphdensity = 0.65) {
+joinEigenanatomy <- function(datamatrix, mask = NA,
+  list_of_eanat_images, graphdensity = 0.65,
+  verbose = T ) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
@@ -27,7 +29,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphd
         for (eimg in templist) {
           newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask >
           0])
-          print(sum(newe > 0)/sum(mask > 0))
+#          print(sum(newe > 0)/sum(mask > 0))
         }
         newe[mask > 0] <- newe[mask > 0]/sum(newe[mask > 0])
         newelist <- lappend(newelist, newe)
@@ -55,6 +57,11 @@ joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphd
     ct <- ct + 1
   }
   myfavoritecost<-1.05*min(costs)
+  if ( verbose )
+    {
+    print( paste("costs", costs ) )
+    print( paste("myfavoritecost", myfavoritecost ) )
+    }
   if (length(graphdensity) > 1) {
     return( joinEigenanatomy(datamatrix, mask, list_of_eanat_images, graphdensity[  which( costs <= myfavoritecost )[1]  ] ) )
   }
