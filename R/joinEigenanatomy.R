@@ -59,7 +59,8 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
   myfavoritecost<-1.05*min(costs)
   if ( verbose )
     {
-    print( paste("costs", costs ) )
+    print( paste("costs" ) )
+    print(costs)
     print( paste("myfavoritecost", myfavoritecost ) )
     }
   if (length(graphdensity) > 1) {
