@@ -24,7 +24,6 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     asl <- antsImageRead(asl, 4)
   } else if (class(asl) == "antsImage") {
     if (asl@pixeltype != pixtype) {
-      print(paste("'asl' must have pixeltype  ", pixtype))
       asl <- antsImageClone(asl, pixtype)
     }
     if (asl@dimension != 4) {
