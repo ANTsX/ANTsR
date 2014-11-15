@@ -1,8 +1,8 @@
-antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", interpolator = "Linear", 
-  imagetype = 0, ...) {
+antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", interpolator = "Linear",
+  imagetype = 0, whichtoinvert=NA, ...) {
   numargs <- nargs()
   if (typeof(fixed) == "list") {
-    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float", 
+    .Call("antsApplyTransforms", int_antsProcessArguments(c(fixed, "-z", 1, "--float",
       0)), PACKAGE = "ANTsR")
     return(0)
   }
@@ -20,7 +20,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       ttexists <- TRUE
       for (i in 1:length(transformlist)) {
-        if (!file.exists(transformlist[i])) 
+        if (!file.exists(transformlist[i]))
           ttexists <- FALSE
       }
       if (ttexists) {
@@ -32,19 +32,29 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
         m <- moving
         wmo <- warpedmovout
         mytx <- list()
-        for (i in c(1:length(transformlist))) {
+        if ( all(is.na(whichtoinvert)) )
+          whichtoinvert<-rep(F,length(transformlist))
+        for (i in c(1:length(transformlist)))
+          {
           ismat <- FALSE
-          if (i == 1 & length(transformlist) > 1) {
-          if (length(grep(".mat", transformlist[i])) == 1) {
+          if (i == 1 & length(transformlist) > 1 |
+             length(transformlist) > 2 ) {
+          if (length(grep(".mat", transformlist[i])) == 1
+            | whichtoinvert[i]  ) {
             ismat <- TRUE
             print("treating this as an inverse transform")
           }
           }
-          if (!ismat) 
-          mytx <- list(mytx, "-t", transformlist[i]) else mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]", 
-          sep = ""))
+          if (!ismat) {
+            mytx <- list(mytx, "-t", transformlist[i])
+            } else if ( ismat ) {
+              mytx <- list(mytx, "-t",
+              paste("[", transformlist[i], ",1]",
+              sep = ""))
+            }
         }
-        args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator, 
+        args <- list(d = fixed@dimension, i = m, o = wmo,
+          r = f, n = interpolator,
           unlist(mytx))
         myargs <- int_antsProcessArguments(c(args))
         for (jj in c(1:length(myargs))) {
@@ -57,12 +67,12 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
           }
           }
         }
-        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e", 
+        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 0, "-e",
           imagetype), PACKAGE = "ANTsR")
         gc()
         return(antsImageClone(warpedmovout, inpixeltype))
       }
-      if (!ttexists) 
+      if (!ttexists)
         cat("Problem in arg list \n see usage by calling antsApplyTransforms() w/o arguments \n")
     }
     return(0)
@@ -70,7 +80,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
   # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-antsrParseListToString( c(args)
   # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
   # mycmd$outimg, as.numeric(mycmd$outdim) ) ) }
-  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float", 
+  .Call("antsApplyTransforms", int_antsProcessArguments(c(args, "-z", 1, "--float",
     0, "-e", imagetype)), PACKAGE = "ANTsR")
   gc()  # trigger garbage collection
 }
@@ -88,11 +98,11 @@ antsrParseListToString <- function(mylist, outimg = NA, outdim = NA) {
       mystr <- paste(mystr, tfn)
       outdim <- mylist[[x]]@dimension
       if (typeof(mylist[[x - 1]]) == "character") {
-        if (mylist[[x - 1]] == "-o") 
+        if (mylist[[x - 1]] == "-o")
           outimg <- tfn
       }
-      if (typeof(mylist[[x - 1]]) != "S4") 
-        if (mylist[[x - 1]] == "-o") 
+      if (typeof(mylist[[x - 1]]) != "S4")
+        if (mylist[[x - 1]] == "-o")
           outimg <- tfn
     } else mystr <- paste(mystr, toString(mylist[[x]]))
   }
@@ -115,7 +125,7 @@ antsrParseListToString2 <- function(mylist, outimg = NA, outdim = NA) {
       antsImageWrite(mylist[[x]], tfn)
       mystr <- paste(mystr, tfn)
       outdim <- mylist[[x]]@dimension
-      if (names(mylist)[x] == "o") 
+      if (names(mylist)[x] == "o")
         outimg <- tfn
     } else mystr <- paste(mystr, toString(mylist[[x]]))
   }
@@ -124,4 +134,4 @@ antsrParseListToString2 <- function(mylist, outimg = NA, outdim = NA) {
   mystr <- sub("-t,", "-t ", mystr)
   mystr <- sub(", ", " ", mystr)
   return(list(mystr = mystr, outimg = outimg, outdim = outdim))
-} 
+}
