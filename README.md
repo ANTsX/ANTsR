@@ -11,7 +11,7 @@ install_github("stnava/ANTsR")
 
 this assumes you have [cmake](http://www.cmake.org/download/) installed / accessible in your environment
 
-windows users should see https://github.com/talgalili/installr for assistance in setting up their environment for building (must have a compiler too)
+windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
 ## Installation from source
 see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
