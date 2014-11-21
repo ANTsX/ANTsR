@@ -37,7 +37,7 @@ These are still under development; use at your own discretion.
 ### R dependencies
 You may need to install R packages that ANTsR requires. For example:
 ```
-install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "robust", "magic", "knitr", "pixmap", "rgl", "misc3d"), dependencies = TRUE);
+install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "rrcov","magic", "knitr", "pixmap", "rgl", "misc3d","mvtnorm","pcaPP","fastICA","robustbase","robust"), dependencies = TRUE);
 ```
 These dependencies are subject to change until development is stable.
 
