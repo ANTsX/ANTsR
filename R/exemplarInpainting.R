@@ -12,13 +12,16 @@
 #' @author Brian B. Avants
 #' @keywords inpainting template
 #' @examples
-#' fi<-replicate(100, rnorm(100))
+#' set.seed(123)
+#' fi<-abs(replicate(100, rnorm(100)))
 #' fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
 #' fi<-as.antsImage( fi , 'float' )
-#' SmoothImage(2,fi,1.5,fi)
+#' mask<-fi
+#' mask[ mask > 0 ]<-1
+#' mask<-as.antsImage( mask )
+#' SmoothImage(2,fi,3,fi)
 #' mo<-as.antsImage( replicate(100, rnorm(100))  )
 #' mo2<-as.antsImage( replicate(100, rnorm(100))  )
-#' mask<-getMask(fi,mean(fi),Inf,TRUE)
 #' ilist<-list(mo,mo2)
 #' painted<-exemplarInpainting(fi,mask,ilist)
 exemplarInpainting<-function( img, paintMask,
@@ -51,8 +54,11 @@ for ( i in ilist )
     }
   }
 nmatdf<-data.frame(nmat)
-print(dim(nmatdf))
-print(length(targetvoxels))
+if (  nrow(nmatdf) != length(targetvoxels) )
+  {
+  print("nrow(nmatdf) != length(targetvoxels)")
+  return( mask )
+  }
 mdl<-rlm( targetvoxels ~ ., data=nmatdf )
 if ( inpaintLesion )
   {
