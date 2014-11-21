@@ -50,7 +50,6 @@ for ( i in ilist )
     if ( all(dim(lmat)==1) ) lmat<-t(mat) else lmat<-cbind(lmat,t(mat))
     }
   }
-return(list(img,mask))
 nmatdf<-data.frame(nmat)
 print(dim(nmatdf))
 print(length(targetvoxels))
