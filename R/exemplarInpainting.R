@@ -15,10 +15,10 @@
 #' set.seed(123)
 #' fi<-abs(replicate(100, rnorm(100)))
 #' fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
-#' fi<-as.antsImage( fi , 'float' )
 #' mask<-fi
 #' mask[ mask > 0 ]<-1
 #' mask<-as.antsImage( mask )
+#' fi<-as.antsImage( fi , 'float' )
 #' SmoothImage(2,fi,3,fi)
 #' mo<-as.antsImage( replicate(100, rnorm(100))  )
 #' mo2<-as.antsImage( replicate(100, rnorm(100))  )
