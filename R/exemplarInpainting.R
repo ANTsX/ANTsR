@@ -1,7 +1,6 @@
 #' @name exemplarInpainting
 #' @title Uses example images to inpaint or approximate an existing image.
 #' @description  Employs a robust regression approach to learn the relationship between a sample image and a list of images that are mapped to the same space as the sample image.  The regression uses data from an image neighborhood.
-#' @docType algorithm
 #' @usage  approximg<-exemplarInpainting( img, paintMask, list(img1,img2))
 #' @param img - antsImage to be approximated / painted
 #' @param painting mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2
