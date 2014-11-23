@@ -3,20 +3,21 @@
 \alias{exemplarInpainting}
 \title{Uses example images to inpaint or approximate an existing image.}
 \usage{
-approximg<-exemplarInpainting( img, paintMask, list(img1,img2))
+approximg<-exemplarInpainting( img, paintMask, list(img1,img2),
+  featureRadius, sharpen, feather )
 }
 \arguments{
-\item{img}{- antsImage to be approximated / painted}
+\item{img}{antsImage to be approximated / painted}
+
+\item{paintMask}{painting mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2}
+
+\item{imageList}{a list containing antsImages}
 
 \item{featureRadius}{- radius of image neighborhood e.g. 2}
 
 \item{sharpen}{- sharpen the approximated image}
 
 \item{feather}{- value (e.g. 1) that helps feather the mask for smooth blending}
-
-\item{painting}{mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2}
-
-\item{a}{list containing antsImages}
 }
 \value{
 inpainted image
