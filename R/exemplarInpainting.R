@@ -17,13 +17,19 @@
 #' fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
 #' mask<-fi
 #' mask[ mask > 0 ]<-1
-#' mask<-as.antsImage( mask )
+#' mask2<-mask
+#' mask2[11:20,11:20]<-2
+#' mask<-as.antsImage( mask , 'float' )
 #' fi<-as.antsImage( fi , 'float' )
 #' SmoothImage(2,fi,3,fi)
-#' mo<-as.antsImage( replicate(100, rnorm(100))  )
-#' mo2<-as.antsImage( replicate(100, rnorm(100))  )
+#' mo<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
+#' mo2<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
 #' ilist<-list(mo,mo2)
 #' painted<-exemplarInpainting(fi,mask,ilist)
+#' mask2<-as.antsImage( mask2 , 'float' )
+#' painted2<-exemplarInpainting(fi,mask2,ilist)
+#' # just use 1 image, so no regression is performed
+#' painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
 exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2,
   sharpen=FALSE, feather=1 )
@@ -31,6 +37,7 @@ exemplarInpainting<-function( img, paintMask,
 mask<-antsImageClone( paintMask )
 mask[ paintMask != 1 ]<-0 # dont use the lesion
 inpaintLesion<-FALSE
+nlist<-length(imageList)
 if ( max( paintMask ) == 2 ) inpaintLesion<-TRUE
 if ( inpaintLesion )
   {
@@ -46,43 +53,48 @@ if ( inpaintLesion )
   featherMask2[ featherMask2 >= 0 ]<-1.0
   featherMask2[ featherMask > 0 ]<-1.0-featherMask[ featherMask > 0 ]
   }
-targetvoxels<-img[ mask == 1 ]
-radius <- rep(featureRadius,img@dimension)
-nmat<-matrix()
-lmat<-matrix()
-fmat<-matrix()
-for ( i in ilist )
+if ( nlist > 1 )
   {
-  mat<-(antsGetNeighborhoodMatrix( i, mask, radius,
-    boundary.condition='mean'))
-  if ( all(dim(nmat)==1) ) nmat<-t(mat) else nmat<-cbind(nmat,t(mat))
-  if ( inpaintLesion )
+  targetvoxels<-img[ mask == 1 ]
+  radius <- rep(featureRadius,img@dimension)
+  nmat<-matrix()
+  lmat<-matrix()
+  fmat<-matrix()
+  for ( i in ilist )
     {
-    mat<-(antsGetNeighborhoodMatrix(i,lmask,radius,
+    mat<-(antsGetNeighborhoodMatrix( i, mask, radius,
       boundary.condition='mean'))
-    if ( all(dim(lmat)==1) ) lmat<-t(mat) else lmat<-cbind(lmat,t(mat))
-    mat<-(antsGetNeighborhoodMatrix(i,fmask,radius,
-      boundary.condition='mean'))
-    if ( all(dim(fmat)==1) ) fmat<-t(mat) else fmat<-cbind(fmat,t(mat))
+    if ( all(dim(nmat)==1) ) nmat<-t(mat) else nmat<-cbind(nmat,t(mat))
+    if ( inpaintLesion )
+      {
+      mat<-(antsGetNeighborhoodMatrix(i,lmask,radius,
+        boundary.condition='mean'))
+      if ( all(dim(lmat)==1) ) lmat<-t(mat) else lmat<-cbind(lmat,t(mat))
+      mat<-(antsGetNeighborhoodMatrix(i,fmask,radius,
+        boundary.condition='mean'))
+      if ( all(dim(fmat)==1) ) fmat<-t(mat) else fmat<-cbind(fmat,t(mat))
+      }
     }
-  }
-nmatdf<-data.frame(nmat)
-if (  nrow(nmatdf) != length(targetvoxels) )
-  {
-  print("nrow(nmatdf) != length(targetvoxels)")
-  return( mask )
-  }
-mdl<-rlm( targetvoxels ~ ., data=nmatdf )
-if ( inpaintLesion == FALSE )
-  {
-  pvox<-predict(mdl,type='response')
-  predimg<-makeImage( mask, pvox )
-  return(predimg)
-  }
-# otherwise predict from full mat and feather-combine
-lmatdf<-data.frame(fmat)
-lesvox<-predict(mdl,newdata=lmatdf)
-predimg<-makeImage( fmask, lesvox )
+  nmatdf<-data.frame(nmat)
+  if (  nrow(nmatdf) != length(targetvoxels) )
+    {
+    print("nrow(nmatdf) != length(targetvoxels)")
+    return( mask )
+    }
+  mdl<-rlm( targetvoxels ~ ., data=nmatdf )
+  if ( inpaintLesion == FALSE )
+    {
+    pvox<-predict(mdl,type='response')
+    predimg<-makeImage( mask, pvox )
+    return(predimg)
+    }
+  # otherwise predict from full mat and feather-combine
+  lmatdf<-data.frame(fmat)
+  lesvox<-predict(mdl,newdata=lmatdf)
+  predimg<-makeImage( fmask, lesvox )
+} else {
+  predimg<-antsImageClone( ilist[[1]] )
+}
 if ( sharpen )
   ImageMath(img@dimension,predimg,'Sharpen',predimg)
 # now make two vectors - one for the lesion and

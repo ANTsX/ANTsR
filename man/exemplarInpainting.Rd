@@ -10,9 +10,9 @@ approximg<-exemplarInpainting( img, paintMask, list(img1,img2))
 
 \item{featureRadius}{- radius of image neighborhood e.g. 2}
 
-\item{putbackoriginaldata}{- put values in label 1 in approximated image}
-
 \item{sharpen}{- sharpen the approximated image}
+
+\item{feather}{- value (e.g. 1) that helps feather the mask for smooth blending}
 
 \item{painting}{mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2}
 
@@ -30,13 +30,19 @@ fi<-abs(replicate(100, rnorm(100)))
 fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
 mask<-fi
 mask[ mask > 0 ]<-1
-mask<-as.antsImage( mask )
+mask2<-mask
+mask2[11:20,11:20]<-2
+mask<-as.antsImage( mask , 'float' )
 fi<-as.antsImage( fi , 'float' )
 SmoothImage(2,fi,3,fi)
-mo<-as.antsImage( replicate(100, rnorm(100))  )
-mo2<-as.antsImage( replicate(100, rnorm(100))  )
+mo<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
+mo2<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
 ilist<-list(mo,mo2)
 painted<-exemplarInpainting(fi,mask,ilist)
+mask2<-as.antsImage( mask2 , 'float' )
+painted2<-exemplarInpainting(fi,mask2,ilist)
+# just use 1 image, so no regression is performed
+painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
 }
 \author{
 Brian B. Avants
