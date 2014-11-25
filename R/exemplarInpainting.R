@@ -127,8 +127,8 @@ imgvec<-img[ paintMask == 1 ]
 predvec<-predimg[ paintMask == 1 ]
 if (  scaleInpaintIntensity == 0  )
   {
-  sci<-mean(imgvec)+sd(imgvec)
-  scp<-mean(predvec)+sd(predvec)
+  sci<-mean(imgvec)*0.5+sd(imgvec)
+  scp<-mean(predvec)*0.5+sd(predvec)
   scaleInpaintIntensity<-sci/scp
   if (debug) 
     print(paste('scaleInpaintIntensity',scaleInpaintIntensity))
