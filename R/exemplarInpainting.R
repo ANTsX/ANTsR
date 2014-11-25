@@ -4,7 +4,9 @@
 #' @usage  approximg<-exemplarInpainting( img, paintMask, list(img1,img2),
 #'   featureRadius, sharpen, feather )
 #' @param img antsImage to be approximated / painted
-#' @param paintMask painting mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2
+#' @param paintMask painting mask with values 1 or 
+#' values 1 and 2 - if there is a 2 then it will learn 
+#' from label 1 to paint label 2.  should cover the brain.
 #' @param imageList a list containing antsImages
 #' @param featureRadius - radius of image neighborhood e.g. 2
 #' @param sharpen - sharpen the approximated image
@@ -33,13 +35,14 @@
 #' painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
 exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2,
-  sharpen=FALSE, feather=1 )
+  sharpen=FALSE, feather=1, debug=FALSE )
 {
 mask<-antsImageClone( paintMask )
 mask[ paintMask != 1 ]<-0 # dont use the lesion
 inpaintLesion<-FALSE
 nlist<-length(imageList)
 if ( max( paintMask ) == 2 ) inpaintLesion<-TRUE
+if (debug) print(paste(inpaintLesion,'inpaintLesion'))
 if ( inpaintLesion )
   {
   lmask<-antsImageClone( paintMask )
@@ -54,6 +57,7 @@ if ( inpaintLesion )
   featherMask2[ featherMask2 >= 0 ]<-1.0
   featherMask2[ featherMask > 0 ]<-1.0-featherMask[ featherMask > 0 ]
   }
+if (debug) print(paste('got er done'))
 if ( nlist > 1 )
   {
   targetvoxels<-img[ mask == 1 ]
@@ -61,7 +65,8 @@ if ( nlist > 1 )
   nmat<-matrix()
   lmat<-matrix()
   fmat<-matrix()
-  for ( i in ilist )
+  ct<-1
+  for ( i in imageList )
     {
     mat<-(antsGetNeighborhoodMatrix( i, mask, radius,
       boundary.condition='mean'))
@@ -75,6 +80,8 @@ if ( nlist > 1 )
         boundary.condition='mean'))
       if ( all(dim(fmat)==1) ) fmat<-t(mat) else fmat<-cbind(fmat,t(mat))
       }
+    if ( debug ) print(paste("built predictors",ct))
+    ct<-ct+1
     }
   nmatdf<-data.frame(nmat)
   if (  nrow(nmatdf) != length(targetvoxels) )
@@ -82,7 +89,8 @@ if ( nlist > 1 )
     print("nrow(nmatdf) != length(targetvoxels)")
     return( mask )
     }
-  mdl<-rlm( targetvoxels ~ ., data=nmatdf )
+  if ( debug ) print("run lm")
+  mdl<-lm( targetvoxels ~ ., data=nmatdf )
   if ( inpaintLesion == FALSE )
     {
     pvox<-predict(mdl,type='response')
@@ -94,12 +102,23 @@ if ( nlist > 1 )
   lesvox<-predict(mdl,newdata=lmatdf)
   predimg<-makeImage( fmask, lesvox )
 } else {
-  predimg<-antsImageClone( ilist[[1]] )
+  if (debug) print(paste('just basic replacement'))
+  predimg<-antsImageClone( imageList[[1]] )
+  predvec<-predimg[ paintMask == 1 ]
+  imgvec<-img[ paintMask == 1 ]
+  mydf<-data.frame(vox=predimg[ paintMask == 1 ])
+  mdl<-lm( imgvec ~ vox, data=mydf )
+  mydf<-data.frame(vox=predimg[ fmask == 1 ])
+  predvec2<-predict( mdl, newdata=mydf )
+  if (debug) print(summary(mdl))
+  predimg[ fmask == 1]<-predvec2
+  if ( debug ) print(paste(mean(predvec),mean(predvec2)))
 }
 if ( sharpen )
   ImageMath(img@dimension,predimg,'Sharpen',predimg)
 # now make two vectors - one for the lesion and
 # one for the original image
+if ( debug ) print(dim(predimg))
 vec1<-img[ fmask == 1 ]*featherMask2[fmask==1]
 vec2<-predimg[ fmask == 1 ]*featherMask[fmask==1]
 predimg[fmask==1]<-vec2+vec1
