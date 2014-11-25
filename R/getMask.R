@@ -4,7 +4,7 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf,
   # antsImage, if it is not specified, a file chooser is launched. Works on 3D
   # images only If cleanup == TRUE, small and weakly-connected elements are removed
   # by erosion, and then holes are filled.  Returns: a binary antsImage
-  
+  cleanup<-as.numeric(cleanup)
   if (is.character(img)) {
     if (length(img) != 1) {
       stop("'img' must be a single filename")
