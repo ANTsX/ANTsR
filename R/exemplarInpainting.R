@@ -9,6 +9,7 @@
 #' from label 1 to paint label 2.  should cover the brain.
 #' @param imageList a list containing antsImages
 #' @param featureRadius - radius of image neighborhood e.g. 2
+#' @param scaleInpaintIntensity - brighter or darker painted voxels
 #' @param sharpen - sharpen the approximated image
 #' @param feather - value (e.g. 1) that helps feather the mask for smooth blending
 #' @return inpainted image
@@ -34,7 +35,7 @@
 #' # just use 1 image, so no regression is performed
 #' painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
 exemplarInpainting<-function( img, paintMask,
-  imageList, featureRadius=2,
+  imageList, featureRadius=2, scaleInpaintIntensity=1,
   sharpen=FALSE, feather=1, debug=FALSE )
 {
 mask<-antsImageClone( paintMask )
@@ -111,7 +112,7 @@ if ( nlist > 1 )
   mydf<-data.frame(vox=predimg[ fmask == 1 ])
   predvec2<-predict( mdl, newdata=mydf )
   if (debug) print(summary(mdl))
-  predimg[ fmask == 1]<-predvec2
+  predimg[ fmask == 1]<-predvec2*scaleInpaintIntensity
   if ( debug ) print(paste(mean(predvec),mean(predvec2)))
 }
 if ( sharpen )

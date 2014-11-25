@@ -9,11 +9,15 @@ approximg<-exemplarInpainting( img, paintMask, list(img1,img2),
 \arguments{
 \item{img}{antsImage to be approximated / painted}
 
-\item{paintMask}{painting mask with values 1 or values 1 and 2 - if there is a 2 then it will learn from label 1 to paint label 2}
+\item{paintMask}{painting mask with values 1 or
+values 1 and 2 - if there is a 2 then it will learn
+from label 1 to paint label 2.  should cover the brain.}
 
 \item{imageList}{a list containing antsImages}
 
 \item{featureRadius}{- radius of image neighborhood e.g. 2}
+
+\item{scaleInpaintIntensity}{- brighter or darker painted voxels}
 
 \item{sharpen}{- sharpen the approximated image}
 
