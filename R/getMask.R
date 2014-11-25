@@ -1,4 +1,5 @@
-getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = FALSE) {
+getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, 
+                    cleanup = 2 ) {
   # Binarizes a mask between specified thresholds Input can be a file name or an
   # antsImage, if it is not specified, a file chooser is launched. Works on 3D
   # images only If cleanup == TRUE, small and weakly-connected elements are removed
@@ -27,10 +28,10 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = FALSE
   
   ThresholdImage(img@dimension, img, mask_img, lowThresh, highThresh)
   
-  if (cleanup) {
-    ImageMath(img@dimension, mask_img, "ME", mask_img, 2)
+  if (cleanup > 0 ) {
+    ImageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
     ImageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
-    ImageMath(img@dimension, mask_img, "MD", mask_img, 1)
+    ImageMath(img@dimension, mask_img, "MD", mask_img, cleanup-1)
     ImageMath(img@dimension, mask_img, "FillHoles", mask_img)
   }
   
