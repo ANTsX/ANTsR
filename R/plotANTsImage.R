@@ -129,7 +129,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
     return(NULL)
   }
   if (is.na(functional)) {
-    print(paste("functional image file", functional, "does not exist. no overlay will be produced."))
+    # print(paste("functional image file", functional, "does not exist. no overlay will be produced."))
     thresh <- "1.e9x1.e9"
   }
   # .................................................
@@ -313,7 +313,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = "red", axis = 1,
         space = "Lab")
     }
     heatvals <- colorfun(nlevels)
-    print(heatvals)
+    # print(heatvals)
     if (locthresh[1] > 1) 
       heatvals[1:(locthresh[1] - 1)] <- NA
     if (locthresh[2] < (nlevels - 1)) {

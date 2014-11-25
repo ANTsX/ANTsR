@@ -41,7 +41,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
              whichtoinvert[i]==TRUE  ) {
           if (length(grep(".mat", transformlist[i])) == 1 ) {
             ismat <- TRUE
-            print("treating this as an inverse transform")
+            # print("treating this as an inverse transform")
           }
           }
           if (!ismat) {
