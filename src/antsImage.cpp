@@ -38,7 +38,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
 	  image_r.slot( "dimension" ) = 4 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '4'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '4'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 3 )
@@ -52,7 +52,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '3'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '3'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 2 )
@@ -66,7 +66,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
 	  image_r.slot( "dimension" ) = 2 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '2'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '2'" << std::endl ;
 	  return image_r ;
 	}
       else
@@ -88,7 +88,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
 	  image_r.slot( "dimension" ) = 4 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '4'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '4'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 3 )
@@ -102,7 +102,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '3'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '3'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 2 )
@@ -116,7 +116,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
 	  image_r.slot( "dimension" ) = 2 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '2'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '2'" << std::endl ;
 	  return image_r ;
 	}
       else
@@ -138,7 +138,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
 	  image_r.slot( "dimension" ) = 4 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '4'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '4'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 3 )
@@ -152,7 +152,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '3'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '3'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 2 )
@@ -166,7 +166,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '2'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '2'" << std::endl ;
 	  return image_r ;
 	}
       else
@@ -188,7 +188,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
 	  image_r.slot( "dimension" ) = 4 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '4'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '4'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 3 )
@@ -202,7 +202,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '3'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '3'" << std::endl ;
 	  return image_r ;
 	}
       else if( dimension == 2 )
@@ -216,7 +216,7 @@ try
 	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
 	  image_r.slot( "dimension" ) = 3 ;
 	  image_r.slot( "pointer" ) = xptr ;
-	  Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '2'" << std::endl ;
+	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '2'" << std::endl ;
 	  return image_r ;
 	}
       else
@@ -691,7 +691,7 @@ SEXP antsImage_asVector( typename itk::Image< PixelType , Dimension >::Pointer i
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
 }
@@ -1493,7 +1493,7 @@ SEXP antsImage_GetPixels( typename itk::Image< PixelType , Dimension >::Pointer 
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
 }
@@ -1751,7 +1751,7 @@ bool antsImage_SetPixels( typename itk::Image< PixelType , Dimension >::Pointer 
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return 1 ;
     }
   return 0 ;
@@ -1943,7 +1943,7 @@ SEXP antsImage_GetSpacing( typename itk::Image< PixelType , Dimension >::Pointer
     }
   else
     {
-    Rcpp::Rcout << "Empty Image" << std::endl ;
+    // Rcpp::Rcout << "Empty image" << std::endl ;
     return Rcpp::wrap( NA_REAL ) ;
     }
 }
@@ -2139,7 +2139,7 @@ bool antsImage_SetSpacing( typename itk::Image< PixelType , Dimension >::Pointer
     }
   else
     {
-    Rcpp::Rcout << "Empty Image" << std::endl ;
+    // Rcpp::Rcout << "Empty image" << std::endl ;
     return 1;
     }
 }
@@ -2335,7 +2335,7 @@ SEXP antsImage_GetOrigin( typename itk::Image< PixelType , Dimension >::Pointer 
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
 }
@@ -2531,7 +2531,7 @@ bool antsImage_SetOrigin( typename itk::Image< PixelType , Dimension >::Pointer 
     }
   else
     {
-    Rcpp::Rcout << "Empty Image" << std::endl ;
+    // Rcpp::Rcout << "Empty image" << std::endl ;
     return 1;
     }
 }
@@ -2744,7 +2744,7 @@ SEXP antsImage_GetDirection( typename itk::Image< PixelType , Dimension >::Point
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
 }
@@ -2946,7 +2946,7 @@ SEXP antsImage_SetDirection( typename itk::Image< PixelType , Dimension >::Point
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
   return Rcpp::wrap(0);
@@ -3654,7 +3654,7 @@ bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer&
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return 1 ;
     }
   return 0 ;
@@ -4205,7 +4205,7 @@ SEXP antsImage_RelationalOperators( typename itk::Image< PixelType , Dimension >
     }
   else
     {
-      Rcpp::Rcout << "Empty Image" << std::endl ;
+      // Rcpp::Rcout << "Empty image" << std::endl ;
       return Rcpp::wrap( NA_REAL ) ;
     }
 }
