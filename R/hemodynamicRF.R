@@ -49,4 +49,6 @@ hemodynamicRF <- function(scans = 1, onsets = c(1), durations = c(1), rt = 3, ti
   } else {
     hrf
   }
+  hrf<-hrf-min(hrf)
+  hrf<-hrf/sum(hrf)
 } 
