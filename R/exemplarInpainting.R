@@ -4,12 +4,12 @@
 #' @usage  approximg<-exemplarInpainting( img, paintMask, list(img1,img2),
 #'   featureRadius, sharpen, feather )
 #' @param img antsImage to be approximated / painted
-#' @param paintMask painting mask with values 1 or 
-#' values 1 and 2 - if there is a 2 then it will learn 
+#' @param paintMask painting mask with values 1 or
+#' values 1 and 2 - if there is a 2 then it will learn
 #' from label 1 to paint label 2.  should cover the brain.
 #' @param imageList a list containing antsImages
 #' @param featureRadius - radius of image neighborhood e.g. 2
-#' @param scaleInpaintIntensity - brighter or darker painted voxels, 
+#' @param scaleInpaintIntensity - brighter or darker painted voxels,
 #' default of 0 sets this parameter automatically
 #' @param sharpen - sharpen the approximated image
 #' @param feather - value (e.g. 1) that helps feather the mask for smooth blending
@@ -39,6 +39,12 @@ exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2, scaleInpaintIntensity=0,
   sharpen=FALSE, feather=1, debug=FALSE )
 {
+pckg <- try(require(e1071))
+if (!pckg) {
+  cat("Installing 'pixmap' from CRAN\n")
+  getPckg("e1071")
+  require("e1071")
+  }
 mask<-antsImageClone( paintMask )
 mask[ paintMask != 1 ]<-0 # dont use the lesion
 inpaintLesion<-FALSE
@@ -92,7 +98,7 @@ if ( nlist > 1 )
     return( mask )
     }
   if ( debug ) print("run lm")
-  mdl<-lm( targetvoxels ~ ., data=nmatdf )
+  mdl<-svm( targetvoxels ~ ., data=nmatdf )
   if ( inpaintLesion == FALSE )
     {
     pvox<-predict(mdl,type='response')
@@ -109,7 +115,7 @@ if ( nlist > 1 )
   predvec<-predimg[ paintMask == 1 ]
   imgvec<-img[ paintMask == 1 ]
   mydf<-data.frame(vox=predimg[ paintMask == 1 ])
-  mdl<-lm( imgvec ~ vox, data=mydf )
+  mdl<-svm( imgvec ~ vox, data=mydf )
   mydf<-data.frame(vox=predimg[ fmask == 1 ])
   predvec2<-predict( mdl, newdata=mydf )
   if (debug) print(summary(mdl))
@@ -130,7 +136,7 @@ if (  scaleInpaintIntensity == 0  )
   sci<-mean(imgvec)*0.5+sd(imgvec)
   scp<-mean(predvec)*0.5+sd(predvec)
   scaleInpaintIntensity<-sci/scp
-  if (debug) 
+  if (debug)
     print(paste('scaleInpaintIntensity',scaleInpaintIntensity))
   }
 predimg[fmask==1]<-vec2*scaleInpaintIntensity+vec1
