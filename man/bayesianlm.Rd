@@ -39,6 +39,37 @@ Avants BB
 }
 
 \examples{
+  # make some simple data
+  set.seed(1)
+  n<-20
+  rawvars<-sample(1:n)
+  nois<-rnorm(n)
+  # for some reason we dont know age is correlated w/noise
+  age<-as.numeric(rawvars)+(abs(nois))*sign(nois)
+  wt<-( sqrt(rawvars) + rnorm(n) )
+  mdl<-lm( wt ~ age + nois )
+  summary(mdl)
+  X<-model.matrix( mdl )
+  priorcoeffs<-coefficients(mdl)
+  priorwt<-1.e2
+  precisionMat<-diag(3)*priorwt+10.0
+  precisionMat[2,2]<-priorwt^1.5 # prior on age
+  precisionMat[3,3]<-priorwt^1.5
+  # make some new data
+  rawvars2<-sample(1:n)
+  nois2<-rnorm(n)
+  # now age is correlated doubly w/noise
+  age2<-as.numeric(rawvars2)+(abs(nois2))*sign(nois2)*2.0
+  wt2<-( sqrt(rawvars2) + rnorm(n) )
+  mdl2<-lm( wt2 ~ age2 + nois2 )
+  X2<-model.matrix( mdl2 )
+  bmdl<-bayesianlm( X2, wt2, priorMean=priorcoeffs, precisionMat )
+  bmdlNoPrior<-bayesianlm( X2, wt2 )
+  print(priorcoeffs)
+  print(bmdl$beta)
+  print(bmdlNoPrior$beta)
+  \dontrun
+  {
   fn<-"PEDS012_20131101_pcasl_1.nii.gz"
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   asl<-antsImageRead(fn,4)
@@ -94,4 +125,5 @@ Avants BB
   perfimg[ aslmask == 1 ]<-bayesianperfusionloc
   antsImageWrite(perfimg,'perf_bayes.nii.gz')
   print( cor.test(basicperf, perfimg[ aslmask == 1 ] ) )
+  }
 }
