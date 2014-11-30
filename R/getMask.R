@@ -31,7 +31,7 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf,
   if (cleanup > 0 ) {
     ImageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
     ImageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
-    ImageMath(img@dimension, mask_img, "MD", mask_img, cleanup-1)
+    ImageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
     ImageMath(img@dimension, mask_img, "FillHoles", mask_img)
   }
   
