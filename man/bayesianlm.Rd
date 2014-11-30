@@ -68,8 +68,7 @@ Avants BB
   print(priorcoeffs)
   print(bmdl$beta)
   print(bmdlNoPrior$beta)
-  \dontrun
-  {
+  \dontrun{
   fn<-"PEDS012_20131101_pcasl_1.nii.gz"
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   asl<-antsImageRead(fn,4)
