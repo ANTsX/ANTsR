@@ -37,7 +37,7 @@ perfusionregression <- function(mask_img, mat, xideal,
     return(
       list( cbfi = cbfi,
       indstozero = NA,
-      regweights = NA)
+      regweights = rep(1,length(xideal)))
       )
   }
   indstozero <- NULL
