@@ -43,8 +43,10 @@ get_perfusion_predictors <- function(mat,
   colnames(nuis) <- motnames
   dnz<-NA
   if ( ncompcorparameters > 0 | !(all(is.na(useDenoiser))) ) {
-    if (  ncompcorparameters > 0 )
+    if (  ncompcorparameters > 0 ) {
+      rmat<-residuals(lm( mat ~ xideal + nuis ))
       denoisingParams <- compcor(mat, ncompcorparameters)
+      }
     if (!(all(is.na(useDenoiser)))) {
       # include t(motionnuis) if you want to model motion
       DVARS <- computeDVARS(mat)
