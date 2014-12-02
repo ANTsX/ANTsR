@@ -17,11 +17,16 @@ from label 1 to paint label 2.  should cover the brain.}
 
 \item{featureRadius}{- radius of image neighborhood e.g. 2}
 
-\item{scaleInpaintIntensity}{- brighter or darker painted voxels}
+\item{scaleInpaintIntensity}{- brighter or darker painted voxels,
+default of 0 sets this parameter automatically}
 
 \item{sharpen}{- sharpen the approximated image}
 
 \item{feather}{- value (e.g. 1) that helps feather the mask for smooth blending}
+
+\item{predalgorithm}{- string svm or lm}
+
+\item{debug}{- TRUE or FALSE}
 }
 \value{
 inpainted image

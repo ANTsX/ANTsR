@@ -13,6 +13,8 @@
 #' default of 0 sets this parameter automatically
 #' @param sharpen - sharpen the approximated image
 #' @param feather - value (e.g. 1) that helps feather the mask for smooth blending
+#' @param predalgorithm - string svm or lm
+#' @param debug - TRUE or FALSE
 #' @return inpainted image
 #' @author Brian B. Avants
 #' @keywords inpainting template
@@ -37,7 +39,7 @@
 #' painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
 exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2, scaleInpaintIntensity=0,
-  sharpen=FALSE, feather=1, debug=FALSE )
+  sharpen=FALSE, feather=1, predalgorithm='lm', debug=FALSE )
 {
 pckg <- try(require(e1071))
 if (!pckg) {
@@ -98,7 +100,9 @@ if ( nlist > 1 )
     return( mask )
     }
   if ( debug ) print("run lm")
-  mdl<-svm( targetvoxels ~ ., data=nmatdf )
+  if ( predalgorithm == 'svm') {
+    mdl<-svm( targetvoxels ~ ., data=nmatdf )
+  } else mdl<-lm( targetvoxels ~ ., data=nmatdf )
   if ( inpaintLesion == FALSE )
     {
     pvox<-predict(mdl,type='response')
@@ -115,7 +119,9 @@ if ( nlist > 1 )
   predvec<-predimg[ paintMask == 1 ]
   imgvec<-img[ paintMask == 1 ]
   mydf<-data.frame(vox=predimg[ paintMask == 1 ])
-  mdl<-svm( imgvec ~ vox, data=mydf )
+  if ( predalgorithm == 'svm') {
+    mdl<-svm( imgvec ~ vox, data=mydf )
+  } else mdl<-lm( imgvec ~ vox, data=mydf )
   mydf<-data.frame(vox=predimg[ fmask == 1 ])
   predvec2<-predict( mdl, newdata=mydf )
   if (debug) print(summary(mdl))
