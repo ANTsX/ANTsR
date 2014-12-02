@@ -77,15 +77,15 @@ if ( nlist > 1 )
   for ( i in imageList )
     {
     mat<-(antsGetNeighborhoodMatrix( i, mask, radius,
-      boundary.condition='mean'))
+      boundary.condition='image'))
     if ( all(dim(nmat)==1) ) nmat<-t(mat) else nmat<-cbind(nmat,t(mat))
     if ( inpaintLesion )
       {
       mat<-(antsGetNeighborhoodMatrix(i,lmask,radius,
-        boundary.condition='mean'))
+        boundary.condition='image'))
       if ( all(dim(lmat)==1) ) lmat<-t(mat) else lmat<-cbind(lmat,t(mat))
       mat<-(antsGetNeighborhoodMatrix(i,fmask,radius,
-        boundary.condition='mean'))
+        boundary.condition='image'))
       if ( all(dim(fmat)==1) ) fmat<-t(mat) else fmat<-cbind(fmat,t(mat))
       }
     if ( debug ) print(paste("built predictors",ct))
