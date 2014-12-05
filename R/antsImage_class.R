@@ -590,13 +590,13 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value
 setGeneric(name = "as.antsImage", def = function(object, ...) standardGeneric("as.antsImage"))
 
 setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object,
-  pixeltype = "double", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
+  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
   origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
 })
 
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
-  pixeltype = "double", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
+  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
   origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
 })
