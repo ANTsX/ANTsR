@@ -38,7 +38,7 @@ spatialbayesianlm <- function( mylm, ymat, mask,
       blm<-bayesianlm(  blmX, ymat[,v], prior,
         locinvcov*priorWeight,
         regweights=regweights )
-      betamatrix[,v]<-blm$beta[1]
+      betamatrix[,v]<-blm$beta
       }
     return( matrixToImages(betamatrix, mask) )
 }

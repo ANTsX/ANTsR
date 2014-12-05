@@ -59,7 +59,6 @@ Avants BB
   aslmat<-timeseries2matrix(asl,aslmask)
   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
   dv<-computeDVARS(aslmat)
-  # do some comparison with a single y, no priors
   perfmodel<-lm( aslmat ~ tc + dv ) # standard model
   ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask, priorWeight=1.e5 ,smth=3)
   }
