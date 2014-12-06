@@ -35,7 +35,10 @@ weight on the prior
 size of neighborhood
 }
 \item{regweights}{
-weights on rows
+weights on rows - size of ymat
+}
+\item{smoothcoeffmat}{
+prior coefficient matrix
 }
 }
 
@@ -60,6 +63,8 @@ Avants BB
   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
   dv<-computeDVARS(aslmat)
   perfmodel<-lm( aslmat ~ tc + dv ) # standard model
-  ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask, priorWeight=1.e5 ,smth=3)
+  ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask,
+    priorWeight=1.e6 ,smth=1.6, nhood=rep(3,3) )
+  plotANTsImage( ssp[[1]], slices='2x16x2', axis=3 )
   }
 }

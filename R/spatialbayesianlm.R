@@ -1,5 +1,6 @@
 spatialbayesianlm <- function( mylm, ymat, mask,
-  smth=1, priorWeight=1, nhood=NA, regweights=NA  )
+  smth=1, priorWeight=1, nhood=NA, regweights=NA,
+  smoothcoeffmat=NA  )
   {
     if ( sum(mask==1) != ncol(ymat) )
     {
@@ -7,8 +8,23 @@ spatialbayesianlm <- function( mylm, ymat, mask,
     return(NA)
     }
     if ( all(is.na(nhood) ) ) nhood<-rep(1,mask@dimension)
-    if ( all(is.na(regweights) ) ) regweights<-rep(1,nrow(ymat))
-    smoothcoeffmat<-mylm$coefficients
+    if ( all(is.na(regweights) ) )
+      {
+      regweights<-ymat
+      regweights[]<-1
+      }
+    if ( is.null( dim(regweights) ) )
+      {
+      regweights<-ymat
+      regweights[]<-1
+      }
+    if ( ! all( dim(regweights) == dim(ymat) ) )
+      {
+      regweights<-ymat
+      regweights[]<-1
+      }
+    if ( all(is.na(smoothcoeffmat)) )
+      smoothcoeffmat<-mylm$coefficients
     nmatimgs<-list()
     for ( i in 1:nrow(smoothcoeffmat) )
       {
@@ -34,10 +50,8 @@ spatialbayesianlm <- function( mylm, ymat, mask,
       if ( typeof(locinvcov)=='character')
         locinvcov<-invcov
       prior<-(smoothcoeffmat[,v])
-#      if ( skip == 1 ) regweights<-robvals[,v]
       blm<-bayesianlm(  blmX, ymat[,v], prior,
-        locinvcov*priorWeight,
-        regweights=regweights )
+        locinvcov*priorWeight, regweights=regweights[,v] )
       betamatrix[,v]<-blm$beta
       }
     return( matrixToImages(betamatrix, mask) )
