@@ -150,7 +150,7 @@ perfusionregression <- function(mask_img, mat, xideal,
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
       pcov<-cov( parammat )
       locinvcov<-tryCatch( solve( pcov ) ,
-       error = function(e) solve( invcov ) )
+       error = function(e) return( invcov ) )
       if ( typeof(locinvcov)=='character')
         locinvcov<-invcov
       prior<-(smoothcoeffmat[,v])

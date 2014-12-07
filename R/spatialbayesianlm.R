@@ -35,7 +35,8 @@ spatialbayesianlm <- function( mylm, ymat, mask,
         nhood, boundary.condition = "mean")
       smoothcoeffmat[i,]<-temp[ mask==1 ]
       }
-    invcov <- solve( cov( t( smoothcoeffmat ) ) )
+    covmat<-cov( t( smoothcoeffmat ) )
+    invcov <- solve( covmat + diag(ncol(covmat))*1.e-6 )
     betaideal<-rep(0,ncol(ymat))
     blmX<-model.matrix( mylm )
     betamatrix<-ymat[1:(ncol(blmX)-1),]*0
@@ -46,7 +47,7 @@ spatialbayesianlm <- function( mylm, ymat, mask,
         parammat<-cbind( parammat, nmatimgs[[k]][,v] )
       pcov<-cov( parammat )
       locinvcov<-tryCatch( solve( pcov ) ,
-       error = function(e) solve( invcov ) )
+       error = function(e) return( invcov ) )
       if ( typeof(locinvcov)=='character')
         locinvcov<-invcov
       prior<-(smoothcoeffmat[,v])
