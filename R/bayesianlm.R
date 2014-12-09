@@ -47,26 +47,23 @@ bayesianlm <- function( X, y, priorMean, priorPrecision,
 
   pckg <- try(require(mvtnorm))
   betapost<-phi<-0
-  if (pckg) {
+  if ( pckg & FALSE ) {
     # lots of problems below - needs work ... but basically, this crudely
     # estimates integrals of the posterior across parameters
     # compute posterior for gamma
-    errterm = (abs( myresiduals )) # my error distribution
-    #  library(MASS)
-    # gamma_parms <- fitdistr(errterm,"gamma")
+    myresidualsmod<-myresiduals# remove scaling effects
+    errterm = myresidualsmod^2 # my error distribution
+    gamma_parms <- fitdistr(errterm,"gamma")
     # or use residuals directly as theory says
-    b_1 = priorIntercept + 0.5 * mean( errterm )
-    # compute posterior for beta
-    # FIXME - quantiles tied to error here
-    #  pgam<-pgamma(quantile(errterm), shape=fitdistr(errterm,'gamma')$estimate[1] )
-    #  phi1<-max( pgam )
-    quanterr<-quantile( errterm )
-    phi<-mean( pgamma( quanterr, shape = b_1 ) ) # mean across error quantiles
+    b_1 = priorIntercept + 0.5 * mean( errterm, na.rm=T )
+    sorterr<-sort(errterm)
+    shest=fitdistr(sorterr,'gamma')$estimate[1]
+    pgam<-pgamma( sorterr, shape=shest )
+    phi<-mean( pgam, na.rm=T )
     sig1<-solve( tXX + phi* priorPrecision )
     mu1<-as.numeric( mu_n )
-    smallpurt<-abs(mu1)*0.5
     # below gives mean posterior for beta across a range
-    betapost <- pmvnorm( mu1-smallpurt, mu1+smallpurt, mean=mu1, sigma=sig1)[1]
+    betapost <- pmvnorm( mu1,rep(Inf,length(mu1)), mean=mu1, sigma=sig1)[1]
   }
   return( list( beta = beta, beta.std = beta.std,
     beta.t = beta.t, beta.pval = beta.pval,
