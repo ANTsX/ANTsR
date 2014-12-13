@@ -1,6 +1,6 @@
 aslDenoiseR <- function(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1,
   maxnoisepreds = 1:12, debug = FALSE, polydegree = 4, crossvalidationgroups = 4,
-  scalemat = F, noisepoolfun = max, usecompcor=T ) {
+  scalemat = F, noisepoolfun = max, usecompcor=F ) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
   if (length(groups) == 1) {
