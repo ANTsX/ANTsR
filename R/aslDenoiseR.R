@@ -1,6 +1,6 @@
 aslDenoiseR <- function(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1,
   maxnoisepreds = 1:12, debug = FALSE, polydegree = 4, crossvalidationgroups = 4,
-  scalemat = F, noisepoolfun = max) {
+  scalemat = F, noisepoolfun = max, usecompcor=T ) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
   if (length(groups) == 1) {
@@ -76,7 +76,9 @@ aslDenoiseR <- function(boldmatrix, targety, motionparams = NA, selectionthresh 
   if (scalemat)
     svdboldmat <- scale(svdboldmat)
   ##### should the denoising be done per group / run ?
-  noiseu <- svd(svdboldmat[, noisepool], nv = 0, nu = max(maxnoisepreds))$u
+  if (usecompcor) noiseu<-compcor(  svdboldmat , max(maxnoisepreds) )
+  if ( ! usecompcor )
+    noiseu <- svd(svdboldmat[, noisepool], nv = 0, nu = max(maxnoisepreds))$u
   R2summary <- rep(0, length(maxnoisepreds))
   ct <- 1
   for (i in maxnoisepreds) {
