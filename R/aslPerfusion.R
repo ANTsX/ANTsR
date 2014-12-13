@@ -117,7 +117,9 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     motionparams, NULL, 1, ncompcor, useDenoiser )
   if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
-  mynuis <- data.frame( predictors$nuis, predictors$motion )
+  if ( ! all( is.na(predictors$nuis) ) ) {
+    mynuis <- data.frame( predictors$nuis, predictors$motion )
+  } else mynuis <- data.frame( predictors$motion )
 #    motionparams[,3:ncol(motionparams)] )
 #  if ( !all(is.na(useDenoiser)))
 #    mynuis <- data.frame( predictors$nuis )
@@ -125,8 +127,11 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
     cat("Nuisance variables\n")
     print( colnames(mynuis) )
   }
+  if ( ! all( is.na(mynuis)) ) {
+    rmat<-residuals( lm( mat ~ 0 + data.matrix(mynuis) )  )
+  } else rmat<-mat
   perfusion <- perfusionregression(mask_img = moco_mask_img,
-      mat = mat,
+      mat = mat, # or rmat?
       xideal = predictors$xideal,
       nuis = data.matrix(mynuis), dorobust = dorobust,
       skip = skip, selectionValsForRegweights = predictors$dnz,

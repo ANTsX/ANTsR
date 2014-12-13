@@ -51,10 +51,7 @@ Avants BB
   summary(mdl)
   X<-model.matrix( mdl )
   priorcoeffs<-coefficients(mdl)
-  priorwt<-1.e2
-  precisionMat<-diag(3)*priorwt+10.0
-  precisionMat[2,2]<-priorwt^1.5 # prior on age
-  precisionMat[3,3]<-priorwt^1.5
+  covMat<-diag(length(priorcoeffs))+0.1
   # make some new data
   rawvars2<-sample(1:n)
   nois2<-rnorm(n)
@@ -63,6 +60,9 @@ Avants BB
   wt2<-( sqrt(rawvars2) + rnorm(n) )
   mdl2<-lm( wt2 ~ age2 + nois2 )
   X2<-model.matrix( mdl2 )
+  precisionMat<-solve( covMat )
+  precisionMat[2,2]<-precisionMat[2,2]*1.e3 # heavy prior on age
+  precisionMat[3,3]<-precisionMat[3,3]*1.e2 # some prior on noise
   bmdl<-bayesianlm( X2, wt2, priorMean=priorcoeffs, precisionMat )
   bmdlNoPrior<-bayesianlm( X2, wt2 )
   print(priorcoeffs)
@@ -98,14 +98,14 @@ Avants BB
     temp<-antsImageClone( aslmask )
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
-#    SmoothImage(3,temp,1.5,temp)
+    SmoothImage(3,temp,1.5,temp)
     nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
-      rep(1,3), boundary.condition = "mean")
+      rep(2,3), boundary.condition = "mean")
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
   prior  <- rowMeans( smoothcoeffmat  )
   invcov <- solve( cov( t( smoothcoeffmat ) ) )
-  blm2<-bayesianlm(  X, y, prior, invcov*100 )
+  blm2<-bayesianlm(  X, y, prior, invcov*1.e4 )
   print( blm2$beta.p )
   for ( i in 1:ncol(aslmat) )
     {
@@ -114,7 +114,7 @@ Avants BB
       parammat<-cbind( parammat, nmatimgs[[k]][,i] )
     locinvcov<-solve( cov( parammat ) )
     localprior<-(smoothcoeffmat[,i])
-    blm<-bayesianlm(  X, aslmat[,i], localprior, locinvcov*1000 )
+    blm<-bayesianlm(  X, aslmat[,i], localprior, locinvcov*1.e4 )
     bayesianperfusionloc[i]<-blm$beta[1]
     }
   perfimg<-antsImageClone(aslmask)

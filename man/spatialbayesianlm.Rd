@@ -69,30 +69,7 @@ Avants BB
   dv<-computeDVARS(aslmat)
   perfmodel<-lm( aslmat ~ tc + stats::poly(dv,4) ) # standard model
   ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask,
-    priorWeight=1.e4 ,smth=1.6, nhood=rep(3,3) )
+    priorWeight=1.e2 ,smth=1.6, nhood=rep(2,3) )
   plotANTsImage( ssp[[1]], slices='2x16x2', axis=3 )
-  csf<-antsImageRead("seg2pcaslprob1.nii.gz",3)
-  gm<-antsImageRead("seg2pcaslprob2.nii.gz",3)
-  wvox<-aslmask==1
-  for ( i in 4:6 ) {
-    img<-antsImageRead(paste("seg2pcaslprob",i,".nii.gz",sep=''),3)
-    gm[wvox]<-gm[wvox]+img[wvox]
-    }
-  wm<-antsImageRead("seg2pcaslprob3.nii.gz",3)
-  gm[ wvox ]<-gm[ wvox ]*25
-  wm[ wvox ]<-wm[ wvox ]*10
-  csf[ wvox ]<-csf[ wvox ]*0.001
-  gm[wvox]<-gm[wvox]+wm[ wvox ]+csf[ wvox ]
-  smoothcoeffmat<-perfmodel$coefficients
-  smoothcoeffmat[2,]<-gm[wvox]
-  ssp2<-spatialbayesianlm( perfmodel, aslmat, aslmask,
-    priorWeight=5.e3 ,smth=1.5, nhood=rep(3,3),
-    smoothcoeffmat=smoothcoeffmat )
-  smoothcoeffmat[2,]<-ssp3[[1]][aslmask==1]
-  ssp3<-spatialbayesianlm( perfmodel, aslmat, aslmask,
-    priorWeight=5.e3 ,smth=0.0, nhood=rep(3,3),
-    smoothcoeffmat=smoothcoeffmat )
-  cbf <- quantifyCBF( ssp3[[1]], aslmask, pcasl.parameters )
-  plotANTsImage( cbf$meancbf, slices='2x16x2', axis=3 )
   }
 }

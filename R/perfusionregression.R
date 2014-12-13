@@ -22,9 +22,10 @@ perfusionregression <- function(mask_img, mat, xideal,
   }
   cbfform <- formula(mat ~ xideal)
   rcbfform <- formula(mat[, vox] ~ xideal)
-  if (!is.na(nuis)) {
+  if (!all(is.na(nuis))) {
+    rmat<-residuals(lm(mat~nuis))
     cbfform <- formula(mat ~ xideal + nuis)
-    rcbfform <- formula(mat[, vox] ~ xideal + nuis)
+    rcbfform <- formula(rmat[, vox] ~ xideal )
   }
   mycbfmodel <- lm(cbfform)  # standard regression
   cbfi <- antsImageClone(mask_img)
@@ -122,10 +123,12 @@ perfusionregression <- function(mask_img, mat, xideal,
       }
     }
     # standard weighted regression
-    if ( dorobust >= 1 | dorobust <= 0 )
+    if ( dorobust >= 1 | dorobust <= 0 ){
       mycbfmodel <- lm( cbfform )
-    if ( dorobust < 1 & dorobust > 0 )
+      }
+    if ( dorobust < 1 & dorobust > 0 ){
       mycbfmodel <- lm(cbfform, weights = regweights)
+      }
     betaideal <- ((mycbfmodel$coeff)[2, ])
     if ( useBayesian > 0 )
     {
@@ -164,6 +167,6 @@ perfusionregression <- function(mask_img, mat, xideal,
     if ( mean(betaideal) < 0) betaideal <- (betaideal) * (-1)
     cbfi[ mask_img == 1 ] <- betaideal  # robust results
     print(paste("Rejected", length(indstozero)/nrow(mat) * 100, " % "))
-  return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
+  return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights ))
 }
 # y = x beta + c => y - c = x beta

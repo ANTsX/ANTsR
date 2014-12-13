@@ -40,6 +40,7 @@ spatialbayesianlm <- function( mylm, ymat, mask,
     betaideal<-rep(0,ncol(ymat))
     blmX<-model.matrix( mylm )
     betamatrix<-ymat[1:(ncol(blmX)-1),]*0
+    posteriorI<-rep(0,ncol(ymat))
     for ( v in 1:ncol(ymat) )
       {
       parammat<-nmatimgs[[1]][,v]
@@ -54,6 +55,9 @@ spatialbayesianlm <- function( mylm, ymat, mask,
       blm<-bayesianlm(  blmX, ymat[,v], prior,
         locinvcov*priorWeight, regweights=regweights[,v] )
       betamatrix[,v]<-blm$beta
+      posteriorI[v]<-blm$posteriorProbability
       }
-    return( matrixToImages(betamatrix, mask) )
+    mylist<-matrixToImages(betamatrix, mask)
+    mylist<-lappend( mylist, makeImage(mask,posteriorI) )
+    return( mylist )
 }
