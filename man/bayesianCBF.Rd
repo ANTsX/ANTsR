@@ -33,7 +33,12 @@ Employs a robust regression approach to learn the relationship between a sample 
 \examples{
 \dontrun{
 set.seed(123)
-# see fMRIANTs github repository
+# see fMRIANTs github repository for data and I/O suggestions
+bcbf<-bayesianCBF( pcasl, seg, tissuelist,
+  myPriorStrength=30.0,
+  useDataDrivenMask=3,
+  denoisingComponents=1:8,
+  robustnessvalue=0.95 )
 }
 }
 \author{

@@ -19,7 +19,12 @@
 #' @examples
 #' \dontrun{
 #' set.seed(123)
-#' # see fMRIANTs github repository 
+#' # see fMRIANTs github repository for data and I/O suggestions
+#' bcbf<-bayesianCBF( pcasl, seg, tissuelist,
+#'   myPriorStrength=30.0,
+#'   useDataDrivenMask=3,
+#'   denoisingComponents=1:8,
+#'   robustnessvalue=0.95 )
 #' }
 bayesianCBF<-function( pcasl, seg, tissuelist,
   myPriorStrength=30.0,
@@ -30,7 +35,7 @@ bayesianCBF<-function( pcasl, seg, tissuelist,
 {
 compcorComponents<-0
 motionAcc<-2 # motion accuracy - 0 is for testing, 1 or 2 real studies
-if ( all(dim(tissuelist[[1]])==1) | all(dim(seg)==1) |  all(dim(asl)==1) )
+if ( all(dim(tissuelist[[1]])==1) | all(dim(seg)==1) |  all(dim(pcasl)==1) )
   stop(paste("Check your input data"))
 avg<-getAverageOfTimeSeries(pcasl)
 N3BiasFieldCorrection(3,avg,avg,2)
