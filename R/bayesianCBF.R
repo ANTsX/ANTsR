@@ -110,5 +110,5 @@ for ( i in 1:ncol(aslmat) )
 bperfimg<-makeImage(mask,colSums(bayesianperfusionlocp))
 bcbf<- quantifyCBF( bperfimg, mask,pcasl.parameters )
 bcbf<-bcbf$meancbf
-return( bcbf )
+return( list(bcbf=bcbf, nz=sum(perfpro$regweights<0.001) ) )
 }
