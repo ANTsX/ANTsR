@@ -1,0 +1,109 @@
+#' @name bayesianCBF
+#' @title Uses probabilistic segmentation to constrain pcasl-based cbf computation.
+#' @description  Employs a robust regression approach to learn the relationship between a sample image and a list of images that are mapped to the same space as the sample image.
+#' @usage  bcbf<-bayesianCBF( pcasl, seg, tissuelist,
+#'   myPriorStrength=30.0,
+#'   useDataDrivenMask=3,
+#'   denoisingComponents=1:8,
+#'   robustnessvalue=0.95 )
+#' @param pcasl img antsImage for cbf
+#' @param segmentation image, should cover the brain.
+#' @param tissuelist a list containing antsImages eg list(prob1,...,probN)
+#' @param myPriorStrength - e.g 30
+#' @param useDataDrivenMask - morphology parameters e.g. 3
+#' @param denoisingComponents - data-driven denoising parameters
+#' @param robustnessvalue - value (e.g. 0.95) that throws away time points
+#' @return estimated cbf image
+#' @author Brian B. Avants
+#' @keywords cerebral blood flow, asl, bayesian
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' # see fMRIANTs github repository 
+#' }
+bayesianCBF<-function( pcasl, seg, tissuelist,
+  myPriorStrength=30.0,
+  useDataDrivenMask=3,
+  denoisingComponents=1:8,
+  robustnessvalue=0.95 # higher rejects more data. 0.9 or less - keep all
+)
+{
+compcorComponents<-0
+motionAcc<-2 # motion accuracy - 0 is for testing, 1 or 2 real studies
+if ( all(dim(tissuelist[[1]])==1) | all(dim(seg)==1) |  all(dim(asl)==1) )
+  stop(paste("Check your input data"))
+avg<-getAverageOfTimeSeries(pcasl)
+N3BiasFieldCorrection(3,avg,avg,2)
+N3BiasFieldCorrection(3,avg,avg,2)
+mask<-antsImageClone(seg)
+mask[ mask > 0 ]<-1
+if ( useDataDrivenMask > 0 )
+  {
+  mask2<-getMask(avg,mean(avg),Inf,useDataDrivenMask)
+  # cleans up mask to agree with data-driven mask2
+  mask[mask2==0]<-0 
+  seg[mask2==0]<-0
+  }
+aslmat<-timeseries2matrix(pcasl, mask)
+perfpro <- aslPerfusion( pcasl, interpolation="linear", skip=10,
+        dorobust=robustnessvalue, useDenoiser=denoisingComponents,  
+        moreaccurate=motionAcc, verbose=1, mask=mask, useBayesian=0,
+        ncompcor=compcorComponents ) 
+N3BiasFieldCorrection(3,perfpro$m0,perfpro$m0,2)
+pcasl.parameters <- list( sequence="pcasl", m0=perfpro$m0 )
+perfimg<-perfpro$perfusion
+perfdf<-data.frame( xideal=perfpro$xideal, 
+            nuis=perfpro$nuisancevariables)
+perfdf<-perfdf[,!is.na(colMeans(perfdf))]
+perfmodel<-lm( aslmat ~.,data=perfdf, weights=perfpro$regweights )
+blm<-bigLMStats( perfmodel, includeIntercept=T )
+getpriors<-function( img, seg )
+  {
+  n<-max(seg)
+  p<-rep(0,n)
+#  Use the median to be conservative.
+  segvec<-( seg[ seg > 0 ] )
+  for ( i in 1:n ) p[i]<-median( img[ segvec == as.numeric(i) ] )
+  return(p)
+  }
+bayespriormatfull<-blm$beta
+n<-max(seg)*nrow(bayespriormatfull)
+bayespriormat<-matrix( rep(0,n), nrow=max(seg) )
+for( i in 1:ncol(bayespriormat) )
+  bayespriormat[,i]<-getpriors( bayespriormatfull[i,] , seg )
+# set 4 to equal 2 - dgm = gm 
+bayespriormat[4,]<-bayespriormat[2,]
+# set csf to zero perfusion
+bayespriormat[1,2]<-0
+X<-model.matrix( perfmodel )
+localtissuemat<-imageListToMatrix(tissuelist,mask)
+priorwt<-diag(ncol(bayespriormat))*myPriorStrength
+priorwt[3:ncol(priorwt),3:ncol(priorwt)]<-0
+## alternative priors below
+# instead use bayespriormatfull - to est cov?
+priorwt2<-solve(cov(bayespriormat)+
+   diag(ncol(bayespriormat))*.1)*myPriorStrength
+bayesianperfusionloc<-localtissuemat*0
+bayesianperfusionlocp<-localtissuemat*0
+for ( i in 1:ncol(aslmat) )
+  {
+  # here is where we get really bayesian 
+  # average over all tissue models ...
+  localtissuemat[,i]<-abs(localtissuemat[,i])/
+    sum(abs(localtissuemat[,i]))
+  for ( segval in 1:max(seg) )
+    {
+    tissueprior<-localtissuemat[segval,i]
+    localprior<-bayespriormat[segval,]
+    blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt, 
+                      regweights=perfpro$regweights )
+    locbeta<-blm$beta[1]
+    bayesianperfusionloc[segval,i]<-locbeta
+    bayesianperfusionlocp[segval,i]<-locbeta*tissueprior
+    }
+  }
+bperfimg<-makeImage(mask,colSums(bayesianperfusionlocp))
+bcbf<- quantifyCBF( bperfimg, mask,pcasl.parameters )
+bcbf<-bcbf$meancbf
+return( bcbf )
+}
