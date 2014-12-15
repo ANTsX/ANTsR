@@ -45,9 +45,10 @@ bayesianlm <- function( X, y, priorMean, priorPrecision,
     beta.t <- mu_n[-1, ]/beta.std
   beta.pval <- 2 * pt(-abs(beta.t), df = dfe )
 
-  pckg <- try(require(mvtnorm))
+#  pckg <- try(require(mvtnorm))
   betapost<-phi<-0
-  if ( pckg & FALSE ) {
+#  if ( pckg & FALSE ) {
+  if ( FALSE ) {
     # lots of problems below - needs work ... but basically, this crudely
     # estimates integrals of the posterior across parameters
     # compute posterior for gamma
