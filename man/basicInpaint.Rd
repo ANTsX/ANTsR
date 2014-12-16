@@ -14,6 +14,10 @@ values 1 and 2 - if there is a 2 then it will learn
 from label 1 to paint label 2.  should cover the brain.}
 
 \item{speedimage}{- larger means faster/better}
+
+\item{its}{- iterations of graddescent}
+
+\item{gparam}{- graddescent param e.g. 0.05}
 }
 \value{
 inpainted image
@@ -29,10 +33,10 @@ mask<-fi
 mask[ mask > 0 ]<-1
 mask2<-mask
 mask2[11:20,11:20]<-2
-mask<-as.antsImage( mask , 'float' )
+mask<-as.antsImage( mask2 , 'float' )
 fi<-as.antsImage( fi , 'float' )
 SmoothImage(2,fi,3,fi)
-painted<-basicInpaint(fi,mask)
+painted<-basicInPaint(fi,mask)
 \dontrun{
 lmask<-antsImageRead("brainmask.nii.gz",2)
 limg<-antsImageRead("r16slice_lesion.nii.gz",2)

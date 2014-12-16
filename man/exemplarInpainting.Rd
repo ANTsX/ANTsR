@@ -52,7 +52,7 @@ painted<-exemplarInpainting(fi,mask,ilist)
 mask2<-as.antsImage( mask2 , 'float' )
 painted2<-exemplarInpainting(fi,mask2,ilist)
 # just use 1 image, so no regression is performed
-painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
+painted3<-exemplarInpainting(fi,mask2, list(ilist[[1]]))
 }
 \author{
 Brian B. Avants

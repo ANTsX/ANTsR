@@ -7,7 +7,7 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
   myPriorStrength=30.0,
   useDataDrivenMask=3,
   denoisingComponents=1:8,
-  robustnessvalue=0.95 )
+  robustnessvalue=0.95, localweights=F )
 }
 \arguments{
 \item{pcasl}{img antsImage for cbf}
@@ -21,6 +21,8 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
 \item{denoisingComponents}{- data-driven denoising parameters}
 
 \item{robustnessvalue}{- value (e.g. 0.95) that throws away time points}
+
+\item{localweights}{Use estimate of voxel-wise reliability to inform prior weight?}
 
 \item{segmentation}{image, should cover the brain.}
 }
