@@ -36,7 +36,7 @@
 #' mask2<-as.antsImage( mask2 , 'float' )
 #' painted2<-exemplarInpainting(fi,mask2,ilist)
 #' # just use 1 image, so no regression is performed
-#' painted3<-exemplarInpainting(fi,mask2,ilist[[1]])
+#' painted3<-exemplarInpainting(fi,mask2, list(ilist[[1]]))
 exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2, scaleInpaintIntensity=0,
   sharpen=FALSE, feather=1, predalgorithm='lm', debug=FALSE )
@@ -145,6 +145,7 @@ if (  scaleInpaintIntensity == 0  )
   if (debug)
     print(paste('scaleInpaintIntensity',scaleInpaintIntensity))
   }
+predimg<-antsImageClone( img ) # copy image - then replace in full mask
 predimg[fmask==1]<-vec2*scaleInpaintIntensity+vec1
 return( predimg )
 # for bayesian regression - amazingly fast!
