@@ -5,7 +5,7 @@
 #'   myPriorStrength=30.0,
 #'   useDataDrivenMask=3,
 #'   denoisingComponents=1:8,
-#'   robustnessvalue=0.95 )
+#'   robustnessvalue=0.95, localweights=F )
 #' @param pcasl img antsImage for cbf
 #' @param segmentation image, should cover the brain.
 #' @param tissuelist a list containing antsImages eg list(prob1,...,probN)
@@ -13,6 +13,7 @@
 #' @param useDataDrivenMask - morphology parameters e.g. 3
 #' @param denoisingComponents - data-driven denoising parameters
 #' @param robustnessvalue - value (e.g. 0.95) that throws away time points
+#' @param localweights Use estimate of voxel-wise reliability to inform prior weight?
 #' @return estimated cbf image
 #' @author Brian B. Avants
 #' @keywords cerebral blood flow, asl, bayesian
@@ -30,7 +31,8 @@ bayesianCBF<-function( pcasl, seg, tissuelist,
   myPriorStrength=30.0,
   useDataDrivenMask=3,
   denoisingComponents=1:8,
-  robustnessvalue=0.95 # higher rejects more data. 0.9 or less - keep all
+  robustnessvalue=0.95, # higher rejects more data. 0.9 or less - keep all
+  localweights=F
 )
 {
 compcorComponents<-0
@@ -90,6 +92,13 @@ priorwt2<-solve(cov(bayespriormat)+
    diag(ncol(bayespriormat))*.1)*myPriorStrength
 bayesianperfusionloc<-localtissuemat*0
 bayesianperfusionlocp<-localtissuemat*0
+if (localweights) {
+  motion_params <- motion_correction(pcasl, 1)$moco_params[, 1:4]
+  reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params, 
+    usecompcor=T)$R2final
+  unreliability = 1 / reliability
+  unreliability = unreliability / max(unreliability)  
+}
 for ( i in 1:ncol(aslmat) )
   {
   # here is where we get really bayesian 
@@ -100,8 +109,13 @@ for ( i in 1:ncol(aslmat) )
     {
     tissueprior<-localtissuemat[segval,i]
     localprior<-bayespriormat[segval,]
-    blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt, 
+    if(!localweights) {
+      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt, 
                       regweights=perfpro$regweights )
+    } else {
+      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt*unreliability[i], 
+                      regweights=perfpro$regweights )
+    }
     locbeta<-blm$beta[1]
     bayesianperfusionloc[segval,i]<-locbeta
     bayesianperfusionlocp[segval,i]<-locbeta*tissueprior
