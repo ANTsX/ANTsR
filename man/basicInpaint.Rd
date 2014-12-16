@@ -42,6 +42,8 @@ lmask<-antsImageRead("brainmask.nii.gz",2)
 limg<-antsImageRead("r16slice_lesion.nii.gz",2)
 mm<-basicInPaint(limg,lmask)
 plotANTsImage(mm)
+mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
+plotANTsImage(mm2)
 }
 }
 \author{

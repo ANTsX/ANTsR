@@ -29,6 +29,8 @@
 #' limg<-antsImageRead("r16slice_lesion.nii.gz",2)
 #' mm<-basicInPaint(limg,lmask)
 #' plotANTsImage(mm)
+#' mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
+#' plotANTsImage(mm2)
 #' }
 basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
   gparam=0.05 )
@@ -51,12 +53,14 @@ basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
   outimg[ paintMask == 2 ]<-inpainted[ paintMask == 2 ]
   if ( its > 0 )
     {
+    w2<-(1.0-gparam)
     for ( i in 1:its )
       {
-      soutimg<-antsImageClone(outimg)
-      SmoothImage(inpainted@dimension,outimg,1.5,soutimg)
-      outimg[ paintMask == 2 ]<-outimg[ paintMask == 2 ]*(1.0-gparam)+
-        soutimg[ paintMask == 2 ]*gparam
+        soutimg<-antsImageClone(outimg)
+        SmoothImage(inpainted@dimension,outimg,1.5,soutimg)
+        v1<-outimg[ paintMask == 2 ]*w2
+        v2<-soutimg[ paintMask == 2 ]*gparam
+        outimg[ paintMask == 2 ]<-(v1+v2)
       }
     }
   return(outimg)
