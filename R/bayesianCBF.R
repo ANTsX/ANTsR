@@ -96,8 +96,12 @@ if (localweights) {
   motion_params <- motion_correction(pcasl, moreaccurate=1)$moco_params[, 1:4]
   reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params, 
     usecompcor=T)$R2final
-  unreliability = 1 / reliability
-  unreliability = unreliability / max(unreliability)  
+  reliability[reliability<0.05] <- 0.05 
+  unreliability = log(min(reliability) / reliability)
+  if(max(unreliability)<=0){
+    unreliability <- unreliability - min(unreliability)
+  }
+  unreliability <- unreliability / max(unreliability)
 }
 for ( i in 1:ncol(aslmat) )
   {
