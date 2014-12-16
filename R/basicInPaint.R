@@ -54,10 +54,11 @@ basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
   if ( its > 0 )
     {
     w2<-(1.0-gparam)
+    sval<-min( antsGetSpacing(img) )
     for ( i in 1:its )
       {
         soutimg<-antsImageClone(outimg)
-        SmoothImage(inpainted@dimension,outimg,1.5,soutimg)
+        SmoothImage(inpainted@dimension,outimg,sval,soutimg)
         v1<-outimg[ paintMask == 2 ]*w2
         v2<-soutimg[ paintMask == 2 ]*gparam
         outimg[ paintMask == 2 ]<-(v1+v2)
