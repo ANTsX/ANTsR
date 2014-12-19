@@ -41,7 +41,12 @@ basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
   }
   inpainted<-antsImageClone(img)
   paintMaskUse<-antsImageClone(paintMask)
-  ImageMath(img@dimension,paintMaskUse,"GD",paintMask,1)
+  temp<-antsImageClone(paintMask)
+  temp[temp==1]<-0
+  temp[temp==2]<-1
+  ImageMath(img@dimension,temp,"MD",temp,1)
+  paintMaskUse[ temp == 1 & paintMaskUse == 1 ]<-2
+  #  ImageMath(img@dimension,paintMaskUse,"GD",paintMask,1)
   healthymask<-antsImageClone(paintMaskUse)
   healthymask[ paintMaskUse == 2 ]<-0
   if ( is.na(speedimage) ) {
