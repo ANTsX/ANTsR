@@ -40,17 +40,19 @@ basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
     return(1)
   }
   inpainted<-antsImageClone(img)
-  healthymask<-antsImageClone(paintMask)
-  healthymask[ paintMask == 2 ]<-0
+  paintMaskUse<-antsImageClone(paintMask)
+  ImageMath(img@dimension,paintMaskUse,"GD",paintMask,1)
+  healthymask<-antsImageClone(paintMaskUse)
+  healthymask[ paintMaskUse == 2 ]<-0
   if ( is.na(speedimage) ) {
     speedimage<-antsImageClone(img)
-    upit<-mean( img[ paintMask == 2 ] )
-    speedimage[ paintMask == 2 ]<-speedimage[ paintMask == 2 ]+upit
+    upit<-mean( img[ paintMaskUse == 2 ] )
+    speedimage[ paintMaskUse == 2 ]<-speedimage[ paintMaskUse == 2 ]+upit
   }
   ImageMath(inpainted@dimension,inpainted,"FastMarchingExtension",
     speedimage, healthymask, img  )
   outimg<-antsImageClone(img)
-  outimg[ paintMask == 2 ]<-inpainted[ paintMask == 2 ]
+  outimg[ paintMaskUse == 2 ]<-inpainted[ paintMaskUse == 2 ]
   if ( its > 0 )
     {
     w2<-(1.0-gparam)
@@ -59,9 +61,9 @@ basicInPaint<-function( img, paintMask, speedimage=NA, its=0,
       {
         soutimg<-antsImageClone(outimg)
         SmoothImage(inpainted@dimension,outimg,sval,soutimg)
-        v1<-outimg[ paintMask == 2 ]*w2
-        v2<-soutimg[ paintMask == 2 ]*gparam
-        outimg[ paintMask == 2 ]<-(v1+v2)
+        v1<-outimg[ paintMaskUse == 2 ]*w2
+        v2<-soutimg[ paintMaskUse == 2 ]*gparam
+        outimg[ paintMaskUse == 2 ]<-(v1+v2)
       }
     }
   return(outimg)
