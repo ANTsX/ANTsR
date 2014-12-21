@@ -73,7 +73,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       #  cormat<-cor(t(wmat))^beta
       #  wmat<-t(scale(t(wmat)))
       cormat<-antsrimpute(( wmat %*% t(wmat) )^beta)
-      invmat<-solve( cormat + diag(ncol(cormat))*1e-2 )
+      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-2 ) ,
+      error = function(e) return( invcov ) )
+      if ( typeof(invmat)=='character')
+        invmat<-diag(ncol(cormat))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       weightmat[,voxel]<-wts
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
