@@ -38,6 +38,11 @@ mi4<-antsImageRead( getANTsRData('r64') ,2)
 mi5<-antsImageRead( getANTsRData('r85') ,2)
 refmask<-getMask(ref)
 ilist<-list(mi,mi2,mi3,mi4,mi5)
+for ( i in 1:length(ilist) )
+  {
+  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
+  ilist[[i]]=tx$warpedmovout
+  }
 pp<-jointIntensityFusion(ref,refmask,ilist)
 }
 \author{
