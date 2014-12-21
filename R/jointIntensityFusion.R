@@ -45,7 +45,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rnorm(n)) )
-  matcenter<-round(ncol(wmat)/2.0)
+  matcenter<-round(n/2)+1
   intmat<-wmat
   targetIv<-antsGetNeighborhoodMatrix(targetI,
     targetIMask,rad,boundary.condition="mean")
@@ -74,7 +74,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       #  wmat<-t(scale(t(wmat)))
       cormat<-antsrimpute(( wmat %*% t(wmat) )^beta)
       invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-2 ) ,
-      error = function(e) return( invcov ) )
+      error = function(e) return( diag(ncol(cormat)) ) )
       if ( typeof(invmat)=='character')
         invmat<-diag(ncol(cormat))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
