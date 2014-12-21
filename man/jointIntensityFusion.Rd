@@ -31,6 +31,7 @@ intensity generalization of joint label fusion.
 \examples{
 set.seed(123)
 ref<-antsImageRead( getANTsRData('r16') ,2)
+ImageMath(2,ref,"Normalize",ref)
 mi<-antsImageRead( getANTsRData('r27') ,2)
 mi2<-antsImageRead( getANTsRData('r30') ,2)
 mi3<-antsImageRead( getANTsRData('r62') ,2)
@@ -41,6 +42,7 @@ ilist<-list(mi,mi2,mi3,mi4,mi5)
 for ( i in 1:length(ilist) )
   {
   tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
+  ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
   ilist[[i]]=tx$warpedmovout
   }
 pp<-jointIntensityFusion(ref,refmask,ilist)
