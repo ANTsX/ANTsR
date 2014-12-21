@@ -16,14 +16,14 @@
 #' @keywords fusion, template
 #' @examples
 #' set.seed(123)
-#' fi<-antsImageRead( getANTsRData('r16') ,2)
+#' ref<-antsImageRead( getANTsRData('r16') ,2)
 #' mi<-antsImageRead( getANTsRData('r27') ,2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
 #' mi4<-antsImageRead( getANTsRData('r64') ,2)
 #' mi5<-antsImageRead( getANTsRData('r85') ,2)
-#' refmask<-getMask(fi)
-#' ilist<-list(mi,mi2,mi3)
+#' refmask<-getMask(ref)
+#' ilist<-list(mi,mi2,mi3,mi4,mi5)
 #' pp<-jointIntensityFusion(ref,refmask,ilist)
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=1, rad=NA, labelList=NA, doscale = FALSE ) {
