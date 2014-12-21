@@ -45,7 +45,9 @@ for ( i in 1:length(ilist) )
   ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
   ilist[[i]]=tx$warpedmovout
   }
-pp<-jointIntensityFusion(ref,refmask,ilist)
+pp<-jointIntensityFusion(ref,refmask,ilist,beta=4)
+mm<-imageListToMatrix(ilist,refmask)
+avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich

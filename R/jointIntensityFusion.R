@@ -32,6 +32,8 @@
 #'   ilist[[i]]=tx$warpedmovout
 #'   }
 #' pp<-jointIntensityFusion(ref,refmask,ilist,beta=4)
+#' mm<-imageListToMatrix(ilist,refmask)
+#' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=1, rad=NA, labelList=NA, doscale = FALSE ) {
   if (nargs() == 0) {
