@@ -31,7 +31,7 @@
 #'   ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
 #'   ilist[[i]]=tx$warpedmovout
 #'   }
-#' pp<-jointIntensityFusion(ref,refmask,ilist)
+#' pp<-jointIntensityFusion(ref,refmask,ilist,beta=4)
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=1, rad=NA, labelList=NA, doscale = FALSE ) {
   if (nargs() == 0) {
