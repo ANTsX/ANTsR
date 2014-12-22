@@ -70,8 +70,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     {
       for ( ct in 1:length(imatlist)) {
         v<-imatlist[[ct]][,voxel]
-        if ( doscale ) v<-scale(v)
         intmat[ct,]<-v
+        if ( doscale ) v<-scale(v)
         wmat[ct,]<-(v-targetIv[,voxel])
       }
       #  cormat<-cor(t(wmat))^beta
