@@ -25,7 +25,7 @@ bayesianlm <- function( X, y, priorMean, priorPrecision,
   if ( !includeIntercept )
     {
     if (veccoef )  beta <- mu_n[-1] else beta <- mu_n[-1, ]
-    }
+    } else beta<-mu_n
   if ( includeIntercept )  priorIntercept=0
   preds <- X %*% mu_n
   b_n  <- priorIntercept + mean(regweights %*% y)-mean(regweights %*% preds)
