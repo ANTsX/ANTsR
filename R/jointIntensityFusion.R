@@ -106,7 +106,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
           probvals[p]<-sum((weightmat[ ww , voxel ]))
           }
         }
-      segvec[voxel]=segvals[ which(probvals==max(probvals))  ]
+      k<-which(probvals==max(probvals,na.rm=T))
+      segvec[voxel]=segvals[ k ]
       }
     segimg<-makeImage(targetIMask,segvec)
     }

@@ -12,7 +12,8 @@ model, here, is on the multivariate distribution of the parameters.
 }
 
 \usage{
-bsol<-bayesianlm( X, y, priorMean, precisionMatrix, weights )
+bsol<-bayesianlm( X, y, priorMean, precisionMatrix, weights,
+  includeIntercept=F )
 }
 
 \arguments{
@@ -27,6 +28,9 @@ bsol<-bayesianlm( X, y, priorMean, precisionMatrix, weights )
 }
 \item{precisionMatrix}{
   inverse covariance matrix of the parameters - strength of the prior
+}
+\item{includeIntercept}{
+include the intercept in the model
 }
 }
 

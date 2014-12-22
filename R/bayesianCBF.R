@@ -14,7 +14,7 @@
 #' @param denoisingComponents - data-driven denoising parameters
 #' @param robustnessvalue - value (e.g. 0.95) that throws away time points
 #' @param localweights Use estimate of voxel-wise reliability to inform prior weight?
-#' @param perfimg containing precomputed perfusion parameters
+#' @param priorBetas prior betas for each tissue and predictor
 #' @return estimated cbf image
 #' @author Brian Beaumont Avants and Benjamin T. Kandel
 #' @keywords cerebral blood flow, asl, bayesian
@@ -27,14 +27,14 @@
 #'   useDataDrivenMask=3,
 #'   denoisingComponents=1:8,
 #'   robustnessvalue=0.95,
-#'   perfimg=NA )
+#'   priorBetas=NA )
 #' }
 bayesianCBF<-function( pcasl, seg, tissuelist,
   myPriorStrength=30.0,
   useDataDrivenMask=3,
   denoisingComponents=1:8,
   robustnessvalue=0.95, # higher rejects more data. 0.9 or less - keep all
-  localweights=F
+  localweights=F, priorBetas=NA
 )
 {
 compcorComponents<-0
@@ -50,21 +50,20 @@ if ( useDataDrivenMask > 0 )
   {
   mask2<-getMask(avg,mean(avg),Inf,useDataDrivenMask)
   # cleans up mask to agree with data-driven mask2
-  mask[mask2==0]<-0 
+  mask[mask2==0]<-0
   seg[mask2==0]<-0
   }
 aslmat<-timeseries2matrix(pcasl, mask)
 perfpro <- aslPerfusion( pcasl, interpolation="linear", skip=10,
-        dorobust=robustnessvalue, useDenoiser=denoisingComponents,  
+        dorobust=robustnessvalue, useDenoiser=denoisingComponents,
         moreaccurate=motionAcc, verbose=1, mask=mask, useBayesian=0,
-        ncompcor=compcorComponents ) 
+        ncompcor=compcorComponents )
 N3BiasFieldCorrection(3,perfpro$m0,perfpro$m0,2)
 pcasl.parameters <- list( sequence="pcasl", m0=perfpro$m0 )
-perfdf<-data.frame( xideal=perfpro$xideal, 
+perfdf<-data.frame( xideal=perfpro$xideal,
             nuis=perfpro$nuisancevariables)
 perfdf<-perfdf[,!is.na(colMeans(perfdf))]
 perfmodel<-lm( aslmat ~.,data=perfdf, weights=perfpro$regweights )
-blm<-bigLMStats( perfmodel, includeIntercept=T )
 getpriors<-function( img, seg )
   {
   n<-max(seg)
@@ -74,17 +73,20 @@ getpriors<-function( img, seg )
   for ( i in 1:n ) p[i]<-median( img[ segvec == as.numeric(i) ] )
   return(p)
   }
-bayespriormatfull<-blm$beta
-if ( ! is.na( perfimg ) )
+if ( all( is.na( priorBetas ) ) )
   {
-  # should be precomputed perfusion
-  bayespriormatfull[1,]<-perfimg[ mask == 1 ]
+  blm<-bigLMStats( perfmodel, includeIntercept=T )
+  bayespriormatfull<-blm$beta
+  }
+if ( ! all( is.na( priorBetas ) ) )
+  {
+  bayespriormatfull<-priorBetas
   }
 n<-max(seg)*nrow(bayespriormatfull)
 bayespriormat<-matrix( rep(0,n), nrow=max(seg) )
 for( i in 1:ncol(bayespriormat) )
   bayespriormat[,i]<-getpriors( bayespriormatfull[i,] , seg )
-# set 4 to equal 2 - dgm = gm 
+# set 4 to equal 2 - dgm = gm
 bayespriormat[4,]<-bayespriormat[2,]
 # set csf to zero perfusion
 bayespriormat[1,2]<-0
@@ -100,9 +102,9 @@ bayesianperfusionloc<-localtissuemat*0
 bayesianperfusionlocp<-localtissuemat*0
 if (localweights) {
   motion_params <- motion_correction(pcasl, moreaccurate=1)$moco_params[, 1:4]
-  reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params, 
+  reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params,
     usecompcor=T)$R2final
-  reliability[reliability<0.05] <- 0.05 
+  reliability[reliability<0.05] <- 0.05
   unreliability = log(min(reliability) / reliability)
   if(max(unreliability)<=0){
     unreliability <- unreliability - min(unreliability)
@@ -111,7 +113,7 @@ if (localweights) {
 }
 for ( i in 1:ncol(aslmat) )
   {
-  # here is where we get really bayesian 
+  # here is where we get really bayesian
   # average over all tissue models ...
   localtissuemat[,i]<-abs(localtissuemat[,i])/
     sum(abs(localtissuemat[,i]))
@@ -120,13 +122,15 @@ for ( i in 1:ncol(aslmat) )
     tissueprior<-localtissuemat[segval,i]
     localprior<-bayespriormat[segval,]
     if(!localweights) {
-      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt, 
-                      regweights=perfpro$regweights )
+      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt,
+                      regweights=perfpro$regweights,
+                      includeIntercept=T )
     } else {
-      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt*unreliability[i], 
-                      regweights=perfpro$regweights )
+      blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt*unreliability[i],
+                      regweights=perfpro$regweights,
+                      includeIntercept=T )
     }
-    locbeta<-blm$beta[1]
+    locbeta<-blm$beta[2]
     bayesianperfusionloc[segval,i]<-locbeta
     bayesianperfusionlocp[segval,i]<-locbeta*tissueprior
     }
@@ -134,5 +138,7 @@ for ( i in 1:ncol(aslmat) )
 bperfimg<-makeImage(mask,colSums(bayesianperfusionlocp))
 bcbf<- quantifyCBF( bperfimg, mask,pcasl.parameters )
 bcbf<-bcbf$meancbf
-return( list(bcbf=bcbf, nz=sum(perfpro$regweights<0.001) ) )
+bayespriormatfull[2,]<-colSums(bayesianperfusionlocp)
+return( list(bcbf=bcbf, nz=sum(perfpro$regweights<0.001),
+  posteriorBetaSummary=bayespriormatfull ) )
 }

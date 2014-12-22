@@ -24,9 +24,9 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
 
 \item{localweights}{Use estimate of voxel-wise reliability to inform prior weight?}
 
-\item{segmentation}{image, should cover the brain.}
+\item{priorBetas}{prior betas for each tissue and predictor}
 
-\item{perfimg}{containing precomputed perfusion parameters}
+\item{segmentation}{image, should cover the brain.}
 }
 \value{
 estimated cbf image
@@ -43,7 +43,7 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
   useDataDrivenMask=3,
   denoisingComponents=1:8,
   robustnessvalue=0.95,
-  perfimg=NA )
+  priorBetas=NA )
 }
 }
 \author{
