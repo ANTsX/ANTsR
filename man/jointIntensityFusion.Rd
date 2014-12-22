@@ -14,9 +14,9 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 
 \item{atlasList}{list containing antsImages}
 
-\item{beta}{weight sharpness}
+\item{beta}{weight sharpness, default to 2}
 
-\item{rad}{neighborhood radius}
+\item{rad}{neighborhood radius, default to 4}
 
 \item{labelList}{list containing antsImages}
 

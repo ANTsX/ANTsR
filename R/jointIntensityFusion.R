@@ -7,8 +7,8 @@
 #' @param targetI antsImage to be approximated
 #' @param targetIMask  mask with value 1
 #' @param atlasList list containing antsImages
-#' @param beta  weight sharpness
-#' @param rad  neighborhood radius
+#' @param beta  weight sharpness, default to 2
+#' @param rad  neighborhood radius, default to 4
 #' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
 #' @return approximated image
@@ -39,13 +39,13 @@
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-    beta=1, rad=NA, labelList=NA, doscale = TRUE ) {
+    beta=2, rad=NA, labelList=NA, doscale = TRUE ) {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
   }
   dim<-targetI@dimension
-  if ( all(is.na(rad)) ) rad<-rep(2,dim)
+  if ( all(is.na(rad)) ) rad<-rep(4,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rnorm(n)) )
