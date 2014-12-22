@@ -23,7 +23,7 @@
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
 #' mi4<-antsImageRead( getANTsRData('r64') ,2)
 #' mi5<-antsImageRead( getANTsRData('r85') ,2)
-#' refmask<-getMask(ref)
+#' refmask<-getMask(ref,mean(ref) )
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
 #' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[5,0]"
 #' seglist<-list()
