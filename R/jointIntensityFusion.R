@@ -39,7 +39,7 @@
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-    beta=1, rad=NA, labelList=NA, doscale = FALSE ) {
+    beta=1, rad=NA, labelList=NA, doscale = TRUE ) {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
