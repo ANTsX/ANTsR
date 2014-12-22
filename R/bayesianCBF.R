@@ -14,8 +14,9 @@
 #' @param denoisingComponents - data-driven denoising parameters
 #' @param robustnessvalue - value (e.g. 0.95) that throws away time points
 #' @param localweights Use estimate of voxel-wise reliability to inform prior weight?
+#' @param perfimg containing precomputed perfusion parameters
 #' @return estimated cbf image
-#' @author Brian B. Avants
+#' @author Brian Beaumont Avants and Benjamin T. Kandel
 #' @keywords cerebral blood flow, asl, bayesian
 #' @examples
 #' \dontrun{
@@ -25,7 +26,8 @@
 #'   myPriorStrength=30.0,
 #'   useDataDrivenMask=3,
 #'   denoisingComponents=1:8,
-#'   robustnessvalue=0.95 )
+#'   robustnessvalue=0.95,
+#'   perfimg=NA )
 #' }
 bayesianCBF<-function( pcasl, seg, tissuelist,
   myPriorStrength=30.0,
@@ -58,7 +60,6 @@ perfpro <- aslPerfusion( pcasl, interpolation="linear", skip=10,
         ncompcor=compcorComponents ) 
 N3BiasFieldCorrection(3,perfpro$m0,perfpro$m0,2)
 pcasl.parameters <- list( sequence="pcasl", m0=perfpro$m0 )
-perfimg<-perfpro$perfusion
 perfdf<-data.frame( xideal=perfpro$xideal, 
             nuis=perfpro$nuisancevariables)
 perfdf<-perfdf[,!is.na(colMeans(perfdf))]
@@ -74,6 +75,11 @@ getpriors<-function( img, seg )
   return(p)
   }
 bayespriormatfull<-blm$beta
+if ( ! is.na( perfimg ) )
+  {
+  # should be precomputed perfusion
+  bayespriormatfull[1,]<-perfimg[ mask == 1 ]
+  }
 n<-max(seg)*nrow(bayespriormatfull)
 bayespriormat<-matrix( rep(0,n), nrow=max(seg) )
 for( i in 1:ncol(bayespriormat) )

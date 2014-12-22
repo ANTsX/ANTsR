@@ -9,29 +9,33 @@
 #' @param atlasList list containing antsImages
 #' @param beta  weight sharpness
 #' @param rad  neighborhood radius
-#' @param labelList list containing antsImages - not yet used
+#' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
 #' @return approximated image
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
 #' set.seed(123)
-#' ref<-antsImageRead( getANTsRData('r16') ,2)
+#' ref<-antsImageRead( getANTsRData('r16'), 2)
 #' ImageMath(2,ref,"Normalize",ref)
-#' mi<-antsImageRead( getANTsRData('r27') ,2)
+#' mi<-antsImageRead( getANTsRData('r27'),  2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
 #' mi4<-antsImageRead( getANTsRData('r64') ,2)
 #' mi5<-antsImageRead( getANTsRData('r85') ,2)
 #' refmask<-getMask(ref)
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
+#' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[5,0]"
+#' seglist<-list()
 #' for ( i in 1:length(ilist) )
-#'   {
-#'   tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
-#'   ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
-#'   ilist[[i]]=tx$warpedmovout
-#'   }
-#' pp<-jointIntensityFusion(ref,refmask,ilist,beta=4)
+#'  {
+#'  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
+#'  ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
+#'  ilist[[i]]=tx$warpedmovout
+#'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
+#'  seglist[[i]]<-seg$segmentation
+#'  }
+#' pp<-jointIntensityFusion(ref,refmask,ilist,beta=4,labelList=seglist )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
@@ -85,5 +89,27 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
     newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
     newimg<-makeImage(targetIMask,newmeanvec)
-    return( list(predimg=newimg, localWeights=weightmat) )
+    segimg<-NA
+    if ( !( all( is.na(labelList) ) ) )
+    {
+    segmat<-imageListToMatrix( labelList, refmask )
+    segvec<-rep( 0, ncol(segmat) )
+    segvals<-sort( unique( as.numeric(segmat)) )
+    for ( voxel in 1:ncol(segmat) )
+      {
+      probvals<-rep(0,length(segvals))
+      for ( p in 1:length(segvals))
+        {
+        ww<-which(segmat[,voxel]==segvals[p])
+        if ( length(ww) > 0 )
+          {
+          probvals[p]<-sum((weightmat[ ww , voxel ]))
+          }
+        }
+      segvec[voxel]=segvals[ which(probvals==max(probvals))  ]
+      }
+    segimg<-makeImage(targetIMask,segvec)
+    }
+    return( list(predimg=newimg, localWeights=weightmat,
+      segimg=segimg ) )
 }

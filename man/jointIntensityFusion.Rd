@@ -18,7 +18,7 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 
 \item{rad}{neighborhood radius}
 
-\item{labelList}{list containing antsImages - not yet used}
+\item{labelList}{list containing antsImages}
 
 \item{doscale}{scale neighborhood intensities}
 }
@@ -30,22 +30,26 @@ intensity generalization of joint label fusion.
 }
 \examples{
 set.seed(123)
-ref<-antsImageRead( getANTsRData('r16') ,2)
+ref<-antsImageRead( getANTsRData('r16'), 2)
 ImageMath(2,ref,"Normalize",ref)
-mi<-antsImageRead( getANTsRData('r27') ,2)
+mi<-antsImageRead( getANTsRData('r27'),  2)
 mi2<-antsImageRead( getANTsRData('r30') ,2)
 mi3<-antsImageRead( getANTsRData('r62') ,2)
 mi4<-antsImageRead( getANTsRData('r64') ,2)
 mi5<-antsImageRead( getANTsRData('r85') ,2)
 refmask<-getMask(ref)
 ilist<-list(mi,mi2,mi3,mi4,mi5)
+km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[5,0]"
+seglist<-list()
 for ( i in 1:length(ilist) )
-  {
-  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
-  ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
-  ilist[[i]]=tx$warpedmovout
-  }
-pp<-jointIntensityFusion(ref,refmask,ilist,beta=4)
+ {
+ tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
+ ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
+ ilist[[i]]=tx$warpedmovout
+ seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
+ seglist[[i]]<-seg$segmentation
+ }
+pp<-jointIntensityFusion(ref,refmask,ilist,beta=4,labelList=seglist )
 mm<-imageListToMatrix(ilist,refmask)
 avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 }
