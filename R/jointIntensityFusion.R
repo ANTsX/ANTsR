@@ -11,7 +11,7 @@
 #' @param rad  neighborhood radius, default to 4
 #' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
-#' @return approximated image
+#' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
@@ -118,6 +118,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       probImgList[[p]]<-makeImage(targetIMask,probImgVec[[p]])
     segimg<-makeImage(targetIMask,segvec)
     }
-    return( list(predimg=newimg, localWeights=weightmat,
-      segimg=segimg ) )
+    return( list(predimg=newimg, segimg=segimg,
+      localWeights=weightmat, probimgs=probImgList  ) )
 }

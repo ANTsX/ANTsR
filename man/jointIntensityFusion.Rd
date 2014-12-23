@@ -23,7 +23,7 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 \item{doscale}{scale neighborhood intensities}
 }
 \value{
-approximated image
+approximated image, segmentation and probabilities
 }
 \description{
 intensity generalization of joint label fusion.
