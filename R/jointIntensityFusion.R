@@ -95,6 +95,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     segmat<-imageListToMatrix( labelList, refmask )
     segvec<-rep( 0, ncol(segmat) )
     segvals<-sort( unique( as.numeric(segmat)) )
+    probImgList<-list()
+    probImgVec<-list()
+    for ( p in 1:length(segvals) )
+      probImgVec[[p]]<-rep(0,ncol(segmat))
     for ( voxel in 1:ncol(segmat) )
       {
       probvals<-rep(0,length(segvals))
@@ -105,10 +109,13 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
           {
           probvals[p]<-sum((weightmat[ ww , voxel ]))
           }
+        probImgVec[[p]][voxel]<-probvals[p]
         }
       k<-which(probvals==max(probvals,na.rm=T))
       segvec[voxel]=segvals[ k ]
       }
+    for ( p in 1:length(segvals) )
+      probImgList[[p]]<-makeImage(targetIMask,probImgVec[[p]])
     segimg<-makeImage(targetIMask,segvec)
     }
     return( list(predimg=newimg, localWeights=weightmat,
