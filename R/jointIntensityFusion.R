@@ -115,9 +115,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       segvec[voxel]=segvals[ k ]
       }
     for ( p in 1:length(segvals) )
-      probImgList[[p]]<-makeImage(targetIMask,probImgVec[[p]])
+      probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
     segimg<-makeImage(targetIMask,segvec)
     }
-    return( list(predimg=newimg, segimg=segimg,
+    return( list( predimg=newimg, segimg=segimg,
       localWeights=weightmat, probimgs=probImgList  ) )
 }
