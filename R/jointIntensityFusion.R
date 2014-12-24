@@ -89,7 +89,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       weightmat[,voxel]<-wts
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
       if ( voxel %% 500 == 0 ) {
-        setTxtProgressBar( progress, i )
+        setTxtProgressBar( progress, voxel )
       }
     }
     close( progress )
