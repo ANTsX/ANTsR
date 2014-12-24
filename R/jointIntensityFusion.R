@@ -11,6 +11,7 @@
 #' @param rad  neighborhood radius, default to 4
 #' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
+#' @param doNormalize  normalize each image range to 0, 1
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -51,14 +52,18 @@
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-    beta=2, rad=NA, labelList=NA, doscale = TRUE ) {
+    beta=2, rad=NA, labelList=NA, doscale = TRUE,
+    doNormalize=F ) {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
   }
   dim<-targetI@dimension
-  for ( i in atlasList ) ImageMath(dim,i,'Normalize',i)
-  ImageMath(dim,targetI,"Normalize",targetI)
+  if ( doNormalize )
+    {
+    for ( i in atlasList ) ImageMath(dim,i,"Normalize",i)
+    ImageMath(dim,targetI,"Normalize",targetI)
+    }
   if ( all(is.na(rad)) ) rad<-rep(2,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
@@ -112,8 +117,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     }
     close( progress )
     newmeanvec<-antsrimpute(newmeanvec)
-    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
-    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
+#    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
+#    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
     newimg<-makeImage(targetIMask,newmeanvec)
     segimg<-NA
     probImgList<-NA
