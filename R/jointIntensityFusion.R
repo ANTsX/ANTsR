@@ -45,7 +45,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     return(1)
   }
   dim<-targetI@dimension
-  if ( all(is.na(rad)) ) rad<-rep(4,dim)
+  for ( i in atlasList ) ImageMath(dim,i,'Normalize',i)
+  ImageMath(dim,targetI,"Normalize",targetI)
+  if ( all(is.na(rad)) ) rad<-rep(2,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rnorm(n)) )
@@ -64,8 +66,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     {
     imatlist[[ct]]<-antsGetNeighborhoodMatrix(i,
       targetIMask,rad,boundary.condition="mean")
-      ct<-ct+1
+    ct<-ct+1
     }
+  progress <- txtProgressBar(min = 0,
+    max = ncol(targetIv), style = 3)
   for ( voxel in 1:ncol(targetIv) )
     {
       for ( ct in 1:length(imatlist)) {
@@ -84,12 +88,17 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       weightmat[,voxel]<-wts
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
+      if ( voxel %% 500 == 0 ) {
+        setTxtProgressBar( progress, i )
+      }
     }
+    close( progress )
     newmeanvec<-antsrimpute(newmeanvec)
     newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
     newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
     newimg<-makeImage(targetIMask,newmeanvec)
     segimg<-NA
+    probImgList<-NA
     if ( !( all( is.na(labelList) ) ) )
     {
     segmat<-imageListToMatrix( labelList, refmask )
