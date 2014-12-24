@@ -55,12 +55,15 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   intmat<-wmat
   targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
     targetIMask,rad,boundary.condition="image",spatial.info=T)
-  if ( doscale ) targetIvStruct$values<-scale(targetIvStruct$values)
+  targetIv<-targetIvStruct$values
+  indices<-targetIvStruct$indices
+  rm(targetIvStruct)
+  if ( doscale ) targetIv<-scale(targetIv)
 #  imatlist<-list()
-  newmeanvec<-rep(0,ncol(targetIvStruct$values))
+  newmeanvec<-rep(0,ncol(targetIv))
   m<-length(atlasList)
   onev<-rep(1,m)
-  weightmat<-matrix( rep(0, m*ncol(targetIvStruct$values) ), nrow=m )
+  weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
 #  for ( i in atlasList )
 #    {
@@ -70,16 +73,16 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
 #    }
   natlas<-length(atlasList)
   progress <- txtProgressBar(min = 0,
-    max = ncol(targetIvStruct$values), style = 3)
-  for ( voxel in 1:ncol(targetIvStruct$values) )
+    max = ncol(targetIv), style = 3)
+  for ( voxel in 1:ncol(targetIv) )
     {
       for ( ct in 1:natlas) {
 #        v<-imatlist[[ct]][,voxel]
-        cent<-targetIvStruct$indices[voxel,]
+        cent<-indices[voxel,]
         v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
         intmat[ct,]<-v
         if ( doscale ) v<-scale(v)
-        wmat[ct,]<-(v-targetIvStruct$values[,voxel])
+        wmat[ct,]<-(v-targetIv[,voxel])
       }
       #  cormat<-cor(t(wmat))^beta
       #  wmat<-t(scale(t(wmat)))
