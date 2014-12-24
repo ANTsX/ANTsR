@@ -35,9 +35,21 @@
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
 #'  seglist[[i]]<-seg$segmentation
 #'  }
-#' pp<-jointIntensityFusion(ref,refmask,ilist,beta=4,labelList=seglist )
+#' r<-4
+#' d<-2
+#' pp<-jointIntensityFusion(ref,refmask,ilist,
+#'   beta=4,labelList=seglist, rad=rep(r,d) )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
+#' # save memory by separating masks
+#' refmaske<-antsImageClone(refmask)
+#' ImageMath(d,refmaske,"ME",refmask,15)
+#' refmask[refmaske==1]<-0
+#' pp1<-jointIntensityFusion(ref,refmask,ilist,
+#'   beta=2,rad=rep(r,d))
+#' pp2<-jointIntensityFusion(ref,refmaske,ilist,
+#'   beta=2,rad=rep(r,d))
+#' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=2, rad=NA, labelList=NA, doscale = TRUE ) {
   if (nargs() == 0) {
