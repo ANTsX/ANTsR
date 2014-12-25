@@ -98,6 +98,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         cent<-indices[voxel,]
         v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
         intmat[ct,]<-v
+        # handle case where sd is 0
+        if ( sd(v) == 0 ) v<-rnorm(length(v))
         if ( doscale ) v<-scale(v)
         wmat[ct,]<-(v-targetIv[,voxel])
       }
@@ -116,7 +118,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       }
     }
     close( progress )
-    newmeanvec<-antsrimpute(newmeanvec)
+#    newmeanvec<-antsrimpute(newmeanvec)
 #    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
 #    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
     newimg<-makeImage(targetIMask,newmeanvec)
