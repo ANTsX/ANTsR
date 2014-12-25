@@ -67,7 +67,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( all(is.na(rad)) ) rad<-rep(2,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
-  wmat<-t(replicate(length(atlasList), rnorm(n)) )
+  wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
   matcenter<-round(n/2)+1
   intmat<-wmat
   targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
@@ -91,36 +91,35 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   natlas<-length(atlasList)
   progress <- txtProgressBar(min = 0,
     max = ncol(targetIv), style = 3)
-  for ( voxel in 1:ncol(targetIv) )
+  for ( voxel in 12982:ncol(targetIv) )
     {
+      zsd<-rep(1,natlas)
+      wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
       for ( ct in 1:natlas) {
 #        v<-imatlist[[ct]][,voxel]
         cent<-indices[voxel,]
         v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
         intmat[ct,]<-v
         # handle case where sd is 0
-        if ( sd(v) == 0 ) v<-rnorm(length(v))
+        if ( sd(v) == 0 ) {
+          zsd[ct]<-0
+        }
         if ( doscale ) v<-scale(v)
-        wmat[ct,]<-(v-targetIv[,voxel])
+        wmat[ct,]<-v-targetIv[,voxel]
       }
-      #  cormat<-cor(t(wmat))^beta
-      #  wmat<-t(scale(t(wmat)))
-      cormat<-antsrimpute(( wmat %*% t(wmat) )^beta)
-      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-2 ) ,
-      error = function(e) return( diag(ncol(cormat)) ) )
-      if ( typeof(invmat)=='character')
-        invmat<-diag(ncol(cormat))
+      wmat<-wmat[zsd==1,]
+      cormat<-( wmat %*% t(wmat) )^beta
+      invmat<-solve( cormat + diag(ncol(cormat))*1e-4 )
+      onev<-rep(1,sum(zsd))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
-      weightmat[,voxel]<-wts
+      weightmat[zsd==1,voxel]<-wts
+      wts<-weightmat[,voxel]
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
       if ( voxel %% 500 == 0 ) {
         setTxtProgressBar( progress, voxel )
       }
     }
     close( progress )
-#    newmeanvec<-antsrimpute(newmeanvec)
-#    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
-#    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
     newimg<-makeImage(targetIMask,newmeanvec)
     segimg<-NA
     probImgList<-NA
@@ -155,3 +154,20 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     return( list( predimg=newimg, segimg=segimg,
       localWeights=weightmat, probimgs=probImgList  ) )
 }
+#
+##    newmeanvec<-antsrimpute(newmeanvec)
+#    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
+#    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
+#  cormat<-cor(t(wmat))^beta
+#  wmat<-t(scale(t(wmat)))
+#      cormat<-antsrimpute(( wmat %*% t(wmat) )^beta)
+#      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-6 ) ,
+#      error = function(e) return( diag(1.0/ncol(cormat)) ) )
+#      if ( typeof(invmat)=='character')
+#        {
+#        wts<-rep(1.0/natlas,natlas)
+#        } else {
+#        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
+#      }
+#      wts<-wts*zsd
+#
