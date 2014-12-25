@@ -91,7 +91,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   natlas<-length(atlasList)
   progress <- txtProgressBar(min = 0,
     max = ncol(targetIv), style = 3)
-  for ( voxel in 12982:ncol(targetIv) )
+  for ( voxel in 1:ncol(targetIv) )
     {
       zsd<-rep(1,natlas)
       wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
@@ -107,9 +107,17 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         if ( doscale ) v<-scale(v)
         wmat[ct,]<-v-targetIv[,voxel]
       }
+      if ( sum(zsd) > 2 )
+      {
       wmat<-wmat[zsd==1,]
       cormat<-( wmat %*% t(wmat) )^beta
-      invmat<-solve( cormat + diag(ncol(cormat))*1e-4 )
+      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-6 ) ,
+            error = function(e) {
+              print(dim(cormat))
+              return(  diag(1.0/ncol(cormat)) )
+            }
+              )
+      #invmat<-solve( cormat + diag(ncol(cormat))*1 )
       onev<-rep(1,sum(zsd))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       weightmat[zsd==1,voxel]<-wts
@@ -117,6 +125,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
       if ( voxel %% 500 == 0 ) {
         setTxtProgressBar( progress, voxel )
+      }
       }
     }
     close( progress )
