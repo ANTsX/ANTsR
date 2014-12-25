@@ -76,18 +76,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   indices<-targetIvStruct$indices
   rm(targetIvStruct)
   if ( doscale ) targetIv<-scale(targetIv)
-#  imatlist<-list()
   newmeanvec<-rep(0,ncol(targetIv))
   m<-length(atlasList)
   onev<-rep(1,m)
   weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
-#  for ( i in atlasList )
-#    {
-#    imatlist[[ct]]<-antsGetNeighborhoodMatrix(i,
-#      targetIMask,rad,boundary.condition="image")
-#    ct<-ct+1
-#    }
   natlas<-length(atlasList)
   progress <- txtProgressBar(min = 0,
     max = ncol(targetIv), style = 3)
@@ -96,7 +89,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       zsd<-rep(1,natlas)
       wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
       for ( ct in 1:natlas) {
-#        v<-imatlist[[ct]][,voxel]
+#        v<-imatlist[[ct]][,voxel] # too costly, memory-wise
         cent<-indices[voxel,]
         v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
         intmat[ct,]<-v
@@ -111,13 +104,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
       wmat<-wmat[zsd==1,]
       cormat<-( wmat %*% t(wmat) )^beta
-      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-6 ) ,
-            error = function(e) {
-              print(dim(cormat))
-              return(  diag(1.0/ncol(cormat)) )
-            }
-              )
-      #invmat<-solve( cormat + diag(ncol(cormat))*1 )
+      invmat<-solve( cormat + diag(ncol(cormat))*1.e-4 )
       onev<-rep(1,sum(zsd))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       weightmat[zsd==1,voxel]<-wts
@@ -179,4 +166,12 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
 #        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
 #      }
 #      wts<-wts*zsd
+#
+#invmat<-tryCatch
+#( solve( cormat + diag(ncol(cormat))*1e-4 ) ,
+#error = function(e)
+#{
+#  return(  diag(1.0/ncol(cormat)) )
+#}
+#)
 #
