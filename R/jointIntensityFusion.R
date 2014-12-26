@@ -51,7 +51,7 @@
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=2, rad=NA, labelList=NA, doscale = TRUE,
-    doNormalize=T ) {
+    doNormalize=TRUE ) {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
@@ -133,13 +133,16 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       probvals<-rep(0,length(segvals))
       for ( p in 1:length(segvals))
         {
-        ww<-which(segmat[,voxel]==segvals[p])
+        ww<-which(segmat[,voxel]==segvals[p] &
+          weightmat[  , voxel ] > 0 )
         if ( length(ww) > 0 )
           {
           probvals[p]<-sum((weightmat[ ww , voxel ]))
           }
-        probImgVec[[p]][voxel]<-probvals[p]
         }
+      probvals<-probvals/sum(probvals)
+      for ( p in 1:length(segvals))
+        probImgVec[[p]][voxel]<-probvals[p]
       k<-which(probvals==max(probvals,na.rm=T))
       segvec[voxel]=segvals[ k ]
       }
