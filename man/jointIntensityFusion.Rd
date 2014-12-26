@@ -21,6 +21,8 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 \item{labelList}{list containing antsImages}
 
 \item{doscale}{scale neighborhood intensities}
+
+\item{doNormalize}{normalize each image range to 0, 1}
 }
 \value{
 approximated image, segmentation and probabilities
@@ -31,7 +33,6 @@ intensity generalization of joint label fusion.
 \examples{
 set.seed(123)
 ref<-antsImageRead( getANTsRData('r16'), 2)
-ImageMath(2,ref,"Normalize",ref)
 mi<-antsImageRead( getANTsRData('r27'),  2)
 mi2<-antsImageRead( getANTsRData('r30') ,2)
 mi3<-antsImageRead( getANTsRData('r62') ,2)
@@ -44,7 +45,6 @@ seglist<-list()
 for ( i in 1:length(ilist) )
  {
  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
- ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
  ilist[[i]]=tx$warpedmovout
  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
  seglist[[i]]<-seg$segmentation
@@ -52,7 +52,7 @@ for ( i in 1:length(ilist) )
 r<-4
 d<-2
 pp<-jointIntensityFusion(ref,refmask,ilist,
-  beta=4,labelList=seglist, rad=rep(r,d) )
+  beta=1,labelList=seglist, rad=rep(r,d) )
 mm<-imageListToMatrix(ilist,refmask)
 avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 # save memory by separating masks

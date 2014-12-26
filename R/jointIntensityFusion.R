@@ -18,7 +18,6 @@
 #' @examples
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
-#' ImageMath(2,ref,"Normalize",ref)
 #' mi<-antsImageRead( getANTsRData('r27'),  2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
@@ -31,7 +30,6 @@
 #' for ( i in 1:length(ilist) )
 #'  {
 #'  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
-#'  ImageMath(2,tx$warpedmovout,"Normalize",tx$warpedmovout)
 #'  ilist[[i]]=tx$warpedmovout
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
 #'  seglist[[i]]<-seg$segmentation
@@ -39,7 +37,7 @@
 #' r<-4
 #' d<-2
 #' pp<-jointIntensityFusion(ref,refmask,ilist,
-#'   beta=4,labelList=seglist, rad=rep(r,d) )
+#'   beta=1,labelList=seglist, rad=rep(r,d) )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
@@ -53,7 +51,7 @@
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     beta=2, rad=NA, labelList=NA, doscale = TRUE,
-    doNormalize=F ) {
+    doNormalize=T ) {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
@@ -100,15 +98,17 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         if ( doscale ) v<-scale(v)
         wmat[ct,]<-v-targetIv[,voxel]
       }
-      if ( sum(zsd) > 2 )
+      if ( sum(zsd) > (natlas/2) )
       {
       wmat<-wmat[zsd==1,]
       cormat<-( wmat %*% t(wmat) )^beta
-      invmat<-solve( cormat + diag(ncol(cormat))*1.e-4 )
+      invmat<-solve( cormat + diag(ncol(cormat))*1.e-6 )
       onev<-rep(1,sum(zsd))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       weightmat[zsd==1,voxel]<-wts
       wts<-weightmat[,voxel]
+      # if ( abs(sum(wts,na.rm=T) - 1) > 0.01 )
+      #  wts<-rep(1.0/length(wts),length(wts))
       newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
       if ( voxel %% 500 == 0 ) {
         setTxtProgressBar( progress, voxel )
