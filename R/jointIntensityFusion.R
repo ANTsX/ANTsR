@@ -18,6 +18,7 @@
 #' @examples
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
+#' ImageMath(2,ref,"Normalize",ref)
 #' mi<-antsImageRead( getANTsRData('r27'),  2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
@@ -29,6 +30,7 @@
 #' seglist<-list()
 #' for ( i in 1:length(ilist) )
 #'  {
+#'  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
 #'  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
 #'  ilist[[i]]=tx$warpedmovout
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
