@@ -104,9 +104,20 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
       wmat<-wmat[zsd==1,]
       cormat<-( wmat %*% t(wmat) )^beta
-      invmat<-solve( cormat + diag(ncol(cormat))*1.e-6 )
+      tempf<-function()
+      {
+      solve( cormat + diag(ncol(cormat))*1e-6 )
       onev<-rep(1,sum(zsd))
       wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
+      return(wts)
+      }
+      wts<-tryCatch( tempf(),
+            error = function(e) {
+              szsd<-sum(zsd)
+              wts<-rep(1.0/szsd,szsd)
+              return( wts )
+              }
+              )
       weightmat[zsd==1,voxel]<-wts
       wts<-weightmat[,voxel]
       # if ( abs(sum(wts,na.rm=T) - 1) > 0.01 )
