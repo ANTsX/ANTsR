@@ -120,6 +120,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
       wmat<-wmat[zsd==1,]
       cormat<-( wmat %*% t(wmat) )
+      cormatnorm<-norm(cormat,"F")
+      corrho<-cormatnorm*rho
 #      cormat<-cor(t(wmat)) # more stable wrt outliers
       if ( useSaferComputation ) # safer computation
       {
@@ -127,9 +129,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         {
         if ( havefastsvd )
           invmat<-pinv(
-            cormat + diag(ncol(cormat))*rho, 0.01 )^betaf
+            cormat + diag(ncol(cormat))*corrho, 0.01 )^betaf
         if (!havefastsvd )
-          invmat<-solve( cormat + diag(ncol(cormat))*rho )^betaf
+          invmat<-solve( cormat + diag(ncol(cormat))*corrho )^betaf
         onev<-rep(1,sum(zsd))
         wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
         return(wts)
@@ -143,7 +145,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
             }
         )
       } else {
-        invmat<-solve( cormat + diag(ncol(cormat))*rho )^beta
+        invmat<-solve( cormat + diag(ncol(cormat))*corrho )^beta
         onev<-rep(1,sum(zsd))
         wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       }
