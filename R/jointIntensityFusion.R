@@ -12,6 +12,8 @@
 #' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
 #' @param doNormalize  normalize each image range to 0, 1
+#' @param maxAtlasAtVoxel  max n atlases to use at each voxel
+#' @param rho ridge penalty increases robustness to outliers
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -52,12 +54,16 @@
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-    beta=2, rad=NA, labelList=NA, doscale = TRUE,
-    doNormalize=TRUE ) {
+  beta=2, rad=NA, labelList=NA, doscale = TRUE,
+  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=1, debug=F )
+{
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
   }
+  havefastsvd<-F
+  pckg <- try(require(RcppArmadillo))
+  if (!pckg) { havefastsvd<-F }
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -82,57 +88,74 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
   natlas<-length(atlasList)
+  if ( maxAtlasAtVoxel > natlas ) maxAtlasAtVoxel<-natlas
   progress <- txtProgressBar(min = 0,
-    max = ncol(targetIv), style = 3)
+                max = ncol(targetIv), style = 3)
   for ( voxel in 1:ncol(targetIv) )
     {
-      zsd<-rep(1,natlas)
-      wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
-      for ( ct in 1:natlas) {
-#        v<-imatlist[[ct]][,voxel] # too costly, memory-wise
-        cent<-indices[voxel,]
-        v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
-        intmat[ct,]<-v
-        # handle case where sd is 0
-        if ( sd(v) == 0 ) {
-          zsd[ct]<-0
+    zsd<-rep(1,natlas)
+    wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
+    for ( ct in 1:natlas)
+      {
+      cent<-indices[voxel,]
+      v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
+      intmat[ct,]<-v
+      if ( sd(v) == 0 ) {
+        zsd[ct]<-0
         }
-        if ( doscale ) v<-scale(v)
-        wmat[ct,]<-v-targetIv[,voxel]
+      if ( doscale ) v<-scale(v)
+      wmat[ct,]<-(v-targetIv[,voxel])
       }
-      if ( sum(zsd) > (natlas/2) )
+    if ( maxAtlasAtVoxel < natlas ) {
+      ords<-order(rowMeans(abs(wmat)))
+      inds<-1:maxAtlasAtVoxel
+      zsd[ ords[-inds] ]<-0
+      }
+    if ( sum(zsd) > (2) )
       {
       wmat<-wmat[zsd==1,]
-      cormat<-( wmat %*% t(wmat) )^beta
-      tempf<-function()
-      {
-      solve( cormat + diag(ncol(cormat))*1e-6 )
-      onev<-rep(1,sum(zsd))
-      wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
-      return(wts)
-      }
-      wts<-tryCatch( tempf(),
-            error = function(e) {
-              szsd<-sum(zsd)
-              wts<-rep(1.0/szsd,szsd)
-              return( wts )
-              }
-              )
+#      cormat<-( wmat %*% t(wmat) )
+      cormat<-cor(t(wmat))
+      tempf<-function(betaf)
+        {
+        if ( havefastsvd )
+          invmat<-pinv(
+            cormat + diag(ncol(cormat))*rho, 0.01 )^betaf
+        if (!havefastsvd )
+          invmat<-solve( cormat + diag(ncol(cormat))*rho )^betaf
+        onev<-rep(1,sum(zsd))
+        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
+        return(wts)
+        }
+      wts<-tryCatch( tempf(beta),
+          error = function(e)
+            {
+            szsd<-sum(zsd)
+            wts<-rep(1.0/szsd,szsd)
+            return( wts )
+            }
+        )
       weightmat[zsd==1,voxel]<-wts
-      wts<-weightmat[,voxel]
-      # if ( abs(sum(wts,na.rm=T) - 1) > 0.01 )
-      #  wts<-rep(1.0/length(wts),length(wts))
-      newmeanvec[voxel]<-(intmat[,matcenter] %*% wts )[1]
+      intmatc<-intmat[zsd==1,matcenter]
+      pvox<-( intmatc %*% wts )[1]
+      newmeanvec[voxel]<-pvox
+      if ( debug )
+            return(
+                list(voxel=voxel,
+                     wts=wts,intmat=intmat,
+                     wmat=wmat,cormat=cormat, pvox=pvox,
+                     zsd=zsd,intmatc=intmatc)
+                )
       if ( voxel %% 500 == 0 ) {
-        setTxtProgressBar( progress, voxel )
-      }
-      }
+            setTxtProgressBar( progress, voxel )
+        }
     }
-    close( progress )
-    newimg<-makeImage(targetIMask,newmeanvec)
-    segimg<-NA
-    probImgList<-NA
-    if ( !( all( is.na(labelList) ) ) )
+  }
+  close( progress )
+  newimg<-makeImage(targetIMask,newmeanvec)
+  segimg<-NA
+  probImgList<-NA
+  if ( !( all( is.na(labelList) ) ) )
     {
     segmat<-imageListToMatrix( labelList, refmask )
     segvec<-rep( 0, ncol(segmat) )
@@ -148,10 +171,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         {
         ww<-which(segmat[,voxel]==segvals[p] &
           weightmat[  , voxel ] > 0 )
-        if ( length(ww) > 0 )
-          {
-          probvals[p]<-sum((weightmat[ ww , voxel ]))
-          }
+          if ( length(ww) > 0 )
+            {
+            probvals[p]<-sum((weightmat[ ww , voxel ]))
+            }
         }
       probvals<-probvals/sum(probvals)
       for ( p in 1:length(segvals))
@@ -163,31 +186,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
     segimg<-makeImage(targetIMask,segvec)
     }
-    return( list( predimg=newimg, segimg=segimg,
-      localWeights=weightmat, probimgs=probImgList  ) )
+  return( list( predimg=newimg, segimg=segimg,
+    localWeights=weightmat, probimgs=probImgList  ) )
 }
-#
-##    newmeanvec<-antsrimpute(newmeanvec)
-#    newmeanvec[newmeanvec>max(targetI)]<-max(targetI)
-#    newmeanvec[newmeanvec<min(targetI)]<-min(targetI)
-#  cormat<-cor(t(wmat))^beta
-#  wmat<-t(scale(t(wmat)))
-#      cormat<-antsrimpute(( wmat %*% t(wmat) )^beta)
-#      invmat<-tryCatch( solve( cormat + diag(ncol(cormat))*1e-6 ) ,
-#      error = function(e) return( diag(1.0/ncol(cormat)) ) )
-#      if ( typeof(invmat)=='character')
-#        {
-#        wts<-rep(1.0/natlas,natlas)
-#        } else {
-#        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
-#      }
-#      wts<-wts*zsd
-#
-#invmat<-tryCatch
-#( solve( cormat + diag(ncol(cormat))*1e-4 ) ,
-#error = function(e)
-#{
-#  return(  diag(1.0/ncol(cormat)) )
-#}
-#)
-#

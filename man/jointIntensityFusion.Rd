@@ -23,6 +23,10 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 \item{doscale}{scale neighborhood intensities}
 
 \item{doNormalize}{normalize each image range to 0, 1}
+
+\item{maxAtlasAtVoxel}{max n atlases to use at each voxel}
+
+\item{rho}{ridge penalty increases robustness to outliers}
 }
 \value{
 approximated image, segmentation and probabilities
