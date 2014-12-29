@@ -14,6 +14,7 @@
 #' @param doNormalize  normalize each image range to 0, 1
 #' @param maxAtlasAtVoxel  max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers
+#' @param useSaferComputation slower but more error checking
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -55,7 +56,8 @@
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=2, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=0.1, debug=F )
+  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=0.1, # debug=F,
+  useSaferComputation=FALSE )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
@@ -91,10 +93,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( maxAtlasAtVoxel > natlas ) maxAtlasAtVoxel<-natlas
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
+  basewmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
   for ( voxel in 1:ncol(targetIv) )
     {
     zsd<-rep(1,natlas)
-    wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
+    wmat<-basewmat
     for ( ct in 1:natlas)
       {
       cent<-indices[voxel,]
@@ -115,7 +118,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
       wmat<-wmat[zsd==1,]
 #      cormat<-( wmat %*% t(wmat) )
-      cormat<-cor(t(wmat))
+      cormat<-cor(t(wmat)) # more stable wrt outliers
+      if ( useSaferComputation ) # safer computation
+      {
       tempf<-function(betaf)
         {
         if ( havefastsvd )
@@ -135,15 +140,18 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
             return( wts )
             }
         )
+      } else {
+        invmat<-solve( cormat + diag(ncol(cormat))*rho )^beta
+        onev<-rep(1,sum(zsd))
+        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
+      }
       weightmat[zsd==1,voxel]<-wts
-      intmatc<-intmat[zsd==1,matcenter]
-      pvox<-( intmatc %*% wts )[1]
-      newmeanvec[voxel]<-pvox
-      if ( debug )
+      newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
+      if ( FALSE )
             return(
                 list(voxel=voxel,
                      wts=wts,intmat=intmat,
-                     wmat=wmat,cormat=cormat, pvox=pvox,
+                     wmat=wmat,cormat=cormat, pvox=newmeanvec[voxel],
                      zsd=zsd,intmatc=intmatc)
                 )
       if ( voxel %% 500 == 0 ) {
