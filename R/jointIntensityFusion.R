@@ -12,7 +12,7 @@
 #' @param labelList list containing antsImages
 #' @param doscale  scale neighborhood intensities
 #' @param doNormalize  normalize each image range to 0, 1
-#' @param maxAtlasAtVoxel  max n atlases to use at each voxel
+#' @param maxAtlasAtVoxel  min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers
 #' @param useSaferComputation slower but more error checking
 #' @return approximated image, segmentation and probabilities
@@ -42,7 +42,7 @@
 #' r<-4
 #' d<-2
 #' pp<-jointIntensityFusion(ref,refmask,ilist,
-#'   beta=3,labelList=seglist, rad=rep(r,d) )
+#'   labelList=seglist, rad=rep(r,d) )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
@@ -55,8 +55,8 @@
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-  beta=2, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=0.1, # debug=F,
+  beta=1, rad=NA, labelList=NA, doscale = TRUE,
+  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
   useSaferComputation=FALSE )
 {
   if (nargs() == 0) {
@@ -90,7 +90,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
   natlas<-length(atlasList)
-  if ( maxAtlasAtVoxel > natlas ) maxAtlasAtVoxel<-natlas
+  if ( maxAtlasAtVoxel[2] > natlas ) maxAtlasAtVoxel[2]<-natlas
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
   basewmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
@@ -111,9 +111,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       if ( doscale ) v<-scale(v)
       wmat[ct,]<-(v-targetIv[,voxel])
       }
-    if ( maxAtlasAtVoxel < natlas ) {
+    if ( maxAtlasAtVoxel[2] < natlas ) {
       ords<-order(rowMeans(abs(wmat)))
-      inds<-1:maxAtlasAtVoxel
+      inds<-maxAtlasAtVoxel[1]:maxAtlasAtVoxel[2]
       zsd[ ords[-inds] ]<-0
       }
     if ( sum(zsd) > (2) )
@@ -149,13 +149,16 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       }
       weightmat[zsd==1,voxel]<-wts
       newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
-      if ( FALSE )
+      if ( FALSE ) {
+        print("DEBUG MODE")
+        print(maxAtlasAtVoxel)
             return(
                 list(voxel=voxel,
                      wts=wts,intmat=intmat,
                      wmat=wmat,cormat=cormat, pvox=newmeanvec[voxel],
-                     zsd=zsd,intmatc=intmatc)
+                     zsd=zsd,intmatc=intmat[zsd==1,matcenter])
                 )
+              }
       if ( voxel %% 500 == 0 ) {
             setTxtProgressBar( progress, voxel )
         }

@@ -24,7 +24,7 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 
 \item{doNormalize}{normalize each image range to 0, 1}
 
-\item{maxAtlasAtVoxel}{max n atlases to use at each voxel}
+\item{maxAtlasAtVoxel}{min/max n atlases to use at each voxel}
 
 \item{rho}{ridge penalty increases robustness to outliers}
 
@@ -59,8 +59,8 @@ for ( i in 1:length(ilist) )
  }
 r<-4
 d<-2
-pp<-jointIntensityFusion(ref,refmask,ilist, rho=0.01,
-  beta=4,labelList=seglist, rad=rep(r,d) )
+pp<-jointIntensityFusion(ref,refmask,ilist,
+  labelList=seglist, rad=rep(r,d) )
 mm<-imageListToMatrix(ilist,refmask)
 avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 # save memory by separating masks
@@ -78,3 +78,4 @@ Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 }
 \keyword{fusion,}
 \keyword{template}
+
