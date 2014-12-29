@@ -27,6 +27,8 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 \item{maxAtlasAtVoxel}{max n atlases to use at each voxel}
 
 \item{rho}{ridge penalty increases robustness to outliers}
+
+\item{useSaferComputation}{slower but more error checking}
 }
 \value{
 approximated image, segmentation and probabilities
