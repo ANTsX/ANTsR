@@ -100,7 +100,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     wmat<-basewmat
     for ( ct in 1:natlas)
       {
-      cent<-indices[voxel,]
+      # the -1 is a FIXME / maybe a BUG
+      # see antsImage_GetNeighborhood
+      cent<-indices[voxel,]-1
       v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
       intmat[ct,]<-v
       if ( sd(v) == 0 ) {
