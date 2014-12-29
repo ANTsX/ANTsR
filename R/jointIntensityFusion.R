@@ -105,11 +105,13 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       cent<-indices[voxel,]+1
       v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
       intmat[ct,]<-v
-      if ( sd(v) == 0 ) {
+      sdv<-sd(v)
+      if ( sdv == 0 ) {
         zsd[ct]<-0
+        sdv<-1
         }
       if ( doscale ) {
-        v<-( v - mean(v))/sd(v)
+        v<-( v - mean(v))/sdv
       }
       wmat[ct,]<-(v-targetIv[,voxel])
       }
