@@ -55,7 +55,7 @@
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=2, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=1, debug=F )
+  doNormalize=TRUE, maxAtlasAtVoxel=Inf, rho=0.1, debug=F )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
