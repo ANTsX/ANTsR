@@ -100,9 +100,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     wmat<-basewmat
     for ( ct in 1:natlas)
       {
-      # the -1 is a FIXME / maybe a BUG
+      # is this a BUG/FIXME?
       # see antsImage_GetNeighborhood
-      cent<-indices[voxel,]-1
+      cent<-indices[voxel,]+1
       v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
       intmat[ct,]<-v
       if ( sd(v) == 0 ) {
@@ -119,8 +119,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     if ( sum(zsd) > (2) )
       {
       wmat<-wmat[zsd==1,]
-#      cormat<-( wmat %*% t(wmat) )
-      cormat<-cor(t(wmat)) # more stable wrt outliers
+      cormat<-( wmat %*% t(wmat) )
+#      cormat<-cor(t(wmat)) # more stable wrt outliers
       if ( useSaferComputation ) # safer computation
       {
       tempf<-function(betaf)

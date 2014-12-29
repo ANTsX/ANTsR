@@ -59,8 +59,8 @@ for ( i in 1:length(ilist) )
  }
 r<-4
 d<-2
-pp<-jointIntensityFusion(ref,refmask,ilist,
-  beta=3,labelList=seglist, rad=rep(r,d) )
+pp<-jointIntensityFusion(ref,refmask,ilist, rho=0.01,
+  beta=4,labelList=seglist, rad=rep(r,d) )
 mm<-imageListToMatrix(ilist,refmask)
 avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 # save memory by separating masks
@@ -78,4 +78,3 @@ Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 }
 \keyword{fusion,}
 \keyword{template}
-
