@@ -48,6 +48,10 @@ segmentShapeFromImage<-function( img, shape, mask=NA, rad=NA )
     rad,boundary.condition='image')
     mat<-antsrimpute(mat)
   shapecor<-cor( mat, shapevec )
+  refvec<-shape[ mask == 1 ]
+  corinshape<-mean( refvec * shapecor )
+  if ( corinshape < 0  )
+    shapecor<-shapecor*(-1)
   featurei<-makeImage(mask, shapecor )
   return(featurei)
 }
