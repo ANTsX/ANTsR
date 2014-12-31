@@ -6,6 +6,7 @@
 #' @param shape to define features
 #' @param mask  with values 1 or 0
 #' @param rad  max radius (optional)
+#' @param scfun  function to apply to feature image (optional eg abs)
 #' @return feature image
 #' @author Brian B. Avants
 #' @keywords shape template
@@ -21,7 +22,8 @@
 #' plotANTsImage(fi,func=list(fimg),
 #'   thresh=paste(mean(fimg)+sd(fimg)*2,
 #'   max(fimg),sep='x'))
-segmentShapeFromImage<-function( img, shape, mask=NA, rad=NA )
+segmentShapeFromImage<-function( img, shape,
+  mask=NA, rad=NA, scfun )
 {
   if (nargs() == 0) {
     print(args(segmentShapeFromImage))
@@ -33,7 +35,7 @@ segmentShapeFromImage<-function( img, shape, mask=NA, rad=NA )
     # shapearr<-as.array(shape)
     # ww<-which( shapearr > 0, arr.ind=TRUE)
     shapesum<-sum(shape>0)
-    rd<-round( shapesum^(1.0/dim) )+1
+    rd<-round( shapesum^(1.0/dim)*0.5 )+1
     rad<-rep(rd,dim)
     print(paste("computed r",rd))
   }
@@ -42,16 +44,18 @@ segmentShapeFromImage<-function( img, shape, mask=NA, rad=NA )
     rad, boundary.condition='image')
   mat<-antsrimpute(mat)
   matsums<-colSums(mat)
-  shapevec<-rowMeans( mat )
+  shapevec<-rowMeans( mat[ , rep(which.max( matsums ),2)    ] )
   shapevec<-shapevec/max(shapevec)
   mat<-antsGetNeighborhoodMatrix(img, mask,
     rad,boundary.condition='image')
     mat<-antsrimpute(mat)
   shapecor<-cor( mat, shapevec )
-  refvec<-shape[ mask == 1 ]
-  corinshape<-mean( refvec * shapecor )
-  if ( corinshape < 0  )
-    shapecor<-shapecor*(-1)
+  if ( ! missing(scfun) )
+    shapecor<-scfun( shapecor )
+#  refvec<-shape[ mask == 1 ]
+#  corinshape<-mean( refvec * shapecor )
+#  if ( corinshape < 0  )
+#    shapecor<-shapecor*(-1)
   featurei<-makeImage(mask, shapecor )
   return(featurei)
 }
