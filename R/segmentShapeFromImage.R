@@ -42,7 +42,7 @@ segmentShapeFromImage<-function( img, shape, mask=NA, rad=NA )
     rad, boundary.condition='image')
   mat<-antsrimpute(mat)
   matsums<-colSums(mat)
-  shapevec<-mat[ , which.max( matsums )[1]  ]
+  shapevec<-rowMeans( mat )
   shapevec<-shapevec/max(shapevec)
   mat<-antsGetNeighborhoodMatrix(img, mask,
     rad,boundary.condition='image')
