@@ -18,6 +18,7 @@
 #' segs[ segs != 1 ]<-0
 #' shp<-labelClusters( antsImageClone(segs,'float'),10)
 #' shp[ shp != 7 ]<-0
+#' SmoothImage(2,shp,1.5,shp)
 #' fimg<-segmentShapeFromImage(fi,shp,mask)
 #' plotANTsImage(fi,func=list(fimg),
 #'   thresh=paste(mean(fimg)+sd(fimg)*2,
@@ -38,7 +39,7 @@ segmentShapeFromImage<-function( img, shape,
     rd<-round( shapesum^(1.0/dim)*0.5 )+1
     rad<-rep(rd,dim)
   }
-  shapemask<-getMask(shape,0.5,Inf,0)
+  shapemask<-getMask(shape,0.05,Inf,0)
   mat<-antsGetNeighborhoodMatrix(shape, shapemask,
     rad, boundary.condition='image')
   mat<-antsrimpute(mat)
@@ -47,14 +48,10 @@ segmentShapeFromImage<-function( img, shape,
   shapevec<-shapevec/max(shapevec)
   mat<-antsGetNeighborhoodMatrix(img, mask,
     rad,boundary.condition='image')
-    mat<-antsrimpute(mat)
+  mat<-antsrimpute(mat)
   shapecor<-cor( mat, shapevec )
   if ( ! missing(scfun) )
     shapecor<-scfun( shapecor )
-#  refvec<-shape[ mask == 1 ]
-#  corinshape<-mean( refvec * shapecor )
-#  if ( corinshape < 0  )
-#    shapecor<-shapecor*(-1)
   featurei<-makeImage(mask, shapecor )
   return(featurei)
 }

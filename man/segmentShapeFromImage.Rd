@@ -30,6 +30,7 @@ segs<-Atropos( d = 2, a = fi, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x =
 segs[ segs != 1 ]<-0
 shp<-labelClusters( antsImageClone(segs,'float'),10)
 shp[ shp != 7 ]<-0
+SmoothImage(2,shp,1.5,shp)
 fimg<-segmentShapeFromImage(fi,shp,mask)
 plotANTsImage(fi,func=list(fimg),
   thresh=paste(mean(fimg)+sd(fimg)*2,
