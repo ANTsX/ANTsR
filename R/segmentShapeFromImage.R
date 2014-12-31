@@ -37,7 +37,6 @@ segmentShapeFromImage<-function( img, shape,
     shapesum<-sum(shape>0)
     rd<-round( shapesum^(1.0/dim)*0.5 )+1
     rad<-rep(rd,dim)
-    print(paste("computed r",rd))
   }
   shapemask<-getMask(shape,0.5,Inf,0)
   mat<-antsGetNeighborhoodMatrix(shape, shapemask,
