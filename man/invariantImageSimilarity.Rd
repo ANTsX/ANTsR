@@ -3,10 +3,12 @@
 \alias{invariantImageSimilarity}
 \title{mutual information between two images as a function of geometry}
 \usage{
-mival<-invariantImageSimilarity( i1, i2, thetas=0:360 )
+mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 }
 \arguments{
 \item{thetas}{numeric vector}
+
+\item{localSearchIterations}{integer controlling local search in multistart}
 
 \item{img}{antsImage}
 
