@@ -11,8 +11,9 @@ template< unsigned int Dimension >
 SEXP invariantSimilarityHelper(
   typename itk::Image< float , Dimension >::Pointer image1,
   typename itk::Image< float , Dimension >::Pointer image2,
-  SEXP indices )
+  SEXP r_thetas )
 {
+  Rcpp::NumericVector thetas( r_thetas );
   std::vector<double> mivec;
   unsigned int vecsize = 10;
   Rcpp::NumericVector vector_r( vecsize ) ;
@@ -34,7 +35,7 @@ SEXP invariantSimilarityHelper(
       metric->SetNumberOfHistogramBins( bins );
       metric->Initialize();
       mi = metric->GetValue();
-      vector_r[ i ] = mi;
+      vector_r[ i ] = thetas[i];
       }
     dims[0] = vecsize;
     vector_r.attr( "dim" ) = vecsize;
@@ -55,7 +56,6 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       Rcpp::Rcout << "Invalid Arguments: pass 2 images in " << std::endl ;
       Rcpp::wrap( 1 );
     }
-
   Rcpp::S4 in_image1( r_in_image1 ) ;
   Rcpp::S4 in_image2( r_in_image2 ) ;
   std::string in_pixeltype = Rcpp::as< std::string >(
@@ -73,7 +73,6 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     Rcpp::wrap( 1 );
   }
 
-  double mivalue = 1;
   if ( dimension == 2 )
     {
     typedef itk::Image< float , 2 > ImageType;
@@ -82,8 +81,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType > antsimage_xptr2(
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
-    mivalue = invariantSimilarityHelper<2>(
-      *antsimage_xptr1, *antsimage_xptr2, thetas );
+    return Rcpp::wrap( invariantSimilarityHelper<2>(
+      *antsimage_xptr1, *antsimage_xptr2, thetas ) );
   }
   else if ( dimension == 3 )
     {
@@ -93,8 +92,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType3 > antsimage_xptr2_3(
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
-    mivalue = invariantSimilarityHelper<4>(
-      *antsimage_xptr1_3, *antsimage_xptr2_3, thetas );
+    return Rcpp::wrap(  invariantSimilarityHelper<3>(
+      *antsimage_xptr1_3, *antsimage_xptr2_3, thetas ) );
     }
   else if ( dimension == 4 )
     {
@@ -104,9 +103,9 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType4 > antsimage_xptr2_4(
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
-    mivalue = invariantSimilarityHelper<4>(
-      *antsimage_xptr1_4, *antsimage_xptr2_4, thetas );
+    return Rcpp::wrap(  invariantSimilarityHelper<4>(
+      *antsimage_xptr1_4, *antsimage_xptr2_4, thetas ) );
     }
     else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
-  return Rcpp::wrap( mivalue );
+  return Rcpp::wrap( 1 );
 }
