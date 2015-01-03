@@ -1187,8 +1187,6 @@ SEXP antsImage_GetNeighborhood( typename itk::Image< PixelType , Dimension >::Po
   Rcpp::NumericVector index( r_index ) ;
   int physicalFlag = Rcpp::as<int>( physical );
 
-  // Rcpp::Rcout << "Physical Flag = " << physicalFlag << std::endl;
-
   unsigned long maxSize = 1;
   for ( unsigned int i=0; i<Dimension; i++ )
     {
