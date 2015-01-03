@@ -10,6 +10,8 @@ mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 
 \item{localSearchIterations}{integer controlling local search in multistart}
 
+\item{metric}{which metric MI or GC (string)}
+
 \item{img}{antsImage}
 
 \item{img}{antsImage}

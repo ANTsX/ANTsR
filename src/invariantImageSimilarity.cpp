@@ -102,11 +102,12 @@ template< unsigned int ImageDimension >
 SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
-  SEXP r_thetas, SEXP r_lsits )
+  SEXP r_thetas, SEXP r_lsits, SEXP r_WM )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
     Rcpp::as< unsigned int >( r_lsits ) ;
+  std::string whichMetric = Rcpp::as< std::string >( r_WM );
   bool useprincaxis = false;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
@@ -167,7 +168,8 @@ SEXP invariantSimilarityHelper(
       {
       std::cerr << " zero image1 error ";
       }
-
+    RealType bestscale =
+      calculator1->GetTotalMass()/calculator2->GetTotalMass();
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
     if( ImageDimension == 3 )
@@ -246,9 +248,17 @@ SEXP invariantSimilarityHelper(
     typedef  itk::MultiStartOptimizerv4         OptimizerType;
     typename OptimizerType::MetricValuesListType metricvalues;
     typename OptimizerType::Pointer  mstartOptimizer = OptimizerType::New();
+    typedef itk::CorrelationImageToImageMetricv4
+      <ImageType, ImageType, ImageType> GCMetricType;
     typedef itk::MattesMutualInformationImageToImageMetricv4
       <ImageType, ImageType, ImageType> MetricType;
     typename MetricType::ParametersType newparams(  affine1->GetParameters() );
+    typename GCMetricType::Pointer gcmetric = GCMetricType::New();
+    gcmetric->SetFixedImage( image1 );
+    gcmetric->SetVirtualDomainFromImage( image1 );
+    gcmetric->SetMovingImage( image2 );
+    gcmetric->SetMovingTransform( affinesearch );
+    gcmetric->SetParameters( newparams );
     typename MetricType::Pointer mimetric = MetricType::New();
     mimetric->SetNumberOfHistogramBins( mibins );
     mimetric->SetFixedImage( image1 );
@@ -261,23 +271,61 @@ SEXP invariantSimilarityHelper(
         itk::ImageMaskSpatialObject<ImageDimension>::New();
       so->SetImage( const_cast<maskimagetype *>( mask.GetPointer() ) );
       mimetric->SetFixedImageMask( so );
+      gcmetric->SetFixedImageMask( so );
       }
-    mimetric->Initialize();
-    typedef itk::RegistrationParameterScalesFromPhysicalShift<MetricType>
-    RegistrationParameterScalesFromPhysicalShiftType;
-    typename RegistrationParameterScalesFromPhysicalShiftType::Pointer
+    typedef  itk::ConjugateGradientLineSearchOptimizerv4 LocalOptimizerType;
+    typename LocalOptimizerType::Pointer  localoptimizer =
+      LocalOptimizerType::New();
+    RealType     localoptimizerlearningrate = 0.1;
+    localoptimizer->SetLearningRate( localoptimizerlearningrate );
+    localoptimizer->SetMaximumStepSizeInPhysicalUnits(
+      localoptimizerlearningrate );
+    localoptimizer->SetNumberOfIterations( localSearchIterations );
+    localoptimizer->SetLowerLimit( 0 );
+    localoptimizer->SetUpperLimit( 2 );
+    localoptimizer->SetEpsilon( 0.1 );
+    localoptimizer->SetMaximumLineSearchIterations( 10 );
+    localoptimizer->SetDoEstimateLearningRateOnce( true );
+    localoptimizer->SetMinimumConvergenceValue( 1.e-6 );
+    localoptimizer->SetConvergenceWindowSize( 5 );
+    if ( whichMetric.compare("MI") == 0  ) {
+      mimetric->Initialize();
+      typedef itk::RegistrationParameterScalesFromPhysicalShift<MetricType>
+      RegistrationParameterScalesFromPhysicalShiftType;
+      typename RegistrationParameterScalesFromPhysicalShiftType::Pointer
       shiftScaleEstimator =
-    RegistrationParameterScalesFromPhysicalShiftType::New();
-    shiftScaleEstimator->SetMetric( mimetric );
-    shiftScaleEstimator->SetTransformForward( true );
-    typename RegistrationParameterScalesFromPhysicalShiftType::ScalesType
-    movingScales( affinesearch->GetNumberOfParameters() );
-    shiftScaleEstimator->EstimateScales( movingScales );
-    mstartOptimizer->SetScales( movingScales );
-    mstartOptimizer->SetMetric( mimetric );
+      RegistrationParameterScalesFromPhysicalShiftType::New();
+      shiftScaleEstimator->SetMetric( mimetric );
+      shiftScaleEstimator->SetTransformForward( true );
+      typename RegistrationParameterScalesFromPhysicalShiftType::ScalesType
+      movingScales( affinesearch->GetNumberOfParameters() );
+      shiftScaleEstimator->EstimateScales( movingScales );
+      mstartOptimizer->SetScales( movingScales );
+      mstartOptimizer->SetMetric( mimetric );
+      localoptimizer->SetMetric( mimetric );
+      localoptimizer->SetScales( movingScales );
+    }
+    if ( whichMetric.compare("MI") != 0  ) {
+      gcmetric->Initialize();
+      typedef itk::RegistrationParameterScalesFromPhysicalShift<GCMetricType>
+        RegistrationParameterScalesFromPhysicalShiftType;
+      typename RegistrationParameterScalesFromPhysicalShiftType::Pointer
+        shiftScaleEstimator =
+        RegistrationParameterScalesFromPhysicalShiftType::New();
+      shiftScaleEstimator->SetMetric( gcmetric );
+      shiftScaleEstimator->SetTransformForward( true );
+      typename RegistrationParameterScalesFromPhysicalShiftType::ScalesType
+      movingScales( affinesearch->GetNumberOfParameters() );
+      shiftScaleEstimator->EstimateScales( movingScales );
+      mstartOptimizer->SetScales( movingScales );
+      mstartOptimizer->SetMetric( gcmetric );
+      localoptimizer->SetMetric( gcmetric );
+      localoptimizer->SetScales( movingScales );
+    }
     typename OptimizerType::ParametersListType parametersList =
       mstartOptimizer->GetParametersList();
     affinesearch->SetIdentity();
+    affinesearch->Scale( bestscale );
     affinesearch->SetCenter( trans2 );
     affinesearch->SetOffset( trans );
     parametersList.push_back( affinesearch->GetParameters() );
@@ -289,6 +337,7 @@ SEXP invariantSimilarityHelper(
       affinesearch->SetIdentity();
       affinesearch->SetCenter( trans2 );
       affinesearch->SetOffset( trans );
+      affinesearch->Scale( bestscale );
       if( useprincaxis )
         {
         affinesearch->SetMatrix( A_solution );
@@ -304,6 +353,7 @@ SEXP invariantSimilarityHelper(
         affinesearch->SetIdentity();
         affinesearch->SetCenter( trans2 );
         affinesearch->SetOffset( trans );
+        affinesearch->Scale( bestscale );
         if( useprincaxis )
           {
           affinesearch->SetMatrix( A_solution );
@@ -313,23 +363,6 @@ SEXP invariantSimilarityHelper(
         }
       }
     mstartOptimizer->SetParametersList( parametersList );
-    typedef  itk::ConjugateGradientLineSearchOptimizerv4 LocalOptimizerType;
-    typename LocalOptimizerType::Pointer  localoptimizer =
-      LocalOptimizerType::New();
-    localoptimizer->SetMetric( mimetric );
-    localoptimizer->SetScales( movingScales );
-    RealType     localoptimizerlearningrate = 0.1;
-    localoptimizer->SetLearningRate( localoptimizerlearningrate );
-    localoptimizer->SetMaximumStepSizeInPhysicalUnits(
-      localoptimizerlearningrate );
-    localoptimizer->SetNumberOfIterations( localSearchIterations );
-    localoptimizer->SetLowerLimit( 0 );
-    localoptimizer->SetUpperLimit( 2 );
-    localoptimizer->SetEpsilon( 0.1 );
-    localoptimizer->SetMaximumLineSearchIterations( mibins );
-    localoptimizer->SetDoEstimateLearningRateOnce( true );
-    localoptimizer->SetMinimumConvergenceValue( 1.e-6 );
-    localoptimizer->SetConvergenceWindowSize( 3 );
     if( localSearchIterations > 0 )
       {
       mstartOptimizer->SetLocalOptimizer( localoptimizer );
@@ -339,16 +372,6 @@ SEXP invariantSimilarityHelper(
     bestaffine->SetCenter( trans2 );
     bestaffine->SetParameters( mstartOptimizer->GetBestParameters() );
     metricvalues = mstartOptimizer->GetMetricValuesList();
-    RealType mi = 1;
-    typedef itk::MattesMutualInformationImageToImageMetricv4
-        <ImageType, ImageType, ImageType> MetricType;
-    typename MetricType::Pointer metric = MetricType::New();
-    metric->SetFixedImage( image1 );
-    metric->SetMovingImage( image2 );
-    metric->SetTransform( bestaffine );
-    metric->SetNumberOfHistogramBins( mibins );
-    metric->Initialize();
-    mi = metric->GetValue();
     for ( unsigned int k = 0; k < metricvalues.size(); k++ )
       {
       vector_r[k] = metricvalues[k];
@@ -364,7 +387,8 @@ SEXP invariantSimilarityHelper(
 }
 
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
-  SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations )
+  SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
+  SEXP whichMetric )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
@@ -398,7 +422,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap( invariantSimilarityHelper<2>(
       *antsimage_xptr1, *antsimage_xptr2, thetas,
-      localSearchIterations ) );
+      localSearchIterations, whichMetric ) );
   }
   else if ( dimension == 3 )
     {
@@ -410,7 +434,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<3>(
       *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
-      localSearchIterations ) );
+      localSearchIterations, whichMetric ) );
     }
   else if ( dimension == 4 )
     {
@@ -422,7 +446,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<4>(
       *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
-      localSearchIterations ) );
+      localSearchIterations, whichMetric ) );
     }
     else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( 1 );
