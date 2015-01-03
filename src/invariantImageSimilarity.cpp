@@ -102,12 +102,14 @@ template< unsigned int ImageDimension >
 SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
-  SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale )
+  SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale,
+  SEXP r_txfn )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
     Rcpp::as< unsigned int >( r_lsits ) ;
   std::string whichMetric = Rcpp::as< std::string >( r_WM );
+  std::string txfn = Rcpp::as< std::string >( r_txfn );
   bool useprincaxis = false;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
@@ -375,6 +377,18 @@ SEXP invariantSimilarityHelper(
     typename AffineType::Pointer bestaffine = AffineType::New();
     bestaffine->SetCenter( trans2 );
     bestaffine->SetParameters( mstartOptimizer->GetBestParameters() );
+    if ( txfn.length() > 3 )
+      {
+      typename AffineType::Pointer bestaffine = AffineType::New();
+      bestaffine->SetCenter( trans2 );
+      bestaffine->SetParameters( mstartOptimizer->GetBestParameters() );
+      typedef itk::TransformFileWriter TransformWriterType;
+      typename TransformWriterType::Pointer transformWriter =
+        TransformWriterType::New();
+      transformWriter->SetInput( bestaffine );
+      transformWriter->SetFileName( txfn.c_str() );
+      transformWriter->Update();
+      }
     metricvalues = mstartOptimizer->GetMetricValuesList();
     for ( unsigned int k = 0; k < metricvalues.size(); k++ )
       {
@@ -392,7 +406,7 @@ SEXP invariantSimilarityHelper(
 
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
-  SEXP whichMetric, SEXP r_scale )
+  SEXP whichMetric, SEXP r_scale, SEXP txfn )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
@@ -426,7 +440,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap( invariantSimilarityHelper<2>(
       *antsimage_xptr1, *antsimage_xptr2, thetas,
-      localSearchIterations, whichMetric, r_scale ) );
+      localSearchIterations, whichMetric, r_scale, txfn ) );
   }
   else if ( dimension == 3 )
     {
@@ -438,7 +452,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<3>(
       *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
-      localSearchIterations, whichMetric, r_scale ) );
+      localSearchIterations, whichMetric, r_scale, txfn ) );
     }
   else if ( dimension == 4 )
     {
@@ -450,7 +464,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<4>(
       *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
-      localSearchIterations, whichMetric, r_scale ) );
+      localSearchIterations, whichMetric, r_scale, txfn ) );
     }
     else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( 1 );

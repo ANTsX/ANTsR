@@ -8,6 +8,7 @@
 #' @param localSearchIterations integer controlling local search in multistart
 #' @param metric which metric MI or GC (string)
 #' @param scaleImage global scale
+#' @param txFilename if present, write optimal tx to .mat file
 #' @return vector of similarity values
 #' @author Brian B. Avants
 #' @keywords image similarity
@@ -16,7 +17,7 @@
 #' mi<-antsImageRead( getANTsRData('r64') ,2)
 #' mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
 invariantImageSimilarity <- function(in_image1, in_image2, thetas,
-  localSearchIterations=0, metric="MI", scaleImage=1 ) {
+  localSearchIterations=0, metric="MI", scaleImage=1, txfn="" ) {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)
@@ -42,6 +43,6 @@ invariantImageSimilarity <- function(in_image1, in_image2, thetas,
     return(NA)
   }
   .Call("invariantImageSimilarity", in_image1, in_image2,
-    thetain, localSearchIterations, metric, scaleImage,
+    thetain, localSearchIterations, metric, scaleImage, txfn,
     PACKAGE = "ANTsR")
 }
