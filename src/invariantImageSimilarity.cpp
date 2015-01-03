@@ -102,7 +102,7 @@ template< unsigned int ImageDimension >
 SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
-  SEXP r_thetas, SEXP r_lsits, SEXP r_WM )
+  SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
@@ -119,6 +119,7 @@ SEXP invariantSimilarityHelper(
   dims[0]=0;
   typedef float  PixelType;
   typedef double RealType;
+  RealType bestscale = Rcpp::as< RealType >( r_scale ) ;
   typedef itk::Image< PixelType , ImageDimension > ImageType;
   typedef typename ImageType::Pointer ImagePointerType;
   if( image1.IsNotNull() & image2.IsNotNull() )
@@ -168,8 +169,13 @@ SEXP invariantSimilarityHelper(
       {
       std::cerr << " zero image1 error ";
       }
-    RealType bestscale =
-      calculator2->GetTotalMass() / calculator1->GetTotalMass();
+    if ( vnl_math_abs(bestscale-1) < 1.e-6 )
+      {
+      bestscale =
+        calculator2->GetTotalMass() / calculator1->GetTotalMass();
+      RealType powlev = 1.0 / static_cast<RealType>(ImageDimension);
+      bestscale = vcl_pow( bestscale , powlev );
+      }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
     if( ImageDimension == 3 )
@@ -325,7 +331,6 @@ SEXP invariantSimilarityHelper(
     typename OptimizerType::ParametersListType parametersList =
       mstartOptimizer->GetParametersList();
     affinesearch->SetIdentity();
-    affinesearch->Scale( bestscale );
     affinesearch->SetCenter( trans2 );
     affinesearch->SetOffset( trans );
     for ( unsigned int i = 0; i < vecsize; i++ )
@@ -336,7 +341,6 @@ SEXP invariantSimilarityHelper(
       affinesearch->SetIdentity();
       affinesearch->SetCenter( trans2 );
       affinesearch->SetOffset( trans );
-      affinesearch->Scale( bestscale );
       if( useprincaxis )
         {
         affinesearch->SetMatrix( A_solution );
@@ -345,6 +349,7 @@ SEXP invariantSimilarityHelper(
         {
         affinesearch->Rotate3D(axis1, ang1, 1);
         affinesearch->Rotate3D(axis2, ang2, 1);
+        affinesearch->Scale( bestscale );
         parametersList.push_back( affinesearch->GetParameters() );
         }
       if( ImageDimension == 2 )
@@ -352,12 +357,12 @@ SEXP invariantSimilarityHelper(
         affinesearch->SetIdentity();
         affinesearch->SetCenter( trans2 );
         affinesearch->SetOffset( trans );
-        affinesearch->Scale( bestscale );
         if( useprincaxis )
           {
           affinesearch->SetMatrix( A_solution );
           }
         affinesearch->Rotate2D( ang1, 1);
+        affinesearch->Scale( bestscale );
         parametersList.push_back( affinesearch->GetParameters() );
         }
       }
@@ -387,7 +392,7 @@ SEXP invariantSimilarityHelper(
 
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
-  SEXP whichMetric )
+  SEXP whichMetric, SEXP r_scale )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
@@ -421,7 +426,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap( invariantSimilarityHelper<2>(
       *antsimage_xptr1, *antsimage_xptr2, thetas,
-      localSearchIterations, whichMetric ) );
+      localSearchIterations, whichMetric, r_scale ) );
   }
   else if ( dimension == 3 )
     {
@@ -433,7 +438,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<3>(
       *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
-      localSearchIterations, whichMetric ) );
+      localSearchIterations, whichMetric, r_scale ) );
     }
   else if ( dimension == 4 )
     {
@@ -445,7 +450,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<4>(
       *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
-      localSearchIterations, whichMetric ) );
+      localSearchIterations, whichMetric, r_scale ) );
     }
     else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( 1 );

@@ -12,6 +12,8 @@ mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 
 \item{metric}{which metric MI or GC (string)}
 
+\item{scaleImage}{global scale}
+
 \item{img}{antsImage}
 
 \item{img}{antsImage}
