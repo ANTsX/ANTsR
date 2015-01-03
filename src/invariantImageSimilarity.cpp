@@ -14,10 +14,9 @@ SEXP invariantSimilarityHelper(
   SEXP r_thetas )
 {
   Rcpp::NumericVector thetas( r_thetas );
-  std::vector<double> mivec;
-  unsigned int vecsize = 10;
-  Rcpp::NumericVector vector_r( vecsize ) ;
+  Rcpp::NumericVector vector_r( r_thetas ) ;
   Rcpp::IntegerVector dims( 1 );
+  unsigned int vecsize = thetas.size();
   dims[0]=0;
   typedef itk::Image< float , Dimension > ImageType;
   typedef typename ImageType::Pointer ImagePointerType;
@@ -25,6 +24,7 @@ SEXP invariantSimilarityHelper(
     {
     for ( unsigned int i = 0; i < vecsize; i++ )
       {
+      vector_r[ i ]=0;
       double mi = 1;
       typedef itk::MattesMutualInformationImageToImageMetricv4
         <ImageType, ImageType, ImageType> MetricType;
@@ -35,15 +35,15 @@ SEXP invariantSimilarityHelper(
       metric->SetNumberOfHistogramBins( bins );
       metric->Initialize();
       mi = metric->GetValue();
-      vector_r[ i ] = thetas[i];
+      vector_r[ i ] = mi;
       }
     dims[0] = vecsize;
     vector_r.attr( "dim" ) = vecsize;
-    return Rcpp::wrap( mivec );
+    return Rcpp::wrap( vector_r );
     }
   else
     {
-    return Rcpp::wrap( mivec );
+    return Rcpp::wrap( vector_r );
     }
 }
 
