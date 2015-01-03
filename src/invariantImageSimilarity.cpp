@@ -169,7 +169,7 @@ SEXP invariantSimilarityHelper(
       std::cerr << " zero image1 error ";
       }
     RealType bestscale =
-      calculator1->GetTotalMass()/calculator2->GetTotalMass();
+      calculator2->GetTotalMass() / calculator1->GetTotalMass();
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
     if( ImageDimension == 3 )
@@ -328,7 +328,6 @@ SEXP invariantSimilarityHelper(
     affinesearch->Scale( bestscale );
     affinesearch->SetCenter( trans2 );
     affinesearch->SetOffset( trans );
-    parametersList.push_back( affinesearch->GetParameters() );
     for ( unsigned int i = 0; i < vecsize; i++ )
       {
       RealType ang1 = thetas[i];
