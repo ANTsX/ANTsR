@@ -17,6 +17,8 @@ mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 \item{img}{antsImage}
 
 \item{img}{antsImage}
+
+\item{txFilename}{if present, write optimal tx to .mat file}
 }
 \value{
 vector of similarity values
