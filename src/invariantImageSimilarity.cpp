@@ -52,8 +52,6 @@
 #include "itkLaplacianRecursiveGaussianImageFilter.h"
 #include "itkListSample.h"
 #include "itkMRFImageFilter.h"
-#include "itkSimilarity3DTransform.h"
-#include "itkSimilarity2DTransform.h"
 #include "itkMRIBiasFieldCorrectionFilter.h"
 #include "itkMaskImageFilter.h"
 #include "itkMaximumImageFilter.h"
@@ -74,6 +72,8 @@
 #include "itkSampleToHistogramFilter.h"
 #include "itkScalarImageKmeansImageFilter.h"
 #include "itkShrinkImageFilter.h"
+#include "itkSimilarity3DTransform.h"
+#include "itkSimilarity2DTransform.h"
 #include "itkSize.h"
 #include "itkSphereSpatialFunction.h"
 #include "itkSTAPLEImageFilter.h"
@@ -386,21 +386,24 @@ SEXP invariantSimilarityHelper(
       RealType ang1 = thetas[i];
       RealType ang2 = 0; // FIXME should be psi
       vector_r[ i ]=0;
-      affinesearch->SetIdentity();
-      affinesearch->SetCenter( trans2 );
-      affinesearch->SetOffset( trans );
-      simmer->SetIdentity();
-      simmer->SetCenter( trans2 );
-      simmer->SetOffset( trans );
-      if( useprincaxis )
-        {
-        affinesearch->SetMatrix( A_solution );
-        }
       if( ImageDimension == 3 )
         {
+        for ( unsigned int jj = 0; jj < vecsize; jj++ )
+        {
+        ang2=thetas[jj];
+        affinesearch->SetIdentity();
+        affinesearch->SetCenter( trans2 );
+        affinesearch->SetOffset( trans );
+        if( useprincaxis )
+          {
+          affinesearch->SetMatrix( A_solution );
+          }
         affinesearch->Rotate3D(axis1, ang1, 1);
         affinesearch->Rotate3D(axis2, ang2, 1);
         affinesearch->Scale( bestscale );
+        simmer->SetMatrix(  affinesearch->GetMatrix() );
+        parametersList.push_back( simmer->GetParameters() );
+        }
         }
       if( ImageDimension == 2 )
         {
@@ -414,8 +417,8 @@ SEXP invariantSimilarityHelper(
         affinesearch->Rotate2D( ang1, 1);
         affinesearch->Scale( bestscale );
         simmer->SetMatrix(  affinesearch->GetMatrix() );
-        }
         parametersList.push_back( simmer->GetParameters() );
+        }
       }
     mstartOptimizer->SetParametersList( parametersList );
     if( localSearchIterations > 0 )
