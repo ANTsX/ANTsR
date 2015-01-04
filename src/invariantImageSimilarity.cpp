@@ -52,6 +52,8 @@
 #include "itkLaplacianRecursiveGaussianImageFilter.h"
 #include "itkListSample.h"
 #include "itkMRFImageFilter.h"
+#include "itkSimilarity3DTransform.h"
+#include "itkSimilarity2DTransform.h"
 #include "itkMRIBiasFieldCorrectionFilter.h"
 #include "itkMaskImageFilter.h"
 #include "itkMaximumImageFilter.h"
@@ -97,6 +99,44 @@
 #include <sstream>
 #include <string>
 
+template <class TComputeType, unsigned int ImageDimension>
+class SimilarityTransformTraits
+{
+  // Don't worry about the fact that the default option is the
+  // affine Transform, that one will not actually be instantiated.
+public:
+  typedef itk::AffineTransform<TComputeType, ImageDimension> TransformType;
+};
+
+
+template <>
+class SimilarityTransformTraits<double, 2>
+{
+public:
+  typedef itk::Similarity2DTransform<double> TransformType;
+};
+
+template <>
+class SimilarityTransformTraits<float, 2>
+{
+public:
+  typedef itk::Similarity2DTransform<float> TransformType;
+};
+
+template <>
+class SimilarityTransformTraits<double, 3>
+{
+public:
+  typedef itk::Similarity3DTransform<double> TransformType;
+};
+
+template <>
+class SimilarityTransformTraits<float, 3>
+{
+public:
+  typedef itk::Similarity3DTransform<float> TransformType;
+};
+
 
 template< unsigned int ImageDimension >
 SEXP invariantSimilarityHelper(
@@ -110,7 +150,7 @@ SEXP invariantSimilarityHelper(
     Rcpp::as< unsigned int >( r_lsits ) ;
   std::string whichMetric = Rcpp::as< std::string >( r_WM );
   std::string txfn = Rcpp::as< std::string >( r_txfn );
-  bool useprincaxis = false;
+  bool useprincaxis = true;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
   typename maskimagetype::Pointer mask = ITK_NULLPTR;
@@ -127,7 +167,9 @@ SEXP invariantSimilarityHelper(
   if( image1.IsNotNull() & image2.IsNotNull() )
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
-    typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
+    typedef itk::AffineTransform<RealType, ImageDimension> AffineType0;
+    typedef typename SimilarityTransformTraits<RealType,
+      ImageDimension>::TransformType AffineType;
     typedef typename ImageCalculatorType::MatrixType       MatrixType;
     typedef itk::Vector<float, ImageDimension>  VectorType;
     VectorType ccg1;
@@ -250,7 +292,11 @@ SEXP invariantSimilarityHelper(
       axis1[d] = evec_tert[d];
       axis2[d] = evec1_2ndary[d];
       }
-    typename AffineType::Pointer affinesearch = AffineType::New();
+    typename AffineType::Pointer simmer = AffineType::New();
+    simmer->SetIdentity();
+    simmer->SetCenter( trans2 );
+    simmer->SetOffset( trans );
+    typename AffineType0::Pointer affinesearch = AffineType0::New();
     affinesearch->SetIdentity();
     affinesearch->SetCenter( trans2 );
     typedef  itk::MultiStartOptimizerv4         OptimizerType;
@@ -265,13 +311,13 @@ SEXP invariantSimilarityHelper(
     gcmetric->SetFixedImage( image1 );
     gcmetric->SetVirtualDomainFromImage( image1 );
     gcmetric->SetMovingImage( image2 );
-    gcmetric->SetMovingTransform( affinesearch );
+    gcmetric->SetMovingTransform( simmer );
     gcmetric->SetParameters( newparams );
     typename MetricType::Pointer mimetric = MetricType::New();
     mimetric->SetNumberOfHistogramBins( mibins );
     mimetric->SetFixedImage( image1 );
     mimetric->SetMovingImage( image2 );
-    mimetric->SetMovingTransform( affinesearch );
+    mimetric->SetMovingTransform( simmer );
     mimetric->SetParameters( newparams );
     if( mask.IsNotNull() )
       {
@@ -306,7 +352,7 @@ SEXP invariantSimilarityHelper(
       shiftScaleEstimator->SetMetric( mimetric );
       shiftScaleEstimator->SetTransformForward( true );
       typename RegistrationParameterScalesFromPhysicalShiftType::ScalesType
-      movingScales( affinesearch->GetNumberOfParameters() );
+      movingScales( simmer->GetNumberOfParameters() );
       shiftScaleEstimator->EstimateScales( movingScales );
       mstartOptimizer->SetScales( movingScales );
       mstartOptimizer->SetMetric( mimetric );
@@ -323,7 +369,7 @@ SEXP invariantSimilarityHelper(
       shiftScaleEstimator->SetMetric( gcmetric );
       shiftScaleEstimator->SetTransformForward( true );
       typename RegistrationParameterScalesFromPhysicalShiftType::ScalesType
-      movingScales( affinesearch->GetNumberOfParameters() );
+      movingScales( simmer->GetNumberOfParameters() );
       shiftScaleEstimator->EstimateScales( movingScales );
       mstartOptimizer->SetScales( movingScales );
       mstartOptimizer->SetMetric( gcmetric );
@@ -343,6 +389,9 @@ SEXP invariantSimilarityHelper(
       affinesearch->SetIdentity();
       affinesearch->SetCenter( trans2 );
       affinesearch->SetOffset( trans );
+      simmer->SetIdentity();
+      simmer->SetCenter( trans2 );
+      simmer->SetOffset( trans );
       if( useprincaxis )
         {
         affinesearch->SetMatrix( A_solution );
@@ -352,7 +401,6 @@ SEXP invariantSimilarityHelper(
         affinesearch->Rotate3D(axis1, ang1, 1);
         affinesearch->Rotate3D(axis2, ang2, 1);
         affinesearch->Scale( bestscale );
-        parametersList.push_back( affinesearch->GetParameters() );
         }
       if( ImageDimension == 2 )
         {
@@ -365,8 +413,9 @@ SEXP invariantSimilarityHelper(
           }
         affinesearch->Rotate2D( ang1, 1);
         affinesearch->Scale( bestscale );
-        parametersList.push_back( affinesearch->GetParameters() );
+        simmer->SetMatrix(  affinesearch->GetMatrix() );
         }
+        parametersList.push_back( simmer->GetParameters() );
       }
     mstartOptimizer->SetParametersList( parametersList );
     if( localSearchIterations > 0 )
