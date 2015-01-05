@@ -216,11 +216,19 @@ SEXP invariantSimilarityHelper(
       }
     if ( vnl_math_abs(bestscale-1) < 1.e-6 )
       {
+      RealType volelt1 = 1;
+      RealType volelt2 = 1;
+      for ( unsigned int d=0; d<ImageDimension; d++)
+        {
+        volelt1 *= image1->GetSpacing()[d];
+        volelt2 *= image2->GetSpacing()[d];
+        }
       bestscale =
-        calculator2->GetTotalMass() / calculator1->GetTotalMass();
+        ( calculator2->GetTotalMass() * volelt2 )/
+        ( calculator1->GetTotalMass() * volelt1 );
       RealType powlev = 1.0 / static_cast<RealType>(ImageDimension);
       bestscale = vcl_pow( bestscale , powlev );
-      }
+    }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
     if( ImageDimension == 3 )
