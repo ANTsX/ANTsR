@@ -168,9 +168,9 @@ SEXP invariantSimilarityHelper(
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
     typedef itk::AffineTransform<RealType, ImageDimension> AffineType0;
-    typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
+    //typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
     typedef typename SimilarityTransformTraits<RealType,
-      ImageDimension>::TransformType AffineTypeS;
+      ImageDimension>::TransformType AffineType;
     typedef typename ImageCalculatorType::MatrixType       MatrixType;
     typedef itk::Vector<float, ImageDimension>  VectorType;
     VectorType ccg1;
@@ -228,6 +228,8 @@ SEXP invariantSimilarityHelper(
         ( calculator1->GetTotalMass() * volelt1 );
       RealType powlev = 1.0 / static_cast<RealType>(ImageDimension);
       bestscale = vcl_pow( bestscale , powlev );
+      //std::cout << cpm1 << std::endl;
+      //std::cout << cpm2 << std::endl;
     }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
@@ -426,6 +428,10 @@ SEXP invariantSimilarityHelper(
         affinesearch->Rotate2D( ang1, 1);
         affinesearch->Scale( bestscale );
         simmer->SetMatrix(  affinesearch->GetMatrix() );
+        typename AffineType::ParametersType pp =
+          simmer->GetParameters();
+        pp[1]=ang1;
+        pp[0]=bestscale;
         parametersList.push_back( simmer->GetParameters() );
         }
       }
