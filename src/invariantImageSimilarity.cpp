@@ -143,7 +143,7 @@ SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
   SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale,
-  SEXP r_txfn )
+  SEXP r_txfn, SEXP r_doreflection )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
@@ -157,6 +157,7 @@ SEXP invariantSimilarityHelper(
   Rcpp::NumericVector thetas( r_thetas );
   Rcpp::NumericVector vector_r( r_thetas ) ;
   Rcpp::IntegerVector dims( 1 );
+  Rcpp::IntegerVector doReflection( r_doreflection );
   unsigned int vecsize = thetas.size();
   dims[0]=0;
   typedef float  PixelType;
@@ -266,6 +267,13 @@ SEXP invariantSimilarityHelper(
           }
         }
       A_solution =  A_solution * id.transpose();
+      }
+    if ( doReflection[0]  > 0 )
+      {
+      vnl_matrix<RealType> id( A_solution );
+      id.set_identity();
+      id = id - 2.0 * outer_product( evec2_primary , evec2_primary  );
+      A_solution = A_solution * id;
       }
     typename AffineType::Pointer affine1 = AffineType::New();
     typename AffineType::OffsetType trans = affine1->GetOffset();
@@ -473,7 +481,7 @@ SEXP invariantSimilarityHelper(
 
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
-  SEXP whichMetric, SEXP r_scale, SEXP txfn )
+  SEXP whichMetric, SEXP r_scale, SEXP r_doref, SEXP txfn )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
@@ -507,7 +515,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap( invariantSimilarityHelper<2>(
       *antsimage_xptr1, *antsimage_xptr2, thetas,
-      localSearchIterations, whichMetric, r_scale, txfn ) );
+      localSearchIterations, whichMetric, r_scale,
+      r_doref, txfn ) );
   }
   else if ( dimension == 3 )
     {
@@ -519,7 +528,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<3>(
       *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
-      localSearchIterations, whichMetric, r_scale, txfn ) );
+      localSearchIterations, whichMetric, r_scale,
+      r_doref, txfn ) );
     }
   else if ( dimension == 4 )
     {
@@ -531,7 +541,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<4>(
       *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
-      localSearchIterations, whichMetric, r_scale, txfn ) );
+      localSearchIterations, whichMetric, r_scale,
+      r_doref, txfn ) );
     }
     else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( 1 );
