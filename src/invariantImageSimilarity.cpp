@@ -274,7 +274,6 @@ SEXP invariantSimilarityHelper(
       id.set_identity();
       id = id - 2.0 * outer_product( evec1_primary , evec1_primary  );
       A_solution = A_solution * id;
-      std::cout << " reflect " << std::endl;
       }
     typename AffineType::Pointer affine1 = AffineType::New();
     typename AffineType::OffsetType trans = affine1->GetOffset();
@@ -358,7 +357,7 @@ SEXP invariantSimilarityHelper(
     localoptimizer->SetLowerLimit( 0 );
     localoptimizer->SetUpperLimit( 2 );
     localoptimizer->SetEpsilon( 0.1 );
-    localoptimizer->SetMaximumLineSearchIterations( 10 );
+    localoptimizer->SetMaximumLineSearchIterations( 50 );
     localoptimizer->SetDoEstimateLearningRateOnce( true );
     localoptimizer->SetMinimumConvergenceValue( 1.e-6 );
     localoptimizer->SetConvergenceWindowSize( 5 );
