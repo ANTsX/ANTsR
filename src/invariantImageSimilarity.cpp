@@ -150,7 +150,7 @@ SEXP invariantSimilarityHelper(
     Rcpp::as< unsigned int >( r_lsits ) ;
   std::string whichMetric = Rcpp::as< std::string >( r_WM );
   std::string txfn = Rcpp::as< std::string >( r_txfn );
-  bool useprincaxis = true;
+  bool useprincaxis = false;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
   typename maskimagetype::Pointer mask = ITK_NULLPTR;
@@ -254,7 +254,7 @@ SEXP invariantSimilarityHelper(
     vnl_matrix<RealType> A_solution = wahba.V() * wahba.U().transpose();
     A_solution = vnl_inverse( A_solution );
     RealType det = vnl_determinant( A_solution  );
-    if( det < 0 )
+    if( ( det < 0 ) )
       {
       vnl_matrix<RealType> id( A_solution );
       id.set_identity();

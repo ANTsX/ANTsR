@@ -14,11 +14,12 @@
 template< unsigned int ImageDimension >
 void antsReoHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
-  SEXP r_txfn, SEXP r_axis , SEXP r_axis2 )
+  SEXP r_txfn, SEXP r_axis , SEXP r_axis2, SEXP r_reflect )
 {
   typedef double RealType;
   Rcpp::NumericVector axis( r_axis );
   Rcpp::NumericVector axis2( r_axis2 );
+  Rcpp::NumericVector doReflection( r_reflect );
   typedef itk::Image< float , ImageDimension > ImageType;
   typedef typename ImageType::Pointer ImagePointerType;
   if( image1.IsNotNull()  )
@@ -76,8 +77,10 @@ void antsReoHelper(
       vnl_svd<RealType>    wahba( B );
       vnl_matrix<RealType> A_solution = wahba.V() * wahba.U().transpose();
       A_solution = vnl_inverse( A_solution );
-      Rcpp::Rcout << A_solution << std::endl;
       RealType det = vnl_determinant( A_solution  );
+      //Rcpp::Rcout << " det " << det << std::endl;
+      //Rcpp::Rcout << " A_solution " << std::endl;
+      //Rcpp::Rcout << A_solution << std::endl;
       if( det < 0 )
         {
         vnl_matrix<RealType> id( A_solution );
@@ -90,6 +93,13 @@ void antsReoHelper(
             }
           }
           A_solution =  A_solution * id.transpose();
+        }
+      if ( doReflection[0]  > 0 )
+        {
+        vnl_matrix<RealType> id( A_solution );
+        id.set_identity();
+        id = id - 2.0 * outer_product( evec2_primary , evec2_primary  );
+        A_solution = A_solution * id;
         }
       typename AffineType::Pointer affine1 = AffineType::New();
       typename AffineType::OffsetType trans = affine1->GetOffset();
@@ -128,7 +138,7 @@ void antsReoHelper(
 
 
 RcppExport SEXP reorientImage( SEXP r_in_image1,
-  SEXP r_txfn, SEXP r_axis1, SEXP r_axis2  )
+  SEXP r_txfn, SEXP r_axis1, SEXP r_axis2, SEXP rrfl  )
 {
   if( r_in_image1 == NULL  )
     {
@@ -147,7 +157,7 @@ RcppExport SEXP reorientImage( SEXP r_in_image1,
     Rcpp::XPtr< ImagePointerType > antsimage_xptr1(
       static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     antsReoHelper<2>(*antsimage_xptr1, r_txfn,
-      r_axis1, r_axis2 );
+      r_axis1, r_axis2, rrfl );
     }
   else if ( dimension == 3 )
     {
@@ -156,7 +166,7 @@ RcppExport SEXP reorientImage( SEXP r_in_image1,
     Rcpp::XPtr< ImagePointerType3 > antsimage_xptr1_3(
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     antsReoHelper<3>(*antsimage_xptr1_3, r_txfn,
-      r_axis1, r_axis2 );
+      r_axis1, r_axis2, rrfl );
     }
   else if ( dimension == 4 )
     {
@@ -165,8 +175,8 @@ RcppExport SEXP reorientImage( SEXP r_in_image1,
     Rcpp::XPtr< ImagePointerType4 > antsimage_xptr1_4(
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     antsReoHelper<4>(*antsimage_xptr1_4, r_txfn,
-      r_axis1, r_axis2 );
+      r_axis1, r_axis2, rrfl );
     }
-    else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
+  else Rcpp::Rcout << " Dimension " << dimension << " not supported " << std::endl;
   return 0;
 }
