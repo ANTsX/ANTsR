@@ -150,7 +150,7 @@ SEXP invariantSimilarityHelper(
     Rcpp::as< unsigned int >( r_lsits ) ;
   std::string whichMetric = Rcpp::as< std::string >( r_WM );
   std::string txfn = Rcpp::as< std::string >( r_txfn );
-  bool useprincaxis = false;
+  bool useprincaxis = true;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
   typename maskimagetype::Pointer mask = ITK_NULLPTR;
