@@ -143,7 +143,7 @@ SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
   SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale,
-  SEXP r_txfn, SEXP r_doreflection )
+  SEXP r_doreflection, SEXP r_txfn  )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =

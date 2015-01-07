@@ -18,7 +18,7 @@
 #' mi<-antsImageRead( getANTsRData('r64') ,2)
 #' mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
 invariantImageSimilarity <- function(in_image1, in_image2, thetas,
-  localSearchIterations=0, metric="MI", scaleImage=1, doReflection=FALSE,
+  localSearchIterations=0, metric="MI", scaleImage=1, doReflection=0,
   txfn="" ) {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
