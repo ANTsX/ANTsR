@@ -10,9 +10,11 @@ reo<-reorientImage( i1 , axis )
 
 \item{axis2}{vector of size dim for 3D}
 
+\item{doreflection}{vector of size dim for 3D}
+
 \item{txfn}{file name for transformation}
 
-\item{axis}{vector of size dim}
+\item{axis}{vector of size dim, might need to play w/axis sign}
 }
 \value{
 reoriented image
