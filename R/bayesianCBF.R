@@ -16,7 +16,7 @@
 #' @param localweights Use estimate of voxel-wise reliability to inform prior weight?
 #' @param priorBetas prior betas for each tissue and predictor
 #' @return estimated cbf image
-#' @author Brian Beaumont Avants and Benjamin T. Kandel
+#' @author Brian Beaumont Avants and Benjamin M. Kandel
 #' @keywords cerebral blood flow, asl, bayesian
 #' @examples
 #' \dontrun{
