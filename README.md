@@ -3,7 +3,7 @@ An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://g
 
 Authors: Shrinidhi KL,  Avants BB
 
-## easiest installation approach ( from within R )
+## Easiest installation approach (from within R)
 ```
 library( devtools )
 install_github("stnava/ANTsR")
@@ -25,6 +25,58 @@ Install the package as follows:
 ```sh
 $ R CMD INSTALL ANTsR
 ```
+
+## Installation using Homebrew
+
+* Install homebrew
+```
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+* Install cmake
+```
+brew install
+```
+```
+cmake
+```
+
+* Install zlib and wget, if necessary
+```
+brew install wget
+```
+```
+brew tap homebrew/dupes
+```
+```
+brew install zlib
+```
+
+* Edit zlib path in ANTsR/src/ANTS/ANTS-build/CMakeCache.txt file:  
+```
+ZLIB_INCLUDE_DIR:PATH=/usr/local/Cellar/zlib/1.2.8/include
+```
+
+* Possible errors
+
+```
+Error: make: llvm-g++-4.2: No such file or directory, Error: /bin/sh: llvm-g++-4.2: command not found
+``` 
+Solution:  In file: /Library/Frameworks/R.framework/Versions/3.0/Resources/etc/Makeconf
+
+Find: llvm-g++-4.2
+
+Replace with: g++
+
+```
+Warning: cmake-3.1.0 already installed, it's just not linked
+```
+Solution:
+```
+brew link --overwrite cmake
+```
+
+
 
 ### Binaries
 These are still under development; use at your own discretion.
