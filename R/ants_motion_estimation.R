@@ -65,6 +65,9 @@ motion_correction <- function(img, fixed = NA, moreaccurate = 1) {
     print("'img' must be a filename or an 'antsImage'")
     return(NULL)
   }
+
+  if (moreaccurate > 2) moreaccurate <- 2 
+  if (moreaccurate < 0) moreaccurate <- 0 
   
   if (is.na(fixed)) {
     fixed <- new("antsImage", "float", 3)
