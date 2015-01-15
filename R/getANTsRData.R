@@ -19,7 +19,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     ch2 = "http://placid.nlm.nih.gov/download?items=10778", ch2b = "http://placid.nlm.nih.gov/download?items=10780",
     ch2a = "http://placid.nlm.nih.gov/download?items=10784", mni = "http://placid.nlm.nih.gov/download?items=10785",
     mnib = "http://placid.nlm.nih.gov/download?items=10787", mnia = "http://placid.nlm.nih.gov/download?items=10786",
-    mnit = "http://placid.nlm.nih.gov/download?items=11660", nki = "http://files.figshare.com/1363201/NKI.zip")
+    mnit = "http://placid.nlm.nih.gov/download?items=11660", nki = "http://files.figshare.com/1363201/NKI.zip", 
+    pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz")
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki")
@@ -46,7 +47,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     KK = "397a773658558812e91c03bbb29334bb", BT = "eb1f8ee2bba81fb80fed77fb459600f0",
     AB = "d38b04c445772db6e4ef3d2f34787d67", ch2 = "501c45361cf92dadd007bee55f02e053",
     ch2b = "5db6c10eb8aeabc663d10e010860465f", ch2a = "caf2d979a7d9c86f515a5bc447856e7c",
-    mnit = "dab456335a4bfa2b3bc31e9882699ee9")
+    mnit = "dab456335a4bfa2b3bc31e9882699ee9", pcasl = "e59716ae76a853465efacf3cfb53bc58")
   if (!is.null(mymd5))
     if (md5sum(tfn) != mymd5) {
       print("checksum failure")
