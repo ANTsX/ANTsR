@@ -6,7 +6,7 @@ Read Images into a Matrix
 }
 
 \description{
-  Read images into rows of a matrix.
+  Read images into rows of a matrix, given a mask - much faster for large datasets as it is based on C++ implementations.
 }
 
 \usage{
@@ -31,10 +31,10 @@ imagesToMatrix(imageList, mask)
 }
 \seealso{
   \code{\link{matrixToImages}, \link{getMask}}
-} 
+}
 
 \author{
-  Cook PA
+  Cook PA, Avants BB (C++ version)
 }
 
 \examples{

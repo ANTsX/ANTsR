@@ -169,9 +169,9 @@ SEXP invariantSimilarityHelper(
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
     typedef itk::AffineTransform<RealType, ImageDimension> AffineType0;
-    //typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
+    typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
     typedef typename SimilarityTransformTraits<RealType,
-      ImageDimension>::TransformType AffineType;
+      ImageDimension>::TransformType AffineTypeS;
     typedef typename ImageCalculatorType::MatrixType       MatrixType;
     typedef itk::Vector<float, ImageDimension>  VectorType;
     VectorType ccg1;
@@ -464,8 +464,8 @@ SEXP invariantSimilarityHelper(
         simmer->SetMatrix(  affinesearch->GetMatrix() );
         typename AffineType::ParametersType pp =
           simmer->GetParameters();
-        pp[1]=ang1;
-        pp[0]=bestscale;
+        //pp[1]=ang1;
+        //pp[0]=bestscale;
         parametersList.push_back( simmer->GetParameters() );
         }
       }
