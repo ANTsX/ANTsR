@@ -11,10 +11,10 @@ namespace ants
 
   template< class PixelType , int ImageDimension >
   typename itk::Image< PixelType , ImageDimension >::Pointer antsImageRead( std::string filename // image to read
-									    ) 
-  { 
-    itk::NiftiImageIOFactory::RegisterOneFactory();
-    itk::MetaImageIOFactory::RegisterOneFactory();
+									    )
+  {
+//    itk::NiftiImageIOFactory::RegisterOneFactory();
+//    itk::MetaImageIOFactory::RegisterOneFactory();
     typedef itk::Image< PixelType , ImageDimension > ImageType ;
     typedef itk::ImageFileReader< ImageType >    ImageReaderType ;
     typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
@@ -39,9 +39,9 @@ namespace ants
     os << "LargestPossibleRegion: " << image->GetLargestPossibleRegion() ;
     os << "BufferedRegion: " << image->GetBufferedRegion() ;
     os << "RequestedRegion: " << image->GetRequestedRegion() ;
-    return ;    
+    return ;
   }
-  
+
 } // namespace ants
 
 
