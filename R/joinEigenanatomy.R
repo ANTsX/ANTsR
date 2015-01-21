@@ -13,13 +13,18 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
   library(igraph)
   if (!is.na(mask))
     decom <- imageListToMatrix(list_of_eanat_images, mask) else decom <- t(list_of_eanat_images)
+  for ( i in 1:nrow(decom) )
+    {
+    if ( min(decom[i,]) < 0 & max(decom[i,])==0 )
+      decom[i,] <- decom[i,] * (-1.0)
+    }
   myproj <- datamatrix %*% t(decom)
   mycor <- cor(myproj)
   costs <- rep(NA, length(graphdensity))
   ct <- 1
   for (gd in graphdensity) {
     gg <- makeGraph(mycor, gd)
-    communitymembership <- gg$walktrapcomm$membership
+    communitymembership <- gg$community$membership
     if (!is.na(mask)) {
       newelist <- list()
       for (cl in 1:max(communitymembership)) {
