@@ -24,7 +24,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
   ct <- 1
   for (gd in graphdensity) {
     gg <- makeGraph(mycor, gd)
-    communitymembership <- gg$community$membership
+    communitymembership <- gg$walktrapcomm$membership
     if (!is.na(mask)) {
       newelist <- list()
       for (cl in 1:max(communitymembership)) {
