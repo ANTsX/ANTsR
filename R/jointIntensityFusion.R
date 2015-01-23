@@ -90,6 +90,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
   natlas<-length(atlasList)
+  atlasLabels<-1:natlas
+  maxSimImg<-rep(0,ncol(targetIv))
   if ( maxAtlasAtVoxel[2] > natlas ) maxAtlasAtVoxel[2]<-natlas
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
@@ -154,6 +156,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       }
       weightmat[zsd==1,voxel]<-wts
+      maxSimImg[ voxel ]<-atlasLabels[zsd==1][  which.max(wts) ]
       newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
       if ( FALSE ) {
         print("DEBUG MODE")
@@ -172,6 +175,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   }
   close( progress )
   newimg<-makeImage(targetIMask,newmeanvec)
+  maxSimImg<-makeImage(targetIMask,maxSimImg)
   segimg<-NA
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
@@ -206,5 +210,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     segimg<-makeImage(targetIMask,segvec)
     }
   return( list( predimg=newimg, segimg=segimg,
-    localWeights=weightmat, probimgs=probImgList  ) )
+    localWeights=weightmat, probimgs=probImgList,
+    maxSimImg=maxSimImg  ) )
 }

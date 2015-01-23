@@ -6,6 +6,7 @@
 #' @author Brian B. Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
+#' N3BiasFieldCorrection(2,fi,fi,4)
 #' seg<-kmeansSegmentation( fi, 3 )
 kmeansSegmentation <- function(img,k,kmask=NA,mrf=0.1){
   kmimg<-antsImageClone(img)

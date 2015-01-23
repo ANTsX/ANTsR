@@ -17,6 +17,7 @@ k means image segmentation.
 }
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)
+N3BiasFieldCorrection(2,fi,fi,4)
 seg<-kmeansSegmentation( fi, 3 )
 }
 \author{

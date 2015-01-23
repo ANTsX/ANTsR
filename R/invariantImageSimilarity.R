@@ -2,8 +2,8 @@
 #' @title mutual information between two images as a function of geometry
 #' @description  compute mutual information between two images as image is rotated about its center w/or w/o optimization
 #' @usage  mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
-#' @param img antsImage
-#' @param img antsImage
+#' @param fixedImg antsImage that is fixed ie does not move
+#' @param movingImg antsImage to be mapped to fixed
 #' @param thetas numeric vector
 #' @param localSearchIterations integer controlling local search in multistart
 #' @param metric which metric MI or GC (string)

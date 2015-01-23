@@ -17,9 +17,9 @@ mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 
 \item{doReflection}{reflect image about principal axis}
 
-\item{img}{antsImage}
+\item{fixedImg}{antsImage that is fixed ie does not move}
 
-\item{img}{antsImage}
+\item{movingImg}{antsImage to be mapped to fixed}
 
 \item{txFilename}{if present, write optimal tx to .mat file}
 }
