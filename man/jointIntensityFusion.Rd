@@ -30,6 +30,8 @@ outlist<-jointIntensityFusion(targetI, targetIMask,
 \item{rho}{ridge penalty increases robustness to outliers}
 
 \item{useSaferComputation}{slower but more error checking}
+
+\item{usecor}{employ correlation as local similarity}
 }
 \value{
 approximated image, segmentation and probabilities

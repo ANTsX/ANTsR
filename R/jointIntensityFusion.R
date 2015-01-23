@@ -15,6 +15,7 @@
 #' @param maxAtlasAtVoxel  min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers
 #' @param useSaferComputation slower but more error checking
+#' @param usecor employ correlation as local similarity
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -57,7 +58,7 @@
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=1, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
-  useSaferComputation=FALSE )
+  useSaferComputation=FALSE, usecor=FALSE )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
@@ -115,8 +116,12 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       if ( doscale ) {
         v<-( v - mean(v))/sdv
       }
-      wmat[ct,]<-(v-targetIv[,voxel])
-      }
+      if ( usecor )
+        wmat[ct,]<-(v-targetIv[,voxel])
+      else {
+        wmat[ct,]<-( 1.0 - cor(v,targetIv[,voxel]) )
+        }
+    }
     if ( maxAtlasAtVoxel[2] < natlas ) {
       ords<-order(rowMeans(abs(wmat)))
       inds<-maxAtlasAtVoxel[1]:maxAtlasAtVoxel[2]
