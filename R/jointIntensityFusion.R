@@ -160,9 +160,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         onev<-rep(1,sum(zsd))
         wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
       }
-      weightmat[zsd==1,voxel]<-wts
-      maxSimImg[ voxel ]<-atlasLabels[zsd==1][  which.max(wts) ]
-      newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
+      if ( ! is.na( mean(wts)) ) {
+        weightmat[zsd==1,voxel]<-wts
+        maxSimImg[ voxel ]<-atlasLabels[zsd==1][  which.max(wts) ]
+        newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
+      }
       if ( FALSE ) {
         print("DEBUG MODE")
         print(maxAtlasAtVoxel)
