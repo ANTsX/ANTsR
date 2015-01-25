@@ -14,7 +14,7 @@
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' reofi<-reorientImage(fi,c(1,0))
 reorientImage <- function( img, axis1, axis2=NA,
-  doreflection=0, txfn=NA ) {
+  doreflection=0, doscale=0, txfn=NA ) {
   if (length(dim(img)) == 1)
     if (dim(img)[1] == 1)
       return(NULL)
@@ -30,7 +30,7 @@ reorientImage <- function( img, axis1, axis2=NA,
   axis2<-axis2/sqrt( sum( axis2*axis2 )  )*(-1)
   if ( is.na(txfn) ) txfn=tempfile(fileext='.mat')
   .Call("reorientImage", img, txfn, axis1, axis2,
-     doreflection, PACKAGE = "ANTsR")
+     doreflection, doscale=doscale, PACKAGE = "ANTsR")
   img2<-antsApplyTransforms(img,img,transformlist=c(txfn))
   return(list(reoimg=img2,txfn=txfn))
 }
