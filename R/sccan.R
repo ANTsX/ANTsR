@@ -1,10 +1,10 @@
 #' Sparse Statistical Analysis
-#' 
+#'
 #' A tool for sparse statistical analysis on images : scca, pscca (with
 #' options), mscca. Can also convert an imagelist/mask pair to a binary matrix
 #' image.
-#' 
-#' 
+#'
+#'
 #' @param o-or-output=<outputImage> Output dependent on which option is called.
 #' @param p-or-"n_permutations"=<value> Number of permutations to use in scca.
 #' Default: 500.
@@ -38,7 +38,7 @@
 #' takes a list of image and projection files names (one per line) and writes
 #' them to a csv file --- basically computing X*Y (matrices).
 #' @param scca=
-#' 
+#'
 #' Matrix-based scca operations for 2 and 3 views.For all these options, the
 #' FracNonZero terms set the fraction of variables to use in the estimate. E.g.
 #' if one sets 0.5 then half of the variables will have non-zero values. If the
@@ -46,15 +46,15 @@
 #' negative, weights can be (+) or (-). partial does partial scca for 2 views
 #' while partialing out the 3rd view.
 #' @param
-#' list("\n",list(),list("list(name=\"two-view\",<matrix-view1.mhd>,<matrix-view2.mhd>,<mask1>,<mask2>,<FracNonZero1>,<FracNonZero2>)"),"\n",list(),list("list(name=\"three-view\",<matrix-view1.mhd>,<matrix-view2.mhd>,<matrix-view3.mhd>,<mask1>,<mask2>,<mask3>,<FracNonZero1>,<FracNonZero2>,<FracNonZero3>)"),"\n",list(),list("list(name=partial,<matrix-view1.mhd>,<matrix-view2.mhd>,<matrix-view3.mhd>,<mask1>,<mask2>,<mask3>,<FracNonZero1>,<FracNonZero2>,<FracNonZero3>)"),
-#' "\n") Matrix-based scca operations for 2 and 3 views.For all these options,
+#' list("",list(),list("list(name=\"two-view\",<matrix-view1.mhd>,<matrix-view2.mhd>,<mask1>,<mask2>,<FracNonZero1>,<FracNonZero2>)"),"",list(),list("list(name=\"three-view\",<matrix-view1.mhd>,<matrix-view2.mhd>,<matrix-view3.mhd>,<mask1>,<mask2>,<mask3>,<FracNonZero1>,<FracNonZero2>,<FracNonZero3>)"),"",list(),list("list(name=partial,<matrix-view1.mhd>,<matrix-view2.mhd>,<matrix-view3.mhd>,<mask1>,<mask2>,<mask3>,<FracNonZero1>,<FracNonZero2>,<FracNonZero3>)"),
+#' "") Matrix-based scca operations for 2 and 3 views.For all these options,
 #' the FracNonZero terms set the fraction of variables to use in the estimate.
 #' E.g. if one sets 0.5 then half of the variables will have non-zero values.
 #' If the FracNonZero is (+) then the weight vectors must be positive. If they
 #' are negative, weights can be (+) or (-). partial does partial scca for 2
 #' views while partialing out the 3rd view.
 #' @param
-#' 
+#'
 #' Matrix-based scca operations for 2 and 3 views.For all these options, the
 #' FracNonZero terms set the fraction of variables to use in the estimate. E.g.
 #' if one sets 0.5 then half of the variables will have non-zero values. If the
@@ -62,22 +62,22 @@
 #' negative, weights can be (+) or (-). partial does partial scca for 2 views
 #' while partialing out the 3rd view.
 #' @param svd=
-#' 
+#'
 #' a sparse svd implementation --- will report correlation of eigenvector with
 #' original data columns averaged over columns with non-zero weights. will only
 #' use view1 ... unless nuisance matrix is specified. -i controls the number of
 #' sparse approximations per eigenvector, -n controls the number of
 #' eigenvectors. total output will then be i*n sparse eigenvectors.
 #' @param
-#' list("\n",list(),list("list(name=sparse,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"\n",list(),list("list(name=classic,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"\n",list(),list("list(name=cgspca,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"\n",list(),list("list(name=prior,....)"),
-#' "\n",list(),list("list(name=network,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<guidance-matrix>)"),"\n")
+#' list("",list(),list("list(name=sparse,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"",list(),list("list(name=classic,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"",list(),list("list(name=cgspca,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<nuisance-matrix>,i=<num-of-approx>,n=<num-of-eigenvec>)"),"",list(),list("list(name=prior,....)"),
+#' "",list(),list("list(name=network,<matrix-view1.mhd>,<mask1>,<FracNonZero1>,<guidance-matrix>)"),"")
 #' a sparse svd implementation --- will report correlation of eigenvector with
 #' original data columns averaged over columns with non-zero weights. will only
 #' use view1 ... unless nuisance matrix is specified. -i controls the number of
 #' sparse approximations per eigenvector, -n controls the number of
 #' eigenvectors. total output will then be i*n sparse eigenvectors.
 #' @param
-#' 
+#'
 #' a sparse svd implementation --- will report correlation of eigenvector with
 #' original data columns averaged over columns with non-zero weights. will only
 #' use view1 ... unless nuisance matrix is specified. -i controls the number of
@@ -86,13 +86,13 @@
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' sccan( list( "timeseriesimage-to-matrix" = list( moco_img_double , cortmask_img_double , 0.0 , 0.0  ) , o = mat ) )
 #' sccan( list( svd = list( name = "sparse" , filt_mat , cortmask_img_double , -0.15 ) , n = 40 , i = 40 , PClusterThresh = 50 , o = list( mat1 , imglist , mat2 ) ) )
 #' }
-#' 
+#'
 #' @export sccan
 sccan <- function(...) {
   .Call("sccan", int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
-} 
+}
