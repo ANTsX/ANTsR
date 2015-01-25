@@ -4,7 +4,7 @@
 \alias{kmeansSegmentation}
 \title{k means image segmentation.}
 \usage{
-kmeansSegmentation(img,3)
+kmeansSegmentation(img, k, kmask = NA, mrf = 0.1)
 }
 \arguments{
 \item{k}{integer number of classes}

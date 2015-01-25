@@ -1,3 +1,39 @@
+#' ASL-based Perfusion from PASL, CASL or pCASL.
+#' 
+#' This function will estimate perfusion from an ASL time series using a
+#' (robust) regression approach. It will do motion correction, compcorr, factor
+#' out nuisance variables and use regression to estimate the perfusion itself.
+#' It will mask the image too based on a simple procedure ( should fix this in
+#' the future by allowing the user to optionally pass a mask in from the
+#' outside ).  WARNING: the function will estimate the m0 image from the mean
+#' of the control tags assuming that the data is acquired T C T C as is most of
+#' JJ's data.  Quantitative CBF can be obtained by mutiplying the output of
+#' this function by a scalar.
+#' 
+#' 
+#' @param asl_antsr_image_or_filename The filename to an antsr image or pointer
+#' to an antsr image
+#' @param maskThresh=<value> A thresholding value for the mask as a fraction of
+#' the mean value of the image ... may need to be adjusted up or down for your
+#' data although the mask does not need to be perfect.
+#' @param dorobust=<valuein0to1> Controls whether you use a robust regression
+#' when estimating perfusion values
+#' @return output is an antsImage containing perfusion values
+#' 
+#' or
+#' 
+#' 1 -- Failure
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' asl<-antsImageRead("PEDS012_20131101_pcasl_1.nii.gz",4)
+#' # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
+#' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, interpolation="linear",
+#'   dorobust=0.95 )
+#' }
+#' 
+#' @export aslPerfusion
 aslPerfusion <- function(asl, maskThresh = 0.75,
   moreaccurate = 1, dorobust = 0.92,
   m0 = NA, skip = 20, mask = NA,

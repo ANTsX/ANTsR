@@ -4,9 +4,10 @@
 \alias{jointIntensityFusion}
 \title{Estimates an image from another set of images}
 \usage{
-outlist<-jointIntensityFusion(targetI, targetIMask,
-     atlasList, beta = 1, rad = NA,
-     labelList = NA, doscale = FALSE)
+jointIntensityFusion(targetI, targetIMask, atlasList, beta = 1, rad = NA,
+  labelList = NA, doscale = TRUE, doNormalize = TRUE,
+  maxAtlasAtVoxel = c(1, Inf), rho = 0.1, useSaferComputation = FALSE,
+  usecor = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}

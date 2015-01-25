@@ -1,3 +1,24 @@
+#' 3D surface-based rendering of image segmentation labels
+#' 
+#' Will use rgl to render surfaces
+#' 
+#' 
+#' @param labelsimg 3D images of integer labels
+#' @param surfval intensity level that defines isosurface
+#' @param smoothsval sigma for smoothing of each extracted label image
+#' @param alphasurf opacity of each rendered surface
+#' @param physical flag to use true spatial coordinates
+#' @param color colors to use for each label
+#' @return 0 -- Success\cr 1 -- Failure
+#' @author Duda, J
+#' @examples
+#' 
+#' \dontrun{
+#' renderImageLabels(labels)
+#' renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3, color=snapColors(100) )
+#' }
+#' 
+#' @export renderImageLabels
 renderImageLabels <- function(labelsimg, surfval = 0.5, smoothsval = 0, blobrender = TRUE, 
   alphasurf = 1, alphafunc = 1, outdir = "./", outfn = NA, physical = TRUE, color = c(), 
   labels = FALSE) {

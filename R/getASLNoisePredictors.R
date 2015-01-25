@@ -1,24 +1,31 @@
-#' @name getASLNoisePredictors
-#' @title Get nuisance predictors from ASL images
-#' @usage getASLNoisePredictors <- function(aslmat, tc, noisefrac=0.1, 
-#'  polydegree=3, k=5, npreds=12, method='noisepool', covariates=NA, detrend=F, 
-#' noisepoolfun=max)
+#' Get nuisance predictors from ASL images
+#' 
+#' Get nuisance predictors from ASL images
+#' 
+#' 
 #' @param aslmat ASL input matrix.
 #' @param tc Tag-control sawtooth pattern vector.
 #' @param noisefrac Fraction of data to include in noise pool.
-#' @param polydegree Degree of polynomial for detrending. A value of 0 indicates no detrending.
+#' @param polydegree Degree of polynomial for detrending. A value of 0
+#' indicates no detrending.
 #' @param k Number of cross-validation folds.
-#' @param npreds Number of predictors to output. 
-#' @param method Method of selecting noisy voxels.  One of 'compcor' or 'noisepool'. See \code{Details}.
-#' @param covariates Covariates to be considered when assessing prediction of tc pattern.
+#' @param npreds Number of predictors to output.
+#' @param method Method of selecting noisy voxels.  One of 'compcor' or
+#' 'noisepool'. See \code{Details}.
+#' @param covariates Covariates to be considered when assessing prediction of
+#' tc pattern.
 #' @param noisepoolfun Function used for aggregating R^2 values.
-#' @return Matrix of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.
+#' @return Matrix of size \code{nrow(aslmat)} by \code{npreds}, containing a
+#' timeseries of all the nuisance predictors.
 #' @author Brian B. Avants, Benjamin M. Kandel
 #' @examples
+#' 
 #' moco <- antsMotionCalculation(getANTsRData('pcasl'))
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
-#' noise <- getASLNoisePredictors(aslmat, tc) 
+#' noise <- getASLNoisePredictors(aslmat, tc)
+#' 
+#' @export getASLNoisePredictors
 getASLNoisePredictors <- function(aslmat, tc, noisefrac=0.1, 
   polydegree=3, k=5, npreds=12, method='noisepool', covariates=NA, 
   noisepoolfun=max){

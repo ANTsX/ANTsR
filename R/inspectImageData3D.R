@@ -1,3 +1,25 @@
+#' Simple inspectImageData3D function.
+#' 
+#' InspectImageData3D collects basic statistics over a dataset and returns them
+#' in a dataframe.
+#' 
+#' 
+#' @param fn input list of filenames
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) ) 
+#' library(fpc)
+#' library(DMwR)
+#' pamres <- pamk(mm) 
+#' plot(pamres$pamobject)
+#' outlier.scores <- lofactor( mm, k=5)
+#' outliers <- order(outlier.scores, decreasing=T)[1:5]
+#' }
+#' 
+#' @export inspectImageData3D
 inspectImageData3D <- function(myfiles) {
   if (nargs() == 0) {
     print(args(inspectImageData3D))

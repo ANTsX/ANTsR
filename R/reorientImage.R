@@ -1,18 +1,22 @@
-#' @name reorientImage
-#' @title reorient image by its principal axis
-#' @description  align along a specific axis
-#' @usage  reo<-reorientImage( i1 , axis )
+#' reorient image by its principal axis
+#' 
+#' align along a specific axis
+#' 
+#' 
 #' @param img antsImage
-#' @param axis vector of size dim, might need to play w/axis sign
 #' @param axis2 vector of size dim for 3D
 #' @param doreflection vector of size dim for 3D
 #' @param txfn file name for transformation
+#' @param axis vector of size dim, might need to play w/axis sign
 #' @return reoriented image
 #' @author Brian B. Avants
-#' @keywords image geometry
+#' @keywords geometry image
 #' @examples
+#' 
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' reofi<-reorientImage(fi,c(1,0))
+#' 
+#' @export reorientImage
 reorientImage <- function( img, axis1, axis2=NA,
   doreflection=0, doscale=0, txfn=NA ) {
   if (length(dim(img)) == 1)

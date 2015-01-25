@@ -291,6 +291,36 @@ antsSetDirection <- function(x, direction) {
   return(.Call("antsImage_SetDirection", x, direction, PACKAGE = "ANTsR"))
 }
 
+
+
+
+
+
+
+#' Get Neighborhood
+#'
+#' Get the values in a local neighborhood of an 'antsImage'.
+#'
+#'
+#' @param image Image object of S4 class 'antsImage' to get values from.
+#' @param center array of indices for neighborhood center
+#' @param radius array of values for neighborhood radius (in voxels)
+#' @param physical.coordinates a logical indicating if voxel indices and
+#' offsets should be in voxel or physical coordinates
+#' @return list containing three matrices: values: matrix of pixel values where
+#' the number of rows is the size of the neighborhood and there is a column for
+#' each voxel indices: matrix providing the coordinates for each value
+#' @author Duda JT
+#' @examples
+#'
+#' mnit<-getANTsRData("mni")
+#' mnit<-antsImageRead(mnit,3)
+#' center <- dim(mnit)/2
+#' radius <- rep(5,3)
+#' mat<-antsGetNeighborhood(mnit,center,radius)
+#'
+#'
+#' @export antsGetNeighborhood
 antsGetNeighborhood <- function(x, center, radius, physical.coordinates=FALSE) {
 
   if (class(x)[1] != "antsImage") {
@@ -311,6 +341,51 @@ antsGetNeighborhood <- function(x, center, radius, physical.coordinates=FALSE) {
   return(.Call("antsImage_GetNeighborhood", x, center, radius, physical.coordinates))
 }
 
+
+
+
+
+
+
+#' Get Neighborhood
+#'
+#' Summarize neighborhoods for voxels in an antsImage.
+#'
+#'
+#' @param image Image object of S4 class 'antsImage' to get values from.
+#' @param mask Image object of S4 class 'antsImage' indicating which voxels to
+#' examine. Each voxel > 0 will be used as the center of a neighborhood
+#' @param radius array of values for neighborhood radius (in voxels)
+#' @param physical.coordinates a logical indicating if voxel indices and
+#' offsets should be in voxel or physical coordinates
+#' @param boundary.condition a string indicating how to handle voxels in a
+#' neighborhood, but not in the mask "NA" - fill value with NA "image" - use
+#' image value even if not in mask "mean" - use mean of all non-NA values for
+#' that neighborhood
+#' @param spatial.info a boolean indicating of voxel locations and neighborhood
+#' offsets should be returned along with pixel values.
+#' @return
+#'
+#' if spatial.info is false: a matrix of pixel values where the number of rows
+#' is the size of the neighborhood and there is a column for each voxel
+#'
+#' if spatial.info is true, a list containing three matrices: values: matrix of
+#' pixel values where the number of rows is the size of the neighborhood and
+#' there is a column for each voxel indices: matrix providing the center
+#' coordinates for each neighborhood offsets: matrix providing the offsets from
+#' center for each voxel in a neighborhood
+#' @author Duda JT
+#' @examples
+#'
+#' mnit<-getANTsRData("mni")
+#' mnit<-antsImageRead(mnit,3)
+#' mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+#' center <- dim(mnit)/2
+#' radius <- rep(2,3)
+#' mat<-antsGetNeighborhoodMatrix(mnit,mask,radius)
+#'
+#'
+#' @export antsGetNeighborhoodMatrix
 antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates=FALSE, boundary.condition="NA", spatial.info=FALSE) {
 
   if (class(image)[1] != "antsImage") {

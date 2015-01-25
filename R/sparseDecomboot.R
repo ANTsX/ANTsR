@@ -1,3 +1,41 @@
+#' Convenience wrapper for eigenanatomy decomposition.
+#' 
+#' Decomposes a matrix into sparse eigenevectors to maximize explained
+#' variance.
+#' 
+#' 
+#' @param inmatrix n by p input images , subjects or time points by row ,
+#' spatial variable lies along columns
+#' @param inmask optional antsImage mask
+#' @param nboot n bootstrap runs
+#' @param nsamp number of samples e.g. 0.9 indicates 90 percent of data
+#' @param otherparams see sccan for other parameters
+#' @return outputs a decomposition of a population or time series matrix
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' mat<-replicate(100, rnorm(20)) 
+#' mydecom<-sparseDecomboot( mat ) 
+#' # for prediction
+#' library(spls)
+#' library(randomForest)
+#' data(lymphoma)
+#' training<-sample( rep(c(TRUE,FALSE),31)  )
+#' sp<-0.001 ; myz<-0 ; nv<-5
+#' ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv , sparseness=( sp ), mycoption=1, z=myz , nsamp=0.9, nboot=50 ) # NMF style
+#' outmat<-as.matrix(ldd$eigenanatomyimages )
+#' # outmat<-t(ldd$cca1outAuto)
+#' traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]), eig = lymphoma$x[training,]  %*% outmat )
+#' testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]), eig = lymphoma$x[!training,] %*% outmat )
+#' myrf<-randomForest( lclass ~ . ,   data=traindf )
+#' predlymp<-predict(myrf, newdata=testdf)
+#' print(paste("N-errors:",sum(abs( testdf$lclass != predlymp ) )," non-zero ",sum(abs( outmat ) > 0 ) ) )
+#' for ( i in 1:nv )
+#'   print(paste(" non-zero ",i,' is: ',sum(abs( outmat[,i] ) > 0 ) ) )
+#' }
+#' 
+#' @export sparseDecomboot
 sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50, 
   its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0, initializationList = list(), 
   mycoption = 0, nboot = 10, nsamp = 0.9, robust = 0, doseg = TRUE) {

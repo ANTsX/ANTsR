@@ -4,7 +4,7 @@
 \alias{segmentShapeFromImage}
 \title{convolution-based shape identification}
 \usage{
-featimg<-segmentShapeFromImage( img, shape, mask )
+segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun)
 }
 \arguments{
 \item{img}{antsImage}
@@ -21,7 +21,8 @@ featimg<-segmentShapeFromImage( img, shape, mask )
 feature image
 }
 \description{
-takes an image and a shape and concvoles the 2nd with the first to yield a feature image
+takes an image and a shape and concvoles the 2nd with the first to yield a
+feature image
 }
 \examples{
 set.seed(123)

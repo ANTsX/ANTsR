@@ -1,3 +1,18 @@
+#' Simple autocorrelation-based temporal whitening function.
+#' 
+#' Temporally whitens the input matrix using autoregression and returns the
+#' result.
+#' 
+#' 
+#' @param mat input matrix
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#' 
+#' mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
+#' wmat<-temporalwhiten( mat ) 
+#' 
+#' @export temporalwhiten
 temporalwhiten <- function(mat, myord = 2) {
   if (nargs() == 0) {
     print("Usage:  x_whitened<-whiten( x ) ")

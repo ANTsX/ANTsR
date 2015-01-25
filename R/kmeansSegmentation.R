@@ -1,13 +1,18 @@
-#' @name kmeansSegmentation
-#' @title k means image segmentation.
-#' @usage kmeansSegmentation(img,3)
+#' k means image segmentation.
+#' 
+#' k means image segmentation.
+#' 
+#' 
 #' @param k integer number of classes
 #' @return segmentation and probability images
 #' @author Brian B. Avants
 #' @examples
+#' 
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' N3BiasFieldCorrection(2,fi,fi,4)
 #' seg<-kmeansSegmentation( fi, 3 )
+#' 
+#' @export kmeansSegmentation
 kmeansSegmentation <- function(img,k,kmask=NA,mrf=0.1){
   kmimg<-antsImageClone(img)
   dim<-img@dimension

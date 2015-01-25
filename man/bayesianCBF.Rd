@@ -4,11 +4,9 @@
 \alias{bayesianCBF}
 \title{Uses probabilistic segmentation to constrain pcasl-based cbf computation.}
 \usage{
-bcbf<-bayesianCBF( pcasl, seg, tissuelist,
-  myPriorStrength=30.0,
-  useDataDrivenMask=3,
-  denoisingComponents=1:8,
-  robustnessvalue=0.95, localweights=F )
+bayesianCBF(pcasl, seg, tissuelist, myPriorStrength = 30,
+  useDataDrivenMask = 3, denoisingComponents = 1:8,
+  robustnessvalue = 0.95, localweights = F, priorBetas = NA)
 }
 \arguments{
 \item{pcasl}{img antsImage for cbf}
@@ -23,7 +21,8 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
 
 \item{robustnessvalue}{- value (e.g. 0.95) that throws away time points}
 
-\item{localweights}{Use estimate of voxel-wise reliability to inform prior weight?}
+\item{localweights}{Use estimate of voxel-wise reliability to inform prior
+weight?}
 
 \item{priorBetas}{prior betas for each tissue and predictor}
 
@@ -33,7 +32,9 @@ bcbf<-bayesianCBF( pcasl, seg, tissuelist,
 estimated cbf image
 }
 \description{
-Employs a robust regression approach to learn the relationship between a sample image and a list of images that are mapped to the same space as the sample image.
+Employs a robust regression approach to learn the relationship between a
+sample image and a list of images that are mapped to the same space as the
+sample image.
 }
 \examples{
 \dontrun{

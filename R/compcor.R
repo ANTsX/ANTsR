@@ -1,3 +1,20 @@
+#' Simple compcor function.
+#' 
+#' Compcors the input matrix using SVD and returns the result.
+#' 
+#' 
+#' @param mat input fmri image or matrix
+#' @param returnv returns the singular vectors in v-space
+#' @param returnhighvarmat returns the high variance matrix on which svd is
+#' performed
+#' @return dataframe is output
+#' @author Avants BB
+#' @examples
+#' 
+#' mat <- matrix( rnorm(50000) ,ncol=500)
+#' compcorrdf<-compcor( mat ) 
+#' 
+#' @export compcor
 compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd = FALSE, 
   useimagemath = FALSE, randomSamples = 1, returnv = FALSE, returnhighvarmatinds = FALSE, 
   highvarmatinds = NA) {

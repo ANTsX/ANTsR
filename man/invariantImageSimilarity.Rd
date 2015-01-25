@@ -4,7 +4,9 @@
 \alias{invariantImageSimilarity}
 \title{mutual information between two images as a function of geometry}
 \usage{
-mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
+invariantImageSimilarity(in_image1, in_image2, thetas,
+  localSearchIterations = 0, metric = "MI", scaleImage = 1,
+  doReflection = 0, txfn = "")
 }
 \arguments{
 \item{thetas}{numeric vector}
@@ -27,7 +29,8 @@ mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
 vector of similarity values
 }
 \description{
-compute mutual information between two images as image is rotated about its center w/or w/o optimization
+compute mutual information between two images as image is rotated about its
+center w/or w/o optimization
 }
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)

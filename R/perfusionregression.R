@@ -1,3 +1,31 @@
+#' Perfusion Regression
+#' 
+#' Estimate CBF using standard regression and optionally robust regression.
+#' 
+#' 
+#' @param mask_img Mask image selects the voxels where CBF will be estimated.
+#' Voxels corresponding to logical FALSE are not computed.
+#' @param mat Matrix with a column for every time-series voxel. Number of rows
+#' equals the number of time units in the series.
+#' @param xideal 1D time-series signal to be used a ideal or model for
+#' regression.
+#' @param nuis Nuisance parameters obtained from 'get_perfusion_predictors'.
+#' @param m0 m0 antsImage passed in according to needs of specific ASL
+#' sequence.
+#' @param dorobust Real value in interval from 0 to 1.  If greater than 0, then
+#' robust regression will be performed.  A typical value would be 0.95 i.e. use
+#' voxels with 95 percent confidence.
+#' @return Success -- An object of type 'antsImage' containing the CBF estimate
+#' for voxels corresponding to the mask input\cr
+#' @author Shrinidhi KL Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' # predictors -- result of calling 'get_perfusion_predictors'
+#' cbf <- perfusionregression( mask_img, mat , predictors$xideal , predictors$nuis )
+#' }
+#' 
+#' @export perfusionregression
 perfusionregression <- function(mask_img, mat, xideal,
   nuis = NA, dorobust = 0, skip = 20,
   selectionValsForRegweights = NULL,

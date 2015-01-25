@@ -1,3 +1,48 @@
+#' Basic pre-processing for BOLD or ASL-based network analysis.
+#' 
+#' This function works for either raw BOLD time-series data, ASL-based BOLD
+#' time-series data or ASL-based CBF time series data.  In all 3 cases, this
+#' function performs motion-correction, factoring out motion and compcor
+#' nuisance paramters, frequency filtering and masking.  The output contains
+#' the filtered time series (matrix form), the mask and a vector of temporal
+#' signal variance. Some ASL MR sequences allow network analysis of either BOLD
+#' or ASL signal.  See "Implementation of Quantitative Perfusion Imaging
+#' Techniques for Functional Brain Mapping using Pulsed Arterial Spin Labeling"
+#' by Wong et al, 1997 for an overview.  This function employs "surround"
+#' techniques for deriving either CBF or BOLD signal from the input ASL.  This
+#' is a WIP.
+#' 
+#' 
+#' @param asl_antsr_image_or_filename The filename to an antsr image or pointer
+#' to an antsr image
+#' @param tr=<value> The sequence's TR value , typically 3 or 4.
+#' @param freqLo=<value> The lower frequency limit, e.g. 0.01 in band-pass
+#' filter
+#' @param freqHi=<value> The higher frequency limit, e.g. 0.1 in band-pass
+#' filter
+#' @param cbfnetwork="ASLCBF" A string dictating whether to do nothing special
+#' (standard BOLD) or get CBF (ASLCBF) or BOLD (ASLBOLD) signal from ASL
+#' @param maskThresh=<value> A thresholding value for the mask ... may need to
+#' be adjusted up or down for your data although the mask does not need to be
+#' perfect.
+#' @param smoother=<value> A smoothing parameter for space and time.
+#' @param outputprefix=<string> filename prefix - if defined , this function
+#' will write out some sanity checking images.
+#' @return output is a list containing "filteredTimeSeries" "mask"
+#' "temporalvar"
+#' 
+#' or
+#' 
+#' 1 -- Failure
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' fmat<-timeseries2matrix( img, mask )
+#' myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
+#' }
+#' 
+#' @export filterfMRIforNetworkAnalysis
 filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA,
   labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA, usesvd = FALSE , robustcorr = FALSE  ) {
   pixtype <- "float"

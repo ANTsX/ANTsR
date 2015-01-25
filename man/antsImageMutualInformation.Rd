@@ -4,7 +4,7 @@
 \alias{antsImageMutualInformation}
 \title{mutual information between two images}
 \usage{
-mival<-antsImageMutualInformation( i1, i2 )
+antsImageMutualInformation(in_image1, in_image2)
 }
 \arguments{
 \item{img}{antsImage}

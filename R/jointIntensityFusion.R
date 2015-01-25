@@ -1,18 +1,17 @@
-#' @name jointIntensityFusion
-#' @title Estimates an image from another set of images
-#' @description  intensity generalization of joint label fusion.
-#' @usage  outlist<-jointIntensityFusion(targetI, targetIMask,
-#'      atlasList, beta = 1, rad = NA,
-#'      labelList = NA, doscale = FALSE)
+#' Estimates an image from another set of images
+#' 
+#' intensity generalization of joint label fusion.
+#' 
+#' 
 #' @param targetI antsImage to be approximated
-#' @param targetIMask  mask with value 1
+#' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
-#' @param beta  weight sharpness, default to 2
-#' @param rad  neighborhood radius, default to 4
+#' @param beta weight sharpness, default to 2
+#' @param rad neighborhood radius, default to 4
 #' @param labelList list containing antsImages
-#' @param doscale  scale neighborhood intensities
-#' @param doNormalize  normalize each image range to 0, 1
-#' @param maxAtlasAtVoxel  min/max n atlases to use at each voxel
+#' @param doscale scale neighborhood intensities
+#' @param doNormalize normalize each image range to 0, 1
+#' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers
 #' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
@@ -20,6 +19,7 @@
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
+#' 
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
 #' ImageMath(2,ref,"Normalize",ref)
@@ -55,6 +55,8 @@
 #' pp2<-jointIntensityFusion(ref,refmaske,ilist,
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
+#' 
+#' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=1, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,

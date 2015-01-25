@@ -1,3 +1,18 @@
+#' Simple interleaveMatrixWithItself function.
+#' 
+#' Replicate columns of input matrix n times as neighbors of columns in
+#' original matrix.
+#' 
+#' 
+#' @param mat input matrix
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#' 
+#' mat<-replicate(100, rnorm(20)) 
+#' wmat<-interleaveMatrixWithItself( mat , 5 ) 
+#' 
+#' @export interleaveMatrixWithItself
 interleaveMatrixWithItself <- function(x, n = 1) {
   if (nargs() == 0) {
     print(args(interleaveMatrixWithItself))

@@ -1,22 +1,27 @@
-#' @name invariantImageSimilarity
-#' @title mutual information between two images as a function of geometry
-#' @description  compute mutual information between two images as image is rotated about its center w/or w/o optimization
-#' @usage  mival<-invariantImageSimilarity( i1, i2, thetas=0:360, 0 )
-#' @param fixedImg antsImage that is fixed ie does not move
-#' @param movingImg antsImage to be mapped to fixed
+#' mutual information between two images as a function of geometry
+#' 
+#' compute mutual information between two images as image is rotated about its
+#' center w/or w/o optimization
+#' 
+#' 
 #' @param thetas numeric vector
 #' @param localSearchIterations integer controlling local search in multistart
 #' @param metric which metric MI or GC (string)
 #' @param scaleImage global scale
-#' @param doReflection search over reflections about axes, return best
+#' @param doReflection reflect image about principal axis
+#' @param fixedImg antsImage that is fixed ie does not move
+#' @param movingImg antsImage to be mapped to fixed
 #' @param txFilename if present, write optimal tx to .mat file
 #' @return vector of similarity values
 #' @author Brian B. Avants
 #' @keywords image similarity
 #' @examples
+#' 
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' mi<-antsImageRead( getANTsRData('r64') ,2)
 #' mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
+#' 
+#' @export invariantImageSimilarity
 invariantImageSimilarity <- function(in_image1, in_image2, thetas,
   localSearchIterations=0, metric="MI", scaleImage=1, doReflection=0,
   txfn="" ) {
