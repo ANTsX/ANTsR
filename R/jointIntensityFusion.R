@@ -119,7 +119,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       if ( usecor )
         wmat[ct,]<-(v-targetIv[,voxel])
       else {
-        wmat[ct,]<-( 1.0 - cor(v,targetIv[,voxel]) )
+        ip<- ( v * targetIv[,voxel] )
+        wmat[ct,]<-( ip*(-1.0))
         }
     }
     if ( maxAtlasAtVoxel[2] < natlas ) {
