@@ -71,7 +71,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx<-c("Rigid","Affine","SyN","SyNBold","SyNAggro")
+      allowableTx<-c("Rigid","Affine","SyN","SyNBold","SyNAggro","SyNLessAggro")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx=initialTransform
@@ -135,6 +135,25 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outp
           "-f", "4x3x2x1",
           "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""),
+          "-c", "2100x1200x1200x20",
+          "-s", "3x2x1x0",
+          "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float", "0", "-o",
+          paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNLessAggro") {
+          args <- list("-d", as.character(fixed@dimension),
+          "-r", initx,
+          "-m", paste("mattes[", f, ",", m,",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]",
+          "-c","2100x1200x1200x100",
+          "-s", "3x2x1x0",
+          "-f", "4x3x2x1",
+          "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
+          "-t", paste("SyN[0.1,3,0.5]", sep = ""),
           "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0",
           "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float", "0", "-o",
