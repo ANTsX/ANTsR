@@ -12,8 +12,6 @@ CreateJacobianDeterminantImage(dim, tx, doLog = 0)
 \item{imageDimension2|3}{Number of dimensions of the input tx}
 
 \item{deformationField}{transformation file name}
-
-\item{outputImage}{result image, cloned from a fixed image}
 }
 \value{
 jacobianImage

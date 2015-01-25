@@ -2,9 +2,8 @@
 #'
 #' Compute the jacobian determinant from a transformation file
 #'
-#' @param imageDimension2|3 Number of dimensions of the input tx
+#' @param imageDimension Number of dimensions of the input tx
 #' @param deformationField transformation file name
-#' @param outputImage result image, cloned from a fixed image
 #' @param doLog return the log jacobian
 #' @return jacobianImage
 #' @author BB Avants
