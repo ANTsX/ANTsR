@@ -4,19 +4,19 @@
 \alias{CreateJacobianDeterminantImage}
 \title{CreateJacobianDeterminantImage}
 \usage{
-CreateJacobianDeterminantImage(...)
+CreateJacobianDeterminantImage(dim, tx, doLog = 0)
 }
 \arguments{
+\item{doLog}{return the log jacobian}
+
 \item{imageDimension2|3}{Number of dimensions of the input tx}
 
 \item{deformationField}{transformation file name}
 
 \item{outputImage}{result image, cloned from a fixed image}
-
-\item{doLog}{return the log jacobian}
 }
 \value{
-0 -- Success\cr 1 -- Failure
+jacobianImage
 }
 \description{
 Compute the jacobian determinant from a transformation file
@@ -25,8 +25,7 @@ Compute the jacobian determinant from a transformation file
 fi<-antsImageRead( getANTsRData('r16') ,2)
 mi<-antsImageRead( getANTsRData('r64') ,2)
 mytx<-antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN") )
-jac<-antsImageClone(fi)
-CreateJacobianDeterminantImage(2,mytx$fwdtransforms[[1]],jac,1)
+jac<-CreateJacobianDeterminantImage(2,mytx$fwdtransforms[[1]],1)
 plot(jac)
 }
 \author{

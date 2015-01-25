@@ -6,19 +6,23 @@
 #' @param deformationField transformation file name
 #' @param outputImage result image, cloned from a fixed image
 #' @param doLog return the log jacobian
-#' @return 0 -- Success\cr 1 -- Failure
+#' @return jacobianImage
 #' @author BB Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' mi<-antsImageRead( getANTsRData('r64') ,2)
 #' mytx<-antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN") )
-#' jac<-antsImageClone(fi)
-#' CreateJacobianDeterminantImage(2,mytx$fwdtransforms[[1]],jac,1)
+#' jac<-CreateJacobianDeterminantImage(2,mytx$fwdtransforms[[1]],1)
 #' plot(jac)
 #' @export ImageMath
-CreateJacobianDeterminantImage <- function(...) {
-  args<-list(...)
-  if ( length(args) <= 1 ) args<-list("")
-  if (length(args)==4) args[[5]]<-1
-  .Call("CreateJacobianDeterminantImage", as.character(c(...)))
+CreateJacobianDeterminantImage <- function(dim,tx,doLog=0) {
+  args<-list(dim,tx,doLog)
+  img<-antsImageRead(tx,dim)
+  dimg<-antsImageClone( img, "double" )
+  args2<-list(dim,tx,dimg,doLog,1)
+  k<-int_antsProcessArguments(args2)
+  retval<-( .Call("CreateJacobianDeterminantImage",
+    k, PACKAGE = "ANTsR") )
+  jimg<-antsImageClone(args2[[3]],'float')
+  return(jimg)
 }
