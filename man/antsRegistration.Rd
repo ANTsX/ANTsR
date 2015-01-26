@@ -5,7 +5,7 @@
 \title{A simplified (or full) interface to antsRegistration.}
 \usage{
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
-  outprefix = "", initialTransform = NA, ...)
+  initialTransform = NA, outprefix = "", ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -13,6 +13,8 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
 \item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
 affine+syn mapping.  Mutual information metric by default. choose from list
 Rigid, Affine, SyN, SyNBold, SyNAggro.}
+
+\item{initialTransform}{transforms to prepend}
 
 \item{outprefix}{output will be named with this prefix.}
 

@@ -15,7 +15,7 @@
 #' filin<-resampleImage(fi,c(1.5,1.5),0,1)
 #'
 #' @export resampleImage
-resampleImage <- function(image,resampleParams, useVoxels=1, interpType=1 )
+resampleImage <- function(image,resampleParams, useVoxels=0, interpType=1 )
   {
   inimg<-antsImageClone( image, 'double' )
   outimg<-antsImageClone( image, 'double' )

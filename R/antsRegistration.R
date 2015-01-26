@@ -9,6 +9,7 @@
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. choose from list
 #' Rigid, Affine, SyN, SyNBold, SyNAggro.
+#' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @return outputs a list containing warped images and transforms. 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
@@ -41,7 +42,8 @@
 #' }
 #'
 #' @export antsRegistration
-antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", outprefix = "", initialTransform=NA,
+antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
+  initialTransform=NA, outprefix = "",
   ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {

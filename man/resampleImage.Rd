@@ -4,7 +4,7 @@
 \alias{resampleImage}
 \title{resampleImage}
 \usage{
-resampleImage(image, resampleParams, useVoxels = 1, interpType = 1)
+resampleImage(image, resampleParams, useVoxels = 0, interpType = 1)
 }
 \arguments{
 \item{image}{input antsImage matrix}
