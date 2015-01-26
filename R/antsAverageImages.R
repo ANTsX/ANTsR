@@ -5,7 +5,6 @@
 #' @param reference must be an antsImage of the same size as those in the list
 #' @param normalize true or false
 #' @author Avants BB
-#' @author Avants BB
 antsAverageImages <- function(imageList, reference, normalize = FALSE) {
 
   # FIXME - input checking here

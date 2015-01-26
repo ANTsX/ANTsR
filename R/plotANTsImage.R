@@ -1,18 +1,12 @@
-getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
-
-
-
-
-
-
-
+#' plotANTsImage
+#'
 #' Plotting an image slice or multi-slice with optional color overlay.
-#' 
+#'
 #' This is a plotting utility for antsImage types with a background and color
 #' overlay option.  Useful for displaying statistical results overlaid on a
 #' background image.
-#' 
-#' 
+#'
+#'
 #' @param myantsimage the reference image on which to overlay
 #' @param color=<string> the color for the overlay , e.g c("blue","red") length
 #' of this list should match the image list
@@ -27,13 +21,9 @@ getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.
 #' @param outname="figx.jpg" output name if you want to write the result to a
 #' file
 #' @return output is plot to standard R window
-#' 
-#' or
-#' 
-#' 1 -- Failure
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #'   mnit<-getANTsRData("mni")
 #'   mnit<-antsImageRead(mnit,3)
 #'   mniafn<-getANTsRData("mnia")
@@ -43,13 +33,13 @@ getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.
 #'   mnia2<-antsImageRead(mniafn,3)
 #'   ThresholdImage(3,mnia2,mnia2,1,4)
 #'   SmoothImage(3,mnia2,1.5,mnia2)
-#'   plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+#'   plot( mnit, list(mnia,mnia2), slices='50x140x5',
 #'    threshold = "0.25x1", axis=0,color=c('red','blue') )
 #'   ofn<-paste(tempfile(),'.png',sep='')
 #'   # write directly to a file
-#'   plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+#'   plot( mnit, list(mnia,mnia2), slices='50x140x5',
 #'    threshold = "0.25x1", axis=0,color=c('red','blue'), outname = ofn )
-#' 
+#'
 #' @export plotANTsImage
 plotANTsImage <- function(myantsimage, functional = NA,
   color = c("jet","red","blue","green","yellow"),
@@ -93,28 +83,10 @@ plotANTsImage <- function(myantsimage, functional = NA,
 
 
   imagedim <- length(dim(myantsimage))
-  pckg <- try(require(pixmap))
-  if (!pckg) {
-    cat("Installing 'pixmap' from CRAN\n")
-    getPckg("pixmap")
-    require("pixmap")
-  }
-  pckg <- try(require(misc3d))
-  if (!pckg) {
-    cat("Installing 'misc3d' from CRAN\n")
-    getPckg("misc3d")
-    require("misc3d")
-  }
-  pckg <- try(require(rgl))
-  if (!pckg) {
-    cat("Installing 'rgl' from CRAN\n")
-    getPckg("rgl")
-    require("rgl")
-  }
-  library(utils)
-  library("misc3d")
-  library("rgl")
-  library("pixmap")
+  usePkg("pixmap")
+  usePkg("misc3d")
+  usePkg("rgl")
+  usePkg("utils")
   read.img <- function(x, dim = 2) {
     img <- antsImageRead(x, dim)
     img <- as.array(img)
@@ -279,7 +251,7 @@ plotANTsImage <- function(myantsimage, functional = NA,
   if (threshold[1] > threshold[2] | is.na(functional)) {
     if (!is.na(outname))
       dev.off()
-    return(0)
+    return(NULL)
   }
   for (ind in 1:length(functional)) {
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
@@ -382,5 +354,6 @@ plotANTsImage <- function(myantsimage, functional = NA,
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname))
     dev.off()
+ return(NULL)
 }
 plot.antsImage<-plotANTsImage

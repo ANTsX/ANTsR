@@ -18,7 +18,5 @@ calculate the mean of a list of antsImages imageList: can contain anything that 
 }
 \author{
 Avants BB
-
-Avants BB
 }
 

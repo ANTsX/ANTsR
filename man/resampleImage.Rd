@@ -13,16 +13,13 @@ resampleImage(image, resampleParams, useVoxels = 1, interpType = 1)
 
 \item{useVoxels}{true means interpret resample params as voxel counts}
 
-\item{interpType}{one of 0, 1, 2, 3, 4}
+\item{interpType}{one of 0 (nearest neighbor), 1 (linear), 2 (gaussian), 3 (windowed sinc), 4 (bspline)}
 }
 \value{
 output antsImage
 }
 \description{
-Resample image by spacing or other parameters
-}
-\details{
-Change an image by its spacing or number of voxels
+Resample image by spacing or number of voxels with various interpolators
 }
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)

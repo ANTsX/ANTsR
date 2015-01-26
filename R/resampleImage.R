@@ -1,13 +1,11 @@
 #' resampleImage
 #'
-#' Resample image by spacing or other parameters
-#'
-#' Change an image by its spacing or number of voxels
+#' Resample image by spacing or number of voxels with various interpolators
 #'
 #' @param image input antsImage matrix
 #' @param resampleParams vector of size dimension with numeric values
 #' @param useVoxels true means interpret resample params as voxel counts
-#' @param interpType one of 0, 1, 2, 3, 4
+#' @param interpType one of 0 (nearest neighbor), 1 (linear), 2 (gaussian), 3 (windowed sinc), 4 (bspline)
 #' @return output antsImage
 #' @author Avants BB
 #' @examples

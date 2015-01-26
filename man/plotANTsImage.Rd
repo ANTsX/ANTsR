@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotANTsImage.R
 \name{plotANTsImage}
 \alias{plotANTsImage}
-\title{Plotting an image slice or multi-slice with optional color overlay.}
+\title{plotANTsImage}
 \usage{
 plotANTsImage(myantsimage, functional = NA, color = c("jet", "red", "blue",
   "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf",
@@ -32,12 +32,11 @@ file}
 }
 \value{
 output is plot to standard R window
-
-or
-
-1 -- Failure
 }
 \description{
+Plotting an image slice or multi-slice with optional color overlay.
+}
+\details{
 This is a plotting utility for antsImage types with a background and color
 overlay option.  Useful for displaying statistical results overlaid on a
 background image.
@@ -52,11 +51,11 @@ mnit<-getANTsRData("mni")
   mnia2<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia2,mnia2,1,4)
   SmoothImage(3,mnia2,1.5,mnia2)
-  plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+  plot( mnit, list(mnia,mnia2), slices='50x140x5',
    threshold = "0.25x1", axis=0,color=c('red','blue') )
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
-  plotANTsImage( mnit, list(mnia,mnia2), slices='50x140x5',
+  plot( mnit, list(mnia,mnia2), slices='50x140x5',
    threshold = "0.25x1", axis=0,color=c('red','blue'), outname = ofn )
 }
 \author{
