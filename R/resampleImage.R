@@ -13,16 +13,18 @@
 #' @examples
 #'
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
-#' finn<-resampleImage(fi,c(20,20),1,0)
+#' finn<-resampleImage(fi,c(50,60),1,0)
 #' filin<-resampleImage(fi,c(1.5,1.5),0,1)
 #'
 #' @export resampleImage
-resampleImage <- function(image,resampleParams, useSpacing=1, interpType=1 )
+resampleImage <- function(image,resampleParams, useVoxels=1, interpType=1 )
   {
-  outimg<-antsImageClone( image )
+  inimg<-antsImageClone( image, 'double' )
+  outimg<-antsImageClone( image, 'double' )
   rsampar<-paste(resampleParams,collapse='x')
-  args<-list(image@dimension,image,outimg,rsampar,useSpacing,interpType)
-  print(args)
-  retval<-.Call("ResampleImage", int_antsProcessArguments(args) )
+  args<-list(image@dimension,inimg,outimg,rsampar,useVoxels,interpType)
+  k<-int_antsProcessArguments(args)
+  retval<-.Call("ResampleImage", k )
+  outimg<-antsImageClone( outimg, image@pixeltype )
   return( outimg )
   }

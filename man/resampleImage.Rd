@@ -26,7 +26,7 @@ Change an image by its spacing or number of voxels
 }
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)
-finn<-resampleImage(fi,c(20,20),1,0)
+finn<-resampleImage(fi,c(50,60),1,0)
 filin<-resampleImage(fi,c(1.5,1.5),0,1)
 }
 \author{
