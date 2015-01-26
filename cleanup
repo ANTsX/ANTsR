@@ -1,7 +1,8 @@
 ############### still a WIP ###############
 rm -f -r src/*.o src/*.so */*~ *~ \
   src/ANTS-prefix src/ANTS/ANTS-build/bin/ \
-  src/src/ANTS/ANTS-build/ANTS-build/ \
+  src/ANTS/ANTS-build/ANTS-build/ \
+  src/ANTS/ANTS-build/lib \
   `find ./src -name CMakeFiles` \
   src/ANTS/ANTS-build/ITKv4-install src/ANTS/tmp src/CMakeCache.txt \
   src/ANTS/ANTS-build/ITKv4-prefix  \
