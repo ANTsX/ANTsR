@@ -1,8 +1,8 @@
 #' Estimates an image from another set of images
-#' 
+#'
 #' intensity generalization of joint label fusion.
-#' 
-#' 
+#'
+#'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
@@ -19,7 +19,7 @@
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
-#' 
+#'
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
 #' ImageMath(2,ref,"Normalize",ref)
@@ -55,7 +55,7 @@
 #' pp2<-jointIntensityFusion(ref,refmaske,ilist,
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
-#' 
+#'
 #' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=1, rad=NA, labelList=NA, doscale = TRUE,
@@ -190,7 +190,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
     {
-    segmat<-imageListToMatrix( labelList, refmask )
+    segmat<-imageListToMatrix( labelList, targetIMask )
     segvec<-rep( 0, ncol(segmat) )
     segvals<-sort( unique( as.numeric(segmat)) )
     probImgList<-list()
