@@ -4,7 +4,7 @@
 #'
 #' intensity generalization of joint label fusion, still supports segmentation.
 #' this version is more efficient, memory-wise, for 3D images. it is a thin
-#' wrapper.
+#' wrapper that goes slice-by-slice but produces the same results.
 #'
 #'
 #' @param targetI antsImage to be approximated
@@ -32,25 +32,27 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE )
 {
-  if (nargs() == 0) {
+  if (nargs() == 0)
+    {
     print(args(jointIntensityFusion3D))
     return(1)
-  }
+    }
   if ( targetI@dimension != 3 )
-  {
-  print("must be a 3D image")
-  return(NA)
-  }
+    {
+    print("must be a 3D image")
+    return(NA)
+    }
+  whichMaskSlice<-0
   for ( i in 1:dim(targetI)[3] )
     {
     mask2d<-antsImageClone(targetIMask)
     mask2d<-as.array(mask2d)
     if ( max( mask2d[,,i] ) > 0   )
-    {
-      for ( j in 1:dim(targetI)[3] )
       {
+      for ( j in 1:dim(targetI)[3] )
+        {
         if ( j != i ) mask2d[,,j]<-0
-      }
+        }
       mask2d<-as.antsImage(mask2d)
       mask2d<-antsCopyImageInfo(targetIMask,mask2d)
       oo2d<-jointIntensityFusion( targetI=targetI,
@@ -59,26 +61,31 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho,
         useSaferComputation=useSaferComputation, usecor=usecor )
-    if ( ! exists("localJIF2Di") )
-      {
-      localJIF2Di<-oo2d$predimg
-      localJIF2Ds<-oo2d$segimg
-      localJIF2Dp<-oo2d$probImgList
-      } else {
-      localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
-        oo2d$predimg[ mask2d == 1 ]
-      localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
-        oo2d$segimg[ mask2d == 1 ]
-      probct<-1
-      for ( probimg in localJIF2Dp )
+      if ( whichMaskSlice == 0 )
         {
-        probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-          oo2d$probImgList[[probct]][ mask2d == 1 ]
-        probct<-probct+1
+        localJIF2Di<-oo2d$predimg
+        localJIF2Ds<-oo2d$segimg
+        localJIF2Dp<-oo2d$probImgList
+        } else {
+        localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
+          oo2d$predimg[ mask2d == 1 ]
+        localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
+          oo2d$segimg[ mask2d == 1 ]
+        probct<-1
+        for ( probimg in localJIF2Dp )
+          {
+          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
+            oo2d$probImgList[[probct]][ mask2d == 1 ]
+          probct<-probct+1
+          }
         }
+      whichMaskSlice<-whichMaskSlice+1
       }
-    }
-  }
+    print(paste(i,whichMaskSlice))
+    if ( whichMaskSlice == 10 )
+      return( list( predimg=localJIF2Di, segimg=localJIF2Ds,
+        probimgs=localJIF2Dp ) )
+    } # endfor
   return( list( predimg=localJIF2Di, segimg=localJIF2Ds,
     probimgs=localJIF2Dp ) )
 }
