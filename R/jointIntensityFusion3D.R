@@ -81,7 +81,6 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         }
       whichMaskSlice<-whichMaskSlice+1
       }
-    print(paste(i,whichMaskSlice))
     if ( whichMaskSlice == 10 )
       return( list( predimg=localJIF2Di, segimg=localJIF2Ds,
         probimgs=localJIF2Dp ) )
