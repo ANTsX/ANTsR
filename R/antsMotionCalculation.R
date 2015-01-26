@@ -8,12 +8,12 @@
 #' @param framewise Calculate framewise displacement?
 #' @return List containing:  
 #' \itemize{
-#'  \item{moco_img}{Motion corrected time-series image.}
-#'  \item{moco_params}{Data frame of translation parameters.}
-#'  \item{moco_avg_img}{Average motion-corrected image.}
-#'  \item{moco_mask}{Mask used to calculate framewise displacement.} 
-#'  \item{tsDisplacement}{Time-series displacement image.}
-#'  \item{dvars}{DVARS, derivative of frame-wise intensity changes.}
+#'  \item{moco_img}{ Motion corrected time-series image.}
+#'  \item{moco_params}{ Data frame of translation parameters.}
+#'  \item{moco_avg_img}{ Average motion-corrected image.}
+#'  \item{moco_mask}{ Mask used to calculate framewise displacement.} 
+#'  \item{tsDisplacement}{ Time-series displacement image.}
+#'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
 #' @author Benjamin M. Kandel
 #' @examples
