@@ -9,7 +9,7 @@ CreateJacobianDeterminantImage(dim, tx, doLog = 0)
 \arguments{
 \item{doLog}{return the log jacobian}
 
-\item{imageDimension2|3}{Number of dimensions of the input tx}
+\item{imageDimension}{Number of dimensions of the input tx}
 
 \item{deformationField}{transformation file name}
 }
