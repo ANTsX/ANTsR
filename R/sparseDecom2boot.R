@@ -1,3 +1,31 @@
+#' Convenience wrapper for 2-view eigenanatomy decomposition w/bootstrap
+#' initialization.
+#' 
+#' Decomposes two matrices into paired sparse eigenevectors to maximize
+#' canonical correlation.
+#' 
+#' 
+#' @param inmatrix input as inmatrix=list(mat1,mat2). n by p input matrix and n
+#' by q input matrix , spatial variable lies along columns.
+#' @param inmask optional pair of antsImage masks
+#' @param nboot n bootstrap runs
+#' @param nsamp number of samples e.g. 0.9 indicates 90 percent of data
+#' @param otherparams see sccan for other parameters
+#' @return outputs a decomposition of a pair of matrices
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' mat<-replicate(100, rnorm(20)) 
+#' mat2<-replicate(100, rnorm(20)) 
+#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat2), sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0) 
+#' wt<-0.666
+#' mat3<-mat*wt+mat2*(1-wt) 
+#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3), sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 ) 
+#' 
+#' }
+#' 
+#' @export sparseDecom2boot
 sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), 
   nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0, 
   z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), initializationList2 = list(), 

@@ -1,3 +1,54 @@
+#' Preprocess BOLD fMRI image data.
+#' 
+#' Preprocess fMRI data which includes compcor/motion correction, nuisance
+#' regression, band-pass filtering, and spatial smoothing.
+#' 
+#' 
+#' @param boldImage 4-D ANTs image fMRI data.
+#' @param meanBoldFixedImageForMotionCorrection Optional target fixed image for
+#' motion correction.
+#' @param maskImage 3-D ANTs image defining the region of interest.
+#' @param maskingThreshold If mask image is not specified, a mask image is
+#' created using the specified threshold which is in terms of the mean of the
+#' average image ie 0.8 means threshold at 0.8 of the mean.
+#' @param initialNuisanceVariables Optional initial nuisance variables.
+#' @param numberOfCompCorComponents Numer of CompCor nuisance components.
+#' @param doMotionCorrection Booelan indicating whether motion correction
+#' should be performed and used in nuisance regression.
+#' @param useMotionCorrectedImage Boolean indicating whether or not the motion
+#' corrected image should be used in the rest of the pipeline.  This is off by
+#' default to avoid additional interpolation.
+#' @param motionCorrectionAccuracyLevel Accuracy for the motion correcting
+#' registration: 0 = fast/debug parameters, 1 = intrasession parameters, or 2 =
+#' intersession/intersubject parameters.
+#' @param frequencyLowThreshold Lower threshold for bandpass filtering.
+#' @param frequencyHighThreshold Upper threshold for bandpass filtering.
+#' @param spatialSmoothingType Either "none", "gaussian" (isotropic) or
+#' "perona-malik" (anisotropic) smoothing.
+#' @param spatialSmoothingParameters For gaussian smoothing, this is a single
+#' scalar designating the smoothing sigma (in mm).  For perona-malik, a vector
+#' needs to be specified with the conductance parameter and the number of
+#' iterations, e.g. c( 0.25, 5 ).
+#' @return Output is the "clean" fMRI bold image and mask.  Quality assurance
+#' output includes the framewise displacement (FD) and DVARS.  "DVARS is the
+#' root mean squared (RMS) change in BOLD signal from volume to volume (D
+#' referring to temporal derivative of time courses and VARS referring to RMS
+#' variance over voxels.)" --- Power et. al 2012, Spurious but systematic
+#' correlations in functional connectivity MRI networks arise from subject
+#' motion. Neuroimage 59, 2142-2154.  The globalSignal is also returned.
+#' @author Tustison NJ, Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' boldImage <- antsImageRead( "fmri.nii.gz", dim = 4, pixeltype = "float" )
+#' cleanfMRI <- antsPreprocessfMRI( boldImage )
+#' cleanBoldImage <- cleanfMRI$cleanBoldImage
+#' maskImage <- cleanfMRI$maskImage
+#' framewiseDisplacement <- cleanfMRI$FD
+#' dtRMS <- cleanfMRI$DVARS
+#' }
+#' 
+#' @export antsPreprocessfMRI
 antsPreprocessfMRI <- function(boldImage, maskImage = NA, maskingMeanRatioThreshold = 0.75, 
   initialNuisanceVariables = NA, numberOfCompCorComponents = 6, doMotionCorrection = TRUE, 
   useMotionCorrectedImage = FALSE, motionCorrectionAccuracyLevel = 1, meanBoldFixedImageForMotionCorrection = NA, 

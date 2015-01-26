@@ -1,3 +1,51 @@
+#' Perform ROI population analysis between two groups.
+#' 
+#' Student's t-test performed for each labeled region within a specified mask
+#' to determine difference between a control group and an experimental group.
+#' 
+#' 
+#' @param dimensionality Dimension of images.
+#' @param imageFileNames List of image files.
+#' @param testType A value of 'lm', 'student.t', or 'wilcox'.  The latter two
+#' test types are assumed to be two-sampled parametric and non-parametric,
+#' respectively.
+#' @param predictors A simple vector or single column matrix or data frame
+#' specifying sample membership for student.t or wilcox testing.  For the 'lm'
+#' option, a data frame must be specified whose column names match the
+#' specified formula.
+#' @param formula Used with the 'lm' option for more sophisticated modeling.
+#' @param roiLabelsFileName File name of mask defining the region over which
+#' testing is performed (foreground voxel != 0, background voxel = 0)
+#' @return list consisting of unique roi labels, t-values, and p-values.
+#' @author Tustison NJ
+#' @examples
+#' 
+#' \dontrun{
+#' # Get the image files
+#' controlFileNames <- list.files( path = "./example_images/", pattern =
+#'   glob2rx( "phantomtemplate_CONTROL*" ), full.names = TRUE, recursive = FALSE )
+#' experimentalFileNames <- list.files( path = "./example_images/", pattern =
+#'   glob2rx( "phantomtemplate_EXP*" ), full.names = TRUE, recursive = FALSE )
+#' 
+#' images <- c( controlFileNames, experimentalFileNames )
+#' diagnosis <- c( rep( 1, length( controlFileNames ) ), rep( 0, length( experimentalFileNames ) ) )
+#' age <- runif( length( diagnosis ), 25, 30 )
+#' outputPath <- "./test_output/"
+#' 
+#' roiResults.ttest <- simple_roi_analysis( dimensionality = 2, imageFileNames = images,
+#'   predictors = data.frame( diagnosis ),
+#'   roiLabelsFileName = "./example_images/phantomtemplate_roi_labels.nii.gz", testType = 'student.t' )
+#' 
+#' roiResults.wilcox <- simple_roi_analysis( dimensionality = 2, imageFileNames = images,
+#'   predictors = data.frame( diagnosis ),
+#'   roiLabelsFileName = "./example_images/phantomtemplate_roi_labels.nii.gz", testType = 'wilcox' )
+#' 
+#' roiResults.lm <- simple_roi_analysis( dimensionality = 2, imageFileNames = images,
+#'   predictors = data.frame( cbind( diagnosis, age ) ), formula = as.formula( value ~ 1 + diagnosis + age ),
+#'   roiLabelsFileName = "./example_images/phantomtemplate_roi_labels.nii.gz", testType = 'lm' )
+#' }
+#' 
+#' @export simple_roi_analysis
 simple_roi_analysis <- function(dimensionality = 3, imageFileNames = c(), predictors, 
   formula, testType = c("lm", "student.t", "wilcox"), roiLabelsFileName = "") {
   

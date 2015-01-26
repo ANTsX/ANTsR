@@ -1,3 +1,23 @@
+#' Visualize a regression result by a d3 network visualization.
+#' 
+#' Use either a force directed graph or a Sankey graph to show relationships
+#' between predictors and outcome variables.  correlateMyOutcomes should
+#' correspond to the outcome variables ...
+#' 
+#' 
+#' @param myLM lm model output from bigLMStats
+#' @return html file is output
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' colnames(brainpreds)<-paste("Vox",c(1:ncol(brainpreds)),sep='')
+#' colnames( mylm$beta.pval )<-colnames(brainpreds)
+#' demognames<-rownames(mylm$beta.pval)
+#' regressionNetworkViz( mylm , sigthresh=0.05, outfile="temp2.html") 
+#' }
+#' 
+#' @export regressionNetworkViz
 regressionNetworkViz <- function(mylm, sigthresh = 0.05, whichviz = "Sankey", outfile = "temp.html", 
   mygroup = 0, logvals = TRUE, verbose = FALSE, correlateMyOutcomes = NA, corthresh = 0.9, 
   zoom = F, doFDR = TRUE) {

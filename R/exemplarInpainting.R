@@ -1,24 +1,28 @@
-#' @name exemplarInpainting
-#' @title Uses example images to inpaint or approximate an existing image.
-#' @description  Employs a robust regression approach to learn the relationship between a sample image and a list of images that are mapped to the same space as the sample image.  The regression uses data from an image neighborhood.
-#' @usage  approximg<-exemplarInpainting( img, paintMask, list(img1,img2),
-#'   featureRadius, sharpen, feather )
+#' Uses example images to inpaint or approximate an existing image.
+#' 
+#' Employs a robust regression approach to learn the relationship between a
+#' sample image and a list of images that are mapped to the same space as the
+#' sample image.  The regression uses data from an image neighborhood.
+#' 
+#' 
 #' @param img antsImage to be approximated / painted
-#' @param paintMask painting mask with values 1 or
-#' values 1 and 2 - if there is a 2 then it will learn
-#' from label 1 to paint label 2.  should cover the brain.
+#' @param paintMask painting mask with values 1 or values 1 and 2 - if there is
+#' a 2 then it will learn from label 1 to paint label 2.  should cover the
+#' brain.
 #' @param imageList a list containing antsImages
 #' @param featureRadius - radius of image neighborhood e.g. 2
-#' @param scaleInpaintIntensity - brighter or darker painted voxels,
-#' default of 0 sets this parameter automatically
+#' @param scaleInpaintIntensity - brighter or darker painted voxels, default of
+#' 0 sets this parameter automatically
 #' @param sharpen - sharpen the approximated image
-#' @param feather - value (e.g. 1) that helps feather the mask for smooth blending
+#' @param feather - value (e.g. 1) that helps feather the mask for smooth
+#' blending
 #' @param predalgorithm - string svm or lm
 #' @param debug - TRUE or FALSE
 #' @return inpainted image
 #' @author Brian B. Avants
 #' @keywords inpainting template
 #' @examples
+#' 
 #' set.seed(123)
 #' fi<-abs(replicate(100, rnorm(100)))
 #' fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
@@ -37,6 +41,8 @@
 #' painted2<-exemplarInpainting(fi,mask2,ilist)
 #' # just use 1 image, so no regression is performed
 #' painted3<-exemplarInpainting(fi,mask2, list(ilist[[1]]))
+#' 
+#' @export exemplarInpainting
 exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2, scaleInpaintIntensity=0,
   sharpen=FALSE, feather=1, predalgorithm='lm', debug=FALSE )

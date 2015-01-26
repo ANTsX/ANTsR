@@ -1,4 +1,32 @@
 # renderNetwork
+
+
+
+
+
+
+#' 3D surface-based rendering of image ROI-based networks
+#' 
+#' Will use rgl to render a spatial graph
+#' 
+#' 
+#' @param network NxN array or matrix of network connectivity values.
+#' @param locations Nx3 array or matrix of node locations
+#' @param scaling min and max values to use for coloring of edge values
+#' @param lwd width of edge lines
+#' @param edgecolors pre-defined colors for graph edges
+#' @param radius radius of nodes
+#' @param nodetype type of glyph for nodes
+#' @return 0 -- Success\cr 1 -- Failure
+#' @author Duda, J
+#' @examples
+#' 
+#' \dontrun{
+#' renderNetwork(network, locations)
+#' renderNetwork(network, locations, lwd=3, edgecolors=heat.colors(100) )
+#' }
+#' 
+#' @export renderNetwork
 renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius = 3, 
   edgecolors = 0, nodecolors = "blue", nodetype = "s") {
   

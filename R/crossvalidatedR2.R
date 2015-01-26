@@ -21,6 +21,55 @@
 #' }
 #' r2 <- crossvalidatedR2(x, y, covariates=covariate) 
 
+
+
+
+
+
+
+#' Cross-Validated R^2 value
+#' 
+#' Computes an R^2 value for predicting an outcome measure using a k-fold
+#' cross-validation scheme.
+#' 
+#' 
+#' @param x Input predictor matrix.
+#' @param y Target dependent variable.
+#' @param ngroups Number of cross-validation folds to use.
+#' @param covariates Covariate predictors.
+#' @param x Input predictor matrix.
+#' @param y Target dependent variable.
+#' @param ngroups Number of cross-validation folds to use.
+#' @param covariates Covariate predictors.
+#' @return Matrix of size \code{ngroups} by \code{ncol(x)}, which each row
+#' corresponding to one fold and the columns corresponding to the R2 values for
+#' each predictor.
+#' 
+#' Matrix of size \code{ngroups} by \code{ncol(x)}, which each row
+#' corresponding to one fold and the columns corresponding to the R2 values for
+#' each predictor.
+#' @author Brian B Avants, Benjamin M. Kandel
+#' 
+#' Brian B Avants, Benjamin M. Kandel
+#' @examples
+#' 
+#' set.seed(300)
+#' ncol <- 30
+#' nrow <- 20
+#' covariate <- sin((1:nrow)*2*pi/nrow)
+#' x <- matrix(rep(NA, nrow*ncol), nrow=nrow)
+#' xsig <- seq(0,1,length.out=nrow)
+#' y <- xsig + covariate + rnorm(nrow, sd=0.5)
+#' for(i in 1:ncol){
+#'   x[, i] <- xsig + rnorm(nrow, sd=i/ncol)
+#' }
+#' r2 <- crossvalidatedR2(x, y, covariates=covariate)
+#' Cross-Validated R^2 value
+#' 
+#' Computes an R^2 value for predicting an outcome measure using a k-fold
+#' cross-validation scheme.
+#' 
+#' @export crossvalidatedR2
 crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
   nvox <- ncol(x)
   R2 <- matrix(rep(0, ngroups*nvox), nrow = ngroups)

@@ -1,3 +1,18 @@
+#' Simple icawhitening function.
+#' 
+#' Icawhitens the input matrix using SVD and returns the result.
+#' 
+#' 
+#' @param mat input matrix
+#' @param n.comp number of components on which to project
+#' @return matrix is output
+#' @author Avants BB, fastICA package (see CRAN)
+#' @examples
+#' 
+#' mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
+#' wmat<-icawhiten( mat, 2 ) 
+#' 
+#' @export icawhiten
 icawhiten <- function(Xin, n.comp, verbose = FALSE) {
   # from the fastICA library
   X <- t(Xin)

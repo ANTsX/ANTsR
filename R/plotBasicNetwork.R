@@ -1,3 +1,45 @@
+#' Simple plotBasicNetwork function.
+#' 
+#' takes an object output from renderSurfaceFunction and a list of centroids
+#' and plots the centroid network over the rendering object
+#' 
+#' 
+#' @param centroids input matrix of size number of 3D points ( in rows ) by 3 (
+#' in columns )
+#' @param brain input rendering object which is output of renderSurfaceFunction
+#' or a function derived from renderSurfaceFunction
+#' @return None
+#' @author Avants BB and Duda JT
+#' @examples
+#' 
+#' \dontrun{
+#' brain<-renderSurfaceFunction( surfimg =list( mymni[[1]] ) , alphasurf=0.1 , smoothsval = 1.5  )
+#' plotBasicNetwork( centroids = centroids, brain )
+#' # more complete example 
+#'   mnit<-getANTsRData("mni")
+#'   mnit<-antsImageRead(mnit,3)
+#'   mnia<-getANTsRData("mnia")
+#'   mnia<-antsImageRead(mnia,3)
+#'   ThresholdImage(3,mnit,mnit,1,max(mnit))
+#'   ImageMath(3,mnit,"FillHoles",mnit)
+#'   cnt<-getCentroids( mnia, clustparam = 50 )
+#'   aalcnt<-cnt$centroids[1:90,]
+#'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
+#'   testweights<-matrix( rep( 0, 90*90 ) ,nrow=90)
+#'   testweights[31,37]<-1  # ant cingulate to hipp
+#'   testweights[31,36]<-2  # ant cingulate to post cingulate
+#'   testweights[11,65]<-3  # broca to angular 
+#'   plotBasicNetwork( centroids = aalcnt , brain , weights=testweights )
+#'   id<-par3d("userMatrix")
+#'   rid<-rotate3d( id , -pi/2, 1, 0, 0 )
+#'   rid2<-rotate3d( id , pi/2, 0, 0, 1 )
+#'   rid3<-rotate3d( id , -pi/2, 0, 0, 1 )
+#'   par3d(userMatrix = id ) 
+#'   dd<-make3ViewPNG(  rid, id, rid2,  paste('network1',sep='') )
+#'   par3d(userMatrix = id ) 
+#' }
+#' 
+#' @export plotBasicNetwork
 plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nodecolors = "blue", 
   nodetype = "s", scaling = c(0, 0), lwd = 2, radius = 3, showOnlyConnectedNodes = TRUE) {
   if (missing(centroids) | missing(brain)) {

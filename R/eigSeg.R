@@ -1,3 +1,28 @@
+#' Segmentation for eigenanatomy.
+#' 
+#' Segment a mask into regions based on the max value in an image list.  At a
+#' given voxel the segmentation label will contain the index to the image that
+#' has the largest value.  If the 3rd image has the greatest value, the
+#' segmentation label will be 3 at that voxel.
+#' 
+#' 
+#' @param mask D-dimensional mask > 0 defining segmentation region.
+#' @param imageList list containing antsImages or filenames pointing to
+#' antsImages.
+#' @param applySegmentationToImages boolean determines if original image list
+#' is modified by the segmentation.
+#' @return segmentation image.
+#' @author Avants BB
+#' @examples
+#' 
+#' \dontrun{
+#' mylist<-list(image1,image2)
+#' # both approaches below are ok 
+#' myseg<-eigSeg( mask, mylist ) 
+#' myseg<-eigSeg( mask, c("a.nii.gz","b.nii.gz")  ) 
+#' }
+#' 
+#' @export eigSeg
 eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))

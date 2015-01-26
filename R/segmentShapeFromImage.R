@@ -1,16 +1,19 @@
-#' @name segmentShapeFromImage
-#' @title convolution-based shape identification
-#' @description  takes an image and a shape and concvoles the 2nd with the first to yield a feature image
-#' @usage  featimg<-segmentShapeFromImage( img, shape, mask )
+#' convolution-based shape identification
+#' 
+#' takes an image and a shape and concvoles the 2nd with the first to yield a
+#' feature image
+#' 
+#' 
 #' @param img antsImage
 #' @param shape to define features
-#' @param mask  with values 1 or 0
-#' @param rad  max radius (optional)
-#' @param scfun  function to apply to feature image (optional eg abs)
+#' @param mask with values 1 or 0
+#' @param rad max radius (optional)
+#' @param scfun function to apply to feature image (optional eg abs)
 #' @return feature image
 #' @author Brian B. Avants
 #' @keywords shape template
 #' @examples
+#' 
 #' set.seed(123)
 #' fi<-antsImageRead( getANTsRData('r16') ,2)
 #' mask<-getMask(fi)
@@ -23,6 +26,8 @@
 #' plotANTsImage(fi,func=list(fimg),
 #'   thresh=paste(mean(fimg)+sd(fimg)*2,
 #'   max(fimg),sep='x'))
+#' 
+#' @export segmentShapeFromImage
 segmentShapeFromImage<-function( img, shape,
   mask=NA, rad=NA, scfun )
 {

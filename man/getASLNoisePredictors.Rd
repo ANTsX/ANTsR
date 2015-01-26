@@ -4,9 +4,9 @@
 \alias{getASLNoisePredictors}
 \title{Get nuisance predictors from ASL images}
 \usage{
-getASLNoisePredictors <- function(aslmat, tc, noisefrac=0.1,
- polydegree=3, k=5, npreds=12, method='noisepool', covariates=NA, detrend=F,
-noisepoolfun=max)
+getASLNoisePredictors(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5,
+  npreds = 12, method = "noisepool", covariates = NA,
+  noisepoolfun = max)
 }
 \arguments{
 \item{aslmat}{ASL input matrix.}
@@ -15,20 +15,24 @@ noisepoolfun=max)
 
 \item{noisefrac}{Fraction of data to include in noise pool.}
 
-\item{polydegree}{Degree of polynomial for detrending. A value of 0 indicates no detrending.}
+\item{polydegree}{Degree of polynomial for detrending. A value of 0
+indicates no detrending.}
 
 \item{k}{Number of cross-validation folds.}
 
 \item{npreds}{Number of predictors to output.}
 
-\item{method}{Method of selecting noisy voxels.  One of 'compcor' or 'noisepool'. See \code{Details}.}
+\item{method}{Method of selecting noisy voxels.  One of 'compcor' or
+'noisepool'. See \code{Details}.}
 
-\item{covariates}{Covariates to be considered when assessing prediction of tc pattern.}
+\item{covariates}{Covariates to be considered when assessing prediction of
+tc pattern.}
 
 \item{noisepoolfun}{Function used for aggregating R^2 values.}
 }
 \value{
-Matrix of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.
+Matrix of size \code{nrow(aslmat)} by \code{npreds}, containing a
+timeseries of all the nuisance predictors.
 }
 \description{
 Get nuisance predictors from ASL images

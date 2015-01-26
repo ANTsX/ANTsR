@@ -1,3 +1,18 @@
+#' Simple makeImage function.
+#' 
+#' Make an image with given size and voxel value or given a mask and vector.
+#' 
+#' 
+#' @param mat input image size or mask
+#' @param val input image value or vector, size of mask
+#' @return antsImage is output
+#' @author Avants BB
+#' @examples
+#' 
+#' outimg<-makeImage( c(2,10) , 1)
+#' outimg<-makeImage( outimg ,  c(2,10) )
+#' 
+#' @export makeImage
 makeImage <- function(imagesize, voxval = 1) {
   firstparamnumer <-( typeof(imagesize) == "double" |
     typeof(imagesize) == "integer" )

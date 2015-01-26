@@ -1,3 +1,25 @@
+#' Brett's mni2tal
+#' 
+#' mni2tal for converting from ch2/mni space to tal - very approximate.
+#' 
+#' see
+#' http://bioimagesuite.yale.edu/mni2tal/501_95733_More%20Accurate%20Talairach%20Coordinates%20SLIDES.pdf
+#' 
+#' http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach
+#' 
+#' This is a standard approach but it's not very accurate.
+#' 
+#' @param x Point in mni152 space.
+#' @return The output point is in approximate Talairach space.
+#' @author Matthew Brett, adapted for ANTsR by B Avants
+#' @keywords Talairach
+#' @examples
+#' 
+#' \dontrun{
+#'   mni2tal( c(10,12,14) )
+#' }
+#' 
+#' @export mni2tal
 mni2tal <- function(xin = 0) {
   if (nargs() == 0 | length(xin) != 3) {
     print("Usage:  talPoint<-mni2tal( mniPoint ) ")

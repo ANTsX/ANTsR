@@ -268,12 +268,19 @@ SEXP invariantSimilarityHelper(
         }
       A_solution =  A_solution * id.transpose();
       }
-    if ( doReflection[0]  > 0 )
+    if ( doReflection[0] == 1 ||  doReflection[0] == 3 )
       {
-      vnl_matrix<RealType> id( A_solution );
-      id.set_identity();
-      id = id - 2.0 * outer_product( evec1_primary , evec1_primary  );
-      A_solution = A_solution * id;
+        vnl_matrix<RealType> id( A_solution );
+        id.set_identity();
+        id = id - 2.0 * outer_product( evec2_primary , evec2_primary  );
+        A_solution = A_solution * id;
+      }
+    if ( doReflection[0] > 1 )
+      {
+        vnl_matrix<RealType> id( A_solution );
+        id.set_identity();
+        id = id - 2.0 * outer_product( evec1_primary , evec1_primary  );
+        A_solution = A_solution * id;
       }
     typename AffineType::Pointer affine1 = AffineType::New();
     typename AffineType::OffsetType trans = affine1->GetOffset();

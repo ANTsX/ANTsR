@@ -16,16 +16,38 @@ antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
 \item{moreaccurate}{Level of accuracy desired for motion correction.  Higher is more accurate.}
 
 \item{framewise}{Calculate framewise displacement?}
+
+\item{img}{Name of image file, e.g. 'img.nii.gz'.}
+
+\item{mask}{Name of mask file, e.g. 'mask.nii.gz'.  If not provided,
+estimated from data.}
+
+\item{fixed}{Fixed image to register all timepoints to.  If not provided,
+mean image is used.}
+
+\item{moreaccurate}{Level of accuracy desired for motion correction.  Higher
+is more accurate.}
+
+\item{framewise}{Calculate framewise displacement?}
 }
 \value{
 List containing:
 \itemize{
- \item{moco_img}{ Motion corrected time-series image.}
- \item{moco_params}{ Data frame of translation parameters.}
- \item{moco_avg_img}{ Average motion-corrected image.}
- \item{moco_mask}{ Mask used to calculate framewise displacement.}
- \item{tsDisplacement}{ Time-series displacement image.}
- \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
+ \item{moco_img}{Motion corrected time-series image.}
+ \item{moco_params}{Data frame of translation parameters.}
+ \item{moco_avg_img}{Average motion-corrected image.}
+ \item{moco_mask}{Mask used to calculate framewise displacement.}
+ \item{tsDisplacement}{Time-series displacement image.}
+ \item{dvars}{DVARS, derivative of frame-wise intensity changes.}
+}
+
+List containing: \itemize{
+\item{moco_img}{Motion corrected time-series image.}
+\item{moco_params}{Data frame of translation parameters.}
+\item{moco_avg_img}{Average motion-corrected image.}
+\item{moco_mask}{Mask used to calculate framewise displacement.}
+\item{tsDisplacement}{Time-series displacement image.}
+\item{dvars}{DVARS, derivative of frame-wise intensity changes. }
 }
 }
 \description{
@@ -33,8 +55,13 @@ Correct ASL data for motion.
 }
 \examples{
 antsMotionCalculation(getANTsRData('pcasl'))
+Correct ASL data for motion.
+
+Correct ASL data for motion.
 }
 \author{
+Benjamin M. Kandel
+
 Benjamin M. Kandel
 }
 
