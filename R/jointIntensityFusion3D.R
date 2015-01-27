@@ -18,7 +18,7 @@
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers
 #' @param useSaferComputation slower but more error checking
-#' @param usecor employ correlation as local similarity
+#' @param slices vector defining slices to use (speeds parameter selection)
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -30,7 +30,7 @@
 jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   beta=1, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE )
+  useSaferComputation=FALSE, usecor=FALSE, slices=NA )
 {
   if (nargs() == 0)
     {
@@ -43,11 +43,13 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     return(NA)
     }
   whichMaskSlice<-0
-  for ( i in 1:dim(targetI)[3] )
+  if ( all(is.na(slices))  ) slices<-1:dim(targetI)[3]
+  for ( i in slices )
     {
     mask2d<-antsImageClone(targetIMask)
     mask2d<-as.array(mask2d)
-    if ( max( mask2d[,,i] ) > 0   )
+    if ( i < dim(mask2d)[3] & i > 0 )
+    if ( sd( mask2d[,,i] ) > 0   )
       {
       for ( j in 1:dim(targetI)[3] )
         {
@@ -65,7 +67,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         {
         localJIF2Di<-oo2d$predimg
         localJIF2Ds<-oo2d$segimg
-        localJIF2Dp<-oo2d$probImgList
+        localJIF2Dp<-oo2d$probimgs
         } else {
         localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
           oo2d$predimg[ mask2d == 1 ]
