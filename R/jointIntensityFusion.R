@@ -1,8 +1,8 @@
 #' Estimates an image from another set of images
-#' 
+#'
 #' intensity generalization of joint label fusion.
-#' 
-#' 
+#'
+#'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
@@ -12,14 +12,15 @@
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
-#' @param rho ridge penalty increases robustness to outliers
+#' @param rho ridge penalty increases robustness to outliers but also
+#'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
-#' 
+#'
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
 #' ImageMath(2,ref,"Normalize",ref)
@@ -55,11 +56,11 @@
 #' pp2<-jointIntensityFusion(ref,refmaske,ilist,
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
-#' 
+#'
 #' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-  beta=1, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
+  beta=4, rad=NA, labelList=NA, doscale = TRUE,
+  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE )
 {
   if (nargs() == 0) {
@@ -75,7 +76,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     for ( i in atlasList ) ImageMath(dim,i,"Normalize",i)
     ImageMath(dim,targetI,"Normalize",targetI)
     }
-  if ( all(is.na(rad)) ) rad<-rep(2,dim)
+  if ( all(is.na(rad)) ) rad<-rep(3,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
@@ -190,7 +191,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
     {
-    segmat<-imageListToMatrix( labelList, refmask )
+    segmat<-imageListToMatrix( labelList, targetIMask )
     segvec<-rep( 0, ncol(segmat) )
     segvals<-sort( unique( as.numeric(segmat)) )
     probImgList<-list()

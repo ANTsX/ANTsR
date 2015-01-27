@@ -4,9 +4,9 @@
 \alias{jointIntensityFusion}
 \title{Estimates an image from another set of images}
 \usage{
-jointIntensityFusion(targetI, targetIMask, atlasList, beta = 1, rad = NA,
+jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.1, useSaferComputation = FALSE,
+  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
   usecor = FALSE)
 }
 \arguments{
@@ -28,7 +28,8 @@ jointIntensityFusion(targetI, targetIMask, atlasList, beta = 1, rad = NA,
 
 \item{maxAtlasAtVoxel}{min/max n atlases to use at each voxel}
 
-\item{rho}{ridge penalty increases robustness to outliers}
+\item{rho}{ridge penalty increases robustness to outliers but also
+makes image converge to average}
 
 \item{useSaferComputation}{slower but more error checking}
 
