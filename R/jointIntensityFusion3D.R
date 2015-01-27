@@ -77,7 +77,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         for ( probimg in localJIF2Dp )
           {
           probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-            oo2d$probImgList[[probct]][ mask2d == 1 ]
+            oo2d$probimgs[[probct]][ mask2d == 1 ]
           probct<-probct+1
           }
         }
