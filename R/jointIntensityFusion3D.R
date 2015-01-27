@@ -45,6 +45,8 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     print("must be a 3D image")
     return(NA)
     }
+  maskout<-antsImageClone( targetIMask )
+  maskout[ targetIMask==1 ]<-0
   whichMaskSlice<-0
   if ( all( is.na(rad) ) ) rad<-rep(4,3)
   if ( all(is.na(slices))  ) slices<-1:dim(targetI)[3]
@@ -61,6 +63,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         }
       mask2d<-as.antsImage(mask2d)
       mask2d<-antsCopyImageInfo(targetIMask,mask2d)
+      maskout[ mask2d == 1 ]<-1
       oo2d<-jointIntensityFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
         beta=beta, rad=rad, labelList=labelList,
@@ -88,6 +91,6 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds ) )
+  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout ) )
     #  , probimgs=localJIF2Dp ) )
 }
