@@ -12,7 +12,8 @@
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
-#' @param rho ridge penalty increases robustness to outliers
+#' @param rho ridge penalty increases robustness to outliers but also
+#'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
 #' @return approximated image, segmentation and probabilities
@@ -58,8 +59,8 @@
 #'
 #' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
-  beta=1, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
+  beta=4, rad=NA, labelList=NA, doscale = TRUE,
+  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE )
 {
   if (nargs() == 0) {
@@ -75,7 +76,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     for ( i in atlasList ) ImageMath(dim,i,"Normalize",i)
     ImageMath(dim,targetI,"Normalize",targetI)
     }
-  if ( all(is.na(rad)) ) rad<-rep(2,dim)
+  if ( all(is.na(rad)) ) rad<-rep(3,dim)
   n<-1
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )

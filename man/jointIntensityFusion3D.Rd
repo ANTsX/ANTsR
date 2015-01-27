@@ -4,10 +4,10 @@
 \alias{jointIntensityFusion3D}
 \title{jointIntensityFusion3D}
 \usage{
-jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 1, rad = NA,
+jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.1, useSaferComputation = FALSE,
-  usecor = FALSE)
+  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
+  usecor = FALSE, slices = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -28,14 +28,16 @@ jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 1, rad = NA,
 
 \item{maxAtlasAtVoxel}{min/max n atlases to use at each voxel}
 
-\item{rho}{ridge penalty increases robustness to outliers}
+\item{rho}{ridge penalty increases robustness to outliers but also
+makes image converge to average}
 
 \item{useSaferComputation}{slower but more error checking}
 
-\item{usecor}{employ correlation as local similarity}
+\item{slices}{vector defining slices to use (speeds parameter selection)}
 }
 \value{
 approximated image, segmentation and probabilities
+(latter are WIP, might be done by the time your read this ) ...
 }
 \description{
 Estimates an image/labelset from another set of 3D images
@@ -43,10 +45,11 @@ Estimates an image/labelset from another set of 3D images
 \details{
 intensity generalization of joint label fusion, still supports segmentation.
 this version is more efficient, memory-wise, for 3D images. it is a thin
-wrapper.
+wrapper that goes slice-by-slice but produces the same results.
 }
 \examples{
-# see jointIntensityFusion
+# see jointIntensityFusion for a detailed example
+# defaults for this function are current recommended parameters
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich

@@ -16,7 +16,8 @@
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
-#' @param rho ridge penalty increases robustness to outliers
+#' @param rho ridge penalty increases robustness to outliers but also
+#'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
 #' @param slices vector defining slices to use (speeds parameter selection)
 #' @return approximated image, segmentation and probabilities
