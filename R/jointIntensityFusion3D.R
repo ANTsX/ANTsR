@@ -20,6 +20,7 @@
 #' @param useSaferComputation slower but more error checking
 #' @param slices vector defining slices to use (speeds parameter selection)
 #' @return approximated image, segmentation and probabilities
+#' (latter are WIP, might be done by the time your read this ) ...
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
@@ -73,17 +74,17 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
           oo2d$predimg[ mask2d == 1 ]
         localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
           oo2d$segimg[ mask2d == 1 ]
-        probct<-1
-        for ( probimg in localJIF2Dp )
-          {
-          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-            oo2d$probimgs[[probct]][ mask2d == 1 ]
-          probct<-probct+1
-          }
+#        probct<-1
+#        for ( probimg in localJIF2Dp )
+#          {
+#          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
+#            oo2d$probimgs[[probct]][ mask2d == 1 ]
+#          probct<-probct+1
+#          }
         }
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds,
-    probimgs=localJIF2Dp ) )
+  return( list( predimg=localJIF2Di, segimg=localJIF2Ds ) )
+    #  , probimgs=localJIF2Dp ) )
 }
