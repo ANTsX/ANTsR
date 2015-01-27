@@ -25,12 +25,13 @@
 #' @keywords fusion, template
 #' @examples
 #'
-#' # see jointIntensityFusion
+#' # see jointIntensityFusion for a detailed example
+#' # defaults for this function are current recommended parameters
 #'
 #' @export jointIntensityFusion3D
 jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
-  beta=1, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.1, # debug=F,
+  beta=4, rad=NA, labelList=NA, doscale = TRUE,
+  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, slices=NA )
 {
   if (nargs() == 0)
@@ -44,6 +45,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     return(NA)
     }
   whichMaskSlice<-0
+  if ( all( is.na(rad) ) ) rad<-rep(4,3)
   if ( all(is.na(slices))  ) slices<-1:dim(targetI)[3]
   for ( i in slices )
     {
