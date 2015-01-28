@@ -7,7 +7,7 @@
 jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, slices = NA)
+  usecor = FALSE, rSearch = 0, slices = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -32,6 +32,10 @@ jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 makes image converge to average}
 
 \item{useSaferComputation}{slower but more error checking}
+
+\item{usecor}{employ correlation as local similarity}
+
+\item{rSearch}{radius of search, default is 2}
 
 \item{slices}{vector defining slices to use (speeds parameter selection)}
 }

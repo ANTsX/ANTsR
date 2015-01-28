@@ -19,6 +19,8 @@
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
+#' @param usecor employ correlation as local similarity
+#' @param rSearch radius of search, default is 2
 #' @param slices vector defining slices to use (speeds parameter selection)
 #' @return approximated image, segmentation and probabilities
 #' (latter are WIP, might be done by the time your read this ) ...
@@ -33,7 +35,7 @@
 jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, slices=NA )
+  useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA )
 {
   if (nargs() == 0)
     {

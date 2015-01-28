@@ -47,8 +47,8 @@
 #'  }
 #' r<-4
 #' d<-2
-#' pp<-jointIntensityFusion(ref,refmask,ilist,
-#'   labelList=seglist, rad=rep(r,d), useSaferComputation=T )
+#' pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=0,
+#'   labelList=seglist, rad=rep(r,d) )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
@@ -131,7 +131,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       # find best local region in this atlas
       # just needs an input vector, an input image and a radius
       # outputs the best offset ...
-      if ( haveLabels )
+      if ( haveLabels & rSearch > 0 )
       {
       bestmatch<-Inf
       for ( offind in 1:nrow(offsets) )
@@ -238,7 +238,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( !( all( is.na(labelList) ) ) )
     {
     segvec<-rep( 0, ncol(segmat) )
-    segvals<-sort( unique( as.numeric(segmat)) )
+    segvals<-c(0,sort( unique( as.numeric(segmat)) ))
     probImgList<-list()
     probImgVec<-list()
     for ( p in 1:length(segvals) )
@@ -246,24 +246,32 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     for ( voxel in 1:ncol(segmat) )
       {
       probvals<-rep(0,length(segvals))
-      for ( p in 1:length(segvals))
+      segsearch<-segmatSearch[,voxel]
+      if  ( sd(segsearch) > 0 )
+      {
+        for ( p in 1:length(segvals))
         {
-        ww<-which( segmatSearch[,voxel]==segvals[p]
-          &  weightmat[  , voxel ] > 0 )
+        ww<-which( segsearch==segvals[p] )
+#          &  weightmat[  , voxel ] > 0 )
           if ( length(ww) > 0 )
             {
-            probvals[p]<-sum((weightmat[ ww , voxel ]))
+            probvals[p]<-sum((weightmat[ ww , voxel ]),na.rm=T)
             }
         }
       probvals<-probvals/sum(probvals)
+      } else {
+        probvals[ which(segsearch[1]==segvals) ]<-1
+      }
       for ( p in 1:length(segvals))
         probImgVec[[p]][voxel]<-probvals[p]
       k<-which(probvals==max(probvals,na.rm=T))
-      segvec[voxel]=segvals[ k ]
-      }
+        segvec[voxel]=segvals[ k ]
+    }
     for ( p in 1:length(segvals) )
       probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
     segimg<-makeImage(targetIMask,segvec)
+    # 1st probability is background i.e. 0 label
+    probImgList<-probImgList[2:length(probImgList)]
     }
   return( list( predimg=newimg, segimg=segimg,
     localWeights=weightmat, probimgs=probImgList,
