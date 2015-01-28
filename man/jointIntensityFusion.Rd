@@ -59,8 +59,12 @@ seglist<-list()
 for ( i in 1:length(ilist) )
  {
  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
- tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
- ilist[[i]]=tx$warpedmovout
+ mytx<-antsRegistration(fixed=fi , moving=mi ,
+ typeofTransform = c("SyN"),
+ outprefix=tempfile())
+ mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
+   transformlist=mytx$fwdtransforms)
+ ilist[[i]]=mywarpedimage
  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
  seglist[[i]]<-seg$segmentation
  }

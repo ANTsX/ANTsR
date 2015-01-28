@@ -36,8 +36,12 @@
 #' for ( i in 1:length(ilist) )
 #'  {
 #'  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
-#'  tx<-antsRegistration(ref,ilist[[i]],'SyN',tempfile())
-#'  ilist[[i]]=tx$warpedmovout
+#'  mytx<-antsRegistration(fixed=fi , moving=mi ,
+#'  typeofTransform = c("SyN"),
+#'  outprefix=tempfile())
+#'  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
+#'    transformlist=mytx$fwdtransforms)
+#'  ilist[[i]]=mywarpedimage
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
 #'  seglist[[i]]<-seg$segmentation
 #'  }
@@ -75,9 +79,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     segmatSearch<-segmat
     haveLabels=TRUE
     }
-  havefastsvd<-F
-  pckg <- try(require(RcppArmadillo))
-  if (!pckg) { havefastsvd<-F }
+  havefastsvd<-usePkg("RcppArmadillo")
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -110,6 +112,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( maxAtlasAtVoxel[2] > natlas ) maxAtlasAtVoxel[2]<-natlas
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
+  badct<-0
   basewmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
   for ( voxel in 1:ncol(targetIv) )
     {
@@ -210,7 +213,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         weightmat[zsd==1,voxel]<-wts
         maxSimImg[ voxel ]<-atlasLabels[zsd==1][  which.max(wts) ]
         newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
-      }
+      } else badct<-badct+1
       if ( FALSE ) {
         print("DEBUG MODE")
         print(maxAtlasAtVoxel)
@@ -263,5 +266,5 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     }
   return( list( predimg=newimg, segimg=segimg,
     localWeights=weightmat, probimgs=probImgList,
-    maxSimImg=maxSimImg  ) )
+    maxSimImg=maxSimImg, badct=badct  ) )
 }
