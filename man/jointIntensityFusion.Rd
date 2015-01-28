@@ -2,12 +2,12 @@
 % Please edit documentation in R/jointIntensityFusion.R
 \name{jointIntensityFusion}
 \alias{jointIntensityFusion}
-\title{Estimates an image from another set of images}
+\title{joint intensity fusion}
 \usage{
 jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE)
+  usecor = FALSE, boundary.condition = "mean")
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -34,12 +34,14 @@ makes image converge to average}
 \item{useSaferComputation}{slower but more error checking}
 
 \item{usecor}{employ correlation as local similarity}
+
+\item{boundary.condition}{one of 'image' 'mean' 'NA'}
 }
 \value{
 approximated image, segmentation and probabilities
 }
 \description{
-intensity generalization of joint label fusion.
+Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
 }
 \examples{
 set.seed(123)

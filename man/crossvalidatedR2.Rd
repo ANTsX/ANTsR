@@ -14,33 +14,9 @@ crossvalidatedR2(x, y, ngroups=5, covariates=NA)
 \item{ngroups}{Number of cross-validation folds to use.}
 
 \item{covariates}{Covariate predictors.}
-
-\item{x}{Input predictor matrix.}
-
-\item{y}{Target dependent variable.}
-
-\item{ngroups}{Number of cross-validation folds to use.}
-
-\item{covariates}{Covariate predictors.}
-
-\item{x}{Input predictor matrix.}
-
-\item{y}{Target dependent variable.}
-
-\item{ngroups}{Number of cross-validation folds to use.}
-
-\item{covariates}{Covariate predictors.}
 }
 \value{
 Matrix of size \code{ngroups} by \code{ncol(x)}, which each row corresponding to one fold and the columns corresponding to the R2 values for each predictor.
-
-Matrix of size \code{ngroups} by \code{ncol(x)}, which each row
-corresponding to one fold and the columns corresponding to the R2 values for
-each predictor.
-
-Matrix of size \code{ngroups} by \code{ncol(x)}, which each row
-corresponding to one fold and the columns corresponding to the R2 values for
-each predictor.
 }
 \description{
 Computes an R^2 value for predicting an outcome measure using a k-fold cross-validation scheme.
@@ -57,16 +33,8 @@ for(i in 1:ncol){
   x[, i] <- xsig + rnorm(nrow, sd=i/ncol)
 }
 r2 <- crossvalidatedR2(x, y, covariates=covariate)
-Cross-Validated R^2 value
-
-Computes an R^2 value for predicting an outcome measure using a k-fold
-cross-validation scheme.
 }
 \author{
-Brian B Avants, Benjamin M. Kandel
-
-Brian B Avants, Benjamin M. Kandel
-
 Brian B Avants, Benjamin M. Kandel
 }
 

@@ -1,7 +1,6 @@
-#' Estimates an image from another set of images
+#' joint intensity fusion
 #'
-#' intensity generalization of joint label fusion.
-#'
+#' Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
@@ -16,6 +15,7 @@
 #'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
+#' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -61,12 +61,20 @@
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE )
+  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean' )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
     return(1)
   }
+  haveLabels=FALSE
+  BC=boundary.condition
+  if ( !( all( is.na(labelList) ) ) )
+    {
+    segmat<-imageListToMatrix( labelList, targetIMask )
+    segmatSearch<-segmat
+    haveLabels=TRUE
+    }
   havefastsvd<-F
   pckg <- try(require(RcppArmadillo))
   if (!pckg) { havefastsvd<-F }
@@ -83,11 +91,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   matcenter<-round(n/2)+1
   intmat<-wmat
   targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
-    targetIMask,rad,boundary.condition="image",spatial.info=T)
+    targetIMask,rad,boundary.condition=BC,spatial.info=T)
   targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
   targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
-    targetIMask,rep(1,dim),boundary.condition="image",spatial.info=T)
+    targetIMask,rep(2,dim),boundary.condition=BC,spatial.info=T)
   offsets<-targetIvStruct$offsets
   rm(targetIvStruct)
   if ( doscale ) targetIv<-scale(targetIv)
@@ -115,7 +123,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       myoff<-rep(0,dim)
       cent<-indices[voxel,]+1
       # find best local region in this atlas
-      if ( TRUE )
+      # just needs an input vector, an input image and a radius
+      # outputs the best offset ...
+      if ( haveLabels )
       {
       bestmatch<-Inf
       for ( offind in 1:nrow(offsets) )
@@ -131,6 +141,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
             {
             bestmatch<-locor
             myoff<-offsets[offind,]
+            if ( dim == 2 & haveLabels )
+              segval<-antsGetPixels(labelList[[ct]],cent2[1],cent2[2])
+            if ( dim == 3 & haveLabels )
+              segval<-antsGetPixels(labelList[[ct]],cent2[1],cent2[2],cent2[3])
+            if ( haveLabels ) segmatSearch[ct,voxel]<-segval
             }
           }
         }
@@ -218,7 +233,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
     {
-    segmat<-imageListToMatrix( labelList, targetIMask )
     segvec<-rep( 0, ncol(segmat) )
     segvals<-sort( unique( as.numeric(segmat)) )
     probImgList<-list()
@@ -230,7 +244,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       probvals<-rep(0,length(segvals))
       for ( p in 1:length(segvals))
         {
-        ww<-which( segmat[,voxel]==segvals[p]
+        ww<-which( segmatSearch[,voxel]==segvals[p]
           &  weightmat[  , voxel ] > 0 )
           if ( length(ww) > 0 )
             {
