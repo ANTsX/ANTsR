@@ -7,7 +7,7 @@
 jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, boundary.condition = "mean")
+  usecor = FALSE, boundary.condition = "mean", rSearch = 2)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -36,6 +36,8 @@ makes image converge to average}
 \item{usecor}{employ correlation as local similarity}
 
 \item{boundary.condition}{one of 'image' 'mean' 'NA'}
+
+\item{rSearch}{radius of search, default is 2}
 }
 \value{
 approximated image, segmentation and probabilities
@@ -59,10 +61,9 @@ seglist<-list()
 for ( i in 1:length(ilist) )
  {
  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
- mytx<-antsRegistration(fixed=fi , moving=mi ,
- typeofTransform = c("SyN"),
- outprefix=tempfile())
- mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
+ mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
+   typeofTransform = c("SyN"), outprefix=tempfile() )
+ mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage
  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)

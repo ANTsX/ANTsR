@@ -15,6 +15,7 @@
 #'   makes image converge to average
 #' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
+#' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
@@ -36,10 +37,9 @@
 #' for ( i in 1:length(ilist) )
 #'  {
 #'  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
-#'  mytx<-antsRegistration(fixed=fi , moving=mi ,
-#'  typeofTransform = c("SyN"),
-#'  outprefix=tempfile())
-#'  mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
+#'  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
+#'    typeofTransform = c("SyN"), outprefix=tempfile() )
+#'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
 #'    transformlist=mytx$fwdtransforms)
 #'  ilist[[i]]=mywarpedimage
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
@@ -65,7 +65,8 @@
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean' )
+  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
+  rSearch=2 )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
@@ -97,7 +98,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
   targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
-    targetIMask,rep(2,dim),boundary.condition=BC,spatial.info=T)
+    targetIMask,rep(rSearch,dim),boundary.condition=BC,spatial.info=T)
   offsets<-targetIvStruct$offsets
   rm(targetIvStruct)
   if ( doscale ) targetIv<-scale(targetIv)
@@ -125,6 +126,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       # see antsImage_GetNeighborhood
       myoff<-rep(0,dim)
       cent<-indices[voxel,]+1
+      v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
+      intmat[ct,]<-v
       # find best local region in this atlas
       # just needs an input vector, an input image and a radius
       # outputs the best offset ...
@@ -134,14 +137,15 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       for ( offind in 1:nrow(offsets) )
         {
         cent2<-cent+offsets[offind,]
-        v<-(antsGetNeighborhood(atlasList[[ct]],cent2,rad)$values)
-        sdv<-sd(v)
+        tv<-(antsGetNeighborhood(atlasList[[ct]],cent2,rad)$values)
+        sdv<-sd(tv)
         if ( sdv > 0 )
           {
-          v=( v - mean(v) )/sdv
-          locor<-(-1.0 * sum(targetint*v) )
+          tv=( tv - mean(tv) )/sdv
+          locor<-(-1.0 * sum(targetint*tv) )
           if ( locor < bestmatch )
             {
+            v=tv
             bestmatch<-locor
             myoff<-offsets[offind,]
             if ( dim == 2 & haveLabels )
@@ -153,9 +157,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
           }
         }
       }
-      cent<-indices[voxel,]+1+myoff
-      v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
-      intmat[ct,]<-v
       sdv<-sd(v)
       if ( sdv == 0 ) {
         zsd[ct]<-0
