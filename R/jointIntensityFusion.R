@@ -44,7 +44,7 @@
 #' r<-4
 #' d<-2
 #' pp<-jointIntensityFusion(ref,refmask,ilist,
-#'   labelList=seglist, rad=rep(r,d) )
+#'   labelList=seglist, rad=rep(r,d), useSaferComputation=T )
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
