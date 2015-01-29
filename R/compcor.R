@@ -1,8 +1,8 @@
 #' Simple compcor function.
-#' 
+#'
 #' Compcors the input matrix using SVD and returns the result.
-#' 
-#' 
+#'
+#'
 #' @param mat input fmri image or matrix
 #' @param returnv returns the singular vectors in v-space
 #' @param returnhighvarmat returns the high variance matrix on which svd is
@@ -10,13 +10,13 @@
 #' @return dataframe is output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' mat <- matrix( rnorm(50000) ,ncol=500)
-#' compcorrdf<-compcor( mat ) 
-#' 
+#' compcorrdf<-compcor( mat )
+#'
 #' @export compcor
-compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd = FALSE, 
-  useimagemath = FALSE, randomSamples = 1, returnv = FALSE, returnhighvarmatinds = FALSE, 
+compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd = FALSE,
+  useimagemath = FALSE, randomSamples = 1, returnv = FALSE, returnhighvarmatinds = FALSE,
   highvarmatinds = NA) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
@@ -53,11 +53,11 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     highvarmatinds <- which(temporalvar > thresh)
   }
   highvarmat <- mat[, highvarmatinds]
-  if (returnhighvarmatinds) 
+  if (returnhighvarmatinds)
     return(highvarmatinds)
   if (!returnv) {
     if (fastsvd) {
-      library(irlba)
+      usePkg("irlba")
       compcorrsvd <- irlba(highvarmat, nu = ncompcor, nv = 0)
     } else compcorrsvd <- svd(highvarmat, nu = ncompcor, nv = 0)
     if (ncompcor > 0) {
@@ -70,7 +70,7 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
   }
   if (returnv) {
     if (fastsvd) {
-      library(irlba)
+      usePkg("irlba")
       compcorrsvd <- irlba(highvarmat, nu = 0, nv = ncompcor)
     } else compcorrsvd <- svd(highvarmat, nu = 0, nv = ncompcor)
     if (ncompcor > 0) {
@@ -81,4 +81,4 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     }
     return(nuis)
   }
-} 
+}

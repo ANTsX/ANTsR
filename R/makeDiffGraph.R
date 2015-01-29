@@ -16,19 +16,15 @@ diffmat <- function(mat) {
 }
 
 
-makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(-0.001, 
+makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(-0.001,
   10)) {
-  pckg <- try(require(igraph))
-  if (!pckg) {
-    getPckg("igraph")
-  }
-  library(igraph)
+  usePkg("igraph")
   
   numberOfNeighbors <- nrow(myrsfnetworkcorrs)
   if (numberOfNeighbors == 0) {
     return(0)
   }
-  
+
   myrsfnetworkcorrs[myrsfnetworkcorrs < correlationThreshold[1]] <- Inf
   myrsfnetworkcorrs[myrsfnetworkcorrs > correlationThreshold[2]] <- Inf
   adjmat <- myrsfnetworkcorrs
@@ -44,7 +40,7 @@ makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThresh
   adjmat[adjmat == Inf] <- 0
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = nnumberOfNeighbors)
   g1 <- graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
-  # 
+  #
   edgeWeights <- E(g1)$weight
   # print( paste( 'Graph-Density:',graph.density( g1 ) ) )
   gmetric0 <- evcent(g1, scale = TRUE)$vector
@@ -55,8 +51,8 @@ makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThresh
   gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("local"))
   mycommunity <- fastgreedy.community(g1)
   walktrapcomm <- walktrap.community(g1)
-  return(list(mygraph = g1, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3, 
-    betweeness = gmetric4, localtransitivity = gmetric5, community = mycommunity, 
-    walktrapcomm = walktrapcomm, adjacencyMatrix = adjacencyMatrix, centrality = gmetric0, 
+  return(list(mygraph = g1, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3,
+    betweeness = gmetric4, localtransitivity = gmetric5, community = mycommunity,
+    walktrapcomm = walktrapcomm, adjacencyMatrix = adjacencyMatrix, centrality = gmetric0,
     evcent = evcent(g1)))
-} 
+}

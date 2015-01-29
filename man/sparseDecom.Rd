@@ -28,8 +28,8 @@ variance.
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
 # for prediction
-library(spls)
-library(randomForest)
+usePkg("spls")
+usePkg("randomForest")
 data(lymphoma)
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.02 ; myz<-0
@@ -41,8 +41,8 @@ predlymp<-predict(myrf, newdata=testdf)
 print(paste("N-errors:",sum(abs( testdf$lclass != predlymp ) )," non-zero ",sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 # compare to http://arxiv.org/pdf/0707.0701v2.pdf
 # now SNPs
-library(randomForest)
-library(BGLR)
+usePkg("randomForest")
+usePkg("BGLR")
 data(mice)
 snps<-quantifySNPs( mice.X, shiftit =T )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )

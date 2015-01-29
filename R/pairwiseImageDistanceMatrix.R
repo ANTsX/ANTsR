@@ -1,13 +1,13 @@
 #' Simple pairwiseImageDistanceMatrix function for images
-#' 
+#'
 #' Output contains the NImages x NImages matrix of
 #' c("PearsonCorrelation","Mattes") or any Image Metric values available in
 #' ImageMath.  Similarity is computed after an affine registration is
 #' performed.  You can also cluster the images via the dissimilarity
 #' measurement, i.e. the negated similarity metric.  So, the estimated
 #' dissimilarity is returned in the matrix.
-#' 
-#' 
+#'
+#'
 #' @param dim imageDimension
 #' @param myFileList dd<-"MICCAI-2013-SATA-Challenge-Data/CAP/training-images/"
 #' myFileList<-list.files(path=dd, pattern = glob2rx("*nii.gz"),full.names =
@@ -16,13 +16,13 @@
 #' clustering (optional) in a list
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#'   dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 ) 
+#'   dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
 #' }
-#' 
+#'
 #' @export pairwiseImageDistanceMatrix
-pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation", 
+pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation",
   nclusters = NA) {
   fnl <- length(myFileList)
   mymat <- matrix(rep(NA, fnl * fnl), nrow = fnl, ncol = fnl)
@@ -33,7 +33,7 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
         i1 <- antsImageRead(myFileList[ct], dim)
         i2 <- antsImageRead(myFileList[ct2], dim)
         toutfn <- paste(tempdir(), "Z", sep = "/")
-        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"), 
+        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"),
           outprefix = toutfn)
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
         # broken !!  metric <- capture.output(ImageMath(dim, 'j', metrictype, i1,
@@ -55,9 +55,9 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
     mymat <- mymat * (-1)  # make a dissimilarity matrix
   }
   mymat <- mymat - min(mymat, na.rm = T)  # make min zero
-  symat <- (mymat + t(mymat)) * 0.5  # make symmetric 
+  symat <- (mymat + t(mymat)) * 0.5  # make symmetric
   if (!is.na(nclusters)) {
-    library(cluster)
+    usePkg("cluster")
     clusters <- rep(NA, fnl)
     clusterrep <- rep(NA, nclusters)
     pamx <- pam(symat, nclusters)
@@ -72,4 +72,4 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
     return(list(rawMatrix = mymat, symmMatrix = symat, clusters = clusters, representatives = myFileList[clusterrep]))
   }
   return(list(rawMatrix = mymat, symmMatrix = symat))
-} 
+}

@@ -1,40 +1,32 @@
 #' Simple inspectImageData3D function.
-#' 
+#'
 #' InspectImageData3D collects basic statistics over a dataset and returns them
 #' in a dataframe.
-#' 
-#' 
+#'
+#'
 #' @param fn input list of filenames
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) ) 
-#' library(fpc)
-#' library(DMwR)
-#' pamres <- pamk(mm) 
+#' mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) )
+#' usePkg("fpc")
+#' usePkg("DMwR")
+#' pamres <- pamk(mm)
 #' plot(pamres$pamobject)
 #' outlier.scores <- lofactor( mm, k=5)
 #' outliers <- order(outlier.scores, decreasing=T)[1:5]
 #' }
-#' 
+#'
 #' @export inspectImageData3D
 inspectImageData3D <- function(myfiles) {
   if (nargs() == 0) {
     print(args(inspectImageData3D))
     return(1)
   }
-  pckg <- try(require(moments))
-  if (!pckg) {
-    getPckg("moments")
-  }
-  library(moments)
-  pckg <- try(require(extremevalues))
-  if (!pckg) {
-    getPckg("extremevalues")
-  }
-  library(extremevalues)
+  usePkg("moments")
+  usePkg("extremevalues")
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
   idim <- 3
@@ -54,4 +46,3 @@ inspectImageData3D <- function(myfiles) {
   rownames(mymat) <- myfiles
   return(mymat)
 }
- 

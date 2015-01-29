@@ -54,8 +54,8 @@ for ( nvecs in 1:2 ) {
 ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
   sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1, cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
 ### now SNPs ###
-library(randomForest)
-library(BGLR)
+usePkg("randomForest")
+usePkg("BGLR")
 data(mice)
 snps<-mice.X
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )

@@ -1,32 +1,28 @@
 #' Simple function to create and measure a graph from a square input matrix.
-#' 
+#'
 #' Creates an igraph object from a square input correlation matrix - only
 #' positive correlations are used.  Based on the graph.adjacency function of
 #' igraph.  gplot is helpful for visualization.
-#' 
-#' 
+#'
+#'
 #' @param mat input matrix
 #' @param graphdensity fraction of edges to keep
 #' @return a named list is output including the graph object, adjacency matrix
 #' and several graph metrics
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' mat <- matrix(c(rep(1,100)),ncol=10)
-#' gobj<-makeGraph( mat ) 
+#' gobj<-makeGraph( mat )
 #' mat <- matrix(  c( 1, 0.5, 0.2, -0.1, 1, 0.3, -0.2, 0.6, 1 ) , ncol= 3 )
-#' gobj<-makeGraph( mat , 0.5 ) 
+#' gobj<-makeGraph( mat , 0.5 )
 #' gplot( dd$adjacencyMatrix )
 #' }
-#' 
+#'
 #' @export makeGraph
 makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FALSE) {
-  pckg <- try(require(igraph))
-  if (!pckg) {
-    getPckg("igraph")
-  }
-  library(igraph)
+  usePkg("igraph")
   myrsfnetworkcorrs <- myrsfnetworkcorrsin
   if (typeof(myrsfnetworkcorrs) == "list") {
     myrsfnetworkcorrs <- data.matrix(myrsfnetworkcorrsin)
