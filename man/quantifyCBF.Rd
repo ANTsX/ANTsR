@@ -2,7 +2,7 @@
 % Please edit documentation in R/quantifyCBF.R
 \name{quantifyCBF}
 \alias{quantifyCBF}
-\title{Simple quantifyCBF function.}
+\title{quantifyCBF}
 \usage{
 quantifyCBF(perfusion, mask, parameters, M0val = NA, outlierValue = 0.02)
 }

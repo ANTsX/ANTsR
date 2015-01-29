@@ -1,5 +1,5 @@
 #' Basic pre-processing for BOLD or ASL-based network analysis.
-#' 
+#'
 #' This function works for either raw BOLD time-series data, ASL-based BOLD
 #' time-series data or ASL-based CBF time series data.  In all 3 cases, this
 #' function performs motion-correction, factoring out motion and compcor
@@ -11,8 +11,8 @@
 #' by Wong et al, 1997 for an overview.  This function employs "surround"
 #' techniques for deriving either CBF or BOLD signal from the input ASL.  This
 #' is a WIP.
-#' 
-#' 
+#'
+#'
 #' @param asl_antsr_image_or_filename The filename to an antsr image or pointer
 #' to an antsr image
 #' @param tr=<value> The sequence's TR value , typically 3 or 4.
@@ -30,18 +30,18 @@
 #' will write out some sanity checking images.
 #' @return output is a list containing "filteredTimeSeries" "mask"
 #' "temporalvar"
-#' 
+#'
 #' or
-#' 
+#'
 #' 1 -- Failure
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' fmat<-timeseries2matrix( img, mask )
 #' myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
 #' }
-#' 
+#'
 #' @export filterfMRIforNetworkAnalysis
 filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA,
   labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA, usesvd = FALSE , robustcorr = FALSE  ) {
@@ -66,13 +66,7 @@ filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1
     print(myusage)
     return(NULL)
   }
-  if ( usesvd ) {
-  pckg <- try(require(irlba))
-  if (!pckg) {
-    getPckg("irlba")
-  }
-  library(irlba)
-  }
+  usePkg("irlba")
   freqLo <- freqLo * tr
   freqHi <- freqHi * tr
   # network analysis

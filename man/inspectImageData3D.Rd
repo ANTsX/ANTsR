@@ -19,8 +19,8 @@ in a dataframe.
 \examples{
 \dontrun{
 mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) )
-library(fpc)
-library(DMwR)
+usePkg("fpc")
+usePkg("DMwR")
 pamres <- pamk(mm)
 plot(pamres$pamobject)
 outlier.scores <- lofactor( mm, k=5)

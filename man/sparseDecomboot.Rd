@@ -33,8 +33,8 @@ variance.
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecomboot( mat )
 # for prediction
-library(spls)
-library(randomForest)
+usePkg("spls")
+usePkg("randomForest")
 data(lymphoma)
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.001 ; myz<-0 ; nv<-5

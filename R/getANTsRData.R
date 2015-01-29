@@ -1,5 +1,5 @@
 getANTsRData <- function(fileid, usefixedlocation = FALSE) {
-  library(tools)
+  usePkg("tools")
   myusage <- "usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
   if (missing(fileid)) {
     print(myusage)
@@ -19,7 +19,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     ch2 = "http://placid.nlm.nih.gov/download?items=10778", ch2b = "http://placid.nlm.nih.gov/download?items=10780",
     ch2a = "http://placid.nlm.nih.gov/download?items=10784", mni = "http://placid.nlm.nih.gov/download?items=10785",
     mnib = "http://placid.nlm.nih.gov/download?items=10787", mnia = "http://placid.nlm.nih.gov/download?items=10786",
-    mnit = "http://placid.nlm.nih.gov/download?items=11660", nki = "http://files.figshare.com/1363201/NKI.zip", 
+    mnit = "http://placid.nlm.nih.gov/download?items=11660", nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz")
 
   myext <- ".nii.gz"

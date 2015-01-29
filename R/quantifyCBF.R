@@ -1,23 +1,15 @@
-# quantifyCBF chen 2011 paper pCASL
-# --------------------------------------------------------------------------------------
-
-
-
-
-
-
-#' Simple quantifyCBF function.
-#' 
+#' quantifyCBF
+#'
 #' Computes CBF from ASL - pasl or pcasl
-#' 
-#' 
+#'
+#'
 #' @param aslmat input asl matrix
 #' @param aslmask 3D image mask (antsImage)
 #' @param parameters list with entries for sequence and m0 (at minimimum)
 #' @return a list is output with 3 types of cbf images
 #' @author Avants BB, Kandel B, Duda JT
 #' @examples
-#' 
+#'
 #'   \dontrun{
 #'   if (!exists("fn") ) fn<-"PEDS012_20131101_pcasl_1.nii.gz"
 #'   # PEDS029_20101110_pcasl_1.nii.gz # high motion subject
@@ -44,7 +36,7 @@
 #'   antsImageWrite( meancbf , 'temp2.nii.gz')
 #'   plotANTsImage(  meancbf, slices='1x50x1')
 #'   }
-#' 
+#'
 #' @export quantifyCBF
 quantifyCBF <- function(perfusion, mask, parameters,
    M0val = NA, outlierValue = 0.02) {
@@ -246,7 +238,7 @@ quantifyCBF <- function(perfusion, mask, parameters,
   }
   if ( epckg )
     {
-    library(extremevalues)
+    usePkg("extremevalues")
     cbfvals <- meancbfimg[(mask == 1)]
     K <- getOutliers(cbfvals, method = "I", distribution = "normal", FLim = c(outlierValue,
       1 - outlierValue))

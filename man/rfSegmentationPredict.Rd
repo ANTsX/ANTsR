@@ -20,7 +20,7 @@ segmentation is output
 Predict image segmentation via random forests.
 }
 \examples{
-library(randomForest)
+usePkg("randomForest")
 img<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask( img )
 mask2<-getMask( img )

@@ -1,9 +1,9 @@
 #' Simple joinEigenanatomy function.
-#' 
+#'
 #' joinEigenanatomy joins the input matrix using a community membership
 #' approach.
-#' 
-#' 
+#'
+#'
 #' @param datamatrix input matrix before decomposition
 #' @param mask mask used to create datamatrix
 #' @param listEanatImages list containing pointers to eanat images
@@ -12,24 +12,24 @@
 #' communitymembership , graph=gg, bestdensity=graphdensity ))
 #' @author Avants BB
 #' @examples
-#' 
-#' # if you dont have images 
-#' mat<-replicate(100, rnorm(20)) 
-#' mydecom<-sparseDecom( mat ) 
+#'
+#' # if you dont have images
+#' mat<-replicate(100, rnorm(20))
+#' mydecom<-sparseDecom( mat )
 #' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
 #' # or select optimal parameter from a list
 #' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
 #' print(dim( mydecom$eigenanatomyimages ) )
 #' print(dim( t(kk$fusedlist ) ) )
-#' # something similar may be done with images 
+#' # something similar may be done with images
 #' mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
-#' mydecom<-sparseDecom( mat, inmask=mask ) 
+#' mydecom<-sparseDecom( mat, inmask=mask )
 #' kki<-joinEigenanatomy( mat, mask=mask, mydecom$eigenanatomyimages , 0.1 )
 #' print(length( mydecom$eigenanatomyimages ) )
 #' print(length( kki$fusedlist ) )
-#' mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist , 
-#'   sparseness=0, nvecs=length(kki$fusedlist) ) 
-#' 
+#' mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist ,
+#'   sparseness=0, nvecs=length(kki$fusedlist) )
+#'
 #' @export joinEigenanatomy
 joinEigenanatomy <- function(datamatrix, mask = NA,
   list_of_eanat_images, graphdensity = 0.65,
@@ -39,11 +39,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
     print(args(joinEigenanatomy))
     return(1)
   }
-  pckg <- try(require(igraph))
-  if (!pckg) {
-    getPckg("igraph")
-  }
-  library(igraph)
+  usePkg("igraph")
   if (!is.na(mask))
     decom <- imageListToMatrix(list_of_eanat_images, mask) else decom <- t(list_of_eanat_images)
   for ( i in 1:nrow(decom) )

@@ -17,10 +17,10 @@ antsr_frequency_filter <- function(values, tr, freqLo, freqHi, nuis = NA) {
     return(NULL)
   }
   
-  library("signal")
-  library("timeSeries")
-  library("mFilter")
-  library("MASS")
+  usePkg("signal")
+  usePkg("timeSeries")
+  usePkg("mFilter")
+  usePkg("MASS")
   
   useNuis <- FALSE
   if (!is.na(nuis)) {

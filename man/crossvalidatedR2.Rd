@@ -11,7 +11,7 @@ crossvalidatedR2(x, y, ngroups=5, covariates=NA)
 
 \item{y}{Target dependent variable.}
 
-\item{ngroups}{Number of cross-validation folds to use.}
+\item{ngroups}{Number of cross-validation folds to use or the fold labels themselves, equal to the length of y.  e.g. c(1,1,1,2,2,2...)}
 
 \item{covariates}{Covariate predictors.}
 }

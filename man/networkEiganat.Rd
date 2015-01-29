@@ -28,8 +28,8 @@ variance.
 \dontrun{
 mat<-replicate(100, rnorm(20))
 mydecom<-networkEiganat( mat, nvecs=5 )
-library(randomForest)
-library(BGLR)
+usePkg("randomForest")
+usePkg("BGLR")
 data(mice)
 snps<-quantifySNPs( mice.X )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
@@ -57,14 +57,14 @@ testdf <-data.frame( bmi=numericalpheno[!train,phind] , snpse=snpse )
 myrf<-glm( bmi ~ . , data=traindf )
 preddf<-predict(myrf, newdata=testdf )
 cor.test(preddf, testdf$bmi )
-library(visreg)
+usePkg("visreg")
 mydf<-data.frame( PredictedBMIfromSNPs=preddf, RealBMI=testdf$bmi )
 mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
 visreg(mymdl)
 ###########
 # vs glmnet #
 ###########
-library(glmnet)
+usePkg("glmnet")
 kk<-glmnet(y=numericalpheno[train,phind],x=snps[train,] )
 ff<-predict(kk,newx=snps[!train,])
 cor.test(ff[,25],numericalpheno[!train,phind])

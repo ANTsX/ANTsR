@@ -1,9 +1,9 @@
 #' Convenience wrapper for eigenanatomy decomposition.
-#' 
+#'
 #' Decomposes a matrix into sparse eigenevectors to maximize explained
 #' variance.
-#' 
-#' 
+#'
+#'
 #' @param inmatrix n by p input images , subjects or time points by row ,
 #' spatial variable lies along columns
 #' @param inmask optional antsImage mask
@@ -11,12 +11,12 @@
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' mat<-replicate(100, rnorm(20)) 
-#' mydecom<-networkEiganat( mat, nvecs=5 ) 
-#' library(randomForest)
-#' library(BGLR)
+#' mat<-replicate(100, rnorm(20))
+#' mydecom<-networkEiganat( mat, nvecs=5 )
+#' usePkg("randomForest")
+#' usePkg("BGLR")
 #' data(mice)
 #' snps<-quantifySNPs( mice.X )
 #' numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
@@ -28,39 +28,39 @@
 #' lowr<-lowrankRowMatrix(as.matrix( snps[train,] ),900)
 #' snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
 #' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),100) , nvecs=20 , sparseness=( -0.001) )
-#' projmat<-as.matrix( snpdS$eig ) 
-#' projmat<-as.matrix( snpdF$eig ) 
+#' projmat<-as.matrix( snpdS$eig )
+#' projmat<-as.matrix( snpdF$eig )
 #' snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=45, verbose=T, its=20, gradparam=10 )
 #' snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 , sparseness=c( 1, -0.001 ) , downsample=0, verbose=T, its=20, gradparam=10 )
 #' snpd<-snpdSlow
 #' snpd<-snpdFast
-#' projmat<-as.matrix( snpd$v ) 
+#' projmat<-as.matrix( snpd$v )
 #' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),10) , nvecs=20 , sparseness=( -0.001) )
-#' projmat<-as.matrix( snpdS$eig ) 
-#' snpse<-as.matrix( snps[train, ]  ) %*% projmat 
+#' projmat<-as.matrix( snpdS$eig )
+#' snpse<-as.matrix( snps[train, ]  ) %*% projmat
 #' traindf<-data.frame( bmi=numericalpheno[train,phind] , snpse=snpse)
-#' snpse<-as.matrix( snps[!train, ]  ) %*% projmat 
+#' snpse<-as.matrix( snps[!train, ]  ) %*% projmat
 #' testdf <-data.frame( bmi=numericalpheno[!train,phind] , snpse=snpse )
 #' myrf<-glm( bmi ~ . , data=traindf )
 #' preddf<-predict(myrf, newdata=testdf )
 #' cor.test(preddf, testdf$bmi )
-#' library(visreg)
+#' usePkg("visreg")
 #' mydf<-data.frame( PredictedBMIfromSNPs=preddf, RealBMI=testdf$bmi )
-#' mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf) 
+#' mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
 #' visreg(mymdl)
 #' ###########
 #' # vs glmnet #
 #' ###########
-#' library(glmnet)
+#' usePkg("glmnet")
 #' kk<-glmnet(y=numericalpheno[train,phind],x=snps[train,] )
 #' ff<-predict(kk,newx=snps[!train,])
 #' cor.test(ff[,25],numericalpheno[!train,phind])
 #' mydf<-data.frame( PredictedBMIfromSNPs=ff[,25], RealBMI=testdf$bmi )
-#' mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf) 
+#' mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
 #' visreg(mymdl)
 #' ###########
 #' }
-#' 
+#'
 #' @export networkEiganat
 networkEiganat <- function(Xin, sparseness = c(0.1, 0.1),
   nvecs = 5, its = 5, gradparam = 1,

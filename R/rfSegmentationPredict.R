@@ -10,7 +10,7 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' library(randomForest)
+#' usePkg("randomForest")
 #' img<-antsImageRead( getANTsRData('r16') ,2)
 #' mask<-getMask( img )
 #' mask2<-getMask( img )

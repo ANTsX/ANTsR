@@ -20,7 +20,7 @@ list of n-probability images is output where n is number of classes
 Image segmentation via random forests.
 }
 \examples{
-library(randomForest)
+usePkg("randomForest")
 img<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask( img )
 segs<-Atropos( d = 2, a = img, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)
