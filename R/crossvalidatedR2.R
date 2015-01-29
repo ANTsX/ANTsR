@@ -28,8 +28,7 @@ crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
     groups<-createFolds(y,k=ngroups,list=FALSE)
   } else groups <- ngroups
   ngroups<-length(unique(groups))
-  print(ngroups)
-  R2 <- matrix(rep(0, ngroups*nvox), nrow = ngroups)
+  R2v <- matrix(rep(0, ngroups*nvox), nrow = ngroups)
   if(!is.matrix(covariates))
     covariates <- as.matrix(covariates)
 
@@ -45,12 +44,13 @@ crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
       mydf <- data.frame(mydf, covariates[selector, ])
     predmat <- predict(mylm1, newdata = mydf)
     realmat <- x[selector, ]
-    for (v in 1:nvox)
-      {
-      sum1<-sum((predmat[, v] - realmat[,v])^2,na.rm=T)
-      sum2<-sum((mean(realmat[, v],na.rm=T)- realmat[, v])^2, na.rm=T)
-      R2[k, v] <- 100 * (1 - sum1/sum2 )
-      }
+    sum1vec<-colSums(  (predmat - realmat)^2,na.rm=T)
+    temp<-matrix( rep(  colMeans(realmat,na.rm=T), nrow(realmat) ),
+      nrow=nrow(realmat), byrow=T )
+    sum2vec<-colSums( ( temp - realmat )^2, na.rm=T)
+    R2vec <- 100 * (1 - sum1vec/sum2vec )
+    R2v[k, ] <- R2vec
+
   }
-  return(R2)
+  R2v 
 }
