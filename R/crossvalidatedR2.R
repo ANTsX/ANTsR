@@ -4,34 +4,35 @@
 #' @usage crossvalidatedR2(x, y, ngroups=5, covariates=NA)
 #' @param x Input predictor matrix.
 #' @param y Target dependent variable.
-#' @param ngroups Number of cross-validation folds to use.
+#' @param ngroups Number of cross-validation folds to use or the fold labels themselves, equal to the length of y.  e.g. c(1,1,1,2,2,2...)
 #' @param covariates Covariate predictors.
 #' @return Matrix of size \code{ngroups} by \code{ncol(x)}, which each row corresponding to one fold and the columns corresponding to the R2 values for each predictor.
 #' @author Brian B Avants, Benjamin M. Kandel
 #' @examples
 #' set.seed(300)
 #' ncol <- 30
-#' nrow <- 20 
+#' nrow <- 20
 #' covariate <- sin((1:nrow)*2*pi/nrow)
 #' x <- matrix(rep(NA, nrow*ncol), nrow=nrow)
 #' xsig <- seq(0,1,length.out=nrow)
-#' y <- xsig + covariate + rnorm(nrow, sd=0.5) 
+#' y <- xsig + covariate + rnorm(nrow, sd=0.5)
 #' for(i in 1:ncol){
 #'   x[, i] <- xsig + rnorm(nrow, sd=i/ncol)
 #' }
-#' r2 <- crossvalidatedR2(x, y, covariates=covariate) 
+#' r2 <- crossvalidatedR2(x, y, covariates=covariate)
 #' @export crossvalidatedR2
 crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
   nvox <- ncol(x)
-  R2 <- matrix(rep(0, ngroups*nvox), nrow = ngroups)
-  if(length(ngroups == 1)){
+  if(length(ngroups) == 1){
     groups <- c()
     grouplength <- round(nrow(x)/ngroups) - 1
-    for (k in 1:ngroups) 
+    for (k in 1:ngroups)
       groups <- c(groups, rep(k, grouplength))
     groups <- c(rep(1, nrow(x) - length(groups)), groups)
   } else groups <- ngroups
-  if(!is.matrix(covariates)) 
+  ngroups<-length(unique(groups))
+  R2 <- matrix(rep(0, ngroups*nvox), nrow = ngroups)
+  if(!is.matrix(covariates))
     covariates <- as.matrix(covariates)
 
   for (k in 1:ngroups) {
