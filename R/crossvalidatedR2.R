@@ -1,11 +1,12 @@
 #' @name crossvalidatedR2
 #' @title Cross-Validated R^2 value
 #' @description Computes an R^2 value for predicting an outcome measure using a k-fold cross-validation scheme.
-#' @usage crossvalidatedR2(x, y, ngroups=5, covariates=NA)
+#' @usage crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=F)
 #' @param x Input predictor matrix.
 #' @param y Target dependent variable.
 #' @param ngroups Number of cross-validation folds to use or the fold labels themselves, equal to the length of y.  e.g. c(1,1,1,2,2,2...)
 #' @param covariates Covariate predictors.
+#' @param fast Use low-level \code{lm.fit} instead of \code{lm}.  Much faster, but less error checking.
 #' @return Matrix of size \code{ngroups} by \code{ncol(x)}, which each row corresponding to one fold and the columns corresponding to the R2 values for each predictor.
 #' @author Brian B Avants, Benjamin M. Kandel
 #' @examples
@@ -21,7 +22,7 @@
 #' }
 #' r2 <- crossvalidatedR2(x, y, covariates=covariate)
 #' @export crossvalidatedR2
-crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
+crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA, fast=F) {
   usePkg("caret")
   nvox <- ncol(x)
   if(length(ngroups) == 1){
@@ -34,15 +35,29 @@ crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA) {
 
   for (k in 1:ngroups) {
     selector <- groups != k
-    mydf <- data.frame(y[selector])
-    if (!all(is.na(covariates)))
-      mydf <- data.frame(mydf, covariates[selector, ])
-    mylm1 <- lm(x[selector, ] ~ ., data = mydf)
+    if(!fast){
+      mydf <- data.frame(y[selector])
+      if (!all(is.na(covariates)))
+        mydf <- data.frame(mydf, covariates[selector, ])
+      mylm1 <- lm(x[selector, ] ~ ., data = mydf)
+    } else{
+      y.sel <- cbind(rep(1, sum(selector)), y[selector])
+      if(!all(is.na(covariates))) 
+        y.sel <- cbind(y.sel, covariates[selector, ])
+      myfit <- lm.fit(x=y.sel, y=x[selector, ]) # do lm(x~y)-style fit
+    }
     selector <- groups == k
-    mydf <- data.frame(y[selector])
-    if (!all(is.na(covariates)))
-      mydf <- data.frame(mydf, covariates[selector, ])
-    predmat <- predict(mylm1, newdata = mydf)
+    if(!fast){
+      mydf <- data.frame(y[selector])
+      if (!all(is.na(covariates)))
+        mydf <- data.frame(mydf, covariates[selector, ])
+      predmat <- predict(mylm1, newdata = mydf)
+    } else{
+      y.sel <- cbind(rep(1, sum(selector)), y[selector])
+      if (!all(is.na(covariates)))
+        y.sel <- cbind(y.sel, covariates[selector, ])
+      predmat <- y.sel %*% myfit$coefficients
+    }
     realmat <- x[selector, ]
     sum1vec<-colSums(  (predmat - realmat)^2,na.rm=T)
     temp<-matrix( rep(  colMeans(realmat,na.rm=T), nrow(realmat) ),

@@ -4,7 +4,7 @@
 \alias{crossvalidatedR2}
 \title{Cross-Validated R^2 value}
 \usage{
-crossvalidatedR2(x, y, ngroups=5, covariates=NA)
+crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=F)
 }
 \arguments{
 \item{x}{Input predictor matrix.}
@@ -14,6 +14,8 @@ crossvalidatedR2(x, y, ngroups=5, covariates=NA)
 \item{ngroups}{Number of cross-validation folds to use or the fold labels themselves, equal to the length of y.  e.g. c(1,1,1,2,2,2...)}
 
 \item{covariates}{Covariate predictors.}
+
+\item{fast}{Use low-level \code{lm.fit} instead of \code{lm}.  Much faster, but less error checking.}
 }
 \value{
 Matrix of size \code{ngroups} by \code{ncol(x)}, which each row corresponding to one fold and the columns corresponding to the R2 values for each predictor.

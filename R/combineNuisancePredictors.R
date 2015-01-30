@@ -24,7 +24,7 @@
 combineNuisancePredictors <- function(inmat, target, globalpredictors=NA,  
   maxpreds=5, localpredictors=NA, method='cv', k=5, covariates=NA, ordered=F){
   avgR2 <- function(inmat, target, k, covariates){
-    r2 <- crossvalidatedR2(inmat, target, k, covariates)
+    r2 <- crossvalidatedR2(inmat, target, k, covariates, fast=T)
     r2max <- apply(r2, median, MARGIN=2)
     r2pos <- r2max[r2max > 0]
     median(r2pos)
