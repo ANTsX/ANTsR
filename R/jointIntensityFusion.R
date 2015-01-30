@@ -17,6 +17,7 @@
 #' @param usecor employ correlation as local similarity
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
+#' @param segvals list of labels to expect
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -66,7 +67,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
-  rSearch=2 )
+  rSearch=2, segvals=NA )
 {
   if (nargs() == 0) {
     print(args(ajointIntensityFusion))
@@ -238,7 +239,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( !( all( is.na(labelList) ) ) )
     {
     segvec<-rep( 0, ncol(segmat) )
-    segvals<-c(0,sort( unique( as.numeric(segmat)) ))
+    if ( all( is.na(segvals) ) )
+      segvals<-c(0,sort( unique( as.numeric(segmat)) ))
     probImgList<-list()
     probImgVec<-list()
     for ( p in 1:length(segvals) )
