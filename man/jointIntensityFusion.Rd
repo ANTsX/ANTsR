@@ -7,7 +7,8 @@
 jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, boundary.condition = "mean", rSearch = 2)
+  usecor = FALSE, boundary.condition = "mean", rSearch = 2,
+  segvals = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -38,6 +39,8 @@ makes image converge to average}
 \item{boundary.condition}{one of 'image' 'mean' 'NA'}
 
 \item{rSearch}{radius of search, default is 2}
+
+\item{segvals}{list of labels to expect}
 }
 \value{
 approximated image, segmentation and probabilities
