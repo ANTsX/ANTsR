@@ -23,9 +23,10 @@
 #' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 4) 
 combineNuisancePredictors <- function(inmat, target, globalpredictors=NA,  
   maxpreds=5, localpredictors=NA, method='cv', k=5, covariates=NA, ordered=F){
+  usePkg('matrixStats')
   avgR2 <- function(inmat, target, k, covariates){
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast=T)
-    r2max <- apply(r2, median, MARGIN=2)
+    r2max <- colMedians(r2) 
     r2pos <- r2max[r2max > 0]
     median(r2pos)
   } 
@@ -55,7 +56,6 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors=NA,
             preds.remain <- (1:ncol(globalpredictors))[-bestpreds]
           } 
           for(jj in preds.remain){
-            print(jj)
             residmat <- residuals(lm(inmat~globalpredictors[, c(bestpreds, jj)]))
             r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
           }
