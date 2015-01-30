@@ -46,6 +46,7 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     print(myusage)
     return(NULL)
   }
+  usePkg("mFilter")
   freqLo <- freqLo * tr
   freqHi <- freqHi * tr
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
@@ -77,6 +78,7 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     return(filteredTimeSeries)
   }
   if (opt == "butt") {
+    usePkg("signal")
     bf <- butter(2, c(freqLo, freqHi), type = "pass")
     filteredTimeSeries <- matrix(signal::filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
     return(filteredTimeSeries)

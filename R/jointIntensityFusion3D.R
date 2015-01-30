@@ -47,6 +47,13 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     print("must be a 3D image")
     return(NA)
     }
+  segvals<-NA
+  if ( ! all( is.na(labelList) ) )
+    {
+    segmat<-imageListToMatrix( labelList, targetIMask )
+    segvals<-c(0,sort( unique( as.numeric(segmat)) ))
+    rm(segmat)
+    }
   maskout<-antsImageClone( targetIMask )
   maskout[ targetIMask==1 ]<-0
   whichMaskSlice<-0
@@ -70,7 +77,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         targetIMask=mask2d, atlasList=atlasList,
         beta=beta, rad=rad, labelList=labelList,
         doscale=doscale, doNormalize=doNormalize,
-        maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho,
+        maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
         useSaferComputation=useSaferComputation, usecor=usecor )
       if ( whichMaskSlice == 0 )
         {
@@ -82,17 +89,17 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
           oo2d$predimg[ mask2d == 1 ]
         localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
           oo2d$segimg[ mask2d == 1 ]
-#        probct<-1
-#        for ( probimg in localJIF2Dp )
-#          {
-#          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-#            oo2d$probimgs[[probct]][ mask2d == 1 ]
-#          probct<-probct+1
-#          }
+        probct<-1
+        for ( probimg in localJIF2Dp )
+          {
+          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
+            oo2d$probimgs[[probct]][ mask2d == 1 ]
+          probct<-probct+1
+          }
         }
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout ) )
-    #  , probimgs=localJIF2Dp ) )
+  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout,
+     probimgs=localJIF2Dp ) )
 }
