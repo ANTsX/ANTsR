@@ -80,6 +80,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     segmat<-imageListToMatrix( labelList, targetIMask )
     segmatSearch<-segmat
     haveLabels=TRUE
+    if ( all( is.na(segvals) ) )
+      {
+      segvals<-c(sort( unique( as.numeric(segmat)) ))
+      if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
+      }
     }
   havefastsvd<-usePkg("RcppArmadillo")
   dim<-targetI@dimension
@@ -239,8 +244,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( !( all( is.na(labelList) ) ) )
     {
     segvec<-rep( 0, ncol(segmat) )
-    if ( all( is.na(segvals) ) )
-      segvals<-c(0,sort( unique( as.numeric(segmat)) ))
     probImgList<-list()
     probImgVec<-list()
     for ( p in 1:length(segvals) )

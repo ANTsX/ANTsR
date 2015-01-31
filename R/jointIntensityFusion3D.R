@@ -51,7 +51,11 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   if ( ! all( is.na(labelList) ) )
     {
     segmat<-imageListToMatrix( labelList, targetIMask )
-    segvals<-c(0,sort( unique( as.numeric(segmat)) ))
+    if ( all( is.na(segvals) ) )
+      {
+      segvals<-c(sort( unique( as.numeric(segmat)) ))
+      if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
+      }
     rm(segmat)
     }
   maskout<-antsImageClone( targetIMask )

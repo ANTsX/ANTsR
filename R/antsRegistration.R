@@ -11,6 +11,7 @@
 #' Rigid, Affine, SyN, SyNBold, SyNAggro.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
+#' @param mask mask the registration.
 #' @return outputs a list containing warped images and transforms. 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
 #' @examples
@@ -43,7 +44,7 @@
 #'
 #' @export antsRegistration
 antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
-  initialTransform=NA, outprefix = "",
+  initialTransform=NA, outprefix = "", mask=NA,
   ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
@@ -86,6 +87,11 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
         m <- antsrGetPointerName(moving)
         wfo <- antsrGetPointerName(warpedfixout)
         wmo <- antsrGetPointerName(warpedmovout)
+        if (!is.na(mask) )
+          {
+          charmask<-antsImageClone(mask,"unsigned char")
+          maskopt<-antsrGetPointerName(charmask)
+          } else maskopt<-""
         if ( is.na(initx) )
           {
           initx=paste("[",f, ",", m, ",1]", sep = "")
@@ -97,7 +103,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Rigid[0.25]",
           "-c","[1200x1200x100,1e-6,5]",
           "-s", "2x1x0",
-          "-f", "4x2x1",
+          "-f", "4x2x1","-x",maskopt,
           "-m", paste("cc[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""),
           "-c", "[200x10,1e-6,5]", "-s", "1x0",
@@ -115,7 +121,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
             "-t", "Affine[0.25]",
             "-c","2100x1200x1200x0",
             "-s", "3x2x1x0",
-            "-f", "4x3x2x1",
+            "-f", "4x2x2x1","-x",maskopt,
             "-m", paste("mattes[",f, ",", m, ",1,32]", sep = ""),
             "-t", paste(typeofTransform,"[0.25,3,0]", sep = ""),
             "-c", "2100x1200x1200x0",
@@ -134,7 +140,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Affine[0.25]",
           "-c","2100x1200x1200x100",
           "-s", "3x2x1x0",
-          "-f", "4x3x2x1",
+          "-f", "4x2x2x1","-x",maskopt,
           "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""),
           "-c", "2100x1200x1200x20",
@@ -153,7 +159,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Affine[0.25]",
           "-c","2100x1200x1200x100",
           "-s", "3x2x1x0",
-          "-f", "4x3x2x1",
+          "-f", "4x2x2x1","-x",maskopt,
           "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0.5]", sep = ""),
           "-c", "2100x1200x1200x20",
@@ -168,11 +174,13 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
         if (typeofTransform == "Rigid" | typeofTransform == "Affine") {
           args <- list("-d", as.character(fixed@dimension),
           "-r", initx,
-          "-m", paste("mattes[", f, ",", m,
-          ",1,32,regular,0.2]", sep = ""), "-t", paste(typeofTransform,
-          "[0.25]", sep = ""), "-c", myiterations, "-s", "3x2x1x0", "-f",
-          "6x4x2x1", "-u", "1", "-z", "1", "--float", "0", "-o", paste("[",
-            outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          "-m", paste("mattes[", f, ",", m,",1,32,regular,0.2]", sep = ""),
+           "-t", paste(typeofTransform, "[0.25]", sep = ""),
+           "-c", myiterations, "-s", "3x2x1x0",
+           "-f", "6x4x2x1","-x",maskopt,
+           "-u", "1", "-z", "1",
+           "--float", "0",
+           "-o", paste("[",  outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
         }
