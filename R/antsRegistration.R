@@ -90,12 +90,14 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
         if (!is.na(mask) )
           {
           charmask<-antsImageClone(mask,"unsigned char")
-          maskopt<-antsrGetPointerName(charmask)
+          maskopt<-paste(" -x ",antsrGetPointerName(charmask))
           } else maskopt<-""
         if ( is.na(initx) )
           {
           initx=paste("[",f, ",", m, ",1]", sep = "")
           }
+        if ( length(maskopt) > 0 )
+          paste( initx, maskopt )
         if (typeofTransform == "SyNBold") {
           args <- list("-d", as.character(fixed@dimension),
           "-r", initx,
@@ -103,7 +105,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Rigid[0.25]",
           "-c","[1200x1200x100,1e-6,5]",
           "-s", "2x1x0",
-          "-f", "4x2x1","-x",maskopt,
+          "-f", "4x2x1",
           "-m", paste("cc[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""),
           "-c", "[200x10,1e-6,5]", "-s", "1x0",
@@ -121,7 +123,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
             "-t", "Affine[0.25]",
             "-c","2100x1200x1200x0",
             "-s", "3x2x1x0",
-            "-f", "4x2x2x1","-x",maskopt,
+            "-f", "4x2x2x1",
             "-m", paste("mattes[",f, ",", m, ",1,32]", sep = ""),
             "-t", paste(typeofTransform,"[0.25,3,0]", sep = ""),
             "-c", "2100x1200x1200x0",
@@ -140,7 +142,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Affine[0.25]",
           "-c","2100x1200x1200x100",
           "-s", "3x2x1x0",
-          "-f", "4x2x2x1","-x",maskopt,
+          "-f", "4x2x2x1",
           "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""),
           "-c", "2100x1200x1200x20",
@@ -159,7 +161,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-t", "Affine[0.25]",
           "-c","2100x1200x1200x100",
           "-s", "3x2x1x0",
-          "-f", "4x2x2x1","-x",maskopt,
+          "-f", "4x2x2x1",
           "-m", paste("meansquares[",f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0.5]", sep = ""),
           "-c", "2100x1200x1200x20",
@@ -177,7 +179,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
           "-m", paste("mattes[", f, ",", m,",1,32,regular,0.2]", sep = ""),
            "-t", paste(typeofTransform, "[0.25]", sep = ""),
            "-c", myiterations, "-s", "3x2x1x0",
-           "-f", "6x4x2x1","-x",maskopt,
+           "-f", "6x4x2x1",
            "-u", "1", "-z", "1",
            "--float", "0",
            "-o", paste("[",  outprefix, ",", wmo, ",", wfo, "]", sep = ""))
