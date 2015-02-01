@@ -3,7 +3,7 @@ project(ANTsR_SuperBuild)
 include( ExternalProject )
 # if 'CMAKE_BUILD_TYPE' is not specified by user, assume RelWithDebInfo
 if( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE RelWithDebInfo )
+  set( CMAKE_BUILD_TYPE Release)
 endif( NOT CMAKE_BUILD_TYPE )
 
 #   we have to define NDEBUG due to a possible bug in itkMacro.h --- we
