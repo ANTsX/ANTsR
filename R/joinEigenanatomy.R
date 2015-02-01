@@ -7,7 +7,8 @@
 #' @param datamatrix input matrix before decomposition
 #' @param mask mask used to create datamatrix
 #' @param listEanatImages list containing pointers to eanat images
-#' @param gdensity target graph density or densities to search over
+#' @param graphdensity target graph density or densities to search over
+#' @param joinMethod see igraph's community detection
 #' @return return(list(fusedlist = newelist, fusedproj = myproj, memberships =
 #' communitymembership , graph=gg, bestdensity=graphdensity ))
 #' @author Avants BB
@@ -32,8 +33,8 @@
 #'
 #' @export joinEigenanatomy
 joinEigenanatomy <- function(datamatrix, mask = NA,
-  list_of_eanat_images, graphdensity = 0.65,
-  verbose = T ) {
+  list_of_eanat_images, graphdensity = 0.65, joinMethod=NA,
+  verbose = F ) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
@@ -52,8 +53,8 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
   costs <- rep(NA, length(graphdensity))
   ct <- 1
   for (gd in graphdensity) {
-    gg <- makeGraph(mycor, gd)
-    communitymembership <- gg$walktrapcomm$membership
+    gg <- makeGraph(mycor, gd, communityMethod=joinMethod )
+    communitymembership <- gg$community$membership
     if (!is.na(mask)) {
       newelist <- list()
       for (cl in 1:max(communitymembership)) {
@@ -87,10 +88,11 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
     }
     myproj2 <- datamatrix %*% t(decom2)
     cm <- cor(myproj2)
+    diag(cm)<-0
     costs[ct] <- mean(abs(cm[upper.tri(cm)]))
     ct <- ct + 1
   }
-  myfavoritecost<-1.05*min(costs)
+  myfavoritecost<-min(costs)
   if ( verbose )
     {
     print( paste("costs" ) )
@@ -98,10 +100,12 @@ joinEigenanatomy <- function(datamatrix, mask = NA,
     print( paste("myfavoritecost", myfavoritecost ) )
     }
   if (length(graphdensity) > 1) {
-    return( joinEigenanatomy(datamatrix, mask, list_of_eanat_images, graphdensity[  which( costs <= myfavoritecost )[1]  ] ) )
+    return( joinEigenanatomy(datamatrix, mask, list_of_eanat_images,
+       graphdensity[  which.min(costs)  ] ) )
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
-  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership,
+  return(list(fusedlist = newelist, fusedproj = myproj,
+    memberships = communitymembership,
     graph = gg, bestdensity = graphdensity))
 }

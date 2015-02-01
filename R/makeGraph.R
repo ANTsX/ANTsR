@@ -7,6 +7,7 @@
 #'
 #' @param mat input matrix
 #' @param graphdensity fraction of edges to keep
+#' @param communityMethod see igraph's community detection
 #' @return a named list is output including the graph object, adjacency matrix
 #' and several graph metrics
 #' @author Avants BB
@@ -21,7 +22,8 @@
 #' }
 #'
 #' @export makeGraph
-makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FALSE) {
+makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1,
+  communityMethod=NA, getEfficiency = FALSE) {
   usePkg("igraph")
   myrsfnetworkcorrs <- myrsfnetworkcorrsin
   if (typeof(myrsfnetworkcorrs) == "list") {
@@ -64,12 +66,41 @@ makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FAL
   gmetric6 <- igraph::graph.strength(g1)
   gmetric7 <- igraph::centralization.degree(g1)$res
   gmetric8 <- myspsa
-  mycommunity <- multilevel.community(g1)
   walktrapcomm <- walktrap.community(g1)
-  return(list(mygraph = g1, centrality = gmetric0, closeness = gmetric1, pagerank = gmetric2,
-    degree = gmetric3, betweeness = gmetric4, localtransitivity = gmetric5, strength = gmetric6,
-    degcent = gmetric7, effinv = myspsa, community = mycommunity, walktrapcomm = walktrapcomm,
-    adjacencyMatrix = adjacencyMatrix))
+  if (  !is.na(communityMethod) )
+    {
+    if ( communityMethod == 'spinglass' )
+      mycommunity <- spinglass.community(g1)
+    else if ( communityMethod == 'optimal' )
+      mycommunity <- optimal.community(g1)
+    else if ( communityMethod == 'walktrap' )
+      mycommunity <- walktrap.community(g1)
+    else if ( communityMethod == 'multilevel' )
+      mycommunity <- multilevel.community(g1)
+    else if ( communityMethod == 'leading.eigenvector' )
+      mycommunity <- leading.eigenvector.community(g1)
+    else if ( communityMethod == 'label.propagation' )
+      mycommunity <- label.propagation.community(g1)
+    else if ( communityMethod == 'edge.betweenness' )
+      mycommunity <- edge.betweenness.community(g1)
+    else # ( communityMethod == 'fastgreedy.propagation' )
+      mycommunity <- fastgreedy.community(g1)
+    } else mycommunity<-walktrapcomm
+  #########################################################
+  return( list(
+    mygraph = g1,
+    centrality = gmetric0,
+    closeness = gmetric1,
+    pagerank = gmetric2,
+    degree = gmetric3,
+    betweeness = gmetric4,
+    localtransitivity = gmetric5,
+    strength = gmetric6,
+    degcent = gmetric7,
+    effinv = myspsa,
+    community = mycommunity,
+    walktrapcomm = walktrapcomm,
+    adjacencyMatrix = adjacencyMatrix) )
 }
 
 
