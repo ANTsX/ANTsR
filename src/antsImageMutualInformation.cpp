@@ -94,6 +94,6 @@ RcppExport SEXP antsImageMutualInformation( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     mivalue = antsImageMIHelper<4>(*antsimage_xptr1_4,*antsimage_xptr2_4);
     }
-    else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
+    else Rcpp::Rcout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( mivalue );
 }

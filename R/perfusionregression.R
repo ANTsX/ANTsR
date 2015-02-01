@@ -31,7 +31,6 @@ perfusionregression <- function(mask_img, mat, xideal,
   selectionValsForRegweights = NULL,
   useBayesian=0 )
   {
-  getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
     print(myusage)

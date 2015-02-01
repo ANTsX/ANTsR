@@ -207,13 +207,12 @@ SEXP invariantSimilarityHelper(
         }
       catch( ... )
         {
-        std::cerr << " zero image2 error ";
         fixed_center.Fill(0);
         }
       }
     catch( ... )
       {
-      std::cerr << " zero image1 error ";
+      Rcpp::Rcerr << " zero image1 error ";
       }
     if ( vnl_math_abs(bestscale-1) < 1.e-6 )
       {
@@ -229,8 +228,6 @@ SEXP invariantSimilarityHelper(
         ( calculator1->GetTotalMass() * volelt1 );
       RealType powlev = 1.0 / static_cast<RealType>(ImageDimension);
       bestscale = vcl_pow( bestscale , powlev );
-      //std::cout << cpm1 << std::endl;
-      //std::cout << cpm2 << std::endl;
     }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
@@ -577,6 +574,6 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       localSearchIterations, whichMetric, r_scale,
       r_doref, txfn ) );
     }
-    else std::cout << " Dimension " << dimension << " is not supported " << std::endl;
+    else Rcpp::Rcout << " Dimension " << dimension << " is not supported " << std::endl;
   return Rcpp::wrap( 1 );
 }
