@@ -232,10 +232,7 @@ quantifyCBF <- function(perfusion, mask, parameters,
   meancbfimg[(mask < 1)] <- 0
   meancbfimg[(mask == 1)] <- meancbf[(mask == 1)]
 
-  epckg <- try(require(extremevalues))
-  if (!epckg) {
-#    getPckg("extremevalues")
-  }
+  epckg<-usePkg("extremevalues")
   if ( epckg )
     {
     usePkg("extremevalues")

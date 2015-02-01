@@ -37,12 +37,7 @@ perfusionregression <- function(mask_img, mat, xideal,
     print(myusage)
     return(NULL)
   }
-  pckg <- try(require(robust))
-  if (!pckg) {
-    cat("Installing 'robust' from CRAN\n")
-    getPckg("robust")
-    require("robust")
-  }
+  usePckg("robust")
   if (missing(mat) | missing(xideal) | missing(nuis)) {
     print("Missing one or more input parameter(s).")
     print(myusage)

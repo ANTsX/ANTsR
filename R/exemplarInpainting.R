@@ -47,12 +47,7 @@ exemplarInpainting<-function( img, paintMask,
   imageList, featureRadius=2, scaleInpaintIntensity=0,
   sharpen=FALSE, feather=1, predalgorithm='lm', debug=FALSE )
 {
-pckg <- try(require(e1071))
-if (!pckg) {
-  cat("Installing 'pixmap' from CRAN\n")
-  getPckg("e1071")
-  require("e1071")
-  }
+usePkg("e1071")
 mask<-antsImageClone( paintMask )
 mask[ paintMask != 1 ]<-0 # dont use the lesion
 inpaintLesion<-FALSE

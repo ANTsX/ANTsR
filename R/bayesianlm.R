@@ -161,7 +161,6 @@ bayesianlm <- function( X, y, priorMean, priorPrecision,
 
   beta.pval <- 2 * pt(-abs(beta.t), df = dfe )
 
-#  pckg <- try(require(mvtnorm))
   betapost<-phi<-0
 #  if ( pckg & FALSE ) {
   if ( FALSE ) {

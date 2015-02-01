@@ -41,12 +41,7 @@ clusterTimeSeries <- function(  mat, krange=2:10,
     print( args( clusterTimeSeries ) )
     return(1)
   }
-  pckg <- try(require(fpc))
-  if (!pckg) {
-    cat("Installing 'fpc' from CRAN\n")
-    getPckg("fpc")
-    require("fpc")
-  }
+  usePkg("fpc")
   if ( is.na(nsvddims) ) nsvddims<-(max(krange)*2)
 #  mat<-timeseries2matrix( img, mask )
   if ( nsvddims > nrow(mat) ) nsvddims<-nrow(mat)/2
