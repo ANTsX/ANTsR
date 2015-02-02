@@ -43,7 +43,7 @@
 #' @export plotANTsImage
 plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", "blue", 
   "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA, 
-  outname = NA, alpha = 0.5) {
+  outname = NA, alpha = 0.5, ... ) {
   spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical", 
     " print the help ", "myantsimage", "b", 2, "character", " the reference image on which to overlay ", 
     "color", "c", 1, "character", " the color for the overlay ", "functional", 
