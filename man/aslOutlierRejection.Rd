@@ -4,7 +4,7 @@
 \alias{aslOutlierRejection}
 \title{Pair-wise subtraction based outlier rejection.}
 \usage{
-aslOutlierRejection(asl, mask=NA, centralTendency=mean, sigma.mean=2.5, sigma.sd=2.0)
+aslOutlierRejection(asl, mask=NA, centralTendency=median, sigma.mean=2.5, sigma.sd=2.0)
 }
 \arguments{
 \item{asl}{ASL time-series image.}

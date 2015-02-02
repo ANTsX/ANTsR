@@ -1,7 +1,7 @@
 #' @name aslOutlierRejection
 #' @title Pair-wise subtraction based outlier rejection.
 #' @description Performs outlier rejection based on divergence from mean difference.
-#' @usage aslOutlierRejection(asl, mask=NA, centralTendency=mean, sigma.mean=2.5, sigma.sd=2.0)
+#' @usage aslOutlierRejection(asl, mask=NA, centralTendency=median, sigma.mean=2.5, sigma.sd=2.0)
 #' @details Computes pair-wise differences in ASL time-series data and removes outliers.  One of two criteria is sufficient to classify an image as an outlier: 1) A difference image for which the mean is higher than the mean of all the images plus \code{sigma.mean} times the standard deviation of the whole time-series; 2) A difference image which has a standard deviation greater than sigam.sd times the mean standard deviation of each difference image.
 #' @param asl ASL time-series image.
 #' @param mask Mask to compute average over. If not supplied, estimated from data.
@@ -13,7 +13,7 @@
 #' @examples \dontrun{WIP}
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslOutlierRejection
-aslOutlierRejection <- function(asl = NA, mask = NA, centralTendency = median,
+aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
   sigma.mean = 2.5, sigma.sd = 2) {
   if (is.na(asl))
     stop("ASL must be provided.")
