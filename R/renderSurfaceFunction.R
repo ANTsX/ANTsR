@@ -33,6 +33,7 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
   if (missing(surfimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( list(an_ants_image) ) \n ")
   }
+  usePkg("misc3d")
   smoothsval <- rep(smoothsval, length.out = length(surfimg))
   for (i in 1:length(surfimg)) {
     if (smoothsval[i] > 0) {
