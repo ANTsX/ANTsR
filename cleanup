@@ -6,4 +6,5 @@ rm -f -r src/*.o src/*.so */*~ *~ \
   `find ./src -name CMakeFiles` \
   src/ANTS/ANTS-build/ITKv4-install src/ANTS/tmp src/CMakeCache.txt \
   src/ANTS/ANTS-build/ITKv4-prefix  \
+  src/ANTS \
   src/CMakeFiles/ src/cmake_install.cmake
