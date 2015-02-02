@@ -3,6 +3,7 @@ quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)
   }
+  usePkg("magic")
   qsnps<-snps
   okrow<-rep(FALSE,ncol(qsnps))
   traitvec<-as.numeric( traitvecin )

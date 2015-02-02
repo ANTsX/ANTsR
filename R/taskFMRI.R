@@ -33,6 +33,7 @@ taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesig
     print("Usage:  betas<-taskFMRI( x , hrf ) ")
     return(1)
   }
+  usePkg("magic")
   avg <- myvars$avgImage
   mask <- myvars$mask
   nuis <- (myvars$nuisancevariables)

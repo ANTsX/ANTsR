@@ -18,6 +18,7 @@ temporalwhiten <- function(mat, myord = 2) {
     print("Usage:  x_whitened<-whiten( x ) ")
     return(1)
   }
+  usePkg("magic")
   omat <- mat
   for (i in 1:ncol(mat)) {
     gsig <- mat[, i]
