@@ -3,7 +3,6 @@
 #' Compute a sparse, spatially coherent regression from a set of input images
 #' (with mask) to an outcome variable.
 #'
-#'
 #' @param inmatrix Input data matrix, with dimension number of subjects by
 #' number of voxels.
 #' @param demog Input demographics data frame.  Contains outcome variable to
@@ -23,9 +22,7 @@
 #' \item{eigenanatomyimages}{Coefficient vector images.}
 #' \item{umatrix}{Projections of input images on the sparse regression vectors.  Can be used for, e.g., subsequent classification/predictions.}
 #' \item{projections}{Predicted values of outcome variable.}
-#' @note %% ~~further notes~~
 #' @author Kandel BM, Avants BB.
-#' @seealso %% ~~objects to See Also as \code{\link{help}}, ~~~
 #' @references Kandel B.M., D. Wolk, J. Gee, and B. Avants. Predicting
 #' Cognitive Data from Medical Images Using Sparse Linear Regression.
 #' Information Processing in Medical Imaging, 2013.  %% ~put references to the
@@ -69,15 +66,15 @@
 #' }
 #'
 #' @export sparseRegression
-sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05, 
+sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05,
   nvecs = 10, its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0) {
-  if (missing(inmatrix)) 
+  if (missing(inmatrix))
     stop("Missing input image matrix.")
-  if (missing(demog)) 
+  if (missing(demog))
     stop("Missing demographics.")
-  if (missing(outcome)) 
+  if (missing(outcome))
     stop("Missing outcome.")
-  if (is.na(statdir)) 
+  if (is.na(statdir))
     statdir <- paste(tempdir(), "/", sep = "")
   outfn <- paste(statdir, "spca.nii.gz", sep = "")
   decomp <- paste(statdir, "spcaprojectionsView1vec.csv", sep = "")
@@ -90,14 +87,14 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(mask, mfn)
   }
-  args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",", 
-    demog.name, "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, 
+  args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",",
+    demog.name, "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh,
     "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth)
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
   if (!is.na(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)[1:nvecs]
     fnll <- list()
     for (i in 1:length(fnl)) {
@@ -108,13 +105,13 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
   }
   if (is.na(mask)) {
     glb <- paste("spcaprojectionsView1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)
     fnl <- read.csv(fnl)
   }
-  
+
   glb <- paste("spcaprojectionsView1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
   fnu <- read.csv(fnu)
   return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu))
-} 
+}

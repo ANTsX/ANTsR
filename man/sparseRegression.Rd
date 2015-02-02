@@ -45,9 +45,6 @@ A list of values:
 Compute a sparse, spatially coherent regression from a set of input images
 (with mask) to an outcome variable.
 }
-\note{
-%% ~~further notes~~
-}
 \examples{
 \dontrun{
 nsubj <- 1000
@@ -93,8 +90,5 @@ Kandel B.M., D. Wolk, J. Gee, and B. Avants. Predicting
 Cognitive Data from Medical Images Using Sparse Linear Regression.
 Information Processing in Medical Imaging, 2013.  %% ~put references to the
 literature/web site here ~
-}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 

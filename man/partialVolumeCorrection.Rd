@@ -22,21 +22,13 @@ ignored).}
 correction.}
 }
 \value{
-Returns partial volume corrected antsImage. %% ~Describe the value
-returned %% If it is a LIST, use %% \item{comp1 }{Description of 'comp1'} %%
-\item{comp2 }{Description of 'comp2'} %% ...
+Returns partial volume corrected antsImage.
 }
 \description{
 This function performs a partial volume correction for ASL images by
 dividing the observed CBF by the gray matter and white matter probabilities,
 as described in Johnson et al., Radiology 2005: CBF_corrected = CBF_observed
 / (GM_prob + 0.4 * WM_prob)
-}
-\details{
-%% ~~ If necessary, more details than the description above ~~
-}
-\note{
-%% ~~further notes~~
 }
 \examples{
 \dontrun{
@@ -61,11 +53,6 @@ Chui HC, Jagust WJ, Gorno-Tempini ML, Schuff N. Radiology 2005.
 Ratio of GM to WM activity: Quantitative magnetic resonance imaging of human
 brain perfusion at 1.5 T using steady-state inversion of arterial water.
 Roberts DA, Detre JA, Bolinger L, Insko EK, Leigh JS Jr. PNAS 1994.
-
-%% ~put references to the literature/web site here ~
-}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

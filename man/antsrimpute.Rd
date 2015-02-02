@@ -2,7 +2,7 @@
 % Please edit documentation in R/antsrimpute.R
 \name{antsrimpute}
 \alias{antsrimpute}
-\title{Impute NA's on data frame.}
+\title{antsrimpute}
 \usage{
 antsrimpute(mydat, FUN = mean, ...)
 }
@@ -17,14 +17,11 @@ antsrimpute(mydat, FUN = mean, ...)
 Returns mydat with NA's replaced by imputed numbers.
 }
 \description{
-Imputes NA's on data frame (column-wise), using a user-specified function
-(mean is default).  also works on a vector.
+Impute NA's on data frame.
 }
 \details{
-%% ~~ If necessary, more details than the description above ~~
-}
-\note{
-%% ~~further notes~~
+Imputes NA's on data frame (column-wise), using a user-specified function
+(mean is default).  also works on a vector.
 }
 \examples{
 mydat <- data.frame(A=c(1,2,4,5), B=c(1,NA,4,5))
@@ -32,9 +29,6 @@ mean.impute <- antsrimpute(mydat)
 median.impute <- antsrimpute(mydat, median)
 }
 \author{
-Kandel BM, Avants BB %% ~~who you are~~
-}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+Kandel BM, Avants BB
 }
 
