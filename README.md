@@ -1,7 +1,12 @@
 # ANTsR
+
+[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR)
+
 An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
 
-Authors: Shrinidhi KL,  Avants BB
+Original Authors: Shrinidhi KL,  Avants BB
+
+
 
 ## Easiest installation approach (from within R)
 ```
