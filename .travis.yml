@@ -16,17 +16,13 @@ install:
 
 script: travis_retry travis_wait ./travis-tool.sh run_tests
 
-bundler_args: --retry 10
-
-on_failure:
-  - ./travis-tool.sh dump_logs
-
 notifications:
   email:
-    on_success: change
-    on_failure: change
-      recipients:
+    recipients:
       - stnava@gmail.com
+    on_success: change # default: change
+    on_failure: always # default: always
+
 env:
   global:
     - R_BUILD_ARGS="--no-build-vignettes --no-manual --no-resave-data"

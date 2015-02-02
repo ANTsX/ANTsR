@@ -102,7 +102,7 @@ zero mean.
   legend(x='topleft',legend=a2,text.col=cscale)
   # Example 5: effect of varying parameter b1
   b1<-seq(0.4,1.3,by=0.1)
-  nlev<-length(b2)
+  nlev<-length(b1)
   cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
   mat<-matrix(NA,nrow=nlev,ncol=20)
   for (i in 1:nlev) {

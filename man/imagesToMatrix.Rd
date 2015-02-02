@@ -30,7 +30,7 @@ datasets as it is based on C++ implementations.
     simimg<-as.antsImage( replicate(64, rnorm(64) ) )
     antsImageWrite( simimg, paste(tdir,"/image",i,".mha",sep=''))
   }
-  imageList = list.files(tdir, pattern = "\\.mha", full.names = TRUE)
+  imageList = list.files(tdir, pattern = ".mha", full.names = TRUE)
   mask = getMask( antsImageRead( imageList[1] , 2 ) )
   mat = imagesToMatrix(imageList, mask)
   print(dim(mat))
