@@ -212,7 +212,7 @@ SEXP invariantSimilarityHelper(
       }
     catch( ... )
       {
-      Rcpp::Rcerr << " zero image1 error ";
+      // Rcpp::Rcerr << " zero image1 error ";
       }
     if ( vnl_math_abs(bestscale-1) < 1.e-6 )
       {

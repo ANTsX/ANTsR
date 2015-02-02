@@ -50,7 +50,7 @@ void antsReoHelper(
       }
     catch( ... )
       {
-      Rcpp::Rcerr << " zero image1 error ";
+      // Rcpp::Rcerr << " zero image1 error ";
       }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
