@@ -5,16 +5,18 @@
 \title{Simple joinEigenanatomy function.}
 \usage{
 joinEigenanatomy(datamatrix, mask = NA, list_of_eanat_images,
-  graphdensity = 0.65, verbose = T)
+  graphdensity = 0.65, joinMethod = NA, verbose = F)
 }
 \arguments{
 \item{datamatrix}{input matrix before decomposition}
 
 \item{mask}{mask used to create datamatrix}
 
-\item{listEanatImages}{list containing pointers to eanat images}
+\item{graphdensity}{target graph density or densities to search over}
 
-\item{gdensity}{target graph density or densities to search over}
+\item{joinMethod}{see igraph's community detection}
+
+\item{listEanatImages}{list containing pointers to eanat images}
 }
 \value{
 return(list(fusedlist = newelist, fusedproj = myproj, memberships =

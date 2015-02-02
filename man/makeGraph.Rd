@@ -4,10 +4,13 @@
 \alias{makeGraph}
 \title{Simple function to create and measure a graph from a square input matrix.}
 \usage{
-makeGraph(myrsfnetworkcorrsin, graphdensity = 1, getEfficiency = FALSE)
+makeGraph(myrsfnetworkcorrsin, graphdensity = 1, communityMethod = NA,
+  getEfficiency = FALSE)
 }
 \arguments{
 \item{graphdensity}{fraction of edges to keep}
+
+\item{communityMethod}{see igraph's community detection}
 
 \item{mat}{input matrix}
 }
