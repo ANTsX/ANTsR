@@ -79,12 +79,12 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
       if (ttexists) {
         initx=initialTransform
         cat("use simple parameterization \n")
-        moving <- antsImageClone(moving, "double")
-        fixed <- antsImageClone(fixed, "double")
-        warpedfixout <- antsImageClone(moving)
-        warpedmovout <- antsImageClone(fixed)
-        f <- antsrGetPointerName(fixed)
-        m <- antsrGetPointerName(moving)
+        movingc <- antsImageClone(moving, "double")
+        fixedc <- antsImageClone(fixed, "double")
+        warpedfixout <- antsImageClone(movingc)
+        warpedmovout <- antsImageClone(fixedc)
+        f <- antsrGetPointerName(fixedc)
+        m <- antsrGetPointerName(movingc)
         wfo <- antsrGetPointerName(warpedfixout)
         wmo <- antsrGetPointerName(warpedmovout)
         if (!is.na(mask) )
