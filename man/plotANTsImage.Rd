@@ -4,14 +4,14 @@
 \alias{plotANTsImage}
 \title{plotANTsImage}
 \usage{
-plotANTsImage(myantsimage, functional = NA, color = c("jet", "red", "blue",
-  "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf",
-  quality = NA, outname = NA, alpha = 0.5, ...)
+plotANTsImage(x, y, color = c("jet", "red", "blue", "green", "yellow"),
+  axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA,
+  outname = NA, alpha = 0.5, ...)
 }
 \arguments{
-\item{myantsimage}{the reference image on which to overlay}
+\item{x}{the reference image on which to overlay}
 
-\item{functional}{list of the images to use as overlays}
+\item{y}{list of the images to use as overlays}
 
 \item{color=<string>}{the color for the overlay , e.g c('blue','red') length
 of this list should match the image list}

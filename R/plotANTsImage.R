@@ -7,10 +7,10 @@
 #' background image.
 #'
 #'
-#' @param myantsimage the reference image on which to overlay
+#' @param x the reference image on which to overlay
+#' @param y list of the images to use as overlays
 #' @param color=<string> the color for the overlay , e.g c('blue','red') length
 #' of this list should match the image list
-#' @param functional list of the images to use as overlays
 #' @param axis=<value> character ... the axis to slice (1 , 2 or 3)
 #' @param slices=<string> character, the slices to overlay written as 10x20x3
 #' where 10x20 is the range and 3 is the increment, for multislice display
@@ -41,22 +41,20 @@
 #'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
 #'
 #' @export plotANTsImage
-plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", "blue", 
-  "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA, 
+plotANTsImage <- function(x, y, color = c("jet", "red", "blue",
+  "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA,
   outname = NA, alpha = 0.5, ... ) {
-  spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical", 
-    " print the help ", "myantsimage", "b", 2, "character", " the reference image on which to overlay ", 
-    "color", "c", 1, "character", " the color for the overlay ", "functional", 
-    "f", 1, "character", " the image to use as overlay ", "axis", "a", 1, "character", 
-    " the axis to slice (1 , 2 or  3)  ", "slices", "s", 1, "character", " the slices to overlay written as 10x20x3 where 10x20 is the range and 3 is the increment etc. ", 
-    "threshold", "t", 1, "character", " we overlay values above/below this threshold : of form LOxHI  ", 
-    "quality", "q", 1, "integer", " integer quality magnification factor 1 => large (e.g. 10) ", 
+  spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical",
+    " print the help ", "myantsimage", "b", 2, "character", " the reference image on which to overlay ",
+    "color", "c", 1, "character", " the color for the overlay ", "functional",
+    "f", 1, "character", " the image to use as overlay ", "axis", "a", 1, "character",
+    " the axis to slice (1 , 2 or  3)  ", "slices", "s", 1, "character", " the slices to overlay written as 10x20x3 where 10x20 is the range and 3 is the increment etc. ",
+    "threshold", "t", 1, "character", " we overlay values above/below this threshold : of form LOxHI  ",
+    "quality", "q", 1, "integer", " integer quality magnification factor 1 => large (e.g. 10) ",
     "output", "o", 1, "character", " the output prefix ")
   # ............................................. #
   spec <- matrix(spec, ncol = 5, byrow = TRUE)
-  # get the options
-  
-  if (missing(myantsimage)) {
+  if (missing(x)) {
     # print a friendly message and exit with a non-zero error code
     cat("\n")
     self <- "plotANTsImage"
@@ -78,8 +76,10 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     cat(ex)
     return(NULL)
   }
-  
-  
+  # get the options
+  myantsimage<-x
+  if ( missing( y ) ) y<-NA
+  functional<-y
   imagedim <- length(dim(myantsimage))
   usePkg("pixmap")
   usePkg("misc3d")
@@ -93,7 +93,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
   flip.matrix <- function(x) {
     mirror.matrix(rotate180.matrix(x))
   }
-  
+
   # Mirror matrix (left-right)
   mirror.matrix <- function(x) {
     xx <- as.data.frame(x)
@@ -101,24 +101,24 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     xx <- as.matrix(xx)
     xx
   }
-  
+
   # Rotate matrix 90 clockworks
   rotate90.matrix <- function(x) {
     t(mirror.matrix(x))
   }
-  
+
   # Rotate matrix 180 clockworks
   rotate180.matrix <- function(x) {
     xx <- rev(x)
     dim(xx) <- dim(x)
     xx
   }
-  
+
   # Rotate matrix 270 clockworks
   rotate270.matrix <- function(x) {
     mirror.matrix(t(x))
   }
-  
+
   ############################################################################ Color methods The inverse function to col2rgb()
   rgb2col <- function(rgb) {
     hexDigit <- c(0:9, "A", "B", "C", "D", "E", "F")
@@ -131,16 +131,16 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     s <- apply(s, MARGIN = 2, FUN = paste, collapse = "")
     paste("#", s, sep = "")
   }
-  
+
   ############################################################################ Draw methods
   image180 <- function(z, ...) {
     image(rotate180.matrix(z), ...)
   }
-  
+
   image270 <- function(z, ...) {
     image(rotate270.matrix(z), ...)
   }
-  
+
   if (is.na(quality)) {
     quality <- 4
   }
@@ -174,7 +174,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     perms <- c(1, 2, 3)
   }
   # now label the results
-  if (imagedim == 3) 
+  if (imagedim == 3)
     img <- aperm(img, c(perms), resize = T)
   slicesin <- c(as.numeric(unlist(strsplit(slices, "x"))))
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
@@ -182,7 +182,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
   # these slices :')) print(slicesin)
   if (slicesin[1] > dim(img)[imagedim] | slicesin[2] > dim(img)[imagedim]) {
     print("slices do not fit in image dimensions ---exiting")
-    print(paste("slices1 ", slicesin[1], "slices2", slicesin[2], "dim-to-slice", 
+    print(paste("slices1 ", slicesin[1], "slices2", slicesin[2], "dim-to-slice",
       dim(img)[imagedim]))
     return(NULL)
   }
@@ -195,19 +195,19 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     curslice <- curslice + slicesin[imagedim]
     ct <- ct + 1
   }
-  if (is.na(slices[nslices])) 
+  if (is.na(slices[nslices]))
     slices[nslices] <- slicesin[2]
   winrows <- round(length(slices)/10 + 0.5)
-  if (winrows < 1) 
+  if (winrows < 1)
     winrows <- 1
   wincols <- 10
-  if (length(slices) < 10) 
+  if (length(slices) < 10)
     wincols <- length(slices)
-  if (axis != 2 & imagedim > 2) 
+  if (axis != 2 & imagedim > 2)
     slice <- rotate90.matrix(img[, , slices[1]])
-  if (axis == 2 & imagedim > 2) 
+  if (axis == 2 & imagedim > 2)
     slice <- flip.matrix(img[, , slices[1]])
-  if (imagedim > 2) 
+  if (imagedim > 2)
     slice <- mirror.matrix(slice) else slice <- img
   slicerow <- nrow(slice)
   slicecol <- ncol(slice)
@@ -217,9 +217,9 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
   nlevels <- 2^8
   for (sl in c(0:(length(slices) - 1))) {
     if (sl < dim(img)[imagedim]) {
-      if (axis != 2 & imagedim > 2) 
+      if (axis != 2 & imagedim > 2)
         slice <- rotate90.matrix(img[, , slices[sl + 1]])
-      if (axis == 2 & imagedim > 2) 
+      if (axis == 2 & imagedim > 2)
         slice <- flip.matrix(img[, , slices[sl + 1]])
       if (imagedim > 2) {
         slice <- mirror.matrix(slice)
@@ -227,7 +227,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
         slice <- img
       }
       locsl <- (sl%%(wincols)) + 1
-      if (locsl == 1) 
+      if (locsl == 1)
         rowsl <- rowsl + 1
       xl <- ((locsl - 1) * slicecol + 1)
       xs <- c(xl:(xl + slicecol - 1))
@@ -239,8 +239,8 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
   # pdf(paste(output,'.pdf',sep='')) onm<-paste(output,'.jpg',sep='')
   mag <- quality
   pixperinch <- 96
-  if (!is.na(outname)) 
-    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag, height = nrow(bigslice) * 
+  if (!is.na(outname))
+    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag, height = nrow(bigslice) *
       mag, units = "px", quality = 75, bg = "white")) else dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
   x <- pixmapGrey(bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
@@ -248,7 +248,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
   plot(x, bg = "white")
   if (threshold[1] > threshold[2] | is.na(functional)) {
-    if (!is.na(outname)) 
+    if (!is.na(outname))
       dev.off()
     return(NULL)
   }
@@ -258,7 +258,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     if (imagedim == 2) {
       labimg <- rotate270.matrix(labimg)
     }
-    if (imagedim == 3) 
+    if (imagedim == 3)
       labimg <- aperm(labimg, c(perms), resize = T)
     # check sizes
     for (x in c(1:imagedim)) if (dim(img)[x] != dim(labimg)[x]) {
@@ -275,11 +275,11 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
     labimg <- temp
     locthresh <- round((threshold[1:2] - mncl)/(mxcl - mncl) * (nlevels - 1))
-    if (axis != 2 & imagedim > 2) 
+    if (axis != 2 & imagedim > 2)
       labslice <- rotate90.matrix(labimg[, , slices[1]])
-    if (axis == 2 & imagedim > 2) 
+    if (axis == 2 & imagedim > 2)
       labslice <- flip.matrix(labimg[, , slices[1]])
-    if (imagedim > 2) 
+    if (imagedim > 2)
       labslice <- mirror.matrix(labslice) else slice <- img
     slicerow <- nrow(slice)
     slicecol <- ncol(slice)
@@ -287,9 +287,9 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
     rowsl <- 0
     for (sl in c(0:(length(slices) - 1))) {
       if (sl < dim(img)[imagedim]) {
-        if (axis != 2 & imagedim > 2) 
+        if (axis != 2 & imagedim > 2)
           labslice <- rotate90.matrix(labimg[, , slices[sl + 1]])
-        if (axis == 2 & imagedim > 2) 
+        if (axis == 2 & imagedim > 2)
           labslice <- flip.matrix(labimg[, , slices[sl + 1]])
         if (imagedim > 2) {
           labslice <- mirror.matrix(labslice)
@@ -297,7 +297,7 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
           labslice <- labimg
         }
         locsl <- (sl%%(wincols)) + 1
-        if (locsl == 1) 
+        if (locsl == 1)
           rowsl <- rowsl + 1
         xl <- ((locsl - 1) * slicecol + 1)
         xs <- c(xl:(xl + slicecol - 1))
@@ -324,35 +324,35 @@ plotANTsImage <- function(myantsimage, functional = NA, color = c("jet", "red", 
         maxdiff <- diff
       }
     }
-    if (minind > 1) 
+    if (minind > 1)
       minind <- minind - 1
     heatvals <- heat.colors(nlevels, alpha = alpha)
     heatvals <- rainbow(nlevels, alpha = alpha)
-    if (color[ind] != "jet") 
-      colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"), 
+    if (color[ind] != "jet")
+      colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"),
         space = "Lab")
     if (color[ind] == "jet") {
       # print('use jet')
-      colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan", 
-        "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"), 
+      colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
+        "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
         space = "Lab")
     }
     heatvals <- colorfun(nlevels)
     # print(heatvals)
-    if (locthresh[1] > 1) 
+    if (locthresh[1] > 1)
       heatvals[1:(locthresh[1] - 1)] <- NA
     if (locthresh[2] < (nlevels - 1)) {
       upper <- c((locthresh[2] + 1):nlevels)
       heatvals[upper] <- NA
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
-    if (min(biglab) != max(biglab)) 
+    if (min(biglab) != max(biglab))
       plot(pixmapIndexed(biglab, col = heatvals), add = TRUE)
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
-  if (!is.na(outname)) 
+  if (!is.na(outname))
     dev.off()
   return(NULL)
 }
-plot.antsImage <- plotANTsImage 
+plot.antsImage <- plotANTsImage

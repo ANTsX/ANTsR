@@ -2,7 +2,6 @@
 % Please edit documentation in R/aslOutlierRejection.R
 \name{aslOutlierRejection}
 \alias{aslOutlierRejection}
-\alias{aslOutlierRejection.R}
 \title{Pair-wise subtraction based outlier rejection.}
 \usage{
 aslOutlierRejection(asl, mask=NA, centralTendency=mean, sigma.mean=2.5, sigma.sd=2.0)
