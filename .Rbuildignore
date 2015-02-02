@@ -3,5 +3,4 @@ src/ANTS/ANTS-build/
 src/ANTS/ANTS-src/
 src/ANTS/stamp/ 
 src/ANTS/tmp/ 
-src/ANTS
 .gitignore
