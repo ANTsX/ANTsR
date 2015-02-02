@@ -26,7 +26,7 @@
 #'   transformlist=mytx$invtransforms)
 #' # full access via listing the inputs in standard ANTs format
 #' antsApplyTransforms( list( d=as.character(2),
-#'  i=moving,o=outimg,r=fixed,t=mytx$inv[1],sep='') ) )
+#'  i=moving,o=outimg,r=fixed,t=mytx$inv[1],sep='') )
 #' antsApplyTransforms( list( d=as.character(2),
 #'  i=fixed,o=outimg,r=moving,t=paste("[",mytx$inv[1],",1]",sep='') ) )
 #'

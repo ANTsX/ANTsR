@@ -8,9 +8,11 @@ before_install:
   - ./travis-tool.sh bootstrap
 
 install:
-  - ./travis-tool.sh install_deps
+  -  travis_retry travis_wait ./travis-tool.sh install_deps
 
-script: travis_wait ./travis-tool.sh run_tests
+script: travis_retry travis_wait ./travis-tool.sh run_tests
+
+bundler_args: --retry 10
 
 on_failure:
   - ./travis-tool.sh dump_logs
