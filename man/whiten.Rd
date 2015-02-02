@@ -20,7 +20,7 @@ matrix is output
 Whitens the input matrix using SVD and returns the result.
 }
 \examples{
-mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
+mat <- matrix(rnorm(300),ncol=50)
 wmat<-whiten( mat )
 wmat2<-whiten( mat, 2, TRUE )
 }

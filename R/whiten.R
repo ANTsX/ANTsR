@@ -1,19 +1,19 @@
 #' Simple whitening function.
-#' 
+#'
 #' Whitens the input matrix using SVD and returns the result.
-#' 
-#' 
+#'
+#'
 #' @param mat input matrix
 #' @param k rank to use
 #' @param reducex reduce the input matrix to k-size subspace
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#' 
-#' mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
-#' wmat<-whiten( mat ) 
-#' wmat2<-whiten( mat, 2, TRUE ) 
-#' 
+#'
+#' mat <- matrix(rnorm(300),ncol=50)
+#' wmat<-whiten( mat )
+#' wmat2<-whiten( mat, 2, TRUE )
+#'
 #' @export whiten
 whiten <- function(x, k = NA, reducex = FALSE) {
   if (nargs() == 0) {
@@ -32,7 +32,7 @@ whiten <- function(x, k = NA, reducex = FALSE) {
     xw <- (svdx$u %*% dd) %*% t(svdx$v)
     xw <- (xw) %*% x
   }
-  if (reducex) 
+  if (reducex)
     xw <- lowrankRowMatrix(xw, k)
   return(xw)
-} 
+}
