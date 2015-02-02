@@ -1,6 +1,9 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
 
 language: c
+compiler:
+  #  - gcc it fails because of travis limited memory
+  - clang
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -8,7 +11,8 @@ before_install:
   - ./travis-tool.sh bootstrap
 
 install:
-  -  travis_retry travis_wait ./travis-tool.sh install_deps
+  - sudo apt-get install -y cmake
+  - travis_retry travis_wait ./travis-tool.sh install_deps
 
 script: travis_retry travis_wait ./travis-tool.sh run_tests
 
@@ -21,7 +25,8 @@ notifications:
   email:
     on_success: change
     on_failure: change
-
+      recipients:
+      - stnava@gmail.com
 env:
   global:
     - R_BUILD_ARGS="--no-build-vignettes --no-manual --no-resave-data"
