@@ -10,7 +10,6 @@ License: GPL (>=2)
 LazyLoad: yes
 Depends:
     Rcpp,
-    methods,
     MASS
 LinkingTo: Rcpp
 SystemRequirements: cmake
