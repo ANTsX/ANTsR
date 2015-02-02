@@ -39,7 +39,7 @@ These functions are available in \link{ImageMath}, see the operations
 \examples{
 \dontrun{
 # input_img.nii is a 3D image
-mask_img <- get_mask( "input_img.nii" , 500 , 1e9 )
+mask_img <- get_mask( 'input_img.nii' , 500 , 1e9 )
 }
 }
 \author{

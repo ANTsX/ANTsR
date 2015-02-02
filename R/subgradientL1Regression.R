@@ -46,5 +46,4 @@ subgradientL1Regression <- function(y, x, s = 0.01, percentvals = 0.1, nits = 10
   }
   resultcorr <- cor.test(y, x %*% betas)$est
   return(list(betas = betas, deltmag = deltmag, resultcorr = resultcorr))
-}
- 
+} 

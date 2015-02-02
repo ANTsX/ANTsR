@@ -26,38 +26,37 @@
 #' noise <- getASLNoisePredictors(aslmat, tc)
 #' 
 #' @export getASLNoisePredictors
-getASLNoisePredictors <- function(aslmat, tc, noisefrac=0.1, 
-  polydegree=3, k=5, npreds=12, method='noisepool', covariates=NA, 
-  noisepoolfun=max){
+getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5, 
+  npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
   getnoisepool <- function(x, frac = noisefrac) {
     xord <- sort(x)
     l <- round(length(x) * frac)
     val <- xord[l]
     return(x < val & x < 0)
   }
- 
-  if(polydegree > 0){ 
+  
+  if (polydegree > 0) {
     timevals <- 1:nrow(aslmat)
     p <- stats::poly(timevals, degree = polydegree)
     aslmat <- residuals(lm(aslmat ~ 0 + p))
-    if (!all(is.na(covariates))){
+    if (!all(is.na(covariates))) {
       covariates <- cbind(data.matrix(covariates), p)
     } else covariates <- p
-  } 
-
-  R2base <- crossvalidatedR2(aslmat, tc, k, covariates=covariates)
+  }
+  
+  R2base <- crossvalidatedR2(aslmat, tc, k, covariates = covariates)
   R2base <- apply(R2base, FUN = noisepoolfun, MARGIN = 2)
-  noisepool <- getnoisepool(R2base) 
+  noisepool <- getnoisepool(R2base)
   if (all(noisepool == TRUE)) {
     stop("all voxels meet your pvalthresh - try increasing the value")
   }
   if (all(noisepool == FALSE)) {
     stop("zero voxels meet your pvalthresh - try decreasing the value")
   }
-  if(method == 'compcor') {
+  if (method == "compcor") {
     noiseu <- compcor(aslmat, npreds)
-  } else if(method == 'noisepool') {
-    noiseu <- svd(aslmat[, noisepool], nv=0, nu=npreds)$u
+  } else if (method == "noisepool") {
+    noiseu <- svd(aslmat[, noisepool], nv = 0, nu = npreds)$u
   }
   noiseu
-}
+} 

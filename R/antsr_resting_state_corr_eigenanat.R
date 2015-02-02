@@ -62,12 +62,12 @@ antsr_resting_state_corr_eigenanat <- function(...) {
     }
     qv <- matrix(p.adjust(pvals), nrow = nvox1, ncol = nvox2)
   }
-
+  
   if (nvox2 > 1) {
     for (x in c(1:nvox1)) {
       vals1 <- vecs1[, x]
       for (y in c(1:nvox2)) {
-        if (nvox2 > 1)
+        if (nvox2 > 1) 
           vals2 <- vecs2[, y] else vals2 <- vecs2
         # pvalue of relationship with the ROI
         modelresults <- (summary(lm(statform)))
@@ -83,7 +83,7 @@ antsr_resting_state_corr_eigenanat <- function(...) {
       ntw <- c("")
       ntwq <- c("")
       for (y in c(1:nvox2)) {
-        if (!is.na(qv[x, y]))
+        if (!is.na(qv[x, y])) 
           if (x != y & qv[x, y] < 0.01) {
           # & betav[x,y] < 0.0 )
           ntw <- paste(ntw, y - 1)
@@ -97,4 +97,4 @@ antsr_resting_state_corr_eigenanat <- function(...) {
   # results for both cases are the same betav<-betav*(qv <= 0.05)
   dfm <- data.frame(betas = betav, qvals = 1 - qv, pvals = 1 - pvals)
   write.csv(dfm, paste(id, "qvals.csv", sep = ""), row.names = F, q = T)
-}
+} 

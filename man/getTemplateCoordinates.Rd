@@ -35,9 +35,9 @@ This is a standard approach but it's not very accurate.
   clust[ tem < 80 ]<- 0
   clust[ tem > 90 ]<- 0
   clust[  tem > 80 & tem < 90 ]<- 1
-  ImageMath(3, clust,"ME",clust,1)  # erosion
+  ImageMath(3, clust,'ME',clust,1)  # erosion
   clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
-  if ( ! exists("mymni") ) {
+  if ( ! exists('mymni') ) {
   # try getANTsRData if you have www access
     mymni<-list( antsImageRead(getANTsRData('mni'),3),
                  antsImageRead(getANTsRData('mnib'),3),

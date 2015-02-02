@@ -24,7 +24,7 @@
 #' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 #'
 #' @export abpBrainExtraction
-abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
+abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA, 
   tdir = NA) {
   if (missing(img) | missing(tem) | missing(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) ) \n")
@@ -37,12 +37,12 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   } else {
     npriors <- length(tempriors)
   }
-
+  
   # file I/O - all stored in temp dir
   if (is.na(tdir)) {
     tdir <- tempdir()
     initafffn <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = "_InitialAff.mat")
-    EXTRACTION_WARP_OUTPUT_PREFIX <- tempfile(pattern = "antsr", tmpdir = tdir,
+    EXTRACTION_WARP_OUTPUT_PREFIX <- tempfile(pattern = "antsr", tmpdir = tdir, 
       fileext = "_PriorMap")
   } else {
     initafffn <- paste(tdir, "antsr", "_InitialAff.mat", sep = "")
@@ -58,7 +58,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ANTS_METRIC <- "CC"
   ANTS_METRIC_PARAMS <- "1,4"
   # ANTs parameters end
-
+  
   # Atropos params
   ATROPOS_BRAIN_EXTRACTION_INITIALIZATION <- "kmeans[3]"
   ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD <- "Gaussian"
@@ -70,22 +70,22 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ATROPOS_SEGMENTATION_CONVERGENCE <- "[12,0.0001]"
   ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION <- "Socrates"
   ATROPOS_SEGMENTATION_MRF <- "[0.11,1x1x1]"
-  if (img@dimension == 2)
+  if (img@dimension == 2) 
     ATROPOS_SEGMENTATION_MRF <- paste("[0.11,1x1]")
   # Atropos params end
-
+  
   imgsmall <- antsImageClone(img)
-  ResampleImageBySpacing(img@dimension, img, imgsmall, as.character(rep(4, img@dimension)),
+  ResampleImageBySpacing(img@dimension, img, imgsmall, as.character(rep(4, img@dimension)), 
     1)
   temsmall <- antsImageClone(tem)
-  ResampleImageBySpacing(tem@dimension, tem, temsmall, as.character(rep(4, tem@dimension)),
+  ResampleImageBySpacing(tem@dimension, tem, temsmall, as.character(rep(4, tem@dimension)), 
     1)
   # careful initialization of affine mapping , result stored in initafffn
-  if (!file.exists(initafffn))
-    antsAffineInitializer(img@dimension, temsmall, imgsmall, initafffn, 15, 0.1,
+  if (!file.exists(initafffn)) 
+    antsAffineInitializer(img@dimension, temsmall, imgsmall, initafffn, 15, 0.1, 
       0, 10)
   # FIXME - should add mask in above call
-
+  
   # get laplacian images
   lapi <- antsImageClone(img)
   ImageMath(img@dimension, lapi, "Laplacian", img, 1.5, 1)
@@ -95,19 +95,19 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   print(EXTRACTION_WARP_OUTPUT_PREFIX)
   dtem <- antsImageClone(tem, "double")
   dimg <- antsImageClone(img, "double")
-  antsregparams <- list(d = img@dimension, u = 1, o = EXTRACTION_WARP_OUTPUT_PREFIX,
-    r = initafffn, z = 1, w = "[0.025,0.975]", m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt,
-      "double")), ",", antsrGetPointerName(antsImageClone(lapi, "double")),
-      ",", "0.5,32]", sep = ""), c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]",
+  antsregparams <- list(d = img@dimension, u = 1, o = EXTRACTION_WARP_OUTPUT_PREFIX, 
+    r = initafffn, z = 1, w = "[0.025,0.975]", m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt, 
+      "double")), ",", antsrGetPointerName(antsImageClone(lapi, "double")), 
+      ",", "0.5,32]", sep = ""), c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]", 
     f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX
-  fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""), paste(outprefix,
+  fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""), paste(outprefix, 
     "0GenericAffine.mat", sep = ""))
-  invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""), paste(outprefix,
+  invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""), paste(outprefix, 
     "1InverseWarp.nii.gz", sep = ""))
-  if (!file.exists(invtransforms[1]))
+  if (!file.exists(invtransforms[1])) 
     antsRegistration(antsregparams)
-  temmaskwarped <- antsApplyTransforms(img, temmask, transformlist = invtransforms,
+  temmaskwarped <- antsApplyTransforms(img, temmask, transformlist = invtransforms, 
     interpolator = c("NearestNeighbor"))
   ThresholdImage(img@dimension, temmaskwarped, temmaskwarped, 0.5, 1)
   tmp <- antsImageClone(temmaskwarped)
@@ -117,8 +117,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
-  atroparams <- list(d = img@dimension, a = img, m = ATROPOS_BRAIN_EXTRACTION_MRF,
-    o = seg, x = tmpi, i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE,
+  atroparams <- list(d = img@dimension, a = img, m = ATROPOS_BRAIN_EXTRACTION_MRF, 
+    o = seg, x = tmpi, i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION, c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE, 
     k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD)
   Atropos(atroparams)
   fseg <- antsImageClone(seg, "float")
@@ -176,7 +176,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   ThresholdImage(3, dseg, bmask, mindval, dthresh)
   brain <- antsImageClone(img)
   brain[finalseg2 < 0.5] <- 0
-  return(list(brain = brain, bmask = finalseg2, kmeansseg = seg, fwdtransforms = fwdtransforms,
-    invtransforms = invtransforms, temmaskwarped = temmaskwarped, distmeans = distmeans,
+  return(list(brain = brain, bmask = finalseg2, kmeansseg = seg, fwdtransforms = fwdtransforms, 
+    invtransforms = invtransforms, temmaskwarped = temmaskwarped, distmeans = distmeans, 
     dsearchvals = dsearchvals))
-}
+} 

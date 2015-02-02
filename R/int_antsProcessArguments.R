@@ -1,5 +1,5 @@
 int_antsProcessArguments <- function(args) {
-  char_vect<-""
+  char_vect <- ""
   if (typeof(args) == "list") {
     char_vect <- NULL
     for (i in (1:length(args))) {

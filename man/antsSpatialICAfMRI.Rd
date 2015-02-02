@@ -42,10 +42,10 @@ be performed prior to calling this function (cf antsPreprocessfMRI.R).
 \examples{
 \dontrun{
 boldImages <- list()
-boldImages[[1]] <- antsImageRead( "subject1.nii.gz", dim = 4, pixeltype = "float" )
-boldImages[[2]] <- antsImageRead( "subject2.nii.gz", dim = 4, pixeltype = "float" )
-boldImages[[3]] <- antsImageRead( "subject3.nii.gz", dim = 4, pixeltype = "float" )
-boldImages[[4]] <- antsImageRead( "subject4.nii.gz", dim = 4, pixeltype = "float" )
+boldImages[[1]] <- antsImageRead( 'subject1.nii.gz', dim = 4, pixeltype = 'float' )
+boldImages[[2]] <- antsImageRead( 'subject2.nii.gz', dim = 4, pixeltype = 'float' )
+boldImages[[3]] <- antsImageRead( 'subject3.nii.gz', dim = 4, pixeltype = 'float' )
+boldImages[[4]] <- antsImageRead( 'subject4.nii.gz', dim = 4, pixeltype = 'float' )
 
 maskImage <- NA
 
@@ -67,8 +67,8 @@ componentImages <- icaResults$componentImages
 # write out the component images
 for( i in 1:length( icaResults$componentImages ) )
   {
-  componentFileName <- paste0( "componentImage", i, ".nii.gz" )
-  cat( "Writing ", componentFileName, ".\\n" )
+  componentFileName <- paste0( 'componentImage', i, '.nii.gz' )
+  cat( 'Writing ', componentFileName, '.\\n' )
   antsImageWrite( componentImages[[i]], componentFileName )
   }
 }

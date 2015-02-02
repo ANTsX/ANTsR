@@ -11,7 +11,7 @@
 #' 
 #' \dontrun{
 #' # write an image 'img' of class 'antsImage' to a file named 'imagefile.nii'
-#' antsImageWrite( img , "imagefile.nii" )
+#' antsImageWrite( img , 'imagefile.nii' )
 #' }
 #' 
 #' @export antsImageWrite

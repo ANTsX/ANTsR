@@ -45,14 +45,14 @@
 #' demog.train <- data.frame(outcome=demog[subj.train, ])
 #' demog.test <- data.frame(outcome=demog[-subj.train, ])
 #' mymask <- as.antsImage(array(rep(1, 125), dim=c(5,5,5)))
-#' myregression <- sparseRegression(input.train, demog.train, "outcome", mymask,
+#' myregression <- sparseRegression(input.train, demog.train, 'outcome', mymask,
 #'     sparseness=0.05, nvecs=5, its=3, cthresh=250)
 #' # visualization of results
 #' sample <- rep(0, 125)
 #' sample[40:60] <-1
 #' signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
 #' signal.img[signal.img >= 0 ] <- sample
-#' plotANTsImage( signal.img, axis=2, slices="1x5x1") # actual source of signal
+#' plotANTsImage( signal.img, axis=2, slices='1x5x1') # actual source of signal
 #' # compare against first learned regression vector
 #' myimgs <- list()
 #' for( i in 1:5){
@@ -61,23 +61,23 @@
 #'   myimgs[[ i ]] <- antsImageClone(myregression$eigenanatomyimages[[ i ]])
 #'   myimgs[[ i ]][mymask > 0] <- myarray
 #' }
-#' plotANTsImage(myimgs[[1]], axis=2, slices="1x5x1")
+#' plotANTsImage(myimgs[[1]], axis=2, slices='1x5x1')
 #' # use learned eigenvectors for prediction
 #' result <- regressProjections(input.train, input.test, demog.train,
-#'     demog.test, myregression$eigenanatomyimages, mymask, "outcome")
+#'     demog.test, myregression$eigenanatomyimages, mymask, 'outcome')
 #' plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 #' }
 #'
 #' @export sparseRegression
-sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05,
+sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05, 
   nvecs = 10, its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0) {
-  if (missing(inmatrix))
+  if (missing(inmatrix)) 
     stop("Missing input image matrix.")
-  if (missing(demog))
+  if (missing(demog)) 
     stop("Missing demographics.")
-  if (missing(outcome))
+  if (missing(outcome)) 
     stop("Missing outcome.")
-  if (is.na(statdir))
+  if (is.na(statdir)) 
     statdir <- paste(tempdir(), "/", sep = "")
   outfn <- paste(statdir, "spca.nii.gz", sep = "")
   decomp <- paste(statdir, "spcaprojectionsView1vec.csv", sep = "")
@@ -90,14 +90,14 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(mask, mfn)
   }
-  args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",",
-    demog.name, "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh,
+  args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",", 
+    demog.name, "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, 
     "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth)
   .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
   if (!is.na(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)[1:nvecs]
     fnll <- list()
     for (i in 1:length(fnl)) {
@@ -108,13 +108,13 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
   }
   if (is.na(mask)) {
     glb <- paste("spcaprojectionsView1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)
     fnl <- read.csv(fnl)
   }
-
+  
   glb <- paste("spcaprojectionsView1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
   fnu <- read.csv(fnu)
   return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu))
-}
+} 

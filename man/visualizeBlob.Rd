@@ -31,8 +31,8 @@ Viewing angles may also need to be modified for different templates.
 }
 \examples{
 \dontrun{
-  template <- antsImageRead(getANTsRData("mni"), 3)
-  lab <- antsImageRead(getANTsRData("mnia"), 3)
+  template <- antsImageRead(getANTsRData('mni'), 3)
+  lab <- antsImageRead(getANTsRData('mnia'), 3)
   blob <- maskImage(lab, lab, 21)
   visualizeBlob(template, blob)
 }

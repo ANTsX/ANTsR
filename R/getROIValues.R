@@ -14,7 +14,7 @@
 #' @examples
 #' 
 #' \dontrun{
-#' data("aal", package = "ANTsR")
+#' data('aal', package = 'ANTsR')
 #' vals<-getROIValues( image, aal, mask  ) 
 #' }
 #' 

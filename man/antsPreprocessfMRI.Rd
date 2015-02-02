@@ -39,8 +39,8 @@ motion correction.}
 
 \item{frequencyHighThreshold}{Upper threshold for bandpass filtering.}
 
-\item{spatialSmoothingType}{Either "none", "gaussian" (isotropic) or
-"perona-malik" (anisotropic) smoothing.}
+\item{spatialSmoothingType}{Either 'none', 'gaussian' (isotropic) or
+'perona-malik' (anisotropic) smoothing.}
 
 \item{spatialSmoothingParameters}{For gaussian smoothing, this is a single
 scalar designating the smoothing sigma (in mm).  For perona-malik, a vector
@@ -52,11 +52,11 @@ created using the specified threshold which is in terms of the mean of the
 average image ie 0.8 means threshold at 0.8 of the mean.}
 }
 \value{
-Output is the "clean" fMRI bold image and mask.  Quality assurance
-output includes the framewise displacement (FD) and DVARS.  "DVARS is the
+Output is the 'clean' fMRI bold image and mask.  Quality assurance
+output includes the framewise displacement (FD) and DVARS.  'DVARS is the
 root mean squared (RMS) change in BOLD signal from volume to volume (D
 referring to temporal derivative of time courses and VARS referring to RMS
-variance over voxels.)" --- Power et. al 2012, Spurious but systematic
+variance over voxels.)' --- Power et. al 2012, Spurious but systematic
 correlations in functional connectivity MRI networks arise from subject
 motion. Neuroimage 59, 2142-2154.  The globalSignal is also returned.
 }
@@ -66,7 +66,7 @@ regression, band-pass filtering, and spatial smoothing.
 }
 \examples{
 \dontrun{
-boldImage <- antsImageRead( "fmri.nii.gz", dim = 4, pixeltype = "float" )
+boldImage <- antsImageRead( 'fmri.nii.gz', dim = 4, pixeltype = 'float' )
 cleanfMRI <- antsPreprocessfMRI( boldImage )
 cleanBoldImage <- cleanfMRI$cleanBoldImage
 maskImage <- cleanfMRI$maskImage

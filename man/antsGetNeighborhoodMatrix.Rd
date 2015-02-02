@@ -19,8 +19,8 @@ examine. Each voxel > 0 will be used as the center of a neighborhood}
 offsets should be in voxel or physical coordinates}
 
 \item{boundary.condition}{a string indicating how to handle voxels in a
-neighborhood, but not in the mask "NA" - fill value with NA "image" - use
-image value even if not in mask "mean" - use mean of all non-NA values for
+neighborhood, but not in the mask 'NA' - fill value with NA 'image' - use
+image value even if not in mask 'mean' - use mean of all non-NA values for
 that neighborhood}
 
 \item{spatial.info}{a boolean indicating of voxel locations and neighborhood
@@ -40,7 +40,7 @@ center for each voxel in a neighborhood
 Summarize neighborhoods for voxels in an antsImage.
 }
 \examples{
-mnit<-getANTsRData("mni")
+mnit<-getANTsRData('mni')
 mnit<-antsImageRead(mnit,3)
 mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 center <- dim(mnit)/2

@@ -19,7 +19,7 @@ convertRd2rst <- function(infile, outfile = "") {
   mytitle <- Rd[[which(tags == "\\title")]][[2]][1]
   mytitle <- paste("purpose: ", "\n\n", mytitle, "\n")
   cat(mytitle, file = outfile, append = TRUE)
-
+  
   basedescription <- Rd[[which(tags == "\\description")]]
   dlength <- length(basedescription)
   mydescription <- basedescription[[2]][1]
@@ -30,7 +30,7 @@ convertRd2rst <- function(infile, outfile = "") {
   }
   mydescription <- paste("description: ", "\n\n", mydescription, "\n\n")
   cat(mydescription, file = outfile, append = TRUE)
-
+  
   baseusage <- Rd[[which(tags == "\\usage")]]
   dlength <- length(baseusage)
   myusage <- baseusage[[2]][1]
@@ -41,10 +41,10 @@ convertRd2rst <- function(infile, outfile = "") {
   }
   myusage <- paste("usage: ", "\n\n", myusage, "\n")
   cat(myusage, file = outfile, append = TRUE)
-
+  
   baseexamples <- Rd[[which(tags == "\\examples")]]
   myrrsthd <- paste(".. {r ", myfnr, ",eval=FALSE,warning=FALSE,results=\"hide\",message=FALSE,echo=TRUE,results=\"hide\"} \n ")
-
+  
   dlength <- length(baseexamples[[2]])
   myexamples <- baseexamples[[2]][[1]][1]
   if (dlength > 1) {
@@ -59,4 +59,4 @@ convertRd2rst <- function(infile, outfile = "") {
   # == '\\arguments')]][[2]][1] myarguments<-paste('arguments: ',myarguments)
   # cat(myarguments,file=outfile,append = TRUE)
   cat("\n", file = outfile, append = TRUE)
-}
+} 

@@ -29,9 +29,9 @@
 #' and a \code{predict} method.  Defaults to \code{glm}, but svm, randomForest,
 #' etc. will also work (assuming necessary libraries are loaded).
 #' @param which.eigenvectors Method for selecting eigenvectors.  Can be either
-#' \code{"all"} (uses all eigenvectors in \code{vector.names}) or
-#' \code{"optimal"} (uses BIC stepwise model selection to select eigenvectors).
-#' \code{"optimal"} only works for \code{model.function} arguments that include
+#' \code{'all'} (uses all eigenvectors in \code{vector.names}) or
+#' \code{'optimal'} (uses BIC stepwise model selection to select eigenvectors).
+#' \code{'optimal'} only works for \code{model.function} arguments that include
 #' an \code{extractAIC} method and a \code{coefficients} attribute.
 #' @param ... Additional arguments for input to \code{model.function}.  Example
 #' input would be \code{family=binomial} for classification instead of
@@ -70,7 +70,7 @@
 #' data.split <- splitData(demog, 2/3, return.rows=TRUE)
 #' result <- regressProjections(input[data.split$rows.in, ], input[data.split$rows.out, ], 
 #'             data.split$data.in, data.split$data.out, mydecom$eigenanatomyimages, 
-#' 	    mask, "outcome")
+#' \t    mask, 'outcome')
 #' 
 #' @export regressProjections
 regressProjections <- function(input.train, input.test, demog.train, demog.test, 

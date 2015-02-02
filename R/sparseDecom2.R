@@ -39,8 +39,8 @@
 #' ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
 #'   sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1, cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
 #' ### now SNPs ###
-#' usePkg("randomForest")
-#' usePkg("BGLR")
+#' usePkg('randomForest')
+#' usePkg('BGLR')
 #' data(mice)
 #' snps<-mice.X
 #' numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
@@ -62,9 +62,9 @@
 #' }
 #'
 #' @export sparseDecom2
-sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
-  nvecs = 3, its = 2, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0,
-  z = 0, smooth = 0, robust = 0, mycoption = 0, initializationList = list(), initializationList2 = list(),
+sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), 
+  nvecs = 3, its = 2, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0, 
+  z = 0, smooth = 0, robust = 0, mycoption = 0, initializationList = list(), initializationList2 = list(), 
   ell1 = 0.05, priorWeight = 0) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
@@ -85,7 +85,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     return(0)
   }
   post <- c(1, 2)
-  if (is.na(statdir))
+  if (is.na(statdir)) 
     statdir <- paste(tempdir(), "/", sep = "")
   mfn <- paste(statdir, "sccamask", post, ".nii.gz", sep = "")
   outfn <- paste(statdir, "scca.nii.gz", sep = "")
@@ -97,23 +97,23 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   if (class(inmask[[1]])[[1]] == "antsImage") {
     m1 <- inmask[[1]]
     dim <- as.numeric(m1@dimension)
-    if (dim[1] == 4)
+    if (dim[1] == 4) 
       sccaname <- "dynsccan["
     antsImageWrite(inmask[[1]], mfn[1])
   } else mfn[1] <- NA
   if (class(inmask[[2]])[[1]] == "antsImage") {
     m2 <- inmask[[2]]
     dim2 <- as.numeric(m2@dimension)
-    if (dim2[1] == 4)
+    if (dim2[1] == 4) 
       sccaname <- "dynsccan["
     antsImageWrite(inmask[[2]], mfn[2])
   } else mfn[2] <- NA
-  args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1],
-    ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1",
-    ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, "--QClusterThresh",
-    cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth,
+  args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1], 
+    ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1", 
+    ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, "--QClusterThresh", 
+    cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth, 
     "-r", robust, "-c", mycoption, "--prior-weight", priorWeight)
-
+  
   if (length(initializationList) > 0) {
     ct <- 1
     outfns <- c()
@@ -127,11 +127,11 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
     fileConn <- file(initlistfn)
     writeLines(outfns, fileConn)
     close(fileConn)
-    args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",",
-      mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""),
-      "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms,
-      "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong,
-      "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1],
+    args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", 
+      mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), 
+      "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, 
+      "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, 
+      "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1], 
       "--initialization", initlistfn, "--prior-weight", priorWeight)
     if (length(initializationList2) > 0) {
       ct <- 1
@@ -146,12 +146,12 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
       fileConn <- file(initlistfn2)
       writeLines(outfns, fileConn)
       close(fileConn)
-      args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",",
-        mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]",
-        sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1],
-        "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn,
-        "-g", uselong, "-z", z, "-s", smooth, "-r", robust, "-c", mycoption,
-        "--mask", mfn[1], "--initialization", initlistfn, "--mask2", mfn[2],
+      args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", 
+        mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", 
+        sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], 
+        "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, 
+        "-g", uselong, "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, 
+        "--mask", mfn[1], "--initialization", initlistfn, "--mask2", mfn[2], 
         "--initialization2", initlistfn2, "--prior-weight", priorWeight)
     }
   }
@@ -159,7 +159,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   mydecomp <- read.csv(decomp[1])
   if (!is.na(inmask[[1]])) {
     glb <- paste("scca*View1vec*.nii.gz", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)[1:nvecs]
     fnll <- list()
     for (i in 1:length(fnl)) {
@@ -171,7 +171,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   mydecomp2 <- read.csv(decomp[2])
   if (!is.na(inmask[[2]])) {
     glb <- paste("scca*View2vec*.nii.gz", sep = "")
-    fnl2 <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl2 <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)[1:nvecs]
     fnll2 <- list()
     for (i in 1:length(fnl2)) {
@@ -182,13 +182,13 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   }
   if (is.na(inmask[[1]])) {
     glb <- paste("scca*_Variate_View1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)
     fnl <- read.csv(fnl)
   }
   if (is.na(inmask[[2]])) {
     glb <- paste("scca*_Variate_View2vec.csv", sep = "")
-    fnl2 <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
+    fnl2 <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
       recursive = T)
     fnl2 <- read.csv(fnl2)
   }
@@ -197,6 +197,6 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
   if (file.exists(pvfn)) {
     ccasummary <- read.csv(pvfn)
   }
-  return(list(projections = mydecomp, projections2 = mydecomp2, eig1 = fnl, eig2 = fnl2,
+  return(list(projections = mydecomp, projections2 = mydecomp2, eig1 = fnl, eig2 = fnl2, 
     ccasummary = ccasummary))
-}
+} 

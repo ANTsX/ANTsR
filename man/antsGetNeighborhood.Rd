@@ -25,7 +25,7 @@ each voxel indices: matrix providing the coordinates for each value
 Get the values in a local neighborhood of an 'antsImage'.
 }
 \examples{
-mnit<-getANTsRData("mni")
+mnit<-getANTsRData('mni')
 mnit<-antsImageRead(mnit,3)
 center <- dim(mnit)/2
 radius <- rep(5,3)

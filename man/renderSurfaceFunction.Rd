@@ -31,14 +31,16 @@ Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g.
 functional).
 }
 \examples{
-mnit<-getANTsRData("mni")
+\dontrun{
+       mnit<-getANTsRData('mni')
        mnit<-antsImageRead(mnit,3)
-       mnia<-getANTsRData("mnia")
+       mnia<-getANTsRData('mnia')
        mnia<-antsImageRead(mnia,3)
        ThresholdImage(3,mnit,mnit,1,max(mnit))
        ThresholdImage(3,mnia,mnia,1,2)
 #       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
        brain<-renderSurfaceFunction( surfimg =list( mnit ) , list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
+       }
 }
 \author{
 Avants B, Kandel B

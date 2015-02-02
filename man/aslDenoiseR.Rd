@@ -20,14 +20,14 @@ Denoises regression based reconstruction of CBF from arterial spin labeling
 }
 \examples{
 \dontrun{
-fn<-"PEDS012_20131101_pcasl_1.nii.gz"
+fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 asl<-antsImageRead(fn,4)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
 tr<-antsGetSpacing(asl)[4]
 aslmean<-getAverageOfTimeSeries( asl )
 aslmask<-getMask(aslmean,lowThresh=mean(aslmean)*0.5,cleanup=TRUE)
 aslmat<-timeseries2matrix(asl,aslmask)
-tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
+tc<-as.factor(rep(c('C','T'),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
 clustasl<-clusterTimeSeries( aslmat, 4 )
 dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
@@ -46,7 +46,7 @@ antsImageWrite(perfimg,'perf.nii.gz')
 m0<-getAverageOfTimeSeries(asl)
 ctl<-c(1:(nrow(aslmat)/2))*2
 m0[ aslmask==1 ]<-colMeans(aslmat[ctl,])
-pcasl.parameters<-list( sequence="pcasl", m0=m0 )
+pcasl.parameters<-list( sequence='pcasl', m0=m0 )
 cbf <- quantifyCBF( perfimg, aslmask, pcasl.parameters )
 antsImageWrite(perfimg,'cbf.nii.gz')
 }

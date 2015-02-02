@@ -18,7 +18,7 @@ filter}
 \item{freqHi=<value>}{The higher frequency limit, e.g. 0.1 in band-pass
 filter}
 
-\item{opt=c("trig","butt","stl")}{Type of filter to use: butterworth,
+\item{opt=c('trig','butt','stl')}{Type of filter to use: butterworth,
 trigonometric, stl.}
 }
 \value{
@@ -30,7 +30,7 @@ This function works for a BOLD time-series data
 \examples{
 fmat<-replicate(1000, rnorm(200))
 k<-1
-for ( ftype in c("butt","stl","trig") ) {
+for ( ftype in c('butt','stl','trig') ) {
   myres<-frequencyFilterfMRI( fmat, tr = 4, freqLo = 0.01, freqHi = 0.05, opt = ftype )
   comparemat<-cbind(fmat[,k],myres[,k])
   plot(ts(comparemat),main=ftype)

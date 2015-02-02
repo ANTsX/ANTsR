@@ -58,14 +58,14 @@ on the multivariate distribution of the parameters.
   print(bmdl$beta)
   print(bmdlNoPrior$beta)
   \dontrun{
-  fn<-"PEDS012_20131101_pcasl_1.nii.gz"
+  fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   asl<-antsImageRead(fn,4)
   tr<-antsGetSpacing(asl)[4]
   aslmean<-getAverageOfTimeSeries( asl )
   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
   aslmat<-timeseries2matrix(asl,aslmask)
-  tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
+  tc<-as.factor(rep(c('C','T'),nrow(aslmat)/2))
   dv<-computeDVARS(aslmat)
   # do some comparison with a single y, no priors
   y<-rowMeans(aslmat)
@@ -86,10 +86,10 @@ on the multivariate distribution of the parameters.
     {
     temp<-antsImageClone( aslmask )
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
-#    ImageMath(3,temp,"PeronaMalik",temp,150,10)
+#    ImageMath(3,temp,'PeronaMalik',temp,150,10)
     SmoothImage(3,temp,1.5,temp)
     nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
-      rep(2,3), boundary.condition = "mean")
+      rep(2,3), boundary.condition = 'mean')
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
   prior  <- rowMeans( smoothcoeffmat  )

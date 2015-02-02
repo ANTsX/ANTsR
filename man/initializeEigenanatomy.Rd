@@ -37,7 +37,7 @@ eanat<-sparseDecom( dmat, inmask=initdf$mask,
   nvecs=length(initdf2$initlist) )
 # now a regression
 eanatMatrix<-imageListToMatrix(  eanat$eigenanatomyimages, initdf$mask )
-# "averages" loosely speaking anyway
+# 'averages' loosely speaking anyway
 myEigenanatomyRegionAverages<-dmat \%*\% t( eanatMatrix )
 dependentvariable<-rnorm( nrow(dmat) )
 summary(lm( dependentvariable ~ myEigenanatomyRegionAverages ))

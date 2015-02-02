@@ -19,7 +19,7 @@
 #' mylist<-list(image1,image2)
 #' # both approaches below are ok 
 #' myseg<-eigSeg( mask, mylist ) 
-#' myseg<-eigSeg( mask, c("a.nii.gz","b.nii.gz")  ) 
+#' myseg<-eigSeg( mask, c('a.nii.gz','b.nii.gz')  ) 
 #' }
 #' 
 #' @export eigSeg

@@ -6,7 +6,7 @@
 #' 
 #' 
 #' @param csvlist input list of csv files eg by Sys.glob ...
-#' @param usecol a column name or number e.g. 1 or "Volume"
+#' @param usecol a column name or number e.g. 1 or 'Volume'
 #' @param mycolname rename the column by this string (optional)
 #' @param datarownames the desired now names (optional)
 #' @return data frame is output
@@ -15,8 +15,8 @@
 #' 
 #' \dontrun{
 #' data(aal,package='ANTsR')
-#' csvlist<-Sys.glob("*md*csv")
-#' mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , "Mean" , datarownames=aal$label_name )
+#' csvlist<-Sys.glob('*md*csv')
+#' mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , 'Mean' , datarownames=aal$label_name )
 #' # should have each ROI value for each subject listed in a large data frame
 #' }
 #' 

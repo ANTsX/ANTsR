@@ -23,13 +23,13 @@ Read images into rows of a matrix.
 \examples{
 \dontrun{
 
-  imageFNList <- list.files("./", pattern = glob2rx("testView*.nii.gz"), full.names = TRUE)
+  imageFNList <- list.files('./', pattern = glob2rx('testView*.nii.gz'), full.names = TRUE)
 
   imageList<-list()
   for ( fn in imageFNList )
     imageList<-lappend( imageList, antsImageRead( fn, 3 ) )
 
-  mask <- antsImageRead("/mnt/data/masks/brainmask.nii.gz",3)
+  mask <- antsImageRead('/mnt/data/masks/brainmask.nii.gz',3)
 
   mat <- imageListToMatrix(imageList, mask)
 

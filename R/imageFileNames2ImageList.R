@@ -11,17 +11,19 @@
 #' @examples
 #' 
 #' \dontrun{
-#'   gglb<-paste("gmView1vec*.nii.gz",sep='')
+#'   gglb<-paste('gmView1vec*.nii.gz',sep='')
 #'   gfnl<-imageFileNames2ImageList( list.files(path=statdir, pattern = glob2rx(gglb),full.names = T,recursive = T) , 3 )
 #' }
 #' 
 #' @export imageFileNames2ImageList
-imageFileNames2ImageList <- function(x, dim ) {
+imageFileNames2ImageList <- function(x, dim) {
   if (nargs() == 0) {
     print("Usage:  ilist<-imageFileNames2ImageList( x , imageDimension ) ")
     return(1)
   }
-  localreadfun<-function(x){ antsImageRead(x,dim) }
-  ilist<-lapply( x, localreadfun )
+  localreadfun <- function(x) {
+    antsImageRead(x, dim)
+  }
+  ilist <- lapply(x, localreadfun)
   return(ilist)
-}
+} 

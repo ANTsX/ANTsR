@@ -16,7 +16,7 @@
 #' @examples
 #' 
 #' \dontrun{
-#' N3BiasFieldCorrection( 3 , "input_img.nii" , "output_img.nii" , 2 )
+#' N3BiasFieldCorrection( 3 , 'input_img.nii' , 'output_img.nii' , 2 )
 #' }
 #' 
 #' @export N3BiasFieldCorrection

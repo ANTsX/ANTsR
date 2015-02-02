@@ -8,12 +8,12 @@ Atropos(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]",
   priorweight = 0.5, ...)
 }
 \arguments{
-\item{d-or-"image-dimensionality"=<value>}{This option forces the image to
+\item{d-or-'image-dimensionality'=<value>}{This option forces the image to
 be treated as a specified-dimensional image. If not specified, Atropos tries
 to infer the dimensionality from the first input image. Allowed values: 2,
 3, 4.}
 
-\item{a-or-"intensity-image"=c(<intensityImage1>,<intensityImage2>,etc)}{One
+\item{a-or-'intensity-image'=c(<intensityImage1>,<intensityImage2>,etc)}{One
 or more scalar images is specified for segmentation using the
 -a/--intensity-image option. For segmentation scenarios with no prior
 information, the first scalar image encountered on the command line is used
@@ -44,7 +44,7 @@ minimize usage option (see -m). With that option one can specify a prior
 probability threshold in which only those pixels exceeding that threshold
 are stored in memory. <probimagelist> -- object of type 'antsImageList' .}
 
-\item{list(list(),list("list(name=\"Random\",<numberOfClasses>)"),list(),list("list(name=\"Otsu\",<numberOfTissueClasses>)"),list(),list("list(name=\"KMeans\",<numberOfTissueClasses>,<clusterCenters(inascendingorderandforfirstintensityimageonly)>)"),list(),list("list(name=\"PriorProbabilityImages\",<numberOfTissueClasses>,<probimagelist>,<priorWeighting>,<priorProbabilityThreshold>)"),list(),list("list(name=\"PriorLabelImage\",<numberOfTissueClasses>,<labelImage>,<priorWeighting>)"),}{) To initialize the FMM parameters, one of the following options must be
+\item{list(list(),list('list(name=\'Random\',<numberOfClasses>)'),list(),list('list(name=\'Otsu\',<numberOfTissueClasses>)'),list(),list('list(name=\'KMeans\',<numberOfTissueClasses>,<clusterCenters(inascendingorderandforfirstintensityimageonly)>)'),list(),list('list(name=\'PriorProbabilityImages\',<numberOfTissueClasses>,<probimagelist>,<priorWeighting>,<priorProbabilityThreshold>)'),list(),list('list(name=\'PriorLabelImage\',<numberOfTissueClasses>,<labelImage>,<priorWeighting>)'),}{) To initialize the FMM parameters, one of the following options must be
 specified. If one does not have prior label or probability images we
 recommend using kmeans as it is typically faster than otsu and can be used
 with multivariate initialization. However, since a Euclidean distance on the
@@ -72,7 +72,7 @@ minimize usage option (see -m). With that option one can specify a prior
 probability threshold in which only those pixels exceeding that threshold
 are stored in memory. <probimagelist> -- object of type 'antsImageList' .}
 
-\item{s-or-"partial-volume-label-set"=<value>}{<value> --
+\item{s-or-'partial-volume-label-set'=<value>}{<value> --
 label1xlabel2xlabel3. The partial volume estimation option allows one to
 modelmixtures of classes within single voxels. Atropos currently allows the
 user to model two class mixtures per partial volume class. The user
@@ -85,14 +85,14 @@ would be 3 tissue classes and 2 partial volume classes. Optionally,the user
 can limit partial volume handling to mrf considerations only whereby the
 output would only be the three tissues.}
 
-\item{"use-partial-volume-likelihoods"=<value>}{<value> -- 1(0) |
+\item{'use-partial-volume-likelihoods'=<value>}{<value> -- 1(0) |
 true/(false) The user can specify whether or not to use the partial volume
 likelihoods, in which case the partial volume class is considered separate
 from the tissue classes. Alternatively, one can use the MRF only to handle
 partial volume in which case, partial volume voxels are not considered as
 separate classes.}
 
-\item{p-or-"posterior-formulation"=}{Different posterior probability formulations are possible as are different
+\item{p-or-'posterior-formulation'=}{Different posterior probability formulations are possible as are different
 update options. To guarantee theoretical convergence properties, a proper
 formulation of the well-known iterated conditional modes (ICM) uses an
 asynchronous update step modulated by a specified annealing temperature. If
@@ -102,7 +102,7 @@ synchronous update step will take place at each iteration. The annealing
 temperature, T, converts the posteriorProbability to
 posteriorProbability_raisedto_(1/T) over the course of optimization.}
 
-\item{list(list(),list("list(name=\"Socrates\",<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)"),list(),list("list(name=\"Plato\",<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)"),list(),list("list(name=\"Aristotle\",<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)"))}{Different posterior probability formulations are possible as are different
+\item{list(list(),list('list(name=\'Socrates\',<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)'),list(),list('list(name=\'Plato\',<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)'),list(),list('list(name=\'Aristotle\',<useMixtureModelProportions=1>,<initialAnnealingTemperature=1>,<annealingRate=1>,<minimumTemperature=0.1>)'))}{Different posterior probability formulations are possible as are different
 update options. To guarantee theoretical convergence properties, a proper
 formulation of the well-known iterated conditional modes (ICM) uses an
 asynchronous update step modulated by a specified annealing temperature. If
@@ -122,7 +122,7 @@ synchronous update step will take place at each iteration. The annealing
 temperature, T, converts the posteriorProbability to
 posteriorProbability_raisedto_(1/T) over the course of optimization.}
 
-\item{x-or-"mask-image"=<maskimagefilename>}{The image mask (which is
+\item{x-or-'mask-image'=<maskimagefilename>}{The image mask (which is
 required) defines the region which is to be labeled by the Atropos
 algorithm.}
 
@@ -132,14 +132,14 @@ decreases or increases less than the specified threshold from the previous
 iteration or the maximum number of iterations is exceeded the program
 terminates.}
 
-\item{k-or-"likelihood-model"=}{Both parametric and non-parametric options exist in Atropos. The Gaussian
+\item{k-or-'likelihood-model'=}{Both parametric and non-parametric options exist in Atropos. The Gaussian
 parametric option is commonly used (e.g. SPM & FAST) where the mean and
 standard deviation for the Gaussian of each class is calculated at each
 iteration. Other groups use non-parametric approaches exemplified by option
 2. We recommend using options 1 or 2 as they are fairly standard and the
 default parameters work adequately.}
 
-\item{list(list(),list("\"Gaussian\""),list(),list("list(name=\"HistogramParzenWindows\",<sigma=1.0>,<numberOfBins=32>)"),list(),list("list(name=\"ManifoldParzenWindows\",<pointSetSigma=1.0>,<evaluationKNeighborhood=50>,<CovarianceKNeighborhood=0>,<kernelSigma=0>)"),list(),list("list(name=\"JointShapeAndOrientationProbability\",<shapeSigma=1.0>,<numberOfShapeBins=64>,<orientationSigma=1.0>,<numberOfOrientationBins=32>)"),list(),list("\"LogEuclideanGaussian\""),}{) Both parametric and non-parametric options exist in Atropos. The
+\item{list(list(),list('\'Gaussian\''),list(),list('list(name=\'HistogramParzenWindows\',<sigma=1.0>,<numberOfBins=32>)'),list(),list('list(name=\'ManifoldParzenWindows\',<pointSetSigma=1.0>,<evaluationKNeighborhood=50>,<CovarianceKNeighborhood=0>,<kernelSigma=0>)'),list(),list('list(name=\'JointShapeAndOrientationProbability\',<shapeSigma=1.0>,<numberOfShapeBins=64>,<orientationSigma=1.0>,<numberOfOrientationBins=32>)'),list(),list('\'LogEuclideanGaussian\''),}{) Both parametric and non-parametric options exist in Atropos. The
 Gaussian parametric option is commonly used (e.g. SPM & FAST) where the mean
 and standard deviation for the Gaussian of each class is calculated at each
 iteration. Other groups use non-parametric approaches exemplified by option
@@ -161,7 +161,7 @@ smoothing. The radius parameter specifies the mrf neighborhood. Different
 update schemes are possible but only the asynchronous updating has
 theoretical convergence properties.}
 
-\item{list(list(),list("list(<smoothingFactor=0.3>,<radius=1x1x...>)"),list(),list("list(<mrfCoefficientImage>,<radius=1x1x...>)"))}{Markov random field (MRF) theory provides a general framework for enforcing
+\item{list(list(),list('list(<smoothingFactor=0.3>,<radius=1x1x...>)'),list(),list('list(<mrfCoefficientImage>,<radius=1x1x...>)'))}{Markov random field (MRF) theory provides a general framework for enforcing
 spatially contextual constraints on the segmentation solution. The default
 smoothing factor of 0.3 provides a moderate amount of smoothing. Increasing
 this number causes more smoothing whereas decreasing the number lessens the
@@ -192,18 +192,18 @@ posterior probability images specified in the same format as the prior
 probability images. <posteriorProbabilityImages> -- object of type
 'antsImageList'.}
 
-\item{u-or-"minimize-memory-usage"=<value>}{<value> = (0)/1 By default,
+\item{u-or-'minimize-memory-usage'=<value>}{<value> = (0)/1 By default,
 memory usage is not minimized, however, if this is needed, the various
 probability and distance images are calculated on the fly instead of being
 stored in memory at each iteration. Also, if prior probability images are
 used, only the non -negligible pixel values are stored in memory. <VALUES>:
 0}
 
-\item{w-or-"winsorize-outliers"=}{To remove the effects of outliers in calculating the weighted mean and
+\item{w-or-'winsorize-outliers'=}{To remove the effects of outliers in calculating the weighted mean and
 weighted covariance, the user can opt to remove the outliers through the
 options specified below.}
 
-\item{list(list(),list("list(name=BoxPlot,<lowerPercentile=0.25>,<upperPercentile=0.75>,<whiskerLength=1.5>)"),list(),list("list(name=GrubbsRosner,<significanceLevel=0.05>,<winsorizingLevel=0.10>)"))}{To remove the effects of outliers in calculating the weighted mean and
+\item{list(list(),list('list(name=BoxPlot,<lowerPercentile=0.25>,<upperPercentile=0.75>,<whiskerLength=1.5>)'),list(),list('list(name=GrubbsRosner,<significanceLevel=0.05>,<winsorizingLevel=0.10>)'))}{To remove the effects of outliers in calculating the weighted mean and
 weighted covariance, the user can opt to remove the outliers through the
 options specified below.}
 
@@ -211,7 +211,7 @@ options specified below.}
 weighted covariance, the user can opt to remove the outliers through the
 options specified below.}
 
-\item{e-or-"use-euclidean-distance"=<value>}{<value> = (0)/1 Given prior
+\item{e-or-'use-euclidean-distance'=<value>}{<value> = (0)/1 Given prior
 label or probability images, the labels are propagated throughout the masked
 region so that every voxel in the mask is labeled. Propagation is done by
 using a signed distance transform of the label. Alternatively, propagation
@@ -219,7 +219,7 @@ of the labels with the fast marching filter respects the distance along the
 shape of the mask (e.g. the sinuous sulci and gyri of the cortex).
 <VALUES>: 0}
 
-\item{l-or-"label-propagation"=list(name=whichLabel,<lambda=0.0>,<boundaryProbability=1.0>)}{The propagation of each prior label can be controlled by the lambda and
+\item{l-or-'label-propagation'=list(name=whichLabel,<lambda=0.0>,<boundaryProbability=1.0>)}{The propagation of each prior label can be controlled by the lambda and
 boundary probability parameters. The latter parameter is the probability (in
 the range [0,1]) of the label on the boundary which increases linearly to a
 maximum value of 1.0 in the interior of the labeled region. The former
@@ -242,7 +242,7 @@ a=c(img1,img2).
 \examples{
 img<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask(img)
-segs1<-Atropos( d = 2, a = img, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)
+segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)
 }
 \author{
 Shrinidhi KL, B Avants

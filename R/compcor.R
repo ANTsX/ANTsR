@@ -15,8 +15,8 @@
 #' compcorrdf<-compcor( mat )
 #'
 #' @export compcor
-compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd = FALSE,
-  useimagemath = FALSE, randomSamples = 1, returnv = FALSE, returnhighvarmatinds = FALSE,
+compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fastsvd = FALSE, 
+  useimagemath = FALSE, randomSamples = 1, returnv = FALSE, returnhighvarmatinds = FALSE, 
   highvarmatinds = NA) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
@@ -53,7 +53,7 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     highvarmatinds <- which(temporalvar > thresh)
   }
   highvarmat <- mat[, highvarmatinds]
-  if (returnhighvarmatinds)
+  if (returnhighvarmatinds) 
     return(highvarmatinds)
   if (!returnv) {
     if (fastsvd) {
@@ -81,4 +81,4 @@ compcor <- function(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA, fas
     }
     return(nuis)
   }
-}
+} 

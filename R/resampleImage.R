@@ -15,14 +15,13 @@
 #' filin<-resampleImage(fi,c(1.5,1.5),0,1)
 #'
 #' @export resampleImage
-resampleImage <- function(image,resampleParams, useVoxels=0, interpType=1 )
-  {
-  inimg<-antsImageClone( image, 'double' )
-  outimg<-antsImageClone( image, 'double' )
-  rsampar<-paste(resampleParams,collapse='x')
-  args<-list(image@dimension,inimg,outimg,rsampar,useVoxels,interpType)
-  k<-int_antsProcessArguments(args)
-  retval<-.Call("ResampleImage", k )
-  outimg<-antsImageClone( outimg, image@pixeltype )
-  return( outimg )
-  }
+resampleImage <- function(image, resampleParams, useVoxels = 0, interpType = 1) {
+  inimg <- antsImageClone(image, "double")
+  outimg <- antsImageClone(image, "double")
+  rsampar <- paste(resampleParams, collapse = "x")
+  args <- list(image@dimension, inimg, outimg, rsampar, useVoxels, interpType)
+  k <- int_antsProcessArguments(args)
+  retval <- .Call("ResampleImage", k)
+  outimg <- antsImageClone(outimg, image@pixeltype)
+  return(outimg)
+} 

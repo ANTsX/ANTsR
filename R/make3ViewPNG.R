@@ -54,4 +54,4 @@ make3ViewPNG <- function(rotationView1, rotationView2, rotationView3, fnprefix) 
   grid.raster(aabbcc)
   dev.off()
   return(aabbcc)
-}
+} 

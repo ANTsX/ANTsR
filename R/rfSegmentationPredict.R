@@ -10,13 +10,13 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' usePkg("randomForest")
+#' usePkg('randomForest')
 #' img<-antsImageRead( getANTsRData('r16') ,2)
 #' mask<-getMask( img )
 #' mask2<-getMask( img )
-#' ImageMath(2,mask,"ME",mask,25)
+#' ImageMath(2,mask,'ME',mask,25)
 #' mask2[ mask == 1 ]<-0
-#' segs<-Atropos( d = 2, a = img, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)
+#' segs<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)
 #' fimgs<-list( img )
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100, verbose=TRUE )
 #' rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
@@ -33,4 +33,4 @@ rfSegmentationPredict <- function(rfSegmentationModel, featureimages, mask, verb
   segs <- antsImageClone(mask)
   segs[mask == 1] <- predict(rfSegmentationModel, newdata = mydf)
   return(segs)
-}
+} 

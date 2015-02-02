@@ -27,17 +27,16 @@
 #' 
 #' \dontrun{
 #' # input_img.nii is a 3D image
-#' mask_img <- get_mask( "input_img.nii" , 500 , 1e9 )
+#' mask_img <- get_mask( 'input_img.nii' , 500 , 1e9 )
 #' }
 #' 
 #' @export getMask
-getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, 
-                    cleanup = 2 ) {
+getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2) {
   # Binarizes a mask between specified thresholds Input can be a file name or an
   # antsImage, if it is not specified, a file chooser is launched. Works on 3D
   # images only If cleanup == TRUE, small and weakly-connected elements are removed
   # by erosion, and then holes are filled.  Returns: a binary antsImage
-  cleanup<-as.numeric(cleanup)
+  cleanup <- as.numeric(cleanup)
   if (is.character(img)) {
     if (length(img) != 1) {
       stop("'img' must be a single filename")
@@ -61,7 +60,7 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf,
   
   ThresholdImage(img@dimension, img, mask_img, lowThresh, highThresh)
   
-  if (cleanup > 0 ) {
+  if (cleanup > 0) {
     ImageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
     ImageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
     ImageMath(img@dimension, mask_img, "MD", mask_img, cleanup)

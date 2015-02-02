@@ -28,7 +28,7 @@ feature image
 set.seed(123)
 fi<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask(fi)
-segs<-Atropos( d = 2, a = fi, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)$segmentation
+segs<-Atropos( d = 2, a = fi, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)$segmentation
 segs[ segs != 1 ]<-0
 shp<-labelClusters( antsImageClone(segs,'float'),10)
 shp[ shp != 7 ]<-0

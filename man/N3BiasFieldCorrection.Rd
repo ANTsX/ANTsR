@@ -31,7 +31,7 @@ Perform Bias Field Correction on the given image
 }
 \examples{
 \dontrun{
-N3BiasFieldCorrection( 3 , "input_img.nii" , "output_img.nii" , 2 )
+N3BiasFieldCorrection( 3 , 'input_img.nii' , 'output_img.nii' , 2 )
 }
 }
 \author{

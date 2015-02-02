@@ -5,17 +5,16 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   }
   indexMask <- (maskImage == 1)
   newImageArray <- as.array(referenceImage)
-
+  
   # set everything to zero so that only non-zero mask elements are non-zero
   newImageArray <- newImageArray * 0
-
+  
   for (i in 1:nrow(timeSeriesMatrix)) {
     newImageArray[, , , i][indexMask] <- timeSeriesMatrix[i, ]
   }
-  newImageArray<-newImageArray[,,,1:nrow(timeSeriesMatrix)]
+  newImageArray <- newImageArray[, , , 1:nrow(timeSeriesMatrix)]
   newImage <- as.antsImage(newImageArray)
   antsCopyImageInfo(referenceImage, newImage)
-  newImage<-antsImageClone( newImage,
-    out_pixeltype = referenceImage@pixeltype)
+  newImage <- antsImageClone(newImage, out_pixeltype = referenceImage@pixeltype)
   return(newImage)
-}
+} 

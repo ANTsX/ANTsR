@@ -21,9 +21,9 @@
 #'   tdir<-tempdir()
 #'   for ( i in 1:n ) {
 #'     simimg<-as.antsImage( replicate(64, rnorm(64) ) )
-#'     antsImageWrite( simimg, paste(tdir,"/image",i,".mha",sep=''))
+#'     antsImageWrite( simimg, paste(tdir,'/image',i,'.mha',sep=''))
 #'   }
-#'   imageList = list.files(tdir, pattern = ".mha", full.names = TRUE)
+#'   imageList = list.files(tdir, pattern = '.mha', full.names = TRUE)
 #'   mask = getMask( antsImageRead( imageList[1] , 2 ) )
 #'   mat = imagesToMatrix(imageList, mask)
 #'   print(dim(mat))
@@ -31,16 +31,14 @@
 #'
 #' @export imagesToMatrix
 imagesToMatrix <- function(imageList, mask) {
-  n<-length( imageList )
-  if ( n < 1 )
-    {
+  n <- length(imageList)
+  if (n < 1) {
     print(" length of input list must be >= 1 ")
     return(NA)
-    }
-  if ( class(imageList) != "character" )
-    {
+  }
+  if (class(imageList) != "character") {
     print("Must pass a list of filenames")
     return(NA)
-    }
-  return( .Call("imagesToMatrix", imageList, mask, n ) )
-}
+  }
+  return(.Call("imagesToMatrix", imageList, mask, n))
+} 

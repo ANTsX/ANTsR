@@ -15,7 +15,7 @@ the same as the dimensions of the image in the file. Allowed values: 2, 3,
 
 \item{pixeltype}{C++ datatype to be used to represent the pixels read. This
 datatype need not be the same as the datatype used in the file. Allowed
-values: "double", "float" , "unsigned int" , "unsigned char".}
+values: 'double', 'float' , 'unsigned int' , 'unsigned char'.}
 }
 \value{
 S4 object of Class 'antsImage' -- Success\cr 1 -- Failure
@@ -25,9 +25,9 @@ Read an image file into an S4 object of class 'antsImage'.
 }
 \examples{
 \dontrun{
-img <- antsImageRead( "imagefile.nii" , dimension = 3  )
-img <- antsImageRead( "imagefile.nii" , dimension = 2  )
-img <- antsImageRead( "imagefile.nii" , dimension = 4 , pixeltype =  "double" )
+img <- antsImageRead( 'imagefile.nii' , dimension = 3  )
+img <- antsImageRead( 'imagefile.nii' , dimension = 2  )
+img <- antsImageRead( 'imagefile.nii' , dimension = 4 , pixeltype =  'double' )
 }
 }
 \author{

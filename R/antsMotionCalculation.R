@@ -19,26 +19,23 @@
 #' @examples
 #' antsMotionCalculation(getANTsRData('pcasl'))
 #' @export antsMotionCalculation
-antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1){
-  moco <- motion_correction(img, fixed=fixed, moreaccurate=moreaccurate)
+antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
+  moco <- motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)
   tmpdir <- tempdir()
-  file.mocoparam <- paste(tmpdir, 'moco.csv',sep='')
-  file.mask <- paste(tmpdir, 'mask.nii.gz',sep='')
-  file.out <- paste(tmpdir, 'out.csv',sep='')
-  write.csv(moco$moco_params, file.mocoparam, row.names=F)
-  if(is.na(mask)){
-    mask <- getMask(moco$moco_avg_img, 500, Inf, cleanup=T)
+  file.mocoparam <- paste(tmpdir, "moco.csv", sep = "")
+  file.mask <- paste(tmpdir, "mask.nii.gz", sep = "")
+  file.out <- paste(tmpdir, "out.csv", sep = "")
+  write.csv(moco$moco_params, file.mocoparam, row.names = F)
+  if (is.na(mask)) {
+    mask <- getMask(moco$moco_avg_img, 500, Inf, cleanup = T)
   }
   antsImageWrite(mask, file.mask)
-  antsMotionCorrStats(list(x=file.mask, d=img, o=file.out,
-    f=framewise, m=file.mocoparam))
-  tsDisplacement <- antsImageRead(paste(tmpdir, 'out.nii.gz', sep=''), 4)
+  antsMotionCorrStats(list(x = file.mask, d = img, o = file.out, f = framewise, 
+    m = file.mocoparam))
+  tsDisplacement <- antsImageRead(paste(tmpdir, "out.nii.gz", sep = ""), 4)
   aslmat <- timeseries2matrix(antsImageRead(img, 4), mask)
   dvars <- computeDVARS(aslmat)
-  list(moco_img=antsImageClone(moco$moco_img),
-    moco_params=moco$moco_params,
-    moco_avg_img=antsImageClone(moco$moco_avg_img),
-    moco_mask=antsImageClone(mask),
-    tsDisplacement=antsImageClone(tsDisplacement),
-    dvars=dvars)
-}
+  list(moco_img = antsImageClone(moco$moco_img), moco_params = moco$moco_params, 
+    moco_avg_img = antsImageClone(moco$moco_avg_img), moco_mask = antsImageClone(mask), 
+    tsDisplacement = antsImageClone(tsDisplacement), dvars = dvars)
+} 

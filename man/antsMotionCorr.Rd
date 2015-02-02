@@ -27,8 +27,8 @@ time series. Fixed image is a reference space or time slice.
 antsMotionCorr( list( d = 3 , a = img , o = avg_img ) )
 antsMotionCorr( list( d = 3 ,
   o = list( moco_params , moco_img , avg_img ) ,
-  m = list( name = "MI" , avg_img , img , 1 , 32 , 50 ) ,
-  t = "Rigid[0.01]" , i = 25 ,
+  m = list( name = 'MI' , avg_img , img , 1 , 32 , 50 ) ,
+  t = 'Rigid[0.01]' , i = 25 ,
   u = 1 , e = 1 , s = 0 , f = 1 , n = 25 ) )
 }
 }

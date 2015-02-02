@@ -13,7 +13,7 @@ plotANTsImage(myantsimage, functional = NA, color = c("jet", "red", "blue",
 
 \item{functional}{list of the images to use as overlays}
 
-\item{color=<string>}{the color for the overlay , e.g c("blue","red") length
+\item{color=<string>}{the color for the overlay , e.g c('blue','red') length
 of this list should match the image list}
 
 \item{axis=<value>}{character ... the axis to slice (1 , 2 or 3)}
@@ -27,7 +27,7 @@ threshold : of form LOxHI}
 \item{quality=<value>}{integer quality magnification factor 1 => large (e.g.
 10)}
 
-\item{outname="figx.jpg"}{output name if you want to write the result to a
+\item{outname='figx.jpg'}{output name if you want to write the result to a
 file}
 }
 \value{
@@ -42,9 +42,9 @@ overlay option.  Useful for displaying statistical results overlaid on a
 background image.
 }
 \examples{
-mnit<-getANTsRData("mni")
+mnit<-getANTsRData('mni')
   mnit<-antsImageRead(mnit,3)
-  mniafn<-getANTsRData("mnia")
+  mniafn<-getANTsRData('mnia')
   mnia<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia,mnia,22,25)
   SmoothImage(3,mnia,1.5,mnia)
@@ -52,11 +52,11 @@ mnit<-getANTsRData("mni")
   ThresholdImage(3,mnia2,mnia2,1,4)
   SmoothImage(3,mnia2,1.5,mnia2)
   plot( mnit, list(mnia,mnia2), slices='50x140x5',
-   threshold = "0.25x1", axis=0,color=c('red','blue') )
+   threshold = '0.25x1', axis=0,color=c('red','blue') )
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices='50x140x5',
-   threshold = "0.25x1", axis=0,color=c('red','blue'), outname = ofn )
+   threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
 }
 \author{
 Avants BB

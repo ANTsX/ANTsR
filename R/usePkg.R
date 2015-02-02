@@ -11,10 +11,10 @@
 #' usePkg('extremevalues')
 #' 
 #' @export usePkg
-usePkg <- function(pkg){
-  success <- try(require(pkg, character.only=T))
-  if (!success){
-    install.packages(pkg, repos='http://cran.r-project.org')
-    success <- try(require(pkg, character.only=T))
+usePkg <- function(pkg) {
+  success <- try(require(pkg, character.only = T))
+  if (!success) {
+    install.packages(pkg, repos = "http://cran.r-project.org")
+    success <- try(require(pkg, character.only = T))
   }
 } 

@@ -25,4 +25,4 @@ getAverageOfTimeSeries <- function(timeseriesimage) {
   averageImage <- new("antsImage", timeseriesimage@pixeltype, 3)
   antsMotionCorr(list(d = 3, a = timeseriesimage, o = averageImage))
   return(averageImage)
-}
+} 

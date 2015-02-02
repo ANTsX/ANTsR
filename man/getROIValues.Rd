@@ -24,7 +24,7 @@ Computes the mean value in each label of an ROI after masking with MaskImage
 }
 \examples{
 \dontrun{
-data("aal", package = "ANTsR")
+data('aal', package = 'ANTsR')
 vals<-getROIValues( image, aal, mask  )
 }
 }

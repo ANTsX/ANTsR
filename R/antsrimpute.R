@@ -26,8 +26,8 @@ antsrimpute <- function(mydat, FUN = mean, ...) {
     mydat2
   } else {
     mydat2 <- mydat
-    for (x in 1:ncol(mydat)) mydat2[is.na(mydat[, x]), x] <- FUN(as.numeric(mydat[,
+    for (x in 1:ncol(mydat)) mydat2[is.na(mydat[, x]), x] <- FUN(as.numeric(mydat[, 
       x]), na.rm = T, ...)
     mydat2
   }
-}
+} 

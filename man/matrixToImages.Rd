@@ -21,7 +21,7 @@ Unmasks rows of a matrix and writes as images.
 }
 \examples{
 \dontrun{
-  mat = matrixToImages(aMat, mask, "aMat_")
+  mat = matrixToImages(aMat, mask, 'aMat_')
 }
 }
 \author{

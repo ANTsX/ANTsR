@@ -10,8 +10,8 @@ pairwiseImageDistanceMatrix(dim, myFileList,
 \arguments{
 \item{dim}{imageDimension}
 
-\item{myFileList}{dd<-"MICCAI-2013-SATA-Challenge-Data/CAP/training-images/"
-myFileList<-list.files(path=dd, pattern = glob2rx("*nii.gz"),full.names =
+\item{myFileList}{dd<-'MICCAI-2013-SATA-Challenge-Data/CAP/training-images/'
+myFileList<-list.files(path=dd, pattern = glob2rx('*nii.gz'),full.names =
 T,recursive = T)}
 }
 \value{
@@ -20,7 +20,7 @@ clustering (optional) in a list
 }
 \description{
 Output contains the NImages x NImages matrix of
-c("PearsonCorrelation","Mattes") or any Image Metric values available in
+c('PearsonCorrelation','Mattes') or any Image Metric values available in
 ImageMath.  Similarity is computed after an affine registration is
 performed.  You can also cluster the images via the dissimilarity
 measurement, i.e. the negated similarity metric.  So, the estimated

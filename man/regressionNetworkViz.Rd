@@ -21,10 +21,10 @@ correspond to the outcome variables ...
 }
 \examples{
 \dontrun{
-colnames(brainpreds)<-paste("Vox",c(1:ncol(brainpreds)),sep='')
+colnames(brainpreds)<-paste('Vox',c(1:ncol(brainpreds)),sep='')
 colnames( mylm$beta.pval )<-colnames(brainpreds)
 demognames<-rownames(mylm$beta.pval)
-regressionNetworkViz( mylm , sigthresh=0.05, outfile="temp2.html")
+regressionNetworkViz( mylm , sigthresh=0.05, outfile='temp2.html')
 }
 }
 \author{

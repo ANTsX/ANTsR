@@ -20,7 +20,7 @@
 #' #  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline')
 #'   myvars<-getfMRInuisanceVariables( fmri, moreaccurate = TRUE ,  maskThresh=100 )
 #'   mat <- timeseries2matrix( fmri, mask )
-#'   mat  <- filterfMRIforNetworkAnalysis( cbind(mat) , 2.5, cbfnetwork = "BOLD" , freqLo=0.001 , freqHi = 0.15  )$filteredTimeSeries
+#'   mat  <- filterfMRIforNetworkAnalysis( cbind(mat) , 2.5, cbfnetwork = 'BOLD' , freqLo=0.001 , freqHi = 0.15  )$filteredTimeSeries
 #'   blockfing = c(0, 36, 72, 108,144)
 #'   hrf <- hemodynamicRF( scans=dim(fmri)[4] , onsets=blockfing , durations=rep(  12,  length( blockfing ) ) ,  rt=2.5 )
 #'   activationBeta<-taskFMRI(  fmriMatrix , hrf , myvars )

@@ -54,10 +54,10 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = F) {
   veccoef <- FALSE
   if (is.null(dim(mylm$coefficients))) 
     veccoef <- TRUE
-  if (!includeIntercept) { 
+  if (!includeIntercept) {
     if (veccoef) 
       beta <- mylm$coefficients[-1] else beta <- mylm$coefficients[-1, ]
-  }  else beta <- mylm$coefficients 
+  } else beta <- mylm$coefficients
   myresponse <- model.response(model.frame(mylm))
   X <- model.matrix(mylm)
   dfr <- dim(X)[2] - 1
@@ -86,12 +86,12 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = F) {
     beta.std <- t(sqrt(as.vector(colSums((mylm$residuals)^2)/mylm$df.residual) %o% 
       mycoefs))
   }
-  if (!includeIntercept){
+  if (!includeIntercept) {
     if (veccoef) 
       beta.t <- mylm$coefficients[-1]/beta.std
     if (!veccoef) 
       beta.t <- mylm$coefficients[-1, ]/beta.std
-  } else beta.t <- mylm$coefficients / beta.std
+  } else beta.t <- mylm$coefficients/beta.std
   beta.pval <- 2 * pt(-abs(beta.t), df = mylm$df.residual)
   list(fstat = fstat, pval.model = pval.model, beta = beta, beta.std = beta.std, 
     beta.t = beta.t, beta.pval = beta.pval)

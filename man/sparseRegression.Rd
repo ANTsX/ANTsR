@@ -62,14 +62,14 @@ input.test <- input[-subj.train, ]
 demog.train <- data.frame(outcome=demog[subj.train, ])
 demog.test <- data.frame(outcome=demog[-subj.train, ])
 mymask <- as.antsImage(array(rep(1, 125), dim=c(5,5,5)))
-myregression <- sparseRegression(input.train, demog.train, "outcome", mymask,
+myregression <- sparseRegression(input.train, demog.train, 'outcome', mymask,
     sparseness=0.05, nvecs=5, its=3, cthresh=250)
 # visualization of results
 sample <- rep(0, 125)
 sample[40:60] <-1
 signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
 signal.img[signal.img >= 0 ] <- sample
-plotANTsImage( signal.img, axis=2, slices="1x5x1") # actual source of signal
+plotANTsImage( signal.img, axis=2, slices='1x5x1') # actual source of signal
 # compare against first learned regression vector
 myimgs <- list()
 for( i in 1:5){
@@ -78,10 +78,10 @@ for( i in 1:5){
   myimgs[[ i ]] <- antsImageClone(myregression$eigenanatomyimages[[ i ]])
   myimgs[[ i ]][mymask > 0] <- myarray
 }
-plotANTsImage(myimgs[[1]], axis=2, slices="1x5x1")
+plotANTsImage(myimgs[[1]], axis=2, slices='1x5x1')
 # use learned eigenvectors for prediction
 result <- regressProjections(input.train, input.test, demog.train,
-    demog.test, myregression$eigenanatomyimages, mymask, "outcome")
+    demog.test, myregression$eigenanatomyimages, mymask, 'outcome')
 plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 }
 }

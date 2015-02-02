@@ -10,9 +10,9 @@
 #' @examples
 #'
 #' \dontrun{
-#' mm<-inspectImageData3D( fnl<-c("r16slice.nii.gz","r64slice.nii.gz" ) )
-#' usePkg("fpc")
-#' usePkg("DMwR")
+#' mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
+#' usePkg('fpc')
+#' usePkg('DMwR')
 #' pamres <- pamk(mm)
 #' plot(pamres$pamobject)
 #' outlier.scores <- lofactor( mm, k=5)
@@ -45,4 +45,4 @@ inspectImageData3D <- function(myfiles) {
   }
   rownames(mymat) <- myfiles
   return(mymat)
-}
+} 

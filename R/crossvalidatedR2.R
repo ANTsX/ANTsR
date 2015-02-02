@@ -22,50 +22,50 @@
 #' }
 #' r2 <- crossvalidatedR2(x, y, covariates=covariate)
 #' @export crossvalidatedR2
-crossvalidatedR2 <- function(x, y, ngroups=5, covariates=NA, fast=F) {
+crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = F) {
   usePkg("caret")
   nvox <- ncol(x)
-  if(length(ngroups) == 1){
-    groups<-createFolds(y,k=ngroups,list=FALSE)
+  if (length(ngroups) == 1) {
+    groups <- createFolds(y, k = ngroups, list = FALSE)
   } else groups <- ngroups
-  ngroups<-length(unique(groups))
-  R2v <- matrix(rep(0, ngroups*nvox), nrow = ngroups)
-  if(!is.matrix(covariates))
+  ngroups <- length(unique(groups))
+  R2v <- matrix(rep(0, ngroups * nvox), nrow = ngroups)
+  if (!is.matrix(covariates)) 
     covariates <- as.matrix(covariates)
-
+  
   for (k in 1:ngroups) {
     selector <- groups != k
-    if(!fast){
+    if (!fast) {
       mydf <- data.frame(y[selector])
-      if (!all(is.na(covariates)))
+      if (!all(is.na(covariates))) 
         mydf <- data.frame(mydf, covariates[selector, ])
       mylm1 <- lm(x[selector, ] ~ ., data = mydf)
-    } else{
+    } else {
       y.sel <- cbind(rep(1, sum(selector)), y[selector])
-      if(!all(is.na(covariates))) 
+      if (!all(is.na(covariates))) 
         y.sel <- cbind(y.sel, covariates[selector, ])
-      myfit <- lm.fit(x=y.sel, y=x[selector, ]) # do lm(x~y)-style fit
+      myfit <- lm.fit(x = y.sel, y = x[selector, ])  # do lm(x~y)-style fit
     }
     selector <- groups == k
-    if(!fast){
+    if (!fast) {
       mydf <- data.frame(y[selector])
-      if (!all(is.na(covariates)))
+      if (!all(is.na(covariates))) 
         mydf <- data.frame(mydf, covariates[selector, ])
       predmat <- predict(mylm1, newdata = mydf)
-    } else{
+    } else {
       y.sel <- cbind(rep(1, sum(selector)), y[selector])
-      if (!all(is.na(covariates)))
+      if (!all(is.na(covariates))) 
         y.sel <- cbind(y.sel, covariates[selector, ])
       predmat <- y.sel %*% myfit$coefficients
     }
     realmat <- x[selector, ]
-    sum1vec<-colSums(  (predmat - realmat)^2,na.rm=T)
-    temp<-matrix( rep(  colMeans(realmat,na.rm=T), nrow(realmat) ),
-      nrow=nrow(realmat), byrow=T )
-    sum2vec<-colSums( ( temp - realmat )^2, na.rm=T)
-    R2vec <- 100 * (1 - sum1vec/sum2vec )
+    sum1vec <- colSums((predmat - realmat)^2, na.rm = T)
+    temp <- matrix(rep(colMeans(realmat, na.rm = T), nrow(realmat)), nrow = nrow(realmat), 
+      byrow = T)
+    sum2vec <- colSums((temp - realmat)^2, na.rm = T)
+    R2vec <- 100 * (1 - sum1vec/sum2vec)
     R2v[k, ] <- R2vec
-
+    
   }
-  R2v 
-}
+  R2v
+} 

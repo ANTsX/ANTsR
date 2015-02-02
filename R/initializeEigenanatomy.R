@@ -27,7 +27,7 @@
 #'   nvecs=length(initdf2$initlist) )
 #' # now a regression
 #' eanatMatrix<-imageListToMatrix(  eanat$eigenanatomyimages, initdf$mask )
-#' # "averages" loosely speaking anyway
+#' # 'averages' loosely speaking anyway
 #' myEigenanatomyRegionAverages<-dmat %*% t( eanatMatrix )
 #' dependentvariable<-rnorm( nrow(dmat) )
 #' summary(lm( dependentvariable ~ myEigenanatomyRegionAverages ))
@@ -50,7 +50,7 @@
 initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
   nclasses <- nrow(initmat)
   classlabels <- rownames(initmat)
-  if (is.null(classlabels))
+  if (is.null(classlabels)) 
     classlabels <- paste("init", 1:nclasses, sep = "")
   initlist <- list()
   if (is.na(mask)) {
@@ -70,6 +70,6 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
     }
     ct <- ct + nreps
   }
-
+  
   return(list(initlist = initlist, mask = mask, enames = eanatnames))
-}
+} 

@@ -31,8 +31,8 @@ Perform thresholding on the given image
 }
 \examples{
 \dontrun{
-ThresholdImage( 3 , "input_img.nii" , "output_img.nii" , 2 , 3 )
-ThresholdImage( 3 , "input_img.nii" , "output_img.nii" , "Otsu" , 3 )
+ThresholdImage( 3 , 'input_img.nii' , 'output_img.nii' , 2 , 3 )
+ThresholdImage( 3 , 'input_img.nii' , 'output_img.nii' , 'Otsu' , 3 )
 }
 }
 \author{

@@ -38,5 +38,4 @@ icawhiten <- function(Xin, n.comp, verbose = FALSE) {
   K <- matrix(K[1:n.comp, ], n.comp, p)
   X1 <- K %*% X
   return(X1)
-}
- 
+} 

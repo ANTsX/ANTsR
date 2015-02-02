@@ -40,7 +40,7 @@
 #' # generate sample demographics that do not explain outcome
 #' age <- runif(nsubjects, 50, 75)
 #' demog <- data.frame(outcome=outcome, age=age)
-#' result <- cvEigenanatomy(demog, input, "outcome", ratio=5, mask, 
+#' result <- cvEigenanatomy(demog, input, 'outcome', ratio=5, mask, 
 #'             sparseness=0.25, nvecs=4) 
 #' }
 #' 

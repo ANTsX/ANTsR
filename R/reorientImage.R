@@ -17,24 +17,25 @@
 #' reofi<-reorientImage(fi,c(1,0))
 #' 
 #' @export reorientImage
-reorientImage <- function( img, axis1, axis2=NA,
-  doreflection=0, doscale=0, txfn=NA ) {
-  if (length(dim(img)) == 1)
-    if (dim(img)[1] == 1)
+reorientImage <- function(img, axis1, axis2 = NA, doreflection = 0, doscale = 0, 
+  txfn = NA) {
+  if (length(dim(img)) == 1) 
+    if (dim(img)[1] == 1) 
       return(NULL)
-  if ( img@pixeltype != "float"    )
-       {
-       print(args(reorientImage))
-       print("input images must have float pixeltype")
-       return(NA)
-       }
-  if ( is.na(axis2)  ) axis2<-rep(0,img@dimension)
-#  img2<-antsImageClone(img)
-  axis1<-axis1/sqrt( sum( axis1*axis1 )  )*(-1)
-  axis2<-axis2/sqrt( sum( axis2*axis2 )  )*(-1)
-  if ( is.na(txfn) ) txfn=tempfile(fileext='.mat')
-  .Call("reorientImage", img, txfn, axis1, axis2,
-     doreflection, doscale=doscale, PACKAGE = "ANTsR")
-  img2<-antsApplyTransforms(img,img,transformlist=c(txfn))
-  return(list(reoimg=img2,txfn=txfn))
-}
+  if (img@pixeltype != "float") {
+    print(args(reorientImage))
+    print("input images must have float pixeltype")
+    return(NA)
+  }
+  if (is.na(axis2)) 
+    axis2 <- rep(0, img@dimension)
+  # img2<-antsImageClone(img)
+  axis1 <- axis1/sqrt(sum(axis1 * axis1)) * (-1)
+  axis2 <- axis2/sqrt(sum(axis2 * axis2)) * (-1)
+  if (is.na(txfn)) 
+    txfn = tempfile(fileext = ".mat")
+  .Call("reorientImage", img, txfn, axis1, axis2, doreflection, doscale = doscale, 
+    PACKAGE = "ANTsR")
+  img2 <- antsApplyTransforms(img, img, transformlist = c(txfn))
+  return(list(reoimg = img2, txfn = txfn))
+} 

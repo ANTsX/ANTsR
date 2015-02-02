@@ -14,7 +14,7 @@
 #' @examples
 #' 
 #' \dontrun{
-#'   mat = matrixToImages(aMat, mask, "aMat_")
+#'   mat = matrixToImages(aMat, mask, 'aMat_')
 #' }
 #' 
 #' 

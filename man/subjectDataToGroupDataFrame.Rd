@@ -10,7 +10,7 @@ subjectDataToGroupDataFrame(csvlist, usecol, mycolname = NA,
 \arguments{
 \item{csvlist}{input list of csv files eg by Sys.glob ...}
 
-\item{usecol}{a column name or number e.g. 1 or "Volume"}
+\item{usecol}{a column name or number e.g. 1 or 'Volume'}
 
 \item{mycolname}{rename the column by this string (optional)}
 
@@ -27,8 +27,8 @@ for the values and where rows correspond to subjects.
 \examples{
 \dontrun{
 data(aal,package='ANTsR')
-csvlist<-Sys.glob("*md*csv")
-mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , "Mean" , datarownames=aal$label_name )
+csvlist<-Sys.glob('*md*csv')
+mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , 'Mean' , datarownames=aal$label_name )
 # should have each ROI value for each subject listed in a large data frame
 }
 }

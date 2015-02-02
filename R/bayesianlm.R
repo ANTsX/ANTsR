@@ -45,14 +45,14 @@
 #'   print(bmdl$beta)
 #'   print(bmdlNoPrior$beta)
 #'   \dontrun{
-#'   fn<-"PEDS012_20131101_pcasl_1.nii.gz"
+#'   fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 #' # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
 #'   asl<-antsImageRead(fn,4)
 #'   tr<-antsGetSpacing(asl)[4]
 #'   aslmean<-getAverageOfTimeSeries( asl )
 #'   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
 #'   aslmat<-timeseries2matrix(asl,aslmask)
-#'   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
+#'   tc<-as.factor(rep(c('C','T'),nrow(aslmat)/2))
 #'   dv<-computeDVARS(aslmat)
 #'   # do some comparison with a single y, no priors
 #'   y<-rowMeans(aslmat)
@@ -73,10 +73,10 @@
 #'     {
 #'     temp<-antsImageClone( aslmask )
 #'     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
-#' #    ImageMath(3,temp,"PeronaMalik",temp,150,10)
+#' #    ImageMath(3,temp,'PeronaMalik',temp,150,10)
 #'     SmoothImage(3,temp,1.5,temp)
 #'     nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
-#'       rep(2,3), boundary.condition = "mean")
+#'       rep(2,3), boundary.condition = 'mean')
 #'     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
 #'     }
 #'   prior  <- rowMeans( smoothcoeffmat  )
@@ -103,90 +103,83 @@
 #'   }
 #' 
 #' @export bayesianlm
-bayesianlm <- function( X, y, priorMean, priorPrecision,
-  priorIntercept = 0, regweights, includeIntercept = F ) {
-  if ( is.null(dim(y)) ) veccoef<-TRUE else veccoef<-FALSE
-# priorPrecision is the inverse of the covariance matrix
-  if (  missing(priorPrecision) )
-    priorPrecision<-diag( ncol(X) )*0
-  if (  missing(priorMean) )
-    priorMean<-rep( 0, ncol(X) )
-  if ( !missing(regweights) )
-    {
-    regweights<-diag(regweights)
-    }
-  if (  missing(regweights) )
-    {
-    regweights<-rep(1,length(y))
-    regweights<-diag(regweights)
-    }
+bayesianlm <- function(X, y, priorMean, priorPrecision, priorIntercept = 0, regweights, 
+  includeIntercept = F) {
+  if (is.null(dim(y))) 
+    veccoef <- TRUE else veccoef <- FALSE
+  # priorPrecision is the inverse of the covariance matrix
+  if (missing(priorPrecision)) 
+    priorPrecision <- diag(ncol(X)) * 0
+  if (missing(priorMean)) 
+    priorMean <- rep(0, ncol(X))
+  if (!missing(regweights)) {
+    regweights <- diag(regweights)
+  }
+  if (missing(regweights)) {
+    regweights <- rep(1, length(y))
+    regweights <- diag(regweights)
+  }
   dfr <- dim(X)[2] - 1
   dfe <- dim(X)[1] - dfr - 1
-  tXX<-t(X) %*% ( regweights %*% X )
-  XtXinv <- solve( tXX + priorPrecision )
-  temp<-t(X) %*% ( regweights %*% y )
-  X2 <- ( priorPrecision %*% priorMean + temp )
+  tXX <- t(X) %*% (regweights %*% X)
+  XtXinv <- solve(tXX + priorPrecision)
+  temp <- t(X) %*% (regweights %*% y)
+  X2 <- (priorPrecision %*% priorMean + temp)
   mu_n <- XtXinv %*% X2
-  if ( !includeIntercept )
-    {
-    if (veccoef )  beta <- mu_n[-1] else beta <- mu_n[-1, ]
-    } else beta<-mu_n
-  if ( includeIntercept )  priorIntercept=0
+  if (!includeIntercept) {
+    if (veccoef) 
+      beta <- mu_n[-1] else beta <- mu_n[-1, ]
+  } else beta <- mu_n
+  if (includeIntercept) 
+    priorIntercept = 0
   preds <- X %*% mu_n
-  b_n  <- priorIntercept + mean(regweights %*% y)-mean(regweights %*% preds)
+  b_n <- priorIntercept + mean(regweights %*% y) - mean(regweights %*% preds)
   preds <- preds + b_n
-  myresiduals<-( y - preds )
-
+  myresiduals <- (y - preds)
+  
   if (!includeIntercept) {
     if (dim(X)[2] > 2) {
       mycoefs <- diag(XtXinv[2:dim(X)[2], 2:dim(X)[2]])
-      } else {
-        mycoefs <- XtXinv[2, 2]
-      }
-    } else mycoefs <- diag(XtXinv[1:dim(X)[2], 1:dim(X)[2]])
-
-  if ( veccoef ) {
+    } else {
+      mycoefs <- XtXinv[2, 2]
+    }
+  } else mycoefs <- diag(XtXinv[1:dim(X)[2], 1:dim(X)[2]])
+  
+  if (veccoef) {
     beta.std <- sqrt(sum((myresiduals)^2)/dfe * mycoefs)
   } else {
-    beta.std <- t(sqrt(as.vector(colSums((myresiduals)^2)/dfe) %o%
-      mycoefs))
+    beta.std <- t(sqrt(as.vector(colSums((myresiduals)^2)/dfe) %o% mycoefs))
   }
-
-  if (!includeIntercept){
-    if (veccoef)
+  
+  if (!includeIntercept) {
+    if (veccoef) 
       beta.t <- mu_n[-1]/beta.std
-    if (!veccoef)
+    if (!veccoef) 
       beta.t <- mu_n[-1, ]/beta.std
-    } else beta.t <- mu_n / beta.std
-
-  beta.pval <- 2 * pt(-abs(beta.t), df = dfe )
-
-  betapost<-phi<-0
-#  if ( pckg & FALSE ) {
-  if ( FALSE ) {
-    # lots of problems below - needs work ... but basically, this crudely
-    # estimates integrals of the posterior across parameters
-    # compute posterior for gamma
-    myresidualsmod<-myresiduals# remove scaling effects
-    errterm = myresidualsmod^2 # my error distribution
-    gamma_parms <- fitdistr(errterm,"gamma")
+  } else beta.t <- mu_n/beta.std
+  
+  beta.pval <- 2 * pt(-abs(beta.t), df = dfe)
+  
+  betapost <- phi <- 0
+  # if ( pckg & FALSE ) {
+  if (FALSE) {
+    # lots of problems below - needs work ... but basically, this crudely estimates
+    # integrals of the posterior across parameters compute posterior for gamma
+    myresidualsmod <- myresiduals  # remove scaling effects
+    errterm = myresidualsmod^2  # my error distribution
+    gamma_parms <- fitdistr(errterm, "gamma")
     # or use residuals directly as theory says
-    b_1 = priorIntercept + 0.5 * mean( errterm, na.rm=T )
-    sorterr<-sort(errterm)
-    shest=fitdistr(sorterr,'gamma')$estimate[1]
-    pgam<-pgamma( sorterr, shape=shest )
-    phi<-mean( pgam, na.rm=T )
-    sig1<-solve( tXX + phi* priorPrecision )
-    mu1<-as.numeric( mu_n )
+    b_1 = priorIntercept + 0.5 * mean(errterm, na.rm = T)
+    sorterr <- sort(errterm)
+    shest = fitdistr(sorterr, "gamma")$estimate[1]
+    pgam <- pgamma(sorterr, shape = shest)
+    phi <- mean(pgam, na.rm = T)
+    sig1 <- solve(tXX + phi * priorPrecision)
+    mu1 <- as.numeric(mu_n)
     # below gives mean posterior for beta across a range
-    betapost <- pmvnorm( mu1,rep(Inf,length(mu1)), mean=mu1, sigma=sig1)[1]
+    betapost <- pmvnorm(mu1, rep(Inf, length(mu1)), mean = mu1, sigma = sig1)[1]
   }
-  return( list( beta = beta, beta.std = beta.std,
-    beta.t = beta.t, beta.pval = beta.pval,
-    fitted.values=preds,
-    betaPosteriors=betapost,
-    precisionPosteriors=phi,
-    posteriorProbability=phi*betapost
-     )
-    )
-}
+  return(list(beta = beta, beta.std = beta.std, beta.t = beta.t, beta.pval = beta.pval, 
+    fitted.values = preds, betaPosteriors = betapost, precisionPosteriors = phi, 
+    posteriorProbability = phi * betapost))
+} 
