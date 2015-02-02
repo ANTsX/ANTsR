@@ -36,7 +36,7 @@ perfusionregression <- function(mask_img, mat, xideal,
     print(myusage)
     return(NULL)
   }
-  usePckg("robust")
+  usePkg("robust")
   if (missing(mat) | missing(xideal) | missing(nuis)) {
     print("Missing one or more input parameter(s).")
     print(myusage)
