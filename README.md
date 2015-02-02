@@ -199,7 +199,7 @@ antsImageWrite( agebetas, 'agebetas.nii.gz' )
 ```
 mnit<-getANTsRData("mni")
 mnit<-antsImageRead(mnit,3)
-ResampleImageBySpacing(3,mnit,mnit,4,4,4)
+mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
 mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
 mat<-antsGetNeighborhoodMatrix(mnit,mask,radius,

@@ -74,12 +74,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
     ATROPOS_SEGMENTATION_MRF <- paste("[0.11,1x1]")
   # Atropos params end
   
-  imgsmall <- antsImageClone(img)
-  ResampleImageBySpacing(img@dimension, img, imgsmall, as.character(rep(4, img@dimension)), 
-    1)
-  temsmall <- antsImageClone(tem)
-  ResampleImageBySpacing(tem@dimension, tem, temsmall, as.character(rep(4, tem@dimension)), 
-    1)
+  imgsmall <- resampleImage(img , rep(4, img@dimension) )
+  temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
   if (!file.exists(initafffn)) 
     antsAffineInitializer(img@dimension, temsmall, imgsmall, initafffn, 15, 0.1, 
