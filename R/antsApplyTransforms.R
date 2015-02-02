@@ -18,6 +18,7 @@
 #'
 #' # will give the full form of help
 #' antsApplyTransforms( "-h")
+#' # see antsRegistration
 #' # example 1 - simplified
 #' mywarpedimage<-antsApplyTransforms(fixed=fixed,moving=moving,
 #'   transformlist=mytx$fwdtransforms)
@@ -29,6 +30,7 @@
 #' antsApplyTransforms( list( d=as.character(2),
 #'  i=fixed,o=outimg,r=moving,t=paste("[",mytx$inv[1],",1]",sep='') ) )
 #'
+#' @seealso \code{\link{antsRegistration}}
 #' @export antsApplyTransforms
 antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", interpolator = "Linear",
   imagetype = 0, whichtoinvert=NA, ...) {

@@ -19,10 +19,6 @@
 #' \dontrun{
 #' # will give the full form of help
 #' antsRegistration( "-h")
-#' # example 1 - simplified, uses antsImages for I/O
-#' antsRegOut<-antsRegistration(fixed=img1,moving=img2,
-#'   typeofTransform="Affine",outprefix="./test")
-#' # example 2
 #'   fi<-antsImageRead( getANTsRData('r16') ,2)
 #'   mi<-antsImageRead( getANTsRData('r64') ,2)
 #'   mytx<-antsRegistration(fixed=fi , moving=mi ,
@@ -33,13 +29,14 @@
 #'   par(mfrow=c(1,2))
 #'   plotANTsImage(fi)
 #'   plotANTsImage(mywarpedimage)
-#' # example 3 - full access, only uses file-based I/O
-#'   antsRegistration(
-#'     list( d=2,m="mi[r16slice.nii.gz,
-#'     r64slice.nii.gz,1,20,Regular,0.05]",
-#'   t="affine[1.0]", c="2100x1200x1200x0",
-#'   s="3x2x1x0", f="4x3x2x1", u="1",
-#'   o="[xtest,xtest.nii.gz,xtest_inv.nii.gz]" ) )
+#'   # example 2 - full access, only uses file-based I/O
+#'   if ( FALSE )
+#'     antsRegistration(
+#'       list( d=2,m="mi[r16slice.nii.gz,
+#'       r64slice.nii.gz,1,20,Regular,0.05]",
+#'       t="affine[1.0]", c="2100x1200x1200x0",
+#'       s="3x2x1x0", f="4x3x2x1", u="1",
+#'       o="[xtest,xtest.nii.gz,xtest_inv.nii.gz]" ) )
 #' }
 #'
 #' @export antsRegistration
@@ -79,12 +76,12 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "",
       if (ttexists) {
         initx=initialTransform
         cat("use simple parameterization \n")
-        movingc <- antsImageClone(moving, "double")
-        fixedc <- antsImageClone(fixed, "double")
-        warpedfixout <- antsImageClone(movingc)
-        warpedmovout <- antsImageClone(fixedc)
-        f <- antsrGetPointerName(fixedc)
-        m <- antsrGetPointerName(movingc)
+        moving <- antsImageClone(moving, "double")
+        fixed <- antsImageClone(fixed, "double")
+        warpedfixout <- antsImageClone(moving)
+        warpedmovout <- antsImageClone(fixed)
+        f <- antsrGetPointerName(fixed)
+        m <- antsrGetPointerName(moving)
         wfo <- antsrGetPointerName(warpedfixout)
         wmo <- antsrGetPointerName(warpedmovout)
         if (!is.na(mask) )
