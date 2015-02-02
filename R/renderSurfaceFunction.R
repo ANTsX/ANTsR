@@ -16,7 +16,7 @@
 #' @author Avants B, Kandel B
 #' @seealso \code{\link{plotBasicNetwork}}
 #' @examples
-#'
+#' \dontrun{
 #'        mnit<-getANTsRData("mni")
 #'        mnit<-antsImageRead(mnit,3)
 #'        mnia<-getANTsRData("mnia")
@@ -25,7 +25,7 @@
 #'        ThresholdImage(3,mnia,mnia,1,2)
 #' #       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
 #'        brain<-renderSurfaceFunction( surfimg =list( mnit ) , list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
-#'
+#'        }
 #' @export renderSurfaceFunction
 renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, offsetfval,
   smoothsval = 0, smoothfval = 0, blobrender = TRUE, alphasurf = 1, alphafunc = 1,

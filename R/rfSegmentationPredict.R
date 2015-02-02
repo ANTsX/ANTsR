@@ -17,10 +17,10 @@
 #' ImageMath(2,mask,"ME",mask,25)
 #' mask2[ mask == 1 ]<-0
 #' segs<-Atropos( d = 2, a = img, m = "[0.2,1x1]",c = "[5,0]",  i = "kmeans[3]", x = mask)
-#' fimgs<-lappend( img )
+#' fimgs<-list( img )
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100, verbose=TRUE )
 #' rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
-#' plotANTsImage( rfseg2 )
+#' plot( rfseg2 )
 #'
 #' @export rfSegmentationPredict
 rfSegmentationPredict <- function(rfSegmentationModel, featureimages, mask, verbose = FALSE) {
