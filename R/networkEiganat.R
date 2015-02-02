@@ -172,11 +172,19 @@ lowrank <- function(A, k = 1) {
   return(u %*% d %*% t(v))
 }
 
+eanatcolMaxs<-function(v)
+{
+  if ( class(v) =='matrix')
+  {
+  return( apply(v,FUN=max,MARGIN=2) )
+  } else return(v)
+}
+
 eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
   if (abs(sparam) >= 1)
     return(vin)
   v <- vin
-  v<-v*sign(colMaxs(v))
+  v<-v*sign(eanatcolMaxs(v))
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask))
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
@@ -189,7 +197,7 @@ eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
     return(vin)
   if (nrow(vin) < ncol(vin))
     v <- t(vin) else v <- vin
-  v<-v*sign(colMaxs(v))
+  v<-v*sign(eanatcolMaxs(v))
   b <- round(abs(as.numeric(sparam)) * nrow(v))
   if (b < 3)
     b <- 3
