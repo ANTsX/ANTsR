@@ -26,7 +26,6 @@ inspectImageData3D <- function(myfiles) {
     return(1)
   }
   usePkg("moments")
-  usePkg("extremevalues")
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
   idim <- 3
@@ -45,4 +44,4 @@ inspectImageData3D <- function(myfiles) {
   }
   rownames(mymat) <- myfiles
   return(mymat)
-} 
+}

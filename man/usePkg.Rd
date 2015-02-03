@@ -16,7 +16,7 @@ T if package successfully loaded, F otherwise. cbf image
 Use any package.  If package is not installed, this will install from CRAN.
 }
 \examples{
-usePkg('extremevalues')
+usePkg('randomForest')
 }
 \author{
 Benjamin M. Kandel

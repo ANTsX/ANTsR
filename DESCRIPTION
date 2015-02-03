@@ -8,7 +8,7 @@ Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)
 LazyLoad: yes
-Imports: methods, signal, igraph, visreg, psych, fastICA, fpc, irlba, caret, randomForest, e1071, mFilter, wmtsa, tools, DMwR, moments, extremevalues, rgl, grid, png, BGLR, glmnet, cluster, robust, pixmap, misc3d, utils, sna, magic, spls
+Imports: methods, signal, igraph, visreg, psych, fastICA, fpc, irlba, caret, randomForest, e1071, mFilter, wmtsa, tools, DMwR, moments, rgl, grid, png, BGLR, glmnet, cluster, robust, pixmap, misc3d, utils, sna, magic, spls
 Depends: Rcpp
 LinkingTo: Rcpp
 SystemRequirements: cmake
