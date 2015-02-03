@@ -18,7 +18,7 @@
 #' gobj<-makeGraph( mat )
 #' mat <- matrix(  c( 1, 0.5, 0.2, -0.1, 1, 0.3, -0.2, 0.6, 1 ) , ncol= 3 )
 #' gobj<-makeGraph( mat , 0.5 )
-#' gplot( dd$adjacencyMatrix )
+#' # gplot( gobj$adjacencyMatrix ) # need sna library for this
 #' }
 #'
 #' @export makeGraph
