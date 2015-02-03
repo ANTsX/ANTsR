@@ -8,6 +8,7 @@ Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)
 LazyLoad: yes
-Depends: Rcpp, methods, psych
+Depends: Rcpp, methods
+Suggests: psych, igraph, fpc, irlba, caret, tools, rgl, grid, png, BGLR, glmnet, cluster, robust, pixmap, misc3d, signal, mFilter, sna, e1071, randomForest, magic, fastICA, visreg, moments, wmtsa, DMwR
 LinkingTo: Rcpp
 SystemRequirements: cmake
