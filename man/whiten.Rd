@@ -7,11 +7,11 @@
 whiten(x, k = NA, reducex = FALSE)
 }
 \arguments{
+\item{x}{input matrix}
+
 \item{k}{rank to use}
 
 \item{reducex}{reduce the input matrix to k-size subspace}
-
-\item{mat}{input matrix}
 }
 \value{
 matrix is output

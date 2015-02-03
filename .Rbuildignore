@@ -1,6 +1,9 @@
 ^\.travis\.yml$
-src/ANTS/ANTS-build/ 
+src/ANTS/ANTS-build/
 src/ANTS/ANTS-src/
-src/ANTS/stamp/ 
-src/ANTS/tmp/ 
+src/ANTS/stamp/
+src/ANTS/tmp/
+src/ANTS/ANTS-build/ITKv4/.git
+src/ANTS/ANTS-build/ITKv4/Modules/Remote/MGHIO/.git
+src/ANTS/ANTS-src/.git
 .gitignore

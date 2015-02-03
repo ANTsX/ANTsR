@@ -2,8 +2,7 @@
 #'
 #' Whitens the input matrix using SVD and returns the result.
 #'
-#'
-#' @param mat input matrix
+#' @param x input matrix
 #' @param k rank to use
 #' @param reducex reduce the input matrix to k-size subspace
 #' @return matrix is output
