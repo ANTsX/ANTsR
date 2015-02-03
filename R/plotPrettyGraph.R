@@ -30,7 +30,7 @@ usePkg("sna")
 usePkg("igraph")
 as.matrix(sort(functionToPlot))
 # Now, to make the prettiest graph we can:
-png( pngfn , h = 2^figScale, w = 2^figScale ) # , type = "cairo-png")
+png( pngfn , height = 2^figScale, width = 2^figScale ) # , type = "cairo-png")
 par(mai = c(0, 0, 0, 0))
 frange<-(functionToPlot - min(functionToPlot)) /
                        (max(functionToPlot) - min(functionToPlot))

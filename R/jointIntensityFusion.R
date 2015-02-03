@@ -69,10 +69,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
   rSearch=2, segvals=NA )
 {
-  if (nargs() == 0) {
-    print(args(ajointIntensityFusion))
-    return(1)
-  }
   haveLabels=FALSE
   BC=boundary.condition
   if ( !( all( is.na(labelList) ) ) )
