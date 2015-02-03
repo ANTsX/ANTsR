@@ -9,6 +9,7 @@
 namespace ants
 {
 
+  // [[Rcpp::export]]
   template< class PixelType , int ImageDimension >
   typename itk::Image< PixelType , ImageDimension >::Pointer antsImageRead( std::string filename // image to read
 									    )
@@ -31,6 +32,7 @@ namespace ants
     return image_reader->GetOutput() ;
   }
 
+  // [[Rcpp::export]]
   template< class ImagePointerType >
   void printImageInfo( ImagePointerType image , std::ostream& os )
   {
@@ -45,6 +47,7 @@ namespace ants
 } // namespace ants
 
 
+// [[Rcpp::export]]
 RcppExport SEXP antsImageRead( SEXP r_filename , SEXP r_pixeltype , SEXP r_dimension )
 try
 {

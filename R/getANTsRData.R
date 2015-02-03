@@ -1,3 +1,16 @@
+#' getANTsRData
+#'
+#' Downloads antsr test data
+#'
+#' @param fileid one of the permitted file ids
+#' @param usefixedlocation directory to which you download files
+#' @return filename string
+#' @author Avants BB
+#' @examples
+#'
+#' fi <- getANTsRData( "r16" )
+#'
+#' @export getANTsRData
 getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   usePkg("tools")
   myusage <- "usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
