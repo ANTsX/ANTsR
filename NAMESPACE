@@ -1,14 +1,6 @@
-Package: ANTsR
-Type: Package
-Title: ANTs <--> R
-Version: 1.0
-Date: 2012-02-01
-Author: Shrinidhi KL, Brian B. Avants, ANTS-developers
-Maintainer: Brian B. Avants <stnava@gmail.com>
-Description: Package provides access to ANTs routines in R
-License: GPL (>=2)
-LazyLoad: yes
-Imports: methods, signal, igraph
-Depends: Rcpp
-LinkingTo: Rcpp
-SystemRequirements: cmake
+useDynLib(ANTsR)
+S3method(as.data.frame, antsMatrix)
+exportMethods(coerce)
+exportPattern("^[^.]")
+import(Rcpp)
+import(methods)
