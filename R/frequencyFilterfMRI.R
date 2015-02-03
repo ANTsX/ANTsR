@@ -79,7 +79,7 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
   if (opt == "butt") {
     usePkg("signal")
     bf <- butter(2, c(freqLo, freqHi), type = "pass")
-    filteredTimeSeries <- matrix(signal::filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
+    filteredTimeSeries <- matrix(filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
     return(filteredTimeSeries)
   }
   if (opt == "trig") {
