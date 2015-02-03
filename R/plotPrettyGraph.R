@@ -39,7 +39,8 @@ alpharange[ alpharange > 1 ]<-1
 functionToPlotColor <- hsv( hueval , 1, frange, alpha=alpharange )
 functionToPlotScaler <- abs(functionToPlot)/max(abs(functionToPlot)) * 0.5 + 1/2
 if ( is.na( vertexSize ) ) vertexSize <- functionToPlotScaler
-prettyPlot <- sna::gplot(dat = adjacencyMatrix,
+# gplot is from sna
+prettyPlot <- gplot(dat = adjacencyMatrix,
                     label = rownames(adjacencyMatrix),
                     mode = layoutmode,
                     pad = 0,
