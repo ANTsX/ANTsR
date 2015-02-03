@@ -53,18 +53,18 @@ makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1,
   edgeWeights <- E(g1)$weight
   # compute local efficiency
   if (getEfficiency) {
-    mysps <- igraph::shortest.paths(g1)
+    mysps <- shortest.paths(g1)
     mysps[mysps == Inf] <- 2 * max(adjacencyMatrix)
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
-  gmetric0 <- igraph::evcent(g1)$vector
-  gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- igraph::page.rank(g1)$vector  #
-  gmetric3 <- igraph::degree(g1)
-  gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)  #
-  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"))
-  gmetric6 <- igraph::graph.strength(g1)
-  gmetric7 <- igraph::centralization.degree(g1)$res
+  gmetric0 <- evcent(g1)$vector
+  gmetric1 <- closeness(g1, normalized = T, weights = edgeWeights)
+  gmetric2 <- page.rank(g1)$vector  #
+  gmetric3 <- degree(g1)
+  gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  #
+  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat"))
+  gmetric6 <- graph.strength(g1)
+  gmetric7 <- centralization.degree(g1)$res
   gmetric8 <- myspsa
   walktrapcomm <- walktrap.community(g1)
   if (  !is.na(communityMethod) )
