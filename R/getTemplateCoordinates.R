@@ -1,54 +1,54 @@
 #' Define an anatomical coordinate system in a new image based on a template
-#' 
+#'
 #' This function will provide a mapping that labels an input image and its
 #' blobs.
-#' 
+#'
 #' Uses Matthew Brett's mni2tal to get the final Talairach coordinates from MNI
 #' space.
-#' 
+#'
 #' This is a standard approach but it's not very accurate.
-#' 
+#'
 #' @param x x
 #' @return The output point is in approximate template space.
 #' @author Avants, BB
 #' @keywords Talairach, Template, Coordinates
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' #
-#' # ch2bet is available in chris rorden's mricron 
-#' #  but you can do something with any other image 
-#' #  e.g. a statistical image 
+#' # ch2bet is available in chris rorden's mricron
+#' #  but you can do something with any other image
+#' #  e.g. a statistical image
 #' #
 #'   tem<-antsImageRead('ch2bet.nii.gz',3)
-#'   clust <- antsImageClone( tem )  
+#'   clust <- antsImageClone( tem )
 #'   clust[ tem < 80 ]<- 0
 #'   clust[ tem > 90 ]<- 0
 #'   clust[  tem > 80 & tem < 90 ]<- 1
-#'   ImageMath(3, clust,'ME',clust,1)  # erosion 
+#'   ImageMath(3, clust,'ME',clust,1)  # erosion
 #'   clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
 #'   if ( ! exists('mymni') ) {
 #'   # try getANTsRData if you have www access
-#'     mymni<-list( antsImageRead(getANTsRData('mni'),3), 
-#'                  antsImageRead(getANTsRData('mnib'),3), 
+#'     mymni<-list( antsImageRead(getANTsRData('mni'),3),
+#'                  antsImageRead(getANTsRData('mnib'),3),
 #'                  antsImageRead(getANTsRData('mnia'),3) )
 #'   }
 #'   template_cluster_pair<-list(tem,clust)
 #'   gcoords<-getTemplateCoordinates( template_cluster_pair , mymni , convertToTal = TRUE )
-#' # output will be like 
+#' # output will be like
 #' # > gcoords$templatepoints
 #' #     x   y   z t label Brodmann                 AAL
 #' # 1  -12  13  -3 0     1        0           Caudate_R
 #' # 2   13  16   5 0     2        0           Caudate_L
 #' #
 #' # can also use a white matter label set ...
-#' # 
+#' #
 #' }
-#' 
+#'
 #' @export getTemplateCoordinates
-getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels, 
+getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
   labelnames = NA, outprefix = NA, convertToTal = FALSE) {
-  if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) < 
+  if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) <
     2) {
     print(args(getTemplateCoordinates))
     print(" imagePairToBeLabeled <-list( myBrain, myBrainBlobs ) ")
@@ -69,16 +69,16 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
     outprefix <- paste(tempdir(), "/Z", sep = "")
   }
   txfn <- paste(outprefix, "0GenericAffine.mat", sep = "")
-  if (!file.exists(txfn)) 
-    mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("Affine"), 
+  if (!file.exists(txfn))
+    mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("Affine"),
       outprefix = outprefix) else mytx <- list(fwdtransforms = txfn)
-  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi, transformlist = mytx$fwdtransforms, 
+  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi, transformlist = mytx$fwdtransforms,
     interpolator = c("Linear"))
   milab <- imagePairToBeLabeled[[2]]
-  mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms, 
+  mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
     interpolator = c("NearestNeighbor"))
   pointfile <- paste(outprefix, "coords.csv", sep = "")
-  ImageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage, 
+  ImageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage,
     1)
   mypoints <- read.csv(pointfile)
   for (mylab in 2:length(templatePairWithLabels)) {
@@ -98,19 +98,19 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
     # iterate through the point list and index the filab image ( template labels )
     templateLab <- rep(NA, nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
-      if (imagedim == 2) 
+      if (imagedim == 2)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
-      if (imagedim == 3) 
+      if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
       templateLab[i] <- getValueAtPoint(filab, mypoint)
     }
-    if (mylab == 2) 
+    if (mylab == 2)
       mypoints <- cbind(mypoints, Brodmann = templateLab)
-    if (mylab == 3 & max(filab[filab > 0]) == 11) 
+    if (mylab == 3 & max(filab[filab > 0]) == 11)
       mypoints <- cbind(mypoints, Tracts = templateLab)
-    if (mylab == 3 & max(filab[filab > 0]) != 11) 
+    if (mylab == 3 & max(filab[filab > 0]) != 11)
       mypoints <- cbind(mypoints, AAL = templateLab)
-    if (mylab > 3) 
+    if (mylab > 3)
       mypoints <- cbind(mypoints, templateLab = templateLab)
   }
   if (convertToTal & imagedim == 3) {
@@ -121,7 +121,7 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
       mypoints$z[i] <- talpt[3]
     }
   }
-  
+
   if (!convertToTal & imagedim == 3) {
     # assume MNI
     for (i in 1:nrow(mypoints)) {
@@ -135,27 +135,27 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
   mypoints$y <- round(mypoints$y * scl)/scl
   mypoints$z <- round(mypoints$z * scl)/scl
   if (max(filab[filab > 0]) == 11) {
-    data("tracts", package = "ANTsR")
+    data("tracts", package = "ANTsR", envir = environment())
     tractnames <- rep("", nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
       tractnum <- as.character(mypoints$Tracts[i])
       tractname <- as.character(tracts$label_name[as.numeric(tractnum)])
-      if (length(tractname) > 0) 
+      if (length(tractname) > 0)
         tractnames[i] <- tractname
     }
     mypoints$Tracts <- tractnames
   }
   if (max(filab[filab > 0]) != 11) {
-    data("aal", package = "ANTsR")
+    data("aal", package = "ANTsR", envir = environment())
     aalnames <- rep("", nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
       aalnum <- as.character(mypoints$AAL[i])
       aalname <- as.character(aal$label_name[as.numeric(aalnum)])
-      if (length(aalname) > 0) 
+      if (length(aalname) > 0)
         aalnames[i] <- aalname
     }
     mypoints$AAL <- aalnames
   }
-  return(list(templatepoints = mypoints, myLabelsInTemplateSpace = mywarpedLimage, 
+  return(list(templatepoints = mypoints, myLabelsInTemplateSpace = mywarpedLimage,
     myImageInTemplateSpace = mywarpedimage))
-} 
+}
