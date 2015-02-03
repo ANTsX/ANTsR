@@ -87,12 +87,12 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     if (nrow(myTimeSeries)%%2 > 0) {
       firsttime <- myTimeSeries[1, ]
       myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
-      filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
+      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
       filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
       filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
     } else {
-      filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
+      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
     }
     temporalvar <- apply(filteredTimeSeries, 2, var)
