@@ -16,9 +16,9 @@
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
 #' # for prediction
-#' usePkg('spls')
 #' usePkg('randomForest')
-#' data(lymphoma)
+#' usePkg('spls')
+#' data(lymphoma) # from spls
 #' training<-sample( rep(c(TRUE,FALSE),31)  )
 #' sp<-0.02 ; myz<-0
 #' ldd<-sparseDecom( lymphoma$x[training,], nvecs=5 , sparseness=( sp ), mycoption=1, z=myz ) # NMF style
@@ -51,15 +51,15 @@
 #' }
 #'
 #' @export sparseDecom
-sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50, 
-  its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0, initializationList = list(), 
+sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50,
+  its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0, initializationList = list(),
   mycoption = 0, robust = 0, ell1 = 1) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
     return(0)
   }
-  if (is.na(statdir)) 
+  if (is.na(statdir))
     statdir <- paste(tempdir(), "/", sep = "")
   outfn <- paste(statdir, "spca.nii.gz", sep = "")
   decomp <- paste(statdir, "spcaprojectionsView1vec.csv", sep = "")
@@ -73,11 +73,11 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     antsImageWrite(inmask, mfn)
   }
   sccaname <- "recon["
-  if (maskdim == 4) 
+  if (maskdim == 4)
     sccaname <- "recon4d["
-  args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]", 
-    sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh, "-n", nvecs, 
-    "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", inmask, "-r", 
+  args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]",
+    sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh, "-n", nvecs,
+    "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", inmask, "-r",
     robust)
   if (length(initializationList) > 0) {
     ct <- 1
@@ -92,9 +92,9 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     fileConn <- file(initlistfn)
     writeLines(initfns, fileConn)
     close(fileConn)
-    args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, 
-      "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, "-n", 
-      nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r", robust, 
+    args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness,
+      "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, "-n",
+      nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r", robust,
       "--mask", mfn, "--initialization", initlistfn)
     print(initlistfn)
   }
@@ -107,7 +107,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
   fnu <- read.csv(fnu)
   if (class(inmask)[[1]][1] == "antsImage") {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)[1:nvecs]
     fnll <- list()
     for (i in 1:length(fnl)) {
@@ -118,11 +118,11 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
   }
   if (class(inmask)[[1]][1] != "antsImage") {
     glb <- paste("spca*_Variate_View1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, 
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)
     fnl <- read.csv(fnl)
   }
-  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu, 
+  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu,
     computationtime = (time2 - time1)))
-  
-} 
+
+}

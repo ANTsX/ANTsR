@@ -51,8 +51,6 @@ mnit<-getANTsRData('mni')
   mnia2<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia2,mnia2,1,4)
   SmoothImage(3,mnia2,1.5,mnia2)
-  plot( mnit, list(mnia,mnia2), slices='50x140x5',
-   threshold = '0.25x1', axis=0,color=c('red','blue') )
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices='50x140x5',

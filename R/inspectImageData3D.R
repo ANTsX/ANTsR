@@ -12,10 +12,9 @@
 #' \dontrun{
 #' mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
 #' usePkg('fpc')
-#' usePkg('DMwR')
 #' pamres <- pamk(mm)
 #' plot(pamres$pamobject)
-#' outlier.scores <- lofactor( mm, k=5)
+#' outlier.scores <- DMwR::lofactor( mm, k=5)
 #' outliers <- order(outlier.scores, decreasing=T)[1:5]
 #' }
 #'
@@ -25,7 +24,7 @@ inspectImageData3D <- function(myfiles) {
     print(args(inspectImageData3D))
     return(1)
   }
-  usePkg("moments")
+  # usePkg("moments")
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
   idim <- 3

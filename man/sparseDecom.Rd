@@ -28,9 +28,9 @@ variance.
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
 # for prediction
-usePkg('spls')
 usePkg('randomForest')
-data(lymphoma)
+usePkg('spls')
+data(lymphoma) # from spls
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.02 ; myz<-0
 ldd<-sparseDecom( lymphoma$x[training,], nvecs=5 , sparseness=( sp ), mycoption=1, z=myz ) # NMF style
