@@ -36,10 +36,6 @@
 #' dmat<-replicate(nvox, rnorm(20))
 #' dmat2<-replicate(30, rnorm(20))
 #' mat<-t(replicate(3, rnorm(nvox)) )
-#' for ( i in 1:nrow(mat) ) {
-#'   mat[i,]<-eanatsparsify( mat[i,] , 0.5^(i+1)  )
-#'   print(paste(sum(mat[i,]>0)/ncol(mat), 0.5^(i+1)  ))
-#' }
 #' initdf<-initializeEigenanatomy( mat )
 #' eanat<-sparseDecom2( list(dmat,dmat2), inmask=c(initdf$mask,NA),
 #'   sparseness=c( -0.1, -0.2 ), smooth=0,
@@ -50,7 +46,7 @@
 initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
   nclasses <- nrow(initmat)
   classlabels <- rownames(initmat)
-  if (is.null(classlabels)) 
+  if (is.null(classlabels))
     classlabels <- paste("init", 1:nclasses, sep = "")
   initlist <- list()
   if (is.na(mask)) {
@@ -63,13 +59,13 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
   for (i in 1:nclasses) {
     vecimg <- antsImageClone(mask)
     initf <- initmat[i, ]
-    vecimg[mask == 1] <- initf  # eanatsparsify( initf , sparval[1] )
+    vecimg[mask == 1] <- initf  #.eanatsparsify( initf , sparval[1] )
     for (nr in 1:nreps) {
       initlist <- lappend(initlist, vecimg)
       eanatnames[ct + nr - 1] <- toString(classlabels[i])
     }
     ct <- ct + nreps
   }
-  
+
   return(list(initlist = initlist, mask = mask, enames = eanatnames))
-} 
+}

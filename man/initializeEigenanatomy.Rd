@@ -46,10 +46,6 @@ nvox<-1000
 dmat<-replicate(nvox, rnorm(20))
 dmat2<-replicate(30, rnorm(20))
 mat<-t(replicate(3, rnorm(nvox)) )
-for ( i in 1:nrow(mat) ) {
-  mat[i,]<-eanatsparsify( mat[i,] , 0.5^(i+1)  )
-  print(paste(sum(mat[i,]>0)/ncol(mat), 0.5^(i+1)  ))
-}
 initdf<-initializeEigenanatomy( mat )
 eanat<-sparseDecom2( list(dmat,dmat2), inmask=c(initdf$mask,NA),
   sparseness=c( -0.1, -0.2 ), smooth=0,

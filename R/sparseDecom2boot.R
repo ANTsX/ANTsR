@@ -139,10 +139,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
         prevec <- cca1out[, j]
         vec1[prevec > 0] <- 0
       }
-      cca1out[, nv] <- eanatsparsify(vec1, abs(sparseness[1]))
+      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness[1]))
       cca1outAuto[, nv] <- vec1
     } else {
-      cca1out[, nv] <- eanatsparsify(vec1, abs(sparseness[1]))
+      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness[1]))
       cca1outAuto[, nv] <- vec1
     }
     ### now vec 2 ###
@@ -157,10 +157,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
         prevec <- cca2out[, j]
         vec2[prevec > 0] <- 0
       }
-      cca2out[, nv] <- eanatsparsify(vec2, abs(sparseness[2]))
+      cca2out[, nv] <-.eanatsparsify(vec2, abs(sparseness[2]))
       cca2outAuto[, nv] <- vec2
     } else {
-      cca2out[, nv] <- eanatsparsify(vec2, abs(sparseness[2]))
+      cca2out[, nv] <-.eanatsparsify(vec2, abs(sparseness[2]))
       cca2outAuto[, nv] <- vec2
     }
   }

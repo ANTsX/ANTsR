@@ -21,7 +21,7 @@
   badct <- 0
   while (deltaminerr > 0 & approxerr > convcrit & ct < maxits) {
     # while( badct < 2 & ct < maxits )
-    
+
     # print(paste('ct',ct,length(p_k),deltaminerr,approxerr,' bad ', badct))
     temp <- (A %*% c(p_k))
     temp <- c(At %*% temp)
@@ -29,7 +29,7 @@
     iprk <- sum(r_k * r_k)
     alpha_k <- iprk/alpha_denom
     x_k1 <- c(x_k) + c(p_k) * alpha_k  # this adds the scaled residual to the current solution
-    x_k1 <- c(eanatsparsifyv(as.matrix(x_k1), sp))
+    x_k1 <- .eanatsparsifyv(as.matrix(x_k1), sp)
     temp <- At %*% (A %*% as.matrix(x_k1))
     r_k1 <- b - c(temp)
     approxerr <- norm(r_k1)
@@ -47,9 +47,9 @@
     p_k <- p_k1
     x_k <- x_k1
     ct <- ct + 1
-    if (deltaminerr < 0) 
+    if (deltaminerr < 0)
       badct <- badct + 1
   }
   x_k <- bestsol
   return(x_k)
-} 
+}
