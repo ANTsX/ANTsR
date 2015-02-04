@@ -8,6 +8,8 @@ KellyKapowski(d = NA, s = NA, g = NA, w = NA, c = "[45,0.0,10]",
   r = 0.025, m = 1.5, outimg = outimg, ...)
 }
 \arguments{
+\item{d}{Number of dimensions of the input image}
+
 \item{s}{segmentation image}
 
 \item{g}{gray matter probability image}
@@ -20,9 +22,9 @@ KellyKapowski(d = NA, s = NA, g = NA, w = NA, c = "[45,0.0,10]",
 
 \item{m}{gradient field smoothing parameter}
 
-\item{imageDimension2|3|4}{Number of dimensions of the input image}
+\item{outimg}{output image}
 
-\item{inputImage}{Input image to operate on}
+\item{...}{anything else, see KK help in ANTs}
 }
 \value{
 0 -- Success\cr 1 -- Failure

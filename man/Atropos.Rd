@@ -36,8 +36,6 @@ The smoothness parameters are governed by the -b/--bspline option.}
 \item{priorweight}{usually 0, 0.25 or 0.5}
 
 \item{...}{more parameters, see Atropos help in ANTs}
-
-\item{m}{mrf parameters see Atropos for format of these}
 }
 \value{
 0 -- Success\cr 1 -- Failure

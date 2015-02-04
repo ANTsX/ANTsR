@@ -15,8 +15,7 @@
 #' # different ways you might smooth images of different dimensionality
 #' img<-makeImage(c(5,5),rnorm(25))
 #' SmoothImage( 2 , img ,'1.2x1.5', img)
-#' SmoothImage( 3 , img ,'1x0x1', img)
-#' SmoothImage( 4 , img ,'1x2x1x0', img)
+#' SmoothImage( 2 , img ,c(1.2,1.5), img)
 #'
 #' @export SmoothImage
 SmoothImage <- function(dim,inimg,sigma,outimg) {
