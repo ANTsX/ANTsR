@@ -5,7 +5,6 @@
 \alias{as.antsMatrix}
 \alias{as.antsMatrix,data.frame-method}
 \alias{as.antsMatrix,list-method}
-\alias{as.list,antsMatrix-method}
 \title{as.antsMatrix}
 \usage{
 as.antsMatrix(object, ...)
@@ -13,8 +12,6 @@ as.antsMatrix(object, ...)
 \S4method{as.antsMatrix}{list}(object, elementtype)
 
 \S4method{as.antsMatrix}{data.frame}(object, elementtype)
-
-\S4method{as.list}{antsMatrix}(x)
 }
 \arguments{
 \item{object}{An object}
@@ -33,7 +30,5 @@ convert types to an antsMatrix
 \item \code{list}: 
 
 \item \code{data.frame}: 
-
-\item \code{antsMatrix}: 
 }}
 

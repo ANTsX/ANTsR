@@ -58,7 +58,7 @@ setMethod(f = "as.antsMatrix", signature(object = "data.frame"), definition = fu
   return(.Call("antsMatrix_asantsMatrix", as.list(object), elementtype, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn as.antsMatrix
+# FIXME - doc where?
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
