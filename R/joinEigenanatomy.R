@@ -41,7 +41,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
   }
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   if (!is.na(mask))
-    decom <- imageListToMatrix(list_of_eanat_images, mask) else decom <- t(list_of_eanat_images)
+    decom <- imageListToMatrix(listEanatImages, mask) else decom <- t(listEanatImages)
   for (i in 1:nrow(decom)) {
     if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0)
       decom[i, ] <- decom[i, ] * (-1)
@@ -56,9 +56,9 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
     if (!is.na(mask)) {
       newelist <- list()
       for (cl in 1:max(communitymembership)) {
-        newe <- antsImageClone(list_of_eanat_images[[1]])
+        newe <- antsImageClone(listEanatImages[[1]])
         newe[mask > 0] <- 0
-        templist <- list_of_eanat_images[communitymembership == cl]
+        templist <- listEanatImages[communitymembership == cl]
         for (eimg in templist) {
           newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask >
           0])
@@ -97,7 +97,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
     print(paste("myfavoritecost", myfavoritecost))
   }
   if (length(graphdensity) > 1) {
-    return(joinEigenanatomy(datamatrix, mask, list_of_eanat_images, graphdensity[which.min(costs)]))
+    return(joinEigenanatomy(datamatrix, mask, listEanatImages, graphdensity[which.min(costs)]))
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
