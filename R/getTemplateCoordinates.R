@@ -102,7 +102,7 @@ getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
       if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
-      templateLab[i] <- getValueAtPoint(filab, mypoint)
+      templateLab[i] <- .getValueAtPoint(filab, mypoint)
     }
     if (mylab == 2)
       mypoints <- cbind(mypoints, Brodmann = templateLab)

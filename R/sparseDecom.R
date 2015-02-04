@@ -103,7 +103,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50
     print(initlistfn)
   }
   time1 <- (Sys.time())
-  .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+  .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   time2 <- (Sys.time())
   mydecomp <- read.csv(decomp)
   glb <- paste("spca_Umatrix_View1vec.csv", sep = "")

@@ -163,7 +163,7 @@ sparseDecom2 <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01
         "--initialization2", initlistfn2, "--prior-weight", priorWeight)
     }
   }
-  .Call("sccan", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+  .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp[1])
   if (!is.na(inmask[[1]])) {
     glb <- paste("scca*View1vec*.nii.gz", sep = "")

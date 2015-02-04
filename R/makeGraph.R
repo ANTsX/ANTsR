@@ -106,7 +106,7 @@ makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1,
 
 
 
-largeScaleCommunity <- function(g, mode = "all") {
+.largeScaleCommunity <- function(g, mode = "all") {
   cat("Assigning initial communities...\n")
   V(g)$group <- V(g)$name
   ## random order in which vertices will be processed

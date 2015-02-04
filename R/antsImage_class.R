@@ -422,7 +422,7 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
   
 }
 
-getValueAtPoint <- function(x, point) {
+.getValueAtPoint <- function(x, point) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
     return()

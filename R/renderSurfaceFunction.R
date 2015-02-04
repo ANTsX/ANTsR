@@ -163,7 +163,7 @@ makefacet <- function(data) {
 
 # Make a function that puts the facets together with the file headers and writes
 # it out
-makestl <- function(facetvector, outfile) {
+.makestl <- function(facetvector, outfile) {
   # Code for 3D function->stl files for molding and casting stl creation functions
   # similar to week 4 files Laura Perovich Oct 2012 Load package misc3d that
   # includes surfaceTriangles function
@@ -185,9 +185,9 @@ makestl <- function(facetvector, outfile) {
 ############################ source('R/renderSurfaceFunction.R')
 ############################ fn<-'/Users/stnava/Downloads/resimplerenderingexample/wmss.nii.gz'
 ############################ img<-antsImageRead(fn,3) brain<-renderSurfaceFunction( img )
-############################ fv<-makefacet(brain[[1]]) makestl(fv,'/tmp/temp.stl')
+############################ fv<-makefacet(brain[[1]]) .makestl(fv,'/tmp/temp.stl')
 
-getvertices <- function(inrglmesh) {
+.getvertices <- function(inrglmesh) {
   cter <- nrow(inrglmesh[[1]])
   vertices <- matrix(NA, nrow = 3 * cter, ncol = 3)
   inds <- c(1:cter)

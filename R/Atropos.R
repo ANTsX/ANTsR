@@ -250,12 +250,12 @@
 Atropos <- function(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]", priorweight = 0.5, 
   ...) {
   if (typeof(d) == "list") {
-    .Call("Atropos", int_antsProcessArguments(d), PACKAGE = "ANTsR")
+    .Call("Atropos", .int_antsProcessArguments(d), PACKAGE = "ANTsR")
     return(0)
   }
   if (missing(d) | missing(a) | missing(x)) {
     print("Input error - check params & usage")
-    .Call("Atropos", int_antsProcessArguments(c(list("-h"))), PACKAGE = "ANTsR")
+    .Call("Atropos", .int_antsProcessArguments(c(list("-h"))), PACKAGE = "ANTsR")
     return(NULL)
   }
   # define the output temp files
@@ -283,7 +283,7 @@ Atropos <- function(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]", prio
   if (typeof(a) == "list") 
     outimg <- antsImageClone(a[[1]], "unsigned int") else outimg <- antsImageClone(a, "unsigned int")
   mydim <- as.numeric(outimg@dimension)
-  outs <- paste("[", antsrGetPointerName(outimg), ",", probs, "]", sep = "")
+  outs <- paste("[", .antsrGetPointerName(outimg), ",", probs, "]", sep = "")
   mymask <- antsImageClone(x, "unsigned int")
   if (length(a) == 1) 
     myargs <- list(d = d, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask, 
@@ -299,7 +299,7 @@ Atropos <- function(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]", prio
       c = c, m = m, i = i, x = mymask, ...)
     print(" more than 3 input images not really supported, using first 3 ")
   }
-  .Call("Atropos", int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
+  .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
   probsout <- list.files(path = tdir, pattern = glob2rx(searchpattern), full.names = TRUE, 
     recursive = FALSE)
   pimg <- antsImageRead(probsout[1], mydim)

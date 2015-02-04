@@ -49,7 +49,7 @@ plotBasicNetwork <- function(centroids, brain, weights = NA, edgecolors = 0, nod
   nLabels <- nrow(centroids)
   rgl.bg(color = "white")
   par3d(windowRect = c(100, 100, 600, 600))
-  mesh <- getvertices(brain[[1]])
+  mesh <- .getvertices(brain[[1]])
   nSurfaceVerts <- dim(mesh$vertices)[1]
   mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
   labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts

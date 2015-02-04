@@ -28,7 +28,7 @@ plotNetwork <- function(network, mask, centroids, N = 100, scaling = c(0, 0)) {
   drawScene.rgl(list(brain))
   par3d(windowRect = c(100, 100, 600, 600))
   
-  mesh <- getvertices(brain)
+  mesh <- .getvertices(brain)
   nSurfaceVerts <- dim(mesh$vertices)[1]
   
   # print( 'get centroids' )

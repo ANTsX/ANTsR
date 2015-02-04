@@ -1,4 +1,4 @@
-ants_brain_extraction <- function(img = "") {
+.ants_brain_extraction <- function(img = "") {
   # check if called with no arguments and print usage
   if (nchar(img) == 0) {
     print("usage: ants_brain_extraction( <time-series-average-image> )")

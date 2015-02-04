@@ -1,6 +1,6 @@
 # getNetwork
 getNetwork <- function(tmat, mask, labels, timeStep = 1) {
-  labelmat <- labels2matrix(labels, mask)
+  labelmat <- .labels2matrix(labels, mask)
   regions <- tmat %*% labelmat
   
   sums <- colSums(regions)

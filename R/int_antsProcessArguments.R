@@ -1,4 +1,4 @@
-int_antsProcessArguments <- function(args) {
+.int_antsProcessArguments <- function(args) {
   char_vect <- ""
   if (typeof(args) == "list") {
     char_vect <- NULL

@@ -92,8 +92,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA, tempriors = NA,
   dtem <- antsImageClone(tem, "double")
   dimg <- antsImageClone(img, "double")
   antsregparams <- list(d = img@dimension, u = 1, o = EXTRACTION_WARP_OUTPUT_PREFIX, 
-    r = initafffn, z = 1, w = "[0.025,0.975]", m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt, 
-      "double")), ",", antsrGetPointerName(antsImageClone(lapi, "double")), 
+    r = initafffn, z = 1, w = "[0.025,0.975]", m = paste("mattes[", .antsrGetPointerName(antsImageClone(lapt, 
+      "double")), ",", .antsrGetPointerName(antsImageClone(lapi, "double")), 
       ",", "0.5,32]", sep = ""), c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]", 
     f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX

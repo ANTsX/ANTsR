@@ -22,5 +22,5 @@
 #' 
 #' @export ThresholdImage
 ThresholdImage <- function(...) {
-  .Call("ThresholdImage", int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+  .Call("ThresholdImage", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
 } 

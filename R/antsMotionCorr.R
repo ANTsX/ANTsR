@@ -26,6 +26,6 @@
 #' 
 #' @export antsMotionCorr
 antsMotionCorr <- function(...) {
-  .Call("antsMotionCorr", int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+  .Call("antsMotionCorr", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
   gc()  # trigger garbage collection
 } 

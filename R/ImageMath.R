@@ -23,5 +23,5 @@ ImageMath <- function(...) {
   args <- list(...)
   if (length(args) <= 1) 
     args <- ""
-  .Call("ImageMath", int_antsProcessArguments(args), PACKAGE = "ANTsR")
+  .Call("ImageMath", .int_antsProcessArguments(args), PACKAGE = "ANTsR")
 } 

@@ -6,5 +6,5 @@ LabelGeometryMeasures <- function(...) {
     img1int <- antsImageClone(img1, "unsigned int")
     veccer2[[2]] <- img1int
   }
-  pp <- .Call("LabelGeometryMeasures", int_antsProcessArguments(veccer2))
+  pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer2))
 } 

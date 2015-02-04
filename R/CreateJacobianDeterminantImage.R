@@ -19,7 +19,7 @@ CreateJacobianDeterminantImage <- function(dim, tx, doLog = 0) {
   img <- antsImageRead(tx, dim)
   dimg <- antsImageClone(img, "double")
   args2 <- list(dim, tx, dimg, doLog, 1)
-  k <- int_antsProcessArguments(args2)
+  k <- .int_antsProcessArguments(args2)
   retval <- (.Call("CreateJacobianDeterminantImage", k, PACKAGE = "ANTsR"))
   jimg <- antsImageClone(args2[[3]], "float")
   return(jimg)

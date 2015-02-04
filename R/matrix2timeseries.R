@@ -1,3 +1,17 @@
+#' Simple matrix2timeseries function.
+#'
+#' matrix2timeseriess converts a matrix to a 4D image.
+#'
+#' @param referenceImage reference 4D image
+#' @param maskImage mask image defining voxels of interest
+#' @timeSeriesMatrix matrix to convert to image
+#' @return antsImage in 4D is output
+#' @author Avants BB
+#' @examples
+#' \dontrun{
+#'  }
+#'
+#' @export matrix2timeseries
 matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   if (length(dim(referenceImage)) != 4) {
     cat("This function is for 4D images.  Returning reference image.\n")
@@ -5,10 +19,10 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   }
   indexMask <- (maskImage == 1)
   newImageArray <- as.array(referenceImage)
-  
+
   # set everything to zero so that only non-zero mask elements are non-zero
   newImageArray <- newImageArray * 0
-  
+
   for (i in 1:nrow(timeSeriesMatrix)) {
     newImageArray[, , , i][indexMask] <- timeSeriesMatrix[i, ]
   }
@@ -17,4 +31,4 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
   antsCopyImageInfo(referenceImage, newImage)
   newImage <- antsImageClone(newImage, out_pixeltype = referenceImage@pixeltype)
   return(newImage)
-} 
+}

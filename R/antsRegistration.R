@@ -44,7 +44,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
   outprefix = "", mask = NA, ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
-    .Call("antsRegistration", int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")
+    .Call("antsRegistration", .int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")
     return(0)
   }
   if (nchar(typeofTransform) == 0) 
@@ -59,7 +59,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
     cat("For full mode: use standard ants call , e.g. : \n")
     cat(" ANTsR::antsRegistration( list( d=2,m=\"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", t=\"affine[1.0]\", c=\"2100x1200x1200x0\",  s=\"3x2x1x0\", f=\"4x3x2x1\", u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n")
     cat("full help: \n")
-    .Call("antsRegistration", int_antsProcessArguments(c(list("--help"))), PACKAGE = "ANTsR")
+    .Call("antsRegistration", .int_antsProcessArguments(c(list("--help"))), PACKAGE = "ANTsR")
     return(0)
   }
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
@@ -81,13 +81,13 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
         fixed <- antsImageClone(fixed, "double")
         warpedfixout <- antsImageClone(moving)
         warpedmovout <- antsImageClone(fixed)
-        f <- antsrGetPointerName(fixed)
-        m <- antsrGetPointerName(moving)
-        wfo <- antsrGetPointerName(warpedfixout)
-        wmo <- antsrGetPointerName(warpedmovout)
+        f <- .antsrGetPointerName(fixed)
+        m <- .antsrGetPointerName(moving)
+        wfo <- .antsrGetPointerName(warpedfixout)
+        wmo <- .antsrGetPointerName(warpedmovout)
         if (!is.na(mask)) {
           charmask <- antsImageClone(mask, "unsigned char")
-          maskopt <- paste(" -x ", antsrGetPointerName(charmask))
+          maskopt <- paste(" -x ", .antsrGetPointerName(charmask))
         } else maskopt <- ""
         if (is.na(initx)) {
           initx = paste("[", f, ",", m, ",1]", sep = "")
@@ -156,7 +156,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
         }
-        .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+        .Call("antsRegistration", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix)
         # txlist<-list.files( path = outpath, pattern = glob2rx( paste(outvar,'*',sep='')
         # ), full.names = TRUE, recursive = FALSE )
@@ -170,7 +170,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
     }
     return(0)
   }
-  .Call("antsRegistration", int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+  .Call("antsRegistration", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   gc()  # trigger garbage collection
 }
 
@@ -186,11 +186,11 @@ antsrmakeRandomString <- function(n = 1, mylength = 12) {
   return(randomString)
 }
 
-antsrGetPointerName <- function(img) {
+.antsrGetPointerName <- function(img) {
   # if ( Sys.info()['sysname'] == 'Linux' ) endofpointer<-20 if (
   # Sys.info()['sysname'] == 'Darwin' ) endofpointer<-21 pname<- substr(
-  # int_antsProcessArguments( list( img ) ) , 11 , endofpointer )
-  splitptrname <- strsplit(int_antsProcessArguments(list(img)), " ")[[1]][2]
+  # .int_antsProcessArguments( list( img ) ) , 11 , endofpointer )
+  splitptrname <- strsplit(.int_antsProcessArguments(list(img)), " ")[[1]][2]
   pname <- strsplit(splitptrname, ">")
   return(pname[[1]])
 } 
