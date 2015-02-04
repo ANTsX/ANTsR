@@ -12,7 +12,7 @@ usePkg(packageName, allowInstall = FALSE)
 \item{allowInstall}{let the package be installed from CRAN}
 }
 \value{
-T if package successfully loaded, F otherwise. cbf image
+T if package successfully loaded, F otherwise.
 }
 \description{
 Use any package.  If package is not installed, this will install from CRAN.

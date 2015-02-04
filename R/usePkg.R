@@ -5,7 +5,7 @@
 #'
 #' @param packageName Name of package as *string*.
 #' @param allowInstall let the package be installed from CRAN
-#' @return T if package successfully loaded, F otherwise. cbf image
+#' @return T if package successfully loaded, F otherwise.
 #' @author Benjamin M. Kandel, BB Avants
 #' @examples
 #'
