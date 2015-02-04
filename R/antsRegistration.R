@@ -12,6 +12,7 @@
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
+#' @param ... additional options see antsRegistration in ANTs
 #' @return outputs a list containing warped images and transforms. 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
 #' @examples

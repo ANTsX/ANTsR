@@ -21,6 +21,8 @@ Rigid, Affine, SyN, SyNBold, SyNAggro.}
 \item{outprefix}{output will be named with this prefix.}
 
 \item{mask}{mask the registration.}
+
+\item{...}{additional options see antsRegistration in ANTs}
 }
 \value{
 outputs a list containing warped images and transforms. 1 -- Failure
