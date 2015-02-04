@@ -1,6 +1,6 @@
 
 
-diffmat <- function(mat) {
+.diffmat <- function(mat) {
   # return( cor( mat ) )
   if (missing(mat)) {
     print(args(diffmat))
@@ -16,7 +16,7 @@ diffmat <- function(mat) {
 }
 
 
-makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(-0.001, 
+.makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(-0.001, 
   10)) {
   usePkg("igraph")
   
