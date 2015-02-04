@@ -7,7 +7,7 @@
 #' @param img image to be bias corrected
 #' @param intensityTruncation Params to TruncateImageIntensity in ImageMath
 #' @param mask optional antsImage mask
-#' @param weightimg optional antsImage weighting
+#' @param weightimg optional antsImage weighting - not implemented yet
 #' @param usen3 Use N3 instead of N4
 #' @return outputs a bias corrected image. 1 -- Failure
 #' @author Tustison N, Avants BB
@@ -38,29 +38,16 @@ abpN4 <- function(img = NA, intensityTruncation = c(0.025, 0.975, 256),
     N3BiasFieldCorrection(list(img@dimension, outimg, outimg, "2"))
     return(outimg)
   }
-  N4_CONVERGENCE_1 <- "[50x50x50x50,0.0000001]"
-  N4_CONVERGENCE_2 <- "[20x20x20x20,0.0000001]"
-  N4_SHRINK_FACTOR_1 <- "4"
-  N4_SHRINK_FACTOR_2 <- "2"
-  N4_BSPLINE_PARAMS <- "[200]"
   if (is.na(mask)) {
-    N4BiasFieldCorrection(list(d = outimg@dimension, i = outimg, s = N4_SHRINK_FACTOR_1,
-      c = N4_CONVERGENCE_1, b = N4_BSPLINE_PARAMS, o = outimg))
+    outimg<-N4BiasFieldCorrection(img)
     return(outimg)
   }
-  if (is.na(weightimg)) {
-    N4BiasFieldCorrection(list(d = outimg@dimension, i = outimg, s = N4_SHRINK_FACTOR_1,
-      c = N4_CONVERGENCE_1, b = N4_BSPLINE_PARAMS, x = mask, o = outimg))
-    N4BiasFieldCorrection(list(d = outimg@dimension, i = outimg, s = N4_SHRINK_FACTOR_2,
-      c = N4_CONVERGENCE_2, b = N4_BSPLINE_PARAMS, x = mask, o = outimg))
+  if (!is.na(mask)) {
+    outimg<-N4BiasFieldCorrection(img,mask)
+    return(outimg)
   }
   if (!is.na(weightimg)) {
-    N4BiasFieldCorrection(list(d = outimg@dimension, i = outimg, s = N4_SHRINK_FACTOR_1,
-      c = N4_CONVERGENCE_1, b = N4_BSPLINE_PARAMS, x = mask, w = weightimg,
-      o = outimg))
-    N4BiasFieldCorrection(list(d = outimg@dimension, i = outimg, s = N4_SHRINK_FACTOR_2,
-      c = N4_CONVERGENCE_2, b = N4_BSPLINE_PARAMS, x = mask, w = weightimg,
-      o = outimg))
+    return(img)
   }
   return(outimg)
 }

@@ -14,7 +14,7 @@ abpN4(img = NA, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
 
 \item{mask}{optional antsImage mask}
 
-\item{weightimg}{optional antsImage weighting}
+\item{weightimg}{optional antsImage weighting - not implemented yet}
 
 \item{usen3}{Use N3 instead of N4}
 }
