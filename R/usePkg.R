@@ -12,12 +12,13 @@
 #'
 #' @export usePkg
 usePkg <- function(packageName) {
-  # update according to H Wickham's advice
-  success<-requireNamespace(packageName, quietly = TRUE)
+  # extended based on H Wickham's advice
+  success<-requireNamespace(packageName)
   if (!success) {
     install.packages(packageName, repos = "http://cran.r-project.org",
       dependencies=FALSE )
-    success <- requireNamespace(packageName, character.only = T)
-  }
+    success <- requireNamespace(packageName)
+    attachNamespace(packageName)
+  } else attachNamespace(packageName)
   return(success)
 }
