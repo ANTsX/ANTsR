@@ -21,23 +21,28 @@
 #' @export ImageMath
 ImageMath <- function(...) {
   args <- list(...)
-  if ( class(args[[1]] ) != 'numeric')
+  if ( class(args[[1]] ) != 'numeric' |
+       class(args[[1]] ) != 'integer'  )
   {
+  print(class(args[[1]]))
   print("first param should be image dimensionality")
   return(NA)
   }
   if ( class(args[[2]])[[1]] != 'antsImage' )
   {
+  print(class(args[[2]]))
   print("2nd param should (usually) be an antsImage")
   return(NA)
   }
   if ( class(args[[3]] ) != 'character')
   {
+  print(class(args[[3]]))
   print("3rd param should be a character string defining the operation")
   return(NA)
   }
   if ( class(args[[4]])[[1]]  != 'antsImage' )
   {
+  print(class(args[[4]]))
   print("4th param should be an antsImage")
   return(NA)
   }
