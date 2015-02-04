@@ -14,12 +14,14 @@
 #' usePkg('randomForest')
 #' img<-antsImageRead( getANTsRData('r16') ,2)
 #' mask<-getMask( img )
-#' segs<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)
+#' segs<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',
+#'   i = 'kmeans[3]', x = mask)
 #' fimgs<-lappend( img, segs$probabilityimages )
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , verbose=TRUE )
 #' plotANTsImage( rfsegs$segmentation )
 #' # now use in atropos w/priors
-#' # segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
+#' # segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',
+#'   c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
 #'
 #' @export rfSegmentation
 rfSegmentation <- function(labelimg, featureimages, ntrees = 100, verbose = FALSE) {
@@ -27,14 +29,19 @@ rfSegmentation <- function(labelimg, featureimages, ntrees = 100, verbose = FALS
     print("Usage:  probs<-rfSegmentation( x, x2 ) ")
     return(1)
   }
+  haverf<-usePkg("randomForest")
+  if ( !haverf ) {
+    print("need randomForest package for this function")
+    return(NA)
+  }
   mask <- antsImageClone(labelimg)
   mask <- getMask(mask)
   labels <- as.factor(labelimg[mask == 1])
   fmat <- t(imageListToMatrix(featureimages, mask))
   mydf <- data.frame(labels = labels, fmat)
-  myrf <- randomForest(labels ~ ., data = mydf, ntree = ntrees, type = "classification", 
+  myrf <- randomForest(labels ~ ., data = mydf, ntree = ntrees, type = "classification",
     importance = TRUE, na.action = na.omit, do.trace = verbose)
-  if (verbose) 
+  if (verbose)
     print(myrf)
   probabilityimages <- predict(myrf, type = "prob")
   probabilityimages <- matrixToImages(t(probabilityimages), mask)
@@ -42,4 +49,4 @@ rfSegmentation <- function(labelimg, featureimages, ntrees = 100, verbose = FALS
   segs[mask == 1] <- predict(myrf)
   myout <- list(segmentation = segs, probabilityimages = probabilityimages, rfModel = myrf)
   return(myout)
-} 
+}

@@ -1,10 +1,10 @@
 #' Convenience wrapper for 2-view eigenanatomy decomposition w/bootstrap
 #' initialization.
-#' 
+#'
 #' Decomposes two matrices into paired sparse eigenevectors to maximize
 #' canonical correlation.
-#' 
-#' 
+#'
+#'
 #' @param inmatrix input as inmatrix=list(mat1,mat2). n by p input matrix and n
 #' by q input matrix , spatial variable lies along columns.
 #' @param inmask optional pair of antsImage masks
@@ -14,21 +14,23 @@
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' mat<-replicate(100, rnorm(20)) 
-#' mat2<-replicate(100, rnorm(20)) 
-#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat2), sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0) 
+#' mat<-replicate(100, rnorm(20))
+#' mat2<-replicate(100, rnorm(20))
+#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat2),
+#'   sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
 #' wt<-0.666
-#' mat3<-mat*wt+mat2*(1-wt) 
-#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3), sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 ) 
-#' 
+#' mat3<-mat*wt+mat2*(1-wt)
+#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3),
+#'   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
+#'
 #' }
-#' 
+#'
 #' @export sparseDecom2boot
-sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01), 
-  nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0, 
-  z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), initializationList2 = list(), 
+sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
+  nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0,
+  z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), initializationList2 = list(),
   ell1 = 0.05, nboot = 10, nsamp = 1, doseg = FALSE) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
@@ -52,7 +54,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     makemat <- matrix(rep(0, nboot * ncol(mat2)), ncol = ncol(mat2))
     bootccalist2 <- lappend(bootccalist2, makemat)
   }
-  if (nsamp >= 0.999999999) 
+  if (nsamp >= 0.999999999)
     doreplace <- TRUE else doreplace <- FALSE
   for (boots in 1:nboot) {
     mysample <- sample(1:nsubj, size = mysize, replace = doreplace)
@@ -60,20 +62,20 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     submat2 <- mat2[mysample, ]
     sublist <- list(submat1, submat2)
     print(paste("boot", boots, "sample", mysize))
-    (myres <- sparseDecom2(inmatrix = sublist, inmask = mymask, sparseness = sparseness, 
-      nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0, 
-      uselong = uselong, z = z, smooth = smooth, robust = robust, mycoption = mycoption, 
-      initializationList = initializationList, initializationList2 = initializationList2, 
+    (myres <- sparseDecom2(inmatrix = sublist, inmask = mymask, sparseness = sparseness,
+      nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = 0,
+      uselong = uselong, z = z, smooth = smooth, robust = robust, mycoption = mycoption,
+      initializationList = initializationList, initializationList2 = initializationList2,
       ell1 = ell1))
     myressum <- abs(diag(cor(myres$projections, myres$projections2)))
     print(myressum)
-    if (length(dim(myres$eig1)) == 0) 
+    if (length(dim(myres$eig1)) == 0)
       cca1 <- t(imageListToMatrix(myres$eig1, mymask[[1]]))
-    if (length(dim(myres$eig1)) == 2) 
+    if (length(dim(myres$eig1)) == 2)
       cca1 <- (myres$eig1)
-    if (length(dim(myres$eig2)) == 0) 
+    if (length(dim(myres$eig2)) == 0)
       cca2 <- t(imageListToMatrix(myres$eig2, mymask[[2]]))
-    if (length(dim(myres$eig2)) == 2) 
+    if (length(dim(myres$eig2)) == 2)
       cca2 <- (myres$eig2)
     if (boots > 1 & TRUE) {
       cca1copy <- cca1
@@ -117,9 +119,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     cca1out <- cca1out + (cca1) * myressum
     cca2out <- cca2out + (cca2) * myressum
     for (nv in 1:nvecs) {
-      if (sparseness[1] > 0) 
+      if (sparseness[1] > 0)
         bootccalist1[[nv]][boots, ] <- abs(cca1[, nv]) else bootccalist1[[nv]][boots, ] <- (cca1[, nv])
-      if (sparseness[2] > 0) 
+      if (sparseness[2] > 0)
         bootccalist2[[nv]][boots, ] <- abs(cca2[, nv]) else bootccalist2[[nv]][boots, ] <- (cca2[, nv])
     }
   }
@@ -164,21 +166,21 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   }
   for (i in 1:ncol(cca1outAuto)) {
     mynorm <- sqrt(sum(cca1outAuto[, i] * cca1outAuto[, i]))
-    if (mynorm > 0) 
+    if (mynorm > 0)
       cca1outAuto[, i] <- cca1outAuto[, i]/mynorm
     mynorm <- sqrt(sum(cca2outAuto[, i] * cca2outAuto[, i]))
-    if (mynorm > 0) 
+    if (mynorm > 0)
       cca2outAuto[, i] <- cca2outAuto[, i]/mynorm
   }
   fakemask1 <- makeImage(c(1, 1, ncol(mat1)), 1)
   fakemask2 <- makeImage(c(1, 1, ncol(mat2)), 1)
-  usefakemask <- c((length(dim(myres$eig1)) == 2), (length(dim(myres$eig2)) == 
+  usefakemask <- c((length(dim(myres$eig1)) == 2), (length(dim(myres$eig2)) ==
     2))
   locmask <- inmask
   if (usefakemask[1]) {
-    if (doseg) 
+    if (doseg)
       cca1outAuto <- matrixSeg(t(cca1outAuto))
-    if (dim(cca1outAuto)[2] != nvecs) 
+    if (dim(cca1outAuto)[2] != nvecs)
       cca1outAuto <- t(cca1outAuto)
     cca1out <- (cca1outAuto)
   } else {
@@ -188,9 +190,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     cca1out <- cca1outAuto
   }
   if (usefakemask[2]) {
-    if (doseg) 
+    if (doseg)
       cca2outAuto <- matrixSeg(t(cca2outAuto))
-    if (dim(cca2outAuto)[2] != nvecs) 
+    if (dim(cca2outAuto)[2] != nvecs)
       cca2outAuto <- t(cca2outAuto)
     cca2out <- (cca2outAuto)
   } else {
@@ -199,31 +201,31 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
     cca2outAuto <- t(imageListToMatrix(cca2outAuto, locmask[[2]]))
     cca2out <- cca2outAuto
   }
-  #################################################################################### 
-  if (usefakemask[1]) 
+  ####################################################################################
+  if (usefakemask[1])
     init1 <- matrixToImages(t(cca1out), fakemask1) else init1 <- matrixToImages(t(cca1out), locmask[[1]])
-  if (usefakemask[2]) 
+  if (usefakemask[2])
     init2 <- matrixToImages(t(cca2out), fakemask2) else init2 <- matrixToImages(t(cca2out), locmask[[2]])
   print("Get Final Results")
-  if (!usefakemask[1] & !usefakemask[2]) 
+  if (!usefakemask[1] & !usefakemask[2])
     maskinit <- locmask
-  if (usefakemask[1] & usefakemask[2]) 
+  if (usefakemask[1] & usefakemask[2])
     maskinit <- c(fakemask1, fakemask2)
-  if (usefakemask[1] & !usefakemask[2]) 
+  if (usefakemask[1] & !usefakemask[2])
     maskinit <- c(fakemask1, locmask[[2]])
-  if (!usefakemask[1] & usefakemask[2]) 
+  if (!usefakemask[1] & usefakemask[2])
     maskinit <- c(locmask[[1]], fakemask2)
-  myres <- sparseDecom2(inmatrix = inmatrix, inmask = maskinit, sparseness = sparseness, 
-    nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = perms, 
-    uselong = uselong, z = z, smooth = smooth, robust = robust, mycoption = mycoption, 
+  myres <- sparseDecom2(inmatrix = inmatrix, inmask = maskinit, sparseness = sparseness,
+    nvecs = nvecs, its = its, cthresh = cthresh, statdir = statdir, perms = perms,
+    uselong = uselong, z = z, smooth = smooth, robust = robust, mycoption = mycoption,
     initializationList = init1, initializationList2 = init2, ell1 = ell1)
-  ### 
-  if (usefakemask[1]) 
+  ###
+  if (usefakemask[1])
     myres$eig1 <- t(imageListToMatrix(myres$eig1, fakemask1))
-  if (usefakemask[2]) 
+  if (usefakemask[2])
     myres$eig2 <- t(imageListToMatrix(myres$eig2, fakemask2))
-  return(list(projections = myres$projections, projections2 = myres$projections2, 
-    eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary, bootccalist1 = bootccalist1, 
+  return(list(projections = myres$projections, projections2 = myres$projections2,
+    eig1 = myres$eig1, eig2 = myres$eig2, ccasummary = myres$ccasummary, bootccalist1 = bootccalist1,
     bootccalist2 = bootccalist2, cca1outAuto = (cca1outAuto), cca2outAuto = (cca2outAuto)))
 }
 
@@ -232,4 +234,4 @@ cosineDist <- function(xin, yin) {
   x <- t(as.matrix(xin))
   y <- t(as.matrix(yin))
   return(as.numeric(1 - x %*% t(y)/(sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
-} 
+}

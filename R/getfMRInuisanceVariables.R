@@ -1,12 +1,12 @@
 #' Extract generic fMRI nuisance variables for ASL or BOLD
-#' 
+#'
 #' Will motion correct, run compcorr and estimate global signal. Outputs a list
 #' with the time series data matrix (time by voxels), motion and other nuisance
 #' variables, global signal (for BOLD or ASL), the mask and the average time
 #' series image.  Meant to be used before filterfMRIforNetworkAnalysis or any
 #' other results-oriented processing.
-#' 
-#' 
+#'
+#'
 #' @param boldImageOrFileName input antsImage or filename
 #' @param maskThresh will use this intensity threshold to estimate a mask
 #' otherwise will use the mask passed in
@@ -14,22 +14,29 @@
 #' @return outputs list described above.
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' # set moreaccurate=T for final results 
+#' # set moreaccurate=T for final results
 #' dd<-getfMRInuisanceVariables( bold, maskThresh=100 , moreaccurate=F )
-#' tsResid<-residuals( lm( dd$matrixTimeSeries ~ dd$globalsignal + dd$nuisancevariables ))
-#' mynetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4, mask=dd$mask ,cbfnetwork = 'BOLD', labels = aalImageLabels , graphdensity = 0.25 )
-#' # use colnames( dd$nuisancevariables ) to see nuisance variables 
-#' 
-#' ee<-getfMRInuisanceVariables( pcasl, mask = pcaslmask , moreaccurate=F )
-#' tsResid<-residuals( lm( ee$matrixTimeSeries ~ ee$globalsignalASL + ee$nuisancevariables ))
-#' myASLnetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4, mask=ee$mask ,cbfnetwork = 'ASLCBF', labels = aal2asl , graphdensity = 0.25 )
-#' # use colnames( dd$nuisancevariables ) to see nuisance variables 
+#' tsResid<-residuals( lm( dd$matrixTimeSeries ~
+#'     dd$globalsignal + dd$nuisancevariables ))
+#' mynetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4,
+#'    mask=dd$mask ,cbfnetwork = 'BOLD',
+#'   labels = aalImageLabels , graphdensity = 0.25 )
+#' # use colnames( dd$nuisancevariables ) to see nuisance variables
+#'
+#' ee<-getfMRInuisanceVariables( pcasl, mask = pcaslmask ,
+#'    moreaccurate=F )
+#' tsResid<-residuals( lm( ee$matrixTimeSeries ~
+#'     ee$globalsignalASL + ee$nuisancevariables ))
+#' myASLnetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4,
+#'    mask=ee$mask ,cbfnetwork = 'ASLCBF', labels = aal2asl ,
+#'    graphdensity = 0.25 )
+#' # use colnames( dd$nuisancevariables ) to see nuisance variables
 #' }
-#' 
+#'
 #' @export getfMRInuisanceVariables
-getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE, 
+getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE,
   mask = NA) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
@@ -72,15 +79,15 @@ getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE
     return(NULL)
   }
   moco_results <- motion_correction(fmri, moreaccurate = moreaccurate)
-  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09, 
+  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09,
     cleanup = TRUE)
-  if (!is.na(mask)) 
+  if (!is.na(mask))
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   motionparams <- as.data.frame(moco_results$moco_params)
   predictors <- get_perfusion_predictors(mat, motionparams, NULL, 1, 3)
   globalsignal <- predictors$globalsignal
-  return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img, 
-    avgImage = moco_results$moco_avg_img, globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL, 
+  return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img,
+    avgImage = moco_results$moco_avg_img, globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL,
     moco_img = moco_results$moco_img))
-} 
+}

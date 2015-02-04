@@ -23,17 +23,21 @@
 #'        mnia<-antsImageRead(mnia,3)
 #'        ThresholdImage(3,mnit,mnit,1,max(mnit))
 #'        ThresholdImage(3,mnia,mnia,1,2)
-#' #       brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
-#'        brain<-renderSurfaceFunction( surfimg =list( mnit ) , list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
+#'        brain<-renderSurfaceFunction( surfimg =list( mnit ) ,
+#'           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 #'        }
 #' @export renderSurfaceFunction
-renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, offsetfval, 
-  smoothsval = 0, smoothfval = 0, blobrender = TRUE, alphasurf = 1, alphafunc = 1, 
+renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, offsetfval,
+  smoothsval = 0, smoothfval = 0, blobrender = TRUE, alphasurf = 1, alphafunc = 1,
   outdir = "./", outfn = NA, mycol, physical = TRUE) {
   if (missing(surfimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( list(an_ants_image) ) \n ")
   }
-  usePkg("misc3d")
+  havemsc3d<-usePkg("misc3d")
+  if ( ! havemsc3d ) {
+    print("Need misc3d for this")
+    return(NA)
+  }
   smoothsval <- rep(smoothsval, length.out = length(surfimg))
   for (i in 1:length(surfimg)) {
     if (smoothsval[i] > 0) {
@@ -43,14 +47,14 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
     }
   }
   surfval <- rep(surfval, length.out = length(surfimg))
-  if (length(alphasurf) != length(surfimg)) 
+  if (length(alphasurf) != length(surfimg))
     alphasurf <- rep(alphasurf, length.out = length(surfimg))
   mylist <- list()
   if (missing(funcimg)) {
     cat("No functional images--only plotting surface images.\n")
     for (i in 1:length(surfimg)) {
       surf <- as.array(surfimg[[i]])
-      brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], 
+      brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i],
         draw = FALSE, smooth = 1, material = "metal", depth = 0.6, color = "white")
       # each point has an ID, 3 points make a triangle , the points are laid out as c(
       # x1 , y1, z1, x2, y2, z2 , ...  , xn, yn, zn ) indices are just numbers
@@ -75,11 +79,11 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
   if (missing(mycol)) {
     mycol <- rainbow(length(funcimg))
   }
-  if (length(alphafunc) != length(funcimg)) 
+  if (length(alphafunc) != length(funcimg))
     alphafunc <- rep(alphafunc, length.out = length(funcimg))
   for (i in 1:length(surfimg)) {
     surf <- as.array(surfimg[[i]])
-    brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE, 
+    brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE,
       smooth = 1, material = "metal", depth = 0.6, color = "white")
     if (physical == TRUE) {
       brain$v1 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v1)
@@ -96,10 +100,10 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
       usefval <- mean(vals)
       # print(usefval)
     } else usefval <- basefval
-    if (missing(offsetfval)) 
+    if (missing(offsetfval))
       offsetfval <- sd(vals[vals > usefval])
     # print(paste(i, usefval, alphafunc[i]))
-    blob <- contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE, 
+    blob <- contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE,
       smooth = 1, material = "metal", depth = 0.6, color = mycol[[i]])
     if (physical == TRUE) {
       blob$v1 <- antsTransformIndexToPhysicalPoint(funcimg[[i]], blob$v1)
@@ -115,7 +119,7 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
   par3d(windowRect = c(0, 0, 500, 500))  # make the window large
   par3d(zoom = 1.1)  # larger values make the image smaller
   drawScene.rgl(mylist)  # surface render
-  if (!is.na(outfn)) 
+  if (!is.na(outfn))
     movie3d(spin3d(), duration = 15, dir = outdir, movie = outfn, clean = F)
   return(mylist)
 }
@@ -138,17 +142,17 @@ makefacet <- function(data) {
   startline1 <- "+"
   startline2 <- " solid LAURA"
   endline <- " endsolid LAURA"
-  
+
   facetvector <- c()
   progress <- txtProgressBar(min = 0, max = nrow(data[[1]]), style = 3)
   for (i in 1:nrow(data[[1]])) {
-    v1 <- paste("  vertex", as.character(data[[1]][i, 1]), as.character(data[[1]][i, 
+    v1 <- paste("  vertex", as.character(data[[1]][i, 1]), as.character(data[[1]][i,
       2]), as.character(data[[1]][i, 3]), sep = " ")
-    v2 <- paste("  vertex", as.character(data[[2]][i, 1]), as.character(data[[2]][i, 
+    v2 <- paste("  vertex", as.character(data[[2]][i, 1]), as.character(data[[2]][i,
       2]), as.character(data[[2]][i, 3]), sep = " ")
-    v3 <- paste("  vertex", as.character(data[[3]][i, 1]), as.character(data[[3]][i, 
+    v3 <- paste("  vertex", as.character(data[[3]][i, 1]), as.character(data[[3]][i,
       2]), as.character(data[[3]][i, 3]), sep = " ")
-    facetvector <- c(facetvector, tristart1, tristart2, v1, v2, v3, triend1, 
+    facetvector <- c(facetvector, tristart1, tristart2, v1, v2, v3, triend1,
       triend2)
     if (i%%50 == 0) {
       setTxtProgressBar(progress, i)
@@ -195,4 +199,4 @@ getvertices <- function(inrglmesh) {
 }
 # vtri <- surfaceTriangles(vertices[,1], vertices[,2], vertices[,3] ,
 # color='red') drawScene(updateTriangles(vtri, material = 'default', smooth = 3)
-# ) 
+# )
