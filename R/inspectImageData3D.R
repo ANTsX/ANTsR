@@ -4,17 +4,17 @@
 #' in a dataframe.
 #'
 #'
-#' @param fn input list of filenames
+#' @param myfiles input list of filenames
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
 #' mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
-#' usePkg('fpc')
+#' if ( !usePkg("DMwR") | ! usePkg('fpc') )
+#'    { print("Need DMwR and fpc packages") } else {
 #' pamres <- pamk(mm)
 #' plot(pamres$pamobject)
-#' outlier.scores <- DMwR::lofactor( mm, k=5)
+#' outlier.scores <- lofactor( mm, k=5)
 #' outliers <- order(outlier.scores, decreasing=T)[1:5]
 #' }
 #'
@@ -24,7 +24,8 @@ inspectImageData3D <- function(myfiles) {
     print(args(inspectImageData3D))
     return(1)
   }
-  # usePkg("moments")
+  if ( !usePkg("fpc") ) { print("Need fpc package"); return(NULL) }
+  if ( !usePkg("moments") ) { print("Need moments package"); return(NULL) }
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
   idim <- 3

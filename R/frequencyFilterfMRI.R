@@ -46,7 +46,6 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     print(myusage)
     return(NULL)
   }
- #  usePkg("mFilter")
   freqLo <- freqLo * tr
   freqHi <- freqHi * tr
   voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
@@ -68,7 +67,7 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     return(boldmat)
   }
   if (opt == "wav") {
-    # usePkg("wmtsa")
+    if ( !usePkg("wmtsa") ) { print("Need wmtsa package"); return(NULL) }
     dnz <- myTimeSeries * 0
     for (i in 1:ncol(myTimeSeries)) {
       dnz[, i] <- wavShrink(myTimeSeries[, i], thresh.fun = "adaptive", thresh.scale = 0.1)
@@ -77,13 +76,13 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = 
     return(filteredTimeSeries)
   }
   if (opt == "butt") {
-    usePkg("signal")
+    if ( !usePkg("signal") ) { print("Need signal package"); return(NULL) }
     bf <- butter(2, c(freqLo, freqHi), type = "pass")
     filteredTimeSeries <- matrix(filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
     return(filteredTimeSeries)
   }
   if (opt == "trig") {
-    usePkg("mFilter")
+    if ( !usePkg("mFilter") ) { print("Need mFilter package"); return(NULL) }
     if (nrow(myTimeSeries)%%2 > 0) {
       firsttime <- myTimeSeries[1, ]
       myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]

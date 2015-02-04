@@ -1,15 +1,15 @@
 #' Split time series image into k distinct images
-#' 
+#'
 #' Uses clustering methods to split a time series into similar subsets.
-#' 
-#' 
+#'
+#'
 #' @param img input image
 #' @param mask mask to use
 #' @param krange k cluster range to explore
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
 #'   if (!exists('fn') ) fn<-'PEDS029_20101110_pcasl_1.nii.gz'
 #'    # high motion subject
@@ -33,18 +33,18 @@
 #'     ct<-ct+1
 #'     }
 #'   }
-#' 
+#'
 #' @export clusterTimeSeries
 clusterTimeSeries <- function(mat, krange = 2:10, nsvddims = NA, criterion = "asw") {
   if (nargs() == 0) {
     print(args(clusterTimeSeries))
     return(1)
   }
-  usePkg("fpc")
-  if (is.na(nsvddims)) 
+  if ( !usePkg("fpc") ) { print("Need fpc package"); return(NULL) }
+  if (is.na(nsvddims))
     nsvddims <- (max(krange) * 2)
   # mat<-timeseries2matrix( img, mask )
-  if (nsvddims > nrow(mat)) 
+  if (nsvddims > nrow(mat))
     nsvddims <- nrow(mat)/2
   matsvd <- svd(mat, nu = nsvddims, nv = 0)
   pk <- pamk(mat, krange = krange, criterion = criterion)
@@ -56,4 +56,4 @@ clusterTimeSeries <- function(mat, krange = 2:10, nsvddims = NA, criterion = "as
     # matrix2timeseries( img, mask, kmat )
   }
   return(list(kimgs = tsimagelist, clusters = clusters))
-} 
+}

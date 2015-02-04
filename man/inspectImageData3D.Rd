@@ -7,7 +7,7 @@
 inspectImageData3D(myfiles)
 }
 \arguments{
-\item{fn}{input list of filenames}
+\item{myfiles}{input list of filenames}
 }
 \value{
 matrix is output
@@ -17,12 +17,12 @@ InspectImageData3D collects basic statistics over a dataset and returns them
 in a dataframe.
 }
 \examples{
-\dontrun{
 mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
-usePkg('fpc')
+if ( !usePkg("DMwR") | ! usePkg('fpc') )
+   { print("Need DMwR and fpc packages") } else {
 pamres <- pamk(mm)
 plot(pamres$pamobject)
-outlier.scores <- DMwR::lofactor( mm, k=5)
+outlier.scores <- lofactor( mm, k=5)
 outliers <- order(outlier.scores, decreasing=T)[1:5]
 }
 }

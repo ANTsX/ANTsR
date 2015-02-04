@@ -5,19 +5,30 @@
 \title{Simple compcor function.}
 \usage{
 compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
-  fastsvd = FALSE, useimagemath = FALSE, randomSamples = 1,
-  returnv = FALSE, returnhighvarmatinds = FALSE, highvarmatinds = NA)
+  useimagemath = FALSE, randomSamples = 1, returnv = FALSE,
+  returnhighvarmatinds = FALSE, highvarmatinds = NA)
 }
 \arguments{
-\item{returnv}{returns the singular vectors in v-space}
+\item{fmri}{input fmri image or matrix}
 
-\item{mat}{input fmri image or matrix}
+\item{ncompcor}{n compcor vectors}
 
-\item{returnhighvarmat}{returns the high variance matrix on which svd is
-performed}
+\item{variance_extreme}{high variance threshold e.g 0.95 for 95 percent}
+
+\item{mask}{optional mask for image}
+
+\item{useimagemath}{use the imagemath implementation instead}
+
+\item{randomSamples}{take this many random samples to speed things up}
+
+\item{returnv}{return the spatial vectors}
+
+\item{highvarmatinds}{index list}
+
+\item{returnhighvarmat}{returns the high variance matrix on which svd is}
 }
 \value{
-dataframe is output
+dataframe of nuisance predictors is output
 }
 \description{
 Compcors the input matrix using SVD and returns the result.

@@ -25,10 +25,10 @@ fastwhiten <- function(x, mynu = NA) {
     print("Usage:  x_whitened<-whiten( x ) ")
     return(1)
   }
-  usePkg("irlba")
-  if (is.na(mynu)) 
+  if ( !usePkg("irlba") ) { print("Need irlba package"); return(NULL) }
+  if (is.na(mynu))
     svdx <- irlba(x) else svdx <- irlba(x, nu = mynu, nv = 0)
   dd <- (svdx$d)^(-1/2)
   xw <- ((svdx$u %*% diag(dd)) %*% t(svdx$u)) %*% x
   return(xw)
-} 
+}
