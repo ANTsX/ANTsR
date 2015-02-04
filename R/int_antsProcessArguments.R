@@ -23,4 +23,4 @@
     }
   }
   return(char_vect)
-} 
+}

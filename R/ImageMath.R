@@ -21,7 +21,28 @@
 #' @export ImageMath
 ImageMath <- function(...) {
   args <- list(...)
-  if (length(args) <= 1) 
+  if ( class(args[[1]] ) != 'numeric')
+  {
+  print("first param should be image dimensionality")
+  return(NA)
+  }
+  if ( class(args[[2]])[[1]] != 'antsImage' )
+  {
+  print("2nd param should (usually) be an antsImage")
+  return(NA)
+  }
+  if ( class(args[[3]] ) != 'character')
+  {
+  print("3rd param should be a character string defining the operation")
+  return(NA)
+  }
+  if ( class(args[[4]])[[1]]  != 'antsImage' )
+  {
+  print("4th param should be an antsImage")
+  return(NA)
+  }
+  if (length(args) <= 1)
     args <- ""
-  .Call("ImageMath", .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-} 
+  catchout<-.Call("ImageMath",
+    .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+}
