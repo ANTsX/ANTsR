@@ -3,9 +3,7 @@
 #' @title Inpaints missing imaging data from boundary data
 #'
 #' @description  Smooths data along the boundary into the missing region.
-#'
-#' @usage  approximg<-basicInPaint( img, paintMask )
-#'
+
 #' @param img antsImage to be approximated / painted
 #' @param paintMask painting mask with values 1 or
 #' values 1 and 2 - if there is a 2 then it will learn
