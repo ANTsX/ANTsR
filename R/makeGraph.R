@@ -26,9 +26,9 @@
 makeGraph <- function( mat, graphdensity = 1,
   communityMethod=NA, getEfficiency = FALSE) {
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
-  myrsfnetworkcorrs <- myrsfnetworkcorrsin
+  myrsfnetworkcorrs <- mat
   if (typeof(myrsfnetworkcorrs) == "list") {
-    myrsfnetworkcorrs <- data.matrix(myrsfnetworkcorrsin)
+    myrsfnetworkcorrs <- data.matrix(mat)
   }
   diag(myrsfnetworkcorrs) <- 0
   correlationThreshold <- 1e-06
