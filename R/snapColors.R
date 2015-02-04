@@ -1,4 +1,4 @@
-snapColors <- function(N) {
+.snapColors <- function(N) {
   palette <- rep(rgb(0, 0, 0), 3518)
   palette[1] <- rgb(1, 0, 0)
   palette[2] <- rgb(0, 1, 0)
