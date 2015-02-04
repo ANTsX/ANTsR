@@ -14,11 +14,11 @@
         char_vect <- c(char_vect, paste(args[[i]]$name, "[", sep = ""))
         args[[i]]$name <- NULL
         for (j in (1:length(args[[i]]))) {
-          char_vect <- c(char_vect, as.character(int_antsExtractXptrAsString(args[[i]][[j]])))
+          char_vect <- c(char_vect, as.character(.int_antsExtractXptrAsString(args[[i]][[j]])))
         }
         char_vect <- c(char_vect, "]")
       } else {
-        char_vect <- c(char_vect, as.character(int_antsExtractXptrAsString(args[[i]])))
+        char_vect <- c(char_vect, as.character(.int_antsExtractXptrAsString(args[[i]])))
       }
     }
   }
