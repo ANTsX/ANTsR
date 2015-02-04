@@ -53,7 +53,7 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {
 }
 
 
-matrixSeg <- function(mydatamatrix) {
+.matrixSeg <- function(mydatamatrix) {
   segids <- apply(abs(mydatamatrix), 2, which.max)
   segmax <- apply(abs(mydatamatrix), 2, max)
   binmat <- mydatamatrix * 0

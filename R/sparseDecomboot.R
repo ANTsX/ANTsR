@@ -130,7 +130,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
   if (usefakemask) {
     locmask <- fakemask1
     if (doseg)
-      cca1outAuto <- matrixSeg(t(cca1outAuto)) else cca1outAuto <- t(cca1outAuto)
+      cca1outAuto <- .matrixSeg(t(cca1outAuto)) else cca1outAuto <- t(cca1outAuto)
     cca1out <- cca1outAuto
   } else {
     cca1outAuto <- matrixToImages(t(cca1outAuto), locmask)

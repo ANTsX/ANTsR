@@ -3,7 +3,7 @@
 # mask while including background ( img == 0 ) for consistency with
 # timeseries2matrix
 
-labels2vector <- function(img, mask) {
+.labels2vector <- function(img, mask) {
   if (length(img) != length(mask)) {
     stop("image and mask must be same size")
   }

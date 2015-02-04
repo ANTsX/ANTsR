@@ -130,7 +130,7 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
 # Make a function that will make each facet from data returned from
 # surfaceTriangles applied to a function (probably a more elegant way to do
 # this?)
-makefacet <- function(data) {
+.makefacet <- function(data) {
   # Code for 3D function->stl files for molding and casting stl creation functions
   # similar to week 4 files Laura Perovich Oct 2012 Load package misc3d that
   # includes surfaceTriangles function Define character constants used in the stl
@@ -185,7 +185,7 @@ makefacet <- function(data) {
 ############################ source('R/renderSurfaceFunction.R')
 ############################ fn<-'/Users/stnava/Downloads/resimplerenderingexample/wmss.nii.gz'
 ############################ img<-antsImageRead(fn,3) brain<-renderSurfaceFunction( img )
-############################ fv<-makefacet(brain[[1]]) .makestl(fv,'/tmp/temp.stl')
+############################ fv<-.makefacet(brain[[1]]) .makestl(fv,'/tmp/temp.stl')
 
 .getvertices <- function(inrglmesh) {
   cter <- nrow(inrglmesh[[1]])

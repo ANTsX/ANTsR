@@ -9,7 +9,7 @@
 #' equals the number of time units in the series.
 #' @param xideal 1D time-series signal to be used a ideal or model for
 #' regression.
-#' @param nuis Nuisance parameters obtained from 'get_perfusion_predictors'.
+#' @param nuis Nuisance parameters obtained from '.get_perfusion_predictors'.
 #' @param m0 m0 antsImage passed in according to needs of specific ASL
 #' sequence.
 #' @param dorobust Real value in interval from 0 to 1.  If greater than 0, then
@@ -21,7 +21,7 @@
 #' @examples
 #' 
 #' \dontrun{
-#' # predictors -- result of calling 'get_perfusion_predictors'
+#' # predictors -- result of calling '.get_perfusion_predictors'
 #' cbf <- perfusionregression( mask_img, mat , predictors$xideal , predictors$nuis )
 #' }
 #' 

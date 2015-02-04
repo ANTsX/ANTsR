@@ -85,7 +85,7 @@ getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   motionparams <- as.data.frame(moco_results$moco_params)
-  predictors <- get_perfusion_predictors(mat, motionparams, NULL, 1, 3)
+  predictors <- .get_perfusion_predictors(mat, motionparams, NULL, 1, 3)
   globalsignal <- predictors$globalsignal
   return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img,
     avgImage = moco_results$moco_avg_img, globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL,

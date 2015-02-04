@@ -149,7 +149,7 @@ aslPerfusion <- function(asl, maskThresh = 0.75,
   perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
 
   # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
-  predictors <- get_perfusion_predictors( mat,
+  predictors <- .get_perfusion_predictors( mat,
     motionparams, NULL, 1, ncompcor, useDenoiser )
   if ( verbose ) print( names(predictors) )
   # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )

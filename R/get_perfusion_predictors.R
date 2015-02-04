@@ -1,7 +1,7 @@
-get_perfusion_predictors <- function(mat,
+.get_perfusion_predictors <- function(mat,
   motionparams, xideal = NULL, labelfirst = 1,
   ncompcorparameters = 3, useDenoiser = NA) {
-  myusage <- "usage: get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
+  myusage <- "usage: .get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
   if (nargs() == 0) {
     print(myusage)
     return(NULL)

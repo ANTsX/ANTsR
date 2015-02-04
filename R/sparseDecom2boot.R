@@ -179,7 +179,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   locmask <- inmask
   if (usefakemask[1]) {
     if (doseg)
-      cca1outAuto <- matrixSeg(t(cca1outAuto))
+      cca1outAuto <- .matrixSeg(t(cca1outAuto))
     if (dim(cca1outAuto)[2] != nvecs)
       cca1outAuto <- t(cca1outAuto)
     cca1out <- (cca1outAuto)
@@ -191,7 +191,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 
   }
   if (usefakemask[2]) {
     if (doseg)
-      cca2outAuto <- matrixSeg(t(cca2outAuto))
+      cca2outAuto <- .matrixSeg(t(cca2outAuto))
     if (dim(cca2outAuto)[2] != nvecs)
       cca2outAuto <- t(cca2outAuto)
     cca2out <- (cca2outAuto)

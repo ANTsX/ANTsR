@@ -1,4 +1,4 @@
-filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, freqHi = 0.1, 
+.filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, freqHi = 0.1, 
   smoother = 0, pre = "", moreaccurate = TRUE) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( asl, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\"), smoother = 0 , outputprefix = NULL )"
@@ -104,7 +104,7 @@ filterPASLforNetworkAnalysis <- function(asl, mask, moco, tr, freqLo = 0.01, fre
   print(dim(motionparams))
   print(dim(ogmat))
   
-  predictors <- get_perfusion_predictors(ogmat, motionparams, NULL, 1, 3)
+  predictors <- .get_perfusion_predictors(ogmat, motionparams, NULL, 1, 3)
   motionparamsandcompcorr <- predictors$nuis
   ogmat <- residuals(lm(ogmat ~ motionparamsandcompcorr))
   gmat <- ogmat  #

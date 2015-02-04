@@ -41,7 +41,7 @@
 #' nfolds<-6
 #' train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 #' train<-( train < 4 )
-#' lrmat<-.lowrankRowMatrix( as.matrix( snps[train,] ) ,  50 )
+#' lrmat<-..lowrankRowMatrix( as.matrix( snps[train,] ) ,  50 )
 #' snpd<-sparseDecom( lrmat, nvecs=20 , sparseness=( 0.001), z=-1 )
 #' projmat<-as.matrix( snpd$eig )
 #' snpse<-as.matrix( snps[train, ]  ) %*% projmat

@@ -1,7 +1,7 @@
-ants_motion_estimation <- function(img = "") {
+.ants_motion_estimation <- function(img = "") {
   # check if called with no arguments and print usage
   if (nchar(img) == 0) {
-    print("usage: ants_motion_estimation( <time-series-image> )")
+    print("usage: .ants_motion_estimation( <time-series-image> )")
     return
   }
   

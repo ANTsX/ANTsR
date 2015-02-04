@@ -174,10 +174,10 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
   gc()  # trigger garbage collection
 }
 
-############################################################### antsrmakeRandomString(n, length) function generates a random string random
+############################################################### .antsrmakeRandomString(n, length) function generates a random string random
 ############################################################### string of the length (length), made up of numbers, small and capital letters
 ############################################################### helper function
-antsrmakeRandomString <- function(n = 1, mylength = 12) {
+.antsrmakeRandomString <- function(n = 1, mylength = 12) {
   randomString <- c(1:n)  # initialize vector
   for (i in 1:n) {
     randomString[i] <- paste(sample(c(0:9, letters, LETTERS), mylength, replace = TRUE), 
