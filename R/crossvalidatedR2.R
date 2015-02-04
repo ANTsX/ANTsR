@@ -23,12 +23,12 @@
 #' r2 <- crossvalidatedR2(x, y, covariates=covariate)
 #' @export crossvalidatedR2
 crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = F) {
-  havecaret-usePkg("caret")
+  havecaret<-usePkg("caret")
   nvox <- ncol(x)
   if (length(ngroups) == 1) {
-    if ( havecaret )
+    if ( havecaret ) {
       groups <- createFolds(y, k = ngroups, list = FALSE)
-    else groups<-rep_len( c(1:ngroups), length(y) )
+      } else groups<-rep_len( c(1:ngroups), length(y) )
   } else groups <- ngroups
   ngroups <- length(unique(groups))
   R2v <- matrix(rep(0, ngroups * nvox), nrow = ngroups)

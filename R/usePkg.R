@@ -14,7 +14,9 @@
 usePkg <- function(pkg) {
   success <- try(require(pkg, character.only = T))
   if (!success) {
-    install.packages(pkg, repos = "http://cran.r-project.org")
+    install.packages(pkg, repos = "http://cran.r-project.org",
+      dependencies=FALSE )
     success <- try(require(pkg, character.only = T))
   }
+  return(success)
 }
