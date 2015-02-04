@@ -4,10 +4,12 @@
 \alias{usePkg}
 \title{Use any package.  If package is not installed, this will install from CRAN.}
 \usage{
-usePkg(packageName)
+usePkg(packageName, allowInstall = FALSE)
 }
 \arguments{
 \item{packageName}{Name of package as *string*.}
+
+\item{allowInstall}{let the package be installed from CRAN}
 }
 \value{
 T if package successfully loaded, F otherwise. cbf image
