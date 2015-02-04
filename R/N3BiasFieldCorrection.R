@@ -1,25 +1,17 @@
 #' Bias Field Correction
-#' 
+#'
 #' Perform Bias Field Correction on the given image
-#' 
-#' 
-#' @param imageDimension2|3 Number of dimensions of the input image
-#' @param inputImage Input image to operate on
-#' @param outputImage Result image
-#' @param shrikFactor Shrink Factor
-#' @param maskImage Image to be used as mask
-#' @param numberofIterations Number of Iterations
-#' @param numberofFittingLevels Number of fitting levels
-#' @param outputBiasField Output bias-field
-#' @return 0 -- Success\cr 1 -- Failure
+#'
+#'
+#' @param ... See N3BiasFieldCorrection in ANTs
+#' @return NULL
 #' @author Shrinidhi KL
 #' @examples
-#' 
-#' \dontrun{
-#' N3BiasFieldCorrection( 3 , 'input_img.nii' , 'output_img.nii' , 2 )
-#' }
-#' 
+#'
+#' img<-makeImage(c(5,5),rnorm(25))
+#' N3BiasFieldCorrection( 2 , img, img, 2 )
+#'
 #' @export N3BiasFieldCorrection
 N3BiasFieldCorrection <- function(...) {
-  .Call("N3BiasFieldCorrection", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
-} 
+  pp<-.Call("N3BiasFieldCorrection", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+}

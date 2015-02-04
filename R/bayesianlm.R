@@ -1,20 +1,20 @@
 #' Simple bayesian regression function.
-#' 
+#'
 #' Take a prior mean and precision matrix for the regression solution and uses
 #' them to solve for the regression parameters.  The Bayesian model, here, is
 #' on the multivariate distribution of the parameters.
-#' 
-#' 
+#'
 #' @param X data matrix
 #' @param y outcome
 #' @param priorMean expected parameters
-#' @param precisionMatrix inverse covariance matrix of the parameters -
-#' strength of the prior
+#' @param priorPrecision inverse covariance matrix of the parameters -
+#' @param priorIntercept inverse covariance matrix of the parameters -
+#' @param regweights weights on each y, a vector as in lm
 #' @param includeIntercept include the intercept in the model
 #' @return bayesian regression solution is output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #'   # make some simple data
 #'   set.seed(1)
 #'   n<-20
@@ -101,16 +101,17 @@
 #'   antsImageWrite(perfimg,'perf_bayes.nii.gz')
 #'   print( cor.test(basicperf, perfimg[ aslmask == 1 ] ) )
 #'   }
-#' 
+#'
 #' @export bayesianlm
-bayesianlm <- function(X, y, priorMean, priorPrecision, priorIntercept = 0, regweights, 
+bayesianlm <- function(X, y, priorMean, priorPrecision,
+   priorIntercept = 0, regweights,
   includeIntercept = F) {
-  if (is.null(dim(y))) 
+  if (is.null(dim(y)))
     veccoef <- TRUE else veccoef <- FALSE
   # priorPrecision is the inverse of the covariance matrix
-  if (missing(priorPrecision)) 
+  if (missing(priorPrecision))
     priorPrecision <- diag(ncol(X)) * 0
-  if (missing(priorMean)) 
+  if (missing(priorMean))
     priorMean <- rep(0, ncol(X))
   if (!missing(regweights)) {
     regweights <- diag(regweights)
@@ -127,16 +128,16 @@ bayesianlm <- function(X, y, priorMean, priorPrecision, priorIntercept = 0, regw
   X2 <- (priorPrecision %*% priorMean + temp)
   mu_n <- XtXinv %*% X2
   if (!includeIntercept) {
-    if (veccoef) 
+    if (veccoef)
       beta <- mu_n[-1] else beta <- mu_n[-1, ]
   } else beta <- mu_n
-  if (includeIntercept) 
+  if (includeIntercept)
     priorIntercept = 0
   preds <- X %*% mu_n
   b_n <- priorIntercept + mean(regweights %*% y) - mean(regweights %*% preds)
   preds <- preds + b_n
   myresiduals <- (y - preds)
-  
+
   if (!includeIntercept) {
     if (dim(X)[2] > 2) {
       mycoefs <- diag(XtXinv[2:dim(X)[2], 2:dim(X)[2]])
@@ -144,22 +145,22 @@ bayesianlm <- function(X, y, priorMean, priorPrecision, priorIntercept = 0, regw
       mycoefs <- XtXinv[2, 2]
     }
   } else mycoefs <- diag(XtXinv[1:dim(X)[2], 1:dim(X)[2]])
-  
+
   if (veccoef) {
     beta.std <- sqrt(sum((myresiduals)^2)/dfe * mycoefs)
   } else {
     beta.std <- t(sqrt(as.vector(colSums((myresiduals)^2)/dfe) %o% mycoefs))
   }
-  
+
   if (!includeIntercept) {
-    if (veccoef) 
+    if (veccoef)
       beta.t <- mu_n[-1]/beta.std
-    if (!veccoef) 
+    if (!veccoef)
       beta.t <- mu_n[-1, ]/beta.std
   } else beta.t <- mu_n/beta.std
-  
+
   beta.pval <- 2 * pt(-abs(beta.t), df = dfe)
-  
+
   betapost <- phi <- 0
   # if ( pckg & FALSE ) {
   if (FALSE) {
@@ -179,7 +180,7 @@ bayesianlm <- function(X, y, priorMean, priorPrecision, priorIntercept = 0, regw
     # below gives mean posterior for beta across a range
     betapost <- pmvnorm(mu1, rep(Inf, length(mu1)), mean = mu1, sigma = sig1)[1]
   }
-  return(list(beta = beta, beta.std = beta.std, beta.t = beta.t, beta.pval = beta.pval, 
-    fitted.values = preds, betaPosteriors = betapost, precisionPosteriors = phi, 
+  return(list(beta = beta, beta.std = beta.std, beta.t = beta.t, beta.pval = beta.pval,
+    fitted.values = preds, betaPosteriors = betapost, precisionPosteriors = phi,
     posteriorProbability = phi * betapost))
-} 
+}

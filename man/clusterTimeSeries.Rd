@@ -7,11 +7,13 @@
 clusterTimeSeries(mat, krange = 2:10, nsvddims = NA, criterion = "asw")
 }
 \arguments{
+\item{mat}{input time series matrix}
+
 \item{krange}{k cluster range to explore}
 
-\item{img}{input image}
+\item{nsvddims}{eg 2}
 
-\item{mask}{mask to use}
+\item{criterion}{for clustering see pamk}
 }
 \value{
 matrix is output

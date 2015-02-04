@@ -1,11 +1,12 @@
 #' Uses probabilistic segmentation to constrain pcasl-based cbf computation.
-#' 
+#'
 #' Employs a robust regression approach to learn the relationship between a
 #' sample image and a list of images that are mapped to the same space as the
 #' sample image.
-#' 
-#' 
+#'
+#'
 #' @param pcasl img antsImage for cbf
+#' @param segmentation image, should cover the brain.
 #' @param tissuelist a list containing antsImages eg list(prob1,...,probN)
 #' @param myPriorStrength - e.g 30
 #' @param useDataDrivenMask - morphology parameters e.g. 3
@@ -14,12 +15,11 @@
 #' @param localweights Use estimate of voxel-wise reliability to inform prior
 #' weight?
 #' @param priorBetas prior betas for each tissue and predictor
-#' @param segmentation image, should cover the brain.
 #' @return estimated cbf image
 #' @author Brian Beaumont Avants and Benjamin M. Kandel
 #' @keywords asl, bayesian blood cerebral flow,
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' set.seed(123)
 #' # see fMRIANTs github repository for data and I/O suggestions
@@ -30,9 +30,9 @@
 #'   robustnessvalue=0.95,
 #'   priorBetas=NA )
 #' }
-#' 
+#'
 #' @export bayesianCBF
-bayesianCBF<-function( pcasl, seg, tissuelist,
+bayesianCBF<-function( pcasl, segmentation, tissuelist,
   myPriorStrength=30.0,
   useDataDrivenMask=3,
   denoisingComponents=1:8,

@@ -3,9 +3,10 @@
 #' Uses clustering methods to split a time series into similar subsets.
 #'
 #'
-#' @param img input image
-#' @param mask mask to use
+#' @param mat input time series matrix
 #' @param krange k cluster range to explore
+#' @param nsvddims eg 2
+#' @param criterion for clustering see pamk
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
@@ -35,7 +36,8 @@
 #'   }
 #'
 #' @export clusterTimeSeries
-clusterTimeSeries <- function(mat, krange = 2:10, nsvddims = NA, criterion = "asw") {
+clusterTimeSeries <- function(mat, krange = 2:10,
+  nsvddims = NA, criterion = "asw") {
   if (nargs() == 0) {
     print(args(clusterTimeSeries))
     return(1)

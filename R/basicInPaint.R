@@ -1,7 +1,7 @@
-#' @name basicInpaint
+#' @name basicInPaint
 #' @title Inpaints missing imaging data from boundary data
 #' @description  Smooths data along the boundary into the missing region.
-#' @usage  approximg<-basicInpaint( img, paintMask )
+#' @usage  approximg<-basicInPaint( img, paintMask )
 #' @param img antsImage to be approximated / painted
 #' @param paintMask painting mask with values 1 or
 #' values 1 and 2 - if there is a 2 then it will learn
@@ -52,7 +52,7 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     upit <- mean(img[paintMaskUse == 2])
     speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
   }
-  ImageMath(inpainted@dimension, inpainted, "FastMarchingExtension", speedimage, 
+  ImageMath(inpainted@dimension, inpainted, "FastMarchingExtension", speedimage,
     healthymask, img)
   outimg <- antsImageClone(img)
   outimg[paintMaskUse == 2] <- inpainted[paintMaskUse == 2]
@@ -68,4 +68,4 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     }
   }
   return(outimg)
-} 
+}

@@ -5,7 +5,7 @@
 #'
 #'
 #' @param fixed fixed image to which we register the moving image.
-#' @param movingImage moving image to be mapped to fixed space.
+#' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. choose from list
 #' Rigid, Affine, SyN, SyNBold, SyNAggro.

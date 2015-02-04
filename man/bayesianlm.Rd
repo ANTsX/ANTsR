@@ -14,10 +14,13 @@ bayesianlm(X, y, priorMean, priorPrecision, priorIntercept = 0, regweights,
 
 \item{priorMean}{expected parameters}
 
-\item{includeIntercept}{include the intercept in the model}
+\item{priorPrecision}{inverse covariance matrix of the parameters -}
 
-\item{precisionMatrix}{inverse covariance matrix of the parameters -
-strength of the prior}
+\item{priorIntercept}{inverse covariance matrix of the parameters -}
+
+\item{regweights}{weights on each y, a vector as in lm}
+
+\item{includeIntercept}{include the intercept in the model}
 }
 \value{
 bayesian regression solution is output

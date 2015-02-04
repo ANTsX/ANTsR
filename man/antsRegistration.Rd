@@ -10,6 +10,8 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
 
+\item{moving}{moving image to be mapped to fixed space.}
+
 \item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
 affine+syn mapping.  Mutual information metric by default. choose from list
 Rigid, Affine, SyN, SyNBold, SyNAggro.}
@@ -19,8 +21,6 @@ Rigid, Affine, SyN, SyNBold, SyNAggro.}
 \item{outprefix}{output will be named with this prefix.}
 
 \item{mask}{mask the registration.}
-
-\item{movingImage}{moving image to be mapped to fixed space.}
 }
 \value{
 outputs a list containing warped images and transforms. 1 -- Failure

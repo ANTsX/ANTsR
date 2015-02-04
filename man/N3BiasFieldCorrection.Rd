@@ -7,32 +7,14 @@
 N3BiasFieldCorrection(...)
 }
 \arguments{
-\item{imageDimension2|3}{Number of dimensions of the input image}
-
-\item{inputImage}{Input image to operate on}
-
-\item{outputImage}{Result image}
-
-\item{shrikFactor}{Shrink Factor}
-
-\item{maskImage}{Image to be used as mask}
-
-\item{numberofIterations}{Number of Iterations}
-
-\item{numberofFittingLevels}{Number of fitting levels}
-
-\item{outputBiasField}{Output bias-field}
-}
-\value{
-0 -- Success\cr 1 -- Failure
+\item{...}{See N3BiasFieldCorrection in ANTs}
 }
 \description{
 Perform Bias Field Correction on the given image
 }
 \examples{
-\dontrun{
-N3BiasFieldCorrection( 3 , 'input_img.nii' , 'output_img.nii' , 2 )
-}
+img<-makeImage(c(5,5),rnorm(25))
+N3BiasFieldCorrection( 2 , img, img, 2 )
 }
 \author{
 Shrinidhi KL
