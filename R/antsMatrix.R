@@ -69,12 +69,12 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 #' convert antsMatrix to list
 #'
 #' @param x input antsmatrix
-#' @param row.names
-#' @param optional
+#' @param row.names standard row.names
+#' @param optional other options
 #' @return list is output
 #' @author Avants BB
 #'
-#' @export as.list.antsMatrix
+#' @export
 as.list.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst))] <- lst[length(lst)]
@@ -90,12 +90,12 @@ setAs("antsMatrix", "list", function(from) {
 #' convert antsMatrix to data frame
 #'
 #' @param x input matrix
-#' @param row.names
-#' @param optional
+#' @param row.names standard row.names
+#' @param optional other options
 #' @return data frame is output
 #' @author Avants BB
 #'
-#' @export as.data.frame.antsMatrix
+#' @export
 as.data.frame.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst))] <- lst[length(lst)]

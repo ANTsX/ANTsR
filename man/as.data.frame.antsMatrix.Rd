@@ -9,9 +9,9 @@ as.data.frame.antsMatrix(x, row.names = NULL, optional = FALSE, ...)
 \arguments{
 \item{x}{input matrix}
 
-\item{row.names}{}
+\item{row.names}{standard row.names}
 
-\item{optional}{}
+\item{optional}{other options}
 }
 \value{
 data frame is output

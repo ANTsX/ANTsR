@@ -9,9 +9,9 @@ as.list.antsMatrix(x, row.names = NULL, optional = FALSE, ...)
 \arguments{
 \item{x}{input antsmatrix}
 
-\item{row.names}{}
+\item{row.names}{standard row.names}
 
-\item{optional}{}
+\item{optional}{other options}
 }
 \value{
 list is output
