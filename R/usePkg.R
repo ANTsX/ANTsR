@@ -12,7 +12,8 @@
 #'
 #' @export usePkg
 usePkg <- function(packageName) {
-  success <- try(require(packageName, character.only = T))
+  # update according to H Wickham's advice
+  success<-requireNamespace(packageName, quietly = TRUE)
   if (!success) {
     install.packages(packageName, repos = "http://cran.r-project.org",
       dependencies=FALSE )
