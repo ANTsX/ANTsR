@@ -30,8 +30,10 @@
 #' }
 #'
 #' @export taskFMRI
-taskFMRI <- function(mat, hrf, myvars, correctautocorr = FALSE, residualizedesignmatrix = FALSE,
-  myformula = "globalsignal + motion1 +   \n      motion2 + motion3 + compcorr1 + compcorr2 + compcorr3") {
+taskFMRI <- function(mat, hrf, myvars,
+  correctautocorr = FALSE, residualizedesignmatrix = FALSE,
+  myformula = "globalsignal + motion1 +
+    motion2 + motion3 + compcorr1 + compcorr2 + compcorr3") {
   if (nargs() == 0) {
     print("Usage:  betas<-taskFMRI( x , hrf ) ")
     return(1)
