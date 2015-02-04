@@ -5,8 +5,7 @@
 \title{Simple taskFMRI function.}
 \usage{
 taskFMRI(mat, hrf, myvars, correctautocorr = FALSE,
-  residualizedesignmatrix = FALSE,
-  myformula = "globalsignal + motion1 +\\n    motion2 + motion3 + compcorr1 + compcorr2 + compcorr3")
+  residualizedesignmatrix = FALSE, myformula = NA)
 }
 \arguments{
 \item{fmriMatrix}{input matrix}

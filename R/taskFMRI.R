@@ -32,13 +32,20 @@
 #' @export taskFMRI
 taskFMRI <- function(mat, hrf, myvars,
   correctautocorr = FALSE, residualizedesignmatrix = FALSE,
-  myformula = "globalsignal + motion1 +
-    motion2 + motion3 + compcorr1 + compcorr2 + compcorr3") {
+  myformula = NA) {
   if (nargs() == 0) {
     print("Usage:  betas<-taskFMRI( x , hrf ) ")
     return(1)
   }
-  usePkg("magic")
+  if ( all(is.na(myformula) ) )
+    myformula<-"globalsignal + motion1 +
+      motion2 + motion3 + compcorr1 + compcorr2 + compcorr3"
+  havemagic<-usePkg("magic")
+  if ( ! havemagic )
+    {
+    print("Must have magic package to use this function")
+    return(NA)
+    }
   avg <- myvars$avgImage
   mask <- myvars$mask
   nuis <- (myvars$nuisancevariables)
@@ -109,7 +116,7 @@ taskFMRI <- function(mat, hrf, myvars,
 
 
 
-arCorrection <- function(boldmatin, loops = 3, armethod = "burg") {
+.arCorrection <- function(boldmatin, loops = 3, armethod = "burg") {
   boldmat <- boldmatin
   for (i in 1:loops) {
     arcoefs <- ar(boldmat, FALSE, 2, method = armethod)$ar  # use something similar to  SPM's  autoregression estimate
