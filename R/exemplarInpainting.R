@@ -46,10 +46,10 @@
 exemplarInpainting <- function(img, paintMask, imageList,
   featureRadius = 2, scaleInpaintIntensity = 0,
   sharpen = FALSE, feather = 1, predalgorithm = "lm", debug = FALSE) {
+  havesvm<-FALSE
   if ( predalgorithm == 'svm' )
     {
     havesvm<-usePkg("e1071")
-    if ( !havesvm ) predalgorithm<-"lm"
     }
   mask <- antsImageClone(paintMask)
   mask[paintMask != 1] <- 0  # dont use the lesion
@@ -104,7 +104,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
     }
     if (debug)
       print("run lm")
-    if (predalgorithm == "svm") {
+    if (predalgorithm == "svm" & havesvm ) {
       mdl <- svm(targetvoxels ~ ., data = nmatdf)
     } else mdl <- lm(targetvoxels ~ ., data = nmatdf)
     if (inpaintLesion == FALSE) {
@@ -123,7 +123,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
     predvec <- predimg[paintMask == 1]
     imgvec <- img[paintMask == 1]
     mydf <- data.frame(vox = predimg[paintMask == 1])
-    if (predalgorithm == "svm") {
+    if (predalgorithm == "svm" & havesvm ) {
       mdl <- svm(imgvec ~ vox, data = mydf)
     } else mdl <- lm(imgvec ~ vox, data = mydf)
     mydf <- data.frame(vox = predimg[fmask == 1])
