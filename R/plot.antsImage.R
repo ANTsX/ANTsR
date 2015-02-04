@@ -79,10 +79,14 @@ plot.antsImage <- function(x, y, color = c("jet", "red", "blue",
   if ( missing( y ) ) y<-NA
   functional<-y
   imagedim <- length(dim(myantsimage))
-  usePkg("pixmap")
-  usePkg("misc3d")
-  usePkg("rgl")
-#  usePkg("utils")
+  hvpx<-usePkg("pixmap")
+  hvmsc<-usePkg("misc3d")
+  havergl<-usePkg("rgl")
+  if ( !havergl | !havemsc | ! havepx )
+    {
+    print(paste("you need rgl, misc3d and pixmap libraries to use this."))
+    return(NULL)
+    }
   read.img <- function(x, dim = 2) {
     img <- antsImageRead(x, dim)
     img <- as.array(img)
