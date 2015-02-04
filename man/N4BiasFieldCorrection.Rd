@@ -19,8 +19,7 @@ Perform Bias Field Correction on the given image
 }
 \examples{
 img<-makeImage( c(50,50), rnorm(2500) )
- ImageMath(2,img,PadImage,img,5)
- n4img<-N4BiasFieldCorrection(img,mask)
+ n4img<-N4BiasFieldCorrection(img)
 }
 \author{
 BB Avants

@@ -9,8 +9,7 @@
 #' @examples
 #'
 #'  img<-makeImage( c(50,50), rnorm(2500) )
-#'  ImageMath(2,img,PadImage,img,5)
-#'  n4img<-N4BiasFieldCorrection(img,mask)
+#'  n4img<-N4BiasFieldCorrection(img)
 #'
 #' @export N4BiasFieldCorrection
 N4BiasFieldCorrection<-function( img , mask=NA )
