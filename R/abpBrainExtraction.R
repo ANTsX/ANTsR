@@ -62,18 +62,17 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   # ANTs parameters end
 
   # Atropos params
+  locmrf<-paste(rep(1,img@dimension),collapse='x')
   ATROPOS_BRAIN_EXTRACTION_INITIALIZATION <- "kmeans[3]"
   ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD <- "Gaussian"
   ATROPOS_BRAIN_EXTRACTION_CONVERGENCE <- "[3,0.0001]"
-  ATROPOS_BRAIN_EXTRACTION_MRF <- paste("[0.2,1x1x1]")
+  ATROPOS_BRAIN_EXTRACTION_MRF <- paste("[0.2,",locmrf,"]")
   ATROPOS_SEGMENTATION_INITIALIZATION <- "PriorProbabilityImages"
   ATROPOS_SEGMENTATION_PRIOR_WEIGHT <- 0
   ATROPOS_SEGMENTATION_LIKELIHOOD <- "Gaussian"
   ATROPOS_SEGMENTATION_CONVERGENCE <- "[12,0.0001]"
   ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION <- "Socrates"
-  ATROPOS_SEGMENTATION_MRF <- "[0.11,1x1x1]"
-  if (img@dimension == 2)
-    ATROPOS_SEGMENTATION_MRF <- paste("[0.11,1x1]")
+  ATROPOS_SEGMENTATION_MRF <- paste("[0.11,",locmrf,"]")
   # Atropos params end
 
   imgsmall <- resampleImage(img , rep(4, img@dimension) )
