@@ -17,7 +17,7 @@ usePkg <- function(packageName) {
   if (!success) {
     install.packages(packageName, repos = "http://cran.r-project.org",
       dependencies=FALSE )
-    success <- try(require(packageName, character.only = T))
+    success <- requireNamespace(packageName, character.only = T)
   }
   return(success)
 }
