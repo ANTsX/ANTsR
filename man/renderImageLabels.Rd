@@ -30,7 +30,7 @@ Will use rgl to render surfaces
 \examples{
 \dontrun{
 renderImageLabels(labels)
-renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3, color=snapColors(100) )
+renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3  )
 }
 }
 \author{

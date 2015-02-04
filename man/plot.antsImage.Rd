@@ -4,9 +4,9 @@
 \alias{plot.antsImage}
 \title{plot.antsImage}
 \usage{
-plot.antsImage(x, y, color = c("jet", "red", "blue", "green", "yellow"),
-  axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA,
-  outname = NA, alpha = 0.5, ...)
+\method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
+  "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf",
+  quality = NA, outname = NA, alpha = 0.5, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay}
@@ -59,3 +59,4 @@ mnit<-getANTsRData('mni')
 \author{
 Avants BB
 }
+

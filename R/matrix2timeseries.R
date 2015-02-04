@@ -4,12 +4,9 @@
 #'
 #' @param referenceImage reference 4D image
 #' @param maskImage mask image defining voxels of interest
-#' @timeSeriesMatrix matrix to convert to image
+#' @param timeSeriesMatrix matrix to convert to image
 #' @return antsImage in 4D is output
 #' @author Avants BB
-#' @examples
-#' \dontrun{
-#'  }
 #'
 #' @export matrix2timeseries
 matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
