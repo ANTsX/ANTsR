@@ -167,7 +167,11 @@ renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, off
   # Code for 3D function->stl files for molding and casting stl creation functions
   # similar to week 4 files Laura Perovich Oct 2012 Load package misc3d that
   # includes surfaceTriangles function
-  usePkg("misc3d")
+  havemsc3d<-usePkg("misc3d")
+  if ( ! havemsc3d ) {
+    print("Need misc3d for this")
+    return(NA)
+  }
   # Define character constants used in the stl files
   tristart1 <- "facet normal 0 0 0"
   tristart2 <- " outer loop"

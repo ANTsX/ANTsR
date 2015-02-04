@@ -1,8 +1,8 @@
 #' Perfusion Regression
-#' 
+#'
 #' Estimate CBF using standard regression and optionally robust regression.
-#' 
-#' 
+#'
+#'
 #' @param mask_img Mask image selects the voxels where CBF will be estimated.
 #' Voxels corresponding to logical FALSE are not computed.
 #' @param mat Matrix with a column for every time-series voxel. Number of rows
@@ -19,21 +19,21 @@
 #' for voxels corresponding to the mask input\cr
 #' @author Shrinidhi KL Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' # predictors -- result of calling '.get_perfusion_predictors'
 #' cbf <- perfusionregression( mask_img, mat , predictors$xideal , predictors$nuis )
 #' }
-#' 
+#'
 #' @export perfusionregression
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20, 
+perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20,
   selectionValsForRegweights = NULL, useBayesian = 0) {
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
     print(myusage)
     return(NULL)
   }
-  usePkg("robust")
+  if ( !usePkg("robust") ) { print("Need robust package"); return(NULL) }
   if (missing(mat) | missing(xideal) | missing(nuis)) {
     print("Missing one or more input parameter(s).")
     print(myusage)
@@ -49,7 +49,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
   mycbfmodel <- lm(cbfform)  # standard regression
   cbfi <- antsImageClone(mask_img)
   betaideal <- ((mycbfmodel$coeff)[2, ])
-  if (mean(betaideal) < 0) 
+  if (mean(betaideal) < 0)
     betaideal <- (betaideal) * (-1)
   cbfi[mask_img == 1] <- betaideal  # standard results
   if (dorobust == 0) {
@@ -88,7 +88,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     }
     thisct <- thisct + 1
   }
-  if (skip == 1) 
+  if (skip == 1)
     for (i in 1:nrow(robvals)) {
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- robvals[i, ]
@@ -96,7 +96,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       robvals[i, ] <- temp[mask_img == 1]
     }
   regweights <- (rgw/myct)
-  if (is.na(mean(regweights))) 
+  if (is.na(mean(regweights)))
     regweights[] <- 1
   # check if the robustness selects the blank part of the time series now use the
   # weights in a weighted regression
@@ -144,7 +144,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- smoothcoeffmat[i, ]
       SmoothImage(3, temp, 1.5, temp)
-      nmatimgs[[i]] <- antsGetNeighborhoodMatrix(temp, mask_img, rep(1, 3), 
+      nmatimgs[[i]] <- antsGetNeighborhoodMatrix(temp, mask_img, rep(1, 3),
         boundary.condition = "mean")
       smoothcoeffmat[i, ] <- temp[mask_img == 1]
     }
@@ -153,23 +153,23 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, 
     blmX <- model.matrix(mycbfmodel)
     for (v in 1:ncol(mat)) {
       parammat <- nmatimgs[[1]][, v]
-      for (k in 2:length(nmatimgs)) parammat <- cbind(parammat, nmatimgs[[k]][, 
+      for (k in 2:length(nmatimgs)) parammat <- cbind(parammat, nmatimgs[[k]][,
         v])
       pcov <- cov(parammat)
       locinvcov <- tryCatch(solve(pcov), error = function(e) return(invcov))
-      if (typeof(locinvcov) == "character") 
+      if (typeof(locinvcov) == "character")
         locinvcov <- invcov
       prior <- (smoothcoeffmat[, v])
-      if (skip == 1) 
+      if (skip == 1)
         regweights <- robvals[, v]
       blm <- bayesianlm(blmX, mat[, v], prior, locinvcov * useBayesian, regweights = regweights)
       betaideal[v] <- blm$beta[1]
     }
   }
-  if (mean(betaideal) < 0) 
+  if (mean(betaideal) < 0)
     betaideal <- (betaideal) * (-1)
   cbfi[mask_img == 1] <- betaideal  # robust results
   print(paste("Rejected", length(indstozero)/nrow(mat) * 100, " % "))
   return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
 }
-# y = x beta + c => y - c = x beta 
+# y = x beta + c => y - c = x beta

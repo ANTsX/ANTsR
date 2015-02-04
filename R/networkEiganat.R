@@ -52,10 +52,10 @@
 #' myrf<-glm( bmi ~ . , data=traindf )
 #' preddf<-predict(myrf, newdata=testdf )
 #' cor.test(preddf, testdf$bmi )
-#' usePkg('visreg')
+#' if ( usePkg('visreg') ) {
 #' mydf<-data.frame( PredictedBMIfromSNPs=preddf, RealBMI=testdf$bmi )
 #' mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
-#' visreg(mymdl)
+#' visreg(mymdl) }
 #' ###########
 #' # vs glmnet #
 #' ###########

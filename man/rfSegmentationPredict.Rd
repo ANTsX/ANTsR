@@ -8,10 +8,13 @@ rfSegmentationPredict(rfSegmentationModel, featureimages, mask,
   verbose = FALSE)
 }
 \arguments{
-\item{featureimages}{input list of antsImage feature images - should match
-model}
+\item{rfSegmentationModel}{input rf model}
 
-\item{model}{input rf model}
+\item{featureimages}{input list of antsImage feature images}
+
+\item{mask}{antsImage mask}
+
+\item{verbose}{bool}
 }
 \value{
 segmentation is output
@@ -20,7 +23,7 @@ segmentation is output
 Predict image segmentation via random forests.
 }
 \examples{
-usePkg('randomForest')
+if ( usePkg('randomForest') ) {
 img<-antsImageRead( getANTsRData('r16') ,2)
 mask<-getMask( img )
 mask2<-getMask( img )
@@ -31,6 +34,7 @@ fimgs<-list( img )
 rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100, verbose=TRUE )
 rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
 plot( rfseg2 )
+}
 }
 \author{
 Tustison NJ, Avants BB

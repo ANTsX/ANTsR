@@ -8,6 +8,8 @@ temporalwhiten(mat, myord = 2)
 }
 \arguments{
 \item{mat}{input matrix}
+
+\item{myord}{integer order value}
 }
 \value{
 matrix is output

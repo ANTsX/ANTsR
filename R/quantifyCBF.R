@@ -231,7 +231,7 @@ quantifyCBF <- function(perfusion, mask, parameters, M0val = NA, outlierValue = 
   meancbfimg[(mask < 1)] <- 0
   meancbfimg[(mask == 1)] <- meancbf[(mask == 1)]
 
-  epckg <- FALSE # usePkg("extremevalues")
+  epckg <- usePkg("extremevalues")
   if (epckg) {
 #    usePkg("extremevalues")
 #    cbfvals <- meancbfimg[(mask == 1)]

@@ -9,6 +9,26 @@ regressionNetworkViz(mylm, sigthresh = 0.05, whichviz = "Sankey",
   correlateMyOutcomes = NA, corthresh = 0.9, zoom = F, doFDR = TRUE)
 }
 \arguments{
+\item{sigthresh}{significance threshold}
+
+\item{whichviz}{which visualization method}
+
+\item{outfile}{significance threshold}
+
+\item{mygroup}{color each entry by group membership}
+
+\item{logvals}{bool}
+
+\item{verbose}{bool}
+
+\item{correlateMyOutcomes}{not sure, see code}
+
+\item{corthresh}{correlation threshold}
+
+\item{zoom}{zooming factor}
+
+\item{doFDR}{bool}
+
 \item{myLM}{lm model output from bigLMStats}
 }
 \value{

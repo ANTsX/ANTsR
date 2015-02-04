@@ -22,7 +22,6 @@ quantifySNPs <- function(snps, freqthresh = 0.1 ,
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)
   }
-  usePkg("magic")
   qsnps<-snps
   okrow<-rep(FALSE,ncol(qsnps))
   traitvec<-as.numeric( traitvecin )
@@ -65,7 +64,7 @@ quantifySNPs <- function(snps, freqthresh = 0.1 ,
     }
   }
   qsnps<-qsnps[,okrow]
-  if ( shiftit ) {
+  if ( shiftit & usePkg("magic") ) {
     qsnps<-qsnps+ashift(qsnps,c(0,1))+ashift(qsnps,c(0,-1))
     qsnps<-qsnps+ashift(qsnps,c(0,1))+ashift(qsnps,c(0,-1))
   }

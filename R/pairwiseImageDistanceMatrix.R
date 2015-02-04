@@ -22,7 +22,7 @@
 #' }
 #'
 #' @export pairwiseImageDistanceMatrix
-pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation", 
+pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation",
   nclusters = NA) {
   fnl <- length(myFileList)
   mymat <- matrix(rep(NA, fnl * fnl), nrow = fnl, ncol = fnl)
@@ -33,7 +33,7 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
         i1 <- antsImageRead(myFileList[ct], dim)
         i2 <- antsImageRead(myFileList[ct2], dim)
         toutfn <- paste(tempdir(), "Z", sep = "/")
-        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"), 
+        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"),
           outprefix = toutfn)
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
         # broken !!  metric <- capture.output(ImageMath(dim, 'j', metrictype, i1,
@@ -56,8 +56,7 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
   }
   mymat <- mymat - min(mymat, na.rm = T)  # make min zero
   symat <- (mymat + t(mymat)) * 0.5  # make symmetric
-  if (!is.na(nclusters)) {
-    usePkg("cluster")
+  if ( !is.na(nclusters) &  usePkg("cluster") ) {
     clusters <- rep(NA, fnl)
     clusterrep <- rep(NA, nclusters)
     pamx <- pam(symat, nclusters)
@@ -72,4 +71,4 @@ pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCo
     return(list(rawMatrix = mymat, symmMatrix = symat, clusters = clusters, representatives = myFileList[clusterrep]))
   }
   return(list(rawMatrix = mymat, symmMatrix = symat))
-} 
+}

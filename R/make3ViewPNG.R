@@ -24,9 +24,13 @@
 #'
 #' @export make3ViewPNG
 make3ViewPNG <- function(rotationView1, rotationView2, rotationView3, fnprefix) {
-  usePkg("rgl")
-  usePkg("grid")
-  usePkg("png")
+  if ( !  usePkg("rgl")  |
+       !  usePkg("grid") |
+       !  usePkg("png") )
+       {
+       print("Need rgl, grid and png")
+       return(NULL)
+       }
   if (nargs() == 0 | missing(fnprefix)) {
     print("Usage:  make3ViewPNG( x , fn = 'output.png') ")
     return(1)
