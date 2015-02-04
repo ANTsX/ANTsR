@@ -15,7 +15,7 @@
 #' 
 #' \dontrun{
 #' renderImageLabels(labels)
-#' renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3, color=snapColors(100) )
+#' renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3  )
 #' }
 #' 
 #' @export renderImageLabels
@@ -30,7 +30,7 @@ renderImageLabels <- function(labelsimg, surfval = 0.5, smoothsval = 0, blobrend
   
   colors <- color
   if (length(colors) < 1) {
-    colors <- snapColors(nLabels)
+    colors <- .snapColors(nLabels)
   }
   mylist <- list()
   

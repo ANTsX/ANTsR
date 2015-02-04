@@ -99,7 +99,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
     v <- t((replicate(ncol(X), rnorm(nvecs))))
     v <- svd(Xin, nu = 0, nv = nvecs)$v
   }
-  v <- eanatsparsify(v, sparseness[2], mask, clustval = clustval)
+  v <- .eanatsparsify(v, sparseness[2], mask, clustval = clustval)
   u <- (X %*% v)
   time1 <- (Sys.time())
   for (jj in 1:its) {
@@ -111,7 +111,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
     if (!missing(prior)) {
       v <- v + t(X) %*% (X %*% (prior - v)) * pgradparam
     }
-    v <- eanatsparsify(v, sparseness[2], mask, clustval = clustval)
+    v <- .eanatsparsify(v, sparseness[2], mask, clustval = clustval)
     if (!useregression) {
       uupdate <- t(t(v) %*% t(X - myrecon))
       u <- u + uupdate * gradparam
@@ -127,7 +127,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
 
     if (abs(sparseness[1]) < 1) {
       u <- whiten(u)
-      u <- eanatsparsify(u, sparseness[1], verbose = F)
+      u <- .eanatsparsify(u, sparseness[1], verbose = F)
     }
     if (is.na(norm(u))) {
       if (verbose)
@@ -179,30 +179,30 @@ lowrank <- function(A, k = 1) {
   return(u %*% d %*% t(v))
 }
 
-eanatcolMaxs <- function(v) {
+.eanatcolMaxs <- function(v) {
   if (class(v) == "matrix") {
     return(apply(v, FUN = max, MARGIN = 2))
   } else return(v)
 }
 
-eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
+.eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
   if (abs(sparam) >= 1)
     return(vin)
   v <- vin
-  v <- v * sign(eanatcolMaxs(v))
+  v <- v * sign(.eanatcolMaxs(v))
   if (class(v)[[1]][1] == "antsImage" & !is.na(mask))
     v <- as.matrix(vin[mask > 1e-05])
   v <- as.matrix(v)
-  vpos <- eanatsparsifyv(v, sparam, mask, clustval = clustval, verbose = verbose)
+  vpos <- .eanatsparsifyv(v, sparam, mask, clustval = clustval, verbose = verbose)
   return(vpos)
 }
 
-eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
+.eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
   if (abs(sparam) >= 1)
     return(vin)
   if (nrow(vin) < ncol(vin))
     v <- t(vin) else v <- vin
-  v <- v * sign(eanatcolMaxs(v))
+  v <- v * sign(.eanatcolMaxs(v))
   b <- round(abs(as.numeric(sparam)) * nrow(v))
   if (b < 3)
     b <- 3
