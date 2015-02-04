@@ -19,9 +19,12 @@
 #'
 #' data("bold_correlation_matrix",package="ANTsR")
 #' dmat<-data.matrix(bold_correlation_matrix)
-#' gg<-makeGraph( dmat, 0.1 )
-#' rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
-#' plotPrettyGraph( gg$mygraph, gg$adjacencyMatrix, gg$degree , figScale=12 , scaleText=5 )
+#' if ( usePkg("igraph") ) {
+#'  gg<-makeGraph( dmat, 0.1 )
+#'  rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
+#'  plotPrettyGraph( gg$mygraph, gg$adjacencyMatrix,
+#'    gg$degree , figScale=12 , scaleText=5 )
+#'  }
 #'
 #' @export plotPrettyGraph
 plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
