@@ -7,19 +7,19 @@
 partialVolumeCorrection(img, img.gm, img.wm, mask = NULL, proportion = 0.4)
 }
 \arguments{
+\item{img}{Low-resolution image to be corrected.  All input images can be
+either of type antsImage or numeric vectors (if numeric vectors, the mask is
+ignored).}
+
+\item{img.gm}{Gray matter probability image for partial volume correction.}
+
+\item{img.wm}{White matter probability image for partial volume
+correction.}
+
 \item{mask}{Brain mask for image.}
 
 \item{proportion}{Ratio of activity for white matter to gray matter.
 Assumed to be 0.4.}
-
-\item{image}{Low-resolution image to be corrected.  All input images can be
-either of type antsImage or numeric vectors (if numeric vectors, the mask is
-ignored).}
-
-\item{image.gm}{Gray matter probability image for partial volume correction.}
-
-\item{image.wm}{White matter probability image for partial volume
-correction.}
 }
 \value{
 Returns partial volume corrected antsImage.
@@ -31,7 +31,6 @@ as described in Johnson et al., Radiology 2005: CBF_corrected = CBF_observed
 / (GM_prob + 0.4 * WM_prob)
 }
 \examples{
-\dontrun{
 activity.gm <- 10
 activity.wm <- activity.gm * 0.4
 percent.gm <- matrix(seq(0.1, 1, by=0.1), nrow=2)
@@ -39,7 +38,6 @@ percent.wm <- -percent.gm + 1
 activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5) +
                   rnorm(n=length(percent.wm), mean=activity.wm, sd=5)
 activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
-}
 }
 \author{
 Kandel BM %% ~~who you are~~
@@ -54,6 +52,4 @@ Ratio of GM to WM activity: Quantitative magnetic resonance imaging of human
 brain perfusion at 1.5 T using steady-state inversion of arterial water.
 Roberts DA, Detre JA, Bolinger L, Insko EK, Leigh JS Jr. PNAS 1994.
 }
-\keyword{~kwd1}
-\keyword{~kwd2}
 

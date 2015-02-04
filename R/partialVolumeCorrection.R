@@ -5,11 +5,11 @@
 #' as described in Johnson et al., Radiology 2005: CBF_corrected = CBF_observed
 #' / (GM_prob + 0.4 * WM_prob)
 #'
-#' @param image Low-resolution image to be corrected.  All input images can be
+#' @param img Low-resolution image to be corrected.  All input images can be
 #' either of type antsImage or numeric vectors (if numeric vectors, the mask is
 #' ignored).
-#' @param image.gm Gray matter probability image for partial volume correction.
-#' @param image.wm White matter probability image for partial volume
+#' @param img.gm Gray matter probability image for partial volume correction.
+#' @param img.wm White matter probability image for partial volume
 #' correction.
 #' @param mask Brain mask for image.
 #' @param proportion Ratio of activity for white matter to gray matter.
@@ -25,10 +25,8 @@
 #' brain perfusion at 1.5 T using steady-state inversion of arterial water.
 #' Roberts DA, Detre JA, Bolinger L, Insko EK, Leigh JS Jr. PNAS 1994.
 #'
-#' @keywords ~kwd1 ~kwd2
 #' @examples
-#'
-#' \dontrun{
+#' 
 #' activity.gm <- 10
 #' activity.wm <- activity.gm * 0.4
 #' percent.gm <- matrix(seq(0.1, 1, by=0.1), nrow=2)
@@ -36,7 +34,6 @@
 #' activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5) +
 #'                   rnorm(n=length(percent.wm), mean=activity.wm, sd=5)
 #' activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
-#' }
 #'
 #' @export partialVolumeCorrection
 partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion = 0.4) {
