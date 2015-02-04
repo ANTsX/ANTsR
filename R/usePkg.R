@@ -11,12 +11,12 @@
 #' usePkg('randomForest')
 #'
 #' @export usePkg
-usePkg <- function(pkg) {
-  success <- try(require(pkg, character.only = T))
+usePkg <- function(packageName) {
+  success <- try(require(packageName, character.only = T))
   if (!success) {
-    install.packages(pkg, repos = "http://cran.r-project.org",
+    install.packages(packageName, repos = "http://cran.r-project.org",
       dependencies=FALSE )
-    success <- try(require(pkg, character.only = T))
+    success <- try(require(packageName, character.only = T))
   }
   return(success)
 }

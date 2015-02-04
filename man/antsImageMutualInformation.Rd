@@ -7,9 +7,9 @@
 antsImageMutualInformation(in_image1, in_image2)
 }
 \arguments{
-\item{img}{antsImage}
+\item{in_image1}{antsImage}
 
-\item{img}{antsImage}
+\item{in_image2}{antsImage}
 }
 \value{
 mutual information value

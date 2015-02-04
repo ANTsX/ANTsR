@@ -4,7 +4,7 @@
 \alias{usePkg}
 \title{Use any package.  If package is not installed, this will install from CRAN.}
 \usage{
-usePkg(pkg)
+usePkg(packageName)
 }
 \arguments{
 \item{packageName}{Name of package as *string*.}
