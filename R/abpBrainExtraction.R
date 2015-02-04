@@ -7,8 +7,8 @@
 #' @param img image to which we map a brain mask
 #' @param tem Template image which has an associated label mask.
 #' @param temmask Template's antsImage brain mask.
-#' @param tempriors=c(img1,img2,...,imgN) Vector of spatial priors - NOT
-#' IMPLEMENTED YET
+#' @param tempriors e.g. c(img1,img2,...,imgN) Vector of spatial priors - may
+#' not be implemented yet
 #' @param tdir temporary directory
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB

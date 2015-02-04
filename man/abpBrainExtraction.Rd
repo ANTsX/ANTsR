@@ -14,10 +14,10 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA, tempriors = NA,
 
 \item{temmask}{Template's antsImage brain mask.}
 
-\item{tdir}{temporary directory}
+\item{tempriors}{e.g. c(img1,img2,...,imgN) Vector of spatial priors - may
+not be implemented yet}
 
-\item{tempriors=c(img1,img2,...,imgN)}{Vector of spatial priors - NOT
-IMPLEMENTED YET}
+\item{tdir}{temporary directory}
 }
 \value{
 outputs a brain image and brain mask.
