@@ -30,9 +30,9 @@ ImageMath <- function(...) {
   }
   if ( class(args[[2]])[[1]] != 'antsImage' )
   {
-  print(class(args[[2]]))
-  print("2nd param should (usually) be an antsImage")
-  return(NA)
+#  print(class(args[[2]]))
+#  print("2nd param should (usually) be an antsImage")
+#  return(NA)
   }
   if ( class(args[[3]] ) != 'character')
   {
@@ -40,11 +40,11 @@ ImageMath <- function(...) {
   print("3rd param should be a character string defining the operation")
   return(NA)
   }
-  if ( class(args[[4]])[[1]]  != 'antsImage' )
+  if ( class(args[[4]])[[1]]  != 'antsImage'  )
   {
-  print(class(args[[4]]))
-  print("4th param should be an antsImage")
-  return(NA)
+#  print(class(args[[4]]))
+#  print("4th param should be an antsImage")
+#  return(NA)
   }
   if (length(args) <= 1)
     args <- ""
