@@ -1,3 +1,12 @@
+#' LabelGeometryMeasures
+#'
+#' Wrapper for the ANTs funtion LabelGeometryMeasures
+#'
+#' @param ... see ants function
+#' @return none
+#' @author Avants BB
+#'
+#' @export LabelGeometryMeasures
 LabelGeometryMeasures <- function(...) {
   veccer <- c(...)
   veccer2 <- veccer
@@ -7,4 +16,4 @@ LabelGeometryMeasures <- function(...) {
     veccer2[[2]] <- img1int
   }
   pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer2))
-} 
+}
