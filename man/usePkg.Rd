@@ -19,6 +19,6 @@ Use any package.  If package is not installed, this will install from CRAN.
 usePkg('randomForest')
 }
 \author{
-Benjamin M. Kandel
+Benjamin M. Kandel, BB Avants
 }
 
