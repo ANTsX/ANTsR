@@ -3,23 +3,30 @@
 #' Decomposes a matrix into sparse eigenevectors to maximize explained
 #' variance.
 #'
-#'
 #' @param inmatrix n by p input images , subjects or time points by row ,
 #' spatial variable lies along columns
 #' @param inmask optional antsImage mask
-#' @param nboot n bootstrap runs
-#' @param nsamp number of samples e.g. 0.9 indicates 90 percent of data
-#' @param otherparams see sccan for other parameters
-#' @return outputs a decomposition of a population or time series matrix
+#' @param sparseness lower values equal more sparse
+#' @param nvecs number of vectors
+#' @param its number of iterations
+#' @param cthresh cluster threshold
+#' @param statdir place on disk to save results
+#' @param z u penalty, experimental
+#' @param smooth smoothness eg 0.5
+#' @param initializationList see initializeEigenanatomy
+#' @param mycoption 0, 1 or 2 all produce different output 0 is combination
+#'   of 1 (spatial orthogonality) and 2 (subject space orthogonality)
+#' @param nboot boostrap integer
+#' @param nsamp boostrap integer
+#' @param robust boolean
+#' @param doseg orthogonalize bootstrap results
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecomboot( mat )
 #' # for prediction
-#' usePkg('spls')
-#' usePkg('randomForest')
+#' if ( usePkg("randomForest") & usePkg("spls") ) {
 #' data(lymphoma)
 #' training<-sample( rep(c(TRUE,FALSE),31)  )
 #' sp<-0.001 ; myz<-0 ; nv<-5
@@ -40,8 +47,10 @@
 #' }
 #'
 #' @export sparseDecomboot
-sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50,
-  its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0, initializationList = list(),
+sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01,
+  nvecs = 50,
+  its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0,
+  initializationList = list(),
   mycoption = 0, nboot = 10, nsamp = 0.9, robust = 0, doseg = TRUE) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {

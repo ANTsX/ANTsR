@@ -9,6 +9,7 @@
 #' @param listEanatImages list containing pointers to eanat images
 #' @param graphdensity target graph density or densities to search over
 #' @param joinMethod see igraph's community detection
+#' @param verbose bool
 #' @return return(list(fusedlist = newelist, fusedproj = myproj, memberships =
 #' communitymembership , graph=gg, bestdensity=graphdensity ))
 #' @author Avants BB
@@ -32,18 +33,19 @@
 #'   sparseness=0, nvecs=length(kki$fusedlist) )
 #'
 #' @export joinEigenanatomy
-joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphdensity = 0.65, 
+joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
+  graphdensity = 0.65,
   joinMethod = NA, verbose = F) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
     return(1)
   }
-  usePkg("igraph")
-  if (!is.na(mask)) 
+  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+  if (!is.na(mask))
     decom <- imageListToMatrix(list_of_eanat_images, mask) else decom <- t(list_of_eanat_images)
   for (i in 1:nrow(decom)) {
-    if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0) 
+    if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0)
       decom[i, ] <- decom[i, ] * (-1)
   }
   myproj <- datamatrix %*% t(decom)
@@ -60,7 +62,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphd
         newe[mask > 0] <- 0
         templist <- list_of_eanat_images[communitymembership == cl]
         for (eimg in templist) {
-          newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask > 
+          newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask >
           0])
           # print(sum(newe > 0)/sum(mask > 0))
         }
@@ -70,13 +72,13 @@ joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphd
       decom2 <- imageListToMatrix(newelist, mask)
     }
     if (is.na(mask)) {
-      newdecom <- matrix(rep(0, ncol(datamatrix) * max(communitymembership)), 
+      newdecom <- matrix(rep(0, ncol(datamatrix) * max(communitymembership)),
         nrow = max(communitymembership))
       for (cl in 1:max(communitymembership)) {
         vec <- rep(0, ncol(datamatrix))
         ntosum <- sum(communitymembership == cl)
         tempmat <- decom[communitymembership == cl, ]
-        if (ntosum > 1) 
+        if (ntosum > 1)
           tempvec <- apply(tempmat, FUN = sum, MARGIN = 2) else tempvec <- tempmat
         tempvec <- tempvec/sum(abs(tempvec))
         newdecom[cl, ] <- tempvec
@@ -101,6 +103,6 @@ joinEigenanatomy <- function(datamatrix, mask = NA, list_of_eanat_images, graphd
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
-  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership, 
+  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership,
     graph = gg, bestdensity = graphdensity))
-} 
+}

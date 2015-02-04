@@ -11,7 +11,7 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' usePkg('randomForest')
+#' if ( usePkg("randomForest") ) {
 #' img<-antsImageRead( getANTsRData('r16') ,2)
 #' mask<-getMask( img )
 #' segs<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',
@@ -22,6 +22,7 @@
 #' # now use in atropos w/priors
 #' segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',
 #'   c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
+#'  }
 #'
 #' @export rfSegmentation
 rfSegmentation <- function(labelimg, featureimages, ntrees = 100, verbose = FALSE) {

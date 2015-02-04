@@ -33,4 +33,4 @@ rfSegmentationPredict <- function(rfSegmentationModel, featureimages, mask, verb
   segs <- antsImageClone(mask)
   segs[mask == 1] <- predict(rfSegmentationModel, newdata = mydf)
   return(segs)
-} 
+}

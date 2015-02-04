@@ -14,7 +14,28 @@ spatial variable lies along columns}
 
 \item{inmask}{optional antsImage mask}
 
-\item{otherparams}{see sccan for other parameters}
+\item{sparseness}{lower values equal more sparse}
+
+\item{nvecs}{number of vectors}
+
+\item{its}{number of iterations}
+
+\item{cthresh}{cluster threshold}
+
+\item{statdir}{place on disk to save results}
+
+\item{z}{u penalty, experimental}
+
+\item{smooth}{smoothness eg 0.5}
+
+\item{initializationList}{see initializeEigenanatomy}
+
+\item{mycoption}{0, 1 or 2 all produce different output 0 is combination
+of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
+
+\item{robust}{rank transform input data - good for data checking}
+
+\item{ell1}{the ell1 grad descent param}
 }
 \value{
 outputs a decomposition of a population or time series matrix
@@ -24,12 +45,10 @@ Decomposes a matrix into sparse eigenevectors to maximize explained
 variance.
 }
 \examples{
-\dontrun{
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
 # for prediction
-usePkg('randomForest')
-usePkg('spls')
+if ( usePkg("randomForest") & usePkg("spls")  & usePkg('BGLR') ) {
 data(lymphoma) # from spls
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.02 ; myz<-0
@@ -45,8 +64,6 @@ print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
   ' non-zero ',sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 # compare to http://arxiv.org/pdf/0707.0701v2.pdf
 # now SNPs
-usePkg('randomForest')
-usePkg('BGLR')
 data(mice)
 snps<-quantifySNPs( mice.X, shiftit =T )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )

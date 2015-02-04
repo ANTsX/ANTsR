@@ -26,8 +26,8 @@
 #' @export plotPrettyGraph
 plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
 # adapted from http://is-r.tumblr.com/
-usePkg("sna")
-usePkg("igraph")
+if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+if ( !usePkg("sna") ) { print("Need sna package"); return(NULL) }
 as.matrix(sort(functionToPlot))
 # Now, to make the prettiest graph we can:
 png( pngfn , height = 2^figScale, width = 2^figScale ) # , type = "cairo-png")

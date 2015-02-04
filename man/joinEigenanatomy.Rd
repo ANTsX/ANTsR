@@ -4,7 +4,7 @@
 \alias{joinEigenanatomy}
 \title{Simple joinEigenanatomy function.}
 \usage{
-joinEigenanatomy(datamatrix, mask = NA, list_of_eanat_images,
+joinEigenanatomy(datamatrix, mask = NA, listEanatImages,
   graphdensity = 0.65, joinMethod = NA, verbose = F)
 }
 \arguments{
@@ -12,11 +12,13 @@ joinEigenanatomy(datamatrix, mask = NA, list_of_eanat_images,
 
 \item{mask}{mask used to create datamatrix}
 
+\item{listEanatImages}{list containing pointers to eanat images}
+
 \item{graphdensity}{target graph density or densities to search over}
 
 \item{joinMethod}{see igraph's community detection}
 
-\item{listEanatImages}{list containing pointers to eanat images}
+\item{verbose}{bool}
 }
 \value{
 return(list(fusedlist = newelist, fusedproj = myproj, memberships =

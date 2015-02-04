@@ -3,21 +3,29 @@
 #' Decomposes a matrix into sparse eigenevectors to maximize explained
 #' variance.
 #'
-#'
 #' @param inmatrix n by p input images , subjects or time points by row ,
 #' spatial variable lies along columns
 #' @param inmask optional antsImage mask
-#' @param otherparams see sccan for other parameters
+#' @param sparseness lower values equal more sparse
+#' @param nvecs number of vectors
+#' @param its number of iterations
+#' @param cthresh cluster threshold
+#' @param statdir place on disk to save results
+#' @param z u penalty, experimental
+#' @param smooth smoothness eg 0.5
+#' @param initializationList see initializeEigenanatomy
+#' @param mycoption 0, 1 or 2 all produce different output 0 is combination
+#'   of 1 (spatial orthogonality) and 2 (subject space orthogonality)
+#' @param robust rank transform input data - good for data checking
+#' @param ell1 the ell1 grad descent param
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
 #' # for prediction
-#' usePkg('randomForest')
-#' usePkg('spls')
+#' if ( usePkg("randomForest") & usePkg("spls")  & usePkg('BGLR') ) {
 #' data(lymphoma) # from spls
 #' training<-sample( rep(c(TRUE,FALSE),31)  )
 #' sp<-0.02 ; myz<-0
@@ -33,8 +41,6 @@
 #'   ' non-zero ',sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 #' # compare to http://arxiv.org/pdf/0707.0701v2.pdf
 #' # now SNPs
-#' usePkg('randomForest')
-#' usePkg('BGLR')
 #' data(mice)
 #' snps<-quantifySNPs( mice.X, shiftit =T )
 #' numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
@@ -55,8 +61,11 @@
 #' }
 #'
 #' @export sparseDecom
-sparseDecom <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50,
-  its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0, initializationList = list(),
+sparseDecom <- function(inmatrix = NA, inmask = 0,
+  sparseness = 0.01,
+  nvecs = 50,
+  its = 5, cthresh = 250,
+  statdir = NA, z = 0, smooth = 0, initializationList = list(),
   mycoption = 0, robust = 0, ell1 = 1) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {

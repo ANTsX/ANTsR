@@ -8,6 +8,7 @@
 #' @param mat input matrix
 #' @param graphdensity fraction of edges to keep
 #' @param communityMethod see igraph's community detection
+#' @param getEfficiency boolean, this is slow to compute
 #' @return a named list is output including the graph object, adjacency matrix
 #' and several graph metrics
 #' @author Avants BB
@@ -22,9 +23,9 @@
 #' }
 #'
 #' @export makeGraph
-makeGraph <- function(myrsfnetworkcorrsin, graphdensity = 1,
+makeGraph <- function( mat, graphdensity = 1,
   communityMethod=NA, getEfficiency = FALSE) {
-  usePkg("igraph")
+  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   myrsfnetworkcorrs <- myrsfnetworkcorrsin
   if (typeof(myrsfnetworkcorrs) == "list") {
     myrsfnetworkcorrs <- data.matrix(myrsfnetworkcorrsin)

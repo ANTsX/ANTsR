@@ -15,26 +15,42 @@ spatial variable lies along columns}
 
 \item{inmask}{optional antsImage mask}
 
-\item{nboot}{n bootstrap runs}
+\item{sparseness}{lower values equal more sparse}
 
-\item{nsamp}{number of samples e.g. 0.9 indicates 90 percent of data}
+\item{nvecs}{number of vectors}
 
-\item{otherparams}{see sccan for other parameters}
-}
-\value{
-outputs a decomposition of a population or time series matrix
+\item{its}{number of iterations}
+
+\item{cthresh}{cluster threshold}
+
+\item{statdir}{place on disk to save results}
+
+\item{z}{u penalty, experimental}
+
+\item{smooth}{smoothness eg 0.5}
+
+\item{initializationList}{see initializeEigenanatomy}
+
+\item{mycoption}{0, 1 or 2 all produce different output 0 is combination
+of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
+
+\item{nboot}{boostrap integer}
+
+\item{nsamp}{boostrap integer}
+
+\item{robust}{boolean}
+
+\item{doseg}{orthogonalize bootstrap results}
 }
 \description{
 Decomposes a matrix into sparse eigenevectors to maximize explained
 variance.
 }
 \examples{
-\dontrun{
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecomboot( mat )
 # for prediction
-usePkg('spls')
-usePkg('randomForest')
+if ( usePkg("randomForest") & usePkg("spls") ) {
 data(lymphoma)
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.001 ; myz<-0 ; nv<-5
