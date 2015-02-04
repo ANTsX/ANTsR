@@ -44,7 +44,7 @@ Computes CBF from ASL - pasl or pcasl
   meancbf <- cbf$kmeancbf
   print(mean(meancbf[ pcasl.processing$mask==1 ]))
   antsImageWrite( meancbf , 'temp2.nii.gz')
-  plotANTsImage(  meancbf, slices='1x50x1')
+  plot(  meancbf, slices='1x50x1')
   }
 }
 \author{

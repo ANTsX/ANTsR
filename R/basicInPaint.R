@@ -28,9 +28,9 @@
 #' lmask<-antsImageRead('brainmask.nii.gz',2)
 #' limg<-antsImageRead('r16slice_lesion.nii.gz',2)
 #' mm<-basicInPaint(limg,lmask)
-#' plotANTsImage(mm)
+#' plot(mm)
 #' mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
-#' plotANTsImage(mm2)
+#' plot(mm2)
 #' }
 basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05) {
   if (nargs() == 0) {

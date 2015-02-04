@@ -66,9 +66,9 @@ plotANTsImage <- function(x, y, color = c("jet", "red", "blue",
       cat(format(hlist, width = 40, justify = c("left")))
     }
     cat(format("Example: in 2D \n", width = 40, justify = c("left")))
-    ex <- paste(" plotANTsImage(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
+    ex <- paste(" plot(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
     cat(format("Example: in 3D \n", width = 40, justify = c("left")))
-    ex <- paste(" plotANTsImage(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
+    ex <- paste(" plot(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
     ex <- format(ex, width = length(ex), justify = c("left"))
     cat("\n")
     cat(ex)

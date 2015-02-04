@@ -41,8 +41,8 @@ antsRegistration( '-h')
   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
     transformlist=mytx$fwdtransforms)
   par(mfrow=c(1,2))
-  plotANTsImage(fi)
-  plotANTsImage(mywarpedimage)
+  plot(fi)
+  plot(mywarpedimage)
   # example 2 - full access, only uses file-based I/O
   if ( FALSE )
     antsRegistration(

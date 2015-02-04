@@ -23,7 +23,7 @@
 #' shp[ shp != 7 ]<-0
 #' SmoothImage(2,shp,1.5,shp)
 #' fimg<-segmentShapeFromImage(fi,shp,mask)
-#' plotANTsImage(fi,func=list(fimg),
+#' plot(fi,func=list(fimg),
 #'   thresh=paste(mean(fimg)+sd(fimg)*2,
 #'   max(fimg),sep='x'))
 #' 

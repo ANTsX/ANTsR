@@ -35,7 +35,7 @@
 #'   perfmodel<-lm( aslmat ~ tc + stats::poly(dv,4) ) # standard model
 #'   ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask,
 #'     priorWeight=1.e2 ,smth=1.6, nhood=rep(2,3) )
-#'   plotANTsImage( ssp[[1]], slices='2x16x2', axis=3 )
+#'   plot( ssp[[1]], slices='2x16x2', axis=3 )
 #'   }
 #' 
 #' @export spatialbayesianlm

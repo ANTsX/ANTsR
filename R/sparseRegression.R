@@ -49,7 +49,7 @@
 #' sample[40:60] <-1
 #' signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
 #' signal.img[signal.img >= 0 ] <- sample
-#' plotANTsImage( signal.img, axis=2, slices='1x5x1') # actual source of signal
+#' plot( signal.img, axis=2, slices='1x5x1') # actual source of signal
 #' # compare against first learned regression vector
 #' myimgs <- list()
 #' for( i in 1:5){
@@ -58,7 +58,7 @@
 #'   myimgs[[ i ]] <- antsImageClone(myregression$eigenanatomyimages[[ i ]])
 #'   myimgs[[ i ]][mymask > 0] <- myarray
 #' }
-#' plotANTsImage(myimgs[[1]], axis=2, slices='1x5x1')
+#' plot(myimgs[[1]], axis=2, slices='1x5x1')
 #' # use learned eigenvectors for prediction
 #' result <- regressProjections(input.train, input.test, demog.train,
 #'     demog.test, myregression$eigenanatomyimages, mymask, 'outcome')
