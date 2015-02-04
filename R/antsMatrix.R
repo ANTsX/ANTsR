@@ -67,15 +67,6 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 })
 
 
-#' convert antsMatrix to data frame
-#'
-#' @param x input matrix
-#' @param row.names standard row.names
-#' @param optional other options
-#' @return data frame is output
-#' @author Avants BB
-#'
-#' @export
 as.data.frame.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst))] <- lst[length(lst)]
