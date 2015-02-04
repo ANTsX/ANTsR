@@ -5,7 +5,7 @@
 #'
 #' @param packageName Name of package as *string*.
 #' @return T if package successfully loaded, F otherwise. cbf image
-#' @author Benjamin M. Kandel
+#' @author Benjamin M. Kandel, BB Avants
 #' @examples
 #'
 #' usePkg('randomForest')
