@@ -6,7 +6,7 @@
 \usage{
 taskFMRI(mat, hrf, myvars, correctautocorr = FALSE,
   residualizedesignmatrix = FALSE,
-  myformula = "globalsignal + motion1 +   \\n      motion2 + motion3 + compcorr1 + compcorr2 + compcorr3")
+  myformula = "globalsignal + motion1 +\\n    motion2 + motion3 + compcorr1 + compcorr2 + compcorr3")
 }
 \arguments{
 \item{fmriMatrix}{input matrix}
