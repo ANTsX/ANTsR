@@ -32,10 +32,12 @@ canonical correlation.
 \dontrun{
 mat<-replicate(100, rnorm(20))
 mat2<-replicate(100, rnorm(20))
-mydecom<-sparseDecom2( inmatrix=list(mat,mat2), sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
+mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
+  sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
 wt<-0.666
 mat3<-mat*wt+mat2*(1-wt)
-mydecom<-sparseDecom2( inmatrix=list(mat,mat3), sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
+mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
+  sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
 
 # a masked example
 im<-antsImageRead( getANTsRData('r64') ,2)
@@ -52,18 +54,23 @@ for ( nvecs in 1:2 ) {
   initlist<-lappend( initlist, init1 )
 }
 ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
-  sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1, cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
+  sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1,
+  cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
 ### now SNPs ###
-usePkg('randomForest')
-usePkg('BGLR')
+rf<-usePkg('randomForest')
+bg<-usePkg('BGLR')
+if ( bg & rf ) {
 data(mice)
 snps<-mice.X
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
-numericalpheno<-residuals( lm( numericalpheno ~ as.factor(mice.pheno$Litter) ) )
+numericalpheno<-residuals( lm( numericalpheno ~
+  as.factor(mice.pheno$Litter) ) )
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
-snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ), numericalpheno[train,] ), nvecs=20, sparseness=c( 0.001, -0.5 ), its=3, ell1=0.1 , z=-1 )
+snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ),
+  numericalpheno[train,] ), nvecs=20, sparseness=c( 0.001, -0.5 ),
+  its=3, ell1=0.1 , z=-1 )
 for ( j in 3:3) {
 traindf<-data.frame( bmi=numericalpheno[ train,j] ,
    snpse=as.matrix( snps[train, ] ) \%*\% as.matrix( snpd$eig1 ) )
@@ -74,6 +81,7 @@ preddf<-predict(myrf, newdata=testdf )
 print( cor.test(preddf, testdf$bmi ) )
 plot( preddf, testdf$bmi )
 }
+} # check bg and rf
 }
 }
 \author{

@@ -26,7 +26,9 @@ file.
 }
 \examples{
 \dontrun{
-brain<-renderSurfaceFunction( surfimg =list( bm ) , alphasurf=0.1 ,smoothsval = 1.5 , smoothfval = 1.0, funcimg=list(cnt$clustimg) , alphafunc=0.2 )
+brain<-renderSurfaceFunction( surfimg =list( bm ) ,
+    alphasurf=0.1 ,smoothsval = 1.5 , smoothfval = 1.0,
+    funcimg=list(cnt$clustimg) , alphafunc=0.2 )
 plotBasicNetwork( centroids =  cnt$centroids , brain )
 make3ViewPNG(  rid, id, rid2,  paste('figure/network',i,sep='') )
 }

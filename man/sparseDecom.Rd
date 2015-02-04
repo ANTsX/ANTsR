@@ -33,12 +33,16 @@ usePkg('spls')
 data(lymphoma) # from spls
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.02 ; myz<-0
-ldd<-sparseDecom( lymphoma$x[training,], nvecs=5 , sparseness=( sp ), mycoption=1, z=myz ) # NMF style
-traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]), eig = lymphoma$x[training,]  \%*\% as.matrix(ldd$eigenanatomyimages ))
-testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]), eig = lymphoma$x[!training,] \%*\% as.matrix(ldd$eigenanatomyimages ))
+ldd<-sparseDecom( lymphoma$x[training,], nvecs=5 , sparseness=( sp ),
+  mycoption=1, z=myz ) # NMF style
+traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]),
+  eig = lymphoma$x[training,]  \%*\% as.matrix(ldd$eigenanatomyimages ))
+testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]),
+ eig = lymphoma$x[!training,] \%*\% as.matrix(ldd$eigenanatomyimages ))
 myrf<-randomForest( lclass ~ . ,   data=traindf )
 predlymp<-predict(myrf, newdata=testdf)
-print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),' non-zero ',sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
+print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
+  ' non-zero ',sum(abs( ldd$eigenanatomyimages ) > 0 ) ) )
 # compare to http://arxiv.org/pdf/0707.0701v2.pdf
 # now SNPs
 usePkg('randomForest')

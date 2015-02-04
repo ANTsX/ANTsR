@@ -38,14 +38,18 @@ usePkg('randomForest')
 data(lymphoma)
 training<-sample( rep(c(TRUE,FALSE),31)  )
 sp<-0.001 ; myz<-0 ; nv<-5
-ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv , sparseness=( sp ), mycoption=1, z=myz , nsamp=0.9, nboot=50 ) # NMF style
+ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv ,
+  sparseness=( sp ), mycoption=1, z=myz , nsamp=0.9, nboot=50 ) # NMF style
 outmat<-as.matrix(ldd$eigenanatomyimages )
 # outmat<-t(ldd$cca1outAuto)
-traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]), eig = lymphoma$x[training,]  \%*\% outmat )
-testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]), eig = lymphoma$x[!training,] \%*\% outmat )
+traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]),
+  eig = lymphoma$x[training,]  \%*\% outmat )
+testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]),
+  eig = lymphoma$x[!training,] \%*\% outmat )
 myrf<-randomForest( lclass ~ . ,   data=traindf )
 predlymp<-predict(myrf, newdata=testdf)
-print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),' non-zero ',sum(abs( outmat ) > 0 ) ) )
+print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
+  'non-zero ',sum(abs( outmat ) > 0 ) ) )
 for ( i in 1:nv )
   print(paste(' non-zero ',i,' is: ',sum(abs( outmat[,i] ) > 0 ) ) )
 }

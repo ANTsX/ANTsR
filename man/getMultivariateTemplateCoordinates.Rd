@@ -35,24 +35,11 @@ TBN
  temlab2<-antsImageRead('temp2.nii.gz',3)
  # try getANTsRData if you have www access
  mymni<-list( antsImageRead(getANTsRData('mni'),3),
- \\t      antsImageRead(getANTsRData('mnib'),3),
-              antsImageRead(getANTsRData('mnia'),3) )
+       antsImageRead(getANTsRData('mnib'),3),
+       antsImageRead(getANTsRData('mnia'),3) )
  mytem<-list(tem,temlab,temlab2)
- mynetworkdescriptor<-getMultivariateTemplateCoordinates(  mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )
-# output looks like
-#     NetworkID   x   y   z t label Brodmann AAL
-# 1  N1_omnibus  -7   7  11 0     1        0  71
-# 2     N1_node  50 -12 -21 0     1       20  90
-# 3     N1_node -29  22   5 0     2       48  29
-# 4     N1_node  25 -17  36 0     3        0   0
-# 5     N1_node -25   4  39 0     4        0   0
-# 6  N2_omnibus   7   1   3 0     1        0   0
-# 7     N2_node  42 -14 -26 0     1       20  56
-# 8     N2_node  20   7  -8 0     2       48  74
-# 9     N2_node  -2  33 -10 0     3       11  31
-# 10    N2_node -41 -34  23 0     4       48  17
-# 11    N2_node  50 -37  24 0     5       41  82
-# 12    N2_node -24  30  24 0     6       48   0
+ mynetworkdescriptor<-getMultivariateTemplateCoordinates(
+   mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )
 }
 }
 \author{
