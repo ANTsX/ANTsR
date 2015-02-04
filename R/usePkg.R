@@ -19,6 +19,11 @@ usePkg <- function(packageName) {
       dependencies=FALSE )
     success <- requireNamespace(packageName)
     attachNamespace(packageName)
-  } else attachNamespace(packageName)
+  } else {
+    temp<-tryCatch({attachNamespace(packageName)},
+      error = function(e) {
+      }, finally = {
+      })
+  }
   return(success)
 }
