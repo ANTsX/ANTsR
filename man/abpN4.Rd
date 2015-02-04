@@ -8,15 +8,15 @@ abpN4(img = NA, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
   weightimg = NA, usen3 = FALSE)
 }
 \arguments{
+\item{img}{image to be bias corrected}
+
 \item{intensityTruncation}{Params to TruncateImageIntensity in ImageMath}
 
 \item{mask}{optional antsImage mask}
 
+\item{weightimg}{optional antsImage weighting}
+
 \item{usen3}{Use N3 instead of N4}
-
-\item{image}{image to be bias corrected}
-
-\item{weightimage}{optional antsImage weighting}
 }
 \value{
 outputs a bias corrected image. 1 -- Failure
@@ -26,11 +26,9 @@ Truncate outlier intensities and bias correct with N4 with or without mask
 and weight images.
 }
 \examples{
-\dontrun{
 fn<-getANTsRData('r16')
 img<-antsImageRead(fn,2)
 img2<-abpN4( img )
-}
 }
 \author{
 Tustison N, Avants BB
