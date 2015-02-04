@@ -1,7 +1,4 @@
-#' Simple compcor function.
-#'
 #' Compcors the input matrix using SVD and returns the result.
-#'
 #'
 #' @param fmri input fmri image or matrix
 #' @param ncompcor n compcor vectors
@@ -10,7 +7,8 @@
 #' @param useimagemath use the imagemath implementation instead
 #' @param randomSamples take this many random samples to speed things up
 #' @param returnv return the spatial vectors
-#' @param returnhighvarmat returns the high variance matrix on which svd is
+#' @param returnhighvarmat bool to return the high variance matrix
+#' @param returnhighvarmatinds bool to return the high variance matrix indices
 #' @param highvarmatinds index list
 #' @return dataframe of nuisance predictors is output
 #' @author Avants BB
@@ -24,7 +22,8 @@ compcor <- function(fmri, ncompcor = 4,
   variance_extreme = 0.975,
   mask = NA,
   useimagemath = FALSE, randomSamples = 1,
-  returnv = FALSE, returnhighvarmatinds = FALSE,
+  returnv = FALSE, returnhighvarmat = FALSE,
+  returnhighvarmatinds = FALSE,
   highvarmatinds = NA) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")

@@ -8,6 +8,8 @@ corw(mat, weights)
 }
 \arguments{
 \item{mat}{input matrix}
+
+\item{weights}{input weights, size of nrow of matrix}
 }
 \value{
 matrix is output

@@ -2,11 +2,12 @@
 % Please edit documentation in R/compcor.R
 \name{compcor}
 \alias{compcor}
-\title{Simple compcor function.}
+\title{Compcors the input matrix using SVD and returns the result.}
 \usage{
 compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
   useimagemath = FALSE, randomSamples = 1, returnv = FALSE,
-  returnhighvarmatinds = FALSE, highvarmatinds = NA)
+  returnhighvarmat = FALSE, returnhighvarmatinds = FALSE,
+  highvarmatinds = NA)
 }
 \arguments{
 \item{fmri}{input fmri image or matrix}
@@ -23,9 +24,11 @@ compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
 
 \item{returnv}{return the spatial vectors}
 
-\item{highvarmatinds}{index list}
+\item{returnhighvarmat}{bool to return the high variance matrix}
 
-\item{returnhighvarmat}{returns the high variance matrix on which svd is}
+\item{returnhighvarmatinds}{bool to return the high variance matrix indices}
+
+\item{highvarmatinds}{index list}
 }
 \value{
 dataframe of nuisance predictors is output
