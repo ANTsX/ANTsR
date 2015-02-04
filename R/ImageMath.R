@@ -21,7 +21,7 @@
 #' @export ImageMath
 ImageMath <- function(...) {
   args <- list(...)
-  if ( class(args[[1]] ) != 'numeric' |
+  if ( class(args[[1]] ) != 'numeric' &
        class(args[[1]] ) != 'integer'  )
   {
   print(class(args[[1]]))
