@@ -1,14 +1,37 @@
-antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = NA, 
-  gdens = 0.25, threshLo = 1, threshHi = 90, freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02, 
+#' antsBOLDNetworkAnalysis
+#'
+#' An implementation of a network analysis framework for BOLD data.
+#'
+#' @param bold input 4D image
+#' @param mask antsImage defines areas of interest
+#' @param labels antsImage defines regions of interest
+#' @param motion motion parameters
+#' @param gdens graph density
+#' @param threshLo lower threshold for the label image
+#' @param threshHi upper threshold for the label image
+#' @param freqLo lower frequency cutoff
+#' @param freqHi upper frequency cutoff
+#' @param winsortrim winsorize the bold signal by these values eg 0.02
+#' @param throwaway this number of initial bold volumes
+#' @return list of outputs
+#' @author BB Avants
+#' @examples
+#' # none yet - this is not very well tested with recent ANTsR
+#'
+#' @export antsBOLDNetworkAnalysis
+antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
+  labels = NA, motion = NA,
+  gdens = 0.25, threshLo = 1, threshHi = 90,
+  freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
   throwaway = 10) {
   myscale <- function(x, doscale = F) {
-    if (doscale) 
+    if (doscale)
       return(scale(x))
     return(x)
   }
-  usePkg("psych")
-  usePkg("glasso")
-  usePkg("igraph")
+  if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
+  if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
+  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   mytimes <- dim(bold)[4]
   aalm <- labels
   aalmask <- antsImageClone(aalm)
@@ -33,13 +56,13 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
   }
   # question - should this be a constant of 0.2 as recommended in Yan Craddock He
   # Milham?
-  keepinds <- which(templateFD < (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) > 
+  keepinds <- which(templateFD < (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) >
     throwaway))
   keepinds <- c(throwaway, keepinds)
-  throwinds <- which(templateFD > (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) > 
+  throwinds <- which(templateFD > (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) >
     throwaway))
   doimpute <- TRUE
-  if (length(throwinds) > 0 & doimpute) 
+  if (length(throwinds) > 0 & doimpute)
     for (i in throwinds) {
       previ <- max(keepinds[keepinds < i])
       nexti <- min(keepinds[keepinds > i])
@@ -52,7 +75,7 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
     }
   keepinds <- throwaway:mytimes
   usemotiondirectly <- TRUE
-  if (usemotiondirectly) 
+  if (usemotiondirectly)
     motionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
   colnames(motionnuis) <- paste("mot", 1:ncol(motionnuis), sep = "")
   bkgd <- TRUE
@@ -74,10 +97,10 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
     colnames(bgdnuis) <- paste("bgdNuis", 1:newnuisv, sep = "")
   }
   print(paste("winsorizing with trim", winsortrim))
-  if (winsortrim > 0) 
+  if (winsortrim > 0)
     omat <- winsor(omat, trim = winsortrim)
   omat <- omat[keepinds, ]
-  ################################################## 
+  ##################################################
   classiccompcor <- compcor(omat, mask = mask, ncompcor = 4)
   omotionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
   motnuisshift <- ashift(omotionnuis, c(1, 0))
@@ -91,12 +114,12 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
   dtran <- (omotionnuis - motnuisshift)[, 10:12]
   dmatrixm <- apply(dmatrix * dmatrix, FUN = sum, MARGIN = 1)
   dtranm <- apply(dtran * dtran, FUN = sum, MARGIN = 1)
-  if (bkgd) 
-    mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor, 
-      bgdnuis, templateFD[keepinds], DVARS[keepinds]) else mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor, 
+  if (bkgd)
+    mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
+      bgdnuis, templateFD[keepinds], DVARS[keepinds]) else mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
     templateFD[keepinds], DVARS[keepinds])
   colnames(mynuis)[1:2] <- c("dmatrix", "dtran")
-  colnames(mynuis)[(length(colnames(mynuis)) - 1):length(colnames(mynuis))] <- c("FD", 
+  colnames(mynuis)[(length(colnames(mynuis)) - 1):length(colnames(mynuis))] <- c("FD",
     "DVARS")
   print("My nuisance variables are:")
   print(colnames(mynuis))
@@ -104,8 +127,8 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
   mat <- myscale(residuals(lm(omat ~ mynuis)), doscale = TRUE)
   flo <- freqLo
   fhi <- freqHi
-  mynetwork <- filterfMRIforNetworkAnalysis(mat, tr = antsGetSpacing(bold)[4], 
-    mask = aalmask, cbfnetwork = "BOLD", labels = aalm, graphdensity = as.numeric(gdens), 
+  mynetwork <- filterfMRIforNetworkAnalysis(mat, tr = antsGetSpacing(bold)[4],
+    mask = aalmask, cbfnetwork = "BOLD", labels = aalm, graphdensity = as.numeric(gdens),
     freqLo = flo, freqHi = fhi, usesvd = FALSE)  # , nuisancein = locmotnuis )
   ################################################## now finalize it all ############### return network values on full dataset
   names(matmag) <- "MatrixMotion"
@@ -130,10 +153,10 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA, labels = NA, motion = 
   names(meanFD) <- "meanFD"
   meanDVARS <- mean(DVARS)
   names(meanDVARS) <- "meanDVARS"
-  myc <- c(matmag, tranmag, matsd, transd, mydeg, mypr, mycent, mytrans, myclose, 
+  myc <- c(matmag, tranmag, matsd, transd, mydeg, mypr, mycent, mytrans, myclose,
     mybtwn, mytimes, meanFD, meanDVARS)
   outmat <- matrix(myc, nrow = 1)
   colnames(outmat) <- names(myc)
   return(list(subjectSummary = outmat, mynetwork = mynetwork, boldmask = aalmask))
-  ################################################## 
-} 
+  ##################################################
+}
