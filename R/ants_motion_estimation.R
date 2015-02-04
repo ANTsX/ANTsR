@@ -50,14 +50,14 @@
 #'
 #' @param img 4D antsImage
 #' @param fixed target fixed image
-#' @moreaccurate 0, 1 or 2 with higher values being more accurte (use 2
-#'   for real applications, 0 for testing)
+#' @param moreaccurate 0, 1 or 2 with higher values being more accurte
+#'  (use 2 for real applications, 0 for testing)
 #' @return list of outputs
 #' @author Avants BB
 #' @examples
 #'
 #' testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
-#' ImageMath(4,testimg,"PadImage",5)
+#' ImageMath(4,testimg,"PadImage",testimg,5)
 #' mocorr<-motion_correction( testimg )
 #'
 #' @export motion_correction
