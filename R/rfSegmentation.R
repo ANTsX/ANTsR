@@ -20,7 +20,7 @@
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , verbose=TRUE )
 #' plotANTsImage( rfsegs$segmentation )
 #' # now use in atropos w/priors
-#' # segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',
+#' segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',
 #'   c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
 #'
 #' @export rfSegmentation
