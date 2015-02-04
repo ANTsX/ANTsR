@@ -27,9 +27,9 @@
 #' nfolds<-6
 #' train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 #' train<-( train < 4 )
-#' lowr<-lowrankRowMatrix(as.matrix( snps[train,] ),900)
+#' lowr<-.lowrankRowMatrix(as.matrix( snps[train,] ),900)
 #' snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
-#' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),100),
+#' snpdF<-sparseDecom( .lowrankRowMatrix(as.matrix( snps[train,] ),100),
 #'   nvecs=20 , sparseness=( -0.001) )
 #' projmat<-as.matrix( snpdS$eig )
 #' projmat<-as.matrix( snpdF$eig )
@@ -42,7 +42,7 @@
 #' snpd<-snpdSlow
 #' snpd<-snpdFast
 #' projmat<-as.matrix( snpd$v )
-#' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
+#' snpdF<-sparseDecom( .lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
 #'   nvecs=20 , sparseness=( -0.001) )
 #' projmat<-as.matrix( snpdS$eig )
 #' snpse<-as.matrix( snps[train, ]  ) %*% projmat
@@ -79,7 +79,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
   if (dowhite > 0 & (nvecs * 2 < nrow(Xin)))
     X <- icawhiten(X, dowhite)
   if (downsample > 0 & (nvecs < nrow(Xin)))
-    X <- lowrankRowMatrix(X, downsample)
+    X <- .lowrankRowMatrix(X, downsample)
   if (doscale) {
     X <- scale(X)
     X <- X/norm(X, "F")
@@ -119,7 +119,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
     if (useregression)
       for (a in 1:nrow(X)) {
         tt <- c(u[a, ])
-        # if ( abs(sparseness[1]) < 1 ) usol <- conjGradS(A = v, x_k = tt, b_in = c(X[a,
+        # if ( abs(sparseness[1]) < 1 ) usol <- .conjGradS(A = v, x_k = tt, b_in = c(X[a,
         # ]), sp = sparseness[1]) else
         usol <- as.numeric(coefficients(lm(c(X[a, ]) ~ v))[2:(ncol(v) + 1)])
         u[a, ] <- usol
@@ -158,7 +158,7 @@ networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gr
 }
 
 
-lowrankRowMatrix <- function(A, k = 2) {
+.lowrankRowMatrix <- function(A, k = 2) {
   if (k > nrow(A))
     return(A)
   p <- ncol(A)

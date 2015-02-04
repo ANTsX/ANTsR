@@ -108,7 +108,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
     }
     return(0)
   }
-  # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-antsrParseListToString( c(args)
+  # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-.antsrParseListToString( c(args)
   # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
   # mycmd$outimg, as.numeric(mycmd$outdim) ) ) }
   .Call("antsApplyTransforms", .int_antsProcessArguments(c(args, "-z", 1, "--float", 
@@ -117,7 +117,7 @@ antsApplyTransforms <- function(fixed = NA, moving = NA, transformlist = "", int
 }
 
 
-antsrParseListToString <- function(mylist, outimg = NA, outdim = NA) {
+.antsrParseListToString <- function(mylist, outimg = NA, outdim = NA) {
   mystr <- ""
   len <- length(mylist)
   outimg <- ""
@@ -144,7 +144,7 @@ antsrParseListToString <- function(mylist, outimg = NA, outdim = NA) {
   return(list(mystr = mystr, outimg = outimg, outdim = outdim))
 }
 
-antsrParseListToString2 <- function(mylist, outimg = NA, outdim = NA) {
+..antsrParseListToString2 <- function(mylist, outimg = NA, outdim = NA) {
   mystr <- ""
   outimg <- ""
   outdim <- 11

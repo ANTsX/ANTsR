@@ -84,7 +84,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
         for (k in 1:ncol(cca1)) {
           temp1 <- abs(cca1out[, j])
           temp2 <- abs(cca1[, k])
-          mymult[j, k] <- cosineDist(temp1, temp2)
+          mymult[j, k] <- .cosineDist(temp1, temp2)
           # sum( abs( temp1/sum(temp1) - temp2/sum(temp2) ) )
         }
       }
@@ -152,7 +152,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs 
     bootccalist1 = bootccalist1, cca1outAuto = cca1outAuto))
 }
 
-cosineDist <- function(xin, yin) {
+.cosineDist <- function(xin, yin) {
   x <- t(as.matrix(xin))
   y <- t(as.matrix(yin))
   return(as.numeric(1 - x %*% t(y)/(sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
