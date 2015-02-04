@@ -2,8 +2,8 @@
 #'
 #' Compute the jacobian determinant from a transformation file
 #'
-#' @param imageDimension Number of dimensions of the input tx
-#' @param deformationField transformation file name
+#' @param dim Number of dimensions of the input tx
+#' @param tx deformation transformation file name
 #' @param doLog return the log jacobian
 #' @return jacobianImage
 #' @author BB Avants
@@ -23,4 +23,4 @@ CreateJacobianDeterminantImage <- function(dim, tx, doLog = 0) {
   retval <- (.Call("CreateJacobianDeterminantImage", k, PACKAGE = "ANTsR"))
   jimg <- antsImageClone(args2[[3]], "float")
   return(jimg)
-} 
+}
