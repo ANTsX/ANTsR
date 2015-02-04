@@ -79,8 +79,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
   if (!file.exists(initafffn))
-    antsAffineInitializer(img@dimension, temsmall, imgsmall, initafffn, 15, 0.1,
-      0, 10)
+    antsAffineInitializer(img@dimension, temsmall, imgsmall,
+      initafffn, 15, 0.1, 0, 10)
   # FIXME - should add mask in above call
 
   # get laplacian images
@@ -101,12 +101,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]",
     f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX
-  fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""), paste(outprefix,
-    "0GenericAffine.mat", sep = ""))
-  invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""), paste(outprefix,
-    "1InverseWarp.nii.gz", sep = ""))
-  if (!file.exists(invtransforms[1]))
-    antsRegistration(antsregparams)
+  mytx<-antsRegistration( tem, img, typeofTransform = c('SyN'),
+    initialTransform=initafffn )
+  fwdtransforms <- mytx$fwdtransforms
+  invtransforms <- mytx$invtransforms
   temmaskwarped <- antsApplyTransforms(img, temmask,
     transformlist = invtransforms,
     interpolator = c("NearestNeighbor"))
