@@ -81,8 +81,8 @@ plot.antsImage <- function(x, y, color = c("jet", "red", "blue",
   imagedim <- length(dim(myantsimage))
   hvpx<-usePkg("pixmap")
   hvmsc<-usePkg("misc3d")
-  havergl<-usePkg("rgl")
-  if ( !havergl | !havemsc | ! havepx )
+  hvrgl<-usePkg("rgl")
+  if ( !hvrgl | !hvmsc | ! hvpx )
     {
     print(paste("you need rgl, misc3d and pixmap libraries to use this."))
     return(NULL)
