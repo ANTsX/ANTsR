@@ -1,6 +1,6 @@
-binarizeSNPs <- function(snps) {
+.binarizeSNPs <- function(snps) {
   if (nargs() == 0) {
-    print("Usage:  x_b<-binarizeSNPs( x ) ")
+    print("Usage:  x_b<-.binarizeSNPs( x ) ")
     return(1)
   }
   nrep <- 2
