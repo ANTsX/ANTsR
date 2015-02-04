@@ -12,13 +12,15 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA, tempriors = NA,
 
 \item{tem}{Template image which has an associated label mask.}
 
-\item{tmask}{Template's antsImage brain mask.}
+\item{temmask}{Template's antsImage brain mask.}
+
+\item{tdir}{temporary directory}
 
 \item{tempriors=c(img1,img2,...,imgN)}{Vector of spatial priors - NOT
 IMPLEMENTED YET}
 }
 \value{
-outputs a brain image and brain mask. 1 -- Failure
+outputs a brain image and brain mask.
 }
 \description{
 Brain extraction based on mapping a template image and its mask to the input
