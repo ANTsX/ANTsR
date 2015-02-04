@@ -1,4 +1,4 @@
-mergeLabels <- function(dataMatrix, pca, corrThresh, maxExtent, colName = "variate") {
+.mergeLabels <- function(dataMatrix, pca, corrThresh, maxExtent, colName = "variate") {
   # Fuses regions of a PCA decomposition if the projections are highly correlated.
   # dataMatrix is the voxel data of dimension (subjects, voxels), pca should be a
   # matrix with dims (voxels, eigenvectors) corrThresh = minimum correlation for

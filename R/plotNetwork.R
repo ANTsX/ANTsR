@@ -1,4 +1,4 @@
-# getNetwork
+# .getNetwork
 plotNetwork <- function(network, mask, centroids, N = 100, scaling = c(0, 0)) {
   
   nLabels <- dim(centroids$centroids)[1]
