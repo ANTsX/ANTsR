@@ -17,7 +17,7 @@ equals the number of time units in the series.}
 \item{xideal}{1D time-series signal to be used a ideal or model for
 regression.}
 
-\item{nuis}{Nuisance parameters obtained from 'get_perfusion_predictors'.}
+\item{nuis}{Nuisance parameters obtained from '.get_perfusion_predictors'.}
 
 \item{dorobust}{Real value in interval from 0 to 1.  If greater than 0, then
 robust regression will be performed.  A typical value would be 0.95 i.e. use
@@ -35,7 +35,7 @@ Estimate CBF using standard regression and optionally robust regression.
 }
 \examples{
 \dontrun{
-# predictors -- result of calling 'get_perfusion_predictors'
+# predictors -- result of calling '.get_perfusion_predictors'
 cbf <- perfusionregression( mask_img, mat , predictors$xideal , predictors$nuis )
 }
 }

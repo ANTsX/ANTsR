@@ -1,4 +1,24 @@
-quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=T, traitvecin=NA, trainvec=NA ) {
+#' Simple quantifySNPs function.
+#'
+#' quantifySNPs converts trinary snps to frequency data
+#'
+#' @param snps input matrix
+#' @param freqthresh remove snps below this frequency
+#' @param shiftit shift the snps to smooth the estimate
+#' @param replaceWithF replaces snps with frequency values
+#' @param traitvecin map snps to trait vector
+#' @param trainvec defines training data
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#'
+#' mat <- matrix(rnorm(300),ncol=50)
+#' wmat<-quantifySNPs( mat )
+#' wmat2<-quantifySNPs( mat, 2, TRUE )
+#'
+#' @export quantifySNPs
+quantifySNPs <- function(snps, freqthresh = 0.1 ,
+  shiftit = FALSE, replaceWithF=T, traitvecin=NA, trainvec=NA ) {
   if (nargs() == 0) {
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)
@@ -51,4 +71,4 @@ quantifySNPs <- function(snps, freqthresh = 0.1 , shiftit = FALSE, replaceWithF=
     qsnps<-qsnps+ashift(qsnps,c(0,1))+ashift(qsnps,c(0,-1))
   }
   return( qsnps )
-} 
+}

@@ -40,9 +40,9 @@ phind<-3
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
-lowr<-.lowrankRowMatrix(as.matrix( snps[train,] ),900)
+lowr<-..lowrankRowMatrix(as.matrix( snps[train,] ),900)
 snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
-snpdF<-sparseDecom( .lowrankRowMatrix(as.matrix( snps[train,] ),100),
+snpdF<-sparseDecom( ..lowrankRowMatrix(as.matrix( snps[train,] ),100),
   nvecs=20 , sparseness=( -0.001) )
 projmat<-as.matrix( snpdS$eig )
 projmat<-as.matrix( snpdF$eig )
@@ -55,7 +55,7 @@ snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 ,
 snpd<-snpdSlow
 snpd<-snpdFast
 projmat<-as.matrix( snpd$v )
-snpdF<-sparseDecom( .lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
+snpdF<-sparseDecom( ..lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
   nvecs=20 , sparseness=( -0.001) )
 projmat<-as.matrix( snpdS$eig )
 snpse<-as.matrix( snps[train, ]  ) \%*\% projmat
