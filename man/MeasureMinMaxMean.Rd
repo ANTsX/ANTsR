@@ -8,6 +8,8 @@ MeasureMinMaxMean(image, mask = NA)
 }
 \arguments{
 \item{image}{Input image of type \code{antsImage}.}
+
+\item{mask}{image mask}
 }
 \value{
 List with entries \code{img.min}, \code{img.max}, \code{img.mean}.

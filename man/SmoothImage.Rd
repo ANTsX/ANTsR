@@ -4,16 +4,16 @@
 \alias{SmoothImage}
 \title{Smooth an image}
 \usage{
-SmoothImage(...)
+SmoothImage(dim, inimg, sigma, outimg)
 }
 \arguments{
-\item{imageDimension2|3|4}{Number of dimensions of the input image}
+\item{dim}{Number of dimensions of the input image}
 
-\item{inputImage}{Input image to operate on}
+\item{inimg}{Input image to operate on}
 
-\item{Sigma}{Smoothing factor in format 1.1x1.5x0.5 for a 3D image}
+\item{sigma}{Smoothing factor in format 1.1x1.5x0.5 for a 3D image}
 
-\item{outputImage}{Result image}
+\item{outimg}{Result image, placeholder}
 }
 \value{
 0 -- Success\cr 1 -- Failure
@@ -23,12 +23,10 @@ Perform smoothing on the given image with a given sigma, defined in physical
 space units
 }
 \examples{
-\dontrun{
 # different ways you might smooth images of different dimensionality
+img<-makeImage(c(5,5),rnorm(25))
 SmoothImage( 2 , img ,'1.2x1.5', img)
-SmoothImage( 3 , img ,'1x0x1', img)
-SmoothImage( 4 , img ,'1x2x1x0', img)
-}
+SmoothImage( 2 , img ,c(1.2,1.5), img)
 }
 \author{
 Shrinidhi KL, Avants BB

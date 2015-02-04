@@ -26,7 +26,6 @@
 #' @param x mask image
 #' @param i initialization see Atropos in ANTs for full set of options
 #' @param m mrf parameters see Atropos for format of these
-#' @param m mrf parameters see Atropos for format of these
 #' @param c convergence parameters see Atropos for format of these
 #' @param priorweight usually 0, 0.25 or 0.5
 #' @param ... more parameters, see Atropos help in ANTs
