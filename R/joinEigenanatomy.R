@@ -21,8 +21,6 @@
 #' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
 #' # or select optimal parameter from a list
 #' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
-#' print(dim( mydecom$eigenanatomyimages ) )
-#' print(dim( t(kk$fusedlist ) ) )
 #' # something similar may be done with images
 #' mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
 #' mydecom<-sparseDecom( mat, inmask=mask )
