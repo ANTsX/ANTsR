@@ -17,6 +17,11 @@ antsPreprocessfMRI(boldImage, maskImage = NA,
 
 \item{maskImage}{3-D ANTs image defining the region of interest.}
 
+\item{maskingMeanRatioThreshold}{If mask image is not specified,
+a mask image is
+created using the specified threshold which is in terms of the mean of the
+average image ie 0.8 means threshold at 0.8 of the mean.}
+
 \item{initialNuisanceVariables}{Optional initial nuisance variables.}
 
 \item{numberOfCompCorComponents}{Numer of CompCor nuisance components.}
@@ -47,9 +52,7 @@ scalar designating the smoothing sigma (in mm).  For perona-malik, a vector
 needs to be specified with the conductance parameter and the number of
 iterations, e.g. c( 0.25, 5 ).}
 
-\item{maskingThreshold}{If mask image is not specified, a mask image is
-created using the specified threshold which is in terms of the mean of the
-average image ie 0.8 means threshold at 0.8 of the mean.}
+\item{residualizeMatrix}{boolean}
 }
 \value{
 Output is the 'clean' fMRI bold image and mask.  Quality assurance

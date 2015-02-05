@@ -8,7 +8,8 @@
 #' @param meanBoldFixedImageForMotionCorrection Optional target fixed image for
 #' motion correction.
 #' @param maskImage 3-D ANTs image defining the region of interest.
-#' @param maskingThreshold If mask image is not specified, a mask image is
+#' @param maskingMeanRatioThreshold If mask image is not specified,
+#' a mask image is
 #' created using the specified threshold which is in terms of the mean of the
 #' average image ie 0.8 means threshold at 0.8 of the mean.
 #' @param initialNuisanceVariables Optional initial nuisance variables.
@@ -29,6 +30,7 @@
 #' scalar designating the smoothing sigma (in mm).  For perona-malik, a vector
 #' needs to be specified with the conductance parameter and the number of
 #' iterations, e.g. c( 0.25, 5 ).
+#' @param residualizeMatrix boolean
 #' @return Output is the 'clean' fMRI bold image and mask.  Quality assurance
 #' output includes the framewise displacement (FD) and DVARS.  'DVARS is the
 #' root mean squared (RMS) change in BOLD signal from volume to volume (D
@@ -49,13 +51,20 @@
 #' }
 #'
 #' @export antsPreprocessfMRI
-antsPreprocessfMRI <- function(boldImage, maskImage = NA, maskingMeanRatioThreshold = 0.75,
-  initialNuisanceVariables = NA, numberOfCompCorComponents = 6, doMotionCorrection = TRUE,
-  useMotionCorrectedImage = FALSE, motionCorrectionAccuracyLevel = 1, meanBoldFixedImageForMotionCorrection = NA,
-  frequencyLowThreshold = NA, frequencyHighThreshold = NA, spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0, residualizeMatrix = TRUE) {
-
-  # compute nuisance variables
+antsPreprocessfMRI <- function(boldImage,
+  maskImage = NA,
+  maskingMeanRatioThreshold = 0.75,
+  initialNuisanceVariables = NA,
+  numberOfCompCorComponents = 6,
+  doMotionCorrection = TRUE,
+  useMotionCorrectedImage = FALSE,
+  motionCorrectionAccuracyLevel = 1,
+  meanBoldFixedImageForMotionCorrection = NA,
+  frequencyLowThreshold = NA,
+  frequencyHighThreshold = NA,
+  spatialSmoothingType = "none",
+  spatialSmoothingParameters = 0,
+  residualizeMatrix = TRUE) {
 
   nuisanceVariables <- initialNuisanceVariables
 
