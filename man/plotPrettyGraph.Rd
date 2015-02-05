@@ -37,8 +37,7 @@ dmat<-data.matrix(bold_correlation_matrix)
 if ( usePkg("igraph") ) {
  gg<-makeGraph( dmat, 0.1 )
  rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
- plotPrettyGraph( gg$adjacencyMatrix,
-   gg$degree , figScale=12 , scaleText=5 )
+ plotPrettyGraph( gg$adjacencyMatrix, gg$degree , figScale=12 , scaleText=5 )
  }
 }
 \author{
