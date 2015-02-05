@@ -7,9 +7,9 @@
 lappend(lst, obj)
 }
 \arguments{
-\item{inlist}{list to which you will append the 2nd item}
+\item{lst}{list to which you will append the 2nd item}
 
-\item{myitem}{to be added to the list}
+\item{obj}{to be added to the list}
 }
 \value{
 outputs the appended list

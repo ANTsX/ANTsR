@@ -8,7 +8,13 @@ labelClusters(imagein, minClusterSize = 50, minThresh = 1e-06,
   maxThresh = 1)
 }
 \arguments{
-\item{img}{input antsImage e.g. a statistical map}
+\item{imagein}{input antsImage e.g. a statistical map}
+
+\item{minClusterSize}{throw away clusters smaller than this value}
+
+\item{minThresh}{threshold to a statistical map}
+
+\item{maxThresh}{threshold to a statistical map}
 }
 \value{
 labeled cluster image is output
