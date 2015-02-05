@@ -10,11 +10,12 @@
 #' @param xideal 1D time-series signal to be used a ideal or model for
 #' regression.
 #' @param nuis Nuisance parameters obtained from '.get_perfusion_predictors'.
-#' @param m0 m0 antsImage passed in according to needs of specific ASL
-#' sequence.
 #' @param dorobust Real value in interval from 0 to 1.  If greater than 0, then
 #' robust regression will be performed.  A typical value would be 0.95 i.e. use
 #' voxels with 95 percent confidence.
+#' @param skip skip / stride over this number of voxels to increase speed
+#' @param selectionValsForRegweights scalar function to guide parameter est.
+#' @param useBayesian if greater than zero, use a bayesian prior w/this weight
 #' @return Success -- An object of type 'antsImage' containing the CBF estimate
 #' for voxels corresponding to the mask input\cr
 #' @author Shrinidhi KL Avants BB
@@ -26,7 +27,8 @@
 #' }
 #'
 #' @export perfusionregression
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA, dorobust = 0, skip = 20,
+perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
+  dorobust = 0, skip = 20,
   selectionValsForRegweights = NULL, useBayesian = 0) {
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {

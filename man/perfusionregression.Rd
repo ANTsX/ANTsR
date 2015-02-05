@@ -23,8 +23,11 @@ regression.}
 robust regression will be performed.  A typical value would be 0.95 i.e. use
 voxels with 95 percent confidence.}
 
-\item{m0}{m0 antsImage passed in according to needs of specific ASL
-sequence.}
+\item{skip}{skip / stride over this number of voxels to increase speed}
+
+\item{selectionValsForRegweights}{scalar function to guide parameter est.}
+
+\item{useBayesian}{if greater than zero, use a bayesian prior w/this weight}
 }
 \value{
 Success -- An object of type 'antsImage' containing the CBF estimate

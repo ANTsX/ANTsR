@@ -10,12 +10,42 @@ networkEiganat(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5,
   timeme = T, addb = T, useregression = T)
 }
 \arguments{
-\item{inmatrix}{n by p input images , subjects or time points by row ,
+\item{Xin}{n by p input images , subjects or time points by row ,
 spatial variable lies along columns}
 
-\item{inmask}{optional antsImage mask}
+\item{sparseness}{sparseness pair c( 0.1 , 0.1 )}
 
-\item{otherparams}{see sccan for other parameters}
+\item{nvecs}{number of vectors}
+
+\item{its}{number of iterations}
+
+\item{gradparam}{gradient descent parameter for data}
+
+\item{mask}{optional antsImage mask}
+
+\item{v}{the spatial solultion}
+
+\item{prior}{the prior}
+
+\item{pgradparam}{gradient descent parameter for prior term}
+
+\item{clustval}{integer greater than or equal to zero}
+
+\item{downsample}{bool}
+
+\item{doscale}{bool}
+
+\item{domin}{bool}
+
+\item{verbose}{bool}
+
+\item{dowhite}{bool}
+
+\item{timeme}{bool}
+
+\item{addb}{bool}
+
+\item{useregression}{bool}
 }
 \value{
 outputs a decomposition of a population or time series matrix

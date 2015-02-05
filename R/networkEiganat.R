@@ -3,11 +3,25 @@
 #' Decomposes a matrix into sparse eigenevectors to maximize explained
 #' variance.
 #'
-#'
-#' @param inmatrix n by p input images , subjects or time points by row ,
+#' @param Xin n by p input images , subjects or time points by row ,
 #' spatial variable lies along columns
-#' @param inmask optional antsImage mask
-#' @param otherparams see sccan for other parameters
+#' @param sparseness sparseness pair c( 0.1 , 0.1 )
+#' @param nvecs number of vectors
+#' @param its number of iterations
+#' @param gradparam gradient descent parameter for data
+#' @param mask optional antsImage mask
+#' @param v the spatial solultion
+#' @param prior the prior
+#' @param pgradparam  gradient descent parameter for prior term
+#' @param clustval integer greater than or equal to zero
+#' @param downsample bool
+#' @param doscale bool
+#' @param domin bool
+#' @param verbose bool
+#' @param dowhite bool
+#' @param timeme bool
+#' @param addb bool
+#' @param useregression bool
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
@@ -72,9 +86,25 @@
 #' }
 #'
 #' @export networkEiganat
-networkEiganat <- function(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5, gradparam = 1,
-  mask = NA, v, prior, pgradparam = 0.1, clustval = 0, downsample = 0, doscale = T,
-  domin = T, verbose = F, dowhite = 0, timeme = T, addb = T, useregression = T) {
+networkEiganat <- function(
+  Xin,
+  sparseness = c(0.1, 0.1),
+  nvecs = 5,
+  its = 5,
+  gradparam = 1,
+  mask = NA,
+  v,
+  prior,
+  pgradparam = 0.1,
+  clustval = 0,
+  downsample = 0,
+  doscale = T,
+  domin = T,
+  verbose = F,
+  dowhite = 0,
+  timeme = T,
+  addb = T,
+  useregression = T) {
   X <- Xin/norm(Xin, "F")
   if (dowhite > 0 & (nvecs * 2 < nrow(Xin)))
     X <- icawhiten(X, dowhite)

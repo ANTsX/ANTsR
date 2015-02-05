@@ -12,6 +12,8 @@
 #' @param myFileList dd<-'MICCAI-2013-SATA-Challenge-Data/CAP/training-images/'
 #' myFileList<-list.files(path=dd, pattern = glob2rx('*nii.gz'),full.names =
 #' T,recursive = T)
+#' @param metrictype similarity function
+#' @param nclusters integer controlling max number of clusters to search over
 #' @return raw dissimilarity matrix is output, symmetrized matrix and
 #' clustering (optional) in a list
 #' @author Avants BB
@@ -22,7 +24,8 @@
 #' }
 #'
 #' @export pairwiseImageDistanceMatrix
-pairwiseImageDistanceMatrix <- function(dim, myFileList, metrictype = "PearsonCorrelation",
+pairwiseImageDistanceMatrix <- function(dim,
+  myFileList, metrictype = "PearsonCorrelation",
   nclusters = NA) {
   fnl <- length(myFileList)
   mymat <- matrix(rep(NA, fnl * fnl), nrow = fnl, ncol = fnl)

@@ -13,6 +13,10 @@ pairwiseImageDistanceMatrix(dim, myFileList,
 \item{myFileList}{dd<-'MICCAI-2013-SATA-Challenge-Data/CAP/training-images/'
 myFileList<-list.files(path=dd, pattern = glob2rx('*nii.gz'),full.names =
 T,recursive = T)}
+
+\item{metrictype}{similarity function}
+
+\item{nclusters}{integer controlling max number of clusters to search over}
 }
 \value{
 raw dissimilarity matrix is output, symmetrized matrix and
