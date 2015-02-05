@@ -2,16 +2,16 @@
 % Please edit documentation in R/SmoothImage.R
 \name{SmoothImage}
 \alias{SmoothImage}
-\title{Smooth an image}
+\title{Smooth image}
 \usage{
-SmoothImage(dim, inimg, sigma, outimg)
+SmoothImage(dim, inim, sigma, outimg)
 }
 \arguments{
 \item{dim}{Number of dimensions of the input image}
 
 \item{inimg}{Input image to operate on}
 
-\item{sigma}{Smoothing factor in format 1.1x1.5x0.5 for a 3D image}
+\item{sigma}{Smoothing factor.  Either scalar, or vector of length \code{dim} for \code{dim}-dimensional image.}
 
 \item{outimg}{Result image, placeholder}
 }
@@ -19,13 +19,10 @@ SmoothImage(dim, inimg, sigma, outimg)
 0 -- Success\cr 1 -- Failure
 }
 \description{
-Perform smoothing on the given image with a given sigma, defined in physical
-space units
+Perform smoothing on the given image with a given sigma, defined in physical space units
 }
 \examples{
-# different ways you might smooth images of different dimensionality
 img<-makeImage(c(5,5),rnorm(25))
-SmoothImage( 2 , img ,'1.2x1.5', img)
 SmoothImage( 2 , img ,c(1.2,1.5), img)
 }
 \author{

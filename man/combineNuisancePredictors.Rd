@@ -4,8 +4,7 @@
 \alias{combineNuisancePredictors}
 \title{Combine and reduce dimensionality of nuisance predictors.}
 \usage{
-combineNuisancePredictors <- function(inmat, target,
-globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
+combineNuisancePredictors(inmat, target, globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
 }
 \arguments{
 \item{inmat}{Input predictor matrix.}

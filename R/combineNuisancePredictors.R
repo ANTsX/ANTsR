@@ -1,8 +1,7 @@
 #' @name combineNuisancePredictors
 #' @title Combine and reduce dimensionality of nuisance predictors.
 #' @description Combine and select nuisance predictors to maximize correlation between \code{inmat} and \code{target}.
-#' @usage combineNuisancePredictors <- function(inmat, target,
-#' globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
+#' @usage combineNuisancePredictors(inmat, target, globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
 #' @param inmat Input predictor matrix.
 #' @param target Target outcome matrix.
 #' @param globalpredictors Global predictors of size \code{nrow(inmat)} by \code{n}, where \code{n} is the number of global predictors.
