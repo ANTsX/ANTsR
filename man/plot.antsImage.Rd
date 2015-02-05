@@ -13,22 +13,27 @@
 
 \item{y}{list of the images to use as overlays}
 
-\item{color=<string>}{the color for the overlay , e.g c('blue','red') length
+\item{color}{the color for the overlay , e.g c('blue','red') length
 of this list should match the image list}
 
-\item{axis=<value>}{character ... the axis to slice (1 , 2 or 3)}
+\item{axis}{... the axis to slice (1 , 2 or 3)}
 
-\item{slices=<string>}{character, the slices to overlay written as 10x20x3
-where 10x20 is the range and 3 is the increment, for multislice display}
+\item{slices}{character, the slices to overlay written as 10x20x3 ( or TODO
+c(5,10,25) ) where 10x20 is the range and 3 is the increment,
+for multislice display}
 
-\item{threshold=<string>}{character, we overlay values above/below this
+\item{threshold}{character, we overlay values above/below this
 threshold : of form LOxHI}
 
-\item{quality=<value>}{integer quality magnification factor 1 => large (e.g.
+\item{quality}{integer quality magnification factor 1 => large (e.g.
 10)}
 
-\item{outname='figx.jpg'}{output name if you want to write the result to a
+\item{outname}{eg'figx.jpg' output name if you want to write the result to a
 file}
+
+\item{alpha}{opacity}
+
+\item{...}{other parameters}
 }
 \value{
 output is plot to standard R window
