@@ -1,7 +1,7 @@
 #' @name SmoothImage 
 #' @title Smooth image 
 #' @description Perform smoothing on the given image with a given sigma, defined in physical space units
-#' @usage SmoothImage(dim, inim, sigma, outimg)
+#' @usage SmoothImage(dim, inimg, sigma, outimg)
 #' @param dim Number of dimensions of the input image
 #' @param inimg Input image to operate on
 #' @param sigma Smoothing factor.  Either scalar, or vector of length \code{dim} for \code{dim}-dimensional image. 

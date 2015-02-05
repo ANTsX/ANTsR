@@ -4,7 +4,7 @@
 \alias{SmoothImage}
 \title{Smooth image}
 \usage{
-SmoothImage(dim, inim, sigma, outimg)
+SmoothImage(dim, inimg, sigma, outimg)
 }
 \arguments{
 \item{dim}{Number of dimensions of the input image}
