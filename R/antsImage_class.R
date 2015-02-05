@@ -245,6 +245,20 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   return(.Call("antsImage_GetPixels", x, lst, PACKAGE = "ANTsR"))
 }
 
+#' @title antsImageGetSet
+#' @description Get and set methods for image header information
+#' @name antsImageGetSet 
+#' @examples 
+#' img <- makeImage(c(5,5), rnorm(25))
+#' antsSetSpacing(img, c(2.0, 2.0))
+#' antsSetOrigin(img, c(0.5, 0.5))
+NULL 
+
+#' @rdname antsImageGetSet 
+#' @usage antsGetSpacing(x) 
+#' @param x Image to access 
+#' @return For \code{get} methods, vector of size \code{dim(x)}. 
+#' For \code{set} methods, 0 to indicate success. 
 antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -253,7 +267,8 @@ antsGetSpacing <- function(x) {
 
   return(.Call("antsImage_GetSpacing", x, PACKAGE = "ANTsR"))
 }
-
+#' @rdname antsImageGetSet 
+#' @param spacing Desired spacing as vector of size dim(x)
 antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -273,6 +288,8 @@ antsSetSpacing <- function(x, spacing) {
   return(.Call("antsImage_SetSpacing", x, spacing, PACKAGE = "ANTsR"))
 }
 
+#' @rdname antsImageGetSet 
+#' @usage antsGetOrigin(x) 
 antsGetOrigin <- function(x) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -280,7 +297,9 @@ antsGetOrigin <- function(x) {
   }
   return(.Call("antsImage_GetOrigin", x, PACKAGE = "ANTsR"))
 }
-
+#' @rdname antsImageGetSet
+#' @usage antsSetOrigin(x, origin)
+#' @param origin Desired origin as vector of size dim(x)
 antsSetOrigin <- function(x, origin) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -299,6 +318,8 @@ antsSetOrigin <- function(x, origin) {
   return(.Call("antsImage_SetOrigin", x, origin, PACKAGE = "ANTsR"))
 }
 
+#' @rdname antsImageGetSet
+#' @usage antsGetDirection(x)
 antsGetDirection <- function(x) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -307,6 +328,9 @@ antsGetDirection <- function(x) {
   return(.Call("antsImage_GetDirection", x, PACKAGE = "ANTsR"))
 }
 
+#' @rdname antsImageGetSet
+#' @usage antsSetDirection(x, direction)
+#' @param direction Desired direction as vector of size dim(x)
 antsSetDirection <- function(x, direction) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -353,9 +377,9 @@ antsSetDirection <- function(x, direction) {
 #'
 #'
 #' @export antsGetNeighborhood
-antsGetNeighborhood <- function(x, center, radius, physical.coordinates = FALSE) {
+antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FALSE) {
 
-  if (class(x)[1] != "antsImage") {
+  if (class(image)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
     return()
   }
@@ -370,7 +394,7 @@ antsGetNeighborhood <- function(x, center, radius, physical.coordinates = FALSE)
     return()
   }
 
-  return(.Call("antsImage_GetNeighborhood", x, center, radius, physical.coordinates))
+  return(.Call("antsImage_GetNeighborhood", image, center, radius, physical.coordinates))
 }
 
 
