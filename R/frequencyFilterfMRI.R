@@ -3,13 +3,13 @@
 #' This function works for a BOLD time-series data
 #'
 #'
-#' @param boldMatrix Time series matrix for bold image
-#' @param tr=<value> The sequence's TR value , typically 3 or 4.
-#' @param freqLo=<value> The lower frequency limit, e.g. 0.01 in band-pass
+#' @param boldmat Time series matrix for bold image
+#' @param tr The sequence's TR value , typically 3 or 4.
+#' @param freqLo The lower frequency limit, e.g. 0.01 in band-pass
 #' filter
-#' @param freqHi=<value> The higher frequency limit, e.g. 0.1 in band-pass
+#' @param freqHi The higher frequency limit, e.g. 0.1 in band-pass
 #' filter
-#' @param opt=c('trig','butt','stl') Type of filter to use: butterworth,
+#' @param opt  one of 'trig','butt','stl' Type of filter to use: butterworth,
 #' trigonometric, stl.
 #' @return output is the filtered time series.
 #' @author Avants BB
@@ -25,7 +25,8 @@
 #' }
 #'
 #' @export frequencyFilterfMRI
-frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = "butt") {
+frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
+  freqHi = 0.1, opt = "butt") {
   pixtype <- "float"
   if (nargs() == 0) {
     print(myusage)

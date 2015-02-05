@@ -7,7 +7,9 @@
 fastwhiten(x, mynu = NA)
 }
 \arguments{
-\item{mat}{input matrix}
+\item{x}{input matrix}
+
+\item{mynu}{number of u vectors}
 }
 \value{
 matrix is output

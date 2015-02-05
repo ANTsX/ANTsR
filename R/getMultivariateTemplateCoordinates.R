@@ -10,8 +10,7 @@
 #' @param imageSetToBeLabeledIn a template paired with (most likely) the output
 #' of a multivariate sparse decomposition or (alternatively) could be just a
 #' statistical map with zeroes in non-interesting areas
-#' @param imagePairToBeLabeled e.g. the template image and the activation map
-#' @param templatePairWithLabels e..g the mni image and brodmann label set
+#' @param templateWithLabels e..g the mni image and brodmann label set
 #' @param labelnames a list of names for the labels
 #' @param outprefix if output to a file, provide file prefix
 #' @param convertToTal bool, return talairach coordinates

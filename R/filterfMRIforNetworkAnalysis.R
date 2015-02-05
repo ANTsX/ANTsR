@@ -13,21 +13,24 @@
 #' is a WIP.
 #'
 #'
-#' @param asl_antsr_image_or_filename The filename to an antsr image or pointer
+#' @param aslmat The filename to an antsr image or pointer
 #' to an antsr image
-#' @param tr=<value> The sequence's TR value , typically 3 or 4.
-#' @param freqLo=<value> The lower frequency limit, e.g. 0.01 in band-pass
+#' @param tr The sequence's TR value , typically 3 or 4.
+#' @param freqLo The lower frequency limit, e.g. 0.01 in band-pass
 #' filter
-#' @param freqHi=<value> The higher frequency limit, e.g. 0.1 in band-pass
+#' @param freqHi The higher frequency limit, e.g. 0.1 in band-pass
 #' filter
-#' @param cbfnetwork="ASLCBF" A string dictating whether to do nothing special
+#' @param cbfnetwork "ASLCBF" A string dictating whether to do nothing special
 #' (standard BOLD) or get CBF (ASLCBF) or BOLD (ASLBOLD) signal from ASL
-#' @param maskThresh=<value> A thresholding value for the mask ... may need to
-#' be adjusted up or down for your data although the mask does not need to be
-#' perfect.
-#' @param smoother=<value> A smoothing parameter for space and time.
-#' @param outputprefix=<string> filename prefix - if defined , this function
-#' will write out some sanity checking images.
+#' @param mask the mask image
+#' @param labels the label image
+#' @param graphdensity desired density
+#' @param seg a segmentation image
+#' @param useglasso use sparse inverse covariance for network estimation
+#' @param nuisancein nuisance variable data frame
+#' @param usesvd bool, to reduce nuisance variables
+#' @param robustcorr bool
+
 #' @return output is a list containing "filteredTimeSeries" "mask"
 #' "temporalvar"
 #'
@@ -43,8 +46,18 @@
 #' }
 #'
 #' @export filterfMRIforNetworkAnalysis
-filterfMRIforNetworkAnalysis <- function(aslmat, tr, freqLo = 0.01, freqHi = 0.1, cbfnetwork = "ASLCBF", mask = NA,
-  labels = NA, graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein=NA, usesvd = FALSE , robustcorr = FALSE  ) {
+filterfMRIforNetworkAnalysis <- function(
+  aslmat,
+  tr, freqLo = 0.01, freqHi = 0.1,
+  cbfnetwork = "ASLCBF",
+  mask = NA,
+  labels = NA,
+  graphdensity = 0.5,
+  seg = NA,
+  useglasso = NA,
+  nuisancein=NA,
+  usesvd = FALSE ,
+  robustcorr = FALSE  ) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
   if (nargs() == 0) {
