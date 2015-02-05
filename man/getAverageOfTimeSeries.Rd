@@ -2,9 +2,9 @@
 % Please edit documentation in R/getAverageOfTimeSeries.R
 \name{getAverageOfTimeSeries}
 \alias{getAverageOfTimeSeries}
-\title{Returns a 3D average of a 4D time series.}
+\title{getAverageOfTimeSeries}
 \usage{
-getAverageOfTimeSeries(timeseriesimage)
+getAverageOfTimeSeries(img)
 }
 \arguments{
 \item{img}{input 4D image}
@@ -13,13 +13,11 @@ getAverageOfTimeSeries(timeseriesimage)
 3D ants image is output
 }
 \description{
-Averages the 3D sub-volumes of a 4D input ants image.
+Returns a 3D average of a 4D time series.
 }
 \examples{
 img<-as.antsImage( array(data = rep(0,10^4), dim = c(10,10,10,10) ) )
 avg<-getAverageOfTimeSeries( img )
-print(dim(avg))
-avg<-getAverageOfTimeSeries( avg )
 }
 \author{
 Avants BB
