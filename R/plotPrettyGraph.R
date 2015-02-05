@@ -3,15 +3,15 @@
 #' PlotPrettyGraph given inputs from the makeGraph function.  adapted from
 #' http://is-r.tumblr.com/.
 #'
-#'
 #' @param adjacencyMatrix igraph adjacencyMatrix
-#' @param graphMetricValue igraph node-level graph value e.g. degree,
+#' @param functionToPlot igraph node-level graph value e.g. degree,
 #' page.rank, etc
 #' @param pngfn filename for output png or to screen if NA
 #' @param scaleText relative size of text to vertices
 #' @param vertexSize cex size of vertices
 #' @param figScale the figure will be of square size 2^figScale in pixels
 #' @param layoutmode see gplot.layout in sna package
+#' @param hueval controls the hue in hsv
 #' @return no output
 #' @author Avants BB, Christopher DeSante and David Sparks
 #' @examples

@@ -9,17 +9,20 @@
 #'
 #' @param x the reference image on which to overlay
 #' @param y list of the images to use as overlays
-#' @param color=<string> the color for the overlay , e.g c('blue','red') length
+#' @param color the color for the overlay , e.g c('blue','red') length
 #' of this list should match the image list
-#' @param axis=<value> character ... the axis to slice (1 , 2 or 3)
-#' @param slices=<string> character, the slices to overlay written as 10x20x3
-#' where 10x20 is the range and 3 is the increment, for multislice display
-#' @param threshold=<string> character, we overlay values above/below this
+#' @param axis  ... the axis to slice (1 , 2 or 3)
+#' @param slices character, the slices to overlay written as 10x20x3 ( or TODO
+#' c(5,10,25) ) where 10x20 is the range and 3 is the increment,
+#' for multislice display
+#' @param threshold character, we overlay values above/below this
 #' threshold : of form LOxHI
-#' @param quality=<value> integer quality magnification factor 1 => large (e.g.
+#' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
-#' @param outname='figx.jpg' output name if you want to write the result to a
+#' @param outname eg'figx.jpg' output name if you want to write the result to a
 #' file
+#' @param alpha  opacity
+#' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
 #' @examples
@@ -39,9 +42,15 @@
 #'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
 #'
 #' @export plot.antsImage
-plot.antsImage <- function(x, y, color = c("jet", "red", "blue",
-  "green", "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf", quality = NA,
-  outname = NA, alpha = 0.5, ... ) {
+plot.antsImage <- function(x, y,
+  color = c("jet", "red", "blue",  "green", "yellow"),
+  axis = 1,
+  slices = "1x1x1",
+  threshold = "0.5xInf",
+  quality = NA,
+  outname = NA,
+  alpha = 0.5,
+  ... ) {
   spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical",
     " print the help ", "myantsimage", "b", 2, "character", " the reference image on which to overlay ",
     "color", "c", 1, "character", " the color for the overlay ", "functional",

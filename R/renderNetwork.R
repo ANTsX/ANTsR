@@ -16,7 +16,7 @@
 #' @param lwd width of edge lines
 #' @param edgecolors pre-defined colors for graph edges
 #' @param radius radius of nodes
-#' @param nodecolor  color of node
+#' @param nodecolors  color of node
 #' @param nodetype type of glyph for nodes
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Duda, J

@@ -14,6 +14,22 @@ in columns )}
 
 \item{brain}{input rendering object which is output of renderSurfaceFunction
 or a function derived from renderSurfaceFunction}
+
+\item{weights}{edge weights}
+
+\item{edgecolors}{a color(map) for edges}
+
+\item{nodecolors}{a color(map) for nodes}
+
+\item{nodetype}{sphere or other node type}
+
+\item{scaling}{controls functional range}
+
+\item{lwd}{line width}
+
+\item{radius}{for nodes}
+
+\item{showOnlyConnectedNodes}{boolean}
 }
 \value{
 None
@@ -24,7 +40,8 @@ and plots the centroid network over the rendering object
 }
 \examples{
 \dontrun{
-brain<-renderSurfaceFunction( surfimg =list( mymni[[1]] ) , alphasurf=0.1 , smoothsval = 1.5  )
+brain<-renderSurfaceFunction( surfimg =list( mymni[[1]] ) ,
+ alphasurf=0.1 , smoothsval = 1.5  )
 plotBasicNetwork( centroids = centroids, brain )
 # more complete example
   mnit<-getANTsRData('mni')

@@ -11,6 +11,9 @@ plotPrettyGraph(adjacencyMatrix, functionToPlot, pngfn = "graph.png",
 \arguments{
 \item{adjacencyMatrix}{igraph adjacencyMatrix}
 
+\item{functionToPlot}{igraph node-level graph value e.g. degree,
+page.rank, etc}
+
 \item{pngfn}{filename for output png or to screen if NA}
 
 \item{scaleText}{relative size of text to vertices}
@@ -21,8 +24,7 @@ plotPrettyGraph(adjacencyMatrix, functionToPlot, pngfn = "graph.png",
 
 \item{layoutmode}{see gplot.layout in sna package}
 
-\item{graphMetricValue}{igraph node-level graph value e.g. degree,
-page.rank, etc}
+\item{hueval}{controls the hue in hsv}
 }
 \value{
 no output

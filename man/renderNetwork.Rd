@@ -20,9 +20,9 @@ renderNetwork(network, locations, scaling = c(0, 0), lwd = 2, radius = 3,
 
 \item{edgecolors}{pre-defined colors for graph edges}
 
-\item{nodetype}{type of glyph for nodes}
+\item{nodecolors}{color of node}
 
-\item{nodecolor}{color of node}
+\item{nodetype}{type of glyph for nodes}
 }
 \value{
 0 -- Success\cr 1 -- Failure
