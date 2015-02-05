@@ -4,11 +4,10 @@
 #' http://is-r.tumblr.com/.
 #'
 #'
-#' @param graphObject igraph graphObject
 #' @param adjacencyMatrix igraph adjacencyMatrix
 #' @param graphMetricValue igraph node-level graph value e.g. degree,
 #' page.rank, etc
-#' @param pngfn filename for output png
+#' @param pngfn filename for output png or to screen if NA
 #' @param scaleText relative size of text to vertices
 #' @param vertexSize cex size of vertices
 #' @param figScale the figure will be of square size 2^figScale in pixels
@@ -22,18 +21,19 @@
 #' if ( usePkg("igraph") ) {
 #'  gg<-makeGraph( dmat, 0.1 )
 #'  rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
-#'  plotPrettyGraph( gg$mygraph, gg$adjacencyMatrix,
+#'  plotPrettyGraph( gg$adjacencyMatrix,
 #'    gg$degree , figScale=12 , scaleText=5 )
 #'  }
 #'
 #' @export plotPrettyGraph
-plotPrettyGraph <- function( graphObject, adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
+plotPrettyGraph <- function(  adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
 # adapted from http://is-r.tumblr.com/
 if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
 if ( !usePkg("sna") ) { print("Need sna package"); return(NULL) }
 as.matrix(sort(functionToPlot))
 # Now, to make the prettiest graph we can:
-png( pngfn , height = 2^figScale, width = 2^figScale ) # , type = "cairo-png")
+if ( !is.na( pngfn ) )
+  png( pngfn , height = 2^figScale, width = 2^figScale )
 par(mai = c(0, 0, 0, 0))
 frange<-(functionToPlot - min(functionToPlot)) /
                        (max(functionToPlot) - min(functionToPlot))
@@ -60,5 +60,5 @@ prettyPlot <- gplot(dat = adjacencyMatrix,
                     vertex.col = functionToPlotColor,
                     label.border = "#ffffff00",  # To hide borders
                     vertex.border = "#ffffff00" )  # To hide borders
-dev.off()
+if ( !is.na( pngfn ) ) dev.off()
 }

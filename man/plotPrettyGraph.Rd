@@ -4,16 +4,14 @@
 \alias{plotPrettyGraph}
 \title{Simple plotPrettyGraph function saves to png.}
 \usage{
-plotPrettyGraph(graphObject, adjacencyMatrix, functionToPlot,
-  pngfn = "graph.png", scaleText = 0.5, vertexSize = NA, figScale = 11,
-  layoutmode = "eigen", hueval = 0)
+plotPrettyGraph(adjacencyMatrix, functionToPlot, pngfn = "graph.png",
+  scaleText = 0.5, vertexSize = NA, figScale = 11, layoutmode = "eigen",
+  hueval = 0)
 }
 \arguments{
-\item{graphObject}{igraph graphObject}
-
 \item{adjacencyMatrix}{igraph adjacencyMatrix}
 
-\item{pngfn}{filename for output png}
+\item{pngfn}{filename for output png or to screen if NA}
 
 \item{scaleText}{relative size of text to vertices}
 
@@ -39,7 +37,7 @@ dmat<-data.matrix(bold_correlation_matrix)
 if ( usePkg("igraph") ) {
  gg<-makeGraph( dmat, 0.1 )
  rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
- plotPrettyGraph( gg$mygraph, gg$adjacencyMatrix,
+ plotPrettyGraph( gg$adjacencyMatrix,
    gg$degree , figScale=12 , scaleText=5 )
  }
 }
