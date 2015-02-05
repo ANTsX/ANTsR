@@ -11,7 +11,6 @@
 #' @param debug boolean
 #' @param polydegree eg 4 for polynomial nuisance variables
 #' @param crossvalidationgroups prior defined or integer valued
-#' @param tr bold tr
 #' @param scalemat boolean
 #' @param noisepoolfun function to help select noise pool e.g. max
 #' @param usecompcor boolean

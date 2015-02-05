@@ -32,8 +32,6 @@ estimation}
 \item{noisepoolfun}{function to help select noise pool e.g. max}
 
 \item{usecompcor}{boolean}
-
-\item{tr}{bold tr}
 }
 \value{
 matrix is output
