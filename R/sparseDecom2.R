@@ -8,7 +8,6 @@
 #' @param inmask optional pair of antsImage masks
 #' @param sparseness a c(.,.) pair of values e.g c(0.01,0.1) enforces an
 #' unsigned 99 percent and 90 percent sparse solution for each respective view
-#' @param otherparams see sccan for other parameters
 #' @param nvecs number of eigenvector pairs
 #' @param its number of iterations, 10 or 20 usually sufficient
 #' @param cthresh cluster threshold pair

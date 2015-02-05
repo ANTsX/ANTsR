@@ -49,8 +49,6 @@ orthogonality or 0 - both}
 
 \item{priorWeight}{Scalar value weight on prior between 0 (prior is weak)
 and 1 (prior is strong).  Only engaged if initialization is used}
-
-\item{otherparams}{see sccan for other parameters}
 }
 \value{
 outputs a decomposition of a pair of matrices

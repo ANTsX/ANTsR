@@ -2,10 +2,11 @@
 #'
 #' Computes CBF from ASL - pasl or pcasl
 #'
-#'
-#' @param aslmat input asl matrix
-#' @param aslmask 3D image mask (antsImage)
+#' @param perfusion input asl matrix
+#' @param mask 3D image mask (antsImage)
 #' @param parameters list with entries for sequence and m0 (at minimimum)
+#' @param M0val baseline M0 value (optional)
+#' @param outlierValue trim outliers by this fractional value (optional)
 #' @return a list is output with 3 types of cbf images
 #' @author Avants BB, Kandel B, Duda JT
 #' @examples
@@ -38,7 +39,8 @@
 #'   }
 #'
 #' @export quantifyCBF
-quantifyCBF <- function(perfusion, mask, parameters, M0val = NA, outlierValue = 0.02) {
+quantifyCBF <- function(perfusion,
+  mask, parameters, M0val = NA, outlierValue = 0.02) {
 
   if (is.null(parameters$sequence)) {
     stop("Parameter list must specify a sequence type: pasl, pcasl, or casl")

@@ -7,11 +7,15 @@
 quantifyCBF(perfusion, mask, parameters, M0val = NA, outlierValue = 0.02)
 }
 \arguments{
+\item{perfusion}{input asl matrix}
+
+\item{mask}{3D image mask (antsImage)}
+
 \item{parameters}{list with entries for sequence and m0 (at minimimum)}
 
-\item{aslmat}{input asl matrix}
+\item{M0val}{baseline M0 value (optional)}
 
-\item{aslmask}{3D image mask (antsImage)}
+\item{outlierValue}{trim outliers by this fractional value (optional)}
 }
 \value{
 a list is output with 3 types of cbf images

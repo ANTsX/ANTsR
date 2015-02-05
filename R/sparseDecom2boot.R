@@ -10,7 +10,6 @@
 #' @param inmask optional pair of antsImage masks
 #' @param sparseness a c(.,.) pair of values e.g c(0.01,0.1) enforces an
 #' unsigned 99 percent and 90 percent sparse solution for each respective view
-#' @param otherparams see sccan for other parameters
 #' @param nvecs number of eigenvector pairs
 #' @param its number of iterations, 10 or 20 usually sufficient
 #' @param cthresh cluster threshold pair
@@ -26,8 +25,6 @@
 #' @param initializationList initialization for first view
 #' @param initializationList2 initialization for 2nd view
 #' @param ell1 gradient descent parameter, if negative then l0 otherwise use l1
-#' @param priorWeight Scalar value weight on prior between 0 (prior is weak)
-#' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param nboot n bootstrap runs
 #' @param nsamp number of samples e.g. 0.9 indicates 90 percent of data
 #' @param doseg boolean to control matrix orthogonality during bootstrap

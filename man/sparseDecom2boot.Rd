@@ -53,11 +53,6 @@ orthogonality or 0 - both}
 \item{nsamp}{number of samples e.g. 0.9 indicates 90 percent of data}
 
 \item{doseg}{boolean to control matrix orthogonality during bootstrap}
-
-\item{otherparams}{see sccan for other parameters}
-
-\item{priorWeight}{Scalar value weight on prior between 0 (prior is weak)
-and 1 (prior is strong).  Only engaged if initialization is used}
 }
 \value{
 outputs a decomposition of a pair of matrices

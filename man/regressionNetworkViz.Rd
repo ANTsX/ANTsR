@@ -9,6 +9,8 @@ regressionNetworkViz(mylm, sigthresh = 0.05, whichviz = "Sankey",
   correlateMyOutcomes = NA, corthresh = 0.9, zoom = F, doFDR = TRUE)
 }
 \arguments{
+\item{mylm}{lm model output from bigLMStats}
+
 \item{sigthresh}{significance threshold}
 
 \item{whichviz}{which visualization method}
@@ -28,8 +30,6 @@ regressionNetworkViz(mylm, sigthresh = 0.05, whichviz = "Sankey",
 \item{zoom}{zooming factor}
 
 \item{doFDR}{bool}
-
-\item{myLM}{lm model output from bigLMStats}
 }
 \value{
 html file is output

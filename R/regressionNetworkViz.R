@@ -5,7 +5,7 @@
 #' correspond to the outcome variables ...
 #'
 #'
-#' @param myLM lm model output from bigLMStats
+#' @param mylm lm model output from bigLMStats
 #' @param sigthresh significance threshold
 #' @param whichviz which visualization method
 #' @param outfile significance threshold

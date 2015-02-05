@@ -4,9 +4,8 @@
 \alias{renderImageLabels}
 \title{3D surface-based rendering of image segmentation labels}
 \usage{
-renderImageLabels(labelsimg, surfval = 0.5, smoothsval = 0,
-  blobrender = TRUE, alphasurf = 1, alphafunc = 1, outdir = "./",
-  outfn = NA, physical = TRUE, color = c(), labels = FALSE)
+renderImageLabels(labelsimg, surfval = 0.5, smoothsval = 0, alphasurf = 1,
+  physical = TRUE, color = c())
 }
 \arguments{
 \item{labelsimg}{3D images of integer labels}
