@@ -9,7 +9,7 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
+#' mm<-inspectImageData3D( fnl<-c(getANTsRData('r16'), getANTsRData('r64') ) )
 #' if ( !usePkg("DMwR") | ! usePkg('fpc') )
 #'    { print("Need DMwR and fpc packages") } else {
 #' pamres <- pamk(mm)
