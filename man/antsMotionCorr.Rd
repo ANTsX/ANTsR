@@ -7,9 +7,7 @@
 antsMotionCorr(...)
 }
 \arguments{
-\item{d-or-dimensionality=<value>}{This option forces the image to be
-treated as a specified-dimensional image. If not specified, N4 tries to
-infer the dimensionality from the input image. Allowed values: 2, 3.}
+\item{...}{antsMotionCorr parameters, as in ANTs}
 }
 \value{
 0 -- Success\cr 1 -- Failure
