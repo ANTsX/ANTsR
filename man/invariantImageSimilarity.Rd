@@ -2,7 +2,7 @@
 % Please edit documentation in R/invariantImageSimilarity.R
 \name{invariantImageSimilarity}
 \alias{invariantImageSimilarity}
-\title{mutual information between two images as a function of geometry}
+\title{similarity metrics between two images as a function of geometry}
 \usage{
 invariantImageSimilarity(in_image1, in_image2, thetas,
   localSearchIterations = 0, metric = "MI", scaleImage = 1,
@@ -29,7 +29,7 @@ invariantImageSimilarity(in_image1, in_image2, thetas,
 vector of similarity values
 }
 \description{
-compute mutual information between two images as image is rotated about its
+compute similarity metric between two images as image is rotated about its
 center w/or w/o optimization
 }
 \examples{

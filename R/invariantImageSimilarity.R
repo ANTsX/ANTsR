@@ -1,8 +1,7 @@
-#' mutual information between two images as a function of geometry
+#' similarity metrics between two images as a function of geometry
 #'
-#' compute mutual information between two images as image is rotated about its
+#' compute similarity metric between two images as image is rotated about its
 #' center w/or w/o optimization
-#'
 #'
 #' @param in_image1 reference image
 #' @param in_image2 moving image
