@@ -4,7 +4,7 @@
 \alias{combineNuisancePredictors}
 \title{Combine and reduce dimensionality of nuisance predictors.}
 \usage{
-combineNuisancePredictors(inmat, target, globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
+combineNuisancePredictors(inmat, target, globalpredictors=NA, maxpreds=4, localpredictors=NA, k=5, covariates=NA, ordered=F)
 }
 \arguments{
 \item{inmat}{Input predictor matrix.}
@@ -24,8 +24,6 @@ combineNuisancePredictors(inmat, target, globalpredictors=NA, localpredictors=NA
 \item{covariates}{Covariates to be considered when assessing prediction of \code{target}.}
 
 \item{ordered}{Can the predictors be assumed to be ordered from most important to least important, as in output from PCA? Computation is much faster if so.}
-
-\item{noisepoolfun}{Function used for aggregating R^2 values.}
 }
 \value{
 Array of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.  If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)} by \code{ncol(aslmat)} by \code{npreds}.
