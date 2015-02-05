@@ -4,17 +4,17 @@
 \alias{antsGetNeighborhood}
 \title{Get Neighborhood}
 \usage{
-antsGetNeighborhood(x, center, radius, physical.coordinates = FALSE)
+antsGetNeighborhood(image, center, radius, physical.coordinates = FALSE)
 }
 \arguments{
+\item{image}{Image object of S4 class 'antsImage' to get values from.}
+
 \item{center}{array of indices for neighborhood center}
 
 \item{radius}{array of values for neighborhood radius (in voxels)}
 
 \item{physical.coordinates}{a logical indicating if voxel indices and
 offsets should be in voxel or physical coordinates}
-
-\item{image}{Image object of S4 class 'antsImage' to get values from.}
 }
 \value{
 list containing three matrices: values: matrix of pixel values where
