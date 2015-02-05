@@ -9,7 +9,12 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mm<-inspectImageData3D( fnl<-c(getANTsRData('r16'), getANTsRData('r64') ) )
+#' mm<-inspectImageData3D(
+#'  fnl<-c(getANTsRData('r16'),
+#'  getANTsRData('r27'),
+#'  getANTsRData('r62'),
+#'  getANTsRData('r64'),
+#'  getANTsRData('r85') ) )
 #' if ( !usePkg("DMwR") | ! usePkg('fpc') )
 #'    { print("Need DMwR and fpc packages") } else {
 #' pamres <- pamk(mm)
