@@ -8,25 +8,28 @@
 #' derived from global residual signal. Estimate final glm.
 #'
 #'
-#' @param fmriMatrix input matrix
-#' @param blockDesign input array
+#' @param mat input matrix
+#' @param hrf input hrf
+#' @param myvars output of getfMRInuisanceVariables
+#' @param correctautocorr correction auto correlation boolean
+#' @param residualizedesignmatrix boolean
+#' @param myformula statistical equation to be assessed at each voxel
 #' @return c( betas ) is output
 #' @author Avants BB
 #' @examples
 #'
 #' \dontrun{
 #' # read the fmri image in and maybe do slice timing correction
-#' #  fmri<-antsImageRead( fn[2] , 4 )
-#' #  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline')
-#'   myvars<-getfMRInuisanceVariables( fmri, moreaccurate = TRUE ,
-#'     maskThresh=100 )
-#'   mat <- timeseries2matrix( fmri, mask )
-#'   mat  <- filterfMRIforNetworkAnalysis( cbind(mat) , 2.5,
-#'     cbfnetwork = 'BOLD' , freqLo=0.001 , freqHi = 0.15  )$filteredTimeSeries
-#'   blockfing = c(0, 36, 72, 108,144)
+#'   fmri<-getANTsRData('pcasl')
+#'   fmri<-antsImageRead( fmri , 4 )
+#' #  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline') # optional
+#'   myvars<-getfMRInuisanceVariables( fmri, moreaccurate = 0, maskThresh=100 )
+#'   mat <- myvars$matrixTimeSeries
+#'   mat<-frequencyFilterfMRI(mat, 2.5, freqLo=0.01, freqHi=0.1, opt="butt")
+#'   blockfing = c(0, 36, 72 )
 #'   hrf <- hemodynamicRF( scans=dim(fmri)[4] , onsets=blockfing ,
 #'     durations=rep(  12,  length( blockfing ) ) ,  rt=2.5 )
-#'   activationBeta<-taskFMRI(  fmriMatrix , hrf , myvars )
+#'   activationBeta<-taskFMRI(  mat , hrf , myvars )
 #' }
 #'
 #' @export taskFMRI
@@ -54,7 +57,7 @@ taskFMRI <- function(mat, hrf, myvars,
   if (residualizedesignmatrix)
     desmat <- residuals(lm(desmat ~ hrf))
   desmat <- cbind(hrf, desmat)
-  colnames(desmat) <- c(colnames(hrf), "globalsignal", colnames(nuis))
+  colnames(desmat) <- c(colnames(hrf), colnames(desmat)  )
   print(colnames(desmat))
   ####################################################### Statistical methods of estimation and inference for # functional MR image
   ####################################################### analysis Bullmore 1996 #

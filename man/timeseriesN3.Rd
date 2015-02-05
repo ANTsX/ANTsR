@@ -7,11 +7,11 @@
 timeseriesN3(boldimg, mask, ncorrections = c(4, 2, 2))
 }
 \arguments{
+\item{boldimg}{input matrix}
+
 \item{mask}{mask to use}
 
 \item{ncorrections}{levels at which to apply n3}
-
-\item{mat}{input matrix}
 }
 \value{
 antsImage is output

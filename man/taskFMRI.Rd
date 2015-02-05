@@ -8,9 +8,17 @@ taskFMRI(mat, hrf, myvars, correctautocorr = FALSE,
   residualizedesignmatrix = FALSE, myformula = NA)
 }
 \arguments{
-\item{fmriMatrix}{input matrix}
+\item{mat}{input matrix}
 
-\item{blockDesign}{input array}
+\item{hrf}{input hrf}
+
+\item{myvars}{output of getfMRInuisanceVariables}
+
+\item{correctautocorr}{correction auto correlation boolean}
+
+\item{residualizedesignmatrix}{boolean}
+
+\item{myformula}{statistical equation to be assessed at each voxel}
 }
 \value{
 c( betas ) is output
@@ -26,17 +34,16 @@ derived from global residual signal. Estimate final glm.
 \examples{
 \dontrun{
 # read the fmri image in and maybe do slice timing correction
-#  fmri<-antsImageRead( fn[2] , 4 )
-#  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline')
-  myvars<-getfMRInuisanceVariables( fmri, moreaccurate = TRUE ,
-    maskThresh=100 )
-  mat <- timeseries2matrix( fmri, mask )
-  mat  <- filterfMRIforNetworkAnalysis( cbind(mat) , 2.5,
-    cbfnetwork = 'BOLD' , freqLo=0.001 , freqHi = 0.15  )$filteredTimeSeries
-  blockfing = c(0, 36, 72, 108,144)
+  fmri<-getANTsRData('pcasl')
+  fmri<-antsImageRead( fmri , 4 )
+#  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline') # optional
+  myvars<-getfMRInuisanceVariables( fmri, moreaccurate = 0, maskThresh=100 )
+  mat <- myvars$matrixTimeSeries
+  mat<-frequencyFilterfMRI(mat, 2.5, freqLo=0.01, freqHi=0.1, opt="butt")
+  blockfing = c(0, 36, 72 )
   hrf <- hemodynamicRF( scans=dim(fmri)[4] , onsets=blockfing ,
     durations=rep(  12,  length( blockfing ) ) ,  rt=2.5 )
-  activationBeta<-taskFMRI(  fmriMatrix , hrf , myvars )
+  activationBeta<-taskFMRI(  mat , hrf , myvars )
 }
 }
 \author{
