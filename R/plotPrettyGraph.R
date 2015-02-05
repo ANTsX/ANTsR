@@ -21,12 +21,13 @@
 #' if ( usePkg("igraph") ) {
 #'  gg<-makeGraph( dmat, 0.1 )
 #'  rownames(gg$adjacencyMatrix)<-colnames(bold_correlation_matrix)
-#'  plotPrettyGraph( gg$adjacencyMatrix,
-#'    gg$degree , figScale=12 , scaleText=5 )
+#'  plotPrettyGraph( gg$adjacencyMatrix, gg$degree , figScale=12 , scaleText=5 )
 #'  }
 #'
 #' @export plotPrettyGraph
-plotPrettyGraph <- function(  adjacencyMatrix, functionToPlot, pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 , layoutmode = "eigen", hueval = 0 ) {
+plotPrettyGraph <- function(  adjacencyMatrix, functionToPlot,
+  pngfn="graph.png", scaleText=0.5, vertexSize = NA, figScale=11 ,
+  layoutmode = "eigen", hueval = 0 ) {
 # adapted from http://is-r.tumblr.com/
 if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
 if ( !usePkg("sna") ) { print("Need sna package"); return(NULL) }
@@ -61,4 +62,5 @@ prettyPlot <- gplot(dat = adjacencyMatrix,
                     label.border = "#ffffff00",  # To hide borders
                     vertex.border = "#ffffff00" )  # To hide borders
 if ( !is.na( pngfn ) ) dev.off()
+detach('package:sna',unload=T)
 }
