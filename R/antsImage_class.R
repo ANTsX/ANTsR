@@ -247,18 +247,18 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 
 #' @title antsImageGetSet
 #' @description Get and set methods for image header information
-#' @name antsImageGetSet 
-#' @examples 
+#' @name antsImageGetSet
+#' @examples
 #' img <- makeImage(c(5,5), rnorm(25))
 #' antsSetSpacing(img, c(2.0, 2.0))
 #' antsSetOrigin(img, c(0.5, 0.5))
-NULL 
 
-#' @rdname antsImageGetSet 
-#' @usage antsGetSpacing(x) 
-#' @param x Image to access 
-#' @return For \code{get} methods, vector of size \code{dim(x)}. 
-#' For \code{set} methods, 0 to indicate success. 
+
+#' @rdname antsImageGetSet
+#' @usage antsGetSpacing(x)
+#' @param x Image to access
+#' @return For \code{get} methods, vector of size \code{dim(x)}.
+#' For \code{set} methods, 0 to indicate success.
 antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -267,7 +267,7 @@ antsGetSpacing <- function(x) {
 
   return(.Call("antsImage_GetSpacing", x, PACKAGE = "ANTsR"))
 }
-#' @rdname antsImageGetSet 
+#' @rdname antsImageGetSet
 #' @param spacing Desired spacing as vector of size dim(x)
 antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
@@ -288,8 +288,8 @@ antsSetSpacing <- function(x, spacing) {
   return(.Call("antsImage_SetSpacing", x, spacing, PACKAGE = "ANTsR"))
 }
 
-#' @rdname antsImageGetSet 
-#' @usage antsGetOrigin(x) 
+#' @rdname antsImageGetSet
+#' @usage antsGetOrigin(x)
 antsGetOrigin <- function(x) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
