@@ -25,10 +25,9 @@ mm<-inspectImageData3D(
  getANTsRData('r85') ) )
 if ( !usePkg("DMwR") | ! usePkg('fpc') )
    { print("Need DMwR and fpc packages") } else {
-pamres <- pamk(mm)
-plot(pamres$pamobject)
+pamres <- pamk(mm,1:4)
 outlier.scores <- lofactor( mm, k=5)
-outliers <- order(outlier.scores, decreasing=T)[1:5]
+outliers <- order(outlier.scores, decreasing=T)
 }
 }
 \author{
