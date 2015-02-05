@@ -14,6 +14,8 @@ statistical or network map}
 
 \item{threshparam}{thresholds the input image at mean( img[ img > 0 ] ) -
 threshparam * sdev( img[ img > 0 ] )}
+
+\item{outprefix}{prefix if you want to output to a file}
 }
 \value{
 the centroids are output in matrix of size npoints by 3

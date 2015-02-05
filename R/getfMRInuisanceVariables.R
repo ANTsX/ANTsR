@@ -7,10 +7,11 @@
 #' other results-oriented processing.
 #'
 #'
-#' @param boldImageOrFileName input antsImage or filename
+#' @param fmri input antsImage or filename
 #' @param maskThresh will use this intensity threshold to estimate a mask
 #' otherwise will use the mask passed in
-#' @param mask binary image masking the intput image
+#' @param moreaccurate zero, one or two with increasing accuracy/computation
+#' @param mask binary image masking the intput image, precedent over mask thresh
 #' @return outputs list described above.
 #' @author Avants BB
 #' @examples
@@ -36,7 +37,8 @@
 #' }
 #'
 #' @export getfMRInuisanceVariables
-getfMRInuisanceVariables <- function(fmri, maskThresh = 500, moreaccurate = TRUE,
+getfMRInuisanceVariables <- function(
+  fmri, maskThresh = 500, moreaccurate = 1,
   mask = NA) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)

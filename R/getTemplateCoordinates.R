@@ -8,7 +8,11 @@
 #'
 #' This is a standard approach but it's not very accurate.
 #'
-#' @param x x
+#' @param imagePairToBeLabeled e.g. the template image and the activation map
+#' @param templatePairWithLabels e..g the mni image and brodmann label set
+#' @param labelnames a list of names for the labels
+#' @param outprefix if output to a file, provide file prefix
+#' @param convertToTal bool, return talairach coordinates
 #' @return The output point is in approximate template space.
 #' @author Avants, BB
 #' @keywords Talairach, Template, Coordinates
@@ -46,8 +50,12 @@
 #' }
 #'
 #' @export getTemplateCoordinates
-getTemplateCoordinates <- function(imagePairToBeLabeled, templatePairWithLabels,
-  labelnames = NA, outprefix = NA, convertToTal = FALSE) {
+getTemplateCoordinates <- function(
+  imagePairToBeLabeled,
+  templatePairWithLabels,
+  labelnames = NA,
+  outprefix = NA,
+  convertToTal = FALSE) {
   if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) <
     2) {
     print(args(getTemplateCoordinates))
