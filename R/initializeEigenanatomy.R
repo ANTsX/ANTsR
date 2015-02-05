@@ -5,9 +5,9 @@
 #' sparseDecom2.
 #'
 #'
-#' @param mat input matrix where rows provide initial vector values
-#' @param nreps nrepetitions to use
+#' @param initmat input matrix where rows provide initial vector values
 #' @param mask mask if available
+#' @param nreps nrepetitions to use
 #' @return list is output
 #' @author Avants BB
 #' @examples
