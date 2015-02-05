@@ -2,7 +2,7 @@
 % Please edit documentation in R/subgradientL1Regression.R
 \name{subgradientL1Regression}
 \alias{subgradientL1Regression}
-\title{Simple subgradientL1Regressioning function.}
+\title{Simple subgradientL1Regression function.}
 \usage{
 subgradientL1Regression(y, x, s = 0.01, percentvals = 0.1, nits = 100,
   betas = NA, sparval = NA)
@@ -11,6 +11,16 @@ subgradientL1Regression(y, x, s = 0.01, percentvals = 0.1, nits = 100,
 \item{y}{outcome variable}
 
 \item{x}{predictor matrix}
+
+\item{s}{gradient descent parameter}
+
+\item{percentvals}{percent of values to use each iteration}
+
+\item{nits}{number of iterations}
+
+\item{betas}{initial guess at solution}
+
+\item{sparval}{sparseness}
 }
 \value{
 output has a list of summary items

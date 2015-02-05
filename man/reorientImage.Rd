@@ -10,13 +10,15 @@ reorientImage(img, axis1, axis2 = NA, doreflection = 0, doscale = 0,
 \arguments{
 \item{img}{antsImage}
 
+\item{axis1}{vector of size dim, might need to play w/axis sign}
+
 \item{axis2}{vector of size dim for 3D}
 
-\item{doreflection}{vector of size dim for 3D}
+\item{doreflection}{boolean}
+
+\item{doscale}{scalar value, 1 allows automated estimate of scaling}
 
 \item{txfn}{file name for transformation}
-
-\item{axis}{vector of size dim, might need to play w/axis sign}
 }
 \value{
 reoriented image

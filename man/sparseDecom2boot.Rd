@@ -17,11 +17,47 @@ by q input matrix , spatial variable lies along columns.}
 
 \item{inmask}{optional pair of antsImage masks}
 
+\item{sparseness}{a c(.,.) pair of values e.g c(0.01,0.1) enforces an
+unsigned 99 percent and 90 percent sparse solution for each respective view}
+
+\item{nvecs}{number of eigenvector pairs}
+
+\item{its}{number of iterations, 10 or 20 usually sufficient}
+
+\item{cthresh}{cluster threshold pair}
+
+\item{statdir}{temporary directory if you want to look at full output}
+
+\item{perms}{number of permutations}
+
+\item{uselong}{enforce solutions of both views to be the same - requires
+matrices to be the same size}
+
+\item{z}{subject space (low-dimensional space) sparseness value}
+
+\item{smooth}{smooth the data (only available when mask is used)}
+
+\item{robust}{rank transform input matrices}
+
+\item{mycoption}{enforce 1 - spatial orthogonality, 2 - low-dimensional
+orthogonality or 0 - both}
+
+\item{initializationList}{initialization for first view}
+
+\item{initializationList2}{initialization for 2nd view}
+
+\item{ell1}{gradient descent parameter, if negative then l0 otherwise use l1}
+
 \item{nboot}{n bootstrap runs}
 
 \item{nsamp}{number of samples e.g. 0.9 indicates 90 percent of data}
 
+\item{doseg}{boolean to control matrix orthogonality during bootstrap}
+
 \item{otherparams}{see sccan for other parameters}
+
+\item{priorWeight}{Scalar value weight on prior between 0 (prior is weak)
+and 1 (prior is strong).  Only engaged if initialization is used}
 }
 \value{
 outputs a decomposition of a pair of matrices

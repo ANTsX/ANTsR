@@ -21,7 +21,23 @@ image}
 \item{offsetfval}{intensity level that defines upper threshold for
 functional image}
 
+\item{smoothsval}{smoothing for the surface image}
+
+\item{smoothfval}{smoothing for the functional image}
+
 \item{blobrender}{render a blob as opposed to a surface patch}
+
+\item{alphasurf}{alpha for the surface contour}
+
+\item{alphafunc}{alpha value for functional blobs}
+
+\item{outdir}{output directory}
+
+\item{outfn}{output file name}
+
+\item{mycol}{name of color or colors}
+
+\item{physical}{boolean}
 }
 \value{
 0 -- Success\cr 1 -- Failure

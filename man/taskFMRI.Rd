@@ -21,7 +21,7 @@ taskFMRI(mat, hrf, myvars, correctautocorr = FALSE,
 \item{myformula}{statistical equation to be assessed at each voxel}
 }
 \value{
-c( betas ) is output
+list of betas and other names entries is output
 }
 \description{
 Input 4D time series matrix. (Perform slice timing correction externally).

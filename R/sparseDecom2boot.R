@@ -8,9 +8,29 @@
 #' @param inmatrix input as inmatrix=list(mat1,mat2). n by p input matrix and n
 #' by q input matrix , spatial variable lies along columns.
 #' @param inmask optional pair of antsImage masks
+#' @param sparseness a c(.,.) pair of values e.g c(0.01,0.1) enforces an
+#' unsigned 99 percent and 90 percent sparse solution for each respective view
+#' @param otherparams see sccan for other parameters
+#' @param nvecs number of eigenvector pairs
+#' @param its number of iterations, 10 or 20 usually sufficient
+#' @param cthresh cluster threshold pair
+#' @param statdir temporary directory if you want to look at full output
+#' @param perms number of permutations
+#' @param uselong enforce solutions of both views to be the same - requires
+#'  matrices to be the same size
+#' @param z subject space (low-dimensional space) sparseness value
+#' @param smooth smooth the data (only available when mask is used)
+#' @param robust rank transform input matrices
+#' @param mycoption enforce 1 - spatial orthogonality, 2 - low-dimensional
+#' orthogonality or 0 - both
+#' @param initializationList initialization for first view
+#' @param initializationList2 initialization for 2nd view
+#' @param ell1 gradient descent parameter, if negative then l0 otherwise use l1
+#' @param priorWeight Scalar value weight on prior between 0 (prior is weak)
+#' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param nboot n bootstrap runs
 #' @param nsamp number of samples e.g. 0.9 indicates 90 percent of data
-#' @param otherparams see sccan for other parameters
+#' @param doseg boolean to control matrix orthogonality during bootstrap
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -28,9 +48,11 @@
 #' }
 #'
 #' @export sparseDecom2boot
-sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
+sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
+  sparseness = c(0.01, 0.01),
   nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0, uselong = 0,
-  z = 0, smooth = 0, robust = 0, mycoption = 1, initializationList = list(), initializationList2 = list(),
+  z = 0, smooth = 0, robust = 0, mycoption = 1,
+  initializationList = list(), initializationList2 = list(),
   ell1 = 0.05, nboot = 10, nsamp = 1, doseg = FALSE) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {

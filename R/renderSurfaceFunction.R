@@ -3,7 +3,6 @@
 #' Will use rgl to render a substrate (e.g. anatomical) and overlay image (e.g.
 #' functional).
 #'
-#'
 #' @param surfimg Input image to use as rendering substrate.
 #' @param funcimg Input list of images to use as functional overlays.
 #' @param surfval intensity level that defines isosurface
@@ -11,7 +10,15 @@
 #' image
 #' @param offsetfval intensity level that defines upper threshold for
 #' functional image
+#' @param smoothsval smoothing for the surface image
+#' @param smoothfval smoothing for the functional image
 #' @param blobrender render a blob as opposed to a surface patch
+#' @param alphasurf alpha for the surface contour
+#' @param alphafunc alpha value for functional blobs
+#' @param outdir  output directory
+#' @param outfn  output file name
+#' @param mycol  name of color or colors
+#' @param physical boolean
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Avants B, Kandel B
 #' @seealso \code{\link{plotBasicNetwork}}
@@ -27,9 +34,21 @@
 #'           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 #'        }
 #' @export renderSurfaceFunction
-renderSurfaceFunction <- function(surfimg, funcimg, surfval = 0.5, basefval, offsetfval,
-  smoothsval = 0, smoothfval = 0, blobrender = TRUE, alphasurf = 1, alphafunc = 1,
-  outdir = "./", outfn = NA, mycol, physical = TRUE) {
+renderSurfaceFunction <- function(
+  surfimg,
+  funcimg,
+  surfval = 0.5,
+  basefval,
+  offsetfval,
+  smoothsval = 0,
+  smoothfval = 0,
+  blobrender = TRUE,
+  alphasurf = 1,
+  alphafunc = 1,
+  outdir = "./",
+  outfn = NA,
+  mycol,
+  physical = TRUE) {
   if (missing(surfimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( list(an_ants_image) ) \n ")
   }

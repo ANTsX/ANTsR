@@ -1,13 +1,23 @@
 #' WIP: data-driven denoising for resting state fMRI
-#' 
+#'
 #' Uses a target function to denoise resting bold data
-#' 
-#' 
-#' @param mat input bold matrix
+#'
+#' @param boldmatrix input bold matrix
+#' @param targety target to predict
+#' @param motionparams motion parameters / nuisance variables
+#' @param selectionthresh e.g. 0.1 take 10 percent worst variables for noise
+#' estimation
+#' @param maxnoisepreds integer search range e.g 1:10
+#' @param debug boolean
+#' @param polydegree eg 4 for polynomial nuisance variables
+#' @param crossvalidationgroups prior defined or integer valued
+#' @param tr bold tr
+#' @param scalemat boolean
+#' @param noisepoolfun function to help select noise pool e.g. max
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
 #' # simplest approach - load the bold & a mask, then denoise
 #' bold<-antsImageRead('bold.nii.gz',4)
@@ -34,7 +44,7 @@
 #' betaimg<-antsImageClone( boldmask )
 #' betaimg[ boldmask == 1 ]<-betas
 #' antsImageWrite( betaimg, 'betas2.nii.gz' )
-#' 
+#'
 #' # more complex
 #' bold<-antsImageRead('bold.nii.gz',4)
 #' boldmask<-antsImageRead('meanboldmask.nii.gz',3)
@@ -75,10 +85,12 @@
 #' mdl<-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )
 #' betas<-mdl$beta.t[1,]
 #' }
-#' 
+#'
 #' @export rsfDenoise
-rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1, 
-  maxnoisepreds = 1:12, debug = FALSE, polydegree = 4, crossvalidationgroups = 4, 
+rsfDenoise <- function(boldmatrix,
+  targety, motionparams = NA, selectionthresh = 0.1,
+  maxnoisepreds = 1:12, debug = FALSE,
+  polydegree = 4, crossvalidationgroups = 4,
   tr = 1, scalemat = F, noisepoolfun = max) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
@@ -89,16 +101,16 @@ rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh =
     for (k in 1:kfolds) groups <- c(groups, rep(k, grouplength))
     groups <- c(rep(1, nrow(boldmatrix) - length(groups)), groups)
   }
-  
-  
+
+
   getnoisepool <- function(x, frac = selectionthresh) {
     xord <- sort(x)
     l <- round(length(x) * frac)
     val <- xord[l]
     return(x < val & x < 0)
   }
-  
-  crossvalidatedR2 <- function(residmatIn, targety, groups, howmuchnoise = 0, noiseu = NA, 
+
+  crossvalidatedR2 <- function(residmatIn, targety, groups, howmuchnoise = 0, noiseu = NA,
     p = NA) {
     residmat <- residmatIn
     nvox <- ncol(residmat)
@@ -107,35 +119,35 @@ rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh =
     for (k in kfo) {
       selector <- groups != k
       mydf <- data.frame(targety[selector])
-      if (!all(is.na(p))) 
+      if (!all(is.na(p)))
         mydf <- data.frame(mydf, p[selector, ])
       mylm1 <- lm(residmat[selector, ] ~ ., data = mydf)
       selector <- groups == k
       mydf <- data.frame(targety[selector])
-      if (!all(is.na(p))) 
+      if (!all(is.na(p)))
         mydf <- data.frame(mydf, p[selector, ])
       predmat <- predict(mylm1, newdata = mydf)
       realmat <- residmat[selector, ]
-      for (v in 1:nvox) R2[k, v] <- 100 * (1 - sum((predmat[, v] - realmat[, 
+      for (v in 1:nvox) R2[k, v] <- 100 * (1 - sum((predmat[, v] - realmat[,
         v])^2)/sum((mean(realmat[, v]) - realmat[, v])^2))
     }
     return(R2)
   }
-  
+
   ################################################# overall description of the method 1. regressors include: design + trends +
   ################################################# noise-pool 2. find noise-pool by initial cross-validation without noise
   ################################################# regressors 3. cross-validate predictions using different numbers of noise
   ################################################# regressors 4. select best n for predictors from noise pool 5. return the noise
   ################################################# mask and the value for n make regressors
   timevals <- NA
-  if (all(is.na(timevals))) 
+  if (all(is.na(timevals)))
     timevals <- 1:nrow(boldmatrix)
   p <- stats::poly(timevals, degree = polydegree)
-  if (!all(is.na(motionparams))) 
+  if (!all(is.na(motionparams)))
     p <- cbind(data.matrix(motionparams), p)
   rawboldmat <- data.matrix(boldmatrix)
   svdboldmat <- residuals(lm(rawboldmat ~ 0 + p))
-  if (debug) 
+  if (debug)
     print("lm")
   ################### now redo some work w/new hrf
   R2base <- crossvalidatedR2(svdboldmat, targety, groups, p = NA)
@@ -149,7 +161,7 @@ rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh =
     print("zero voxels meet your pvalthresh - try decreasing the value")
     return(NA)
   } else print(paste("Noise pool has nvoxels=", sum(noisepool)))
-  if (scalemat) 
+  if (scalemat)
     svdboldmat <- scale(svdboldmat)
   ##### should the denoising be done per group / run ?
   noiseu <- svd(svdboldmat[, noisepool], nv = 0, nu = max(maxnoisepreds))$u
@@ -157,10 +169,10 @@ rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh =
   ct <- 1
   for (i in maxnoisepreds) {
     svdboldmat <- residuals(lm(rawboldmat ~ 0 + p + noiseu[, 1:i]))
-    R2 <- crossvalidatedR2(svdboldmat, targety, groups, noiseu = NA, howmuchnoise = i, 
+    R2 <- crossvalidatedR2(svdboldmat, targety, groups, noiseu = NA, howmuchnoise = i,
       p = NA)
     R2max <- apply(R2, FUN = max, MARGIN = 2)
-    if (ct == 1) 
+    if (ct == 1)
       R2perNoiseLevel <- R2max else R2perNoiseLevel <- cbind(R2perNoiseLevel, R2max)
     R2pos <- R2max[R2max > 0]
     R2summary[ct] <- median(R2pos)
@@ -168,9 +180,9 @@ rsfDenoise <- function(boldmatrix, targety, motionparams = NA, selectionthresh =
     ct <- ct + 1
   }
   scl <- 0.95
-  if (max(R2summary) < 0) 
+  if (max(R2summary) < 0)
     scl <- 1.05
   bestn <- maxnoisepreds[which(R2summary > scl * max(R2summary))[1]]
-  return(list(n = bestn, R2atBestN = R2summary[bestn], noisepool = noisepool, R2base = R2base, 
+  return(list(n = bestn, R2atBestN = R2summary[bestn], noisepool = noisepool, R2base = R2base,
     R2final = R2perNoiseLevel, noiseu = noiseu, polys = p))
-} 
+}

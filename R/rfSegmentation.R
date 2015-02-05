@@ -2,11 +2,12 @@
 #'
 #' Image segmentation via random forests.
 #'
-#'
-#' @param labelimage input antsImage labelimage --- assume non-zero entries
+#' @param labelimg input antsImage labelimage --- assume non-zero entries
 #' create a mask
 #' @param featureimages input list of antsImage feature images - length n means
 #' n predictors in rf
+#' @param ntrees number of rf trees
+#' @param verbose boolean
 #' @return list of n-probability images is output where n is number of classes
 #' @author Tustison NJ, Avants BB
 #' @examples
@@ -25,7 +26,8 @@
 #'  }
 #'
 #' @export rfSegmentation
-rfSegmentation <- function(labelimg, featureimages, ntrees = 100, verbose = FALSE) {
+rfSegmentation <- function(labelimg, featureimages,
+  ntrees = 100, verbose = FALSE) {
   if (nargs() == 0) {
     print("Usage:  probs<-rfSegmentation( x, x2 ) ")
     return(1)

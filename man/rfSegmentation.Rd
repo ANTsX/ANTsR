@@ -7,11 +7,15 @@
 rfSegmentation(labelimg, featureimages, ntrees = 100, verbose = FALSE)
 }
 \arguments{
+\item{labelimg}{input antsImage labelimage --- assume non-zero entries
+create a mask}
+
 \item{featureimages}{input list of antsImage feature images - length n means
 n predictors in rf}
 
-\item{labelimage}{input antsImage labelimage --- assume non-zero entries
-create a mask}
+\item{ntrees}{number of rf trees}
+
+\item{verbose}{boolean}
 }
 \value{
 list of n-probability images is output where n is number of classes

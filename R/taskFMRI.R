@@ -14,7 +14,7 @@
 #' @param correctautocorr correction auto correlation boolean
 #' @param residualizedesignmatrix boolean
 #' @param myformula statistical equation to be assessed at each voxel
-#' @return c( betas ) is output
+#' @return list of betas and other names entries is output
 #' @author Avants BB
 #' @examples
 #'

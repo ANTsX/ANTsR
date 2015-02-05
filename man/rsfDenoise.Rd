@@ -9,7 +9,28 @@ rsfDenoise(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1,
   crossvalidationgroups = 4, tr = 1, scalemat = F, noisepoolfun = max)
 }
 \arguments{
-\item{mat}{input bold matrix}
+\item{boldmatrix}{input bold matrix}
+
+\item{targety}{target to predict}
+
+\item{motionparams}{motion parameters / nuisance variables}
+
+\item{selectionthresh}{e.g. 0.1 take 10 percent worst variables for noise
+estimation}
+
+\item{maxnoisepreds}{integer search range e.g 1:10}
+
+\item{debug}{boolean}
+
+\item{polydegree}{eg 4 for polynomial nuisance variables}
+
+\item{crossvalidationgroups}{prior defined or integer valued}
+
+\item{tr}{bold tr}
+
+\item{scalemat}{boolean}
+
+\item{noisepoolfun}{function to help select noise pool e.g. max}
 }
 \value{
 matrix is output
