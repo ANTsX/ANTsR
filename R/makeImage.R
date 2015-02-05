@@ -3,8 +3,8 @@
 #' Make an image with given size and voxel value or given a mask and vector.
 #' 
 #' 
-#' @param mat input image size or mask
-#' @param val input image value or vector, size of mask
+#' @param imagesize input image size or mask
+#' @param voxval input image value or vector, size of mask
 #' @return antsImage is output
 #' @author Avants BB
 #' @examples

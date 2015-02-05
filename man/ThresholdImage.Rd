@@ -2,38 +2,34 @@
 % Please edit documentation in R/ThresholdImage.R
 \name{ThresholdImage}
 \alias{ThresholdImage}
-\title{Theshold Image}
+\title{Threshold Image}
 \usage{
-ThresholdImage(...)
+ThresholdImage(dim, inimg, outimg, lothresh, hithresh, inval=0, outval=1)
 }
 \arguments{
-\item{imageDimension2|3}{Number of dimensions of the input image}
+\item{dim}{Dimension of the input image}
 
-\item{inputImage}{Input image to operate on}
+\item{inimg}{Input image to operate on}
 
-\item{outputImage}{Result image}
+\item{outimg}{Result image}
 
-\item{thresh-low}{Lower edge of threshold window}
+\item{lothresh}{Lower edge of threshold window}
 
-\item{thresh-high}{Higher edge of threshold window}
+\item{hithresh}{Higher edge of threshold window}
 
-\item{inside-value}{Inside value}
+\item{inval}{Output value for image voxels in between \code{lothresh} and \code{hithresh}}
 
-\item{outside-value}{Outside value}
-
-\item{number-of-thresholds}{Number of thresholds}
+\item{outval}{Output value for image voxels lower than \code{lothresh} or higher than \code{hithresh}}
 }
 \value{
 0 -- Success\cr 1 -- Failure
 }
 \description{
-Perform thresholding on the given image
+Threshold Image
 }
 \examples{
-\dontrun{
-ThresholdImage( 3 , 'input_img.nii' , 'output_img.nii' , 2 , 3 )
-ThresholdImage( 3 , 'input_img.nii' , 'output_img.nii' , 'Otsu' , 3 )
-}
+img <- makeImage(c(5,5), rnorm(25))
+ThresholdImage(2, img, img, 0.5, 1e3)
 }
 \author{
 Shrinidhi KL

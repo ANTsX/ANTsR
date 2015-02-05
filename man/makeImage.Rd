@@ -7,9 +7,9 @@
 makeImage(imagesize, voxval = 1)
 }
 \arguments{
-\item{mat}{input image size or mask}
+\item{imagesize}{input image size or mask}
 
-\item{val}{input image value or vector, size of mask}
+\item{voxval}{input image value or vector, size of mask}
 }
 \value{
 antsImage is output

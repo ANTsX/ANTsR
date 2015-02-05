@@ -1,17 +1,16 @@
 #' @name combineNuisancePredictors
 #' @title Combine and reduce dimensionality of nuisance predictors.
 #' @description Combine and select nuisance predictors to maximize correlation between \code{inmat} and \code{target}.
-#' @usage combineNuisancePredictors <- function(inmat, target,
-#' globalpredictors=NA, localpredictors=NA, maxpreds=4, k=5)
+#' @usage combineNuisancePredictors(inmat, target, globalpredictors=NA, 
+#'   maxpreds=4, localpredictors=NA, method="cv", k=5, covariates=NA, ordered=F)
 #' @param inmat Input predictor matrix.
 #' @param target Target outcome matrix.
 #' @param globalpredictors Global predictors of size \code{nrow(inmat)} by \code{n}, where \code{n} is the number of global predictors.
-#' @param localpredictors Local predictor array of size \code{nrow(inmat)} by \code{ncol(inmat)} by \code{m}, where \code{m} is the number of local predictors.
 #' @param maxpreds Maximum number of predictors to output.
+#' @param localpredictors Local predictor array of size \code{nrow(inmat)} by \code{ncol(inmat)} by \code{m}, where \code{m} is the number of local predictors.
 #' @param k Number of cross-validation folds.
 #' @param method Method of selecting noisy voxels.  One of 'svd' or 'cv'. See \code{Details}.
 #' @param covariates Covariates to be considered when assessing prediction of \code{target}.
-#' @param noisepoolfun Function used for aggregating R^2 values.
 #' @param ordered Can the predictors be assumed to be ordered from most important to least important, as in output from PCA? Computation is much faster if so.
 #' @return Array of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.  If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)} by \code{ncol(aslmat)} by \code{npreds}.
 #' @author Benjamin M. Kandel, Brian B. Avants
@@ -21,7 +20,7 @@
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 #' noise <- getASLNoisePredictors(aslmat, tc)
 #' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 4)
-combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 5, 
+combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 4, 
   localpredictors = NA, method = "cv", k = 5, covariates = NA, ordered = F) {
   avgR2 <- function(inmat, target, k, covariates) {
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
