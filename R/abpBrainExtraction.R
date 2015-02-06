@@ -109,7 +109,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   temmaskwarped <- antsApplyTransforms(img, temmask,
     transformlist = invtransforms,
     interpolator = c("NearestNeighbor"))
-  temmaskwarped<-thresholdImage( temmaskwarped, , 0.5, 1 )
+  temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
   ImageMath(img@dimension, tmp, "MD", temmaskwarped, 2)
   ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
