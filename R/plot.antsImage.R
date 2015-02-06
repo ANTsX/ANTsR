@@ -45,7 +45,7 @@
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
   axis = 1,
-  slices = "1x1x1",
+  slices = round(seq(1, dim(x)[axis], length.out=8)),
   threshold = "0.5xInf",
   quality = NA,
   outname = NA,
@@ -187,7 +187,12 @@ plot.antsImage <- function(x, y,
   # now label the results
   if (imagedim == 3)
     img <- aperm(img, c(perms), resize = T)
-  slicesin <- c(as.numeric(unlist(strsplit(slices, "x"))))
+  if(class(slices) == 'character'){ 
+    slicesin <- c(as.numeric(unlist(strsplit(slices, "x"))))
+  } else {
+    slicesin <- slices
+  }
+print(slicesin) 
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
   # print(paste('threshold at ', threshold[1], ' and ', threshold[2], 'you chose
   # these slices :')) print(slicesin)
