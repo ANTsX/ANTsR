@@ -206,7 +206,24 @@ setMethod(f = "[", signature(x = "antsImage", i = "matrix", j = "antsRegion"), d
   return(.Call("antsImage_asVector", x, i, j, PACKAGE = "ANTsR"))
 })
 
-
+#' Get Pixels
+#'
+#' Get pixel values from an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param i indices in first dimension
+#' @param j indices in second dimension
+#' @param k indices in third dimension
+#' @param l indices in forth dimension
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pixel<-antsGetPixels(img,i=c(1,2),j=1)
+#'
+#'
+#' @export antsGetPixels
 antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
