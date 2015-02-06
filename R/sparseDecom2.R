@@ -29,7 +29,6 @@
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
 #' mat<-replicate(100, rnorm(20))
 #' mat2<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
@@ -37,8 +36,9 @@
 #' wt<-0.666
 #' mat3<-mat*wt+mat2*(1-wt)
 #' mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
-#'   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
+#'   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=5 )
 #'
+#' \dontrun{
 #' # a masked example
 #' im<-antsImageRead( getANTsRData('r64') ,2)
 #' dd<- im > 250
