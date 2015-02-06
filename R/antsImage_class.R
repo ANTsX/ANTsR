@@ -541,7 +541,7 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 #' pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
 #'
 #'
-#' @export antsGetPixels
+#' @export antsTransformIndexToPhysicalPoint
 antsTransformIndexToPhysicalPoint <- function(x, index) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -565,6 +565,23 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
   return(.Call("antsImage_TransformIndexToPhysicalPoint", x, index, PACKAGE = "ANTsR"))
 }
 
+
+
+#' Get Index from Spatial Point
+#'
+#' Get index from spatial point of an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param x image physical point
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pt<-antsTransformPhysicalPointToIndex(img,c(2,2))
+#'
+#'
+#' @export antsTransformPhysicalPointToIndex
 antsTransformPhysicalPointToIndex <- function(x, point) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
