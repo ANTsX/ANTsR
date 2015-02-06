@@ -24,8 +24,8 @@ it is possible to specify which label(s) to mask at.
 }
 \examples{
 \dontrun{
-  myimg <- antsImageRead(getANTsRData('ch2'), 3)
-  mylab <- antsImageRead(getANTsRData('ch2a'), 3)
+  myimg <- antsImageRead(getANTsRData("ch2"), 3)
+  mylab <- antsImageRead(getANTsRData("ch2a"), 3)
   myimg.mask <- maskImage(myimg, mylab, 3)
   plot(myimg.mask, axis=3, slices='90x90x90')
   myimg.mask <- maskImage(myimg, mylab, list( 1,  3, 9 ) )

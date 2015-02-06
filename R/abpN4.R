@@ -34,8 +34,8 @@ abpN4 <- function(img = NA, intensityTruncation = c(0.025, 0.975, 256),
   ImageMath(dim, outimg, "TruncateImageIntensity", outimg,
     intensityTruncation[1], intensityTruncation[2], intensityTruncation[3])
   if (usen3 == TRUE) {
-    N3BiasFieldCorrection(list(img@dimension, outimg, outimg, "4"))
-    N3BiasFieldCorrection(list(img@dimension, outimg, outimg, "2"))
+    outimg<-n3BiasFieldCorrection( outimg, 4 )
+    outimg<-n3BiasFieldCorrection( outimg, 2 )
     return(outimg)
   }
   if (is.na(mask)) {
