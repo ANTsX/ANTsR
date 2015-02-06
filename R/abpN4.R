@@ -5,7 +5,7 @@
 #'
 #'
 #' @param img image to be bias corrected
-#' @param intensityTruncation Params to TruncateImageIntensity in ImageMath
+#' @param intensityTruncation Params to TruncateImageIntensity in iMath
 #' @param mask optional antsImage mask
 #' @param weightimg optional antsImage weighting - not implemented yet
 #' @param usen3 Use N3 instead of N4

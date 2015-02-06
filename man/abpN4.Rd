@@ -10,7 +10,7 @@ abpN4(img = NA, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
 \arguments{
 \item{img}{image to be bias corrected}
 
-\item{intensityTruncation}{Params to TruncateImageIntensity in ImageMath}
+\item{intensityTruncation}{Params to TruncateImageIntensity in iMath}
 
 \item{mask}{optional antsImage mask}
 

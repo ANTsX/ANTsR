@@ -73,7 +73,7 @@
 #'     {
 #'     temp<-antsImageClone( aslmask )
 #'     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
-#' #    ImageMath(3,temp,'PeronaMalik',temp,150,10)
+#' #   temp<-iMath(temp,'PeronaMalik',150,10)
 #'     temp<-smoothImage(temp,1.5)
 #'     nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
 #'       rep(2,3), boundary.condition = 'mean')

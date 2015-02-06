@@ -15,7 +15,7 @@
 #' mytx<-antsRegistration(fixed=fi , moving=mi, typeofTransform = c('SyN') )
 #' jac<-createJacobianDeterminantImage(fi,mytx$fwdtransforms[[1]],1)
 #' # plot(jac)
-#' @export ImageMath
+#' @export createJacobianDeterminantImage
 createJacobianDeterminantImage <- function( domainImg, tx, doLog = 0) {
   dim<-domainImg@dimension
   args <- list(dim, tx, doLog)

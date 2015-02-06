@@ -6,7 +6,7 @@
 #' \enumerate{ \item Erosion with radius 2 voxels \item Retain largest
 #' component \item Dilation with radius 1 voxel \item Morphological closing }
 #'
-#' These functions are available in \link{ImageMath}, see the operations
+#' These functions are available in \link{iMath}, see the operations
 #' \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.
 #'
 #' @param img Input image. Can be an \code{antsImage} of 2, 3 or 4 dimensions.
