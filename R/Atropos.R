@@ -41,9 +41,8 @@ Atropos <- function( a, x,
   c = "[5,0]",
   priorweight = 0.5,
   ...) {
-  if ( missing(a) | missing(x)) {
-    print("Input error - check params & usage")
-    .Call("Atropos", .int_antsProcessArguments(c(list("-h"))), PACKAGE = "ANTsR")
+  if ( missing(x)) {
+    .Call("Atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
     return(NULL)
   }
   # define the output temp files
@@ -86,20 +85,18 @@ Atropos <- function( a, x,
     myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], m = m, o = outs,
       c = c, m = m, i = i, x = mymask, ...)
-    print(" more than 4 input images not really supported, using first 4 ")
   }
   if (length(a) == 5) {
     myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], a = a[[5]], m = m, o = outs,
       c = c, m = m, i = i, x = mymask, ...)
-    print(" more than 4 input images not really supported, using first 4 ")
   }
   if (length(a) >= 6) {
     myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], a = a[[5]], a = a[[6]], m = m, o = outs,
       c = c, m = m, i = i, x = mymask, ...)
   }
-  if (length(a) > 6)
+  if ( length(a) > 6)
     print(" more than 6 input images not really supported, using first 6 ")
   .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
   probsout <- list.files(path = tdir,

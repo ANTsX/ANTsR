@@ -3,7 +3,6 @@
 #' Brain extraction based on mapping a template image and its mask to the input
 #' image.  Should be preceded by abpN4.
 #'
-#'
 #' @param img image to which we map a brain mask
 #' @param tem Template image which has an associated label mask.
 #' @param temmask Template's antsImage brain mask.
