@@ -18,27 +18,27 @@
 #' img<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask( img )
 #' segs<-kmeansSegmentation( img, k=3, kmask = mask)
-#' KellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
+#' kellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
 #'   w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
 #'
-#' @export KellyKapowski
-KellyKapowski <- function( s = NA, g = NA, w = NA,
+#' @export kellyKapowski
+kellyKapowski <- function( s = NA, g = NA, w = NA,
    its = 50, r = 0.025,
    m = 1.5, outimg = outimg, ...) {
-  if (missing(d) | missing(s) | missing(g) | missing(w) | missing(c) | missing(r) |
-    missing(m) | missing(outimg)) {
+  if (missing(s) | missing(g) | missing(w) | missing(its) | missing(r) |
+    missing(m)  ) {
     print("Input error - check params & usage")
     return(NULL)
   }
   if (class(s)[1] == "antsImage") {
     s <- antsImageClone(s, "unsigned int")
   }
-  # KellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
+  # kellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
   d=s@dimension
   outimg=antsImageClone(g)
   kkargs <- list(d = d, s = s, g = g, w = w, c = its, r = 0.5, m = 1,
-    outimg = outimg)
-  temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
+    o = outimg)
+  temp<-.Call( "kellyKapowski", .int_antsProcessArguments(c(kkargs)),
     PACKAGE = "ANTsR" )
   return(outimg)
 }
