@@ -48,7 +48,7 @@ plotBasicNetwork( centroids = centroids, brain )
   mnit<-antsImageRead(mnit,3)
   mnia<-getANTsRData("mnia")
   mnia<-antsImageRead(mnia,3)
-  ThresholdImage(3,mnit,mnit,1,max(mnit))
+  mnit<-thresholdImage( mnit, 1, max(mnit) )
   mnit<-iMath(mnit,"FillHoles")
   cnt<-getCentroids( mnia, clustparam = 50 )
   aalcnt<-cnt$centroids[1:90,]

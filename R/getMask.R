@@ -52,10 +52,7 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2) {
     stop("'lowthresh' and 'highthresh' must be numeric scalars")
   }
 
-
-  mask_img <- new("antsImage", "float", img@dimension)
-
-  ThresholdImage(img@dimension, img, mask_img, lowThresh, highThresh)
+  mask_img<-thresholdImage( img, lowThresh, highThresh )
 
   if (cleanup > 0) {
     ImageMath(img@dimension, mask_img, "ME", mask_img, cleanup)

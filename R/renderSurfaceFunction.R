@@ -28,8 +28,8 @@
 #'        mnit<-antsImageRead(mnit,3)
 #'        mnia<-getANTsRData("mnia")
 #'        mnia<-antsImageRead(mnia,3)
-#'        ThresholdImage(3,mnit,mnit,1,max(mnit))
-#'        ThresholdImage(3,mnia,mnia,1,2)
+#'        mnit<-thresholdImage( mnit, 1, max(mnit) )
+#'        mnia<-thresholdImage( mnia, 1, 2 )
 #'        brain<-renderSurfaceFunction( surfimg =list( mnit ) ,
 #'           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 #'        }

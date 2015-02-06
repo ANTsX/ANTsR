@@ -39,9 +39,7 @@ renderImageLabels <- function(
   mylist <- list()
 
   for (i in 1:nLabels) {
-    print(i)
-    limg <- antsImageClone(labelsimg)
-    ThresholdImage(3, limg, limg, i, i)
+    limg<-thresholdImage( limg, i, i)
 
     if (smoothsval > 0) {
       limg<-smoothImage(limg, smoothsval)

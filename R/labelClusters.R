@@ -26,8 +26,7 @@ labelClusters <- function(imagein, minClusterSize = 50,
     return(1)
   }
   dim <- imagein@dimension
-  clust <- antsImageClone(imagein)
-  ThresholdImage(dim, imagein, clust, minThresh, maxThresh)
+  clust<-thresholdImage( imagein, minThresh, maxThresh )
   LabelClustersUniquely(dim, clust, clust, minClusterSize)
   return(clust)
 }
