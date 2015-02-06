@@ -17,7 +17,8 @@ install:
   - export CXX=clang++
   - echo "CC=clang" >  .R/Makevars
   - echo "CXX=clang++" >> .R/Makevars
-  - ./travis-tool.sh install_github RcppCore/Rcpp
+  - git clone https://github.com/RcppCore/Rcpp.git
+  - R CMD INSTALL Rcpp
   - git clone https://github.com/stnava/ANTsR.git
   - R CMD INSTALL ANTsR
   #  - travis_retry travis_wait ./travis-tool.sh install_deps
