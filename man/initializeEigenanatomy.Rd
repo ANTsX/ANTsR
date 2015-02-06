@@ -8,11 +8,11 @@ pca.}
 initializeEigenanatomy(initmat, mask = NA, nreps = 1)
 }
 \arguments{
+\item{initmat}{input matrix where rows provide initial vector values}
+
 \item{mask}{mask if available}
 
 \item{nreps}{nrepetitions to use}
-
-\item{mat}{input matrix where rows provide initial vector values}
 }
 \value{
 list is output

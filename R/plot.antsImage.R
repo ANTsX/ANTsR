@@ -27,6 +27,7 @@
 #' @author Avants BB
 #' @examples
 #'
+#' \dontrun{
 #'   mnit<-getANTsRData('mni')
 #'   mnit<-antsImageRead(mnit,3)
 #'   mniafn<-getANTsRData('mnia')
@@ -40,6 +41,7 @@
 #'   # write directly to a file
 #'   plot( mnit, list(mnia,mnia2), slices='50x140x5',
 #'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
+#' }
 #'
 #' @export plot.antsImage
 plot.antsImage <- function(x, y,

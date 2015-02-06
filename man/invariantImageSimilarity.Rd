@@ -2,14 +2,18 @@
 % Please edit documentation in R/invariantImageSimilarity.R
 \name{invariantImageSimilarity}
 \alias{invariantImageSimilarity}
-\title{mutual information between two images as a function of geometry}
+\title{similarity metrics between two images as a function of geometry}
 \usage{
 invariantImageSimilarity(in_image1, in_image2, thetas,
   localSearchIterations = 0, metric = "MI", scaleImage = 1,
   doReflection = 0, txfn = "")
 }
 \arguments{
-\item{thetas}{numeric vector}
+\item{in_image1}{reference image}
+
+\item{in_image2}{moving image}
+
+\item{thetas}{numeric vector of search angles}
 
 \item{localSearchIterations}{integer controlling local search in multistart}
 
@@ -19,17 +23,13 @@ invariantImageSimilarity(in_image1, in_image2, thetas,
 
 \item{doReflection}{reflect image about principal axis}
 
-\item{fixedImg}{antsImage that is fixed ie does not move}
-
-\item{movingImg}{antsImage to be mapped to fixed}
-
-\item{txFilename}{if present, write optimal tx to .mat file}
+\item{txfn}{if present, write optimal tx to .mat file}
 }
 \value{
 vector of similarity values
 }
 \description{
-compute mutual information between two images as image is rotated about its
+compute similarity metric between two images as image is rotated about its
 center w/or w/o optimization
 }
 \examples{

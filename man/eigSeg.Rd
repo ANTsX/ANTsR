@@ -9,11 +9,11 @@ eigSeg(mask = NA, imgList = NA, applySegmentationToImages = TRUE)
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}
 
+\item{imgList}{list containing antsImages or filenames pointing to
+antsImages.}
+
 \item{applySegmentationToImages}{boolean determines if original image list
 is modified by the segmentation.}
-
-\item{imageList}{list containing antsImages or filenames pointing to
-antsImages.}
 }
 \value{
 segmentation image.

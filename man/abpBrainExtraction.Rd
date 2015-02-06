@@ -30,8 +30,10 @@ image.  Should be preceded by abpN4.
 # short example first
 fn<-getANTsRData('r16')
 img<-antsImageRead(fn,2)
+img<-resampleImage(img,c(128,128),1,0)
 tf<-getANTsRData('r64')
 tem<-antsImageRead(tf,2)
+tem<-resampleImage(tem,c(128,128),1,0)
 temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ]<-1
 temmask[ tem  <= 20 ]<-0

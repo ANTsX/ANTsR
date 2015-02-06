@@ -25,31 +25,34 @@
 #'
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
+#' ref<-resampleImage(ref,c(50,50),1,0)
 #' ImageMath(2,ref,"Normalize",ref)
 #' mi<-antsImageRead( getANTsRData('r27'),  2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
 #' mi4<-antsImageRead( getANTsRData('r64') ,2)
 #' mi5<-antsImageRead( getANTsRData('r85') ,2)
-#' refmask<-getMask(ref,mean(ref) )
+#' refmask<-getMask(ref,mean(ref),Inf,1)
+#' ImageMath(2,refmask,"ME",refmask,10) # just to speed things up
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
-#' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[5,0]"
+#' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[1,0]"
 #' seglist<-list()
 #' for ( i in 1:length(ilist) )
 #'  {
 #'  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
 #'  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-#'    typeofTransform = c("SyN"), outprefix=tempfile() )
+#'    typeofTransform = c("Affine"), outprefix=tempfile() )
 #'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
 #'    transformlist=mytx$fwdtransforms)
 #'  ilist[[i]]=mywarpedimage
 #'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
 #'  seglist[[i]]<-seg$segmentation
 #'  }
-#' r<-4
+#' r<-2
 #' d<-2
 #' pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=0,
 #'   labelList=seglist, rad=rep(r,d) )
+#' \dontrun{
 #' mm<-imageListToMatrix(ilist,refmask)
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
@@ -61,6 +64,7 @@
 #' pp2<-jointIntensityFusion(ref,refmaske,ilist,
 #'   beta=2,rad=rep(r,d))
 #' pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
+#' }
 #'
 #' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,

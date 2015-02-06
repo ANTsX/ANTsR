@@ -11,7 +11,7 @@ getROIValues(valueImage, roiImage, maskImage)
 
 \item{roiImage}{ROI lable image}
 
-\item{valueImage}{overall maskImage}
+\item{maskImage}{overall maskImage}
 }
 \value{
 A list with components: \code{roiValues}, the (number) labels of

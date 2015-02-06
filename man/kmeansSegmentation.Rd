@@ -7,13 +7,19 @@
 kmeansSegmentation(img, k, kmask = NA, mrf = 0.1)
 }
 \arguments{
+\item{img}{input image}
+
 \item{k}{integer number of classes}
+
+\item{kmask}{segment inside this mask}
+
+\item{mrf}{smoothness, higher is smoother}
 }
 \value{
 segmentation and probability images
 }
 \description{
-k means image segmentation.
+k means image segmentation that is a wrapper around Atropos
 }
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)

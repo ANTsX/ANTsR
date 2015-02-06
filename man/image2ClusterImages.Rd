@@ -8,7 +8,13 @@ image2ClusterImages(x, minClusterSize = 50, minThresh = 1e-06,
   maxThresh = 1)
 }
 \arguments{
-\item{img}{input antsImage e.g. a statistical map}
+\item{x}{input antsImage e.g. a statistical map}
+
+\item{minClusterSize}{throw away clusters smaller than this value}
+
+\item{minThresh}{threshold to a statistical map}
+
+\item{maxThresh}{threshold to a statistical map}
 }
 \value{
 the original image broken into a list of cluster images is the

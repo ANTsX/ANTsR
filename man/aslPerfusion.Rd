@@ -11,22 +11,40 @@ aslPerfusion(asl, maskThresh = 0.75, moreaccurate = 1, dorobust = 0.92,
   N3 = FALSE)
 }
 \arguments{
-\item{asl_antsr_image_or_filename}{The filename to an antsr image or pointer
-to an antsr image}
+\item{asl}{input asl image}
 
-\item{maskThresh=<value>}{A thresholding value for the mask as a fraction of
-the mean value of the image ... may need to be adjusted up or down for your
-data although the mask does not need to be perfect.}
+\item{maskThresh}{for estimating a brain mask}
 
-\item{dorobust=<valuein0to1>}{Controls whether you use a robust regression
-when estimating perfusion values}
+\item{moreaccurate}{zero, one or two with the last being the most accurate}
+
+\item{dorobust}{robustness parameter, lower value keeps more data}
+
+\item{m0}{known M0 if any}
+
+\item{skip}{stride to speed up robust regression weight estimates}
+
+\item{mask}{known brain mask}
+
+\item{interpolation}{e.g. 'linear'}
+
+\item{checkmeansignal}{throw out volumes with mean lower than this thresh}
+
+\item{moco_results}{passes prior motion results so moco does not get repeated}
+
+\item{regweights}{known temporal weights on regression solution, if any}
+
+\item{useDenoiser}{use the aslDenoiser if this value is a range gt than zero}
+
+\item{useBayesian}{strength of bayesian prior}
+
+\item{verbose}{bool}
+
+\item{ncompcor}{number of compcor parameters}
+
+\item{N3}{bool correct target image before motion corr}
 }
 \value{
-output is an antsImage containing perfusion values
-
-or
-
-1 -- Failure
+output a list of relevant objects
 }
 \description{
 This function will estimate perfusion from an ASL time series using a

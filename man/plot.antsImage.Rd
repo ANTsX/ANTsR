@@ -47,7 +47,8 @@ overlay option.  Useful for displaying statistical results overlaid on a
 background image.
 }
 \examples{
-mnit<-getANTsRData('mni')
+\dontrun{
+  mnit<-getANTsRData('mni')
   mnit<-antsImageRead(mnit,3)
   mniafn<-getANTsRData('mnia')
   mnia<-antsImageRead(mniafn,3)
@@ -60,6 +61,7 @@ mnit<-getANTsRData('mni')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices='50x140x5',
    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
+}
 }
 \author{
 Avants BB

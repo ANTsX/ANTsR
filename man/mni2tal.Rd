@@ -7,7 +7,7 @@
 mni2tal(xin = 0)
 }
 \arguments{
-\item{x}{Point in mni152 space.}
+\item{xin}{Point in mni152 space.}
 }
 \value{
 The output point is in approximate Talairach space.

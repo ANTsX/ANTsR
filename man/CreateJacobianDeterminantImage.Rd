@@ -22,9 +22,11 @@ Compute the jacobian determinant from a transformation file
 \examples{
 fi<-antsImageRead( getANTsRData('r16') ,2)
 mi<-antsImageRead( getANTsRData('r64') ,2)
+fi<-resampleImage(fi,c(128,128),1,0)
+mi<-resampleImage(mi,c(128,128),1,0)
 mytx<-antsRegistration(fixed=fi , moving=mi, typeofTransform = c('SyN') )
 jac<-CreateJacobianDeterminantImage(2,mytx$fwdtransforms[[1]],1)
-plot(jac)
+# plot(jac)
 }
 \author{
 BB Avants

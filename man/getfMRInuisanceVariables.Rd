@@ -4,16 +4,18 @@
 \alias{getfMRInuisanceVariables}
 \title{Extract generic fMRI nuisance variables for ASL or BOLD}
 \usage{
-getfMRInuisanceVariables(fmri, maskThresh = 500, moreaccurate = TRUE,
+getfMRInuisanceVariables(fmri, maskThresh = 500, moreaccurate = 1,
   mask = NA)
 }
 \arguments{
+\item{fmri}{input antsImage or filename}
+
 \item{maskThresh}{will use this intensity threshold to estimate a mask
 otherwise will use the mask passed in}
 
-\item{mask}{binary image masking the intput image}
+\item{moreaccurate}{zero, one or two with increasing accuracy/computation}
 
-\item{boldImageOrFileName}{input antsImage or filename}
+\item{mask}{binary image masking the intput image, precedent over mask thresh}
 }
 \value{
 outputs list described above.

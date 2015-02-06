@@ -1,27 +1,32 @@
-#' Simple inspectImageData3D function.
+#' Simple rapidlyInspectImageData function.
 #'
-#' InspectImageData3D collects basic statistics over a dataset and returns them
+#' rapidlyInspectImageData collects basic statistics over a dataset and returns them
 #' in a dataframe.
-#'
 #'
 #' @param myfiles input list of filenames
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
 #'
-#' mm<-inspectImageData3D( fnl<-c('r16slice.nii.gz','r64slice.nii.gz' ) )
+#' \dontrun{
+#'  fnl<-c( getANTsRData('r16'),
+#'  getANTsRData('r27'),
+#'  getANTsRData('r62'),
+#'  getANTsRData('r64'),
+#'  getANTsRData('r85') )
+#' mm<-rapidlyInspectImageData( fnl )
 #' if ( !usePkg("DMwR") | ! usePkg('fpc') )
 #'    { print("Need DMwR and fpc packages") } else {
-#' pamres <- pamk(mm)
-#' plot(pamres$pamobject)
-#' outlier.scores <- lofactor( mm, k=5)
-#' outliers <- order(outlier.scores, decreasing=T)[1:5]
+#'   pamres <- pamk(mm,1:4)
+#'   outlier.scores <- lofactor( mm, k=3 )
+#'   outliers <- order(outlier.scores)
+#'   }
 #' }
 #'
-#' @export inspectImageData3D
-inspectImageData3D <- function(myfiles) {
+#' @export rapidlyInspectImageData
+rapidlyInspectImageData <- function(myfiles) {
   if (nargs() == 0) {
-    print(args(inspectImageData3D))
+    print(args(rapidlyInspectImageData))
     return(1)
   }
   if ( !usePkg("fpc") ) { print("Need fpc package"); return(NULL) }

@@ -3,12 +3,42 @@ Type: Package
 Title: ANTs in R
 Version: 1.0
 Date: 2012-02-01
-Author: Shrinidhi KL, Brian B. Avants, ANTS-developers
+ Authors@R: c(person("Brian B. Avants", role = c("aut", "cre"),
+         email = "stnava@gmail.com"),
+        person("Benjamin M. Kandel", "Developer", role = "aut"),
+        person("Jeff T. Duda", "Developer", role = "aut"),
+        person("Philip A. Cook", "Developer", role = "aut"),
+        person("Nicholas J. Tustison", "Developer", role = "aut"),
+        person("Shrinidhi KL", "Developer", role = "aut"),
+        )
+Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
+    Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)
 LazyLoad: yes
 Depends: Rcpp, methods, tools
-Suggests: psych, igraph, fpc, irlba, caret, rgl, grid, png, BGLR, glmnet, cluster, robust, pixmap, misc3d, signal, mFilter, sna, e1071, randomForest, magic, fastICA, visreg, moments, wmtsa, DMwR
+Suggests:
+    BGLR,
+    caret,
+    cluster,
+    DMwR,
+    e1071,
+    fastICA,
+    fpc,
+    grid,
+    glmnet,
+    igraph,
+    magic,
+    misc3d,
+    moments,
+    pixmap,
+    png,
+    psych,
+    randomForest,
+    rgl,
+    robust,
+    signal,
+    visreg
 LinkingTo: Rcpp
-SystemRequirements: cmake
+SystemRequirements: cmake, git

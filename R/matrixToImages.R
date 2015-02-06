@@ -1,23 +1,21 @@
 #' Convert rows of a matrix to images
-#' 
+#'
 #' Unmasks rows of a matrix and writes as images.
-#' 
-#' 
+#'
+#'
 #' @param dataMatrix A matrix such as that created by \code{imagesToMatrix}.
-#' @param mask An \code{antsImage} containing a binary mask. Rows of the matrix
+#' @param mask An \code{antsImage} containing a binary mask.
+#' Rows of the matrix
 #' are unmasked and written as images. The mask defines the output image space.
-#' @param outputRoot A string that is prepended to output image names. Output
-#' images will be numbered by row number in the input matrix, starting with
-#' 001.
 #' @author Cook PA
 #' @seealso \code{\link{imagesToMatrix}, \link{getMask}}
 #' @examples
-#' 
+#'
 #' \dontrun{
 #'   mat = matrixToImages(aMat, mask, 'aMat_')
 #' }
-#' 
-#' 
+#'
+#'
 #' @export matrixToImages
 matrixToImages <- function(dataMatrix, mask) {
   # Writes rows of a matrix to 3D images.  mask should be an antsImage of the
@@ -25,21 +23,21 @@ matrixToImages <- function(dataMatrix, mask) {
   if (!is(mask, "antsImage")) {
     stop("Mask must be an antsImage")
   }
-  
+
   numImages <- dim(dataMatrix)[1]
-  
+
   numVoxelsInMatrix <- dim(dataMatrix)[2]
-  
+
   numVoxelsInMask <- length(which(mask > 0))
-  
+
   if (numVoxelsInMatrix != numVoxelsInMask) {
-    stop(paste("Number of masked voxels", numVoxelsInMask, " do not match data", 
+    stop(paste("Number of masked voxels", numVoxelsInMask, " do not match data",
       numVoxelsInMatrix))
   }
-  
+
   imagelist <- list()
   for (i in 1:numImages) {
-    
+
     img <- antsImageClone(mask)
     vec <- dataMatrix[i, ]
     img[mask <= 0] <- 0
@@ -48,4 +46,4 @@ matrixToImages <- function(dataMatrix, mask) {
     # antsImageWrite( img, paste(outputRoot, sprintf('%03d.nii.gz', i), sep = '') )
   }
   return(imagelist)
-} 
+}

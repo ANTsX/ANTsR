@@ -8,6 +8,8 @@ imageFileNames2ImageList(x, dim)
 }
 \arguments{
 \item{x}{input file name list}
+
+\item{dim}{img dimensionality}
 }
 \value{
 a list like this : mylist<-list( img1, img2 , etcetera ) is the

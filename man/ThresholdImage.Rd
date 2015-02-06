@@ -4,7 +4,7 @@
 \alias{ThresholdImage}
 \title{Threshold Image}
 \usage{
-ThresholdImage(dim, inimg, outimg, lothresh, hithresh, inval=0, outval=1)
+ThresholdImage(dim, inimg, outimg, lothresh, hithresh, inval=1, outval=0)
 }
 \arguments{
 \item{dim}{Dimension of the input image}

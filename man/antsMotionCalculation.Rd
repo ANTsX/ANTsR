@@ -7,9 +7,9 @@
 antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
 }
 \arguments{
-\item{img}{Name of image file, e.g. 'img.nii.gz'.}
+\item{img}{antsImage, usually 4D.}
 
-\item{mask}{Name of mask file, e.g. 'mask.nii.gz'.  If not provided, estimated from data.}
+\item{mask}{mask for image (3D).  If not provided, estimated from data.}
 
 \item{fixed}{Fixed image to register all timepoints to.  If not provided, mean image is used.}
 
@@ -32,7 +32,9 @@ List containing:
 Correct ASL data for motion.
 }
 \examples{
-antsMotionCalculation(getANTsRData('pcasl'))
+set.seed(120)
+simimg<-makeImage( rep(5,4), rnorm(5^4))
+antsMotionCalculation(simimg,moreaccurate=0)
 }
 \author{
 Benjamin M. Kandel

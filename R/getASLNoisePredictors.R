@@ -1,8 +1,8 @@
 #' Get nuisance predictors from ASL images
-#' 
+#'
 #' Get nuisance predictors from ASL images
-#' 
-#' 
+#'
+#'
 #' @param aslmat ASL input matrix.
 #' @param tc Tag-control sawtooth pattern vector.
 #' @param noisefrac Fraction of data to include in noise pool.
@@ -19,14 +19,16 @@
 #' timeseries of all the nuisance predictors.
 #' @author Brian B. Avants, Benjamin M. Kandel
 #' @examples
-#' 
-#' moco <- antsMotionCalculation(getANTsRData('pcasl'))
+#' # for real data do img<-antsImageRead(getANTsRData('pcasl'),4)
+#' set.seed(120)
+#' img<-makeImage( c(10,10,10,20), rnorm(1000*20)+1 )
+#' moco <- antsMotionCalculation(img,moreaccurate=0)
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 #' noise <- getASLNoisePredictors(aslmat, tc)
-#' 
+#'
 #' @export getASLNoisePredictors
-getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5, 
+getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5,
   npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
   getnoisepool <- function(x, frac = noisefrac) {
     xord <- sort(x)
@@ -34,7 +36,7 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k
     val <- xord[l]
     return(x < val & x < 0)
   }
-  
+
   if (polydegree > 0) {
     timevals <- 1:nrow(aslmat)
     p <- stats::poly(timevals, degree = polydegree)
@@ -43,7 +45,7 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k
       covariates <- cbind(data.matrix(covariates), p)
     } else covariates <- p
   }
-  
+
   R2base <- crossvalidatedR2(aslmat, tc, k, covariates = covariates)
   R2base <- apply(R2base, FUN = noisepoolfun, MARGIN = 2)
   noisepool <- getnoisepool(R2base)
@@ -59,4 +61,4 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k
     noiseu <- svd(aslmat[, noisepool], nv = 0, nu = npreds)$u
   }
   noiseu
-} 
+}

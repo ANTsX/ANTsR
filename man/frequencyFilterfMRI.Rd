@@ -8,17 +8,17 @@ frequencyFilterfMRI(boldmat, tr, freqLo = 0.01, freqHi = 0.1,
   opt = "butt")
 }
 \arguments{
-\item{boldMatrix}{Time series matrix for bold image}
+\item{boldmat}{Time series matrix for bold image}
 
-\item{tr=<value>}{The sequence's TR value , typically 3 or 4.}
+\item{tr}{The sequence's TR value , typically 3 or 4.}
 
-\item{freqLo=<value>}{The lower frequency limit, e.g. 0.01 in band-pass
+\item{freqLo}{The lower frequency limit, e.g. 0.01 in band-pass
 filter}
 
-\item{freqHi=<value>}{The higher frequency limit, e.g. 0.1 in band-pass
+\item{freqHi}{The higher frequency limit, e.g. 0.1 in band-pass
 filter}
 
-\item{opt=c('trig','butt','stl')}{Type of filter to use: butterworth,
+\item{opt}{one of 'trig','butt','stl' Type of filter to use: butterworth,
 trigonometric, stl.}
 }
 \value{

@@ -33,11 +33,15 @@ Array of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of a
 Combine and select nuisance predictors to maximize correlation between \code{inmat} and \code{target}.
 }
 \examples{
-moco <- antsMotionCalculation(getANTsRData('pcasl'))
+set.seed(120)
+simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
+moco <- antsMotionCalculation( simimg , moreaccurate=0)
+# for real data use below
+# moco <- antsMotionCalculation(getANTsRData('pcasl'))
 aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
 tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 noise <- getASLNoisePredictors(aslmat, tc)
-noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 4)
+noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 }
 \author{
 Benjamin M. Kandel, Brian B. Avants

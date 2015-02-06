@@ -10,7 +10,14 @@
 #' @param imageSetToBeLabeledIn a template paired with (most likely) the output
 #' of a multivariate sparse decomposition or (alternatively) could be just a
 #' statistical map with zeroes in non-interesting areas
+#' @param templateWithLabels e..g the mni image and brodmann label set
+#' @param labelnames a list of names for the labels
+#' @param outprefix if output to a file, provide file prefix
+#' @param convertToTal bool, return talairach coordinates
 #' @param pvals the already computed pvalue for each component
+#' @param threshparam for pvals
+#' @param clustparam for clusters
+#' @param identifier unique ID for this study
 #' @return The output point coordinates are in approximate Talairach / MNI (or
 #' whatever) template space.
 #' @author Avants, BB
@@ -31,9 +38,16 @@
 #' }
 #'
 #' @export getMultivariateTemplateCoordinates
-getMultivariateTemplateCoordinates <- function(imageSetToBeLabeledIn, templateWithLabels,
-  labelnames = NA, outprefix = NA, convertToTal = FALSE, pvals = NA, threshparam = 1,
-  clustparam = 250, identifier) {
+getMultivariateTemplateCoordinates <- function(
+  imageSetToBeLabeledIn,
+  templateWithLabels,
+  labelnames = NA,
+  outprefix = NA,
+  convertToTal = FALSE,
+  pvals = NA,
+  threshparam = 1,
+  clustparam = 250,
+  identifier ) {
 
   # this function is similar to getTemplateCoordinates however we need to get the
   # coordinates for each of the entries in imageSetToBeLabeled where coordinates

@@ -7,9 +7,11 @@
 icawhiten(Xin, n.comp, verbose = FALSE)
 }
 \arguments{
+\item{Xin}{input matrix}
+
 \item{n.comp}{number of components on which to project}
 
-\item{mat}{input matrix}
+\item{verbose}{bool}
 }
 \value{
 matrix is output

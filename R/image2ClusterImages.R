@@ -1,19 +1,22 @@
 #' Converts an image to several independent images.
-#' 
+#'
 #' Produces a unique image for each connected component 1 through N of size >
 #' minClusterSize
-#' 
-#' 
-#' @param img input antsImage e.g. a statistical map
+#'
+#'
+#' @param x input antsImage e.g. a statistical map
+#' @param minClusterSize throw away clusters smaller than this value
+#' @param minThresh threshold to a statistical map
+#' @param maxThresh threshold to a statistical map
 #' @return the original image broken into a list of cluster images is the
 #' output
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' imageclusterlist<-image2ClusterImages( img ) 
+#' imageclusterlist<-image2ClusterImages( img )
 #' }
-#' 
+#'
 #' @export image2ClusterImages
 image2ClusterImages <- function(x, minClusterSize = 50, minThresh = 1e-06, maxThresh = 1) {
   if (nargs() == 0) {
@@ -31,4 +34,4 @@ image2ClusterImages <- function(x, minClusterSize = 50, minThresh = 1e-06, maxTh
     clustlist <- lappend(clustlist, labimg)
   }
   return(clustlist)
-} 
+}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/antsImage_class.R
 \name{antsGetNeighborhoodMatrix}
 \alias{antsGetNeighborhoodMatrix}
-\title{Get Neighborhood}
+\title{antsGetNeighborhoodMatrix for the masked image}
 \usage{
 antsGetNeighborhoodMatrix(image, mask, radius, physical.coordinates = FALSE,
   boundary.condition = "NA", spatial.info = FALSE)
@@ -40,12 +40,11 @@ center for each voxel in a neighborhood
 Summarize neighborhoods for voxels in an antsImage.
 }
 \examples{
-mnit<-getANTsRData('mni')
-mnit<-antsImageRead(mnit,3)
-mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
-center <- dim(mnit)/2
-radius <- rep(2,3)
-mat<-antsGetNeighborhoodMatrix(mnit,mask,radius)
+r16<-getANTsRData('r16')
+r16<-antsImageRead(r16,2)
+mask<-getMask(r16,lowThresh=mean(r16),cleanup=1)
+radius <- rep(2,2)
+mat<-antsGetNeighborhoodMatrix(r16,mask,radius)
 }
 \author{
 Duda JT

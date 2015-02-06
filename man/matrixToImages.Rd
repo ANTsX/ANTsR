@@ -9,12 +9,9 @@ matrixToImages(dataMatrix, mask)
 \arguments{
 \item{dataMatrix}{A matrix such as that created by \code{imagesToMatrix}.}
 
-\item{mask}{An \code{antsImage} containing a binary mask. Rows of the matrix
+\item{mask}{An \code{antsImage} containing a binary mask.
+Rows of the matrix
 are unmasked and written as images. The mask defines the output image space.}
-
-\item{outputRoot}{A string that is prepended to output image names. Output
-images will be numbered by row number in the input matrix, starting with
-001.}
 }
 \description{
 Unmasks rows of a matrix and writes as images.

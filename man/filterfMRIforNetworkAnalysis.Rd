@@ -10,28 +10,35 @@ filterfMRIforNetworkAnalysis(aslmat, tr, freqLo = 0.01, freqHi = 0.1,
   robustcorr = FALSE)
 }
 \arguments{
-\item{asl_antsr_image_or_filename}{The filename to an antsr image or pointer
+\item{aslmat}{The filename to an antsr image or pointer
 to an antsr image}
 
-\item{tr=<value>}{The sequence's TR value , typically 3 or 4.}
+\item{tr}{The sequence's TR value , typically 3 or 4.}
 
-\item{freqLo=<value>}{The lower frequency limit, e.g. 0.01 in band-pass
+\item{freqLo}{The lower frequency limit, e.g. 0.01 in band-pass
 filter}
 
-\item{freqHi=<value>}{The higher frequency limit, e.g. 0.1 in band-pass
+\item{freqHi}{The higher frequency limit, e.g. 0.1 in band-pass
 filter}
 
-\item{cbfnetwork="ASLCBF"}{A string dictating whether to do nothing special
+\item{cbfnetwork}{"ASLCBF" A string dictating whether to do nothing special
 (standard BOLD) or get CBF (ASLCBF) or BOLD (ASLBOLD) signal from ASL}
 
-\item{maskThresh=<value>}{A thresholding value for the mask ... may need to
-be adjusted up or down for your data although the mask does not need to be
-perfect.}
+\item{mask}{the mask image}
 
-\item{smoother=<value>}{A smoothing parameter for space and time.}
+\item{labels}{the label image}
 
-\item{outputprefix=<string>}{filename prefix - if defined , this function
-will write out some sanity checking images.}
+\item{graphdensity}{desired density}
+
+\item{seg}{a segmentation image}
+
+\item{useglasso}{use sparse inverse covariance for network estimation}
+
+\item{nuisancein}{nuisance variable data frame}
+
+\item{usesvd}{bool, to reduce nuisance variables}
+
+\item{robustcorr}{bool}
 }
 \value{
 output is a list containing "filteredTimeSeries" "mask"

@@ -13,7 +13,21 @@ getMultivariateTemplateCoordinates(imageSetToBeLabeledIn, templateWithLabels,
 of a multivariate sparse decomposition or (alternatively) could be just a
 statistical map with zeroes in non-interesting areas}
 
+\item{templateWithLabels}{e..g the mni image and brodmann label set}
+
+\item{labelnames}{a list of names for the labels}
+
+\item{outprefix}{if output to a file, provide file prefix}
+
+\item{convertToTal}{bool, return talairach coordinates}
+
 \item{pvals}{the already computed pvalue for each component}
+
+\item{threshparam}{for pvals}
+
+\item{clustparam}{for clusters}
+
+\item{identifier}{unique ID for this study}
 }
 \value{
 The output point coordinates are in approximate Talairach / MNI (or

@@ -7,7 +7,9 @@
 interleaveMatrixWithItself(x, n = 1)
 }
 \arguments{
-\item{mat}{input matrix}
+\item{x}{input matrix}
+
+\item{n}{number of interleaves}
 }
 \value{
 matrix is output

@@ -8,7 +8,15 @@ getTemplateCoordinates(imagePairToBeLabeled, templatePairWithLabels,
   labelnames = NA, outprefix = NA, convertToTal = FALSE)
 }
 \arguments{
-\item{x}{x}
+\item{imagePairToBeLabeled}{e.g. the template image and the activation map}
+
+\item{templatePairWithLabels}{e..g the mni image and brodmann label set}
+
+\item{labelnames}{a list of names for the labels}
+
+\item{outprefix}{if output to a file, provide file prefix}
+
+\item{convertToTal}{bool, return talairach coordinates}
 }
 \value{
 The output point is in approximate template space.

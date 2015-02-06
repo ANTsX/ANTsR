@@ -5,7 +5,8 @@
 #' matrix before input.
 #'
 #'
-#' @param mat input matrix
+#' @param x input matrix
+#' @param mynu number of u vectors
 #' @return matrix is output
 #' @author Avants BB
 #' @examples

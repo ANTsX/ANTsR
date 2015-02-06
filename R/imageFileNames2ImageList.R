@@ -5,6 +5,7 @@
 #'
 #'
 #' @param x input file name list
+#' @param dim img dimensionality
 #' @return a list like this : mylist<-list( img1, img2 , etcetera ) is the
 #' output ... img* are antsImages
 #' @author Avants BB
