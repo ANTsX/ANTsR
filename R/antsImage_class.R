@@ -538,7 +538,7 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 #' @examples
 #'
 #' img<-makeImage(c(10,10),rnorm(100))
-#' pt<-antsTransformIndexToSpatialPoint(img,c(2,2))
+#' pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
 #'
 #'
 #' @export antsGetPixels
