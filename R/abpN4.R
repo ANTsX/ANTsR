@@ -39,11 +39,11 @@ abpN4 <- function(img = NA, intensityTruncation = c(0.025, 0.975, 256),
     return(outimg)
   }
   if (is.na(mask)) {
-    outimg<-N4BiasFieldCorrection(img)
+    outimg<-n4BiasFieldCorrection(img)
     return(outimg)
   }
   if (!is.na(mask)) {
-    outimg<-N4BiasFieldCorrection(img,mask)
+    outimg<-n4BiasFieldCorrection(img,mask)
     return(outimg)
   }
   if (!is.na(weightimg)) {

@@ -26,9 +26,10 @@ for the values and where rows correspond to subjects.
 }
 \examples{
 \dontrun{
-data(aal,package='ANTsR')
-csvlist<-Sys.glob('*md*csv')
-mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , 'Mean' , datarownames=aal$label_name )
+data(aal,package="ANTsR")
+csvlist<-Sys.glob("*md*csv")
+mypopulationdataframe<-subjectDataToGroupDataFrame( csvlist , "Mean" ,
+  datarownames=aal$label_name )
 # should have each ROI value for each subject listed in a large data frame
 }
 }

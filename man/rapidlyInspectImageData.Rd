@@ -24,7 +24,7 @@ in a dataframe.
  getANTsRData("r64"),
  getANTsRData("r85") )
 mm<-rapidlyInspectImageData( fnl )
-if ( !usePkg("DMwR") | ! usePkg('fpc') )
+if ( !usePkg("DMwR") | ! usePkg("fpc") )
    { print("Need DMwR and fpc packages") } else {
   pamres <- pamk(mm,1:4)
   outlier.scores <- lofactor( mm, k=3 )

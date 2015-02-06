@@ -20,9 +20,9 @@
 #'
 #' \dontrun{
 #' # read the fmri image in and maybe do slice timing correction
-#'   fmri<-getANTsRData('pcasl')
+#'   fmri<-getANTsRData("pcasl")
 #'   fmri<-antsImageRead( fmri , 4 )
-#' #  ImageMath(4,fmri,'SliceTimingCorrection',fmri,'bspline') # optional
+#' #  ImageMath(4,fmri,"SliceTimingCorrection",fmri,"bspline") # optional
 #'   myvars<-getfMRInuisanceVariables( fmri, moreaccurate = 0, maskThresh=100 )
 #'   mat <- myvars$matrixTimeSeries
 #'   mat<-frequencyFilterfMRI(mat, 2.5, freqLo=0.01, freqHi=0.1, opt="butt")

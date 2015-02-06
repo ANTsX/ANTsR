@@ -61,7 +61,7 @@ renderSurfaceFunction <- function(
   for (i in 1:length(surfimg)) {
     if (smoothsval[i] > 0) {
       simg <- antsImageClone(surfimg[[i]])
-      SmoothImage(3, simg, smoothsval[i], simg)
+      simg<-smoothImage(simg, smoothsval[i])
       surfimg[[i]] <- simg
     }
   }
@@ -91,7 +91,7 @@ renderSurfaceFunction <- function(
   if (smoothfval > 0) {
     for (i in 1:length(funcimg)) {
       fimg <- antsImageClone(funcimg[[i]])
-      SmoothImage(3, fimg, smoothfval, fimg)
+      fimg<-smoothImage( fimg, smoothfval )
       funcimg[[i]] <- fimg
     }
   }

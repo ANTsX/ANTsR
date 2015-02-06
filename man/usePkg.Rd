@@ -18,7 +18,7 @@ T if package successfully loaded, F otherwise.
 Use any package.  If package is not installed, this will install from CRAN.
 }
 \examples{
-usePkg('randomForest')
+usePkg("randomForest")
 }
 \author{
 Benjamin M. Kandel, BB Avants

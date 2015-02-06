@@ -32,7 +32,7 @@
 #' mask2[11:20,11:20]<-2
 #' mask<-as.antsImage( mask , "float" )
 #' fi<-as.antsImage( fi , "float" )
-#' SmoothImage(2,fi,3,fi)
+#' fi<-smoothImage(fi,3)
 #' mo<-as.antsImage( replicate(100, rnorm(100)) , "float" )
 #' mo2<-as.antsImage( replicate(100, rnorm(100)) , "float" )
 #' ilist<-list(mo,mo2)
@@ -66,8 +66,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
     fmask <- antsImageClone(paintMask)
     fmask[paintMask < 0.5] <- 0  # full mask
     fmask[paintMask >= 0.5] <- 1  #
-    featherMask <- antsImageClone(lmask)
-    SmoothImage(img@dimension, featherMask, feather, featherMask)
+    featherMask<-smoothImage(fmask, feather)
     featherMask2 <- antsImageClone(lmask)
     featherMask2[featherMask2 >= 0] <- 1
     featherMask2[featherMask > 0] <- 1 - featherMask[featherMask > 0]
