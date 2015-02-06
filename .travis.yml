@@ -12,9 +12,9 @@ before_install:
 
 install:
   - sudo apt-get install -y cmake
-  - travis_retry travis_wait ./travis-tool.sh install_deps
+  #  - travis_retry travis_wait ./travis-tool.sh install_deps
 
-script: travis_retry travis_wait 1000 ./travis-tool.sh run_tests
+script: travis_retry travis_wait 1000 ./travis-tool.sh install_github
 
 notifications:
   email:
