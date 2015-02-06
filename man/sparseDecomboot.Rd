@@ -49,6 +49,7 @@ variance.
 \examples{
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecomboot( mat )
+\dontrun{
 # for prediction
 if ( usePkg("randomForest") & usePkg("spls") ) {
 data(lymphoma)
@@ -69,6 +70,7 @@ print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
 for ( i in 1:nv )
   print(paste(' non-zero ',i,' is: ',sum(abs( outmat[,i] ) > 0 ) ) )
 }
+} # end dontrun
 }
 \author{
 Avants BB

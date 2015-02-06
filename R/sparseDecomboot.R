@@ -25,6 +25,7 @@
 #'
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecomboot( mat )
+#' \dontrun{
 #' # for prediction
 #' if ( usePkg("randomForest") & usePkg("spls") ) {
 #' data(lymphoma)
@@ -45,6 +46,7 @@
 #' for ( i in 1:nv )
 #'   print(paste(' non-zero ',i,' is: ',sum(abs( outmat[,i] ) > 0 ) ) )
 #' }
+#' } # end dontrun
 #'
 #' @export sparseDecomboot
 sparseDecomboot <- function(inmatrix = NA, inmask = 0, sparseness = 0.01,
