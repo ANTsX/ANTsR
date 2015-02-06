@@ -1,6 +1,6 @@
 #' @name ThresholdImage
 #' @title Threshold Image
-#' @usage ThresholdImage(dim, inimg, outimg, lothresh, hithresh, inval=0, outval=1)
+#' @usage ThresholdImage(dim, inimg, outimg, lothresh, hithresh, inval=1, outval=0)
 #' @param dim Dimension of the input image
 #' @param inimg Input image to operate on
 #' @param outimg Result image
