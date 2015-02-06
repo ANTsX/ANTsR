@@ -19,7 +19,7 @@
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage( rep(5,4), rnorm(5^4))
-#' antsMotionCalculation(simimg)
+#' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
   moco <- motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)

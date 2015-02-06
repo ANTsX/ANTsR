@@ -34,7 +34,7 @@ Correct ASL data for motion.
 \examples{
 set.seed(120)
 simimg<-makeImage( rep(5,4), rnorm(5^4))
-antsMotionCalculation(simimg)
+antsMotionCalculation(simimg,moreaccurate=0)
 }
 \author{
 Benjamin M. Kandel
