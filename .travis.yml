@@ -12,6 +12,7 @@ before_install:
 
 install:
   - sudo apt-get install -y cmake
+  - ./travis-tool.sh install_github RcppCore/Rcpp
   - git clone https://github.com/stnava/ANTsR.git
   - R CMD INSTALL ANTsR
   #  - travis_retry travis_wait ./travis-tool.sh install_deps
