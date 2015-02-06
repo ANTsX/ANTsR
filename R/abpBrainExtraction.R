@@ -118,7 +118,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
-  atroparams <- list( a = img,
+  atroparams <- list(d = img@dimension, a = img,
     m = ATROPOS_BRAIN_EXTRACTION_MRF,
     o = seg, x = tmpi,
     i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION,
