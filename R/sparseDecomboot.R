@@ -16,15 +16,17 @@
 #' @param initializationList see initializeEigenanatomy
 #' @param mycoption 0, 1 or 2 all produce different output 0 is combination
 #'   of 1 (spatial orthogonality) and 2 (subject space orthogonality)
-#' @param nboot boostrap integer
-#' @param nsamp boostrap integer
+#' @param nboot boostrap integer e.g. 10 equals 10 boostraps
+#' @param nsamp value less than or equal to 1, e.g. 0.9 means 90 percent of data
+#' will be used in each boostrap resampling
 #' @param robust boolean
 #' @param doseg orthogonalize bootstrap results
 #' @author Avants BB
 #' @examples
 #'
 #' mat<-replicate(100, rnorm(20))
-#' mydecom<-sparseDecomboot( mat )
+#' mydecom<-sparseDecomboot( mat, nboot=5, nsamp=0.9, nvecs=2 )
+#'
 #' \dontrun{
 #' # for prediction
 #' if ( usePkg("randomForest") & usePkg("spls") ) {
