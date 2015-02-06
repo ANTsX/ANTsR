@@ -45,7 +45,7 @@ multivariate segmentation if you pass a list of images in: e.g.
 a=c(img1,img2).
 }
 \examples{
-img<-antsImageRead( getANTsRData('r16') , 2 )
+img<-antsImageRead( getANTsRData("r16") , 2 )
 img<-resampleImage( img, c(64,64), 1, 0 )
 mask<-getMask(img)
 segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',

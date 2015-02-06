@@ -14,7 +14,7 @@
 #' @keywords geometry image
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData('r16') ,2)
+#' fi<-antsImageRead( getANTsRData("r16") ,2)
 #' reofi<-reorientImage(fi,c(1,0))
 #'
 #' @export reorientImage

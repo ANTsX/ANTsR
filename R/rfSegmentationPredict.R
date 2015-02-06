@@ -11,7 +11,7 @@
 #' @examples
 #'
 #' if ( usePkg('randomForest') ) {
-#' img<-antsImageRead( getANTsRData('r16') ,2)
+#' img<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask( img )
 #' mask2<-getMask( img )
 #' ImageMath(2,mask,'ME',mask,25)

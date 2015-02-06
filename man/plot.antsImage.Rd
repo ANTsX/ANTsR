@@ -48,9 +48,9 @@ background image.
 }
 \examples{
 \dontrun{
-  mnit<-getANTsRData('mni')
+  mnit<-getANTsRData("mni")
   mnit<-antsImageRead(mnit,3)
-  mniafn<-getANTsRData('mnia')
+  mniafn<-getANTsRData("mnia")
   mnia<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia,mnia,22,25)
   SmoothImage(3,mnia,1.5,mnia)

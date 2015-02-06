@@ -18,8 +18,8 @@ mutual information value
 compute mutual information between two images
 }
 \examples{
-fi<-antsImageRead( getANTsRData('r16') ,2)
-mi<-antsImageRead( getANTsRData('r64') ,2)
+fi<-antsImageRead( getANTsRData("r16") ,2)
+mi<-antsImageRead( getANTsRData("r64") ,2)
 mival<-antsImageMutualInformation(fi,mi)
 }
 \author{

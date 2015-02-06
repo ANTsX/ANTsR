@@ -20,8 +20,8 @@
 #' \dontrun{
 #' # will give the full form of help
 #' antsRegistration( '-h')
-#'   fi<-antsImageRead( getANTsRData('r16') ,2)
-#'   mi<-antsImageRead( getANTsRData('r64') ,2)
+#'   fi<-antsImageRead( getANTsRData("r16") ,2)
+#'   mi<-antsImageRead( getANTsRData("r64") ,2)
 #'   mytx<-antsRegistration(fixed=fi , moving=mi ,
 #'     typeofTransform = c('SyN'),
 #'     outprefix=paste(tempdir(),'/Z',sep=''))

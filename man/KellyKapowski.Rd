@@ -30,7 +30,7 @@ Diffeomorphic registration-based cortical thickness based on probabilistic
 segmentation of an image.  This is an optimization algorithm.
 }
 \examples{
-img<-antsImageRead( getANTsRData('r16') ,2)
+img<-antsImageRead( getANTsRData("r16") ,2)
 mask<-getMask( img )
 segs<-kmeansSegmentation( img, k=3, kmask = mask)
 KellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],

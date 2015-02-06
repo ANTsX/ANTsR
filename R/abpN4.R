@@ -13,7 +13,7 @@
 #' @author Tustison N, Avants BB
 #' @examples
 #'
-#' fn<-getANTsRData('r16')
+#' fn<-getANTsRData("r16")
 #' img<-antsImageRead(fn,2)
 #' img2<-abpN4( img )
 #'
