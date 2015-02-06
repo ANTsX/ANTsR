@@ -17,6 +17,7 @@ install:
   - export CXX=clang++
   - echo "CC=clang" >  .R/Makevars
   - echo "CXX=clang++" >> .R/Makevars
+  - source .R/Makevars
   - git clone https://github.com/RcppCore/Rcpp.git
   - R CMD INSTALL Rcpp
   - git clone https://github.com/stnava/ANTsR.git
