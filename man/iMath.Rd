@@ -11,7 +11,7 @@ iMath(img, operation, ...)
 
 \item{operation}{a character string e.g. "GetLargestComponent" ... the
 special case of "GetOperations" will return a list of operations and brief
-description.}
+description.  Some operations may not be valid (WIP), but most are.}
 
 \item{...}{additional parameters}
 }
@@ -26,6 +26,7 @@ mask<-getMask( fi )
 op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
 op2<-iMath( mask , "Neg" )  # negate
 op3<-iMath( mask , "D" )  # distance transform
+ops<-iMath( mask , "GetOperations" )  # list all ops
 }
 \author{
 BB Avants
