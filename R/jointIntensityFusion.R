@@ -25,13 +25,15 @@
 #'
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData('r16'), 2)
+#' ref<-resampleImage(fi,c(50,50),1,0)
 #' ImageMath(2,ref,"Normalize",ref)
 #' mi<-antsImageRead( getANTsRData('r27'),  2)
 #' mi2<-antsImageRead( getANTsRData('r30') ,2)
 #' mi3<-antsImageRead( getANTsRData('r62') ,2)
 #' mi4<-antsImageRead( getANTsRData('r64') ,2)
 #' mi5<-antsImageRead( getANTsRData('r85') ,2)
-#' refmask<-getMask(ref,mean(ref) )
+#' refmask<-getMask(ref,mean(ref),Inf,1)
+#' ImageMath(2,refmask,"ME",refmask,10) # just to speed things up
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
 #' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[1,0]"
 #' seglist<-list()
