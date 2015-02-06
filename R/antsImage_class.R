@@ -403,7 +403,7 @@ antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FA
 
 
 
-#' Get Neighborhood
+#' antsGetNeighborhoodMatrix for the masked image
 #'
 #' Summarize neighborhoods for voxels in an antsImage.
 #'
@@ -433,9 +433,9 @@ antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FA
 #' @author Duda JT
 #' @examples
 #'
-#' mnit<-getANTsRData('mni')
-#' mnit<-antsImageRead(mnit,3)
-#' mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+#' mnit<-getANTsRData('r16')
+#' mnit<-antsImageRead(r16,2)
+#' mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=1)
 #' center <- dim(mnit)/2
 #' radius <- rep(2,3)
 #' mat<-antsGetNeighborhoodMatrix(mnit,mask,radius)
