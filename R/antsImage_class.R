@@ -13,6 +13,16 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' C++ type used to represent an ITK image pointed to by 'pointer'. the
 #' actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 #'
+#' @param .Object input object to convert
+#' @param pixeltype string e.g. "float" "unsigned char" "int"
+#' @param dimension dimensionality of the image
+#' @param x input object to convert
+#' @param mask mask for the region
+#' @param region antsRegion for the image
+#' @param i the slowest moving index to the image
+#' @param j the next slowest moving index to the image, similar for k
+#' @param e1 internal control for types
+#' @param e2 internal control for types
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
@@ -720,8 +730,9 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value
 #' convert types to antsImage
 #'
 #' @param object An object
-#' @param data Numeric vector or data.frame
-#' @param Fun Function. Default function is \code{sum}
+#' @param pixeltype a character string e.g. "float"
+#' @param spacing numeric vector matching image dimensionality e.g. c(1.2,1.2)
+#' @param origin numeric vector matching image dimensionality e.g. c(0,0)
 #' @param ... Extra named arguments passed to FUN
 #' @rdname as.antsImage
 #' @export

@@ -5,7 +5,7 @@
 \title{Compute cortical thickness using the DiReCT algorithm.}
 \usage{
 kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
-  outimg = outimg, ...)
+  ...)
 }
 \arguments{
 \item{s}{segmentation image}
@@ -23,7 +23,7 @@ kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
 \item{...}{anything else, see KK help in ANTs}
 }
 \value{
-0 -- Success\cr 1 -- Failure
+thickness antsImage
 }
 \description{
 Diffeomorphic registration-based cortical thickness based on probabilistic

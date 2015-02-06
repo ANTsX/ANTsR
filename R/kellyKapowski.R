@@ -11,7 +11,7 @@
 #' @param r gradient descent update parameter
 #' @param m gradient field smoothing parameter
 #' @param ... anything else, see KK help in ANTs
-#' @return 0 -- Success\cr 1 -- Failure
+#' @return thickness antsImage
 #' @author Shrinidhi KL, Avants BB
 #' @examples
 #'
@@ -25,7 +25,7 @@
 #' @export kellyKapowski
 kellyKapowski <- function( s = NA, g = NA, w = NA,
    its = 50, r = 0.025,
-   m = 1.5, outimg = outimg, ...) {
+   m = 1.5,  ...) {
   if (missing(s) | missing(g) | missing(w) | missing(its) | missing(r) |
     missing(m)  ) {
     print("Input error - check params & usage")

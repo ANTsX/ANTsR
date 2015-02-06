@@ -8,6 +8,9 @@
 #'  to the actual image
 #'  C++ type 'itk::image< pixeltype , dimension >::Pointer'
 #'
+#' @param .Object input object to convert
+#' @param elementtype string e.g. "float"
+#' @param x input object to convert
 #' @slot elementtype
 setClass(Class = "antsMatrix", representation(elementtype = "character", pointer = "externalptr"))
 
@@ -40,7 +43,7 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 #'
 #' @param object An object
 #' @param data Numeric vector or data.frame
-#' @param Fun Function. Default function is \code{sum}
+#' @param elementtype e.g. "float" or "double"
 #' @param ... Extra named arguments passed to FUN
 #' @rdname as.antsMatrix
 #' @export
