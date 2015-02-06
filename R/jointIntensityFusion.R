@@ -35,7 +35,6 @@
 #' refmask<-getMask(ref,mean(ref),Inf,1)
 #' ImageMath(2,refmask,"ME",refmask,10) # just to speed things up
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
-#' km<-"kmeans[3]"; mrf<-"[0.2,1x1]"; conv<-"[1,0]"
 #' seglist<-list()
 #' for ( i in 1:length(ilist) )
 #'  {
@@ -45,7 +44,7 @@
 #'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
 #'    transformlist=mytx$fwdtransforms)
 #'  ilist[[i]]=mywarpedimage
-#'  seg<-Atropos( d = 2, a = ilist[[i]],   m = mrf, c =conv,  i = km, x = refmask)
+#'  seg<-kmeansSegmentation( ilist[[i]], k=3, kmask = refmask)
 #'  seglist[[i]]<-seg$segmentation
 #'  }
 #' r<-2
