@@ -12,9 +12,11 @@ before_install:
 
 install:
   - sudo apt-get install -y cmake
+  - git clone https://github.com/stnava/ANTsR.git
+  - R CMD INSTALL ANTsR
   #  - travis_retry travis_wait ./travis-tool.sh install_deps
 
-script: travis_retry travis_wait 1000 ./travis-tool.sh install_github stnava/ANTsR
+# script: travis_retry travis_wait 1000 ./travis-tool.sh install_github stnava/ANTsR
 
 notifications:
   email:
