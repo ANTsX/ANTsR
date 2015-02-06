@@ -12,6 +12,9 @@ before_install:
 
 install:
   - sudo apt-get install -y cmake
+  - mkdir -p .R
+  - echo "CC=clang" >  .R/Makevars
+  - echo "CXX=clang++" >> .R/Makevars
   - ./travis-tool.sh install_github RcppCore/Rcpp
   - git clone https://github.com/stnava/ANTsR.git
   - R CMD INSTALL ANTsR
