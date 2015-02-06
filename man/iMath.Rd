@@ -10,8 +10,9 @@ iMath(img, operation, ...)
 \item{img}{input object, usually antsImage}
 
 \item{operation}{a character string e.g. "GetLargestComponent" ... the
-special case of "GetOperations" will return a list of operations and brief
-description.  Some operations may not be valid (WIP), but most are.}
+special case of "GetOperations" or "GetOperationsFull" will return
+a list of operations and brief description.
+Some operations may not be valid (WIP), but most are.}
 
 \item{...}{additional parameters}
 }
