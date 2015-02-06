@@ -573,7 +573,7 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
 #'
 #'
 #' @param x Image object of S4 class 'antsImage' to get values from.
-#' @param x image physical point
+#' @param point image physical point
 #' @return array of pixel values
 #' @examples
 #'
@@ -702,6 +702,26 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"),
     return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
   })
 
+
+#' Set a pixel value at an index
+#'
+#' Set a pixel value at an index in an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage'.
+#' @param i the slowest moving index to the image
+#' @param j the next slowest moving index to the image, similar for k ( 2d )
+#' @param k the next slowest moving index to the image ( 3d )
+#' @param l the next slowest moving index to the image ( 4d )
+#' @param value the value to place at this location
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' antsSetPixels(img,2,3,value=Inf)
+#'
+#'
+#' @export antsTransformPhysicalPointToIndex
 antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
@@ -747,27 +767,27 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       return()
     }
   }
-  return(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
+  temp<-(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
 }
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 #' as.antsImage
