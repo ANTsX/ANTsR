@@ -11,4 +11,4 @@ LazyLoad: yes
 Depends: Rcpp, methods, tools
 Suggests: psych, igraph, fpc, irlba, caret, rgl, grid, png, BGLR, glmnet, cluster, robust, pixmap, misc3d, signal, mFilter, sna, e1071, randomForest, magic, fastICA, visreg, moments, wmtsa, DMwR
 LinkingTo: Rcpp
-SystemRequirements: cmake
+SystemRequirements: cmake, git
