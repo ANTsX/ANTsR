@@ -51,7 +51,7 @@ Estimates an image from another set of images - intensity generalization of join
 \examples{
 set.seed(123)
 ref<-antsImageRead( getANTsRData('r16'), 2)
-ref<-resampleImage(fi,c(50,50),1,0)
+ref<-resampleImage(ref,c(50,50),1,0)
 ImageMath(2,ref,"Normalize",ref)
 mi<-antsImageRead( getANTsRData('r27'),  2)
 mi2<-antsImageRead( getANTsRData('r30') ,2)
