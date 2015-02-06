@@ -17,7 +17,7 @@
 #'
 #' fmat<-replicate(1000, rnorm(200))
 #' k<-1
-#' for ( ftype in c('butt','stl','trig') ) {
+#' for ( ftype in c("butt","stl","trig") ) {
 #'   myres<-frequencyFilterfMRI( fmat, tr = 4, freqLo = 0.01, freqHi = 0.05, opt = ftype )
 #'   comparemat<-cbind(fmat[,k],myres[,k])
 #'   plot(ts(comparemat),main=ftype)

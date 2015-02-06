@@ -26,7 +26,7 @@ Truncate outlier intensities and bias correct with N4 with or without mask
 and weight images.
 }
 \examples{
-fn<-getANTsRData('r16')
+fn<-getANTsRData("r16")
 img<-antsImageRead(fn,2)
 img2<-abpN4( img )
 }

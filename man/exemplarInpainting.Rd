@@ -47,14 +47,14 @@ mask<-fi
 mask[ mask > 0 ]<-1
 mask2<-mask
 mask2[11:20,11:20]<-2
-mask<-as.antsImage( mask , 'float' )
-fi<-as.antsImage( fi , 'float' )
+mask<-as.antsImage( mask , "float" )
+fi<-as.antsImage( fi , "float" )
 SmoothImage(2,fi,3,fi)
-mo<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
-mo2<-as.antsImage( replicate(100, rnorm(100)) , 'float' )
+mo<-as.antsImage( replicate(100, rnorm(100)) , "float" )
+mo2<-as.antsImage( replicate(100, rnorm(100)) , "float" )
 ilist<-list(mo,mo2)
 painted<-exemplarInpainting(fi,mask,ilist)
-mask2<-as.antsImage( mask2 , 'float' )
+mask2<-as.antsImage( mask2 , "float" )
 painted2<-exemplarInpainting(fi,mask2,ilist)
 # just use 1 image, so no regression is performed
 painted3<-exemplarInpainting(fi,mask2, list(ilist[[1]]))

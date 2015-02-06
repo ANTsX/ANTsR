@@ -8,10 +8,6 @@
 #' multivariate segmentation if you pass a list of images in: e.g.
 #' a=c(img1,img2).
 #'
-#' @param d This option forces the image to
-#' be treated as a specified-dimensional image. If not specified, Atropos tries
-#' to infer the dimensionality from the first input image. Allowed values: 2,
-#' 3, 4.
 #' @param a One or more scalar images is specified for segmentation using the
 #' -a/--intensity-image option. For segmentation scenarios with no prior
 #' information, the first scalar image encountered on the command line is used
@@ -33,19 +29,20 @@
 #' @author Shrinidhi KL, B Avants
 #' @examples
 #'
-#' img<-antsImageRead( getANTsRData('r16') ,2)
+#' img<-antsImageRead( getANTsRData("r16") , 2 )
+#' img<-resampleImage( img, c(64,64), 1, 0 )
 #' mask<-getMask(img)
-#' segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)
+#' segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',
+#'    c = '[2,0]',  i = 'kmeans[3]', x = mask )
 #' @export Atropos
-Atropos <- function(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]", priorweight = 0.5,
+Atropos <- function( a, x,
+  i = "kmeans[3]",
+  m = "[0.2,1x1]",
+  c = "[5,0]",
+  priorweight = 0.5,
   ...) {
-  if (typeof(d) == "list") {
-    .Call("Atropos", .int_antsProcessArguments(d), PACKAGE = "ANTsR")
-    return(0)
-  }
-  if (missing(d) | missing(a) | missing(x)) {
-    print("Input error - check params & usage")
-    .Call("Atropos", .int_antsProcessArguments(c(list("-h"))), PACKAGE = "ANTsR")
+  if ( missing(x)) {
+    .Call("Atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
     return(NULL)
   }
   # define the output temp files
@@ -76,26 +73,40 @@ Atropos <- function(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]", prio
   outs <- paste("[", .antsrGetPointerName(outimg), ",", probs, "]", sep = "")
   mymask <- antsImageClone(x, "unsigned int")
   if (length(a) == 1)
-    myargs <- list(d = d, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask,
+    myargs <- list(d = mydim, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask,
       ...)
   if (length(a) == 2)
-    myargs <- list(d = d, a = a[[1]], a = a[[2]], m = m, o = outs, c = c, m = m,
+    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], m = m, o = outs, c = c, m = m,
       i = i, x = mymask, ...)
   if (length(a) == 3)
-    myargs <- list(d = d, a = a[[1]], a = a[[2]], a = a[[3]], m = m, o = outs,
+    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]], m = m, o = outs,
       c = c, m = m, i = i, x = mymask, ...)
-  if (length(a) > 3) {
-    myargs <- list(d = d, a = a[[1]], a = a[[2]], a = a[[3]], m = m, o = outs,
+  if (length(a) == 4) {
+    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+      a = a[[4]], m = m, o = outs,
       c = c, m = m, i = i, x = mymask, ...)
-    print(" more than 3 input images not really supported, using first 3 ")
   }
+  if (length(a) == 5) {
+    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+      a = a[[4]], a = a[[5]], m = m, o = outs,
+      c = c, m = m, i = i, x = mymask, ...)
+  }
+  if (length(a) >= 6) {
+    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+      a = a[[4]], a = a[[5]], a = a[[6]], m = m, o = outs,
+      c = c, m = m, i = i, x = mymask, ...)
+  }
+  if ( length(a) > 6)
+    print(" more than 6 input images not really supported, using first 6 ")
   .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
-  probsout <- list.files(path = tdir, pattern = glob2rx(searchpattern), full.names = TRUE,
+  probsout <- list.files(path = tdir,
+    pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)
   pimg <- antsImageRead(probsout[1], mydim)
   probimgs <- c(pimg)
   for (x in c(2:length(probsout))) {
     probimgs <- c(probimgs, antsImageRead(probsout[x], mydim))
   }
-  return(list(segmentation = outimg, probabilityimages = probimgs))
+  outimg=antsImageClone( outimg, 'float' )
+  return(list( segmentation = outimg, probabilityimages = probimgs ))
 }

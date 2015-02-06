@@ -10,7 +10,7 @@
 #' @author Avants BB
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData('r16') ,2)
+#' fi<-antsImageRead( getANTsRData("r16") ,2)
 #' finn<-resampleImage(fi,c(50,60),1,0)
 #' filin<-resampleImage(fi,c(1.5,1.5),0,1)
 #'

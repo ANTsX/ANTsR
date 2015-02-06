@@ -22,7 +22,7 @@ segmentation and probability images
 k means image segmentation that is a wrapper around Atropos
 }
 \examples{
-fi<-antsImageRead( getANTsRData('r16') ,2)
+fi<-antsImageRead( getANTsRData("r16") ,2)
 N3BiasFieldCorrection(2,fi,fi,4)
 seg<-kmeansSegmentation( fi, 3 )
 }

@@ -13,15 +13,14 @@
 #' @examples
 #'
 #' if ( usePkg("randomForest") ) {
-#' img<-antsImageRead( getANTsRData('r16') ,2)
+#' img<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask( img )
-#' segs<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',
-#'   i = 'kmeans[3]', x = mask)
+#' segs<-kmeansSegmentation( img, k=3, kmask = mask)
 #' fimgs<-lappend( img, segs$probabilityimages )
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , verbose=TRUE )
 #' plot( rfsegs$segmentation )
 #' # now use in atropos w/priors
-#' segs2<-Atropos( d = 2, a = fimgs, m = '[0.2,1x1]',
+#' segs2<-Atropos( a = img, m = '[0.2,1x1]',
 #'   c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
 #'  }
 #'

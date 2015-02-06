@@ -30,10 +30,10 @@
 #'
 #' \dontrun{
 #' boldImages <- list()
-#' boldImages[[1]] <- antsImageRead( 'subject1.nii.gz', dim = 4, pixeltype = 'float' )
-#' boldImages[[2]] <- antsImageRead( 'subject2.nii.gz', dim = 4, pixeltype = 'float' )
-#' boldImages[[3]] <- antsImageRead( 'subject3.nii.gz', dim = 4, pixeltype = 'float' )
-#' boldImages[[4]] <- antsImageRead( 'subject4.nii.gz', dim = 4, pixeltype = 'float' )
+#' boldImages[[1]] <- antsImageRead( "subject1.nii.gz", dim = 4, pixeltype = 'float' )
+#' boldImages[[2]] <- antsImageRead( "subject2.nii.gz", dim = 4, pixeltype = 'float' )
+#' boldImages[[3]] <- antsImageRead( "subject3.nii.gz", dim = 4, pixeltype = 'float' )
+#' boldImages[[4]] <- antsImageRead( "subject4.nii.gz", dim = 4, pixeltype = 'float' )
 #'
 #' maskImage <- NA
 #'

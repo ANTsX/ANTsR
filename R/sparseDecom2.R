@@ -40,7 +40,7 @@
 #'
 #' \dontrun{
 #' # a masked example
-#' im<-antsImageRead( getANTsRData('r64') ,2)
+#' im<-antsImageRead( getANTsRData("r64") ,2)
 #' dd<- im > 250
 #' mask<-antsImageClone( im )
 #' mask[ !dd ]<-0

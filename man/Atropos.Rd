@@ -4,15 +4,10 @@
 \alias{Atropos}
 \title{FMM Segmentation}
 \usage{
-Atropos(d, a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]",
+Atropos(a, x, i = "kmeans[3]", m = "[0.2,1x1]", c = "[5,0]",
   priorweight = 0.5, ...)
 }
 \arguments{
-\item{d}{This option forces the image to
-be treated as a specified-dimensional image. If not specified, Atropos tries
-to infer the dimensionality from the first input image. Allowed values: 2,
-3, 4.}
-
 \item{a}{One or more scalar images is specified for segmentation using the
 -a/--intensity-image option. For segmentation scenarios with no prior
 information, the first scalar image encountered on the command line is used
@@ -50,9 +45,11 @@ multivariate segmentation if you pass a list of images in: e.g.
 a=c(img1,img2).
 }
 \examples{
-img<-antsImageRead( getANTsRData('r16') ,2)
+img<-antsImageRead( getANTsRData("r16") , 2 )
+img<-resampleImage( img, c(64,64), 1, 0 )
 mask<-getMask(img)
-segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',c = '[5,0]',  i = 'kmeans[3]', x = mask)
+segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',
+   c = '[2,0]',  i = 'kmeans[3]', x = mask )
 }
 \author{
 Shrinidhi KL, B Avants

@@ -9,11 +9,11 @@
 #' @param ... all parameters
 #' @author Shrinidhi KL
 #' @examples
-#' fi<-antsImageRead( getANTsRData('r16') ,2)
+#' fi<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask(fi)
-#' ImageMath( 2 , fi , 'GD', fi , 1 )  # gray matter dilation
-#' ImageMath( 2 , mask , 'Neg', mask )  # negate
-#' ImageMath( 2 , mask , 'D', mask )  # distance transform
+#' ImageMath( 2 , fi , "GD", fi , 1 )  # gray matter dilation
+#' ImageMath( 2 , mask , "Neg", mask )  # negate
+#' ImageMath( 2 , mask , "D", mask )  # distance transform
 #' plot(mask)
 #'
 #' @export ImageMath

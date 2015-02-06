@@ -27,7 +27,7 @@ feature image
 \examples{
 set.seed(123)
 fi<-makeImage(c(20,20),rnorm(400,mean=1,sd=0.1))
-# fi<-antsImageRead( getANTsRData('r16') ,2)
+# fi<-antsImageRead( getANTsRData("r16") ,2)
 mask<-getMask(fi,0.8,Inf,0)
 segs<-kmeansSegmentation( fi ,3 , mask)$segmentation
 segs[ segs != 1 ]<-0

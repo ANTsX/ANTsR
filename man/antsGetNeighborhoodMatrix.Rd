@@ -40,7 +40,7 @@ center for each voxel in a neighborhood
 Summarize neighborhoods for voxels in an antsImage.
 }
 \examples{
-r16<-getANTsRData('r16')
+r16<-getANTsRData("r16")
 r16<-antsImageRead(r16,2)
 mask<-getMask(r16,lowThresh=mean(r16),cleanup=1)
 radius <- rep(2,2)

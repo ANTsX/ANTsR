@@ -3,7 +3,6 @@
 #' Brain extraction based on mapping a template image and its mask to the input
 #' image.  Should be preceded by abpN4.
 #'
-#'
 #' @param img image to which we map a brain mask
 #' @param tem Template image which has an associated label mask.
 #' @param temmask Template's antsImage brain mask.
@@ -15,10 +14,10 @@
 #' @examples
 #'
 #' # short example first
-#' fn<-getANTsRData('r16')
+#' fn<-getANTsRData("r16")
 #' img<-antsImageRead(fn,2)
 #' img<-resampleImage(img,c(128,128),1,0)
-#' tf<-getANTsRData('r64')
+#' tf<-getANTsRData("r64")
 #' tem<-antsImageRead(tf,2)
 #' tem<-resampleImage(tem,c(128,128),1,0)
 #' temmask<-antsImageClone( tem )
