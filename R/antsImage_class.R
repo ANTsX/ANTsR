@@ -375,11 +375,6 @@ antsSetDirection <- function(x, direction) {
 }
 
 
-
-
-
-
-
 #' Get Neighborhood
 #'
 #' Get the values in a local neighborhood of an 'antsImage'.
@@ -531,6 +526,22 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 
 }
 
+
+#' Get Spatial Point from Index
+#'
+#' Get spatial point from index of an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param index image index
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pt<-antsTransformIndexToSpatialPoint(img,c(2,2))
+#'
+#'
+#' @export antsGetPixels
 antsTransformIndexToPhysicalPoint <- function(x, index) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
