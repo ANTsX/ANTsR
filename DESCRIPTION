@@ -3,11 +3,16 @@ Type: Package
 Title: ANTs in R
 Version: 1.0
 Date: 2012-02-01
-Authors@R: c(person("BBAvants", "Developer", role = c("aut", "cre"),
+ Authors@R: c(person("Brian B. Avants", role = c("aut", "cre"),
          email = "stnava@gmail.com"),
-        person("BMKandel", "Developer", role = "aut") )
-Author: Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J Tustison,
-  Shrinidhi KL, Brian B. Avants
+        person("Benjamin M. Kandel", "Developer", role = "aut"),
+        person("Jeff T. Duda", "Developer", role = "aut"),
+        person("Philip A. Cook", "Developer", role = "aut"),
+        person("Nicholas J. Tustison", "Developer", role = "aut"),
+        person("Shrinidhi KL", "Developer", role = "aut"),
+        )
+Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
+    Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: Package provides access to ANTs routines in R
 License: GPL (>=2)

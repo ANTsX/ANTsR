@@ -1,7 +1,7 @@
 #' @name combineNuisancePredictors
 #' @title Combine and reduce dimensionality of nuisance predictors.
 #' @description Combine and select nuisance predictors to maximize correlation between \code{inmat} and \code{target}.
-#' @usage combineNuisancePredictors(inmat, target, globalpredictors=NA, 
+#' @usage combineNuisancePredictors(inmat, target, globalpredictors=NA,
 #'   maxpreds=4, localpredictors=NA, method="cv", k=5, covariates=NA, ordered=F)
 #' @param inmat Input predictor matrix.
 #' @param target Target outcome matrix.
@@ -15,12 +15,17 @@
 #' @return Array of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.  If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)} by \code{ncol(aslmat)} by \code{npreds}.
 #' @author Benjamin M. Kandel, Brian B. Avants
 #' @examples
-#' moco <- antsMotionCalculation(getANTsRData('pcasl'))
+#' set.seed(120)
+#' simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
+#' moco <- antsMotionCalculation( simimg , moreaccurate=0)
+#' # for real data use below
+#' # moco <- antsMotionCalculation(getANTsRData('pcasl'))
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 #' noise <- getASLNoisePredictors(aslmat, tc)
-#' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 4)
-combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 4, 
+#' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
+#' @export combineNuisancePredictors
+combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 4,
   localpredictors = NA, method = "cv", k = 5, covariates = NA, ordered = F) {
   avgR2 <- function(inmat, target, k, covariates) {
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
@@ -28,7 +33,7 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
     r2pos <- r2max[r2max > 0]
     median(r2pos)
   }
-  bestPredictors <- function(inmat, noisemat, target = target, maxpreds = maxpreds, 
+  bestPredictors <- function(inmat, noisemat, target = target, maxpreds = maxpreds,
     method = method, k = k, covariates = covariates, ordered = ordered) {
     if (method == "svd") {
       noise <- svd(noisemat, nv = 0, nu = maxpreds)$u
@@ -41,7 +46,7 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
           r2sum[ii] <- avgR2(residmat, target, k, covariates)
         }
         scl <- 0.95
-        if (max(r2sum, na.rm = T) < 0) 
+        if (max(r2sum, na.rm = T) < 0)
           scl <- 1.05
         mxt <- scl * max(r2sum, na.rm = T)
         bestpreds <- (1:maxpreds)[which(r2sum > mxt)[1]]
@@ -54,7 +59,7 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
           preds.remain <- (1:ncol(globalpredictors))[-bestpreds]
           }
           for (jj in preds.remain) {
-          residmat <- residuals(lm(inmat ~ globalpredictors[, c(bestpreds, 
+          residmat <- residuals(lm(inmat ~ globalpredictors[, c(bestpreds,
             jj)]))
           r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
           }
@@ -65,8 +70,8 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
     }
     noise
   }
-  
-  noise <- bestPredictors(inmat, globalpredictors, target, maxpreds, method, k, 
+
+  noise <- bestPredictors(inmat, globalpredictors, target, maxpreds, method, k,
     covariates, ordered)
   noise
-} 
+}
