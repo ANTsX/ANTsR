@@ -44,7 +44,7 @@ renderImageLabels <- function(
     ThresholdImage(3, limg, limg, i, i)
 
     if (smoothsval > 0) {
-      SmoothImage(3, limg, smoothsval, limg)
+      limg<-smoothImage(limg, smoothsval)
     }
 
     print(sum(as.array(limg)))

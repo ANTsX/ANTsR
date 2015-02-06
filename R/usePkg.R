@@ -9,7 +9,7 @@
 #' @author Benjamin M. Kandel, BB Avants
 #' @examples
 #'
-#' usePkg('randomForest')
+#' usePkg("randomForest")
 #'
 #' @export usePkg
 usePkg <- function(packageName, allowInstall=FALSE ) {

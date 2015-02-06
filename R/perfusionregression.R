@@ -94,7 +94,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     for (i in 1:nrow(robvals)) {
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- robvals[i, ]
-      SmoothImage(3, temp, 1.5, temp)
+      temp<-smoothImage(temp, 1.5)
       robvals[i, ] <- temp[mask_img == 1]
     }
   regweights <- (rgw/myct)
@@ -145,7 +145,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     for (i in 1:nrow(smoothcoeffmat)) {
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- smoothcoeffmat[i, ]
-      SmoothImage(3, temp, 1.5, temp)
+      temp<-smoothImage( temp, 1.5 )
       nmatimgs[[i]] <- antsGetNeighborhoodMatrix(temp, mask_img, rep(1, 3),
         boundary.condition = "mean")
       smoothcoeffmat[i, ] <- temp[mask_img == 1]

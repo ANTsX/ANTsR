@@ -41,15 +41,15 @@ Uses a target function to denoise resting bold data
 \examples{
 \dontrun{
 # simplest approach - load the bold & a mask, then denoise
-bold<-antsImageRead('bold.nii.gz',4)
+bold<-antsImageRead("bold.nii.gz",4)
 avgbold<-getAverageOfTimeSeries(bold)
 boldmask<-getMask( avgbold, lowThresh=mean(avgbold), cleanup=TRUE )
-roimask<-antsImageRead('roi.nii.gz',3)
+roimask<-antsImageRead("roi.nii.gz",3)
 timeselect<-10:(dim(bold)[4]-10)
 # can do this if you like its approach
 cleanfMRI <- antsPreprocessfMRI( bold, maskImage=boldmask,
   frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
-  spatialSmoothingType = 'gaussian', spatialSmoothingParameters = 2,
+  spatialSmoothingType = "gaussian", spatialSmoothingParameters = 2,
   residualizeMatrix=TRUE, numberOfCompCorComponents=2 )
 boldmat<-timeseries2matrix( cleanfMRI$cleanBoldImage, cleanfMRI$maskImage )
 roimat<-timeseries2matrix( cleanfMRI$cleanBoldImage, roimask )
@@ -64,13 +64,13 @@ betas<-mdl$beta.t[1,]
 sum(betas[betas > 3])
 betaimg<-antsImageClone( boldmask )
 betaimg[ boldmask == 1 ]<-betas
-antsImageWrite( betaimg, 'betas2.nii.gz' )
+antsImageWrite( betaimg, "betas2.nii.gz" )
 
 # more complex
-bold<-antsImageRead('bold.nii.gz',4)
-boldmask<-antsImageRead('meanboldmask.nii.gz',3)
-aalimg<-antsImageRead('meanboldAALmask.nii.gz',3)
-data('aal',package='ANTsR')
+bold<-antsImageRead("bold.nii.gz",4)
+boldmask<-antsImageRead("meanboldmask.nii.gz",3)
+aalimg<-antsImageRead("meanboldAALmask.nii.gz",3)
+data("aal",package="ANTsR")
 dmnlabels<-aal$label_num[aal$isdmn>0]
 aalvec<-aalimg > 0
 whichregion<-3
@@ -84,7 +84,7 @@ for ( i in 1:max(aalimg) )
 maskvec<-boldmask > 0 & aalimg == whichregion
 boldmask[ maskvec ]<-0
 timeselect<-10:dim(bold)[4]
-if ( ! exists('moco') ) {
+if ( ! exists("moco") ) {
   moco<-motion_correction(bold,moreaccurate=1)
   moco<-as.matrix( moco$moco_params )[timeselect,3:ncol(moco$moco_params)]
 }
@@ -92,15 +92,15 @@ boldmat<-timeseries2matrix(bold,boldmask)
 boldmat<-boldmat[timeselect,]
 aalimg[aalimg > 0 ]<-1
 dmnvec<-rowMeans(timeseries2matrix(bold,aalimg))[timeselect]
-dmnvec<-(stl(ts(dmnvec, frequency = 4),'per')$time.series)[,2]
-dmnvec2<-(stl(ts(dmnvec, frequency = 100),'per')$time.series)[,2]
+dmnvec<-(stl(ts(dmnvec, frequency = 4),"per")$time.series)[,2]
+dmnvec2<-(stl(ts(dmnvec, frequency = 100),"per")$time.series)[,2]
 dmnvec<-ts(as.numeric(dmnvec)-as.numeric(dmnvec2))
 dmnmat<-matrix( dmnvec, ncol=1)
 dnz<-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,
                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
-print(paste('Best number of noise regressors',dnz$n))
+print(paste("Best number of noise regressors",dnz$n))
 # now recompute the matrix using the full mask
-boldmask<-antsImageRead('meanboldmask.nii.gz',3)
+boldmask<-antsImageRead("meanboldmask.nii.gz",3)
 boldmat<-timeseries2matrix(bold,boldmask)
 boldmat<-boldmat[timeselect,]
 mdl<-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )

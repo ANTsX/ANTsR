@@ -53,10 +53,10 @@ background image.
   mniafn<-getANTsRData("mnia")
   mnia<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia,mnia,22,25)
-  SmoothImage(3,mnia,1.5,mnia)
+  mnia<-smoothImage(mnia,1.5)
   mnia2<-antsImageRead(mniafn,3)
   ThresholdImage(3,mnia2,mnia2,1,4)
-  SmoothImage(3,mnia2,1.5,mnia2)
+  mnia2<-smoothImage(mnia2,1.5)
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices='50x140x5',

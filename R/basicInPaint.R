@@ -24,7 +24,7 @@
 #' mask2[11:20,11:20]<-2
 #' mask<-as.antsImage( mask2 , 'float' )
 #' fi<-as.antsImage( fi , 'float' )
-#' SmoothImage(2,fi,3,fi)
+#' fi<-smoothImage(fi,3)
 #' painted<-basicInPaint(fi,mask)
 #' \dontrun{
 #' lmask<-antsImageRead('brainmask.nii.gz',2)
@@ -62,8 +62,7 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     w2 <- (1 - gparam)
     sval <- min(antsGetSpacing(img))
     for (i in 1:its) {
-      soutimg <- antsImageClone(outimg)
-      SmoothImage(inpainted@dimension, outimg, sval, soutimg)
+      soutimg<-smoothImage(outimg, sval, )
       v1 <- outimg[paintMaskUse == 2] * w2
       v2 <- soutimg[paintMaskUse == 2] * gparam
       outimg[paintMaskUse == 2] <- (v1 + v2)

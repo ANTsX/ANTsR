@@ -49,7 +49,7 @@ mask2<-mask
 mask2[11:20,11:20]<-2
 mask<-as.antsImage( mask , "float" )
 fi<-as.antsImage( fi , "float" )
-SmoothImage(2,fi,3,fi)
+fi<-smoothImage(fi,3)
 mo<-as.antsImage( replicate(100, rnorm(100)) , "float" )
 mo2<-as.antsImage( replicate(100, rnorm(100)) , "float" )
 ilist<-list(mo,mo2)

@@ -255,7 +255,7 @@ networkEiganat <- function(
       vecimg <- antsImageClone(mask)
       vecimg[mask > 0] <- sparsev
       temp <- antsImageClone(mask)
-      SmoothImage(mask@dimension, vecimg, 1, temp)
+      temp<-smoothImage( vecimg, 1 )
       ImageMath(mask@dimension, temp, "ClusterThresholdVariate", vecimg, mask,
         clustval)
       sparsev <- c(temp[mask > 0.5])
