@@ -16,9 +16,10 @@
 #' @examples
 #'
 #' img<-antsImageRead( getANTsRData("r16") ,2)
+#' img<-resampleImage(img,c(64,64),1,0)
 #' mask<-getMask( img )
 #' segs<-kmeansSegmentation( img, k=3, kmask = mask)
-#' kellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
+#' thk<-kellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
 #'   w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
 #'
 #' @export kellyKapowski
@@ -38,7 +39,7 @@ kellyKapowski <- function( s = NA, g = NA, w = NA,
   outimg=antsImageClone(g)
   kkargs <- list(d = d, s = s, g = g, w = w, c = its, r = 0.5, m = 1,
     o = outimg)
-  temp<-.Call( "kellyKapowski", .int_antsProcessArguments(c(kkargs)),
+  temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
     PACKAGE = "ANTsR" )
   return(outimg)
 }
