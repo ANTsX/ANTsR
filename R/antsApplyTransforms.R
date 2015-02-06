@@ -23,8 +23,8 @@
 #' # example 1 - simplified
 #'   fixed<-antsImageRead( getANTsRData('r16') ,2)
 #'   moving<-antsImageRead( getANTsRData('r64') ,2)
-#' fixed<-resampleImage(fixed,c(128,128),1,0)
-#' moving<-resampleImage(moving,c(128,128),1,0)
+#' fixed<-resampleImage(fixed,c(64,64),1,0)
+#' moving<-resampleImage(moving,c(64,64),1,0)
 #'   mytx<-antsRegistration(fixed=fixed , moving=moving ,
 #'     typeofTransform = c('SyN'),
 #'     outprefix=paste(tempdir(),'/Z',sep=''))
