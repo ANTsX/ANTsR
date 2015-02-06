@@ -25,13 +25,13 @@
 #' @examples
 #'
 #' \dontrun{
-#'  tem<-antsImageRead('templates/template_brain.nii.gz',3)
-#'  temlab<-antsImageRead('temp.nii.gz',3)
-#'  temlab2<-antsImageRead('temp2.nii.gz',3)
+#'  tem<-antsImageRead("templates/template_brain.nii.gz",3)
+#'  temlab<-antsImageRead("temp.nii.gz",3)
+#'  temlab2<-antsImageRead("temp2.nii.gz",3)
 #'  # try getANTsRData if you have www access
-#'  mymni<-list( antsImageRead(getANTsRData('mni'),3),
-#'        antsImageRead(getANTsRData('mnib'),3),
-#'        antsImageRead(getANTsRData('mnia'),3) )
+#'  mymni<-list( antsImageRead(getANTsRData("mni"),3),
+#'        antsImageRead(getANTsRData("mnib"),3),
+#'        antsImageRead(getANTsRData("mnia"),3) )
 #'  mytem<-list(tem,temlab,temlab2)
 #'  mynetworkdescriptor<-getMultivariateTemplateCoordinates(
 #'    mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )

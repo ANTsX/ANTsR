@@ -4,26 +4,26 @@
 #' segmentation of an image.  This is an optimization algorithm.
 #'
 #'
-#' @param d Number of dimensions of the input image
 #' @param s segmentation image
 #' @param g gray matter probability image
 #' @param w white matter probability image
-#' @param c convergence params - first controls iterations
+#' @param its convergence params - controls iterations
 #' @param r gradient descent update parameter
 #' @param m gradient field smoothing parameter
-#' @param outimg output image
 #' @param ... anything else, see KK help in ANTs
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
 #' @examples
 #'
-#' \dontrun{
-#' KellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=45,r=0.5,m=1,o=oimg )
-#' }
+#' img<-antsImageRead( getANTsRData('r16') ,2)
+#' mask<-getMask( img )
+#' segs<-kmeansSegmentation( img, k=3, kmask = mask)
+#' KellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
+#'   w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
 #'
 #' @export KellyKapowski
-KellyKapowski <- function(d = NA, s = NA, g = NA, w = NA,
-   c = "[45,0.0,10]", r = 0.025,
+KellyKapowski <- function( s = NA, g = NA, w = NA,
+   its = 50, r = 0.025,
    m = 1.5, outimg = outimg, ...) {
   if (missing(d) | missing(s) | missing(g) | missing(w) | missing(c) | missing(r) |
     missing(m) | missing(outimg)) {
@@ -34,6 +34,11 @@ KellyKapowski <- function(d = NA, s = NA, g = NA, w = NA,
     s <- antsImageClone(s, "unsigned int")
   }
   # KellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
-  kkargs <- list(d = d, s = s, g = g, w = w, c = 10, r = 0.5, m = 1, outimg = outimg)
-  .Call("KellyKapowski", .int_antsProcessArguments(c(kkargs)), PACKAGE = "ANTsR")
+  d=s@dimension
+  outimg=antsImageClone(g)
+  kkargs <- list(d = d, s = s, g = g, w = w, c = its, r = 0.5, m = 1,
+    outimg = outimg)
+  temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
+    PACKAGE = "ANTsR" )
+  return(outimg)
 }

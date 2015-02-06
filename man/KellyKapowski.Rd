@@ -4,25 +4,21 @@
 \alias{KellyKapowski}
 \title{Compute cortical thickness using the DiReCT algorithm.}
 \usage{
-KellyKapowski(d = NA, s = NA, g = NA, w = NA, c = "[45,0.0,10]",
-  r = 0.025, m = 1.5, outimg = outimg, ...)
+KellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
+  outimg = outimg, ...)
 }
 \arguments{
-\item{d}{Number of dimensions of the input image}
-
 \item{s}{segmentation image}
 
 \item{g}{gray matter probability image}
 
 \item{w}{white matter probability image}
 
-\item{c}{convergence params - first controls iterations}
+\item{its}{convergence params - controls iterations}
 
 \item{r}{gradient descent update parameter}
 
 \item{m}{gradient field smoothing parameter}
-
-\item{outimg}{output image}
 
 \item{...}{anything else, see KK help in ANTs}
 }
@@ -34,9 +30,11 @@ Diffeomorphic registration-based cortical thickness based on probabilistic
 segmentation of an image.  This is an optimization algorithm.
 }
 \examples{
-\dontrun{
-KellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=45,r=0.5,m=1,o=oimg )
-}
+img<-antsImageRead( getANTsRData('r16') ,2)
+mask<-getMask( img )
+segs<-kmeansSegmentation( img, k=3, kmask = mask)
+KellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
+  w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
 }
 \author{
 Shrinidhi KL, Avants BB

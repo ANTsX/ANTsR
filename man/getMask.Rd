@@ -7,9 +7,8 @@
 getMask(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2)
 }
 \arguments{
-\item{img}{Input image. Can be a filename of a 3D image or an
-\code{antsImage} of dimension 3. If \code{img} is NULL, a file chooser
-dialog will appear.}
+\item{img}{Input image. Can be an \code{antsImage} of 2, 3 or 4 dimensions.
+If \code{img} is NULL, a file chooser dialog will appear.}
 
 \item{lowThresh}{An inclusive lower threshold for voxels to be included in
 the mask.}
@@ -22,7 +21,7 @@ clean up the mask by eroding away small or weakly-connected areas, and
 closing holes.}
 }
 \value{
-Object of type \code{antsImage} containing the masked image. The
+Object of type \code{antsImage} containing the mask image. The
 voxel intensities will be binarized, 1 for voxels in the mask and 0 outside.
 }
 \description{
@@ -37,10 +36,8 @@ These functions are available in \link{ImageMath}, see the operations
 \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.
 }
 \examples{
-\dontrun{
-# input_img.nii is a 3D image
-mask_img <- get_mask( 'input_img.nii' , 500 , 1e9 )
-}
+img<-antsImageRead( getANTsRData("r16") ,2)
+mask<-getMask( img )
 }
 \author{
 Shrinidhi KL, Cook PA
