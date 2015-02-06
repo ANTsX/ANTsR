@@ -27,7 +27,7 @@ mm<-rapidlyInspectImageData( fnl )
 if ( !usePkg("DMwR") | ! usePkg('fpc') )
    { print("Need DMwR and fpc packages") } else {
   pamres <- pamk(mm,1:4)
-  outlier.scores <- lofactor( mm, k=5 )
+  outlier.scores <- lofactor( mm, k=3 )
   outliers <- order(outlier.scores)
   }
 }
