@@ -48,41 +48,12 @@ plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
   axis = 1,
   slices = round(seq(1, dim(x)[axis], length.out=8)),
+  window.img = quantile(x[x!=0], 0.05, 0.95),
   threshold = "0.5xInf",
-  quality = NA,
+  quality = 4,
   outname = NA,
   alpha = 0.5,
   ... ) {
-  spec <- c("verbose", "v", 2, "integer", " verbose output ", "help", "h", 0, "logical",
-    " print the help ", "myantsimage", "b", 2, "character", " the reference image on which to overlay ",
-    "color", "c", 1, "character", " the color for the overlay ", "functional",
-    "f", 1, "character", " the image to use as overlay ", "axis", "a", 1, "character",
-    " the axis to slice (1 , 2 or  3)  ", "slices", "s", 1, "character", " the slices to overlay written as 10x20x3 where 10x20 is the range and 3 is the increment etc. ",
-    "threshold", "t", 1, "character", " we overlay values above/below this threshold : of form LOxHI  ",
-    "quality", "q", 1, "integer", " integer quality magnification factor 1 => large (e.g. 10) ",
-    "output", "o", 1, "character", " the output prefix ")
-  # ............................................. #
-  spec <- matrix(spec, ncol = 5, byrow = TRUE)
-  if (missing(x)) {
-    # print a friendly message and exit with a non-zero error code
-    cat("\n")
-    self <- "plot.antsImage"
-    cat(paste(self, "\n"))
-    for (x in 1:nrow(spec)) {
-      cat("\n")
-      longopt <- paste("--", spec[x, 1], sep = "")
-      shortopt <- paste("-", spec[x, 2], sep = "")
-      hlist <- paste(shortopt, "|", longopt, spec[x, 5], "\n \n")
-      # print(hlist,quote=F)
-      cat(format(hlist, width = 40, justify = c("left")))
-    }
-    cat(format("Example: in 2D \n", width = 40, justify = c("left")))
-    ex <- paste(" plot.antsImage(myantsimage=mask,functional=mask,threshold=\"50x150\",color=\"red\",axis=1)\n \n ")
-    cat(format("Example: in 3D \n", width = 40, justify = c("left")))
-    ex <- paste(" plot.antsImage(myantsimage=img,functional=img,threshold=\"50x150\",slices=\"10x20x3\",color=\"red\",axis=0)\n \n ")
-    ex <- format(ex, width = length(ex), justify = c("left"))
-    cat("\n")
-    cat(ex)
     return(NULL)
   }
   # get the options
@@ -154,17 +125,6 @@ plot.antsImage <- function(x, y,
     image(rotate270.matrix(z), ...)
   }
 
-  if (is.na(quality)) {
-    quality <- 4
-  }
-  if (is.na(slices) & imagedim > 2) {
-    print(paste(" No slices set."))
-    return(NULL)
-  }
-  if (is.na(myantsimage)) {
-    print(paste("image", myantsimage, "does not exist. Exiting."))
-    return(NULL)
-  }
   if (is.na(functional)) {
     # print(paste('functional image file', functional, 'does not exist. no overlay
     # will be produced.'))
@@ -190,31 +150,14 @@ plot.antsImage <- function(x, y,
   if (imagedim == 3)
     img <- aperm(img, c(perms), resize = T)
   if(class(slices) == 'character'){ 
-    slicesin <- c(as.numeric(unlist(strsplit(slices, "x"))))
-  } else {
-    slicesin <- slices
-  }
-print(slicesin) 
+    slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
+    slices = round(seq(slices[1], slices[2], by=slices[3]))
+  } 
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
-  # print(paste('threshold at ', threshold[1], ' and ', threshold[2], 'you chose
-  # these slices :')) print(slicesin)
-  if (slicesin[1] > dim(img)[imagedim] | slicesin[2] > dim(img)[imagedim]) {
-    print("slices do not fit in image dimensions ---exiting")
-    print(paste("slices1 ", slicesin[1], "slices2", slicesin[2], "dim-to-slice",
-      dim(img)[imagedim]))
-    return(NULL)
+  if (max(slices) > dim(img)[axis]) {
+    stop('Slices do not fit in image dimensions.') 
   }
-  nslices <- round((slicesin[2] - slicesin[1])/slicesin[imagedim]) + 1
-  slices <- rep(NA, nslices)
-  ct <- 1
-  curslice <- slicesin[1]
-  while (ct < nslices) {
-    slices[ct] <- curslice
-    curslice <- curslice + slicesin[imagedim]
-    ct <- ct + 1
-  }
-  if (is.na(slices[nslices]))
-    slices[nslices] <- slicesin[2]
+  nslices <- length(slices) 
   winrows <- round(length(slices)/10 + 0.5)
   if (winrows < 1)
     winrows <- 1
@@ -257,14 +200,20 @@ print(slicesin)
   # pdf(paste(output,'.pdf',sep='')) onm<-paste(output,'.jpg',sep='')
   mag <- quality
   pixperinch <- 96
-  if (!is.na(outname))
-    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag, height = nrow(bigslice) *
-      mag, units = "px", quality = 75, bg = "white")) else dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
-  x <- pixmapGrey(bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice))
+  if (!is.na(outname)){
+    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag, 
+       height = nrow(bigslice) * mag, units = "px", quality = 75, bg = "white"))
+  } else {
+    dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
+  } 
+  bigslice[bigslice<window.img[1]] <- window.img[1]
+  bigslice[bigslice>window.img[2]] <- window.img[2] 
+  img.plot <- suppressWarnings(pixmapGrey(
+    bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice)))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
-  plot(x, bg = "white")
+  plot(img.plot, bg = "white")
   if (threshold[1] > threshold[2] | is.na(functional)) {
     if (!is.na(outname))
       dev.off()
