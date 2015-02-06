@@ -16,7 +16,7 @@
 #' mask2<-getMask( img )
 #' ImageMath(2,mask,'ME',mask,25)
 #' mask2[ mask == 1 ]<-0
-#' seg<-kmeansSegmentation( img, k=3, kmask = mask)
+#' segs<-kmeansSegmentation( img, k=3, kmask = mask)
 #' fimgs<-list( img )
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100 )
 #' rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
