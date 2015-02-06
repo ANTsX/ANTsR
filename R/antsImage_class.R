@@ -26,6 +26,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
+#' @slot pointer the memory location
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 
@@ -962,6 +963,7 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
 #'
 #' @slot pixeltype
 #' @slot dimension
+#' @slot pointer the memory location
 setClass(Class = "antsImageList", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 

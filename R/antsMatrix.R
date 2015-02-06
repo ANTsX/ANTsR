@@ -12,6 +12,7 @@
 #' @param elementtype string e.g. "float"
 #' @param x input object to convert
 #' @slot elementtype
+#' @slot pointer the memory location
 setClass(Class = "antsMatrix", representation(elementtype = "character", pointer = "externalptr"))
 
 #' @describeIn antsMatrix
