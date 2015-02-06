@@ -515,8 +515,8 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
-      Rcpp::Rcout << "Invalid Arguments: pass 2 images in " << std::endl ;
-      Rcpp::wrap( 1 );
+    Rcpp::Rcout << "Invalid Arguments: pass 2 images in " << std::endl;
+    Rcpp::wrap( 1 );
     }
   Rcpp::S4 in_image1( r_in_image1 ) ;
   Rcpp::S4 in_image2( r_in_image2 ) ;
@@ -530,10 +530,11 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     in_image2.slot( "dimension" ) ) ;
   if (  ( dimension != dimension2 ) ||
         ( in_pixeltype.compare(in_pixeltype2) != 0 ) )
-  {
-    Rcpp::Rcout << "Images must have equivalent dimensionality & pixel type" << std::endl ;
+    {
+    Rcpp::Rcout << "Images must have equivalent dimensionality & pixel type"
+      << std::endl ;
     Rcpp::wrap( 1 );
-  }
+    }
 
   if ( dimension == 2 )
     {
@@ -574,6 +575,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       localSearchIterations, whichMetric, r_scale,
       r_doref, txfn ) );
     }
-    else Rcpp::Rcout << " Dimension " << dimension << " is not supported " << std::endl;
+  else Rcpp::Rcout << " Dimension " << dimension <<
+    " is not supported " << std::endl;
   return Rcpp::wrap( 1 );
 }

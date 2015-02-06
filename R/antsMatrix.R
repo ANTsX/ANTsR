@@ -65,15 +65,3 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
   lst[[length(lst)]] <- NULL
   return(lst)
 })
-
-
-as.data.frame.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
-  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
-  names(lst)[1:(length(lst))] <- lst[length(lst)]
-  lst[[length(lst)]] <- NULL
-  as.data.frame(lst)
-}
-
-setAs("antsMatrix", "data.frame", function(from) {
-  as.data.frame.antsMatrix(from)
-})
