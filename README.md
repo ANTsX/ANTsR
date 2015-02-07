@@ -40,10 +40,7 @@ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/
 
 * Install cmake
 ```
-brew install
-```
-```
-cmake
+brew install cmake
 ```
 
 * Install zlib and wget, if necessary
@@ -66,7 +63,7 @@ ZLIB_INCLUDE_DIR:PATH=/usr/local/Cellar/zlib/1.2.8/include
 
 ```
 Error: make: llvm-g++-4.2: No such file or directory, Error: /bin/sh: llvm-g++-4.2: command not found
-``` 
+```
 Solution:  In file: /Library/Frameworks/R.framework/Versions/3.0/Resources/etc/Makeconf
 
 Find: llvm-g++-4.2
@@ -94,9 +91,11 @@ These are still under development; use at your own discretion.
 ### R dependencies
 You may need to install R packages that ANTsR requires. For example:
 ```
-install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "rrcov","magic", "knitr", "pixmap", "rgl", "misc3d","mvtnorm","pcaPP","fastICA","robustbase","robust"), dependencies = TRUE);
+install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
 ```
 These dependencies are subject to change until development is stable.
+You can gain additional functionality by installing packages that
+are listed in the (`DESCRIPTION` file)[https://github.com/stnava/ANTsR/blob/master/DESCRIPTION] under `Suggests`.
 
 ## Usage
 Load the package:

@@ -1,9 +1,14 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
 
 language: c
+
 compiler:
   # - gcc # it fails because of travis limited memory
   - clang
+
+os:
+  - linux
+  - osx
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -16,22 +21,20 @@ before_install:
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
   - git clone https://github.com/stnava/ANTsR.git
-#  - mkdir -p ANTsR/src/ANTS/ANTS-build
-#  - basedir=${PWD}
-#  - cd ANTsR/src/ANTS/
-#  - git clone https://github.com/stnava/ANTs.git
-#  - mv ANTs ANTS-src
-#  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
-#  - cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo  -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
+  - mkdir -p ANTsR/src/ANTS/ANTS-build
+  - basedir=${PWD}
+  - cd ANTsR/src/ANTS/
+  - git clone https://github.com/stnava/ANTs.git
+  - mv ANTs ANTS-src
+  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
+  - cmake -D CMAKE_BUILD_TYPE=Debug  -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
 #  - cd ${basedir}
 
 install:
   - ./travis-tool.sh install_github RcppCore/Rcpp
 
 script:
-  - travis_retry  R CMD INSTALL ANTsR
-  - R CMD build ANTsR
-  - R CMD check ANTsR_1.0.tar.gz   --as-cran --no-install
+  - travis_retry  R CMD INSTALL ANTsR && R CMD build ANTsR && R CMD check ANTsR_1.0.tar.gz --as-cran --no-install --no-manual
 
 # script: travis_retry travis_wait 1000 ./travis-tool.sh install_github stnava/ANTsR
 
