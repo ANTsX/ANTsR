@@ -9,17 +9,28 @@ before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
-  - sudo apt-get install -y cmake
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
+  - git clone https://github.com/stnava/ANTsR.git
+  - mkdir -p ANTsR/src/ANTS/ANTS-build
+  - basedir=${PWD}
+  - cd ANTsR/src/ANTS/
+  - git clone https://github.com/stnava/ANTs.git
+  - mv ANTs ANTS-src
+  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
+  - echo BA_CHECK $PWD
+  - cmake -DRUN_LONG_TESTS=OFF -DRUN_SHORT_TESTS=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./.. && make -j 2
+  - cd ${basedir}
 
 install:
+  - sudo apt-get install -y cmake
   - ./travis-tool.sh install_github RcppCore/Rcpp
-  - git clone https://github.com/stnava/ANTsR.git
+
+script:
   - travis_retry  R CMD INSTALL ANTsR
   #  - travis_retry travis_wait ./travis-tool.sh install_deps
 
