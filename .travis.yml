@@ -2,8 +2,8 @@
 
 language: c
 compiler:
-  - gcc # it fails because of travis limited memory
-  # - clang
+  # - gcc # it fails because of travis limited memory
+  - clang
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -18,8 +18,7 @@ install:
 #  - echo "CC=clang" >  .R/Makevars
 #  - echo "CXX=clang++" >> .R/Makevars
 #  - source .R/Makevars
-  - git clone https://github.com/RcppCore/Rcpp.git
-  - R CMD INSTALL Rcpp
+  - ./travis-tool.sh install_github RcppCore/Rcpp
   - git clone https://github.com/stnava/ANTsR.git
   - R CMD INSTALL ANTsR
   - R CMD INSTALL ANTsR
