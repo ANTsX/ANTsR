@@ -74,10 +74,7 @@ install_github("stnava/ANTsR")
 <li>Install cmake</li>
 </ul>
 
-<pre><code>brew install
-</code></pre>
-
-<pre><code>cmake
+<pre><code>brew install cmake
 </code></pre>
 
 <ul>
@@ -138,10 +135,12 @@ install_github("stnava/ANTsR")
 
 <p>You may need to install R packages that ANTsR requires. For example:</p>
 
-<pre><code>install.packages(pkgs = c("Rcpp", "signal", "timeSeries", "mFilter", "doParallel", "rrcov","magic", "knitr", "pixmap", "rgl", "misc3d","mvtnorm","pcaPP","fastICA","robustbase","robust"), dependencies = TRUE);
+<pre><code>install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
 </code></pre>
 
-<p>These dependencies are subject to change until development is stable.</p>
+<p>These dependencies are subject to change until development is stable.
+You can gain additional functionality by installing packages that
+are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>.</p>
 
 <h2>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
@@ -246,7 +245,7 @@ antsImageWrite( agebetas, 'agebetas.nii.gz' )
 
 <pre><code>mnit&lt;-getANTsRData("mni")
 mnit&lt;-antsImageRead(mnit,3)
-ResampleImageBySpacing(3,mnit,mnit,4,4,4)
+mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
 mask&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius &lt;- rep(2,mnit@dimension)
 mat&lt;-antsGetNeighborhoodMatrix(mnit,mask,radius,
