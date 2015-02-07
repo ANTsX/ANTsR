@@ -20,6 +20,7 @@ ExternalProject_Add( ANTS
                -D COPY_SCRIPT_FILES_TO_BIN_DIR=ON # for useful things like buildtemplateparallel
                -D BUILD_SHARED_LIBS=OFF # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
+         -D BUILD_EXTERNAL_APPLICATIONS=OFF
          -D BUILD_ALL_ANTS_APPS=OFF # only what we need for ANTsR
 	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
     cmakedefine NDEBUG
