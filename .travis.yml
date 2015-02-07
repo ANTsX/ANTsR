@@ -23,7 +23,7 @@ before_install:
   - mv ANTs ANTS-src
   - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
   - echo BA_CHECK $PWD
-  - cmake -DRUN_LONG_TESTS=OFF -DRUN_SHORT_TESTS=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
+  - cmake -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
   - cd ${basedir}
 
 install:
