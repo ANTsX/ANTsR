@@ -95,7 +95,7 @@ install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
 ```
 These dependencies are subject to change until development is stable.
 You can gain additional functionality by installing packages that
-are listed in the (`DESCRIPTION` file)[https://github.com/stnava/ANTsR/blob/master/DESCRIPTION] under `Suggests`.
+are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
 
 ## Usage
 Load the package:
