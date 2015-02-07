@@ -5,6 +5,9 @@ RCPP_INCLUDE_DIR=`${R_DIR}Rscript -e 'Rcpp:::CxxFlags()'`
 RCPP_LIB_DIR=`${R_DIR}Rscript -e 'Rcpp:::LdFlags()'`
 R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
 R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
+if [[ $TRAVIS -eq true ]] ; then
+  CMAKE_BUILD_TYPE=Debug
+fi
 cd ./src
 cmake -D ANTS_DIR:PATH="$ANTS_DIR" -D ITK_DIR:PATH="$ITK_DIR" -D RCPP_INCLUDE_DIR:PATH="$RCPP_INCLUDE_DIR" -D RCPP_LIB_DIR:PATH="$RCPP_LIB_DIR" -D R_INCLUDE_DIR:PATH="$R_INCLUDE_DIR" -D R_LIB_DIR:PATH="$R_LIB_DIR" -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  .
 make -j 2 # $ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS
