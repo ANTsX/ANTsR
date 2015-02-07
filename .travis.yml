@@ -21,7 +21,8 @@ install:
   - git clone https://github.com/RcppCore/Rcpp.git
   - R CMD INSTALL Rcpp
   - git clone https://github.com/stnava/ANTsR.git
-  - travis_retry travis_wait R CMD INSTALL ANTsR
+  - R CMD INSTALL ANTsR
+  - R CMD INSTALL ANTsR
   #  - travis_retry travis_wait ./travis-tool.sh install_deps
 
 # script: travis_retry travis_wait 1000 ./travis-tool.sh install_github stnava/ANTsR
