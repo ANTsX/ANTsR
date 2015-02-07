@@ -16,15 +16,14 @@ before_install:
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
   - git clone https://github.com/stnava/ANTsR.git
-  - mkdir -p ANTsR/src/ANTS/ANTS-build
-  - basedir=${PWD}
-  - cd ANTsR/src/ANTS/
-  - git clone https://github.com/stnava/ANTs.git
-  - mv ANTs ANTS-src
-  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
-  - echo BA_CHECK $PWD
-  - cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo  -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
-  - cd ${basedir}
+#  - mkdir -p ANTsR/src/ANTS/ANTS-build
+#  - basedir=${PWD}
+#  - cd ANTsR/src/ANTS/
+#  - git clone https://github.com/stnava/ANTs.git
+#  - mv ANTs ANTS-src
+#  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
+#  - cmake -D CMAKE_BUILD_TYPE=RelWithDebInfo  -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 2
+#  - cd ${basedir}
 
 install:
   - sudo apt-get install -y cmake
