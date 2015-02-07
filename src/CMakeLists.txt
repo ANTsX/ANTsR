@@ -7,21 +7,22 @@ if( NOT CMAKE_BUILD_TYPE )
 endif( NOT CMAKE_BUILD_TYPE )
 
 #   we have to define NDEBUG due to a possible bug in itkMacro.h --- we
-#   require   return static_cast<TTarget>(x); to be implemented rather 
+#   require   return static_cast<TTarget>(x); to be implemented rather
 #   than the dynamic_cast
 ExternalProject_Add( ANTS
-   TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/tmp 
+   TMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/tmp
     STAMP_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/stamp
     DOWNLOAD_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     GIT_REPOSITORY https://github.com/stnava/ANTs.git
-    GIT_TAG 7163380e900d0396fc479802576128a753c8c32e
+    GIT_TAG c0132f794134a1f00afd9b8754b431f94568be62
     SOURCE_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-src
     CMAKE_ARGS -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} # build type set by user
                -D COPY_SCRIPT_FILES_TO_BIN_DIR=ON # for useful things like buildtemplateparallel
                -D BUILD_SHARED_LIBS=OFF # R requires shared objects
 	       -D BUILD_TESTING=OFF # reduces build time
+         -D BUILD_ALL_ANTS_APPS=OFF # only what we need for ANTsR
 	       -D USE_SYSTEM_ITK=OFF # use the ITK built above using superbuild or use the one specified by user through 'ITK_DIR'
-    cmakedefine NDEBUG 
+    cmakedefine NDEBUG
     BINARY_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build
     INSTALL_COMMAND "" )
 set( ANTS_DIR ${ANTsR_SuperBuild_SOURCE_DIR}/ANTS/ANTS-build )
