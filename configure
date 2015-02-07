@@ -5,6 +5,9 @@ RCPP_INCLUDE_DIR=`${R_DIR}Rscript -e 'Rcpp:::CxxFlags()'`
 RCPP_LIB_DIR=`${R_DIR}Rscript -e 'Rcpp:::LdFlags()'`
 R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
 R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
+if [[ `uname` -eq Darwin ]] ; then
+  CMAKE_BUILD_TYPE=MinSizeRel
+fi
 if [[ $TRAVIS -eq true ]] ; then
   CMAKE_BUILD_TYPE=Debug
 fi

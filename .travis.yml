@@ -15,7 +15,6 @@ before_install:
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
-  - git clone https://github.com/stnava/ANTsR.git
 #  - mkdir -p ANTsR/src/ANTS/ANTS-build
 #  - basedir=${PWD}
 #  - cd ANTsR/src/ANTS/
@@ -26,12 +25,12 @@ before_install:
 #  - cd ${basedir}
 
 install:
-  - sudo apt-get install -y cmake
   - ./travis-tool.sh install_github RcppCore/Rcpp
 
 script:
   - travis_retry  R CMD INSTALL ANTsR
-  #  - travis_retry travis_wait ./travis-tool.sh install_deps
+  - R CMD build ANTsR
+  - R CMD check ANTsR_1.0.tar.gz   --as-cran --no-install
 
 # script: travis_retry travis_wait 1000 ./travis-tool.sh install_github stnava/ANTsR
 
@@ -45,7 +44,7 @@ notifications:
 env:
   global:
     - R_BUILD_ARGS="--no-build-vignettes --no-manual --no-resave-data"
-    - R_CHECK_ARGS="--no-build-vignettes --no-manual --timings --verbose"
+    - R_CHECK_ARGS="--no-build-vignettes --no-manual --timings"
     - R_CHECK_TIME="TRUE"
     - R_CHECK_TESTS="FALSE"
     - _R_CHECK_TIMINGS_="0"
