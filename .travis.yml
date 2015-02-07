@@ -12,7 +12,6 @@ os:
 
 before_install:
   - cd ..
-  - sudo apt-get pdflatex
   - basedir=${PWD}
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
