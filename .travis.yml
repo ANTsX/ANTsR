@@ -11,6 +11,7 @@ os:
   - osx
 
 before_install:
+  - cd ..
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
@@ -20,7 +21,6 @@ before_install:
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
-  - cd ..
   - mkdir -p ANTsR/src/ANTS/ANTS-build
   - basedir=${PWD}
   - cd ANTsR/src/ANTS/
