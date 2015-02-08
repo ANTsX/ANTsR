@@ -30,6 +30,15 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 
+setMethod(f = "show", "antsImage", function(object){
+    cat("antsImage\n")
+    cat("  Pixel Type   :", object@pixeltype, "\n")
+    cat("  Dimensions   :", paste(dim(object), collapse="x"), "\n")
+    cat("  Voxel Spacing:", paste(antsGetSpacing(object), collapse="x"), "\n")
+    cat("  Origin       :", antsGetOrigin(object), "\n")
+    cat("  Direction    :", antsGetDirection(object), "\n")
+    cat("\n")
+})
 #' @describeIn antsImage
 setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
   pixeltype = "float", dimension = 3) {
