@@ -173,5 +173,7 @@ actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 etc noting that short is not supported}
 
 \item{\code{dimension}}{usually 2 or 3 but can be 4}
+
+\item{\code{pointer}}{the memory location}
 }}
 

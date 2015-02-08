@@ -13,5 +13,7 @@ An S4 class to hold a list of antsImages
 \item{\code{pixeltype}}{}
 
 \item{\code{dimension}}{}
+
+\item{\code{pointer}}{the memory location}
 }}
 

@@ -4,9 +4,9 @@
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
 
-Original Authors: Shrinidhi KL,  Avants BB
+Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
 
-
+Original Authors: Shrinidhi KL,  Brian B. Avants
 
 ## Easiest installation approach (from within R)
 ```
