@@ -18,6 +18,11 @@ this assumes you have [cmake](http://www.cmake.org/download/) installed / access
 
 windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
+## Try releases
+
+[releases](https://github.com/stnava/ANTsR/releases) are new so try at own risk,
+but let us know of issues ...
+
 ## Installation from source
 see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
 

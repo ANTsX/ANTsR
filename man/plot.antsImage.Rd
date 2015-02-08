@@ -5,8 +5,8 @@
 \title{plot.antsImage}
 \usage{
 \method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
-  "yellow"), axis = 1, slices = "1x1x1", threshold = "0.5xInf",
-  quality = NA, outname = NA, alpha = 0.5, ...)
+  "yellow"), axis = 2, slices, window.img = quantile(x[x != 0], 0.05, 0.95),
+  threshold = "0.5xInf", quality = 4, outname = NA, alpha = 0.5, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay}
@@ -48,9 +48,9 @@ background image.
 }
 \examples{
 \dontrun{
-  mnit<-getANTsRData("mni")
+  mnit<-getANTsRData('mni')
   mnit<-antsImageRead(mnit,3)
-  mniafn<-getANTsRData("mnia")
+  mniafn<-getANTsRData('mnia')
   mnia<-antsImageRead(mniafn,3)
   mnia<-thresholdImage(mnia,22,25)
   mnia<-smoothImage(mnia,1.5)
