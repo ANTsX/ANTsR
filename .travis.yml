@@ -25,12 +25,6 @@ before_install:
 
 install:
   - ./travis-tool.sh install_github RcppCore/Rcpp
-#  - mkdir -p ANTsR/src/ANTS/ANTS-build
-#  - cd ANTsR/src/ANTS/
-#  - git clone https://github.com/stnava/ANTs.git
-#  - mv ANTs ANTS-src
-#  - cd ${basedir}/ANTsR/src/ANTS/ANTS-build
-#  - cmake -D CMAKE_BUILD_TYPE=Debug  -D BUILD_TESTING=OFF -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF ./../ANTS-src && make -j 1
   - cd ${basedir}
 
 script:

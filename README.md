@@ -97,6 +97,8 @@ These dependencies are subject to change until development is stable.
 You can gain additional functionality by installing packages that
 are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
 
+The [`travis.yml` file](https://github.com/stnava/ANTsR/blob/master/.travis.yml) also shows a way to install from Linux command line.
+
 ## Usage
 Load the package:
 ```
