@@ -35,7 +35,7 @@ mask2<-mask
 mask2[11:20,11:20]<-2
 mask<-as.antsImage( mask2 , 'float' )
 fi<-as.antsImage( fi , 'float' )
-SmoothImage(2,fi,3,fi)
+fi<-smoothImage(fi,3)
 painted<-basicInPaint(fi,mask)
 \dontrun{
 lmask<-antsImageRead('brainmask.nii.gz',2)

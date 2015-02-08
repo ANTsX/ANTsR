@@ -26,19 +26,19 @@
 #' set.seed(123)
 #' ref<-antsImageRead( getANTsRData("r16"), 2)
 #' ref<-resampleImage(ref,c(50,50),1,0)
-#' ImageMath(2,ref,"Normalize",ref)
+#' ref<-iMath(ref,"Normalize")
 #' mi<-antsImageRead( getANTsRData("r27"),  2)
 #' mi2<-antsImageRead( getANTsRData("r30") ,2)
 #' mi3<-antsImageRead( getANTsRData("r62") ,2)
 #' mi4<-antsImageRead( getANTsRData("r64") ,2)
 #' mi5<-antsImageRead( getANTsRData("r85") ,2)
 #' refmask<-getMask(ref,mean(ref),Inf,1)
-#' ImageMath(2,refmask,"ME",refmask,10) # just to speed things up
+#' refmask<-iMath(refmask,"ME",10) # just to speed things up
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
 #' seglist<-list()
 #' for ( i in 1:length(ilist) )
 #'  {
-#'  ImageMath(2,ilist[[i]],"Normalize",ilist[[i]])
+#'  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
 #'  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
 #'    typeofTransform = c("Affine"), outprefix=tempfile() )
 #'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
@@ -56,7 +56,7 @@
 #' avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
 #' # save memory by separating masks
 #' refmaske<-antsImageClone(refmask)
-#' ImageMath(d,refmaske,"ME",refmask,15)
+#' refmaske<-iMath(refmaske,"ME",15)
 #' refmask[refmaske==1]<-0
 #' pp1<-jointIntensityFusion(ref,refmask,ilist,
 #'   beta=2,rad=rep(r,d))

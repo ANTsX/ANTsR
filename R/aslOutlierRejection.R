@@ -19,8 +19,8 @@ aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
     stop("ASL must be provided.")
   if (is.na(mask)) {
     avg <- getAverageOfTimeSeries(asl)
-    N3BiasFieldCorrection(3, avg, avg, 2)
-    N3BiasFieldCorrection(3, avg, avg, 2)
+    avg<-n3BiasFieldCorrection( avg, 2 )
+    avg<-n3BiasFieldCorrection( avg, 2 )
     mask <- getMask(avg, mean(avg), Inf)
   }
   nvox <- sum(mask[mask > 0])

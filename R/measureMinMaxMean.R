@@ -11,11 +11,11 @@
 #'
 #' \dontrun{
 #'   myimg <- as.antsImage(array(rnorm(1000), dim=c(10, 10, 10)))
-#'   MeasureMinMaxMean(myimg)
+#'   measureMinMaxMean(myimg)
 #' }
 #'
-#' @export MeasureMinMaxMean
-MeasureMinMaxMean <- function(image, mask = NA) {
+#' @export measureMinMaxMean
+measureMinMaxMean <- function(image, mask = NA) {
   if (missing(image))
     stop("Missing input image.")
   if (!is.na(mask)) {

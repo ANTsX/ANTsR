@@ -5,7 +5,7 @@
 #'
 #'
 #' @param img image to be bias corrected
-#' @param intensityTruncation Params to TruncateImageIntensity in ImageMath
+#' @param intensityTruncation Params to TruncateImageIntensity in iMath
 #' @param mask optional antsImage mask
 #' @param weightimg optional antsImage weighting - not implemented yet
 #' @param usen3 Use N3 instead of N4
@@ -34,16 +34,16 @@ abpN4 <- function(img = NA, intensityTruncation = c(0.025, 0.975, 256),
   ImageMath(dim, outimg, "TruncateImageIntensity", outimg,
     intensityTruncation[1], intensityTruncation[2], intensityTruncation[3])
   if (usen3 == TRUE) {
-    N3BiasFieldCorrection(list(img@dimension, outimg, outimg, "4"))
-    N3BiasFieldCorrection(list(img@dimension, outimg, outimg, "2"))
+    outimg<-n3BiasFieldCorrection( outimg, 4 )
+    outimg<-n3BiasFieldCorrection( outimg, 2 )
     return(outimg)
   }
   if (is.na(mask)) {
-    outimg<-N4BiasFieldCorrection(img)
+    outimg<-n4BiasFieldCorrection(img)
     return(outimg)
   }
   if (!is.na(mask)) {
-    outimg<-N4BiasFieldCorrection(img,mask)
+    outimg<-n4BiasFieldCorrection(img,mask)
     return(outimg)
   }
   if (!is.na(weightimg)) {

@@ -13,9 +13,20 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' C++ type used to represent an ITK image pointed to by 'pointer'. the
 #' actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 #'
+#' @param .Object input object to convert
+#' @param pixeltype string e.g. "float" "unsigned char" "int"
+#' @param dimension dimensionality of the image
+#' @param x input object to convert
+#' @param mask mask for the region
+#' @param region antsRegion for the image
+#' @param i the slowest moving index to the image
+#' @param j the next slowest moving index to the image, similar for k
+#' @param e1 internal control for types
+#' @param e2 internal control for types
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
+#' @slot pointer the memory location
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 
@@ -196,7 +207,24 @@ setMethod(f = "[", signature(x = "antsImage", i = "matrix", j = "antsRegion"), d
   return(.Call("antsImage_asVector", x, i, j, PACKAGE = "ANTsR"))
 })
 
-
+#' Get Pixels
+#'
+#' Get pixel values from an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param i indices in first dimension
+#' @param j indices in second dimension
+#' @param k indices in third dimension
+#' @param l indices in forth dimension
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pixel<-antsGetPixels(img,i=c(1,2),j=1)
+#'
+#'
+#' @export antsGetPixels
 antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
@@ -346,11 +374,6 @@ antsSetDirection <- function(x, direction) {
   }
   return(.Call("antsImage_SetDirection", x, direction, PACKAGE = "ANTsR"))
 }
-
-
-
-
-
 
 
 #' Get Neighborhood
@@ -504,6 +527,22 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 
 }
 
+
+#' Get Spatial Point from Index
+#'
+#' Get spatial point from index of an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param index image index
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
+#'
+#'
+#' @export antsTransformIndexToPhysicalPoint
 antsTransformIndexToPhysicalPoint <- function(x, index) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -527,6 +566,23 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
   return(.Call("antsImage_TransformIndexToPhysicalPoint", x, index, PACKAGE = "ANTsR"))
 }
 
+
+
+#' Get Index from Spatial Point
+#'
+#' Get index from spatial point of an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param point image physical point
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' pt<-antsTransformPhysicalPointToIndex(img,c(2,2))
+#'
+#'
+#' @export antsTransformPhysicalPointToIndex
 antsTransformPhysicalPointToIndex <- function(x, point) {
   if (class(x)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -647,6 +703,26 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"),
     return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
   })
 
+
+#' Set a pixel value at an index
+#'
+#' Set a pixel value at an index in an 'antsImage'.
+#'
+#'
+#' @param x Image object of S4 class 'antsImage'.
+#' @param i the slowest moving index to the image
+#' @param j the next slowest moving index to the image, similar for k ( 2d )
+#' @param k the next slowest moving index to the image ( 3d )
+#' @param l the next slowest moving index to the image ( 4d )
+#' @param value the value to place at this location
+#' @return array of pixel values
+#' @examples
+#'
+#' img<-makeImage(c(10,10),rnorm(100))
+#' antsSetPixels(img,2,3,value=Inf)
+#'
+#'
+#' @export antsTransformPhysicalPointToIndex
 antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
@@ -692,27 +768,27 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       return()
     }
   }
-  return(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
+  temp<-(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
 }
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
-    return(antsSetPixels(x, i, j, ..., value = value))
+    temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 #' as.antsImage
@@ -720,8 +796,9 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value
 #' convert types to antsImage
 #'
 #' @param object An object
-#' @param data Numeric vector or data.frame
-#' @param Fun Function. Default function is \code{sum}
+#' @param pixeltype a character string e.g. "float"
+#' @param spacing numeric vector matching image dimensionality e.g. c(1.2,1.2)
+#' @param origin numeric vector matching image dimensionality e.g. c(0,0)
 #' @param ... Extra named arguments passed to FUN
 #' @rdname as.antsImage
 #' @export
@@ -886,6 +963,7 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
 #'
 #' @slot pixeltype
 #' @slot dimension
+#' @slot pointer the memory location
 setClass(Class = "antsImageList", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 

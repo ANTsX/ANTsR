@@ -38,7 +38,7 @@ timeseries of all the nuisance predictors.
 Get nuisance predictors from ASL images
 }
 \examples{
-# for real data do img<-antsImageRead(getANTsRData('pcasl'),4)
+# for real data do img<-antsImageRead(getANTsRData("pcasl"),4)
 set.seed(120)
 img<-makeImage( c(10,10,10,20), rnorm(1000*20)+1 )
 moco <- antsMotionCalculation(img,moreaccurate=0)

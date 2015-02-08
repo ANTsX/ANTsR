@@ -45,18 +45,18 @@ lm2 <- lm(y2~x)
 mylm <- lm(y ~ x)
 
 myest <- bigLMStats(mylm)
-print(paste('R beta estimates for first outcome is', summary(lm1)$coefficients[-1,1],
-            'and for second outcome is', summary(lm2)$coefficients[-1,1]))
-print(paste('and our estimate is', as.numeric(myest$beta[,1]), as.numeric(myest$beta[,2])))
-print(paste('R std error estimate for first outcome is', summary(lm1)$coefficients[-1,2],
-            'and for second outcome is', summary(lm2)$coefficients[-1,2],
-            'and our estimate is', myest$beta.std[,1], myest$beta.std[,2]))
-print(paste('R t value estimate for first outcome is', summary(lm1)$coefficients[-1,3],
-            'and for second outcome is', summary(lm2)$coefficients[-1,3],
-            'and our estimate is', myest$beta.t[,1], myest$beta.t[,2]))
-print(paste('R pval for first outcome is', summary(lm1)$coefficients[-1,4],
-            'and for second outcome is', summary(lm2)$coefficients[-1,4],
-            'and our estimate is', myest$beta.pval[,1], myest$beta.pval[,2]))
+print(paste("R beta estimates for first outcome is", summary(lm1)$coefficients[-1,1],
+            "and for second outcome is", summary(lm2)$coefficients[-1,1]))
+print(paste("and our estimate is", as.numeric(myest$beta[,1]), as.numeric(myest$beta[,2])))
+print(paste("R std error estimate for first outcome is", summary(lm1)$coefficients[-1,2],
+            "and for second outcome is", summary(lm2)$coefficients[-1,2],
+            "and our estimate is", myest$beta.std[,1], myest$beta.std[,2]))
+print(paste("R t value estimate for first outcome is", summary(lm1)$coefficients[-1,3],
+            "and for second outcome is", summary(lm2)$coefficients[-1,3],
+            "and our estimate is", myest$beta.t[,1], myest$beta.t[,2]))
+print(paste("R pval for first outcome is", summary(lm1)$coefficients[-1,4],
+            "and for second outcome is", summary(lm2)$coefficients[-1,4],
+            "and our estimate is", myest$beta.pval[,1], myest$beta.pval[,2]))
 }
 \author{
 Kandel BM.

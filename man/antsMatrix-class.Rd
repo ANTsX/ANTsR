@@ -17,6 +17,13 @@
 
 \S4method{as.list}{antsMatrix}(x)
 }
+\arguments{
+\item{.Object}{input object to convert}
+
+\item{elementtype}{string e.g. "float"}
+
+\item{x}{input object to convert}
+}
 \description{
 An S4 class to hold an antsMatrix imported from ITK types
  C++ type used to represent an element of the matrix pointer

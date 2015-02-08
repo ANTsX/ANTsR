@@ -27,7 +27,7 @@
 #'     perf <- aslPerfusion( img, interpolation='linear',
 #'       dorobust=0.9, useDenoiser=4, skip=10, useBayesian=0,
 #'       moreaccurate=0, verbose=F, mask=aslmask )
-#'     perfp <- list( sequence='pcasl', m0=perf$m0 )
+#'     perfp <- list( sequence="pcasl", m0=perf$m0 )
 #'     cbf <- quantifyCBF( perf$perfusion, perf$mask, perfp )
 #'     ofn<-paste('temp',ct,'.nii.gz',sep='')
 #'     antsImageWrite( cbf$kmeancbf , ofn )

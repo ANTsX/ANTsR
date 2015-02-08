@@ -18,6 +18,11 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     return(NULL)
   }
 
+  if ( fileid == "r16" )
+    return( paste(path.package("ANTsR"),"/extdata/r16slice.jpg",sep="") )
+  if ( fileid == "r64" )
+    return( paste(path.package("ANTsR"),"/extdata/r64slice.jpg",sep="") )
+
   # ch2b = brodmann ch2a = aal mnib = brodmann mnia = all mnit = tracts
 
   myurl <- switch(fileid, r16 = "http://placid.nlm.nih.gov/download?items=10764",

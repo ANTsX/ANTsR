@@ -32,7 +32,7 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
     mask <- getMask(moco$moco_avg_img, 500, Inf, cleanup = T)
   }
   antsImageWrite(mask, file.mask)
-  antsMotionCorrStats(list(x = file.mask, d = img, o = file.out, f = framewise,
+  .antsMotionCorrStats(list(x = file.mask, d = img, o = file.out, f = framewise,
     m = file.mocoparam))
   tsDisplacement <- antsImageRead(paste(tmpdir, "out.nii.gz", sep = ""), 4)
   aslmat <- timeseries2matrix( img, mask)

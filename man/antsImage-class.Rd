@@ -87,6 +87,27 @@
 
 \S4method{>}{antsImage,ANY}(e1, e2)
 }
+\arguments{
+\item{.Object}{input object to convert}
+
+\item{pixeltype}{string e.g. "float" "unsigned char" "int"}
+
+\item{dimension}{dimensionality of the image}
+
+\item{x}{input object to convert}
+
+\item{mask}{mask for the region}
+
+\item{region}{antsRegion for the image}
+
+\item{i}{the slowest moving index to the image}
+
+\item{j}{the next slowest moving index to the image, similar for k}
+
+\item{e1}{internal control for types}
+
+\item{e2}{internal control for types}
+}
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the
 actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'

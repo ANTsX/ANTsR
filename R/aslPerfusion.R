@@ -128,8 +128,8 @@ aslPerfusion <- function(
     m0 <- antsImageClone(moco_mask_img)
     m0[moco_mask_img == 0] <- 0
     m0[moco_mask_img == 1] <- m0vals
-    N3BiasFieldCorrection(3,m0,m0,4)
-    N3BiasFieldCorrection(3,m0,m0,2)
+    m0<-n3BiasFieldCorrection(m0,4)
+    m0<-n3BiasFieldCorrection(m0,2)
     # Get average tagged image
     m1 <- antsImageClone(moco_mask_img)
     m1[moco_mask_img == 0] <- 0

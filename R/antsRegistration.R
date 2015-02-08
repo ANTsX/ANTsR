@@ -27,7 +27,6 @@
 #'     outprefix=paste(tempdir(),'/Z',sep=''))
 #'   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
 #'     transformlist=mytx$fwdtransforms)
-#'   par(mfrow=c(1,2))
 #'   plot(fi)
 #'   plot(mywarpedimage)
 #'   # example 2 - full access, only uses file-based I/O

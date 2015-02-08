@@ -67,7 +67,7 @@ antsImageWrite(perfimg,'perf.nii.gz')
 m0<-getAverageOfTimeSeries(asl)
 ctl<-c(1:(nrow(aslmat)/2))*2
 m0[ aslmask==1 ]<-colMeans(aslmat[ctl,])
-pcasl.parameters<-list( sequence='pcasl', m0=m0 )
+pcasl.parameters<-list( sequence="pcasl", m0=m0 )
 cbf <- quantifyCBF( perfimg, aslmask, pcasl.parameters )
 antsImageWrite(perfimg,'cbf.nii.gz')
 }

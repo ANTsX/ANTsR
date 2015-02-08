@@ -31,7 +31,8 @@ timeseriesN3 <- function(boldimg, mask, ncorrections = c(4, 2, 2)) {
   }
   for (i in 1:nrow(mat)) {
     perf <- makeImage(mask, mat[i, ])
-    for (nc in ncorrections) N3BiasFieldCorrection(dim - 1, perf, perf, nc)
+    for (nc in ncorrections)
+      perf<-n3BiasFieldCorrection( perf, nc )
     mat[i, ] <- perf[mask == 1]
   }
   if (ismatrix)

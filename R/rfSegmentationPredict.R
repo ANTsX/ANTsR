@@ -14,7 +14,7 @@
 #' img<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask( img )
 #' mask2<-getMask( img )
-#' ImageMath(2,mask,'ME',mask,25)
+#' mask<-iMath(mask,'ME',25)
 #' mask2[ mask == 1 ]<-0
 #' segs<-kmeansSegmentation( img, k=3, kmask = mask)
 #' fimgs<-list( img )

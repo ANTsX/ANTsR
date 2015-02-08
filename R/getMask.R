@@ -6,7 +6,7 @@
 #' \enumerate{ \item Erosion with radius 2 voxels \item Retain largest
 #' component \item Dilation with radius 1 voxel \item Morphological closing }
 #'
-#' These functions are available in \link{ImageMath}, see the operations
+#' These functions are available in \link{iMath}, see the operations
 #' \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.
 #'
 #' @param img Input image. Can be an \code{antsImage} of 2, 3 or 4 dimensions.
@@ -52,10 +52,7 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2) {
     stop("'lowthresh' and 'highthresh' must be numeric scalars")
   }
 
-
-  mask_img <- new("antsImage", "float", img@dimension)
-
-  ThresholdImage(img@dimension, img, mask_img, lowThresh, highThresh)
+  mask_img<-thresholdImage( img, lowThresh, highThresh )
 
   if (cleanup > 0) {
     ImageMath(img@dimension, mask_img, "ME", mask_img, cleanup)

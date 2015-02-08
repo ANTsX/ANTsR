@@ -9,10 +9,10 @@
 #' @examples
 #'
 #'  img<-makeImage( c(50,50), rnorm(2500) )
-#'  n4img<-N4BiasFieldCorrection(img)
+#'  n4img<-n4BiasFieldCorrection(img)
 #'
-#' @export N4BiasFieldCorrection
-N4BiasFieldCorrection<-function( img , mask=NA )
+#' @export n4BiasFieldCorrection
+n4BiasFieldCorrection<-function( img , mask=NA )
 {
 if ( is.na(mask) ) mask<-getMask(img)
 N4_CONVERGENCE_1 <- "[50x50x50x50,0.0000001]"
@@ -21,7 +21,7 @@ N4_SHRINK_FACTOR_1 <- "4"
 N4_SHRINK_FACTOR_2 <- "2"
 N4_BSPLINE_PARAMS <- "[200]"
 outimg<-antsImageClone(img)
-.helpN4BiasFieldCorrection(
+.helpn4BiasFieldCorrection(
   list(d = outimg@dimension,
        i = img,
        s = N4_SHRINK_FACTOR_1,
@@ -32,6 +32,6 @@ outimg<-antsImageClone(img)
        )
 return(outimg)
 }
-.helpN4BiasFieldCorrection <- function(...) {
+.helpn4BiasFieldCorrection <- function(...) {
   .Call("N4BiasFieldCorrection", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
 }

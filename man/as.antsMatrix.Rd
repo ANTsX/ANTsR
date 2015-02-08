@@ -18,9 +18,9 @@ as.antsMatrix(object, ...)
 
 \item{...}{Extra named arguments passed to FUN}
 
-\item{data}{Numeric vector or data.frame}
+\item{elementtype}{e.g. "float" or "double"}
 
-\item{Fun}{Function. Default function is \code{sum}}
+\item{data}{Numeric vector or data.frame}
 }
 \description{
 convert types to an antsMatrix

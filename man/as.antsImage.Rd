@@ -24,9 +24,11 @@ as.antsImage(object, ...)
 
 \item{...}{Extra named arguments passed to FUN}
 
-\item{data}{Numeric vector or data.frame}
+\item{pixeltype}{a character string e.g. "float"}
 
-\item{Fun}{Function. Default function is \code{sum}}
+\item{spacing}{numeric vector matching image dimensionality e.g. c(1.2,1.2)}
+
+\item{origin}{numeric vector matching image dimensionality e.g. c(0,0)}
 }
 \description{
 convert types to antsImage

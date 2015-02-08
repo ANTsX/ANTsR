@@ -109,7 +109,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   temmaskwarped <- antsApplyTransforms(img, temmask,
     transformlist = invtransforms,
     interpolator = c("NearestNeighbor"))
-  ThresholdImage(img@dimension, temmaskwarped, temmaskwarped, 0.5, 1)
+  temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
   ImageMath(img@dimension, tmp, "MD", temmaskwarped, 2)
   ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
@@ -124,13 +124,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE,
     k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD)
   Atropos(atroparams)
-  fseg <- antsImageClone(seg, "float")
-  segwm <- antsImageClone(img)
-  ThresholdImage(img@dimension, fseg, segwm, 3, 3)
-  seggm <- antsImageClone(img)
-  ThresholdImage(img@dimension, fseg, seggm, 2, 2)
-  segcsf <- antsImageClone(img)
-  ThresholdImage(img@dimension, fseg, segcsf, 1, 1)
+  fseg <- antsImageClone(  seg, "float")
+  segwm<-thresholdImage(  fseg, 3, 3 )
+  seggm<-thresholdImage(  fseg, 2, 2)
+  segcsf<-thresholdImage( fseg, 1, 1)
   ImageMath(img@dimension, segwm, "GetLargestComponent", segwm)
   ImageMath(img@dimension, seggm, "GetLargestComponent", seggm)
   ImageMath(img@dimension, seggm, "FillHoles", seggm)
@@ -145,7 +142,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   finalseg[segwm > 0.5 & seggm < 0.5] <- 3
   finalseg[segcsf > 0.5 & seggm < 0.5 & segwm < 0.5] <- 1
   # BA - finalseg looks good! could stop here
-  ThresholdImage(img@dimension, finalseg, tmp, 2, 3)
+  tmp<-thresholdImage( finalseg, 2, 3)
   ImageMath(img@dimension, tmp, "ME", tmp, 2)
   ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
   ImageMath(img@dimension, tmp, "MD", tmp, 4)
@@ -176,7 +173,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   localmin <- which.min(distmeans)
   dthresh <- dsearchvals[localmin]
   bmask <- antsImageClone(finalseg2)
-  ThresholdImage(img@dimension, dseg, bmask, mindval, dthresh)
+  bmask<-thresholdImage( dseg, mindval, dthresh )
   brain <- antsImageClone(img)
   brain[finalseg2 < 0.5] <- 0
   return(list(brain = brain, bmask = finalseg2,

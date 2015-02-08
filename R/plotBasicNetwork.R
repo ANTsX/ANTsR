@@ -28,8 +28,8 @@
 #'   mnit<-antsImageRead(mnit,3)
 #'   mnia<-getANTsRData("mnia")
 #'   mnia<-antsImageRead(mnia,3)
-#'   ThresholdImage(3,mnit,mnit,1,max(mnit))
-#'   ImageMath(3,mnit,"FillHoles",mnit)
+#'   mnit<-thresholdImage( mnit, 1, max(mnit) )
+#'   mnit<-iMath(mnit,"FillHoles")
 #'   cnt<-getCentroids( mnia, clustparam = 50 )
 #'   aalcnt<-cnt$centroids[1:90,]
 #'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )

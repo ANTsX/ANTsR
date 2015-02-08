@@ -1,5 +1,4 @@
 useDynLib(ANTsR)
-# S3method(as.data.frame, antsMatrix)
 exportMethods(coerce)
 exportPattern("^[^.]")
 import(methods)

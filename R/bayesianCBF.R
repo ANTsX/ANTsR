@@ -45,8 +45,8 @@ motionAcc<-2 # motion accuracy - 0 is for testing, 1 or 2 real studies
 if ( all(dim(tissuelist[[1]])==1) | all(dim(seg)==1) |  all(dim(pcasl)==1) )
   stop(paste("Check your input data"))
 avg<-getAverageOfTimeSeries(pcasl)
-N3BiasFieldCorrection(3,avg,avg,2)
-N3BiasFieldCorrection(3,avg,avg,2)
+avg<-n3BiasFieldCorrection(avg,2)
+avg<-n3BiasFieldCorrection(avg,2)
 mask<-antsImageClone(seg)
 mask[ mask > 0 ]<-1
 if ( useDataDrivenMask > 0 )
@@ -61,7 +61,7 @@ perfpro <- aslPerfusion( pcasl, interpolation="linear", skip=10,
         dorobust=robustnessvalue, useDenoiser=denoisingComponents,
         moreaccurate=motionAcc, verbose=1, mask=mask, useBayesian=0,
         ncompcor=compcorComponents )
-N3BiasFieldCorrection(3,perfpro$m0,perfpro$m0,2)
+perfpro$m0<-n3BiasFieldCorrection(perfpro$m0,2)
 pcasl.parameters <- list( sequence="pcasl", m0=perfpro$m0 )
 perfdf<-data.frame( xideal=perfpro$xideal,
             nuis=perfpro$nuisancevariables)

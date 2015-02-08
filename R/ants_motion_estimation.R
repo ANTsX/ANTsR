@@ -57,7 +57,7 @@
 #' @examples
 #'
 #' testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
-#' ImageMath(4,testimg,"PadImage",testimg,5)
+#' testimg<-iMath(testimg,"PadImage",5)
 #' mocorr<-motion_correction( testimg )
 #'
 #' @export motion_correction

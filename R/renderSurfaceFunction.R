@@ -28,8 +28,8 @@
 #'        mnit<-antsImageRead(mnit,3)
 #'        mnia<-getANTsRData("mnia")
 #'        mnia<-antsImageRead(mnia,3)
-#'        ThresholdImage(3,mnit,mnit,1,max(mnit))
-#'        ThresholdImage(3,mnia,mnia,1,2)
+#'        mnit<-thresholdImage( mnit, 1, max(mnit) )
+#'        mnia<-thresholdImage( mnia, 1, 2 )
 #'        brain<-renderSurfaceFunction( surfimg =list( mnit ) ,
 #'           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
 #'        }
@@ -61,7 +61,7 @@ renderSurfaceFunction <- function(
   for (i in 1:length(surfimg)) {
     if (smoothsval[i] > 0) {
       simg <- antsImageClone(surfimg[[i]])
-      SmoothImage(3, simg, smoothsval[i], simg)
+      simg<-smoothImage(simg, smoothsval[i])
       surfimg[[i]] <- simg
     }
   }
@@ -91,7 +91,7 @@ renderSurfaceFunction <- function(
   if (smoothfval > 0) {
     for (i in 1:length(funcimg)) {
       fimg <- antsImageClone(funcimg[[i]])
-      SmoothImage(3, fimg, smoothfval, fimg)
+      fimg<-smoothImage( fimg, smoothfval )
       funcimg[[i]] <- fimg
     }
   }

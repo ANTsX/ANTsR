@@ -25,7 +25,7 @@ clustering (optional) in a list
 \description{
 Output contains the NImages x NImages matrix of
 c('PearsonCorrelation','Mattes') or any Image Metric values available in
-ImageMath.  Similarity is computed after an affine registration is
+iMath.  Similarity is computed after an affine registration is
 performed.  You can also cluster the images via the dissimilarity
 measurement, i.e. the negated similarity metric.  So, the estimated
 dissimilarity is returned in the matrix.
