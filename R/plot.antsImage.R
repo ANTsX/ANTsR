@@ -28,9 +28,9 @@
 #' @examples
 #'
 #' \dontrun{
-#'   mnit<-getANTsRData("mni")
+#'   mnit<-getANTsRData('mni')
 #'   mnit<-antsImageRead(mnit,3)
-#'   mniafn<-getANTsRData("mnia")
+#'   mniafn<-getANTsRData('mnia')
 #'   mnia<-antsImageRead(mniafn,3)
 #'   ThresholdImage(3,mnia,mnia,22,25)
 #'   SmoothImage(3,mnia,1.5,mnia)
@@ -46,18 +46,19 @@
 #' @export plot.antsImage
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
-  axis = 1,
-  slices = round(seq(1, dim(x)[axis], length.out=8)),
+  axis = 2,
+  slices, 
   window.img = quantile(x[x!=0], 0.05, 0.95),
   threshold = "0.5xInf",
   quality = 4,
   outname = NA,
   alpha = 0.5,
   ... ) {
-    return(NULL)
-  }
-  # get the options
   myantsimage<-x
+  if(missing(slices)){
+    nonzeros <- which(apply(as.array(myantsimage), axis, sum) != 0)
+    slices <- round(seq(nonzeros[1], nonzeros[length(nonzeros)], length.out=11)[-c(1, 8)])
+  }
   if ( missing( y ) ) y<-NA
   functional<-y
   imagedim <- length(dim(myantsimage))
@@ -154,7 +155,7 @@ plot.antsImage <- function(x, y,
     slices = round(seq(slices[1], slices[2], by=slices[3]))
   } 
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
-  if (max(slices) > dim(img)[axis]) {
+  if (max(slices) > dim(myantsimage)[axis]) {
     stop('Slices do not fit in image dimensions.') 
   }
   nslices <- length(slices) 
