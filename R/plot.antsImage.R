@@ -22,6 +22,7 @@
 #' @param outname eg'figx.jpg' output name if you want to write the result to a
 #' file
 #' @param alpha  opacity
+#' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -47,12 +48,13 @@
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
   axis = 2,
-  slices, 
+  slices,
   window.img = quantile(x[x!=0], 0.05, 0.95),
   threshold = "0.5xInf",
   quality = 4,
   outname = NA,
   alpha = 0.5,
+  newwindow = FALSE,
   ... ) {
   myantsimage<-x
   if(missing(slices)){
@@ -68,7 +70,7 @@ plot.antsImage <- function(x, y,
   if ( !hvrgl | !hvmsc | ! hvpx )
     {
     print(paste("you need rgl, misc3d and pixmap libraries to use this."))
-    return(NULL)
+    invisible(return())
     }
   read.img <- function(x, dim = 2) {
     img <- antsImageRead(x, dim)
@@ -150,15 +152,16 @@ plot.antsImage <- function(x, y,
   # now label the results
   if (imagedim == 3)
     img <- aperm(img, c(perms), resize = T)
-  if(class(slices) == 'character'){ 
+  if(class(slices) == 'character'){
     slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
     slices = round(seq(slices[1], slices[2], by=slices[3]))
-  } 
+  }
   threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
   if (max(slices) > dim(myantsimage)[axis]) {
-    stop('Slices do not fit in image dimensions.') 
+    stop('Slices do not fit in image dimensions.')
   }
-  nslices <- length(slices) 
+  if ( imagedim == 2 ) slices=1
+  nslices <- length(slices)
   winrows <- round(length(slices)/10 + 0.5)
   if (winrows < 1)
     winrows <- 1
@@ -202,13 +205,13 @@ plot.antsImage <- function(x, y,
   mag <- quality
   pixperinch <- 96
   if (!is.na(outname)){
-    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag, 
+    suppressMessages(jpeg(outname, width = ncol(bigslice) * mag,
        height = nrow(bigslice) * mag, units = "px", quality = 75, bg = "white"))
   } else {
-    dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
-  } 
+    if (newwindow) dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
+  }
   bigslice[bigslice<window.img[1]] <- window.img[1]
-  bigslice[bigslice>window.img[2]] <- window.img[2] 
+  bigslice[bigslice>window.img[2]] <- window.img[2]
   img.plot <- suppressWarnings(pixmapGrey(
     bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice)))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
@@ -218,7 +221,7 @@ plot.antsImage <- function(x, y,
   if (threshold[1] > threshold[2] | is.na(functional)) {
     if (!is.na(outname))
       dev.off()
-    return(NULL)
+    invisible(return())
   }
   for (ind in 1:length(functional)) {
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
@@ -233,7 +236,7 @@ plot.antsImage <- function(x, y,
       print(paste("img", dim(img)))
       print(paste("lab", dim(labimg)))
       print("mask and label image do not match---exiting")
-      return(NULL)
+      invisible(return())
     }
     mncl <- min(labimg)
     mxcl <- max(labimg)
@@ -321,6 +324,5 @@ plot.antsImage <- function(x, y,
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname))
     dev.off()
-  return(NULL)
+  invisible()
 }
-plot.antsImage <- plot.antsImage
