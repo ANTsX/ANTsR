@@ -160,14 +160,14 @@ print(dim(gmat))
 ```
 
 **Convert a list of images to a matrix**
+
 ```
 nimages<-100
 ilist<-list()
 for ( i in 1:nimages )
 {
-  simimg<-array( data=rnorm(2500), dim=c(50,50))
-  simimg<-as.antsImage( simimg )
-  SmoothImage(simimg,1.5,simimg)
+  simimg<-makeImage( c(50,50) , rnorm(2500) )
+  simimg<-smoothImage(simimg,1.5)
   ilist[i]<-simimg
 }
 # get a mask from the first image
@@ -178,6 +178,10 @@ print(dim(mat))
 ```
 
 **Do fast statistics on a big matrix**
+
+Once we have a matrix representation of our population, we
+might run a quick voxel-wise regression within the mask.  
+Then we look at some summary statistics.
 ```
 mat<-imageListToMatrix( ilist, mask )
 age<-rnorm( nrow(mat) ) # simulated age
@@ -194,46 +198,59 @@ print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
 
 
 **Write out a statistical map**
+
+We might also write out the images so that we can save them for later
+or look at them with other software.
 ```
-agebetas<-antsImageClone( mask )
-agebetas[ mask == 1 ]<-mdli$beta.t[1,]
-antsImageWrite( agebetas, 'agebetas.nii.gz' )
+agebetas<-makeImage( mask , mdli$beta.t[1,] )
+antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )
 ```
 
 **Neighborhood operations**
 
+Images neighborhoods contain rich shape and texture information.  
+We can extract neighborhoods for further analysis at a given scale.
 ```
 mnit<-getANTsRData("mni")
 mnit<-antsImageRead(mnit,3)
 mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
-mask<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
-mat<-antsGetNeighborhoodMatrix(mnit,mask,radius,
+mat2<-antsGetNeighborhoodMatrix(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 ```
-
+The `boundary.condition` says how to treat data that is outside of the mask
+or the image boundaries.  Here, we replace this data with the mean
+in-mask value of the local neighborhood.
 
 **Eigenanatomy & SCCAN**
+
+Images often have many voxels ($p$-voxels) and,
+in medical applications, this means that $p>n$ or even $p>>n$, where $n$ is
+the number of subjects.
+Therefore, we often want to "intelligently" reduce the dimensionality of the
+data.  However, we want to retain spatial locality. This is the point of
+"eigenanatomy" which is a variation of sparse PCA that uses (optionally)
+biologically-motivated smoothness, locality or sparsity constraints.
 ```
-# assume you ran the neighborhood example above
-eanat<-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
+# assume you ran the population example above
+eanat<-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
 eseg<-eigSeg(mask,eanat$eig,F)
 jeanat<-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
-# see our paper in the journal "methods"
 eseg2<-eigSeg(mask,jeanat$fusedlist,F)
 ```
+The parameters for the example above are set for fast processing.
+You can see our paper for some theory on these methods[@Kandel2014a].
 
-```
-?sparseDecom
-?sparseDecom2
-?initializeEigenanatomy
-```
-See [sccan tutorial](http://stnava.github.io/sccanTutorial/)
+More information is available within the examples that can be seen within
+the help for `sparseDecom`, `sparseDecom2` and the helper function
+`initializeEigenanatomy`. You might also
+see the [sccan tutorial](http://stnava.github.io/sccanTutorial/).
 
 **Other useful tools**
 ```
-?ImageMath
+?iMath
 ?ThresholdImage
 ?quantifyCBF
 ?antsPreprocessfMRI
@@ -244,7 +261,6 @@ See [sccan tutorial](http://stnava.github.io/sccanTutorial/)
 ?inspectImageData3D
 ?makeGraph
 ?matrixToImages
-?plotANTsImage
 ?antsRegistration
 ?plotPrettyGraph
 ?plotBasicNetwork

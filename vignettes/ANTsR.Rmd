@@ -1,0 +1,516 @@
+---
+title: "ANTs*R*: Transformations and statistical representations for images"
+author: "Brian B. Avants"
+date: "`r Sys.Date()`"
+bibliography: REFERENCES.bib
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{ANTs*R*: Transformations and statistical representations for images}
+    %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[utf8]{inputenc}
+---
+
+
+```{r global options, include=FALSE}
+library(rmarkdown)
+library(knitr)
+```
+
+> "A small leak will sink a great ship."
+(folk wisdom)
+
+
+# Introduction
+
+The ANTs*R* package interfaces state of the art image processing with *R*
+statistical methods.  The project grew out of the need, at University of
+Pennsylvania, to develop large-scale analytics pipelines that track provenance
+from scanner to scientific study. ANTs*R* achieves this by wrapping an ANTs and
+ITK C++ core via `Rcpp` [@dirksbook].
+
+[ITK](http://www.itk.org/) is a templated C++ framework with rich I/O and support for arbitrary image types (usually 2, 3
+or 4 dimensions) as well as surface representations.  [ANTs](http://stnava.github.io/ANTs), built on ITK, focuses on multivariate
+image matching and segmentation as well as geometric (even high-dimensional) image transformation.  Both tools are [deeply validated and widely used](http://journal.frontiersin.org/ResearchTopic/1580).
+
+Together, these tools allow powerful image manipulations.
+However, they lack a true statistical back-end. Historically, statistical
+software was not amenable to direct manipulation of multiple
+dimensional images.  This led to "in-house" statistical programming or, perhaps
+worse (for science), reliance on closed source commercial software.  Given the
+increasing [popularity of *R*](http://r4stats.com/articles/popularity/) and prominence of quantitative imaging, it is natural that *R* should have a package
+focused on biological or medical image analysis.
+
+This package integrates several frameworks for extracting quantitative
+information from images and mapping them into reference coordinate systems.
+Human brain mapping studies have long relied on Talairach-Tournoux and related
+coordinate systems [@TALAIRACH1958]. Similar standardized localization is becoming more common within non-human studies [@Johnson2010;@Majka2013]. Atlases
+of other organ systems are also emerging and being applied clinically [@deMarvao2014].  This class of methods relies on *image transformation* and *image segmentation* as an aid to the ultimate goal of quantifying variability within and across populations. Longer term, such methods will be critical to individualized patient care and other translational applications.
+
+
+## ANTs*R* Algorithms
+
+Here, we provide an overivew of the methods available within ANTs*R*.
+
+- core image processing and I/O: ITK [@Avants2014a];
+
+- registration and utilities for image processing: ANTs mappings [@Tustison2014] and feature extraction [@Tustison2014a];
+
+- dimensionality reduction: Eigenanatomy [@Dhillon2014] and SCCAN [@Avants2014];
+
+- methods for ASL-based cerebral blood flow quantification [@Kandel2015];
+
+- neighborhood representations of images that enable rich statistical models [@Kandel2015]
+
+- core statistics and temporal filtering via *R* packages.
+
+In combination, these tools enable one to go from near-raw medical imaging data
+to a fully reproducible scientific publication [@Avants2015].
+
+## Data organization and access in ANTs*R*
+
+This package consistently represents a _scalar_ image as a vector, a collection
+of scalar images as a matrix and a time series image as a matrix.  Currently,
+ANTsR does not explicitly represent images with vector valued voxels
+(e.g. tensor or warp images) although these may be supported in the future in a
+way that is similar to our current support for time series images.  The large
+majority of images employed within ANTs*R* are of 2, 3 or 4 dimensions with `float` pixel types. This information is stored with the `antsImage` class.  
+A few example images are included in ANTs*R*. A few are built into the package
+but more can be downloaded.  See `?getANTsRData`.
+
+```{r}
+img<-antsImageRead( getANTsRData("r16"), 2 ) # built in image
+img
+```
+
+Take a quick look at the image.
+
+```{r}
+img2<-antsImageRead( getANTsRData("r64"), 2 ) # built in image
+plot(img2)
+```
+
+## Contributions of the package
+
+ANTs*R* includes:
+
+- An organizational system
+  + relatively small scripts implement full studies
+
+- Implementation of foundational methods
+  + Smoothing, temporal filtering, etc
+  + functional image denoising via `compcor` and `*DenoiseR`
+  + flexible: easy to estimate voxel-wise statistical models
+
+- Reference simulation data and examples distributed with the package
+
+- Interpretation of results
+  + sparse low-dimensional predictors
+  + anatomical labeling of predictors based on AAL and other coordinate systems
+
+- Openness and reproducibility
+
+# Overview of ANTs*R* functionality
+
+Here, we quickly summarize ANTsR functionality and useful tools.
+
+## The travis build system
+
+We test ANTs*R* regularly.  The status of the build (and an expected build
+  result) can be seen here: [![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR).  Take a look at the detailed log to see what one might
+  expect if building ANTs*R* from source.
+
+## Image input and output
+
+If nothing else, ANTs*R* makes it easy to read and write medical images
+and to map them into a format compatible with R.
+
+**Read, write, access an image**
+```{r}
+mnifilename<-getANTsRData("mni")
+dimension<-3 # you have to know this ahead of time
+img<-antsImageRead(mnifilename,dimension)
+img
+antsImageWrite(img,mnifilename)
+antsGetSpacing(img)
+antsGetDirection(img)
+antsGetOrigin(img)
+print(antsGetPixels(img,50,60,44))
+print(max(img))
+```
+
+**Index an image with a label**
+
+Often, you would like to summarize or extract information from within a known
+region of an image with arbitrary shape but within a given intensity "zone". We
+simulate this situation below and show a few accessors and type conversions.
+```{r}
+gaussimg<-array( data=rnorm(125), dim=c(5,5,5))
+arrayimg<-array( data=(1:125), dim=c(5,5,5))
+img<-as.antsImage( arrayimg )
+print( max(img) )
+print( mean(img[ img > 50  ]))
+print( max(img[ img >= 50 & img <= 99  ]))
+print( mean( gaussimg[ img >= 50 & img <= 99  ]) )
+```
+
+**Convert a 4D image to a matrix**
+
+Four dimensional images are generated and used in the same way.  One can
+easily transform from 4D image to matrix and back.
+```{r}
+gaussimg<-makeImage(c(5,5,5,10), voxval = rnorm(125*10)  )
+print(dim(gaussimg))
+avg3d<-getAverageOfTimeSeries( gaussimg )
+voxelselect <- avg3d < 0.25
+mask<-antsImageClone( avg3d )
+mask[ voxelselect  ]<-0
+mask[ !voxelselect  ]<-1
+gmat<-timeseries2matrix( gaussimg, mask )
+print(dim(gmat))
+```
+
+If one has a mask, then one can
+use `makeImage` to generate a new image from a scalar or vector.
+```{r}
+newimg<-makeImage( mask, mean(avg3d) )    # from scalar
+newimg<-makeImage( mask, colMeans(gmat) ) # from vector
+```
+
+
+**Convert a list of images to a matrix**
+
+Often, one has several scalar images that need to be accumulated for
+statistical processing.  Here, we generate a simulated set of these
+images and then proceed to smooth them, store them in a list and convert
+them to a matrix after extracting the information of each image within
+a data-driven mask.
+```{r}
+nimages<-100
+ilist<-list()
+for ( i in 1:nimages )
+{
+  simimg<-makeImage( c(50,50) , rnorm(2500) )
+  simimg<-smoothImage(simimg,1.5)
+  ilist[i]<-simimg
+}
+# get a mask from the first image
+mask<-getMask( ilist[[1]],
+  lowThresh=mean(ilist[[1]]), cleanup=TRUE )
+mat<-imageListToMatrix( ilist, mask )
+print(dim(mat))
+```
+
+Once we have a matrix representation of our population, we
+might run a quick voxel-wise regression within the mask.  
+Then we look at some summary statistics.
+```{r}
+mat<-imageListToMatrix( ilist, mask )
+age<-rnorm( nrow(mat) ) # simulated age
+gender<-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
+# this creates "real" but noisy effects to detect
+mat<-mat*(age^2+rnorm(nrow(mat)))
+mdl<-lm( mat ~ age + gender )
+mdli<-bigLMStats( mdl, 1.e-4 )
+print(names(mdli))
+print(rownames(mdli$beta.t))
+print(paste("age",min(p.adjust(mdli$beta.pval[1,]))))
+print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
+```
+
+
+**Write out a statistical map**
+
+We might also write out the images so that we can save them for later
+or look at them with other software.
+```{r}
+agebetas<-makeImage( mask , mdli$beta.t[1,] )
+antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )
+```
+
+**Neighborhood operations**
+
+Images neighborhoods contain rich shape and texture information.  
+We can extract neighborhoods for further analysis at a given scale.
+```{r}
+mnit<-getANTsRData("mni")
+mnit<-antsImageRead(mnit,3)
+mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
+mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+radius <- rep(2,mnit@dimension)
+mat2<-antsGetNeighborhoodMatrix(mnit, mask2, radius,
+  physical.coordinates = FALSE,
+  boundary.condition = "mean" )
+```
+The `boundary.condition` says how to treat data that is outside of the mask
+or the image boundaries.  Here, we replace this data with the mean
+in-mask value of the local neighborhood.
+
+**Eigenanatomy & SCCAN**
+
+Images often have many voxels ($p$-voxels) and,
+in medical applications, this means that $p>n$ or even $p>>n$, where $n$ is
+the number of subjects.
+Therefore, we often want to "intelligently" reduce the dimensionality of the
+data.  However, we want to retain spatial locality. This is the point of
+"eigenanatomy" which is a variation of sparse PCA that uses (optionally)
+biologically-motivated smoothness, locality or sparsity constraints.
+
+```{r}
+# assume you ran the population example above
+eanat<-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
+eseg<-eigSeg(mask,eanat$eig,F)
+jeanat<-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
+eseg2<-eigSeg(mask,jeanat$fusedlist,F)
+```
+The parameters for the example above are set for fast processing.
+You can see our paper for some theory on these methods[@Kandel2014a].
+
+More information is available within the examples that can be seen within
+the help for `sparseDecom`, `sparseDecom2` and the helper function
+`initializeEigenanatomy`. You might also
+see the [sccan tutorial](http://stnava.github.io/sccanTutorial/).
+
+
+Other useful tools in ANTs*R* include `iMath`, `thresholdImage`,
+`quantifyCBF`,
+`antsPreprocessfMRI`,
+`aslPerfusion`,
+`computeDVARS`,
+`getROIValues`,
+`hemodynamicRF`,
+`makeGraph`,
+`matrixToImages`,
+`rfSegmentation`,
+`antsRegistration`,
+`plotPrettyGraph`,
+`plotBasicNetwork`,
+`getTemplateCoordinates`,
+`antsSet*`.
+
+Several image mathematics operations (like `ImageMath` in ANTs)
+are accessible too via `iMath`.
+
+For more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
+github site [github RKRNS](https://github.com/stnava/RKRNS).
+
+A good visualization alternative is [antsSurf](https://github.com/stnava/antsSurf).
+
+
+
+## Example ... Data
+
+ANTs*R* also provides AAL label [@Tzourio-Mazoyer2002] names via:
+```{r aal}
+data(aal,package='ANTsR')
+labs<-1:90
+```
+with cortical labs defined by `labs`.
+
+
+## Voxels of clustered effect size
+
+
+Use a threshold to find clusters of voxels with large effect.
+
+
+
+## Sparse canonical correlation between BOLD and stimuli
+
+CCA maximizes $PearsonCorrelation( XW^T, ZY^T )$ where $X, W$ are as above and $Z$
+and $Y$ are similarly defined.  CCA optimizes the matrices $W, Y$
+operating on $X, Z$ to find a low-dimensional representation of the
+data pair $( X , Z )$ in which correlation is maximal.  Following
+ideas outlined in @Dhillon2014 and @Avants2014, this method can be
+extended with sparsity constraints that yield rows of $W, Y$ with a
+controllable number of non-zero entries.
+
+## SCCAN voxel selection & classification
+
+
+Set up the CCA by pairing the beta matrix
+with the design matrix.
+
+
+## Initialize SCCAN
+
+
+Use the SVD of the beta matrix to initialize sparse CCA.
+
+
+```{r initcca,results='hide'}
+# initcca<-t( svd( btsc$eventbetas, nu=0, nv=10 )$v )
+# initcca<-initializeEigenanatomy( initcca, mask=mask, nreps=1 )$initlist
+nv<-5
+```
+These `r nv` vectors initialize the sparse optimizer in a good place.
+
+## Supervised clustering with SCCAN
+
+
+The design matrix guides the dimensionality reduction
+performed on the $\beta$ matrix.
+
+
+```{r runcca,results='hide', eval=FALSE }
+mycca<-sparseDecom2( inmatrix=ccamats, initializationList=initcca,
+  sparseness=c( -0.001, -0.95 ), nvecs=nv, its=10, cthresh=c(250,0),
+  uselong=0, smooth=0.0, mycoption=1, inmask=c(mask,NA) )
+ccaout<-(data.matrix(imageListToMatrix( mycca$eig1, mask )))
+ff<-which(colSums(abs(ccaout))>1.e-4)
+pct<-length(ff)/ncol(mat)*100 # refer to via `r pct`
+```
+We also count the non-zero voxels which cover FIXME % of the brain.
+
+## Predictive model
+
+
+Given CCA solution matrix $W$, one may employ the low-dimensional
+representation, $XW^T$, in multi-label classification.  Currently, we
+employ SVM or random forests as multi-label learners for the problem:
+
+$$L_i = f( XW^T ),$$
+
+that is, learning a (sentence) label function from the BOLD data.
+
+
+## Predictive model: 2
+
+```{r ccapred,eval=FALSE}
+mydf<-data.frame( lab=mylabs,  
+  vox=data.matrix(btsc$eventbetas) %*% t(ccaout) )
+mdl<-svm( lab ~., data=mydf[inds,])
+err<-sum(mydf[-inds,]$lab==predict( mdl, newdata=mydf[-inds,]))/nrow(mydf[-inds,])
+print(paste("CCA: Correct",err*100))
+# here is another approach ... use cca to transform BOLD signal to stimuli
+mydf3<-data.frame( lab=mylabs,
+  vox=data.matrix(btsc$eventbetas) %*% t(ccaout) %*% t(mycca$eig2) )
+mdl2<-svm( lab ~., data=mydf3[inds,])
+err<-sum(mydf3[-inds,]$lab==predict( mdl2, newdata=mydf3[-inds,]))/nrow(mydf3[-inds,])
+print(paste("CCA2: Correct",err*100))
+```
+The input predictors are both clustered and sparse.
+
+
+## Quick look at CCA results
+
+Rescale the cca results and make a picture.
+
+```{r vizcca,echo=FALSE,warnings=FALSE,results='hide',eval=FALSE}
+for ( img in mycca$eig1 ) {
+  img[mask==1]<-abs(img[mask==1])
+  img[mask==1]<-img[mask==1]/max(img[mask==1])
+}
+ofn<-"Figs/temp.jpg"
+plotANTsImage( eximg, mycca$eig1, slices='12x56x1' ,
+ thresh='0.01x1.1', color=rainbow(nv), outname=ofn)
+```
+
+## CCA results in image space
+
+
+# Interpreting SCCAN results
+
+## Confusion matrix
+
+heatmap of co-occurrence of predictions
+```{r confmat,echo=FALSE,eval=FALSE}
+library(caret)
+truth<-mydf[-inds,]$lab
+pred<-predict( mdl, newdata=mydf[-inds,])
+xtab <- table(pred, truth)
+cm<-confusionMatrix(xtab)
+print(cm$table)
+```
+
+
+## Confusion matrix 2
+
+```{r confmat2,echo=FALSE,eval=FALSE}
+pheatmap(cm$table, cluster_rows = F, cluster_cols = F)
+```
+
+## Anatomical coordinates of SCCAN predictors
+
+ANTs propagates AAL labels to the cortex [@Avants2014a;@Tustison2014]
+
+```{r aallabel,eval=FALSE}
+fn<-paste(path.package("RKRNS"),"/extdata/111157_aal.nii.gz",sep="")
+aalimg<-antsImageRead(fn,3)
+ccaanat<-list()
+for ( img in mycca$eig1 ) {
+  nzind<-img[ mask == 1 ] > 0
+  aalvals<-aalimg[ mask == 1 ][ nzind ]
+  aalmax<-which.max( hist( aalvals, breaks=1:90, plot=FALSE )$counts )+1
+  ccaanat<-lappend( ccaanat, aal$label_name[aalmax] )
+}
+# The SCCAN predictors include: `r unlist(ccaanat)`.
+```
+
+How much of the known network do we actually find?
+
+
+## Associating classes to SCCAN predictors
+Recalling: CCA maximizes $PearsonCorrelation( XW^T, ZY^T )$,
+we can study matrix $Y$ which contrasts or combines columns of the design matrix.
+```{r sccanpredictorclass,eval=FALSE}
+rownames(mycca$eig2)<-levels(mylabs)
+temp<-(mycca$eig2)
+temp[ abs(mycca$eig2) < 0.03 ]<-0
+```
+## Associating classes to SCCAN predictors: 2
+
+```{r sccanpredictorclass2,eval=FALSE}
+pheatmap(temp)
+```
+
+# Conclusions
+
+##
+
+With the current ANTs*R*, one may:
+
+- Exploit *R* functionality with imaging data
+
+- Use feature selection based on various filtering strategies in `iMath` and elsewhere
+
+- Employ dimensionality reduction through eigenanatomy or SCCAN
+
+- Use relatively few low-dimensional predictors for decoding
+
+- Interpret multivariate results intuitively
+
+- Allows us to exploit prior anatomical labels ....
+
+- or conceptions about what anatomy the decoding should be driven by?
+
+
+See [ANTsR](https://github.com/stnava/ANTsR) for all source code and documentation and [RKRNS-talk](http://stnava.github.io/RKRNS) for html slides
+that discuss extensions to BOLD decoding.
+
+# BOLD data processing with ANTs*R*
+
+Good approaches exist in ANTs*R*
+which yield both motion matrices and relevant summary
+measurements such as FD and DVARS.  See `?antsPreprocessfMRI`
+for a simplified utility function.  This function could be
+used on each run of an experiment and the results stored
+in organized fashion for later use.
+
+## Motion correction
+To motion correct your data, one might run:
+```{r motioncorr,results='hide',eval=FALSE}
+# get an average image
+averageImage <- getAverageOfTimeSeries( boldImage )
+motionCorrectionResults <- motion_correction(boldImage,
+   fixed = averageImage, moreaccurate = 0 )
+```
+Set the `moreaccurate` flag to `1` or `2` for usable (not test) results.
+You might also estimate FD and DVARS from these results.  One might
+use `antsPreprocessfMRI` to get these directly.  Note, however, to
+turn this function's frequency filtering off if you want to do decoding.
+
+## FD and DVARS
+
+hey hey ...
+
+# References

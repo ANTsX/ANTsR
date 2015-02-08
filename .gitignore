@@ -38,10 +38,9 @@ src/sccan.o
 src/LabelClustersUniquely.o
 src/ResampleImageBySpacing.o
 src/symbols.rds
-
-
 # things to ignore in ANTsR/src/ANTsR
 src/ANTsR/ANTsR-build/
 src/ANTsR/ANTsR-build-dev/
 src/ANTsR/stamp/
 src/ANTsR/tmp/
+inst/doc

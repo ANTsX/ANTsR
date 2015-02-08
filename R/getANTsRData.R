@@ -2,7 +2,8 @@
 #'
 #' Downloads antsr test data
 #'
-#' @param fileid one of the permitted file ids
+#' @param fileid one of the permitted file ids or pass "show" to list all
+#'   valid possibilities. Note that most require internet access to download.
 #' @param usefixedlocation directory to which you download files
 #' @return filename string
 #' @author Avants BB
@@ -17,6 +18,9 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     print(myusage)
     return(NULL)
   }
+  if ( fileid == "show" )
+   return( c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
+     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit" ) )
 
   if ( fileid == "r16" )
     return( paste(path.package("ANTsR"),"/extdata/r16slice.jpg",sep="") )
@@ -25,16 +29,26 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
 
   # ch2b = brodmann ch2a = aal mnib = brodmann mnia = all mnit = tracts
 
-  myurl <- switch(fileid, r16 = "http://placid.nlm.nih.gov/download?items=10764",
-    r27 = "http://placid.nlm.nih.gov/download?items=11916", r30 = "http://placid.nlm.nih.gov/download?items=11917",
-    r62 = "http://placid.nlm.nih.gov/download?items=11918", r85 = "http://placid.nlm.nih.gov/download?items=11920",
-    r64 = "http://placid.nlm.nih.gov/download?items=10765", KK = "http://placid.nlm.nih.gov/download?items=10766",
-    ADNI = "http://placid.nlm.nih.gov/download?folders=238", K1 = "http://www.nitrc.org/frs/downloadlink.php/2201",
-    BT = "http://placid.nlm.nih.gov/download?items=10767", AB = "http://placid.nlm.nih.gov/download?items=10753",
-    ch2 = "http://placid.nlm.nih.gov/download?items=10778", ch2b = "http://placid.nlm.nih.gov/download?items=10780",
-    ch2a = "http://placid.nlm.nih.gov/download?items=10784", mni = "http://placid.nlm.nih.gov/download?items=10785",
-    mnib = "http://placid.nlm.nih.gov/download?items=10787", mnia = "http://placid.nlm.nih.gov/download?items=10786",
-    mnit = "http://placid.nlm.nih.gov/download?items=11660", nki = "http://files.figshare.com/1363201/NKI.zip",
+  myurl <- switch(fileid,
+    r16 = "http://placid.nlm.nih.gov/download?items=10764",
+    r27 = "http://placid.nlm.nih.gov/download?items=11916",
+    r30 = "http://placid.nlm.nih.gov/download?items=11917",
+    r62 = "http://placid.nlm.nih.gov/download?items=11918",
+    r85 = "http://placid.nlm.nih.gov/download?items=11920",
+    r64 = "http://placid.nlm.nih.gov/download?items=10765",
+    KK = "http://placid.nlm.nih.gov/download?items=10766",
+    ADNI = "http://placid.nlm.nih.gov/download?folders=238",
+    K1 = "http://www.nitrc.org/frs/downloadlink.php/2201",
+    BT = "http://placid.nlm.nih.gov/download?items=10767",
+    AB = "http://placid.nlm.nih.gov/download?items=10753",
+    ch2 = "http://placid.nlm.nih.gov/download?items=10778",
+    ch2b = "http://placid.nlm.nih.gov/download?items=10780",
+    ch2a = "http://placid.nlm.nih.gov/download?items=10784",
+    mni = "http://placid.nlm.nih.gov/download?items=10785",
+    mnib = "http://placid.nlm.nih.gov/download?items=10787",
+    mnia = "http://placid.nlm.nih.gov/download?items=10786",
+    mnit = "http://placid.nlm.nih.gov/download?items=11660",
+    nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz")
 
   myext <- ".nii.gz"
