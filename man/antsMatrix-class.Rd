@@ -42,5 +42,7 @@ An S4 class to hold an antsMatrix imported from ITK types
 
 \describe{
 \item{\code{elementtype}}{}
+
+\item{\code{pointer}}{the memory location}
 }}
 

@@ -4,9 +4,9 @@
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
 
-Original Authors: Shrinidhi KL,  Avants BB
+Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
 
-
+Original Authors: Shrinidhi KL,  Brian B. Avants
 
 ## Easiest installation approach (from within R)
 ```
@@ -96,6 +96,8 @@ install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
 These dependencies are subject to change until development is stable.
 You can gain additional functionality by installing packages that
 are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
+
+The [`travis.yml` file](https://github.com/stnava/ANTsR/blob/master/.travis.yml) also shows a way to install from Linux command line.
 
 ## Usage
 Load the package:
