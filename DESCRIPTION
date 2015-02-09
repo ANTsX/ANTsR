@@ -9,7 +9,8 @@ Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: ANTsR interfaces state of the art image processing with R statistical methods.  The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses.
 License: GPL (>=2)
 LazyLoad: yes
-Depends: Rcpp, methods, tools
+Depends: Rcpp
+Imports: methods, tools
 Suggests:
     BGLR,
     caret,
@@ -31,7 +32,9 @@ Suggests:
     randomForest,
     rgl,
     robust,
+    robustbase,
     signal,
+    sna,
     testthat,
     visreg,
     knitr

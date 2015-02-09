@@ -6,6 +6,10 @@
 #' @slot index
 #' @slot size
 #' @useDynLib ANTsR
+#' @import Rcpp
+#' @import methods
+#' @import tools
+
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
 
