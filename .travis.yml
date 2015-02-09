@@ -13,7 +13,19 @@ before_install:
 - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
 - chmod 755 ./travis-tool.sh
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh install_r rmarkdown
+- ./travis-tool.sh install_r    rmarkdown
+- ./travis-tool.sh install_r    knitr
+- ./travis-tool.sh install_r    grid
+- ./travis-tool.sh install_r    igraph
+- ./travis-tool.sh install_r    magic
+- ./travis-tool.sh install_r    moments
+- ./travis-tool.sh install_r    pixmap
+- ./travis-tool.sh install_r    png
+- ./travis-tool.sh install_r    psych
+- ./travis-tool.sh install_r    signal
+- ./travis-tool.sh install_r    visreg
+- ./travis-tool.sh install_r    rgl
+- ./travis-tool.sh install_r    misc3d
 - mkdir -p ~/.R
 - export CC=clang
 - export CXX=clang++
@@ -26,9 +38,9 @@ install:
 - cd ${basedir}
 
 script:
-- R CMD build ANTsR --no-build-vignettes
+- R CMD build ANTsR
 - R CMD INSTALL --build ANTsR_1.0.tar.gz
-- R CMD  check ANTsR_1.0.tar.gz --no-install --no-manual --as-cran --no-vignettes
+- R CMD  check ANTsR_1.0.tar.gz --no-install --no-manual --as-cran
 - Rscript -e 'library(ANTsR);  fi<-antsImageRead( getANTsRData("r16") ,2); mi<-antsImageRead( getANTsRData("r64"),2)' -e 'antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN"))'
 - cd ANTsR
 

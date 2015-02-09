@@ -15,6 +15,7 @@
 #' @param slices character, the slices to overlay written as 10x20x3 ( or TODO
 #' c(5,10,25) ) where 10x20 is the range and 3 is the increment,
 #' for multislice display
+#' @param window.img intensity windowing
 #' @param threshold character, we overlay values above/below this
 #' threshold : of form LOxHI
 #' @param quality  integer quality magnification factor 1 => large (e.g.

@@ -23,6 +23,8 @@ of this list should match the image list}
 c(5,10,25) ) where 10x20 is the range and 3 is the increment,
 for multislice display}
 
+\item{window.img}{intensity windowing}
+
 \item{threshold}{character, we overlay values above/below this
 threshold : of form LOxHI}
 
