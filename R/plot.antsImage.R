@@ -4,6 +4,13 @@
 #' overlay option.  Useful for displaying statistical results overlaid on a
 #' background image.
 #'
+#' @usage plot( x, y, color, axis=1, slices, window.img,
+#'  threshold = "0.5xInf",
+#'  quality = 4,
+#'  outname = NA,
+#'  alpha = 0.5,
+#'  newwindow = FALSE,
+#'  ...  )
 #'
 #' @param x the reference image on which to overlay
 #' @param y list of the images to use as overlays
