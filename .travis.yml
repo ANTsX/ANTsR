@@ -18,7 +18,7 @@ before_install:
 - echo "CC=clang" >  ~/.R/Makevars
 - echo "CXX=clang++" >> ~/.R/Makevars
 - source ~/.R/Makevars
-
+- sudo apt-get update
 install:
 - ./travis-tool.sh bootstrap
 - ./travis-tool.sh r_binary_install BGLR
