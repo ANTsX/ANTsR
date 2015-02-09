@@ -63,6 +63,6 @@ renderImageLabels <- function(
     mylist[[i]] <- brain
   }
 
-  rgl::drawScene.rgl(mylist, add = TRUE)
+  misc3d::drawScene.rgl(mylist, add = TRUE)
   return(mylist)
 }

@@ -85,7 +85,7 @@ renderSurfaceFunction <- function(
       }
       mylist[[i]] <- brain
     }
-    rgl::drawScene.rgl(mylist)
+    misc3d::drawScene.rgl(mylist)
     return(mylist)
   }
   if (smoothfval > 0) {
@@ -134,10 +134,10 @@ renderSurfaceFunction <- function(
   # s<-scene3d() s$par3d$windowRect <- c(0, 0, 500, 500) # make the window large
   # 1.5*s$par3d$windowRect s$par3d$zoom = 1.1 # larger values make the image
   # smaller
-  rgl::drawScene.rgl(mylist)  # surface render
+  misc3d::drawScene.rgl(mylist)  # surface render
   rgl::par3d(windowRect = c(0, 0, 500, 500))  # make the window large
   rgl::par3d(zoom = 1.1)  # larger values make the image smaller
-  rgl::drawScene.rgl(mylist)  # surface render
+  misc3d::drawScene.rgl(mylist)  # surface render
   if (!is.na(outfn))
     rgl::movie3d(spin3d(), duration = 15, dir = outdir, movie = outfn, clean = F)
   return(mylist)

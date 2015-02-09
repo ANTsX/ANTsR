@@ -60,7 +60,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
   indstozero <- NULL
   # robust procedure Yohai, V.J. (1987) High breakdown-point and high efficiency
   # estimates for regression.  _The Annals of Statistics_ *15*, 642-65
-  ctl <- robust::lmrob.control("KS2011", max.it = 1000)
+  ctl <- robustbase::lmrob.control("KS2011", max.it = 1000)
   regweights <- rep(0, nrow(mat))
   rbetaideal <- rep(0, ncol(mat))
   robvals <- mat * 0
@@ -81,7 +81,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
   }
   thisct <- 1
   for (vox in visitvals) {
-    try(mycbfmodel <- robust::lmrob(rcbfform, control = ctl), silent = T)
+    try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = T)
     rbetaideal[vox] <- mycbfmodel$coeff[2]
     if (!is.null(mycbfmodel$rweights) & vissel[thisct] > visselThresh) {
       rgw <- rgw + mycbfmodel$rweights
