@@ -50,7 +50,7 @@ install:
 - cd ${basedir}
 
 script:
-- travis_retry R CMD build ANTsR
+- travis_wait 50 R CMD build ANTsR
 # - R CMD INSTALL --build ANTsR_1.0.tar.gz
 - R CMD  check ANTsR_1.0.tar.gz --no-install --no-manual --as-cran
 - Rscript -e 'library(ANTsR);  fi<-antsImageRead( getANTsRData("r16") ,2); mi<-antsImageRead( getANTsRData("r64"),2)' -e 'antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN"))'
