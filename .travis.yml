@@ -19,9 +19,10 @@ before_install:
 - echo "CXX=clang++" >> ~/.R/Makevars
 - source ~/.R/Makevars
 - sudo apt-get update
+
 install:
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh r_binary_install BGLR
+#- ./travis-tool.sh r_binary_install BGLR
 - ./travis-tool.sh r_binary_install caret
 - ./travis-tool.sh r_binary_install cluster
 - ./travis-tool.sh r_binary_install DMwR
@@ -71,6 +72,7 @@ notifications:
   email:
     recipients:
     - stnava@gmail.com
+    - arman.eshaghi@gmail.com
     on_success: change
     on_failure: always
 
