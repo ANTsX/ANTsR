@@ -20,35 +20,42 @@ before_install:
 - source ~/.R/Makevars
 
 install:
+- wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip
+- unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc
+    -d $HOME/pandoc
+- chmod +x $HOME/pandoc/pandoc
+- export PATH=$PATH:$HOME/pandoc/
+- pandoc --version
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh install_r    BGLR
-- ./travis-tool.sh install_r    caret
-- ./travis-tool.sh install_r    cluster
-- ./travis-tool.sh install_r    DMwR
-- ./travis-tool.sh install_r    e1071
-- ./travis-tool.sh install_r    fastICA
-- ./travis-tool.sh install_r    fpc
-- ./travis-tool.sh install_r    grid
-- ./travis-tool.sh install_r    glmnet
-- ./travis-tool.sh install_r    igraph
-- ./travis-tool.sh install_r    magic
-- ./travis-tool.sh install_r    misc3d
-- ./travis-tool.sh install_r    moments
-- ./travis-tool.sh install_r    pixmap
-- ./travis-tool.sh install_r    png
-- ./travis-tool.sh install_r    psych
-- ./travis-tool.sh install_r    randomForest
-- ./travis-tool.sh install_r    rgl
-- ./travis-tool.sh install_r    robust
-- ./travis-tool.sh install_r    signal
-- ./travis-tool.sh install_r    visreg
-- ./travis-tool.sh install_r    Rcpp
-- ./travis-tool.sh install_r    knitr
-- ./travis-tool.sh install_r    rmarkdown
+- ./travis-tool.sh install_github jimhester/covr
+- ./travis-tool.sh r_install BGLR
+- ./travis-tool.sh r_binary_install caret
+- ./travis-tool.sh r_binary_install cluster
+- ./travis-tool.sh r_install DMwR
+- ./travis-tool.sh r_binary_install e1071
+- ./travis-tool.sh r_binary_install fastICA
+- ./travis-tool.sh r_install fpc
+- ./travis-tool.sh r_install grid
+- ./travis-tool.sh r_binary_install glmnet
+- ./travis-tool.sh r_binary_install igraph
+- ./travis-tool.sh r_binary_install magic
+- ./travis-tool.sh r_binary_install misc3d
+- ./travis-tool.sh r_binary_install moments
+- ./travis-tool.sh r_binary_install pixmap
+- ./travis-tool.sh r_binary_install png
+- ./travis-tool.sh r_binary_install psych
+- ./travis-tool.sh r_binary_install randomForest
+- ./travis-tool.sh r_binary_install rgl
+- ./travis-tool.sh r_binary_install robust
+- ./travis-tool.sh r_binary_install signal
+- ./travis-tool.sh r_install visreg
+- ./travis-tool.sh r_binary_install Rcpp
+- ./travis-tool.sh r_binary_install knitr
+- ./travis-tool.sh r_install rmarkdown
 - cd ${basedir}
 
 script:
-- travis_wait 40 R CMD build ANTsR
+- travis_wait 50 R CMD build ANTsR --resave-data
 # - R CMD INSTALL --build ANTsR_1.0.tar.gz
 - R CMD  check ANTsR_1.0.tar.gz --no-install --no-manual --as-cran
 - Rscript -e 'library(ANTsR);  fi<-antsImageRead( getANTsRData("r16") ,2); mi<-antsImageRead( getANTsRData("r64"),2)' -e 'antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN"))'
@@ -63,7 +70,8 @@ before_deploy: git fetch --tags
 #  file: ../ANTsR_1.0.tgz
 #  on:
 #    repo: stnava/ANTsR
-
+after_success:
+- Rscript -e 'library(covr);coveralls()'
 after_failure:
 - ./travis-tool.sh dump_logs
 
@@ -71,6 +79,7 @@ notifications:
   email:
     recipients:
     - stnava@gmail.com
+    - arman.eshaghi@gmail.com
     on_success: change
     on_failure: always
 
