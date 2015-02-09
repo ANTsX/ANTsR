@@ -23,10 +23,10 @@ before_install:
 install:
 - ./travis-tool.sh bootstrap
 - ./travis-tool.sh install_github jimhester/covr
-#- ./travis-tool.sh r_binary_install BGLR
+- ./travis-tool.sh r_install BGLR
 - ./travis-tool.sh r_binary_install caret
 - ./travis-tool.sh r_binary_install cluster
-- ./travis-tool.sh r_binary_install DMwR
+- ./travis-tool.sh r_install DMwR
 - ./travis-tool.sh r_binary_install e1071
 - ./travis-tool.sh r_binary_install fastICA
 - ./travis-tool.sh r_binary_install fpc
