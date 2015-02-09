@@ -30,7 +30,7 @@
         <h1>
 <a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> and <a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">vignette</a></p>
 
 <p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> and <a href="https://github.com/InsightSoftwareConsortium/ITK">ITK</a> features in R.</p>
 
@@ -50,10 +50,10 @@ install_github("stnava/ANTsR")
 <p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
 <h2>
-<a id="try-releases" class="anchor" href="#try-releases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Try releases</h2>
+<a id="antsr-manual-and-releases" class="anchor" href="#antsr-manual-and-releases" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR manual and releases</h2>
 
-<p><a href="https://github.com/stnava/ANTsR/releases">releases</a> are new so try at own risk,
-but let us know of issues ...</p>
+<p><a href="https://github.com/stnava/ANTsR/releases">R-style manual and releases</a> are new
+so let us know of any <a href="https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues">issues</a> ...</p>
 
 <h2>
 <a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
@@ -217,9 +217,8 @@ print(dim(gmat))
 ilist&lt;-list()
 for ( i in 1:nimages )
 {
-  simimg&lt;-array( data=rnorm(2500), dim=c(50,50))
-  simimg&lt;-as.antsImage( simimg )
-  SmoothImage(simimg,1.5,simimg)
+  simimg&lt;-makeImage( c(50,50) , rnorm(2500) )
+  simimg&lt;-smoothImage(simimg,1.5)
   ilist[i]&lt;-simimg
 }
 # get a mask from the first image
@@ -230,6 +229,10 @@ print(dim(mat))
 </code></pre>
 
 <p><strong>Do fast statistics on a big matrix</strong></p>
+
+<p>Once we have a matrix representation of our population, we
+might run a quick voxel-wise regression within the mask.<br>
+Then we look at some summary statistics.</p>
 
 <pre><code>mat&lt;-imageListToMatrix( ilist, mask )
 age&lt;-rnorm( nrow(mat) ) # simulated age
@@ -246,43 +249,60 @@ print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))
 
 <p><strong>Write out a statistical map</strong></p>
 
-<pre><code>agebetas&lt;-antsImageClone( mask )
-agebetas[ mask == 1 ]&lt;-mdli$beta.t[1,]
-antsImageWrite( agebetas, 'agebetas.nii.gz' )
+<p>We might also write out the images so that we can save them for later
+or look at them with other software.</p>
+
+<pre><code>agebetas&lt;-makeImage( mask , mdli$beta.t[1,] )
+antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )
 </code></pre>
 
 <p><strong>Neighborhood operations</strong></p>
 
+<p>Images neighborhoods contain rich shape and texture information.<br>
+We can extract neighborhoods for further analysis at a given scale.</p>
+
 <pre><code>mnit&lt;-getANTsRData("mni")
 mnit&lt;-antsImageRead(mnit,3)
 mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
-mask&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
+mask2&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius &lt;- rep(2,mnit@dimension)
-mat&lt;-antsGetNeighborhoodMatrix(mnit,mask,radius,
+mat2&lt;-antsGetNeighborhoodMatrix(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 </code></pre>
 
+<p>The <code>boundary.condition</code> says how to treat data that is outside of the mask
+or the image boundaries.  Here, we replace this data with the mean
+in-mask value of the local neighborhood.</p>
+
 <p><strong>Eigenanatomy &amp; SCCAN</strong></p>
 
-<pre><code># assume you ran the neighborhood example above
-eanat&lt;-sparseDecom( mat, mask, 0.05, 20, cthresh=250 )
+<p>Images often have many voxels ($p$-voxels) and,
+in medical applications, this means that $p&gt;n$ or even $p&gt;&gt;n$, where $n$ is
+the number of subjects.
+Therefore, we often want to "intelligently" reduce the dimensionality of the
+data.  However, we want to retain spatial locality. This is the point of
+"eigenanatomy" which is a variation of sparse PCA that uses (optionally)
+biologically-motivated smoothness, locality or sparsity constraints.</p>
+
+<pre><code># assume you ran the population example above
+eanat&lt;-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
 eseg&lt;-eigSeg(mask,eanat$eig,F)
 jeanat&lt;-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
-# see our paper in the journal "methods"
 eseg2&lt;-eigSeg(mask,jeanat$fusedlist,F)
 </code></pre>
 
-<pre><code>?sparseDecom
-?sparseDecom2
-?initializeEigenanatomy
-</code></pre>
+<p>The parameters for the example above are set for fast processing.
+You can see our paper for some theory on these methods[@Kandel2014a].</p>
 
-<p>See <a href="http://stnava.github.io/sccanTutorial/">sccan tutorial</a></p>
+<p>More information is available within the examples that can be seen within
+the help for <code>sparseDecom</code>, <code>sparseDecom2</code> and the helper function
+<code>initializeEigenanatomy</code>. You might also
+see the <a href="http://stnava.github.io/sccanTutorial/">sccan tutorial</a>.</p>
 
 <p><strong>Other useful tools</strong></p>
 
-<pre><code>?ImageMath
+<pre><code>?iMath
 ?ThresholdImage
 ?quantifyCBF
 ?antsPreprocessfMRI
@@ -293,7 +313,6 @@ eseg2&lt;-eigSeg(mask,jeanat$fusedlist,F)
 ?inspectImageData3D
 ?makeGraph
 ?matrixToImages
-?plotANTsImage
 ?antsRegistration
 ?plotPrettyGraph
 ?plotBasicNetwork
