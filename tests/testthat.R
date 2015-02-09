@@ -1,4 +1,4 @@
 library(testthat)
-library(covr)
+library(ANTsR)
 
-test_check("covr")
+test_check("ANTsR")
