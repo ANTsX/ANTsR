@@ -1,6 +1,6 @@
 # ANTsR
 
-[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) and check the new  [vignette](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
+[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR) and check the new  [vignette](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
 and [manual](https://github.com/stnava/ANTsR/releases)
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
