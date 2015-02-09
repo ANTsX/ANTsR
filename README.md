@@ -1,6 +1,7 @@
 # ANTsR
 
-[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) and [vignette](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
+[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) and check the new  [vignette](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
+and [manual](https://github.com/stnava/ANTsR/releases)
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
 
@@ -20,7 +21,7 @@ windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/)
 
 ## ANTsR manual and releases
 
-[R-style manual and releases](https://github.com/stnava/ANTsR/releases) are new
+[Releases](https://github.com/stnava/ANTsR/releases) are new
 so let us know of any [issues](https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues) ...
 
 ## Installation from source
