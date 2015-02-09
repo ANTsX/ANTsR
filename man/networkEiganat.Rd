@@ -98,7 +98,7 @@ cor.test(preddf, testdf$bmi )
 if ( usePkg('visreg') ) {
 mydf<-data.frame( PredictedBMIfromSNPs=preddf, RealBMI=testdf$bmi )
 mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
-visreg(mymdl) }
+visreg::visreg(mymdl) }
 ###########
 # vs glmnet #
 ###########

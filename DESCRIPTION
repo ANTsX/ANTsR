@@ -22,7 +22,7 @@ Suggests:
     glmnet,
     igraph,
     magic,
-    mFilter, 
+    mFilter,
     misc3d,
     moments,
     pixmap,
@@ -32,6 +32,7 @@ Suggests:
     rgl,
     robust,
     signal,
+    testthat,
     visreg,
     knitr
 LinkingTo: Rcpp

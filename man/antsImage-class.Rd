@@ -8,15 +8,6 @@
 \alias{==,antsImage,ANY-method}
 \alias{>,antsImage,ANY-method}
 \alias{>=,antsImage,ANY-method}
-\alias{[,antsImage,NULL,ANY-method}
-\alias{[,antsImage,NULL,antsRegion-method}
-\alias{[,antsImage,array,ANY-method}
-\alias{[,antsImage,array,antsRegion-method}
-\alias{[,antsImage,list,ANY-method}
-\alias{[,antsImage,logical,ANY-method}
-\alias{[,antsImage,logical,antsRegion-method}
-\alias{[,antsImage,matrix,ANY-method}
-\alias{[,antsImage,matrix,antsRegion-method}
 \alias{antsImage-class}
 \alias{as.array,antsImage-method}
 \alias{as.matrix,antsImage-method}
@@ -28,9 +19,12 @@
 \alias{mean,antsImage-method}
 \alias{min,antsImage-method}
 \alias{sd,antsImage-method}
+\alias{show,antsImage-method}
 \alias{var,antsImage-method}
 \title{An S4 class for an antsImage}
 \usage{
+\S4method{show}{antsImage}(object)
+
 \S4method{initialize}{antsImage}(.Object, pixeltype = "float",
   dimension = 3)
 
@@ -57,24 +51,6 @@
 \S4method{as.array}{antsImage}(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer()))
 
-\S4method{[}{antsImage,`NULL`,ANY}(x, i)
-
-\S4method{[}{antsImage,logical,ANY}(x, i)
-
-\S4method{[}{antsImage,array,ANY}(x, i)
-
-\S4method{[}{antsImage,matrix,ANY}(x, i)
-
-\S4method{[}{antsImage,list,ANY}(x, i)
-
-\S4method{[}{antsImage,`NULL`,antsRegion}(x, i, j)
-
-\S4method{[}{antsImage,logical,antsRegion}(x, i, j)
-
-\S4method{[}{antsImage,array,antsRegion}(x, i, j)
-
-\S4method{[}{antsImage,matrix,antsRegion}(x, i, j)
-
 \S4method{==}{antsImage,ANY}(e1, e2)
 
 \S4method{!=}{antsImage,ANY}(e1, e2)
@@ -88,6 +64,8 @@
 \S4method{>}{antsImage,ANY}(e1, e2)
 }
 \arguments{
+\item{object}{input object to convert}
+
 \item{.Object}{input object to convert}
 
 \item{pixeltype}{string e.g. "float" "unsigned char" "int"}
@@ -100,13 +78,13 @@
 
 \item{region}{antsRegion for the image}
 
-\item{i}{the slowest moving index to the image}
-
-\item{j}{the next slowest moving index to the image, similar for k}
-
 \item{e1}{internal control for types}
 
 \item{e2}{internal control for types}
+
+\item{i}{the slowest moving index to the image}
+
+\item{j}{the next slowest moving index to the image, similar for k}
 }
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the
@@ -114,6 +92,8 @@ actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 }
 \section{Methods (by generic)}{
 \itemize{
+\item \code{show}: 
+
 \item \code{initialize}: 
 
 \item \code{dim}: 
@@ -135,24 +115,6 @@ actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 \item \code{as.matrix}: 
 
 \item \code{as.array}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
-
-\item \code{[}: 
 
 \item \code{==}: 
 

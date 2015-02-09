@@ -4,8 +4,8 @@
 \alias{plot.antsImage}
 \title{plot.antsImage}
 \usage{
-\method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
-  "yellow"), axis = 2, slices, window.img = quantile(x[x != 0], 0.05, 0.95),
+plot.antsImage(x, y, color = c("jet", "red", "blue", "green", "yellow"),
+  axis = 2, slices, window.img = quantile(x[x != 0], c(0.05, 0.95)),
   threshold = "0.5xInf", quality = 4, outname = NA, alpha = 0.5,
   newwindow = FALSE, ...)
 }

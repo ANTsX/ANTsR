@@ -14,6 +14,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' C++ type used to represent an ITK image pointed to by 'pointer'. the
 #' actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 #'
+#' @param object input object to convert
 #' @param .Object input object to convert
 #' @param pixeltype string e.g. "float" "unsigned char" "int"
 #' @param dimension dimensionality of the image
@@ -144,13 +145,7 @@ setMethod("[", c( "antsImage", "NULL", "ANY", "ANY"),
 })
 
 
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   region <- new("antsRegion", index = integer(), size = integer())
@@ -158,13 +153,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY", "ANY"),
 })
 
 
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   if (typeof(i) != "logical") {
@@ -576,51 +565,26 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
   return(.Call("antsImage_TransformPhysicalPointToIndex", x, point, PACKAGE = "ANTsR"))
 }
 
-
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
 
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
@@ -630,13 +594,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric", "ANY"),
 # standardGeneric for "[<-" defined from package "base"
 # function (x, i, j, ..., value)
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"),
   definition = function(x, i, j, ..., value) {
   mask <- logical(0)
@@ -644,26 +602,14 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"),
   return(.Call("antsImage_SetRegion", x, mask, region, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "logical"),
   definition = function(x, i, j, ..., value) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "array"),
   definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
@@ -675,13 +621,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array"),
 })
 
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"),
   definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
@@ -692,13 +632,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"),
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "list"),
   definition = function(x, i, j, ..., value) {
   if (class(i$mask) == "NULL") {
@@ -714,38 +648,20 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "list"),
   return(.Call("antsImage_SetRegion", x, i$mask, i$region, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x, i, j, ..., value) {
   mask <- logical(0)
   return(.Call("antsImage_SetRegion", x, mask, j, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "logical", j = "antsRegion"),
   definition = function(x, i, j, ..., value) {
     return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
   })
 
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"),
 definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
@@ -755,13 +671,7 @@ definition = function(x, i, j, ..., value) {
   return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
 })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"),
   definition = function(x, i, j, ..., value) {
     if (typeof(i) != "logical") {
