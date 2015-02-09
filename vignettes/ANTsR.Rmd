@@ -29,7 +29,7 @@ Pennsylvania, to develop large-scale analytics pipelines that track provenance
 from scanner to scientific study. ANTs*R* achieves this by wrapping an ANTs and
 ITK C++ core via `Rcpp` [@dirksbook].
 
-[ITK](http://www.itk.org/) is a templated C++ framework with rich I/O and support for arbitrary image types (usually 2, 3
+[ITK](http://www.itk.org/) is a templated C++ framework with I/O and support for arbitrary image types (usually 2, 3
 or 4 dimensions) as well as surface representations.  [ANTs](http://stnava.github.io/ANTs), built on ITK, focuses on multivariate
 image matching and segmentation as well as geometric (even high-dimensional) image transformation.  Both tools are [deeply validated and widely used](http://journal.frontiersin.org/ResearchTopic/1580).
 
@@ -292,21 +292,20 @@ one such case [@Wang2013a].
 
 Basic I/O and management of images as vectors is critical. However, there is
 additional information that can be gained by representing an image and its
-neighborhood information.  Image neighborhoods contain rich shape and texture.
-Here, we extract neighborhoods for further analysis at a given scale.
+neighborhood information.  ANTs*R* represents image neighborhoods, which capture shape and texture, as a matrix.  Here, extract an image neighborhood matrix representation such that we may analyze it at a given scale.
 ```{r nhood}
 mnit<-getANTsRData("mni")
 mnit<-antsImageRead(mnit,3)
-mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
+mnit <- resampleImage( mnit , rep(4, mnit@dimension) ) # downsample
 mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
 mat2<-antsGetNeighborhoodMatrix(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
+print(dim(mat2))
 ```
-The `boundary.condition` says how to treat data that is outside of the mask
-or the image boundaries.  This example replaces missing data with the mean
-in-mask value of the local neighborhood.
+The variable `mat2` has size determined by the neighborhood radius (here, 5)
+and the number of non-zero voxels in the mask. The `boundary.condition` says how to treat data that is outside of the mask or the image boundaries.  This example replaces missing data with the mean in-mask value of the local neighborhood.
 
 Other useful tools in ANTs*R* include `iMath`, `thresholdImage`,
 `quantifyCBF`,
@@ -378,7 +377,7 @@ For more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
 github site [github RKRNS](https://github.com/stnava/RKRNS).
 
 
-##  ANTs*R* Dimensionality reduction
+## Dimensionality reduction
 
 
 Images often have many voxels ($p$-voxels) and, in medical applications, this means that $p>n$ or even $p>>n$, where $n$ is the number of subjects.

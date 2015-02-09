@@ -33,17 +33,14 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
   }
   if (!is.numeric(tr) | missing(tr)) {
     print("TR parameter is missing or not numeric type - is typically between 2 and 4 , depending on your fMRI acquisition")
-    print(myusage)
     return(NULL)
   }
   if (!is.numeric(freqLo) | !is.numeric(freqHi)) {
     print("freqLo/Hi is not numeric type")
-    print(myusage)
     return(NULL)
   }
   if (missing(boldmat)) {
     print("Missing first (image) parameter")
-    print(myusage)
     return(NULL)
   }
   freqLo <- freqLo * tr

@@ -39,8 +39,6 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {
     segids <- apply(abs(mydata), 2, which.max)
     segmax <- apply(abs(mydata), 2, max)
     maskseg[maskvox] <- (segids * (segmax > 1e-09))
-    print(max(segmax))
-    print(max(segids))
     if (applySegmentationToImages) {
       for (i in 1:length(imgList)) {
         img <- imgList[[i]]

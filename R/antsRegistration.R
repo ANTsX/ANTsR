@@ -76,7 +76,6 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
-        cat("use simple parameterization \n")
         moving <- antsImageClone(moving, "double")
         fixed <- antsImageClone(fixed, "double")
         warpedfixout <- antsImageClone(moving)
