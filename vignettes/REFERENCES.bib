@@ -277,8 +277,6 @@
   Month                    = {Jan},
   Pages                    = {156--170},
   Volume                   = {105},
-
-  __markedentry            = {[stnava:]},
   Abstract                 = {We present RIPMMARC (Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture), a flexible and widely applicable method for extracting information unique to a given modality from a multi-modal data set. We use RIPMMARC to improve the interpretation of arterial spin labeling (ASL) perfusion images by removing the component of perfusion that is predicted by the underlying anatomy. Using patch-based, rotation invariant descriptors derived from the anatomical image, we learn a predictive relationship between local neuroanatomical structure and the corresponding perfusion image. This relation allows us to produce an image of perfusion that would be predicted given only the underlying anatomy and a residual image that represents perfusion information that cannot be predicted by anatomical features. Our learned structural features are significantly better at predicting brain perfusion than tissue probability maps, which are the input to standard partial volume correction techniques. Studies in test-retest data show that both the anatomically predicted and residual perfusion signals are highly replicable for a given subject. In a pediatric population, both the raw perfusion and structurally predicted images are tightly linked to age throughout adolescence throughout the brain. Interestingly, the residual perfusion also shows a strong correlation with age in selected regions including the hippocampi (corr = 0.38, p-value <10(-6)), precuneus (corr = -0.44, p < 10(-5)), and combined default mode network regions (corr = -0.45, p < 10(-8)) that is independent of global anatomy-perfusion trends. This finding suggests that there is a regionally heterogeneous pattern of functional specialization that is distinct from that of cortical structural development.},
   Doi                      = {10.1016/j.neuroimage.2014.10.052},
   Institution              = {Penn Image Computing and Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, USA.},
@@ -299,8 +297,6 @@
   Number                   = {Pt 3},
   Pages                    = {137--144},
   Volume                   = {17},
-
-  __markedentry            = {[stnava:]},
   Abstract                 = {Although much attention has recently been focused on single-subject functional networks, using methods such as resting-state functional MRI, methods for constructing single-subject structural networks are in their infancy. Single-subject cortical networks aim to describe the self-similarity across the cortical structure, possibly signifying convergent developmental pathways. Previous methods for constructing single-subject cortical networks have used patch-based correlations and distance metrics based on curvature and thickness. We present here a method for constructing similarity-based cortical structural networks that utilizes a rotation-invariant representation of structure. The resulting graph metrics are closely linked to age and indicate an increasing degree of closeness throughout development in nearly all brain regions, perhaps corresponding to a more regular structure as the brain matures. The derived graph metrics demonstrate a four-fold increase in power for detecting age as compared to cortical thickness. This proof of concept study indicates that the proposed metric may be useful in identifying biologically relevant cortical patterns.},
   Keywords                 = {Cerebral Cortex, anatomy /&/ histology/growth /&/ development; Child; Connectome, methods; Humans; Image Enhancement, methods; Image Interpretation, Computer-Assisted, methods; Magnetic Resonance Imaging, methods; Nerve Net, growth /&/ development/physiology; Reproducibility of Results; Rotation; Sensitivity and Specificity},
   Language                 = {eng},
@@ -317,8 +313,6 @@
   Year                     = {2014},
 
   Month                    = {Oct},
-
-  __markedentry            = {[stnava:6]},
   Abstract                 = {Rigorous statistical analysis of multimodal imaging datasets is challenging. Mass-univariate methods for extracting correlations between image voxels and outcome measurements are not ideal for multimodal datasets, as they do not account for interactions between the different modalities. The extremely high dimensionality of medical images necessitates dimensionality reduction, such as principal component analysis (PCA) or independent component analysis (ICA). These dimensionality reduction techniques, however, consist of contributions from every region in the brain and are therefore difficult to interpret. Recent advances in sparse dimensionality reduction have enabled construction of a set of image regions that explain the variance of the images while still maintaining anatomical interpretability. The projections of the original data on the sparse eigenvectors, however, are highly collinear and therefore difficult to incorporate into multi-modal image analysis pipelines. We propose here a method for clustering sparse eigenvectors and selecting a subset of the eigenvectors to make interpretable predictions from a multi-modal dataset. Evaluation on a publicly available dataset shows that the proposed method outperforms PCA and ICA-based regressions while still maintaining anatomical meaning. To facilitate reproducibility, the complete dataset used and all source code is publicly available.},
   Doi                      = {10.1016/j.ymeth.2014.10.016},
   Institution              = {Penn Image Computing and Science Laboratory, University of Pennsylvania, Philadelphia, PA, United States; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, United States.},
@@ -370,6 +364,49 @@
   Pmid                     = {24381539},
   Timestamp                = {2014.08.09},
   Url                      = {http://dx.doi.org/10.3389/fnins.2013.00247}
+}
+
+@Article{Kim2008,
+  Title                    = {Structural consequences of diffuse traumatic brain injury: a large deformation tensor-based morphometry study.},
+  Author                   = {Kim, Junghoon and Avants, Brian and Patel, Sunil and Whyte, John and Coslett, Branch H. and Pluta, John and Detre, John A. and Gee, James C.},
+  Journal                  = {Neuroimage},
+  Year                     = {2008},
+
+  Month                    = {Feb},
+  Number                   = {3},
+  Pages                    = {1014--1026},
+  Volume                   = {39},
+  Abstract                 = {Traumatic brain injury (TBI) is one of the most common causes of long-term disability. Despite the importance of identifying neuropathology in individuals with chronic TBI, methodological challenges posed at the stage of inter-subject image registration have hampered previous voxel-based MRI studies from providing a clear pattern of structural atrophy after TBI. We used a novel symmetric diffeomorphic image normalization method to conduct a tensor-based morphometry (TBM) study of TBI. The key advantage of this method is that it simultaneously estimates an optimal template brain and topology preserving deformations between this template and individual subject brains. Detailed patterns of atrophies are then revealed by statistically contrasting control and subject deformations to the template space. Participants were 29 survivors of TBI and 20 control subjects who were matched in terms of age, gender, education, and ethnicity. Localized volume losses were found most prominently in white matter regions and the subcortical nuclei including the thalamus, the midbrain, the corpus callosum, the mid- and posterior cingulate cortices, and the caudate. Significant voxel-wise volume loss clusters were also detected in the cerebellum and the frontal/temporal neocortices. Volume enlargements were identified largely in ventricular regions. A similar pattern of results was observed in a subgroup analysis where we restricted our analysis to the 17 TBI participants who had no macroscopic focal lesions (total lesion volume >1.5 cm(3)). The current study confirms, extends, and partly challenges previous structural MRI studies in chronic TBI. By demonstrating that a large deformation image registration technique can be successfully combined with TBM to identify TBI-induced diffuse structural changes with greater precision, our approach is expected to increase the sensitivity of future studies examining brain-behavior relationships in the TBI population.},
+  Doi                      = {10.1016/j.neuroimage.2007.10.005},
+  Institution              = {Moss Rehabilitation Research Institute, Albert Einstein Healthcare Network, Philadelphia, PA 19141, USA. kimj@einstein.edu},
+  Keywords                 = {Adolescent; Adult; Algorithms; Brain Injuries, pathology; Brain, pathology; Data Interpretation, Statistical; Diffusion Magnetic Resonance Imaging; Female; Humans; Image Processing, Computer-Assisted; Male; Middle Aged; Nonlinear Dynamics; Reference Values},
+  Language                 = {eng},
+  Medline-pst              = {ppublish},
+  Owner                    = {stnava},
+  Pii                      = {S1053-8119(07)00901-9},
+  Pmid                     = {17999940},
+  Timestamp                = {2015.02.08},
+  Url                      = {http://dx.doi.org/10.1016/j.neuroimage.2007.10.005}
+}
+
+@Article{Klein2012,
+  Title                    = {101 labeled brain images and a consistent human cortical labeling protocol.},
+  Author                   = {Klein, Arno and Tourville, Jason},
+  Journal                  = {Front Neurosci},
+  Year                     = {2012},
+  Pages                    = {171},
+  Volume                   = {6},
+
+  __markedentry            = {[stnava:6]},
+  Abstract                 = {We introduce the Mindboggle-101 dataset, the largest and most complete set of free, publicly accessible, manually labeled human brain images. To manually label the macroscopic anatomy in magnetic resonance images of 101 healthy participants, we created a new cortical labeling protocol that relies on robust anatomical landmarks and minimal manual edits after initialization with automated labels. The "Desikan-Killiany-Tourville" (DKT) protocol is intended to improve the ease, consistency, and accuracy of labeling human cortical areas. Given how difficult it is to label brains, the Mindboggle-101 dataset is intended to serve as brain atlases for use in labeling other brains, as a normative dataset to establish morphometric variation in a healthy population for comparison against clinical populations, and contribute to the development, training, testing, and evaluation of automated registration and labeling algorithms. To this end, we also introduce benchmarks for the evaluation of such algorithms by comparing our manual labels with labels automatically generated by probabilistic and multi-atlas registration-based approaches. All data and related software and updated information are available on the http://mindboggle.info/data website.},
+  Doi                      = {10.3389/fnins.2012.00171},
+  Institution              = {of Medicine Stony Brook, NY, USA ; Department of Psychiatry, Columbia University New York, NY, USA.},
+  Language                 = {eng},
+  Medline-pst              = {epublish},
+  Owner                    = {stnava},
+  Pmid                     = {23227001},
+  Timestamp                = {2015.02.08},
+  Url                      = {http://dx.doi.org/10.3389/fnins.2012.00171}
 }
 
 @Article{Majka2013,
@@ -519,6 +556,28 @@
   Url                      = {http://dx.doi.org/10.3389/fninf.2013.00039}
 }
 
+@Article{Tustison2010,
+  Title                    = {N4ITK: improved N3 bias correction.},
+  Author                   = {Tustison, Nicholas J. and Avants, Brian B. and Cook, Philip A. and Zheng, Yuanjie and Egan, Alexander and Yushkevich, Paul A. and Gee, James C.},
+  Journal                  = {IEEE Trans Med Imaging},
+  Year                     = {2010},
+
+  Month                    = {Jun},
+  Number                   = {6},
+  Pages                    = {1310--1320},
+  Volume                   = {29},
+  Abstract                 = {A variant of the popular nonparametric nonuniform intensity normalization (N3) algorithm is proposed for bias field correction. Given the superb performance of N3 and its public availability, it has been the subject of several evaluation studies. These studies have demonstrated the importance of certain parameters associated with the B-spline least-squares fitting. We propose the substitution of a recently developed fast and robust B-spline approximation routine and a modified hierarchical optimization scheme for improved bias field correction over the original N3 algorithm. Similar to the N3 algorithm, we also make the source code, testing, and technical documentation of our contribution, which we denote as "N4ITK," available to the public through the Insight Toolkit of the National Institutes of Health. Performance assessment is demonstrated using simulated data from the publicly available Brainweb database, hyperpolarized (3)He lung image data, and 9.4T postmortem hippocampus data.},
+  Doi                      = {10.1109/TMI.2010.2046908},
+  Institution              = {Department of Radiology, University of Pennsylvania, Philadelphia, PA 19140, USA. ntustison@wustl.edu},
+  Keywords                 = {Algorithms; Artifacts; Brain, anatomy /&/ histology; Humans; Image Enhancement, methods; Image Interpretation, Computer-Assisted, methods; Magnetic Resonance Imaging, methods; Reproducibility of Results; Sensitivity and Specificity},
+  Language                 = {eng},
+  Medline-pst              = {ppublish},
+  Owner                    = {stnava},
+  Pmid                     = {20378467},
+  Timestamp                = {2015.02.08},
+  Url                      = {http://dx.doi.org/10.1109/TMI.2010.2046908}
+}
+
 @Article{Tustison2014,
   Title                    = {Large-scale evaluation of ANTs and FreeSurfer cortical thickness measurements.},
   Author                   = {Tustison, Nicholas J. and Cook, Philip A. and Klein, Arno and Song, Gang and Das, Sandhitsu R. and Duda, Jeffrey T. and Kandel, Benjamin M. and {van Strien}, Niels and Stone, James R. and Gee, James C. and Avants, Brian B.},
@@ -581,6 +640,46 @@
   Pmid                     = {11771995},
   Timestamp                = {2014.08.09},
   Url                      = {http://dx.doi.org/10.1006/nimg.2001.0978}
+}
+
+@Article{Wang2011,
+  Title                    = {A learning-based wrapper method to correct systematic errors in automatic image segmentation: consistently improved performance in hippocampus, cortex and brain segmentation.},
+  Author                   = {Wang, Hongzhi and Das, Sandhitsu R. and Suh, Jung Wook and Altinay, Murat and Pluta, John and Craige, Caryne and Avants, Brian and Yushkevich, Paul A. and , Alzheimer's Disease Neuroimaging Initiative},
+  Journal                  = {Neuroimage},
+  Year                     = {2011},
+
+  Month                    = {Apr},
+  Number                   = {3},
+  Pages                    = {968--985},
+  Volume                   = {55},
+  Abstract                 = {We propose a simple but generally applicable approach to improving the accuracy of automatic image segmentation algorithms relative to manual segmentations. The approach is based on the hypothesis that a large fraction of the errors produced by automatic segmentation are systematic, i.e., occur consistently from subject to subject, and serves as a wrapper method around a given host segmentation method. The wrapper method attempts to learn the intensity, spatial and contextual patterns associated with systematic segmentation errors produced by the host method on training data for which manual segmentations are available. The method then attempts to correct such errors in segmentations produced by the host method on new images. One practical use of the proposed wrapper method is to adapt existing segmentation tools, without explicit modification, to imaging data and segmentation protocols that are different from those on which the tools were trained and tuned. An open-source implementation of the proposed wrapper method is provided, and can be applied to a wide range of image segmentation problems. The wrapper method is evaluated with four host brain MRI segmentation methods: hippocampus segmentation using FreeSurfer (Fischl et al., 2002); hippocampus segmentation using multi-atlas label fusion (Artaechevarria et al., 2009); brain extraction using BET (Smith, 2002); and brain tissue segmentation using FAST (Zhang et al., 2001). The wrapper method generates 72\%, 14\%, 29\% and 21\% fewer erroneously segmented voxels than the respective host segmentation methods. In the hippocampus segmentation experiment with multi-atlas label fusion as the host method, the average Dice overlap between reference segmentations and segmentations produced by the wrapper method is 0.908 for normal controls and 0.893 for patients with mild cognitive impairment. Average Dice overlaps of 0.964, 0.905 and 0.951 are obtained for brain extraction, white matter segmentation and gray matter segmentation, respectively.},
+  Institution              = {Penn Image Computing and Science Laboratory, Department of Radiology, University of Pennsylvania, Philadelphia, PA, USA. hongzhiw@mail.med.upenn.edu},
+  Keywords                 = {Aged; Algorithms; Alzheimer Disease, pathology; Artificial Intelligence; Atlases as Topic; Brain, anatomy /&/ histology/pathology; Cerebral Cortex, anatomy /&/ histology/pathology; Databases, Factual; Female; Hippocampus, anatomy /&/ histology/pathology; Humans; Image Enhancement, methods; Image Processing, Computer-Assisted, methods; Male; Middle Aged; Software},
+  Language                 = {eng},
+  Medline-pst              = {ppublish},
+  Owner                    = {stnava},
+  Pmid                     = {21237273},
+  Timestamp                = {2015.02.08}
+}
+
+@Article{Wang2013a,
+  Title                    = {Multi-atlas segmentation with joint label fusion and corrective learning-an open source implementation.},
+  Author                   = {Wang, Hongzhi and Yushkevich, Paul A.},
+  Journal                  = {Front Neuroinform},
+  Year                     = {2013},
+  Pages                    = {27},
+  Volume                   = {7},
+
+  __markedentry            = {[stnava:]},
+  Abstract                 = {Label fusion based multi-atlas segmentation has proven to be one of the most competitive techniques for medical image segmentation. This technique transfers segmentations from expert-labeled images, called atlases, to a novel image using deformable image registration. Errors produced by label transfer are further reduced by label fusion that combines the results produced by all atlases into a consensus solution. Among the proposed label fusion strategies, weighted voting with spatially varying weight distributions derived from atlas-target intensity similarity is a simple and highly effective label fusion technique. However, one limitation of most weighted voting methods is that the weights are computed independently for each atlas, without taking into account the fact that different atlases may produce similar label errors. To address this problem, we recently developed the joint label fusion technique and the corrective learning technique, which won the first place of the 2012 MICCAI Multi-Atlas Labeling Challenge and was one of the top performers in 2013 MICCAI Segmentation: Algorithms, Theory and Applications (SATA) challenge. To make our techniques more accessible to the scientific research community, we describe an Insight-Toolkit based open source implementation of our label fusion methods. Our implementation extends our methods to work with multi-modality imaging data and is more suitable for segmentation problems with multiple labels. We demonstrate the usage of our tools through applying them to the 2012 MICCAI Multi-Atlas Labeling Challenge brain image dataset and the 2013 SATA challenge canine leg image dataset. We report the best results on these two datasets so far.},
+  Doi                      = {10.3389/fninf.2013.00027},
+  Institution              = {Department of Radiology, PICSL, Perelman School of Medicine at the University of Pennsylvania Philadelphia, PA, USA.},
+  Language                 = {eng},
+  Medline-pst              = {epublish},
+  Owner                    = {stnava},
+  Pmid                     = {24319427},
+  Timestamp                = {2015.02.08},
+  Url                      = {http://dx.doi.org/10.3389/fninf.2013.00027}
 }
 
 @Article{neuRosim,

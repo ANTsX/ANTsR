@@ -6,7 +6,8 @@
 \usage{
 \method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
   "yellow"), axis = 2, slices, window.img = quantile(x[x != 0], 0.05, 0.95),
-  threshold = "0.5xInf", quality = 4, outname = NA, alpha = 0.5, ...)
+  threshold = "0.5xInf", quality = 4, outname = NA, alpha = 0.5,
+  newwindow = FALSE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay}
@@ -32,6 +33,8 @@ threshold : of form LOxHI}
 file}
 
 \item{alpha}{opacity}
+
+\item{newwindow}{boolean controlling if we open a new device for this plot}
 
 \item{...}{other parameters}
 }
