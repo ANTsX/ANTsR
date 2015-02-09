@@ -62,7 +62,7 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     w2 <- (1 - gparam)
     sval <- min(antsGetSpacing(img))
     for (i in 1:its) {
-      soutimg<-smoothImage(outimg, sval, )
+      soutimg<-smoothImage(outimg, sval )
       v1 <- outimg[paintMaskUse == 2] * w2
       v2 <- soutimg[paintMaskUse == 2] * gparam
       outimg[paintMaskUse == 2] <- (v1 + v2)

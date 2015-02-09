@@ -4,10 +4,6 @@ setMethod(f = ".int_antsExtractXptrAsString", signature = c("antsImage"), defini
   return(as.character(c(object@pointer)))
 })
 
-setMethod(f = ".int_antsExtractXptrAsString", signature = c("antsImageList"), definition = function(object) {
-  return(paste(as.character(c(object@pointer)), "%", sep = ""))
-})
-
 setMethod(f = ".int_antsExtractXptrAsString", signature = c("antsMatrix"), definition = function(object) {
   return(as.character(c(object@pointer)))
 })

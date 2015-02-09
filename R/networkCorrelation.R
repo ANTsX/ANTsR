@@ -9,7 +9,7 @@
     return(NULL)
   }
   
-  cov <- NetworkCovariance(n1, n2)
+  cov <- .NetworkCovariance(n1, n2)
   
   var1 <- var(n1[upper.tri(n1)])
   var2 <- var(n2[upper.tri(n2)])

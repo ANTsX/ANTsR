@@ -29,7 +29,6 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
   freqHi = 0.1, opt = "butt") {
   pixtype <- "float"
   if (nargs() == 0) {
-    print(myusage)
     return(NULL)
   }
   if (!is.numeric(tr) | missing(tr)) {

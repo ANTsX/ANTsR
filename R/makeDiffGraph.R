@@ -3,7 +3,6 @@
 .diffmat <- function(mat) {
   # return( cor( mat ) )
   if (missing(mat)) {
-    print(args(diffmat))
     return(1)
   }
   mydiffs <- matrix(rep(NA, ncol(mat) * ncol(mat)), ncol = ncol(mat))
@@ -38,7 +37,7 @@
     # print( paste( ' 0'd ',whichnodestoZero,' of ', length( adjmat ) ) )
   }
   adjmat[adjmat == Inf] <- 0
-  adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = nnumberOfNeighbors)
+  adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
   g1 <- graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
   #
   edgeWeights <- E(g1)$weight

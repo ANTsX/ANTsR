@@ -12,7 +12,6 @@ vignette: >
 
 
 ```{r global options, include=FALSE}
-library(rmarkdown)
 library(knitr)
 library(ANTsR)
 runLongExamples<-TRUE
@@ -43,7 +42,7 @@ increasing [popularity of *R*](http://r4stats.com/articles/popularity/) and prom
 focused on biological or medical image analysis.
 
 This package integrates several frameworks for extracting quantitative
-information from images and mapping them into reference coordinate systems.
+information from images and mapping images into reference coordinate systems.
 Human brain mapping studies have long relied on Talairach-Tournoux and related
 coordinate systems [@TALAIRACH1958]. Similar standardized localization is becoming more common within non-human studies [@Johnson2010;@Majka2013]. Atlases
 of other organ systems are also emerging and being applied clinically [@deMarvao2014].  This class of methods relies on *image transformation* and *image segmentation* as an aid to the ultimate goal of quantifying variability within and across populations. Longer term, such methods will be critical to individualized patient care and other translational applications.
@@ -63,19 +62,19 @@ Here, we provide an overivew of the methods available within ANTs*R*.
 
 - neighborhood representations of images that enable rich statistical models [@Kandel2015]
 
-- core statistics and temporal filtering via *R* packages.
+- core statistics and temporal filtering via *R* packages that is amenable to BOLD image processing
 
 In combination, these tools enable one to go from near-raw medical imaging data
 to a fully reproducible scientific publication [@Avants2015].
 
 ## Data organization and access in ANTs*R*
 
-This package consistently represents a _scalar_ image as a vector, a collection
-of scalar images as a matrix and a time series image as a matrix.  Currently,
-ANTsR does not explicitly represent images with vector valued voxels
+This package uses an `antsImage` S4 class to hold pointers to ITK images.  We convert `antsImage` objects to *R* objects before passing them to *R* statistical methods.  E.g. we convert a _scalar_ image to a vector, a collection
+of scalar images to a matrix or a time series image to a matrix.  Currently,
+ANTs*R* does not explicitly represent images with vector valued voxels
 (e.g. tensor or warp images) although these may be supported in the future in a
 way that is similar to our current support for time series images.  The large
-majority of images employed within ANTs*R* are of 2, 3 or 4 dimensions with `float` pixel types. This information is stored with the `antsImage` class.  
+majority of images employed within ANTs*R* are of 2, 3 or 4 dimensions with `float` pixel types. This information is stored within the `antsImage` class.  
 A few example images are built into  ANTs*R*,
 but more can be downloaded.  See `?getANTsRData`.
 
@@ -88,7 +87,7 @@ Take a quick look at the image.
 
 ```{r basic plot,message=FALSE,warnings=FALSE,echo=FALSE}
 img2<-antsImageRead( getANTsRData("r64"), 2 ) # built in image
-plot(img2)
+invisible(plot(img2))
 ```
 
 ## Contributions of the package
@@ -110,6 +109,13 @@ ANTs*R* includes:
 
 - Openness and reproducibility
 
+In total, ANTs*R* is a rigorous framework upon which one may build customized
+statistical implementations appropriate for large-scale functional, structural
+or combined functional and structural image analyses.  Because much of the
+core is implemented with C++, the framework also remains efficient.  Finally,
+note that `Rscript` allows one to send ANTs*R* scripts to clusters and take
+advantage of distributed computing resources.
+
 ## Basic ANTs*R* functionality
 
 Here, we quickly summarize ANTsR functionality and useful tools.
@@ -123,7 +129,7 @@ We test ANTs*R* regularly.  The status of the build (and an expected build
 **Image input and output**
 
 If nothing else, ANTs*R* makes it easy to read and write (medical) images
-and to map them into a format compatible with R.  Formats we frequently use
+and to map them into a format compatible with *R*.  Formats we frequently use
 include jpg, tiff, mha, nii.gz and nrrd. However, only the last three have a
 proper physical space representation necessary for mapping.  Below is an example of how we access this type of image and see its geometry.
 
@@ -132,7 +138,7 @@ mnifilename<-getANTsRData("mni")
 dimension<-3 # you have to know this ahead of time
 img<-antsImageRead(mnifilename,dimension)
 img
-antsImageWrite(img,mnifilename)
+retval<-antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)
@@ -144,10 +150,10 @@ print(max(img))
 
 Often, you would like to summarize or extract information from within a known
 region of an image with arbitrary shape but within a given intensity "zone". We
-simulate this situation below and show a few accessors and type conversions.
+simulate this below and show a few accessors and type conversions.
 ```{r indexing}
-gaussimg<-array( data=rnorm(125), dim=c(5,5,5))
-arrayimg<-array( data=(1:125), dim=c(5,5,5))
+gaussimg<-array( data=rnorm(125), dim=c(5,5,5) )
+arrayimg<-array( data=(1:125), dim=c(5,5,5) )
 img<-as.antsImage( arrayimg )
 print( max(img) )
 print( mean(img[ img > 50  ]))
@@ -171,8 +177,7 @@ gmat<-timeseries2matrix( gaussimg, mask )
 print(dim(gmat))
 ```
 
-If one has a mask, then one can
-use `makeImage` to generate a new image from a scalar or vector.
+If one has a mask, then one can use `makeImage` to generate a new image from a scalar or vector.
 ```{r makeimage}
 newimg<-makeImage( mask, mean(avg3d) )    # from scalar
 newimg<-makeImage( mask, colMeans(gmat) ) # from vector
@@ -202,9 +207,7 @@ mat<-imageListToMatrix( ilist, mask )
 print(dim(mat))
 ```
 
-Once we have a matrix representation of our population, we
-might run a quick voxel-wise regression within the mask.  
-Then we look at some summary statistics.
+Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask.  Then we look at some summary statistics.
 ```{r image matrix}
 mat<-imageListToMatrix( ilist, mask )
 age<-rnorm( nrow(mat) ) # simulated age

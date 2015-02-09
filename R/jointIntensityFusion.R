@@ -85,7 +85,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
       }
     }
-  havefastsvd<-usePkg("RcppArmadillo")
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -193,11 +192,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
       tempf<-function(betaf)
         {
-        if ( havefastsvd )
-          invmat<-pinv(
-            cormat + diag(ncol(cormat))*corrho, 0.01 )^betaf
-        if (!havefastsvd )
-          invmat<-solve( cormat + diag(ncol(cormat))*corrho )^betaf
+        invmat<-solve( cormat + diag(ncol(cormat))*corrho )^betaf
         onev<-rep(1,sum(zsd))
         wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
         return(wts)

@@ -30,6 +30,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   pointer = "externalptr"))
 
+#' @describeIn antsImage
 setMethod(f = "show", "antsImage", function(object){
     cat("antsImage\n")
     cat("  Pixel Type   :", object@pixeltype, "\n")
@@ -615,26 +616,31 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
   return(.Call("antsImage_TransformPhysicalPointToIndex", x, point, PACKAGE = "ANTsR"))
 }
 
+#' @describeIn antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"), definition = function(x,
   i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "numeric"), definition = function(x,
   i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"), definition = function(x,
   i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"), definition = function(x,
   i, j, k = NA, l = NA) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"), definition = function(x,
   i, value) {
   mask <- logical(0)
@@ -642,12 +648,14 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL"), definition = functi
   return(.Call("antsImage_SetRegion", x, mask, region, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "logical"), definition = function(x,
   i, value) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "array"), definition = function(x,
   i, value) {
   if (typeof(i) != "logical") {
@@ -658,6 +666,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array"), definition = funct
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"), definition = function(x,
   i, value) {
   if (typeof(i) != "logical") {
@@ -668,6 +677,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"), definition = func
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "list"), definition = function(x,
   i, value) {
   if (class(i$mask) == "NULL") {
@@ -683,17 +693,20 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "list"), definition = functi
   return(.Call("antsImage_SetRegion", x, i$mask, i$region, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "antsRegion"), definition = function(x,
   i, j, value) {
   mask <- logical(0)
   return(.Call("antsImage_SetRegion", x, mask, j, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "logical", j = "antsRegion"),
   definition = function(x, i, j, value) {
     return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
   })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"), definition = function(x,
   i, j, value) {
   if (typeof(i) != "logical") {
@@ -703,6 +716,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"), 
   return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"),
   definition = function(x, i, j, value) {
     if (typeof(i) != "logical") {
@@ -780,21 +794,25 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   temp<-(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
 }
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
+#' @describeIn antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
@@ -964,23 +982,4 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
     print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
     return()
   }
-})
-
-###################################################################################################
-
-#' An S4 class to hold a list of antsImages
-#'
-#' @slot pixeltype
-#' @slot dimension
-#' @slot pointer the memory location
-setClass(Class = "antsImageList", representation(pixeltype = "character", dimension = "integer",
-  pointer = "externalptr"))
-
-setMethod(f = "initialize", signature(.Object = "antsImageList"), definition = function(.Object,
-  pixeltype = "float", dimension = 3) {
-  .Call("antsImageList", pixeltype, dimension, PACKAGE = "ANTsR")
-})
-
-setMethod(f = "as.list", signature(x = "antsImageList"), definition = function(x) {
-  return(.Call("antsImageList_asList", x, PACKAGE = "ANTsR"))
 })

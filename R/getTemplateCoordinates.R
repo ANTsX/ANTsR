@@ -144,6 +144,7 @@ getTemplateCoordinates <- function(
   mypoints$y <- round(mypoints$y * scl)/scl
   mypoints$z <- round(mypoints$z * scl)/scl
   if (max(filab[filab > 0]) == 11) {
+    tracts <- NULL
     data("tracts", package = "ANTsR", envir = environment())
     tractnames <- rep("", nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
@@ -155,6 +156,7 @@ getTemplateCoordinates <- function(
     mypoints$Tracts <- tractnames
   }
   if (max(filab[filab > 0]) != 11) {
+    aal <- NULL
     data("aal", package = "ANTsR", envir = environment())
     aalnames <- rep("", nrow(mypoints))
     for (i in 1:nrow(mypoints)) {

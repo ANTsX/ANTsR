@@ -48,7 +48,7 @@ makeGraph <- function( mat, graphdensity = 1,
   }
   adjmat[adjmat == Inf] <- 0
   adjmat[adjmat > 0] <- adjmat[adjmat > 0] - 1
-  adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = nnumberOfNeighbors)
+  adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
   g1 <- graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
   #
   edgeWeights <- E(g1)$weight
