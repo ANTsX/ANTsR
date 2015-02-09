@@ -18,7 +18,6 @@ before_install:
 - echo "CC=clang" >  ~/.R/Makevars
 - echo "CXX=clang++" >> ~/.R/Makevars
 - source ~/.R/Makevars
-- sudo apt-get update
 
 install:
 - ./travis-tool.sh bootstrap
@@ -65,7 +64,8 @@ before_deploy: git fetch --tags
 #  file: ../ANTsR_1.0.tgz
 #  on:
 #    repo: stnava/ANTsR
-
+after_success:
+- Rscript -e 'library(covr);coveralls()'
 after_failure:
 - ./travis-tool.sh dump_logs
 
