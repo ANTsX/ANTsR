@@ -24,6 +24,7 @@ install:
 - unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc
     -d $HOME/pandoc
 - chmod +x $HOME/pandoc/pandoc
+- export PATH=$PATH:$HOME/pandoc/
 - pandoc --version
 - ./travis-tool.sh bootstrap
 - ./travis-tool.sh install_github jimhester/covr
