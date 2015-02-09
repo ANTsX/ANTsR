@@ -7,7 +7,7 @@ output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Transformations and statistical representations for images in R}
-    %\usepackage[utf8]{inputenc}
+    \usepackage[utf8]{inputenc}
 ---
 
 
