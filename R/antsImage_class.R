@@ -133,19 +133,9 @@ setMethod(f = "as.array", signature(x = "antsImage"),
 
 # see https://github.com/klutometis/roxygen/issues/272
 
-##  setMethod("[", "pixmap",
-## function(x, i, j, ..., drop=FALSE){
-## \alias{[,pixmap-method}
 
-
-#' Selection from an antsImage
-#'
-#' @name [
-#' @aliases [,antsImage-method
-#' @docType methods
-#' @rdname extract-methods
-#'
-setMethod("[", signature(x = "antsImage", i = "NULL", j="ANY"),
+#' @describeIn as.antsImage
+setMethod("[", c( "antsImage", "NULL", "ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   mask <- logical(0)
   region <- new("antsRegion", index = integer(), size = integer())
@@ -160,7 +150,7 @@ setMethod("[", signature(x = "antsImage", i = "NULL", j="ANY"),
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY"),
+setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
@@ -174,7 +164,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY"),
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY"),
+setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   if (typeof(i) != "logical") {
     print("'mask' provided is not of type 'logical'")
@@ -593,7 +583,7 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"),
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
   return(antsGetPixels(x, i, j, k, l))
 })
@@ -605,7 +595,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"),
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "numeric"),
+setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
@@ -617,7 +607,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "numeric"),
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"),
+setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
@@ -630,7 +620,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"),
 #' @docType methods
 #' @rdname extract-methods
 #'
-setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"),
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })

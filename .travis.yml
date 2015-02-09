@@ -25,7 +25,7 @@ install:
     -d $HOME/pandoc
 - chmod +x $HOME/pandoc/pandoc
 - export PATH=$PATH:$HOME/pandoc/
-- pandoc --version
+# - pandoc --version
 - ./travis-tool.sh bootstrap
 - ./travis-tool.sh install_github jimhester/covr
 - ./travis-tool.sh r_install BGLR
