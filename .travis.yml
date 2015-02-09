@@ -21,30 +21,30 @@ before_install:
 
 install:
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh install_r    BGLR
-- ./travis-tool.sh install_r    caret
-- ./travis-tool.sh install_r    cluster
-- ./travis-tool.sh install_r    DMwR
-- ./travis-tool.sh install_r    e1071
-- ./travis-tool.sh install_r    fastICA
-- ./travis-tool.sh install_r    fpc
-- ./travis-tool.sh install_r    grid
-- ./travis-tool.sh install_r    glmnet
-- ./travis-tool.sh install_r    igraph
-- ./travis-tool.sh install_r    magic
-- ./travis-tool.sh install_r    misc3d
-- ./travis-tool.sh install_r    moments
-- ./travis-tool.sh install_r    pixmap
-- ./travis-tool.sh install_r    png
-- ./travis-tool.sh install_r    psych
-- ./travis-tool.sh install_r    randomForest
-- ./travis-tool.sh install_r    rgl
-- ./travis-tool.sh install_r    robust
-- ./travis-tool.sh install_r    signal
-- ./travis-tool.sh install_r    visreg
-- ./travis-tool.sh install_r    Rcpp
-- ./travis-tool.sh install_r    knitr
-- ./travis-tool.sh install_r    rmarkdown
+- ./travis-tool.sh r_binary_install BGLR
+- ./travis-tool.sh r_binary_install caret
+- ./travis-tool.sh r_binary_install cluster
+- ./travis-tool.sh r_binary_install DMwR
+- ./travis-tool.sh r_binary_install e1071
+- ./travis-tool.sh r_binary_install fastICA
+- ./travis-tool.sh r_binary_install fpc
+- ./travis-tool.sh r_binary_install grid
+- ./travis-tool.sh r_binary_install glmnet
+- ./travis-tool.sh r_binary_install igraph
+- ./travis-tool.sh r_binary_install magic
+- ./travis-tool.sh r_binary_install misc3d
+- ./travis-tool.sh r_binary_install moments
+- ./travis-tool.sh r_binary_install pixmap
+- ./travis-tool.sh r_binary_install png
+- ./travis-tool.sh r_binary_install psych
+- ./travis-tool.sh r_binary_install randomForest
+- ./travis-tool.sh r_binary_install rgl
+- ./travis-tool.sh r_binary_install robust
+- ./travis-tool.sh r_binary_install signal
+- ./travis-tool.sh r_binary_install visreg
+- ./travis-tool.sh r_binary_install Rcpp
+- ./travis-tool.sh r_binary_install knitr
+- ./travis-tool.sh r_binary_install rmarkdown
 - cd ${basedir}
 
 script:
