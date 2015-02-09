@@ -29,7 +29,7 @@ install:
 - ./travis-tool.sh r_install DMwR
 - ./travis-tool.sh r_binary_install e1071
 - ./travis-tool.sh r_binary_install fastICA
-- ./travis-tool.sh r_binary_install fpc
+- ./travis-tool.sh r_install fpc
 - ./travis-tool.sh r_binary_install grid
 - ./travis-tool.sh r_binary_install glmnet
 - ./travis-tool.sh r_binary_install igraph
