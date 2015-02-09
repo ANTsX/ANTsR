@@ -74,8 +74,8 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
   }
   if (opt == "butt") {
     if ( !usePkg("signal") ) { print("Need signal package"); return(NULL) }
-    bf <- butter(2, c(freqLo, freqHi), type = "pass")
-    filteredTimeSeries <- matrix(filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
+    bf <- signal::butter(2, c(freqLo, freqHi), type = "pass")
+    filteredTimeSeries <- matrix(signal::filter(bf, myTimeSeries), nrow = nrow(myTimeSeries))
     return(filteredTimeSeries)
   }
   if (opt == "trig") {
@@ -83,12 +83,12 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
     if (nrow(myTimeSeries)%%2 > 0) {
       firsttime <- myTimeSeries[1, ]
       myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
-      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
+      filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
       filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
       filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
     } else {
-      filteredTimeSeries <- residuals(cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
+      filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
     }
     temporalvar <- apply(filteredTimeSeries, 2, var)

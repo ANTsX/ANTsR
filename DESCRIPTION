@@ -10,7 +10,7 @@ Description: ANTsR interfaces state of the art image processing with R statistic
 License: GPL (>=2)
 LazyLoad: yes
 Depends: Rcpp, methods, tools
-Imports:
+Suggests:
     BGLR,
     caret,
     cluster,
@@ -22,6 +22,7 @@ Imports:
     glmnet,
     igraph,
     magic,
+    mFilter, 
     misc3d,
     moments,
     pixmap,

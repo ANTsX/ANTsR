@@ -49,7 +49,7 @@ clusterTimeSeries <- function(mat, krange = 2:10,
   if (nsvddims > nrow(mat))
     nsvddims <- nrow(mat)/2
   matsvd <- svd(mat, nu = nsvddims, nv = 0)
-  pk <- pamk(mat, krange = krange, criterion = criterion)
+  pk <- fpc::pamk(mat, krange = krange, criterion = criterion)
   clusters <- pk$pamobject$clustering
   tsimagelist <- list()
   for (i in 1:max(clusters)) {

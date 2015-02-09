@@ -50,7 +50,7 @@ plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
   axis = 2,
   slices,
-  window.img = quantile(x[x!=0], 0.05, 0.95),
+  window.img = quantile(x[x!=0], c(0.05, 0.95)),
   threshold = "0.5xInf",
   quality = 4,
   outname = NA,
@@ -60,7 +60,9 @@ plot.antsImage <- function(x, y,
   myantsimage<-x
   if(missing(slices)){
     nonzeros <- which(apply(as.array(myantsimage), axis, sum) != 0)
-    slices <- round(seq(nonzeros[1], nonzeros[length(nonzeros)], length.out=11)[-c(1, 8)])
+    nslices <- 10
+    slices <- round(seq(nonzeros[1], nonzeros[length(nonzeros)], 
+                        length.out=nslices+2)[-c(1, nslices+2)])
   }
   if ( missing( y ) ) y<-NA
   functional<-y
@@ -203,6 +205,8 @@ plot.antsImage <- function(x, y,
     }
   }
   # pdf(paste(output,'.pdf',sep='')) onm<-paste(output,'.jpg',sep='')
+  bbox <- c(1, 1, c(1+antsGetSpacing(myantsimage)[-axis]*dim(myantsimage)[-axis]) *
+              c(wincols, winrows))
   mag <- quality
   pixperinch <- 96
   if (!is.na(outname)){
@@ -213,12 +217,16 @@ plot.antsImage <- function(x, y,
   }
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
-  img.plot <- suppressWarnings(pixmapGrey(
-    bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice)))
+  image(x=seq(bbox[1], bbox[3], length.out=ncol(bigslice)+1), 
+        y=seq(bbox[2], bbox[4], length.out=nrow(bigslice)+1), 
+        z = t(bigslice.scl[nrow(bigslice):1,, drop=F]), 
+        asp=1, xlab='', ylab='', col=gray.colors(264, start=0, end=0.95), axes=F)
+  img.plot <- suppressWarnings(pixmap::pixmapGrey(
+    bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice), bbox=bbox))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
-  plot(img.plot, bg = "white")
+  pixmap::plot(img.plot, bg = "white")
   if (threshold[1] > threshold[2] | is.na(functional)) {
     if (!is.na(outname))
       dev.off()
@@ -319,7 +327,7 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      plot(pixmapIndexed(biglab, col = heatvals), add = TRUE)
+      plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE)
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))

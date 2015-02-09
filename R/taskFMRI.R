@@ -76,18 +76,18 @@ taskFMRI <- function(mat, hrf, myvars,
       if (abs(arcoefs[1]) > 0.05)
         {
           print(arcoefs)
-          mat1 <- ashift(amat, c(1, 0))
+          mat1 <- magic::ashift(amat, c(1, 0))
           mat1[1, ] <- amat[1, ]
-          mat2 <- ashift(amat, c(2, 0))
+          mat2 <- magic::ashift(amat, c(2, 0))
           mat2[1, ] <- amat[1, ]
           mat2[2, ] <- amat[2, ]
           if (length(arcoefs) == 2)
           amat <- amat - mat1 * arcoefs[1] - mat2 * arcoefs[2]
           if (length(arcoefs) == 1)
           amat <- amat - mat1 * arcoefs[1]
-          mat1 <- ashift(adesmat, c(1, 0))
+          mat1 <- magic::ashift(adesmat, c(1, 0))
           mat1[1, ] <- adesmat[1, ]
-          mat2 <- ashift(adesmat, c(2, 0))
+          mat2 <- magic::ashift(adesmat, c(2, 0))
           mat2[1, ] <- adesmat[1, ]
           mat2[2, ] <- adesmat[2, ]
           if (length(arcoefs) == 2)
@@ -126,9 +126,9 @@ taskFMRI <- function(mat, hrf, myvars,
     if (i == 1)
       initialarcoefs <- arcoefs
     if (abs(arcoefs[1]) > 0.05) {
-      mat1 <- ashift(boldmat, c(1, 0))
+      mat1 <- magic::ashift(boldmat, c(1, 0))
       mat1[1, ] <- boldmat[1, ]
-      mat2 <- ashift(boldmat, c(2, 0))
+      mat2 <- magic::ashift(boldmat, c(2, 0))
       mat2[1, ] <- boldmat[1, ]
       mat2[2, ] <- boldmat[2, ]
       if (length(arcoefs) == 2)

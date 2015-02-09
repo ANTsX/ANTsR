@@ -94,7 +94,7 @@ antsSpatialICAfMRI <- function(boldImages, maskImage = NA, numberOfICAComponents
 
   # taken from the fastICA package
 
-  icaResults <- fastICA(X = t(groupBoldMatrix), n.comp = numberOfICAComponents,
+  icaResults <- fastICA::fastICA(X = t(groupBoldMatrix), n.comp = numberOfICAComponents,
     alg.typ = c("parallel"), fun = c("logcosh"), alpha = 1, method = c("C"),
     row.norm = FALSE, maxit = 200, tol = 1e-04, verbose = TRUE, w.init = NULL)
 

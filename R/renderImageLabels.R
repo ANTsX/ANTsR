@@ -29,7 +29,10 @@ renderImageLabels <- function(
   if (missing(labelsimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ")
   }
-
+  if(!usePkg("rgl") | usePkg('misc3d')) {
+    print("rgl and misc3d are necessary for this function.")
+    return(NULL)
+  }
   nLabels <- max(as.array(labelsimg))
 
   colors <- color
@@ -48,7 +51,7 @@ renderImageLabels <- function(
     print(sum(as.array(limg)))
 
     surf <- as.array(limg)
-    brain <- contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE,
+    brain <- misc3d::contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE,
       smooth = 1, color = colors[i])
 
     print("convert points")
@@ -60,6 +63,6 @@ renderImageLabels <- function(
     mylist[[i]] <- brain
   }
 
-  drawScene.rgl(mylist, add = TRUE)
+  rgl::drawScene.rgl(mylist, add = TRUE)
   return(mylist)
 }

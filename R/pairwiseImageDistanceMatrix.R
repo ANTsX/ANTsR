@@ -62,7 +62,7 @@ pairwiseImageDistanceMatrix <- function(dim,
   if ( !is.na(nclusters) &  usePkg("cluster") ) {
     clusters <- rep(NA, fnl)
     clusterrep <- rep(NA, nclusters)
-    pamx <- pam(symat, nclusters)
+    pamx <- cluster::pam(symat, nclusters)
     clusters <- summary(pamx)$clustering
     for (nc in 1:nclusters) {
       wc <- c(1:fnl)[clusters == nc]

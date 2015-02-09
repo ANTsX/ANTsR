@@ -98,12 +98,12 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   }
   print(paste("winsorizing with trim", winsortrim))
   if (winsortrim > 0)
-    omat <- winsor(omat, trim = winsortrim)
+    omat <- psych::winsor(omat, trim = winsortrim)
   omat <- omat[keepinds, ]
   ##################################################
   classiccompcor <- compcor(omat, mask = mask, ncompcor = 4)
   omotionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
-  motnuisshift <- ashift(omotionnuis, c(1, 0))
+  motnuisshift <- magic::ashift(omotionnuis, c(1, 0))
   motmag <- apply(omotionnuis, FUN = mean, MARGIN = 2)
   matmag <- sqrt(sum(motmag[1:9] * motmag[1:9]))
   tranmag <- sqrt(sum(motmag[10:12] * motmag[10:12]))

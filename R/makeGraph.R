@@ -49,43 +49,43 @@ makeGraph <- function( mat, graphdensity = 1,
   adjmat[adjmat == Inf] <- 0
   adjmat[adjmat > 0] <- adjmat[adjmat > 0] - 1
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
-  g1 <- graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
+  g1 <- igraph::graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
   #
-  edgeWeights <- E(g1)$weight
+  edgeWeights <- igraph::E(g1)$weight
   # compute local efficiency
   if (getEfficiency) {
-    mysps <- shortest.paths(g1)
+    mysps <- igraph::shortest.paths(g1)
     mysps[mysps == Inf] <- 2 * max(adjacencyMatrix)
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
-  gmetric0 <- evcent(g1)$vector
-  gmetric1 <- closeness(g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- page.rank(g1)$vector  #
-  gmetric3 <- degree(g1)
-  gmetric4 <- betweenness(g1, normalized = F, weights = edgeWeights)  #
-  gmetric5 <- transitivity(g1, isolates = c("zero"), type = c("barrat"))
-  gmetric6 <- graph.strength(g1)
-  gmetric7 <- centralization.degree(g1)$res
+  gmetric0 <- igraph::evcent(g1)$vector
+  gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
+  gmetric2 <- igraph::page.rank(g1)$vector  #
+  gmetric3 <- igraph::degree(g1)
+  gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)  #
+  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"))
+  gmetric6 <- igraph::graph.strength(g1)
+  gmetric7 <- igraph::centralization.degree(g1)$res
   gmetric8 <- myspsa
-  walktrapcomm <- walktrap.community(g1)
+  walktrapcomm <- igraph::walktrap.community(g1)
   if (  !is.na(communityMethod) )
     {
     if ( communityMethod == 'spinglass' )
-      mycommunity <- spinglass.community(g1)
+      mycommunity <- igraph::spinglass.community(g1)
     else if ( communityMethod == 'optimal' )
-      mycommunity <- optimal.community(g1)
+      mycommunity <- igraph::optimal.community(g1)
     else if ( communityMethod == 'walktrap' )
-      mycommunity <- walktrap.community(g1)
+      mycommunity <- igraph::walktrap.community(g1)
     else if ( communityMethod == 'multilevel' )
-      mycommunity <- multilevel.community(g1)
+      mycommunity <- igraph::multilevel.community(g1)
     else if ( communityMethod == 'leading.eigenvector' )
-      mycommunity <- leading.eigenvector.community(g1)
+      mycommunity <- igraph::leading.eigenvector.community(g1)
     else if ( communityMethod == 'label.propagation' )
-      mycommunity <- label.propagation.community(g1)
+      mycommunity <- igraph::label.propagation.community(g1)
     else if ( communityMethod == 'edge.betweenness' )
-      mycommunity <- edge.betweenness.community(g1)
+      mycommunity <- igraph::edge.betweenness.community(g1)
     else # ( communityMethod == 'fastgreedy.propagation' )
-      mycommunity <- fastgreedy.community(g1)
+      mycommunity <- igraph::fastgreedy.community(g1)
     } else mycommunity<-walktrapcomm
   #########################################################
   return( list(

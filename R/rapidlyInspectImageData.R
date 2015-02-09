@@ -18,7 +18,7 @@
 #' if ( !usePkg("DMwR") | ! usePkg("fpc") )
 #'    { print("Need DMwR and fpc packages") } else {
 #'   pamres <- pamk(mm,1:4)
-#'   outlier.scores <- lofactor( mm, k=3 )
+#'   outlier.scores <- DMwR::lofactor( mm, k=3 )
 #'   outliers <- order(outlier.scores)
 #'   }
 #' }
@@ -29,7 +29,6 @@ rapidlyInspectImageData <- function(myfiles) {
     print(args(rapidlyInspectImageData))
     return(1)
   }
-  if ( !usePkg("fpc") ) { print("Need fpc package"); return(NULL) }
   if ( !usePkg("moments") ) { print("Need moments package"); return(NULL) }
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
@@ -44,8 +43,8 @@ rapidlyInspectImageData <- function(myfiles) {
     mymat[i, 2] <- mean(img[img > thresh])
     mymat[i, 3] <- sd(img[img > min(img)])
     mymat[i, 4] <- sd(img[img > thresh])
-    mymat[i, 5] <- kurtosis(img[img > min(img)])
-    mymat[i, 6] <- kurtosis(img[img > thresh])
+    mymat[i, 5] <- moments::kurtosis(img[img > min(img)])
+    mymat[i, 6] <- moments::kurtosis(img[img > thresh])
   }
   rownames(mymat) <- myfiles
   return(mymat)

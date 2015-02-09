@@ -73,7 +73,7 @@ renderSurfaceFunction <- function(
     cat("No functional images--only plotting surface images.\n")
     for (i in 1:length(surfimg)) {
       surf <- as.array(surfimg[[i]])
-      brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i],
+      brain <- misc3d::contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i],
         draw = FALSE, smooth = 1, material = "metal", depth = 0.6, color = "white")
       # each point has an ID, 3 points make a triangle , the points are laid out as c(
       # x1 , y1, z1, x2, y2, z2 , ...  , xn, yn, zn ) indices are just numbers
@@ -85,7 +85,7 @@ renderSurfaceFunction <- function(
       }
       mylist[[i]] <- brain
     }
-    drawScene.rgl(mylist)
+    rgl::drawScene.rgl(mylist)
     return(mylist)
   }
   if (smoothfval > 0) {
@@ -102,7 +102,7 @@ renderSurfaceFunction <- function(
     alphafunc <- rep(alphafunc, length.out = length(funcimg))
   for (i in 1:length(surfimg)) {
     surf <- as.array(surfimg[[i]])
-    brain <- contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE,
+    brain <- misc3d::contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE,
       smooth = 1, material = "metal", depth = 0.6, color = "white")
     if (physical == TRUE) {
       brain$v1 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v1)
@@ -122,7 +122,7 @@ renderSurfaceFunction <- function(
     if (missing(offsetfval))
       offsetfval <- sd(vals[vals > usefval])
     # print(paste(i, usefval, alphafunc[i]))
-    blob <- contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE,
+    blob <- misc3d::contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE,
       smooth = 1, material = "metal", depth = 0.6, color = mycol[[i]])
     if (physical == TRUE) {
       blob$v1 <- antsTransformIndexToPhysicalPoint(funcimg[[i]], blob$v1)
@@ -134,12 +134,12 @@ renderSurfaceFunction <- function(
   # s<-scene3d() s$par3d$windowRect <- c(0, 0, 500, 500) # make the window large
   # 1.5*s$par3d$windowRect s$par3d$zoom = 1.1 # larger values make the image
   # smaller
-  drawScene.rgl(mylist)  # surface render
-  par3d(windowRect = c(0, 0, 500, 500))  # make the window large
-  par3d(zoom = 1.1)  # larger values make the image smaller
-  drawScene.rgl(mylist)  # surface render
+  rgl::drawScene.rgl(mylist)  # surface render
+  rgl::par3d(windowRect = c(0, 0, 500, 500))  # make the window large
+  rgl::par3d(zoom = 1.1)  # larger values make the image smaller
+  rgl::drawScene.rgl(mylist)  # surface render
   if (!is.na(outfn))
-    movie3d(spin3d(), duration = 15, dir = outdir, movie = outfn, clean = F)
+    rgl::movie3d(spin3d(), duration = 15, dir = outdir, movie = outfn, clean = F)
   return(mylist)
 }
 

@@ -65,8 +65,8 @@ quantifySNPs <- function(snps, freqthresh = 0.1 ,
   }
   qsnps<-qsnps[,okrow]
   if ( shiftit & usePkg("magic") ) {
-    qsnps<-qsnps+ashift(qsnps,c(0,1))+ashift(qsnps,c(0,-1))
-    qsnps<-qsnps+ashift(qsnps,c(0,1))+ashift(qsnps,c(0,-1))
+    qsnps<-qsnps+magic::ashift(qsnps,c(0,1))+magic::ashift(qsnps,c(0,-1))
+    qsnps<-qsnps+magic::ashift(qsnps,c(0,1))+magic::ashift(qsnps,c(0,-1))
   }
   return( qsnps )
 }

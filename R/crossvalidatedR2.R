@@ -27,7 +27,7 @@ crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = F) {
   nvox <- ncol(x)
   if (length(ngroups) == 1) {
     if ( havecaret ) {
-      groups <- createFolds(y, k = ngroups, list = FALSE)
+      groups <- caret::createFolds(y, k = ngroups, list = FALSE)
       } else groups<-rep_len( c(1:ngroups), length(y) )
   } else groups <- ngroups
   ngroups <- length(unique(groups))

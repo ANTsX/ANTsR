@@ -25,7 +25,7 @@ temporalwhiten <- function(mat, myord = 2) {
     gsig <- mat[, i]
     arval <- rep(0, myord)
     try(arval <- ar(gsig, FALSE, myord)$ar)
-    omat[, i] <- shift(gsig, 1) * arval[1] + shift(gsig, 2) * arval[2]
+    omat[, i] <- magic::shift(gsig, 1) * arval[1] + magic::shift(gsig, 2) * arval[2]
   }
   return(omat)
 }

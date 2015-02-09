@@ -104,7 +104,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
     if (debug)
       print("run lm")
     if (predalgorithm == "svm" & havesvm ) {
-      mdl <- svm(targetvoxels ~ ., data = nmatdf)
+      mdl <- e1071::svm(targetvoxels ~ ., data = nmatdf)
     } else mdl <- lm(targetvoxels ~ ., data = nmatdf)
     if (inpaintLesion == FALSE) {
       pvox <- predict(mdl, type = "response")
@@ -123,7 +123,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
     imgvec <- img[paintMask == 1]
     mydf <- data.frame(vox = predimg[paintMask == 1])
     if (predalgorithm == "svm" & havesvm ) {
-      mdl <- svm(imgvec ~ vox, data = mydf)
+      mdl <- e1071::svm(imgvec ~ vox, data = mydf)
     } else mdl <- lm(imgvec ~ vox, data = mydf)
     mydf <- data.frame(vox = predimg[fmask == 1])
     predvec2 <- predict(mdl, newdata = mydf)

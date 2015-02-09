@@ -43,7 +43,10 @@ visualizeBlob <- function(template, blob, outname = "wmBlob", dim = 3) {
       blob <- antsImageClone(blob, "float")
     }
   } else stop("Blob must be file name or antsImage.")
-
+  if(!usePkg('rgl')) {
+    print("Must have rgl to use this function.")
+    return(NULL)
+  }
   mymask <- getMask(template)
   myseg <- Atropos( a = template, m = "[0.25,1x1x1]",
     c = "[2,0]", x = mymask,
@@ -55,12 +58,12 @@ visualizeBlob <- function(template, blob, outname = "wmBlob", dim = 3) {
   ImageMath(dim, glassbrain, "FillHoles", glassbrain)
   myrender <- renderSurfaceFunction(list(glassbrain), list(wm, blob), surfval = 0.2,
     smoothsval = 1.5, alphasurf = 0.3, smoothfval = 1.5, alphafunc = 1)
-  lateralLeft <- rotationMatrix(pi/2, 0, -1, 0) %*% rotationMatrix(pi/2, -1, 0,
+  lateralLeft <- rgl::rotationMatrix(pi/2, 0, -1, 0) %*% rotationMatrix(pi/2, -1, 0,
     0)
-  par3d(userMatrix = lateralLeft, windowRect = c(25, 25, 325, 325), zoom = 0.7)
-  rgl.snapshot(paste(outname, "_lateral.png", sep = ""))
-  anterior <- rotationMatrix(0, 0, -1, 0) %*% rotationMatrix(pi/2, -1, 0, 0)
-  par3d(userMatrix = anterior, windowRect = c(25, 25, 325, 325), zoom = 0.7)
-  rgl.snapshot(paste(outname, "anterior.png", sep = ""))
+  rgl::par3d(userMatrix = lateralLeft, windowRect = c(25, 25, 325, 325), zoom = 0.7)
+  rgl::rgl.snapshot(paste(outname, "_lateral.png", sep = ""))
+  anterior <- rgl::rotationMatrix(0, 0, -1, 0) %*% rotationMatrix(pi/2, -1, 0, 0)
+  rgl::par3d(userMatrix = anterior, windowRect = c(25, 25, 325, 325), zoom = 0.7)
+  rgl::rgl.snapshot(paste(outname, "anterior.png", sep = ""))
   list(mask = mymask, seg = myseg, glassbrain = glassbrain)
 }
