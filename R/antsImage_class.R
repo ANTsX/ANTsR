@@ -5,6 +5,7 @@
 #'
 #' @slot index
 #' @slot size
+#' @useDynLib ANTsR
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
 
