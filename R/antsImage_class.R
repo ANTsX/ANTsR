@@ -753,50 +753,26 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
 }
 
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "numeric", j = "NULL", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)
   })
 
 
-#' Assignment to an antsImage
-#'
-#' @name [<-
-#' @aliases [<-,antsImage-method
-#' @docType methods
-#' @rdname replacement-methods
-#'
+#' @describeIn as.antsImage
 setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value = "numeric"),
   definition = function(x, i, j, ..., value) {
     temp<-antsSetPixels(x, i, j, ..., value = value)

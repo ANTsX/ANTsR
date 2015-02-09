@@ -10,7 +10,9 @@
 \alias{[,antsImage,numeric,NULL,ANY-method}
 \alias{[,antsImage,numeric,numeric,ANY-method}
 \alias{[<-,antsImage,NULL,ANY,ANY-method}
+\alias{[<-,antsImage,NULL,NULL,numeric-method}
 \alias{[<-,antsImage,NULL,antsRegion,ANY-method}
+\alias{[<-,antsImage,NULL,numeric,numeric-method}
 \alias{[<-,antsImage,array,ANY,ANY-method}
 \alias{[<-,antsImage,array,antsRegion,ANY-method}
 \alias{[<-,antsImage,list,ANY,ANY-method}
@@ -18,6 +20,8 @@
 \alias{[<-,antsImage,logical,antsRegion,ANY-method}
 \alias{[<-,antsImage,matrix,ANY,ANY-method}
 \alias{[<-,antsImage,matrix,antsRegion,ANY-method}
+\alias{[<-,antsImage,numeric,NULL,numeric-method}
+\alias{[<-,antsImage,numeric,numeric,numeric-method}
 \alias{as.antsImage}
 \alias{as.antsImage,array-method}
 \alias{as.antsImage,matrix-method}
@@ -58,6 +62,14 @@
 \S4method{[}{antsImage,array,antsRegion,ANY}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,matrix,antsRegion,ANY}(x, i, j, ...) <- value
+
+\S4method{[}{antsImage,`NULL`,`NULL`,numeric}(x, i, j, ...) <- value
+
+\S4method{[}{antsImage,numeric,numeric,numeric}(x, i, j, ...) <- value
+
+\S4method{[}{antsImage,numeric,`NULL`,numeric}(x, i, j, ...) <- value
+
+\S4method{[}{antsImage,`NULL`,numeric,numeric}(x, i, j, ...) <- value
 
 as.antsImage(object, ...)
 
@@ -118,6 +130,14 @@ convert types to antsImage
 \item \code{x = antsImage,i = array,j = antsRegion,value = ANY}: 
 
 \item \code{x = antsImage,i = matrix,j = antsRegion,value = ANY}: 
+
+\item \code{x = antsImage,i = NULL,j = NULL,value = numeric}: 
+
+\item \code{x = antsImage,i = numeric,j = numeric,value = numeric}: 
+
+\item \code{x = antsImage,i = numeric,j = NULL,value = numeric}: 
+
+\item \code{x = antsImage,i = NULL,j = numeric,value = numeric}: 
 
 \item \code{matrix}: 
 

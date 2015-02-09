@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.antsImage.R
 \name{plot.antsImage}
 \alias{plot.antsImage}
-\title{plot.antsImage}
+\title{Plotting an image slice or multi-slice with optional color overlay.}
 \usage{
 plot.antsImage(x, y, color = c("jet", "red", "blue", "green", "yellow"),
   axis = 2, slices, window.img = quantile(x[x != 0], c(0.05, 0.95)),
@@ -44,9 +44,6 @@ file}
 output is plot to standard R window
 }
 \description{
-Plotting an image slice or multi-slice with optional color overlay.
-}
-\details{
 This is a plotting utility for antsImage types with a background and color
 overlay option.  Useful for displaying statistical results overlaid on a
 background image.

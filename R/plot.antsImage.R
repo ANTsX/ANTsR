@@ -1,5 +1,3 @@
-#' plot.antsImage
-#'
 #' Plotting an image slice or multi-slice with optional color overlay.
 #'
 #' This is a plotting utility for antsImage types with a background and color
@@ -45,7 +43,7 @@
 #'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
 #' }
 #'
-#' @export plot.antsImage
+#' @export
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
   axis = 2,
@@ -61,7 +59,7 @@ plot.antsImage <- function(x, y,
   if(missing(slices)){
     nonzeros <- which(apply(as.array(myantsimage), axis, sum) != 0)
     nslices <- 10
-    slices <- round(seq(nonzeros[1], nonzeros[length(nonzeros)], 
+    slices <- round(seq(nonzeros[1], nonzeros[length(nonzeros)],
                         length.out=nslices+2)[-c(1, nslices+2)])
   }
   if ( missing( y ) ) y<-NA
@@ -217,9 +215,9 @@ plot.antsImage <- function(x, y,
   }
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
-  image(x=seq(bbox[1], bbox[3], length.out=ncol(bigslice)+1), 
-        y=seq(bbox[2], bbox[4], length.out=nrow(bigslice)+1), 
-        z = t(bigslice.scl[nrow(bigslice):1,, drop=F]), 
+  image(x=seq(bbox[1], bbox[3], length.out=ncol(bigslice)+1),
+        y=seq(bbox[2], bbox[4], length.out=nrow(bigslice)+1),
+        z = t(bigslice.scl[nrow(bigslice):1,, drop=F]),
         asp=1, xlab='', ylab='', col=gray.colors(264, start=0, end=0.95), axes=F)
   img.plot <- suppressWarnings(pixmap::pixmapGrey(
     bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice), bbox=bbox))
