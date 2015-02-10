@@ -21,6 +21,21 @@
 #' rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100 )
 #' rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
 #' plot( rfseg2 )
+#' \dontrun{
+#'    img<-antsImageRead( getANTsRData("r16") ,2)
+#'    img2<-antsImageRead( getANTsRData("r64") ,2)
+#'    mask<-getMask( img )
+#'    mask2<-getMask( img2 )
+#'    segs<-kmeansSegmentation( img, k=3, kmask = mask)
+#'    nimg<-iMath(img,"Normalize")
+#'    fimgs<-list( nimg )
+#'    rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100 )
+#'    mytx<-antsRegistration(fixed=img , moving=img2 ,
+#'             typeofTransform = c('SyN') )
+#'    fimgs2<-list( iMath(mytx$warpedmovout,"Normalize") )
+#'    rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs2 , mask )
+#'    plot( rfseg2 )
+#'    }
 #' }
 #'
 #' @export rfSegmentationPredict
