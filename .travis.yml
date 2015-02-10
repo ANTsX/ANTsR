@@ -5,7 +5,7 @@ compiler:
 
 os:
 - linux
-- osx
+# - osx # currently builds too slowly ...
 
 before_install:
 - cd ..
