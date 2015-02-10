@@ -59,7 +59,7 @@ script:
 - R CMD INSTALL --build ANTsR_1.0.tar.gz
 #- R CMD check ANTsR
 # - R CMD  check ANTsR_1.0.tar.gz --no-install --as-cran
-# - cd ANTsR
+ - cd ANTsR
 
 before_deploy: git fetch --tags
 
@@ -72,8 +72,8 @@ deploy:
     repo: stnava/ANTsR
 
 after_success:
-- cd ANTsR # covr needs to be within package root, it seems
-- Rscript -e 'library(covr);coveralls()'
+# - cd ANTsR # covr needs to be within package root, it seems
+# - Rscript -e 'library(covr);coveralls()' # times out
 
 after_failure:
 - ./travis-tool.sh dump_logs
