@@ -7,9 +7,9 @@
 lowrankRowMatrix(A, k = 2)
 }
 \arguments{
-\item{k}{rank to use}
+\item{A}{input matrix}
 
-\item{x}{input matrix}
+\item{k}{rank to use}
 }
 \value{
 matrix is output
@@ -19,7 +19,7 @@ Produces a low rank version of the input matrix
 }
 \examples{
 mat <- matrix(rnorm(300),ncol=50)
-lrmatlowrankRowMatrix( mat , 2 )
+lrmat <- lowrankRowMatrix( mat , 2 )
 }
 \author{
 Avants BB

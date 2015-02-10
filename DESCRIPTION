@@ -12,6 +12,7 @@ LazyLoad: yes
 Depends: Rcpp
 Imports: methods, tools
 Suggests:
+    abind,
     BGLR,
     caret,
     cluster,

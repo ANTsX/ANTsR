@@ -191,14 +191,14 @@ networkEiganat <- function(
 
 #' Produces a low rank version of the input matrix
 #'
-#' @param x input matrix
+#' @param A input matrix
 #' @param k rank to use
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
 #'
 #' mat <- matrix(rnorm(300),ncol=50)
-#' lrmatlowrankRowMatrix( mat , 2 )
+#' lrmat <- lowrankRowMatrix( mat , 2 )
 #'
 #' @export lowrankRowMatrix
 lowrankRowMatrix <- function(A, k = 2) {
