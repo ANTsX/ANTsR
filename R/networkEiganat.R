@@ -41,9 +41,9 @@
 #' nfolds<-6
 #' train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 #' train<-( train < 4 )
-#' lowr<-..lowrankRowMatrix(as.matrix( snps[train,] ),900)
+#' lowr<-lowrankRowMatrix(as.matrix( snps[train,] ),900)
 #' snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
-#' snpdF<-sparseDecom( ..lowrankRowMatrix(as.matrix( snps[train,] ),100),
+#' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),100),
 #'   nvecs=20 , sparseness=( -0.001) )
 #' projmat<-as.matrix( snpdS$eig )
 #' projmat<-as.matrix( snpdF$eig )
@@ -56,7 +56,7 @@
 #' snpd<-snpdSlow
 #' snpd<-snpdFast
 #' projmat<-as.matrix( snpd$v )
-#' snpdF<-sparseDecom( ..lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
+#' snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
 #'   nvecs=20 , sparseness=( -0.001) )
 #' projmat<-as.matrix( snpdS$eig )
 #' snpse<-as.matrix( snps[train, ]  ) %*% projmat
@@ -109,7 +109,7 @@ networkEiganat <- function(
   if (dowhite > 0 & (nvecs * 2 < nrow(Xin)))
     X <- icawhiten(X, dowhite)
   if (downsample > 0 & (nvecs < nrow(Xin)))
-    X <- ..lowrankRowMatrix(X, downsample)
+    X <- lowrankRowMatrix(X, downsample)
   if (doscale) {
     X <- scale(X)
     X <- X/norm(X, "F")
@@ -188,7 +188,20 @@ networkEiganat <- function(
 }
 
 
-..lowrankRowMatrix <- function(A, k = 2) {
+
+#' Produces a low rank version of the input matrix
+#'
+#' @param x input matrix
+#' @param k rank to use
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#'
+#' mat <- matrix(rnorm(300),ncol=50)
+#' lrmatlowrankRowMatrix( mat , 2 )
+#'
+#' @export lowrankRowMatrix
+lowrankRowMatrix <- function(A, k = 2) {
   if (k > nrow(A))
     return(A)
   p <- ncol(A)

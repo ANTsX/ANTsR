@@ -32,6 +32,6 @@ whiten <- function(x, k = NA, reducex = FALSE) {
     xw <- (xw) %*% x
   }
   if (reducex)
-    xw <- ..lowrankRowMatrix(xw, k)
+    xw <- lowrankRowMatrix(xw, k)
   return(xw)
 }
