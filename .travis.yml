@@ -56,6 +56,7 @@ install:
 
 script:
 - R CMD INSTALL ANTsR
+- R CMD check ANTsR
 # - R CMD build ANTsR --no-build-vignettes
 # - R CMD INSTALL --build ANTsR_1.0.tar.gz
 # - R CMD  check ANTsR_1.0.tar.gz --no-install --as-cran

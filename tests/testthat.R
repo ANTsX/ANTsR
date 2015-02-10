@@ -1,4 +1,4 @@
 library(testthat)
 library(ANTsR)
 
-# test_check("ANTsR")
+test_check("ANTsR")
