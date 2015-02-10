@@ -569,6 +569,7 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 }
 
 #' @describeIn as.antsImage
+#' @export as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
   return(antsGetPixels(x, i, j, k, l))
