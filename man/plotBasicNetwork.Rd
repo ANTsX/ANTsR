@@ -58,13 +58,13 @@ plotBasicNetwork( centroids = centroids, brain )
   testweights[31,36]<-2  # ant cingulate to post cingulate
   testweights[11,65]<-3  # broca to angular
   plotBasicNetwork( centroids = aalcnt , brain , weights=testweights )
-  id<-par3d('userMatrix')
+  id<-rgl::par3d('userMatrix')
   rid<-rotate3d( id , -pi/2, 1, 0, 0 )
   rid2<-rotate3d( id , pi/2, 0, 0, 1 )
   rid3<-rotate3d( id , -pi/2, 0, 0, 1 )
-  par3d(userMatrix = id )
+  rgl::par3d(userMatrix = id )
   dd<-make3ViewPNG(  rid, id, rid2,  paste('network1',sep='') )
-  par3d(userMatrix = id )
+  rgl::par3d(userMatrix = id )
 }
 }
 \author{
