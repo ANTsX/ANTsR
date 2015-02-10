@@ -46,8 +46,8 @@
 #'   mnia2<-smoothImage(mnia2,1.5)
 #'   ofn<-paste(tempfile(),'.png',sep='')
 #'   # write directly to a file
-#'   plot( mnit, list(mnia,mnia2), slices='50x140x5',
-#'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
+#'   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
+#'    threshold = '0.25x1', axis=2,color=c('red','blue'), outname = ofn )
 #' }
 #'
 #' @aliases plot
@@ -137,7 +137,7 @@ plot.antsImage <- function(x, y,
     image(rotate270.matrix(z), ...)
   }
 
-  if (is.na(functional)) {
+  if (all(is.na(functional))) {
     # print(paste('functional image file', functional, 'does not exist. no overlay
     # will be produced.'))
     thresh <- "1.e9x1.e9"
@@ -223,17 +223,13 @@ plot.antsImage <- function(x, y,
   }
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
-  image(x=seq(bbox[1], bbox[3], length.out=ncol(bigslice)+1),
-        y=seq(bbox[2], bbox[4], length.out=nrow(bigslice)+1),
-        z = t(bigslice.scl[nrow(bigslice):1,, drop=F]),
-        asp=1, xlab='', ylab='', col=gray.colors(264, start=0, end=0.95), axes=F)
   img.plot <- suppressWarnings(pixmap::pixmapGrey(
     bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice), bbox=bbox))
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
   pixmap::plot(img.plot, bg = "white")
-  if (threshold[1] > threshold[2] | is.na(functional)) {
+  if (threshold[1] > threshold[2] | all(is.na(functional))) {
     if (!is.na(outname))
       dev.off()
     invisible(return())
@@ -333,7 +329,7 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE)
+      suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE))
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))

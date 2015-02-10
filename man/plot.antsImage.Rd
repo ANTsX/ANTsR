@@ -65,8 +65,8 @@ background image.
   mnia2<-smoothImage(mnia2,1.5)
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
-  plot( mnit, list(mnia,mnia2), slices='50x140x5',
-   threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
+  plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
+   threshold = '0.25x1', axis=2,color=c('red','blue'), outname = ofn )
 }
 }
 \author{
