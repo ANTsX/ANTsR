@@ -9,7 +9,6 @@
 #' @import Rcpp
 #' @import methods
 #' @import tools
-
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
 
@@ -138,10 +137,16 @@ setMethod(f = "as.array", signature(x = "antsImage"),
 
 # see https://github.com/klutometis/roxygen/issues/272
 
-
+#' @param x antsImage
+#' @param i logical or i-th dimension
+#' @param j not used or j-th dimension
+#' @param drop method for missing data
+#' @param k not used or k-th dimension
+#' @param l not used or l-th dimension
+#' @param value ok
 #' @describeIn as.antsImage
 setMethod("[", c( "antsImage", "NULL", "ANY", "ANY"),
-  definition = function(x, i, j, ..., drop) {
+  definition = function(x, i, j,..., drop) {
   mask <- logical(0)
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))

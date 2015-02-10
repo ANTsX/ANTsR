@@ -84,7 +84,21 @@ as.antsImage(object, ...)
   length.out = length(dim(object)))))
 }
 \arguments{
+\item{x}{antsImage}
+
+\item{i}{logical or i-th dimension}
+
+\item{j}{not used or j-th dimension}
+
 \item{...}{Extra named arguments passed to FUN}
+
+\item{drop}{method for missing data}
+
+\item{k}{not used or k-th dimension}
+
+\item{l}{not used or l-th dimension}
+
+\item{value}{ok}
 
 \item{object}{An object}
 
