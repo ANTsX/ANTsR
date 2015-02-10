@@ -127,6 +127,7 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
 })
 
 #' @describeIn antsImage
+#' @export as.array.antsImage
 setMethod(f = "as.array", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer())) {
