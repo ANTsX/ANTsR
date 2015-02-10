@@ -57,9 +57,9 @@ install:
 script:
 - R CMD build ANTsR --no-build-vignettes
 - R CMD INSTALL --build ANTsR_1.0.tar.gz
-#- R CMD check ANTsR
+- cd ANTsR
+# - R CMD check ANTsR
 # - R CMD  check ANTsR_1.0.tar.gz --no-install --as-cran
- - cd ANTsR
 
 before_deploy: git fetch --tags
 
@@ -70,10 +70,6 @@ deploy:
   file: ../ANTsR_1.0.tgz
   on:
     repo: stnava/ANTsR
-
-after_success:
-# - cd ANTsR # covr needs to be within package root, it seems
-# - Rscript -e 'library(covr);coveralls()' # times out
 
 after_failure:
 - ./travis-tool.sh dump_logs
