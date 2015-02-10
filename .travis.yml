@@ -55,26 +55,26 @@ install:
 - cd ${basedir}
 
 script:
-- R CMD INSTALL ANTsR
+- R CMD build ANTsR --no-build-vignettes
+- R CMD INSTALL --build ANTsR_1.0.tar.gz
 #- R CMD check ANTsR
-# - R CMD build ANTsR --no-build-vignettes
-# - R CMD INSTALL --build ANTsR_1.0.tar.gz
 # - R CMD  check ANTsR_1.0.tar.gz --no-install --as-cran
-# - Rscript -e 'library(ANTsR);  fi<-antsImageRead( getANTsRData("r16") ,2); mi<-antsImageRead( getANTsRData("r64"),2)' -e 'antsRegistration(fixed=fi , moving=mi, typeofTransform = c("SyN"))'
 # - cd ANTsR
 
 before_deploy: git fetch --tags
 
-# deploy:
-#  provider: releases
-#  api_key:
-#    secure: KeamoMlOUTB1Oi1VrBIbRaDCzHdrVqfSKXYc06zqi6FBkdXIsaNmX2P50CyOAlEBpkXATUMX2S8CAqwa37XSEF3WwSpRDTGEWgwas0N3D1PRSPN8HJYZ2hKWjcchZF1ov9ERRMOtJshlQ+W6YddPQiHRVCx2/8VAjNqxgT+1sQI=
-#  file: ../ANTsR_1.0.tgz
-#  on:
-#    repo: stnava/ANTsR
+deploy:
+  provider: releases
+  api_key:
+    secure: KeamoMlOUTB1Oi1VrBIbRaDCzHdrVqfSKXYc06zqi6FBkdXIsaNmX2P50CyOAlEBpkXATUMX2S8CAqwa37XSEF3WwSpRDTGEWgwas0N3D1PRSPN8HJYZ2hKWjcchZF1ov9ERRMOtJshlQ+W6YddPQiHRVCx2/8VAjNqxgT+1sQI=
+  file: ../ANTsR_1.0.tgz
+  on:
+    repo: stnava/ANTsR
+
 after_success:
 - cd ANTsR # covr needs to be within package root, it seems
 - Rscript -e 'library(covr);coveralls()'
+
 after_failure:
 - ./travis-tool.sh dump_logs
 

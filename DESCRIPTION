@@ -42,8 +42,7 @@ Suggests:
     sna,
     testthat,
     visreg,
-    wmtsa,
-    methods
+    wmtsa
 LinkingTo: Rcpp
-SystemRequirements: cmake, git, clang
+SystemRequirements: cmake, git, clang (recommended)
 VignetteBuilder: knitr
