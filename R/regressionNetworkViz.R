@@ -80,11 +80,11 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   }
   JJLinks <- data.frame(source = jjsources, target = jjtargets, value = jjvalues)
   if (whichviz == "Sankey") {
-    d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
+    d3Network::d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", fontsize = 12, nodeWidth = 30, width = 700,
       file = outfile)
   } else {
-    d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
+    d3Network::d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", Group = "group", width = 550, height = 400,
       zoom = zoom, opacity = 0.9, file = outfile)
   }

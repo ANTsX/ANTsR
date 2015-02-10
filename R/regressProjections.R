@@ -129,7 +129,7 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
     formula.hi <- as.formula(formula.hi)
     model.initial <- model.function(formula = as.formula(formula.lo), data = demog.train,
       ...)
-    model.optimal <- stepAIC(model.initial, scope = list(lower = as.formula(formula.lo),
+    model.optimal <- MASS::stepAIC(model.initial, scope = list(lower = as.formula(formula.lo),
       upper = as.formula(formula.hi)), direction = c("both"), k = log(nrow(demog.train)),
       trace = 1)
     model.train <- model.function(formula = model.optimal$call, data = demog.train,

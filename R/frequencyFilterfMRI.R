@@ -67,7 +67,7 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
     if ( !usePkg("wmtsa") ) { print("Need wmtsa package"); return(NULL) }
     dnz <- myTimeSeries * 0
     for (i in 1:ncol(myTimeSeries)) {
-      dnz[, i] <- wavShrink(myTimeSeries[, i], thresh.fun = "adaptive", thresh.scale = 0.1)
+      dnz[, i] <- wmtsa::wavShrink(myTimeSeries[, i], thresh.fun = "adaptive", thresh.scale = 0.1)
     }
     filteredTimeSeries <- ts(myTimeSeries - dnz)
     return(filteredTimeSeries)

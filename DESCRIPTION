@@ -15,14 +15,18 @@ Suggests:
     BGLR,
     caret,
     cluster,
+    d3Network,
     DMwR,
     e1071,
     fastICA,
     fpc,
-    grid,
+    glasso,
     glmnet,
+    grid,
     igraph,
+    knitr,
     magic,
+    MASS,
     mFilter,
     misc3d,
     moments,
@@ -37,7 +41,7 @@ Suggests:
     sna,
     testthat,
     visreg,
-    knitr
+    wmtsa
 LinkingTo: Rcpp
 SystemRequirements: cmake, git, clang
 VignetteBuilder: knitr

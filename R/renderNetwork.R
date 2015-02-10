@@ -1,10 +1,3 @@
-# renderNetwork
-
-
-
-
-
-
 #' 3D surface-based rendering of image ROI-based networks
 #'
 #' Will use rgl to render a spatial graph
@@ -42,7 +35,7 @@ renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius
   }
 
   labelVerts <- c(1:nLabels)
-  spheres3d(locations$vertices[labelVerts, ], color = nodecolors, type = nodetype,
+  rgl::spheres3d(locations$vertices[labelVerts, ], color = nodecolors, type = nodetype,
     radius = radius)
 
   edgelocations <- c()
@@ -76,6 +69,6 @@ renderNetwork <- function(network, locations, scaling = c(0, 0), lwd = 2, radius
     }
   }
 
-  segments3d(locations$vertices[edgelocations, ], col = rep(edgecolors, each = 2),
+  rgl::segments3d(locations$vertices[edgelocations, ], col = rep(edgecolors, each = 2),
     lwd = lwd)
 }

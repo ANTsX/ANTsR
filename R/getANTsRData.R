@@ -24,8 +24,16 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
 
   if ( fileid == "r16" )
     return( paste(path.package("ANTsR"),"/extdata/r16slice.jpg",sep="") )
+  if ( fileid == "r27" )
+    return( paste(path.package("ANTsR"),"/extdata/r27slice.jpg",sep="") )
+  if ( fileid == "r30" )
+    return( paste(path.package("ANTsR"),"/extdata/r30slice.jpg",sep="") )
+  if ( fileid == "r62" )
+    return( paste(path.package("ANTsR"),"/extdata/r62slice.jpg",sep="") )
   if ( fileid == "r64" )
     return( paste(path.package("ANTsR"),"/extdata/r64slice.jpg",sep="") )
+  if ( fileid == "r85" )
+    return( paste(path.package("ANTsR"),"/extdata/r85slice.jpg",sep="") )
 
   # ch2b = brodmann ch2a = aal mnib = brodmann mnia = all mnit = tracts
 

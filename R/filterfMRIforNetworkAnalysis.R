@@ -83,8 +83,8 @@ filterfMRIforNetworkAnalysis <- function(
   freqHi <- freqHi * tr
   # network analysis
   wb <- (mask > 0)  # whole brain
-  leftinds <- shift(c(1:nrow(aslmat)), 1)
-  rightinds <- shift(c(1:nrow(aslmat)), -1)
+  leftinds <- magic::shift(c(1:nrow(aslmat)), 1)
+  rightinds <- magic::shift(c(1:nrow(aslmat)), -1)
   oaslmat <- aslmat
   if (cbfnetwork == "ASLCBF") {
     # surround subtraction for cbf networks
@@ -160,7 +160,8 @@ filterfMRIforNetworkAnalysis <- function(
             if ( i != j ) {
             a<-scale(tlabmat[,i])
             b<-scale(tlabmat[,j])
-            rcormat[i,j]<-rcormat[j,i]<-as.numeric(coefficients(rlm(a~b)))[2]
+            rcormat[i,j]<-rcormat[j,i]<-as.numeric(
+              coefficients(MASS::rlm(a~b)))[2]
             }
         }
     }
@@ -178,14 +179,13 @@ filterfMRIforNetworkAnalysis <- function(
     if ( !is.na(useglasso) )
     if ( useglasso > 0 ) # treat useglasso as rho
       {
-      gcormat<-glasso( cormat, useglasso )$wi
+      gcormat<-glasso::glasso( cormat, useglasso )$wi
       diagmag<-sqrt( diag(gcormat) %o% diag(gcormat) )*(-1)
       gcormat<-gcormat/diagmag
       myinds<-( abs( gcormat ) < 1.e-4 )
       gcormat[ myinds ]<-0
       diag(gcormat)<-1
       rgdens<-( 0.5*sum(gcormat>0&gcormat<1)/ (0.5*ncol(gcormat)*(ncol(gcormat)-1)) )
-      print(paste("Use Glasso",useglasso,"density",rgdens))
       }
     if ( ! is.na( nuisancein ) ) pcormat<-pcormat[1:nbrainregions,1:nbrainregions]
     if ( ! is.na( nuisancein ) ) gcormat<-pcormat[1:nbrainregions,1:nbrainregions]
