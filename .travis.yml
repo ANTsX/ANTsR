@@ -73,6 +73,7 @@ before_deploy: git fetch --tags
 #  on:
 #    repo: stnava/ANTsR
 after_success:
+- cd ANTsR # covr needs to be within package root, it seems
 - Rscript -e 'library(covr);coveralls()'
 after_failure:
 - ./travis-tool.sh dump_logs
