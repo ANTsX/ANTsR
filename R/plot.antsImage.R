@@ -4,14 +4,6 @@
 #' overlay option.  Useful for displaying statistical results overlaid on a
 #' background image.
 #'
-#' @usage plot( x, y, color, axis=1, slices, window.img,
-#'  threshold = "0.5xInf",
-#'  quality = 4,
-#'  outname = NA,
-#'  alpha = 0.5,
-#'  newwindow = FALSE,
-#'  ...  )
-#'
 #' @param x the reference image on which to overlay
 #' @param y list of the images to use as overlays
 #' @param color the color for the overlay , e.g c('blue','red') length
@@ -50,7 +42,7 @@
 #'    threshold = '0.25x1', axis=2,color=c('red','blue'), outname = ofn )
 #' }
 #'
-#' @aliases plot
+#' @method plot antsImage
 #' @export
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
