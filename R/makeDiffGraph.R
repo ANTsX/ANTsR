@@ -53,5 +53,5 @@
   return(list(mygraph = g1, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3,
     betweeness = gmetric4, localtransitivity = gmetric5, community = mycommunity,
     walktrapcomm = walktrapcomm, adjacencyMatrix = adjacencyMatrix, centrality = gmetric0,
-    igraph::evcent = evcent(g1)))
+    evcent = igraph::evcent(g1)))
 }

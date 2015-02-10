@@ -152,9 +152,24 @@ setMethod("[", c( "antsImage", "NULL", "ANY", "ANY"),
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn as.antsImage
+setMethod("[", c( "antsImage", "NULL", "ANY"),
+  definition = function(x, i, j,..., drop) {
+  mask <- logical(0)
+  region <- new("antsRegion", index = integer(), size = integer())
+  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+})
+
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY", "ANY"),
+  definition = function(x, i, j, ..., drop) {
+  region <- new("antsRegion", index = integer(), size = integer())
+  return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
+})
+
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY"),
   definition = function(x, i, j, ..., drop) {
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
@@ -172,6 +187,16 @@ setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY", "ANY"),
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
 })
 
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY"),
+  definition = function(x, i, j, ..., drop) {
+  if (typeof(i) != "logical") {
+    print("'mask' provided is not of type 'logical'")
+    return()
+  }
+  region <- new("antsRegion", index = integer(), size = integer())
+  return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
+})
 
 
 #' Get Pixels
@@ -574,8 +599,13 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 }
 
 #' @describeIn as.antsImage
-#' @export as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL", "ANY"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
+  return(antsGetPixels(x, i, j, k, l))
+})
+
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
   return(antsGetPixels(x, i, j, k, l))
 })
@@ -587,14 +617,31 @@ setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric", "ANY"),
 })
 
 #' @describeIn as.antsImage
+setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  return(antsGetPixels(x, i, j, k, l))
+})
+
+#' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
 
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  return(antsGetPixels(x, i, j, k, l))
+})
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric", "ANY"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  return(antsGetPixels(x, i, j, k, l))
+})
+
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
   return(antsGetPixels(x, i, j, k, l))
 })
