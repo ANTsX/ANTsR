@@ -25,8 +25,6 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @param x input object to convert
 #' @param mask mask for the region
 #' @param region antsRegion for the image
-#' @param i the slowest moving index to the image
-#' @param j the next slowest moving index to the image, similar for k
 #' @param e1 internal control for types
 #' @param e2 internal control for types
 #' @slot pixeltype usually float, can be other types unsigned char, int, double

@@ -81,10 +81,6 @@
 \item{e1}{internal control for types}
 
 \item{e2}{internal control for types}
-
-\item{i}{the slowest moving index to the image}
-
-\item{j}{the next slowest moving index to the image, similar for k}
 }
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the

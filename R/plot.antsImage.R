@@ -50,6 +50,7 @@
 #'    threshold = '0.25x1', axis=0,color=c('red','blue'), outname = ofn )
 #' }
 #'
+#' @aliases plot
 #' @export
 plot.antsImage <- function(x, y,
   color = c("jet", "red", "blue",  "green", "yellow"),
