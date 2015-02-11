@@ -1,7 +1,7 @@
 context("segmenting image")
 
 test_that("image can be segmented with Atropos", {
-          img <- antsImageRead("data/r16slice.nii.gz", 2)
+          img <- antsImageRead( getANTsRData( "r16" ) , 2)
           mask <- antsImageClone(img)
           mask[img>10] <- 1
           mask[img<=10] <- 0
@@ -11,6 +11,6 @@ test_that("image can be segmented with Atropos", {
           # condition for passing is that less than 0.1% of voxels are classified
           # differently from our standard to allow for randomness in initialization.
           expect_true(
-           sum(abs(as.array(seg) - as.array(segs1$segmentation))) < nvox*1e-3) 
- 
+           sum(abs(as.array(seg) - as.array(segs1$segmentation))) < nvox*1e-3)
+
 })
