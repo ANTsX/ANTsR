@@ -27,7 +27,6 @@ install:
 - export PATH=$PATH:$HOME/pandoc/
 # - pandoc --version
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh install_github jimhester/covr
 - ./travis-tool.sh r_install BGLR
 - ./travis-tool.sh r_binary_install caret
 - ./travis-tool.sh r_binary_install cluster
