@@ -73,8 +73,6 @@ deploy:
     all_branches: true
 
 #  file: ../ANTsR_1.0.tgz # osx
-script: 
-- ./travis-tool.sh run_tests
 
 after_failure:
 - ./travis-tool.sh dump_logs
