@@ -4,10 +4,12 @@
 \alias{rapidlyInspectImageData}
 \title{Simple rapidlyInspectImageData function.}
 \usage{
-rapidlyInspectImageData(myfiles)
+rapidlyInspectImageData(myfiles, dimension = 3)
 }
 \arguments{
 \item{myfiles}{input list of filenames}
+
+\item{dimension}{image dimensionality}
 }
 \value{
 matrix is output
@@ -18,7 +20,7 @@ in a dataframe.
 }
 \examples{
 \dontrun{
- fnl<-c( getANTsRData("r16"),
+ fnl <- c( getANTsRData("r16"),
  getANTsRData("r27"),
  getANTsRData("r62"),
  getANTsRData("r64"),

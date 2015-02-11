@@ -4,12 +4,13 @@
 #' in a dataframe.
 #'
 #' @param myfiles input list of filenames
+#' @param dimension image dimensionality
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
 #'
 #' \dontrun{
-#'  fnl<-c( getANTsRData("r16"),
+#'  fnl <- c( getANTsRData("r16"),
 #'  getANTsRData("r27"),
 #'  getANTsRData("r62"),
 #'  getANTsRData("r64"),
@@ -24,7 +25,7 @@
 #' }
 #'
 #' @export rapidlyInspectImageData
-rapidlyInspectImageData <- function(myfiles) {
+rapidlyInspectImageData <- function(myfiles, dimension=3 ) {
   if (nargs() == 0) {
     print(args(rapidlyInspectImageData))
     return(1)
