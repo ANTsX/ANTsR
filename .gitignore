@@ -4,6 +4,7 @@
 *.o 
 
 # things to ignore in directory ANTsR/src
+src/itkMakefile
 src/CMakeCache.txt
 src/CMakeFiles/
 src/cmake_install.cmake
