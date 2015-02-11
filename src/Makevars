@@ -1,11 +1,9 @@
-## Emacs please make this a -*- mode: Makefile; -*-
-##
-## Use the R_HOME indirection to support installations of multiple R version
-antsinclude=${PWD}/ANTS/ANTS-src/Examples/include/
+myrootantssource=${PWD}/ANTS/ANTS-src/
 myrootantslib=${PWD}/ANTS/ANTS-build/lib/
+myrootitksource=${PWD}/ANTS/ANTS-build/ITKv4/ # old version
 myrootitksource=${PWD}/ANTS/ANTS-build/ITKv4-install/include/ITK-4.8/
 myrootitkbin=${PWD}/ANTS/ANTS-build/ITKv4-build/
-PKG_CPPFLAGS= -I${PWD}/ -I${antsinclude} -I${myrootitksource}
+PKG_CPPFLAGS= -I${myrootitksource} -I${myrootantssource}/Examples/include/
 libants=`find ${myrootantslib} -name "lib*.a"`
 myarch  := $(shell uname)
 libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `
