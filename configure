@@ -22,13 +22,14 @@ if [[ ! -s ants ]] ; then
   mkdir ants itks antb itkb
   git clone $itkgit itks
   cd itkb
-  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=OFF -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
+  # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On 
+  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=ON -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
   git clone $antsgit ants
   cd antb
-  cmake -D ITK_DIR:PATH=../itkb/include/ITK-4.8/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
+  cmake -D ITK_DIR:PATH=../itkb/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   cd ..
   cp antsr.h ants/Examples/include/
