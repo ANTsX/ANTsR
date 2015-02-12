@@ -1,7 +1,6 @@
 exportPattern("^[^.]")
 export(Atropos)
 export(ImageMath)
-export(LabelClustersUniquely)
 export(LabelGeometryMeasures)
 export(LabelImageCentroids)
 export(abpBrainExtraction)
