@@ -3,4 +3,6 @@ src/ants/
 src/itks/
 src/itkb/
 src/antb/
+src/*.o
+src/*.so
 .gitignore
