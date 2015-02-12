@@ -27,6 +27,10 @@ labelClusters <- function(imagein, minClusterSize = 50,
   }
   dim <- imagein@dimension
   clust<-thresholdImage( imagein, minThresh, maxThresh )
-  LabelClustersUniquely(dim, clust, clust, minClusterSize)
+  .LabelClustersUniquely(dim, clust, clust, minClusterSize)
   return(clust)
+}
+
+.LabelClustersUniquely <- function(...) {
+pp<-.Call("LabelClustersUniquely", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
 }
