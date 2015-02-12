@@ -22,7 +22,7 @@ if [[ ! -s ants ]] ; then
   mkdir ants itks antb itkb
   git clone $itkgit itks
   cd itkb
-  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=OFF -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKGroup_Remote=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
+  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=OFF -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
