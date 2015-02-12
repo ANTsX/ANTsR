@@ -13,7 +13,10 @@ src/ANTsR-prefix/
 src/ANTsR.so
 src/ITK/
 src/ITK-prefix/
-src/ANTS/
+src/ants/
+src/itks/
+src/itkb/
+src/antb/
 src/Atropos.o
 src/ImageMath.o
 src/KellyKapowski.o
