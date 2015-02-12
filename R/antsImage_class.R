@@ -995,3 +995,39 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
     return()
   }
 })
+
+#' @describeIn antsImage 
+"+.antsImage" <- function(x, y){
+  imgsum <- as.antsImage(as.array(x) + as.array(y))
+  antsCopyImageInfo(x, imgsum)
+}
+
+#' @describeIn antsImage 
+"-.antsImage" <- function(x, y){
+  imgdif <- as.antsImage(as.array(x) - as.array(y))
+  antsCopyImageInfo(x, imgdif)
+}
+
+#' @describeIn antsImage 
+"/.antsImage" <- function(x, y){
+  imgfrac <- as.antsImage(as.array(x) / as.array(y))
+  antsCopyImageInfo(x, imgfrac)
+}
+
+#' @describeIn antsImage
+"*.antsImage" <- function(x, y){
+  imgmult <- as.antsImage(as.array(x) * as.array(y))
+  antsCopyImageInfo(x, imgmult)
+}
+
+#' @describeIn antsImage 
+"^.antsImage" <- function(x, y){
+  imgpow <- as.antsImage(as.array(x) ^ as.array(y))
+  antsCopyImageInfo(x, imgpow)
+}       
+
+#' @describeIn antsImage
+"%%.antsImage" <- function(x, y){
+  imgmod <- as.antsImage(as.array(x) %% as.array(y))
+  antsCopyImageInfo(x, imgmod)
+} 
