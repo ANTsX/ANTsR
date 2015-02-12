@@ -1,6 +1,6 @@
 ^\.travis\.yml$
-src/ants
-src/itks
-src/itkb
-src/antb
+src/ants/
+src/itks/
+src/itkb/
+src/antb/
 .gitignore
