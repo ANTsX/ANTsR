@@ -14,8 +14,21 @@ if [[ $TRAVIS -eq true ]] ; then
   JTHREADS=2
 fi
 cd ./src
-cmake -D ANTS_DIR:PATH="$ANTS_DIR" -D ITK_DIR:PATH="$ITK_DIR" -D RCPP_INCLUDE_DIR:PATH="$RCPP_INCLUDE_DIR" -D RCPP_LIB_DIR:PATH="$RCPP_LIB_DIR" -D R_INCLUDE_DIR:PATH="$R_INCLUDE_DIR" -D R_LIB_DIR:PATH="$R_LIB_DIR" -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  .
-if [[ -s Makefile ]] ; then
-  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"        # this builds ants and itk
-  mv Makefile itkMakefile
+antstag=befe3dc8f6c8089fe0fe6ee475482de0cb6d3bb4
+antsgit=https://github.com/stnava/ANTs.git
+itktag=a664dadfbc39d190449c6ecb9d0ffe93901a24d3
+itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
+if [[ ! -s ants ]] ; then
+  mkdir ants itks antb itkb
+  git clone $itkgit itks
+  cd itkb
+  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=OFF -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
+  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+  make install | grep -v "Installing" | grep -v "Looking for"
+  cd ../
+  git clone $antsgit ants
+  cd antb
+  cmake -D ITK_DIR:PATH=../itkb/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
+  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+  cd ..
 fi
