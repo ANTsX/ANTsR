@@ -996,38 +996,85 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
   }
 })
 
-#' @describeIn antsImage 
+#' @title is.antsImage
+#'
+#' @description Tests if object is antsImage 
+#'
+#' @param x An object
+#' @return TRUE if \code{object} is antsImage; FALSE otherwise.
+#' @examples
+#' is.antsImage(antsImageRead(getANTsRData('r16'), 2))
+#' @export is.antsImage 
+is.antsImage <- function(x){ 
+  class(x) == 'antsImage'
+}
+
+#' @title arith.antsImage 
+#' @description Atomic arithmetic operators for antsImages 
+#' @param x antsImage 
+#' @param y antsImage or numeric 
+#' @examples 
+#' r16 <- antsImageRead(getANTsRData('r16'), 2)
+#' r64 <- antsImageRead(getANTsRData('r64'), 2)
+#' r16 + r64
+#' r16 + 5 
+#' r16 / 10 
+#' @name antsImageArith 
 "+.antsImage" <- function(x, y){
-  imgsum <- as.antsImage(as.array(x) + as.array(y))
+  if(is.antsImage(y)){
+    imgsum <- as.antsImage(as.array(x) + as.array(y))
+  } else{
+    imgsum <- as.antsImage(as.array(x) + y)
+  }
   antsCopyImageInfo(x, imgsum)
 }
 
-#' @describeIn antsImage 
+#' @rdname antsImageArith 
 "-.antsImage" <- function(x, y){
-  imgdif <- as.antsImage(as.array(x) - as.array(y))
+  if(is.antsImage(y)){
+    imgdif <- as.antsImage(as.array(x) - as.array(y))
+  } else{
+    imgdif <- as.antsImage(as.array(x) - y)
+  }
   antsCopyImageInfo(x, imgdif)
 }
 
-#' @describeIn antsImage 
+#' @rdname antsImageArith 
 "/.antsImage" <- function(x, y){
-  imgfrac <- as.antsImage(as.array(x) / as.array(y))
+  if(is.antsImage(y)){
+    imgfrac <- as.antsImage(as.array(x) / as.array(y))
+  } else{
+    imgfrac <- as.antsImage(as.array(x) / y)
+  }
   antsCopyImageInfo(x, imgfrac)
 }
 
-#' @describeIn antsImage
+#' @rdname antsImageArith
 "*.antsImage" <- function(x, y){
-  imgmult <- as.antsImage(as.array(x) * as.array(y))
+  if(is.antsImage(y)){
+    imgmult <- as.antsImage(as.array(x) * as.array(y))
+  } else{
+    imgmult <- as.antsImage(as.array(x) * y)
+  }
   antsCopyImageInfo(x, imgmult)
 }
 
-#' @describeIn antsImage 
+#' @rdname antsImageArith 
 "^.antsImage" <- function(x, y){
-  imgpow <- as.antsImage(as.array(x) ^ as.array(y))
+  if(is.antsImage(y)){
+    imgpow <- as.antsImage(as.array(x) ^ as.array(y))
+  } else{
+    imgpow <- as.antsImage(as.array(x) ^ y)
+  }  
   antsCopyImageInfo(x, imgpow)
 }       
 
-#' @describeIn antsImage
+#' @rdname antsImageArith
 "%%.antsImage" <- function(x, y){
-  imgmod <- as.antsImage(as.array(x) %% as.array(y))
+  if(is.antsImage(y)){
+    imgmod <- as.antsImage(as.array(x) %% as.array(y))
+  } else {
+    imgmod <- as.antsImage(as.array(x) %% y)
+  }
   antsCopyImageInfo(x, imgmod)
 } 
