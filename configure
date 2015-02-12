@@ -28,7 +28,7 @@ if [[ ! -s ants ]] ; then
   cd ../
   git clone $antsgit ants
   cd antb
-  cmake -D ITK_DIR:PATH=../itkb/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
+  cmake -D ITK_DIR:PATH=../itkb/include/ITK-4.8/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   cd ..
   cp antsr.h ants/Examples/include/
