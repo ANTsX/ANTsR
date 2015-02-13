@@ -27,7 +27,9 @@ install:
 - export PATH=$PATH:$HOME/pandoc/
 # - pandoc --version
 - ./travis-tool.sh bootstrap
-- cd ANTsR ; ../travis-tool.sh install_deps; cd .. 
+- cd ANTsR 
+- ../travis-tool.sh install_deps > ../log.txt
+- cd .. 
 - cd ${basedir}
 
 script:
