@@ -48,18 +48,22 @@ iMath <- function( img, operation , ... ) {
     }
   return(trimops)
   }
-  if ( class(img)[[1]] == 'antsImage' )
-  {
-  dim<-img@dimension
-  outimg<-antsImageClone(img)
-  args<-list(dim,outimg,operation,img,...)
-  catchout<-.Call("ImageMath",
-    .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-  return(outimg)
-  }
-  if ( class(img)[[1]] != 'antsImage' )
-  {
-  print("1st param should be an antsImage")
-  return(NA)
-  }
+  if ( is.antsImage(img) )
+    {
+    outimage = antsImageClone(img)
+    catchout<-.Call("imageMorphology",
+        image, outimage, "binary.dilate", 2, PACKAGE = "ANTsR")
+
+  #dim<-img@dimension
+  #outimg<-antsImageClone(img)
+  #args<-list(dim,outimg,operation,img,...)
+  #catchout<-.Call("ImageMath",
+  #    .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+  #return(outimg)
+    }
+  else
+    {
+    print("1st param should be an antsImage")
+    return(NA)
+    }
 }
