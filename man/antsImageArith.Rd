@@ -8,6 +8,8 @@
 \alias{\%\%.antsImage}
 \alias{^.antsImage}
 \alias{antsImageArith}
+\alias{exp.antsImage}
+\alias{log.antsImage}
 \title{arith.antsImage}
 \usage{
 \method{+}{antsImage}(x, y)
@@ -21,11 +23,17 @@
 \method{^}{antsImage}(x, y)
 
 \method{\%\%}{antsImage}(x, y)
+
+\method{log}{antsImage}(x, ...)
+
+\method{exp}{antsImage}(x)
 }
 \arguments{
 \item{x}{antsImage}
 
 \item{y}{antsImage or numeric}
+
+\item{...}{Additional arguments passed to underlying R operator}
 }
 \description{
 Atomic arithmetic operators for antsImages
@@ -36,5 +44,6 @@ r64 <- antsImageRead(getANTsRData('r64'), 2)
 r16 + r64
 r16 + 5
 r16 / 10
+log(r16, base=10)
 }
 

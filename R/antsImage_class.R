@@ -1078,3 +1078,18 @@ is.antsImage <- function(x){
   }
   antsCopyImageInfo(x, imgmod)
 } 
+
+#' @param ... Additional arguments passed to underlying R operator
+#' @examples 
+#' log(r16, base=10)
+#' @rdname antsImageArith 
+"log.antsImage" <- function(x, ...){
+  imglog <- as.antsImage(log(as.array(x), ...))
+  antsCopyImageInfo(x, imglog)
+}
+
+#' @rdname antsImageArith
+"exp.antsImage" <- function(x){
+  imgexp <- as.antsImage(exp(as.array(x)))
+  antsCopyImageInfo(x, imgexp)
+}
