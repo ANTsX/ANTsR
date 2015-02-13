@@ -1021,11 +1021,10 @@ is.antsImage <- function(x){
 #' r16 / 10
 #' @name antsImageArith
 "+.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
-
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgsum <- as.antsImage(as.array(x) + as.array(y))
   } else{
     imgsum <- as.antsImage(as.array(x) + y)
@@ -1035,11 +1034,10 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "-.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
-
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgdif <- as.antsImage(as.array(x) - as.array(y))
   } else{
     imgdif <- as.antsImage(as.array(x) - y)
@@ -1049,11 +1047,10 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "/.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
-
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgfrac <- as.antsImage(as.array(x) / as.array(y))
   } else{
     imgfrac <- as.antsImage(as.array(x) / y)
@@ -1063,11 +1060,10 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "*.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
-
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgmult <- as.antsImage(as.array(x) * as.array(y))
   } else{
     imgmult <- as.antsImage(as.array(x) * y)
@@ -1077,11 +1073,11 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "^.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
 
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgpow <- as.antsImage(as.array(x) ^ as.array(y))
   } else{
     imgpow <- as.antsImage(as.array(x) ^ y)
@@ -1091,11 +1087,10 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "%%.antsImage" <- function(x, y){
-  if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-    stop("Images do not occupy the same physical space")
-  }
-
   if(is.antsImage(y)){
+    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+      stop("Images do not occupy the same physical space")
+    }
     imgmod <- as.antsImage(as.array(x) %% as.array(y))
   } else {
     imgmod <- as.antsImage(as.array(x) %% y)
