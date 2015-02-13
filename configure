@@ -24,6 +24,7 @@ if [[ ! -s ants ]] ; then
   cd itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
+    -D BUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=${PWD}/itkinst/  \
@@ -35,13 +36,19 @@ if [[ ! -s ants ]] ; then
     -DITK_WRAPPING:BOOL=OFF \
     -DModule_MGHIO:BOOL=ON \
     -DModule_ITKReview:BOOL=ON \
-    -DModule_ITKVtkGlue:BOOL=OFF  ../itks/ 
+    -DModule_ITKVtkGlue:BOOL=OFF  ../itks/
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
   git clone $antsgit ants
   cd antb
-  cmake -D ITK_DIR:PATH=../itkb/ -D BUILD_EXTERNAL_APPLICATIONS=OFF -D BUILD_ALL_ANTS_APPS=OFF -D USE_SYSTEM_ITK=OFF -D BUILD_TESTING=OFF -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
+  cmake -D ITK_DIR:PATH=../itkb/ \
+    -D BUILD_SHARED_LIBS=OFF \
+    -D BUILD_EXTERNAL_APPLICATIONS=OFF \
+    -D BUILD_ALL_ANTS_APPS=OFF \
+    -D USE_SYSTEM_ITK=OFF \
+    -D BUILD_TESTING=OFF \
+    -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   cd ..
   cp antsr.h ants/Examples/include/
