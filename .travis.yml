@@ -27,30 +27,7 @@ install:
 - export PATH=$PATH:$HOME/pandoc/
 # - pandoc --version
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh r_install BGLR
-- ./travis-tool.sh r_binary_install caret
-- ./travis-tool.sh r_binary_install cluster
-- ./travis-tool.sh r_install DMwR
-- ./travis-tool.sh r_binary_install e1071
-- ./travis-tool.sh r_binary_install fastICA
-- ./travis-tool.sh r_install fpc
-- ./travis-tool.sh r_install grid
-- ./travis-tool.sh r_binary_install glmnet
-- ./travis-tool.sh r_binary_install igraph
-- ./travis-tool.sh r_binary_install magic
-- ./travis-tool.sh r_binary_install misc3d
-- ./travis-tool.sh r_binary_install moments
-- ./travis-tool.sh r_binary_install pixmap
-- ./travis-tool.sh r_binary_install png
-- ./travis-tool.sh r_binary_install psych
-- ./travis-tool.sh r_binary_install randomForest
-- ./travis-tool.sh r_binary_install rgl
-- ./travis-tool.sh r_binary_install robust
-- ./travis-tool.sh r_binary_install signal
-- ./travis-tool.sh r_install visreg
-- ./travis-tool.sh r_binary_install Rcpp
-- ./travis-tool.sh r_binary_install knitr
-- ./travis-tool.sh r_install rmarkdown
+- ./travis-tool.sh install_deps 
 - cd ${basedir}
 
 script:
