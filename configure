@@ -25,8 +25,8 @@ if [[ ! -s ants ]] ; then
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   compflags=" -Wno-c++11-extensions -fPIC "
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} $compflags "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} $compflags "\
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-extensions -fPIC "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-extensions -fPIC "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
@@ -46,8 +46,8 @@ if [[ ! -s ants ]] ; then
   git clone $antsgit ants
   cd antb
   cmake -DITK_DIR:PATH=../itkb/ \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} $compflags "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} $compflags "\
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-extensions -fPIC "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-extensions -fPIC "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_EXTERNAL_APPLICATIONS=OFF \
     -DBUILD_ALL_ANTS_APPS=OFF \
