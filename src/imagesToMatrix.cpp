@@ -54,7 +54,7 @@ Rcpp::NumericMatrix imagesToMatrixHelper( std::vector< std::string > fns,
     }
 }
 
-// [[Rcpp::export]]
+// [[myRcpp::export]]
 RcppExport SEXP imagesToMatrix( SEXP r_fns, SEXP r_mask,
   SEXP r_n )
 {
