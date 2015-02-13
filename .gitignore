@@ -1,12 +1,15 @@
 # ignore all the backup files created by editors
+*~
+*.so
+*.o
 
 # things to ignore in directory ANTsR/src
 src/*.o
 src/*.so
 src/symbols.rds
 # things to ignore in ANTsR/src/ANTsR
-src/ANTsR/ANTsR-build/
-src/ANTsR/ANTsR-build-dev/
-src/ANTsR/stamp/
-src/ANTsR/tmp/
+src/itks/
+src/ants/
+src/itkb/
+src/antb/
 inst/doc
