@@ -14,6 +14,7 @@
 #'
 #'
 #' @export antsCopyImageInfo
+# This implementation mimics: itkImageToImageFilter.hxx
 antsImagePhysicalSpaceConsistency <- function(img1, img2, coordinate.tolerance=1e-6, direction.tolerance=1e-6) {
   if (!(is.antsImage(img1)) || !(is.antsImage(img2))) {
     stop("Both inputs must be of class 'antsImage'")
