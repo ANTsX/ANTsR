@@ -4,6 +4,7 @@
 #' to build a random forest prediction from an image population
 #'
 #' @param y list of training label images, can be a factor or numeric vector
+#' this can also be a regular old vector
 #' @param x a list of lists where each list contains feature images
 #' @param labelmask a mask for the features (all in the same image space)
 #' the labelmask defines the number of parallel samples that will be used
@@ -31,8 +32,8 @@
 #'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
 #'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
 #'   limg<-antsImageClone(mask)
-#'   limg[ 3:6, 3:6 ]<-(i %% 2)
-#'   ilist[[i]]<-list(img,imgb)
+#'   limg[ 3:6, 3:6 ]<-(i %% 2)  # the label image is constant
+#'   ilist[[i]]<-list(img,imgb)  # two features
 #'   lablist[[i]]<-limg
 #' }
 #' rfm<-vwnrfs( lablist , ilist, mask, rad=c(0,0) )
@@ -69,14 +70,20 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   rmsz<-sum( randmask > 0 ) # entries in mask
   tv<-rep(NA, length(y)*rmsz )
   seqby<-seq.int( 1, length(tv)+1, by=rmsz )
+  # check y type
+  yisimg<-TRUE
+  if (  typeof(y) == "integer" | typeof(y) == "double" ) yisimg<-FALSE
   for ( i in 1:(length(y)) )
     {
     nxt<-seqby[ i + 1 ]-1
 #    tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
-    tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
+    if ( yisimg )
+      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
         y[[i]], randmask, rep(0,idim), spatial.info=F,
         boundary.condition='image' ) )
+    else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
     }
+  print(yisimg)
   if ( asFactors ) tv<-factor( tv )
   # 3.2 next define the feature matrix
   testmat<-t(antsGetNeighborhoodMatrix( x[[1]][[1]], randmask,

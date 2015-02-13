@@ -8,7 +8,8 @@ vwnrfs(y, x, labelmask, rad = NA, nsamples = 1, ntrees = 500,
   asFactors = TRUE)
 }
 \arguments{
-\item{y}{list of training label images, can be a factor or numeric vector}
+\item{y}{list of training label images, can be a factor or numeric vector
+this can also be a regular old vector}
 
 \item{x}{a list of lists where each list contains feature images}
 
@@ -46,8 +47,8 @@ for ( i in inds ) {
   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 2)+scl*mean(rnorm(1))
   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 2)+scl*mean(rnorm(1))
   limg<-antsImageClone(mask)
-  limg[ 3:6, 3:6 ]<-(i \%\% 2)
-  ilist[[i]]<-list(img,imgb)
+  limg[ 3:6, 3:6 ]<-(i \%\% 2)  # the label image is constant
+  ilist[[i]]<-list(img,imgb)  # two features
   lablist[[i]]<-limg
 }
 rfm<-vwnrfs( lablist , ilist, mask, rad=c(0,0) )
