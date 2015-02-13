@@ -1,6 +1,7 @@
 #!/bin/bash
 # retrieve Rcpp and R include and link directories
 # R_DIR=(set by the user from command line)
+CXX_STD = CXX11
 RCPP_INCLUDE_DIR=`${R_DIR}Rscript -e 'Rcpp:::CxxFlags()'`
 RCPP_LIB_DIR=`${R_DIR}Rscript -e 'Rcpp:::LdFlags()'`
 R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
@@ -24,9 +25,11 @@ if [[ ! -s ants ]] ; then
   cd itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   compflags=" -Wno-c++11-extensions -fPIC "
+  compflags=" -Wno-c++11-long-long -fPIC "
+  compflags=" -fPIC "
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-extensions -fPIC "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-extensions -fPIC "\
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fPIC "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
@@ -46,8 +49,8 @@ if [[ ! -s ants ]] ; then
   git clone $antsgit ants
   cd antb
   cmake -DITK_DIR:PATH=../itkb/ \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-extensions -fPIC "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-extensions -fPIC "\
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fPIC "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_EXTERNAL_APPLICATIONS=OFF \
     -DBUILD_ALL_ANTS_APPS=OFF \
