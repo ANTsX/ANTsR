@@ -54,10 +54,8 @@ install:
 - cd ${basedir}
 
 script:
-- R CMD build ANTsR --no-build-vignettes
-- R CMD INSTALL --build ANTsR_1.0.tar.gz
-- R CMD check ANTsR_1.0.tar.gz --no-install --as-cran --no-build-vignettes --no-manual
-- cd ANTsR
+- R CMD BUILD ANTsR --no-build-vignettes
+- travis_wait R CMD CHECK --as-cran ANTsR_1.0.tar.gz
 # - R CMD check ANTsR
 
 before_deploy: git fetch --tags
