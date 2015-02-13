@@ -23,7 +23,7 @@ if [[ ! -s ants ]] ; then
   git clone $itkgit itks
   cd itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
-  compflags=" -Wno-c++11-extensions -fPIC -g -O2 "
+  compflags=" -Wno-c++11-extensions -fPIC "
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} $compflags "\
     -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} $compflags "\
