@@ -47,6 +47,7 @@ variance.
 \examples{
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
+\dontrun{
 # for prediction
 if ( usePkg("randomForest") & usePkg("spls")  & usePkg('BGLR') ) {
 data(lymphoma) # from spls
@@ -65,7 +66,7 @@ print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
 # compare to http://arxiv.org/pdf/0707.0701v2.pdf
 # now SNPs
 data(mice)
-snps<-quantifySNPs( mice.X, shiftit =T )
+snps<-quantifySNPs( mice.X, shiftit = TRUE )
 numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
 nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
@@ -81,6 +82,7 @@ myrf<-randomForest( bmi ~ . , data=traindf )
 preddf<-predict(myrf, newdata=testdf )
 cor.test(preddf, testdf$bmi )
 plot(preddf, testdf$bmi )
+}
 }
 }
 \author{
