@@ -24,8 +24,8 @@ if [[ ! -s ants ]] ; then
   cd itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fPIC -g -O2 "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC  -g -O2 "\
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-extension -fPIC -g -O2 "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-extension -fPIC  -g -O2 "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
