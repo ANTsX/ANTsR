@@ -22,8 +22,20 @@ if [[ ! -s ants ]] ; then
   mkdir ants itks antb itkb
   git clone $itkgit itks
   cd itkb
-  # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On 
-  cmake -D BUILD_EXAMPLES=OFF -D BUILD_TESTING=OFF -D ITK_BUILD_DEFAULT_MODULES=ON -D CMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" -D CMAKE_INSTALL_PREFIX:PATH=./ ../itks
+  # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
+  cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
+    -DBUILD_TESTING:BOOL=OFF \
+    -DBUILD_EXAMPLES:BOOL=OFF \
+    -DCMAKE_INSTALL_PREFIX:PATH=${PWD}/itkinst/  \
+    -DITK_LEGACY_REMOVE:BOOL=OFF  \
+    -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON \
+    -DITKV3_COMPATIBILITY:BOOL=ON \
+    -DITK_BUILD_DEFAULT_MODULES:BOOL=ON \
+    -DKWSYS_USE_MD5:BOOL=ON \
+    -DITK_WRAPPING:BOOL=OFF \
+    -DModule_MGHIO:BOOL=ON \
+    -DModule_ITKReview:BOOL=ON \
+    -DModule_ITKVtkGlue:BOOL=OFF  ../itks/ 
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   make install | grep -v "Installing" | grep -v "Looking for"
   cd ../

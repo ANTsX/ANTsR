@@ -1,7 +1,7 @@
 myrootantssource=${PWD}/ants/
 myrootantslib=${PWD}/antb/lib/
-myrootitklib=${PWD}/itkb/lib/
-myrootitksource=${PWD}/itkb/include/ITK-4.8/
+myrootitklib=${PWD}/itkb/itkinst/lib/
+myrootitksource=${PWD}/itkb/itkinst/include/ITK-4.8/
 PKG_CPPFLAGS= -I${PWD} -I${myrootitksource} -I${myrootantssource}/Examples/include/
 libants=`find ${myrootantslib} -name "lib*.a"`
 libitk=`find ${myrootitklib} -name "lib*.a"`
