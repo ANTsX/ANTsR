@@ -1,3 +1,4 @@
+CXX_STD = CXX11
 myrootantssource=${PWD}/ants/
 myrootantslib=${PWD}/antb/lib/
 myrootitklib=${PWD}/itkb/itkinst/lib/

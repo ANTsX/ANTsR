@@ -8,10 +8,10 @@ R_INCLUDE_DIR=`${R_DIR}R CMD config --cppflags`
 R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
 JTHREADS=2
 if [[ `uname` -eq Darwin ]] ; then
-  CMAKE_BUILD_TYPE=MinSizeRel
+  CMAKE_BUILD_TYPE=Release
 fi
 if [[ $TRAVIS -eq true ]] ; then
-  CMAKE_BUILD_TYPE=MinSizeRel
+  CMAKE_BUILD_TYPE=Release
   JTHREADS=2
 fi
 cd ./src
@@ -24,9 +24,9 @@ if [[ ! -s ants ]] ; then
   git clone $itkgit itks
   cd itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
-  compflags=" -Wno-c++11-extensions -fPIC "
-  compflags=" -Wno-c++11-long-long -fPIC "
   compflags=" -fPIC "
+  compflags=" -Wno-c++11-extensions -fPIC -O2 "
+  compflags=" -Wno-c++11-long-long -fPIC -O2 "
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fPIC "\
     -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC "\
