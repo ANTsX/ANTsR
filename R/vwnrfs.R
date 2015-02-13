@@ -14,8 +14,9 @@
 #' @param nsamples (per subject to enter training)
 #' @param ntrees (for the random forest model)
 #' @param asFactors boolean - treat the y entries as factors
-#' @return list a 3-list with the rf model, training vector and feature matrix
-#' @author Avants BB
+#' @return list a 4-list with the rf model, training vector, feature matrix
+#' and the random mask
+#' @author Avants BB, Tustison NJ
 #'
 #' @examples
 #'
@@ -106,7 +107,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   if ( usePkg("randomForest") )
     {
     rfm<-randomForest(y=tv,x=fm,ntrees=ntrees)
-    return( list(rfm=rfm, tv=tv, fm=fm) )
+    return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
     }
   else
     {

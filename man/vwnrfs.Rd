@@ -27,7 +27,8 @@ contributed from each feature image.}
 \item{asFactors}{boolean - treat the y entries as factors}
 }
 \value{
-list a 3-list with the rf model, training vector and feature matrix
+list a 4-list with the rf model, training vector, feature matrix
+and the random mask
 }
 \description{
 Represents feature images as a neighborhood and uses the features
@@ -57,6 +58,6 @@ rfm<-vwnrfs( lablist , ilist, mask, rad=c(2,2) )
 sum(abs(as.numeric(rfm$tv)-as.numeric(predict(rfm$rfm))))
 }
 \author{
-Avants BB
+Avants BB, Tustison NJ
 }
 
