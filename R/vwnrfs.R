@@ -83,7 +83,6 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         boundary.condition='image' ) )
     else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
     }
-  print(yisimg)
   if ( asFactors ) tv<-factor( tv )
   # 3.2 next define the feature matrix
   testmat<-t(antsGetNeighborhoodMatrix( x[[1]][[1]], randmask,
