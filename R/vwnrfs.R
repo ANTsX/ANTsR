@@ -53,7 +53,8 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     stop("vwnrfs: dimensionality does not match")
   # first thing - find unique labels
   ulabs<-sort(unique(c(as.numeric(mask))))
-  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
+#  return(ulabs)
+#  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
   # second thing - create samples for each unique label
   randmask<-antsImageClone( labelmask )*0
   for ( ulab in ulabs )

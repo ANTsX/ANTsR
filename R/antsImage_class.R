@@ -74,11 +74,11 @@ setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
   return(sd(as.array(x)))
 })
 
-#' @describeIn antsImage
-setGeneric("nnz",function(x){standardGeneric("nnz")})
-setMethod(f = "nnz", signature(x = "antsImage"), definition = function(x) {
-  return(length( which( as.array(x) != 0)))
-})
+###  @  describeIn antsImage # this doesnt work b/c nnz is not a generic
+# setGeneric("nnz",function(x){standardGeneric("nnz")})
+# setMethod(f = "nnz", signature(x = "antsImage"), definition = function(x) {
+#   return(length( which( as.array(x) != 0)))
+# })
 
 #' @describeIn antsImage
 setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical()) {

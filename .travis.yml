@@ -5,7 +5,7 @@ compiler:
 
 os:
 - linux
-- osx
+# - osx # currently builds too slowly ...
 
 before_install:
 - cd ..
@@ -27,14 +27,37 @@ install:
 - export PATH=$PATH:$HOME/pandoc/
 # - pandoc --version
 - ./travis-tool.sh bootstrap
-- cd ANTsR 
-- ../travis-tool.sh install_deps > ../log.txt
-- cd .. 
+- ./travis-tool.sh r_install BGLR
+- ./travis-tool.sh r_binary_install caret
+- ./travis-tool.sh r_binary_install cluster
+- ./travis-tool.sh r_install DMwR
+- ./travis-tool.sh r_binary_install e1071
+- ./travis-tool.sh r_binary_install fastICA
+- ./travis-tool.sh r_install fpc
+- ./travis-tool.sh r_install grid
+- ./travis-tool.sh r_binary_install glmnet
+- ./travis-tool.sh r_binary_install igraph
+- ./travis-tool.sh r_binary_install magic
+- ./travis-tool.sh r_binary_install misc3d
+- ./travis-tool.sh r_binary_install moments
+- ./travis-tool.sh r_binary_install pixmap
+- ./travis-tool.sh r_binary_install png
+- ./travis-tool.sh r_binary_install psych
+- ./travis-tool.sh r_binary_install randomForest
+- ./travis-tool.sh r_binary_install rgl
+- ./travis-tool.sh r_binary_install robust
+- ./travis-tool.sh r_binary_install signal
+- ./travis-tool.sh r_install visreg
+- ./travis-tool.sh r_binary_install Rcpp
+- ./travis-tool.sh r_binary_install knitr
+- ./travis-tool.sh r_install rmarkdown
 - cd ${basedir}
 
 script:
-- R CMD build --no-build-vignettes ANTsR 
-- travis_wait 40 R CMD check --as-cran ANTsR_1.0.tar.gz
+- R CMD build ANTsR --no-build-vignettes
+- travis_wait 40 R CMD INSTALL --build ANTsR_1.0.tar.gz
+- travis_wait 40 R CMD check ANTsR_1.0.tar.gz --no-install --as-cran --no-build-vignettes --no-manual
+- cd ANTsR
 # - R CMD check ANTsR
 
 before_deploy: git fetch --tags
@@ -69,3 +92,4 @@ env:
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
+  - _R_CHECK_FORCE_SUGGESTS_="0"
