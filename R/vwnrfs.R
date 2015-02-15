@@ -62,7 +62,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     randvec<-rep( FALSE, length( ulabvec ) )
     k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
     n<-sum( ulabvec == TRUE )
-    randvec[ ulabvec == TRUE ][ (1:n)[1:k] ]<-TRUE
+    randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
     randmask[ randvec ]<-ulab
     }
   # third thing - at each sample, find the training label/value
@@ -79,9 +79,10 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     nxt<-seqby[ i + 1 ]-1
 #    tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
     if ( yisimg )
-      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
-        y[[i]], randmask, rep(0,idim), spatial.info=F,
-        boundary.condition='image' ) )
+      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
+#      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
+#        y[[i]], randmask, rep(0,idim), spatial.info=F,
+#        boundary.condition='image' ) )
     else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
     }
   if ( asFactors ) tv<-factor( tv )
@@ -97,7 +98,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       rad, spatial.info=F, boundary.condition='image' ))
     for ( k in 2:nfeats )
       {
-      m2<-t(antsGetNeighborhoodMatrix( x[[i]][[1]], randmask,
+      m2<-t(antsGetNeighborhoodMatrix( x[[i]][[k]], randmask,
           rad, spatial.info=F, boundary.condition='image' ))
       m1<-cbind( m1, m2 )
       }
