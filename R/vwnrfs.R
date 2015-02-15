@@ -107,7 +107,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     }
   if ( usePkg("randomForest") )
     {
-    rfm<-randomForest(y=tv,x=fm,ntrees=ntrees)
+    rfm <- randomForest::randomForest(y=tv,x=fm,ntrees=ntrees)
     return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
     }
   else
