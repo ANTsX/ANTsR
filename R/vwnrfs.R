@@ -52,8 +52,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   if ( idim != x[[1]][[1]]@dimension )
     stop("vwnrfs: dimensionality does not match")
   # first thing - find unique labels
-  ulabs<-sort(unique(c(as.numeric(mask))))
-#  return(ulabs)
+  ulabs<-sort(unique(c(as.numeric(labelmask))))
 #  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
   # second thing - create samples for each unique label
   randmask<-antsImageClone( labelmask )*0
@@ -62,8 +61,8 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     ulabvec<-( labelmask == as.numeric( ulab ) )
     randvec<-rep( FALSE, length( ulabvec ) )
     k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
-    n<-sum(ulabvec == TRUE )
-    randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
+    n<-sum( ulabvec == TRUE )
+    randvec[ ulabvec == TRUE ][ (1:n)[1:k] ]<-TRUE
     randmask[ randvec ]<-ulab
     }
   # third thing - at each sample, find the training label/value

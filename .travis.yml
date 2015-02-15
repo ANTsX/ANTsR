@@ -5,7 +5,7 @@ compiler:
 
 os:
 - linux
-- osx # currently builds too slowly ...
+# - osx # currently builds too slowly ...
 
 before_install:
 - cd ..
@@ -74,8 +74,8 @@ script:
 
 #  file: ../ANTsR_1.0.tgz # osx
 
-# after_failure:
-# - ./travis-tool.sh dump_logs
+after_failure:
+ - ./travis-tool.sh dump_logs
 
 notifications:
   email:

@@ -50,16 +50,18 @@ iMath <- function( img, operation , ... ) {
   }
   if ( is.antsImage(img) )
     {
-    outimage = antsImageClone(img)
-    catchout<-.Call("imageMorphology",
-        image, outimage, "binary.dilate", 2, PACKAGE = "ANTsR")
-
-  #dim<-img@dimension
-  #outimg<-antsImageClone(img)
-  #args<-list(dim,outimg,operation,img,...)
-  #catchout<-.Call("ImageMath",
-  #    .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-  #return(outimg)
+# not sure what's going on below - but shouldnt commit things that break
+# the build or R CMD check or that make vignettes fail.
+#    outimage = antsImageClone(img)
+#    catchout<-.Call("ImageMath",
+#        image, outimage, "MD", 2, PACKAGE = "ANTsR")
+#
+    dim<-img@dimension
+    outimg<-antsImageClone(img)
+    args<-list(dim,outimg,operation,img,...)
+    catchout<-.Call("ImageMath",
+      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+    return(outimg)
     }
   else
     {
