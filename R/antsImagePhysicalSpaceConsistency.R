@@ -5,6 +5,8 @@
 #'
 #' @param img1 Image object of S4 class 'antsImage'.
 #' @param img2 Image object of S4 class 'antsImage'.
+#' @param coordinate.tolerance floating point error tolerance in origin
+#' @param direction.tolerance floating point error tolerance in direction matrix
 #' @return Boolean indicating consistency of physical space
 #' @examples
 #'

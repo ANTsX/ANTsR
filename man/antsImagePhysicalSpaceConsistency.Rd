@@ -11,6 +11,10 @@ antsImagePhysicalSpaceConsistency(img1, img2, coordinate.tolerance = 1e-06,
 \item{img1}{Image object of S4 class 'antsImage'.}
 
 \item{img2}{Image object of S4 class 'antsImage'.}
+
+\item{coordinate.tolerance}{floating point error tolerance in origin}
+
+\item{direction.tolerance}{floating point error tolerance in direction matrix}
 }
 \value{
 Boolean indicating consistency of physical space
