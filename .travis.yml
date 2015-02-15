@@ -75,7 +75,7 @@ before_deploy: git fetch --tags
 #  file: ../ANTsR_1.0.tgz # osx
 
 after_failure:
-- ./travis-tool.sh dump_logs
+# - ./travis-tool.sh dump_logs
 
 notifications:
   email:
