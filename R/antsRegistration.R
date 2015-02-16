@@ -8,7 +8,7 @@
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. choose from list
-#' Rigid, Affine, SyN, SyNBold, SyNAggro.
+#' Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -54,7 +54,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
   if (numargs < 1 | missing(fixed) | missing(moving) | missing(typeofTransform) |
     missing(outprefix)) {
     cat("for simplified mode: \n")
-    cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"AffineFast\",\"SyN\"),  outputPrefix=\"./antsRegOut\" \n")
+    cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"AffineFast\",\"SyN\",\"SyNCC\"),  outputPrefix=\"./antsRegOut\" \n")
     cat("")
     cat("For full mode: use standard ants call , e.g. : \n")
     cat(" ANTsR::antsRegistration( list( d=2,m=\"mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]\", t=\"affine[1.0]\", c=\"2100x1200x1200x0\",  s=\"3x2x1x0\", f=\"4x3x2x1\", u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n")
@@ -72,7 +72,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN", "SyNBold", "SyNAggro", "SyNLessAggro")
+      allowableTx <- c("Rigid", "Affine", "SyN","SyNCC",
+        "SyNBold", "SyNAggro", "SyNLessAggro")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
@@ -126,6 +127,20 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
           "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
             sep = ""), "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "2100x1200x1200x20",
+          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
+          "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNCC") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
+          "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
           "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),

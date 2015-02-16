@@ -96,6 +96,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     {
     m1<-t(antsGetNeighborhoodMatrix( x[[i]][[1]], randmask,
       rad, spatial.info=F, boundary.condition='image' ))
+    if ( nfeats > 1 )
     for ( k in 2:nfeats )
       {
       m2<-t(antsGetNeighborhoodMatrix( x[[i]][[k]], randmask,
