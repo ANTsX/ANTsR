@@ -213,6 +213,8 @@ plot.antsImage <- function(x, y,
   } else {
     if (newwindow) dev.new(height = nrow(bigslice)/pixperinch, width = ncol(bigslice)/pixperinch)
   }
+  if ( window.img[ 1 ] == window.img[ 2 ] )
+    window.img[ 1 ]<-min( x )
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
   img.plot <- suppressWarnings(pixmap::pixmapGrey(
