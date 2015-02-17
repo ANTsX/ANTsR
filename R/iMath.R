@@ -24,7 +24,7 @@ iMath <- function( img, operation , param, img2 , ... ) {
 #  call <- match.call() # see glm
   iMathOps <- NULL
   data( "iMathOps", package = "ANTsR", envir = environment() )
-  if ( ! ( operation  %in% trimops ) )
+  if ( ! ( operation  %in% iMathOps$Operation ) )
     {
     stop(paste("'operation'",operation," not recognized"))
     }
