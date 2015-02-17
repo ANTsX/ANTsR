@@ -4,7 +4,7 @@
 \alias{iMath}
 \title{iMath}
 \usage{
-iMath(img, operation, ...)
+iMath(img, operation, param, img2, ...)
 }
 \arguments{
 \item{img}{input object, usually antsImage}
@@ -14,7 +14,9 @@ special case of "GetOperations" or "GetOperationsFull" will return
 a list of operations and brief description.
 Some operations may not be valid (WIP), but most are.}
 
-\item{...}{additional parameters}
+\item{param}{... additional parameters}
+
+\item{img2}{... additional image or image list}
 }
 \description{
 Perform various (often mathematical) operations on the input image.

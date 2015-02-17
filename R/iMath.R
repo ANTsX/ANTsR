@@ -9,8 +9,8 @@
 #' special case of "GetOperations" or "GetOperationsFull" will return
 #' a list of operations and brief description.
 #' Some operations may not be valid (WIP), but most are.
-#' @param ... additional parameters
-#' @img2 ... additional image or image list
+#' @param param ... additional parameters
+#' @param img2 ... additional image or image list
 #' @author BB Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )

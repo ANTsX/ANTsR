@@ -14,7 +14,7 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
 
 \item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
 affine+syn mapping.  Mutual information metric by default. choose from list
-Rigid, Affine, SyN, SyNBold, SyNAggro.}
+Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.}
 
 \item{initialTransform}{transforms to prepend}
 
