@@ -40,7 +40,13 @@ iMath <- function( img, operation , param, img2 , ... ) {
   if ( operation == "GetOperationsFull" ) return(ops)
   return(trimops)
   }
-  if ( is.antsImage(img) )
+  wh<-which( iMathOps$Operation == operation )
+  if ( iMathOps$OutputType[wh] != 'antsImage-D'  )
+    {
+    stop(paste("output of",operation,'is',iMathOps$OutputType[wh]))
+    return(NA)
+    }
+  if ( is.antsImage(img) & iMathOps$OutputType[wh] == 'antsImage-D'  )
     {
 # not sure what's going on below - but shouldnt commit things that break
 # the build or R CMD check or that make vignettes fail.

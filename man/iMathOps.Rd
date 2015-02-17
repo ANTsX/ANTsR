@@ -18,6 +18,7 @@ Examples, description and categorization of iMath operations.
   }
 }
 \examples{
+i<-antsImageRead( getANTsRData('r16') , 2 )
 data( "iMathOps", package = "ANTsR", envir = environment() ) #
 j  <- 7
 op <- as.character( iMathOps$Operation[j] )
