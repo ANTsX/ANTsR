@@ -17,6 +17,8 @@ Some operations may not be valid (WIP), but most are.}
 \item{param}{... additional parameters}
 
 \item{img2}{... additional image or image list}
+
+\item{...}{further parameter options}
 }
 \description{
 Perform various (often mathematical) operations on the input image.

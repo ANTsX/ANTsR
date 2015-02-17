@@ -11,6 +11,7 @@
 #' Some operations may not be valid (WIP), but most are.
 #' @param param ... additional parameters
 #' @param img2 ... additional image or image list
+#' @param ... further parameter options
 #' @author BB Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
