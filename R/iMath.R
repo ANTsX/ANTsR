@@ -10,6 +10,7 @@
 #' a list of operations and brief description.
 #' Some operations may not be valid (WIP), but most are.
 #' @param ... additional parameters
+#' @img2 ... additional image or image list
 #' @author BB Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
@@ -56,7 +57,7 @@ iMath <- function( img, operation , param, img2 , ... ) {
 #
     dim<-img@dimension
     outimg<-antsImageClone(img)
-    args<-list(dim,outimg,operation,img,...)
+    args<-list(dim,outimg,operation,img,param,...)
     catchout<-.Call("ImageMath",
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     return(outimg)
