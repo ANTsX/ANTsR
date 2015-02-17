@@ -51,8 +51,9 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
     typeofTransform = "SyN"
   if (nchar(outprefix) == 0)
     outprefix = tempfile()
-  if (numargs < 1 | missing(fixed) | missing(moving) | missing(typeofTransform) |
-    missing(outprefix)) {
+  if ( numargs < 1 | missing(fixed) | missing(moving)
+        | missing(typeofTransform) | missing(outprefix) )
+    {
     cat("for simplified mode: \n")
     cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"AffineFast\",\"SyN\",\"SyNCC\"),  outputPrefix=\"./antsRegOut\" \n")
     cat("")
@@ -137,8 +138,11 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", init
         if (typeofTransform == "SyNCC") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
-          "-f", "4x2x2x1",
+          "-t", "Rigid[1]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+          "-f", "4x4x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[1]", "-c", "1200x1200x100", "-s", "2x1x0",
+          "-f", "4x2x1",
           "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
           "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
