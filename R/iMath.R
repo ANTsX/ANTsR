@@ -21,7 +21,7 @@
 #' ops<-iMath( mask , "GetOperations" )  # list all ops
 #'
 #' @export iMath
-iMath <- function( img, operation , param, ... ) {
+iMath <- function( img, operation , param=NA, ... ) {
 #  call <- match.call() # see glm
   iMathOps <- NULL
   data( "iMathOps", package = "ANTsR", envir = environment() )
@@ -58,7 +58,10 @@ iMath <- function( img, operation , param, ... ) {
     dim<-img@dimension
     outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
     outimg<-new("antsImage", img@pixeltype, outdim)
-    args<-list(dim,outimg,operation,img,param,...)
+    if ( is.na(param) )
+      args<-list(dim,outimg,operation,img,...)
+    if (!is.na(param) )
+      args<-list(dim,outimg,operation,img,param,...)
     catchout<-.Call("ImageMath",
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     return(outimg)
