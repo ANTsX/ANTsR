@@ -27,8 +27,8 @@ iMath <- function( img, operation , param=NA, ... ) {
   data( "iMathOps", package = "ANTsR", envir = environment() )
   if ( operation == "GetOperations" | operation == "GetOperationsFull" )
   {
-  if ( operation == "GetOperationsFull" ) return(ops)
-  return(trimops)
+  if ( operation == "GetOperationsFull" ) return(iMathOps)
+  return(iMathOps$Operation)
   }
   if ( ! ( operation  %in% iMathOps$Operation ) )
     {
