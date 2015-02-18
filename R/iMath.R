@@ -43,10 +43,15 @@ iMath <- function( img, operation , param, img2 , ... ) {
   return(trimops)
   }
   wh<-which( iMathOps$Operation == operation )
-  if ( iMathOps$OutputType[wh] != 'antsImage-D'  )
+  if ( iMathOps$Operation[wh] == 'LabelStats' & is.antsImage(param)  )
     {
-    stop(paste("output of",operation,'is',iMathOps$OutputType[wh]))
-    return(NA)
+    dim<-img@dimension
+    tf<-tempfile(fileext = ".csv")
+    args<-list(dim,tf,operation,param,img)
+    catchout<-.Call("ImageMath",
+        .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+    df<-read.csv(tf)
+    return(df)
     }
   if ( is.antsImage(img) & iMathOps$OutputType[wh] == 'antsImage-D'  )
     {

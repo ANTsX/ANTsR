@@ -14,14 +14,18 @@ Examples, description and categorization of iMath operations.
     \item{\code{Parameters}}{descriptive parameters}
     \item{\code{Example}}{working example code}
     \item{\code{Description}}{free text description}
-    \item{\code{OutputType}}{enumerated type of the output}
+    \item{\code{OutputDimensionalityChange}}{NA if not image, otherwise
+      increment to output image dimensionality relative to input image}
   }
 }
 \examples{
 i<-antsImageRead( getANTsRData('r16') , 2 )
+roiImg<-getMask(i)
 data( "iMathOps", package = "ANTsR", envir = environment() ) #
-j  <- 7
-op <- as.character( iMathOps$Operation[j] )
-k  <- eval( parse( text = toString( iMathOps$Example[j] ) ) )
+for ( j in c(13,18) )
+  {
+  op <- as.character( iMathOps$Operation[j] )
+  k  <- eval( parse( text = toString( iMathOps$Example[j] ) ) )
+  }
 }
 \keyword{datasets}
