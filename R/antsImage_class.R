@@ -1120,6 +1120,6 @@ is.antsImage <- function(x){
 }
 
 #' @rdname antsImageArith
-"sum.antsImage" <- function(x){
-  return( sum( as.array( x ) ) )
+"sum.antsImage" <- function(x, na.rm = FALSE ){
+  return( sum( as.array( x ) , na.rm = na.rm ) )
 }

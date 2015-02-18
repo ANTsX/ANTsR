@@ -10,7 +10,6 @@
 #' a list of operations and brief description.
 #' Some operations may not be valid (WIP), but most are.
 #' @param param ... additional parameters
-#' @param img2 ... additional image or image list
 #' @param ... further parameter options
 #' @author BB Avants
 #' @examples
@@ -22,7 +21,7 @@
 #' ops<-iMath( mask , "GetOperations" )  # list all ops
 #'
 #' @export iMath
-iMath <- function( img, operation , param, img2 , ... ) {
+iMath <- function( img, operation , param, ... ) {
 #  call <- match.call() # see glm
   iMathOps <- NULL
   data( "iMathOps", package = "ANTsR", envir = environment() )
@@ -53,16 +52,12 @@ iMath <- function( img, operation , param, img2 , ... ) {
     df<-read.csv(tf)
     return(df)
     }
-  if ( is.antsImage(img) & iMathOps$OutputDimensionalityChange[wh] == 0 )
+  # might remove
+  if ( is.antsImage(img) & is.numeric(iMathOps$OutputDimensionalityChange[wh]) )
     {
-# not sure what's going on below - but shouldnt commit things that break
-# the build or R CMD check or that make vignettes fail.
-#    outimage = antsImageClone(img)
-#    catchout<-.Call("ImageMath",
-#        image, outimage, "MD", 2, PACKAGE = "ANTsR")
-#
     dim<-img@dimension
-    outimg<-antsImageClone(img)
+    outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
+    outimg<-new("antsImage", img@pixeltype, outdim)
     args<-list(dim,outimg,operation,img,param,...)
     catchout<-.Call("ImageMath",
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
