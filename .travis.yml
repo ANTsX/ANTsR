@@ -42,7 +42,7 @@ install:
 script:
 - R CMD build ANTsR --no-build-vignettes
 # - R CMD INSTALL ANTsR_1.0.tar.gz  # --build
-- R CMD check ANTsR_1.0.tar.gz --as-cran --no-build-vignettes
+- travis_wait 40 R CMD check ANTsR_1.0.tar.gz --as-cran --no-build-vignettes
 # - cd ANTsR
 # - R CMD check ANTsR
 
