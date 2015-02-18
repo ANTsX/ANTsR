@@ -43,8 +43,8 @@ if [[ ! -s ants ]] ; then
     -DModule_MGHIO:BOOL=ON \
     -DModule_ITKReview:BOOL=ON \
     -DModule_ITKVtkGlue:BOOL=OFF  ../itks/
-  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
-  make install | grep -v "Installing" | grep -v "Looking for"
+#  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+#  make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
   git clone $antsgit ants
   cd antb
@@ -57,7 +57,7 @@ if [[ ! -s ants ]] ; then
     -DUSE_SYSTEM_ITK=OFF \
     -DBUILD_TESTING=OFF \
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
-  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+#  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   cd ..
   cp antsr.h ants/Examples/include/
 fi
