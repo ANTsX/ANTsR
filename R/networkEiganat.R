@@ -269,8 +269,9 @@ lowrankRowMatrix <- function(A, k = 2) {
       vecimg[mask > 0] <- sparsev
       temp <- antsImageClone(mask)
       temp<-smoothImage( vecimg, 1 )
-      ImageMath(mask@dimension, temp, "ClusterThresholdVariate", vecimg, mask,
-        clustval)
+      temp[ mask < 0.5 ]<-0
+      temp2<-labelClusters( temp, 1000, minThresh = 0.1, maxThresh=0.5 )
+      temp[ temp2 < 1 ]<-0
       sparsev <- c(temp[mask > 0.5])
     }
     v[, i] <- sparsev
