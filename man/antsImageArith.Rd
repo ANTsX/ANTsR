@@ -29,7 +29,7 @@
 
 \method{exp}{antsImage}(x)
 
-\method{sum}{antsImage}(x, na.rm = FALSE)
+\method{sum}{antsImage}(..., na.rm = FALSE)
 }
 \arguments{
 \item{x}{antsImage}
