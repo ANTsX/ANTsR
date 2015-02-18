@@ -53,7 +53,7 @@ iMath <- function( img, operation , param, img2 , ... ) {
     df<-read.csv(tf)
     return(df)
     }
-  if ( is.antsImage(img) & iMathOps$OutputType[wh] == 'antsImage-D'  )
+  if ( is.antsImage(img) & iMathOps$OutputDimensionalityChange[wh] == 0 )
     {
 # not sure what's going on below - but shouldnt commit things that break
 # the build or R CMD check or that make vignettes fail.
