@@ -25,6 +25,11 @@ iMath <- function( img, operation , param=NA, ... ) {
 #  call <- match.call() # see glm
   iMathOps <- NULL
   data( "iMathOps", package = "ANTsR", envir = environment() )
+  if ( operation == "GetOperations" | operation == "GetOperationsFull" )
+  {
+  if ( operation == "GetOperationsFull" ) return(ops)
+  return(trimops)
+  }
   if ( ! ( operation  %in% iMathOps$Operation ) )
     {
     stop(paste("'operation'",operation," not recognized"))
@@ -35,11 +40,6 @@ iMath <- function( img, operation , param=NA, ... ) {
   print(class(operation))
   print("2nd param should be a character string defining the operation")
   return(NA)
-  }
-  if ( operation == "GetOperations" | operation == "GetOperationsFull" )
-  {
-  if ( operation == "GetOperationsFull" ) return(ops)
-  return(trimops)
   }
   wh<-which( iMathOps$Operation == operation )
   if ( iMathOps$Operation[wh] == 'LabelStats' & is.antsImage(param)  )
