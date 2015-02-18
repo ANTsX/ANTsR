@@ -1118,8 +1118,3 @@ is.antsImage <- function(x){
   imgexp <- as.antsImage(exp(as.array(x)))
   antsCopyImageInfo(x, imgexp)
 }
-
-#' @rdname antsImageArith
-"sum.antsImage" <- function(..., na.rm = FALSE ){
-  return( sum( as.array( ... ) , na.rm = na.rm ) )
-}
