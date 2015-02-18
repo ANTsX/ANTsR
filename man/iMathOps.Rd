@@ -22,7 +22,7 @@ Examples, description and categorization of iMath operations.
 i<-antsImageRead( getANTsRData('r16') , 2 )
 roiImg<-getMask(i)
 data( "iMathOps", package = "ANTsR", envir = environment() ) #
-for ( j in c(13,18) )
+for ( j in c(1:nrow(iMathOps)) )
   {
   op <- as.character( iMathOps$Operation[j] )
   k  <- eval( parse( text = toString( iMathOps$Example[j] ) ) )
