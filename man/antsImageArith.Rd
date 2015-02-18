@@ -10,7 +10,6 @@
 \alias{antsImageArith}
 \alias{exp.antsImage}
 \alias{log.antsImage}
-\alias{sum.antsImage}
 \title{arith.antsImage}
 \usage{
 \method{+}{antsImage}(x, y)
@@ -28,8 +27,6 @@
 \method{log}{antsImage}(x, ...)
 
 \method{exp}{antsImage}(x)
-
-\method{sum}{antsImage}(..., na.rm = FALSE)
 }
 \arguments{
 \item{x}{antsImage}
