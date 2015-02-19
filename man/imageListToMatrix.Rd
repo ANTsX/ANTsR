@@ -11,7 +11,7 @@ imageListToMatrix(imageList, mask)
 read, in order - these are image objects, not file names.}
 
 \item{mask}{An \code{antsImage} containing a binary mask, voxels in the mask
-are placed in the matrix.}
+are placed in the matrix. If not provided, estimated from first image in list.}
 }
 \value{
 A matrix containing the masked data, the result of calling
@@ -21,23 +21,18 @@ A matrix containing the masked data, the result of calling
 Read images into rows of a matrix.
 }
 \examples{
-\dontrun{
-
-  imageFNList <- list.files("./",
-    pattern = glob2rx("testView*.nii.gz"), full.names = TRUE)
-
-  imageList<-list()
-  for ( fn in imageFNList )
-    imageList<-lappend( imageList, antsImageRead( fn, 3 ) )
-
-  mask <- antsImageRead("/mnt/data/masks/brainmask.nii.gz",3)
-
-  mat <- imageListToMatrix(imageList, mask)
-
-}
+img <- antsImageRead(getANTsRData('r16'), 2)
+ imglist <- list()
+ nvox <- dim(img)[1] * dim(img)[2]
+ nsubj <- 50
+ for(ii in 1:nsubj){
+   imglist[ii] <- img + rnorm(nvox, sd=mean(img[img!=0]))
+ }
+ mask <- getMask(img)
+ imgmat <- imageListToMatrix(imglist, mask)
 }
 \author{
-Cook PA, Avants B
+Cook PA, Avants B, Kandel BM
 }
 \seealso{
 \code{\link{matrixToImages}, \link{getMask}}
