@@ -16,7 +16,7 @@ smoothImage <- function(inimg,sigma) {
   outimg<-antsImageClone(inimg)
   if (typeof(sigma)=='double') smoothingparams<-paste(sigma,collapse='x')
   args <- list(dim,outimg,"G",inimg,smoothingparams)
-  pp<-.Call("imageMath", .int_antsProcessArguments(c(args)),
+  pp<-.Call("ImageMath", .int_antsProcessArguments(c(args)),
     PACKAGE = "ANTsR")
   return(outimg)
 }
