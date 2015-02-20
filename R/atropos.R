@@ -42,7 +42,7 @@ atropos <- function( a, x,
   priorweight = 0.5,
   ...) {
   if ( missing(x)) {
-    .Call("atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
+    .Call("Atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
     return(NULL)
   }
   # define the output temp files
