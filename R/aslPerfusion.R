@@ -156,7 +156,7 @@ aslPerfusion <- function(
   # Get perfusion time series
   perfusionTimeSeries <- #antsImageClone(moco_results$moco_img)
     new("antsImage", "float", 4)
-  ImageMath(4, perfusionTimeSeries,
+  imageMath(4, perfusionTimeSeries,
     "TimeSeriesInterpolationSubtraction", asl,
     interpolation)
   perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0

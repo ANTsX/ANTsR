@@ -4,7 +4,7 @@
 #' specifying prior constraints. These prior constraints include the
 #' specification of a prior label image, prior probability images (one for each
 #' class), and/or an MRF prior to enforce spatial smoothing of the labels.
-#' Similar algorithms include FAST and SPM.  Atropos can also perform
+#' Similar algorithms include FAST and SPM.  atropos can also perform
 #' multivariate segmentation if you pass a list of images in: e.g.
 #' a=c(img1,img2).
 #'
@@ -20,11 +20,11 @@
 #' intensity image between the original intensity and its smoothed counterpart.
 #' The smoothness parameters are governed by the -b/--bspline option.
 #' @param x mask image
-#' @param i initialization see Atropos in ANTs for full set of options
-#' @param m mrf parameters see Atropos for format of these
-#' @param c convergence parameters see Atropos for format of these
+#' @param i initialization see atropos in ANTs for full set of options
+#' @param m mrf parameters see atropos for format of these
+#' @param c convergence parameters see atropos for format of these
 #' @param priorweight usually 0, 0.25 or 0.5
-#' @param ... more parameters, see Atropos help in ANTs
+#' @param ... more parameters, see atropos help in ANTs
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL, B Avants
 #' @examples
@@ -32,17 +32,17 @@
 #' img<-antsImageRead( getANTsRData("r16") , 2 )
 #' img<-resampleImage( img, c(64,64), 1, 0 )
 #' mask<-getMask(img)
-#' segs1<-Atropos( d = 2, a = img, m = '[0.2,1x1]',
+#' segs1<-atropos( d = 2, a = img, m = '[0.2,1x1]',
 #'    c = '[2,0]',  i = 'kmeans[3]', x = mask )
-#' @export Atropos
-Atropos <- function( a, x,
+#' @export atropos
+atropos <- function( a, x,
   i = "kmeans[3]",
   m = "[0.2,1x1]",
   c = "[5,0]",
   priorweight = 0.5,
   ...) {
   if ( missing(x)) {
-    .Call("Atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
+    .Call("atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
     return(NULL)
   }
   # define the output temp files
@@ -98,7 +98,7 @@ Atropos <- function( a, x,
   }
   if ( length(a) > 6)
     print(" more than 6 input images not really supported, using first 6 ")
-  .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
+  .Call("atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
   probsout <- list.files(path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)

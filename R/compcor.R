@@ -31,7 +31,7 @@ compcor <- function(fmri, ncompcor = 4,
   }
   if (useimagemath & !is.na(mask)) {
     myoutfn <- tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".nii.gz")
-    ImageMath(4, myoutfn, "CompCorrAuto", fmri, mask, ncompcor)
+    imageMath(4, myoutfn, "CompCorrAuto", fmri, mask, ncompcor)
     mycsv <- sub(".nii.gz", "_compcorr.csv", myoutfn)
     myvarimg <- sub(".nii.gz", "_variance.nii.gz", myoutfn)
     varimage <- antsImageRead(myvarimg, 3)

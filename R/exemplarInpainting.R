@@ -134,7 +134,7 @@ exemplarInpainting <- function(img, paintMask, imageList,
       print(paste(mean(imgvec), mean(predvec2)))
   }
   if (sharpen)
-    ImageMath(img@dimension, predimg, "Sharpen", predimg)
+    imageMath(img@dimension, predimg, "Sharpen", predimg)
   # now make two vectors - one for the lesion and one for the original image
   if (debug)
     print(dim(predimg))

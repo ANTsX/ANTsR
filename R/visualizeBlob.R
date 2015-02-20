@@ -48,14 +48,14 @@ visualizeBlob <- function(template, blob, outname = "wmBlob", dim = 3) {
     return(NULL)
   }
   mymask <- getMask(template)
-  myseg <- Atropos( a = template, m = "[0.25,1x1x1]",
+  myseg <- atropos( a = template, m = "[0.25,1x1x1]",
     c = "[2,0]", x = mymask,
     i = "kmeans[3]" )
   wm <- antsImageClone(maskImage(myseg$segmentation, myseg$segmentation, 3), "float")
   glassbrain <- antsImageClone(mymask)
   glassbrain<-smoothImage( glassbrain, 3 )
   glassbrain<-thresholdImage( glassbrain,  0.3, Inf )
-  ImageMath(dim, glassbrain, "FillHoles", glassbrain)
+  imageMath(dim, glassbrain, "FillHoles", glassbrain)
   myrender <- renderSurfaceFunction(list(glassbrain), list(wm, blob), surfval = 0.2,
     smoothsval = 1.5, alphasurf = 0.3, smoothfval = 1.5, alphafunc = 1)
   lateralLeft <- rgl::rotationMatrix(pi/2, 0, -1, 0) %*%

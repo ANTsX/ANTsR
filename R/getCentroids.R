@@ -35,7 +35,7 @@ getCentroids <- function(img, clustparam = 250, threshparam = NA, outprefix = NA
   clust <- NA
   if (!is.na(threshparam)) {
     threshimg <- antsImageClone(img)
-    ImageMath(threshimg@dimension, threshimg, "abs", threshimg)
+    imageMath(threshimg@dimension, threshimg, "abs", threshimg)
     meanval <- mean(threshimg[threshimg > (.Machine$double.eps * 2)])
     sdval <- sd(threshimg[threshimg > (.Machine$double.eps * 2)])
     threshval <- (meanval - sdval * threshparam)
@@ -44,8 +44,8 @@ getCentroids <- function(img, clustparam = 250, threshparam = NA, outprefix = NA
     threshimg[threshimg > threshval] <- 1
     threshimg[threshimg <= threshval] <- 0
     clust <- labelClusters(threshimg, clustparam)
-    ImageMath(imagedim, pointfile, "LabelStats", clust, clust, 1)
-  } else ImageMath(imagedim, pointfile, "LabelStats", img, img, clustparam)
+    imageMath(imagedim, pointfile, "LabelStats", clust, clust, 1)
+  } else imageMath(imagedim, pointfile, "LabelStats", img, img, clustparam)
   mypoints <- read.csv(pointfile)
   scl <- 10
   mypoints$x <- round(mypoints$x * scl)/scl

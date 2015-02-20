@@ -19,7 +19,7 @@ kmeansSegmentation(img, k, kmask = NA, mrf = 0.1)
 segmentation and probability images
 }
 \description{
-k means image segmentation that is a wrapper around Atropos
+k means image segmentation that is a wrapper around atropos
 }
 \examples{
 fi<-antsImageRead( getANTsRData("r16") ,2)

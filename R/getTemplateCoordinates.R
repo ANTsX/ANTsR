@@ -87,7 +87,7 @@ getTemplateCoordinates <- function(
   mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
     interpolator = c("NearestNeighbor"))
   pointfile <- paste(outprefix, "coords.csv", sep = "")
-  ImageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage,
+  imageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage,
     1)
   mypoints <- read.csv(pointfile)
   for (mylab in 2:length(templatePairWithLabels)) {

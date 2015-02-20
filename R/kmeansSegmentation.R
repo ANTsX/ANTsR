@@ -1,6 +1,6 @@
 #' k means image segmentation.
 #'
-#' k means image segmentation that is a wrapper around Atropos
+#' k means image segmentation that is a wrapper around atropos
 #'
 #' @param img input image
 #' @param k integer number of classes
@@ -18,13 +18,13 @@
 kmeansSegmentation <- function(img, k, kmask = NA, mrf = 0.1) {
   kmimg <- antsImageClone(img)
   dim <- img@dimension
-  ImageMath(dim, kmimg, "Normalize", kmimg)
+  imageMath(dim, kmimg, "Normalize", kmimg)
   if (is.na(kmask))
     kmask <- getMask(kmimg, 0.01, 1, cleanup = 2)
-  ImageMath(dim, kmask, "FillHoles", kmask)
+  imageMath(dim, kmask, "FillHoles", kmask)
   nhood <- paste(rep(1, dim), collapse = "x")
   mrf <- paste("[", mrf, ",", nhood, "]")
-  kmimg <- Atropos( a = kmimg, m = mrf, c = "[5,0]",
+  kmimg <- atropos( a = kmimg, m = mrf, c = "[5,0]",
     i = paste("kmeans[",k, "]", sep = ""), x = kmask)
   kmimg$segmentation <- antsImageClone(kmimg$segmentation, img@pixeltype)
   return(kmimg)
