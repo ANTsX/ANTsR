@@ -250,7 +250,7 @@ segview<-as.antsImage( rbind(as.array(iMath(fi,"Normalize")),
 invisible(plot(segview))
 ```
 
-If you like segmentation, also look at `rfSegmentation` and `Atropos`.
+If you like segmentation, also look at `rfSegmentation` and `atropos`.
 
 **Registration**
 
