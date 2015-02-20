@@ -98,7 +98,7 @@ atropos <- function( a, x,
   }
   if ( length(a) > 6)
     print(" more than 6 input images not really supported, using first 6 ")
-  .Call("atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
+  .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
   probsout <- list.files(path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)
