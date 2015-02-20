@@ -42,7 +42,7 @@ install:
 script:
 - travis_wait 40 R CMD build ANTsR
 # - R CMD INSTALL ANTsR_1.0.tar.gz  # --build # cant do both this and full check
-- travis_wait 40 R CMD check ANTsR_1.0.tar.gz --as-cran --no-install
+- travis_wait 120 R CMD check ANTsR_1.0.tar.gz --as-cran
 # - cd ANTsR
 # - R CMD check ANTsR
 
