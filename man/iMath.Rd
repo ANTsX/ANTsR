@@ -21,7 +21,7 @@ Some operations may not be valid (WIP), but most are.}
 \description{
 Perform various (often mathematical) operations on the input image.
 Additional parameters should be specific for each operation.  See the
-the full imageMath in ANTs, on which this function is based.
+the full ImageMath in ANTs, on which this function is based.
 }
 \examples{
 fi<-antsImageRead( getANTsRData("r16") , 2 )
