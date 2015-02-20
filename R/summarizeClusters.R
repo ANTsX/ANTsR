@@ -1,8 +1,8 @@
-# .SummarizeClusters.R - print out anatomical labels of ROIs labels - array of
+# .summarizeClusters.R - print out anatomical labels of ROIs labels - array of
 # labels sets (images) labelinfo - array of label names data frames clusters -
 # array of ROI images pvalues - significance values ( or other ) associated with
 # ROIs
-.SummarizeClusters <- function(labels, labelinfo, clusters, pvalues) {
+.summarizeClusters <- function(labels, labelinfo, clusters, pvalues) {
   nSets <- length(labels)
   nClusters <- length(clusters)
   
@@ -28,7 +28,7 @@
       clust <- clusters[[j]]
       clustVox <- which(clust > 0)
       clust[clust > 0] <- 1
-      centroid <- LabelImageCentroids(clust, physical = TRUE)
+      centroid <- labelImageCentroids(clust, physical = TRUE)
       xc <- centroid$centroids[1]
       yc <- centroid$centroids[2]
       zc <- centroid$centroids[3]

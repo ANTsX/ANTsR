@@ -36,8 +36,8 @@ invariantImageSimilarity <- function(in_image1, in_image2,
   thetain <- thetas
   if (max(abs(thetas)) > 2)
     thetain <- (thetas * pi)/180
-  ImageMath(in_image1@dimension, in_image1, "Normalize", in_image1)
-  ImageMath(in_image2@dimension, in_image2, "Normalize", in_image2)
+  imageMath(in_image1@dimension, in_image1, "Normalize", in_image1)
+  imageMath(in_image2@dimension, in_image2, "Normalize", in_image2)
   if (class(localSearchIterations) != "numeric") {
     print("wrong input: localSearchIterations is not numeric")
     return(NA)

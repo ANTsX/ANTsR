@@ -1,23 +1,23 @@
-#' ImageMath
+#' imageMath
 #'
 #' Perform math-operations on the given image.  The first argument should
 #' be dimensionality, the 2nd the output image, the third a string
 #' describing the operation.  The fourth should be in the input image.
 #' Additional parameters should be specific for each function.  See the
-#' the ImageMath help in ANTs.
+#' the imageMath help in ANTs.
 #'
 #' @param ... all parameters
 #' @author Shrinidhi KL
 #' @examples
 #' fi<-antsImageRead( getANTsRData("r16") ,2)
 #' mask<-getMask(fi)
-#' ImageMath( 2 , fi , "GD", fi , 1 )  # gray matter dilation
-#' ImageMath( 2 , mask , "Neg", mask )  # negate
-#' ImageMath( 2 , mask , "D", mask )  # distance transform
+#' imageMath( 2 , fi , "GD", fi , 1 )  # gray matter dilation
+#' imageMath( 2 , mask , "Neg", mask )  # negate
+#' imageMath( 2 , mask , "D", mask )  # distance transform
 #' plot(mask)
 #'
-#' @export ImageMath
-ImageMath <- function(...) {
+#' @export imageMath
+imageMath <- function(...) {
   args <- list(...)
   if ( class(args[[1]] ) != 'numeric' &
        class(args[[1]] ) != 'integer'  )

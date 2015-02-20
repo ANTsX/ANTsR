@@ -62,7 +62,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   ANTS_METRIC_PARAMS <- "1,4"
   # ANTs parameters end
 
-  # Atropos params
+  # atropos params
   locmrf<-paste(rep(1,img@dimension),collapse='x')
   ATROPOS_BRAIN_EXTRACTION_INITIALIZATION <- "kmeans[3]"
   ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD <- "Gaussian"
@@ -74,7 +74,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   ATROPOS_SEGMENTATION_CONVERGENCE <- "[12,0.0001]"
   ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION <- "Socrates"
   ATROPOS_SEGMENTATION_MRF <- paste("[0.11,",locmrf,"]")
-  # Atropos params end
+  # atropos params end
 
   imgsmall <- resampleImage(img , rep(4, img@dimension) )
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
@@ -86,9 +86,9 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
 
   # get laplacian images
   lapi <- antsImageClone(img)
-  ImageMath(img@dimension, lapi, "Laplacian", img, 1.5, 1)
+  imageMath(img@dimension, lapi, "Laplacian", img, 1.5, 1)
   lapt <- antsImageClone(tem)
-  ImageMath(tem@dimension, lapt, "Laplacian", tem, 1.5, 1)
+  imageMath(tem@dimension, lapt, "Laplacian", tem, 1.5, 1)
   # FIXME should add mask to below via -x option
   print(EXTRACTION_WARP_OUTPUT_PREFIX)
   dtem <- antsImageClone(tem, "double")
@@ -111,9 +111,9 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     interpolator = c("NearestNeighbor"))
   temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
-  ImageMath(img@dimension, tmp, "MD", temmaskwarped, 2)
-  ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
-  ImageMath(img@dimension, tmp, "FillHoles", tmp)
+  imageMath(img@dimension, tmp, "MD", temmaskwarped, 2)
+  imageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
+  imageMath(img@dimension, tmp, "FillHoles", tmp)
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
@@ -123,17 +123,17 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION,
     c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE,
     k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD)
-  Atropos(atroparams)
+  atropos(atroparams)
   fseg <- antsImageClone(  seg, "float")
   segwm<-thresholdImage(  fseg, 3, 3 )
   seggm<-thresholdImage(  fseg, 2, 2)
   segcsf<-thresholdImage( fseg, 1, 1)
-  ImageMath(img@dimension, segwm, "GetLargestComponent", segwm)
-  ImageMath(img@dimension, seggm, "GetLargestComponent", seggm)
-  ImageMath(img@dimension, seggm, "FillHoles", seggm)
+  imageMath(img@dimension, segwm, "GetLargestComponent", segwm)
+  imageMath(img@dimension, seggm, "GetLargestComponent", seggm)
+  imageMath(img@dimension, seggm, "FillHoles", seggm)
   segwm[segwm > 0.5] <- 3
   tmp <- antsImageClone(segcsf)
-  ImageMath(img@dimension, tmp, "ME", segcsf, 10)
+  imageMath(img@dimension, tmp, "ME", segcsf, 10)
   seggm[seggm < 0.5 & tmp > 0.5] <- 2
   seggm[seggm > 0.5] <- 2
   finalseg <- antsImageClone(img)
@@ -143,20 +143,20 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   finalseg[segcsf > 0.5 & seggm < 0.5 & segwm < 0.5] <- 1
   # BA - finalseg looks good! could stop here
   tmp<-thresholdImage( finalseg, 2, 3)
-  ImageMath(img@dimension, tmp, "ME", tmp, 2)
-  ImageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
-  ImageMath(img@dimension, tmp, "MD", tmp, 4)
-  ImageMath(img@dimension, tmp, "FillHoles", tmp)
+  imageMath(img@dimension, tmp, "ME", tmp, 2)
+  imageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
+  imageMath(img@dimension, tmp, "MD", tmp, 4)
+  imageMath(img@dimension, tmp, "FillHoles", tmp)
   tmp[tmp > 0 | temmaskwarped > 0.25] <- 1
-  ImageMath(img@dimension, tmp, "MD", tmp, 5)
-  ImageMath(img@dimension, tmp, "ME", tmp, 5)
+  imageMath(img@dimension, tmp, "MD", tmp, 5)
+  imageMath(img@dimension, tmp, "ME", tmp, 5)
   tmp2 <- antsImageClone(tmp)
-  ImageMath(img@dimension, tmp2, "FillHoles", tmp)
+  imageMath(img@dimension, tmp2, "FillHoles", tmp)
   # FIXME - steps above should all be checked again ...
   finalseg2 <- antsImageClone(tmp2)
   dseg <- antsImageClone(finalseg2)
-  ImageMath(img@dimension, dseg, "ME", dseg, 5)
-  ImageMath(img@dimension, dseg, "MaurerDistance", dseg)
+  imageMath(img@dimension, dseg, "ME", dseg, 5)
+  imageMath(img@dimension, dseg, "MaurerDistance", dseg)
   droundmax <- 20
   dsearchvals <- c(1:100)/100 * droundmax - 0.5 * droundmax
   mindval <- min(dseg)

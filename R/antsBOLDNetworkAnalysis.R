@@ -87,7 +87,7 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
     backgroundvoxels[] <- FALSE
     backgroundvoxels[neginds] <- TRUE
     negmask[backgroundvoxels] <- 1
-    ImageMath(3, negmask, "ME", negmask, 1)
+    imageMath(3, negmask, "ME", negmask, 1)
     tempmat <- myscale(timeseries2matrix(bold, negmask)[keepinds, ])
     bgsvd <- svd(tempmat)
     mysum <- cumsum(bgsvd$d)/sum(bgsvd$d)

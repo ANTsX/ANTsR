@@ -44,9 +44,9 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
   temp <- antsImageClone(paintMask)
   temp[temp == 1] <- 0
   temp[temp == 2] <- 1
-  ImageMath(img@dimension, temp, "MD", temp, 1)
+  imageMath(img@dimension, temp, "MD", temp, 1)
   paintMaskUse[temp == 1 & paintMaskUse == 1] <- 2
-  # ImageMath(img@dimension,paintMaskUse,'GD',paintMask,1)
+  # imageMath(img@dimension,paintMaskUse,'GD',paintMask,1)
   healthymask <- antsImageClone(paintMaskUse)
   healthymask[paintMaskUse == 2] <- 0
   if (is.na(speedimage)) {
@@ -54,7 +54,7 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     upit <- mean(img[paintMaskUse == 2])
     speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
   }
-  ImageMath(inpainted@dimension, inpainted, "FastMarchingExtension", speedimage,
+  imageMath(inpainted@dimension, inpainted, "FastMarchingExtension", speedimage,
     healthymask, img)
   outimg <- antsImageClone(img)
   outimg[paintMaskUse == 2] <- inpainted[paintMaskUse == 2]

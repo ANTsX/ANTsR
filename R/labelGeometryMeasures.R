@@ -1,13 +1,13 @@
-#' LabelGeometryMeasures
+#' labelGeometryMeasures
 #'
-#' Wrapper for the ANTs funtion LabelGeometryMeasures
+#' Wrapper for the ANTs funtion labelGeometryMeasures
 #'
 #' @param ... see ants function
 #' @return none
 #' @author Avants BB
 #'
-#' @export LabelGeometryMeasures
-LabelGeometryMeasures <- function(...) {
+#' @export labelGeometryMeasures
+labelGeometryMeasures <- function(...) {
   veccer <- c(...)
   veccer2 <- veccer
   if (length(veccer) > 1) {

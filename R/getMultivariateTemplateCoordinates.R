@@ -72,7 +72,7 @@ getMultivariateTemplateCoordinates <- function(
     img <- imageSetToBeLabeledIn[[x]]
     threshimg <- antsImageClone(img)
     thresh <- 1/length(as.array(threshimg))
-    ImageMath(threshimg@dimension, threshimg, "abs", threshimg)
+    imageMath(threshimg@dimension, threshimg, "abs", threshimg)
     # threshimg[ threshimg > (.Machine$double.eps*2) ]<-1
     meanval <- mean(threshimg[threshimg > (.Machine$double.eps * 2)])
     sdval <- sd(threshimg[threshimg > (.Machine$double.eps * 2)])

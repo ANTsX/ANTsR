@@ -31,6 +31,6 @@ projectImageAlongAxis <- function(imageND,
   if (axis >= imageND@dimension)
     axis <- (imageND@dimension - 1)
   downimg <- antsImageClone(referenceImageNDminus1)
-  ImageMath(imageND@dimension, downimg, "Project", imageND, axis, projtype)
+  imageMath(imageND@dimension, downimg, "Project", imageND, axis, projtype)
   return(downimg)
 }

@@ -39,7 +39,7 @@ pairwiseImageDistanceMatrix <- function(dim,
         mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"),
           outprefix = toutfn)
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
-        # broken !!  metric <- capture.output(ImageMath(dim, 'j', metrictype, i1,
+        # broken !!  metric <- capture.output(imageMath(dim, 'j', metrictype, i1,
         # mywarpedimage))[1]
         wh <- (mywarpedimage > 0 & i1 > 0)
         if (metrictype == "PearsonCorrelation") {

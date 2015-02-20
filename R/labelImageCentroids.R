@@ -1,4 +1,4 @@
-#' LabelImageCentroids
+#' labelImageCentroids
 #'
 #' Converts a label image to coordinates summarizing their positions
 #'
@@ -13,10 +13,10 @@
 #' @examples
 #'
 #' labelImage<-makeImage( c(2,2,2) , 0:7 )
-#' LabelImageCentroids(labelImage)
+#' labelImageCentroids(labelImage)
 #'
-#' @export LabelImageCentroids
-LabelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
+#' @export labelImageCentroids
+labelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
 
   # Get centroids of labels
   d <- dim(img)
