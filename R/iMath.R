@@ -2,7 +2,7 @@
 #'
 #' Perform various (often mathematical) operations on the input image.
 #' Additional parameters should be specific for each operation.  See the
-#' the full imageMath in ANTs, on which this function is based.
+#' the full ImageMath in ANTs, on which this function is based.
 #'
 #' @param img input object, usually antsImage
 #' @param operation a character string e.g. "GetLargestComponent" ... the
@@ -47,7 +47,7 @@ iMath <- function( img, operation , param=NA, ... ) {
     dim<-img@dimension
     tf<-tempfile(fileext = ".csv")
     args<-list(dim,tf,operation,param,img)
-    catchout<-.Call("imageMath",
+    catchout<-.Call("ImageMath",
         .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     df<-read.csv(tf)
     return(df)
@@ -62,7 +62,7 @@ iMath <- function( img, operation , param=NA, ... ) {
       args<-list(dim,outimg,operation,img,...)
     if (!is.na(param) )
       args<-list(dim,outimg,operation,img,param,...)
-    catchout<-.Call("imageMath",
+    catchout<-.Call("ImageMath",
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     return(outimg)
     }
