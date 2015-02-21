@@ -107,6 +107,38 @@ for erosion and maximum for dilation (ITK rules).
     distanceMap <- iMath(mask, 'MaurerDistance')
     invisible(plot(distanceMap))
     ```
- * 
 
+ *  `D` implements ITK's `DanielssonDistanceMap`. It calculates the Euclidean
+   distance map, which shows at each voxel the shortest distance to the nearest
+   voxel in the background (assuming that the input is a binary image).
+    
+    ```{r}
+    distanceMap <- iMath(mask, 'D')
+    invisible(plot(distanceMap))
+    ```
+
+##Denoising with anisotropic diffusion
+
+To reduce noise without changing important parts of an image in computer vision, Perona-Malik is a
+promising method. Perona-Malik method to reduce noise with anisotropic diffusion is accessible 
+via `PeronaMalik` operation in `iMath`. It requires two parameters: 1) number of iterations, and 
+2) conductance.
+
+  ```{r}
+  denoised <- iMath(fi, 'PeronaMalik', 10, 0.5)
+  invisible(plot(denoised))
+  #to see what the filter has removed
+  invisible(plot(fi - denoised)) 
+  ```
+
+##Magnitude of gradient computation
+
+`Grad` operation in `iMath` calculates the gradient of the magnitude of an image by convolution
+with the first derivative of a Gaussian. Required parameters are: 1) sigma, and 2) normalize 
+output (0 or 1, boolean).
+
+  ```{r}
+  grad <- iMath(fi, 'Grad', 1)
+  invisible(plot(grad))
+  ```
 
