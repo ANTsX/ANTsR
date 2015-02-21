@@ -5,7 +5,8 @@
 #' @param image input antsImage matrix
 #' @param resampleParams vector of size dimension with numeric values
 #' @param useVoxels true means interpret resample params as voxel counts
-#' @param interpType one of 0 (nearest neighbor), 1 (linear), 2 (gaussian), 3 (windowed sinc), 4 (bspline)
+#' @param interpType one of 0 (linear), 1 (nearest neighbor),
+#'   2 (gaussian), 3 (windowed sinc), 4 (bspline)
 #' @return output antsImage
 #' @author Avants BB
 #' @examples
@@ -24,4 +25,4 @@ resampleImage <- function(image, resampleParams, useVoxels = 0, interpType = 1) 
   retval <- .Call("ResampleImage", k)
   outimg <- antsImageClone(outimg, image@pixeltype)
   return(outimg)
-} 
+}

@@ -13,7 +13,8 @@ resampleImage(image, resampleParams, useVoxels = 0, interpType = 1)
 
 \item{useVoxels}{true means interpret resample params as voxel counts}
 
-\item{interpType}{one of 0 (nearest neighbor), 1 (linear), 2 (gaussian), 3 (windowed sinc), 4 (bspline)}
+\item{interpType}{one of 0 (linear), 1 (nearest neighbor),
+2 (gaussian), 3 (windowed sinc), 4 (bspline)}
 }
 \value{
 output antsImage
