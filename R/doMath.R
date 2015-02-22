@@ -1,8 +1,9 @@
-#' iMath
+#' %doMath%
 #'
-#' Perform various (often mathematical) operations on the input image.
+#' Perform various (often mathematical) operations on the input image, using
+#' functional programming style.
 #' Additional parameters should be specific for each operation.  See the
-#' the full ImageMath in ANTs, on which this function is based.
+#' vignettes section for complete documentation of this funciton.
 #'
 #' @param img input object, usually antsImage
 #' @param operation a character string e.g. "GetLargestComponent" ... the
@@ -18,16 +19,19 @@
 #' op1<- fi %doMath% "GD 1"   # gray matter dilation by 1 voxel
 #' op2<- mask %doMath% "Neg"  # negate
 #' op3<- mask %doMath% "D"    # distance transform
+#' op4<- mask %doMath% "D" %doMath% "Laplacian 1 1"   # consecutive math operations are easy
 #' ops<- mask %doMath% "GetOperations"  # list all ops
 #'
 #' @export %doMath%
 `%doMath%` <- function( img, operationAndArgs ) {
 #  call <- match.call() # see glm
-  splittedOpArg <- strsplit(operationAndArgs, sep = " ")
+  param<- NA
+  splittedOpArg <- strsplit(operationAndArgs, split = " ")
   operation <- splittedOpArg[[1]][1]
+  #check if any parameter has been passed
   if (length(splittedOpArg[[1]]) > 1)
   {
-  param <- splittedOpArg[[1]][2:3]
+  param <- splittedOpArg[[1]][2:length(splittedOpArg[[1]])]
   }
   iMathOps <- NULL
   data( "iMathOps", package = "ANTsR", envir = environment() )
@@ -51,7 +55,7 @@
     {
     dim<-img@dimension
     tf<-tempfile(fileext = ".csv")
-    args<-list(dim,tf,operation,param,img)
+    args<-list(dim,tf,operation,param[1],img)
     catchout<-.Call("ImageMath",
         .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     df<-read.csv(tf)
@@ -63,13 +67,20 @@
     dim<-img@dimension
     outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
     outimg<-new("antsImage", img@pixeltype, outdim)
-    if ( is.na(param) )
-      args<-list(dim,outimg,operation,img,...)
-    if (!is.na(param) )
-      args<-list(dim,outimg,operation,img,param,...)
+    
+    if ( class(param) != 'list' )
+      args<-list(dim,outimg,operation,img)
+    if (class(param) == 'list' )
+      #args<-list(dim,outimg,operation,img,param,...)
+      args<-list(dim,outimg,operation,img)
+      param <- splittedOpArg[[1]][2:length(splittedOpArg[[1]])]
+      for (n in 1:length(param)){
+       args <- c(args, param[n])
+        }
     catchout<-.Call("ImageMath",
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     return(outimg)
+    
     }
   else
     {
@@ -77,3 +88,65 @@
     return(NA)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
