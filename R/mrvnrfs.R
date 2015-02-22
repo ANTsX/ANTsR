@@ -38,13 +38,13 @@
 #'   ilist[[i]]<-list(img,imgb)  # two features
 #'   lablist[[i]]<-limg
 #' }
-#' rfm<-mrvwnrfs( lablist , ilist, mask, rad=c(0,0), multiResSchedule=1 )
-#' rfmresult<-mrvwnrfs.predict( rfm$rflist ,
+#' rfm<-mrvnrfs( lablist , ilist, mask, rad=c(0,0), multiResSchedule=1 )
+#' rfmresult<-mrvnrfs.predict( rfm$rflist ,
 #'    list(ilist[[2]]), mask, rad=c(0,0),
 #'    multiResSchedule=1 )
 #'
-#' @export mrvwnrfs
-mrvwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
+#' @export mrvnrfs
+mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE ) {
     # check y type
     yisimg<-TRUE
@@ -130,7 +130,7 @@ mrvwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
 #' Represents multiscale feature images as a neighborhood and uses the features
 #' to apply a random forest segmentation model to a new image
 #'
-#' @param rflist a list of random forest models from mrvwnrfs
+#' @param rflist a list of random forest models from mrvnrfs
 #' @param x a list of lists where each list contains feature images
 #' @param labelmask a mask for the features (all in the same image space)
 #' @param rad vector of dimensionality d define nhood radius
@@ -140,8 +140,8 @@ mrvwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
 #' and the random mask
 #' @author Avants BB, Tustison NJ
 #'
-#' @export mrvwnrfs.predict
-mrvwnrfs.predict <- function( rflist, x, labelmask, rad=NA,
+#' @export mrvnrfs.predict
+mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
   multiResSchedule=c(4,2,1), asFactors=TRUE ) {
     rfct<-1
     for ( mr in multiResSchedule )
