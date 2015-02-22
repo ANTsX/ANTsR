@@ -16,7 +16,7 @@ GC;Morphology;element radius;"iMath(i,op,1)";grayscale closing;0
 FillHoles;LabelOp;None;"iMath(i,op)";fills holes in binary object;0
 GetLargestComponent;LabelOp;None;"iMath(i,op)";returns largest portion of binary object;0
 LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
-Neg;Intensity;None;"iMath(i,op)";create image negative;0
-Normalize;Intensity;None;"iMath(i,op)";normalize intensity into 0 1 range;0
-TruncateImageIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
+Neg;Intensity;None;"iMath(i,op)";creates image negative;0
+Normalize;Intensity;None;"iMath(i,op)";normalizes intensity into 0 1 range;0
+TruncateImageIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trims intensities by quantiles;0
 Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
