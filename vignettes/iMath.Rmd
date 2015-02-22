@@ -69,13 +69,23 @@ for erosion and maximum for dilation (ITK rules).
     ME <- iMath(mask, "ME", 3)
     invisible(plot(ME))
     ```
+##Opening and closing image filters
+
+  * Morphological closing of a binary image: operation `MC` fill small holes with the 
+    provided radius parameter, for example:
+
+      ```{r}
+      iMath(fi, 'MC', k
+
+      ```
+  * Morphological opening of a binary image:
 
 ##Padding or cropping an image 
 
 `PadImage` is a function for add/remove voxels to/from images.
 
 * Positive numbers will pad image in each direction. So for example using 2
-  will make an image with 256 voxels in X and Y direction, 260.
+  will increase an image with 256 voxels to 260.
   
     ```{r}
     padded <- iMath(fi, "PadImage", 2)
@@ -142,3 +152,15 @@ output (0 or 1, boolean).
   invisible(plot(grad))
   ```
 
+##Laplacian of Gaussian of an image
+
+`Laplacian` operation calculates the the Laplacian of Gaussian of an image by convolving with
+the second derivative of a Gaussian. `sigma` and `normalize` (0 or 1, boolean) are two required 
+parameters.
+
+  ```{r}
+  laplacianImage <- iMath(fi, 'Laplacian', 1, 1)
+  invisible(plot(laplacianImage))
+  ```
+
+##
