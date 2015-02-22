@@ -323,11 +323,11 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE))
+      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE)) )
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname))
     dev.off()
-  invisible()
+  invisible(return())
 }
