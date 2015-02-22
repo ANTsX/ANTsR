@@ -27,24 +27,24 @@ install:
 - export PATH=$PATH:$HOME/pandoc/
 # - pandoc --version
 - ./travis-tool.sh bootstrap
-- ./travis-tool.sh r_binary_install igraph
-- ./travis-tool.sh r_binary_install magic
-- ./travis-tool.sh r_binary_install moments
-- ./travis-tool.sh r_binary_install pixmap
-- ./travis-tool.sh r_binary_install psych
-- ./travis-tool.sh r_binary_install signal
-- ./travis-tool.sh r_install visreg
+# - ./travis-tool.sh r_binary_install igraph
+# - ./travis-tool.sh r_binary_install magic
+# - ./travis-tool.sh r_binary_install moments
+# - ./travis-tool.sh r_binary_install pixmap
+# - ./travis-tool.sh r_binary_install psych
+# - ./travis-tool.sh r_binary_install signal
+# - ./travis-tool.sh r_install visreg
 - ./travis-tool.sh r_binary_install Rcpp
 - ./travis-tool.sh r_binary_install knitr
 - ./travis-tool.sh r_install rmarkdown
 - cd ${basedir}
 
 script:
-# - travis_wait 40 R CMD build ANTsR
-- R CMD INSTALL ANTsR # _1.0.tar.gz  # --build # cant do both this and full check
-# - travis_wait 120 R CMD check ANTsR_1.0.tar.gz --as-cran # --no-install
+- travis_wait 40 R CMD build ANTsR --no-build-vignettes
+- R CMD INSTALL ANTsR_1.0.tar.gz  # --build # cant do both this and full check
+# - travis_wait 120 R CMD check ANTsR_1.0.tar.gz --as-cran  --no-install
 # - cd ANTsR
-- R CMD check ANTsR
+# - R CMD check ANTsR
 
 # before_deploy: git fetch --tags
 
