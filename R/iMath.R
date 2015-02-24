@@ -80,3 +80,30 @@ if ( iMathOps$Operation[wh] == 'ReflectionMatrix'  )
   }
  stop("no matching call to iMath")
 }
+
+
+
+#' iBind
+#'
+#' bind two images along their edge
+#'
+#' @param img input object, an antsImage
+#' @param img2 second antsImage, same size as first
+#' @param along dimension to bind along
+#' @author BB Avants
+#' @examples
+#' fi<-antsImageRead( getANTsRData("r16") , 2 )
+#' mi<-antsImageRead( getANTsRData("r62") , 2 )
+#' bi<-iBind( fi, mi , 1 )
+#' multismoo<- fi %>% iBind( smoothImage(fi,2) ) %>% iBind( smoothImage(fi,4) )
+#'
+#' @export iBind
+iBind<-function( img1, img2, along=NA ) {
+  if ( is.na(along) ) along=img1@dimension
+  if ( along > img1@dimension | along < 1 ) along=img1@dimensions
+  if ( dim(img1)[along] != dim(img1)[along] )
+    stop("cant bind images along sides of different size")
+  imgbind<-as.antsImage( abind::abind(as.array(img1), as.array(img2),
+    along=along ) )
+  antsCopyImageInfo(img1,imgbind)
+}
