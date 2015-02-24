@@ -107,3 +107,33 @@ iBind<-function( img1, img2, along=NA ) {
     along=along ) )
   antsCopyImageInfo(img1,imgbind)
 }
+
+
+#' reflectImage
+#'
+#' reflects an image along its axis
+#'
+#' @param img input object, an antsImage
+#' @param axis which dimension to reflect across
+#' @param tx transformation type to estimate after reflection
+#' @author BB Avants
+#' @examples
+#' fi<-antsImageRead( getANTsRData("r16") , 2 )
+#' fir<-reflectImage( fi, 1, "Affine" )
+#'
+#' @export reflectImage
+reflectImage<-function( img1, axis=NA, tx=NA ) {
+  if ( is.na(axis) ) axis=img1@dimension
+  if ( axis > img1@dimension | axis < 1 ) axis=img1@dimensions
+  rflct<-iMath(img1,"ReflectionMatrix",axis)
+  if ( ! is.na(tx) )
+  {
+  rfi<-invisible( antsRegistration(img1,img1,typeofTransform = tx,
+    initialTransform = rflct )$warpedmovout )
+  return( rfi )
+  }
+  else
+  {
+  return( antsApplyTransforms( img1, img1, rflct  )  )
+  }
+}
