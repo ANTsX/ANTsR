@@ -20,3 +20,5 @@ Neg;Intensity;None;"iMath(i,op)";create image negative;0
 Normalize;Intensity;None;"iMath(i,op)";normalize intensity into 0 1 range;0
 TruncateImageIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
 Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+ReflectionMatrix;Transformation;axis;"iMath(i,op,0)";returns a reflection matrix itk transform in filename form;NA

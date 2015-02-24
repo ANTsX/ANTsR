@@ -30,6 +30,10 @@ op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
 op2<-iMath( mask , "Neg" )  # negate
 op3<-iMath( mask , "D" )  # distance transform
 ops<-iMath( mask , "GetOperations" )  # list all ops
+
+if ( usePkg("magrittr") ) { # string ops together
+  lapgd <- fi \%>\% iMath("Laplacian",1)  \%>\% iMath("GD",3)
+}
 }
 \author{
 BB Avants

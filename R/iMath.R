@@ -20,6 +20,10 @@
 #' op3<-iMath( mask , "D" )  # distance transform
 #' ops<-iMath( mask , "GetOperations" )  # list all ops
 #'
+#' if ( usePkg("magrittr") ) { # string ops together
+#'   lapgd <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
+#' }
+#'
 #' @export iMath
 iMath <- function( img, operation , param=NA, ... ) {
 #  call <- match.call() # see glm
@@ -42,18 +46,7 @@ iMath <- function( img, operation , param=NA, ... ) {
   return(NA)
   }
   wh<-which( iMathOps$Operation == operation )
-  if ( iMathOps$Operation[wh] == 'LabelStats' & is.antsImage(param)  )
-    {
-    dim<-img@dimension
-    tf<-tempfile(fileext = ".csv")
-    args<-list(dim,tf,operation,param,img)
-    catchout<-.Call("ImageMath",
-        .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-    df<-read.csv(tf)
-    return(df)
-    }
-  # might remove
-  if ( is.antsImage(img) & is.numeric(iMathOps$OutputDimensionalityChange[wh]) )
+  if ( is.antsImage(img) & !is.na(iMathOps$OutputDimensionalityChange[wh]) )
     {
     dim<-img@dimension
     outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
@@ -66,9 +59,24 @@ iMath <- function( img, operation , param=NA, ... ) {
       .int_antsProcessArguments(args), PACKAGE = "ANTsR")
     return(outimg)
     }
-  else
-    {
-    print("1st param should be an antsImage")
-    return(NA)
-    }
+if ( iMathOps$Operation[wh] == 'LabelStats' & is.antsImage(param)  )
+  {
+  dim<-img@dimension
+  tf<-tempfile(fileext = ".csv")
+  args<-list(dim,tf,operation,param,img)
+  catchout<-.Call("ImageMath",
+      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+  df<-read.csv(tf)
+  return(df)
+  }
+if ( iMathOps$Operation[wh] == 'ReflectionMatrix'  )
+  {
+  dim<-img@dimension
+  tf<-tempfile(fileext = ".mat")
+  args<-list(dim,tf,operation,img,param)
+  catchout<-.Call("ImageMath",
+      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+  return(tf)
+  }
+ stop("no matching call to iMath")
 }
