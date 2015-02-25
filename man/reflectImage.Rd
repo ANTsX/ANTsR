@@ -18,7 +18,7 @@ reflects an image along its axis
 }
 \examples{
 fi<-antsImageRead( getANTsRData("r16") , 2 )
-fir<-reflectImage( fi, 1, "Affine" )
+asym<-fi \%>\% reflectImage( 1, "Affine" ) \%>\%  - fi
 }
 \author{
 BB Avants

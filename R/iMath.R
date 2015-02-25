@@ -119,7 +119,7 @@ iBind<-function( img1, img2, along=NA ) {
 #' @author BB Avants
 #' @examples
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
-#' fir<-reflectImage( fi, 1, "Affine" )
+#' asym<-fi %>% reflectImage( 1, "Affine" ) %>%  - fi
 #'
 #' @export reflectImage
 reflectImage<-function( img1, axis=NA, tx=NA ) {
