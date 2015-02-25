@@ -138,3 +138,59 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
   return( antsApplyTransforms( img1, img1, rflct  )  )
   }
 }
+
+#iMath functionality with functional style (infix)
+`%o%` <- function( img, operationAndArgs ) {
+#  call <- match.call() # see glm
+  param<- NA
+  splittedOpArg <- strsplit(operationAndArgs, split = " ")
+  operation <- splittedOpArg[[1]][1]
+  #check if any parameter has been passed
+  if (length(splittedOpArg[[1]]) > 1)
+  {
+  param <- splittedOpArg[[1]][2:length(splittedOpArg[[1]])]
+  }
+  iMathOps <- NULL
+  data( "iMathOps", package = "ANTsR", envir = environment() )
+  if ( operation == "GetOperations" | operation == "GetOperationsFull" )
+  {
+  if ( operation == "GetOperationsFull" ) return(iMathOps)
+  return(iMathOps$Operation)
+  }
+  if ( ! ( operation  %in% iMathOps$Operation ) )
+    {
+    stop(paste("'operation'",operation," not recognized"))
+    }
+  if ( class( operation ) != 'character')
+  {
+  print(class(operation))
+  print("2nd param should be a character string defining the operation")
+  return(NA)
+  }
+  wh<-which( iMathOps$Operation == operation )
+  if ( is.antsImage(img) & is.numeric(iMathOps$OutputDimensionalityChange[wh]) )
+    {
+    dim<-img@dimension
+    outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
+    outimg<-new("antsImage", img@pixeltype, outdim)
+    
+    if ( class(param) != 'list' )
+      args<-list(dim,outimg,operation,img)
+    if (class(param) == 'list' )
+      #args<-list(dim,outimg,operation,img,param,...)
+      args<-list(dim,outimg,operation,img)
+      param <- splittedOpArg[[1]][2:length(splittedOpArg[[1]])]
+      for (n in 1:length(param)){
+       args <- c(args, param[n])
+        }
+    catchout<-.Call("ImageMath",
+      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
+    return(outimg)
+    
+    }
+  else
+    {
+    print("1st param should be an antsImage")
+    return(NA)
+    }
+}
