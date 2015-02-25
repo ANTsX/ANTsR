@@ -123,12 +123,13 @@ iBind<-function( img1, img2, along=NA ) {
 #'
 #' @export reflectImage
 reflectImage<-function( img1, axis=NA, tx=NA ) {
-  if ( is.na(axis) ) axis=img1@dimension
-  if ( axis > img1@dimension | axis < 1 ) axis=img1@dimensions
-  rflct<-iMath(img1,"ReflectionMatrix",axis)
+  if ( is.na(axis) ) axis=( img1@dimension - 1 )
+  if ( axis > img1@dimension | axis < 0 ) axis=(img1@dimension-1)
+  rflct<-iMath(img1,"ReflectionMatrix",axis-1)
   if ( ! is.na(tx) )
   {
   rfi<-invisible( antsRegistration(img1,img1,typeofTransform = tx,
+    outprefix = tempfile(),
     initialTransform = rflct )$warpedmovout )
   return( rfi )
   }
