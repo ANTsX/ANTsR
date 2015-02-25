@@ -87,7 +87,7 @@ if ( iMathOps$Operation[wh] == 'ReflectionMatrix'  )
 #'
 #' bind two images along their edge
 #'
-#' @param img input object, an antsImage
+#' @param img1 input object, an antsImage
 #' @param img2 second antsImage, same size as first
 #' @param along dimension to bind along
 #' @author BB Avants
@@ -113,7 +113,7 @@ iBind<-function( img1, img2, along=NA ) {
 #'
 #' reflects an image along its axis
 #'
-#' @param img input object, an antsImage
+#' @param img1 input object, an antsImage
 #' @param axis which dimension to reflect across
 #' @param tx transformation type to estimate after reflection
 #' @author BB Avants

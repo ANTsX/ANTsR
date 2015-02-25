@@ -7,11 +7,11 @@
 iBind(img1, img2, along = NA)
 }
 \arguments{
+\item{img1}{input object, an antsImage}
+
 \item{img2}{second antsImage, same size as first}
 
 \item{along}{dimension to bind along}
-
-\item{img}{input object, an antsImage}
 }
 \description{
 bind two images along their edge
