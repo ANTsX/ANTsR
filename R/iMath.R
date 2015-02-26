@@ -138,3 +138,9 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
   return( antsApplyTransforms( img1, img1, rflct  )  )
   }
 }
+#' @importFrom magrittr %>%
+#' @name %>%
+#' @description Chain operators together
+#' @export
+#' @usage lhs \%>\% rhs
+NULL
