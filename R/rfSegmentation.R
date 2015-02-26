@@ -41,7 +41,7 @@ rfSegmentation <- function(labelimg, featureimages,
   labels <- as.factor(labelimg[mask == 1])
   fmat <- t(imageListToMatrix(featureimages, mask))
   mydf <- data.frame(labels = labels, fmat)
-  myrf <- randomForest::randomForest(labels ~ ., data = mydf, ntree = ntrees, type = "classification",
+  myrf <- randomForest::randomForest(y=labels,x=fmat, ntree = ntrees, type = "classification",
     importance = TRUE, na.action = na.omit, do.trace = verbose)
   if (verbose)
     print(myrf)
