@@ -48,6 +48,6 @@ rfSegmentationPredict <- function(rfSegmentationModel, featureimages,
   fmat <- t(imageListToMatrix(featureimages, mask))
   mydf <- data.frame(fmat)
   segs <- antsImageClone(mask)
-  segs[mask == 1] <- predict(rfSegmentationModel, newdata = mydf)
+  segs[mask == 1] <- predict(rfSegmentationModel, newdata = fmat )
   return(segs)
 }
