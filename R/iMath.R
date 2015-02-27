@@ -148,6 +148,8 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
 #' @importFrom magrittr %>%
 #' @name %>%
 #' @description Chain operators together
+#' @param lhs input from left side
+#' @param rhs additional params
 #' @export
 #' @usage lhs \%>\% rhs
 NULL

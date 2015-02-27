@@ -6,6 +6,11 @@
 \usage{
 lhs \%>\% rhs
 }
+\arguments{
+\item{lhs}{input from left side}
+
+\item{rhs}{additional params}
+}
 \description{
 Chain operators together
 }
