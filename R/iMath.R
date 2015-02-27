@@ -138,6 +138,13 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
   return( antsApplyTransforms( img1, img1, rflct  )  )
   }
 }
+
+
+#' Pipe an object forward
+#'
+#' The \code{\%>>\%} operator pipes the object on the left-hand side to the
+#' right-hand side according to the syntax.
+#'
 #' @importFrom magrittr %>%
 #' @name %>%
 #' @description Chain operators together
