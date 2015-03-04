@@ -440,6 +440,8 @@ antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FA
 #' that neighborhood
 #' @param spatial.info a boolean indicating of voxel locations and neighborhood
 #' offsets should be returned along with pixel values.
+#' @param get.gradient a boolean indicating if a matrix of gradients (at the
+#' center voxel) should be returned in addition to the value matrix (WIP)
 #' @return
 #'
 #' if spatial.info is false: a matrix of pixel values where the number of rows
@@ -462,7 +464,7 @@ antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FA
 #'
 #' @export antsGetNeighborhoodMatrix
 antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates = FALSE,
-  boundary.condition = "NA", spatial.info = FALSE) {
+  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
 
   if (class(image)[1] != "antsImage") {
     print("Input must be of class 'antsImage'")
@@ -493,7 +495,7 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
   }
 
   return(.Call("antsImage_GetNeighborhoodMatrix", image, mask, radius, physical.coordinates,
-    boundary, spatial.info))
+    boundary, spatial.info, get.gradient ))
 
 }
 

@@ -5,7 +5,7 @@
 \title{antsGetNeighborhoodMatrix for the masked image}
 \usage{
 antsGetNeighborhoodMatrix(image, mask, radius, physical.coordinates = FALSE,
-  boundary.condition = "NA", spatial.info = FALSE)
+  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE)
 }
 \arguments{
 \item{image}{Image object of S4 class 'antsImage' to get values from.}
@@ -25,6 +25,9 @@ that neighborhood}
 
 \item{spatial.info}{a boolean indicating of voxel locations and neighborhood
 offsets should be returned along with pixel values.}
+
+\item{get.gradient}{a boolean indicating if a matrix of gradients (at the
+center voxel) should be returned in addition to the value matrix (WIP)}
 }
 \value{
 if spatial.info is false: a matrix of pixel values where the number of rows
