@@ -49,6 +49,13 @@ overlay option.  Useful for displaying statistical results overlaid on a
 background image.
 }
 \examples{
+img <- makeImage(c(4,4), rnorm(4*4))
+mask <- makeImage(c(4,4),
+   as.matrix(c(0,0,0,0,
+            0,1,1,0,
+            0,1,1,0,
+            0,0,0,0), nrow=4))
+plot(img, list(mask))
 \dontrun{
   mnit<-getANTsRData('mni')
   mnit<-antsImageRead(mnit,3)

@@ -26,6 +26,13 @@
 #' @author Avants BB
 #' @examples
 #'
+#' img <- makeImage(c(4,4), rnorm(4*4))
+#' mask <- makeImage(c(4,4), 
+#'    as.matrix(c(0,0,0,0,
+#'             0,1,1,0,
+#'             0,1,1,0,
+#'             0,0,0,0), nrow=4))
+#' plot(img, list(mask))
 #' \dontrun{
 #'   mnit<-getANTsRData('mni')
 #'   mnit<-antsImageRead(mnit,3)
@@ -323,7 +330,8 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals), add = TRUE)) )
+      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals, 
+                                                             bbox = bbox), add = TRUE)) )
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
