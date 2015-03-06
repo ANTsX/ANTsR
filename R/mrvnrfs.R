@@ -164,6 +164,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
       fm<-matrix( rep(NA, nent ), nrow=(nrow(testmat)*length(x)) )
+      rm( testmat )
       seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
       for ( i in 1:(length(x)) )
         {
