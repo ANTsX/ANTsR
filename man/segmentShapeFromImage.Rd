@@ -4,7 +4,8 @@
 \alias{segmentShapeFromImage}
 \title{convolution-based shape identification}
 \usage{
-segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun)
+segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun,
+  maskZeroes = TRUE)
 }
 \arguments{
 \item{img}{antsImage}
@@ -16,6 +17,8 @@ segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun)
 \item{rad}{max radius ( optional, not recommended )}
 
 \item{scfun}{function to apply to create feature image (defaults to cor)}
+
+\item{maskZeroes}{if TRUE (default), zeroes will not influence the result}
 }
 \value{
 feature image

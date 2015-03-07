@@ -2,7 +2,7 @@
 #'
 #' Get a binary mask image from the given image after thresholding.
 #'
-#' If \code{cleanup} is \code{TRUE}, the following steps are applied
+#' If \code{cleanup} is \code{>0}, the following steps are applied
 #' \enumerate{ \item Erosion with radius 2 voxels \item Retain largest
 #' component \item Dilation with radius 1 voxel \item Morphological closing }
 #'
@@ -15,12 +15,12 @@
 #' the mask.
 #' @param highThresh An inclusive upper threshold for voxels to be included in
 #' the mask.
-#' @param cleanup If \code{TRUE}, morphological operations will be applied to
+#' @param cleanup If \code{>0}, morphological operations will be applied to
 #' clean up the mask by eroding away small or weakly-connected areas, and
 #' closing holes.
 #' @return Object of type \code{antsImage} containing the mask image. The
 #' voxel intensities will be binarized, 1 for voxels in the mask and 0 outside.
-#' @author Shrinidhi KL, Cook PA
+#' @author Shrinidhi KL, Cook PA, Avants BB
 #' @keywords mask
 #' @examples
 #'
@@ -39,8 +39,8 @@ getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
       img <- antsImageClone(img, "float")
     }
   }
-  if ( missing( lowThresh ) )  lowThresh = mean(img)
-  if ( missing( highThresh ) ) highThresh = max( img )
+  if ( missing( lowThresh ) )  lowThresh = mean( img )
+  if ( missing( highThresh ) ) highThresh = max( img  )
   if ( ( !is.numeric(lowThresh) )  ||
        ( !is.numeric(highThresh) ) ||
           length(lowThresh) > 1    || length(highThresh) > 1 )
@@ -55,14 +55,21 @@ getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
     imageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
     imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
     imageMath(img@dimension, mask_img, "FillHoles", mask_img)
-    while (  min(mask_img) == max(mask_img) & cleanup > 0 )
+    while (  ( min(mask_img) == max(mask_img) ) & cleanup > 0 )
       {
       cleanup <- cleanup - 1
       mask_img <- thresholdImage( img, lowThresh, highThresh )
-      imageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
-      imageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
-      imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
-      imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+      if ( cleanup > 0 )
+        {
+        imageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
+        imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
+        imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+        }
+      if ( cleanup == 0 )
+        {
+        clustlab<-labelClusters( mask_img, 1 )
+        mask_img <- thresholdImage( clustlab, 1, 1 )
+        }
       }
   }
   return(mask_img)

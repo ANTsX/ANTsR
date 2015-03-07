@@ -16,7 +16,7 @@ the mask.}
 \item{highThresh}{An inclusive upper threshold for voxels to be included in
 the mask.}
 
-\item{cleanup}{If \code{TRUE}, morphological operations will be applied to
+\item{cleanup}{If \code{>0}, morphological operations will be applied to
 clean up the mask by eroding away small or weakly-connected areas, and
 closing holes.}
 }
@@ -28,7 +28,7 @@ voxel intensities will be binarized, 1 for voxels in the mask and 0 outside.
 Get a binary mask image from the given image after thresholding.
 }
 \details{
-If \code{cleanup} is \code{TRUE}, the following steps are applied
+If \code{cleanup} is \code{>0}, the following steps are applied
 \enumerate{ \item Erosion with radius 2 voxels \item Retain largest
 component \item Dilation with radius 1 voxel \item Morphological closing }
 
@@ -40,7 +40,7 @@ img<-antsImageRead( getANTsRData("r16") ,2)
 mask<-getMask( img )
 }
 \author{
-Shrinidhi KL, Cook PA
+Shrinidhi KL, Cook PA, Avants BB
 }
 \keyword{mask}
 

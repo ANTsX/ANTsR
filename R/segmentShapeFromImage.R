@@ -8,6 +8,7 @@
 #' @param mask with values 1 or 0
 #' @param rad max radius ( optional, not recommended )
 #' @param scfun function to apply to create feature image (defaults to cor)
+#' @param maskZeroes if TRUE (default), zeroes will not influence the result
 #' @return feature image
 #' @author Brian B. Avants
 #' @keywords shape template
@@ -33,7 +34,8 @@
 #' }
 #'
 #' @export segmentShapeFromImage
-segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun) {
+segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun,
+  maskZeroes=TRUE ) {
   if (nargs() == 0) {
     print(args(segmentShapeFromImage))
     return(1)
@@ -41,28 +43,29 @@ segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun) {
   dim <- img@dimension
   if (is.na(mask))
     mask <- getMask(img)
-  shapemask<-iMath(shape,"Normalize")
-  shapemask[ shapemask < 0.001 ]<-0
-  shapemask[ shapemask >= 0.001 ]<-1
+  shapemask<-getMask(shape)
   shape<-cropImage( shape, shapemask )
   shapemask<-cropImage( shapemask, shapemask )
   if (all(is.na(rad))) {
     rad <- round( (( dim( shape ) - 1 ) / 2) )
   }
-  eps<-1.e-12 # this is a weird bug
+  eps<-1.e-12 # this is an odd bug : round(dim(img)/2) gives wrong result
   temp<-iMath( as.antsImage(as.array(shape)) , 'PadImage', 1 )
   shapevec<-antsGetNeighborhood(  temp, round(dim(temp)/2+eps), rad )$values
   temp<-iMath( as.antsImage(as.array(shapemask)) , 'PadImage', 1 )
   shpmskvec<-antsGetNeighborhood( temp, round(dim(temp)/2+eps), rad )$values
-  selector <- ( shpmskvec > 0 )
-  shapevec<-shapevec[ selector ]
+  selector <- ( shpmskvec > eps )
   mat <- antsGetNeighborhoodMatrix(img, mask, rad, boundary.condition = "image")
-  mat <- antsrimpute(mat)
-  mat<-mat[selector,]
+  mat <- antsrimpute( mat )
+  if ( maskZeroes )
+    {
+    shapevec<-shapevec[ selector ]
+    mat<-mat[ selector, ]
+    }
   if ( ! missing( scfun ) )
     {
-    shapecor<-rep( 0.0 , ncol(mat) )
-    for ( kk in 1:ncol(mat) )
+    shapecor<-rep( 0.0 , ncol( mat ) )
+    for ( kk in 1:ncol( mat ) )
       {
       shapecor[kk] <- scfun( mat[,kk], shapevec )
       }
