@@ -27,7 +27,7 @@
 #' @examples
 #'
 #' img <- makeImage(c(4,4), rnorm(4*4))
-#' mask <- makeImage(c(4,4), 
+#' mask <- makeImage(c(4,4),
 #'    as.matrix(c(0,0,0,0,
 #'             0,1,1,0,
 #'             0,1,1,0,
@@ -210,8 +210,8 @@ plot.antsImage <- function(x, y,
     }
   }
   # pdf(paste(output,'.pdf',sep='')) onm<-paste(output,'.jpg',sep='')
-  bbox <- c(1, 1, c(1+antsGetSpacing(myantsimage)[-axis]*dim(myantsimage)[-axis]) *
-              c(wincols, winrows))
+  bbox <- c(1, 1, dim(myantsimage) ) #c(1+antsGetSpacing(myantsimage)[-axis]*dim(myantsimage)[-axis]) *
+#              c(wincols, winrows))
   mag <- quality
   pixperinch <- 96
   if (!is.na(outname)){
@@ -225,7 +225,7 @@ plot.antsImage <- function(x, y,
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
   img.plot <- suppressWarnings(pixmap::pixmapGrey(
-    bigslice, nrow = nrow(bigslice), ncol = ncol(bigslice), bbox=bbox))
+    bigslice, bbox=bbox ) )
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
@@ -330,7 +330,7 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals, 
+      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals,
                                                              bbox = bbox), add = TRUE)) )
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
