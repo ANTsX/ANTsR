@@ -13,8 +13,8 @@
 #' c(5,10,25) ) where 10x20 is the range and 3 is the increment,
 #' for multislice display
 #' @param window.img intensity windowing
-#' @param threshold character, we overlay values above/below this
-#' threshold : of form LOxHI
+#' @param threshold vector we overlay values above/below this
+#' threshold : of form c(LO,HI)
 #' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
 #' @param outname eg'figx.jpg' output name if you want to write the result to a
@@ -46,7 +46,7 @@
 #'   ofn<-paste(tempfile(),'.png',sep='')
 #'   # write directly to a file
 #'   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-#'    threshold = '0.25x1', axis=2,color=c('red','blue'), outname = ofn )
+#'    threshold = c(0.25,1), axis=2,color=c('red','blue'), outname = ofn )
 #' }
 #'
 #' @method plot antsImage
@@ -56,7 +56,7 @@ plot.antsImage <- function(x, y,
   axis = 2,
   slices,
   window.img = quantile(x[x!=0], c(0.05, 0.95)),
-  threshold = "0.5xInf",
+  threshold = c(0.5,Inf),
   quality = 4,
   outname = NA,
   alpha = 0.5,
@@ -164,7 +164,8 @@ plot.antsImage <- function(x, y,
     slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
     slices = round(seq(slices[1], slices[2], by=slices[3]))
   }
-  threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
+  if ( typeof(threshold) == "character" )
+    threshold <- c(as.numeric(unlist(strsplit(threshold, "x"))))
   if (max(slices) > dim(myantsimage)[axis]) {
     stop('Slices do not fit in image dimensions.')
   }
@@ -252,8 +253,6 @@ plot.antsImage <- function(x, y,
     }
     mncl <- min(labimg)
     mxcl <- max(labimg)
-    # print('threshold') print(threshold) print(paste('min/max of image', mncl,
-    # mxcl))
     temp <- labimg
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
     labimg <- temp
@@ -330,8 +329,10 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
-      invisible( suppressWarnings(plot(pixmap::pixmapIndexed(biglab, col = heatvals,
-                                                             bbox = bbox), add = TRUE)) )
+      invisible( suppressWarnings(
+        plot(
+          pixmap::pixmapIndexed(biglab,
+            col = heatvals, bbox = bbox), add = TRUE) ) )
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))

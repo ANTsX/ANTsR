@@ -21,21 +21,27 @@ segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun)
 feature image
 }
 \description{
-takes an image and a shape and concvoles the 2nd with the first to yield a
+takes an image and a shape and convolves the 2nd with the first to yield a
 feature image
 }
 \examples{
 set.seed(123)
 fi<-makeImage(c(20,20),rnorm(400,mean=1,sd=0.1))
-# fi<-antsImageRead( getANTsRData("r16") ,2)
 mask<-getMask(fi,0.8,Inf,0)
 segs<-kmeansSegmentation( fi ,3 , mask)$segmentation
 segs[ segs != 1 ]<-0
 shp<-labelClusters( segs,1)
 shp[ shp != 1 ]<-0
 fimg<-segmentShapeFromImage(fi,shp,mask)
+
 \dontrun{
-plot(fimg)
+fi<-antsImageRead( getANTsRData("r16") ,2)
+mask<-getMask(fi,0.8,Inf,0)
+segs<-kmeansSegmentation( fi , 10 , mask)$segmentation
+segs[ segs != 8 ]<-0
+shp<- segs \%>\% iMath("ME",1) \%>\% labelClusters( 2 )
+shp[ shp != 23 ]<-0
+plot( segmentShapeFromImage(fi,shp,mask) )
 }
 }
 \author{

@@ -6,8 +6,8 @@
 \usage{
 \method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
   "yellow"), axis = 2, slices, window.img = quantile(x[x != 0], c(0.05,
-  0.95)), threshold = "0.5xInf", quality = 4, outname = NA, alpha = 0.5,
-  newwindow = FALSE, ...)
+  0.95)), threshold = c(0.5, Inf), quality = 4, outname = NA,
+  alpha = 0.5, newwindow = FALSE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay}
@@ -25,8 +25,8 @@ for multislice display}
 
 \item{window.img}{intensity windowing}
 
-\item{threshold}{character, we overlay values above/below this
-threshold : of form LOxHI}
+\item{threshold}{vector we overlay values above/below this
+threshold : of form c(LO,HI)}
 
 \item{quality}{integer quality magnification factor 1 => large (e.g.
 10)}
@@ -69,7 +69,7 @@ plot(img, list(mask))
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-   threshold = '0.25x1', axis=2,color=c('red','blue'), outname = ofn )
+   threshold = c(0.25,1), axis=2,color=c('red','blue'), outname = ofn )
 }
 }
 \author{
