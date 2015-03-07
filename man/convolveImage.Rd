@@ -21,8 +21,10 @@ convolves images together
 }
 \examples{
 fi<-antsImageRead( getANTsRData("r16") ,2)
-convimg<-makeImage( c(5,5) , rnorm(25) )
+convimg<-makeImage( c(3,3) , c(1,0,1,0,-4,0,1,0,1) )
 convout<-convolveImage( fi, convimg )
+convimg2<-makeImage( c(3,3) , c(0,1,0,1,0,-1,0,-1,0) )
+convout2<-convolveImage( fi, convimg2 )
 }
 \author{
 Brian B. Avants
