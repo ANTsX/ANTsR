@@ -1,13 +1,13 @@
 #' convolution-based shape identification
 #'
-#' takes an image and a shape and convolves the 2nd with the first to yield a
-#' feature image
+#' takes an image and a shape and relates the 2nd with the first to yield a
+#' feature image - the function is user modifiable but defaults to cor
 #'
 #' @param img antsImage
 #' @param shape to define features
 #' @param mask with values 1 or 0
-#' @param rad max radius (optional)
-#' @param scfun function to apply to feature image (optional eg abs)
+#' @param rad max radius ( optional, not recommended )
+#' @param scfun function to apply to create feature image (defaults to cor)
 #' @return feature image
 #' @author Brian B. Avants
 #' @keywords shape template
@@ -47,18 +47,28 @@ segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun) {
   shape<-cropImage( shape, shapemask )
   shapemask<-cropImage( shapemask, shapemask )
   if (all(is.na(rad))) {
-    rad <- round( ( dim( shape ) - 1 ) / 2 )
+    rad <- round( (( dim( shape ) - 1 ) / 2) )
   }
-  mat <- antsGetNeighborhoodMatrix(shape, shapemask, rad, boundary.condition = "image")
-  mat <- antsrimpute(mat)
-  matsums <- colSums(mat)
-  shapevec <- rowMeans(mat[, rep(which.max(matsums), 2)])
-  shapevec <- shapevec/max(shapevec)
+  eps<-1.e-12 # this is a weird bug
+  temp<-iMath( as.antsImage(as.array(shape)) , 'PadImage', 1 )
+  shapevec<-antsGetNeighborhood(  temp, round(dim(temp)/2+eps), rad )$values
+  temp<-iMath( as.antsImage(as.array(shapemask)) , 'PadImage', 1 )
+  shpmskvec<-antsGetNeighborhood( temp, round(dim(temp)/2+eps), rad )$values
+  selector <- ( shpmskvec > 0 )
+  shapevec<-shapevec[ selector ]
   mat <- antsGetNeighborhoodMatrix(img, mask, rad, boundary.condition = "image")
   mat <- antsrimpute(mat)
-  shapecor <- cor(mat, shapevec)
-  if (!missing(scfun))
-    shapecor <- scfun(shapecor)
-  featurei <- makeImage(mask, shapecor)
+  mat<-mat[selector,]
+  if ( ! missing( scfun ) )
+    {
+    shapecor<-rep( 0.0 , ncol(mat) )
+    for ( kk in 1:ncol(mat) )
+      {
+      shapecor[kk] <- scfun( mat[,kk], shapevec )
+      }
+    } else shapecor<-cor( shapevec, mat )
+  # convolve(h2$xt,x2$xt,type="open") # could not get this to work
+  shapecor<-antsrimpute( as.numeric( shapecor ) )
+  featurei <- makeImage( mask, shapecor )
   return(featurei)
 }

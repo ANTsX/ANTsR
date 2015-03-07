@@ -4,7 +4,7 @@
 \alias{getMask}
 \title{Get Mask}
 \usage{
-getMask(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2)
+getMask(img, lowThresh, highThresh, cleanup = 2)
 }
 \arguments{
 \item{img}{Input image. Can be an \code{antsImage} of 2, 3 or 4 dimensions.

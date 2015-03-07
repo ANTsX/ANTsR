@@ -3,12 +3,12 @@
 #include<vector>
 #include<string>
 #include<Rcpp.h>
+#include "itkCentralDifferenceImageFunction.h"
+#include "itkContinuousIndex.h"
 #include "itkImage.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionIteratorWithIndex.h"
-#include "itkCentralDifferenceImageFunction.h"
-#include "itkContinuousIndex.h"
 #include "itkNeighborhoodIterator.h"
 #include "itkPermuteAxesImageFilter.h"
 

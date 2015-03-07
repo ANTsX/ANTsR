@@ -28,29 +28,25 @@
 #' mask<-getMask( img )
 #'
 #' @export getMask
-getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2) {
+getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
   # Binarizes a mask between specified thresholds Input can be a file name or an
   # antsImage, if it is not specified, a file chooser is launched. Works on 3D
   # images only If cleanup == TRUE, small and weakly-connected elements are removed
   # by erosion, and then holes are filled.  Returns: a binary antsImage
   cleanup <- as.numeric(cleanup)
-  if (is.character(img)) {
-    if (length(img) != 1) {
-      stop("'img' must be a single filename")
-    }
-    img <- antsImageRead(img, 3, "float")
-  } else if (class(img) == "antsImage") {
+  if (class(img) == "antsImage") {
     if (img@pixeltype != "float") {
       img <- antsImageClone(img, "float")
     }
-  } else {
-    img <- file.choose()
   }
-
-  if ((!is.numeric(lowThresh)) || (!is.numeric(highThresh)) || length(lowThresh) >
-    1 || length(highThresh) > 1) {
+  if ( missing( lowThresh ) )  lowThresh = mean(img)
+  if ( missing( highThresh ) ) highThresh = max( img )
+  if ( ( !is.numeric(lowThresh) )  ||
+       ( !is.numeric(highThresh) ) ||
+          length(lowThresh) > 1    || length(highThresh) > 1 )
+    {
     stop("'lowthresh' and 'highthresh' must be numeric scalars")
-  }
+    }
 
   mask_img<-thresholdImage( img, lowThresh, highThresh )
 
@@ -59,8 +55,15 @@ getMask <- function(img = NULL, lowThresh = 1, highThresh = Inf, cleanup = 2) {
     imageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
     imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
     imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+    while (  min(mask_img) == max(mask_img) & cleanup > 0 )
+      {
+      cleanup <- cleanup - 1
+      mask_img <- thresholdImage( img, lowThresh, highThresh )
+      imageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
+      imageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
+      imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
+      imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+      }
   }
-
   return(mask_img)
-
 }

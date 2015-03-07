@@ -13,16 +13,16 @@ segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun)
 
 \item{mask}{with values 1 or 0}
 
-\item{rad}{max radius (optional)}
+\item{rad}{max radius ( optional, not recommended )}
 
-\item{scfun}{function to apply to feature image (optional eg abs)}
+\item{scfun}{function to apply to create feature image (defaults to cor)}
 }
 \value{
 feature image
 }
 \description{
-takes an image and a shape and convolves the 2nd with the first to yield a
-feature image
+takes an image and a shape and relates the 2nd with the first to yield a
+feature image - the function is user modifiable but defaults to cor
 }
 \examples{
 set.seed(123)
