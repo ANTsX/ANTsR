@@ -110,7 +110,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     {
     rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
       importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
-      keep.forest = TRUE , na.action = na.omit )
+      keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
       # need the forest for prediction
     return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
     }
