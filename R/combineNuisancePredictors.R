@@ -22,7 +22,7 @@
 #' # moco <- antsMotionCalculation(getANTsRData("pcasl"))
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
-#' noise <- getASLNoisePredictors(aslmat, tc)
+#' noise <- getASLNoisePredictors(aslmat, tc, 0.5 )
 #' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 #' @export combineNuisancePredictors
 combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 4,
