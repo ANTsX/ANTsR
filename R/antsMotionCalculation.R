@@ -29,7 +29,8 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
   file.out <- paste(tmpdir, "out.csv", sep = "")
   write.csv(moco$moco_params, file.mocoparam, row.names = F)
   if (is.na(mask)) {
-    mask <- getMask(moco$moco_avg_img, 500, Inf, cleanup = T)
+    mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
+      Inf, cleanup = 2)
   }
   antsImageWrite(mask, file.mask)
   .antsMotionCorrStats(list(x = file.mask, d = img, o = file.out, f = framewise,
