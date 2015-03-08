@@ -33,23 +33,24 @@ save.ANTsR <- function(filename="./ANTsRsession", objects=NA, ...){
       ANTsRImageData[ii, "dims"] <- (eval(as.name(ANTsRimgnames[ii])))@dimension
     }
   }
-  
-  save(list=c(objects[!myimgs], "ANTsRImageData"), file=rdatfile, ...)
+  write.csv(ANTsRImageData, file.path(filename, 'ANTsRImageData.csv'), 
+    row.names=FALSE) 
+  save(list=objects[!myimgs], file=rdatfile, ...)
 }
 
-#' @usage load.ANTsR(filename)
+#' @usage load.ANTsR(filename="./ANTsRsession")
 #' @describeIn save.ANTsR Load saved ANTsR session.
-load.ANTsR <- function(filename){
+load.ANTsR <- function(filename="./ANTsRsession"){
   load(file.path(filename, ".RData"), envir=globalenv())
   #need images accessible within local function environment too
   load(file.path(filename, ".RData"))
+  ANTsRImageData <- read.csv(file.path(filename, 'ANTsRImageData.csv'))
   for(ii in 1:nrow(ANTsRImageData)){
     imgname <- ANTsRImageData$names[ii]  
     assign(as.character(ANTsRImageData$names[ii]),  antsImageRead(
       file.path(filename, paste(as.character(ANTsRImageData$names[ii], 
         ".nii.gz", sep=""))), 
       ANTsRImageData$dims[ii], 
-      ANTsRImageData$pixeltypes[ii]), envir=.GlobalEnv) 
+      as.character(ANTsRImageData$pixeltypes[ii])), envir=.GlobalEnv) 
   }
-  rm(ANTsRImageData, envir=.GlobalEnv)
 }

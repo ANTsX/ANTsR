@@ -7,7 +7,7 @@
 \usage{
 save.ANTsR(filename="./ANTsRsession", objects=NA, ...)
 
-load.ANTsR(filename)
+load.ANTsR(filename="./ANTsRsession")
 }
 \arguments{
 \item{filename}{Prefix for folder to store data.}
