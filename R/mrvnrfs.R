@@ -78,8 +78,6 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       testmat<-t(antsGetNeighborhoodMatrix( submask, submask,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
-      print("feat count")
-      print(paste(nfeats,nrow(testmat),ncol(testmat),length(x)))
       nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)*1.0
       fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
       seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
