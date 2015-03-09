@@ -61,6 +61,7 @@ plot.antsImage <- function(x, y,
   outname = NA,
   alpha = 0.5,
   newwindow = FALSE,
+  checkreg = FALSE,
   ... ) {
   myantsimage<-x
   if(missing(slices)){
@@ -333,6 +334,13 @@ plot.antsImage <- function(x, y,
         plot(
           pixmap::pixmapIndexed(biglab,
             col = heatvals, bbox = bbox), add = TRUE) ) )
+  }
+  if (checkreg ) {
+    if (length(overlay) > 1){
+    stop('Only one overlay is accepted for checking registration.')
+    }
+    edgeImage <- iMath(x, Canny)
+    plot.antsImage(x, c(edgeImage))
   }
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
