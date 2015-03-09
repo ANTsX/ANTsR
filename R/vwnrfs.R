@@ -53,7 +53,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     stop("vwnrfs: dimensionality does not match")
   # first thing - find unique labels
   ulabs<-sort(unique(c(as.numeric(labelmask))))
-#  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
+  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
   # second thing - create samples for each unique label
   randmask<-antsImageClone( labelmask )*0
   for ( ulab in ulabs )
@@ -77,21 +77,21 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   for ( i in 1:(length(y)) )
     {
     nxt<-seqby[ i + 1 ]-1
-#    tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
     if ( yisimg )
-      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
-#      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
-#        y[[i]], randmask, rep(0,idim), spatial.info=F,
-#        boundary.condition='image' ) )
+      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
+        y[[i]], randmask, rep(0,idim), spatial.info=F,
+        boundary.condition='image' ) )
     else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
     }
+  tv[ tv == 0 ] <- min( ulabs ) # BUG FIXME
   if ( asFactors ) tv<-factor( tv )
-  # 3.2 next define the feature matrix
-  testmat<-t(antsGetNeighborhoodMatrix( x[[1]][[1]], randmask,
-    rad, spatial.info=F, boundary.condition='image' ))
-  hdsz<-ncol(testmat) # neighborhood size
   nfeats<-length(x[[1]])
-  fm<-matrix( rep(NA, length(tv)*nfeats*hdsz ), nrow=length(tv)  )
+  testmat<-antsGetNeighborhoodMatrix( image=randmask, mask=randmask,
+    radius=rad, spatial.info=F, boundary.condition='image' )
+  testmat<-t( testmat )
+  hdsz<-nrow(testmat) # neighborhood size
+  nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)
+  fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
   for ( i in 1:(length(y)) )
     {
     m1<-t(antsGetNeighborhoodMatrix( x[[i]][[1]], randmask,

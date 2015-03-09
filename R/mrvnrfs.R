@@ -70,7 +70,9 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         {
         for ( kk in 1:length(xsub) )
           {
-          temp<-lappend(  unlist( xsub[[kk]] ) ,  unlist(newprobs[[kk]])  )
+          p1<-unlist( xsub[[kk]] )
+          p2<-unlist(newprobs[[kk]])
+          temp<-lappend(  p1 ,  p2  )
           xsub[[kk]]<-temp
           }
         }
@@ -78,10 +80,11 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       testmat<-t(antsGetNeighborhoodMatrix( submask, submask,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
-      nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)*1.0
-      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
-      seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
-      for ( i in 1:(length(x)) )
+      nent<-nfeats*ncol(testmat)*nrow(testmat)*length(xsub)*1.0
+      fm<-matrix( nrow=(nrow(testmat)*length(xsub)) ,
+        ncol=ncol(testmat)*nfeats  )
+      seqby<-seq.int( 1, hdsz*length(xsub)+1, by=hdsz )
+      for ( i in 1:(length(xsub)) )
         {
         xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
         m1<-t(antsGetNeighborhoodMatrix( xsub[[i]][[1]], submask,
@@ -100,15 +103,14 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         }
 #    return(list(ysub=ysub,xsub=xsub,submask=submask))
     sol<-vwnrfs( ysub, xsub, submask, rad, nsamples, ntrees, asFactors )
-#    print("runrfdone")
     if ( asFactors )
     {
-    probs<-t( predict(sol$rfm,newdata=fm,type='prob') )
+    probsrf<-t( predict(sol$rfm,newdata=fm,type='prob') )
     newprobs<-list()
-    for ( i in 1:(length(x)) )
+    for ( i in 1:(length(xsub)) )
       {
       nxt<-seqby[ i + 1 ]-1
-      probsx<-matrixToImages(probs[,seqby[i]:nxt],  submask )
+      probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submask )
       for ( temp in 1:length(probsx) )
         probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
           useVoxels=1, 0 )
@@ -120,7 +122,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     rflist[[rfct]]<-sol$rfm
     rfct<-rfct+1
     } # mr loop
-    return( list(rflist=rflist, probs=newprobs ) )
+    return( list(rflist=rflist, probs=newprobs, randmask=sol$randmask ) )
 }
 
 
