@@ -25,7 +25,9 @@ if [[ ! -s antb/Makefile  ]] ; then
     git clone $itkgit itks
   fi
   cd itks
-  git checkout master;  git pull;  git checkout $itktag
+  if [ -d .git ]; then
+    git checkout master;  git pull;  git checkout $itktag
+  fi
   cd ../itkb
   # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   compflags=" -fPIC "
@@ -54,7 +56,9 @@ if [[ ! -s antb/Makefile  ]] ; then
     git clone $antsgit ants
   fi
   cd ants
-  git checkout master;  git pull;  git checkout $antstag
+  if [ -d .git ]; then
+    git checkout master;  git pull;  git checkout $antstag
+  fi
   cd ../antb
   cmake -DITK_DIR:PATH=../itkb/ \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
