@@ -25,7 +25,7 @@ if [[ ! -s antb/Makefile  ]] ; then
     git clone $itkgit itks
   fi
   cd itks
-  if [ -d .git ]; then
+  if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $itktag
   fi
   cd ../itkb
@@ -56,7 +56,7 @@ if [[ ! -s antb/Makefile  ]] ; then
     git clone $antsgit ants
   fi
   cd ants
-  if [ -d .git ]; then
+  if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $antstag
   fi
   cd ../antb
