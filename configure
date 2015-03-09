@@ -15,9 +15,9 @@ if [[ $TRAVIS -eq true ]] ; then
   JTHREADS=2
 fi
 cd ./src
-antstag=06039ab125e21fca0f2ae8c1b4e473db9a58bc69
+antstag=d44425c0cb81a37a861bc58aa17e8d17bdce38b0
 antsgit=https://github.com/stnava/ANTs.git
-itktag=92f40d20f71e139f5ab45ffb3f89fc9281bdcb7c
+itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
 itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 if [[ ! -s antb/Makefile  ]] ; then
   mkdir ants itks antb itkb
