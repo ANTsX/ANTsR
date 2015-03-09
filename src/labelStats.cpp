@@ -22,9 +22,6 @@ Rcpp::DataFrame labelStatsHelper(
  
   long nlabs = labelStatisticsImageFilter->GetNumberOfLabels();
   
-  std::cout << "nlabs " << nlabs << std::endl; 
-
-
   Rcpp::NumericVector labelvals =
     Rcpp::NumericVector(nlabs, Rcpp::NumericVector::get_na()); 
   Rcpp::NumericVector means = Rcpp::NumericVector(nlabs, Rcpp::NumericVector::get_na()); 
@@ -50,7 +47,6 @@ Rcpp::DataFrame labelStatsHelper(
          labelIterator != labelStatisticsImageFilter->GetValidLabelValues().end();
          ++labelIterator)
   {
-    std::cout << "on label " << ii << std::endl; 
     if ( labelStatisticsImageFilter->HasLabel(*labelIterator) )
     {
       int labelValue = *labelIterator;
