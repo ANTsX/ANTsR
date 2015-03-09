@@ -78,8 +78,10 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       testmat<-t(antsGetNeighborhoodMatrix( submask, submask,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
-      nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
-      fm<-matrix( rep(NA, nent ), nrow=(nrow(testmat)*length(x)) )
+      print("feat count")
+      print(paste(nfeats,nrow(testmat),ncol(testmat),length(x)))
+      nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)*1.0
+      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
       seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
       for ( i in 1:(length(x)) )
         {
@@ -163,7 +165,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
-      fm<-matrix( rep(NA, nent ), nrow=(nrow(testmat)*length(x)) )
+      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
       rm( testmat )
       seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
       for ( i in 1:(length(x)) )
