@@ -21,11 +21,11 @@ itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
 itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 if [[ ! -s antb/Makefile  ]] ; then
   mkdir ants itks antb itkb
-  if [[ ! -s itks ]] ; then
+  if [[ ! -s itks/CMakeLists.txt ]] ; then
     git clone $itkgit itks
   fi
   cd itks
-  if [ -d .git ]; then
+  if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $itktag
   fi
   cd ../itkb
@@ -52,11 +52,11 @@ if [[ ! -s antb/Makefile  ]] ; then
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
   make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
-  if [[ ! -s ants ]] ; then
+  if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsgit ants
   fi
   cd ants
-  if [ -d .git ]; then
+  if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $antstag
   fi
   cd ../antb
