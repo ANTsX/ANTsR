@@ -5,9 +5,10 @@
 \alias{save.ANTsR}
 \title{save.ANTsR}
 \usage{
-save.ANTsR(filename="./ANTsRsession", objects=NA, ...)
+save.ANTsR(filename="./.ANTsRsession", objects=NA,
+  env=as.environment(1), ...)
 
-load.ANTsR(filename="./ANTsRsession")
+load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
 }
 \arguments{
 \item{filename}{Prefix for folder to store data.}
@@ -19,15 +20,11 @@ load.ANTsR(filename="./ANTsRsession")
 \description{
 Save and load ANTsR sessions.
 }
-\section{Functions}{
-\itemize{
-\item \code{load.ANTsR}: Load saved ANTsR session.
-}}
 \examples{
 a <- 1
 b <- c(2,3,4)
 img <- antsImageRead(getANTsRData('r16'), 2)
 save.ANTsR(objects=c('b', 'img'))
-load.ANTsR("./ANTsRsession")
+load.ANTsR("./.ANTsRsession")
 }
 
