@@ -34,7 +34,7 @@
 #'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
 #'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
 #'   limg<-antsImageClone(mask)
-#'   limg[ 3:6, 3:6 ]<-(i %% 2)  # the label image is constant
+#'   limg[ 3:6, 3:6 ]<-(i %% 2)+1  # the label image is constant
 #'   ilist[[i]]<-list(img,imgb)  # two features
 #'   lablist[[i]]<-limg
 #' }
