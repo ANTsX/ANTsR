@@ -31,6 +31,5 @@ convolveImage <- function( image, kernelImage, crop=TRUE ) {
     kernelImage[ kernelImageMask == 0 ]<-
       mean( kernelImage[ kernelImageMask == 1 ] )
     }
-  .Call("convolveImage",
-    image, kernelImage, PACKAGE = "ANTsR")
+  .Call("convolveImage", image, kernelImage, PACKAGE = "ANTsR")
 }

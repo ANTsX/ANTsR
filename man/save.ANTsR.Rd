@@ -15,6 +15,8 @@ load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
 
 \item{objects}{Vector of character names of objects to store.  Can be antsImages.}
 
+\item{env}{Environment to save from or load to.}
+
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{
