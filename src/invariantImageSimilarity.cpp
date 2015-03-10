@@ -509,6 +509,7 @@ SEXP invariantSimilarityHelper(
     }
 }
 
+// [[Rcpp::export]]
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
   SEXP whichMetric, SEXP r_scale, SEXP r_doref, SEXP txfn )

@@ -15,10 +15,10 @@ if [[ $TRAVIS -eq true ]] ; then
   JTHREADS=2
 fi
 cd ./src
-antstag=d44425c0cb81a37a861bc58aa17e8d17bdce38b0
+itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 antsgit=https://github.com/stnava/ANTs.git
 itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
-itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
+antstag=01b4ae6a1a55594ea27aac922184d325104c8901
 if [[ ! -s antb/Makefile  ]] ; then
   mkdir ants itks antb itkb
   if [[ ! -s itks/CMakeLists.txt ]] ; then
