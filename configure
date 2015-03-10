@@ -49,9 +49,11 @@ if [[ ! -s antb/Makefile  ]] ; then
     -DModule_MGHIO:BOOL=ON \
     -DModule_ITKReview:BOOL=ON \
     -DModule_ITKVtkGlue:BOOL=OFF  ../itks/
-  # dont call make here ... this should be done elsewere
-#  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
-#  make install | grep -v "Installing" | grep -v "Looking for"
+  # dont call make here ... this should be done elsewere ... but do so
+  # temporarily just to get the includes going ... maybe these should be in
+  # ANTsR/inst/include ?
+  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+  make install | grep -v "Installing" | grep -v "Looking for"
   cd ../
   if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsgit ants
@@ -72,6 +74,4 @@ if [[ ! -s antb/Makefile  ]] ; then
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
     # dont call make here ... this should be done elsewere
   # make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
-  cd ..
-  cp antsr.h ants/Examples/include/
 fi
