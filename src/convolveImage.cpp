@@ -1,12 +1,12 @@
 #include <algorithm>
 #include <stdio.h>
-#include <Rcpp.h>
 #include "itkCastImageFilter.h"
 #include "itkImage.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkConvolutionImageFilter.h"
 #include <string>
 #include <vector>
+#include <Rcpp.h>
 
 
 template< class ImageType >
@@ -29,7 +29,7 @@ typename ImageType::Pointer convolveImageHelper(
 }
 
 // [[myRcpp::export]]
-RcppExport SEXP convolveImage( SEXP r_in_image1 ,
+RcppExport SEXP itkConvolveImage( SEXP r_in_image1 ,
   SEXP r_in_image2  )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL  )
