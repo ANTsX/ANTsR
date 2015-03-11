@@ -15,7 +15,7 @@ if [[ $TRAVIS -eq true ]] ; then
   JTHREADS=2
 fi
 cd ./src
-antstag=d44425c0cb81a37a861bc58aa17e8d17bdce38b0
+antstag=285a4cccc818cf36c2027850320516e3e2f39f87
 antsgit=https://github.com/stnava/ANTs.git
 itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
 itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
