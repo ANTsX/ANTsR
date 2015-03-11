@@ -3,15 +3,14 @@
 #include<vector>
 #include<string>
 #include<Rcpp.h>
-#include "itkCentralDifferenceImageFunction.h"
-#include "itkContinuousIndex.h"
 #include "itkImage.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkNeighborhoodIterator.h"
 #include "itkPermuteAxesImageFilter.h"
-
+#include "itkCentralDifferenceImageFunction.h"
+#include "itkContinuousIndex.h"
 #include "vnl/vnl_matrix.h"
 #include "vnl/vnl_vector.h"
 

@@ -28,7 +28,7 @@ typename ImageType::Pointer convolveImageHelper(
   return NULL;
 }
 
-
+// [[myRcpp::export]]
 RcppExport SEXP convolveImage( SEXP r_in_image1 ,
   SEXP r_in_image2  )
 {
