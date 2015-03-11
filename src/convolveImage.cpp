@@ -29,7 +29,7 @@ typename ImageType::Pointer convolveImageHelper(
 }
 
 // [[myRcpp::export]]
-RcppExport SEXP itkConvolveImage( SEXP r_in_image1 ,
+RcppExport SEXP itkConvolveImageK( SEXP r_in_image1 ,
   SEXP r_in_image2  )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL  )
