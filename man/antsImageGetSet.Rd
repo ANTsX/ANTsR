@@ -23,16 +23,16 @@ antsGetDirection(x)
 antsSetDirection(x, direction)
 }
 \arguments{
-\item{x}{Image to access}
+\item{x}{antsImage to access, of dimensionality \code{d}.}
 
-\item{spacing}{Desired spacing as vector of size dim(x)}
+\item{spacing}{numeric vector of length \code{d}.}
 
-\item{origin}{Desired origin as vector of size dim(x)}
+\item{origin}{numeric vector of length \code{d}.}
 
-\item{direction}{Desired direction as vector of size dim(x)}
+\item{direction}{matrix of size \code{d * d}.}
 }
 \value{
-For \code{get} methods, vector of size \code{dim(x)}.
+For \code{get} methods, vector of length \code{d} (origin, spacing) or matrix of size \code{d * d} (direction).
 For \code{set} methods, 0 to indicate success.
 }
 \description{
