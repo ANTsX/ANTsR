@@ -24,7 +24,7 @@ C++ pointers.
 \examples{
 img <- antsImageRead(getANTsRData("r16"), 2)
 img2 <- antsImageClone(img)
-img.int <- antsImageCone(img , "unsigned int")
+img.int <- antsImageClone(img , "unsigned int")
 }
 \author{
 Shrinidhi KL
