@@ -1,18 +1,18 @@
 #' Check for physical space consistency
 #'
-#' Check if two 'antsImage' objects occupy the same physical space
+#' Check if two \code{antsImage} objects occupy the same physical space
 #'
 #'
-#' @param img1 Image object of S4 class 'antsImage'.
-#' @param img2 Image object of S4 class 'antsImage'.
+#' @param img1 Image object of S4 class \code{antsImage}.
+#' @param img2 Image object of S4 class \code{antsImage}.
 #' @param coordinate.tolerance floating point error tolerance in origin
 #' @param direction.tolerance floating point error tolerance in direction matrix
 #' @return Boolean indicating consistency of physical space
 #' @examples
 #'
-#' img1 <- makeImage(c(10,10),rnorm(100))
-#' img2 <- makeImage(c(10,10),rnorm(100))
-#' check <- antsImagePhysicalSpaceConsistency(img1,img2)
+#' img1 <- makeImage(c(10,10), rnorm(100))
+#' img2 <- makeImage(c(10,10), rnorm(100))
+#' check <- antsImagePhysicalSpaceConsistency(img1, img2)
 #'
 #'
 #' @export antsCopyImageInfo

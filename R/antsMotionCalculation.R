@@ -1,5 +1,5 @@
 #' @name antsMotionCalculation
-#' @title Correct ASL data for motion.
+#' @title Correct 4D time-series data for motion.
 #' @usage antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
 #' @param img antsImage, usually 4D.
 #' @param mask mask for image (3D).  If not provided, estimated from data.
@@ -18,7 +18,8 @@
 #' @author Benjamin M. Kandel
 #' @examples
 #' set.seed(120)
-#' simimg<-makeImage( rep(5,4), rnorm(5^4))
+#' simimg<-makeImage(rep(5,4), rnorm(5^4))
+#' # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
