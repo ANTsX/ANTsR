@@ -28,7 +28,6 @@ try
       Rcpp::S4 matrix_r( std::string( "antsMatrix" ) ) ;
       matrix_r.slot( "elementtype" ) = std::string( "double" ) ;
       matrix_r.slot( "pointer" ) = xptr ;
-      Rcpp::Rcout << "Empty matrix created. ElementType: 'double'" << std::endl ;
       return matrix_r ;
     }
   if( elementtype == "float" )
@@ -42,7 +41,6 @@ try
       Rcpp::S4 matrix_r( std::string( "antsMatrix" ) ) ;
       matrix_r.slot( "elementtype" ) = std::string( "float" ) ;
       matrix_r.slot( "pointer" ) = xptr ;
-      Rcpp::Rcout << "Empty matrix created. ElementType: 'float'" << std::endl ;
       return matrix_r ;
     }
   if( elementtype == "unsigned int" )
@@ -56,7 +54,6 @@ try
       Rcpp::S4 matrix_r( std::string( "antsMatrix" ) ) ;
       matrix_r.slot( "elementtype" ) = std::string( "unsigned int" ) ;
       matrix_r.slot( "pointer" ) = xptr ;
-      Rcpp::Rcout << "Empty matrix created. ElementType: 'unsigned int'" << std::endl ;
       return matrix_r ;
     }
   if( elementtype == "unsigned char" )
@@ -70,7 +67,6 @@ try
       Rcpp::S4 matrix_r( std::string( "antsMatrix" ) ) ;
       matrix_r.slot( "elementtype" ) = std::string( "unsigned char" ) ;
       matrix_r.slot( "pointer" ) = xptr ;
-      Rcpp::Rcout << "Empty matrix created. ElementType: 'unsigned char'" << std::endl ;
       return matrix_r ;
     }
   else

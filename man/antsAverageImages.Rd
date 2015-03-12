@@ -2,21 +2,22 @@
 % Please edit documentation in R/antsAverageImages.R
 \name{antsAverageImages}
 \alias{antsAverageImages}
-\title{antsAverageImages}
+\title{averages an image list with or without intensity normalization}
 \usage{
-antsAverageImages(imageList, reference, normalize = FALSE)
+antsAverageImages(imageList, normalize = FALSE)
 }
 \arguments{
 \item{imageList}{must be an antsImage list}
 
-\item{reference}{must be an antsImage of the same size as those in the list}
+\item{normalize}{boolean determines if image is divided by mean before
+averaging}
 
-\item{normalize}{true or false}
+\item{reference}{must be an antsImage of the same size as those in the list}
 }
 \description{
 calculate the mean of a list of antsImages imageList: can contain anything that be cast via as.array()
 }
 \author{
-Avants BB
+Avants BB, Pustina D
 }
 
