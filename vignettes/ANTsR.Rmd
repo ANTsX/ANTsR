@@ -309,7 +309,7 @@ and the number of non-zero voxels in the mask. The `boundary.condition` says how
 
 Other useful tools in ANTs*R* include `iMath`, `thresholdImage`,
 `quantifyCBF`,
-`antsPreprocessfMRI`,
+`preprocessfMRI`,
 `aslPerfusion`,
 `computeDVARS`,
 `getROIValues`,
@@ -354,7 +354,7 @@ A good visualization alternative outside of ANTs*R* is [antsSurf](https://github
 
 Good approaches exist in ANTs*R* for preprocessing BOLD data.
 These yield both motion matrices and relevant summary
-measurements such as FD and DVARS.  See `?antsPreprocessfMRI`
+measurements such as FD and DVARS.  See `?preprocessfMRI`
 for a simplified utility function.  This function could be
 used on each run of an experiment and the results stored
 in organized fashion for later use.
@@ -370,7 +370,7 @@ motionCorrectionResults <- antsMotionCalculation( boldImage,
 ```
 A `moreaccurate` flag should be set to `1` or `2` for usable (not test) results.
 FD and DVARS are returned which may be used to summarize motion.  One might
-also get this data from `antsPreprocessfMRI` which also provides denoising
+also get this data from `preprocessfMRI` which also provides denoising
 options based on data-driven methods including frequency filtering.
 
 For more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
