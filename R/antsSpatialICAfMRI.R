@@ -1,7 +1,7 @@
 #' Perform spatial ICA on fMRI bold data.
 #'
 #' Perform spatial ICA on group or individual fMRI data.  Preprocessing should
-#' be performed prior to calling this function (cf antsPreprocessfMRI.R).
+#' be performed prior to calling this function (cf preprocessfMRI.R).
 #'
 #'
 #' @param boldImages a list of 4-D ANTs image fMRI data.
@@ -40,7 +40,7 @@
 #' cleanBoldImages <- list()
 #' for( i in 1:length( boldImages[[1]] ) )
 #'   {
-#'   fmri <- antsPreprocessfMRI( boldImages[[i]] )
+#'   fmri <- preprocessfMRI( boldImages[[i]] )
 #'   if( i == 1 )
 #'     {
 #'     maskImage <- fmri$maskImage
