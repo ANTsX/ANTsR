@@ -7,9 +7,9 @@
 antsCopyImageInfo(reference, target)
 }
 \arguments{
-\item{reference}{image object of S4 class 'antsImage' to get values from.}
+\item{reference}{image object of S4 class \code{antsImage} to get values from.}
 
-\item{target}{image object of S4 class 'antsImage' to copy values to.}
+\item{target}{image object of S4 class \code{antsImage} to copy values to.}
 }
 \value{
 Target image with reference header information.

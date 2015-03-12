@@ -3,8 +3,8 @@
 #' Copy origin, direction, and spacing from one \code{antsImage} to another
 #'
 #'
-#' @param reference image object of S4 class 'antsImage' to get values from.
-#' @param target image object of S4 class 'antsImage' to copy values to.
+#' @param reference image object of S4 class \code{antsImage} to get values from.
+#' @param target image object of S4 class \code{antsImage} to copy values to.
 #' @return Target image with reference header information. 
 #' @examples
 #'
