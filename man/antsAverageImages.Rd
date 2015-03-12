@@ -11,8 +11,6 @@ antsAverageImages(imageList, normalize = FALSE)
 
 \item{normalize}{boolean determines if image is divided by mean before
 averaging}
-
-\item{reference}{must be an antsImage of the same size as those in the list}
 }
 \description{
 calculate the mean of a list of antsImages imageList: can contain anything that be cast via as.array()

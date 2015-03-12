@@ -91,7 +91,7 @@ on the multivariate distribution of the parameters.
     temp[ aslmask == 1 ] <- smoothcoeffmat[i,]
 #   temp<-iMath(temp,'PeronaMalik',150,10)
     temp<-smoothImage(temp,1.5)
-    nmatimgs[[i]]<-antsGetNeighborhoodMatrix(temp,aslmask,
+    nmatimgs[[i]]<-getNeighborhoodInMask(temp,aslmask,
       rep(2,3), boundary.condition = 'mean')
     smoothcoeffmat[i,]<-temp[ aslmask==1 ]
     }
