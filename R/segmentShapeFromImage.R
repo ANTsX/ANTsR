@@ -51,11 +51,11 @@ segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun,
   }
   eps<-1.e-12 # this is an odd bug : round(dim(img)/2) gives wrong result
   temp<-iMath( as.antsImage(as.array(shape)) , 'PadImage', 1 )
-  shapevec<-antsGetNeighborhood(  temp, round(dim(temp)/2+eps), rad )$values
+  shapevec<-getNeighborhoodAtVoxel(  temp, round(dim(temp)/2+eps), rad )$values
   temp<-iMath( as.antsImage(as.array(shapemask)) , 'PadImage', 1 )
-  shpmskvec<-antsGetNeighborhood( temp, round(dim(temp)/2+eps), rad )$values
+  shpmskvec<-getNeighborhoodAtVoxel( temp, round(dim(temp)/2+eps), rad )$values
   selector <- ( shpmskvec > eps )
-  mat <- antsGetNeighborhoodMatrix(img, mask, rad, boundary.condition = "image")
+  mat <- getNeighborhoodInMask(img, mask, rad, boundary.condition = "image")
   mat <- antsrimpute( mat )
   if ( maskZeroes )
     {

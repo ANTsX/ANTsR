@@ -66,7 +66,7 @@ spatialbayesianlm <- function(mylm, ymat, mask, smth = 1, priorWeight = 1, nhood
     temp <- antsImageClone(mask)
     temp[mask == 1] <- smoothcoeffmat[i, ]
     temp<-smoothImage(temp, smth)
-    nmatimgs[[i]] <- antsGetNeighborhoodMatrix(temp, mask, nhood, boundary.condition = "mean")
+    nmatimgs[[i]] <- getNeighborhoodInMask(temp, mask, nhood, boundary.condition = "mean")
     smoothcoeffmat[i, ] <- temp[mask == 1]
   }
   covmat <- cov(t(smoothcoeffmat))

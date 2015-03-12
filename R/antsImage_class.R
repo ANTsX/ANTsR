@@ -397,48 +397,53 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
 
 
 
-
-#' antsGetNeighborhoodMatrix for the masked image
+#' @name getNeighborhoodInMask 
+#' @title Get neighborhoods for voxels within mask
 #'
-#' Summarize neighborhoods for voxels in an antsImage.
-#'
-#'
-#' @param image Image object of S4 class 'antsImage' to get values from.
-#' @param mask Image object of S4 class 'antsImage' indicating which voxels to
+#' @param image image object of S4 class \code{antsImage} to get values from.
+#' @param mask image object of S4 class \code{antsImage} indicating which voxels to
 #' examine. Each voxel > 0 will be used as the center of a neighborhood
 #' @param radius array of values for neighborhood radius (in voxels)
-#' @param physical.coordinates a logical indicating if voxel indices and
+#' @param physical.coordinates logical indicating if voxel indices and
 #' offsets should be in voxel or physical coordinates
-#' @param boundary.condition a string indicating how to handle voxels in a
-#' neighborhood, but not in the mask 'NA' - fill value with NA 'image' - use
-#' image value even if not in mask 'mean' - use mean of all non-NA values for
-#' that neighborhood
+#' @param boundary.condition  string indicating how to handle voxels in a
+#' neighborhood, but not in the mask. See \code{Details}. 
 #' @param spatial.info a boolean indicating of voxel locations and neighborhood
 #' offsets should be returned along with pixel values.
 #' @param get.gradient a boolean indicating if a matrix of gradients (at the
 #' center voxel) should be returned in addition to the value matrix (WIP)
+#' @details 
+#' \code{boundary.condition} should be one of: 
+#' \itemize{
+#'   \item{\code{NA}: }{Fill values with \code{NA}.}
+#'   \item{\code{image}: }{Use image value, even if not in mask.}
+#'   \item{\code{mean}: }{Use man of all non-\code{NA} values for that neighborhood.}
+#' }
 #' @return
 #'
-#' if spatial.info is false: a matrix of pixel values where the number of rows
+#' if \code{spatial.info} is false: a matrix of pixel values where the number of rows
 #' is the size of the neighborhood and there is a column for each voxel
 #'
-#' if spatial.info is true, a list containing three matrices: values: matrix of
-#' pixel values where the number of rows is the size of the neighborhood and
-#' there is a column for each voxel indices: matrix providing the center
-#' coordinates for each neighborhood offsets: matrix providing the offsets from
-#' center for each voxel in a neighborhood
+#' if \code{spatial.info} is true, a list containing three matrices: 
+#' \itemize{ 
+#'  \item{values: }{matrix of pixel values where the number of rows 
+#'  is the size of the neighborhood and there is a column for each voxel.} 
+#'  \item{indices: }{matrix providing the center coordinates for each neighborhood}
+#'  \item{offsets: }{matrix providing the offsets from center for each 
+#'   voxel in a neighborhood}
+#' }
 #' @author Duda JT
 #' @examples
 #'
-#' r16<-getANTsRData("r16")
-#' r16<-antsImageRead(r16,2)
-#' mask<-getMask(r16,lowThresh=mean(r16),cleanup=1)
+#' r16 <- getANTsRData("r16")
+#' r16 <- antsImageRead(r16,2)
+#' mask <- getMask(r16,lowThresh=mean(r16),cleanup=1)
 #' radius <- rep(2,2)
-#' mat<-antsGetNeighborhoodMatrix(r16,mask,radius)
+#' mat <- getNeighborhoodInMask(r16,mask,radius)
 #'
 #'
-#' @export antsGetNeighborhoodMatrix
-antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates = FALSE,
+#' @export getNeighborhoodInMask
+getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FALSE,
   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
 
   if (class(image)[1] != "antsImage") {

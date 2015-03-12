@@ -78,7 +78,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     {
     nxt<-seqby[ i + 1 ]-1
     if ( yisimg )
-      tv[ seqby[i]:nxt ]<-t( antsGetNeighborhoodMatrix(
+      tv[ seqby[i]:nxt ]<-t( getNeighborhoodInMask(
         y[[i]], randmask, rep(0,idim), spatial.info=F,
         boundary.condition='image' ) )
     else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
@@ -86,7 +86,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   tv[ tv == 0 ] <- min( ulabs ) # BUG FIXME
   if ( asFactors ) tv<-factor( tv )
   nfeats<-length(x[[1]])
-  testmat<-antsGetNeighborhoodMatrix( image=randmask, mask=randmask,
+  testmat<-getNeighborhoodInMask( image=randmask, mask=randmask,
     radius=rad, spatial.info=F, boundary.condition='image' )
   testmat<-t( testmat )
   hdsz<-nrow(testmat) # neighborhood size
@@ -94,12 +94,12 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
   for ( i in 1:(length(y)) )
     {
-    m1<-t(antsGetNeighborhoodMatrix( x[[i]][[1]], randmask,
+    m1<-t(getNeighborhoodInMask( x[[i]][[1]], randmask,
       rad, spatial.info=F, boundary.condition='image' ))
     if ( nfeats > 1 )
     for ( k in 2:nfeats )
       {
-      m2<-t(antsGetNeighborhoodMatrix( x[[i]][[k]], randmask,
+      m2<-t(getNeighborhoodInMask( x[[i]][[k]], randmask,
           rad, spatial.info=F, boundary.condition='image' ))
       m1<-cbind( m1, m2 )
       }

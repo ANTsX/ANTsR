@@ -101,11 +101,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
   matcenter<-round(n/2)+1
   intmat<-wmat
-  targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
+  targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
   targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
-  targetIvStruct<-antsGetNeighborhoodMatrix(targetI,
+  targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rep(rSearch,dim),boundary.condition=BC,spatial.info=T)
   offsets<-targetIvStruct$offsets
   rm(targetIvStruct)
@@ -134,7 +134,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       # see antsImage_GetNeighborhood
       myoff<-rep(0,dim)
       cent<-indices[voxel,]+1
-      v<-antsGetNeighborhood(atlasList[[ct]],cent,rad)$values
+      v<-getNeighborhoodAtVoxel(atlasList[[ct]],cent,rad)$values
       intmat[ct,]<-v
       # find best local region in this atlas
       # just needs an input vector, an input image and a radius
@@ -145,7 +145,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       for ( offind in 1:nrow(offsets) )
         {
         cent2<-cent+offsets[offind,]
-        tv<-(antsGetNeighborhood(atlasList[[ct]],cent2,rad)$values)
+        tv<-(getNeighborhoodAtVoxel(atlasList[[ct]],cent2,rad)$values)
         sdv<-sd(tv)
         if ( sdv > 0 )
           {
