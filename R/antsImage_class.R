@@ -83,8 +83,7 @@ setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
 #' @describeIn antsImage
 setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical()) {
   if (typeof(mask) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
 
   if (length(mask) == 0) {
@@ -108,8 +107,7 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
 setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
   mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
@@ -119,12 +117,10 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   if (x@dimension != 2) {
-    print("image dimension must be 2")
-    return()
+    stop("image dimension must be 2")
   }
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
@@ -135,8 +131,7 @@ setMethod(f = "as.array", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
@@ -186,8 +181,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "logical", j="ANY"),
 setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
   if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
@@ -197,8 +191,7 @@ setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY", "ANY"),
 setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY"),
   definition = function(x, i, j, ..., drop) {
   if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
@@ -231,8 +224,7 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
     } else if (class(i) == "integer" || class(i) == "numeric") {
       lst <- c(lst, list(i))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -242,8 +234,7 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
     } else if (class(j) == "integer" || class(j) == "numeric") {
       lst <- c(lst, list(j))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -253,8 +244,7 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
     } else if (class(k) == "integer" || class(k) == "numeric") {
       lst <- c(lst, list(k))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -264,8 +254,7 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
     } else if (class(l) == "integer" || class(l) == "numeric") {
       lst <- c(lst, list(l))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
   return(.Call("antsImage_GetPixels", x, lst, PACKAGE = "ANTsR"))
@@ -287,8 +276,7 @@ antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 #' For \code{set} methods, 0 to indicate success.
 antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
 
   return(.Call("antsImage_GetSpacing", x, PACKAGE = "ANTsR"))
@@ -297,18 +285,15 @@ antsGetSpacing <- function(x) {
 #' @param spacing Desired spacing as vector of size dim(x)
 antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
 
   if ((class(spacing) != "numeric") && (class(spacing) != "array")) {
-    print("spacing must be of class 'numeric'")
-    return()
+    stop("spacing must be of class 'numeric'")
   }
 
   if (length(spacing) != length(dim(x))) {
-    print("spacing must be of same dimensions as image")
-    return()
+    stop("spacing must be of same dimensions as image")
   }
 
   return(.Call("antsImage_SetSpacing", x, spacing, PACKAGE = "ANTsR"))
@@ -318,8 +303,7 @@ antsSetSpacing <- function(x, spacing) {
 #' @usage antsGetOrigin(x)
 antsGetOrigin <- function(x) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   return(.Call("antsImage_GetOrigin", x, PACKAGE = "ANTsR"))
 }
@@ -328,17 +312,14 @@ antsGetOrigin <- function(x) {
 #' @param origin Desired origin as vector of size dim(x)
 antsSetOrigin <- function(x, origin) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   if ((class(origin) != "numeric") && (class(origin) != "array")) {
-    print("spacing must be of class 'numeric' or 'array'")
-    return()
+    stop("spacing must be of class 'numeric' or 'array'")
   }
 
   if (length(origin) != length(dim(x))) {
-    print("spacing must be of same dimensions as image")
-    return()
+    stop("spacing must be of same dimensions as image")
   }
 
   return(.Call("antsImage_SetOrigin", x, origin, PACKAGE = "ANTsR"))
@@ -348,8 +329,7 @@ antsSetOrigin <- function(x, origin) {
 #' @usage antsGetDirection(x)
 antsGetDirection <- function(x) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   return(.Call("antsImage_GetDirection", x, PACKAGE = "ANTsR"))
 }
@@ -359,16 +339,13 @@ antsGetDirection <- function(x) {
 #' @param direction Desired direction as vector of size dim(x)
 antsSetDirection <- function(x, direction) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   if ((class(direction) != "matrix") & (class(direction) != "array")) {
-    print("direction must be of class 'matrix' or 'array'")
-    return()
+    stop("direction must be of class 'matrix' or 'array'")
   }
   if ((dim(direction)[1] != length(dim(x))) || (dim(direction)[2] != length(dim(x)))) {
-    print("direction matrix must be of size imagedim * imagedim")
-    return()
+    stop("direction matrix must be of size imagedim * imagedim")
   }
   return(.Call("antsImage_SetDirection", x, direction, PACKAGE = "ANTsR"))
 }
@@ -400,18 +377,15 @@ antsSetDirection <- function(x, direction) {
 antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FALSE) {
 
   if (class(image)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
 
   if ((class(center) != "numeric")) {
-    print("center must be of class 'numeric'")
-    return()
+    stop("center must be of class 'numeric'")
   }
 
   if ((class(radius) != "numeric")) {
-    print("radius must be of class 'numeric'")
-    return()
+    stop("radius must be of class 'numeric'")
   }
 
   return(.Call("antsImage_GetNeighborhood", image, center, radius, physical.coordinates))
@@ -467,23 +441,19 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
 
   if (class(image)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
 
   if ((class(mask) != "antsImage")) {
-    print("center must be of class 'antsImage'")
-    return()
+    stop("center must be of class 'antsImage'")
   }
 
   if ((class(radius) != "numeric")) {
-    print("radius must be of class 'numeric'")
-    return()
+    stop("radius must be of class 'numeric'")
   }
 
   if ((prod(radius * 2 + 1) * sum(as.array(mask))) > (2^31 - 1)) {
-    print("Requested matrix size is too large for Rcpp")
-    return(NA)
+    stop("Requested matrix size is too large for Rcpp")
   }
 
   boundary = 0
@@ -501,12 +471,10 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 
 .getValueAtPoint <- function(x, point) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   if ((class(point) != "numeric")) {
-    print("point must be of class 'numeric'")
-    return()
+    stop("point must be of class 'numeric'")
   }
 
   idx <- as.numeric(antsTransformPhysicalPointToIndex(x, point))
@@ -545,12 +513,10 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 #' @export antsTransformIndexToPhysicalPoint
 antsTransformIndexToPhysicalPoint <- function(x, index) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   if ((class(index) != "numeric") && (class(index) != "matrix")) {
-    print("index must be of class 'numeric' or 'matrix'")
-    return()
+    stop("index must be of class 'numeric' or 'matrix'")
   }
 
   if (class(index) == "numeric") {
@@ -559,8 +525,7 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
 
   imgdim <- length(dim(x))
   if (dim(index)[2] != imgdim) {
-    print(paste("Index matrix must be of size N x", imgdim))
-    return()
+    stop(paste("Index matrix must be of size N x", imgdim))
   }
 
   return(.Call("antsImage_TransformIndexToPhysicalPoint", x, index, PACKAGE = "ANTsR"))
@@ -585,12 +550,10 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
 #' @export antsTransformPhysicalPointToIndex
 antsTransformPhysicalPointToIndex <- function(x, point) {
   if (class(x)[1] != "antsImage") {
-    print("Input must be of class 'antsImage'")
-    return()
+    stop("Input must be of class 'antsImage'")
   }
   if ((class(point) != "numeric") && (class(point) != "matrix")) {
-    print("point must be of class 'numeric' or 'matrix'")
-    return()
+    stop("point must be of class 'numeric' or 'matrix'")
   }
 
   if (class(point) == "numeric") {
@@ -599,8 +562,7 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 
   imgdim <- length(dim(x))
   if (dim(point)[2] != imgdim) {
-    print(paste("Point matrix must be of size N x", imgdim))
-    return()
+    stop(paste("Point matrix must be of size N x", imgdim))
   }
 
   return(.Call("antsImage_TransformPhysicalPointToIndex", x, point, PACKAGE = "ANTsR"))
@@ -677,8 +639,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "logical"),
 setMethod(f = "[<-", signature(x = "antsImage", i = "array"),
   definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
@@ -689,8 +650,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "array"),
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix"),
   definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   region <- new("antsRegion", index = integer(), size = integer())
   return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
@@ -702,12 +662,10 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "list"),
   if (class(i$mask) == "NULL") {
     i$mask <- logical(0)
   } else if (typeof(i$mask) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   if (class(i$region) != "antsRegion") {
-    print("'region' provided is not of class 'antsRegion'")
-    return()
+    stop("'region' provided is not of class 'antsRegion'")
   }
   return(.Call("antsImage_SetRegion", x, i$mask, i$region, value, PACKAGE = "ANTsR"))
 })
@@ -729,8 +687,7 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "logical", j = "antsRegion")
 setMethod(f = "[<-", signature(x = "antsImage", i = "array", j = "antsRegion"),
 definition = function(x, i, j, ..., value) {
   if (typeof(i) != "logical") {
-    print("'mask' provided is not of type 'logical'")
-    return()
+    stop("'mask' provided is not of type 'logical'")
   }
   return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
 })
@@ -739,8 +696,7 @@ definition = function(x, i, j, ..., value) {
 setMethod(f = "[<-", signature(x = "antsImage", i = "matrix", j = "antsRegion"),
   definition = function(x, i, j, ..., value) {
     if (typeof(i) != "logical") {
-      print("'mask' provided is not of type 'logical'")
-      return()
+      stop("'mask' provided is not of type 'logical'")
     }
     return(.Call("antsImage_SetRegion", x, i, j, value, PACKAGE = "ANTsR"))
   })
@@ -772,8 +728,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     } else if (class(i) == "integer" || class(i) == "numeric") {
       lst <- c(lst, list(i))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -783,8 +738,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     } else if (class(j) == "integer" || class(j) == "numeric") {
       lst <- c(lst, list(j))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -794,8 +748,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     } else if (class(k) == "integer" || class(k) == "numeric") {
       lst <- c(lst, list(k))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
 
@@ -805,8 +758,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     } else if (class(l) == "integer" || class(l) == "numeric") {
       lst <- c(lst, list(l))
     } else {
-      print("indices must be of class 'integer' or 'numeric'")
-      return()
+      stop("indices must be of class 'integer' or 'numeric'")
     }
   }
   temp<-(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
@@ -870,12 +822,10 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "=="
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -886,8 +836,7 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
     return(.Call("antsImage_RelationalOperators", e1, e2, region, 
       operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
@@ -897,12 +846,10 @@ setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "!="
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -910,8 +857,7 @@ setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
@@ -920,12 +866,10 @@ setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "<="
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -933,8 +877,7 @@ setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
@@ -943,12 +886,10 @@ setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- ">="
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -956,8 +897,7 @@ setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
@@ -966,12 +906,10 @@ setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "<"
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -979,8 +917,7 @@ setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
@@ -989,12 +926,10 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- ">"
   if (class(e2) == "list") {
     if (length(e2$value) != 1) {
-      print("length of value must be 1")
-      return()
+      stop("length of value must be 1")
     }
     if (class(e2$region) != "antsRegion") {
-      print("region argument not of class 'antsRegion'")
-      return()
+      stop("region argument not of class 'antsRegion'")
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
@@ -1002,8 +937,7 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
     region <- new("antsRegion", index = integer(), size = integer())
     return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
   } else {
-    print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
-    return()
+    stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
 })
 
