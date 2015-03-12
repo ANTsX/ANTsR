@@ -53,7 +53,6 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   aalmask[mylog] <- 1
   aalmask[!mylog] <- 0
   aalm[!mylog] <- 0
-  print(paste("You are using:", length(unique(aalm[aalmask > 0])), "unique labels."))
   omat <- myscale(timeseries2matrix(bold, aalmask))
   if ( missing( motion ) )
     {
@@ -113,11 +112,9 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
     bgsvd <- svd(tempmat)
     mysum <- cumsum(bgsvd$d)/sum(bgsvd$d)
     newnuisv <- min(c(10, which(mysum > 0.8)[1]))
-    print(paste(newnuisv, " % var of bgd ", mysum[newnuisv]))
     bgdnuis <- bgsvd$u[, 1:newnuisv]
     colnames(bgdnuis) <- paste("bgdNuis", 1:newnuisv, sep = "")
   }
-  print(paste("winsorizing with trim", winsortrim))
   if (winsortrim > 0)
     omat <- psych::winsor(omat, trim = winsortrim)
   omat <- omat[keepinds, ]
@@ -142,8 +139,6 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   colnames(mynuis)[1:2] <- c("dmatrix", "dtran")
   colnames(mynuis)[(length(colnames(mynuis)) - 1):length(colnames(mynuis))] <- c("FD",
     "DVARS")
-  print("My nuisance variables are:")
-  print(colnames(mynuis))
   mytimes <- dim(omat)[1]
   mat <- myscale(residuals(lm(omat ~ mynuis)), doscale = TRUE)
   flo <- freqLo
@@ -178,6 +173,7 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
     mybtwn, mytimes, meanFD, meanDVARS)
   outmat <- matrix(myc, nrow = 1)
   colnames(outmat) <- names(myc)
-  return(list(subjectSummary = outmat, mynetwork = mynetwork, boldmask = aalmask))
+  return( list( subjectSummary = outmat, mynetwork = mynetwork,
+    boldmask = aalmask, nuisanceVariables=mynuis ) )
   ##################################################
 }
