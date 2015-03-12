@@ -2,28 +2,29 @@
 % Please edit documentation in R/antsImageClone.R
 \name{antsImageClone}
 \alias{antsImageClone}
-\title{Image Clone}
+\title{Clone an \code{antsImage}.}
 \usage{
 antsImageClone(in_image, out_pixeltype = in_image@pixeltype)
 }
 \arguments{
-\item{in_image}{Image object of S4 class 'antsImage' to be cloned.}
+\item{in_image}{image object of S4 class \code{antsImage} to be cloned.}
 
 \item{out_pixeltype}{C++ datatype to be used to represent the pixels in the
-output image. Allowed values: 'double', 'float', 'unsigned int', 'unsigned
-char'.}
+output image. Allowed values: \code{double}, \code{float},
+\code{unsigned int}, \code{unsigned char}.}
 }
 \value{
-S4 object of Class 'antsImage' -- Success\cr 1 -- Failure
+object of class \code{antsImage}
 }
 \description{
-Clone an image object of S4 class 'antsImage'.
+Clone an image object of S4 class \code{antsImage}. N.B.: You cannot use
+\code{a <- img} because the R assignment operator does not deal with the underlying
+C++ pointers.
 }
 \examples{
-\dontrun{
-# clone an image 'img' of class 'antsImage' to an image of pixeltype 'double'
-antsImageCone( img , 'double' )
-}
+img <- antsImageRead(getANTsRData("r16"), 2)
+img2 <- antsImageClone(img)
+img.int <- antsImageCone(img , "unsigned int")
 }
 \author{
 Shrinidhi KL
