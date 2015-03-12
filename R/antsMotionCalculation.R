@@ -22,7 +22,7 @@
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
-  moco <- motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)
+  moco <- .motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)
   tmpdir <- tempdir()
   file.mocoparam <- paste(tmpdir, "moco.csv", sep = "")
   file.mask <- paste(tmpdir, "mask.nii.gz", sep = "")

@@ -104,7 +104,7 @@ priorwt2<-solve(cov(bayespriormat)+
 bayesianperfusionloc<-localtissuemat*0
 bayesianperfusionlocp<-localtissuemat*0
 if (localweights) {
-  motion_params <- motion_correction(pcasl, moreaccurate=1)$moco_params[, 1:4]
+  motion_params <- .motion_correction(pcasl, moreaccurate=1)$moco_params[, 1:4]
   reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params,
     usecompcor=T)$R2final
   reliability[reliability<0.05] <- 0.05

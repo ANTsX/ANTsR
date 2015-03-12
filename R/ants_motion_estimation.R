@@ -44,7 +44,7 @@
 }
 
 
-#' Simple motion_correction function.
+#' Simple .motion_correction function.
 #'
 #' motion corrects 4D time series imaging data
 #'
@@ -58,10 +58,9 @@
 #'
 #' testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
 #' testimg<-iMath(testimg,"PadImage",5)
-#' mocorr<-motion_correction( testimg )
+#' mocorr<-.motion_correction( testimg )
 #'
-#' @export motion_correction
-motion_correction <- function(img, fixed = NA, moreaccurate = 1) {
+.motion_correction <- function(img, fixed = NA, moreaccurate = 1) {
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")

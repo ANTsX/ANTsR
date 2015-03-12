@@ -157,9 +157,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
             bestmatch<-locor
             myoff<-offsets[offind,]
             if ( dim == 2 & haveLabels )
-              segval<-antsGetPixels(labelList[[ct]],cent2[1],cent2[2])
+              segval<-getPixels(labelList[[ct]],cent2[1],cent2[2])
             if ( dim == 3 & haveLabels )
-              segval<-antsGetPixels(labelList[[ct]],cent2[1],cent2[2],cent2[3])
+              segval<-getPixels(labelList[[ct]],cent2[1],cent2[2],cent2[3])
             if ( haveLabels ) segmatSearch[ct,voxel]<-segval
             }
           }

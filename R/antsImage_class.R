@@ -212,11 +212,11 @@ setMethod(f = "[", signature(x = "antsImage", i = "ANY", j="ANY"),
 #' @examples
 #'
 #' img<-makeImage(c(10,10),rnorm(100))
-#' pixel<-antsGetPixels(img,i=c(1,2),j=1)
+#' pixel<-getPixels(img,i=c(1,2),j=1)
 #'
 #'
-#' @export antsGetPixels
-antsGetPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
+#' @export getPixels
+getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
     if (is.null(i)) {
@@ -485,11 +485,11 @@ antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates 
 
   value <- NA
   if (dims == 2) {
-    value <- antsGetPixels(x, i = idx[1], j = idx[2])
+    value <- getPixels(x, i = idx[1], j = idx[2])
   } else if (dims == 3) {
-    value <- antsGetPixels(x, i = idx[1], j = idx[2], k = idx[3])
+    value <- getPixels(x, i = idx[1], j = idx[2], k = idx[3])
   } else if (dims == 4) {
-    value <- antsGetPixels(x, i = idx[1], j = idx[2], k = idx[3], l = idx[4])
+    value <- getPixels(x, i = idx[1], j = idx[2], k = idx[3], l = idx[4])
   }
 
   return(value[[1]])
@@ -572,49 +572,49 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "NULL"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop ) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod("[", signature(x = "antsImage", i = "numeric", j = "numeric"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "NULL"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric", "ANY"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"),
  definition = function(x, i, j, k = NA, l = NA, ..., drop) {
-  return(antsGetPixels(x, i, j, k, l))
+  return(getPixels(x, i, j, k, l))
 })
 
 # > getGeneric("[<-")

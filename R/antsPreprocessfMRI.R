@@ -74,7 +74,7 @@ antsPreprocessfMRI <- function(boldImage,
 
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
-    motionCorrectionResults <- motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
+    motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
       moreaccurate = motionCorrectionAccuracyLevel)
     motionCorrectionParameters <- motionCorrectionResults$moco_params
     nuisanceVariables <- as.matrix(motionCorrectionParameters)[, 3:ncol(motionCorrectionParameters)]
