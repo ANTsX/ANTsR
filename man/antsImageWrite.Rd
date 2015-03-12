@@ -7,7 +7,7 @@
 antsImageWrite(image, filename)
 }
 \arguments{
-\item{image}{Image object of S4 class 'antsImage' to be written.}
+\item{image}{Image object of S4 class \code{antsImage} to be written.}
 
 \item{filename}{Name of the file to write the image to.}
 }
@@ -15,13 +15,20 @@ antsImageWrite(image, filename)
 0 -- Success\cr 1 -- Failure
 }
 \description{
-Write an image object of S4 class 'antsImage' to a file.
+Write an image object of S4 class \code{antsImage} to a file.
 }
 \examples{
-\dontrun{
-# write an image 'img' of class 'antsImage' to a file named 'imagefile.nii'
-antsImageWrite( img , 'imagefile.nii' )
-}
+fn <- getANTsRData( "r16" )
+fi <- antsImageRead( fn , 2 )
+antsImageWrite( fi , tempfile( fileext = ".nii.gz" ) )
+antsImageWrite( fi , tempfile( fileext = ".mha" ) )
+antsImageWrite( fi , tempfile( fileext = ".nrrd" ) )
+antsImageWrite( antsImageClone( fi, "unsigned int" ) ,
+  tempfile( fileext = ".jpg" )  )
+antsImageWrite( antsImageClone( fi, "float" ) ,
+  tempfile( fileext = ".tif" )  )
+antsImageWrite( fi, tempfile( fileext = ".mrc" )  )
+antsImageWrite( fi, tempfile( fileext = ".hd5" )  )
 }
 \author{
 Shrinidhi KL
