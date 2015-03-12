@@ -4,8 +4,7 @@
 \alias{abpBrainExtraction}
 \title{An ants-based brain extraction script.}
 \usage{
-abpBrainExtraction(img = NA, tem = NA, temmask = NA, tempriors = NA,
-  tdir = NA)
+abpBrainExtraction(img = NA, tem = NA, temmask = NA, tdir = NA)
 }
 \arguments{
 \item{img}{image to which we map a brain mask}
@@ -14,10 +13,7 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA, tempriors = NA,
 
 \item{temmask}{Template's antsImage brain mask.}
 
-\item{tempriors}{e.g. c(img1,img2,...,imgN) Vector of spatial priors - may
-not be implemented yet}
-
-\item{tdir}{temporary directory}
+\item{tdir}{temporary directory (optional)}
 }
 \value{
 outputs a brain image and brain mask.
@@ -27,7 +23,6 @@ Brain extraction based on mapping a template image and its mask to the input
 image.  Should be preceded by abpN4.
 }
 \examples{
-# short example first
 fn<-getANTsRData("r16")
 img<-antsImageRead(fn,2)
 img<-resampleImage(img,c(128,128),1,0)

@@ -37,17 +37,16 @@ Apply a transform list to map an image from one domain to another.
 antsApplyTransforms( '-h')
 # see antsRegistration
 # example 1 - simplified
-  fixed<-antsImageRead( getANTsRData("r16") ,2)
-  moving<-antsImageRead( getANTsRData("r64") ,2)
+fixed<-antsImageRead( getANTsRData("r16") ,2)
+moving<-antsImageRead( getANTsRData("r64") ,2)
 fixed<-resampleImage(fixed,c(64,64),1,0)
 moving<-resampleImage(moving,c(64,64),1,0)
-  mytx<-antsRegistration(fixed=fixed , moving=moving ,
-    typeofTransform = c('SyN'),
-    outprefix=paste(tempdir(),'/Z',sep=''))
-mywarpedimage<-antsApplyTransforms(fixed=fixed,moving=moving,
-  transformlist=mytx$fwdtransforms)
-mywarpedimage<-antsApplyTransforms(fixed=moving,moving=fixed,
-  transformlist=mytx$invtransforms)
+mytx<-antsRegistration(fixed=fixed , moving=moving ,
+  typeofTransform = c("SyN") )
+mywarpedimage<-antsApplyTransforms( fixed=fixed,moving=moving,
+  transformlist=mytx$fwdtransforms )
+mywarpedimage<-antsApplyTransforms( fixed=moving,moving=fixed,
+  transformlist=mytx$invtransforms )
 # full access via listing the inputs in standard ANTs format
 }
 \author{
