@@ -16,7 +16,6 @@
 \alias{initialize,antsImage-method}
 \alias{is.na,antsImage-method}
 \alias{max,antsImage-method}
-\alias{mean,antsImage-method}
 \alias{min,antsImage-method}
 \alias{sd,antsImage-method}
 \alias{show,antsImage-method}
@@ -37,8 +36,6 @@
 \S4method{var}{antsImage}(x)
 
 \S4method{sd}{antsImage}(x)
-
-\S4method{mean}{antsImage}(x, mask = logical())
 
 \S4method{is.na}{antsImage}(x)
 
@@ -101,8 +98,6 @@ actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 \item \code{var}: 
 
 \item \code{sd}: 
-
-\item \code{mean}: 
 
 \item \code{is.na}: 
 
