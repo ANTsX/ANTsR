@@ -7,19 +7,19 @@
 antsCopyImageInfo(reference, target)
 }
 \arguments{
-\item{reference}{Image object of S4 class 'antsImage' to get values from.}
+\item{reference}{image object of S4 class 'antsImage' to get values from.}
 
-\item{target}{Image object of S4 class 'antsImage' to copy values to.}
+\item{target}{image object of S4 class 'antsImage' to copy values to.}
 }
 \value{
-Matrix of image indices
+Target image with reference header information.
 }
 \description{
-Copy header info from one 'antsImage' to another
+Copy origin, direction, and spacing from one \code{antsImage} to another
 }
 \examples{
-img<-makeImage(c(10,10),rnorm(100))
-img2<-makeImage(c(10,10), rnorm(100))
-img2<-antsCopyImageInfo(img, img2)
+img <- makeImage(c(10,10),rnorm(100))
+img2 <- makeImage(c(10,10), rnorm(100))
+img2 <- antsCopyImageInfo(img, img2)
 }
 
