@@ -46,10 +46,12 @@
 #' NeuroImage 59, 2142-2154.
 #' @author Tustison NJ, Avants BB
 #' @examples
-#' \dontrun{
-#'  boldImage <- antsImageRead(getANTsRData('pcasl'), 4) 
-#'  cleanfMRI <- preprocessfMRI( boldImage )
-#'} 
+#' set.seed(123)
+#' nvox <- 10*10*10*20
+#' dims <- c(10,10,10,20)
+#' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
+#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'), 4) 
+#' cleanfMRI <- preprocessfMRI(boldImage)
 #' @export preprocessfMRI
 preprocessfMRI <- function(boldImage,
   maskImage = NA,
