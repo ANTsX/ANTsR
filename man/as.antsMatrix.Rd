@@ -5,22 +5,21 @@
 \alias{as.antsMatrix}
 \alias{as.antsMatrix,data.frame-method}
 \alias{as.antsMatrix,list-method}
+\alias{as.antsMatrix,matrix-method}
 \title{as.antsMatrix}
 \usage{
 as.antsMatrix(object, ...)
 
-\S4method{as.antsMatrix}{list}(object, elementtype)
+\S4method{as.antsMatrix}{list}(object, elementtype = "float")
 
-\S4method{as.antsMatrix}{data.frame}(object, elementtype)
+\S4method{as.antsMatrix}{data.frame}(object, elementtype = "float")
+
+\S4method{as.antsMatrix}{matrix}(object, elementtype = "float")
 }
 \arguments{
 \item{object}{An object}
 
-\item{...}{Extra named arguments passed to FUN}
-
 \item{elementtype}{e.g. "float" or "double"}
-
-\item{data}{Numeric vector or data.frame}
 }
 \description{
 convert types to an antsMatrix
@@ -30,5 +29,10 @@ convert types to an antsMatrix
 \item \code{list}: 
 
 \item \code{data.frame}: 
+
+\item \code{matrix}: 
 }}
+\examples{
+as.antsMatrix(matrix(rnorm(10), nrow=2))
+}
 
