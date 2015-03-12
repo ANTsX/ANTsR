@@ -3,34 +3,39 @@
 #' Register a pair of images either through the full or simplified interface
 #' to the ANTs registration method.
 #'
+#' @usage antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN", 
+#'   initialTransform = NA, outprefix = "", mask = NA, ...) 
 #'
 #' @param fixed fixed image to which we register the moving image.
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
-#' Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.
+#' One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC}, 
+# \code{SyNBold}, \code{SyNAggro}.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
 #' @param ... additional options see antsRegistration in ANTs
 #' @details 
+#' typeofTransform can be one of: 
 #' \itemize{
-#'   \item{"Rigid"}{Rigid transformation: Only rotation and translation.}
-#'   \item{"Affine"}{Affine transformation: Rigid + scaling.}
-#'   \item{"SyN"}{Symmetric normalization: Affine + deformable transformation, 
+#'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+#'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
+#'   \item{"AffineFast": }{Fast version of \code{Affine}.}
+#'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation, 
 #'     with mutual information as optimization metric.}
-#'   \item{"SyNCC"}{SyN, but with cross-correlation as the metric.}
-#'   \item{"SynBOLD"}{SyN, but optimized for registrations between 
+#'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
+#'   \item{"SynBOLD": }{SyN, but optimized for registrations between 
 #'     BOLD and T1 images.} 
-#'   \item{"SyNAggro"}{SyN, but with more aggressive registration 
+#'   \item{"SyNAggro": }{SyN, but with more aggressive registration 
 #'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
 #' }
 #' @return outputs a list containing: 
 #' \itemize{
-#'   \item{warpedmovout}{Moving image warped to space of fixed image.}
-#'   \item{warpedfixout}{Fixed image warped to space of moving image.}
-#'   \item{fwdtransforms}{Transforms to move from moving to fixed image.}
-#'   \item{invtransforms}{Transforms to move from fixed to moving image.}
+#'   \item{warpedmovout: }{Moving image warped to space of fixed image.}
+#'   \item{warpedfixout: }{Fixed image warped to space of moving image.}
+#'   \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
+#'   \item{invtransforms: }{Transforms to move from fixed to moving image.}
 #' } 
 #' Ouptut of 1 indicates failure
 #' @author Shrinidhi KL, Avants BB
@@ -59,7 +64,7 @@
 #' }
 #'
 #' @export antsRegistration
-antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "", initialTransform = NA,
+antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", initialTransform = NA,
   outprefix = "", mask = NA, ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
