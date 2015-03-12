@@ -8,9 +8,9 @@ antsImagePhysicalSpaceConsistency(img1, img2, coordinate.tolerance = 1e-06,
   direction.tolerance = 1e-06)
 }
 \arguments{
-\item{img1}{Image object of S4 class 'antsImage'.}
+\item{img1}{Image object of S4 class \code{antsImage}.}
 
-\item{img2}{Image object of S4 class 'antsImage'.}
+\item{img2}{Image object of S4 class \code{antsImage}.}
 
 \item{coordinate.tolerance}{floating point error tolerance in origin}
 
@@ -20,11 +20,11 @@ antsImagePhysicalSpaceConsistency(img1, img2, coordinate.tolerance = 1e-06,
 Boolean indicating consistency of physical space
 }
 \description{
-Check if two 'antsImage' objects occupy the same physical space
+Check if two \code{antsImage} objects occupy the same physical space
 }
 \examples{
-img1 <- makeImage(c(10,10),rnorm(100))
-img2 <- makeImage(c(10,10),rnorm(100))
-check <- antsImagePhysicalSpaceConsistency(img1,img2)
+img1 <- makeImage(c(10,10), rnorm(100))
+img2 <- makeImage(c(10,10), rnorm(100))
+check <- antsImagePhysicalSpaceConsistency(img1, img2)
 }
 
