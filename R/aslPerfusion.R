@@ -30,12 +30,22 @@
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
-#' asl<-antsImageRead("PEDS012_20131101_pcasl_1.nii.gz",4)
 #' # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
-#' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, interpolation="linear",
-#'   dorobust=0.95 )
-#' }
+#' # fn<-'PEDS012_20131101_pcasl_1.nii.gz'
+#' # asl<-antsImageRead(fn,4)
+#' set.seed(1)
+#' nvox <- 10*10*10*20
+#' dims <- c(10,10,10,20)
+#' asl <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
+#' aslmean <- getAverageOfTimeSeries( asl )
+#' aslmask <- getMask( aslmean , 0.001 , Inf )
+#' aslmat<-timeseries2matrix( asl, aslmask )
+#' for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
+#' asl<-matrix2timeseries( asl, aslmask, aslmat )
+#' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0 )
+#' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, ncompcor=2 )
+#' # allow some rejection
+#' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0.925 )
 #'
 #' @export aslPerfusion
 aslPerfusion <- function(
