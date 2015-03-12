@@ -2,33 +2,29 @@
 % Please edit documentation in R/abpN4.R
 \name{abpN4}
 \alias{abpN4}
-\title{N4 with previously set parameters based on ants brain processing strategies.}
+\title{MR image bias correction based on the N4 algorithm.}
 \usage{
-abpN4(img = NA, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
-  weightimg = NA, usen3 = FALSE)
+abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
+  usen3 = FALSE)
 }
 \arguments{
 \item{img}{image to be bias corrected}
 
-\item{intensityTruncation}{Params to TruncateImageIntensity in iMath}
+\item{intensityTruncation}{quantiles for image truncation.}
 
 \item{mask}{optional antsImage mask}
 
-\item{weightimg}{optional antsImage weighting - not implemented yet}
-
-\item{usen3}{Use N3 instead of N4}
+\item{usen3}{Use N3 algorithm instead of N4}
 }
 \value{
-outputs a bias corrected image. 1 -- Failure
+outputs a bias corrected image. 1 indicates failure.
 }
 \description{
-Truncate outlier intensities and bias correct with N4 with or without mask
-and weight images.
+Truncate outlier intensities and bias correct with the N4 algorithm.
 }
 \examples{
-fn<-getANTsRData("r16")
-img<-antsImageRead(fn,2)
-img2<-abpN4( img )
+img <- antsImageRead(getANTsRData("r16"),2)
+img2 <- abpN4( img )
 }
 \author{
 Tustison N, Avants BB
