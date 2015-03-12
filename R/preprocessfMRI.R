@@ -1,6 +1,6 @@
 #' Preprocess BOLD fMRI image data.
 #'
-#' Preprocess fMRI data which includes compcor/motion correction, nuisance
+#' Preprocess fMRI data by performing compcor/motion correction, nuisance
 #' regression, band-pass filtering, and spatial smoothing.
 #'
 #'
@@ -14,7 +14,7 @@
 #' average image ie 0.8 means threshold at 0.8 of the mean.
 #' @param initialNuisanceVariables Optional initial nuisance variables.
 #' @param numberOfCompCorComponents Numer of CompCor nuisance components.
-#' @param doMotionCorrection Booelan indicating whether motion correction
+#' @param doMotionCorrection Boolean indicating whether motion correction
 #' should be performed and used in nuisance regression.
 #' @param useMotionCorrectedImage Boolean indicating whether or not the motion
 #' corrected image should be used in the rest of the pipeline.  This is off by
@@ -24,34 +24,36 @@
 #' intersession/intersubject parameters.
 #' @param frequencyLowThreshold Lower threshold for bandpass filtering.
 #' @param frequencyHighThreshold Upper threshold for bandpass filtering.
-#' @param spatialSmoothingType Either 'none', 'gaussian' (isotropic) or
-#' 'perona-malik' (anisotropic) smoothing.
+#' @param spatialSmoothingType Either \code{none}, \code{gaussian} (isotropic) or
+#' \code{perona-malik} (anisotropic) smoothing.
 #' @param spatialSmoothingParameters For gaussian smoothing, this is a single
 #' scalar designating the smoothing sigma (in mm).  For perona-malik, a vector
 #' needs to be specified with the conductance parameter and the number of
-#' iterations, e.g. c( 0.25, 5 ).
+#' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
-#' @return Output is the 'clean' fMRI bold image and mask.  Quality assurance
-#' output includes the framewise displacement (FD) and DVARS.  'DVARS is the
-#' root mean squared (RMS) change in BOLD signal from volume to volume (D
-#' referring to temporal derivative of time courses and VARS referring to RMS
-#' variance over voxels.)' --- Power et. al 2012, Spurious but systematic
-#' correlations in functional connectivity MRI networks arise from subject
-#' motion. Neuroimage 59, 2142-2154.  The globalSignal is also returned.
+#' @return List of: 
+#' \itemize{
+#'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
+#'   \item{maskImage: }{mask image.}
+#'   \item{DVARS: }{Framewise change in BOLD signal, as in Powers et al.}
+#'   \item{DVARSPostCleaning: }{DVARS after cleaning image.}
+#'   \item{FD: }{Framewise displacement.}
+#'   \item{globalSignal: }{Global signal.}
+#'   \item{nuisanceVariables: }{Nuisance variables used in denoising.}
+#' }
+#' @references Power et al. 2012, "Spurious but systematic correlations 
+#' in functional connectivity MRI networks arise from subject motion."
+#' NeuroImage 59, 2142-2154.
 #' @author Tustison NJ, Avants BB
 #' @examples
-#'
-#' \dontrun{
-#' boldImage <- antsImageRead( 'fmri.nii.gz', dim = 4, pixeltype = 'float' )
-#' cleanfMRI <- antsPreprocessfMRI( boldImage )
-#' cleanBoldImage <- cleanfMRI$cleanBoldImage
-#' maskImage <- cleanfMRI$maskImage
-#' framewiseDisplacement <- cleanfMRI$FD
-#' dtRMS <- cleanfMRI$DVARS
-#' }
-#'
-#' @export antsPreprocessfMRI
-antsPreprocessfMRI <- function(boldImage,
+#' set.seed(123)
+#' nvox <- 10*10*10*20
+#' dims <- c(10,10,10,20)
+#' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
+#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'), 4) 
+#' cleanfMRI <- preprocessfMRI(boldImage)
+#' @export preprocessfMRI
+preprocessfMRI <- function(boldImage,
   maskImage = NA,
   maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables = NA,
@@ -144,7 +146,6 @@ antsPreprocessfMRI <- function(boldImage,
 
   # replace boldMatrix in place with residualized version
   if (!is.na(nuisanceVariables[1]) & residualizeMatrix) {
-    print(colnames(nuisanceVariables))
     boldMatrix <- residuals(lm(boldMatrix ~ scale(nuisanceVariables)))
   }
   # replace boldMatrix in place with frequency filtered version
@@ -168,20 +169,18 @@ antsPreprocessfMRI <- function(boldImage,
         "x", spatialSmoothingParameters[1], "x0")
       imageMath(4, smoothCleanBoldImage, "G", smoothCleanBoldImage, sigmaVector)
     } else {
-      cat("Error:  expecting a single scalar parameter.  See help.\n")
-      return
+      stop("Expecting a single scalar parameter.")
     }
   } else if (spatialSmoothingType == "perona-malik") {
     if (length(spatialSmoothingParameters) == 2) {
       imageMath(4, smoothCleanBoldImage, "PeronaMalik", cleanBoldImage, spatialSmoothingParameters[1],
         spatialSmoothingParameters[2])
     } else {
-      cat("Error:  expecting a two element vector.  See help.\n")
+      stop("Expecting a two element vector.")
       return
     }
   } else if (spatialSmoothingType != "none") {
-    cat("Error:  unrecognized smoothing option.  See help.\n")
-    return
+    stop("Unrecognized smoothing option.")
   }
   #####################################################################
   return(list(cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,

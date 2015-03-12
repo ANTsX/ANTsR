@@ -7,7 +7,7 @@
 antsTransformIndexToPhysicalPoint(x, index)
 }
 \arguments{
-\item{x}{Image object of S4 class 'antsImage' to get values from.}
+\item{x}{image object of S4 class \code{antsImage} to get values from.}
 
 \item{index}{image index}
 }
@@ -15,10 +15,10 @@ antsTransformIndexToPhysicalPoint(x, index)
 array of pixel values
 }
 \description{
-Get spatial point from index of an 'antsImage'.
+Get spatial point from index of an \code{antsImage}.
 }
 \examples{
-img<-makeImage(c(10,10),rnorm(100))
-pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
+img <- makeImage(c(10,10),rnorm(100))
+pt <- antsTransformIndexToPhysicalPoint(img, c(2,2))
 }
 

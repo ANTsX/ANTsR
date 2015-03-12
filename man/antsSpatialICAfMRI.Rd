@@ -37,7 +37,7 @@ and the component images.
 }
 \description{
 Perform spatial ICA on group or individual fMRI data.  Preprocessing should
-be performed prior to calling this function (cf antsPreprocessfMRI.R).
+be performed prior to calling this function (cf preprocessfMRI.R).
 }
 \examples{
 set.seed( 123 )
@@ -52,7 +52,7 @@ boldImages[[4]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" 
 cleanBoldImages <- list()
 for( i in 1:length( boldImages ) )
   {
-  fmri <- antsPreprocessfMRI( boldImages[[i]], numberOfCompCorComponents=2 )
+  fmri <- preprocessfMRI( boldImages[[i]] )
   if( i == 1 )
     {
     maskImage <- fmri$maskImage

@@ -26,7 +26,7 @@
 #' roimask<-antsImageRead("roi.nii.gz",3)
 #' timeselect<-10:(dim(bold)[4]-10)
 #' # can do this if you like its approach
-#' cleanfMRI <- antsPreprocessfMRI( bold, maskImage=boldmask,
+#' cleanfMRI <- preprocessfMRI( bold, maskImage=boldmask,
 #'   frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
 #'   spatialSmoothingType = "gaussian", spatialSmoothingParameters = 2,
 #'   residualizeMatrix=TRUE, numberOfCompCorComponents=2 )

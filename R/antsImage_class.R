@@ -271,8 +271,8 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 
 #' @rdname antsImageGetSet
 #' @usage antsGetSpacing(x)
-#' @param x Image to access
-#' @return For \code{get} methods, vector of size \code{dim(x)}.
+#' @param x antsImage to access, of dimensionality \code{d}.
+#' @return For \code{get} methods, vector of length \code{d} (origin, spacing) or matrix of size \code{d * d} (direction).
 #' For \code{set} methods, 0 to indicate success.
 antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
@@ -282,7 +282,7 @@ antsGetSpacing <- function(x) {
   return(.Call("antsImage_GetSpacing", x, PACKAGE = "ANTsR"))
 }
 #' @rdname antsImageGetSet
-#' @param spacing Desired spacing as vector of size dim(x)
+#' @param spacing numeric vector of length \code{d}.
 antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -309,7 +309,7 @@ antsGetOrigin <- function(x) {
 }
 #' @rdname antsImageGetSet
 #' @usage antsSetOrigin(x, origin)
-#' @param origin Desired origin as vector of size dim(x)
+#' @param origin numeric vector of length \code{d}.
 antsSetOrigin <- function(x, origin) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -336,7 +336,7 @@ antsGetDirection <- function(x) {
 
 #' @rdname antsImageGetSet
 #' @usage antsSetDirection(x, direction)
-#' @param direction Desired direction as vector of size dim(x)
+#' @param direction matrix of size \code{d * d}.
 antsSetDirection <- function(x, direction) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -504,16 +504,16 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
 
 #' Get Spatial Point from Index
 #'
-#' Get spatial point from index of an 'antsImage'.
+#' Get spatial point from index of an \code{antsImage}.
 #'
 #'
-#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param x image object of S4 class \code{antsImage} to get values from.
 #' @param index image index
 #' @return array of pixel values
 #' @examples
 #'
-#' img<-makeImage(c(10,10),rnorm(100))
-#' pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
+#' img <- makeImage(c(10,10),rnorm(100))
+#' pt <- antsTransformIndexToPhysicalPoint(img, c(2,2))
 #'
 #'
 #' @export antsTransformIndexToPhysicalPoint
