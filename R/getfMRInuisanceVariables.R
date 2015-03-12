@@ -80,7 +80,7 @@ getfMRInuisanceVariables <- function(
     print("input image must have dimension 4 ")
     return(NULL)
   }
-  moco_results <- motion_correction(fmri, moreaccurate = moreaccurate)
+  moco_results <- .motion_correction(fmri, moreaccurate = moreaccurate)
   moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09,
     cleanup = TRUE)
   if (!is.na(mask))

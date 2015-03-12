@@ -64,7 +64,7 @@
 #' boldmask[ maskvec ]<-0
 #' timeselect<-10:dim(bold)[4]
 #' if ( ! exists("moco") ) {
-#'   moco<-motion_correction(bold,moreaccurate=1)
+#'   moco<-.motion_correction(bold,moreaccurate=1)
 #'   moco<-as.matrix( moco$moco_params )[timeselect,3:ncol(moco$moco_params)]
 #' }
 #' boldmat<-timeseries2matrix(bold,boldmask)

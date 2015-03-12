@@ -95,7 +95,7 @@ aslPerfusion <- function(
     return(NULL)
   }
   if (is.null(moco_results))
-    moco_results <- motion_correction(asl, moreaccurate = moreaccurate)
+    moco_results <- .motion_correction(asl, moreaccurate = moreaccurate)
   motionparams <- as.data.frame(moco_results$moco_params)
   moco_mask_img <- getMask(moco_results$moco_avg_img,
     lowThresh = mean(moco_results$moco_avg_img) *
