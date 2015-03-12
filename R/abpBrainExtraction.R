@@ -6,14 +6,11 @@
 #' @param img image to which we map a brain mask
 #' @param tem Template image which has an associated label mask.
 #' @param temmask Template's antsImage brain mask.
-#' @param tempriors e.g. c(img1,img2,...,imgN) Vector of spatial priors - may
-#' not be implemented yet
-#' @param tdir temporary directory
+#' @param tdir temporary directory (optional)
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
 #'
-#' # short example first
 #' fn<-getANTsRData("r16")
 #' img<-antsImageRead(fn,2)
 #' img<-resampleImage(img,c(128,128),1,0)
@@ -27,19 +24,14 @@
 #'
 #' @export abpBrainExtraction
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
-  tempriors = NA,
   tdir = NA) {
   if (missing(img) | missing(tem) | missing(temmask)) {
-    cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask, tempriors=c(img1,img2,...,imgN) ) \n")
+    cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")
     return(NULL)
   }
-  if (missing(tempriors)) {
-    tempriors <- 3
-    npriors <- 3
-  } else {
-    npriors <- length(tempriors)
-  }
+  tempriors <- 3
+  npriors <- 3
 
   # file I/O - all stored in temp dir
   if (is.na(tdir)) {
