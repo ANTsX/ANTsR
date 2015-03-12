@@ -19,6 +19,7 @@ Suggests:
     d3Network,
     DMwR,
     e1071,
+    extremevalues,
     fastICA,
     fpc,
     glasso,
