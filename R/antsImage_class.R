@@ -439,11 +439,11 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
 #' r16 <- antsImageRead(r16,2)
 #' mask <- getMask(r16,lowThresh=mean(r16),cleanup=1)
 #' radius <- rep(2,2)
-#' mat <- antsGetNeighborhoodMatrix(r16,mask,radius)
+#' mat <- getNeighborhoodInMask(r16,mask,radius)
 #'
 #'
-#' @export antsGetNeighborhoodMatrix
-antsGetNeighborhoodMatrix <- function(image, mask, radius, physical.coordinates = FALSE,
+#' @export getNeighborhoodInMask
+getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FALSE,
   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
 
   if (class(image)[1] != "antsImage") {

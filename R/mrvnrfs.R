@@ -77,7 +77,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
           }
         }
       nfeats<-length(xsub[[1]])
-      testmat<-t(antsGetNeighborhoodMatrix( submask, submask,
+      testmat<-t(getNeighborhoodInMask( submask, submask,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*ncol(testmat)*nrow(testmat)*length(xsub)*1.0
@@ -87,14 +87,14 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       for ( i in 1:(length(xsub)) )
         {
         xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        m1<-t(antsGetNeighborhoodMatrix( xsub[[i]][[1]], submask,
+        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submask,
           rad, spatial.info=F, boundary.condition='image' ))
         if ( nfeats > 1 )
         for ( k in 2:nfeats )
           {
           xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
             useVoxels=1, 0 )
-          m2<-t(antsGetNeighborhoodMatrix( xsub[[i]][[k]], submask,
+          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submask,
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }
@@ -161,7 +161,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
           }
         }
       nfeats<-length(xsub[[1]])
-      testmat<-t(antsGetNeighborhoodMatrix( submask, submask,
+      testmat<-t(getNeighborhoodInMask( submask, submask,
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
@@ -171,14 +171,14 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       for ( i in 1:(length(x)) )
         {
         xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        m1<-t(antsGetNeighborhoodMatrix( xsub[[i]][[1]], submask,
+        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submask,
           rad, spatial.info=F, boundary.condition='image' ))
         if ( nfeats > 1 )
         for ( k in 2:nfeats )
           {
           xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
             useVoxels=1, 0 )
-          m2<-t(antsGetNeighborhoodMatrix( xsub[[i]][[k]], submask,
+          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submask,
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }

@@ -146,7 +146,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- smoothcoeffmat[i, ]
       temp<-smoothImage( temp, 1.5 )
-      nmatimgs[[i]] <- antsGetNeighborhoodMatrix(temp, mask_img, rep(1, 3),
+      nmatimgs[[i]] <- getNeighborhoodInMask(temp, mask_img, rep(1, 3),
         boundary.condition = "mean")
       smoothcoeffmat[i, ] <- temp[mask_img == 1]
     }
