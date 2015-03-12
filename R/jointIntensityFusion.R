@@ -18,6 +18,7 @@
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
+#' @param includezero boolean - try to predict the zero label
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -70,7 +71,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
-  rSearch=2, segvals=NA )
+  rSearch=2, segvals=NA, includezero=FALSE )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -82,7 +83,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     if ( all( is.na(segvals) ) )
       {
       segvals<-c(sort( unique( as.numeric(segmat)) ))
-      if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
+      if ( includezero )
+        if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
+      if ( !includezero )
+        segvals<-segvals[  segvals != 0 ]
       }
     }
   dim<-targetI@dimension

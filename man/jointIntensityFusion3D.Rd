@@ -7,7 +7,7 @@
 jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, rSearch = 0, slices = NA)
+  usecor = FALSE, rSearch = 0, slices = NA, includezero = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -38,6 +38,8 @@ makes image converge to average}
 \item{rSearch}{radius of search, default is 2}
 
 \item{slices}{vector defining slices to use (speeds parameter selection)}
+
+\item{includezero}{boolean - try to predict the zero label}
 }
 \value{
 approximated image, segmentation and probabilities
