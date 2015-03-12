@@ -351,30 +351,31 @@ antsSetDirection <- function(x, direction) {
 }
 
 
-#' Get Neighborhood
+#' Get a hypercube neighborhood at a voxel
 #'
-#' Get the values in a local neighborhood of an 'antsImage'.
+#' Get the values in a local neighborhood of an \code{antsImage}.
 #'
-#'
-#' @param image Image object of S4 class 'antsImage' to get values from.
+#' @param image Image object of S4 class \code{antsImage} to get values from.
 #' @param center array of indices for neighborhood center
 #' @param radius array of values for neighborhood radius (in voxels)
 #' @param physical.coordinates a logical indicating if voxel indices and
 #' offsets should be in voxel or physical coordinates
-#' @return list containing three matrices: values: matrix of pixel values where
-#' the number of rows is the size of the neighborhood and there is a column for
-#' each voxel indices: matrix providing the coordinates for each value
+#' @return a list
+#' \itemize{
+#'   \item{values}{numeric vector of values}
+#'   \item{indices}{matrix providing the coordinates for each value}
+#' }
 #' @author Duda JT
 #' @examples
 #'
 #' img<-makeImage(c(10,10),rnorm(100))
 #' center <- dim(img)/2
 #' radius <- rep(3,2)
-#' mat<-antsGetNeighborhood(img,center,radius)
+#' nhlist<-getNeighborhoodAtVoxel(img,center,radius)
 #'
 #'
-#' @export antsGetNeighborhood
-antsGetNeighborhood <- function(image, center, radius, physical.coordinates = FALSE) {
+#' @export getNeighborhoodAtVoxel
+getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates = FALSE) {
 
   if (class(image)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -835,10 +836,10 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
   } else if ((class(e2) == "numeric" | class(e2) == "integer") && length(e2) == 1) {
-    if(class(e2) == "integer") 
+    if(class(e2) == "integer")
       e2 <- as.numeric(e2)
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, 
+    return(.Call("antsImage_RelationalOperators", e1, e2, region,
       operator, PACKAGE = "ANTsR"))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
