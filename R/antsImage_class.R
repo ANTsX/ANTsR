@@ -504,16 +504,16 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
 
 #' Get Spatial Point from Index
 #'
-#' Get spatial point from index of an 'antsImage'.
+#' Get spatial point from index of an \code{antsImage}.
 #'
 #'
-#' @param x Image object of S4 class 'antsImage' to get values from.
+#' @param x image object of S4 class \code{antsImage} to get values from.
 #' @param index image index
 #' @return array of pixel values
 #' @examples
 #'
-#' img<-makeImage(c(10,10),rnorm(100))
-#' pt<-antsTransformIndexToPhysicalPoint(img,c(2,2))
+#' img <- makeImage(c(10,10),rnorm(100))
+#' pt <- antsTransformIndexToPhysicalPoint(img, c(2,2))
 #'
 #'
 #' @export antsTransformIndexToPhysicalPoint

@@ -24,6 +24,7 @@ time series. Fixed image is a reference space or time slice.
 \examples{
 # boldfn <- getANTsRData( "pcasl" )
 # bold <- antsImageRead( boldfn , 4 )
+set.seed( 123 )
 bold <- makeImage( c(10,10,10,20) , rnorm( 10*10*10*20)+1 )
 bold <- iMath( bold, "PadImage", 5 )
 aimg <- new("antsImage", "float", 3)
