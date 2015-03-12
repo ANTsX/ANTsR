@@ -1,42 +1,61 @@
-#' A simplified (or full) interface to antsRegistration.
+#' Perform registration between two images. 
 #'
-#' Register a pair of images either through the full or simplified interface.
-#' Uses file I/O to manage images / transformations.
+#' Register a pair of images either through the full or simplified interface
+#' to the ANTs registration method.
 #'
 #'
 #' @param fixed fixed image to which we register the moving image.
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
-#' affine+syn mapping.  Mutual information metric by default. choose from list
+#' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
 #' Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
 #' @param ... additional options see antsRegistration in ANTs
-#' @return outputs a list containing warped images and transforms. 1 -- Failure
+#' @details 
+#' \itemize{
+#'   \item{"Rigid"}{Rigid transformation: Only rotation and translation.}
+#'   \item{"Affine"}{Affine transformation: Rigid + scaling.}
+#'   \item{"SyN"}{Symmetric normalization: Affine + deformable transformation, 
+#'     with mutual information as optimization metric.}
+#'   \item{"SyNCC"}{SyN, but with cross-correlation as the metric.}
+#'   \item{"SynBOLD"}{SyN, but optimized for registrations between 
+#'     BOLD and T1 images.} 
+#'   \item{"SyNAggro"}{SyN, but with more aggressive registration 
+#'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
+#' }
+#' @return outputs a list containing: 
+#' \itemize{
+#'   \item{warpedmovout}{Moving image warped to space of fixed image.}
+#'   \item{warpedfixout}{Fixed image warped to space of moving image.}
+#'   \item{fwdtransforms}{Transforms to move from moving to fixed image.}
+#'   \item{invtransforms}{Transforms to move from fixed to moving image.}
+#' } 
+#' Ouptut of 1 indicates failure
 #' @author Shrinidhi KL, Avants BB
 #' @examples
 #'
 #' \dontrun{
 #' # will give the full form of help
-#' antsRegistration( '-h')
-#'   fi<-antsImageRead( getANTsRData("r16") ,2)
-#'   mi<-antsImageRead( getANTsRData("r64") ,2)
-#'   mytx<-antsRegistration(fixed=fi , moving=mi ,
-#'     typeofTransform = c('SyN'),
-#'     outprefix=paste(tempdir(),'/Z',sep=''))
-#'   mywarpedimage<-antsApplyTransforms(fixed=fi,moving=mi,
-#'     transformlist=mytx$fwdtransforms)
-#'   plot(fi)
-#'   plot(mywarpedimage)
-#'   # example 2 - full access, only uses file-based I/O
-#'   if ( FALSE )
-#'     antsRegistration(
-#'       list( d=2,m='mi[r16slice.nii.gz,
-#'       r64slice.nii.gz,1,20,Regular,0.05]',
-#'       t='affine[1.0]', c='2100x1200x1200x0',
-#'       s='3x2x1x0', f='4x3x2x1', u='1',
-#'       o='[xtest,xtest.nii.gz,xtest_inv.nii.gz]' ) )
+#' antsRegistration("-h")
+#' fi <- antsImageRead(getANTsRData("r16") ,2)
+#' mi <- antsImageRead(getANTsRData("r64") ,2)
+#' mytx <- antsRegistration(fixed=fi, moving=mi,
+#'   typeofTransform = c('SyN'),
+#'   outprefix=paste(tempdir(),'/Z',sep=''))
+#' mywarpedimage <- antsApplyTransforms(fixed=fi,moving=mi,
+#'   transformlist=mytx$fwdtransforms)
+#' plot(fi)
+#' plot(mywarpedimage)
+#' # example 2 - full access, only uses file-based I/O
+#' if ( FALSE )
+#'   antsRegistration(
+#'     list( d=2,m='mi[r16slice.nii.gz,
+#'     r64slice.nii.gz,1,20,Regular,0.05]',
+#'     t='affine[1.0]', c='2100x1200x1200x0',
+#'     s='3x2x1x0', f='4x3x2x1', u='1',
+#'     o='[xtest,xtest.nii.gz,xtest_inv.nii.gz]' ) )
 #' }
 #'
 #' @export antsRegistration

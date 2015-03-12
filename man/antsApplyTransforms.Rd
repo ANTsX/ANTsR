@@ -30,7 +30,13 @@ other interpolator available in antsApplyTransforms.}
 an antsImage is output. 1 -- Failure
 }
 \description{
-Apply a transform list to map an image from one domain to another.
+Apply a transform list to map an image from one domain to another. In image
+registration, one computes mappings between (usually) pairs of images.
+These transforms are often a sequence of increasingly complex maps, e.g.
+from translation, to rigid, to affine to deformation.  The list of such
+transforms is passed to this function to interpolate one image domain
+into the next image domain, as below.  The order matters strongly and the
+user is advised to familiarize with the standards established in examples.
 }
 \examples{
 # will give the full form of help
