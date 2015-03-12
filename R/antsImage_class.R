@@ -80,7 +80,7 @@ setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
 #   return(length( which( as.array(x) != 0)))
 # })
 
-#' @describeIn antsImage
+#' @rdname antsImageArith
 setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask = logical()) {
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")

@@ -1,20 +1,20 @@
-#' Image Clone
+#' Clone an \code{antsImage}.
 #' 
-#' Clone an image object of S4 class 'antsImage'.
+#' Clone an image object of S4 class \code{antsImage}. N.B.: You cannot use 
+#' \code{a <- img} because the R assignment operator does not deal with the underlying
+#' C++ pointers. 
 #' 
-#' 
-#' @param in_image Image object of S4 class 'antsImage' to be cloned.
+#' @param in_image image object of S4 class \code{antsImage} to be cloned.
 #' @param out_pixeltype C++ datatype to be used to represent the pixels in the
-#' output image. Allowed values: 'double', 'float', 'unsigned int', 'unsigned
-#' char'.
-#' @return S4 object of Class 'antsImage' -- Success\cr 1 -- Failure
+#' output image. Allowed values: \code{double}, \code{float}, 
+#' \code{unsigned int}, \code{unsigned char}.
+#' @return object of class \code{antsImage} 
 #' @author Shrinidhi KL
 #' @examples
 #' 
-#' \dontrun{
-#' # clone an image 'img' of class 'antsImage' to an image of pixeltype 'double'
-#' antsImageCone( img , 'double' )
-#' }
+#' img <- antsImageRead(getANTsRData("r16"), 2) 
+#' img2 <- antsImageClone(img) 
+#' img.int <- antsImageCone(img , "unsigned int")
 #' 
 #' @export antsImageClone
 antsImageClone <- function(in_image, out_pixeltype = in_image@pixeltype) {
