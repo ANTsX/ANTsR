@@ -2,7 +2,7 @@
 % Please edit documentation in R/antsMotionCalculation.R
 \name{antsMotionCalculation}
 \alias{antsMotionCalculation}
-\title{Correct ASL data for motion.}
+\title{Correct 4D time-series data for motion.}
 \usage{
 antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
 }
@@ -29,11 +29,12 @@ List containing:
 }
 }
 \description{
-Correct ASL data for motion.
+Correct 4D time-series data for motion.
 }
 \examples{
 set.seed(120)
-simimg<-makeImage( rep(5,4), rnorm(5^4))
+simimg<-makeImage(rep(5,4), rnorm(5^4))
+# for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
 antsMotionCalculation(simimg,moreaccurate=0)
 }
 \author{
