@@ -1,29 +1,24 @@
-#' N4 with previously set parameters based on ants brain processing strategies.
+#' MR image bias correction based on the N4 algorithm. 
 #'
-#' Truncate outlier intensities and bias correct with N4 with or without mask
-#' and weight images.
-#'
+#' Truncate outlier intensities and bias correct with the N4 algorithm.
 #'
 #' @param img image to be bias corrected
-#' @param intensityTruncation Params to TruncateImageIntensity in iMath
+#' @param intensityTruncation quantiles for image truncation. 
 #' @param mask optional antsImage mask
-#' @param weightimg optional antsImage weighting - not implemented yet
-#' @param usen3 Use N3 instead of N4
-#' @return outputs a bias corrected image. 1 -- Failure
+#' @param usen3 Use N3 algorithm instead of N4
+#' @return outputs a bias corrected image. 1 indicates failure.
 #' @author Tustison N, Avants BB
 #' @examples
 #'
-#' fn<-getANTsRData("r16")
-#' img<-antsImageRead(fn,2)
-#' img2<-abpN4( img )
+#' img <- antsImageRead(getANTsRData("r16"),2)
+#' img2 <- abpN4( img )
 #'
 #' @export abpN4
-abpN4 <- function(img = NA, intensityTruncation = c(0.025, 0.975, 256),
-  mask = NA, weightimg = NA, usen3 = FALSE) {
+abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
+  mask = NA,  usen3 = FALSE) {
   numargs <- nargs()
   if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
-    cat(" abpN4( img = inimg , intensityTruncation=c( 0.025, 0.975, 256 ), mask=NA, weightimg=NA, usen3=FALSE ) \n")
-    return(0)
+    stop("Missing image.") 
   }
   if (length(intensityTruncation) != 3) {
     cat("length( intensityTruncation ) should = 3 \n")
