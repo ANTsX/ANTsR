@@ -879,9 +879,12 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
     }
     return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
       PACKAGE = "ANTsR"))
-  } else if (class(e2) == "numeric" && length(e2) == 1) {
+  } else if ((class(e2) == "numeric" | class(e2) == "integer") && length(e2) == 1) {
+    if(class(e2) == "integer") 
+      e2 <- as.numeric(e2)
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    return(.Call("antsImage_RelationalOperators", e1, e2, region, 
+      operator, PACKAGE = "ANTsR"))
   } else {
     print("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
     return()
