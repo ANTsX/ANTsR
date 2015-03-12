@@ -25,22 +25,22 @@
 #' S = estimated source matrix
 #'
 #' and the component images.
-#' @author Tustison NJ
+#' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' \dontrun{
+#' set.seed( 123 )
 #' boldImages <- list()
-#' boldImages[[1]] <- antsImageRead( "subject1.nii.gz", dim = 4, pixeltype = 'float' )
-#' boldImages[[2]] <- antsImageRead( "subject2.nii.gz", dim = 4, pixeltype = 'float' )
-#' boldImages[[3]] <- antsImageRead( "subject3.nii.gz", dim = 4, pixeltype = 'float' )
-#' boldImages[[4]] <- antsImageRead( "subject4.nii.gz", dim = 4, pixeltype = 'float' )
-#'
-#' maskImage <- NA
+#' nvox <- 10*10*10*20
+#' dims <- c(10,10,10,20)
+#' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
+#' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
+#' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
+#' boldImages[[4]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
 #'
 #' cleanBoldImages <- list()
-#' for( i in 1:length( boldImages[[1]] ) )
+#' for( i in 1:length( boldImages ) )
 #'   {
-#'   fmri <- antsPreprocessfMRI( boldImages[[i]] )
+#'   fmri <- antsPreprocessfMRI( boldImages[[i]], numberOfCompCorComponents=2 )
 #'   if( i == 1 )
 #'     {
 #'     maskImage <- fmri$maskImage
@@ -48,8 +48,8 @@
 #'   cleanBoldImages[[i]] <- fmri$cleanBoldImage
 #'   }
 #'
-#' icaResults <- antsSpatialICAfMRI( cleanBoldImages,
-#'   numberOfICAComponents = 20, cleanBoldImages[[i]] )
+#' icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
+#'   numberOfICAComponents = 2 )
 #' componentImages <- icaResults$componentImages
 #'
 #' # write out the component images
@@ -57,9 +57,8 @@
 #'   {
 #'   componentFileName <- paste0( 'componentImage', i, '.nii.gz' )
 #'   cat( 'Writing ', componentFileName, '.\n' )
-#'   antsImageWrite( componentImages[[i]], componentFileName )
-#'   }
-#' }
+#'   # antsImageWrite( componentImages[[i]], componentFileName )
+#'  }
 #'
 #' @export antsSpatialICAfMRI
 antsSpatialICAfMRI <- function(boldImages, maskImage = NA, numberOfICAComponents = 20,
