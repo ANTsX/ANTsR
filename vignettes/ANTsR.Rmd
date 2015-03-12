@@ -142,7 +142,7 @@ retval<-antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)
-print(antsGetPixels(img,50,60,44))
+print(getPixels(img,50,60,44))
 print(max(img))
 ```
 
@@ -299,7 +299,7 @@ mnit<-antsImageRead(mnit,3)
 mnit <- resampleImage( mnit , rep(4, mnit@dimension) ) # downsample
 mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
-mat2<-antsGetNeighborhoodMatrix(mnit, mask2, radius,
+mat2<-getNeighborhoodInMask(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 print(dim(mat2))
