@@ -235,13 +235,12 @@ quantifyCBF <- function(perfusion,
 
   epckg <- usePkg("extremevalues")
   if (epckg) {
-#    usePkg("extremevalues")
-#    cbfvals <- meancbfimg[(mask == 1)]
-#    K <- getOutliers(cbfvals, method = "I", distribution = "normal", FLim = c(outlierValue,
-#      1 - outlierValue))
-#    kcbf <- antsImageClone(meancbfimg)
-#    kcbf[meancbfimg < K$yMin] <- 0
-#    kcbf[meancbfimg > K$yMax] <- K$yMax
+    cbfvals <- meancbfimg[(mask == 1)]
+    K <- getOutliers(cbfvals, method = "I", distribution = "normal",
+      FLim = c(outlierValue, 1 - outlierValue))
+    kcbf <- antsImageClone(meancbfimg)
+    kcbf[meancbfimg < K$yMin] <- 0
+    kcbf[meancbfimg > K$yMax] <- K$yMax
   } else kcbf <- NA
 
   if (!hasTime) {
