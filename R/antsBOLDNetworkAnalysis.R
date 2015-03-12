@@ -1,12 +1,15 @@
-#' antsBOLDNetworkAnalysis
+#' a basic framework for network analysis that produces graph metrics
 #'
-#' An implementation of a network analysis framework for BOLD data.
+#' An implementation of a network analysis framework for BOLD data. We expect
+#' that you mapped a label image ( e.g. aal ) to the 3D BOLD space. We build a
+#' network and graph metrics from this image and these labels based on the
+#' user-defined graph density level.
 #'
 #' @param bold input 4D image
 #' @param mask antsImage defines areas of interest
-#' @param labels antsImage defines regions of interest
-#' @param motion motion parameters
-#' @param gdens graph density
+#' @param labels antsImage defines regions of interest ie a parcellation
+#' @param motion motion parameters - if missing, will estimate from data
+#' @param gdens graph density applied to network covariance matrix
 #' @param threshLo lower threshold for the label image
 #' @param threshHi upper threshold for the label image
 #' @param freqLo lower frequency cutoff
@@ -17,13 +20,24 @@
 #' @author BB Avants
 #' @examples
 #' # none yet - this is not very well tested with recent ANTsR
-#'
+#' \dontrun{
+#' myimg <- antsImageRead(getANTsRData( "ch2" ), 3)
+#' mylab <- antsImageRead(getANTsRData( "ch2a" ), 3)
+#' boldfn <- getANTsRData( "pcasl" )
+#' bold <- antsImageRead( boldfn , 4 )
+#' avgbold <- getAverageOfTimeSeries( bold )
+#' breg <- antsRegistration( avgbold, myimg, typeofTransform = c("AffineFast") )
+#' warpedParcellation <- antsApplyTransforms( avgbold, mylab,
+#'     transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
+#' mask <- getMask( avgbold )
+#' result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
+#' }
 #' @export antsBOLDNetworkAnalysis
 antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
-  labels = NA, motion = NA,
-  gdens = 0.25, threshLo = 1, threshHi = 90,
+  labels = NA, motion ,
+  gdens = 0.2, threshLo = 1, threshHi = 90,
   freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
-  throwaway = 10) {
+  throwaway ) {
   myscale <- function(x, doscale = F) {
     if (doscale)
       return(scale(x))
@@ -41,6 +55,11 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   aalm[!mylog] <- 0
   print(paste("You are using:", length(unique(aalm[aalmask > 0])), "unique labels."))
   omat <- myscale(timeseries2matrix(bold, aalmask))
+  if ( missing( motion ) )
+    {
+    temp<-antsMotionCalculation( bold  )
+    motion<-temp$moco_params
+    }
   templateFD <- rep(0, nrow(motion))
   DVARS <- rep(0, nrow(motion))
   for (i in 2:nrow(motion)) {
@@ -56,6 +75,8 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   }
   # question - should this be a constant of 0.2 as recommended in Yan Craddock He
   # Milham?
+  if ( missing( throwaway ) )
+    throwaway <- round( 10.0 / antsGetSpacing(bold)[4]  )
   keepinds <- which(templateFD < (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) >
     throwaway))
   keepinds <- c(throwaway, keepinds)

@@ -2,22 +2,22 @@
 % Please edit documentation in R/antsBOLDNetworkAnalysis.R
 \name{antsBOLDNetworkAnalysis}
 \alias{antsBOLDNetworkAnalysis}
-\title{antsBOLDNetworkAnalysis}
+\title{a basic framework for network analysis that produces graph metrics}
 \usage{
-antsBOLDNetworkAnalysis(bold = NA, mask = NA, labels = NA, motion = NA,
-  gdens = 0.25, threshLo = 1, threshHi = 90, freqLo = 0.01,
-  freqHi = 0.1, winsortrim = 0.02, throwaway = 10)
+antsBOLDNetworkAnalysis(bold = NA, mask = NA, labels = NA, motion,
+  gdens = 0.2, threshLo = 1, threshHi = 90, freqLo = 0.01,
+  freqHi = 0.1, winsortrim = 0.02, throwaway)
 }
 \arguments{
 \item{bold}{input 4D image}
 
 \item{mask}{antsImage defines areas of interest}
 
-\item{labels}{antsImage defines regions of interest}
+\item{labels}{antsImage defines regions of interest ie a parcellation}
 
-\item{motion}{motion parameters}
+\item{motion}{motion parameters - if missing, will estimate from data}
 
-\item{gdens}{graph density}
+\item{gdens}{graph density applied to network covariance matrix}
 
 \item{threshLo}{lower threshold for the label image}
 
@@ -35,10 +35,25 @@ antsBOLDNetworkAnalysis(bold = NA, mask = NA, labels = NA, motion = NA,
 list of outputs
 }
 \description{
-An implementation of a network analysis framework for BOLD data.
+An implementation of a network analysis framework for BOLD data. We expect
+that you mapped a label image ( e.g. aal ) to the 3D BOLD space. We build a
+network and graph metrics from this image and these labels based on the
+user-defined graph density level.
 }
 \examples{
 # none yet - this is not very well tested with recent ANTsR
+\dontrun{
+myimg <- antsImageRead(getANTsRData( "ch2" ), 3)
+mylab <- antsImageRead(getANTsRData( "ch2a" ), 3)
+boldfn <- getANTsRData( "pcasl" )
+bold <- antsImageRead( boldfn , 4 )
+avgbold <- getAverageOfTimeSeries( bold )
+breg <- antsRegistration( avgbold, myimg, typeofTransform = c("AffineFast") )
+warpedParcellation <- antsApplyTransforms( avgbold, mylab,
+    transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
+mask <- getMask( avgbold )
+result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
+}
 }
 \author{
 BB Avants
