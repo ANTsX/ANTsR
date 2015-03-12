@@ -397,7 +397,7 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
 
 
 
-#' @name getNeighborhoodInMask 
+#' @name getNeighborhoodInMask
 #' @title Get neighborhoods for voxels within mask
 #'
 #' @param image image object of S4 class \code{antsImage} to get values from.
@@ -407,13 +407,13 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
 #' @param physical.coordinates logical indicating if voxel indices and
 #' offsets should be in voxel or physical coordinates
 #' @param boundary.condition  string indicating how to handle voxels in a
-#' neighborhood, but not in the mask. See \code{Details}. 
+#' neighborhood, but not in the mask. See \code{Details}.
 #' @param spatial.info a boolean indicating of voxel locations and neighborhood
 #' offsets should be returned along with pixel values.
 #' @param get.gradient a boolean indicating if a matrix of gradients (at the
 #' center voxel) should be returned in addition to the value matrix (WIP)
-#' @details 
-#' \code{boundary.condition} should be one of: 
+#' @details
+#' \code{boundary.condition} should be one of:
 #' \itemize{
 #'   \item{\code{NA}: }{Fill values with \code{NA}.}
 #'   \item{\code{image}: }{Use image value, even if not in mask.}
@@ -424,12 +424,12 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
 #' if \code{spatial.info} is false: a matrix of pixel values where the number of rows
 #' is the size of the neighborhood and there is a column for each voxel
 #'
-#' if \code{spatial.info} is true, a list containing three matrices: 
-#' \itemize{ 
-#'  \item{values: }{matrix of pixel values where the number of rows 
-#'  is the size of the neighborhood and there is a column for each voxel.} 
+#' if \code{spatial.info} is true, a list containing three matrices:
+#' \itemize{
+#'  \item{values: }{matrix of pixel values where the number of rows
+#'  is the size of the neighborhood and there is a column for each voxel.}
 #'  \item{indices: }{matrix providing the center coordinates for each neighborhood}
-#'  \item{offsets: }{matrix providing the offsets from center for each 
+#'  \item{offsets: }{matrix providing the offsets from center for each
 #'   voxel in a neighborhood}
 #' }
 #' @author Duda JT
@@ -964,6 +964,7 @@ is.antsImage <- function(x){
 #' @description Atomic arithmetic operators for antsImages
 #' @param x antsImage
 #' @param y antsImage or numeric
+#' @param mask antsImage logical mask (optional)
 #' @examples
 #' r16 <- antsImageRead(getANTsRData('r16'), 2)
 #' r64 <- antsImageRead(getANTsRData('r64'), 2)

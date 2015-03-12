@@ -19,6 +19,8 @@ as.antsMatrix(object, ...)
 \arguments{
 \item{object}{An object}
 
+\item{...}{other parameters}
+
 \item{elementtype}{e.g. "float" or "double"}
 }
 \description{

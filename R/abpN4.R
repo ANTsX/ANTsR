@@ -1,9 +1,9 @@
-#' MR image bias correction based on the N4 algorithm. 
+#' MR image bias correction based on the N4 algorithm.
 #'
 #' Truncate outlier intensities and bias correct with the N4 algorithm.
 #'
 #' @param img image to be bias corrected
-#' @param intensityTruncation quantiles for image truncation. 
+#' @param intensityTruncation quantiles for image truncation.
 #' @param mask optional antsImage mask
 #' @param usen3 Use N3 algorithm instead of N4
 #' @return outputs a bias corrected image. 1 indicates failure.
@@ -18,7 +18,7 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
   mask = NA,  usen3 = FALSE) {
   numargs <- nargs()
   if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
-    stop("Missing image.") 
+    stop("Missing image.")
   }
   if (length(intensityTruncation) != 3) {
     cat("length( intensityTruncation ) should = 3 \n")
@@ -40,9 +40,6 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
   if (!is.na(mask)) {
     outimg<-n4BiasFieldCorrection(img,mask)
     return(outimg)
-  }
-  if (!is.na(weightimg)) {
-    return(img)
   }
   return(outimg)
 }

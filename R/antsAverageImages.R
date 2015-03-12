@@ -10,7 +10,7 @@ antsAverageImages <- function( imageList, normalize = FALSE )
   avg <- imageList[[1]] * 0
   for ( i in imageList ) {
     if ( normalize ) {
-      i <- i / mean( img )
+      i <- i / mean( i )
     }
     template <- template + i
   }

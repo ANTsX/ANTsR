@@ -44,30 +44,31 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 #'
 #' @param object An object
 #' @param elementtype e.g. "float" or "double"
+#' @param ... other parameters
 #' @rdname as.antsMatrix
-#' @examples 
+#' @examples
 #' as.antsMatrix(matrix(rnorm(10), nrow=2))
 #' @export
-setGeneric(name = "as.antsMatrix", def = function(object, ...) 
+setGeneric(name = "as.antsMatrix", def = function(object, ...)
   standardGeneric("as.antsMatrix"))
 
 #' @describeIn as.antsMatrix
-setMethod(f = "as.antsMatrix", signature(object = "list"), 
+setMethod(f = "as.antsMatrix", signature(object = "list"),
   definition = function(object, elementtype="float") {
   return(.Call("antsMatrix_asantsMatrix", object, elementtype, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn as.antsMatrix
-setMethod(f = "as.antsMatrix", signature(object = "data.frame"), 
+setMethod(f = "as.antsMatrix", signature(object = "data.frame"),
   definition = function(object, elementtype="float") {
-  return(.Call("antsMatrix_asantsMatrix", as.list(object), 
+  return(.Call("antsMatrix_asantsMatrix", as.list(object),
     elementtype, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn as.antsMatrix
-setMethod(f = "as.antsMatrix", signature(object = "matrix"), 
+setMethod(f = "as.antsMatrix", signature(object = "matrix"),
   definition = function(object, elementtype="float") {
-  return(.Call("antsMatrix_asantsMatrix", as.list(as.data.frame(object)), 
+  return(.Call("antsMatrix_asantsMatrix", as.list(as.data.frame(object)),
     elementtype, PACKAGE = "ANTsR"))
 })
 

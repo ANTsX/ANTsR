@@ -35,6 +35,8 @@
 \arguments{
 \item{x}{antsImage}
 
+\item{mask}{antsImage logical mask (optional)}
+
 \item{y}{antsImage or numeric}
 
 \item{...}{Additional arguments passed to underlying R operator}
