@@ -24,11 +24,10 @@ S4 object of Class 'antsImage' -- Success\cr 1 -- Failure
 Read an image file into an S4 object of class 'antsImage'.
 }
 \examples{
-\dontrun{
-img <- antsImageRead( 'imagefile.nii' , dimension = 3  )
-img <- antsImageRead( 'imagefile.nii' , dimension = 2  )
-img <- antsImageRead( 'imagefile.nii' , dimension = 4 , pixeltype =  'double' )
-}
+fn <- getANTsRData( "r16" )
+fi <- antsImageRead( fn , 2 )
+img <- antsImageRead( fn , dimension = 2  )
+img <- antsImageRead( fn , dimension = 2 , 'double' )
 }
 \author{
 Shrinidhi KL
