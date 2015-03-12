@@ -6,25 +6,24 @@
 #' class), and/or an MRF prior to enforce spatial smoothing of the labels.
 #' Similar algorithms include FAST and SPM.  atropos can also perform
 #' multivariate segmentation if you pass a list of images in: e.g.
-#' a=c(img1,img2).
+#' \code{a=c(img1,img2)}.
 #'
-#' @param a One or more scalar images is specified for segmentation using the
-#' -a/--intensity-image option. For segmentation scenarios with no prior
-#' information, the first scalar image encountered on the command line is used
-#' to order labelings such that the class with the smallest intensity signature
-#' is class '1' through class 'N' which represents the voxels with the largest
-#' intensity values. The optional adaptive smoothing weight parameter is
-#' applicable only when using prior label or probability images. This scalar
-#' parameter is to be specified between [0,1] which smooths each labeled region
-#' separately and modulates the intensity measurement at each voxel in each
-#' intensity image between the original intensity and its smoothed counterpart.
-#' The smoothness parameters are governed by the -b/--bspline option.
-#' @param x mask image
-#' @param i initialization see atropos in ANTs for full set of options
-#' @param m mrf parameters see atropos for format of these
-#' @param c convergence parameters see atropos for format of these
-#' @param priorweight usually 0, 0.25 or 0.5
-#' @param ... more parameters, see atropos help in ANTs
+#' @param a One or more scalar images to segment. If priors are not used, the intensities
+#' of the first image are used to order the classes in the segmentation output, from lowest 
+#' to highest intensity. Otherwise the order of the classes is dictated by the order of the prior
+#' images.
+#' @param x mask image.
+#' @param i initialization usually \code{KMeans[N]} for N classes or a list of N prior probability images. 
+#' See Atropos in ANTs for full set of options.
+#' @param m mrf parameters as a string, usually \code{"[smoothingFactor,radius]"} where \code{smoothingFactor} 
+#' determines the amount of smoothing and radius determines the MRF neighborhood, as an ANTs style neighborhood 
+#' vector eg "1x1x1" for a 3D image. The radius must match the dimensionality of the image, eg 1x1 for 2D and 
+#' The default in ANTs is \code{smoothingFactor=0.3} and \code{radius=1}. See Atropos for more options.
+#' @param c convergence parameters, \code{"[numberOfIterations,convergenceThreshold]"}. A threshold of 0 runs
+#' the full \code{numberOfIterations}, otherwise Atropos tests convergence by comparing the mean maximum posterior 
+#' probability over the whole region of interest defined by the mask \code{x}.
+#' @param priorweight usually 0 (priors used for initialization only), 0.25 or 0.5.
+#' @param ... more parameters, see Atropos help in ANTs
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL, B Avants
 #' @examples
@@ -34,9 +33,14 @@
 #' mask<-getMask(img)
 #' segs1<-atropos( d = 2, a = img, m = '[0.2,1x1]',
 #'    c = '[2,0]',  i = 'kmeans[3]', x = mask )
+#'
+#' # Use probabilities from k-means seg as priors 
+#'
+#' segs2<-atropos( d = 2, a = img, m = '[0.2,1x1]',
+#'    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
 #' @export atropos
 atropos <- function( a, x,
-  i = "kmeans[3]",
+  i = "KMeans[3]",
   m = "[0.2,1x1]",
   c = "[5,0]",
   priorweight = 0.5,
