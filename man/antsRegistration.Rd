@@ -4,7 +4,7 @@
 \alias{antsRegistration}
 \title{Perform registration between two images.}
 \usage{
-antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
+antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
   initialTransform = NA, outprefix = "", mask = NA, ...)
 }
 \arguments{
@@ -14,7 +14,7 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "",
 
 \item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
 affine+syn mapping.  Mutual information metric by default. See \code{Details.}
-Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.}
+One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},}
 
 \item{initialTransform}{transforms to prepend}
 
@@ -27,10 +27,10 @@ Rigid, Affine, SyN, SyNCC, SyNBold, SyNAggro.}
 \value{
 outputs a list containing:
 \itemize{
-  \item{warpedmovout}{Moving image warped to space of fixed image.}
-  \item{warpedfixout}{Fixed image warped to space of moving image.}
-  \item{fwdtransforms}{Transforms to move from moving to fixed image.}
-  \item{invtransforms}{Transforms to move from fixed to moving image.}
+  \item{warpedmovout: }{Moving image warped to space of fixed image.}
+  \item{warpedfixout: }{Fixed image warped to space of moving image.}
+  \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
+  \item{invtransforms: }{Transforms to move from fixed to moving image.}
 }
 Ouptut of 1 indicates failure
 }
@@ -39,15 +39,17 @@ Register a pair of images either through the full or simplified interface
 to the ANTs registration method.
 }
 \details{
+typeofTransform can be one of:
 \itemize{
-  \item{"Rigid"}{Rigid transformation: Only rotation and translation.}
-  \item{"Affine"}{Affine transformation: Rigid + scaling.}
-  \item{"SyN"}{Symmetric normalization: Affine + deformable transformation,
+  \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+  \item{"Affine": }{Affine transformation: Rigid + scaling.}
+  \item{"AffineFast": }{Fast version of \code{Affine}.}
+  \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
     with mutual information as optimization metric.}
-  \item{"SyNCC"}{SyN, but with cross-correlation as the metric.}
-  \item{"SynBOLD"}{SyN, but optimized for registrations between
+  \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
+  \item{"SynBOLD": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
-  \item{"SyNAggro"}{SyN, but with more aggressive registration
+  \item{"SyNAggro": }{SyN, but with more aggressive registration
     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
 }
 }
