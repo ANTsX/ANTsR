@@ -9,18 +9,18 @@
 #' \code{a=c(img1,img2)}.
 #'
 #' @param a One or more scalar images to segment. If priors are not used, the intensities
-#' of the first image are used to order the classes in the segmentation output, from lowest 
+#' of the first image are used to order the classes in the segmentation output, from lowest
 #' to highest intensity. Otherwise the order of the classes is dictated by the order of the prior
 #' images.
 #' @param x mask image.
-#' @param i initialization usually \code{KMeans[N]} for N classes or a list of N prior probability images. 
+#' @param i initialization usually \code{KMeans[N]} for N classes or a list of N prior probability images.
 #' See Atropos in ANTs for full set of options.
-#' @param m mrf parameters as a string, usually \code{"[smoothingFactor,radius]"} where \code{smoothingFactor} 
-#' determines the amount of smoothing and radius determines the MRF neighborhood, as an ANTs style neighborhood 
-#' vector eg "1x1x1" for a 3D image. The radius must match the dimensionality of the image, eg 1x1 for 2D and 
+#' @param m mrf parameters as a string, usually \code{"[smoothingFactor,radius]"} where \code{smoothingFactor}
+#' determines the amount of smoothing and radius determines the MRF neighborhood, as an ANTs style neighborhood
+#' vector eg "1x1x1" for a 3D image. The radius must match the dimensionality of the image, eg 1x1 for 2D and
 #' The default in ANTs is \code{smoothingFactor=0.3} and \code{radius=1}. See Atropos for more options.
 #' @param c convergence parameters, \code{"[numberOfIterations,convergenceThreshold]"}. A threshold of 0 runs
-#' the full \code{numberOfIterations}, otherwise Atropos tests convergence by comparing the mean maximum posterior 
+#' the full \code{numberOfIterations}, otherwise Atropos tests convergence by comparing the mean maximum posterior
 #' probability over the whole region of interest defined by the mask \code{x}.
 #' @param priorweight usually 0 (priors used for initialization only), 0.25 or 0.5.
 #' @param ... more parameters, see Atropos help in ANTs
@@ -28,16 +28,21 @@
 #' @author Shrinidhi KL, B Avants
 #' @examples
 #'
-#' img<-antsImageRead( getANTsRData("r16") , 2 )
-#' img<-resampleImage( img, c(64,64), 1, 0 )
-#' mask<-getMask(img)
-#' segs1<-atropos( d = 2, a = img, m = '[0.2,1x1]',
+#' img <- antsImageRead( getANTsRData("r16") , 2 )
+#' img <- resampleImage( img, c(64,64), 1, 0 )
+#' mask <- getMask(img)
+#' segs1 <- atropos( d = 2, a = img, m = '[0.2,1x1]',
 #'    c = '[2,0]',  i = 'kmeans[3]', x = mask )
 #'
-#' # Use probabilities from k-means seg as priors 
+#' # Use probabilities from k-means seg as priors
 #'
-#' segs2<-atropos( d = 2, a = img, m = '[0.2,1x1]',
+#' segs2 <- atropos( d = 2, a = img, m = '[0.2,1x1]',
 #'    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+#'
+#' feats <- list(img, iMath(img,"Laplacian"), iMath(img,"Grad") )
+#' segs3 <- atropos( d = 2, a = feats, m = '[0.2,1x1]',
+#'    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+#'
 #' @export atropos
 atropos <- function( a, x,
   i = "KMeans[3]",
@@ -69,7 +74,6 @@ atropos <- function( a, x,
     }
     i <- paste("PriorProbabilityImages[", length(i), ",", probs, ",", priorweight,
       "]", sep = "")
-    print(i)
   }
   if (typeof(a) == "list")
     outimg <- antsImageClone(a[[1]], "unsigned int") else outimg <- antsImageClone(a, "unsigned int")
@@ -101,7 +105,7 @@ atropos <- function( a, x,
       c = c, m = m, i = i, x = mymask, ...)
   }
   if ( length(a) > 6)
-    print(" more than 6 input images not really supported, using first 6 ")
+    stop(" more than 6 input images not really supported, using first 6 ")
   .Call("Atropos", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
   probsout <- list.files(path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
