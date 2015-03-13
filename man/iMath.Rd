@@ -29,8 +29,6 @@ mask<-getMask( fi )
 op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
 op2<-iMath( mask , "Neg" )  # negate
 op3<-iMath( mask , "D" )  # distance transform
-op4<-iMath( iMath(fi,"Neg") , "BlobDetector", 500 )  # + blob
-op5<-iMath( iMath(fi,"Laplacian") , "BlobDetector", 500 )  # lap blob
 ops<-iMath( mask , "GetOperations" )  # list all ops
 
 if ( usePkg("magrittr") ) { # string ops together
@@ -40,3 +38,4 @@ if ( usePkg("magrittr") ) { # string ops together
 \author{
 BB Avants
 }
+

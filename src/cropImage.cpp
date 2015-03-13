@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <Rcpp.h>
 #include "itkCastImageFilter.h"
+
 #include "itkImage.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkExtractImageFilter.h"
 #include "itkLabelStatisticsImageFilter.h"
+#include "itkPasteImageFilter.h"
 #include <string>
 #include <vector>
 
@@ -39,23 +41,108 @@ typename ImageType::Pointer cropImageHelper(
     cropper->SetExtractionRegion( region );
     cropper->SetDirectionCollapseToSubmatrix();
     cropper->Update();
+    cropper->GetOutput()->SetSpacing( image->GetSpacing() );
     return cropper->GetOutput();
     }
   return NULL;
 }
 
 
-RcppExport SEXP cropImage( SEXP r_in_image1 ,
-  SEXP r_in_image2,  SEXP r_label  )
+template< class ImageType >
+typename ImageType::Pointer cropIndHelper(
+  typename ImageType::Pointer image,
+  SEXP r_loind, SEXP r_upind )
 {
-  if( r_in_image1 == NULL || r_in_image2 == NULL  )
+  enum { Dimension = ImageType::ImageDimension };
+  typedef typename ImageType::Pointer ImagePointerType;
+  Rcpp::NumericVector lindv( r_loind ) ;
+  Rcpp::NumericVector uindv( r_upind ) ;
+  if( lindv.size() != Dimension || uindv.size() != Dimension )
     {
-    Rcpp::Rcout << " Invalid Arguments: pass 3 images in " << std::endl ;
+    Rcpp::Rcout << "indices do not match the image in dimensions" << std::endl;
+    return NULL;
+    }
+  typename ImageType::RegionType region;
+  typename ImageType::RegionType::SizeType size;
+  typename ImageType::IndexType loind;
+  typename ImageType::IndexType upind;
+  typename ImageType::IndexType index;
+  for( int i = 0 ; i < Dimension; ++i )
+    {
+    loind[i] = lindv[i] - 1;
+    upind[i] = uindv[i] - 1; // R uses a different indexing, by 1 instead of 0
+    if ( upind[i] > loind[i] )
+      {
+      size[i] = upind[i] - loind[i] + 1;
+      index[i] = loind[i];
+      }
+    else
+      {
+      size[i] = loind[i] - upind[i] + 1;
+      index[i] = upind[i];
+      }
+    }
+  if( image.IsNotNull() )
+    {
+    region.SetSize( size );
+    region.SetIndex( index );
+    typedef itk::ExtractImageFilter<ImageType, ImageType> CropperType;
+    typename CropperType::Pointer cropper = CropperType::New();
+    cropper->SetInput( image );
+    cropper->SetExtractionRegion( region );
+    cropper->SetDirectionCollapseToSubmatrix();
+    cropper->Update();
+    cropper->GetOutput()->SetSpacing( image->GetSpacing() );
+    return cropper->GetOutput();
+    }
+  return NULL;
+}
+
+template< class ImageType >
+typename ImageType::Pointer decropImageHelper(
+  typename ImageType::Pointer cimage,
+  typename ImageType::Pointer fimage )
+{
+  enum { Dimension = ImageType::ImageDimension };
+  typename ImageType::RegionType region;
+  typedef typename ImageType::Pointer ImagePointerType;
+  if( cimage.IsNotNull() & fimage.IsNotNull() )
+    {
+    typedef itk::PasteImageFilter <ImageType, ImageType >
+      PasteImageFilterType;
+    // The SetDestinationIndex() method prescribes where in the first
+    // input to start pasting data from the second input.
+    // The SetSourceRegion method prescribes the section of the second
+    // image to paste into the first.
+    typename ImageType::IndexType destinationIndex =
+      cimage->GetLargestPossibleRegion().GetIndex();
+    typename PasteImageFilterType::Pointer pasteFilter
+      = PasteImageFilterType::New ();
+    pasteFilter->SetSourceImage(cimage);
+    pasteFilter->SetDestinationImage(fimage);
+    pasteFilter->SetSourceRegion(cimage->GetLargestPossibleRegion());
+    pasteFilter->SetDestinationIndex(destinationIndex);
+    pasteFilter->Update();
+    return pasteFilter->GetOutput();
+    }
+  return NULL;
+}
+
+RcppExport SEXP cropImage( SEXP r_in_image1 ,
+  SEXP r_in_image2,  SEXP r_label, SEXP r_decrop,
+  SEXP r_loind, SEXP r_upind  )
+{
+  if( r_in_image1 == NULL  )
+    {
+    Rcpp::Rcout << " Invalid Arguments: pass at least 1 image in " << std::endl ;
     Rcpp::wrap( 1 ) ;
     }
   unsigned int label = 1;
   if ( r_label != NULL  )
     label=Rcpp::as< unsigned int >( r_label );
+  unsigned int decrop = 0;
+  if ( r_decrop != NULL  )
+    decrop=Rcpp::as< unsigned int >( r_decrop );
   Rcpp::S4 in_image1( r_in_image1 ) ;
   Rcpp::S4 in_image2( r_in_image2 ) ;
   std::string in_pixeltype = Rcpp::as< std::string >(
@@ -87,11 +174,26 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
     Rcpp::XPtr< ImagePointerType > antsimage_xptr2(
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
 
-    ImagePointerType* out_image_ptr_ptr =
-      new ImagePointerType(
-        cropImageHelper<ImageType>(
-          *antsimage_xptr1,*antsimage_xptr2, label )
-        );
+    ImagePointerType* out_image_ptr_ptr = NULL;
+
+    if ( decrop == 0 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2, label )
+          );
+    else if ( decrop == 1 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          decropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2 )
+          );
+    else if ( decrop == 2 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropIndHelper<ImageType>(
+            *antsimage_xptr1, r_loind, r_upind  )
+          );
 
     Rcpp::XPtr< ImagePointerType >
       out_image_xptr( out_image_ptr_ptr , true );
@@ -106,11 +208,26 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
     Rcpp::XPtr< ImagePointerType > antsimage_xptr2(
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
 
-    ImagePointerType* out_image_ptr_ptr =
-      new ImagePointerType(
-        cropImageHelper<ImageType>(
-          *antsimage_xptr1,*antsimage_xptr2, label )
-        );
+    ImagePointerType* out_image_ptr_ptr = NULL;
+
+    if ( decrop == 0 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2, label )
+          );
+    else if ( decrop == 1 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          decropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2 )
+          );
+    else if ( decrop == 2 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropIndHelper<ImageType>(
+            *antsimage_xptr1, r_loind, r_upind  )
+          );
 
     Rcpp::XPtr< ImagePointerType >
       out_image_xptr( out_image_ptr_ptr , true );
@@ -126,11 +243,26 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
     Rcpp::XPtr< ImagePointerType > antsimage_xptr2(
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
 
-    ImagePointerType* out_image_ptr_ptr =
-      new ImagePointerType(
-        cropImageHelper<ImageType>(
-          *antsimage_xptr1,*antsimage_xptr2, label )
-        );
+    ImagePointerType* out_image_ptr_ptr = NULL;
+
+    if ( decrop == 0 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2, label )
+          );
+    else if ( decrop == 1 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          decropImageHelper<ImageType>(
+            *antsimage_xptr1,*antsimage_xptr2 )
+          );
+    else if ( decrop == 2 )
+      out_image_ptr_ptr =
+        new ImagePointerType(
+          cropIndHelper<ImageType>(
+            *antsimage_xptr1, r_loind, r_upind  )
+          );
 
     Rcpp::XPtr< ImagePointerType >
       out_image_xptr( out_image_ptr_ptr , true );

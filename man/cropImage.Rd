@@ -20,10 +20,10 @@ subimage
 uses a label image to crop a smaller image from within a larger image
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16") ,2)
-mask<-getMask( fi )
-cropped<-cropImage( fi, mask, 1 )
-cropped<-cropImage( fi, fi, 250 )
+fi <- antsImageRead( getANTsRData("r16") ,2)
+mask <- getMask( fi )
+cropped <- cropImage( fi, mask, 1 )
+cropped <- cropImage( fi, fi, 250 )
 }
 \author{
 Brian B. Avants, Nicholas J. Tustison

@@ -10,18 +10,76 @@
 #' @keywords crop, extract sub-image
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData("r16") ,2)
-#' mask<-getMask( fi )
-#' cropped<-cropImage( fi, mask, 1 )
-#' cropped<-cropImage( fi, fi, 250 )
+#' fi <- antsImageRead( getANTsRData("r16") ,2)
+#' mask <- getMask( fi )
+#' cropped <- cropImage( fi, mask, 1 )
+#' cropped <- cropImage( fi, fi, 250 )
 #'
 #' @export cropImage
 cropImage <- function( image, labelImage, label=1 ) {
   if ( image@pixeltype != "float" | labelImage@pixeltype != "float" ) {
-    print(args(cropImage))
-    print("input images must have float pixeltype")
-    return(NA)
+    stop("input images must have float pixeltype")
   }
   .Call("cropImage",
-    image, labelImage, label, PACKAGE = "ANTsR")
+    image, labelImage, label, 0, NULL, NULL, PACKAGE = "ANTsR")
+}
+
+
+#' crop a sub-image by image indices
+#'
+#' create a proper antsImage sub-image by indexing the image with indices.
+#' this is similar to but different from array sub-setting in that the resulting
+#' sub-image can be decropped back into its place without having to store its
+#' original index locations explicitly.
+#'
+#' @param image antsImage to crop
+#' @param lowerind vector of lower index, should be length image dimensionality
+#' @param upperind vector of upper index, should be length image dimensionality
+#' @return subimage
+#' @author Brian B. Avants, Nicholas J. Tustison
+#' @keywords crop, extract sub-image
+#' @examples
+#'
+#' fi <- antsImageRead( getANTsRData("r16") ,2)
+#' cropped <- cropIndices( fi, c(2,10), c(5,15) )
+#' cropped<-smoothImage( cropped, 5 )
+#' decropped<-decropImage( cropped, fi )
+#'
+#' @export cropIndices
+cropIndices <- function( image, lowerind, upperind ) {
+  if ( image@pixeltype != "float"  ) {
+    stop("input images must have float pixeltype")
+  }
+  if ( image@dimension != length(lowerind) |
+       image@dimension != length(upperind)  )
+       stop("dimensionality and index length dont match")
+  .Call("cropImage",
+    image, image, 1, 2, lowerind, upperind, PACKAGE = "ANTsR")
+}
+
+
+#' decrop a sub-image back into the full image
+#'
+#' the inverse function for \code{cropImage}
+#'
+#' @param croppedImage cropped antsImage
+#' @param fullImage antsImage to put back into
+#' @return decroppedImage
+#' @author Brian B. Avants, Nicholas J. Tustison
+#' @keywords decrop, extract sub-image
+#' @examples
+#'
+#' fi <- antsImageRead( getANTsRData("r16") ,2)
+#' mask <- getMask( fi )
+#' cropped <- cropImage( fi, mask, 1 )
+#' cropped <- smoothImage( cropped, 1)
+#' decropped <- decropImage( cropped , fi )
+#'
+#' @export decropImage
+decropImage <- function( croppedImage, fullImage ) {
+  if ( croppedImage@pixeltype != "float" | fullImage@pixeltype != "float" ) {
+    stop("input images must have float pixeltype")
+  }
+  .Call("cropImage",
+    croppedImage, fullImage, 1, 1, NULL, NULL, PACKAGE = "ANTsR")
 }
