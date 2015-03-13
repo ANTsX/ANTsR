@@ -21,6 +21,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @param .Object input object to convert
 #' @param pixeltype string e.g. "float" "unsigned char" "int"
 #' @param dimension dimensionality of the image
+#' @param components number of components per pixel'
 #' @param x input object to convert
 #' @param mask mask for the region
 #' @param region antsRegion for the image
@@ -31,7 +32,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @slot dimension usually 2 or 3 but can be 4
 #' @slot pointer the memory location
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
-  pointer = "externalptr"))
+  components = "integer", pointer = "externalptr"))
 
 #' @describeIn antsImage
 setMethod(f = "show", "antsImage", function(object){
@@ -45,7 +46,7 @@ setMethod(f = "show", "antsImage", function(object){
 })
 #' @describeIn antsImage
 setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
-  pixeltype = "float", dimension = 3) {
+  pixeltype = "float", dimension = 3, components = 1) {
   return(.Call("antsImage", pixeltype, dimension, PACKAGE = "ANTsR"))
 })
 

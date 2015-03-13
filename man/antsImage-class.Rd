@@ -25,7 +25,7 @@
 \S4method{show}{antsImage}(object)
 
 \S4method{initialize}{antsImage}(.Object, pixeltype = "float",
-  dimension = 3)
+  dimension = 3, components = 1)
 
 \S4method{dim}{antsImage}(x)
 
@@ -68,6 +68,8 @@
 \item{pixeltype}{string e.g. "float" "unsigned char" "int"}
 
 \item{dimension}{dimensionality of the image}
+
+\item{components}{number of components per pixel'}
 
 \item{x}{input object to convert}
 
