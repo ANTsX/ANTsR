@@ -1,6 +1,6 @@
 ---
 title: "iMath (mathematical operations inside ANTsR)"
-author: "Brian B. Avants"
+author: "Brian B. Avants, Arman Eshaghi"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
