@@ -2528,12 +2528,10 @@ SEXP antsImage_TransformIndexToPhysicalPoint( typename ImageType::Pointer image,
   if ( indices.ncol() != nDim )
     {
     Rcpp::stop("index matrix must be of size N * ImageDimension");
-    return Rcpp::wrap(1);
     }
   if ( !image.IsNotNull() )
     {
     Rcpp::stop("must pass a valid antsImage");
-    return Rcpp::wrap(1);
     }
 
   unsigned long N = indices.nrow();
