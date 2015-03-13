@@ -8,7 +8,7 @@
 #' values: 'double', 'float' , 'unsigned int' , 'unsigned char'.
 #' @param dimension Number of dimensions of the image read. This need not be
 #' the same as the dimensions of the image in the file. Allowed values: 2, 3,
-#' 4.
+#' 4. If not provided, the dimension is obtained from the image file
 #' @return S4 object of Class 'antsImage' -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
 #' @examples
@@ -19,20 +19,28 @@
 #' img <- antsImageRead( fn , dimension = 2 , 'double' )
 #'
 #' @export antsImageRead
-antsImageRead <- function(filename, dimension, pixeltype = "float") {
+antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   if (class(filename) != "character" || length(filename) != 1) {
-    print("'filename' argument must be of class 'character' and have length 1")
-    return(NULL)
+    stop("'filename' argument must be of class 'character' and have length 1")
   }
   if (class(pixeltype) != "character" || length(pixeltype) != 1) {
-    print("'pixeltype' argument must be of class 'character' and have length 1")
-    return(NULL)
+    stop("'pixeltype' argument must be of class 'character' and have length 1")
   }
-  if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) !=
-    1) {
-    print("'dimension' argument must be of class 'numeric' and have length 1")
-    return(NULL)
+  if ( !is.null(dimension) ) {
+    if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) !=
+      1) {
+      stop("'dimension' argument must be of class 'numeric' and have length 1")
+      }
+    }
+  else {
+    imageInfo = antsImageHeaderInfo( filename )
+    dimension = imageInfo$nDimensions
+    }
+
+  if ( (dimension < 2) || (dimension > 4 ) ) {
+    stop("only images of dimensions 2,3,4 are supported")
   }
+
   rval <- (.Call("antsImageRead", filename, pixeltype, dimension, PACKAGE = "ANTsR"))
   return(rval)
 }
