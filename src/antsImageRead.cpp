@@ -72,6 +72,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
       //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -86,6 +87,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
       //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -100,6 +102,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "double" ) ;
       image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -114,6 +117,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -128,6 +132,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -142,6 +147,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "float" ) ;
       image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
       //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -156,6 +162,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -170,6 +177,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -184,6 +192,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
       image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -198,6 +207,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
       image_r.slot( "dimension" ) = 4 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -212,6 +222,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
       image_r.slot( "dimension" ) = 3 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;
@@ -226,6 +237,7 @@ try
       Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
       image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
       image_r.slot( "dimension" ) = 2 ;
+      image_r.slot( "components" ) = 1 ;
       image_r.slot( "pointer" ) = xptr ;
 //      ants::printImageInfo( ( *ptr_ptr_image ) , Rcpp::Rcout ) ;
       return image_r ;

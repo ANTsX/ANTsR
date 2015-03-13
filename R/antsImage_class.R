@@ -38,6 +38,7 @@ setClass(Class = "antsImage", representation(pixeltype = "character", dimension 
 setMethod(f = "show", "antsImage", function(object){
     cat("antsImage\n")
     cat("  Pixel Type   :", object@pixeltype, "\n")
+    cat("  Pixel Size   :", object@components, "\n")
     cat("  Dimensions   :", paste(dim(object), collapse="x"), "\n")
     cat("  Voxel Spacing:", paste(antsGetSpacing(object), collapse="x"), "\n")
     cat("  Origin       :", antsGetOrigin(object), "\n")
