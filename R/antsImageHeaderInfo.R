@@ -7,10 +7,7 @@
 
 #' @author Duda JT
 #' @examples
-#'
-#' \dontrun{
-#' t = antsImageHeaderInfo( "testimage.nii.gz")
-#' }
+#' antsImageHeaderInfo( getANTsRData("r16") )  
 #'
 #' @return outputs a list containing:
 #' \itemize{
