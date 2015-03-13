@@ -1,6 +1,6 @@
 ---
 title: "iMath (mathematical operations inside ANTsR)"
-author: "Brian B. Avants"
+author: "Brian B. Avants, Arman Eshaghi"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -10,17 +10,18 @@ vignette: >
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts <- chunk$set(collapse = T, comment = "#>")
+library( knitr )
+knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
 ```
 
 ## Basic operations
 
-`iMath`  wraps some functions of `ImageMath` from ANTs software. For basic 
-arithmetics (e.g., add, subtract), while it's possible to use `iMath`, usually it 
-is easier to use `antsImage` class capabilities. 
+`iMath`  wraps some functions of `ImageMath` from ANTs software. For basic
+arithmetics (e.g., add, subtract), while it's possible to use `iMath`, usually it
+is easier to use `antsImage` class capabilities.
 
-  * Basic arithmetics with `antsImageClass` is easier, and is similar to 
+  * Basic arithmetics with `antsImageClass` is easier, and is similar to
   array operations in R:
 
     ```{r}
@@ -35,11 +36,11 @@ is easier to use `antsImage` class capabilities.
 
 ##Dilation or erosion of masks and images
 
-The typical rule for dilation and erosion of images in ANTsR is minimum 
+The typical rule for dilation and erosion of images in ANTsR is minimum
 for erosion and maximum for dilation (ITK rules).
 
   * Grayscale dilation of an image (compare it with binary dilation below):
-  
+
     ```{r}
     #dilating by a radius of 3 voxels
     GDdilated <- iMath(fi,"GD", 3)
@@ -56,7 +57,7 @@ for erosion and maximum for dilation (ITK rules).
     invisible(plot(erosion))
     ```
 
-  * Morphological dilation works on binary images, where it makes white 
+  * Morphological dilation works on binary images, where it makes white
   regions bigger:
 
     ```{r}
@@ -75,26 +76,26 @@ for erosion and maximum for dilation (ITK rules).
 
 ##Opening and closing image filters
 
-  * Morphological closing of a binary image: operation `MC` fill holes with the 
+  * Morphological closing of a binary image: operation `MC` fill holes with the
     provided radius parameter, for example:
 
-      ```{r}
-      newMask <- iMath(mask, "MC", 4)
-      invisible(plot(newMask))
-      ```
+  ```{r closer}
+  newMask <- iMath(mask, "MC", 4)
+  invisible(plot(newMask))
+  ```
 
-  * Morphological opening of a binary image: removes small structures at the boundary 
+  * Morphological opening of a binary image: removes small structures at the boundary
     or interior of an image. Syntax is similar to the previous procedure with the operation
     `MO`.
 
 
-##Padding or cropping an image 
+##Padding or cropping an image
 
 `PadImage` is a function to add/remove voxels to/from images.
 
 * Positive numbers will pad image in each direction. So for example using 2
   will increase an image with 256 voxels to 260.
-  
+
     ```{r}
     padded <- iMath(fi, "PadImage", 2)
     #compare padded image dimensions with the original dimensions
@@ -103,7 +104,7 @@ for erosion and maximum for dilation (ITK rules).
     ```
 
   * Negative numbers will crop the image in each direciton. For example using -2
-  will convert a 2-dimensional image with 256 voxels in X and Y direction to 
+  will convert a 2-dimensional image with 256 voxels in X and Y direction to
   252 voxels in each dimension.
 
     ```{r}
@@ -114,11 +115,11 @@ for erosion and maximum for dilation (ITK rules).
     ```
 
 ##Distance map
-  
+
   * `MaurerDistance` calculates the Euclidean distance transform of a binary
-  image in time linear with total number of voxels. It assumes that inside 
+  image in time linear with total number of voxels. It assumes that inside
   the binary image has negative distance, while outside of the binary mask
-  has positve distance. Distance maps could be used for example, in shape 
+  has positve distance. Distance maps could be used for example, in shape
   analysis, skletonizing or path finding.
 
     ```{r}
@@ -129,7 +130,7 @@ for erosion and maximum for dilation (ITK rules).
  *  `D` implements ITK's `DanielssonDistanceMap`. It calculates the Euclidean
    distance map, which shows at each voxel the shortest distance to the nearest
    voxel in the background (assuming that the input is a binary image).
-    
+
     ```{r}
     distanceMap <- iMath(mask, "D")
     invisible(plot(distanceMap))
@@ -138,38 +139,38 @@ for erosion and maximum for dilation (ITK rules).
 ##Denoising with anisotropic diffusion
 
 To reduce noise without changing important parts of an image in computer vision, Perona-Malik is a
-promising method. Perona-Malik method to reduce noise with anisotropic diffusion is accessible 
-via `PeronaMalik` operation in `iMath`. It requires two parameters: 1) number of iterations, and 
+promising method. Perona-Malik method to reduce noise with anisotropic diffusion is accessible
+via `PeronaMalik` operation in `iMath`. It requires two parameters: 1) number of iterations, and
 2) conductance.
 
-  ```{r}
-  denoised <- iMath(fi, "PeronaMalik", 10, 0.5)
-  invisible(plot(denoised))
-  #to see what the filter has removed
-  invisible(plot(fi - denoised)) 
-  ```
+```{r pm}
+denoised <- iMath(fi, "PeronaMalik", 10, 0.5)
+invisible(plot(denoised))
+# to see what the filter has removed
+invisible(plot(fi - denoised))
+```
 
-##Magnitude of gradient computation
+## Magnitude of gradient computation
 
 `Grad` operation in `iMath` calculates the gradient of the magnitude of an image by convolution
-with the first derivative of a Gaussian. Required parameters are: 1) sigma, and 2) normalize 
+with the first derivative of a Gaussian. Required parameters are: 1) sigma, and 2) normalize
 output (0 or 1, boolean).
 
-  ```{r}
+```{r grad}
   grad <- iMath(fi, "Grad", 1)
   invisible(plot(grad))
-  ```
+```
 
-##Laplacian of Gaussian of an image
+## Laplacian of Gaussian of an image
 
 `Laplacian` operation calculates the the Laplacian of Gaussian of an image by convolving with
-the second derivative of a Gaussian. `sigma` and `normalize` (0 or 1, boolean) are two required 
+the second derivative of a Gaussian. `sigma` and `normalize` (0 or 1, boolean) are two required
 parameters.
 
-  ```{r}
+```{r lap}
   laplacianImage <- iMath(fi, "Laplacian", 1, 1)
   invisible(plot(laplacianImage))
-  ```
+```
 
 ##Sequential operations on images
 
@@ -177,17 +178,17 @@ Usually it is easier to perform sequential procedures starting from left to righ
 instead of right to left, as one needs with funcitons. This has been made possible by
 another package that `ANTsR` depends on, `magrittr`. For example, instead of:
 
-  ```{r}
-  fi<-antsImageRead( getANTsRData("r16") , 2 )
-  result <- iMath(iMath(fi, "Laplacian", 1), "GD", 3)
-  ```
-  
+```{r}
+fi<-antsImageRead( getANTsRData("r16") , 2 )
+result <- iMath(iMath(fi, "Laplacian", 1), "GD", 3)
+```
+
   One can do:
-  
-  ```{r}
-  require(magrittr)
-  result <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3) 
-  ```
+
+```{r}
+require(magrittr)
+result <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
+```
 
 ##Other operations
 
@@ -199,3 +200,11 @@ another package that `ANTsR` depends on, `magrittr`. For example, instead of:
 |Normalize| `img %>% iMath("Normalize")` |Creates image negative|
 |TruncateImageIntensity| `img %>% iMath("TruncateImageIntensity", 0.05, 0.95)`|Trims intensities by quantiles|
 |Sharpen| `img %>% iMath("Sharpen")` | Makes edges sharper|
+
+
+
+## All iMath operations
+```{r, results='asis',echo=FALSE}
+data("iMathOps")
+kable( iMathOps , caption = "Valid iMath Operations", padding = 0 )
+```
