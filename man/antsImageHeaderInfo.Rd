@@ -26,9 +26,7 @@ outputs a list containing:
 Read file info from image header
 }
 \examples{
-\dontrun{
-t = antsImageHeaderInfo( "testimage.nii.gz")
-}
+antsImageHeaderInfo( getANTsRData("r16") )
 }
 \author{
 Duda JT
