@@ -3,20 +3,22 @@
 #' uses a label image to crop a smaller image from within a larger image
 #'
 #' @param image antsImage to crop
-#' @param labelImage antsImage with label values
+#' @param labelImage antsImage with label values.  
+#'  If not supplied, estimated from data.
 #' @param label the label value to use
 #' @return subimage
 #' @author Brian B. Avants, Nicholas J. Tustison
 #' @keywords crop, extract sub-image
 #' @examples
 #'
-#' fi <- antsImageRead( getANTsRData("r16") ,2)
-#' mask <- getMask( fi )
-#' cropped <- cropImage( fi, mask, 1 )
-#' cropped <- cropImage( fi, fi, 250 )
+#' fi <- antsImageRead(getANTsRData("r16"), 2)
+#' cropped <- cropImage(fi)
+#' cropped <- cropImage(fi, fi, 250)
 #'
 #' @export cropImage
 cropImage <- function( image, labelImage, label=1 ) {
+  if(missing(labelImage))
+    labelImage <- getMask(image)
   if ( image@pixeltype != "float" | labelImage@pixeltype != "float" ) {
     stop("input images must have float pixeltype")
   }
