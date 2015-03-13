@@ -4,29 +4,37 @@
 \alias{plot.antsImage}
 \title{Plotting an image slice or multi-slice with optional color overlay.}
 \usage{
-\method{plot}{antsImage}(x, y, color = c("jet", "red", "blue", "green",
-  "yellow"), axis = 2, slices, window.img = quantile(x[x != 0], c(0.05,
-  0.95)), threshold = c(0.5, Inf), quality = 4, outname = NA,
-  alpha = 0.5, newwindow = FALSE, ...)
+\method{plot}{antsImage}(x, y, color.img = "white", color.overlay = c("jet",
+  "red", "blue", "green", "yellow"), axis = 2, slices,
+  colorbar = missing(y), title.colorbar, title.img, color.colorbar,
+  window.img = quantile(x[x != 0], c(0.05, 0.95)), window.overlay,
+  quality = 4, outname = NA, alpha = 0.5, newwindow = FALSE, ...)
 }
 \arguments{
-\item{x}{the reference image on which to overlay}
+\item{x}{the reference image on which to overlay.}
 
-\item{y}{list of the images to use as overlays}
+\item{y}{image or list of images to use as overlays.}
 
-\item{color}{the color for the overlay , e.g c('blue','red') length
-of this list should match the image list}
+\item{color.img}{color for main image.}
+
+\item{color.overlay}{the color for the overlay , e.g c('blue','red') length
+of this list should match the image list.}
 
 \item{axis}{... the axis to slice (1 , 2 or 3)}
 
-\item{slices}{character, the slices to overlay written as 10x20x3 ( or TODO
-c(5,10,25) ) where 10x20 is the range and 3 is the increment,
-for multislice display}
+\item{slices}{vector of slices to plot (e.g., c(10, 15, 20))}
 
-\item{window.img}{intensity windowing}
+\item{colorbar}{make colorbar?}
 
-\item{threshold}{vector we overlay values above/below this
-threshold : of form c(LO,HI)}
+\item{title.colorbar}{title for colorbar}
+
+\item{title.img}{title for main image}
+
+\item{color.colorbar}{color scale to use for colorbar}
+
+\item{window.img}{lower and upper thresholds for display of main image}
+
+\item{window.overlay}{lower and upper thresholds for display of overlay}
 
 \item{quality}{integer quality magnification factor 1 => large (e.g.
 10)}
@@ -69,7 +77,7 @@ plot(img, list(mask))
   ofn<-paste(tempfile(),'.png',sep='')
   # write directly to a file
   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-   threshold = c(0.25,1), axis=2,color=c('red','blue'), outname = ofn )
+   window.overlay = c(0.25,1), axis=2,color=c('red','blue'), outname = ofn )
 }
 }
 \author{
