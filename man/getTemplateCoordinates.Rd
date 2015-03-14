@@ -38,7 +38,7 @@ This is a standard approach but it's not very accurate.
 #  but you can do something with any other image
 #  e.g. a statistical image
 #
-  tem<-antsImageRead("ch2bet.nii.gz",3)
+  tem<-antsImageRead(getANTsRData("ch2"),3)
   clust <- antsImageClone( tem )
   clust[ tem < 80 ]<- 0
   clust[ tem > 90 ]<- 0

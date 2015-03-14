@@ -24,7 +24,7 @@
 #' #  but you can do something with any other image
 #' #  e.g. a statistical image
 #' #
-#'   tem<-antsImageRead("ch2bet.nii.gz",3)
+#'   tem<-antsImageRead(getANTsRData("ch2"),3)
 #'   clust <- antsImageClone( tem )
 #'   clust[ tem < 80 ]<- 0
 #'   clust[ tem > 90 ]<- 0
@@ -79,16 +79,18 @@ getTemplateCoordinates <- function(
   }
   txfn <- paste(outprefix, "0GenericAffine.mat", sep = "")
   if (!file.exists(txfn))
-    mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("Affine"),
+    mytx <- antsRegistration(fixed = fi, moving = mi,
+      typeofTransform = c("Affine"),
       outprefix = outprefix) else mytx <- list(fwdtransforms = txfn)
-  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi, transformlist = mytx$fwdtransforms,
+  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi,
+    transformlist = mytx$fwdtransforms,
     interpolator = c("Linear"))
   milab <- imagePairToBeLabeled[[2]]
   mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
     interpolator = c("NearestNeighbor"))
   pointfile <- paste(outprefix, "coords.csv", sep = "")
-  imageMath(milab@dimension, pointfile, "LabelStats", mywarpedLimage, mywarpedLimage,
-    1)
+  imageMath(milab@dimension, pointfile, "LabelStats",
+    mywarpedLimage, mywarpedLimage, 1)
   mypoints <- read.csv(pointfile)
   for (mylab in 2:length(templatePairWithLabels)) {
     filab <- templatePairWithLabels[[mylab]]
@@ -111,6 +113,8 @@ getTemplateCoordinates <- function(
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
       if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
+        print( filab)
+        print( mypoint )
       templateLab[i] <- .getValueAtPoint(filab, mypoint)
     }
     if (mylab == 2)
@@ -167,6 +171,7 @@ getTemplateCoordinates <- function(
     }
     mypoints$AAL <- aalnames
   }
-  return(list(templatepoints = mypoints, myLabelsInTemplateSpace = mywarpedLimage,
+  return(list(templatepoints = mypoints,
+    myLabelsInTemplateSpace = mywarpedLimage,
     myImageInTemplateSpace = mywarpedimage))
 }
