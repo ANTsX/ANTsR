@@ -17,11 +17,11 @@
 #'
 #' # make some simulated images and convert them to a matrix
 #'
-#'   n <- 8
+#'   n <- 2
 #'   tdir<-tempdir()
 #'   for ( i in 1:n ) {
 #'     simimg<-as.antsImage( replicate(64, rnorm(64) ) )
-#'     antsImageWrite( simimg, paste(tdir,"/image",i,".mha",sep=""))
+#'     antsImageWrite( simimg, tempfile(fileext='.mha'))
 #'   }
 #'   imageList = list.files(tdir, pattern = ".mha", full.names = TRUE)
 #'   mask = getMask( antsImageRead( imageList[1] , 2 ) )

@@ -60,15 +60,15 @@ mi2<-antsImageRead( getANTsRData("r30") ,2)
 mi3<-antsImageRead( getANTsRData("r62") ,2)
 mi4<-antsImageRead( getANTsRData("r64") ,2)
 mi5<-antsImageRead( getANTsRData("r85") ,2)
-refmask<-getMask(ref,mean(ref),Inf,1)
-refmask<-iMath(refmask,"ME",10) # just to speed things up
+refmask<-getMask(ref)
+refmask<-iMath(refmask,"ME",2) # just to speed things up
 ilist<-list(mi,mi2,mi3,mi4,mi5)
 seglist<-list()
 for ( i in 1:length(ilist) )
  {
  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-   typeofTransform = c("Affine"), outprefix=tempfile() )
+   typeofTransform = c("Affine") )
  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage

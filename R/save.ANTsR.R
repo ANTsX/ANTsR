@@ -7,11 +7,12 @@
 #' @param env Environment to save from or load to.
 #' @param ... Additional arguments to pass to \code{save}.
 #' @examples
+#' \dontrun{ # causes problems with devtools::run_examples()
 #' a <- 1
-#' b <- c(2,3,4)
-#' img <- antsImageRead(getANTsRData('r16'), 2)
-#' save.ANTsR(objects=c('b', 'img'))
+#' b <- c( 2, 3, 4)
+#' save.ANTsR(objects=c('b', 'a'))
 #' load.ANTsR("./.ANTsRsession")
+#' }
 #' @rdname save.ANTsR
 #' @export
 save.ANTsR <- function(filename="./.ANTsRsession", objects=NA,

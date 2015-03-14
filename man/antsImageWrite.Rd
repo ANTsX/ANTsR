@@ -19,7 +19,7 @@ Write an image object of S4 class \code{antsImage} to a file.
 }
 \examples{
 fn <- getANTsRData( "r16" )
-fi <- antsImageRead( fn , 2 )
+fi <- antsImageRead( fn )
 antsImageWrite( fi , tempfile( fileext = ".nii.gz" ) )
 antsImageWrite( fi , tempfile( fileext = ".mha" ) )
 antsImageWrite( fi , tempfile( fileext = ".nrrd" ) )
