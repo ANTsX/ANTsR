@@ -304,7 +304,9 @@ plot.antsImage <- function(x, y,
     invisible(return())
   }
   if ( ! all( is.na(functional) ) )
+  {
   for (ind in 1:length(functional)) {
+
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
     if ( exists("plotimask") ) # the label image
       labimg <- as.array(  cropImage(functional[[ind]], plotimask ) )
@@ -395,11 +397,14 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
+      {
       invisible( suppressWarnings(
         plot(
           pixmap::pixmapIndexed(biglab,
             col = heatvals, bbox = bbox), add = TRUE) ) )
-  }
+      }
+  } # for loop
+  } # if not all na functional
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname))
