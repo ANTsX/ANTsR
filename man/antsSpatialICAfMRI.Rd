@@ -42,12 +42,12 @@ be performed prior to calling this function (cf preprocessfMRI.R).
 \examples{
 set.seed( 123 )
 boldImages <- list()
-nvox <- 5*5*5*10
-dims <- c(5,5,5,10)
-boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[4]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
+nvox <- 8*8*8*10
+dims <- c(8,8,8,10)
+boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
+boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
+boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
+boldImages[[4]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
 
 cleanBoldImages <- list()
 for( i in 1:length( boldImages ) )

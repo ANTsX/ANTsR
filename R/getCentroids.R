@@ -5,6 +5,7 @@
 #'
 #' @param img the image to reduce to centroids - presumably some kind of
 #' statistical or network map
+#' @param clustparam look at regions greater than or equal to this size
 #' @param outprefix prefix if you want to output to a file
 #' @return the centroids are output in matrix of size npoints by 3
 #' @author Avants BB
@@ -15,7 +16,7 @@
 #' cents<-getCentroids( img  )
 #'
 #' @export getCentroids
-getCentroids <- function(img, clustparam = 250, threshparam = NA, outprefix = NA) {
+getCentroids <- function(img, clustparam = 250, outprefix = NA) {
   if (nargs() == 0 | missing(img)) {
     print(args(getCentroids))
     return(1)
