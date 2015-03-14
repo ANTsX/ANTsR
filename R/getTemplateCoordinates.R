@@ -113,8 +113,6 @@ getTemplateCoordinates <- function(
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
       if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
-        print( filab)
-        print( mypoint )
       templateLab[i] <- .getValueAtPoint(filab, mypoint)
     }
     if (mylab == 2)
