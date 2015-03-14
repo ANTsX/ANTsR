@@ -19,8 +19,8 @@ Uses weighted regression to compute pairwise correlation matrix on input
 matrix - by columns.
 }
 \examples{
-mat <- matrix(c(rep(1,100),rep(0,20)),ncol=10)
-wcmat<-corw( mat , weights = rep(1,ncol(mat) ) )
+mat <- matrix( rnorm(100), nrow=10 )
+wcmat<-corw( mat , weights = abs( nrorm( nrow(mat) ) ) )
 }
 \author{
 Avants BB

@@ -33,13 +33,13 @@ mask<-fi
 mask[ mask > 0 ]<-1
 mask2<-mask
 mask2[11:20,11:20]<-2
-mask<-as.antsImage( mask2 , 'float' )
-fi<-as.antsImage( fi , 'float' )
-fi<-smoothImage(fi,3)
-painted<-basicInPaint(fi,mask)
+mask<-as.antsImage( mask2  )
+fi<-as.antsImage( fi )
+fi<-smoothImage( fi, 3 )
+painted<-basicInPaint( fi, mask )
 \dontrun{
-lmask<-antsImageRead('brainmask.nii.gz',2)
-limg<-antsImageRead('r16slice_lesion.nii.gz',2)
+lmask<-antsImageRead( "brainmask.nii.gz", 2 )
+limg<-antsImageRead( "r16slice_lesion.nii.gz", 2 )
 mm<-basicInPaint(limg,lmask)
 plot(mm)
 mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)

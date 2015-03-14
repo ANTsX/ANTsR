@@ -17,7 +17,6 @@
 #' @param m0 known M0 if any
 #' @param skip stride to speed up robust regression weight estimates
 #' @param mask known brain mask
-#' @param interpolation e.g. 'linear'
 #' @param checkmeansignal throw out volumes with mean lower than this thresh
 #' @param moco_results passes prior motion results so moco does not get repeated
 #' @param regweights known temporal weights on regression solution, if any
@@ -56,7 +55,6 @@ aslPerfusion <- function(
   m0 = NA,
   skip = 20,
   mask = NA,
-  interpolation = "linear",
   checkmeansignal = 100,
   moco_results = NULL,
   regweights = NULL,
@@ -164,11 +162,8 @@ aslPerfusion <- function(
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
   }
   # Get perfusion time series
-  perfusionTimeSeries <- #antsImageClone(moco_results$moco_img)
-    new("antsImage", "float", 4)
-  imageMath(4, perfusionTimeSeries,
-    "TimeSeriesInterpolationSubtraction", asl,
-    interpolation)
+  perfusionTimeSeries <- antsImageClone( asl )
+  imageMath(4, perfusionTimeSeries, "TimeSeriesSimpleSubtraction", asl )
   perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
   perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
 

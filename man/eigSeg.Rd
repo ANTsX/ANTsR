@@ -25,12 +25,10 @@ has the largest value.  If the 3rd image has the greatest value, the
 segmentation label will be 3 at that voxel.
 }
 \examples{
-\dontrun{
-mylist<-list(image1,image2)
-# both approaches below are ok
-myseg<-eigSeg( mask, mylist )
-myseg<-eigSeg( mask, c('a.nii.gz','b.nii.gz')  )
-}
+mylist<-list( antsImageRead( getANTsRData("r16") ),
+  antsImageRead( getANTsRData("r27") ),
+  antsImageRead( getANTsRData("r85") ) )
+myseg<-eigSeg( getMask( mylist[[1]] ) , mylist )
 }
 \author{
 Avants BB

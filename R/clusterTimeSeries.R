@@ -12,7 +12,7 @@
 #' @examples
 #'
 #' \dontrun{
-#'   if (!exists('fn') ) fn<-'PEDS029_20101110_pcasl_1.nii.gz'
+#'   if (!exists("fn") ) fn<-getANTsRData("pcasl")
 #'    # high motion subject
 #'   asl<-antsImageRead(fn,4)
 #'   tr<-antsGetSpacing(asl)[4]
@@ -24,14 +24,11 @@
 #'     {
 #'     sel<-clustasl$clusters != ct
 #'     img<-matrix2timeseries( asl, aslmask, omat[sel,] )
-#'     perf <- aslPerfusion( img, interpolation='linear',
+#'     perf <- aslPerfusion( img, interpolation="linear",
 #'       dorobust=0.9, useDenoiser=4, skip=10, useBayesian=0,
 #'       moreaccurate=0, verbose=F, mask=aslmask )
 #'     perfp <- list( sequence="pcasl", m0=perf$m0 )
 #'     cbf <- quantifyCBF( perf$perfusion, perf$mask, perfp )
-#'     ofn<-paste('temp',ct,'.nii.gz',sep='')
-#'     antsImageWrite( cbf$kmeancbf , ofn )
-#'     ct<-ct+1
 #'     }
 #'   }
 #'

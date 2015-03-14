@@ -10,11 +10,6 @@ getCentroids(img, clustparam = 250, threshparam = NA, outprefix = NA)
 \item{img}{the image to reduce to centroids - presumably some kind of
 statistical or network map}
 
-\item{clustparam}{ignore post-threshold clusters smaller than this value}
-
-\item{threshparam}{thresholds the input image at mean( img[ img > 0 ] ) -
-threshparam * sdev( img[ img > 0 ] )}
-
 \item{outprefix}{prefix if you want to output to a file}
 }
 \value{
@@ -25,9 +20,10 @@ Reduces a variate/statistical/network image to a set of centroids describing
 the center of each stand-alone non-zero component in the image.
 }
 \examples{
-\dontrun{
- getCentroids( f  , clustparam = 250, threshparam = 0 )
-}
+img<-antsImageRead( getANTsRData( "r16" ) )
+img<-thresholdImage( img, 90, 120 )
+img<-labelClusters( img, 10 )
+cents<-getCentroids( img  )
 }
 \author{
 Avants BB

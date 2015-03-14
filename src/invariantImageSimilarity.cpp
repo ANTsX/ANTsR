@@ -210,7 +210,7 @@ SEXP invariantSimilarityHelper(
       {
       // Rcpp::Rcerr << " zero image1 error ";
       }
-    if ( vnl_math_abs(bestscale-1) < 1.e-6 )
+    if ( vnl_math_abs( bestscale - 1.0 ) < 1.e-6 )
       {
       RealType volelt1 = 1;
       RealType volelt2 = 1;
