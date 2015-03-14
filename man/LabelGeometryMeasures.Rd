@@ -23,6 +23,6 @@ seg<-kmeansSegmentation( fi, 3 )$segmentation
 geom<-labelGeometryMeasures(seg,fi)
 }
 \author{
-Avants BB
+Avants BB, Tustison NJ
 }
 
