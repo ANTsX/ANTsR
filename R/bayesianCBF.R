@@ -57,7 +57,7 @@ if ( useDataDrivenMask > 0 )
   seg[mask2==0]<-0
   }
 aslmat<-timeseries2matrix(pcasl, mask)
-perfpro <- aslPerfusion( pcasl, interpolation="linear", skip=10,
+perfpro <- aslPerfusion( pcasl, skip=10,
         dorobust=robustnessvalue, useDenoiser=denoisingComponents,
         moreaccurate=motionAcc, verbose=1, mask=mask, useBayesian=0,
         ncompcor=compcorComponents )
