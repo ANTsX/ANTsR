@@ -50,7 +50,7 @@ of other organ systems are also emerging and being applied clinically [@deMarvao
 
 ## ANTs*R* Algorithms
 
-Here, we provide an overivew of the methods available within ANTs*R*.
+Here, we provide an overview of the methods available within ANTs*R*.
 
 - core image processing and I/O: ITK [@Avants2014a];
 
@@ -131,18 +131,17 @@ We test ANTs*R* regularly.  The status of the build (and an expected build
 If nothing else, ANTs*R* makes it easy to read and write (medical) images
 and to map them into a format compatible with *R*.  Formats we frequently use
 include jpg, tiff, mha, nii.gz and nrrd. However, only the last three have a
-proper physical space representation necessary for mapping.  Below is an example of how we access this type of image and see its geometry.
+proper physical space representation necessary for mapping.  Below is an example of how we access this type of image and see its geometry.  Check `antsImageWrite` for the primary supported I/O.
 
-```{r physical space,eval=runLongExamples}
-mnifilename<-getANTsRData("mni")
-dimension<-3 # you have to know this ahead of time
-img<-antsImageRead(mnifilename,dimension)
+```{r physical space}
+mnifilename<-getANTsRData("r27")
+img<-antsImageRead(mnifilename)
 img
 retval<-antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)
-print(getPixels(img,50,60,44))
+print(img[120,122]) # same type of thing in 3 or 4D
 print(max(img))
 ```
 
@@ -245,9 +244,7 @@ penalty [@Avants2011]. Note that we also bias correct the image to help it match
 fi<-antsImageRead( getANTsRData("r16") ,2)
 fi<-n3BiasFieldCorrection(fi,2)
 seg<-kmeansSegmentation( fi, 3 )
-segview<-as.antsImage( rbind(as.array(iMath(fi,"Normalize")),
-  as.array(iMath(seg$segmentation,"Normalize"))))
-invisible(plot(segview))
+invisible(plot(seg$segmentation))
 ```
 
 If you like segmentation, also look at `rfSegmentation` and `atropos`.
@@ -261,9 +258,9 @@ simple wrapper for SyN image registration [@Tustison2013],
 mi<-antsImageRead( getANTsRData("r64") ,2)
 mytx<-antsRegistration(fixed=fi , moving=mi ,
     typeofTransform = c('SyN'))
-regresult<-as.antsImage( rbind( as.array(iMath(mytx$warpedmovout,"Normalize")),
-  as.array(iMath(fi,"Normalize")) ) )
-invisible(plot(regresult))
+regresult<-iMath(mytx$warpedmovout,"Normalize")
+fiedge<-iMath(fi,"Canny",1,5,12)
+invisible(plot(regresult, list(fiedge), window.overlay=c(0.5,1)) )
 ```
 
 while `invariantImageSimilarity` provides powerful multi-start search for
