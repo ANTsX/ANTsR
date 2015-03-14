@@ -146,12 +146,12 @@ plot.antsImage <- function(x, y,
   image270 <- function(z, ...) {
     image(rotate270.matrix(z), ...)
   }
-  makePalette <- function(color, nlevels=15){
-    if (color == "white"){
+  makePalette <- function( mpcolor, nlevels=15){
+    if (mpcolor == "white"){
       colorfun <- colorRampPalette(c("black", "white"), interpolate = c("spline"),
         space = "Lab")
-    } else if (color != "jet"){
-      colorfun <- colorRampPalette(c("white", color), interpolate = c("spline"),
+    } else if (mpcolor != "jet"){
+      colorfun <- colorRampPalette(c("white", mpcolor), interpolate = c("spline"),
         space = "Lab")
     } else {
       colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
@@ -378,7 +378,7 @@ plot.antsImage <- function(x, y,
     heatvals <- heat.colors(nlevels, alpha = alpha)
     heatvals <- rainbow(nlevels, alpha = alpha)
     if (color.overlay[ind] != "jet")
-      colorfun <- colorRampPalette(c("white", color[ind]), interpolate = c("spline"),
+      colorfun <- colorRampPalette(c("white", color.overlay[ind]), interpolate = c("spline"),
         space = "Lab")
     if (color.overlay[ind] == "jet") {
       # print('use jet')
