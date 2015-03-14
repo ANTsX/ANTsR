@@ -62,8 +62,8 @@ this function by a scalar.
 # fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 # asl<-antsImageRead(fn,4)
 set.seed(1)
-nvox <- 10*10*10*20
-dims <- c(10,10,10,20)
+nvox <- 5*5*5*10
+dims <- c(5,5,5,10)
 asl <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
 aslmean <- getAverageOfTimeSeries( asl )
 aslmask <- getMask( aslmean , 0.001 , Inf )

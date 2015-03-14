@@ -30,8 +30,8 @@
 #'
 #' set.seed( 123 )
 #' boldImages <- list()
-#' nvox <- 10*10*10*20
-#' dims <- c(10,10,10,20)
+#' nvox <- 5*5*5*10
+#' dims <- c(5,5,5,10)
 #' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
 #' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
 #' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )

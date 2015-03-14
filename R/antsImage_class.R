@@ -21,7 +21,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @param .Object input object to convert
 #' @param pixeltype string e.g. "float" "unsigned char" "int"
 #' @param dimension dimensionality of the image
-#' @param components number of components per pixel'
+#' @param components number of components per pixel
 #' @param x input object to convert
 #' @param mask mask for the region
 #' @param region antsRegion for the image
@@ -30,6 +30,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
+#' @slot components number of pixel components
 #' @slot pointer the memory location
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   components = "integer", pointer = "externalptr"))
