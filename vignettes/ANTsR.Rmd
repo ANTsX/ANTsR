@@ -14,7 +14,7 @@ vignette: >
 ```{r global options, include=FALSE}
 library(knitr)
 library(ANTsR)
-runLongExamples<-TRUE
+runLongExamples<-FALSE
 ```
 
 > "A small leak will sink a great ship."
@@ -294,8 +294,8 @@ Basic I/O and management of images as vectors is critical. However, there is
 additional information that can be gained by representing an image and its
 neighborhood information.  ANTs*R* represents image neighborhoods, which capture shape and texture, as a matrix.  Here, extract an image neighborhood matrix representation such that we may analyze it at a given scale.
 ```{r nhood}
-mnit<-getANTsRData("mni")
-mnit<-antsImageRead(mnit,3)
+mnit<-getANTsRData("r16")
+mnit<-antsImageRead( mnit )
 mnit <- resampleImage( mnit , rep(4, mnit@dimension) ) # downsample
 mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)

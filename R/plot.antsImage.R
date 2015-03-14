@@ -292,15 +292,18 @@ plot.antsImage <- function(x, y,
   } else {
 #    window.overlay <- NA
   }
+  if ( ! missing( window.overlay ) )
   if ( typeof(window.overlay) == "character" ){
     window.overlay <- c(as.numeric(unlist(strsplit(window.overlay, "x"))))
   }
+  if ( ! missing( window.overlay ) )
   if ( ( window.overlay[1] > window.overlay[2] ) |
          all( is.na( functional ) ) ) {
     if (!is.na(outname))
       dev.off()
     invisible(return())
   }
+  if ( ! all( is.na(functional) ) )
   for (ind in 1:length(functional)) {
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
     if ( exists("plotimask") ) # the label image
