@@ -24,10 +24,10 @@ Save and load ANTsR sessions.
 }
 \examples{
 \dontrun{ # causes problems with devtools::run_examples()
-a <- 1
-b <- c( 2, 3, 4)
-save.ANTsR(objects=c('b', 'a'))
-load.ANTsR("./.ANTsRsession")
+# a <- 1
+# b <- c( 2, 3, 4)
+# save.ANTsR(objects=c('b', 'a'))
+# load.ANTsR("./.ANTsRsession")
 }
 }
 

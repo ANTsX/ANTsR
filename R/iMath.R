@@ -13,6 +13,7 @@
 #' @param ... further parameter options
 #' @author BB Avants
 #' @examples
+#'
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
 #' mask<-getMask( fi )
 #' op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel

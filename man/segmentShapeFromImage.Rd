@@ -36,16 +36,6 @@ segs[ segs != 1 ]<-0
 shp<-labelClusters( segs,1)
 shp[ shp != 1 ]<-0
 fimg<-segmentShapeFromImage(fi,shp,mask)
-
-\dontrun{
-fi<-antsImageRead( getANTsRData("r16") ,2)
-mask<-getMask(fi,0.8,Inf,0)
-segs<-kmeansSegmentation( fi , 10 , mask)$segmentation
-segs[ segs != 8 ]<-0
-shp<- segs \%>\% iMath("ME",1) \%>\% labelClusters( 2 )
-shp[ shp != 23 ]<-0
-plot( segmentShapeFromImage(fi,shp,mask) )
-}
 }
 \author{
 Brian B. Avants
