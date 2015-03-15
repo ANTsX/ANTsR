@@ -43,6 +43,8 @@
 #'
 #' fi <- antsImageRead(getANTsRData("r16") ,2)
 #' mi <- antsImageRead(getANTsRData("r64") ,2)
+#' fi<-resampleImage(fi,c(60,60),1,0)
+#' mi<-resampleImage(mi,c(60,60),1,0) # speed up
 #' mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
 #' mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
 #'   transformlist=mytx$fwdtransforms )
