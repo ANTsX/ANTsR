@@ -39,7 +39,7 @@ if [[ ! -s antb/Makefile  ]] ; then
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
-    -DCMAKE_INSTALL_PREFIX:PATH=${PWD}/itkinst/  \
+    -DCMAKE_INSTALL_PREFIX:PATH=../itki/  \
     -DITK_LEGACY_REMOVE:BOOL=OFF  \
     -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON \
     -DITKV3_COMPATIBILITY:BOOL=ON \
@@ -73,7 +73,7 @@ if [[ ! -s antb/Makefile  ]] ; then
   fi
   # rm -r -f .git
   cd ../antb
-  cmake -DITK_DIR:PATH=../itkb/ \
+  cmake -DITK_DIR:PATH=../itki/ \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
     -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
     -DBUILD_SHARED_LIBS=OFF \
