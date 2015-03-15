@@ -20,7 +20,7 @@
 #' @examples
 #'
 #' \dontrun{
-#'   dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
+#'   # dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
 #' }
 #'
 #' @export pairwiseImageDistanceMatrix

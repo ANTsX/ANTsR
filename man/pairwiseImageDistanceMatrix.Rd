@@ -32,7 +32,7 @@ dissimilarity is returned in the matrix.
 }
 \examples{
 \dontrun{
-  dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
+  # dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
 }
 }
 \author{
