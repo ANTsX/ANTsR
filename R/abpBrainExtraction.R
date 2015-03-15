@@ -72,9 +72,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
   if (!file.exists(initafffn))
-    antsAffineInitializer(img@dimension, temsmall, imgsmall,
-      initafffn, 15, 0.1, 0, 10)
-  # FIXME - should add mask in above call
+    temp<-affineInitializer(
+      fixedImage=temsmall, movingImage=imgsmall,
+      searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
+      localSearchIterations=10, txfn=initafffn )
 
   # get laplacian images
   lapi <- antsImageClone(img)
