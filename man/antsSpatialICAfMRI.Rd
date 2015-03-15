@@ -42,21 +42,17 @@ be performed prior to calling this function (cf preprocessfMRI.R).
 \examples{
 set.seed( 123 )
 boldImages <- list()
-nvox <- 10*10*10*20
-dims <- c(10,10,10,20)
-boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-boldImages[[4]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
+nvox <- 8*8*8*10
+dims <- c(8,8,8,10)
+boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
+boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
+boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 4 )
 
 cleanBoldImages <- list()
 for( i in 1:length( boldImages ) )
   {
   fmri <- preprocessfMRI( boldImages[[i]] )
-  if( i == 1 )
-    {
-    maskImage <- fmri$maskImage
-    }
+  if( i == 1 ) maskImage <- fmri$maskImage
   cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }
 
@@ -68,7 +64,6 @@ componentImages <- icaResults$componentImages
 for( i in 1:length( icaResults$componentImages ) )
   {
   componentFileName <- paste0( 'componentImage', i, '.nii.gz' )
-  cat( 'Writing ', componentFileName, '.\\n' )
   # antsImageWrite( componentImages[[i]], componentFileName )
  }
 }

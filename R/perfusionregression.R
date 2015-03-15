@@ -22,8 +22,8 @@
 #' @examples
 #'
 #' \dontrun{
-#' # predictors -- result of calling '.get_perfusion_predictors'
-#' cbf <- perfusionregression( mask_img, mat , predictors$xideal , predictors$nuis )
+#' #
+#' # cbf <- perfusionregression( mask_img, mat, xideal , nuis )
 #' }
 #'
 #' @export perfusionregression

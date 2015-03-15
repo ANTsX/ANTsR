@@ -1,4 +1,4 @@
-#' imageMath
+#' R access to the ANTs program ImageMath
 #'
 #' Perform math-operations on the given image.  The first argument should
 #' be dimensionality, the 2nd the output image, the third a string

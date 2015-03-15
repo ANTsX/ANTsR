@@ -63,6 +63,9 @@ is a WIP.
 }
 \examples{
 \dontrun{
+if (!exists("fn") ) fn<-getANTsRData("pcasl")
+img<-antsImageRead( fn )
+mask<-getMask( getAverageOfTimeSeries( img )  )
 fmat<-timeseries2matrix( img, mask )
 myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
 }

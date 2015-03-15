@@ -29,23 +29,12 @@ other results-oriented processing.
 }
 \examples{
 \dontrun{
-# set moreaccurate=T for final results
-dd<-getfMRInuisanceVariables( bold, maskThresh=100 , moreaccurate=F )
-tsResid<-residuals( lm( dd$matrixTimeSeries ~
-    dd$globalsignal + dd$nuisancevariables ))
-mynetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4,
-   mask=dd$mask ,cbfnetwork = 'BOLD',
-  labels = aalImageLabels , graphdensity = 0.25 )
-# use colnames( dd$nuisancevariables ) to see nuisance variables
-
-ee<-getfMRInuisanceVariables( pcasl, mask = pcaslmask ,
-   moreaccurate=F )
-tsResid<-residuals( lm( ee$matrixTimeSeries ~
-    ee$globalsignalASL + ee$nuisancevariables ))
-myASLnetwork<-filterfMRIforNetworkAnalysis( tsResid , tr=4,
-   mask=ee$mask ,cbfnetwork = 'ASLCBF', labels = aal2asl ,
-   graphdensity = 0.25 )
-# use colnames( dd$nuisancevariables ) to see nuisance variables
+if (!exists("fn") ) fn<-getANTsRData("pcasl")
+pcasl<-antsImageRead( fn )
+aslmean<-getAverageOfTimeSeries( pcasl )
+aslmask<-getMask(aslmean)
+ee<-getfMRInuisanceVariables( pcasl, mask = aslmask ,
+        moreaccurate=F )
 }
 }
 \author{

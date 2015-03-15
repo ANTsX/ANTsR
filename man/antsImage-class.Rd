@@ -69,7 +69,7 @@
 
 \item{dimension}{dimensionality of the image}
 
-\item{components}{number of components per pixel'}
+\item{components}{number of components per pixel}
 
 \item{x}{input object to convert}
 
@@ -128,6 +128,8 @@ actual image is of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 etc noting that short is not supported}
 
 \item{\code{dimension}}{usually 2 or 3 but can be 4}
+
+\item{\code{components}}{number of pixel components}
 
 \item{\code{pointer}}{the memory location}
 }}

@@ -5,10 +5,9 @@
 \title{ASL-based Perfusion from PASL, CASL or pCASL.}
 \usage{
 aslPerfusion(asl, maskThresh = 0.75, moreaccurate = 1, dorobust = 0.92,
-  m0 = NA, skip = 20, mask = NA, interpolation = "linear",
-  checkmeansignal = 100, moco_results = NULL, regweights = NULL,
-  useDenoiser = NA, useBayesian = 0, verbose = FALSE, ncompcor = 0,
-  N3 = FALSE)
+  m0 = NA, skip = 20, mask = NA, checkmeansignal = 100,
+  moco_results = NULL, regweights = NULL, useDenoiser = NA,
+  useBayesian = 0, verbose = FALSE, ncompcor = 0, N3 = FALSE)
 }
 \arguments{
 \item{asl}{input asl image}
@@ -24,8 +23,6 @@ aslPerfusion(asl, maskThresh = 0.75, moreaccurate = 1, dorobust = 0.92,
 \item{skip}{stride to speed up robust regression weight estimates}
 
 \item{mask}{known brain mask}
-
-\item{interpolation}{e.g. 'linear'}
 
 \item{checkmeansignal}{throw out volumes with mean lower than this thresh}
 
@@ -62,8 +59,8 @@ this function by a scalar.
 # fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 # asl<-antsImageRead(fn,4)
 set.seed(1)
-nvox <- 10*10*10*20
-dims <- c(10,10,10,20)
+nvox <- 5*5*5*10
+dims <- c(5,5,5,10)
 asl <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
 aslmean <- getAverageOfTimeSeries( asl )
 aslmask <- getMask( aslmean , 0.001 , Inf )

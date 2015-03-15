@@ -54,27 +54,13 @@ typeofTransform can be one of:
 }
 }
 \examples{
-\dontrun{
-# will give the full form of help
-antsRegistration("-h")
 fi <- antsImageRead(getANTsRData("r16") ,2)
 mi <- antsImageRead(getANTsRData("r64") ,2)
-mytx <- antsRegistration(fixed=fi, moving=mi,
-  typeofTransform = c('SyN'),
-  outprefix=paste(tempdir(),'/Z',sep=''))
-mywarpedimage <- antsApplyTransforms(fixed=fi,moving=mi,
-  transformlist=mytx$fwdtransforms)
-plot(fi)
-plot(mywarpedimage)
-# example 2 - full access, only uses file-based I/O
-if ( FALSE )
-  antsRegistration(
-    list( d=2,m='mi[r16slice.nii.gz,
-    r64slice.nii.gz,1,20,Regular,0.05]',
-    t='affine[1.0]', c='2100x1200x1200x0',
-    s='3x2x1x0', f='4x3x2x1', u='1',
-    o='[xtest,xtest.nii.gz,xtest_inv.nii.gz]' ) )
-}
+fi<-resampleImage(fi,c(60,60),1,0)
+mi<-resampleImage(mi,c(60,60),1,0) # speed up
+mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
+mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
+  transformlist=mytx$fwdtransforms )
 }
 \author{
 Shrinidhi KL, Avants BB

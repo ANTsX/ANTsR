@@ -71,22 +71,22 @@ nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
 lowr<-lowrankRowMatrix(as.matrix( snps[train,] ),900)
-snpdS<-sparseDecom( lowr , nvecs=20 , sparseness=( -0.001) )
+snpdS<-sparseDecom( lowr , nvecs=2 , sparseness=( -0.001), its=3  )
 snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),100),
-  nvecs=20 , sparseness=( -0.001) )
+  nvecs=2 , sparseness=( -0.001), its=3 )
 projmat<-as.matrix( snpdS$eig )
 projmat<-as.matrix( snpdF$eig )
-snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 ,
-  sparseness=c( 1, -0.001 ) , downsample=45, verbose=T, its=20,
+snpdFast<-networkEiganat( as.matrix( snps[train,] ), nvecs=2 ,
+  sparseness=c( 1, -0.001 ) , downsample=45, verbose=T, its=3,
   gradparam=10 )
-snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=20 ,
+snpdSlow<-networkEiganat( as.matrix( snps[train,] ), nvecs=2 ,
   sparseness=c( 1, -0.001 ) , downsample=0, verbose=T,
-  its=20, gradparam=10 )
+  its=3, gradparam=10 )
 snpd<-snpdSlow
 snpd<-snpdFast
 projmat<-as.matrix( snpd$v )
 snpdF<-sparseDecom( lowrankRowMatrix(as.matrix( snps[train,] ),10) ,
-  nvecs=20 , sparseness=( -0.001) )
+  nvecs=2 , sparseness=( -0.001), its=3  )
 projmat<-as.matrix( snpdS$eig )
 snpse<-as.matrix( snps[train, ]  ) \%*\% projmat
 traindf<-data.frame( bmi=numericalpheno[train,phind] , snpse=snpse)

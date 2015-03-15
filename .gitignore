@@ -4,6 +4,7 @@
 *.o
 
 # things to ignore in directory ANTsR/src
+extdata/
 src/*.o
 src/*.so
 src/symbols.rds
@@ -13,3 +14,4 @@ src/ants/
 src/itkb/
 src/antb/
 inst/doc
+vignettes/*pdf

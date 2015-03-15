@@ -25,11 +25,14 @@ Read an image file into an S4 object of class 'antsImage'.
 }
 \examples{
 fn <- getANTsRData( "r16" )
-fi <- antsImageRead( fn , 2 )
+fi <- antsImageRead( fn )
 img <- antsImageRead( fn , dimension = 2  )
 img <- antsImageRead( fn , dimension = 2 , 'double' )
 }
 \author{
 Shrinidhi KL
+}
+\seealso{
+\code{\link{antsImageWrite}}
 }
 

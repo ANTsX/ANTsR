@@ -7,10 +7,11 @@
 #' @param filename Name of the file to write the image to.
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
+#' @seealso \code{\link{antsImageRead}}
 #' @examples
 #'
 #' fn <- getANTsRData( "r16" )
-#' fi <- antsImageRead( fn , 2 )
+#' fi <- antsImageRead( fn )
 #' antsImageWrite( fi , tempfile( fileext = ".nii.gz" ) )
 #' antsImageWrite( fi , tempfile( fileext = ".mha" ) )
 #' antsImageWrite( fi , tempfile( fileext = ".nrrd" ) )

@@ -14,6 +14,8 @@
 #' @examples
 #'
 #' \dontrun{
+#' img <- antsImageRead(  getANTsRData('r16') )
+#' img <- thresholdImage( img, 1 , Inf )
 #' imageclusterlist<-image2ClusterImages( img )
 #' }
 #'

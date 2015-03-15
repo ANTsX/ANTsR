@@ -16,7 +16,7 @@
 #' @param title.img title for main image
 #' @param color.colorbar color scale to use for colorbar
 #' @param window.img lower and upper thresholds for display of main image
-#' @param window.overlay lower and upper thresholds for display of overlay 
+#' @param window.overlay lower and upper thresholds for display of overlay
 #' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
 #' @param outname name of output file if you want to write result to file, e.g. 
@@ -48,20 +48,21 @@
 #'   ofn<-paste(tempfile(),'.png',sep='')
 #'   # write directly to a file
 #'   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-#'    window.overlay = c(0.25,1), axis=2,color=c('red','blue'), outname = ofn )
+#'     window.overlay = c(0.25,1), axis=2, 
+#'     overlay.color=c('red','blue'), outname = ofn )
 #' }
 #'
 #' @method plot antsImage
 #' @export
 plot.antsImage <- function(x, y,
-  color.img = "white", 
+  color.img = "white",
   color.overlay = c("jet", "red", "blue",  "green", "yellow"),
   axis = 2,
   slices,
   colorbar = missing(y),
   title.colorbar,
   title.img,
-  color.colorbar, 
+  color.colorbar,
   window.img = quantile(x[x!=0], c(0.05, 0.95)),
   window.overlay,
   quality = 4,
@@ -70,16 +71,17 @@ plot.antsImage <- function(x, y,
   newwindow = FALSE,
   ... ) {
   if(missing(slices)){
-    x <- cropImage(x, getMask(x, cleanup=0)) 
+    plotimask<-getMask(x, cleanup=0)
+    x <- cropImage(x, plotimask )
     nslices <- 10
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
   }
-  color.colorbar <- ifelse(missing(y), "white", color.overlay[1]) 
+  color.colorbar <- ifelse(missing(y), "white", color.overlay[1])
   myantsimage <- x
-  if (missing(y)) 
+  if (missing(y))
     y <- NA
   if (is.antsImage(y))
-    y <- list(y) 
+    y <- list(y)
   functional <- y
   imagedim <- length(dim(myantsimage))
   hvpx <- usePkg("pixmap")
@@ -145,12 +147,12 @@ plot.antsImage <- function(x, y,
   image270 <- function(z, ...) {
     image(rotate270.matrix(z), ...)
   }
-  makePalette <- function(color, nlevels=15){
-    if (color == "white"){
+  makePalette <- function( mpcolor, nlevels=15){
+    if (mpcolor == "white"){
       colorfun <- colorRampPalette(c("black", "white"), interpolate = c("spline"),
         space = "Lab")
-    } else if (color != "jet"){
-      colorfun <- colorRampPalette(c("white", color), interpolate = c("spline"),
+    } else if (mpcolor != "jet"){
+      colorfun <- colorRampPalette(c("white", mpcolor), interpolate = c("spline"),
         space = "Lab")
     } else {
       colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
@@ -191,7 +193,7 @@ plot.antsImage <- function(x, y,
   if (max(slices) > dim(myantsimage)[axis]) {
     stop("Slices do not fit in image dimensions.")
   }
-  if ( imagedim == 2 )  
+  if ( imagedim == 2 )
     slices <- 1
   nslices <- length(slices)
   winrows <- round(length(slices) / 10)
@@ -250,7 +252,7 @@ plot.antsImage <- function(x, y,
   bigslice[bigslice>window.img[2]] <- window.img[2]
   if(colorbar){
     levels <- seq(window.img[1], window.img[2], length.out=15)
-    # code taken from filled.contour 
+    # code taken from filled.contour
     mar.orig <- (par.orig <- par(c("mar", "las", "mfrow")))$mar
     on.exit(par(par.orig))
     w <- (3 + mar.orig[2L]) * par("csi") * 2.54
@@ -263,8 +265,8 @@ plot.antsImage <- function(x, y,
     plot.new()
     plot.window(xlim = c(0, 1), ylim = range(levels), xaxs = "i",
         yaxs = "i")
-    rect(0, levels[-length(levels)], 1, levels[-1L], 
-         col = makePalette(color.colorbar, 15)) 
+    rect(0, levels[-length(levels)], 1, levels[-1L],
+         col = makePalette(color.colorbar, 15))
     axis(4)
     box()
     if (!missing(title.colorbar))
@@ -281,35 +283,44 @@ plot.antsImage <- function(x, y,
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
   pixmap::plot(img.plot, bg = "white")
-  
-  if (missing(window.overlay) & !is.na(y)){
+
+  if (missing(window.overlay) & !all(is.na(y))) {
     window.overlay <- quantile(y[[1]][y[[1]] != 0], c(0.05, 0.95))
     if(window.overlay[1] == window.overlay[2]){
       window.overlay[1] <- min(y[[1]])
       window.overlay[2] <- max(y[[1]])
     }
   } else {
-    window.overlay <- NA
+#    window.overlay <- NA
   }
+  if ( ! missing( window.overlay ) )
   if ( typeof(window.overlay) == "character" ){
     window.overlay <- c(as.numeric(unlist(strsplit(window.overlay, "x"))))
   }
-  if (window.overlay[1] > window.overlay[2] | all(is.na(functional))) {
+  if ( ! missing( window.overlay ) )
+  if ( ( window.overlay[1] > window.overlay[2] ) |
+         all( is.na( functional ) ) ) {
     if (!is.na(outname))
       dev.off()
     invisible(return())
   }
+  if ( ! all( is.na(functional) ) )
+  {
   for (ind in 1:length(functional)) {
+
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
-    labimg <- as.array(functional[[ind]])  # the label image
+    if ( exists("plotimask") ) # the label image
+      labimg <- as.array(  cropImage(functional[[ind]], plotimask ) )
+    else
+      labimg <- as.array(functional[[ind]])  # the label image
     if (imagedim == 2) {
       labimg <- rotate270.matrix(labimg)
     }
     if (imagedim == 3)
       labimg <- aperm(labimg, c(perms), resize = T)
     # check sizes
-    if (!antsImagePhysicalSpaceConsistency(img, labimg))
-      stop("Image and overlay image sizes do not match.")
+#    if ( ! antsImagePhysicalSpaceConsistency( img, labimg ) )
+#      stop("Image and overlay image sizes do not match.")
     mncl <- min(labimg)
     mxcl <- max(labimg)
     temp <- labimg
@@ -367,7 +378,18 @@ plot.antsImage <- function(x, y,
     }
     if (minind > 1)
       minind <- minind - 1
-    # print(heatvals)
+    heatvals <- heat.colors(nlevels, alpha = alpha)
+    heatvals <- rainbow(nlevels, alpha = alpha)
+    if (color.overlay[ind] != "jet")
+      colorfun <- colorRampPalette(c("white", color.overlay[ind]), interpolate = c("spline"),
+        space = "Lab")
+    if (color.overlay[ind] == "jet") {
+      # print('use jet')
+      colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
+        "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
+        space = "Lab")
+    }
+    heatvals <- colorfun(nlevels)
     if (locthresh[1] > 1)
       heatvals[1:(locthresh[1] - 1)] <- NA
     if (locthresh[2] < (nlevels - 1)) {
@@ -376,11 +398,14 @@ plot.antsImage <- function(x, y,
     }
     # heatvals[1:(length(heatvals)-50 ) ]<-NA
     if (min(biglab) != max(biglab))
+      {
       invisible( suppressWarnings(
         plot(
           pixmap::pixmapIndexed(biglab,
             col = heatvals, bbox = bbox), add = TRUE) ) )
-  }
+      }
+  } # for loop
+  } # if not all na functional
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   if (!is.na(outname))

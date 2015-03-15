@@ -15,12 +15,10 @@
 #' @author Avants BB
 #' @examples
 #'
-#' \dontrun{
-#' mylist<-list(image1,image2)
-#' # both approaches below are ok
-#' myseg<-eigSeg( mask, mylist )
-#' myseg<-eigSeg( mask, c('a.nii.gz','b.nii.gz')  )
-#' }
+#' mylist<-list( antsImageRead( getANTsRData("r16") ),
+#'   antsImageRead( getANTsRData("r27") ),
+#'   antsImageRead( getANTsRData("r85") ) )
+#' myseg<-eigSeg( getMask( mylist[[1]] ) , mylist )
 #'
 #' @export eigSeg
 eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {

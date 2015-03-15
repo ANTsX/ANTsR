@@ -10,7 +10,7 @@
 #' @param sigma.sd Scalar defining how many standard deviations away from mean of standard deviations the volume must be to be rejected.
 #' @return List of ASL time-series image including only inlier pairs and vector of outlier pair numbers (numbers correspond to *input* ASL time-series).
 #' @author Benjamin M. Kandel
-#' @examples \dontrun{WIP}
+#' @examples \dontrun{ #WIP }
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslOutlierRejection
 aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,

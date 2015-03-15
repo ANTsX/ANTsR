@@ -4,10 +4,12 @@
 \alias{labelGeometryMeasures}
 \title{labelGeometryMeasures}
 \usage{
-labelGeometryMeasures(...)
+labelGeometryMeasures(labelImage, intensityImage = NA)
 }
 \arguments{
-\item{...}{see ants function}
+\item{labelImage}{on which to compute geometry}
+
+\item{intensityImage}{optional}
 }
 \value{
 none
@@ -15,7 +17,12 @@ none
 \description{
 Wrapper for the ANTs funtion labelGeometryMeasures
 }
+\examples{
+fi<-antsImageRead( getANTsRData("r16") , 2 )
+seg<-kmeansSegmentation( fi, 3 )$segmentation
+geom<-labelGeometryMeasures(seg,fi)
+}
 \author{
-Avants BB
+Avants BB, Tustison NJ
 }
 

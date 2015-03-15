@@ -18,15 +18,13 @@
 #'
 #'   # make some simple data
 #'   \dontrun{
-#'   fn<-"PEDS012_20131101_pcasl_1.nii.gz"
-#' # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
+#'   if (!exists("fn") ) fn<-getANTsRData("pcasl")
 #'   asl<-antsImageRead(fn,4)
 #'   tr<-antsGetSpacing(asl)[4]
 #'   aslmean<-getAverageOfTimeSeries( asl )
 #'   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
-#'   pcaslpre <- aslPerfusion( asl, interpolation="linear",
-#'   dorobust=0, useDenoiser=NA, skip=1, useBayesian=0,
-#'   moreaccurate=0, verbose=T, mask=aslmask ) # throw away lots of data
+#'   pcaslpre <- aslPerfusion( asl, dorobust=0, useDenoiser=NA, skip=1,
+#'      useBayesian=0, moreaccurate=0, verbose=T, mask=aslmask ) 
 #'   # user might compare to useDenoiser=FALSE
 #'   pcasl.parameters <- list( sequence="pcasl", m0=pcaslpre$m0 )
 #'   aslmat<-timeseries2matrix(asl,aslmask)

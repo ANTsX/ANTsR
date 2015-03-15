@@ -79,10 +79,10 @@ for erosion and maximum for dilation (ITK rules).
   * Morphological closing of a binary image: operation `MC` fill holes with the
     provided radius parameter, for example:
 
-  ```{r closer}
-  newMask <- iMath(mask, "MC", 4)
-  invisible(plot(newMask))
-  ```
+```{r closer}
+newMask <- iMath(mask, "MC", 4)
+invisible(plot(newMask,slices=c(1,1)))
+```
 
   * Morphological opening of a binary image: removes small structures at the boundary
     or interior of an image. Syntax is similar to the previous procedure with the operation

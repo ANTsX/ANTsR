@@ -2,18 +2,21 @@
 #'
 #' Wrapper for the ANTs funtion labelGeometryMeasures
 #'
-#' @param ... see ants function
+#' @param labelImage on which to compute geometry
+#' @param intensityImage optional
 #' @return none
-#' @author Avants BB
+#' @author Avants BB, Tustison NJ
+#' @examples
+#' fi<-antsImageRead( getANTsRData("r16") , 2 )
+#' seg<-kmeansSegmentation( fi, 3 )$segmentation
+#' geom<-labelGeometryMeasures(seg,fi)
+#'
 #'
 #' @export labelGeometryMeasures
-labelGeometryMeasures <- function(...) {
-  veccer <- c(...)
-  veccer2 <- veccer
-  if (length(veccer) > 1) {
-    img1 <- antsImageClone(veccer[[2]])
-    img1int <- antsImageClone(img1, "unsigned int")
-    veccer2[[2]] <- img1int
-  }
-  pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer2))
+labelGeometryMeasures <- function( labelImage, intensityImage=NA ) {
+  if ( missing( intensityImage )) intensityImage <- labelImage
+  outcsv<-tempfile( fileext='.csv' )
+  veccer<-list( labelImage@dimension, labelImage, intensityImage, outcsv )
+  pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer) )
+  return( read.csv( outcsv) )
 }

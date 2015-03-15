@@ -12,9 +12,9 @@
 #' @examples
 #'
 #' \dontrun{
-#'   gglb<-paste('gmView1vec*.nii.gz',sep='')
-#'   gfnl<-imageFileNames2ImageList( list.files(path=statdir,
-#'     pattern = glob2rx(gglb),full.names = T,recursive = T) , 3 )
+#'   # gglb<-paste('gmView1vec*.nii.gz',sep='')
+#'   # gfnl<-imageFileNames2ImageList( list.files(path=statdir,
+#'   #   pattern = glob2rx(gglb),full.names = T,recursive = T) , 3 )
 #' }
 #'
 #' @export imageFileNames2ImageList
