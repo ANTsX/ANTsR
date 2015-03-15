@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <Rcpp.h>
 #include "itkCastImageFilter.h"
-
+#include "itkExtractImageFilter.h"
 #include "itkImage.h"
 #include "itkImageRegionIteratorWithIndex.h"
-#include "itkExtractImageFilter.h"
 #include "itkLabelStatisticsImageFilter.h"
 #include "itkPasteImageFilter.h"
 #include <string>
@@ -266,6 +265,95 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
 
     Rcpp::XPtr< ImagePointerType >
       out_image_xptr( out_image_ptr_ptr , true );
+    out_image.slot( "pointer" ) = out_image_xptr;
+    }
+    else Rcpp::Rcout << " Dimension " << dimension << " is not supported " << std::endl;
+  return out_image;
+}
+
+
+
+
+template< class ImageType, class ImageDM1Type >
+typename ImageDM1Type::Pointer extractSliceHelper(
+  typename ImageType::Pointer image,
+  SEXP r_slice, SEXP r_direction )
+{
+enum { ImageDimension = ImageType::ImageDimension };
+typedef itk::Image< float, ImageDimension - 1> SliceType;
+typename ImageType::RegionType region;
+typename ImageType::RegionType::SizeType size =
+  image->GetLargestPossibleRegion().GetSize();
+size[ Rcpp::as< unsigned int >( r_direction )  ] = 0;
+typename ImageType::IndexType index;
+index.Fill( 0 );
+index[ Rcpp::as< unsigned int >( r_direction ) ] =
+  Rcpp::as< unsigned int >( r_slice );
+region.SetIndex( index );
+region.SetSize( size );
+
+typedef itk::ExtractImageFilter<ImageType, SliceType> ExtracterType;
+typename ExtracterType::Pointer extracter = ExtracterType::New();
+extracter->SetInput( image );
+extracter->SetExtractionRegion( region );
+extracter->SetDirectionCollapseToIdentity();
+extracter->Update();
+return extracter->GetOutput();
+}
+
+
+RcppExport SEXP extractSlice( SEXP r_in_image1,
+  SEXP r_slice, SEXP r_direction  )
+{
+  if( r_in_image1 == NULL  )
+    {
+    Rcpp::Rcout << " Invalid Arguments: pass at least 1 image in " << std::endl ;
+    Rcpp::wrap( 1 ) ;
+    }
+  Rcpp::S4 in_image1( r_in_image1 ) ;
+  std::string in_pixeltype = Rcpp::as< std::string >(
+    in_image1.slot( "pixeltype" ) ) ;
+  unsigned int dimension = Rcpp::as< unsigned int >(
+    in_image1.slot( "dimension" ) ) ;
+  // make new out image, result of cropping
+  Rcpp::S4 out_image( std::string( "antsImage" ) ) ;
+  out_image.slot( "pixeltype" ) = in_pixeltype ;
+  out_image.slot( "dimension" ) = dimension-1 ;
+
+  if ( dimension == 3 )
+    {
+    typedef itk::Image< float , 3 > ImageType;
+    typedef itk::Image< float , 2 > ImageDM1Type;
+    typedef ImageType::Pointer ImagePointerType;
+    typedef ImageDM1Type::Pointer ImageDM1PointerType;
+    Rcpp::XPtr< ImagePointerType > antsimage_xptr1(
+        static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
+    ImageDM1PointerType* out_image_ptr_ptr = NULL;
+    out_image_ptr_ptr =
+          new ImageDM1PointerType(
+            extractSliceHelper<ImageType, ImageDM1Type>(
+              *antsimage_xptr1, r_slice, r_direction )
+            );
+    Rcpp::XPtr< ImageDM1PointerType >
+        out_image_xptr( out_image_ptr_ptr , true );
+    out_image.slot( "pointer" ) = out_image_xptr;
+    }
+  else if ( dimension == 4 )
+    {
+    typedef itk::Image< float , 4 > ImageType;
+    typedef itk::Image< float , 3 > ImageDM1Type;
+    typedef ImageType::Pointer ImagePointerType;
+    typedef ImageDM1Type::Pointer ImageDM1PointerType;
+    Rcpp::XPtr< ImagePointerType > antsimage_xptr1(
+        static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
+    ImageDM1PointerType* out_image_ptr_ptr = NULL;
+    out_image_ptr_ptr =
+            new ImageDM1PointerType(
+              extractSliceHelper<ImageType, ImageDM1Type>(
+                *antsimage_xptr1, r_slice, r_direction )
+              );
+    Rcpp::XPtr< ImageDM1PointerType >
+          out_image_xptr( out_image_ptr_ptr , true );
     out_image.slot( "pointer" ) = out_image_xptr;
     }
     else Rcpp::Rcout << " Dimension " << dimension << " is not supported " << std::endl;

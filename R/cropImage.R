@@ -3,7 +3,7 @@
 #' uses a label image to crop a smaller image from within a larger image
 #'
 #' @param image antsImage to crop
-#' @param labelImage antsImage with label values.  
+#' @param labelImage antsImage with label values.
 #'  If not supplied, estimated from data.
 #' @param label the label value to use
 #' @return subimage
@@ -84,4 +84,33 @@ decropImage <- function( croppedImage, fullImage ) {
   }
   .Call("cropImage",
     croppedImage, fullImage, 1, 1, NULL, NULL, PACKAGE = "ANTsR")
+}
+
+
+
+
+#' extract a slice from an image
+#'
+#' extract a slice from an image and return an image of dimensionality, d-1
+#'
+#' @param image antsImage to crop
+#' @param slice which slice, integer
+#' @param direction which axis, integer
+#' @return antsImage of dimension - 1
+#' @author Brian B. Avants, Nicholas J. Tustison
+#' @keywords extract
+#' @examples
+#'
+#' fi <- makeImage( c(10,10,10), rnorm(1000) )
+#' slice <- extractSlice( fi, 1, 1 )
+#'
+#' @export extractSlice
+extractSlice <- function( image, slice, direction ) {
+  if ( image@pixeltype != "float"  ) {
+    stop("input images must have float pixeltype")
+  }
+  if ( dimension < 3 ) stop("can extract 1-d image")
+  if ( direction > image@dimension  )
+       stop("dimensionality and index length dont match")
+  .Call("extractSlice", image, slice-1, direction-1, PACKAGE = "ANTsR")
 }
