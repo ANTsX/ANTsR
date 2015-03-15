@@ -43,7 +43,6 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     initafffn <- paste(tdir, "antsr", "_InitialAff.mat", sep = "")
     EXTRACTION_WARP_OUTPUT_PREFIX <- paste(tdir, "antsr", "_PriorMap", sep = "")
   }
-  print(initafffn)
   # ANTs parameters begin
   ANTS_MAX_ITERATIONS <- "100x100x70x20"
   ANTS_TRANSFORMATION <- "SyN[0.1,3,0]"
@@ -83,7 +82,6 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   lapt <- antsImageClone(tem)
   imageMath(tem@dimension, lapt, "Laplacian", tem, 1.5, 1)
   # FIXME should add mask to below via -x option
-  print(EXTRACTION_WARP_OUTPUT_PREFIX)
   dtem <- antsImageClone(tem, "double")
   dimg <- antsImageClone(img, "double")
   antsregparams <- list(d = img@dimension, u = 1,

@@ -28,9 +28,10 @@ affineInitializer <- function( fixedImage, movingImage, searchFactor=20,
   {
   if ( missing( txfn )) txfn <- tempfile( fileext='.mat' )
   veccer<-list( fixedImage@dimension, fixedImage, movingImage, txfn,
-    searchFactor, radianFraction, usePrincipalAxis, localSearchIterations )
+    searchFactor, radianFraction, as.numeric(usePrincipalAxis),
+    localSearchIterations )
   if ( ! missing( mask ) ) veccer<-lappend( veccer, mask )
-  temp<-.Call("antsAffineInitializer", .int_antsProcessArguments( veccer ),
-    PACKAGE = "ANTsR")
+  xxx <- .int_antsProcessArguments( veccer )
+  temp<-.Call("antsAffineInitializer", xxx,  PACKAGE = "ANTsR")
   return( txfn )
 }
