@@ -17,7 +17,7 @@ library(ANTsR)
 
 ## Basic operations
 
-`iMath`  wraps some functions of `ImageMath` from ANTs software. For basic
+`iMath`  wraps some functions of `ImageMath` from [ANTs software](http://stnava.github.io/ANTs/). For basic
 arithmetics (e.g., add, subtract), while it's possible to use `iMath`, usually it
 is easier to use `antsImage` class capabilities.
 
