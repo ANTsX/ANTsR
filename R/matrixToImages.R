@@ -12,7 +12,7 @@
 #' @examples
 #'
 #' \dontrun{
-#'   mat = matrixToImages( aMat, mask )
+#'   # mat = matrixToImages( aMat, mask )
 #' }
 #'
 #'

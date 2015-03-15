@@ -27,7 +27,7 @@ Performs outlier rejection based on divergence from mean difference.
 Computes pair-wise differences in ASL time-series data and removes outliers.  One of two criteria is sufficient to classify an image as an outlier: 1) A difference image for which the mean is higher than the mean of all the images plus \code{sigma.mean} times the standard deviation of the whole time-series; 2) A difference image which has a standard deviation greater than sigam.sd times the mean standard deviation of each difference image.
 }
 \examples{
-\dontrun{WIP}
+\dontrun{ #WIP }
 }
 \author{
 Benjamin M. Kandel

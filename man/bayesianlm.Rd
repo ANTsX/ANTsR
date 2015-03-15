@@ -62,6 +62,7 @@ on the multivariate distribution of the parameters.
   print(bmdlNoPrior$beta)
   \dontrun{
   fn<-'PEDS012_20131101_pcasl_1.nii.gz'
+  fn<-getANTsRData("pcasl")
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   asl<-antsImageRead(fn,4)
   tr<-antsGetSpacing(asl)[4]

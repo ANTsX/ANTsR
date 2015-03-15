@@ -35,7 +35,7 @@ Uses clustering methods to split a time series into similar subsets.
     {
     sel<-clustasl$clusters != ct
     img<-matrix2timeseries( asl, aslmask, omat[sel,] )
-    perf <- aslPerfusion( img, interpolation="linear",
+    perf <- aslPerfusion( img,
       dorobust=0.9, useDenoiser=4, skip=10, useBayesian=0,
       moreaccurate=0, verbose=F, mask=aslmask )
     perfp <- list( sequence="pcasl", m0=perf$m0 )

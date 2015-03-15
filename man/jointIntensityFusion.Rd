@@ -79,19 +79,6 @@ r<-2
 d<-2
 pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=0,
   labelList=seglist, rad=rep(r,d) )
-\dontrun{
-mm<-imageListToMatrix(ilist,refmask)
-avg<-makeImage(refmask,colMeans(mm)) # compare to pp[[1]]
-# save memory by separating masks
-refmaske<-antsImageClone(refmask)
-refmaske<-iMath(refmaske,"ME",15)
-refmask[refmaske==1]<-0
-pp1<-jointIntensityFusion(ref,refmask,ilist,
-  beta=2,rad=rep(r,d))
-pp2<-jointIntensityFusion(ref,refmaske,ilist,
-  beta=2,rad=rep(r,d))
-pp1[[1]][refmaske==1]<-pp2[[1]][refmaske==1]
-}
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich

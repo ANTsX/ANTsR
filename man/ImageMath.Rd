@@ -2,7 +2,7 @@
 % Please edit documentation in R/imageMath.R
 \name{imageMath}
 \alias{imageMath}
-\title{imageMath}
+\title{R access to the ANTs program ImageMath}
 \usage{
 imageMath(...)
 }
