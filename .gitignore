@@ -13,5 +13,6 @@ src/itks/
 src/ants/
 src/itkb/
 src/antb/
+src/itki/
 inst/doc
 vignettes/*pdf

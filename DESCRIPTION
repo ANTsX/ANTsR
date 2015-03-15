@@ -46,4 +46,5 @@ Suggests:
     wmtsa
 LinkingTo: Rcpp
 SystemRequirements: cmake, git, clang (recommended)
+Additional_repositories: https://github.com/InsightSoftwareConsortium/ITK.git, https://github.com/stnava/ANTs.git
 VignetteBuilder: knitr

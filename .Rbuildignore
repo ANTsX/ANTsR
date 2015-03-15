@@ -2,6 +2,7 @@
 src/ants/
 src/itks/
 src/itkb/
+src/itki/
 src/antb/
 src/*.o
 src/*.so

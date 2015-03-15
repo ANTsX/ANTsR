@@ -20,7 +20,7 @@ antsgit=https://github.com/stnava/ANTs.git
 itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
 antstag=a31237f76a91b9866519b39c3384d1f716350bcc
 if [[ ! -s antb/Makefile  ]] ; then
-  mkdir ants itks antb itkb
+  mkdir ants itks antb itkb itki
   if [[ ! -s itks/CMakeLists.txt ]] ; then
     git clone $itkgit itks
   fi
@@ -28,8 +28,8 @@ if [[ ! -s antb/Makefile  ]] ; then
   if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $itktag
   fi
+#  rm -r -f Testing Examples Documentation Testing  # .git
   cd ../itkb
-  # -D ITKGroup_Core=On -D Module_ITKReview=On -D ITKGroup_Filtering=On -D ITKModule_MGHIO=On -D ITKGroup_IO=On -D ITKGroup_Numerics=On -D ITKGroup_Registration=On -D ITKGroup_Segmentation=On
   compflags=" -fPIC "
   compflags=" -Wno-c++11-extensions -fPIC -O2 -std=c++11 "
   compflags=" -Wno-c++11-long-long -fPIC -O2  "
@@ -39,16 +39,24 @@ if [[ ! -s antb/Makefile  ]] ; then
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TESTING:BOOL=OFF \
     -DBUILD_EXAMPLES:BOOL=OFF \
-    -DCMAKE_INSTALL_PREFIX:PATH=${PWD}/itkinst/  \
+    -DCMAKE_INSTALL_PREFIX:PATH=../itki/  \
     -DITK_LEGACY_REMOVE:BOOL=OFF  \
     -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON \
     -DITKV3_COMPATIBILITY:BOOL=ON \
-    -DITK_BUILD_DEFAULT_MODULES:BOOL=ON \
+    -DITK_BUILD_DEFAULT_MODULES:BOOL=OFF \
     -DKWSYS_USE_MD5:BOOL=ON \
     -DITK_WRAPPING:BOOL=OFF \
-    -DModule_MGHIO:BOOL=OFF \
+    -DModule_MGHIO:BOOL=ON \
+    -DModule_ITKDeprecated:BOOL=OFF \
     -DModule_ITKReview:BOOL=ON \
-    -DModule_ITKVtkGlue:BOOL=OFF  ../itks/
+    -DModule_ITKVtkGlue:BOOL=OFF \
+    -D ITKGroup_Core=ON \
+    -D Module_ITKReview=ON \
+    -D ITKGroup_Filtering=ON \
+    -D ITKGroup_IO=ON \
+    -D ITKGroup_Numerics=ON \
+    -D ITKGroup_Registration=ON \
+    -D ITKGroup_Segmentation=ON ../itks/
   # dont call make here ... this should be done elsewere ... but do so
   # temporarily just to get the includes going ... maybe these should be in
   # ANTsR/inst/include ?
@@ -62,8 +70,9 @@ if [[ ! -s antb/Makefile  ]] ; then
   if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $antstag
   fi
+  # rm -r -f .git
   cd ../antb
-  cmake -DITK_DIR:PATH=../itkb/ \
+  cmake -DITK_DIR:PATH=../itki/ \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
     -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
     -DBUILD_SHARED_LIBS=OFF \
