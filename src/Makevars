@@ -1,8 +1,8 @@
 CXX_STD = CXX11
 myrootantssource=${PWD}/ants/
 myrootantslib=${PWD}/antb/lib/
-myrootitklib=${PWD}/itkb/itkinst/lib/
-myrootitksource=${PWD}/itkb/itkinst/include/ITK-4.8/
+myrootitklib=${PWD}/itki/lib/
+myrootitksource=${PWD}/itki/include/ITK-4.8/
 PKG_CPPFLAGS= -I../inst/include -I${PWD} -I${myrootitksource} -I${myrootantssource}/Examples/include/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
 libants=`find ${myrootantslib} -name "lib*.a"`
 libitk=`find ${myrootitklib} -name "lib*.a"`
