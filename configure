@@ -20,7 +20,7 @@ antsgit=https://github.com/stnava/ANTs.git
 itktag=1d6fe27b6e7552f62f94b6c3cb64c4438bce3a86
 antstag=a31237f76a91b9866519b39c3384d1f716350bcc
 if [[ ! -s antb/Makefile  ]] ; then
-  mkdir ants itks antb itkb
+  mkdir ants itks antb itkb itki
   if [[ ! -s itks/CMakeLists.txt ]] ; then
     git clone $itkgit itks
   fi
@@ -53,7 +53,6 @@ if [[ ! -s antb/Makefile  ]] ; then
     -D ITKGroup_Core=ON \
     -D Module_ITKReview=ON \
     -D ITKGroup_Filtering=ON \
-    -D ITKModule_MGHIO=OFF \
     -D ITKGroup_IO=ON \
     -D ITKGroup_Numerics=ON \
     -D ITKGroup_Registration=ON \
