@@ -20,7 +20,7 @@
 \item{color.overlay}{the color for the overlay , e.g c('blue','red') length
 of this list should match the image list.}
 
-\item{axis}{... the axis to slice (1 , 2 or 3)}
+\item{axis}{the axis to slice (1 , 2 or 3)}
 
 \item{slices}{vector of slices to plot (e.g., c(10, 15, 20))}
 
@@ -39,8 +39,8 @@ of this list should match the image list.}
 \item{quality}{integer quality magnification factor 1 => large (e.g.
 10)}
 
-\item{outname}{eg'figx.jpg' output name if you want to write the result to a
-file}
+\item{outname}{name of output file if you want to write result to file, e.g.
+\code{plot.jpg}.}
 
 \item{alpha}{opacity}
 

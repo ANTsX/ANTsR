@@ -9,7 +9,7 @@
 #' @param color.img color for main image.
 #' @param color.overlay the color for the overlay , e.g c('blue','red') length
 #' of this list should match the image list.
-#' @param axis  ... the axis to slice (1 , 2 or 3)
+#' @param axis the axis to slice (1 , 2 or 3)
 #' @param slices vector of slices to plot (e.g., c(10, 15, 20)) 
 #' @param colorbar make colorbar?
 #' @param title.colorbar title for colorbar
@@ -19,8 +19,8 @@
 #' @param window.overlay lower and upper thresholds for display of overlay 
 #' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
-#' @param outname eg'figx.jpg' output name if you want to write the result to a
-#' file
+#' @param outname name of output file if you want to write result to file, e.g. 
+#' \code{plot.jpg}. 
 #' @param alpha  opacity
 #' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param ...  other parameters
