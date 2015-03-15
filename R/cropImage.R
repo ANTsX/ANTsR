@@ -109,7 +109,7 @@ extractSlice <- function( image, slice, direction ) {
   if ( image@pixeltype != "float"  ) {
     stop("input images must have float pixeltype")
   }
-  if ( dimension < 3 ) stop("can extract 1-d image")
+  if ( image@dimension < 3 ) stop("can extract 1-d image")
   if ( direction > image@dimension  )
        stop("dimensionality and index length dont match")
   .Call("extractSlice", image, slice-1, direction-1, PACKAGE = "ANTsR")
