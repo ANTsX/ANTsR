@@ -28,7 +28,7 @@ if [[ ! -s antb/Makefile  ]] ; then
   if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $itktag
   fi
-  rm -r -f Testing Examples Documentation Testing  # .git
+#  rm -r -f Testing Examples Documentation Testing  # .git
   cd ../itkb
   compflags=" -fPIC "
   compflags=" -Wno-c++11-extensions -fPIC -O2 -std=c++11 "
