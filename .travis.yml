@@ -7,6 +7,12 @@ os:
 - linux
 # - osx # currently builds too slowly ...
 
+branches: 
+  only: 
+    - master
+    - cran 
+    - rcmdcheck 
+
 before_install:
 - cd ..
 - basedir=${PWD}
