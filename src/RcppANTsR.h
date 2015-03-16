@@ -92,6 +92,14 @@ template <>
 SEXP wrap( const typename itk::VectorImage<unsigned char,4>::Pointer &image );
 
 
+template <>
+typename itk::ImageBase<2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::ImageBase<3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::ImageBase<4>::Pointer as( SEXP itkImageR );
 
 
 template <>
@@ -104,9 +112,6 @@ template <>
 typename itk::Image<double,4>::Pointer as( SEXP itkImageR );
 
 template <>
-typename itk::VectorImage<double,1>::Pointer as( SEXP itkImageR );
-
-template <>
 typename itk::VectorImage<double,2>::Pointer as( SEXP itkImageR );
 
 template <>
@@ -114,6 +119,64 @@ typename itk::VectorImage<double,3>::Pointer as( SEXP itkImageR );
 
 template <>
 typename itk::VectorImage<double,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+typename itk::Image<float,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<float,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<float,4>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<float,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<float,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<float,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+typename itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+typename itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR );
+
+template <>
+typename itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR );
+
 
 }
 

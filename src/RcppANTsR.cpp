@@ -502,25 +502,75 @@ SEXP wrap( const typename itk::VectorImage<unsigned char,4>::Pointer &image )
 
 
 template <>
+typename itk::ImageBase<2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::ImageBase<Dim>           ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::ImageBase<3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::ImageBase<Dim>           ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::ImageBase<4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::ImageBase<Dim>           ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
 typename itk::Image<double,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
       (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",190,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
@@ -529,21 +579,17 @@ typename itk::Image<double,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
-      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
       (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",213,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
@@ -552,67 +598,208 @@ typename itk::Image<double,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
       (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",236,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
 template <>
-typename itk::VectorImage<double,1>::Pointer as( SEXP itkImageR )
+typename itk::Image<float,2>::Pointer as( SEXP itkImageR )
 {
-  const unsigned int Dim = 1;
-  typedef itk::VectorImage<double,Dim>   ImageType;
-  typedef typename ImageType::Pointer    ImagePointerType;
+  const unsigned int Dim = 2;
+  typedef itk::Image<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
-      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) < 2) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",259,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
+
+template <>
+typename itk::Image<float,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::Image<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<float,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::Image<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::Image<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::Image<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::Image<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::Image<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::Image<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::Image<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
 
 template <>
 typename itk::VectorImage<double,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
-  typedef itk::VectorImage<double,Dim>   ImageType;
-  typedef typename ImageType::Pointer    ImagePointerType;
+  typedef itk::VectorImage<double,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) < 2) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",282,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
@@ -620,22 +807,18 @@ template <>
 typename itk::VectorImage<double,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
-  typedef itk::VectorImage<double,Dim>   ImageType;
-  typedef typename ImageType::Pointer    ImagePointerType;
+  typedef itk::VectorImage<double,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) < 2) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",305,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
@@ -643,26 +826,191 @@ template <>
 typename itk::VectorImage<double,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
-  typedef itk::VectorImage<double,Dim>   ImageType;
-  typedef typename ImageType::Pointer    ImagePointerType;
+  typedef itk::VectorImage<double,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
-  // FIXME - what does "location" refer to in exception object?
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) < 2) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
     {
-    itk::ExceptionObject error("itkImageRcppWrapR.cpp",328,
-                               "Invalid S4 object type", "unknown");
-    throw error;
+    Rcpp::stop( "Invalid S4 object type");
     }
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
-
   return *xptr;
 }
 
+template <>
+typename itk::VectorImage<float,2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::VectorImage<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
 
-//}
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<float,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::VectorImage<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<float,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::VectorImage<float,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::VectorImage<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::VectorImage<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::VectorImage<unsigned int,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 2;
+  typedef itk::VectorImage<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 3;
+  typedef itk::VectorImage<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+typename itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR )
+{
+  const unsigned int Dim = 4;
+  typedef itk::VectorImage<unsigned char,Dim>        ImageType;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  Rcpp::S4 itkImageObject( itkImageR );
+
+  if (!itkImageObject.is( "antsImage") ||
+      (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
+      (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
+      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
+  return *xptr;
+}
+
 
 }

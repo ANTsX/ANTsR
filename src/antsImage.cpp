@@ -509,15 +509,15 @@ Rcpp::IntegerVector antsImage_dim( typename ImageType::Pointer image )
 {
   if ( ! image.IsNotNull() )
     {
-    Rcpp::Rcout << "Image not yet allocated" << std::endl;
-    return Rcpp::wrap( 1 );
+    Rcpp::stop("Image not yet allocated");
     }
 
   Rcpp::IntegerVector dim_r( ImageType::ImageDimension ) ;
   for( unsigned int i = 0 ; i < ImageType::ImageDimension ; ++i )
     {
-      dim_r[i] = image->GetLargestPossibleRegion().GetSize(i) ;
+    dim_r[i] = image->GetLargestPossibleRegion().GetSize(i) ;
     }
+
   return dim_r ;
 }
 
@@ -526,42 +526,34 @@ try
 {
   if( r_antsimage == NULL )
     {
-      Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( NA_REAL ) ;
+    Rcpp::stop("Unspecified Arguments");
     }
 
-  Rcpp::S4 antsimage( r_antsimage ) ;
-  std::string pixeltype = Rcpp::as< std::string >( antsimage.slot( "pixeltype" ) ) ;
-  unsigned int dimension = Rcpp::as< int >( antsimage.slot( "dimension" ) ) ;
+  Rcpp::S4 antsimage( r_antsimage );
+  unsigned int dimension = Rcpp::as< int >( antsimage.slot( "dimension" ) );
 
   if ( dimension == 2)
-  {
+    {
     typedef itk::ImageBase<2>      ImageType;
     typedef ImageType::Pointer     ImagePointerType;
-    Rcpp::XPtr<ImagePointerType> XPtr( static_cast<SEXP>( antsimage.slot( "pointer" ) ) );
-    ImageType* image = dynamic_cast<ImageType*>( (*XPtr).GetPointer() );
-    return antsImage_dim<ImageType>( image );
-  }
+    return antsImage_dim<ImageType>( Rcpp::as<ImagePointerType>( r_antsimage ) );
+    }
   else if ( dimension == 3)
-  {
+    {
     typedef itk::ImageBase<3>      ImageType;
     typedef ImageType::Pointer     ImagePointerType;
-    Rcpp::XPtr<ImagePointerType> XPtr( static_cast<SEXP>( antsimage.slot( "pointer" ) ) );
-    ImageType* image = dynamic_cast<ImageType*>( (*XPtr).GetPointer() );
-    return antsImage_dim<ImageType>( image );
-  }
+    return antsImage_dim<ImageType>( Rcpp::as<ImagePointerType>( r_antsimage ) );
+    }
   else if ( dimension == 4)
-  {
+    {
     typedef itk::ImageBase<4>      ImageType;
     typedef ImageType::Pointer     ImagePointerType;
-    Rcpp::XPtr<ImagePointerType> XPtr( static_cast<SEXP>( antsimage.slot( "pointer" ) ) );
-    ImageType* image = dynamic_cast<ImageType*>( (*XPtr).GetPointer() );
-    return antsImage_dim<ImageType>( image );
-  }
-  else {
+    return antsImage_dim<ImageType>( Rcpp::as<ImagePointerType>( r_antsimage ) );
+    }
+  else
+    {
     Rcpp::stop( "Invalid image dimension");
-  }
-
+    }
 }
 catch( itk::ExceptionObject & err )
   {
