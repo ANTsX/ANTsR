@@ -21,6 +21,7 @@
 #'
 #' @export antsImageRead
 antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
+  components=1
   if (class(filename) != "character" || length(filename) != 1) {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
@@ -36,12 +37,13 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   else {
     imageInfo = antsImageHeaderInfo( filename )
     dimension = imageInfo$nDimensions
+    components = imageInfo$nComponents
     }
 
   if ( (dimension < 2) || (dimension > 4 ) ) {
     stop("only images of dimensions 2,3,4 are supported")
   }
 
-  rval <- (.Call("antsImageRead", filename, pixeltype, dimension, PACKAGE = "ANTsR"))
+  rval <- (.Call("antsImageRead", filename, pixeltype, dimension, components, PACKAGE = "ANTsR"))
   return(rval)
 }
