@@ -6,6 +6,7 @@
 #include "itkAddImageFilter.h"
 #include "itkMultiplyImageFilter.h"
 #include "itkImage.h"
+#include "itkVectorImage.h"
 #include "itkImageBase.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -17,228 +18,180 @@
 #include "vnl/vnl_matrix.h"
 #include "vnl/vnl_vector.h"
 
-RcppExport SEXP antsImage( SEXP r_pixeltype , SEXP r_dimension )
+template< class ImageType >
+SEXP antsImage( std::string pixeltype, unsigned int components )
+{
+  unsigned int nDim = ImageType::ImageDimension;
+  Rcpp::S4 image_r(std::string( "antsImage "));
+  image_r.slot("pixeltype") = pixeltype;
+  image_r.slot("dimension") = nDim;
+  image_r.slot("components") = components;
+
+  typedef typename ImageType::Pointer ImagePointerType;
+  ImagePointerType* ptr_ptr_image = new ImagePointerType;
+  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true );
+  image_r.slot("pointer") = xptr;
+
+  return image_r;
+}
+RcppExport SEXP antsImage( SEXP r_pixeltype , SEXP r_dimension, SEXP r_components )
 try
 {
-  if( r_pixeltype == NULL || r_dimension == NULL )
+  if( r_pixeltype == NULL || r_dimension == NULL || r_components == NULL )
     {
-      Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+    Rcpp::stop("Unspecified Arguments");
     }
 
   std::string pixeltype = Rcpp::as< std::string >( r_pixeltype ) ;
   unsigned int dimension = Rcpp::as< int >( r_dimension ) ;
+  unsigned int components = Rcpp::as< int >( r_components );
+
+  if ( (dimension < 1) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
 
   if( pixeltype == "double" )
     {
-      if( dimension == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '4'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '3'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 2 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'double' | Dimension: '2'" << std::endl ;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
-	}
-    }
+    typedef double ValueType;
+    if( dimension == 4 )
+	    {
+      typedef itk::Image<ValueType,4>       ImageType;
+      typedef itk::VectorImage<ValueType,4> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+      }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<ValueType,3>       ImageType;
+	    typedef itk::VectorImage<ValueType,3> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<ValueType,2>       ImageType;
+      typedef itk::VectorImage<ValueType,2> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
+	  }
   else if( pixeltype == "float" )
     {
-      if( dimension == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '4'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '3'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'float' | Dimension: '2'" << std::endl ;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
-	}
+    typedef float ValueType;
+    if( dimension == 4 )
+	    {
+      typedef itk::Image<ValueType,4>       ImageType;
+      typedef itk::VectorImage<ValueType,4> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+      }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<ValueType,3>       ImageType;
+	    typedef itk::VectorImage<ValueType,3> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<ValueType,2>       ImageType;
+      typedef itk::VectorImage<ValueType,2> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
     }
   else if( pixeltype == "unsigned int" )
     {
-      if( dimension == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '4'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '3'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned int' | Dimension: '2'" << std::endl ;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
-	}
+    typedef unsigned int ValueType;
+    if( dimension == 4 )
+	    {
+      typedef itk::Image<ValueType,4>       ImageType;
+      typedef itk::VectorImage<ValueType,4> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+      }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<ValueType,3>       ImageType;
+	    typedef itk::VectorImage<ValueType,3> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<ValueType,2>       ImageType;
+      typedef itk::VectorImage<ValueType,2> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
     }
   else if( pixeltype == "unsigned char" )
     {
-      if( dimension == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '4'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '3'" << std::endl ;
-	  return image_r ;
-	}
-      else if( dimension == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension >::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-	  // Rcpp::Rcout << "Empty image created. PixelType: 'unsigned char' | Dimension: '2'" << std::endl ;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( 1 ) ;
-	}
+    typedef unsigned char ValueType;
+    if( dimension == 4 )
+	    {
+      typedef itk::Image<ValueType,4>       ImageType;
+      typedef itk::VectorImage<ValueType,4> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+      }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<ValueType,3>       ImageType;
+	    typedef itk::VectorImage<ValueType,3> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<ValueType,2>       ImageType;
+      typedef itk::VectorImage<ValueType,2> VectorImageType;
+
+      return (components==1) ?
+        antsImage<ImageType>( pixeltype, components ) :
+        antsImage<VectorImageType>( pixeltype, components );
+	    }
     }
   else
     {
-      Rcpp::Rcout << "Unsupported PixelType" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+    Rcpp::stop("Unsupported PixelType");
     }
+
 }
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
 catch( const std::exception& exc )
   {
-    Rcpp::Rcout<< exc.what() << std::endl ;
-    return Rcpp::wrap( 1 ) ;
+  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << exc.what() << std::endl ;
+  Rcpp::stop( "Exception caught");
   }
 
 
