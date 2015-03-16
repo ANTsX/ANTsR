@@ -39,8 +39,17 @@ typename ImageType::Pointer cropImageHelper(
     cropper->SetInput( image );
     cropper->SetExtractionRegion( region );
     cropper->SetDirectionCollapseToSubmatrix();
-    cropper->Update();
+    cropper->UpdateLargestPossibleRegion();
     cropper->GetOutput()->SetSpacing( image->GetSpacing() );
+    typename ImageType::RegionType region =
+      cropper->GetOutput()->GetLargestPossibleRegion();
+    typename ImageType::IndexType ind = region.GetIndex();
+    typename ImageType::PointType neworig;
+    image->TransformIndexToPhysicalPoint( ind, neworig );
+    ind.Fill(0);
+    region.SetIndex( ind );
+    cropper->GetOutput()->SetRegions( region );
+    cropper->GetOutput()->SetOrigin( neworig );
     return cropper->GetOutput();
     }
   return NULL;
@@ -92,6 +101,15 @@ typename ImageType::Pointer cropIndHelper(
     cropper->SetDirectionCollapseToSubmatrix();
     cropper->Update();
     cropper->GetOutput()->SetSpacing( image->GetSpacing() );
+    typename ImageType::RegionType region =
+      cropper->GetOutput()->GetLargestPossibleRegion();
+    typename ImageType::IndexType ind = region.GetIndex();
+    typename ImageType::PointType neworig;
+    image->TransformIndexToPhysicalPoint( ind, neworig );
+    ind.Fill(0);
+    region.SetIndex( ind );
+    cropper->GetOutput()->SetRegions( region );
+    cropper->GetOutput()->SetOrigin( neworig );
     return cropper->GetOutput();
     }
   return NULL;
@@ -113,8 +131,10 @@ typename ImageType::Pointer decropImageHelper(
     // input to start pasting data from the second input.
     // The SetSourceRegion method prescribes the section of the second
     // image to paste into the first.
-    typename ImageType::IndexType destinationIndex =
-      cimage->GetLargestPossibleRegion().GetIndex();
+    typename ImageType::IndexType destinationIndex;
+    fimage->TransformPhysicalPointToIndex(
+      cimage->GetOrigin(), destinationIndex );
+//      cimage->GetLargestPossibleRegion().GetIndex();
     typename PasteImageFilterType::Pointer pasteFilter
       = PasteImageFilterType::New ();
     pasteFilter->SetSourceImage(cimage);
