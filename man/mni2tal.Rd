@@ -7,29 +7,26 @@
 mni2tal(xin = 0)
 }
 \arguments{
-\item{xin}{Point in mni152 space.}
+\item{xin}{point in mni152 space.}
 }
 \value{
-The output point is in approximate Talairach space.
+output point in approximate Talairach space.
 }
 \description{
 mni2tal for converting from ch2/mni space to tal - very approximate.
 }
 \details{
-see
-http://bioimagesuite.yale.edu/mni2tal/501_95733_More%20Accurate%20Talairach%20Coordinates%20SLIDES.pdf
-
-http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach
-
 This is a standard approach but it's not very accurate.
 }
 \examples{
-\dontrun{
-  mni2tal( c(10,12,14) )
-}
+mni2tal( c(10,12,14) )
 }
 \author{
 Matthew Brett, adapted for ANTsR by B Avants
+}
+\references{
+\url{http://bioimagesuite.yale.edu/mni2tal/501_95733_More\%20Accurate\%20Talairach\%20Coordinates\%20SLIDES.pdf},
+\url{http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach}
 }
 \keyword{Talairach}
 
