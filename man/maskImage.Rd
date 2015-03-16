@@ -11,9 +11,11 @@ maskImage(img.in, img.mask, level = 1, binarize = FALSE)
 
 \item{img.mask}{Mask or label image.}
 
-\item{level}{Level at which to mask image.}
+\item{level}{Level(s) at which to mask image.  If vector or list
+of values, output image is non-zero at all locations where label image
+matches any of the levels specified.}
 
-\item{binarize}{binarize the output image}
+\item{binarize}{binarize the output image?}
 }
 \value{
 An object of type antsImage.
@@ -23,13 +25,11 @@ Mask an input image by a mask image.  If the mask image has multiple labels,
 it is possible to specify which label(s) to mask at.
 }
 \examples{
-\dontrun{
-  myimg <- antsImageRead(getANTsRData("ch2"), 3)
-  mylab <- antsImageRead(getANTsRData("ch2a"), 3)
-  myimg.mask <- maskImage(myimg, mylab, 3)
-  plot(myimg.mask, axis=3, slices='90x90x90')
-  myimg.mask <- maskImage(myimg, mylab, list( 1,  3, 9 ) )
-  }
+myimg <- antsImageRead(getANTsRData("r16"))
+mask <- getMask(myimg)
+myimg.mask <- maskImage(myimg, mask, 3)
+seg <- kmeansSegmentation(myimg, 3)
+myimg.mask <- maskImage(myimg, seg$segmentation, c(1,3))
 }
 \author{
 Kandel BM and Avants B.
