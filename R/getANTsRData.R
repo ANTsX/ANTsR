@@ -85,8 +85,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     atroposseg = "f40680bd1de0592c9fa9e380bd9e29be")
   if (!is.null(mymd5))
     if (md5sum(tfn) != mymd5) {
-      print("checksum failure")
-      return(NULL)
+      stop("checksum failure")
     }
   return(tfn)
 }
