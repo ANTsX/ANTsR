@@ -18,7 +18,7 @@ cd ./src
 itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 antsgit=https://github.com/stnava/ANTs.git
 itktag=63a970e3d607555a3315270e06c99d272c0a242f
-antstag=21fe38896f07f4b5134807c9c8ff9636b7aa790c
+antstag=b71657da39808e969a89bbd249a5bbfc3f529951
 if [[ ! -s antb/Makefile  ]] ; then
   mkdir ants itks antb itkb itki
   if [[ ! -s itks/CMakeLists.txt ]] ; then
