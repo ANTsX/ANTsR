@@ -61,7 +61,7 @@ if [[ ! -s antb/Makefile  ]] ; then
   # temporarily just to get the includes going ... maybe these should be in
   # ANTsR/inst/include ?
   make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
-  make install | grep -v "Installing" | grep -v "Looking for"
+  make install | grep -v "Installing" | grep -v "Looking for" | grep -v "Up-to-date"
   cd ../
   if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsgit ants
