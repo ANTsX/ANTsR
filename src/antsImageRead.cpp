@@ -62,11 +62,12 @@ RcppExport SEXP antsImageRead( SEXP r_filename , SEXP r_pixeltype , SEXP r_dimen
 try
 {
   // check and set the parameters
-  if( r_filename == NULL || r_pixeltype == NULL || r_dimension == NULL )
+  if( r_filename == NULL || r_pixeltype == NULL ||
+      r_dimension == NULL || r_components == NULL )
     {
-      Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( 1 ) ;
+    Rcpp::stop("Unspecified Arguments");
     }
+
   std::string filename = Rcpp::as< std::string >( r_filename );
   std::string pixeltype = Rcpp::as< std::string >( r_pixeltype );
   unsigned int dimension = Rcpp::as< unsigned int >( r_dimension );
@@ -204,8 +205,15 @@ try
 
 
 }
- catch( const std::exception& exc )
-   {
-     Rcpp::Rcout<< exc.what() << std::endl ;
-     return Rcpp::wrap( 1 ) ;
-   }
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << exc.what() << std::endl ;
+  Rcpp::stop( "Exception caught");
+  }
