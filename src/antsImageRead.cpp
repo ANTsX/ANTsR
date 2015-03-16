@@ -1,60 +1,33 @@
-#include<vector>
-#include<string>
-#include<Rcpp.h>
+#include <vector>
+#include <string>
+#include <RcppANTsR.h>
 #include "itkNiftiImageIOFactory.h"
 #include "itkMetaImageIOFactory.h"
 #include "itkImageFileReader.h"
 #include "itkImage.h"
 
-//namespace ants
-//{
 
-  // [[myRcpp::export]]
-  template< class ImageType >
-  SEXP antsImageRead( std::string filename, std::string pixeltype, unsigned int components )
-  {
-    const unsigned int nDim = ImageType::ImageDimension;
+template< class ImageType >
+SEXP antsImageRead( std::string filename, std::string pixeltype, unsigned int components )
+{
+  typedef typename ImageType::Pointer           ImagePointerType;
+  typedef itk::ImageFileReader< ImageType >     ImageReaderType;
 
-    typedef typename ImageType::Pointer           ImagePointerType;
-    typedef itk::ImageFileReader< ImageType >    ImageReaderType;
-    typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
-    image_reader->SetFileName( filename.c_str() ) ;
-    try
-      {
-      image_reader->Update();
-      }
-    catch( itk::ExceptionObject & e )
-      {
-      Rcpp::Rcout << "Exception caught during reference file reading " << e << std::endl;
-      return NULL;
-      }
+  typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
+  image_reader->SetFileName( filename.c_str() ) ;
+  try
+    {
+    image_reader->Update();
+    }
+  catch( itk::ExceptionObject & e )
+    {
+    Rcpp::Rcout << "Exception caught during reference file reading " << e << std::endl;
+    return NULL;
+    }
 
-    ImagePointerType itkImage = image_reader->GetOutput();
-    ImagePointerType* ptr_ptr_image = new ImagePointerType( itkImage );
-    Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true );
-
-    Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-    image_r.slot( "pixeltype" ) = pixeltype;
-    image_r.slot( "dimension" ) = nDim;
-    image_r.slot( "components" ) = components;
-    image_r.slot( "pointer" ) = xptr;
-
-    return image_r;
-  }
-
-  // [[myRcpp::export]]
-  template< class ImagePointerType >
-  void printImageInfo( ImagePointerType image , std::ostream& os )
-  {
-    os << "Origin: " << image->GetOrigin() << "\n" ;
-    os << "Spacing: " << image->GetSpacing() << "\n" ;
-    os << "LargestPossibleRegion: " << image->GetLargestPossibleRegion() ;
-    os << "BufferedRegion: " << image->GetBufferedRegion() ;
-    os << "RequestedRegion: " << image->GetRequestedRegion() ;
-    return ;
-  }
-
-//} // namespace ants
+  ImagePointerType itkImage = image_reader->GetOutput();
+  return Rcpp::wrap( itkImage );
+}
 
 
 // [[myRcpp::export]]
@@ -201,9 +174,6 @@ try
     {
     Rcpp::stop("Unsupported PixelType");
     }
-
-
-
 }
 catch( itk::ExceptionObject & err )
   {

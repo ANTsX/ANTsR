@@ -1,8 +1,8 @@
 
-#include<algorithm>
-#include<vector>
-#include<string>
-#include<Rcpp.h>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <RcppANTsR.h>
 #include "itkAddImageFilter.h"
 #include "itkMultiplyImageFilter.h"
 #include "itkImage.h"
@@ -357,6 +357,7 @@ try
 	  typedef double PixelType ;
 	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
 	  typedef ImageType::Pointer ImagePointerType ;
+    ImagePointerType itkImage = Rcpp::as<ImagePointerType>( r_antsimage );
 	  Rcpp::XPtr< ImagePointerType > antsimage_xptr( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
 	  return antsImage_isna< ImageType >( *antsimage_xptr ) ;
 	}
