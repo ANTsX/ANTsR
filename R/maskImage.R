@@ -6,28 +6,29 @@
 #'
 #' @param img.in Input image.
 #' @param img.mask Mask or label image.
-#' @param level Level at which to mask image.
-#' @param binarize binarize the output image
+#' @param level Level(s) at which to mask image.  If vector or list
+#' of values, output image is non-zero at all locations where label image 
+#' matches any of the levels specified. 
+#' @param binarize binarize the output image?
 #' @return An object of type antsImage.
 #' @author Kandel BM and Avants B.
 #' @examples
 #'
-#'   \dontrun{
-#'   myimg <- antsImageRead(getANTsRData("ch2"), 3)
-#'   mylab <- antsImageRead(getANTsRData("ch2a"), 3)
-#'   myimg.mask <- maskImage(myimg, mylab, 3)
-#'   plot(myimg.mask, axis=3, slices='90x90x90')
-#'   myimg.mask <- maskImage(myimg, mylab, list( 1,  3, 9 ) )
-#'   }
+#' myimg <- antsImageRead(getANTsRData("r16"))
+#' mask <- getMask(myimg)
+#' myimg.mask <- maskImage(myimg, mask, 3)
+#' seg <- kmeansSegmentation(myimg, 3)
+#' myimg.mask <- maskImage(myimg, seg$segmentation, c(1,3))
 #'
 #' @export maskImage
 maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
-  if (class(level) == "numeric") {
+  if (class(level) == "numeric" & length(level) == 1) {
     img.out <- antsImageClone(img.in)
     img.out[img.mask != level] <- 0
     return(img.out)
   }
-  if (class(level) == "list") {
+  if ( (class(level) == "list") | 
+       (class(level) == "numeric" & length(level) > 1) ) {
     img.out <- antsImageClone(img.in)
     img.out[img.out > 0] <- 0
     for (mylevel in level) {
