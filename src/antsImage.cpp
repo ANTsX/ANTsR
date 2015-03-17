@@ -22,7 +22,7 @@ template< class ImageType >
 SEXP antsImage( std::string pixeltype, unsigned int components )
 {
   unsigned int nDim = ImageType::ImageDimension;
-  Rcpp::S4 image_r(std::string( "antsImage "));
+  Rcpp::S4 image_r(std::string( "antsImage"));
   image_r.slot("pixeltype") = pixeltype;
   image_r.slot("dimension") = nDim;
   image_r.slot("components") = components;
