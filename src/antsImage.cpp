@@ -34,7 +34,9 @@ SEXP antsImage( std::string pixeltype, unsigned int components )
 
   return image_r;
 }
+
 RcppExport SEXP antsImage( SEXP r_pixeltype , SEXP r_dimension, SEXP r_components )
+{
 try
 {
   if( r_pixeltype == NULL || r_dimension == NULL || r_components == NULL )
@@ -189,11 +191,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
-
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 template< typename ImageType >
 typename ImageType::Pointer antsImage_Arith(
@@ -342,7 +347,7 @@ try
 {
   if( r_antsimage == NULL )
     {
-      return Rcpp::wrap( 1 ) ;
+    return Rcpp::wrap( 1 ) ;
     }
 
   Rcpp::S4 antsimage( r_antsimage ) ;
@@ -522,6 +527,7 @@ Rcpp::IntegerVector antsImage_dim( typename ImageType::Pointer image )
 }
 
 RcppExport SEXP antsImage_dim( SEXP r_antsimage )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -563,10 +569,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class PixelType , unsigned int Dimension >
@@ -2028,10 +2038,15 @@ SEXP antsImage_GetSpacing( SEXP  r_antsimage )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>(r_antsimage);
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
   return Rcpp::wrap( image->GetSpacing().GetVnlVector() );
 }
 
 RcppExport SEXP antsImage_GetSpacing( SEXP r_antsimage )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2071,10 +2086,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class ImageType >
@@ -2082,6 +2101,11 @@ SEXP antsImage_SetSpacing( SEXP r_antsimage, SEXP r_spacing )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>(r_antsimage);
+
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   unsigned int nDim = ImageType::ImageDimension;
   typename ImageType::SpacingType itkSpacing;
@@ -2097,6 +2121,7 @@ SEXP antsImage_SetSpacing( SEXP r_antsimage, SEXP r_spacing )
 }
 
 RcppExport SEXP antsImage_SetSpacing( SEXP r_antsimage, SEXP r_spacing )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2140,10 +2165,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class ImageType >
@@ -2151,10 +2180,15 @@ SEXP antsImage_GetOrigin( SEXP r_antsimage )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>(r_antsimage);
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
   return Rcpp::wrap( image->GetOrigin().GetVnlVector() );
 }
 
 RcppExport SEXP antsImage_GetOrigin( SEXP r_antsimage )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2193,10 +2227,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class ImageType >
@@ -2204,6 +2242,10 @@ SEXP antsImage_SetOrigin( SEXP r_antsimage, SEXP r_origin )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>( r_antsimage );
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   unsigned int nDim = ImageType::ImageDimension;
   typename ImageType::PointType itkOrigin;
@@ -2219,12 +2261,12 @@ SEXP antsImage_SetOrigin( SEXP r_antsimage, SEXP r_origin )
 }
 
 RcppExport SEXP antsImage_SetOrigin( SEXP r_antsimage, SEXP r_origin )
+{
 try
 {
   if( r_antsimage == NULL )
     {
-      Rcpp::Rcout << "Unspecified Argument" << std::endl;
-      return Rcpp::wrap( 1 );
+    Rcpp::stop("Unspecified Argument");
     }
 
   Rcpp::S4 antsimage( r_antsimage );
@@ -2258,10 +2300,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 
@@ -2270,6 +2316,10 @@ SEXP antsImage_GetDirection( SEXP r_antsimage )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>( r_antsimage );
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   unsigned int nDim = ImageType::ImageDimension;
   Rcpp::NumericMatrix dir( nDim, nDim );
@@ -2286,6 +2336,7 @@ SEXP antsImage_GetDirection( SEXP r_antsimage )
 }
 
 RcppExport SEXP antsImage_GetDirection( SEXP r_antsimage )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2327,10 +2378,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class ImageType >
@@ -2338,6 +2393,10 @@ SEXP antsImage_SetDirection( SEXP r_antsimage, SEXP r_direction )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   ImagePointerType image = Rcpp::as<ImagePointerType>( r_antsimage );
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   unsigned int nDim = ImageType::ImageDimension;
   Rcpp::NumericMatrix direction( r_direction );
@@ -2367,6 +2426,7 @@ SEXP antsImage_SetDirection( SEXP r_antsimage, SEXP r_direction )
 }
 
 RcppExport SEXP antsImage_SetDirection( SEXP r_antsimage, SEXP r_direction )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2406,10 +2466,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class ImageType >
@@ -2424,6 +2488,10 @@ SEXP antsImage_TransformIndexToPhysicalPoint( SEXP r_antsimage, SEXP r_index )
   const unsigned int nDim = ImageType::ImageDimension;
 
   ImagePointerType image = Rcpp::as<ImagePointerType>( r_antsimage );
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   Rcpp::NumericMatrix indices( r_index );
   if ( indices.ncol() != nDim )
@@ -2461,6 +2529,7 @@ SEXP antsImage_TransformIndexToPhysicalPoint( SEXP r_antsimage, SEXP r_index )
 }
 
 RcppExport SEXP antsImage_TransformIndexToPhysicalPoint( SEXP r_antsimage, SEXP r_index )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2500,10 +2569,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 template< class ImageType >
 SEXP antsImage_TransformPhysicalPointToIndex( SEXP r_antsimage, SEXP r_point )
@@ -2516,6 +2589,10 @@ SEXP antsImage_TransformPhysicalPointToIndex( SEXP r_antsimage, SEXP r_point )
   const unsigned int nDim = ImageType::ImageDimension;
 
   ImagePointerType image = Rcpp::as<ImagePointerType>(r_antsimage);
+  if ( ! image.IsNotNull() )
+    {
+    Rcpp::stop("Image not yet allocated");
+    }
 
   Rcpp::NumericMatrix points( r_point );
   if ( points.ncol() != nDim)
@@ -2553,6 +2630,7 @@ SEXP antsImage_TransformPhysicalPointToIndex( SEXP r_antsimage, SEXP r_point )
 }
 
 RcppExport SEXP antsImage_TransformPhysicalPointToIndex( SEXP r_antsimage, SEXP r_point )
+{
 try
 {
   if( r_antsimage == NULL )
@@ -2592,10 +2670,14 @@ catch( itk::ExceptionObject & err )
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 template< class PixelType , unsigned int Dimension >
 bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer& image , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
