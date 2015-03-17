@@ -17,165 +17,165 @@ namespace Rcpp {
 //SEXP wrap( const typename vnl_vector<T> &vector );
 
 template <>
-SEXP wrap( const typename itk::Image<double,2>::Pointer &image );
+SEXP wrap( const itk::Image<double,2>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::Image<double,3>::Pointer &image );
+SEXP wrap( const itk::Image<double,3>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::Image<double,4>::Pointer &image );
+SEXP wrap( const itk::Image<double,4>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,2>::Pointer &image );
+SEXP wrap( const itk::VectorImage<double,2>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,3>::Pointer &image );
+SEXP wrap( const itk::VectorImage<double,3>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,4>::Pointer &image );
-
-
-template <>
-SEXP wrap( const typename itk::Image<float,2>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::Image<float,3>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::Image<float,4>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<float,2>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<float,3>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<float,4>::Pointer &image );
+SEXP wrap( const itk::VectorImage<double,4>::Pointer &image );
 
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,2>::Pointer &image );
+SEXP wrap( const itk::Image<float,2>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,3>::Pointer &image );
+SEXP wrap( const itk::Image<float,3>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,4>::Pointer &image );
+SEXP wrap( const itk::Image<float,4>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,2>::Pointer &image );
+SEXP wrap( const itk::VectorImage<float,2>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,3>::Pointer &image );
+SEXP wrap( const itk::VectorImage<float,3>::Pointer &image );
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,4>::Pointer &image );
-
-
-template <>
-SEXP wrap( const typename itk::Image<unsigned char,2>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::Image<unsigned char,3>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::Image<unsigned char,4>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,2>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,3>::Pointer &image );
-
-template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,4>::Pointer &image );
+SEXP wrap( const itk::VectorImage<float,4>::Pointer &image );
 
 
 template <>
-typename itk::ImageBase<2>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned int,2>::Pointer &image );
 
 template <>
-typename itk::ImageBase<3>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned int,3>::Pointer &image );
 
 template <>
-typename itk::ImageBase<4>::Pointer as( SEXP itkImageR );
-
-
-template <>
-typename itk::Image<double,2>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned int,4>::Pointer &image );
 
 template <>
-typename itk::Image<double,3>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned int,2>::Pointer &image );
 
 template <>
-typename itk::Image<double,4>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned int,3>::Pointer &image );
 
 template <>
-typename itk::VectorImage<double,2>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::VectorImage<double,3>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::VectorImage<double,4>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned int,4>::Pointer &image );
 
 
 template <>
-typename itk::Image<float,2>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned char,2>::Pointer &image );
 
 template <>
-typename itk::Image<float,3>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned char,3>::Pointer &image );
 
 template <>
-typename itk::Image<float,4>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::Image<unsigned char,4>::Pointer &image );
 
 template <>
-typename itk::VectorImage<float,2>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned char,2>::Pointer &image );
 
 template <>
-typename itk::VectorImage<float,3>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned char,3>::Pointer &image );
 
 template <>
-typename itk::VectorImage<float,4>::Pointer as( SEXP itkImageR );
-
-
-template <>
-typename itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR );
-
-template <>
-typename itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR );
+SEXP wrap( const itk::VectorImage<unsigned char,4>::Pointer &image );
 
 
 template <>
-typename itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR );
+itk::ImageBase<2>::Pointer as( SEXP itkImageR );
 
 template <>
-typename itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR );
+itk::ImageBase<3>::Pointer as( SEXP itkImageR );
 
 template <>
-typename itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR );
+itk::ImageBase<4>::Pointer as( SEXP itkImageR );
+
 
 template <>
-typename itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR );
+itk::Image<double,2>::Pointer as( SEXP itkImageR );
 
 template <>
-typename itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR );
+itk::Image<double,3>::Pointer as( SEXP itkImageR );
 
 template <>
-typename itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR );
+itk::Image<double,4>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<double,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<double,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<double,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+itk::Image<float,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<float,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<float,4>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<float,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<float,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<float,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR );
+
+
+template <>
+itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR );
+
+template <>
+itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR );
 
 
 }
