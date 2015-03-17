@@ -49,7 +49,7 @@ setMethod(f = "show", "antsImage", function(object){
 #' @describeIn antsImage
 setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
   pixeltype = "float", dimension = 3, components = 1) {
-  return(.Call("antsImage", pixeltype, dimension, PACKAGE = "ANTsR"))
+  return(.Call("antsImage", pixeltype, dimension, components, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn antsImage
