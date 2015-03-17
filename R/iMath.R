@@ -100,6 +100,10 @@ if ( iMathOps$Operation[wh] == 'ReflectionMatrix'  )
 #'
 #' @export iBind
 iBind<-function( img1, img2, along=NA ) {
+  if(!usePkg("abind")){
+    print("Need package 'abind' to use function 'iBind.'")
+    invisible(return())
+  }
   if ( is.na(along) ) along=img1@dimension
   if ( along > img1@dimension | along < 1 ) along=img1@dimensions
   if ( dim(img1)[along] != dim(img1)[along] )
