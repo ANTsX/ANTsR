@@ -25,11 +25,11 @@ SEXP wrap( const vnl_vector<T> &vector)
 namespace traits {
 
 template <class ImageType>
-SEXP wrap( const typename itk::SmartPointer<ImageType> &image )
+SEXP wrap( const itk::SmartPointer<ImageType> &image )
 {
-  typedef typename ImageType::Pointer                       ImagePointerType;
-  typedef typename ImageType::PixelType                     PixelType;
-  typedef typename itk::NumericTraits<PixelType>::ValueType ValueType;
+  typedef ImageType::Pointer                       ImagePointerType;
+  typedef ImageType::PixelType                     PixelType;
+  typedef itk::NumericTraits<PixelType>::ValueType ValueType;
 
   ImagePointerType itkImage = dynamic_cast< image
   ImagePointerType* rawPointer = new ImagePointerType( image );
@@ -69,10 +69,10 @@ SEXP wrap( const typename itk::SmartPointer<ImageType> &image )
 */
 
 template <>
-SEXP wrap( const typename itk::Image<double,2>::Pointer &image )
+SEXP wrap( const itk::Image<double,2>::Pointer &image )
 {
   typedef itk::Image<double,2>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -87,10 +87,10 @@ SEXP wrap( const typename itk::Image<double,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<double,3>::Pointer &image )
+SEXP wrap( const itk::Image<double,3>::Pointer &image )
 {
   typedef itk::Image<double,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -105,10 +105,10 @@ SEXP wrap( const typename itk::Image<double,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<double,4>::Pointer &image )
+SEXP wrap( const itk::Image<double,4>::Pointer &image )
 {
   typedef itk::Image<double,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -123,10 +123,10 @@ SEXP wrap( const typename itk::Image<double,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,2>::Pointer &image )
+SEXP wrap( const itk::VectorImage<double,2>::Pointer &image )
 {
   typedef itk::VectorImage<double,2>  ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -141,10 +141,10 @@ SEXP wrap( const typename itk::VectorImage<double,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,3>::Pointer &image )
+SEXP wrap( const itk::VectorImage<double,3>::Pointer &image )
 {
   typedef itk::VectorImage<double,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -159,10 +159,10 @@ SEXP wrap( const typename itk::VectorImage<double,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<double,4>::Pointer &image )
+SEXP wrap( const itk::VectorImage<double,4>::Pointer &image )
 {
   typedef itk::VectorImage<double,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -177,10 +177,10 @@ SEXP wrap( const typename itk::VectorImage<double,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<float,2>::Pointer &image )
+SEXP wrap( const itk::Image<float,2>::Pointer &image )
 {
   typedef itk::Image<float,2>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -195,10 +195,10 @@ SEXP wrap( const typename itk::Image<float,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<float,3>::Pointer &image )
+SEXP wrap( const itk::Image<float,3>::Pointer &image )
 {
   typedef itk::Image<float,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -213,10 +213,10 @@ SEXP wrap( const typename itk::Image<float,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<float,4>::Pointer &image )
+SEXP wrap( const itk::Image<float,4>::Pointer &image )
 {
   typedef itk::Image<float,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -231,10 +231,10 @@ SEXP wrap( const typename itk::Image<float,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<float,2>::Pointer &image )
+SEXP wrap( const itk::VectorImage<float,2>::Pointer &image )
 {
   typedef itk::VectorImage<float,2>  ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -249,10 +249,10 @@ SEXP wrap( const typename itk::VectorImage<float,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<float,3>::Pointer &image )
+SEXP wrap( const itk::VectorImage<float,3>::Pointer &image )
 {
   typedef itk::VectorImage<float,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -267,10 +267,10 @@ SEXP wrap( const typename itk::VectorImage<float,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<float,4>::Pointer &image )
+SEXP wrap( const itk::VectorImage<float,4>::Pointer &image )
 {
   typedef itk::VectorImage<float,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -285,10 +285,10 @@ SEXP wrap( const typename itk::VectorImage<float,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,2>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned int,2>::Pointer &image )
 {
   typedef itk::Image<unsigned int,2>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -303,10 +303,10 @@ SEXP wrap( const typename itk::Image<unsigned int,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,3>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned int,3>::Pointer &image )
 {
   typedef itk::Image<unsigned int,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -321,10 +321,10 @@ SEXP wrap( const typename itk::Image<unsigned int,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned int,4>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned int,4>::Pointer &image )
 {
   typedef itk::Image<unsigned int,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -339,10 +339,10 @@ SEXP wrap( const typename itk::Image<unsigned int,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,2>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned int,2>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned int,2>  ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -357,10 +357,10 @@ SEXP wrap( const typename itk::VectorImage<unsigned int,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,3>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned int,3>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned int,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -375,10 +375,10 @@ SEXP wrap( const typename itk::VectorImage<unsigned int,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned int,4>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned int,4>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned int,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -393,10 +393,10 @@ SEXP wrap( const typename itk::VectorImage<unsigned int,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned char,2>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned char,2>::Pointer &image )
 {
   typedef itk::Image<unsigned char,2>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -411,10 +411,10 @@ SEXP wrap( const typename itk::Image<unsigned char,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned char,3>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned char,3>::Pointer &image )
 {
   typedef itk::Image<unsigned char,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -429,10 +429,10 @@ SEXP wrap( const typename itk::Image<unsigned char,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::Image<unsigned char,4>::Pointer &image )
+SEXP wrap( const itk::Image<unsigned char,4>::Pointer &image )
 {
   typedef itk::Image<unsigned char,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -447,10 +447,10 @@ SEXP wrap( const typename itk::Image<unsigned char,4>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,2>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned char,2>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned char,2>  ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -465,10 +465,10 @@ SEXP wrap( const typename itk::VectorImage<unsigned char,2>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,3>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned char,3>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned char,3>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -483,10 +483,10 @@ SEXP wrap( const typename itk::VectorImage<unsigned char,3>::Pointer &image )
 }
 
 template <>
-SEXP wrap( const typename itk::VectorImage<unsigned char,4>::Pointer &image )
+SEXP wrap( const itk::VectorImage<unsigned char,4>::Pointer &image )
 {
   typedef itk::VectorImage<unsigned char,4>        ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
+  typedef ImageType::Pointer ImagePointerType;
 
   ImagePointerType* rawPointer = new ImagePointerType( image );
   Rcpp::XPtr< ImagePointerType > xptr( rawPointer , true ) ;
@@ -502,11 +502,11 @@ SEXP wrap( const typename itk::VectorImage<unsigned char,4>::Pointer &image )
 
 
 template <>
-typename itk::ImageBase<2>::Pointer as( SEXP itkImageR )
+itk::ImageBase<2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::ImageBase<Dim>           ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -520,11 +520,11 @@ typename itk::ImageBase<2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::ImageBase<3>::Pointer as( SEXP itkImageR )
+itk::ImageBase<3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::ImageBase<Dim>           ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -538,11 +538,11 @@ typename itk::ImageBase<3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::ImageBase<4>::Pointer as( SEXP itkImageR )
+itk::ImageBase<4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::ImageBase<Dim>           ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -556,11 +556,11 @@ typename itk::ImageBase<4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<double,2>::Pointer as( SEXP itkImageR )
+itk::Image<double,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -575,11 +575,11 @@ typename itk::Image<double,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<double,3>::Pointer as( SEXP itkImageR )
+itk::Image<double,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -594,11 +594,11 @@ typename itk::Image<double,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<double,4>::Pointer as( SEXP itkImageR )
+itk::Image<double,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::Image<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -613,11 +613,11 @@ typename itk::Image<double,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<float,2>::Pointer as( SEXP itkImageR )
+itk::Image<float,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::Image<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -632,11 +632,11 @@ typename itk::Image<float,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<float,3>::Pointer as( SEXP itkImageR )
+itk::Image<float,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::Image<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -651,11 +651,11 @@ typename itk::Image<float,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<float,4>::Pointer as( SEXP itkImageR )
+itk::Image<float,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::Image<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -670,11 +670,11 @@ typename itk::Image<float,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::Image<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -689,11 +689,11 @@ typename itk::Image<unsigned int,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::Image<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -708,11 +708,11 @@ typename itk::Image<unsigned int,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::Image<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -727,11 +727,11 @@ typename itk::Image<unsigned int,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::Image<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -746,11 +746,11 @@ typename itk::Image<unsigned char,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::Image<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -765,11 +765,11 @@ typename itk::Image<unsigned char,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR )
+itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::Image<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -785,11 +785,11 @@ typename itk::Image<unsigned char,4>::Pointer as( SEXP itkImageR )
 
 
 template <>
-typename itk::VectorImage<double,2>::Pointer as( SEXP itkImageR )
+itk::VectorImage<double,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::VectorImage<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -804,11 +804,11 @@ typename itk::VectorImage<double,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<double,3>::Pointer as( SEXP itkImageR )
+itk::VectorImage<double,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::VectorImage<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -823,11 +823,11 @@ typename itk::VectorImage<double,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<double,4>::Pointer as( SEXP itkImageR )
+itk::VectorImage<double,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::VectorImage<double,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -842,11 +842,11 @@ typename itk::VectorImage<double,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<float,2>::Pointer as( SEXP itkImageR )
+itk::VectorImage<float,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::VectorImage<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -861,11 +861,11 @@ typename itk::VectorImage<float,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<float,3>::Pointer as( SEXP itkImageR )
+itk::VectorImage<float,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::VectorImage<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -880,11 +880,11 @@ typename itk::VectorImage<float,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<float,4>::Pointer as( SEXP itkImageR )
+itk::VectorImage<float,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::VectorImage<float,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -899,11 +899,11 @@ typename itk::VectorImage<float,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::VectorImage<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -918,11 +918,11 @@ typename itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::VectorImage<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -937,11 +937,11 @@ typename itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::VectorImage<unsigned int,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -956,11 +956,11 @@ typename itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 2;
   typedef itk::VectorImage<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -975,11 +975,11 @@ typename itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 3;
   typedef itk::VectorImage<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
@@ -994,11 +994,11 @@ typename itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR )
 }
 
 template <>
-typename itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR )
+itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR )
 {
   const unsigned int Dim = 4;
   typedef itk::VectorImage<unsigned char,Dim>        ImageType;
-  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef ImageType::Pointer   ImagePointerType;
   Rcpp::S4 itkImageObject( itkImageR );
 
   if (!itkImageObject.is( "antsImage") ||
