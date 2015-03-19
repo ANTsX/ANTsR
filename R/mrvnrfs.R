@@ -3,8 +3,7 @@
 #' Represents multiscale feature images as a neighborhood and uses the features
 #' to build a random forest segmentation model from an image population
 #'
-#' @param y list of training label images, can be a factor or numeric vector
-#' this can also be a regular old vector
+#' @param y list of training labels. either an image or numeric value
 #' @param x a list of lists where each list contains feature images
 #' @param labelmask a mask for the features (all in the same image space)
 #' the labelmask defines the number of parallel samples that will be used
@@ -31,24 +30,26 @@
 #' for ( i in inds ) {
 #'   img<-antsImageClone(mask)
 #'   imgb<-antsImageClone(mask)
-#'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
-#'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
+#'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
+#'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
 #'   limg<-antsImageClone(mask)
-#'   limg[ 3:6, 3:6 ]<-(i %% 2)+1  # the label image is constant
+#'   limg[ 3:6, 3:6 ]<-(i %% 4)+1  # the label image is constant
 #'   ilist[[i]]<-list(img,imgb)  # two features
 #'   lablist[[i]]<-limg
 #' }
-#' rfm<-mrvnrfs( lablist , ilist, mask, rad=c(0,0), multiResSchedule=1 )
+#' rad<-rep( 1, 2 )
+#' mr <- c(1.5,1)
+#' rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr )
 #' rfmresult<-mrvnrfs.predict( rfm$rflist ,
-#'    list(ilist[[2]]), mask, rad=c(0,0),
-#'    multiResSchedule=1 )
+#'    list(ilist[[2]]), mask, rad=rad,
+#'    multiResSchedule=mr )
 #'
 #' @export mrvnrfs
 mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE ) {
     # check y type
     yisimg<-TRUE
-    if (  typeof(y) == "integer" | typeof(y) == "double" ) yisimg<-FALSE
+    if ( typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double") yisimg<-FALSE
     rflist<-list()
     rfct<-1
     for ( mr in multiResSchedule )
@@ -110,10 +111,14 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     for ( i in 1:(length(xsub)) )
       {
       nxt<-seqby[ i + 1 ]-1
+      probsx<-list(labelmask)
       probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submask )
+      if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
       for ( temp in 1:length(probsx) )
+        {
         probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
           useVoxels=1, 0 )
+        }
       newprobs[[i]]<-probsx
       }
     } else {
@@ -193,6 +198,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       {
       nxt<-seqby[ i + 1 ]-1
       probsx<-matrixToImages(probs[,seqby[i]:nxt],  submask )
+      if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
       for ( temp in 1:length(probsx) )
         probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
           useVoxels=1, 0 )

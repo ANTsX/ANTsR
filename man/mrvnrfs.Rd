@@ -8,8 +8,7 @@ mrvnrfs(y, x, labelmask, rad = NA, nsamples = 1, ntrees = 500,
   multiResSchedule = c(4, 2, 1), asFactors = TRUE)
 }
 \arguments{
-\item{y}{list of training label images, can be a factor or numeric vector
-this can also be a regular old vector}
+\item{y}{list of training labels. either an image or numeric value}
 
 \item{x}{a list of lists where each list contains feature images}
 
@@ -47,17 +46,19 @@ scl<-0.33 # a noise parameter
 for ( i in inds ) {
   img<-antsImageClone(mask)
   imgb<-antsImageClone(mask)
-  img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 2)+scl*mean(rnorm(1))
-  imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 2)+scl*mean(rnorm(1))
+  img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
+  imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
   limg<-antsImageClone(mask)
-  limg[ 3:6, 3:6 ]<-(i \%\% 2)+1  # the label image is constant
+  limg[ 3:6, 3:6 ]<-(i \%\% 4)+1  # the label image is constant
   ilist[[i]]<-list(img,imgb)  # two features
   lablist[[i]]<-limg
 }
-rfm<-mrvnrfs( lablist , ilist, mask, rad=c(0,0), multiResSchedule=1 )
+rad<-rep( 1, 2 )
+mr <- c(1.5,1)
+rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr )
 rfmresult<-mrvnrfs.predict( rfm$rflist ,
-   list(ilist[[2]]), mask, rad=c(0,0),
-   multiResSchedule=1 )
+   list(ilist[[2]]), mask, rad=rad,
+   multiResSchedule=mr )
 }
 \author{
 Avants BB, Tustison NJ

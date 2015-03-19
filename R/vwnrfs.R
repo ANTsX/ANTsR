@@ -27,20 +27,31 @@
 #' lablist<-list()
 #' inds<-1:50
 #' scl<-0.33 # a noise parameter
+#' for ( predtype in c("label","scalar") )
+#' {
 #' for ( i in inds ) {
 #'   img<-antsImageClone(mask)
 #'   imgb<-antsImageClone(mask)
-#'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
-#'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 2)+scl*mean(rnorm(1))
 #'   limg<-antsImageClone(mask)
-#'   limg[ 3:6, 3:6 ]<-(i %% 2)+1  # the label image is constant
-#'   ilist[[i]]<-list(img,imgb)  # two features
-#'   lablist[[i]]<-limg
-#' }
-#' rfm<-vwnrfs( lablist , ilist, mask, rad=c(0,0) )
-#' sum(abs(as.numeric(rfm$tv)-as.numeric(predict(rfm$rfm))))
-#' rfm<-vwnrfs( lablist , ilist, mask, rad=c(2,2) )
-#' sum(abs(as.numeric(rfm$tv)-as.numeric(predict(rfm$rfm))))
+#'   if ( predtype == "label") {  # 4 class prediction
+#'     img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
+#'     imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
+#'     limg[ 3:6, 3:6 ]<-(i %% 4)+1  # the label image is constant
+#'     }
+#'     if ( predtype == "scalar") {
+#'       img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+#'       imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+#'       limg[ 3:6, 3:6 ]<-i^2.0  # a real outcome
+#'       }
+#'     ilist[[i]]<-list(img,imgb)  # two features
+#'     lablist[[i]]<-limg
+#'   }
+#'   rfm<-vwnrfs( lablist , ilist, mask, rad=c(2,2) )
+#'   if ( predtype == "label" )
+#'     print(  sum( rfm$tv != predict(rfm$rfm) ) )
+#'   if ( predtype == "scalar" )
+#'     print( cor(as.numeric(rfm$tv) , as.numeric(predict(rfm$rfm) ) ) )
+#' } # end predtype loop
 #'
 #' @export vwnrfs
 vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
@@ -48,11 +59,14 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   if ( all( is.na( rad )  ) ) {
     rad<-rep(0, x[[1]][[1]]@dimension )
   }
+  # check y type
+  yisimg<-TRUE
+  if (  typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double" ) yisimg<-FALSE
   idim<-length(rad)
   if ( idim != x[[1]][[1]]@dimension )
     stop("vwnrfs: dimensionality does not match")
   # first thing - find unique labels
-  ulabs<-sort(unique(c(as.numeric(labelmask))))
+  ulabs<-sort( unique( c( as.numeric( labelmask ) ) ) )
   if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
   # second thing - create samples for each unique label
   randmask<-antsImageClone( labelmask )*0
@@ -69,11 +83,8 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   # and the features at that location - go subject by subject
   # 3.1 first define the training vector
   rmsz<-sum( randmask > 0 ) # entries in mask
-  tv<-rep(NA, length(y)*rmsz )
+  tv<-rep( NA, length(y)*rmsz )
   seqby<-seq.int( 1, length(tv)+1, by=rmsz )
-  # check y type
-  yisimg<-TRUE
-  if (  typeof(y) == "integer" | typeof(y) == "double" ) yisimg<-FALSE
   for ( i in 1:(length(y)) )
     {
     nxt<-seqby[ i + 1 ]-1
@@ -81,7 +92,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       tv[ seqby[i]:nxt ]<-t( getNeighborhoodInMask(
         y[[i]], randmask, rep(0,idim), spatial.info=F,
         boundary.condition='image' ) )
-    else tv[ seqby[i]:nxt ]<-rep( y[i], rmsz )
+    else tv[ seqby[i]:nxt ]<-rep( y[[i]], rmsz )
     }
   tv[ tv == 0 ] <- min( ulabs ) # BUG FIXME
   if ( asFactors ) tv<-factor( tv )
@@ -116,6 +127,6 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     }
   else
     {
-    return("install the randomForest package")
+    stop("install the randomForest package")
     }
 }
