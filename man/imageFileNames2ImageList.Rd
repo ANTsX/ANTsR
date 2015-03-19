@@ -9,7 +9,7 @@ imageFileNames2ImageList(x, dim)
 \arguments{
 \item{x}{input file name list}
 
-\item{dim}{img dimensionality}
+\item{dim}{img dimensionality (optional)}
 }
 \value{
 a list like this : mylist<-list( img1, img2 , etcetera ) is the
@@ -23,7 +23,7 @@ containing antsImages.
 \dontrun{
   # gglb<-paste('gmView1vec*.nii.gz',sep='')
   # gfnl<-imageFileNames2ImageList( list.files(path=statdir,
-  #   pattern = glob2rx(gglb),full.names = T,recursive = T) , 3 )
+  #   pattern = glob2rx(gglb),full.names = T,recursive = T) )
 }
 }
 \author{

@@ -7,7 +7,10 @@
 \alias{[,antsImage,NULL,NULL-method}
 \alias{[,antsImage,NULL,numeric-method}
 \alias{[,antsImage,logical,ANY-method}
+\alias{[,antsImage,missing,missing-method}
+\alias{[,antsImage,missing,numeric-method}
 \alias{[,antsImage,numeric,NULL-method}
+\alias{[,antsImage,numeric,missing-method}
 \alias{[,antsImage,numeric,numeric-method}
 \alias{[<-,antsImage,NULL,ANY,ANY-method}
 \alias{[<-,antsImage,NULL,NULL,numeric-method}
@@ -54,6 +57,12 @@
 \S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+
+\S4method{[}{antsImage,missing,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+
+\S4method{[}{antsImage,numeric,missing}(x, i, j, k = NA, l = NA, ..., drop)
+
+\S4method{[}{antsImage,missing,missing}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,`NULL`,ANY,ANY}(x, i, j, ...) <- value
 
@@ -150,6 +159,12 @@ convert types to antsImage
 \item \code{x = antsImage,i = NULL,j = numeric}: 
 
 \item \code{x = antsImage,i = NULL,j = numeric}: 
+
+\item \code{x = antsImage,i = missing,j = numeric}: 
+
+\item \code{x = antsImage,i = numeric,j = missing}: 
+
+\item \code{x = antsImage,i = missing,j = missing}: 
 
 \item \code{x = antsImage,i = NULL,j = ANY,value = ANY}: 
 
