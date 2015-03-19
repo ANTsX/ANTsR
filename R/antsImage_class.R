@@ -625,6 +625,29 @@ setMethod(f = "[", signature(x = "antsImage", i = "NULL", j = "numeric"),
   return(getPixels(x, i, j, k, l))
 })
 
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "missing", j = "numeric"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  i <- 1:(dim(x)[1])
+  return(getPixels(x, i, j, k, l))
+})
+
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "numeric", j = "missing"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  j <- 1:(dim(x)[2])
+  return(getPixels(x, i, j, k, l))
+})
+
+#' @describeIn as.antsImage
+setMethod(f = "[", signature(x = "antsImage", i = "missing", j = "missing"),
+ definition = function(x, i, j, k = NA, l = NA, ..., drop) {
+  i <- 1:(dim(x)[1])
+  j <- 1:(dim(x)[2])
+  return(getPixels(x, i, j, k, l))
+})
+
+
 # > getGeneric("[<-")
 # standardGeneric for "[<-" defined from package "base"
 # function (x, i, j, ..., value)
