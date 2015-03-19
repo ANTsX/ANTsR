@@ -56,7 +56,7 @@ for ( i in inds ) {
     if ( predtype == "scalar") {
       img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
       imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-      limg[ 3:6, 3:6 ]<-i^2.0  # a real outcome
+      limg<-i^2.0  # a real outcome
       }
     ilist[[i]]<-list(img,imgb)  # two features
     lablist[[i]]<-limg

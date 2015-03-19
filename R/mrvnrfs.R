@@ -22,27 +22,41 @@
 #'
 #' mask<-makeImage( c(10,10), 0 )
 #' mask[ 3:6, 3:6 ]<-1
-#' mask[ 5, 5 ]<-2
+#' mask[ 5, 5:6]<-2
 #' ilist<-list()
 #' lablist<-list()
 #' inds<-1:50
 #' scl<-0.33 # a noise parameter
+#' for ( predtype in c("label","scalar") )
+#' {
 #' for ( i in inds ) {
 #'   img<-antsImageClone(mask)
 #'   imgb<-antsImageClone(mask)
-#'   img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
-#'   imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
 #'   limg<-antsImageClone(mask)
-#'   limg[ 3:6, 3:6 ]<-(i %% 4)+1  # the label image is constant
-#'   ilist[[i]]<-list(img,imgb)  # two features
-#'   lablist[[i]]<-limg
-#' }
+#'   if ( predtype == "label") {  # 4 class prediction
+#'     img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
+#'     imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i %% 4)+scl*mean(rnorm(1))
+#'     limg[ 3:6, 3:6 ]<-(i %% 4)+1  # the label image is constant
+#'     }
+#'     if ( predtype == "scalar") {
+#'       img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+#'       imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+#'       limg<-i^2.0  # a real outcome
+#'       }
+#'     ilist[[i]]<-list(img,imgb)  # two features
+#'     lablist[[i]]<-limg
+#'   }
 #' rad<-rep( 1, 2 )
 #' mr <- c(1.5,1)
-#' rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr )
-#' rfmresult<-mrvnrfs.predict( rfm$rflist ,
-#'    list(ilist[[2]]), mask, rad=rad,
-#'    multiResSchedule=mr )
+#' rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr,
+#'      asFactors = (  predtype == "label" ) )
+#' rfmresult<-mrvnrfs.predict( rfm$rflist,
+#'      ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
+#'      multiResSchedule=mr )
+#' if ( predtype == "scalar" )
+#'   print( cor( unlist(lablist) , rfmresult$seg ) )
+#' } # end predtype loop
+#'
 #'
 #' @export mrvnrfs
 mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
@@ -67,7 +81,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         }
       }
       xsub<-x
-      if ( rfct > 1 & asFactors )
+      if ( rfct > 1 )
         {
         for ( kk in 1:length(xsub) )
           {
@@ -104,15 +118,17 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         }
 #    return(list(ysub=ysub,xsub=xsub,submask=submask))
     sol<-vwnrfs( ysub, xsub, submask, rad, nsamples, ntrees, asFactors )
-    if ( asFactors )
-    {
-    probsrf<-t( predict(sol$rfm,newdata=fm,type='prob') )
+    predtype<-'response'
+    if ( asFactors ) predtype<-'prob'
+    probsrf<-t( predict( sol$rfm, newdata=fm, type=predtype ) )
     newprobs<-list()
     for ( i in 1:(length(xsub)) )
       {
       nxt<-seqby[ i + 1 ]-1
       probsx<-list(labelmask)
-      probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submask )
+      if ( asFactors )
+        probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submask )
+      else probsx<-list( makeImage( submask, probsrf[seqby[i]:nxt] ) )
       if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
       for ( temp in 1:length(probsx) )
         {
@@ -121,11 +137,6 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         }
       newprobs[[i]]<-probsx
       }
-    } else {
-      # FIXME - this should run the rf model at each
-      # neighborhood location, right?
-      newprobs<-predict(sol$rfm,newdata=fm)
-    }
     rflist[[rfct]]<-sol$rfm
     rfct<-rfct+1
     } # mr loop
@@ -159,7 +170,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       submask<-resampleImage( labelmask, subdim, useVoxels=1,
         interpType=1 )
       xsub<-x
-      if ( rfct > 1 & asFactors )
+      if ( rfct > 1 )
         {
         for ( kk in 1:length(xsub) )
           {
@@ -192,27 +203,32 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
         nxt<-seqby[ i + 1 ]-1
         fm[ seqby[i]:nxt, ]<-m1
         }
-    if ( asFactors )
-    {
-    probs<-t( predict( rflist[[rfct]] ,newdata=fm,type='prob') )
+    predtype<-'response'
+    if ( asFactors ) predtype<-'prob'
+    probs<-t( predict( rflist[[rfct]] ,newdata=fm,type=predtype) )
     newprobs<-list()
     for ( i in 1:(length(x)) )
       {
       nxt<-seqby[ i + 1 ]-1
-      probsx<-matrixToImages(probs[,seqby[i]:nxt],  submask )
+      if ( asFactors )
+        probsx<-matrixToImages(probs[,seqby[i]:nxt],  submask )
+      else probsx<-list( makeImage( submask, probs[seqby[i]:nxt] ) )
       if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
       for ( temp in 1:length(probsx) )
         probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
           useVoxels=1, 0 )
       newprobs[[i]]<-probsx
       }
-    } else {
-      newprobs<-predict( rflist[[rfct]] ,newdata=fm)
-    }
     rfct<-rfct+1
     } # mr loop
+    if ( asFactors )
+      {
+      rfseg<-imageListToMatrix( unlist(newprobs) , labelmask )
+      rfseg<-apply( rfseg, FUN=which.max, MARGIN=2)
+      rfseg<-makeImage( labelmask , rfseg )
+      return( list( seg=rfseg, probs=newprobs ) )
+      }
     rfseg<-imageListToMatrix( unlist(newprobs) , labelmask )
-    rfseg<-apply( rfseg, FUN=which.max, MARGIN=2)
-    rfseg<-makeImage( labelmask , rfseg )
+    rfseg<-apply( rfseg, FUN=median, MARGIN=1)
     return( list( seg=rfseg, probs=newprobs ) )
 }

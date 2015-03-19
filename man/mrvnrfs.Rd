@@ -38,27 +38,40 @@ to build a random forest segmentation model from an image population
 \examples{
 mask<-makeImage( c(10,10), 0 )
 mask[ 3:6, 3:6 ]<-1
-mask[ 5, 5 ]<-2
+mask[ 5, 5:6]<-2
 ilist<-list()
 lablist<-list()
 inds<-1:50
 scl<-0.33 # a noise parameter
+for ( predtype in c("label","scalar") )
+{
 for ( i in inds ) {
   img<-antsImageClone(mask)
   imgb<-antsImageClone(mask)
-  img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
-  imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
   limg<-antsImageClone(mask)
-  limg[ 3:6, 3:6 ]<-(i \%\% 4)+1  # the label image is constant
-  ilist[[i]]<-list(img,imgb)  # two features
-  lablist[[i]]<-limg
-}
+  if ( predtype == "label") {  # 4 class prediction
+    img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
+    imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
+    limg[ 3:6, 3:6 ]<-(i \%\% 4)+1  # the label image is constant
+    }
+    if ( predtype == "scalar") {
+      img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+      imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
+      limg<-i^2.0  # a real outcome
+      }
+    ilist[[i]]<-list(img,imgb)  # two features
+    lablist[[i]]<-limg
+  }
 rad<-rep( 1, 2 )
 mr <- c(1.5,1)
-rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr )
-rfmresult<-mrvnrfs.predict( rfm$rflist ,
-   list(ilist[[2]]), mask, rad=rad,
-   multiResSchedule=mr )
+rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr,
+     asFactors = (  predtype == "label" ) )
+rfmresult<-mrvnrfs.predict( rfm$rflist,
+     ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
+     multiResSchedule=mr )
+if ( predtype == "scalar" )
+  print( cor( unlist(lablist) , rfmresult$seg ) )
+} # end predtype loop
 }
 \author{
 Avants BB, Tustison NJ
