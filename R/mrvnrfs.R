@@ -228,7 +228,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       rfseg<-makeImage( labelmask , rfseg )
       return( list( seg=rfseg, probs=newprobs ) )
       }
-    rfseg<-imageListToMatrix( unlist(newprobs) , labelmask )
-    rfseg<-apply( rfseg, FUN=median, MARGIN=1)
+    rfseg<-apply( imageListToMatrix( unlist(newprobs) ,
+       labelmask ), FUN=median, MARGIN=1 )
     return( list( seg=rfseg, probs=newprobs ) )
 }
