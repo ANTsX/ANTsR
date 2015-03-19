@@ -67,7 +67,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     stop("vwnrfs: dimensionality does not match")
   # first thing - find unique labels
   ulabs<-sort( unique( c( as.numeric( labelmask ) ) ) )
-  if ( min(ulabs) == 0 ) ulabs<-ulabs[-1] # background
+  ulabs<-ulabs[ ulabs > 0 ]
   # second thing - create samples for each unique label
   randmask<-antsImageClone( labelmask )*0
   for ( ulab in ulabs )
@@ -82,6 +82,7 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
   # third thing - at each sample, find the training label/value
   # and the features at that location - go subject by subject
   # 3.1 first define the training vector
+  # NOTE: should find the same values in each image
   rmsz<-sum( randmask > 0 ) # entries in mask
   tv<-rep( NA, length(y)*rmsz )
   seqby<-seq.int( 1, length(tv)+1, by=rmsz )
@@ -89,12 +90,9 @@ vwnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     {
     nxt<-seqby[ i + 1 ]-1
     if ( yisimg )
-      tv[ seqby[i]:nxt ]<-t( getNeighborhoodInMask(
-        y[[i]], randmask, rep(0,idim), spatial.info=F,
-        boundary.condition='image' ) )
+      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
     else tv[ seqby[i]:nxt ]<-rep( y[[i]], rmsz )
     }
-  tv[ tv == 0 ] <- min( ulabs ) # BUG FIXME
   if ( asFactors ) tv<-factor( tv )
   nfeats<-length(x[[1]])
   testmat<-getNeighborhoodInMask( image=randmask, mask=randmask,

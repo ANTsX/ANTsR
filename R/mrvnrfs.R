@@ -122,6 +122,8 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       newprobs[[i]]<-probsx
       }
     } else {
+      # FIXME - this should run the rf model at each
+      # neighborhood location, right?
       newprobs<-predict(sol$rfm,newdata=fm)
     }
     rflist[[rfct]]<-sol$rfm

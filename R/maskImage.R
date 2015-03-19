@@ -7,8 +7,8 @@
 #' @param img.in Input image.
 #' @param img.mask Mask or label image.
 #' @param level Level(s) at which to mask image.  If vector or list
-#' of values, output image is non-zero at all locations where label image 
-#' matches any of the levels specified. 
+#' of values, output image is non-zero at all locations where label image
+#' matches any of the levels specified.
 #' @param binarize binarize the output image?
 #' @return An object of type antsImage.
 #' @author Kandel BM and Avants B.
@@ -22,16 +22,17 @@
 #'
 #' @export maskImage
 maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
-  if (class(level) == "numeric" & length(level) == 1) {
-    img.out <- antsImageClone(img.in)
-    img.out[img.mask != level] <- 0
+  if ( class(level) == "numeric" & length(level) == 1) {
+    img.out <- antsImageClone(img.in) * 0
+    img.out[ img.mask != level] <- 0
     return(img.out)
   }
-  if ( (class(level) == "list") | 
-       (class(level) == "numeric" & length(level) > 1) ) {
-    img.out <- antsImageClone(img.in)
-    img.out[img.out > 0] <- 0
-    for (mylevel in level) {
+  if ( (class(level) == "list") |
+       (class(level) == "numeric"
+       & length(level) > 1) )
+    {
+    img.out <- antsImageClone(img.in) * 0
+    for ( mylevel in level ) {
       myval <- as.numeric(mylevel)
       if (binarize)
         img.out[img.mask == myval] <- 1
