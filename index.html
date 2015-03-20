@@ -30,7 +30,8 @@
         <h1>
 <a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> and <a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">vignette</a></p>
+<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a> and check the new  <a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">vignette</a>
+and <a href="https://github.com/stnava/ANTsR/releases">manual</a></p>
 
 <p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> and <a href="https://github.com/InsightSoftwareConsortium/ITK">ITK</a> features in R.</p>
 
@@ -52,7 +53,7 @@ install_github("stnava/ANTsR")
 <h2>
 <a id="antsr-manual-and-releases" class="anchor" href="#antsr-manual-and-releases" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR manual and releases</h2>
 
-<p><a href="https://github.com/stnava/ANTsR/releases">R-style manual and releases</a> are new
+<p><a href="https://github.com/stnava/ANTsR/releases">Releases</a> are new
 so let us know of any <a href="https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues">issues</a> ...</p>
 
 <h2>
@@ -341,6 +342,23 @@ github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
 
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 </code></pre>
+
+<h2>
+<a id="research-using-antsr" class="anchor" href="#research-using-antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Research using ANTsR</h2>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25449745">Inter-modality inference</a> yet to be added RIPMMARC</p>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25448483">Eigenanatomy for multiple modality population studies</a> function <code>sparseDecom</code></p>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25320792">Structural networks from subject-level data</a> function <code>makeGraph</code> plus yet to be added RIPMMARC</p>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24683960">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p>
+
+<p>this uses but does not mention</p>
+
+<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24852460">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p>
       </section>
     </div>
     <footer>
