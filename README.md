@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR) and check the new  [vignette](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
 and [manual](https://github.com/stnava/ANTsR/releases)
 
-An R package providing [ANTs](http://stnava.github.io/ANTs/) and [ITK](https://github.com/InsightSoftwareConsortium/ITK) features in R.
+An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
 
 Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
 
@@ -12,10 +12,12 @@ Original Authors: Shrinidhi KL,  Brian B. Avants
 ## Easiest installation approach (from within R)
 ```
 library( devtools )
+install_github("stnava/cmaker")
+install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 ```
 
-this assumes you have [cmake](http://www.cmake.org/download/) installed / accessible in your environment
+this assumes you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.
 
 windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
@@ -25,74 +27,18 @@ windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/)
 so let us know of any [issues](https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues) ...
 
 ## Installation from source
-see [install from source](http://stnava.github.io/software/2014/01/08/antsr/)
 
 First, clone the repository:
 ```sh
+$ git clone https://github.com/stnava/ITKR.git
 $ git clone https://github.com/stnava/ANTsR.git
 ```
 
 Install the package as follows:
 ```sh
+$ R CMD INSTALL ITKR
 $ R CMD INSTALL ANTsR
 ```
-
-## Installation using Homebrew
-
-* Install homebrew
-```
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-```
-
-* Install cmake
-```
-brew install cmake
-```
-
-* Install zlib and wget, if necessary
-```
-brew install wget
-```
-```
-brew tap homebrew/dupes
-```
-```
-brew install zlib
-```
-
-* Edit zlib path in ANTsR/src/ANTS/ANTS-build/CMakeCache.txt file:  
-```
-ZLIB_INCLUDE_DIR:PATH=/usr/local/Cellar/zlib/1.2.8/include
-```
-
-* Possible errors
-
-```
-Error: make: llvm-g++-4.2: No such file or directory, Error: /bin/sh: llvm-g++-4.2: command not found
-```
-Solution:  In file: /Library/Frameworks/R.framework/Versions/3.0/Resources/etc/Makeconf
-
-Find: llvm-g++-4.2
-
-Replace with: g++
-
-```
-Warning: cmake-3.1.0 already installed, it's just not linked
-```
-Solution:
-```
-brew link --overwrite cmake
-```
-
-
-
-### Binaries
-These are still under development; use at your own discretion.
-
- * [Mac OS X](https://dl.dropboxusercontent.com/u/9717050/ANTsR_osx_1.0.tgz)
- * [RHEL](https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-redhat-linux-gnu.tar.gz)
- * [Other Linux](https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
-
 
 ### R dependencies
 You may need to install R packages that ANTsR requires. For example:
@@ -126,8 +72,7 @@ and to map them into a format compatible with R.
 **Read, write, access an image**
 ```
 mnifilename<-getANTsRData("mni")
-dimension<-3
-img<-antsImageRead(mnifilename,dimension)
+img<-antsImageRead(mnifilename)
 antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
@@ -213,11 +158,11 @@ Images neighborhoods contain rich shape and texture information.
 We can extract neighborhoods for further analysis at a given scale.
 ```
 mnit<-getANTsRData("mni")
-mnit<-antsImageRead(mnit,3)
+mnit<-antsImageRead(mnit)
 mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
 mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
-mat2<-antsGetNeighborhoodMatrix(mnit, mask2, radius,
+mat2<-getNeighborhoodMatrix(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 ```
@@ -269,9 +214,9 @@ see the [sccan tutorial](http://stnava.github.io/sccanTutorial/).
 ?antsSet*
 ```
 
-All of `ImageMath` from ANTs is accessible too
+Parts of `ImageMath` from ANTs are accessible via
 ```
-ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
+?iMath
 ```
 
 for more fMRI focused tools, see [RKRNS](http://stnava.github.io/RKRNS/) and its
