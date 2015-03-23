@@ -33,7 +33,7 @@
 <p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a> and check the new  <a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">vignette</a>
 and <a href="https://github.com/stnava/ANTsR/releases">manual</a></p>
 
-<p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> and <a href="https://github.com/InsightSoftwareConsortium/ITK">ITK</a> features in R.</p>
+<p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R.</p>
 
 <p>Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison</p>
 
@@ -43,10 +43,12 @@ and <a href="https://github.com/stnava/ANTsR/releases">manual</a></p>
 <a id="easiest-installation-approach-from-within-r" class="anchor" href="#easiest-installation-approach-from-within-r" aria-hidden="true"><span class="octicon octicon-link"></span></a>Easiest installation approach (from within R)</h2>
 
 <pre><code>library( devtools )
+install_github("stnava/cmaker")
+install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 </code></pre>
 
-<p>this assumes you have <a href="http://www.cmake.org/download/">cmake</a> installed / accessible in your environment</p>
+<p>this assumes you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>.</p>
 
 <p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
@@ -59,85 +61,15 @@ so let us know of any <a href="https://github.com/stnava/ANTsR/issueshttps://git
 <h2>
 <a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
-<p>see <a href="http://stnava.github.io/software/2014/01/08/antsr/">install from source</a></p>
-
 <p>First, clone the repository:</p>
 
-<div class="highlight highlight-sh"><pre>$ git clone https://github.com/stnava/ANTsR.git</pre></div>
+<div class="highlight highlight-sh"><pre>$ git clone https://github.com/stnava/ITKR.git
+$ git clone https://github.com/stnava/ANTsR.git</pre></div>
 
 <p>Install the package as follows:</p>
 
-<div class="highlight highlight-sh"><pre>$ R CMD INSTALL ANTsR</pre></div>
-
-<h2>
-<a id="installation-using-homebrew" class="anchor" href="#installation-using-homebrew" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation using Homebrew</h2>
-
-<ul>
-<li>Install homebrew</li>
-</ul>
-
-<pre><code>ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-</code></pre>
-
-<ul>
-<li>Install cmake</li>
-</ul>
-
-<pre><code>brew install cmake
-</code></pre>
-
-<ul>
-<li>Install zlib and wget, if necessary</li>
-</ul>
-
-<pre><code>brew install wget
-</code></pre>
-
-<pre><code>brew tap homebrew/dupes
-</code></pre>
-
-<pre><code>brew install zlib
-</code></pre>
-
-<ul>
-<li>Edit zlib path in ANTsR/src/ANTS/ANTS-build/CMakeCache.txt file:<br>
-</li>
-</ul>
-
-<pre><code>ZLIB_INCLUDE_DIR:PATH=/usr/local/Cellar/zlib/1.2.8/include
-</code></pre>
-
-<ul>
-<li>Possible errors</li>
-</ul>
-
-<pre><code>Error: make: llvm-g++-4.2: No such file or directory, Error: /bin/sh: llvm-g++-4.2: command not found
-</code></pre>
-
-<p>Solution:  In file: /Library/Frameworks/R.framework/Versions/3.0/Resources/etc/Makeconf</p>
-
-<p>Find: llvm-g++-4.2</p>
-
-<p>Replace with: g++</p>
-
-<pre><code>Warning: cmake-3.1.0 already installed, it's just not linked
-</code></pre>
-
-<p>Solution:</p>
-
-<pre><code>brew link --overwrite cmake
-</code></pre>
-
-<h3>
-<a id="binaries" class="anchor" href="#binaries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Binaries</h3>
-
-<p>These are still under development; use at your own discretion.</p>
-
-<ul>
-<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_osx_1.0.tgz">Mac OS X</a></li>
-<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-redhat-linux-gnu.tar.gz">RHEL</a></li>
-<li><a href="https://dl.dropboxusercontent.com/u/9717050/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Other Linux</a></li>
-</ul>
+<div class="highlight highlight-sh"><pre>$ R CMD INSTALL ITKR
+$ R CMD INSTALL ANTsR</pre></div>
 
 <h3>
 <a id="r-dependencies" class="anchor" href="#r-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>R dependencies</h3>
@@ -178,8 +110,7 @@ and to map them into a format compatible with R.</p>
 <p><strong>Read, write, access an image</strong></p>
 
 <pre><code>mnifilename&lt;-getANTsRData("mni")
-dimension&lt;-3
-img&lt;-antsImageRead(mnifilename,dimension)
+img&lt;-antsImageRead(mnifilename)
 antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
@@ -263,11 +194,11 @@ antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )
 We can extract neighborhoods for further analysis at a given scale.</p>
 
 <pre><code>mnit&lt;-getANTsRData("mni")
-mnit&lt;-antsImageRead(mnit,3)
+mnit&lt;-antsImageRead(mnit)
 mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
 mask2&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius &lt;- rep(2,mnit@dimension)
-mat2&lt;-antsGetNeighborhoodMatrix(mnit, mask2, radius,
+mat2&lt;-getNeighborhoodMatrix(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 </code></pre>
@@ -321,9 +252,9 @@ see the <a href="http://stnava.github.io/sccanTutorial/">sccan tutorial</a>.</p>
 ?antsSet*
 </code></pre>
 
-<p>All of <code>ImageMath</code> from ANTs is accessible too</p>
+<p>Parts of <code>ImageMath</code> from ANTs are accessible via</p>
 
-<pre><code>ImageMath(3,threshimg,'ClusterThresholdVariate',threshimg,mask,5)
+<pre><code>?iMath
 </code></pre>
 
 <p>for more fMRI focused tools, see <a href="http://stnava.github.io/RKRNS/">RKRNS</a> and its
