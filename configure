@@ -39,6 +39,7 @@ if [[ ! -s antb/Makefile  ]] ; then
     -DBUILD_ALL_ANTS_APPS=OFF \
     -DUSE_SYSTEM_ITK=OFF \
     -DBUILD_TESTING=OFF \
+    -DCOPY_SCRIPT_FILES_TO_BIN_DIR=OFF \
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
   cd ../
 #  for x in invariantImageSimilarity.cpp ../R/invariantImageSimilarity.R ../R/convolveImage.R ../man/convolveImage.Rd ../man/invariantImageSimilarity.Rd ; do
