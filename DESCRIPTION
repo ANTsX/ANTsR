@@ -44,7 +44,7 @@ Suggests:
     testthat,
     visreg,
     wmtsa
-LinkingTo: Rcpp
+LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 NeedsCompilation: yes
 OS_type: unix

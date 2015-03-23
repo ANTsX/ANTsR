@@ -1,6 +1,14 @@
 #!/bin/bash
 CXX_STD=CXX11
-R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
+ITKRCMAKE=`${R_DIR}Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
+ITKRLIB=`${R_DIR}Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
+compflags=`${R_DIR}Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
+ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
+# get a version of cmake
+cmaker=`which cmake`
+if [[ ! -x $cmaker ]] ; then # try r version
+  cmaker=`${R_HOME}/bin/Rscript -e 'a<-cmaker::cmake()'`
+fi
 JTHREADS=2
 if [[ `uname` -eq Darwin ]] ; then
   CMAKE_BUILD_TYPE=Release
@@ -10,52 +18,9 @@ if [[ $TRAVIS -eq true ]] ; then
   JTHREADS=2
 fi
 cd ./src
-itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 antsgit=https://github.com/stnava/ANTs.git
-itktag=63a970e3d607555a3315270e06c99d272c0a242f
 antstag=93a23eeabfdc5e5de1847577bc3bdaf5bffa2705
 if [[ ! -s antb/Makefile  ]] ; then
-  mkdir ants itks antb itkb itki
-  if [[ ! -s itks/CMakeLists.txt ]] ; then
-    git clone $itkgit itks
-  fi
-  cd itks
-  if [[ -d .git ]]; then
-    git checkout master;  git pull;  git checkout $itktag
-  fi
-#  rm -r -f Testing Examples Documentation Testing  # .git
-  cd ../itkb
-  compflags=" -fPIC -O2  "
-  cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_TESTING:BOOL=OFF \
-    -DBUILD_EXAMPLES:BOOL=OFF \
-    -DCMAKE_INSTALL_PREFIX:PATH=../itki/  \
-    -DITK_LEGACY_REMOVE:BOOL=OFF  \
-    -DITK_FUTURE_LEGACY_REMOVE:=BOOL=ON \
-    -DITKV3_COMPATIBILITY:BOOL=ON \
-    -DITK_BUILD_DEFAULT_MODULES:BOOL=OFF \
-    -DKWSYS_USE_MD5:BOOL=ON \
-    -DITK_WRAPPING:BOOL=OFF \
-    -DModule_MGHIO:BOOL=ON \
-    -DModule_ITKDeprecated:BOOL=OFF \
-    -DModule_ITKReview:BOOL=ON \
-    -DModule_ITKVtkGlue:BOOL=OFF \
-    -D ITKGroup_Core=ON \
-    -D Module_ITKReview=ON \
-    -D ITKGroup_Filtering=ON \
-    -D ITKGroup_IO=ON \
-    -D ITKGroup_Numerics=ON \
-    -D ITKGroup_Registration=ON \
-    -D ITKGroup_Segmentation=ON ../itks/
-  # dont call make here ... this should be done elsewere ... but do so
-  # temporarily just to get the includes going ... maybe these should be in
-  # ANTsR/inst/include ?
-  make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
-  make install | grep -v "Installing" | grep -v "Looking for" | grep -v "Up-to-date"
-  cd ../
   if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsgit ants
   fi
@@ -63,17 +28,20 @@ if [[ ! -s antb/Makefile  ]] ; then
   if [[ -d .git ]]; then
     git checkout master;  git pull;  git checkout $antstag
   fi
-  # rm -r -f .git
-  cd ../antb
-  cmake -DITK_DIR:PATH=../itkb/ \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
+  cd ../
+  mkdir antb
+  cd ./antb
+  ${cmaker} -DITK_DIR:PATH=${ITKDIR} \
+    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} ${compflags} -DNDEBUG  "\
+    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} ${compflags} -DNDEBUG  "\
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_EXTERNAL_APPLICATIONS=OFF \
     -DBUILD_ALL_ANTS_APPS=OFF \
     -DUSE_SYSTEM_ITK=OFF \
     -DBUILD_TESTING=OFF \
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
-    # dont call make here ... this should be done elsewere
-  # make -j $JTHREADS | grep -v "Installing" | grep -v "Looking for"
+  cd ../
+#  for x in invariantImageSimilarity.cpp ../R/invariantImageSimilarity.R ../R/convolveImage.R ../man/convolveImage.Rd ../man/invariantImageSimilarity.Rd ; do
+#    if [[ -s $x ]] ; then  rm $x; fi
+#  done
 fi
