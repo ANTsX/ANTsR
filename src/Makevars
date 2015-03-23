@@ -1,18 +1,22 @@
 CXX_STD = CXX11
-myrootantssource=${PWD}/ants/
-myrootantslib=${PWD}/antb/lib/
-myrootitklib=${PWD}/itki/lib/
-myrootitksource=${PWD}/itki/include/ITK-4.8/
-PKG_CPPFLAGS= -I../inst/include -I${PWD} -I${myrootitksource} -I${myrootantssource}/Examples/include/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
-libants=`find ${myrootantslib} -name "lib*.a"`
-libitk=`find ${myrootitklib} -name "lib*.a"`
-myarch  := $(shell uname)
-libtwo=`$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()" `
-PKG_LIBS = ${libtwo} ${libitk} ${libants} ${libitk} ${libants} ${libtwo} ${libitk} ${libants} ${libitk} ${libants} ${libtwo}
+
+myantssource=${PWD}/ants/
+myantslib=${PWD}/antb/lib/
+
+ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
+
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/
+
+libants=`find ${myantslib} -name "lib*.a"`
+
+libitk=`find \`$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\` -name "lib*.a"`
+
+PKG_LIBS = ${libants} ${libitk} ${libants} ${libitk}
+
 .PHONY: all libs
 
 all: $(SHLIB)
 
 $(SHLIB): libs
 
-libs: ; cd ${PWD}/itkb && $(MAKE) -j 2 && make install && cd ${PWD}/antb && $(MAKE) -j 2
+libs: ; cd ${PWD}/antb && $(MAKE) -j 2
