@@ -37,7 +37,7 @@ install:
 - ./travis-tool.sh r_binary_install knitr
 - ./travis-tool.sh r_install rmarkdown
 - ./travis-tool.sh r_install magrittr
-- ./travis-tool.sh stnava/ITKR
+- ./travis-tool.sh install_github stnava/ITKR
 - cd ${basedir}
 
 script:
