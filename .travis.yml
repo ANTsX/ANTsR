@@ -7,11 +7,11 @@ os:
 - linux
 # - osx # currently builds too slowly ...
 
-branches: 
-  only: 
+branches:
+  only:
     - master
-    - cran 
-    - rcmdcheck 
+    - cran
+    - rcmdcheck
 
 before_install:
 - cd ..
@@ -44,6 +44,7 @@ install:
 - ./travis-tool.sh r_binary_install knitr
 - ./travis-tool.sh r_install rmarkdown
 - ./travis-tool.sh r_install magrittr
+- ./travis-tool.sh install_github stnava/ITKR
 - cd ${basedir}
 
 script:
