@@ -1,6 +1,4 @@
 #!/bin/bash
-# retrieve Rcpp and R include and link directories
-# R_DIR=(set by the user from command line)
 CXX_STD=CXX11
 R_LIB_DIR=`${R_DIR}R CMD config --ldflags`
 JTHREADS=2
@@ -15,7 +13,7 @@ cd ./src
 itkgit=https://github.com/InsightSoftwareConsortium/ITK.git
 antsgit=https://github.com/stnava/ANTs.git
 itktag=63a970e3d607555a3315270e06c99d272c0a242f
-antstag=93a23eeabfdc5e5de1847577bc3bdaf5bffa2705 
+antstag=93a23eeabfdc5e5de1847577bc3bdaf5bffa2705
 if [[ ! -s antb/Makefile  ]] ; then
   mkdir ants itks antb itkb itki
   if [[ ! -s itks/CMakeLists.txt ]] ; then
@@ -27,9 +25,7 @@ if [[ ! -s antb/Makefile  ]] ; then
   fi
 #  rm -r -f Testing Examples Documentation Testing  # .git
   cd ../itkb
-  compflags=" -fPIC "
-  compflags=" -Wno-c++11-extensions -fPIC -O2 -std=c++11 "
-  compflags=" -Wno-c++11-long-long -fPIC -O2  "
+  compflags=" -fPIC -O2  "
   cmake -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}" \
     -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
     -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-c++11-long-long -fPIC -O2 -DNDEBUG  "\
