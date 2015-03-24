@@ -27,19 +27,21 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
   {
   fixed <- getAverageOfTimeSeries( bold )
   }
-  moco <- .motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)
+  moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate)
   tmpdir <- tempdir()
-  file.mocoparam <- paste(tmpdir, "moco.csv", sep = "")
-  file.mask <- paste(tmpdir, "mask.nii.gz", sep = "")
-  file.out <- paste(tmpdir, "out.csv", sep = "")
+  file.mocoparam <- tempfile( fileext="moco.csv" )
+  file.out <- tempfile( fileext="out.csv" )
+  tsout<-sub("out.csv", "out.nii.gz", file.out ) # should replace text here
   write.csv(moco$moco_params, file.mocoparam, row.names = F)
   if (is.na(mask)) {
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
       Inf, cleanup = 2)
   }
-  .antsMotionCorrStats(list(x = mask, d = img, o = file.out, f = framewise,
-    m = file.mocoparam))
-  tsDisplacement <- antsImageRead(paste(tmpdir, "out.nii.gz", sep = ""), 4)
+  tsimg <- antsImageClone( img, "double" )
+  .antsMotionCorrStats( list( x = mask, d = tsimg, o = file.out,
+    f = framewise,
+    m = file.mocoparam) )
+  tsDisplacement <- antsImageRead( tsout , 4, "double" )
   aslmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS(aslmat)
   list(
