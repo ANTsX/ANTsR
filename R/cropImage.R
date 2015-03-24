@@ -11,7 +11,7 @@
 #' @keywords crop, extract sub-image
 #' @examples
 #'
-#' fi <- antsImageRead(getANTsRData("r16"), 2)
+#' fi <- antsImageRead(getANTsRData("r16"))
 #' cropped <- cropImage(fi)
 #' cropped <- cropImage(fi, fi, 250)
 #'
@@ -42,7 +42,7 @@ cropImage <- function( image, labelImage, label=1 ) {
 #' @keywords crop, extract sub-image
 #' @examples
 #'
-#' fi <- antsImageRead( getANTsRData("r16") ,2)
+#' fi <- antsImageRead( getANTsRData("r16"))
 #' cropped <- cropIndices( fi, c(2,10), c(5,15) )
 #' cropped<-smoothImage( cropped, 5 )
 #' decropped<-decropImage( cropped, fi )
@@ -71,7 +71,7 @@ cropIndices <- function( image, lowerind, upperind ) {
 #' @keywords decrop, extract sub-image
 #' @examples
 #'
-#' fi <- antsImageRead( getANTsRData("r16") ,2)
+#' fi <- antsImageRead( getANTsRData("r16"))
 #' mask <- getMask( fi )
 #' cropped <- cropImage( fi, mask, 1 )
 #' cropped <- smoothImage( cropped, 1)

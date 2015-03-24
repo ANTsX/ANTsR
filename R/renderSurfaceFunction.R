@@ -25,9 +25,9 @@
 #' @examples
 #' \dontrun{
 #'        mnit<-getANTsRData("mni")
-#'        mnit<-antsImageRead(mnit,3)
+#'        mnit<-antsImageRead(mnit)
 #'        mnia<-getANTsRData("mnia")
-#'        mnia<-antsImageRead(mnia,3)
+#'        mnia<-antsImageRead(mnia)
 #'        mnit<-thresholdImage( mnit, 1, max(mnit) )
 #'        mnia<-thresholdImage( mnia, 1, 2 )
 #'        brain<-renderSurfaceFunction( surfimg =list( mnit ) ,

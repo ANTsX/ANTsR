@@ -13,7 +13,7 @@
 #' @examples
 #'
 #' if ( usePkg("randomForest") ) {
-#' img<-antsImageRead( getANTsRData("r16") ,2)
+#' img<-antsImageRead( getANTsRData("r16"))
 #' mask<-getMask( img )
 #' segs<-kmeansSegmentation( img, k=3, kmask = mask)
 #' fimgs<-lappend( img, segs$probabilityimages )

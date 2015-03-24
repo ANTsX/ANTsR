@@ -19,7 +19,7 @@
 #'   # make some simple data
 #'   \dontrun{
 #'   if (!exists("fn") ) fn<-getANTsRData("pcasl")
-#'   asl<-antsImageRead(fn,4)
+#'   asl<-antsImageRead(fn)
 #'   tr<-antsGetSpacing(asl)[4]
 #'   aslmean<-getAverageOfTimeSeries( asl )
 #'   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
