@@ -37,29 +37,23 @@ install:
 - ./travis-tool.sh r_binary_install knitr
 - ./travis-tool.sh r_install rmarkdown
 - ./travis-tool.sh r_install magrittr
-- ./travis-tool.sh install_github stnava/ITKR
+- wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
+- R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
 - cd ${basedir}
 
 script:
+- source ~/.R/Makevars
 - travis_wait 40 R CMD build ANTsR --no-build-vignettes
-- R CMD INSTALL ANTsR_1.0.tar.gz  # --build # cant do both this and full check
-# - travis_wait 120 R CMD check ANTsR_1.0.tar.gz --as-cran  --no-install
-# - cd ANTsR
-# - R CMD check ANTsR
+- R CMD INSTALL --build ANTsR_1.0.tar.gz
+- cd ANTsR
 
-# before_deploy: git fetch --tags
+before_deploy: git fetch --tags
 
-# deploy:
-#  provider: releases
-#  api_key:
-#    secure: KeamoMlOUTB1Oi1VrBIbRaDCzHdrVqfSKXYc06zqi6FBkdXIsaNmX2P50CyOAlEBpkXATUMX2S8CAqwa37XSEF3WwSpRDTGEWgwas0N3D1PRSPN8HJYZ2hKWjcchZF1ov9ERRMOtJshlQ+W6YddPQiHRVCx2/8VAjNqxgT+1sQI=
-#  file: ../ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz
-#  skip_cleanup: true
-#  on:
-#    tags: true
-#    all_branches: master
-
-#  file: ../ANTsR_1.0.tgz # osx
+deploy:
+  provider: releases
+  api_key:
+    secure: sMbXZTmLc6h1nsUkZlanuI7huOILHQJSuNLGKRCrmn/NcF6mAW4nX92hSGC1QpXafGAhuzKy0oATVJGVziPWpZ5e4bw3+puPEMfc6w743YMBYYSHoHTGoefnRuzngjDrhSZc7QHSRLp32z3i/cpArLT0SYg61/89h9lp93jXJQo=
+  file: ../ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz
 
 after_failure:
  - ./travis-tool.sh dump_logs
