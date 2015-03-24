@@ -2,18 +2,24 @@
 % Please edit documentation in R/antsAverageImages.R
 \name{antsAverageImages}
 \alias{antsAverageImages}
-\title{averages an image list with or without intensity normalization}
+\title{Computes average of image list}
 \usage{
 antsAverageImages(imageList, normalize = FALSE)
 }
 \arguments{
-\item{imageList}{must be an antsImage list}
+\item{imageList}{list of antsImages}
 
 \item{normalize}{boolean determines if image is divided by mean before
 averaging}
 }
 \description{
-calculate the mean of a list of antsImages imageList: can contain anything that be cast via as.array()
+Calculate the mean of a list of antsImages
+}
+\examples{
+r16 <- antsImageRead(getANTsRData('r16'))
+r64 <- antsImageRead(getANTsRData('r64'))
+mylist <- list(r16, r64)
+antsAverageImages(mylist)
 }
 \author{
 Avants BB, Pustina D

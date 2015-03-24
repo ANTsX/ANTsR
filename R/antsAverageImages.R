@@ -1,10 +1,15 @@
-#' averages an image list with or without intensity normalization
+#' Computes average of image list 
 #'
-#' calculate the mean of a list of antsImages imageList: can contain anything that be cast via as.array()
-#' @param imageList must be an antsImage list
+#' Calculate the mean of a list of antsImages 
+#' @param imageList list of antsImages 
 #' @param normalize boolean determines if image is divided by mean before
 #' averaging
 #' @author Avants BB, Pustina D
+#' @examples
+#' r16 <- antsImageRead(getANTsRData('r16'))
+#' r64 <- antsImageRead(getANTsRData('r64'))
+#' mylist <- list(r16, r64)
+#' antsAverageImages(mylist)
 antsAverageImages <- function( imageList, normalize = FALSE )
   {
   avg <- imageList[[1]] * 0
@@ -12,7 +17,7 @@ antsAverageImages <- function( imageList, normalize = FALSE )
     if ( normalize ) {
       i <- i / mean( i )
     }
-    template <- template + i
+    avg <- avg + i
   }
   avg <- avg / length(imageList)
   return( avg )
