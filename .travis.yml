@@ -1,18 +1,13 @@
 language: c
-
 compiler:
 - clang
-
 os:
 - linux
-# - osx # currently builds too slowly ...
-
 branches:
   only:
-    - master
-    - cran
-    - rcmdcheck
-
+  - master
+  - cran
+  - rcmdcheck
 before_install:
 - cd ..
 - basedir=${PWD}
@@ -24,14 +19,11 @@ before_install:
 - echo "CC=clang" >  ~/.R/Makevars
 - echo "CXX=clang++" >> ~/.R/Makevars
 - source ~/.R/Makevars
-
 install:
 - wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip
-- unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc
-    -d $HOME/pandoc
+- unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc -d $HOME/pandoc
 - chmod +x $HOME/pandoc/pandoc
 - export PATH=$PATH:$HOME/pandoc/
-# - pandoc --version
 - ./travis-tool.sh bootstrap
 - ./travis-tool.sh r_binary_install Rcpp
 - ./travis-tool.sh r_binary_install knitr
@@ -40,24 +32,13 @@ install:
 - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
 - R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
 - cd ${basedir}
-
 script:
 - source ~/.R/Makevars
 - travis_wait 40 R CMD build ANTsR --no-build-vignettes
 - R CMD INSTALL --build ANTsR_1.0.tar.gz
 - cd ANTsR
-
-before_deploy: git fetch --tags
-
-deploy:
-  provider: releases
-  api_key:
-    secure: sMbXZTmLc6h1nsUkZlanuI7huOILHQJSuNLGKRCrmn/NcF6mAW4nX92hSGC1QpXafGAhuzKy0oATVJGVziPWpZ5e4bw3+puPEMfc6w743YMBYYSHoHTGoefnRuzngjDrhSZc7QHSRLp32z3i/cpArLT0SYg61/89h9lp93jXJQo=
-  file: ../ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz
-
 after_failure:
- - ./travis-tool.sh dump_logs
-
+- ./travis-tool.sh dump_logs
 notifications:
   email:
     recipients:
@@ -65,7 +46,6 @@ notifications:
     - arman.eshaghi@gmail.com
     on_success: change
     on_failure: always
-
 env:
   global:
   - R_BUILD_ARGS=" "
@@ -76,3 +56,10 @@ env:
   - _R_CHECK_FORCE_SUGGESTS_="0"
   - BOOTSTRAP_LATEX=1
   - WARNINGS_ARE_ERRORS=1
+deploy:
+  provider: releases
+  api_key:
+    secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+  file: ../ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz
+  on:
+    repo: stnava/ANTsR
