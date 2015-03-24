@@ -21,7 +21,7 @@ subimage
 uses a label image to crop a smaller image from within a larger image
 }
 \examples{
-fi <- antsImageRead(getANTsRData("r16"), 2)
+fi <- antsImageRead(getANTsRData("r16"))
 cropped <- cropImage(fi)
 cropped <- cropImage(fi, fi, 250)
 }

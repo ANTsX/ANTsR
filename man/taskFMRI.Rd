@@ -35,7 +35,7 @@ derived from global residual signal. Estimate final glm.
 \dontrun{
 # read the fmri image in and maybe do slice timing correction
   fmri<-getANTsRData("pcasl")
-  fmri<-antsImageRead( fmri , 4 )
+  fmri<-antsImageRead( fmri )
 #  fmri<-iMath(fmri,"SliceTimingCorrection","bspline") # optional
   myvars<-getfMRInuisanceVariables( fmri, moreaccurate = 0, maskThresh=100 )
   mat <- myvars$matrixTimeSeries

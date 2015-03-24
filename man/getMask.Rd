@@ -36,7 +36,7 @@ These functions are available in \link{iMath}, see the operations
 \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.
 }
 \examples{
-img<-antsImageRead( getANTsRData("r16") ,2)
+img<-antsImageRead( getANTsRData("r16"))
 mask<-getMask( img )
 }
 \author{

@@ -33,8 +33,8 @@ compute similarity metric between two images as image is rotated about its
 center w/or w/o optimization
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16") ,2)
-mi<-antsImageRead( getANTsRData("r64") ,2)
+fi<-antsImageRead( getANTsRData("r16"))
+mi<-antsImageRead( getANTsRData("r64"))
 mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
 }
 \author{

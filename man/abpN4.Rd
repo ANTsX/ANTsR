@@ -23,7 +23,7 @@ outputs a bias corrected image. 1 indicates failure.
 Truncate outlier intensities and bias correct with the N4 algorithm.
 }
 \examples{
-img <- antsImageRead(getANTsRData("r16"),2)
+img <- antsImageRead(getANTsRData("r16"))
 img2 <- abpN4( img )
 }
 \author{

@@ -52,14 +52,14 @@ Estimates an image from another set of images - intensity generalization of join
 }
 \examples{
 set.seed(123)
-ref<-antsImageRead( getANTsRData("r16"), 2)
+ref<-antsImageRead( getANTsRData("r16"))
 ref<-resampleImage(ref,c(50,50),1,0)
 ref<-iMath(ref,"Normalize")
-mi<-antsImageRead( getANTsRData("r27"),  2)
-mi2<-antsImageRead( getANTsRData("r30") ,2)
-mi3<-antsImageRead( getANTsRData("r62") ,2)
-mi4<-antsImageRead( getANTsRData("r64") ,2)
-mi5<-antsImageRead( getANTsRData("r85") ,2)
+mi<-antsImageRead( getANTsRData("r27"))
+mi2<-antsImageRead( getANTsRData("r30"))
+mi3<-antsImageRead( getANTsRData("r62"))
+mi4<-antsImageRead( getANTsRData("r64"))
+mi5<-antsImageRead( getANTsRData("r85"))
 refmask<-getMask(ref)
 refmask<-iMath(refmask,"ME",2) # just to speed things up
 ilist<-list(mi,mi2,mi3,mi4,mi5)

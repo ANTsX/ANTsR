@@ -27,7 +27,7 @@ Computes CBF from ASL - pasl or pcasl
 \dontrun{
   if (!exists("fn") ) fn<-getANTsRData("pcasl")
   # PEDS029_20101110_pcasl_1.nii.gz # high motion subject
-  asl<-antsImageRead(fn,4)
+  asl<-antsImageRead(fn)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
   pcasl.bayesian <- aslPerfusion( asl,
         dorobust=0., useDenoiser=4, skip=11, useBayesian=1000,

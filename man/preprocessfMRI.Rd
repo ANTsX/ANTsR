@@ -75,7 +75,7 @@ set.seed(123)
 nvox <- 10*10*10*20
 dims <- c(10,10,10,20)
 boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
-# for real data: boldImage <- antsImageRead(getANTsRData('pcasl'), 4)
+# for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 cleanfMRI <- preprocessfMRI(boldImage)
 }
 \author{

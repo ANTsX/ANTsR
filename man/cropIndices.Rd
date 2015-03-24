@@ -23,7 +23,7 @@ sub-image can be decropped back into its place without having to store its
 original index locations explicitly.
 }
 \examples{
-fi <- antsImageRead( getANTsRData("r16") ,2)
+fi <- antsImageRead( getANTsRData("r16"))
 cropped <- cropIndices( fi, c(2,10), c(5,15) )
 cropped<-smoothImage( cropped, 5 )
 decropped<-decropImage( cropped, fi )

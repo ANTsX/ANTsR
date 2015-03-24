@@ -31,7 +31,7 @@ datasets as it is based on C++ implementations.
     antsImageWrite( simimg, tempfile(fileext='.mha'))
   }
   imageList = list.files(tdir, pattern = ".mha", full.names = TRUE)
-  mask = getMask( antsImageRead( imageList[1] , 2 ) )
+  mask = getMask( antsImageRead( imageList[1] ) )
   mat = imagesToMatrix(imageList, mask)
   print(dim(mat))
 }

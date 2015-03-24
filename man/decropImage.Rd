@@ -18,7 +18,7 @@ decroppedImage
 the inverse function for \code{cropImage}
 }
 \examples{
-fi <- antsImageRead( getANTsRData("r16") ,2)
+fi <- antsImageRead( getANTsRData("r16"))
 mask <- getMask( fi )
 cropped <- cropImage( fi, mask, 1 )
 cropped <- smoothImage( cropped, 1)

@@ -24,7 +24,7 @@ Predict image segmentation via random forests.
 }
 \examples{
 if ( usePkg('randomForest') ) {
-img<-antsImageRead( getANTsRData("r16") ,2)
+img<-antsImageRead( getANTsRData("r16"))
 mask<-getMask( img )
 mask2<-getMask( img )
 mask<-iMath(mask,'ME',25)
@@ -35,8 +35,8 @@ rfsegs<-rfSegmentation( segs$segmentation, fimgs , ntrees=100 )
 rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fimgs , mask2 )
 plot( rfseg2 )
 \dontrun{
-   img<-antsImageRead( getANTsRData("r16") ,2)
-   img2<-antsImageRead( getANTsRData("r64") ,2)
+   img<-antsImageRead( getANTsRData("r16"))
+   img2<-antsImageRead( getANTsRData("r64"))
    mask<-getMask( img )
    mask2<-getMask( img2 )
    segs<-kmeansSegmentation( img, k=3, kmask = mask)

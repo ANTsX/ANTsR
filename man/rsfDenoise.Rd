@@ -44,7 +44,7 @@ Uses a target function to denoise resting bold data
 # bold <- antsImageRead( fn )
 # avgbold<-getAverageOfTimeSeries(bold)
 # boldmask<-getMask( avgbold )
-# roimask<-antsImageRead("roi.nii.gz",3)
+# roimask<-antsImageRead("roi.nii.gz")
 # timeselect<-10:(dim(bold)[4]-10)
 # # can do this if you like its approach
 # cleanfMRI <- preprocessfMRI( bold, maskImage=boldmask,
@@ -68,9 +68,9 @@ Uses a target function to denoise resting bold data
 # antsImageWrite( betaimg, "betas2.nii.gz" )
 #
 # # more complex
-# bold<-antsImageRead("bold.nii.gz",4)
-# boldmask<-antsImageRead("meanboldmask.nii.gz",3)
-# aalimg<-antsImageRead("meanboldAALmask.nii.gz",3)
+# bold<-antsImageRead("bold.nii.gz")
+# boldmask<-antsImageRead("meanboldmask.nii.gz")
+# aalimg<-antsImageRead("meanboldAALmask.nii.gz")
 # data("aal",package="ANTsR")
 # dmnlabels<-aal$label_num[aal$isdmn>0]
 # aalvec<-aalimg > 0
@@ -101,7 +101,7 @@ Uses a target function to denoise resting bold data
 #                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
 # print(paste("Best number of noise regressors",dnz$n))
 # # now recompute the matrix using the full mask
-# boldmask<-antsImageRead("meanboldmask.nii.gz",3)
+# boldmask<-antsImageRead("meanboldmask.nii.gz")
 # boldmat<-timeseries2matrix(bold,boldmask)
 # boldmat<-boldmat[timeselect,]
 # mdl<-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )

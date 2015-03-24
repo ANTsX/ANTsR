@@ -24,7 +24,7 @@
 #' @keywords mask
 #' @examples
 #'
-#' img<-antsImageRead( getANTsRData("r16") ,2)
+#' img<-antsImageRead( getANTsRData("r16"))
 #' mask<-getMask( img )
 #'
 #' @export getMask
