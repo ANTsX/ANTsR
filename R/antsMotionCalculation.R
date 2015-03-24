@@ -23,6 +23,10 @@
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
+  if ( is.na( fixed )  )
+  {
+  fixed <- getAverageOfTimeSeries( bold )
+  }
   moco <- .motion_correction(img, fixed = fixed, moreaccurate = moreaccurate)
   tmpdir <- tempdir()
   file.mocoparam <- paste(tmpdir, "moco.csv", sep = "")
@@ -33,13 +37,16 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
       Inf, cleanup = 2)
   }
-  antsImageWrite(mask, file.mask)
-  .antsMotionCorrStats(list(x = file.mask, d = img, o = file.out, f = framewise,
+  .antsMotionCorrStats(list(x = mask, d = img, o = file.out, f = framewise,
     m = file.mocoparam))
   tsDisplacement <- antsImageRead(paste(tmpdir, "out.nii.gz", sep = ""), 4)
   aslmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS(aslmat)
-  list(moco_img = antsImageClone(moco$moco_img), moco_params = moco$moco_params,
-    moco_avg_img = antsImageClone(moco$moco_avg_img), moco_mask = antsImageClone(mask),
-    tsDisplacement = antsImageClone(tsDisplacement), dvars = dvars)
+  list(
+    moco_img = antsImageClone(moco$moco_img),
+    moco_params = moco$moco_params,
+    moco_avg_img = antsImageClone(moco$moco_avg_img),
+    moco_mask = antsImageClone(mask),
+    tsDisplacement = antsImageClone(tsDisplacement),
+    dvars = dvars )
 }
