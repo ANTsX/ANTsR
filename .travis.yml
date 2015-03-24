@@ -61,5 +61,7 @@ deploy:
   api_key:
     secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
   file: ../ANTsR_0.3_R_x86_64-pc-linux-gnu.tar.gz
+  skip_cleanup: true
   on:
-    repo: stnava/ANTsR
+    tags: true
+#    repo: stnava/ANTsR
