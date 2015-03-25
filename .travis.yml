@@ -29,6 +29,7 @@ install:
 - ./travis-tool.sh r_binary_install knitr
 - ./travis-tool.sh r_install rmarkdown
 - ./travis-tool.sh r_install magrittr
+- ./travis-tool.sh r_binary_install randomForest
 - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
 - R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
 - cd ${basedir}
