@@ -17,7 +17,7 @@
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16"))
-#' mi <- antsImageRead(getANTsRData("r64"))
+#' mi <- antsImageRead(getANTsRData("r27"))
 #' tx <- affineInitializer( fi, mi )
 #'
 #'

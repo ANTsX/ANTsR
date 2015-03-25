@@ -26,7 +26,7 @@ image.  Should be preceded by abpN4.
 fn<-getANTsRData("r16")
 img<-antsImageRead(fn)
 img<-resampleImage(img,c(128,128),1,0)
-tf<-getANTsRData("r64")
+tf<-getANTsRData("r27")
 tem<-antsImageRead(tf)
 tem<-resampleImage(tem,c(128,128),1,0)
 temmask<-antsImageClone( tem )
