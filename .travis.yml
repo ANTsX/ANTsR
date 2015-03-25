@@ -35,7 +35,8 @@ install:
 script:
 - source ~/.R/Makevars
 - travis_wait 40 R CMD build ANTsR --no-build-vignettes
-- R CMD INSTALL --build ANTsR_*.tar.gz
+- R CMD check ANTsR_*.tar.gz
+# - R CMD INSTALL --build ANTsR_*.tar.gz
 - cd ANTsR
 after_failure:
 - ./travis-tool.sh dump_logs
