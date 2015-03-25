@@ -25,7 +25,7 @@
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
   if ( is.na( fixed )  )
   {
-  fixed <- getAverageOfTimeSeries( bold )
+  fixed <- getAverageOfTimeSeries( img )
   }
   moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate)
   tmpdir <- tempdir()
