@@ -4,43 +4,109 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Antsr by stnava</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
   </head>
   <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/stnava/ANTsR">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/stnava/ANTsR/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/stnava/ANTsR/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
     <div class="wrapper">
-      <header>
-        <h1>Antsr</h1>
-        <p>...</p>
-        <p class="view"><a href="https://github.com/stnava/ANTsR">View the Project on GitHub <small>stnava/ANTsR</small></a></p>
-        <ul>
-          <li><a href="https://github.com/stnava/ANTsR/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/stnava/ANTsR/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/stnava/ANTsR">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
+
       <section>
+        <div id="title">
+          <h1>Antsr</h1>
+          <p>...</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/stnava">stnava</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
         <h1>
 <a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a> and check the new  <a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">vignette</a>
-and <a href="https://github.com/stnava/ANTsR/releases">manual</a></p>
+<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a></p>
 
 <p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R.</p>
 
-<p>Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison</p>
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
 
-<p>Original Authors: Shrinidhi KL,  Brian B. Avants</p>
+<p>Version: 0.3</p>
+
+<p>License: GPL (&gt;=2)</p>
+
+<p>Depends:    R (≥ 3.0), methods</p>
+
+<p>Imports:    Rcpp, tools, magrittr</p>
+
+<p>LinkingTo:  Rcpp, ITKR</p>
+
+<p>Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison</p>
+
+<p>Maintainer: <a href="http://stnava.github.io/">Brian B. Avants</a></p>
+
+<p>URL:    <a href="http://stnava.github.io/ANTsR/">homepage</a></p>
+
+<p>BugReports: <a href="http://github.com/stnava/ANTsR/issues">github issues</a></p>
+
+<p>NeedsCompilation:   yes</p>
+
+<p>Travis checks:  <a href="https://travis-ci.org/stnava/ANTsR">ANTsR results</a></p>
 
 <h2>
-<a id="easiest-installation-approach-from-within-r" class="anchor" href="#easiest-installation-approach-from-within-r" aria-hidden="true"><span class="octicon octicon-link"></span></a>Easiest installation approach (from within R)</h2>
+<a id="downloads" class="anchor" href="#downloads" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloads</h2>
+
+<p>Reference manual:   <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR-manual.pdf">ANTsR.pdf</a></p>
+
+<p>Vignettes:</p>
+
+<ul>
+<li><p><a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html">ANTsR</a></p></li>
+<li><p><a href="https://cdn.rawgit.com/stnava/ANTsDoc/master/html/iMath.html">iMath</a></p></li>
+</ul>
+
+<p>Package source: <a href="https://github.com/stnava/ANTsR/zipball/master">from github</a></p>
+
+<p>OS X Mavericks, Yosemite binaries:  <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz">OSX</a></p>
+
+<p>Ubuntu binaries: <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Ubuntu</a></p>
+
+<p>We currently only have OSX and Linux (ubuntu from Travis) binaries.
+We are working toward Windows binaries.</p>
+
+<h2>
+<a id="research-using-antsr" class="anchor" href="#research-using-antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Research using ANTsR</h2>
+
+<ul>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25449745">Inter-modality inference</a> yet to be added RIPMMARC</p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25448483">Eigenanatomy for multiple modality population studies</a> function <code>sparseDecom</code></p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25433513">Tumor segmentation</a> function <code>mrvnrfs</code> (not exactly the same but close)</p></li>
+<li><p><a href="http://www.nature.com/articles/sdata20153">Multiple modality pediatric template and population study</a> employs several aspects of ANTsR</p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25320792">Structural networks from subject-level data</a> function <code>makeGraph</code> plus yet to be added RIPMMARC</p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24683960">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24852460">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p></li>
+</ul>
+
+<h2>
+<a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
 <pre><code>library( devtools )
 install_github("stnava/cmaker")
@@ -53,13 +119,7 @@ install_github("stnava/ANTsR")
 <p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
 <h2>
-<a id="antsr-manual-and-releases" class="anchor" href="#antsr-manual-and-releases" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR manual and releases</h2>
-
-<p><a href="https://github.com/stnava/ANTsR/releases">Releases</a> are new
-so let us know of any <a href="https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues">issues</a> ...</p>
-
-<h2>
-<a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
+<a id="install-from-command-line" class="anchor" href="#install-from-command-line" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install from command line</h2>
 
 <p>First, clone the repository:</p>
 
@@ -273,31 +333,9 @@ github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
 
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 </code></pre>
-
-<h2>
-<a id="research-using-antsr" class="anchor" href="#research-using-antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Research using ANTsR</h2>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25449745">Inter-modality inference</a> yet to be added RIPMMARC</p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25448483">Eigenanatomy for multiple modality population studies</a> function <code>sparseDecom</code></p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25433513">Tumor segmentation</a> function <code>mrvnrfs</code> (not exactly the same but close)</p>
-
-<p><a href="http://www.nature.com/articles/sdata20153">Multiple modality pediatric template and population study</a> employs several aspects of ANTsR</p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25320792">Structural networks from subject-level data</a> function <code>makeGraph</code> plus yet to be added RIPMMARC</p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24683960">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p>
-
-<p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24852460">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p>
       </section>
+
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/stnava">stnava</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>
