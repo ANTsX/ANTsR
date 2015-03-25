@@ -5,11 +5,46 @@ and [manual](https://github.com/stnava/ANTsR/releases)
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
 
-Current Authors and Contributors:  Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
+## Description
 
-Original Authors: Shrinidhi KL,  Brian B. Avants
+Version: 0.3
 
-## Easiest installation approach (from within R)
+License: GPL (>=2)
+
+Depends:	R (≥ 3.0), methods
+
+Imports:	Rcpp, tools, magrittr
+
+LinkingTo:	Rcpp, ITKR
+
+Author:	Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
+
+Maintainer:	[Brian B. Avants](http://stnava.github.io/)
+
+URL:	[homepage](http://stnava.github.io/ANTsR/)
+
+BugReports: [github issues](http://github.com/stnava/ANTsR/issues)
+
+NeedsCompilation:	yes
+
+Travis checks:	[ANTsR results](https://travis-ci.org/stnava/ANTsR)
+
+## Downloads
+
+Reference manual:	[ANTsR.pdf]()
+
+Vignettes:	[Overview](), [iMath]()
+
+Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
+
+OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz)
+
+Ubuntu binaries: [Ubuntu]()
+
+We currently only have OSX and Linux (ubuntu from Travis) binaries.
+We are working toward Windows binaries.
+
+## Installation from source
 ```
 library( devtools )
 install_github("stnava/cmaker")
@@ -21,12 +56,8 @@ this assumes you have [git](http://git-scm.com/) installed / accessible in your 
 
 windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
-## ANTsR manual and releases
 
-[Releases](https://github.com/stnava/ANTsR/releases) are new
-so let us know of any [issues](https://github.com/stnava/ANTsR/issueshttps://github.com/stnava/ANTsR/issues) ...
-
-## Installation from source
+## Install from command line
 
 First, clone the repository:
 ```sh
