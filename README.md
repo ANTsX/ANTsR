@@ -34,9 +34,9 @@ Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/
 
 Vignettes:
 
-*	[ANTsR](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/ANTsR.html)
+*	[ANTsR](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/ANTsR.html)
 
-* [iMath](https://cdn.rawgit.com/stnava/ANTsDoc/master/html/iMath.html)
+* [iMath](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/iMath.html)
 
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
