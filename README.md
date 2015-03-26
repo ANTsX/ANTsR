@@ -38,7 +38,7 @@ Vignettes:
 
 * [iMath](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/iMath.html)
 
-* [Wiki]()
+Wiki: [Notes and work in progress examples](https://github.com/stnava/ANTsR/wiki)
 
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
