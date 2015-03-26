@@ -25,7 +25,7 @@
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
-#'   \item{"SynBOLD": }{SyN, but optimized for registrations between
+#'   \item{"SynBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
 #'   \item{"SyNAggro": }{SyN, but with more aggressive registration
 #'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
