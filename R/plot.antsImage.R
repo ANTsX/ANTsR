@@ -63,7 +63,7 @@ plot.antsImage <- function(x, y,
   title.colorbar,
   title.img,
   color.colorbar,
-  window.img = quantile(x[x!=0], c(0.05, 0.95)),
+  window.img,
   window.overlay,
   quality = 4,
   outname = NA,
@@ -75,6 +75,14 @@ plot.antsImage <- function(x, y,
     x <- cropImage(x, plotimask )
     nslices <- 10
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
+  }
+  nonzeros <- x[x != 0]
+  if(missing(window.img)){
+    if (length(nonzeros) > 0 ){
+      window.img <- quantile(nonzeros, c(0.05, 0.95))
+    } else {
+      window.img <- c(0, 0) 
+    }
   }
   color.colorbar <- ifelse(missing(y), "white", color.overlay[1])
   myantsimage <- x
