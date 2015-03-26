@@ -38,13 +38,14 @@ Vignettes:
 
 * [iMath](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/iMath.html)
 
+* [Wiki]()
+
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
 OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz)
 
 Ubuntu binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
 
-We currently only have OSX and Linux (ubuntu from Travis) binaries.
 We are working toward Windows binaries.
 
 
