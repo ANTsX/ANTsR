@@ -7,7 +7,6 @@ branches:
   only:
   - master
   - cran
-  - rcmdcheck
 before_install:
 - cd ..
 - basedir=${PWD}
