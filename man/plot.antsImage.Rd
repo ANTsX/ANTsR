@@ -7,8 +7,8 @@
 \method{plot}{antsImage}(x, y, color.img = "white", color.overlay = c("jet",
   "red", "blue", "green", "yellow"), axis = 2, slices,
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
-  window.img = quantile(x[x != 0], c(0.05, 0.95)), window.overlay,
-  quality = 4, outname = NA, alpha = 0.5, newwindow = FALSE, ...)
+  window.img, window.overlay, quality = 4, outname = NA, alpha = 0.5,
+  newwindow = FALSE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
