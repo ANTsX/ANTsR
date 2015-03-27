@@ -58,6 +58,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     mnit = "http://placid.nlm.nih.gov/download?items=11660",
     nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz",
+    pcaslseg = "http://files.figshare.com/1862040/101_seg.nii.gz",
     atroposseg = "http://files.figshare.com/1893339/atroposseg.nii")
 
   myext <- ".nii.gz"
@@ -82,9 +83,10 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     AB = "d38b04c445772db6e4ef3d2f34787d67", ch2 = "501c45361cf92dadd007bee55f02e053",
     ch2b = "5db6c10eb8aeabc663d10e010860465f", ch2a = "caf2d979a7d9c86f515a5bc447856e7c",
     mnit = "dab456335a4bfa2b3bc31e9882699ee9", pcasl = "e59716ae76a853465efacf3cfb53bc58",
+    pcaslseg = "3872d709475ee2d51d90aa7f4df5af8f",
     atroposseg = "f40680bd1de0592c9fa9e380bd9e29be")
   if (!is.null(mymd5))
-    if (md5sum(tfn) != mymd5) {
+    if (tools::md5sum(tfn) != mymd5) {
       stop("checksum failure")
     }
   return(tfn)
