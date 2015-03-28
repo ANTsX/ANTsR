@@ -48,7 +48,7 @@ Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/
 
 We are working toward Windows binaries.
 
-After you download, a binary, you can install (via command line)
+Install the binary, after downloading, via command line:
 
 ```
 R CMD INSTALL ANTsR_*.tgz
@@ -75,6 +75,8 @@ R CMD INSTALL ANTsR_*.tgz
 
 
 ## Installation from source
+
+**with devtools in R**
 ```
 library( devtools )
 install_github("stnava/cmaker")
@@ -87,7 +89,7 @@ this assumes you have [git](http://git-scm.com/) installed / accessible in your 
 windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
 
-## Install from command line
+**from command line**
 
 First, clone the repository:
 ```sh
@@ -104,7 +106,8 @@ $ R CMD INSTALL ANTsR
 ### R dependencies
 You may need to install R packages that ANTsR requires. For example:
 ```
-install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
+mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
+install.packages( pkgs = mydeps, dependencies = TRUE )
 ```
 These dependencies are subject to change until development is stable.
 You can gain additional functionality by installing packages that
