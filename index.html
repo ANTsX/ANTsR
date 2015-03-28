@@ -92,7 +92,7 @@
 
 <p>We are working toward Windows binaries.</p>
 
-<p>After you download, a binary, you can install (via command line)</p>
+<p>Install the binary, after downloading, via command line:</p>
 
 <pre><code>R CMD INSTALL ANTsR_*.tgz
 </code></pre>
@@ -114,6 +114,8 @@
 <h2>
 <a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
+<p><strong>with devtools in R</strong></p>
+
 <pre><code>library( devtools )
 install_github("stnava/cmaker")
 install_github("stnava/ITKR")
@@ -124,8 +126,7 @@ install_github("stnava/ANTsR")
 
 <p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
-<h2>
-<a id="install-from-command-line" class="anchor" href="#install-from-command-line" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install from command line</h2>
+<p><strong>from command line</strong></p>
 
 <p>First, clone the repository:</p>
 
@@ -142,7 +143,8 @@ $ R CMD INSTALL ANTsR</pre></div>
 
 <p>You may need to install R packages that ANTsR requires. For example:</p>
 
-<pre><code>install.packages(pkgs = c("Rcpp", "tools", "methods"), dependencies = TRUE);
+<pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
+install.packages( pkgs = mydeps, dependencies = TRUE )
 </code></pre>
 
 <p>These dependencies are subject to change until development is stable.
