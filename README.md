@@ -44,9 +44,15 @@ Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
 OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz)
 
-Ubuntu binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
+Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
 
 We are working toward Windows binaries.
+
+After you download, a binary, you can install (via command line)
+
+```
+R CMD INSTALL ANTsR_*.tgz
+```
 
 
 ## Research using ANTsR
