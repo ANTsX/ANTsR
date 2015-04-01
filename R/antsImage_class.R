@@ -793,7 +793,12 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  temp<-(.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
+  returnList <- (.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
+
+  if ( returnList$flag > 0 ) {
+    warning( returnList$error )
+  }
+  return( returnList$image )
 }
 
 
