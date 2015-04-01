@@ -42,6 +42,7 @@ script:
 after_failure:
 - ./travis-tool.sh dump_logs
 - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
+- cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
 notifications:
   email:
     recipients:
