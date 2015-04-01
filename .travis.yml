@@ -41,11 +41,13 @@ script:
 - cd ANTsR
 after_failure:
 - ./travis-tool.sh dump_logs
+- cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
 notifications:
   email:
     recipients:
     - stnava@gmail.com
     - arman.eshaghi@gmail.com
+    - jeff.duda@gmail.com
     on_success: change
     on_failure: always
 env:
