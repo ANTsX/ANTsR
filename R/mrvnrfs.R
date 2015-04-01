@@ -69,6 +69,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     for ( mr in multiResSchedule )
       {
       subdim<-round( dim( labelmask ) / mr )
+      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
       submask<-resampleImage( labelmask, subdim, useVoxels=1,
         interpType=1 )
       ysub<-y
@@ -167,6 +168,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
     for ( mr in multiResSchedule )
       {
       subdim<-round( dim( labelmask ) / mr )
+      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
       submask<-resampleImage( labelmask, subdim, useVoxels=1,
         interpType=1 )
       xsub<-x
