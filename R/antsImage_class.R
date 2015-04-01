@@ -983,7 +983,7 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
 #' is.antsImage(antsImageRead(getANTsRData('r16'), 2))
 #' @export is.antsImage
 is.antsImage <- function(x){
-  inherits(x, 'antsImage') 
+  inherits(x, 'antsImage')
 }
 
 #' @title arith.antsImage

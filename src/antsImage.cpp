@@ -1667,98 +1667,104 @@ catch( const std::exception& exc )
   }
 
 
+
 template< class PixelType , unsigned int Dimension >
 bool antsImage_SetPixels( typename itk::Image< PixelType , Dimension >::Pointer image , SEXP r_coordinates , SEXP r_value )
 {
-  typedef itk::Image< PixelType , Dimension > ImageType ;
-  typedef typename ImageType::Pointer ImagePointerType ;
-  typedef itk::PermuteAxesImageFilter< ImageType > PermuteAxesFilterType ;
-  typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
-  typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
+  typedef itk::Image< PixelType , Dimension > ImageType;
+  typedef typename ImageType::Pointer ImagePointerType;
 
   if( image.IsNotNull() )
     {
-      Rcpp::List list_coordinates( r_coordinates ) ;
-      std::vector< std::vector< double > > coordinates ;
-      if( list_coordinates.size() != Dimension )
-	{
-	  Rcpp::Rcout << "indices do not match the image in dimensions" << std::endl ;
-	  return 1 ;
-	}
-      for( int i = 0 ; i < list_coordinates.size() ; ++i )
-	{
-	  coordinates.push_back( Rcpp::as< std::vector< double > >( list_coordinates[i] ) ) ;
-	}
+    Rcpp::List list_coordinates( r_coordinates );
+    std::vector< std::vector< double > > coordinates;
 
-      unsigned int value_size = 1 ;
-      for( unsigned int i = 0 ; i < Dimension ; ++i )
-	{
-	  if( coordinates[i].size() == 0 )
+    if( list_coordinates.size() != Dimension )
 	    {
+	    Rcpp::Rcout << "indices do not match the image in dimensions" << std::endl;
+	    return 1 ;
+ 	    }
+
+    for( int i = 0; i < list_coordinates.size(); ++i )
+	    {
+	    coordinates.push_back( Rcpp::as< std::vector< double > >( list_coordinates[i] ) );
+	    }
+
+    unsigned int value_size = 1 ;
+    for( unsigned int i = 0 ; i < Dimension ; ++i )
+	    {
+	    if( coordinates[i].size() == 0 )
+	      {
 	      coordinates[i].reserve( image->GetLargestPossibleRegion().GetSize(i) ) ;
 	      for( unsigned int j = 0 ; j < image->GetLargestPossibleRegion().GetSize(i) ; ++j )
-		{
-		  coordinates[i].push_back( j ) ;
-		}
+		      {
+		      coordinates[i].push_back( j ) ;
+		      }
+	       }
+	     value_size *= coordinates[i].size() ;
 	    }
-	  value_size *= coordinates[i].size() ;
-	}
-      Rcpp::NumericVector value( r_value ) ;
-      if( value.size() != (int)value_size && value.size() != 1 )
-	{
-	  Rcpp::Rcout << "rhs vector must be scalar or of same length as indices" << std::endl ;
-	  return 1 ;
-	}
-      std::vector< unsigned int > ind( Dimension ) ;
-      typename ImageType::IndexType index ;
-      if( value.size() == 1 )
-	{
-	  for( unsigned int i = 0 ; i < value_size ; ++i )
+    Rcpp::NumericVector value( r_value ) ;
+    if( value.size() != (int)value_size && value.size() != 1 )
 	    {
+	    Rcpp::Rcout << "rhs vector must be scalar or of same length as indices" << std::endl ;
+	    return 1 ;
+	    }
+
+    std::vector< unsigned int > ind( Dimension ) ;
+    typename ImageType::IndexType index ;
+    if( value.size() == 1 )
+	    {
+	    for( unsigned int i = 0 ; i < value_size ; ++i )
+	      {
 	      for( unsigned int j = 0 ; j < Dimension ; ++j )
-		{
-		  index[j] = coordinates[ j ][ ind[j] ] ;
-		}
+		      {
+		      index[j] = coordinates[ j ][ ind[j] ]-1 ;
+		      }
 	      image->SetPixel( index , value[0] ) ;
-	      ++ind[0] ;
-	      for( unsigned int j = 0 ; j < Dimension - 1 ; ++j )
-		{
-		  if( ind[j] == coordinates[j].size() )
-		    {
-		      ++ind[j+1] ;
-		      ind[j] = 0 ;
-		    }
-		}
+	      ++ind[0];
+
+	      for( unsigned int j = 0 ; j < Dimension-1 ; ++j )
+		      {
+		      if( ind[j] == coordinates[j].size() )
+		        {
+		        ++ind[j+1] ;
+		        ind[j] = 0 ;
+		        }
+		      }
+	      }
 	    }
-	}
-      else
-	{
-	  for( unsigned int i = 0 ; i < value_size ; ++i )
+    else
 	    {
+	    for( unsigned int i = 0 ; i < value_size ; ++i )
+	      {
 	      for( unsigned int j = 0 ; j < Dimension ; ++j )
-		{
-		  index[j] = coordinates[ j ][ ind[j] ] ;
-		}
+		      {
+		      index[j] = coordinates[ j ][ ind[j] ]-1 ;
+		      }
 	      image->SetPixel( index , value[i] ) ;
 	      ++ind[0] ;
 	      for( unsigned int j = 0 ; j < Dimension - 1 ; ++j )
-		{
-		  if( ind[j] == coordinates[j].size() )
-		    {
-		      ++ind[j+1] ;
-		      ind[j] = 0 ;
-		    }
-		}
+		      {
+		      if( ind[j] == coordinates[j].size() )
+		        {
+		        ++ind[j+1] ;
+		        ind[j] = 0 ;
+		        }
+		      }
+	      }
 	    }
-	}
     }
   else
     {
-      // Rcpp::Rcout << "Empty image" << std::endl ;
-      return 1 ;
+    // Rcpp::Rcout << "Empty image" << std::endl ;
+    return 1 ;
     }
   return 0 ;
 }
+
+
+
+
 
 RcppExport SEXP antsImage_SetPixels( SEXP r_antsimage , SEXP r_coordinates , SEXP r_value )
 try
