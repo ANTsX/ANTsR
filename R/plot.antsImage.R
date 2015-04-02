@@ -10,7 +10,7 @@
 #' @param color.overlay the color for the overlay , e.g c('blue','red') length
 #' of this list should match the image list.
 #' @param axis the axis to slice (1 , 2 or 3)
-#' @param slices vector of slices to plot (e.g., c(10, 15, 20)) 
+#' @param slices vector of slices to plot (e.g., c(10, 15, 20))
 #' @param colorbar make colorbar?
 #' @param title.colorbar title for colorbar
 #' @param title.img title for main image
@@ -19,8 +19,8 @@
 #' @param window.overlay lower and upper thresholds for display of overlay
 #' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
-#' @param outname name of output file if you want to write result to file, e.g. 
-#' \code{plot.jpg}. 
+#' @param outname name of output file if you want to write result to file, e.g.
+#' \code{plot.jpg}.
 #' @param alpha  opacity
 #' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param ...  other parameters
@@ -48,7 +48,7 @@
 #'   ofn<-paste(tempfile(),'.png',sep='')
 #'   # write directly to a file
 #'   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-#'     window.overlay = c(0.25,1), axis=2, 
+#'     window.overlay = c(0.25,1), axis=2,
 #'     overlay.color=c('red','blue'), outname = ofn )
 #' }
 #'
@@ -81,7 +81,7 @@ plot.antsImage <- function(x, y,
     if (length(nonzeros) > 0 ){
       window.img <- quantile(nonzeros, c(0.05, 0.95))
     } else {
-      window.img <- c(0, 0) 
+      window.img <- c(0, 0)
     }
   }
   color.colorbar <- ifelse(missing(y), "white", color.overlay[1])
@@ -404,7 +404,7 @@ plot.antsImage <- function(x, y,
       upper <- c((locthresh[2] + 1):nlevels)
       heatvals[upper] <- NA
     }
-    # heatvals[1:(length(heatvals)-50 ) ]<-NA
+    heatvals[1]<-NA # dont overlay the background
     if (min(biglab) != max(biglab))
       {
       invisible( suppressWarnings(
