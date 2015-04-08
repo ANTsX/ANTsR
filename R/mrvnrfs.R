@@ -99,6 +99,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       nent<-nfeats*ncol(testmat)*nrow(testmat)*length(xsub)*1.0
       fm<-matrix( nrow=(nrow(testmat)*length(xsub)) ,
         ncol=ncol(testmat)*nfeats  )
+      rm( testmat )
       seqby<-seq.int( 1, hdsz*length(xsub)+1, by=hdsz )
       for ( i in 1:(length(xsub)) )
         {
@@ -207,7 +208,7 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
         }
     predtype<-'response'
     if ( asFactors ) predtype<-'prob'
-    probs<-t( predict( rflist[[rfct]] ,newdata=fm,type=predtype) )
+    probs<-t( predict( rflist[[rfct]] ,newdata=fm, type=predtype) )
     newprobs<-list()
     for ( i in 1:(length(x)) )
       {
