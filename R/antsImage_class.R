@@ -360,7 +360,7 @@ antsSetDirection <- function(x, direction) {
 #'
 #' @param image Image object of S4 class \code{antsImage} to get values from.
 #' @param center array of indices for neighborhood center
-#' @param radius array of values for neighborhood radius (in voxels)
+#' @param kernel either an array of values for neighborhood radius (in voxels) or a binary array of the same dimension as the image, specifying the shape of the neighborhood to extract
 #' @param physical.coordinates a logical indicating if voxel indices and
 #' offsets should be in voxel or physical coordinates
 #' @return a list
@@ -374,11 +374,13 @@ antsSetDirection <- function(x, direction) {
 #' img<-makeImage(c(10,10),rnorm(100))
 #' center <- dim(img)/2
 #' radius <- rep(3,2)
-#' nhlist<-getNeighborhoodAtVoxel(img,center,radius)
-#'
+#' nhlist <- getNeighborhoodAtVoxel(img,center,radius)
+#' kernel <- 1*(rnorm(49)>0)
+#' dim(kernel) <- c(7,7)
+#' randlist <- getNeighborhoodAtVoxel(img,center,kernel)
 #'
 #' @export getNeighborhoodAtVoxel
-getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates = FALSE) {
+getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates = FALSE ) {
 
   if (class(image)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -388,16 +390,25 @@ getNeighborhoodAtVoxel <- function(image, center, radius, physical.coordinates =
     stop("center must be of class 'numeric'")
   }
 
-  if ((class(radius) != "numeric")) {
-    stop("radius must be of class 'numeric'")
+  radius = dim(kernel)
+  if ( is.null(radius) ) {
+    kernelSize = 2*kernel+1
+    kernel = rep(1, prod(kernelSize))
+    dim(kernel) = kernelSize
+    radius = (kernelSize-1)/2
+    }
+  else {
+    # Check that all sizes are odd
+    radius = (dim(kernel)-1)/2
   }
 
-  return(.Call("antsImage_GetNeighborhood", image, center, radius, physical.coordinates))
+  if ( length(dim(kernel)) != image@dimension ) {
+    stop("kernel must have same number of dimensions as 'image'")
+  }
+
+  return(.Call("antsImage_GetNeighborhood", image, center, kernel, radius,
+               physical.coordinates, PACKAGE="ANTsR"))
 }
-
-
-
-
 
 
 #' @name getNeighborhoodInMask

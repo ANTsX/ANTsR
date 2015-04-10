@@ -1181,59 +1181,65 @@ catch( const std::exception& exc )
 
 template< class PixelType , unsigned int Dimension >
 SEXP antsImage_GetNeighborhood( typename itk::Image< PixelType , Dimension >::Pointer image ,
-                                SEXP r_index, SEXP r_radius, SEXP physical )
+                                SEXP r_index, SEXP r_kernel, SEXP r_radius, SEXP physical )
 {
 
   typedef itk::Image<PixelType, Dimension> ImageType;
   typedef typename ImageType::RegionType   RegionType;
   typedef typename ImageType::IndexType    IndexType;
 
-  Rcpp::NumericVector radius( r_radius ) ;
-  Rcpp::NumericVector index( r_index ) ;
+  Rcpp::NumericVector kernel( r_kernel );
+  Rcpp::NumericVector radius( r_radius );
+  Rcpp::NumericVector index( r_index );
   int physicalFlag = Rcpp::as<int>( physical );
 
-  unsigned long maxSize = 1;
-  for ( unsigned int i=0; i<Dimension; i++ )
+  unsigned long maxSize = 0;
+  std::vector<int> offsets;
+  for ( unsigned int i=0; i<kernel.size(); i++ )
     {
-    maxSize *= ( 1 + 2*radius[i] );
+    if ( kernel[i] > 1.e-6 ) // use epsilon instead of zero
+      {
+      offsets.push_back(i);
+      ++maxSize;
+      }
     }
 
-  std::vector<double> pixelList;
-  pixelList.reserve(maxSize);
-
+  Rcpp::NumericVector pixels(maxSize);
   std::vector<IndexType> indexList;
   indexList.reserve(maxSize);
 
   RegionType region;
-  for (unsigned int i=0; i<Dimension; i++)
+  typename itk::NeighborhoodIterator<ImageType>::SizeType nRadius;
+
+  for ( unsigned int i=0; i<Dimension; i++ )
     {
-    int offset = index[i] - radius[i] - 1;  // -1 is for R indexing to ITK indexing conversion
-
-    if ( offset < 0 )
-      {
-      offset = 0;
-      }
-
-    int limit = index[i] + radius[i];
-    if ( limit > ( image->GetLargestPossibleRegion().GetSize()[i]-1) )
-      {
-      limit = image->GetLargestPossibleRegion().GetSize()[i]-1;
-      }
-
-    region.SetSize(i, limit-offset );
-    region.SetIndex(i, offset );
+    nRadius[i] = radius[i];
+    region.SetSize(i, 1);
+    region.SetIndex(i, index[i]-1); // R-to-ITK index conversion
     }
 
-  itk::ImageRegionIteratorWithIndex<ImageType> it( image, region );
-  while( !it.IsAtEnd() )
+  RegionType imageSize = image->GetLargestPossibleRegion();
+  itk::NeighborhoodIterator<ImageType> nit( nRadius, image, region );
+
+  unsigned int idx = 0;
+  for (unsigned int i = 0; i < offsets.size(); i++ )
     {
-    //Rcpp::Rcout << it.GetIndex() << " " << it.Value() << std::endl;
-    pixelList.push_back( it.Value() );
-    indexList.push_back( it.GetIndex() );
-    ++it;
+    //Rcpp::Rcout << nit.GetIndex(i) << ":" << offsets[i] << "=" << kernel[offsets[i]] << std::endl;
+    if ( kernel[offsets[i]] > 1e-6 )
+      {
+      if ( imageSize.IsInside( nit.GetIndex(offsets[i]) ) )
+        {
+        pixels[idx] = nit.GetPixel(offsets[i]);
+        }
+      else
+        {
+        pixels[idx] = NA_REAL;
+        }
+      indexList.push_back( nit.GetIndex(offsets[i]) );
+      ++idx;
+      }
     }
 
-  Rcpp::NumericVector pixels( pixelList.begin(), pixelList.end() );
   Rcpp::NumericMatrix indices( pixels.size(), Dimension );
   for ( unsigned int i=0; i<pixels.size(); i++)
     {
@@ -1247,7 +1253,7 @@ SEXP antsImage_GetNeighborhood( typename itk::Image< PixelType , Dimension >::Po
       {
       if ( !physicalFlag )
         {
-        indices(i,j) = indexList[i][j];
+        indices(i,j) = indexList[i][j] + 1; // ITK-to-R index conversion
         }
       else
         {
@@ -1261,31 +1267,32 @@ SEXP antsImage_GetNeighborhood( typename itk::Image< PixelType , Dimension >::Po
 
 }
 
-RcppExport SEXP antsImage_GetNeighborhood( SEXP r_antsimage, SEXP r_index, SEXP r_radius, SEXP physical )
+RcppExport SEXP antsImage_GetNeighborhood( SEXP r_antsimage, SEXP r_index,
+                                           SEXP r_kernel, SEXP r_radius,
+                                           SEXP physical )
+{
 try
 {
   if ( r_antsimage == NULL )
     {
-    Rcpp::Rcout << "Unspecified Argument" << std::endl ;
-    return Rcpp::wrap( 1 ) ;
+    Rcpp::stop("Unspecified Argument");
     }
 
-  Rcpp::S4 antsimage( r_antsimage ) ;
-  std::string pixeltype = Rcpp::as< std::string >( antsimage.slot( "pixeltype" ) ) ;
-  unsigned int dimension = Rcpp::as< int >( antsimage.slot( "dimension" ) ) ;
+  Rcpp::S4 antsimage( r_antsimage );
+  std::string pixeltype = Rcpp::as< std::string >( antsimage.slot( "pixeltype" ) );
+  unsigned int dimension = Rcpp::as< int >( antsimage.slot( "dimension" ) );
 
-  Rcpp::NumericVector radius( r_radius ) ;
-  Rcpp::NumericVector index( r_index ) ;
+  Rcpp::NumericVector kernel( r_kernel );
+  Rcpp::NumericVector index( r_index );
+  Rcpp::NumericVector radius( r_radius );
 
   if ( radius.size() != dimension )
     {
-    Rcpp::Rcout << "Radius must have same dimension as image" << std::endl ;
-    return Rcpp::wrap( NA_REAL );
+    Rcpp::stop("Radius must have same dimension as image");
     }
   if ( index.size() != dimension )
     {
-    Rcpp::Rcout << "Index must have same dimension as image" << std::endl ;
-    return Rcpp::wrap( NA_REAL );
+    Rcpp::stop("Index must have same dimension as image");
     }
 
   unsigned long maxSize = 1;
@@ -1294,8 +1301,6 @@ try
     maxSize *= ( 1 + 2*radius[i] );
     }
 
-  std::vector<double> pixelList;
-
   if ( pixeltype == "double")
     {
     typedef double PixelType;
@@ -1303,19 +1308,19 @@ try
       {
       typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 3 )
       {
       typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 2 )
       {
       typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else
       {
@@ -1330,19 +1335,19 @@ try
       {
       typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 3 )
       {
       typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 2 )
       {
       typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else
       {
@@ -1357,19 +1362,19 @@ try
       {
       typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 3 )
       {
       typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 2 )
       {
       typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else
       {
@@ -1384,19 +1389,19 @@ try
       {
       typedef itk::Image<PixelType,4>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 4>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 3 )
       {
       typedef itk::Image<PixelType,3>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 3>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else if( dimension == 2 )
       {
       typedef itk::Image<PixelType,2>::Pointer ImagePointerType;
       Rcpp::XPtr< ImagePointerType > itkImage( static_cast< SEXP >( antsimage.slot( "pointer" ) ) ) ;
-      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_radius, physical );
+      return antsImage_GetNeighborhood<PixelType, 2>( *itkImage, r_index, r_kernel, r_radius, physical );
       }
     else
       {
@@ -1411,10 +1416,21 @@ try
     return Rcpp::wrap( NA_REAL );
     }
 }
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
 catch( const std::exception& exc )
-{
-  Rcpp::Rcout<< exc.what() << std::endl ;
-  return Rcpp::wrap( 1 ) ;
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+  Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
 }
 
 
