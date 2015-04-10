@@ -1,4 +1,5 @@
-language: c
+language: r
+sudo: required
 compiler:
 - clang
 os:
