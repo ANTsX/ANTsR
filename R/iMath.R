@@ -135,7 +135,7 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
   {
   rfi<-invisible( antsRegistration(img1,img1,typeofTransform = tx,
     outprefix = tempfile(),
-    initialTransform = rflct )$warpedmovout )
+    initialTransform = rflct ) )
   return( rfi )
   }
   else
