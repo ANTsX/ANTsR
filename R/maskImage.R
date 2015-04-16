@@ -23,7 +23,7 @@
 #' @export maskImage
 maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
   if ( class(level) == "numeric" & length(level) == 1) {
-    img.out <- antsImageClone(img.in) * 0
+    img.out <- antsImageClone(img.in) 
     img.out[ img.mask != level] <- 0
     return(img.out)
   }
