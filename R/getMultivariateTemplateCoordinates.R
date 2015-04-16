@@ -71,18 +71,10 @@ getMultivariateTemplateCoordinates <- function(
   for (x in 2:length(imageSetToBeLabeledIn)) {
     img <- imageSetToBeLabeledIn[[x]]
     threshimg <- antsImageClone(img)
-    thresh <- 1/length(as.array(threshimg))
-    imageMath(threshimg@dimension, threshimg, "abs", threshimg)
-    # threshimg[ threshimg > (.Machine$double.eps*2) ]<-1
-    meanval <- mean(threshimg[threshimg > (.Machine$double.eps * 2)])
-    sdval <- sd(threshimg[threshimg > (.Machine$double.eps * 2)])
-    threshval <- (meanval - sdval * threshparam)
-    if (threshval < (.Machine$double.eps * 2))
-      threshval <- (.Machine$double.eps * 2)
-    threshimg[threshimg > threshval] <- 1
-    threshimg[threshimg <= threshval] <- 0
+    if ( max(threshimg) < 0 ) threshimg=threshimg*(-1)
     imageSetToBeLabeled <- lappend(list(mytemplate), threshimg)
-    temp <- getTemplateCoordinates(imageSetToBeLabeled, templateWithLabels, labelnames,
+    temp <- getTemplateCoordinates(
+      imageSetToBeLabeled, templateWithLabels, labelnames,
       outprefix, convertToTal)
     talRegion <- ""
     if (temp$templatepoints$x < 0)
