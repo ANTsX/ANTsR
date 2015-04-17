@@ -4,14 +4,14 @@
 \alias{getNeighborhoodAtVoxel}
 \title{Get a hypercube neighborhood at a voxel}
 \usage{
-getNeighborhoodAtVoxel(image, center, radius, physical.coordinates = FALSE)
+getNeighborhoodAtVoxel(image, center, kernel, physical.coordinates = FALSE)
 }
 \arguments{
 \item{image}{Image object of S4 class \code{antsImage} to get values from.}
 
 \item{center}{array of indices for neighborhood center}
 
-\item{radius}{array of values for neighborhood radius (in voxels)}
+\item{kernel}{either an array of values for neighborhood radius (in voxels) or a binary array of the same dimension as the image, specifying the shape of the neighborhood to extract}
 
 \item{physical.coordinates}{a logical indicating if voxel indices and
 offsets should be in voxel or physical coordinates}
@@ -30,7 +30,10 @@ Get the values in a local neighborhood of an \code{antsImage}.
 img<-makeImage(c(10,10),rnorm(100))
 center <- dim(img)/2
 radius <- rep(3,2)
-nhlist<-getNeighborhoodAtVoxel(img,center,radius)
+nhlist <- getNeighborhoodAtVoxel(img,center,radius)
+kernel <- 1*(rnorm(49)>0)
+dim(kernel) <- c(7,7)
+randlist <- getNeighborhoodAtVoxel(img,center,kernel)
 }
 \author{
 Duda JT
