@@ -16,7 +16,6 @@ namespace ants
   int antsImageWrite( SEXP r_image , // image to write
                       std::string filename )
   {
-    Rcpp::Rcout << "antsImageWrite<ImageType>" << std::endl;
     typedef typename ImageType::Pointer ImagePointerType;
     ImagePointerType image = Rcpp::as<ImagePointerType>( r_image );
 
@@ -58,8 +57,6 @@ try
     {
     Rcpp::stop( "Unsupported pixeltype");
     }
-
-  Rcpp::Rcout << "Valid image" << std::endl;
 
   // write the image
   if ( pixeltype == "double" )
