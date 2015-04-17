@@ -85,7 +85,7 @@ img
 
 Take a quick look at the image.
 
-```{r basic plot,message=FALSE,warnings=FALSE,echo=FALSE}
+```{r basic_plot,message=FALSE,warnings=FALSE,echo=FALSE}
 img2<-antsImageRead( getANTsRData("r64"), 2 ) # built in image
 invisible(plot(img2))
 ```
@@ -135,7 +135,7 @@ proper physical space representation necessary for mapping.  Below is an example
 
 ```{r physical space}
 mnifilename<-getANTsRData("r27")
-img<-antsImageRead(mnifilename)
+img<-antsImageRead(mnifilename, pixeltype="unsigned char")
 img
 retval<-antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
