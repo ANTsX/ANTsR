@@ -28,5 +28,11 @@ antsImageWrite <- function(image, filename) {
     print("'image' argument provided is not of class 'antsImage'")
     return(NULL)
   }
+
+  if (length(image@components) == 0)
+    {
+    image@components = as.integer(1)
+    }
+
   return(.Call("antsImageWrite", image, filename, PACKAGE = "ANTsR"))
 }
