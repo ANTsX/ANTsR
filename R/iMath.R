@@ -123,8 +123,10 @@ iBind<-function( img1, img2, along=NA ) {
 #' @param tx transformation type to estimate after reflection
 #' @author BB Avants
 #' @examples
+#'
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
-#' asym<-fi %>% reflectImage( 1, "Affine" ) %>%  - fi
+#' asym<-reflectImage( fi, 1, "Affine" )$warpedmovout
+#' asym<-asym-fi
 #'
 #' @export reflectImage
 reflectImage<-function( img1, axis=NA, tx=NA ) {
