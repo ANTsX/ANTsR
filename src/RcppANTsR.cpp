@@ -627,6 +627,7 @@ itk::Image<float,2>::Pointer as( SEXP itkImageR )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
+
   XPtr<ImagePointerType> xptr( static_cast<SEXP>( itkImageObject.slot("pointer") ));
   return *xptr;
 }
@@ -795,7 +796,7 @@ itk::VectorImage<double,2>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -814,7 +815,7 @@ itk::VectorImage<double,3>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -833,7 +834,7 @@ itk::VectorImage<double,4>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "double") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -852,7 +853,7 @@ itk::VectorImage<float,2>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -871,7 +872,7 @@ itk::VectorImage<float,3>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -890,7 +891,7 @@ itk::VectorImage<float,4>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "float") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -909,7 +910,7 @@ itk::VectorImage<unsigned int,2>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -928,7 +929,7 @@ itk::VectorImage<unsigned int,3>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -947,7 +948,7 @@ itk::VectorImage<unsigned int,4>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned int") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -966,7 +967,7 @@ itk::VectorImage<unsigned char,2>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -985,7 +986,7 @@ itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }
@@ -1004,7 +1005,7 @@ itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR )
   if (!itkImageObject.is( "antsImage") ||
       (Rcpp::as<std::string>(itkImageObject.slot("pixeltype")) != "unsigned char") ||
       (Rcpp::as<int>(itkImageObject.slot("dimension")) != Dim) ||
-      (Rcpp::as<int>(itkImageObject.slot("components")) != 1) )
+      (Rcpp::as<int>(itkImageObject.slot("components")) < 1) )
     {
     Rcpp::stop( "Invalid S4 object type");
     }

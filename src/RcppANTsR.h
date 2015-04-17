@@ -11,9 +11,8 @@
 inline SEXP exception_to_r_condition( const itk::ExceptionObject & ex)
 {
   //std::string ex_class = demangle( typeid(ex).name() ) ;
-  //std::string ex_msg   = ex.what() ;
+  std::string ex_msg   = ex.what() ;
   std::string ex_class = "ITK";
-  std::string ex_msg = "ITK Exception";
 
   Rcpp::Shield<SEXP> cppstack( rcpp_get_stack_trace() );
   Rcpp::Shield<SEXP> call( get_last_call() );
