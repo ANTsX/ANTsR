@@ -5,7 +5,7 @@ myantslib=${PWD}/antb/lib/
 
 ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
 
-PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
 
 libants=`find ${myantslib} -name "lib*.a"`
 
