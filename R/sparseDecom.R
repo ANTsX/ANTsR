@@ -18,6 +18,7 @@
 #'   of 1 (spatial orthogonality) and 2 (subject space orthogonality)
 #' @param robust rank transform input data - good for data checking
 #' @param ell1 the ell1 grad descent param
+#' @param getSmall try to get smallest evecs (bool)
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
@@ -67,7 +68,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   nvecs = 50,
   its = 5, cthresh = 250,
   statdir = NA, z = 0, smooth = 0, initializationList = list(),
-  mycoption = 0, robust = 0, ell1 = 1) {
+  mycoption = 0, robust = 0, ell1 = 1, getSmall = 0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
@@ -92,7 +93,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]",
     sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh, "-n", nvecs,
     "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", inmask, "-r",
-    robust)
+    robust, "--get-small", getSmall )
   if (length(initializationList) > 0) {
     ct <- 1
     initfns <- c()
@@ -109,7 +110,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness,
       "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, "-n",
       nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r", robust,
-      "--mask", mfn, "--initialization", initlistfn)
+      "--mask", mfn, "--initialization", initlistfn, , "--get-small", getSmall)
     print(initlistfn)
   }
   time1 <- (Sys.time())
