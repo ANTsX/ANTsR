@@ -22,13 +22,13 @@ list of segmentation result images
 uses topological constraints to enhance accuracy of brain segmentation
 }
 \examples{
-img = antsImageRead( getANTsRData("r16") ,2)
+img = antsImageRead( getANTsRData("simple") ,2)
 img = n3BiasFieldCorrection( img , 4 )
 img = n3BiasFieldCorrection( img , 2 )
 bmk = getMask( img )
-segs <- kmeansSegmentation( img, 3, bm )
+segs <- kmeansSegmentation( img, 3, bmk )
 priors = segs$probabilityimages
-seg = geoSeg( fi, bmk, priors, 'none' )
+seg = geoSeg( img, bmk, priors, 'none' )
 }
 \author{
 Brian B. Avants
