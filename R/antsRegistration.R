@@ -179,9 +179,6 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
         if (typeofTransform == "TVMSQ") {
           tvtx="TimeVaryingVelocityField[ 1.0, 4, 0.0,0.0, 0.5,0 ]"
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-            "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-            "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
-            "-f", "4x2x2x1",
             "-m", paste("meansquares[", f, ",", m, ",1,2]", sep = ""),
             "-t", tvtx,
             "-c", "2100x1200x1200x20",
