@@ -20,8 +20,10 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   }
   if ( fileid == "show" )
    return( c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
-     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg" ) )
+     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg","simple" ) )
 
+  if ( fileid == "simple" )
+    return( paste(path.package("ANTsR"),"/extdata/simple.jpg",sep="") )
   if ( fileid == "r16" )
     return( paste(path.package("ANTsR"),"/extdata/r16slice.jpg",sep="") )
   if ( fileid == "r27" )

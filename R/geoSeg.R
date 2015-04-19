@@ -10,7 +10,7 @@
 #' @author Brian B. Avants
 #' @examples
 #'
-#' img = antsImageRead( getANTsRData("r16") ,2)
+#' img = antsImageRead( getANTsRData("simple") ,2)
 #' img = n3BiasFieldCorrection( img , 4 )
 #' img = n3BiasFieldCorrection( img , 2 )
 #' bmk = getMask( img )
