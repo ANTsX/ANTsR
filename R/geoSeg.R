@@ -51,7 +51,7 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none" )
 
   # 4 wm / gm / csf priors from jacobian
   jac    = createJacobianDeterminantImage( wmp, tvreg$fwdtransforms[[1]], 0)
-  jacinv = createJacobianDeterminantImage( wmp, tvreg$invtransforms[[2]], 0)
+  jacinv = createJacobianDeterminantImage( wmp, tvreg$invtransforms[[1]], 0)
   thkj   = antsApplyTransforms( fixed=wmp, moving=jacinv,
        transformlist=tvreg$fwdtransforms ) * gm
 
