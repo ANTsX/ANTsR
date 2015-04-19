@@ -4,7 +4,7 @@
 \alias{geoSeg}
 \title{brain segmentation based on geometric priors}
 \usage{
-geoSeg(img, brainmask, priors, vesselopt = "none")
+geoSeg(img, brainmask, priors, vesselopt = "none", vesselk = 2)
 }
 \arguments{
 \item{img}{input image}
@@ -14,6 +14,8 @@ geoSeg(img, brainmask, priors, vesselopt = "none")
 \item{priors}{spatial priors}
 
 \item{vesselopt}{one of bright, dark or none}
+
+\item{vesselk}{integer for kmeans vessel-based processing}
 }
 \value{
 list of segmentation result images

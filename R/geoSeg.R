@@ -6,6 +6,7 @@
 #' @param brainmask binary image
 #' @param priors spatial priors
 #' @param vesselopt one of bright, dark or none
+#' @param vesselk integer for kmeans vessel-based processing
 #' @return list of segmentation result images
 #' @author Brian B. Avants
 #' @examples
@@ -19,7 +20,7 @@
 #' seg = geoSeg( img, bmk, priors, 'none' )
 #'
 #' @export geoSeg
-geoSeg <- function( img, brainmask, priors, vesselopt="none" )
+geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   {
   if ( ! exists("vesselopt") ) vesselopt="none"
   dim = img@dimension
@@ -27,8 +28,7 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none" )
   # 1 vessels via bright / dark
   if ( vesselopt != 'none' )
   {
-  vseg <- atropos( d = dim, a = img, m = '[0.1,1x1]',
-     c = '[5,0]',  i = 'kmeans[2]', x = brainmask )
+  vseg <- kmeansSegmentation( img, vesselk, brainmask )
   if ( vesselopt == 'bright' )
     mask<-thresholdImage( vseg$segmentation , 1, 1 )
   if ( vesselopt == 'dark' )
