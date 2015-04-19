@@ -90,10 +90,18 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   sccaname <- "recon["
   if (maskdim == 4)
     sccaname <- "recon4d["
-  args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness, "]",
-    sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh, "-n", nvecs,
-    "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "--mask", inmask, "-r",
-    robust, "--get-small", getSmall )
+  args <- list("--svd",
+    paste(sccaname, matname, ",", mfn, ",", sparseness, "]",sep = ""),
+    "--l1", ell1,
+    "-i", its,
+    "--PClusterThresh", cthresh,
+    "-n", nvecs,
+    "-o", outfn,
+    "-z", z,
+    "-s", smooth,
+    "-c", mycoption,
+    "--mask", inmask,
+    "-r", robust, "--get-small", getSmall )
   if (length(initializationList) > 0) {
     ct <- 1
     initfns <- c()
@@ -107,10 +115,20 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     fileConn <- file(initlistfn)
     writeLines(initfns, fileConn)
     close(fileConn)
-    args <- list("--svd", paste(sccaname, matname, ",", mfn, ",", sparseness,
-      "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh, "-n",
-      nvecs, "-o", outfn, "-z", z, "-s", smooth, "-c", mycoption, "-r", robust,
-      "--mask", mfn, "--initialization", initlistfn, , "--get-small", getSmall)
+    args <- list("--svd",
+    paste(sccaname, matname, ",", mfn, ",", sparseness,"]", sep = ""),
+    "--l1", 1,
+    "-i", its,
+    "--PClusterThresh", cthresh,
+    "-n",  nvecs,
+    "-o", outfn,
+    "-z", z,
+    "-s", smooth,
+    "-c", mycoption,
+    "-r", robust,
+    "--mask", mfn,
+    "--initialization", initlistfn,
+    "--get-small", getSmall)
     print(initlistfn)
   }
   time1 <- (Sys.time())
