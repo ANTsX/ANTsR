@@ -51,6 +51,7 @@ typeofTransform can be one of:
     BOLD and T1 images.}
   \item{"SyNAggro": }{SyN, but with more aggressive registration
     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
+  \item{"TVMSQ": }{time-varying diffeomorphism with mean square metric}
 }
 }
 \examples{

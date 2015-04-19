@@ -11,7 +11,7 @@
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
 #' One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
-# \code{SyNBold}, \code{SyNAggro}.
+# \code{SyNBold}, \code{SyNAggro}, \code{TVMSQ}.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -29,6 +29,7 @@
 #'     BOLD and T1 images.}
 #'   \item{"SyNAggro": }{SyN, but with more aggressive registration
 #'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
+#'   \item{"TVMSQ": }{time-varying diffeomorphism with mean square metric}
 #' }
 #' @return outputs a list containing:
 #' \itemize{
@@ -170,6 +171,24 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
             sep = ""), "-t", paste("SyN[0.1,3,0.5]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
           "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "TVMSQ") {
+          tvtx="TimeVaryingVelocityField[ 1.0, 4, 0.0,0.0, 0.5,0 ]"
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+            "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+            "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
+            "-f", "4x2x2x1",
+            "-m", paste("meansquares[", f, ",", m, ",1,2]", sep = ""),
+            "-t", tvtx,
+            "-c", "2100x1200x1200x20",
+            "-s", "3x2x1x0",
+            "-f", "4x3x2x1",
+            "-u", "1", "-z", "1", "--float",
+            "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
