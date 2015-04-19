@@ -23,6 +23,8 @@ One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
 \item{mask}{mask the registration.}
 
 \item{...}{additional options see antsRegistration in ANTs}
+
+\item{gradientStep}{gradient step size (not for all tx)}
 }
 \value{
 outputs a list containing:
