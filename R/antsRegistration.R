@@ -85,7 +85,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
       allowableTx <- c("Rigid", "Affine", "SyN","SyNCC",
-        "SyNBold", "SyNAggro", "SyNLessAggro")
+        "SyNBold", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
