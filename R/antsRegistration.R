@@ -15,7 +15,7 @@
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
-#' @param gradientStep gradient step size (not for all tx)
+#' @param gradStep gradient step size (not for all tx)
 #' @param ... additional options see antsRegistration in ANTs
 #' @details
 #' typeofTransform can be one of:
@@ -52,7 +52,8 @@
 #'   transformlist=mytx$fwdtransforms )
 #'
 #' @export antsRegistration
-antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", initialTransform = NA,
+antsRegistration <- function(fixed = NA, moving = NA,
+  typeofTransform = "SyN", initialTransform = NA,
   outprefix = "", mask = NA, gradStep=NA, ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
@@ -90,8 +91,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
-        moving <- antsImageClone(moving, "double")
-        fixed <- antsImageClone(fixed, "double")
+        moving <- antsImageClone(moving, "float")
+        fixed <- antsImageClone(fixed, "float")
         warpedfixout <- antsImageClone(moving)
         warpedmovout <- antsImageClone(fixed)
         f <- .antsrGetPointerName(fixed)
@@ -101,7 +102,7 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
         if (!is.na(mask)) {
           charmask <- antsImageClone(mask, "unsigned char")
           maskopt <- .antsrGetPointerName(charmask)
-        } else maskopt <- ""
+        } else maskopt=NA
         if (is.na(initx)) {
           initx = paste("[", f, ",", m, ",1]", sep = "")
         }
@@ -111,9 +112,9 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
           "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
-          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "--float", "0",
+          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "--float", "1",
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -127,9 +128,9 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-f", "4x2x2x1", "-m", paste("mattes[", f, ",", m, ",1,32]",
             sep = ""), "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "--float", "0", "-o", paste("[", outprefix, ",",
+          "1", "-z", "1", "--float", "1", "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -143,8 +144,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
             sep = ""), "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
-          "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          "1", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -162,8 +163,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
           "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
-          "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          "1", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -177,8 +178,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
             sep = ""), "-t", paste("SyN[0.1,3,0.5]", sep = ""), "-c", "2100x1200x1200x20",
           "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "--float",
-          "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          "1", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -196,8 +197,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
             "-s", "0",
             "-f", "1",
             "-u", "1", "-z", "1", "--float",
-            "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+            "1", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
@@ -211,8 +212,8 @@ antsRegistration <- function(fixed = NA, moving = NA, typeofTransform = "SyN", i
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
           "-s", "3x2x1x0", "-f", "6x4x2x1", "-u", "1", "-z", "1", "--float",
-          "0", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
-          if ( length(maskopt) > 0  )
+          "1", "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( args, list( "-x", maskopt ) )
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
