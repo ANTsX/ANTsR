@@ -22,7 +22,7 @@
 #' bmk = getMask( img )
 #' segs <- kmeansSegmentation( img, 3, bmk )
 #' priors = segs$probabilityimages
-#' seg = geoSeg( img, bmk, priors, 'none' )
+#' seg = geoSeg( img, bmk, priors )
 #'
 #' @export geoSeg
 geoSeg <- function( img, brainmask, priors, seginit,
