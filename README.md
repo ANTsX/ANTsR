@@ -54,7 +54,6 @@ Install the binary, after downloading, via command line:
 R CMD INSTALL ANTsR_*.tgz
 ```
 
-
 ## Research using ANTsR
 
 * [Inter-modality inference](http://www.ncbi.nlm.nih.gov/pubmed/25449745) yet to be added RIPMMARC
@@ -75,6 +74,14 @@ R CMD INSTALL ANTsR_*.tgz
 
 
 ## Installation from source
+
+**[drat](https://github.com/cran/drat)**
+```
+drat::addRepo("ANTs-R")
+install.packages("ANTsR")
+```
+Thanks to [zarquon42b](https://github.com/zarquon42b).
+
 
 **with devtools in R**
 ```

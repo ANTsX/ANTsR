@@ -4,21 +4,28 @@
 \alias{geoSeg}
 \title{brain segmentation based on geometric priors}
 \usage{
-geoSeg(img, brainmask, priors, vesselopt = "none", vesselk = 2,
-  gradStep = 1)
+geoSeg(img, brainmask, priors, seginit, vesselopt = "none", vesselk = 2,
+  gradStep = 1, mrfval = 0.1, atroposits = 5)
 }
 \arguments{
-\item{img}{input image}
+\item{img}{input image or list of images (multiple features) where 1st image
+would typically be the primary constrast}
 
 \item{brainmask}{binary image}
 
-\item{priors}{spatial priors}
+\item{priors}{spatial priors, assume first is csf, second is gm, third is wm}
+
+\item{seginit}{a previously computed segmentation which should have the structure of \code{atropos} or \code{kmeansSegmentation} output}
 
 \item{vesselopt}{one of bright, dark or none}
 
 \item{vesselk}{integer for kmeans vessel-based processing}
 
 \item{gradStep}{scalar for registration}
+
+\item{mrfval}{e.g. 0.05 or 0.1}
+
+\item{atroposits}{e.g. 5 iterations}
 }
 \value{
 list of segmentation result images

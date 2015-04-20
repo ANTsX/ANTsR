@@ -4,7 +4,7 @@
 \alias{antsApplyTransforms}
 \title{Apply transforms to images.}
 \usage{
-antsApplyTransforms(fixed = NA, moving = NA, transformlist = "",
+antsApplyTransforms(fixed, moving, transformlist = "",
   interpolator = "Linear", imagetype = 0, whichtoinvert = NA, ...)
 }
 \arguments{
