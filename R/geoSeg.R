@@ -50,7 +50,6 @@ geoSeg <- function( img, brainmask, priors, seginit,
   if ( missing(seginit) ) {
     seginit <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
       c = atroposits,  i = priors, x = mask )
-    return( seginit )
     }
   wm   = thresholdImage( seginit$segmentation, 3, 3 )
   wm   = wm %>% iMath( "GetLargestComponent" ) %>% iMath("MD",1)
