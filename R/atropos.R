@@ -48,7 +48,7 @@ atropos <- function( a, x,
   i = "KMeans[3]",
   m = "[0.2,1x1]",
   c = "[5,0]",
-  priorweight = 0.5,
+  priorweight = 0.25,
   ...) {
   if ( missing(x)) {
     .Call("Atropos", .int_antsProcessArguments(c(a)), PACKAGE = "ANTsR")
