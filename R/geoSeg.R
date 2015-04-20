@@ -23,7 +23,9 @@
 geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   {
   if ( ! exists("vesselopt") ) vesselopt="none"
-  dim = img@dimension
+  idim = img@dimension
+
+  mrfterm=paste("[0.1,",paste(rep(1,idim),collapse='x'),"]")
 
   # 1 vessels via bright / dark
   if ( vesselopt != 'none' )
@@ -36,7 +38,7 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   } else mask = antsImageClone( brainmask )
 
   # 2 wm / gm use topology to modify wm
-  s2 <- atropos( d = dim, a = img, m = '[0.1,1x1]',
+  s2 <- atropos( d = idim, a = img, m = mrfterm,
      c = '[50,0]',  i = priors, x = mask )
   wm   = thresholdImage( s2$segmentation, 3, 3 )
   wm   = wm %>% iMath( "GetLargestComponent" ) %>% iMath("MD",1)
@@ -55,21 +57,34 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   thkj   = antsApplyTransforms( fixed=wmp, moving=jacinv,
        transformlist=tvreg$fwdtransforms ) * gm
 
-  # 5 resegment with new priors
+  #####################################
+  # 5 resegment with new priors begin #
+  #####################################
+  #
+  # gm topology constraint based on gm/wm jacobian
   thksig = antsImageClone( thkj )
   a      = 0.01
   beta   = 0.6
   thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
+  s2$probabilityimages[[2]] = priors[[2]] * thksig
+  #
+  # csf topology constraint based on gm/wm jacobian
   thkcsf = thresholdImage( thkj, 0.05, 0.5  ) * iMath( wm, "Neg" )
   thkcsf = smoothImage( thkcsf, 0.5 )
-  s2$probabilityimages[[3]] = s2$probabilityimages[[3]] * wm
-  s2$probabilityimages[[3]] = s2$probabilityimages[[3]] * iMath( thksig, "Neg")
-  s2$probabilityimages[[2]] = s2$probabilityimages[[2]] * thksig
-  s2$probabilityimages[[1]] = s2$probabilityimages[[1]] * iMath( thksig, "Neg")
-  s2$probabilityimages[[1]] = s2$probabilityimages[[1]] + thkcsf
-  s3 <- atropos( d = dim, a = img, m = '[0.1,1x1]',
+  s2$probabilityimages[[1]] = priors[[1]] * iMath( thksig, "Neg")
+  s2$probabilityimages[[1]] = priors[[1]] + thkcsf
+  #
+  # wm topology constraint based on largest connected component
+  # and excluding high gm-prob voxels
+  s2$probabilityimages[[3]] = priors[[3]] * wm
+  s2$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
+  #
+  # now resegment with topology-modified priors
+  s3 <- atropos( d = idim, a = img, m = mrfterm,
     c = '[50,0]',  i = s2$probabilityimages, x = mask )
-
+  ###################################
+  # 5 resegment with new priors end #
+  ###################################
   return( list( segobj=s3, seginit=s2, thkcsf=thkcsf, thkj=thkj ) )
 }
 
