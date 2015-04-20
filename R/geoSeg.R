@@ -7,6 +7,7 @@
 #' @param priors spatial priors
 #' @param vesselopt one of bright, dark or none
 #' @param vesselk integer for kmeans vessel-based processing
+#' @param gradStep scalar for registration
 #' @return list of segmentation result images
 #' @author Brian B. Avants
 #' @examples
@@ -20,7 +21,8 @@
 #' seg = geoSeg( img, bmk, priors, 'none' )
 #'
 #' @export geoSeg
-geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
+geoSeg <- function( img, brainmask, priors, vesselopt="none",
+  vesselk=2, gradStep=1 )
   {
   if ( ! exists("vesselopt") ) vesselopt="none"
   idim = img@dimension
@@ -49,7 +51,7 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
 
   # 3 wm / gm use diffeo to estimate gm
   tvreg = antsRegistration( gmp, wmp, typeofTransform = "TVMSQ",
-    gradStep=1.0, mask=cort )
+    gradStep=gradStep, mask=cort )
 
   # 4 wm / gm / csf priors from jacobian
   jac    = createJacobianDeterminantImage( wmp, tvreg$fwdtransforms[[1]], 0)
