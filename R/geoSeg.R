@@ -28,7 +28,7 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   mrfterm=paste("[0.1,",paste(rep(1,idim),collapse='x'),"]")
 
   # 1 vessels via bright / dark
-  if ( vesselopt != 'none' )
+  if ( vesselopt == 'bright' | vesselopt == 'dark' )
   {
   vseg <- kmeansSegmentation( img, vesselk, brainmask )
   if ( vesselopt == 'bright' )
