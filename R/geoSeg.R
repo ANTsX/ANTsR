@@ -32,9 +32,9 @@ geoSeg <- function( img, brainmask, priors, vesselopt="none", vesselk=2 )
   {
   vseg <- kmeansSegmentation( img, vesselk, brainmask )
   if ( vesselopt == 'bright' )
-    mask<-thresholdImage( vseg$segmentation , 1, 1 )
+    mask = thresholdImage( vseg$segmentation , 1, (vesselk-1) )
   if ( vesselopt == 'dark' )
-    mask<-thresholdImage( vseg$segmentation , 2, 2 )
+    mask = thresholdImage( vseg$segmentation , 2, vesselk )
   } else mask = antsImageClone( brainmask )
 
   # 2 wm / gm use topology to modify wm
