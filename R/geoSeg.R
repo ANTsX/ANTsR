@@ -48,8 +48,9 @@ geoSeg <- function( img, brainmask, priors, seginit,
 
   # 2 wm / gm use topology to modify wm
   if ( missing(seginit) ) {
-    seginit <- atropos( d = idim, a = img, m = mrfterm,
+    seginit <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
       c = atroposits,  i = priors, x = mask )
+    return( seginit )
     }
   wm   = thresholdImage( seginit$segmentation, 3, 3 )
   wm   = wm %>% iMath( "GetLargestComponent" ) %>% iMath("MD",1)
@@ -91,7 +92,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
   seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
   #
   # now resegment with topology-modified priors
-  s3 <- atropos( d = idim, a = img, m = mrfterm,
+  s3 <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
     c = atroposits,  i = seginit$probabilityimages, x = mask )
   ###################################
   # 5 resegment with new priors end #
