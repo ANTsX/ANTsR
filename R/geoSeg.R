@@ -74,8 +74,8 @@ geoSeg <- function( img, brainmask, priors, seginit,
   #
   # gm topology constraint based on gm/wm jacobian
   thksig = antsImageClone( thkj )
-  a      = 0.01
-  beta   = 0.6
+  a      = 0.05
+  beta   = 0.5
   thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
   seginit$probabilityimages[[2]] = priors[[2]] * thksig
   #
