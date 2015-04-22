@@ -46,8 +46,7 @@ SEXP splitChannels( SEXP r_antsimage )
   Rcpp::List outputList( nComponents );
   for (unsigned int i=0; i<nComponents; i++)
     {
-    Rcpp::S4 img( Rcpp::wrap(images[i]) );
-    outputList[i] = img;
+    outputList[i] = Rcpp::wrap( images[i] );
     }
 
   return( Rcpp::wrap(outputList) );
