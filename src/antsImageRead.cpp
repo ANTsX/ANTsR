@@ -15,15 +15,7 @@ SEXP antsImageRead( std::string filename, std::string pixeltype, unsigned int co
 
   typename ImageReaderType::Pointer image_reader = ImageReaderType::New() ;
   image_reader->SetFileName( filename.c_str() ) ;
-  try
-    {
-    image_reader->Update();
-    }
-  catch( itk::ExceptionObject & e )
-    {
-    Rcpp::Rcout << "Exception caught during reference file reading " << e << std::endl;
-    return NULL;
-    }
+  image_reader->Update();
 
   ImagePointerType itkImage = image_reader->GetOutput();
   return Rcpp::wrap( itkImage );
@@ -32,6 +24,7 @@ SEXP antsImageRead( std::string filename, std::string pixeltype, unsigned int co
 
 // [[myRcpp::export]]
 RcppExport SEXP antsImageRead( SEXP r_filename , SEXP r_pixeltype , SEXP r_dimension, SEXP r_components )
+{
 try
 {
   // check and set the parameters
@@ -175,15 +168,17 @@ try
     Rcpp::stop("Unsupported PixelType");
     }
 }
-catch( itk::ExceptionObject & err )
+catch( const itk::ExceptionObject& err )
   {
-  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << err << std::endl;
-  Rcpp::stop("ITK exception caught");
+  forward_exception_to_r( err );
   }
 catch( const std::exception& exc )
   {
-  Rcpp::Rcout << "STD ExceptionObject caught !" << std::endl;
-  Rcpp::Rcout << exc.what() << std::endl ;
-  Rcpp::stop( "Exception caught");
+  forward_exception_to_r( exc );
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
