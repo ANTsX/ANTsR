@@ -12,6 +12,7 @@
 #' @param gradStep scalar for registration
 #' @param mrfval e.g. 0.05 or 0.1
 #' @param atroposits e.g. 5 iterations
+#' @param jacw precomputed diffeo jacobian
 #' @return list of segmentation result images
 #' @author Brian B. Avants
 #' @examples
@@ -27,7 +28,7 @@
 #' @export geoSeg
 geoSeg <- function( img, brainmask, priors, seginit,
   vesselopt="none", vesselk=2,
-  gradStep=1, mrfval=0.1, atroposits=5 )
+  gradStep=1, mrfval=0.1, atroposits=5, jacw=NA )
   {
   if ( typeof( img ) == "S4" ) img=list( img )
   if ( ! exists("vesselopt") ) vesselopt="none"
@@ -59,14 +60,18 @@ geoSeg <- function( img, brainmask, priors, seginit,
   gmp  = gm + wmp
 
   # 3 wm / gm use diffeo to estimate gm
-  tvreg = antsRegistration( gmp, wmp, typeofTransform = "TVMSQ",
-    gradStep=gradStep, mask=cort )
+  if ( ! is.na( jacw ) )
+    {
+    tvreg = antsRegistration( gmp, wmp, typeofTransform = "TVMSQ",
+      gradStep=gradStep, mask=cort )
 
-  # 4 wm / gm / csf priors from jacobian
-  jac    = createJacobianDeterminantImage( wmp, tvreg$fwdtransforms[[1]], 0)
-  jacinv = createJacobianDeterminantImage( wmp, tvreg$invtransforms[[1]], 0)
-  thkj   = antsApplyTransforms( fixed=wmp, moving=jacinv,
-       transformlist=tvreg$fwdtransforms ) * gm
+    # 4 wm / gm / csf priors from jacobian
+  #  jac    = createJacobianDeterminantImage( wmp, tvreg$fwdtransforms[[1]], 0)
+    jacinv = createJacobianDeterminantImage( wmp, tvreg$invtransforms[[1]], 0)
+    jacw = antsApplyTransforms( fixed=wmp, moving=jacinv,
+         transformlist=tvreg$fwdtransforms )
+    }
+  thkj   = jacw * gm
 
   #####################################
   # 5 resegment with new priors begin #
@@ -96,7 +101,8 @@ geoSeg <- function( img, brainmask, priors, seginit,
   ###################################
   # 5 resegment with new priors end #
   ###################################
-  return( list( segobj=s3, seginit=seginit, thkcsf=thkcsf, thkj=thkj ) )
+  return( list( segobj=s3, seginit=seginit, thkcsf=thkcsf,
+    thkj=thkj, jacw=jacw ) )
 }
 
 # 5 curvature seg - use results of 4 to segment based on
