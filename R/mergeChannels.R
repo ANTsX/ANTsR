@@ -23,10 +23,10 @@ mergeChannels <- function(imageList) {
     {
       stop( "list may only contain 'antsImage' objects")
     }
-    #if ( length( imageList[[i]]@components ) == 0)
-    #{
-    #  imageList[[i]]@components = as.integer(1)
-    #}
+    if ( length( imageList[[i]]@components ) == 0)
+      {
+      imageList[[i]]@components = as.integer(1)
+      }
   }
 
   img = .Call("mergeChannels", imageList, package="ANTsR")
