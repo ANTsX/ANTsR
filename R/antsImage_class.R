@@ -1028,12 +1028,14 @@ is.antsImage <- function(x){
 
 #' @rdname antsImageArith
 "-.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
+  if(missing(y)) {
+    imgdif <- as.antsImage(0 - as.array(x))
+  } else if(is.antsImage(y)){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
     imgdif <- as.antsImage(as.array(x) - as.array(y))
-  } else{
+  } else {
     imgdif <- as.antsImage(as.array(x) - y)
   }
   antsCopyImageInfo(x, imgdif)
