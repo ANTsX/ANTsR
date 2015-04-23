@@ -15,32 +15,29 @@
 #' @export aslOutlierRejection
 aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
   sigma.mean = 2.5, sigma.sd = 2) {
-  if (is.na(asl))
-    stop("ASL must be provided.")
   if (is.na(mask)) {
     avg <- getAverageOfTimeSeries(asl)
     avg<-n3BiasFieldCorrection( avg, 2 )
     avg<-n3BiasFieldCorrection( avg, 2 )
     mask <- getMask(avg, mean(avg), Inf)
   }
+  diffs <- antsImageClone(asl)
+  imageMath(4, diffs, "TimeSeriesSimpleSubtraction", asl)
   nvox <- sum(mask[mask > 0])
   npairs <- dim(asl)[4]/2
   tc <- rep(c(1, 2), npairs)
-  diffs <- matrix(rep(NA, npairs * nvox), ncol = npairs)
   aslmat <- timeseries2matrix(asl, mask)
-  for (ii in 1:npairs) {
-    diffs[, ii] <- aslmat[ii * 2, ] - aslmat[ii * 2 - 1, ]
-  }
   if (mean(diffs) < 0)
     diffs <- -diffs
-  centers <- apply(diffs, 2, centralTendency)
+  ts.diff <- timeseries2matrix(diffs, mask)
+  centers <- apply(ts.diff, 1, centralTendency)
   mean.centers <- mean(centers)
   sd.centers <- sd(centers)
-  sds <- apply(diffs, 2, sd)
+  sds <- apply(ts.diff, 1, sd)
   mean.sds <- mean(sds)
   sd.sds <- sd(sds)
   which.outlierpairs <- which((abs(centers - mean.centers) > sigma.mean * sd.centers) |
-    (abs(sds - mean.sds) > sigma.sd * sd.centers))
+    (abs(sds - mean.sds) > sigma.sd * sd.sds))
   which.outliers <- rep(which.outlierpairs, each = 2)
   tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
   which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
