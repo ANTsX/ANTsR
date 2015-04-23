@@ -12,6 +12,9 @@
 #' Information Processing in Medical Imaging, 2003.
 #' @keywords curvature
 #' @examples
+#' img = makeImage( c(10,10,10) , rnorm( 1000 ) )
+#' fik <- weingartenImageCurvature( img )
+#' if ( abs( mean(fik) - 128 ) > 1 ) stop("weingartenImageCurvature failure")
 #' \dontrun{
 #' fi <- antsImageRead( getANTsRData( "mni" ) )
 #' fik <- weingartenImageCurvature( fi )
