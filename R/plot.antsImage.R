@@ -204,11 +204,11 @@ plot.antsImage <- function(x, y,
   if ( imagedim == 2 )
     slices <- 1
   nslices <- length(slices)
-  winrows <- round(length(slices) / 10)
+  winrows <- round(length(slices) / 4 ) # controls number of rows
   if (winrows < 1)
     winrows <- 1
-  wincols <- 10
-  if (length(slices) < 10)
+  wincols <- round(nslices/winrows) # controls number of rows
+  if (length(slices) < wincols )
     wincols <- length(slices)
   if (axis != 2 & imagedim > 2)
     slice <- rotate90.matrix(img[, , slices[1]])
