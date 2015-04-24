@@ -193,6 +193,10 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
   ts <- timeseries2matrix(asl, mask)
   
   if (method == 'robust') {
+    if (!usePkg("robust")) { 
+      print("Need robust package") 
+      return(NULL) 
+    }
     xideal <- (rep(c(1, 0), 
       dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # control minus tag
     inds <- robSelection(ts, xideal, nuis, ...)
