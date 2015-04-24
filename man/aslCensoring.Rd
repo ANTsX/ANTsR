@@ -12,6 +12,8 @@ aslCensoring(asl, mask = NA, nuis = NA, method = "outlier")
 \item{mask}{mask for calculating perfusion}
 
 \item{method}{one of 'outlier', 'robust', or 'scor'.  See \code{Details}.}
+
+\item{...}{Additional arguments to pass to censoring method.  See \code{Details.}}
 }
 \value{
 vector of the same length as number of timepoints in \code{asl}, with
@@ -20,13 +22,50 @@ vector of the same length as number of timepoints in \code{asl}, with
 \description{
 Censor bad volumes from ASL data.
 }
+\details{
+\code{aslCensoring} is an interface to ASL timepoint censoring algorithms.
+Three options are currently provided, with different additional arguments:
+\enumerate{
+ \item{\code{outlier}}{ Outlier rejection from Tan et al.  This method rejects
+   volumes that are either far from the mean of the time-series or whose
+   standard deviation is far from the standard deviations of the individual volumes.
+   Accepts two additional arguments:
+     \itemize{
+        \item{\code{sigma.mean}: }{how many standard
+        deviations the mean of the volume can be from the
+        mean of all the volumes before
+        being thrown out.}
+        \item{\code{sigma.sd}: }{how many standard deviations from the
+        mean of standard deviations can the standard deviation of the volume be
+        before being thrown out.}
+     }
+}
+ \item{\code{robust}}{ Uses a robust regression approach to estimate volumes
+   with high leverage.  Accepts three arguments:
+   \itemize{
+     \item{\code{nuis}:}{ Nuisance regressors to use as covariates.}
+     \item{\code{robthresh}:}{ Threshold for weights on leverage estimates.  Points
+        with weights under this value will be thrown out; defaults to 0.95.}
+     \item{\code{skip}:}{ Proportion of points to skip when estimating leverage.
+       Defaults to 20 (1/20 of the image is used).}
+    }
+  }
+  \item{\code{scor}}{ SCOR method of Dolui et al.  No parameters.}
+}
+}
 \examples{
 nvox <- 5 * 5 * 5 * 10
 dims <- c(5, 5, 5, 10)
-asl <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
+voxvals <- array(rnorm(nvox) + 500, dim=dims)
+voxvals[, , , 5] <- voxvals[, , , 5] + 600
+asl <- makeImage(dims, voxvals) \%>\% iMath("PadImage", 2)
 censored <- aslCensoring(asl)
 }
 \author{
 Kandel BM
+}
+\references{
+Tan H. et al., ``A Fast, Effective Filtering Method
+for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 }
 
