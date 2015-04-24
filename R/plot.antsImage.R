@@ -23,6 +23,7 @@
 #' \code{plot.jpg}.
 #' @param alpha  opacity
 #' @param newwindow  boolean controlling if we open a new device for this plot
+#' @param nslices  number of slices to view
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -69,11 +70,11 @@ plot.antsImage <- function(x, y,
   outname = NA,
   alpha = 0.5,
   newwindow = FALSE,
+  nslices = 10,
   ... ) {
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
     x <- cropImage(x, plotimask )
-    nslices <- 10
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
   }
   nonzeros <- x[x != 0]
