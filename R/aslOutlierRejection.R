@@ -10,7 +10,13 @@
 #' @param sigma.sd Scalar defining how many standard deviations away from mean of standard deviations the volume must be to be rejected.
 #' @return List of ASL time-series image including only inlier pairs and vector of outlier pair numbers (numbers correspond to *input* ASL time-series).
 #' @author Benjamin M. Kandel
-#' @examples \dontrun{ #WIP }
+#' @examples 
+#' nvox <- 5 * 5 * 5 * 10
+#' dims <- c(5, 5, 5, 10)
+#' voxvals <- array(rnorm(nvox) + 500, dim=dims)
+#' voxvals[, , , 5] <- voxvals[, , , 5] + 600
+#' asl <- makeImage(dims, voxvals) %>% iMath("PadImage", 2)
+#' outliers <- aslOutlierRejection(asl)
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslOutlierRejection
 aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
@@ -31,7 +37,7 @@ aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
     diffs <- -diffs
   ts.diff <- timeseries2matrix(diffs, mask)
   centers <- apply(ts.diff, 1, centralTendency)
-  mean.centers <- mean(centers)
+  mean.centers <- centralTendency(centers)
   sd.centers <- sd(centers)
   sds <- apply(ts.diff, 1, sd)
   mean.sds <- mean(sds)
@@ -42,7 +48,11 @@ aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
   tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
   which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
   which.outliers[tc.outliers == 2] <- which.outliers[tc.outliers == 2] * 2
-  aslmat.inlier <- aslmat[-which.outliers, ]
+  if (length(which.outliers) > 0) {
+    aslmat.inlier <- aslmat[-which.outliers, ]
+  } else { 
+    aslmat.inlier <- aslmat 
+  }
   asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
   list(asl.inliers = asl.inlier, outliers = which.outliers)
 
