@@ -60,7 +60,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
   gmp  = gm + wmp
 
   # 3 wm / gm use diffeo to estimate gm
-  if ( ! is.na( jacw ) )
+  if (  is.na( jacw ) )
     {
     tvreg = antsRegistration( gmp, wmp, typeofTransform = "TVMSQ",
       gradStep=gradStep, mask=cort )
