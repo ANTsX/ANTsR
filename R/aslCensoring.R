@@ -1,53 +1,54 @@
 #' Censor bad volumes from ASL data.
-#' 
+#'
 #' @param asl input asl image
-#' @param mask mask for calculating perfusion 
+#' @param mask mask for calculating perfusion
+#' @param nuis fixed nuisance parameters
 #' @param method one of 'outlier', 'robust', or 'scor'.  See \code{Details}.
 #' @param ... Additional arguments to pass to censoring method.  See \code{Details.}
 #' @details \code{aslCensoring} is an interface to ASL timepoint censoring algorithms.
-#' Three options are currently provided, with different additional arguments: 
+#' Three options are currently provided, with different additional arguments:
 #' \enumerate{
-#'  \item{\code{outlier}}{ Outlier rejection from Tan et al.  This method rejects 
-#'    volumes that are either far from the mean of the time-series or whose 
+#'  \item{\code{outlier}}{ Outlier rejection from Tan et al.  This method rejects
+#'    volumes that are either far from the mean of the time-series or whose
 #'    standard deviation is far from the standard deviations of the individual volumes.
-#'    Accepts two additional arguments: 
+#'    Accepts two additional arguments:
 #'      \itemize{
-#'         \item{\code{sigma.mean}: }{how many standard 
-#'         deviations the mean of the volume can be from the 
-#'         mean of all the volumes before 
+#'         \item{\code{sigma.mean}: }{how many standard
+#'         deviations the mean of the volume can be from the
+#'         mean of all the volumes before
 #'         being thrown out.}
-#'         \item{\code{sigma.sd}: }{how many standard deviations from the 
-#'         mean of standard deviations can the standard deviation of the volume be 
+#'         \item{\code{sigma.sd}: }{how many standard deviations from the
+#'         mean of standard deviations can the standard deviation of the volume be
 #'         before being thrown out.}
 #'      }
 #' }
-#'  \item{\code{robust}}{ Uses a robust regression approach to estimate volumes 
+#'  \item{\code{robust}}{ Uses a robust regression approach to estimate volumes
 #'    with high leverage.  Accepts three arguments:
 #'    \itemize{
 #'      \item{\code{nuis}:}{ Nuisance regressors to use as covariates.}
-#'      \item{\code{robthresh}:}{ Threshold for weights on leverage estimates.  Points 
+#'      \item{\code{robthresh}:}{ Threshold for weights on leverage estimates.  Points
 #'         with weights under this value will be thrown out; defaults to 0.95.}
-#'      \item{\code{skip}:}{ Proportion of points to skip when estimating leverage.  
+#'      \item{\code{skip}:}{ Proportion of points to skip when estimating leverage.
 #'        Defaults to 20 (1/20 of the image is used).}
 #'     }
 #'   }
 #'   \item{\code{scor}}{ SCOR method of Dolui et al.  No parameters.}
-#' }  
-#' @return vector of the same length as number of timepoints in \code{asl}, with 
+#' }
+#' @return vector of the same length as number of timepoints in \code{asl}, with
 #'  1 indicating the corresponding timepoint is included and 0 indicating exclusion.
-#' @author Kandel BM 
-#' @examples 
+#' @author Kandel BM
+#' @examples
 #' nvox <- 5 * 5 * 5 * 10
 #' dims <- c(5, 5, 5, 10)
 #' voxvals <- array(rnorm(nvox) + 500, dim=dims)
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
 #' asl <- makeImage(dims, voxvals) %>% iMath("PadImage", 2)
 #' censored <- aslCensoring(asl)
-#' @references Tan H. et al., ``A Fast, Effective Filtering Method 
+#' @references Tan H. et al., ``A Fast, Effective Filtering Method
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
-#' @export aslCensoring 
+#' @export aslCensoring
 
-aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
+aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   # Supporting functions for censoring data: robSelection and scor.
   robSelection <- function(mat, xideal, nuis=NA,  robthresh=0.95, skip=20) {
     cbfform <- formula(mat ~ xideal)
@@ -56,7 +57,7 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
       rmat <- residuals(lm(mat ~ nuis))
       cbfform <- formula(mat ~ xideal + nuis)
       rcbfform <- formula(rmat[, vox] ~ xideal)
-    }  
+    }
     if (!all(is.na(nuis))) {
       rmat <- residuals(lm(mat ~ nuis))
       cbfform <- formula(mat ~ xideal + nuis)
@@ -155,13 +156,13 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
     }
     asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
     list(asl.inliers = asl.inlier, outliers = which.outliers)
-  } 
+  }
 
   scor <- function(asl){
     npairs <- dim(asl)[1]
     indices <- 1:npairs
     meancbf <- apply(asl, 1, mean)
-    var.tot <- var(meancbf) 
+    var.tot <- var(meancbf)
     var.prev <- var.tot + 1
     while(var.tot < var.prev){
       print(paste(var.prev, var.tot))
@@ -178,32 +179,32 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
       meancbf <- apply(asl[, indices[!is.na(indices)]], 1, mean)
       var.tot <- var(meancbf)
     }
-    indices.out <- rep(1, length(indices)) 
-    indices.out[which(is.na(indices))] <- 0 
+    indices.out <- rep(1, length(indices))
+    indices.out[which(is.na(indices))] <- 0
   }
-  
+
   if (is.na(mask)){
-    myar <- apply(as.array(asl), c(1, 2, 3), mean) 
-    img <- makeImage(dim(myar), myar) 
+    myar <- apply(as.array(asl), c(1, 2, 3), mean)
+    img <- makeImage(dim(myar), myar)
     antsSetSpacing(img, antsGetSpacing(asl)[1:3])
     antsSetOrigin(img, antsGetOrigin(asl)[1:3])
     antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
     mask <- getMask(img)
   }
   ts <- timeseries2matrix(asl, mask)
-  
+
   if (method == 'robust') {
-    if (!usePkg("robust")) { 
-      print("Need robust package") 
-      return(NULL) 
+    if (!usePkg("robust")) {
+      print("Need robust package")
+      return(NULL)
     }
-    xideal <- (rep(c(1, 0), 
+    xideal <- (rep(c(1, 0),
       dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # control minus tag
     inds <- robSelection(ts, xideal, nuis, ...)
   } else if (method == 'outlier') {
     inds <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
-    inds <- scor(ts) 
+    inds <- scor(ts)
   }
 
-} 
+}
