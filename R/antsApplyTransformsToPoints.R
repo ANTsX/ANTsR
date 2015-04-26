@@ -78,9 +78,13 @@ antsApplyTransformsToPoints <- function(
           }
       }
     if ( class(points)[[1]] != "antsImage" )
-      usepts = as.antsImage( as.matrix(points) ) else usepts = ( points )
+      {
+      usepts = as.antsImage( data.matrix( points ) )
+      } else {
+      usepts = antsImageClone( points )
+      }
     if ( usepts@dimension != 2 ) stop("must be 2d antsImage")
-    pointsout = antsImageClone( points )
+    pointsout = antsImageClone( usepts )
     args <- list( d = dim, i = usepts, o = pointsout, unlist(mytx) )
     myargs <- .int_antsProcessArguments(c(args))
     for (jj in c(1:length(myargs))) {
@@ -94,7 +98,10 @@ antsApplyTransformsToPoints <- function(
           }
         }
     .Call("antsApplyTransformsToPoints",
-         c(myargs, "-f", 1, "--precision", 0, PACKAGE = "ANTsR") )
+         c(myargs, "-f", 1, "--precision", 0), PACKAGE = "ANTsR" )
+    if ( class(points)[[1]] == "antsImage" ) return( pointsout )
+    pointsout = data.frame( as.matrix( pointsout ) )
+    colnames( pointsout ) = colnames( points )
     return( pointsout )
     }
     if (!ttexists)
