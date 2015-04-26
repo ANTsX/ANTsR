@@ -35,10 +35,6 @@ Importantly, point mapping goes the opposite direction of image mapping,
 for both reasons of convention and engineering.
 }
 \examples{
-# will give the full form of help
-antsApplyTransformsToPoints("-h")
-# see antsRegistration
-# example 1 - simplified
 fixed <- antsImageRead( getANTsRData("r16") ,2)
 moving <- antsImageRead( getANTsRData("r64") ,2)
 fixed <- resampleImage(fixed,c(64,64),1,0)

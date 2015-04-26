@@ -22,10 +22,6 @@
 #' @author Avants BB
 #' @examples
 #'
-#' # will give the full form of help
-#' antsApplyTransformsToPoints("-h")
-#' # see antsRegistration
-#' # example 1 - simplified
 #' fixed <- antsImageRead( getANTsRData("r16") ,2)
 #' moving <- antsImageRead( getANTsRData("r64") ,2)
 #' fixed <- resampleImage(fixed,c(64,64),1,0)
@@ -82,7 +78,7 @@ antsApplyTransformsToPoints <- function(
           }
       }
     if ( class(points)[[1]] != "antsImage" )
-      usepts = as.antsImage( points ) else usepts = ( points )
+      usepts = as.antsImage( as.matrix(points) ) else usepts = ( points )
     if ( usepts@dimension != 2 ) stop("must be 2d antsImage")
     pointsout = antsImageClone( points )
     args <- list( d = dim, i = usepts, o = pointsout, unlist(mytx) )
