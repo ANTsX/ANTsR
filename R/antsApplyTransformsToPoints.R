@@ -98,7 +98,7 @@ antsApplyTransformsToPoints <- function(
           }
         }
     .Call("antsApplyTransformsToPoints",
-         c(myargs, "-f", 1, "--precision", 0, PACKAGE = "ANTsR")
+         c(myargs, "-f", 1, "--precision", 0, PACKAGE = "ANTsR") )
     return( pointsout )
     }
     if (!ttexists)
