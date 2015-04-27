@@ -91,7 +91,11 @@ geoSeg <- function( img, brainmask, priors, seginit,
     smoothImage( smv )
   #
   # csf topology constraint based on gm/wm jacobian
-  thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" ) * iMath( priors[[4]], "Neg" )
+  if ( length(priors) > 3 )
+    thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" ) *
+      iMath( priors[[4]], "Neg" )
+  if ( length(priors) <= 3 )
+    thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" )
   thkcsf = smoothImage( thkcsf, 0.1 )
   temp = priors[[1]] + thkcsf
   temp[ temp > 1 ] = 1
