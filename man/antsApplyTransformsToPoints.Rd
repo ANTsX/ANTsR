@@ -45,6 +45,9 @@ pts=data.frame(  x=c(110.5,120,130) , y=c(108.1,121.0,130),
   label=c(1,2,3) )
 wpts <- antsApplyTransformsToPoints( dim=2, points=pts,
   transformlist=mytx$fwdtransforms )
+wptsi <- antsApplyTransformsToPoints( dim=2, points=wpts,
+  transformlist=mytx$invtransforms ) # close to pts
+
 \dontrun{
 fixed <- antsImageRead( getANTsRData("r16") ,2)
 moving <- antsImageRead( getANTsRData("r64") ,2)
