@@ -80,23 +80,37 @@ geoSeg <- function( img, brainmask, priors, seginit,
   #
   # gm topology constraint based on gm/wm jacobian
   thksig = antsImageClone( thkj )
+  # sigmoid transformation below ... 1 / ( 1 + exp(  - w / a ) )
+  # where w = thkj - beta ...
   a      = 0.05
   thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
   seginit$probabilityimages[[2]] = priors[[2]] + thksig
   seginit$probabilityimages[[2]][ seginit$probabilityimages[[2]] >  1] = 1
+  seginit$probabilityimages[[2]] = seginit$probabilityimages[[2]] * thksig %>%
+    smoothImage(0.5)
   #
   # csf topology constraint based on gm/wm jacobian
   thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" ) * iMath( priors[[4]], "Neg" )
   thkcsf = smoothImage( thkcsf, 0.1 )
   temp = priors[[1]] + thkcsf
   temp[ temp > 1 ] = 1
-  seginit$probabilityimages[[1]] = temp
+  temp = priors[[1]] * thkcsf
+  seginit$probabilityimages[[1]] = temp %>% smoothImage(0.5)
   #
   # wm topology constraint based on largest connected component
   # and excluding high gm-prob voxels
-  seginit$probabilityimages[[3]] = priors[[3]] * wm
-  seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
-  #
+  seginit$probabilityimages[[3]] = priors[[3]] * wm %>% smoothImage(0.5)
+#  seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
+
+  seginit$probabilityimages[[4]] = seginit$probabilityimages[[4]] *
+    thresholdImage(  seginit$probabilityimages[[4]], 0.25, Inf )
+
+  # now let's renormalize the priors
+  modmat = imageListToMatrix( seginit$probabilityimages, mask )
+  modmatsums = colSums( modmat )
+  for ( k in 1:ncol(modmat) ) modmat[,k] = modmat[,k] / modmatsums[k]
+  seginit$probabilityimages = matrixToImages( modmat, mask )
+
   # now resegment with topology-modified priors
   s3 <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
     c = atroposits,  i = seginit$probabilityimages, x = mask )
