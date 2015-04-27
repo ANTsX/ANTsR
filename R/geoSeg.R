@@ -103,8 +103,9 @@ geoSeg <- function( img, brainmask, priors, seginit,
   seginit$probabilityimages[[3]] = priors[[3]] * wm %>% smoothImage( smv )
   seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
 
-  seginit$probabilityimages[[4]] = seginit$probabilityimages[[4]] *
-    thresholdImage(  seginit$probabilityimages[[4]], 0.25, Inf )
+  if ( length( seginit$probabilityimages ) > 3 )
+    seginit$probabilityimages[[4]] = seginit$probabilityimages[[4]] *
+      thresholdImage(  seginit$probabilityimages[[4]], 0.25, Inf )
 
   # now let's renormalize the priors
   modmat = imageListToMatrix( seginit$probabilityimages, mask )
