@@ -148,13 +148,7 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
     tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
     which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
     which.outliers[tc.outliers == 2] <- which.outliers[tc.outliers == 2] * 2
-    if (length(which.outliers) > 0) {
-      aslmat.inlier <- aslmat[-which.outliers, ]
-    } else {
-      aslmat.inlier <- aslmat
-    }
-    asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
-    list(asl.inliers = asl.inlier, outliers = which.outliers)
+    which.outliers 
   } 
 
   scor <- function(asl){
@@ -180,6 +174,7 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
     }
     indices.out <- rep(1, length(indices)) 
     indices.out[which(is.na(indices))] <- 0 
+    which(indices.out == 0)
   }
   
   if (is.na(mask)){
@@ -199,11 +194,18 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier') {
     }
     xideal <- (rep(c(1, 0), 
       dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # control minus tag
-    inds <- robSelection(ts, xideal, nuis, ...)
+    which.outliers <- robSelection(ts, xideal, nuis, ...)
   } else if (method == 'outlier') {
-    inds <- aslOutlierRejection(asl, mask, ...)
+    which.outliers <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
-    inds <- scor(ts) 
+    which.outliers <- scor(ts) 
   }
 
+  if (length(which.outliers) > 0) {
+    aslmat.inlier <- ts[-which.outliers, ]
+  } else {
+    aslmat.inlier <- ts
+  }
+  asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
+  list(which.outliers=which.outliers, asl.inlier=asl.inlier)
 } 
