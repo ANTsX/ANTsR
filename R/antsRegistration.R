@@ -3,9 +3,6 @@
 #' Register a pair of images either through the full or simplified interface
 #' to the ANTs registration method.
 #'
-#' @usage antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
-#'   initialTransform = NA, outprefix = "", mask = NA, ...)
-#'
 #' @param fixed fixed image to which we register the moving image.
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
@@ -40,7 +37,7 @@
 #'   \item{invtransforms: }{Transforms to move from fixed to moving image.}
 #' }
 #' Ouptut of 1 indicates failure
-#' @author Shrinidhi KL, Avants BB
+#' @author Shrinidhi KL, Tustison NJ, Avants BB
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16") ,2)
@@ -52,9 +49,9 @@
 #'   transformlist=mytx$fwdtransforms )
 #'
 #' @export antsRegistration
-antsRegistration <- function(fixed = NA, moving = NA,
+antsRegistration <- function( fixed = NA, moving = NA,
   typeofTransform = "SyN", initialTransform = NA,
-  outprefix = "", mask = NA, gradStep=NA, ...) {
+  outprefix = "", mask = NA, gradStep=NA, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
     .Call("antsRegistration", .int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")

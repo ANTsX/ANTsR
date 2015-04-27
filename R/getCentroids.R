@@ -31,10 +31,6 @@ getCentroids <- function(img, clustparam = 250, outprefix = NA) {
   pointfile <- paste(outprefix, "coords.csv", sep = "")
   imageMath(imagedim, pointfile, "LabelStats", img, img, clustparam)
   mypoints <- read.csv(pointfile)
-  scl <- 10
-  mypoints$x <- round(mypoints$x * scl)/scl
-  mypoints$y <- round(mypoints$y * scl)/scl
-  mypoints$z <- round(mypoints$z * scl)/scl
-  centroids <- as.matrix(data.frame(x = mypoints$x, y = mypoints$y, z = mypoints$z))
+  centroids <- as.matrix(data.frame(x = mypoints$x, y = mypoints$y, z = mypoints$z, t=mypoints$t ))
   return( centroids )
 }

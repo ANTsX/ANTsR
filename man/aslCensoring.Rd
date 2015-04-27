@@ -4,12 +4,14 @@
 \alias{aslCensoring}
 \title{Censor bad volumes from ASL data.}
 \usage{
-aslCensoring(asl, mask = NA, nuis = NA, method = "outlier")
+aslCensoring(asl, mask = NA, nuis = NA, method = "outlier", ...)
 }
 \arguments{
 \item{asl}{input asl image}
 
 \item{mask}{mask for calculating perfusion}
+
+\item{nuis}{fixed nuisance parameters}
 
 \item{method}{one of 'outlier', 'robust', or 'scor'.  See \code{Details}.}
 

@@ -13,6 +13,7 @@
 #' @param mrfval e.g. 0.05 or 0.1
 #' @param atroposits e.g. 5 iterations
 #' @param jacw precomputed diffeo jacobian
+#' @param beta higher values lead to more csf
 #' @return list of segmentation result images
 #' @author Brian B. Avants
 #' @examples
@@ -28,7 +29,7 @@
 #' @export geoSeg
 geoSeg <- function( img, brainmask, priors, seginit,
   vesselopt="none", vesselk=2,
-  gradStep=1, mrfval=0.1, atroposits=5, jacw=NA )
+  gradStep=1, mrfval=0.1, atroposits=5, jacw=NA, beta=0.6 )
   {
   if ( typeof( img ) == "S4" ) img=list( img )
   if ( ! exists("vesselopt") ) vesselopt="none"
@@ -80,12 +81,11 @@ geoSeg <- function( img, brainmask, priors, seginit,
   # gm topology constraint based on gm/wm jacobian
   thksig = antsImageClone( thkj )
   a      = 0.05
-  beta   = 0.5
   thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
   seginit$probabilityimages[[2]] = priors[[2]] * thksig
   #
   # csf topology constraint based on gm/wm jacobian
-  thkcsf = thresholdImage( thkj, 0.05, 0.5  ) * iMath( wm, "Neg" )
+  thkcsf = thresholdImage( thkj, 0.05, beta ) * iMath( wm, "Neg" )
   thkcsf = smoothImage( thkcsf, 0.5 )
   seginit$probabilityimages[[1]] = priors[[1]] * iMath( thksig, "Neg")
   seginit$probabilityimages[[1]] = priors[[1]] + thkcsf

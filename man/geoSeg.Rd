@@ -5,7 +5,7 @@
 \title{brain segmentation based on geometric priors}
 \usage{
 geoSeg(img, brainmask, priors, seginit, vesselopt = "none", vesselk = 2,
-  gradStep = 1, mrfval = 0.1, atroposits = 5, jacw = NA)
+  gradStep = 1, mrfval = 0.1, atroposits = 5, jacw = NA, beta = 0.6)
 }
 \arguments{
 \item{img}{input image or list of images (multiple features) where 1st image
@@ -28,6 +28,8 @@ would typically be the primary constrast}
 \item{atroposits}{e.g. 5 iterations}
 
 \item{jacw}{precomputed diffeo jacobian}
+
+\item{beta}{higher values lead to more csf}
 }
 \value{
 list of segmentation result images

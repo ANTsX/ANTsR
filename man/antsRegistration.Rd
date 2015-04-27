@@ -5,7 +5,7 @@
 \title{Perform registration between two images.}
 \usage{
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
-  initialTransform = NA, outprefix = "", mask = NA, ...)
+  initialTransform = NA, outprefix = "", mask = NA, gradStep = NA, ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -66,6 +66,6 @@ mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
   transformlist=mytx$fwdtransforms )
 }
 \author{
-Shrinidhi KL, Avants BB
+Shrinidhi KL, Tustison NJ, Avants BB
 }
 
