@@ -13,7 +13,7 @@
 #' @param mrfval e.g. 0.05 or 0.1
 #' @param atroposits e.g. 5 iterations
 #' @param jacw precomputed diffeo jacobian
-#' @param beta higher values lead to more csf
+#' @param beta for sigma transformation ( thksig output variable )
 #' @return list of segmentation result images
 #' @author Brian B. Avants
 #' @examples
@@ -82,13 +82,15 @@ geoSeg <- function( img, brainmask, priors, seginit,
   thksig = antsImageClone( thkj )
   a      = 0.05
   thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
-  seginit$probabilityimages[[2]] = priors[[2]] * thksig
+  seginit$probabilityimages[[2]] = priors[[2]] + thksig
+  seginit$probabilityimages[[2]][ seginit$probabilityimages[[2]] >  1] = 1
   #
   # csf topology constraint based on gm/wm jacobian
-  thkcsf = thresholdImage( thkj, 0.05, beta ) * iMath( wm, "Neg" )
-  thkcsf = smoothImage( thkcsf, 0.5 )
-  seginit$probabilityimages[[1]] = priors[[1]] * iMath( thksig, "Neg")
-  seginit$probabilityimages[[1]] = priors[[1]] + thkcsf
+  thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" ) * iMath( priors[[4]], "Neg" )
+  thkcsf = smoothImage( thkcsf, 0.1 )
+  temp = priors[[1]] + thkcsf
+  temp[ temp > 1 ] = 1
+  seginit$probabilityimages[[1]] = temp
   #
   # wm topology constraint based on largest connected component
   # and excluding high gm-prob voxels
@@ -101,7 +103,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
   ###################################
   # 5 resegment with new priors end #
   ###################################
-  return( list( segobj=s3, seginit=seginit, thkcsf=thkcsf,
+  return( list( segobj=s3, seginit=seginit, thksig=thksig,
     thkj=thkj, jacw=jacw ) )
 }
 

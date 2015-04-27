@@ -149,10 +149,6 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
     which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
     which.outliers[tc.outliers == 2] <- which.outliers[tc.outliers == 2] * 2
-<<<<<<< HEAD
-    which.outliers 
-  } 
-=======
     if (length(which.outliers) > 0) {
       aslmat.inlier <- aslmat[-which.outliers, ]
     } else {
@@ -161,7 +157,6 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
     list(asl.inliers = asl.inlier, outliers = which.outliers)
   }
->>>>>>> 6aeeaafa9b16695aeff4ff484d470aff55e5c69b
 
   scor <- function(asl){
     npairs <- dim(asl)[1]
@@ -184,8 +179,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
       meancbf <- apply(asl[, indices[!is.na(indices)]], 1, mean)
       var.tot <- var(meancbf)
     }
-    indices.out <- rep(1, length(indices)) 
-    indices.out[which(is.na(indices))] <- 0 
+    indices.out <- rep(1, length(indices))
+    indices.out[which(is.na(indices))] <- 0
     which(indices.out == 0)
   }
 
@@ -210,7 +205,7 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   } else if (method == 'outlier') {
     which.outliers <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
-    which.outliers <- scor(ts) 
+    which.outliers <- scor(ts)
   }
 
   if (length(which.outliers) > 0) {
@@ -220,4 +215,4 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   }
   asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
   list(which.outliers=which.outliers, asl.inlier=asl.inlier)
-} 
+}
