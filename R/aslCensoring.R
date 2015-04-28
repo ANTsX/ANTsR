@@ -173,8 +173,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
       meancbf <- apply(asl[, indices[!is.na(indices)]], 1, mean)
       var.tot <- var(meancbf)
     }
-    indices.out <- rep(1, length(indices)) 
-    indices.out[which(is.na(indices))] <- 0 
+    indices.out <- rep(1, length(indices))
+    indices.out[which(is.na(indices))] <- 0
     which(indices.out == 0)
   }
 
@@ -199,7 +199,7 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   } else if (method == 'outlier') {
     which.outliers <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
-    which.outliers <- scor(ts) 
+    which.outliers <- scor(ts)
   }
 
   if (length(which.outliers) > 0) {
@@ -209,4 +209,4 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   }
   asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
   list(which.outliers=which.outliers, asl.inlier=asl.inlier)
-} 
+}

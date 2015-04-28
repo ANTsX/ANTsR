@@ -29,7 +29,7 @@ would typically be the primary constrast}
 
 \item{jacw}{precomputed diffeo jacobian}
 
-\item{beta}{higher values lead to more csf}
+\item{beta}{for sigma transformation ( thksig output variable )}
 }
 \value{
 list of segmentation result images
