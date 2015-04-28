@@ -29,7 +29,7 @@
 #' @export geoSeg
 geoSeg <- function( img, brainmask, priors, seginit,
   vesselopt="none", vesselk=2,
-  gradStep=1, mrfval=0.1, atroposits=5, jacw=NA, beta=0.6 )
+  gradStep=1.25, mrfval=0.1, atroposits=10, jacw=NA, beta=0.9 )
   {
   if ( typeof( img ) == "S4" ) img=list( img )
   if ( ! exists("vesselopt") ) vesselopt="none"
@@ -100,7 +100,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
   thkcsf = smoothImage( thkcsf, 0.1 )
   temp = priors[[1]] + thkcsf
   temp[ temp > 1 ] = 1
-  temp = priors[[1]] * thkcsf
+#  temp = priors[[1]] * thkcsf
   seginit$probabilityimages[[1]] = temp %>% smoothImage( smv )
   #
   # wm topology constraint based on largest connected component
