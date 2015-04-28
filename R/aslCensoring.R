@@ -149,19 +149,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
     which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
     which.outliers[tc.outliers == 2] <- which.outliers[tc.outliers == 2] * 2
-<<<<<<< HEAD
     which.outliers 
   } 
-=======
-    if (length(which.outliers) > 0) {
-      aslmat.inlier <- aslmat[-which.outliers, ]
-    } else {
-      aslmat.inlier <- aslmat
-    }
-    asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
-    list(asl.inliers = asl.inlier, outliers = which.outliers)
-  }
->>>>>>> 6aeeaafa9b16695aeff4ff484d470aff55e5c69b
 
   scor <- function(asl){
     npairs <- dim(asl)[1]
