@@ -84,7 +84,8 @@ geoSeg <- function( img, brainmask, priors, seginit,
   # where w = thkj - beta ...
   smv = 0
   a = 0.05
-  thksig[ mask == 1 ] = 1.0 / ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
+  thksig[ mask == 1 ] = 1.0 /
+    ( 1 + exp( -1.0 * ( thkj[mask==1] - beta ) / a ) )
   seginit$probabilityimages[[2]] = priors[[2]] + thksig
   seginit$probabilityimages[[2]][ seginit$probabilityimages[[2]] >  1] = 1
   seginit$probabilityimages[[2]] = seginit$probabilityimages[[2]] * thksig %>%
@@ -106,17 +107,17 @@ geoSeg <- function( img, brainmask, priors, seginit,
   # and excluding high gm-prob voxels
   seginit$probabilityimages[[3]] = priors[[3]] * wm %>% smoothImage( smv )
   seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
-
+  #
   if ( length( seginit$probabilityimages ) > 3 )
     seginit$probabilityimages[[4]] = seginit$probabilityimages[[4]] *
       thresholdImage(  seginit$probabilityimages[[4]], 0.25, Inf )
-
+  #
   # now let's renormalize the priors
   modmat = imageListToMatrix( seginit$probabilityimages, mask )
   modmatsums = colSums( modmat )
   for ( k in 1:ncol(modmat) ) modmat[,k] = modmat[,k] / modmatsums[k]
   seginit$probabilityimages = matrixToImages( modmat, mask )
-
+  #
   # now resegment with topology-modified priors
   s3 <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
     c = atroposits,  i = seginit$probabilityimages, x = mask )

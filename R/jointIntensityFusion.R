@@ -134,10 +134,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         cent2<-cent+offsets[offind,]
         tv<-(getNeighborhoodAtVoxel(atlasList[[ct]],cent2,rad)$values)
         sdv<-sd(tv)
-        if ( sdv > 0 )
+        if ( abs(sdv) > 1.e-10 )
           {
           tv=( tv - mean(tv) )/sdv
           locor<-(-1.0 * sum(targetint*tv) )
+          if ( !is.na(locor) )
           if ( locor < bestmatch )
             {
             v=tv
@@ -255,6 +256,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       for ( p in 1:length(segvals))
         probImgVec[[p]][voxel]<-probvals[p]
       k<-which(probvals==max(probvals,na.rm=T))
+      if ( length(k) > 0 )
         segvec[voxel]=segvals[ k ]
     }
     for ( p in 1:length(segvals) )
