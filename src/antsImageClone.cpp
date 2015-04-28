@@ -8,7 +8,7 @@
 #include "itkImageFileWriter.h"
 
 namespace ants
-{ 
+{
 
   template< class InImageType , class OutImageType >
   typename OutImageType::Pointer antsImageClone( typename InImageType::Pointer in_image )
@@ -64,6 +64,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
     {
@@ -80,6 +81,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
     {
@@ -96,6 +98,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
     {
@@ -112,6 +115,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
     {
@@ -128,6 +132,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
     {
@@ -144,6 +149,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -160,6 +166,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -192,6 +199,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -208,6 +216,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -224,6 +233,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "double" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -240,6 +250,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
     {
@@ -256,6 +267,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
     {
@@ -272,6 +284,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
     {
@@ -288,6 +301,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
     {
@@ -304,6 +318,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
     {
@@ -320,6 +335,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
     {
@@ -336,6 +352,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -352,6 +369,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -368,6 +386,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -384,6 +403,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -400,6 +420,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -416,6 +437,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "float" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -432,6 +454,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
     {
@@ -448,6 +471,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
     {
@@ -464,6 +488,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
     {
@@ -480,6 +505,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
     {
@@ -496,6 +522,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
     {
@@ -512,6 +539,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
     {
@@ -528,6 +556,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -544,6 +573,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -560,6 +590,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -576,6 +607,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -592,6 +624,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -608,6 +641,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned int" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -624,6 +658,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "double" ) )
     {
@@ -640,6 +675,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "double" ) )
     {
@@ -656,6 +692,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "double" ) )
     {
@@ -672,6 +709,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "float" ) )
     {
@@ -688,6 +726,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "float" ) )
     {
@@ -704,6 +743,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "float" ) )
     {
@@ -720,6 +760,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -736,6 +777,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -752,6 +794,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "unsigned int" ) )
     {
@@ -768,6 +811,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 4 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -784,6 +828,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 3 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -800,6 +845,7 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else if( in_pixeltype == std::string( "unsigned char" ) && dimension == 2 && out_pixeltype == std::string( "unsigned char" ) )
     {
@@ -816,12 +862,13 @@ RcppExport SEXP antsImageClone( SEXP r_in_image , SEXP r_out_pixeltype )
       OutImagePointerType* out_image_ptr_ptr = new OutImagePointerType( ants::antsImageClone< InImageType , OutImageType >( *in_image_xptr ) ) ;
       Rcpp::XPtr< OutImagePointerType > out_image_xptr( out_image_ptr_ptr , true ) ;
       out_image.slot( "pointer" ) = out_image_xptr ;
+      out_image.slot( "components" ) = (*out_image_ptr_ptr)->GetNumberOfComponentsPerPixel();
     }
   else
     {
       Rcpp::Rcout << "Usupported PixelType or Dimension" << std::endl ;
       return Rcpp::wrap( 1 ) ;
     }
-  
+
   return out_image ;
 }
