@@ -24,7 +24,7 @@ is easier to use `antsImage` class capabilities.
   * Basic arithmetics with `antsImageClass` is easier, and is similar to
   array operations in R:
 
-    ```{r}
+    ```{r basic}
     fi  <- antsImageRead(getANTsRData("r16"), 2)
     sumfi <- fi + fi
     mulfi <- fi * 2
@@ -41,7 +41,7 @@ for erosion and maximum for dilation (ITK rules).
 
   * Grayscale dilation of an image (compare it with binary dilation below):
 
-    ```{r}
+    ```{r greydilate}
     #dilating by a radius of 3 voxels
     GDdilated <- iMath(fi,"GD", 3)
     #to see what dilation has done
@@ -52,7 +52,7 @@ for erosion and maximum for dilation (ITK rules).
 
   * Grayscale erosion of an image (compare it with binary erosion below).
 
-    ```{r}
+    ```{r greyerode}
     erosion <- iMath(fi,"GE", 3)
     invisible(plot(erosion))
     ```
@@ -60,7 +60,7 @@ for erosion and maximum for dilation (ITK rules).
   * Morphological dilation works on binary images, where it makes white
   regions bigger:
 
-    ```{r}
+    ```{r dilate}
     mask <- getMask(fi)
     MD <- iMath(mask, "MD", 3)
     #to see the difference it made
@@ -69,7 +69,7 @@ for erosion and maximum for dilation (ITK rules).
 
   * Morphological erosion makes white regions of a binary mask smaller.
 
-    ```{r}
+    ```{r erode}
     ME <- iMath(mask, "ME", 3)
     invisible(plot(ME))
     ```
@@ -96,7 +96,7 @@ invisible(plot(newMask,slices=c(1,1)))
 * Positive numbers will pad image in each direction. So for example using 2
   will increase an image with 256 voxels to 260.
 
-    ```{r}
+    ```{r pad_up}
     padded <- iMath(fi, "PadImage", 2)
     #compare padded image dimensions with the original dimensions
     dim(fi)
@@ -107,7 +107,7 @@ invisible(plot(newMask,slices=c(1,1)))
   will convert a 2-dimensional image with 256 voxels in X and Y direction to
   252 voxels in each dimension.
 
-    ```{r}
+    ```{r pad_down}
     cropped <- iMath(fi, "PadImage", -2)
     #compare cropped image with the original one
     dim(fi)
@@ -122,16 +122,18 @@ invisible(plot(newMask,slices=c(1,1)))
   has positve distance. Distance maps could be used for example, in shape
   analysis, skletonizing or path finding.
 
-    ```{r}
-    distanceMap <- iMath(mask, "MaurerDistance")
-    invisible(plot(distanceMap))
+    # FIXME - this is broken
+    # ```{r maurer}
+    # distanceMap <- iMath(mask, "MaurerDistance")
+    # distanceMap <- distanceMap*0
+    # invisible(plot(distanceMap))
     ```
 
  *  `D` implements ITK's `DanielssonDistanceMap`. It calculates the Euclidean
    distance map, which shows at each voxel the shortest distance to the nearest
    voxel in the background (assuming that the input is a binary image).
 
-    ```{r}
+    ```{r distancemap}
     distanceMap <- iMath(mask, "D")
     invisible(plot(distanceMap))
     ```
