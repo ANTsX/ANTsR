@@ -5,7 +5,8 @@
 \title{brain segmentation based on geometric priors}
 \usage{
 geoSeg(img, brainmask, priors, seginit, vesselopt = "none", vesselk = 2,
-  gradStep = 1, mrfval = 0.1, atroposits = 5, jacw = NA, beta = 0.6)
+  gradStep = 1.25, mrfval = 0.1, atroposits = 10, jacw = NA,
+  beta = 0.9)
 }
 \arguments{
 \item{img}{input image or list of images (multiple features) where 1st image
