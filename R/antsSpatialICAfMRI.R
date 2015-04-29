@@ -40,7 +40,7 @@
 #' cleanBoldImages <- list()
 #' for( i in 1:length( boldImages ) )
 #'   {
-#'   fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=F )
+#'   fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=FALSE )
 #'   if( i == 1 ) maskImage <- fmri$maskImage
 #'   cleanBoldImages[[i]] <- fmri$cleanBoldImage
 #'   }
