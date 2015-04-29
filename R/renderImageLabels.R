@@ -29,7 +29,7 @@ renderImageLabels <- function(
   if (missing(labelsimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ")
   }
-  if(!usePkg("rgl") | usePkg('misc3d')) {
+  if(!require("rgl") || !require('misc3d')) {
     print("rgl and misc3d are necessary for this function.")
     return(NULL)
   }
