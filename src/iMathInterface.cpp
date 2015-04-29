@@ -30,6 +30,66 @@ SEXP iMathGetLargestComponent( Rcpp::List args )
  }
 
 template <class ImageType>
+SEXP iMathMC( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  unsigned long radius = Rcpp::as<unsigned long>( args[2] );
+  PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+
+  ImagePointerType output = ants::iMathMC<ImageType>( input, radius, value );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
+SEXP iMathMD( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  unsigned long radius = Rcpp::as<unsigned long>( args[2] );
+  PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+
+  ImagePointerType output = ants::iMathMD<ImageType>( input, radius, value );
+
+  return Rcpp::wrap(output);
+ }
+
+template <class ImageType>
+SEXP iMathME( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  unsigned long radius = Rcpp::as<unsigned long>( args[2] );
+  PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+
+  ImagePointerType output = ants::iMathME<ImageType>( input, radius, value );
+
+  return Rcpp::wrap(output);
+ }
+
+template <class ImageType>
+SEXP iMathMO( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  unsigned long radius = Rcpp::as<unsigned long>( args[2] );
+  PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+
+  ImagePointerType output = ants::iMathMO<ImageType>( input, radius, value );
+
+  return Rcpp::wrap(output);
+ }
+
+template <class ImageType>
 SEXP iMathNormalize( Rcpp::List args )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -161,7 +221,8 @@ try
     // Optional parameters with defaul values
     if ( args.size() < 3 )
       {
-      args.push_back( Rcpp::wrap(50) );  // minSize
+      unsigned long minSize = iMathGetLargestComponentMinSize;
+      args.push_back( Rcpp::wrap(minSize) );  // minSize
       }
 
     if ( pixeltype == "double" )
@@ -242,6 +303,426 @@ try
         {
         typedef itk::Image<ValueType,4>       ImageType;
         return iMathGetLargestComponent<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "MC" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("MC only supports scalar images");
+      }
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      unsigned long radius = iMathMCRadius;
+      args.push_back( Rcpp::wrap(radius) );  // radius
+      }
+    if ( args.size() < 4)
+      {
+      double value = iMathMCValue;
+      args.push_back( Rcpp::wrap(value));
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMC<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "MD" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("MD only supports scalar images");
+      }
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      unsigned long radius = iMathMDRadius;
+      args.push_back( Rcpp::wrap(radius) );  // radius
+      }
+    if ( args.size() < 4)
+      {
+      double value = iMathMDValue;
+      args.push_back( Rcpp::wrap(value));
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMD<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "ME" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("ME only supports scalar images");
+      }
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      unsigned long radius = iMathMERadius;
+      args.push_back( Rcpp::wrap(radius) );  // radius
+      }
+    if ( args.size() < 4)
+      {
+      double value = iMathMDValue;
+      args.push_back( Rcpp::wrap(value));
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathME<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "MO" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("MO only supports scalar images");
+      }
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      unsigned long radius = iMathMORadius;
+      args.push_back( Rcpp::wrap(radius) );  // radius
+      }
+    if ( args.size() < 4)
+      {
+      double value = iMathMDValue;
+      args.push_back( Rcpp::wrap(value));
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMO<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMO<ImageType>( args );
         }
       }
     }
@@ -348,10 +829,12 @@ try
 }
 catch( const itk::ExceptionObject& err )
   {
+  Rcpp::Rcout << "ITK Exception" << std::endl;
   forward_exception_to_r( err );
   }
 catch( const std::exception& exc )
   {
+  Rcpp::Rcout << "STD Exception" << std::endl;
   forward_exception_to_r( exc );
   }
 catch(...)
