@@ -2,27 +2,40 @@
 % Please edit documentation in R/iMath.R
 \name{iMath}
 \alias{iMath}
-\title{R access to the ANTs program iMath}
+\title{iMath}
 \usage{
-iMath(...)
+iMath(img, operation, param = NA, ...)
 }
 \arguments{
-\item{...}{all parameters}
+\item{img}{input object, usually antsImage}
+
+\item{operation}{a character string e.g. "GetLargestComponent" ... the
+special case of "GetOperations" or "GetOperationsFull" will return
+a list of operations and brief description.
+Some operations may not be valid (WIP), but most are.}
+
+\item{param}{... additional parameters}
+
+\item{...}{further parameter options}
 }
 \description{
-Perform math-operations on the given image.  The first input is the
-input (usually an 'antsImage' object), the second is the operation.
-Additional parameters should be specific for each function.  See the
-the iMath help in ANTs.
+Perform various (often mathematical) operations on the input image.
+Additional parameters should be specific for each operation.  See the
+the full ImageMath in ANTs, on which this function is based.
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16") ,2)
-mask<-getMask(fi)
-mask[1:256,100:150] = 0
-mask = iMath( mask, "GetLargestComponent" )
-plot(mask)
+fi<-antsImageRead( getANTsRData("r16") , 2 )
+mask<-getMask( fi )
+op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
+op2<-iMath( mask , "Neg" )  # negate
+op3<-iMath( mask , "D" )  # distance transform
+ops<-iMath( mask , "GetOperations" )  # list all ops
+
+if ( usePkg("magrittr") ) { # string ops together
+  lapgd <- fi \%>\% iMath("Laplacian",1)  \%>\% iMath("GD",3)
+}
 }
 \author{
-Duda JT
+BB Avants
 }
 
