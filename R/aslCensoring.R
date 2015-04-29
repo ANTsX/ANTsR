@@ -50,7 +50,7 @@
 
 aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
   # Supporting functions for censoring data: robSelection and scor.
-  robSelection <- function(mat, xideal, nuis=NA,  robthresh=0.95, skip=20) {
+  robSelection <- function(mat, xideal, mask, nuis=NA,  robthresh=0.95, skip=20) {
     cbfform <- formula(mat ~ xideal)
     rcbfform <- formula(mat[, vox] ~ xideal)
     if (!all(is.na(nuis))) {
@@ -68,7 +68,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     if (mean(betaideal) < 0) {
       betaideal <- (betaideal) * (-1)
     }
-    cbfi[mask_img == 1] <- betaideal  # standard results
+    cbfi <- antsImageClone(mask)
+    cbfi[mask == 1] <- betaideal  # standard results
     indstozero <- NULL
     ctl <- robustbase::lmrob.control("KS2011", max.it = 1000)
     regweights <- rep(0, nrow(mat))
@@ -99,18 +100,18 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     }
     # check if the robustness selects the blank part of the time series now use the
     # weights in a weighted regression
-    indstozero <- which(regweights < (dorobust * max(regweights)))
-    keepinds <- which(regweights > (dorobust * max(regweights)))
+    indstozero <- which(regweights < (robthresh * max(regweights)))
+    keepinds <- which(regweights > (robthresh * max(regweights)))
     if (length(keepinds) < 20) {
-      indstozero <- which(regweights < (0.95 * dorobust * max(regweights)))
-      keepinds <- which(regweights > (0.95 * dorobust * max(regweights)))
+      indstozero <- which(regweights < (0.95 * robthresh * max(regweights)))
+      keepinds <- which(regweights > (0.95 * robthresh * max(regweights)))
     }
     if (length(keepinds) < 20) {
-      indstozero <- which(regweights < (0.5 * dorobust * max(regweights)))
-      keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
+      indstozero <- which(regweights < (0.5 * robthresh * max(regweights)))
+      keepinds <- which(regweights > (0.5 * robthresh * max(regweights)))
     }
     regweights[indstozero] <- 0  # hard thresholding
-    if (dorobust < 1 & dorobust > 0) {
+    if (robthresh < 1 & robthresh > 0) {
       mycbfmodel <- lm(cbfform, weights = regweights)
     }
     betaideal <- ((mycbfmodel$coeff)[2, ])
@@ -194,8 +195,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
       return(NULL)
     }
     xideal <- (rep(c(1, 0),
-      dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # control minus tag
-    which.outliers <- robSelection(ts, xideal, nuis, ...)
+      dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # control minus tag
+    which.outliers <- robSelection(ts, xideal, mask, nuis, ...)
   } else if (method == 'outlier') {
     which.outliers <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
