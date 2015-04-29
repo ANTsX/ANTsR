@@ -29,7 +29,7 @@ renderImageLabels <- function(
   if (missing(labelsimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( an_ants_image ) \n ")
   }
-  if(!usePkg("rgl") | usePkg('misc3d')) {
+  if(!require("rgl") || !require('misc3d')) {
     print("rgl and misc3d are necessary for this function.")
     return(NULL)
   }
@@ -42,23 +42,23 @@ renderImageLabels <- function(
   mylist <- list()
 
   for (i in 1:nLabels) {
-    limg<-thresholdImage( limg, i, i)
+    labelsimg<-thresholdImage( labelsimg, i, i)
 
     if (smoothsval > 0) {
-      limg<-smoothImage(limg, smoothsval)
+      labelsimg<-smoothImage(labelsimg, smoothsval)
     }
 
-    print(sum(as.array(limg)))
+    print(sum(as.array(labelsimg)))
 
-    surf <- as.array(limg)
+    surf <- as.array(labelsimg)
     brain <- misc3d::contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE,
       smooth = 1, color = colors[i])
 
     print("convert points")
     if (physical == TRUE) {
-      brain$v1 <- antsTransformIndexToPhysicalPoint(limg, brain$v1)
-      brain$v2 <- antsTransformIndexToPhysicalPoint(limg, brain$v2)
-      brain$v3 <- antsTransformIndexToPhysicalPoint(limg, brain$v3)
+      brain$v1 <- antsTransformIndexToPhysicalPoint(labelsimg, brain$v1)
+      brain$v2 <- antsTransformIndexToPhysicalPoint(labelsimg, brain$v2)
+      brain$v3 <- antsTransformIndexToPhysicalPoint(labelsimg, brain$v3)
     }
     mylist[[i]] <- brain
   }
