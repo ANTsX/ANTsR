@@ -33,9 +33,9 @@
 #' n=16
 #' nvox <- n*n*n*12
 #' dims <- c(n,n,n,12)
-#' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
-#' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
-#' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
+#' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 )
+#' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 )
+#' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) 
 #'
 #' cleanBoldImages <- list()
 #' for( i in 1:length( boldImages ) )
