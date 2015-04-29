@@ -32,7 +32,6 @@ iMath <- function(...) {
   operation = args[[2]]
 
   if ( (operation != "GetLargestComponent") &&
-       (operation != "Canny") &&
        (operation != "Normalize") )
     {
     img = args[[1]]

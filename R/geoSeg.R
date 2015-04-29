@@ -18,6 +18,7 @@
 #' @author Brian B. Avants
 #' @examples
 #'
+#' \dontrun{
 #' img = antsImageRead( getANTsRData("simple") ,2)
 #' img = n3BiasFieldCorrection( img , 4 )
 #' img = n3BiasFieldCorrection( img , 2 )
@@ -25,6 +26,7 @@
 #' segs <- kmeansSegmentation( img, 3, bmk )
 #' priors = segs$probabilityimages
 #' seg = geoSeg( img, bmk, priors )
+#' }
 #'
 #' @export geoSeg
 geoSeg <- function( img, brainmask, priors, seginit,

@@ -19,7 +19,7 @@ Temporally whitens the input matrix using autoregression and returns the
 result.
 }
 \examples{
-mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
+mat<-replicate(100, rnorm(20))
 wmat<-temporalwhiten( mat )
 }
 \author{
