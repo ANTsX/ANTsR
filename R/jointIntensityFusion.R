@@ -62,6 +62,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
 {
   haveLabels=FALSE
   BC=boundary.condition
+  nvox = sum( targetIMask == 1 )
   if ( !( all( is.na(labelList) ) ) )
     {
     segmat<-imageListToMatrix( labelList, targetIMask )
@@ -223,18 +224,22 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     }
   }
   close( progress )
-  newimg<-makeImage(targetIMask,newmeanvec)
-  maxSimImg<-makeImage(targetIMask,maxSimImg)
+  rm( segmat )
+  rm( targetIv )
+  rm( indices )
+  rm( offsets )
+  newimg<-makeImage( targetIMask, newmeanvec )
+  maxSimImg<-makeImage( targetIMask, maxSimImg )
   segimg<-NA
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
     {
-    segvec<-rep( 0, ncol(segmat) )
+    segvec<-rep( 0, nvox )
     probImgList<-list()
     probImgVec<-list()
-    for ( p in 1:length(segvals) )
-      probImgVec[[p]]<-rep(0,ncol(segmat))
-    for ( voxel in 1:ncol(segmat) )
+    for ( p in 1:length( segvals ) )
+      probImgVec[[p]]<-rep( 0, nvox )
+    for ( voxel in 1:nvox )
       {
       probvals<-rep(0,length(segvals))
       segsearch<-segmatSearch[,voxel]
