@@ -30,8 +30,9 @@
 #'
 #' set.seed( 123 )
 #' boldImages <- list()
-#' nvox <- 8*8*8*10
-#' dims <- c(8,8,8,10)
+#' n=16
+#' nvox <- n*n*n*12
+#' dims <- c(n,n,n,12)
 #' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
 #' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
 #' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 4 )
@@ -39,7 +40,7 @@
 #' cleanBoldImages <- list()
 #' for( i in 1:length( boldImages ) )
 #'   {
-#'   fmri <- preprocessfMRI( boldImages[[i]] )
+#'   fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=F )
 #'   if( i == 1 ) maskImage <- fmri$maskImage
 #'   cleanBoldImages[[i]] <- fmri$cleanBoldImage
 #'   }
@@ -85,7 +86,7 @@ antsSpatialICAfMRI <- function(boldImages, maskImage = NA, numberOfICAComponents
       groupBoldMatrix <- rbind(groupBoldMatrix, subjectBoldMatrix)
     }
   }
-
+  return( groupBoldMatrix )
   # taken from the fastICA package
 
   icaResults <- fastICA::fastICA(X = t(groupBoldMatrix), n.comp = numberOfICAComponents,

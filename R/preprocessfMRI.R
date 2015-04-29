@@ -31,7 +31,7 @@
 #' needs to be specified with the conductance parameter and the number of
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
-#' @return List of: 
+#' @return List of:
 #' \itemize{
 #'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
 #'   \item{maskImage: }{mask image.}
@@ -41,16 +41,17 @@
 #'   \item{globalSignal: }{Global signal.}
 #'   \item{nuisanceVariables: }{Nuisance variables used in denoising.}
 #' }
-#' @references Power et al. 2012, "Spurious but systematic correlations 
+#' @references Power et al. 2012, "Spurious but systematic correlations
 #' in functional connectivity MRI networks arise from subject motion."
 #' NeuroImage 59, 2142-2154.
 #' @author Tustison NJ, Avants BB
 #' @examples
 #' set.seed(123)
-#' nvox <- 10*10*10*20
-#' dims <- c(10,10,10,20)
+#' n=16
+#' nvox <- n*n*n*12
+#' dims <- c(n,n,n,12)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
-#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl')) 
+#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 #' cleanfMRI <- preprocessfMRI(boldImage)
 #' @export preprocessfMRI
 preprocessfMRI <- function(boldImage,
@@ -121,8 +122,7 @@ preprocessfMRI <- function(boldImage,
   # Calculate the mask, if not supplied.
 
   if (is.na(maskImage)) {
-    maskImage <- getMask(averageImage, mean(averageImage) * maskingMeanRatioThreshold,
-      Inf, TRUE)
+    maskImage <- getMask( averageImage )
   }
   averageImage[maskImage == 0] <- 0
 

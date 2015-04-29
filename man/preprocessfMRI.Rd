@@ -72,8 +72,9 @@ regression, band-pass filtering, and spatial smoothing.
 }
 \examples{
 set.seed(123)
-nvox <- 10*10*10*20
-dims <- c(10,10,10,20)
+n=16
+nvox <- n*n*n*12
+dims <- c(n,n,n,12)
 boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
 # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 cleanfMRI <- preprocessfMRI(boldImage)
