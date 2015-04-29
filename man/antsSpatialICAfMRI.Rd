@@ -59,14 +59,6 @@ for( i in 1:length( boldImages ) )
 
 icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
   numberOfICAComponents = 2 )
-componentImages <- icaResults$componentImages
-
-# write out the component images
-for( i in 1:length( icaResults$componentImages ) )
-  {
-  componentFileName <- paste0( 'componentImage', i, '.nii.gz' )
-  # antsImageWrite( componentImages[[i]], componentFileName )
- }
 }
 \author{
 Tustison NJ, Avants BB
