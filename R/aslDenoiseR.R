@@ -18,22 +18,20 @@
 #' @author Avants BB
 #' @examples
 #'
-#' # fn<-'PEDS012_20131101_pcasl_1.nii.gz'
-#' # asl<-antsImageRead(fn,4)
-#' # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
+#' # asl<-antsImageRead( getANTsRData("pcasl") )
 #' set.seed(1)
 #' nvox <- 10*10*10*20
 #' dims <- c(10,10,10,20)
 #' asl <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
 #' aslmean <- getAverageOfTimeSeries( asl )
-#' aslmask <- getMask( aslmean , 0.001 , Inf )
+#' aslmask <- getMask( aslmean  )
 #' aslmat<-timeseries2matrix( asl, aslmask )
 #' for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
 #' asl<-matrix2timeseries( asl, aslmask, aslmat )
 #' tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 #' dv<-computeDVARS(aslmat)
 #' dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
-#'  maxnoisepreds=c(1:2), debug=FALSE, polydegree=4, crossvalidationgroups=8 )
+#'   maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
 #' nzimg<-makeImage(aslmask, dnz$R2final )
 #' # a classic regression approach to estimating perfusion
 #' # not recommended, but shows the basic idea.
