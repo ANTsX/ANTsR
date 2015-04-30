@@ -22,7 +22,7 @@
 #' set.seed(1)
 #' nvox <- 10*10*10*20
 #' dims <- c(10,10,10,20)
-#' asl <- makeImage( dims , rnorm( nvox )+500 ) %>% iMath("PadImage" , 2 )
+#' asl <- makeImage( dims , rnorm( nvox )+500 )
 #' aslmean <- getAverageOfTimeSeries( asl )
 #' aslmask <- getMask( aslmean  )
 #' aslmat<-timeseries2matrix( asl, aslmask )
@@ -32,7 +32,7 @@
 #' dv<-computeDVARS(aslmat)
 #' dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
 #'   maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
-#' nzimg<-makeImage(aslmask, dnz$R2final )
+#' \dontrun{
 #' # a classic regression approach to estimating perfusion
 #' # not recommended, but shows the basic idea.
 #' # see ?quantifyCBF for a better approach
@@ -44,6 +44,7 @@
 #' m0[ aslmask==1 ]<-colMeans(aslmat[ctl,])
 #' pcasl.parameters<-list( sequence="pcasl", m0=m0 )
 #' cbf <- quantifyCBF( perfimg, aslmask, pcasl.parameters )
+#' }
 #'
 #' @export aslDenoiseR
 aslDenoiseR <- function(
