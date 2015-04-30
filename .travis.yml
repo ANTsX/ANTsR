@@ -1,5 +1,5 @@
 language: r
-sudo: required
+sudo: false 
 compiler:
 - clang
 os:
