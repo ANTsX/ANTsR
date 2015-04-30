@@ -4,7 +4,7 @@
 \alias{aslAveraging}
 \title{Average ASL tag-control pairs to estimate perfusion}
 \usage{
-aslAveraging(asl, mask = NA, nuisance = NA, method = "regression")
+aslAveraging(asl, mask = NA, nuisance = NA, method = "regression", ...)
 }
 \arguments{
 \item{asl}{input asl image}
@@ -14,21 +14,50 @@ aslAveraging(asl, mask = NA, nuisance = NA, method = "regression")
 \item{nuisance}{nuisance covariates to include in regression}
 
 \item{method}{method to use for computing average.  One of \code{sincSubtract},
- \code{simpleSubtract}, \code{regression},
- or \code{bayesian}. See \code{Details}.}
+ \code{simpleSubtract}, \code{cubicSubtract}, \code{surroundSubtract},
+\code{regression}, or \code{bayesian}. See \code{Details}.}
+
+\item{...}{additional parameters to pass to ASL averaging functions.
+  See \code{Details}.}
 }
 \description{
 This function averages arterial spin labeling (ASL) functional MRI
 tag-control image pairs to estimate perfusion.
 }
+\details{
+Two major types of methods are available for ASL signal averaging:
+\itemize{
+   \item{Subtraction}{: All the subtraction methods are based on subtracting
+    the tag from control images and averaging the result.  \code{simple}
+    subtracts adjacent tag and control images.  The other methods use
+    interpolation to obtain a subtracted time-series.  Sinc subtraction may
+    be marginally more accurate than cubic interpolation, but takes much
+    longer.  Surround subtraction uses linear interpolation and is fast.}
+   \item{Regression}{: Regression regresses the time-series on a vector
+   of alternating tag-control dummy variables.  Regression can incorporate
+   nuisance covariates.  Bayesian regression incorporates regularization in
+   the regression to encourage all voxels of the same tissue type to have
+   similar perfusion values.}
+ }
+For \code{bayesian}, two more arguments are required:
+\itemize{
+  \item{segmentation}{: a segmentation image}
+  \item{tissuelist}{: a list of tissue probability images}
+}
+These would be as output from \code{atropos}; see \code{Examples} for a
+sample usage.
+}
 \examples{
 nvox <- 5 * 5 * 5 * 10
 dims <- c(5, 5, 5, 10)
 voxvals <- array(rnorm(nvox) + 500, dim=dims)
-voxvals[, , , 5] <- voxvals[, , , 5] + 600
 asl <- makeImage(dims, voxvals) \%>\% iMath("PadImage", 2)
-censored <- aslCensoring(asl)
-avg <- aslAveraging(censored$asl.inlier)
+avg <- aslAveraging(asl)
+slice <- extractSlice(asl, 4, 4)
+mask <-getMask(slice)
+seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
+bayesAvg <- aslAveraging(censored$asl.inlier, method='bayesian',
+  segmentation=seg$segmentation, tissuelist=seg$tissuelist)
 }
 \author{
 Kandel BM, Avants BB

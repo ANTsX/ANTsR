@@ -6,6 +6,11 @@
 #include <ants.h>
 #include "itkImage.h"
 #include "itkWindowedSincInterpolateImageFunction.h"
+#include "itkBSplineInterpolateImageFunction.h" 
+#include "itkLinearInterpolateImageFunction.h"
+#include "itkLinearInterpolateImageFunction.h"
+#include "itkLinearInterpolateImageFunction.h"
+
 template< class ImageType >
 SEXP timeSeriesSubtractionHelper( SEXP r_antsimage, std::string method )
 {
@@ -15,6 +20,7 @@ SEXP timeSeriesSubtractionHelper( SEXP r_antsimage, std::string method )
   typedef itk::Image< PixelType, ImageDimension > InputImageType; 
   typedef itk::Image< PixelType, ImageDimension - 1 > OutputImageType; 
   typename InputImageType::Pointer filtered;  
+  typename ImageType::Pointer input = Rcpp::as< ImagePointerType >( r_antsimage ); 
   if (method.find("simple") != std::string::npos)
   {
     typedef itk::AlternatingValueSimpleSubtractionImageFilter<InputImageType, 
@@ -23,7 +29,6 @@ SEXP timeSeriesSubtractionHelper( SEXP r_antsimage, std::string method )
                                                     MeanFilterType;
     typename SimpleSubtractionImageFilterType::Pointer subtractFilter = 
       SimpleSubtractionImageFilterType::New(); 
-    typename ImageType::Pointer input = Rcpp::as< ImagePointerType >( r_antsimage ); 
     subtractFilter->SetInput( input ); 
     subtractFilter->Update(); 
     filtered = subtractFilter->GetOutput(); 
@@ -39,14 +44,57 @@ SEXP timeSeriesSubtractionHelper( SEXP r_antsimage, std::string method )
       DifferenceFilterType::New();
     SincInterpolatorPointerType labelInterp = SincInterpolatorType::New(); 
     SincInterpolatorPointerType controlInterp = SincInterpolatorType::New(); 
+    differenceFilter->SetSubtractionDimension( ImageDimension - 1 ); 
     differenceFilter->SetControlInterpolator( controlInterp );
     differenceFilter->SetLabelInterpolator( labelInterp );
     differenceFilter->SetIndexPadding( SincRadius );
-    typename ImageType::Pointer input = Rcpp::as< ImagePointerType >( r_antsimage ); 
     differenceFilter->SetInput( input ); 
     differenceFilter->Update(); 
     filtered = differenceFilter->GetOutput(); 
-  }  else 
+  } else if (method.find("cubic") != std::string::npos)
+  {
+    typedef itk::AlternatingValueDifferenceImageFilter< InputImageType, 
+            InputImageType > DifferenceFilterType; 
+    typedef itk::BSplineInterpolateImageFunction< InputImageType, 
+            double, double >  BSplineInterpolatorType; 
+    typedef typename BSplineInterpolatorType::Pointer 
+      BSplineInterpolatorPointerType; 
+    typename DifferenceFilterType::Pointer differenceFilter = 
+      DifferenceFilterType::New(); 
+    differenceFilter->SetSubtractionDimension( ImageDimension - 1 ); 
+    BSplineInterpolatorPointerType labelInterpolator = BSplineInterpolatorType::New(); 
+    labelInterpolator->SetSplineOrder( 3 ); 
+    BSplineInterpolatorPointerType controlInterpolator = 
+      BSplineInterpolatorType::New(); 
+    controlInterpolator->SetSplineOrder( 3 ); 
+    differenceFilter->SetControlInterpolator( controlInterpolator ); 
+    differenceFilter->SetLabelInterpolator( labelInterpolator ); 
+    differenceFilter->SetIndexPadding( 1 ); 
+    differenceFilter->SetInput( input ); 
+    differenceFilter->Update(); 
+    filtered = differenceFilter->GetOutput(); 
+  } else if ( (method.find("surround") != std::string::npos) || 
+      (method.find("linear") != std::string::npos) )
+  {
+    typedef itk::AlternatingValueDifferenceImageFilter< InputImageType, 
+            InputImageType > DifferenceFilterType; 
+    typedef itk::LinearInterpolateImageFunction< InputImageType, 
+            double > LinearInterpolatorType; 
+    typedef typename LinearInterpolatorType::Pointer 
+      LinearInterpolatorPointerType; 
+    typename DifferenceFilterType::Pointer differenceFilter = 
+     DifferenceFilterType::New(); 
+    LinearInterpolatorPointerType controlInterpolator = 
+      LinearInterpolatorType::New(); 
+    LinearInterpolatorPointerType labelInterpolator = 
+      LinearInterpolatorType::New(); 
+    differenceFilter->SetSubtractionDimension( ImageDimension - 1 ); 
+    differenceFilter->SetControlInterpolator( controlInterpolator ); 
+    differenceFilter->SetLabelInterpolator( labelInterpolator ); 
+    differenceFilter->SetInput( input ); 
+    differenceFilter->Update(); 
+    filtered = differenceFilter->GetOutput(); 
+  } else 
   {
     Rcpp::stop("Unsupported method."); 
   }
