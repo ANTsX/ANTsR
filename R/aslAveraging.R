@@ -103,7 +103,7 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
         tissueprior<-localtissuemat[segval,i]
         localprior<-bayespriormat[segval,]
         blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt,
-          regweights=perfpro$regweights, includeIntercept=T)
+           includeIntercept=T)
         locbeta<-blm$beta[2]
         bayesianperfusionloc[segval,i]<-locbeta
         bayesianperfusionlocp[segval,i]<-locbeta*tissueprior
