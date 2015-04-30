@@ -61,14 +61,14 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     } else {
       xideal <- (rep(c(0, 1), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # tag minus control
     } 
-    perfdf<-data.frame( xideal=perfpro$xideal,
-                nuis=perfpro$nuisancevariables)
+    perfdf<-data.frame( xideal=xideal,
+                nuis=nuisance)
     perfdf<-perfdf[,!is.na(colMeans(perfdf))]
     perfmodel<-lm(aslmat ~., data=perfdf)
-    getpriors<-function(img, seg) {
-      n <- max(seg)
+    getpriors<-function(img, segmentation) {
+      n <- max(segmentation)
       p <- rep(0,n)
-      segvec <- (seg[seg > 0])
+      segvec <- (segmentation[segmentation > 0])
       for (i in 1:n) {
         p[i]<-median(img[segvec == as.numeric(i)])
       }
@@ -80,10 +80,10 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     } else {
       bayespriormatfull<-priorBetas
     }
-    n <- max(seg) * nrow(bayespriormatfull)
-    bayespriormat <- matrix(rep(0, n), nrow=max(seg))
+    n <- max(segmentation) * nrow(bayespriormatfull)
+    bayespriormat <- matrix(rep(0, n), nrow=max(segmentation))
     for(i in 1:ncol(bayespriormat)) {
-      bayespriormat[, i] <- getpriors(bayespriormatfull[i, ], seg)
+      bayespriormat[, i] <- getpriors(bayespriormatfull[i, ], segmentation)
     }
 #   set 4 to equal 2 - dgm = gm
     bayespriormat[4, ] <- bayespriormat[2, ]
@@ -99,7 +99,7 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     # here is where we get really bayesian
     # average over all tissue models ...
       localtissuemat[,i]<-abs(localtissuemat[,i]) / sum(abs(localtissuemat[,i]))
-      for ( segval in 1:max(seg) ) {
+      for ( segval in 1:max(segmentation) ) {
         tissueprior<-localtissuemat[segval,i]
         localprior<-bayespriormat[segval,]
         blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt,
