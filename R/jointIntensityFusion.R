@@ -19,6 +19,7 @@
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
 #' @param includezero boolean - try to predict the zero label
+#' @param computeProbs boolean - requires more memory
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -58,7 +59,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
-  rSearch=2, segvals=NA, includezero=FALSE )
+  rSearch=2, segvals=NA, includezero=FALSE, computeProbs=FALSE )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -235,10 +236,12 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   if ( !( all( is.na(labelList) ) ) )
     {
     segvec<-rep( 0, nvox )
-    probImgList<-list()
-    probImgVec<-list()
-    for ( p in 1:length( segvals ) )
-      probImgVec[[p]]<-rep( 0, nvox )
+    if ( computeProbs ) {
+      probImgList<-list()
+      probImgVec<-list()
+      for ( p in 1:length( segvals ) )
+        probImgVec[[p]]<-rep( 0, nvox )
+      }
     for ( voxel in 1:nvox )
       {
       probvals<-rep(0,length(segvals))
@@ -258,17 +261,20 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       } else {
         probvals[ which(segsearch[1]==segvals) ]<-1
       }
-      for ( p in 1:length(segvals))
-        probImgVec[[p]][voxel]<-probvals[p]
+      if ( computeProbs )
+        for ( p in 1:length(segvals))
+          probImgVec[[p]][voxel]<-probvals[p]
       k<-which(probvals==max(probvals,na.rm=T))
       if ( length(k) > 0 )
         segvec[voxel]=segvals[ k ]
     }
-    for ( p in 1:length(segvals) )
-      probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
+    if ( computeProbs )
+      for ( p in 1:length(segvals) )
+        probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
     segimg<-makeImage(targetIMask,segvec)
     # 1st probability is background i.e. 0 label
-    probImgList<-probImgList[2:length(probImgList)]
+    if ( computeProbs )
+      probImgList<-probImgList[2:length(probImgList)]
     }
   return( list( predimg=newimg, segimg=segimg,
     localWeights=weightmat, probimgs=probImgList,

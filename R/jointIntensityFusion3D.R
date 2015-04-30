@@ -25,6 +25,7 @@
 #' @param includezero boolean - try to predict the zero label
 #' @return approximated image, segmentation and probabilities
 #' (latter are WIP, might be done by the time your read this ) ...
+#' @param computeProbs boolean - requires more memory
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
@@ -37,7 +38,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA,
-  includezero=FALSE )
+  includezero=FALSE, computeProbs=FALSE )
 {
   if (nargs() == 0)
     {
@@ -84,24 +85,26 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         beta=beta, rad=rad, labelList=labelList,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
-        useSaferComputation=useSaferComputation, usecor=usecor )
+        useSaferComputation=useSaferComputation, usecor=usecor,
+        computeProbs=computeProbs )
       if ( whichMaskSlice == 0 )
         {
         localJIF2Di<-oo2d$predimg
         localJIF2Ds<-oo2d$segimg
-        localJIF2Dp<-oo2d$probimgs
+        if ( computeProbs ) localJIF2Dp<-oo2d$probimgs
         } else {
-        localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
-          oo2d$predimg[ mask2d == 1 ]
-        localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
-          oo2d$segimg[ mask2d == 1 ]
-        probct<-1
-        for ( probimg in localJIF2Dp )
-          {
-          probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-            oo2d$probimgs[[probct]][ mask2d == 1 ]
-          probct<-probct+1
-          }
+          localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
+            oo2d$predimg[ mask2d == 1 ]
+          localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
+            oo2d$segimg[ mask2d == 1 ]
+          probct<-1
+          if ( computeProbs )
+            for ( probimg in localJIF2Dp )
+              {
+              probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
+                oo2d$probimgs[[probct]][ mask2d == 1 ]
+              probct<-probct+1
+              }
         }
       whichMaskSlice<-whichMaskSlice+1
       }
