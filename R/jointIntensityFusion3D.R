@@ -51,6 +51,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     return(NA)
     }
   segvals<-NA
+  localJIF2Dp=NA
   if ( ! all( is.na(labelList) ) )
     {
     segmat<-imageListToMatrix( labelList, targetIMask )
