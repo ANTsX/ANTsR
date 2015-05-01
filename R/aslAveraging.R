@@ -1,20 +1,20 @@
-#' Average ASL tag-control pairs to estimate perfusion 
-#' 
-#' This function averages arterial spin labeling (ASL) functional MRI 
-#' tag-control image pairs to estimate perfusion.  
+#' Average ASL tag-control pairs to estimate perfusion
+#'
+#' This function averages arterial spin labeling (ASL) functional MRI
+#' tag-control image pairs to estimate perfusion.
 #' @param asl input asl image
 #' @param mask in which to calculate perfusion
 #' @param nuisance nuisance covariates to include in regression
-#' @param method method to use for computing average.  One of \code{sincSubtract}, 
-#'  \code{simpleSubtract}, \code{cubicSubtract}, \code{surroundSubtract}, 
-#' \code{regression}, or \code{bayesian}. See \code{Details}. 
-#' @param ... additional parameters to pass to ASL averaging functions.  
+#' @param method method to use for computing average.  One of \code{sincSubtract},
+#'  \code{simpleSubtract}, \code{cubicSubtract}, \code{surroundSubtract},
+#' \code{regression}, or \code{bayesian}. See \code{Details}.
+#' @param ... additional parameters to pass to ASL averaging functions.
 #'   See \code{Details}.
-#' 
-#' @details 
-#' Two major types of methods are available for ASL signal averaging: 
+#'
+#' @details
+#' Two major types of methods are available for ASL signal averaging:
 #' \itemize{
-#'    \item{Subtraction}{: All the subtraction methods are based on subtracting 
+#'    \item{Subtraction}{: All the subtraction methods are based on subtracting
 #'     the tag from control images and averaging the result.  \code{simple}
 #'     subtracts adjacent tag and control images.  The other methods use
 #'     interpolation to obtain a subtracted time-series.  Sinc subtraction may
@@ -26,14 +26,14 @@
 #'    the regression to encourage all voxels of the same tissue type to have
 #'    similar perfusion values.}
 #'  }
-#' For \code{bayesian}, two more arguments are required: 
+#' For \code{bayesian}, two more arguments are required:
 #' \itemize{
 #'   \item{segmentation}{: a segmentation image}
-#'   \item{tissuelist}{: a list of tissue probability images} 
+#'   \item{tissuelist}{: a list of tissue probability images}
 #' }
 #' These would be as output from \code{atropos}; see \code{Examples} for a
 #' sample usage.
-#' 
+#'
 #' @author Kandel BM, Avants BB
 #' @examples
 #' nvox <- 5 * 5 * 5 * 10
@@ -44,23 +44,23 @@
 #' slice <- extractSlice(asl, 4, 4)
 #' mask <-getMask(slice)
 #' seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
-#' bayesAvg <- aslAveraging(censored$asl.inlier, method='bayesian', 
+#' bayesAvg <- aslAveraging(censored$asl.inlier, method='bayesian',
 #'   segmentation=seg$segmentation, tissuelist=seg$tissuelist)
-#' 
-#' @export 
+#'
+#' @export
 aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
 # define helper function
-  bayesianPerfusion <- function(asl, mask, segmentation, tissuelist, 
+  bayesianPerfusion <- function(asl, mask, segmentation, tissuelist,
   nuisance=NA, myPriorStrength=30.0,
   useDataDrivenMask=3,
   localweights=F, priorBetas=NA) {
-    aslmat <- timeseries2matrix(asl, thresholdImage(segmentation, 1, Inf))  
-    labelfirst <- TRUE 
+    aslmat <- timeseries2matrix(asl, thresholdImage(segmentation, 1, Inf))
+    labelfirst <- TRUE
     if (!labelfirst) {
       xideal <- (rep(c(1, 0), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # control minus tag
     } else {
       xideal <- (rep(c(0, 1), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # tag minus control
-    } 
+    }
     perfdf<-data.frame( xideal=xideal,
                 nuis=nuisance)
     perfdf<-perfdf[,!is.na(colMeans(perfdf))]
@@ -130,10 +130,10 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
       xideal <- (rep(c(1, 0), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # control minus tag
     } else {
       xideal <- (rep(c(0, 1), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # tag minus control
-    } 
+    }
     cbfform <- formula(ts ~ xideal)
     if (!all(is.na(nuisance))) {
-      cbfform <- formula(mat ~ xideal + nuisance)
+      cbfform <- formula( ts ~ xideal + nuisance)
     }
     mycbfmodel <- lm(cbfform)  # standard regression
     cbfi <- antsImageClone(mask)
