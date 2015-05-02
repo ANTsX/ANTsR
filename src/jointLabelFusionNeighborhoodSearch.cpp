@@ -51,6 +51,7 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
 // of the intvec with the nit neighborhood
   nitSearch.SetLocation( ind );
   PixelType bestcor = -1.e11;
+  PixelType bestsd = 0;
   for( unsigned int i = 0; i < nitSearch.Size(); i++ )
     {
     typename ImageType::IndexType ind2 = nitSearch.GetIndex(i);
@@ -85,12 +86,13 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
           bestvec[i] = outvec[i];
           }
         bestcor = locor;
+        bestsd = outsd;
         }
-//      Rcpp::Rcout << " locor " << locor << " best " << bestcor << std::endl;
       }
     }
   return Rcpp::List::create( Rcpp::Named("segval") = segval,
-    Rcpp::Named("values") = bestvec );
+    Rcpp::Named("values") = bestvec,
+    Rcpp::Named("bestsd") = bestsd  );
 }
 
 // nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
