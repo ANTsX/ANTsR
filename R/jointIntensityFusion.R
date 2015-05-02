@@ -92,13 +92,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   intmat<-wmat
   targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
-  targetIv<-targetIvStruct$values
+  otargetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
-  targetIvStruct<-getNeighborhoodInMask(targetI,
-    targetIMask,rep(rSearch,dim),boundary.condition=BC,spatial.info=T)
-  offsets<-targetIvStruct$offsets
   rm(targetIvStruct)
-  if ( doscale ) targetIv<-scale(targetIv)
+  targetIv<-scale(otargetIv)
   newmeanvec<-rep(0,ncol(targetIv))
   m<-length(atlasList)
   onev<-rep(1,m)
@@ -117,57 +114,34 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     zsd<-rep(1,natlas)
     wmat<-basewmat
     targetint<-targetIv[,voxel]
+    otargetint<-otargetIv[,voxel]
     for ( ct in 1:natlas)
       {
       # is this a BUG/FIXME?
       # see antsImage_GetNeighborhood
-      myoff<-rep(0,dim)
       cent<-indices[voxel,]+1
-      v<-getNeighborhoodAtVoxel(atlasList[[ct]],cent,rad)$values
-      intmat[ct,]<-v
-      # find best local region in this atlas
-      # just needs an input vector, an input image and a radius
-      # outputs the best offset ...
-      if ( haveLabels & rSearch > 0 )
-      {
-      bestmatch<-Inf
-      for ( offind in 1:nrow(offsets) )
-        {
-        cent2<-cent+offsets[offind,]
-        tv<-(getNeighborhoodAtVoxel(atlasList[[ct]],cent2,rad)$values)
-        sdv<-sd(tv)
-        if ( abs(sdv) > 1.e-10 )
-          {
-          tv=( tv - mean(tv) )/sdv
-          locor<-(-1.0 * sum(targetint*tv) )
-          if ( !is.na(locor) )
-          if ( locor < bestmatch )
-            {
-            v=tv
-            bestmatch<-locor
-            myoff<-offsets[offind,]
-            if ( dim == 2 & haveLabels )
-              segval<-getPixels(labelList[[ct]],cent2[1],cent2[2])
-            if ( dim == 3 & haveLabels )
-              segval<-getPixels(labelList[[ct]],cent2[1],cent2[2],cent2[3])
-            if ( haveLabels ) segmatSearch[ct,voxel]<-segval
-            }
-          }
-        }
-      }
-      sdv<-sd(v)
+      nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
+        targetint, cent, max(rad), rSearch,
+        atlasList[[ct]],
+        labelList[[ct]],
+        PACKAGE = "ANTsR" )
+      segval = nhsearch[[ 1 ]]
+      v = nhsearch[[ 2 ]]
+      segmatSearch[ct,voxel]<-segval
+      intmat[ct,] = v * sd( otargetint) + mean( otargetint )
+      sdv<-sd(v) # assignment
       if ( sdv == 0 ) {
-        zsd[ct]<-0
+        zsd[ct]<-0 # assignment
         sdv<-1
         }
       if ( doscale ) {
         v<-( v - mean(v))/sdv
         }
       if ( !usecor )
-        wmat[ct,]<-(v-targetint)
+        wmat[ct,]<-(v-targetint) # assignment
       else {
         ip<- ( v * targetint )
-        wmat[ct,]<-( ip*(-1.0))
+        wmat[ct,]<-( ip*(-1.0))  # assignment
         }
       } # for all atlases
     if ( maxAtlasAtVoxel[2] < natlas ) {
@@ -223,12 +197,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
             setTxtProgressBar( progress, voxel )
         }
     }
-  }
+  } # loop over voxels
   close( progress )
   rm( segmat )
   rm( targetIv )
   rm( indices )
-  rm( offsets )
   newimg<-makeImage( targetIMask, newmeanvec )
   maxSimImg<-makeImage( targetIMask, maxSimImg )
   segimg<-NA
