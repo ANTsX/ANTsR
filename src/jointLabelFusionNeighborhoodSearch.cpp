@@ -4,7 +4,6 @@
 #include <string>
 #include "RcppANTsR.h"
 #include <ants.h>
-#include "itkImage.h"
 
 template< class ImageType >
 SEXP jointLabelFusionNeighborhoodSearchHelper(
