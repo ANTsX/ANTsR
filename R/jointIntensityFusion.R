@@ -123,20 +123,19 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],
-        labelList[[ct]],
-        PACKAGE = "ANTsR" )
+        labelList[[ct]] )
       segval = nhsearch[[ 1 ]]
       v = nhsearch[[ 2 ]]
+      vmean = nhsearch[[ 3 ]]
+      sdv = nhsearch[[ 4 ]]
       segmatSearch[ct,voxel]<-segval
-      intmat[ct,] = v * sd( otargetint) + mean( otargetint )
-      sdv<-sd(v) # assignment
-      if ( is.na(sdv) ) sdv=0
+      intmat[ct,] = v
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
         }
       if ( doscale ) {
-        v<-( v - mean(v))/sdv
+        v<-( v - vmean ) / sdv
         }
       if ( !usecor )
         wmat[ct,]<-(v-targetint) # assignment

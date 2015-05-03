@@ -52,6 +52,7 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
   nitSearch.SetLocation( ind );
   PixelType bestcor = -1.e11;
   PixelType bestsd = 0;
+  PixelType bestmean = 0;
   for( unsigned int i = 0; i < nitSearch.Size(); i++ )
     {
     typename ImageType::IndexType ind2 = nitSearch.GetIndex(i);
@@ -73,11 +74,10 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
     //  locor<-(-1.0 * sum(targetint*tv) )
     if ( outsd > 1.e-10 )
       {
-      for ( unsigned int i=0; i < intvec.size(); i++ )
-        outvec[i] = ( outvec[i] - outmean ) / outsd;
       PixelType locor = 0;
       for ( unsigned int i=0; i < intvec.size(); i++ ) {
-        locor += intvec[i] * outvec[i];
+        PixelType temp = ( outvec[i] - outmean ) / outsd;
+        locor += intvec[i] * temp;
         }
       if ( locor > bestcor )
         {
@@ -87,11 +87,13 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
           }
         bestcor = locor;
         bestsd = outsd;
+        bestmean = outmean;
         }
       }
     }
   return Rcpp::List::create( Rcpp::Named("segval") = segval,
     Rcpp::Named("values") = bestvec,
+    Rcpp::Named("bestmean") = bestmean,
     Rcpp::Named("bestsd") = bestsd  );
 }
 

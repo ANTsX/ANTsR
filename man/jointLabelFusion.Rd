@@ -2,7 +2,7 @@
 % Please edit documentation in R/jointLabelFusion.R
 \name{jointLabelFusion}
 \alias{jointLabelFusion}
-\title{joint intensity fusion}
+\title{joint label fusion}
 \usage{
 jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
@@ -50,7 +50,7 @@ makes image converge to average}
 approximated image, segmentation and probabilities
 }
 \description{
-Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
+A multiple atlas voting scheme to customize labels for a new subject.
 }
 \examples{
 set.seed(123)
@@ -78,9 +78,8 @@ for ( i in 1:length(ilist) )
  seglist[[i]]<-seg$segmentation
  }
 r<-2
-d<-2
-pp<-jointLabelFusion(ref,refmask,ilist, rSearch=0,
-  labelList=seglist, rad=rep(r,d) )
+pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+  labelList=seglist, rad=rep(r, length(dim(ref)) ) )
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich

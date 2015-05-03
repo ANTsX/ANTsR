@@ -50,9 +50,8 @@
 #'  seglist[[i]]<-seg$segmentation
 #'  }
 #' r<-2
-#' d<-2
-#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=0,
-#'   labelList=seglist, rad=rep(r,d) )
+#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+#'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
 #'
 #' @export jointLabelFusion
 jointLabelFusion <- function( targetI, targetIMask, atlasList,
@@ -118,18 +117,18 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],
-        labelList[[ct]],
-        PACKAGE = "ANTsR" )
+        labelList[[ct]] )
       segval = nhsearch[[ 1 ]]
       v = nhsearch[[ 2 ]]
-      sdv = nhsearch[[ 3 ]]
+      vmean = nhsearch[[ 3 ]]
+      sdv = nhsearch[[ 4 ]]
       segmatSearch[ct,voxel]<-segval
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
         }
       if ( doscale ) {
-        v<-( v - mean(v))/sdv
+        v<-( v - vmean )/sdv
         }
       if ( !usecor )
         wmat[ct,]<-(v-targetint) # assignment
@@ -230,7 +229,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
           probImgVec[[p]][voxel]<-probvals[p]
       k<-which(probvals==max(probvals,na.rm=T))
       if ( length(k) > 0 )
-        segvec[voxel]=segvals[ k ]
+        segvec[voxel]=segvals[ k ][1]
     }
     if ( computeProbs )
       for ( p in 1:length(segvals) )
