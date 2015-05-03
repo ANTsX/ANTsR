@@ -117,7 +117,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],
-        labelList[[ct]] )
+        labelList[[ct]], PACKAGE="ANTsR" )
       segval = nhsearch[[ 1 ]]
       v = nhsearch[[ 2 ]]
       vmean = nhsearch[[ 3 ]]

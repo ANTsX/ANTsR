@@ -97,16 +97,8 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
     Rcpp::Named("bestsd") = bestsd  );
 }
 
-// nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
-//  targetint, cent, max(rad), rSearch, atlasList[[ct]],
-//  PACKAGE = "ANTsR" )
-RcppExport SEXP jointLabelFusionNeighborhoodSearch(
-  SEXP r_intvec,      // intensity vector
-  SEXP r_cent,        // dimension-d vector
-  SEXP r_rad,         // uinteger
-  SEXP r_radSearch,   // uinteger
-  SEXP r_antsimage,   // atlas image
-  SEXP r_antsimageseg  )  // atlas image seg
+
+RcppExport SEXP jointLabelFusionNeighborhoodSearch( SEXP r_intvec, SEXP r_cent, SEXP r_rad, SEXP r_radSearch, SEXP r_antsimage, SEXP r_antsimageseg  )
 {
 try
 {
