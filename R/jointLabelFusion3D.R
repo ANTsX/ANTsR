@@ -89,12 +89,9 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
         computeProbs=computeProbs )
       if ( whichMaskSlice == 0 )
         {
-        localJIF2Di<-oo2d$predimg
         localJIF2Ds<-oo2d$segimg
         if ( computeProbs ) localJIF2Dp<-oo2d$probimgs
         } else {
-          localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
-            oo2d$predimg[ mask2d == 1 ]
           localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
             oo2d$segimg[ mask2d == 1 ]
           probct<-1
@@ -109,6 +106,6 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout,
+  return( list( segimg=localJIF2Ds, mask=maskout,
      probimgs=localJIF2Dp ) )
 }
