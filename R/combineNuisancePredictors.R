@@ -70,8 +70,8 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
           preds.remain <- (1:ncol(globalpredictors))[-bestpreds]
           }
           for (jj in preds.remain) {
-          residmat <- residuals(lm(inmat ~ globalpredictors[, c(bestpreds,
-            jj)]))
+          residmat <- residuals(lm(inmat ~ as.matrix(globalpredictors[, c(bestpreds,
+            jj)])))
           r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
           }
           bestpreds <- c(bestpreds, which.max(r2sum[, ii]))
