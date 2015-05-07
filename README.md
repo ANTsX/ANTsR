@@ -6,7 +6,7 @@ An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
 
 ## Description
 
-Version: 0.3
+Version: 0.4
 
 License: GPL (>=2)
 
@@ -305,3 +305,30 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 ```
+
+
+# Release notes
+
+## 0.4
+
+* WIP: ASL pipeline fuctionality
+
+* BUG: Fixed image indexing bug
+
+* BUG: plot.antsImage improvements
+
+* ENH: more antsRegistration options
+
+* ENH: geoSeg 
+
+* ENH: JointLabelFusion and JointIntensityFusion
+ 
+* ENH: Enable negating images
+
+* ENH: weingarten curvature
+
+* ENH: antsApplyTransformsToPoints with example
+
+## 0.3
+
+First official release.
