@@ -131,7 +131,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
         v<-( v - vmean )/sdv
         }
       if ( !usecor )
-        wmat[ct,]<-(v-targetint) # assignment
+        wmat[ct,]<-abs(v-targetint) # assignment
       else {
         ip<- ( v * targetint )
         wmat[ct,]<-( ip*(-1.0))  # assignment

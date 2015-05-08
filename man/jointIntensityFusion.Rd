@@ -19,7 +19,7 @@ jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{beta}{weight sharpness, default to 2}
 
-\item{rad}{neighborhood radius, default to 4}
+\item{rad}{neighborhood radius, default to 3}
 
 \item{labelList}{list containing antsImages}
 
