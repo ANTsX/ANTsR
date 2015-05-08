@@ -8,7 +8,7 @@
   "red", "blue", "green", "yellow"), axis = 2, slices,
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
   window.img, window.overlay, quality = 4, outname = NA, alpha = 0.5,
-  newwindow = FALSE, nslices = 10, ...)
+  newwindow = FALSE, nslices = 10, dorot = 0, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
@@ -47,6 +47,8 @@ of this list should match the image list.}
 \item{newwindow}{boolean controlling if we open a new device for this plot}
 
 \item{nslices}{number of slices to view}
+
+\item{dorot}{do a rotation of the slice before viewing}
 
 \item{...}{other parameters}
 }
