@@ -51,8 +51,8 @@
 #' @export
 aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
 # define helper function
-  bayesianPerfusion <- function(asl, mask, segmentation, tissuelist,
-  nuisance=NA, myPriorStrength=30.0,
+  bayesianPerfusion <- function(asl, mask, nuisance, segmentation, tissuelist,
+   myPriorStrength=30.0,
   useDataDrivenMask=3,
   localweights=F, priorBetas=NA) {
     aslmat <- timeseries2matrix(asl, thresholdImage(segmentation, 1, Inf))
@@ -155,7 +155,7 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
       antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
       mask <- getMask(img)
      }
-     avg <- bayesianPerfusion(asl, mask, ...)
+     avg <- bayesianPerfusion(asl, mask, nuisance, ...)
   }
   if (mean(avg) < 0) {
     avg <- -avg
