@@ -144,7 +144,15 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     cbfi[mask == 1] <- betaideal  # standard results
     avg <- antsImageClone(cbfi)
   } else if (method == 'bayesian') {
-
+     if (is.na(mask)){
+      myar <- apply(as.array(asl), c(1, 2, 3), mean)
+      img <- makeImage(dim(myar), myar)
+      antsSetSpacing(img, antsGetSpacing(asl)[1:3])
+      antsSetOrigin(img, antsGetOrigin(asl)[1:3])
+      antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
+      mask <- getMask(img)
+     }
+     avg <- bayesianPerfusion(asl, mask, ...)
   }
   if (mean(avg) < 0) {
     avg <- -avg
