@@ -344,7 +344,8 @@ plot.antsImage <- function(x, y,
     temp <- labimg
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
     labimg <- temp
-    locthresh <- round((window.overlay[1:2] - mncl)/(mxcl - mncl) * (nlevels - 1))
+    locthresh <- round((window.overlay[1:2] - mncl) /
+                      (mxcl - mncl) * (nlevels - 1))
     if (axis != 2 & imagedim > 2)
       labslice <- rotate90.matrix(labimg[, , slices[1]])
     if (axis == 2 & imagedim > 2 & dorot==0 )
@@ -361,8 +362,10 @@ plot.antsImage <- function(x, y,
       if (sl < dim(img)[imagedim]) {
         if (axis != 2 & imagedim > 2)
           labslice <- rotate90.matrix(labimg[, , slices[sl + 1]])
-        if (axis == 2 & imagedim > 2)
-          labslice <- flip.matrix(labimg[, , slices[sl + 1]])
+        if (axis == 2 & imagedim > 2 & dorot==0 )
+          labslice <- flip.matrix(labimg[, , slices[1]])
+        if (axis == 2 & imagedim > 2 & dorot==1 )
+          labslice <- rotate270.matrix(labimg[, , slices[sl + 1]])
         if (imagedim > 2) {
           labslice <- mirror.matrix(labslice)
         } else {
