@@ -147,6 +147,20 @@ SEXP iMathMO( Rcpp::List args )
  }
 
 template <class ImageType>
+SEXP iMathMaurerDistance( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  PixelType foreground = (PixelType) Rcpp::as<double>( args[2] );
+
+  ImagePointerType output = ants::iMathMaurerDistance<ImageType>( input, foreground );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
 SEXP iMathNormalize( Rcpp::List args )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -156,7 +170,22 @@ SEXP iMathNormalize( Rcpp::List args )
   ImagePointerType output = ants::iMathNormalize<ImageType>( input );
 
   return Rcpp::wrap(output);
- }
+}
+
+template <class ImageType>
+SEXP iMathPeronaMalik( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  unsigned long nIterations = Rcpp::as<unsigned long>( args[2] );
+  double conductance = Rcpp::as<double>( args[3] );
+
+
+  ImagePointerType output = ants::iMathPeronaMalik<ImageType>( input, nIterations, conductance );
+
+  return Rcpp::wrap(output);
+}
 
 RcppExport SEXP iMathInterface( SEXP r_args )
 {
@@ -1183,6 +1212,106 @@ try
         }
       }
     }
+  else if ( operation == "MaurerDistance" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("MaurerDistance only supports scalar images");
+      }
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      double foreground = iMathMaurerDistanceForeground;
+      args.push_back( Rcpp::wrap(foreground) );  // radius
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathMaurerDistance<ImageType>( args );
+        }
+      }
+    }
   else if ( operation == "Normalize" )
     {
     Rcpp::S4 image( args[0] );
@@ -1276,6 +1405,113 @@ try
         }
       }
     }
+  else if ( operation == "PeronaMalik" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("PeronaMalik only supports scalar images");
+      }
+
+    // Optional parameters with default values
+     if ( args.size() < 3 )
+       {
+       unsigned long nIterations = iMathPeronaMalikNIterations;
+       args.push_back( Rcpp::wrap(nIterations) );
+       }
+    if ( args.size() < 4 )
+      {
+      double conductance = iMathPeronaMalikConductance;
+      args.push_back( Rcpp::wrap(conductance) );
+     }
+
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    }
+
   else
     {
     Rcpp::Rcout << "Operation = " << operation << std::endl;

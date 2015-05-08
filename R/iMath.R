@@ -15,8 +15,8 @@
 #' @examples
 #' WIP - PadImage;Basic;positive or negative padvalue;"iMath(i,op,5)";pads or de-pads image by n voxels on all sides;0
 #' WIP - D;Filter;None;"iMath(i,op)";distance transform;0
-#' WIP - MaurerDistance;Filter;None;"iMath(i,op)";distance transform;0
-#' WIP - PeronaMalik;Filter;"iterations, conductance";"iMath(i,op,10,0.5)";perona malik edge preserving smoothing;0
+#' MaurerDistance;Filter;None;"iMath(i,op)";distance transform;0
+#' PeronaMalik;Filter;"iterations, conductance";"iMath(i,op,10,0.5)";perona malik edge preserving smoothing;0
 #' WIP - Grad;Filter;sigma;"iMath(i,op,1)";gradient magnitude;0
 #' WIP - Laplacian;Filter;sigma;"iMath(i,op,1)";laplacian of intensity;0
 #' Canny;Filter;sigma;"iMath(i,op,1,5,12)";canny edge detector;0
@@ -25,10 +25,10 @@
 #' ME;Morphology;element radius;"iMath(i,op,1)";erosion;0
 #' MO;Morphology;element radius;"iMath(i,op,1)";opening;0
 #' MC;Morphology;element radius;"iMath(i,op,1)";closing;0
-#' WIP - GD;Morphology;element radius;"iMath(i,op,1)";grayscale dilation;0
-#' WIP - GE;Morphology;element radius;"iMath(i,op,1)";grayscale erosion;0
-#' WIP - GO;Morphology;element radius;"iMath(i,op,1)";grayscale opening;0
-#' WIP - GC;Morphology;element radius;"iMath(i,op,1)";grayscale closing;0
+#' GD;Morphology;element radius;"iMath(i,op,1)";grayscale dilation;0
+#' GE;Morphology;element radius;"iMath(i,op,1)";grayscale erosion;0
+#' GO;Morphology;element radius;"iMath(i,op,1)";grayscale opening;0
+#' GC;Morphology;element radius;"iMath(i,op,1)";grayscale closing;0
 #' WIP - FillHoles;LabelOp;None;"iMath(i,op)";fills holes in binary object;0
 #' GetLargestComponent;LabelOp;None;"iMath(i,op)";returns largest portion of binary object;0
 #' WIP - LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
