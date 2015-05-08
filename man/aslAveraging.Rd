@@ -53,11 +53,12 @@ dims <- c(5, 5, 5, 10)
 voxvals <- array(rnorm(nvox) + 500, dim=dims)
 asl <- makeImage(dims, voxvals) \%>\% iMath("PadImage", 2)
 avg <- aslAveraging(asl)
+
 slice <- extractSlice(asl, 4, 4)
 mask <-getMask(slice)
 seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
-bayesAvg <- aslAveraging(censored$asl.inlier, method='bayesian',
-  segmentation=seg$segmentation, tissuelist=seg$tissuelist)
+bayesAvg <- aslAveraging(asl, method='bayesian',
+  segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
 }
 \author{
 Kandel BM, Avants BB
