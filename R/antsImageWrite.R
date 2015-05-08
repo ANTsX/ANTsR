@@ -34,5 +34,5 @@ antsImageWrite <- function(image, filename) {
     image@components = as.integer(1)
     }
 
-  return(.Call("antsImageWrite", image, filename, PACKAGE = "ANTsR"))
+  invisible(.Call("antsImageWrite", image, filename, PACKAGE = "ANTsR"))
 }
