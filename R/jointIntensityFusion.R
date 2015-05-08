@@ -6,7 +6,7 @@
 #' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
 #' @param beta weight sharpness, default to 2
-#' @param rad neighborhood radius, default to 4
+#' @param rad neighborhood radius, default to 3
 #' @param labelList list containing antsImages
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
@@ -138,7 +138,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         v<-( v - vmean ) / sdv
         }
       if ( !usecor )
-        wmat[ct,]<-(v-targetint) # assignment
+        wmat[ct,]<-abs(v-targetint) # assignment
       else {
         ip<- ( v * targetint )
         wmat[ct,]<-( ip*(-1.0))  # assignment
