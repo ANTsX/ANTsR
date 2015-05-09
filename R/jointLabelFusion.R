@@ -111,7 +111,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     zsd<-rep(1,natlas)
     wmat<-basewmat
     targetint<-targetIv[,voxel]
-    cent<-indices[voxel,]+1
+    cent<-indices[voxel,]
     for ( ct in 1:natlas)
       {
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",

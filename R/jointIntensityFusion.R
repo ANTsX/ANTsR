@@ -92,10 +92,9 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   intmat<-wmat
   targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
-  otargetIv<-targetIvStruct$values
+  targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
   rm(targetIvStruct)
-  targetIv<-scale(otargetIv)
   newmeanvec<-rep(0,ncol(targetIv))
   m<-length(atlasList)
   onev<-rep(1,m)
@@ -114,12 +113,11 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     zsd<-rep(1,natlas)
     wmat<-basewmat
     targetint<-targetIv[,voxel]
-    otargetint<-otargetIv[,voxel]
     for ( ct in 1:natlas)
       {
       # is this a BUG/FIXME?
       # see antsImage_GetNeighborhood
-      cent<-indices[voxel,]+1
+      cent<-indices[voxel,]
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],

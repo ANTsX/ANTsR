@@ -311,6 +311,8 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 ## 0.4
 
+* WIP: iMath improvements
+
 * WIP: ASL pipeline fuctionality
 
 * BUG: Fixed image indexing bug
@@ -328,6 +330,10 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 * ENH: weingarten curvature
 
 * ENH: antsApplyTransformsToPoints with example
+
+* ENH: renormalizeProbabilityImages
+
+* ENH: Suppress output from imageWrite.
 
 ## 0.3
 
