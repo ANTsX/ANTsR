@@ -4,6 +4,9 @@
 #' @param mask mask for calculating perfusion
 #' @param nuis fixed nuisance parameters
 #' @param method one of 'outlier', 'robust', or 'scor'.  See \code{Details}.
+#' @param reject.pairs whether to reject only tag-control pairs of images,
+#' as opposed to single images.  Rejecting pairs of images is necessary for
+#' non-regression-based ASL averaging methods.
 #' @param ... Additional arguments to pass to censoring method.  See \code{Details.}
 #' @details \code{aslCensoring} is an interface to ASL timepoint censoring algorithms.
 #' Three options are currently provided, with different additional arguments:
@@ -42,13 +45,14 @@
 #' dims <- c(5, 5, 5, 10)
 #' voxvals <- array(rnorm(nvox) + 500, dim=dims)
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
-#' asl <- makeImage(dims, voxvals) %>% iMath("PadImage", 2)
+#' asl <- makeImage(dims, voxvals)
 #' censored <- aslCensoring(asl)
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslCensoring
 
-aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
+aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',
+                         reject.pairs=F, ...) {
   # Supporting functions for censoring data: robSelection and scor.
   robSelection <- function(mat, xideal, mask, nuis=NA,  robthresh=0.95, skip=20) {
     cbfform <- formula(mat ~ xideal)
@@ -150,8 +154,8 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     tc.outliers <- rep(c(1, 2), length(which.outlierpairs))
     which.outliers[tc.outliers == 1] <- which.outliers[tc.outliers == 1] * 2 - 1
     which.outliers[tc.outliers == 2] <- which.outliers[tc.outliers == 2] * 2
-    which.outliers 
-  } 
+    which.outliers
+  }
 
   scor <- function(asl){
     npairs <- dim(asl)[1]
@@ -201,6 +205,15 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',...) {
     which.outliers <- aslOutlierRejection(asl, mask, ...)
   } else if (method == 'scor') {
     which.outliers <- scor(ts)
+  }
+
+  if (reject.pairs) {
+    odds <- which.outliers[which((which.outliers %% 2) == 1)]
+    evens <- which.outliers[which((which.outliers %% 2) == 0)]
+    odds.additional <- odds + 1
+    evens.additional <- evens - 1
+    which.outliers <- sort(unique(c(which.outliers,
+                                    odds.additional, evens.additional)))
   }
 
   if (length(which.outliers) > 0) {
