@@ -6,8 +6,9 @@
 #' @param aslmat ASL input matrix.
 #' @param tc Tag-control sawtooth pattern vector.
 #' @param noisefrac Fraction of data to include in noise pool.
-#' @param polydegree Degree of polynomial for detrending. A value of 0
-#' indicates no detrending.
+#' @param polydegree Degree of polynomial for detrending, with a value of 0
+#' indicating no detrending, or \code{'gam'} for GAM-based estimation of
+#' time-series trends.
 #' @param k Number of cross-validation folds.
 #' @param npreds Number of predictors to output.
 #' @param method Method of selecting noisy voxels.  One of 'compcor' or
@@ -37,10 +38,20 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k
     return(x < val & x < 0)
   }
 
-  if (polydegree > 0) {
+  if (is.numeric(polydegree)) {
+    if (polydegree > 0) {
+      timevals <- 1:nrow(aslmat)
+      p <- stats::poly(timevals, degree = polydegree)
+      aslmat <- residuals(lm(aslmat ~ 0 + p))
+      if (!all(is.na(covariates))) {
+        covariates <- cbind(data.matrix(covariates), p)
+      } else covariates <- p
+    }
+  } else if (polydegree == 'gam') {
     timevals <- 1:nrow(aslmat)
-    p <- stats::poly(timevals, degree = polydegree)
-    aslmat <- residuals(lm(aslmat ~ 0 + p))
+    mean.ts <- apply(aslmat, 1, mean)
+    mygam <- gam::gam(mean.ts ~ gam::s(timevals))
+    p <- mygam$fitted.values
     if (!all(is.na(covariates))) {
       covariates <- cbind(data.matrix(covariates), p)
     } else covariates <- p
