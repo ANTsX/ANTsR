@@ -4,6 +4,8 @@
 #' tag-control image pairs to estimate perfusion.
 #' @param asl input asl image
 #' @param mask in which to calculate perfusion
+#' @param tc vector indicating which images are tagged and which are controls.
+#' Strongly recommended if using \code{regression} or \code{bayesian} methods.
 #' @param nuisance nuisance covariates to include in regression
 #' @param method method to use for computing average.  One of \code{sincSubtract},
 #'  \code{simpleSubtract}, \code{cubicSubtract}, \code{surroundSubtract},
@@ -36,32 +38,28 @@
 #'
 #' @author Kandel BM, Avants BB
 #' @examples
-#' nvox <- 5 * 5 * 5 * 10
-#' dims <- c(5, 5, 5, 10)
+#' nvox <- 8 * 8 * 8 * 10
+#' dims <- c(8, 8, 8, 10)
 #' voxvals <- array(rnorm(nvox) + 500, dim=dims)
-#' asl <- makeImage(dims, voxvals) %>% iMath("PadImage", 2)
-#' avg <- aslAveraging(asl)
+#' asl <- makeImage(dims, voxvals)
+#' tc <- rep(c(-0.5, 0.5), dims[4]/2)
+#' avg <- aslAveraging(asl, tc=tc)
 #'
 #' slice <- extractSlice(asl, 4, 4)
 #' mask <-getMask(slice)
 #' seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
-#' bayesAvg <- aslAveraging(asl, method='bayesian',
+#' bayesAvg <- aslAveraging(asl, tc=tc, method='bayesian',
 #'   segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
 #'
 #' @export
-aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
+aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression", ...) {
 # define helper function
-  bayesianPerfusion <- function(asl, mask, nuisance, segmentation, tissuelist,
+  bayesianPerfusion <- function(asl, xideal, nuisance, segmentation, tissuelist,
    myPriorStrength=30.0,
   useDataDrivenMask=3,
   localweights=F, priorBetas=NA) {
-    aslmat <- timeseries2matrix(asl, thresholdImage(segmentation, 1, Inf))
-    labelfirst <- TRUE
-    if (!labelfirst) {
-      xideal <- (rep(c(1, 0), dim(aslmat)[1])[1:dim(aslmat)[1]] - 0.5)  # control minus tag
-    } else {
-      xideal <- (rep(c(0, 1), dim(aslmat)[1])[1:dim(aslmat)[1]] - 0.5)  # tag minus control
-    }
+    mask <- thresholdImage(segmentation, 1, Inf)
+    aslmat <- timeseries2matrix(asl, mask)
     perfdf<-data.frame( xideal=xideal,
                 nuis=nuisance)
     perfdf<-perfdf[,!is.na(colMeans(perfdf))]
@@ -116,6 +114,20 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     bperfimg
   }
 
+  if ( (method == "regression" | method == "bayesian") & all(is.na(tc)) ) {
+    warning(paste("Using regression to estimate perfusion, but not provided",
+                  "with \n tag-control labels.  Assuming first image is tag, \n",
+                  "with alternating tag-control pairs."))
+    labelfirst <- TRUE
+    if (!labelfirst) {
+      tc <- (rep(c(1, 0),
+                 dim(asl)[4])[1:dim(asl)[4]] - 0.5)  #control minus tag
+    } else {
+      tc <- (rep(c(0, 1),
+                 dim(asl)[4])[1:dim(asl)[4]] - 0.5)  # tag minus control
+    }
+  }
+
   if (length(grep("Subtract", method)) > 0) {
     avg <- .Call("timeSeriesSubtraction", asl, method)
   } else if (method == "regression"){
@@ -129,11 +141,7 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
       mask <- getMask(img)
     }
     ts <- timeseries2matrix(asl, mask)
-    if (!labelfirst) {
-      xideal <- (rep(c(1, 0), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # control minus tag
-    } else {
-      xideal <- (rep(c(0, 1), dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # tag minus control
-    }
+    xideal <- tc
     cbfform <- formula(ts ~ xideal)
     if (!all(is.na(nuisance))) {
       cbfform <- formula( ts ~ xideal + nuisance)
@@ -147,16 +155,8 @@ aslAveraging <- function(asl, mask=NA,  nuisance=NA, method="regression", ...) {
     cbfi[mask == 1] <- betaideal  # standard results
     avg <- antsImageClone(cbfi)
   } else if (method == 'bayesian') {
-     if (is.na(mask)){
-      myar <- apply(as.array(asl), c(1, 2, 3), mean)
-      img <- makeImage(dim(myar), myar)
-      antsSetSpacing(img, antsGetSpacing(asl)[1:3])
-      antsSetOrigin(img, antsGetOrigin(asl)[1:3])
-      antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
-      mask <- getMask(img)
-     }
-     avg <- bayesianPerfusion(asl, mask, nuisance, ...)
-  }
+    avg <- bayesianPerfusion(asl, tc, nuisance, ...)
+  } else stop("Unrecognized method.")
   if (mean(avg) < 0) {
     avg <- -avg
   }

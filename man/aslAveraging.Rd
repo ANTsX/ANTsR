@@ -4,12 +4,16 @@
 \alias{aslAveraging}
 \title{Average ASL tag-control pairs to estimate perfusion}
 \usage{
-aslAveraging(asl, mask = NA, nuisance = NA, method = "regression", ...)
+aslAveraging(asl, mask = NA, tc = NA, nuisance = NA,
+  method = "regression", ...)
 }
 \arguments{
 \item{asl}{input asl image}
 
 \item{mask}{in which to calculate perfusion}
+
+\item{tc}{vector indicating which images are tagged and which are controls.
+Strongly recommended if using \code{regression} or \code{bayesian} methods.}
 
 \item{nuisance}{nuisance covariates to include in regression}
 
@@ -48,16 +52,17 @@ These would be as output from \code{atropos}; see \code{Examples} for a
 sample usage.
 }
 \examples{
-nvox <- 5 * 5 * 5 * 10
-dims <- c(5, 5, 5, 10)
+nvox <- 8 * 8 * 8 * 10
+dims <- c(8, 8, 8, 10)
 voxvals <- array(rnorm(nvox) + 500, dim=dims)
-asl <- makeImage(dims, voxvals) \%>\% iMath("PadImage", 2)
-avg <- aslAveraging(asl)
+asl <- makeImage(dims, voxvals)
+tc <- rep(c(-0.5, 0.5), dims[4]/2)
+avg <- aslAveraging(asl, tc=tc)
 
 slice <- extractSlice(asl, 4, 4)
 mask <-getMask(slice)
 seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
-bayesAvg <- aslAveraging(asl, method='bayesian',
+bayesAvg <- aslAveraging(asl, tc=tc, method='bayesian',
   segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
 }
 \author{
