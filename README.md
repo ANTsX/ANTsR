@@ -6,7 +6,7 @@ An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
 
 ## Description
 
-Version: 0.4
+Version: 0.3.1
 
 License: GPL (>=2)
 
@@ -30,7 +30,7 @@ Travis checks:	[ANTsR results](https://travis-ci.org/stnava/ANTsR)
 
 ## Downloads
 
-Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR-manual.pdf)
+Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf)
 
 Vignettes:
 
@@ -42,9 +42,9 @@ Wiki: [Notes and work in progress examples](https://github.com/stnava/ANTsR/wiki
 
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
-OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz)
+OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_OSX_0.3.1.tgz)
 
-Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
+Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
 
 We are working toward Windows binaries.
 
@@ -309,7 +309,7 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 # Release notes
 
-## 0.4
+## 0.3.1
 
 * WIP: iMath improvements
 
@@ -321,10 +321,10 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 * ENH: more antsRegistration options
 
-* ENH: geoSeg 
+* ENH: geoSeg
 
 * ENH: JointLabelFusion and JointIntensityFusion
- 
+
 * ENH: Enable negating images
 
 * ENH: weingarten curvature
@@ -335,6 +335,6 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 * ENH: Suppress output from imageWrite.
 
-## 0.3
+## 0.3.0
 
 First official release.
