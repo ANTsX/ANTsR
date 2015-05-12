@@ -7,8 +7,8 @@
 #' @param tc Tag-control sawtooth pattern vector.
 #' @param noisefrac Fraction of data to include in noise pool.
 #' @param polydegree Degree of polynomial for detrending, with a value of 0
-#' indicating no detrending, or \code{'gam'} for GAM-based estimation of
-#' time-series trends.
+#' indicating no detrending, or \code{'loess'} for LOESS-based estimation of
+#' global time-series trends.
 #' @param k Number of cross-validation folds.
 #' @param npreds Number of predictors to output.
 #' @param method Method of selecting noisy voxels.  One of 'compcor' or
@@ -29,7 +29,7 @@
 #' noise <- getASLNoisePredictors(aslmat, tc)
 #'
 #' @export getASLNoisePredictors
-getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5,
+getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 'loess', k = 5,
   npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
   getnoisepool <- function(x, frac = noisefrac) {
     xord <- sort(x)
@@ -47,11 +47,11 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 3, k
         covariates <- cbind(data.matrix(covariates), p)
       } else covariates <- p
     }
-  } else if (polydegree == 'gam') {
+  } else if (polydegree == 'loess') {
     timevals <- 1:nrow(aslmat)
     mean.ts <- apply(aslmat, 1, mean)
-    mygam <- gam::gam(mean.ts ~ gam::s(timevals))
-    p <- mygam$fitted.values
+    myloess <- loess(mean.ts ~ timevals)
+    p <- myloess$fitted
     if (!all(is.na(covariates))) {
       covariates <- cbind(data.matrix(covariates), p)
     } else covariates <- p
