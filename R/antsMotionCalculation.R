@@ -38,10 +38,10 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
       Inf, cleanup = 2)
   }
   tsimg <- antsImageClone( img, "double" )
-  .antsMotionCorrStats( list( x = mask, d = tsimg, o = file.out,
-    f = framewise,
-    m = file.mocoparam) )
-  tsDisplacement <- antsImageRead( tsout , 4, "double" )
+ #.antsMotionCorrStats( list( x = mask, d = tsimg, o = file.out,
+ #   f = framewise,
+ #   m = file.mocoparam) )
+ # tsDisplacement <- antsImageRead( tsout , 4, "double" )
   aslmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS(aslmat)
   list(
@@ -49,6 +49,6 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
     moco_params = moco$moco_params,
     moco_avg_img = antsImageClone(moco$moco_avg_img),
     moco_mask = antsImageClone(mask),
-    tsDisplacement = antsImageClone(tsDisplacement),
+ #   tsDisplacement = antsImageClone(tsDisplacement),
     dvars = dvars )
 }
