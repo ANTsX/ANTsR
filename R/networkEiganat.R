@@ -207,7 +207,7 @@ lowrankRowMatrix <- function(A, k = 2 ) {
   if ( usePkg("RRedsvd") )
   {
     x<-as(A,"CsparseMatrix")
-    s <- redsvd( x, k )
+    s <- RRedsvd::redsvd( x, k )
     K <- t(s$U)
   } else {
     s <- svd(A, nu = k, nv = 0)
