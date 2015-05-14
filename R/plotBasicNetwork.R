@@ -28,7 +28,7 @@
 #'   mnit<-thresholdImage( mnit, 1, max(mnit) )
 #'   mnit<-iMath(mnit,"FillHoles")
 #'   cnt<-getCentroids( mnia, clustparam = 50 )
-#'   aalcnt<-cnt[1:90,]
+#'   aalcnt<-cnt[1:90,1:3]
 #'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
 #'   testweights<-matrix( rep( 0, 90*90 ) ,nrow=90)
 #'   testweights[31,37]<-1  # ant cingulate to hipp
