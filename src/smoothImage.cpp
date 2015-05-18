@@ -84,7 +84,7 @@ try
   else if ( ( pixeltype == "float" ) & ( dimension  == 4 ) )
   {
     typedef float PixelType;
-    const unsigned int dim = 3;
+    const unsigned int dim = 4;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = smoothImageHelper< ImageType >(
         r_inimg, r_outimg, sigma, physicalSpacing);
