@@ -22,15 +22,11 @@
 #' @export antsImageRead
 antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   components=1
-  filename <- path.expand(filename)
-  if (!file.exists(filename))
+  
   if (class(filename) != "character" || length(filename) != 1) {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
   filename <- path.expand(filename)
-  if (!file.exists(filename))
-      stop("file not found")
-  
   if (class(pixeltype) != "character" || length(pixeltype) != 1) {
     stop("'pixeltype' argument must be of class 'character' and have length 1")
   }
