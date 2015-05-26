@@ -17,6 +17,32 @@ SEXP iMathCanny( Rcpp::List args )
  }
 
 template <class ImageType>
+SEXP iMathDistanceMap( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  bool useSpacing = Rcpp::as<bool>( args[2] );
+
+  ImagePointerType output = ants::iMathDistanceMap<ImageType>( input, useSpacing );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
+SEXP iMathFillHoles( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  double holeParam = Rcpp::as<double>( args[2] );
+
+  ImagePointerType output = ants::iMathFillHoles<ImageType>( input, holeParam );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
 SEXP iMathGC( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
@@ -82,6 +108,34 @@ SEXP iMathGetLargestComponent( Rcpp::List args )
   unsigned int minSize = Rcpp::as<unsigned int>( args[2] );
 
   ImagePointerType output = ants::iMathGetLargestComponent<ImageType>( input, minSize );
+
+  return Rcpp::wrap(output);
+ }
+
+template <class ImageType>
+SEXP iMathGrad( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  double sigma = Rcpp::as<double>( args[2] );
+  bool normalize = Rcpp::as<bool>( args[3] );
+
+  ImagePointerType output = ants::iMathGrad<ImageType>( input, sigma, normalize );
+
+  return Rcpp::wrap(output);
+ }
+
+template <class ImageType>
+SEXP iMathLaplacian( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  double sigma = Rcpp::as<double>( args[2] );
+  bool normalize = Rcpp::as<bool>( args[3] );
+
+  ImagePointerType output = ants::iMathLaplacian<ImageType>( input, sigma, normalize );
 
   return Rcpp::wrap(output);
  }
@@ -173,6 +227,20 @@ SEXP iMathNormalize( Rcpp::List args )
 }
 
 template <class ImageType>
+SEXP iMathPad( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  int padding = Rcpp::as<int>( args[2] );
+
+  ImagePointerType output = ants::iMathMaurerDistance<ImageType>( input, padding );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
 SEXP iMathPeronaMalik( Rcpp::List args )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -183,6 +251,55 @@ SEXP iMathPeronaMalik( Rcpp::List args )
 
 
   ImagePointerType output = ants::iMathPeronaMalik<ImageType>( input, nIterations, conductance );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
+SEXP iMathSharpen( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+
+  ImagePointerType output = ants::iMathSharpen<ImageType>( input );
+
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
+SEXP iMathTruncateIntensity( Rcpp::List args )
+{
+  const unsigned int ImageDimension = ImageType::ImageDimension;
+  typedef typename ImageType::Pointer   ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+
+  typedef itk::Image<unsigned int, ImageDimension>   MaskImageType;
+  typedef typename MaskImageType::Pointer   MaskImagePointerType;
+
+  ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+  double lowerQ = (PixelType) Rcpp::as<double>( args[2] );
+  double upperQ = (PixelType) Rcpp::as<double>( args[3] );
+  int nBins = (PixelType) Rcpp::as<int>( args[4] );
+
+  MaskImagePointerType mask=NULL;
+
+  if ( args.size() > 5 )
+    {
+    mask = Rcpp::as<MaskImagePointerType>( args[5] );
+    }
+  else
+    {
+    mask = MaskImageType::New();
+    mask->SetSpacing( input->GetSpacing() );
+    mask->SetOrigin( input->GetOrigin() );
+    mask->SetDirection( input->GetDirection() );
+    mask->SetRegions( input->GetLargestPossibleRegion() );
+    mask->Allocate();
+    mask->FillBuffer(1);
+    }
+
+  ImagePointerType output = ants::iMathTruncateIntensity<ImageType>( input, lowerQ, upperQ, nBins, mask );
 
   return Rcpp::wrap(output);
 }
@@ -291,6 +408,196 @@ try
         }
       }
 
+    }
+  else if ( operation == "DistanceMap" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      bool useSpacing = iMathDistanceMapUseSpacing;
+      args.push_back( Rcpp::wrap(useSpacing) );  // radius
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathDistanceMap<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "FillHoles" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      double holeParam = iMathFillHolesHoleParam;
+      args.push_back( Rcpp::wrap(holeParam) );  // radius
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathFillHoles<ImageType>( args );
+        }
+      }
     }
   else if ( operation == "GC" )
     {
@@ -492,7 +799,7 @@ try
         }
       }
     }
-  else if ( operation == "gE" )
+  else if ( operation == "GE" )
     {
     Rcpp::S4 image( args[0] );
     dim = Rcpp::as< int >( image.slot( "dimension" ) );
@@ -789,6 +1096,206 @@ try
         {
         typedef itk::Image<ValueType,4>       ImageType;
         return iMathGetLargestComponent<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "Grad" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      double sigma = iMathGradSigma;
+      args.push_back( Rcpp::wrap(sigma) );  // radius
+      }
+    if ( args.size() < 4 )
+      {
+      bool normalize = iMathGradNormalize;
+      args.push_back( Rcpp::wrap(normalize) );  // radius
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathGrad<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "Laplacian" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      double sigma = iMathLaplacianSigma;
+      args.push_back( Rcpp::wrap(sigma) );  // radius
+      }
+    if ( args.size() < 4 )
+      {
+      bool normalize = iMathLaplacianNormalize;
+      args.push_back( Rcpp::wrap(normalize) );  // radius
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathLaplacian<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathLaplacian<ImageType>( args );
         }
       }
     }
@@ -1405,6 +1912,100 @@ try
         }
       }
     }
+  else if ( operation == "Pad" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 3 )
+      {
+      Rcpp::stop( "Pad: requires a padding value");
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPad<ImageType>( args );
+        }
+      }
+    }
   else if ( operation == "PeronaMalik" )
     {
     Rcpp::S4 image( args[0] );
@@ -1428,7 +2029,6 @@ try
       double conductance = iMathPeronaMalikConductance;
       args.push_back( Rcpp::wrap(conductance) );
      }
-
 
     if ( pixeltype == "double" )
       {
@@ -1508,6 +2108,198 @@ try
         {
         typedef itk::Image<ValueType,4>       ImageType;
         return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "Sharpen" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("Sharpen only supports scalar images");
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathSharpen<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "TruncateIntensity" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    // Optional parameters with default values
+    if ( args.size() < 4 )
+      {
+      Rcpp::stop("TruncateIntensity: requires lowerQ and upperQ values");
+      }
+    if ( args.size() < 5 )
+      {
+      int nBins = iMathTruncateIntensityNBins;
+      args.push_back( Rcpp::wrap(nBins) );
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 3 )
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathTruncateIntensity<ImageType>( args );
         }
       }
     }

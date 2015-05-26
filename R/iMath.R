@@ -13,14 +13,11 @@
 #' @param ... further parameter options
 #' @author JT Duda
 #' @examples
-#' WIP - PadImage;Basic;positive or negative padvalue;"iMath(i,op,5)";pads or de-pads image by n voxels on all sides;0
-#' WIP - D;Filter;None;"iMath(i,op)";distance transform;0
 #' MaurerDistance;Filter;None;"iMath(i,op)";distance transform;0
 #' PeronaMalik;Filter;"iterations, conductance";"iMath(i,op,10,0.5)";perona malik edge preserving smoothing;0
-#' WIP - Grad;Filter;sigma;"iMath(i,op,1)";gradient magnitude;0
-#' WIP - Laplacian;Filter;sigma;"iMath(i,op,1)";laplacian of intensity;0
+#' Grad;Filter;sigma;"iMath(i,op,1)";gradient magnitude;0
+#' Laplacian;Filter;sigma;"iMath(i,op,1)";laplacian of intensity;0
 #' Canny;Filter;sigma;"iMath(i,op,1,5,12)";canny edge detector;0
-#' WIP - BlobDetector;Filter;nblobs;"iMath(i,op,100)";scale space blob detection-negate image to be positive blobs;0
 #' MD;Morphology;element radius;"iMath(i,op,1)";dilation;0
 #' ME;Morphology;element radius;"iMath(i,op,1)";erosion;0
 #' MO;Morphology;element radius;"iMath(i,op,1)";opening;0
@@ -29,16 +26,17 @@
 #' GE;Morphology;element radius;"iMath(i,op,1)";grayscale erosion;0
 #' GO;Morphology;element radius;"iMath(i,op,1)";grayscale opening;0
 #' GC;Morphology;element radius;"iMath(i,op,1)";grayscale closing;0
-#' WIP - FillHoles;LabelOp;None;"iMath(i,op)";fills holes in binary object;0
 #' GetLargestComponent;LabelOp;None;"iMath(i,op)";returns largest portion of binary object;0
-#' WIP - LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
-#' WIP - Neg;Intensity;None;"iMath(i,op)";create image negative;0
 #' Normalize;Intensity;None;"iMath(i,op)";normalize intensity into 0 1 range;0
-#' WIP - TruncateImageIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
-#' WIP - Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+#' TruncateIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
+#' Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+#' Pad;Basic;positive or negative padvalue;"iMath(i,op,5)";pads or de-pads image by n voxels on all sides;0
+#' DistanceMap;Filter;None;"iMath(i,op)";distance transform;0
+#' FillHoles;LabelOp;None;"iMath(i,op)";fills holes in binary object;0
+#' WIP - BlobDetector;Filter;nblobs;"iMath(i,op,100)";scale space blob detection-negate image to be positive blobs;0
+#' WIP - LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
 #' WIP - ReflectionMatrix;Transformation;axis;"iMath(i,op,0)";returns a reflection matrix itk transform in filename form;NA
 
-#'
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
 #' mask<-getMask( fi )
 #' op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
