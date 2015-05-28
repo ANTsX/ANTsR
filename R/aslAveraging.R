@@ -54,7 +54,7 @@
 #' @export
 aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression", ...) {
 # define helper function
-  bayesianPerfusion <- function(asl, xideal, nuisance, segmentation, tissuelist,
+  bayesianPerfusion <- function(asl, mask, xideal, nuisance, segmentation, tissuelist,
    myPriorStrength=30.0,
   useDataDrivenMask=3,
   localweights=F, priorBetas=NA) {
@@ -155,7 +155,7 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
     cbfi[mask == 1] <- betaideal  # standard results
     avg <- antsImageClone(cbfi)
   } else if (method == 'bayesian') {
-    avg <- bayesianPerfusion(asl, tc, nuisance, ...)
+    avg <- bayesianPerfusion(asl, mask, tc, nuisance, ...)
   } else stop("Unrecognized method.")
   if (mean(avg) < 0) {
     avg <- -avg
