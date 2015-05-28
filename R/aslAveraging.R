@@ -60,9 +60,9 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
   localweights=F, priorBetas=NA) {
     mask <- thresholdImage(segmentation, 1, Inf)
     aslmat <- timeseries2matrix(asl, mask)
-    perfdf<-data.frame( xideal=xideal,
+    perfdf <- data.frame( xideal=xideal,
                 nuis=nuisance)
-    perfdf<-perfdf[,!is.na(colMeans(perfdf))]
+    perfdf <- as.matrix(perfdf[,!is.na(colMeans(perfdf))])
     perfmodel<-lm(aslmat ~ perfdf)
     getpriors<-function(img, segmentation) {
       n <- max(segmentation)
