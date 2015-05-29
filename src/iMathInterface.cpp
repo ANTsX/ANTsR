@@ -409,7 +409,8 @@ try
       }
 
     }
-  else if ( operation == "DistanceMap" )
+  //else if ( operation == "DistanceMap" )
+  else if ( operation == "D" )
     {
     Rcpp::S4 image( args[0] );
     dim = Rcpp::as< int >( image.slot( "dimension" ) );
@@ -1912,7 +1913,7 @@ try
         }
       }
     }
-  else if ( operation == "Pad" )
+  else if ( operation == "PadImage" )
     {
     Rcpp::S4 image( args[0] );
     dim = Rcpp::as< int >( image.slot( "dimension" ) );
