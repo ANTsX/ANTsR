@@ -60,6 +60,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       segvals<-c(sort( unique( as.numeric(segmat)) ))
       if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
       }
+    if ( !includezero ) segvals = segvals[ segvals != 0 ]
     rm(segmat)
     }
   maskout<-antsImageClone( targetIMask )
