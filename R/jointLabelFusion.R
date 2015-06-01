@@ -1,12 +1,12 @@
-#' joint intensity fusion
+#' joint label fusion
 #'
-#' Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
+#' A multiple atlas voting scheme to customize labels for a new subject.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
 #' @param beta weight sharpness, default to 2
-#' @param rad neighborhood radius, default to 3
+#' @param rad neighborhood radius, default to 4
 #' @param labelList list containing antsImages
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
@@ -50,20 +50,21 @@
 #'  seglist[[i]]<-seg$segmentation
 #'  }
 #' r<-2
-#' d<-2
-#' pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=0,
-#'   labelList=seglist, rad=rep(r,d) )
+#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+#'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
 #'
-#' @export jointIntensityFusion
-jointIntensityFusion <- function( targetI, targetIMask, atlasList,
+#' @export jointLabelFusion
+jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
+  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='image',
   rSearch=2, segvals=NA, includezero=FALSE, computeProbs=FALSE )
 {
   haveLabels=FALSE
   BC=boundary.condition
   nvox = sum( targetIMask == 1 )
+  if ( length(labelList) != length(atlasList) )
+    stop("length(labelList) != length(atlasList)")
   if ( !( all( is.na(labelList) ) ) )
     {
     segmat<-imageListToMatrix( labelList, targetIMask )
@@ -89,35 +90,30 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
   wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
   matcenter<-round(n/2)+1
-  intmat<-wmat
   targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
   targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
-  rm(targetIvStruct)
-  newmeanvec<-rep(0,ncol(targetIv))
+  if ( doscale ) targetIv<-scale(targetIv)
   m<-length(atlasList)
   onev<-rep(1,m)
   weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
   natlas<-length(atlasList)
   atlasLabels<-1:natlas
-  maxSimImg<-rep(0,ncol(targetIv))
   if ( maxAtlasAtVoxel[2] > natlas ) maxAtlasAtVoxel[2]<-natlas
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
   badct<-0
   basewmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
-  for ( voxel in 1:ncol(targetIv) )
+  for ( voxel in 1:ncol( targetIv ) )
     {
     zsd<-rep(1,natlas)
     wmat<-basewmat
     targetint<-targetIv[,voxel]
+    cent<-indices[voxel,]
     for ( ct in 1:natlas)
       {
-      # is this a BUG/FIXME?
-      # see antsImage_GetNeighborhood
-      cent<-indices[voxel,]
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],
@@ -127,13 +123,12 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       vmean = nhsearch[[ 3 ]]
       sdv = nhsearch[[ 4 ]]
       segmatSearch[ct,voxel]<-segval
-      intmat[ct,] = v
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
         }
       if ( doscale ) {
-        v<-( v - vmean ) / sdv
+        v<-( v - vmean )/sdv
         }
       if ( !usecor )
         wmat[ct,]<-abs(v-targetint) # assignment
@@ -178,17 +173,16 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       }
       if ( ! is.na( mean(wts)) ) {
         weightmat[zsd==1,voxel]<-wts
-        maxSimImg[ voxel ]<-atlasLabels[zsd==1][  which.max(wts) ]
-        newmeanvec[voxel]<-(intmat[zsd==1,matcenter] %*% wts)[1]
       } else badct<-badct+1
       if ( FALSE ) {
         print("DEBUG MODE")
         print(maxAtlasAtVoxel)
             return(
-                list(voxel=voxel,
-                     wts=wts,intmat=intmat,
-                     wmat=wmat,cormat=cormat, pvox=newmeanvec[voxel],
-                     zsd=zsd,intmatc=intmat[zsd==1,matcenter])
+                list( voxel  = voxel,
+                      wts    = wts,
+                      wmat   = wmat,
+                      cormat = cormat,
+                      zsd    = zsd )
                 )
               }
       if ( voxel %% 500 == 0 ) {
@@ -200,8 +194,6 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   rm( segmat )
   rm( targetIv )
   rm( indices )
-  newimg<-makeImage( targetIMask, newmeanvec )
-  maxSimImg<-makeImage( targetIMask, maxSimImg )
   segimg<-NA
   probImgList<-NA
   if ( !( all( is.na(labelList) ) ) )
@@ -247,7 +239,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     if ( computeProbs )
       probImgList<-probImgList[2:length(probImgList)]
     }
-  return( list( predimg=newimg, segimg=segimg,
+  return( list( segimg=segimg,
     localWeights=weightmat, probimgs=probImgList,
-    maxSimImg=maxSimImg, badct=badct  ) )
+    badct=badct  ) )
 }

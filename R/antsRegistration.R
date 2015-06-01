@@ -23,7 +23,7 @@
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
-#'   \item{"SynBold": }{SyN, but optimized for registrations between
+#'   \item{"SyNBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
 #'   \item{"SyNAggro": }{SyN, but with more aggressive registration
 #'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
@@ -224,8 +224,9 @@ antsRegistration <- function( fixed = NA, moving = NA,
           warpedfixout = antsImageClone(warpedfixout, inpixeltype), fwdtransforms = fwdtransforms,
           invtransforms = invtransforms))
       }
-      if (!ttexists)
-        cat("Problem in arg list \n see usage by calling antsRegistration() w/o arguments \n")
+      if (!ttexists) {
+        stop("Unrecognized transform type.")
+      }
     }
     return(0)
   }

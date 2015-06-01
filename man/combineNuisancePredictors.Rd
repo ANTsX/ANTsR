@@ -12,25 +12,36 @@ combineNuisancePredictors(inmat, target, globalpredictors=NA,
 
 \item{target}{Target outcome matrix.}
 
-\item{globalpredictors}{Global predictors of size \code{nrow(inmat)} by \code{n}, where \code{n} is the number of global predictors.}
+\item{globalpredictors}{Global predictors of size \code{nrow(inmat)}
+by \code{n}, where \code{n} is the number of global predictors.}
 
 \item{maxpreds}{Maximum number of predictors to output.}
 
-\item{localpredictors}{Local predictor array of size \code{nrow(inmat)} by \code{ncol(inmat)} by \code{m}, where \code{m} is the number of local predictors.}
+\item{localpredictors}{Local predictor array of size \code{nrow(inmat)}
+by \code{ncol(inmat)} by \code{m}, where \code{m} is the number of
+local predictors.}
 
-\item{method}{Method of selecting noisy voxels.  One of 'svd' or 'cv'. See \code{Details}.}
+\item{method}{Method of selecting noisy voxels.  One of 'svd' or 'cv'.
+See \code{Details}.}
 
 \item{k}{Number of cross-validation folds.}
 
-\item{covariates}{Covariates to be considered when assessing prediction of \code{target}.}
+\item{covariates}{Covariates to be considered when assessing prediction
+of \code{target}.}
 
-\item{ordered}{Can the predictors be assumed to be ordered from most important to least important, as in output from PCA? Computation is much faster if so.}
+\item{ordered}{Can the predictors be assumed to be ordered from most
+important to least important, as in output from PCA?
+Computation is much faster if so.}
 }
 \value{
-Array of size \code{nrow(aslmat)} by \code{npreds}, containing a timeseries of all the nuisance predictors.  If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)} by \code{ncol(aslmat)} by \code{npreds}.
+Array of size \code{nrow(aslmat)} by \code{npreds},
+containing a timeseries of all the nuisance predictors.
+If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)}
+by \code{ncol(aslmat)} by \code{npreds}.
 }
 \description{
-Combine and select nuisance predictors to maximize correlation between \code{inmat} and \code{target}.
+Combine and select nuisance predictors to maximize
+correlation between \code{inmat} and \code{target}.
 }
 \examples{
 set.seed(120)

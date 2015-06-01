@@ -76,8 +76,7 @@ aslPerfusion <- function(
   }
   if (is.character(asl)) {
     if (length(asl) != 1) {
-      print("'asl' should be only one filename")
-      return(NULL)
+      stop("'asl' should be only one filename")
     }
     asl <- antsImageRead(asl, 4)
   } else if (class(asl) == "antsImage") {
@@ -85,12 +84,10 @@ aslPerfusion <- function(
       asl <- antsImageClone(asl, pixtype)
     }
     if (asl@dimension != 4) {
-      print(paste("'asl' must have pixeltype ", pixtype, " and dimension '4'"))
-      return(NULL)
+      stop(paste("'asl' must have pixeltype ", pixtype, " and dimension '4'"))
     }
   } else {
-    print("'asl' must be a filename or an 'antsImage'")
-    return(NULL)
+    stop("'asl' must be a filename or an 'antsImage'")
   }
   if (missing(asl)) {
     print("Missing first (image) parameter")
@@ -99,8 +96,7 @@ aslPerfusion <- function(
   }
   n <- length(dim(asl))
   if (n != 4) {
-    print("input image must have dimension 4 ")
-    return(NULL)
+    stop("input image must have dimension 4 ")
   }
   if (is.null(moco_results))
     moco_results <- .motion_correction(asl, moreaccurate = moreaccurate)
@@ -116,7 +112,8 @@ aslPerfusion <- function(
     asl<-timeseriesN3( asl, moco_mask_img )
     }
   if (is.na(m0)) {
-    print("Estimating m0 image from the mean of the control values - might be wrong for your data! please check!")
+    warning(paste("Estimating m0 image from the mean of the control values.", 
+     "Might be wrong for your data! Please check!"))
     ctllabs<-c(1:(dim(asl)[4]/2)) * 2 # TC - jj data
     taglabs<-ctllabs-1
     mvals2 <- apply(mat[ctllabs, ], 2, mean)
@@ -146,7 +143,6 @@ aslPerfusion <- function(
   if (!is.na(mask))
     moco_mask_img <- mask
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
-  # mat <- timeseries2matrix( asl, moco_mask_img)
   if (checkmeansignal > 0) {
     if ( verbose )
       print("Check the mean signal to eliminate frames with high drop out rate")
@@ -154,37 +150,33 @@ aslPerfusion <- function(
     if ( verbose ) plot(ts(imgmeans))
     if ( sum( imgmeans > checkmeansignal ) < (nrow(mat)/2) )
     {
-    print("imgmeans suggests data is likely bad - return NA")
+    warning("imgmeans suggests data is likely bad - returning NA")
     return(NA)
     }
     mat <- subset(mat, imgmeans > checkmeansignal)
     motionparams <- subset(motionparams, imgmeans > checkmeansignal)
     imgmeans <- apply(mat, FUN = mean, MARGIN = 1)
   }
-  # Get perfusion time series
-  perfusionTimeSeries <- antsImageClone( asl )
-  imageMath(4, perfusionTimeSeries, "TimeSeriesSimpleSubtraction", asl )
-  perfusionTimeSeries[!is.finite(as.array(perfusionTimeSeries))]<- 0
-  perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]<- -1 * perfusionTimeSeries[is.finite(as.array(perfusionTimeSeries))]
 
-  # mat <- antsr_frequency_filter( mat , freqHi = 0.5 , freqLo = 0.01, tr = 4 )
   predictors <- .get_perfusion_predictors( mat,
     motionparams, NULL, 1, ncompcor, useDenoiser )
-  if ( verbose ) print( names(predictors) )
-  # predictors$nuis<-cbind( predictors$globalsignalASL, predictors$nuis )
+  if (verbose) { 
+    print( names(predictors) )
+  }
   if ( ! all( is.na(predictors$nuis) ) ) {
     mynuis <- data.frame( predictors$nuis, predictors$motion )
-  } else mynuis <- data.frame( predictors$motion )
-#    motionparams[,3:ncol(motionparams)] )
-#  if ( !all(is.na(useDenoiser)))
-#    mynuis <- data.frame( predictors$nuis )
+  } else {
+    mynuis <- data.frame( predictors$motion )
+  }
   if ( verbose ) {
     cat("Nuisance variables\n")
     print( colnames(mynuis) )
   }
   if ( ! all( is.na(mynuis)) ) {
-    rmat<-residuals( lm( mat ~ 0 + data.matrix(mynuis) )  )
-  } else rmat<-mat
+    rmat <- residuals( lm( mat ~ 0 + data.matrix(mynuis) )  )
+  } else {
+    rmat <- mat
+  }
   perfusion <- perfusionregression(mask_img = moco_mask_img,
       mat = mat, # or rmat?
       xideal = predictors$xideal,
@@ -192,7 +184,6 @@ aslPerfusion <- function(
       skip = skip, selectionValsForRegweights = predictors$dnz,
       useBayesian=useBayesian )
   return(list(perfusion = perfusion$cbfi,
-    perfusionTimeSeries = perfusionTimeSeries,
     aslTimeSeries = mat, xideal = predictors$xideal,
     nuisancevariables = mynuis,
     mask = moco_mask_img, m0 = m0, m1 = m1,

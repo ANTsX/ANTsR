@@ -4,8 +4,8 @@
 \alias{getASLNoisePredictors}
 \title{Get nuisance predictors from ASL images}
 \usage{
-getASLNoisePredictors(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5,
-  npreds = 12, method = "noisepool", covariates = NA,
+getASLNoisePredictors(aslmat, tc, noisefrac = 0.1, polydegree = "loess",
+  k = 5, npreds = 12, method = "noisepool", covariates = NA,
   noisepoolfun = max)
 }
 \arguments{
@@ -15,8 +15,9 @@ getASLNoisePredictors(aslmat, tc, noisefrac = 0.1, polydegree = 3, k = 5,
 
 \item{noisefrac}{Fraction of data to include in noise pool.}
 
-\item{polydegree}{Degree of polynomial for detrending. A value of 0
-indicates no detrending.}
+\item{polydegree}{Degree of polynomial for detrending, with a value of 0
+indicating no detrending, or \code{'loess'} for LOESS-based estimation of
+global time-series trends.}
 
 \item{k}{Number of cross-validation folds.}
 

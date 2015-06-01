@@ -24,6 +24,7 @@
 #' @param alpha  opacity
 #' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param nslices  number of slices to view
+#' @param dorot  do a rotation of the slice before viewing
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -71,6 +72,7 @@ plot.antsImage <- function(x, y,
   alpha = 0.5,
   newwindow = FALSE,
   nslices = 10,
+  dorot = 0,
   ... ) {
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
@@ -219,6 +221,11 @@ plot.antsImage <- function(x, y,
     slice <- mirror.matrix(slice) else slice <- img
   slicerow <- nrow(slice)
   slicecol <- ncol(slice)
+  if ( dorot == 1 )
+    {
+    slicerow <- ncol(slice)
+    slicecol <- nrow(slice)
+    }
   bigslice <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
   rowsl <- 0
   # convert to 0 255
@@ -227,8 +234,10 @@ plot.antsImage <- function(x, y,
     if (sl < dim(img)[imagedim]) {
       if (axis != 2 & imagedim > 2)
         slice <- rotate90.matrix(img[, , slices[sl + 1]])
-      if (axis == 2 & imagedim > 2)
+      if (axis == 2 & imagedim > 2 & dorot==0 )
         slice <- flip.matrix(img[, , slices[sl + 1]])
+      if (axis == 2 & imagedim > 2 & dorot==1 )
+        slice <- rotate270.matrix(img[, , slices[sl + 1]])
       if (imagedim > 2) {
         slice <- mirror.matrix(slice)
       } else {
@@ -335,11 +344,14 @@ plot.antsImage <- function(x, y,
     temp <- labimg
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
     labimg <- temp
-    locthresh <- round((window.overlay[1:2] - mncl)/(mxcl - mncl) * (nlevels - 1))
+    locthresh <- round((window.overlay[1:2] - mncl) /
+                      (mxcl - mncl) * (nlevels - 1))
     if (axis != 2 & imagedim > 2)
       labslice <- rotate90.matrix(labimg[, , slices[1]])
-    if (axis == 2 & imagedim > 2)
+    if (axis == 2 & imagedim > 2 & dorot==0 )
       labslice <- flip.matrix(labimg[, , slices[1]])
+    if (axis == 2 & imagedim > 2 & dorot==1 )
+      labslice <- rotate270.matrix(labimg[, , slices[sl + 1]])
     if (imagedim > 2)
       labslice <- mirror.matrix(labslice) else slice <- img
     slicerow <- nrow(slice)
@@ -350,8 +362,10 @@ plot.antsImage <- function(x, y,
       if (sl < dim(img)[imagedim]) {
         if (axis != 2 & imagedim > 2)
           labslice <- rotate90.matrix(labimg[, , slices[sl + 1]])
-        if (axis == 2 & imagedim > 2)
-          labslice <- flip.matrix(labimg[, , slices[sl + 1]])
+        if (axis == 2 & imagedim > 2 & dorot==0 )
+          labslice <- flip.matrix(labimg[, , slices[1]])
+        if (axis == 2 & imagedim > 2 & dorot==1 )
+          labslice <- rotate270.matrix(labimg[, , slices[sl + 1]])
         if (imagedim > 2) {
           labslice <- mirror.matrix(labslice)
         } else {

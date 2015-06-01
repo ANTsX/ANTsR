@@ -1,11 +1,10 @@
-#' jointIntensityFusion3D
+#' jointLabelFusion3D
 #'
-#' Estimates an image/labelset from another set of 3D images
+#' Estimates an labelset from another set of 3D labels
 #'
-#' intensity generalization of joint label fusion, still supports segmentation.
-#' this version is more efficient, memory-wise, for 3D images. it is a thin
-#' wrapper that goes slice-by-slice but produces the same results.
-#'
+#' joint label fusion. this version is more efficient,
+#' memory-wise, for 3D images. it is a thin wrapper
+#' that goes slice-by-slice but produces the same results.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
@@ -30,11 +29,11 @@
 #' @keywords fusion, template
 #' @examples
 #'
-#' # see jointIntensityFusion for a detailed example
+#' # see jointLabelFusion for a detailed example
 #' # defaults for this function are current recommended parameters
 #'
-#' @export jointIntensityFusion3D
-jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
+#' @export jointLabelFusion3D
+jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA,
@@ -42,7 +41,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
 {
   if (nargs() == 0)
     {
-    print(args(jointIntensityFusion3D))
+    print(args(jointLabelFusion3D))
     return(1)
     }
   if ( targetI@dimension != 3 )
@@ -60,7 +59,6 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       segvals<-c(sort( unique( as.numeric(segmat)) ))
       if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
       }
-    if ( !includezero ) segvals = segvals[ segvals != 0 ]
     rm(segmat)
     }
   maskout<-antsImageClone( targetIMask )
@@ -82,7 +80,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       mask2d<-as.antsImage(mask2d)
       mask2d<-antsCopyImageInfo(targetIMask,mask2d)
       maskout[ mask2d == 1 ]<-1
-      oo2d<-jointIntensityFusion( targetI=targetI,
+      oo2d<-jointLabelFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
         beta=beta, rad=rad, labelList=labelList,
         doscale=doscale, doNormalize=doNormalize,
@@ -91,12 +89,9 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         computeProbs=computeProbs )
       if ( whichMaskSlice == 0 )
         {
-        localJIF2Di<-oo2d$predimg
         localJIF2Ds<-oo2d$segimg
         if ( computeProbs ) localJIF2Dp<-oo2d$probimgs
         } else {
-          localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
-            oo2d$predimg[ mask2d == 1 ]
           localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
             oo2d$segimg[ mask2d == 1 ]
           probct<-1
@@ -111,6 +106,6 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout,
+  return( list( segimg=localJIF2Ds, mask=maskout,
      probimgs=localJIF2Dp ) )
 }

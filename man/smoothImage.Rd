@@ -4,24 +4,32 @@
 \alias{smoothImage}
 \title{Smooth image}
 \usage{
-smoothImage( inimg, sigma )
+smoothImage(inimg, sigma, sigmaInPhysicalCoordinates = TRUE, FWHM = FALSE)
 }
 \arguments{
-\item{inimg}{Input image to operate on}
+\item{inimg}{Image to smooth}
 
-\item{sigma}{Smoothing factor.  Either scalar, or vector of length \code{dim} for \code{dim}-dimensional image.}
+\item{sigma}{Smoothing factor.  Can be scalar, in which case the same sigma
+is applied to each dimension, or a vector of length \code{dim(inimg)} to
+specify a unique smoothness for each dimension.}
+
+\item{sigmaInPhysicalCoordinates}{If true, the smoothing factor is in
+millimeters; if false, it is in pixels.}
+
+\item{FWHM}{If true, sigma is interpreted as the full-width-half-max (FWHM)
+of the filter, not the sigma of a Gaussian kernel.}
 }
 \value{
-antsImage smoothed
+antsImage smoothed image
 }
 \description{
-Perform smoothing on the given image with a given sigma, defined in physical space units
+Smooth image
 }
 \examples{
-img<-makeImage(c(5,5),rnorm(25))
-simg<-smoothImage( img ,c(1.2,1.5) )
+img <- makeImage(c(5,5), rnorm(25))
+simg <- smoothImage(img, c(1.2,1.5))
 }
 \author{
-Shrinidhi KL, Avants BB
+Kandel BM, Avants BB
 }
 

@@ -1,12 +1,13 @@
 # ANTsR
 
-[![Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
+[![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
+[ ![Codeship Build Status](https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master)](https://codeship.com/projects/79732)
 
 An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
 
 ## Description
 
-Version: 0.3
+Version: 0.3.1
 
 License: GPL (>=2)
 
@@ -30,7 +31,7 @@ Travis checks:	[ANTsR results](https://travis-ci.org/stnava/ANTsR)
 
 ## Downloads
 
-Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR-manual.pdf)
+Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf)
 
 Vignettes:
 
@@ -42,9 +43,9 @@ Wiki: [Notes and work in progress examples](https://github.com/stnava/ANTsR/wiki
 
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
-OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz)
+OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_OSX_0.3.1.tgz)
 
-Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
+Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
 
 We are working toward Windows binaries.
 
@@ -305,3 +306,36 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 ```
+
+
+# Release notes
+
+## 0.3.1
+
+* WIP: iMath improvements
+
+* WIP: ASL pipeline fuctionality
+
+* BUG: Fixed image indexing bug
+
+* BUG: plot.antsImage improvements
+
+* ENH: more antsRegistration options
+
+* ENH: geoSeg
+
+* ENH: JointLabelFusion and JointIntensityFusion
+
+* ENH: Enable negating images
+
+* ENH: weingarten curvature
+
+* ENH: antsApplyTransformsToPoints with example
+
+* ENH: renormalizeProbabilityImages
+
+* ENH: Suppress output from imageWrite.
+
+## 0.3.0
+
+First official release.

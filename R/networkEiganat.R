@@ -201,12 +201,18 @@ networkEiganat <- function(
 #' lrmat <- lowrankRowMatrix( mat , 2 )
 #'
 #' @export lowrankRowMatrix
-lowrankRowMatrix <- function(A, k = 2) {
+lowrankRowMatrix <- function(A, k = 2 ) {
   if (k > nrow(A))
     return(A)
-  p <- ncol(A)
-  s <- svd(A, nu = k, nv = 0)
-  K <- t(s$u)
+  if ( usePkg("RRedsvd") )
+  {
+    x<-as(A,"CsparseMatrix")
+    s <- RRedsvd::redsvd( x, k )
+    K <- t(s$U) # %*% diag(s$D[1:k]))
+  } else {
+    s <- svd(A, nu = k, nv = 0)
+    K <- t(s$u) # %*% diag(s$d[1:k]) )
+  }
   X1 <- K %*% A
   return(X1)
 }

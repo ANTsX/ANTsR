@@ -4,7 +4,8 @@
 \alias{aslCensoring}
 \title{Censor bad volumes from ASL data.}
 \usage{
-aslCensoring(asl, mask = NA, nuis = NA, method = "outlier", ...)
+aslCensoring(asl, mask = NA, nuis = NA, method = "outlier",
+  reject.pairs = F, ...)
 }
 \arguments{
 \item{asl}{input asl image}
@@ -14,6 +15,10 @@ aslCensoring(asl, mask = NA, nuis = NA, method = "outlier", ...)
 \item{nuis}{fixed nuisance parameters}
 
 \item{method}{one of 'outlier', 'robust', or 'scor'.  See \code{Details}.}
+
+\item{reject.pairs}{whether to reject only tag-control pairs of images,
+as opposed to single images.  Rejecting pairs of images is necessary for
+non-regression-based ASL averaging methods.}
 
 \item{...}{Additional arguments to pass to censoring method.  See \code{Details.}}
 }
@@ -60,7 +65,7 @@ nvox <- 5 * 5 * 5 * 10
 dims <- c(5, 5, 5, 10)
 voxvals <- array(rnorm(nvox) + 500, dim=dims)
 voxvals[, , , 5] <- voxvals[, , , 5] + 600
-asl <- makeImage(dims, voxvals) \%>\% iMath("PadImage", 2)
+asl <- makeImage(dims, voxvals)
 censored <- aslCensoring(asl)
 }
 \author{

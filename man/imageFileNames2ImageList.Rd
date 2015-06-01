@@ -4,29 +4,28 @@
 \alias{imageFileNames2ImageList}
 \title{Simple imageFileNames2ImageListing function.}
 \usage{
-imageFileNames2ImageList(x, dim)
+imageFileNames2ImageList(x)
 }
 \arguments{
 \item{x}{input file name list}
-
-\item{dim}{img dimensionality (optional)}
 }
 \value{
-a list like this : mylist<-list( img1, img2 , etcetera ) is the
-output ... img* are antsImages
+a list containing the images  this : mylist<-list( img1, img2 , etcetera ) is the
 }
 \description{
 ImageFileNames2ImageLists converts the input list of file names to a list
 containing antsImages.
 }
 \examples{
-\dontrun{
-  # gglb<-paste('gmView1vec*.nii.gz',sep='')
-  # gfnl<-imageFileNames2ImageList( list.files(path=statdir,
-  #   pattern = glob2rx(gglb),full.names = T,recursive = T) )
+dir  <- paste(tempdir(), .Platform$file.sep, sep='')
+img <- makeImage(c(4,4))
+for (ii in 1:6) {
+  antsImageWrite(img, paste(dir, 'image', ii, '.nii.gz', sep=''))
 }
+imagenames <- list.files(dir, glob2rx('*.nii.gz'), full.names=TRUE)
+images <- imageFileNames2ImageList(imagenames)
 }
 \author{
-Avants BB
+Avants BB, Kandel BM
 }
 
