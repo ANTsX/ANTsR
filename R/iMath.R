@@ -49,10 +49,10 @@
 #' }
 #'
 #' @export iMath
-iMath <- function( input=NA, operation=NA, param=NA, ... ) {
+iMath <- function( img, operation, param=NA, ... ) {
 
   # input is usually an 'antsImage'
-  if (is.na(input))
+  if (is.na(img))
     {
     stop("No input provided")
     }
@@ -64,11 +64,11 @@ iMath <- function( input=NA, operation=NA, param=NA, ... ) {
   args = list()
   if ( is.na(param) )
     {
-    args = list(input, operation, ...)
+    args = list(img, operation, ...)
     }
   else
     {
-    args =  list(input, operation, param, ...)
+    args =  list(img, operation, param, ...)
     }
 
   catchout = .Call("iMathInterface", args, PACKAGE="ANTsR")
