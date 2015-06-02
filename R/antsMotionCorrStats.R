@@ -1,4 +1,6 @@
-.antsMotionCorrStats <- function(...) {
-  .Call("antsMotionCorrStats",
-    .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+.antsMotionCorrStats <- function(inimg, mask, mocoparams) {
+  tsimg <- antsImageClone(inimg, "float")
+  mocomat <- as.matrix(mocoparams)
+  .Call("antsMotionCorrStats", tsimg, mask, mocomat,
+    PACKAGE = "ANTsR")
 }
