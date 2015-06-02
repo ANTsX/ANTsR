@@ -13,6 +13,7 @@
 #'  \item{moco_avg_img}{ Average motion-corrected image.}
 #'  \item{moco_mask}{ Mask used to calculate framewise displacement.}
 #'  \item{tsDisplacement}{ Time-series displacement image.}
+#'  \item{fd}{ Time-series mean and max displacements.}
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
 #' @author Benjamin M. Kandel
@@ -34,6 +35,8 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
   }
   tsimg <- antsImageClone( img, "double" )
   mocostats <- .antsMotionCorrStats(tsimg, mask, moco$moco_params)
+  fd <- as.data.frame(mocostats$Displacements)
+  names(fd) <- c("MeanDisplacement", "MaxDisplacement")
 
   aslmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS(aslmat)
@@ -43,5 +46,6 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, 
     moco_avg_img = antsImageClone(moco$moco_avg_img),
     moco_mask = antsImageClone(mask),
     tsDisplacement = mocostats$TimeSeriesDisplacement,
+    fd = fd,
     dvars = dvars )
 }
