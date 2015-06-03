@@ -235,7 +235,7 @@ SEXP iMathPad( Rcpp::List args )
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   int padding = Rcpp::as<int>( args[2] );
 
-  ImagePointerType output = ants::iMathMaurerDistance<ImageType>( input, padding );
+  ImagePointerType output = ants::iMathPad<ImageType>( input, padding );
 
   return Rcpp::wrap(output);
 }
