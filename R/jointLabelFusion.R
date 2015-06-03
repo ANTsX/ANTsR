@@ -159,7 +159,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       if ( ! is.na( mean(wts)) ) {
         weightmat[,voxel]<-wts
         # hongzhi method
-        probmat = segmat * 0
+        probmat = matrix( 0, ncol=nvox, nrow=length(segvals) )
         segct = 1
         for ( lseg in segvals )
           {
