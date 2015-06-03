@@ -4,7 +4,8 @@
 \alias{makeImage}
 \title{Simple makeImage function.}
 \usage{
-makeImage(imagesize, voxval = 1)
+makeImage(imagesize, voxval = 0, spacing = c(NA), origin = c(NA),
+  direction = c(NA), components = 1, pixeltype = "float")
 }
 \arguments{
 \item{imagesize}{input image size or mask}

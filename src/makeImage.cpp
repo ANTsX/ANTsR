@@ -41,6 +41,7 @@ SEXP makeImage( Rcpp::NumericVector size, Rcpp::NumericVector spacing,
   image->SetOrigin( itk_origin );
   image->SetDirection( itk_direction );
   image->Allocate();
+  image->FillBuffer(0);
 
   return Rcpp::wrap( image );
 }
