@@ -1,8 +1,8 @@
 #' iMath
 #'
-#' Perform various (often mathematical) operations on the input image.
+#' Perform various (often mathematical) operations on the input image/s.
 #' Additional parameters should be specific for each operation.  See the
-#' the full ImageMath in ANTs, on which this function is based.
+#' the full iMath in ANTs, on which this function is based.
 #'
 #' @param img input object, usually antsImage
 #' @param operation a character string e.g. "GetLargestComponent" ... the
@@ -11,9 +11,32 @@
 #' Some operations may not be valid (WIP), but most are.
 #' @param param ... additional parameters
 #' @param ... further parameter options
-#' @author BB Avants
+#' @author JT Duda
 #' @examples
-#'
+#' MaurerDistance;Filter;None;"iMath(i,op)";distance transform;0
+#' PeronaMalik;Filter;"iterations, conductance";"iMath(i,op,10,0.5)";perona malik edge preserving smoothing;0
+#' Grad;Filter;sigma;"iMath(i,op,1)";gradient magnitude;0
+#' Laplacian;Filter;sigma;"iMath(i,op,1)";laplacian of intensity;0
+#' Canny;Filter;sigma;"iMath(i,op,1,5,12)";canny edge detector;0
+#' MD;Morphology;element radius;"iMath(i,op,1)";dilation;0
+#' ME;Morphology;element radius;"iMath(i,op,1)";erosion;0
+#' MO;Morphology;element radius;"iMath(i,op,1)";opening;0
+#' MC;Morphology;element radius;"iMath(i,op,1)";closing;0
+#' GD;Morphology;element radius;"iMath(i,op,1)";grayscale dilation;0
+#' GE;Morphology;element radius;"iMath(i,op,1)";grayscale erosion;0
+#' GO;Morphology;element radius;"iMath(i,op,1)";grayscale opening;0
+#' GC;Morphology;element radius;"iMath(i,op,1)";grayscale closing;0
+#' GetLargestComponent;LabelOp;None;"iMath(i,op)";returns largest portion of binary object;0
+#' Normalize;Intensity;None;"iMath(i,op)";normalize intensity into 0 1 range;0
+#' TruncateIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
+#' Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+#' Pad;Basic;positive or negative padvalue;"iMath(i,op,5)";pads or de-pads image by n voxels on all sides;0
+#' DistanceMap;Filter;None;"iMath(i,op)";distance transform;0
+#' FillHoles;LabelOp;None;"iMath(i,op)";fills holes in binary object;0
+#' WIP - BlobDetector;Filter;nblobs;"iMath(i,op,100)";scale space blob detection-negate image to be positive blobs;0
+#' WIP - LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
+#' WIP - ReflectionMatrix;Transformation;axis;"iMath(i,op,0)";returns a reflection matrix itk transform in filename form;NA
+
 #' fi<-antsImageRead( getANTsRData("r16") , 2 )
 #' mask<-getMask( fi )
 #' op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
@@ -26,60 +49,30 @@
 #' }
 #'
 #' @export iMath
-iMath <- function( img, operation , param=NA, ... ) {
-#  call <- match.call() # see glm
-  iMathOps <- NULL
-  data( "iMathOps", package = "ANTsR", envir = environment() )
-  if ( operation == "GetOperations" | operation == "GetOperationsFull" )
-  {
-  if ( operation == "GetOperationsFull" ) return(iMathOps)
-  return(iMathOps$Operation)
-  }
-  if ( ! ( operation  %in% iMathOps$Operation ) )
+iMath <- function( img, operation, param=NA, ... ) {
+
+  # input is usually an 'antsImage'
+  if (is.na(img))
     {
-    stop(paste("'operation'",operation," not recognized"))
+    stop("No input provided")
+    }
+  if ( is.na(operation) || (!is.character(operation)) )
+    {
+    stop("operation must be a character string")
     }
 
-  if ( class( operation ) != 'character')
-  {
-  print(class(operation))
-  print("2nd param should be a character string defining the operation")
-  return(NA)
-  }
-  wh<-which( iMathOps$Operation == operation )
-  if ( is.antsImage(img) & !is.na(iMathOps$OutputDimensionalityChange[wh]) )
+  args = list()
+  if ( is.na(param) )
     {
-    dim<-img@dimension
-    outdim<-dim+as.numeric(  iMathOps$OutputDimensionalityChange[wh]  )
-    outimg<-new("antsImage", img@pixeltype, outdim)
-    if ( is.na(param) )
-      args<-list(dim,outimg,operation,img,...)
-    if (!is.na(param) )
-      args<-list(dim,outimg,operation,img,param,...)
-    catchout<-.Call("ImageMath",
-      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-    return(outimg)
+    args = list(img, operation, ...)
     }
-if ( iMathOps$Operation[wh] == 'LabelStats' & is.antsImage(param)  )
-  {
-  dim<-img@dimension
-  tf<-tempfile(fileext = ".csv")
-  args<-list(dim,tf,operation,param,img)
-  catchout<-.Call("ImageMath",
-      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-  df<-read.csv(tf)
-  return(df)
-  }
-if ( iMathOps$Operation[wh] == 'ReflectionMatrix'  )
-  {
-  dim<-img@dimension
-  tf<-tempfile(fileext = ".mat")
-  args<-list(dim,tf,operation,img,param)
-  catchout<-.Call("ImageMath",
-      .int_antsProcessArguments(args), PACKAGE = "ANTsR")
-  return(tf)
-  }
- stop("no matching call to iMath")
+  else
+    {
+    args =  list(img, operation, param, ...)
+    }
+
+  catchout = .Call("iMathInterface", args, PACKAGE="ANTsR")
+
 }
 
 
@@ -160,4 +153,3 @@ reflectImage<-function( img1, axis=NA, tx=NA ) {
 #' @export
 #' @usage lhs \%>\% rhs
 NULL
-
