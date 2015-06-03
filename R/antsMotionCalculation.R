@@ -30,10 +30,16 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   fixed <- getAverageOfTimeSeries( img )
   }
   moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate)
-  if (moreaccurate > 2){
+  mocoparams <- moco$moco_params
+  if (moreaccurate > 2) {
     for(ii in 1:4){
+      moco <- .motion_correction(img, fixed=moco$moco_avg_img,
+                                 moreaccurate=2)
+      mocoparams <- moco$moco_params
+    }
+    if (moreaccurate > 3) {
       moco <- .motion_correction(moco$moco_img, fixed=moco$moco_avg_img,
-                                 moreaccurate=moreaccurate)
+                                 moreaccurate=3)
     }
   }
   if (is.na(mask)) {
@@ -41,7 +47,7 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
       Inf, cleanup = 2)
   }
   tsimg <- antsImageClone( img, "double" )
-  mocostats <- .antsMotionCorrStats(tsimg, mask, moco$moco_params)
+  mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams)
   fd <- as.data.frame(mocostats$Displacements)
   names(fd) <- c("MeanDisplacement", "MaxDisplacement")
 
@@ -49,7 +55,7 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   dvars <- computeDVARS(aslmat)
   list(
     moco_img = antsImageClone(moco$moco_img),
-    moco_params = moco$moco_params,
+    moco_params = mocoparams,
     moco_avg_img = antsImageClone(moco$moco_avg_img),
     moco_mask = antsImageClone(mask),
     tsDisplacement = mocostats$TimeSeriesDisplacement,
