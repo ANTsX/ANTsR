@@ -25,6 +25,7 @@ List containing:
  \item{moco_avg_img}{ Average motion-corrected image.}
  \item{moco_mask}{ Mask used to calculate framewise displacement.}
  \item{tsDisplacement}{ Time-series displacement image.}
+ \item{fd}{ Time-series mean and max displacements.}
  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 }
 }
