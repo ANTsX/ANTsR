@@ -159,7 +159,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       if ( ! is.na( mean(wts)) ) {
         weightmat[,voxel]<-wts
         # hongzhi method
-        probmat = matrix( 0, ncol=nvox, nrow=length(segvals) )
         segct = 1
         for ( lseg in segvals )
           {
@@ -167,7 +166,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
           lsegmat[ segmat == lseg ] = 1
           lsegprobs = wts %*% lsegmat
           lsegprobs[ lsegprobs <  0 ] = 0
-          probmat[ segct, ] = lsegprobs
           .Call("addNeighborhoodToImage",
             posteriorList[[segct]], cent, rad, lsegprobs,
             package="ANTsR" )
