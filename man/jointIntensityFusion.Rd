@@ -8,7 +8,7 @@ jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
   usecor = FALSE, boundary.condition = "mean", rSearch = 2,
-  segvals = NA, includezero = FALSE, computeProbs = FALSE)
+  segvals = NA, includezero = TRUE, computeProbs = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}

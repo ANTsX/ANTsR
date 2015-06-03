@@ -7,7 +7,7 @@
 jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, rSearch = 0, slices = NA, includezero = FALSE,
+  usecor = FALSE, rSearch = 0, slices = NA, includezero = TRUE,
   computeProbs = FALSE)
 }
 \arguments{

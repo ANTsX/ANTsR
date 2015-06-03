@@ -19,7 +19,6 @@
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
 #' @param includezero boolean - try to predict the zero label
-#' @param computeProbs boolean - requires more memory
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -58,7 +57,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA, includezero=TRUE, computeProbs=FALSE )
+  rSearch=2, segvals=NA, includezero=TRUE )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -196,5 +195,5 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     segimg[  segimg == ct ] = segvals[ ct ]
   return( list( segimg=segimg,
     localWeights=weightmat, probimgs=posteriorList,
-    badct=badct  ) )
+    badct=badct, segvals=segvals  ) )
 }
