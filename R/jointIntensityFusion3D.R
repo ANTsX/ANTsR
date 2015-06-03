@@ -38,7 +38,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA,
-  includezero=FALSE, computeProbs=FALSE )
+  includezero=TRUE, computeProbs=FALSE )
 {
   if (nargs() == 0)
     {
@@ -85,6 +85,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       oo2d<-jointIntensityFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
         beta=beta, rad=rad, labelList=labelList,
+        rSearch=rSearch,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
         useSaferComputation=useSaferComputation, usecor=usecor,

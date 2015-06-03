@@ -58,7 +58,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA, includezero=FALSE, computeProbs=FALSE )
+  rSearch=2, segvals=NA, includezero=TRUE, computeProbs=FALSE )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -79,6 +79,9 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
         segvals<-segvals[  segvals != 0 ]
       }
     }
+  posteriorList=list() # weight for each label
+  for ( i in 1:length(segvals) )
+    posteriorList = lappend( posteriorList , targetI * 0 )
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -94,6 +97,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
   targetIv<-targetIvStruct$values
   indices<-targetIvStruct$indices
+  rm( targetIvStruct )
   if ( doscale ) targetIv<-scale(targetIv)
   m<-length(atlasList)
   onev<-rep(1,m)
@@ -112,6 +116,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     wmat<-basewmat
     targetint<-targetIv[,voxel]
     cent<-indices[voxel,]
+    segmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
     for ( ct in 1:natlas)
       {
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
@@ -122,16 +127,18 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       v = nhsearch[[ 2 ]]
       vmean = nhsearch[[ 3 ]]
       sdv = nhsearch[[ 4 ]]
+      bestcor = nhsearch[[ 5 ]]
+      segmat[ct, ] = nhsearch[[ 6 ]]
       segmatSearch[ct,voxel]<-segval
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
-        }
+        } else sdv=sd(v)
       if ( doscale ) {
-        v<-( v - vmean )/sdv
+        v<-( v - mean(v) )/sdv
         }
       if ( !usecor )
-        wmat[ct,]<-abs(v-targetint) # assignment
+        wmat[ct,]<-abs(v-(targetint)) # assignment
       else {
         ip<- ( v * targetint )
         wmat[ct,]<-( ip*(-1.0))  # assignment
@@ -140,106 +147,56 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     if ( maxAtlasAtVoxel[2] < natlas ) {
       ords<-order(rowMeans(abs(wmat)))
       inds<-maxAtlasAtVoxel[1]:maxAtlasAtVoxel[2]
-      zsd[ ords[-inds] ]<-0
+      # zsd[ ords[-inds] ]<-0
       }
     if ( sum(zsd) > (2) )
       {
-      wmat<-wmat[zsd==1,]
-      cormat<-( wmat %*% t(wmat) )
-      cormatnorm<-norm(cormat,"F")
-      corrho<-cormatnorm*rho
-#      cormat<-cor(t(wmat)) # more stable wrt outliers
-      if ( useSaferComputation ) # safer computation
-      {
-      tempf<-function(betaf)
-        {
-        invmat<-solve( cormat + diag(ncol(cormat))*corrho )^betaf
-        onev<-rep(1,sum(zsd))
-        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
-        return(wts)
-        }
-      wts<-tryCatch( tempf(beta),
-          error = function(e)
-            {
-            szsd<-sum(zsd)
-            wts<-rep(1.0/szsd,szsd)
-            return( wts )
-            }
-        )
-      } else {
-        invmat<-solve( cormat + diag(ncol(cormat))*corrho )^beta
-        onev<-rep(1,sum(zsd))
-        wts<-invmat %*% onev / ( sum( onev * invmat %*% onev ))
-      }
+      cormat = ( ( (wmat) %*% t(wmat) ) / ( ncol(wmat) - 1 ) )^beta
+      tempmat = ( antsrimpute(cormat) + diag(ncol(cormat)) * rho )
+      onev<-rep(1,ncol(cormat))
+      wts = solve( tempmat, onev )
+      wts = wts * 1.0 / sum( wts * onev )
       if ( ! is.na( mean(wts)) ) {
-        weightmat[zsd==1,voxel]<-wts
+        weightmat[,voxel]<-wts
+        # hongzhi method
+        probmat = segmat * 0
+        segct = 1
+        for ( lseg in segvals )
+          {
+          lsegmat = segmat * 0
+          lsegmat[ segmat == lseg ] = 1
+          lsegprobs = wts %*% lsegmat
+          lsegprobs[ lsegprobs <  0 ] = 0
+          probmat[ segct, ] = lsegprobs
+          .Call("addNeighborhoodToImage",
+            posteriorList[[segct]], cent, rad, lsegprobs,
+            package="ANTsR" )
+          segct = segct + 1
+          }
       } else badct<-badct+1
-      if ( FALSE ) {
-        print("DEBUG MODE")
-        print(maxAtlasAtVoxel)
-            return(
-                list( voxel  = voxel,
-                      wts    = wts,
-                      wmat   = wmat,
-                      cormat = cormat,
-                      zsd    = zsd )
-                )
-              }
-      if ( voxel %% 500 == 0 ) {
-            setTxtProgressBar( progress, voxel )
-        }
     }
   } # loop over voxels
+  totalImage = targetIMask * 0
+  for ( poo in 1:length(posteriorList) )
+    totalImage = totalImage + posteriorList[[poo]]
+  selector = totalImage > 0
+  for ( poo in 1:length(posteriorList) )
+    {
+    posteriorList[[poo]][ selector ] =
+      posteriorList[[poo]][ selector ] /
+      totalImage[ selector ]
+    }
   close( progress )
   rm( segmat )
   rm( targetIv )
   rm( indices )
-  segimg<-NA
-  probImgList<-NA
-  if ( !( all( is.na(labelList) ) ) )
-    {
-    segvec<-rep( 0, nvox )
-    if ( computeProbs ) {
-      probImgList<-list()
-      probImgVec<-list()
-      for ( p in 1:length( segvals ) )
-        probImgVec[[p]]<-rep( 0, nvox )
-      }
-    for ( voxel in 1:nvox )
-      {
-      probvals<-rep(0,length(segvals))
-      segsearch<-segmatSearch[,voxel]
-      if  ( sd(segsearch) > 0 )
-      {
-        for ( p in 1:length(segvals))
-        {
-        ww<-which( segsearch==segvals[p] )
-#          &  weightmat[  , voxel ] > 0 )
-          if ( length(ww) > 0 )
-            {
-            probvals[p]<-sum((weightmat[ ww , voxel ]),na.rm=T)
-            }
-        }
-      probvals<-probvals/sum(probvals)
-      } else {
-        probvals[ which(segsearch[1]==segvals) ]<-1
-      }
-      if ( computeProbs )
-        for ( p in 1:length(segvals))
-          probImgVec[[p]][voxel]<-probvals[p]
-      k<-which(probvals==max(probvals,na.rm=T))
-      if ( length(k) > 0 )
-        segvec[voxel]=segvals[ k ][1]
-    }
-    if ( computeProbs )
-      for ( p in 1:length(segvals) )
-        probImgList[[p]]<-makeImage( targetIMask, probImgVec[[p]] )
-    segimg<-makeImage(targetIMask,segvec)
-    # 1st probability is background i.e. 0 label
-    if ( computeProbs )
-      probImgList<-probImgList[2:length(probImgList)]
-    }
+  finalseg=imageListToMatrix( posteriorList, targetIMask  )
+  finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
+  segimg = makeImage( targetIMask , finalsegvec  )
+  # finally, remap to original segmentation labels
+  for ( ct in 1:length(segvals) )
+    segimg[  segimg == ct ] = segvals[ ct ]
   return( list( segimg=segimg,
-    localWeights=weightmat, probimgs=probImgList,
+    localWeights=weightmat, probimgs=posteriorList,
     badct=badct  ) )
 }

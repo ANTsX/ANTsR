@@ -59,7 +59,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='mean',
-  rSearch=2, segvals=NA, includezero=FALSE, computeProbs=FALSE )
+  rSearch=2, segvals=NA, includezero=TRUE, computeProbs=FALSE )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -92,7 +92,8 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   intmat<-wmat
   targetIvStruct<-getNeighborhoodInMask(targetI,
     targetIMask,rad,boundary.condition=BC,spatial.info=T)
-  targetIv<-targetIvStruct$values
+  targetIv<-( targetIvStruct$values )
+  if ( doscale ) targetIv<-scale( targetIvStruct$values )
   indices<-targetIvStruct$indices
   rm(targetIvStruct)
   newmeanvec<-rep(0,ncol(targetIv))
@@ -113,15 +114,14 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     zsd<-rep(1,natlas)
     wmat<-basewmat
     targetint<-targetIv[,voxel]
+    cent<-indices[voxel,]
     for ( ct in 1:natlas)
       {
-      # is this a BUG/FIXME?
-      # see antsImage_GetNeighborhood
-      cent<-indices[voxel,]
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
         targetint, cent, max(rad), rSearch,
         atlasList[[ct]],
-        labelList[[ct]], PACKAGE="ANTsR" )
+        labelList[[ct]],
+        PACKAGE="ANTsR" )
       segval = nhsearch[[ 1 ]]
       v = nhsearch[[ 2 ]]
       vmean = nhsearch[[ 3 ]]
@@ -139,7 +139,7 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         wmat[ct,]<-abs(v-targetint) # assignment
       else {
         ip<- ( v * targetint )
-        wmat[ct,]<-( ip*(-1.0))  # assignment
+        wmat[ct,]<-( ip * (-1.0) )  # assignment
         }
       } # for all atlases
     if ( maxAtlasAtVoxel[2] < natlas ) {
@@ -183,12 +183,13 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       } else badct<-badct+1
       if ( FALSE ) {
         print("DEBUG MODE")
-        print(maxAtlasAtVoxel)
             return(
                 list(voxel=voxel,
                      wts=wts,intmat=intmat,
                      wmat=wmat,cormat=cormat, pvox=newmeanvec[voxel],
-                     zsd=zsd,intmatc=intmat[zsd==1,matcenter])
+                     zsd=zsd,intmatc=intmat[zsd==1,matcenter],
+                     segmat=segmatSearch,
+                     targetint=targetint)
                 )
               }
       if ( voxel %% 500 == 0 ) {
@@ -221,11 +222,10 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
       {
         for ( p in 1:length(segvals))
         {
-        ww<-which( segsearch==segvals[p] )
-#          &  weightmat[  , voxel ] > 0 )
+        ww<-which( segsearch==segvals[p] &  weightmat[  , voxel ] > 0 )
           if ( length(ww) > 0 )
             {
-            probvals[p]<-sum((weightmat[ ww , voxel ]),na.rm=T)
+            probvals[p]<-sum(weightmat[ ww , voxel ],na.rm=T)
             }
         }
       probvals<-probvals/sum(probvals)
