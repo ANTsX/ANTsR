@@ -23,12 +23,19 @@
 #' # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
-antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1, framewise = 1) {
+antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
+                                  framewise = 1) {
   if ( is.na( fixed )  )
   {
   fixed <- getAverageOfTimeSeries( img )
   }
   moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate)
+  if (moreaccurate > 2){
+    for(ii in 1:4){
+      moco <- .motion_correction(moco$moco_img, fixed=moco$moco_avg_img,
+                                 moreaccurate=moreaccurate)
+    }
+  }
   if (is.na(mask)) {
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
       Inf, cleanup = 2)
