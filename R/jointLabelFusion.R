@@ -18,7 +18,6 @@
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
-#' @param includezero boolean - try to predict the zero label
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -57,20 +56,20 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   useSaferComputation=FALSE, usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA, includezero=TRUE )
+  rSearch=2, segvals=NA )
 {
   haveLabels=FALSE
   BC=boundary.condition
   nvox = sum( targetIMask == 1 )
   if ( length(labelList) != length(atlasList) )
     stop("length(labelList) != length(atlasList)")
+  includezero = TRUE
   if ( !( all( is.na(labelList) ) ) )
     {
-    segmat<-imageListToMatrix( labelList, targetIMask )
-    segmatSearch<-segmat
     haveLabels=TRUE
     if ( all( is.na(segvals) ) )
       {
+      segmat<-imageListToMatrix( labelList, targetIMask )
       segvals<-c(sort( unique( as.numeric(segmat)) ))
       if ( includezero )
         if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
@@ -128,7 +127,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       sdv = nhsearch[[ 4 ]]
       bestcor = nhsearch[[ 5 ]]
       segmat[ct, ] = nhsearch[[ 6 ]]
-      segmatSearch[ct,voxel]<-segval
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
@@ -191,9 +189,11 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
   segimg = makeImage( targetIMask , finalsegvec  )
   # finally, remap to original segmentation labels
+  rsegimg = segimg * 0
   for ( ct in 1:length(segvals) )
-    segimg[  segimg == ct ] = segvals[ ct ]
-  return( list( segimg=segimg,
+    rsegimg[  segimg == ct ] = segvals[ ct ]
+  rm( segimg )
+  return( list( segimg=rsegimg,
     localWeights=weightmat, probimgs=posteriorList,
     badct=badct, segvals=segvals  ) )
 }

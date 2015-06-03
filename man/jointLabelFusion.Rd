@@ -8,7 +8,7 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
   usecor = FALSE, boundary.condition = "image", rSearch = 2,
-  segvals = NA, includezero = TRUE)
+  segvals = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -41,8 +41,6 @@ makes image converge to average}
 \item{rSearch}{radius of search, default is 2}
 
 \item{segvals}{list of labels to expect}
-
-\item{includezero}{boolean - try to predict the zero label}
 }
 \value{
 approximated image, segmentation and probabilities

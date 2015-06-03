@@ -21,7 +21,6 @@
 #' @param usecor employ correlation as local similarity
 #' @param rSearch radius of search, default is 2
 #' @param slices vector defining slices to use (speeds parameter selection)
-#' @param includezero boolean - try to predict the zero label
 #' @return approximated image, segmentation and probabilities
 #' (latter are WIP, might be done by the time your read this ) ...
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
@@ -35,8 +34,7 @@
 jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA,
-  includezero=FALSE )
+  useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA )
 {
   if (nargs() == 0)
     {
@@ -105,5 +103,5 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
       }
     } # endfor
   return( list( segimg=localJIF2Ds, mask=maskout,
-     probimgs=localJIF2Dp ) )
+     probimgs=localJIF2Dp, segvals=segvals ) )
 }

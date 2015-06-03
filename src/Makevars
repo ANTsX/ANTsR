@@ -19,4 +19,6 @@ all: $(SHLIB)
 
 $(SHLIB): libs
 
-libs: ; cd ${PWD}/antb && $(MAKE) -j 2
+libs: ; cd ${PWD}/antb 
+
+tlibs: ; cd ${PWD}/antb && $(MAKE) -j 2
