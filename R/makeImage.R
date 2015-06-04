@@ -5,6 +5,11 @@
 #'
 #' @param imagesize input image size or mask
 #' @param voxval input image value or vector, size of mask
+#' @param spacing image spatial resolution
+#' @param origin image spatial origin
+#' @param direction direction matrix to convert from index to physical space
+#' @param components components per pixel
+#' @param pixeltype data type of image values
 #' @return antsImage is output
 #' @author Avants BB
 #' @examples
