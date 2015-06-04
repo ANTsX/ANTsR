@@ -29,13 +29,13 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   {
   fixed <- getAverageOfTimeSeries( img )
   }
-  moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate)
+  moreaccurate.init <- min(c(moreaccurate, 2))
+  moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate.init)
   mocoparams <- moco$moco_params
   if (moreaccurate > 2) {
-    for(ii in 1:4){
+    for(ii in 1:2){
       moco <- .motion_correction(img, fixed=moco$moco_avg_img,
                                  moreaccurate=2)
-      mocoparams <- moco$moco_params
     }
     if (moreaccurate > 3) {
       moco <- .motion_correction(moco$moco_img, fixed=moco$moco_avg_img,
