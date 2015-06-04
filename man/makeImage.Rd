@@ -4,12 +4,23 @@
 \alias{makeImage}
 \title{Simple makeImage function.}
 \usage{
-makeImage(imagesize, voxval = 1)
+makeImage(imagesize, voxval = 0, spacing = c(NA), origin = c(NA),
+  direction = c(NA), components = 1, pixeltype = "float")
 }
 \arguments{
 \item{imagesize}{input image size or mask}
 
 \item{voxval}{input image value or vector, size of mask}
+
+\item{spacing}{image spatial resolution}
+
+\item{origin}{image spatial origin}
+
+\item{direction}{direction matrix to convert from index to physical space}
+
+\item{components}{components per pixel}
+
+\item{pixeltype}{data type of image values}
 }
 \value{
 antsImage is output

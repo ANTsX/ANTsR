@@ -19,23 +19,22 @@ Some operations may not be valid (WIP), but most are.}
 \item{...}{further parameter options}
 }
 \description{
-Perform various (often mathematical) operations on the input image.
+Perform various (often mathematical) operations on the input image/s.
 Additional parameters should be specific for each operation.  See the
-the full ImageMath in ANTs, on which this function is based.
+the full iMath in ANTs, on which this function is based.
 }
 \examples{
 fi<-antsImageRead( getANTsRData("r16") , 2 )
 mask<-getMask( fi )
 op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
-op2<-iMath( mask , "Neg" )  # negate
-op3<-iMath( mask , "D" )  # distance transform
-ops<-iMath( mask , "GetOperations" )  # list all ops
+op2<-iMath( mask , "D" )  # distance transform
+op3<-iMath( mask , "GetOperations" )  # list all ops
 
 if ( usePkg("magrittr") ) { # string ops together
   lapgd <- fi \%>\% iMath("Laplacian",1)  \%>\% iMath("GD",3)
 }
 }
 \author{
-BB Avants
+JT Duda
 }
 
