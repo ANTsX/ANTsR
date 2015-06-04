@@ -17,7 +17,7 @@
 #' mask<-getMask( fi )
 #' op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
 #' op2<-iMath( mask , "D" )  # distance transform
-#' op3<-iMath( mask , "GetOperations" )  # list all ops
+#' op3<-iMath( 0 , "GetOperations" )  # list all ops
 #'
 #' if ( usePkg("magrittr") ) { # string ops together
 #'   lapgd <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
@@ -36,17 +36,42 @@ iMath <- function( img, operation, param=NA, ... ) {
     stop("operation must be a character string")
     }
 
-  args = list()
-  if ( is.na(param) )
+  iMathOps = NULL
+  data( "iMathOps", package="ANTsR", envir=environment() )
+
+  if ( operation == "GetOperations" | operation == "GetOperationsFull")
     {
-    args = list(img, operation, ...)
+
+    if ( operation == "GetOperationsFull")
+      {
+      return( iMathOps )
+      }
+    else
+      {
+      return( iMathOps$Operation)
+      }
     }
   else
     {
-    args =  list(img, operation, param, ...)
+
+    if ( ! ( operation  %in% iMathOps$Operation ) )
+      {
+      stop(paste("'operation'",operation," not recognized"))
+      }
+
+    args = list()
+    if ( is.na(param) )
+      {
+      args = list(img, operation, ...)
+      }
+    else
+      {
+      args =  list(img, operation, param, ...)
+      }
+    retval = .Call("iMathInterface", args, PACKAGE="ANTsR")
     }
 
-  catchout = .Call("iMathInterface", args, PACKAGE="ANTsR")
+    return( retval )
 
 }
 
