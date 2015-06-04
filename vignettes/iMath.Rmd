@@ -1,8 +1,9 @@
 ---
 title: "iMath (mathematical operations inside ANTsR)"
-author: "Brian B. Avants, Arman Eshaghi"
+author: "Brian B. Avants, Arman Eshaghi, Jeffrey T. Duda"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Transformations and statistical representations for images in R}
@@ -17,12 +18,9 @@ library(ANTsR)
 
 ## Basic operations
 
-`iMath`  wraps some functions of `ImageMath` from [ANTs software](http://stnava.github.io/ANTs/). For basic
-arithmetics (e.g., add, subtract), while it's possible to use `iMath`, usually it
-is easier to use `antsImage` class capabilities.
-
-  * Basic arithmetics with `antsImageClass` is easier, and is similar to
-  array operations in R:
+`iMath`  wraps some functions of `ImageMath` from [ANTs software](http://stnava.github.io/ANTs/). Basic
+arithmetics (e.g., add, subtract), are built into the `antsImage` class capabilities, and are similar to
+array operations in R:
 
     ```{r basic}
     fi  <- antsImageRead(getANTsRData("r16"), 2)
@@ -34,7 +32,7 @@ is easier to use `antsImage` class capabilities.
     divfi <- sumfi / mulfi
     ```
 
-##Dilation or erosion of masks and images
+##Morphological operations on masks and images
 
 The typical rule for dilation and erosion of images in ANTsR is minimum
 for erosion and maximum for dilation (ITK rules).
@@ -74,15 +72,13 @@ for erosion and maximum for dilation (ITK rules).
     invisible(plot(ME))
     ```
 
-##Opening and closing image filters
-
   * Morphological closing of a binary image: operation `MC` fill holes with the
     provided radius parameter, for example:
 
-```{r closer}
-newMask <- iMath(mask, "MC", 4)
-invisible(plot(newMask,slices=c(1,1)))
-```
+    ```{r closer}
+    newMask <- iMath(mask, "MC", 4)
+    invisible(plot(newMask,slices=c(1,1)))
+    ```
 
   * Morphological opening of a binary image: removes small structures at the boundary
     or interior of an image. Syntax is similar to the previous procedure with the operation
@@ -91,7 +87,7 @@ invisible(plot(newMask,slices=c(1,1)))
 
 ##Padding or cropping an image
 
-`PadImage` is a function to add/remove voxels to/from images.
+`PadImage` is a function to add/remove voxels to/from the boundaries of an image.
 
 * Positive numbers will pad image in each direction. So for example using 2
   will increase an image with 256 voxels to 260.
@@ -115,23 +111,24 @@ invisible(plot(newMask,slices=c(1,1)))
     ```
 
 ##Distance map
+Distance maps may be used for a number of purposes, including: shape
+analysis, skeletonization and path finding.
 
-  * `MaurerDistance` calculates the Euclidean distance transform of a binary
-  image in time linear with total number of voxels. It assumes that inside
-  the binary image has negative distance, while outside of the binary mask
-  has positve distance. Distance maps could be used for example, in shape
-  analysis, skletonizing or path finding.
+  * `MaurerDistance` implements ITK's [SignedMaurerDistanceMap](http://www.itk.org/Doxygen/html/classitk_1_1SignedMaurerDistanceMapImageFilter.html) which
+  calculates the Euclidean distance transform of a binary
+  image in time linear with total number of voxels [@Maurer2003].
+  It assumes that inside the binary image has negative distance,
+  while outside of the binary mask has positive distance.
 
-    # FIXME - this is broken
-    # ```{r maurer}
-    # distanceMap <- iMath(mask, "MaurerDistance")
-    # distanceMap <- distanceMap*0
-    # invisible(plot(distanceMap))
+    ```{r maurer}
+    distanceMap <- iMath(mask, "MaurerDistance")
+    invisible(plot(distanceMap))
     ```
 
- *  `D` implements ITK's `DanielssonDistanceMap`. It calculates the Euclidean
+ *  `D` implements ITK's [DanielssonDistanceMap](http://www.itk.org/Doxygen/html/classitk_1_1DanielssonDistanceMapImageFilter.html). It calculates the Euclidean
    distance map, which shows at each voxel the shortest distance to the nearest
-   voxel in the background (assuming that the input is a binary image).
+   voxel in the background (assuming that the input is a binary image)
+   [@Danielsson1980].
 
     ```{r distancemap}
     distanceMap <- iMath(mask, "D")
@@ -143,7 +140,9 @@ invisible(plot(newMask,slices=c(1,1)))
 To reduce noise without changing important parts of an image in computer vision, Perona-Malik is a
 promising method. Perona-Malik method to reduce noise with anisotropic diffusion is accessible
 via `PeronaMalik` operation in `iMath`. It requires two parameters: 1) number of iterations, and
-2) conductance.
+2) conductance. This implements ITK's [GradientAnisotropicDiffusionImageFilter](http://www.itk.org/Doxygen/html/classitk_1_1GradientAnisotropicDiffusionImageFilter.html).
+
+The conductance parameter is described by ITK's [AnisotropicDiffusionFunction](http://www.itk.org/Doxygen/html/classitk_1_1AnisotropicDiffusionFunction.html): "The conductance parameter controls the sensitivity of the conductance term in the basic anisotropic diffusion equation. It affects the conductance term in different ways depending on the particular variation on the basic equation. As a general rule, the lower the value, the more strongly the diffusion equation preserves image features (such as high gradients or curvature). A high value for conductance will cause the filter to diffuse image features more readily. Typical values range from 0.5 to 2.0 for data like the Visible Human color data, but the correct value for your application is wholly dependent on the results you want from a specific data set and the number or iterations you perform."
 
 ```{r pm}
 denoised <- iMath(fi, "PeronaMalik", 10, 0.5)
@@ -154,9 +153,13 @@ invisible(plot(fi - denoised))
 
 ## Magnitude of gradient computation
 
-`Grad` operation in `iMath` calculates the gradient of the magnitude of an image by convolution
-with the first derivative of a Gaussian. Required parameters are: 1) sigma, and 2) normalize
-output (0 or 1, boolean).
+`Grad` implements ITK's [GradientMagnitudeRecursiveGaussian](http://www.itk.org/Doxygen/html/classitk_1_1GradientMagnitudeRecursiveGaussianImageFilter.html#a170eaa3168a017c92cc0b640943e9ca2) which calculates the gradient of the magnitude of an image by convolution
+with the first derivative of a Gaussian. Parameters are:
+
+* `sigma` (Optional: double, default=0.5) is the full width at half max of the Gaussian kernel,
+specified in physical space units.
+
+* `normalize` (Optional: 0 or 1 boolean, default=0) specifies if the output should be scaled to lie in [0,1]
 
 ```{r grad}
   grad <- iMath(fi, "Grad", 1)
@@ -165,9 +168,13 @@ output (0 or 1, boolean).
 
 ## Laplacian of Gaussian of an image
 
-`Laplacian` operation calculates the the Laplacian of Gaussian of an image by convolving with
-the second derivative of a Gaussian. `sigma` and `normalize` (0 or 1, boolean) are two required
-parameters.
+`Laplacian` implements ITK's [LaplacianRecursiveGaussianImageFilter](http://www.itk.org/Doxygen/html/classitk_1_1LaplacianRecursiveGaussianImageFilter.html) which  calculates the the Laplacian of Gaussian of an image by convolving with
+the second derivative of a Gaussian. Parameters are:
+
+* `sigma` (Optional: double, default=0.5) is the full width at half max of the Gaussian kernel,
+specified in physical space units.
+
+* `normalize` (Optional: 0 or 1 boolean, default=0) specifies if the output should be scaled to lie in [0,1]
 
 ```{r lap}
   laplacianImage <- iMath(fi, "Laplacian", 1, 1)
@@ -177,7 +184,7 @@ parameters.
 ##Sequential operations on images
 
 Usually it is easier to perform sequential procedures starting from left to right,
-instead of right to left, as one needs with funcitons. This has been made possible by
+instead of right to left, as one needs with functions. This has been made possible by
 another package that `ANTsR` depends on, `magrittr`. For example, instead of:
 
 ```{r}
@@ -198,7 +205,6 @@ result <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
 | ------------- |:-------------------------:| --------------------------:|
 | FillHoles     |`img %>% iMath("FillHoles")`| Fills holes in binary object|
 | GetLargestComponent |`img %>% iMath("GetLargestComponent")`|Returns largest portion of binary object|
-| Neg | `img %>% iMath("Neg")`|Creates image negative|
 |Normalize| `img %>% iMath("Normalize")` |Creates image negative|
 |TruncateImageIntensity| `img %>% iMath("TruncateImageIntensity", 0.05, 0.95)`|Trims intensities by quantiles|
 |Sharpen| `img %>% iMath("Sharpen")` | Makes edges sharper|
@@ -210,3 +216,5 @@ result <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
 data("iMathOps")
 kable( iMathOps , caption = "Valid iMath Operations", padding = 0 )
 ```
+
+## References
