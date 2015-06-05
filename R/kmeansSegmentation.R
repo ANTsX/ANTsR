@@ -16,12 +16,11 @@
 #'
 #' @export kmeansSegmentation
 kmeansSegmentation <- function(img, k, kmask = NA, mrf = 0.1) {
-  kmimg <- antsImageClone(img)
   dim <- img@dimension
-  imageMath(dim, kmimg, "Normalize", kmimg)
+  kmimg = iMath(img, "Normalize")
   if (is.na(kmask))
     kmask <- getMask(kmimg, 0.01, 1, cleanup = 2)
-  imageMath(dim, kmask, "FillHoles", kmask)
+  kmask = iMath(kmask, "FillHoles")
   nhood <- paste(rep(1, dim), collapse = "x")
   mrf <- paste("[", mrf, ",", nhood, "]")
   kmimg <- atropos( a = kmimg, m = mrf, c = "[5,0]",

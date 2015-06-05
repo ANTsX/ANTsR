@@ -51,19 +51,19 @@ getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
   mask_img<-thresholdImage( img, lowThresh, highThresh )
 
   if (cleanup > 0) {
-    imageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
-    imageMath(img@dimension, mask_img, "GetLargestComponent", mask_img)
-    imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
-    imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+    mask_img = iMath(mask_img, "ME", cleanup)
+    mask_img = iMath(mask_img, "GetLargestComponent")
+    mask_img = iMath(mask_img, "MD", cleanup)
+    mask_img = iMath(mask_img, "FillHoles")
     while (  ( min(mask_img) == max(mask_img) ) & cleanup > 0 )
       {
       cleanup <- cleanup - 1
       mask_img <- thresholdImage( img, lowThresh, highThresh )
       if ( cleanup > 0 )
         {
-        imageMath(img@dimension, mask_img, "ME", mask_img, cleanup)
-        imageMath(img@dimension, mask_img, "MD", mask_img, cleanup)
-        imageMath(img@dimension, mask_img, "FillHoles", mask_img)
+        mask_img = iMath(mask_img, "ME", cleanup)
+        mask_img = iMath(mask_img, "MD", cleanup)
+        mask_img = iMath(mask_img, "FillHoles")
         }
       if ( cleanup == 0 )
         {

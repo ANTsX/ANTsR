@@ -27,8 +27,8 @@
 
   bm_img<-thresholdImage( img, "Otsu", 3 )
   bm_img<-thresholdImage( bm_img,  2, 3 )
-  imageMath(3, bm_img, "ME", bm_img, 1)
-  imageMath(3, bm_img, "GetLargestComponent", bm_img)
-  imageMath(3, bm_img, "MD", bm_img, 1)
-  imageMath(3, bm_img, "ME", bm_img, 1)
+  bm_img = iMath(bm_img, "ME", 1)
+  bm_img = iMath(bm_img, "GetLargestComponent")
+  bm_img = iMath(bm_img, "MD", 1)
+  bm_img = iMath(bm_img, "ME", 1)
 }

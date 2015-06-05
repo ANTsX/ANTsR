@@ -83,8 +83,8 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   dim<-targetI@dimension
   if ( doNormalize )
     {
-    for ( i in atlasList ) imageMath(dim,i,"Normalize",i)
-    imageMath(dim,targetI,"Normalize",targetI)
+    for ( i in atlasList ) i = iMath(i,"Normalize")
+    targetI = iMath(targetI,"Normalize")
     }
   if ( all(is.na(rad)) ) rad<-rep(3,dim)
   n<-1

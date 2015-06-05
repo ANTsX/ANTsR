@@ -161,19 +161,19 @@ preprocessfMRI <- function(boldImage,
   cleanBoldImage <- matrix2timeseries(boldImage, maskImage, boldMatrix)
 
   # anisotropically smooth the 4-D image, if desired
-
-  smoothCleanBoldImage <- antsImageClone(cleanBoldImage, "float")
+  smoothCleanBoldImage = cleanBoldImage*1
+  
   if (spatialSmoothingType == "gaussian") {
     if (length(spatialSmoothingParameters) == 1) {
       sigmaVector <- paste0(spatialSmoothingParameters[1], "x", spatialSmoothingParameters[1],
         "x", spatialSmoothingParameters[1], "x0")
-      imageMath(4, smoothCleanBoldImage, "G", smoothCleanBoldImage, sigmaVector)
+      smoothCleanBoldImage = smoothImage(cleanBoldImage, sigmaVector)
     } else {
       stop("Expecting a single scalar parameter.")
     }
   } else if (spatialSmoothingType == "perona-malik") {
     if (length(spatialSmoothingParameters) == 2) {
-      imageMath(4, smoothCleanBoldImage, "PeronaMalik", cleanBoldImage, spatialSmoothingParameters[1],
+      smoothCleanBoldImage = iMath(cleanBoldImage, "PeronaMalik", spatialSmoothingParameters[1],
         spatialSmoothingParameters[2])
     } else {
       stop("Expecting a two element vector.")
