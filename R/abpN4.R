@@ -24,10 +24,7 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
     cat("length( intensityTruncation ) should = 3 \n")
     return(1)
   }
-  outimg <- antsImageClone(img, "float")
-  dim <- img@dimension
-  imageMath(dim, outimg, "TruncateImageIntensity", outimg,
-    intensityTruncation[1], intensityTruncation[2], intensityTruncation[3])
+  outimg = iMath(img, "TruncateIntensity", intensityTruncation[1], intensityTruncation[2], intensityTruncation[3])
   if (usen3 == TRUE) {
     outimg<-n3BiasFieldCorrection( outimg, 4 )
     outimg<-n3BiasFieldCorrection( outimg, 2 )
