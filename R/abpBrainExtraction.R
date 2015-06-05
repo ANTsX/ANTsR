@@ -77,10 +77,9 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
       localSearchIterations=10, txfn=initafffn )
 
   # get laplacian images
-  lapi <- antsImageClone(img)
-  imageMath(img@dimension, lapi, "Laplacian", img, 1.5, 1)
-  lapt <- antsImageClone(tem)
-  imageMath(tem@dimension, lapt, "Laplacian", tem, 1.5, 1)
+  lapi = iMath(img, "Laplacian", 1.5, 1)
+  lapt = iMath(tem, "Laplacian", 1.5, 1)
+
   # FIXME should add mask to below via -x option
   dtem <- antsImageClone(tem, "double")
   dimg <- antsImageClone(img, "double")
@@ -102,9 +101,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     interpolator = c("NearestNeighbor") )
   temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
-  imageMath(img@dimension, tmp, "MD", temmaskwarped, 2)
-  imageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
-  imageMath(img@dimension, tmp, "FillHoles", tmp)
+
+  tmp = iMath(temmaskwarped, "MD", 2)
+  tmp = iMath(tmp, "GetLargestComponent", 2)
+  tmp = iMath(tmp, "FillHoles")
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
@@ -119,12 +119,11 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   segwm<-thresholdImage(  fseg, 3, 3 )
   seggm<-thresholdImage(  fseg, 2, 2)
   segcsf<-thresholdImage( fseg, 1, 1)
-  imageMath(img@dimension, segwm, "GetLargestComponent", segwm)
-  imageMath(img@dimension, seggm, "GetLargestComponent", seggm)
-  imageMath(img@dimension, seggm, "FillHoles", seggm)
+  segwm = iMath(segwm, "GetLargestComponent")
+  seggm = iMath(seggm, "GetLargestComponent")
+  seggm = iMath(seggm, "FillHoles")
   segwm[segwm > 0.5] <- 3
-  tmp <- antsImageClone(segcsf)
-  imageMath(img@dimension, tmp, "ME", segcsf, 10)
+  tmp = iMath(segcsf, "ME", 10)
   seggm[seggm < 0.5 & tmp > 0.5] <- 2
   seggm[seggm > 0.5] <- 2
   finalseg <- antsImageClone(img)
@@ -134,20 +133,19 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   finalseg[segcsf > 0.5 & seggm < 0.5 & segwm < 0.5] <- 1
   # BA - finalseg looks good! could stop here
   tmp<-thresholdImage( finalseg, 2, 3)
-  imageMath(img@dimension, tmp, "ME", tmp, 2)
-  imageMath(img@dimension, tmp, "GetLargestComponent", tmp, 2)
-  imageMath(img@dimension, tmp, "MD", tmp, 4)
-  imageMath(img@dimension, tmp, "FillHoles", tmp)
+
+  tmp = iMath(tmp, "ME", 2)
+  tmp = iMath(tmp, "GetLargestComponent", 2)
+  tmp = iMath(tmp, "MD", 4)
+  tmp = iMath(tmp, "FillHoles")
   tmp[tmp > 0 | temmaskwarped > 0.25] <- 1
-  imageMath(img@dimension, tmp, "MD", tmp, 5)
-  imageMath(img@dimension, tmp, "ME", tmp, 5)
-  tmp2 <- antsImageClone(tmp)
-  imageMath(img@dimension, tmp2, "FillHoles", tmp)
+  tmp = iMath(tmp, "MD", 5)
+  tmp = iMath(tmp, "ME", 5)
+  finalseg2 = iMath(tmp, "FillHoles")
+
   # FIXME - steps above should all be checked again ...
-  finalseg2 <- antsImageClone(tmp2)
-  dseg <- antsImageClone(finalseg2)
-  imageMath(img@dimension, dseg, "ME", dseg, 5)
-  imageMath(img@dimension, dseg, "MaurerDistance", dseg)
+  dseg = iMath(finalseg2, "ME", 5)
+  dseg = iMath(dseg, "MaurerDistance")
   droundmax <- 20
   dsearchvals <- c(1:100)/100 * droundmax - 0.5 * droundmax
   mindval <- min(dseg)
