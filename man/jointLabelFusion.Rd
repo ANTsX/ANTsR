@@ -8,7 +8,7 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
   maxAtlasAtVoxel = c(1, Inf), rho = 0.01, usecor = FALSE,
   boundary.condition = "image", rSearch = 2, segvals = NA,
-  probimgs = NA)
+  probimgs = NA, jifImage = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -41,6 +41,8 @@ makes image converge to average}
 \item{segvals}{list of labels to expect}
 
 \item{probimgs}{list of probability images (to help slice by slice estimate)}
+
+\item{jifImage}{the current estimated jif image (helps speed slice by slice)}
 }
 \value{
 approximated image, segmentation and probabilities
