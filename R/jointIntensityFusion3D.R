@@ -72,7 +72,6 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho,
         usecor=usecor, jifImage=jifImage )
-      antsImageWrite( jifImage , '/tmp/jif.nii.gz' )
       }
     } # endfor
   return( jifImage )
