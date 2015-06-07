@@ -65,7 +65,8 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   whichMaskSlice<-0
   if ( all( is.na(rad) ) ) rad<-rep(4,3)
   if ( all(is.na(slices))  )
-    slices<-seq.int(1,dim(targetI)[3], by=rad[3]*2+1)
+    slices<-seq.int(1,dim(targetI)[3], by=1)
+#    slices<-seq.int(1,dim(targetI)[3], by=rad[3]*2+1)
   for ( i in slices )
     {
     mask2d<-antsImageClone(targetIMask)
