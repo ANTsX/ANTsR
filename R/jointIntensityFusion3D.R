@@ -2,7 +2,7 @@
 #'
 #' Estimates an image/labelset from another set of 3D images
 #'
-#' intensity generalization of joint label fusion, still supports segmentation.
+#' intensity generalization of joint label fusion, does not support segmentation.
 #' this version is more efficient, memory-wise, for 3D images. it is a thin
 #' wrapper that goes slice-by-slice but produces the same results.
 #'
@@ -12,19 +12,16 @@
 #' @param atlasList list containing antsImages
 #' @param beta weight sharpness, default to 2
 #' @param rad neighborhood radius, default to 4
-#' @param labelList list containing antsImages
 #' @param doscale scale neighborhood intensities
 #' @param doNormalize normalize each image range to 0, 1
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
-#' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
 #' @param rSearch radius of search, default is 2
 #' @param slices vector defining slices to use (speeds parameter selection)
 #' @return approximated image, segmentation and probabilities
 #' (latter are WIP, might be done by the time your read this ) ...
-#' @param computeProbs boolean - requires more memory
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
 #' @examples
@@ -34,10 +31,9 @@
 #'
 #' @export jointIntensityFusion3D
 jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
-  beta=4, rad=NA, labelList=NA, doscale = TRUE,
+  beta=4, rad=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA,
-  computeProbs=FALSE )
+  usecor=FALSE, rSearch=0, slices=NA )
 {
   if (nargs() == 0)
     {
@@ -49,25 +45,15 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     print("must be a 3D image")
     return(NA)
     }
-  segvals<-NA
-  localJIF2Dp=NA
-  if ( ! all( is.na(labelList) ) )
-    {
-    segmat<-imageListToMatrix( labelList, targetIMask )
-    if ( all( is.na(segvals) ) )
-      {
-      segvals<-c(sort( unique( as.numeric(segmat)) ))
-      if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
-      }
-    rm(segmat)
-    }
+  jifImage = targetI*0
   maskout<-antsImageClone( targetIMask )
   maskout[ targetIMask==1 ]<-0
-  whichMaskSlice<-0
   if ( all( is.na(rad) ) ) rad<-rep(4,3)
-  if ( all(is.na(slices))  ) slices<-1:dim(targetI)[3]
+  if ( all(is.na(slices))  )
+    slices<-seq.int(1,dim(targetI)[3], by=rad[3]*2+1)
   for ( i in slices )
     {
+    print(paste('slice',i))
     mask2d<-antsImageClone(targetIMask)
     mask2d<-as.array(mask2d)
     if ( i < dim(mask2d)[3] & i > 0 )
@@ -82,34 +68,12 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       maskout[ mask2d == 1 ]<-1
       oo2d<-jointIntensityFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
-        beta=beta, rad=rad, labelList=labelList,
-        rSearch=rSearch,
+        beta=beta, rad=rad, rSearch=rSearch,
         doscale=doscale, doNormalize=doNormalize,
-        maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
-        useSaferComputation=useSaferComputation, usecor=usecor,
-        computeProbs=computeProbs )
-      if ( whichMaskSlice == 0 )
-        {
-        localJIF2Di<-oo2d$predimg
-        localJIF2Ds<-oo2d$segimg
-        if ( computeProbs ) localJIF2Dp<-oo2d$probimgs
-        } else {
-          localJIF2Di[ mask2d == 1 ]<-localJIF2Di[ mask2d == 1 ]+
-            oo2d$predimg[ mask2d == 1 ]
-          localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
-            oo2d$segimg[ mask2d == 1 ]
-          probct<-1
-          if ( computeProbs )
-            for ( probimg in localJIF2Dp )
-              {
-              probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-                oo2d$probimgs[[probct]][ mask2d == 1 ]
-              probct<-probct+1
-              }
-        }
-      whichMaskSlice<-whichMaskSlice+1
+        maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho,
+        usecor=usecor, jifImage=jifImage )
+      antsImageWrite( jifImage , '/tmp/jif.nii.gz' )
       }
     } # endfor
-  return( list( predimg=localJIF2Di, segimg=localJIF2Ds, mask=maskout,
-     probimgs=localJIF2Dp ) )
+  return( jifImage )
 }

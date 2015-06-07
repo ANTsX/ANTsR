@@ -5,10 +5,9 @@
 \title{joint intensity fusion}
 \usage{
 jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
-  labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, boundary.condition = "mean", rSearch = 2,
-  segvals = NA, computeProbs = FALSE)
+  doscale = TRUE, doNormalize = TRUE, maxAtlasAtVoxel = c(1, Inf),
+  rho = 0.01, usecor = FALSE, boundary.condition = "image", rSearch = 2,
+  jifImage = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -21,8 +20,6 @@ jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{rad}{neighborhood radius, default to 3}
 
-\item{labelList}{list containing antsImages}
-
 \item{doscale}{scale neighborhood intensities}
 
 \item{doNormalize}{normalize each image range to 0, 1}
@@ -32,17 +29,13 @@ jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
 
-\item{useSaferComputation}{slower but more error checking}
-
 \item{usecor}{employ correlation as local similarity}
 
 \item{boundary.condition}{one of 'image' 'mean' 'NA'}
 
 \item{rSearch}{radius of search, default is 2}
 
-\item{segvals}{list of labels to expect}
-
-\item{computeProbs}{boolean - requires more memory}
+\item{jifImage}{the current estimated jif image (helps speed slice by slice)}
 }
 \value{
 approximated image, segmentation and probabilities
@@ -72,13 +65,10 @@ for ( i in 1:length(ilist) )
  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage
- seg<-kmeansSegmentation( ilist[[i]], k=3, kmask = refmask)
- seglist[[i]]<-seg$segmentation
  }
 r<-2
 d<-2
-pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=0,
-  labelList=seglist, rad=rep(r,d) )
+pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=1, rad=rep(r,d) )
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich

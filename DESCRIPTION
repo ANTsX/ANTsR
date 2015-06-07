@@ -38,6 +38,7 @@ Suggests:
     rgl,
     robust,
     robustbase,
+    RRedsvd,
     signal,
     sna,
     testthat,

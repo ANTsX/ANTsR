@@ -129,26 +129,24 @@
   }
   if (moreaccurate == 2) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = "Rigid[0.1]", i = "100x50x20",
+      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = "100x50x20",
       u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1))
   }
   if (moreaccurate == 1) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = "Rigid[0.1]", i = 20, u = 1,
+      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = 20, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1))
   }
   if (moreaccurate == 0) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.02), t = "Rigid[0.1]", i = 3, u = 1,
+      fixed, img, 1, 32, "regular", 0.02), t = "Affine[0.1]", i = 3, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1))
   }
   if (moreaccurate < 3) {
     moco_params <- as.data.frame(moco_params)
     mynames <- c("MetricPre", "MetricPost",
                  paste('MOCOparam', 1:(ncol(moco_params)-2), sep=''))
-    names(moco_params) <- mynames #c("MetricPre", "MetricPost", "MOCOparam0", "MOCOparam1",
-      #"MOCOparam2", "MOCOparam3", "MOCOparam4", "MOCOparam5", "MOCOparam6", "MOCOparam7",
-      #"MOCOparam8", "MOCOparam9", "MOCOparam10", "MOCOparam11")
+    names(moco_params) <- mynames
   } else {
     moco_params <- NA
   }

@@ -5,9 +5,9 @@
 \title{jointIntensityFusion3D}
 \usage{
 jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
-  labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, rSearch = 0, slices = NA, computeProbs = FALSE)
+  doscale = TRUE, doNormalize = TRUE, maxAtlasAtVoxel = c(1, Inf),
+  rho = 0.01, usecor = FALSE, rSearch = 0, slices = NA,
+  computeProbs = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -20,8 +20,6 @@ jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{rad}{neighborhood radius, default to 4}
 
-\item{labelList}{list containing antsImages}
-
 \item{doscale}{scale neighborhood intensities}
 
 \item{doNormalize}{normalize each image range to 0, 1}
@@ -30,8 +28,6 @@ jointIntensityFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
-
-\item{useSaferComputation}{slower but more error checking}
 
 \item{usecor}{employ correlation as local similarity}
 
@@ -49,7 +45,7 @@ approximated image, segmentation and probabilities
 Estimates an image/labelset from another set of 3D images
 }
 \details{
-intensity generalization of joint label fusion, still supports segmentation.
+intensity generalization of joint label fusion, does not support segmentation.
 this version is more efficient, memory-wise, for 3D images. it is a thin
 wrapper that goes slice-by-slice but produces the same results.
 }

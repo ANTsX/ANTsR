@@ -18,6 +18,7 @@
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
 #' @param probimgs list of probability images (to help slice by slice estimate)
+#' @param jifImage the current estimated jif image (helps speed slice by slice)
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -56,7 +57,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA, probimgs=NA )
+  rSearch=2, segvals=NA, probimgs=NA, jifImage=NA )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -64,6 +65,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   if ( length(labelList) != length(atlasList) )
     stop("length(labelList) != length(atlasList)")
   includezero = TRUE
+  if ( is.na( jifImage ) ) jifImage = targetI * 0
   if ( !( all( is.na(labelList) ) ) )
     {
     haveLabels=TRUE
@@ -116,6 +118,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     targetint<-targetIv[,voxel]
     cent<-indices[voxel,]
     segmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
+    intmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
     for ( ct in 1:natlas)
       {
       nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
@@ -128,6 +131,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       sdv = nhsearch[[ 4 ]]
       bestcor = nhsearch[[ 5 ]]
       segmat[ct, ] = nhsearch[[ 6 ]]
+      intmat[ct, ] = v
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
@@ -172,6 +176,13 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
             } else skipped=skipped+1
           segct = segct + 1
           }
+        pwts = wts
+        pwts[ wts < 0 ] = 0
+        pwts = pwts / sum( pwts )
+        lintensity = pwts %*% intmat
+        .Call("addNeighborhoodToImage",
+              jifImage, cent, rad, lintensity,
+              package="ANTsR" )
       } else badct<-badct+1
     }
   } # loop over voxels
@@ -198,5 +209,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     rsegimg[  segimg == ct ] = segvals[ ct ]
   rm( segimg )
   return( list( segimg=rsegimg, probimgs=probimgs,
+    predimg=jifImage,
     badct=badct, segvals=segvals  ) )
 }
