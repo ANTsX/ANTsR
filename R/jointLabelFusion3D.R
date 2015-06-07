@@ -17,7 +17,6 @@
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
-#' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
 #' @param rSearch radius of search, default is 2
 #' @param slices vector defining slices to use (speeds parameter selection)
@@ -34,7 +33,7 @@
 jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, rSearch=0, slices=NA )
+  usecor=FALSE, rSearch=0, slices=NA )
 {
   if (nargs() == 0)
     {
@@ -82,7 +81,7 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
         beta=beta, rad=rad, labelList=labelList,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
-        useSaferComputation=useSaferComputation, usecor=usecor
+        usecor=usecor
         )
       if ( whichMaskSlice == 0 )
         {

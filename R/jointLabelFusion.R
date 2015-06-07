@@ -13,7 +13,6 @@
 #' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
-#' @param useSaferComputation slower but more error checking
 #' @param usecor employ correlation as local similarity
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
@@ -55,7 +54,7 @@
 jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  useSaferComputation=FALSE, usecor=FALSE, boundary.condition='image',
+  usecor=FALSE, boundary.condition='image',
   rSearch=2, segvals=NA )
 {
   haveLabels=FALSE
@@ -79,7 +78,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     }
   posteriorList=list() # weight for each label
   for ( i in 1:length(segvals) )
-    posteriorList = lappend( posteriorList , targetI * 0 )
+    posteriorList [[ i ]] = targetI * 0
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -99,7 +98,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   if ( doscale ) targetIv<-scale(targetIv)
   m<-length(atlasList)
   onev<-rep(1,m)
-  weightmat<-matrix( rep(0, m*ncol(targetIv) ), nrow=m )
   ct<-1
   natlas<-length(atlasList)
   atlasLabels<-1:natlas
@@ -107,7 +105,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   progress <- txtProgressBar(min = 0,
                 max = ncol(targetIv), style = 3)
   badct<-0
-  basewmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
+  basewmat<-t( replicate(length(atlasList), rep(0.0,n) ) )
   for ( voxel in 1:ncol( targetIv ) )
     {
     zsd<-rep(1,natlas)
@@ -154,7 +152,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       wts = solve( tempmat, onev )
       wts = wts * 1.0 / sum( wts * onev )
       if ( ! is.na( mean(wts)) ) {
-        weightmat[,voxel]<-wts
         # hongzhi method
         segct = 1
         for ( lseg in segvals )
@@ -193,7 +190,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   for ( ct in 1:length(segvals) )
     rsegimg[  segimg == ct ] = segvals[ ct ]
   rm( segimg )
-  return( list( segimg=rsegimg,
-    localWeights=weightmat, probimgs=posteriorList,
+  return( list( segimg=rsegimg, probimgs=posteriorList,
     badct=badct, segvals=segvals  ) )
 }

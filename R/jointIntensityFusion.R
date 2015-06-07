@@ -154,10 +154,16 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     if ( sum(zsd) > (2) )
       {
       cormat = ( ( (wmat) %*% t(wmat) ) / ( ncol(wmat) - 1 ) )^beta
-      tempmat = ( antsrimpute(cormat) + diag(ncol(cormat)) * rho )
+      tempmat = ( (cormat) + diag(ncol(cormat)) * rho )
       onev<-rep(1,ncol(cormat))
       wts = solve( tempmat, onev )
       wts = wts * 1.0 / sum( wts * onev )
+
+# this approach leads to positive weights but may not be as nice
+#      cormat = ( ( (wmat) %*% t(wmat) ) / ( ncol(wmat) - 1 ) )
+#      invmat<-solve( cormat + diag(ncol(cormat))*rho )^beta
+#      wts<-as.numeric( invmat %*% onev / ( sum( onev * invmat %*% onev )) )
+
       if ( ! is.na( mean(wts)) ) {
         weightmat[,voxel]<-wts
         # hongzhi method
