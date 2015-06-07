@@ -89,6 +89,14 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( segimg=oo2d$segimg, mask=maskout,
+  finalseg=imageListToMatrix( oo2d$probimgs, targetIMask  )
+  finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
+  segimg = makeImage( targetIMask , finalsegvec  )
+  # finally, remap to original segmentation labels
+  rsegimg = segimg * 0
+  for ( ct in 1:length(segvals) )
+    rsegimg[  segimg == ct ] = segvals[ ct ]
+  rm( segimg )
+  return( list( segimg=rsegimg, mask=maskout,
      probimgs=oo2d$probimgs, segvals=segvals ) )
 }

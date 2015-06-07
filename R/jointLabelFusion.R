@@ -157,15 +157,19 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       if ( ! is.na( mean(wts)) ) {
         # hongzhi method
         segct = 1
+        skipped=0
         for ( lseg in segvals )
           {
-          lsegmat = segmat * 0
-          lsegmat[ segmat == lseg ] = 1
-          lsegprobs = wts %*% lsegmat
-          lsegprobs[ lsegprobs <  0 ] = 0
-          .Call("addNeighborhoodToImage",
-            probimgs[[segct]], cent, rad, lsegprobs,
-            package="ANTsR" )
+          if ( sum( segmat == lseg ) > 0  )
+            {
+            lsegmat = segmat * 0
+            lsegmat[ segmat == lseg ] = 1
+            lsegprobs = wts %*% lsegmat
+            lsegprobs[ lsegprobs <  0 ] = 0
+            .Call("addNeighborhoodToImage",
+              probimgs[[segct]], cent, rad, lsegprobs,
+              package="ANTsR" )
+            } else skipped=skipped+1
           segct = segct + 1
           }
       } else badct<-badct+1
