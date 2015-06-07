@@ -57,6 +57,9 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
       }
     rm(segmat)
     }
+  probimgs=list() # weight for each label
+  for ( i in 1:length(segvals) )
+    probimgs[[ i ]] = targetI * 0
   maskout<-antsImageClone( targetIMask )
   maskout[ targetIMask==1 ]<-0
   whichMaskSlice<-0
@@ -81,26 +84,11 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
         beta=beta, rad=rad, labelList=labelList,
         doscale=doscale, doNormalize=doNormalize,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
-        usecor=usecor
+        usecor=usecor, probimgs=probimgs
         )
-      if ( whichMaskSlice == 0 )
-        {
-        localJIF2Ds<-oo2d$segimg
-        localJIF2Dp<-oo2d$probimgs
-        } else {
-          localJIF2Ds[ mask2d == 1 ]<-localJIF2Ds[ mask2d == 1 ]+
-            oo2d$segimg[ mask2d == 1 ]
-          probct<-1
-          for ( probimg in localJIF2Dp )
-              {
-              probimg[ mask2d == 1 ]<-probimg[ mask2d == 1 ]+
-                oo2d$probimgs[[probct]][ mask2d == 1 ]
-              probct<-probct+1
-              }
-        }
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  return( list( segimg=localJIF2Ds, mask=maskout,
-     probimgs=localJIF2Dp, segvals=segvals ) )
+  return( list( segimg=oo2d$segimg, mask=maskout,
+     probimgs=oo2d$probimgs, segvals=segvals ) )
 }

@@ -28,7 +28,7 @@ fi<-antsImageRead( getANTsRData("r16") , 2 )
 mask<-getMask( fi )
 op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
 op2<-iMath( mask , "D" )  # distance transform
-op3<-iMath( mask , "GetOperations" )  # list all ops
+op3<-iMath( 0 , "GetOperations" )  # list all ops
 
 if ( usePkg("magrittr") ) { # string ops together
   lapgd <- fi \%>\% iMath("Laplacian",1)  \%>\% iMath("GD",3)

@@ -6,8 +6,8 @@
 \usage{
 jointLabelFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, rSearch = 0, slices = NA)
+  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, usecor = FALSE, rSearch = 0,
+  slices = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -30,8 +30,6 @@ jointLabelFusion3D(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
-
-\item{useSaferComputation}{slower but more error checking}
 
 \item{usecor}{employ correlation as local similarity}
 

@@ -17,6 +17,7 @@
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param segvals list of labels to expect
+#' @param probimgs list of probability images (to help slice by slice estimate)
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -55,7 +56,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, labelList=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA )
+  rSearch=2, segvals=NA, probimgs=NA )
 {
   haveLabels=FALSE
   BC=boundary.condition
@@ -76,9 +77,12 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
         segvals<-segvals[  segvals != 0 ]
       }
     }
-  posteriorList=list() # weight for each label
-  for ( i in 1:length(segvals) )
-    posteriorList [[ i ]] = targetI * 0
+  if ( all(  is.na(probimgs) ) )
+    {
+    probimgs=list() # weight for each label
+    for ( i in 1:length(segvals) )
+      probimgs[[ i ]] = targetI * 0
+    }
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -97,7 +101,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   rm( targetIvStruct )
   if ( doscale ) targetIv<-scale(targetIv)
   m<-length(atlasList)
-  onev<-rep(1,m)
   ct<-1
   natlas<-length(atlasList)
   atlasLabels<-1:natlas
@@ -161,7 +164,7 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
           lsegprobs = wts %*% lsegmat
           lsegprobs[ lsegprobs <  0 ] = 0
           .Call("addNeighborhoodToImage",
-            posteriorList[[segct]], cent, rad, lsegprobs,
+            probimgs[[segct]], cent, rad, lsegprobs,
             package="ANTsR" )
           segct = segct + 1
           }
@@ -169,20 +172,20 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
     }
   } # loop over voxels
   totalImage = targetIMask * 0
-  for ( poo in 1:length(posteriorList) )
-    totalImage = totalImage + posteriorList[[poo]]
+  for ( poo in 1:length(probimgs) )
+    totalImage = totalImage + probimgs[[poo]]
   selector = totalImage > 0
-  for ( poo in 1:length(posteriorList) )
+  for ( poo in 1:length(probimgs) )
     {
-    posteriorList[[poo]][ selector ] =
-      posteriorList[[poo]][ selector ] /
+    probimgs[[poo]][ selector ] =
+      probimgs[[poo]][ selector ] /
       totalImage[ selector ]
     }
   close( progress )
   rm( segmat )
   rm( targetIv )
   rm( indices )
-  finalseg=imageListToMatrix( posteriorList, targetIMask  )
+  finalseg=imageListToMatrix( probimgs, targetIMask  )
   finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
   segimg = makeImage( targetIMask , finalsegvec  )
   # finally, remap to original segmentation labels
@@ -190,6 +193,6 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
   for ( ct in 1:length(segvals) )
     rsegimg[  segimg == ct ] = segvals[ ct ]
   rm( segimg )
-  return( list( segimg=rsegimg, probimgs=posteriorList,
+  return( list( segimg=rsegimg, probimgs=probimgs,
     badct=badct, segvals=segvals  ) )
 }

@@ -6,9 +6,9 @@
 \usage{
 jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, useSaferComputation = FALSE,
-  usecor = FALSE, boundary.condition = "image", rSearch = 2,
-  segvals = NA)
+  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, usecor = FALSE,
+  boundary.condition = "image", rSearch = 2, segvals = NA,
+  probimgs = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -32,8 +32,6 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
 
-\item{useSaferComputation}{slower but more error checking}
-
 \item{usecor}{employ correlation as local similarity}
 
 \item{boundary.condition}{one of 'image' 'mean' 'NA'}
@@ -41,6 +39,8 @@ makes image converge to average}
 \item{rSearch}{radius of search, default is 2}
 
 \item{segvals}{list of labels to expect}
+
+\item{probimgs}{list of probability images (to help slice by slice estimate)}
 }
 \value{
 approximated image, segmentation and probabilities
