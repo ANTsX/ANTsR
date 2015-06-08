@@ -59,7 +59,7 @@ return( list(
 #' @param y input matrix
 #' @param k rank to use
 #' @param seed for testing
-#' @return randomized svd of t(x) Y is output
+#' @return randomized svd of t(x) y is output
 #' @author Avants BB
 #' @examples
 #' set.seed(13)
@@ -104,7 +104,28 @@ return( list(
   ) )
 }
 
-.gramschmidt <- function( A ) {
+.gramschmidt <- function( A, tol=1.e-8 ) {
   A.qr <- qr(A)
-  qr.Q(A.qr)
+  return( qr.Q(A.qr) )
+    stopifnot(is.numeric(A), is.matrix(A))
+    m <- nrow(A)
+    n <- ncol(A)
+    if (m < n)
+        stop("No. of rows of 'A' must be greater or equal no. of colums.")
+    Q <- matrix(0, m, n)
+    R <- matrix(0, n, n)
+    for (k in 1:n) {
+        Q[, k] <- A[, k]
+        if (k > 1) {
+            for (i in 1:(k - 1)) {
+                R[i, k] <- t(Q[, i]) %*% Q[, k]
+                Q[, k] <- Q[, k] - R[i, k] * Q[, i]
+            }
+        }
+        R[k, k] <- sum(abs(Q[, k])^2)^(1/2.0) # Norm(Q[, k])
+        if (abs(R[k, k]) <= tol)
+            stop("Matrix 'A' does not have full rank.")
+        Q[, k] <- Q[, k]/R[k, k]
+    }
+    Q # %*% R
 }
