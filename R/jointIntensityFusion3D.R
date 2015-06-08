@@ -45,6 +45,11 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
     print("must be a 3D image")
     return(NA)
     }
+  if ( doNormalize )
+    {
+    for ( i in atlasList ) i = iMath(i,"Normalize")
+    targetI = iMath(targetI,"Normalize")
+    }
   jifImage = targetI*0
   maskout<-antsImageClone( targetIMask )
   maskout[ targetIMask==1 ]<-0
@@ -70,7 +75,7 @@ jointIntensityFusion3D <- function( targetI, targetIMask, atlasList,
       oo2d<-jointIntensityFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
         beta=beta, rad=rad, rSearch=rSearch,
-        doscale=doscale, doNormalize=doNormalize,
+        doscale=doscale, doNormalize=FALSE,
         maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho,
         usecor=usecor, jifImage=jifImage )
       }

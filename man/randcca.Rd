@@ -16,7 +16,7 @@ randcca(x, y, k, seed)
 \item{seed}{for testing}
 }
 \value{
-randomized svd of t(x) Y is output
+randomized svd of t(x) y is output
 }
 \description{
 uses random matrix to estimate cca results
