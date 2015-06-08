@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Antsr by stnava</title>
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
@@ -41,14 +41,15 @@
         <h1>
 <a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
 
-<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a></p>
+<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Travis Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a>
+<a href="https://codeship.com/projects/79732"> <img src="https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master" alt="Codeship Build Status"></a></p>
 
 <p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R.</p>
 
 <h2>
 <a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
 
-<p>Version: 0.3</p>
+<p>Version: 0.3.1</p>
 
 <p>License: GPL (&gt;=2)</p>
 
@@ -73,7 +74,7 @@
 <h2>
 <a id="downloads" class="anchor" href="#downloads" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloads</h2>
 
-<p>Reference manual:   <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR-manual.pdf">ANTsR.pdf</a></p>
+<p>Reference manual:   <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf">ANTsR.pdf</a></p>
 
 <p>Vignettes:</p>
 
@@ -86,9 +87,9 @@
 
 <p>Package source: <a href="https://github.com/stnava/ANTsR/zipball/master">from github</a></p>
 
-<p>OS X Mavericks, Yosemite binaries:  <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_OSX_0.3.tgz">OSX</a></p>
+<p>OS X Mavericks, Yosemite binaries:  <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_OSX_0.3.1.tgz">OSX</a></p>
 
-<p>Linux binaries: <a href="https://github.com/stnava/ANTsR/releases/download/v0.3/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Ubuntu</a></p>
+<p>Linux binaries: <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Ubuntu</a></p>
 
 <p>We are working toward Windows binaries.</p>
 
@@ -349,6 +350,32 @@ github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
 
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 </code></pre>
+
+<h1>
+<a id="release-notes" class="anchor" href="#release-notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release notes</h1>
+
+<h2>
+<a id="031" class="anchor" href="#031" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.1</h2>
+
+<ul>
+<li><p>WIP: iMath improvements</p></li>
+<li><p>WIP: ASL pipeline fuctionality</p></li>
+<li><p>BUG: Fixed image indexing bug</p></li>
+<li><p>BUG: plot.antsImage improvements</p></li>
+<li><p>ENH: more antsRegistration options</p></li>
+<li><p>ENH: geoSeg</p></li>
+<li><p>ENH: JointLabelFusion and JointIntensityFusion</p></li>
+<li><p>ENH: Enable negating images</p></li>
+<li><p>ENH: weingarten curvature</p></li>
+<li><p>ENH: antsApplyTransformsToPoints with example</p></li>
+<li><p>ENH: renormalizeProbabilityImages</p></li>
+<li><p>ENH: Suppress output from imageWrite.</p></li>
+</ul>
+
+<h2>
+<a id="030" class="anchor" href="#030" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.0</h2>
+
+<p>First official release.</p>
       </section>
 
     </div>
