@@ -60,7 +60,8 @@
 #' testimg<-iMath(testimg,"PadImage",5)
 #' mocorr<-.motion_correction( testimg )
 #'
-.motion_correction <- function(img, fixed = NA, moreaccurate = 1) {
+.motion_correction <- function(img, fixed = NA, moreaccurate = 1,
+                               txtype = "Affine") {
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")
@@ -124,22 +125,22 @@
   moco_params <- new("antsMatrix", "double")
   if (moreaccurate == 3) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 16 ), t = "Syn[0.1,3,0]", i = "100x50x20",
+      fixed, img, 1, 16 ), t = paste(txtype, "[0.1,3,0]", sep=""), i = "100x50x20",
       u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1))
   }
   if (moreaccurate == 2) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = "100x50x20",
+      fixed, img, 1, 32, "regular", 0.1), t = paste(txtype, "[0.1]", sep=""), i = "100x50x20",
       u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1))
   }
   if (moreaccurate == 1) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = "Affine[0.1]", i = 20, u = 1,
+      fixed, img, 1, 32, "regular", 0.1), t = paste(txtype, "[0.1]", sep=""), i = 20, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1))
   }
   if (moreaccurate == 0) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.02), t = "Affine[0.1]", i = 3, u = 1,
+      fixed, img, 1, 32, "regular", 0.02), t = paste(txtype, "[0.1]", sep=""), i = 3, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1))
   }
   if (moreaccurate < 3) {

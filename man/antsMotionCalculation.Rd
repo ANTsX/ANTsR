@@ -2,9 +2,10 @@
 % Please edit documentation in R/antsMotionCalculation.R
 \name{antsMotionCalculation}
 \alias{antsMotionCalculation}
-\title{Correct 4D time-series data for motion.}
+\title{antsMotionCalculation}
 \usage{
-antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
+antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
+  txtype = "Affine", framewise = 1)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}
@@ -14,6 +15,9 @@ antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
 \item{fixed}{Fixed image to register all timepoints to.  If not provided, mean image is used.}
 
 \item{moreaccurate}{Level of accuracy desired for motion correction.  Higher is more accurate.}
+
+\item{txtype}{Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
+\code{"SyN"}.}
 
 \item{framewise}{Calculate framewise displacement?}
 }

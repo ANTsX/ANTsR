@@ -1,10 +1,13 @@
-#' @name antsMotionCalculation
-#' @title Correct 4D time-series data for motion.
-#' @usage antsMotionCalculation(img, mask=NA, fixed=NA, moreaccurate=1, framewise=1)
+#'  antsMotionCalculation
+#'
+#'  Correct 4D time-series data for motion.
+#'
 #' @param img antsImage, usually 4D.
 #' @param mask mask for image (3D).  If not provided, estimated from data.
 #' @param fixed Fixed image to register all timepoints to.  If not provided, mean image is used.
 #' @param moreaccurate Level of accuracy desired for motion correction.  Higher is more accurate.
+#' @param txtype Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
+#' \code{"SyN"}.
 #' @param framewise Calculate framewise displacement?
 #' @return List containing:
 #' \itemize{
@@ -24,7 +27,7 @@
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
-                                  framewise = 1) {
+                   txtype = "Affine", framewise = 1) {
   if ( is.na( fixed )  )
   {
   fixed <- getAverageOfTimeSeries( img )
