@@ -122,6 +122,14 @@ sparseDecom2 <- function(
     return(0)
   }
   post <- c(1, 2)
+  if (class(inmask[[1]])[[1]] == "antsImage") {
+    if ( sum( inmask[[1]] > 0.5 ) != ncol(inmatrix[[1]]) )
+      stop("dimensions of view 1 mask and view 1 matrix do not match")
+  }
+  if (class(inmask[[2]])[[1]] == "antsImage") {
+    if ( sum( inmask[[2]] > 0.5 ) != ncol(inmatrix[[2]]) )
+      stop("dimensions of view 2 mask and view 2 matrix do not match")
+  }
   if (is.na(statdir))
     statdir <- paste(tempdir(), "/", sep = "")
   mfn <- paste(statdir, "sccamask", post, ".nii.gz", sep = "")
