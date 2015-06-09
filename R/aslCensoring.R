@@ -41,8 +41,8 @@
 #'  1 indicating the corresponding timepoint is included and 0 indicating exclusion.
 #' @author Kandel BM
 #' @examples
-#' nvox <- 5 * 5 * 5 * 10
-#' dims <- c(5, 5, 5, 10)
+#' nvox <- 5 * 5 * 5 * 30
+#' dims <- c(5, 5, 5, 30)
 #' voxvals <- array(rnorm(nvox) + 500, dim=dims)
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
 #' asl <- makeImage(dims, voxvals)
@@ -133,15 +133,21 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',
       avg<-n3BiasFieldCorrection( avg, 2 )
       mask <- getMask(avg, mean(avg), Inf)
     }
-    diffs <- antsImageClone(asl)
-    imageMath(4, diffs, "TimeSeriesSimpleSubtraction", asl)
     nvox <- sum(mask[mask > 0])
     npairs <- dim(asl)[4]/2
     tc <- rep(c(1, 2), npairs)
     aslmat <- timeseries2matrix(asl, mask)
-    if (mean(diffs) < 0)
+    diffs <- matrix(rep(NA, nrow(aslmat)/2 * ncol(aslmat)),
+                    nrow=nrow(aslmat)/2)
+    for (ii in 1:nrow(diffs)) {
+      diffs[ii, ] <- aslmat[ii*2, ] - aslmat[ii*2-1, ]
+    }
+
+    if (mean(diffs) < 0) {
       diffs <- -diffs
-    ts.diff <- timeseries2matrix(diffs, mask)
+    }
+
+    ts.diff <- diffs
     centers <- apply(ts.diff, 1, centralTendency)
     mean.centers <- centralTendency(centers)
     sd.centers <- sd(centers)
