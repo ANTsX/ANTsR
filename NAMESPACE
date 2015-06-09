@@ -1,6 +1,5 @@
 exportPattern("^[^.]")
 export(atropos)
-export(imageMath)
 export(labelGeometryMeasures)
 export(labelImageCentroids)
 export(abpBrainExtraction)
