@@ -28,9 +28,7 @@ getCentroids <- function(img, clustparam = 250, outprefix = NA) {
   if (is.na(outprefix)) {
     outprefix <- paste(tempdir(), "/Z", sep = "")
   }
-  pointfile <- paste(outprefix, "coords.csv", sep = "")
-  imageMath(imagedim, pointfile, "LabelStats", img, img, clustparam)
-  mypoints <- read.csv(pointfile)
+  mypoints <- labelStats( img, img, clustparam )
   centroids <- as.matrix(data.frame(x = mypoints$x, y = mypoints$y, z = mypoints$z, t=mypoints$t ))
   return( centroids )
 }

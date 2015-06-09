@@ -4,7 +4,6 @@
 #' @param ncompcor n compcor vectors
 #' @param variance_extreme high variance threshold e.g 0.95 for 95 percent
 #' @param mask optional mask for image
-#' @param useimagemath use the imagemath implementation instead
 #' @param randomSamples take this many random samples to speed things up
 #' @param returnv return the spatial vectors
 #' @param returnhighvarmat bool to return the high variance matrix
@@ -20,23 +19,13 @@
 #' @export compcor
 compcor <- function(fmri, ncompcor = 4,
   variance_extreme = 0.975,
-  mask = NA,
-  useimagemath = FALSE, randomSamples = 1,
+  mask = NA, randomSamples = 1,
   returnv = FALSE, returnhighvarmat = FALSE,
   returnhighvarmatinds = FALSE,
   highvarmatinds = NA) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
-  }
-  if (useimagemath & !is.na(mask)) {
-    myoutfn <- tempfile(pattern = "file", tmpdir = tempdir(), fileext = ".nii.gz")
-    imageMath(4, myoutfn, "CompCorrAuto", fmri, mask, ncompcor)
-    mycsv <- sub(".nii.gz", "_compcorr.csv", myoutfn)
-    myvarimg <- sub(".nii.gz", "_variance.nii.gz", myoutfn)
-    varimage <- antsImageRead(myvarimg, 3)
-    mycompcorrdf <- read.csv(mycsv)
-    return(mycompcorrdf)
   }
   if (class(fmri)[1] == "antsImage" & is.na(mask)) {
     print("Need to input a mask too")
