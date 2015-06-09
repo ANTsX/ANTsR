@@ -4,15 +4,13 @@
 \alias{getCentroids}
 \title{Convert an image to the geometric centroids of its signal}
 \usage{
-getCentroids(img, clustparam = 250, outprefix = NA)
+getCentroids(img, clustparam = 250)
 }
 \arguments{
 \item{img}{the image to reduce to centroids - presumably some kind of
 statistical or network map}
 
 \item{clustparam}{look at regions greater than or equal to this size}
-
-\item{outprefix}{prefix if you want to output to a file}
 }
 \value{
 the centroids are output in matrix of size npoints by 3

@@ -6,7 +6,6 @@
 #' @param img the image to reduce to centroids - presumably some kind of
 #' statistical or network map
 #' @param clustparam look at regions greater than or equal to this size
-#' @param outprefix prefix if you want to output to a file
 #' @return the centroids are output in matrix of size npoints by 3
 #' @author Avants BB
 #' @examples
@@ -16,7 +15,7 @@
 #' cents<-getCentroids( img  )
 #'
 #' @export getCentroids
-getCentroids <- function(img, clustparam = 250, outprefix = NA) {
+getCentroids <- function(img, clustparam = 250 ) {
   if (nargs() == 0 | missing(img)) {
     print(args(getCentroids))
     return(1)
@@ -25,10 +24,18 @@ getCentroids <- function(img, clustparam = 250, outprefix = NA) {
     print("  class(img)[[1]] != antsImage ")
   }
   imagedim <- img@dimension
-  if (is.na(outprefix)) {
-    outprefix <- paste(tempdir(), "/Z", sep = "")
-  }
-  mypoints <- labelStats( img, img, clustparam )
-  centroids <- as.matrix(data.frame(x = mypoints$x, y = mypoints$y, z = mypoints$z, t=mypoints$t ))
+  mypoints <- labelClusters( img, clustparam ) %>%
+    labelGeometryMeasures( )
+  x = mypoints$Centroid_x
+  y = mypoints$Centroid_y
+  if ( imagedim ==  3 ) z = mypoints$Centroid_z else z=rep(0,nrow(mypoints))
+  if ( imagedim ==  4 ) t = mypoints$Centroid_t else t=rep(0,nrow(mypoints))
+  centroids <- as.matrix(
+    data.frame(
+      x = x,
+      y = y,
+      z = z,
+      t = t )
+      )
   return( centroids )
 }
