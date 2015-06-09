@@ -5,9 +5,8 @@
 \title{Compcors the input matrix using SVD and returns the result.}
 \usage{
 compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
-  useimagemath = FALSE, randomSamples = 1, returnv = FALSE,
-  returnhighvarmat = FALSE, returnhighvarmatinds = FALSE,
-  highvarmatinds = NA)
+  randomSamples = 1, returnv = FALSE, returnhighvarmat = FALSE,
+  returnhighvarmatinds = FALSE, highvarmatinds = NA)
 }
 \arguments{
 \item{fmri}{input fmri image or matrix}
@@ -17,8 +16,6 @@ compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
 \item{variance_extreme}{high variance threshold e.g 0.95 for 95 percent}
 
 \item{mask}{optional mask for image}
-
-\item{useimagemath}{use the imagemath implementation instead}
 
 \item{randomSamples}{take this many random samples to speed things up}
 
