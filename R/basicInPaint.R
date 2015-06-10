@@ -53,7 +53,7 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
     upit <- mean(img[paintMaskUse == 2])
     speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
   }
-  inpainted = iMath( speedimage,"FastMarchingExtension", healthymask, img )
+  inpainted = fastMarchingExtension( speedimage, healthymask, img )
   outimg <- antsImageClone(img)
   outimg[paintMaskUse == 2] <- inpainted[paintMaskUse == 2]
   if (its > 0) {
