@@ -18,7 +18,7 @@ fastMarchingExtension(speedImage, labelImage, valueImage)
 antsImage
 }
 \description{
-Fast marching extension
+This in an implementation of ITK's FastMarchingExtensionImageFilter - From http://www.itk.org/Doxygen/html/classitk_1_1FastMarchingExtensionImageFilter.html - Fast marching can be used to extend auxiliary variables smoothly from the zero level set. Starting from an initial position on the front, this class simultaneously calculate the signed distance and extend a set of auxiliary values. This class is templated over the level set image type, the auxiliary variable type and the number of auxiliary variables to extended. The initial front is specified by two containers: one containing the known points and one containing the trial points. The auxiliary variables on the front are represented by two auxiliary variable containers: one containing the value of the variables at the know points and on containing the value of the variables at the trail points. Implemenation of this class is based on Chapter 11 of "Level Set Methods and Fast Marching Methods", J.A. Sethian, Cambridge Press, Second edition, 1999.
 }
 \author{
 Duda, JT

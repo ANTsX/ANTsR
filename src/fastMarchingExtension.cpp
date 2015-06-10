@@ -96,8 +96,10 @@ SEXP fastMarchingExtension( SEXP r_speedImage, SEXP r_labelImage, SEXP r_valueIm
   fastMarching->SetStoppingCriterion( criterion );
   fastMarching->Update();
 
-  //return Rcpp::wrap( fastMarching->GetAuxiliaryImage(0) );
-  return Rcpp::wrap(0);
+  ImagePointerType output = fastMarching->GetAuxiliaryImage(0);
+
+  return Rcpp::wrap( output );
+
 }
 
 
