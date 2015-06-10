@@ -7,9 +7,9 @@
 abpBrainExtraction(img = NA, tem = NA, temmask = NA, tdir = NA)
 }
 \arguments{
-\item{img}{image to which we map a brain mask}
+\item{img}{whole head image to which we map a brain mask}
 
-\item{tem}{Template image which has an associated label mask.}
+\item{tem}{Template image (the whole head) which has an associated label mask.}
 
 \item{temmask}{Template's antsImage brain mask.}
 
