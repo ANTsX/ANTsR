@@ -42,10 +42,15 @@ csvd = svd( C )
 # Now A is decomposed as A = AYYt = BYt = ZZtBYt = ZCYt = ZUSVtYt
 
 # Both ZU and YV are othornormal, and ZU is the left singular vectors and YV is the right singular vector. S is the diagonal matrix with singular values.
+normer<-function( x ) { sum( sqrt( x*x ) ) }
+# nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
+# low1=scale(lowmat)/nn
+zu = Z %*% csvd$u
+yv = Y %*% csvd$v
 return( list(
   d=csvd$d,
-  u=Z %*% csvd$u,
-  v=Y %*% csvd$v
+  u=zu,
+  v=yv
   ) )
 
 }
@@ -97,10 +102,15 @@ rm( B )
 rm( P )
 csvd = svd( C )
 rm( C )
+normer<-function( x ) { sum( sqrt( x*x ) ) }
+# nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
+# low1=scale(lowmat)/nn
+zu = Z %*% csvd$u
+yv = Y %*% csvd$v
 return( list(
   d=csvd$d,
-  u=Z %*% csvd$u,
-  v=Y %*% csvd$v
+  u=zu,
+  v=yv
   ) )
 }
 

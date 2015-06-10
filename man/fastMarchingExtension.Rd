@@ -2,16 +2,17 @@
 % Please edit documentation in R/fastMarchingExtension.R
 \name{fastMarchingExtension}
 \alias{fastMarchingExtension}
-\title{Fast Marching Extension}
+\title{Fast Marching Extension filter will extend an intensity or label image
+from a known region into the unknown region along a geodesic path}
 \usage{
 fastMarchingExtension(speedImage, labelImage, valueImage)
 }
 \arguments{
-\item{speedImage}{}
+\item{speedImage}{defines the cost or distance function}
 
-\item{labelImage}{}
+\item{labelImage}{defines the known (value 1) and unknown (value 2) regions}
 
-\item{valueImage}{}
+\item{valueImage}{these values are extended into the unknown regions}
 }
 \value{
 antsImage
