@@ -5,7 +5,8 @@
 \title{Perform registration between two images.}
 \usage{
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
-  initialTransform = NA, outprefix = "", mask = NA, gradStep = NA, ...)
+  initialTransform = NA, outprefix = "", mask = NA, gradStep = NA,
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -23,6 +24,8 @@ One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
 \item{mask}{mask the registration.}
 
 \item{gradStep}{gradient step size (not for all tx)}
+
+\item{verbose}{request verbose output (useful for debugging)}
 
 \item{...}{additional options see antsRegistration in ANTs}
 }

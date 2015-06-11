@@ -13,6 +13,7 @@
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
 #' @param gradStep gradient step size (not for all tx)
+#' @param verbose request verbose output (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
 #' @details
 #' typeofTransform can be one of:
@@ -51,7 +52,7 @@
 #' @export antsRegistration
 antsRegistration <- function( fixed = NA, moving = NA,
   typeofTransform = "SyN", initialTransform = NA,
-  outprefix = "", mask = NA, gradStep=NA, ... ) {
+  outprefix = "", mask = NA, gradStep=NA, verbose=FALSE, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
     .Call("antsRegistration", .int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")
@@ -217,13 +218,15 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         args[[ length(args)+1]]="--float"
         args[[ length(args)+1]]="1"
+        if ( verbose ) {
+          args[[ length(args)+1]]="-v"
+          args[[ length(args)+1]]="1"
+          }
         args = .int_antsProcessArguments(c(args))
-#        print( args )
         .Call("antsRegistration", args, PACKAGE = "ANTsR")
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix)
         # txlist<-list.files( path = outpath, pattern = glob2rx( paste(outvar,'*',sep='')
         # ), full.names = TRUE, recursive = FALSE )
-        gc()  # trigger garbage collection
         return(list(warpedmovout = antsImageClone(warpedmovout, inpixeltype),
           warpedfixout = antsImageClone(warpedfixout, inpixeltype), fwdtransforms = fwdtransforms,
           invtransforms = invtransforms))
@@ -236,10 +239,12 @@ antsRegistration <- function( fixed = NA, moving = NA,
   }
   args[[ length(args)+1]]="--float"
   args[[ length(args)+1]]="1"
+  if ( verbose ) {
+    args[[ length(args)+1]]="-v"
+    args[[ length(args)+1]]="1"
+    }
   args = .int_antsProcessArguments(c(args))
-#  print( args )
   .Call("antsRegistration", args, PACKAGE = "ANTsR")
-  gc()  # trigger garbage collection
 }
 
 ############################################################### .antsrmakeRandomString(n, length) function generates a random string random
