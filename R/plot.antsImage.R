@@ -25,6 +25,7 @@
 #' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param nslices  number of slices to view
 #' @param dorot  do a rotation of the slice before viewing
+#' @param ncolumns number of columns in plot
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -73,6 +74,7 @@ plot.antsImage <- function(x, y,
   newwindow = FALSE,
   nslices = 10,
   dorot = 0,
+  ncolumns = 4,
   ... ) {
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
@@ -207,7 +209,7 @@ plot.antsImage <- function(x, y,
   if ( imagedim == 2 )
     slices <- 1
   nslices <- length(slices)
-  winrows <- round(length(slices) / 4 ) # controls number of rows
+  winrows <- round(length(slices) / ncolumns ) # controls number of rows
   if (winrows < 1)
     winrows <- 1
   wincols <- round(nslices/winrows) # controls number of rows
