@@ -108,8 +108,9 @@ antsApplyTransforms <- function(
           imagetype), PACKAGE = "ANTsR")
         return(antsImageClone(warpedmovout, inpixeltype))
       }
-      if (!ttexists)
-        cat("Problem in arg list \n see usage by calling antsApplyTransforms() w/o arguments \n")
+      if (!ttexists) {
+        stop("One or more transforms does not exist.")
+      }
     }
     return(0)
   }
