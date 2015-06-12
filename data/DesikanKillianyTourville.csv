@@ -1,86 +1,86 @@
-label_num;label_name
-1;"Unlabeled"
-2;"aals"
-3;"ahls"
-4;"3rd Ventricle"
-5;"calcarine"
-6;"central"
-7;"central_insular"
-8;"cingulate"
-9;"circular"
-10;"collateral"
-11;"4th Ventricle"
-12;"first_transverse"
-13;"Heschls"
-14;"inferior_frontal"
-15;"5th Ventricle"
-16;"intraparietal"
-17;"primary_inter"
-18;"lateral_occipital"
-19;"occ_temporal"
-20;"olfactory"
-21;"par_occipital"
-22;"pals"
-23;"Right Accumbens Area"
-24;"phls"
-25;"postcentral"
-26;"precentral"
-27;"subparietal"
-28;"superior_frontal"
-29;"superior_temporal"
-30;"Left Accumbens Area"
-31;"Right Amygdala"
-32;"Left Amygdala"
-33;"Right Amygdala Anterior"
-34;"Left Amygdala Anterior"
-35;"Brain Stem"
-36;"Right Caudate"
-37;"Left Caudate"
-38;"Right Cerebellum Exterior"
-39;"Left Cerebellum Exterior"
-40;"Right Cerebellum White Matter"
-41;"Left Cerebellum White Matter"
-42;"Right Cerebral Exterior"
-43;"Left Cerebral Exterior"
-44;"Right Cerebral White Matter"
-45;"Left Cerebral White Matter"
-46;"CSF"
-47;"Right Hippocampus"
-48;"Left Hippocampus"
-49;"Right Inf Lat Vent"
-50;"Left Inf Lat Vent"
-51;"Right Lateral Ventricle"
-52;"Left Lateral Ventricle"
-53;"Right Lesion"
-54;"Left Lesion"
-55;"Right Pallidum"
-56;"Left Pallidum"
-57;"Right Putamen"
-58;"Left Putamen"
-59;"Right Thalamus Proper"
-60;"Left Thalamus Proper"
-61;"Right Ventral DC"
-62;"Left Ventral DC"
-63;"Right vessel"
-64;"Left vessel"
-65;"Left Insula"
-66;"Right Insula"
-67;"Left Operculum"
-68;"Right Operculum"
-69;"Optic Chiasm"
-70;"Basal Forebrain"
-71;"Cerebellar Vermal Lobules I-V"
-72;"Cerebellar Vermal Lobules VI-VII"
-73;"Cerebellar Vermal Lobules VIII-X"
-74;"Vitamin E Tablet"
-75;"Left Basal Forebrain"
-76;"Right Basal Forebrain"
-80;"frontomarginal"
-81;"inferior_rostral"
-82;"inferior_temporal"
-83;"lateral_orbital"
-84;"superior_rostral"
-85;"lateral"
+label_num;label_name;Tissue
+1;"Unlabeled";None
+2;"aals";None
+3;"ahls";None
+4;"3rd Ventricle";CSF
+5;"calcarine";Cortex
+6;"central";Cortex
+7;"central_insular";Cortex
+8;"cingulate";Cortex
+9;"circular";Cortex
+10;"collateral";Cortex
+11;"4th Ventricle";CSF
+12;"first_transverse";Cortex
+13;"Heschls";Cortex
+14;"inferior_frontal";Cortex
+15;"5th Ventricle";CSF
+16;"intraparietal";Cortex
+17;"primary_inter";Cortex
+18;"lateral_occipital";Cortex
+19;"occ_temporal";Cortex
+20;"olfactory";Cortex
+21;"par_occipital";Cortex
+22;"pals";Cortex
+23;"Right Accumbens Area";Deep
+24;"phls";Cortex
+25;"postcentral";Cortex
+26;"precentral";Cortex
+27;"subparietal";Cortex
+28;"superior_frontal";Cortex
+29;"superior_temporal";Cortex
+30;"Left Accumbens Area";Deep
+31;"Right Amygdala";Deep
+32;"Left Amygdala";Deep
+33;"Right Amygdala Anterior";Deep
+34;"Left Amygdala Anterior";Deep
+35;"Brain Stem";Deep
+36;"Right Caudate";Deep
+37;"Left Caudate";Deep
+38;"Right Cerebellum Exterior";Deep
+39;"Left Cerebellum Exterior";Deep
+40;"Right Cerebellum White Matter";Deep
+41;"Left Cerebellum White Matter";Deep
+42;"Right Cerebral Exterior";Deep
+43;"Left Cerebral Exterior";Deep
+44;"Right Cerebral White Matter";WM
+45;"Left Cerebral White Matter";WM
+46;"CSF";CSF
+47;"Right Hippocampus";Deep
+48;"Left Hippocampus";Deep
+49;"Right Inf Lat Vent";CSF
+50;"Left Inf Lat Vent";CSF
+51;"Right Lateral Ventricle";CSF
+52;"Left Lateral Ventricle";CSF
+53;"Right Lesion";CSF
+54;"Left Lesion";CSF
+55;"Right Pallidum";Deep
+56;"Left Pallidum";Deep
+57;"Right Putamen";Deep
+58;"Left Putamen";Deep
+59;"Right Thalamus Proper";Deep
+60;"Left Thalamus Proper";Deep
+61;"Right Ventral DC";Deep
+62;"Left Ventral DC";Deep
+63;"Right vessel";Vessel
+64;"Left vessel";Vessel
+65;"Left Insula";Cortex
+66;"Right Insula";Cortex
+67;"Left Operculum";Cortex
+68;"Right Operculum";Cortex
+69;"Optic Chiasm";NA
+70;"Basal Forebrain";Deep
+71;"Cerebellar Vermal Lobules I-V";Deep
+72;"Cerebellar Vermal Lobules VI-VII";Deep
+73;"Cerebellar Vermal Lobules VIII-X";Deep
+74;"Vitamin E Tablet";NA
+75;"Left Basal Forebrain";Deep
+76;"Right Basal Forebrain";Deep
+80;"frontomarginal";Cortex
+81;"inferior_rostral";Cortex
+82;"inferior_temporal";Cortex
+83;"lateral_orbital";Cortex
+84;"superior_rostral";Cortex
+85;"lateral";NA
 86;"anterior_occipital"
 87;"lhos"
 88;"mhos"
