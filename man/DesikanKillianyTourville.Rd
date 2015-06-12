@@ -11,6 +11,7 @@ A data frame label numbers and names for the neuroanatomical DesikanKillianyTour
   \describe{
     \item{\code{label_num}}{ Numerical label value. }
     \item{\code{label_name}}{ Shorthand anatomical value. }
+    \item{\code{tissue}}{ Shorthand tissue value. }
   }
 }
 \references{
