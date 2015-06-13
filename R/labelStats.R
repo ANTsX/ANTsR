@@ -21,6 +21,7 @@ labelStats <- function(image, labelImage){
   image.float <- antsImageClone(image, "float")
   labelImage.int <- antsImageClone(labelImage, "unsigned int")
   df <- .Call("labelStats", image.float, labelImage.int, PACKAGE = "ANTsR")
+  df=df[ order(df$LabelValue) , ]
   df 
 }
 
