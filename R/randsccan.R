@@ -24,14 +24,14 @@ if ( !is.na(seed) ) set.seed(seed)
 # First a random Gaussian matrix G with m rows and r columns is sampled and computes Y = At G.
 # Then apply the Gram-Schmidt process to Y so that each column of Y is ortho-normalized.
 G = ( replicate( k , rnorm( nrow(A) ) ) )
-Y = .gramschmidt( t(A) %*% G )
+Y = .gramschmidt( t(A) %*% G )  # this is a orthornomal basis in P (sparse?)
 
 # Then we compute B = AY with n rows and r columns. Although the size of Y is much smaller than that of A, Y holds the informatin of A; that is AYYt = A. Intuitively, the row information is compresed by Y and can be decompressed by Yt
-B = A %*% Y
+B = A %*% Y    # subject space
 
 # Similarly, we take another random Gaussian matrix P with r rows and r columns, and compute Z = BP. As in the previous case, the columns of Z are ortho-normalized by the Gram-Schmidt process. ZZtt B = B.
-P = ( replicate( k , rnorm( k ) ) )
-Z = .gramschmidt( B %*% P )
+P = ( replicate( k , rnorm( k ) ) )  # gauss mat
+Z = .gramschmidt( B %*% P )  # small basis again
 
 #  Then compute C = Zt B.
 C = t(Z) %*% B
@@ -43,10 +43,12 @@ csvd = svd( C )
 
 # Both ZU and YV are othornormal, and ZU is the left singular vectors and YV is the right singular vector. S is the diagonal matrix with singular values.
 normer<-function( x ) { sum( sqrt( x*x ) ) }
-# nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
-# low1=scale(lowmat)/nn
 zu = Z %*% csvd$u
-yv = Y %*% csvd$v
+nn=apply( zu, MARGIN=2, FUN=normer )
+zu=t( t(zu)/nn )
+yv = Y %*% csvd$v   # could be made sparse and plugged back in above ...
+nn=apply( yv, MARGIN=2, FUN=normer )
+yv=t( t(yv)/nn )
 return( list(
   d=csvd$d,
   u=zu,
@@ -105,8 +107,13 @@ rm( C )
 normer<-function( x ) { sum( sqrt( x*x ) ) }
 # nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
 # low1=scale(lowmat)/nn
+normer<-function( x ) { sum( sqrt( x*x ) ) }
 zu = Z %*% csvd$u
-yv = Y %*% csvd$v
+nn=apply( zu, MARGIN=2, FUN=normer )
+zu=t( t(zu)/nn )
+yv = Y %*% csvd$v   # could be made sparse and plugged back in above ...
+nn=apply( yv, MARGIN=2, FUN=normer )
+yv=t( t(yv)/nn )
 return( list(
   d=csvd$d,
   u=zu,
