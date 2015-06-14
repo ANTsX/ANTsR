@@ -58,6 +58,71 @@ return( list(
 }
 
 
+
+
+
+
+
+
+
+#' randomized whitening function.
+#'
+#' uses random matrix to whiten a matrix
+#'
+#' @param A input matrix
+#' @param k rank to use
+#' @param seed for testing
+#' @return whitened matrix is output
+#' @author Avants BB
+#' @references N. Halko, P.G. Martinsson, J. Tropp "Finding structure with randomness: Stochastic algorithms for constructing approximate matrix decompositions" arXiv 0909.4061
+#' @keywords whiten
+#' @examples
+#'
+#' A <- matrix(rnorm(3000), ncol=50 )
+#' k=10
+#' Aw=randwhiten(A,k)
+#' # (Aw) %*% t(Aw)
+#' @export randwhiten
+randwhiten <- function( A, k, seed=NA ) {
+  if ( !is.na(seed) ) set.seed(seed)
+  X <- t(A)
+  n.comp=k
+  n <- nrow(X)
+  p <- ncol(X)
+  X <- scale(X, scale = FALSE)
+  X <- t(X)
+#  V <- X %*% t(X)/n
+  G = replicate( k , rnorm( ncol( t(X) ) ) )
+  Y = .gramschmidt( X %*% ( t(X) %*% G ) ) # keep this
+  rm( G )
+  B = X %*% ( t(X)  %*% Y )
+  P = replicate( k , rnorm( k ) )
+  Z = .gramschmidt( B %*% P ) # keep this
+  C = t(Z) %*% B
+  rm( B )
+  rm( P )
+  csvd = svd( C )
+  rm( C )
+  normer<-function( x ) { sum( sqrt( x*x ) ) }
+  zu = Z %*% csvd$u
+  nn=apply( zu, MARGIN=2, FUN=normer )
+  zu=t( t(zu)/nn )
+  yv = Y %*% csvd$v   # could be made sparse and plugged back in above ...
+  nn=apply( yv, MARGIN=2, FUN=normer )
+  yv=t( t(yv)/nn )
+  s = list(
+    d=csvd$d,
+    u=zu,
+    v=yv
+    )
+  D <- diag(c(1/sqrt(s$d)))
+  K <- D %*% t(s$u)
+  K <- matrix(K[1:n.comp, ], n.comp, p)
+  xw <- K %*% X # lowrank in row
+}
+
+
+
 #' randomized cca function.
 #'
 #' uses random matrix to estimate cca results
@@ -92,33 +157,38 @@ return( list(
 #'
 #' @export randcca
 randcca <- function( x, y, k, seed ) {
-#  here : A = t(x) %*% y
-G = replicate( k , rnorm( ncol(x) ) )
-Y = .gramschmidt( t(y) %*% ( x %*% G ) ) # keep this
-rm( G )
-B = t(x) %*% ( y  %*% Y )
-P = replicate( k , rnorm( k ) )
-Z = .gramschmidt( B %*% P ) # keep this
-C = t(Z) %*% B
-rm( B )
-rm( P )
-csvd = svd( C )
-rm( C )
-normer<-function( x ) { sum( sqrt( x*x ) ) }
-# nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
-# low1=scale(lowmat)/nn
-normer<-function( x ) { sum( sqrt( x*x ) ) }
-zu = Z %*% csvd$u
-nn=apply( zu, MARGIN=2, FUN=normer )
-zu=t( t(zu)/nn )
-yv = Y %*% csvd$v   # could be made sparse and plugged back in above ...
-nn=apply( yv, MARGIN=2, FUN=normer )
-yv=t( t(yv)/nn )
-return( list(
-  d=csvd$d,
-  u=zu,
-  v=yv
-  ) )
+  if ( !is.na(seed) ) set.seed(seed)
+  xw = randwhiten( x , k )
+  yw = randwhiten( y , k )
+  G = replicate( k , rnorm( ncol(x) ) )
+  Y = .gramschmidt( t(yw) %*% ( xw %*% G ) ) # keep this
+  rm( G )
+  B = t(xw) %*% ( yw  %*% Y )
+  P = replicate( k , rnorm( k ) )
+  Z = .gramschmidt( B %*% P ) # keep this
+  C = t(Z) %*% B
+  rm( B )
+  rm( P )
+  csvd = svd( C )
+  rm( C )
+  normer<-function( x ) { sum( sqrt( x*x ) ) }
+  # nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
+  # low1=scale(lowmat)/nn
+  normer<-function( x ) { sum( sqrt( x*x ) ) }
+  zu = Z %*% csvd$u
+  nn=apply( zu, MARGIN=2, FUN=normer )
+  zu=t( t(zu)/nn )
+  yv = Y %*% csvd$v   # could be made sparse and plugged back in above ...
+  nn=apply( yv, MARGIN=2, FUN=normer )
+  yv=t( t(yv)/nn )
+  s=list(
+    d=csvd$d,
+    u=zu,
+    v=yv
+    )
+  D <- diag(c(1/sqrt(s$d)))
+  K <- D %*% t(s$u)
+  return( ( K %*% t(xw) ) %*% yw )
 }
 
 .gramschmidt <- function( A, tol=1.e-8 ) {
