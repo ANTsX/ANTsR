@@ -20,7 +20,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   }
   if ( fileid == "show" )
    return( c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
-     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg","simple" ) )
+     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg","simple",
+     "rsbold", "rsboldmask", "rsboldseg" ) )
 
   if ( fileid == "simple" )
     return( paste(path.package("ANTsR"),"/extdata/simple.jpg",sep="") )
@@ -61,7 +62,10 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz",
     pcaslseg = "http://files.figshare.com/1862040/101_seg.nii.gz",
-    atroposseg = "http://files.figshare.com/1893339/atroposseg.nii")
+    atroposseg = "http://files.figshare.com/1893339/atroposseg.nii",
+    rsbold = "http://files.figshare.com/2119176/rest.nii.gz",
+    rsboldmask = "http://files.figshare.com/2119177/mask.nii.gz",
+    rsboldseg = "http://files.figshare.com/2119178/seg.nii.gz" )
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki")
@@ -86,7 +90,10 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     ch2b = "5db6c10eb8aeabc663d10e010860465f", ch2a = "caf2d979a7d9c86f515a5bc447856e7c",
     mnit = "dab456335a4bfa2b3bc31e9882699ee9", pcasl = "e59716ae76a853465efacf3cfb53bc58",
     pcaslseg = "3872d709475ee2d51d90aa7f4df5af8f",
-    atroposseg = "f40680bd1de0592c9fa9e380bd9e29be")
+    atroposseg = "f40680bd1de0592c9fa9e380bd9e29be",
+    rsbold = "dfba022d1f715c00e042a79c6250eb16",
+    rsboldmask = "15c9c6b38ce8e7f69fd4b64c110a17b4",
+    rsboldseg = "d50ceabc2bffbf12cee8b16e2216bfbc")
   if (!is.null(mymd5))
     if (tools::md5sum(tfn) != mymd5) {
       stop("checksum failure")
