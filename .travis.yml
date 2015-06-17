@@ -35,6 +35,8 @@ install:
 - cd ${basedir}
 script:
 - source ~/.R/Makevars
+- export CXX=clang++
+- export CC=clang
 - travis_wait 40 R CMD build ANTsR --no-build-vignettes
 - travis_wait 100 R CMD check ANTsR_*.tar.gz
 # - R CMD INSTALL --build ANTsR_*.tar.gz

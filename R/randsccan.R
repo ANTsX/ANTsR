@@ -139,21 +139,6 @@ randwhiten <- function( A, k, seed=NA ) {
 #' y <- x %*% matrix( rnorm( 60*100 ), nrow=60)
 #' k=10
 #' dr=randcca(x,y,k,1)
-#' dt=svd( t(x)%*%y )
-#' cor(dr$d[1:k],dt$d[1:k])
-#' tt=2
-#' ct=0
-#' for ( i in 1:20 )
-#'   ct=ct+as.numeric( dr$d[tt] < randcca(x,y[sample(1:50),],k,1)$d[tt] )
-#' if ( ct > 0 ) stop("should not happen")
-#' \dontrun{
-#' # produce low rank cca matrix
-#' K = t(dr$u)
-#' lowAr = ( K %*% t(x) ) %*% y
-#' K = t(dt$u)[1:k,]
-#' lowAt = ( K %*% t(x) ) %*% y
-#' mydecom<-sparseDecom( lowAr )
-#' }
 #'
 #' @export randcca
 randcca <- function( x, y, k, seed ) {
@@ -171,9 +156,6 @@ randcca <- function( x, y, k, seed ) {
   rm( P )
   csvd = svd( C )
   rm( C )
-  normer<-function( x ) { sum( sqrt( x*x ) ) }
-  # nn=apply( scale(lowmat), MARGIN=1, FUN=normer )
-  # low1=scale(lowmat)/nn
   normer<-function( x ) { sum( sqrt( x*x ) ) }
   zu = Z %*% csvd$u
   nn=apply( zu, MARGIN=2, FUN=normer )
