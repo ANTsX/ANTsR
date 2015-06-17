@@ -10,7 +10,7 @@ vignette: >
     \usepackage[utf8]{inputenc}
 ---
 
-```{r, echo = FALSE, message = FALSE}
+```{r, echo = FALSE, message = FALSE, include = FALSE}
 library( knitr )
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
@@ -104,7 +104,23 @@ Motion correction:
   invisible(plot(meanbold, axis=3, slices=1:30, ncolumns=10))
   invisible(plot(moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10))
 ```
-Plot registration parameters from motion correction
+
+It can also be useful to plot the data as a matrix, where each row is the
+time-series for a voxels. Due to the large number of voxels however, using
+just a sample of the voxels is much faster
+```{r mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+  nVox = length(which(as.array(mask)==1))
+  vox = sample(1:nVox, 1000)
+  invisible(plot(as.antsImage( t(timeseries2matrix(img,mask)[,vox]))))
+  invisible(plot(as.antsImage( t(timeseries2matrix(moco$moco_img,mask)[,vox]))))
+```
+
+
+It is useful to plot the registration parameters from the motion correction
+to get a qualitative feels for how much motion is in the data. In addition to the
+registration parameters, we plot the mean framewise displacement, which measures
+the average displacement of voxels, between consecutive timepoints.
+
 ```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
   # extract just the transform parameters
   reg_params <- as.matrix(moco$moco_params[,3:8])
@@ -153,7 +169,7 @@ Plot registration parameters from motion correction
   trendCategory = factor(trendNames, levels=c("Original", "Detrended"))
   trend.dat$Signal = c(global_pre, global_moco, global_moco_detrend)
   trend.dat$Type = trendType
-  trend.dat$Category = trendNames
+  trend.dat$Category = trendCategory
   trendPlot <- ggplot(trend.dat, aes(x=Time, y=Signal, group=Type, colour=Type) )
   trendPlot <- trendPlot + geom_line(size=0.5)
   trendPlot <- trendPlot + theme(text=element_text(size=10), legend.position="top")
