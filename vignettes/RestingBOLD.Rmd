@@ -1,0 +1,172 @@
+---
+title: "Resting BOLD (basic analyses using ANTsR)"
+author: "Jeffrey T. Duda"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{Resting BOLD processing images in R}
+    \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+library( knitr )
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(ANTsR)
+library(ggplot2)
+library(igraph)
+library(pracma)
+```
+
+## Background
+This document provides some examples illustrating how ANTsR may be used to
+analyze resting state BOLD fMRI data using established approaches. As the focus
+is on processing the BOLD signal, here we require the following data
+
+* A BOLD fMRI time-series image
+
+* A brain mask image
+
+* A tissue-segmentation that identifies (at least): CSF, gray matter, white matter
+
+* A set of labels identifying anatomical regions of interest (the network to analyze)
+
+Obtaining these is a non-trivial matter, but will be the topic of a future document
+as the process is the same for both resting and task-based BOLD.
+
+The processing here is largely based upon a recent review of methods for dealing
+with motion in resting fMRI [@Power2014].
+
+
+## Preprocessing
+
+### Steady-state
+
+Removal of pre steady-state time-points. It is typical to exclude any data obtained
+during the first 10s as shown here:
+
+
+```{r steadystate ,message=FALSE,warnings=FALSE}
+  img = antsImageRead(getANTsRData("rsbold"))
+  mask = antsImageRead(getANTsRData("rsboldmask"))
+  seg = antsImageRead(getANTsRData("rsboldseg")))
+
+  # Save image info
+  d = dim(img)
+  spacing = antsGetSpacing(img)
+  origin = antsGetOrigin(img)
+  direction = antsGetDirection(img)
+
+  # Identify first steady-state timepoint
+  tr = spacing[4]
+  steady = ceiling(10.0 / tr)
+
+  # Eliminate non steady-state timepoints, restore image info
+  img = as.antsImage(img[1:d[1],1:d[2],1:d[3],steady:d[4]])
+  flag = antsSetSpacing(img, spacing)
+  flag = antsSetDirection(img, direction)
+  origin[4] = origin[4] + tr * steady
+  flag = antsSetOrigin( img, origin )
+
+```
+The `flag` variable is used to obtain a success/failure indication from
+the methods and may be used for error checking.
+
+Updating the origin is
+not especially important here but could be in task-data with stimulus
+timing files. This could also be important to sync with
+physiological measures, if acquired.
+
+### Motion correction
+
+Now we want to correct for motion between time points. To do so we will:
+
+* Find the mean of all time points - we do this using `apply.antsImage` which is
+an extension of the `R` method `apply` with additional functionality to
+maintain image header info integrity
+
+* Align all time-points to the mean - this is accomplished with `antsMotionCalculation`,
+the fixed parameter is used to set the reference image to which all time-points are aligned
+and the txtype parameter indicates the type of transform to be estimated,
+the default is "Affine", but for this type of analyses it is typical to use "Rigid"
+
+* Examine motion correction parameters for quality control
+
+* Obtain a matrix of transform parameters to use as nuissance regressors, a common approach
+is to use the 6 rigid parameters, their squares, the derivative and the squared derivative
+
+Motion correction:
+```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+  meanbold <- apply.antsImage(img, c(1,2,3), mean)
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
+
+  invisible(plot(meanbold, axis=3, slices=1:30, ncolumns=10))
+  invisible(plot(moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10))
+```
+Plot registration parameters from motion correction
+```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+  # extract just the transform parameters
+  reg_params <- as.matrix(moco$moco_params[,3:8])
+
+  nTimes = dim(reg_params)[1]
+  orderedBreaks = c("Framewise", "X", "Y", "Z", "Pitch", "Roll", "Yaw" )
+  moco.dat <- data.frame(Time=rep(1:nTimes, 7)*spacing[4])
+  moco.dat$Values = c( as.vector(reg_params), moco$fd$MeanDisplacement )
+  moco.dat$Category = c( rep("Angle", 3*nTimes), rep("Displacement", 4*nTimes) )
+  moco.dat$Type = rep(c("Pitch", "Roll", "Yaw","X", "Y", "Z", "Framewise"), each=nTimes)
+  regPlot <- ggplot(moco.dat, aes(x=Time, y=Values, group=Type, colour=Type) )
+  regPlot <- regPlot + geom_line(size=0.5)
+  regPlot <- regPlot + theme(text=element_text(size=10), legend.position="top")
+  regPlot <- regPlot + ggtitle("Motion correction parameters")
+  regPlot <- regPlot + facet_grid(Category ~ ., scales="free" )
+  regPlot <- regPlot + scale_color_discrete(breaks=orderedBreaks)
+  print(regPlot)
+
+  # Get scaling to show DVARS as % of mean signal for cross-subject comparison
+  scaling <- 1000.0 / mean(moco$moco_avg_img[mask>0])
+
+  dvars <- scaling * computeDVARS(timeseries2matrix(moco$moco_img, mask))
+  orig_dvars <- scaling * computeDVARS(timeseries2matrix(img, mask))
+
+  dvarType <- c(rep("dvar_pre",length(orig_dvars)), rep("dvar_post",length(dvars)) )
+  dvarTime <- c(1:length(orig_dvars), 1:length(dvars))*spacing[4]
+  dvar.data <- data.frame(DVARS=c(orig_dvars, dvars), Type=dvarType, Time=dvarTime)
+
+  dvarPlot <- ggplot(dvar.data, aes(x=Time, y=DVARS, group=Type, colour=Type) )
+  dvarPlot <- dvarPlot + geom_line(size=0.5)
+  dvarPlot <- dvarPlot + theme(text=element_text(size=10), legend.position="top")
+  dvarPlot <- dvarPlot + ggtitle("DVARS: pre and post motion correction")
+  dvarPlot <- dvarPlot + scale_colour_discrete(labels=c("Moco", "Original"))
+  print(dvarPlot)
+
+  global_pre <- rowMeans(timeseries2matrix(img, mask))
+  global_moco <- rowMeans(timeseries2matrix(moco$moco_img, mask))
+
+  boldMat = detrend(timeseries2matrix(moco$moco_img, mask))
+  global_moco_detrend = rowMeans(boldMat)
+
+  trend.dat = data.frame( Time=rep(1:nTimes,3) )
+  trendType = c( rep("Original", nTimes), rep("Motion-corrected",nTimes) )
+  trendType = c(trendType, rep("Moco & Detrended",nTimes) )
+  trendNames = c(rep("Original",nTimes*2), rep("Detrended", nTimes))
+  trendCategory = factor(trendNames, levels=c("Original", "Detrended"))
+  trend.dat$Signal = c(global_pre, global_moco, global_moco_detrend)
+  trend.dat$Type = trendType
+  trend.dat$Category = trendNames
+  trendPlot <- ggplot(trend.dat, aes(x=Time, y=Signal, group=Type, colour=Type) )
+  trendPlot <- trendPlot + geom_line(size=0.5)
+  trendPlot <- trendPlot + theme(text=element_text(size=10), legend.position="top")
+  trendPlot <- trendPlot + facet_grid(Category ~ ., scales="free" )
+  trendPlot <- trendPlot + ggtitle("Detrending the time-series")
+  print(trendPlot)
+
+
+  #reg_params <- cbind(reg_params, reg_params*reg_params)
+
+```
+
+
+
+
+## References
