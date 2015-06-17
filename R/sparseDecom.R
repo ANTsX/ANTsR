@@ -79,13 +79,19 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   outfn <- paste(statdir, "spca.nii.gz", sep = "")
   decomp <- paste(statdir, "spcaprojectionsView1vec.csv", sep = "")
   matname <- paste(statdir, "spcamatrix.mha", sep = "")
-  antsImageWrite(as.antsImage(inmatrix), matname)
+  antsImageWrite( as.antsImage(inmatrix), matname )
+  if ( ! file.exists( matname) ) stop("sparseDecom cannot write image")
   mfn <- NA
   maskdim <- 0
+  if (class(inmask)[[1]] == "antsImage") {
+    if ( sum( inmask > 0.5 ) != ncol(inmatrix) )
+      stop("dimensions of mask and matrix do not match")
+  }
   if (class(inmask)[[1]][1] == "antsImage") {
     maskdim <- inmask@dimension
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(inmask, mfn)
+    if ( ! file.exists( mfn ) ) stop("sparseDecom cannot write mask")
   }
   sccaname <- "recon["
   if (maskdim == 4)
@@ -134,6 +140,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   time1 <- (Sys.time())
   .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   time2 <- (Sys.time())
+  if ( ! file.exists(decomp) ) stop("failure - output not written")
   mydecomp <- read.csv(decomp)
   glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
