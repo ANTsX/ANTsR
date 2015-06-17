@@ -50,7 +50,7 @@ during the first 10s as shown here:
 ```{r steadystate ,message=FALSE,warnings=FALSE}
   img = antsImageRead(getANTsRData("rsbold"))
   mask = antsImageRead(getANTsRData("rsboldmask"))
-  seg = antsImageRead(getANTsRData("rsboldseg")))
+  seg = antsImageRead(getANTsRData("rsboldseg"))
 
   # Save image info
   d = dim(img)
