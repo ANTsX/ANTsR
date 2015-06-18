@@ -45,7 +45,8 @@ outputs a decomposition of a population or time series matrix
 }
 \description{
 Decomposes a matrix into sparse eigenevectors to maximize explained
-variance.
+variance. Note: we do not scale the matrices internally.
+We leave scaling choices to the user.
 }
 \examples{
 mat<-replicate(100, rnorm(20))

@@ -1,7 +1,8 @@
 #' Convenience wrapper for eigenanatomy decomposition.
 #'
 #' Decomposes a matrix into sparse eigenevectors to maximize explained
-#' variance.
+#' variance. Note: we do not scale the matrices internally.
+#' We leave scaling choices to the user.
 #'
 #' @param inmatrix n by p input images , subjects or time points by row ,
 #' spatial variable lies along columns

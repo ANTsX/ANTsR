@@ -55,7 +55,8 @@ outputs a decomposition of a pair of matrices
 }
 \description{
 Decomposes two matrices into paired sparse eigenevectors to maximize
-canonical correlation.
+canonical correlation. Note: we do not scale the matrices internally.
+We leave scaling choices to the user.
 }
 \examples{
 mat<-replicate(100, rnorm(20))

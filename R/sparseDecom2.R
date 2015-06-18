@@ -1,7 +1,8 @@
 #' Convenience wrapper for 2-view eigenanatomy decomposition.
 #'
 #' Decomposes two matrices into paired sparse eigenevectors to maximize
-#' canonical correlation.
+#' canonical correlation. Note: we do not scale the matrices internally.
+#' We leave scaling choices to the user.
 #'
 #' @param inmatrix input as inmatrix=list(mat1,mat2). n by p input matrix and n
 #' by q input matrix , spatial variable lies along columns.
