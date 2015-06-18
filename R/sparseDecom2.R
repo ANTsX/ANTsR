@@ -26,6 +26,7 @@
 #' @param ell1 gradient descent parameter, if negative then l0 otherwise use l1
 #' @param priorWeight Scalar value weight on prior between 0 (prior is weak)
 #' and 1 (prior is strong).  Only engaged if initialization is used
+#' @param verbose activates verbose output to screen
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -103,7 +104,8 @@ sparseDecom2 <- function(
   initializationList = list(),
   initializationList2 = list(),
   ell1 = 0.05,
-  priorWeight = 0 ) {
+  priorWeight = 0,
+  verbose = 0  ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
@@ -158,7 +160,7 @@ sparseDecom2 <- function(
     ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1",
     ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, "--QClusterThresh",
     cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth,
-    "-r", robust, "-c", mycoption, "--prior-weight", priorWeight)
+    "-r", robust, "-c", mycoption, "--prior-weight", priorWeight,"-v", verbose)
 
   if (length(initializationList) > 0) {
     ct <- 1
@@ -178,7 +180,7 @@ sparseDecom2 <- function(
       "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms,
       "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong,
       "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1],
-      "--initialization", initlistfn, "--prior-weight", priorWeight)
+      "--initialization", initlistfn, "--prior-weight", priorWeight,"-v", verbose)
     if (length(initializationList2) > 0) {
       ct <- 1
       outfns <- c()
@@ -198,7 +200,8 @@ sparseDecom2 <- function(
         "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn,
         "-g", uselong, "-z", z, "-s", smooth, "-r", robust, "-c", mycoption,
         "--mask", mfn[1], "--initialization", initlistfn, "--mask2", mfn[2],
-        "--initialization2", initlistfn2, "--prior-weight", priorWeight)
+        "--initialization2", initlistfn2, "--prior-weight", priorWeight,
+        "-v", verbose)
     }
   }
   .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
