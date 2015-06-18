@@ -17,6 +17,7 @@
 #include "itkContinuousIndex.h"
 #include "vnl/vnl_matrix.h"
 #include "vnl/vnl_vector.h"
+#include "vnl/algo/vnl_determinant.h"
 
 template< class ImageType >
 SEXP antsImage( std::string pixeltype, unsigned int components )
@@ -2372,8 +2373,13 @@ SEXP antsImage_SetDirection( SEXP r_antsimage, SEXP r_direction )
     for ( unsigned int j=0; j<nDim; j++ )
       {
         itkDirection(i,j) = direction(i,j);
-        }
       }
+    }
+
+  if ( vnl_determinant(itkDirection.GetVnlMatrix()) == 0.0 )
+    {
+    Rcpp::stop("Image direction matrix has determinant == 0");
+    }
 
   image->SetDirection( itkDirection );
   return Rcpp::wrap(NULL);
