@@ -44,8 +44,9 @@ with motion in resting fMRI [@Power2014].
 ### Steady-state
 
 Removal of pre steady-state time-points. It is typical to exclude any data obtained
-during the first 10s as shown here:
-
+during the first 10 seconds as shown below. The choice of 10s is based on an informal
+review of current literature of 3T human data. For other applications, be sure to
+check the relevant literature.
 
 ```{r steadystate ,message=FALSE,warnings=FALSE}
   img = antsImageRead(getANTsRData("rsbold"))
@@ -76,22 +77,24 @@ the methods and may be used for error checking.
 Updating the origin is
 not especially important here but could be in task-data with stimulus
 timing files. This could also be important to sync with
-physiological measures, if acquired.
+non image based physiological measures, if acquired.
 
 ### Motion correction
 
-Now we want to correct for motion between time points. To do so we will:
+To correct for motion that occurs during acquisition:
 
-* Find the mean of all time points - we do this using `apply.antsImage` which is
+* Find the mean volume of all time points.  This is done with `apply.antsImage` which is
 an extension of the `R` method `apply` with additional functionality to
 maintain image header info integrity
 
-* Align all time-points to the mean - this is accomplished with `antsMotionCalculation`,
-the fixed parameter is used to set the reference image to which all time-points are aligned
-and the txtype parameter indicates the type of transform to be estimated,
-the default is "Affine", but for this type of analyses it is typical to use "Rigid"
+* Align all time-points to the mean. This is accomplished with `antsMotionCalculation`,
+the `fixed` parameter is used to set the reference image to which all time-points are aligned
+and the `txtype` parameter indicates the type of transform to be estimated.
+The default for `txtype` is "Affine", but for this type of analyses it is typical to use "Rigid".
 
-* Examine motion correction parameters for quality control
+* Examine motion correction parameters for quality control.
+
+* Identify "bad" time points for removal
 
 * Obtain a matrix of transform parameters to use as nuissance regressors, a common approach
 is to use the 6 rigid parameters, their squares, the derivative and the squared derivative
@@ -105,7 +108,7 @@ Motion correction:
   invisible(plot(moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10))
 ```
 
-It can also be useful to plot the data as a matrix, where each row is the
+It can also be informative to plot the data as a matrix, where each row is the
 time-series for a voxels. Due to the large number of voxels however, using
 just a sample of the voxels is much faster
 ```{r mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
@@ -116,12 +119,12 @@ just a sample of the voxels is much faster
 ```
 
 
-It is useful to plot the registration parameters from the motion correction
-to get a qualitative feels for how much motion is in the data. In addition to the
+Plotting the registration parameters from the motion correction provides a
+qualitative feel for how much motion is in the data. In addition to the
 registration parameters, we plot the mean framewise displacement, which measures
 the average displacement of voxels, between consecutive timepoints.
 
-```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
   # extract just the transform parameters
   reg_params <- as.matrix(moco$moco_params[,3:8])
 
@@ -156,10 +159,55 @@ the average displacement of voxels, between consecutive timepoints.
   dvarPlot <- dvarPlot + scale_colour_discrete(labels=c("Moco", "Original"))
   print(dvarPlot)
 
+```
+
+### Identify "bad" time-points
+
+The motion parameters are often used to identify "bad" timepoints. A mean framewise displacement
+great than 0.2mm is a common threshold. For illustrative purposes, we will use a threshold of
+0.08mm. Because the displacement is a measure of motion between two timepoints, both timepoints
+associated with the displacement are marked as bad.
+
+```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+
+  badtimes = which(moco$fd$MeanDisplacement > 0.08)
+
+  bad.data = data.frame(Time=(1:nTimes)*tr)
+  bad.data$FD = moco$fd$MeanDisplacement
+
+  bad.data.rect = data.frame(Start=badtimes*tr)
+  bad.data.rect$Stop = (badtimes+1)*tr
+  rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2,size=0)
+
+  badPlot <- ggplot(bad.data) + geom_line(aes(x=Time, y=FD))
+  badPlot <- badPlot + geom_hline( yintercept=0.08, linetype="dashed", alpha=0.5 )
+  badPlot <- badPlot + theme(text=element_text(size=10), legend.position="none")
+  badPlot <- badPlot + ggtitle("Bad timepoints")
+  badPlot <- badPlot + geom_rect(data=bad.data.rect, rect.aes)
+  print(badPlot)
+
+  badtimes = sort(c(badtimes, badtimes+1))
+  goodtimes = (1:nTimes)[-badtimes]
+
+```
+
+## Time-series processing
+
+### Detrending the data
+
+Next, the time-series data is detrended while excluding the bad timepoints
+identified earlier. The global signal (mean signal over the whole brain)
+is used to illustrate the effect of the detrending.
+
+```{r detrend,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
   global_pre <- rowMeans(timeseries2matrix(img, mask))
   global_moco <- rowMeans(timeseries2matrix(moco$moco_img, mask))
 
-  boldMat = detrend(timeseries2matrix(moco$moco_img, mask))
+  boldMat = timeseries2matrix(moco$moco_img, mask)
+  boldMat[goodtimes,] = detrend(boldMat[goodtimes,])
+  boldMat[badtimes,] = NA
+
   global_moco_detrend = rowMeans(boldMat)
 
   trend.dat = data.frame( Time=rep(1:nTimes,3) )
@@ -177,12 +225,134 @@ the average displacement of voxels, between consecutive timepoints.
   trendPlot <- trendPlot + ggtitle("Detrending the time-series")
   print(trendPlot)
 
+```
 
-  #reg_params <- cbind(reg_params, reg_params*reg_params)
+### Collect "nuissance" parameters to regress out
+
+Some typical nuissance parameters are
+
+* motion parameters, their squares, and the derivatives of both
+
+* mean signal in white matter
+
+* mean signal in CSF
+
+* physiologocial noise estimated via `compcor`
+
+* global mean signal in brain - NOTE: this is a controversial topic
+
+There are two camps when it comes to global signal, some leave it in, others
+regress it out. It is unclear which is best. Here we will include it as a nuissance
+parameters as done in the paper on which the methods are based. This should not
+be interpreted as an implied endorsement of one camp over the other.
+
+```{r nuissance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
+  detrendImg = matrix2timeseries( img, mask, boldMat )
+
+  wmMask = seg*1
+  wmMask[ wmMask != 3] = 0
+  wmMask[ wmMask == 3 ] = 1
+  wmMask = iMath( wmMask, "ME", 1)
+  wmMean = rowMeans(timeseries2matrix(detrendImg, wmMask))
+
+  csfMask = seg*1
+  csfMask[ csfMask != 1] = 0
+  csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
+
+  compcor = compcor(boldMat[goodtimes,], ncompcor = 4)
+  compcorNuis = matrix(0, nTimes, 4)
+  compcorNuis[goodtimes, ] = compcor
+  compcorNuis[badtimes, ] = NA
+
+
+  tissueType = c( rep("Global", nTimes), rep("White matter",nTimes), rep("CSF",nTimes) )
+  tissueType = c(tissueType, rep("CompCor1",nTimes), rep("CompCor2",nTimes))
+  tissueType = c(tissueType, rep("CompCor3",nTimes), rep("CompCor4",nTimes) )
+
+  tissueCategory = c(rep("Tissue", nTimes*3), rep("CompCor", nTimes*4))
+
+  signal = c(global_moco_detrend, wmMean, csfMean, compcorNuis[,1], compcorNuis[,2])
+  signal = c(signal, compcorNuis[,3], compcorNuis[,4])
+
+  tissue.dat = data.frame( Time=rep(1:nTimes,7) )
+  tissue.dat$Signal = signal
+  tissue.dat$Type = tissueType
+  tissue.dat$Category = tissueCategory
+
+  tissuePlot <- ggplot(tissue.dat, aes(x=Time, y=Signal, group=Type, colour=Type) )
+  tissuePlot <- tissuePlot + geom_line(size=0.5)
+  tissuePlot <- tissuePlot + theme(text=element_text(size=10), legend.position="top")
+  tissuePlot <- tissuePlot + facet_grid(Category ~ ., scales="free" )
+  tissuePlot <- tissuePlot + ggtitle("Nuisance parameters")
+  print(tissuePlot)
 
 ```
 
+The nuissance parameters are now regressed out the signal. This is illustrated by looking
+at the mean signal in the cortex before and after the regression.
 
+```{r regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 
+  ctxMask = seg*1
+  ctxMask[ ctxMask != 2] = 0
+  ctxMask[ ctxMask == 2 ] = 1
+  ctxMean = rowMeans(timeseries2matrix(detrendImg, ctxMask))
+
+  moco = cbind(reg_params, reg_params*reg_params)
+  mocoDeriv = rbind( rep(0,dim(moco)[2]), diff(moco,1) )
+
+  nuissance = cbind( global_moco_detrend, moco, mocoDeriv, wmMean, csfMean )
+
+  boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuissance[goodtimes,] ) )
+
+  regressedImg = matrix2timeseries( img, mask, outMat)
+  ctxMeanRegressed = rowMeans(timeseries2matrix(regressedImg, ctxMask))
+
+  cortex.dat =  data.frame( Time=rep(1:nTimes,2) )
+  cortex.dat$Values = c(ctxMean, ctxMeanRegressed)
+  cortex.dat$Type = c(rep("Original",nTimes), rep("Regressed",nTimes))
+  cortexPlot = ggplot(cortex.dat, aes(x=Time, y=Values, group=Type, colour=Type))
+  cortexPlot = cortexPlot + geom_line(size=0.5)
+  cortexPlot = cortexPlot + theme(text=element_text(size=10), legend.position="top")
+  cortexPlot = cortexPlot + ggtitle("Effect of nuisance parameter regression")
+  cortexPlot = cortexPlot + facet_grid(Type ~ ., scales="free" )
+  print(cortexPlot)
+
+```
+
+The next step is frequency filtering. However, first we want to fill in the "bad"
+timepoints with interpolated data. This is to avoid artifact that would result having
+non-evenly sampled time-series data. This bad timepoints will be again removed after
+the frequency filtering
+
+```{r frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+
+if ( length(badtimes) > 0 )
+  {
+  for ( v in c(1:nVox) )
+    {
+    boldMat[badtimes,v] = spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v], xout=badtimes )$y
+    }
+  }
+
+  ctxMeanSpline = matrix2timeseries( img, mask, boldMat)
+  ctxMeanSpline = rowMeans(timeseries2matrix(ctxMeanSpline, ctxMask))
+
+  boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=0.009, freqHi=0.08, opt="trig" )
+
+  ctxMeanFiltered = matrix2timeseries( img, mask, boldMat)
+  ctxMeanFiltered = rowMeans(timeseries2matrix(ctxMeanFiltered, ctxMask))
+  ctxMeanFiltered[badtimes] = NA
+
+  freq.dat =  data.frame( Time=rep(1:nTimes,2) )
+  freq.dat$Values = c(ctxMeanSpline, ctxMeanFiltered)
+  freq.dat$Type = c(rep("Original",nTimes), rep("Filtered",nTimes))
+  freqPlot = ggplot(freq.dat, aes(x=Time, y=Values, group=Type, colour=Type))
+  freqPlot = freqPlot + geom_line(size=0.5)
+  freqPlot = freqPlot + theme(text=element_text(size=10), legend.position="top")
+  freqPlot = freqPlot + ggtitle("Effect of bandpass filtering")
+  print(freqPlot)
+```
 
 ## References
