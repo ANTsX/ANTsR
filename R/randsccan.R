@@ -131,7 +131,11 @@ randwhiten <- function( A, k, seed=NA ) {
 #' @param y input matrix
 #' @param k rank to use
 #' @param seed for testing
-#' @return randomized svd of t(x) y is output
+#' @return outputs a list containing:
+#' \itemize{
+#'   \item{whitened: }{low-rank whitened joint matrix}
+#'   \item{svd: }{low-rank svd of joint matrix}
+#' }
 #' @author Avants BB
 #' @examples
 #' set.seed(13)
@@ -170,7 +174,9 @@ randcca <- function( x, y, k, seed ) {
     )
   D <- diag(c(1/sqrt(s$d)))
   K <- D %*% t(s$u)
-  return( ( K %*% t(xw) ) %*% yw )
+  return(
+    list( whitened=( K %*% t(xw) ) %*% yw, svd=s )
+    )
 }
 
 .gramschmidt <- function( A, tol=1.e-8 ) {

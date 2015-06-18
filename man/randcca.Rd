@@ -16,7 +16,11 @@ randcca(x, y, k, seed)
 \item{seed}{for testing}
 }
 \value{
-randomized svd of t(x) y is output
+outputs a list containing:
+\itemize{
+  \item{whitened: }{low-rank whitened joint matrix}
+  \item{svd: }{low-rank svd of joint matrix}
+}
 }
 \description{
 uses random matrix to estimate cca results
