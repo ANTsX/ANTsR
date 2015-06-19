@@ -391,33 +391,69 @@ more common to define ROIs that contain many voxels and represent regions for wh
 is some a priori knowledge regarding the functional network to which each region belongs. The
 provided network definition provides the center point of each ROI so we must first create an
 image where each ROI is a sphere of radius=5mm centered on the provided point.
-```{r frequencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
-labels = mask*0
+```{r networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+labelImg = mask*0
 nPts = dim(pts)[1]
-for ( i in 1:nPts) {
-  pt = as.numeric(pts$x[i], pts$y[i], pts$z[i] )
-  idx = antsTransformPhysicalPointToIndex(mean,pt)
+rad = 5
+n = ceiling(rad / antsGetSpacing(mask))
+
+for ( r in 1:nPts) {
+  pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
+  idx = antsTransformPhysicalPointToIndex(mask,pt)
 
   for ( i in c(-n[1]:n[1]) ) {
     for (j in c(-n[2]:n[2])) {
       for (k in c(-n[3]:n[3])) {
         local = idx + c(i,j,k)
-        localpt = antsTransformIndexToPhysicalPoint(mean,local)
-
+        localpt = antsTransformIndexToPhysicalPoint(mask,local)
         dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
-        if ( dist <= r) {
-          labels[local[1], local[2], local[3]] = pts$id[i]
+        inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
+        if ( (dist <= rad) && ( inImage == TRUE ) ) {
+          labelImg[local[1], local[2], local[3]] = pts$id[r]
          }
         }
       }
     }
   }
+```
+### Creating a correlation matrix  
+Now that we have roi labels, we want to find the mean timesignal for each ROI
+and then find the correlation matrix that give the correlation betweeen each
+of these ROI mean signals. Need to be careful in the case where ROIs did
+not map into the image space and thus have 0 voxels.
+```{r roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+labelMask = labelImg*1
+labelMask[labelMask > 0] = 1
+labeledMat = matrix2timeseries( img, mask, boldMat )
+labeledMat = timeseries2matrix( labeledMat, labelMask )
+labeledMat = labeledMat[goodtimes,]
+labels = labelImg[labelImg > 0]
 
+nLabels = max(labels)
+roiMat = matrix(0, nrow=dim(labeledMat)[1], ncol=nLabels)
+for ( i in c(1:nLabels) ) {
+  if (length(which(labels==i)) > 0 ) {
+    roiMat[,i] = rowMeans(labeledMat[,(labels==i)])
+  }
+}
+
+missingROIs = which(colMeans(roiMat)==0)
+goodROIs = (1:nLabels)
+if ( length(missingROIS) > 0 ) {
+  goodROIs = goodROIs[-missingROIs]
+}
+
+connMat = suppressWarnings(cor(roiMat))
+diag(connMat) = rep(0, length(diag(connMat)) )
+if ( length(missingROIS) > 0 ) {
+  connMat[missingROIs,] = 0
+  connMat[,missingROIs] = 0
+}
 ```
 
 
 
-### Creating a correlation matrix
+
 
 ### Visualizing constant density graphs
 Create matrix image that is colored by functional network
