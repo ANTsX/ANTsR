@@ -1108,3 +1108,9 @@ is.antsImage <- function(x){
   imgexp <- as.antsImage(exp(as.array(x)))
   antsCopyImageInfo(x, imgexp)
 }
+
+#' @rdname antsImageArith
+"abs.antsImage" <- function(x){
+  imgabs <- as.antsImage(abs(as.array(x)))
+  antsCopyImageInfo(x, imgabs)
+}

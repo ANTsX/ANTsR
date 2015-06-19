@@ -8,6 +8,7 @@
 \alias{/.antsImage}
 \alias{\%\%.antsImage}
 \alias{^.antsImage}
+\alias{abs.antsImage}
 \alias{antsImageArith}
 \alias{exp.antsImage}
 \alias{log.antsImage}
@@ -31,6 +32,8 @@
 \method{log}{antsImage}(x, ...)
 
 \method{exp}{antsImage}(x)
+
+\method{abs}{antsImage}(x)
 }
 \arguments{
 \item{x}{antsImage}
