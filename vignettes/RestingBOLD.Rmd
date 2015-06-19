@@ -416,7 +416,7 @@ for ( r in 1:nPts) {
     }
   }
 ```
-### Creating a correlation matrix  
+### Getting ROI average signals
 Now that we have roi labels, we want to find the mean timesignal for each ROI
 and then find the correlation matrix that give the correlation betweeen each
 of these ROI mean signals. Need to be careful in the case where ROIs did
@@ -436,16 +436,33 @@ for ( i in c(1:nLabels) ) {
     roiMat[,i] = rowMeans(labeledMat[,(labels==i)])
   }
 }
+nActualTimes = dim(roiMat)[1]
+```
+Plot of the ROI averaged signals
+```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 
+means.dat = data.frame(Time=rep( (1:nActualTimes)*tr, nLabels))
+yoffset = (rep( 1:nLabels, each=nActualTimes)-1)*0.5
+means.dat$Signal = data.frame( Signal=as.vector(roiMat)*yoffset)
+#means.dat$ID = rep( 1:nLabels, each=nActualTimes)
+
+#meanPlot = ggplot(means.dat, aes(x=Time, y=Signal, group=ID, colour=ID))
+#meanPlot = meanPlot + geom_line(size=0.5)
+#meanPlot = meanPlot + theme(text=element_text(size=10), legend.position="top")
+#meanPlot = meanPlot + ggtitle("Mean BOLD signal in network ROIs")
+#print(meanPlot)
+```
+
+```{r corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 missingROIs = which(colMeans(roiMat)==0)
 goodROIs = (1:nLabels)
-if ( length(missingROIS) > 0 ) {
+if ( length(missingROIs) > 0 ) {
   goodROIs = goodROIs[-missingROIs]
 }
 
 connMat = suppressWarnings(cor(roiMat))
 diag(connMat) = rep(0, length(diag(connMat)) )
-if ( length(missingROIS) > 0 ) {
+if ( length(missingROIs) > 0 ) {
   connMat[missingROIs,] = 0
   connMat[,missingROIs] = 0
 }
