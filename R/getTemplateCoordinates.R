@@ -88,8 +88,7 @@ getTemplateCoordinates <- function(
   milab <- imagePairToBeLabeled[[2]]
   mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
     interpolator = c("NearestNeighbor"))
-  mypoints <- getCentroids( mywarpedLimage )
-  return( mypoints )
+  mypoints <- data.frame( getCentroids( mywarpedLimage ) )
   for (mylab in 2:length(templatePairWithLabels)) {
     filab <- templatePairWithLabels[[mylab]]
     if (class(filab)[[1]] != "antsImage") {

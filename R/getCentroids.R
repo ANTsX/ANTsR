@@ -24,12 +24,13 @@ getCentroids <- function(img, clustparam = 250 ) {
     print("  class(img)[[1]] != antsImage ")
   }
   imagedim <- img@dimension
-  mypoints <- labelClusters( img, clustparam ) %>%
-    labelGeometryMeasures( )
-  x = mypoints$Centroid_x
-  y = mypoints$Centroid_y
-  if ( imagedim ==  3 ) z = mypoints$Centroid_z else z=rep(0,nrow(mypoints))
-  if ( imagedim ==  4 ) t = mypoints$Centroid_t else t=rep(0,nrow(mypoints))
+  mypoints <- labelClusters( img, clustparam, maxThresh=Inf )
+  mypoints = data.frame( labelStats( mypoints, mypoints ) )
+  mypoints = mypoints[-1,] # remove 0 label
+  x = mypoints$x
+  y = mypoints$y
+  if ( imagedim ==  3 ) z = mypoints$z else z=rep(0,nrow(mypoints))
+  if ( imagedim ==  4 ) t = mypoints$t else t=rep(0,nrow(mypoints))
   centroids <- as.matrix(
     data.frame(
       x = x,
