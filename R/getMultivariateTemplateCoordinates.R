@@ -66,45 +66,24 @@ getMultivariateTemplateCoordinates <- function(
     pvals <- rep(NA, length(imageSetToBeLabeledIn) - 1)
   }
   myout <- NA
-  talregions <- rep(NA, length(imageSetToBeLabeledIn) - 1)
   mytemplate <- imageSetToBeLabeledIn[[1]]
   for (x in 2:length(imageSetToBeLabeledIn)) {
     img <- imageSetToBeLabeledIn[[x]]
-    threshimg <- antsImageClone(img)
-    if ( max(threshimg) < 0 ) threshimg=threshimg*(-1)
-    imageSetToBeLabeled <- lappend(list(mytemplate), threshimg)
-    temp <- getTemplateCoordinates(
-      imageSetToBeLabeled, templateWithLabels, labelnames,
-      outprefix, convertToTal)
-    talRegion <- ""
-    if (temp$templatepoints$x < 0)
-      talRegion <- paste(talRegion, "L", sep = "") else talRegion <- paste(talRegion, "R", sep = "")
-    if (temp$templatepoints$y > 0)
-      talRegion <- paste(talRegion, "A", sep = "") else talRegion <- paste(talRegion, "P", sep = "")
-    if (temp$templatepoints$z < 0)
-      talRegion <- paste(talRegion, "S", sep = "") else talRegion <- paste(talRegion, "I", sep = "")
-    talregions[x - 1] <- talRegion
-    clust <- labelClusters(threshimg, clustparam)
+    threshimg <- abs( antsImageClone(img) )
+    clust <- labelClusters(threshimg, minClusterSize=clustparam,
+      minThresh = 1e-6, maxThresh = Inf )
     imageSetToBeLabeled <- lappend(list(mytemplate), clust)
-    temp2 <- getTemplateCoordinates(imageSetToBeLabeled, templateWithLabels,
-      labelnames, outprefix, convertToTal)
-    if (x == 2) {
-      myout <- data.frame(NetworkID = paste("N", identifier[1], "_omnibus",
-        sep = ""), temp$templatepoints, pval = pvals[x - 1])
-      subnet <- data.frame(NetworkID = rep(paste("N", identifier[1], "_node",
-        sep = ""), nrow(temp2$templatepoints)), temp2$templatepoints, pval = rep(NA,
-        nrow(temp2$templatepoints)))
-      myout <- rbind(myout, subnet)
-    } else {
-      pre <- paste("N", identifier[x - 1], sep = "")
-      mynextout <- data.frame(NetworkID = paste(pre, "_omnibus", sep = ""),
-        temp$templatepoints, pval = pvals[x - 1])
-      subnet <- data.frame(NetworkID = rep(paste(pre, "_node", sep = ""), nrow(temp2$templatepoints)),
-        temp2$templatepoints, pval = rep(NA, nrow(temp2$templatepoints)))
-      myout <- rbind(myout, mynextout)
-      myout <- rbind(myout, subnet)
-    }
+    temp2 <- getTemplateCoordinates(
+      imageSetToBeLabeled, templateWithLabels,labelnames,
+      outprefix, convertToTal)
+    pre <- paste("N", identifier[x - 1], sep = "")
+    subnet <- data.frame(NetworkID = rep(paste(pre, "_node", sep = ""),
+      nrow(temp2$templatepoints)),
+      temp2$templatepoints, pval = c( round(pvals[x - 1]*1.e6)/1.e6,
+        rep("",nrow(temp2$templatepoints)-1) ) )
+    if ( all( is.na( myout ) ) ) myout = subnet
+      else myout <- rbind(myout, subnet)
   }
-  return(list(networks = myout, myLabelsInTemplateSpace = temp$myLabelsInTemplateSpace,
-    myImageInTemplateSpace = temp$myImageInTemplateSpace))
+  return(list(networks = myout, myLabelsInTemplateSpace = temp2$myLabelsInTemplateSpace,
+    myImageInTemplateSpace = temp2$myImageInTemplateSpace))
 }
