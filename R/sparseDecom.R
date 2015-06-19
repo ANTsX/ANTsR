@@ -21,7 +21,7 @@
 #' @param ell1 the ell1 grad descent param
 #' @param getSmall try to get smallest evecs (bool)
 #' @param verbose activates verbose output
-#' @param powerit alternative implementation
+#' @param powerit alternative power iteration implementation, faster
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples

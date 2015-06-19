@@ -18,7 +18,7 @@ fi
 cd ./src
 antsgit=https://github.com/stnava/ANTs.git
 antstag=839b8b6012acd85f3a73a03dc703f4e17cfefc86 # bug fix for -v
-antstag=7d0f91b4fd75230ff513c3c04d2e1c822123f87d # power it
+antstag=aa0626a1eec2d2f309cf8837117bd30f99f7527a # power it minus curvatur sparseness
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi

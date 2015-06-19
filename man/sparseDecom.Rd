@@ -42,7 +42,7 @@ of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
 
 \item{verbose}{activates verbose output}
 
-\item{powerit}{alternative implementation}
+\item{powerit}{alternative power iteration implementation, faster}
 }
 \value{
 outputs a decomposition of a population or time series matrix
