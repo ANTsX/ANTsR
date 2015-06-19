@@ -20,6 +20,8 @@
 #' @param robust rank transform input data - good for data checking
 #' @param ell1 the ell1 grad descent param
 #' @param getSmall try to get smallest evecs (bool)
+#' @param verbose activates verbose output
+#' @param powerit alternative implementation
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
@@ -69,7 +71,8 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   nvecs = 50,
   its = 5, cthresh = 250,
   statdir = NA, z = 0, smooth = 0, initializationList = list(),
-  mycoption = 0, robust = 0, ell1 = 1, getSmall = 0 ) {
+  mycoption = 0, robust = 0, ell1 = 1, getSmall = 0, verbose=0,
+  powerit=0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
@@ -95,6 +98,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     if ( ! file.exists( mfn ) ) stop("sparseDecom cannot write mask")
   }
   sccaname <- "recon["
+  if ( powerit ) sccaname <- "derka["
   if (maskdim == 4)
     sccaname <- "recon4d["
   args <- list("--svd",
@@ -108,7 +112,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-s", smooth,
     "-c", mycoption,
     "--mask", inmask,
-    "-r", robust, "--get-small", getSmall )
+    "-r", robust, "--get-small", getSmall,"-v",1 )
   if (length(initializationList) > 0) {
     ct <- 1
     initfns <- c()
@@ -135,7 +139,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-r", robust,
     "--mask", mfn,
     "--initialization", initlistfn,
-    "--get-small", getSmall)
+    "--get-small", getSmall,"-v",1)
     print(initlistfn)
   }
   time1 <- (Sys.time())
@@ -145,7 +149,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   mydecomp <- read.csv(decomp)
   glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
-  fnu <- read.csv(fnu)
+  if ( powerit == 0 ) fnu <- read.csv(fnu) else fnu=NA
   if (class(inmask)[[1]][1] == "antsImage") {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
@@ -165,5 +169,4 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
   }
   return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu,
     computationtime = (time2 - time1)))
-
 }

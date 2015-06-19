@@ -7,7 +7,7 @@
 sparseDecom(inmatrix = NA, inmask = 0, sparseness = 0.01, nvecs = 50,
   its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0,
   initializationList = list(), mycoption = 0, robust = 0, ell1 = 1,
-  getSmall = 0)
+  getSmall = 0, verbose = 0, powerit = 0)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,
@@ -39,6 +39,10 @@ of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
 \item{ell1}{the ell1 grad descent param}
 
 \item{getSmall}{try to get smallest evecs (bool)}
+
+\item{verbose}{activates verbose output}
+
+\item{powerit}{alternative implementation}
 }
 \value{
 outputs a decomposition of a population or time series matrix
