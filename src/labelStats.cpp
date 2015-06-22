@@ -10,7 +10,7 @@ Rcpp::DataFrame labelStatsHelper(
 {
   typedef float PixelType;
   typedef itk::Image< PixelType, Dimension > ImageType;
-  typedef itk::ImageRegionIteratorWithIndex<ImageType>                    Iterator;
+  typedef itk::ImageRegionIteratorWithIndex<LabelImageType>                    Iterator;
   typedef unsigned int LabelType;
   typedef typename ImageType::PointType PointType;
   typedef itk::Image< LabelType, Dimension > LabelImageType;
@@ -77,7 +77,7 @@ Rcpp::DataFrame labelStatsHelper(
     ++ii;
   }
 
-  Iterator It( image, image->GetLargestPossibleRegion() );
+  Iterator It( labelImage, labelImage->GetLargestPossibleRegion() );
   std::vector<PointType> comvec;
   for ( unsigned int i = 0; i < nlabs; i++ )
     {
