@@ -10,10 +10,10 @@ Rcpp::DataFrame labelStatsHelper(
 {
   typedef float PixelType;
   typedef itk::Image< PixelType, Dimension > ImageType;
-  typedef itk::ImageRegionIteratorWithIndex<LabelImageType>                    Iterator;
   typedef unsigned int LabelType;
   typedef typename ImageType::PointType PointType;
   typedef itk::Image< LabelType, Dimension > LabelImageType;
+  typedef itk::ImageRegionIteratorWithIndex<LabelImageType>                    Iterator;
   typedef itk::LabelStatisticsImageFilter< ImageType, LabelImageType >
     LabelStatisticsImageFilterType;
   typename LabelStatisticsImageFilterType::Pointer labelStatisticsImageFilter =
