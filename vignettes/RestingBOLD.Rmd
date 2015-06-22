@@ -17,6 +17,7 @@ library(ANTsR)
 library(ggplot2)
 library(igraph)
 library(pracma)
+library(dplyr)
 ```
 
 ## Background
@@ -40,9 +41,11 @@ with motion in resting fMRI [@Power2014].
 
 
 ## Preprocessing
+The preprocessing steps include processing methods used for processing fMRI for
+a variety of purposes. This is followed by a section of Connectitivy processing
+that includes steps that are specific to processing resting state data.
 
 ### Steady-state
-
 Removal of pre steady-state time-points. It is typical to exclude any data obtained
 during the first 10 seconds as shown below. The choice of 10s is based on an informal
 review of current literature of 3T human data. For other applications, be sure to
@@ -64,6 +67,9 @@ direction = antsGetDirection(img)
 tr = spacing[4]
 steady = ceiling(10.0 / tr)
 
+fullmean = rowMeans( timeseries2matrix(img, mask) )
+allTimes = d[4]
+
 # Eliminate non steady-state timepoints, restore image info
 img = as.antsImage(img[1:d[1],1:d[2],1:d[3],steady:d[4]])
 flag = antsSetSpacing(img, spacing)
@@ -78,28 +84,28 @@ the methods and may be used for error checking.
 Updating the origin is
 not especially important here but could be in task-data with stimulus
 timing files. This could also be important to sync with
-non image based physiological measures, if acquired.
+non image based physiological measures, if acquired. In the plot below, mean global
+signal in the brain is plotted with a red line indicating the point at which the
+system has reached the steady state. Data previous to this point are discarded.
 
-```{r saves,message=FALSE,warnings=FALSE,echo=FALSE}
+```{r ssplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 origmean = apply.antsImage(img, c(1,2,3), mean)
-```
+xintercept = 10*spacing[4]
 
-### Spatial smoothing
-Smoothing should be applied to all spatial dimenions, but the time dimension
-should be left alone
-```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
-img = smoothImage(img, c(6,6,6,0) )
+ss.dat <- data.frame(Time=rep(1:allTimes)*spacing[4])
+ss.dat$Values = fullmean
+ssPlot <- ggplot(ss.dat, aes(x=Time, y=Values))
+  ssPlot <- ssPlot + geom_line(size=0.5)
+  ssPlot <- ssPlot + geom_vline( xintercept=xintercept,colour="red" )
+  ssPlot <- ssPlot + theme(text=element_text(size=10), legend.position="top")
+  ssPlot <- ssPlot + ggtitle("exclude non steady state points")
+print(ssPlot)
+
 ```
 
 The temporal mean of the original time series data
 ```{r rawplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
-```
-
-The temporal mean of the smoothed time series data
-```{r smoothplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
-smoothmean = apply.antsImage(img, c(1,2,3), mean)
-invisible(plot(smoothmean, axis=3, slices=1:30, ncolumns=10))
 ```
 
 ### Motion correction
@@ -193,17 +199,17 @@ print(dvarPlot)
 ### Identify "bad" time-points
 The motion parameters are often used to identify "bad" timepoints. A mean framewise displacement
 greater than 0.2mm is a common threshold used in human data. For illustrative purposes, we will use a threshold of
-0.15mm. Because the displacement is a measure of motion between two timepoints, both timepoints
+0.1 mm. Because the displacement is a measure of motion between two timepoints, both timepoints
 associated with the displacement are marked as bad.
 
 ```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
-badtimes = which(moco$fd$MeanDisplacement > 0.15)
+badtimes = which(moco$fd$MeanDisplacement > 0.1)
 badtimes = sort(c(badtimes, badtimes+1))
 goodtimes = (1:nTimes)[-badtimes]
 ```
 
 ```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
-badstarts = which(moco$fd$MeanDisplacement > 0.15)
+badstarts = which(moco$fd$MeanDisplacement > 0.1)
 
 bad.data = data.frame(Time=(1:nTimes)*tr)
 bad.data$FD = moco$fd$MeanDisplacement
@@ -213,14 +219,23 @@ bad.data.rect$Stop = (badstarts+1)*tr
 rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2,size=0)
 
 badPlot <- ggplot(bad.data) + geom_line(aes(x=Time, y=FD))
-badPlot <- badPlot + geom_hline( yintercept=0.15, linetype="dashed", alpha=0.5 )
+badPlot <- badPlot + geom_hline( yintercept=0.1, linetype="dashed", alpha=0.5 )
 badPlot <- badPlot + theme(text=element_text(size=10), legend.position="none")
 badPlot <- badPlot + ggtitle("Bad timepoints")
 badPlot <- badPlot + geom_rect(data=bad.data.rect, rect.aes)
 print(badPlot)
 ```
 
-## Time-series processing
+## Connectivity processing
+The steps here are:
+
+* Demean and detrend the data
+
+* Regress out nuissance parameters
+
+* Frequency filtering
+
+* Spatial smoothing
 
 ### Detrending the data
 Next, the time-series data is detrended while excluding the bad timepoints
@@ -255,7 +270,7 @@ trendPlot <- trendPlot + ggtitle("Detrending the time-series")
 print(trendPlot)
 ```
 
-### Collect "nuissance" parameters to regress out
+### Collect nuissance parameters to regress out
 
 Some typical nuissance parameters are
 
@@ -347,6 +362,7 @@ cortexPlot = cortexPlot + facet_grid(Type ~ ., scales="free" )
 print(cortexPlot)
 ```
 
+### Frequency filtering
 The next step is frequency filtering. However, first we want to fill in the "bad"
 timepoints with interpolated data. This is to avoid artifacts that would result from having
 non-evenly sampled time-series data. This bad timepoints will be again removed after
@@ -358,7 +374,7 @@ if ( length(badtimes) > 0 ) {
     }
   }
 
-ctxMeanSpline = matrix2timeseries( img, mask, boldMat)
+ctxMeanSpline = matrix2timeseries( img, mask, boldMat )
 ctxMeanSpline = rowMeans(timeseries2matrix(ctxMeanSpline, ctxMask))
 boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=0.009, freqHi=0.08, opt="trig" )
 
@@ -366,19 +382,30 @@ ctxMeanFiltered = matrix2timeseries( img, mask, boldMat)
 ctxMeanFiltered = rowMeans(timeseries2matrix(ctxMeanFiltered, ctxMask))
 ctxMeanFiltered[badtimes] = NA
 ```
+### Spatial smoothing
+Smoothing should be applied to all spatial dimensions, but the time dimension
+should be left alone. It is common to smooth with a Gaussian kernel with
+FWHM=6.0mm.
+```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+img = matrix2timeseries( img, mask, boldMat )
+img = smoothImage(img, c(6,6,6,0), FWHM=TRUE )
+```
 
-```{r frequencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
-freq.dat =  data.frame( Time=rep(1:nTimes,2) )
-freq.dat$Values = c(ctxMeanSpline, ctxMeanFiltered)
-freq.dat$Type = c(rep("Original",nTimes), rep("Filtered",nTimes))
+```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5}
+ctxMeanSmoothed = rowMeans(timeseries2matrix(img, ctxMask))
+ctxMeanSmoothed[badtimes] = NA
+
+freq.dat =  data.frame( Time=rep(1:nTimes,3) )
+freq.dat$Values = c(ctxMeanSpline, ctxMeanFiltered, ctxMeanSmoothed)
+freq.dat$Type = c(rep("Original",nTimes), rep("Filtered",nTimes), rep("Smoothed",nTimes))
 freq.dat$Data = freq.dat$Type
 freq.dat$Data[badtimes] = "Interpolated"
-freq.dat$Type = factor(freq.dat$Type, levels=c("Original", "Filtered"))
-freq.dat$Data = factor(freq.dat$Data, levels=c("Original", "Interpolated", "Filtered"))
+freq.dat$Type = factor(freq.dat$Type, levels=c("Original", "Filtered", "Smoothed"))
+freq.dat$Data = factor(freq.dat$Data, levels=c("Original", "Interpolated", "Filtered", "Smoothed"))
 freqPlot = ggplot(freq.dat, aes(x=Time, y=Values, group=Type, colour=Data))
 freqPlot = freqPlot + geom_line(size=0.5)
 freqPlot = freqPlot + theme(text=element_text(size=10), legend.position="top")
-freqPlot = freqPlot + ggtitle("Effect of bandpass filtering")
+freqPlot = freqPlot + ggtitle("Effect of bandpass filtering & spatial smoothing")
 freqPlot = freqPlot + facet_grid(Type ~ ., scales="free" )
 print(freqPlot)
 ```
@@ -445,7 +472,7 @@ plotMat = plotMat / max(plotMat)
 
 means.dat = data.frame(Time=rep( (1:nActualTimes)*tr, nLabels))
 yoffset = (rep( 1:nLabels, each=nActualTimes)-1)*0.5
-means.dat$Signal = as.vector(plotMat)+yoffset
+means.dat$Signal = (as.vector(plotMat)/2)+yoffset
 means.dat$ID = factor(rep( 1:nLabels, each=nActualTimes))
 
 meanPlot = ggplot(means.dat, aes(x=Time, y=Signal, group=ID, colour=ID))
@@ -470,16 +497,104 @@ if ( length(missingROIs) > 0 ) {
   connMat[,missingROIs] = 0
 }
 ```
-
-
-
-
-
 ### Visualizing constant density graphs
 Create matrix image that is colored by functional network
+```{r adjacency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
+  density = 0.1
+  nEdges = length(upper.tri(connMat))*density
+  thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
+  adj = 1*(connMat >= thresh)
+
+  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+  components = clusters(graph)
+  maxID = which(components$csize == max(components$csize))[1]
+
+  adj[components$membership!=maxID,] = 0
+  adj[,components$membership!=maxID] = 0
+  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+
+  #plot(as.antsImage(adj))
+
+```
+
+```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+
+graph = graph.adjacency( adj, mode="directed", weighted=NULL )
+V(graph)$name = pts$id
+V(graph)$comm = pts$system
+V(graph)$degree = degree(graph)
+
+systems = levels(pts$system)
+
+node_list <- get.data.frame(graph, what = "vertices")
+edge_list <- get.data.frame(graph, what = "edges") %>%
+  inner_join(node_list %>% select(name, comm), by = c("from" = "name")) %>%
+  inner_join(node_list %>% select(name, comm), by = c("to" = "name")) %>%
+  mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
+
+all_nodes <- sort(node_list$name)
+plot_data <- edge_list %>% mutate(
+        to = factor(to, levels = all_nodes),
+        from = factor(from, levels = all_nodes))
+
+name_order <- (node_list %>% arrange(comm))$name
+plot_data <- edge_list %>% mutate(
+        to = factor(to, levels = name_order),
+        from = factor(from, levels = name_order))
+
+plot_data$group = as.integer(plot_data$group)
+for ( i in 1:length(systems) ) { plot_data$group[ which( plot_data$group == i) ] = as.character( systems[i] ) }
+
+lut = c("Sensory/Somatomotor Hand"="cyan3", "Sensory/Somatomotor Mouth"="orange", "Cingulo-opercular Task Control"="purple", "Auditory" = "pink2", "Default Mode"="red", "Memory Retrieval"="gray50", "Visual"="blue", "Fronto-parietal Task Control"="yellow2", "Salience"="black", "Subcortical"="chocolate4", "Ventral Attention"="aquamarine4", "Dorsal Attention"="green", "Cerebellar"="cadetblue1", "Uncertain"="peachpuff2" )
+
+adjplot = ggplot(plot_data, aes(x = from, y = to, fill = group)) + geom_raster() + theme_bw() + scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) + theme( axis.title=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),  aspect.ratio = 1 ) + scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
+
+print(adjplot)
+
+```
 
 Export to graphml file for visualization GEPHI
 
+```{r adjacency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
+  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+  components = clusters(bingraph)
+  maxID = which(components$csize == max(components$csize))[1]
+
+  adj[components$membership!=maxID,] = 0
+  adj[,components$membership!=maxID] = 0
+  graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
+
+  # Set node colors
+  graph = set.vertex.attribute(graph, "r", index=V(graph), value=as.double(pts$r))
+  graph = set.vertex.attribute(graph, "g", index=V(graph), value=as.double(pts$g))
+  graph = set.vertex.attribute(graph, "b", index=V(graph), value=as.double(pts$b))
+
+  # Set edge colors
+  edges = get.edges( graph, E(graph) )
+  nEdges = dim(edges)[1]
+  er = rep(200, nEdges)
+  eg = rep(200, nEdges)
+  eb = rep(200, nEdges)
+
+  for ( e in c(1:nEdges) )
+    {
+    if ( pts$system[edges[e,1]] == pts$system[edges[e,2]] )
+     {
+      er[e] = pts$r[edges[e,1]]
+      eg[e] = pts$g[edges[e,1]]
+      eb[e] = pts$b[edges[e,1]]
+      }
+    }
+
+  graph = set.edge.attribute(graph, "r", index=E(graph), value=as.double(er))
+  graph = set.edge.attribute(graph, "g", index=E(graph), value=as.double(eg))
+  graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
+
+  # uncomment line below to write out graph
+  # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
+```
 
 
 ### Graph metrics
