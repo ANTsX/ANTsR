@@ -11,7 +11,9 @@ Rcpp::DataFrame labelStatsHelper(
   typedef float PixelType;
   typedef itk::Image< PixelType, Dimension > ImageType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType>                    Iterator;
-  typedef itk::Image< unsigned int, Dimension > LabelImageType;
+  typedef unsigned int LabelType;
+  typedef typename ImageType::PointType PointType;
+  typedef itk::Image< LabelType, Dimension > LabelImageType;
   typedef itk::LabelStatisticsImageFilter< ImageType, LabelImageType >
     LabelStatisticsImageFilterType;
   typename LabelStatisticsImageFilterType::Pointer labelStatisticsImageFilter =
@@ -47,12 +49,14 @@ Rcpp::DataFrame labelStatsHelper(
 
   typename ImageType::SpacingType spacing = image->GetSpacing();
   float voxelVolume = 1.0;
-  for (int ii = 0; ii < spacing.Size(); ii++)
+  for (unsigned int ii = 0; ii < spacing.Size(); ii++)
   {
     voxelVolume *= spacing[ii];
   }
 
-  int ii = 0; // counter for label values
+  std::map<LabelType, LabelType> RoiList;
+
+  LabelType ii = 0; // counter for label values
   for (typename ValidLabelValuesType::const_iterator
          labelIterator  = labelStatisticsImageFilter->GetValidLabelValues().begin();
          labelIterator != labelStatisticsImageFilter->GetValidLabelValues().end();
@@ -60,7 +64,7 @@ Rcpp::DataFrame labelStatsHelper(
   {
     if ( labelStatisticsImageFilter->HasLabel(*labelIterator) )
     {
-      int labelValue = *labelIterator;
+      LabelType labelValue = *labelIterator;
       labelvals[ii] = labelValue;
       means[ii]     = labelStatisticsImageFilter->GetMean(labelValue);
       mins[ii]      = labelStatisticsImageFilter->GetMinimum(labelValue);
@@ -68,60 +72,43 @@ Rcpp::DataFrame labelStatsHelper(
       variances[ii] = labelStatisticsImageFilter->GetVariance(labelValue);
       counts[ii]    = labelStatisticsImageFilter->GetCount(labelValue);
       volumes[ii]   = labelStatisticsImageFilter->GetCount(labelValue) * voxelVolume;
+      RoiList[ labelValue ] = ii;
     }
     ++ii;
   }
 
-  typedef std::vector<float> LabelSetType;
-  LabelSetType myLabelSet;
   Iterator It( image, image->GetLargestPossibleRegion() );
-  for( It.GoToBegin(); !It.IsAtEnd(); ++It )
+  std::vector<PointType> comvec;
+  for ( unsigned int i = 0; i < nlabs; i++ )
     {
-    PixelType label = It.Get();
-    if( fabs(label) > 0 )
-      {
-      if( find( myLabelSet.begin(), myLabelSet.end(), label )
-          == myLabelSet.end() )
-        {
-        myLabelSet.push_back( label );
-        }
-      }
-    }
-  std::sort(myLabelSet.begin(), myLabelSet.end() );
-  typename LabelSetType::const_iterator it;
-  unsigned long labelcount = 1;
-  for( it = myLabelSet.begin(); it != myLabelSet.end(); ++it )
-    {
-    float currentlabel = *it;
     typename ImageType::PointType myCenterOfMass;
     myCenterOfMass.Fill(0);
-    unsigned long totalct = 0;
-    for( It.GoToBegin(); !It.IsAtEnd(); ++It )
+    comvec.push_back( myCenterOfMass );
+    }
+  for( It.GoToBegin(); !It.IsAtEnd(); ++It )
+    {
+    LabelType label = static_cast<LabelType>( It.Get() );
+    if(  label > 0  )
       {
-      PixelType label = It.Get();
-      if(  label == currentlabel  )
+      typename ImageType::PointType point;
+      image->TransformIndexToPhysicalPoint( It.GetIndex(), point );
+      for( unsigned int i = 0; i < spacing.Size(); i++ )
         {
-        // compute center of mass
-        typename ImageType::PointType point;
-        image->TransformIndexToPhysicalPoint( It.GetIndex(), point );
-        for( unsigned int i = 0; i < spacing.Size(); i++ )
-          {
-          myCenterOfMass[i] += point[i];
-          }
-        totalct++;
+        comvec[  RoiList[ label ] ][i] += point[i];
         }
       }
-    for( unsigned int i = 0; i < spacing.Size(); i++ )
-      {
-      myCenterOfMass[i] /= (float)totalct;
-      }
-      x[labelcount]=myCenterOfMass[0];
-      y[labelcount]=myCenterOfMass[1];
-      if ( Dimension > 2 ) z[labelcount]=myCenterOfMass[2];
-      if ( Dimension > 3 ) t[labelcount]=myCenterOfMass[3];
-    labelcount++;
     }
-
+  for ( unsigned int labelcount = 0; labelcount < comvec.size(); labelcount++ )
+    {
+    for ( unsigned int k = 0; k < Dimension; k++ )
+      {
+      comvec[ labelcount ][k] = comvec[ labelcount ][k] / counts[labelcount];
+      }
+    x[labelcount]=comvec[ labelcount ][0];
+    y[labelcount]=comvec[ labelcount ][1];
+    if ( Dimension > 2 ) z[labelcount]=comvec[ labelcount ][2];
+    if ( Dimension > 3 ) t[labelcount]=comvec[ labelcount ][3];
+    }
 
   Rcpp::DataFrame labelStats = Rcpp::DataFrame::create(
     Rcpp::Named("LabelValue") = labelvals,
