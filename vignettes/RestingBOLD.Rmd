@@ -439,20 +439,23 @@ for ( i in c(1:nLabels) ) {
 nActualTimes = dim(roiMat)[1]
 ```
 Plot of the ROI averaged signals
-```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=FALSE}
+plotMat = roiMat + min(roiMat)
+plotMat = plotMat / max(plotMat)
 
 means.dat = data.frame(Time=rep( (1:nActualTimes)*tr, nLabels))
 yoffset = (rep( 1:nLabels, each=nActualTimes)-1)*0.5
-means.dat$Signal = data.frame( Signal=as.vector(roiMat)*yoffset)
-#means.dat$ID = rep( 1:nLabels, each=nActualTimes)
+means.dat$Signal = as.vector(plotMat)+yoffset
+means.dat$ID = factor(rep( 1:nLabels, each=nActualTimes))
 
-#meanPlot = ggplot(means.dat, aes(x=Time, y=Signal, group=ID, colour=ID))
-#meanPlot = meanPlot + geom_line(size=0.5)
-#meanPlot = meanPlot + theme(text=element_text(size=10), legend.position="top")
-#meanPlot = meanPlot + ggtitle("Mean BOLD signal in network ROIs")
-#print(meanPlot)
+meanPlot = ggplot(means.dat, aes(x=Time, y=Signal, group=ID, colour=ID))
+meanPlot = meanPlot + geom_line(size=0.5)
+meanPlot = meanPlot + theme(text=element_text(size=10), legend.position="none", axis.text.y=element_blank())
+meanPlot = meanPlot + ggtitle("Mean BOLD signal in network ROIs")
+print(meanPlot)
 ```
 
+Create correlation matrix
 ```{r corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 missingROIs = which(colMeans(roiMat)==0)
 goodROIs = (1:nLabels)
