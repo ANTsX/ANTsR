@@ -46,6 +46,8 @@ Rcpp::DataFrame labelStatsHelper(
     Rcpp::NumericVector(nlabs, Rcpp::NumericVector::get_na());
   Rcpp::NumericVector t =
     Rcpp::NumericVector(nlabs, Rcpp::NumericVector::get_na());
+  Rcpp::NumericVector mass =
+    Rcpp::NumericVector(nlabs, 0.0 );
 
   typename ImageType::SpacingType spacing = image->GetSpacing();
   float voxelVolume = 1.0;
@@ -96,6 +98,7 @@ Rcpp::DataFrame labelStatsHelper(
         {
         comvec[  RoiList[ label ] ][i] += point[i];
         }
+      mass[  RoiList[ label ] ] += image->GetPixel( It.GetIndex() );
       }
     }
   for ( unsigned int labelcount = 0; labelcount < comvec.size(); labelcount++ )
@@ -118,6 +121,7 @@ Rcpp::DataFrame labelStatsHelper(
     Rcpp::Named("Variance")    = variances,
     Rcpp::Named("Count")       = counts,
     Rcpp::Named("Volume")      = volumes,
+    Rcpp::Named("Mass")      = mass,
     Rcpp::Named("x")      = x,
     Rcpp::Named("y")      = y,
     Rcpp::Named("z")      = z,
