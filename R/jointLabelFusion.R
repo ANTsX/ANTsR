@@ -157,7 +157,8 @@ jointLabelFusion <- function( targetI, targetIMask, atlasList,
       tempmat = ( antsrimpute(cormat) + diag(ncol(cormat)) * rho )
       onev<-rep(1,ncol(cormat))
       wts = solve( tempmat, onev )
-      wts = wts * 1.0 / sum( wts * onev )
+      #  wts = as.numeric( NMF::fcnnls( tempmat, onev )$x )
+      wts = wts / sum( wts )
       if ( ! is.na( mean(wts)) ) {
         # hongzhi method
         segct = 1

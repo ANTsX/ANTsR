@@ -14,15 +14,14 @@
   approxerr <- 1e+09
   ct <- 0
   bestsol <- x_k
-  starterr <- sum(b * b)
+  starterr <- Inf
   minerr <- starterr
   deltaminerr <- 1
   lasterr <- starterr * 2
   badct <- 0
   while (deltaminerr > 0 & approxerr > convcrit & ct < maxits) {
     # while( badct < 2 & ct < maxits )
-
-    # print(paste('ct',ct,length(p_k),deltaminerr,approxerr,' bad ', badct))
+#    print(paste('ct',ct,length(p_k),deltaminerr,approxerr,' bad ', badct))
     temp <- (A %*% c(p_k))
     temp <- c(At %*% temp)
     alpha_denom <- c(p_k %*% temp)
