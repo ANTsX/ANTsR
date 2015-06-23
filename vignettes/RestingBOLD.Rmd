@@ -41,9 +41,9 @@ with motion in resting fMRI [@Power2014].
 
 
 ## Preprocessing
-The preprocessing steps include processing methods used for processing fMRI for
-a variety of purposes. This is followed by a section of Connectitivy processing
-that includes steps that are specific to processing resting state data.
+The preprocessing steps include methods used for processing fMRI for
+a variety of purposes. This is followed by a section on Connectivity processing
+that includes steps specific to the processing of resting state data.
 
 ### Steady-state
 Removal of pre steady-state time-points. It is typical to exclude any data obtained
@@ -65,7 +65,7 @@ direction = antsGetDirection(img)
 
 # Identify first steady-state timepoint
 tr = spacing[4]
-steady = ceiling(10.0 / tr)
+steady = floor(10.0 / tr) + 1
 
 fullmean = rowMeans( timeseries2matrix(img, mask) )
 allTimes = d[4]
@@ -125,10 +125,6 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 
 * Identify "bad" time points for removal
 
-* Obtain a matrix of transform parameters to use as nuissance regressors, a common approach
-is to use the 6 rigid parameters, their squares, the derivative and the squared derivative
-
-Motion correction:
 ```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
 meanbold <- apply.antsImage(img, c(1,2,3), mean)
 moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
@@ -147,7 +143,6 @@ vox = sample(1:nVox, 1000)
 invisible(plot(as.antsImage( t(timeseries2matrix(img,mask)[,vox]))))
 invisible(plot(as.antsImage( t(timeseries2matrix(moco$moco_img,mask)[,vox]))))
 ```
-
 
 Plotting the registration parameters from the motion correction provides a
 qualitative feel for how much motion is in the data. In addition to the
@@ -216,7 +211,7 @@ bad.data$FD = moco$fd$MeanDisplacement
 
 bad.data.rect = data.frame(Start=badstarts*tr)
 bad.data.rect$Stop = (badstarts+1)*tr
-rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2,size=0)
+rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
 
 badPlot <- ggplot(bad.data) + geom_line(aes(x=Time, y=FD))
 badPlot <- badPlot + geom_hline( yintercept=0.1, linetype="dashed", alpha=0.5 )
@@ -231,16 +226,16 @@ The steps here are:
 
 * Demean and detrend the data
 
-* Regress out nuissance parameters
+* Regress out nuisance parameters
 
 * Frequency filtering
 
 * Spatial smoothing
 
 ### Detrending the data
-Next, the time-series data is detrended while excluding the bad timepoints
+The time-series data is detrended while excluding the bad timepoints
 identified earlier. The global signal (mean signal over the whole brain)
-is used to illustrate the effect of the detrending.
+is used to illustrate the effect of the demeaning & detrending.
 
 ```{r detrend,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 global_pre <- rowMeans(timeseries2matrix(img, mask))
@@ -251,6 +246,8 @@ boldMat[goodtimes,] = detrend(boldMat[goodtimes,])
 boldMat[badtimes,] = NA
 
 global_moco_detrend = rowMeans(boldMat)
+global_pre[badtimes] = NA
+global_moco[badtimes] = NA
 ```
 
 ```{r detrendplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
@@ -270,26 +267,29 @@ trendPlot <- trendPlot + ggtitle("Detrending the time-series")
 print(trendPlot)
 ```
 
-### Collect nuissance parameters to regress out
+### Collect nuisance parameters to regress out
 
-Some typical nuissance parameters are
+Some typical nuisance parameters are
 
-* motion parameters, their squares, and the derivatives of both
+* detrended motion parameters, their squares, and the derivatives of both
 
-* mean signal in white matter
+* mean signal in white matter & it's derivative
 
-* mean signal in CSF
+* mean signal in CSF & it's derivative
 
 * physiologocial noise estimated via `compcor`
 
-* global mean signal in brain - NOTE: this is a controversial topic
+* global mean signal in brain & it's derivative
+  - NOTE: this is a controversial topic, see below
 
 There are two camps when it comes to global signal, some leave it in, others
-regress it out. It is unclear which is best. Here we will include it as a nuissance
-parameters as done in the paper on which the methods are based. This should not
-be interpreted as an implied endorsement of one camp over the other.
+regress it out. It is unclear which is best. Here we will include it as a nuisance
+parameter as done in the paper on which the methods are based. This should not
+be interpreted as an implied endorsement of one camp over the other. The
+values at "bad" timepoints are interpolated with splines so that derivatives
+may be calculated without "spreading" the influence of the bad time points.
 
-```{r nuissance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 detrendImg = matrix2timeseries( img, mask, boldMat )
 
 wmMask = seg*1
@@ -302,10 +302,22 @@ csfMask = seg*1
 csfMask[ csfMask != 1] = 0
 csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
 
+globalMean = rowMeans(timeseries2matrix(detrendImg, mask))
+
 compcor = compcor(boldMat[goodtimes,], ncompcor = 4)
 compcorNuis = matrix(0, nTimes, 4)
 compcorNuis[goodtimes, ] = compcor
 compcorNuis[badtimes, ] = NA
+
+tissueNuis = cbind(globalMean, wmMean, csfMean)
+if ( length(badtimes) > 0 ) {
+  for ( v in c(1:dim(tissueNuis)[2]) ) {
+    tissueInterp = spline( c(1:nTimes)[goodtimes], tissueNuis[goodtimes,v], xout=badtimes )$y
+    tissueNuis[badtimes,v]=tissueInterp
+    }
+  }
+tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
+
 ```
 
 ```{r nuissanceplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
@@ -340,9 +352,10 @@ ctxMask[ ctxMask == 2 ] = 1
 ctxMean = rowMeans(timeseries2matrix(detrendImg, ctxMask))
 
 moco = cbind(reg_params, reg_params*reg_params)
+moco = detrend(moco)
 mocoDeriv = rbind( rep(0,dim(moco)[2]), diff(moco,1) )
 
-nuissance = cbind( global_moco_detrend, moco, mocoDeriv, wmMean, csfMean )
+nuissance = cbind( moco, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuissance[goodtimes,] ) )
 
@@ -444,9 +457,9 @@ for ( r in 1:nPts) {
   }
 ```
 ### Getting ROI average signals
-Now that we have roi labels, we want to find the mean timesignal for each ROI
-and then find the correlation matrix that give the correlation betweeen each
-of these ROI mean signals. Need to be careful in the case where ROIs did
+Now that we have roi labels, we want to find the mean time signal for each ROI
+and then find the correlation matrix that give the correlation between each
+of these ROI signals. We need to be careful in the case where ROIs did
 not map into the image space and thus have 0 voxels.
 ```{r roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 labelMask = labelImg*1
@@ -499,7 +512,7 @@ if ( length(missingROIs) > 0 ) {
 ```
 ### Visualizing constant density graphs
 Create matrix image that is colored by functional network
-```{r adjacency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5}
 
   density = 0.1
   nEdges = length(upper.tri(connMat))*density
@@ -507,16 +520,20 @@ Create matrix image that is colored by functional network
   adj = 1*(connMat >= thresh)
 
   bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
-  components = clusters(graph)
+  components = clusters(bingraph)
   maxID = which(components$csize == max(components$csize))[1]
 
   adj[components$membership!=maxID,] = 0
   adj[,components$membership!=maxID] = 0
   bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
 
-  #plot(as.antsImage(adj))
+  invisible(plot(as.antsImage(adj)))
 
 ```
+
+A more interesting way to visualize the adjacency matrix is to color the components
+by the system to which they belong. Connections within a system are color coded while
+connections between systems are gray.
 
 ```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 
@@ -526,6 +543,7 @@ V(graph)$comm = pts$system
 V(graph)$degree = degree(graph)
 
 systems = levels(pts$system)
+systemNames = as.character(systems)
 
 node_list <- get.data.frame(graph, what = "vertices")
 edge_list <- get.data.frame(graph, what = "edges") %>%
@@ -554,9 +572,10 @@ print(adjplot)
 
 ```
 
-Export to graphml file for visualization GEPHI
+It is also possible to export the data to a graphml file for visualization
+with an application such as GEPHI
 
-```{r adjacency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r graphml,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 
   bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
   components = clusters(bingraph)
@@ -578,6 +597,8 @@ Export to graphml file for visualization GEPHI
   eg = rep(200, nEdges)
   eb = rep(200, nEdges)
 
+  # colors for intra-system connections
+  #  gray for inter-system connections
   for ( e in c(1:nEdges) )
     {
     if ( pts$system[edges[e,1]] == pts$system[edges[e,2]] )
