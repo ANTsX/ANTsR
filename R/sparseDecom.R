@@ -28,6 +28,8 @@
 #'
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
+#' mat<-scale(mat)
+#' mydecom2<-sparseDecom( mat-min(mat) ) # non-neg matrix
 #' \dontrun{
 #' # for prediction
 #' if ( usePkg("randomForest") & usePkg("spls")  & usePkg('BGLR') ) {
