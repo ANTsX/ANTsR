@@ -43,7 +43,7 @@ cropImage <- function( image, labelImage, label=1 ) {
 #' @examples
 #'
 #' fi <- antsImageRead( getANTsRData("r16"))
-#' cropped <- cropIndices( fi, c(2,10), c(5,15) )
+#' cropped <- cropIndices( fi, c(10,10), c(100,100) )
 #' cropped<-smoothImage( cropped, 5 )
 #' decropped<-decropImage( cropped, fi )
 #'
