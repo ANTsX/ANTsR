@@ -112,7 +112,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-s", smooth,
     "-c", mycoption,
     "--mask", inmask,
-    "-r", robust, "--get-small", getSmall,"-v",1 )
+    "-r", robust, "--get-small", getSmall,"-v",verbose )
   if (length(initializationList) > 0) {
     ct <- 1
     initfns <- c()
@@ -139,7 +139,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-r", robust,
     "--mask", mfn,
     "--initialization", initlistfn,
-    "--get-small", getSmall,"-v",1)
+    "--get-small", getSmall,"-v",verbose)
     print(initlistfn)
   }
   time1 <- (Sys.time())
