@@ -43,9 +43,9 @@ Wiki: [Notes and work in progress examples](https://github.com/stnava/ANTsR/wiki
 
 Package source:	[from github](https://github.com/stnava/ANTsR/zipball/master)
 
-OS X Mavericks, Yosemite binaries:	[OSX](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_OSX_0.3.1.tgz)
+OS X Mavericks, Yosemite binaries:	[OSX](http://github.com/stnava/ANTsR/releases/)
 
-Linux binaries: [Ubuntu](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz)
+Linux binaries: [Ubuntu](http://github.com/stnava/ANTsR/releases/)
 
 We are working toward Windows binaries.
 

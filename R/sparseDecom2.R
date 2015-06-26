@@ -33,10 +33,15 @@
 #'
 #' mat<-replicate(100, rnorm(20))
 #' mat2<-replicate(100, rnorm(20))
+#' mat<-scale(mat)
+#' mat<-mat-min(mat)
+#' mat2<-scale(mat2)
+#' mat2<-mat2-min(mat2)
 #' mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
 #'   sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
 #' wt<-0.666
 #' mat3<-mat*wt+mat2*(1-wt)
+#' mat3<-mat3-min(mat3)
 #' mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
 #'   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=5 )
 #'

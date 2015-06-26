@@ -28,6 +28,11 @@
 #'
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
+#' mat<-scale(mat)
+#' mydecom2<-sparseDecom( mat-min(mat) ) # non-neg matrix
+#' # params that lead to algorithm similar to NMF
+#' mydecom3<-sparseDecom( mat-min(mat), z=1, sparseness=1 )
+#'
 #' \dontrun{
 #' # for prediction
 #' if ( usePkg("randomForest") & usePkg("spls")  & usePkg('BGLR') ) {
@@ -67,9 +72,9 @@
 #' }
 #' @export sparseDecom
 sparseDecom <- function(inmatrix = NA, inmask = 0,
-  sparseness = 0.01,
-  nvecs = 50,
-  its = 5, cthresh = 250,
+  sparseness = 0.1,
+  nvecs = 10,
+  its = 5, cthresh = 50,
   statdir = NA, z = 0, smooth = 0, initializationList = list(),
   mycoption = 0, robust = 0, ell1 = 1, getSmall = 0, verbose=0,
   powerit=0 ) {
@@ -112,7 +117,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-s", smooth,
     "-c", mycoption,
     "--mask", inmask,
-    "-r", robust, "--get-small", getSmall,"-v",1 )
+    "-r", robust, "--get-small", getSmall,"-v",verbose )
   if (length(initializationList) > 0) {
     ct <- 1
     initfns <- c()
@@ -139,7 +144,7 @@ sparseDecom <- function(inmatrix = NA, inmask = 0,
     "-r", robust,
     "--mask", mfn,
     "--initialization", initlistfn,
-    "--get-small", getSmall,"-v",1)
+    "--get-small", getSmall,"-v",verbose)
     print(initlistfn)
   }
   time1 <- (Sys.time())
