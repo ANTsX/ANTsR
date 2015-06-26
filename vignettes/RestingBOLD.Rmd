@@ -18,12 +18,13 @@ library(ggplot2)
 library(igraph)
 library(pracma)
 library(dplyr)
+library(mFilter)
 ```
 
-## Background
-This document provides some examples illustrating how ANTsR may be used to
-analyze resting state BOLD fMRI data using established approaches. As the focus
-is on processing the BOLD signal, here we require the following data
+## Overview
+This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR) may be used to
+analyze resting state BOLD fMRI data using established methodology. The focus
+is on processing the BOLD signal, here we start with the the following data
 
 * A BOLD fMRI time-series image
 
@@ -33,93 +34,96 @@ is on processing the BOLD signal, here we require the following data
 
 * A set of labels identifying anatomical regions of interest (the network to analyze)
 
-Obtaining these is a non-trivial matter, but will be the topic of a future document
+```{r data ,message=FALSE,warnings=FALSE}
+img = antsImageRead(getANTsRData("rsbold"))
+mask = antsImageRead(getANTsRData("rsboldmask"))
+seg = antsImageRead(getANTsRData("rsboldseg"))
+pts = read.csv(getANTsRData("rsboldpts"))
+```
+
+Obtaining these for your own data set is a non-trivial matter, but will be the topic of a future document
 as the process is the same for both resting and task-based BOLD.
 
 The processing here is largely based upon a recent review of methods for dealing
 with motion in resting fMRI [@Power2014].
 
+The Preprocessing section includes methods used for processing fMRI for
+a variety of purposes. This is followed by a section on Connectivity processing
+that includes steps specific to the processing of resting state data. Finally,
+a section on building graphs and calculating graph metrics is presented.
 
 ## Preprocessing
-The preprocessing steps include methods used for processing fMRI for
-a variety of purposes. This is followed by a section on Connectivity processing
-that includes steps specific to the processing of resting state data.
+One step that is omitted here is slice timing correction as this can vary greatly
+between acquisition sequences. The included steps are:
+
+* Removal of initial time points that occur before magnetization steady state is reached
+
+* Rigid registration of time points to correct for subject head motion
+
+* Plotting of motion parameters for inspection
+
+* Identification of "bad" time points for exclusion
 
 ### Steady-state
-Removal of pre steady-state time-points. It is typical to exclude any data obtained
-during the first 10 seconds as shown below. The choice of 10s is based on an informal
-review of current literature of 3T human data. For other applications, be sure to
-check the relevant literature.
+The first step is the removal of pre steady state time points.
+It is typical to exclude any data obtained during the first 10 seconds as shown below.
+The choice of 10s is based on an informal review of current literature of 3T human data [@Power2012].
+For other applications, be sure to check the relevant literature.
 
 ```{r steadystate ,message=FALSE,warnings=FALSE}
-img = antsImageRead(getANTsRData("rsbold"))
-mask = antsImageRead(getANTsRData("rsboldmask"))
-seg = antsImageRead(getANTsRData("rsboldseg"))
-pts = read.csv(getANTsRData("rsboldpts"))
-
-# Save image info
-d = dim(img)
-spacing = antsGetSpacing(img)
-origin = antsGetOrigin(img)
-direction = antsGetDirection(img)
-
-# Identify first steady-state timepoint
-tr = spacing[4]
+# Find first steady state timepoint
+tr = antsGetSpacing(img)[4]
 steady = floor(10.0 / tr) + 1
 
-fullmean = rowMeans( timeseries2matrix(img, mask) )
-allTimes = d[4]
+# Global signal before cropping (save for visualization)
+origmean = apply.antsImage(img, c(1,2,3), mean)
+fullmean = rowMeans(timeseries2matrix(img, mask))
+allTimes = dim(img)[4]
 
-# Eliminate non steady-state timepoints, restore image info
-img = as.antsImage(img[1:d[1],1:d[2],1:d[3],steady:d[4]])
-flag = antsSetSpacing(img, spacing)
-flag = antsSetDirection(img, direction)
-origin[4] = origin[4] + tr * steady
-flag = antsSetOrigin( img, origin )
+# Eliminate non steady-state timepoints
+img = cropIndices(img, c(1,1,1,steady), dim(img) )
 ```
 
-The `flag` variable is used to obtain a success/failure indication from
-the methods and may be used for error checking.
-
-Updating the origin is
-not especially important here but could be in task-data with stimulus
-timing files. This could also be important to sync with
-non image based physiological measures, if acquired. In the plot below, mean global
-signal in the brain is plotted with a red line indicating the point at which the
-system has reached the steady state. Data previous to this point are discarded.
+In the plot below, mean global
+signal in the brain is plotted with a red box indicating the points at which the
+system has non yet reached the steady state. Data in this range are discarded.
 
 ```{r ssplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
-origmean = apply.antsImage(img, c(1,2,3), mean)
-xintercept = 10*spacing[4]
+# exclusion area
+noss.data = data.frame(Start=0)
+noss.data$Stop = (steady-1)*tr
+noss.rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
 
-ss.dat <- data.frame(Time=rep(1:allTimes)*spacing[4])
+# mean signal in brain
+ss.dat <- data.frame(Time=rep(1:allTimes)*tr)
 ss.dat$Values = fullmean
-ssPlot <- ggplot(ss.dat, aes(x=Time, y=Values))
-  ssPlot <- ssPlot + geom_line(size=0.5)
-  ssPlot <- ssPlot + geom_vline( xintercept=xintercept,colour="red" )
-  ssPlot <- ssPlot + theme(text=element_text(size=10), legend.position="top")
-  ssPlot <- ssPlot + ggtitle("exclude non steady state points")
-print(ssPlot)
 
+ssPlot <- ggplot(ss.dat)
+  ssPlot <- ssPlot + geom_line(aes(x=Time, y=Values), size=0.5)
+  ssPlot <- ssPlot + geom_rect(data=noss.data, noss.rect.aes)
+  ssPlot <- ssPlot + theme(text=element_text(size=10), legend.position="none")
+  ssPlot <- ssPlot + ggtitle("Exclude points previous to magnetization steady state")
+print(ssPlot)
 ```
 
-The temporal mean of the original time series data
+The temporal mean of the original time series data:
 ```{r rawplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
 ```
 
 ### Motion correction
-
-To correct for motion that occurs during acquisition:
+To correct for rigid body motion that occurs during acquisition:
 
 * Find the mean volume of all time points.  This is done with `apply.antsImage` which is
 an extension of the `R` method `apply` with additional functionality to
-maintain image header info integrity
+maintain image header info integrity.
 
 * Align all time-points to the mean. This is accomplished with `antsMotionCalculation`,
 the `fixed` parameter is used to set the reference image to which all time-points are aligned
 and the `txtype` parameter indicates the type of transform to be estimated.
 The default for `txtype` is "Affine", but for this type of analyses it is typical to use "Rigid".
+
+* To help ensure an accurate fit, 3 iterations of the above steps are used
 
 * Examine motion correction parameters for quality control.
 
@@ -127,8 +131,13 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 
 ```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
 meanbold <- apply.antsImage(img, c(1,2,3), mean)
-moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
+for ( i in 1:3 )
+  {
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
+  meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+  }
 ```
+
 ```{r mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 invisible(plot(moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10))
 ```
@@ -147,7 +156,7 @@ invisible(plot(as.antsImage( t(timeseries2matrix(moco$moco_img,mask)[,vox]))))
 Plotting the registration parameters from the motion correction provides a
 qualitative feel for how much motion is in the data. In addition to the
 registration parameters, we plot the mean framewise displacement, which measures
-the average displacement of voxels, between consecutive timepoints.
+the average displacement of voxels, between consecutive time points.
 
 ```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 # extract just the transform parameters
@@ -155,7 +164,7 @@ reg_params <- as.matrix(moco$moco_params[,3:8])
 
 nTimes = dim(reg_params)[1]
 orderedBreaks = c("Framewise", "X", "Y", "Z", "Pitch", "Roll", "Yaw" )
-moco.dat <- data.frame(Time=rep(1:nTimes, 7)*spacing[4])
+moco.dat <- data.frame(Time=rep(1:nTimes, 7)*tr)
 moco.dat$Values = c( as.vector(reg_params), moco$fd$MeanDisplacement )
 moco.dat$Category = c( rep("Angle", 3*nTimes), rep("Displacement", 4*nTimes) )
 moco.dat$Type = rep(c("Pitch", "Roll", "Yaw","X", "Y", "Z", "Framewise"), each=nTimes)
@@ -179,15 +188,16 @@ orig_dvars <- scaling * computeDVARS(timeseries2matrix(img, mask))
 ```
 
 ```{r dvarplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
-dvarType <- c(rep("dvar_pre",length(orig_dvars)), rep("dvar_post",length(dvars)) )
-dvarTime <- c(1:length(orig_dvars), 1:length(dvars))*spacing[4]
+dvarType <- c(rep("Original",length(orig_dvars)), rep("Moco",length(dvars)) )
+dvarTime <- c(1:length(orig_dvars), 1:length(dvars))*tr
 dvar.data <- data.frame(DVARS=c(orig_dvars, dvars), Type=dvarType, Time=dvarTime)
+dvarType = factor(dvarType, levels=c("Original", "Moco"))
 
 dvarPlot <- ggplot(dvar.data, aes(x=Time, y=DVARS, group=Type, colour=Type) )
 dvarPlot <- dvarPlot + geom_line(size=0.5)
 dvarPlot <- dvarPlot + theme(text=element_text(size=10), legend.position="top")
 dvarPlot <- dvarPlot + ggtitle("DVARS: pre and post motion correction")
-dvarPlot <- dvarPlot + scale_colour_discrete(labels=c("Moco", "Original"))
+dvarPlot <- dvarPlot + scale_colour_discrete(breaks=c("Original", "Moco"))
 print(dvarPlot)
 ```
 
@@ -292,14 +302,17 @@ may be calculated without "spreading" the influence of the bad time points.
 ```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 detrendImg = matrix2timeseries( img, mask, boldMat )
 
+# white matter is labeled as 3
 wmMask = seg*1
 wmMask[ wmMask != 3] = 0
 wmMask[ wmMask == 3 ] = 1
 wmMask = iMath( wmMask, "ME", 1)
 wmMean = rowMeans(timeseries2matrix(detrendImg, wmMask))
 
+# CSF is labeled as 1
 csfMask = seg*1
 csfMask[ csfMask != 1] = 0
+csfMask = iMath( csfMask, "ME", 1)
 csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
 
 globalMean = rowMeans(timeseries2matrix(detrendImg, mask))
@@ -316,6 +329,7 @@ if ( length(badtimes) > 0 ) {
     tissueNuis[badtimes,v]=tissueInterp
     }
   }
+
 tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
 
 ```
@@ -379,7 +393,9 @@ print(cortexPlot)
 The next step is frequency filtering. However, first we want to fill in the "bad"
 timepoints with interpolated data. This is to avoid artifacts that would result from having
 non-evenly sampled time-series data. This bad timepoints will be again removed after
-the frequency filtering.
+the frequency filtering. Frequencies with the range of 0.009 Hz - 0.08 Hz are retained.
+In some cases it may be interesting to examine smaller subranges of frequencies to
+look for phenomena that occur at specific frequencies.
 ```{r frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 if ( length(badtimes) > 0 ) {
   for ( v in c(1:nVox) ) {
@@ -402,6 +418,7 @@ FWHM=6.0mm.
 ```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 img = matrix2timeseries( img, mask, boldMat )
 img = smoothImage(img, c(6,6,6,0), FWHM=TRUE )
+boldMat = timeseries2matrix(img, mask)
 ```
 
 ```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5}
@@ -495,6 +512,58 @@ meanPlot = meanPlot + ggtitle("Mean BOLD signal in network ROIs")
 print(meanPlot)
 ```
 
+If system labels are provided for the ROIs, it is possible to look at the mean
+and standard deviation for the BOLD signal within a system. Comparing the mean
+signal between systems provides some hints about how much those systems are working
+together, while the standard deviation ribbons indicate how cohesively the
+components of a given system are working.
+
+```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE}
+
+
+systemNames = levels(pts$system)
+
+nSystems = length(systemNames)
+sysMatMean = matrix(0, nrow=dim(labeledMat)[1], ncol=nSystems)
+sysMatSD = matrix(0, nrow=dim(labeledMat)[1], ncol=nSystems)
+
+systems = pts$system[labels]
+
+for ( i in 1:nSystems ) {
+  sys = systemNames[i]
+  sysIdx = which(systems==sys)
+  if ( length(sysIdx) > 0)
+    {
+    sysMatMean[,i] = rowMeans(labeledMat[,sysIdx])
+    sysMatSD[,i] = apply(labeledMat[,sysIdx], 1, sd)
+    }
+  }
+
+```{r sysmeanplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=15, echo=FALSE}
+
+systemNickNames = c("Motor/Hand", "Motor/Mouth", "CO-Task", "Auditory", "Default", "Memory", "Visual", "FP-Task", "Salience", "Subcortical", "V Attention", "D Attention", "Cerebellar", "Uncertain" )
+
+lut = list("Motor/Hand"="cyan3", "Motor/Mouth"="orange", "CO-Task"="purple", "Auditory"="pink2", "Default"="red", "Memory"="gray50", "Visual"="blue", "FP-Task"="yellow2", "Salience"="black", "Subcortical"="chocolate4", "V Attention"="aquamarine4", "D Attention"="green", "Cerebellar"="cadetblue1", "Uncertain"="peachpuff2" )
+
+
+sys.dat = data.frame(Time=rep( (1:nActualTimes)*tr, nSystems))
+sys.dat$Signal = as.vector(sysMatMean)
+sys.dat$System = factor( rep( systemNickNames, foreach=nActualTimes), levels=systemNickNames)
+sys.dat$Lower = as.vector(sysMatMean) - as.vector(sysMatSD)
+sys.dat$Upper = as.vector(sysMatMean) + as.vector(sysMatSD)
+
+sysPlot = ggplot(sys.dat)
+sysPlot = sysPlot + geom_line(aes(x=Time, y=Signal, group=System), size=0.5)
+sysPlot = sysPlot + geom_ribbon(aes(x=Time, ymin=Lower, ymax=Upper, alpha=0.05, fill=System))
+sysPlot = sysPlot + scale_fill_manual( values = lut, na.value="gray80", name="System", breaks=systemNickNames, drop=FALSE)
+sysPlot = sysPlot + theme(text=element_text(size=10), legend.position="none")
+sysPlot = sysPlot + ggtitle("Mean BOLD signal in systems")
+sysPlot = sysPlot + facet_grid(System ~ ., scales="free" )
+print(sysPlot)
+
+```
+
+
 Create correlation matrix
 ```{r corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 missingROIs = which(colMeans(roiMat)==0)
@@ -511,29 +580,35 @@ if ( length(missingROIs) > 0 ) {
 }
 ```
 ### Visualizing constant density graphs
-Create matrix image that is colored by functional network
+Networks are often created by using a constant density. For example, to create
+a network with density=0.1, we binarize the correlation matrix to retain 10% of
+the edges, favoring the egdes with the highest correlation values. The resulting
+adjacency matrix is then used to create a graph.
+
 ```{r adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5}
 
-  density = 0.1
-  nEdges = length(upper.tri(connMat))*density
-  thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
-  adj = 1*(connMat >= thresh)
+density = 0.1
+nEdges = length(upper.tri(connMat))*density
+thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
+adj = 1*(connMat >= thresh)
 
-  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
-  components = clusters(bingraph)
-  maxID = which(components$csize == max(components$csize))[1]
+bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+components = clusters(bingraph)
+maxID = which(components$csize == max(components$csize))[1]
 
-  adj[components$membership!=maxID,] = 0
-  adj[,components$membership!=maxID] = 0
-  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+adj[components$membership!=maxID,] = 0
+adj[,components$membership!=maxID] = 0
+bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
 
-  invisible(plot(as.antsImage(adj)))
+invisible(plot(as.antsImage(adj)))
 
 ```
 
 A more interesting way to visualize the adjacency matrix is to color the components
-by the system to which they belong. Connections within a system are color coded while
-connections between systems are gray.
+by the system to which they belong. Of course, this requires that the ROIs used to define
+the network, include system identifies. In the plot, connections within a system are color coded while
+connections between systems are gray. For this type of plot, the order of the rows are
+sorted, so that nodes in the same system are clustered together.
 
 ```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 
@@ -569,54 +644,56 @@ lut = c("Sensory/Somatomotor Hand"="cyan3", "Sensory/Somatomotor Mouth"="orange"
 adjplot = ggplot(plot_data, aes(x = from, y = to, fill = group)) + geom_raster() + theme_bw() + scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) + theme( axis.title=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),  aspect.ratio = 1 ) + scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
 
 print(adjplot)
-
 ```
 
 It is also possible to export the data to a graphml file for visualization
-with an application such as GEPHI
+with an application such as [GEPHI](http://gephi.github.io/).
+In the example, the node colors are retained and
+edges for intra-system connections are colored the same as their nodes, while
+inter-system edges are gray.
 
 ```{r graphml,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 
-  bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
-  components = clusters(bingraph)
-  maxID = which(components$csize == max(components$csize))[1]
+# Retain only the largest connected component
+bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
+components = clusters(bingraph)
+maxID = which(components$csize == max(components$csize))[1]
 
-  adj[components$membership!=maxID,] = 0
-  adj[,components$membership!=maxID] = 0
-  graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
+adj[components$membership!=maxID,] = 0
+adj[,components$membership!=maxID] = 0
+graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
 
-  # Set node colors
-  graph = set.vertex.attribute(graph, "r", index=V(graph), value=as.double(pts$r))
-  graph = set.vertex.attribute(graph, "g", index=V(graph), value=as.double(pts$g))
-  graph = set.vertex.attribute(graph, "b", index=V(graph), value=as.double(pts$b))
+# Set node colors
+graph = set.vertex.attribute(graph, "r", index=V(graph), value=as.double(pts$r))
+graph = set.vertex.attribute(graph, "g", index=V(graph), value=as.double(pts$g))
+graph = set.vertex.attribute(graph, "b", index=V(graph), value=as.double(pts$b))
 
-  # Set edge colors
-  edges = get.edges( graph, E(graph) )
-  nEdges = dim(edges)[1]
-  er = rep(200, nEdges)
-  eg = rep(200, nEdges)
-  eb = rep(200, nEdges)
+# Set edge colors
+edges = get.edges( graph, E(graph) )
+nEdges = dim(edges)[1]
+er = rep(200, nEdges)
+eg = rep(200, nEdges)
+eb = rep(200, nEdges)
 
-  # colors for intra-system connections
-  #  gray for inter-system connections
-  for ( e in c(1:nEdges) )
-    {
-    if ( pts$system[edges[e,1]] == pts$system[edges[e,2]] )
-     {
-      er[e] = pts$r[edges[e,1]]
-      eg[e] = pts$g[edges[e,1]]
-      eb[e] = pts$b[edges[e,1]]
-      }
+# colors for intra-system connections
+#  gray for inter-system connections
+for ( e in c(1:nEdges) )
+  {
+  if ( pts$system[edges[e,1]] == pts$system[edges[e,2]] )
+   {
+    er[e] = pts$r[edges[e,1]]
+    eg[e] = pts$g[edges[e,1]]
+    eb[e] = pts$b[edges[e,1]]
     }
+  }
 
-  graph = set.edge.attribute(graph, "r", index=E(graph), value=as.double(er))
-  graph = set.edge.attribute(graph, "g", index=E(graph), value=as.double(eg))
-  graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
+graph = set.edge.attribute(graph, "r", index=E(graph), value=as.double(er))
+graph = set.edge.attribute(graph, "g", index=E(graph), value=as.double(eg))
+graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
 
-  # uncomment line below to write out graph
-  # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
+# uncomment line below to write out graph
+# write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
 ```
-
 
 ### Graph metrics
 
