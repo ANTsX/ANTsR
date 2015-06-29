@@ -16,6 +16,8 @@
 #' @param rSearch radius of search, default is 2
 #' @param boundary.condition one of 'image' 'mean' 'NA'
 #' @param jifImage the current estimated jif image (helps speed slice by slice)
+#' @param imputeList 2nd modality to impute
+#' @param imputedImage current estimate of 2nd modality
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 #' @keywords fusion, template
@@ -33,7 +35,7 @@
 #' refmask<-getMask(ref)
 #' refmask<-iMath(refmask,"ME",2) # just to speed things up
 #' ilist<-list(mi,mi2,mi3,mi4,mi5)
-#' seglist<-list()
+#' implist<-list()
 #' for ( i in 1:length(ilist) )
 #'  {
 #'  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
@@ -42,22 +44,31 @@
 #'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
 #'    transformlist=mytx$fwdtransforms)
 #'  ilist[[i]]=mywarpedimage
+#'  implist[[i]]=mywarpedimage %>% iMath("Laplacian")
 #'  }
 #' r<-2
 #' d<-2
-#' pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=1, rad=rep(r,d) )
+#' pp<-jointIntensityFusion( ref, refmask, ilist, rSearch=1, rad=rep(r,d) )
+#' pp<-jointIntensityFusion( ref, refmask, ilist, rSearch=1, rad=rep(r,d),
+#'   imputeList=implist )
 #'
 #' @export jointIntensityFusion
 jointIntensityFusion <- function( targetI, targetIMask, atlasList,
   beta=4, rad=NA, doscale = TRUE,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01,
   usecor=FALSE, boundary.condition='image', rSearch=2,
-  jifImage=NA )
+  jifImage=NA, imputeList=NA, imputedImage=NA )
 {
   BC=boundary.condition
   nvox = sum( targetIMask == 1 )
   includezero = TRUE
   if ( is.na(jifImage) ) jifImage = targetI * 0
+  doImputation = FALSE
+  if ( is.na(imputedImage) & ! all( is.na( imputeList ) ) )
+    {
+    imputedImage = targetI * 0
+    doImputation = TRUE
+    }
   dim<-targetI@dimension
   if ( doNormalize )
     {
@@ -91,18 +102,31 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
     targetint<-targetIv[,voxel]
     cent<-indices[voxel,]
     intmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
+    if ( doImputation )
+      {
+      if ( length(imputeList) != length(atlasList))
+        stop("imputation list must be same length as atlas list")
+      impmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
+      }
     for ( ct in 1:natlas)
       {
-      nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
-        targetint, cent, max(rad), rSearch,
-        atlasList[[ct]],
-        atlasList[[ct]], PACKAGE="ANTsR" )
+      if ( !doImputation )
+        nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
+          targetint, cent, max(rad), rSearch,
+          atlasList[[ct]],
+          atlasList[[ct]], PACKAGE="ANTsR" )
+      if ( doImputation )
+        nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
+          targetint, cent, max(rad), rSearch,
+          atlasList[[ct]],
+          imputeList[[ct]], PACKAGE="ANTsR" )
       segval = nhsearch[[ 1 ]]
       v = nhsearch[[ 2 ]]
       vmean = nhsearch[[ 3 ]]
       sdv = nhsearch[[ 4 ]]
       bestcor = nhsearch[[ 5 ]]
       intmat[ct, ] = v
+      if ( doImputation ) impmat[ct, ] = nhsearch[[ 6 ]]
       if ( sdv == 0 ) {
         zsd[ct]<-0 # assignment
         sdv<-1
@@ -141,11 +165,19 @@ jointIntensityFusion <- function( targetI, targetIMask, atlasList,
         .Call("addNeighborhoodToImage",
             jifImage, cent, rad, lintensity,
             package="ANTsR" )
+        if ( doImputation )
+          {
+          impintensity = pwts %*% impmat
+          .Call("addNeighborhoodToImage",
+            imputedImage, cent, rad, impintensity,
+            package="ANTsR" )
+          }
       } else badct<-badct+1
     }
   } # loop over voxels
   close( progress )
   rm( targetIv )
   rm( indices )
-  return( jifImage )
+  if ( ! doImputation ) return( jifImage )
+  return( list( jifImage, imputedImage ) )
 }

@@ -7,7 +7,7 @@
 jointIntensityFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
   doscale = TRUE, doNormalize = TRUE, maxAtlasAtVoxel = c(1, Inf),
   rho = 0.01, usecor = FALSE, boundary.condition = "image", rSearch = 2,
-  jifImage = NA)
+  jifImage = NA, imputeList = NA, imputedImage = NA)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -36,6 +36,10 @@ makes image converge to average}
 \item{rSearch}{radius of search, default is 2}
 
 \item{jifImage}{the current estimated jif image (helps speed slice by slice)}
+
+\item{imputeList}{2nd modality to impute}
+
+\item{imputedImage}{current estimate of 2nd modality}
 }
 \value{
 approximated image, segmentation and probabilities
@@ -56,7 +60,7 @@ mi5<-antsImageRead( getANTsRData("r85"))
 refmask<-getMask(ref)
 refmask<-iMath(refmask,"ME",2) # just to speed things up
 ilist<-list(mi,mi2,mi3,mi4,mi5)
-seglist<-list()
+implist<-list()
 for ( i in 1:length(ilist) )
  {
  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
@@ -65,10 +69,13 @@ for ( i in 1:length(ilist) )
  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage
+ implist[[i]]=mywarpedimage \%>\% iMath("Laplacian")
  }
 r<-2
 d<-2
-pp<-jointIntensityFusion(ref,refmask,ilist, rSearch=1, rad=rep(r,d) )
+pp<-jointIntensityFusion( ref, refmask, ilist, rSearch=1, rad=rep(r,d) )
+pp<-jointIntensityFusion( ref, refmask, ilist, rSearch=1, rad=rep(r,d),
+  imputeList=implist )
 }
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich
