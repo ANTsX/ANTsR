@@ -704,7 +704,8 @@ graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
 ## Graph metrics
 Having derived a graph representation of the resting brain network, the next
 logical step is to examine graph-metrics that encapsulate various properties of
-the network. Three types of metrics will be examined.
+the network. These are describe in further detail in a review of graph metrics
+for studying connectivity in the brain [@Rubinov2010]. Two types of metrics will be examined.
 
 * Node measures
 
@@ -724,7 +725,7 @@ following is a non-comprehensive list of possible node metrics
 
 * Page-rank - Google page rank measure
 
-```{r constnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r constnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=7}
 
 graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
 
