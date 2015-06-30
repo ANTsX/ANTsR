@@ -107,6 +107,7 @@ print(ssPlot)
 ```
 
 The temporal mean of the original time series data:
+
 ```{r rawplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
 ```
@@ -300,22 +301,23 @@ values at "bad" timepoints are interpolated with splines so that derivatives
 may be calculated without "spreading" the influence of the bad time points.
 
 ```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
-detrendImg = matrix2timeseries( img, mask, boldMat )
-
 # white matter is labeled as 3
 wmMask = seg*1
 wmMask[ wmMask != 3] = 0
 wmMask[ wmMask == 3 ] = 1
 wmMask = iMath( wmMask, "ME", 1)
-wmMean = rowMeans(timeseries2matrix(detrendImg, wmMask))
+wmVox = which(subset(wmMask, mask > 0 )==1)
+wmMean = rowMeans(boldMat[,wmVox])
 
 # CSF is labeled as 1
 csfMask = seg*1
 csfMask[ csfMask != 1] = 0
-csfMask = iMath( csfMask, "ME", 1)
-csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
+#csfMask = iMath( csfMask, "ME", 1)
+csfVox = which(subset(csfMask, mask > 0)==1)
+csfMean= rowMeans(boldMat[,csfVox])
+#csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
 
-globalMean = rowMeans(timeseries2matrix(detrendImg, mask))
+globalMean = rowMeans(boldMat)
 
 compcor = compcor(boldMat[goodtimes,], ncompcor = 4)
 compcorNuis = matrix(0, nTimes, 4)
@@ -329,9 +331,7 @@ if ( length(badtimes) > 0 ) {
     tissueNuis[badtimes,v]=tissueInterp
     }
   }
-
 tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
-
 ```
 
 ```{r nuissanceplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
@@ -355,16 +355,18 @@ tissuePlot <- tissuePlot + theme(text=element_text(size=10), legend.position="to
 tissuePlot <- tissuePlot + facet_grid(Category ~ ., scales="free" )
 tissuePlot <- tissuePlot + ggtitle("Nuisance parameters")
 print(tissuePlot)
+
+# Save mean cortex signal for later plotting
+ctxMask = seg*1
+ctxMask[ ctxMask != 2] = 0
+ctxMask[ ctxMask == 2 ] = 1
+ctxVox = which(subset(ctxMask, mask > 0)==1)
+ctxMean = rowMeans(boldMat[,ctxVox])
 ```
 
 The nuissance parameters are now regressed out the signal. This is illustrated by looking
 at the mean signal in the cortex before and after the regression.
 ```{r regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
-ctxMask = seg*1
-ctxMask[ ctxMask != 2] = 0
-ctxMask[ ctxMask == 2 ] = 1
-ctxMean = rowMeans(timeseries2matrix(detrendImg, ctxMask))
-
 moco = cbind(reg_params, reg_params*reg_params)
 moco = detrend(moco)
 mocoDeriv = rbind( rep(0,dim(moco)[2]), diff(moco,1) )
@@ -372,12 +374,11 @@ mocoDeriv = rbind( rep(0,dim(moco)[2]), diff(moco,1) )
 nuissance = cbind( moco, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuissance[goodtimes,] ) )
-
-regressedImg = matrix2timeseries( img, mask, boldMat)
-ctxMeanRegressed = rowMeans(timeseries2matrix(regressedImg, ctxMask))
 ```
 
 ```{r regressionplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+ctxMeanRegressed = rowMeans(boldMat[,ctxVox])
+
 cortex.dat =  data.frame( Time=rep(1:nTimes,2) )
 cortex.dat$Values = c(ctxMean, ctxMeanRegressed)
 cortex.dat$Type = c(rep("Original",nTimes), rep("Regressed",nTimes))
@@ -403,12 +404,13 @@ if ( length(badtimes) > 0 ) {
     }
   }
 
-ctxMeanSpline = matrix2timeseries( img, mask, boldMat )
-ctxMeanSpline = rowMeans(timeseries2matrix(ctxMeanSpline, ctxMask))
+# save interpolated values for plotting
+ctxMeanSpline = rowMeans(boldMat[,ctxVox])
+
 boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=0.009, freqHi=0.08, opt="trig" )
 
-ctxMeanFiltered = matrix2timeseries( img, mask, boldMat)
-ctxMeanFiltered = rowMeans(timeseries2matrix(ctxMeanFiltered, ctxMask))
+# save filtered values for plotting
+ctxMeanFiltered = rowMeans(boldMat[,ctxVox])
 ctxMeanFiltered[badtimes] = NA
 ```
 ### Spatial smoothing
@@ -422,7 +424,7 @@ boldMat = timeseries2matrix(img, mask)
 ```
 
 ```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5}
-ctxMeanSmoothed = rowMeans(timeseries2matrix(img, ctxMask))
+ctxMeanSmoothed = rowMeans(boldMat[,ctxVox])
 ctxMeanSmoothed[badtimes] = NA
 
 freq.dat =  data.frame( Time=rep(1:nTimes,3) )
@@ -446,7 +448,7 @@ print(freqPlot)
 First, a set of ROIs is needed. While each individual voxel could be treated as an ROI, it is
 more common to define ROIs that contain many voxels and represent regions for which there
 is some a priori knowledge regarding the functional network to which each region belongs. The
-provided network definition provides the center point of each ROI so we must first create an
+provided network definition used here lists the center point of each ROI so we must first create an
 image where each ROI is a sphere of radius=5mm centered on the provided point.
 ```{r networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 labelImg = mask*0
@@ -481,21 +483,24 @@ not map into the image space and thus have 0 voxels.
 ```{r roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 labelMask = labelImg*1
 labelMask[labelMask > 0] = 1
-labeledMat = matrix2timeseries( img, mask, boldMat )
-labeledMat = timeseries2matrix( labeledMat, labelMask )
-labeledMat = labeledMat[goodtimes,]
-labels = labelImg[labelImg > 0]
+labelMask[mask == 0] = 0
+labelVox = which(subset(labelMask, mask > 0)==1)
+
+labeledBoldMat = boldMat[goodtimes,labelVox]
+labels = labelImg[labelMask > 0]
 
 nLabels = max(labels)
-roiMat = matrix(0, nrow=dim(labeledMat)[1], ncol=nLabels)
+roiMat = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nLabels)
 for ( i in c(1:nLabels) ) {
-  if (length(which(labels==i)) > 0 ) {
-    roiMat[,i] = rowMeans(labeledMat[,(labels==i)])
+  if (length(which(labels==i)) > 1 ) {
+    roiMat[,i] = rowMeans(labeledBoldMat[,(labels==i)])
   }
 }
 nActualTimes = dim(roiMat)[1]
 ```
+
 Plot of the ROI averaged signals
+
 ```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=FALSE}
 plotMat = roiMat + min(roiMat)
 plotMat = plotMat / max(plotMat)
@@ -519,13 +524,11 @@ together, while the standard deviation ribbons indicate how cohesively the
 components of a given system are working.
 
 ```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE}
-
-
 systemNames = levels(pts$system)
 
 nSystems = length(systemNames)
-sysMatMean = matrix(0, nrow=dim(labeledMat)[1], ncol=nSystems)
-sysMatSD = matrix(0, nrow=dim(labeledMat)[1], ncol=nSystems)
+sysMatMean = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
+sysMatSD = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
 
 systems = pts$system[labels]
 
@@ -534,8 +537,8 @@ for ( i in 1:nSystems ) {
   sysIdx = which(systems==sys)
   if ( length(sysIdx) > 0)
     {
-    sysMatMean[,i] = rowMeans(labeledMat[,sysIdx])
-    sysMatSD[,i] = apply(labeledMat[,sysIdx], 1, sd)
+    sysMatMean[,i] = rowMeans(labeledBoldMat[,sysIdx])
+    sysMatSD[,i] = apply(labeledBoldMat[,sysIdx], 1, sd)
     }
   }
 
@@ -579,6 +582,7 @@ if ( length(missingROIs) > 0 ) {
   connMat[,missingROIs] = 0
 }
 ```
+
 ### Visualizing constant density graphs
 Networks are often created by using a constant density. For example, to create
 a network with density=0.1, we binarize the correlation matrix to retain 10% of
@@ -611,6 +615,8 @@ connections between systems are gray. For this type of plot, the order of the ro
 sorted, so that nodes in the same system are clustered together.
 
 ```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+
+pts$system = factor(pts$system, levels=c("Sensory/Somatomotor Hand", "Sensory/Somatomotor Mouth", "Cingulo-opercular Task Control", "Auditory", "Default Mode", "Memory Retrieval", "Visual", "Fronto-parietal Task Control", "Salience", "Subcortical", "Ventral Attention", "Dorsal Attention", "Cerebellar", "Uncertain"))
 
 graph = graph.adjacency( adj, mode="directed", weighted=NULL )
 V(graph)$name = pts$id
@@ -695,7 +701,101 @@ graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
 # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
 ```
 
-### Graph metrics
+## Graph metrics
+Having derived a graph representation of the resting brain network, the next
+logical step is to examine graph-metrics that encapsulate various properties of
+the network. Three types of metrics will be examined.
 
+* Node measures
+
+* Global network measures
+
+### Node measures
+The measures are made independently for each node/vertex in the graph. The
+following is a non-comprehensive list of possible node metrics
+
+* Degree - the number of connections that include the node
+
+* Clustering coefficient - local neighborhood connectivity
+
+* Path length - mean shortest distance between this node and all others
+
+* Local efficiency - measures "closeness" off nodes in a neighborhood
+
+* Page-rank - Google page rank measure
+
+```{r constnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
+graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
+
+deg = degree(graph)
+deg[deg==0] = NA
+
+pathsmat =  shortest.paths(graph, weights=NA)
+pathsmat[!is.finite(pathsmat)] = NA
+paths = rowMeans(pathsmat, na.rm=TRUE)
+paths[paths==0] = NA
+
+clust = transitivity(graph, type="local")
+clust[deg < 2] = NA
+
+pager = page.rank(graph)$vector
+pager[deg < 2] = NA
+
+# from http://pastebin.com/XqkEYtJS
+leff <- numeric(length(deg))
+goodnodes <- which(deg > 1)
+leff[goodnodes] <- sapply(goodnodes, function(x) {
+    neighbs <- neighbors(graph, v=x)
+    g.sub <- induced.subgraph(graph, neighbs)
+    Nv <- vcount(g.sub)
+
+    lpaths <- shortest.paths(g.sub, weights=NA)
+    lpaths <- paths[upper.tri(lpaths)]
+
+    pathsup <- lpaths[upper.tri(lpaths)]
+    2 / Nv / (Nv - 1) * sum(1 / lpaths[which(is.na(lpaths)==FALSE)])
+    }
+  )
+leff[deg < 2] = NA
+leff[which(is.na(deg)==TRUE)] = NA
+
+
+
+```
+
+```{r cnodeplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+nNodes = length(deg)
+
+cnode.dat = data.frame(Node=rep(1:nNodes,5))
+cnode.dat$Value = c( deg, paths, leff, clust, pager )
+cnode.dat$Metric = c( rep("Degree", nNodes), rep("Shortest Path", nNodes), rep("Local Efficiency", nNodes), rep("Clustering Coefficient", nNodes), rep("Page-Rank", nNodes) )
+
+cnodePlot = ggplot(cnode.dat, aes(x=Node, y=Value, group=Metric, fill=Metric, colour=Metric))
+cnodePlot = cnodePlot + geom_point()
+cnodePlot = cnodePlot + theme(text=element_text(size=10), legend.position="none")
+cnodePlot = cnodePlot + ggtitle("Node metrics")
+cnodePlot = cnodePlot + facet_grid(Metric~ ., scales="free")
+invisible(print(cnodePlot))
+
+```
+
+### Global network measures
+The measures summarize the entire network in a single measure. All node metrics may
+be meaned over all nodes to obtain a global metric. Additional metrics include
+
+* Global efficiency - closeness of nodes to all other nodes
+
+* Clustering coefficient - same as node based, but using entire graph as neighborhood
+
+```{r globalnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+
+geff<-1/(shortest.paths(graph))
+geff[!is.finite(geff)]<-NA
+geff<-mean(geff,na.rm=TRUE)
+
+cc = transitivity(graph)
+
+```
 
 ## References
