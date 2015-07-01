@@ -21,7 +21,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   if ( fileid == "show" )
    return( c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
      "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg","simple",
-     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts" ) )
+     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice" ) )
 
   if ( fileid == "simple" )
     return( paste(path.package("ANTsR"),"/extdata/simple.jpg",sep="") )
@@ -66,7 +66,9 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     rsbold = "http://files.figshare.com/2119176/rest.nii.gz",
     rsboldmask = "http://files.figshare.com/2119177/mask.nii.gz",
     rsboldseg = "http://files.figshare.com/2119178/seg.nii.gz",
-    rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv" )
+    rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv",
+    decslice = "http://figshare.com/download/file/2156224",
+    dtislice = "http://figshare.com/download/file/2157766" )
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki")
@@ -95,7 +97,10 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     rsbold = "dfba022d1f715c00e042a79c6250eb16",
     rsboldmask = "15c9c6b38ce8e7f69fd4b64c110a17b4",
     rsboldseg = "d50ceabc2bffbf12cee8b16e2216bfbc",
-    rsboldpts = "9eefc8d78fae07bfc0b5ef2da45b5d39")
+    rsboldpts = "9eefc8d78fae07bfc0b5ef2da45b5d39",
+    decslice = "08f41703ac7398319c6dba66701c0653",
+    dtislice = "4be958c6b705ea2125414ccd666a05fe")
+    
   if (!is.null(mymd5))
     if (tools::md5sum(tfn) != mymd5) {
       stop("checksum failure")
