@@ -30,14 +30,26 @@ this example a file is read in, and each channel is smoothed independently.
 
 ```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 # How to plot a 2D color image
-plotColor <- function(imgList) {
-  rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) /255 })
+plotColor <- function(imgList, scale=TRUE, vectors=NULL) {
+
+  if (class(imgList) == "antsImage") {
+    imgList = list(imgList, imgList, imgList)
+  }
+
+  # max in all images
+  maxi = 1.0
+  if ( scale )
+    {
+    maxi = max( unlist( lapply( imgList, function(x) { max(x) } ) ) )
+    }
+
+  rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) / maxi })
   col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
 
   d = dim(rgbList[[1]])
 
   x = rep(1:d[2],each=d[1])
-  y = rep(1:d[2], d[1])
+  y = rep(1:d[1], d[2])
   pts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x,y) )
 
   dat = data.frame(x=pts[,1], y=pts[,2], col=col)
@@ -46,7 +58,21 @@ plotColor <- function(imgList) {
   y1 = min(pts[,2])
   y2 = max(pts[,2])
 
-  g = ggplot(dat, aes(x=x, y=y, fill=col)) + geom_raster(hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) ) + coord_cartesian(xlim=c(x1,x2), ylim=c(y1,y2))
+  g = ggplot(dat) + geom_raster(aes(x=x, y=y, fill=col), hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) ) + coord_cartesian(xlim=c(x1,x2), ylim=c(y1,y2))
+
+  if ( !is.null(vectors) ) {
+
+    #xvec = as.vector( as.matrix(vectors[[1]]) )
+    #yvec = as.vector( as.matrix(vectors[[2]]) )
+
+    xvec = as.vector( apply(t(as.matrix(vectors[[1]])),2,rev) )
+    yvec = as.vector( apply(t(as.matrix(vectors[[2]])),2,rev) )
+
+    vpts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x+0.5,y+0.5) )
+    vdat = data.frame(x=vpts[,1]-xvec, y=vpts[,2]-yvec, xend=vpts[,1]+xvec, yend=vpts[,2]+yvec)
+    g = g + geom_segment(data=vdat, aes(x=x,y=y,xend=xend,yend=yend), colour="white", alpha=0.5)
+  }
+
   print(g)
 
   #dim(col) <- dim(imgList[[1]])
@@ -77,8 +103,129 @@ simg = mergeChannels(sList)
 # antsImageWrite(simg, "smoothslice.nii.gz")
 ```
 
-ggplot(dat, aes(x=x, y=y, fill=col)) + geom_raster(hjust=0, vjust=0) + theme(legend.position="none", aspect.ratio=1 ) + scale_fill_manual(values=as.character(levels(factor(rgb))) )
+## Working with diffusion tensor images
+```{r dti1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+dt = antsImageRead(getANTsRData("dtislice"))
+dtList = splitChannels(dt)
 
+# Component of tensor are stored as: XX, XY, XZ, YY, YZ, ZZ
+trace = dtList[[1]] + dtList[[4]] + dtList[[6]]
+trace[trace<0] = 0
+plotColor( trace )
+```
+
+We only want to deal with voxels in the brain, so the `getMask` function is used
+to obtain rough estimate of the brain, and the image is plotted with background voxels
+tinted red.
+
+```{r dti2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+mask = getMask(trace)
+plotColor( list(trace, trace*m, trace*m))
+```
+
+Since we are only interested in voxels in the brain, a matrix
+is created where each row is voxel in the brain and each column in a tensor component,
+listed in upper.tri order. This allows us to quickly calculate the eigen
+decomposition for each tensor.
+
+```{r dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# matrix of tensor values in brain
+mat = do.call(cbind, lapply( dtList, function(x) { x[mask>0] } ) )
+
+# convert tensor from vector to matrix
+initTensor <- function(x) {
+  tens = diag(3)
+  tens[lower.tri(tens, diag=TRUE)] = x
+  tens = tens + t(tens) - diag(diag(tens))
+  return(tens)
+  }
+
+getFractionalAnisotropy <- function(evs) {
+  numer = sqrt( (evs[1]-evs[2])^2 + (evs[2]-evs[3])^2 + (evs[3]-evs[1])^2 )
+  denom = sqrt( sum(evs*evs) )
+  fa = 0
+  if ( denom > 0 ) {
+    fa = sqrt(0.5) * numer/denom
+    }
+  }
+
+# Eigen decomp for each tensor
+eigs = unlist( apply(mat, 1, function(x) { eigen( initTensor(x) ) } ) )
+
+eval1 = as.numeric(eigs[names(eigs)=="values1"])
+eval2 = as.numeric(eigs[names(eigs)=="values2"])
+eval3 = as.numeric(eigs[names(eigs)=="values3"])
+
+eval1[eval1 < 0] = 0
+eval2[eval2 < 0] = 0
+eval3[eval3 < 0] = 0
+
+evalueMat = cbind(eval1, eval2, eval3)
+
+# Create images from the eigenvalues
+eval1 = makeImage(mask, eval1)
+eval2 = makeImage(mask, eval2)
+eval3 = makeImage(mask, eval3)
+
+plotColor( list(eval1, eval2, eval3))
+```
+
+The Fractional Anisotropy (FA) is typically used to measure how directionally specific
+the diffusion of water is within a voxel. This values is plotted below
+
+```{r dti4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+faValues = apply(evalueMat, 1, getFractionalAnisotropy )
+faValues[faValues < 0] = 0
+fa = makeImage(mask, faValues)
+plotColor( fa )
+```
+
+Also of great interest is the eigenvector associated with the largest eigenvalue, this
+estimates the primary direction of diffusion and in white matter this corresponds to
+the direction that is parallel to the myelinated axons in a fiber bundle
+
+```{r dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+evec1 = as.numeric(eigs[names(eigs)=="vectors1"])
+evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors2"]))
+evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors3"]))
+
+evecx = makeImage(mask, evec1[,1])
+evecy = makeImage(mask, evec1[,2])
+evecz = makeImage(mask, evec1[,3])
+
+plotColor( list(abs(evecx), abs(evecy), abs(evecz)) )
+```
+
+Weighting the magnitude of the direction by the FA is standard practice as it highlights
+regions with high directional specificity (i.e. white matter).
+This is known as a directional encoded colormap (DEC).
+
+```{r dti6,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+decList = list(abs(fa*evecx), abs(fa*evecy), abs(fa*evecz))
+plotColor(decList)
+```
+
+To check our processing, it can be useful to plot line segments showing the direction
+of some of the vectors. This is done in a subset of the image to avoid too much visual
+clutter.
+
+```{r dti7,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+lower = c(40,80)
+upper = c(80,120)
+subfa = cropIndices(fa, lower=lower, upper=upper)
+subx = cropIndices(evecx, lower=lower, upper=upper)
+suby = cropIndices(evecy, lower=lower, upper=upper)
+subz = cropIndices(evecz, lower=lower, upper=upper)
+
+plotColor( list(abs(subfa*subx), abs(subfa*suby), abs(subfa*subz)), vectors=list(subx, suby))
+
+
+```
+
+## Deterministic Fiber tractography
+
+A common use for DTI is fiber tractography. Here we give a simplified example in which
+we restrict the tracts to lie within the slice
 
 
 ## References
