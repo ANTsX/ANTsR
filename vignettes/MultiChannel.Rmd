@@ -37,7 +37,7 @@ img
 plotColor <- function(imgList) {
   rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) /255 })
   col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
-  dim(col) <- dim(r)
+  dim(col) <- dim(imgList[[1]])
   grid.raster(col, interpolate=FALSE)
 }
 
