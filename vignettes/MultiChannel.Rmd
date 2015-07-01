@@ -28,18 +28,27 @@ Examples will be added to this document as new functionality is implemented.
 Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in. In
 this example a file is read in, and each channel is smoothed independently.
 
-```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-# Read in and display header info
-img = antsImageRead( getANTsRData("decslice"))
-img
-
+```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 # How to plot a 2D color image
 plotColor <- function(imgList) {
   rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) /255 })
   col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
-  dim(col) <- dim(imgList[[1]])
-  grid.raster(col, interpolate=FALSE)
+  x = rep(1:128,each=128)
+  y = rep(128:1, 128)
+  dat = data.frame(x=x, y=y, col=col)
+
+  g = ggplot(dat, aes(x=x, y=y, fill=col)) + geom_raster(hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) ) + coord_cartesian(xlim=c(1,128), ylim=c(1,128))
+  print(g)
+
+  #dim(col) <- dim(imgList[[1]])
+  #grid.raster(col, interpolate=FALSE)
 }
+```
+
+```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# Read in and display header info
+img = antsImageRead( getANTsRData("decslice"))
+img
 
 # Convert to list of scalar images
 iList = splitChannels(img)
@@ -58,5 +67,9 @@ simg = mergeChannels(sList)
 # Write to file
 # antsImageWrite(simg, "smoothslice.nii.gz")
 ```
+
+ggplot(dat, aes(x=x, y=y, fill=col)) + geom_raster(hjust=0, vjust=0) + theme(legend.position="none", aspect.ratio=1 ) + scale_fill_manual(values=as.character(levels(factor(rgb))) )
+
+
 
 ## References
