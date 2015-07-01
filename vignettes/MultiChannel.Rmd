@@ -1,0 +1,62 @@
+---
+title: "Multichannel image proccessing"
+author: "Jeffrey T. Duda"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{Multichannel images}
+    \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+library( knitr )
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(ANTsR)
+library(ggplot2)
+library(grid)
+```
+
+## Overview
+This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR)
+may be used to work with multihchannel images, such as rgb (i.e. color) data. This
+is still an extremely new feature and much of ANTsR does not support this image type.
+Examples will be added to this document as new functionality is implemented.
+
+## Basics
+Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in. In
+this example a file is read in, and each channel is smoothed independently.
+
+```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# Read in and display header info
+img = antsImageRead( getANTsRData("decslice"))
+img
+
+# How to plot a 2D color image
+plotColor <- function(imgList) {
+  rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) /255 })
+  col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
+  dim(col) <- dim(r)
+  grid.raster(col, interpolate=FALSE)
+}
+
+# Convert to list of scalar images
+iList = splitChannels(img)
+plotColor(iList)
+```
+
+The `lapply` function provides a convenient way to process all channels
+
+```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+sList = lapply( iList, function(x) { smoothImage(x, 1.5) } )
+plotColor(sList)
+
+# Merge back into multichannel image
+simg = mergeChannels(sList)
+
+# Write to file
+# antsImageWrite(simg, "smoothslice.nii.gz")
+```
+
+## References
