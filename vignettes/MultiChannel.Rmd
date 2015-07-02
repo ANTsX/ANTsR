@@ -120,7 +120,7 @@ tinted red.
 
 ```{r dti2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 mask = getMask(trace)
-plotColor( list(trace, trace*m, trace*m))
+plotColor( list(trace, trace*mask, trace*mask))
 ```
 
 Since we are only interested in voxels in the brain, a matrix
@@ -205,7 +205,7 @@ decList = list(abs(fa*evecx), abs(fa*evecy), abs(fa*evecz))
 plotColor(decList)
 ```
 
-To check our processing, it can be useful to plot line segments showing the direction
+To verify our processing, it can be useful to plot line segments showing the direction
 of some of the vectors. This is done in a subset of the image to avoid too much visual
 clutter.
 
