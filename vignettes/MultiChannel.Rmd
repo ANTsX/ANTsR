@@ -340,7 +340,7 @@ for ( i in 1:dim(seedPts)[1] ) {
 }
 ldat = data.frame(x=trackx, y=tracky, id=factor(trackid))
 plotColor(subDecList, paths=ldat, points=seedPts, vectors=list(subVecList[[1]], subVecList[[2]]))
-plotColor(subfa, paths=ldat)
+plotColor(subfa, paths=ldat, points=seedPts)
 
 ```
 
