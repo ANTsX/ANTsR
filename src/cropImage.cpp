@@ -168,6 +168,8 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
     in_image1.slot( "pixeltype" ) ) ;
   unsigned int dimension = Rcpp::as< unsigned int >(
     in_image1.slot( "dimension" ) ) ;
+  unsigned int components = Rcpp::as< unsigned int> (
+    in_image1.slot( "components" ) );
   std::string in_pixeltype2 = Rcpp::as< std::string >(
     in_image2.slot( "pixeltype" ) ) ;
   unsigned int dimension2 = Rcpp::as< unsigned int >(
@@ -183,6 +185,7 @@ RcppExport SEXP cropImage( SEXP r_in_image1 ,
   Rcpp::S4 out_image( std::string( "antsImage" ) ) ;
   out_image.slot( "pixeltype" ) = in_pixeltype ;
   out_image.slot( "dimension" ) = dimension ;
+  out_image.slot( "components" ) = components;
 
   if ( dimension == 2 )
     {
