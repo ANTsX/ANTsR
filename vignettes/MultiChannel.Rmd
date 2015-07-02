@@ -30,11 +30,13 @@ this example a file is read in, and each channel is smoothed independently.
 
 ```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 # How to plot a 2D color image
-plotColor <- function(imgList, scale=TRUE, vectors=NULL) {
+plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL) {
 
   if (class(imgList) == "antsImage") {
     imgList = list(imgList, imgList, imgList)
   }
+
+  direction = antsGetDirection( imgList[[1]] )
 
   # max in all images
   maxi = 1.0
@@ -44,6 +46,8 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL) {
     }
 
   rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) / maxi })
+  rgbList = lapply( imgList, function(x) { t(as.matrix(x)) / maxi })
+
   col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
 
   d = dim(rgbList[[1]])
@@ -58,25 +62,50 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL) {
   y1 = min(pts[,2])
   y2 = max(pts[,2])
 
-  g = ggplot(dat) + geom_raster(aes(x=x, y=y, fill=col), hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) ) + coord_cartesian(xlim=c(x1,x2), ylim=c(y1,y2))
+  g = ggplot(dat) + geom_raster(aes(x=x, y=y, fill=col), hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) )
+
+  g = g + coord_cartesian( xlim=c(x1,x2), ylim=c(y1,y2) )
+  if ( direction[1,1] > 0 ) {
+    g = g + scale_x_continuous( lim=c(x1,x2) )
+    }
+  else {
+    g = g + scale_x_reverse( lim=c(x2,x1) )  
+   }
+  if ( direction[2,2] > 0 ) {
+    g = g + scale_y_continuous( lim=c(y1,y2) )
+    }
+  else {
+    g = g + scale_y_reverse( lim=c(y2,y1) )  
+   }
+
+
+
+  if ( !is.null(points) ) {
+    pdat = data.frame( x=points[,1], y=points[,2], id=factor(1:dim(points)[1]) )
+    g = g + geom_point( data=pdat, aes(x=x, y=y, colour=id ))
+  }
+
+  if ( !is.null(paths) ) {
+    g = g + geom_path(data=paths, aes(x=x,y=y,group=id,colour=id))
+    }
 
   if ( !is.null(vectors) ) {
-
-    #xvec = as.vector( as.matrix(vectors[[1]]) )
-    #yvec = as.vector( as.matrix(vectors[[2]]) )
-
-    xvec = as.vector( apply(t(as.matrix(vectors[[1]])),2,rev) )
-    yvec = as.vector( apply(t(as.matrix(vectors[[2]])),2,rev) )
-
+    xvec = as.vector( t(as.matrix(vectors[[1]])) )
+    yvec = as.vector( -t(as.matrix(vectors[[2]])) )
     vpts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x+0.5,y+0.5) )
+
+    mag = sqrt(xvec*xvec + yvec*yvec)
+    elim = which(mag < 0.01)
+    if (length(elim) > 0 ) {
+      xvec = xvec[-elim]
+      yvec = yvec[-elim]
+      vpts = vpts[-elim,]
+      }
     vdat = data.frame(x=vpts[,1]-xvec, y=vpts[,2]-yvec, xend=vpts[,1]+xvec, yend=vpts[,2]+yvec)
     g = g + geom_segment(data=vdat, aes(x=x,y=y,xend=xend,yend=yend), colour="white", alpha=0.5)
   }
 
-  print(g)
-
-  #dim(col) <- dim(imgList[[1]])
-  #grid.raster(col, interpolate=FALSE)
+  suppressWarnings(print(g))
 }
 ```
 
@@ -181,7 +210,7 @@ plotColor( fa )
 ```
 
 Also of great interest is the eigenvector associated with the largest eigenvalue, this
-estimates the primary direction of diffusion and in white matter this corresponds to
+estimates the primary direction of diffusion (PDD) and in white matter this corresponds to
 the direction that is parallel to the myelinated axons in a fiber bundle
 
 ```{r dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
@@ -192,16 +221,18 @@ evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors3"]))
 evecx = makeImage(mask, evec1[,1])
 evecy = makeImage(mask, evec1[,2])
 evecz = makeImage(mask, evec1[,3])
+decList = list(evecx, evecy, evecz)
+decList = lapply(decList, abs)
 
-plotColor( list(abs(evecx), abs(evecy), abs(evecz)) )
+plotColor( decList )
 ```
 
-Weighting the magnitude of the direction by the FA is standard practice as it highlights
+Weighting the magnitude of the PDD by the FA is standard practice as it highlights
 regions with high directional specificity (i.e. white matter).
-This is known as a directional encoded colormap (DEC).
+This is known as a directional encoded colormap (DEC) [@Pajevic1999]
 
 ```{r dti6,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-decList = list(abs(fa*evecx), abs(fa*evecy), abs(fa*evecz))
+decList = lapply( decList, function(x){ fa*x } )
 plotColor(decList)
 ```
 
@@ -213,19 +244,106 @@ clutter.
 lower = c(40,80)
 upper = c(80,120)
 subfa = cropIndices(fa, lower=lower, upper=upper)
-subx = cropIndices(evecx, lower=lower, upper=upper)
-suby = cropIndices(evecy, lower=lower, upper=upper)
-subz = cropIndices(evecz, lower=lower, upper=upper)
+subVecList = list(evecx, evecy, evecz)
+subVecList = lapply( subVecList, function(x){ cropIndices(x, lower=lower, upper=upper)})
+subDecList = lapply( subVecList, function(x){ abs(subfa*x) })
 
-plotColor( list(abs(subfa*subx), abs(subfa*suby), abs(subfa*subz)), vectors=list(subx, suby))
-
-
+plotColor( subDecList, vectors=list(subVecList[[1]], subVecList[[2]]) )
 ```
 
 ## Deterministic Fiber tractography
 
-A common use for DTI is fiber tractography. Here we give a simplified example in which
-we restrict the tracts to lie within the slice
+A common use for DTI is fiber tractography [@Basser2000]. Here we give a simplified example in which
+we restrict the tracts to lie within the slice. The first step is define a set of seeds
+which serve as the starting points for our tractography. Often, all points in the white
+matter are used as seed for "whole-brain tracking." Here we manually define a small set
+of seed points for illustration.
+
+```{r seeds,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+
+# indices of seed points
+seedIndices = rbind( c(61,92), c(62,92), c(63,92) )
+seedIndices = rbind( seedIndices, c(64,92), c(65,92), c(65,92) )
+seedIndices = rbind( seedIndices, c(61,93), c(62,93), c(63,93) )
+seedIndices = rbind( seedIndices, c(64,93), c(65,93), c(65,93) )
+
+# convert to physical space points
+seedPts = antsTransformIndexToPhysicalPoint(fa, seedIndices)
+plotColor( subfa, points=seedPts )
+```
+
+
+```{r tracking,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+trackFromSeed <- function(vecs, fa, seed) {
+  stepSize = 0.2
+  faThresh = 0.2
+  iPt = seed
+  pts = iPt
+  idx =  antsTransformPhysicalPointToIndex(fa, seed)
+  faValue = fa[idx[1], idx[2]]
+  ppdx = vecs[[1]][ idx[1], idx[2] ]
+  ppdy = vecs[[2]][ idx[1], idx[2] ]
+  lastVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  iVec = lastVec
+
+  while ( faValue > faThresh ) {
+    iVec = iVec / sqrt(sum(iVec*iVec))
+    if ( sum(iVec*lastVec) <  0 ) { iVec = -iVec }
+
+    iPt = iPt + stepSize*iVec
+    pts = rbind(pts, iPt)
+    idx =  antsTransformPhysicalPointToIndex(fa, iPt)
+    faValue = fa[idx[1], idx[2]]
+    lastVec = iVec
+
+    ppdx = vecs[[1]][ idx[1], idx[2] ]
+    ppdy = vecs[[2]][ idx[1], idx[2] ]
+    iVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  }
+
+  iPt = seed
+  idx =  antsTransformPhysicalPointToIndex(fa, seed)
+  faValue = fa[idx[1], idx[2]]
+  vecs = lapply( vecs, function(x){ -x })
+  ppdx = vecs[[1]][ idx[1], idx[2] ]
+  ppdy = vecs[[2]][ idx[1], idx[2] ]
+  lastVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  iVec = lastVec
+
+  while ( faValue > faThresh ) {
+    iVec = iVec / sqrt(sum(iVec*iVec))
+    if ( sum(iVec*lastVec) <  0 ) { iVec = -iVec }
+
+    iPt = iPt + stepSize*iVec
+    pts = rbind(iPt, pts)
+    idx =  antsTransformPhysicalPointToIndex(fa, iPt)
+    faValue = fa[idx[1], idx[2]]
+    lastVec = iVec
+
+    ppdx = vecs[[1]][ idx[1], idx[2] ]
+    ppdy = vecs[[2]][ idx[1], idx[2] ]
+    iVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  }
+
+  return(data.frame(x=pts[,1],y=pts[,2]))
+
+}
+
+trackx = c()
+tracky = c()
+trackid = c()
+for ( i in 1:dim(seedPts)[1] ) {
+  track = trackFromSeed(list(evecx,evecy), fa, seedPts[i,])
+  trackx = c(trackx,track$x)
+  tracky = c(tracky,track$y)
+  trackid = c(trackid, rep(i, length(track$x)))  
+}
+ldat = data.frame(x=trackx, y=tracky, id=factor(trackid))
+plotColor(subDecList, paths=ldat, points=seedPts, vectors=list(subVecList[[1]], subVecList[[2]]))
+plotColor(subfa, paths=ldat)
+
+```
+
 
 
 ## References
