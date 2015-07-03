@@ -160,8 +160,11 @@ listed in upper.tri order. This allows us to quickly calculate the eigen
 decomposition for each tensor.
 
 ```{r dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-# matrix of tensor values in brain
-mat = do.call(cbind, lapply( dtList, function(x) { x[mask>0] } ) )
+# list-based call to convert values to an array
+# mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
+
+# simplest convesion to array
+mat = as.array(dt, mask==1)
 
 # convert tensor from vector to matrix
 initTensor <- function(x) {
@@ -180,23 +183,18 @@ getFractionalAnisotropy <- function(evs) {
     }
   }
 
-# Eigen decomp for each tensor
-eigs = unlist( apply(mat, 1, function(x) { eigen( initTensor(x) ) } ) )
+# Eigen decomposition for each tensor
+eigs = unlist( apply(mat, 2, function(x) { eigen( initTensor(x) ) } ) )
 
-eval1 = as.numeric(eigs[names(eigs)=="values1"])
-eval2 = as.numeric(eigs[names(eigs)=="values2"])
-eval3 = as.numeric(eigs[names(eigs)=="values3"])
-
-eval1[eval1 < 0] = 0
-eval2[eval2 < 0] = 0
-eval3[eval3 < 0] = 0
-
-evalueMat = cbind(eval1, eval2, eval3)
+evalMat = as.numeric(eigs[names(eigs)=="values1"])
+evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values2"]))
+evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values3"]))
+evalMat[evalMat < 0 ] = 0
 
 # Create images from the eigenvalues
-eval1 = makeImage(mask, eval1)
-eval2 = makeImage(mask, eval2)
-eval3 = makeImage(mask, eval3)
+eval1 = makeImage(mask, evalMat[,1])
+eval2 = makeImage(mask, evalMat[,2])
+eval3 = makeImage(mask, evalMat[,3])
 
 plotColor( list(eval1, eval2, eval3))
 ```
@@ -205,7 +203,7 @@ The Fractional Anisotropy (FA) is typically used to measure how directionally sp
 the diffusion of water is within a voxel. This values is plotted below
 
 ```{r dti4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-faValues = apply(evalueMat, 1, getFractionalAnisotropy )
+faValues = apply(evalMat, 1, getFractionalAnisotropy )
 faValues[faValues < 0] = 0
 fa = makeImage(mask, faValues)
 plotColor( fa )
