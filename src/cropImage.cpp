@@ -338,10 +338,13 @@ RcppExport SEXP extractSlice( SEXP r_in_image1,
     in_image1.slot( "pixeltype" ) ) ;
   unsigned int dimension = Rcpp::as< unsigned int >(
     in_image1.slot( "dimension" ) ) ;
+  unsigned int components = Rcpp::as< unsigned int>(
+    in_image1.slot( "components") );
   // make new out image, result of cropping
   Rcpp::S4 out_image( std::string( "antsImage" ) ) ;
   out_image.slot( "pixeltype" ) = in_pixeltype ;
   out_image.slot( "dimension" ) = dimension-1 ;
+  out_image.slot( "components" ) = components;
 
   if ( dimension == 3 )
     {
