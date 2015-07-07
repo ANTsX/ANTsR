@@ -17,8 +17,8 @@ if [[ $TRAVIS -eq true ]] ; then
 fi
 cd ./src
 antsgit=https://github.com/stnava/ANTs.git
-antstag=839b8b6012acd85f3a73a03dc703f4e17cfefc86 # bug fix for -v
 antstag=aa0626a1eec2d2f309cf8837117bd30f99f7527a # power it minus curvatur sparseness
+antstag=d28a2b88349ee47d0dc6fa1babb92dde01274ad3 # physical space bug fix
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi
