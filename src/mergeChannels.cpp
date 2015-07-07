@@ -53,7 +53,6 @@ RcppExport SEXP mergeChannels( SEXP r_imageList )
 try
 {
   Rcpp::List imageList( r_imageList );
-  unsigned int nImages = imageList.size();
 
   SEXP r_antsimage = imageList[0];
   Rcpp::S4 antsimage( r_antsimage );
