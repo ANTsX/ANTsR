@@ -13,9 +13,12 @@
 \alias{exp.antsImage}
 \alias{log.antsImage}
 \alias{mean,antsImage-method}
+\alias{sum,antsImage-method}
 \title{arith.antsImage}
 \usage{
 \S4method{mean}{antsImage}(x, mask = logical())
+
+\S4method{sum}{antsImage}(x, mask = logical())
 
 \method{+}{antsImage}(x, y)
 
