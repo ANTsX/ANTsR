@@ -97,6 +97,19 @@ setMethod(f = "mean", signature(x = "antsImage"), definition = function(x, mask 
 
 })
 
+#' @rdname antsImageArith
+setMethod(f = "sum", signature(x = "antsImage"), definition = function(x, mask = logical()) {
+  if (typeof(mask) != "logical") {
+    stop("'mask' provided is not of type 'logical'")
+  }
+
+  if (length(mask) == 0) {
+    return(sum(as.array(x)))
+  } else {
+    return(sum(as.array(x)[mask]))
+  }
+})
+
 #' @describeIn antsImage
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   val <- .Call("antsImage_isna", x, PACKAGE = "ANTsR")
