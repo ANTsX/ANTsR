@@ -122,5 +122,4 @@ plotBasicNetwork <- function(
     }
   }
   rgl::segments3d(mesh$vertices[edgelocations, ], col = rep(edgecolors, each = 2), lwd = lwd)
-  return(1)
 }
