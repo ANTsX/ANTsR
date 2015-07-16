@@ -4,7 +4,7 @@
 \alias{getCentroids}
 \title{Convert an image to the geometric centroids of its signal}
 \usage{
-getCentroids(img, clustparam = 250)
+getCentroids(img, clustparam = 0)
 }
 \arguments{
 \item{img}{the image to reduce to centroids - presumably some kind of

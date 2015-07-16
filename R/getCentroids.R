@@ -15,7 +15,7 @@
 #' cents<-getCentroids( img  )
 #'
 #' @export getCentroids
-getCentroids <- function(img, clustparam = 250 ) {
+getCentroids <- function(img, clustparam = 0 ) {
   if (nargs() == 0 | missing(img)) {
     print(args(getCentroids))
     return(1)
@@ -24,7 +24,10 @@ getCentroids <- function(img, clustparam = 250 ) {
     print("  class(img)[[1]] != antsImage ")
   }
   imagedim <- img@dimension
-  mypoints <- labelClusters( img, clustparam, maxThresh=Inf )
+  if ( clustparam > 0 )
+    mypoints <- labelClusters( img, clustparam, maxThresh=Inf )
+  if ( clustparam == 0 )
+    mypoints <- antsImageClone( img  )
   mypoints = data.frame( labelStats( mypoints, mypoints ) )
   mypoints = mypoints[-1,] # remove 0 label
   x = mypoints$x
