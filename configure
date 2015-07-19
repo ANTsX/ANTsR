@@ -19,6 +19,7 @@ cd ./src
 antsgit=https://github.com/stnava/ANTs.git
 antstag=aa0626a1eec2d2f309cf8837117bd30f99f7527a # power it minus curvatur sparseness
 antstag=d28a2b88349ee47d0dc6fa1babb92dde01274ad3 # physical space bug fix
+antstag=fd89a011b2394af4dc7035e0e9e552cf6612f956 # label overlap measures fix
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi
