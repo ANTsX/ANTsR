@@ -111,6 +111,93 @@ sparseDecom2 <- function(
   ell1 = 0.05,
   priorWeight = 0,
   verbose = 0  ) {
+  # helper function allows easier R-based permutation
+  sccaner=.sparseDecom2helper(
+    inmatrix,
+    inmask,
+    sparseness,
+    nvecs,
+    its,
+    cthresh,
+    statdir,
+    uselong,
+    z,
+    smooth,
+    robust,
+    mycoption,
+    initializationList,
+    initializationList2,
+    ell1,
+    priorWeight,
+    verbose
+    )
+  ccasummary = data.frame(
+    corrs = sccaner$corrs,
+    pvalues = rep(NA,nvecs)
+    )
+  if ( perms >  0 )
+  {
+  ccasummary$pvalues = rep(0 , nvecs )
+  for ( permer in 1:perms )
+  {
+  permmatrix = list(
+    inmatrix[[1]][ sample( 1:nrow(inmatrix[[1]]) ) ,  ],
+    inmatrix[[2]][ sample( 1:nrow(inmatrix[[2]]) ) ,  ]
+    )
+  sccanerp=.sparseDecom2helper(
+    permmatrix,
+    inmask,
+    sparseness,
+    nvecs,
+    its,
+    cthresh,
+    statdir,
+    uselong,
+    z,
+    smooth,
+    robust,
+    mycoption,
+    initializationList,
+    initializationList2,
+    ell1,
+    priorWeight,
+    verbose
+    )
+    counter = as.numeric( abs(ccasummary$corrs) < abs(sccanerp$corrs)   )
+    ccasummary$pvalues = ccasummary$pvalues + counter
+    }
+    ccasummary$pvalues = ccasummary$pvalues / perms
+  }
+  return(
+    list(
+      projections = sccaner$projections,
+      projections2 = sccaner$projections2,
+      eig1 = sccaner$eig1,
+      eig2 = sccaner$eig2,
+      ccasummary = ccasummary
+      )
+    )
+}
+
+
+.sparseDecom2helper <- function(
+  inmatrix,
+  inmask,
+  sparseness,
+  nvecs,
+  its,
+  cthresh,
+  statdir,
+  uselong,
+  z,
+  smooth,
+  robust,
+  mycoption,
+  initializationList,
+  initializationList2,
+  ell1,
+  priorWeight,
+  verbose) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
@@ -163,7 +250,7 @@ sparseDecom2 <- function(
   } else mfn[2] <- NA
   args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",", mfn[1],
     ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1",
-    ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms, "--QClusterThresh",
+    ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", 0, "--QClusterThresh",
     cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth,
     "-r", robust, "-c", mycoption, "--prior-weight", priorWeight,"-v", verbose)
 
@@ -182,7 +269,7 @@ sparseDecom2 <- function(
     close(fileConn)
     args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",",
       mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""),
-      "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", perms,
+      "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", 0,
       "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong,
       "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1],
       "--initialization", initlistfn, "--prior-weight", priorWeight,"-v", verbose)
@@ -202,7 +289,7 @@ sparseDecom2 <- function(
       args <- list("--scca", paste(sccaname, matname[1], ",", matname[2], ",",
         mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]",
         sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1],
-        "-p", perms, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn,
+        "-p", 0, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn,
         "-g", uselong, "-z", z, "-s", smooth, "-r", robust, "-c", mycoption,
         "--mask", mfn[1], "--initialization", initlistfn, "--mask2", mfn[2],
         "--initialization2", initlistfn2, "--prior-weight", priorWeight,
@@ -221,6 +308,7 @@ sparseDecom2 <- function(
       fnll <- lappend(fnll, img)
     }
     fnl <- fnll
+    projmat1=t( imageListToMatrix( fnl, inmask[[1]] ) )
   }
   mydecomp2 <- read.csv(decomp[2])
   if (!is.na(inmask[[2]])) {
@@ -233,24 +321,31 @@ sparseDecom2 <- function(
       fnll2 <- lappend(fnll2, img)
     }
     fnl2 <- fnll2
+    projmat2=t( imageListToMatrix( fnl2, inmask[[2]] ) )
   }
   if (is.na(inmask[[1]])) {
     glb <- paste("scca*_Variate_View1vec.csv", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)
     fnl <- read.csv(fnl)
+    projmat1 = data.matrix( fnl )
   }
   if (is.na(inmask[[2]])) {
     glb <- paste("scca*_Variate_View2vec.csv", sep = "")
     fnl2 <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
       recursive = T)
     fnl2 <- read.csv(fnl2)
+    projmat2 = data.matrix( fnl2 )
   }
-  pvfn <- paste(statdir, "scca_summary.csv", sep = "")
-  ccasummary <- NA
-  if (file.exists(pvfn)) {
-    ccasummary <- read.csv(pvfn)
-  }
-  return(list(projections = mydecomp, projections2 = mydecomp2, eig1 = fnl, eig2 = fnl2,
-    ccasummary = ccasummary))
+  return(
+    list(
+        projections = mydecomp,
+        projections2 = mydecomp2,
+        eig1 = fnl,
+        eig2 = fnl2,
+        corrs = diag(
+          cor( inmatrix[[1]] %*% projmat1 ,
+               inmatrix[[2]] %*% projmat2 )  )
+        )
+      )
 }
