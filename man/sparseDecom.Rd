@@ -4,10 +4,10 @@
 \alias{sparseDecom}
 \title{Convenience wrapper for eigenanatomy decomposition.}
 \usage{
-sparseDecom(inmatrix = NA, inmask = 0, sparseness = 0.1, nvecs = 10,
+sparseDecom(inmatrix = NA, inmask = NA, sparseness = 0.1, nvecs = 10,
   its = 5, cthresh = 50, statdir = NA, z = 0, smooth = 0,
   initializationList = list(), mycoption = 0, robust = 0, ell1 = 1,
-  getSmall = 0, verbose = 0, powerit = 0)
+  getSmall = 0, verbose = 0, powerit = 0, priorWeight = 0)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,
@@ -43,6 +43,8 @@ of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
 \item{verbose}{activates verbose output}
 
 \item{powerit}{alternative power iteration implementation, faster}
+
+\item{priorWeight}{scalar weight}
 }
 \value{
 outputs a decomposition of a population or time series matrix
@@ -85,7 +87,8 @@ nfolds<-6
 train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 train<-( train < 4 )
 lrmat<-lowrankRowMatrix( as.matrix( snps[train,] ) ,  50 )
-snpd<-sparseDecom( lrmat, nvecs=20 , sparseness=( 0.001), z=-1 )
+lrmat=scale(lrmat)
+snpd<-sparseDecom( lrmat-min(lrmat), nvecs=20 , sparseness=( 0.001), z=-1 )
 projmat<-as.matrix( snpd$eig )
 snpse<-as.matrix( snps[train, ]  ) \%*\% projmat
 traindf<-data.frame( bmi=numericalpheno[train,3] , snpse=snpse)

@@ -22,6 +22,7 @@
 #' @param getSmall try to get smallest evecs (bool)
 #' @param verbose activates verbose output
 #' @param powerit alternative power iteration implementation, faster
+#' @param priorWeight scalar weight
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples
@@ -58,7 +59,8 @@
 #' train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
 #' train<-( train < 4 )
 #' lrmat<-lowrankRowMatrix( as.matrix( snps[train,] ) ,  50 )
-#' snpd<-sparseDecom( lrmat, nvecs=20 , sparseness=( 0.001), z=-1 )
+#' lrmat=scale(lrmat)
+#' snpd<-sparseDecom( lrmat-min(lrmat), nvecs=20 , sparseness=( 0.001), z=-1 )
 #' projmat<-as.matrix( snpd$eig )
 #' snpse<-as.matrix( snps[train, ]  ) %*% projmat
 #' traindf<-data.frame( bmi=numericalpheno[train,3] , snpse=snpse)
@@ -71,107 +73,40 @@
 #' }
 #' }
 #' @export sparseDecom
-sparseDecom <- function(inmatrix = NA, inmask = 0,
+sparseDecom <- function(inmatrix = NA, inmask = NA,
   sparseness = 0.1,
   nvecs = 10,
   its = 5, cthresh = 50,
   statdir = NA, z = 0, smooth = 0, initializationList = list(),
   mycoption = 0, robust = 0, ell1 = 1, getSmall = 0, verbose=0,
-  powerit=0 ) {
+  powerit=0, priorWeight=0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
     return(0)
   }
-  if (is.na(statdir))
-    statdir <- paste(tempdir(), "/", sep = "")
-  outfn <- paste(statdir, "spca.nii.gz", sep = "")
-  decomp <- paste(statdir, "spcaprojectionsView1vec.csv", sep = "")
-  matname <- paste(statdir, "spcamatrix.mha", sep = "")
-  antsImageWrite( as.antsImage(inmatrix), matname )
-  if ( ! file.exists( matname) ) stop("sparseDecom cannot write image")
-  mfn <- NA
-  maskdim <- 0
-  if (class(inmask)[[1]] == "antsImage") {
-    if ( sum( inmask > 0.5 ) != ncol(inmatrix) )
-      stop("dimensions of mask and matrix do not match")
-  }
-  if (class(inmask)[[1]][1] == "antsImage") {
-    maskdim <- inmask@dimension
-    mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
-    antsImageWrite(inmask, mfn)
-    if ( ! file.exists( mfn ) ) stop("sparseDecom cannot write mask")
-  }
-  sccaname <- "recon["
-  if ( powerit ) sccaname <- "derka["
-  if (maskdim == 4)
-    sccaname <- "recon4d["
-  args <- list("--svd",
-    paste(sccaname, matname, ",", mfn, ",", sparseness, "]",sep = ""),
-    "--l1", ell1,
-    "-i", its,
-    "--PClusterThresh", cthresh,
-    "-n", nvecs,
-    "-o", outfn,
-    "-z", z,
-    "-s", smooth,
-    "-c", mycoption,
-    "--mask", inmask,
-    "-r", robust, "--get-small", getSmall,"-v",verbose )
-  if (length(initializationList) > 0) {
-    ct <- 1
-    initfns <- c()
-    for (img in initializationList) {
-      initfn <- paste(statdir, "init", ct, ".nii.gz", sep = "")
-      initfns <- c(initfns, initfn)
-      antsImageWrite(img, initfn)
-      ct <- ct + 1
-    }
-    initlistfn <- paste(statdir, "init.txt", sep = "")
-    fileConn <- file(initlistfn)
-    writeLines(initfns, fileConn)
-    close(fileConn)
-    args <- list("--svd",
-    paste(sccaname, matname, ",", mfn, ",", sparseness,"]", sep = ""),
-    "--l1", 1,
-    "-i", its,
-    "--PClusterThresh", cthresh,
-    "-n",  nvecs,
-    "-o", outfn,
-    "-z", z,
-    "-s", smooth,
-    "-c", mycoption,
-    "-r", robust,
-    "--mask", mfn,
-    "--initialization", initlistfn,
-    "--get-small", getSmall,"-v",verbose)
-    print(initlistfn)
-  }
+  if (class(inmask)[[1]] != "antsImage") # create a false mask that we dont use
+    if ( is.na(inmask) ) inmask = new("antsImage", "float", 3)
   time1 <- (Sys.time())
-  .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
-  time2 <- (Sys.time())
-  if ( ! file.exists(decomp) ) stop("failure - output not written")
-  mydecomp <- read.csv(decomp)
-  glb <- paste("spca_Umatrix_View1vec.csv", sep = "")
-  fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
-  if ( powerit == 0 ) fnu <- read.csv(fnu) else fnu=NA
-  if (class(inmask)[[1]][1] == "antsImage") {
-    glb <- paste("spca*View1vec*.nii.gz", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
-      recursive = T)[1:nvecs]
-    fnll <- list()
-    for (i in 1:length(fnl)) {
-      img <- antsImageRead(fnl[i], length(dim(inmask)))
-      fnll <- lappend(fnll, img)
+  if ( robust > 0 )
+    {
+    outval = .Call( "eigenanatomyCpp",
+        robustMatrixTransform(inmatrix),
+        inmask, sparseness, nvecs, its, cthresh, z, smooth,
+        initializationList, mycoption, ell1, verbose, powerit,
+        priorWeight,
+        PACKAGE="ANTsR" )
+    } else {
+    outval = .Call( "eigenanatomyCpp",
+        inmatrix,
+        inmask, sparseness, nvecs, its, cthresh, z, smooth,
+        initializationList, mycoption, ell1, verbose, powerit,
+        priorWeight,
+        PACKAGE="ANTsR" )
     }
-    fnl <- fnll
-  }
-  if (class(inmask)[[1]][1] != "antsImage") {
-    glb <- paste("spca*_Variate_View1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
-      recursive = T)
-    fnl <- read.csv(fnl)
-  }
-  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu,
-    computationtime = (time2 - time1)))
+  time2 <- (Sys.time())
+  outval = lappend( outval,  (time2 - time1) )
+  names(outval)[length(outval)]='computationtime'
+  return( outval )
+#  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu,
 }

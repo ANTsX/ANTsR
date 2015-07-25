@@ -105,15 +105,22 @@ sparseDecom2 <- function(
   z = 0,
   smooth = 0,
   robust = 0,
-  mycoption = 0,
+  mycoption = 1,
   initializationList = list(),
   initializationList2 = list(),
   ell1 = 0.05,
   priorWeight = 0,
   verbose = 0  ) {
+  if ( robust > 0 )
+    {
+    inputMatrices = list(
+      robustMatrixTransform( inmatrix[[1]] ),
+      robustMatrixTransform( inmatrix[[2]] )
+    )
+    } else inputMatrices = inmatrix
   # helper function allows easier R-based permutation
   sccaner=.sparseDecom2helper(
-    inmatrix,
+    inputMatrices,
     inmask,
     sparseness,
     nvecs,
@@ -141,8 +148,8 @@ sparseDecom2 <- function(
   for ( permer in 1:perms )
   {
   permmatrix = list(
-    inmatrix[[1]][ sample( 1:nrow(inmatrix[[1]]) ) ,  ],
-    inmatrix[[2]][ sample( 1:nrow(inmatrix[[2]]) ) ,  ]
+    inputMatrices[[1]][ sample( 1:nrow(inputMatrices[[1]]) ) ,  ],
+    inputMatrices[[2]][ sample( 1:nrow(inputMatrices[[2]]) ) ,  ]
     )
   sccanerp=.sparseDecom2helper(
     permmatrix,
@@ -181,7 +188,7 @@ sparseDecom2 <- function(
 
 
 .sparseDecom2helper <- function(
-  inmatrix,
+  inputMatrices,
   inmask,
   sparseness,
   nvecs,
@@ -199,8 +206,8 @@ sparseDecom2 <- function(
   priorWeight,
   verbose) {
   numargs <- nargs()
-  if (numargs < 1 | missing(inmatrix)) {
-    cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
+  if (numargs < 1 | missing(inputMatrices)) {
+    cat(" sparseDecom( inputMatrices=NA,  inmask=NA , sparseness=c(0.01,0.01) , nvecs=50 , cthresh=c(250,250),  its=5  ) \n")
     cat(" each input should be a list with 2 entries e.g. sparseness=c(0.01,0.02) \n")
     return(0)
   }
@@ -218,11 +225,11 @@ sparseDecom2 <- function(
   }
   post <- c(1, 2)
   if (class(inmask[[1]])[[1]] == "antsImage") {
-    if ( sum( inmask[[1]] > 0.5 ) != ncol(inmatrix[[1]]) )
+    if ( sum( inmask[[1]] > 0.5 ) != ncol(inputMatrices[[1]]) )
       stop("dimensions of view 1 mask and view 1 matrix do not match")
   }
   if (class(inmask[[2]])[[1]] == "antsImage") {
-    if ( sum( inmask[[2]] > 0.5 ) != ncol(inmatrix[[2]]) )
+    if ( sum( inmask[[2]] > 0.5 ) != ncol(inputMatrices[[2]]) )
       stop("dimensions of view 2 mask and view 2 matrix do not match")
   }
   if (is.na(statdir))
@@ -231,8 +238,8 @@ sparseDecom2 <- function(
   outfn <- paste(statdir, "scca.nii.gz", sep = "")
   decomp <- paste(statdir, "sccaprojectionsView", post, "vec.csv", sep = "")
   matname <- paste(statdir, "sccamatrix", post, ".mha", sep = "")
-  antsImageWrite(as.antsImage(inmatrix[[1]]), matname[1])
-  antsImageWrite(as.antsImage(inmatrix[[2]]), matname[2])
+  antsImageWrite(as.antsImage(inputMatrices[[1]]), matname[1])
+  antsImageWrite(as.antsImage(inputMatrices[[2]]), matname[2])
   sccaname <- "two-view["
   if (class(inmask[[1]])[[1]] == "antsImage") {
     m1 <- inmask[[1]]
@@ -252,7 +259,7 @@ sparseDecom2 <- function(
     ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""), "--l1",
     ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", 0, "--QClusterThresh",
     cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong, "-z", z, "-s", smooth,
-    "-r", robust, "-c", mycoption, "--prior-weight", priorWeight,"-v", verbose)
+    "-r", 0, "-c", mycoption, "--prior-weight", priorWeight,"-v", verbose)
 
   if (length(initializationList) > 0) {
     ct <- 1
@@ -271,7 +278,7 @@ sparseDecom2 <- function(
       mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]", sep = ""),
       "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1], "-p", 0,
       "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn, "-g", uselong,
-      "-z", z, "-s", smooth, "-r", robust, "-c", mycoption, "--mask", mfn[1],
+      "-z", z, "-s", smooth, "-r", 0, "-c", mycoption, "--mask", mfn[1],
       "--initialization", initlistfn, "--prior-weight", priorWeight,"-v", verbose)
     if (length(initializationList2) > 0) {
       ct <- 1
@@ -290,7 +297,7 @@ sparseDecom2 <- function(
         mfn[1], ",", mfn[2], ",", sparseness[1], ",", sparseness[2], "]",
         sep = ""), "--l1", ell1, "-i", its, "--PClusterThresh", cthresh[1],
         "-p", 0, "--QClusterThresh", cthresh[2], "-n", nvecs, "-o", outfn,
-        "-g", uselong, "-z", z, "-s", smooth, "-r", robust, "-c", mycoption,
+        "-g", uselong, "-z", z, "-s", smooth, "-r", 0, "-c", mycoption,
         "--mask", mfn[1], "--initialization", initlistfn, "--mask2", mfn[2],
         "--initialization2", initlistfn2, "--prior-weight", priorWeight,
         "-v", verbose)
@@ -344,8 +351,8 @@ sparseDecom2 <- function(
         eig1 = fnl,
         eig2 = fnl2,
         corrs = diag(
-          cor( inmatrix[[1]] %*% projmat1 ,
-               inmatrix[[2]] %*% projmat2 )  )
+          cor( inputMatrices[[1]] %*% projmat1 ,
+               inputMatrices[[2]] %*% projmat2 ) )
         )
       )
 }
