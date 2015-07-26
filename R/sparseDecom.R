@@ -104,6 +104,11 @@
 #'   sparseness=0.0, smooth=0.5, verbose=1,
 #'   initializationList=initlist, cthresh=25,
 #'   nvecs=3, priorWeight=0.5 )
+#' ee=matrixToImages( eanat$eigenanatomyimages, refmask )
+#' eseg=eigSeg(  refmask, ee )
+#' priormat=imageListToMatrix( initlist, refmask )
+#' cor( t(eanat$eigenanatomyimages), t(priormat) )
+#' plot( ref, eseg )
 #' }
 #' @export sparseDecom
 sparseDecom <- function(inmatrix = NA, inmask = NA,
