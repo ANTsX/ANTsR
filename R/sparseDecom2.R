@@ -110,7 +110,13 @@ sparseDecom2 <- function(
   initializationList2 = list(),
   ell1 = 0.05,
   priorWeight = 0,
-  verbose = 0  ) {
+  verbose = FALSE  ) {
+  if (class(inmask[[1]])[[1]] != "antsImage")
+     maskx = new("antsImage", "float", 3) else maskx = antsImageClone( inmask[[1]] )
+  if (class(inmask[[2]])[[1]] != "antsImage")
+     masky = new("antsImage", "float", 3) else masky = antsImageClone( inmask[[2]] )
+  inmask = c( maskx, masky )
+  verbose = as.numeric( verbose )
   if ( robust > 0 )
     {
     inputMatrices = list(
@@ -119,7 +125,7 @@ sparseDecom2 <- function(
     )
     } else inputMatrices = inmatrix
   # helper function allows easier R-based permutation
-  sccaner=.sparseDecom2helper(
+  sccaner=.sparseDecom2helper2(
     inputMatrices,
     inmask,
     sparseness,
@@ -151,7 +157,7 @@ sparseDecom2 <- function(
     inputMatrices[[1]][ sample( 1:nrow(inputMatrices[[1]]) ) ,  ],
     inputMatrices[[2]][ sample( 1:nrow(inputMatrices[[2]]) ) ,  ]
     )
-  sccanerp=.sparseDecom2helper(
+  sccanerp=.sparseDecom2helper2(
     permmatrix,
     inmask,
     sparseness,
@@ -186,6 +192,57 @@ sparseDecom2 <- function(
     )
 }
 
+
+.sparseDecom2helper2 <- function(
+  inputMatrices,
+  inmask,
+  sparseness,
+  nvecs,
+  its,
+  cthresh,
+  statdir,
+  uselong,
+  z,
+  smooth,
+  robust,
+  mycoption,
+  initializationList,
+  initializationList2,
+  ell1,
+  priorWeight,
+  verbose) {
+  outval = .Call( "sccanCpp",
+    inputMatrices[[1]],
+    inputMatrices[[2]],
+    inmask[[1]],
+    inmask[[2]],
+    sparseness[1],
+    sparseness[2],
+    nvecs,
+    its,
+    cthresh[1],
+    cthresh[2],
+    z,
+    smooth,
+    initializationList,
+    initializationList2,
+    mycoption,
+    ell1,
+    verbose,
+    priorWeight,
+    PACKAGE="ANTsR" )
+  p1 = inputMatrices[[1]] %*% t(outval$eig1)
+  p2 = inputMatrices[[2]] %*% t(outval$eig2)
+  return(
+      list(
+        projections = p1,
+        projections2 = p2,
+        eig1 = t(outval$eig1),
+        eig2 = t(outval$eig2),
+        corrs = diag( cor( p1 , p2  ) )
+        )
+      )
+}
 
 .sparseDecom2helper <- function(
   inputMatrices,

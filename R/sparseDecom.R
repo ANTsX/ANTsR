@@ -116,13 +116,14 @@ sparseDecom <- function(inmatrix = NA, inmask = NA,
   nvecs = 10,
   its = 5, cthresh = 50,
   statdir = NA, z = 0, smooth = 0, initializationList = list(),
-  mycoption = 0, robust = 0, ell1 = 1, getSmall = 0, verbose=0,
+  mycoption = 0, robust = 0, ell1 = 1, getSmall = 0, verbose=FALSE,
   powerit=0, priorWeight=0 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     cat(" sparseDecom( inmatrix=NA,  inmask=NA , sparseness=0.01 , nvecs=50 , its=5 , cthresh=250 ) \n")
     return(0)
   }
+  verbose = as.numeric( verbose )
   if (class(inmask)[[1]] != "antsImage") # create a false mask that we dont use
     if ( is.na(inmask) ) inmask = new("antsImage", "float", 3)
   time1 <- (Sys.time())
