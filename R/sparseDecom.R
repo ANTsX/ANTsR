@@ -22,7 +22,7 @@
 #' @param getSmall try to get smallest evecs (bool)
 #' @param verbose activates verbose output
 #' @param powerit alternative power iteration implementation, faster
-#' @param priorWeight scalar weight
+#' @param priorWeight scalar weight typically in range zero to two
 #' @return outputs a decomposition of a population or time series matrix
 #' @author Avants BB
 #' @examples

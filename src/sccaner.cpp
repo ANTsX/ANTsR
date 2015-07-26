@@ -123,6 +123,7 @@ SEXP eigenanatomyCppHelper(
         PixelType pix = it.Get();
         if ( pix >= 0.5 )
           {
+          pix = init->GetPixel( it.GetIndex() );
           priorROIMat( i, ct ) = pix;
           ct++;
           }
@@ -130,6 +131,7 @@ SEXP eigenanatomyCppHelper(
         }
       }
     sccanobj->SetMatrixPriorROI( priorROIMat );
+    nvecs = nImages;
     }
   sccanobj->SetPriorWeight( priorWeight );
   sccanobj->SetLambda( priorWeight );
@@ -212,13 +214,13 @@ SEXP eigenanatomyCppHelper(
   // solutions should be much smaller so may not be a big deal to copy
   // FIXME - should not copy, should map memory
   vMatrix solV = sccanobj->GetVariatesP();
-  NumericMatrix eanatMat( solV.rows(), solV.cols() );
+  NumericMatrix eanatMat( solV.cols(), solV.rows() );
   unsigned long rows = solV.rows();
   for( unsigned long c = 0; c < solV.cols(); c++ )
     {
     for( unsigned int r = 0; r < rows; r++ )
       {
-      eanatMat( r, c) = solV( r, c);
+      eanatMat( c, r ) = solV( r, c );
       }
     }
   vMatrix solU = sccanobj->GetMatrixU();
@@ -237,7 +239,6 @@ SEXP eigenanatomyCppHelper(
         Rcpp::Named("umatrix") = eanatMatU,
         Rcpp::Named("varex") = truecorr )
       );
-// return( wrap(NA_REAL) );
 }
 
 RcppExport SEXP eigenanatomyCpp(
