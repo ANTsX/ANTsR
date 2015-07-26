@@ -70,7 +70,40 @@
 #' preddf<-predict(myrf, newdata=testdf )
 #' cor.test(preddf, testdf$bmi )
 #' plot(preddf, testdf$bmi )
+#' } # check for packages
+#' # prior-based example
+#' set.seed(123)
+#' ref<-antsImageRead( getANTsRData("r16"))
+#' ref<-iMath(ref,"Normalize")
+#' mi<-antsImageRead( getANTsRData("r27"))
+#' mi2<-antsImageRead( getANTsRData("r30"))
+#' mi3<-antsImageRead( getANTsRData("r62"))
+#' mi4<-antsImageRead( getANTsRData("r64"))
+#' mi5<-antsImageRead( getANTsRData("r85"))
+#' refmask<-getMask(ref)
+#' refmask<-iMath(refmask,"ME",2) # just to speed things up
+#' ilist<-list(mi,mi2,mi3,mi4,mi5)
+#' for ( i in 1:length(ilist) )
+#' {
+#' ilist[[i]]<-iMath(ilist[[i]],"Normalize")
+#' mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
+#'   typeofTransform = c("Affine") )
+#' mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
+#'   transformlist=mytx$fwdtransforms)
+#' ilist[[i]]=mywarpedimage
 #' }
+#' mat=imageListToMatrix( ilist , refmask )
+#' kmseg=kmeansSegmentation( ref, 3, refmask )
+#' initlist=list()
+#' for ( k in 1:3 )
+#'  initlist[[k]]=
+#'    thresholdImage(kmseg$probabilityimages[[k]],0.1,Inf) *
+#'    kmseg$probabilityimages[[k]]
+#' eanat<-sparseDecom( mat,
+#'   inmask=refmask, ell1=0.1,
+#'   sparseness=0.0, smooth=0.5, verbose=1,
+#'   initializationList=initlist, cthresh=25,
+#'   nvecs=3, priorWeight=0.5 )
 #' }
 #' @export sparseDecom
 sparseDecom <- function(inmatrix = NA, inmask = NA,
