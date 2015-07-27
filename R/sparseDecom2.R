@@ -184,6 +184,19 @@ sparseDecom2 <- function(
     }
     ccasummary$pvalues = ccasummary$pvalues / perms
   }
+  mynames = paste(0:(nvecs-1),sep='')
+  if ( length(mynames) <= 10 ) mynames = paste( "00", mynames, sep='')
+  if ( length(mynames) >10 ) {
+    mynames[1:10] = paste( "00", mynames[1:10], sep='')
+    tt = nvecs
+    if ( tt > 99 ) tt = 99
+    mynames[11:tt] = paste( "0", mynames[11:tt], sep='')
+  }
+  mynames=paste("Variate",mynames,sep='')
+  colnames( sccaner$eig1 ) = mynames[1:nvecs]
+  colnames( sccaner$eig2 ) = mynames[1:nvecs]
+  colnames( sccaner$projections ) = mynames[1:nvecs]
+  colnames( sccaner$projections2 ) = mynames[1:nvecs]
   return(
     list(
       projections = sccaner$projections,
