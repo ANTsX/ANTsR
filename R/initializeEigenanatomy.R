@@ -26,7 +26,7 @@
 #'   initializationList=initdf2$initlist, cthresh=0,
 #'   nvecs=length(initdf2$initlist) )
 #' # now a regression
-#' eanatMatrix<-imageListToMatrix(  eanat$eigenanatomyimages, initdf$mask )
+#' eanatMatrix<-eanat$eigenanatomyimages
 #' # 'averages' loosely speaking anyway
 #' myEigenanatomyRegionAverages<-dmat %*% t( eanatMatrix )
 #' dependentvariable<-rnorm( nrow(dmat) )

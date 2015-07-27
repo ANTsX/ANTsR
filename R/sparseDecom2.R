@@ -111,10 +111,13 @@ sparseDecom2 <- function(
   ell1 = 0.05,
   priorWeight = 0,
   verbose = FALSE  ) {
+  idim=3
+  if (class(inmask[[1]])[[1]] == "antsImage" ) idim=inmask[[1]]@dimension
+  if (class(inmask[[2]])[[1]] == "antsImage" ) idim=inmask[[2]]@dimension
   if (class(inmask[[1]])[[1]] != "antsImage")
-     maskx = new("antsImage", "float", 3) else maskx = antsImageClone( inmask[[1]] )
+     maskx = new("antsImage", "float",idim) else maskx = antsImageClone( inmask[[1]] )
   if (class(inmask[[2]])[[1]] != "antsImage")
-     masky = new("antsImage", "float", 3) else masky = antsImageClone( inmask[[2]] )
+     masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
   inmask = c( maskx, masky )
   verbose = as.numeric( verbose )
   if ( robust > 0 )
