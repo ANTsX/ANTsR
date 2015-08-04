@@ -38,7 +38,8 @@ kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
 # something similar may be done with images
 mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
 mydecom<-sparseDecom( mat, inmask=mask )
-kki<-joinEigenanatomy( mat, mask=mask, mydecom$eigenanatomyimages , 0.1 )
+eanatimages = matrixToImages( mydecom$eigenanatomyimages, mask )
+kki<-joinEigenanatomy( mat, mask=mask, eanatimages , 0.1 )
 if ( usePkg("igraph") ) {
   mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist ,
     sparseness=0, nvecs=length(kki$fusedlist) )
