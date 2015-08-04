@@ -16,12 +16,17 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
 library(ggplot2)
 library(grid)
+
+if("parallel" %in% rownames(installed.packages()) == TRUE) {
+  library(parallel)
+}  
+
 ```
 
 ## Overview
 This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR)
-may be used to work with multihchannel images, such as rgb (i.e. color) data. This
-is still an extremely new feature and much of ANTsR does not support this image type.
+may be used to work with multi channel images, such as rgb (i.e. color) data. This
+is still an extremely new feature and much of ANTsR does not yet support this image type.
 Examples will be added to this document as new functionality is implemented.
 
 ## Basics
@@ -78,8 +83,6 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
     g = g + scale_y_reverse( lim=c(y2,y1) )  
    }
 
-
-
   if ( !is.null(points) ) {
     pdat = data.frame( x=points[,1], y=points[,2], id=factor(1:dim(points)[1]) )
     g = g + geom_point( data=pdat, aes(x=x, y=y, colour=id ))
@@ -113,15 +116,14 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
 # Read in and display header info
 img = antsImageRead( getANTsRData("decslice"))
 img
+img[64,64]
 
 # Convert to list of scalar images
 iList = splitChannels(img)
 plotColor(iList)
 ```
 
-The `lapply` function provides a convenient way to process all channels. Here it
-is worth mentioning that ANTsR is not yet compatible with `mclapply` as provided
-in the "parallel" package. It's something we will be looking into in the future.
+The `lapply` function provides a convenient way to process all channels.
 
 ```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 sList = lapply( iList, function(x) { smoothImage(x, 1.5) } )
@@ -132,6 +134,17 @@ simg = mergeChannels(sList)
 
 # Write to file
 # antsImageWrite(simg, "smoothslice.nii.gz")
+```
+
+It is worth mentioning that ANTsR is not yet compatible with `mclapply` as provided
+in the "parallel" package. It's something we will be looking into in the future. The
+main problem has to do with allocating new images, some functions that only access
+existing data will work, such as the following command:
+```{r mclapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+if("parallel" %in% rownames(installed.packages()) == TRUE) {
+  iMeans = mclapply( iList, function(x) mean (x) )
+}
+iMeans
 ```
 
 ## Working with diffusion tensor images
