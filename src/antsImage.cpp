@@ -1540,7 +1540,7 @@ SEXP antsImage_GetPixels( SEXP r_antsimage, SEXP r_indices )
 	    }
 
     //Rcpp::NumericVector vector_r( vector_r_size );
-    Rcpp::NumericMatrix values( nValues, nComponents );
+    Rcpp::NumericMatrix values( nComponents, nValues );
 
     std::vector< unsigned int > ind( Dimension );
 
@@ -1561,13 +1561,13 @@ SEXP antsImage_GetPixels( SEXP r_antsimage, SEXP r_indices )
       if ( nComponents == 1 )
         {
         //unsigned int channel = rcpp_indices(v, rcpp_indices.ncol()-1);
-        values(i,0) = PixelConvertType::GetNthComponent( 0, pix );
+        values(0,i) = PixelConvertType::GetNthComponent( 0, pix );
         }
       else
         {
         for ( unsigned int n=0; n<nComponents; n++)
           {
-          values(i,n) = PixelConvertType::GetNthComponent( n, pix );
+          values(n,i) = PixelConvertType::GetNthComponent( n, pix );
           }
         }
 
@@ -1597,11 +1597,11 @@ SEXP antsImage_GetPixels( SEXP r_antsimage, SEXP r_indices )
     else
       {
       Rcpp::IntegerVector dims( Dimension+1 );
-      for( unsigned int i = 0 ; i < Dimension ; ++i )
+      dims[0] = nComponents;
+      for( unsigned int i = 1 ; i <= Dimension ; ++i )
     	  {
-    	  dims[i] = indices[i].size();
+    	  dims[i] = indices[i-1].size();
     	  }
-      dims[Dimension] = nComponents;
       values.attr( "dim" ) = dims;
       }
       return values;
