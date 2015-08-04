@@ -89,10 +89,11 @@ age <- runif(nsubjects, 50, 75)
 demog <- data.frame(outcome=outcome, age=age)
 # randomly divide data into training and testing
 data.split <- splitData(demog, 2/3, return.rows=TRUE)
+eanatimages <- matrixToImages( eanat$eig, mask )
 result <- regressProjections(input[data.split$rows.in, ],
   input[data.split$rows.out, ],
   data.split$data.in, data.split$data.out,
-  mydecom$eigenanatomyimages,
+  eanatimages,
   mask, 'outcome')
 }
 \author{

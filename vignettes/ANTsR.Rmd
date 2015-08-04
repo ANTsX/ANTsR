@@ -392,8 +392,9 @@ biologically-motivated smoothness, locality or sparsity constraints.
 ```{r eanat,echo=TRUE,message=FALSE,warning=FALSE}
 # assume you ran the population example above
 eanat<-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
-eseg<-eigSeg(mask,eanat$eig,F)
-jeanat<-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
+eanatimages = matrixToImages( eanat$eig, mask )
+eseg<-eigSeg(mask, eanatimages ,F)
+jeanat<-joinEigenanatomy(mat, mask, eanatimages, c(0.1))
 eseg2<-eigSeg(mask,jeanat$fusedlist,F)
 ```
 The parameters for the example above are set for fast processing.
