@@ -867,15 +867,17 @@ setGeneric(name = "as.antsImage", def = function(object, ...) standardGeneric("a
 #' @describeIn as.antsImage
 setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
-  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
-  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
+  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
+  components = FALSE) {
+  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, components, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
-  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object))))) {
-  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, PACKAGE = "ANTsR"))
+  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
+  components = FALSE) {
+  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, components, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn antsImage

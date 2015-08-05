@@ -3021,288 +3021,296 @@ catch( const std::exception& exc )
 
 
 template< class ImageType >
-typename ImageType::Pointer antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& spacing , Rcpp::NumericVector& origin )
+SEXP antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& spacing,
+                            Rcpp::NumericVector& origin, unsigned int components  )
 {
-  typedef typename ImageType::Pointer ImagePointerType ;
-  typedef itk::PermuteAxesImageFilter< ImageType > PermuteAxesFilterType ;
-  typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
-  typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
+  typedef typename ImageType::Pointer ImagePointerType;
+  typedef typename ImageType::PixelType PixelType;
+  typedef itk::DefaultConvertPixelTraits<PixelType> PixelConvertType;
 
-  Rcpp::IntegerVector vector_dim = vector.attr( "dim" ) ;
-  typename ImageType::IndexType image_index ;
-  typename ImageType::SizeType image_size ;
-  typename ImageType::SpacingType image_spacing ;
-  typename ImageType::PointType image_origin ;
-  for( unsigned int i = 0 ; i < ImageType::ImageDimension ; ++i )
+  Rcpp::IntegerVector vector_dim = vector.attr( "dim" );
+  unsigned int vector_offset = 0;
+  if ( components > 1 )
     {
-      image_index[i] = 0 ;
-      image_size[i] = vector_dim[i] ;
-      image_spacing[i] = spacing[i] ;
-      image_origin[i] = origin[i] ;
+    vector_offset = 1;
     }
-  typename ImageType::RegionType image_region ;
-  image_region.SetIndex( image_index ) ;
-  image_region.SetSize( image_size ) ;
+  typename ImageType::IndexType image_index;
+  typename ImageType::SizeType image_size;
+  typename ImageType::SpacingType image_spacing;
+  typename ImageType::PointType image_origin;
+  for( unsigned int i = 0; i < ImageType::ImageDimension; ++i )
+    {
+      image_index[i] = 0;
+      image_size[i] = vector_dim[i+vector_offset];
+      image_spacing[i] = spacing[i];
+      image_origin[i] = origin[i];
+    }
+  typename ImageType::RegionType image_region;
+  image_region.SetIndex( image_index );
+  image_region.SetSize( image_size );
 
-  ImagePointerType image = ImageType::New() ;
-  image->SetRegions( image_region ) ;
-  image->SetSpacing( image_spacing ) ;
-  image->SetOrigin( image_origin ) ;
-  image->Allocate() ;
+  ImagePointerType image = ImageType::New();
+  image->SetRegions( image_region );
+  image->SetSpacing( image_spacing );
+  image->SetOrigin( image_origin );
+  image->SetNumberOfComponentsPerPixel( components );
+  image->Allocate();
 
   itk::ImageRegionIterator< ImageType > image_iter( image , image_region ) ;
   unsigned int vector_ind = 0 ;
-  for( image_iter.GoToBegin() ; !image_iter.IsAtEnd() ; ++image_iter )
+  for( image_iter.GoToBegin(); !image_iter.IsAtEnd(); ++image_iter )
     {
-      image_iter.Set( static_cast< typename ImageType::PixelType >( vector[vector_ind++] ) ) ;
+    PixelType pix;
+    itk::NumericTraits<PixelType>::SetLength(pix, components);
+    //Rcpp::Rcout << itk::NumericTraits<PixelType>::GetLength(pix) << std::endl;
+    for ( unsigned int n=0; n<components; n++)
+      {
+      PixelConvertType::SetNthComponent(n, pix, vector[vector_ind++]);
+      }
+    image_iter.Set(pix);
     }
 
-  return image ;
+  return Rcpp::wrap(image);
 }
 
-RcppExport SEXP antsImage_asantsImage( SEXP r_vector , SEXP r_pixeltype , SEXP r_spacing , SEXP r_origin )
+RcppExport SEXP antsImage_asantsImage( SEXP r_vector, SEXP r_pixeltype , SEXP r_spacing ,
+                                       SEXP r_origin, SEXP r_components=Rcpp::wrap(false) )
+{
 try
 {
   if( r_vector == NULL || r_pixeltype == NULL || r_spacing == NULL || r_origin == NULL )
     {
-      Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
-      return Rcpp::wrap( NA_REAL ) ;
+    Rcpp::Rcout << "Unspecified Arguments" << std::endl ;
+    return Rcpp::wrap( NA_REAL );
     }
 
-  std::string pixeltype = Rcpp::as< std::string >( r_pixeltype ) ;
-  Rcpp::NumericVector vector( r_vector ) ;
-  Rcpp::IntegerVector vector_dim = vector.attr( "dim" ) ;
-  Rcpp::NumericVector spacing( r_spacing ) ;
-  Rcpp::NumericVector origin( r_origin ) ;
-  if( spacing.size() != vector_dim.size() || origin.size() != vector_dim.size() )
+  std::string pixeltype = Rcpp::as< std::string >( r_pixeltype );
+  Rcpp::NumericVector vector( r_vector );
+  Rcpp::IntegerVector vector_dim = vector.attr( "dim" );
+  Rcpp::NumericVector v_spacing( r_spacing );
+  Rcpp::NumericVector v_origin( r_origin );
+  bool hasComponents = Rcpp::as<bool>( r_components );
+
+  unsigned int components = 1;
+  unsigned int dimension = vector_dim.size();
+  if (hasComponents)
     {
-      Rcpp::Rcout << "spacing or origin is incompatible with the vector" << std::endl ;
-      return Rcpp::wrap( NA_REAL ) ;
+    --dimension;
+    components = vector_dim[0];
     }
 
-  if( pixeltype == "double" )
+  unsigned int spacingOffset = 0;
+  unsigned int originOffset = 0;
+  if ( hasComponents )
     {
-      if( vector_dim.size() == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef double PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "double" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( NA_REAL ) ;
-	}
-    }
-  else if( pixeltype == "float" )
-    {
-      if( vector_dim.size() == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef float PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "float" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( NA_REAL ) ;
-	}
-    }
-  else if( pixeltype == "unsigned int" )
-    {
-      if( vector_dim.size() == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef unsigned int PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned int" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( NA_REAL ) ;
-	}
-    }
-  else if( pixeltype == "unsigned char" )
-    {
-      if( vector_dim.size() == 4 )
-	{
-	  const int ImageDimension = 4 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 4 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 3 )
-	{
-	  const int ImageDimension = 3 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 3 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else if( vector_dim.size() == 2 )
-	{
-	  const int ImageDimension = 2 ;
-	  typedef unsigned char PixelType ;
-	  typedef itk::Image< PixelType , ImageDimension > ImageType ;
-	  typedef ImageType::Pointer ImagePointerType ;
-	  ImagePointerType* ptr_ptr_image = new ImagePointerType( antsImage_asantsImage< ImageType >( vector , spacing , origin ) ) ;
-	  Rcpp::XPtr< ImagePointerType > xptr( ptr_ptr_image , true ) ;
-	  Rcpp::S4 image_r( std::string( "antsImage" ) ) ;
-	  image_r.slot( "pixeltype" ) = std::string( "unsigned char" ) ;
-	  image_r.slot( "dimension" ) = 2 ;
-	  image_r.slot( "pointer" ) = xptr ;
-    image_r.slot( "components" ) = 1;
-	  return image_r ;
-	}
-      else
-	{
-	  Rcpp::Rcout << "Unsupported Dimension" << std::endl ;
-	  return Rcpp::wrap( NA_REAL ) ;
-	}
+    if ( v_spacing.size() == (dimension+1) )
+      {
+      spacingOffset = 1;
+      }
+    else if ( v_spacing.size() == dimension )
+      {
+      spacingOffset = 0;
+      }
+    else
+      {
+      Rcpp::stop("Invalid spacing size");
+      }
+
+    if ( v_origin.size() == (dimension+1) )
+      {
+      originOffset = 1;
+      }
+    else if ( v_origin.size() == dimension )
+      {
+      originOffset = 0;
+      }
+    else
+      {
+      Rcpp::stop("Invalid origin size");
+      }
     }
   else
     {
-      Rcpp::Rcout << "Unsupported PixelType" << std::endl ;
-      return Rcpp::wrap( NA_REAL ) ;
+    if ( v_spacing.size() != dimension )
+      {
+      Rcpp::stop("Invalid spacing size");
+      }
+    if ( v_origin.size() != dimension )
+      {
+      Rcpp::stop("Invalid origin size");
+      }
+    }
+
+  Rcpp::NumericVector spacing( dimension );
+  Rcpp::NumericVector origin( dimension );
+
+  for ( unsigned int i=0; i<dimension; i++ )
+    {
+    spacing[i] = v_spacing[i+spacingOffset];
+    origin[i] = v_origin[i+originOffset];
+  }
+
+  if( pixeltype == "double" )
+    {
+    typedef double PixelType;
+    if( dimension == 4 )
+	    {
+	    typedef itk::Image<PixelType,4> ImageType;
+      typedef itk::VectorImage<PixelType,4> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<PixelType, 3> ImageType;
+      typedef itk::VectorImage<PixelType, 3> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<PixelType, 2> ImageType;
+      typedef itk::VectorImage<PixelType, 2> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else
+      {
+      Rcpp::stop("Unsupported image dimension");
+      }
+    }
+  else if( pixeltype == "float" )
+    {
+    typedef float PixelType;
+    if( dimension == 4 )
+	    {
+	    typedef itk::Image<PixelType,4> ImageType;
+      typedef itk::VectorImage<PixelType,4> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if( dimension == 3 )
+	    {
+	    typedef itk::Image<PixelType, 3> ImageType;
+      typedef itk::VectorImage<PixelType, 3> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if( dimension == 2 )
+	    {
+	    typedef itk::Image<PixelType, 2> ImageType;
+      typedef itk::VectorImage<PixelType, 2> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else
+      {
+      Rcpp::stop("Unsupported image dimension");
+      }
+    }
+  else if( pixeltype == "unsigned int" )
+    {
+    typedef unsigned int PixelType;
+    if ( dimension == 4 )
+	    {
+	    typedef itk::Image<PixelType,4> ImageType;
+      typedef itk::VectorImage<PixelType,4> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if ( dimension == 3 )
+	    {
+	    typedef itk::Image<PixelType, 3> ImageType;
+      typedef itk::VectorImage<PixelType, 3> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if ( dimension == 2 )
+	    {
+	    typedef itk::Image<PixelType, 2> ImageType;
+      typedef itk::VectorImage<PixelType, 2> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else
+      {
+      Rcpp::stop("Unsupported image dimension");
+      }
+    }
+  if( pixeltype == "unsigned char" )
+    {
+    typedef unsigned char PixelType;
+    if ( dimension == 4 )
+	    {
+	    typedef itk::Image<PixelType,4> ImageType;
+      typedef itk::VectorImage<PixelType,4> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if ( dimension == 3 )
+	    {
+	    typedef itk::Image<PixelType, 3> ImageType;
+      typedef itk::VectorImage<PixelType, 3> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else if ( dimension == 2 )
+	    {
+	    typedef itk::Image<PixelType, 2> ImageType;
+      typedef itk::VectorImage<PixelType, 2> VectorImageType;
+
+      return ( components == 1 ) ?
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+	    }
+    else
+      {
+      Rcpp::stop("Unsupported image dimension");
+      }
+    }
+  else
+    {
+    Rcpp::stop("Unsupported pixeltype");
     }
 }
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
 catch( const std::exception& exc )
   {
-    Rcpp::Rcout<< exc.what() << std::endl ;
-    return Rcpp::wrap( NA_REAL ) ;
+  forward_exception_to_r( exc ) ;
   }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 
 template< class PixelType , unsigned int Dimension >
