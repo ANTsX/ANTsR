@@ -28,6 +28,7 @@ install:
   - ./travis-tool.sh bootstrap
   - ./travis-tool.sh r_binary_install Rcpp
   - ./travis-tool.sh r_binary_install knitr
+  - ./travis-tool.sh r_binary_install ggplot2
   - ./travis-tool.sh r_install rmarkdown
   - ./travis-tool.sh r_install magrittr
   - ./travis-tool.sh r_install testthat
