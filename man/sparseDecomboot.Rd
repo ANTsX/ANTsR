@@ -4,10 +4,10 @@
 \alias{sparseDecomboot}
 \title{Convenience wrapper for eigenanatomy decomposition.}
 \usage{
-sparseDecomboot(inmatrix = NA, inmask = 0, sparseness = 0.01,
-  nvecs = 50, its = 5, cthresh = 250, statdir = NA, z = 0,
-  smooth = 0, initializationList = list(), mycoption = 0, nboot = 10,
-  nsamp = 0.9, robust = 0, doseg = TRUE)
+sparseDecomboot(inmatrix = NA, inmask = NA, sparseness = 0.01,
+  nvecs = 50, its = 5, cthresh = 250, z = 0, smooth = 0,
+  initializationList = list(), mycoption = 0, nboot = 10, nsamp = 0.9,
+  robust = 0, doseg = TRUE)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,
@@ -22,8 +22,6 @@ spatial variable lies along columns}
 \item{its}{number of iterations}
 
 \item{cthresh}{cluster threshold}
-
-\item{statdir}{place on disk to save results}
 
 \item{z}{u penalty, experimental}
 
@@ -62,15 +60,15 @@ ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv ,
 outmat<-as.matrix(ldd$eigenanatomyimages )
 # outmat<-t(ldd$cca1outAuto)
 traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]),
-  eig = lymphoma$x[training,]  \%*\% outmat )
+  eig = lymphoma$x[training,]  \%*\% t(outmat) )
 testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]),
-  eig = lymphoma$x[!training,] \%*\% outmat )
+  eig = lymphoma$x[!training,] \%*\% t(outmat) )
 myrf<-randomForest( lclass ~ . ,   data=traindf )
 predlymp<-predict(myrf, newdata=testdf)
 print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
   'non-zero ',sum(abs( outmat ) > 0 ) ) )
 for ( i in 1:nv )
-  print(paste(' non-zero ',i,' is: ',sum(abs( outmat[,i] ) > 0 ) ) )
+  print(paste(' non-zero ',i,' is: ',sum(abs( outmat[i,] ) > 0 ) ) )
 }
 } # end dontrun
 }
