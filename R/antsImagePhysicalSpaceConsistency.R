@@ -7,6 +7,7 @@
 #' @param img2 Image object of S4 class \code{antsImage}.
 #' @param coordinate.tolerance floating point error tolerance in origin
 #' @param direction.tolerance floating point error tolerance in direction matrix
+#' @param data.type boolean, if TRUE check pixeltype and components, default is FALSE
 #' @return Boolean indicating consistency of physical space
 #' @examples
 #'
@@ -17,7 +18,8 @@
 #'
 #' @export antsCopyImageInfo
 # This implementation mimics: itkImageToImageFilter.hxx
-antsImagePhysicalSpaceConsistency <- function(img1, img2, coordinate.tolerance=1e-6, direction.tolerance=1e-6) {
+antsImagePhysicalSpaceConsistency <- function(img1, img2, coordinate.tolerance=1e-6, direction.tolerance=1e-6,
+    data.type=FALSE ) {
   if (!(is.antsImage(img1)) || !(is.antsImage(img2))) {
     stop("Both inputs must be of class 'antsImage'")
   }
@@ -52,6 +54,18 @@ antsImagePhysicalSpaceConsistency <- function(img1, img2, coordinate.tolerance=1
   {
     #print( "Image have different directions")
     return(FALSE)
+  }
+
+  if ( data.type == TRUE )
+  {
+    if ( img1@pixeltype != img2@pixeltype )
+      {
+      return(FALSE)
+      }
+    if ( img1@components != img2@components )
+      {
+      return(FALSE)
+      }
   }
 
   return(TRUE)
