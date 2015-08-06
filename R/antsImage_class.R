@@ -69,7 +69,7 @@ setMethod(f = "max", signature(x = "antsImage"), definition = function(x) {
 
 #' @describeIn antsImage
 setMethod(f = "var", signature(x = "antsImage"), definition = function(x) {
-  return(var(as.array(x)))
+  return(var(as.vector(as.array(x))))
 })
 
 #' @describeIn antsImage
@@ -868,16 +868,32 @@ setGeneric(name = "as.antsImage", def = function(object, ...) standardGeneric("a
 setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
   origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
-  components = FALSE) {
-  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, components, PACKAGE = "ANTsR"))
+  direction = diag(length(dim(object))), components = FALSE, reference = NA) {
+  if ( is.antsImage(reference) )
+    {
+    pixeltype = reference@pixeltype
+    components = (reference@components > 1)
+    spacing = antsGetSpacing(reference)
+    origin = antsGetOrigin(reference)
+    direction = antsGetDirection(reference)
+    }
+  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, direction, components, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn as.antsImage
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
   origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
-  components = FALSE) {
-  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, components, PACKAGE = "ANTsR"))
+  direction = diag(length(dim(object))), components = FALSE, reference = NA) {
+  if ( is.antsImage(reference) )
+    {
+    pixeltype = reference@pixeltype
+    components = (reference@components > 1)
+    spacing = antsGetSpacing(reference)
+    origin = antsGetOrigin(reference)
+    direction = antsGetDirection(reference)
+    }
+  return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, direction, components, PACKAGE = "ANTsR"))
 })
 
 #' @describeIn antsImage
@@ -1034,9 +1050,9 @@ is.antsImage <- function(x){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgsum <- as.antsImage(as.array(x) + as.array(y))
+    imgsum <- as.antsImage(as.array(x) + as.array(y), reference=x)
   } else{
-    imgsum <- as.antsImage(as.array(x) + y)
+    imgsum <- as.antsImage(as.array(x) + y, reference=x)
   }
   antsCopyImageInfo(x, imgsum)
 }
@@ -1044,14 +1060,14 @@ is.antsImage <- function(x){
 #' @rdname antsImageArith
 "-.antsImage" <- function(x, y){
   if(missing(y)) {
-    imgdif <- as.antsImage(0 - as.array(x))
+    imgdif <- as.antsImage(0 - as.array(x), reference=x)
   } else if(is.antsImage(y)){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgdif <- as.antsImage(as.array(x) - as.array(y))
+    imgdif <- as.antsImage(as.array(x) - as.array(y), reference=x)
   } else {
-    imgdif <- as.antsImage(as.array(x) - y)
+    imgdif <- as.antsImage(as.array(x) - y, reference=x)
   }
   antsCopyImageInfo(x, imgdif)
 }
@@ -1062,9 +1078,9 @@ is.antsImage <- function(x){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgfrac <- as.antsImage(as.array(x) / as.array(y))
+    imgfrac <- as.antsImage(as.array(x) / as.array(y), reference=x)
   } else{
-    imgfrac <- as.antsImage(as.array(x) / y)
+    imgfrac <- as.antsImage(as.array(x) / y, reference=x)
   }
   antsCopyImageInfo(x, imgfrac)
 }
@@ -1075,23 +1091,22 @@ is.antsImage <- function(x){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgmult <- as.antsImage(as.array(x) * as.array(y))
+    imgmult <- as.antsImage(as.array(x) * as.array(y), reference=x)
   } else{
-    imgmult <- as.antsImage(as.array(x) * y)
+    imgmult <- as.antsImage(as.array(x) * y, reference=x)
   }
   antsCopyImageInfo(x, imgmult)
 }
 
 #' @rdname antsImageArith
 "^.antsImage" <- function(x, y){
-
   if(is.antsImage(y)){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgpow <- as.antsImage(as.array(x) ^ as.array(y))
+    imgpow <- as.antsImage(as.array(x) ^ as.array(y), reference=x)
   } else{
-    imgpow <- as.antsImage(as.array(x) ^ y)
+    imgpow <- as.antsImage(as.array(x) ^ y, reference=x)
   }
   antsCopyImageInfo(x, imgpow)
 }
@@ -1102,9 +1117,9 @@ is.antsImage <- function(x){
     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
       stop("Images do not occupy the same physical space")
     }
-    imgmod <- as.antsImage(as.array(x) %% as.array(y))
+    imgmod <- as.antsImage(as.array(x) %% as.array(y), reference=x)
   } else {
-    imgmod <- as.antsImage(as.array(x) %% y)
+    imgmod <- as.antsImage(as.array(x) %% y, reference=x)
   }
   antsCopyImageInfo(x, imgmod)
 }
@@ -1114,18 +1129,18 @@ is.antsImage <- function(x){
 #' log(r16, base=10)
 #' @rdname antsImageArith
 "log.antsImage" <- function(x, ...){
-  imglog <- as.antsImage(log(as.array(x), ...))
+  imglog <- as.antsImage(log(as.array(x), ...), reference=x)
   antsCopyImageInfo(x, imglog)
 }
 
 #' @rdname antsImageArith
 "exp.antsImage" <- function(x){
-  imgexp <- as.antsImage(exp(as.array(x)))
+  imgexp <- as.antsImage(exp(as.array(x)), reference=x)
   antsCopyImageInfo(x, imgexp)
 }
 
 #' @rdname antsImageArith
 "abs.antsImage" <- function(x){
-  imgabs <- as.antsImage(abs(as.array(x)))
+  imgabs <- as.antsImage(abs(as.array(x)), reference=x)
   antsCopyImageInfo(x, imgabs)
 }

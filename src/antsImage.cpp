@@ -3021,8 +3021,9 @@ catch( const std::exception& exc )
 
 
 template< class ImageType >
-SEXP antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& spacing,
-                            Rcpp::NumericVector& origin, unsigned int components  )
+SEXP antsImage_asantsImage( Rcpp::NumericVector& vector, Rcpp::NumericVector& spacing,
+                            Rcpp::NumericVector& origin, Rcpp::NumericMatrix& direction,
+                            unsigned int components  )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   typedef typename ImageType::PixelType PixelType;
@@ -3038,12 +3039,17 @@ SEXP antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& s
   typename ImageType::SizeType image_size;
   typename ImageType::SpacingType image_spacing;
   typename ImageType::PointType image_origin;
+  typename ImageType::DirectionType image_direction;
   for( unsigned int i = 0; i < ImageType::ImageDimension; ++i )
     {
       image_index[i] = 0;
       image_size[i] = vector_dim[i+vector_offset];
       image_spacing[i] = spacing[i];
       image_origin[i] = origin[i];
+      for ( unsigned int j = 0; j < ImageType::ImageDimension; j++)
+        {
+        image_direction(i,j) = direction(i,j);
+        }
     }
   typename ImageType::RegionType image_region;
   image_region.SetIndex( image_index );
@@ -3053,6 +3059,7 @@ SEXP antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& s
   image->SetRegions( image_region );
   image->SetSpacing( image_spacing );
   image->SetOrigin( image_origin );
+  image->SetDirection( image_direction );
   image->SetNumberOfComponentsPerPixel( components );
   image->Allocate();
 
@@ -3073,8 +3080,8 @@ SEXP antsImage_asantsImage( Rcpp::NumericVector& vector , Rcpp::NumericVector& s
   return Rcpp::wrap(image);
 }
 
-RcppExport SEXP antsImage_asantsImage( SEXP r_vector, SEXP r_pixeltype , SEXP r_spacing ,
-                                       SEXP r_origin, SEXP r_components=Rcpp::wrap(false) )
+RcppExport SEXP antsImage_asantsImage( SEXP r_vector, SEXP r_pixeltype, SEXP r_spacing ,
+                                       SEXP r_origin, SEXP r_direction, SEXP r_components=Rcpp::wrap(false) )
 {
 try
 {
@@ -3089,7 +3096,14 @@ try
   Rcpp::IntegerVector vector_dim = vector.attr( "dim" );
   Rcpp::NumericVector v_spacing( r_spacing );
   Rcpp::NumericVector v_origin( r_origin );
+  Rcpp::NumericMatrix v_direction( r_direction );
+
   bool hasComponents = Rcpp::as<bool>( r_components );
+
+  if ( v_direction.nrow() != v_direction.ncol() )
+    {
+    Rcpp::stop( "Direction matrix must be square");
+    }
 
   unsigned int components = 1;
   unsigned int dimension = vector_dim.size();
@@ -3101,6 +3115,7 @@ try
 
   unsigned int spacingOffset = 0;
   unsigned int originOffset = 0;
+  unsigned int directionOffset = 0;
   if ( hasComponents )
     {
     if ( v_spacing.size() == (dimension+1) )
@@ -3128,6 +3143,19 @@ try
       {
       Rcpp::stop("Invalid origin size");
       }
+
+    if ( v_direction.nrow() == (dimension+1) )
+      {
+      directionOffset = 1;
+      }
+    else if ( v_direction.nrow() == dimension )
+      {
+      directionOffset = 0;
+      }
+    else
+      {
+      Rcpp::stop("Invalid direction size");
+      }
     }
   else
     {
@@ -3143,11 +3171,16 @@ try
 
   Rcpp::NumericVector spacing( dimension );
   Rcpp::NumericVector origin( dimension );
+  Rcpp::NumericMatrix direction( dimension, dimension );
 
   for ( unsigned int i=0; i<dimension; i++ )
     {
     spacing[i] = v_spacing[i+spacingOffset];
     origin[i] = v_origin[i+originOffset];
+    for ( unsigned int j=0; j<dimension; j++ )
+      {
+      direction(i,j) = v_direction(i+directionOffset, j+directionOffset);
+      }
   }
 
   if( pixeltype == "double" )
@@ -3159,8 +3192,8 @@ try
       typedef itk::VectorImage<PixelType,4> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if( dimension == 3 )
 	    {
@@ -3168,8 +3201,8 @@ try
       typedef itk::VectorImage<PixelType, 3> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if( dimension == 2 )
 	    {
@@ -3177,8 +3210,8 @@ try
       typedef itk::VectorImage<PixelType, 2> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else
       {
@@ -3194,8 +3227,8 @@ try
       typedef itk::VectorImage<PixelType,4> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if( dimension == 3 )
 	    {
@@ -3203,8 +3236,8 @@ try
       typedef itk::VectorImage<PixelType, 3> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if( dimension == 2 )
 	    {
@@ -3212,8 +3245,8 @@ try
       typedef itk::VectorImage<PixelType, 2> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else
       {
@@ -3229,8 +3262,8 @@ try
       typedef itk::VectorImage<PixelType,4> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if ( dimension == 3 )
 	    {
@@ -3238,8 +3271,8 @@ try
       typedef itk::VectorImage<PixelType, 3> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if ( dimension == 2 )
 	    {
@@ -3247,8 +3280,8 @@ try
       typedef itk::VectorImage<PixelType, 2> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else
       {
@@ -3264,8 +3297,8 @@ try
       typedef itk::VectorImage<PixelType,4> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if ( dimension == 3 )
 	    {
@@ -3273,8 +3306,8 @@ try
       typedef itk::VectorImage<PixelType, 3> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else if ( dimension == 2 )
 	    {
@@ -3282,8 +3315,8 @@ try
       typedef itk::VectorImage<PixelType, 2> VectorImageType;
 
       return ( components == 1 ) ?
-        antsImage_asantsImage<ImageType>( vector, spacing, origin, components) :
-        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, components );
+        antsImage_asantsImage<ImageType>( vector, spacing, origin, direction, components) :
+        antsImage_asantsImage<VectorImageType>( vector, spacing, origin, direction, components );
 	    }
     else
       {
