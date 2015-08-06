@@ -1,5 +1,8 @@
 context("antsImage Basic Operations")
 
+# Use pixeltype=="double" for tests, if using the default pixeltype=="float"
+# then all test will fail due loss of precision
+
 values = rnorm(100)
 img = makeImage(c(10,10), values, pixeltype="double")  # this get changed
 img1 = makeImage(c(10,10), values, pixeltype="double") # this is constant
@@ -45,6 +48,12 @@ test_that("[] returns correct value", {
   expect_true( values[2] == img[2,1] )
 })
 
+test_that("[] sets correct value", {
+  val = rnorm(1)
+  img[3,1] = val
+  expect_true( img[3,1] == val )
+})
+
 test_that( "antsSetSpacing works", {
   expect_true( antsSetSpacing(img, c(2,3)) == 0 )
 })
@@ -70,7 +79,7 @@ test_that( "antsGetDirection works", {
 })
 
 test_that( "antsImage + scalar", {
-  expect_true( sum(img + 2) == sum(values + 2) )
+  expect_true( sum(img1 + 2) == sum(values + 2) )
 })
 test_that( "antsImage + scalar, preserves header", {
   expect_true( antsImagePhysicalSpaceConsistency(data.type=T,img, img+2) )
@@ -84,7 +93,7 @@ test_that( "antsImage + antsImage, preserves header", {
 })
 
 test_that( "antsImage * scalar", {
-  expect_true( sum(img * 2) == sum(values * 2) )
+  expect_true( sum(img1 * 2) == sum(values * 2) )
 })
 test_that( "antsImage * scalar, preserves header", {
   expect_true( antsImagePhysicalSpaceConsistency(data.type=T,img, img*2) )
@@ -98,7 +107,7 @@ test_that( "antsImage * antsImage, preserves header", {
 })
 
 test_that( "antsImage / scalar", {
-  expect_true( sum(img / 2) == sum(values / 2) )
+  expect_true( sum(img1 / 2) == sum(values / 2) )
 })
 test_that( "antsImage / scalar, preserves header", {
   expect_true( antsImagePhysicalSpaceConsistency(data.type=T,img, img/2) )
@@ -112,7 +121,7 @@ test_that( "antsImage / antsImage, preserves header", {
 })
 
 test_that( "antsImage ^ scalar", {
-  expect_true( sum(img ^ 2) == sum(values ^ 2) )
+  expect_true( sum(img1 ^ 2) == sum(values ^ 2) )
 })
 test_that( "antsImage ^ scalar, preserves header", {
   expect_true( antsImagePhysicalSpaceConsistency(data.type=T,img, img^2) )
@@ -126,7 +135,7 @@ test_that( "antsImage ^ antsImage, preserves header", {
 })
 
 test_that( "antsImage ^ scalar", {
-  expect_true( sum(img %% 2) == sum(values %% 2) )
+  expect_true( sum(img1 %% 2) == sum(values %% 2) )
 })
 test_that( "antsImage %% scalar, preserves header", {
   expect_true( antsImagePhysicalSpaceConsistency(data.type=T,img, img%%2) )
@@ -167,7 +176,7 @@ test_that( "antsImage exp, preserves header", {
 
 mvalues = c(values, values2)
 mvalues3 = c(values3, values3)
-mimg = mergeChannels( list(img, img2) )
+mimg = mergeChannels( list(img1, img2) )
 mimg1 = mergeChannels( list(img1, img2) )
 mimg2 = mergeChannels( list(img1, img2) )
 mimg3 = mergeChannels( list(img3, img3) )
