@@ -5,7 +5,7 @@
 \title{Check for physical space consistency}
 \usage{
 antsImagePhysicalSpaceConsistency(img1, img2, coordinate.tolerance = 1e-06,
-  direction.tolerance = 1e-06)
+  direction.tolerance = 1e-06, data.type = FALSE)
 }
 \arguments{
 \item{img1}{Image object of S4 class \code{antsImage}.}
@@ -15,6 +15,8 @@ antsImagePhysicalSpaceConsistency(img1, img2, coordinate.tolerance = 1e-06,
 \item{coordinate.tolerance}{floating point error tolerance in origin}
 
 \item{direction.tolerance}{floating point error tolerance in direction matrix}
+
+\item{data.type}{boolean, if TRUE check pixeltype and components, default is FALSE}
 }
 \value{
 Boolean indicating consistency of physical space
