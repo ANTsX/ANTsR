@@ -29,10 +29,6 @@ may be used to work with multi channel images, such as rgb (i.e. color) data. Th
 is still an extremely new feature and much of ANTsR does not yet support this image type.
 Examples will be added to this document as new functionality is implemented.
 
-## Basics
-Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in. In
-this example a file is read in, and each channel is smoothed independently.
-
 ```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 # How to plot a 2D color image
 plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL) {
@@ -112,20 +108,41 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
 }
 ```
 
+## Basics
+Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in.
+Basic conversions and math operations work as expected.
+
 ```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 # Read in and display header info
 img = antsImageRead( getANTsRData("decslice"))
 img
 img[64,64]
 
+# Convert to an array
+arr = as.array(img)
+dim(arr)
+
+# Convert array to multichannel antsImage
+img2 = as.antsImage(arr, components=TRUE)
+img2
+
+# Convert array to antsImage and set header info via reference image
+img2 = as.antsImage(arr, components=TRUE, reference=img )
+img2
+
+# Basic math ops work the same as for scalar images
+2 * sum(img)
+sum(img * 2)
+```
+
+Many functions only work on scalar images, so here we split a multichannel image into a list
+of scalar images, then the `lapply` function provides a convenient way to process all channels.
+
+```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 # Convert to list of scalar images
 iList = splitChannels(img)
 plotColor(iList)
-```
 
-The `lapply` function provides a convenient way to process all channels.
-
-```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 sList = lapply( iList, function(x) { smoothImage(x, 1.5) } )
 plotColor(sList)
 
@@ -139,12 +156,25 @@ simg = mergeChannels(sList)
 It is worth mentioning that ANTsR is not yet compatible with `mclapply` as provided
 in the "parallel" package. It's something we will be looking into in the future. The
 main problem has to do with allocating new images, some functions that only access
-existing data will work, such as the following command:
+existing data will work, however it does not guarantee a faster execution time.
 ```{r mclapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+iMeans = 0
+time1 = 0
+timeParallel = NA
 if("parallel" %in% rownames(installed.packages()) == TRUE) {
-  iMeans = mclapply( iList, function(x) mean (x) )
+  ptm = proc.time()
+  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),3) )
+  timeParallel = proc.time() - ptm
+  unlist(iMeans)
 }
-iMeans
+
+ptm = proc.time()
+iMeans = lapply(iList, function(x) mean(x) )
+timeSerial = proc.time() - ptm
+unlist(iMeans)
+
+timeParallel
+timeSerial
 ```
 
 ## Working with diffusion tensor images
