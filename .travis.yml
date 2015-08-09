@@ -29,6 +29,10 @@ install:
   - ./travis-tool.sh r_binary_install Rcpp
   - ./travis-tool.sh r_binary_install knitr
   - ./travis-tool.sh r_binary_install ggplot2
+  - ./travis-tool.sh r_binary_install igraph
+  - ./travis-tool.sh r_binary_install pracma
+  - ./travis-tool.sh r_binary_install dplyr
+  - ./travis-tool.sh r_binary_install mFilter
   - ./travis-tool.sh r_install rmarkdown
   - ./travis-tool.sh r_install magrittr
   - ./travis-tool.sh r_install testthat

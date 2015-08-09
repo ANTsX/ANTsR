@@ -1,9 +1,9 @@
 #' Time-series image to matrix of time windows around user-specified events
-#' 
+#'
 #' Extract a matrix from a time-series image after applying a mask where each
 #' row is a space-time vector
-#' 
-#' 
+#'
+#'
 #' @param timeseriesmatrix Input timeseriesmatrix from timeseries2matrix
 #' @param mask Input mask of type 'antsImage' ... the mask will be replicated
 #' into a 4D image of length timewindow + zeropadvalue.
@@ -16,15 +16,15 @@
 #' ntimewindow*sizeofnonzerovaluesinmask*nevents \cr
 #' @author Avants BB
 #' @examples
-#' 
+#'
 #' img <- makeImage( c(10,10,10,50) , 0 )
 #' mask <- as.antsImage( array( 1 , dim(img)[1:3] ) )
 #' mat<-timeseries2matrix( img, mask )
 #' mat <- timeserieswindow2matrix( mat , mask, c(1, 4, 5 ), 2, 0 )
 #' print( dim(mat$eventmatrix) )
 #' print( dim(mat$mask4d) )
-#' 
-#' ##### another approach 
+#'
+#' ##### another approach
 #' dim4<-c( 20, 30, 10, 100 )
 #' i1<-10:15
 #' i2<-11:18
@@ -40,33 +40,33 @@
 #' msk <- as.antsImage( arr3d )
 #' img <- as.antsImage( arr )
 #' mat<-timeseries2matrix( img, msk )
-#' eanat<-sparseDecom(  mat,  msk, sparseness=0.1, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( mat,    0, sparseness=0.1,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' enomask<-eanat2$eigenanatomyimages[,1]
-#' emask<-eanat$eigenanatomyimages[[1]][ msk == 1 ]
+#' eanat<-sparseDecom(  mat, msk, sparseness=0.1, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+#' eanat2<-sparseDecom( mat, NA, sparseness=0.1,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+#' enomask<-eanat2$eigenanatomyimages[1,]
+#' emask<-eanat$eigenanatomyimages[1,]
 #' print( enomask[31:40] )
 #' print(   emask[31:40] )
-#' 
-#' # same thing with event matrices .... 
+#'
+#' # same thing with event matrices ....
 #' ttt<-timeserieswindow2matrix( mat, msk, c(20,40,60,70) , 6, 0 )
 #' tte<-ttt$eventmatrix
 #' eanat<-sparseDecom(  tte, ttt$mask4d, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( tte,          0, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+#' eanat2<-sparseDecom( tte,          NA, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
 #' enomask<-eanat2$eigenanatomyimages[,1]
-#' # back to timematrix 
+#' # back to timematrix
 #' tmat<-matrix( enomask,  nrow=6 )
-#' # back to image 
-#' eimg<-antsImageClone( msk ) 
+#' # back to image
+#' eimg<-antsImageClone( msk )
 #' eimg[ msk == 1 ]<-tmat[1,]
-#' # convert image space to evec space 
-#' emat<-timeseries2matrix( eanat$eigenanatomyimages[[1]], msk )
-#' # convert emat to events 
-#' eavent<-timeserieswindow2matrix( data.matrix(emat) , msk, 1 , 6, 0 )
-#' emask<-eavent$eventmatrix[1,]
+#' # convert image space to evec space
+#' emat<-eanat2$eigenanatomyimages
+#' # convert emat to events FIXME this does not currently work
+#' # eavent<-timeserieswindow2matrix( data.matrix(emat) , msk, 1 , 6, 0 )
+#' # emask<-eavent$eventmatrix[1,]
 #' #############################
-#' 
+#'
 #' @export timeserieswindow2matrix
-timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindow, 
+timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindow,
   zeropadvalue = 0, spacing = NA) {
   if (length(dim(timeseriesmatrix)) != 2) {
     print("Mask should be of dimensionality 3")
@@ -84,8 +84,8 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindo
     mask4d[, , , i] <- maskvec
   }
   mask4d <- as.antsImage(mask4d)
-  if (!is.na(spacing)) 
-    if (length(spacing) == 4) 
+  if (!is.na(spacing))
+    if (length(spacing) == 4)
       antsSetSpacing(mask4d, spacing)
   nvox4dmask <- sum(mask4d == 1)
   if (ncol(timeseriesmatrix) * timewindow != nvox4dmask) {
@@ -105,12 +105,12 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindo
   ct <- 1
   for (i in eventlist) {
     maxrow <- i + (timewindow - 1)
-    if (maxrow > nrow(timeseriesmatrix)) 
+    if (maxrow > nrow(timeseriesmatrix))
       maxrow <- nrow(timeseriesmatrix)
     locmat <- as.numeric(t(timeseriesmatrix[i:maxrow, ]))
-    if (length(locmat) == nvox4dmask) 
+    if (length(locmat) == nvox4dmask)
       outmat[ct, ] <- locmat
     ct <- ct + 1
   }
   return(list(eventmatrix = outmat, mask4d = mask4d))
-} 
+}
