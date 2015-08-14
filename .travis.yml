@@ -3,8 +3,8 @@ sudo: required
 compiler:
   - clang
 os:
-#  - linux
-  - osx
+  - linux
+#  - osx
 branches:
   only:
   - master
@@ -22,8 +22,8 @@ before_install:
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
 install:
-  - wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip
-  - unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc -d $HOME/pandoc
+  - if [[ $TRAVIS_OS_NAME -eq linux ]] ; then wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip;  unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc -d $HOME/pandoc ; fi
+#  - if [[ $TRAVIS_OS_NAME -eq osx ]] ; then curl ;  ; fi
   - chmod +x $HOME/pandoc/pandoc
   - export PATH=$PATH:$HOME/pandoc/
   - ./travis-tool.sh bootstrap
