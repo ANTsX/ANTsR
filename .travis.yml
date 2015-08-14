@@ -3,7 +3,8 @@ sudo: required
 compiler:
   - clang
 os:
-  - linux
+#  - linux
+  - osx
 branches:
   only:
   - master
