@@ -1,10 +1,21 @@
 language: r
-sudo: required
+sudo: false
 compiler:
   - clang
 os:
   - linux
 #  - osx
+addons:
+  apt:
+    sources:
+    - r-packages-precise
+    packages:
+    - r-base-dev
+    - r-recommended
+    - pandoc
+cache:
+  directories:
+    - ~/Rlib
 branches:
   only:
   - master
@@ -15,31 +26,34 @@ before_install:
   - basedir=${PWD}
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
+install:
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
-install:
-  - if [[ $TRAVIS_OS_NAME -eq linux ]] ; then wget https://s3.amazonaws.com/rstudio-buildtools/pandoc-1.12.3.zip;  unzip -j pandoc-1.12.3.zip pandoc-1.12.3/linux/debian/x86_64/pandoc -d $HOME/pandoc ; fi
-#  - if [[ $TRAVIS_OS_NAME -eq osx ]] ; then curl ;  ; fi
-  - chmod +x $HOME/pandoc/pandoc
-  - export PATH=$PATH:$HOME/pandoc/
+  - mkdir -p ~/Rlib
+  - echo 'R_LIBS=~/Rlib' > .Renviron
+  - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
+  - echo '.travis.yml' > .Rbuildignore
+  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
+  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) { install.packages("Rcpp", dependencies = TRUE) }'
+  - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"ggplot2" %in% rownames(installed.packages())) { install.packages("ggplot2", dependencies = TRUE) }'
+  - Rscript -e 'if(!"igraph" %in% rownames(installed.packages())) { install.packages("igraph", dependencies = TRUE) }'
+  - Rscript -e 'if(!"pracma" %in% rownames(installed.packages())) { install.packages("pracma", dependencies = TRUE) }'
+  - Rscript -e 'if(!"dplyr" %in% rownames(installed.packages())) { install.packages("dplyr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"mFilter" %in% rownames(installed.packages())) { install.packages("mFilter", dependencies = TRUE) }'
+  - Rscript -e 'if(!"rmarkdown" %in% rownames(installed.packages())) { install.packages("rmarkdown", dependencies = TRUE) }'
+  - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"testthat" %in% rownames(installed.packages())) { install.packages("testthat", dependencies = TRUE) }'
+  - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
+  - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
+  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
   - export PATH=$HOME/bin/:$PATH:
   - export PATH=$HOME/cmake/:$PATH:
-  - ./travis-tool.sh bootstrap
-  - ./travis-tool.sh r_binary_install Rcpp
-  - ./travis-tool.sh r_binary_install knitr
-  - ./travis-tool.sh r_binary_install ggplot2
-  - ./travis-tool.sh r_binary_install igraph
-  - ./travis-tool.sh r_binary_install pracma
-  - ./travis-tool.sh r_binary_install dplyr
-  - ./travis-tool.sh r_binary_install mFilter
-  - ./travis-tool.sh r_install rmarkdown
-  - ./travis-tool.sh r_install magrittr
-  - ./travis-tool.sh r_install testthat
-  - ./travis-tool.sh r_binary_install randomForest
   - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - cd ${basedir}
