@@ -40,6 +40,7 @@ cache:
 # - update all installed packages
 # - install package with dependencies
 install:
+  - basedir=${PWD}
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
@@ -68,6 +69,7 @@ install:
   - cd ~/
   - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - R CMD INSTALL --library=~/Rlib ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
+  - cd ${basedir}
 
 # Build and check package
 script:
