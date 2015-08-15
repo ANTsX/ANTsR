@@ -30,6 +30,14 @@ cache:
   directories:
     - ~/Rlib
 
+before_install:
+  - basedir=${PWD}
+  - cd ..
+  - wget http://www.cmake.org/files/v3.2/cmake-3.2.0-rc1-Linux-x86_64.sh
+  - sh cmake-3.2.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}
+  - export PATH=$HOME/bin/:$PATH
+  - cd $basedir
+
 # install the package and dependencies:
 # - create directory for R libraries (if not already exists)
 # - create .Renviron with location of R libraries
@@ -40,7 +48,6 @@ cache:
 # - update all installed packages
 # - install package with dependencies
 install:
-  - basedir=${PWD}
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
@@ -90,6 +97,8 @@ after_failure:
 #  - ./travis-tool.sh dump_logs
   - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
   - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
+  - ls $HOME/bin/
+  - which cmake
 
 # send e-mails if stuff changes
 notifications:
