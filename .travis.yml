@@ -13,7 +13,8 @@ addons:
     - r-base-dev
     - r-recommended
     - pandoc
-    r_binary_packages:
+    - knitr
+#    r_binary_packages:
     - dplyr
     - covr
     - Rcpp
@@ -23,7 +24,6 @@ addons:
     - igraph
     - pracma
     - mFilter
-    - knitr
     - rmarkdown
     - testthat
     - randomForest
