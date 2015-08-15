@@ -23,6 +23,7 @@ addons:
     - igraph
     - pracma
     - mFilter
+    - knitr
     - rmarkdown
     - testthat
     - randomForest
