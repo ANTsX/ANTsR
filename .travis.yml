@@ -2,6 +2,8 @@
 
 # use c as catch-all language
 language: c
+compiler:
+  - clang
 
 # use containers
 sudo: false
@@ -38,6 +40,12 @@ cache:
 # - update all installed packages
 # - install package with dependencies
 install:
+  - mkdir -p ~/.R
+  - export CC=clang
+  - export CXX=clang++
+  - echo "CC=clang" >  ~/.R/Makevars
+  - echo "CXX=clang++" >> ~/.R/Makevars
+  - source ~/.R/Makevars
   - mkdir -p ~/Rlib
   - echo 'R_LIBS=~/Rlib' > .Renviron
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
