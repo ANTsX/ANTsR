@@ -1,5 +1,5 @@
 language: r
-sudo: required
+sudo: false
 compiler:
   - clang
 os:
@@ -9,8 +9,8 @@ branches:
   only:
   - master
 before_install:
-#  - wget http://www.cmake.org/files/v3.2/cmake-3.2.0-rc1-Linux-x86_64.sh
-#  - sudo sh cmake-3.2.0-rc1-Linux-x86_64.sh --skip-license --prefix=/usr
+  - wget http://www.cmake.org/files/v3.2/cmake-3.2.0-rc1-Linux-x86_64.sh
+  - sh cmake-3.2.0-rc1-Linux-x86_64.sh --skip-license --prefix=./
   - cd ..
   - basedir=${PWD}
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -26,6 +26,8 @@ install:
 #  - if [[ $TRAVIS_OS_NAME -eq osx ]] ; then curl ;  ; fi
   - chmod +x $HOME/pandoc/pandoc
   - export PATH=$PATH:$HOME/pandoc/
+  - export PATH=$HOME/bin/:$PATH:
+  - export PATH=$HOME/cmake/:$PATH:
   - ./travis-tool.sh bootstrap
   - ./travis-tool.sh r_binary_install Rcpp
   - ./travis-tool.sh r_binary_install knitr
