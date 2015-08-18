@@ -193,10 +193,13 @@ sparseDecom2 <- function(
     mynames[11:tt] = paste( "0", mynames[11:tt], sep='')
   }
   mynames=paste("Variate",mynames,sep='')
-  colnames( sccaner$eig1 ) = mynames[1:nvecs]
-  colnames( sccaner$eig2 ) = mynames[1:nvecs]
-  colnames( sccaner$projections ) = mynames[1:nvecs]
-  colnames( sccaner$projections2 ) = mynames[1:nvecs]
+  if ( nvecs > 1 )
+    {
+    colnames( sccaner$eig1 ) = mynames[1:nvecs]
+    colnames( sccaner$eig2 ) = mynames[1:nvecs]
+    colnames( sccaner$projections ) = mynames[1:nvecs]
+    colnames( sccaner$projections2 ) = mynames[1:nvecs]
+    }
   return(
     list(
       projections = sccaner$projections,
@@ -250,12 +253,15 @@ sparseDecom2 <- function(
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)
   outcorrs = diag( cor( p1 , p2  ) )
-  myord = rev( order( abs( outcorrs ) ) )
-  outcorrs = outcorrs[ myord ]
-  p1 = p1[ , myord ]
-  p2 = p2[ , myord ]
-  outval$eig1 = outval$eig1[ myord, ]
-  outval$eig2 = outval$eig2[ myord, ]
+  if ( priorWeight < 1.e-10 )
+    {
+    myord = rev( order( abs( outcorrs ) ) )
+    outcorrs = outcorrs[ myord ]
+    p1 = p1[ , myord ]
+    p2 = p2[ , myord ]
+    outval$eig1 = outval$eig1[ myord, ]
+    outval$eig2 = outval$eig2[ myord, ]
+    }
   return(
       list(
         projections = p1,
