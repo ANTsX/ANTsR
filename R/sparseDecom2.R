@@ -254,8 +254,8 @@ sparseDecom2 <- function(
   outcorrs = outcorrs[ myord ]
   p1 = p1[ , myord ]
   p2 = p2[ , myord ]
-  outval$eig1 = outval$eig1[ , myord ]
-  outval$eig2 = outval$eig2[ , myord ]
+  outval$eig1 = outval$eig1[ myord, ]
+  outval$eig2 = outval$eig2[ myord, ]
   return(
       list(
         projections = p1,
