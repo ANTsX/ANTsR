@@ -105,7 +105,7 @@ sparseDecom2 <- function(
   z = 0,
   smooth = 0,
   robust = 0,
-  mycoption = 1,
+  mycoption = 0,
   initializationList = list(),
   initializationList2 = list(),
   ell1 = 0.05,
