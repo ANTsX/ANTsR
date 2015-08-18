@@ -249,13 +249,20 @@ sparseDecom2 <- function(
     PACKAGE="ANTsR" )
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)
+  outcorrs = diag( cor( p1 , p2  ) )
+  myord = rev( order( abs( outcorrs ) ) )
+  outcorrs = outcorrs[ myord ]
+  p1 = p1[ , myord ]
+  p2 = p2[ , myord ]
+  outval$eig1 = outval$eig1[ , myord ]
+  outval$eig2 = outval$eig2[ , myord ]
   return(
       list(
         projections = p1,
         projections2 = p2,
         eig1 = t(outval$eig1),
         eig2 = t(outval$eig2),
-        corrs = diag( cor( p1 , p2  ) )
+        corrs = outcorrs
         )
       )
 }
