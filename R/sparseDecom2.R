@@ -27,6 +27,7 @@
 #' @param priorWeight Scalar value weight on prior between 0 (prior is weak)
 #' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param verbose activates verbose output to screen
+#' @param rejector rejects small correlation solutions
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -110,7 +111,8 @@ sparseDecom2 <- function(
   initializationList2 = list(),
   ell1 = 0.05,
   priorWeight = 0,
-  verbose = FALSE  ) {
+  verbose = FALSE,
+  rejector=0  ) {
   idim=3
   if (class(inmask[[1]])[[1]] == "antsImage" ) idim=inmask[[1]]@dimension
   if (class(inmask[[2]])[[1]] == "antsImage" ) idim=inmask[[2]]@dimension
@@ -199,6 +201,16 @@ sparseDecom2 <- function(
     colnames( sccaner$eig2 ) = mynames[1:nvecs]
     colnames( sccaner$projections ) = mynames[1:nvecs]
     colnames( sccaner$projections2 ) = mynames[1:nvecs]
+    }
+  if ( rejector > 0 )
+    {
+    selector=abs(ccasummary$corrs) > rejector
+    if ( sum( selector ) > 1 )
+      {
+      sccaner$eig1 = sccaner$eig1[ , selector ]
+      sccaner$eig2 = sccaner$eig2[ , selector ]
+      ccasummary = ccasummary[ selector, ]
+      }
     }
   return(
     list(
