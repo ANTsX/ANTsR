@@ -9,7 +9,8 @@ sparseDecom2boot(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
   nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0,
   uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 1,
   initializationList = list(), initializationList2 = list(), ell1 = 0.05,
-  nboot = 10, nsamp = 1, doseg = FALSE)
+  nboot = 10, nsamp = 1, doseg = FALSE, priorWeight = 0,
+  verbose = FALSE)
 }
 \arguments{
 \item{inmatrix}{input as inmatrix=list(mat1,mat2). n by p input matrix and n
@@ -53,6 +54,11 @@ orthogonality or 0 - both}
 \item{nsamp}{number of samples e.g. 0.9 indicates 90 percent of data}
 
 \item{doseg}{boolean to control matrix orthogonality during bootstrap}
+
+\item{priorWeight}{Scalar value weight on prior between 0 (prior is weak)
+and 1 (prior is strong).  Only engaged if initialization is used}
+
+\item{verbose}{activates verbose output to screen}
 }
 \value{
 outputs a decomposition of a pair of matrices

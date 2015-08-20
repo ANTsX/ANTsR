@@ -7,7 +7,7 @@
 sparseDecom2(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
   nvecs = 3, its = 2, cthresh = c(0, 0), statdir = NA, perms = 0,
   uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 0,
-  initializationList = list(), initializationList2 = list(), ell1 = 0.05,
+  initializationList = list(), initializationList2 = list(), ell1 = 0.5,
   priorWeight = 0, verbose = FALSE, rejector = 0)
 }
 \arguments{
