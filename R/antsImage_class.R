@@ -859,6 +859,9 @@ setMethod(f = "[<-", signature(x = "antsImage", i = "NULL", j = "numeric", value
 #' @param pixeltype a character string e.g. "float"
 #' @param spacing numeric vector matching image dimensionality e.g. c(1.2,1.2)
 #' @param origin numeric vector matching image dimensionality e.g. c(0,0)
+#' @param direction numeric matrix matching image dimensionality eg diag(2)
+#' @param components number of components per voxel, e.g. 1
+#' @param reference optional reference antsImage providing all header info
 #' @param ... Extra named arguments passed to FUN
 #' @rdname as.antsImage
 #' @export

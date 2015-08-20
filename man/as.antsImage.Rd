@@ -128,6 +128,12 @@ as.antsImage(object, ...)
 \item{spacing}{numeric vector matching image dimensionality e.g. c(1.2,1.2)}
 
 \item{origin}{numeric vector matching image dimensionality e.g. c(0,0)}
+
+\item{direction}{numeric matrix matching image dimensionality eg diag(2)}
+
+\item{components}{number of components per voxel, e.g. 1}
+
+\item{reference}{optional reference antsImage providing all header info}
 }
 \description{
 convert types to antsImage
