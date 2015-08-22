@@ -73,8 +73,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   bootccalist1 <- list()
   bootccalist2 <- list()
   nsubs = nrow(mat1)
-  allmat1 = matrix( nrow=ncol(mat1)*nboot, ncol=nvecs )
-  allmat2 = matrix( nrow=ncol(mat2)*nboot, ncol=nvecs )
+  allmat1 = matrix( ncol=nv*nboot, nrow=ncol(mat1) )
+  allmat2 = matrix( ncol=nv*nboot, nrow=ncol(mat2) )
   for (i in 1:nvecs) {
     makemat <- matrix(rep(0, nboot * ncol(mat1)), ncol = ncol(mat1))
     bootccalist1 <- lappend(bootccalist1, makemat)
@@ -150,10 +150,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     }
     cca1out <- cca1out + (cca1) # * myressum
     cca2out <- cca2out + (cca2) # * myressum
-    bootInds = (( boots - 1 )*ncol(mat1)+1):(boots*ncol(mat1))
-    allmat1[ bootInds ,  ] = cca1
-    bootInds = (( boots - 1 )*ncol(mat2)+1):(boots*ncol(mat2))
-    allmat2[ bootInds ,  ] = cca2
+    bootInds = (( boots - 1 )*nv+1):(boots*nv)
+    allmat1[  ,  bootInds ] = (cca1)
+    allmat2[  ,  bootInds ] = (cca2)
     for (nv in 1:nvecs) {
       # if (sparseness[1] > 0)
         bootccalist1[[nv]][boots, ] <- (cca1[, nv])
@@ -168,9 +167,9 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   for ( k in 1:nv )
     {
     cca1out[,k] =
-      .eanatsparsify( cca1out[,k], sparseness[1] )
+      .eanatsparsify( abs(cca1out[,k]), sparseness[1] )
     cca2out[,k] =
-      .eanatsparsify( cca2out[,k], sparseness[2] )
+      .eanatsparsify( abs(cca2out[,k]), sparseness[2] )
 #    zz = abs( cca1out[,k] ) < 0.2
 #    cca1out[zz,k] = 0
 #    zz = abs( cca2out[,k] ) < 0.2
@@ -197,9 +196,16 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     priorWeight=priorWeight,
     verbose=verbose )
   return(
-    list( bootsccan=ccaout,  cca1boot=cca1out, cca2boot=cca2out,
-      bootccalist1=bootccalist1,bootccalist2=bootccalist2,
-      allmat1=allmat1, allmat2=allmat2 )
+    list(
+      bootsccan=ccaout,
+      cca1boot=cca1out,
+      cca2boot=cca2out,
+      bootccalist1=bootccalist1,
+      bootccalist2=bootccalist2,
+      allmat1=allmat1,
+      allmat2=allmat2,
+      init1=init1,
+      init2=init2 )
     )
 ##### old implementation below #####
   cca1outAuto <- cca1out

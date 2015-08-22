@@ -98,7 +98,7 @@ sparseDecom2 <- function(
   inmask = c(NA, NA),
   sparseness = c(0.01, 0.01),
   nvecs = 3,
-  its = 2,
+  its = 20,
   cthresh = c(0, 0),
   statdir = NA,
   perms = 0,
@@ -109,7 +109,7 @@ sparseDecom2 <- function(
   mycoption = 0,
   initializationList = list(),
   initializationList2 = list(),
-  ell1 = 0.5,
+  ell1 = 10,
   priorWeight = 0,
   verbose = FALSE,
   rejector=0  ) {
