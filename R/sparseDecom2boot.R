@@ -73,8 +73,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   bootccalist1 <- list()
   bootccalist2 <- list()
   nsubs = nrow(mat1)
-  allmat1 = matrix( ncol=nv*nboot, nrow=ncol(mat1) )
-  allmat2 = matrix( ncol=nv*nboot, nrow=ncol(mat2) )
+  allmat1 = matrix( ncol=nvecs*nboot, nrow=ncol(mat1) )
+  allmat2 = matrix( ncol=nvecs*nboot, nrow=ncol(mat2) )
   for (i in 1:nvecs) {
     makemat <- matrix(rep(0, nboot * ncol(mat1)), ncol = ncol(mat1))
     bootccalist1 <- lappend(bootccalist1, makemat)
@@ -88,7 +88,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     submat1 <- mat1[mysample, ]
     submat2 <- mat2[mysample, ]
     sublist <- list(submat1, submat2)
-    print(paste("boot", boots, "sample", mysize))
+#    print(paste("boot", boots, "sample", mysize))
     (myres <- sparseDecom2(
       inmatrix = sublist,
       inmask = mymask,
@@ -150,7 +150,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     }
     cca1out <- cca1out + (cca1) # * myressum
     cca2out <- cca2out + (cca2) # * myressum
-    bootInds = (( boots - 1 )*nv+1):(boots*nv)
+    bootInds = (( boots - 1 )*nvecs+1):(boots*nvecs)
     allmat1[  ,  bootInds ] = (cca1)
     allmat2[  ,  bootInds ] = (cca2)
     for (nv in 1:nvecs) {
@@ -164,7 +164,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   }
 
   if ( doseg )
-  for ( k in 1:nv )
+  for ( k in 1:nvecs )
     {
     cca1out[,k] =
       .eanatsparsify( abs(cca1out[,k]), sparseness[1] )
@@ -195,6 +195,15 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     ell1 = ell1,
     priorWeight=priorWeight,
     verbose=verbose )
+  jh=matrix( 0, nrow=ncol(inmatrix[[1]]), ncol=ncol(inmatrix[[2]]) )
+  colnames(jh)=colnames(inmatrix[[2]])
+  rownames(jh)=colnames(inmatrix[[1]])
+  for ( i in 1:ncol(allmat1) )
+    {
+    wh1=which( abs( allmat1[,i] ) > 1.e-10 )
+    wh2=which( abs( allmat2[,i] ) > 1.e-10 )
+    jh[ wh1, wh2 ] = jh[ wh1, wh2 ] + 1
+    }
   return(
     list(
       bootsccan=ccaout,
@@ -205,7 +214,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
       allmat1=allmat1,
       allmat2=allmat2,
       init1=init1,
-      init2=init2 )
+      init2=init2,
+      jh=jh )
     )
 ##### old implementation below #####
   cca1outAuto <- cca1out
