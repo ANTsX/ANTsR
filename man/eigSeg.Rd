@@ -4,13 +4,12 @@
 \alias{eigSeg}
 \title{Segmentation for eigenanatomy.}
 \usage{
-eigSeg(mask = NA, imgList = NA, applySegmentationToImages = TRUE)
+eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE)
 }
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}
 
-\item{imgList}{list containing antsImages or filenames pointing to
-antsImages.}
+\item{imgList}{list containing antsImages or a matrix matching the mask.}
 
 \item{applySegmentationToImages}{boolean determines if original image list
 is modified by the segmentation.}
@@ -29,6 +28,8 @@ mylist<-list( antsImageRead( getANTsRData("r16") ),
   antsImageRead( getANTsRData("r27") ),
   antsImageRead( getANTsRData("r85") ) )
 myseg<-eigSeg( getMask( mylist[[1]] ) , mylist )
+mat=imageListToMatrix( mylist, getMask( mylist[[1]] ) )
+myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 }
 \author{
 Avants BB

@@ -7,8 +7,7 @@
 #'
 #'
 #' @param mask D-dimensional mask > 0 defining segmentation region.
-#' @param imgList list containing antsImages or filenames pointing to
-#' antsImages.
+#' @param imgList list containing antsImages or a matrix matching the mask.
 #' @param applySegmentationToImages boolean determines if original image list
 #' is modified by the segmentation.
 #' @return segmentation image.
@@ -19,9 +18,11 @@
 #'   antsImageRead( getANTsRData("r27") ),
 #'   antsImageRead( getANTsRData("r85") ) )
 #' myseg<-eigSeg( getMask( mylist[[1]] ) , mylist )
+#' mat=imageListToMatrix( mylist, getMask( mylist[[1]] ) )
+#' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 #'
 #' @export eigSeg
-eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {
+eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)
@@ -29,25 +30,26 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = TRUE) {
   maskvox <- (mask > 0)
   maskseg <- antsImageClone(mask)
   maskseg[maskvox] <- 0
-  if (length(imgList) > 0) {
-    if (typeof(imgList) == "list")
-      mydata <- imageListToMatrix(imgList, mask)
-    if (typeof(imgList) == "character")
-      mydata <- imagesToMatrix(imgList, mask)
-    segids <- apply(abs(mydata), 2, which.max)
-    segmax <- apply(abs(mydata), 2, max)
-    maskseg[maskvox] <- (segids * (segmax > 1e-09))
-    if (applySegmentationToImages) {
-      for (i in 1:length(imgList)) {
-        img <- imgList[[i]]
-        img[maskseg != as.numeric(i)] <- 0
-        imgList[[i]] <- img
+  if ( class(imgList) == "matrix")
+    mydata <- imgList
+  if ( class(imgList) != "matrix")
+    if ( length(imgList) > 0 )
+      if ( typeof(imgList) == "list")
+        mydata <- imageListToMatrix(imgList, mask)
+  if ( ! exists('mydata') )
+    stop("wrong input type - see help")
+  segids <- apply(abs(mydata), 2, which.max)
+  segmax <- apply(abs(mydata), 2, max)
+  maskseg[maskvox] <- (segids * (segmax > 1e-09))
+  if (applySegmentationToImages & class(imgList) != "matrix" ) {
+    for (i in 1:length(imgList)) {
+      img <- imgList[[i]]
+      img[maskseg != as.numeric(i)] <- 0
+      imgList[[i]] <- img
       }
     }
-    return(maskseg)
-  } else print("No images in list")
+  return(maskseg)
 }
-
 
 .matrixSeg <- function(mydatamatrix) {
   segids <- apply(abs(mydatamatrix), 2, which.max)
