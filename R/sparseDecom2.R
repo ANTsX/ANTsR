@@ -120,6 +120,8 @@ sparseDecom2 <- function(
      maskx = new("antsImage", "float",idim) else maskx = antsImageClone( inmask[[1]] )
   if (class(inmask[[2]])[[1]] != "antsImage")
      masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
+  if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
+    stop("Matrices must have same number of rows")
   inmask = c( maskx, masky )
   verbose = as.numeric( verbose )
   if ( robust > 0 )
