@@ -30,9 +30,9 @@
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
 #' mat<-scale(mat)
-#' mydecom2<-sparseDecom( mat-min(mat) ) # non-neg matrix
+#' mydecom2<-sparseDecom( mat )
 #' # params that lead to algorithm similar to NMF
-#' mydecom3<-sparseDecom( mat-min(mat), z=1, sparseness=1 )
+#' mydecom3<-sparseDecom( mat, z=1, sparseness=1 )
 #'
 #' \dontrun{
 #' # for prediction
@@ -148,6 +148,16 @@ sparseDecom <- function(inmatrix = NA, inmask = NA,
   time2 <- (Sys.time())
   outval = lappend( outval,  (time2 - time1) )
   names(outval)[length(outval)]='computationtime'
+  if ( verbose )
+  {
+  reconerr=lm( inmatrix ~  ( inmatrix %*% t(outval$eigenanatomyimages) ) )
+  reconmat = predict( reconerr )
+  reconerr=mean( abs( inmatrix - reconmat ) )
+  outval[length(outval)-1]=reconerr
+  names(outval)[length(outval)-1]='meanReconstructionError'
+  outval[[length(outval)+1]]=reconmat
+  names(outval)[length(outval)]='Reconstruction'
+  }
   return( outval )
 #  return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu,
 }
