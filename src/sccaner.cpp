@@ -163,7 +163,7 @@ SEXP eigenanatomyCppHelper(
   sccanobj->SetSmoother( smooth );
   if ( sparseness < 0 ) sccanobj->SetKeepPositiveP(false);
   sccanobj->SetSCCANFormulation(  SCCANType::PQ );
-  sccanobj->SetFractionNonZeroP( sparseness );
+  sccanobj->SetFractionNonZeroP( fabs( sparseness ) );
   sccanobj->SetMinClusterSizeP( cthresh );
   sccanobj->SetMatrixP( vnlX );
 //  sccanobj->SetMatrixR( r ); // FIXME
@@ -468,8 +468,8 @@ SEXP sccanCppHelper(
   if ( sparsenessx < 0 ) sccanobj->SetKeepPositiveP(false);
   if ( sparsenessy < 0 ) sccanobj->SetKeepPositiveQ(false);
   sccanobj->SetSCCANFormulation(  SCCANType::PQ );
-  sccanobj->SetFractionNonZeroP( sparsenessx );
-  sccanobj->SetFractionNonZeroQ( sparsenessy );
+  sccanobj->SetFractionNonZeroP( fabs( sparsenessx ) );
+  sccanobj->SetFractionNonZeroQ( fabs( sparsenessy ) );
   sccanobj->SetMinClusterSizeP( cthreshx );
   sccanobj->SetMinClusterSizeQ( cthreshy );
   sccanobj->SetMatrixP( vnlX );

@@ -150,11 +150,18 @@ sparseDecom <- function(inmatrix = NA, inmask = NA,
   names(outval)[length(outval)]='computationtime'
   if ( verbose )
   {
-  reconerr=lm( inmatrix ~  ( inmatrix %*% t(outval$eigenanatomyimages) ) )
-  reconmat = predict( reconerr )
-  reconerr=mean( abs( inmatrix - reconmat ) )
+  temp=lm( inmatrix ~  ( inmatrix %*% t(outval$eigenanatomyimages) ) )
+  reconmat = predict( temp )
+  reconerr = 0
+  for ( i in 1:ncol(inmatrix) )
+    {
+    temp = abs( cor(inmatrix[,i],reconmat[,i]) )
+    reconerr = reconerr + temp
+    }
+  reconerr = reconerr / ncol( inmatrix )
+#  reconerr=mean( abs( inmatrix - reconmat ) )
   outval[length(outval)-1]=reconerr
-  names(outval)[length(outval)-1]='meanReconstructionError'
+#  names(outval)[length(outval)-1]='meanReconstructionError'
   outval[[length(outval)+1]]=reconmat
   names(outval)[length(outval)]='Reconstruction'
   }
