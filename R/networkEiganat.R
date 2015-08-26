@@ -204,7 +204,7 @@ networkEiganat <- function(
 lowrankRowMatrix <- function(A, k = 2 ) {
   if (k > nrow(A))
     return(A)
-  if ( usePkg("RRedsvd") )
+  if ( usePkg("RRedsvd") & FALSE )
   {
     x<-as(A,"CsparseMatrix")
     s <- RRedsvd::redsvd( x, k )
