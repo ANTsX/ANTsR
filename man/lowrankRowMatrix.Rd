@@ -4,12 +4,14 @@
 \alias{lowrankRowMatrix}
 \title{Produces a low rank version of the input matrix}
 \usage{
-lowrankRowMatrix(A, k = 2)
+lowrankRowMatrix(A, k = 2, faster = FALSE)
 }
 \arguments{
 \item{A}{input matrix}
 
 \item{k}{rank to use}
+
+\item{faster}{boolean}
 }
 \value{
 matrix is output

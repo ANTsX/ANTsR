@@ -124,7 +124,11 @@ sparseDecom <- function(inmatrix = NA, inmask = NA,
     return(0)
   }
   idim=3
-  if (class(inmask)[[1]] == "antsImage" ) idim=inmask@dimension
+  if (class(inmask)[[1]] == "antsImage" ) {
+    idim=inmask@dimension
+    if ( sum( inmask >= 0.5 ) != ncol( inmatrix )  )
+      stop("mask size not equal to matrix column count")
+    }
   verbose = as.numeric( verbose )
   if (class(inmask)[[1]] != "antsImage") # create a false mask that we dont use
     if ( is.na(inmask) ) inmask = new("antsImage", "float", idim)
