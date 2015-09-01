@@ -98,7 +98,9 @@ antsRegistration <- function( fixed = NA, moving = NA,
         wfo <- .antsrGetPointerName(warpedfixout)
         wmo <- .antsrGetPointerName(warpedmovout)
         if (!is.na(mask)) {
-          charmask <- antsImageClone(mask, "unsigned char")
+          maskScale = mask - min( mask )
+          maskScale = maskScale / max( maskScale ) * 255
+          charmask <- antsImageClone( maskScale , "unsigned char")
           maskopt <- .antsrGetPointerName(charmask)
         } else maskopt=NA
         if (is.na(initx)) {
