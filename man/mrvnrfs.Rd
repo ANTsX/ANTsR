@@ -70,7 +70,7 @@ rfmresult<-mrvnrfs.predict( rfm$rflist,
      ilist, masklist, rad=rad, asFactors=(  predtype == "label" ),
      multiResSchedule=mr )
 if ( predtype == "scalar" )
-  print( cor( unlist(lablist) , rfmresult$seg ) )
+  print( cor( unlist(lablist) , unlist(rfmresult$seg) ) )
 } # end predtype loop
 }
 \author{
