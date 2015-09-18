@@ -4,7 +4,7 @@
 \alias{vwnrfs}
 \title{voxelwise neighborhood random forest segmentation and prediction}
 \usage{
-vwnrfs(y, x, labelmask, rad = NA, nsamples = 1, ntrees = 500,
+vwnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
   asFactors = TRUE)
 }
 \arguments{
@@ -13,10 +13,9 @@ this can also be a regular old vector}
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmask}{a mask for the features (all in the same image space)
-the labelmask defines the number of parallel samples that will be used
-per subject sample. two labels will double the number of predictors
-contributed from each feature image.}
+\item{labelmasks}{a list of masks where each mask defines the image space
+for the given list. that is, the nth mask indexes the nth feature set.
+multi-label masks will try to balance sampling for each label.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -40,6 +39,7 @@ mask[ 3:6, 3:6 ]<-1
 mask[ 5, 5:6]<-2
 ilist<-list()
 lablist<-list()
+masklist<-list()
 inds<-1:50
 scl<-0.33 # a noise parameter
 for ( predtype in c("label","scalar") )
@@ -60,8 +60,10 @@ for ( i in inds ) {
       }
     ilist[[i]]<-list(img,imgb)  # two features
     lablist[[i]]<-limg
+    masklist[[i]] = mask
   }
-  rfm<-vwnrfs( lablist , ilist, mask, rad=c(2,2) )
+  rfm<-vwnrfs( lablist , ilist, masklist[[1]], rad=c(2,2) ) # use single mask
+  rfm<-vwnrfs( lablist , ilist, masklist, rad=c(2,2) )
   if ( predtype == "label" )
     print(  sum( rfm$tv != predict(rfm$rfm) ) )
   if ( predtype == "scalar" )

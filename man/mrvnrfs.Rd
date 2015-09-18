@@ -4,7 +4,7 @@
 \alias{mrvnrfs}
 \title{multi-res voxelwise neighborhood random forest segmentation learning}
 \usage{
-mrvnrfs(y, x, labelmask, rad = NA, nsamples = 1, ntrees = 500,
+mrvnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
   multiResSchedule = c(4, 2, 1), asFactors = TRUE)
 }
 \arguments{
@@ -12,10 +12,8 @@ mrvnrfs(y, x, labelmask, rad = NA, nsamples = 1, ntrees = 500,
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmask}{a mask for the features (all in the same image space)
-the labelmask defines the number of parallel samples that will be used
-per subject sample. two labels will double the number of predictors
-contributed from each feature image.}
+\item{labelmasks}{a list of masks where each mask defines the image space
+for the given list. that is, the nth mask indexes the nth feature set.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -41,6 +39,7 @@ mask[ 3:6, 3:6 ]<-1
 mask[ 5, 5:6]<-2
 ilist<-list()
 lablist<-list()
+masklist<-list()
 inds<-1:50
 scl<-0.33 # a noise parameter
 for ( predtype in c("label","scalar") )
@@ -61,13 +60,14 @@ for ( i in inds ) {
       }
     ilist[[i]]<-list(img,imgb)  # two features
     lablist[[i]]<-limg
+    masklist[[i]] = mask
   }
 rad<-rep( 1, 2 )
 mr <- c(1.5,1)
-rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr,
+rfm<-mrvnrfs( lablist , ilist, masklist, rad=rad, multiResSchedule=mr,
      asFactors = (  predtype == "label" ) )
 rfmresult<-mrvnrfs.predict( rfm$rflist,
-     ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
+     ilist, masklist, rad=rad, asFactors=(  predtype == "label" ),
      multiResSchedule=mr )
 if ( predtype == "scalar" )
   print( cor( unlist(lablist) , rfmresult$seg ) )

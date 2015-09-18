@@ -5,10 +5,8 @@
 #'
 #' @param y list of training labels. either an image or numeric value
 #' @param x a list of lists where each list contains feature images
-#' @param labelmask a mask for the features (all in the same image space)
-#' the labelmask defines the number of parallel samples that will be used
-#' per subject sample. two labels will double the number of predictors
-#' contributed from each feature image.
+#' @param labelmasks a list of masks where each mask defines the image space
+#' for the given list. that is, the nth mask indexes the nth feature set.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param nsamples (per subject to enter training)
 #' @param ntrees (for the random forest model)
@@ -25,6 +23,7 @@
 #' mask[ 5, 5:6]<-2
 #' ilist<-list()
 #' lablist<-list()
+#' masklist<-list()
 #' inds<-1:50
 #' scl<-0.33 # a noise parameter
 #' for ( predtype in c("label","scalar") )
@@ -45,13 +44,14 @@
 #'       }
 #'     ilist[[i]]<-list(img,imgb)  # two features
 #'     lablist[[i]]<-limg
+#'     masklist[[i]] = mask
 #'   }
 #' rad<-rep( 1, 2 )
 #' mr <- c(1.5,1)
-#' rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr,
+#' rfm<-mrvnrfs( lablist , ilist, masklist, rad=rad, multiResSchedule=mr,
 #'      asFactors = (  predtype == "label" ) )
 #' rfmresult<-mrvnrfs.predict( rfm$rflist,
-#'      ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
+#'      ilist, masklist, rad=rad, asFactors=(  predtype == "label" ),
 #'      multiResSchedule=mr )
 #' if ( predtype == "scalar" )
 #'   print( cor( unlist(lablist) , rfmresult$seg ) )
@@ -59,19 +59,29 @@
 #'
 #'
 #' @export mrvnrfs
-mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
+mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
   ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE ) {
     # check y type
     yisimg<-TRUE
+    if ( typeof(labelmasks) != "list" ) {
+      inmask = antsImageClone( labelmasks )
+      labelmasks=list()
+      for ( i in 1:length(x) ) labelmasks[[i]] = inmask
+    }
     if ( typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double") yisimg<-FALSE
     rflist<-list()
     rfct<-1
     for ( mr in multiResSchedule )
       {
-      subdim<-round( dim( labelmask ) / mr )
-      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
-      submask<-resampleImage( labelmask, subdim, useVoxels=1,
-        interpType=1 )
+      submasks = list()
+      for ( i in 1:length(labelmasks) )
+        {
+        subdim<-round( dim( labelmasks[[i]] ) / mr )
+        subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
+        submask<-resampleImage( labelmasks[[i]], subdim, useVoxels=1,
+          interpType=1 )
+        submasks[[i]]=submask
+        }
       ysub<-y
       if ( yisimg )
       {
@@ -93,7 +103,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
           }
         }
       nfeats<-length(xsub[[1]])
-      testmat<-t(getNeighborhoodInMask( submask, submask,
+      testmat<-t(getNeighborhoodInMask( submasks[[1]], submasks[[1]],
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*ncol(testmat)*nrow(testmat)*length(xsub)*1.0
@@ -103,15 +113,16 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
       seqby<-seq.int( 1, hdsz*length(xsub)+1, by=hdsz )
       for ( i in 1:(length(xsub)) )
         {
+        subdim = dim( submasks[[i]] )
         xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submask,
+        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submasks[[i]],
           rad, spatial.info=F, boundary.condition='image' ))
         if ( nfeats > 1 )
         for ( k in 2:nfeats )
           {
           xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
             useVoxels=1, 0 )
-          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submask,
+          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submasks[[i]],
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }
@@ -119,7 +130,7 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
         fm[ seqby[i]:nxt, ]<-m1
         }
 #    return(list(ysub=ysub,xsub=xsub,submask=submask))
-    sol<-vwnrfs( ysub, xsub, submask, rad, nsamples, ntrees, asFactors )
+    sol<-vwnrfs( ysub, xsub, submasks, rad, nsamples, ntrees, asFactors )
     predtype<-'response'
     if ( asFactors ) predtype<-'prob'
     probsrf<-t( predict( sol$rfm, newdata=fm, type=predtype ) )
@@ -127,15 +138,15 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
     for ( i in 1:(length(xsub)) )
       {
       nxt<-seqby[ i + 1 ]-1
-      probsx<-list(labelmask)
+      probsx<-list(labelmasks[[i]])
       if ( asFactors )
-        probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submask )
-      else probsx<-list( makeImage( submask, probsrf[seqby[i]:nxt] ) )
-      if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
+        probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submasks[[i]] )
+      else probsx<-list( makeImage( submasks[[i]], probsrf[seqby[i]:nxt] ) )
       for ( temp in 1:length(probsx) )
         {
-        probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
-          useVoxels=1, 0 )
+        if ( ! all( dim( probsx[[temp]] ) == dim(labelmasks[[temp]]) ) )
+          probsx[[temp]]<-resampleImage( probsx[[temp]],
+            dim(labelmasks[[temp]]), useVoxels=1, 0 )
         }
       newprobs[[i]]<-probsx
       }
@@ -154,7 +165,8 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
 #'
 #' @param rflist a list of random forest models from mrvnrfs
 #' @param x a list of lists where each list contains feature images
-#' @param labelmask a mask for the features (all in the same image space)
+#' @param labelmasks a list of masks where each mask defines the image space
+#' for the given list. that is, the nth mask indexes the nth feature set.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param multiResSchedule an integer vector defining multi-res levels
 #' @param asFactors boolean - treat the y entries as factors
@@ -163,15 +175,29 @@ mrvnrfs <- function( y, x, labelmask, rad=NA, nsamples=1,
 #' @author Avants BB, Tustison NJ
 #'
 #' @export mrvnrfs.predict
-mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
-  multiResSchedule=c(4,2,1), asFactors=TRUE ) {
+mrvnrfs.predict <- function( rflist, x,
+  labelmasks,
+  rad=NA,
+  multiResSchedule=c(4,2,1),
+  asFactors=TRUE )
+  {
+    if ( typeof(labelmasks) != "list" ) {
+      inmask = antsImageClone( labelmasks )
+      labelmasks=list()
+      for ( i in 1:length(x) ) labelmasks[[i]] = inmask
+    }
     rfct<-1
     for ( mr in multiResSchedule )
       {
-      subdim<-round( dim( labelmask ) / mr )
-      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
-      submask<-resampleImage( labelmask, subdim, useVoxels=1,
-        interpType=1 )
+      submasks = list()
+      for ( i in 1:length(labelmasks) )
+        {
+        subdim<-round( dim( labelmasks[[i]] ) / mr )
+        subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
+        submask<-resampleImage( labelmasks[[i]], subdim, useVoxels=1,
+          interpType=1 )
+        submasks[[i]]=submask
+        }
       xsub<-x
       if ( rfct > 1 )
         {
@@ -182,24 +208,27 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
           }
         }
       nfeats<-length(xsub[[1]])
-      testmat<-t(getNeighborhoodInMask( submask, submask,
+      testmat<-t(getNeighborhoodInMask( submasks[[1]], submasks[[1]],
         rad, spatial.info=F, boundary.condition='image' ))
       hdsz<-nrow(testmat) # neighborhood size
       nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
-      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
+      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,
+                  ncol=ncol(testmat)*nfeats  )
       rm( testmat )
       seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
       for ( i in 1:(length(x)) )
         {
-        xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submask,
+        subdim = dim( submasks[[i]] )
+        xsub[[i]][[1]]<-resampleImage(
+          xsub[[i]][[1]], subdim, useVoxels=1, 0 )
+        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submasks[[i]],
           rad, spatial.info=F, boundary.condition='image' ))
         if ( nfeats > 1 )
         for ( k in 2:nfeats )
           {
           xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
             useVoxels=1, 0 )
-          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submask,
+          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submasks[[i]],
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }
@@ -214,11 +243,13 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
       {
       nxt<-seqby[ i + 1 ]-1
       if ( asFactors )
-        probsx<-matrixToImages(probs[,seqby[i]:nxt],  submask )
-      else probsx<-list( makeImage( submask, probs[seqby[i]:nxt] ) )
-      if ( ! all( dim( probsx[[1]] ) == dim(labelmask) ) )
+        probsx<-matrixToImages(probs[,seqby[i]:nxt],  submasks[[i]] )
+      else probsx<-list( makeImage( submasks[[i]], probs[seqby[i]:nxt] ) )
+      if ( ! all( dim( probsx[[1]] ) == dim(labelmasks[[i]]) ) )
       for ( temp in 1:length(probsx) )
-        probsx[[temp]]<-resampleImage( probsx[[temp]], dim(labelmask),
+        probsx[[temp]]<-resampleImage(
+          probsx[[temp]],
+          dim(labelmasks[[i]]),
           useVoxels=1, 0 )
       newprobs[[i]]<-probsx
       }
@@ -226,12 +257,12 @@ mrvnrfs.predict <- function( rflist, x, labelmask, rad=NA,
     } # mr loop
     if ( asFactors )
       {
-      rfseg<-imageListToMatrix( unlist(newprobs) , labelmask )
+      rfseg<-imageListToMatrix( unlist(newprobs) , labelmasks[[1]] )
       rfseg<-apply( rfseg, FUN=which.max, MARGIN=2)
-      rfseg<-makeImage( labelmask , rfseg )
+      rfseg<-makeImage( labelmasks[[1]] , rfseg )
       return( list( seg=rfseg, probs=newprobs ) )
       }
     rfseg<-apply( imageListToMatrix( unlist(newprobs) ,
-       labelmask ), FUN=median, MARGIN=1 )
+       labelmasks[[1]] ), FUN=median, MARGIN=1 )
     return( list( seg=rfseg, probs=newprobs ) )
 }
