@@ -58,10 +58,12 @@
 #' @export vwnrfs
 vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
   ntrees=500, asFactors=TRUE ) {
+  useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
     inmask = antsImageClone( labelmasks )
     labelmasks=list()
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
+    useFirstMask = TRUE
   }
   if ( all( is.na( rad )  ) ) {
     rad<-rep(0, x[[1]][[1]]@dimension )
@@ -93,14 +95,6 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
   rmsz<-sum( randmask > 0 ) # entries in mask
   tv<-rep( NA, length(y)*rmsz )
   seqby<-seq.int( 1, length(tv)+1, by=rmsz )
-  for ( i in 1:(length(y)) )
-    {
-    nxt<-seqby[ i + 1 ]-1
-    if ( yisimg )
-      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
-    else tv[ seqby[i]:nxt ]<-rep( y[[i]], rmsz )
-    }
-  if ( asFactors ) tv<-factor( tv )
   nfeats<-length(x[[1]])
   testmat<-getNeighborhoodInMask( image=randmask, mask=randmask,
     radius=rad, spatial.info=F, boundary.condition='image' )
@@ -109,6 +103,8 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
   nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)
   fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
   for ( i in 1:(length(y)) )
+    {
+    if ( !useFirstMask )
     {
     # get locally appropriate randmask
     randmask<-antsImageClone( labelmasks[[i]] )*0
@@ -121,6 +117,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
       randmask[ randvec ]<-ulab
       }
+    }
     # ok ...
     m1<-t(getNeighborhoodInMask( x[[i]][[1]], randmask,
       rad, spatial.info=F, boundary.condition='image' ))
@@ -133,13 +130,17 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       }
     nxt<-seqby[ i + 1 ]-1
     fm[ seqby[i]:nxt, ]<-m1
+    if ( yisimg )
+      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
+    else tv[ seqby[i]:nxt ]<-rep( y[[i]], rmsz )
     }
+  if ( asFactors ) tv<-factor( tv )
   if ( usePkg("randomForest") )
     {
     rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
       importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
       keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
-      # need the forest for prediction
+    # need the forest for prediction
     return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
     }
   else

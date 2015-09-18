@@ -63,14 +63,17 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
   ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE ) {
     # check y type
     yisimg<-TRUE
+    useFirstMask=FALSE
     if ( typeof(labelmasks) != "list" ) {
       inmask = antsImageClone( labelmasks )
       labelmasks=list()
       for ( i in 1:length(x) ) labelmasks[[i]] = inmask
+      useFirstMask = TRUE
     }
     if ( typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double") yisimg<-FALSE
     rflist<-list()
     rfct<-1
+    newprobs<-list()
     for ( mr in multiResSchedule )
       {
       submasks = list()
@@ -87,6 +90,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       {
       for ( i in 1:(length(y)) )
         {
+        subdim<-dim( submasks[[i]] )
         ysub[[i]]<-resampleImage( y[[i]], subdim, useVoxels=1,
           interpType=1 ) # might be labels
         }
@@ -102,51 +106,47 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
           xsub[[kk]]<-temp
           }
         }
+      for (  i in 1:length(xsub) )
+        for ( j in 1:length(xsub[[i]]))
+          {
+          subdim<-dim( submasks[[i]] )
+          xsub[[i]][[j]] =
+            resampleImage( xsub[[i]][[j]], subdim, useVoxels=1,
+               interpType=1 ) # might be labels
+          }
+      if ( ! useFirstMask )
+        sol<-vwnrfs( ysub, xsub, submasks,
+          rad, nsamples, ntrees, asFactors )
+      if ( useFirstMask )
+        sol<-vwnrfs( ysub, xsub, submasks[[1]],
+          rad, nsamples, ntrees, asFactors )
       nfeats<-length(xsub[[1]])
-      testmat<-t(getNeighborhoodInMask( submasks[[1]], submasks[[1]],
-        rad, spatial.info=F, boundary.condition='image' ))
-      hdsz<-nrow(testmat) # neighborhood size
-      nent<-nfeats*ncol(testmat)*nrow(testmat)*length(xsub)*1.0
-      fm<-matrix( nrow=(nrow(testmat)*length(xsub)) ,
-        ncol=ncol(testmat)*nfeats  )
-      rm( testmat )
-      seqby<-seq.int( 1, hdsz*length(xsub)+1, by=hdsz )
+      predtype<-'response'
+      if ( asFactors ) predtype<-'prob'
       for ( i in 1:(length(xsub)) )
         {
         subdim = dim( submasks[[i]] )
-        xsub[[i]][[1]]<-resampleImage( xsub[[i]][[1]], subdim, useVoxels=1, 0 )
         m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submasks[[i]],
           rad, spatial.info=F, boundary.condition='image' ))
         if ( nfeats > 1 )
         for ( k in 2:nfeats )
           {
-          xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
-            useVoxels=1, 0 )
           m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submasks[[i]],
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }
-        nxt<-seqby[ i + 1 ]-1
-        fm[ seqby[i]:nxt, ]<-m1
-        }
-#    return(list(ysub=ysub,xsub=xsub,submask=submask))
-    sol<-vwnrfs( ysub, xsub, submasks, rad, nsamples, ntrees, asFactors )
-    predtype<-'response'
-    if ( asFactors ) predtype<-'prob'
-    probsrf<-t( predict( sol$rfm, newdata=fm, type=predtype ) )
-    newprobs<-list()
-    for ( i in 1:(length(xsub)) )
-      {
-      nxt<-seqby[ i + 1 ]-1
+      probsrf<-t(
+        predict( sol$rfm, newdata=m1, type=predtype ) )
       probsx<-list(labelmasks[[i]])
       if ( asFactors )
-        probsx<-matrixToImages(probsrf[,seqby[i]:nxt],  submasks[[i]] )
-      else probsx<-list( makeImage( submasks[[i]], probsrf[seqby[i]:nxt] ) )
+        probsx<-matrixToImages(probsrf,  submasks[[i]] )
+      else probsx<-list(
+        makeImage( submasks[[i]], probsrf ) )
       for ( temp in 1:length(probsx) )
         {
-        if ( ! all( dim( probsx[[temp]] ) == dim(labelmasks[[temp]]) ) )
+        if ( !all( dim( probsx[[temp]] ) == dim(labelmasks[[i]]) ) )
           probsx[[temp]]<-resampleImage( probsx[[temp]],
-            dim(labelmasks[[temp]]), useVoxels=1, 0 )
+            dim(labelmasks[[i]]), useVoxels=1, 0 )
         }
       newprobs[[i]]<-probsx
       }
@@ -187,8 +187,12 @@ mrvnrfs.predict <- function( rflist, x,
       for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     }
     rfct<-1
+    predtype<-'response'
+    if ( asFactors ) predtype<-'prob'
+    newprobs = list()
     for ( mr in multiResSchedule )
       {
+      newsegs = list()
       submasks = list()
       for ( i in 1:length(labelmasks) )
         {
@@ -203,19 +207,12 @@ mrvnrfs.predict <- function( rflist, x,
         {
         for ( kk in 1:length(xsub) )
           {
-          temp<-lappend(  unlist( xsub[[kk]] ) ,  unlist(newprobs[[kk]])  )
+          temp<-lappend(  unlist( xsub[[kk]] ) ,
+            unlist(newprobs[[kk]])  )
           xsub[[kk]]<-temp
           }
         }
       nfeats<-length(xsub[[1]])
-      testmat<-t(getNeighborhoodInMask( submasks[[1]], submasks[[1]],
-        rad, spatial.info=F, boundary.condition='image' ))
-      hdsz<-nrow(testmat) # neighborhood size
-      nent<-nfeats*nrow(testmat)*ncol(testmat)*length(x)
-      fm<-matrix( nrow=(nrow(testmat)*length(x)) ,
-                  ncol=ncol(testmat)*nfeats  )
-      rm( testmat )
-      seqby<-seq.int( 1, hdsz*length(x)+1, by=hdsz )
       for ( i in 1:(length(x)) )
         {
         subdim = dim( submasks[[i]] )
@@ -232,37 +229,27 @@ mrvnrfs.predict <- function( rflist, x,
               rad, spatial.info=F, boundary.condition='image' ))
           m1<-cbind( m1, m2 )
           }
-        nxt<-seqby[ i + 1 ]-1
-        fm[ seqby[i]:nxt, ]<-m1
-        }
-    predtype<-'response'
-    if ( asFactors ) predtype<-'prob'
-    probs<-t( predict( rflist[[rfct]] ,newdata=fm, type=predtype) )
-    newprobs<-list()
-    for ( i in 1:(length(x)) )
-      {
-      nxt<-seqby[ i + 1 ]-1
+      probsrf<-t(
+        predict( rflist[[rfct]], newdata=m1, type=predtype ) )
       if ( asFactors )
-        probsx<-matrixToImages(probs[,seqby[i]:nxt],  submasks[[i]] )
-      else probsx<-list( makeImage( submasks[[i]], probs[seqby[i]:nxt] ) )
-      if ( ! all( dim( probsx[[1]] ) == dim(labelmasks[[i]]) ) )
+        probsx<-matrixToImages(probsrf,  submasks[[i]] )
+      else probsx<-list(
+        makeImage( submasks[[i]], probsrf ) )
       for ( temp in 1:length(probsx) )
-        probsx[[temp]]<-resampleImage(
-          probsx[[temp]],
-          dim(labelmasks[[i]]),
-          useVoxels=1, 0 )
+        {
+        if ( !all( dim( probsx[[temp]] ) == dim(labelmasks[[i]]) ) )
+          probsx[[temp]]<-resampleImage( probsx[[temp]],
+            dim(labelmasks[[i]]), useVoxels=1, 0 )
+        }
+      if ( asFactors )
+      {
+      rfseg<-imageListToMatrix( unlist(probsx) , labelmasks[[i]] )
+      rfseg<-apply( rfseg, FUN=which.max, MARGIN=2 )
+      newsegs[[i]] = makeImage( submasks[[i]], rfseg )
+      } else newsegs[[i]] = median( probsrf )
       newprobs[[i]]<-probsx
       }
     rfct<-rfct+1
     } # mr loop
-    if ( asFactors )
-      {
-      rfseg<-imageListToMatrix( unlist(newprobs) , labelmasks[[1]] )
-      rfseg<-apply( rfseg, FUN=which.max, MARGIN=2)
-      rfseg<-makeImage( labelmasks[[1]] , rfseg )
-      return( list( seg=rfseg, probs=newprobs ) )
-      }
-    rfseg<-apply( imageListToMatrix( unlist(newprobs) ,
-       labelmasks[[1]] ), FUN=median, MARGIN=1 )
-    return( list( seg=rfseg, probs=newprobs ) )
+    return( list( seg=newsegs, probs=newprobs) )
 }
