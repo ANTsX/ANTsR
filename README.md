@@ -92,12 +92,14 @@ install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 ```
 
-this assumes you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.
+this **assumes** you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.  you may also need [cmake](http://www.cmake.org) if you do/can not install `cmaker`.
 
 windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
 
 
 **from command line**
+
+Assumes git, cmake and compilers are available in your environment (as above).
 
 First, clone the repository:
 ```sh
