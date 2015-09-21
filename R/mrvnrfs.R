@@ -12,6 +12,7 @@
 #' @param ntrees (for the random forest model)
 #' @param multiResSchedule an integer vector defining multi-res levels
 #' @param asFactors boolean - treat the y entries as factors
+#' @param voxchunk split up prediction by this number of voxels per chunk
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ
@@ -60,7 +61,7 @@
 #'
 #' @export mrvnrfs
 mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
-  ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE ) {
+  ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE, voxchunk=1000 ) {
     # check y type
     yisimg<-TRUE
     useFirstMask=FALSE
@@ -125,19 +126,30 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       if ( asFactors ) predtype<-'prob'
       for ( i in 1:(length(xsub)) )
         {
-        subdim = dim( submasks[[i]] )
-        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submasks[[i]],
-          rad, spatial.info=F, boundary.condition='image' ))
-        if ( nfeats > 1 )
-        for ( k in 2:nfeats )
+        splitter = round( sum(  submasks[[i]] / voxchunk ) )
+        if ( splitter <= 2 ) splitter=1
+        subsubmask = splitMask( submasks[[i]] , splitter )
+        for ( sp in 1:splitter )
           {
-          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submasks[[i]],
-              rad, spatial.info=F, boundary.condition='image' ))
-          m1<-cbind( m1, m2 )
+          locmask = thresholdImage( subsubmask, sp, sp )
+          m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], locmask,
+            rad, spatial.info=F, boundary.condition='image' ))
+          if ( nfeats > 1 )
+          for ( k in 2:nfeats )
+            {
+            m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], locmask,
+                rad, spatial.info=F, boundary.condition='image' ))
+            m1<-cbind( m1, m2 )
+            }
+          subprobsrf<-t(
+            predict( sol$rfm, newdata=m1, type=predtype ) )
+          if ( sp == 1 )
+            {
+            probsrf = subprobsrf
+            } else {
+              probsrf = cbind( probsrf, subprobsrf )
+            }
           }
-      probsrf<-t(
-        predict( sol$rfm, newdata=m1, type=predtype ) )
-      probsx<-list(labelmasks[[i]])
       if ( asFactors )
         probsx<-matrixToImages(probsrf,  submasks[[i]] )
       else probsx<-list(
@@ -170,6 +182,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
 #' @param rad vector of dimensionality d define nhood radius
 #' @param multiResSchedule an integer vector defining multi-res levels
 #' @param asFactors boolean - treat the y entries as factors
+#' @param voxchunk split up prediction by this number of voxels per chunk
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ
@@ -179,7 +192,7 @@ mrvnrfs.predict <- function( rflist, x,
   labelmasks,
   rad=NA,
   multiResSchedule=c(4,2,1),
-  asFactors=TRUE )
+  asFactors=TRUE, voxchunk=1000 )
   {
     if ( typeof(labelmasks) != "list" ) {
       inmask = antsImageClone( labelmasks )
@@ -218,19 +231,32 @@ mrvnrfs.predict <- function( rflist, x,
         subdim = dim( submasks[[i]] )
         xsub[[i]][[1]]<-resampleImage(
           xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], submasks[[i]],
-          rad, spatial.info=F, boundary.condition='image' ))
-        if ( nfeats > 1 )
-        for ( k in 2:nfeats )
+        splitter = round( sum(  submasks[[i]] / voxchunk ) )
+        if ( splitter <= 2 ) splitter=1
+        subsubmask = splitMask( submasks[[i]] , splitter )
+        for ( sp in 1:splitter )
           {
-          xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
-            useVoxels=1, 0 )
-          m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], submasks[[i]],
-              rad, spatial.info=F, boundary.condition='image' ))
-          m1<-cbind( m1, m2 )
+          locmask = thresholdImage( subsubmask, sp, sp )
+          m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], locmask,
+            rad, spatial.info=F, boundary.condition='image' ))
+          if ( nfeats > 1 )
+          for ( k in 2:nfeats )
+            {
+            xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
+                useVoxels=1, 0 )
+            m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], locmask,
+                rad, spatial.info=F, boundary.condition='image' ))
+            m1<-cbind( m1, m2 )
+            }
+          subprobsrf<-t(
+            predict( rflist[[rfct]], newdata=m1, type=predtype ) )
+          if ( sp == 1 )
+            {
+            probsrf = subprobsrf
+            } else {
+              probsrf = cbind( probsrf, subprobsrf )
+            }
           }
-      probsrf<-t(
-        predict( rflist[[rfct]], newdata=m1, type=predtype ) )
       if ( asFactors )
         probsx<-matrixToImages(probsrf,  submasks[[i]] )
       else probsx<-list(
@@ -252,4 +278,45 @@ mrvnrfs.predict <- function( rflist, x,
     rfct<-rfct+1
     } # mr loop
     return( list( seg=newsegs, probs=newprobs) )
+}
+
+
+
+#' split a mask into n labeled sub-masks
+#'
+#' @param mask antsImage mask
+#' @param n number of mask chunks
+#' @return relabeledMask
+#' @author Avants BB, Tustison NJ
+#'
+#' @examples
+#' mask = getMask( antsImageRead( getANTsRData("r16" ) ) )
+#' smask = splitMask( mask, 10 )
+#'
+#' @export splitMask
+splitMask <- function( mask, n )
+{
+# first compute chunk size
+  hasvalues = mask >= 0.5
+  nnz = sum( hasvalues )
+  voxchunk = round( nnz / n ) - 1
+  chunk.seq = seq(1, nnz, by=voxchunk )
+  chunk.seq[ length(chunk.seq) ] = nnz
+  smask = mask * 0
+  for ( ch in 1:( length(chunk.seq)-1 ) )
+    {
+    # set end of this chunk
+    chnxt = chunk.seq[ ch + 1 ] - 1
+    if ( ch ==  ( length(chunk.seq)-1 ) ) chnxt = nnz
+    # create mask for this chunk
+    temp = which( hasvalues, arr.ind=T )[ chunk.seq[ch]:chnxt ]
+    tnnz = hasvalues
+    tnnz[ -temp ] = FALSE
+    smask[ tnnz ] = ch
+    }
+  if ( sum( mask >= 0.5 ) != sum(smask >= 0.5 ) )
+    {
+    stop("submask non-zero entries should be the same as input mask" )
+    }
+  return( smask )
 }
