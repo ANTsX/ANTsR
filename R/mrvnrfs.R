@@ -59,13 +59,16 @@
 #' } # end predtype loop
 #'
 #' \dontrun{
+#' myop="GD" # try "Laplacian" or "Grad"
+#' myop="Laplacian"
+#' myop="Grad"
 #' img = antsImageRead( getANTsRData("r16") )
 #' mask = getMask( img )
-#' grad = iMath(img,"Grad",1,1)
+#' grad = iMath(img,myop,1,1)
 #' predimglist = list( grad )
 #' featimglist = list( list( img ) )
 #' masklist = list( mask )
-#' mr <- c(3,2,1)
+#' mr <- c(4,2,1)
 #' rad=c(2,2)
 #' vwout = mrvnrfs( predimglist , featimglist, masklist,
 #'   rad=rad, nsamples = 2000, multiResSchedule=mr, ntrees=1000,
@@ -73,16 +76,17 @@
 #'
 #' img = antsImageRead( getANTsRData("r64") )
 #' mask = getMask( img )
-#' grad = iMath(img,"Grad",1,1)
 #' predimglist = list( grad )
 #' featimglist = list( list( img ) )
 #' masklist = list( mask )
 #' rfmresult<-mrvnrfs.predict( vwout$rflist, featimglist, masklist,
-#'  rad=rad, multiResSchedule=mr,
-#'  asFactors=FALSE )
-#' plot( iMath(img,"Grad",1,1) ) # real gradient image
+#'   rad=rad, multiResSchedule=mr,
+#'   asFactors=FALSE )
+#' gtr = iMath(img,myop,1,1)*mask # ground truth
+#' plot( gtr )
 #' dev.new()
-#' plot( rfmresult$probs[[1]][[1]] )
+#' plot( rfmresult$probs[[1]][[1]]*mask )
+#' print( cor( rfmresult$probs[[1]][[1]][mask==1], gtr[mask==1] ))
 #' }
 #'
 #' @export mrvnrfs
