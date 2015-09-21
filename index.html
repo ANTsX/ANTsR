@@ -87,9 +87,9 @@
 
 <p>Package source: <a href="https://github.com/stnava/ANTsR/zipball/master">from github</a></p>
 
-<p>OS X Mavericks, Yosemite binaries:  <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_OSX_0.3.1.tgz">OSX</a></p>
+<p>OS X Mavericks, Yosemite binaries:  <a href="http://github.com/stnava/ANTsR/releases/">OSX</a></p>
 
-<p>Linux binaries: <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR_1.0_R_x86_64-pc-linux-gnu.tar.gz">Ubuntu</a></p>
+<p>Linux binaries: <a href="http://github.com/stnava/ANTsR/releases/">Ubuntu</a></p>
 
 <p>We are working toward Windows binaries.</p>
 
@@ -131,20 +131,22 @@ install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 </code></pre>
 
-<p>this assumes you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>.</p>
+<p>this <strong>assumes</strong> you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>.  you may also need <a href="http://www.cmake.org">cmake</a> if you do/can not install <code>cmaker</code>.</p>
 
 <p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
 
 <p><strong>from command line</strong></p>
 
+<p>Assumes git, cmake and compilers are available in your environment (as above).</p>
+
 <p>First, clone the repository:</p>
 
-<div class="highlight highlight-sh"><pre>$ git clone https://github.com/stnava/ITKR.git
+<div class="highlight highlight-source-shell"><pre>$ git clone https://github.com/stnava/ITKR.git
 $ git clone https://github.com/stnava/ANTsR.git</pre></div>
 
 <p>Install the package as follows:</p>
 
-<div class="highlight highlight-sh"><pre>$ R CMD INSTALL ITKR
+<div class="highlight highlight-source-shell"><pre>$ R CMD INSTALL ITKR
 $ R CMD INSTALL ANTsR</pre></div>
 
 <h3>
