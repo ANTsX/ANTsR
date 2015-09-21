@@ -58,6 +58,32 @@
 #'   print( cor( unlist(lablist) , unlist(rfmresult$seg) ) )
 #' } # end predtype loop
 #'
+#' \dontrun{
+#' img = antsImageRead( getANTsRData("r16") )
+#' mask = getMask( img )
+#' grad = iMath(img,"Grad",1,1)
+#' predimglist = list( grad )
+#' featimglist = list( list( img ) )
+#' masklist = list( mask )
+#' mr <- c(3,2,1)
+#' rad=c(2,2)
+#' vwout = mrvnrfs( predimglist , featimglist, masklist,
+#'   rad=rad, nsamples = 2000, multiResSchedule=mr, ntrees=1000,
+#'   asFactors=FALSE )
+#'
+#' img = antsImageRead( getANTsRData("r64") )
+#' mask = getMask( img )
+#' grad = iMath(img,"Grad",1,1)
+#' predimglist = list( grad )
+#' featimglist = list( list( img ) )
+#' masklist = list( mask )
+#' rfmresult<-mrvnrfs.predict( vwout$rflist, featimglist, masklist,
+#'  rad=rad, multiResSchedule=mr,
+#'  asFactors=FALSE )
+#' plot( iMath(img,"Grad",1,1) ) # real gradient image
+#' dev.new()
+#' plot( rfmresult$probs[[1]][[1]] )
+#' }
 #'
 #' @export mrvnrfs
 mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
@@ -83,7 +109,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
         subdim<-round( dim( labelmasks[[i]] ) / mr )
         subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
         submask<-resampleImage( labelmasks[[i]], subdim, useVoxels=1,
-          interpType=1 )
+          interpType=as.numeric(asFactors) )
         submasks[[i]]=submask
         }
       ysub<-y
@@ -93,7 +119,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
         {
         subdim<-dim( submasks[[i]] )
         ysub[[i]]<-resampleImage( y[[i]], subdim, useVoxels=1,
-          interpType=1 ) # might be labels
+          interpType=as.numeric(asFactors) ) # might be labels
         }
       }
       xsub<-x
@@ -113,7 +139,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
           subdim<-dim( submasks[[i]] )
           xsub[[i]][[j]] =
             resampleImage( xsub[[i]][[j]], subdim, useVoxels=1,
-               interpType=1 ) # might be labels
+               interpType=as.numeric(asFactors) ) # might be labels
           }
       if ( ! useFirstMask )
         sol<-vwnrfs( ysub, xsub, submasks,
@@ -212,7 +238,7 @@ mrvnrfs.predict <- function( rflist, x,
         subdim<-round( dim( labelmasks[[i]] ) / mr )
         subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
         submask<-resampleImage( labelmasks[[i]], subdim, useVoxels=1,
-          interpType=1 )
+          interpType=as.numeric(asFactors) )
         submasks[[i]]=submask
         }
       xsub<-x

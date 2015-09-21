@@ -56,7 +56,7 @@
 #' } # end predtype loop
 #'
 #' @export vwnrfs
-vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
+vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   ntrees=500, asFactors=TRUE ) {
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {

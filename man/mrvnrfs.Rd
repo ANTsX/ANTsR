@@ -74,6 +74,33 @@ rfmresult<-mrvnrfs.predict( rfm$rflist,
 if ( predtype == "scalar" )
   print( cor( unlist(lablist) , unlist(rfmresult$seg) ) )
 } # end predtype loop
+
+\dontrun{
+img = antsImageRead( getANTsRData("r16") )
+mask = getMask( img )
+grad = iMath(img,"Grad",1,1)
+predimglist = list( grad )
+featimglist = list( list( img ) )
+masklist = list( mask )
+mr <- c(3,2,1)
+rad=c(2,2)
+vwout = mrvnrfs( predimglist , featimglist, masklist,
+  rad=rad, nsamples = 2000, multiResSchedule=mr, ntrees=1000,
+  asFactors=FALSE )
+
+img = antsImageRead( getANTsRData("r64") )
+mask = getMask( img )
+grad = iMath(img,"Grad",1,1)
+predimglist = list( grad )
+featimglist = list( list( img ) )
+masklist = list( mask )
+rfmresult<-mrvnrfs.predict( vwout$rflist, featimglist, masklist,
+ rad=rad, multiResSchedule=mr,
+ asFactors=FALSE )
+plot( iMath(img,"Grad",1,1) ) # real gradient image
+dev.new()
+plot( rfmresult$probs[[1]][[1]] )
+}
 }
 \author{
 Avants BB, Tustison NJ

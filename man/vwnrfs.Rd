@@ -4,7 +4,7 @@
 \alias{vwnrfs}
 \title{voxelwise neighborhood random forest segmentation and prediction}
 \usage{
-vwnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
+vwnrfs(y, x, labelmasks, rad = NA, nsamples = 8, ntrees = 500,
   asFactors = TRUE)
 }
 \arguments{
