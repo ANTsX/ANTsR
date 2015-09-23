@@ -130,11 +130,12 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       m1<-cbind( m1, m2 )
       }
     nxt<-seqby[ i + 1 ]-1
-    if ( rnow(m1) != nrow(fm[ seqby[i]:nxt, ]) )
+    if ( nrow(m1) != nrow(fm[ seqby[i]:nxt, ]) )
       {
-      print("The nsamples you chose is too large for the input images.")
-      print("Perhaps using a binary mask or reduce nsamples.")
-      stop("vwnrfs error.")
+      ermsg=paste(
+        "The nsamples you chose is too large for the input images.",
+        "Perhaps using a binary mask or reduce nsamples.")
+      stop( ermsg )
       }
     fm[ seqby[i]:nxt, ]<-m1
     if ( yisimg )
