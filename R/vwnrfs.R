@@ -134,7 +134,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       {
       ermsg=paste(
         "The nsamples you chose is too large for the input images.",
-        "Perhaps using a binary mask or reduce nsamples.")
+        "Perhaps try using a binary mask or reduce nsamples.")
       stop( ermsg )
       }
     fm[ seqby[i]:nxt, ]<-m1
