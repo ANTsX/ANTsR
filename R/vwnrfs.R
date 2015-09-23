@@ -101,7 +101,8 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   testmat<-t( testmat )
   hdsz<-nrow(testmat) # neighborhood size
   nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)
-  fm<-matrix( nrow=(nrow(testmat)*length(x)) ,  ncol=ncol(testmat)*nfeats  )
+  masksizesum = sum( randmask > 0 )
+  fm<-matrix( nrow=( masksizesum*length(x)) ,  ncol=ncol(testmat)*nfeats  )
   for ( i in 1:(length(y)) )
     {
     if ( !useFirstMask )
@@ -129,6 +130,12 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       m1<-cbind( m1, m2 )
       }
     nxt<-seqby[ i + 1 ]-1
+    if ( rnow(m1) != nrow(fm[ seqby[i]:nxt, ]) )
+      {
+      print("The nsamples you chose is too large for the input images.")
+      print("Perhaps using a binary mask or reduce nsamples.")
+      stop("vwnrfs error.")
+      }
     fm[ seqby[i]:nxt, ]<-m1
     if ( yisimg )
       tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
