@@ -19,7 +19,6 @@ typename ImageType::Pointer cropImageHelper(
 {
   enum { Dimension = ImageType::ImageDimension };
   typename ImageType::RegionType region;
-  typedef typename ImageType::Pointer ImagePointerType;
   if( image.IsNotNull() & labimage.IsNotNull() )
     {
     typedef itk::Image<unsigned short, Dimension>      ShortImageType;
@@ -62,7 +61,6 @@ typename ImageType::Pointer cropIndHelper(
   SEXP r_loind, SEXP r_upind )
 {
   enum { Dimension = ImageType::ImageDimension };
-  typedef typename ImageType::Pointer ImagePointerType;
   Rcpp::NumericVector lindv( r_loind ) ;
   Rcpp::NumericVector uindv( r_upind ) ;
   if( lindv.size() != Dimension || uindv.size() != Dimension )
@@ -122,7 +120,6 @@ typename ImageType::Pointer decropImageHelper(
 {
   enum { Dimension = ImageType::ImageDimension };
   typename ImageType::RegionType region;
-  typedef typename ImageType::Pointer ImagePointerType;
   if( cimage.IsNotNull() & fimage.IsNotNull() )
     {
     typedef itk::PasteImageFilter <ImageType, ImageType >

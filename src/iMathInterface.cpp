@@ -46,7 +46,6 @@ template <class ImageType>
 SEXP iMathGC( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
-  typedef typename ImageType::PixelType PixelType;
 
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
@@ -60,7 +59,6 @@ template <class ImageType>
 SEXP iMathGD( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
-  typedef typename ImageType::PixelType PixelType;
 
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
@@ -74,7 +72,6 @@ template <class ImageType>
 SEXP iMathGE( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
-  typedef typename ImageType::PixelType PixelType;
 
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
@@ -88,7 +85,6 @@ template <class ImageType>
 SEXP iMathGO( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
-  typedef typename ImageType::PixelType PixelType;
 
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
@@ -230,7 +226,6 @@ template <class ImageType>
 SEXP iMathPad( Rcpp::List args )
 {
   typedef typename ImageType::Pointer   ImagePointerType;
-  typedef typename ImageType::PixelType PixelType;
 
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   int padding = Rcpp::as<int>( args[2] );

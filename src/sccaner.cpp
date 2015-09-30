@@ -99,7 +99,6 @@ SEXP eigenanatomyCppHelper(
   typedef double                                        Scalar;
   typedef itk::ants::antsSCCANObject<ImageType, Scalar> SCCANType;
   typedef typename SCCANType::MatrixType                vMatrix;
-  typedef typename SCCANType::VectorType                vVector;
   typename SCCANType::Pointer sccanobj = SCCANType::New();
 
   typename ImageType::Pointer mask = Rcpp::as<ImagePointerType>( r_mask );
@@ -370,7 +369,6 @@ SEXP sccanCppHelper(
   typedef double                                        Scalar;
   typedef itk::ants::antsSCCANObject<ImageType, Scalar> SCCANType;
   typedef typename SCCANType::MatrixType                vMatrix;
-  typedef typename SCCANType::VectorType                vVector;
   typename SCCANType::Pointer sccanobj = SCCANType::New();
 
   typename ImageType::Pointer maskx = Rcpp::as<ImagePointerType>( r_maskx );
