@@ -180,7 +180,6 @@ try
     {
       typedef double ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       antsMatrixType* ptr_matrix = new antsMatrixType ;
