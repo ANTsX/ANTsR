@@ -17,7 +17,7 @@ if [[ $TRAVIS -eq true ]] ; then
 fi
 cd ./src
 antsgit=https://github.com/stnava/ANTs.git
-antstag=6d06a0a1d83b502869bb7bf05b221634a991dd91
+antstag=7310968feddc83425b8f14c113e0781f93b9b28d
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi
