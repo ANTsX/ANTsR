@@ -2,8 +2,8 @@
 #' pca.
 #'
 #' InitializeEigenanatomy is a helper function to initialize sparseDecom and
-#' sparseDecom2.
-#'
+#' sparseDecom2.  Can be used to estimate sparseness parameters per eigenvector.
+#' The user then only chooses nvecs and optional regularization parameters.
 #'
 #' @param initmat input matrix where rows provide initial vector values
 #' @param mask mask if available
@@ -13,13 +13,15 @@
 #' @examples
 #'
 #' mat<-t(replicate(3, rnorm(100)) )
-#' for ( i in 1:nrow(mat) ) mat[i, abs(mat[i,]) < 1 ]<-0
-#' initdf<-initializeEigenanatomy( mat )
-#' dmat<-replicate(100, rnorm(20))
+#' initdf<-initializeEigenanatomy( mat ) # produces a mask
+#' dmat<-replicate(100, rnorm(20)) # data matrix
+#' svdv = t( svd( mat, nu=0, nv=10 )$v )
+#' ilist = matrixToImages( svdv, initdf$mask )
+#' eseg = eigSeg( initdf$mask, ilist,  TRUE  )
 #' eanat<-sparseDecom( dmat, inmask=initdf$mask,
-#'   sparseness=0, smooth=0,
-#'   initializationList=initdf$initlist, cthresh=0,
-#'   nvecs=length(initdf$initlist) )
+#'  sparseness=0, smooth=0,
+#'  initializationList=ilist, cthresh=0,
+#'  nvecs=length(ilist) )
 #' initdf2<-initializeEigenanatomy( mat, nreps=2 )
 #' eanat<-sparseDecom( dmat, inmask=initdf$mask,
 #'   sparseness=0, smooth=0, z=-0.5,
