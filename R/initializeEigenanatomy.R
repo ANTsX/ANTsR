@@ -49,8 +49,11 @@
 initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
   if ( class(initmat)[1] == 'antsImage' )
     {
-    initmatvec = initmat[ initmat > 0  ]
+    selectvec = initmat > 0
+    if ( ! is.na( mask ) ) selectvec = mask > 0
+    initmatvec = initmat[ selectvec ]
     ulabs = sort( unique( initmatvec ) )
+    ulabs = ulabs[ ulabs > 0 ]
     nvox = length( initmatvec )
     temp = matrix( nrow=length(ulabs) , ncol=nvox )
     rnmsx = paste(ulabs,sep='')
