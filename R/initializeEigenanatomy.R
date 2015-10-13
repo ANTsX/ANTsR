@@ -5,7 +5,8 @@
 #' sparseDecom2.  Can be used to estimate sparseness parameters per eigenvector.
 #' The user then only chooses nvecs and optional regularization parameters.
 #'
-#' @param initmat input matrix where rows provide initial vector values
+#' @param initmat input matrix where rows provide initial vector values.
+#' alternatively, this can be an antsImage which contains labeled regions.
 #' @param mask mask if available
 #' @param nreps nrepetitions to use
 #' @return list is output
@@ -46,6 +47,18 @@
 #'
 #' @export initializeEigenanatomy
 initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
+  if ( class(initmat)[1] == 'antsImage' )
+    {
+    initmatvec = initmat[ initmat > 0  ]
+    ulabs = unique( initmatvec )
+    nvox = length( initmatvec )
+    temp = matrix( nrow=length(ulabs) , ncol=nvox )
+    for ( x in 1:length(ulabs) )
+      {
+      temp[ x , ] = as.numeric( initmatvec == ulabs[x] )
+      }
+    initmat = temp
+    }
   nclasses <- nrow(initmat)
   classlabels <- rownames(initmat)
   if (is.null(classlabels))
@@ -63,11 +76,10 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
     initf <- initmat[i, ]
     vecimg[mask == 1] <- initf  #.eanatsparsify( initf , sparval[1] )
     for (nr in 1:nreps) {
-      initlist <- lappend(initlist, vecimg)
+      initlist[[ct]] <- vecimg
       eanatnames[ct + nr - 1] <- toString(classlabels[i])
+      ct <- ct + 1
     }
-    ct <- ct + nreps
   }
-
   return(list(initlist = initlist, mask = mask, enames = eanatnames))
 }

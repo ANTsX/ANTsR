@@ -8,7 +8,8 @@ pca.}
 initializeEigenanatomy(initmat, mask = NA, nreps = 1)
 }
 \arguments{
-\item{initmat}{input matrix where rows provide initial vector values}
+\item{initmat}{input matrix where rows provide initial vector values.
+alternatively, this can be an antsImage which contains labeled regions.}
 
 \item{mask}{mask if available}
 
