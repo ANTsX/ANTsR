@@ -53,11 +53,13 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
     ulabs = unique( initmatvec )
     nvox = length( initmatvec )
     temp = matrix( nrow=length(ulabs) , ncol=nvox )
+    rnmsx = paste("label",ulabs,sep='')
     for ( x in 1:length(ulabs) )
       {
       temp[ x , ] = as.numeric( initmatvec == ulabs[x] )
       }
     initmat = temp
+    rownames( initmat ) = rnmsx
     }
   nclasses <- nrow(initmat)
   classlabels <- rownames(initmat)
