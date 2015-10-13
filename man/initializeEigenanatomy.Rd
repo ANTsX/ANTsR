@@ -5,7 +5,7 @@
 \title{Convert a matrix to a form that can be used to initialize sparse cca and
 pca.}
 \usage{
-initializeEigenanatomy(initmat, mask = NA, nreps = 1)
+initializeEigenanatomy(initmat, mask = NA, nreps = 1, smoothing = 0)
 }
 \arguments{
 \item{initmat}{input matrix where rows provide initial vector values.
@@ -14,6 +14,8 @@ alternatively, this can be an antsImage which contains labeled regions.}
 \item{mask}{mask if available}
 
 \item{nreps}{nrepetitions to use}
+
+\item{smoothing}{if using an initial label image, optionally smooth each roi}
 }
 \value{
 list is output

@@ -9,6 +9,7 @@
 #' alternatively, this can be an antsImage which contains labeled regions.
 #' @param mask mask if available
 #' @param nreps nrepetitions to use
+#' @param smoothing if using an initial label image, optionally smooth each roi
 #' @return list is output
 #' @author Avants BB
 #' @examples
@@ -46,7 +47,8 @@
 #'   nvecs=length(initdf$initlist), priorWeight = 0.1 )
 #'
 #' @export initializeEigenanatomy
-initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
+initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1,
+  smoothing = 0 ) {
   if ( class(initmat)[1] == 'antsImage' )
     {
     selectvec = initmat > 0
@@ -59,7 +61,9 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
     rnmsx = paste(ulabs,sep='')
     for ( x in 1:length(ulabs) )
       {
-      temp[ x , ] = as.numeric( initmatvec == ulabs[x] )
+      timg = thresholdImage( initmat, ulabs[x], ulabs[x] )
+      if ( smoothing > 0 ) timg = smoothImage( timg, smoothing )
+      temp[ x , ] = timg[ selectvec ]
       }
     initmat = temp
     rownames( initmat ) = rnmsx
