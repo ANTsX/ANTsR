@@ -50,10 +50,10 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1) {
   if ( class(initmat)[1] == 'antsImage' )
     {
     initmatvec = initmat[ initmat > 0  ]
-    ulabs = unique( initmatvec )
+    ulabs = sort( unique( initmatvec ) )
     nvox = length( initmatvec )
     temp = matrix( nrow=length(ulabs) , ncol=nvox )
-    rnmsx = paste("label",ulabs,sep='')
+    rnmsx = paste(ulabs,sep='')
     for ( x in 1:length(ulabs) )
       {
       temp[ x , ] = as.numeric( initmatvec == ulabs[x] )
