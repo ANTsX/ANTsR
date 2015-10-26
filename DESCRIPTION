@@ -43,7 +43,10 @@ Suggests:
     sna,
     testthat,
     visreg,
-    wmtsa
+    wmtsa,
+    Morpho,
+    Rvcg,
+    RcppOctave
 LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 NeedsCompilation: yes
