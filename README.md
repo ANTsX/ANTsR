@@ -76,8 +76,9 @@ R CMD INSTALL ANTsR_*.tgz
 
 ## Installation from source
 
-**[drat](https://github.com/cran/drat)**
+See full instructions [here](https://github.com/ANTs-R/drat) but briefly:
 ```
+install.packages("drat")
 drat::addRepo("ANTs-R")
 install.packages("ANTsR")
 ```
@@ -87,7 +88,7 @@ Thanks to [zarquon42b](https://github.com/zarquon42b).
 **with devtools in R**
 ```
 library( devtools )
-install_github("stnava/cmaker")
+# install_github("stnava/cmaker") # if you do not have cmake
 install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 ```
