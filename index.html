@@ -105,7 +105,24 @@
 <h2>
 <a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
 
-<p>See full instructions <a href="https://github.com/ANTs-R/drat">here</a> but briefly:</p>
+<p>Please read this entire section before choosing which method you prefer.</p>
+
+<p>In general, these <strong>assume</strong> you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>.  you may also need <a href="http://www.cmake.org">cmake</a> if you do/can not install <code>cmaker</code>.</p>
+
+<p>Windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.</p>
+
+<p>You may need to install R packages that ANTsR requires. For example:</p>
+
+<pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
+install.packages( pkgs = mydeps, dependencies = TRUE )
+</code></pre>
+
+<p>These dependencies are subject to change until development is stable.
+You can gain additional functionality by installing packages that
+are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>.</p>
+
+<p><strong>Method 1: <a href="https://github.com/cran/drat">drat</a></strong>
+See full instructions <a href="https://github.com/ANTs-R/drat">here</a> but briefly:</p>
 
 <pre><code>install.packages("drat")
 drat::addRepo("ANTs-R")
@@ -114,7 +131,7 @@ install.packages("ANTsR")
 
 <p>Thanks to <a href="https://github.com/zarquon42b">zarquon42b</a>.</p>
 
-<p><strong>with devtools in R</strong></p>
+<p><strong>Method 2: with devtools in R</strong></p>
 
 <pre><code>library( devtools )
 # install_github("stnava/cmaker") # if you do not have cmake
@@ -122,11 +139,7 @@ install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 </code></pre>
 
-<p>this <strong>assumes</strong> you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>.  you may also need <a href="http://www.cmake.org">cmake</a> if you do/can not install <code>cmaker</code>.</p>
-
-<p>windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too)</p>
-
-<p><strong>from command line</strong></p>
+<p><strong>Method 3: from command line (most traditional method)</strong></p>
 
 <p>Assumes git, cmake and compilers are available in your environment (as above).</p>
 
@@ -139,19 +152,6 @@ $ git clone https://github.com/stnava/ANTsR.git</pre></div>
 
 <div class="highlight highlight-source-shell"><pre>$ R CMD INSTALL ITKR
 $ R CMD INSTALL ANTsR</pre></div>
-
-<h3>
-<a id="r-dependencies" class="anchor" href="#r-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>R dependencies</h3>
-
-<p>You may need to install R packages that ANTsR requires. For example:</p>
-
-<pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
-install.packages( pkgs = mydeps, dependencies = TRUE )
-</code></pre>
-
-<p>These dependencies are subject to change until development is stable.
-You can gain additional functionality by installing packages that
-are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>.</p>
 
 <p>The <a href="https://github.com/stnava/ANTsR/blob/master/.travis.yml"><code>travis.yml</code> file</a> also shows a way to install from Linux command line.</p>
 
