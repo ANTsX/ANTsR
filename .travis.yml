@@ -54,7 +54,7 @@ script:
   - cd ..
   - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - export MAKE="make -j2"
+  # - export MAKE="make -j2"
   - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
 
 # report coverage rate to coveralls
@@ -70,10 +70,10 @@ after_failure:
 notifications:
   email:
     recipients:
-    # - stnava@gmail.com
-    # - arman.eshaghi@gmail.com
-    # - jeff.duda@gmail.com
-    - zarquon42@gmail.com
+   # - stnava@gmail.com
+   # - arman.eshaghi@gmail.com
+   # - jeff.duda@gmail.com
+   - zarquon42@gmail.com
     on_success: change
     on_failure: always
 
