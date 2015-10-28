@@ -37,6 +37,7 @@ before_install:
 # - update all installed packages
 # - install package with dependencies
 install:
+  - echo $(ls)
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
@@ -49,7 +50,7 @@ install:
   - sudo R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="http://cran.rstudio.com")); install_deps(dependencies = TRUE)'
   #- ./travis-tool.sh install_deps
-  - cd ${basedir}
+  # - cd ${basedir}
 
 # Build and check package
 script:
