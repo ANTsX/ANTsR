@@ -46,7 +46,7 @@ install:
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
   - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
-  - R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
+  - sudo R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - ./travis-tool.sh install_deps
   - cd ${basedir}
 
