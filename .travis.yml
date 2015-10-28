@@ -20,7 +20,7 @@ env:
 # only run for pushes to master branch
 branches:
   only:
-   - master
+  # - master
 
 
 before_install:
