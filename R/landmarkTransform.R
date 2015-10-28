@@ -58,9 +58,9 @@ landmarkTransform <- function(lmFix,lmMoving,type=c("rigid","similarity","affine
 #' @examples
 #' require(Morpho)
 #' fi <- antsImageRead(getANTsRData("r16") ,2)
+#' load(system.file("extdata/landmarks.RData",package="ANTsR"))
 #' ## project landmarks into IJK space 
 #' fiLM2IJK <- applyTransform(fiLM,diag(c(-1,-1,1)))
-#' load(system.file("extdata/landmarks.RData",package="ANTsR"))
 #' ## now compute a rigid transform to permuted landmarks
 #' rotmat <- computeTransform(fiLM2IJK,fiLM2IJK[4:1,])
 #' trafo <- transform2mat(rotmat,"rotmat2D.mat")
