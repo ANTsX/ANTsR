@@ -19,12 +19,13 @@ branches:
 before_install:
    - sudo add-apt-repository ppa:zarquon42/travis-trusty -y
    - sudo add-apt-repository ppa:marutter/c2d4u -y
+   - sudo add-apt-repository ppa:marutter/rrutter -y
    - sudo apt-get update -qq
    - sudo apt-get install -y cmake liboctave-dev octave
    - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
    - chmod 755 ./travis-tool.sh
-   - ./travis-tool.sh bootstrap
-   - ./travis-tool.sh install_r_binary rgl Rcpp morpho rvcg knitr ggplot2 igraph pracma dplyr mFilter rmarkdown magrittr testthat randomForest 
+   - sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf
+   - sudo apt-get install -y  r-cran-rgl r-cran-rcpp r-cran-morpho r-cran-rvcg r-cran-knitr r-cran-ggplot2 r-cran-igraph r-cran-pracma r-cran-dplyr r-cran-mfilter r-cran-rmarkdown r-cran-magrittr r-cran-testthat r-cran-randomforest 
 
 # install the package and dependencies:
 # - create directory for R libraries (if not already exists)
