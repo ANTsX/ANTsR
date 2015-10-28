@@ -26,7 +26,7 @@ before_install:
    - chmod 755 ./travis-tool.sh
    - sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf
    - sudo chmod 2777 /usr/local/lib/R /usr/local/lib/R/site-library
-   - sudo apt-get install -y  r-cran-rgl r-cran-rcpp r-cran-morpho r-cran-rvcg r-cran-knitr r-cran-ggplot2 r-cran-igraph r-cran-pracma r-cran-dplyr r-cran-mfilter r-cran-rmarkdown r-cran-magrittr r-cran-testthat r-cran-randomforest 
+   - sudo apt-get install -y  r-cran-rgl r-cran-rcpp r-cran-morpho r-cran-rvcg r-cran-knitr r-cran-ggplot2 r-cran-igraph r-cran-pracma r-cran-dplyr r-cran-mfilter r-cran-rmarkdown r-cran-magrittr r-cran-testthat r-cran-randomforest r-cran-devtools
 
 # install the package and dependencies:
 # - create directory for R libraries (if not already exists)
