@@ -21,7 +21,7 @@ before_install:
    - sudo add-apt-repository ppa:marutter/c2d4u -y
    - sudo add-apt-repository ppa:marutter/rrutter -y
    - sudo apt-get update -qq
-   - sudo apt-get install -y cmake liboctave-dev octave tk8.5-dev 
+   - sudo apt-get install -y cmake liboctave-dev octave tk8.5-dev xvfb
    - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
    - chmod 755 ./travis-tool.sh
    - sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf
@@ -36,6 +36,7 @@ before_install:
 # - install covr if not already installed
 # - update all installed packages
 # - install package with dependencies
+
 install:
   - echo $(ls)
   - mkdir -p ~/.R
@@ -48,6 +49,9 @@ install:
   - echo '.travis.yml' > .Rbuildignore
   - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - sudo R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
+  - export DISPLAY=:99.0
+  - sudo sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
   - Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="http://cran.rstudio.com")); install_deps(dependencies = TRUE)'
   #- ./travis-tool.sh install_deps
   # - cd ${basedir}
