@@ -45,8 +45,7 @@ Suggests:
     sna,
     testthat,
     visreg,
-    wmtsa,
-    
+    wmtsa    
 LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 NeedsCompilation: yes
