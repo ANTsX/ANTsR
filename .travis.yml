@@ -25,6 +25,7 @@ before_install:
    - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
    - chmod 755 ./travis-tool.sh
    - sudo apt-get install -y --no-install-recommends r-base-dev r-recommended qpdf
+   - sudo chmod 2777 /usr/local/lib/R /usr/local/lib/R/site-library
    - sudo apt-get install -y  r-cran-rgl r-cran-rcpp r-cran-morpho r-cran-rvcg r-cran-knitr r-cran-ggplot2 r-cran-igraph r-cran-pracma r-cran-dplyr r-cran-mfilter r-cran-rmarkdown r-cran-magrittr r-cran-testthat r-cran-randomforest 
 
 # install the package and dependencies:
@@ -47,7 +48,8 @@ install:
   - echo '.travis.yml' > .Rbuildignore
   - wget https://github.com/stnava/ITKR/releases/download/v0.0.0/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
   - sudo R CMD INSTALL ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz
-  - ./travis-tool.sh install_deps
+  - Rscript -e 'library(devtools); library(methods); options(repos=c(CRAN="http://cran.rstudio.com")); install_deps(dependencies = TRUE)'
+  #- ./travis-tool.sh install_deps
   - cd ${basedir}
 
 # Build and check package
@@ -73,9 +75,10 @@ after_failure:
 notifications:
   email:
     recipients:
-    - stnava@gmail.com
-    - arman.eshaghi@gmail.com
-    - jeff.duda@gmail.com
+    # - stnava@gmail.com
+    # - arman.eshaghi@gmail.com
+    # - jeff.duda@gmail.com
+    - zarquon42@gmail.com
     on_success: change
     on_failure: always
 
