@@ -6,6 +6,16 @@ compiler:
   - clang
 sudo: required
 dist: trusty
+env:
+  global:
+  - R_BUILD_ARGS=" "
+  - R_CHECK_ARGS=" --timings"
+  - R_CHECK_TIME=TRUE
+  - R_CHECK_TESTS=TRUE
+  - _R_CHECK_TIMINGS_=FALSE
+  - _R_CHECK_FORCE_SUGGESTS_=FALSE
+  - BOOTSTRAP_LATEX=1
+  - WARNINGS_ARE_ERRORS=0
 
 # use trusty beta
 # sudo: true
@@ -62,9 +72,9 @@ script:
   - export CXX=clang++
   - export CC=clang
   - cd ..
-  - sudo R CMD build ANTsR --no-build-vignettes --no-manual
+  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - sudo R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
+  - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
 
 # report coverage rate to coveralls
 after_success:
@@ -86,16 +96,6 @@ notifications:
     on_success: change
     on_failure: always
 
-env:
-  global:
-  - R_BUILD_ARGS=" "
-  - R_CHECK_ARGS=" --timings"
-  - R_CHECK_TIME="TRUE"
-  - R_CHECK_TESTS="TRUE"
-  - _R_CHECK_TIMINGS_="0"
-  - _R_CHECK_FORCE_SUGGESTS_="0"
-  - BOOTSTRAP_LATEX=1
-  - WARNINGS_ARE_ERRORS=0
 deploy:
   provider: releases
   api_key:
