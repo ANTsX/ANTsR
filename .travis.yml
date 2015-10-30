@@ -11,7 +11,7 @@ sudo: false
 # only run for pushes to master branch
 branches:
   only:
-   - master
+  - master
 
 # install R: use r-packages-precise (https://cran.r-project.org/bin/linux/ubuntu/precise/)
 # as source which is white listed (https://github.com/travis-ci/apt-source-whitelist/)
@@ -54,6 +54,7 @@ install:
   - export CXX=clang++
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
+  - echo "SHLIB_OPENMP_CXXFLAGS=" >> ~/.R/Makevars
   - source ~/.R/Makevars
   - mkdir -p ~/Rlib
   - echo 'R_LIBS=~/Rlib' > .Renviron
@@ -71,6 +72,8 @@ install:
   - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
   - Rscript -e 'if(!"testthat" %in% rownames(installed.packages())) { install.packages("testthat", dependencies = TRUE) }'
   - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
+  - Rscript -e 'if(!"Morpho" %in% rownames(installed.packages())) { install.packages("Morpho", dependencies = TRUE) }'
+  - Rscript -e 'if(!"Rvcg" %in% rownames(installed.packages())) { install.packages("Rvcg", dependencies = TRUE) }'
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`octave-config -p OCTLIBDIR`
   - Rscript -e 'if (!"RcppOctave" %in% rownames(installed.packages())) {install.packages("http://cran.r-project.org/src/contrib/Archive/RcppOctave/RcppOctave_0.14.5.tar.gz",repos=NULL,type="source")} ' 
 #  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
@@ -99,8 +102,8 @@ after_success:
 
 after_failure:
 #  - ./travis-tool.sh dump_logs
-  - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
-  - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
+  - cat /home/travis/build/zarquon42b/ANTsR.Rcheck/00install.out
+  - cat /home/travis/build/zarquon42b/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
@@ -119,7 +122,7 @@ env:
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
-  - _R_CHECK_FORCE_SUGGESTS_="0"
+  - _R_CHECK_FORCE_SUGGESTS_=FALSE
   - BOOTSTRAP_LATEX=1
   - WARNINGS_ARE_ERRORS=0
 deploy:
