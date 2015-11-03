@@ -10,7 +10,8 @@ SEXP smoothImageHelper(
     SEXP r_inimg,
     SEXP r_outimg,
     Rcpp::NumericVector sigma,
-    bool sigmaInPhysicalCoordinates)
+    bool sigmaInPhysicalCoordinates,
+    unsigned int kernelwidth)
 {
   typedef typename ImageType::Pointer ImagePointerType;
   typename ImageType::Pointer inimg =
@@ -43,6 +44,7 @@ SEXP smoothImageHelper(
     }
     filter->SetVariance( varianceArray );
   }
+  filter->SetMaximumKernelWidth(kernelwidth);
   filter->SetMaximumError( 0.01f );
   filter->SetInput( inimg );
   filter->Update();
@@ -54,7 +56,8 @@ SEXP smoothImageHelper(
 RcppExport SEXP smoothImage( SEXP r_inimg,
     SEXP r_outimg,
     SEXP r_sigma,
-    SEXP sigmaInPhysicalCoordinates )
+    SEXP sigmaInPhysicalCoordinates,
+    SEXP r_kernelwidth )
 {
 try
 {
@@ -63,13 +66,15 @@ try
   unsigned int dimension = Rcpp::as< int >( antsImage.slot( "dimension" ) );
   bool physicalSpacing = Rcpp::as< bool >( sigmaInPhysicalCoordinates );
   Rcpp::NumericVector sigma( r_sigma );
+  unsigned int kernelwidth = Rcpp::as< unsigned int >( r_kernelwidth );
+
   if ( (pixeltype == "float") & ( dimension == 2 ) )
   {
     typedef float PixelType;
     const unsigned int dim = 2;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = smoothImageHelper< ImageType >(
-        r_inimg, r_outimg, sigma, physicalSpacing);
+        r_inimg, r_outimg, sigma, physicalSpacing, kernelwidth);
     return( outimg );
   }
   else if ( ( pixeltype == "float" ) & ( dimension == 3 ) )
@@ -78,7 +83,7 @@ try
     const unsigned int dim = 3;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = smoothImageHelper< ImageType >(
-        r_inimg, r_outimg, sigma, physicalSpacing);
+        r_inimg, r_outimg, sigma, physicalSpacing, kernelwidth);
     return( outimg );
   }
   else if ( ( pixeltype == "float" ) & ( dimension  == 4 ) )
@@ -87,7 +92,7 @@ try
     const unsigned int dim = 4;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = smoothImageHelper< ImageType >(
-        r_inimg, r_outimg, sigma, physicalSpacing);
+        r_inimg, r_outimg, sigma, physicalSpacing, kernelwidth);
     return (outimg);
   }
   else
