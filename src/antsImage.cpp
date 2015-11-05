@@ -798,7 +798,6 @@ SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension
 
   typedef double                           RealType;
   typedef itk::Image<PixelType, Dimension> ImageType;
-  typedef typename ImageType::RegionType   RegionType;
   typedef typename ImageType::IndexType    IndexType;
   typedef typename ImageType::PointType    PointType;
   typedef itk::CentralDifferenceImageFunction< ImageType,
@@ -1786,7 +1785,6 @@ template< class PixelType , unsigned int Dimension >
 int antsImage_SetPixels( typename itk::Image< PixelType , Dimension >::Pointer image , SEXP r_coordinates , SEXP r_value )
 {
   typedef itk::Image< PixelType , Dimension > ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
   std::string errorMessage = "";
 
   if( image.IsNotNull() )
@@ -2741,10 +2739,6 @@ template< class PixelType , unsigned int Dimension >
 bool antsImage_SetRegion( typename itk::Image< PixelType , Dimension >::Pointer& image , SEXP r_mask , SEXP r_antsregion , SEXP r_value )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
-  typedef typename ImageType::Pointer ImagePointerType ;
-  typedef itk::PermuteAxesImageFilter< ImageType > PermuteAxesFilterType ;
-  typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
-  typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
 
   if( image.IsNotNull() )
     {
@@ -3350,10 +3344,6 @@ template< class PixelType , unsigned int Dimension >
 SEXP antsImage_RelationalOperators( typename itk::Image< PixelType , Dimension >::Pointer image , SEXP r_value , SEXP r_antsregion , SEXP r_operator )
 {
   typedef itk::Image< PixelType , Dimension > ImageType ;
-  typedef typename ImageType::Pointer ImagePointerType ;
-  typedef itk::PermuteAxesImageFilter< ImageType > PermuteAxesFilterType ;
-  typedef typename PermuteAxesFilterType::Pointer PermuteAxesFilterPointerType ;
-  typedef typename PermuteAxesFilterType::PermuteOrderArrayType PermuteAxesFilterOrderType ;
 
   if( image.IsNotNull() )
     {

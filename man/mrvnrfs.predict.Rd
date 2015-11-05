@@ -4,21 +4,24 @@
 \alias{mrvnrfs.predict}
 \title{multi-res voxelwise neighborhood random forest segmentation}
 \usage{
-mrvnrfs.predict(rflist, x, labelmask, rad = NA, multiResSchedule = c(4, 2,
-  1), asFactors = TRUE)
+mrvnrfs.predict(rflist, x, labelmasks, rad = NA, multiResSchedule = c(4, 2,
+  1), asFactors = TRUE, voxchunk = 1000)
 }
 \arguments{
 \item{rflist}{a list of random forest models from mrvnrfs}
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmask}{a mask for the features (all in the same image space)}
+\item{labelmasks}{a list of masks where each mask defines the image space
+for the given list. that is, the nth mask indexes the nth feature set.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
 \item{multiResSchedule}{an integer vector defining multi-res levels}
 
 \item{asFactors}{boolean - treat the y entries as factors}
+
+\item{voxchunk}{split up prediction by this number of voxels per chunk}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix

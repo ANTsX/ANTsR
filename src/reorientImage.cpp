@@ -22,7 +22,6 @@ void antsReoHelper(
   Rcpp::NumericVector doReflection( r_reflect );
   Rcpp::NumericVector doScale( r_scale );
   typedef itk::Image< float , ImageDimension > ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
   if( image1.IsNotNull()  )
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;

@@ -76,28 +76,42 @@ R CMD INSTALL ANTsR_*.tgz
 
 ## Installation from source
 
-**[drat](https://github.com/cran/drat)**
+Please read this entire section before choosing which method you prefer.
+
+In general, these **assume** you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.  you may also need [cmake](http://www.cmake.org) if you do/can not install `cmaker`.
+
+Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
+
+You may need to install R packages that ANTsR requires. For example:
 ```
+mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
+install.packages( pkgs = mydeps, dependencies = TRUE )
+```
+These dependencies are subject to change until development is stable.
+You can gain additional functionality by installing packages that
+are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
+
+**Method 1: [drat](https://github.com/cran/drat)**
+See full instructions [here](https://github.com/ANTs-R/drat) but briefly:
+```
+install.packages("drat")
 drat::addRepo("ANTs-R")
 install.packages("ANTsR")
 ```
 Thanks to [zarquon42b](https://github.com/zarquon42b).
 
 
-**with devtools in R**
+**Method 2: with devtools in R**
 ```
 library( devtools )
-install_github("stnava/cmaker")
+# install_github("stnava/cmaker") # if you do not have cmake
 install_github("stnava/ITKR")
 install_github("stnava/ANTsR")
 ```
 
-this assumes you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.
+**Method 3: from command line (most traditional method)**
 
-windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too)
-
-
-**from command line**
+Assumes git, cmake and compilers are available in your environment (as above).
 
 First, clone the repository:
 ```sh
@@ -110,16 +124,6 @@ Install the package as follows:
 $ R CMD INSTALL ITKR
 $ R CMD INSTALL ANTsR
 ```
-
-### R dependencies
-You may need to install R packages that ANTsR requires. For example:
-```
-mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
-install.packages( pkgs = mydeps, dependencies = TRUE )
-```
-These dependencies are subject to change until development is stable.
-You can gain additional functionality by installing packages that
-are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
 
 The [`travis.yml` file](https://github.com/stnava/ANTsR/blob/master/.travis.yml) also shows a way to install from Linux command line.
 

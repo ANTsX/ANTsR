@@ -193,6 +193,7 @@ networkEiganat <- function(
 #'
 #' @param A input matrix
 #' @param k rank to use
+#' @param faster boolean
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
@@ -201,10 +202,10 @@ networkEiganat <- function(
 #' lrmat <- lowrankRowMatrix( mat , 2 )
 #'
 #' @export lowrankRowMatrix
-lowrankRowMatrix <- function(A, k = 2 ) {
+lowrankRowMatrix <- function(A, k = 2, faster=FALSE ) {
   if (k > nrow(A))
     return(A)
-  if ( usePkg("RRedsvd") )
+  if ( usePkg("RRedsvd") & faster )
   {
     x<-as(A,"CsparseMatrix")
     s <- RRedsvd::redsvd( x, k )

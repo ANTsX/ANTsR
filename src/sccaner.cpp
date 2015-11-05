@@ -99,7 +99,6 @@ SEXP eigenanatomyCppHelper(
   typedef double                                        Scalar;
   typedef itk::ants::antsSCCANObject<ImageType, Scalar> SCCANType;
   typedef typename SCCANType::MatrixType                vMatrix;
-  typedef typename SCCANType::VectorType                vVector;
   typename SCCANType::Pointer sccanobj = SCCANType::New();
 
   typename ImageType::Pointer mask = Rcpp::as<ImagePointerType>( r_mask );
@@ -163,7 +162,7 @@ SEXP eigenanatomyCppHelper(
   sccanobj->SetSmoother( smooth );
   if ( sparseness < 0 ) sccanobj->SetKeepPositiveP(false);
   sccanobj->SetSCCANFormulation(  SCCANType::PQ );
-  sccanobj->SetFractionNonZeroP( sparseness );
+  sccanobj->SetFractionNonZeroP( fabs( sparseness ) );
   sccanobj->SetMinClusterSizeP( cthresh );
   sccanobj->SetMatrixP( vnlX );
 //  sccanobj->SetMatrixR( r ); // FIXME
@@ -370,7 +369,6 @@ SEXP sccanCppHelper(
   typedef double                                        Scalar;
   typedef itk::ants::antsSCCANObject<ImageType, Scalar> SCCANType;
   typedef typename SCCANType::MatrixType                vMatrix;
-  typedef typename SCCANType::VectorType                vVector;
   typename SCCANType::Pointer sccanobj = SCCANType::New();
 
   typename ImageType::Pointer maskx = Rcpp::as<ImagePointerType>( r_maskx );
@@ -468,8 +466,8 @@ SEXP sccanCppHelper(
   if ( sparsenessx < 0 ) sccanobj->SetKeepPositiveP(false);
   if ( sparsenessy < 0 ) sccanobj->SetKeepPositiveQ(false);
   sccanobj->SetSCCANFormulation(  SCCANType::PQ );
-  sccanobj->SetFractionNonZeroP( sparsenessx );
-  sccanobj->SetFractionNonZeroQ( sparsenessy );
+  sccanobj->SetFractionNonZeroP( fabs( sparsenessx ) );
+  sccanobj->SetFractionNonZeroQ( fabs( sparsenessy ) );
   sccanobj->SetMinClusterSizeP( cthreshx );
   sccanobj->SetMinClusterSizeQ( cthreshy );
   sccanobj->SetMatrixP( vnlX );

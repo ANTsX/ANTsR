@@ -18,8 +18,6 @@ SEXP jointLabelFusionNeighborhoodSearchHelper(
   typedef typename ImageType::Pointer  ImagePointerType;
   const unsigned int ImageDimension = ImageType::ImageDimension;
   typedef float                        PixelType;
-  typedef itk::Image< PixelType, ImageDimension > InputImageType;
-  typedef itk::Image< PixelType, ImageDimension > OutputImageType;
   typename ImageType::Pointer image =
     Rcpp::as< ImagePointerType >( r_antsimage );
   typename ImageType::Pointer imageseg =
@@ -194,8 +192,6 @@ SEXP addNeighborhoodToImageHelper(
   typedef typename ImageType::Pointer  ImagePointerType;
   const unsigned int ImageDimension = ImageType::ImageDimension;
   typedef float                        PixelType;
-  typedef itk::Image< PixelType, ImageDimension > InputImageType;
-  typedef itk::Image< PixelType, ImageDimension > OutputImageType;
   typename ImageType::Pointer image =
     Rcpp::as< ImagePointerType >( r_antsimage );
   Rcpp::NumericVector center( r_center );

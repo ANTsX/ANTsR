@@ -10,8 +10,6 @@ try
 {
   std::string fname = Rcpp::as<std::string>(r_filename);
 
-  typedef itk::ImageIOBase::IOComponentType ScalarPixelType;
-
   itk::ImageIOBase::Pointer imageIO =
       itk::ImageIOFactory::CreateImageIO(
           fname.c_str(), itk::ImageIOFactory::ReadMode);
@@ -104,4 +102,5 @@ catch( itk::ExceptionObject & err )
   // Since the goal of the example is to catch the exception,
   // we declare this a success.
   Rcpp::stop("ITK exception caught");
+  return Rcpp::wrap( NA_REAL ) ;
 }

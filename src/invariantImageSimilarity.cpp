@@ -160,14 +160,11 @@ SEXP invariantSimilarityHelper(
   typedef double RealType;
   RealType bestscale = Rcpp::as< RealType >( r_scale ) ;
   typedef itk::Image< PixelType , ImageDimension > ImageType;
-  typedef typename ImageType::Pointer ImagePointerType;
   if( image1.IsNotNull() & image2.IsNotNull() )
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
     typedef itk::AffineTransform<RealType, ImageDimension> AffineType0;
     typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
-    typedef typename SimilarityTransformTraits<RealType,
-      ImageDimension>::TransformType AffineTypeS;
     typedef typename ImageCalculatorType::MatrixType       MatrixType;
     typedef itk::Vector<float, ImageDimension>  VectorType;
     VectorType ccg1;
@@ -584,7 +581,6 @@ typename ImageType::Pointer convolveImageHelper(
   typename ImageType::Pointer kernel )
 {
   enum { Dimension = ImageType::ImageDimension };
-  typedef typename ImageType::Pointer ImagePointerType;
   if( image.IsNotNull() & kernel.IsNotNull() )
     {
     typedef itk::ConvolutionImageFilter<ImageType> FilterType;

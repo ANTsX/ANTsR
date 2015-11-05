@@ -58,9 +58,9 @@ We leave scaling choices to the user.
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
 mat<-scale(mat)
-mydecom2<-sparseDecom( mat-min(mat) ) # non-neg matrix
+mydecom2<-sparseDecom( mat )
 # params that lead to algorithm similar to NMF
-mydecom3<-sparseDecom( mat-min(mat), z=1, sparseness=1 )
+mydecom3<-sparseDecom( mat, z=1, sparseness=1 )
 
 \dontrun{
 # for prediction

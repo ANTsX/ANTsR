@@ -97,7 +97,6 @@ try
     {
       typedef double ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       Rcpp::XPtr< antsMatrixType > antsmatrix_xptr( static_cast< SEXP >( antsmatrix.slot( "pointer" ) ) ) ;
@@ -113,7 +112,6 @@ try
     {
       typedef float ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       Rcpp::XPtr< antsMatrixType > antsmatrix_xptr( static_cast< SEXP >( antsmatrix.slot( "pointer" ) ) ) ;
@@ -129,7 +127,6 @@ try
     {
       typedef unsigned int ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       Rcpp::XPtr< antsMatrixType > antsmatrix_xptr( static_cast< SEXP >( antsmatrix.slot( "pointer" ) ) ) ;
@@ -145,7 +142,6 @@ try
     {
       typedef unsigned char ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       Rcpp::XPtr< antsMatrixType > antsmatrix_xptr( static_cast< SEXP >( antsmatrix.slot( "pointer" ) ) ) ;
@@ -184,7 +180,6 @@ try
     {
       typedef double ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       antsMatrixType* ptr_matrix = new antsMatrixType ;
@@ -210,7 +205,6 @@ try
     {
       typedef float ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       antsMatrixType* ptr_matrix = new antsMatrixType ;
@@ -236,7 +230,6 @@ try
     {
       typedef unsigned int ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       antsMatrixType* ptr_matrix = new antsMatrixType ;
@@ -262,7 +255,6 @@ try
     {
       typedef unsigned char ElementType ;
       typedef vnl_matrix< ElementType > MatrixType ;
-      typedef vnl_vector< ElementType > VectorType ;
       typedef std::vector< std::string > HeaderType ;
       typedef std::pair< HeaderType , MatrixType > antsMatrixType ;
       antsMatrixType* ptr_matrix = new antsMatrixType ;
