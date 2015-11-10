@@ -54,6 +54,13 @@ iMath <- function( img, operation, param=NA, ... ) {
   else
     {
 
+    # Temp fix for backward compat
+    if ( operation == "TruncateImageIntensity")
+      {
+      print(paste(operation, "is moving to TruncateIntensity. Please update your code"))
+      operation = "TruncateIntensity"
+      }
+
     if ( ! ( operation  %in% iMathOps$Operation ) )
       {
       stop(paste("'operation'",operation," not recognized"))
