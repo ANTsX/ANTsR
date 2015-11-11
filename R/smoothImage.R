@@ -9,6 +9,7 @@
 #' millimeters; if false, it is in pixels.
 #' @param FWHM If true, sigma is interpreted as the full-width-half-max (FWHM)
 #' of the filter, not the sigma of a Gaussian kernel.
+#' @param max_kernel_width Maximum kernel width
 #' @return antsImage smoothed image
 #' @author Kandel BM, Avants BB
 #' @examples
@@ -16,7 +17,7 @@
 #' simg <- smoothImage(img, c(1.2,1.5))
 #' @export smoothImage
 smoothImage <- function(inimg, sigma, sigmaInPhysicalCoordinates=TRUE,
-    FWHM=FALSE) {
+    FWHM=FALSE, max_kernel_width = 70) {
   smoothingparams<-sigma
   outimg<-antsImageClone(inimg)
   sigma <- as.vector(sigma)
@@ -29,8 +30,10 @@ smoothImage <- function(inimg, sigma, sigmaInPhysicalCoordinates=TRUE,
   if (FWHM) {
     sigma <- sigma / 2.355
   }
+  max_kernel_width = as.integer(ceiling(max_kernel_width))
   outimg <- .Call("smoothImage",
     inimg.float, outimg, sigma, sigmaInPhysicalCoordinates,
+    max_kernel_width,
     PACKAGE = "ANTsR")
   return(antsImageClone(outimg, inimg@pixeltype))
 }
