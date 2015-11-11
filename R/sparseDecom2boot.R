@@ -31,6 +31,7 @@
 #' @param priorWeight Scalar value weight on prior between 0 (prior is weak)
 #' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param verbose activates verbose output to screen
+#' @param estimateSparseness effect size to estimate sparseness per vector
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -55,7 +56,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   z = 0, smooth = 0, robust = 0, mycoption = 1,
   initializationList = list(), initializationList2 = list(),
   ell1 = 0.05, nboot = 10, nsamp = 1, doseg = FALSE,
-  priorWeight = 0.0, verbose=FALSE ) {
+  priorWeight = 0.0, verbose=FALSE,
+  estimateSparseness = 0.2 ) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print(args(sparseDecom2boot))
@@ -109,7 +111,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
     myressum <- abs(diag(cor(myres$projections, myres$projections2)))
     cca1 <- (myres$eig1)
     cca2 <- (myres$eig2)
-    if (boots > 1 & TRUE) {
+    if (boots > 1 & TRUE ) {  # try to sort results
       cca1copy <- cca1
       mymult <- matrix(rep(0, ncol(cca1) * ncol(cca1)), ncol = ncol(cca1))
       for (j in 1:ncol(cca1out)) {
@@ -147,7 +149,7 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
         mymult[, arrind[2]] <- 0
       }
       cca2 <- cca2copy
-    }
+    } # end try to sort results
     cca1out <- cca1out + (cca1) # * myressum
     cca2out <- cca2out + (cca2) # * myressum
     bootInds = (( boots - 1 )*nvecs+1):(boots*nvecs)
@@ -166,14 +168,56 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   if ( doseg )
   for ( k in 1:nvecs )
     {
-    cca1out[,k] =
-      .eanatsparsify( abs(cca1out[,k]), sparseness[1] )
-    cca2out[,k] =
-      .eanatsparsify( abs(cca2out[,k]), sparseness[2] )
-#    zz = abs( cca1out[,k] ) < 0.2
-#    cca1out[zz,k] = 0
-#    zz = abs( cca2out[,k] ) < 0.2
-#    cca2out[zz,k] = 0
+    vec1 = cca1out[,k]
+    svec1 = sign( vec1 )
+    vec1pos = vec1
+    vec1neg = vec1
+    vec1pos[ svec1 < 0 ] = 0
+    vec1neg[ svec1 > 0 ] = 0
+    if ( sum( vec1pos * vec1 ) < sum( vec1neg * vec1 ) ) vec1 = vec1 * (-1)
+    if ( sparseness[1] < 0 )
+      {
+      temp = .eanatsparsify( abs(vec1), abs(sparseness[1]) )
+      cca1out[,k] = vec1 * sign( temp )
+      } else cca1out[,k] = .eanatsparsify( vec1, sparseness[1] )
+
+      vec2 = cca2out[,k]
+      svec2 = sign( vec2 )
+      vec2pos = vec2
+      vec2neg = vec2
+      vec2pos[ svec2 < 0 ] = 0
+      vec2neg[ svec2 > 0 ] = 0
+      if ( sum( vec2pos * vec2 ) < sum( vec2neg * vec2 ) ) vec2 = vec2 * (-1)
+      if ( sparseness[2] < 0 )
+        {
+        temp = .eanatsparsify( abs(vec2), abs(sparseness[2]) )
+        cca2out[,k] = vec2 * sign( temp )
+        } else cca2out[,k] = .eanatsparsify( vec2, sparseness[2] )
+    }
+  if ( estimateSparseness > 1.e-9 )
+    {
+    sparseness[1]=0
+    sparseness[2]=0
+    for ( k in 1:nvecs )
+      {
+      vec1 = colMeans( bootccalist1[[k]] )
+      vec2 = colMeans( bootccalist2[[k]] )
+      v1sd = apply( bootccalist1[[k]] , FUN=sd, MARGIN=2 )
+      v1sd[ v1sd == 0 ] = 1
+      v2sd = apply( bootccalist2[[k]] , FUN=sd, MARGIN=2 )
+      v2sd[ v2sd == 0 ] = 1
+      vec1 = vec1 / v1sd
+      vec2 = vec2 / v2sd
+      vec1[ abs(vec1) < estimateSparseness ] = 0
+      vec2[ abs(vec2) < estimateSparseness ] = 0
+      nz1 = sum(abs(sign(vec1)))/length(vec1)
+      nz2 = sum(abs(sign(vec2)))/length(vec2)
+      if ( verbose ) print( paste( "EstimatedSpar", nz1, nz2) )
+      if ( nz1 == 0 ) vec1 = rnorm( length( vec1 ) )
+      if ( nz2 == 0 ) vec2 = rnorm( length( vec2 ) )
+      cca1out[,k] = vec1
+      cca2out[,k] = vec2
+      }
     }
   init1 = initializeEigenanatomy( t( cca1out ), inmask[[1]] )
   init2 = initializeEigenanatomy( t( cca2out ), inmask[[2]] )
@@ -207,8 +251,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
   return(
     list(
       bootsccan=ccaout,
-      cca1boot=cca1out,
-      cca2boot=cca2out,
+      eig1=cca1out,
+      eig2=cca2out,
       bootccalist1=bootccalist1,
       bootccalist2=bootccalist2,
       allmat1=allmat1,

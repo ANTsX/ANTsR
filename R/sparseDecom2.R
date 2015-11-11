@@ -220,7 +220,8 @@ sparseDecom2 <- function(
       projections2 = sccaner$projections2,
       eig1 = sccaner$eig1,
       eig2 = sccaner$eig2,
-      ccasummary = ccasummary
+      ccasummary = ccasummary,
+      sparseness = sparseness
       )
     )
 }
