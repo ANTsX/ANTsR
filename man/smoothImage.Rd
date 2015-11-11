@@ -4,7 +4,8 @@
 \alias{smoothImage}
 \title{Smooth image}
 \usage{
-smoothImage(inimg, sigma, sigmaInPhysicalCoordinates = TRUE, FWHM = FALSE)
+smoothImage(inimg, sigma, sigmaInPhysicalCoordinates = TRUE, FWHM = FALSE,
+  max_kernel_width = 70)
 }
 \arguments{
 \item{inimg}{Image to smooth}
@@ -18,6 +19,8 @@ millimeters; if false, it is in pixels.}
 
 \item{FWHM}{If true, sigma is interpreted as the full-width-half-max (FWHM)
 of the filter, not the sigma of a Gaussian kernel.}
+
+\item{max_kernel_width}{Maximum kernel width}
 }
 \value{
 antsImage smoothed image
