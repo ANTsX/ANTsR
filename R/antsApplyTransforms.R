@@ -18,8 +18,12 @@
 #' HammingWindowedSinc, LanczosWindowedSinc, Gaussian, or BSpline.
 #' other interpolator available in antsApplyTransforms.
 #' @param imagetype choose 0/1/2/3 mapping to scalar/vector/tensor/time-series
-#' .
-#' @param whichtoinvert list of booleans, same length as transforms
+#' @param whichtoinvert optional list of booleans, same length as transforms. 
+#' whichtoinvert[i] is TRUE if transformlist[i] is a matrix, and the matrix should
+#' be inverted. If transformlist[i] is a warp field, whichtoinvert[i] must be FALSE.
+#'
+#' If the transform list is a matrix followed by a warp field, whichtoinvert
+#' defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).
 #' @param ... other parameters to pass to antsApplyTransforms.
 #' @return an antsImage is output. 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
@@ -56,63 +60,76 @@ antsApplyTransforms <- function(
     cat(" antsApplyTransforms(\"-d\",\"2\",\"-i\",\"r64slice.nii.gz\",\"-o\",\"temp.nii.gz\",\"-r\",\"r16slice.nii.gz\",\"-t\",\"./Z0GenericAffine.mat\") \n")
     cat("for full help: \n")
     cat("use .Call( \"antsApplyTransforms\", .int_antsProcessArguments( c(list(\"--help\")) ), PACKAGE=\"ANTsR\" );\n\n")
-    return(0)
+    return(1)
   }
   args <- list(fixed, moving, transformlist, interpolator, ...)
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
-      ttexists <- TRUE
       for (i in 1:length(transformlist)) {
-        if (!file.exists(transformlist[i]))
-          ttexists <- FALSE
-      }
-      if (ttexists) {
-        inpixeltype <- fixed@pixeltype
-        warpedmovout <- antsImageClone(moving)
-        f <- fixed
-        m <- moving
-        wmo <- warpedmovout
-        mytx <- list()
-        if (all(is.na(whichtoinvert)))
-          whichtoinvert <- rep(F, length(transformlist))
-        for (i in c(1:length(transformlist))) {
-          ismat <- FALSE
-          if ((i == 1 & length(transformlist) > 1) | whichtoinvert[i] ==
-          TRUE) {
-          if (length(grep(".mat", transformlist[i])) == 1) {
-            ismat <- TRUE
-            # print('treating this as an inverse transform')
-          }
-          }
-          if (!ismat) {
-          mytx <- list(mytx, "-t", transformlist[i])
-          } else if (ismat) {
-          mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]",
-            sep = ""))
-          }
+        if (!file.exists(transformlist[i])) {
+          stop(paste("Transform ", transformlist[i], " does not exist.", sep = ""))
         }
-        args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator,
-          unlist(mytx))
-        myargs <- .int_antsProcessArguments(c(args))
-        for (jj in c(1:length(myargs))) {
-          if (!is.na(myargs[jj])) {
+      }
+      inpixeltype <- fixed@pixeltype
+      warpedmovout <- antsImageClone(moving)
+      f <- fixed
+      m <- moving
+      wmo <- warpedmovout
+      mytx <- list()
+      # If whichtoinvert is NA, then attempt to guess the right thing to do
+      #
+      # If the transform list is (affine.mat, warp), whichtoinvert = c("T", "F")
+      #
+      # else whichtoinvert = rep("F", length(transformlist))
+      if (all(is.na(whichtoinvert))) {
+        if ( length(transformlist) == 2 & grepl("\\.mat$", transformlist[1]) & !(grepl("\\.mat$", transformlist[2])) ) {
+          whichtoinvert <- c(T, F)
+        }
+        else {
+          whichtoinvert <- rep(F, length(transformlist))
+        }
+      }
+      if (length(whichtoinvert) != length(transformlist)) {
+        stop("Transform list and inversion list must be the same length")
+      }
+      for (i in c(1:length(transformlist))) {
+        ismat <- FALSE
+        if (grepl("\\.mat$", transformlist[i])) {
+          ismat <- TRUE
+        }
+        if (whichtoinvert[i] && !(ismat) ) {
+          # Can't invert a warp field, user should pass inverseWarp directly. Something wrong
+          stop(paste("Cannot invert transform " , i , " ( " , transformlist[i], " ), because it is not a matrix. ", sep = ""))
+        }
+        if (whichtoinvert[i]) {
+          mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]",
+                                         sep = ""))
+        }
+        else {
+          mytx <- list(mytx, "-t", transformlist[i])
+        }
+
+      }
+      args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator,
+                   unlist(mytx))
+      myargs <- .int_antsProcessArguments(c(args))
+      for (jj in c(1:length(myargs))) {
+        if (!is.na(myargs[jj])) {
           if (myargs[jj] == "-") {
             myargs2 <- rep(NA, (length(myargs) - 1))
             myargs2[1:(jj - 1)] <- myargs[1:(jj - 1)]
             myargs2[jj:(length(myargs) - 1)] <- myargs[(jj + 1):(length(myargs))]
             myargs <- myargs2
           }
-          }
         }
-        .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 1, "-e",
-          imagetype), PACKAGE = "ANTsR")
-        return(antsImageClone(warpedmovout, inpixeltype))
       }
-      if (!ttexists) {
-        stop("One or more transforms does not exist.")
-      }
+      .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 1, "-e",
+                                     imagetype), PACKAGE = "ANTsR")
+      return(antsImageClone(warpedmovout, inpixeltype))
     }
-    return(0)
+    # Get here if fixed, moving, transformlist are not missing, fixed is not of type character,
+    # and fixed and moving are not both of type antsImage
+    return(1)
   }
   # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-.antsrParseListToString( c(args)
   # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
