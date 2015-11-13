@@ -154,6 +154,7 @@ setMethod(f = "as.array", signature(x = "antsImage"),
 
 # see https://github.com/klutometis/roxygen/issues/272
 
+#' ants image substitutions
 #' @param x antsImage
 #' @param i logical or i-th dimension
 #' @param j not used or j-th dimension

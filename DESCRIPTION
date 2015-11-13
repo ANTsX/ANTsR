@@ -5,11 +5,19 @@ Version: 0.3.1
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
-Description: ANTsR interfaces state of the art image processing with R statistical methods.  The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses.
+Description: ANTsR interfaces state of the art image processing with R
+    statistical methods. The project grew out of the need, at University of
+    Pennsylvania, to develop large-scale analytics pipelines that track provenance
+    from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp
+    to access these frameworks from within R and support reproducible analyses.
 License: GPL (>=2)
 LazyLoad: yes
-Depends: methods
-Imports: Rcpp, tools, magrittr
+Depends:
+    methods
+Imports:
+    Rcpp,
+    tools,
+    magrittr
 Suggests:
     abind,
     BGLR,
@@ -48,5 +56,7 @@ LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 NeedsCompilation: yes
 OS_type: unix
-Additional_repositories: https://github.com/InsightSoftwareConsortium/ITK.git, https://github.com/stnava/ANTs.git
+Additional_repositories: https://github.com/InsightSoftwareConsortium/ITK.git,
+    https://github.com/stnava/ANTs.git
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1
