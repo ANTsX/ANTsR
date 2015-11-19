@@ -100,7 +100,7 @@ plot.antsImage <- function(x, y,
   hvpx <- usePkg("pixmap")
   hvmsc <- usePkg("misc3d")
   hvrgl <- usePkg("rgl")
-  if ( !hvrgl | !hvmsc | ! hvpx )
+  if ( !hvmsc | ! hvpx )
     {
     print(paste("You need rgl, misc3d and pixmap libraries to use this."))
     invisible(return())
