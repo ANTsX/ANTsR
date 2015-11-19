@@ -27,6 +27,7 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
   filename <- path.expand(filename)
+  if ( ! file.exists( filename ) ) stop("file does not exist")
   if (class(pixeltype) != "character" || length(pixeltype) != 1) {
     stop("'pixeltype' argument must be of class 'character' and have length 1")
   }
