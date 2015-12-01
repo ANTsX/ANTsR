@@ -220,14 +220,14 @@ return( nvecs )
     b <- nrow(v)
   for (i in 1:ncol(v)) {
     sparsev <- as.numeric( c(v[, i]) )
-    if ( smoother > 0 & !is.na(mask) & FALSE )
+    if ( smoother > 0 & !is.na(mask)  )
       {
       simg = makeImage( mask, sparsev ) %>% iMath("GD",5)
       simg[ mask == 1 ] = sparsev
       simg = smoothImage( simg, sigma = smoother,
         sigmaInPhysicalCoordinates = FALSE )
       sparsevnew = simg[ mask == 1 ]
-      sparsev = sparsevnew
+      sparsev[ ] = sparsevnew[ ]
       }
     if ( sparam < 0 )
       {
