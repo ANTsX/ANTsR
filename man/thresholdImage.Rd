@@ -20,6 +20,9 @@ thresholdImage(inimg, lothresh, hithresh, inval=1, outval=0)
 \value{
 antsImage
 }
+\description{
+converts a scalar image into a binary image by thresholding operations
+}
 \examples{
 img <- makeImage(c(5,5), rnorm(25)+0.5)
 imgt<-thresholdImage( img, 0.5, Inf )

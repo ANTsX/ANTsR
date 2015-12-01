@@ -428,6 +428,9 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #' @name getNeighborhoodInMask
 #' @title Get neighborhoods for voxels within mask
 #'
+#' this converts a scalar image to a matrix with rows that contain neighbors
+#' around a center voxel
+#'
 #' @param image image object of S4 class \code{antsImage} to get values from.
 #' @param mask image object of S4 class \code{antsImage} indicating which voxels to
 #' examine. Each voxel > 0 will be used as the center of a neighborhood

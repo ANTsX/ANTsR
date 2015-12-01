@@ -42,7 +42,7 @@ the case when we impose sparsity.
 \examples{
 mat <- matrix(rnorm(2000),ncol=50)
 nvecsSel<-eanatSelect( mat, selectorScale = 1.2 )
-esol <- sparseDecom( mat, nvecs = nv )
+esol <- sparseDecom( mat, nvecs = nvecsSel )
 print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
 }
 \author{

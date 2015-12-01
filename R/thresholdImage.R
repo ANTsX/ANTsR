@@ -1,5 +1,7 @@
-#' @name thresholdImage
-#' @title Threshold Image
+#' Threshold Image
+#' 
+#' converts a scalar image into a binary image by thresholding operations
+#' 
 #' @usage thresholdImage(inimg, lothresh, hithresh, inval=1, outval=0)
 #' @param inimg Input image to operate on
 #' @param lothresh Lower edge of threshold window

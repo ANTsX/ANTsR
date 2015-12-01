@@ -2,7 +2,10 @@
 % Please edit documentation in R/antsImage_class.R
 \name{getNeighborhoodInMask}
 \alias{getNeighborhoodInMask}
-\title{Get neighborhoods for voxels within mask}
+\title{Get neighborhoods for voxels within mask
+
+this converts a scalar image to a matrix with rows that contain neighbors
+around a center voxel}
 \usage{
 getNeighborhoodInMask(image, mask, radius, physical.coordinates = FALSE,
   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE)

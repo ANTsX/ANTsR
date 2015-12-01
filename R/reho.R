@@ -44,7 +44,7 @@ for ( k in 1:nrow(myshifts) )
   if (  ( mydistance[k] <  maxDistance ) & ( mydistance[k] > 1.e-9 ) )
     {
     locshiftarr = c( ss, 0 )
-    rsfmris = antsCopyImageInfo( rsfmri, as.antsImage( ashift( as.array( rsfmri ) , locshiftarr ) ) )
+    rsfmris = antsCopyImageInfo( rsfmri, as.antsImage( magic::ashift( as.array( rsfmri ) , locshiftarr ) ) )
     mshift = timeseries2matrix( rsfmris, mask )
     for ( i in 1:ncol(basemat) )
       {
