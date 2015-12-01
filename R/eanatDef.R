@@ -242,14 +242,21 @@ return( nvecs )
     sparsev[ord[(b+1):length(ord)]] <- 0  # L0 penalty
     if ( ! is.na( mask ) & clustval > 0 )
       {
-      sparimg = makeImage( mask, sparsev )
-      timg = labelClusters( sparimg, clustval,
-        minThresh = 1e-9, maxThresh = Inf )
-      if ( sum( timg > 0 ) > 0 ) # otherwise we are degenerates
-        {
-        timg = thresholdImage( timg, 1, Inf ) * sparimg
-        sparsev = timg[ mask > 0.5 ]
-        }
+        sparimg = makeImage( mask, sparsev )
+        timg = labelClusters( sparimg, clustval,
+          minThresh = 1e-9, maxThresh = Inf )
+        cvl = round( clustval * 0.95 )
+        while ( (sum( timg > 0 ) == 0 ) & cvl > 1 )# otherwise we are degenerates
+          {
+          timg = labelClusters( sparimg, cvl,
+            minThresh = 1e-9, maxThresh = Inf )
+          cvl = round( cvl * 0.95 )
+          }
+        if ( sum( timg > 0 ) > 0 )
+          {
+          timg = thresholdImage( timg, 1, Inf ) * sparimg
+          sparsev = timg[ mask > 0.5 ]
+          }
       }
     v[, i] <- sparsev
   }
