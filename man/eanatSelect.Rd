@@ -4,7 +4,7 @@
 \alias{eanatSelect}
 \title{Selection of n eigenvectors and sparsity for eigenanatomy}
 \usage{
-eanatSelect(inmat, mask = NA, cthresh = 0, maxNEvec = 0,
+eanatSelect(inmat, mask = NA, cthresh = 0, smooth = 0, maxNEvec = 0,
   selectorScale = 1.1, verbose = FALSE)
 }
 \arguments{
@@ -13,6 +13,8 @@ eanatSelect(inmat, mask = NA, cthresh = 0, maxNEvec = 0,
 \item{mask}{input mask, must match matrix}
 
 \item{cthresh}{remove isolated voxel islands of size below this value}
+
+\item{smooth}{smooth the input data first by this value}
 
 \item{maxNEvec}{integer that, if set greater than zero, indicates that we use
 a low-rank approximation to the input matrix before proceeding to eanat.

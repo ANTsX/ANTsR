@@ -108,6 +108,7 @@ return( solutionmatrix )
 #' @param inmat input matrix
 #' @param mask input mask, must match matrix
 #' @param cthresh remove isolated voxel islands of size below this value
+#' @param smooth smooth the input data first by this value
 #' @param maxNEvec integer that, if set greater than zero, indicates that we use
 #' a low-rank approximation to the input matrix before proceeding to eanat.
 #' this value should be greater than \code{nvecs}
@@ -127,7 +128,7 @@ return( solutionmatrix )
 #' esol <- sparseDecom( mat, nvecs = nvecsSel )
 #' print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
 #' @export eanatSelect
-eanatSelect <- function( inmat, mask=NA, cthresh=0,
+eanatSelect <- function( inmat, mask=NA, cthresh=0, smooth=0,
   maxNEvec = 0, selectorScale=1.1, verbose=FALSE )
 {
 mat = scale( inmat )
@@ -148,7 +149,7 @@ for ( xpn in 2:mxn )
     if ( ! foundNA )
       {
       ilist = matrixToImages( solutionmatrix[1:xpn,], mask )
-      eseg = eigSeg( mask, ilist,  TRUE, cthresh=cthresh  )
+      eseg = eigSeg( mask, ilist,  TRUE, cthresh=cthresh, smooth=smooth  )
       temp = imageListToMatrix( ilist, mask )
       pp1 = mat %*% t( temp )
       mycorrs[xpn] = mean( abs( cor(pp1) ) )

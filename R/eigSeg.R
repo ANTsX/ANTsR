@@ -45,8 +45,9 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
     {
     for ( i in 1:nrow(mydata) )
       {
-      tempImg = makeImage( mask, mydata[i,] )
-      mydata[i,] = smoothImage( tempImg, smooth, sigmaInPhysicalCoordinates=F )
+      tempImg = makeImage( mask, mydata[i,] ) %>%
+        smoothImage( smooth, sigmaInPhysicalCoordinates=F )
+      mydata[i,] = tempImg[ mask >= 0.5 ]
       }
     }
   segids <- apply(abs(mydata), 2, which.max)
