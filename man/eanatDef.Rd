@@ -5,22 +5,17 @@
 \title{Eigenanatomy with deflation}
 \usage{
 eanatDef(inmat, nvecs, mask = NA, smoother = 0, cthresh = 0, its = 5,
-  eps = 0.1, positivity = FALSE, maxNEvec = 0, selectorScale = 1.5,
-  verbose = FALSE)
+  eps = 0.1, positivity = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}
 
-\item{nvecs}{number of eigenanatomy vectors to compute. if this is missing,
-we use a data-driven method to select its value. the principle used here is
-that we want few but sparse pseudo-eigenvectors that are minimally
-correlated in row-space. true left and right eigenvectors are uncorrelated
-in both row and column (left and right eigenvector) spaces, but this is not
-the case when we impose sparsity.}
+\item{nvecs}{number of eigenanatomy vectors to compute. see
+\code{eanatSelect} for a method to compute an optimal \code{nvecs} value.}
 
 \item{mask}{input mask, must match matrix}
 
-\item{smoother}{regularization parameter, typically 0 or 0.5}
+\item{smoother}{regularization parameter, typically 0 or 0.5, in voxels}
 
 \item{cthresh}{remove isolated voxel islands of size below this value}
 
@@ -30,16 +25,6 @@ the case when we impose sparsity.}
 
 \item{positivity}{return unsigned eigenanatomy vectors}
 
-\item{maxNEvec}{integer that, if set greater than zero, indicates that we use
-a low-rank approximation to the input matrix before proceeding to eanat.
-this value should be greater than \code{nvecs}}
-
-\item{selectorScale}{influences automatic selection of \code{nvecs} and tries
-to find the knee in the correlation plot. This parameter produces fewer,
-less sparse eigenanatomy pseudo-eigenvectors as its value increases.  Its
-minimum value is 1 and a reasonable range is between 1 and 2.  The user
-should look at the plot produced when verbosity is turned on.}
-
 \item{verbose}{controls whether computation is silent or not.}
 }
 \value{
@@ -47,20 +32,29 @@ matrix is output, analogous to \code{svd(mat,nu=0,nv=nvecs)}
 }
 \description{
 Simplified, low-parameter eigenanatomy implemented with deflation. The
-algorithm is able to automatically select the key \code{nvecs} and hidden
-\code{sparseness} parameters.  The user should select the \code{cthresh} and
-\code{smoother} regularization parameters for his or her application and also
-based on observing algorithm behavior when \code{verbose=TRUE}.
+algorithm is able to automatically select hidden \code{sparseness}
+parameters, given the key parameter \code{nvecs}.  The user should select the
+\code{cthresh} and  \code{smoother} regularization parameters for his or her #' application and also based on observing algorithm behavior when
+\code{verbose=TRUE}.
 }
 \examples{
-mat <- matrix(rnorm(1000),ncol=50)
-esol<-eanatDef( mat )
-cor( mat \%*\% t(esol))
-\dontrun{
-mat <- matrix(rnorm(8000),ncol=50)
-esol<-eanatDef( mat, selectorScale = 1.2 )
-print(paste("selected", nrow(esol),'pseudo-eigenvectors'))
+mat <- matrix(rnorm(2000),ncol=50)
+nv <- eanatSelect( mat, selectorScale = 1.2 )
+esol <- eanatDef( mat, nvecs=nv )
+es2 <- sparseDecom( mat, nvecs = nv )
+print( paste( "selected", nrow(esol),'pseudo-eigenvectors') )
 print( mean( abs( cor( mat \%*\% t(esol)) ) ) ) # what we use to select nvecs
+
 }
+\author{
+Avants BB, Tustison NJ
+}
+\references{
+Kandel, B. M.; Wang, D. J. J.; Gee, J. C. & Avants, B. B.
+Eigenanatomy: sparse dimensionality reduction for multi-modal medical
+image analysis. Methods,  2015, 73, 43-53.
+}
+\seealso{
+\code{\link{eanatSelect}}
 }
 
