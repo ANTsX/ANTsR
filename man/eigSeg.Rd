@@ -5,7 +5,7 @@
 \title{Segmentation for eigenanatomy.}
 \usage{
 eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
-  cthresh = 0)
+  cthresh = 0, smooth = 0)
 }
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}
@@ -16,6 +16,8 @@ eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
 is modified by the segmentation.}
 
 \item{cthresh}{throw away isolated clusters smaller than this value}
+
+\item{smooth}{smooth the input data first by this value}
 }
 \value{
 segmentation image.

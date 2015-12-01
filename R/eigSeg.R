@@ -11,6 +11,7 @@
 #' @param applySegmentationToImages boolean determines if original image list
 #' is modified by the segmentation.
 #' @param cthresh throw away isolated clusters smaller than this value
+#' @param smooth smooth the input data first by this value
 #' @return segmentation image.
 #' @author Avants BB
 #' @examples
@@ -23,8 +24,8 @@
 #' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 #'
 #' @export eigSeg
-eigSeg <- function(mask = NA, imgList = NA,
-  applySegmentationToImages = FALSE, cthresh=0 ) {
+eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
+  cthresh=0, smooth=0 ) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)
@@ -40,6 +41,14 @@ eigSeg <- function(mask = NA, imgList = NA,
         mydata <- imageListToMatrix(imgList, mask)
   if ( ! exists('mydata') )
     stop("wrong input type - see help")
+  if ( smooth > 0 & !is.na(mask) )
+    {
+    for ( i in 1:nrow(mydata) )
+      {
+      tempImg = makeImage( mask, mydata[i,] )
+      mydata[i,] = smoothImage( tempImg, smooth, sigmaInPhysicalCoordinates=F )
+      }
+    }
   segids <- apply(abs(mydata), 2, which.max)
   segmax <- apply(abs(mydata), 2, max)
   maskseg[maskvox] <- (segids * (segmax > 1e-09))
