@@ -10,6 +10,7 @@
 #' @param imgList list containing antsImages or a matrix matching the mask.
 #' @param applySegmentationToImages boolean determines if original image list
 #' is modified by the segmentation.
+#' @param cthresh throw away isolated clusters smaller than this value
 #' @return segmentation image.
 #' @author Avants BB
 #' @examples
@@ -22,7 +23,8 @@
 #' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 #'
 #' @export eigSeg
-eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE) {
+eigSeg <- function(mask = NA, imgList = NA,
+  applySegmentationToImages = FALSE, cthresh=0 ) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)
@@ -41,6 +43,15 @@ eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE) {
   segids <- apply(abs(mydata), 2, which.max)
   segmax <- apply(abs(mydata), 2, max)
   maskseg[maskvox] <- (segids * (segmax > 1e-09))
+  if ( cthresh > 0 )
+    {
+    for ( kk in 1:max(maskseg) )
+      {
+      timg = thresholdImage( maskseg, kk, kk ) %>% labelClusters( cthresh )
+      timg = thresholdImage( timg, 1, Inf ) * as.numeric( kk )
+      maskseg[ maskseg == kk ] = timg[ maskseg == kk ]
+      }
+    }
   if (applySegmentationToImages & class(imgList) != "matrix" ) {
     for (i in 1:length(imgList)) {
       img <- imgList[[i]]

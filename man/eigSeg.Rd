@@ -4,7 +4,8 @@
 \alias{eigSeg}
 \title{Segmentation for eigenanatomy.}
 \usage{
-eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE)
+eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
+  cthresh = 0)
 }
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}
@@ -13,6 +14,8 @@ eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE)
 
 \item{applySegmentationToImages}{boolean determines if original image list
 is modified by the segmentation.}
+
+\item{cthresh}{throw away isolated clusters smaller than this value}
 }
 \value{
 segmentation image.
