@@ -9,7 +9,6 @@ Coordinates have been modified from nifti space to ITK space
 \usage{data(aal)}
 \format{
   A data frame listing the following variables.
-  x;y;z;ROI;SystemLabel;SystemName;Color;r;g;b;Anatomy;Lobe
   \describe{
     \item{\code{x}}{ x coordinate }
     \item{\code{y}}{ y coordinate }
