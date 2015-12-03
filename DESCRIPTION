@@ -1,7 +1,8 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R
-Version: 0.3.1
+Version: 0.3.2
+Date: 2015-12-02
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
