@@ -2,10 +2,7 @@
 % Please edit documentation in R/antsImage_class.R
 \name{getNeighborhoodInMask}
 \alias{getNeighborhoodInMask}
-\title{Get neighborhoods for voxels within mask
-
-this converts a scalar image to a matrix with rows that contain neighbors
-around a center voxel}
+\title{Get neighborhoods for voxels within mask}
 \usage{
 getNeighborhoodInMask(image, mask, radius, physical.coordinates = FALSE,
   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE)
@@ -42,6 +39,10 @@ if \code{spatial.info} is true, a list containing three matrices:
  \item{offsets: }{matrix providing the offsets from center for each
   voxel in a neighborhood}
 }
+}
+\description{
+this converts a scalar image to a matrix with rows that contain neighbors
+around a center voxel
 }
 \details{
 \code{boundary.condition} should be one of:
