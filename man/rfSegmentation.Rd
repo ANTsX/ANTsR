@@ -4,14 +4,16 @@
 \alias{rfSegmentation}
 \title{A rfSegmentation function.}
 \usage{
-rfSegmentation(labelimg, featureimages, ntrees = 100, verbose = FALSE)
+rfSegmentation(featureMatrix, mask, labelimg = NA, ntrees = 100,
+  verbose = FALSE)
 }
 \arguments{
-\item{labelimg}{input antsImage labelimage --- assume non-zero entries
-create a mask}
-
-\item{featureimages}{input list of antsImage feature images - length n means
+\item{featureMatrix}{input matrix of features matched to mask size
 n predictors in rf}
+
+\item{mask}{input antsImage mask}
+
+\item{labelimg}{input antsImage labelimage, optional for supervised seg}
 
 \item{ntrees}{number of rf trees}
 
@@ -21,24 +23,38 @@ n predictors in rf}
 list of n-probability images is output where n is number of classes
 }
 \description{
-Image segmentation via random forests.
+Unsupervised image segmentation via random forests.  An example.
 }
 \examples{
-
+\dontrun{
 if ( usePkg("randomForest") ) {
-img<-antsImageRead( getANTsRData("r16"))
+img<-antsImageRead( getANTsRData("r16") ) \%>\% iMath("Normalize")
 mask<-getMask( img )
 segs<-kmeansSegmentation( img, k=3, kmask = mask)
-fimgs<-lappend( img, segs$probabilityimages )
-rfsegs<-rfSegmentation( segs$segmentation, fimgs , verbose=TRUE )
-plot( rfsegs$segmentation )
-# now use in atropos w/priors
-segs2<-atropos( a = img, m = '[0.2,1x1]',
-  c = '[5,0]',  i = rfsegs$probabilityimages, x = mask)
- }
-
+fmat0 = t( antsrimpute( getNeighborhoodInMask( img, mask, c(2,2) ) ) )
+fmat1 = t( antsrimpute( getNeighborhoodInMask(
+  segs$probabilityimages[[1]], mask, c(2,2) ) ) )
+fmat2 = t( antsrimpute( getNeighborhoodInMask(
+  segs$probabilityimages[[2]], mask, c(2,2) ) ) )
+fmat3 = t( antsrimpute( getNeighborhoodInMask(
+  segs$probabilityimages[[3]], mask, c(2,2) ) ) )
+fmat = cbind( fmat0, fmat1, fmat2, fmat3 )
+# produces proximity between all voxel pairs
+rfsegs<-rfSegmentation( fmat, verbose=FALSE )
+lrr = lowrankRowMatrix( rfsegs, 10, faster = TRUE )
+nv = eanatSelect( inmat=lrr, mask=mask, selectorScale=1.2,  cthresh=50,
+  verbose=T, smooth=1 )
+ee = eanatDef( lrr, mask, nvecs=nv, smooth=0., cthresh=50,
+  its=2, verbose=TRUE )
+eseg = eigSeg( mask, ee )
+plot( img, eseg )
+}
+}
 }
 \author{
 Tustison NJ, Avants BB
+}
+\seealso{
+\code{\link{mrvnrfs}}
 }
 

@@ -37,7 +37,7 @@ eanatDef <- function( inmat, nvecs, mask=NA,
   smoother=0, cthresh=0, its=5, eps=0.1,
   positivity = FALSE, verbose=FALSE )
 {
-mat = scale( inmat )
+mat = ( inmat )
 if ( !positivity ) keeppos = (-1.0) else keeppos = (1.0)
 if ( is.na(mask) ) {
   mask = makeImage( c(3,ncol(mat)+2), voxval=0 )
@@ -53,7 +53,7 @@ eseg = eigSeg( mask, ilist,  TRUE )
 solutionmatrix = imageListToMatrix( ilist, mask )
 sparvals = rep( NA, nvecs )
 for ( i in 1:nvecs )
-  sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos
+  sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos * 2
 for ( sol in 1:nrow(solutionmatrix))
   {
   if ( sol == 1 ) rmat = mat else {
@@ -65,12 +65,17 @@ for ( sol in 1:nrow(solutionmatrix))
   # now do projected gradient descent
   for ( i in 1:its )
     {
-    grad = .bootSmooth( rmat, vec, smoother, mask )
+    grad = .bootSmooth( rmat, vec, mask, smoother=0, nboot=0 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
     vec = .eanatDefSparsifyV( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
     if ( is.na(mean(vec))) vec = rnorm( length(vec) )
+    if ( sol > 1 ) # quick orthogonalization
+      {
+#      hasvals = apply( abs(solutionmatrix[1:sol,]), FUN=sum, MARGIN=2 )
+#      vec[ hasvals > 0 ] = 0
+      }
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
     if ( verbose ) print( rq )
@@ -171,7 +176,7 @@ return( nvecs )
 }
 
 
-.bootSmooth <- function( rmat, vec, smoother, mask )
+.bootSmooth <- function( rmat, vec,  mask, smoother=0, nboot=10 )
   {
   if ( smoother == 0 )
     {
@@ -191,18 +196,18 @@ return( nvecs )
     grad[] = newvec[]
     return( grad )
     }
-    sgrad = vec * 0
-    for ( i in 1:smoother )
+    sgrad = vec
+    for ( i in 1:nboot )
       {
       n = nrow(rmat)
-      myboot = sample( 1:n, replace=TRUE, size=round(0.8*n) )
+      myboot = sample( 1:n, replace=FALSE, size=round(0.5*n) ) # 50% drop
       bootmat = rmat[myboot,]
-      lg = t( bootmat ) %*% ( bootmat %*% vec )
+      lg = t( bootmat ) %*% ( bootmat %*% sgrad )
       lg = lg / sqrt( sum( lg * lg ) )
-      sgrad = sgrad + grad
+      sgrad = sgrad + lg
+      sgrad = ( sgrad / sqrt( sum( sgrad * sgrad ) ) )
       }
-    grad[ ] = ( sgrad / sqrt( sum( sgrad * sgrad ) ) )[ ]
-    return( grad )
+    return( sgrad[] )
     }
 }
 

@@ -119,6 +119,10 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       randmask[ randvec ]<-ulab
       }
     }
+    if ( sum(randmask > 0 ) == 0 )
+      {
+      stop("error in input data - mask ", i," is empty")
+      }
     # ok ...
     m1<-t(getNeighborhoodInMask( x[[i]][[1]], randmask,
       rad, spatial.info=F, boundary.condition='image' ))

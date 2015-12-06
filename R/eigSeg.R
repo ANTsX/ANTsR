@@ -24,8 +24,8 @@
 #' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 #'
 #' @export eigSeg
-eigSeg <- function(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
-  cthresh=0, smooth=0 ) {
+eigSeg <- function( mask = NA, imgList = NA, applySegmentationToImages = FALSE,
+  cthresh=0, smooth=1 ) {
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)

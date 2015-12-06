@@ -5,7 +5,7 @@
 \title{Segmentation for eigenanatomy.}
 \usage{
 eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
-  cthresh = 0, smooth = 0)
+  cthresh = 0, smooth = 1)
 }
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}
