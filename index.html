@@ -34,12 +34,12 @@
 <p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Travis Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a>
 <a href="https://codeship.com/projects/79732"> <img src="https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master" alt="Codeship Build Status"></a></p>
 
-<p>An R package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R.</p>
+<p>A package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.</p>
 
 <h2>
 <a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
 
-<p>Version: 0.3.1</p>
+<p>Version: 0.3.2</p>
 
 <p>License: GPL (&gt;=2)</p>
 
@@ -111,15 +111,15 @@
 
 <p>Windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.</p>
 
-<p>You may need to install R packages that ANTsR requires. For example:</p>
+<p>You may need to install R packages that ANTsR requires. For example, minimally:</p>
 
 <pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
 </code></pre>
 
-<p>These dependencies are subject to change until development is stable.
-You can gain additional functionality by installing packages that
-are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>.</p>
+<p>You can gain additional functionality by installing packages that
+are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>.
+A complete list of recommended ancillary packages <a href="https://github.com/stnava/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality">here</a>.</p>
 
 <p><strong>Method 1: <a href="https://github.com/cran/drat">drat</a></strong>
 See full instructions <a href="https://github.com/ANTs-R/drat">here</a> but briefly:</p>
@@ -185,7 +185,7 @@ antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)
-print(antsGetPixels(img,50,60,44))
+print( img[50,60,44] )
 print(max(img))
 </code></pre>
 
@@ -268,7 +268,7 @@ mnit&lt;-antsImageRead(mnit)
 mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
 mask2&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius &lt;- rep(2,mnit@dimension)
-mat2&lt;-getNeighborhoodMatrix(mnit, mask2, radius,
+mat2&lt;-getNeighborhoodInMask(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 </code></pre>
@@ -290,8 +290,6 @@ biologically-motivated smoothness, locality or sparsity constraints.</p>
 <pre><code># assume you ran the population example above
 eanat&lt;-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
 eseg&lt;-eigSeg(mask,eanat$eig,F)
-jeanat&lt;-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
-eseg2&lt;-eigSeg(mask,jeanat$fusedlist,F)
 </code></pre>
 
 <p>The parameters for the example above are set for fast processing.
@@ -346,6 +344,21 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 <h1>
 <a id="release-notes" class="anchor" href="#release-notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release notes</h1>
+
+<p>More like <em>development highlights</em>, as opposed to <em>release notes</em>.  See <code>git log</code> for the complete history.  We try to follow <a href="http://yihui.name/en/2013/06/r-package-versioning/">these versioning recommendations for R packages</a>.  Under these guidelines, only <code>major.minor</code> is an official release.</p>
+
+<h2>
+<a id="032" class="anchor" href="#032" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.2</h2>
+
+<ul>
+<li><p>ENH: automation for eigenanatomy</p></li>
+<li><p>ENH: reworked SCCAN and eanat</p></li>
+<li><p>ENH: mrvnrfs</p></li>
+<li><p>ENH: resting state Vignette</p></li>
+<li><p>DOC: clarify/extend antsApplyTransforms</p></li>
+<li><p>ENH: multidimensional images</p></li>
+<li><p>STYLE: iMath not ImageMath in ANTsR</p></li>
+</ul>
 
 <h2>
 <a id="031" class="anchor" href="#031" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.1</h2>
