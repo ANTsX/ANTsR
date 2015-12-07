@@ -3,7 +3,7 @@
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
 [ ![Codeship Build Status](https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master)](https://codeship.com/projects/79732)
 
-An R package providing [ANTs](http://stnava.github.io/ANTs/) features in R.
+A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.
 
 ## Description
 
@@ -82,14 +82,14 @@ In general, these **assume** you have [git](http://git-scm.com/) installed / acc
 
 Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
 
-You may need to install R packages that ANTsR requires. For example:
+You may need to install R packages that ANTsR requires. For example, minimally:
 ```
 mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
 ```
-These dependencies are subject to change until development is stable.
 You can gain additional functionality by installing packages that
 are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
+A complete list of recommended ancillary packages [here](https://github.com/stnava/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality).
 
 **Method 1: [drat](https://github.com/cran/drat)**
 See full instructions [here](https://github.com/ANTs-R/drat) but briefly:
@@ -153,7 +153,7 @@ antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)
-print(antsGetPixels(img,50,60,44))
+print( img[50,60,44] )
 print(max(img))
 ```
 
@@ -238,7 +238,7 @@ mnit<-antsImageRead(mnit)
 mnit <- resampleImage( mnit , rep(4, mnit@dimension) )
 mask2<-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
 radius <- rep(2,mnit@dimension)
-mat2<-getNeighborhoodMatrix(mnit, mask2, radius,
+mat2<-getNeighborhoodInMask(mnit, mask2, radius,
   physical.coordinates = FALSE,
   boundary.condition = "mean" )
 ```
@@ -259,8 +259,6 @@ biologically-motivated smoothness, locality or sparsity constraints.
 # assume you ran the population example above
 eanat<-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
 eseg<-eigSeg(mask,eanat$eig,F)
-jeanat<-joinEigenanatomy(mat,mask,eanat$eig, c(0.1))
-eseg2<-eigSeg(mask,jeanat$fusedlist,F)
 ```
 The parameters for the example above are set for fast processing.
 You can see our paper for some theory on these methods[@Kandel2014a].
@@ -313,6 +311,24 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 
 # Release notes
+
+These are highlights.  See `git log` for the complete history.
+
+## 0.3.2
+
+* ENH: automation for eigenanatomy
+
+* ENH: reworked SCCAN and eanat
+
+* ENH: mrvnrfs
+
+* ENH: resting state Vignette
+
+* DOC: clarify/extend antsApplyTransforms
+
+* ENH: multidimensional images
+
+* STYLE: iMath not ImageMath in ANTsR
 
 ## 0.3.1
 
