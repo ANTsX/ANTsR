@@ -65,16 +65,17 @@ for ( sol in 1:nrow(solutionmatrix))
   # now do projected gradient descent
   for ( i in 1:its )
     {
-    grad = .bootSmooth( rmat, vec, mask, smoother=0, nboot=0 )
+    grad = .bootSmooth( rmat, vec, mask, smoother=0, nboot=50 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
     vec = .eanatDefSparsifyV( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
     if ( is.na(mean(vec))) vec = rnorm( length(vec) )
-    if ( sol > 1 ) # quick orthogonalization
+    doOrth = TRUE
+    if ( sol > 1 & doOrth ) # quick orthogonalization
       {
-#      hasvals = apply( abs(solutionmatrix[1:sol,]), FUN=sum, MARGIN=2 )
-#      vec[ hasvals > 0 ] = 0
+      hasvals = apply( abs(solutionmatrix[1:sol,]), FUN=sum, MARGIN=2 )
+      vec[ hasvals > 0 ] = 0
       }
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
@@ -186,7 +187,7 @@ return( nvecs )
     }
   else
     {
-    if ( TRUE )
+    if ( smoother > 0 )
     {
     grad = t( rmat ) %*% ( rmat %*% vec )
     grad = grad / sqrt( sum( grad * grad ) )
