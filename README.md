@@ -7,7 +7,7 @@ A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well 
 
 ## Description
 
-Version: 0.3.1
+Version: 0.3.2
 
 License: GPL (>=2)
 
@@ -312,7 +312,7 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 # Release notes
 
-These are highlights.  See `git log` for the complete history.
+More like *development highlights*, as opposed to *release notes*.  See `git log` for the complete history.  We try to follow [these versioning recommendations for R packages](http://yihui.name/en/2013/06/r-package-versioning/).  Under these guidelines, only `major.minor` is an official release.
 
 ## 0.3.2
 
