@@ -154,10 +154,8 @@ for ( sol in 1:nrow(solutionmatrix))
     grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=50 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
-    print("begin spar")
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
-    print("end spar")
     if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
