@@ -130,38 +130,45 @@ eseg = eigSeg( mask, ilist,  TRUE )
 solutionmatrix = imageListToMatrix( ilist, mask )
 sparvals = rep( NA, nvecs )
 for ( i in 1:nvecs )
-  sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos * 2
+  sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos
+allsols = solutionmatrix[1,] * 0
 for ( sol in 1:nrow(solutionmatrix))
   {
   if ( sol == 1 ) rmat = mat else {
     pp = mat %*% t( solutionmatrix )
-    rmat = scale( residuals( lm( mat ~ pp[ ,1:(sol-1)] ) ) )
+    rmat = residuals( lm( mat ~ pp[ ,1:(sol-1)] ) )
   }
   vec = solutionmatrix[sol,]
   if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
   vec = vec / sqrt( sum( vec * vec ) ) # this is initial vector
+  doOrth = T
+  if ( doOrth & sol > 1 ) # quick orthogonalization
+    {
+    mysubset = allsols < 1.e-6 # allow values where prior solutions are small
+    vec[ !mysubset ] = 0
+    if ( verbose )
+      {
+      temp = sum(!mysubset)/length(allsols)
+      print( paste("ORTH:", temp , sum(sparvals[1:(i-1)]) ) )
+      }
+    } else mysubset = rep( TRUE, length(vec) )
   # now do projected stochastic gradient descent
   for ( i in 1:its )
     {
-    doOrth = TRUE
-    if ( sol > 1 & doOrth ) # quick orthogonalization
-      {
-      mysubset = apply( abs(solutionmatrix[1:sol,]), FUN=sum, MARGIN=2 ) < 1.e-9
-      vec[ !mysubset ] = 0
-      } else mysubset = rep( TRUE, length(vec) )
     grad = vec * 0
-    if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
+#    if ( is.na(mean( vec )) | sum( vec^2 ) == 0 ) vec = rnorm( length( vec ) )
     grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=50 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
-    if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
+#    if ( is.na(mean( vec )) | sum( vec^2 ) == 0 ) vec = rnorm( length( vec ) )
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
     if ( verbose ) print( rq )
     }
   solutionmatrix[sol,]=vec
+  allsols = allsols + abs( vec )
   pp = mat %*% t( solutionmatrix )
   errn = mean( abs(  mat -  predict( lm( mat ~ pp[,1:sol] ) ) ) )
   errni = mean( abs(  mat -  predict( lm( mat ~ pp1[,1:sol] ) ) ) )
@@ -209,6 +216,7 @@ return( solutionmatrix )
   smoother=0, clustval = 0, verbose = F)
   {
     vin = matrix( vin, ncol=1 )
+    if ( any( is.na( vin ) ) ) vin = antsrimpute( vin )
     if ( max(vin) == 0 )       vin = vin *(-1)
     if (abs(sparam) >= 1)      return(vin)
     if (nrow(vin) < ncol(vin)) v <- t(vin) else v <- vin
@@ -282,7 +290,12 @@ return( solutionmatrix )
       smin = optimize( myoptf, interval = optinterval2,
         tol = sparResolution, locth = clustval )$minimum
       }
-    v[, 1] <- operateOnVec( sparsev, smin, locth=clustval  )
+    temp = operateOnVec( sparsev, smin, locth=clustval  )
+    myspar = sum( abs( temp) >  0 ) / length( temp )
+#    if ( max(abs(temp)) == 0 )
+#      temp = operateOnVec( sparsev, smin, locth=0  )
+    v[, 1] <- temp
+    if ( verbose ) print( paste( "tar", sparam, "got", myspar  ) )
     return( v * mysigns )
   }
 
