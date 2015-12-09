@@ -154,8 +154,10 @@ for ( sol in 1:nrow(solutionmatrix))
     grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=50 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
+    print("begin spar")
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
+    print("end spar")
     if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
@@ -214,28 +216,28 @@ return( solutionmatrix )
     if (nrow(vin) < ncol(vin)) v <- t(vin) else v <- vin
     mysigns = sign( v )
     sparsev <- as.numeric( c(v[, 1]) )
-    sparResolution = ( 1.0 / length(sparsev) )
+    sparResolution = ( 1.0 / length(sparsev) ) * 2
     if ( sparam > 0 )
       {
       sparsev[sparsev < 0] <- 0
-      ord <- order(sparsev)
       }
     # smooth first
     if ( smoother > 0 & !is.na(mask)  )
       {
-      simg = makeImage( mask, sparsev ) %>% iMath("GD",5)
+      simg = makeImage( mask, sparsev ) %>% iMath("GD",3)
       simg[ mask == 1 ] = sparsev
       simg = smoothImage( simg, sigma = smoother,
         sigmaInPhysicalCoordinates = FALSE )
       sparsevnew = simg[ mask == 1 ]
       sparsev[ ] = sparsevnew[ ]
       }
-
+    sparsenessThresh = max( abs( sparsev ) )
+    optinterval = c( -1.0 * sparsenessThresh, sparsenessThresh )
     # this is the key geometric operation
-    operateOnVec <- function( myvec, s )
+    operateOnVec <- function( myvec, s, locth )
       {
       cursparvec = myvec * 0
-      if ( ! is.na( mask ) & clustval > 0 )
+      if ( ! is.na( mask ) & locth > 0 )
         {
         sparimg = makeImage( mask, myvec )
         timg = labelClusters( abs(sparimg), clustval,
@@ -249,11 +251,11 @@ return( solutionmatrix )
       else
         {
         cursparvec = myvec
-        cursparvec[ myvec < s ] = 0
+        cursparvec[ abs(myvec) < s ] = 0
         }
-        if ( smoother > 0 & !is.na(mask) )
+        if ( smoother > 0 & !is.na(mask) & FALSE )
           {
-          simg = makeImage( mask, cursparvec ) %>% iMath("GD",5)
+          simg = makeImage( mask, cursparvec ) %>% iMath("GD",3)
           simg[ mask == 1 ] = cursparvec
           simg = smoothImage( simg, sigma = smoother,
             sigmaInPhysicalCoordinates = FALSE )
@@ -264,19 +266,25 @@ return( solutionmatrix )
     # we wish to call optimize with a function that returns a value
     # based on the difference between the current and target sparval
     # the input argument is sparsenessThresh
-    myoptf <- function( s )
+    myoptf <- function( s , locth = 0 )
       {
-      cursparvec = operateOnVec( sparsev, s )
+      cursparvec = operateOnVec( sparsev, s, locth=locth )
       myspar = sum( abs( cursparvec) >  0 ) / length( sparsev )
       testspar = abs( abs(myspar) - abs(sparam) )
       if ( myspar == 0 ) testspar = 1.e12
+#      print(paste("mx",max(vin),"mn",min(vin)))
+#      print( paste( "s", s, "myspar", myspar, "goal", sparam ) )
       return( testspar )
       }
-    sparsenessThresh=max(abs(sparsev))
-    optinterval = c(-1*sparsenessThresh, sparsenessThresh)
     smin = optimize( myoptf, interval = optinterval,
-      tol = sparResolution )$minimum
-    v[, 1] <- operateOnVec( sparsev, smin )
+      tol = sparResolution, locth = 0 )$minimum
+    if ( clustval > 0 )
+      {
+      optinterval2 = c( -1.0 * abs(smin), abs(smin) )
+      smin = optimize( myoptf, interval = optinterval2,
+        tol = sparResolution, locth = clustval )$minimum
+      }
+    v[, 1] <- operateOnVec( sparsev, smin, locth=clustval  )
     return( v * mysigns )
   }
 
