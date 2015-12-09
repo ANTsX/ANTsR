@@ -149,7 +149,7 @@ for ( sol in 1:nrow(solutionmatrix))
     if ( verbose )
       {
       temp = sum(!mysubset)/length(allsols)
-      print( paste("ORTH:", temp , sum(sparvals[1:(i-1)]) ) )
+      print( paste("ORTH:", temp , sum(abs(sparvals[1:(sol-1)])) ) )
       }
     } else mysubset = rep( TRUE, length(vec) )
   # now do projected stochastic gradient descent
