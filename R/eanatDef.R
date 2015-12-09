@@ -217,7 +217,7 @@ return( solutionmatrix )
   {
     vin = matrix( vin, ncol=1 )
     if ( any( is.na( vin ) ) ) vin = antsrimpute( vin )
-    if ( max(vin) == 0 )       vin = vin *(-1)
+    if ( max(vin) <= 0 )       vin = vin *(-1)
     if (abs(sparam) >= 1)      return(vin)
     if (nrow(vin) < ncol(vin)) v <- t(vin) else v <- vin
     mysigns = sign( v )
