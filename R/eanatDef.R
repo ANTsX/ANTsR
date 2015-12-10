@@ -141,7 +141,7 @@ for ( sol in 1:nrow(solutionmatrix))
   vec = solutionmatrix[sol,]
   if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
   vec = vec / sqrt( sum( vec * vec ) ) # this is initial vector
-  doOrth = T
+  doOrth = F
   if ( doOrth & sol > 1 ) # quick orthogonalization
     {
     mysubset = allsols < 1.e-6 # allow values where prior solutions are small
