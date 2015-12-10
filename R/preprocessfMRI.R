@@ -103,7 +103,7 @@ preprocessfMRI <- function(boldImage,
         translationAtTime1
       transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% samplePoint +
         translationAtTime2
-      framewiseDisplacement[i] <- sum(abs(transformedPointAtTime2 - transformedPointAtTime1))
+      framewiseDisplacement[i] <- dist( rbind(transformedPointAtTime2,transformedPointAtTime1 ))[[1]]
     }
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
 
@@ -162,7 +162,7 @@ preprocessfMRI <- function(boldImage,
 
   # anisotropically smooth the 4-D image, if desired
   smoothCleanBoldImage = cleanBoldImage*1
-  
+
   if (spatialSmoothingType == "gaussian") {
     if (length(spatialSmoothingParameters) == 1) {
       sigmaVector <- paste0(spatialSmoothingParameters[1], "x", spatialSmoothingParameters[1],
