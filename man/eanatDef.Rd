@@ -34,7 +34,8 @@ matrix is output, analogous to \code{svd(mat,nu=0,nv=nvecs)}
 Simplified, low-parameter eigenanatomy implemented with deflation. The
 algorithm is able to automatically select hidden \code{sparseness}
 parameters, given the key parameter \code{nvecs}.  The user should select the
-\code{cthresh} and  \code{smoother} regularization parameters for his or her #' application and also based on observing algorithm behavior when
+\code{cthresh} and  \code{smoother} regularization parameters for a given
+application and also based on observing algorithm behavior when
 \code{verbose=TRUE}.
 }
 \examples{

@@ -80,7 +80,8 @@ return( nvecs )
 #' Simplified, low-parameter eigenanatomy implemented with deflation. The
 #' algorithm is able to automatically select hidden \code{sparseness}
 #' parameters, given the key parameter \code{nvecs}.  The user should select the
-#' \code{cthresh} and  \code{smoother} regularization parameters for his or her #' application and also based on observing algorithm behavior when
+#' \code{cthresh} and  \code{smoother} regularization parameters for a given
+#' application and also based on observing algorithm behavior when
 #' \code{verbose=TRUE}.
 #'
 #' @param inmat input matrix
@@ -230,7 +231,7 @@ return( solutionmatrix )
     # smooth first
     if ( smoother > 0 & !is.na(mask)  )
       {
-      simg = makeImage( mask, sparsev ) %>% iMath("GD",3)
+      simg = makeImage( mask, sparsev ) # %>% iMath("GD",3)
       simg[ mask == 1 ] = sparsev
       simg = smoothImage( simg, sigma = smoother,
         sigmaInPhysicalCoordinates = FALSE )
@@ -261,7 +262,7 @@ return( solutionmatrix )
         }
         if ( smoother > 0 & !is.na(mask) & FALSE )
           {
-          simg = makeImage( mask, cursparvec ) %>% iMath("GD",3)
+          simg = makeImage( mask, cursparvec ) # %>% iMath("GD",3)
           simg[ mask == 1 ] = cursparvec
           simg = smoothImage( simg, sigma = smoother,
             sigmaInPhysicalCoordinates = FALSE )

@@ -8,29 +8,30 @@
 #' @param minClusterSize throw away clusters smaller than this value
 #' @param minThresh threshold to a statistical map
 #' @param maxThresh threshold to a statistical map
+#' @param fullyConnected boolean sets neighborhood connectivity pattern
 #' @return labeled cluster image is output
 #' @author Avants BB
 #' @examples
 #'
+#' img<-antsImageRead( getANTsRData("r16") )
+#' timgFully = labelClusters( img, 10, 128, 150, TRUE )
+#' timgFace = labelClusters( img, 10, 128, 150, FALSE )
 #' \dontrun{
-#' img<-antsImageRead( getANTsRData("mnib"), 3 )
-#' outimage<-labelClusters( img )
+#' plot(img, timgFace )
+#' plot(img, timgFully )
 #' }
 #'
 #' @export labelClusters
 labelClusters <- function(imagein, minClusterSize = 50,
-   minThresh = 1e-06, maxThresh = 1) {
-  if (nargs() == 0) {
-    print("Usage: clusers<-labelClusters( imagein , minClusterSize = 50 ) ")
-    print(" imagein is an antsImage ")
-    return(1)
-  }
+   minThresh = 1e-06, maxThresh = 1, fullyConnected = FALSE ) {
   dim <- imagein@dimension
   clust<-thresholdImage( imagein, minThresh, maxThresh )
-  .LabelClustersUniquely(dim, clust, clust, minClusterSize)
+  temp = as.numeric( fullyConnected )
+  .LabelClustersUniquely(dim, clust, clust, minClusterSize, temp )
   return(clust)
 }
 
 .LabelClustersUniquely <- function(...) {
-pp<-.Call("LabelClustersUniquely", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+pp<-.Call("LabelClustersUniquely", .int_antsProcessArguments(c(...)),
+  PACKAGE = "ANTsR")
 }

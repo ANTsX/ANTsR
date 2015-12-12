@@ -5,7 +5,7 @@
 \title{Simple labelClustering function.}
 \usage{
 labelClusters(imagein, minClusterSize = 50, minThresh = 1e-06,
-  maxThresh = 1)
+  maxThresh = 1, fullyConnected = FALSE)
 }
 \arguments{
 \item{imagein}{input antsImage e.g. a statistical map}
@@ -15,6 +15,8 @@ labelClusters(imagein, minClusterSize = 50, minThresh = 1e-06,
 \item{minThresh}{threshold to a statistical map}
 
 \item{maxThresh}{threshold to a statistical map}
+
+\item{fullyConnected}{boolean sets neighborhood connectivity pattern}
 }
 \value{
 labeled cluster image is output
@@ -25,9 +27,12 @@ minClusterSize
 }
 \examples{
 
+img<-antsImageRead( getANTsRData("r16") )
+timgFully = labelClusters( img, 10, 128, 150, TRUE )
+timgFace = labelClusters( img, 10, 128, 150, FALSE )
 \dontrun{
-img<-antsImageRead( getANTsRData("mnib"), 3 )
-outimage<-labelClusters( img )
+plot(img, timgFace )
+plot(img, timgFully )
 }
 
 }
