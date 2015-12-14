@@ -231,7 +231,7 @@ return( solutionmatrix )
     # smooth first
     if ( smoother > 0 & !is.na(mask)  )
       {
-      simg = makeImage( mask, sparsev ) # %>% iMath("GD",3)
+      simg = makeImage( mask, sparsev ) %>% iMath("GD",5)
       simg[ mask == 1 ] = sparsev
       simg = smoothImage( simg, sigma = smoother,
         sigmaInPhysicalCoordinates = FALSE )
@@ -262,7 +262,7 @@ return( solutionmatrix )
         }
         if ( smoother > 0 & !is.na(mask) & FALSE )
           {
-          simg = makeImage( mask, cursparvec ) # %>% iMath("GD",3)
+          simg = makeImage( mask, cursparvec ) %>% iMath("GD",5)
           simg[ mask == 1 ] = cursparvec
           simg = smoothImage( simg, sigma = smoother,
             sigmaInPhysicalCoordinates = FALSE )
