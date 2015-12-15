@@ -2,6 +2,7 @@
 #include "itkImage.h"
 #include "itkVectorImage.h"
 #include "itkVector.h"
+#include "itkImageRegionIteratorWithIndex.h"
 #include "vnl/vnl_vector_ref.h"
 
 #include <RcppCommon.h>
@@ -199,7 +200,79 @@ itk::VectorImage<unsigned char,3>::Pointer as( SEXP itkImageR );
 template <>
 itk::VectorImage<unsigned char,4>::Pointer as( SEXP itkImageR );
 
+// antsImageIterator conversions
 
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,2> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,3> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,4> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,2> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,3> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,4> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,2> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,3> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,4> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,2> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,3> > & iterator );
+
+template <>
+SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > & iterator );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<double,2> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<double,3> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<double,4> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<float,2> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<float,3> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<float,4> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,2> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,3> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,4> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,2> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,3> > as( SEXP itkImageIteratorR );
+
+template <>
+itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkImageIteratorR );
 }
 
 // This needs to go after wrap declarations
