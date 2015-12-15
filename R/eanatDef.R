@@ -158,7 +158,7 @@ for ( sol in 1:nrow(solutionmatrix))
     {
     grad = vec * 0
 #    if ( is.na(mean( vec )) | sum( vec^2 ) == 0 ) vec = rnorm( length( vec ) )
-    grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=50 )
+    grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=0 )
     if ( i == 1 ) w1=1 else w1=1
     vec = vec*w1 + grad * eps
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
@@ -231,7 +231,7 @@ return( solutionmatrix )
     # smooth first
     if ( smoother > 0 & !is.na(mask)  )
       {
-      simg = makeImage( mask, sparsev ) %>% iMath("GD",5)
+      simg = makeImage( mask, sparsev ) # %>% iMath("GD",5)
       simg[ mask == 1 ] = sparsev
       simg = smoothImage( simg, sigma = smoother,
         sigmaInPhysicalCoordinates = FALSE )
@@ -262,7 +262,7 @@ return( solutionmatrix )
         }
         if ( smoother > 0 & !is.na(mask) & FALSE )
           {
-          simg = makeImage( mask, cursparvec ) %>% iMath("GD",5)
+          simg = makeImage( mask, cursparvec ) # %>% iMath("GD",5)
           simg[ mask == 1 ] = cursparvec
           simg = smoothImage( simg, sigma = smoother,
             sigmaInPhysicalCoordinates = FALSE )
