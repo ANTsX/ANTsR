@@ -7,6 +7,7 @@
 #include "itkAffineTransform.h"
 #include "itkTranslationTransform.h"
 #include "itkResampleImageFilter.h"
+#include "itkTransformFileReader.h"
 
 template< class TransformType >
 Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
@@ -587,6 +588,46 @@ try
       return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref );
 	    }
     }
+
+  return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
+
+RcppExport SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
+{
+try
+{
+  std::string filename = Rcpp::as<std::string>( r_filename );
+  std::string precision = Rcpp::as<std::string>( r_precision );
+
+  if ( precision == "float")
+  {
+    typedef itk::TransformFileReaderTemplate<float> TransformReaderType;
+    typename TransformReaderType::Pointer reader = TransformReaderType::New();
+    reader->SetFileName( filename );
+    reader->Update();
+
+    const TransformReaderType::TransformListType * transforms =
+      reader->GetTransformList();
+    Rcpp::Rcout << "Number of transforms = " << transforms->size() << std::endl;
+
+  }
 
   return( Rcpp::wrap(NA_REAL) );
 

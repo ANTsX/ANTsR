@@ -80,9 +80,22 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' @return antsImage
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
-#' tx = new("antsTransform")'
+#' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 #' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
 antsApplyTransformToImage <- function(tx, image, ref) {
   return(.Call("antsTransform_TransformImage", tx, image, ref, PACKAGE = "ANTsR"))
+}
+
+#' @title antsTransformRead
+#' @description read a transform from file
+#' @param filename filename of transform
+#' @return antsTransform
+#' @examples
+#' img <- antsImageRead(getANTsRData("r16"))
+#' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' img2 = antsApplyTransformToImage(tx, img, img)
+antsTransformRead <- function( filename, precision="float" )  {
+  return(.Call("antsTransform_Read", filename, precision, PACKAGE="ANTsR"))
 }
