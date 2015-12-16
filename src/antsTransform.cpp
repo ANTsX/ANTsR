@@ -6,6 +6,7 @@
 
 #include "itkAffineTransform.h"
 #include "itkTranslationTransform.h"
+#include "itkResampleImageFilter.h"
 
 template< class TransformType >
 Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
@@ -445,6 +446,145 @@ try
     else if( dimension == 2 )
 	    {
       return antsTransform_TransformPoint<PrecisionType,2>( r_transform, r_point );
+	    }
+    }
+
+  return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
+
+
+// Apply transform to image
+template< class TransformType >
+SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+{
+  typedef typename TransformType::Pointer          TransformPointerType;
+  typedef typename TransformType::InputPointType   InputPointType;
+  typedef typename TransformType::OutputPointType  OutputPointType;
+
+  Rcpp::S4 image( r_image );
+  std::string pixeltype = Rcpp::as<std::string>(image.slot("pixeltype"));
+
+  TransformPointerType transform = Rcpp::as<TransformPointerType>( r_transform );
+  //typename TransformType::Pointer transform = TransformType::New();
+  typedef typename TransformType::ParametersValueType                   PrecisionType;
+
+  if ( pixeltype=="float" )
+    {
+    typedef itk::Image<float,TransformType::InputSpaceDimension> ImageType;
+    typedef typename ImageType::Pointer                          ImagePointerType;
+
+    typedef itk::ImageBase<TransformType::InputSpaceDimension> ImageBaseType;
+    typedef typename ImageBaseType::Pointer                    ImageBasePointerType;
+
+    ImagePointerType inputImage = Rcpp::as<ImagePointerType>( r_image );
+    ImageBasePointerType refImage = Rcpp::as<ImageBasePointerType>( r_ref );
+
+    typedef itk::ResampleImageFilter<ImageType,ImageType,PrecisionType,PrecisionType> FilterType;
+    typename FilterType::Pointer filter = FilterType::New();
+
+    filter->SetInput( inputImage );
+    filter->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
+    filter->SetOutputSpacing( refImage->GetSpacing() );
+    filter->SetOutputOrigin( refImage->GetOrigin() );
+    filter->SetOutputDirection( refImage->GetDirection() );
+    filter->SetTransform( transform );
+    filter->Update();
+
+    return Rcpp::wrap<ImagePointerType>( filter->GetOutput() );
+
+    }
+
+    return Rcpp::wrap(NA_REAL);
+
+}
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+{
+  Rcpp::S4 transform( r_transform );
+  std::string type = Rcpp::as<std::string>( transform.slot("type") );
+
+  if ( type == "AffineTransform" )
+    {
+    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
+    return antsTransform_TransformImage<TransformType>( r_transform, r_image, r_ref );
+    }
+  else
+    {
+    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
+    Rcpp::stop( "Transform type not supported" );
+    }
+
+  return Rcpp::wrap(NA_REAL);
+}
+
+
+RcppExport SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+{
+try
+{
+  Rcpp::S4 transform( r_transform );
+
+  std::string precision = Rcpp::as<std::string>( transform.slot("precision") );
+  unsigned int dimension = Rcpp::as<int>( transform.slot("dimension") );
+
+  if ( (dimension < 1) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
+
+  if ( (precision != "float") && (precision != "double"))
+    {
+    Rcpp::stop( "Precision must be 'float' or 'double'");
+    }
+
+  if( precision == "double" )
+    {
+    typedef double PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref  );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref );
+	    }
+	  }
+  else if( precision == "float" )
+    {
+    typedef float PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref );
 	    }
     }
 

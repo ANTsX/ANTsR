@@ -71,3 +71,18 @@ antsTransformGetParameters <- function(tx) {
 antsApplyTransformToPoint <- function(tx, point) {
   return(.Call("antsTransform_TransformPoint", tx, point, PACKAGE = "ANTsR"))
 }
+
+#' @title antsApplyTransformToImage
+#' @description Apply transform to spatial point
+#' @param tx antsTransform
+#' @param image antsImage to transform
+#' @param ref antImage giving the reference output space
+#' @return antsImage
+#' @examples
+#' img <- antsImageRead(getANTsRData("r16"))
+#' tx = new("antsTransform")'
+#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' img2 = antsApplyTransformToImage(tx, img, img)
+antsApplyTransformToImage <- function(tx, image, ref) {
+  return(.Call("antsTransform_TransformImage", tx, image, ref, PACKAGE = "ANTsR"))
+}
