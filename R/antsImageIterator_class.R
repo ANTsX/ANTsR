@@ -24,7 +24,7 @@ setClass(Class = "antsImageIterator", representation(pixeltype = "character", di
   components = "integer", pointer = "externalptr"))
 
 #' @describeIn antsImageIterator
-setMethod(f = "show", "antsImage", function(object){
+setMethod(f = "show", "antsImageIterator", function(object){
     cat("antsImageIterator\n")
     cat("  Pixel Type          :", object@pixeltype, "\n")
     cat("  Components Per Pixel:", object@components, "\n")
@@ -33,7 +33,7 @@ setMethod(f = "show", "antsImage", function(object){
 })
 
 #' @describeIn antsImageIterator
-setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
+setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(.Object,
   pixeltype = "float", dimension = 3, components = 1) {
   return(.Call("antsImageIterator", pixeltype, dimension, components, PACKAGE = "ANTsR"))
 })
