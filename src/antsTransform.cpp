@@ -4,11 +4,24 @@
 #include <string>
 #include <RcppANTsR.h>
 
+#include "antsUtilities.h"
 #include "itkAffineTransform.h"
 #include "itkTranslationTransform.h"
 #include "itkResampleImageFilter.h"
 #include "itkTransformFileReader.h"
 #include "itkCompositeTransform.h"
+#include "itkDisplacementFieldTransform.h"
+#include "itkConstantBoundaryCondition.h"
+
+#include "itkBSplineInterpolateImageFunction.h"
+#include "itkLinearInterpolateImageFunction.h"
+#include "itkGaussianInterpolateImageFunction.h"
+#include "itkInterpolateImageFunction.h"
+#include "itkNearestNeighborInterpolateImageFunction.h"
+#include "itkWindowedSincInterpolateImageFunction.h"
+#include "itkLabelImageGaussianInterpolateImageFunction.h"
+
+
 
 template< class TransformType >
 Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
@@ -326,6 +339,9 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
   typedef typename TransformType::InputPointType   InputPointType;
   typedef typename TransformType::OutputPointType  OutputPointType;
 
+  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
+  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
+
   TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
   Rcpp::NumericVector inPoint( r_point );
 
@@ -335,7 +351,18 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
     inItkPoint[i] = inPoint[i];
     }
 
-  OutputPointType outItkPoint = itkTransform->TransformPoint( inItkPoint );
+  OutputPointType outItkPoint;
+  if ( type == "CompositeTransform")
+  {
+    CompositeTransformPointerType cTransform
+      = dynamic_cast<CompositeTransformType *>( itkTransform.GetPointer() );
+    Rcpp::Rcout << "Number of transforms: " << cTransform->GetNumberOfTransforms() << std::endl;
+    outItkPoint = cTransform->TransformPoint( inItkPoint );
+  }
+  else
+  {
+    outItkPoint = itkTransform->TransformPoint( inItkPoint );
+  }
 
   Rcpp::NumericVector outPoint( OutputPointType::PointDimension );
   for (unsigned int i=0; i<OutputPointType::PointDimension; i++)
@@ -422,18 +449,26 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 // Apply transform to image
 template< class TransformType, class PixelType >
-SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
 {
   typedef typename TransformType::Pointer          TransformPointerType;
   typedef typename TransformType::InputPointType   InputPointType;
   typedef typename TransformType::OutputPointType  OutputPointType;
 
+  const unsigned int Dimension = TransformType::InputSpaceDimension;
+
+  Rcpp::S4 antsTransform( r_transform );
+  std::string type = Rcpp::as<std::string>( antsTransform.slot("type") );
+
   TransformPointerType transform = Rcpp::as<TransformPointerType>( r_transform );
 
   typedef typename TransformType::ParametersValueType                   PrecisionType;
 
+  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
+  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
+
   typedef itk::Image<PixelType,TransformType::InputSpaceDimension> ImageType;
-  typedef typename ImageType::Pointer                          ImagePointerType;
+  typedef typename ImageType::Pointer                              ImagePointerType;
 
   // Use base for reference image so we can ignore it's pixeltype
   typedef itk::ImageBase<TransformType::InputSpaceDimension> ImageBaseType;
@@ -445,19 +480,130 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
   typedef itk::ResampleImageFilter<ImageType,ImageType,PrecisionType,PrecisionType> FilterType;
   typename FilterType::Pointer filter = FilterType::New();
 
+  std::string interp = Rcpp::as<std::string>( r_interpolation );
+
+  typedef itk::InterpolateImageFunction<ImageType, PrecisionType> InterpolatorType;
+  typename InterpolatorType::Pointer interpolator = ITK_NULLPTR;
+
+  // adapted from make_interpolator_snip.tmpl
+  if( interp == "linear" )
+    {
+    typedef itk::LinearInterpolateImageFunction<ImageType, PrecisionType> LinearInterpolatorType;
+    typename LinearInterpolatorType::Pointer linearInterpolator = LinearInterpolatorType::New();
+    interpolator = linearInterpolator;
+    }
+  else if( interp == "nearestneighbor" )
+    {
+    typedef itk::NearestNeighborInterpolateImageFunction<ImageType, PrecisionType> NearestNeighborInterpolatorType;
+    typename NearestNeighborInterpolatorType::Pointer nearestNeighborInterpolator = NearestNeighborInterpolatorType::New();
+    interpolator = nearestNeighborInterpolator;
+    }
+  else if( interp == "bspline" )
+    {
+    typedef itk::BSplineInterpolateImageFunction<ImageType, PrecisionType> BSplineInterpolatorType;
+    typename BSplineInterpolatorType::Pointer bSplineInterpolator = BSplineInterpolatorType::New();
+    interpolator = bSplineInterpolator;
+    }
+  else if( interp == "gaussian" )
+    {
+    typedef itk::GaussianInterpolateImageFunction<ImageType, PrecisionType> GaussianInterpolatorType;
+    typename GaussianInterpolatorType::Pointer gaussianInterpolator = GaussianInterpolatorType::New();
+    double sigma[Dimension];
+    for( unsigned int d = 0; d < Dimension; d++ )
+      {
+      sigma[d] = inputImage->GetSpacing()[d];
+      }
+    double alpha = 1.0;
+    gaussianInterpolator->SetParameters( sigma, alpha );
+    interpolator = gaussianInterpolator;
+    }
+  else if( interp ==  "CosineWindowedSinc" )
+    {
+    typedef itk::WindowedSincInterpolateImageFunction
+                 <ImageType, 3, itk::Function::CosineWindowFunction<3, PrecisionType, PrecisionType>, itk::ConstantBoundaryCondition< ImageType >, PrecisionType> CosineInterpolatorType;
+    typename CosineInterpolatorType::Pointer cosineInterpolator = CosineInterpolatorType::New();
+    interpolator = cosineInterpolator;
+    }
+  else if( interp == "hammingwindowedsinc" )
+    {
+    typedef itk::WindowedSincInterpolateImageFunction
+                 <ImageType, 3, itk::Function::HammingWindowFunction<3, PrecisionType, PrecisionType >, itk::ConstantBoundaryCondition< ImageType >, PrecisionType> HammingInterpolatorType;
+    typename HammingInterpolatorType::Pointer hammingInterpolator = HammingInterpolatorType::New();
+    interpolator = hammingInterpolator;
+    }
+  else if( interp == "lanczoswindowedsinc" )
+    {
+    typedef itk::WindowedSincInterpolateImageFunction
+                 <ImageType, 3, itk::Function::LanczosWindowFunction<3, PrecisionType, PrecisionType>, itk::ConstantBoundaryCondition< ImageType >, PrecisionType > LanczosInterpolatorType;
+    typename LanczosInterpolatorType::Pointer lanczosInterpolator = LanczosInterpolatorType::New();
+    interpolator = lanczosInterpolator;
+    }
+  else if( interp == "blackmanwindowedsinc" )
+    {
+    typedef itk::WindowedSincInterpolateImageFunction
+                 <ImageType, 3, itk::Function::BlackmanWindowFunction<3, PrecisionType, PrecisionType>, itk::ConstantBoundaryCondition< ImageType >, PrecisionType > BlackmanInterpolatorType;
+    typename BlackmanInterpolatorType::Pointer blackmanInterpolator = BlackmanInterpolatorType::New();
+    interpolator = blackmanInterpolator;
+    }
+  else if( interp == "welchwindowedsinc" )
+    {
+    typedef itk::WindowedSincInterpolateImageFunction
+                 <ImageType, 3, itk::Function::WelchWindowFunction<3, PrecisionType, PrecisionType>, itk::ConstantBoundaryCondition< ImageType >, PrecisionType > WelchInterpolatorType;
+    typename WelchInterpolatorType::Pointer welchInterpolator = WelchInterpolatorType::New();
+    interpolator = welchInterpolator;
+    }
+  else if( interp == "multilabel" )
+    {
+    const unsigned int NVectorComponents = 1;
+    typedef ants::VectorPixelCompare<PrecisionType, NVectorComponents> CompareType;
+    typedef typename itk::LabelImageGaussianInterpolateImageFunction<ImageType, PrecisionType,
+	    CompareType> MultiLabelInterpolatorType;
+    typename MultiLabelInterpolatorType::Pointer multiLabelInterpolator = MultiLabelInterpolatorType::New();
+    double sigma[Dimension];
+    for( unsigned int d = 0; d < Dimension; d++ )
+      {
+      sigma[d] = inputImage->GetSpacing()[d];
+      }
+    double alpha = 4.0;
+    multiLabelInterpolator->SetParameters( sigma, alpha );
+    interpolator = multiLabelInterpolator;
+    }
+
+   //sanity check thtat this function MUST return a valid interpolator
+   if ( interpolator.IsNull() )
+    {
+    Rcpp::stop("Error:  Unrecognized interpolation option. ");
+    }
+
+
   filter->SetInput( inputImage );
   filter->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
   filter->SetOutputSpacing( refImage->GetSpacing() );
   filter->SetOutputOrigin( refImage->GetOrigin() );
   filter->SetOutputDirection( refImage->GetDirection() );
-  filter->SetTransform( transform );
+  filter->SetInterpolator( interpolator );
+
+  if ( type == "CompositeTransform")
+  {
+    CompositeTransformPointerType cTransform
+      = dynamic_cast<CompositeTransformType *>( transform.GetPointer() );
+    Rcpp::Rcout << "Number of transforms: " << cTransform->GetNumberOfTransforms() << std::endl;
+    filter->SetTransform(cTransform);
+    filter->DebugOn();
+    cTransform->DebugOn();
+  }
+  else
+  {
+    filter->SetTransform( transform );
+  }
+
   filter->Update();
 
   return Rcpp::wrap<ImagePointerType>( filter->GetOutput() );
 }
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
 {
   Rcpp::S4 transform( r_transform );
   std::string type = Rcpp::as<std::string>( transform.slot("type") );
@@ -470,19 +616,19 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
 
   if ( pixeltype == "double" )
   {
-    return antsTransform_TransformImage<TransformType, double>( r_transform, r_image, r_ref );
+    return antsTransform_TransformImage<TransformType, double>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "float" )
   {
-    return antsTransform_TransformImage<TransformType, float>( r_transform, r_image, r_ref );
+    return antsTransform_TransformImage<TransformType, float>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "unsigned int" )
   {
-    return antsTransform_TransformImage<TransformType, unsigned int>( r_transform, r_image, r_ref );
+    return antsTransform_TransformImage<TransformType, unsigned int>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "unsigned char" )
   {
-    return antsTransform_TransformImage<TransformType, unsigned char>( r_transform, r_image, r_ref );
+    return antsTransform_TransformImage<TransformType, unsigned char>( r_transform, r_image, r_ref, r_interpolation );
   }
   else
   {
@@ -494,7 +640,7 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
 }
 
 
-RcppExport SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
+RcppExport SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_iterpolation )
 {
 try
 {
@@ -518,15 +664,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref  );
+      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref );
+      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref );
+      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
 	  }
   else if( precision == "float" )
@@ -534,15 +680,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref );
+      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref );
+      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref );
+      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     }
 
@@ -585,7 +731,7 @@ SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
   reader->Update();
 
   const typename TransformReaderType::TransformListType * transformList = reader->GetTransformList();
-  Rcpp::Rcout << "Number of transforms = " << transformList->size() << std::endl;
+  //Rcpp::Rcout << "Number of transforms = " << transformList->size() << std::endl;
 
   Rcpp::S4 antsTransform( "antsTransform" );
   antsTransform.slot("dimension") = Dimension;
@@ -674,7 +820,7 @@ SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
   antsTransform.slot("dimension") = Dimension;
   antsTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
 
-  Rcpp::List transforms( r_list  );
+  Rcpp::List transforms( r_list );
 
   typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformBaseType;
   typedef typename TransformBaseType::Pointer               TransformBasePointerType;
@@ -686,6 +832,9 @@ SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
     {
     TransformBasePointerType t = Rcpp::as<TransformBasePointerType>( transforms[i] );
     comp_transform->AddTransform( t );
+    Rcpp::S4 tran(transforms[i]);
+
+    Rcpp::Rcout << "Adding transform: " << Rcpp::as<std::string>(tran.slot("type")) << std::endl;
     }
 
   TransformBasePointerType transform = dynamic_cast<TransformBaseType *>(comp_transform.GetPointer());
@@ -721,6 +870,122 @@ try
     else if ( dimension == 2 )
     {
       return antsTransform_Compose<PrecisionType,2>( r_list, r_precision );
+    }
+    else
+    {
+      Rcpp::stop( "Unsupported dimension" );
+    }
+  }
+
+  return( Rcpp::wrap(NA_REAL) );
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
+
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_FromDisplacementField( SEXP r_field, std::string precision )
+{
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension>                  TransformType;
+  typedef typename TransformType::Pointer                                    TransformPointerType;
+  typedef typename itk::DisplacementFieldTransform<PrecisionType, Dimension> DisplacementFieldTransformType;
+  typedef typename DisplacementFieldTransformType::DisplacementFieldType     DisplacementFieldType;
+  typedef typename DisplacementFieldType::PixelType                          VectorType;
+
+  // Displacement field is an itk::Image with vector pixels, while in ANTsR we use the
+  // itk::VectorImage class for multichannel data. So we must copy the field
+  // and pass it to the transform
+  typedef itk::VectorImage<PrecisionType, Dimension> AntsrFieldType;
+  typedef typename AntsrFieldType::Pointer           AntsrFieldPointerType;
+
+  AntsrFieldPointerType antsrField = Rcpp::as<AntsrFieldPointerType>( r_field );
+  typename DisplacementFieldType::Pointer itkField = DisplacementFieldType::New();
+  itkField->SetRegions( antsrField->GetLargestPossibleRegion() );
+  itkField->SetSpacing( antsrField->GetSpacing() );
+  itkField->SetOrigin( antsrField->GetOrigin() );
+  itkField->SetDirection( antsrField->GetDirection() );
+  itkField->Allocate();
+
+  typedef itk::ImageRegionIteratorWithIndex<DisplacementFieldType> IteratorType;
+  IteratorType it( itkField, itkField->GetLargestPossibleRegion() );
+  while ( !it.IsAtEnd() )
+  {
+    typename AntsrFieldType::PixelType vec = antsrField->GetPixel( it.GetIndex() );
+    VectorType dvec;
+    for ( unsigned int i=0; i<Dimension; i++)
+      {
+      dvec[i] = vec[i];
+      }
+    itkField->SetPixel(it.GetIndex(), dvec);
+    ++it;
+  }
+
+  typename DisplacementFieldTransformType::Pointer displacementTransform =
+    DisplacementFieldTransformType::New();
+  displacementTransform->SetDisplacementField( itkField );
+
+  TransformPointerType transform = dynamic_cast<TransformType *>( displacementTransform.GetPointer() );
+
+  Rcpp::S4 antsTransform( "antsTransform" );
+  antsTransform.slot("dimension") = Dimension;
+  antsTransform.slot("precision") = precision;
+  std::string type = displacementTransform->GetNameOfClass();
+  antsTransform.slot("type") = type;
+  TransformPointerType * rawPointer = new TransformPointerType( transform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+  antsTransform.slot("pointer") = xptr;
+
+  return antsTransform;
+}
+
+RcppExport SEXP antsTransform_FromDisplacementField( SEXP r_field )
+{
+try
+{
+  Rcpp::S4 antsImage( r_field );
+  unsigned int dimension = Rcpp::as<int>( antsImage.slot("dimension"));
+  unsigned int components = Rcpp::as<int>( antsImage.slot("components"));
+  std::string precision = Rcpp::as<std::string>( antsImage.slot("pixeltype"));
+
+  if ( (precision != "float") && (precision != "double") )
+  {
+    Rcpp::stop("Field must have pixeltype of either float or double");
+  }
+
+  if ( components != dimension )
+  {
+    Rcpp::stop("Field must have number of pixel compenents equal to image dimension");
+  }
+
+  if ( precision == "float")
+  {
+    typedef float PrecisionType;
+    if ( dimension == 4 )
+    {
+      return antsTransform_FromDisplacementField<PrecisionType,4>( r_field, precision );
+    }
+    else if ( dimension == 3)
+    {
+      return antsTransform_FromDisplacementField<PrecisionType,3>( r_field, precision );
+    }
+    else if ( dimension == 2 )
+    {
+      return antsTransform_FromDisplacementField<PrecisionType,2>( r_field, precision );
     }
     else
     {

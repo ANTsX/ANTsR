@@ -30,8 +30,14 @@ setMethod(f = "show", "antsTransform", function(object){
 
 #' @describeIn antsTransform
 setMethod(f = "initialize", signature(.Object = "antsTransform"), definition = function(.Object,
-  precision = "float", dimension = 3, type = "AffineTransform", pointer=NULL) {
-  return(.Call("antsTransform", precision, dimension, type, PACKAGE = "ANTsR"))
+  precision = "float", dimension = 3, type = "AffineTransform", parameters=NA) {
+  tx = .Call("antsTransform", precision, dimension, type, PACKAGE = "ANTsR")
+  if ( !is.na(parameters) )
+  {
+    antsTransformSetParameters(tx, parameters)
+  }
+
+  return( tx )
 })
 
 
@@ -59,6 +65,10 @@ antsTransformGetParameters <- function(tx) {
   return(.Call("antsTransform_GetParameters", tx, PACKAGE = "ANTsR"))
 }
 
+antsTransformFromDisplacementField <- function( field ) {
+  return(.Call("antsTransform_FromDisplacementField", field, PACKAGE="ANTsR"))
+}
+
 #' @title antsApplyTransformToPoint
 #' @description Apply transform to spatial point
 #' @param tx antsTransform
@@ -83,8 +93,8 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 #' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
-antsApplyTransformToImage <- function(tx, image, ref) {
-  return(.Call("antsTransform_TransformImage", tx, image, ref, PACKAGE = "ANTsR"))
+antsApplyTransformToImage <- function(tx, image, ref, interpolation="linear") {
+  return(.Call("antsTransform_TransformImage", tx, image, ref, tolower(interpolation), PACKAGE = "ANTsR"))
 }
 
 #' @title antsTransformRead
@@ -100,6 +110,16 @@ antsTransformRead <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
 }
 
+#' @title antsTransformCompose
+#' @description compose multiple transforms in reverse queue order
+#' @param transformList a list of antsTransforms
+#' @return antsTransform of type "CompositeTransform"
+#' @examples
+#' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' tx2 = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+#' antsTransformSetParameters(tx2, c(0,-1,1,0,dim(img)[1],0) )
+#' tx3 = antsTransformCompose( list(tx, tx2) )
 antsTransformCompose <- function( transformList ) {
 
   # check for type consistency
