@@ -96,6 +96,27 @@ antsApplyTransformToImage <- function(tx, image, ref) {
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 #' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
-antsTransformRead <- function( filename, precision="float" )  {
-  return(.Call("antsTransform_Read", filename, precision, PACKAGE="ANTsR"))
+antsTransformRead <- function( filename, dimension=3, precision="float" )  {
+  return(.Call("antsTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
+}
+
+antsTransformCompose <- function( transformList ) {
+
+  # check for type consistency
+  precision = transformList[[1]]@precision
+  dimension = transformList[[1]]@dimension
+  for ( i in 1:length(transformList))
+  {
+    if ( precision != transformList[[i]]@precision )
+    {
+      stop("All transform must have the same precision")
+    }
+    if ( dimension != transformList[[i]]@dimension)
+    {
+      stop("All transform must have the same dimension")
+    }
+
+  }
+  return(.Call("antsTransform_Compose", transformList, dimension, precision, PACKAGE="ANTsR"))
+
 }

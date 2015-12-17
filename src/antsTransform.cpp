@@ -8,6 +8,7 @@
 #include "itkTranslationTransform.h"
 #include "itkResampleImageFilter.h"
 #include "itkTransformFileReader.h"
+#include "itkCompositeTransform.h"
 
 template< class TransformType >
 Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
@@ -34,7 +35,13 @@ SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
     {
     typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
     typename TransformType::Pointer transformPointer = TransformType::New();
-    return Rcpp::wrap( transformPointer );
+
+    typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformBaseType;
+    typedef typename TransformBaseType::Pointer               TransformBasePointerType;
+    TransformBasePointerType basePointer
+      = dynamic_cast<TransformBaseType *>( transformPointer.GetPointer() );
+
+    return Rcpp::wrap( basePointer );
     }
   else
     {
@@ -115,10 +122,12 @@ catch(...)
 return Rcpp::wrap(NA_REAL); //not reached
 }
 
-template< class TransformType >
+
+template< class PrecisionType, unsigned int Dimension >
 SEXP antsTransform_GetParameters( SEXP r_transform )
 {
-  typedef typename TransformType::Pointer           TransformPointerType;
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  typedef typename TransformType::Pointer                   TransformPointerType;
 
   TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
   Rcpp::NumericVector parameters( itkTransform->GetNumberOfParameters() );
@@ -129,27 +138,6 @@ SEXP antsTransform_GetParameters( SEXP r_transform )
   }
 
   return parameters;
-}
-
-template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_GetParameters( SEXP r_transform )
-{
-
-  Rcpp::S4 transform( r_transform );
-  std::string type = Rcpp::as<std::string>( transform.slot("type") );
-
-  if ( type == "AffineTransform" )
-    {
-    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
-    return antsTransform_GetParameters<TransformType>( transform );
-    }
-  else
-    {
-    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
-    Rcpp::stop( "Transform type not supported" );
-    }
-
-  return Rcpp::wrap(NA_REAL);
 }
 
 
@@ -225,12 +213,12 @@ catch(...)
 return Rcpp::wrap(NA_REAL); //not reached
 }
 
-// Set transform parameters
 
-template< class TransformType >
+template< class PrecisionType, unsigned int Dimension >
 SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
 {
-  typedef typename TransformType::Pointer          TransformPointerType;
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  typedef typename TransformType::Pointer                   TransformPointerType;
 
   TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
   Rcpp::NumericVector parameters( r_parameters );
@@ -250,30 +238,7 @@ SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
   itkTransform->SetParameters( itkParameters );
 
   return(Rcpp::wrap(true));
-
 }
-
-template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
-{
-
-  Rcpp::S4 transform( r_transform );
-  std::string type = Rcpp::as<std::string>( transform.slot("type") );
-
-  if ( type == "AffineTransform" )
-    {
-    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
-    return antsTransform_SetParameters<TransformType>( r_transform, r_parameters );
-    }
-  else
-    {
-    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
-    Rcpp::stop( "Transform type not supported" );
-    }
-
-  return Rcpp::wrap(NA_REAL);
-}
-
 
 RcppExport SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
 {
@@ -349,9 +314,14 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 // Apply transform to point
-template< class TransformType >
+template< class PrecisionType, unsigned int Dimension >
 SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
 {
+
+  Rcpp::S4 transform( r_transform );
+  std::string type = Rcpp::as<std::string>( transform.slot("type") );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
   typedef typename TransformType::Pointer          TransformPointerType;
   typedef typename TransformType::InputPointType   InputPointType;
   typedef typename TransformType::OutputPointType  OutputPointType;
@@ -374,27 +344,6 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
     }
 
   return outPoint;
-}
-
-template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
-{
-
-  Rcpp::S4 transform( r_transform );
-  std::string type = Rcpp::as<std::string>( transform.slot("type") );
-
-  if ( type == "AffineTransform" )
-    {
-    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
-    return antsTransform_TransformPoint<TransformType>( r_transform, r_point );
-    }
-  else
-    {
-    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
-    Rcpp::stop( "Transform type not supported" );
-    }
-
-  return Rcpp::wrap(NA_REAL);
 }
 
 
@@ -472,48 +421,39 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 // Apply transform to image
-template< class TransformType >
+template< class TransformType, class PixelType >
 SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
 {
   typedef typename TransformType::Pointer          TransformPointerType;
   typedef typename TransformType::InputPointType   InputPointType;
   typedef typename TransformType::OutputPointType  OutputPointType;
 
-  Rcpp::S4 image( r_image );
-  std::string pixeltype = Rcpp::as<std::string>(image.slot("pixeltype"));
-
   TransformPointerType transform = Rcpp::as<TransformPointerType>( r_transform );
-  //typename TransformType::Pointer transform = TransformType::New();
+
   typedef typename TransformType::ParametersValueType                   PrecisionType;
 
-  if ( pixeltype=="float" )
-    {
-    typedef itk::Image<float,TransformType::InputSpaceDimension> ImageType;
-    typedef typename ImageType::Pointer                          ImagePointerType;
+  typedef itk::Image<PixelType,TransformType::InputSpaceDimension> ImageType;
+  typedef typename ImageType::Pointer                          ImagePointerType;
 
-    typedef itk::ImageBase<TransformType::InputSpaceDimension> ImageBaseType;
-    typedef typename ImageBaseType::Pointer                    ImageBasePointerType;
+  // Use base for reference image so we can ignore it's pixeltype
+  typedef itk::ImageBase<TransformType::InputSpaceDimension> ImageBaseType;
+  typedef typename ImageBaseType::Pointer                    ImageBasePointerType;
 
-    ImagePointerType inputImage = Rcpp::as<ImagePointerType>( r_image );
-    ImageBasePointerType refImage = Rcpp::as<ImageBasePointerType>( r_ref );
+  ImagePointerType inputImage = Rcpp::as<ImagePointerType>( r_image );
+  ImageBasePointerType refImage = Rcpp::as<ImageBasePointerType>( r_ref );
 
-    typedef itk::ResampleImageFilter<ImageType,ImageType,PrecisionType,PrecisionType> FilterType;
-    typename FilterType::Pointer filter = FilterType::New();
+  typedef itk::ResampleImageFilter<ImageType,ImageType,PrecisionType,PrecisionType> FilterType;
+  typename FilterType::Pointer filter = FilterType::New();
 
-    filter->SetInput( inputImage );
-    filter->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
-    filter->SetOutputSpacing( refImage->GetSpacing() );
-    filter->SetOutputOrigin( refImage->GetOrigin() );
-    filter->SetOutputDirection( refImage->GetDirection() );
-    filter->SetTransform( transform );
-    filter->Update();
+  filter->SetInput( inputImage );
+  filter->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
+  filter->SetOutputSpacing( refImage->GetSpacing() );
+  filter->SetOutputOrigin( refImage->GetOrigin() );
+  filter->SetOutputDirection( refImage->GetDirection() );
+  filter->SetTransform( transform );
+  filter->Update();
 
-    return Rcpp::wrap<ImagePointerType>( filter->GetOutput() );
-
-    }
-
-    return Rcpp::wrap(NA_REAL);
-
+  return Rcpp::wrap<ImagePointerType>( filter->GetOutput() );
 }
 
 template< class PrecisionType, unsigned int Dimension >
@@ -522,18 +462,35 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref )
   Rcpp::S4 transform( r_transform );
   std::string type = Rcpp::as<std::string>( transform.slot("type") );
 
-  if ( type == "AffineTransform" )
-    {
-    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
-    return antsTransform_TransformImage<TransformType>( r_transform, r_image, r_ref );
-    }
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  //return antsTransform_TransformImage<TransformType>( r_transform, r_image, r_ref );
+
+  Rcpp::S4 image( r_image );
+  std::string pixeltype = Rcpp::as<std::string>(image.slot("pixeltype"));
+
+  if ( pixeltype == "double" )
+  {
+    return antsTransform_TransformImage<TransformType, double>( r_transform, r_image, r_ref );
+  }
+  else if ( pixeltype == "float" )
+  {
+    return antsTransform_TransformImage<TransformType, float>( r_transform, r_image, r_ref );
+  }
+  else if ( pixeltype == "unsigned int" )
+  {
+    return antsTransform_TransformImage<TransformType, unsigned int>( r_transform, r_image, r_ref );
+  }
+  else if ( pixeltype == "unsigned char" )
+  {
+    return antsTransform_TransformImage<TransformType, unsigned char>( r_transform, r_image, r_ref );
+  }
   else
-    {
-    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
-    Rcpp::stop( "Transform type not supported" );
-    }
+  {
+    Rcpp::stop("Unsupported pixeltype in antsImage");
+  }
 
   return Rcpp::wrap(NA_REAL);
+
 }
 
 
@@ -609,28 +566,169 @@ catch(...)
 return Rcpp::wrap(NA_REAL); //not reached
 }
 
-RcppExport SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
+{
+
+  std::string filename = Rcpp::as<std::string>( r_filename );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformBaseType;
+  typedef typename TransformBaseType::Pointer               TransformBasePointerType;
+  typedef typename itk::CompositeTransform<PrecisionType, Dimension> CompositeTransformType;
+
+  typedef itk::TransformFileReaderTemplate<PrecisionType> TransformReaderType;
+  typedef typename TransformReaderType::TransformListType TransformListType;
+
+  typename TransformReaderType::Pointer reader = TransformReaderType::New();
+  reader->SetFileName( filename );
+  reader->Update();
+
+  const typename TransformReaderType::TransformListType * transformList = reader->GetTransformList();
+  Rcpp::Rcout << "Number of transforms = " << transformList->size() << std::endl;
+
+  Rcpp::S4 antsTransform( "antsTransform" );
+  antsTransform.slot("dimension") = Dimension;
+  antsTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
+
+  TransformBasePointerType transform;
+
+  if ( transformList->size() > 1 )
+  {
+    typename CompositeTransformType::Pointer comp_transform = CompositeTransformType::New();
+    typedef typename TransformListType::const_iterator TransformIteratorType;
+    for (TransformIteratorType i = transformList->begin(); i != transformList->end(); ++i)
+    {
+      comp_transform->AddTransform( dynamic_cast<TransformBaseType *>( i->GetPointer()) );
+    }
+
+    transform = dynamic_cast<TransformBaseType *>(comp_transform.GetPointer());
+  }
+  else
+  {
+    transform = dynamic_cast<TransformBaseType *>( transformList->front().GetPointer() );
+  }
+
+  std::string type = transform->GetNameOfClass();
+  antsTransform.slot("type") = type;
+
+  TransformBasePointerType * rawPointer = new TransformBasePointerType( transform );
+  Rcpp::XPtr<TransformBasePointerType> xptr( rawPointer, true );
+  antsTransform.slot("pointer") = xptr;
+
+  return antsTransform;
+}
+
+RcppExport SEXP antsTransform_Read( SEXP r_filename, SEXP r_dimension, SEXP r_precision )
 {
 try
 {
-  std::string filename = Rcpp::as<std::string>( r_filename );
+  unsigned int dimension = Rcpp::as<int>( r_dimension );
   std::string precision = Rcpp::as<std::string>( r_precision );
 
   if ( precision == "float")
   {
-    typedef itk::TransformFileReaderTemplate<float> TransformReaderType;
-    typename TransformReaderType::Pointer reader = TransformReaderType::New();
-    reader->SetFileName( filename );
-    reader->Update();
-
-    const TransformReaderType::TransformListType * transforms =
-      reader->GetTransformList();
-    Rcpp::Rcout << "Number of transforms = " << transforms->size() << std::endl;
-
+    typedef float PrecisionType;
+    if ( dimension == 4 )
+    {
+      return antsTransform_Read<PrecisionType,4>( r_filename, r_precision );
+    }
+    else if ( dimension == 3)
+    {
+      return antsTransform_Read<PrecisionType,3>( r_filename, r_precision );
+    }
+    else if ( dimension == 2 )
+    {
+      return antsTransform_Read<PrecisionType,2>( r_filename, r_precision );
+    }
+    else
+    {
+      Rcpp::stop( "Unsupported dimension" );
+    }
   }
 
   return( Rcpp::wrap(NA_REAL) );
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
+{
+  Rcpp::S4 antsTransform( "antsTransform" );
+  antsTransform.slot("dimension") = Dimension;
+  antsTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
+
+  Rcpp::List transforms( r_list  );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformBaseType;
+  typedef typename TransformBaseType::Pointer               TransformBasePointerType;
+  typedef typename itk::CompositeTransform<PrecisionType, Dimension> CompositeTransformType;
+
+  typename CompositeTransformType::Pointer comp_transform = CompositeTransformType::New();
+
+  for ( unsigned int i=0; i<transforms.size(); i++ )
+    {
+    TransformBasePointerType t = Rcpp::as<TransformBasePointerType>( transforms[i] );
+    comp_transform->AddTransform( t );
+    }
+
+  TransformBasePointerType transform = dynamic_cast<TransformBaseType *>(comp_transform.GetPointer());
+
+  std::string type = comp_transform->GetNameOfClass();
+  antsTransform.slot("type") = type;
+
+  TransformBasePointerType * rawPointer = new TransformBasePointerType( transform );
+  Rcpp::XPtr<TransformBasePointerType> xptr( rawPointer, true );
+  antsTransform.slot("pointer") = xptr;
+
+  return antsTransform;
+}
+
+RcppExport SEXP antsTransform_Compose( SEXP r_list, SEXP r_dimension, SEXP r_precision )
+{
+try
+{
+  unsigned int dimension = Rcpp::as<int>( r_dimension );
+  std::string precision = Rcpp::as<std::string>( r_precision );
+
+  if ( precision == "float")
+  {
+    typedef float PrecisionType;
+    if ( dimension == 4 )
+    {
+      return antsTransform_Compose<PrecisionType,4>( r_list, r_precision );
+    }
+    else if ( dimension == 3)
+    {
+      return antsTransform_Compose<PrecisionType,3>( r_list, r_precision );
+    }
+    else if ( dimension == 2 )
+    {
+      return antsTransform_Compose<PrecisionType,2>( r_list, r_precision );
+    }
+    else
+    {
+      Rcpp::stop( "Unsupported dimension" );
+    }
+  }
+
+  return( Rcpp::wrap(NA_REAL) );
 }
 catch( itk::ExceptionObject & err )
   {

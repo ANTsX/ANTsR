@@ -4,6 +4,7 @@
 #include "itkVector.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "vnl/vnl_vector_ref.h"
+#include "itkTransform.h"
 #include "itkAffineTransform.h"
 
 #include <RcppCommon.h>
@@ -278,40 +279,40 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkIma
 
 
 template <>
-SEXP wrap( const itk::AffineTransform<double,2>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<double,2,2>::Pointer &itkTransform );
 
 template <>
-SEXP wrap( const itk::AffineTransform<double,3>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<double,3,3>::Pointer &itkTransform );
 
 template <>
-SEXP wrap( const itk::AffineTransform<double,4>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<double,4,4>::Pointer &itkTransform );
 
 template <>
-SEXP wrap( const itk::AffineTransform<float,2>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<float,2,2>::Pointer &itkTransform );
 
 template <>
-SEXP wrap( const itk::AffineTransform<float,3>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<float,3,3>::Pointer &itkTransform );
 
 template <>
-SEXP wrap( const itk::AffineTransform<float,4>::Pointer &itkTransform );
+SEXP wrap( const itk::Transform<float,4,4>::Pointer &itkTransform );
 
 template <>
-itk::AffineTransform<double,2>::Pointer as( SEXP antsTransform );
+itk::Transform<double,2,2>::Pointer as( SEXP antsTransform );
 
 template <>
-itk::AffineTransform<double,3>::Pointer  as( SEXP antsTransform );
+itk::Transform<double,3,3>::Pointer  as( SEXP antsTransform );
 
 template <>
-itk::AffineTransform<double,4>::Pointer  as( SEXP antsTransform );
+itk::Transform<double,4,4>::Pointer  as( SEXP antsTransform );
 
 template <>
-itk::AffineTransform<float,2>::Pointer  as( SEXP antsTransform );
+itk::Transform<float,2,2>::Pointer  as( SEXP antsTransform );
 
 template <>
-itk::AffineTransform<float,3>::Pointer  as( SEXP antsTransform );
+itk::Transform<float,3,3>::Pointer  as( SEXP antsTransform );
 
 template <>
-itk::AffineTransform<float,4>::Pointer  as( SEXP antsTransform );
+itk::Transform<float,4,4>::Pointer  as( SEXP antsTransform );
 
 
 }
