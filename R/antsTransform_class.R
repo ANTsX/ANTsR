@@ -91,7 +91,7 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' antsTransformSetParameters(tx, c(0,-1,1,0,,0) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
 antsApplyTransformToImage <- function(transform, image, reference, interpolation="linear") {
   if ( typeof(transform) == "list")
@@ -124,9 +124,9 @@ antsTransformInverse <- function( transform ) {
 #' @return antsTransform of type "CompositeTransform"
 #' @examples
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' antsTransformSetParameters(tx, c(0,-1,1,0,0,0) )
 #' tx2 = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-#' antsTransformSetParameters(tx2, c(0,-1,1,0,dim(img)[1],0) )
+#' antsTransformSetParameters(tx2, c(0,-1,1,0,0,0) )
 #' tx3 = antsTransformCompose( list(tx, tx2) )
 antsTransformCompose <- function( transformList ) {
 
