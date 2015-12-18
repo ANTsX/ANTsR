@@ -71,7 +71,7 @@ antsImageIteratorGet <- function(x) {
 #' it <- antsImageIterator( img )
 #' flag <- antsImageIteratorSet( it, 2.0 )
 antsImageIteratorSet <- function(x, value) {
-  return(.Call("antsImageIterator_Set", x, value, PACKAGE = "ANTsR"))
+  invisible(return(.Call("antsImageIterator_Set", x, value, PACKAGE = "ANTsR")))
 }
 
 #' @title antsImageIteratorGetIndex
@@ -96,7 +96,7 @@ antsImageIteratorGetIndex <- function(x) {
 #' it <- antsImageIterator( img )
 #' flag <- antsImageIteratorSetIndex( it, c(2,3) )
 antsImageIteratorSetIndex <- function(x, index) {
-  return(.Call("antsImageIterator_SetIndex", x, index, PACKAGE = "ANTsR"))
+  invisible(return(.Call("antsImageIterator_SetIndex", x, index, PACKAGE = "ANTsR")))
 }
 
 #' @title antsImageIteratorNext
