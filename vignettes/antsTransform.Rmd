@@ -1,0 +1,178 @@
+---
+title: "Using the antsTransform class"
+author: "Jeffrey T. Duda"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{transforms}
+    \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+library( knitr )
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(ANTsR)
+library(ggplot2)
+library(grid)
+
+if("parallel" %in% rownames(installed.packages()) == TRUE) {
+  library(parallel)
+}  
+
+```
+
+```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+# How to plot a 2D color image
+plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL) {
+
+  if (class(imgList) == "antsImage") {
+    imgList = list(imgList, imgList, imgList)
+  }
+
+  direction = antsGetDirection( imgList[[1]] )
+
+  # max in all images
+  maxi = 1.0
+  if ( scale )
+    {
+    maxi = max( unlist( lapply( imgList, function(x) { max(x) } ) ) )
+    }
+
+  rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) / maxi })
+  rgbList = lapply( imgList, function(x) { t(as.matrix(x)) / maxi })
+
+  col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
+
+  d = dim(rgbList[[1]])
+
+  x = rep(1:d[2],each=d[1])
+  y = rep(1:d[1], d[2])
+  pts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x,y) )
+
+  dat = data.frame(x=pts[,1], y=pts[,2], col=col)
+  x1 = min(pts[,1])
+  x2 = max(pts[,1])
+  y1 = min(pts[,2])
+  y2 = max(pts[,2])
+
+  g = ggplot(dat) + geom_raster(aes(x=x, y=y, fill=col), hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) )
+
+  g = g + coord_cartesian( xlim=c(x1,x2), ylim=c(y1,y2) )
+  if ( direction[1,1] > 0 ) {
+    g = g + scale_x_continuous( lim=c(x1,x2) )
+    }
+  else {
+    g = g + scale_x_reverse( lim=c(x2,x1) )  
+   }
+  if ( direction[2,2] > 0 ) {
+    g = g + scale_y_continuous( lim=c(y1,y2) )
+    }
+  else {
+    g = g + scale_y_reverse( lim=c(y2,y1) )  
+   }
+
+  if ( !is.null(points) ) {
+    pdat = data.frame( x=points[,1], y=points[,2], id=factor(1:dim(points)[1]) )
+    g = g + geom_point( data=pdat, aes(x=x, y=y, colour=id ))
+  }
+
+  if ( !is.null(paths) ) {
+    g = g + geom_path(data=paths, aes(x=x,y=y,group=id,colour=id))
+    }
+
+  if ( !is.null(vectors) ) {
+    xvec = as.vector( t(as.matrix(vectors[[1]])) )
+    yvec = as.vector( -t(as.matrix(vectors[[2]])) )
+    vpts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x+0.5,y+0.5) )
+
+    mag = sqrt(xvec*xvec + yvec*yvec)
+    elim = which(mag < 0.01)
+    if (length(elim) > 0 ) {
+      xvec = xvec[-elim]
+      yvec = yvec[-elim]
+      vpts = vpts[-elim,]
+      }
+    vdat = data.frame(x=vpts[,1]-xvec, y=vpts[,2]-yvec, xend=vpts[,1]+xvec, yend=vpts[,2]+yvec)
+    g = g + geom_segment(data=vdat, aes(x=x,y=y,xend=xend,yend=yend), colour="red", alpha=0.5)
+  }
+
+  suppressWarnings(print(g))
+}
+```
+
+
+## Overview
+This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR)
+may be used to work with spatial transforms. This class is based upon the [itk::Transform](http://www.itk.org/Doxygen/html/classitk_1_1Transform.html) class
+which provides the underlying implementations. This class may be used to apply spatial
+transforms to points, vectors, and images.
+
+## Basics
+Here we illustrate how an Affine transform may be created and applied to an image. When applying
+the transform to an image, it is required that we define a reference space, which the physical
+space in which the output lies. A variety of options are also available for the interpolation
+method to be used
+
+```{r basics,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+img <- antsImageRead(getANTsRData("r16"))
+invisible(plotColor(img))
+tx <- new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+print(tx)
+antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+img2 = antsApplyTransformToImage(transform=tx, image=img, reference=img)
+invisible(plotColor(img2))
+img3 = antsApplyTransformToImage(transform=tx, image=img, reference=img, interpolation="gaussian")
+invisible(plotColor(img3))
+```
+
+## Composing Transforms
+Transforms may be composed by creating a list of transforms in the order they
+should be applied
+```{r compose,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+tx2 = antsTransformCompose(list(tx,tx))
+img4 = antsApplyTransformToImage(transform=tx2, image=img, reference=img)
+invisible(plotColor(img4))
+```
+
+## Non-linear transforms
+Non-linear transforms defined by a displacement field may also be used. Here we
+create an example field and apply it to the image
+
+```{r warp,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+
+x = img*0
+y = img*0
+it = antsImageIterator(img)
+center = dim(img)/2
+while ( !antsImageIteratorIsAtEnd(it) )
+{
+  idx = antsImageIteratorGetIndex(it)
+  vec = idx - center
+  x[idx[1],idx[2]] = vec[1]
+  y[idx[1],idx[2]] = vec[2]
+  it = antsImageIteratorNext(it)
+}
+
+x = (x/max(x))*10
+y = (y/max(y))*4
+x[x<0] = 0
+y[y<0] = 0
+field = mergeChannels(list(x,y))
+subimg = as.antsImage(img[110:150,110:150])
+subx = as.antsImage(x[110:150,110:150])
+suby = as.antsImage(y[110:150,110:150])
+invisible(plotColor(subimg, vectors=list(subx,suby)))
+
+warpTx = antsTransformFromDisplacementField( field )
+warped = antsApplyTransformToImage(warpTx,img,img)
+invisible(plotColor(warped))
+invisible(plotColor(abs(img-warped)))
+
+warped2 = antsApplyTransformToImage(list(tx,warpTx), img, img)
+invisible(plotColor(warped2))
+invisible(plotColor(abs(warped2-img2)))
+```
+
+## References

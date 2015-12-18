@@ -1520,7 +1520,7 @@ template <>
 itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkImageIteratorR )
 {
   const unsigned int Dim = 4;
-  typedef itk::Image<unsigned char,Dim>                        ImageType;
+  typedef itk::Image<unsigned char,Dim>                ImageType;
   typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
   typedef IteratorType*                                IteratorPointerType;
@@ -1538,5 +1538,222 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkIma
   XPtr<IteratorType> xptr( static_cast<SEXP>( itkImageIterator.slot("pointer") ));
   return *xptr;
 }
+
+template<>
+SEXP wrap( const itk::Transform<double,2,2>::Pointer & itkTransform )
+{
+  typedef itk::Transform<double,2,2>      TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "double";
+  antsTransform.slot( "dimension" ) = 2;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template<>
+SEXP wrap( const itk::Transform<double,3,3>::Pointer & itkTransform )
+{
+  typedef itk::Transform<double,3,3>   TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "double";
+  antsTransform.slot( "dimension" ) = 3;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template<>
+SEXP wrap( const itk::Transform<double,4,4>::Pointer & itkTransform )
+{
+  typedef itk::Transform<double,4,4>      TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "double";
+  antsTransform.slot( "dimension" ) = 4;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template<>
+SEXP wrap( const itk::Transform<float,2,2>::Pointer & itkTransform )
+{
+  typedef itk::Transform<float,2,2>   TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "float";
+  antsTransform.slot( "dimension" ) = 2;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template<>
+SEXP wrap( const itk::Transform<float,3,3>::Pointer & itkTransform )
+{
+  typedef itk::Transform<float,3>   TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "float";
+  antsTransform.slot( "dimension" ) = 3;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template<>
+SEXP wrap( const itk::Transform<float,4,4>::Pointer & itkTransform )
+{
+  typedef itk::Transform<float,4,4>   TransformType;
+  typedef TransformType::Pointer          TransformPointerType;
+
+  TransformPointerType* rawPointer = new TransformPointerType( itkTransform );
+  Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
+
+  Rcpp::S4 antsTransform( std::string( "antsTransform" ) );
+  antsTransform.slot( "precision" ) = "float";
+  antsTransform.slot( "dimension" ) = 4;
+  antsTransform.slot( "type" ) = itkTransform->GetNameOfClass();
+  antsTransform.slot( "pointer") = xptr;
+
+  return( wrap(antsTransform) );
+}
+
+template <>
+itk::Transform<double,2,2>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 2;
+  typedef itk::Transform<double,Dim,Dim>         TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "double") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim)  )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+itk::Transform<double,3,3>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 3;
+  typedef itk::Transform<double,Dim,Dim>         TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "double") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+itk::Transform<double,4,4>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 4;
+  typedef itk::Transform<double,Dim,Dim>         TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "double") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+itk::Transform<float,2,2>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 2;
+  typedef itk::Transform<float,Dim,Dim>         TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "float") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+itk::Transform<float,3,3>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 3;
+  typedef itk::Transform<float,Dim,Dim>         TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "float") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
+template <>
+itk::Transform<float,4,4>::Pointer as( SEXP r_transform )
+{
+  const unsigned int Dim = 4;
+  typedef itk::Transform<float,Dim,Dim>              TransformType;
+  typedef TransformType::Pointer                  TransformPointerType;
+  Rcpp::S4 antsTransform( r_transform );
+
+  if (!antsTransform.is( "antsTransform") ||
+      (Rcpp::as<std::string>(antsTransform.slot("precision")) != "float") ||
+      (Rcpp::as<int>(antsTransform.slot("dimension")) != Dim) )
+    {
+    Rcpp::stop( "Invalid S4 object type");
+    }
+  XPtr<TransformPointerType> xptr( static_cast<SEXP>( antsTransform.slot("pointer") ));
+  return *xptr;
+}
+
 
 }

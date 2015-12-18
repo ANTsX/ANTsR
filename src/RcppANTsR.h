@@ -4,6 +4,8 @@
 #include "itkVector.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "vnl/vnl_vector_ref.h"
+#include "itkTransform.h"
+#include "itkAffineTransform.h"
 
 #include <RcppCommon.h>
 
@@ -56,7 +58,6 @@ SEXP wrap( const itk::VectorImage<double,3>::Pointer &image );
 
 template <>
 SEXP wrap( const itk::VectorImage<double,4>::Pointer &image );
-
 
 template <>
 SEXP wrap( const itk::Image<float,2>::Pointer &image );
@@ -273,7 +274,50 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,3> > as( SEXP itkIma
 
 template <>
 itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkImageIteratorR );
+
+// antsTransform functions
+
+
+template <>
+SEXP wrap( const itk::Transform<double,2,2>::Pointer &itkTransform );
+
+template <>
+SEXP wrap( const itk::Transform<double,3,3>::Pointer &itkTransform );
+
+template <>
+SEXP wrap( const itk::Transform<double,4,4>::Pointer &itkTransform );
+
+template <>
+SEXP wrap( const itk::Transform<float,2,2>::Pointer &itkTransform );
+
+template <>
+SEXP wrap( const itk::Transform<float,3,3>::Pointer &itkTransform );
+
+template <>
+SEXP wrap( const itk::Transform<float,4,4>::Pointer &itkTransform );
+
+template <>
+itk::Transform<double,2,2>::Pointer as( SEXP antsTransform );
+
+template <>
+itk::Transform<double,3,3>::Pointer  as( SEXP antsTransform );
+
+template <>
+itk::Transform<double,4,4>::Pointer  as( SEXP antsTransform );
+
+template <>
+itk::Transform<float,2,2>::Pointer  as( SEXP antsTransform );
+
+template <>
+itk::Transform<float,3,3>::Pointer  as( SEXP antsTransform );
+
+template <>
+itk::Transform<float,4,4>::Pointer  as( SEXP antsTransform );
+
+
 }
+
+
 
 // This needs to go after wrap declarations
 #include <Rcpp.h>
