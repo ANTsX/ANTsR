@@ -114,9 +114,13 @@ antsTransformRead <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
 }
 
+antsTransformInverse <- function( transform ) {
+  return(.Call("antsTransform_Inverse", transform))
+}
+
 #' @title antsTransformCompose
 #' @description compose multiple transforms
-#' @param transformList a list of antsTransforms in the order they should be applied
+#' @param transformList a list of antsTransforms in the reverse order they should be applied
 #' @return antsTransform of type "CompositeTransform"
 #' @examples
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
@@ -141,6 +145,7 @@ antsTransformCompose <- function( transformList ) {
     }
 
   }
+  transformList = rev(transformList)
   return(.Call("antsTransform_Compose", transformList, dimension, precision, PACKAGE="ANTsR"))
 
 }
