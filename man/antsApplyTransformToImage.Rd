@@ -23,7 +23,7 @@ Apply transform to spatial point
 \examples{
 img <- antsImageRead(getANTsRData("r16"))
 tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+antsTransformSetParameters(tx, c(0,-1,1,0,,0) )
 img2 = antsApplyTransformToImage(tx, img, img)
 }
 

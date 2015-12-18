@@ -7,7 +7,7 @@
 antsTransformCompose(transformList)
 }
 \arguments{
-\item{transformList}{a list of antsTransforms in the order they should be applied}
+\item{transformList}{a list of antsTransforms in the reverse order they should be applied}
 }
 \value{
 antsTransform of type "CompositeTransform"
@@ -17,9 +17,9 @@ compose multiple transforms
 }
 \examples{
 tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+antsTransformSetParameters(tx, c(0,-1,1,0,0,0) )
 tx2 = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-antsTransformSetParameters(tx2, c(0,-1,1,0,dim(img)[1],0) )
+antsTransformSetParameters(tx2, c(0,-1,1,0,0,0) )
 tx3 = antsTransformCompose( list(tx, tx2) )
 }
 
