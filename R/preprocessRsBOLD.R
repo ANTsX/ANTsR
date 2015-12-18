@@ -1,6 +1,6 @@
-#' Preprocess BOLD fMRI image data.
+#' Preprocess resting BOLD fMRI image data.
 #'
-#' Preprocess fMRI data by performing compcor/motion correction, nuisance
+#' Preprocess resting fMRI by performing compcor/motion correction, nuisance
 #' regression, band-pass filtering, and spatial smoothing.
 #'
 #'
@@ -52,9 +52,9 @@
 #' dims <- c(n,n,n,12)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
-#' cleanfMRI <- preprocessfMRI(boldImage)
-#' @export preprocessfMRI
-preprocessfMRI <- function(boldImage,
+#' cleanfMRI <- preprocessRestingBOLD(boldImage)
+#' @export preprocessRestingBOLD
+preprocessRestingBOLD <- function(boldImage,
   maskImage = NA,
   maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables = NA,
@@ -124,7 +124,7 @@ preprocessfMRI <- function(boldImage,
           framewiseDisplacement[i] <- dist( rbind(transformedPointAtTime2,transformedPointAtTime1 ))[[1]]
       }
       else {
-        
+
       }
     }
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
