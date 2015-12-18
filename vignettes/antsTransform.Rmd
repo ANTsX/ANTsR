@@ -110,17 +110,16 @@ which provides the underlying implementations. This class may be used to apply s
 transforms to points, vectors, and images.
 
 ## Basics
-Here we illustrate how an Affine transform may be created and applied to an image. When applying
+Here we illustrate how an Affine transform may be created and applied to point and images. When applying
 the transform to an image, it is required that we define a reference space, which the physical
-space in which the output lies. A variety of options are also available for the interpolation
-method to be used
+space in which the output lies. The pixeltype of the reference image will be ignored, the output
+will have the same pixeltype as the input image. A variety of options are also available for
+the interpolation method to be used. Linear transforms may be inverted as shown below.
 
 ```{r basics,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-img <- antsImageRead(getANTsRData("r16"))
-invisible(plotColor(img))
 tx <- new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 print(tx)
-antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+antsTransformSetParameters(tx, c(0,-1,1,0,256,0) )
 
 point = c(80,40)
 antsApplyTransformToPoint(tx, point)
@@ -128,6 +127,8 @@ antsApplyTransformToPoint(tx, point)
 pts = list(c(80,40), c(20,30))
 lapply( pts, function(x) {antsApplyTransformToPoint(tx, x)})
 
+img <- antsImageRead(getANTsRData("r16"))
+invisible(plotColor(img))
 
 img2 = antsApplyTransformToImage(transform=tx, image=img, reference=img)
 invisible(plotColor(img2))
