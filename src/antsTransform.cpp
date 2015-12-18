@@ -351,7 +351,9 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
     inItkPoint[i] = inPoint[i];
     }
 
+/*
   OutputPointType outItkPoint;
+
   if ( type == "CompositeTransform")
   {
     CompositeTransformPointerType cTransform
@@ -363,6 +365,8 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
   {
     outItkPoint = itkTransform->TransformPoint( inItkPoint );
   }
+*/
+OutputPointType outItkPoint = itkTransform->TransformPoint( inItkPoint );
 
   Rcpp::NumericVector outPoint( OutputPointType::PointDimension );
   for (unsigned int i=0; i<OutputPointType::PointDimension; i++)
@@ -582,21 +586,25 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, S
   filter->SetOutputOrigin( refImage->GetOrigin() );
   filter->SetOutputDirection( refImage->GetDirection() );
   filter->SetInterpolator( interpolator );
-
+  /*
   if ( type == "CompositeTransform")
   {
     CompositeTransformPointerType cTransform
       = dynamic_cast<CompositeTransformType *>( transform.GetPointer() );
-    Rcpp::Rcout << "Number of transforms: " << cTransform->GetNumberOfTransforms() << std::endl;
+    //for ( unsigned int i=0; i<cTransform->GetNumberOfTransforms(); i++)
+    //  {
+    //  Rcpp::Rcout << cTransform->GetNthTransform(i)->GetNameOfClass() << std::endl;
+    //  }
+
     filter->SetTransform(cTransform);
-    filter->DebugOn();
-    cTransform->DebugOn();
+
   }
   else
   {
     filter->SetTransform( transform );
   }
-
+*/
+  filter->SetTransform( transform );
   filter->Update();
 
   return Rcpp::wrap<ImagePointerType>( filter->GetOutput() );

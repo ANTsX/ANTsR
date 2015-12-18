@@ -51,7 +51,7 @@ setMethod(f = "initialize", signature(.Object = "antsTransform"), definition = f
 #' params = antsTransformGetParameters(tx)
 #' antsTransformSetParameters(tx, params*2)
 antsTransformSetParameters <- function(tx, parameters) {
-  return(.Call("antsTransform_SetParameters", tx, parameters, PACKAGE = "ANTsR"))
+  invisible(return(.Call("antsTransform_SetParameters", tx, parameters, PACKAGE = "ANTsR")))
 }
 
 #' @title antsTransformGetParameters
@@ -111,8 +111,8 @@ antsTransformRead <- function( filename, dimension=3, precision="float" )  {
 }
 
 #' @title antsTransformCompose
-#' @description compose multiple transforms in reverse queue order
-#' @param transformList a list of antsTransforms
+#' @description compose multiple transforms 
+#' @param transformList a list of antsTransforms in the order they should be applied
 #' @return antsTransform of type "CompositeTransform"
 #' @examples
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
