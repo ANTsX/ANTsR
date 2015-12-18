@@ -1004,3 +1004,99 @@ catch(...)
   }
 return Rcpp::wrap(NA_REAL); //not reached
 }
+
+
+// Apply transform to point
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_Inverse( SEXP r_transform )
+{
+
+  Rcpp::S4 transform( r_transform );
+  std::string type = Rcpp::as<std::string>( transform.slot("type") );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  typedef typename TransformType::Pointer          TransformPointerType;
+  TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
+
+  if ( !itkTransform->IsLinear() )
+  {
+    Rcpp::stop("Only linear transforms may be inverted with this method");
+  }
+
+  TransformPointerType inverse = itkTransform->GetInverseTransform();
+  return Rcpp::wrap(inverse);
+
+}
+
+
+RcppExport SEXP antsTransform_Inverse( SEXP r_transform )
+{
+try
+{
+  Rcpp::S4 transform( r_transform );
+
+  std::string precision = Rcpp::as<std::string>( transform.slot("precision") );
+  unsigned int dimension = Rcpp::as<int>( transform.slot("dimension") );
+
+  if ( (dimension < 1) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
+
+  if ( (precision != "float") && (precision != "double"))
+    {
+    Rcpp::stop( "Precision must be 'float' or 'double'");
+    }
+
+  if( precision == "double" )
+    {
+    typedef double PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_Inverse<PrecisionType,4>( r_transform );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_Inverse<PrecisionType,3>( r_transform );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_Inverse<PrecisionType,2>( r_transform );
+	    }
+	  }
+  else if( precision == "float" )
+    {
+    typedef float PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_Inverse<PrecisionType,4>( r_transform );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_Inverse<PrecisionType,3>( r_transform );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_Inverse<PrecisionType,2>( r_transform );
+	    }
+    }
+
+  return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
