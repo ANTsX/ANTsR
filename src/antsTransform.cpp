@@ -351,21 +351,6 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
     inItkPoint[i] = inPoint[i];
     }
 
-/*
-  OutputPointType outItkPoint;
-
-  if ( type == "CompositeTransform")
-  {
-    CompositeTransformPointerType cTransform
-      = dynamic_cast<CompositeTransformType *>( itkTransform.GetPointer() );
-    Rcpp::Rcout << "Number of transforms: " << cTransform->GetNumberOfTransforms() << std::endl;
-    outItkPoint = cTransform->TransformPoint( inItkPoint );
-  }
-  else
-  {
-    outItkPoint = itkTransform->TransformPoint( inItkPoint );
-  }
-*/
 OutputPointType outItkPoint = itkTransform->TransformPoint( inItkPoint );
 
   Rcpp::NumericVector outPoint( OutputPointType::PointDimension );
@@ -842,7 +827,7 @@ SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
     comp_transform->AddTransform( t );
     Rcpp::S4 tran(transforms[i]);
 
-    Rcpp::Rcout << "Adding transform: " << Rcpp::as<std::string>(tran.slot("type")) << std::endl;
+    //Rcpp::Rcout << "Adding transform: " << Rcpp::as<std::string>(tran.slot("type")) << std::endl;
     }
 
   TransformBasePointerType transform = dynamic_cast<TransformBaseType *>(comp_transform.GetPointer());

@@ -51,7 +51,7 @@ setMethod(f = "initialize", signature(.Object = "antsTransform"), definition = f
 #' params = antsTransformGetParameters(tx)
 #' antsTransformSetParameters(tx, params*2)
 antsTransformSetParameters <- function(tx, parameters) {
-  invisible(return(.Call("antsTransform_SetParameters", tx, parameters, PACKAGE = "ANTsR")))
+  invisible(.Call("antsTransform_SetParameters", tx, parameters, PACKAGE = "ANTsR"))
 }
 
 #' @title antsTransformGetParameters
@@ -93,8 +93,12 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 #' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
-antsApplyTransformToImage <- function(tx, image, ref, interpolation="linear") {
-  return(.Call("antsTransform_TransformImage", tx, image, ref, tolower(interpolation), PACKAGE = "ANTsR"))
+antsApplyTransformToImage <- function(transform, image, reference, interpolation="linear") {
+  if ( typeof(transform) == "list")
+  {
+    transform <- antsTransformCompose(transform)
+  }
+  return(.Call("antsTransform_TransformImage", transform, image, reference, tolower(interpolation), PACKAGE = "ANTsR"))
 }
 
 #' @title antsTransformRead
@@ -111,7 +115,7 @@ antsTransformRead <- function( filename, dimension=3, precision="float" )  {
 }
 
 #' @title antsTransformCompose
-#' @description compose multiple transforms 
+#' @description compose multiple transforms
 #' @param transformList a list of antsTransforms in the order they should be applied
 #' @return antsTransform of type "CompositeTransform"
 #' @examples
