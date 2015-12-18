@@ -84,7 +84,7 @@ preprocessRestingBOLD <- function(boldImage,
     # Reference image for motion correction
     motionCorrectionResults  = NA
     if ( is.na(meanBoldFixedImageForMotionCorrection) ) {
-      meanBoldFixedImageForMotionCorrection <- apply.antsImage(img, c(1,2,3), mean)
+      meanBoldFixedImageForMotionCorrection <- getAverageOfTimeSeries(boldImage)
     }
 
     # Iterative motion correction
@@ -113,13 +113,13 @@ preprocessRestingBOLD <- function(boldImage,
 
       if ( !denseFramewise ) {
         # pick a point 10 voxels from the center
-        samplePoint <- data.matrix(t(matrix(rep(10, 3), nrow = 1)))
+        samplePoint <- data.matrix( matrix(rep(10, 3), nrow = 1) )
         samplePoint <- antsTransformIndexToPhysicalPoint(meanBoldFixedImageForMotionCorrection, samplePoint)
 
         # calculate the transformed point at time point i and ( i - 1 )
-        transformedPointAtTime1 <- data.matrix(rotationMatrixAtTime1) %*% samplePoint +
+        transformedPointAtTime1 <- data.matrix(rotationMatrixAtTime1) %*% t(samplePoint) +
           translationAtTime1
-        transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% samplePoint +
+        transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% t(samplePoint) +
           translationAtTime2
           framewiseDisplacement[i] <- dist( rbind(transformedPointAtTime2,transformedPointAtTime1 ))[[1]]
       }
