@@ -91,8 +91,9 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
 #' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
-#' antsTransformSetParameters(tx, c(0,-1,1,0,,0) )
+#' antsTransformSetParameters(tx, c(0.9,0,0,1.1,10,11) )
 #' img2 = antsApplyTransformToImage(tx, img, img)
+#' # plot(img,img2)
 antsApplyTransformToImage <- function(transform, image, reference, interpolation="linear") {
   if ( typeof(transform) == "list")
   {
