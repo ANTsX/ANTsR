@@ -109,24 +109,80 @@ may be used to work with spatial transforms. This class is based upon the [itk::
 which provides the underlying implementations. This class may be used to apply spatial
 transforms to points, vectors, and images.
 
-## Basics
-Here we illustrate how an Affine transform may be created and applied to point and images. When applying
-the transform to an image, it is required that we define a reference space, which the physical
-space in which the output lies. The pixeltype of the reference image will be ignored, the output
-will have the same pixeltype as the input image. A variety of options are also available for
-the interpolation method to be used. Linear transforms may be inverted as shown below.
-
-```{r basics,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## Transforming point data
+An `AffineTransform` is created and defined by setting its parameters. These parameters
+are the components of the matrix, in row order, followed by the translation components.
+```{r basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 tx <- new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 print(tx)
 antsTransformSetParameters(tx, c(0,-1,1,0,256,0) )
 
 point = c(80,40)
-antsApplyTransformToPoint(tx, point)
+outpoint = antsApplyTransformToPoint(tx, point)
+print(outpoint)
+```
 
-pts = list(c(80,40), c(20,30))
-lapply( pts, function(x) {antsApplyTransformToPoint(tx, x)})
+Sets of points may be transformed using `apply` and its variants.
+```{r basics2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+ptsMat = rbind(c(80,40), c(20,30))
+t(apply( ptsMat, 1, function(x) {antsApplyTransformToPoint(tx, x)}))
 
+ptsList = list(c(80,40), c(20,30))
+lapply( ptsList, function(x) {antsApplyTransformToPoint(tx, x)})
+```
+
+Linear transforms may be inverted, but non-linear transforms may not be directly inverted.
+See later sections for more on non-linear transforms.
+```{r basics3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+itx = antsTransformInverse(tx)
+antsApplyTransformToPoint( itx, outpoint )
+```
+
+Applying a transform to a vector is not the same as applying the transform to a point since a
+vector does not have a spatial location but rather is a direction. Clearly, it is important to call the correct antsApplyTransform method for your specific data type.
+```{r basics4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+vector = c(80,40)
+antsApplyTransformToVector(tx, vector)
+```
+
+Currently, only affine transforms may be created within R directly, but creation
+routines for a larger set of possible transforms are under development.
+
+## Nomenclature: talking about talking about transforms
+To discuss more complex operations such as transform composition and the transforming
+of images, it is helpful to define a nomenclature. The nomenclature used here is based
+upon that defined by [Avants et. al.](http://journal.frontiersin.org/article/10.3389/fninf.2014.00044/full).
+
+A physical point: $x \in \Omega$ where $\Omega$ is the domain, usually of an image
+
+An image: $I \colon \Omega^d \rightarrow \mathbb{R}^n$ where n is the number of components per pixel and $d$ is dimensionality. A second image is J.
+
+Domain map: $\phi \colon \Omega_i \rightarrow \Omega_j$ where $\rightarrow$ may be replaced with any mapping symbol
+
+Affine mapping: $\leftrightarrow$ a low-dimensional invertible transform: affine, rigid, translation, etc.
+
+Affine mapping: $\rightarrow$ designates the direction an affine mapping is applied.
+
+Deformation field: $\rightsquigarrow$ deformation field mapping J to I. May not be invertible.
+
+Spline-based deformation field: $\substack{ \rightsquigarrow \\ b }$ e.g., B-Spline field mapping $J$ to $I$.
+
+Diffeomorphism: Represented as $\leftrightsquigarrow$, these are differentiable maps with
+  differentiable inverse.  Ideally, the algorithm should output the
+  inverse and forward mapping.
+
+Composite mapping: $\phi=\phi_1(\phi_2(x))$ is defined by $\leftrightsquigarrow \rightarrow$ where $\phi_2$ is of type $\leftrightsquigarrow$.
+
+Not invertible: $\nleftrightarrow$ indicates a mapping that is not invertible.
+
+Perform image warping: As an example, $\rightarrow$ $J$ represents the application of an affine transform $\rightarrow$ to image $J$ such that $\rightarrow J = J( A( x ) ) $.
+
+Similarity measure: $\substack{ \approx \\ s }$ or $\approx_s$ indicates the metric $s$ that compares a pair of images.
+
+
+
+## Images
+```{r images,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 img <- antsImageRead(getANTsRData("r16"))
 invisible(plotColor(img))
 
@@ -138,28 +194,36 @@ invisible(plotColor(img3))
 itx = antsTransformInverse(tx)
 img_invert = antsApplyTransformToImage(transform=itx, image=img2, reference=img)
 invisible(plotColor(img_invert))
-
 ```
 
 ## File IO
 Routines are provided to read transforms from file, for both linear and non-linear.
-Methods for writing transforms to file are under development.
+Methods for writing transforms to file are under development. It is important to
+note that when converting from a multichannel antsImage to a `DisplacementField` transform,
+the data is copied so later changes to the antsImage, will not propagate to the transform,
+the transform would need to be reinitialized with the modified antsImage. This is due
+to underlying differences in data representation.
 ```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-
 # Don't run until we have test files
 #linTx = antsTransformRead("yourfile.mat")
-#warpTx = antsTransformFromDisplacementField(antsImageRead("yourfield.nii.gz"))
-
+#warpImage = antsImageRead("yourfield.nii.gz")
+#warpTx = antsTransformFromDisplacementField(warpImage)
 ```
 
 ## Composing Transforms
-Transforms may be composed by creating a list of transforms in the reverse order that they
-should be applied
+When applying
+the transform to an image, it is required that we define a reference space, which the physical
+space in which the output lies. The pixeltype of the reference image will be ignored, the output
+will have the same pixeltype as the input image. A variety of options are also available for
+the interpolation method to be used. Linear transforms may be inverted as shown below.
+
 ```{r compose,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 tx2 = antsTransformCompose(list(tx,tx))
 img4 = antsApplyTransformToImage(transform=tx2, image=img, reference=img)
 invisible(plotColor(img4))
 ```
+
+
 
 ## Non-linear transforms
 Non-linear transforms defined by a displacement field may also be used. Here we
@@ -188,7 +252,7 @@ field = mergeChannels(list(x,y))
 subimg = as.antsImage(img[110:150,110:150])
 subx = as.antsImage(x[110:150,110:150])
 suby = as.antsImage(y[110:150,110:150])
-invisible(plotColor(subimg, vectors=list(subx,suby)))
+invisible(plotColor(subimg, vectors=list(subx,-suby)))
 
 warpTx = antsTransformFromDisplacementField( field )
 warped = antsApplyTransformToImage(warpTx,img,img)

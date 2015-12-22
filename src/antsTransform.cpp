@@ -435,6 +435,114 @@ catch(...)
 return Rcpp::wrap(NA_REAL); //not reached
 }
 
+// Apply transform to vector
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
+{
+
+  Rcpp::S4 transform( r_transform );
+  std::string type = Rcpp::as<std::string>( transform.slot("type") );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  typedef typename TransformType::Pointer          TransformPointerType;
+  typedef typename TransformType::InputVectorType   InputVectorType;
+  typedef typename TransformType::OutputVectorType  OutputVectorType;
+
+  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
+  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
+
+  TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
+  Rcpp::NumericVector inVector( r_vector );
+
+  InputVectorType inItkVector;
+  for (unsigned int i=0; i<InputVectorType::Dimension; i++)
+    {
+    inItkVector[i] = inVector[i];
+    }
+
+  OutputVectorType outItkVector = itkTransform->TransformVector( inItkVector );
+
+  Rcpp::NumericVector outVector( OutputVectorType::Dimension );
+  for (unsigned int i=0; i<OutputVectorType::Dimension; i++)
+    {
+    outVector[i] = outItkVector[i];
+    }
+
+  return outVector;
+}
+
+
+RcppExport SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
+{
+try
+{
+  Rcpp::S4 transform( r_transform );
+
+  std::string precision = Rcpp::as<std::string>( transform.slot("precision") );
+  unsigned int dimension = Rcpp::as<int>( transform.slot("dimension") );
+
+  if ( (dimension < 1) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
+
+  if ( (precision != "float") && (precision != "double"))
+    {
+    Rcpp::stop( "Precision must be 'float' or 'double'");
+    }
+
+  if( precision == "double" )
+    {
+    typedef double PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,4>( r_transform, r_vector  );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,3>( r_transform, r_vector  );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
+	    }
+	  }
+  else if( precision == "float" )
+    {
+    typedef float PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,4>( r_transform, r_vector );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,3>( r_transform, r_vector );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
+	    }
+    }
+
+  return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
 
 // Apply transform to image
 template< class TransformType, class PixelType >
@@ -571,24 +679,7 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, S
   filter->SetOutputOrigin( refImage->GetOrigin() );
   filter->SetOutputDirection( refImage->GetDirection() );
   filter->SetInterpolator( interpolator );
-  /*
-  if ( type == "CompositeTransform")
-  {
-    CompositeTransformPointerType cTransform
-      = dynamic_cast<CompositeTransformType *>( transform.GetPointer() );
-    //for ( unsigned int i=0; i<cTransform->GetNumberOfTransforms(); i++)
-    //  {
-    //  Rcpp::Rcout << cTransform->GetNthTransform(i)->GetNameOfClass() << std::endl;
-    //  }
 
-    filter->SetTransform(cTransform);
-
-  }
-  else
-  {
-    filter->SetTransform( transform );
-  }
-*/
   filter->SetTransform( transform );
   filter->Update();
 

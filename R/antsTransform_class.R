@@ -82,6 +82,20 @@ antsApplyTransformToPoint <- function(tx, point) {
   return(.Call("antsTransform_TransformPoint", tx, point, PACKAGE = "ANTsR"))
 }
 
+#' @title antsApplyTransformToVector
+#' @description Apply transform to spatial vector
+#' @param transform antsTransform
+#' @param vector array of vector coordinates
+#' @return array of coordinates
+#' @examples
+#' tx = new("antsTransform")
+#' params = antsTransformGetParameters(transform)
+#' antsTransformSetParameters(transform, params*2)
+#' vec2 = antsApplyTransformToVector(transform, c(1,2,3))
+antsApplyTransformToVector <- function(transform, vector) {
+  return(.Call("antsTransform_TransformVector", transform, vector, PACKAGE = "ANTsR"))
+}
+
 #' @title antsApplyTransformToImage
 #' @description Apply transform to spatial point
 #' @param tx antsTransform
