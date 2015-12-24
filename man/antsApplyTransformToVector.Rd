@@ -18,9 +18,8 @@ array of coordinates
 Apply transform to spatial vector
 }
 \examples{
-tx = new("antsTransform")
-params = antsTransformGetParameters(transform)
-antsTransformSetParameters(transform, params*2)
+\dontrun{
 vec2 = antsApplyTransformToVector(transform, c(1,2,3))
+}
 }
 

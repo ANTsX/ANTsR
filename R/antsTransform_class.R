@@ -88,10 +88,9 @@ antsApplyTransformToPoint <- function(tx, point) {
 #' @param vector array of vector coordinates
 #' @return array of coordinates
 #' @examples
-#' tx = new("antsTransform")
-#' params = antsTransformGetParameters(transform)
-#' antsTransformSetParameters(transform, params*2)
+#' \dontrun{
 #' vec2 = antsApplyTransformToVector(transform, c(1,2,3))
+#' }
 antsApplyTransformToVector <- function(transform, vector) {
   return(.Call("antsTransform_TransformVector", transform, vector, PACKAGE = "ANTsR"))
 }
