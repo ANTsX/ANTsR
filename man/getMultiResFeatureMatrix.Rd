@@ -10,9 +10,11 @@ getMultiResFeatureMatrix(x, labelmask, rad = NA, multiResSchedule = c(0),
 \arguments{
 \item{x}{a list of feature images}
 
-\item{labelmask}{the mask defines the image space
-for the associated feature list and the number of parallel predictors.
-more labels means more predictors.}
+\item{labelmask}{the mask defines the image space for the associated feature
+and increases the number of predictors.  more labels means more
+predictors.  a different mask may be used for each feature, if desired, in
+which case this should be a list of masks where the length of the list
+is equal to the number of features.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -26,7 +28,7 @@ mat a matrix of predictors with n samples rows
 \description{
 Represents feature images as a neighborhood across scales. each subject
 gets a label image and feature list.  these labels/features should be
-the same for all subjects.  e.g each subject has a k-label image
+the same type for all subjects.  e.g each subject has a k-label image
 where the labels cover the same anatomy and the feature images are the same.
 for each label in a mask, produce a multi-resolution neighborhood
 sampling from the data within the label, for a given feature. do this for

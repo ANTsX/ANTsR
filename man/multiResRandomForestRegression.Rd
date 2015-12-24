@@ -15,7 +15,8 @@ otherwise regression.}
 
 \item{labelmasks}{a list of masks where each mask defines the image space
 for the given list and the number of parallel predictors.  more labels means
-more predictors.}
+more predictors.  alternatively, separate masks may be used for each feature
+in which case this should be a list of lists.  see examples.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -31,7 +32,10 @@ correspond to which subjects and a prediction vector.
 }
 \description{
 Represents feature images as a neighborhood across scales
-to build a random forest prediction from an image population
+to build a random forest prediction from an image population. A use case
+for this function is to predict cognition from multiple image features, e.g.
+from the voxelwise FA of the corpus callosum and, in parallel, voxelwise
+measurements of the volume of the inferior frontal gyrus.
 }
 \examples{
 
@@ -69,7 +73,8 @@ flist = list( )
 for ( i in 1:length(fns) )
   {
 # 2 labels means 2 sets of side by side predictors and features at each scale
-  masklist[[ i ]] = kmeansSegmentation( ilist[[i]], 2 )$segmentation
+  locseg = kmeansSegmentation( ilist[[i]], 2 )$segmentation
+  masklist[[ i ]] = list( locseg, locseg \%>\% thresholdImage(2,2), locseg )
   flist[[ i ]] = list( ilist[[i]], ilist[[i]] \%>\% iMath("Laplacian",1),
     ilist[[i]] \%>\% iMath("Grad",1)  )
   }

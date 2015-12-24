@@ -1,14 +1,18 @@
 #' multiple resolution neighborhood random forest regression
 #'
 #' Represents feature images as a neighborhood across scales
-#' to build a random forest prediction from an image population
+#' to build a random forest prediction from an image population. A use case
+#' for this function is to predict cognition from multiple image features, e.g.
+#' from the voxelwise FA of the corpus callosum and, in parallel, voxelwise
+#' measurements of the volume of the inferior frontal gyrus.
 #'
 #' @param y vector of scalar values or labels.  if a factor, do classification,
 #' otherwise regression.
 #' @param x a list of lists where each list contains feature images
 #' @param labelmasks a list of masks where each mask defines the image space
 #' for the given list and the number of parallel predictors.  more labels means
-#' more predictors.
+#' more predictors.  alternatively, separate masks may be used for each feature
+#' in which case this should be a list of lists.  see examples.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param nsamples (per subject to enter training)
 #' @param multiResSchedule an integer vector defining multi-res levels
@@ -58,7 +62,8 @@
 #' for ( i in 1:length(fns) )
 #'   {
 #' # 2 labels means 2 sets of side by side predictors and features at each scale
-#'   masklist[[ i ]] = kmeansSegmentation( ilist[[i]], 2 )$segmentation
+#'   locseg = kmeansSegmentation( ilist[[i]], 2 )$segmentation
+#'   masklist[[ i ]] = list( locseg, locseg %>% thresholdImage(2,2), locseg )
 #'   flist[[ i ]] = list( ilist[[i]], ilist[[i]] %>% iMath("Laplacian",1),
 #'     ilist[[i]] %>% iMath("Grad",1)  )
 #'   }
@@ -105,8 +110,7 @@ multiResRandomForestRegression <- function(
   idim<-length(rad)
   if ( idim != x[[1]][[1]]@dimension )
     stop("multiResRandomForestRegression: dimensionality does not match")
-  tt = (x[[1]])
-  fm = getMultiResFeatureMatrix( tt, labelmasks[[1]],
+  fm = getMultiResFeatureMatrix( x[[1]], labelmasks[[1]],
     rad=rad, multiResSchedule = multiResSchedule, nsamples=nsamples )
   if ( length( labelmasks ) > 1 )
     {
@@ -139,7 +143,7 @@ multiResRandomForestRegression <- function(
 #'
 #' Represents feature images as a neighborhood across scales. each subject
 #' gets a label image and feature list.  these labels/features should be
-#' the same for all subjects.  e.g each subject has a k-label image
+#' the same type for all subjects.  e.g each subject has a k-label image
 #' where the labels cover the same anatomy and the feature images are the same.
 #' for each label in a mask, produce a multi-resolution neighborhood
 #' sampling from the data within the label, for a given feature. do this for
@@ -150,9 +154,11 @@ multiResRandomForestRegression <- function(
 #' image-based feature set.  future work will allow other covariates.
 #'
 #' @param x a list of feature images
-#' @param labelmask the mask defines the image space
-#' for the associated feature list and the number of parallel predictors.
-#' more labels means more predictors.
+#' @param labelmask the mask defines the image space for the associated feature
+#' and increases the number of predictors.  more labels means more
+#' predictors.  a different mask may be used for each feature, if desired, in
+#' which case this should be a list of masks where the length of the list
+#' is equal to the number of features.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param multiResSchedule a vector of smoothing values
 #' @param nsamples defines the number of samples to take for each label.
@@ -175,53 +181,41 @@ getMultiResFeatureMatrix <- function(
   nsamples=10
   )
   {
-  ulabs = sort( unique( labelmask[ labelmask >  0  ] ) )
-  # loop over multires, labels and features
-  for ( lab in ulabs )
+  # loop over features, labels and multires
+  for ( featk in 1:length(x) )
     {
-    for ( smlev in multiResSchedule )
+    if ( class( labelmask )[1] == 'antsImage' )
+      locmask = ( labelmask )
+    if ( class( labelmask )[1] == 'list' )
+      locmask = labelmask[[ featk ]]
+    ulabs = sort( unique( locmask[ locmask >  0  ] ) )
+    for ( lab in ulabs )
       {
-      randmask = labelmask * 0
-      ulabvec<-( labelmask == as.numeric( lab ) )
+      randmask = locmask * 0
+      ulabvec<-( locmask == as.numeric( lab ) )
       randvec<-rep( FALSE, length( ulabvec ) )
       k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
       n<-sum( ulabvec == TRUE )
       randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
       randmask[ randvec ]<-1
-      featk = 1
-      if ( ! exists("testmat") )
+      for ( smlev in multiResSchedule )
         {
-        testmat<-t( getNeighborhoodInMask(
-          image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
-            radius=rad, spatial.info=F, boundary.condition='image' ) )
-        }
-      else
-        {
-        testmat <- cbind( testmat,
-          t( getNeighborhoodInMask(
+        if ( ! exists("testmat") )
+          {
+          testmat<-t( getNeighborhoodInMask(
             image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
               radius=rad, spatial.info=F, boundary.condition='image' ) )
-          )
-        }
-      if ( length(x) > 1 )
-      for ( featk in 2:length(x) )
-        {
-        testmat <- cbind( testmat,
-          t( getNeighborhoodInMask(
-            image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
-              radius=rad, spatial.info=F, boundary.condition='image' ) )
-          )
-        } # features
-      } # multires
-    if ( ! exists("getMultiResFeatureMatrixfullmatz") )
-      {
-      getMultiResFeatureMatrixfullmatz <- testmat
-      }
-    else
-      {
-      getMultiResFeatureMatrixfullmatz <-
-        cbind( getMultiResFeatureMatrixfullmatz,  testmat )
-      }
-    } # labels
-  return( getMultiResFeatureMatrixfullmatz )
+          }
+        else
+          {
+          testmat <- cbind( testmat,
+            t( getNeighborhoodInMask(
+              image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
+                radius=rad, spatial.info=F, boundary.condition='image' ) )
+            )
+          }
+        } # multires
+      } # labels
+    } # features
+  return( testmat )
 }
