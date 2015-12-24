@@ -88,6 +88,7 @@ for ( i in 1:length(fns) )
          rad=r,  multiResSchedule=mr, nsamples = ns )
   myp = predict( mrrfr, newdata=fmat )
   mypreds[ i ] = mymode( myp ) # get the most frequent observation
+  # use median or mean for continuous predictions
   }
 print("predicted")
 print( mypreds )
