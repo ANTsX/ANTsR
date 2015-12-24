@@ -24,13 +24,17 @@ more labels means more predictors.}
 mat a matrix of predictors with n samples rows
 }
 \description{
-Represents feature images as a neighborhood across scales.
-each subject gets a mask and feature list.  these mask/features should be
+Represents feature images as a neighborhood across scales. each subject
+gets a label image and feature list.  these labels/features should be
 the same for all subjects.  e.g each subject has a k-label image
 where the labels cover the same anatomy and the feature images are the same.
 for each label in a mask, produce a multi-resolution neighborhood
 sampling from the data within the label, for a given feature. do this for
-each feature.
+each feature. so, 2 labels will double the width of the predictor matrix.
+an additional scale parameter or feature will increase the width.  more
+samples will increase the number of rows in the predictor matrix. the labels
+allow one to collect predictors side-by-side from different parts of an
+image-based feature set.  future work will allow other covariates.
 }
 \examples{
 

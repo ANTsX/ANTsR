@@ -21,6 +21,7 @@
 #' lesions using LINDA: Lesion Identification with Neighborhood Data Analysis,
 #' Human Brain Mapping, 2016. (related work, not identical)
 #'
+#' @seealso \code{\link{getMultiResFeatureMatrix}} \code{\link{mrvnrfs}}
 #' @examples
 #'
 #' mask<-makeImage( c(100,100), 0 )
@@ -56,7 +57,8 @@
 #' flist = list( )
 #' for ( i in 1:length(fns) )
 #'   {
-#'   masklist[[ i ]] = thresholdImage( ilist[[i]], 1, Inf ) %>% iMath("MD",1)
+#' # 2 labels means 2 sets of side by side predictors and features at each scale
+#'   masklist[[ i ]] = kmeansSegmentation( ilist[[i]], 2 )$segmentation
 #'   flist[[ i ]] = list( ilist[[i]], ilist[[i]] %>% iMath("Laplacian",1),
 #'     ilist[[i]] %>% iMath("Grad",1)  )
 #'   }
@@ -64,14 +66,18 @@
 #' r = c( 1, 1 )
 #' mr = c( 2, 1, 0 )
 #' ns = 50
-#' mrrfr = multiResRandomForestRegression( yvec, flist, masklist, rad=c(1,1),
+#' trn = c(1:3,6:8)
+#' ytrain = yvec[ trn ]
+#' ftrain = flist[ trn ]
+#' mtrain = masklist[ trn ]
+#' mrrfr = multiResRandomForestRegression( ytrain, ftrain, mtrain, rad=c(1,1),
 #'   nsamples = ns, multiResSchedule=mr )
 #' mypreds = rep( NA, length( fns ) )
 #' mymode <- function(x) {
 #'  ux <- unique(x)
 #'  ux[which.max(tabulate(match(x, ux)))]
 #' }
-#' for ( i in 1:length(fns) )
+#' for ( i in 4:5 ) # test set
 #'   {
 #'   fmat = getMultiResFeatureMatrix( flist[[i]], masklist[[i]],
 #'          rad=r,  multiResSchedule=mr, nsamples = ns )
@@ -80,9 +86,9 @@
 #'   # use median or mean for continuous predictions
 #'   }
 #' print("predicted")
-#' print( mypreds )
+#' print( mypreds[-trn] )
 #' print("ground truth")
-#' print( yvec )
+#' print( yvec[-trn] )
 #' }
 #' @export multiResRandomForestRegression
 multiResRandomForestRegression <- function(
@@ -131,13 +137,17 @@ multiResRandomForestRegression <- function(
 
 #' build multiple resolution predictor matrix from feature images
 #'
-#' Represents feature images as a neighborhood across scales.
-#' each subject gets a mask and feature list.  these mask/features should be
+#' Represents feature images as a neighborhood across scales. each subject
+#' gets a label image and feature list.  these labels/features should be
 #' the same for all subjects.  e.g each subject has a k-label image
 #' where the labels cover the same anatomy and the feature images are the same.
 #' for each label in a mask, produce a multi-resolution neighborhood
 #' sampling from the data within the label, for a given feature. do this for
-#' each feature.
+#' each feature. so, 2 labels will double the width of the predictor matrix.
+#' an additional scale parameter or feature will increase the width.  more
+#' samples will increase the number of rows in the predictor matrix. the labels
+#' allow one to collect predictors side-by-side from different parts of an
+#' image-based feature set.  future work will allow other covariates.
 #'
 #' @param x a list of feature images
 #' @param labelmask the mask defines the image space

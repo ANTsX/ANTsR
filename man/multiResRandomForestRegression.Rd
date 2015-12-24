@@ -68,7 +68,8 @@ masklist = list( )
 flist = list( )
 for ( i in 1:length(fns) )
   {
-  masklist[[ i ]] = thresholdImage( ilist[[i]], 1, Inf ) \%>\% iMath("MD",1)
+# 2 labels means 2 sets of side by side predictors and features at each scale
+  masklist[[ i ]] = kmeansSegmentation( ilist[[i]], 2 )$segmentation
   flist[[ i ]] = list( ilist[[i]], ilist[[i]] \%>\% iMath("Laplacian",1),
     ilist[[i]] \%>\% iMath("Grad",1)  )
   }
@@ -76,14 +77,18 @@ yvec = factor( rep( c(1,2), each = 4 ) ) # classification
 r = c( 1, 1 )
 mr = c( 2, 1, 0 )
 ns = 50
-mrrfr = multiResRandomForestRegression( yvec, flist, masklist, rad=c(1,1),
+trn = c(1:3,6:8)
+ytrain = yvec[ trn ]
+ftrain = flist[ trn ]
+mtrain = masklist[ trn ]
+mrrfr = multiResRandomForestRegression( ytrain, ftrain, mtrain, rad=c(1,1),
   nsamples = ns, multiResSchedule=mr )
 mypreds = rep( NA, length( fns ) )
 mymode <- function(x) {
  ux <- unique(x)
  ux[which.max(tabulate(match(x, ux)))]
 }
-for ( i in 1:length(fns) )
+for ( i in 4:5 ) # test set
   {
   fmat = getMultiResFeatureMatrix( flist[[i]], masklist[[i]],
          rad=r,  multiResSchedule=mr, nsamples = ns )
@@ -92,9 +97,9 @@ for ( i in 1:length(fns) )
   # use median or mean for continuous predictions
   }
 print("predicted")
-print( mypreds )
+print( mypreds[-trn] )
 print("ground truth")
-print( yvec )
+print( yvec[-trn] )
 }
 }
 \author{
@@ -104,5 +109,8 @@ Avants BB, Tustison NJ
 Pustina, D, et al.  Automated segmentation of chronic stroke
 lesions using LINDA: Lesion Identification with Neighborhood Data Analysis,
 Human Brain Mapping, 2016. (related work, not identical)
+}
+\seealso{
+\code{\link{getMultiResFeatureMatrix}} \code{\link{mrvnrfs}}
 }
 
