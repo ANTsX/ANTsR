@@ -49,6 +49,7 @@
 #'   yvec , ilist, masklist, rad=r, multiResSchedule=mr )
 #' preds = predict( rfm, newdata=featMat )
 #' \dontrun{
+#' # data: https://github.com/stnava/ANTsTutorial/tree/master/phantomData
 #' fns = Sys.glob("phantom*wmgm.jpg")
 #' ilist = imageFileNames2ImageList( fns )
 #' masklist = list( )
