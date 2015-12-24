@@ -44,6 +44,40 @@
 #' rfm <- multiResRandomForestRegression(
 #'   yvec , ilist, masklist, rad=r, multiResSchedule=mr )
 #' preds = predict( rfm, newdata=featMat )
+#' \dontrun{
+#' fns = Sys.glob("phantom*wmgm.jpg")
+#' ilist = imageFileNames2ImageList( fns )
+#' masklist = list( )
+#' flist = list( )
+#' for ( i in 1:length(fns) )
+#'   {
+#'   masklist[[ i ]] = thresholdImage( ilist[[i]], 1, Inf ) %>% iMath("MD",1)
+#'   flist[[ i ]] = list( ilist[[i]], ilist[[i]] %>% iMath("Laplacian",1),
+#'     ilist[[i]] %>% iMath("Grad",1)  )
+#'   }
+#' yvec = factor( rep( c(1,2), each = 4 ) ) # classification
+#' r = c( 1, 1 )
+#' mr = c( 2, 1, 0 )
+#' ns = 50
+#' mrrfr = multiResRandomForestRegression( yvec, flist, masklist, rad=c(1,1),
+#'   nsamples = ns, multiResSchedule=mr )
+#' mypreds = rep( NA, length( fns ) )
+#' mymode <- function(x) {
+#'  ux <- unique(x)
+#'  ux[which.max(tabulate(match(x, ux)))]
+#' }
+#' for ( i in 1:length(fns) )
+#'   {
+#'   fmat = getMultiResFeatureMatrix( flist[[i]], masklist[[i]],
+#'          rad=r,  multiResSchedule=mr, nsamples = ns )
+#'   myp = predict( mrrfr, newdata=fmat )
+#'   mypreds[ i ] = mymode( myp ) # get the most frequent observation
+#'   }
+#' print("predicted")
+#' print( mypreds )
+#' print("ground truth")
+#' print( yvec )
+#' }
 #' @export multiResRandomForestRegression
 multiResRandomForestRegression <- function(
   y,
