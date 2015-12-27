@@ -48,12 +48,13 @@ nvox <- n*n*n*12
 dims <- c(n,n,n,12)
 boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 )
 boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 )
-boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 ) 
+boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 )
 
 cleanBoldImages <- list()
 for( i in 1:length( boldImages ) )
   {
-  fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=FALSE )
+  fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=FALSE,
+    doMotionCorrection = FALSE )
   if( i == 1 ) maskImage <- fmri$maskImage
   cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }

@@ -181,6 +181,7 @@ getMultiResFeatureMatrix <- function(
   nsamples=10
   )
   {
+  set.seed( 0 ) # set this in order to increase repeatability of sample call
   # loop over features, labels and multires
   for ( featk in 1:length(x) )
     {
