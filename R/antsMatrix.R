@@ -30,6 +30,12 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 })
 
 #' @describeIn antsMatrix
+setMethod(f = "as.matrix", signature(x = "antsMatrix"), definition = function(x) {
+  as.matrix.data.frame(as.data.frame(x))
+})
+
+
+#' @describeIn antsMatrix
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
