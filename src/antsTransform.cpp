@@ -184,12 +184,6 @@ SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension
     typename TransformType::Pointer transformPointer = TransformType::New();
     matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
     }
-  else if ( type == "Rigid3DTransform" )
-    {
-    typedef itk::Rigid3DTransform<PrecisionType> TransformType;
-    typename TransformType::Pointer transformPointer = TransformType::New();
-    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
-    }
   else if ( type == "QuaternionRigidTransform" )
     {
     typedef itk::QuaternionRigidTransform<PrecisionType> TransformType;

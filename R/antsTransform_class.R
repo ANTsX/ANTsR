@@ -62,7 +62,7 @@ antsTransformCreate <- function( type="AffineTransform", precision="float", dime
   supported.types=FALSE )
   {
 
-    matrixOffsetTypes = c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "Rigid3DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform","Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
+    matrixOffsetTypes = c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform","Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
     supportedTypes = c(matrixOffsetTypes, "DisplacementFieldTransform")
 
     if ( supported.types ) {

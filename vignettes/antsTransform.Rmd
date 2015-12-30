@@ -111,7 +111,7 @@ transforms to points, vectors, and images.
 
 ## Transforming point and vector data
 To demonstrate the methods, we will first create a linear transform and demonstate it's application
-to point and vector data.An `AffineTransform` is created then defined by setting
+to point and vector data. An `AffineTransform` is created then defined by setting
 its parameters. These parameters are the components of the matrix, in row order,
 followed by the translation components.
 ```{r basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
@@ -225,8 +225,6 @@ img4 = antsApplyTransformToImage(transform=tx2, image=img, reference=img)
 invisible(plotColor(img4))
 ```
 
-
-
 ## Non-linear transforms
 Non-linear transforms defined by a displacement field may also be used. Here we
 create an example field and apply it to the image
@@ -265,6 +263,193 @@ invisible(plotColor(abs(img-warped)))
 warped2 = antsApplyTransformToImage(transform=list(warpTx,tx), image=img, reference=img)
 invisible(plotColor(warped2))
 invisible(plotColor(abs(warped2-img2)))
+
+
 ```
+
+## Available Linear Transforms
+Descriptions of the transform types comes from the ITK documentation of the associated class.
+
+Many of these transforms have a center and offset that can be set. Here are some words of caution
+from the ITK documentation.
+
+The center of rotation of an antsTransform is a fixed point -
+for most transforms here,
+this point is not a "parameter" of the transform - the exception is that
+"centered" transforms have center as a parameter during optimization.
+
+WARNING: When using the Center, we strongly recommend only changing the
+matrix and translation to define a transform.   Changing a transform's
+center, changes the mapping between spaces - specifically, translation is
+not changed with respect to that new center, and so the offset is updated
+to * maintain the consistency with translation.   If a center is not used,
+or is set before the matrix and the offset, then it is safe to change the
+offset directly.
+
+As a rule of thumb, if you wish to set the center explicitly, set
+before Offset computations are done.
+
+To define an affine transform, you must set the matrix,
+center, and translation OR the matrix and offset
+
+### AffineTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1AffineTransform.html)
+An affine transformation is defined mathematically as a linear transformation plus a constant offset. If A is a constant n x n matrix and b is a constant n-vector, then y = Ax+b defines an affine transformation from the n-vector x to the n-vector y. Any two affine transformations may be composed and the result is another affine transformation. However, the order is important. This class also supports the specification of a center of rotation (center) and a translation that is applied with respect to that centered rotation. By default the center of rotation is set to the origin.
+
+*Parameters*: The first (NDimension x NDimension) parameters defines the matrix in row-major order (where the column index varies the fastest). The last NDimension parameters defines the translation in each dimensions.
+
+*FixedParameters*: The NDimension coordinates of the center of rotation
+
+### CenteredAffineTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1CenteredAffineTransform.html)
+Affine transformation with a specified center of rotation.
+
+*Parameters*: The first (NDimension x NDimension) parameters define the matrix, the next N parameters define the center of rotation and the last N parameters define the translation to be applied after the coordinate system has been restored to the rotation center. Note that the Offset of the superclass is no longer in the parameters array since it is fully dependent on the rotation center and the translation parameters.
+
+*FixedParameters*: None
+
+### CenteredEuler3DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1CenteredEuler3DTransform.html)
+This transform applies a rotation about a specific coordinate or centre of rotation followed by a translation.
+
+*Parameters*: An array with 9 values, ordered as follows:
+
+- p[1] = angle around x-axis (in radians)
+- p[2] = angle around y-axis (in radians)
+- p[3] = angle around z-axis (in radians)
+- p[4] = x coordinate of center
+- p[5] = y coordinate of center
+- p[6] = z coordinate of center
+- p[7] = x component of translation
+- p[8] = y component of translation
+- p[9] = z component of translation
+
+*FixedParameters*: None
+
+### CenteredRigid2DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1CenteredRigid2DTransform.html)
+This transform applies a rigid transformation is 2D space. The transform is specified as a rotation around arbitrary center and is followed by a translation. The main difference between this class and its superclass Rigid2DTransform is that the center of rotation is exposed for optimization.
+
+*Parameters*: An array of 5 elements ordered as follows:
+
+- p[1] = angle (in radians)
+- p[2] = x coordinate of center
+- p[3] = y coordinate of center
+- p[4] = x component of translation
+- p[5] = y component of translation
+
+*FixedParameters*: None
+
+### CenteredSimilarity2DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1CenteredSimilarity2DTransform.html)
+This transform applies a homogenous scale and rigid transform in 2D space. The transform is specified as a scale and rotation around a arbitrary center and is followed by a translation. given one angle for rotation, a homogeneous scale and a 2D offset for translation.
+
+The main difference between this class and its superclass Similarity2DTransform is that the center of transformation is exposed for optimization.
+
+*Parameters*: an array of 6 elements ordered as follows:
+
+- p[1] = scale
+- p[2] = angle (in radians)
+- p[3] = x coordinate of the center
+- p[4] = y coordinate of the center
+- p[5] = x component of the translation
+- p[6] = y component of the translation
+
+*FixedParameters*: None
+
+### Euler2DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1Euler2DTransform.html)
+This transform applies a rigid transformation is 2D space. The transform is specified as a rotation around arbitrary center and is followed by a translation. This transform is basically is a synonym for Rigid2DTransform.
+
+*Parameters*: An array of 3 elements ordered as follows:
+
+- p[1] = angle (in radians)
+- p[2] = x component of translation
+- p[3] = y component of translation
+
+*FixedParameters*: center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+
+### Euler3DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1Euler3DTransform.html)
+This transform applies a rotation and translation to the space given 3 Euler angles and a 3D translation. Rotation is about a user specified center.
+
+*Parameters*: An array of 6 elements, ordered as follows:
+
+- p[1] = angle around x-axis (in radians)
+- p[2] = angle around y-axis (in radians)
+- p[3] = angle around z-axis (in radians)
+- p[4] = x component of translation
+- p[5] = y component of translation
+- p[6] = z component of translation
+
+
+*FixedParameters*: An array of 3 element, defining the center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+- p[3] = z coordinate of center
+
+### QuaternionRigidTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1QuaternionRigidTransform.html)
+This transform applies a rotation and translation to the space given a quaternion and a 3D translation. Rotation is about a user specified center.
+
+*Parameters*: An array of 7 elements.
+
+- p[1] = x components of rotation axis
+- p[2] = y components of rotation axis
+- p[3] = z components of rotation axis
+- p[4] = angle around rotation axis (in radians)
+- p[5] = x component of translation
+- p[6] = y component of translation
+- p[7] = z component of translation
+
+*FixedParameters*: An array of 3 elements defining the center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+- p[3] = z coordinate of center
+
+### Rigid2DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1Rigid2DTransform.html)
+This transform applies a rigid transformation is 2D space. The transform is specified as a rotation around arbitrary center and is followed by a translation.
+
+*Parameters*: An array of 3 elements ordered as follows:
+
+- p[1] = angle (in radians)
+- p[2] = x component of translation
+- p[3] = y component of translation
+
+*FixedParameters*: center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+
+### Similarity2DTransform - [ITK](http://www.itk.org/Doxygen/html/classitk_1_1Similarity2DTransform.html)
+This transform applies a homogenous scale and rigid transform in 2D space. The transform is specified as a scale and rotation around a arbitrary center and is followed by a translation. Given one angle for rotation, a homogeneous scale and a 2D offset for translation.
+
+*Parameters*: scale, angle and translation, ordered as follows:
+
+- p[1] = scale
+- p[2] = angle (in radians)
+- p[3] = x component of translation
+- p[4] = y component of translation
+
+*FixedParameters*: center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+
+### Similarity3DTransform
+This transform applies a rotation, translation and isotropic scaling to the space.
+
+*Parameters*: An array of 7 elements
+
+- p[1] = angle around x-axis (in radians)
+- p[2] = angle around y-axis (in radians)
+- p[3] = angle around z-axis (in radians)
+- p[4] = x coordinate of center
+- p[5] = y coordinate of center
+- p[6] = z coordinate of center
+- p[7] = scale
+
+*FixedParameters*: center of rotation
+
+- p[1] = x coordinate of center
+- p[2] = y coordinate of center
+- p[3] = z coordinate of center
 
 ## References
