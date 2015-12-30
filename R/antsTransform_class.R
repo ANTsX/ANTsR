@@ -40,6 +40,113 @@ setMethod(f = "initialize", signature(.Object = "antsTransform"), definition = f
   return( tx )
 })
 
+#' @title antsTransformCreate
+#' @description Create and initialize a antsTransform
+#' @param type type of transforms
+#' @param precision numerical precision
+#' @param dimension spatial dimension of transform
+#' @param matrix matrix for linear transforms
+#' @param offset offset for linear transforms
+#' @param center center for linear transforms
+#' @param translation translation for linear transforms
+#' @param parameters array of parameters
+#' @param fixed.parameters array of fixed parameters
+#' @param displacement.field multichannel antsImage for non-linear transform
+#' @param supported.types flag that returns array of possible transforms types
+#' @return antsTransforms or list of transform types
+#' @examples
+#' trans= c(3,4,5)
+#' tx = antsTransformCreate( type="Euler3DTransform", translation=trans )
+antsTransformCreate <- function( type="AffineTransform", precision="float", dimension=3, matrix=NA,
+  offset=NA, center=NA, translation=NA, parameters=NA, fixed.parameters=NA, displacement.field=NA,
+  supported.types=FALSE )
+  {
+
+    matrixOffsetTypes = c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "Rigid3DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform","Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
+    supportedTypes = c(matrixOffsetTypes, "DisplacementFieldTransform")
+
+    if ( list.types ) {
+      return( supportedTypes )
+    }
+
+
+    # Check for valid dimension
+    if ( (dimension < 2) || (dimension > 4) )
+    {
+      stop(paste("Unsupported dimension:", dimension))
+    }
+
+    # Check for valid precision
+    precisionTypes = c("float", "double")
+    if ( sum(precision==precisionTypes)==0)
+    {
+      stop(paste("Unsupported precision:", precision))
+    }
+
+    # Check for supported transform type
+    if ( sum(type==supportedTypes)==0 )
+    {
+      stop(paste("Unsupported type:", type))
+    }
+
+    # Check parameters with type
+    if (type=="Euler3DTransform")
+    {
+      dimension = 3
+    }
+    else if (type=="Euler2DTransform")
+    {
+      dimension = 2
+    }
+    else if (type=="Rigid3DTransform")
+    {
+      dimension = 3
+    }
+    else if (type=="QuaternionRigidTransform")
+    {
+      dimension = 3
+    }
+    else if (type=="Rigid2DTransform")
+    {
+      dimension = 2
+    }
+    else if (type=="CenteredRigid2DTransform")
+    {
+      dimension = 2
+    }
+    else if (type=="CenteredEuler3DTransform")
+    {
+      dimension = 3
+    }
+    else if (type=="Similarity3DTransform")
+    {
+      dimension = 3
+    }
+    else if (type=="Similarity2DTransform")
+    {
+      dimension = 2
+    }
+    else if (type=="CenteredSimilarity2DTransform")
+    {
+      dimension = 2
+    }
+
+    # If displacement field
+    if ( !is.na(displacement.field))
+    {
+      return( antsTransformFromDisplacementField(displacement.field) )
+    }
+
+    # Transforms that derive from itk::MatrixOffsetTransformBase
+    if ( sum(type==matrixOffsetTypes) > 0 )
+    {
+      return(.Call("antsTransform_MatrixOffset",type,precision,dimension,matrix,offset,center,translation,parameters,fixed.parameters))
+    }
+
+    stop( "Unknown transform type")
+
+  }
+
 
 #' @title antsTransformSetParameters
 #' @description Set parameters of transform

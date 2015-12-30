@@ -6,10 +6,22 @@
 
 #include "antsUtilities.h"
 #include "itkAffineTransform.h"
+#include "itkCenteredAffineTransform.h"
+#include "itkEuler2DTransform.h"
+#include "itkEuler3DTransform.h"
+#include "itkRigid2DTransform.h"
+#include "itkRigid3DTransform.h"
+#include "itkCenteredRigid2DTransform.h"
+#include "itkCenteredEuler3DTransform.h"
+#include "itkSimilarity2DTransform.h"
+#include "itkCenteredSimilarity2DTransform.h"
+#include "itkSimilarity3DTransform.h"
+#include "itkQuaternionRigidTransform.h"
 #include "itkTranslationTransform.h"
 #include "itkResampleImageFilter.h"
 #include "itkTransformFileReader.h"
 #include "itkCompositeTransform.h"
+#include "itkMatrixOffsetTransformBase.h"
 #include "itkDisplacementFieldTransform.h"
 #include "itkConstantBoundaryCondition.h"
 
@@ -22,7 +34,7 @@
 #include "itkLabelImageGaussianInterpolateImageFunction.h"
 
 
-
+/*
 template< class TransformType >
 Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
 {
@@ -32,17 +44,13 @@ Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
   TransformPointerType * rawPointer = new TransformPointerType( transformPtr );
   Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
   return xptr;
-}
+}*/
 
 template< class PrecisionType, unsigned int Dimension >
 SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
 {
 
-  Rcpp::S4 transform( "antsTransform" );
   std::string type = Rcpp::as<std::string>( r_type );
-  transform.slot("type") = type;
-  transform.slot("dimension") = Rcpp::as< unsigned int >( r_dimension );
-  transform.slot("precision") = Rcpp::as<std::string>( r_precision );
 
   if ( type == "AffineTransform" )
     {
@@ -62,7 +70,7 @@ SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
     Rcpp::stop( "Transform type not supported" );
     }
 
-  return transform;
+  return Rcpp::wrap(NA_REAL);
 }
 
 RcppExport SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
@@ -112,6 +120,294 @@ try
     else if( dimension == 2 )
 	    {
       return antsTransform<PrecisionType,2>( r_precision, r_dimension, r_type  );
+	    }
+    }
+
+  return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
+    SEXP r_matrix, SEXP r_offset, SEXP r_center, SEXP r_translation,
+    SEXP r_parameters, SEXP r_fixedparameters )
+  {
+
+  std::string type = Rcpp::as<std::string>( r_type );
+  unsigned int dimension = Rcpp::as< unsigned int >( r_dimension );
+
+  typedef itk::MatrixOffsetTransformBase< PrecisionType, Dimension, Dimension> MatrixOffsetBaseType;
+  typedef typename MatrixOffsetBaseType::Pointer                               MatrixOffsetBasePointerType;
+  typedef itk::Transform<PrecisionType,Dimension,Dimension>                    TransformBaseType;
+  typedef typename TransformBaseType::Pointer                                  TransformBasePointerType;
+
+  MatrixOffsetBasePointerType matrixOffset = NULL;
+
+  // Initialize transform by type
+  if ( type == "AffineTransform" )
+    {
+    typedef itk::AffineTransform<PrecisionType,Dimension> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "CenteredAffineTransform" )
+    {
+    typedef itk::CenteredAffineTransform<PrecisionType,Dimension> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Euler3DTransform" )
+    {
+    typedef itk::Euler3DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Euler2DTransform" )
+    {
+    typedef itk::Euler2DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Rigid3DTransform" )
+    {
+    typedef itk::Rigid3DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "QuaternionRigidTransform" )
+    {
+    typedef itk::QuaternionRigidTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Rigid2DTransform" )
+    {
+    typedef itk::Rigid2DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "CenteredEuler3DTransform" )
+    {
+    typedef itk::CenteredEuler3DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "CenteredRigid2DTransform" )
+    {
+    typedef itk::CenteredRigid2DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Similarity3DTransform" )
+    {
+    typedef itk::Similarity3DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "Similarity2DTransform" )
+    {
+    typedef itk::Similarity2DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else if ( type == "CenteredSimilarity2DTransform" )
+    {
+    typedef itk::CenteredSimilarity2DTransform<PrecisionType> TransformType;
+    typename TransformType::Pointer transformPointer = TransformType::New();
+    matrixOffset = dynamic_cast<MatrixOffsetBaseType*>( transformPointer.GetPointer() );
+    }
+  else
+    {
+    Rcpp::Rcout << "Passed transform type: " << type << std::endl;
+    Rcpp::stop( "Transform type not supported" );
+    }
+
+  matrixOffset->SetIdentity();
+
+  // Set parameters
+  Rcpp::NumericVector testvec( r_matrix );
+  if ( testvec[0] == testvec[0])
+    {
+    Rcpp::NumericMatrix matrix( r_matrix );
+    if ( (matrix.nrow() != dimension) || (matrix.ncol() != dimension) )
+      {
+      Rcpp::stop( "Matrix must of size dimension*dimension");
+      }
+
+    typename MatrixOffsetBaseType::MatrixType itkMatrix;
+    for ( unsigned int i=0; i<dimension; i++)
+      for ( unsigned int j=0; j<dimension; j++)
+      {
+        itkMatrix(i,j) = matrix(i,j);
+      }
+
+    matrixOffset->SetMatrix( itkMatrix );
+    }
+
+  Rcpp::NumericVector translation( r_translation );
+  if ( translation[0] == translation[0] )
+  {
+    if ( translation.length() != dimension )
+      {
+      Rcpp::stop("Translation must be of length: dimension");
+      }
+
+    typename MatrixOffsetBaseType::OutputVectorType itkTranslation;
+    for ( unsigned int i=0; i<dimension; i++)
+      {
+      itkTranslation[i] = translation[i];
+      }
+
+    matrixOffset->SetTranslation( itkTranslation );
+  }
+
+  Rcpp::NumericVector offset( r_offset );
+  if ( offset[0] == offset[0] )
+  {
+    if ( offset.length() != dimension )
+      {
+      Rcpp::stop("Offset must be of length: dimension");
+      }
+
+    typename MatrixOffsetBaseType::OutputVectorType itkOffset;
+    for ( unsigned int i=0; i<dimension; i++)
+      {
+      itkOffset[i] = offset[i];
+      }
+
+    matrixOffset->SetOffset( itkOffset );
+  }
+
+  Rcpp::NumericVector center( r_center );
+  if ( center[0] == center[0] )
+  {
+    if ( center.length() != dimension )
+      {
+      Rcpp::stop("Center must be of length: dimension");
+      }
+
+    typename MatrixOffsetBaseType::InputPointType itkCenter;
+    for ( unsigned int i=0; i<dimension; i++)
+      {
+      itkCenter[i] = center[i];
+      }
+
+    matrixOffset->SetCenter( itkCenter );
+  }
+
+  Rcpp::NumericVector parameters( r_parameters );
+  if ( parameters[0] == parameters[0] )
+  {
+    if ( parameters.length() != matrixOffset->GetNumberOfParameters() )
+      {
+      Rcpp::stop("Parameters has incorrect length");
+      }
+
+    typename MatrixOffsetBaseType::ParametersType itkParameters;
+    itkParameters.SetSize( matrixOffset->GetNumberOfParameters() );
+    for ( unsigned int i=0; i<matrixOffset->GetNumberOfParameters(); i++)
+      {
+      itkParameters[i] = parameters[i];
+      }
+
+    matrixOffset->SetParameters( itkParameters );
+  }
+
+  Rcpp::NumericVector fixedparameters( r_fixedparameters );
+  if ( fixedparameters[0] == fixedparameters[0] )
+  {
+    if ( fixedparameters.length() != matrixOffset->GetNumberOfFixedParameters() )
+      {
+      Rcpp::stop("fixed.parameters has incorrect length");
+      }
+
+    typename MatrixOffsetBaseType::FixedParametersType itkFixedParameters;
+    itkFixedParameters.SetSize( matrixOffset->GetNumberOfFixedParameters() );
+    for ( unsigned int i=0; i<matrixOffset->GetNumberOfFixedParameters(); i++)
+      {
+      itkFixedParameters[i] = fixedparameters[i];
+      }
+
+    matrixOffset->SetFixedParameters( itkFixedParameters );
+  }
+
+
+  TransformBasePointerType itkTransform = dynamic_cast<TransformBaseType*>( matrixOffset.GetPointer() );
+  return Rcpp::wrap( itkTransform );
+}
+
+RcppExport SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
+  SEXP r_matrix, SEXP r_offset, SEXP r_center, SEXP r_translation,
+  SEXP r_parameters, SEXP r_fixedparameters )
+{
+try
+{
+
+  std::string precision = Rcpp::as< std::string >( r_precision );
+  unsigned int dimension = Rcpp::as< int >( r_dimension );
+
+  if ( (dimension < 2) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
+
+  if ( (precision != "float") && (precision != "double"))
+    {
+    Rcpp::stop( "Precision must be 'float' or 'double'");
+    }
+
+  if( precision == "double" )
+    {
+    typedef double PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
+	    }
+	  }
+  else if( precision == "float" )
+    {
+    typedef float PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
+      }
+    else if( dimension == 3 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
+          r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
 	    }
     }
 

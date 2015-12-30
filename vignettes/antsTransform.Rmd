@@ -109,9 +109,11 @@ may be used to work with spatial transforms. This class is based upon the [itk::
 which provides the underlying implementations. This class may be used to apply spatial
 transforms to points, vectors, and images.
 
-## Transforming point data
-An `AffineTransform` is created and defined by setting its parameters. These parameters
-are the components of the matrix, in row order, followed by the translation components.
+## Transforming point and vector data
+To demonstrate the methods, we will first create a linear transform and demonstate it's application
+to point and vector data.An `AffineTransform` is created then defined by setting
+its parameters. These parameters are the components of the matrix, in row order,
+followed by the translation components.
 ```{r basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 tx <- new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
 print(tx)
@@ -122,7 +124,7 @@ outpoint = antsApplyTransformToPoint(tx, point)
 print(outpoint)
 ```
 
-Sets of points may be transformed using `apply` and its variants.
+This transforms may be applied to a set of points using `apply` and its variants.
 ```{r basics2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 ptsMat = rbind(c(80,40), c(20,30))
 t(apply( ptsMat, 1, function(x) {antsApplyTransformToPoint(tx, x)}))
