@@ -33,7 +33,7 @@ antsTransformCreate(type = "AffineTransform", precision = "float",
 \item{supported.types}{flag that returns array of possible transforms types}
 }
 \value{
-antsTransforms or list of transform types
+antsTransform or list of transform types
 }
 \description{
 Create and initialize a antsTransform
