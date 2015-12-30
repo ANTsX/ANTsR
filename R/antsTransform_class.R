@@ -53,7 +53,7 @@ setMethod(f = "initialize", signature(.Object = "antsTransform"), definition = f
 #' @param fixed.parameters array of fixed parameters
 #' @param displacement.field multichannel antsImage for non-linear transform
 #' @param supported.types flag that returns array of possible transforms types
-#' @return antsTransforms or list of transform types
+#' @return antsTransform or list of transform types
 #' @examples
 #' trans= c(3,4,5)
 #' tx = antsTransformCreate( type="Euler3DTransform", translation=trans )
@@ -65,7 +65,7 @@ antsTransformCreate <- function( type="AffineTransform", precision="float", dime
     matrixOffsetTypes = c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "Rigid3DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform","Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
     supportedTypes = c(matrixOffsetTypes, "DisplacementFieldTransform")
 
-    if ( list.types ) {
+    if ( supported.types ) {
       return( supportedTypes )
     }
 
