@@ -5,7 +5,8 @@
 \title{Eigenanatomy with deflation}
 \usage{
 eanatDef(inmat, nvecs, mask = NA, smoother = 0, cthresh = 0, its = 5,
-  eps = 0.1, positivity = FALSE, verbose = FALSE)
+  eps = 0.1, positivity = FALSE, priors = NA, priorWeight = 0,
+  verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}
@@ -24,6 +25,10 @@ eanatDef(inmat, nvecs, mask = NA, smoother = 0, cthresh = 0, its = 5,
 \item{eps}{gradient descent parameter}
 
 \item{positivity}{return unsigned eigenanatomy vectors}
+
+\item{priors}{external initialization matrix.}
+
+\item{priorWeight}{weight on priors in range 0 to 1.}
 
 \item{verbose}{controls whether computation is silent or not.}
 }
@@ -54,6 +59,9 @@ Avants BB, Tustison NJ
 Kandel, B. M.; Wang, D. J. J.; Gee, J. C. & Avants, B. B.
 Eigenanatomy: sparse dimensionality reduction for multi-modal medical
 image analysis. Methods,  2015, 73, 43-53.
+PS Dhillon, DA Wolk, SR Das, LH Ungar, JC Gee, BB Avants
+Subject-specific functional parcellation via Prior Based Eigenanatomy
+NeuroImage, 2014, 99, 14-27.
 }
 \seealso{
 \code{\link{eanatSelect}}
