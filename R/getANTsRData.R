@@ -94,7 +94,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
       "motor", "parietal_association_cortex",
       "posterior_default","right_executive",
       "salience","supplementary_motor","visual")
-    selinds = c(4,1,3,6,7,8,9,11,12,13)
+    selinds = c(4,1,2,3,6,7,8,11,12,13)
     unzip( tfn , exdir = tdir )
     flist = Sys.glob( paste(tdir,"/rsfmrinetwork_*nii.gz",sep='') )
     ilist = imageFileNames2ImageList( flist )
