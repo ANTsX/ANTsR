@@ -93,12 +93,17 @@ return( nvecs )
 #' @param its number of iterations
 #' @param eps gradient descent parameter
 #' @param positivity return unsigned eigenanatomy vectors
+#' @param priors external initialization matrix.
+#' @param priorWeight weight on priors in range 0 to 1.
 #' @param verbose controls whether computation is silent or not.
 #' @return matrix is output, analogous to \code{svd(mat,nu=0,nv=nvecs)}
 #' @author Avants BB, Tustison NJ
 #' @references Kandel, B. M.; Wang, D. J. J.; Gee, J. C. & Avants, B. B.
 #' Eigenanatomy: sparse dimensionality reduction for multi-modal medical
 #' image analysis. Methods,  2015, 73, 43-53.
+#' PS Dhillon, DA Wolk, SR Das, LH Ungar, JC Gee, BB Avants
+#' Subject-specific functional parcellation via Prior Based Eigenanatomy
+#' NeuroImage, 2014, 99, 14-27.
 #'
 #' @examples
 #' mat <- matrix(rnorm(2000),ncol=50)
@@ -107,13 +112,27 @@ return( nvecs )
 #' es2 <- sparseDecom( mat, nvecs = nv )
 #' print( paste( "selected", nrow(esol),'pseudo-eigenvectors') )
 #' print( mean( abs( cor( mat %*% t(esol)) ) ) ) # what we use to select nvecs
+#' \dontrun{
+#' networkPriors = getANTsRData("fmrinetworks")
+#' ilist = networkPriors$images
+#' mni = antsImageRead( getANTsRData("mni") )
+#' mnireg = antsRegistration( meanbold*mask, mni, typeofTransform = 'Affine')
+#' for ( i in 1:length(ilist) )
+#'   ilist[[i]] = antsApplyTransforms( meanbold,ilist[[i]],mnireg$fwdtransform )
+#' pr = imageListToMatrix( ilist, cortMask )
+#' esol <- eanatDef( boldMat,
+#'   nvecs = length(ilist), cortMask, verbose=FALSE,
+#'   cthresh = 25, smoother = 0, positivity = TRUE, its=10, priors=pr,
+#'   priorWeight=0.15, eps=0.1 )
+#' }
 #'
 #' @seealso \code{\link{eanatSelect}}
 #'
 #' @export eanatDef
 eanatDef <- function( inmat, nvecs, mask=NA,
   smoother=0, cthresh=0, its=5, eps=0.1,
-  positivity = FALSE, verbose=FALSE )
+  positivity = FALSE, priors=NA, priorWeight=0,
+  verbose=FALSE )
 {
 mat = ( inmat )
 if ( !positivity ) keeppos = (-1.0) else keeppos = (1.0)
@@ -124,11 +143,31 @@ if ( is.na(mask) ) {
 if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
 if ( missing(nvecs) ) stop("Must set nvecs.  See eanatSelect function.")
 if ( nvecs >= nrow(mat) ) nvecs = nrow( mat ) - 1
+havePriors = TRUE
+if ( all( is.na( priors ) ) )
+{
+havePriors = FALSE
 solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
 pp1 = mat %*% t( solutionmatrix )
 ilist = matrixToImages( solutionmatrix, mask )
 eseg = eigSeg( mask, ilist,  TRUE )
 solutionmatrix = imageListToMatrix( ilist, mask )
+} else {
+  for ( sol in 1:nrow(priors))
+    {
+    vec = priors[sol,]
+    vec = vec / sqrt( sum( vec * vec ) )
+    priors[sol,] = vec
+    }
+  solutionmatrix = priors
+  pp1 = mat %*% t( solutionmatrix )
+}
+for ( sol in 1:nrow(solutionmatrix))
+  {
+  vec = solutionmatrix[sol,]
+  vec = vec / sqrt( sum( vec * vec ) )
+  solutionmatrix[sol,] = vec
+  }
 sparvals = rep( NA, nvecs )
 for ( i in 1:nvecs )
   sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos
@@ -138,37 +177,25 @@ for ( sol in 1:nrow(solutionmatrix))
   if ( sol == 1 ) rmat = mat else {
     pp = mat %*% t( solutionmatrix )
     rmat = residuals( lm( mat ~ pp[ ,1:(sol-1)] ) )
-  }
-  vec = solutionmatrix[sol,]
-  if ( is.na(mean(vec)) | sum( vec * vec ) == 0 ) vec = rnorm( length( vec ) )
-  vec = vec / sqrt( sum( vec * vec ) ) # this is initial vector
-  doOrth = F
-  if ( doOrth & sol > 1 ) # quick orthogonalization
-    {
-    mysubset = allsols < 1.e-6 # allow values where prior solutions are small
-    vec[ !mysubset ] = 0
-    if ( verbose )
-      {
-      temp = sum(!mysubset)/length(allsols)
-      print( paste("ORTH:", temp , sum(abs(sparvals[1:(sol-1)])) ) )
-      }
-    } else mysubset = rep( TRUE, length(vec) )
+    }
   # now do projected stochastic gradient descent
   for ( i in 1:its )
     {
+    vec = solutionmatrix[sol,]
+    vec = vec / sqrt( sum( vec * vec ) ) # this is initial vector
     grad = vec * 0
-#    if ( is.na(mean( vec )) | sum( vec^2 ) == 0 ) vec = rnorm( length( vec ) )
-    grad[mysubset] = .bootSmooth( rmat[,mysubset], vec[mysubset], nboot=0 )
-    if ( i == 1 ) w1=1 else w1=1
-    vec = vec*w1 + grad * eps
+    grad = .bootSmooth( rmat, vec, nboot=0 )
+    grad = grad / sqrt( sum( grad * grad ) )
+    if ( havePriors )
+      grad = grad * ( 1 - priorWeight) + priors[sol,] * priorWeight
+    vec = vec + grad * eps
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh )
-#    if ( is.na(mean( vec )) | sum( vec^2 ) == 0 ) vec = rnorm( length( vec ) )
     vec = vec / sqrt( sum( vec * vec ) )
-    rq = sum( vec * ( t(rmat) %*% ( rmat %*% vec ) ) )
+    rq = sum( vec * ( t(mat) %*% ( mat %*% vec ) ) )
     if ( verbose ) print( rq )
+    solutionmatrix[sol,]=vec
     }
-  solutionmatrix[sol,]=vec
   allsols = allsols + abs( vec )
   pp = mat %*% t( solutionmatrix )
   errn = mean( abs(  mat -  predict( lm( mat ~ pp[,1:sol] ) ) ) )

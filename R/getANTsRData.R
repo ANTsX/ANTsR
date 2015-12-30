@@ -5,6 +5,7 @@
 #' @param fileid one of the permitted file ids or pass "show" to list all
 #'   valid possibilities. Note that most require internet access to download.
 #' @param usefixedlocation directory to which you download files
+#' @param verbose optional boolean
 #' @return filename string
 #' @author Avants BB
 #' @examples
@@ -12,7 +13,7 @@
 #' fi <- getANTsRData( "r16" )
 #'
 #' @export getANTsRData
-getANTsRData <- function(fileid, usefixedlocation = FALSE) {
+getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
   myusage <- "usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
   if (missing(fileid)) {
     print(myusage)
@@ -68,10 +69,12 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
     rsboldseg = "http://files.figshare.com/2119178/seg.nii.gz",
     rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv",
     decslice = "http://files.figshare.com/2156224/rgbslice.nii.gz",
-    dtislice = "http://files.figshare.com/2157786/dtslice.nii.gz" )
+    dtislice = "http://files.figshare.com/2157786/dtslice.nii.gz" ,
+    fmrinetworks = "https://ndownloader.figshare.com/files/3639108" )
 
   myext <- ".nii.gz"
-  if (fileid == "ADNI" | fileid == "K1" | fileid == "nki")
+  if (fileid == "ADNI" | fileid == "K1" | fileid == "nki" |
+    fileid == "fmrinetworks")
     myext <- ".zip"
   tdir <- tempdir()  # for temporary storage
   tfn <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = myext)  # for temporary storage
@@ -81,6 +84,30 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE) {
   }
   if (!file.exists(tfn))
     download.file(myurl, tfn)
+  if ( fileid == "fmrinetworks" )
+    {
+    inms = c(
+      "IFG_middle_temporal",
+      "anterior_cingulate_precun","auditory",
+      "default", "left_executive",
+      "left_right_exec_combined_network",
+      "motor", "parietal_association_cortex",
+      "posterior_default","right_executive",
+      "salience","supplementary_motor","visual")
+    selinds = c(4,1,2,3,6,7,8,11,12,13)
+    unzip( tfn , exdir = tdir )
+    flist = Sys.glob( paste(tdir,"/rsfmrinetwork_*nii.gz",sep='') )
+    ilist = imageFileNames2ImageList( flist )
+    if ( verbose )
+      {
+      lochelp="Map the mni template to your image then transform these
+      network files to the individual space.\n"
+      cat( lochelp )
+      }
+    return( list(
+      networkNames=inms[selinds],
+      images=ilist[selinds] ) )
+    }
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki") {
     return(tfn)
   }
