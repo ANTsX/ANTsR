@@ -4,13 +4,15 @@
 \alias{getANTsRData}
 \title{getANTsRData}
 \usage{
-getANTsRData(fileid, usefixedlocation = FALSE)
+getANTsRData(fileid, usefixedlocation = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{fileid}{one of the permitted file ids or pass "show" to list all
 valid possibilities. Note that most require internet access to download.}
 
 \item{usefixedlocation}{directory to which you download files}
+
+\item{verbose}{optional boolean}
 }
 \value{
 filename string
