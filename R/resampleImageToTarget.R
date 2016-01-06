@@ -11,11 +11,12 @@
 #' @examples
 #'
 #' fi<-antsImageRead( getANTsRData("r16"))
-#' finn<-resampleImage(fi,c(50,60),1,0)
-#' filin<-resampleImage(fi,c(1.5,1.5),0,1)
+#' fi.ref<-antsImageRead( getANTsRData("r64"))
+#' fi <- resampleImage(fi, c(2.2, 2.2, 2.2), useVoxels = 0, interpType = 1)
+#' finew <- resampleImageToTarget(fi, fi.ref)
 #'
-#' @export resampleImage
-resampleImage <- function(image, target, interpType = 1) {
+#' @export resampleImageToTarget
+resampleImageToTarget <- function(image, target, interpType = 1) {
   inimg <- antsImageClone(image, "double")
   outimg <- antsImageClone(image, "double")
   rsampar <- paste(dim(target), collapse = "x")
