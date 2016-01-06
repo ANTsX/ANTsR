@@ -3,12 +3,11 @@
 #' Resample image by using another image as target reference.
 #'
 #' @param image input antsImage matrix
-#' @param resampleParams vector of size dimension with numeric values
-#' @param useVoxels true means interpret resample params as voxel counts
+#' @param target reference image to use for voxel size and header info
 #' @param interpType one of 0 (linear), 1 (nearest neighbor),
 #'   2 (gaussian), 3 (windowed sinc), 4 (bspline)
 #' @return output antsImage
-#' @author Avants BB
+#' @author Pustina D
 #' @examples
 #'
 #' fi<-antsImageRead( getANTsRData("r16"))
