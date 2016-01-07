@@ -31,6 +31,7 @@
 #' needs to be specified with the conductance parameter and the number of
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
+#' @param denseFramewise boolean for dense framewise stats
 #' @return List of:
 #' \itemize{
 #'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
@@ -65,7 +66,6 @@ preprocessRestingBOLD <- function(boldImage,
   motionCorrectionAccuracyLevel = 1,
   motionCorrectionIterations = 1,
   meanBoldFixedImageForMotionCorrection = NA,
-
   frequencyLowThreshold = NA,
   frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
