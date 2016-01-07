@@ -31,7 +31,7 @@ Travis checks:	[ANTsR results](https://travis-ci.org/stnava/ANTsR)
 
 ## Downloads
 
-Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf)
+Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/)
 
 Vignettes:
 
@@ -315,6 +315,8 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 More like *development highlights*, as opposed to *release notes*.  See `git log` for the complete history.  We try to follow [these versioning recommendations for R packages](http://yihui.name/en/2013/06/r-package-versioning/).  Under these guidelines, only `major.minor` is an official release.
 
 ## 0.3.2
+
+* WIP: transform objects can be created on the fly and manipulated thanks to jeff duda
 
 * ENH: automation for eigenanatomy
 
