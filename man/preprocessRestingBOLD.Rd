@@ -56,6 +56,8 @@ needs to be specified with the conductance parameter and the number of
 iterations, e.g. \code{c(0.25, 5)}.}
 
 \item{residualizeMatrix}{boolean}
+
+\item{motionCorrectionIteration}{number of iteration for motion correction}
 }
 \value{
 List of:
