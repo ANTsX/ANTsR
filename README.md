@@ -316,6 +316,8 @@ More like *development highlights*, as opposed to *release notes*.  See `git log
 
 ## 0.3.2
 
+* WIP: transform objects can be created on the fly and manipulated thanks to jeff duda
+
 * ENH: automation for eigenanatomy
 
 * ENH: reworked SCCAN and eanat
