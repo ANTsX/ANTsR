@@ -31,7 +31,7 @@ Travis checks:	[ANTsR results](https://travis-ci.org/stnava/ANTsR)
 
 ## Downloads
 
-Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf)
+Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/)
 
 Vignettes:
 
