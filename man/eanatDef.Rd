@@ -4,9 +4,9 @@
 \alias{eanatDef}
 \title{Eigenanatomy with deflation}
 \usage{
-eanatDef(inmat, nvecs, mask = NA, smoother = 0, cthresh = 0, its = 5,
-  eps = 0.1, positivity = FALSE, priors = NA, priorWeight = 0,
-  verbose = FALSE)
+eanatDef(inmat, nvecs = 0, mask = NA, smoother = 0, cthresh = 0,
+  its = 5, eps = 0.1, positivity = FALSE, priors = NA,
+  priorWeight = 0, verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}
