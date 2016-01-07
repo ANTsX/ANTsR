@@ -22,6 +22,7 @@
 #' @param motionCorrectionAccuracyLevel Accuracy for the motion correcting
 #' registration: 0 = fast/debug parameters, 1 = intrasession parameters, or 2 =
 #' intersession/intersubject parameters.
+#' @param motionCorrectionIteration number of iteration for motion correction
 #' @param frequencyLowThreshold Lower threshold for bandpass filtering.
 #' @param frequencyHighThreshold Upper threshold for bandpass filtering.
 #' @param spatialSmoothingType Either \code{none}, \code{gaussian} (isotropic) or
