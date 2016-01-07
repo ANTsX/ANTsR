@@ -4,10 +4,10 @@
 \alias{antsTransformGetParameters}
 \title{antsTransformGetParameters}
 \usage{
-antsTransformGetParameters(tx)
+antsTransformGetParameters(transform)
 }
 \arguments{
-\item{tx}{antsTransform}
+\item{transform}{antsTransform}
 }
 \value{
 array of parameters'

@@ -8,11 +8,13 @@ antsApplyTransformToImage(transform, image, reference,
   interpolation = "linear")
 }
 \arguments{
+\item{transform}{antsTransform}
+
 \item{image}{antsImage to transform}
 
-\item{tx}{antsTransform}
+\item{reference}{antImage giving the reference output space}
 
-\item{ref}{antImage giving the reference output space}
+\item{interpolation}{type of interpolator to use}
 }
 \value{
 antsImage

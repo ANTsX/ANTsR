@@ -150,26 +150,26 @@ antsTransformCreate <- function( type="AffineTransform", precision="float", dime
 
 #' @title antsTransformSetParameters
 #' @description Set parameters of transform
-#' @param tx antsTransform
+#' @param transform antsTransform
 #' @param parameters array of parameters'
 #' @return TRUE
 #' @examples
 #' tx = new("antsTransform")
 #' params = antsTransformGetParameters(tx)
 #' antsTransformSetParameters(tx, params*2)
-antsTransformSetParameters <- function(tx, parameters) {
-  invisible(.Call("antsTransform_SetParameters", tx, parameters, PACKAGE = "ANTsR"))
+antsTransformSetParameters <- function(transform, parameters) {
+  invisible(.Call("antsTransform_SetParameters", transform, parameters, PACKAGE = "ANTsR"))
 }
 
 #' @title antsTransformGetParameters
 #' @description Get parameters of transform
-#' @param tx antsTransform
+#' @param transform antsTransform
 #' @return array of parameters'
 #' @examples
 #' tx = new("antsTransform")
 #' params = antsTransformGetParameters(tx)
-antsTransformGetParameters <- function(tx) {
-  return(.Call("antsTransform_GetParameters", tx, PACKAGE = "ANTsR"))
+antsTransformGetParameters <- function(transform) {
+  return(.Call("antsTransform_GetParameters", transform, PACKAGE = "ANTsR"))
 }
 
 antsTransformFromDisplacementField <- function( field ) {
@@ -178,15 +178,16 @@ antsTransformFromDisplacementField <- function( field ) {
 
 #' @title antsApplyTransformToPoint
 #' @description Apply transform to spatial point
-#' @param tx antsTransform
+#' @param transform antsTransform
+#' @param point a spatial point
 #' @return array of coordinates
 #' @examples
 #' tx = new("antsTransform")
 #' params = antsTransformGetParameters(tx)
 #' antsTransformSetParameters(tx, params*2)
 #' pt2 = antsApplyTransformToPoint(tx, c(1,2,3))
-antsApplyTransformToPoint <- function(tx, point) {
-  return(.Call("antsTransform_TransformPoint", tx, point, PACKAGE = "ANTsR"))
+antsApplyTransformToPoint <- function(transform, point) {
+  return(.Call("antsTransform_TransformPoint", transform, point, PACKAGE = "ANTsR"))
 }
 
 #' @title antsApplyTransformToVector
@@ -204,9 +205,10 @@ antsApplyTransformToVector <- function(transform, vector) {
 
 #' @title antsApplyTransformToImage
 #' @description Apply transform to spatial point
-#' @param tx antsTransform
+#' @param transform antsTransform
 #' @param image antsImage to transform
-#' @param ref antImage giving the reference output space
+#' @param reference antImage giving the reference output space
+#' @param interpolation type of interpolator to use
 #' @return antsImage
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
@@ -225,6 +227,8 @@ antsApplyTransformToImage <- function(transform, image, reference, interpolation
 #' @title antsTransformRead
 #' @description read a transform from file
 #' @param filename filename of transform
+#' @param dimension spatial dimension of transform
+#' @param precision numerical precision of transform
 #' @return antsTransform
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
@@ -235,6 +239,15 @@ antsTransformRead <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
 }
 
+#' @title antsTransformInverse
+#' @description invert a linear antsTransform
+#' @param transform trasform to invert
+#' @return antsTransform
+#' @examples
+#' img <- antsImageRead(getANTsRData("r16"))
+#' tx = new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+#' antsTransformSetParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
+#' img2 = antsApplyTransformToImage(tx, img, img)
 antsTransformInverse <- function( transform ) {
   return(.Call("antsTransform_Inverse", transform))
 }

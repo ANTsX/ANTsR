@@ -4,10 +4,12 @@
 \alias{antsApplyTransformToPoint}
 \title{antsApplyTransformToPoint}
 \usage{
-antsApplyTransformToPoint(tx, point)
+antsApplyTransformToPoint(transform, point)
 }
 \arguments{
-\item{tx}{antsTransform}
+\item{transform}{antsTransform}
+
+\item{point}{a spatial point}
 }
 \value{
 array of coordinates

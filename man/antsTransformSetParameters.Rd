@@ -4,10 +4,10 @@
 \alias{antsTransformSetParameters}
 \title{antsTransformSetParameters}
 \usage{
-antsTransformSetParameters(tx, parameters)
+antsTransformSetParameters(transform, parameters)
 }
 \arguments{
-\item{tx}{antsTransform}
+\item{transform}{antsTransform}
 
 \item{parameters}{array of parameters'}
 }
