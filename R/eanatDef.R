@@ -129,7 +129,7 @@ return( nvecs )
 #' @seealso \code{\link{eanatSelect}}
 #'
 #' @export eanatDef
-eanatDef <- function( inmat, nvecs, mask=NA,
+eanatDef <- function( inmat, nvecs=0, mask=NA,
   smoother=0, cthresh=0, its=5, eps=0.1,
   positivity = FALSE, priors=NA, priorWeight=0,
   verbose=FALSE )
@@ -141,11 +141,11 @@ if ( is.na(mask) ) {
   mask[ 2, 2:(2+ncol(mat)-1) ] = 1
   }
 if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
-if ( missing(nvecs) ) stop("Must set nvecs.  See eanatSelect function.")
 if ( nvecs >= nrow(mat) ) nvecs = nrow( mat ) - 1
 havePriors = TRUE
 if ( all( is.na( priors ) ) )
 {
+if ( nvecs == 0 ) stop("Must set nvecs.  See eanatSelect function.")
 havePriors = FALSE
 solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
 pp1 = mat %*% t( solutionmatrix )
@@ -153,6 +153,7 @@ ilist = matrixToImages( solutionmatrix, mask )
 eseg = eigSeg( mask, ilist,  TRUE )
 solutionmatrix = imageListToMatrix( ilist, mask )
 } else {
+  nvecs = nrow( priors )
   for ( sol in 1:nrow(priors))
     {
     vec = priors[sol,]
