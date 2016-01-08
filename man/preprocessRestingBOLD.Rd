@@ -40,6 +40,8 @@ default to avoid additional interpolation.}
 registration: 0 = fast/debug parameters, 1 = intrasession parameters, or 2 =
 intersession/intersubject parameters.}
 
+\item{motionCorrectionIterations}{number of iteration for motion correction}
+
 \item{meanBoldFixedImageForMotionCorrection}{Optional target fixed image for
 motion correction.}
 
@@ -56,8 +58,6 @@ needs to be specified with the conductance parameter and the number of
 iterations, e.g. \code{c(0.25, 5)}.}
 
 \item{residualizeMatrix}{boolean}
-
-\item{motionCorrectionIteration}{number of iteration for motion correction}
 }
 \value{
 List of:
