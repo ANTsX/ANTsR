@@ -187,30 +187,3 @@ preprocessfMRI <- function(boldImage,
     DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal,
     nuisanceVariables = nuisanceVariables))
 }
-
-
-#' computeDVARS
-#'
-#' compute the DVARS quality control metric
-#'
-#'
-#' @param boldMatrix matrix of bold signal
-#' @return DVARS vector.
-#' @author Tustison NJ, Avants BB
-#' @examples
-#'
-#'  mat <- matrix(c(0,1,2,0,0,1,2,2,2),ncol=3)
-#'  dv<-computeDVARS(mat)
-#'
-#' @export computeDVARS
-computeDVARS <- function(boldMatrix) {
-  # For quality assurance measures, we calculate the temporal derivative of the RMS
-  # variance over voxels (DVARS as in
-  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
-  DVARS <- rep(0, nrow(boldMatrix))
-  for (i in 2:nrow(boldMatrix)) {
-    DVARS[i] <- sqrt(mean((boldMatrix[i, ] - boldMatrix[i - 1, ])^2))
-  }
-  DVARS[1] <- mean(DVARS)
-  return(DVARS)
-}
