@@ -5,7 +5,7 @@ myantslib=${PWD}/antb/lib/
 
 ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
 
-PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ -I${myantssource}/Utilities -I${myantssource}/Examples/ -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ -I${myantssource}/Utilities -I${myantssource}/Examples/ -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
 
 # see https://github.com/stnava/ANTsR/issues/69
 # -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
