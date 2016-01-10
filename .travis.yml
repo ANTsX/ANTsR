@@ -6,7 +6,7 @@ os:
   - osx
 
 # use c as catch-all language
-language: c
+language: r
 compiler:
   - clang
 
@@ -36,7 +36,7 @@ before_install:
   - basedir=${PWD}
   - cd ..
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then echo "need cmake 3.2"; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
 
@@ -77,8 +77,9 @@ install:
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
 #  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
   - cd ~/
-  - wget https://github.com/stnava/ITKR/releases/download/v0.0.1-alpha/ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz
-  - R CMD INSTALL --library=~/Rlib ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz
+  - itkrrel=v0.0.1-alpha
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/${itkrrel}/ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_0.0_OSX_ElCapitan.tgz; curl https://github.com/stnava/ITKR/releases/download/${itkrrel}/${osxitkr}; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
   - cd ${basedir}
 
 # Build and check package
