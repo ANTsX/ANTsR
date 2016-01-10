@@ -1,17 +1,19 @@
-# .travis.yml using container-based infrastructure
+# use containers
+sudo: false
+
+os:
+  - linux
+  - osx
 
 # use c as catch-all language
 language: c
 compiler:
   - clang
 
-# use containers
-sudo: false
-
 # only run for pushes to master branch
-branches:
-  only:
-   - master
+# branches:
+#  only:
+#   - master
 
 # install R: use r-packages-precise (https://cran.r-project.org/bin/linux/ubuntu/precise/)
 # as source which is white listed (https://github.com/travis-ci/apt-source-whitelist/)
