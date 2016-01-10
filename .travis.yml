@@ -5,10 +5,17 @@ os:
   - linux
   - osx
 
+mylang=r
+if [ "$TRAVIS_OS_NAME" == "linux" ]; then mylang=c; fi
+
 # use c as catch-all language
-language: r
+language: $mylang
 compiler:
   - clang
+
+matrix:
+  allow_failures:
+    - os: osx
 
 # only run for pushes to master branch
 # branches:
