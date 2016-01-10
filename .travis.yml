@@ -100,13 +100,13 @@ after_success:
 #  - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
 
 after_failure:
+  - cat ~/build/stnava/ANTsR.Rcheck/00install.out
+  - cat ~/build/stnava/ANTsR.Rcheck/00check.log
 #  - ./travis-tool.sh dump_logs
-  - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
-  - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
-  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00install.out
-  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00check.log
-  - cat ~/ANTsR.Rcheck/00install.out
-  - cat ~/ANTsR.Rcheck/00check.log
+#  - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
+#  - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log  LINUX
+#  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00install.out
+#  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00check.log OSX
 
 # send e-mails if stuff changes
 notifications:

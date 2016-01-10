@@ -5,16 +5,16 @@ myantslib=${PWD}/antb/lib/
 
 ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
 
-PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
-  -I${myantssource}/Utilities -I${myantssource}/Examples/ \
-  -I${myantssource}/Tensor/
 
-# see https://github.com/stnava/ANTsR/issues/69
-# -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
-#
-ifeq ($(UNAME_S),Linux)
-    PKG_CPPFLAGS += -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
-endif
+if test `uname` = "Darwin" ; then
+  PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
+    -I${myantssource}/Utilities -I${myantssource}/Examples/ \
+    -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+else
+  PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
+    -I${myantssource}/Utilities -I${myantssource}/Examples/ \
+    -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+fi
 
 libants=`find ${myantslib} -name "lib*.a"`
 
