@@ -105,6 +105,8 @@ after_failure:
   - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
   - cat /Users/travis/build/stnava/ANTsR.Rcheck/00install.out
   - cat /Users/travis/build/stnava/ANTsR.Rcheck/00check.log
+  - cat ~/ANTsR.Rcheck/00install.out
+  - cat ~/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
