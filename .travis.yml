@@ -86,7 +86,7 @@ install:
   - cd ~/
   - itkrrel=v0.0.1-alpha
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/${itkrrel}/ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_0.0_R_x86_64-unknown-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_0.0_OSX_ElCapitan.tgz; curl https://github.com/stnava/ITKR/releases/download/${itkrrel}/${osxitkr}; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_0.0_OSX_ElCapitan.tgz; Rscript -e 'download.file("https://github.com/stnava/ITKR/releases/download/v0.0.1-alpha/ITKR_0.0_OSX_ElCapitan.tgz", "ITKR_0.0_OSX_ElCapitan.tgz", quiet = FALSE, mode = "wb")'; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
   - cd ${basedir}
 
 # Build and check package
