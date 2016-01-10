@@ -6,9 +6,7 @@ os:
   - osx
 
 # use c as catch-all language
-language:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then language=cpp; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then language=r; fi
+language: cpp
 
 compiler:
   - clang
@@ -22,8 +20,6 @@ matrix:
 #  only:
 #   - master
 
-# install R: use r-packages-precise (https://cran.r-project.org/bin/linux/ubuntu/precise/)
-# as source which is white listed (https://github.com/travis-ci/apt-source-whitelist/)
 addons:
   apt:
     sources:
@@ -42,8 +38,8 @@ cache:
 before_install:
   - basedir=${PWD}
   - cd ..
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version;  curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh ; chmod 755 ./travis-tool.sh;  ./travis-tool.sh bootstrap; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
 
