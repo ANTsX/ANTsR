@@ -5,11 +5,11 @@ os:
   - linux
   - osx
 
-mylang=r
-if [ "$TRAVIS_OS_NAME" == "linux" ]; then mylang=c; fi
-
 # use c as catch-all language
-language: $mylang
+language:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mylang=c; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then mylang=r; fi
+
 compiler:
   - clang
 
