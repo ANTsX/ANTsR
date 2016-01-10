@@ -9,6 +9,7 @@ os:
 language:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mylang=c; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then mylang=r; fi
+  - language=${mylang}
 
 compiler:
   - clang
