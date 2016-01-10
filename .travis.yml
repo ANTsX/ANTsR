@@ -7,9 +7,8 @@ os:
 
 # use c as catch-all language
 language:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mylang=c; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then mylang=r; fi
-  - language=${mylang}
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then language=cpp; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then language=r; fi
 
 compiler:
   - clang
