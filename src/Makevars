@@ -5,16 +5,23 @@ myantslib=${PWD}/antb/lib/
 
 ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
 
-PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ -I${myantssource}/Utilities -I${myantssource}/Examples/ -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
+  -I${myantssource}/Utilities -I${myantssource}/Examples/ \
+  -I${myantssource}/Tensor/
 
 # see https://github.com/stnava/ANTsR/issues/69
 # -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+#
+ifeq ($(UNAME_S),Linux)
+    PKG_CPPFLAGS += -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+endif
 
 libants=`find ${myantslib} -name "lib*.a"`
 
 libitk=`find \`$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\` -name "lib*.a"`
 
-PKG_LIBS = ${libitk} ${libants} ${libitk} ${libants} ${libitk} ${libants} ${libitk} ${libants} ${itklib}
+PKG_LIBS = ${libitk} ${libants} ${libitk} ${libants} ${libitk} ${libants}  \
+  ${libitk} ${libants} ${itklib}
 
 .PHONY: all libs
 
