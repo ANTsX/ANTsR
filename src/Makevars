@@ -10,11 +10,11 @@ if test `uname` = "Darwin" ; then
   PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
     -I${myantssource}/Utilities -I${myantssource}/Examples/ \
     -I${myantssource}/Tensor/
-    
+
 if test `uname` = "Linux" ; then
   PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
     -I${myantssource}/Utilities -I${myantssource}/Examples/ \
-    -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1
+    -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
 
 libants=`find ${myantslib} -name "lib*.a"`
 
