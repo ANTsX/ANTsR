@@ -103,6 +103,8 @@ after_failure:
 #  - ./travis-tool.sh dump_logs
   - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
   - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log
+  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00install.out
+  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
