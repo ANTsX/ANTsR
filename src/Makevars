@@ -24,7 +24,8 @@ libants=`find ${myantslib} -name "lib*.a"`
 libitk=`find \`$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\` -name "lib*.a"`
 
 PKG_LIBS = ${libitk} ${libants} ${libitk} ${libants} ${libitk} ${libants}  \
-  ${libitk} ${libants} ${itklib}
+  ${libitk} ${libants} ${itklib} ${libants} ${libitk} ${libants} ${itklib} \
+  ${libants} ${itklib} ${libants} ${libitk} ${libants} ${itklib}
 
 .PHONY: all libs
 
