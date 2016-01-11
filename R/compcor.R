@@ -35,7 +35,7 @@ compcor <- function(fmri, ncompcor = 4,
   if (class(fmri)[1] == "antsImage" & !is.na(mask)) {
     mat <- timeseries2matrix(fmri, mask)
   }
-  if (class(fmri)[1] == "matrix") {
+  if ( length(grep("matrix",class(fmri) ) ) > 0 ) {
     mat <- fmri
   }
   if (is.na(highvarmatinds)) {

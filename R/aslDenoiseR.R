@@ -4,12 +4,12 @@
 #'
 #' @param boldmatrix input bold matrix
 #' @param targety target to predict
-#' @param motionparams motion parameters / nuisance variables
+#' @param covariates motion or other parameters / nuisance variables
 #' @param selectionthresh e.g. 0.1 take 10 percent worst variables for noise
 #' estimation
 #' @param maxnoisepreds integer search range e.g 1:10
 #' @param debug boolean
-#' @param polydegree eg 4 for polynomial nuisance variables
+#' @param polydegree eg 4 for polynomial nuisance variables or 'loess'
 #' @param crossvalidationgroups prior defined or integer valued
 #' @param scalemat boolean
 #' @param noisepoolfun function to help select noise pool e.g. max
@@ -30,7 +30,7 @@
 #' asl<-matrix2timeseries( asl, aslmask, aslmat )
 #' tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 #' dv<-computeDVARS(aslmat)
-#' dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
+#' dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
 #'   maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
 #' \dontrun{
 #' # a classic regression approach to estimating perfusion
@@ -50,7 +50,7 @@
 aslDenoiseR <- function(
   boldmatrix,
   targety,
-  motionparams = NA,
+  covariates = NA,
   selectionthresh = 0.1,
   maxnoisepreds = 1:12,
   debug = FALSE,
@@ -76,33 +76,6 @@ aslDenoiseR <- function(
     return(x < val & x < 0)
   }
 
-  crossvalidatedR2 <- function(residmatIn, targety, groups, howmuchnoise = 0, noiseu = NA,
-    p = NA) {
-    residmat <- residmatIn
-    nvox <- ncol(residmat)
-    kfo <- unique(groups)
-    R2 <- matrix(rep(0, nvox * length(kfo)), nrow = length(kfo))
-    for (k in kfo) {
-      selector <- groups != k
-      mydf <- data.frame(targety[selector])
-      if (!all(is.na(p)))
-        mydf <- data.frame(mydf, p[selector, ])
-      mylm1 <- lm(residmat[selector, ] ~ ., data = mydf)
-      selector <- groups == k
-      mydf <- data.frame(targety[selector])
-      if (!all(is.na(p)))
-        mydf <- data.frame(mydf, p[selector, ])
-      predmat <- predict(mylm1, newdata = mydf)
-      realmat <- residmat[selector, ]
-      for (v in 1:nvox) {
-        sum1 <- sum((predmat[, v] - realmat[, v])^2, na.rm = T)
-        sum2 <- sum((mean(realmat[, v], na.rm = T) - realmat[, v])^2, na.rm = T)
-        R2[k, v] <- 100 * (1 - sum1/sum2)
-      }
-    }
-    return(R2)
-  }
-
   ################################################# overall description of the method 1. regressors include: design + trends +
   ################################################# noise-pool 2. find noise-pool by initial cross-validation without noise
   ################################################# regressors 3. cross-validate predictions using different numbers of noise
@@ -111,15 +84,31 @@ aslDenoiseR <- function(
   timevals <- NA
   if (all(is.na(timevals)))
     timevals <- 1:nrow(boldmatrix)
-  p <- stats::poly(timevals, degree = polydegree)
-  if (!all(is.na(motionparams)))
-    p <- cbind(data.matrix(motionparams), p)
+  #
+  if (is.numeric(polydegree)) {
+    if (polydegree > 0) {
+      p <- stats::poly(timevals, degree = polydegree)
+      aslmat <- residuals(lm(boldmatrix ~ 0 + p))
+      if (!all(is.na(covariates))) {
+        covariates <- cbind(data.matrix(covariates), p)
+      } else covariates <- p
+    }
+  } else if (polydegree == 'loess') {
+    timevals <- 1:nrow(boldmatrix)
+    mean.ts <- apply(boldmatrix, 1, mean)
+    myloess <- loess(mean.ts ~ timevals)
+    p <- myloess$fitted
+    if (!all(is.na(covariates))) {
+      covariates <- cbind(data.matrix(covariates), p)
+    } else covariates <- p
+  }
   rawboldmat <- data.matrix(boldmatrix)
-  svdboldmat <- residuals(lm(rawboldmat ~ 0 + p))
+  svdboldmat <- residuals(lm(rawboldmat ~ 0 + covariates))
   if (debug)
     print("lm")
   ################### now redo some work w/new hrf
-  R2base <- crossvalidatedR2(svdboldmat, targety, groups, p = NA)
+  R2base <- crossvalidatedR2(svdboldmat, targety, groups,
+    covariates = covariates)
   R2base <- apply(R2base, FUN = noisepoolfun, MARGIN = 2)
   noisepool <- getnoisepool(R2base)
   if (all(noisepool == TRUE)) {
@@ -140,9 +129,9 @@ aslDenoiseR <- function(
   R2summary <- rep(0, length(maxnoisepreds))
   ct <- 1
   for (i in maxnoisepreds) {
-    svdboldmat <- residuals(lm(rawboldmat ~ 0 + p + noiseu[, 1:i]))
-    R2 <- crossvalidatedR2(svdboldmat, targety, groups, noiseu = NA, howmuchnoise = i,
-      p = NA)
+    svdboldmat <- residuals(lm(rawboldmat ~ 0 + covariates + noiseu[, 1:i]))
+    R2 <- crossvalidatedR2(svdboldmat, targety, groups,
+      covariates = covariates )
     R2max <- apply(R2, FUN = max, MARGIN = 2)
     if (ct == 1)
       R2perNoiseLevel <- R2max else R2perNoiseLevel <- cbind(R2perNoiseLevel, R2max)
@@ -161,5 +150,6 @@ aslDenoiseR <- function(
   if (ct > 2)
     R2final <- R2perNoiseLevel[, bestn - min(maxnoisepreds) + 1]
   return(list(n = bestn, R2atBestN = R2summary[bestn], noisepool = noisepool, R2base = R2base,
-    R2final = R2final, noiseu = noiseu[, 1:bestn], polys = p))
+    R2final = R2final, noiseu = noiseu[, 1:bestn],
+    covariates = covariates))
 }

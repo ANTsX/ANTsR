@@ -4,7 +4,7 @@
 \alias{aslDenoiseR}
 \title{WIP: data-driven denoising for ASL MRI}
 \usage{
-aslDenoiseR(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1,
+aslDenoiseR(boldmatrix, targety, covariates = NA, selectionthresh = 0.1,
   maxnoisepreds = 1:12, debug = FALSE, polydegree = 4,
   crossvalidationgroups = 4, scalemat = F, noisepoolfun = max,
   usecompcor = F)
@@ -14,7 +14,7 @@ aslDenoiseR(boldmatrix, targety, motionparams = NA, selectionthresh = 0.1,
 
 \item{targety}{target to predict}
 
-\item{motionparams}{motion parameters / nuisance variables}
+\item{covariates}{motion or other parameters / nuisance variables}
 
 \item{selectionthresh}{e.g. 0.1 take 10 percent worst variables for noise
 estimation}
@@ -23,7 +23,7 @@ estimation}
 
 \item{debug}{boolean}
 
-\item{polydegree}{eg 4 for polynomial nuisance variables}
+\item{polydegree}{eg 4 for polynomial nuisance variables or 'loess'}
 
 \item{crossvalidationgroups}{prior defined or integer valued}
 
@@ -53,7 +53,7 @@ for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
 asl<-matrix2timeseries( asl, aslmask, aslmat )
 tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
-dnz<-aslDenoiseR( aslmat, tc, motionparams=dv, selectionthresh=0.1,
+dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
   maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
 \dontrun{
 # a classic regression approach to estimating perfusion
