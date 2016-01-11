@@ -67,6 +67,57 @@ ctl<-c(1:(nrow(aslmat)/2))*2
 m0[ aslmask==1 ]<-colMeans(aslmat[ctl,])
 pcasl.parameters<-list( sequence="pcasl", m0=m0 )
 cbf <- quantifyCBF( perfimg, aslmask, pcasl.parameters )
+
+# default mode network example
+
+if ( ! exists("bold") )
+  {
+  bold = antsImageRead( getANTsRData("rsbold") )
+  meanbold = getAverageOfTimeSeries( bold )
+  boldmask = getMask(  meanbold )
+  # map to mni
+  mni = antsImageRead( getANTsRData("mni") )
+  mniaal = antsImageRead( getANTsRData("mnia") )
+  mymap = antsRegistration( meanbold * boldmask, mni, typeofTransform='SyNBold',
+   verbose=1 )
+  aalimg = antsApplyTransforms( meanbold, mniaal, mymap$fwdtransforms,
+    interpolator='NearestNeighbor')
+  data("aal",package="ANTsR")
+  timeselect<-10:dim(bold)[4]
+  if ( ! exists("moco") )
+    {
+    moco = antsMotionCalculation( bold, boldmask )
+    }
+  sbold = smoothImage( moco$moco_img , 3.0 )
+  antsImageWrite( boldmask, 'boldmask.nii.gz' )
+  antsImageWrite( meanbold, 'boldmean.nii.gz' )
+  antsImageWrite( aalimg, 'boldaal.nii.gz' )
+  boldmask = boldmask * thresholdImage( aalimg, 1, Inf )
+  }
+postcing<-aal$label_num[ grep( "Cingulum_Post", aal$label_name ) ]
+postCingMask = maskImage( boldmask, aalimg,
+  level = as.numeric(postcing), binarize=T )
+mpostCingMask= antsImageClone( postCingMask ) * 0
+mpostCingMask[ postCingMask == 0 ] = 1
+boldmat = timeseries2matrix( sbold, boldmask*mpostCingMask )
+boldmat = boldmat[timeselect,]
+boldmat = frequencyFilterfMRI( boldmat, tr=antsGetSpacing(bold)[4], opt='trig' )
+dmnvec<-( timeseries2matrix(  sbold, postCingMask )[timeselect,] )
+dmnvec = rowMeans(
+  frequencyFilterfMRI( dmnvec, tr=antsGetSpacing(bold)[4], opt='trig' ) )
+dmnmat = matrix( dmnvec, ncol=1)
+mocpar = moco$moco_params[ timeselect , 3:14 ]
+dnz<-aslDenoiseR( boldmat, dmnvec, covariates=mocpar, selectionthresh=0.2,
+  maxnoisepreds=c(2:10), debug=TRUE, polydegree='loess',
+  crossvalidationgroups=8 )
+boldmat<-timeseries2matrix(sbold, boldmask)
+boldmat<-boldmat[timeselect,]
+boldmat = frequencyFilterfMRI( boldmat, tr=antsGetSpacing(bold)[4], opt='trig' )
+mdl<-bigLMStats( lm( boldmat ~ dmnvec + dnz$covariates + dnz$noiseu ), 0.001 )
+betas<-mdl$beta.t[1,]
+betaImg = makeImage( boldmask, betas )
+antsImageWrite( betaImg, 'dmnBetas.nii.gz' )
+# this should give default mode network around beta = 12
 }
 
 }
