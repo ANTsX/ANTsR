@@ -78,7 +78,7 @@ atropos <- function( a, x,
   if (typeof(a) == "list")
     outimg <- antsImageClone(a[[1]], "unsigned int") else outimg <- antsImageClone(a, "unsigned int")
   mydim <- as.numeric(outimg@dimension)
-  outs <- paste("[", .antsrGetPointerName(outimg), ",", probs, "]", sep = "")
+  outs <- paste("[", antsrGetPointerName(outimg), ",", probs, "]", sep = "")
   mymask <- antsImageClone(x, "unsigned int")
   if (length(a) == 1)
     myargs <- list(d = mydim, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask,

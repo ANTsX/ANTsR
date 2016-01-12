@@ -93,15 +93,15 @@ antsRegistration <- function( fixed = NA, moving = NA,
         fixed <- antsImageClone(fixed, "float")
         warpedfixout <- antsImageClone(moving)
         warpedmovout <- antsImageClone(fixed)
-        f <- .antsrGetPointerName(fixed)
-        m <- .antsrGetPointerName(moving)
-        wfo <- .antsrGetPointerName(warpedfixout)
-        wmo <- .antsrGetPointerName(warpedmovout)
+        f <- antsrGetPointerName(fixed)
+        m <- antsrGetPointerName(moving)
+        wfo <- antsrGetPointerName(warpedfixout)
+        wmo <- antsrGetPointerName(warpedmovout)
         if (!is.na(mask)) {
           maskScale = mask - min( mask )
           maskScale = maskScale / max( maskScale ) * 255
           charmask <- antsImageClone( maskScale , "unsigned char")
-          maskopt <- .antsrGetPointerName(charmask)
+          maskopt <- antsrGetPointerName(charmask)
         } else maskopt=NA
         if (is.na(initx)) {
           initx = paste("[", f, ",", m, ",1]", sep = "")
@@ -261,7 +261,23 @@ antsRegistration <- function( fixed = NA, moving = NA,
   return(randomString)
 }
 
-.antsrGetPointerName <- function(img) {
+
+#' Return the antsImage pointer string
+#'
+#' This is a low-level function that may be useful for debugging.  It will
+#' return the pointer name itself from an antsImage object.
+#'
+#' @param img  image whose pointer we want
+#' @return string
+#' @author Avants BB
+#' @examples
+#'
+#' img = antsImageRead( getANTsRData("r16") )
+#' antsrGetPointerName( img )
+#' antsrGetPointerName( antsImageClone( img ))
+#'
+#' @export antsrGetPointerName
+antsrGetPointerName <- function(img) {
   # if ( Sys.info()['sysname'] == 'Linux' ) endofpointer<-20 if (
   # Sys.info()['sysname'] == 'Darwin' ) endofpointer<-21 pname<- substr(
   # .int_antsProcessArguments( list( img ) ) , 11 , endofpointer )

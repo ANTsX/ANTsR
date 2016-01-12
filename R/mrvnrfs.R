@@ -245,6 +245,7 @@ mrvnrfs.predict <- function( rflist, x,
           interpType=as.numeric(asFactors) )
         submasks[[i]]=submask
         }
+#      print( paste("opt",antsrGetPointerName( x[[1]][[1]] ) ))
       xsub<-x
       if ( rfct > 1 )
         {
@@ -287,6 +288,8 @@ mrvnrfs.predict <- function( rflist, x,
               probsrf = cbind( probsrf, subprobsrf )
             }
           }
+#      print( paste("opt-2",antsrGetPointerName( x[[1]][[1]] ) ))
+#      print( paste("npt-1",antsrGetPointerName( xsub[[1]][[1]] ) ))
       if ( asFactors )
         probsx<-matrixToImages(probsrf,  submasks[[i]] )
       else probsx<-list(
