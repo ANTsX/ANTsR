@@ -8,9 +8,8 @@ ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
 
 PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
   -I${myantssource}/Utilities -I${myantssource}/Examples/ \
-  -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=@CAN_STATIC@
+  -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=@VCL_STATIC_CONST_INIT_FLOAT@
 
-CXX1XSTD=@CXXFLAGS@
 libants=`find ${myantslib} -name "lib*.a"`
 
 libitk=`find \`$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\` -name "lib*.a"`
