@@ -583,6 +583,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+CAN_STATIC
 HAVE_CXX11
 OBJEXT
 EXEEXT
@@ -2454,8 +2455,12 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
   fi
 
-
+CAN_STATIC=0
+if [ $CXXFLAGS  == "-std=c++11" ]; then
+   CAN_STATIC=1
+fi
 # check C++11 compliance and flags
+
 
 ac_config_files="$ac_config_files src/Makevars"
 

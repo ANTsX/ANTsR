@@ -54,9 +54,13 @@ cd ../..
 
 AC_LANG_CPLUSPLUS
 AX_CXX_COMPILE_STDCXX_11([noext],)
-
+CAN_STATIC=0
+if [[ $CXXFLAGS  == "-std=c++11" ]]; then
+   CAN_STATIC=1
+fi
 # check C++11 compliance and flags
 AC_SUBST(CXXFLAGS)
+AC_SUBST(CAN_STATIC)
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
 cd ./src
