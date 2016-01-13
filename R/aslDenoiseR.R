@@ -139,7 +139,6 @@ aslDenoiseR <- function(
   if (is.numeric(polydegree)) {
     if (polydegree > 0) {
       p <- stats::poly(timevals, degree = polydegree)
-      aslmat <- residuals(lm(boldmatrix ~ 0 + p))
       if (!all(is.na(covariates))) {
         covariates <- cbind(data.matrix(covariates), p)
       } else covariates <- p
@@ -154,10 +153,10 @@ aslDenoiseR <- function(
     } else covariates <- p
   }
   rawboldmat <- data.matrix(boldmatrix)
-  svdboldmat <- residuals(lm(rawboldmat ~ 0 + covariates))
+  svdboldmat <- residuals( lm( rawboldmat ~ 1 + covariates ) )
   ################### now redo some work w/new hrf
-  R2base <- crossvalidatedR2(svdboldmat, targety, groups,
-    covariates = covariates)
+  R2base <- crossvalidatedR2( svdboldmat, targety, groups,
+    covariates = NA )
   R2base <- apply(R2base, FUN = noisepoolfun, MARGIN = 2)
   noisepool <- getnoisepool(R2base)
   if (all(noisepool == TRUE)) {
@@ -178,9 +177,9 @@ aslDenoiseR <- function(
   R2summary <- rep(0, length(maxnoisepreds))
   ct <- 1
   for (i in maxnoisepreds) {
-    svdboldmat <- residuals(lm(rawboldmat ~ 0 + covariates + noiseu[, 1:i]))
-    R2 <- crossvalidatedR2(svdboldmat, targety, groups,
-      covariates = covariates )
+    svdboldmat <- residuals( lm( rawboldmat ~ 1 + covariates + noiseu[, 1:i]))
+    R2 <- crossvalidatedR2( svdboldmat, targety, groups,
+      covariates = NA )
     R2max <- apply(R2, FUN = max, MARGIN = 2)
     if (ct == 1)
       R2perNoiseLevel <- R2max else R2perNoiseLevel <- cbind(R2perNoiseLevel, R2max)
