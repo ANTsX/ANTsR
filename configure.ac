@@ -1,5 +1,6 @@
 AC_INIT([ANTSR], 0.6) 
 m4_include([src/m4/ax_cxx_compile_stdcxx_11.m4])
+m4_include([src/m4/vcl_cxx_static_const_init_float.m4])
 
 #!/bin/bash
 CXX_STD=CXX11
@@ -56,13 +57,9 @@ cd ../..
 AC_LANG_CPLUSPLUS
 # check C++11 compliance and flags
 AX_CXX_COMPILE_STDCXX_11([noext],)
-CAN_STATIC=0
-if [[ $CXXFLAGS  == "-std=c++11" ]]; then
-   CAN_STATIC=1
-fi
-
+VCL_CXX_STATIC_CONST_INIT_FLOAT
 AC_SUBST(CXXFLAGS)
-AC_SUBST(CAN_STATIC)
+AC_SUBST(VCL_STATIC_CONST_INIT_FLOAT)
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
 cd ./src
