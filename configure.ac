@@ -46,6 +46,7 @@ ${cmaker} -DITK_DIR:PATH=${ITKDIR} \
     -DBUILD_TESTING=OFF \
     -DCOPY_SCRIPT_FILES_TO_BIN_DIR=OFF \
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
+
 cd ../..
 #  for x in invariantImageSimilarity.cpp ../R/invariantImageSimilarity.R ../R/convolveImage.R ../man/convolveImage.Rd ../man/invariantImageSimilarity.Rd ; do
 #    if [[ -s $x ]] ; then  rm $x; fi
@@ -53,12 +54,13 @@ cd ../..
 
 
 AC_LANG_CPLUSPLUS
+# check C++11 compliance and flags
 AX_CXX_COMPILE_STDCXX_11([noext],)
 CAN_STATIC=0
 if [[ $CXXFLAGS  == "-std=c++11" ]]; then
    CAN_STATIC=1
 fi
-# check C++11 compliance and flags
+
 AC_SUBST(CXXFLAGS)
 AC_SUBST(CAN_STATIC)
 AC_CONFIG_FILES([src/Makevars])
