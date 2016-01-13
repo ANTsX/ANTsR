@@ -4,7 +4,7 @@
 \alias{timeseriesN3}
 \title{Run N3 on slices of timeseries.}
 \usage{
-timeseriesN3(boldimg, mask, ncorrections = c(4, 2, 2))
+timeseriesN3(boldimg, mask, ncorrections = c(2, 2))
 }
 \arguments{
 \item{boldimg}{input matrix}
