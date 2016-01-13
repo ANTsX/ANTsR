@@ -58,6 +58,7 @@ install:
   - export CXX=clang++
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
+  - echo "CXX1X=clang++" >> ~/.R/Makevars
   - source ~/.R/Makevars
   - mkdir -p ~/Rlib
   - echo 'R_LIBS=~/Rlib' > .Renviron
