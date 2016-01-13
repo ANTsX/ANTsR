@@ -1,8 +1,22 @@
-
-
 CXX_STD = CXX11
 
+myantssource=${PWD}/ants/
 myantslib=${PWD}/antb/lib/
+
+ITK = `$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'`
+
+
+UNAME := $(shell uname)
+CXX_EXT=@CXXFLAGS@
+ifeq ($(CXX_EXT), -std=c++11)
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
+  -I${myantssource}/Utilities -I${myantssource}/Examples/ \
+  -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1
+else
+PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
+  -I${myantssource}/Utilities -I${myantssource}/Examples/ \
+  -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=0
+endif
 
 libants=`find ${myantslib} -name "lib*.a"`
 
