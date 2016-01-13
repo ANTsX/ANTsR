@@ -8,12 +8,12 @@
 #' @param selectionthresh e.g. 0.1 take 10 percent worst variables for noise
 #' estimation
 #' @param maxnoisepreds integer search range e.g 1:10
-#' @param debug boolean
 #' @param polydegree eg 4 for polynomial nuisance variables or 'loess'
 #' @param crossvalidationgroups prior defined or integer valued
 #' @param scalemat boolean
 #' @param noisepoolfun function to help select noise pool e.g. max
 #' @param usecompcor boolean
+#' @param verbose boolean
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
@@ -31,7 +31,7 @@
 #' tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 #' dv<-computeDVARS(aslmat)
 #' dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
-#'   maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
+#'   maxnoisepreds=c(1:2), polydegree=2, crossvalidationgroups=2 )
 #' \dontrun{
 #' # a classic regression approach to estimating perfusion
 #' # not recommended, but shows the basic idea.
@@ -85,7 +85,7 @@
 #' dmnmat = matrix( dmnvec, ncol=1)
 #' mocpar = moco$moco_params[ timeselect , 3:14 ]
 #' dnz<-aslDenoiseR( boldmat, dmnvec, covariates=mocpar, selectionthresh=0.2,
-#'   maxnoisepreds=c(2:10), debug=TRUE, polydegree='loess',
+#'   maxnoisepreds=c(2:10),  polydegree='loess',
 #'   crossvalidationgroups=8 )
 #' boldmat<-timeseries2matrix(sbold, boldmask)
 #' boldmat<-boldmat[timeselect,]
@@ -103,13 +103,13 @@ aslDenoiseR <- function(
   targety,
   covariates = NA,
   selectionthresh = 0.1,
-  maxnoisepreds = 1:12,
-  debug = FALSE,
-  polydegree = 4,
+  maxnoisepreds = 2:12,
+  polydegree = 'loess',
   crossvalidationgroups = 4,
   scalemat = F,
   noisepoolfun = max,
-  usecompcor = F) {
+  usecompcor = F,
+  verbose = F ) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
   if (length(groups) == 1) {
@@ -119,7 +119,7 @@ aslDenoiseR <- function(
     for (k in 1:kfolds) groups <- c(groups, rep(k, grouplength))
     groups <- c(rep(1, nrow(boldmatrix) - length(groups)), groups)
   }
-
+  ##### identify low reproducibility voxels
   getnoisepool <- function(x, frac = selectionthresh) {
     xord <- sort(x)
     l <- round(length(x) * frac)
@@ -127,11 +127,11 @@ aslDenoiseR <- function(
     return(x < val & x < 0)
   }
 
-  ################################################# overall description of the method 1. regressors include: design + trends +
-  ################################################# noise-pool 2. find noise-pool by initial cross-validation without noise
-  ################################################# regressors 3. cross-validate predictions using different numbers of noise
-  ################################################# regressors 4. select best n for predictors from noise pool 5. return the noise
-  ################################################# mask and the value for n make regressors
+  # overall description of the method 1. regressors include: design + trends +
+  # noise-pool 2. find noise-pool by initial cross-validation without noise
+  # regressors 3. cross-validate predictions using different numbers of noise
+  # regressors 4. select best n for predictors from noise pool 5. return the noise
+  # mask and the value for n make regressors
   timevals <- NA
   if (all(is.na(timevals)))
     timevals <- 1:nrow(boldmatrix)
@@ -155,8 +155,6 @@ aslDenoiseR <- function(
   }
   rawboldmat <- data.matrix(boldmatrix)
   svdboldmat <- residuals(lm(rawboldmat ~ 0 + covariates))
-  if (debug)
-    print("lm")
   ################### now redo some work w/new hrf
   R2base <- crossvalidatedR2(svdboldmat, targety, groups,
     covariates = covariates)
@@ -188,7 +186,7 @@ aslDenoiseR <- function(
       R2perNoiseLevel <- R2max else R2perNoiseLevel <- cbind(R2perNoiseLevel, R2max)
     R2pos <- R2max[R2max > 0]
     R2summary[ct] <- median(R2pos)
-    print(paste("NoiseU:", i, "MeanRSqrd", R2summary[ct]))
+    if ( verbose ) print(paste("NoiseU:", i, "MeanRSqrd", R2summary[ct]))
     ct <- ct + 1
   }
   scl <- 0.95

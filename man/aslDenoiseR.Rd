@@ -5,9 +5,8 @@
 \title{WIP: data-driven denoising for ASL MRI}
 \usage{
 aslDenoiseR(boldmatrix, targety, covariates = NA, selectionthresh = 0.1,
-  maxnoisepreds = 1:12, debug = FALSE, polydegree = 4,
-  crossvalidationgroups = 4, scalemat = F, noisepoolfun = max,
-  usecompcor = F)
+  maxnoisepreds = 2:12, polydegree = "loess", crossvalidationgroups = 4,
+  scalemat = F, noisepoolfun = max, usecompcor = F, verbose = F)
 }
 \arguments{
 \item{boldmatrix}{input bold matrix}
@@ -21,8 +20,6 @@ estimation}
 
 \item{maxnoisepreds}{integer search range e.g 1:10}
 
-\item{debug}{boolean}
-
 \item{polydegree}{eg 4 for polynomial nuisance variables or 'loess'}
 
 \item{crossvalidationgroups}{prior defined or integer valued}
@@ -32,6 +29,8 @@ estimation}
 \item{noisepoolfun}{function to help select noise pool e.g. max}
 
 \item{usecompcor}{boolean}
+
+\item{verbose}{boolean}
 }
 \value{
 matrix is output
@@ -54,7 +53,7 @@ asl<-matrix2timeseries( asl, aslmask, aslmat )
 tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
 dv<-computeDVARS(aslmat)
 dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
-  maxnoisepreds=c(1:2), debug=TRUE, polydegree=2, crossvalidationgroups=2 )
+  maxnoisepreds=c(1:2), polydegree=2, crossvalidationgroups=2 )
 \dontrun{
 # a classic regression approach to estimating perfusion
 # not recommended, but shows the basic idea.
@@ -108,7 +107,7 @@ dmnvec = rowMeans(
 dmnmat = matrix( dmnvec, ncol=1)
 mocpar = moco$moco_params[ timeselect , 3:14 ]
 dnz<-aslDenoiseR( boldmat, dmnvec, covariates=mocpar, selectionthresh=0.2,
-  maxnoisepreds=c(2:10), debug=TRUE, polydegree='loess',
+  maxnoisepreds=c(2:10),  polydegree='loess',
   crossvalidationgroups=8 )
 boldmat<-timeseries2matrix(sbold, boldmask)
 boldmat<-boldmat[timeselect,]
