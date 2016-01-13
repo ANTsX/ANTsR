@@ -8,7 +8,7 @@
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
 #' One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
-# \code{SyNBold}, \code{SyNAggro}, \code{TVMSQ}.
+# \code{SyNBold}, \code{SyNBoldAff}, \code{SyNAggro}, \code{TVMSQ}.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -26,6 +26,8 @@
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
 #'   \item{"SyNBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
+#'   \item{"SyNBoldAff": }{SyN, but optimized for registrations between
+#'     BOLD and T1 images, with additional affine step.}
 #'   \item{"SyNAggro": }{SyN, but with more aggressive registration
 #'     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
 #'   \item{"TVMSQ": }{time-varying diffeomorphism with mean square metric}
@@ -85,7 +87,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
       allowableTx <- c("Rigid", "Affine", "SyN","SyNCC",
-        "SyNBold", "SyNAggro", "SyNLessAggro", "TVMSQ")
+        "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
@@ -111,6 +113,25 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
           "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
+          "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
+          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1",
+          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na( maskopt )  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNBoldAff") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
+          "-f", "4x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]", "-c", "[200x20,1e-6,5]", "-s", "1x0",
+          "-f", "2x1",
+          "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
           "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1",
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))

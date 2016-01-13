@@ -54,6 +54,8 @@ typeofTransform can be one of:
   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
   \item{"SyNBold": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
+  \item{"SyNBoldAff": }{SyN, but optimized for registrations between
+    BOLD and T1 images, with additional affine step.}
   \item{"SyNAggro": }{SyN, but with more aggressive registration
     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
   \item{"TVMSQ": }{time-varying diffeomorphism with mean square metric}
