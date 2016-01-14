@@ -17,7 +17,7 @@ ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
 ITKINCLUDES=`${R_DIR}Rscript -e 'ITKR:::itkIncludes()'`
 CPPFLAGS="$(R CMD config CPPFLAGS) -I${PWD}/src/ -I${PWD}/src/ants/ -I${myantssource}Examples/include/ \
   -I${myantssource}/Utilities/ -I${myantssource}/Examples/ \
-  -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_STATIC_CONST_INIT_FLOAT=1 \
+  -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1 \
   -I${ITKINCLUDES}/ -I${R_INCLUDE_DIR} "
 echo $CPPFLAGS
 
