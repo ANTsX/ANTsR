@@ -2,12 +2,25 @@ AC_INIT([ANTSR], 0.6)
 m4_include([src/m4/ax_cxx_compile_stdcxx_11.m4])
 m4_include([src/m4/vcl_cxx_static_const_init_float.m4])
 
-#!/bin/bash
+#!/bin/bash#
+RCPP_INCLUDES=`${R_DIR}Rscript -e "cat(system.file(package='Rcpp'))"`/include/
+myantssource=${PWD}/src/ants/
 CXX_STD=CXX11
+CXX=$(R CMD config CXX) 
+CXXFLAGS="$(R CMD config CXX1XSTD) $(R CMD config CXX1XFLAGS)"
+
+#CXXFLAGS='${CXXFLAGS} ${CPPFLAGS}'
 ITKRCMAKE=`${R_DIR}Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
 ITKRLIB=`${R_DIR}Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
 compflags=`${R_DIR}Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
 ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
+ITKINCLUDES=`${R_DIR}Rscript -e 'ITKR:::itkIncludes()'`
+CPPFLAGS="$(R CMD config CPPFLAGS) -I${PWD}/src/ -I${PWD}/src/ants/ -I${myantssource}Examples/include/ \
+  -I${myantssource}/Utilities/ -I${myantssource}/Examples/ \
+  -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_STATIC_CONST_INIT_FLOAT=1 \
+  -I${ITKINCLUDES}/ -I${R_INCLUDE_DIR} "
+echo $CPPFLAGS
+
 # get a version of cmake
 cmaker=`which cmake`
 if [[ ! -x $cmaker ]] ; then # try r version
@@ -55,11 +68,9 @@ cd ../..
 
 
 AC_LANG_CPLUSPLUS
-# check C++11 compliance and flags
-AX_CXX_COMPILE_STDCXX_11([noext],)
 VCL_CXX_STATIC_CONST_INIT_FLOAT
-AC_SUBST(CXXFLAGS)
 AC_SUBST(VCL_STATIC_CONST_INIT_FLOAT)
+
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
 cd ./src
