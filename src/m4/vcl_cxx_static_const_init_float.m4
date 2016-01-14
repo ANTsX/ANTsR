@@ -1,14 +1,37 @@
+
 AC_DEFUN([VCL_CXX_STATIC_CONST_INIT_FLOAT],
-[AC_MSG_CHECKING(whether the C++ compiler allows initialization of static const floats)
-AC_LANG_SAVE
+[AC_MSG_CHECKING(whether to use VCL_STATIC_CONST_INIT_FLOAT=1)
+#AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-AC_TRY_RUN([
-class A {
- public:
-  static const float x = 27.0f;
-  static const double y = 27.0;
-};
-int main() { return A::x == 27.0f && A::y == 27.0 ? 0 : 1; }
-],[VCL_STATIC_CONST_INIT_FLOAT=0;AC_MSG_RESULT(no)],[VCL_STATIC_CONST_INIT_FLOAT=1;AC_MSG_RESULT(yes)],)
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+#include<algorithm>
+#include<vector>
+#include<string>
+#include<Rcpp.h>
+#include "ants.h"
+#include "antsr.h"
+
+RcppExport SEXP Atropos( SEXP r_args )
+try
+{
+  std::vector< std::string > args = Rcpp::as< std::vector< std::string > >( r_args ) ;
+  std::transform( args.begin() , args.end() , args.begin() , process_pointers ) ;
+  if( insert_commas( args , args.begin() ) )
+    {
+      return Rcpp::wrap( 1 ) ;
+    }
+  return Rcpp::wrap( ants::Atropos( args , &Rcpp::Rcout ) ) ;
+}
+ catch( const std::exception& exc )
+   {
+     Rcpp::Rcout<< exc.what() << std::endl ;
+     return Rcpp::wrap( 1 ) ;
+   }
+
+
+
+]])],[VCL_STATIC_CONST_INIT_FLOAT=1;AC_MSG_RESULT(yes)],[VCL_STATIC_CONST_INIT_FLOAT=0;AC_MSG_RESULT(no)])
 export VCL_STATIC_CONST_INIT_FLOAT
-AC_LANG_RESTORE])
+#AC_LANG_RESTORE
+])
+
