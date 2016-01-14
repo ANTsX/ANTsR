@@ -287,10 +287,10 @@ return( solutionmatrix )
 #          selector = cursparvec == 0
 #          cursparvec[ selector ] = myvec[ selector ] * 0.9
           } else {
-#            print(" back up plan ")
+#           back up plan - return largest component
             timg = labelClusters( abs( sparimg ), 2,
               minThresh = s, maxThresh = Inf )
-            timg = thresholdImage( timg, 1, Inf ) * sparimg
+            timg = thresholdImage( timg, 1, 1 ) * sparimg
             cursparvec = timg[ mask > 0.5 ]
           }
         }
