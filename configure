@@ -1747,7 +1747,7 @@ CPPFLAGS="$(R CMD config CPPFLAGS) -I${PWD}/src/ -I${PWD}/src/ants/ -I${myantsso
   -I${myantssource}/Utilities/ -I${myantssource}/Examples/ \
   -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1 \
   -I${ITKINCLUDES}/ -I${R_INCLUDE_DIR} "
-echo $CPPFLAGS
+
 
 # get a version of cmake
 cmaker=`which cmake`
