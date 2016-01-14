@@ -57,9 +57,9 @@
 #        scalemat = F, noisepoolfun = max)
 #      clustasl<-(clusterTimeSeries( mat,  8 )$clusters)
       clustasl<-8
-      dnz<-aslDenoiseR( mat, xideal, # motionparams=DVARS,
+      dnz<-aslDenoiseR( mat, xideal, covariates=DVARS,
         selectionthresh=0.05, crossvalidationgroups=clustasl,
-        maxnoisepreds=useDenoiser, debug=FALSE, polydegree=4 )
+        maxnoisepreds=useDenoiser, polydegree='loess' )
       denoisingParams <- data.matrix(data.frame(dnz$noiseu))
       dnz<-dnz$R2final
     }
