@@ -191,7 +191,7 @@ for ( sol in 1:nrow(solutionmatrix))
       grad = grad * ( 1 - priorWeight) + priors[sol,] * priorWeight
     vec = vec + grad * eps
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
-      smoother=smoother, clustval=cthresh )
+      smoother=smoother, clustval=cthresh, verbose=verbose )
     vec = vec / sqrt( sum( vec * vec ) )
     rq = sum( vec * ( t(mat) %*% ( mat %*% vec ) ) )
     if ( verbose ) print( rq )
@@ -242,20 +242,23 @@ return( solutionmatrix )
 
 
 .hyperButt <- function( vin, sparam, mask = NA,
-  smoother=0, clustval = 0, verbose = F)
+  smoother=0, clustval = 0, verbose = F )
   {
     vin = matrix( vin, ncol=1 )
     if ( any( is.na( vin ) ) ) vin = antsrimpute( vin )
     if ( max(vin) <= 0 )       vin = vin *(-1)
+    if ( sum(vin<0) > sum(vin>0) ) vin = vin *(-1)
     if (abs(sparam) >= 1)      return(vin)
     if (nrow(vin) < ncol(vin)) v <- t(vin) else v <- vin
-    mysigns = sign( v )
     sparsev <- as.numeric( c(v[, 1]) )
     sparResolution = ( 1.0 / length(sparsev) ) * 2
     if ( sparam > 0 )
       {
       sparsev[sparsev < 0] <- 0
       }
+    mysigns = sign( sparsev )
+#    print( "rangein" )
+#    print( range(sparsev) )
     # smooth first
     if ( smoother > 0 & !is.na(mask)  )
       {
@@ -281,7 +284,15 @@ return( solutionmatrix )
           {
           timg = thresholdImage( timg, 1, Inf ) * sparimg
           cursparvec = timg[ mask > 0.5 ]
-          } else cursparvec = myvec*0
+#          selector = cursparvec == 0
+#          cursparvec[ selector ] = myvec[ selector ] * 0.9
+          } else {
+#            print(" back up plan ")
+            timg = labelClusters( abs( sparimg ), 2,
+              minThresh = s, maxThresh = Inf )
+            timg = thresholdImage( timg, 1, Inf ) * sparimg
+            cursparvec = timg[ mask > 0.5 ]
+          }
         }
       else
         {
@@ -301,31 +312,41 @@ return( solutionmatrix )
     # we wish to call optimize with a function that returns a value
     # based on the difference between the current and target sparval
     # the input argument is sparsenessThresh
-    myoptf <- function( s , locth = 0 )
+    myoptf <- function( s , sparsevIn, locth = 0 )
       {
-      cursparvec = operateOnVec( sparsev, s, locth=locth )
-      myspar = sum( abs( cursparvec) >  0 ) / length( sparsev )
+      cursparvec = operateOnVec( sparsevIn, s, locth=locth )
+      myspar = sum( abs( cursparvec) >  0 ) / length( sparsevIn )
       testspar = abs( abs(myspar) - abs(sparam) )
-      if ( myspar == 0 ) testspar = 1.e12
-#      print(paste("mx",max(vin),"mn",min(vin)))
-#      print( paste( "s", s, "myspar", myspar, "goal", sparam ) )
+      if ( myspar == 0 ) {
+        testspar = Inf
+        }
+#      print( paste( "s", s, "myspar", myspar, "goal", sparam ,"testspar", testspar ) )
       return( testspar )
       }
-    smin = optimize( myoptf, interval = optinterval,
-      tol = sparResolution, locth = 0 )$minimum
+    smin = optimize( myoptf, interval = range( sparsev ),
+        tol = sparResolution, sparsevIn=sparsev, locth = 0 )$minimum
     if ( clustval > 0 )
       {
-      optinterval2 = c( -1.0 * abs(smin), abs(smin) )
+      optinterval2 = range( sparsev )
+      optinterval2[ 1 ] = smin * (-1)
+      optinterval2[ 2 ] = smin
       smin = optimize( myoptf, interval = optinterval2,
-        tol = sparResolution, locth = clustval )$minimum
+        lower = min(optinterval2), upper = max(optinterval2),
+        tol = sparResolution, sparsevIn=sparsev, locth = clustval )$minimum
       }
     temp = operateOnVec( sparsev, smin, locth=clustval  )
     myspar = sum( abs( temp) >  0 ) / length( temp )
-#    if ( max(abs(temp)) == 0 )
-#      temp = operateOnVec( sparsev, smin, locth=0  )
+    if ( max(abs(temp)) == 0 )
+      {
+      if ( verbose ) print("zeroed too much")
+      temp = operateOnVec( sparsev, smin, locth=0  )
+      myspar = sum( abs( temp) >  0 ) / length( temp )
+      }
     v[, 1] <- temp
-    if ( verbose ) print( paste( "tar", sparam, "got", myspar  ) )
-    return( v * mysigns )
+#    if ( verbose )
+#      print( paste( "tar", sparam, "got", myspar, "mx", max(abs(sparsev)), "smin", smin ))
+    v = v * mysigns
+    return( v )
   }
 
 #' Test eigenanatomy in order
