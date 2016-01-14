@@ -1,5 +1,4 @@
-AC_INIT([ANTSR], 0.6) 
-m4_include([src/m4/ax_cxx_compile_stdcxx_11.m4])
+AC_INIT([ANTSR], 0.3) 
 m4_include([src/m4/vcl_cxx_static_const_init_float.m4])
 
 #!/bin/bash#
