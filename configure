@@ -1786,7 +1786,7 @@ ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
 ITKINCLUDES=`${R_DIR}Rscript -e 'ITKR:::itkIncludes()'`
 CPPFLAGS="$(R CMD config CPPFLAGS) -I${PWD}/src/ -I${PWD}/src/ants/ -I${myantssource}Examples/include/ \
   -I${myantssource}/Utilities/ -I${myantssource}/Examples/ \
-  -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_STATIC_CONST_INIT_FLOAT=1 \
+  -I${myantssource}/Tensor/ -I${RCPP_INCLUDES} -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1 \
   -I${ITKINCLUDES}/ -I${R_INCLUDE_DIR} "
 echo $CPPFLAGS
 
@@ -2350,8 +2350,8 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use VCL_STATIC_CONST_INIT_FLOAT=1" >&5
-$as_echo_n "checking whether to use VCL_STATIC_CONST_INIT_FLOAT=1... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use VCL_CAN_STATIC_CONST_INIT_FLOAT=1" >&5
+$as_echo_n "checking whether to use VCL_CAN_STATIC_CONST_INIT_FLOAT=1... " >&6; }
 #AC_LANG_SAVE
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
