@@ -124,6 +124,7 @@ aslDenoiseR <- function(
     xord <- sort(x)
     l <- round(length(x) * frac)
     val <- xord[l]
+    return( x < val )
     return(x < val & x < 0)
   }
 
@@ -166,7 +167,7 @@ aslDenoiseR <- function(
   if (all(noisepool == FALSE)) {
     print("zero voxels meet your pvalthresh - try decreasing the value")
     return(NA)
-  } else print(paste("Noise pool has nvoxels=", sum(noisepool)))
+  } else if ( verbose ) print(paste("Noise pool has nvoxels=", sum(noisepool)))
   if (scalemat)
     svdboldmat <- scale(svdboldmat)
   ##### should the denoising be done per group / run ?
