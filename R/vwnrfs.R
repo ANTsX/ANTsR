@@ -57,7 +57,12 @@
 #'
 #' @export vwnrfs
 vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
-  ntrees=500, asFactors=TRUE ) {
+                    ntrees=500, asFactors=TRUE, reduceFactor=1) {
+  
+  if ( ! usePkg("randomForest") )
+    stop("Please install the randomForest package, example: install.packages('randomForest')")
+ 
+  # one labelmask or many
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
     inmask = antsImageClone( labelmasks )
@@ -65,98 +70,284 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     useFirstMask = TRUE
   }
-  if ( all( is.na( rad )  ) ) {
-    rad<-rep(0, x[[1]][[1]]@dimension )
-  }
+  
+  # set rad=0 if not defined
+  if ( all( is.na( rad )  ) ) rad<-rep(0, x[[1]][[1]]@dimension )
+  
   # check y type
   yisimg<-TRUE
   if (  typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double" ) yisimg<-FALSE
+  
   idim<-length(rad)
   if ( idim != x[[1]][[1]]@dimension )
     stop("vwnrfs: dimensionality does not match")
-  # first thing - find unique labels
+  
+  invisible(gc())
+
+  # initialize fm and tv to maximum potential size
   ulabs<-sort( unique( c( as.numeric( labelmasks[[1]] ) ) ) )
   ulabs<-ulabs[ ulabs > 0 ]
-  # second thing - create samples for each unique label
-  randmask<-antsImageClone( labelmasks[[1]] )*0
-  for ( ulab in ulabs )
-    {
-    ulabvec<-( labelmasks[[1]] == as.numeric( ulab ) )
-    randvec<-rep( FALSE, length( ulabvec ) )
-    k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
-    n<-sum( ulabvec == TRUE )
-    randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
-    randmask[ randvec ]<-ulab
+  neigh = prod(rad*2+1) # neighborhood size we'll get from getNeighborhoodInMask
+  nsubj = length(x) # number of subjects
+  nfeats = length(x[[1]]) # number of features
+  tv<-rep( NA, nsamples*length(ulabs)*nsubj )  # Y for random forest
+  fm = matrix(nrow=length(tv) ,  ncol=neigh*nfeats )  # X for random forest
+  
+  # fill tv and fm
+  fromrow = torow =  0
+  for ( i in 1:nsubj) {
+    
+    xfactor = x[[i]]
+    if (yisimg) { yfactor = y[[i]] 
+    } else { yfactor = y[i] }
+    labmaskfactor = antsImageClone(labelmasks[[i]])
+    
+    # resample subject images with provided factor
+    if (reduceFactor != 1) {
+      subdim<-round( dim(labelmasks[[i]]) / reduceFactor )
+      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
+      if (yisimg) yfactor<-resampleImage( y[[i]], subdim, useVoxels=1, interpType=as.numeric(asFactors) )
+      for ( k in 1:nfeats ) xfactor[[k]]<-resampleImage( xfactor[[k]], subdim, useVoxels=1, 0 )
+      if (i==1 | useFirstMask==F) 
+        labmaskfactor = resampleImage(labmaskfactor, subdim, useVoxels=1,
+                                     interpType=as.numeric(asFactors) ) 
+    }      
+      
+      
+    # get randmask, only once unless necessary
+    if (i==1 | useFirstMask==F) {
+      randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=T)
+      randvox = sum(randmask==1)
+      if ( randvox == 0 ) stop("error in input data - randmask ", i," is empty")
     }
-  # third thing - at each sample, find the training label/value
-  # and the features at that location - go subject by subject
-  # 3.1 first define the training vector
-  # NOTE: should find the same values in each image
-  rmsz<-sum( randmask > 0 ) # entries in mask
-  tv<-rep( NA, length(y)*rmsz )
-  seqby<-seq.int( 1, length(tv)+1, by=rmsz )
-  nfeats<-length(x[[1]])
-  testmat<-getNeighborhoodInMask( image=randmask, mask=randmask,
-    radius=rad, spatial.info=F, boundary.condition='image' )
-  testmat<-t( testmat )
-  hdsz<-nrow(testmat) # neighborhood size
-  nent<-nfeats*ncol(testmat)*nrow(testmat)*length(x)
-  masksizesum = sum( randmask > 0 )
-  fm<-matrix( nrow=( masksizesum*length(x)) ,  ncol=ncol(testmat)*nfeats  )
-  for ( i in 1:(length(y)) )
-    {
-    if ( !useFirstMask )
-    {
-    # get locally appropriate randmask
-    randmask<-antsImageClone( labelmasks[[i]] )*0
-    for ( ulab in ulabs )
-      {
-      ulabvec<-( labelmasks[[i]] == as.numeric( ulab ) )
-      randvec<-rep( FALSE, length( ulabvec ) )
-      k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
-      n<-sum( ulabvec == TRUE )
-      randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
-      randmask[ randvec ]<-ulab
-      }
+    
+    # which rows shall we fill
+    fromrow = torow+1
+    torow = fromrow + randvox - 1
+    
+    # fill tv
+    if ( yisimg ) { 
+      tv[ fromrow:torow ] = t(getNeighborhoodInMask( yfactor, randmask, rad*0, spatial.info=F, boundary.condition='image' ))
+    } else { 
+      tv[ fromrow:torow ] = rep( yfactor, randvox ) 
     }
-    if ( sum(randmask > 0 ) == 0 )
-      {
-      stop("error in input data - mask ", i," is empty")
-      }
-    # ok ...
-    m1<-t(getNeighborhoodInMask( x[[i]][[1]], randmask,
-      rad, spatial.info=F, boundary.condition='image' ))
-    if ( nfeats > 1 )
-    for ( k in 2:nfeats )
-      {
-      m2<-t(getNeighborhoodInMask( x[[i]][[k]], randmask,
-          rad, spatial.info=F, boundary.condition='image' ))
-      m1<-cbind( m1, m2 )
-      }
-    nxt<-seqby[ i + 1 ]-1
-    if ( nrow(m1) != length(seqby[i]:nxt) )
-      {
-      ermsg=paste(
-        "The nsamples you chose is too large for the input images.",
-        "Perhaps try using a binary mask or reduce nsamples.")
-      stop( ermsg )
-      }
-    fm[ seqby[i]:nxt, ]<-m1
-    if ( yisimg )
-      tv[ seqby[i]:nxt ]<-y[[i]][ randmask > 0 ]
-    else tv[ seqby[i]:nxt ]<-rep( y[[i]], rmsz )
+    
+    fromcol = tocol = 0 # columns need reset for nfeats loop
+    for ( k in 1:nfeats ) {
+      # which columns shall we fill
+      fromcol = tocol+1
+      tocol = fromcol + neigh - 1
+      
+      # get neighborhood
+      m1<-t(getNeighborhoodInMask( xfactor[[k]], randmask, rad, spatial.info=F, boundary.condition='image' ))
+      
+      # make sure neiborhood is not out of image
+      if (any(is.na(m1)))
+        stop(paste('Neighborhood falling out of image for subject',i,'feature',k,'\n',
+                   'Consider zero-padding images to increase neighborhood availability.'))
+      
+      # put in fm
+      fm[fromrow:torow, fromcol:tocol] = m1
+      
+      invisible(gc())
     }
+  }
+  
+  invisible(gc())
+
+  # prune tv and fm to non-NA rows
+  fm = fm[!is.na(tv),]
+  tv = tv[!is.na(tv)]
   if ( asFactors ) tv<-factor( tv )
-  if ( usePkg("randomForest") )
-    {
-    rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
-      importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
-      keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
-    # need the forest for prediction
-    return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
+  
+  invisible(gc())
+
+  rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
+                                    importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
+                                    keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
+
+  invisible(gc())
+  return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
+}
+
+
+
+
+
+
+#' voxelwise neighborhood random forest prediction
+#'
+#' Takes a model created with vwnrfs and builds a prediction
+#' based on similar features used to train vwnrfs
+#'
+#' @param rfm random forest model trained with vwnrfs with certain 
+#' number of features.
+#' @param x a list of lists. Each list contains the list of feature
+#' images required to predict a response or an image. The features
+#' must be the same used during training. I.e., if you train on
+#' T1 and T2 images, those should be the same features used for
+#' prediction, in the same exact order for each subject.
+#' @param labelmasks a list of masks where each mask defines the space 
+#' to predict from. These can be individual masks for each subject 
+#' (i.e., custom brain masks) or a single antsImage that will be used
+#' for all subjects.
+#' @param rad vector of dimensionality d define the neighborhood radius.
+#' Must be the same radius with which the model was trained, i.e.,
+#' c(1,1,1)
+#' @param asFactors boolean - treat the y entries as factors. If this is
+#' true, the prediction will be a classification, and the output will
+#' produce images. If this is false, the prediction will be a regression, 
+#' and the output will produce a single response value.
+#' @return list a 2-list with the rf model, training vector, feature matrix
+#' and the random mask
+#' @author Pustina D
+#'
+#' @examples
+#' ## Do not run
+#' ## vwnrfs.predict(rfm, x=x, labelmasks=labelmasks,
+#' ## rad=rad, asFactors=TRUE, voxchunk=voxchunk,
+#' ## reduceFactor = mr)mask<-makeImage( c(10,10), 0 )
+#' ## End do not run
+#'
+#' @export vwnrfs.predict
+vwnrfs.predict = function(rfm, x, labelmasks, rad=NA, 
+                          asFactors=TRUE, voxchunk=30000, 
+                          reduceFactor = 1) {
+  
+  if ( ! usePkg("randomForest") )
+    stop("Please install the randomForest package, example: install.packages('randomForest')")
+  
+  # one labelmask or many
+  if ( typeof(labelmasks) != "list" ) {
+    inmask = antsImageClone( labelmasks )
+    labelmasks=list()
+    for ( i in 1:length(x) ) labelmasks[[i]] = inmask
+  } 
+  
+  neigh = prod(rad*2+1) # neighborhood size we'd get from getNeighborhoodInMask
+  nsubj = length(x) # number of subjects
+  nfeats = length(x[[1]]) # number of features
+  masterprobs = list()  # this will have posterior probabilities
+  if (asFactors) seg = list()  # this will have segmentations
+  if (!asFactors) response = rep(NA, nsubj)  # or responses
+  
+  # predict each subject individually
+  for(i in 1:nsubj) {
+
+    xfactor = x[[i]]
+    labmaskfactor = antsImageClone(labelmasks[[i]])
+    
+    # resample subject images with provided factor
+    if (reduceFactor != 1) {
+      subdim = round( dim(labmaskfactor) / reduceFactor )
+      subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
+      for ( k in 1:nfeats ) xfactor[[k]]<-resampleImage( xfactor[[k]], subdim, useVoxels=1, 0 )
+      labmaskfactor = resampleImage(labmaskfactor, subdim, useVoxels=1, interpType=as.numeric(asFactors) ) 
     }
-  else
-    {
-    stop("install the randomForest package")
+
+    # initialize output images for this subject
+    if (asFactors) { nprob = length(levels(rfm$y))
+    } else { nprob=1 }
+    masterprobs[[i]] = list()
+    for (t in 1:nprob) masterprobs[[i]][[t]] = labmaskfactor*0
+    ##
+    
+    
+    nchunks = round( sum(labmaskfactor!=0) / voxchunk )
+    if ( nchunks <= 2 ) nchunks=1
+    chunkmask = splitMask(labmaskfactor,nchunks)
+    for (ch in 1:nchunks) {
+      fm = matrix(nrow=sum(chunkmask==ch), ncol=neigh*nfeats) # initialize matrix to predict from
+      fromcol = tocol = 0 # reset this for the nfeats loop
+      binchunk = thresholdImage(chunkmask,ch,ch) # binary mask for this chunk only
+      
+      for ( k in 1:nfeats ) {
+        # which columns shall we fill
+        fromcol = tocol+1
+        tocol = fromcol + neigh - 1
+        
+        # get neighborhood
+        m1<-t(getNeighborhoodInMask( xfactor[[k]], binchunk, rad, spatial.info=F, boundary.condition='image' ))
+        
+        # make sure neiborhood is not out of image
+        if (any(is.na(m1)))
+          stop(paste('Neighborhood falling out of image for subject',i,'feature',k,'\n',
+                     'Consider padding the images with zero values to increase neighborhood availability.'))
+        
+        # put in fm
+        fm[, fromcol:tocol] = m1
+        invisible(gc())
+      }
+      
+      # predict this chunk
+      predtype<-'response'
+      if ( asFactors ) predtype<-'prob'
+      probs = t( predict( rfm ,newdata=fm, type=predtype) )
+      
+      # fill masterprobs of this subject
+      for (m in 1:nprob) masterprobs[[i]][[m]][binchunk==1] = probs[m,]
+      
+      rm(probs)
+      invisible(gc()) # clean up some memory
     }
+    
+    # create segmentation for this sub
+    if (asFactors) { 
+      temp = imageListToMatrix( unlist(masterprobs[[i]]) , labmaskfactor )
+      temp = apply( temp, FUN=which.max, MARGIN=2)
+      seg[[i]] = makeImage( labmaskfactor , temp )
+      rm(temp); invisible(gc())
+    } else {
+      response[i] = apply( imageListToMatrix( unlist(masterprobs) , labmaskfactor ), FUN=median, MARGIN=1 )
+    }
+  }
+  
+  # return either image segmentation or response
+  if ( asFactors ) {
+    return( list( seg=seg, probs=masterprobs ) )
+  } else {
+    return( list( seg=response, probs=masterprobs ) )
+  }
+}
+
+
+
+
+#' split a mask into n labeled sub-masks
+#'
+#' @param mask antsImage mask
+#' @param n number of mask chunks
+#' @return relabeledMask
+#' @author Avants BB, Tustison NJ
+#'
+#' @examples
+#' mask = getMask( antsImageRead( getANTsRData("r16" ) ) )
+#' smask = splitMask( mask, 10 )
+#'
+#' @export splitMask
+splitMask <- function( mask, n )
+{
+  # first compute chunk size
+  hasvalues = mask >= 0.5
+  nnz = sum( hasvalues )
+  voxchunk = round( nnz / n ) - 1
+  chunk.seq = seq(1, nnz, by=voxchunk )
+  chunk.seq[ length(chunk.seq) ] = nnz
+  smask = mask * 0
+  for ( ch in 1:( length(chunk.seq)-1 ) )
+  {
+    # set end of this chunk
+    chnxt = chunk.seq[ ch + 1 ] - 1
+    if ( ch ==  ( length(chunk.seq)-1 ) ) chnxt = nnz
+    # create mask for this chunk
+    temp = which( hasvalues, arr.ind=T )[ chunk.seq[ch]:chnxt ]
+    tnnz = hasvalues
+    tnnz[ -temp ] = FALSE
+    smask[ tnnz ] = ch
+  }
+  if ( sum( mask >= 0.5 ) != sum(smask >= 0.5 ) )
+  {
+    stop("submask non-zero entries should be the same as input mask" )
+  }
+  return( smask )
 }
