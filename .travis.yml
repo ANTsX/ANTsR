@@ -83,9 +83,9 @@ install:
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
 #  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
   - cd ~/
-  - itkrrel=v0.0.1-alpha
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/test/ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_0.0_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_0.0.tgz; Rscript -e 'download.file("https://github.com/stnava/ITKR/releases/download/test/ITKR_0.0.tgz", "ITKR_0.0.tgz", quiet = FALSE, mode = "wb")'; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
+  - itkrrel=0.0
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_${itkrrel}.tgz; Rscript -e 'download.file("https://github.com/stnava/ITKR/releases/download/latest/ITKR_0.0.tgz", "ITKR_0.0.tgz", quiet = FALSE, mode = "wb")'; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
   - cd ${basedir}
 
 # Build and check package
@@ -95,11 +95,15 @@ script:
   - export CC=clang
   - cd ..
   - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
-  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
   - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
+  - travis_wait 100  R CMD INSTALL --build ANTsR
+  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi
+  - mydir=${PWD}
 
 # report coverage rate to coveralls
 after_success:
+  - cd $mydir
 #  - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
 
 after_failure:
@@ -131,6 +135,7 @@ env:
   - _R_CHECK_FORCE_SUGGESTS_="0"
   - BOOTSTRAP_LATEX=1
   - WARNINGS_ARE_ERRORS=0
+
 deploy:
   provider: releases
   api_key:
