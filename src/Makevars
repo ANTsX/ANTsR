@@ -9,7 +9,7 @@ PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
   -I${myantssource}/Utilities -I${myantssource}/Examples/ \
   -I${myantssource}/Tensor/
 
-ifeq ($(UNAME), Darwin)
+ifeq ($(CC), clang)
 PKG_CPPFLAGS = -I${ITK} -I${PWD} -I${myantssource}/Examples/include/ \
   -I${myantssource}/Utilities -I${myantssource}/Examples/ \
   -I${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1
