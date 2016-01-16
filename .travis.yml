@@ -96,7 +96,7 @@ script:
   - cd ..
   - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
+  - if [[ ! -n "TRAVIS_TAG" ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual; fi # --as-cran
   - mydir=${PWD}
 
 # report coverage rate to coveralls
