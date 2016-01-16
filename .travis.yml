@@ -42,7 +42,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version;  curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh ; chmod 755 ./travis-tool.sh;  ./travis-tool.sh bootstrap; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sed -i 's|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=1|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=0|g' src/Makevars; fi
+#  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sed -i 's|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=1|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=0|g' src/Makevars; fi
 
 # install the package and dependencies:
 # - create directory for R libraries (if not already exists)
