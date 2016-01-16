@@ -89,7 +89,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   ulabs<-ulabs[ ulabs > 0 ]
   neigh = prod(rad*2+1) # neighborhood size we'll get from getNeighborhoodInMask
   nsubj = length(x) # number of subjects
-  nfeats = nfeats<-length(x[[1]]) # number of features
+  nfeats = length(x[[1]]) # number of features
   tv<-rep( NA, nsamples*length(ulabs)*nsubj )  # Y for random forest
   fm = matrix(nrow=length(tv) ,  ncol=neigh*nfeats )  # X for random forest
   
