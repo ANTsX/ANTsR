@@ -95,9 +95,8 @@ script:
   - export CC=clang
   - cd ..
   - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
-  - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi
+  - travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual # --as-cran
   - mydir=${PWD}
 
 # report coverage rate to coveralls
@@ -138,14 +137,14 @@ env:
 before_deploy:
   - cd $mydir
   - travis_wait 100  R CMD INSTALL --build ANTsR
-  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi
+  - BIN_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then  BIN_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi
 
 deploy:
   provider: releases
   api_key:
     secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-  file: ${PKG_FILE_NAME}
+  file: ${BIN_FILE_NAME}
   skip_cleanup: true
   on:
     tags: true
