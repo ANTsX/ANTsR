@@ -15,7 +15,7 @@
 #' @param asFactors boolean - treat the y entries as factors
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
-#' @author Avants BB, Tustison NJ
+#' @author Avants BB, Tustison NJ, Pustina D
 #'
 #' @examples
 #'
