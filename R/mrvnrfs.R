@@ -5,15 +5,18 @@
 #'
 #' @param y list of training labels. either an image or numeric value
 #' @param x a list of lists where each list contains feature images
-#' @param labelmask a mask for the features (all in the same image space)
-#' the labelmask defines the number of parallel samples that will be used
-#' per subject sample. two labels will double the number of predictors
-#' contributed from each feature image.
+#' @param labelmasks a mask (or list of masks) used to define where the 
+#' samples will come from. Note, two labels (e.g., GM and WM) will double
+#' the number of samples from each feature images. If the mask is binary, 
+#' samples are selected randomly within 1 values.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param nsamples (per subject to enter training)
 #' @param ntrees (for the random forest model)
 #' @param multiResSchedule an integer vector defining multi-res levels
 #' @param asFactors boolean - treat the y entries as factors
+#' @param voxchunk value of maximal voxels to predict at once. This value
+#' is used to split the prediction into smaller chunks such that memory
+#' requirements do not become too big
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ, Pustina D
@@ -137,10 +140,14 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
 #'
 #' @param rflist a list of random forest models from mrvnrfs
 #' @param x a list of lists where each list contains feature images
-#' @param labelmask a mask for the features (all in the same image space)
+#' @param labelmasks a mask (or list of masks) used to define the area to predict. 
+#' This is used to save time by contstrain the prediction in within the brain.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param multiResSchedule an integer vector defining multi-res levels
 #' @param asFactors boolean - treat the y entries as factors
+#' @param voxchunk value of maximal voxels to predict at once. This value
+#' is used to split the prediction into smaller chunks such that memory
+#' requirements do not become too big
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ, Pustina D
