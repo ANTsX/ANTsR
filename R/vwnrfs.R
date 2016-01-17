@@ -98,8 +98,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   for ( i in 1:nsubj) {
     
     xfactor = x[[i]]
-    if (yisimg) { yfactor = y[[i]] 
-    } else { yfactor = y[i] }
+    yfactor = y[[i]]
     labmaskfactor = antsImageClone(labelmasks[[i]])
     
     # resample subject images with provided factor
