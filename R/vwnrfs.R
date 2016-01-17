@@ -61,7 +61,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   
   if ( ! usePkg("randomForest") )
     stop("Please install the randomForest package, example: install.packages('randomForest')")
- 
+  
   # one labelmask or many
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
@@ -83,7 +83,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
     stop("vwnrfs: dimensionality does not match")
   
   invisible(gc())
-
+  
   # initialize fm and tv to maximum potential size
   ulabs<-sort( unique( c( as.numeric( labelmasks[[1]] ) ) ) )
   ulabs<-ulabs[ ulabs > 0 ]
@@ -98,7 +98,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   for ( i in 1:nsubj) {
     
     xfactor = x[[i]]
-    yfactor = y[[i]]
+    yfactor = y[[i]] 
     labmaskfactor = antsImageClone(labelmasks[[i]])
     
     # resample subject images with provided factor
@@ -109,10 +109,10 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       for ( k in 1:nfeats ) xfactor[[k]]<-resampleImage( xfactor[[k]], subdim, useVoxels=1, 0 )
       if (i==1 | useFirstMask==F) 
         labmaskfactor = resampleImage(labmaskfactor, subdim, useVoxels=1,
-                                     interpType=as.numeric(asFactors) ) 
+                                      interpType=as.numeric(asFactors) ) 
     }      
-      
-      
+    
+    
     # get randmask, only once unless necessary
     if (i==1 | useFirstMask==F) {
       randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=T)
@@ -153,18 +153,18 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
   }
   
   invisible(gc())
-
+  
   # prune tv and fm to non-NA rows
   fm = fm[!is.na(tv),]
   tv = tv[!is.na(tv)]
   if ( asFactors ) tv<-factor( tv )
   
   invisible(gc())
-
+  
   rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
                                     importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
                                     keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
-
+  
   invisible(gc())
   return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )
 }
@@ -197,6 +197,11 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
 #' true, the prediction will be a classification, and the output will
 #' produce images. If this is false, the prediction will be a regression, 
 #' and the output will produce a single response value.
+#' @param voxchunk value of maximal voxels to predict at once. This value
+#' is used to split the prediction into smaller chunks such that memory
+#' requirements do not become too big.
+#' @param reduceFactor value of resolution reduction (i.e., for 1mm voxels
+#' and reduceFactor=3) the model will be trained on ~3mm images.
 #' @return list a 2-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Pustina D
@@ -232,7 +237,7 @@ vwnrfs.predict = function(rfm, x, labelmasks, rad=NA,
   
   # predict each subject individually
   for(i in 1:nsubj) {
-
+    
     xfactor = x[[i]]
     labmaskfactor = antsImageClone(labelmasks[[i]])
     
@@ -243,7 +248,7 @@ vwnrfs.predict = function(rfm, x, labelmasks, rad=NA,
       for ( k in 1:nfeats ) xfactor[[k]]<-resampleImage( xfactor[[k]], subdim, useVoxels=1, 0 )
       labmaskfactor = resampleImage(labmaskfactor, subdim, useVoxels=1, interpType=as.numeric(asFactors) ) 
     }
-
+    
     # initialize output images for this subject
     if (asFactors) { nprob = length(levels(rfm$y))
     } else { nprob=1 }
