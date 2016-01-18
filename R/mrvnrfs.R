@@ -153,102 +153,6 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
 #' @author Avants BB, Tustison NJ, Pustina D
 #'
 #' @export mrvnrfs.predict
-<<<<<<< HEAD
-mrvnrfs.predict <- function( rflist, x,
-  labelmasks,
-  rad=NA,
-  multiResSchedule=c(4,2,1),
-  asFactors=TRUE, voxchunk=1000 )
-  {
-    if ( typeof(labelmasks) != "list" ) {
-      inmask = antsImageClone( labelmasks )
-      labelmasks=list()
-      for ( i in 1:length(x) ) labelmasks[[i]] = inmask
-    }
-    rfct<-1
-    predtype<-'response'
-    if ( asFactors ) predtype<-'prob'
-    newprobs = list()
-    for ( mr in multiResSchedule )
-      {
-      newsegs = list()
-      submasks = list()
-      for ( i in 1:length(labelmasks) )
-        {
-        subdim<-round( dim( labelmasks[[i]] ) / mr )
-        subdim[ subdim < 2*rad+1 ] <- ( 2*rad+1 )[  subdim < 2*rad+1 ]
-        submask<-resampleImage( labelmasks[[i]], subdim, useVoxels=1,
-          interpType=as.numeric(asFactors) )
-        submasks[[i]]=submask
-        }
-#      print( paste("opt",antsrGetPointerName( x[[1]][[1]] ) ))
-      xsub<-x
-      if ( rfct > 1 )
-        {
-        for ( kk in 1:length(xsub) )
-          {
-          temp<-lappend(  unlist( xsub[[kk]] ) ,
-            unlist(newprobs[[kk]])  )
-          xsub[[kk]]<-temp
-          }
-        }
-      nfeats<-length(xsub[[1]])
-      for ( i in 1:(length(x)) )
-        {
-        subdim = dim( submasks[[i]] )
-        xsub[[i]][[1]]<-resampleImage(
-          xsub[[i]][[1]], subdim, useVoxels=1, 0 )
-        splitter = round( sum(  submasks[[i]] / voxchunk ) )
-        if ( splitter <= 2 ) splitter=1
-        subsubmask = splitMask( submasks[[i]] , splitter )
-        for ( sp in 1:splitter )
-          {
-          locmask = thresholdImage( subsubmask, sp, sp )
-          m1<-t(getNeighborhoodInMask( xsub[[i]][[1]], locmask,
-            rad, spatial.info=F, boundary.condition='image' ))
-          if ( nfeats > 1 )
-          for ( k in 2:nfeats )
-            {
-            xsub[[i]][[k]]<-resampleImage( xsub[[i]][[k]], subdim,
-                useVoxels=1, 0 )
-            m2<-t(getNeighborhoodInMask( xsub[[i]][[k]], locmask,
-                rad, spatial.info=F, boundary.condition='image' ))
-            m1<-cbind( m1, m2 )
-            }
-          subprobsrf<-t(
-            predict( rflist[[rfct]], newdata=m1, type=predtype ) )
-          if ( sp == 1 )
-            {
-            probsrf = subprobsrf
-            } else {
-              probsrf = cbind( probsrf, subprobsrf )
-            }
-          }
-#      print( paste("opt-2",antsrGetPointerName( x[[1]][[1]] ) ))
-#      print( paste("npt-1",antsrGetPointerName( xsub[[1]][[1]] ) ))
-      if ( asFactors )
-        probsx<-matrixToImages(probsrf,  submasks[[i]] )
-      else probsx<-list(
-        makeImage( submasks[[i]], probsrf ) )
-      for ( temp in 1:length(probsx) )
-        {
-        if ( !all( dim( probsx[[temp]] ) == dim(labelmasks[[i]]) ) )
-          probsx[[temp]]<-resampleImage( probsx[[temp]],
-            dim(labelmasks[[i]]), useVoxels=1, 0 )
-        }
-      if ( asFactors )
-      {
-      rfseg<-imageListToMatrix( unlist(probsx) , labelmasks[[i]] )
-      rfseg<-apply( rfseg, FUN=which.max, MARGIN=2 )
-      newsegs[[i]] = makeImage( submasks[[i]], rfseg )
-      } else newsegs[[i]] = median( probsrf )
-      newprobs[[i]]<-probsx
-      }
-    rfct<-rfct+1
-    } # mr loop
-    return( list( seg=newsegs, probs=newprobs) )
-}
-=======
 mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
                              multiResSchedule=c(4,2,1), asFactors=TRUE,
                              voxchunk=60000) {
@@ -270,7 +174,6 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
   
   rfct<-1
   for ( mr in multiResSchedule ){
->>>>>>> origin/master
 
     if ( rfct > 1 ) {
       for ( kk in 1:length(x) ) {
