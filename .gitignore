@@ -17,6 +17,7 @@ src/antb/
 src/itki/
 inst/doc
 vignettes/*pdf
+vignettes/*html
 
 .Rhistory
 R/.Rhistory
