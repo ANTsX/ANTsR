@@ -115,7 +115,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
     
     # get randmask, only once unless necessary
     if (i==1 | useFirstMask==F) {
-      randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=as.numeric(asFactors))
+      randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=asFactors)
       randvox = sum(randmask==1)
       if ( randvox == 0 ) stop("error in input data - randmask ", i," is empty")
     }
