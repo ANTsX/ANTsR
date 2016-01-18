@@ -5,9 +5,9 @@
 #'
 #' @param y list of training labels. either an image or numeric value
 #' @param x a list of lists where each list contains feature images
-#' @param labelmasks a mask (or list of masks) used to define where the 
+#' @param labelmasks a mask (or list of masks) used to define where the
 #' samples will come from. Note, two labels (e.g., GM and WM) will double
-#' the number of samples from each feature images. If the mask is binary, 
+#' the number of samples from each feature images. If the mask is binary,
 #' samples are selected randomly within 1 values.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param nsamples (per subject to enter training)
@@ -57,7 +57,7 @@
 #'      ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
 #'      multiResSchedule=mr )
 #' if ( predtype == "scalar" )
-#'   print( cor( unlist(lablist) , rfmresult$seg ) )
+#'   print( cor( unlist(lablist) , unlist( rfmresult$seg ) ) )
 #' } # end predtype loop
 #'
 #'
@@ -65,13 +65,13 @@
 mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
                      ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE,
                      voxchunk=50000) {
-  
+
   # check if Y is antsImage or a number
   yisimg<-TRUE
   if ( typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double") yisimg<-FALSE
   rflist<-list()
   rfct<-1
-  
+
   # for a single labelmask create a list with it
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
@@ -80,15 +80,16 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     useFirstMask = TRUE
   }
-  
+
   # loop of resolutions
+  verbose = FALSE # need to add this option to command line if you want messages
   mrcount=0
   for ( mr in multiResSchedule ) {
     mrcount=mrcount+1
-    message(paste(mrcount,'of',length(multiResSchedule)))
-    
+    if ( verbose ) message(paste(mrcount,'of',length(multiResSchedule)))
+
     invisible(gc())
-    
+
     # add newprobs from previous run, already correct dimension
     if ( rfct > 1 ) {
       for ( kk in 1:length(x) ) {
@@ -99,35 +100,35 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       }
       rm(newprobs); invisible(gc())
     }
-    
+
     invisible(gc())
-    
+
     # build model for this mr
     if (!useFirstMask) sol<-vwnrfs( y, x, labelmasks, rad, nsamples, ntrees, asFactors, reduceFactor = mr )
     if (useFirstMask)  sol<-vwnrfs( y, x, labelmasks[[1]], rad, nsamples, ntrees, asFactors, reduceFactor = mr )
-    
+
     sol$fm = sol$tv = sol$randmask = NULL
-    
+
     invisible(gc())
-    
+
     # if not last mr, predict new features for next round
     if (mrcount < length(multiResSchedule)) {
       predme = vwnrfs.predict(rfm=sol$rfm, x=x, labelmasks=labelmasks,
                           rad=rad, asFactors=asFactors, voxchunk=voxchunk,
                             reduceFactor = mr)
-   
+
       newprobs=predme$probs
       rm(predme); invisible(gc())
       for ( tt1 in 1:length(newprobs) )
         for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[tt1]]), useVoxels=1, 0 )
     }
-    
+
     invisible(gc())
     rflist[[rfct]]<-sol$rfm
     rfct<-rfct+1
   } # mr loop
-  
+
   return( list(rflist=rflist) )
 }
 
@@ -140,7 +141,7 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
 #'
 #' @param rflist a list of random forest models from mrvnrfs
 #' @param x a list of lists where each list contains feature images
-#' @param labelmasks a mask (or list of masks) used to define the area to predict. 
+#' @param labelmasks a mask (or list of masks) used to define the area to predict.
 #' This is used to save time by contstrain the prediction in within the brain.
 #' @param rad vector of dimensionality d define nhood radius
 #' @param multiResSchedule an integer vector defining multi-res levels
@@ -158,8 +159,8 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
                              voxchunk=60000) {
   if ( ! usePkg("randomForest") )
     stop("Please install the randomForest package, example: install.packages('randomForest')")
-  
-  
+
+
   # for a single labelmask create a list the same
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
@@ -168,10 +169,10 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     useFirstMask = TRUE
   }
-  
+
   predtype<-'response'
   if ( asFactors ) predtype<-'prob'
-  
+
   rfct<-1
   for ( mr in multiResSchedule ){
 
@@ -184,8 +185,8 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
       }
       rm(newprobs); invisible(gc())
     }
-    
-    
+
+
     predme = vwnrfs.predict(rflist[[rfct]], x=x, labelmasks=labelmasks,
                               rad=rad, asFactors=asFactors, voxchunk=voxchunk,
                               reduceFactor = mr)
@@ -197,7 +198,7 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
         for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[1]]), useVoxels=1, 0 )
     }
-    
+
     rfct<-rfct+1
   } # mr loop
   return(list(seg=newseg, probs=newprobs))

@@ -12,9 +12,9 @@ mrvnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmasks}{a mask (or list of masks) used to define where the 
+\item{labelmasks}{a mask (or list of masks) used to define where the
 samples will come from. Note, two labels (e.g., GM and WM) will double
-the number of samples from each feature images. If the mask is binary, 
+the number of samples from each feature images. If the mask is binary,
 samples are selected randomly within 1 values.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
@@ -75,7 +75,7 @@ rfmresult<-mrvnrfs.predict( rfm$rflist,
      ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
      multiResSchedule=mr )
 if ( predtype == "scalar" )
-  print( cor( unlist(lablist) , rfmresult$seg ) )
+  print( cor( unlist(lablist) , unlist( rfmresult$seg ) ) )
 } # end predtype loop
 
 

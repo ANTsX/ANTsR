@@ -12,7 +12,7 @@ mrvnrfs.predict(rflist, x, labelmasks, rad = NA, multiResSchedule = c(4, 2,
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmasks}{a mask (or list of masks) used to define the area to predict. 
+\item{labelmasks}{a mask (or list of masks) used to define the area to predict.
 This is used to save time by contstrain the prediction in within the brain.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
