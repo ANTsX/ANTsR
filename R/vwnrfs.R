@@ -115,7 +115,7 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
     
     # get randmask, only once unless necessary
     if (i==1 | useFirstMask==F) {
-      randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=T)
+      randmask = randomMask(labmaskfactor,nsamples=nsamples,perLabel=as.numeric(asFactors))
       randvox = sum(randmask==1)
       if ( randvox == 0 ) stop("error in input data - randmask ", i," is empty")
     }
@@ -233,7 +233,7 @@ vwnrfs.predict = function(rfm, x, labelmasks, rad=NA,
   nfeats = length(x[[1]]) # number of features
   masterprobs = list()  # this will have posterior probabilities
   if (asFactors) seg = list()  # this will have segmentations
-  if (!asFactors) response = rep(NA, nsubj)  # or responses
+  if (!asFactors) response = list()  # or responses
   
   # predict each subject individually
   for(i in 1:nsubj) {
@@ -302,7 +302,7 @@ vwnrfs.predict = function(rfm, x, labelmasks, rad=NA,
       seg[[i]] = makeImage( labmaskfactor , temp )
       rm(temp); invisible(gc())
     } else {
-      response[i] = apply( imageListToMatrix( unlist(masterprobs) , labmaskfactor ), FUN=median, MARGIN=1 )
+      response[[i]] = apply( imageListToMatrix( unlist(masterprobs[[i]]) , labmaskfactor ), FUN=median, MARGIN=1 )
     }
   }
   
