@@ -5,15 +5,15 @@
 \title{multi-res voxelwise neighborhood random forest segmentation}
 \usage{
 mrvnrfs.predict(rflist, x, labelmasks, rad = NA, multiResSchedule = c(4, 2,
-  1), asFactors = TRUE, voxchunk = 1000)
+  1), asFactors = TRUE, voxchunk = 60000)
 }
 \arguments{
 \item{rflist}{a list of random forest models from mrvnrfs}
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmasks}{a list of masks where each mask defines the image space
-for the given list. that is, the nth mask indexes the nth feature set.}
+\item{labelmasks}{a mask (or list of masks) used to define the area to predict. 
+This is used to save time by contstrain the prediction in within the brain.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -21,7 +21,9 @@ for the given list. that is, the nth mask indexes the nth feature set.}
 
 \item{asFactors}{boolean - treat the y entries as factors}
 
-\item{voxchunk}{split up prediction by this number of voxels per chunk}
+\item{voxchunk}{value of maximal voxels to predict at once. This value
+is used to split the prediction into smaller chunks such that memory
+requirements do not become too big}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix
@@ -32,6 +34,6 @@ Represents multiscale feature images as a neighborhood and uses the features
 to apply a random forest segmentation model to a new image
 }
 \author{
-Avants BB, Tustison NJ
+Avants BB, Tustison NJ, Pustina D
 }
 

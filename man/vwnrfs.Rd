@@ -5,7 +5,7 @@
 \title{voxelwise neighborhood random forest segmentation and prediction}
 \usage{
 vwnrfs(y, x, labelmasks, rad = NA, nsamples = 8, ntrees = 500,
-  asFactors = TRUE)
+  asFactors = TRUE, reduceFactor = 1)
 }
 \arguments{
 \item{y}{list of training label images, can be a factor or numeric vector
@@ -73,6 +73,6 @@ for ( i in inds ) {
 
 }
 \author{
-Avants BB, Tustison NJ
+Avants BB, Tustison NJ, Pustina D
 }
 

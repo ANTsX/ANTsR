@@ -5,15 +5,17 @@
 \title{multi-res voxelwise neighborhood random forest segmentation learning}
 \usage{
 mrvnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
-  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 1000)
+  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 50000)
 }
 \arguments{
 \item{y}{list of training labels. either an image or numeric value}
 
 \item{x}{a list of lists where each list contains feature images}
 
-\item{labelmasks}{a list of masks where each mask defines the image space
-for the given list. that is, the nth mask indexes the nth feature set.}
+\item{labelmasks}{a mask (or list of masks) used to define where the 
+samples will come from. Note, two labels (e.g., GM and WM) will double
+the number of samples from each feature images. If the mask is binary, 
+samples are selected randomly within 1 values.}
 
 \item{rad}{vector of dimensionality d define nhood radius}
 
@@ -25,7 +27,9 @@ for the given list. that is, the nth mask indexes the nth feature set.}
 
 \item{asFactors}{boolean - treat the y entries as factors}
 
-\item{voxchunk}{split up prediction by this number of voxels per chunk}
+\item{voxchunk}{value of maximal voxels to predict at once. This value
+is used to split the prediction into smaller chunks such that memory
+requirements do not become too big}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix
@@ -42,7 +46,6 @@ mask[ 3:6, 3:6 ]<-1
 mask[ 5, 5:6]<-2
 ilist<-list()
 lablist<-list()
-masklist<-list()
 inds<-1:50
 scl<-0.33 # a noise parameter
 for ( predtype in c("label","scalar") )
@@ -63,52 +66,21 @@ for ( i in inds ) {
       }
     ilist[[i]]<-list(img,imgb)  # two features
     lablist[[i]]<-limg
-    masklist[[i]] = mask
   }
 rad<-rep( 1, 2 )
 mr <- c(1.5,1)
-rfm<-mrvnrfs( lablist , ilist, masklist, rad=rad, multiResSchedule=mr,
+rfm<-mrvnrfs( lablist , ilist, mask, rad=rad, multiResSchedule=mr,
      asFactors = (  predtype == "label" ) )
 rfmresult<-mrvnrfs.predict( rfm$rflist,
-     ilist, masklist, rad=rad, asFactors=(  predtype == "label" ),
+     ilist, mask, rad=rad, asFactors=(  predtype == "label" ),
      multiResSchedule=mr )
 if ( predtype == "scalar" )
-  print( cor( unlist(lablist) , unlist(rfmresult$seg) ) )
+  print( cor( unlist(lablist) , rfmresult$seg ) )
 } # end predtype loop
 
-\dontrun{
-myop="GD" # try "Laplacian" or "Grad"
-myop="Laplacian"
-myop="Grad"
-img = antsImageRead( getANTsRData("r16") )
-mask = getMask( img )
-grad = iMath(img,myop,1,1)
-predimglist = list( grad )
-featimglist = list( list( img ) )
-masklist = list( mask )
-mr <- c(4,2,1)
-rad=c(2,2)
-vwout = mrvnrfs( predimglist , featimglist, masklist,
-  rad=rad, nsamples = 2000, multiResSchedule=mr, ntrees=1000,
-  asFactors=FALSE )
-
-img = antsImageRead( getANTsRData("r64") )
-mask = getMask( img )
-predimglist = list( grad )
-featimglist = list( list( img ) )
-masklist = list( mask )
-rfmresult<-mrvnrfs.predict( vwout$rflist, featimglist, masklist,
-  rad=rad, multiResSchedule=mr,
-  asFactors=FALSE )
-gtr = iMath(img,myop,1,1)*mask # ground truth
-plot( gtr )
-dev.new()
-plot( rfmresult$probs[[1]][[1]]*mask )
-print( cor( rfmresult$probs[[1]][[1]][mask==1], gtr[mask==1] ))
-}
 
 }
 \author{
-Avants BB, Tustison NJ
+Avants BB, Tustison NJ, Pustina D
 }
 
