@@ -41,8 +41,4 @@ randomMask = function(img, nsamples, perLabel=F) {
     randmask[ulabvec] = 1
   }
   return(randmask)
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/master
