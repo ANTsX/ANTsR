@@ -37,8 +37,6 @@ Reference manual:	[ANTsR.pdf](https://github.com/stnava/ANTsR/releases/)
 
 *	[ANTsR](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/ANTsR.html)
 
-*	[ANTsR](http://htmlpreview.github.io/?https://github.com/stnava/ANTsR/releases/download/latest/vignettes.ANTsR.html)
-
 * [iMath](http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/iMath.html)
 
 Wiki: [Notes and work in progress examples](https://github.com/stnava/ANTsR/wiki)
