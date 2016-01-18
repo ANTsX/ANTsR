@@ -113,16 +113,14 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
     # if not last mr, predict new features for next round
     if (mrcount < length(multiResSchedule)) {
       predme = vwnrfs.predict(rfm=sol$rfm, x=x, labelmasks=labelmasks,
-                          rad=rad, asFactors=TRUE, voxchunk=voxchunk,
+                          rad=rad, asFactors=asFactors, voxchunk=voxchunk,
                             reduceFactor = mr)
    
       newprobs=predme$probs
       rm(predme); invisible(gc())
-      for ( tt1 in 1:length(newprobs) ) {
-        for (tt2 in 1:length(newprobs[[tt1]])) {
+      for ( tt1 in 1:length(newprobs) )
+        for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[tt1]]), useVoxels=1, 0 )
-        }
-      }
     }
     
     invisible(gc())
@@ -175,7 +173,7 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
   if ( asFactors ) predtype<-'prob'
   
   rfct<-1
-  for ( mr in multiResSchedule ) {
+  for ( mr in multiResSchedule ){
 
     if ( rfct > 1 ) {
       for ( kk in 1:length(x) ) {
@@ -189,17 +187,15 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
     
     
     predme = vwnrfs.predict(rflist[[rfct]], x=x, labelmasks=labelmasks,
-                              rad=rad, asFactors=TRUE, voxchunk=voxchunk,
+                              rad=rad, asFactors=asFactors, voxchunk=voxchunk,
                               reduceFactor = mr)
 
     newprobs = predme$probs
     newseg = predme$seg
     if (rfct < length(multiResSchedule)) {
-      for ( tt1 in 1:length(newprobs) ) {
-        for (tt2 in 1:length(newprobs[[tt1]])) {
+      for ( tt1 in 1:length(newprobs) )
+        for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[1]]), useVoxels=1, 0 )
-        }
-      }
     }
     
     rfct<-rfct+1
