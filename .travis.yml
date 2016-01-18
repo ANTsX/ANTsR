@@ -11,9 +11,9 @@ language: cpp
 compiler:
   - clang
 
-matrix:
-  allow_failures:
-    - os: osx
+# matrix:
+#   allow_failures:
+#    - os: osx
 
 # only run for pushes to master branch
 # branches:
