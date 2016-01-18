@@ -1,0 +1,23 @@
+
+
+CXX_STD = CXX11
+
+myantslib=${PWD}/antb/lib/
+
+libants=`find ${myantslib} -name "lib*.a"`
+
+libitk=`find \`$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\` -name "lib*.a"`
+
+PKG_LIBS = ${libitk} ${libants} ${libitk} ${libants} ${libitk} ${libants}  \
+  ${libitk} ${libants} ${itklib} ${libants} ${libitk} ${libants} ${itklib} \
+  ${libants} ${itklib} ${libants} ${libitk} ${libants} ${itklib}
+
+.PHONY: all libs
+
+all: $(SHLIB)
+
+$(SHLIB): libs
+
+tlibs: ; cd ${PWD}/antb
+
+libs: ; cd ${PWD}/antb && $(MAKE) -j 2

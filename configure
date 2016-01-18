@@ -4,6 +4,7 @@ ITKRCMAKE=`${R_DIR}Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
 ITKRLIB=`${R_DIR}Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
 compflags=`${R_DIR}Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
 ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
+
 # get a version of cmake
 cmaker=`which cmake`
 if [[ ! -x $cmaker ]] ; then # try r version
@@ -16,6 +17,22 @@ if [[ $TRAVIS -eq true ]] ; then
   CMAKE_BUILD_TYPE=Release
 fi
 cd ./src
+# platform-specific Makevars
+echo "myantssource=\${PWD}/ants/" > Makevars
+echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
+if [[ `uname` -eq Darwin ]] ; then
+echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
+  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
+  -I\${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1" >> Makevars
+fi
+if [[ `uname` -eq Linux ]] ;then
+echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
+  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
+  -I\${myantssource}/Tensor/" >> Makevars
+fi
+cat Makevars.in >> Makevars
+
+# get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
 antstag=ebca2ebaf90748934e71f2a72953ac43cc73bb5e # reduce core apps
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
@@ -41,6 +58,3 @@ ${cmaker} -DITK_DIR:PATH=${ITKDIR} \
     -DCOPY_SCRIPT_FILES_TO_BIN_DIR=OFF \
     -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
 cd ../
-#  for x in invariantImageSimilarity.cpp ../R/invariantImageSimilarity.R ../R/convolveImage.R ../man/convolveImage.Rd ../man/invariantImageSimilarity.Rd ; do
-#    if [[ -s $x ]] ; then  rm $x; fi
-#  done
