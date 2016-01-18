@@ -3,15 +3,6 @@ title: "Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion 
 author: "Brian B. Avants, Dorian Pustina, Nicholas J. Tustison"
 date: "February 22, 2015"
 output:
-  beamer_presentation:
-    colortheme: dolphin
-    fonttheme: structurebold
-    highlight: tango
-    includes:
-      in_header: mystyle.tex
-    incremental: yes
-    theme: AnnArbor
-    toc: yes
   ioslides_presentation:
     highlight: tango
     incremental: yes
