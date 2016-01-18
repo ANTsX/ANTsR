@@ -20,12 +20,12 @@ cd ./src
 # platform-specific Makevars
 echo "myantssource=\${PWD}/ants/" > Makevars
 echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
-if [[ `uname` -eq Darwin ]] ; then
+if [[ $OSTYPE == darwin* ]]; then
 echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
   -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
   -I\${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1" >> Makevars
 fi
-if [[ `uname` -eq Linux ]] ;then
+if [[ $OSTYPE == linux* ]]; then
 echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
   -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
   -I\${myantssource}/Tensor/" >> Makevars
