@@ -24,6 +24,8 @@ multi-label masks will try to balance sampling for each label.}
 \item{ntrees}{(for the random forest model)}
 
 \item{asFactors}{boolean - treat the y entries as factors}
+
+\item{reduceFactor}{integer factor by which to reduce (imaging) data resolution}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix

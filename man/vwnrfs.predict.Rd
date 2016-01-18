@@ -8,7 +8,7 @@ vwnrfs.predict(rfm, x, labelmasks, rad = NA, asFactors = TRUE,
   voxchunk = 30000, reduceFactor = 1)
 }
 \arguments{
-\item{rfm}{random forest model trained with vwnrfs with certain 
+\item{rfm}{random forest model trained with vwnrfs with certain
 number of features.}
 
 \item{x}{a list of lists. Each list contains the list of feature
@@ -17,8 +17,8 @@ must be the same used during training. I.e., if you train on
 T1 and T2 images, those should be the same features used for
 prediction, in the same exact order for each subject.}
 
-\item{labelmasks}{a list of masks where each mask defines the space 
-to predict from. These can be individual masks for each subject 
+\item{labelmasks}{a list of masks where each mask defines the space
+to predict from. These can be individual masks for each subject
 (i.e., custom brain masks) or a single antsImage that will be used
 for all subjects.}
 
@@ -28,7 +28,7 @@ c(1,1,1)}
 
 \item{asFactors}{boolean - treat the y entries as factors. If this is
 true, the prediction will be a classification, and the output will
-produce images. If this is false, the prediction will be a regression, 
+produce images. If this is false, the prediction will be a regression,
 and the output will produce a single response value.}
 
 \item{voxchunk}{value of maximal voxels to predict at once. This value
