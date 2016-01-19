@@ -76,6 +76,7 @@ plot.antsImage <- function(x, y,
   dorot = 0,
   ncolumns = 4,
   ... ) {
+  if ( length( dim( x ) ) < axis ) axis = length( dim( x ) )
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
     x <- cropImage(x, plotimask )
@@ -215,12 +216,17 @@ plot.antsImage <- function(x, y,
   wincols <- round(nslices/winrows) # controls number of rows
   if (length(slices) < wincols )
     wincols <- length(slices)
-  if (axis != 2 & imagedim > 2)
-    slice <- rotate90.matrix(img[, , slices[1]])
-  if (axis == 2 & imagedim > 2)
-    slice <- flip.matrix(img[, , slices[1]])
-  if (imagedim > 2)
-    slice <- mirror.matrix(slice) else slice <- img
+  reoSlice <- function( inimg )
+    {
+    if (axis != 2 & imagedim > 2)
+      slice <- rotate90.matrix(inimg[, , slices[1]])
+    if (axis == 2 & imagedim > 2)
+      slice <- flip.matrix(inimg[, , slices[1]])
+    if (imagedim > 2)
+      slice <- mirror.matrix(slice) else slice <- img
+    return( slice )
+    }
+  slice = reoSlice( img )
   slicerow <- nrow(slice)
   slicecol <- ncol(slice)
   if ( dorot == 1 )
@@ -232,19 +238,24 @@ plot.antsImage <- function(x, y,
   rowsl <- 0
   # convert to 0 255
   nlevels <- 2^8
-  for (sl in c(0:(length(slices) - 1))) {
-    if (sl < dim(img)[imagedim]) {
+  reoSlice2 <- function( inimg, insl )
+    {
       if (axis != 2 & imagedim > 2)
-        slice <- rotate90.matrix(img[, , slices[sl + 1]])
+        slice <- rotate90.matrix(inimg[, , slices[insl + 1]])
       if (axis == 2 & imagedim > 2 & dorot==0 )
-        slice <- flip.matrix(img[, , slices[sl + 1]])
+        slice <- flip.matrix(inimg[, , slices[insl + 1]])
       if (axis == 2 & imagedim > 2 & dorot==1 )
-        slice <- rotate270.matrix(img[, , slices[sl + 1]])
+        slice <- rotate270.matrix(inimg[, , slices[insl + 1]])
       if (imagedim > 2) {
         slice <- mirror.matrix(slice)
       } else {
-        slice <- img
+        slice <- inimg
       }
+      return( slice )
+    }
+  for (sl in c(0:(length(slices) - 1))) {
+    if (sl < dim(img)[imagedim]) {
+      slice = reoSlice2( img, sl )
       locsl <- (sl%%(wincols)) + 1
       if (locsl == 1)
         rowsl <- rowsl + 1
@@ -348,31 +359,14 @@ plot.antsImage <- function(x, y,
     labimg <- temp
     locthresh <- round((window.overlay[1:2] - mncl) /
                       (mxcl - mncl) * (nlevels - 1))
-    if (axis != 2 & imagedim > 2)
-      labslice <- rotate90.matrix(labimg[, , slices[1]])
-    if (axis == 2 & imagedim > 2 & dorot==0 )
-      labslice <- flip.matrix(labimg[, , slices[1]])
-    if (axis == 2 & imagedim > 2 & dorot==1 )
-      labslice <- rotate270.matrix(labimg[, , slices[sl + 1]])
-    if (imagedim > 2)
-      labslice <- mirror.matrix(labslice) else slice <- img
+    labslice = reoSlice( labimg )
     slicerow <- nrow(slice)
     slicecol <- ncol(slice)
     bigslice <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
     rowsl <- 0
     for (sl in c(0:(length(slices) - 1))) {
       if (sl < dim(img)[imagedim]) {
-        if (axis != 2 & imagedim > 2)
-          labslice <- rotate90.matrix(labimg[, , slices[sl + 1]])
-        if (axis == 2 & imagedim > 2 & dorot==0 )
-          labslice <- flip.matrix(labimg[, , slices[1]])
-        if (axis == 2 & imagedim > 2 & dorot==1 )
-          labslice <- rotate270.matrix(labimg[, , slices[sl + 1]])
-        if (imagedim > 2) {
-          labslice <- mirror.matrix(labslice)
-        } else {
-          labslice <- labimg
-        }
+        labslice = reoSlice2( labimg, sl )
         locsl <- (sl%%(wincols)) + 1
         if (locsl == 1)
           rowsl <- rowsl + 1
