@@ -52,7 +52,7 @@
 #'   # write directly to a file
 #'   plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
 #'     window.overlay = c(0.25,1), axis=2,
-#'     overlay.color=c('red','blue'), outname = ofn )
+#'     color.overlay=c('red','blue'), outname = ofn )
 #' }
 #'
 #' @method plot antsImage
