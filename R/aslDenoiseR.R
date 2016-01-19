@@ -124,7 +124,7 @@ aslDenoiseR <- function(
     xord <- sort(x)
     l <- round(length(x) * frac)
     val <- xord[l]
-    return( x < val )
+#    return( x < val )
     return(x < val & x < 0)
   }
 
