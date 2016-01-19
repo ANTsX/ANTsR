@@ -81,11 +81,11 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
   if (opt == "trig") {
     if ( !usePkg("mFilter") ) { print("Need mFilter package"); return(NULL) }
     if (nrow(myTimeSeries)%%2 > 0) {
-      firsttime <- myTimeSeries[1, ]
-      myTimeSeries <- myTimeSeries[2:nrow(myTimeSeries), ]
+      firsttime = myTimeSeries[1, ]
+      myTimeSeries <- rbind( firsttime, myTimeSeries ) # pad the time-series
       filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
         drift = FALSE, root = FALSE, type = c("trigonometric")))
-      filteredTimeSeries <- rbind(firsttime, filteredTimeSeries)
+      filteredTimeSeries <- filteredTimeSeries[2:nrow(filteredTimeSeries), ] # depad
       filteredTimeSeries <- ts(filteredTimeSeries, frequency = 1/tr)
     } else {
       filteredTimeSeries <- residuals(mFilter::cffilter(myTimeSeries, pl = voxHi, pu = voxLo,
