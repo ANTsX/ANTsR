@@ -31,11 +31,16 @@ This function works for a BOLD time-series data
 
 fmat<-replicate(1000, rnorm(200))
 k<-1
+tr = 4
 for ( ftype in c("butt","stl","trig") ) {
-  myres<-frequencyFilterfMRI( fmat, tr = 4, freqLo = 0.01, freqHi = 0.05, opt = ftype )
-  comparemat<-cbind(fmat[,k],myres[,k])
-  plot(ts(comparemat),main=ftype)
+  myres <- frequencyFilterfMRI( fmat, tr = tr, freqLo = 0.01, freqHi = 0.05, opt = ftype )
+  comparemat <- cbind( fmat[,k], myres[,k] )
+  plot( ts( comparemat ), main=ftype )
   Sys.sleep(0.3)
+  temp = spectrum( ts(fmat[,k], frequency=1/tr ) )
+  plot( temp$freq, temp$spec, type='l' )
+  temp = spectrum( ts(myres[,k], frequency=1/tr ) )
+  plot( temp$freq, temp$spec, type='l' )
 }
 
 }
