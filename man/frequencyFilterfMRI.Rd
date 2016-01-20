@@ -37,10 +37,11 @@ for ( ftype in c("butt","stl","trig") ) {
   comparemat <- cbind( fmat[,k], myres[,k] )
   plot( ts( comparemat ), main=ftype )
   Sys.sleep(0.3)
-  temp = spectrum( ts(fmat[,k], frequency=1/tr ) )
-  plot( temp$freq, temp$spec, type='l' )
-  temp = spectrum( ts(myres[,k], frequency=1/tr ) )
-  plot( temp$freq, temp$spec, type='l' )
+  # uncomment below to visualize effect of frequency filtering
+  # temp = spectrum( ts(fmat[,k], frequency=1/tr ) )
+  # plot( temp$freq, temp$spec, type='l' )
+  # temp = spectrum( ts(myres[,k], frequency=1/tr ) )
+  # plot( temp$freq, temp$spec, type='l' )
 }
 
 }
