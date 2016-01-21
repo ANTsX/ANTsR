@@ -23,6 +23,10 @@
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
+#'   \item{"SyNOnly": }{Symmetric normalization: no initial transformation,
+#'     with mutual information as optimization metric.  Assumes images are
+#'     aligned by an inital transformation. Can be useful if you want to run
+#'     an unmasked affine followed by masked deformable registration.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
 #'   \item{"SyNBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
@@ -86,7 +90,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNCC",
+      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
         "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
@@ -168,7 +172,21 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
           "-f", "4x2x2x1",
           "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
-          "-t", paste("SyN", "[0.25,3,0]", sep = ""),
+          "-t", paste("SyN[0.25,3,0]", sep = ""),
+          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+            wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNOnly") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste("SyN[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
           "1", "-z", "1", "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))

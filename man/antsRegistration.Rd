@@ -52,6 +52,10 @@ typeofTransform can be one of:
     with mutual information as optimization metric.}
   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
     with mutual information as optimization metric.}
+  \item{"SyNOnly": }{Symmetric normalization: no initial transformation,
+    with mutual information as optimization metric.  Assumes images are
+    aligned by an inital transformation. Can be useful if you want to run
+    an unmasked affine followed by masked deformable registration.}
   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
   \item{"SyNBold": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
