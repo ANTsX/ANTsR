@@ -524,6 +524,8 @@ for ( r in 1:nPts) {
       }
     }
   }
+plot( meanbold, labelImg, axis=3, nslices=30, ncolumns=10, 
+        window.overlay = c( 1, max(labelImg) ) )
 ```
 ### Getting ROI average signals
 Now that we have roi labels, we want to find the mean time signal for each ROI
