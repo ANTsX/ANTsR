@@ -1,6 +1,6 @@
 ---
 title: "Resting BOLD (basic analyses using ANTsR)"
-author: "Jeffrey T. Duda"
+author: "Jeffrey T. Duda, Brian B. Avants"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
@@ -35,10 +35,46 @@ is on processing the BOLD signal, here we start with the the following data
 * A set of labels identifying anatomical regions of interest (the network to analyze)
 
 ```{r data ,message=FALSE,warnings=FALSE}
-img = antsImageRead(getANTsRData("rsbold"))
-mask = antsImageRead(getANTsRData("rsboldmask"))
-seg = antsImageRead(getANTsRData("rsboldseg"))
-pts = read.csv(getANTsRData("rsboldpts"))
+# based on ACT output or sample data
+id = "BAvants"
+pre = paste("~/rsfTest/",id,"/",sep='')
+fn = path.expand( paste( pre, "rsfMRI0/",id,"_rsfMRI0.nii.gz", sep='' ) )
+if ( file.exists( fn ) )
+  {
+  img  = antsImageRead( fn  )
+  meanbold = getAverageOfTimeSeries( img )
+  mask = getMask( meanbold )
+  sfn = path.expand( paste( pre, "/act/", id,"_STRUCTURAL_BrainSegmentation.nii.gz", sep='' ) )
+  seg = antsImageRead( sfn   )
+  t1fn = path.expand( paste( pre, "/act/", id,"_STRUCTURAL_BrainSegmentation0N4.nii.gz", sep='' ) )
+  t1 = antsImageRead( t1fn   )
+  } else { # use sample data
+  img = antsImageRead(getANTsRData("rsbold"))
+  meanbold = getAverageOfTimeSeries( img )
+  mask = antsImageRead(getANTsRData("rsboldmask"))
+  seg = antsImageRead(getANTsRData("rsboldseg"))
+  t1 = antsImageClone( seg )
+  t1[ t1 > 3 ] = 2
+  }
+```
+
+
+```{r mapT1toMNI}
+t1brain = t1 * thresholdImage( seg, 1, 6 )
+if ( ! exists("boldmap") )
+  boldmap = antsRegistration( meanbold, t1brain, typeofTransform='SyNBoldAff' )
+if ( ! exists("mnimap") )
+  {
+  mni = antsImageRead( getANTsRData( "mni" ) )
+  mnimap = antsRegistration( t1brain, mni, typeofTransform='SyN' )
+  }
+mni2boldmaps = c( boldmap$fwdtransforms, mnimap$fwdtransforms )
+mni2boldmapsInv = c(  mnimap$invtransforms , boldmap$invtransforms )
+mni2bold = antsApplyTransforms( meanbold, mni, mni2boldmaps )
+seg2bold = antsApplyTransforms( meanbold, seg, boldmap$fwdtransforms, interpolator = "NearestNeighbor" )
+plot( meanbold , boldmap$warpedmovout %>% iMath("Canny", 10, 1, 1) )
+plot( meanbold , mni2bold %>% iMath("Canny", 10, 1, 1) )
+plot( meanbold , maskImage( seg2bold, seg2bold, 2 ) )
 ```
 
 Obtaining these for your own data set is a non-trivial matter, but will be the topic of a future document
@@ -131,11 +167,14 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 * Identify "bad" time points for removal
 
 ```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
-meanbold <- apply.antsImage(img, c(1,2,3), mean)
-for ( i in 1:3 )
+if ( ! exists("moco") )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
-  meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+  meanbold <- apply.antsImage(img, c(1,2,3), mean)
+  for ( i in 1:3 )
+    {
+    moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
+    meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+    }
   }
 ```
 
@@ -209,13 +248,14 @@ greater than 0.2mm is a common threshold used in human data. For illustrative pu
 associated with the displacement are marked as bad.
 
 ```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
-badtimes = which(moco$fd$MeanDisplacement > 0.1)
+fdthresh = 0.2
+badtimes = which(moco$fd$MeanDisplacement > fdthresh )
 badtimes = sort(c(badtimes, badtimes+1))
 goodtimes = (1:nTimes)[-badtimes]
 ```
 
 ```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
-badstarts = which(moco$fd$MeanDisplacement > 0.1)
+badstarts = which(moco$fd$MeanDisplacement > fdthresh )
 
 bad.data = data.frame(Time=(1:nTimes)*tr)
 bad.data$FD = moco$fd$MeanDisplacement
@@ -225,7 +265,7 @@ bad.data.rect$Stop = (badstarts+1)*tr
 rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
 
 badPlot <- ggplot(bad.data) + geom_line(aes(x=Time, y=FD))
-badPlot <- badPlot + geom_hline( yintercept=0.1, linetype="dashed", alpha=0.5 )
+badPlot <- badPlot + geom_hline( yintercept=fdthresh, linetype="dashed", alpha=0.5 )
 badPlot <- badPlot + theme(text=element_text(size=10), legend.position="none")
 badPlot <- badPlot + ggtitle("Bad timepoints")
 badPlot <- badPlot + geom_rect(data=bad.data.rect, rect.aes)
@@ -302,7 +342,7 @@ may be calculated without "spreading" the influence of the bad time points.
 
 ```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 # white matter is labeled as 3
-wmMask = seg*1
+wmMask = seg2bold*1*mask
 wmMask[ wmMask != 3] = 0
 wmMask[ wmMask == 3 ] = 1
 wmMask = iMath( wmMask, "ME", 1)
@@ -310,7 +350,7 @@ wmVox = which(subset(wmMask, mask > 0 )==1)
 wmMean = rowMeans(boldMat[,wmVox])
 
 # CSF is labeled as 1
-csfMask = seg*1
+csfMask = seg2bold*1
 csfMask[ csfMask != 1] = 0
 #csfMask = iMath( csfMask, "ME", 1)
 csfVox = which(subset(csfMask, mask > 0)==1)
@@ -357,21 +397,21 @@ tissuePlot <- tissuePlot + ggtitle("Nuisance parameters")
 print(tissuePlot)
 
 # Save mean cortex signal for later plotting
-ctxMask = seg*1
+ctxMask = seg2bold*1
 ctxMask[ ctxMask != 2] = 0
 ctxMask[ ctxMask == 2 ] = 1
 ctxVox = which(subset(ctxMask, mask > 0)==1)
 ctxMean = rowMeans(boldMat[,ctxVox])
 ```
 
-The nuissance parameters are now regressed out the signal. This is illustrated by looking
+The nuisance parameters are now regressed out the signal. This is illustrated by looking
 at the mean signal in the cortex before and after the regression.
 ```{r regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
-moco = cbind(reg_params, reg_params*reg_params)
-moco = detrend(moco)
-mocoDeriv = rbind( rep(0,dim(moco)[2]), diff(moco,1) )
+mocoNuis = cbind(reg_params, reg_params*reg_params)
+mocoNuis = detrend(mocoNuis)
+mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
-nuissance = cbind( moco, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
+nuissance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuissance[goodtimes,] ) )
 ```
@@ -419,7 +459,8 @@ should be left alone. It is common to smooth with a Gaussian kernel with
 FWHM=6.0mm.
 ```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 img = matrix2timeseries( img, mask, boldMat )
-img = smoothImage(img, c(6,6,6,0), FWHM=TRUE )
+sptl = sqrt( sum( antsGetSpacing(img)[1:3]^2  ))
+img = smoothImage(img, c(rep(sptl,3),0), FWHM=TRUE )
 boldMat = timeseries2matrix(img, mask)
 ```
 
@@ -451,6 +492,9 @@ is some a priori knowledge regarding the functional network to which each region
 provided network definition used here lists the center point of each ROI so we must first create an
 image where each ROI is a sphere of radius=5mm centered on the provided point.
 ```{r networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+data(powers_areal_mni_itk)
+pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
+pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
 labelImg = mask*0
 nPts = dim(pts)[1]
 rad = 5
@@ -468,7 +512,8 @@ for ( r in 1:nPts) {
         dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
         inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
         if ( (dist <= rad) && ( inImage == TRUE ) ) {
-          labelImg[local[1], local[2], local[3]] = pts$id[r]
+          rlocal = round( local )
+          labelImg[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
          }
         }
       }
@@ -524,13 +569,13 @@ together, while the standard deviation ribbons indicate how cohesively the
 components of a given system are working.
 
 ```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE}
-systemNames = levels(pts$system)
+systemNames = levels(pts$SystemName)
 
 nSystems = length(systemNames)
 sysMatMean = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
 sysMatSD = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
 
-systems = pts$system[labels]
+systems = pts$SystemName[labels]
 
 for ( i in 1:nSystems ) {
   sys = systemNames[i]
@@ -540,7 +585,8 @@ for ( i in 1:nSystems ) {
     sysMatMean[,i] = rowMeans(labeledBoldMat[,sysIdx])
     sysMatSD[,i] = apply(labeledBoldMat[,sysIdx], 1, sd)
     }
-  }
+}
+```
 
 ```{r sysmeanplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=15, echo=FALSE}
 
@@ -616,14 +662,14 @@ sorted, so that nodes in the same system are clustered together.
 
 ```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
 
-pts$system = factor(pts$system, levels=c("Sensory/Somatomotor Hand", "Sensory/Somatomotor Mouth", "Cingulo-opercular Task Control", "Auditory", "Default Mode", "Memory Retrieval", "Visual", "Fronto-parietal Task Control", "Salience", "Subcortical", "Ventral Attention", "Dorsal Attention", "Cerebellar", "Uncertain"))
+pts$SystemName = factor(pts$SystemName, levels=c("Sensory/Somatomotor Hand", "Sensory/Somatomotor Mouth", "Cingulo-opercular Task Control", "Auditory", "Default Mode", "Memory Retrieval", "Visual", "Fronto-parietal Task Control", "Salience", "Subcortical", "Ventral Attention", "Dorsal Attention", "Cerebellar", "Uncertain"))
 
 graph = graph.adjacency( adj, mode="directed", weighted=NULL )
-V(graph)$name = pts$id
-V(graph)$comm = pts$system
+V(graph)$name = pts$ROI
+V(graph)$comm = pts$SystemName
 V(graph)$degree = degree(graph)
 
-systems = levels(pts$system)
+systems = levels(pts$SystemName)
 systemNames = as.character(systems)
 
 node_list <- get.data.frame(graph, what = "vertices")
