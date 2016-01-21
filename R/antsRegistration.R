@@ -17,6 +17,8 @@
 #' typeofTransform can be one of:
 #' \itemize{
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+#'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
+#'   May be useful for quick visualization fixes.'}
 #'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
@@ -90,7 +92,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
+      allowableTx <- c("Rigid", "QuickRigid","Affine", "SyN","SyNRA","SyNOnly","SyNCC",
         "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
@@ -271,6 +273,17 @@ antsRegistration <- function( fixed = NA, moving = NA,
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
+          "-s", "3x2x1x0", "-f", "6x4x2x1", "-u", "1", "-z", "1",
+          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
+        }
+        if ( typeofTransform == "QuickRigid" ) {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", paste("Rigid[0.25]", sep = ""), "-c 100x100x0x0",
           "-s", "3x2x1x0", "-f", "6x4x2x1", "-u", "1", "-z", "1",
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )

@@ -46,7 +46,7 @@ cat Makevars.in >> Makevars
 
 # get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
-antstag=ebca2ebaf90748934e71f2a72953ac43cc73bb5e # reduce core apps
+antstag=3876f39de256b45754aa1f1993fbf71a8b9aef7b
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi

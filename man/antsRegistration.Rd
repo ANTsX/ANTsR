@@ -46,6 +46,8 @@ to the ANTs registration method.
 typeofTransform can be one of:
 \itemize{
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+  \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
+  May be useful for quick visualization fixes.'}
   \item{"Affine": }{Affine transformation: Rigid + scaling.}
   \item{"AffineFast": }{Fast version of \code{Affine}.}
   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
