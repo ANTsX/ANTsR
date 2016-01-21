@@ -7,8 +7,6 @@
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
-#' One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
-# \code{SyNBold}, \code{SyNBoldAff}, \code{SyNAggro}, \code{TVMSQ}.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -22,6 +20,8 @@
 #'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
+#'     with mutual information as optimization metric.}
+#'   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
 #'   \item{"SyNBold": }{SyN, but optimized for registrations between
@@ -86,7 +86,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN","SyNCC",
+      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNCC",
         "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
@@ -146,8 +146,29 @@ antsRegistration <- function( fixed = NA, moving = NA,
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1", "-m", paste("mattes[", f, ",", m, ",1,32]",
-            sep = ""), "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
+          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+            wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNRA") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste("SyN", "[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
           "1", "-z", "1", "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
@@ -250,9 +271,14 @@ antsRegistration <- function( fixed = NA, moving = NA,
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix)
         # txlist<-list.files( path = outpath, pattern = glob2rx( paste(outvar,'*',sep='')
         # ), full.names = TRUE, recursive = FALSE )
-        return(list(warpedmovout = antsImageClone(warpedmovout, inpixeltype),
-          warpedfixout = antsImageClone(warpedfixout, inpixeltype), fwdtransforms = fwdtransforms,
-          invtransforms = invtransforms))
+        if ( sum(  fixed - warpedmovout ) == 0  ) # FIXME better error catching
+          stop( "Registration failed. Use verbose mode to diagnose." )
+        return(
+          list( warpedmovout = antsImageClone(warpedmovout, inpixeltype),
+                warpedfixout = antsImageClone(warpedfixout, inpixeltype),
+                fwdtransforms = fwdtransforms,
+                invtransforms = invtransforms )
+              )
       }
       if (!ttexists) {
         stop("Unrecognized transform type.")
