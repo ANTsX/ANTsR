@@ -1764,34 +1764,6 @@ if [ $TRAVIS == true ] ; then
   CMAKE_BUILD_TYPE=Release
 fi
 cd ./src
-# platform-specific Makevars
-echo "myantssource=\${PWD}/ants/" > Makevars
-echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
-needVCL_CAN_STATIC_CONST_INIT_FLOAT=0
-if [[ ${#CC} -gt 0 ]] ; then # test the requested compiler
-  temp=$(${CC} --version | grep clang)
-  if [[ ${#temp} -gt 0 ]] ; then
-    needVCL_CAN_STATIC_CONST_INIT_FLOAT=1
-  fi
-else # just try gcc directly
-  temp=$(gcc --version | grep clang)
-  if [[ ${#temp} -gt 0 ]] ; then
-    needVCL_CAN_STATIC_CONST_INIT_FLOAT=1
-  fi
-fi
-echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
-if [[ ${needVCL_CAN_STATIC_CONST_INIT_FLOAT} -eq 1 ]]; then
-echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
-  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
-  -I\${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1" >> Makevars
-else
-echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
-  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
-  -I\${myantssource}/Tensor/" >> Makevars
-fi
-cat Makevars.in >> Makevars
-
-# get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
 antstag=b04b74a2f10f966fbd4fd642fa0412fe7143bdc6 # mask bug
 if [ ! -s ants/CMakeLists.txt  ] ; then
