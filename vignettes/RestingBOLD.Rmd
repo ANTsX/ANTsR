@@ -35,12 +35,16 @@ is on processing the BOLD signal, here we start with the the following data
 * A set of labels identifying anatomical regions of interest (the network to analyze)
 
 ```{r data ,message=FALSE,warnings=FALSE}
+fdthresh = 0.1 # threshold for throwing out bad data, typically between 0.1 and 0.5
 # based on ACT output or sample data
 id = "BAvants"
 pre = paste("~/rsfTest/",id,"/",sep='')
 fn = path.expand( paste( pre, "rsfMRI0/",id,"_rsfMRI0.nii.gz", sep='' ) )
+testData = 1
 if ( file.exists( fn ) )
   {
+  fdthresh = 0.2 # threshold for throwing out bad data, typically between 0.1 and 0.5
+  testData = 3
   img  = antsImageRead( fn  )
   meanbold = getAverageOfTimeSeries( img )
   mask = getMask( meanbold )
@@ -170,7 +174,7 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 if ( ! exists("moco") )
   {
   meanbold <- apply.antsImage(img, c(1,2,3), mean)
-  for ( i in 1:3 )
+  for ( i in 1:testData )
     {
     moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
     meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
@@ -248,14 +252,15 @@ greater than 0.2mm is a common threshold used in human data. For illustrative pu
 associated with the displacement are marked as bad.
 
 ```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
-fdthresh = 0.2
 badtimes = which(moco$fd$MeanDisplacement > fdthresh )
+if ( length( badtimes ) == 0 ) badtimes = c(1)
 badtimes = sort(c(badtimes, badtimes+1))
 goodtimes = (1:nTimes)[-badtimes]
 ```
 
 ```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
 badstarts = which(moco$fd$MeanDisplacement > fdthresh )
+if ( length( badstarts ) == 0 ) badstarts = c(1)
 
 bad.data = data.frame(Time=(1:nTimes)*tr)
 bad.data$FD = moco$fd$MeanDisplacement
@@ -359,11 +364,11 @@ csfMean= rowMeans(boldMat[,csfVox])
 
 globalMean = rowMeans(boldMat)
 
-compcor = compcor(boldMat[goodtimes,], ncompcor = 4)
+compcorTemp = compcor(boldMat[goodtimes,], ncompcor = 4)
 compcorNuis = matrix(0, nTimes, 4)
-compcorNuis[goodtimes, ] = compcor
+compcorNuis[goodtimes, ] = compcorTemp
 compcorNuis[badtimes, ] = NA
-
+colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
 tissueNuis = cbind(globalMean, wmMean, csfMean)
 if ( length(badtimes) > 0 ) {
   for ( v in c(1:dim(tissueNuis)[2]) ) {
@@ -731,7 +736,7 @@ eb = rep(200, nEdges)
 #  gray for inter-system connections
 for ( e in c(1:nEdges) )
   {
-  if ( pts$system[edges[e,1]] == pts$system[edges[e,2]] )
+  if ( pts$SystemName[edges[e,1]] == pts$SystemName[edges[e,2]] )
    {
     er[e] = pts$r[edges[e,1]]
     eg[e] = pts$g[edges[e,1]]
@@ -844,5 +849,31 @@ geff<-mean(geff,na.rm=TRUE)
 cc = transitivity(graph)
 
 ```
+
+
+
+Finally, make a dense map of the default mode network, using regression.
+```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
+# get priors for different networks
+if ( ! exists( "networkPriors" ) ) 
+  {
+  networkPriors = getANTsRData("fmrinetworks")
+  ilist = networkPriors$images
+  for ( i in 1:length(ilist) )
+    ilist[[i]] = antsApplyTransforms( meanbold, ilist[[i]], mni2boldmaps )
+  }
+pr = imageListToMatrix( ilist, mask )
+refSignal = ( boldMat %*% t(pr) )
+networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuissance[goodtimes,] )
+mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
+bmdl = bigLMStats( mdl, 1.e-4 )
+betas = bmdl$beta.t[1,]
+betasI = makeImage( mask, betas )
+loth = quantile(  betas, probs=0.8 )
+plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10, 
+        window.overlay = c( loth, max(betas) ) )
+```
+
 
 ## References
