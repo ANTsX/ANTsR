@@ -57,6 +57,16 @@
 #' mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
 #'   transformlist=mytx$fwdtransforms )
 #'
+#' \dontrun{ # quick visualization fix for images with odd orientation
+#' mni = antsImageRead( getANTsRData( "mni" ) )
+#' strokt1=antsImageRead('strokt1.nii.gz')
+#' strokt1reg=antsRegistration(
+#'   fixed=mni,
+#'   moving=strokt1,
+#'   typeofTransform = "QuickRigid",verbose=TRUE )
+#'  plot(  strokt1reg$warpedmovout, axis=3, nslices=20)
+#' }
+#'
 #' @export antsRegistration
 antsRegistration <- function( fixed = NA, moving = NA,
   typeofTransform = "SyN", initialTransform = NA,
@@ -90,7 +100,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
   }
   if ( typeofTransform == "QuickRigid" ) {
     typeofTransform <- "Rigid"
-    myiterations <- "200x200x0x0"
+    myiterations <- "20x20x0x0"
   }
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
