@@ -14,8 +14,7 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
 \item{moving}{moving image to be mapped to fixed space.}
 
 \item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
-affine+syn mapping.  Mutual information metric by default. See \code{Details.}
-One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},}
+affine+syn mapping.  Mutual information metric by default. See \code{Details.}}
 
 \item{initialTransform}{transforms to prepend}
 
@@ -47,10 +46,18 @@ to the ANTs registration method.
 typeofTransform can be one of:
 \itemize{
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+  \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
+  May be useful for quick visualization fixes.'}
   \item{"Affine": }{Affine transformation: Rigid + scaling.}
   \item{"AffineFast": }{Fast version of \code{Affine}.}
   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
     with mutual information as optimization metric.}
+  \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
+    with mutual information as optimization metric.}
+  \item{"SyNOnly": }{Symmetric normalization: no initial transformation,
+    with mutual information as optimization metric.  Assumes images are
+    aligned by an inital transformation. Can be useful if you want to run
+    an unmasked affine followed by masked deformable registration.}
   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
   \item{"SyNBold": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
@@ -70,6 +77,16 @@ mi<-resampleImage(mi,c(60,60),1,0) # speed up
 mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
 mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
   transformlist=mytx$fwdtransforms )
+
+\dontrun{ # quick visualization fix for images with odd orientation
+mni = antsImageRead( getANTsRData( "mni" ) )
+strokt1=antsImageRead('strokt1.nii.gz')
+strokt1reg=antsRegistration(
+  fixed=mni,
+  moving=strokt1,
+  typeofTransform = "QuickRigid",verbose=TRUE )
+ plot(  strokt1reg$warpedmovout, axis=3, nslices=20)
+}
 
 }
 \author{

@@ -7,8 +7,6 @@
 #' @param moving moving image to be mapped to fixed space.
 #' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
 #' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
-#' One of \code{Rigid}, \code{Affine}, \code{AffineFast}, \code{SyN}, \code{SyNCC},
-# \code{SyNBold}, \code{SyNBoldAff}, \code{SyNAggro}, \code{TVMSQ}.
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -19,10 +17,18 @@
 #' typeofTransform can be one of:
 #' \itemize{
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+#'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
+#'   May be useful for quick visualization fixes.'}
 #'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
+#'   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
+#'     with mutual information as optimization metric.}
+#'   \item{"SyNOnly": }{Symmetric normalization: no initial transformation,
+#'     with mutual information as optimization metric.  Assumes images are
+#'     aligned by an inital transformation. Can be useful if you want to run
+#'     an unmasked affine followed by masked deformable registration.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
 #'   \item{"SyNBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
@@ -51,6 +57,16 @@
 #' mywarpedimage <- antsApplyTransforms( fixed=fi, moving=mi,
 #'   transformlist=mytx$fwdtransforms )
 #'
+#' \dontrun{ # quick visualization fix for images with odd orientation
+#' mni = antsImageRead( getANTsRData( "mni" ) )
+#' strokt1=antsImageRead('strokt1.nii.gz')
+#' strokt1reg=antsRegistration(
+#'   fixed=mni,
+#'   moving=strokt1,
+#'   typeofTransform = "QuickRigid",verbose=TRUE )
+#'  plot(  strokt1reg$warpedmovout, axis=3, nslices=20)
+#' }
+#'
 #' @export antsRegistration
 antsRegistration <- function( fixed = NA, moving = NA,
   typeofTransform = "SyN", initialTransform = NA,
@@ -78,15 +94,19 @@ antsRegistration <- function( fixed = NA, moving = NA,
   }
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
   myiterations <- "2100x1200x1200x10"
-  if (typeofTransform == "AffineFast") {
+  if ( typeofTransform == "AffineFast" ) {
     typeofTransform <- "Affine"
     myiterations <- "2100x1200x0x0"
+  }
+  if ( typeofTransform == "QuickRigid" ) {
+    typeofTransform <- "Rigid"
+    myiterations <- "20x20x0x0"
   }
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN","SyNCC",
+      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
         "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
@@ -146,8 +166,43 @@ antsRegistration <- function( fixed = NA, moving = NA,
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1", "-m", paste("mattes[", f, ",", m, ",1,32]",
-            sep = ""), "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
+          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+            wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNRA") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste("SyN[0.25,3,0]", sep = ""),
+          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+            wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "SyNOnly") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste("SyN[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
           "1", "-z", "1", "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
@@ -250,9 +305,14 @@ antsRegistration <- function( fixed = NA, moving = NA,
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix)
         # txlist<-list.files( path = outpath, pattern = glob2rx( paste(outvar,'*',sep='')
         # ), full.names = TRUE, recursive = FALSE )
-        return(list(warpedmovout = antsImageClone(warpedmovout, inpixeltype),
-          warpedfixout = antsImageClone(warpedfixout, inpixeltype), fwdtransforms = fwdtransforms,
-          invtransforms = invtransforms))
+        if ( sum(  fixed - warpedmovout ) == 0  ) # FIXME better error catching
+          stop( "Registration failed. Use verbose mode to diagnose." )
+        return(
+          list( warpedmovout = antsImageClone(warpedmovout, inpixeltype),
+                warpedfixout = antsImageClone(warpedfixout, inpixeltype),
+                fwdtransforms = fwdtransforms,
+                invtransforms = invtransforms )
+              )
       }
       if (!ttexists) {
         stop("Unrecognized transform type.")
