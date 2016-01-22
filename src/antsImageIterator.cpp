@@ -20,7 +20,6 @@ SEXP antsImageIterator( SEXP r_antsimage )
   ImagePointerType image = Rcpp::as<ImagePointerType>( r_antsimage );
 
   typedef typename itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                         IteratorPointerType;
   IteratorType iterator(image, image->GetLargestPossibleRegion());
   IteratorType* rawPointer = new IteratorType( iterator );
 

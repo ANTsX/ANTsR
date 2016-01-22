@@ -629,9 +629,6 @@ SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
   typedef typename TransformType::InputPointType   InputPointType;
   typedef typename TransformType::OutputPointType  OutputPointType;
 
-  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
-  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
-
   TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
   Rcpp::NumericVector inPoint( r_point );
 
@@ -738,8 +735,6 @@ SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
   typedef typename TransformType::InputVectorType   InputVectorType;
   typedef typename TransformType::OutputVectorType  OutputVectorType;
 
-  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
-  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
 
   TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
   Rcpp::NumericVector inVector( r_vector );
@@ -839,8 +834,6 @@ template< class TransformType, class PixelType >
 SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
 {
   typedef typename TransformType::Pointer          TransformPointerType;
-  typedef typename TransformType::InputPointType   InputPointType;
-  typedef typename TransformType::OutputPointType  OutputPointType;
 
   const unsigned int Dimension = TransformType::InputSpaceDimension;
 
@@ -850,9 +843,6 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, S
   TransformPointerType transform = Rcpp::as<TransformPointerType>( r_transform );
 
   typedef typename TransformType::ParametersValueType                   PrecisionType;
-
-  typedef itk::CompositeTransform<PrecisionType, TransformType::InputSpaceDimension > CompositeTransformType;
-  typedef typename CompositeTransformType::Pointer          CompositeTransformPointerType;
 
   typedef itk::Image<PixelType,TransformType::InputSpaceDimension> ImageType;
   typedef typename ImageType::Pointer                              ImagePointerType;

@@ -1039,7 +1039,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,2> > & iterator )
 {
   typedef itk::Image<double,2>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1058,7 +1057,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,3> > & iterator )
 {
   typedef itk::Image<double,3>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1077,7 +1075,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<double,4> > & iterator )
 {
   typedef itk::Image<double,4>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1096,7 +1093,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,2> > & iterator )
 {
   typedef itk::Image<float,2>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1115,7 +1111,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,3> > & iterator )
 {
   typedef itk::Image<float,3>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1134,7 +1129,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<float,4> > & iterator )
 {
   typedef itk::Image<float,4>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1153,7 +1147,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,2> > & iterator )
 {
   typedef itk::Image<unsigned int,2>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1172,7 +1165,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,3> > & iterator )
 {
   typedef itk::Image<unsigned int,3>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1191,7 +1183,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,4> > & iterator )
 {
   typedef itk::Image<unsigned int,4>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1210,7 +1201,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,2> > & iterator )
 {
   typedef itk::Image<unsigned char,2>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1229,7 +1219,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,3> > & iterator )
 {
   typedef itk::Image<unsigned char,3>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1248,7 +1237,6 @@ template <>
 SEXP wrap( const itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > & iterator )
 {
   typedef itk::Image<unsigned char,4>                          ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
 
   IteratorType* rawPointer = new IteratorType( iterator );
@@ -1268,9 +1256,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<double,2> > as( SEXP itkImageItera
 {
   const unsigned int Dim = 2;
   typedef itk::Image<double,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1291,9 +1277,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<double,3> > as( SEXP itkImageItera
 {
   const unsigned int Dim = 3;
   typedef itk::Image<double,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1314,9 +1298,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<double,4> > as( SEXP itkImageItera
 {
   const unsigned int Dim = 4;
   typedef itk::Image<double,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1337,9 +1319,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<float,2> > as( SEXP itkImageIterat
 {
   const unsigned int Dim = 2;
   typedef itk::Image<float,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1360,9 +1340,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<float,3> > as( SEXP itkImageIterat
 {
   const unsigned int Dim = 3;
   typedef itk::Image<float,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1383,9 +1361,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<float,4> > as( SEXP itkImageIterat
 {
   const unsigned int Dim = 4;
   typedef itk::Image<float,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1406,9 +1382,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,2> > as( SEXP itkImag
 {
   const unsigned int Dim = 2;
   typedef itk::Image<unsigned int,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1429,9 +1403,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,3> > as( SEXP itkImag
 {
   const unsigned int Dim = 3;
   typedef itk::Image<unsigned int,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1452,9 +1424,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned int,4> > as( SEXP itkImag
 {
   const unsigned int Dim = 4;
   typedef itk::Image<unsigned int,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1475,9 +1445,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,2> > as( SEXP itkIma
 {
   const unsigned int Dim = 2;
   typedef itk::Image<unsigned char,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1498,9 +1466,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,3> > as( SEXP itkIma
 {
   const unsigned int Dim = 3;
   typedef itk::Image<unsigned char,Dim>                        ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
@@ -1521,9 +1487,7 @@ itk::ImageRegionIteratorWithIndex< itk::Image<unsigned char,4> > as( SEXP itkIma
 {
   const unsigned int Dim = 4;
   typedef itk::Image<unsigned char,Dim>                ImageType;
-  typedef ImageType::Pointer                           ImagePointerType;
   typedef itk::ImageRegionIteratorWithIndex<ImageType> IteratorType;
-  typedef IteratorType*                                IteratorPointerType;
 
   Rcpp::S4 itkImageIterator( itkImageIteratorR );
 
