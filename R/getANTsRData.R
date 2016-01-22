@@ -22,7 +22,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
   validlist = c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
     "ch2","ch2a","ch2b",
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn",
-    "atroposseg","simple",
+    "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
     "show" )
   if (  sum( validlist == fileid ) == 0 )
