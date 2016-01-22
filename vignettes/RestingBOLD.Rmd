@@ -363,16 +363,17 @@ csfMean= rowMeans(boldMat[,csfVox])
 #csfMean = rowMeans(timeseries2matrix(detrendImg, csfMask))
 
 globalMean = rowMeans(boldMat)
-
-compcorTemp = compcor(boldMat[goodtimes,], ncompcor = 4)
-compcorNuis = matrix(0, nTimes, 4)
+ncompcor = 4
+compcorTemp = compcor(boldMat[goodtimes,], ncompcor = ncompcor)
+compcorNuis = matrix(0, nTimes, ncompcor )
 compcorNuis[goodtimes, ] = compcorTemp
 compcorNuis[badtimes, ] = NA
 colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
 tissueNuis = cbind(globalMean, wmMean, csfMean)
 if ( length(badtimes) > 0 ) {
   for ( v in c(1:dim(tissueNuis)[2]) ) {
-    tissueInterp = spline( c(1:nTimes)[goodtimes], tissueNuis[goodtimes,v], xout=badtimes )$y
+    tissueInterp = spline( c(1:nTimes)[goodtimes], tissueNuis[goodtimes,v],
+      method='natural', xout=badtimes )$y
     tissueNuis[badtimes,v]=tissueInterp
     }
   }
@@ -445,7 +446,8 @@ look for phenomena that occur at specific frequencies.
 ```{r frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 if ( length(badtimes) > 0 ) {
   for ( v in c(1:nVox) ) {
-    boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v], xout=badtimes )$y
+    boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
+      method='natural', xout=badtimes )$y
     }
   }
 
@@ -524,7 +526,7 @@ for ( r in 1:nPts) {
       }
     }
   }
-plot( meanbold, labelImg, axis=3, nslices=30, ncolumns=10, 
+plot( meanbold, labelImg, axis=3, nslices=30, ncolumns=10,
         window.overlay = c( 1, max(labelImg) ) )
 ```
 ### Getting ROI average signals
@@ -858,7 +860,7 @@ Finally, make a dense map of the default mode network, using regression.
 ```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 # get priors for different networks
-if ( ! exists( "networkPriors" ) ) 
+if ( ! exists( "networkPriors" ) )
   {
   networkPriors = getANTsRData("fmrinetworks")
   ilist = networkPriors$images
@@ -873,7 +875,7 @@ bmdl = bigLMStats( mdl, 1.e-4 )
 betas = bmdl$beta.t["ROI",]
 betasI = makeImage( mask, betas )
 loth = quantile(  betas, probs=0.8 )
-plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10, 
+plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
         window.overlay = c( loth, max(betas) ) )
 ```
 
