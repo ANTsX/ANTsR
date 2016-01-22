@@ -1,8 +1,12 @@
 
 AC_DEFUN([VCL_CXX_STATIC_CONST_INIT_FLOAT],
 [AC_MSG_CHECKING(whether to use VCL_CAN_STATIC_CONST_INIT_FLOAT=1)
-#AC_LANG_SAVE
+dnl set language to c++
 AC_LANG_CPLUSPLUS
+dnl check if a custom piece of code can be compiled with 
+dnl VCL_CAN_STATIC_CONST_INIT_FLOAT=1
+dnl if not, we set VCL_CAN_STATIC_CONST_INIT_FLOAT=0
+
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 #include<algorithm>
 #include<vector>
@@ -31,7 +35,7 @@ try
 
 
 ]])],[VCL_STATIC_CONST_INIT_FLOAT=1;AC_MSG_RESULT(yes)],[VCL_STATIC_CONST_INIT_FLOAT=0;AC_MSG_RESULT(no)])
+dnl export variable
 export VCL_STATIC_CONST_INIT_FLOAT
-#AC_LANG_RESTORE
 ])
 

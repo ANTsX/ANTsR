@@ -1,14 +1,16 @@
 AC_INIT([ANTSR], 0.3) 
+
+dnl import the custom autoconf macro stored in src/m4
 m4_include([src/m4/vcl_cxx_static_const_init_float.m4])
 
-#!/bin/bash#
+dnl set environment variables
+
 RCPP_INCLUDES=`${R_DIR}Rscript -e "cat(system.file(package='Rcpp'))"`/include/
 myantssource=${PWD}/src/ants/
 CXX_STD=CXX11
 CXX=$(R CMD config CXX) 
 CXXFLAGS="$(R CMD config CXX1XSTD) $(R CMD config CXX1XFLAGS)"
 
-#CXXFLAGS='${CXXFLAGS} ${CPPFLAGS}'
 ITKRCMAKE=`${R_DIR}Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
 ITKRLIB=`${R_DIR}Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
 compflags=`${R_DIR}Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
@@ -67,9 +69,11 @@ cd ../..
 
 
 AC_LANG_CPLUSPLUS
+dnl run the custom macro
 VCL_CXX_STATIC_CONST_INIT_FLOAT
 AC_SUBST(VCL_STATIC_CONST_INIT_FLOAT)
 
+dnl tell autoconf which files to generate
 AC_CONFIG_FILES([src/Makevars])
 AC_OUTPUT
 cd ./src
