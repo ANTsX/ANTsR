@@ -6,7 +6,7 @@
 A data frame providing coordinates for the nodes identified by Powers at al.
 Coordinates have been modified from nifti space to ITK space
 }
-\usage{data(aal)}
+\usage{data(powers_areal_mni_itk)}
 \format{
   A data frame listing the following variables.
   \describe{
