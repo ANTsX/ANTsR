@@ -19,10 +19,16 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     print(myusage)
     return(NULL)
   }
+  validlist = c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
+    "ch2","ch2a","ch2b",
+    "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn",
+    "atroposseg","simple",
+    "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
+    "show" )
+  if (  sum( validlist == fileid ) == 0 )
+    stop("no data with that id - try show to get list of valid ids")
   if ( fileid == "show" )
-   return( c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
-     "ch2","ch2a","ch2b","mni","mnia","mnib","mnit","atroposseg","simple",
-     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice" ) )
+   return( validlist )
 
   if ( fileid == "simple" )
     return( paste(path.package("ANTsR"),"/extdata/simple.jpg",sep="") )
@@ -51,9 +57,13 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     ch2b = "http://placid.nlm.nih.gov/download?items=10780",
     ch2a = "http://placid.nlm.nih.gov/download?items=10784",
     mni = "https://ndownloader.figshare.com/files/3674667",
-    mnib = "http://placid.nlm.nih.gov/download?items=10787",
+    mnib = "https://ndownloader.figshare.com/files/3676050",
     mnia = "https://ndownloader.figshare.com/files/3674664",
     mnit = "http://placid.nlm.nih.gov/download?items=11660",
+    mninat = "https://ndownloader.figshare.com/files/3676062",
+    mnijhu1 = "https://ndownloader.figshare.com/files/3676056",
+    mnijhu2 = "https://ndownloader.figshare.com/files/3676059",
+    mnidfn = "https://ndownloader.figshare.com/files/3676047",
     nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz",
     pcaslseg = "http://files.figshare.com/1862040/101_seg.nii.gz",
