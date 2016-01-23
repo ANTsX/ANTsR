@@ -5,13 +5,14 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
 vignette: >
-    %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Resting BOLD processing images in R}
-    \usepackage[utf8]{inputenc}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
 library( knitr )
+library( rmarkdown )
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
 library(ggplot2)
@@ -857,7 +858,7 @@ cc = transitivity(graph)
 
 
 Finally, make a dense map of the default mode network, using regression.
-```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5},eval=FALSE}
+```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 # get priors for different networks
 if ( ! exists( "networkPriors" ) )

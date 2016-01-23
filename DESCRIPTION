@@ -47,6 +47,7 @@ Suggests:
     psych,
     randomForest,
     rgl,
+    rmarkdown,
     robust,
     robustbase,
     RRedsvd,

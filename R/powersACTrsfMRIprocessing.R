@@ -16,7 +16,7 @@
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
-#' @param templateMap antsRegistration output mapping struturalImage to template space.
+#' @param templateMap antsRegistration output mapping template space (as moving) to struturalImage (fixed).
 #' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
@@ -88,8 +88,10 @@ t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=verbose )
+notemplateMap = FALSE
 if ( any( is.na( templateMap ) ) )
   {
+  notemplateMap = TRUE
   mni = antsImageRead( getANTsRData( "mni" ) )
   templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
     verbose=verbose )
@@ -685,26 +687,26 @@ cc = igraph::transitivity(graph)
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 
 # get priors for different networks
-if ( ! exists( "networkPriors" ) )
+if ( ! exists( "networkPriors" ) & notemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
   ilist = networkPriors$images
   for ( i in 1:length(ilist) )
     ilist[[i]] = antsApplyTransforms( meanbold, ilist[[i]], mni2boldmaps )
-  }
-pr = imageListToMatrix( ilist, mask )
-refSignal = ( boldMat %*% t(pr) )
-networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-mdl = lm( boldMat[ goodtimes, ] ~ . , data=networkDf )
-bmdl = bigLMStats( mdl, 1.e-4 )
-betas = bmdl$beta.t["ROI",]
-betasI = makeImage( mask, betas )
-loth = quantile(  betas, probs=0.8 )
-if ( verbose )
-  plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
-        window.overlay = c( loth, max(betas) ) )
+  pr = imageListToMatrix( ilist, mask )
+  refSignal = ( boldMat %*% t(pr) )
+  networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
+  mdl = lm( boldMat[ goodtimes, ] ~ . , data=networkDf )
+  bmdl = bigLMStats( mdl, 1.e-4 )
+  betas = bmdl$beta.t["ROI",]
+  betasI = makeImage( mask, betas )
+  loth = quantile(  betas, probs=0.8 )
+  if ( verbose )
+    plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
+          window.overlay = c( loth, max(betas) ) )
+  } else betasI = NA
 connMatNodes = NA
-if ( is.na( structuralNodes )  )
+if ( is.na( structuralNodes ) & notemplateMap )
   {
   dmnnodes = antsImageRead( getANTsRData("mnidfn") )
   dmnnodes = antsApplyTransforms( meanbold, dmnnodes, mni2boldmaps,
@@ -716,7 +718,10 @@ if ( is.na( structuralNodes )  )
   dmnpr = imageListToMatrix( dmnlist, mask )
   dmnref = ( boldMat %*% t(dmnpr) )
   connMatNodes = cor( dmnref )
-  } else {
+  }
+
+  if ( ! is.na( structuralNodes ) )
+    {
     dmnnodes = antsApplyTransforms(
       meanbold, structuralNodes, boldmap$fwdtransforms,
       interpolator = 'NearestNeighbor' )

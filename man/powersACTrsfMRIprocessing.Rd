@@ -27,7 +27,7 @@ frames should be interpolated. Set typically between 0.1 and 0.5.}
 
 \item{structuralNodes}{regions of interest for network analysis, in the structural image space.}
 
-\item{templateMap}{antsRegistration output mapping struturalImage to template space.}
+\item{templateMap}{antsRegistration output mapping template space (as moving) to struturalImage (fixed).}
 
 \item{smoothingSigmas}{4-vector defining amount of smoothing in FWHM units}
 

@@ -81,13 +81,13 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     fileid == "fmrinetworks")
     myext <- ".zip"
   tdir <- tempdir()  # for temporary storage
-  tfn <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = myext)  # for temporary storage
+  tfn <- tempfile( pattern = "antsr", tmpdir = tdir, fileext = myext )  # for temporary storage
   if (usefixedlocation == TRUE) {
-    tdir <- system.file(package = "ANTsR")  # for a fixed location
-    tfn <- paste(tdir, "/html/", fileid, myext, sep = "")  # for a fixed location
+    tdir <- system.file( package = "ANTsR" )  # for a fixed location
+    tfn <- paste( tdir, "/html/", fileid, myext, sep = "" )  # for a fixed location
   }
-  if (!file.exists(tfn))
-    download.file(myurl, tfn)
+  if ( ! file.exists( tfn ) )
+    download.file( myurl, tfn )
   if ( fileid == "fmrinetworks" )
     {
     inms = c(
