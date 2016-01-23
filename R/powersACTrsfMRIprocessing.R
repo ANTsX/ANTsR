@@ -34,6 +34,7 @@
 #'   \item{seg2bold: }{strutural segmentation in bold space.}
 #'   \item{nodes2bold: }{strutural nodes in bold space.}
 #'   \item{mapsToTemplate: }{invertible maps from bold to template space.}
+#'   \item{networkPriors2Bold: }{standard network priors in BOLD space.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -53,6 +54,14 @@
 #' t1 = antsImageRead( t1fn   )
 #' tt = powersACTrsfMRIprocessing( img, fdthresh=0.2, repeatMotionEst=1,
 #'   structuralImage=t1, structuralSeg=seg, verbose= TRUE )
+#' # bold to template
+#' antsApplyTransforms( mni, getAverageOfTimeSeries( img ),
+#'    transformlist=tt$mapsToTemplate$toTemplate,
+#'    whichtoinvert=tt$mapsToTemplate$toTemplateInversion )
+#' # template to bold
+#' antsApplyTransforms( getAverageOfTimeSeries( img ), mni,
+#'    transformlist=tt$mapsToTemplate$toBold,
+#'    whichtoinvert=tt$mapsToTemplate$toBoldInversion )
 #' }
 #'
 #' @export powersACTrsfMRIprocessing
@@ -91,6 +100,7 @@ if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold al
   mask1 = iMath(mask,"ME",1) # gm
   mask2 = iMath(mask,"ME",2) # wm
   structuralSeg = structuralSeg + mask1 + mask2
+  t1brain = meanbold * mask
   }
   else t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 if ( ! exists("boldmap") )
@@ -695,13 +705,15 @@ cc = igraph::transitivity(graph)
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 
 # get priors for different networks
+networkPriors2Bold=NA
 if ( ! exists( "networkPriors" ) & notemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
-  ilist = networkPriors$images
-  for ( i in 1:length(ilist) )
-    ilist[[i]] = antsApplyTransforms( meanbold, ilist[[i]], mni2boldmaps )
-  pr = imageListToMatrix( ilist, mask )
+  networkPriors2Bold = networkPriors$images
+  for ( i in 1:length(networkPriors2Bold) )
+    networkPriors2Bold[[i]] = antsApplyTransforms( meanbold,
+      networkPriors2Bold[[i]], mni2boldmaps )
+  pr = imageListToMatrix( networkPriors2Bold, mask )
   refSignal = ( boldMat %*% t(pr) )
   networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
   mdl = lm( boldMat[ goodtimes, ] ~ . , data=networkDf )
@@ -747,8 +759,9 @@ if ( is.na( structuralNodes ) & notemplateMap )
     connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
 
   concatenatedMaps =
-    list( fwdtransforms =  mni2boldmaps,
-          invtransforms =  mni2boldmapsInv )
+    list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
+          toTemplate =  mni2boldmapsInv,
+          toTemplateInversion = c(TRUE,FALSE,TRUE,FALSE) )
 
   return(
     list(
@@ -763,7 +776,8 @@ if ( is.na( structuralNodes ) & notemplateMap )
         goodtimes     = goodtimes,
         seg2bold      = seg2bold,
         nodes2bold    = dmnnodes,
-        mapsToTemplate = concatenatedMaps
+        mapsToTemplate = concatenatedMaps,
+        networkPriors2Bold = networkPriors2Bold
         )
       )
 }

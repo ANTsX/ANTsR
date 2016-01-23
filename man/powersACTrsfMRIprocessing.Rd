@@ -49,6 +49,7 @@ outputs a list containing:
   \item{seg2bold: }{strutural segmentation in bold space.}
   \item{nodes2bold: }{strutural nodes in bold space.}
   \item{mapsToTemplate: }{invertible maps from bold to template space.}
+  \item{networkPriors2Bold: }{standard network priors in BOLD space.}
 }
 }
 \description{
@@ -76,6 +77,14 @@ t1fn = list.files( pre, full.names = TRUE, recursive = TRUE,
 t1 = antsImageRead( t1fn   )
 tt = powersACTrsfMRIprocessing( img, fdthresh=0.2, repeatMotionEst=1,
   structuralImage=t1, structuralSeg=seg, verbose= TRUE )
+# bold to template
+antsApplyTransforms( mni, getAverageOfTimeSeries( img ),
+   transformlist=tt$mapsToTemplate$toTemplate,
+   whichtoinvert=tt$mapsToTemplate$toTemplateInversion )
+# template to bold
+antsApplyTransforms( getAverageOfTimeSeries( img ), mni,
+   transformlist=tt$mapsToTemplate$toBold,
+   whichtoinvert=tt$mapsToTemplate$toBoldInversion )
 }
 
 }
