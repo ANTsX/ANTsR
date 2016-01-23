@@ -346,7 +346,7 @@ if ( haveBadTimes ) {
     boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
       method='natural', xout=badtimes )$y
     }
-  } else {
+  } else { # FIXME - may not want to do this ie may want to avoid using badtimes
     badtimes  = NA
     haveBadTimes = FALSE
     goodtimes = ( 1:nTimes )
@@ -693,7 +693,18 @@ if ( is.na( structuralNodes )  )
   dmnpr = imageListToMatrix( dmnlist, mask )
   dmnref = ( boldMat %*% t(dmnpr) )
   connMatNodes = cor( dmnref )
-  }
+  } else {
+    dmnnodes = antsApplyTransforms(
+      meanbold, structuralNodes, boldmap$fwdtransforms,
+      interpolator = 'NearestNeighbor' )
+    ulabs = sort( unique( dmnnodes[ mask == 1 & dmnnodes > 0 ] ) )
+    dmnlist = list()
+    for ( i in 1:length( ulabs ) )
+      dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
+    dmnpr = imageListToMatrix( dmnlist, mask )
+    dmnref = ( boldMat %*% t(dmnpr) )
+    connMatNodes = cor( dmnref )
+    }
   connMatNodesPartialCorr = NA
   if ( usePkg( "corpcor" ) )
     connMatNodesPartialCorr = cor2pcor( connMatNodes ) # partial correlation
