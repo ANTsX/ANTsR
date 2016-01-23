@@ -33,6 +33,7 @@
 #'   \item{goodtimes: }{good time points.}
 #'   \item{seg2bold: }{strutural segmentation in bold space.}
 #'   \item{nodes2bold: }{strutural nodes in bold space.}
+#'   \item{mnimap: }{invertible maps to MNI space.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -744,8 +745,9 @@ return(
         connMatNodesPartialCorr = connMatNodesPartialCorr,
         FD            = moco$fd$MeanDisplacement,
         goodtimes     = goodtimes,
+        seg2bold      = seg2bold,
         nodes2bold    = dmnnodes,
-        seg2bold      = seg2bold
+        mnimap        = mnimap
         )
       )
 }

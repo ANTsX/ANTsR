@@ -48,6 +48,7 @@ outputs a list containing:
   \item{goodtimes: }{good time points.}
   \item{seg2bold: }{strutural segmentation in bold space.}
   \item{nodes2bold: }{strutural nodes in bold space.}
+  \item{mnimap: }{invertible maps to MNI space.}
 }
 }
 \description{
