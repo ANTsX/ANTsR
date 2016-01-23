@@ -2,15 +2,16 @@
 title: "iMath (mathematical operations inside ANTsR)"
 author: "Brian B. Avants, Arman Eshaghi, Jeffrey T. Duda"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
 bibliography: REFERENCES.bib
+output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Transformations and statistical representations for images in R}
     \usepackage[utf8]{inputenc}
 ---
 
-```{r, echo = FALSE, message = FALSE}
+
+```{r global options, include=FALSE}
 library( knitr )
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
