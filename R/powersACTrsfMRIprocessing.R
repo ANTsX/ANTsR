@@ -127,7 +127,7 @@ if ( verbose )
   ssPlot <- ggplot2::ggplot(ss.dat)
     ssPlot <- ssPlot + ggplot2::geom_line(ggplot2::aes(x=Time, y=Values), size=0.5)
     ssPlot <- ssPlot + ggplot2::geom_rect(data=noss.data, noss.rect.aes)
-    ssPlot <- ssPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+    ssPlot <- ssPlot + ggplot2::theme(text=ggplot2::element_text((size=10), legend.position="none")
     ssPlot <- ssPlot + ggplot2::ggtitle("Exclude points previous to magnetization steady state")
   print(ssPlot)
   invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
@@ -169,7 +169,7 @@ if ( verbose )
   {
   regPlot <- ggplot2::ggplot(moco.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Type) )
     regPlot <- regPlot + ggplot2::geom_line(size=0.5)
-    regPlot <- regPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+    regPlot <- regPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
     regPlot <- regPlot + ggplot2::ggtitle("Motion correction parameters")
     regPlot <- regPlot + ggplot2::facet_grid(Category ~ ., scales="free" )
     regPlot <- regPlot + ggplot2::scale_color_discrete(breaks=orderedBreaks)
@@ -190,7 +190,7 @@ if ( verbose )
 
   dvarPlot <- ggplot2::ggplot(dvar.data, ggplot2::aes(x=Time, y=DVARS, group=Type, colour=Type) )
   dvarPlot <- dvarPlot + ggplot2::geom_line(size=0.5)
-  dvarPlot <- dvarPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  dvarPlot <- dvarPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
   dvarPlot <- dvarPlot + ggplot2::ggtitle("DVARS: pre and post motion correction")
   dvarPlot <- dvarPlot + scale_colour_discrete(breaks=c("Original", "Moco"))
   print(dvarPlot)
@@ -222,7 +222,7 @@ if ( haveBadTimes & verbose )
 
   badPlot <- ggplot2::ggplot(bad.data) + ggplot2::geom_line(ggplot2::aes(x=Time, y=FD))
   badPlot <- badPlot + ggplot2::geom_hline( yintercept=fdthresh, linetype="dashed", alpha=0.5 )
-  badPlot <- badPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  badPlot <- badPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="none")
   badPlot <- badPlot + ggplot2::ggtitle("Bad timepoints")
   badPlot <- badPlot + ggplot2::geom_rect(data=bad.data.rect, rect.aes)
   print(badPlot)
@@ -252,7 +252,7 @@ if ( verbose )
   trend.dat$Category = trendCategory
   trendPlot <- ggplot2::ggplot(trend.dat, ggplot2::aes(x=Time, y=Signal, group=Type, colour=Type) )
   trendPlot <- trendPlot + ggplot2::geom_line(size=0.5)
-  trendPlot <- trendPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  trendPlot <- trendPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
   trendPlot <- trendPlot + ggplot2::facet_grid(Category ~ ., scales="free" )
   trendPlot <- trendPlot + ggplot2::ggtitle("Detrending the time-series")
   print(trendPlot)
@@ -308,7 +308,7 @@ if ( verbose )
 
   tissuePlot <- ggplot2::ggplot(tissue.dat, ggplot2::aes(x=Time, y=Signal, group=Type, colour=Type) )
   tissuePlot <- tissuePlot + ggplot2::geom_line(size=0.5)
-  tissuePlot <- tissuePlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  tissuePlot <- tissuePlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
   tissuePlot <- tissuePlot + ggplot2::facet_grid(Category ~ ., scales="free" )
   tissuePlot <- tissuePlot + ggplot2::ggtitle("Nuisance parameters")
   print(tissuePlot)
@@ -323,7 +323,7 @@ ctxMean = rowMeans(boldMat[,ctxVox])
 
 ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 mocoNuis = cbind(reg_params, reg_params*reg_params)
-mocoNuis = detrend(mocoNuis)
+mocoNuis = pracma::detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
@@ -340,7 +340,7 @@ if ( verbose )
   cortex.dat$Type = c(rep("Original",nTimes), rep("Regressed",nTimes))
   cortexPlot = ggplot2::ggplot(cortex.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Type))
   cortexPlot = cortexPlot + ggplot2::geom_line(size=0.5)
-  cortexPlot = cortexPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  cortexPlot = cortexPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
   cortexPlot = cortexPlot + ggplot2::ggtitle("Effect of nuisance parameter regression")
   cortexPlot = cortexPlot + ggplot2::facet_grid(Type ~ ., scales="free" )
   print(cortexPlot)
@@ -390,14 +390,14 @@ if ( verbose )
   freq.dat$Data = factor(freq.dat$Data, levels=c("Original", "Interpolated", "Filtered", "Smoothed"))
   freqPlot = ggplot2::ggplot(freq.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Data))
   freqPlot = freqPlot + ggplot2::geom_line(size=0.5)
-  freqPlot = freqPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  freqPlot = freqPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="top")
   freqPlot = freqPlot + ggplot2::ggtitle("Effect of bandpass filtering & spatial smoothing")
   freqPlot = freqPlot + ggplot2::facet_grid(Type ~ ., scales="free" )
   print(freqPlot)
   }
 
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-data( powers_areal_mni_itk, package='ANTsR' )
+data("powers_areal_mni_itk", package = "ANTsR", envir = environment())
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
 pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
 labelImg = mask*0
@@ -459,7 +459,7 @@ if ( verbose )
 
   meanPlot = ggplot2::ggplot(means.dat, ggplot2::aes(x=Time, y=Signal, group=ID, colour=ID))
   meanPlot = meanPlot + ggplot2::geom_line(size=0.5)
-  meanPlot = meanPlot + ggplot2::theme(text=element_text(size=10), legend.position="none", axis.text.y=ggplot2::element_blank() )
+  meanPlot = meanPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="none", axis.text.y=ggplot2::element_blank() )
   meanPlot = meanPlot + ggplot2::ggtitle("Mean BOLD signal in network ROIs")
   print(meanPlot)
   }
@@ -494,8 +494,8 @@ if ( verbose )
   sysPlot = ggplot2::ggplot(sys.dat)
   sysPlot = sysPlot + ggplot2::geom_line(ggplot2::aes(x=Time, y=Signal, group=System), size=0.5)
   sysPlot = sysPlot + ggplot2::geom_ribbon(  ggplot2::aes( x=Time, ymin=Lower, ymax=Upper, alpha=0.05, fill=System ) )
-  sysPlot = sysPlot + scale_fill_manual( values = lut, na.value="gray80", name="System", breaks=systemNickNames, drop=FALSE)
-  sysPlot = sysPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  sysPlot = sysPlot + ggplot2::scale_fill_manual( values = lut, na.value="gray80", name="System", breaks=systemNickNames, drop=FALSE)
+  sysPlot = sysPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="none")
   sysPlot = sysPlot + ggplot2::ggtitle("Mean BOLD signal in systems")
   sysPlot = sysPlot + ggplot2::facet_grid(System ~ ., scales="free" )
   print(sysPlot)
@@ -540,9 +540,9 @@ if ( verbose )
   {
   pts$SystemName = factor(pts$SystemName, levels=c("Sensory/Somatomotor Hand", "Sensory/Somatomotor Mouth", "Cingulo-opercular Task Control", "Auditory", "Default Mode", "Memory Retrieval", "Visual", "Fronto-parietal Task Control", "Salience", "Subcortical", "Ventral Attention", "Dorsal Attention", "Cerebellar", "Uncertain"))
   graph = graph.adjacency( adj, mode="directed", weighted=NULL )
-  V(graph)$name = pts$ROI
-  V(graph)$comm = pts$SystemName
-  V(graph)$degree = degree(graph)
+  igraph::V(graph)$name = pts$ROI
+  igraph::V(graph)$comm = pts$SystemName
+  igraph::V(graph)$degree = igraph::degree(graph)
 
   systems = levels(pts$SystemName)
   systemNames = as.character(systems)
@@ -551,15 +551,15 @@ if ( verbose )
   edge_list <- get.data.frame(graph, what = "edges") %>%
     inner_join(node_list %>% select(name, comm), by = c("from" = "name")) %>%
     inner_join(node_list %>% select(name, comm), by = c("to" = "name")) %>%
-    mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
+    dplyr::mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
 
   all_nodes <- sort(node_list$name)
-  plot_data <- edge_list %>% mutate(
+  plot_data <- edge_list %>% dplyr::mutate(
           to = factor(to, levels = all_nodes),
           from = factor(from, levels = all_nodes))
 
   name_order <- (node_list %>% arrange(comm))$name
-  plot_data <- edge_list %>% mutate(
+  plot_data <- edge_list %>% dplyr::mutate(
           to = factor(to, levels = name_order),
           from = factor(from, levels = name_order))
 
@@ -570,32 +570,32 @@ if ( verbose )
 
   adjplot = ggplot2::ggplot( plot_data,
     ggplot2::aes(x = from, y = to, fill = group)) +
-    geom_raster() + theme_bw() + scale_x_discrete(drop = FALSE) +
-    scale_y_discrete(drop = FALSE) +
+    ggplot2::geom_raster() + ggplot2::theme_bw() + ggplot2::scale_x_discrete(drop = FALSE) +
+    ggplot2::scale_y_discrete(drop = FALSE) +
     ggplot2::theme( axis.title=ggplot2::element_blank(),
     axis.ticks=ggplot2::element_blank(),
     axis.text = ggplot2::element_blank(),
     aspect.ratio = 1 ) +
-    scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
+    ggplot2::scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
 
   print(adjplot)
   }
 
 # Retain only the largest connected component
-bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
-components = clusters(bingraph)
+bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
+components = igraph::clusters(bingraph)
 maxID = which(components$csize == max(components$csize))[1]
 adj[components$membership!=maxID,] = 0
 adj[,components$membership!=maxID] = 0
-graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
+graph = igraph::graph.adjacency( adj, mode="undirected", weighted=NULL )
 
 # Set node colors
-graph = set.vertex.attribute(graph, "r", index=V(graph), value=as.double(pts$r))
-graph = set.vertex.attribute(graph, "g", index=V(graph), value=as.double(pts$g))
-graph = set.vertex.attribute(graph, "b", index=V(graph), value=as.double(pts$b))
+graph = igraph::set.vertex.attribute(graph, "r", index=igraph::V(graph), value=as.double(pts$r))
+graph = igraph::set.vertex.attribute(graph, "g", index=igraph::V(graph), value=as.double(pts$g))
+graph = igraph::set.vertex.attribute(graph, "b", index=igraph::V(graph), value=as.double(pts$b))
 
 # Set edge colors
-edges = get.edges( graph, E(graph) )
+edges = igraph::get.edges( graph, E(graph) )
 nEdges = dim(edges)[1]
 er = rep(200, nEdges)
 eg = rep(200, nEdges)
@@ -613,9 +613,9 @@ for ( e in c(1:nEdges) )
     }
   }
 
-graph = set.edge.attribute(graph, "r", index=E(graph), value=as.double(er))
-graph = set.edge.attribute(graph, "g", index=E(graph), value=as.double(eg))
-graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
+graph = igraph::set.edge.attribute(graph, "r", index=igraph::E(graph), value=as.double(er))
+graph = igraph::set.edge.attribute(graph, "g", index=igraph::E(graph), value=as.double(eg))
+graph = igraph::set.edge.attribute(graph, "b", index=igraph::E(graph), value=as.double(eb))
 
 # uncomment line below to write out graph
 # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
@@ -662,17 +662,17 @@ cnode.dat$Metric = c(
 if ( verbose )
   {
   cnodePlot = ggplot2::ggplot(cnode.dat, ggplot2::aes(x=Node, y=Value, group=Metric, fill=Metric, colour=Metric))
-  cnodePlot = cnodePlot + geom_point()
-  cnodePlot = cnodePlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  cnodePlot = cnodePlot + ggplot2::geom_point()
+  cnodePlot = cnodePlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="none")
   cnodePlot = cnodePlot + ggplot2::ggtitle("Node metrics")
   cnodePlot = cnodePlot + ggplot2::facet_grid(Metric~ ., scales="free")
   invisible(print(cnodePlot))
   }
 
-geff<-1/(shortest.paths(graph))
+geff<-1/(igraph::tshortest.paths(graph))
 geff[!is.finite(geff)]<-NA
 geff<-mean(geff,na.rm=TRUE)
-cc = transitivity(graph)
+cc = igraph::transitivity(graph)
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 
 # get priors for different networks
