@@ -84,7 +84,15 @@ if ( missing(img) ) # for stand-alone testing
   }
 meanbold = getAverageOfTimeSeries( img )
 mask = getMask( meanbold )
-t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
+if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold alone
+  {
+  structuralImage = antsImageClone( meanbold )
+  structuralSeg = antsImageClone( mask )
+  mask1 = iMath(mask,"ME",1) # gm
+  mask2 = iMath(mask,"ME",2) # wm
+  structuralSeg = structuralSeg + mask1 + mask2
+  }
+  else t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=verbose )
