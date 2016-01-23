@@ -62,7 +62,7 @@ powersACTrsfMRIprocessing <- function( img,
   verbose = FALSE )
 {
 print( "TODO:
-  input list of structuralNodes, allow mapping rsf to reference space, 
+  input list of structuralNodes, allow mapping rsf to reference space,
   allow custom template, take ACT maps as input")
 if ( ! usePkg( "ggplot2" ) ) stop("need ggplot2")
 if ( ! usePkg( "igraph"  ) ) stop("need igraph")
@@ -118,17 +118,17 @@ if ( verbose )
   {
   noss.data = data.frame(Start=0)
   noss.data$Stop = (steady-1)*tr
-  noss.rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
+  noss.rect.aes = ggplot2::aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
 
   # mean signal in brain
   ss.dat <- data.frame(Time=rep(1:allTimes)*tr)
   ss.dat$Values = fullmean
 
-  ssPlot <- ggplot(ss.dat)
-    ssPlot <- ssPlot + geom_line(aes(x=Time, y=Values), size=0.5)
-    ssPlot <- ssPlot + geom_rect(data=noss.data, noss.rect.aes)
-    ssPlot <- ssPlot + theme(text=element_text(size=10), legend.position="none")
-    ssPlot <- ssPlot + ggtitle("Exclude points previous to magnetization steady state")
+  ssPlot <- ggplot2::ggplot(ss.dat)
+    ssPlot <- ssPlot + ggplot2::geom_line(ggplot2::aes(x=Time, y=Values), size=0.5)
+    ssPlot <- ssPlot + ggplot2::geom_rect(data=noss.data, noss.rect.aes)
+    ssPlot <- ssPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+    ssPlot <- ssPlot + ggplot2::ggtitle("Exclude points previous to magnetization steady state")
   print(ssPlot)
   invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
   }
@@ -167,12 +167,12 @@ moco.dat$Category = c( rep("Angle", 3*nTimes), rep("Displacement", 4*nTimes) )
 moco.dat$Type = rep(c("Pitch", "Roll", "Yaw","X", "Y", "Z", "Framewise"), each=nTimes)
 if ( verbose )
   {
-  regPlot <- ggplot(moco.dat, aes(x=Time, y=Values, group=Type, colour=Type) )
-    regPlot <- regPlot + geom_line(size=0.5)
-    regPlot <- regPlot + theme(text=element_text(size=10), legend.position="top")
-    regPlot <- regPlot + ggtitle("Motion correction parameters")
-    regPlot <- regPlot + facet_grid(Category ~ ., scales="free" )
-    regPlot <- regPlot + scale_color_discrete(breaks=orderedBreaks)
+  regPlot <- ggplot2::ggplot(moco.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Type) )
+    regPlot <- regPlot + ggplot2::geom_line(size=0.5)
+    regPlot <- regPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+    regPlot <- regPlot + ggplot2::ggtitle("Motion correction parameters")
+    regPlot <- regPlot + ggplot2::facet_grid(Category ~ ., scales="free" )
+    regPlot <- regPlot + ggplot2::scale_color_discrete(breaks=orderedBreaks)
   print(regPlot)
   }
 
@@ -188,10 +188,10 @@ if ( verbose )
   dvar.data <- data.frame(DVARS=c(orig_dvars, dvars), Type=dvarType, Time=dvarTime)
   dvarType = factor(dvarType, levels=c("Original", "Moco"))
 
-  dvarPlot <- ggplot(dvar.data, aes(x=Time, y=DVARS, group=Type, colour=Type) )
-  dvarPlot <- dvarPlot + geom_line(size=0.5)
-  dvarPlot <- dvarPlot + theme(text=element_text(size=10), legend.position="top")
-  dvarPlot <- dvarPlot + ggtitle("DVARS: pre and post motion correction")
+  dvarPlot <- ggplot2::ggplot(dvar.data, ggplot2::aes(x=Time, y=DVARS, group=Type, colour=Type) )
+  dvarPlot <- dvarPlot + ggplot2::geom_line(size=0.5)
+  dvarPlot <- dvarPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  dvarPlot <- dvarPlot + ggplot2::ggtitle("DVARS: pre and post motion correction")
   dvarPlot <- dvarPlot + scale_colour_discrete(breaks=c("Original", "Moco"))
   print(dvarPlot)
   }
@@ -218,13 +218,13 @@ if ( haveBadTimes & verbose )
 
   bad.data.rect = data.frame(Start=badstarts*tr)
   bad.data.rect$Stop = (badstarts+1)*tr
-  rect.aes = aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
+  rect.aes = ggplot2::aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
 
-  badPlot <- ggplot(bad.data) + geom_line(aes(x=Time, y=FD))
-  badPlot <- badPlot + geom_hline( yintercept=fdthresh, linetype="dashed", alpha=0.5 )
-  badPlot <- badPlot + theme(text=element_text(size=10), legend.position="none")
-  badPlot <- badPlot + ggtitle("Bad timepoints")
-  badPlot <- badPlot + geom_rect(data=bad.data.rect, rect.aes)
+  badPlot <- ggplot2::ggplot(bad.data) + ggplot2::geom_line(ggplot2::aes(x=Time, y=FD))
+  badPlot <- badPlot + ggplot2::geom_hline( yintercept=fdthresh, linetype="dashed", alpha=0.5 )
+  badPlot <- badPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  badPlot <- badPlot + ggplot2::ggtitle("Bad timepoints")
+  badPlot <- badPlot + ggplot2::geom_rect(data=bad.data.rect, rect.aes)
   print(badPlot)
   }
 
@@ -232,7 +232,7 @@ if ( haveBadTimes & verbose )
 global_pre <- rowMeans(timeseries2matrix(img, mask))
 global_moco <- rowMeans(timeseries2matrix(moco$moco_img, mask))
 boldMat = timeseries2matrix(moco$moco_img, mask)
-boldMat[goodtimes,] = detrend(boldMat[goodtimes,])
+boldMat[goodtimes,] = pracma::detrend(boldMat[goodtimes,])
 if ( haveBadTimes ) boldMat[badtimes,] = NA
 
 global_moco_detrend = rowMeans(boldMat)
@@ -250,11 +250,11 @@ if ( verbose )
   trend.dat$Signal = c(global_pre, global_moco, global_moco_detrend)
   trend.dat$Type = trendType
   trend.dat$Category = trendCategory
-  trendPlot <- ggplot(trend.dat, aes(x=Time, y=Signal, group=Type, colour=Type) )
-  trendPlot <- trendPlot + geom_line(size=0.5)
-  trendPlot <- trendPlot + theme(text=element_text(size=10), legend.position="top")
-  trendPlot <- trendPlot + facet_grid(Category ~ ., scales="free" )
-  trendPlot <- trendPlot + ggtitle("Detrending the time-series")
+  trendPlot <- ggplot2::ggplot(trend.dat, ggplot2::aes(x=Time, y=Signal, group=Type, colour=Type) )
+  trendPlot <- trendPlot + ggplot2::geom_line(size=0.5)
+  trendPlot <- trendPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  trendPlot <- trendPlot + ggplot2::facet_grid(Category ~ ., scales="free" )
+  trendPlot <- trendPlot + ggplot2::ggtitle("Detrending the time-series")
   print(trendPlot)
   }
 
@@ -306,11 +306,11 @@ if ( verbose )
   tissue.dat$Type = tissueType
   tissue.dat$Category = tissueCategory
 
-  tissuePlot <- ggplot(tissue.dat, aes(x=Time, y=Signal, group=Type, colour=Type) )
-  tissuePlot <- tissuePlot + geom_line(size=0.5)
-  tissuePlot <- tissuePlot + theme(text=element_text(size=10), legend.position="top")
-  tissuePlot <- tissuePlot + facet_grid(Category ~ ., scales="free" )
-  tissuePlot <- tissuePlot + ggtitle("Nuisance parameters")
+  tissuePlot <- ggplot2::ggplot(tissue.dat, ggplot2::aes(x=Time, y=Signal, group=Type, colour=Type) )
+  tissuePlot <- tissuePlot + ggplot2::geom_line(size=0.5)
+  tissuePlot <- tissuePlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  tissuePlot <- tissuePlot + ggplot2::facet_grid(Category ~ ., scales="free" )
+  tissuePlot <- tissuePlot + ggplot2::ggtitle("Nuisance parameters")
   print(tissuePlot)
   }
 
@@ -338,11 +338,11 @@ if ( verbose )
   cortex.dat =  data.frame( Time=rep(1:nTimes,2) )
   cortex.dat$Values = c(ctxMean, ctxMeanRegressed)
   cortex.dat$Type = c(rep("Original",nTimes), rep("Regressed",nTimes))
-  cortexPlot = ggplot(cortex.dat, aes(x=Time, y=Values, group=Type, colour=Type))
-  cortexPlot = cortexPlot + geom_line(size=0.5)
-  cortexPlot = cortexPlot + theme(text=element_text(size=10), legend.position="top")
-  cortexPlot = cortexPlot + ggtitle("Effect of nuisance parameter regression")
-  cortexPlot = cortexPlot + facet_grid(Type ~ ., scales="free" )
+  cortexPlot = ggplot2::ggplot(cortex.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Type))
+  cortexPlot = cortexPlot + ggplot2::geom_line(size=0.5)
+  cortexPlot = cortexPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  cortexPlot = cortexPlot + ggplot2::ggtitle("Effect of nuisance parameter regression")
+  cortexPlot = cortexPlot + ggplot2::facet_grid(Type ~ ., scales="free" )
   print(cortexPlot)
   }
 
@@ -388,16 +388,16 @@ if ( verbose )
   freq.dat$Data[badtimes] = "Interpolated"
   freq.dat$Type = factor(freq.dat$Type, levels=c("Original", "Filtered", "Smoothed"))
   freq.dat$Data = factor(freq.dat$Data, levels=c("Original", "Interpolated", "Filtered", "Smoothed"))
-  freqPlot = ggplot(freq.dat, aes(x=Time, y=Values, group=Type, colour=Data))
-  freqPlot = freqPlot + geom_line(size=0.5)
-  freqPlot = freqPlot + theme(text=element_text(size=10), legend.position="top")
-  freqPlot = freqPlot + ggtitle("Effect of bandpass filtering & spatial smoothing")
-  freqPlot = freqPlot + facet_grid(Type ~ ., scales="free" )
+  freqPlot = ggplot2::ggplot(freq.dat, ggplot2::aes(x=Time, y=Values, group=Type, colour=Data))
+  freqPlot = freqPlot + ggplot2::geom_line(size=0.5)
+  freqPlot = freqPlot + ggplot2::theme(text=element_text(size=10), legend.position="top")
+  freqPlot = freqPlot + ggplot2::ggtitle("Effect of bandpass filtering & spatial smoothing")
+  freqPlot = freqPlot + ggplot2::facet_grid(Type ~ ., scales="free" )
   print(freqPlot)
   }
 
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-data(powers_areal_mni_itk)
+data( powers_areal_mni_itk, package='ANTsR' )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
 pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
 labelImg = mask*0
@@ -457,10 +457,10 @@ if ( verbose )
   means.dat$Signal = (as.vector(plotMat)/2)+yoffset
   means.dat$ID = factor(rep( 1:nLabels, each=nActualTimes))
 
-  meanPlot = ggplot(means.dat, aes(x=Time, y=Signal, group=ID, colour=ID))
-  meanPlot = meanPlot + geom_line(size=0.5)
-  meanPlot = meanPlot + theme(text=element_text(size=10), legend.position="none", axis.text.y=element_blank())
-  meanPlot = meanPlot + ggtitle("Mean BOLD signal in network ROIs")
+  meanPlot = ggplot2::ggplot(means.dat, ggplot2::aes(x=Time, y=Signal, group=ID, colour=ID))
+  meanPlot = meanPlot + ggplot2::geom_line(size=0.5)
+  meanPlot = meanPlot + ggplot2::theme(text=element_text(size=10), legend.position="none", axis.text.y=ggplot2::element_blank() )
+  meanPlot = meanPlot + ggplot2::ggtitle("Mean BOLD signal in network ROIs")
   print(meanPlot)
   }
 
@@ -491,13 +491,13 @@ if ( verbose )
   sys.dat$System = factor( rep( systemNickNames, foreach=nActualTimes), levels=systemNickNames)
   sys.dat$Lower = as.vector(sysMatMean) - as.vector(sysMatSD)
   sys.dat$Upper = as.vector(sysMatMean) + as.vector(sysMatSD)
-  sysPlot = ggplot(sys.dat)
-  sysPlot = sysPlot + geom_line(aes(x=Time, y=Signal, group=System), size=0.5)
-  sysPlot = sysPlot + geom_ribbon(aes(x=Time, ymin=Lower, ymax=Upper, alpha=0.05, fill=System))
+  sysPlot = ggplot2::ggplot(sys.dat)
+  sysPlot = sysPlot + ggplot2::geom_line(ggplot2::aes(x=Time, y=Signal, group=System), size=0.5)
+  sysPlot = sysPlot + ggplot2::geom_ribbon(  ggplot2::aes( x=Time, ymin=Lower, ymax=Upper, alpha=0.05, fill=System ) )
   sysPlot = sysPlot + scale_fill_manual( values = lut, na.value="gray80", name="System", breaks=systemNickNames, drop=FALSE)
-  sysPlot = sysPlot + theme(text=element_text(size=10), legend.position="none")
-  sysPlot = sysPlot + ggtitle("Mean BOLD signal in systems")
-  sysPlot = sysPlot + facet_grid(System ~ ., scales="free" )
+  sysPlot = sysPlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  sysPlot = sysPlot + ggplot2::ggtitle("Mean BOLD signal in systems")
+  sysPlot = sysPlot + ggplot2::facet_grid(System ~ ., scales="free" )
   print(sysPlot)
   }
 
@@ -568,7 +568,15 @@ if ( verbose )
 
   lut = c("Sensory/Somatomotor Hand"="cyan3", "Sensory/Somatomotor Mouth"="orange", "Cingulo-opercular Task Control"="purple", "Auditory" = "pink2", "Default Mode"="red", "Memory Retrieval"="gray50", "Visual"="blue", "Fronto-parietal Task Control"="yellow2", "Salience"="black", "Subcortical"="chocolate4", "Ventral Attention"="aquamarine4", "Dorsal Attention"="green", "Cerebellar"="cadetblue1", "Uncertain"="peachpuff2" )
 
-  adjplot = ggplot(plot_data, aes(x = from, y = to, fill = group)) + geom_raster() + theme_bw() + scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) + theme( axis.title=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),  aspect.ratio = 1 ) + scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
+  adjplot = ggplot2::ggplot( plot_data,
+    ggplot2::aes(x = from, y = to, fill = group)) +
+    geom_raster() + theme_bw() + scale_x_discrete(drop = FALSE) +
+    scale_y_discrete(drop = FALSE) +
+    ggplot2::theme( axis.title=ggplot2::element_blank(),
+    axis.ticks=ggplot2::element_blank(),
+    axis.text = ggplot2::element_blank(),
+    aspect.ratio = 1 ) +
+    scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
 
   print(adjplot)
   }
@@ -611,16 +619,16 @@ graph = set.edge.attribute(graph, "b", index=E(graph), value=as.double(eb))
 
 # uncomment line below to write out graph
 # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
-graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
+graph = igraph::graph.adjacency( adj, mode="undirected", weighted=NULL )
 deg = degree(graph)
 deg[ deg == 0 ] = NA
-pathsmat =  shortest.paths(graph, weights=NA)
+pathsmat =  igraph::shortest.paths(graph, weights=NA)
 pathsmat[!is.finite(pathsmat)] = NA
 paths = rowMeans(pathsmat, na.rm=TRUE)
 paths[paths==0] = NA
-clust = transitivity(graph, type="local")
+clust = igraph::transitivity(graph, type="local")
 clust[deg < 2] = NA
-pager = page.rank(graph)$vector
+pager = igraph::page.rank(graph)$vector
 pager[deg < 2] = NA
 # from http://pastebin.com/XqkEYtJS
 leff <- numeric(length(deg))
@@ -628,10 +636,10 @@ goodnodes <- which(deg > 1)
 leff[goodnodes] <- sapply( goodnodes,
   function( x )
     {
-    neighbs <- neighbors(graph, v=x)
-    g.sub <- induced.subgraph(graph, neighbs)
-    Nv <- vcount(g.sub)
-    lpaths <- shortest.paths(g.sub, weights=NA)
+    neighbs <- igraph::neighbors(graph, v=x)
+    g.sub <- igraph::induced.subgraph(graph, neighbs)
+    Nv <- igraph::vcount(g.sub)
+    lpaths <- igraph::shortest.paths(g.sub, weights=NA)
     lpaths <- paths[upper.tri(lpaths)]
     pathsup <- lpaths[upper.tri(lpaths)]
     2 / Nv / (Nv - 1) * sum(1 / lpaths[which(is.na(lpaths)==FALSE)])
@@ -653,11 +661,11 @@ cnode.dat$Metric = c(
 
 if ( verbose )
   {
-  cnodePlot = ggplot(cnode.dat, aes(x=Node, y=Value, group=Metric, fill=Metric, colour=Metric))
+  cnodePlot = ggplot2::ggplot(cnode.dat, ggplot2::aes(x=Node, y=Value, group=Metric, fill=Metric, colour=Metric))
   cnodePlot = cnodePlot + geom_point()
-  cnodePlot = cnodePlot + theme(text=element_text(size=10), legend.position="none")
-  cnodePlot = cnodePlot + ggtitle("Node metrics")
-  cnodePlot = cnodePlot + facet_grid(Metric~ ., scales="free")
+  cnodePlot = cnodePlot + ggplot2::theme(text=element_text(size=10), legend.position="none")
+  cnodePlot = cnodePlot + ggplot2::ggtitle("Node metrics")
+  cnodePlot = cnodePlot + ggplot2::facet_grid(Metric~ ., scales="free")
   invisible(print(cnodePlot))
   }
 
@@ -713,7 +721,7 @@ if ( is.na( structuralNodes )  )
     }
   connMatNodesPartialCorr = NA
   if ( usePkg( "corpcor" ) )
-    connMatNodesPartialCorr = cor2pcor( connMatNodes ) # partial correlation
+    connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
 return(
     list(
         boldMat       = boldMat,
