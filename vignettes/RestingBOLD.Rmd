@@ -857,7 +857,7 @@ cc = transitivity(graph)
 
 
 Finally, make a dense map of the default mode network, using regression.
-```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5},eval=FALSE}
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 # get priors for different networks
 if ( ! exists( "networkPriors" ) )
