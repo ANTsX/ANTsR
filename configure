@@ -42,7 +42,31 @@ echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
   -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
   -I\${myantssource}/Tensor/" >> Makevars
 fi
-cat Makevars.in >> Makevars
+
+echo "CXX_STD = CXX11" >> Makevars
+
+echo "myantslib=\${PWD}/antb/lib/" >> Makevars
+
+echo "libants=\`find \${myantslib} -name \"lib*.a\"\`" >> Makevars
+
+echo "libitk=\`find \\\`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\\\` -name \"lib*.a\"\` " >> Makevars
+
+echo "PKG_LIBS = \${libitk}  \${libants} \${libitk} \${libants} \${libitk} \
+                 \${libants} \${libitk} \${libants} \${itklib}  \${libants} \
+                 \${libitk} \${libants} \${itklib}   \${libants} \${itklib} \
+                 \${libants} \${libitk} \${libants} \${itklib}" >> Makevars
+
+echo ".PHONY: all libs" >> Makevars
+
+echo "all: \$(SHLIB)" >> Makevars
+
+echo "\$(SHLIB): libs" >> Makevars
+
+echo "tlibs: ; cd \${PWD}/antb" >> Makevars
+
+echo "libs: ; cd \${PWD}/antb && \$(MAKE) -j 2" >> Makevars
+
+#  cat Makevars.in >> Makevars
 
 # get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
