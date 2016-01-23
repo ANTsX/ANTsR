@@ -11,7 +11,7 @@ powersACTrsfMRIprocessing(img, fdthresh = 0.2, repeatMotionEst = 1,
 \arguments{
 \item{img}{input time series antsImage}
 
-\item{fdthresh}{threshold for framewise displacment.  determines what time
+\item{fdthresh}{threshold for framewise displacement.  determines what time
 frames should be interpolated. Set typically between 0.1 and 0.5.}
 
 \item{repeatMotionEst}{number of times to repeat motion estimation.}
@@ -38,6 +38,9 @@ outputs a list containing:
   \item{connMatPowers: }{Powers nodes connectivity matrix.}
   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
+  \item{FD: }{mean framewise displacement.}
+  \item{DVARS: }{signal variability.}
+  \item{goodtimes: }{good time points.}
 }
 }
 \description{

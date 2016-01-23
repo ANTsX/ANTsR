@@ -8,7 +8,7 @@
 #' the wide variety of confounds that impact functional MRI.
 #'
 #' @param img input time series antsImage
-#' @param fdthresh threshold for framewise displacment.  determines what time
+#' @param fdthresh threshold for framewise displacement.  determines what time
 #' frames should be interpolated. Set typically between 0.1 and 0.5.
 #' @param repeatMotionEst number of times to repeat motion estimation.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
@@ -26,6 +26,9 @@
 #'   \item{connMatPowers: }{Powers nodes connectivity matrix.}
 #'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
 #'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
+#'   \item{FD: }{mean framewise displacement.}
+#'   \item{DVARS: }{signal variability.}
+#'   \item{goodtimes: }{good time points.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -58,6 +61,9 @@ powersACTrsfMRIprocessing <- function( img,
   structuralNodes = NA,
   verbose = FALSE )
 {
+print( "TODO:
+  input list of structuralNodes, allow mapping rsf to reference space, 
+  allow custom template, take ACT maps as input")
 if ( ! usePkg( "ggplot2" ) ) stop("need ggplot2")
 if ( ! usePkg( "igraph"  ) ) stop("need igraph")
 if ( ! usePkg( "pracma"  ) ) stop("need pracma")
@@ -320,7 +326,7 @@ mocoNuis = cbind(reg_params, reg_params*reg_params)
 mocoNuis = detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
-nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
+nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 
@@ -710,13 +716,15 @@ if ( is.na( structuralNodes )  )
     connMatNodesPartialCorr = cor2pcor( connMatNodes ) # partial correlation
 return(
     list(
-        boldMat=boldMat,
-        boldMask=mask,
-        nuisance=nuisance,
-        dmnBetas=betasI,
-        connMatPowers=connMat,
-        connMatNodes = connMatNodes,
-        connMatNodesPartialCorr = connMatNodesPartialCorr
+        boldMat       = boldMat,
+        boldMask      = mask,
+        nuisance      = nuisance,
+        dmnBetas      = betasI,
+        connMatPowers = connMat,
+        connMatNodes  = connMatNodes,
+        connMatNodesPartialCorr = connMatNodesPartialCorr,
+        FD            = moco$fd$MeanDisplacement,
+        goodtimes     = goodtimes
         )
       )
 }
