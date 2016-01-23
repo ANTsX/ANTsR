@@ -16,6 +16,8 @@
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
+#' @param mnimap antsRegistration output mapping struturalImage to MNI space.
+#' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
 #' \itemize{
@@ -29,6 +31,8 @@
 #'   \item{FD: }{mean framewise displacement.}
 #'   \item{DVARS: }{signal variability.}
 #'   \item{goodtimes: }{good time points.}
+#'   \item{seg2bold: }{strutural segmentation in bold space.}
+#'   \item{nodes2bold: }{strutural nodes in bold space.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -59,8 +63,11 @@ powersACTrsfMRIprocessing <- function( img,
   structuralImage = NA,
   structuralSeg = NA,
   structuralNodes = NA,
+  mnimap  = NA,
+  smoothingSigmas = NA,
   verbose = FALSE )
 {
+powers_areal_mni_itk <- NULL
 print( "TODO:
   input list of structuralNodes, allow mapping rsf to reference space,
   allow custom template, take ACT maps as input")
@@ -83,7 +90,7 @@ t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=verbose )
-if ( ! exists("mnimap") )
+if ( any( is.na( mnimap ) ) )
   {
   mni = antsImageRead( getANTsRData( "mni" ) )
   mnimap = antsRegistration( t1brain, mni, typeofTransform='SyN',
@@ -91,13 +98,11 @@ if ( ! exists("mnimap") )
   }
 mni2boldmaps = c( boldmap$fwdtransforms, mnimap$fwdtransforms )
 mni2boldmapsInv = c(  mnimap$invtransforms , boldmap$invtransforms )
-mni2bold = antsApplyTransforms( meanbold, mni, mni2boldmaps )
 seg2bold = antsApplyTransforms( meanbold, structuralSeg, boldmap$fwdtransforms,
   interpolator = "NearestNeighbor" )
 if ( verbose )
   {
   plot( meanbold , boldmap$warpedmovout %>% iMath("Canny", 10, 1, 1) )
-  plot( meanbold , mni2bold %>% iMath("Canny", 10, 1, 1) )
   plot( meanbold , maskImage( seg2bold, seg2bold, 2 ) )
   }
 
@@ -346,16 +351,17 @@ if ( verbose )
   }
 
 ## ----frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-if ( haveBadTimes ) {
+if ( haveBadTimes )
+  {
   for ( v in c(1:nVox) ) {
     boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
       method='natural', xout=badtimes )$y
     }
-  } else { # FIXME - may not want to do this ie may want to avoid using badtimes
-    badtimes  = NA
-    haveBadTimes = FALSE
-    goodtimes = ( 1:nTimes )
-    }
+  # FIXME - may not want to do this ie may want to avoid using badtimes
+  badtimes  = NA
+  haveBadTimes = FALSE
+  goodtimes = ( 1:nTimes )
+  }
 
 # save interpolated values for plotting
 ctxMeanSpline = rowMeans(boldMat[,ctxVox])
@@ -370,8 +376,12 @@ if ( haveBadTimes ) ctxMeanFiltered[badtimes] = NA
 
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
 img     = matrix2timeseries( img, mask, boldMat )
-sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  ))
-img     = smoothImage(img, c(rep(sptl,3),0), FWHM=TRUE )
+if ( any( is.na( smoothingSigmas ) ) )
+  {
+  sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  )) * 1.5
+  smoothingSigmas = c( sptl, sptl, sptl, 1.0 )
+  }
+img     = smoothImage(img, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix(img, mask)
 
 ## ----smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5----
@@ -396,7 +406,7 @@ if ( verbose )
   }
 
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-data("powers_areal_mni_itk", package = "ANTsR", envir = environment())
+data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
 pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
 labelImg = mask*0
@@ -546,13 +556,13 @@ if ( verbose )
   systems = levels(pts$SystemName)
   systemNames = as.character(systems)
 
-  node_list <- igraph::get.data.frame(graph, what = "vertices")
-  edge_list <- igraph::get.data.frame(graph, what = "edges") %>%
-    dplyr::inner_join(node_list %>% select(name, comm), by = c("from" = "name")) %>%
-    dplyr::inner_join(node_list %>% select(name, comm), by = c("to" = "name")) %>%
-    dplyr::mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
+#  node_list <- igraph::get.data.frame(graph, what = "vertices")
+#  edge_list <- igraph::get.data.frame(graph, what = "edges") %>%
+#    dplyr::inner_join(node_list %>% select(name, comm), by = c("from" = "name")) %>%
+#    dplyr::inner_join(node_list %>% select(name, comm), by = c("to" = "name")) %>%
+#    dplyr::mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
 
-  all_nodes <- sort(node_list$name)
+#  all_nodes <- sort(node_list$name)
 #  plot_data <- edge_list %>% dplyr::mutate(
 #          to = factor(to, levels = all_nodes),
 #          from = factor(from, levels = all_nodes))
@@ -594,7 +604,7 @@ graph = igraph::set.vertex.attribute(graph, "g", index=igraph::V(graph), value=a
 graph = igraph::set.vertex.attribute(graph, "b", index=igraph::V(graph), value=as.double(pts$b))
 
 # Set edge colors
-edges = igraph::get.edges( graph, E(graph) )
+edges = igraph::get.edges( graph, igraph::E(graph) )
 nEdges = dim(edges)[1]
 er = rep(200, nEdges)
 eg = rep(200, nEdges)
@@ -718,6 +728,8 @@ if ( is.na( structuralNodes )  )
     dmnref = ( boldMat %*% t(dmnpr) )
     connMatNodes = cor( dmnref )
     }
+  if ( verbose )
+    plot( meanbold , dmnnodes, window.overlay=c(1,max(dmnnodes)), axis=3 )
   connMatNodesPartialCorr = NA
   if ( usePkg( "corpcor" ) )
     connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
@@ -731,7 +743,9 @@ return(
         connMatNodes  = connMatNodes,
         connMatNodesPartialCorr = connMatNodesPartialCorr,
         FD            = moco$fd$MeanDisplacement,
-        goodtimes     = goodtimes
+        goodtimes     = goodtimes,
+        nodes2bold    = dmnnodes,
+        seg2bold      = seg2bold
         )
       )
 }
