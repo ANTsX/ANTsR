@@ -6,7 +6,7 @@
 \usage{
 powersACTrsfMRIprocessing(img, fdthresh = 0.2, repeatMotionEst = 1,
   freqLimits = c(0.008, 0.09), nCompCor = 4, structuralImage = NA,
-  structuralSeg = NA, structuralNodes = NA, mnimap = NA,
+  structuralSeg = NA, structuralNodes = NA, templateMap = NA,
   smoothingSigmas = NA, verbose = FALSE)
 }
 \arguments{
@@ -27,7 +27,7 @@ frames should be interpolated. Set typically between 0.1 and 0.5.}
 
 \item{structuralNodes}{regions of interest for network analysis, in the structural image space.}
 
-\item{mnimap}{antsRegistration output mapping struturalImage to MNI space.}
+\item{templateMap}{antsRegistration output mapping struturalImage to template space.}
 
 \item{smoothingSigmas}{4-vector defining amount of smoothing in FWHM units}
 
@@ -40,7 +40,7 @@ outputs a list containing:
   \item{boldMask: }{BOLD mask.}
   \item{nuisance: }{Nuisance variables.}
   \item{dmnBetas: }{Default mode network beta map.}
-  \item{connMatPowers: }{Powers nodes connectivity matrix.}
+  \item{connMatPowers: }{Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
   \item{FD: }{mean framewise displacement.}
@@ -48,7 +48,7 @@ outputs a list containing:
   \item{goodtimes: }{good time points.}
   \item{seg2bold: }{strutural segmentation in bold space.}
   \item{nodes2bold: }{strutural nodes in bold space.}
-  \item{mnimap: }{invertible maps to MNI space.}
+  \item{mapsToTemplate: }{invertible maps from bold to template space.}
 }
 }
 \description{

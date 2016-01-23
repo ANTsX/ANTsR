@@ -16,7 +16,7 @@
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
-#' @param mnimap antsRegistration output mapping struturalImage to MNI space.
+#' @param templateMap antsRegistration output mapping struturalImage to template space.
 #' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
@@ -25,7 +25,7 @@
 #'   \item{boldMask: }{BOLD mask.}
 #'   \item{nuisance: }{Nuisance variables.}
 #'   \item{dmnBetas: }{Default mode network beta map.}
-#'   \item{connMatPowers: }{Powers nodes connectivity matrix.}
+#'   \item{connMatPowers: }{Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 #'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
 #'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 #'   \item{FD: }{mean framewise displacement.}
@@ -33,7 +33,7 @@
 #'   \item{goodtimes: }{good time points.}
 #'   \item{seg2bold: }{strutural segmentation in bold space.}
 #'   \item{nodes2bold: }{strutural nodes in bold space.}
-#'   \item{mnimap: }{invertible maps to MNI space.}
+#'   \item{mapsToTemplate: }{invertible maps from bold to template space.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -64,14 +64,11 @@ powersACTrsfMRIprocessing <- function( img,
   structuralImage = NA,
   structuralSeg = NA,
   structuralNodes = NA,
-  mnimap  = NA,
+  templateMap  = NA,
   smoothingSigmas = NA,
   verbose = FALSE )
 {
 powers_areal_mni_itk <- NULL
-print( "TODO:
-  input list of structuralNodes, allow mapping rsf to reference space,
-  allow custom template, take ACT maps as input")
 if ( ! usePkg( "ggplot2" ) ) stop("need ggplot2")
 if ( ! usePkg( "igraph"  ) ) stop("need igraph")
 if ( ! usePkg( "pracma"  ) ) stop("need pracma")
@@ -91,14 +88,14 @@ t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=verbose )
-if ( any( is.na( mnimap ) ) )
+if ( any( is.na( templateMap ) ) )
   {
   mni = antsImageRead( getANTsRData( "mni" ) )
-  mnimap = antsRegistration( t1brain, mni, typeofTransform='SyN',
+  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
     verbose=verbose )
   }
-mni2boldmaps = c( boldmap$fwdtransforms, mnimap$fwdtransforms )
-mni2boldmapsInv = c(  mnimap$invtransforms , boldmap$invtransforms )
+mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
+mni2boldmapsInv = c(  templateMap$invtransforms , boldmap$invtransforms )
 seg2bold = antsApplyTransforms( meanbold, structuralSeg, boldmap$fwdtransforms,
   interpolator = "NearestNeighbor" )
 if ( verbose )
@@ -147,6 +144,8 @@ if ( ! exists("moco") )
     moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
     meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
     }
+  if ( ! exists("moco") )
+    moco = antsMotionCalculation( img, fixed=meanbold, txtype="Rigid", moreaccurate = 0 )
   }
 
 ## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
@@ -729,12 +728,16 @@ if ( is.na( structuralNodes )  )
     dmnref = ( boldMat %*% t(dmnpr) )
     connMatNodes = cor( dmnref )
     }
-  if ( verbose )
-    plot( meanbold , dmnnodes, window.overlay=c(1,max(dmnnodes)), axis=3 )
+
   connMatNodesPartialCorr = NA
   if ( usePkg( "corpcor" ) )
     connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
-return(
+
+  concatenatedMaps =
+    list( fwdtransforms =  mni2boldmaps,
+          invtransforms =  mni2boldmapsInv )
+
+  return(
     list(
         boldMat       = boldMat,
         boldMask      = mask,
@@ -747,7 +750,7 @@ return(
         goodtimes     = goodtimes,
         seg2bold      = seg2bold,
         nodes2bold    = dmnnodes,
-        mnimap        = mnimap
+        mapsToTemplate = concatenatedMaps
         )
       )
 }
