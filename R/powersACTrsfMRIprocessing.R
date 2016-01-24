@@ -156,6 +156,7 @@ if ( ! all( is.na( extraRuns ) ) )
     moco$moco_params = rbind( moco$moco_params, mocoTemp$moco_params )
     moco$fd = rbind( moco$fd, mocoTemp$fd )
     moco$dvars = c( moco$dvars, mocoTemp$dvars )
+    rm( mocoTemp )
     }
   }
 
@@ -276,8 +277,8 @@ mocoNuis = pracma::detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
-if ( ! all( is.na( runNuis ) ) )
-  nuisance = cbind( nuisance, runs=factor(runNuis) )
+# if ( ! all( is.na( runNuis ) ) )
+#  nuisance = cbind( nuisance, runs=factor(runNuis) )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 
@@ -565,7 +566,7 @@ if ( ! exists( "networkPriors" ) & notemplateMap )
   pr = imageListToMatrix( networkPriors2Bold, mask )
   refSignal = ( boldMat %*% t(pr) )
   networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-  if ( TRUE )
+  if ( FALSE )
     {
     dnz<-aslDenoiseR( boldMat[goodtimes,], refSignal[goodtimes,1],
       covariates=nuisance[goodtimes,],
@@ -624,6 +625,7 @@ if ( is.na( structuralNodes ) & notemplateMap )
     list(
         boldMat       = boldMat,
         boldMask      = mask,
+        motionCorr    = moco,
         nuisance      = nuisance,
         dmnBetas      = betasI,
         connMatPowers = connMat,
@@ -634,7 +636,8 @@ if ( is.na( structuralNodes ) & notemplateMap )
         seg2bold      = seg2bold,
         nodes2bold    = dmnnodes,
         mapsToTemplate = concatenatedMaps,
-        networkPriors2Bold = networkPriors2Bold
+        networkPriors2Bold = networkPriors2Bold,
+        runID = runNuis
         )
       )
 }
