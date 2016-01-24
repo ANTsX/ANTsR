@@ -5,7 +5,7 @@
 \title{Perform spatial ICA on fMRI bold data.}
 \usage{
 antsSpatialICAfMRI(boldImages, maskImage = NA, numberOfICAComponents = 20,
-  normalizeComponentImages = TRUE)
+  normalizeComponentImages = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{boldImages}{a list of 4-D ANTs image fMRI data.}
@@ -17,6 +17,8 @@ must be specified.}
 
 \item{normalizeComponentImages}{Boolean to specify whether each component
 vector element is normalized to its z-score.}
+
+\item{verbose}{boolean setting verbosity level.}
 }
 \value{
 Output list includes standard ICA matrices from the fastICA

@@ -24,18 +24,19 @@
 #' \itemize{
 #'   \item{boldMat: }{Matrix of filtered BOLD data.}
 #'   \item{boldMask: }{BOLD mask.}
+#'   \item{motionCorr: }{Motion corrected data.}
 #'   \item{nuisance: }{Nuisance variables.}
-#'   \item{dmnBetas: }{Default mode network beta map.}
-#'   \item{connMatPowers: }{Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 #'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
 #'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 #'   \item{FD: }{mean framewise displacement.}
-#'   \item{DVARS: }{signal variability.}
-#'   \item{goodtimes: }{good time points.}
-#'   \item{seg2bold: }{strutural segmentation in bold space.}
-#'   \item{nodes2bold: }{strutural nodes in bold space.}
-#'   \item{mapsToTemplate: }{invertible maps from bold to template space.}
-#'   \item{networkPriors2Bold: }{standard network priors in BOLD space.}
+#'   \item{badtimes: }{time frames that are above FD threshold.}
+#'   \item{seg2bold: }{strutural segmentation in BOLD space.}
+#'   \item{nodes2bold: }{strutural nodes in BOLD space.}
+#'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
+#'   \item{runID: }{Identifies which run over time series.}
+#'   \item{dmnBetas: }{Default mode network beta map.}
+#'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
+#'   \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
@@ -128,7 +129,7 @@ if ( ! all( is.na( extraRuns ) ) )
 mocoTxType = "Rigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=1 )
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
   }
 if ( repeatMotionEst < 1 )
   moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate = 0 )
@@ -142,7 +143,7 @@ if ( ! all( is.na( extraRuns ) ) )
     {
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
-    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=1 )
+    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
     if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
     if ( usePkg("abind") )
       {
@@ -277,35 +278,15 @@ ctxVox = which(subset(ctxMask, mask > 0)==1)
 ctxMean = rowMeans(boldMat[,ctxVox])
 
 ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-mocoNuis = cbind(reg_params, reg_params*reg_params)
-mocoNuis = pracma::detrend(mocoNuis)
-mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
-
-compcorTemp = compcor( boldMat[goodtimes,], nCompCor )
-compcorNuis = matrix(0, nTimes, nCompCor )
-compcorNuis[goodtimes, ] = compcorTemp
-if ( haveBadTimes ) compcorNuis[badtimes, ] = NA
+mocoNuis = cbind( reg_params, reg_params * reg_params )
+mocoNuis = pracma::detrend( mocoNuis )
+mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
+compcorNuis = compcor( boldMat, nCompCor )
 colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
-nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
+nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv,
+  compcorNuis, dvars=dvars )
 if ( ! all( is.na( runNuis ) ) )
   nuisance = cbind( nuisance, runs=factor(runNuis) )
-
-boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
-
-## ----regressionplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
-ctxMeanRegressed = rowMeans(boldMat[,ctxVox])
-
-
-# save interpolated values for plotting
-ctxMeanSpline = rowMeans(boldMat[,ctxVox])
-
-if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
-  boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
-    freqHi=freqLimits[2], opt="trig" )
-
-# save filtered values for plotting
-ctxMeanFiltered = rowMeans(boldMat[,ctxVox])
-if ( haveBadTimes ) ctxMeanFiltered[badtimes] = NA
 
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
 img     = matrix2timeseries( moco$moco_img, mask, boldMat )
@@ -314,9 +295,13 @@ if ( any( is.na( smoothingSigmas ) ) )
   sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  )) * 1.5
   smoothingSigmas = c( sptl, sptl, sptl, 1.0 )
   }
-img     = smoothImage(img, smoothingSigmas, FWHM=TRUE )
-boldMat = timeseries2matrix(img, mask)
+img     = smoothImage( img, smoothingSigmas, FWHM=TRUE )
+boldMat = timeseries2matrix( img, mask )
+if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
+  boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
+    freqHi=freqLimits[2], opt="trig" )
 
+rboldMat <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 connMatNodes = NA
 if ( ! is.na( structuralNodes ) )
   {
@@ -328,7 +313,7 @@ if ( ! is.na( structuralNodes ) )
   for ( i in 1:length( ulabs ) )
     dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
   dmnpr = imageListToMatrix( dmnlist, mask )
-  dmnref = ( boldMat %*% t(dmnpr) )
+  dmnref = ( rboldMat %*% t(dmnpr) )
   connMatNodes = cor( dmnref )
   }
 
@@ -349,8 +334,8 @@ if ( ! exists( "networkPriors" ) ) # & notemplateMap )
   pr = imageListToMatrix( networkPriors2Bold, mask )
   refSignal = ( boldMat %*% t(pr) )
   networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-  mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
-  bmdl = bigLMStats( mdl, 1.e-4 )
+  mdl = lm( scale(boldMat[goodtimes,]) ~ . , data=networkDf )
+  bmdl = bigLMStats( mdl )
   betas = bmdl$beta.t["ROI",]
   betasI = makeImage( mask, betas )
   loth = quantile(  betas, probs=0.8 )
@@ -383,11 +368,6 @@ return(
       #      connMatPowers = connMat,
       )
     )
-
-
-## ----smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5----
-ctxMeanSmoothed = rowMeans(boldMat[,ctxVox])
-if ( haveBadTimes ) ctxMeanSmoothed[badtimes] = NA
 
 
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
@@ -500,39 +480,6 @@ if ( verbose )
 
   systems = levels(pts$SystemName)
   systemNames = as.character(systems)
-
-#  node_list <- igraph::get.data.frame(graph, what = "vertices")
-#  edge_list <- igraph::get.data.frame(graph, what = "edges") %>%
-#    dplyr::inner_join(node_list %>% select(name, comm), by = c("from" = "name")) %>%
-#    dplyr::inner_join(node_list %>% select(name, comm), by = c("to" = "name")) %>%
-#    dplyr::mutate(group = ifelse(comm.x == comm.y, comm.x, NA) %>% factor())
-
-#  all_nodes <- sort(node_list$name)
-#  plot_data <- edge_list %>% dplyr::mutate(
-#          to = factor(to, levels = all_nodes),
-#          from = factor(from, levels = all_nodes))
-
-#  name_order <- (node_list %>% arrange(comm))$name
-#  plot_data <- edge_list %>% dplyr::mutate(
-#          to = factor(to, levels = name_order),
-#          from = factor(from, levels = name_order))
-
-#  plot_data$group = as.integer(plot_data$group)
-#  for ( i in 1:length(systems) ) { plot_data$group[ which( plot_data$group == i) ] = as.character( systems[i] ) }
-
-#  lut = c("Sensory/Somatomotor Hand"="cyan3", "Sensory/Somatomotor Mouth"="orange", "Cingulo-opercular Task Control"="purple", "Auditory" = "pink2", "Default Mode"="red", "Memory Retrieval"="gray50", "Visual"="blue", "Fronto-parietal Task Control"="yellow2", "Salience"="black", "Subcortical"="chocolate4", "Ventral Attention"="aquamarine4", "Dorsal Attention"="green", "Cerebellar"="cadetblue1", "Uncertain"="peachpuff2" )
-
-#  adjplot = ggplot2::ggplot( plot_data,
-#    ggplot2::aes(x = from, y = to, fill = group)) +
-#    ggplot2::geom_raster() + ggplot2::theme_bw() + ggplot2::scale_x_discrete(drop = FALSE) +
-#    ggplot2::scale_y_discrete(drop = FALSE) +
-#    ggplot2::theme( axis.title=ggplot2::element_blank(),
-#    axis.ticks=ggplot2::element_blank(),
-#    axis.text = ggplot2::element_blank(),
-#    aspect.ratio = 1 ) +
-#    ggplot2::scale_fill_manual( values = lut, na.value="gray80", name="System",  breaks=systemNames, drop=FALSE )
-
-#  print(adjplot)
   }
 
 # Retain only the largest connected component
@@ -617,21 +564,6 @@ geff<-1/(igraph::shortest.paths(graph))
 geff[!is.finite(geff)]<-NA
 geff<-mean(geff,na.rm=TRUE)
 cc = igraph::transitivity(graph)
-refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 
-connMatNodes = NA
-if ( is.na( structuralNodes ) & notemplateMap )
-  {
-  dmnnodes = antsImageRead( getANTsRData("mnidfn") )
-  dmnnodes = antsApplyTransforms( meanbold, dmnnodes, mni2boldmaps,
-                                    interpolator = 'NearestNeighbor' )
-  ulabs = sort( unique( dmnnodes[ mask == 1 & dmnnodes > 0 ] ) )
-  dmnlist = list()
-  for ( i in 1:length( ulabs ) )
-    dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
-  dmnpr = imageListToMatrix( dmnlist, mask )
-  dmnref = ( boldMat %*% t(dmnpr) )
-  connMatNodes = cor( dmnref )
-  }
 
 }

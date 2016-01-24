@@ -10,6 +10,7 @@
 #' @param numberOfICAComponents Number of estimated observers (components).
 #' @param normalizeComponentImages Boolean to specify whether each component
 #' vector element is normalized to its z-score.
+#' @param verbose boolean setting verbosity level.
 #' @return Output list includes standard ICA matrices from the fastICA
 #' algorithm:
 #'
@@ -50,8 +51,9 @@
 #'   numberOfICAComponents = 2 )
 #'
 #' @export antsSpatialICAfMRI
-antsSpatialICAfMRI <- function(boldImages, maskImage = NA, numberOfICAComponents = 20,
-  normalizeComponentImages = TRUE) {
+antsSpatialICAfMRI <- function(boldImages, maskImage = NA,
+  numberOfICAComponents = 20,
+  normalizeComponentImages = TRUE, verbose=FALSE ) {
 
   if (is.na(maskImage)) {
     stop("No mask image specified. \n\n")
@@ -84,7 +86,7 @@ antsSpatialICAfMRI <- function(boldImages, maskImage = NA, numberOfICAComponents
 
   icaResults <- fastICA::fastICA(X = t(groupBoldMatrix), n.comp = numberOfICAComponents,
     alg.typ = c("parallel"), fun = c("logcosh"), alpha = 1, method = c("C"),
-    row.norm = FALSE, maxit = 200, tol = 1e-04, verbose = TRUE, w.init = NULL)
+    row.norm = FALSE, maxit = 200, tol = 1e-04, verbose = verbose, w.init = NULL)
 
   # create componentImages
 

@@ -40,18 +40,19 @@ outputs a list containing:
 \itemize{
   \item{boldMat: }{Matrix of filtered BOLD data.}
   \item{boldMask: }{BOLD mask.}
+  \item{motionCorr: }{Motion corrected data.}
   \item{nuisance: }{Nuisance variables.}
-  \item{dmnBetas: }{Default mode network beta map.}
-  \item{connMatPowers: }{Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
   \item{FD: }{mean framewise displacement.}
-  \item{DVARS: }{signal variability.}
-  \item{goodtimes: }{good time points.}
-  \item{seg2bold: }{strutural segmentation in bold space.}
-  \item{nodes2bold: }{strutural nodes in bold space.}
-  \item{mapsToTemplate: }{invertible maps from bold to template space.}
-  \item{networkPriors2Bold: }{standard network priors in BOLD space.}
+  \item{badtimes: }{time frames that are above FD threshold.}
+  \item{seg2bold: }{strutural segmentation in BOLD space.}
+  \item{nodes2bold: }{strutural nodes in BOLD space.}
+  \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
+  \item{runID: }{Identifies which run over time series.}
+  \item{dmnBetas: }{Default mode network beta map.}
+  \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
+  \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 }
 }
 \description{
