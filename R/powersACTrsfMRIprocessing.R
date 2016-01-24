@@ -128,7 +128,7 @@ if ( ! all( is.na( extraRuns ) ) )
 mocoTxType = "Rigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=1 )
   }
 if ( repeatMotionEst < 1 )
   moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate = 0 )
@@ -142,7 +142,7 @@ if ( ! all( is.na( extraRuns ) ) )
     {
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
-    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
+    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=1 )
     if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
     if ( usePkg("abind") )
       {
@@ -177,16 +177,19 @@ if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold al
   else t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
 
 if ( ! exists("boldmap") )
+  {
+  if ( verbose ) print("boldmap to structure")
   boldmap = antsRegistration( meanbold * mask, t1brain,
-    typeofTransform='SyNBoldAff', verbose=verbose )
-
+    typeofTransform='SyNBoldAff', verbose=FALSE )
+  }
 notemplateMap = FALSE
 if ( any( is.na( templateMap ) ) )
   {
   notemplateMap = TRUE
   mni = antsImageRead( getANTsRData( "mni" ) )
+  if ( verbose ) print("boldmap to template")
   templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
-    verbose=verbose )
+    verbose=FALSE )
   }
 
 mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
@@ -227,10 +230,18 @@ if ( length( badtimes ) > 0 )
 global_moco <- rowMeans( timeseries2matrix( moco$moco_img, mask) )
 boldMat = timeseries2matrix( moco$moco_img, mask )
 boldMat[goodtimes,] = pracma::detrend(boldMat[goodtimes,])
-if ( haveBadTimes ) boldMat[badtimes,] = NA
-
 global_moco_detrend = rowMeans(boldMat)
-if ( haveBadTimes ) global_moco[badtimes] = NA
+nTimes = nrow(boldMat)
+if ( haveBadTimes )
+  {
+  for ( v in c(1:nVox) ) {
+    boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
+      method='natural', xout=badtimes )$y
+    }
+  # FIXME - may not want to do this ie may want to avoid using badtimes
+  haveBadTimes = FALSE
+  goodtimes = ( 1:nTimes )
+  }
 
 ## ----nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 # white matter is labeled as 3
@@ -247,13 +258,7 @@ csfMask[ csfMask != 1] = 0
 csfVox = which(subset(csfMask, mask > 0)==1)
 csfMean= rowMeans(boldMat[,csfVox])
 
-nTimes = nrow(boldMat)
 globalMean = rowMeans(boldMat)
-compcorTemp = compcor( boldMat[goodtimes,], nCompCor )
-compcorNuis = matrix(0, nTimes, nCompCor )
-compcorNuis[goodtimes, ] = compcorTemp
-if ( haveBadTimes ) compcorNuis[badtimes, ] = NA
-colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
 tissueNuis = cbind(globalMean, wmMean, csfMean)
 if ( haveBadTimes ) {
   for ( v in c(1:dim(tissueNuis)[2]) ) {
@@ -276,28 +281,20 @@ mocoNuis = cbind(reg_params, reg_params*reg_params)
 mocoNuis = pracma::detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
+compcorTemp = compcor( boldMat[goodtimes,], nCompCor )
+compcorNuis = matrix(0, nTimes, nCompCor )
+compcorNuis[goodtimes, ] = compcorTemp
+if ( haveBadTimes ) compcorNuis[badtimes, ] = NA
+colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
-# if ( ! all( is.na( runNuis ) ) )
-#  nuisance = cbind( nuisance, runs=factor(runNuis) )
+if ( ! all( is.na( runNuis ) ) )
+  nuisance = cbind( nuisance, runs=factor(runNuis) )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 
 ## ----regressionplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
 ctxMeanRegressed = rowMeans(boldMat[,ctxVox])
 
-
-## ----frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-if ( haveBadTimes )
-  {
-  for ( v in c(1:nVox) ) {
-    boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
-      method='natural', xout=badtimes )$y
-    }
-  # FIXME - may not want to do this ie may want to avoid using badtimes
-  badtimes  = NA
-  haveBadTimes = FALSE
-  goodtimes = ( 1:nTimes )
-  }
 
 # save interpolated values for plotting
 ctxMeanSpline = rowMeans(boldMat[,ctxVox])
@@ -319,6 +316,74 @@ if ( any( is.na( smoothingSigmas ) ) )
   }
 img     = smoothImage(img, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix(img, mask)
+
+connMatNodes = NA
+if ( ! is.na( structuralNodes ) )
+  {
+  dmnnodes = antsApplyTransforms(
+    meanbold, structuralNodes, boldmap$fwdtransforms,
+    interpolator = 'NearestNeighbor' )
+  ulabs = sort( unique( dmnnodes[ mask == 1 & dmnnodes > 0 ] ) )
+  dmnlist = list()
+  for ( i in 1:length( ulabs ) )
+    dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
+  dmnpr = imageListToMatrix( dmnlist, mask )
+  dmnref = ( boldMat %*% t(dmnpr) )
+  connMatNodes = cor( dmnref )
+  }
+
+connMatNodesPartialCorr = NA
+if ( usePkg( "corpcor" ) )
+  connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
+
+#
+# get priors for different networks
+networkPriors2Bold=NA
+if ( ! exists( "networkPriors" ) ) # & notemplateMap )
+  {
+  networkPriors = getANTsRData( "fmrinetworks" )
+  networkPriors2Bold = networkPriors$images
+  for ( i in 1:length(networkPriors2Bold) )
+    networkPriors2Bold[[i]] = antsApplyTransforms( meanbold,
+      networkPriors2Bold[[i]], mni2boldmaps )
+  pr = imageListToMatrix( networkPriors2Bold, mask )
+  refSignal = ( boldMat %*% t(pr) )
+  networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
+  mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
+  bmdl = bigLMStats( mdl, 1.e-4 )
+  betas = bmdl$beta.t["ROI",]
+  betasI = makeImage( mask, betas )
+  loth = quantile(  betas, probs=0.8 )
+  if ( verbose )
+    plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
+          window.overlay = c( loth, max(betas) ) )
+  } else betasI = NA
+
+concatenatedMaps =
+  list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
+        toTemplate =  mni2boldmapsInv,
+        toTemplateInversion = c(TRUE,FALSE,TRUE,FALSE) )
+
+return(
+  list(
+      boldMat       = boldMat,
+      boldMask      = mask,
+      motionCorr    = moco,
+      nuisance      = nuisance,
+      connMatNodes  = connMatNodes,
+      connMatNodesPartialCorr = connMatNodesPartialCorr,
+      FD            = moco$fd$MeanDisplacement,
+      badtimes      = badtimes,
+      seg2bold      = seg2bold,
+      nodes2bold    = dmnnodes,
+      mapsToTemplate = concatenatedMaps,
+      runID         = runNuis,
+      dmnBetas      = betasI,
+      networkPriors2Bold = networkPriors2Bold
+      #      connMatPowers = connMat,
+      )
+    )
+
 
 ## ----smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5----
 ctxMeanSmoothed = rowMeans(boldMat[,ctxVox])
@@ -554,35 +619,6 @@ geff<-mean(geff,na.rm=TRUE)
 cc = igraph::transitivity(graph)
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 
-# get priors for different networks
-networkPriors2Bold=NA
-if ( ! exists( "networkPriors" ) & notemplateMap )
-  {
-  networkPriors = getANTsRData( "fmrinetworks" )
-  networkPriors2Bold = networkPriors$images
-  for ( i in 1:length(networkPriors2Bold) )
-    networkPriors2Bold[[i]] = antsApplyTransforms( meanbold,
-      networkPriors2Bold[[i]], mni2boldmaps )
-  pr = imageListToMatrix( networkPriors2Bold, mask )
-  refSignal = ( boldMat %*% t(pr) )
-  networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-  if ( FALSE )
-    {
-    dnz<-aslDenoiseR( boldMat[goodtimes,], refSignal[goodtimes,1],
-      covariates=nuisance[goodtimes,],
-      selectionthresh=0.1, maxnoisepreds=c(2:12), verbose=verbose,
-      polydegree='loess', crossvalidationgroups=6 )
-    networkDf = data.frame( ROI=refSignal[goodtimes,1],  dnz$covariates , dnz$noiseu )
-    }
-  mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
-  bmdl = bigLMStats( mdl, 1.e-4 )
-  betas = bmdl$beta.t["ROI",]
-  betasI = makeImage( mask, betas )
-  loth = quantile(  betas, probs=0.8 )
-  if ( verbose )
-    plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
-          window.overlay = c( loth, max(betas) ) )
-  } else betasI = NA
 connMatNodes = NA
 if ( is.na( structuralNodes ) & notemplateMap )
   {
@@ -598,46 +634,4 @@ if ( is.na( structuralNodes ) & notemplateMap )
   connMatNodes = cor( dmnref )
   }
 
-  if ( ! is.na( structuralNodes ) )
-    {
-    dmnnodes = antsApplyTransforms(
-      meanbold, structuralNodes, boldmap$fwdtransforms,
-      interpolator = 'NearestNeighbor' )
-    ulabs = sort( unique( dmnnodes[ mask == 1 & dmnnodes > 0 ] ) )
-    dmnlist = list()
-    for ( i in 1:length( ulabs ) )
-      dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
-    dmnpr = imageListToMatrix( dmnlist, mask )
-    dmnref = ( boldMat %*% t(dmnpr) )
-    connMatNodes = cor( dmnref )
-    }
-
-  connMatNodesPartialCorr = NA
-  if ( usePkg( "corpcor" ) )
-    connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
-
-  concatenatedMaps =
-    list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
-          toTemplate =  mni2boldmapsInv,
-          toTemplateInversion = c(TRUE,FALSE,TRUE,FALSE) )
-
-  return(
-    list(
-        boldMat       = boldMat,
-        boldMask      = mask,
-        motionCorr    = moco,
-        nuisance      = nuisance,
-        dmnBetas      = betasI,
-        connMatPowers = connMat,
-        connMatNodes  = connMatNodes,
-        connMatNodesPartialCorr = connMatNodesPartialCorr,
-        FD            = moco$fd$MeanDisplacement,
-        goodtimes     = goodtimes,
-        seg2bold      = seg2bold,
-        nodes2bold    = dmnnodes,
-        mapsToTemplate = concatenatedMaps,
-        networkPriors2Bold = networkPriors2Bold,
-        runID = runNuis
-        )
-      )
 }
