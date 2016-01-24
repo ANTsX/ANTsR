@@ -142,7 +142,7 @@ if ( ! all( is.na( extraRuns ) ) )
     {
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
-    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=0 )
+    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
     if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
     if ( usePkg("abind") )
       {
