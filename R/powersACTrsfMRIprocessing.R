@@ -246,6 +246,7 @@ csfMask[ csfMask != 1] = 0
 csfVox = which(subset(csfMask, mask > 0)==1)
 csfMean= rowMeans(boldMat[,csfVox])
 
+nTimes = nrow(boldMat)
 globalMean = rowMeans(boldMat)
 compcorTemp = compcor( boldMat[goodtimes,], nCompCor )
 compcorNuis = matrix(0, nTimes, nCompCor )
