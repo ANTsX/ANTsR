@@ -209,7 +209,7 @@ if ( verbose )
 # extract just the transform parameters #
 #########################################
 reg_params <- as.matrix( moco$moco_params[,3:8] ) # FIXME this is bad coding
-dvars <- scaling * computeDVARS( timeseries2matrix( moco$moco_img, mask ) )
+dvars <- computeDVARS( timeseries2matrix( moco$moco_img, mask ) )
 
 ## ----badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
 goodtimes = (1:nrow( moco$moco_img ))
