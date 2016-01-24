@@ -104,7 +104,7 @@ steady = floor(10.0 / tr) + 1
 origmean = apply.antsImage(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
 allTimes = dim(img)[4]
-
+runNuis  = NA
 # Eliminate non steady-state timepoints
 img = cropIndices(img, c(1,1,1,steady), dim(img) )
 
@@ -112,12 +112,14 @@ if ( ! all( is.na( extraRuns ) ) )
   {
   if ( class( extraRuns )[[1]] != "list"  )
     stop("extraRuns must be a list of antsImages.")
+  runNuis = rep(1, dim(img)[4] )
   for ( i in 1:length( extraRuns ) )
     {
     timg = extraRuns[[i]]
     allTimes = allTimes + dim( timg )[4]
     timg = cropIndices( timg, c(1,1,1,steady), dim(timg) )
     extraRuns[[i]] = timg
+    runNuis = c( runNuis, rep(i+1, dim(timg)[4] ) )
     }
   }
 
@@ -371,6 +373,8 @@ mocoNuis = pracma::detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
 
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis, dvars=dvars )
+if ( ! all( is.na( runNuis ) ) )
+  nuisance = cbind( nuisance, runs=factor(runNuis) )
 
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 
