@@ -7,7 +7,7 @@
 powersACTrsfMRIprocessing(img, fdthresh = 0.2, repeatMotionEst = 1,
   freqLimits = c(0.008, 0.09), nCompCor = 4, structuralImage = NA,
   structuralSeg = NA, structuralNodes = NA, templateMap = NA,
-  smoothingSigmas = NA, verbose = FALSE)
+  smoothingSigmas = NA, extraRuns = NA, verbose = FALSE)
 }
 \arguments{
 \item{img}{input time series antsImage}
@@ -30,6 +30,8 @@ frames should be interpolated. Set typically between 0.1 and 0.5.}
 \item{templateMap}{antsRegistration output mapping template space (as moving) to struturalImage (fixed).}
 
 \item{smoothingSigmas}{4-vector defining amount of smoothing in FWHM units}
+
+\item{extraRuns}{a list containing additional BOLD images (runs) to be merged with the first image}
 
 \item{verbose}{enables visualization as well as commentary.}
 }

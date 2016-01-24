@@ -18,6 +18,7 @@
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
 #' @param templateMap antsRegistration output mapping template space (as moving) to struturalImage (fixed).
 #' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units
+#' @param extraRuns a list containing additional BOLD images (runs) to be merged with the first image
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
 #' \itemize{
@@ -75,6 +76,7 @@ powersACTrsfMRIprocessing <- function( img,
   structuralNodes = NA,
   templateMap  = NA,
   smoothingSigmas = NA,
+  extraRuns = NA,
   verbose = FALSE )
 {
 powers_areal_mni_itk <- NULL
@@ -91,8 +93,74 @@ if ( missing(img) ) # for stand-alone testing
   structuralImage = antsImageClone( structuralSeg )
   structuralImage[ structuralImage > 3 ] = 2
   }
+# start with basic mean bold image
 meanbold = getAverageOfTimeSeries( img )
 mask = getMask( meanbold )
+# Find first steady state timepoint
+tr = antsGetSpacing(img)[4]
+steady = floor(10.0 / tr) + 1
+
+# Global signal before cropping (save for visualization)
+origmean = apply.antsImage(img, c(1,2,3), mean)
+fullmean = rowMeans(timeseries2matrix(img, mask))
+allTimes = dim(img)[4]
+
+# Eliminate non steady-state timepoints
+img = cropIndices(img, c(1,1,1,steady), dim(img) )
+
+if ( ! all( is.na( extraRuns ) ) )
+  {
+  if ( class( extraRuns )[[1]] != "list"  )
+    stop("extraRuns must be a list of antsImages.")
+  for ( i in 1:length( extraRuns ) )
+    {
+    timg = extraRuns[[i]]
+    allTimes = allTimes + dim( timg )[4]
+    timg = cropIndices( timg, c(1,1,1,steady), dim(timg) )
+    extraRuns[[i]] = timg
+    }
+  }
+
+
+## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
+mocoTxType = "Rigid"
+for ( i in 1:repeatMotionEst )
+  {
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
+  }
+if ( repeatMotionEst < 1 )
+  moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate = 0 )
+
+meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+
+# now add any additional runs and merge moco results
+if ( ! all( is.na( extraRuns ) ) )
+  {
+  for ( i in 1:length( extraRuns ) )
+    {
+    timg = extraRuns[[i]]
+    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType )
+    if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
+    if ( usePkg("abind") )
+      {
+      ttmo = as.array( moco$moco_img )
+      ttmo = abind::abind( ttmo, as.array( mocoTemp$moco_img ) )
+      moco$moco_img = antsCopyImageInfo( moco$moco_img, as.antsImage(ttmo) )
+      rm( ttmo )
+      moco$tsDisplacement = NA
+      } else stop( "need abind package for the extraRuns feature")
+    if ( verbose ) print("merge parameters, fd and dvars")
+    moco$moco_params = rbind( moco$moco_params, mocoTemp$moco_params )
+    moco$fd = rbind( moco$fd, mocoTemp$fd )
+    moco$dvars = c( moco$dvars, mocoTemp$dvars )
+    }
+  }
+
+## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
+if ( verbose )
+  invisible( plot( moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10 ) )
+
+#
 if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold alone
   {
   structuralImage = antsImageClone( meanbold )
@@ -123,54 +191,6 @@ if ( verbose )
   plot( meanbold , boldmap$warpedmovout %>% iMath("Canny", 10, 1, 1) )
   plot( meanbold , maskImage( seg2bold, seg2bold, 2 ) )
   }
-
-# Find first steady state timepoint
-tr = antsGetSpacing(img)[4]
-steady = floor(10.0 / tr) + 1
-
-# Global signal before cropping (save for visualization)
-origmean = apply.antsImage(img, c(1,2,3), mean)
-fullmean = rowMeans(timeseries2matrix(img, mask))
-allTimes = dim(img)[4]
-
-# Eliminate non steady-state timepoints
-img = cropIndices(img, c(1,1,1,steady), dim(img) )
-
-# exclusion area
-if ( verbose )
-  {
-#  noss.data = data.frame(Start=0)
-#  noss.data$Stop = (steady-1)*tr
-#  noss.rect.aes = ggplot2::aes(xmin=Start,xmax=Stop,ymin=-Inf,ymax=Inf,fill="pink",alpha=0.2)
-
-  # mean signal in brain
-#  ss.dat <- data.frame(Time=rep(1:allTimes)*tr)
-#  ss.dat$Values = fullmean
-
-#  ssPlot <- ggplot2::ggplot(ss.dat)
-#    ssPlot <- ssPlot + ggplot2::geom_line(ggplot2::aes(x=Time, y=Values), size=0.5)
-#    ssPlot <- ssPlot + ggplot2::geom_rect(data=noss.data, noss.rect.aes)
-#    ssPlot <- ssPlot + ggplot2::theme(text=ggplot2::element_text(size=10), legend.position="none")
-#    ssPlot <- ssPlot + ggplot2::ggtitle("Exclude points previous to magnetization steady state")
-#  print(ssPlot)
-  invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
-  }
-
-## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
-if ( ! exists("moco") )
-  {
-  for ( i in 1:repeatMotionEst )
-    {
-    moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
-    meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
-    }
-  if ( ! exists("moco") )
-    moco = antsMotionCalculation( img, fixed=meanbold, txtype="Rigid", moreaccurate = 0 )
-  }
-
-## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
-if ( verbose )
-  invisible( plot( moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10 ) )
 
 ## ----mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
 nVox = length(which(as.array(mask)==1))
@@ -543,11 +563,8 @@ if ( length(missingROIs) > 0 ) {
   connMat[missingROIs,] = 0
   connMat[,missingROIs] = 0
 }
-# mygraph = makeGraph( connMat, 0.25 )
-
 
 ## ----adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5----
-
 density = 0.1
 nEdges = length(upper.tri(connMat))*density
 thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
@@ -562,7 +579,6 @@ adj[,components$membership!=maxID] = 0
 bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
 
 if ( verbose ) invisible(plot(as.antsImage(adj)))
-
 
 ## ----adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
 if ( verbose )
@@ -716,7 +732,15 @@ if ( ! exists( "networkPriors" ) & notemplateMap )
   pr = imageListToMatrix( networkPriors2Bold, mask )
   refSignal = ( boldMat %*% t(pr) )
   networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-  mdl = lm( boldMat[ goodtimes, ] ~ . , data=networkDf )
+  if ( TRUE )
+    {
+    dnz<-aslDenoiseR( boldMat[goodtimes,], refSignal[goodtimes,1],
+      covariates=nuisance[goodtimes,],
+      selectionthresh=0.1, maxnoisepreds=c(2:12), verbose=verbose,
+      polydegree='loess', crossvalidationgroups=6 )
+    networkDf = data.frame( ROI=refSignal[goodtimes,1],  dnz$covariates , dnz$noiseu )
+    }
+  mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
   bmdl = bigLMStats( mdl, 1.e-4 )
   betas = bmdl$beta.t["ROI",]
   betasI = makeImage( mask, betas )
