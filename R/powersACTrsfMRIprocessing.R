@@ -324,6 +324,7 @@ if ( usePkg( "corpcor" ) )
 #
 # get priors for different networks
 networkPriors2Bold=NA
+betasI = NA
 if ( ! exists( "networkPriors" ) ) # & notemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
@@ -331,18 +332,21 @@ if ( ! exists( "networkPriors" ) ) # & notemplateMap )
   for ( i in 1:length(networkPriors2Bold) )
     networkPriors2Bold[[i]] = antsApplyTransforms( meanbold,
       networkPriors2Bold[[i]], mni2boldmaps )
-  pr = imageListToMatrix( networkPriors2Bold, mask )
-  refSignal = ( boldMat %*% t(pr) )
-  networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
-  mdl = lm( scale(boldMat[goodtimes,]) ~ . , data=networkDf )
-  bmdl = bigLMStats( mdl )
-  betas = bmdl$beta.t["ROI",]
-  betasI = makeImage( mask, betas )
-  loth = quantile(  betas, probs=0.8 )
-  if ( verbose )
-    plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
-          window.overlay = c( loth, max(betas) ) )
-  } else betasI = NA
+  if ( FALSE )
+    {
+    pr = imageListToMatrix( networkPriors2Bold, mask )
+    refSignal = scale( boldMat %*% t(pr) )
+    networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuisance[goodtimes,] )
+    mdl = lm( scale(boldMat[goodtimes,]) ~ . , data=networkDf )
+    bmdl = bigLMStats( mdl , 0.01 )
+    betas = bmdl$beta.t["ROI",]
+    betasI = makeImage( mask, betas )
+    loth = quantile(  betas, probs=0.8 )
+    if ( verbose )
+      plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
+            window.overlay = c( loth, max(betas) ) )
+    }
+  }
 
 concatenatedMaps =
   list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
