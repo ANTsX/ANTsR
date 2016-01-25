@@ -13,6 +13,7 @@
 #' @param repeatMotionEst number of times to repeat motion estimation.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
 #' @param nCompCor number of compcor components to use.
+#' @param polydegree eg 4 for polynomial nuisance variables
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
@@ -25,6 +26,8 @@
 #'   \item{boldMat: }{Matrix of filtered BOLD data.}
 #'   \item{boldMask: }{BOLD mask.}
 #'   \item{motionCorr: }{Motion corrected data.}
+#'   \item{polyNuis: }{Polynomial nuisance variables.}
+#'   \item{timevals: }{Temporal variables.}
 #'   \item{nuisance: }{Nuisance variables.}
 #'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
 #'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
@@ -35,6 +38,7 @@
 #'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
 #'   \item{runID: }{Identifies which run over time series.}
 #'   \item{dmnBetas: }{Default mode network beta map.}
+#'   \item{fusedImg:}{runs fused into one image and corrected}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
 #'   \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 #' }
@@ -71,7 +75,8 @@ powersACTrsfMRIprocessing <- function( img,
   fdthresh=0.2,
   repeatMotionEst = 1,
   freqLimits = c( 0.008, 0.09 ),
-  nCompCor = 4,
+  nCompCor = 0,
+  polydegree = NA,
   structuralImage = NA,
   structuralSeg = NA,
   structuralNodes = NA,
@@ -105,15 +110,13 @@ steady = floor(10.0 / tr) + 1
 origmean = apply.antsImage(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
 allTimes = dim(img)[4]
-runNuis  = NA
 # Eliminate non steady-state timepoints
 img = cropIndices(img, c(1,1,1,steady), dim(img) )
-
+runNuis = rep(1, dim(img)[4] )
 if ( ! all( is.na( extraRuns ) ) )
   {
   if ( class( extraRuns )[[1]] != "list"  )
     stop("extraRuns must be a list of antsImages.")
-  runNuis = rep(1, dim(img)[4] )
   for ( i in 1:length( extraRuns ) )
     {
     timg = extraRuns[[i]]
@@ -126,10 +129,11 @@ if ( ! all( is.na( extraRuns ) ) )
 
 
 ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
+moreacc = 2
 mocoTxType = "Rigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=moreacc )
   }
 if ( repeatMotionEst < 1 )
   moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate = 0 )
@@ -143,7 +147,7 @@ if ( ! all( is.na( extraRuns ) ) )
     {
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
-    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=2 )
+    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=moreacc )
     if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
     if ( usePkg("abind") )
       {
@@ -281,27 +285,56 @@ ctxMean = rowMeans(boldMat[,ctxVox])
 mocoNuis = cbind( reg_params, reg_params * reg_params )
 mocoNuis = pracma::detrend( mocoNuis )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
-compcorNuis = compcor( boldMat, nCompCor )
-colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
-nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv,
-  compcorNuis, dvars=dvars )
-if ( ! all( is.na( runNuis ) ) )
-  nuisance = cbind( nuisance, runs=factor(runNuis) )
+nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
+runNuis = factor( runNuis )
+nuisance = cbind( nuisance, runs=runNuis )
+if ( nCompCor > 0 )
+  {
+  compcorNuis = compcor( boldMat, nCompCor )
+  colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
+  nuisance = cbind( nuisance, compcorNuis )
+  }
+
+timevals = 0
+for ( runlev in levels( runNuis ) )
+  {
+  if ( length( timevals ) == 1 )
+    {
+    timevals = as.numeric( 1:sum( runNuis == runlev ) ) * tr
+    } else {
+    timevals = c( timevals, as.numeric( 1:sum( runNuis == runlev ) ) * tr )
+    }
+  }
+
+polyNuis = NA
+if ( !is.na( polydegree ) ) # polynomial regressors
+  {
+  polyNuis <- stats::poly( timevals, degree = polydegree )
+  # residualize but also keep the scale mean
+  rboldMat <- residuals( lm( boldMat ~ polyNuis * runNuis ) )
+  meanmat = rboldMat * 0
+  for ( i in 1:nrow( meanmat ) ) meanmat[i,]=colMeans( boldMat )
+  boldMat = rboldMat + meanmat
+  rm( meanmat )
+  rm( rboldMat )
+  if ( verbose ) print("residuals done")
+  }
+if ( verbose ) print("polyNuis done")
+fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
+
 
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
-img     = matrix2timeseries( moco$moco_img, mask, boldMat )
 if ( any( is.na( smoothingSigmas ) ) )
   {
   sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  )) * 1.5
   smoothingSigmas = c( sptl, sptl, sptl, 1.0 )
   }
-img     = smoothImage( img, smoothingSigmas, FWHM=TRUE )
+img     = smoothImage( fusedImg, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
   boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
     freqHi=freqLimits[2], opt="trig" )
 
-rboldMat <- residuals( lm( boldMat[goodtimes,] ~ nuisance[goodtimes,] ) )
 connMatNodes = NA
 if ( ! is.na( structuralNodes ) )
   {
@@ -313,7 +346,7 @@ if ( ! is.na( structuralNodes ) )
   for ( i in 1:length( ulabs ) )
     dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
   dmnpr = imageListToMatrix( dmnlist, mask )
-  dmnref = ( rboldMat %*% t(dmnpr) )
+  dmnref = ( boldMat %*% t(dmnpr) )
   connMatNodes = cor( dmnref )
   }
 
@@ -358,6 +391,8 @@ return(
       boldMat       = boldMat,
       boldMask      = mask,
       motionCorr    = moco,
+      polyNuis      = polyNuis,
+      timevals      = timevals,
       nuisance      = nuisance,
       connMatNodes  = connMatNodes,
       connMatNodesPartialCorr = connMatNodesPartialCorr,
@@ -368,7 +403,8 @@ return(
       mapsToTemplate = concatenatedMaps,
       runID         = runNuis,
       dmnBetas      = betasI,
-      networkPriors2Bold = networkPriors2Bold
+      networkPriors2Bold = networkPriors2Bold,
+      fusedImg = fusedImg
       #      connMatPowers = connMat,
       )
     )
