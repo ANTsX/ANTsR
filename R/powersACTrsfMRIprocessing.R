@@ -163,6 +163,7 @@ if ( ! all( is.na( extraRuns ) ) )
     moco$dvars = c( moco$dvars, mocoTemp$dvars )
     rm( mocoTemp )
     }
+    if ( verbose ) print("fusion done")
   }
 
 ## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
@@ -184,6 +185,8 @@ if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold al
 if ( ! exists("boldmap") )
   {
   if ( verbose ) print("boldmap to structure")
+#  boldmap = antsRegistration( meanbold * mask, t1brain,
+#    typeofTransform='QuickRigid', verbose=FALSE )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=FALSE )
   }
@@ -231,15 +234,18 @@ if ( length( badtimes ) > 0 )
   haveBadTimes = TRUE
   } else badtimes = NA
 
-## ----detrend,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5-----
-global_moco <- rowMeans( timeseries2matrix( moco$moco_img, mask) )
+
 boldMat = timeseries2matrix( moco$moco_img, mask )
-boldMat[goodtimes,] = pracma::detrend(boldMat[goodtimes,])
-global_moco_detrend = rowMeans(boldMat)
 nTimes = nrow(boldMat)
 if ( haveBadTimes )
   {
-  for ( v in c(1:nVox) ) {
+  if ( verbose  )
+    {
+    print( "badtimes" )
+    print( badtimes )
+    }
+  for ( v in c(1:nVox) )
+    {
     boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
       method='natural', xout=badtimes )$y
     }
@@ -309,19 +315,23 @@ for ( runlev in levels( runNuis ) )
 polyNuis = NA
 if ( !is.na( polydegree ) ) # polynomial regressors
   {
-  polyNuis <- stats::poly( timevals, degree = polydegree )
-  # residualize but also keep the scale mean
-  rboldMat <- residuals( lm( boldMat ~ polyNuis * runNuis ) )
-  meanmat = rboldMat * 0
+  meanmat = boldMat * 0
+  rboldMat = boldMat * 0
   for ( i in 1:nrow( meanmat ) ) meanmat[i,]=colMeans( boldMat )
+  for ( runlev in levels( runNuis ) )
+    {
+    polyNuis <- stats::poly( timevals[ runNuis == runlev ], degree = polydegree )
+    rboldMat[ runNuis == runlev, ] <- residuals( lm( boldMat[ runNuis == runlev, ] ~ polyNuis ) )
+    }
+  # residualize but also keep the scale mean
   boldMat = rboldMat + meanmat
   rm( meanmat )
   rm( rboldMat )
   if ( verbose ) print("residuals done")
+  polyNuis <- stats::poly( timevals, degree = polydegree )
   }
 if ( verbose ) print("polyNuis done")
 fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
-
 
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
 if ( any( is.na( smoothingSigmas ) ) )

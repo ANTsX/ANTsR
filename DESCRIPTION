@@ -43,7 +43,6 @@ Suggests:
     moments,
     pixmap,
     png,
-    pracma,
     psych,
     randomForest,
     rgl,
