@@ -16,7 +16,9 @@ fMRINormalization(img, fdthresh = Inf, repeatMotionEst = 2,
 \item{fdthresh}{threshold for framewise displacement.  determines what time
 frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.}
 
-\item{repeatMotionEst}{number of times to repeat motion estimation.}
+\item{repeatMotionEst}{number of times to repeat motion estimation. We
+recommend the value 2, in general.  The first run improves the template
+estimate such that the 2nd run gives a more accurate correction.}
 
 \item{freqLimits}{pair defining bandwidth of interest from low to high.}
 
@@ -74,7 +76,8 @@ do motion correction and produce a variety of nuisance regressors.  It will
 also do spatial and temporal filtering as well as interpolation between
 time frames that exceed a given framewise displacement.  Finally, we return
 maps to the common coordinate system.  Output may be trimmed in the future
-but currently provides access at different stages: merging versus filtering.
+but currently provides access at different stages: merging versus filtering
+and normalized, fused BOLD images in both subject and template space.
 }
 \examples{
 # this example is long-running ( perhaps 10 minutes on an OSX laptop 2016 )
