@@ -126,27 +126,38 @@
   avg_img <- new("antsImage", "float", 3)
   moco_img <- new("antsImage", "float", 4)
   moco_params <- new("antsMatrix", "double")
-  if (moreaccurate == 3) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 16 ), t = paste(txtype, "[0.1,3,0]", sep=""), i = "100x50x20",
-      u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1, v = as.numeric(verbose) ) )
+  mibins = 20
+  if ( moreaccurate == 3 ) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
+      m = list(name = "MI", fixed, img, 1, mibins ),
+      t = paste(txtype, "[0.1,3,0]", sep=""),
+      i = "100x50x20",
+      u = 1, e = 1, s = "2x1x0", f = "4x2x1",
+      n = n, l = 1, v = as.numeric(verbose) ) )
   }
-  if (moreaccurate == 2) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = paste(txtype, "[0.1]", sep=""), i = "100x50x20",
-      u = 1, e = 1, s = "2x1x0", f = "4x2x1", n = n, l = 1, v = as.numeric(verbose)))
+  if ( moreaccurate == 2 ) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
+      m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.25 ),
+      t = paste(txtype, "[0.1]", sep=""),
+      i = "100x50x30",
+      u = 1, e = 1, s = "2x1x0", f = "4x2x1",
+      n = n, l = 1, v = as.numeric(verbose)))
   }
-  if (moreaccurate == 1) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.1), t = paste(txtype, "[0.1]", sep=""), i = 20, u = 1,
+  if ( moreaccurate == 1 ) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
+      m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.25 ),
+      t = paste(txtype, "[0.1]", sep=""),
+      i = "100",
+      u = 1, e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)))
+  }
+  if ( moreaccurate == 0 ) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
+      m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.02),
+      t = paste(txtype, "[0.1]", sep=""),
+      i = 3, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)))
   }
-  if (moreaccurate == 0) {
-    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img), m = list(name = "MI",
-      fixed, img, 1, 32, "regular", 0.02), t = paste(txtype, "[0.1]", sep=""), i = 3, u = 1,
-      e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)))
-  }
-  if (moreaccurate < 3) {
+  if ( moreaccurate < 3 ) {
     moco_params <- as.data.frame(moco_params)
     mynames <- c("MetricPre", "MetricPost",
                  paste('MOCOparam', 1:(ncol(moco_params)-2), sep=''))
@@ -154,6 +165,13 @@
   } else {
     moco_params <- NA
   }
-  return(list(moco_img = moco_img, moco_params = moco_params, moco_avg_img = antsImageClone(avg_img,
-    inpixeltype)))
+  return
+    (
+    list
+      (
+      moco_img = moco_img,
+      moco_params = moco_params,
+      moco_avg_img = antsImageClone(avg_img, inpixeltype )
+      )
+    )
 }
