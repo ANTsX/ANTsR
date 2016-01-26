@@ -1,5 +1,5 @@
 ---
-title: "Using the antsTransform class"
+title: "Using the antsrTransform class"
 author: "Jeffrey T. Duda"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -110,41 +110,43 @@ which provides the underlying implementations. This class may be used to apply s
 transforms to points, vectors, and images.
 
 ## Transforming point and vector data
-To demonstrate the methods, we will first create a linear transform and demonstate it's application
+To demonstrate the methods, we will first create a linear transform and demonstrate its application
 to point and vector data. An `AffineTransform` is created then defined by setting
 its parameters. These parameters are the components of the matrix, in row order,
-followed by the translation components.
+followed by the translation components. If no parameters are set, an identity transform
+is returned. Parameters may be changed later using `setAntsrTransformParameters`
 ```{r basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-tx <- new("antsTransform", precision="float", type="AffineTransform", dimension=2 )
+tx <- createAntsrTransform( precision="float", type="AffineTransform", dimension=2)
+setAntsrTransformParameters(tx, c(0,-1,1,0,256,0))
 print(tx)
-antsTransformSetParameters(tx, c(0,-1,1,0,256,0) )
 
 point = c(80,40)
-outpoint = antsApplyTransformToPoint(tx, point)
+outpoint = applyAntsrTransform(tx, point)
 print(outpoint)
 ```
 
 This transforms may be applied to a set of points using `apply` and its variants.
 ```{r basics2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 ptsMat = rbind(c(80,40), c(20,30))
-t(apply( ptsMat, 1, function(x) {antsApplyTransformToPoint(tx, x)}))
+t(apply( ptsMat, 1, function(x) {applyAntsrTransform(tx, x)}))
 
 ptsList = list(c(80,40), c(20,30))
-lapply( ptsList, function(x) {antsApplyTransformToPoint(tx, x)})
+lapply( ptsList, function(x) {applyAntsrTransform(tx, x)})
 ```
 
 Linear transforms may be inverted, but non-linear transforms may not be directly inverted.
 See later sections for more on non-linear transforms.
 ```{r basics3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-itx = antsTransformInverse(tx)
-antsApplyTransformToPoint( itx, outpoint )
+itx = invertAntsrTransform(tx)
+applyAntsrTransform( itx, outpoint )
 ```
 
 Applying a transform to a vector is not the same as applying the transform to a point since a
-vector does not have a spatial location but rather is a direction. Clearly, it is important to call the correct antsApplyTransform method for your specific data type.
+vector does not have a spatial location but rather is a direction. Clearly, it is important to set
+the dataType correctly (default is "point" if input data is not an `antsImage`).
 ```{r basics4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 vector = c(80,40)
-antsApplyTransformToVector(tx, vector)
+applyAntsrTransform(tx, vector, dataType="vector")
 ```
 
 Currently, only affine transforms may be created within R directly, but creation
@@ -188,13 +190,13 @@ Similarity measure: $\substack{ \approx \\ s }$ or $\approx_s$ indicates the met
 img <- antsImageRead(getANTsRData("r16"))
 invisible(plotColor(img))
 
-img2 = antsApplyTransformToImage(transform=tx, image=img, reference=img)
+img2 = applyAntsrTransform(transform=tx, data=img, reference=img)
 invisible(plotColor(img2))
-img3 = antsApplyTransformToImage(transform=tx, image=img, reference=img, interpolation="gaussian")
+img3 = applyAntsrTransform(transform=tx, data=img, reference=img, interpolation="gaussian")
 invisible(plotColor(img3))
 
-itx = antsTransformInverse(tx)
-img_invert = antsApplyTransformToImage(transform=itx, image=img2, reference=img)
+itx = invertAntsrTransform(tx)
+img_invert = applyAntsrTransform(transform=itx, data=img2, reference=img)
 invisible(plotColor(img_invert))
 ```
 
@@ -207,9 +209,9 @@ the transform would need to be reinitialized with the modified antsImage. This i
 to underlying differences in data representation.
 ```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 # Don't run until we have test files
-#linTx = antsTransformRead("yourfile.mat")
+#linTx = readAntsrTransform("yourfile.mat")
 #warpImage = antsImageRead("yourfield.nii.gz")
-#warpTx = antsTransformFromDisplacementField(warpImage)
+#warpTx = antsrTransformFromDisplacementField(warpImage)
 ```
 
 ## Composing Transforms
@@ -220,8 +222,8 @@ will have the same pixeltype as the input image. A variety of options are also a
 the interpolation method to be used. Linear transforms may be inverted as shown below.
 
 ```{r compose,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-tx2 = antsTransformCompose(list(tx,tx))
-img4 = antsApplyTransformToImage(transform=tx2, image=img, reference=img)
+tx2 = composeAntsrTransforms(list(tx,tx))
+img4 = applyAntsrTransform(transform=tx2, data=img, reference=img)
 invisible(plotColor(img4))
 ```
 
@@ -254,13 +256,13 @@ subx = as.antsImage(x[110:150,110:150])
 suby = as.antsImage(y[110:150,110:150])
 invisible(plotColor(subimg, vectors=list(subx,-suby)))
 
-warpTx = antsTransformFromDisplacementField( field )
-warped = antsApplyTransformToImage(warpTx,img,img)
+warpTx = antsrTransformFromDisplacementField( field )
+warped = applyAntsrTransform(warpTx,data=img,reference=img)
 invisible(plotColor(warped))
 invisible(plotColor(abs(img-warped)))
 
 
-warped2 = antsApplyTransformToImage(transform=list(warpTx,tx), image=img, reference=img)
+warped2 = applyAntsrTransform(transform=list(warpTx,tx), data=img, reference=img)
 invisible(plotColor(warped2))
 invisible(plotColor(abs(warped2-img2)))
 
@@ -273,7 +275,7 @@ Descriptions of the transform types comes from the ITK documentation of the asso
 Many of these transforms have a center and offset that can be set. Here are some words of caution
 from the ITK documentation.
 
-The center of rotation of an antsTransform is a fixed point -
+The center of rotation of an antsrTransform is a fixed point -
 for most transforms here,
 this point is not a "parameter" of the transform - the exception is that
 "centered" transforms have center as a parameter during optimization.

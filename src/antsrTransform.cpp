@@ -36,7 +36,7 @@
 
 /*
 template< class TransformType >
-Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
+Rcpp::XPtr<typename TransformType::Pointer> antsrTransformGetXPtr()
 {
   typedef typename TransformType::Pointer           TransformPointerType;
   TransformPointerType transformPtr = TransformType::New();
@@ -47,7 +47,7 @@ Rcpp::XPtr<typename TransformType::Pointer> antsTransformGetXPtr()
 }*/
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
+SEXP antsrTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
 {
 
   std::string type = Rcpp::as<std::string>( r_type );
@@ -73,7 +73,7 @@ SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
   return Rcpp::wrap(NA_REAL);
 }
 
-RcppExport SEXP antsTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
+RcppExport SEXP antsrTransform( SEXP r_precision, SEXP r_dimension, SEXP r_type )
 {
 try
 {
@@ -95,15 +95,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform<PrecisionType,4>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,4>( r_precision, r_dimension, r_type  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform<PrecisionType,3>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,3>( r_precision, r_dimension, r_type  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform<PrecisionType,2>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,2>( r_precision, r_dimension, r_type  );
 	    }
 	  }
   else if( precision == "float" )
@@ -111,15 +111,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform<PrecisionType,4>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,4>( r_precision, r_dimension, r_type  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform<PrecisionType,3>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,3>( r_precision, r_dimension, r_type  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform<PrecisionType,2>( r_precision, r_dimension, r_type  );
+      return antsrTransform<PrecisionType,2>( r_precision, r_dimension, r_type  );
 	    }
     }
 
@@ -144,7 +144,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 }
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
+SEXP antsrTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
     SEXP r_matrix, SEXP r_offset, SEXP r_center, SEXP r_translation,
     SEXP r_parameters, SEXP r_fixedparameters )
   {
@@ -346,7 +346,7 @@ SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension
   return Rcpp::wrap( itkTransform );
 }
 
-RcppExport SEXP antsTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
+RcppExport SEXP antsrTransform_MatrixOffset( SEXP r_type, SEXP r_precision, SEXP r_dimension,
   SEXP r_matrix, SEXP r_offset, SEXP r_center, SEXP r_translation,
   SEXP r_parameters, SEXP r_fixedparameters )
 {
@@ -371,17 +371,17 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
 	    }
 	  }
@@ -390,17 +390,17 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,4>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,3>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
+      return antsrTransform_MatrixOffset<PrecisionType,2>( r_type, r_precision, r_dimension, r_matrix,
           r_offset, r_center, r_translation, r_parameters, r_fixedparameters );
 	    }
     }
@@ -427,7 +427,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_GetParameters( SEXP r_transform )
+SEXP antsrTransform_GetParameters( SEXP r_transform )
 {
   typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
   typedef typename TransformType::Pointer                   TransformPointerType;
@@ -444,7 +444,7 @@ SEXP antsTransform_GetParameters( SEXP r_transform )
 }
 
 
-RcppExport SEXP antsTransform_GetParameters( SEXP r_transform )
+RcppExport SEXP antsrTransform_GetParameters( SEXP r_transform )
 {
 try
 {
@@ -468,15 +468,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,4>( r_transform  );
+      return antsrTransform_GetParameters<PrecisionType,4>( r_transform  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,3>( r_transform  );
+      return antsrTransform_GetParameters<PrecisionType,3>( r_transform  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,2>( r_transform );
+      return antsrTransform_GetParameters<PrecisionType,2>( r_transform );
 	    }
 	  }
   else if( precision == "float" )
@@ -484,15 +484,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,4>( r_transform );
+      return antsrTransform_GetParameters<PrecisionType,4>( r_transform );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,3>( r_transform );
+      return antsrTransform_GetParameters<PrecisionType,3>( r_transform );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_GetParameters<PrecisionType,2>( r_transform );
+      return antsrTransform_GetParameters<PrecisionType,2>( r_transform );
 	    }
     }
 
@@ -518,7 +518,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
+SEXP antsrTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
 {
   typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
   typedef typename TransformType::Pointer                   TransformPointerType;
@@ -543,7 +543,7 @@ SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
   return(Rcpp::wrap(true));
 }
 
-RcppExport SEXP antsTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
+RcppExport SEXP antsrTransform_SetParameters( SEXP r_transform, SEXP r_parameters )
 {
 try
 {
@@ -567,15 +567,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,4>( r_transform, r_parameters  );
+      return antsrTransform_SetParameters<PrecisionType,4>( r_transform, r_parameters  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,3>( r_transform, r_parameters  );
+      return antsrTransform_SetParameters<PrecisionType,3>( r_transform, r_parameters  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,2>( r_transform, r_parameters );
+      return antsrTransform_SetParameters<PrecisionType,2>( r_transform, r_parameters );
 	    }
 	  }
   else if( precision == "float" )
@@ -583,15 +583,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,4>( r_transform, r_parameters );
+      return antsrTransform_SetParameters<PrecisionType,4>( r_transform, r_parameters );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,3>( r_transform, r_parameters );
+      return antsrTransform_SetParameters<PrecisionType,3>( r_transform, r_parameters );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_SetParameters<PrecisionType,2>( r_transform, r_parameters );
+      return antsrTransform_SetParameters<PrecisionType,2>( r_transform, r_parameters );
 	    }
     }
 
@@ -618,7 +618,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 // Apply transform to point
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
+SEXP antsrTransform_TransformPoint( SEXP r_transform, SEXP r_point )
 {
 
   Rcpp::S4 transform( r_transform );
@@ -650,7 +650,7 @@ OutputPointType outItkPoint = itkTransform->TransformPoint( inItkPoint );
 }
 
 
-RcppExport SEXP antsTransform_TransformPoint( SEXP r_transform, SEXP r_point )
+RcppExport SEXP antsrTransform_TransformPoint( SEXP r_transform, SEXP r_point )
 {
 try
 {
@@ -674,15 +674,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,4>( r_transform, r_point  );
+      return antsrTransform_TransformPoint<PrecisionType,4>( r_transform, r_point  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,3>( r_transform, r_point  );
+      return antsrTransform_TransformPoint<PrecisionType,3>( r_transform, r_point  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,2>( r_transform, r_point );
+      return antsrTransform_TransformPoint<PrecisionType,2>( r_transform, r_point );
 	    }
 	  }
   else if( precision == "float" )
@@ -690,15 +690,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,4>( r_transform, r_point );
+      return antsrTransform_TransformPoint<PrecisionType,4>( r_transform, r_point );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,3>( r_transform, r_point );
+      return antsrTransform_TransformPoint<PrecisionType,3>( r_transform, r_point );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformPoint<PrecisionType,2>( r_transform, r_point );
+      return antsrTransform_TransformPoint<PrecisionType,2>( r_transform, r_point );
 	    }
     }
 
@@ -724,7 +724,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 // Apply transform to vector
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
+SEXP antsrTransform_TransformVector( SEXP r_transform, SEXP r_vector )
 {
 
   Rcpp::S4 transform( r_transform );
@@ -757,7 +757,7 @@ SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
 }
 
 
-RcppExport SEXP antsTransform_TransformVector( SEXP r_transform, SEXP r_vector )
+RcppExport SEXP antsrTransform_TransformVector( SEXP r_transform, SEXP r_vector )
 {
 try
 {
@@ -781,15 +781,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,4>( r_transform, r_vector  );
+      return antsrTransform_TransformVector<PrecisionType,4>( r_transform, r_vector  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,3>( r_transform, r_vector  );
+      return antsrTransform_TransformVector<PrecisionType,3>( r_transform, r_vector  );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
+      return antsrTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
 	    }
 	  }
   else if( precision == "float" )
@@ -797,15 +797,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,4>( r_transform, r_vector );
+      return antsrTransform_TransformVector<PrecisionType,4>( r_transform, r_vector );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,3>( r_transform, r_vector );
+      return antsrTransform_TransformVector<PrecisionType,3>( r_transform, r_vector );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
+      return antsrTransform_TransformVector<PrecisionType,2>( r_transform, r_vector );
 	    }
     }
 
@@ -831,14 +831,14 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 // Apply transform to image
 template< class TransformType, class PixelType >
-SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
+SEXP antsrTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
 {
   typedef typename TransformType::Pointer          TransformPointerType;
 
   const unsigned int Dimension = TransformType::InputSpaceDimension;
 
-  Rcpp::S4 antsTransform( r_transform );
-  std::string type = Rcpp::as<std::string>( antsTransform.slot("type") );
+  Rcpp::S4 antsrTransform( r_transform );
+  std::string type = Rcpp::as<std::string>( antsrTransform.slot("type") );
 
   TransformPointerType transform = Rcpp::as<TransformPointerType>( r_transform );
 
@@ -967,32 +967,32 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, S
 }
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
+SEXP antsrTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_interpolation )
 {
   Rcpp::S4 transform( r_transform );
   std::string type = Rcpp::as<std::string>( transform.slot("type") );
 
   typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
-  //return antsTransform_TransformImage<TransformType>( r_transform, r_image, r_ref );
+  //return antsrTransform_TransformImage<TransformType>( r_transform, r_image, r_ref );
 
   Rcpp::S4 image( r_image );
   std::string pixeltype = Rcpp::as<std::string>(image.slot("pixeltype"));
 
   if ( pixeltype == "double" )
   {
-    return antsTransform_TransformImage<TransformType, double>( r_transform, r_image, r_ref, r_interpolation );
+    return antsrTransform_TransformImage<TransformType, double>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "float" )
   {
-    return antsTransform_TransformImage<TransformType, float>( r_transform, r_image, r_ref, r_interpolation );
+    return antsrTransform_TransformImage<TransformType, float>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "unsigned int" )
   {
-    return antsTransform_TransformImage<TransformType, unsigned int>( r_transform, r_image, r_ref, r_interpolation );
+    return antsrTransform_TransformImage<TransformType, unsigned int>( r_transform, r_image, r_ref, r_interpolation );
   }
   else if ( pixeltype == "unsigned char" )
   {
-    return antsTransform_TransformImage<TransformType, unsigned char>( r_transform, r_image, r_ref, r_interpolation );
+    return antsrTransform_TransformImage<TransformType, unsigned char>( r_transform, r_image, r_ref, r_interpolation );
   }
   else
   {
@@ -1004,7 +1004,7 @@ SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, S
 }
 
 
-RcppExport SEXP antsTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_iterpolation )
+RcppExport SEXP antsrTransform_TransformImage( SEXP r_transform, SEXP r_image, SEXP r_ref, SEXP r_iterpolation )
 {
 try
 {
@@ -1028,15 +1028,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation  );
+      return antsrTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation  );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
+      return antsrTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
+      return antsrTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
 	  }
   else if( precision == "float" )
@@ -1044,15 +1044,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation );
+      return antsrTransform_TransformImage<PrecisionType,4>( r_transform, r_image, r_ref, r_iterpolation );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
+      return antsrTransform_TransformImage<PrecisionType,3>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
+      return antsrTransform_TransformImage<PrecisionType,2>( r_transform, r_image, r_ref, r_iterpolation );
 	    }
     }
 
@@ -1078,7 +1078,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
+SEXP antsrTransform_Read( SEXP r_filename, SEXP r_precision )
 {
 
   std::string filename = Rcpp::as<std::string>( r_filename );
@@ -1097,9 +1097,9 @@ SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
   const typename TransformReaderType::TransformListType * transformList = reader->GetTransformList();
   //Rcpp::Rcout << "Number of transforms = " << transformList->size() << std::endl;
 
-  Rcpp::S4 antsTransform( "antsTransform" );
-  antsTransform.slot("dimension") = Dimension;
-  antsTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
+  Rcpp::S4 antsrTransform( "antsrTransform" );
+  antsrTransform.slot("dimension") = Dimension;
+  antsrTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
 
   TransformBasePointerType transform;
 
@@ -1120,16 +1120,16 @@ SEXP antsTransform_Read( SEXP r_filename, SEXP r_precision )
   }
 
   std::string type = transform->GetNameOfClass();
-  antsTransform.slot("type") = type;
+  antsrTransform.slot("type") = type;
 
   TransformBasePointerType * rawPointer = new TransformBasePointerType( transform );
   Rcpp::XPtr<TransformBasePointerType> xptr( rawPointer, true );
-  antsTransform.slot("pointer") = xptr;
+  antsrTransform.slot("pointer") = xptr;
 
-  return antsTransform;
+  return antsrTransform;
 }
 
-RcppExport SEXP antsTransform_Read( SEXP r_filename, SEXP r_dimension, SEXP r_precision )
+RcppExport SEXP antsrTransform_Read( SEXP r_filename, SEXP r_dimension, SEXP r_precision )
 {
 try
 {
@@ -1141,15 +1141,15 @@ try
     typedef float PrecisionType;
     if ( dimension == 4 )
     {
-      return antsTransform_Read<PrecisionType,4>( r_filename, r_precision );
+      return antsrTransform_Read<PrecisionType,4>( r_filename, r_precision );
     }
     else if ( dimension == 3)
     {
-      return antsTransform_Read<PrecisionType,3>( r_filename, r_precision );
+      return antsrTransform_Read<PrecisionType,3>( r_filename, r_precision );
     }
     else if ( dimension == 2 )
     {
-      return antsTransform_Read<PrecisionType,2>( r_filename, r_precision );
+      return antsrTransform_Read<PrecisionType,2>( r_filename, r_precision );
     }
     else
     {
@@ -1178,11 +1178,11 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
+SEXP antsrTransform_Compose( SEXP r_list, SEXP r_precision )
 {
-  Rcpp::S4 antsTransform( "antsTransform" );
-  antsTransform.slot("dimension") = Dimension;
-  antsTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
+  Rcpp::S4 antsrTransform( "antsrTransform" );
+  antsrTransform.slot("dimension") = Dimension;
+  antsrTransform.slot("precision") = Rcpp::as<std::string>( r_precision );
 
   Rcpp::List transforms( r_list );
 
@@ -1204,16 +1204,16 @@ SEXP antsTransform_Compose( SEXP r_list, SEXP r_precision )
   TransformBasePointerType transform = dynamic_cast<TransformBaseType *>(comp_transform.GetPointer());
 
   std::string type = comp_transform->GetNameOfClass();
-  antsTransform.slot("type") = type;
+  antsrTransform.slot("type") = type;
 
   TransformBasePointerType * rawPointer = new TransformBasePointerType( transform );
   Rcpp::XPtr<TransformBasePointerType> xptr( rawPointer, true );
-  antsTransform.slot("pointer") = xptr;
+  antsrTransform.slot("pointer") = xptr;
 
-  return antsTransform;
+  return antsrTransform;
 }
 
-RcppExport SEXP antsTransform_Compose( SEXP r_list, SEXP r_dimension, SEXP r_precision )
+RcppExport SEXP antsrTransform_Compose( SEXP r_list, SEXP r_dimension, SEXP r_precision )
 {
 try
 {
@@ -1225,15 +1225,15 @@ try
     typedef float PrecisionType;
     if ( dimension == 4 )
     {
-      return antsTransform_Compose<PrecisionType,4>( r_list, r_precision );
+      return antsrTransform_Compose<PrecisionType,4>( r_list, r_precision );
     }
     else if ( dimension == 3)
     {
-      return antsTransform_Compose<PrecisionType,3>( r_list, r_precision );
+      return antsrTransform_Compose<PrecisionType,3>( r_list, r_precision );
     }
     else if ( dimension == 2 )
     {
-      return antsTransform_Compose<PrecisionType,2>( r_list, r_precision );
+      return antsrTransform_Compose<PrecisionType,2>( r_list, r_precision );
     }
     else
     {
@@ -1262,7 +1262,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_FromDisplacementField( SEXP r_field, std::string precision )
+SEXP antsrTransform_FromDisplacementField( SEXP r_field, std::string precision )
 {
 
   typedef itk::Transform<PrecisionType,Dimension,Dimension>                  TransformType;
@@ -1305,19 +1305,19 @@ SEXP antsTransform_FromDisplacementField( SEXP r_field, std::string precision )
 
   TransformPointerType transform = dynamic_cast<TransformType *>( displacementTransform.GetPointer() );
 
-  Rcpp::S4 antsTransform( "antsTransform" );
-  antsTransform.slot("dimension") = Dimension;
-  antsTransform.slot("precision") = precision;
+  Rcpp::S4 antsrTransform( "antsrTransform" );
+  antsrTransform.slot("dimension") = Dimension;
+  antsrTransform.slot("precision") = precision;
   std::string type = displacementTransform->GetNameOfClass();
-  antsTransform.slot("type") = type;
+  antsrTransform.slot("type") = type;
   TransformPointerType * rawPointer = new TransformPointerType( transform );
   Rcpp::XPtr<TransformPointerType> xptr( rawPointer, true );
-  antsTransform.slot("pointer") = xptr;
+  antsrTransform.slot("pointer") = xptr;
 
-  return antsTransform;
+  return antsrTransform;
 }
 
-RcppExport SEXP antsTransform_FromDisplacementField( SEXP r_field )
+RcppExport SEXP antsrTransform_FromDisplacementField( SEXP r_field )
 {
 try
 {
@@ -1341,15 +1341,15 @@ try
     typedef float PrecisionType;
     if ( dimension == 4 )
     {
-      return antsTransform_FromDisplacementField<PrecisionType,4>( r_field, precision );
+      return antsrTransform_FromDisplacementField<PrecisionType,4>( r_field, precision );
     }
     else if ( dimension == 3)
     {
-      return antsTransform_FromDisplacementField<PrecisionType,3>( r_field, precision );
+      return antsrTransform_FromDisplacementField<PrecisionType,3>( r_field, precision );
     }
     else if ( dimension == 2 )
     {
-      return antsTransform_FromDisplacementField<PrecisionType,2>( r_field, precision );
+      return antsrTransform_FromDisplacementField<PrecisionType,2>( r_field, precision );
     }
     else
     {
@@ -1379,7 +1379,7 @@ return Rcpp::wrap(NA_REAL); //not reached
 
 // Apply transform to point
 template< class PrecisionType, unsigned int Dimension >
-SEXP antsTransform_Inverse( SEXP r_transform )
+SEXP antsrTransform_Inverse( SEXP r_transform )
 {
 
   Rcpp::S4 transform( r_transform );
@@ -1400,7 +1400,7 @@ SEXP antsTransform_Inverse( SEXP r_transform )
 }
 
 
-RcppExport SEXP antsTransform_Inverse( SEXP r_transform )
+RcppExport SEXP antsrTransform_Inverse( SEXP r_transform )
 {
 try
 {
@@ -1424,15 +1424,15 @@ try
     typedef double PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_Inverse<PrecisionType,4>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,4>( r_transform );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_Inverse<PrecisionType,3>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,3>( r_transform );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_Inverse<PrecisionType,2>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,2>( r_transform );
 	    }
 	  }
   else if( precision == "float" )
@@ -1440,15 +1440,15 @@ try
     typedef float PrecisionType;
     if( dimension == 4 )
 	    {
-      return antsTransform_Inverse<PrecisionType,4>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,4>( r_transform );
       }
     else if( dimension == 3 )
 	    {
-      return antsTransform_Inverse<PrecisionType,3>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,3>( r_transform );
 	    }
     else if( dimension == 2 )
 	    {
-      return antsTransform_Inverse<PrecisionType,2>( r_transform );
+      return antsrTransform_Inverse<PrecisionType,2>( r_transform );
 	    }
     }
 
