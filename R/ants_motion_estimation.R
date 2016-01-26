@@ -64,7 +64,6 @@
 .motion_correction <- function( img, fixed = NA, moreaccurate = 1,
                                 txtype = "Affine", verbose=FALSE )
 {
-  print( paste( "Verbose", verbose ) )
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")
