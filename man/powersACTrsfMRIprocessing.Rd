@@ -56,7 +56,8 @@ outputs a list containing:
   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
   \item{runID: }{Identifies which run over time series.}
   \item{dmnBetas: }{Default mode network beta map.}
-  \item{fusedImg:}{runs fused into one image and corrected}
+  \item{fusedImg:}{runs fused into one image and corrected if polydegree set}
+  \item{fusedImgFilt:}{runs fused into one image and filtered}
   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
   \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 }

@@ -38,7 +38,8 @@
 #'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
 #'   \item{runID: }{Identifies which run over time series.}
 #'   \item{dmnBetas: }{Default mode network beta map.}
-#'   \item{fusedImg:}{runs fused into one image and corrected}
+#'   \item{fusedImg:}{runs fused into one image and corrected if polydegree set}
+#'   \item{fusedImgFilt:}{runs fused into one image and filtered}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
 #'   \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
 #' }
@@ -126,6 +127,17 @@ if ( ! all( is.na( extraRuns ) ) )
     runNuis = c( runNuis, rep(i+1, dim(timg)[4] ) )
     }
   }
+runNuis = factor( runNuis )
+timevals = 0
+for ( runlev in levels( runNuis ) )
+  {
+  if ( length( timevals ) == 1 )
+    {
+    timevals = as.numeric( 1:sum( runNuis == runlev ) ) * tr
+    } else {
+    timevals = c( timevals, as.numeric( 1:sum( runNuis == runlev ) ) * tr )
+    }
+  }
 
 
 ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
@@ -165,6 +177,31 @@ if ( ! all( is.na( extraRuns ) ) )
     }
     if ( verbose ) print("fusion done")
   }
+
+#############################################################
+# now use polynomial regressors to match images across runs #
+#############################################################
+polyNuis = NA
+if ( !is.na( polydegree ) ) # polynomial regressors
+  {
+  boldMat = timeseries2matrix( moco$moco_img, mask )
+  meanmat = boldMat * 0
+  rboldMat = boldMat * 0
+  for ( i in 1:nrow( meanmat ) ) meanmat[i,]=colMeans( boldMat )
+  for ( runlev in levels( runNuis ) )
+    {
+    polyNuis <- stats::poly( timevals[ runNuis == runlev ], degree = polydegree )
+    rboldMat[ runNuis == runlev, ] <- residuals( lm( boldMat[ runNuis == runlev, ] ~ polyNuis ) )
+    }
+  # residualize but also keep the scale mean
+  boldMat = rboldMat + meanmat
+  rm( meanmat )
+  rm( rboldMat )
+  if ( verbose ) print("residuals done")
+  polyNuis <- stats::poly( timevals, degree = polydegree )
+  }
+if ( verbose ) print("polyNuis done")
+fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
 
 ## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
 if ( verbose )
@@ -221,7 +258,7 @@ if ( verbose )
 # extract just the transform parameters #
 #########################################
 reg_params <- as.matrix( moco$moco_params[,3:8] ) # FIXME this is bad coding
-dvars <- computeDVARS( timeseries2matrix( moco$moco_img, mask ) )
+dvars <- computeDVARS( timeseries2matrix( fusedImg, mask ) )
 
 ## ----badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
 goodtimes = (1:nrow( moco$moco_img ))
@@ -229,13 +266,11 @@ badtimes = which(moco$fd$MeanDisplacement > fdthresh )
 haveBadTimes = FALSE
 if ( length( badtimes ) > 0 )
   {
-  badtimes = sort(c(badtimes, badtimes+1))
   goodtimes = goodtimes[-badtimes]
   haveBadTimes = TRUE
   } else badtimes = NA
 
-
-boldMat = timeseries2matrix( moco$moco_img, mask )
+boldMat = timeseries2matrix( fusedImg, mask )
 nTimes = nrow(boldMat)
 if ( haveBadTimes )
   {
@@ -289,10 +324,8 @@ ctxMean = rowMeans(boldMat[,ctxVox])
 
 ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 mocoNuis = cbind( reg_params, reg_params * reg_params )
-mocoNuis = pracma::detrend( mocoNuis )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
-runNuis = factor( runNuis )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
   {
@@ -301,49 +334,19 @@ if ( nCompCor > 0 )
   nuisance = cbind( nuisance, compcorNuis )
   }
 
-timevals = 0
-for ( runlev in levels( runNuis ) )
-  {
-  if ( length( timevals ) == 1 )
-    {
-    timevals = as.numeric( 1:sum( runNuis == runlev ) ) * tr
-    } else {
-    timevals = c( timevals, as.numeric( 1:sum( runNuis == runlev ) ) * tr )
-    }
-  }
-
-polyNuis = NA
-if ( !is.na( polydegree ) ) # polynomial regressors
-  {
-  meanmat = boldMat * 0
-  rboldMat = boldMat * 0
-  for ( i in 1:nrow( meanmat ) ) meanmat[i,]=colMeans( boldMat )
-  for ( runlev in levels( runNuis ) )
-    {
-    polyNuis <- stats::poly( timevals[ runNuis == runlev ], degree = polydegree )
-    rboldMat[ runNuis == runlev, ] <- residuals( lm( boldMat[ runNuis == runlev, ] ~ polyNuis ) )
-    }
-  # residualize but also keep the scale mean
-  boldMat = rboldMat + meanmat
-  rm( meanmat )
-  rm( rboldMat )
-  if ( verbose ) print("residuals done")
-  polyNuis <- stats::poly( timevals, degree = polydegree )
-  }
-if ( verbose ) print("polyNuis done")
-fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
-
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
 if ( any( is.na( smoothingSigmas ) ) )
   {
   sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  )) * 1.5
   smoothingSigmas = c( sptl, sptl, sptl, 1.0 )
   }
-img     = smoothImage( fusedImg, smoothingSigmas, FWHM=TRUE )
+img = matrix2timeseries( moco$moco_img, mask, boldMat )
+img     = smoothImage( img, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
   boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
     freqHi=freqLimits[2], opt="trig" )
+fusedImgFilt = matrix2timeseries( moco$moco_img, mask, boldMat )
 
 connMatNodes = NA
 if ( ! is.na( structuralNodes ) )
@@ -414,7 +417,8 @@ return(
       runID         = runNuis,
       dmnBetas      = betasI,
       networkPriors2Bold = networkPriors2Bold,
-      fusedImg = fusedImg
+      fusedImg      = fusedImg,
+      fusedImgFilt  = fusedImgFilt
       #      connMatPowers = connMat,
       )
     )
