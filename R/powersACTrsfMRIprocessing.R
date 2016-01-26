@@ -7,12 +7,15 @@
 #' also do spatial and temporal filtering as well as interpolation between
 #' time frames that exceed a given framewise displacement.  Finally, we return
 #' maps to the common coordinate system.  Output may be trimmed in the future
-#' but currently provides access at different stages: merging versus filtering.
+#' but currently provides access at different stages: merging versus filtering
+#' and normalized, fused BOLD images in both subject and template space.
 #'
 #' @param img input time series antsImage.
 #' @param fdthresh threshold for framewise displacement.  determines what time
 #' frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.
-#' @param repeatMotionEst number of times to repeat motion estimation.
+#' @param repeatMotionEst number of times to repeat motion estimation. We
+#' recommend the value 2, in general.  The first run improves the template
+#' estimate such that the 2nd run gives a more accurate correction.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
 #' @param nCompCor number of compcor components to use.
 #' @param polydegree eg 4 for polynomial nuisance variables.
@@ -163,6 +166,10 @@ if ( repeatMotionEst < 1 )
   }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
 
+# at this point, we might map meanbold to the structural image
+# and then motion correct all runs to that. this approach would be less
+# biased.  however, let us hold that thought for later. FIXME
+
 # now add any additional runs and merge moco results
 if ( ! all( is.na( extraRuns ) ) )
   {
@@ -240,6 +247,7 @@ if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold * mask, t1brain,
     typeofTransform='SyNBoldAff', verbose=FALSE )
   }
+
 notemplateMap = FALSE
 if ( any( is.na( templateMap ) ) )
   {
@@ -483,13 +491,13 @@ return(
        )
 
 ## ----roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-labelMask = labelImg*1
+labelMask = powersLabels*1
 labelMask[labelMask > 0] = 1
 labelMask[mask == 0] = 0
 labelVox = which(subset(labelMask, mask > 0)==1)
 
 labeledBoldMat = boldMat[goodtimes,labelVox]
-labels = labelImg[labelMask > 0]
+labels = powersLabels[labelMask > 0]
 
 nLabels = max(labels)
 roiMat = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nLabels)
