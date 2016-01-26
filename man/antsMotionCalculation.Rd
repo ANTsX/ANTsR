@@ -5,7 +5,7 @@
 \title{antsMotionCalculation}
 \usage{
 antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
-  txtype = "Affine", framewise = 1)
+  txtype = "Affine", framewise = 1, verbose = FALSE)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}
@@ -20,6 +20,8 @@ antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
 \code{"SyN"}.}
 
 \item{framewise}{Calculate framewise displacement?}
+
+\item{verbose}{enables verbose output.}
 }
 \value{
 List containing:

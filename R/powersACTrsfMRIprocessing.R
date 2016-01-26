@@ -156,9 +156,11 @@ for ( i in 1:repeatMotionEst )
     moreaccurate=moreacc )
   }
 if ( repeatMotionEst < 1 )
+  {
+  moreacc = 0
   moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType,
     moreaccurate = 0 )
-
+  }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
 
 # now add any additional runs and merge moco results

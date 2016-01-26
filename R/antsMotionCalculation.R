@@ -9,6 +9,7 @@
 #' @param txtype Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
 #' \code{"SyN"}.
 #' @param framewise Calculate framewise displacement?
+#' @param verbose enables verbose output.
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -27,22 +28,23 @@
 #' antsMotionCalculation(simimg,moreaccurate=0)
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
-                   txtype = "Affine", framewise = 1) {
+                   txtype = "Affine", framewise = 1, verbose=FALSE ) {
   if ( is.na( fixed )  )
   {
   fixed <- getAverageOfTimeSeries( img )
   }
   moreaccurate.init <- min(c(moreaccurate, 2))
-  moco <- .motion_correction( img, fixed = fixed, moreaccurate = moreaccurate.init, txtype=txtype)
+  moco <- .motion_correction( img, fixed = fixed,
+    moreaccurate = moreaccurate.init, txtype=txtype, verbose=verbose )
   mocoparams <- moco$moco_params
   if (moreaccurate > 2) {
     for(ii in 1:2){
       moco <- .motion_correction(img, fixed=moco$moco_avg_img,
-                                 moreaccurate=2, txtype=txtype )
+                              moreaccurate=2, txtype=txtype, verbose=verbose )
     }
     if (moreaccurate > 3) {
       moco <- .motion_correction(moco$moco_img, fixed=moco$moco_avg_img,
-                                 moreaccurate=3, txtype=txtype )
+                              moreaccurate=3, txtype=txtype, verbose=verbose )
     }
   }
   if (is.na(mask)) {
