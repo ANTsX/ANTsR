@@ -7,8 +7,8 @@
 fMRINormalization(img, fdthresh = Inf, repeatMotionEst = 2,
   freqLimits = c(0.01, 0.1), nCompCor = 0, polydegree = NA,
   structuralImage = NA, structuralSeg = NA, structuralNodes = NA,
-  templateMap = NA, smoothingSigmas = NA, extraRuns = NA,
-  verbose = FALSE)
+  templateMap = NA, templateImage = NA, smoothingSigmas = NA,
+  extraRuns = NA, verbose = FALSE)
 }
 \arguments{
 \item{img}{input time series antsImage.}
@@ -32,6 +32,8 @@ frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.}
 
 \item{templateMap}{antsRegistration output mapping template space (as moving) to struturalImage (fixed).}
 
+\item{templateImage}{template reference space to which we map the BOLD image.}
+
 \item{smoothingSigmas}{4-vector defining amount of smoothing in FWHM units.}
 
 \item{extraRuns}{a list containing additional BOLD images (runs) to be merged with the first image.}
@@ -45,6 +47,7 @@ outputs a list containing:
   \item{fusedImgFilt: }{runs fused into one image and filtered}
   \item{seg2bold: }{strutural segmentation in BOLD space.}
   \item{nodes2bold: }{strutural nodes in BOLD space.}
+  \item{boldToTemplate: }{BOLD fusedImg mapped to template space.}
   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
   \item{runID: }{Identifies which run over time series.}
   \item{boldMat: }{Matrix of filtered BOLD data.}
@@ -57,7 +60,8 @@ outputs a list containing:
   \item{badtimes: }{time frames that are above FD threshold.}
   \item{dmnBetas: }{Default mode network beta map.}
   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
-  \item{powersLabels: }{Powers nodes in BOLD space.}
+  \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
+  \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}
   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 }

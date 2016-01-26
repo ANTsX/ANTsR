@@ -20,6 +20,7 @@
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
 #' @param templateMap antsRegistration output mapping template space (as moving) to struturalImage (fixed).
+#' @param templateImage template reference space to which we map the BOLD image.
 #' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units.
 #' @param extraRuns a list containing additional BOLD images (runs) to be merged with the first image.
 #' @param verbose enables visualization as well as commentary.
@@ -29,6 +30,7 @@
 #'   \item{fusedImgFilt: }{runs fused into one image and filtered}
 #'   \item{seg2bold: }{strutural segmentation in BOLD space.}
 #'   \item{nodes2bold: }{strutural nodes in BOLD space.}
+#'   \item{boldToTemplate: }{BOLD fusedImg mapped to template space.}
 #'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
 #'   \item{runID: }{Identifies which run over time series.}
 #'   \item{boldMat: }{Matrix of filtered BOLD data.}
@@ -41,7 +43,8 @@
 #'   \item{badtimes: }{time frames that are above FD threshold.}
 #'   \item{dmnBetas: }{Default mode network beta map.}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
-#'   \item{powersLabels: }{Powers nodes in BOLD space.}
+#'   \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
+#'   \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}
 #'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
 #'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 #' }
@@ -85,6 +88,7 @@ fMRINormalization <- function(
   structuralSeg = NA,
   structuralNodes = NA,
   templateMap  = NA,
+  templateImage = NA,
   smoothingSigmas = NA,
   extraRuns = NA,
   verbose = FALSE )
@@ -164,8 +168,9 @@ if ( ! all( is.na( extraRuns ) ) )
     {
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
+    if ( verbose ) print( paste( "motion correction ", i ) )
     mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=moreacc )
-    if ( verbose ) print("merge corrected image ( and tsDisplacement? )")
+    if ( verbose ) print( "merge corrected image ( and tsDisplacement? )" )
     if ( usePkg("abind") )
       {
       ttmo = as.array( moco$moco_img )
@@ -373,7 +378,6 @@ connMatNodesPartialCorr = NA
 if ( usePkg( "corpcor" ) )
   connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
 
-#
 # get priors for different networks
 networkPriors2Bold=NA
 betasI = NA
@@ -403,21 +407,32 @@ if ( ! exists( "networkPriors" ) ) # & notemplateMap )
 concatenatedMaps =
   list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
         toTemplate =  mni2boldmapsInv,
-        toTemplateInversion = c(TRUE,FALSE,TRUE,FALSE) )
+        toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
+
+boldToTemplate = NA
+if ( exists("mni") & is.na( templateImage ) )
+  templateImage = resampleImage( mni, c( 3, 3, 3 ) )
+if ( !is.na(templateImage) )
+  {
+  ## map the fusedImg to the common template space
+  boldToTemplate = antsApplyTransforms( fixed = templateImage, moving = fusedImg,
+           transformlist = concatenatedMaps$toTemplate,
+           whichtoinvert = concatenatedMaps$toTemplateInversion,
+           imagetype = 3 )
+  }
 
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
-         transformlist=concatenatedMaps$toTemplate,
-         whichtoinvert=concatenatedMaps$toTemplateInversion )
+         transformlist = concatenatedMaps$toTemplate,
+         whichtoinvert = concatenatedMaps$toTemplateInversion )
 powersLabels = mask * 0
 nPts = dim(pts)[1]
-rad = 5
+rad  = 5
 n = ceiling( rad / antsGetSpacing( mask ) )
 for ( r in 1:nPts) {
   pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
   idx = antsTransformPhysicalPointToIndex(mask,pt)
-
   for ( i in c(-n[1]:n[1]) ) {
     for (j in c(-n[2]:n[2])) {
       for (k in c(-n[3]:n[3])) {
@@ -435,8 +450,7 @@ for ( r in 1:nPts) {
   }
 if ( verbose )
   plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
-        window.overlay = c( 1, max(powersLabels) ) )
-
+    window.overlay = c( 1, max(powersLabels) ) )
 
 return(
       list(
@@ -444,6 +458,7 @@ return(
           fusedImgFilt  = fusedImgFilt,
           seg2bold      = seg2bold,
           nodes2bold    = dmnnodes,
+          boldToTemplate = boldToTemplate,
           mapsToTemplate = concatenatedMaps,
           runID         = runNuis,
           boldMat       = boldMat,
@@ -457,11 +472,11 @@ return(
           dmnBetas      = betasI,
           networkPriors2Bold = networkPriors2Bold,
           powersLabels  = powersLabels,
+          powersPoints  = pts,
           connMatNodes  = connMatNodes,
           connMatNodesPartialCorr = connMatNodesPartialCorr
           )
        )
-
 
 ## ----roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 labelMask = labelImg*1
@@ -516,9 +531,9 @@ if ( length(missingROIs) > 0 ) {
 
 ## ----adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5----
 density = 0.1
-nEdges = length(upper.tri(connMat))*density
+nEdges = length( upper.tri( connMat ) ) * density
 thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
-adj = 1*(connMat >= thresh)
+adj = 1 * ( connMat >= thresh )
 
 bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
 components = igraph::clusters(bingraph)
