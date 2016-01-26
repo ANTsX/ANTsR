@@ -351,14 +351,13 @@ if ( any( is.na( smoothingSigmas ) ) )
   sptl    = sqrt( sum( antsGetSpacing(img)[1:3]^2  )) * 1.5
   smoothingSigmas = c( sptl, sptl, sptl, 1.0 )
   }
-img = matrix2timeseries( moco$moco_img, mask, boldMat )
-img     = smoothImage( img, smoothingSigmas, FWHM=TRUE )
+img     = smoothImage( fusedImg, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
   boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
     freqHi=freqLimits[2], opt="trig" )
-fusedImgFilt = matrix2timeseries( moco$moco_img, mask, boldMat )
-
+fusedImgFilt = matrix2timeseries( fusedImg, mask, boldMat )
+#################
 connMatNodes = NA
 if ( ! is.na( structuralNodes ) )
   {
@@ -368,7 +367,7 @@ if ( ! is.na( structuralNodes ) )
   ulabs = sort( unique( dmnnodes[ mask == 1 & dmnnodes > 0 ] ) )
   dmnlist = list()
   for ( i in 1:length( ulabs ) )
-    dmnlist[[i]] = thresholdImage(  dmnnodes, ulabs[i], ulabs[i]  )
+    dmnlist[[i]] = thresholdImage( dmnnodes, ulabs[i], ulabs[i] )
   dmnpr = imageListToMatrix( dmnlist, mask )
   dmnref = ( boldMat %*% t(dmnpr) )
   connMatNodes = cor( dmnref )
@@ -421,6 +420,9 @@ if ( !is.na(templateImage) )
            imagetype = 3 )
   }
 
+######################################################
+## FIXME - this only works if maps are to MNI space ##
+######################################################
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
