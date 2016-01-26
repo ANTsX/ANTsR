@@ -1,53 +1,55 @@
-#' Powers and ants cortical thickness processing for fMRI.
+#' Multi-run normalization, filtering and nuisance estimation for fMRI.
 #'
 #' This function leverages structural image processing based on ANTs
-#' cortical thickness to implement Powers' functional image processing
-#' recommendations.  The function will perform motion correction and
-#' produce a variety of nuisance regressors.  It will also perform
-#' spatial and temporal filtering.  In sum, these regressors mitigate
-#' the wide variety of confounds that impact functional MRI.
+#' cortical thickness to implement standard functional image processing
+#' recommendations.  The function will crop out the first k time frames,
+#' do motion correction and produce a variety of nuisance regressors.  It will
+#' also do spatial and temporal filtering as well as interpolation between
+#' time frames that exceed a given framewise displacement.  Finally, we return
+#' maps to the common coordinate system.  Output may be trimmed in the future
+#' but currently provides access at different stages: merging versus filtering.
 #'
-#' @param img input time series antsImage
+#' @param img input time series antsImage.
 #' @param fdthresh threshold for framewise displacement.  determines what time
-#' frames should be interpolated. Set typically between 0.1 and 0.5.
+#' frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.
 #' @param repeatMotionEst number of times to repeat motion estimation.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
 #' @param nCompCor number of compcor components to use.
-#' @param polydegree eg 4 for polynomial nuisance variables
+#' @param polydegree eg 4 for polynomial nuisance variables.
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
 #' @param structuralNodes regions of interest for network analysis, in the structural image space.
 #' @param templateMap antsRegistration output mapping template space (as moving) to struturalImage (fixed).
-#' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units
-#' @param extraRuns a list containing additional BOLD images (runs) to be merged with the first image
+#' @param smoothingSigmas 4-vector defining amount of smoothing in FWHM units.
+#' @param extraRuns a list containing additional BOLD images (runs) to be merged with the first image.
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
 #' \itemize{
+#'   \item{fusedImg: }{runs fused into one image and corrected if polydegree set}
+#'   \item{fusedImgFilt: }{runs fused into one image and filtered}
+#'   \item{seg2bold: }{strutural segmentation in BOLD space.}
+#'   \item{nodes2bold: }{strutural nodes in BOLD space.}
+#'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
+#'   \item{runID: }{Identifies which run over time series.}
 #'   \item{boldMat: }{Matrix of filtered BOLD data.}
 #'   \item{boldMask: }{BOLD mask.}
 #'   \item{motionCorr: }{Motion corrected data.}
 #'   \item{polyNuis: }{Polynomial nuisance variables.}
 #'   \item{timevals: }{Temporal variables.}
 #'   \item{nuisance: }{Nuisance variables.}
-#'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
-#'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 #'   \item{FD: }{mean framewise displacement.}
 #'   \item{badtimes: }{time frames that are above FD threshold.}
-#'   \item{seg2bold: }{strutural segmentation in BOLD space.}
-#'   \item{nodes2bold: }{strutural nodes in BOLD space.}
-#'   \item{mapsToTemplate: }{invertible maps from BOLD to template space.}
-#'   \item{runID: }{Identifies which run over time series.}
 #'   \item{dmnBetas: }{Default mode network beta map.}
-#'   \item{fusedImg:}{runs fused into one image and corrected if polydegree set}
-#'   \item{fusedImgFilt:}{runs fused into one image and filtered}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
-#'   \item{connMatPowers: }{WIP: Powers nodes connectivity matrix. Assumes template maps are to MNI space.}
+#'   \item{powersLabels: }{Powers nodes in BOLD space.}
+#'   \item{connMatNodes: }{User provided nodal system connectivity matrix.}
+#'   \item{connMatNodesPartialCorr: }{TUser provided nodal system partial correlation matrix.}
 #' }
 #' @author Avants BB, Duda JT
 #' @examples
 #' # this example is long-running ( perhaps 10 minutes on an OSX laptop 2016 )
 #' \dontrun{
-#' exrun = powersACTrsfMRIprocessing( verbose = TRUE ) # will download ex data
+#' exrun = fMRINormalization( verbose = TRUE ) # will download ex data
 #' myid = "BBAvants" # some MRI data
 #' pre = paste("~/rsfTest/",sep='')
 #' fn = list.files( pre, full.names = TRUE, recursive = TRUE,
@@ -59,7 +61,7 @@
 #' t1fn = list.files( pre, full.names = TRUE, recursive = TRUE,
 #'   pattern = glob2rx( paste( myid, "*BrainSegmentation0N4.nii.gz", sep='')  ) )
 #' t1 = antsImageRead( t1fn   )
-#' tt = powersACTrsfMRIprocessing( img, fdthresh=0.2, repeatMotionEst=1,
+#' tt = fMRINormalization( img, repeatMotionEst=1,
 #'   structuralImage=t1, structuralSeg=seg, verbose= TRUE )
 #' # bold to template
 #' antsApplyTransforms( mni, getAverageOfTimeSeries( img ),
@@ -71,11 +73,12 @@
 #'    whichtoinvert=tt$mapsToTemplate$toBoldInversion )
 #' }
 #'
-#' @export powersACTrsfMRIprocessing
-powersACTrsfMRIprocessing <- function( img,
-  fdthresh=0.2,
-  repeatMotionEst = 1,
-  freqLimits = c( 0.008, 0.09 ),
+#' @export fMRINormalization
+fMRINormalization <- function(
+  img,
+  fdthresh=Inf,
+  repeatMotionEst = 2,
+  freqLimits = c( 0.01, 0.1 ),
   nCompCor = 0,
   polydegree = NA,
   structuralImage = NA,
@@ -92,7 +95,7 @@ if ( ! usePkg( "igraph"  ) ) stop("need igraph")
 if ( ! usePkg( "pracma"  ) ) stop("need pracma")
 if ( ! usePkg( "dplyr"   ) ) stop("need dplyr")
 if ( ! usePkg( "mFilter" ) ) stop("need mFilter")
-if ( missing(img) ) # for stand-alone testing
+if ( missing( img ) ) # for stand-alone testing
   {
   img = antsImageRead(  getANTsRData("rsbold")     )
   mask = antsImageRead( getANTsRData("rsboldmask") )
@@ -111,6 +114,7 @@ steady = floor(10.0 / tr) + 1
 origmean = apply.antsImage(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
 allTimes = dim(img)[4]
+
 # Eliminate non steady-state timepoints
 img = cropIndices(img, c(1,1,1,steady), dim(img) )
 runNuis = rep(1, dim(img)[4] )
@@ -139,16 +143,17 @@ for ( runlev in levels( runNuis ) )
     }
   }
 
-
 ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
 moreacc = 2
 mocoTxType = "Rigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate=moreacc )
+  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType,
+    moreaccurate=moreacc )
   }
 if ( repeatMotionEst < 1 )
-  moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType, moreaccurate = 0 )
+  moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType,
+    moreaccurate = 0 )
 
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
 
@@ -175,7 +180,7 @@ if ( ! all( is.na( extraRuns ) ) )
     moco$dvars = c( moco$dvars, mocoTemp$dvars )
     rm( mocoTemp )
     }
-    if ( verbose ) print("fusion done")
+    if ( verbose ) print( "fusion done" )
   }
 
 #############################################################
@@ -187,7 +192,9 @@ if ( !is.na( polydegree ) ) # polynomial regressors
   boldMat = timeseries2matrix( moco$moco_img, mask )
   meanmat = boldMat * 0
   rboldMat = boldMat * 0
-  for ( i in 1:nrow( meanmat ) ) meanmat[i,]=colMeans( boldMat )
+  mycolmean = colMeans( boldMat )
+  mycolmean = mycolmean * 1000 / mean( mycolmean ) # map to 1000
+  for ( i in 1:nrow( meanmat ) ) meanmat[i,]=mycolmean
   for ( runlev in levels( runNuis ) )
     {
     polyNuis <- stats::poly( timevals[ runNuis == runlev ], degree = polydegree )
@@ -207,7 +214,6 @@ fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
 if ( verbose )
   invisible( plot( moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10 ) )
 
-#
 if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold alone
   {
   structuralImage = antsImageClone( meanbold )
@@ -234,7 +240,7 @@ if ( any( is.na( templateMap ) ) )
   mni = antsImageRead( getANTsRData( "mni" ) )
   if ( verbose ) print("boldmap to template")
   templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
-    verbose=FALSE )
+    verbose = FALSE )
   }
 
 mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
@@ -399,40 +405,15 @@ concatenatedMaps =
         toTemplate =  mni2boldmapsInv,
         toTemplateInversion = c(TRUE,FALSE,TRUE,FALSE) )
 
-return(
-  list(
-      boldMat       = boldMat,
-      boldMask      = mask,
-      motionCorr    = moco,
-      polyNuis      = polyNuis,
-      timevals      = timevals,
-      nuisance      = nuisance,
-      connMatNodes  = connMatNodes,
-      connMatNodesPartialCorr = connMatNodesPartialCorr,
-      FD            = moco$fd$MeanDisplacement,
-      badtimes      = badtimes,
-      seg2bold      = seg2bold,
-      nodes2bold    = dmnnodes,
-      mapsToTemplate = concatenatedMaps,
-      runID         = runNuis,
-      dmnBetas      = betasI,
-      networkPriors2Bold = networkPriors2Bold,
-      fusedImg      = fusedImg,
-      fusedImgFilt  = fusedImgFilt
-      #      connMatPowers = connMat,
-      )
-    )
-
-
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
-pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
-labelImg = mask*0
+pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
+         transformlist=concatenatedMaps$toTemplate,
+         whichtoinvert=concatenatedMaps$toTemplateInversion )
+powersLabels = mask * 0
 nPts = dim(pts)[1]
 rad = 5
-n = ceiling(rad / antsGetSpacing(mask))
-
+n = ceiling( rad / antsGetSpacing( mask ) )
 for ( r in 1:nPts) {
   pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
   idx = antsTransformPhysicalPointToIndex(mask,pt)
@@ -446,15 +427,41 @@ for ( r in 1:nPts) {
         inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
         if ( (dist <= rad) && ( inImage == TRUE ) ) {
           rlocal = round( local )
-          labelImg[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
+          powersLabels[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
          }
         }
       }
     }
   }
 if ( verbose )
-  plot( meanbold, labelImg, axis=3, nslices=30, ncolumns=10,
-        window.overlay = c( 1, max(labelImg) ) )
+  plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
+        window.overlay = c( 1, max(powersLabels) ) )
+
+
+return(
+      list(
+          fusedImg      = fusedImg,
+          fusedImgFilt  = fusedImgFilt,
+          seg2bold      = seg2bold,
+          nodes2bold    = dmnnodes,
+          mapsToTemplate = concatenatedMaps,
+          runID         = runNuis,
+          boldMat       = boldMat,
+          boldMask      = mask,
+          motionCorr    = moco,
+          polyNuis      = polyNuis,
+          timevals      = timevals,
+          nuisance      = nuisance,
+          FD            = moco$fd$MeanDisplacement,
+          badtimes      = badtimes,
+          dmnBetas      = betasI,
+          networkPriors2Bold = networkPriors2Bold,
+          powersLabels  = powersLabels,
+          connMatNodes  = connMatNodes,
+          connMatNodesPartialCorr = connMatNodesPartialCorr
+          )
+       )
+
 
 ## ----roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 labelMask = labelImg*1

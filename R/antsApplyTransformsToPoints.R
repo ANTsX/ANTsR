@@ -122,6 +122,8 @@ antsApplyTransformsToPoints <- function(
     if ( class(points)[[1]] == "antsImage" ) return( pointsout )
     pointsout = data.frame( as.matrix( pointsout ) )
     colnames( pointsout ) = colnames( points )
+    if ( ncol( pointsout ) > dim )
+      pointsout[ , (dim+1):ncol(points) ] = points[ , (dim+1):ncol(points) ]
     return( pointsout )
     }
     if (!ttexists)
