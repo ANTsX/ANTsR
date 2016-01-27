@@ -151,7 +151,7 @@ for ( runlev in levels( runNuis ) )
   }
 
 ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
-moreacc = 2
+moreacc = "intraSubjectBOLD"
 mocoTxType = "Rigid"
 for ( i in 1:repeatMotionEst )
   {
