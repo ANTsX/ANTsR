@@ -106,7 +106,7 @@ antsrMotionCalculation <- function(
     (
     list(
       moco_img     = moco_img,
-      mocoparams   = mocoparams,
+      moco_params   = mocoparams,
       moco_avg_img = meanout,
       moco_mask    = mask,
       fd = fd,
