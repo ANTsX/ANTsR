@@ -154,12 +154,12 @@ for ( runlev in levels( runNuis ) )
 mocoTxType = "BOLDRigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsrMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
+  moco <- antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
 if ( repeatMotionEst < 1 )
   {
   mocoTxType = "QuickRigid"
-  moco = antsrMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
+  moco = antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
 
@@ -175,7 +175,7 @@ if ( ! all( is.na( extraRuns ) ) )
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
     if ( verbose ) print( paste( "motion correction ", i ) )
-    mocoTemp <- antsrMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType )
+    mocoTemp <- antsrMotionCalculation( timg, fixed=meanbold, typeofTransform=mocoTxType )
     if ( verbose ) print( "merge corrected image ( and tsDisplacement? )" )
     if ( usePkg("abind") )
       {
