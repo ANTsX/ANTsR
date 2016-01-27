@@ -137,9 +137,9 @@
   }
   if ( moreaccurate == "intraSubjectBOLD" ) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
-      m = list(name = "MI", fixed, img, 1, mibins ),
-      t = paste(txtype, "[0.1]", sep=""),
-      i = "50x10",
+      m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.2 ),
+      t = paste(txtype, "[0.25]", sep=""),
+      i = "50x20",
       u = 1, e = 1, s = "1x0", f = "2x1", n = n, l = 1, v = as.numeric(verbose)))
   }
   if ( moreaccurate == 1 ) {

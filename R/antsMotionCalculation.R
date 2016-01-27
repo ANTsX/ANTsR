@@ -37,8 +37,9 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   }
   moco <- .motion_correction( img, fixed = fixed,
     moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
-  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
-    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
+#  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
+#    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
+  mocoparams <- moco$moco_params
   if (is.na(mask)) {
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
       Inf, cleanup = 2)
