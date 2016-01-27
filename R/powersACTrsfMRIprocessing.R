@@ -343,6 +343,7 @@ ctxMean = rowMeans(boldMat[,ctxVox])
 mocoNuis = cbind( reg_params, reg_params * reg_params )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
+nuisance = cbind( reg_params, tissueNuis, dvars=dvars )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
   {

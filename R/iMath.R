@@ -22,6 +22,8 @@
 #' if ( usePkg("magrittr") ) { # string ops together
 #'   lapgd <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
 #' }
+#' # Canny is useful e.g.
+#' # canny = ( iMath(myreg$warpedmovout,"Normalize")*255 ) %>% iMath("Canny",1,5,12)
 #'
 #' @export iMath
 iMath <- function( img, operation, param=NA, ... ) {

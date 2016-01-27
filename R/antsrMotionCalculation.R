@@ -102,6 +102,7 @@ antsrMotionCalculation <- function(
   mocostats <- .antsMotionCorrStats0(tsimg, mask, mocoparams)
   fd <- as.data.frame(mocostats$Displacements)
   names(fd) <- c("MeanDisplacement", "MaxDisplacement")
+  colnames( mocoparams ) = paste( 'MOCOparam', 1:ncol(mocoparams), sep='' )
   return
     (
     list(
