@@ -14,7 +14,9 @@ antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
 
 \item{fixed}{Fixed image to register all timepoints to.  If not provided, mean image is used.}
 
-\item{moreaccurate}{Level of accuracy desired for motion correction.  Higher is more accurate.}
+\item{moreaccurate}{strategy desired for motion correction.  One of 0 (test)
+1 (high-res only), 2 (multi-level inter-subject), 3 (FIXME), or a special
+method for intraSubjectBOLD.}
 
 \item{txtype}{Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
 \code{"SyN"}.}

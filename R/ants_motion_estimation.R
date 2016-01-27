@@ -86,13 +86,6 @@
     return(NULL)
   }
 
-  if (moreaccurate > 3) {
-    moreaccurate <- 3
-  }
-  if (moreaccurate < 0) {
-    moreaccurate <- 0
-  }
-
   if (is.na(fixed)) {
     fixed <- new("antsImage", "float", 3)
     antsMotionCorr(list(d = 3, a = img, o = fixed))
@@ -142,6 +135,13 @@
       u = 1, e = 1, s = "2x1x0", f = "4x2x1",
       n = n, l = 1, v = as.numeric(verbose)))
   }
+  if ( moreaccurate == "intraSubjectBOLD" ) {
+    antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
+      m = list(name = "MI", fixed, img, 1, mibins ),
+      t = paste(txtype, "[0.1]", sep=""),
+      i = "50x10",
+      u = 1, e = 1, s = "1x0", f = "2x1", n = n, l = 1, v = as.numeric(verbose)))
+  }
   if ( moreaccurate == 1 ) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
       m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.25 ),
@@ -156,14 +156,10 @@
       i = 3, u = 1,
       e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)))
   }
-  if ( moreaccurate < 3 ) {
-    moco_params <- as.data.frame(moco_params)
-    mynames <- c("MetricPre", "MetricPost",
+  moco_params <- as.data.frame( moco_params )
+  mynames <- c("MetricPre", "MetricPost",
                  paste('MOCOparam', 1:(ncol(moco_params)-2), sep=''))
-    names(moco_params) <- mynames
-  } else {
-    moco_params <- NA
-  }
+  names( moco_params ) <- mynames
   return
     (
     list

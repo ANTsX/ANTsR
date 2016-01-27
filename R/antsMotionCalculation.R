@@ -5,7 +5,9 @@
 #' @param img antsImage, usually 4D.
 #' @param mask mask for image (3D).  If not provided, estimated from data.
 #' @param fixed Fixed image to register all timepoints to.  If not provided, mean image is used.
-#' @param moreaccurate Level of accuracy desired for motion correction.  Higher is more accurate.
+#' @param moreaccurate strategy desired for motion correction.  One of 0 (test)
+#' 1 (high-res only), 2 (multi-level inter-subject), 3 (FIXME), or a special
+#' method for intraSubjectBOLD.
 #' @param txtype Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
 #' \code{"SyN"}.
 #' @param framewise Calculate framewise displacement?
@@ -33,20 +35,10 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   {
   fixed <- getAverageOfTimeSeries( img )
   }
-  moreaccurate.init <- min(c(moreaccurate, 2))
   moco <- .motion_correction( img, fixed = fixed,
-    moreaccurate = moreaccurate.init, txtype=txtype, verbose=verbose )
-  mocoparams <- moco$moco_params
-  if (moreaccurate > 2) {
-    for(ii in 1:2){
-      moco <- .motion_correction(img, fixed=moco$moco_avg_img,
-                              moreaccurate=2, txtype=txtype, verbose=verbose )
-    }
-    if (moreaccurate > 3) {
-      moco <- .motion_correction(moco$moco_img, fixed=moco$moco_avg_img,
-                              moreaccurate=3, txtype=txtype, verbose=verbose )
-    }
-  }
+    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
+  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
+    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
   if (is.na(mask)) {
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
       Inf, cleanup = 2)
@@ -55,7 +47,6 @@ antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
   mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams)
   fd <- as.data.frame(mocostats$Displacements)
   names(fd) <- c("MeanDisplacement", "MaxDisplacement")
-
   aslmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS(aslmat)
   list(
