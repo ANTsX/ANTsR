@@ -1,0 +1,117 @@
+#'  antsrMotionCalculation
+#'
+#'  Correct time-series data for motion.
+#'
+#' @param img antsImage, usually ND where D=4.
+#' @param fixed Fixed image to register all timepoints to.  If not provided, mean image is used.
+#' @param mask mask for image (ND-1).  If not provided, estimated from data.
+#' @param typeofTransform One of \code{"Affine"}, \code{"Rigid"}, or
+#' \code{"SyN"}.
+#' @param verbose enables verbose output.
+#' @return List containing:
+#' \itemize{
+#'  \item{moco_img}{ Motion corrected time-series image.}
+#'  \item{moco_params}{ Data frame of translation parameters.}
+#'  \item{moco_avg_img}{ Average motion-corrected image.}
+#'  \item{moco_mask}{ Mask used to calculate framewise displacement.}
+#'  \item{fd}{ Time-series mean and max displacements.}
+#'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
+#' }
+#' @author Brian B. Avants, Benjamin M. Kandel
+#' @examples
+#' set.seed(120)
+#' simimg<-makeImage(rep(5,4), rnorm(5^4))
+#' antsrMotionCalculation(simimg,moreaccurate=0)
+#' @export antsrMotionCalculation
+antsrMotionCalculation <- function(
+  img,
+  fixed = NA,
+  mask  = NA,
+  typeofTransform = "Rigid",
+  verbose=FALSE
+  )
+{
+  validTx = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
+     "AffineFast", "BOLDAffine" )
+  if ( sum( typeofTransform  %in%  validTx ) == 0 )
+    {
+    print( "valid transform list:" )
+    print( validTx )
+    stop( paste( typeofTransform, "not in valid transform list." ) )
+    }
+  imgdim = img@dimension
+  subdim = imgdim - 1
+  ntimes = dim( img )[ img@dimension ]
+  if ( is.na( fixed )  )
+    {
+    fixed <- apply.antsImage( img, c(1:(subdim)), mean, na.rm=T  )
+    }
+  if ( is.na( mask ) ) mask = getMask( fixed )
+  extractSubImage <- function( img, vin )
+    {
+    subdim = img@dimension-1
+    subimg = makeImage(
+      dim( img )[ 1:subdim ],
+      voxval    = vin,
+      spacing   = antsGetSpacing( img )[1:subdim],
+      origin    = antsGetOrigin( img )[1:subdim],
+      direction = antsGetDirection( img )[1:subdim,1:subdim]
+      )
+    }
+  # now loop over all time points and register to the fixed images
+  imgarr = as.array( img )
+  # create array holder for deformed images
+  fixarr = array( dim = c( dim( fixed ), ntimes ) )
+  if ( verbose )
+    progress <- txtProgressBar(min = 1, max = ntimes, style = 3)
+  for ( i in 1:ntimes )
+    {
+    if ( imgdim == 2 ) localImg = extractSubImage( img, imgarr[ , i]       )
+    if ( imgdim == 3 ) localImg = extractSubImage( img, imgarr[ ,  , i]    )
+    if ( imgdim == 4 ) localImg = extractSubImage( img, imgarr[ ,  ,  , i] )
+    locreg = antsRegistration( fixed = fixed, moving = localImg,
+      typeofTransform = typeofTransform )
+    if ( imgdim == 2 ) fixarr[ , i ]      = as.array( locreg$warpedmovout )
+    if ( imgdim == 3 ) fixarr[ ,  , i]    = as.array( locreg$warpedmovout )
+    if ( imgdim == 4 ) fixarr[ ,  ,  , i] = as.array( locreg$warpedmovout )
+#    localtxp = R.matlab::readMat( locreg$fwdtransforms )[[1]]
+    localtxp = readAntsrTransform( locreg$fwdtransforms, subdim )
+    localtxp = getAntsrTransformParameters( localtxp )
+    if ( i ==  1 ) {
+      mocoparams = matrix( nrow=ntimes, ncol=length(localtxp) )
+      if ( verbose ) print( localtxp )
+      }
+    mocoparams[i, ] = localtxp
+    setTxtProgressBar(progress, i )
+    }
+  close( progress )
+  moco_img = as.antsImage( fixarr )
+  antsSetSpacing( moco_img, c( antsGetSpacing(fixed),
+    antsGetSpacing(img)[imgdim]) )
+  antsSetOrigin( moco_img, c( antsGetOrigin(fixed),
+    antsGetOrigin(img)[imgdim]) )
+  mocodir = diag( imgdim )
+  mocodir[ 1:subdim, 1:subdim ] = antsGetDirection( fixed )
+  antsSetDirection( moco_img, mocodir )
+  meanout <- apply.antsImage( moco_img, c(1:(subdim)), mean, na.rm=T )
+  tempmat <- timeseries2matrix( img, mask)
+  dvars <- computeDVARS( tempmat )
+  rm( tempmat )
+  # finally, get framewise displacement
+  tsimg <- antsImageClone( img, "double" )
+  mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams)
+  fd <- as.data.frame(mocostats$Displacements)
+  names(fd) <- c("MeanDisplacement", "MaxDisplacement")
+  return
+    (
+    list(
+      moco_img     = moco_img,
+      mocoparams   = mocoparams,
+      moco_avg_img = meanout,
+      moco_mask    = mask,
+      fixed        = fixed,
+      fd = fd,
+      dvars        = dvars
+      )
+    )
+}
