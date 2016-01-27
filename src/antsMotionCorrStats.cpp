@@ -12,7 +12,8 @@ template< class TimeSeriesImageType >
 SEXP antsMotionCorrStatsHelper(
     SEXP r_tsimg,
     SEXP r_maskimg,
-    SEXP mocoparams )
+    SEXP mocoparams,
+    SEXP r_stupidoffset )
 {
   typedef double RealType;
   const unsigned int dim = TimeSeriesImageType::ImageDimension;
@@ -51,8 +52,9 @@ SEXP antsMotionCorrStatsHelper(
   timeseriesDisplacementImage->SetDirection( timeseriesImage->GetDirection() );
 
   Rcpp::NumericMatrix moco( mocoparams );
+  unsigned int stupidOffset = Rcpp::as< unsigned int >( r_stupidoffset );
   Rcpp::NumericMatrix displacements(moco.nrow(), 2);
-  unsigned int nTransformParams = moco.ncol() - 2;
+  unsigned int nTransformParams = moco.ncol() - stupidOffset;
   for ( int ii = 0; ii < moco.nrow(); ii++ )
   {
     typename AffineTransformType::Pointer affineTransform1 = AffineTransformType::New();
@@ -64,10 +66,10 @@ SEXP antsMotionCorrStatsHelper(
 
     for (int jj = 0; jj < nTransformParams ; jj++ )
     {
-      params1[jj] = moco(ii, jj + 2);
+      params1[jj] = moco(ii, jj + stupidOffset );
       if (ii < (moco.nrow() - 1) )
       {
-        params2[jj] = moco(ii + 1, jj + 2);
+        params2[jj] = moco(ii + 1, jj + stupidOffset );
       }
     }
 
@@ -165,7 +167,8 @@ SEXP antsMotionCorrStatsHelper(
 RcppExport SEXP antsMotionCorrStats(
     SEXP r_tsimg,
     SEXP r_mask,
-    SEXP r_moco )
+    SEXP r_moco,
+    SEXP r_stupidoffset )
 {
 try
 {
@@ -180,7 +183,7 @@ try
   const unsigned int dim = 4;
   typedef itk::Image< PixelType, dim > TimeSeriesImageType;
   return( antsMotionCorrStatsHelper< TimeSeriesImageType >(
-        r_tsimg, r_mask, r_moco ) );
+        r_tsimg, r_mask, r_moco, r_stupidoffset ) );
 }
 
 catch( itk::ExceptionObject & err )

@@ -5,8 +5,8 @@
 #' @param img antsImage, usually ND where D=4.
 #' @param fixed Fixed image to register all timepoints to.  If not provided, mean image is used.
 #' @param mask mask for image (ND-1).  If not provided, estimated from data.
-#' @param typeofTransform One of \code{"Affine"}, \code{"Rigid"}, or
-#' \code{"SyN"}.
+#' @param typeofTransform One of \code{"Affine"}, \code{"Rigid"},
+#' '\code{"BOLDAffine"}, \code{"BOLDRigid"}, \code{"QuickRigid"}.
 #' @param verbose enables verbose output.
 #' @return List containing:
 #' \itemize{
@@ -21,7 +21,7 @@
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
-#' antsrMotionCalculation(simimg,moreaccurate=0)
+#' antsrMotionCalculation( simimg )
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
   img,
@@ -82,9 +82,9 @@ antsrMotionCalculation <- function(
       if ( verbose ) print( localtxp )
       }
     mocoparams[i, ] = localtxp
-    setTxtProgressBar(progress, i )
+    if ( verbose ) setTxtProgressBar(progress, i )
     }
-  close( progress )
+  if ( verbose ) close( progress )
   moco_img = as.antsImage( fixarr )
   antsSetSpacing( moco_img, c( antsGetSpacing(fixed),
     antsGetSpacing(img)[imgdim]) )
@@ -99,7 +99,7 @@ antsrMotionCalculation <- function(
   rm( tempmat )
   # finally, get framewise displacement
   tsimg <- antsImageClone( img, "double" )
-  mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams)
+  mocostats <- .antsMotionCorrStats0(tsimg, mask, mocoparams)
   fd <- as.data.frame(mocostats$Displacements)
   names(fd) <- c("MeanDisplacement", "MaxDisplacement")
   return
@@ -109,7 +109,6 @@ antsrMotionCalculation <- function(
       mocoparams   = mocoparams,
       moco_avg_img = meanout,
       moco_mask    = mask,
-      fixed        = fixed,
       fd = fd,
       dvars        = dvars
       )

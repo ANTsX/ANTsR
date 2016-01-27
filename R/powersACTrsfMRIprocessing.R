@@ -151,18 +151,15 @@ for ( runlev in levels( runNuis ) )
   }
 
 ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
-moreacc = "intraSubjectBOLD"
-mocoTxType = "Rigid"
+mocoTxType = "BOLDRigid"
 for ( i in 1:repeatMotionEst )
   {
-  moco <- antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType,
-    moreaccurate=moreacc )
+  moco <- antsrMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
   }
 if ( repeatMotionEst < 1 )
   {
-  moreacc = 0
-  moco = antsMotionCalculation( img, fixed=meanbold, txtype=mocoTxType,
-    moreaccurate = 0 )
+  mocoTxType = "QuickRigid"
+  moco = antsrMotionCalculation( img, fixed=meanbold, txtype=mocoTxType )
   }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
 
@@ -178,7 +175,7 @@ if ( ! all( is.na( extraRuns ) ) )
     timg = extraRuns[[i]]
     # do a more accurate registration for this stage b/c it's a different run
     if ( verbose ) print( paste( "motion correction ", i ) )
-    mocoTemp <- antsMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType, moreaccurate=moreacc )
+    mocoTemp <- antsrMotionCalculation( timg, fixed=meanbold, txtype=mocoTxType )
     if ( verbose ) print( "merge corrected image ( and tsDisplacement? )" )
     if ( usePkg("abind") )
       {
@@ -186,7 +183,6 @@ if ( ! all( is.na( extraRuns ) ) )
       ttmo = abind::abind( ttmo, as.array( mocoTemp$moco_img ) )
       moco$moco_img = antsCopyImageInfo( moco$moco_img, as.antsImage(ttmo) )
       rm( ttmo )
-      moco$tsDisplacement = NA
       } else stop( "need abind package for the extraRuns feature")
     if ( verbose ) print("merge parameters, fd and dvars")
     moco$moco_params = rbind( moco$moco_params, mocoTemp$moco_params )
@@ -278,7 +274,7 @@ if ( verbose )
 #########################################
 # extract just the transform parameters #
 #########################################
-reg_params <- as.matrix( moco$moco_params[,3:8] ) # FIXME this is bad coding
+reg_params <- as.matrix( moco$moco_params )
 dvars <- computeDVARS( timeseries2matrix( fusedImg, mask ) )
 
 ## ----badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----

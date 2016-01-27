@@ -5,8 +5,8 @@
 #'
 #' @param fixed fixed image to which we register the moving image.
 #' @param moving moving image to be mapped to fixed space.
-#' @param typeofTransform Either a one stage rigid/affine mapping or a 2-stage
-#' affine+syn mapping.  Mutual information metric by default. See \code{Details.}
+#' @param typeofTransform A linear or non-linear registration type.  Mutual
+#' information metric by default. See \code{Details.}
 #' @param initialTransform transforms to prepend
 #' @param outprefix output will be named with this prefix.
 #' @param mask mask the registration.
@@ -19,8 +19,12 @@
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
 #'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
 #'   May be useful for quick visualization fixes.'}
+#'   \item{"BOLDRigid": }{Rigid transformation: Parameters typical for BOLD
+#'   to BOLD intrasubject registration'.'}
 #'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
+#'   \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
+#'   to BOLD intrasubject registration'.'}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
@@ -93,14 +97,31 @@ antsRegistration <- function( fixed = NA, moving = NA,
     return(0)
   }
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
+  myl=0
+  myfAff="6x4x2x1"
+  mysAff="3x2x1x0"
   myiterations <- "2100x1200x1200x10"
   if ( typeofTransform == "AffineFast" ) {
     typeofTransform <- "Affine"
     myiterations <- "2100x1200x0x0"
   }
+  if ( typeofTransform == "BOLDAffine" ) {
+    typeofTransform <- "Affine"
+    myfAff="2x1"
+    mysAff="1x0"
+    myiterations <- "100x20"
+    myl=1
+  }
   if ( typeofTransform == "QuickRigid" ) {
     typeofTransform <- "Rigid"
     myiterations <- "20x20x0x0"
+  }
+  if ( typeofTransform == "BOLDRigid" ) {
+    typeofTransform <- "Rigid"
+    myfAff="2x1"
+    mysAff="1x0"
+    myiterations <- "100x20"
+    myl=1
   }
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
@@ -134,7 +155,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
           "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
-          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1",
+          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
             args=lappend( list( "-x", maskopt ), args )
@@ -153,7 +174,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-f", "2x1",
           "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
           "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
-          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1",
+          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
             args=lappend( list( "-x", maskopt ), args )
@@ -170,7 +191,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
           "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -190,7 +211,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
           "-t", paste("SyN[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -204,7 +225,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
           "-t", paste("SyN[0.25,3,0]", sep = ""),
           "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-o", paste("[", outprefix, ",",
+          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
             wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -219,7 +240,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
           "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
             sep = ""), "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1",
+          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -238,7 +259,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-f", "4x2x1",
           "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
           "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1",
+          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -253,7 +274,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
           "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
             sep = ""), "-t", paste("SyN[0.1,3,0.5]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1",
+          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -272,7 +293,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
             "-c", "[100,1.e-5,5]",
             "-s", "0",
             "-f", "1",
-            "-u", "1", "-z", "1",
+            "-u", "1", "-z", "1", "-l", myl,
             "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
@@ -287,7 +308,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
-          "-s", "3x2x1x0", "-f", "6x4x2x1", "-u", "1", "-z", "1",
+          "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )

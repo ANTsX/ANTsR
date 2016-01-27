@@ -13,8 +13,8 @@ antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
 
 \item{moving}{moving image to be mapped to fixed space.}
 
-\item{typeofTransform}{Either a one stage rigid/affine mapping or a 2-stage
-affine+syn mapping.  Mutual information metric by default. See \code{Details.}}
+\item{typeofTransform}{A linear or non-linear registration type.  Mutual
+information metric by default. See \code{Details.}}
 
 \item{initialTransform}{transforms to prepend}
 
@@ -48,8 +48,12 @@ typeofTransform can be one of:
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
   May be useful for quick visualization fixes.'}
+  \item{"BOLDRigid": }{Rigid transformation: Parameters typical for BOLD
+  to BOLD intrasubject registration'.'}
   \item{"Affine": }{Affine transformation: Rigid + scaling.}
   \item{"AffineFast": }{Fast version of \code{Affine}.}
+  \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
+  to BOLD intrasubject registration'.'}
   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
     with mutual information as optimization metric.}
   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,

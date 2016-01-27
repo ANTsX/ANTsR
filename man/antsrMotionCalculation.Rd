@@ -14,8 +14,8 @@ antsrMotionCalculation(img, fixed = NA, mask = NA,
 
 \item{mask}{mask for image (ND-1).  If not provided, estimated from data.}
 
-\item{typeofTransform}{One of \code{"Affine"}, \code{"Rigid"}, or
-\code{"SyN"}.}
+\item{typeofTransform}{One of \code{"Affine"}, \code{"Rigid"},
+'\code{"BOLDAffine"}, \code{"BOLDRigid"}, \code{"QuickRigid"}.}
 
 \item{verbose}{enables verbose output.}
 }
@@ -36,7 +36,7 @@ Correct time-series data for motion.
 \examples{
 set.seed(120)
 simimg<-makeImage(rep(5,4), rnorm(5^4))
-antsrMotionCalculation(simimg,moreaccurate=0)
+antsrMotionCalculation( simimg )
 }
 \author{
 Brian B. Avants, Benjamin M. Kandel
