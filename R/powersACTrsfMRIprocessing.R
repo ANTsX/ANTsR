@@ -44,7 +44,7 @@
 #'   \item{nuisance: }{Nuisance variables.}
 #'   \item{FD: }{mean framewise displacement.}
 #'   \item{badtimes: }{time frames that are above FD threshold.}
-#'   \item{dmnBetas: }{Default mode network beta map.}
+#'   \item{dmnAtBOLDres: }{Default mode network at BOLD resolution in MNI space.}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
 #'   \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
 #'   \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}
@@ -340,10 +340,13 @@ ctxVox = which(subset(ctxMask, mask > 0)==1)
 ctxMean = rowMeans(boldMat[,ctxVox])
 
 ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-mocoNuis = cbind( reg_params, reg_params * reg_params )
+mocoNuis              = reg_params
+mocoNuis2             = reg_params * reg_params
+colnames( mocoNuis2 ) = paste( "MocoSqr", 1:ncol( mocoNuis2 ) , sep='' )
+mocoNuis  = cbind( mocoNuis, mocoNuis2 )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
+colnames( mocoDeriv ) = paste( "MocoDeriv", 1:ncol( MocoDeriv ) , sep='' )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
-nuisance = cbind( reg_params, tissueNuis, dvars=dvars )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
   {
@@ -416,15 +419,18 @@ concatenatedMaps =
         toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
 
 boldToTemplate = NA
+dmnAtBOLDres = NA
 if ( exists("mni") & is.na( templateImage ) )
-  templateImage = resampleImage( mni, c( 3, 3, 3 ) )
-if ( !is.na(templateImage) )
+  templateImage = resampleImage( mni, rep( 2.0 , 3 ) )
+if ( !is.na( templateImage ) )
   {
   ## map the fusedImg to the common template space
   boldToTemplate = antsApplyTransforms( fixed = templateImage, moving = fusedImg,
            transformlist = concatenatedMaps$toTemplate,
            whichtoinvert = concatenatedMaps$toTemplateInversion,
            imagetype = 3 )
+  dmnnodes = antsImageRead( getANTsRData("mnidfn") )
+  dmnAtBOLDres = resampleImageToTarget( dmnnodes, templateImage, 1  )
   }
 
 ######################################################
@@ -435,28 +441,7 @@ data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
          transformlist = concatenatedMaps$toTemplate,
          whichtoinvert = concatenatedMaps$toTemplateInversion )
-powersLabels = mask * 0
-nPts = dim(pts)[1]
-rad  = 5
-n = ceiling( rad / antsGetSpacing( mask ) )
-for ( r in 1:nPts) {
-  pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
-  idx = antsTransformPhysicalPointToIndex(mask,pt)
-  for ( i in c(-n[1]:n[1]) ) {
-    for (j in c(-n[2]:n[2])) {
-      for (k in c(-n[3]:n[3])) {
-        local = idx + c(i,j,k)
-        localpt = antsTransformIndexToPhysicalPoint(mask,local)
-        dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
-        inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
-        if ( (dist <= rad) && ( inImage == TRUE ) ) {
-          rlocal = round( local )
-          powersLabels[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
-         }
-        }
-      }
-    }
-  }
+powersLabels = makePowersPointsImage( pts, mask )
 if ( verbose )
   plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
     window.overlay = c( 1, max(powersLabels) ) )
@@ -478,7 +463,7 @@ return(
           nuisance      = nuisance,
           FD            = moco$fd$MeanDisplacement,
           badtimes      = badtimes,
-          dmnBetas      = betasI,
+          dmnAtBOLDres  = dmnAtBOLDres,
           networkPriors2Bold = networkPriors2Bold,
           powersLabels  = powersLabels,
           powersPoints  = pts,

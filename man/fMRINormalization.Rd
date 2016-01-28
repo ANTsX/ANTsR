@@ -60,7 +60,7 @@ outputs a list containing:
   \item{nuisance: }{Nuisance variables.}
   \item{FD: }{mean framewise displacement.}
   \item{badtimes: }{time frames that are above FD threshold.}
-  \item{dmnBetas: }{Default mode network beta map.}
+  \item{dmnAtBOLDres: }{Default mode network at BOLD resolution in MNI space.}
   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
   \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
   \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}

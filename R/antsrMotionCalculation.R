@@ -1,6 +1,6 @@
-#'  antsrMotionCalculation
+#' antsrMotionCalculation
 #'
-#'  Correct time-series data for motion.
+#' Correct time-series data for motion.
 #'
 #' @param img antsImage, usually ND where D=4.
 #' @param fixed Fixed image to register all timepoints to.  If not provided, mean image is used.
@@ -66,13 +66,13 @@ antsrMotionCalculation <- function(
     progress <- txtProgressBar(min = 1, max = ntimes, style = 3)
   for ( i in 1:ntimes )
     {
-    if ( imgdim == 2 ) localImg = extractSubImage( img, imgarr[ , i]       )
-    if ( imgdim == 3 ) localImg = extractSubImage( img, imgarr[ ,  , i]    )
+    if ( imgdim == 2 ) localImg = extractSubImage( img, imgarr[ ,       i] )
+    if ( imgdim == 3 ) localImg = extractSubImage( img, imgarr[ ,  ,    i] )
     if ( imgdim == 4 ) localImg = extractSubImage( img, imgarr[ ,  ,  , i] )
     locreg = antsRegistration( fixed = fixed, moving = localImg,
       typeofTransform = typeofTransform )
-    if ( imgdim == 2 ) fixarr[ , i ]      = as.array( locreg$warpedmovout )
-    if ( imgdim == 3 ) fixarr[ ,  , i]    = as.array( locreg$warpedmovout )
+    if ( imgdim == 2 ) fixarr[ ,       i] = as.array( locreg$warpedmovout )
+    if ( imgdim == 3 ) fixarr[ ,  ,    i] = as.array( locreg$warpedmovout )
     if ( imgdim == 4 ) fixarr[ ,  ,  , i] = as.array( locreg$warpedmovout )
 #    localtxp = R.matlab::readMat( locreg$fwdtransforms )[[1]]
     localtxp = readAntsrTransform( locreg$fwdtransforms, subdim )
@@ -99,18 +99,18 @@ antsrMotionCalculation <- function(
   rm( tempmat )
   # finally, get framewise displacement
   tsimg <- antsImageClone( img, "double" )
-  mocostats <- .antsMotionCorrStats0(tsimg, mask, mocoparams)
-  fd <- as.data.frame(mocostats$Displacements)
-  names(fd) <- c("MeanDisplacement", "MaxDisplacement")
-  colnames( mocoparams ) = paste( 'MOCOparam', 1:ncol(mocoparams), sep='' )
+  mocostats <- .antsMotionCorrStats0( tsimg, mask, mocoparams )
+  fd <- as.data.frame( mocostats$Displacements )
+  names(fd) <- c( "MeanDisplacement", "MaxDisplacement" )
+  colnames( mocoparams ) = paste( 'MOCOparam', 1:ncol( mocoparams ), sep='' )
   return
     (
     list(
       moco_img     = moco_img,
-      moco_params   = mocoparams,
+      moco_params  = mocoparams,
       moco_avg_img = meanout,
       moco_mask    = mask,
-      fd = fd,
+      fd           = fd,
       dvars        = dvars
       )
     )
