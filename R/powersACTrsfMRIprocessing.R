@@ -45,6 +45,7 @@
 #'   \item{FD: }{mean framewise displacement.}
 #'   \item{badtimes: }{time frames that are above FD threshold.}
 #'   \item{dmnAtBOLDres: }{Default mode network at BOLD resolution in MNI space.}
+#'   \item{seg2template: }{Segmentation in BOLD resolution MNI space.}
 #'   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
 #'   \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
 #'   \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}
@@ -420,6 +421,7 @@ concatenatedMaps =
 
 boldToTemplate = NA
 dmnAtBOLDres = NA
+seg2template = NA
 if ( exists("mni") & is.na( templateImage ) )
   templateImage = resampleImage( mni, rep( 2.0 , 3 ) )
 if ( !is.na( templateImage ) )
@@ -431,6 +433,9 @@ if ( !is.na( templateImage ) )
            imagetype = 3 )
   dmnnodes = antsImageRead( getANTsRData("mnidfn") )
   dmnAtBOLDres = resampleImageToTarget( dmnnodes, templateImage, 1  )
+  seg2template = antsApplyTransforms( templateImage, structuralSeg,
+    templateMap$invtransforms,
+    interpolator = "NearestNeighbor" )
   }
 
 ######################################################
@@ -464,6 +469,7 @@ return(
           FD            = moco$fd$MeanDisplacement,
           badtimes      = badtimes,
           dmnAtBOLDres  = dmnAtBOLDres,
+          seg2template  = seg2template,
           networkPriors2Bold = networkPriors2Bold,
           powersLabels  = powersLabels,
           powersPoints  = pts,
