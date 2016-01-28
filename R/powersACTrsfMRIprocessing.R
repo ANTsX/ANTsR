@@ -345,7 +345,7 @@ mocoNuis2             = reg_params * reg_params
 colnames( mocoNuis2 ) = paste( "MocoSqr", 1:ncol( mocoNuis2 ) , sep='' )
 mocoNuis  = cbind( mocoNuis, mocoNuis2 )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
-colnames( mocoDeriv ) = paste( "MocoDeriv", 1:ncol( MocoDeriv ) , sep='' )
+colnames( mocoDeriv ) = paste( "MocoDeriv", 1:ncol( mocoDeriv ) , sep='' )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
