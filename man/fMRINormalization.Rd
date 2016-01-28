@@ -61,6 +61,7 @@ outputs a list containing:
   \item{FD: }{mean framewise displacement.}
   \item{badtimes: }{time frames that are above FD threshold.}
   \item{dmnAtBOLDres: }{Default mode network at BOLD resolution in MNI space.}
+  \item{seg2template: }{Segmentation in BOLD resolution MNI space.}
   \item{networkPriors2Bold: }{WIP: standard network priors in BOLD space.}
   \item{powersLabels: }{Powers nodes in BOLD space i.e. fusedImg.}
   \item{powersPoints: }{Powers points in BOLD space i.e. fusedImg.}
