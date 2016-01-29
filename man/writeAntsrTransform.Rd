@@ -9,12 +9,17 @@ writeAntsrTransform(transform, filename)
 \arguments{
 \item{transform}{antsrTransform}
 
-\item{filename}{filename of transform}
+\item{filename}{filename of transform (file extension is ".mat" for affine transforms)}
 }
 \value{
 TRUE
 }
 \description{
-read a transform from file
+write antsrTransform to disk
+}
+\examples{
+trans= c(3,4,5)
+tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
+writeAntsrTransform(tx,"trans.mat")
 }
 
