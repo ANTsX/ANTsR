@@ -32,6 +32,7 @@
 #include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkWindowedSincInterpolateImageFunction.h"
 #include "itkLabelImageGaussianInterpolateImageFunction.h"
+#include "itkTransformFileWriter.h"
 
 
 /*
@@ -1453,6 +1454,92 @@ try
     }
 
   return( Rcpp::wrap(NA_REAL) );
+
+}
+catch( itk::ExceptionObject & err )
+  {
+  Rcpp::Rcout << "ITK ExceptionObject caught !" << std::endl;
+  Rcpp::Rcout << err << std::endl;
+  Rcpp::stop("ITK exception caught");
+  }
+catch( const std::exception& exc )
+  {
+  forward_exception_to_r( exc ) ;
+  }
+catch(...)
+  {
+	Rcpp::stop("c++ exception (unknown reason)");
+  }
+return Rcpp::wrap(NA_REAL); //not reached
+}
+
+template< class PrecisionType, unsigned int Dimension >
+SEXP antsrTransform_Write( SEXP r_transform ,SEXP filename_ ) {
+  std::string filename = Rcpp::as<std::string>(filename_);
+  Rcpp::S4 transform( r_transform );
+  std::string type = Rcpp::as<std::string>( transform.slot("type") );
+
+  typedef itk::Transform<PrecisionType,Dimension,Dimension> TransformType;
+  typedef typename TransformType::Pointer          TransformPointerType;
+  TransformPointerType itkTransform = Rcpp::as<TransformPointerType>( r_transform );
+  typedef itk::TransformFileWriter TransformWriterType;
+  typename TransformWriterType::Pointer transformWriter = TransformWriterType::New();
+  transformWriter->SetInput( itkTransform );
+  transformWriter->SetFileName( filename.c_str() );
+  transformWriter->Update();
+  return Rcpp::wrap(true);
+
+}
+RcppExport SEXP antsrTransform_Write( SEXP r_transform ,SEXP filename_){
+  try
+{
+  Rcpp::S4 transform( r_transform );
+
+  std::string precision = Rcpp::as<std::string>( transform.slot("precision") );
+  unsigned int dimension = Rcpp::as<int>( transform.slot("dimension") );
+  if ( (dimension < 1) || (dimension > 4) )
+    {
+    Rcpp::stop("Unsupported image dimension");
+    }
+
+  if ( (precision != "float") && (precision != "double"))
+    {
+    Rcpp::stop( "Precision must be 'float' or 'double'");
+    }
+
+  if( precision == "double" )
+    {
+    typedef double PrecisionType;
+    if( dimension == 4 )
+	    {
+	      return antsrTransform_Write<PrecisionType,4>( r_transform ,filename_);
+      }
+    else if( dimension == 3 )
+	    {
+      return antsrTransform_Write<PrecisionType,3>( r_transform ,filename_);
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsrTransform_Write<PrecisionType,2>( r_transform ,filename_);
+	    }
+	  }
+  else if( precision == "float" )
+    {
+    typedef float PrecisionType;
+    if( dimension == 4 )
+	    {
+      return antsrTransform_Write<PrecisionType,4>( r_transform ,filename_);
+      }
+    else if( dimension == 3 )
+	    {
+      return antsrTransform_Write<PrecisionType,3>( r_transform ,filename_);
+	    }
+    else if( dimension == 2 )
+	    {
+      return antsrTransform_Write<PrecisionType,2>( r_transform ,filename_);
+	    }
+    }
+return( Rcpp::wrap(NA_REAL) );
 
 }
 catch( itk::ExceptionObject & err )

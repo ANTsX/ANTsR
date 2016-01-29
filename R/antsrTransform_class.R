@@ -57,6 +57,7 @@ setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = 
 #' @examples
 #' trans= c(3,4,5)
 #' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
+#' @export
 createAntsrTransform <- function( type="AffineTransform", precision="float", dimension=3, matrix=NA,
   offset=NA, center=NA, translation=NA, parameters=NA, fixed.parameters=NA, displacement.field=NA,
   supported.types=FALSE )
@@ -269,6 +270,19 @@ applyAntsrTransformToImage <- function(transform, image, reference, interpolatio
 #' }'
 readAntsrTransform <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsrTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
+}
+
+#' @title writeAntsrTransform
+#' @description write antsrTransform to disk
+#' @param transform antsrTransform
+#' @param filename filename of transform (file extension is ".mat" for affine transforms)
+#' @return TRUE
+#' @examples
+#' trans= c(3,4,5)
+#' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
+#' writeAntsrTransform(tx,"trans.mat")
+writeAntsrTransform <- function(transform, filename )  {
+  return(.Call("antsrTransform_Write", transform ,filename, PACKAGE="ANTsR"))
 }
 
 #' @title invertAntsrTransform
