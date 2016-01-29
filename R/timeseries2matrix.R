@@ -23,6 +23,10 @@
 #' @export timeseries2matrix
 timeseries2matrix <- function(img, mask) {
   labs <- sort(unique(mask[mask > 0.001]))
+
+  if (!all( labs == round(labs) ))
+    stop("Mask image must be binary or integer labels")
+
   if (length(labs) == 1) 
     logmask <- (mask == 1) else logmask <- (mask > 0)
   mat <- img[logmask]
