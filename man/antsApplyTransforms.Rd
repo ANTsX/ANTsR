@@ -5,7 +5,8 @@
 \title{Apply transforms to images.}
 \usage{
 antsApplyTransforms(fixed, moving, transformlist = "",
-  interpolator = "Linear", imagetype = 0, whichtoinvert = NA, ...)
+  interpolator = "Linear", imagetype = 0, whichtoinvert = NA,
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image defining domain into which the moving image is
@@ -23,14 +24,16 @@ other interpolator available in antsApplyTransforms.}
 
 \item{imagetype}{choose 0/1/2/3 mapping to scalar/vector/tensor/time-series}
 
-\item{whichtoinvert}{optional list of booleans, same length as transforms. 
+\item{whichtoinvert}{optional list of booleans, same length as transforms.
 whichtoinvert[i] is TRUE if transformlist[i] is a matrix, and the matrix should
 be inverted. If transformlist[i] is a warp field, whichtoinvert[i] must be FALSE.
 
 If the transform list is a matrix followed by a warp field, whichtoinvert
 defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).}
 
-\item{...}{other parameters to pass to antsApplyTransforms.}
+\item{verbose}{print command and run verbose application of transform.}
+
+\item{...}{extra parameters}
 }
 \value{
 an antsImage is output. 1 -- Failure

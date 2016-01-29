@@ -18,13 +18,14 @@
 #' HammingWindowedSinc, LanczosWindowedSinc, Gaussian, or BSpline.
 #' other interpolator available in antsApplyTransforms.
 #' @param imagetype choose 0/1/2/3 mapping to scalar/vector/tensor/time-series
-#' @param whichtoinvert optional list of booleans, same length as transforms. 
+#' @param whichtoinvert optional list of booleans, same length as transforms.
 #' whichtoinvert[i] is TRUE if transformlist[i] is a matrix, and the matrix should
 #' be inverted. If transformlist[i] is a warp field, whichtoinvert[i] must be FALSE.
 #'
 #' If the transform list is a matrix followed by a warp field, whichtoinvert
 #' defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).
-#' @param ... other parameters to pass to antsApplyTransforms.
+#' @param verbose print command and run verbose application of transform.
+#' @param ... extra parameters
 #' @return an antsImage is output. 1 -- Failure
 #' @author Shrinidhi KL, Avants BB
 #' @examples
@@ -52,7 +53,7 @@ antsApplyTransforms <- function(
   moving,
   transformlist = "",
   interpolator = "Linear",
-  imagetype = 0, whichtoinvert = NA, ... ) {
+  imagetype = 0, whichtoinvert = NA, verbose = FALSE, ... ) {
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
     cat(" warpedimg<-antsApplyTransforms( fixed=img1 , moving=img2 , transformlist=c(\"my0GenericAffine.mat\",\"my1Warp.nii.gz\") ) ")
     cat("\n\n")
@@ -123,8 +124,11 @@ antsApplyTransforms <- function(
           }
         }
       }
-      .Call("antsApplyTransforms", c(myargs, "-z", 1, "--float", 1, "-e",
-                                     imagetype), PACKAGE = "ANTsR")
+      myverb = as.numeric( verbose )
+      if ( verbose ) print( myargs )
+      .Call("antsApplyTransforms",
+        c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype),
+        PACKAGE = "ANTsR")
       return(antsImageClone(warpedmovout, inpixeltype))
     }
     # Get here if fixed, moving, transformlist are not missing, fixed is not of type character,
