@@ -31,9 +31,9 @@ timeseries2matrix <- function(img, mask) {
   if (length(labs) == 1) 
     return(mat)
   maskvec <- mask[logmask]
-  mmat <- matrix(apply(mat[, maskvec == labs[1]], FUN = mean, MARGIN = 1), ncol = 1)
+  mmat <- matrix(apply(as.matrix(mat[, maskvec == labs[1]]), FUN = mean, MARGIN = 1), ncol = 1)
   for (i in 2:length(labs)) {
-    newmat <- matrix(apply(mat[, maskvec == labs[i]], FUN = mean, MARGIN = 1), 
+    newmat <- matrix(apply(as.matrix(mat[, maskvec == labs[i]]), FUN = mean, MARGIN = 1), 
       ncol = 1)
     mmat <- cbind(mmat, newmat)
   }
