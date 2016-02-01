@@ -116,7 +116,7 @@ meanbold = getAverageOfTimeSeries( img )
 mask = getMask( meanbold )
 # Find first steady state timepoint
 tr = antsGetSpacing(img)[4]
-steady = floor(10.0 / tr) + 1
+steady = floor( 20.0 / tr) + 1
 
 # Global signal before cropping (save for visualization)
 origmean = apply.antsImage(img, c(1,2,3), mean)
