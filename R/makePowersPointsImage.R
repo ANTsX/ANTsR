@@ -37,7 +37,7 @@ makePowersPointsImage <- function( pts, mask, radius = 5 )
           dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
           inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
           if ( (dist <= rad) && ( inImage == TRUE ) ) {
-            rlocal = round( local )
+            rlocal = round( local - 0.5 )
             powersLabels[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
            }
           }
