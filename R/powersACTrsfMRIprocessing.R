@@ -446,7 +446,7 @@ data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
          transformlist = concatenatedMaps$toTemplate,
          whichtoinvert = concatenatedMaps$toTemplateInversion )
-powersLabels = makePowersPointsImage( pts, mask )
+powersLabels = makePowersPointsImage( pts, mask, radius = 6 )
 if ( verbose )
   plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
     window.overlay = c( 1, max(powersLabels) ) )
