@@ -87,7 +87,11 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     tfn <- paste( tdir, "/html/", fileid, myext, sep = "" )  # for a fixed location
   }
   if ( ! file.exists( tfn ) )
-    download.file( myurl, tfn )
+    {
+    mymeth = 'curl'
+    if ( Sys.info()['sysname'] == 'Linux'  )  mymeth = 'wget'
+    download.file( myurl, tfn, method = mymeth )
+    }
   if ( fileid == "fmrinetworks" )
     {
     inms = c(
