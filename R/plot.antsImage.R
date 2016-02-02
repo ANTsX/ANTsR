@@ -82,6 +82,8 @@ plot.antsImage <- function(x, y,
     x <- cropImage(x, plotimask )
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
   }
+  startpar <- par(c("mar", "las", "mfrow"))$mar
+
   nonzeros <- x[x != 0]
   if(missing(window.img)){
     if (length(nonzeros) > 0 ){
@@ -427,6 +429,7 @@ plot.antsImage <- function(x, y,
   } # if not all na functional
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
+  par( mar = startpar )  # set margins to zero ! less wasted space
   if (!is.na(outname))
     dev.off()
   invisible(return())
