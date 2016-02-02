@@ -323,7 +323,7 @@ csfVox = which(subset(csfMask, mask > 0)==1)
 csfMean= rowMeans(boldMat[,csfVox])
 
 globalMean = rowMeans(boldMat)
-tissueNuis = cbind(globalMean, wmMean, csfMean)
+tissueNuis = cbind( globalMean, wmMean, csfMean )
 if ( haveBadTimes ) {
   for ( v in c(1:dim(tissueNuis)[2]) ) {
     tissueInterp = spline( c(1:nTimes)[goodtimes], tissueNuis[goodtimes,v],
@@ -348,6 +348,7 @@ mocoNuis  = cbind( mocoNuis, mocoNuis2 )
 mocoDeriv = rbind( rep( 0,  dim(mocoNuis)[2] ), diff( mocoNuis, 1 ) )
 colnames( mocoDeriv ) = paste( "MocoDeriv", 1:ncol( mocoDeriv ) , sep='' )
 nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
+nuisance = cbind( mocoNuis, mocoDeriv, globalMean=globalMean, dvars=dvars )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
   {
