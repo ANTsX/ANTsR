@@ -77,10 +77,6 @@ antsrMotionCalculation <- function(
 #    localtxp = R.matlab::readMat( locreg$fwdtransforms )[[1]]
     localtxp = readAntsrTransform( locreg$fwdtransforms, subdim )
     localtxp = getAntsrTransformParameters( localtxp )
-    if ( grep( "Rigid", typeofTransform ) == 1 )
-      {
-      if (  imgdim == 4 ) localtxp = .affine2distance( localtxp )
-      }
     if ( i ==  1 ) {
       mocoparams = matrix( nrow=ntimes, ncol=length(localtxp) )
       if ( verbose ) print( localtxp )
@@ -106,6 +102,15 @@ antsrMotionCalculation <- function(
   mocostats <- .antsMotionCorrStats0( tsimg, mask, mocoparams )
   fd <- as.data.frame( mocostats$Displacements )
   names(fd) <- c( "MeanDisplacement", "MaxDisplacement" )
+  # now do a posthoc mapping of the motion parameters to roll pitch yaw
+  # in the special case of rigid mapping in 3D
+  if ( ( grep( "Rigid", typeofTransform ) == 1 ) & ( imgdim == 4 ) )
+    {
+    mocoparamsR = matrix( nrow=ntimes, ncol=6 )
+    for ( i in 1:ntimes )
+      mocoparamsR[i, ] = .affine2distance( mocoparams[i, ] )
+    mocoparams = mocoparamsR
+    }
   colnames( mocoparams ) = paste( 'MOCOparam', 1:ncol( mocoparams ), sep='' )
   return
     (
