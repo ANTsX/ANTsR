@@ -17,7 +17,7 @@
 #' recommend the value 2, in general.  The first run improves the template
 #' estimate such that the 2nd run gives a more accurate correction.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
-#' @param nCompCor number of compcor components to use.
+#' @param nCompCor number of compcor components to use in CSF plus WM mask.
 #' @param polydegree eg 4 for polynomial nuisance variables.
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
@@ -351,9 +351,16 @@ nuisance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, dvars=dvars )
 nuisance = cbind( nuisance, runs=runNuis )
 if ( nCompCor > 0 )
   {
-  compcorNuis = compcor( boldMat, nCompCor )
+# use seg2bold and moco_img to get a better compcor set "anatomical compcor"
+# http://www.ncbi.nlm.nih.gov/pubmed/25987368
+  tempMask = thresholdImage( seg2bold, 1, 1 )
+  tempMask = tempMask + thresholdImage( seg2bold, 3, 3 ) %>% iMath( "ME", 1 )
+  tempMat = timeseries2matrix( fusedImg, tempMask )
+  compcorNuis = compcor( tempMat, nCompCor )
   colnames( compcorNuis ) = paste("compcor",1:ncol(compcorNuis), sep='' )
   nuisance = cbind( nuisance, compcorNuis )
+  rm( tempMat  )
+  rm( tempMask )
   }
 
 ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------

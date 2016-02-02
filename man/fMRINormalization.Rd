@@ -22,7 +22,7 @@ estimate such that the 2nd run gives a more accurate correction.}
 
 \item{freqLimits}{pair defining bandwidth of interest from low to high.}
 
-\item{nCompCor}{number of compcor components to use.}
+\item{nCompCor}{number of compcor components to use in CSF plus WM mask.}
 
 \item{polydegree}{eg 4 for polynomial nuisance variables.}
 
