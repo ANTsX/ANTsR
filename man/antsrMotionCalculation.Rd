@@ -39,6 +39,6 @@ simimg<-makeImage(rep(5,4), rnorm(5^4))
 antsrMotionCalculation( simimg )
 }
 \author{
-Brian B. Avants, Benjamin M. Kandel
+BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 }
 

@@ -17,7 +17,7 @@
 #'  \item{fd}{ Time-series mean and max displacements.}
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
-#' @author Brian B. Avants, Benjamin M. Kandel
+#' @author BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
@@ -77,6 +77,10 @@ antsrMotionCalculation <- function(
 #    localtxp = R.matlab::readMat( locreg$fwdtransforms )[[1]]
     localtxp = readAntsrTransform( locreg$fwdtransforms, subdim )
     localtxp = getAntsrTransformParameters( localtxp )
+    if ( grep( "Rigid", typeofTransform ) == 1 )
+      {
+      if (  imgdim == 4 ) localtxp = .affine2distance( localtxp )
+      }
     if ( i ==  1 ) {
       mocoparams = matrix( nrow=ntimes, ncol=length(localtxp) )
       if ( verbose ) print( localtxp )
@@ -114,4 +118,25 @@ antsrMotionCalculation <- function(
       dvars        = dvars
       )
     )
+}
+
+
+.affine2distance<-function(affVals) {
+
+	affVals<-as.numeric(affVals)
+
+	dx<-affVals[10]
+	dy<-affVals[11]
+	dz<-affVals[12]
+
+	rotx<-asin(affVals[7])
+	roty<-atan2(affVals[8]/cos(rotx),affVals[9]/cos(rotx))
+	rotz<-atan2(affVals[4]/cos(rotx),affVals[1]/cos(rotx))
+
+	rotx<-rotx*360/(2*pi)
+	roty<-roty*360/(2*pi)
+	rotz<-rotz*360/(2*pi)
+
+	return(c(dx, dy, dz, rotx, roty, rotz))
+
 }
