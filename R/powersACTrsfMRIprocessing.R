@@ -289,7 +289,7 @@ if ( length( badtimes ) > 0 )
   } else badtimes = NA
 
 boldMat = timeseries2matrix( fusedImg, mask )
-nTimes = nrow(boldMat)
+nTimes = nrow( boldMat )
 if ( haveBadTimes )
   {
   if ( verbose  )
