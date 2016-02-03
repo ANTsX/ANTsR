@@ -163,6 +163,7 @@ if ( repeatMotionEst < 1 )
   moco = antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+meanbold = antsCopyImageInfo( origmean, meanbold )
 
 # at this point, we might map meanbold to the structural image
 # and then motion correct all runs to that. this approach would be less
@@ -238,11 +239,16 @@ if ( is.na( structuralImage ) ) # here do a quick hack so we can process bold al
 
 if ( ! exists("boldmap") )
   {
-  if ( verbose ) print("boldmap to structure")
+  if ( verbose ) print("boldmap to structure (no boldmap passed in)")
 #  boldmap = antsRegistration( meanbold * mask, t1brain,
 #    typeofTransform='QuickRigid', verbose=FALSE )
-  boldmap = antsRegistration( meanbold * mask, t1brain,
+  if ( verbose ) print( meanbold )
+  if ( verbose ) print( mask )
+  maskmean = meanbold * mask
+  if ( verbose ) print("mask mean done")
+  boldmap = antsRegistration( maskmean, t1brain,
     typeofTransform='SyNBoldAff', verbose=FALSE )
+  if ( verbose ) print("boldmap to structure done")
   }
 
 notemplateMap = FALSE
