@@ -7,6 +7,10 @@
 #'
 #' @param img input label image
 #' @param mask defines domain of interest
+#' @param targetLabels defines target regions to be returned.  if the target
+#' label does not exist in the input label image, then the matrix will contain
+#' a constant value of missingVal (default NA) in that row.
+#' @param missingVal for missing label values.
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
@@ -17,7 +21,7 @@
 #' labmat = labels2matrix( labs, mask )
 #'
 #' @export labels2matrix
-labels2matrix <- function( img, mask )
+labels2matrix <- function( img, mask, targetLabels = NA, missingVal = NA )
 {
   if ( any( dim( img ) != dim( mask ) ) )
     {
@@ -25,13 +29,16 @@ labels2matrix <- function( img, mask )
     }
   vec <- subset( img, mask > 0 )
   theLabels <- sort( unique( vec ) )
+  if ( ! all( is.na( targetLabels ) ) ) theLabels = targetLabels
   mylabelnames = as.character( theLabels )
   nLabels <- length( theLabels )
   labels <- matrix( 0, nrow = nLabels, ncol = length( vec ) )
   for ( i in 1:nLabels )
     {
     lab = as.numeric( theLabels[ i ] )
-    labels[i, ] <- as.numeric( vec == lab )
+    filler = as.numeric( vec == lab )
+    if ( sum( filler ) == 0 ) filler = rep( missingVal, length( vec ) )
+    labels[i, ] <- filler
     }
   return( labels )
 }

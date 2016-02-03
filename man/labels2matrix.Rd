@@ -4,12 +4,18 @@
 \alias{labels2matrix}
 \title{Convert label image to a matrix}
 \usage{
-labels2matrix(img, mask)
+labels2matrix(img, mask, targetLabels = NA, missingVal = NA)
 }
 \arguments{
 \item{img}{input label image}
 
 \item{mask}{defines domain of interest}
+
+\item{targetLabels}{defines target regions to be returned.  if the target
+label does not exist in the input label image, then the matrix will contain
+a constant value of missingVal (default NA) in that row.}
+
+\item{missingVal}{for missing label values.}
 }
 \value{
 matrix is output
