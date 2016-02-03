@@ -163,7 +163,6 @@ if ( repeatMotionEst < 1 )
   moco = antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
 meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
-meanbold = antsCopyImageInfo( origmean, meanbold )
 
 # at this point, we might map meanbold to the structural image
 # and then motion correct all runs to that. this approach would be less
