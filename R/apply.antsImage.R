@@ -28,14 +28,16 @@ apply.antsImage <- function( X, MARGIN, FUN, ... )
     antsSetSpacing( ar, antsGetSpacing(X)[MARGIN])
     antsSetOrigin( ar, antsGetOrigin(X)[MARGIN])
     dir = antsGetDirection(X)[MARGIN,MARGIN]
-    for ( i in c(1:length(MARGIN)) )
-      {
-      if ( sum(dir[i,]) == 0 )
-        {
-        dir[i,i] = 1
-        }
-      }
-
+#   BA: the code below is inconsistent with other ants approaches
+#   it also has the rather nasty effect of flipping images anatomically
+#   in some cases.
+#    for ( i in c(1:length(MARGIN)) )
+#      {
+#      if ( sum(dir[i,]) == 0 )
+#        {
+#        dir[i,i] = 1
+#        }
+#      }
     antsSetDirection( ar, dir )
     }
 
