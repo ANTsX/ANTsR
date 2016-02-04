@@ -11,6 +11,7 @@
 #' @param splineParam Parameter controlling number of control points in spline.
 #' Either single value, indicating how many control points, or vector 
 #' with one entry per dimension of image, indicating the spacing in each direction.
+#' @param verbose Flag for verbose output.
 #' @return outimg Bias-corrected image
 #' @author BB Avants
 #' @examples
@@ -21,7 +22,8 @@
 #' @export n4BiasFieldCorrection
 n4BiasFieldCorrection<-function( img , mask=NA, shrinkFactor=4, 
   convergence=list(iters=c(50,50,50,50), tol=0.0000001), 
-  splineParam=200)
+  splineParam=200,
+  verbose = FALSE)
 {
 if (!is.antsImage(mask)) 
   mask <- getMask(img) 
@@ -44,7 +46,8 @@ outimg<-antsImageClone(img)
        c = N4_CONVERGENCE_1,
        b = N4_BSPLINE_PARAMS,
        x = mask,
-       o = outimg)
+       o = outimg,
+       v = as.numeric( verbose ))
        )
 return(outimg)
 }
