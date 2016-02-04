@@ -54,6 +54,8 @@ typeofTransform can be one of:
   \item{"AffineFast": }{Fast version of \code{Affine}.}
   \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
   to BOLD intrasubject registration'.'}
+  \item{"ElasticSyN": }{Symmetric normalization: Affine + deformable transformation,
+    with mutual information as optimization metric and elastic regularization.}
   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
     with mutual information as optimization metric.}
   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,

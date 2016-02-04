@@ -25,6 +25,8 @@
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
 #'   \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
 #'   to BOLD intrasubject registration'.'}
+#'   \item{"ElasticSyN": }{Symmetric normalization: Affine + deformable transformation,
+#'     with mutual information as optimization metric and elastic regularization.}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric.}
 #'   \item{"SyNRA": }{Symmetric normalization: Rigid + Affine + deformable transformation,
@@ -128,7 +130,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
       allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
-        "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ")
+        "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ","ElasticSyN")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
@@ -177,6 +179,23 @@ antsRegistration <- function( fixed = NA, moving = NA,
           "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
           "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+          paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        if (typeofTransform == "ElasticSyN") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+          "-t", "Affine[0.25]", "-c", "2100x1200x200x0", "-s", "3x2x1x0",
+          "-f", "4x2x2x1",
+          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+          "-t", paste("SyN[0.25,3,0.5]", sep = ""),
+          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
+            wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
           paste(outprefix, "0GenericAffine.mat", sep = ""))
