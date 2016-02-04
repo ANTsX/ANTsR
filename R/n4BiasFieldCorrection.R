@@ -23,7 +23,7 @@
 n4BiasFieldCorrection<-function( img , mask=NA, shrinkFactor=4, 
   convergence=list(iters=c(50,50,50,50), tol=0.0000001), 
   splineParam=200,
-  verbose = 0)
+  verbose = FALSE)
 {
 if (!is.antsImage(mask)) 
   mask <- getMask(img) 
@@ -47,7 +47,7 @@ outimg<-antsImageClone(img)
        b = N4_BSPLINE_PARAMS,
        x = mask,
        o = outimg,
-       v = v)
+       v = as.numeric( verbose ))
        )
 return(outimg)
 }
