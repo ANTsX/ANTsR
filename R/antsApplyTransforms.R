@@ -75,9 +75,9 @@ antsApplyTransforms <- function(
       warpedmovout <- antsImageClone(moving)
       f <- fixed
       m <- moving
-      if ( fixed@dimension != moving@dimension )
-        if ( imagetype == 0 )
-          stop( "Dimensions do not match. Set imagetype for appropriate input moving image." )
+      if ( ( moving@dimension == 4 ) & ( fixed@dimension == 3 ) &
+           ( imagetype == 0 ) )
+          stop( "Set imagetype 3 to transform time series images." )
       wmo <- warpedmovout
       mytx <- list()
       # If whichtoinvert is NA, then attempt to guess the right thing to do
