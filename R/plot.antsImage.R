@@ -82,7 +82,7 @@ plot.antsImage <- function(x, y,
 
 if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
 
-if ( !is.na( domainImageMap ) )
+if ( ! any( is.na( domainImageMap ) ) )
   {
   if ( is.antsImage( domainImageMap ) )
     {
@@ -99,7 +99,18 @@ if ( !is.na( domainImageMap ) )
     }
   if ( is.list( domainImageMap ) ) # expect an image and transformation
     {
-    stop("domainImageMap list is not implemented yet.")
+    if ( length( domainImageMap ) != 2 )  stop("domainImageMap list Should be length 2.")
+    dimg = domainImageMap[[1]]
+    if ( ! is.antsImage( dimg ) )
+      stop("domainImageMap list first entry list should be antsImage.")
+    tx = domainImageMap[[2]]
+    x = antsApplyTransforms( dimg, x, transformlist = tx )
+    if ( ! missing( "y" ) )
+      {
+      if ( is.antsImage( y ) ) y <- list(y)
+      for ( i in 1:length( y ) )
+        y[[ i ]] = antsApplyTransforms( dimg, y[[ i ]], transformlist = tx )
+      }
     }
   }
 
