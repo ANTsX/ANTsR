@@ -316,6 +316,8 @@ More like *development highlights*, as opposed to *release notes*.  See `git log
 
 ## 0.3.2
 
+* ENH: added domainImg option to plot.antsImage which can standardize plot.
+
 * COMP: test for DVCL define requirement to improve clang and gcc compilations
 
 * WIP: transform objects can be created on the fly and manipulated thanks to jeff duda
