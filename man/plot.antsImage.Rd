@@ -8,7 +8,8 @@
   "red", "blue", "green", "yellow"), axis = 2, slices,
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
   window.img, window.overlay, quality = 4, outname = NA, alpha = 0.5,
-  newwindow = FALSE, nslices = 10, dorot = 0, ncolumns = 4, ...)
+  newwindow = FALSE, nslices = 10, domainImageMap = NA, ncolumns = 4,
+  ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
@@ -48,7 +49,10 @@ of this list should match the image list.}
 
 \item{nslices}{number of slices to view}
 
-\item{dorot}{do a rotation of the slice before viewing}
+\item{domainImageMap}{this input antsImage or list contains a reference image
+(\code{domainImage}) and optional reference mapping named \code{domainMap}.
+these will be used to map the input image(s) to this antsImage space before
+plotting. this is useful for non-standard image orientations.}
 
 \item{ncolumns}{number of columns in plot}
 

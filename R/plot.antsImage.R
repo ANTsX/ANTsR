@@ -24,7 +24,10 @@
 #' @param alpha  opacity
 #' @param newwindow  boolean controlling if we open a new device for this plot
 #' @param nslices  number of slices to view
-#' @param dorot  do a rotation of the slice before viewing
+#' @param domainImageMap this input antsImage or list contains a reference image
+#' (\code{domainImage}) and optional reference mapping named \code{domainMap}.
+#' these will be used to map the input image(s) to this antsImage space before
+#' plotting. this is useful for non-standard image orientations.
 #' @param ncolumns number of columns in plot
 #' @param ...  other parameters
 #' @return output is plot to standard R window
@@ -73,9 +76,33 @@ plot.antsImage <- function(x, y,
   alpha = 0.5,
   newwindow = FALSE,
   nslices = 10,
-  dorot = 0,
+  domainImageMap = NA,
   ncolumns = 4,
   ... ) {
+
+if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
+
+if ( !is.na( domainImageMap ) )
+  {
+  if ( is.antsImage( domainImageMap ) )
+    {
+    tx = new("antsrTransform", precision="float",
+      type="AffineTransform", dimension = x@dimension )
+    x = applyAntsrTransformToImage(tx, x, domainImageMap )
+    if ( ! missing( "y" ) )
+      {
+      if ( is.antsImage( y ) ) y <- list(y)
+      for ( i in 1:length( y ) )
+        y[[ i ]] =
+          applyAntsrTransformToImage(tx, y[[ i ]], domainImageMap )
+      }
+    }
+  if ( is.list( domainImageMap ) ) # expect an image and transformation
+    {
+    stop("domainImageMap list is not implemented yet.")
+    }
+  }
+
   if ( length( dim( x ) ) < axis ) axis = length( dim( x ) )
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
@@ -231,11 +258,6 @@ plot.antsImage <- function(x, y,
   slice = reoSlice( img )
   slicerow <- nrow(slice)
   slicecol <- ncol(slice)
-  if ( dorot == 1 )
-    {
-    slicerow <- ncol(slice)
-    slicecol <- nrow(slice)
-    }
   bigslice <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
   rowsl <- 0
   # convert to 0 255
@@ -244,10 +266,8 @@ plot.antsImage <- function(x, y,
     {
       if (axis != 2 & imagedim > 2)
         slice <- rotate90.matrix(inimg[, , slices[insl + 1]])
-      if (axis == 2 & imagedim > 2 & dorot==0 )
+      if (axis == 2 & imagedim > 2 )
         slice <- flip.matrix(inimg[, , slices[insl + 1]])
-      if (axis == 2 & imagedim > 2 & dorot==1 )
-        slice <- rotate270.matrix(inimg[, , slices[insl + 1]])
       if (imagedim > 2) {
         slice <- mirror.matrix(slice)
       } else {
