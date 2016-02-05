@@ -88,7 +88,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
   }
   if ( ! file.exists( tfn ) )
     {
-    mymeth = 'curl'
+    mymeth = 'auto'
     if ( Sys.info()['sysname'] == 'Linux'  )  mymeth = 'wget'
     download.file( myurl, tfn, method = mymeth )
     }
