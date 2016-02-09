@@ -55,19 +55,23 @@ makeGraph <- function( mat, graphdensity = 1,
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
   g1 <- igraph::graph_from_adjacency_matrix( adjacencyMatrix,
     mode = c("undirected"), weighted = TRUE, diag = FALSE )
-  #
   edgeWeights <- igraph::E(g1)$weight
+  if ( !inverseCorrsAsWeights )
+    {
+    edgeWeights <- psych::fisherz( igraph::E(g1)$weight )
+    E(g1)$weight = edgeWeights
+    }
   # compute local efficiency
   if (getEfficiency) {
     mysps <- igraph::shortest.paths( g1 )
     mysps[mysps == Inf] <- 2 * max( adjacencyMatrix )
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
-  gmetric0 <- igraph::evcent(g1)$vector
-  gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- igraph::page.rank(g1)$vector  #
-  gmetric3 <- igraph::degree(g1)
-  gmetric4 <- igraph::betweenness(g1, normalized = T, weights = edgeWeights)  #
+  gmetric0 <- igraph::evcent( g1 )$vector
+  gmetric1 <- igraph::closeness( g1, normalized = T, weights = edgeWeights)
+  gmetric2 <- igraph::page.rank( g1 )$vector  #
+  gmetric3 <- igraph::degree( g1 )
+  gmetric4 <- igraph::betweenness( g1, normalized = T, weights = edgeWeights )
 #  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat")
   gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"),
     weights = edgeWeights )
