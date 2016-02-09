@@ -29,6 +29,7 @@ makeGraph <- function( mat, graphdensity = 1,
   communityMethod=NA, getEfficiency = FALSE,
   inverseCorrsAsWeights = FALSE ) {
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+  if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
   myrsfnetworkcorrs <- mat
   if (typeof(myrsfnetworkcorrs) == "list") {
     myrsfnetworkcorrs <- data.matrix(mat)
