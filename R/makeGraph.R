@@ -9,6 +9,8 @@
 #' @param graphdensity fraction of edges to keep
 #' @param communityMethod see igraph's community detection
 #' @param getEfficiency boolean, this is slow to compute
+#' @param inverseCorrsAsWeights if TRUE, high correlations produce small
+#' edge weights.
 #' @return a named list is output including the graph object, adjacency matrix
 #' and several graph metrics
 #' @author Avants BB
@@ -24,7 +26,8 @@
 #'
 #' @export makeGraph
 makeGraph <- function( mat, graphdensity = 1,
-  communityMethod=NA, getEfficiency = FALSE) {
+  communityMethod=NA, getEfficiency = FALSE,
+  inverseCorrsAsWeights = FALSE ) {
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   myrsfnetworkcorrs <- mat
   if (typeof(myrsfnetworkcorrs) == "list") {
@@ -38,35 +41,40 @@ makeGraph <- function( mat, graphdensity = 1,
     return(0)
   }
   myrsfnetworkcorrs[myrsfnetworkcorrs < correlationThreshold] <- 0
-  adjmat <- 1/myrsfnetworkcorrs
+  if (  inverseCorrsAsWeights ) adjmat <- 1/myrsfnetworkcorrs
+  if ( !inverseCorrsAsWeights ) adjmat <- myrsfnetworkcorrs
   npossibleedges <- nrow(adjmat) * (nrow(adjmat) - 1)
   ndesirededges <- npossibleedges * graphdensity
   if (graphdensity < 1) {
-    myord <- rev(order(adjmat))
+    if (  inverseCorrsAsWeights ) myord = rev( order( adjmat ) )
+    if ( !inverseCorrsAsWeights ) myord = order( adjmat )
     whichnodestoZero <- round((1 - graphdensity) * length(adjmat))
     adjmat[myord[1:whichnodestoZero]] <- 0
   }
-  adjmat[adjmat == Inf] <- 0
-  adjmat[adjmat > 0] <- adjmat[adjmat > 0] - 1
+  adjmat[ adjmat == Inf ] <- 0
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
-  g1 <- igraph::graph.adjacency(adjacencyMatrix, mode = c("undirected"), weighted = TRUE)
+  g1 <- igraph::graph_from_adjacency_matrix( adjacencyMatrix,
+    mode = c("undirected"), weighted = TRUE, diag = FALSE )
   #
   edgeWeights <- igraph::E(g1)$weight
   # compute local efficiency
   if (getEfficiency) {
-    mysps <- igraph::shortest.paths(g1)
-    mysps[mysps == Inf] <- 2 * max(adjacencyMatrix)
+    mysps <- igraph::shortest.paths( g1 )
+    mysps[mysps == Inf] <- 2 * max( adjacencyMatrix )
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
   gmetric0 <- igraph::evcent(g1)$vector
   gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
   gmetric2 <- igraph::page.rank(g1)$vector  #
   gmetric3 <- igraph::degree(g1)
-  gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)  #
-  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"))
+  gmetric4 <- igraph::betweenness(g1, normalized = T, weights = edgeWeights)  #
+#  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat")
+  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat"),
+    weights = edgeWeights )
   gmetric6 <- igraph::graph.strength(g1)
   gmetric7 <- igraph::centralization.degree(g1)$res
   gmetric8 <- myspsa
+  gmetric9 <- igraph::hub_score(g1)$vector
   walktrapcomm <- igraph::walktrap.community(g1)
   if (  !is.na(communityMethod) )
     {
@@ -88,7 +96,9 @@ makeGraph <- function( mat, graphdensity = 1,
       mycommunity <- igraph::fastgreedy.community(g1)
     } else mycommunity<-walktrapcomm
   #########################################################
-  return( list(
+
+  return(
+    list(
     mygraph = g1,
     centrality = gmetric0,
     closeness = gmetric1,
@@ -96,10 +106,13 @@ makeGraph <- function( mat, graphdensity = 1,
     degree = gmetric3,
     betweeness = gmetric4,
     localtransitivity = gmetric5,
+    globalTransitivity = igraph::transitivity(g1),
     strength = gmetric6,
     degcent = gmetric7,
+    hubScore = gmetric9,
     effinv = myspsa,
     community = mycommunity,
     walktrapcomm = walktrapcomm,
-    adjacencyMatrix = adjacencyMatrix) )
+    adjacencyMatrix = adjacencyMatrix )
+    )
 }

@@ -5,7 +5,7 @@
 \title{Simple function to create and measure a graph from a square input matrix.}
 \usage{
 makeGraph(mat, graphdensity = 1, communityMethod = NA,
-  getEfficiency = FALSE)
+  getEfficiency = FALSE, inverseCorrsAsWeights = FALSE)
 }
 \arguments{
 \item{mat}{input matrix}
@@ -15,6 +15,9 @@ makeGraph(mat, graphdensity = 1, communityMethod = NA,
 \item{communityMethod}{see igraph's community detection}
 
 \item{getEfficiency}{boolean, this is slow to compute}
+
+\item{inverseCorrsAsWeights}{if TRUE, high correlations produce small
+edge weights.}
 }
 \value{
 a named list is output including the graph object, adjacency matrix
