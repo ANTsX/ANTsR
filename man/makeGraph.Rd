@@ -5,7 +5,7 @@
 \title{Simple function to create and measure a graph from a square input matrix.}
 \usage{
 makeGraph(mat, graphdensity = 1, communityMethod = NA,
-  getEfficiency = FALSE, inverseCorrsAsWeights = FALSE)
+  getEfficiency = FALSE, inverseValuesAsWeights = FALSE)
 }
 \arguments{
 \item{mat}{input matrix}
@@ -16,8 +16,12 @@ makeGraph(mat, graphdensity = 1, communityMethod = NA,
 
 \item{getEfficiency}{boolean, this is slow to compute}
 
-\item{inverseCorrsAsWeights}{if TRUE, high correlations produce small
-edge weights.}
+\item{inverseValuesAsWeights}{if TRUE, high correlations produce small
+edge weights.  This detail is important when using igraph algorithms as
+different methods use weights in different ways. See igraph for its
+\code{is_weighted} documentation which notes that weights are used as
+distances in shortest path calculations and as strength (similar to degree)
+for community methods.}
 }
 \value{
 a named list is output including the graph object, adjacency matrix

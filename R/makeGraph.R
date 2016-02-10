@@ -9,8 +9,12 @@
 #' @param graphdensity fraction of edges to keep
 #' @param communityMethod see igraph's community detection
 #' @param getEfficiency boolean, this is slow to compute
-#' @param inverseCorrsAsWeights if TRUE, high correlations produce small
-#' edge weights.
+#' @param inverseValuesAsWeights if TRUE, high correlations produce small
+#' edge weights.  This detail is important when using igraph algorithms as
+#' different methods use weights in different ways. See igraph for its
+#' \code{is_weighted} documentation which notes that weights are used as
+#' distances in shortest path calculations and as strength (similar to degree)
+#' for community methods.
 #' @return a named list is output including the graph object, adjacency matrix
 #' and several graph metrics
 #' @author Avants BB
@@ -27,7 +31,7 @@
 #' @export makeGraph
 makeGraph <- function( mat, graphdensity = 1,
   communityMethod=NA, getEfficiency = FALSE,
-  inverseCorrsAsWeights = FALSE ) {
+  inverseValuesAsWeights = FALSE ) {
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
   myrsfnetworkcorrs <- mat
@@ -42,13 +46,13 @@ makeGraph <- function( mat, graphdensity = 1,
     return(0)
   }
   myrsfnetworkcorrs[myrsfnetworkcorrs < correlationThreshold] <- 0
-  if (  inverseCorrsAsWeights ) adjmat <- 1/myrsfnetworkcorrs
-  if ( !inverseCorrsAsWeights ) adjmat <- myrsfnetworkcorrs
+  if (  inverseValuesAsWeights ) adjmat <- 1/myrsfnetworkcorrs
+  if ( !inverseValuesAsWeights ) adjmat <- myrsfnetworkcorrs
   npossibleedges <- nrow(adjmat) * (nrow(adjmat) - 1)
   ndesirededges <- npossibleedges * graphdensity
   if (graphdensity < 1) {
-    if (  inverseCorrsAsWeights ) myord = rev( order( adjmat ) )
-    if ( !inverseCorrsAsWeights ) myord = order( adjmat )
+    if (  inverseValuesAsWeights ) myord = rev( order( adjmat ) )
+    if ( !inverseValuesAsWeights ) myord = order( adjmat )
     whichnodestoZero <- round((1 - graphdensity) * length(adjmat))
     adjmat[myord[1:whichnodestoZero]] <- 0
   }
@@ -57,7 +61,7 @@ makeGraph <- function( mat, graphdensity = 1,
   g1 <- igraph::graph_from_adjacency_matrix( adjacencyMatrix,
     mode = c("undirected"), weighted = TRUE, diag = FALSE )
   edgeWeights <- igraph::E(g1)$weight
-  if ( !inverseCorrsAsWeights )
+  if ( !inverseValuesAsWeights )
     {
     edgeWeights <- psych::fisherz( igraph::E(g1)$weight )
     E(g1)$weight = edgeWeights
@@ -70,7 +74,7 @@ makeGraph <- function( mat, graphdensity = 1,
   } else myspsa <- NA
   gmetric0 <- igraph::evcent( g1 )$vector
   gmetric1 <- igraph::closeness( g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- igraph::page.rank( g1 )$vector  #
+  gmetric2 <- igraph::page_rank( g1 )$vector  #
   gmetric3 <- igraph::degree( g1 )
   gmetric4 <- igraph::betweenness( g1, normalized = T, weights = edgeWeights )
 #  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat")
