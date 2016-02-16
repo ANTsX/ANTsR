@@ -69,12 +69,18 @@ makeGraph <- function( mat, graphdensity = 1,
   # compute local efficiency
   if (getEfficiency) {
     mysps <- igraph::shortest.paths( g1 )
-    mysps[mysps == Inf] <- 2 * max( adjacencyMatrix )
+    for ( j in 1:ncol( mysps ) ) {
+      mycol = mysps[,j]
+      mycol[ mycol == Inf ] = NA
+      mysps[,j] = mycol
+      }
+#    mysps[mysps == Inf] <- 2 * max( adjacencyMatrix )
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
-  gmetric0 <- igraph::evcent( g1 )$vector
+  # weights = similarity
+  gmetric0 <- igraph::eigen_centrality( g1, weights = edgeWeights )$vector
   gmetric1 <- igraph::closeness( g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- igraph::page_rank( g1 )$vector  #
+  gmetric2 <- igraph::page_rank( g1, weights = edgeWeights )$vector  #
   gmetric3 <- igraph::degree( g1 )
   gmetric4 <- igraph::betweenness( g1, normalized = T, weights = edgeWeights )
 #  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat")
