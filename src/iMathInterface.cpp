@@ -122,6 +122,20 @@ SEXP iMathGrad( Rcpp::List args )
   return Rcpp::wrap(output);
  }
 
+ template <class ImageType>
+ SEXP iMathHistogramEqualization( Rcpp::List args )
+ {
+   typedef typename ImageType::Pointer ImagePointerType;
+
+   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
+   double alpha = Rcpp::as<double>( args[2] );
+   double beta = Rcpp::as<double>( args[3] );
+   ImagePointerType output = ants::iMathHistogramEqualization<ImageType>( input, alpha, beta );
+
+   return Rcpp::wrap(output);
+ }
+
+
 template <class ImageType>
 SEXP iMathLaplacian( Rcpp::List args )
 {
@@ -1192,6 +1206,99 @@ try
         {
         typedef itk::Image<ValueType,4>       ImageType;
         return iMathGrad<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "HistogramEqualization" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("HistogramEqualization only supports scalar images");
+      }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathHistogramEqualization<ImageType>( args );
         }
       }
     }
