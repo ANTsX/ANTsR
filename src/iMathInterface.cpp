@@ -130,9 +130,10 @@ SEXP iMathGrad( Rcpp::List args )
    ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
    double alpha = Rcpp::as<double>( args[2] );
    double beta = Rcpp::as<double>( args[3] );
-   ImagePointerType output = ants::iMathHistogramEqualization<ImageType>( input, alpha, beta );
+   unsigned int r = Rcpp::as<unsigned int>( args[4] );
+   ImagePointerType output = ants::iMathHistogramEqualization<ImageType>( input, alpha, beta, r );
 
-   return Rcpp::wrap(output);
+   return Rcpp::wrap( output );
  }
 
 
