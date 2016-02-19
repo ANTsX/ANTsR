@@ -9,7 +9,7 @@
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
   window.img, window.overlay, quality = 4, outname = NA, alpha = 0.5,
   newwindow = FALSE, nslices = 10, domainImageMap = NA, ncolumns = 4,
-  ...)
+  useAbsoluteScale = FALSE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
@@ -55,6 +55,9 @@ these will be used to map the input image(s) to this antsImage space before
 plotting. this is useful for non-standard image orientations.}
 
 \item{ncolumns}{number of columns in plot}
+
+\item{useAbsoluteScale}{boolean determines whether dynamic range is maximized
+when visualizing overlays}
 
 \item{...}{other parameters}
 }

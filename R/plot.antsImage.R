@@ -29,6 +29,8 @@
 #' these will be used to map the input image(s) to this antsImage space before
 #' plotting. this is useful for non-standard image orientations.
 #' @param ncolumns number of columns in plot
+#' @param useAbsoluteScale boolean determines whether dynamic range is maximized
+#' when visualizing overlays
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -78,6 +80,7 @@ plot.antsImage <- function(x, y,
   nslices = 10,
   domainImageMap = NA,
   ncolumns = 4,
+  useAbsoluteScale = FALSE,
   ... ) {
 
 if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
@@ -387,8 +390,15 @@ if ( ! any( is.na( domainImageMap ) ) )
 #      stop("Image and overlay image sizes do not match.")
     mncl <- min(labimg)
     mxcl <- max(labimg)
+    if ( useAbsoluteScale )
+      {
+      mncl = window.overlay[1]
+      mxcl = window.overlay[2]
+      }
     temp <- labimg
     temp <- (temp - mncl)/(mxcl - mncl) * (nlevels - 1)
+    temp[ temp < 0 ] = 0
+    temp[ temp > 255 ] = 0
     labimg <- temp
     locthresh <- round((window.overlay[1:2] - mncl) /
                       (mxcl - mncl) * (nlevels - 1))
@@ -410,7 +420,6 @@ if ( ! any( is.na( domainImageMap ) ) )
         biglab[ys, xs] <- labslice
       }
     }
-    overlaycolors <- sort(c((unique(c(labimg)))))
     overlaycolors <- c(0:nlevels)
     minind <- 0
     mindiff <- 1e+09
@@ -449,6 +458,11 @@ if ( ! any( is.na( domainImageMap ) ) )
       heatvals[upper] <- NA
     }
     heatvals[1]<-NA # dont overlay the background
+    if ( useAbsoluteScale )
+      {
+      biglab[1]=255
+      biglab[2]=0
+      }
     if (min(biglab) != max(biglab))
       {
       invisible( suppressWarnings(
