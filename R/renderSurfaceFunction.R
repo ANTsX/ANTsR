@@ -70,23 +70,14 @@ renderSurfaceFunction <- function(
     alphasurf <- rep(alphasurf, length.out = length(surfimg))
   mylist <- list()
   if (missing(funcimg)) {
-    cat("No functional images--only plotting surface images.\n")
-    for (i in 1:length(surfimg)) {
-      surf <- as.array(surfimg[[i]])
-      brain <- misc3d::contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i],
-        draw = FALSE, smooth = 1, material = "metal", depth = 0.6, color = "white")
-      # each point has an ID, 3 points make a triangle , the points are laid out as c(
-      # x1 , y1, z1, x2, y2, z2 , ...  , xn, yn, zn ) indices are just numbers
-      # vertices<-c( brain <- subdivision3d(brain)
-      if (physical == TRUE) {
-        brain$v1 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v1)
-        brain$v2 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v2)
-        brain$v3 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v3)
-      }
-      mylist[[i]] <- brain
-    }
-    misc3d::drawScene.rgl(mylist)
-    return(mylist)
+    alphafunc = 0
+    temp = surfimg[[1]] * 0
+    dtemp = dim( temp )
+    x = round(dtemp[1]/2):round(dtemp[1]/2)+1
+    y = round(dtemp[2]/2):round(dtemp[2]/2)+1
+    z = round(dtemp[3]/2):round(dtemp[3]/2)+1
+    temp[ x, y, z ] = 1
+    funcimg = list( temp )
   }
   if (smoothfval > 0) {
     for (i in 1:length(funcimg)) {
@@ -117,12 +108,11 @@ renderSurfaceFunction <- function(
     if (missing(basefval)) {
       # just threshold at mean > 0
       usefval <- mean(vals)
-      # print(usefval)
     } else usefval <- basefval
     if (missing(offsetfval))
       offsetfval <- sd(vals[vals > usefval])
     # print(paste(i, usefval, alphafunc[i]))
-    blob <- misc3d::contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE,
+    blob <- misc3d::contour3d(func, level = c(usefval-0.001), alpha = alphafunc[i], draw = FALSE,
       smooth = 1, material = "metal", depth = 0.6, color = mycol[[i]])
     if (physical == TRUE) {
       blob$v1 <- antsTransformIndexToPhysicalPoint(funcimg[[i]], blob$v1)

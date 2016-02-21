@@ -27,7 +27,7 @@
 #'   mnia<-antsImageRead(mnia)
 #'   mnit<-thresholdImage( mnit, 1, max(mnit) )
 #'   mnit<-iMath(mnit,"FillHoles")
-#'   cnt<-getCentroids( mnia, clustparam = 50 )
+#'   cnt<-getCentroids( mnia, clustparam = 0 )
 #'   aalcnt<-cnt[1:90,1:3]
 #'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
 #'   testweights<-matrix( rep( 0, 90*90 ) ,nrow=90)
