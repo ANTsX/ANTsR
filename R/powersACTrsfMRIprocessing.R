@@ -101,7 +101,6 @@ powers_areal_mni_itk <- NULL
 if ( ! usePkg( "ggplot2" ) ) stop("need ggplot2")
 if ( ! usePkg( "igraph"  ) ) stop("need igraph")
 if ( ! usePkg( "pracma"  ) ) stop("need pracma")
-if ( ! usePkg( "dplyr"   ) ) stop("need dplyr")
 if ( ! usePkg( "mFilter" ) ) stop("need mFilter")
 if ( missing( img ) ) # for stand-alone testing
   {
@@ -378,8 +377,20 @@ if ( any( is.na( smoothingSigmas ) ) )
 img     = smoothImage( fusedImg, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
-  boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=freqLimits[1],
-    freqHi=freqLimits[2], opt="trig" )
+  {
+  locruns = unique( runNuis )
+  boldMat <- frequencyFilterfMRI( boldMat[ runNuis == 1, ],
+    tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
+  if ( max( locruns ) > 1 )
+    {
+    for ( myrun in locruns[ locruns > 1 ] )
+      {
+      boldMatTemp <- frequencyFilterfMRI( boldMat[ runNuis == myrun, ],
+        tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
+      boldMat = rbind( boldMat , boldMatTemp )
+      }
+    }
+  }
 fusedImgFilt = matrix2timeseries( fusedImg, mask, boldMat )
 #################
 connMatNodes = NA
