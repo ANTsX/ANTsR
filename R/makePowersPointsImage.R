@@ -45,3 +45,55 @@ makePowersPointsImage <- function( pts, mask, radius = 5 )
     }
   return( powersLabels )
 }
+
+
+
+#' Create label image from physical space points
+#'
+#' Creates spherical points in the coordinate space of the target image based
+#' on the n-dimensional matrix of points that the user supplies. The image
+#' defines the dimensionality of the data so if the input image is 3D then
+#' the input points should be 3D.
+#'
+#' @param pts input powers points
+#' @param mask antsImage mask defining target space
+#' @param radius for the points
+#' @return antsImage is output
+#' @author Avants BB, Duda JT
+#' @examples
+#'
+#' \dontrun{
+#' mni <- antsImageRead( getANTsRData( "mni" ) ) %>% getMask()
+#' data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
+#' powersLabels = makePowersPointsImage( powers_areal_mni_itk, mni )
+#' }
+#'
+#' @export makePointsImage
+makePointsImage <- function( pts, mask, radius = 5 )
+{
+  powersLabels = mask * 0
+  nPts = dim(pts)[1]
+  rad  = radius
+  n = ceiling( rad / antsGetSpacing( mask ) )
+  dim = mask@dimension
+  if ( ncol( pts ) < dim )
+    stop( "points dimensionality should match that of images" )
+  for ( r in 1:nPts) {
+    pt = as.numeric(c(pts[r,1:dim]))
+    idx = antsTransformPhysicalPointToIndex(mask,pt)
+    for ( i in c(-n[1]:n[1]) ) {
+      for (j in c(-n[2]:n[2])) {
+        for (k in c(-n[3]:n[3])) {
+          local = idx + c(i,j,k)
+          localpt = antsTransformIndexToPhysicalPoint(mask,local)
+          dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
+          inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
+          if ( (dist <= rad) && ( inImage == TRUE ) ) {
+            powersLabels[ local[1], local[2], local[3] ] = r
+           }
+          }
+        }
+      }
+    }
+  return( powersLabels )
+}
