@@ -20,7 +20,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     return(NULL)
   }
   validlist = c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
-    "ch2","ch2a","ch2b",
+    "ch2","ch2a","ch2b","ch2p","ch2pcsv",
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
@@ -56,6 +56,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     ch2 = "https://ndownloader.figshare.com/files/3888853",
     ch2b = "https://ndownloader.figshare.com/files/3676050",
     ch2a = "https://ndownloader.figshare.com/files/3674664",
+    ch2p = "https://ndownloader.figshare.com/files/4227985",
+    ch2pcsv = "https://ndownloader.figshare.com/files/4228324",
     mni = "https://ndownloader.figshare.com/files/3674667",
     mnib = "https://ndownloader.figshare.com/files/3676050",
     mnia = "https://ndownloader.figshare.com/files/3674664",
