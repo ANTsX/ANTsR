@@ -379,17 +379,18 @@ boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
   {
   locruns = levels( runNuis )
-  boldMat <- frequencyFilterfMRI( boldMat[ runNuis == locruns[1], ],
+  boldMatTemp <- frequencyFilterfMRI( boldMat[ runNuis == locruns[1], ],
     tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
   if ( length( locruns ) > 1 )
     {
     for ( myrun in locruns[2:length(locruns)] )
       {
-      boldMatTemp <- frequencyFilterfMRI( boldMat[ runNuis == myrun, ],
+      boldMatTemp2 <- frequencyFilterfMRI( boldMat[ runNuis == myrun, ],
         tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
-      boldMat = rbind( boldMat , boldMatTemp )
+      boldMatTemp = rbind( boldMatTemp , boldMatTemp2 )
       }
     }
+  boldMat = boldMatTemp
   }
 fusedImgFilt = matrix2timeseries( fusedImg, mask, boldMat )
 #################
