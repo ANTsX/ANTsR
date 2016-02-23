@@ -378,12 +378,12 @@ img     = smoothImage( fusedImg, smoothingSigmas, FWHM=TRUE )
 boldMat = timeseries2matrix( img, mask )
 if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
   {
-  locruns = unique( runNuis )
-  boldMat <- frequencyFilterfMRI( boldMat[ runNuis == 1, ],
+  locruns = levels( runNuis )
+  boldMat <- frequencyFilterfMRI( boldMat[ runNuis == locruns[1], ],
     tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
-  if ( max( locruns ) > 1 )
+  if ( length( locruns ) > 1 )
     {
-    for ( myrun in locruns[ locruns > 1 ] )
+    for ( myrun in locruns[2:length(locruns)] )
       {
       boldMatTemp <- frequencyFilterfMRI( boldMat[ runNuis == myrun, ],
         tr=tr, freqLo=freqLimits[1], freqHi=freqLimits[2], opt="trig" )
