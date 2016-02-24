@@ -57,7 +57,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     ch2b = "https://ndownloader.figshare.com/files/3676050",
     ch2a = "https://ndownloader.figshare.com/files/3674664",
     ch2p = "https://ndownloader.figshare.com/files/4249681",
-    ch2pcsv = "https://ndownloader.figshare.com/files/4228324",
+    ch2pcsv = "https://ndownloader.figshare.com/files/4454071",
     mni = "https://ndownloader.figshare.com/files/3674667",
     mnib = "https://ndownloader.figshare.com/files/3676050",
     mnia = "https://ndownloader.figshare.com/files/3674664",

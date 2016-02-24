@@ -124,7 +124,7 @@ plotBasicNetwork <- function(
     edgeweights <- (edgeweights * 400)
     # colormap <- topo.colors(512)
     colormap <- rainbow(512)
-    colormap <- heat.colors(512, alpha = 1)
+    colormap <- heat.colors( 512, alpha = 0.5 )
     jetcolorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
         "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
         space = "Lab")
