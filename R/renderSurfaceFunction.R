@@ -209,16 +209,6 @@ renderSurfaceFunction <- function(
 ############################ img<-antsImageRead(fn,3) brain<-renderSurfaceFunction( img )
 ############################ fv<-.makefacet(brain[[1]]) .makestl(fv,'/tmp/temp.stl')
 
-.getvertices <- function(inrglmesh) {
-  cter <- nrow(inrglmesh[[1]])
-  vertices <- matrix(NA, nrow = 3 * cter, ncol = 3)
-  inds <- c(1:cter)
-  vertices[(3 * inds - 2), ] <- inrglmesh[[1]]
-  vertices[(3 * inds - 1), ] <- inrglmesh[[2]]
-  vertices[(3 * inds - 0), ] <- inrglmesh[[3]]
-  indices <- rep(NA, nrow(vertices))
-  return(list(vertices = vertices, indices = indices))
-}
 # vtri <- surfaceTriangles(vertices[,1], vertices[,2], vertices[,3] ,
 # color='red') drawScene(updateTriangles(vtri, material = 'default', smooth = 3)
 # )

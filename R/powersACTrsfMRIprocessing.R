@@ -117,6 +117,7 @@ mask = getMask( meanbold )
 tr = antsGetSpacing(img)[4]
 steady = floor( 20.0 / tr) + 1
 
+
 # Global signal before cropping (save for visualization)
 origmean = apply.antsImage(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
@@ -155,6 +156,7 @@ mocoTxType = "BOLDRigid"
 for ( i in 1:repeatMotionEst )
   {
   moco <- antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
+  meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
   }
 if ( repeatMotionEst < 1 )
   {

@@ -71,7 +71,7 @@ plotBasicNetwork <- function(
   nSurfaceVerts <- dim(mesh$vertices)[1]
   mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
   labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts
-  if (!is.na(weights) & showOnlyConnectedNodes) {
+  if (!is.na(weights) & showOnlyConnectedNodes) { # node scaled by strength
     radiusw <- rep(0, nrow(centroids))
     gg <- which(apply(weights, FUN = mean, MARGIN = 1, na.rm = T) > 0 | apply(weights,
       FUN = mean, MARGIN = 2, na.rm = T) > 0)
@@ -81,6 +81,18 @@ plotBasicNetwork <- function(
     radiusw <- (radius * radiusscale)
     radius <- radiusw
   }
+  if ( !is.na( weights ) )
+    {
+    ggg = weights
+    luniqvals = length( unique( ggg ) )
+    if ( luniqvals > 250 ) ncuts = 1.0 / 250.0 else ncuts = 1.0 / ( luniqvals*0.5 )
+    qqq = quantile(ggg[ ggg > 0 ], probs=seq(0, 1, by=ncuts), na.rm=TRUE, names=FALSE, type=7 )
+    qqq = unique( qqq )
+    myquartile <- cut(ggg, breaks = qqq, include.lowest=TRUE )
+    myquartile = as.numeric( myquartile )
+    myquartile[ is.na( myquartile) ] = 0
+    weights = matrix( myquartile, nrow=nrow(weights) )
+    }
   rgl::spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
   edgelocations <- c()
   edgeweights <- c()
@@ -113,6 +125,10 @@ plotBasicNetwork <- function(
     # colormap <- topo.colors(512)
     colormap <- rainbow(512)
     colormap <- heat.colors(512, alpha = 1)
+    jetcolorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
+        "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
+        space = "Lab")
+#    colormap <- colorfun( 255 )
     edgecolors <- edgeweights
     for (i in c(1:length(edgeweights))) {
       colind <- floor(edgeweights[i])
@@ -122,4 +138,16 @@ plotBasicNetwork <- function(
     }
   }
   rgl::segments3d(mesh$vertices[edgelocations, ], col = rep(edgecolors, each = 2), lwd = lwd)
+}
+
+
+.getvertices <- function(inrglmesh) {
+  cter <- nrow(inrglmesh[[1]])
+  vertices <- matrix(NA, nrow = 3 * cter, ncol = 3)
+  inds <- c(1:cter)
+  vertices[(3 * inds - 2), ] <- inrglmesh[[1]]
+  vertices[(3 * inds - 1), ] <- inrglmesh[[2]]
+  vertices[(3 * inds - 0), ] <- inrglmesh[[3]]
+  indices <- rep(NA, nrow(vertices))
+  return(list(vertices = vertices, indices = indices))
 }
