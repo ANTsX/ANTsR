@@ -11,6 +11,7 @@
 #' and normalized, fused BOLD images in both subject and template space.
 #'
 #' @param img input time series antsImage.
+#' @param steadyT number of seconds for steady state (used to remove initial volumes)
 #' @param fdthresh threshold for framewise displacement.  determines what time
 #' frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.
 #' @param repeatMotionEst number of times to repeat motion estimation. We
@@ -83,6 +84,7 @@
 #' @export fMRINormalization
 fMRINormalization <- function(
   img,
+  steadyT=20.0,
   fdthresh=Inf,
   repeatMotionEst = 2,
   freqLimits = c( 0.01, 0.1 ),
@@ -115,7 +117,7 @@ meanbold = getAverageOfTimeSeries( img )
 mask = getMask( meanbold )
 # Find first steady state timepoint
 tr = antsGetSpacing(img)[4]
-steady = floor( 20.0 / tr) + 1
+steady = floor( steadyT / tr) + 1
 
 
 # Global signal before cropping (save for visualization)
