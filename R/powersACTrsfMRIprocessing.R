@@ -84,7 +84,7 @@
 #' @export fMRINormalization
 fMRINormalization <- function(
   img,
-  steadyT=20.0
+  steadyT=20.0,
   fdthresh=Inf,
   repeatMotionEst = 2,
   freqLimits = c( 0.01, 0.1 ),
