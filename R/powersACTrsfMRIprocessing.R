@@ -176,10 +176,12 @@ if ( ! all( is.na( extraRuns ) ) )
   {
   for ( i in 1:length( extraRuns ) )
     {
-    timg = extraRuns[[i]]
+    timg = extraRuns[[ i ]]
     # do a more accurate registration for this stage b/c it's a different run
     if ( verbose ) print( paste( "motion correction ", i ) )
     mocoTemp <- antsrMotionCalculation( timg, fixed=meanbold, typeofTransform=mocoTxType )
+    meanbold2 = apply.antsImage( timg, c(1,2,3), mean)
+    mocoTempToSelf <- antsrMotionCalculation( timg, fixed=meanbold2, typeofTransform=mocoTxType )
     if ( verbose ) print( "merge corrected image ( and tsDisplacement? )" )
     if ( usePkg("abind") )
       {
@@ -189,8 +191,8 @@ if ( ! all( is.na( extraRuns ) ) )
       rm( ttmo )
       } else stop( "need abind package for the extraRuns feature")
     if ( verbose ) print("merge parameters, fd and dvars")
-    moco$moco_params = rbind( moco$moco_params, mocoTemp$moco_params )
-    moco$fd = rbind( moco$fd, mocoTemp$fd )
+    moco$moco_params = rbind( moco$moco_params, mocoTempToSelf$moco_params )
+    moco$fd = rbind( moco$fd, mocoTempToSelf$fd )
     moco$dvars = c( moco$dvars, mocoTemp$dvars )
     rm( mocoTemp )
     }
