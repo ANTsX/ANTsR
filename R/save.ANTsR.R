@@ -6,6 +6,9 @@
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
 #' @param env Environment to save from or load to.
 #' @param ... Additional arguments to pass to \code{save}.
+#' 
+#' @author Pustina D
+#' 
 #' @examples
 #' \dontrun{ # causes problems with devtools::run_examples()
 #' # a <- 1
@@ -15,47 +18,62 @@
 #' }
 #' @rdname save.ANTsR
 #' @export
-save.ANTsR <- function(filename="./.ANTsRsession", objects=NA,
-  env=as.environment(1), ...){
-  if(all(is.na(objects))) objects <- ls(envir = env)
-  myimgs <- rep(FALSE, length(objects))
-  for(ii in 1:length(objects)) {
-    if(is.antsImage(eval(as.name(objects[ii])))){
-      myimgs[ii] <- TRUE
-    }
+
+save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
+                       objects=NA,
+                       env=as.environment(1),
+                       overwrite=F, ...) {
+  
+  # create or empty the target folder
+  if (file.exists(file.path(filename,'temp.Rdata')) & overwrite ) {
+    fnames = list.files(filename)
+    drop = file.remove(file.path(filename,fnames) )
+  } else {
+    dir.create(filename,showWarnings = F)
   }
-  dir.create(filename)
-  rdatfile <- file.path(filename, ".RData")
-  ANTsRimgnames <- objects[myimgs]
-  ANTsRImageData <- data.frame(names=ANTsRimgnames,
-    dims=rep(NA, length(ANTsRimgnames)), pixeltypes=rep(NA, length(ANTsRimgnames)))
-  if(length(ANTsRimgnames) >= 1) {
-    for(ii in 1:length(ANTsRimgnames)){
-      antsImageWrite(eval(as.name(ANTsRimgnames[ii])), file.path(filename,
-        paste(ANTsRimgnames[ii], ".nii.gz", sep="")))
-      ANTsRImageData[ii, "pixeltypes"] <- (eval(as.name(ANTsRimgnames[ii])))@pixeltype
-      ANTsRImageData[ii, "dims"] <- (eval(as.name(ANTsRimgnames[ii])))@dimension
-    }
+  if (file.exists(file.path(filename,'temp.Rdata')) & ! overwrite ){
+    stop(paste('Folder', filename, 'not empty and overwrite is false.'))
   }
-  write.csv(ANTsRImageData, file.path(filename, "ANTsRImageData.csv"),
-    row.names=FALSE)
-  save(list=objects[!myimgs], file=rdatfile, ...)
+  
+  
+  antslist = as.list(env)
+  if(all(!is.na(objects))) {
+    index = match(objects,names(antslist))
+    antslist = antslist[index]
+  }
+  
+  
+  funimgS = function(x,fold=filename) {
+    file = paste0(proc.time()[3],'.nii.gz')
+    fn = file.path(fold,file)
+    antsImageWrite(x, fn)
+    return(paste0('ANTSload',file))
+  }
+  
+  temp = rapply(antslist, funimgS, classes='antsImage', how='replace')
+  save(temp,file=file.path(filename,'temp.Rdata'), ...)
+  
 }
+
+
 
 #' @usage load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
 #' @rdname save.ANTsR
 #' @export
-load.ANTsR <- function(filename="./.ANTsRsession", env=as.environment(1)){
-  load(file.path(filename, ".RData"), envir=env)
-  #need images accessible within local function environment too
-  load(file.path(filename, ".RData"))
-  ANTsRImageData <- read.csv(file.path(filename, 'ANTsRImageData.csv'))
-  for(ii in 1:nrow(ANTsRImageData)){
-    imgname <- ANTsRImageData$names[ii]
-    assign(as.character(ANTsRImageData$names[ii]),  antsImageRead(
-      file.path(filename, paste(as.character(ANTsRImageData$names[ii],
-        ".nii.gz", sep=""))),
-      ANTsRImageData$dims[ii],
-      as.character(ANTsRImageData$pixeltypes[ii])), envir=env)
+load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
+                       env=as.environment(1)) {
+  
+  funimgL = function(x,fold=filename) {
+    if (length(x) > 1) return(x)
+    if (substr(x,1,8) == 'ANTSload') {
+      fn = file.path(fold, substr(x,9,nchar(x)) )
+      x = antsImageRead(fn)
+    }
+    return(x)
   }
+  
+  load(file.path(filename,'temp.Rdata'))
+  antslist = rapply(temp, funimgL, classes='character', how='replace')
+  envir = list2env(antslist, envir = env)
+  
 }
