@@ -17,7 +17,7 @@ Imports:	Rcpp, tools, magrittr
 
 LinkingTo:	Rcpp, ITKR
 
-Author:	Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
+Author:	Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison, Dorian Pustina
 
 Maintainer:	[Brian B. Avants](http://stnava.github.io/)
 

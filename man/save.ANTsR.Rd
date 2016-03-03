@@ -30,4 +30,7 @@ Save and load ANTsR sessions.
 # load.ANTsR("./.ANTsRsession")
 }
 }
+\author{
+Pustina D
+}
 

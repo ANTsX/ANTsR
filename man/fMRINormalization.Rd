@@ -4,7 +4,7 @@
 \alias{fMRINormalization}
 \title{Multi-run normalization, filtering and nuisance estimation for fMRI.}
 \usage{
-fMRINormalization(img, fdthresh = Inf, repeatMotionEst = 2,
+fMRINormalization(img, steadyT = 20, fdthresh = Inf, repeatMotionEst = 2,
   freqLimits = c(0.01, 0.1), nCompCor = 0, polydegree = NA,
   structuralImage = NA, structuralSeg = NA, structuralNodes = NA,
   templateMap = NA, templateImage = NA, smoothingSigmas = NA,
@@ -12,6 +12,8 @@ fMRINormalization(img, fdthresh = Inf, repeatMotionEst = 2,
 }
 \arguments{
 \item{img}{input time series antsImage.}
+
+\item{steadyT}{number of seconds for steady state (used to remove initial volumes)}
 
 \item{fdthresh}{threshold for framewise displacement.  determines what time
 frames should be interpolated. Set typically between 0.1 and 0.5 or Inf.}

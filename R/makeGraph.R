@@ -40,7 +40,6 @@ makeGraph <- function( mat, graphdensity = 1,
   }
   diag(myrsfnetworkcorrs) <- 0
   correlationThreshold <- 1e-06
-
   numberOfNeighbors <- nrow(myrsfnetworkcorrs)
   if (numberOfNeighbors == 0) {
     return(0)
@@ -60,10 +59,10 @@ makeGraph <- function( mat, graphdensity = 1,
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
   g1 <- igraph::graph_from_adjacency_matrix( adjacencyMatrix,
     mode = c("undirected"), weighted = TRUE, diag = FALSE )
-  edgeWeights <- igraph::E(g1)$weight
+  edgeWeights <- antsrimpute( igraph::E(g1)$weight )
   if ( !inverseValuesAsWeights )
     {
-    edgeWeights <- psych::fisherz( igraph::E(g1)$weight )
+    edgeWeights <- antsrimpute( psych::fisherz( igraph::E(g1)$weight ) )
     E(g1)$weight = edgeWeights
     }
   # compute local efficiency
@@ -74,7 +73,6 @@ makeGraph <- function( mat, graphdensity = 1,
       mycol[ mycol == Inf ] = NA
       mysps[,j] = mycol
       }
-#    mysps[mysps == Inf] <- 2 * max( adjacencyMatrix )
     myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
   } else myspsa <- NA
   # weights = similarity
