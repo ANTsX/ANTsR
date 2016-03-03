@@ -17,6 +17,8 @@ load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
 
 \item{env}{Environment to save from or load to.}
 
+\item{overwrite}{logical to select whether overwriting existing data is allowed.}
+
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{
