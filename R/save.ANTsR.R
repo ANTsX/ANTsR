@@ -5,6 +5,7 @@
 #' @param filename Prefix for folder to store data.
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
 #' @param env Environment to save from or load to.
+#' @param overwrite logical to select whether overwriting existing data is allowed.
 #' @param ... Additional arguments to pass to \code{save}.
 #' 
 #' @author Pustina D
