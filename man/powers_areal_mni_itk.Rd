@@ -29,5 +29,18 @@ Coordinates have been modified from nifti space to ITK space
 }
 \examples{
 data(powers_areal_mni_itk)
+\dontrun{
+fixed <- antsImageRead( getANTsRData("ch2") )
+moving <- antsImageRead( getANTsRData("mni") )
+mytx <- antsRegistration( fixed=fixed, moving=moving, typeofTransform = c("SyN") )
+data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
+coords = powers_areal_mni_itk[,1:3]
+ch2reg   = antsRegistration( fixed, moving, typeofTransform = "SyN" )
+coordsw <- antsApplyTransformsToPoints( dim=3, points=coords,
+       transformlist=ch2reg$fwdtransforms, whichtoinvert=c(FALSE,FALSE) )
+ptrd = 3
+powersLabels = makePointsImage( coordsw, moving, radius = pard )
+plot( moving, powersLabels, axis=3, nslices=30 )
+}
 }
 \keyword{datasets}

@@ -97,7 +97,8 @@ if ( ! any( is.na( domainImageMap ) ) )
       if ( is.antsImage( y ) ) y <- list(y)
       for ( i in 1:length( y ) )
         y[[ i ]] =
-          applyAntsrTransformToImage(tx, y[[ i ]], domainImageMap )
+          applyAntsrTransformToImage(tx, y[[ i ]], domainImageMap,
+            interpolation = 'NearestNeighbor' )
       }
     }
   if ( is.list( domainImageMap ) ) # expect an image and transformation
@@ -112,7 +113,8 @@ if ( ! any( is.na( domainImageMap ) ) )
       {
       if ( is.antsImage( y ) ) y <- list(y)
       for ( i in 1:length( y ) )
-        y[[ i ]] = antsApplyTransforms( dimg, y[[ i ]], transformlist = tx )
+        y[[ i ]] = antsApplyTransforms( dimg, y[[ i ]], transformlist = tx,
+          interpolator = 'NearestNeighbor' )
       }
     }
   }
