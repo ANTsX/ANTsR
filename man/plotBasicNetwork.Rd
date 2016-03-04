@@ -6,7 +6,7 @@
 \usage{
 plotBasicNetwork(centroids, brain, weights = NA, edgecolors = 0,
   nodecolors = "blue", nodetype = "s", scaling = c(0, 0), lwd = 2,
-  radius = 3, showOnlyConnectedNodes = TRUE)
+  radius = NA, showOnlyConnectedNodes = TRUE)
 }
 \arguments{
 \item{centroids}{input matrix of size number of 3D points ( in rows ) by 3 (
