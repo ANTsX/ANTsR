@@ -6,6 +6,11 @@
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
 #' @param env Environment to save from or load to.
 #' @param overwrite logical to select whether overwriting existing data is allowed.
+#' @param clonediskfiles logical enables the copying of disk files that are not loaded
+#'      in workspace but where character variables point. This enables a later 
+#'      re-instantiation of the full workspace including antsRegistration transformation
+#'      matrices. May need to be careful when saving the entire workspace with this option
+#'      set to true.
 #' @param ... Additional arguments to pass to \code{save}.
 #' 
 #' @author Pustina D
@@ -23,7 +28,9 @@
 save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        objects=NA,
                        env=as.environment(1),
-                       overwrite=F, ...) {
+                       overwrite=F, 
+                       clonediskfiles=T,
+                       ...) {
   
   # create or empty the target folder
   if (file.exists(file.path(filename,'temp.Rdata')) & overwrite ) {
@@ -35,7 +42,7 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
   if (file.exists(file.path(filename,'temp.Rdata')) & ! overwrite ){
     stop(paste('Folder', filename, 'not empty and overwrite is false.'))
   }
-  
+    
   
   antslist = as.list(env)
   if(all(!is.na(objects))) {
@@ -45,16 +52,31 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
   
   
   funimgS = function(x,fold=filename) {
-    file = paste0(proc.time()[3],'.nii.gz')
+    file = paste0(paste(sample(c(0:9, letters, LETTERS), 20, replace=T),collapse=''),'.nii.gz')
     fn = file.path(fold,file)
     antsImageWrite(x, fn)
     return(paste0('ANTSload',file))
   }
   
-  temp = rapply(antslist, funimgS, classes='antsImage', how='replace')
+  funimgSf = function(x,fold=filename) {
+    index = which(file.exists(x))
+    if (length(index) == 0) return(x)
+    for (indx in index) {      
+      file = paste0(paste(sample(c(0:9, letters, LETTERS), 20, replace=T),collapse=''),
+                    '_', basename(x[indx]))
+      fn = file.path(fold,file)
+      file.copy(x[indx],fn)
+      x[indx] = paste0('ANTSrepl', file)
+    }
+    return(x)
+  }
+  
+  temp = rapply(antslist, funimgSf, classes='character', how='replace')
+  temp = rapply(temp, funimgS, classes='antsImage', how='replace')
   save(temp,file=file.path(filename,'temp.Rdata'), ...)
   
 }
+
 
 
 
@@ -65,11 +87,12 @@ load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        env=as.environment(1)) {
   
   funimgL = function(x,fold=filename) {
-    if (length(x) > 1) return(x)
-    if (substr(x,1,8) == 'ANTSload') {
+    if (length(x) == 1 && substr(x,1,8) == 'ANTSload') {
       fn = file.path(fold, substr(x,9,nchar(x)) )
       x = antsImageRead(fn)
-    }
+      return(x)
+    } 
+    x = file.path(fold,gsub('^ANTSrepl','',x))
     return(x)
   }
   
