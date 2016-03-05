@@ -7,10 +7,9 @@
 #' @param env Environment to save from or load to.
 #' @param overwrite logical to select whether overwriting existing data is allowed.
 #' @param clonediskfiles logical enables the copying of disk files that are not loaded
-#'      in workspace but where character variables point. This enables a later 
-#'      re-instantiation of the full workspace including antsRegistration transformation
-#'      matrices. May need to be careful when saving the entire workspace with this option
-#'      set to true.
+#'      in workspace but where character variables point. Set to TRUE if moving sessions 
+#'      from one computer to another or if you save antsRegistration() outputs. Set to 
+#'      FALSE if you save temporary sessions to continue later on the same computer.
 #' @param ... Additional arguments to pass to \code{save}.
 #' 
 #' @author Pustina D
