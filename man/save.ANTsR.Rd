@@ -19,6 +19,12 @@ load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
 
 \item{overwrite}{logical to select whether overwriting existing data is allowed.}
 
+\item{clonediskfiles}{logical enables the copying of disk files that are not loaded
+in workspace but where character variables point. This enables a later 
+re-instantiation of the full workspace including antsRegistration transformation
+matrices. May need to be careful when saving the entire workspace with this option
+set to true.}
+
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{

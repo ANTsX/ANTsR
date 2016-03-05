@@ -8,7 +8,7 @@ multiLabelMorphology(labelsIn, operation, radius, dilationMask = NA,
   labelList = NA)
 }
 \arguments{
-\item{radius}{eg '1vox' or '2mm'}
+\item{radius}{radius of the morphological operation.}
 
 \item{dilationMask}{Optional binary mask to constrain dilation only (eg dilate cortical
 label into WM).}
@@ -25,18 +25,20 @@ labels.}
 processed labels, of type antsImage.
 }
 \description{
-Wraps calls to iMath binary morphology.
+Wraps calls to iMath binary morphology. Additionally, dilation and closing operations preserve
+pre-existing labels. The choices of operation are:
 }
 \details{
 Dilation: dilates all labels sequentially, but does not overwrite original labels.
 This reduces dependence on the intensity ordering of adjoining labels. Ordering dependence
-can still arise when the newly dilated labels overlap. With a mask, constrain dilation
-to the mask region.
+can still arise if two or more labels dilate into the same space - in this case, the label
+with the lowest intensity is retained. With a mask, dilated labels are multiplied by the
+mask and then added to the original label, thus restricting dilation to the mask region.
 
-Erosion: Erodes labels independently, like iMath.
+Erosion: Erodes labels independently, equivalent to calling iMath iteratively.
 
 Closing: Close holes in each label sequentially, but does not overwrite original labels.
-Opening: Opens each label independently, like iMath.
+Opening: Opens each label independently, equivalent to calling iMath iteratively.
 }
 \examples{
 
