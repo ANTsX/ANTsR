@@ -453,6 +453,8 @@ if ( ! any( is.na( domainImageMap ) ) )
         space = "Lab")
     }
     heatvals <- colorfun(nlevels)
+    # fix to get alpha transparency correct
+    if (nchar(heatvals[1]) == 7 & alpha != 1) heatvals = paste0(heatvals,round(alpha*100,0))
     if (locthresh[1] > 1)
       heatvals[1:(locthresh[1] - 1)] <- NA
     if (locthresh[2] < (nlevels - 1)) {
