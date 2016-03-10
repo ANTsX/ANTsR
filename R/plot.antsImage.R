@@ -34,6 +34,7 @@
 #' @param ncolumns number of columns in plot
 #' @param useAbsoluteScale boolean determines whether dynamic range is maximized
 #' when visualizing overlays
+#' @param doCropping  apply cropping, defaults to \code{TRUE}
 #' @param ...  other parameters
 #' @return output is plot to standard R window
 #' @author Avants BB
@@ -84,6 +85,7 @@ plot.antsImage <- function(x, y,
   domainImageMap = NA,
   ncolumns = 4,
   useAbsoluteScale = FALSE,
+  doCropping = TRUE,
   ... ) {
 
 if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
@@ -126,7 +128,7 @@ if ( ! any( is.na( domainImageMap ) ) )
   if ( length( dim( x ) ) < axis ) axis = length( dim( x ) )
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
-    x <- cropImage(x, plotimask )
+    if ( doCropping ) x <- cropImage(x, plotimask )
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
   }
   startpar <- par(c("mar", "las", "mfrow"))$mar
@@ -382,10 +384,13 @@ if ( ! any( is.na( domainImageMap ) ) )
   for (ind in 1:length(functional)) {
 
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
-    if ( exists("plotimask") ) # the label image
-      labimg <- as.array(  cropImage(functional[[ind]], plotimask ) )
-    else
-      labimg <- as.array(functional[[ind]])  # the label image
+    if ( exists("plotimask") ) { # the label image
+      if ( doCropping )
+        {
+        fimg = cropImage(functional[[ind]], plotimask )
+        labimg <- as.array(  fimg )
+        } else labimg <- as.array( functional[[ind]] )
+    } else labimg <- as.array(functional[[ind]])  # the label image
     if (imagedim == 2) {
       labimg <- rotate270.matrix(labimg)
     }

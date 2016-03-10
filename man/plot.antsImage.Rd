@@ -9,7 +9,7 @@
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
   window.img, window.overlay, quality = 2, outname = NA, alpha = 1,
   newwindow = FALSE, nslices = 10, domainImageMap = NA, ncolumns = 4,
-  useAbsoluteScale = FALSE, ...)
+  useAbsoluteScale = FALSE, doCropping = TRUE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
@@ -61,6 +61,8 @@ plotting. this is useful for non-standard image orientations.}
 
 \item{useAbsoluteScale}{boolean determines whether dynamic range is maximized
 when visualizing overlays}
+
+\item{doCropping}{apply cropping, defaults to \code{TRUE}}
 
 \item{...}{other parameters}
 }
