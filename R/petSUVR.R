@@ -42,6 +42,8 @@ temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verb
 pet = getAverageOfTimeSeries( temp )
 petmask = getMask( pet )
 petreg = antsRegistration( anatomicalImage, pet, typeofTransform = "Rigid", verbose=FALSE )
+petmask = antsApplyTransforms( anatomicalImage, petmask,
+  transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
 # NOTE: here, the pet image is now in the anatomical space
 pets = smoothImage( petreg$warpedmovout, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
 if ( subtractBackground )
@@ -55,8 +57,8 @@ if ( subtractBackground )
 if ( labelValue > 0 )
   {
   cerebellum = thresholdImage( anatomicalSegmentation, labelValue, labelValue )
-  pcerebct = mean( pets[ cerebellum == 1 ] )
-  } else pcerebct = mean( pets[ anatomicalSegmentation == 1 ] )
+  pcerebct = mean( pets[ cerebellum == 1 & petmask == 1 ] )
+  } else pcerebct = mean( pets[ anatomicalSegmentation == 1 & petmask == 1 ] )
 petSUVR = pets / pcerebct
 return(
   list( petSUVR = petSUVR,
