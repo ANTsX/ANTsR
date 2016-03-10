@@ -24,7 +24,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
-    "show" )
+    "adfmri", "show" )
   if (  sum( validlist == fileid ) == 0 )
     stop("no data with that id - try show to get list of valid ids")
   if ( fileid == "show" )
@@ -76,7 +76,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv",
     decslice = "http://files.figshare.com/2156224/rgbslice.nii.gz",
     dtislice = "http://files.figshare.com/2157786/dtslice.nii.gz" ,
-    fmrinetworks = "https://ndownloader.figshare.com/files/3639108" )
+    fmrinetworks = "https://ndownloader.figshare.com/files/3639108",
+    adfmri      = "https://ndownloader.figshare.com/files/4822135" )
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki" |
