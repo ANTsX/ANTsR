@@ -16,7 +16,10 @@
 #' @param title.img title for main image
 #' @param color.colorbar color scale to use for colorbar
 #' @param window.img lower and upper thresholds for display of main image
-#' @param window.overlay lower and upper thresholds for display of overlay
+#' @param window.overlay lower and upper thresholds for display of overlay.
+#' if you set \code{window.overlay = c( 0, 100 )} and \code{useAbsoluteScale=T}
+#' then the image overlay will map into that range.  otherswise, the min and
+#' max of the image will be used.
 #' @param quality  integer quality magnification factor 1 => large (e.g.
 #' 10)
 #' @param outname name of output file if you want to write result to file, e.g.
