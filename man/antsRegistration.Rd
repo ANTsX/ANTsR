@@ -45,6 +45,7 @@ to the ANTs registration method.
 \details{
 typeofTransform can be one of:
 \itemize{
+  \item{"Translation": }{Translation transformation.}
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
   May be useful for quick visualization fixes.'}

@@ -16,6 +16,7 @@
 #' @details
 #' typeofTransform can be one of:
 #' \itemize{
+#'   \item{"Translation": }{Translation transformation.}
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
 #'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
 #'   May be useful for quick visualization fixes.'}
@@ -129,7 +130,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
+      allowableTx <- c("Translation","Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
         "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ","ElasticSyN")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
@@ -323,7 +324,9 @@ antsRegistration <- function( fixed = NA, moving = NA,
           fwdtransforms <- c( paste( outprefix, "0Warp.nii.gz", sep = "") )
           invtransforms <- c( paste(outprefix, "0InverseWarp.nii.gz", sep = ""))
         }
-        if (typeofTransform == "Rigid" | typeofTransform == "Affine") {
+        if ( typeofTransform == "Rigid" | typeofTransform == "Affine" |
+             typeofTransform == "Translation" )
+          {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
           "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
@@ -333,7 +336,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
-        }
+          }
         args[[ length(args)+1]]="--float"
         args[[ length(args)+1]]="1"
         if ( verbose ) {
