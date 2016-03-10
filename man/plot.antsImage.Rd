@@ -7,7 +7,7 @@
 \method{plot}{antsImage}(x, y, color.img = "white", color.overlay = c("jet",
   "red", "blue", "green", "yellow"), axis = 2, slices,
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
-  window.img, window.overlay, quality = 4, outname = NA, alpha = 1,
+  window.img, window.overlay, quality = 2, outname = NA, alpha = 1,
   newwindow = FALSE, nslices = 10, domainImageMap = NA, ncolumns = 4,
   useAbsoluteScale = FALSE, ...)
 }
