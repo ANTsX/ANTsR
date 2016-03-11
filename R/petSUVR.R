@@ -38,21 +38,22 @@ petSUVR <- function(
   debug = FALSE )
 {
 pet = getAverageOfTimeSeries( petTime )
-if ( ! debug )
-  {
-  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
+# if ( ! debug )
+#  {
+  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "Rigid", verbose=F )$moco_img
   pet = getAverageOfTimeSeries( temp )
-  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
-  pet = getAverageOfTimeSeries( temp )
-  } else temp = antsImageClone( petTime )
+#  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
+#  pet = getAverageOfTimeSeries( temp )
+#  } else temp = antsImageClone( petTime )
 petmask = getMask( pet )
 if ( subtractBackground )
   {
   petbkgd = mean( pet[ petmask == 0 ]  )
   pet = pet - petbkgd
   }
-if ( ! debug ) typetx = "Rigid" else typetx = "QuickRigid"
-petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx )
+typetx = "Rigid"
+# if ( debug ) typetx = "QuickRigid"
+petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx, verbose = debug )
 petmask = antsApplyTransforms( anatomicalImage, petmask,
   transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
 temp = antsApplyTransforms( anatomicalImage, temp,
