@@ -41,25 +41,25 @@ pet = getAverageOfTimeSeries( temp )
 temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
 pet = getAverageOfTimeSeries( temp )
 petmask = getMask( pet )
+if ( subtractBackground )
+  {
+  petbkgd = mean( pets[ petmask == 0 ]  )
+  pet = pet - petbkgd
+  }
 petreg = antsRegistration( anatomicalImage, pet, typeofTransform = "Rigid", verbose=FALSE )
 petmask = antsApplyTransforms( anatomicalImage, petmask,
   transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
+temp = antsApplyTransforms( anatomicalImage, temp,
+  transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
 # NOTE: here, the pet image is now in the anatomical space
-pets = smoothImage( petreg$warpedmovout, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
-if ( subtractBackground )
-  {
-  bigbrain = thresholdImage( anatomicalSegmentation, 1, Inf ) %>%
-    iMath("MD", 6 ) - ( thresholdImage( tarseg, 1, Inf ) %>% iMath("MD", 4 ) )
-  petbkgd = mean( pets[ bigbrain == 1 & petmask == 1 ]  )
-  petbkgdscale = 1.0
-  pets = pets - petbkgd * petbkgdscale
-  }
+pets = petreg$warpedmovout
 if ( labelValue > 0 )
   {
   cerebellum = thresholdImage( anatomicalSegmentation, labelValue, labelValue )
   pcerebct = mean( pets[ cerebellum == 1 & petmask == 1 ] )
   } else pcerebct = mean( pets[ anatomicalSegmentation == 1 & petmask == 1 ] )
-petSUVR = pets / pcerebct
+petSUVR = smoothImage(  pets / pcerebct, smoothingParameter,
+  sigmaInPhysicalCoordinates = TRUE )
 return(
   list( petSUVR = petSUVR,
         petMask = petmask,
