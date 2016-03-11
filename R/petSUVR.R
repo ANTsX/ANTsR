@@ -18,6 +18,7 @@
 #' background (non-anatomical) activation levels before computing SUVR. In this
 #' case, SUVR will be computed after subtracting this background value from the
 #' mean activation image.
+#' @param debug boolean option activating simple and fast approach
 #' @return suvr antsImage
 #' @author Avants BB
 #' @examples
@@ -33,20 +34,25 @@ petSUVR <- function(
   anatomicalSegmentation,
   smoothingParameter = 2.5,
   labelValue = 0,
-  subtractBackground = FALSE )
+  subtractBackground = FALSE,
+  debug = FALSE )
 {
 pet = getAverageOfTimeSeries( petTime )
-temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
-pet = getAverageOfTimeSeries( temp )
-temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
-pet = getAverageOfTimeSeries( temp )
+if ( ! debug )
+  {
+  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
+  pet = getAverageOfTimeSeries( temp )
+  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
+  pet = getAverageOfTimeSeries( temp )
+  } else temp = antsImageClone( petTime )
 petmask = getMask( pet )
 if ( subtractBackground )
   {
   petbkgd = mean( pet[ petmask == 0 ]  )
   pet = pet - petbkgd
   }
-petreg = antsRegistration( anatomicalImage, pet, typeofTransform = "Rigid", verbose=FALSE )
+if ( ! debug ) typetx = "Rigid" else typetx = "QuickRigid"
+petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx )
 petmask = antsApplyTransforms( anatomicalImage, petmask,
   transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
 temp = antsApplyTransforms( anatomicalImage, temp,

@@ -5,7 +5,8 @@
 \title{Compute SUVR from PET time series images}
 \usage{
 petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
-  smoothingParameter = 2.5, labelValue = 0, subtractBackground = FALSE)
+  smoothingParameter = 2.5, labelValue = 0, subtractBackground = FALSE,
+  debug = FALSE)
 }
 \arguments{
 \item{petTime}{pet time series antsImage}
@@ -23,6 +24,8 @@ appears in anatomicalSegmentation.  If not set, we assume a binary segmentation.
 background (non-anatomical) activation levels before computing SUVR. In this
 case, SUVR will be computed after subtracting this background value from the
 mean activation image.}
+
+\item{debug}{boolean option activating simple and fast approach}
 }
 \value{
 suvr antsImage
