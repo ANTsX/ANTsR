@@ -50,7 +50,7 @@ if ( subtractBackground )
   {
   bigbrain = thresholdImage( anatomicalSegmentation, 1, Inf ) %>%
     iMath("MD", 3 ) - ( thresholdImage( tarseg, 1, Inf ) %>% iMath("MD", 1 ) )
-  petbkgd = mean( pets[ bigbrain == 1 ]  )
+  petbkgd = mean( pets[ bigbrain == 1 & petmask == 1 ]  )
   petbkgdscale = 1.0
   pets = pets - petbkgd * petbkgdscale
   }
