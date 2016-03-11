@@ -83,7 +83,7 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
   if (clonediskfiles) antslist = rapply(antslist, funimgSf, classes='character', how='replace')
   ANTSLOAD = rapply(antslist, funimgS, classes='antsImage', how='replace')
   
-  if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) && overwrite && length(fremove1234567890)) {
+  if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) && overwrite && length(fremove1234567890)>0) {
     drop=file.remove(fremove1234567890) # cleanup remaining files in folder
     rm(fremove1234567890,envir = env)
   }
