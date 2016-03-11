@@ -1,7 +1,7 @@
 #' @title save.ANTsR
 #' @description Save and load ANTsR sessions.
 #' @usage save.ANTsR(filename="./.ANTsRsession", objects=NA,
-#'   env=as.environment(1), ...)
+#'   env=as.environment(1), overwrite=F, clonediskfiles=T, ...)
 #' @param filename Prefix for folder to store data.
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
 #' @param env Environment to save from or load to.
@@ -30,7 +30,7 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        clonediskfiles=T,
                        ...) {
   # convert to absolute path
-  filename = file.path(dirname(normalizePath(filename)),basename(filename))
+  filename = suppressWarnings(file.path(dirname(normalizePath(filename)),basename(filename)))
   
   # create or empty the target folder
   if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) & overwrite ) {
@@ -83,8 +83,10 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
   if (clonediskfiles) antslist = rapply(antslist, funimgSf, classes='character', how='replace')
   ANTSLOAD = rapply(antslist, funimgS, classes='antsImage', how='replace')
   
-  drop=file.remove(fremove1234567890) # cleanup remaining files in folder
-  rm(fremove1234567890,envir = env)
+  if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) && overwrite && length(fremove1234567890)>0) {
+    drop=file.remove(fremove1234567890) # cleanup remaining files in folder
+    rm(fremove1234567890,envir = env)
+  }
   
   save(ANTSLOAD,file=file.path(filename,'ANTSLOAD.Rdata'), ...)
   
