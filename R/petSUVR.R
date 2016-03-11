@@ -43,7 +43,7 @@ pet = getAverageOfTimeSeries( temp )
 petmask = getMask( pet )
 if ( subtractBackground )
   {
-  petbkgd = mean( pets[ petmask == 0 ]  )
+  petbkgd = mean( pet[ petmask == 0 ]  )
   pet = pet - petbkgd
   }
 petreg = antsRegistration( anatomicalImage, pet, typeofTransform = "Rigid", verbose=FALSE )
