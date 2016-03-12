@@ -37,14 +37,15 @@ petSUVR <- function(
   subtractBackground = FALSE,
   debug = FALSE )
 {
+petTime = petTime - min( petTime )
 pet = getAverageOfTimeSeries( petTime )
-# if ( ! debug )
-#  {
-  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "Rigid", verbose=F )$moco_img
-  pet = getAverageOfTimeSeries( temp )
-#  temp = antsrMotionCalculation( petTime, pet, typeofTransform = "BOLDRigid", verbose=F )$moco_img
-#  pet = getAverageOfTimeSeries( temp )
-#  } else temp = antsImageClone( petTime )
+if ( pet@dimension == 3 )
+  petRef = as.antsImage( as.array( petTime )[,,,1] )
+if ( pet@dimension == 2 )
+  petRef = as.antsImage( as.array( petTime )[,,1] )
+petRef = antsCopyImageInfo( pet, petRef )
+temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
+pet = getAverageOfTimeSeries( temp )
 petmask = getMask( pet )
 if ( subtractBackground )
   {
