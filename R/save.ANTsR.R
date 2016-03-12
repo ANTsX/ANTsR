@@ -38,6 +38,7 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
     assign('fremove1234567890', file.path(filename,fnames) , envir = env)
   } else {
     dir.create(filename,showWarnings = F)
+    assign('fremove1234567890', '' , envir = env)
   }
   if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) & ! overwrite ){
     stop(paste('Folder', filename, 'not empty and overwrite is false.'))
