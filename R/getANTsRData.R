@@ -126,7 +126,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
   mymd5 <- switch(fileid,
     KK = "397a773658558812e91c03bbb29334bb", BT = "eb1f8ee2bba81fb80fed77fb459600f0",
     AB = "d38b04c445772db6e4ef3d2f34787d67", ch2 = "501c45361cf92dadd007bee55f02e053",
-    ch2b = "5db6c10eb8aeabc663d10e010860465f", ch2a = "caf2d979a7d9c86f515a5bc447856e7c",
+    ch2b = "5db6c10eb8aeabc663d10e010860465f",
     mnit = "dab456335a4bfa2b3bc31e9882699ee9", pcasl = "e59716ae76a853465efacf3cfb53bc58",
     pcaslseg = "3872d709475ee2d51d90aa7f4df5af8f",
     atroposseg = "f40680bd1de0592c9fa9e380bd9e29be",

@@ -5,7 +5,8 @@
 \title{Render a function onto a surface.}
 \usage{
 antsrSurf(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
-  inflationFactor = 25, rotationParams = c(270, 0, 270), verbose = FALSE)
+  inflationFactor = 25, rotationParams = c(270, 0, 270), filename = NA,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
@@ -20,7 +21,10 @@ spring, summer, autumn, winter, hot, cool, overunder, custom}
 
 \item{inflationFactor}{number of inflation iterations to run}
 
-\item{rotationParams}{3 Rotation angles expressed in degrees}
+\item{rotationParams}{3 Rotation angles expressed in degrees or a matrix of
+rotation parameters that will be applied in sequence.}
+
+\item{filename}{prefix filename for output pngs}
 
 \item{verbose}{prints the command used to call \code{antsSurf}}
 }
@@ -36,6 +40,13 @@ Tools software on github.
 \examples{
 
 \dontrun{
+ch2i = antsImageRead( getANTsRData("mni") )
+ch2seg = thresholdImage( ch2i, "Otsu", 3 )
+wm   = thresholdImage( ch2seg, 3, 3 )
+wm2 = smoothImage( wm, 1 ) \%>\% thresholdImage( 0.2, Inf )
+kimg = weingartenImageCurvature( ch2i, 1.5  ) \%>\% smoothImage( 1 )
+antsrSurf( wm2, list( kimg ), inflationFactor=555, quantlimits=c(0.01,0.99) )
+
 fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 img = antsImageRead( fn ) # see antsSurf on github for data
 wm   = thresholdImage( img, 3, 4 )
