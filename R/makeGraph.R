@@ -61,7 +61,7 @@ makeGraph <- function( mat, graphdensity = 1,
   if ( !inverseValuesAsWeights )
     {
     edgeWeights <- antsrimpute( psych::fisherz( igraph::E(g1)$weight ) )
-    E(g1)$weight = edgeWeights
+    igraph::E(g1)$weight = edgeWeights
     }
   # compute local efficiency
   if (getEfficiency) {
