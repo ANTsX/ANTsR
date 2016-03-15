@@ -45,7 +45,11 @@ ch2seg = thresholdImage( ch2i, "Otsu", 3 )
 wm   = thresholdImage( ch2seg, 3, 3 )
 wm2 = smoothImage( wm, 1 ) \%>\% thresholdImage( 0.2, Inf )
 kimg = weingartenImageCurvature( ch2i, 1.5  ) \%>\% smoothImage( 1 )
-antsrSurf( wm2, list( kimg ), inflationFactor=555, quantlimits=c(0.01,0.99) )
+rp1 = matrix( c(90,180,90), ncol = 3 )
+rp2 = matrix( c(90,180,270), ncol = 3 )
+rp3 = matrix( c(90,180,180), ncol = 3 )
+rp  = rbind( rp1, rp3, rp2 )
+antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
 
 fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 img = antsImageRead( fn ) # see antsSurf on github for data

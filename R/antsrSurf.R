@@ -26,8 +26,12 @@
 #' wm   = thresholdImage( ch2seg, 3, 3 )
 #' wm2 = smoothImage( wm, 1 ) %>% thresholdImage( 0.2, Inf )
 #' kimg = weingartenImageCurvature( ch2i, 1.5  ) %>% smoothImage( 1 )
-#' antsrSurf( wm2, list( kimg ), inflationFactor=555, quantlimits=c(0.01,0.99) )
-#'
+#' rp1 = matrix( c(90,180,90), ncol = 3 )
+#' rp2 = matrix( c(90,180,270), ncol = 3 )
+#' rp3 = matrix( c(90,180,180), ncol = 3 )
+#' rp  = rbind( rp1, rp3, rp2 )
+#' antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
+#' 
 #' fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 #' img = antsImageRead( fn ) # see antsSurf on github for data
 #' wm   = thresholdImage( img, 3, 4 )
@@ -83,6 +87,15 @@ antsImageWrite( x, xfn )
 if ( is.na( filename ) ) filename = tempfile( )
 if ( ! is.matrix( rotationParams ) )
   rotationParams = matrix( rotationParams, ncol=3 )
+if ( nrow( rotationParams ) > 1 )
+  {
+  if ( !  usePkg("abind") | !  usePkg("png") | !  usePkg("grid"))
+    {
+    print("Need abind, grid and png")
+    return(NULL)
+    }
+  }
+pngs = rep( NA, nrow( rotationParams ) )
 for( myrot in 1:nrow( rotationParams ) )
 {
 asscmd = paste( "antsSurf -s [ ",xfn,",255x255x255] ")
@@ -128,6 +141,18 @@ asscmd = paste( asscmd , " -i ", inflationFactor,
 }
 if ( verbose ) print( asscmd )
 sss = system( asscmd )
+if ( nrow( rotationParams ) > 1 ) pngs[ myrot ] = pngfnloc
 }
 
+if ( nrow( rotationParams ) > 1 )
+  {
+  mypng = png::readPNG( pngs[ 1 ] )
+  for ( i in 2:length( pngs ) )
+    {
+    mypng = abind::abind(  mypng, png::readPNG( pngs[ i ] ) , along = 2 )
+    }
+  png(paste(filename, ".png", sep = ""), width = dim(mypng)[2], height = dim(mypng)[1])
+  grid::grid.raster(mypng)
+  dev.off()
+  }
 }
