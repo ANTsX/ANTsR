@@ -16,9 +16,9 @@
 #' Opening: Opens each label independently, equivalent to calling iMath iteratively.
 #'
 #' 
-#' @param labels.in Input image should contain only 0 for background and positive integers for
+#' @param labelsIn Input image should contain only 0 for background and positive integers for
 #' labels.
-#' @param operations One of \code{'MD'}, \code{'ME'}, \code{'MC'}, \code{'MO'}, passed to iMath.
+#' @param operation One of \code{'MD'}, \code{'ME'}, \code{'MC'}, \code{'MO'}, passed to iMath.
 #' @param radius radius of the morphological operation.
 #' @param dilationMask Optional binary mask to constrain dilation only (eg dilate cortical
 #' label into WM).
@@ -38,7 +38,7 @@
 #' # label N should have mean N and 0 variance
 #' labelStats(labelsDilated, labels)
 #' 
-multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, labelList = NA ) {
+multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, labelList=NA ) {
 
   # If no label list supplied, get a list of labels in the image
   if (length(labelList) == 1 && is.na(labelList)) {
