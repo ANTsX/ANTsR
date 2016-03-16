@@ -8,6 +8,11 @@ multiLabelMorphology(labelsIn, operation, radius, dilationMask = NA,
   labelList = NA)
 }
 \arguments{
+\item{labelsIn}{Input image should contain only 0 for background and positive integers for
+labels.}
+
+\item{operation}{One of \code{'MD'}, \code{'ME'}, \code{'MC'}, \code{'MO'}, passed to iMath.}
+
 \item{radius}{radius of the morphological operation.}
 
 \item{dilationMask}{Optional binary mask to constrain dilation only (eg dilate cortical
@@ -15,11 +20,6 @@ label into WM).}
 
 \item{labelList}{Optional list of labels, to perform operation upon. Defaults to all unique
 intensities in \code{labels.in}.}
-
-\item{labels.in}{Input image should contain only 0 for background and positive integers for
-labels.}
-
-\item{operations}{One of \code{'MD'}, \code{'ME'}, \code{'MC'}, \code{'MO'}, passed to iMath.}
 }
 \value{
 processed labels, of type antsImage.

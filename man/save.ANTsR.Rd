@@ -5,10 +5,10 @@
 \alias{save.ANTsR}
 \title{save.ANTsR}
 \usage{
-save.ANTsR(filename="./.ANTsRsession", objects=NA,
+save.ANTsR(filename=file.path('.','.ANTsRsession'), objects=NA,
   env=as.environment(1), overwrite=F, clonediskfiles=T, ...)
 
-load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
+load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
 }
 \arguments{
 \item{filename}{Prefix for folder to store data.}
