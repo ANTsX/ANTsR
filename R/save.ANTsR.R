@@ -1,6 +1,6 @@
 #' @title save.ANTsR
 #' @description Save and load ANTsR sessions.
-#' @usage save.ANTsR(filename="./.ANTsRsession", objects=NA,
+#' @usage save.ANTsR(filename=file.path('.','.ANTsRsession'), objects=NA,
 #'   env=as.environment(1), overwrite=F, clonediskfiles=T, ...)
 #' @param filename Prefix for folder to store data.
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
@@ -31,6 +31,7 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        ...) {
   # convert to absolute path
   filename = suppressWarnings(file.path(dirname(normalizePath(filename)),basename(filename)))
+  fremove1234567890 = NULL
   
   # create or empty the target folder
   if (file.exists(file.path(filename,'ANTSLOAD.Rdata')) & overwrite ) {
@@ -96,13 +97,14 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
 
 
 
-#' @usage load.ANTsR(filename="./.ANTsRsession", env=as.environment(1))
+#' @usage load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
 #' @rdname save.ANTsR
 #' @export
 load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        env=as.environment(1)) {
   # convert to absolute path
   filename = file.path(dirname(normalizePath(filename)),basename(filename))
+  ANTSLOAD = NULL
   
   funimgL = function(x,fold=filename) {
     if (length(x) == 1 && substr(x,1,8) == 'ANTSload') {
