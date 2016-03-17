@@ -31,7 +31,7 @@
 #' rp3 = matrix( c(90,180,180), ncol = 3 )
 #' rp  = rbind( rp1, rp3, rp2 )
 #' antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
-#' 
+#'
 #' fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 #' img = antsImageRead( fn ) # see antsSurf on github for data
 #' wm   = thresholdImage( img, 3, 4 )
@@ -61,10 +61,15 @@ antsrSurf <- function( x, y,
 domainImageMap = NA
 # #' @param domainImageMap resamples surf and func to this domain FIXME
 # check for needed programs
-ass = system("which antsSurf", intern=TRUE )
-cvt = system("which ConvertScalarImageToRGB", intern=TRUE )
+# first get antspath
+myantspath = Sys.getenv(c("ANTSPATH"))
+if ( length( myantspath ) == 0 ) stop("Please set ANTSPATH in your environment")
+ass = file.exists( paste(myantspath,"antsSurf",sep='/') )
+cvt = file.exists( paste(myantspath,"ConvertScalarImageToRGB",sep='/') )
 if ( length( ass ) == 0 ) stop("This function needs antsSurf in the environment.")
 if ( length( cvt ) == 0  ) stop("This function needs ConvertScalarImageToRGB in the environment.")
+ass = paste(myantspath,"antsSurf",sep='/')
+cvt = paste(myantspath,"ConvertScalarImageToRGB",sep='/')
 if ( ! any( is.na( domainImageMap ) ) )
   {
   if ( is.antsImage( domainImageMap ) )
