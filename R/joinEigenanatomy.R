@@ -34,7 +34,7 @@
 #' @export joinEigenanatomy
 joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
   graphdensity = 0.65,
-  joinMethod = NA, verbose = F) {
+  joinMethod = 'walktrap', verbose = F) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
