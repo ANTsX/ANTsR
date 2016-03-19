@@ -1,6 +1,6 @@
-#' Estimates smoothness of an image
-#' 
-#' Either an image 
+#' Estimate image smoothness
+#'
+#' Estimates smoothness of a single image or image matrix
 #'
 #' @param object object may be an image of class "antsImage" or an image matrix
 #' @param mask input mask, must match matrix
@@ -11,7 +11,7 @@
 #' 
 #' @return Outputs the estimated FWHM and RPV image
 #' 
-#' @ description
+#' @description
 #' 
 #' The partial derivatives of an image in x, y, and z directions are used to
 #' create a covariance matrix which in turn is used to calculate the 
@@ -42,18 +42,22 @@
 #' 
 #' @references
 #' Hayasaka (2004) Nonstationary cluster-size inference with random field and permutation methods.
+#' 
 #' Worsley K.J. (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
+#' 
 #' Worsley K.J. (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
+#' 
 #' Worsley K.J. (1999) Detecting Changes in Nonisotropic Images
+#' 
 #' Stefan J.K. (1999) Robust Smoothness Estimation in Statistical Parametric Maps Using Standardized Residual from the General Linear Model
 #' 
-#' @Author Zachary P. Christensen
+#' @author Zachary P. Christensen
 #' 
 #' @seealso resels
 #' 
-#' @note: function currently in beta phase
+#' @note function currently in beta phase
 #' @examples
-#'
+#' 
 #' # estimatation of a single images smoothness
 #' outimg1 <- makeImage(c(10, 10, 10), rnorm(1000))
 #' maskimg <- getMask(outimg1)
@@ -94,7 +98,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     mrss <- 1
   } else if (class(x) == "matrix") {
     if (missing(rdf))
-      stop("Must specify residual degrees of freedom (rdf).")
+      rdf <- nrow(x) - 1
     if (is.null(sample)) {
       nfull <- nrow(x) # original number of images (rows)
     } else {

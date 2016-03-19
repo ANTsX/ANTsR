@@ -8,13 +8,13 @@
 #' @param u Number of clusters
 #' @param n number of statistical field in conjunction
 #' @param resels resel measurements of the search region 
-#' @param df degrees of freedom expressed as df[degrees of interest, degrees of error]
+#' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType:
 #' \itemize{
-#' \item{"T"}{T-field} 
-#' \item{"F"}{F-field} 
-#' \item{"X"}{Chi-square field"} 
-#' \item{"Z"}{Gaussian field}
+#' \item{T: } {T-field} 
+#' \item{F: } {F-field} 
+#' \item{X: } {Chi-square field'} 
+#' \item{Z: } {Gaussian field}
 #' }
 #' 
 #' @return The probability of obtaining the specified cluster
@@ -43,16 +43,18 @@
 #' 
 #' @references 
 #' Friston K.J., (1994) Assessing the Significance of Focal Activations Using Their Spatial Extent.
+#' 
 #' Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power.
+#' 
 #' Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
 #' 
-#' @Author Zachary P. Christensen
+#' @author Zachary P. Christensen
 #' 
 #' @seealso rftResults, resels
 #' 
-#' @note: function currently in beta phase
+#' @note function currently in beta phase
 #' @examples
-#' 
+#'
 #' # generate some data as if we just fitted a linear regression
 #' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
 #' maskimg <- getMask(outimg1)
@@ -63,7 +65,6 @@
 #' resels <- resels(mask, fwhm$fwhm)
 #' peak <- max(clusters[[1]])
 #' peakP <- rftPval(3, 1, 0, 2, 1, resels, c(1, 1), fieldType="T")
-#' 
 #' 
 #' @export rftPval
 rftPval <- function(D, c, k, u, n, resels, df = c(idf, rdf), fieldType) {

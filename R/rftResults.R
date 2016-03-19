@@ -8,19 +8,19 @@
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType:
 #' \itemize{
-#' \item{"T"}{T-field}
-#' \item{"F"}{F-field}
-#' \item{"X"}{Chi-square field"}
-#' \item{"Z"}{Gaussian field}
+#' \item{T: } {T-field} 
+#' \item{F: } {F-field} 
+#' \item{X: } {Chi-square field'} 
+#' \item{Z: } {Gaussian field}
 #' }
 #' @param RPVImg resels per voxel image
 #' @param nvox minimum desired cluster size (default = 1)
 #' @param threshType a numeric value to threshTypeold the statistical field or a character of the following methods:
 #' \itemize{
-#'	\item{"cRFT"}{computes a threshTypeold per expected cluster level probability }
-#'	\item{"pRFT"}{uses the mask and pval calculates the minimum statistical threshTypeold}
-#'	\item{"cFDR"}{uses an uncorrected threshTypeold at the alpha level and then computes and FDR threshTypeold based on cluster maxima}
-#'	\item{"pFDR"}{computes the fdr threshTypeold for the entire field of voxels}
+#'	\item{cRFT: } {computes a threshTypeold per expected cluster level probability }
+#'	\item{pRFT: } {uses the mask and pval calculates the minimum statistical threshTypeold}
+#'	\item{cFDR: } {uses an uncorrected threshTypeold at the alpha level and then computes and FDR threshTypeold based on cluster maxima}
+#'	\item{pFDR: } {computes the fdr threshTypeold for the entire field of voxels}
 #' }
 #' @param pval the p-value for estimating the threshTypeold (default = .05)
 #' @param pp the primary (initial) p-value for threshTypeolding (only used for FDR methods; default = .001)
@@ -48,14 +48,16 @@
 #' value for threshTypeolding the statistical field. \code{statFieldThresh} more fully describes using appropriate threshTypeolds for statistical fields and how \code{pp}
 #' plays a role in FDR threshTypeolding.
 #' 
-#' @References
+#' @references
 #' Chumbley J., (2010) Topological FDR for neuroimaging
+#' 
 #' Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power
+#' 
 #' Worsley K.J., (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
 #' 
-#' @Author Zachary P. Christensen
+#' @author Zachary P. Christensen
 #' @kewords rftPval
-#' @note: function currently in beta phase
+#' @note function currently in beta phase
 #' @examples
 #' 
 #' # estimatation of a single images smoothness
@@ -94,7 +96,6 @@
 #'                                                                                                          followed by cluster FDR threshold at p-value of .05
 #' # correcting for non-isotropic
 #' results5 <- rftResults(timg, resels, fwhm$fwhm, df, fieldType = "T", fwhm$RPVImg)
-#'
 #'
 #' @export rftResults
 rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType, RPVImg = NULL, k = 1, threshType = "pRFT",

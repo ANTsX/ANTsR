@@ -4,22 +4,23 @@
 #' @param pval p-value for determining threshold
 #' @param nvox minimum desired cluster size (in voxels)
 #' @param n number of images in conjunction
-#' @param fwhm-full width at half maxima
-#' @param mask-antsImage mask
-#' @param df degrees of freedom expressed as df[degrees of interest, degrees of error]
+#' @param fwhm full width at half maxima
+#' @param mask antsImage mask
+#' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
+#' @param fieldType:
 #' @param fieldType:
 #' \itemize{
-#' \item{"T"}{T-field} 
-#' \item{"F"}{F-field} 
-#' \item{"X"}{Chi-square field"} 
-#' \item{"Z"}{Gaussian field}
+#' \item{T: } {T-field} 
+#' \item{F: } {F-field} 
+#' \item{X: } {Chi-square field'} 
+#' \item{Z: } {Gaussian field}
 #' }
 #' @param threshType:
 #' \itemize{
-#'	\item{"cRFT"}{computes a threshold per expected cluster level probability}
-#'	\item{"pRFT"}{uses the mask and pval calculates the minimum statistical threshold}
-#'	\item{"cFDR"}{uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
-#'	\item{"pFDR"}{computes the fdr threshold for the entire field of voxels}
+#'	\item{cRFT: } {computes a threshold per expected cluster level probability}
+#'	\item{pRFT: } {uses the mask and pval calculates the minimum statistical threshold}
+#'	\item{cFDR: } {uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
+#'	\item{pFDR: } {computes the fdr threshold for the entire field of voxels}
 #' }
 #' @param pp primary (initial) p-value threshold used in FDR methods
 #' @param verbose enables verbose output
@@ -51,15 +52,16 @@
 #' procedures no specific recommendations are made here. This function simply facilitates
 #' the use of several approaches that users may utilize after consulting available literature.
 #'
-#' @References
+#' @references
 #' Chumbley J., (2010) Topological FDR for neuroimaging
 #' Friston K.J., (1994) Assessing the Significance of Focal Activations Using Their Spatial Extent
 #' Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power
-#' @Author Zachary P. Christensen
-#' @note: function currently in beta phase
+#' @author Zachary P. Christensen
+#' @note function currently in beta phase
 #' @examples
 #'
-#'
+#' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
+#' threshimg <- statFieldThresh(outimg1, .05, 1, c(1, 1, 1), c(1, 2), fieldType = "T", threshType = pRFT)
 #'
 #' @export statFieldThresh
 statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df = c(idf, rdf), fieldType, threshType, pp = .001, verbose = FALSE) {

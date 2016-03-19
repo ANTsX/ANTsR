@@ -2,8 +2,8 @@
 #' 
 #' Utilize the estimated FWHM to find the resels per voxel
 #' 
-#' @param mask statistical value (typically the maxima of a cluster or SPM)
-#' @param fwhm degrees of freedom expressed as df[degrees of interest, degrees of error]
+#' @param mask statistical value (typically the maxima of a cluster or statistical field)
+#' @param fwhm the full width at half maxima measurement
 #' @return A vector of resels for dimensions 0:D
 #'
 #' @description
@@ -16,12 +16,11 @@
 #' @references
 #' Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
 #' 
-#' @Author Zachary P. Christensen
+#' @author Zachary P. Christensen
 #'
 #' @seealso rftPval, euler
-#' @note: function currently in beta phase
-#' @example 
-#' 
+#' @note function currently in beta phase
+#' @examples
 #' # generate some data as if we just fitted a linear regression
 #' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
 #' mask <- getMask(outimg1)
@@ -29,7 +28,7 @@
 #' resels <- resels(maskimg, fwhm$fwhm)
 #' ec <- euler(max(outimg1), c(1, 1) fieldType = "T")
 #' pvox <- sum(ec * resels)
-#'
+#' 
 #' @export resels
 resels <- function(mask, fwhm) {
   if (class(mask) != "antsImage")
