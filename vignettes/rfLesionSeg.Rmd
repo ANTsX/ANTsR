@@ -115,7 +115,7 @@ invisible( plot( ll1$limg ) )
 Now use these to train a model.
 ```{r buildmodel}
 rad<-c(1,1) # fast setting
-mr<-c(2,1) # multi-res schedule, downsample by 4, then feed to level 2
+mr<-c(1,2,4,2,1) # multi-res schedule, U-style schedule
 masks=list(   getMask(seg), getMask(seg1) )
 rfm<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
   masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
