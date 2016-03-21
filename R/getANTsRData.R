@@ -74,8 +74,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     rsboldmask = "http://files.figshare.com/2119177/mask.nii.gz",
     rsboldseg = "http://files.figshare.com/2119178/seg.nii.gz",
     rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv",
-    decslice = "http://files.figshare.com/2156224/rgbslice.nii.gz",
-    dtislice = "http://files.figshare.com/2157786/dtslice.nii.gz" ,
+    decslice = "https://ndownloader.figshare.com/files/2156224",
+    dtislice = "https://ndownloader.figshare.com/files/2157786" ,
     fmrinetworks = "https://ndownloader.figshare.com/files/3639108",
     adfmri      = "https://ndownloader.figshare.com/files/4822135" )
 
