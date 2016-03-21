@@ -20,18 +20,18 @@ statFieldThresh(x, pval, nvox, n, fwhm, resels, df, fieldType, threshType,
 
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
-\item{pp}{primary (initial) p-value threshold used in FDR methods}
-
-\item{verbose}{enables verbose output}
-
-\item{mask}{antsImage mask}
-
-\item{fieldType:}{\itemize{
+\item{fieldType}{\itemize{
 \item{T: } {T-field} 
 \item{F: } {F-field} 
 \item{X: } {Chi-square field'} 
 \item{Z: } {Gaussian field}
 }}
+
+\item{pp}{primary (initial) p-value threshold used in FDR methods}
+
+\item{verbose}{enables verbose output}
+
+\item{mask}{antsImage mask}
 
 \item{threshType:}{\itemize{
 \item{cRFT: } {computes a threshold per expected cluster level probability}

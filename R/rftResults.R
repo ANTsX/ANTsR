@@ -6,7 +6,7 @@
 #' @param resels resel values for the mask
 #' @param fwhm full width at half maxima
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
-#' @param fieldType:
+#' @param fieldType
 #' \itemize{
 #' \item{T: } {T-field} 
 #' \item{F: } {F-field} 
@@ -14,7 +14,7 @@
 #' \item{Z: } {Gaussian field}
 #' }
 #' @param RPVImg resels per voxel image
-#' @param nvox minimum desired cluster size (default = 1)
+#' @param k minimum desired cluster size (default = 1)
 #' @param threshType a numeric value to threshTypeold the statistical field or a character of the following methods:
 #' \itemize{
 #'	\item{cRFT: } {computes a threshTypeold per expected cluster level probability }

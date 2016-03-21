@@ -7,8 +7,7 @@
 #' @param fwhm full width at half maxima
 #' @param mask antsImage mask
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
-#' @param fieldType:
-#' @param fieldType:
+#' @param fieldType
 #' \itemize{
 #' \item{T: } {T-field} 
 #' \item{F: } {F-field} 

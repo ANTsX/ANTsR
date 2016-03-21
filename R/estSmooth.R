@@ -2,7 +2,7 @@
 #'
 #' Estimates smoothness of a single image or image matrix
 #'
-#' @param object object may be an image of class "antsImage" or an image matrix
+#' @param x may be an image of class "antsImage" or an image matrix
 #' @param mask input mask, must match matrix
 #' @param rdf residual degrees of freedom
 #' @param scaleResid logical. if TRUE residuals are scaled

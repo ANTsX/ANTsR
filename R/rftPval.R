@@ -9,7 +9,7 @@
 #' @param n number of statistical field in conjunction
 #' @param resels resel measurements of the search region 
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
-#' @param fieldType:
+#' @param fieldType
 #' \itemize{
 #' \item{T: } {T-field} 
 #' \item{F: } {F-field} 

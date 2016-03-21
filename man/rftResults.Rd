@@ -17,7 +17,16 @@ rftResults(x, resels, fwhm, df, fieldType, RPVImg = NULL, k = 1,
 
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
+\item{fieldType}{\itemize{
+\item{T: } {T-field} 
+\item{F: } {F-field} 
+\item{X: } {Chi-square field'} 
+\item{Z: } {Gaussian field}
+}}
+
 \item{RPVImg}{resels per voxel image}
+
+\item{k}{minimum desired cluster size (default = 1)}
 
 \item{threshType}{a numeric value to threshTypeold the statistical field or a character of the following methods:
 \itemize{
@@ -36,15 +45,6 @@ rftResults(x, resels, fwhm, df, fieldType, RPVImg = NULL, k = 1,
 \item{statdir}{directory where output is saved (if not specified images are not saved)}
 
 \item{verbose}{enables verbose output}
-
-\item{fieldType:}{\itemize{
-\item{T: } {T-field} 
-\item{F: } {F-field} 
-\item{X: } {Chi-square field'} 
-\item{Z: } {Gaussian field}
-}}
-
-\item{nvox}{minimum desired cluster size (default = 1)}
 }
 \value{
 Outputs a statistical value to be used for threshTypeold a statistical field image

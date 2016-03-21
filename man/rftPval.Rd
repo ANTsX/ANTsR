@@ -21,7 +21,7 @@ rftPval(D, c, k, u, n, resels, df, fieldType)
 
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
-\item{fieldType:}{\itemize{
+\item{fieldType}{\itemize{
 \item{T: } {T-field} 
 \item{F: } {F-field} 
 \item{X: } {Chi-square field'} 

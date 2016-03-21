@@ -7,6 +7,8 @@
 estSmooth(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE)
 }
 \arguments{
+\item{x}{may be an image of class "antsImage" or an image matrix}
+
 \item{mask}{input mask, must match matrix}
 
 \item{rdf}{residual degrees of freedom}
@@ -16,8 +18,6 @@ estSmooth(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE)
 \item{sample}{number of images to use for estimating smoothing (default uses all images)}
 
 \item{verbose}{enables verbose output}
-
-\item{object}{object may be an image of class "antsImage" or an image matrix}
 }
 \value{
 Outputs the estimated FWHM and RPV image
