@@ -2,18 +2,12 @@
 title: "Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation"
 author: "Brian B. Avants, Dorian Pustina, Nicholas J. Tustison"
 date: "February 22, 2015"
-output:
-  ioslides_presentation:
-    highlight: tango
-    incremental: yes
-  slidy_presentation:
-    highlight: tango
-    incremental: yes
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{mrvnrfs}
+    \usepackage[utf8]{inputenc}
 ---
-<!--
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{Supplementary Materials}
--->
 
 # Lesion segmentation
 
