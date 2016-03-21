@@ -18,6 +18,8 @@ statFieldThresh(x, pval, nvox, n, fwhm, resels, df, fieldType, threshType,
 
 \item{fwhm}{full width at half maxima}
 
+\item{resels}{resolution elements in search region}
+
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
 \item{fieldType}{\itemize{
@@ -27,18 +29,18 @@ statFieldThresh(x, pval, nvox, n, fwhm, resels, df, fieldType, threshType,
 \item{Z: } {Gaussian field}
 }}
 
-\item{pp}{primary (initial) p-value threshold used in FDR methods}
-
-\item{verbose}{enables verbose output}
-
-\item{mask}{antsImage mask}
-
-\item{threshType:}{\itemize{
+\item{threshType}{\itemize{
 \item{cRFT: } {computes a threshold per expected cluster level probability}
 \item{pRFT: } {uses the mask and pval calculates the minimum statistical threshold}
 \item{cFDR: } {uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
 \item{pFDR: } {computes the fdr threshold for the entire field of voxels}
 }}
+
+\item{pp}{primary (initial) p-value threshold used in FDR methods}
+
+\item{verbose}{enables verbose output}
+
+\item{mask}{antsImage mask}
 }
 \value{
 Outputs a statistical value to be used for threshold a SPM

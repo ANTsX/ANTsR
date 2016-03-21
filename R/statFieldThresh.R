@@ -5,6 +5,7 @@
 #' @param nvox minimum desired cluster size (in voxels)
 #' @param n number of images in conjunction
 #' @param fwhm full width at half maxima
+#' @param resels resolution elements in search region
 #' @param mask antsImage mask
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType
@@ -14,7 +15,7 @@
 #' \item{X: } {Chi-square field'} 
 #' \item{Z: } {Gaussian field}
 #' }
-#' @param threshType:
+#' @param threshType
 #' \itemize{
 #'	\item{cRFT: } {computes a threshold per expected cluster level probability}
 #'	\item{pRFT: } {uses the mask and pval calculates the minimum statistical threshold}
