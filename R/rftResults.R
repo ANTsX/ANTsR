@@ -30,23 +30,29 @@
 #'
 #' @return Outputs a statistical value to be used for threshTypeold a statistical field image
 #' \itemize{
-#' \item{"SetStats"}{"set-level statistics and number of clusters"}
-#' \item{"ClusterStats"}{"cluster-level statistics and descriptors"}
-#' \item{"PeakStats"}{"peak-level statistics and descriptors"}
-#' \item{"LabeledClusters"}{"image of labeled clusters"}
-#' \item{"threshTypeold"}{"the threshTypeold used"}
+#' \item{SetStats: } {set-level statistics and number of clusters}
+#' \item{ClusterStats: } {cluster-level statistics and descriptors}
+#' \item{PeakStats: } {peak-level statistics and descriptor"}
+#' \item{LabeledClusters: } {image of labeled clusters}
+#' \item{threshTypeold: } {the threshTypeold used}
 #' }
 #' 
-#' @description 
+#' @details 
 #' 
-#' \code{rftPval} is used to compute all family-wise error (FWE) corrected statistics while \code{p.adjust} is used to compute all false-discovery rate
-#' based statistics. All statistics herein involve implementation of random field theory (RFT) to some extent.
+#' \code{rftPval} is used to compute all family-wise error (FWE) corrected 
+#' statistics while \code{p.adjust} is used to compute all false-discovery rate
+#' based statistics. All statistics herein involve implementation of random 
+#' field theory (RFT) to some extent.
 #' 
-#' Both cluster-level and peak-level statistics are described by the uncorrected p-value along with the FDR and FWE corrected p-values for each cluster. 
-#' Peak-level statistics are described by the maximum statistical value in each cluster and the comparable Z statistic. The ClusterStats table also contains
-#' coordinates for each cluster and the number of voxels therein. By default \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a specific numeric 
-#' value for threshTypeolding the statistical field. \code{statFieldThresh} more fully describes using appropriate threshTypeolds for statistical fields and how \code{pp}
-#' plays a role in FDR threshTypeolding.
+#' Both cluster-level and peak-level statistics are described by the uncorrected
+#'  p-value along with the FDR and FWE corrected p-values for each cluster. 
+#' Peak-level statistics are described by the maximum statistical value in each
+#' cluster and the comparable Z statistic. The ClusterStats table also contains
+#' coordinates for each cluster and the number of voxels therein. By default 
+#' \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a 
+#' specific numeric value for threshTypeolding the statistical field. 
+#' \code{statFieldThresh} more fully describes using appropriate threshTypeolds
+#' for statistical fields and how \code{pp} plays a role in FDR threshTypeolding.
 #' 
 #' @references
 #' Chumbley J., (2010) Topological FDR for neuroimaging
@@ -57,49 +63,54 @@
 #' 
 #' @author Zachary P. Christensen
 #' @kewords rftPval
-#' @note function currently in beta phase
 #' @examples
-#' 
-#' # estimatation of a single images smoothness
-#' outimg1 <-makeImage(c(10,10,10), rt(1000))
-#' outimg2 <-makeImage(c(10,10,10), rt(1000))
-#' mask <-getMask(outimg1)
-#' imat <-imageListToMatrix(list(outimg1, outimg2), mask)
-#' variable <-rnorm(2)
-#' 
-#' # fit the model
-#' residuals <-matrix(nrow=2,ncol=ncol(imat))
-#' tvals <-matrix(nrow=1,ncol=ncol(imat))
-#' for (i in 1:ncol(imat)){
-#'  fit <-lm(variable~imat[,i])
-#'  residuals[,i] <-residuals(fit)
-#'  tvals[,i] <- summary(fit)$coefficients[2, 3]
+#' \dontrun{
+#' mnit1 <- antsImageRead(getANTsRData('mni'))
+#' mask <- getMask(mnit1)
+#' ilist <- list()
+#' for (i in 1:10) {
+#'  ilist <- lappend(ilist, antsImageClone(mnit1) * rnorm(1))
 #' }
+#' response <- rnorm(10)
+#' imat <- imageListToMatrix(ilist, mask)
+#' residuals <- matrix(nrow = nrow(imat), ncol = ncol(imat))
+#' tvals <- matrix(nrow = nrow(imat), ncol = ncol(imat))
+#' for (i in 1:ncol(imat)) {
+#'  fit <- lm(response ~ imat[, i])
+#'  tvals <- coefficients(fit)[2]
+#'  residuals[, i] <- residuals(fit)
+#' }
+#' myfwhm <- estSmooth(residuals, mask, fit$df.residual)
+#' res <- resels(mask, myfwhm$fwhm)
+#' timg <- makeImage(mask, tvals)
 #' 
-#' df <- c(1, fit$df.residuals)
-#' # scale residuals
-#' mrss <- colMeans(res^2) / df
-#' sr <- r / sqrt(mrss) # scaled residuals
-#' fwhm <- estSmooth(sr, mask, df)
-#' resels <- resels(mask, fwhm$fwhm)
+#' # threshold to create peak values with p-value of .05 (default)
+#' results1 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T", 
+#'                        threshType = "pRFT", pval = .05)
 #' 
-#' # specifying threshTypeolds
-#' timg <-makeImage(mask,tvals)
-#' results1 <- rftResults(timg, resels, fwhm$fwhm, df, fieldType = "T", threshType = "pRFT", pval = .05) # threshold to create peak values with p-value of .05 (default)
+#' # threshold to create clusters with p-value of .05
+#' results2 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
+#'                        threshType = "cRFT", pval = .05)
 #' 
-#' results2 <- rftResults(timg, resels, fwhm$fwhm, df, fieldType = "T", threshType = "cRFT", pval = .05) # threshold to create clusters with p-value of .05
-#' 
-#' results3 <- rftResults(timg, resels, fwhm$fwhm, df, fieldType = "T", threshType = "pFDR", pval = .05, pp=.01) # initial threshold at p-value of .001 
-#'                                                                                                             followed by peak FDR threshTypeold at p-value of .05
-#' 
-#' results4 <- rftResults(timg, resels, fwhm, df, fieldType = "T", threshType = "cFDR", pval = .05, pp = .01) # initial threshold at p-value of .001 
-#'                                                                                                          followed by cluster FDR threshold at p-value of .05
+#' # initial threshold at p-value of .001 followed by peak FDR threshTypeold at
+#' # p-value of .05
+#' results3 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
+#'                        threshType = "pFDR", pval = .05, pp=.01)
+#'                                                                                                                 
+#' # initial threshold at p-value of .001 followed by cluster FDR threshold at 
+#' # p-value of .05
+#' results4 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T", 
+#'                        threshType = "cFDR", pval = .05, pp = .01)
+#'                                                                                                              
 #' # correcting for non-isotropic
-#' results5 <- rftResults(timg, resels, fwhm$fwhm, df, fieldType = "T", fwhm$RPVImg)
-#'
+#' results5 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
+#'                        fwhm$RPVImg)
+#'                        
+#' }
 #' @export rftResults
-rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType, RPVImg = NULL, k = 1, threshType = "pRFT",
-                       pval = .05, pp = .001, n = 1, statdir = NULL, verbose = FALSE) {
+rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType,
+                       RPVImg = NULL, k = 1, threshType = "pRFT", pval = .05,
+                       pp = .001, n = 1, statdir = NULL, verbose = FALSE) {
   if (missing(x))
     stop("Must specify x")
   if (missing(resels))
@@ -118,11 +129,10 @@ rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType, RPVImg = NU
   } else if (class(threshType) == "numeric") {
     u <- threshType
   } else {
-    stop("threshType must be a numeric value or a character specifying the chosen method for calculating a threshTypeold")
+    stop("threshType must be a numeric value or a character specifying the chosen method for calculating a threshold")
   }
   D <- x@dimension
   vox2res <- 1 / prod(fwhm)
-  k <- k * vox2res
   nvox <- length(as.vector(x[x != 0]))
   mask <- getMask(x)
   # extract clusters at threshold
@@ -132,6 +142,8 @@ rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType, RPVImg = NU
   labs <- unique(clust[clust > 0])
   nclus <- length(labs) # number of clusters
   cnames <- paste("Cluster", 1:nclus, sep = "") # create name for each cluster
+  k <- k * vox2res # convert voxel number to resels
+  
   
   # create table for cluster-level statistics----------------------------------------------------------------------------------
   ClusterStats <- as.table(matrix(nrow = nclus, ncol = 7))

@@ -7,7 +7,7 @@
 euler(u, df, fieldType)
 }
 \arguments{
-\item{u}{statistical value (typically the maxima of a cluster or SPM)}
+\item{u}{statistical value (typically the maxima of a cluster or statistical field)}
 
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
@@ -22,19 +22,19 @@ euler(u, df, fieldType)
 A vector of estimated euler characteristics for dimensions 0:D
 }
 \description{
-Calculates the euler characteristic at a threshold level
-}
-\note{
-function currently in beta phase
+Mostly an for internal use in conjunction with \code{resels}. Calculates the
+euler characteristic at a threshold level.
 }
 \examples{
-# generate some data as if we just fitted a linear regression
-outimg1 <-makeImage(c(10,10,10), rt(1000))
-maskimg <-getMask(outimg1)
-fwhm <-estSmooth(outimg1, maskimg)
-resels <-resels(maskimg, fwhm$fwhm)
-ec <-euler(max(outimg1), c(1,10), fieldType='T')
-pvox <-sum(ec*resels)
+mask <- getMask(antsImageRead(getANTsRData('mni')))
+myresels <- resels(mask, c(1, 1, 1))
+# pretend these results are from a t-statistical field fitted with 10 df to
+# find a peak value. 
+df <- c(1, 10) # made up degrees of freedom
+ec <- euler(4, df, fieldType = "T") # peak value is 4
+ez <- euler(3, df, fieldType = "T") # we thresholded at 3
+# uncorrected peak-level p-value
+pvox <- sum(ec * resels)/sum(ez * resels)
 
 }
 \author{

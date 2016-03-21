@@ -6,7 +6,7 @@
 #' @param fwhm the full width at half maxima measurement
 #' @return A vector of resels for dimensions 0:D
 #'
-#' @description
+#' @details
 #' 
 #' Interprets a given antsImage mask (binarized so as to only contain 0s and 1s) into
 #' resolutions elements (as opposed to voxels). Doing so emphasizes the interdependent
@@ -18,16 +18,10 @@
 #' 
 #' @author Zachary P. Christensen
 #'
-#' @seealso rftPval, euler
-#' @note function currently in beta phase
+#' @seealso rftPval, euler, rftResults
 #' @examples
-#' # generate some data as if we just fitted a linear regression
-#' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
-#' mask <- getMask(outimg1)
-#' fwhm <- estSmooth(outimg1, mask)
-#' resels <- resels(maskimg, fwhm$fwhm)
-#' ec <- euler(max(outimg1), c(1, 1) fieldType = "T")
-#' pvox <- sum(ec * resels)
+#' mask <- getMask(antsImageRead(getANTsRData('mni')))
+#' myresels <- resels(mask, c(1, 1, 1))
 #' 
 #' @export resels
 resels <- function(mask, fwhm) {

@@ -11,7 +11,7 @@ rftPval(D, c, k, u, n, resels, df = c(idf, rdf), fieldType)
 
 \item{c}{Threshold}
 
-\item{k}{spatial extent in resels}
+\item{k}{spatial extent in resels (minimum cluster size in resels)}
 
 \item{u}{Number of clusters}
 
@@ -31,10 +31,10 @@ rftPval(D, c, k, u, n, resels, df = c(idf, rdf), fieldType)
 \value{
 The probability of obtaining the specified cluster
 \itemize{
-{"Pcor"}{"corrected p-value"}
-{"Pu"}{"uncorrected p-value"}
-{"Ec"}{"expected number of clusters"}
-{"ek"}{"expected number of resels per cluster"}
+{Pcor: } {corrected p-value}
+{Pu: } {uncorrected p-value}
+{Ec: } {expected number of clusters}
+{ek: } {expected number of resels per cluster}
 }
 }
 \description{
@@ -55,22 +55,22 @@ rft.pval(D, 1, 0, u, n, resels, df, fieldType)
 Where set-level refers to obtaining the set of clusters, cluster-level refers to a specific 
 cluster, and peak-level refers to the maximum (or peak) of a single cluster.
 }
-\note{
-function currently in beta phase
-}
 \examples{
+\dontrun{
+# using rftPval for hypothetical 3D t-statistical image
+# assume resels have been calculated and df = c(dfi, dfe)
 
-# generate some data as if we just fitted a linear regression
-outimg1 <- makeImage(c(10, 10, 10), rt(1000))
-maskimg <- getMask(outimg1)
+# peak RFT p-value (peak = the maximum of a specific cluster)
+peakP <- rftPval(3, 1, 0, peak, 1, resels, df, fieldType = "T")$Pcor 
 
-# create clusters using arbitrary threshold
-clusters <- image2ClusterImages(outimg1, minClusterSize=1, minThresh = 2, maxThresh = Inf)
-fwhm <- estSmooth(outimg1, maskimg)
-resels <- resels(mask, fwhm$fwhm)
-peak <- max(clusters[[1]])
-peakP <- rftPval(3, 1, 0, 2, 1, resels, c(1, 1), fieldType="T")
+# cluster RFT p-value (u = the value the statistical field was threshold at
+# and k = the size of the cluster in resels)
+clusterP <- rftPval(3, 1, k, u, 1, resels, df, fieldType = "T")$Pcor 
 
+# set RFT p-value 
+setP <- rftPval(3, numberOfClusters, minimumClusterSize, u, 1, resels, df,
+                fieldType = "T")$Pcor
+}
 }
 \author{
 Zachary P. Christensen

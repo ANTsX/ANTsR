@@ -25,7 +25,7 @@
 #' @param pp primary (initial) p-value threshold used in FDR methods
 #' @param verbose enables verbose output
 #' @return Outputs a statistical value to be used for threshold a SPM
-#' @description
+#' @details
 #' 
 #' A statistical threshold level is determined using the estimated p-value \code{pval} 
 #' given the provided parameters. "cRFT" and "pRFT" specify the method of estimation 
@@ -54,17 +54,21 @@
 #'
 #' @references
 #' Chumbley J., (2010) Topological FDR for neuroimaging
+#' 
 #' Friston K.J., (1994) Assessing the Significance of Focal Activations Using Their Spatial Extent
+#' 
 #' Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power
 #' @author Zachary P. Christensen
-#' @note function currently in beta phase
 #' @examples
-#'
-#' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
-#' threshimg <- statFieldThresh(outimg1, .05, 1, c(1, 1, 1), c(1, 2), fieldType = "T", threshType = pRFT)
-#'
+#' \dontrun{
+#' # threshold according to estimated peak height
+#' thresh_image <- statFieldThresh(timg, .05, 10, 1, mysmooth$fwhm, 
+#'                                c(1, fit$df.residual), fieldType = "T",
+#'                                threshType = pRFT)
+#' }
 #' @export statFieldThresh
-statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df = c(idf, rdf), fieldType, threshType, pp = .001, verbose = FALSE) {
+statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
+                            fieldType, threshType, pp = .001, verbose = FALSE) {
   D <- x@dimension
   vox2res <- 1 / prod(fwhm)
   k <- nvox * vox2res

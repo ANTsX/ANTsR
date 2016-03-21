@@ -4,7 +4,7 @@
 #' 
 #' @param D image dimensions
 #' @param c Threshold
-#' @param k spatial extent in resels
+#' @param k spatial extent in resels (minimum cluster size in resels)
 #' @param u Number of clusters
 #' @param n number of statistical field in conjunction
 #' @param resels resel measurements of the search region 
@@ -16,13 +16,12 @@
 #' \item{X: } {Chi-square field'} 
 #' \item{Z: } {Gaussian field}
 #' }
-#' 
 #' @return The probability of obtaining the specified cluster
 #' \itemize{
-#' {"Pcor"}{"corrected p-value"}
-#' {"Pu"}{"uncorrected p-value"}
-#' {"Ec"}{"expected number of clusters"}
-#' {"ek"}{"expected number of resels per cluster"}
+#' {Pcor: } {corrected p-value}
+#' {Pu: } {uncorrected p-value}
+#' {Ec: } {expected number of clusters}
+#' {ek: } {expected number of resels per cluster}
 #' }
 #' 
 #' @details 
@@ -47,25 +46,26 @@
 #' Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power.
 #' 
 #' Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
-#' 
 #' @author Zachary P. Christensen
 #' 
 #' @seealso rftResults, resels
 #' 
-#' @note function currently in beta phase
 #' @examples
-#'
-#' # generate some data as if we just fitted a linear regression
-#' outimg1 <- makeImage(c(10, 10, 10), rt(1000))
-#' maskimg <- getMask(outimg1)
+#' \dontrun{
+#' # using rftPval for hypothetical 3D t-statistical image
+#' # assume resels have been calculated and df = c(dfi, dfe)
 #' 
-#' # create clusters using arbitrary threshold
-#' clusters <- image2ClusterImages(outimg1, minClusterSize=1, minThresh = 2, maxThresh = Inf)
-#' fwhm <- estSmooth(outimg1, maskimg)
-#' resels <- resels(mask, fwhm$fwhm)
-#' peak <- max(clusters[[1]])
-#' peakP <- rftPval(3, 1, 0, 2, 1, resels, c(1, 1), fieldType="T")
+#' # peak RFT p-value (peak = the maximum of a specific cluster)
+#' peakP <- rftPval(3, 1, 0, peak, 1, resels, df, fieldType = "T")$Pcor 
 #' 
+#' # cluster RFT p-value (u = the value the statistical field was threshold at
+#' # and k = the size of the cluster in resels)
+#' clusterP <- rftPval(3, 1, k, u, 1, resels, df, fieldType = "T")$Pcor 
+#' 
+#' # set RFT p-value 
+#' setP <- rftPval(3, numberOfClusters, minimumClusterSize, u, 1, resels, df,
+#'                 fieldType = "T")$Pcor
+#' }
 #' @export rftPval
 rftPval <- function(D, c, k, u, n, resels, df = c(idf, rdf), fieldType) {
   if (missing(fieldType)) {
@@ -105,6 +105,5 @@ rftPval <- function(D, c, k, u, n, resels, df = c(idf, rdf), fieldType) {
   Punc <- exp( - rfB * (k ^ (2 / D))) # cumulative cluster-size distribution from which uncorrected P values are calculated
   
   Pcor <- 1 - ppois(c - 1, lambda = (Ec + .Machine$double.eps) * Punc)
-  z <- list(Pcor = Pcor, Punc = Punc, Ec = Ec, ek = ek)
-  z
+  list(Pcor = Pcor, Punc = Punc, Ec = Ec, ek = ek)
 }

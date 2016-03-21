@@ -23,6 +23,9 @@ estSmooth(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE)
 Outputs the estimated FWHM and RPV image
 }
 \description{
+Estimates smoothness of a single image or image matrix
+}
+\details{
 The partial derivatives of an image in x, y, and z directions are used to
 create a covariance matrix which in turn is used to calculate the 
 full-widths at half maxima (FWHM). The FWHM is equivalent to the estimated
@@ -49,26 +52,14 @@ very low and typically results in an overestimation of the the FWHM. If only
 one image or numeric vector is entered then the scaling factor is not used. 
 If a numeric vector is entered the \code{imageMake} function is used to 
 prepare it for smoothness estimation (see Worsley et al., 1999).
-}
-\details{
-Estimates smoothness of a single image or image matrix
-}
-\note{
-function currently in beta phase
+
+Any NA values in \code{object} will be set to zero.
 }
 \examples{
-
-# estimatation of a single images smoothness
-outimg1 <- makeImage(c(10, 10, 10), rnorm(1000))
-maskimg <- getMask(outimg1)
-myfwhm1 <- estSmooth(outimg1, maskimg)
-
-# estimation of smoothness of overall sample images in a statistical model
-outimg2 <- makeImage(c(10,10,10), rnorm(1000))
-imat <- imageListToMatrix(list(outimg1, outimg2), maskimg)
-variable <- rnorm(2)
-fit <- lm(imat ~ variable)
-myfwhm2 <- estSmooth(residuals(fit), maskimg)
+# estimate individual image
+mnit1 <- antsImageRead(getANTsRData('mni'))
+mask <- getMask(mnit1)
+fwhm1 <- estSmooth(mnit1, mask)
 
 }
 \author{
