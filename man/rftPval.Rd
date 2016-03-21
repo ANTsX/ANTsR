@@ -4,7 +4,7 @@
 \alias{rftPval}
 \title{RFT p-values}
 \usage{
-rftPval(D, c, k, u, n, resels, df = c(idf, rdf), fieldType)
+rftPval(D, c, k, u, n, resels, df, fieldType)
 }
 \arguments{
 \item{D}{image dimensions}

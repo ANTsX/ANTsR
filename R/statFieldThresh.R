@@ -104,7 +104,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
       stat <- qchisq(1 - pp, df[1], df[2])
     if (threshType == "cFDR") {
       fdrclust <- labelClusters(x, k, u, Inf)
-      fdrlabs <- unique(clust[clust > 0])
+      fdrlabs <- unique(fdrclust[fdrclust > 0])
       cmax <- c()
       
       if (verbose == "True")

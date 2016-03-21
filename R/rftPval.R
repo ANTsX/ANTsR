@@ -67,7 +67,7 @@
 #'                 fieldType = "T")$Pcor
 #' }
 #' @export rftPval
-rftPval <- function(D, c, k, u, n, resels, df = c(idf, rdf), fieldType) {
+rftPval <- function(D, c, k, u, n, resels, df, fieldType) {
   if (missing(fieldType)) {
     stop("Must specify fieldType")
   } else if (missing(df)) {

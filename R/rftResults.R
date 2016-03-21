@@ -108,7 +108,7 @@
 #'                        
 #' }
 #' @export rftResults
-rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType,
+rftResults <- function(x, resels, fwhm, df, fieldType,
                        RPVImg = NULL, k = 1, threshType = "pRFT", pval = .05,
                        pp = .001, n = 1, statdir = NULL, verbose = FALSE) {
   if (missing(x))
@@ -138,7 +138,7 @@ rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType,
   # extract clusters at threshold
   clust <- labelClusters(x, k, u, Inf)
   if (!is.null(statdir))
-    antsImageWrite(clust, file = paste(statdir, "ClusterImg.nii.gz", sep = ""))
+    antsImageWrite(clust, filename = paste(statdir, "ClusterImg.nii.gz", sep = ""))
   labs <- unique(clust[clust > 0])
   nclus <- length(labs) # number of clusters
   cnames <- paste("Cluster", 1:nclus, sep = "") # create name for each cluster
@@ -168,6 +168,9 @@ rftResults <- function(x, resels, fwhm, df = c(idf, rdf), fieldType,
       K <- tmp * vox2res
     } else {
       # extract resels per voxel in cluster (for non-isotropic image)
+      cmask <- antsImageClone(clust)
+      cmask[cmask != tmp] <- 0
+      cmask[cmask == tmp] <- 1
       rkc <- RPVImg[cmask == 1]
       lkc <- sum(rkc) / tmp
       iv <- matrix(resels(cmask, c(1, 1, 1)), nrow = 1)
