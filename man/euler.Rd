@@ -34,7 +34,7 @@ df <- c(1, 10) # made up degrees of freedom
 ec <- euler(4, df, fieldType = "T") # peak value is 4
 ez <- euler(3, df, fieldType = "T") # we thresholded at 3
 # uncorrected peak-level p-value
-pvox <- sum(ec * resels)/sum(ez * resels)
+pvox <- sum(ec * myresels)/sum(ez * myresels)
 
 }
 \author{
