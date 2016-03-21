@@ -2,27 +2,27 @@ context("iMath Operations")
 
 # Binary morphological operations
 test_that("iMath MD", {
-  img<-antsImageRead( getANTsRData("rsboldmask") )
-  img<-iMath(img, "MD", 1)
-  expect_true(sum(img) == 45544)
+  img<-antsImageRead( getANTsRData("r16") )
+  img<-iMath( getMask(img), "MD", 1)
+  expect_true( abs( sum(img) - 18727 ) < 10 )
 })
 
 test_that("iMath ME", {
-  img<-antsImageRead( getANTsRData("rsboldmask") )
-  img<-iMath(img, "ME", 1)
-  expect_true(sum(img) > 0)
+  img<-antsImageRead( getANTsRData("r16") )
+  img<-iMath( getMask(img), "ME", 1)
+  expect_true( abs( sum(img) - 17303 ) < 10 )
 })
 
 test_that("iMath MO", {
-  img<-antsImageRead( getANTsRData("rsboldmask") )
-  img<-iMath(img, "MO", 1)
-  expect_true(sum(img) == 37385)
+  img<-antsImageRead( getANTsRData("r16") )
+  img<-iMath( getMask(img), "MO", 1)
+  expect_true( abs( sum(img) - 18017 ) < 10 )
 })
 
 test_that("iMath MC", {
-  img<-antsImageRead( getANTsRData("rsboldmask") )
-  img<-iMath(img, "MC", 1)
-  expect_true(sum(img) == 37834)
+  img<-antsImageRead( getANTsRData("r16") )
+  img<-iMath( getMask(img), "MC", 1)
+  expect_true( abs( sum(img) - 18065 ) < 10 )
 })
 
 # Grayscale morphological operations
