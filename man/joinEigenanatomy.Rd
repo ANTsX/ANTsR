@@ -5,7 +5,7 @@
 \title{Simple joinEigenanatomy function.}
 \usage{
 joinEigenanatomy(datamatrix, mask = NA, listEanatImages,
-  graphdensity = 0.65, joinMethod = NA, verbose = F)
+  graphdensity = 0.65, joinMethod = "walktrap", verbose = F)
 }
 \arguments{
 \item{datamatrix}{input matrix before decomposition}
