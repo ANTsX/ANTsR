@@ -4,7 +4,6 @@
 #' positive correlations are used.  Based on the graph.adjacency function of
 #' igraph.  gplot is helpful for visualization.
 #'
-#'
 #' @param mat input matrix
 #' @param graphdensity fraction of edges to keep
 #' @param communityMethod see igraph's community detection
@@ -43,7 +42,7 @@ makeGraph <- function( mat, graphdensity = 1,
     return(0)
   }
   myrsfnetworkcorrs[myrsfnetworkcorrs < correlationThreshold] <- 0
-  if (  inverseValuesAsWeights ) adjmat <- 1/myrsfnetworkcorrs
+  if (  inverseValuesAsWeights ) adjmat <- 1/(myrsfnetworkcorrs)
   if ( !inverseValuesAsWeights ) adjmat <- myrsfnetworkcorrs
   npossibleedges <- nrow(adjmat) * (nrow(adjmat) - 1)
   ndesirededges <- npossibleedges * graphdensity
@@ -86,7 +85,7 @@ makeGraph <- function( mat, graphdensity = 1,
   gmetric7 <- igraph::centralization.degree(g1)$res
   gmetric8 <- myspsa
   gmetric9 <- igraph::hub_score(g1)$vector
-  walktrapcomm <- igraph::walktrap.community(g1)
+  mycommunity <- NA
   if (  !is.na(communityMethod) )
     {
     if ( communityMethod == 'spinglass' )
@@ -105,9 +104,8 @@ makeGraph <- function( mat, graphdensity = 1,
       mycommunity <- igraph::edge.betweenness.community(g1)
     else # ( communityMethod == 'fastgreedy.propagation' )
       mycommunity <- igraph::fastgreedy.community(g1)
-    } else mycommunity<-walktrapcomm
+    }
   #########################################################
-
   return(
     list(
     mygraph = g1,
@@ -123,7 +121,7 @@ makeGraph <- function( mat, graphdensity = 1,
     hubScore = gmetric9,
     effinv = myspsa,
     community = mycommunity,
-    walktrapcomm = walktrapcomm,
+    walktrapcomm = igraph::fastgreedy.community(g1),
     adjacencyMatrix = adjacencyMatrix )
     )
 }

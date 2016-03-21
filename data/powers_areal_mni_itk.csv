@@ -265,3 +265,5 @@ x;y;z;ROI;SystemLabel;SystemName;Color;r;g;b;Anatomy;Lobe
 -29;5;54;264;12;Dorsal Attention;Green;0;255;0;Superior Frontal Gyrus;Frontal
 28;15;-14;265;5;Default Mode;Red;255;0;0;Hippocampus;Temporal
 -27;13;-17;266;5;Default Mode;Red;255;0;0;Hippocampus;Temporal
+-14;-17;9;267;10;Subcortical;Brown;139;69;19;Caudate;Subcortical
+12;-15;7;267;10;Subcortical;Brown;139;69;19;Caudate;Subcortical
