@@ -325,8 +325,9 @@ if ( ! any( is.na( domainImageMap ) ) )
     window.img[ 1 ]<-min( x )
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
-  if(colorbar){
-    levels <- seq(window.img[1], window.img[2], length.out=15)
+  if(colorbar & missing(y)){
+    nlev = 50
+    levels <- seq(window.img[1], window.img[2], length.out=nlev)
     # code taken from filled.contour
     mar.orig <- (par.orig <- par(c("mar", "las", "mfrow")))$mar
     on.exit(par(par.orig))
@@ -341,7 +342,33 @@ if ( ! any( is.na( domainImageMap ) ) )
     plot.window(xlim = c(0, 1), ylim = range(levels), xaxs = "i",
         yaxs = "i")
     rect(0, levels[-length(levels)], 1, levels[-1L],
-         col = makePalette(color.colorbar, 15))
+         col = makePalette(color.colorbar, nlev))
+    axis(4)
+    box()
+    if (!missing(title.colorbar))
+        title(title.colorbar)
+    mar <- mar.orig
+    mar[4L] <- 1
+    par(mar = mar)
+  }
+  if(colorbar & !missing(y)){
+    nlev = 50
+    levels <- seq(window.overlay[1], window.overlay[2], length.out=nlev )
+    # code taken from filled.contour
+    mar.orig <- (par.orig <- par(c("mar", "las", "mfrow")))$mar
+    on.exit(par(par.orig))
+    w <- (3 + mar.orig[2L]) * par("csi") * 2.54
+    layout(matrix(c(2, 1), ncol = 2L), widths = c(1, lcm(w)))
+    par(las = 1)
+    mar <- mar.orig
+    mar[4L] <- mar[2L]
+    mar[2L] <- 1
+    par(mar = mar)
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = range(levels), xaxs = "i",
+        yaxs = "i")
+    rect(0, levels[-length(levels)], 1, levels[-1L],
+         col = makePalette(color.colorbar, nlev))
     axis(4)
     box()
     if (!missing(title.colorbar))
