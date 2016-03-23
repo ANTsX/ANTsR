@@ -40,6 +40,7 @@ setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = 
   return( tx )
 })
 
+
 #' @title createAntsrTransform
 #' @description Create and initialize an antsrTransform
 #' @param type type of transforms
@@ -171,6 +172,30 @@ setAntsrTransformParameters <- function(transform, parameters) {
 #' params = getAntsrTransformParameters(tx)
 getAntsrTransformParameters <- function(transform) {
   return(.Call("antsrTransform_GetParameters", transform, PACKAGE = "ANTsR"))
+}
+
+#' @title setAntsrTransformParameters
+#' @description Set parameters of transform
+#' @param transform antsrTransform
+#' @param parameters array of parameters'
+#' @return TRUE
+#' @examples
+#' tx = new("antsrTransform")
+#' params = getAntsrTransformFixedParameters(tx)
+#' setAntsrTransformFixedParameters(tx, params*2)
+setAntsrTransformFixedParameters <- function(transform, parameters) {
+  invisible(.Call("antsrTransform_SetFixedParameters", transform, parameters, PACKAGE = "ANTsR"))
+}
+
+#' @title getAntsrTransformParameters
+#' @description Get parameters of transform
+#' @param transform antsrTransform
+#' @return array of parameters'
+#' @examples
+#' tx = new("antsrTransform")
+#' params = getAntsrTransformFixedParameters(tx)
+getAntsrTransformFixedParameters <- function(transform) {
+  return(.Call("antsrTransform_GetFixedParameters", transform, PACKAGE = "ANTsR"))
 }
 
 antsrTransformFromDisplacementField <- function( field ) {

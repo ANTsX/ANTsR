@@ -114,10 +114,15 @@ To demonstrate the methods, we will first create a linear transform and demonstr
 to point and vector data. An `AffineTransform` is created then defined by setting
 its parameters. These parameters are the components of the matrix, in row order,
 followed by the translation components. If no parameters are set, an identity transform
-is returned. Parameters may be changed later using `setAntsrTransformParameters`
+is returned. Parameters may be changed later using `setAntsrTransformParameters` and
+`setAntsrTransformFixedarameters`. The difference between Parameters and FixedParameters, is that
+the parameters are considered by optimization problems such as image registration, while
+the fixed parameters are not considered by the optimization.  For a given transform type,
+the parameters and fixed parameters are described in a later section.
 ```{r basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 tx <- createAntsrTransform( precision="float", type="AffineTransform", dimension=2)
-setAntsrTransformParameters(tx, c(0,-1,1,0,256,0))
+setAntsrTransformParameters(tx, c(0,-1,1,0,0,0))
+setAntsrTransformFixedParameters(tx, c(128,128))
 print(tx)
 
 point = c(80,40)
@@ -148,9 +153,6 @@ the dataType correctly (default is "point" if input data is not an `antsImage`).
 vector = c(80,40)
 applyAntsrTransform(tx, vector, dataType="vector")
 ```
-
-Currently, only affine transforms may be created within R directly, but creation
-routines for a larger set of possible transforms are under development.
 
 ## Nomenclature: talking about talking about transforms
 To discuss more complex operations such as transform composition and the transforming
@@ -183,48 +185,101 @@ Perform image warping: As an example, $\rightarrow$ $J$ represents the applicati
 
 Similarity measure: $\substack{ \approx \\ s }$ or $\approx_s$ indicates the metric $s$ that compares a pair of images.
 
-
-
-## Images
-```{r images,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## Transforming Images
+### Reference Space
+When applying transforms to images, it is critical to consider the information contained in the image
+header: spacing, origin and direction. These all play a role in the outcome. Two images with the same
+dimensions but different header information may have very different outcomes when transformed with
+the same transformation. Additionally, To transform an image, some additional information is needed
+in the form of a reference or target space that defines the domain of the output image.
+We will illustrate how this reference space works by using a simple translation transform. First, we apply
+the translation and use the original image space as the reference and it is clear that the image has been
+shifted to the left, relative to it's original position.
+```{r images1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 img <- antsImageRead(getANTsRData("r16"))
 invisible(plotColor(img))
 
-img2 = applyAntsrTransform(transform=tx, data=img, reference=img)
-invisible(plotColor(img2))
-img3 = applyAntsrTransform(transform=tx, data=img, reference=img, interpolation="gaussian")
-invisible(plotColor(img3))
-
-itx = invertAntsrTransform(tx)
-img_invert = applyAntsrTransform(transform=itx, data=img2, reference=img)
-invisible(plotColor(img_invert))
+moveX1 = createAntsrTransform(dimension=2, type="Euler2DTransform", translation=c(20,0) )
+shift1 = applyAntsrTransform(transform=moveX1, data=img, reference=img)
+plotColor(shift1)
 ```
 
-## File IO
-Routines are provided to read transforms from file, for both linear and non-linear.
-Methods for writing transforms to file are under development. It is important to
-note that when converting from a multichannel antsImage to a `DisplacementField` transform,
-the data is copied so later changes to the antsImage, will not propagate to the transform,
-the transform would need to be reinitialized with the modified antsImage. This is due
-to underlying differences in data representation.
-```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-# Don't run until we have test files
-#linTx = readAntsrTransform("yourfile.mat")
-#warpImage = antsImageRead("yourfield.nii.gz")
-#warpTx = antsrTransformFromDisplacementField(warpImage)
+If a large translation is applied, the image begins to leave the physical domain covered
+by the original input image, as shown below.
+```{r images2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+moveX2 = createAntsrTransform(dimension=2, type="Euler2DTransform", translation=c(128,0) )
+shift2 = applyAntsrTransform(transform=moveX2, data=img, reference=img)
+plotColor(shift2)
+```
+
+In order to see the entire brain it is necessary to define a reference space that defines the
+spatial domain covered by the output image. This is done with an antsImage. Now, the output image
+looks similar to the input image when displayed, but if the header of each image is examined it
+is evident that the images cover different spatial domains. It is always important consider the
+domains covered by images, when comparing images.
+```{r images3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+refImg = antsImageClone(img)
+antsSetOrigin(refImg, c(-128,0))
+shift3 = applyAntsrTransform(transform=moveX2, data=img, reference=refImg)
+plotColor(shift3)
+print(img)
+print(refImg)
+```
+
+### Interpolation
+Images represent a regular discrete sampling of a continuous physical space so it is often necessary to
+use interpolation to determine the value at each voxel. The default method is to use
+linear interpolation, and the full set available interpolators is:
+
+- Linear
+- NearestNeighbor
+- BSpline
+- Gaussian
+- CosineWindowedSinc
+- HammingWindowedSinc
+- LanczosWindowedSinc
+- BlackmanWindowedSinc
+- WelchWindowedSinc
+- MultiLabel
+```{r imagesInterp,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+img2 = applyAntsrTransform(tx, data=img, reference=img)
+invisible(plotColor(img2))
+img3 = applyAntsrTransform(tx, data=img, reference=img, interpolation="Gaussian")
+invisible(plotColor(img3))
+img4 = applyAntsrTransform(tx, data=img, reference=img, interpolation="NearestNeighbor")
+invisible(plotColor(img4))
+img5 = applyAntsrTransform(tx, data=img, reference=img, interpolation="HammingWindowedSinc")
+invisible(plotColor(img5))
 ```
 
 ## Composing Transforms
-When applying
-the transform to an image, it is required that we define a reference space, which the physical
-space in which the output lies. The pixeltype of the reference image will be ignored, the output
-will have the same pixeltype as the input image. A variety of options are also available for
-the interpolation method to be used. Linear transforms may be inverted as shown below.
-
+There is often a need to transform an image using a sequence of multiple transform. While this could
+be accomplished by applying each transform individually in series, this would result in a multiple
+interpolations, which adds error and noise to the image each time. Instead it is better to
+compose the series of transforms first and then apply that single final transform. The order of the
+transforms in the is very important. The transforms will be applied by starting at the end of the list
+and working to the start. This is done to remain consistent with how transform are typically represented
+mathematically. For example, a composite mapping written as: $\phi=\phi_1(\phi_2(x))$ means that $\phi_2$ is
+first applied and is followed by $\phi_1$. The example below illustrates the importance of the order.
 ```{r compose,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-tx2 = composeAntsrTransforms(list(tx,tx))
-img4 = applyAntsrTransform(transform=tx2, data=img, reference=img)
-invisible(plotColor(img4))
+txStretch = createAntsrTransform( "AffineTransform", dim=2 )
+params = getAntsrTransformParameters( txStretch )
+params[1] = 0.8
+setAntsrTransformParameters(txStretch, params)
+
+cos45 = cos(pi*45/180)
+sin45 = sin(pi*45/180)
+txRotate <- createAntsrTransform( precision="float", type="AffineTransform", dim=2 )
+setAntsrTransformParameters(txRotate, c(cos45,-sin45,sin45,cos45,0,0) )
+setAntsrTransformFixedParameters(txRotate, c(128,128))
+
+rotateFirst = composeAntsrTransforms(list(txStretch, txRotate))
+order1 = applyAntsrTransform(rotateFirst, img, img)
+plotColor(order1)
+
+stretchFirst = composeAntsrTransforms(list(txRotate, txStretch))
+order2 = applyAntsrTransform(stretchFirst, img, img)
+plotColor(order2)
 ```
 
 ## Non-linear transforms
@@ -261,12 +316,27 @@ warped = applyAntsrTransform(warpTx,data=img,reference=img)
 invisible(plotColor(warped))
 invisible(plotColor(abs(img-warped)))
 
-
 warped2 = applyAntsrTransform(transform=list(warpTx,tx), data=img, reference=img)
 invisible(plotColor(warped2))
 invisible(plotColor(abs(warped2-img2)))
 
+warped3 = applyAntsrTransform(transform=list(tx,warpTx), data=img, reference=img)
+invisible(plotColor(warped3))
+invisible(plotColor(abs(warped3-img2)))
+```
 
+## File IO
+Routines are provided to read transforms from file, for both linear and non-linear.
+Methods for writing transforms to file are under development. It is important to
+note that when converting from a multichannel antsImage to a `DisplacementField` transform,
+the data is copied so later changes to the antsImage, will not propagate to the transform,
+the transform would need to be reinitialized with the modified antsImage. This is due
+to underlying differences in data representation.
+```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# Don't run until we have test files
+#linTx = readAntsrTransform("yourfile.mat")
+#warpImage = antsImageRead("yourfield.nii.gz")
+#warpTx = antsrTransformFromDisplacementField(warpImage)
 ```
 
 ## Available Linear Transforms
