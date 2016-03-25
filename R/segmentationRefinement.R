@@ -34,7 +34,7 @@
 #'        by the mean of the voxels in that ROI.
 #'
 #' @return list with the models per label (LabelModels), the label set (LabelSet), and
-#'         the feature images (FeatureImageNames).
+#'         the feature image names (FeatureImageNames).
 #'
 #' @author Tustison NJ
 #'

@@ -45,7 +45,7 @@ by the mean of the voxels in that ROI.}
 }
 \value{
 list with the models per label (LabelModels), the label set (LabelSet), and
-        the feature images (FeatureImageNames).
+        the feature image names (FeatureImageNames).
 }
 \description{
 A random forest implementation of the corrective learning wrapper introduced
