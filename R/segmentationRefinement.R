@@ -686,8 +686,6 @@ for( l in 1:length( labelSet ) )
 
   subjectProbabilitiesPerLabelStage2 <- predict( labelModelsStage2[[l]], subjectDataPerLabel, type = "prob" )
 
-  # Smooth spatial probabilities
-
   backgroundProbabilityPerLabelArray <- array( 0, dim = dim( segmentationArray ) )
   backgroundProbabilityPerLabelArray[mislabeledVoxelsMaskArrayIndices] <- subjectProbabilitiesPerLabelStage2[, 1]
 
