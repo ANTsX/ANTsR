@@ -409,8 +409,8 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
 #'        by the mean of the voxels in that ROI
 #'
-#' @return a list consisting of 1) the refined segmentation estimate
-#'         (RefinedSegmentationImage) and the foreground probability images.
+#' @return a list consisting of the refined segmentation estimate (RefinedSegmentationImage) 
+#'         and a list of the foreground probability images (ForegroundProbabilityImages).
 #'
 #' @author Tustison NJ
 #'
