@@ -90,7 +90,7 @@ numberOfTimePoints <- nrow( Svoi )
 
 # Baseline signal
 
-S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = FALSE )
+S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = TRUE )
 S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
 
 # See http://www.ncbi.nlm.nih.gov/pubmed/8916023, page 711, equation (3).  Note that
