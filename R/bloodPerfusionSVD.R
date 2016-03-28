@@ -61,7 +61,7 @@ if( missing( aifMaskImage ) )
 # at each time point
 
 aifMatrix <- timeseries2matrix( perfusionImage, aifMaskImage )
-Saif <- rowAvg( aifMatrix )
+Saif <- rowMeans( aifMatrix, na.rm = TRUE )
 
 # Automatically find start of the AIF signal by finding the point at which the signal
 # intensity curve exceeds 10% of the maximum
@@ -90,7 +90,7 @@ numberOfTimePoints <- nrow( Svoi )
 
 # Baseline signal
 
-S0voi <- colAvg( Svoi[1:SaifStartIndex,] )
+S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = FALSE )
 S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
 
 # See http://www.ncbi.nlm.nih.gov/pubmed/8916023, page 711, equation (3).  Note that
@@ -155,12 +155,7 @@ if( is.vector( y ) )
   }
 }
 
-colAvg <- function( data ) apply( data, 2, mean, na.rm = TRUE )
 colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
-colSum <- function( data ) apply( data, 2, sum, na.rm = TRUE )
-rowAvg <- function( data ) apply( data, 1, mean, na.rm = TRUE )
-rowMax <- function( data ) apply( data, 1, max, na.rm = TRUE )
-rowSum <- function( data ) apply( data, 1, sum, na.rm = TRUE )
 
 #' Regularize SVD (deconvolution) solution of cerebral blood flow.
 #'
