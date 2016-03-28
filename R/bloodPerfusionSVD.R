@@ -183,9 +183,9 @@ colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
 
 deconvolutionSVD <- function( arterialInputFunction, threshold = 0.2 )
 {
-  if( ! is.vector( arterialInputFunction ) && ! is.array( arterialInputFunction ) )
+  if( ! is.vector( arterialInputFunction ) )
     {
-    stop( "Expecting an array or vector." )
+    stop( "Expecting a vector." )
     }
 
   N <- length( arterialInputFunction )
