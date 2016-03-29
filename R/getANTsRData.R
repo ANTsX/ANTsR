@@ -21,7 +21,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
   }
   validlist = c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
     "ch2","ch2a","ch2b","ch2p","ch2pcsv",
-    "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn",
+    "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn","mniyeo",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
     "adfmri", "show" )
@@ -66,6 +66,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     mnijhu1 = "https://ndownloader.figshare.com/files/3676056",
     mnijhu2 = "https://ndownloader.figshare.com/files/3676059",
     mnidfn = "https://ndownloader.figshare.com/files/3676047",
+    mniyeo = "https://ndownloader.figshare.com/files/4863193",
     nki = "http://files.figshare.com/1363201/NKI.zip",
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz",
     pcaslseg = "http://files.figshare.com/1862040/101_seg.nii.gz",
