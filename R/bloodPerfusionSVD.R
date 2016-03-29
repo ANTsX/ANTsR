@@ -140,7 +140,6 @@ return( list( cbfImage = cbfOutputImage,
 #' x <- seq( 0, 1, by = 0.0001 )
 #' y <- exp( x )
 #'
-#' Compare with true area of exp( 1 ) - 1 = 1.718282...
 #' areaEstimate <- trapz( x, y )
 #'
 
