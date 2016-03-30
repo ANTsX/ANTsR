@@ -54,8 +54,8 @@ by the mean of the voxels in that ROI}
 Each element of the labelSet requires a model.}
 }
 \value{
-a list consisting of 1) the refined segmentation estimate
-        (RefinedSegmentationImage) and the foreground probability images.
+a list consisting of the refined segmentation estimate (RefinedSegmentationImage) 
+        and a list of the foreground probability images (ForegroundProbabilityImages).
 }
 \description{
 A random forest implementation of the corrective learning wrapper introduced
