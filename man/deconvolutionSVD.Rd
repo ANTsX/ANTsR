@@ -4,7 +4,7 @@
 \alias{deconvolutionSVD}
 \title{Regularize SVD (deconvolution) solution of cerebral blood flow.}
 \usage{
-deconvolutionSVD(arterialInputFunction, threshold = 0.2)
+deconvolutionSVD(arterialInputFunction, thresholdSVD = 0.2)
 }
 \arguments{
 \item{arterialInputFunction}{vector specifying the arterial input function over time.}

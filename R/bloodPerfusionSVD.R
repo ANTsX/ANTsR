@@ -181,7 +181,7 @@ colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
 #' dSVD <- deconvolutionSVD( Caif, 0.2 )
 #'
 
-deconvolutionSVD <- function( arterialInputFunction, threshold = 0.2 )
+deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 {
   if( ! is.vector( arterialInputFunction ) )
     {
@@ -198,7 +198,7 @@ deconvolutionSVD <- function( arterialInputFunction, threshold = 0.2 )
   S <- svd( Caif )
   Dinv <- 1.0 / S$d
 
-  Dinv[which( S$d < threshold * max( S$d ) )] <- 0.0
+  Dinv[which( S$d < thresholdSVD * max( S$d ) )] <- 0.0
 
   dSVD <- S$v %*% diag( Dinv ) %*% t( S$u )
 }
