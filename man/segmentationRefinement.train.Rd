@@ -18,6 +18,9 @@ paper.}
 \item{truthLabelImages}{a list of "ground-truth" segmentation images, one for each
 set of feature images.}
 
+\item{segmentationImages}{a list of estimated segmentation images, one for each set of
+feature images}
+
 \item{featureImageNames}{a vector of character strings naming the set of features.
 This parameter is optional but does help in investigating the relative
 importance of specific features.}

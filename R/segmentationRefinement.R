@@ -15,6 +15,8 @@
 #'        paper.
 #' @param truthLabelImages a list of "ground-truth" segmentation images, one for each
 #'        set of feature images.
+#' @param segmentationImages a list of estimated segmentation images, one for each set of
+#'        feature images
 #' @param featureImageNames a vector of character strings naming the set of features.
 #'        This parameter is optional but does help in investigating the relative
 #'        importance of specific features.
@@ -383,7 +385,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param labelSet a vector specifying the labels of interest.  Must be specified.
 #' @param labelModelsStage1 a list of models for stage 1 (prediction of misclassifed voxels).
 #'        Each element of the labelSet requires a model.
-#' @param labelModelsStage1 a list of models for stage 2 (prediction of background/foreground).
+#' @param labelModelsStage2 a list of models for stage 2 (prediction of background/foreground).
 #'        Each element of the labelSet requires a model.
 #' @param featureImagesStage1 a list of lists of feature images for Stage 1.  Each list of
 #'        feature images corresponds to a single subject.  Possibilities are outlined in
@@ -409,7 +411,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
 #'        by the mean of the voxels in that ROI
 #'
-#' @return a list consisting of the refined segmentation estimate (RefinedSegmentationImage) 
+#' @return a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
 #'         and a list of the foreground probability images (ForegroundProbabilityImages).
 #'
 #' @author Tustison NJ

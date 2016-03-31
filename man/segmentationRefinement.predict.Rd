@@ -25,6 +25,9 @@ the above-cited paper.}
 \item{featureImageNamesStage1}{a vector of character strings naming the set of features.
 Must be specified.}
 
+\item{labelModelsStage2}{a list of models for stage 2 (prediction of background/foreground).
+Each element of the labelSet requires a model.}
+
 \item{featureImagesStage2}{a list of lists of feature images for Stage 2.  Each list of
 feature images corresponds to a single subject.  Possibilities are outlined in
 the above-cited paper.}
@@ -49,12 +52,9 @@ was recommended in Wang et al.}
 
 \item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are normalized
 by the mean of the voxels in that ROI}
-
-\item{labelModelsStage1}{a list of models for stage 2 (prediction of background/foreground).
-Each element of the labelSet requires a model.}
 }
 \value{
-a list consisting of the refined segmentation estimate (RefinedSegmentationImage) 
+a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
         and a list of the foreground probability images (ForegroundProbabilityImages).
 }
 \description{
