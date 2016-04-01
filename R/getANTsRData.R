@@ -78,7 +78,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     decslice = "https://ndownloader.figshare.com/files/2156224",
     dtislice = "https://ndownloader.figshare.com/files/2157786" ,
     fmrinetworks = "https://ndownloader.figshare.com/files/3639108",
-    adfmri      = "https://ndownloader.figshare.com/files/4822135" )
+    adfmri      = "https://ndownloader.figshare.com/files/4901371" )
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki" |
