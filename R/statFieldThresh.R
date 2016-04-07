@@ -6,7 +6,6 @@
 #' @param n number of images in conjunction
 #' @param fwhm full width at half maxima
 #' @param resels resolution elements in search region
-#' @param mask antsImage mask
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType
 #' \itemize{
@@ -72,8 +71,6 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
   D <- x@dimension
   vox2res <- 1 / prod(fwhm)
   k <- nvox * vox2res
-  nvox <- length(as.vector(x[x != 0]))
-  
   # RFT based thresholding ------------------------------------------------------------------------------------------
   if (threshType == "cRFT" | threshType == "pRFT") {
     u <- max(x)
