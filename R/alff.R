@@ -17,7 +17,7 @@
 #' mat <- matrix(rnorm(3000),ncol=50)
 #' fallf = apply( mat, FUN=alffmap, MARGIN=2 )
 #'
-#' @export whiten
+#' @export alffmap
 alffmap <- function( x, flo=0.01, fhi=0.1, tr=1, detrend=TRUE )
   {
   temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE, detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
