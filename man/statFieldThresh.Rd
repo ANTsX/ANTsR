@@ -39,8 +39,6 @@ statFieldThresh(x, pval, nvox, n, fwhm, resels, df, fieldType, threshType,
 \item{pp}{primary (initial) p-value threshold used in FDR methods}
 
 \item{verbose}{enables verbose output}
-
-\item{mask}{antsImage mask}
 }
 \value{
 Outputs a statistical value to be used for threshold a SPM
