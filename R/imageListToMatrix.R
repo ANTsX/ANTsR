@@ -13,7 +13,7 @@
 #' @seealso \code{\link{matrixToImages}, \link{getMask}}
 #' @examples
 #'  img <- antsImageRead(getANTsRData('r16'), 2)
-#'  imglist <- list() 
+#'  imglist <- list()
 #'  nvox <- dim(img)[1] * dim(img)[2]
 #'  nsubj <- 50
 #'  for(ii in 1:nsubj){
@@ -27,7 +27,7 @@ imageListToMatrix <- function(imageList, mask) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
   if(missing(mask))
-    mask <- getMask(imageList[[1]]) 
+    mask <- getMask(imageList[[1]])
 
   numImages <- length(imageList)
 
@@ -39,10 +39,10 @@ imageListToMatrix <- function(imageList, mask) {
     }
     as.numeric(x, mask > 0)
   }
-  
+
   dataVector <- unlist(lapply(imageList, listfunc))
-  
-  dataMatrix <- matrix(dataVector, nrow = numImages, ncol = numVoxels)
-  
+
+  dataMatrix <- t( matrix(dataVector, ncol = numImages, nrow = numVoxels) )
+
   return(dataMatrix)
 }
