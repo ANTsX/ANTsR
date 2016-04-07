@@ -40,9 +40,9 @@ imageListToMatrix <- function(imageList, mask) {
     as.numeric(x, mask > 0)
   }
 
-  dataVector <- unlist(lapply(imageList, listfunc))
-
-  dataMatrix <- t( matrix(dataVector, ncol = numImages, nrow = numVoxels) )
+  dataMatrix <- t( matrix(
+    unlist(lapply(imageList, listfunc)),
+    ncol = numImages, nrow = numVoxels) )
 
   return(dataMatrix)
 }
