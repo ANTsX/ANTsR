@@ -6,7 +6,7 @@
 \usage{
 compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
   randomSamples = 1, returnv = FALSE, returnhighvarmat = FALSE,
-  returnhighvarmatinds = FALSE, highvarmatinds = NA)
+  returnhighvarmatinds = FALSE, highvarmatinds = NA, scale = FALSE)
 }
 \arguments{
 \item{fmri}{input fmri image or matrix}
@@ -26,6 +26,10 @@ compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
 \item{returnhighvarmatinds}{bool to return the high variance matrix indices}
 
 \item{highvarmatinds}{index list}
+
+\item{scale}{scale the matrix of high variance voxels, default FALSE. note
+that you may get slightly different results by scaling the input matrix
+before passing into this function.}
 }
 \value{
 dataframe of nuisance predictors is output

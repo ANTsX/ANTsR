@@ -22,7 +22,7 @@ Read images into rows of a matrix.
 }
 \examples{
  img <- antsImageRead(getANTsRData('r16'), 2)
- imglist <- list() 
+ imglist <- list()
  nvox <- dim(img)[1] * dim(img)[2]
  nsubj <- 50
  for(ii in 1:nsubj){

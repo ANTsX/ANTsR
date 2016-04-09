@@ -9,6 +9,9 @@
 #' @param returnhighvarmat bool to return the high variance matrix
 #' @param returnhighvarmatinds bool to return the high variance matrix indices
 #' @param highvarmatinds index list
+#' @param scale scale the matrix of high variance voxels, default FALSE. note
+#' that you may get slightly different results by scaling the input matrix
+#' before passing into this function.
 #' @return dataframe of nuisance predictors is output
 #' @author Avants BB
 #' @examples
@@ -22,7 +25,8 @@ compcor <- function(fmri, ncompcor = 4,
   mask = NA, randomSamples = 1,
   returnv = FALSE, returnhighvarmat = FALSE,
   returnhighvarmatinds = FALSE,
-  highvarmatinds = NA) {
+  highvarmatinds = NA,
+  scale = FALSE ) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
@@ -49,6 +53,7 @@ compcor <- function(fmri, ncompcor = 4,
     highvarmatinds <- which(temporalvar > thresh)
   }
   highvarmat <- mat[, highvarmatinds]
+  if ( scale ) highvarmat = scale( highvarmat )
   if (returnhighvarmatinds)
     return(highvarmatinds)
   if (!returnv) {
