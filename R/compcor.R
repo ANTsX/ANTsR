@@ -53,7 +53,7 @@ compcor <- function(fmri, ncompcor = 4,
     highvarmatinds <- which(temporalvar > thresh)
   }
   highvarmat <- mat[, highvarmatinds]
-  if ( scale ) highvarmat = scale( highvarmat )
+  if ( scale ) highvarmat = scale( highvarmat , scale = FALSE )
   if (returnhighvarmatinds)
     return(highvarmatinds)
   if (!returnv) {
