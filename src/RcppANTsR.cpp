@@ -169,7 +169,7 @@ SEXP wrap( const itk::VectorImage<double,4>::Pointer &image )
 
   Rcpp::S4 itkImage( std::string( "antsImage" ) );
   itkImage.slot( "pixeltype" ) = "double";
-  itkImage.slot( "dimension" ) = 1;
+  itkImage.slot( "dimension" ) = 4;
   itkImage.slot( "components" ) = image->GetNumberOfComponentsPerPixel();
   itkImage.slot( "pointer") = xptr;
 
@@ -277,7 +277,7 @@ SEXP wrap( const itk::VectorImage<float,4>::Pointer &image )
 
   Rcpp::S4 itkImage( std::string( "antsImage" ) );
   itkImage.slot( "pixeltype" ) = "float";
-  itkImage.slot( "dimension" ) = 1;
+  itkImage.slot( "dimension" ) = 4;
   itkImage.slot( "components" ) = image->GetNumberOfComponentsPerPixel();
   itkImage.slot( "pointer") = xptr;
 
@@ -385,7 +385,7 @@ SEXP wrap( const itk::VectorImage<unsigned int,4>::Pointer &image )
 
   Rcpp::S4 itkImage( std::string( "antsImage" ) );
   itkImage.slot( "pixeltype" ) = "unsigned int";
-  itkImage.slot( "dimension" ) = 1;
+  itkImage.slot( "dimension" ) = 4;
   itkImage.slot( "components" ) = image->GetNumberOfComponentsPerPixel();
   itkImage.slot( "pointer") = xptr;
 
@@ -493,7 +493,7 @@ SEXP wrap( const itk::VectorImage<unsigned char,4>::Pointer &image )
 
   Rcpp::S4 itkImage( std::string( "antsImage" ) );
   itkImage.slot( "pixeltype" ) = "unsigned char";
-  itkImage.slot( "dimension" ) = 1;
+  itkImage.slot( "dimension" ) = 4;
   itkImage.slot( "components" ) = image->GetNumberOfComponentsPerPixel();
   itkImage.slot( "pointer") = xptr;
 
