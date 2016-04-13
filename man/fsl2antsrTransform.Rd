@@ -4,7 +4,7 @@
 \alias{fsl2antsrTransform}
 \title{fsl2antsrTransform}
 \usage{
-fsl2antsrTransform(matrix, reference, moving, flag = 1)
+fsl2antsrTransform(matrix, reference, moving)
 }
 \arguments{
 \item{matrix}{4x4 matrix of parameters}

@@ -6,7 +6,7 @@
 \usage{
 compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NA,
   randomSamples = 1, returnv = FALSE, returnhighvarmat = FALSE,
-  returnhighvarmatinds = FALSE, highvarmatinds = NA, scale = FALSE)
+  returnhighvarmatinds = FALSE, highvarmatinds = NA, scale = TRUE)
 }
 \arguments{
 \item{fmri}{input fmri image or matrix}

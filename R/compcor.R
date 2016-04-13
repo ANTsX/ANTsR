@@ -26,7 +26,7 @@ compcor <- function(fmri, ncompcor = 4,
   returnv = FALSE, returnhighvarmat = FALSE,
   returnhighvarmatinds = FALSE,
   highvarmatinds = NA,
-  scale = FALSE ) {
+  scale = TRUE ) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
