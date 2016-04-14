@@ -121,11 +121,10 @@ return( list( cbfImage = cbfOutputImage,
               mttImage = mttOutputImage ) )
 }
 
-#' Calculate the area under a curve (or set of curves) using the trapezoidal rule.
+#' Calculate the area under a sampled curve (or set of curves).
 #'
-#' Implementation of the deconvolution technique of Ostergaard et al.
-#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023).  Given an arterial input function,
-#'
+#' Given a vector (or a matrix) representing a curve (or set of curves, columnwise),
+#' the area (or set of areas) is calculated using the trapezoidal rule.
 #'
 #' @param x vector of samples for the dependent variable.
 #' @param y vector or matrix of samples for the independent variable.  In the case of the
