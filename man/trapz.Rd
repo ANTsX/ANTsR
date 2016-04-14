@@ -2,7 +2,7 @@
 % Please edit documentation in R/bloodPerfusionSVD.R
 \name{trapz}
 \alias{trapz}
-\title{Calculate the area under a curve (or set of curves) using the trapezoidal rule.}
+\title{Calculate the area under a sampled curve (or set of curves).}
 \usage{
 trapz(x, y)
 }
@@ -16,8 +16,8 @@ latter, curves are organized column-wise.}
 area (areas) under the sampled curve (curves).
 }
 \description{
-Implementation of the deconvolution technique of Ostergaard et al.
-(http://www.ncbi.nlm.nih.gov/pubmed/8916023).  Given an arterial input function,
+Given a vector (or a matrix) representing a curve (or set of curves, columnwise),
+the area (or set of areas) is calculated using the trapezoidal rule.
 }
 \examples{
 
