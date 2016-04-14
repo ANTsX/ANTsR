@@ -34,6 +34,7 @@ Suggests:
     glasso,
     glmnet,
     grid,
+    h5,
     igraph,
     knitr,
     magic,

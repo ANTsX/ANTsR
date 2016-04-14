@@ -36,7 +36,7 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   if (nargs() == 0) {
     return(1)
   }
-  if ( !usePkg("d3Network") ) { print("Need d3Network package"); return(NULL) }
+  if ( !usePkg("networkD3") ) { print("Need networkD3 package"); return(NULL) }
   demognames <- rownames(mylm$beta.pval)
   jjnames <- c(demognames, colnames(mylm$beta.pval))
   if (length(mygroup) == 1)
@@ -80,11 +80,11 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   }
   JJLinks <- data.frame(source = jjsources, target = jjtargets, value = jjvalues)
   if (whichviz == "Sankey") {
-    d3Network::d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
+    networkD3::d3Sankey(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", fontsize = 12, nodeWidth = 30, width = 700,
       file = outfile)
   } else {
-    d3Network::d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
+    networkD3::d3ForceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", Group = "group", width = 550, height = 400,
       zoom = zoom, opacity = 0.9, file = outfile)
   }
