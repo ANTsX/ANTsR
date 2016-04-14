@@ -42,6 +42,8 @@ writeNormalizedPopulationData <- function(
 {
 if ( ! usePkg( "h5" ) )
   stop( "Please install package h5 in order to use this function." )
+if ( sum( imageMask > 0.5 ) != ncol( imageMat ) )
+  stop( "stopping because sum( imageMask > 0.5 ) != ncol( imageMat )" )
 if ( sum( imageBoolean ) != nrow( imageMat ) )
   stop( "stopping because sum( imageBoolean ) != nrow( imageMat )" )
 if ( length( imageBoolean ) != nrow( demographics ) )
@@ -113,7 +115,7 @@ readNormalizedPopulationData <- function( filename )
   h5close(file)
   return(
       list(
-        demographics   = demographics,
+        demographics   = data.frame( demographics ),
         imageMat       = imageMat,
         imageMask      = imageMask,
         imageBoolean   = imageBoolean
