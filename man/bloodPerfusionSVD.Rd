@@ -24,7 +24,9 @@ column 2 in http://www.ncbi.nlm.nih.gov/pubmed/16971140).}
 }
 \value{
 list with the cerebral blood flow image (cbfImage), cerebral blood volume image
-        (cbvImage), and mean transit time (mttImage).
+        (cbvImage), mean transit time (mttImage), and arterial input function signal
+        from the image (aifSignal) and the calculated arterial input function
+        concentration (aifConcentration).
 }
 \description{
 Implementation of the deconvolution technique of Ostergaard et al.
