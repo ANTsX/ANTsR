@@ -73,6 +73,7 @@ R CMD INSTALL ANTsR_*.tgz
 
 * [Prior-based eigenanatomy](http://www.ncbi.nlm.nih.gov/pubmed/24852460) function `sparseDecom`
 
+* [Corrective learning for segmentation](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/) functions `segmentationRefinement.train` and `segmentationRefinement.predict`.
 
 ## Installation from source
 
