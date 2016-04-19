@@ -16,7 +16,9 @@
 #' @param deltaTime time between volumetric acquisitions.  We assume a uniform time sampling.
 #'
 #' @return list with the cerebral blood flow image (cbfImage), cerebral blood volume image
-#'         (cbvImage), and mean transit time (mttImage).
+#'         (cbvImage), mean transit time (mttImage), and arterial input function signal
+#'         from the image (aifSignal) and the calculated arterial input function
+#'         concentration (aifConcentration).
 #'
 #' @author Tustison NJ
 #'
@@ -71,7 +73,7 @@ SaifStartIndex = tail( which( Saif[1:SaifMaxIndex] < 0.1 * ( max( Saif ) - min( 
 
 S0aif <- mean( Saif[1:( SaifStartIndex - 1 )], na.rm = TRUE )
 
-# See http://www.ncbi.nlm.nih.gov/pubmed/8916023, page 711, equation (3).  Note that
+# See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
 # we exclude the constant of proportionality, k, and the TE parameters as they cancel
 # out in estimating the residue function.
 
@@ -93,7 +95,7 @@ numberOfTimePoints <- nrow( Svoi )
 S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = TRUE )
 S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
 
-# See http://www.ncbi.nlm.nih.gov/pubmed/8916023, page 711, equation (3).  Note that
+# See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
 # we exclude the constant of proportionality, k, and the TE parameters as they cancel
 # out in estimating the residue function.
 
@@ -118,7 +120,9 @@ mttOutputImage <- matrixToImages( as.matrix( mtt ), antsImageClone( voiMaskImage
 
 return( list( cbfImage = cbfOutputImage,
               cbvImage = cbvOutputImage,
-              mttImage = mttOutputImage ) )
+              mttImage = mttOutputImage,
+              aifSignal = Saif,
+              aifConcentration = Caif ) )
 }
 
 #' Calculate the area under a sampled curve (or set of curves).
