@@ -150,7 +150,7 @@ asscmd = paste( asscmd , " -i ", inflationFactor,
   if ( myrot < 10 ) pngext = paste( "0",pngext,sep='' )
   if ( myrot < 100 ) pngext = paste( "0",pngext,sep='' )
   pngfnloc = paste( filename, pngext, ".png", sep='' )
-#  system( paste( "rm", pngfnloc ) )
+  system( paste( "rm", pngfnloc ) )
   asscmd = paste( asscmd , " -i ", inflationFactor, " -d ", pngfnloc,
     "[",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] ",sep='' )
 }
