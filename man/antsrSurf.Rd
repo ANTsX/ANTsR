@@ -55,6 +55,23 @@ rp3 = matrix( c(90,180,180), ncol = 3 )
 rp  = rbind( rp1, rp3, rp2 )
 antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
 
+# show how to use absolute scales to allow comparison across renderings
+kimg = thresholdImage( ch2seg , 1, Inf )
+nvox = sum( ch2seg > 0 )
+voxvalsmat = cbind(
+    rnorm( nvox, 2.5, 2 ),
+    rnorm( nvox, 3.0, 2 ),
+    rnorm( nvox, 3.5, 2 ) )
+qq = quantile( voxvalsmat, 0.9 )
+for ( mmm in 1:3 )
+{
+kimg[ ch2seg > 0 ] = as.numeric(voxvalsmat[,mmm])
+kimg = smoothImage( kimg, 3 )
+antsrSurf( wm2, list( kimg ), inflationFactor=55, overlayLimits=c( 2.0, qq ),
+    rotationParams = rp, filename=paste('~/Downloads/ztempX',mmm,sep=''),
+    verbose=TRUE )
+}
+
 fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 img = antsImageRead( fn ) # see antsSurf on github for data
 wm   = thresholdImage( img, 3, 4 )
