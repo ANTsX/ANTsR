@@ -5,8 +5,8 @@
 \title{Render a function onto a surface.}
 \usage{
 antsrSurf(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
-  inflationFactor = 25, rotationParams = c(270, 0, 270), filename = NA,
-  verbose = FALSE)
+  inflationFactor = 25, rotationParams = c(270, 0, 270),
+  overlayLimits = NA, filename = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
@@ -23,6 +23,10 @@ spring, summer, autumn, winter, hot, cool, overunder, custom}
 
 \item{rotationParams}{3 Rotation angles expressed in degrees or a matrix of
 rotation parameters that will be applied in sequence.}
+
+\item{overlayLimits}{absolute lower and upper limits for functional overlay.
+this parameter will override \code{quantlimits}.  Currently, this will set
+levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.}
 
 \item{filename}{prefix filename for output pngs}
 
