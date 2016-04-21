@@ -89,7 +89,8 @@ makePointsImage <- function( pts, mask, radius = 5 )
           dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
           inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
           if ( (dist <= rad) && ( inImage == TRUE ) ) {
-            powersLabels[ local[1], local[2], local[3] ] = r
+            if ( powersLabels[ local[1], local[2], local[3] ] < 0.5 )
+              powersLabels[ local[1], local[2], local[3] ] = r
            }
           }
         }
