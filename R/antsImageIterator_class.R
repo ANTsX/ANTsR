@@ -28,7 +28,7 @@ setMethod(f = "show", "antsImageIterator", function(object){
     cat("antsImageIterator\n")
     cat("  Pixel Type          :", object@pixeltype, "\n")
     cat("  Components Per Pixel:", object@components, "\n")
-    cat("  Dimensions          :", paste(dim(object), collapse="x"), "\n")
+    cat("  Dimensions          :", object@dimension, "\n")
     cat("\n")
 })
 
