@@ -236,3 +236,29 @@ computeDVARS <- function(boldMatrix) {
   DVARS[1] <- mean(DVARS)
   return(DVARS)
 }
+
+
+
+#' computeDVARSspatialMap
+#'
+#' compute the DVARS quality control metric at every voxel
+#'
+#'
+#' @param boldMatrix matrix of bold signal
+#' @return DVARS spatial vector.
+#' @author Tustison NJ, Avants BB
+#' @examples
+#'
+#'  mat <- matrix(c(0,1,2,0,0,1,2,2,2),ncol=3)
+#'  dv<-computeDVARSspatialMap(mat)
+#'
+#' @export computeDVARSspatialMap
+computeDVARSspatialMap <- function(boldMatrix) {
+  # For quality assurance measures, we calculate the temporal derivative of the RMS
+  # variance over voxels (DVARS as in
+  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
+  dvmat = boldMatrix * 0
+  for (i in 2:nrow(boldMatrix))
+    dvmat[i,] = sqrt( ( boldMatrix[i, ] - boldMatrix[i - 1, ] )^2 )
+  return( colMeans( dvmat, na.rm=T ) )
+}

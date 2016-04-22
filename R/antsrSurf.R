@@ -14,6 +14,9 @@
 #' @param inflationFactor number of inflation iterations to run
 #' @param rotationParams 3 Rotation angles expressed in degrees or a matrix of
 #' rotation parameters that will be applied in sequence.
+#' @param overlayLimits absolute lower and upper limits for functional overlay.
+#' this parameter will override \code{quantlimits}.  Currently, this will set
+#' levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.
 #' @param filename prefix filename for output pngs
 #' @param verbose prints the command used to call \code{antsSurf}
 #' @return no output
@@ -31,6 +34,23 @@
 #' rp3 = matrix( c(90,180,180), ncol = 3 )
 #' rp  = rbind( rp1, rp3, rp2 )
 #' antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
+#'
+#' # show how to use absolute scales to allow comparison across renderings
+#' kimg = thresholdImage( ch2seg , 1, Inf )
+#' nvox = sum( ch2seg > 0 )
+#' voxvalsmat = cbind(
+#'     rnorm( nvox, 2.5, 2 ),
+#'     rnorm( nvox, 3.0, 2 ),
+#'     rnorm( nvox, 3.5, 2 ) )
+#' qq = quantile( voxvalsmat, 0.9 )
+#' for ( mmm in 1:3 )
+#' {
+#' kimg[ ch2seg > 0 ] = as.numeric(voxvalsmat[,mmm])
+#' kimg = smoothImage( kimg, 3 )
+#' antsrSurf( wm2, list( kimg ), inflationFactor=55, overlayLimits=c( 2.0, qq ),
+#'     rotationParams = rp, filename=paste('~/Downloads/ztempX',mmm,sep=''),
+#'     verbose=TRUE )
+#' }
 #'
 #' fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 #' img = antsImageRead( fn ) # see antsSurf on github for data
@@ -55,6 +75,7 @@ antsrSurf <- function( x, y,
   colormap = 'jet',
   inflationFactor = 25,
   rotationParams = c(270,0,270),
+  overlayLimits = NA,
   filename = NA,
   verbose = FALSE )
 {
@@ -114,6 +135,13 @@ for ( overlay in y )
   ct = ct + 1
   wms = smoothImage( overlay, 1.0 )
   myquants = quantile( overlay[ abs(overlay) > 0 ], quantlimits )
+  if ( ! all( is.na( overlayLimits ) ) )
+    {
+    myquants = overlayLimits
+    overlay[ overlay < myquants[1] ] = 0
+    overlay[ overlay > myquants[2] ] = myquants[2]
+    if ( verbose ) print( myquants )
+    }
   kblob = thresholdImage( wms, myquants[1], Inf )
   kblobfn = tempfile( fileext = ".nii.gz" )
   antsImageWrite( kblob, kblobfn )
@@ -122,8 +150,6 @@ for ( overlay in y )
   csvlutfn = tempfile(fileext = ".csv" )
   overlayrgbfn = tempfile(fileext = ".nii.gz" )
   if ( verbose ) print( colormap[ct] )
-#  overlay[ overlay < myquants[1] ] = myquants[1]
-#  overlay[ overlay > myquants[2] ] = myquants[2]
   cvtcmd = paste( "ConvertScalarImageToRGB 3 ",overlayfn, overlayrgbfn,
     kblobfn, colormap[ct]," none ", myquants[1],myquants[2]," 0 255", csvlutfn )
   sss = system( cvtcmd )
@@ -141,14 +167,16 @@ asscmd = paste( asscmd , " -i ", inflationFactor,
   if ( myrot < 10 ) pngext = paste( "0",pngext,sep='' )
   if ( myrot < 100 ) pngext = paste( "0",pngext,sep='' )
   pngfnloc = paste( filename, pngext, ".png", sep='' )
+  system( paste( "rm", pngfnloc ) )
   asscmd = paste( asscmd , " -i ", inflationFactor, " -d ", pngfnloc,
     "[",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] ",sep='' )
 }
 if ( verbose ) print( asscmd )
 sss = system( asscmd )
+Sys.sleep( 3 )
 if ( nrow( rotationParams ) > 1 ) pngs[ myrot ] = pngfnloc
 }
-
+Sys.sleep( 3 )
 if ( nrow( rotationParams ) > 1 )
   {
   mypng = png::readPNG( pngs[ 1 ] )

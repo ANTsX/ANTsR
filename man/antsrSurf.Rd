@@ -5,8 +5,8 @@
 \title{Render a function onto a surface.}
 \usage{
 antsrSurf(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
-  inflationFactor = 25, rotationParams = c(270, 0, 270), filename = NA,
-  verbose = FALSE)
+  inflationFactor = 25, rotationParams = c(270, 0, 270),
+  overlayLimits = NA, filename = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
@@ -23,6 +23,10 @@ spring, summer, autumn, winter, hot, cool, overunder, custom}
 
 \item{rotationParams}{3 Rotation angles expressed in degrees or a matrix of
 rotation parameters that will be applied in sequence.}
+
+\item{overlayLimits}{absolute lower and upper limits for functional overlay.
+this parameter will override \code{quantlimits}.  Currently, this will set
+levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.}
 
 \item{filename}{prefix filename for output pngs}
 
@@ -50,6 +54,23 @@ rp2 = matrix( c(90,180,270), ncol = 3 )
 rp3 = matrix( c(90,180,180), ncol = 3 )
 rp  = rbind( rp1, rp3, rp2 )
 antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
+
+# show how to use absolute scales to allow comparison across renderings
+kimg = thresholdImage( ch2seg , 1, Inf )
+nvox = sum( ch2seg > 0 )
+voxvalsmat = cbind(
+    rnorm( nvox, 2.5, 2 ),
+    rnorm( nvox, 3.0, 2 ),
+    rnorm( nvox, 3.5, 2 ) )
+qq = quantile( voxvalsmat, 0.9 )
+for ( mmm in 1:3 )
+{
+kimg[ ch2seg > 0 ] = as.numeric(voxvalsmat[,mmm])
+kimg = smoothImage( kimg, 3 )
+antsrSurf( wm2, list( kimg ), inflationFactor=55, overlayLimits=c( 2.0, qq ),
+    rotationParams = rp, filename=paste('~/Downloads/ztempX',mmm,sep=''),
+    verbose=TRUE )
+}
 
 fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
 img = antsImageRead( fn ) # see antsSurf on github for data

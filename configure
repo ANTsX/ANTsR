@@ -70,8 +70,7 @@ echo "libs: ; cd \${PWD}/antb && \$(MAKE) -j 2" >> Makevars
 
 # get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
-antstag=cd090c7834a99ec41532747cc11c66fc3e6eabec # pad image bug
-antstag=b19a80e84226db61b88e2a341df8899c1bdb9992 # cmake style update
+antstag=80da50b39c2bde6afdd7fb1477beb0e194a974de # 2nd cmake style update
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi

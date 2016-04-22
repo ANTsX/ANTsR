@@ -24,11 +24,19 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn","mniyeo",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
-    "adfmri", "show" )
+    "adfmri", "population", "show" )
   if (  sum( validlist == fileid ) == 0 )
     stop("no data with that id - try show to get list of valid ids")
   if ( fileid == "show" )
    return( validlist )
+  if ( fileid == "population" )
+    {
+    ilist = list(
+      antsImageRead( getANTsRData("r16") ),
+      antsImageRead( getANTsRData("r27") ),
+      antsImageRead( getANTsRData("r64") ) )
+    return( ilist )
+    }
 
   if ( fileid == "simple" )
     return( paste(path.package("ANTsR"),"/extdata/simple.jpg",sep="") )
