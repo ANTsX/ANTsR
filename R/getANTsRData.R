@@ -20,7 +20,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     return(NULL)
   }
   validlist = c("r16", "r27", "r30", "r62", "r64", "r85", "r64","nki", "pcasl",
-    "ch2","ch2a","ch2b","ch2p","ch2pcsv",
+    "ch2","ch2a","ch2b","finn","finncsv",
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn","mniyeo",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
@@ -64,8 +64,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     ch2 = "https://ndownloader.figshare.com/files/3888853",
     ch2b = "https://ndownloader.figshare.com/files/3676050",
     ch2a = "https://ndownloader.figshare.com/files/3674664",
-    ch2p = "https://ndownloader.figshare.com/files/4249681",
-    ch2pcsv = "https://ndownloader.figshare.com/files/4454071",
+    finn = "https://ndownloader.figshare.com/files/4249681",
+    finncsv = "https://ndownloader.figshare.com/files/4454071",
     mni = "https://ndownloader.figshare.com/files/3674667",
     mnib = "https://ndownloader.figshare.com/files/3676050",
     mnia = "https://ndownloader.figshare.com/files/3674664",
@@ -79,7 +79,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     pcasl = "http://files.figshare.com/1862041/101_pcasl.nii.gz",
     pcaslseg = "http://files.figshare.com/1862040/101_seg.nii.gz",
     atroposseg = "http://files.figshare.com/1893339/atroposseg.nii",
-    rsbold = "http://files.figshare.com/2119176/rest.nii.gz",
+    rsbold = "https://ndownloader.figshare.com/files/2119176",
     rsboldmask = "http://files.figshare.com/2119177/mask.nii.gz",
     rsboldseg = "http://files.figshare.com/2119178/seg.nii.gz",
     rsboldpts = "http://files.figshare.com/2126379/bold_rois.csv",
