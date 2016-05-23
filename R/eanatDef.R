@@ -185,10 +185,23 @@ for ( sol in 1:nrow(solutionmatrix))
     vec = solutionmatrix[sol,]
     vec = vec / sqrt( sum( vec * vec ) ) # this is initial vector
     grad = vec * 0
-    grad = .bootSmooth( rmat, vec, nboot=0 )
+#    grad = .bootSmooth( rmat, vec, nboot=0 )
+    grad = t( rmat ) %*% ( rmat %*% vec )
     grad = grad / sqrt( sum( grad * grad ) )
     if ( havePriors )
-      grad = grad * ( 1 - priorWeight) + priors[sol,] * priorWeight
+      {
+      tempp = ( priors[sol,] )
+      grad2 = t( tempp ) * ( tempp * vec ) # may accidentally zero out
+      if ( max( abs( grad2 ) ) == 0 ) {
+        print(paste("zeroed!!!!",sol))
+        grad2 = t(priors[sol,])
+        }
+      grad2 = grad2 / sqrt( sum( grad2 * grad2 ) )
+      grad = grad * ( 1 - priorWeight) + t(grad2) * priorWeight
+      grad = grad / sqrt( sum( grad * grad ) )
+      }
+#    if ( havePriors )
+#      grad = grad * ( 1 - priorWeight) + priors[sol,] * priorWeight
     vec = vec + grad * eps
     vec = .hyperButt( vec, sparvals[sol], mask=mask,
       smoother=smoother, clustval=cthresh, verbose=verbose )
