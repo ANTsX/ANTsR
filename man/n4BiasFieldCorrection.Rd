@@ -6,7 +6,7 @@
 \usage{
 n4BiasFieldCorrection(img, mask = NA, shrinkFactor = 4,
   convergence = list(iters = c(50, 50, 50, 50), tol = 1e-07),
-  splineParam = 200)
+  splineParam = 200, verbose = FALSE)
 }
 \arguments{
 \item{img}{input antsImage}
@@ -22,6 +22,8 @@ iterations for each shrinkage factor, and \code{tol}, the convergence tolerance.
 \item{splineParam}{Parameter controlling number of control points in spline.
 Either single value, indicating how many control points, or vector 
 with one entry per dimension of image, indicating the spacing in each direction.}
+
+\item{verbose}{enables verbose output.}
 }
 \value{
 outimg Bias-corrected image
