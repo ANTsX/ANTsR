@@ -3,12 +3,7 @@
 #' A random forest implementation of the corrective learning wrapper introduced
 #' in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
 #' The training process involves building two sets of models from training data
-#' for each label in the initial segmentation data.  The two sets of models are
-#' for the two stages of refinement:
-#'     Stage 1:  Learn potentially misclassified voxels per label
-#'     Stage 2:  Differentiate background/foreground voxels per label
-#' It is important to note that building the models for the two stages can be
-#' done in parallel.
+#' for each label in the initial segmentation data.
 #'
 #' @param featureImages a list of lists of feature images.  Each list of feature images
 #'        corresponds to a single subject.  Possibilities are outlined in the above-cited
@@ -28,12 +23,9 @@
 #'        each label.
 #' @param neighborhoodRadius specifies which voxel neighbors should be included in
 #'        building the model.  The user can specify a scalar or vector.
-#' @param whichStage Stage1:  voxel misclassification.  Stage2:  background/foreground
-#' @param useLabelDistances if TRUE, Euclidean distance maps for each label are
-#'        created and added to the list of featureImages.  This feature image type
-#'        was recommended in Wang et al.
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
-#'        by the mean of the voxels in that ROI.
+#'        by the mean of the voxels in that ROI.  Can also specify as a vector to normalize
+#'        per feature image.
 #'
 #' @return list with the models per label (LabelModels), the label set (LabelSet), and
 #'         the feature image names (FeatureImageNames).
@@ -78,32 +70,22 @@
 #'    featureImages[[i]] <- featureImageSetPerImage
 #'    }
 #'
-#'  # Perform training for both stages (can be performed simultaneously).  We train
-#'  # on images "r27", "r30", "r62", "r64", "r85" and test/predict on image "r16".
+#'  # Perform training.  We train on images "r27", "r30", "r62", "r64", "r85" and test/predict
+#'    on image "r16".
 #'
-#'  cat( "\nTraining Stage 1\n\n" )
+#'  cat( "\nTraining\n\n" )
 #'
-#'  segRefineStage1 <- segmentationRefinement.train( featureImages = featureImages[2:6],
+#'  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
 #'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-#'    neighborhoodRadius = 0, whichStage = 1,
-#'    useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+#'    normalizeSamplesPerLabel = TRUE )
 #'
-#'  cat( "\nTraining Stage 2\n\n" )
+#'  cat( "\nGenerating importance plots.\n\n" )
 #'
-#'  segRefineStage2 <- segmentationRefinement.train( featureImages = featureImages[2:6],
-#'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
-#'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-#'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-#'    neighborhoodRadius = c( 1, 1 ), whichStage = 2,
-#'    useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
-#'
-#'  cat( "\nGenerating importance plots for Stage 2.\n\n" )
-#'
-#'  for( m in 1:length( segRefineStage2$LabelModels ) )
+#'  for( m in 1:length( segLearning$LabelModels ) )
 #'    {
-#'    forestImp <- importance( segRefineStage2$LabelModels[[m]], type = 1 )
+#'    forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
 #'    forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
 #'    forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
 #'
@@ -111,14 +93,14 @@
 #'
 #'    iPlot <- ggplot( data = forestImp.df, aes( x = Importance, y = Statistic ) ) +
 #'             geom_point( aes( color = Importance ) ) +
-#'             labs( title = paste0( 'Label ', segRefineStage2$LabelSet[m] ) ) +
+#'             labs( title = paste0( 'Label ', segLearning$LabelSet[m] ) ) +
 #'             ylab( "" ) +
 #'             xlab( "MeanDecreaseAccuracy" ) +
 #'             scale_color_continuous( low = "navyblue", high = "darkred" ) +
 #'             theme( axis.text.y = element_text( size = 10 ) ) +
 #'             theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
 #'             theme( legend.position = "none" )
-#'    ggsave( file = paste0( 'importancePlotsStage2Label', segRefineStage2$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
+#'    ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
 #'    }
 #'
 #' }
@@ -126,8 +108,7 @@
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
   maximumNumberOfSamplesPerClass = 500, dilationRadius = 2,
-  neighborhoodRadius = 0, whichStage = c( '1', '2' ),
-  useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
 {
 
 # check inputs
@@ -169,10 +150,11 @@ if( length( featureImageNames ) == 0 )
     }
   }
 
-
-if( useLabelDistances )
+if( length( normalizeSamplesPerLabel ) == 1 )
   {
-  featureImageNames <- append( featureImageNames, "LabelDistance" )
+  normalizeSamplesPerLabel <- rep( normalizeSamplesPerLabel[1], length( featureImageNames ) )
+  } else if ( length( normalizeSamplesPerLabel ) > 1 && length( normalizeSamplesPerLabel ) != length( featureImageNames ) ) {
+  stop( "The size of the variable normalizeSamplesPerLabel does not match the number of features." );
   }
 
 featureNeighborhoodNames <- c()
@@ -215,8 +197,10 @@ for( l in 1:length( labelSet ) )
 
     # Get the ROI mask from the segmentation image for the current label.  Within that ROI,
     # find which voxels are mislabeled.  Within that ROI mask, the mislabeled voxels are
-    # given the '1' label while correctly labeled voxels are given the '2' label.  These
+    # given the '-1' label while correctly labeled voxels are given the '1' label.  These
     # mislabeled and correctly labeled voxels are given in the variable "mislabeledVoxelsMaskArray"
+
+    binaryLabelSet <- c( -1, 1 )
 
     segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImages[[i]], 'float' ), label, label, 1, 0 )
     segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
@@ -230,39 +214,16 @@ for( l in 1:length( labelSet ) )
       next
       }
 
-    if( useLabelDistances )
-      {
-      distanceSingleLabelImage <- iMath( segmentationSingleLabelImage, 'MaurerDistance' )
-      featureImages[[i]][[length( featureImageNames )]] <- distanceSingleLabelImage
-      }
-
     truthSingleLabelImage <- thresholdImage( antsImageClone( truthLabelImages[[i]], 'float' ), label, label, 1, 0 )
     truthSingleLabelArray <- as.array( truthSingleLabelImage )
-
-    binaryLabelSet <- c( 1, 2 )
 
     mislabeledVoxelsMaskArray <- ( truthSingleLabelArray - segmentationSingleLabelArray )
     mislabeledVoxelsMaskArray[which( mislabeledVoxelsMaskArray != 0 )] <- binaryLabelSet[1]
     mislabeledVoxelsMaskArray[which( mislabeledVoxelsMaskArray == 0 )] <- binaryLabelSet[2]
     mislabeledVoxelsMaskArray <- mislabeledVoxelsMaskArray * maskArray
 
-    if( whichStage == 1 )
-      {
-
-      binaryMaskArray <- maskArray
-      binaryTruthArray <- mislabeledVoxelsMaskArray
-
-      } else {
-
-      whichGroundMaskArray <- rep( 0, length( maskArray ) )
-      whichGroundMaskArray[mislabeledVoxelsMaskArray == binaryLabelSet[1] & truthSingleLabelArray == 0] <- binaryLabelSet[1]
-      whichGroundMaskArray[mislabeledVoxelsMaskArray == binaryLabelSet[1] & truthSingleLabelArray == 1] <- binaryLabelSet[2]
-
-      binaryMaskArray <- rep( 0, length( maskArray ) )
-      binaryMaskArray[mislabeledVoxelsMaskArray == binaryLabelSet[1]] <- 1
-      binaryTruthArray <- whichGroundMaskArray
-
-      }
+    binaryMaskArray <- maskArray
+    binaryTruthArray <- mislabeledVoxelsMaskArray
 
     # Ensure that the samples per label are balanced in each subject
     minimumNumberOfSamplesInSubjectData <- maximumNumberOfSamplesPerClass
@@ -318,7 +279,7 @@ for( l in 1:length( labelSet ) )
         endIndex <- startIndex + length( truthLabelIndices[[n]] ) - 1
 
         values <- featureImageNeighborhoodValues[,truthLabelIndices[[n]]]
-        if( normalizeSamplesPerLabel )
+        if( normalizeSamplesPerLabel[j] )
           {
           featureImagesArray <- as.array( featureImages[[i]][[j]] )
           meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
@@ -376,40 +337,25 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #'
 #' A random forest implementation of the corrective learning wrapper introduced
 #' in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
-#' The prediction process involves using the two-stage training models (per label)
-#' to refine an initial segmentation.  The two stages of refinement are:
-#'     Stage 1:  Predict potentially misclassified voxels per label
-#'     Stage 2:  Predict background/foreground voxels per label
+#' The prediction process involves using the label-specific training models
+#' to refine an initial segmentation.
 #'
 #' @param segmentationImage image to refine via corrective learning.
 #' @param labelSet a vector specifying the labels of interest.  Must be specified.
-#' @param labelModelsStage1 a list of models for stage 1 (prediction of misclassifed voxels).
+#' @param labelModels a list of models.
 #'        Each element of the labelSet requires a model.
-#' @param labelModelsStage2 a list of models for stage 2 (prediction of background/foreground).
-#'        Each element of the labelSet requires a model.
-#' @param featureImagesStage1 a list of lists of feature images for Stage 1.  Each list of
+#' @param featureImages a list of lists of feature images.  Each list of label-specific
 #'        feature images corresponds to a single subject.  Possibilities are outlined in
 #'        the above-cited paper.
-#' @param featureImagesStage2 a list of lists of feature images for Stage 2.  Each list of
-#'        feature images corresponds to a single subject.  Possibilities are outlined in
-#'        the above-cited paper.
-#' @param featureImageNamesStage1 a vector of character strings naming the set of features.
-#'        Must be specified.
-#' @param featureImageNamesStage2 a vector of character strings naming the set of features.
+#' @param featureImageNames is a vector of character strings naming the set of features.
 #'        Must be specified.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
 #'        each label.
-#' @param neighborhoodRadiusStage1 specifies which voxel neighbors should be included in
-#'        prediction for Stage 1.  The user can specify a scalar or vector but it must match
+#' @param neighborhoodRadius specifies which voxel neighbors should be included in
+#'        prediction.  The user can specify a scalar or vector but it must match
 #'        with what was used for training.
-#' @param neighborhoodRadiusStage2 specifies which voxel neighbors should be included in
-#'        prediction for Stage 2.  The user can specify a scalar or vector but it must match
-#'        with what was used for training.
-#' @param useLabelDistances if TRUE, Euclidean distance maps for each label are
-#'        created and added to the list of featureImages.  This feature image type
-#'        was recommended in Wang et al.
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
-#'        by the mean of the voxels in that ROI
+#'        by the mean of the voxels in that ROI.  Can be a vector (one element per feature).
 #'
 #' @return a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
 #'         and a list of the foreground probability images (ForegroundProbabilityImages).
@@ -417,8 +363,6 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @author Tustison NJ
 #'
 #' @examples
-#' \dontrun{
-#'
 #' \dontrun{
 #'
 #'  library( ANTsR )
@@ -456,35 +400,24 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #'    featureImages[[i]] <- featureImageSetPerImage
 #'    }
 #'
-#'  # Perform training for both stages (can be performed simultaneously).  We train
-#'  # on images "r27", "r30", "r62", "r64", "r85" and test/predict on image "r16".
+#'  # Perform training.  We train on images "r27", "r30", "r62", "r64", "r85" and
+#'  # test/predict on image "r16".
 #'
-#'  cat( "\nTraining Stage 1\n\n" )
+#'  cat( "\nTraining\n\n" )
 #'
-#'  segRefineStage1 <- segmentationRefinement.train( featureImages = featureImages[2:6],
+#'  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
 #'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-#'    neighborhoodRadius = 0, whichStage = 1,
-#'    useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
-#'
-#'  cat( "\nTraining Stage 2\n\n" )
-#'
-#'  segRefineStage2 <- segmentationRefinement.train( featureImages = featureImages[2:6],
-#'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
-#'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-#'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-#'    neighborhoodRadius = c( 1, 1 ), whichStage = 2,
-#'    useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+#'    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
 #'
 #'  cat( "\nPrediction\n\n" )
 #'
 #'  refinement <- segmentationRefinement.predict(
 #'    segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
-#'    segRefineStage1$LabelModels, featureImages[[1]], featureImageNames,
-#'    segRefineStage2$LabelModels, featureImages[[1]], featureImageNames,
-#'    dilationRadius = 1, neighborhoodRadiusStage1 = 0, neighborhoodRadiusStage2 = c( 1, 1 ),
-#'    useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+#'    segLearning$LabelModels, featureImages[[1]], featureImageNames,
+#'    dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
+#'    normalizeSamplesPerLabel = TRUE )
 #'
 #'  # Compare "ground truth" = atroposSegs[[1]] with refinement$RefinedSegmentationImage
 #'
@@ -493,10 +426,8 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' }
 
 segmentationRefinement.predict <- function( segmentationImage, labelSet,
-  labelModelsStage1, featureImagesStage1, featureImageNamesStage1,
-  labelModelsStage2, featureImagesStage2, featureImageNamesStage2,
-  dilationRadius = 2, neighborhoodRadiusStage1 = 0, neighborhoodRadiusStage2 = 0,
-  useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+  labelModels, featureImages, featureImageNames, dilationRadius = 2,
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
 {
 
 if ( ! usePkg( "randomForest" ) )
@@ -513,92 +444,64 @@ if( missing( labelSet ) )
   stop( "The label set is missing." )
   }
 
-if( missing( labelModelsStage1 ) )
+if( missing( labelModels ) )
   {
-  stop( "The label models for stage 1 are missing." )
+  stop( "The label models are missing." )
   }
-if( missing( featureImagesStage1 ) )
+if( missing( featureImages ) )
   {
-  stop( "The list of features images for stage 1 are missing." )
+  stop( "The list of features images is missing." )
   }
-if( missing( featureImageNamesStage1 ) )
+if( missing( featureImageNames ) )
   {
-  stop( "The list of feature image names for stage 1 are missing." )
+  stop( "The list of feature image names is missing." )
   }
-if( length( labelSet ) != length( labelModelsStage1 ) )
+if( length( labelSet ) != length( labelModels ) )
   {
-  stop( "The number of labels must match the number of stage 1 models." )
-  }
-
-if( missing( labelModelsStage2 ) )
-  {
-  stop( "The label models for stage 2 are missing." )
-  }
-if( missing( featureImagesStage2 ) )
-  {
-  stop( "The list of features images for stage 2 are missing." )
-  }
-if( missing( featureImageNamesStage2 ) )
-  {
-  stop( "The list of feature image names for stage 2 are missing." )
-  }
-if( length( labelSet ) != length( labelModelsStage2 ) )
-  {
-  stop( "The number of labels must match the number of stage 2 models." )
+  stop( "The number of labels must match the number of models." )
   }
 
 dimension <- segmentationImage@dimension
 
-if( length( neighborhoodRadiusStage1 ) != dimension )
+if( length( neighborhoodRadius ) != dimension )
   {
-  neighborhoodRadiusStage1 <- rep( neighborhoodRadiusStage1, dimension )
+  neighborhoodRadius <- rep( neighborhoodRadius, dimension )
   }
-numberOfNeighborhoodVoxelsStage1 <- 1
+numberOfNeighborhoodVoxels <- 1
 for( i in 1:dimension )
   {
-  numberOfNeighborhoodVoxelsStage1 <- numberOfNeighborhoodVoxelsStage1 * ( 2 * neighborhoodRadiusStage1[i] + 1 )
-  }
-if( length( neighborhoodRadiusStage2 ) != dimension )
-  {
-  neighborhoodRadiusStage2 <- rep( neighborhoodRadiusStage2, dimension )
-  }
-numberOfNeighborhoodVoxelsStage2 <- 1
-for( i in 1:dimension )
-  {
-  numberOfNeighborhoodVoxelsStage2 <- numberOfNeighborhoodVoxelsStage2 * ( 2 * neighborhoodRadiusStage2[i] + 1 )
+  numberOfNeighborhoodVoxels <- numberOfNeighborhoodVoxels * ( 2 * neighborhoodRadius[i] + 1 )
   }
 
-
-if( useLabelDistances )
+featureNeighborhoodNames <- c()
+for( i in 1:length( featureImageNames ) )
   {
-  featureImageNamesStage1 <- append( featureImageNamesStage1, "LabelDistance" )
-  featureImageNamesStage2 <- append( featureImageNamesStage2, "LabelDistance" )
-  }
-
-featureNeighborhoodNamesStage1 <- c()
-for( i in 1:length( featureImageNamesStage1 ) )
-  {
-  for( j in 1:numberOfNeighborhoodVoxelsStage1 )
+  for( j in 1:numberOfNeighborhoodVoxels )
     {
-    featureName <- paste0( featureImageNamesStage1[i], 'Neighbor', j )
-    featureNeighborhoodNamesStage1 <- append( featureNeighborhoodNamesStage1, featureName )
+    featureName <- paste0( featureImageNames[i], 'Neighbor', j )
+    featureNeighborhoodNames <- append( featureNeighborhoodNames, featureName )
     }
   }
 
-featureNeighborhoodNamesStage2 <- c()
-for( i in 1:length( featureImageNamesStage2 ) )
+if( length( normalizeSamplesPerLabel ) == 1 )
   {
-  for( j in 1:numberOfNeighborhoodVoxelsStage2 )
-    {
-    featureName <- paste0( featureImageNamesStage2[i], 'Neighbor', j )
-    featureNeighborhoodNamesStage2 <- append( featureNeighborhoodNamesStage2, featureName )
-    }
+  normalizeSamplesPerLabel <- rep( normalizeSamplesPerLabel[1], length( featureImageNames ) )
+  } else if ( length( normalizeSamplesPerLabel ) > 1 && length( normalizeSamplesPerLabel ) != length( featureImageNames ) ) {
+  stop( "The size of the variable normalizeSamplesPerLabel does not match the number of features." );
   }
 
 segmentationArray <- as.array( segmentationImage )
 
 # we add a row of zeros to use with max.col to stand in for a '0' label (i.e. background)
-foregroundProbabilitiesPerLabel <- matrix( 0, nrow = length( labelSet ) + 1, ncol = length( as.array( segmentationImage ) ) )
+foregroundProbabilitiesPerLabel <- matrix()
+if( ! is.element( 0, labelSet ) )
+  {
+  foregroundProbabilitiesPerLabel <- matrix( 0, nrow = length( labelSet ) + 1, ncol = length( as.array( segmentationImage ) ) )
+  foregroundProbabilitiesPerLabel[, length( labelSet ) + 1] <- 0.5
+  } else {
+  foregroundProbabilitiesPerLabel <- matrix( 0, nrow = length( labelSet ), ncol = length( as.array( segmentationImage ) ) )
+  }
+
 foregroundProbabilityImages <- list()
 
 for( l in 1:length( labelSet ) )
@@ -621,94 +524,44 @@ for( l in 1:length( labelSet ) )
     next;
     }
 
-  if( useLabelDistances )
-    {
-    distanceSingleLabelImage <- iMath( segmentationSingleLabelImage, 'MaurerDistance' )
-    featureImagesStage1[[length( featureImageNamesStage1 )]] <- distanceSingleLabelImage
-    featureImagesStage2[[length( featureImageNamesStage2 )]] <- distanceSingleLabelImage
-    }
-
   wholeMaskImage <- segmentationSingleLabelArray
   wholeMaskImage[which( wholeMaskImage != 1 )] <- 1
   wholeMaskImage <- as.antsImage( wholeMaskImage )
 
-  # Accumulate data for stage 1
+  # Accumulate data for prediction
 
-  subjectDataPerLabel <- matrix( NA, nrow = length( maskArrayIndices ), ncol = length( featureImagesStage1 ) * numberOfNeighborhoodVoxelsStage1 )
-  for( j in 1:length( featureImagesStage1 ) )
+  subjectDataPerLabel <- matrix( NA, nrow = length( maskArrayIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
+  for( j in 1:length( featureImages ) )
     {
-    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImagesStage1[[j]], wholeMaskImage, neighborhoodRadiusStage1, boundary.condition = "image" )
+    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
     values <- featureImageNeighborhoodValues[, maskArrayIndices]
-    if( normalizeSamplesPerLabel )
+    if( normalizeSamplesPerLabel[j] )
       {
-      featureImagesArray <- as.array( featureImagesStage1[[j]] )
+      featureImagesArray <- as.array( featureImages[[j]] )
       meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
       if( meanValue != 0 )
         {
         values <- values / meanValue
         }
       }
-    subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxelsStage1 + 1 ):( j * numberOfNeighborhoodVoxelsStage1 )] <- t( values )
+    subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
     }
-  colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNamesStage1 )
+  colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNames )
   subjectDataPerLabel <- as.data.frame( subjectDataPerLabel )
 
-  # Do prediction for stage 1 to generate the mask for stage 2
+  # Do prediction
 
-  subjectProbabilitiesPerLabelStage1 <- predict( labelModelsStage1[[l]], subjectDataPerLabel, type = "prob" )
+  subjectProbabilitiesPerLabel <- predict( labelModels[[l]], subjectDataPerLabel, type = "prob" )
 
-  mislabeledVoxelsMaskArray <- maskArray
-  mislabeledVoxelsMaskArray[maskArrayIndices] <- subjectProbabilitiesPerLabelStage1[,1]
-  mislabeledVoxelsMaskArray[mislabeledVoxelsMaskArray >= 0.5] <- 1
-  mislabeledVoxelsMaskArray[mislabeledVoxelsMaskArray < 0.5] <- 0
-  mislabeledVoxelsMaskArrayIndices <- which( mislabeledVoxelsMaskArray != 0 )
-
-  # Accumulate data for stage 2
-
-  subjectDataPerLabel <- matrix( NA, nrow = length( mislabeledVoxelsMaskArrayIndices ), ncol = length( featureImagesStage2 ) * numberOfNeighborhoodVoxelsStage2 )
-  for( j in 1:length( featureImagesStage2 ) )
-    {
-    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImagesStage2[[j]], wholeMaskImage, neighborhoodRadiusStage2, boundary.condition = "image" )
-    values <- featureImageNeighborhoodValues[, mislabeledVoxelsMaskArrayIndices]
-    if( normalizeSamplesPerLabel )
-      {
-      featureImagesArray <- as.array( featureImagesStage2[[j]] )
-      meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-      if( meanValue != 0 )
-        {
-        values <- values / meanValue
-        }
-      }
-    subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxelsStage2 + 1 ):( j * numberOfNeighborhoodVoxelsStage2 )] <- t( values )
-    }
-  colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNamesStage2 )
-  subjectDataPerLabel <- as.data.frame( subjectDataPerLabel )
-
-  # Do prediction for stage 2
-
-  subjectProbabilitiesPerLabelStage2 <- predict( labelModelsStage2[[l]], subjectDataPerLabel, type = "prob" )
-
-  backgroundProbabilityPerLabelArray <- array( 0, dim = dim( segmentationArray ) )
-  backgroundProbabilityPerLabelArray[mislabeledVoxelsMaskArrayIndices] <- subjectProbabilitiesPerLabelStage2[, 1]
-
-  foregroundProbabilityPerLabelArray <- array( 0, dim = dim( segmentationArray ) )
-  foregroundProbabilityPerLabelArray[mislabeledVoxelsMaskArrayIndices] <- subjectProbabilitiesPerLabelStage2[, 2]
-
-  foregroundProbabilitiesPerLabel[l, mislabeledVoxelsMaskArrayIndices] <- foregroundProbabilityPerLabelArray[mislabeledVoxelsMaskArrayIndices]
-
-  maxBackgroundIndices <- which( backgroundProbabilityPerLabelArray > foregroundProbabilitiesPerLabel[length( labelSet ) + 1, ] )
-
-  foregroundProbabilitiesPerLabel[length( labelSet ) + 1, maxBackgroundIndices] <- backgroundProbabilityPerLabelArray[maxBackgroundIndices]
-
+  foregroundProbabilitiesPerLabel[l, maskArrayIndices] <- subjectProbabilitiesPerLabel[, 2]
   foregroundProbabilityImages[[l]] <- as.antsImage( array( foregroundProbabilitiesPerLabel[l,], dim = dim( segmentationArray ) ), reference = segmentationImage )
   }
 
-appendedLabelSet <- append( labelSet, 0 )
-
-# Before we pick the max label, we set all the probabilities to zero if the
-# foreground probabilities are < 0.5.  Since we're doing a binary comparison,
-# if the foreground < 0.5, that means the label at that voxel should be background.
-# foregroundProbabilitiesPerLabel[foregroundProbabilitiesPerLabel < 0.5] <- 0.0
+appendedLabelSet <- labelSet
+if( ! is.element( 0, labelSet ) )
+  {
+  appendedLabelSet <- c( labelSet, 0 )
+  }
 
 refinedSegmentationArray <- appendedLabelSet[max.col( t( foregroundProbabilitiesPerLabel ), ties.method = 'last' )]
 

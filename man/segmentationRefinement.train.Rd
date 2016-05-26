@@ -7,8 +7,7 @@
 segmentationRefinement.train(featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
   maximumNumberOfSamplesPerClass = 500, dilationRadius = 2,
-  neighborhoodRadius = 0, whichStage = c("1", "2"),
-  useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE)
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
 }
 \arguments{
 \item{featureImages}{a list of lists of feature images.  Each list of feature images
@@ -37,14 +36,9 @@ each label.}
 \item{neighborhoodRadius}{specifies which voxel neighbors should be included in
 building the model.  The user can specify a scalar or vector.}
 
-\item{whichStage}{Stage1:  voxel misclassification.  Stage2:  background/foreground}
-
-\item{useLabelDistances}{if TRUE, Euclidean distance maps for each label are
-created and added to the list of featureImages.  This feature image type
-was recommended in Wang et al.}
-
 \item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are normalized
-by the mean of the voxels in that ROI.}
+by the mean of the voxels in that ROI.  Can also specify as a vector to normalize
+per feature image.}
 }
 \value{
 list with the models per label (LabelModels), the label set (LabelSet), and
@@ -54,12 +48,7 @@ list with the models per label (LabelModels), the label set (LabelSet), and
 A random forest implementation of the corrective learning wrapper introduced
 in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
 The training process involves building two sets of models from training data
-for each label in the initial segmentation data.  The two sets of models are
-for the two stages of refinement:
-    Stage 1:  Learn potentially misclassified voxels per label
-    Stage 2:  Differentiate background/foreground voxels per label
-It is important to note that building the models for the two stages can be
-done in parallel.
+for each label in the initial segmentation data.
 }
 \examples{
 \dontrun{
@@ -99,32 +88,22 @@ done in parallel.
    featureImages[[i]] <- featureImageSetPerImage
    }
 
- # Perform training for both stages (can be performed simultaneously).  We train
- # on images "r27", "r30", "r62", "r64", "r85" and test/predict on image "r16".
+ # Perform training.  We train on images "r27", "r30", "r62", "r64", "r85" and test/predict
+   on image "r16".
 
- cat( "\\nTraining Stage 1\\n\\n" )
+ cat( "\\nTraining\\n\\n" )
 
- segRefineStage1 <- segmentationRefinement.train( featureImages = featureImages[2:6],
+ segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = 0, whichStage = 1,
-   useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
+   normalizeSamplesPerLabel = TRUE )
 
- cat( "\\nTraining Stage 2\\n\\n" )
+ cat( "\\nGenerating importance plots.\\n\\n" )
 
- segRefineStage2 <- segmentationRefinement.train( featureImages = featureImages[2:6],
-   truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
-   featureImageNames = featureImageNames, labelSet = segmentationLabels,
-   maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = c( 1, 1 ), whichStage = 2,
-   useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE )
-
- cat( "\\nGenerating importance plots for Stage 2.\\n\\n" )
-
- for( m in 1:length( segRefineStage2$LabelModels ) )
+ for( m in 1:length( segLearning$LabelModels ) )
    {
-   forestImp <- importance( segRefineStage2$LabelModels[[m]], type = 1 )
+   forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
    forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
    forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
 
@@ -132,14 +111,14 @@ done in parallel.
 
    iPlot <- ggplot( data = forestImp.df, aes( x = Importance, y = Statistic ) ) +
             geom_point( aes( color = Importance ) ) +
-            labs( title = paste0( 'Label ', segRefineStage2$LabelSet[m] ) ) +
+            labs( title = paste0( 'Label ', segLearning$LabelSet[m] ) ) +
             ylab( "" ) +
             xlab( "MeanDecreaseAccuracy" ) +
             scale_color_continuous( low = "navyblue", high = "darkred" ) +
             theme( axis.text.y = element_text( size = 10 ) ) +
             theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
             theme( legend.position = "none" )
-   ggsave( file = paste0( 'importancePlotsStage2Label', segRefineStage2$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
+   ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
    }
 
 }

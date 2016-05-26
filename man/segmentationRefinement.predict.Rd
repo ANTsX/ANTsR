@@ -4,54 +4,34 @@
 \alias{segmentationRefinement.predict}
 \title{Segmentation refinement using corrective learning (prediction)}
 \usage{
-segmentationRefinement.predict(segmentationImage, labelSet, labelModelsStage1,
-  featureImagesStage1, featureImageNamesStage1, labelModelsStage2,
-  featureImagesStage2, featureImageNamesStage2, dilationRadius = 2,
-  neighborhoodRadiusStage1 = 0, neighborhoodRadiusStage2 = 0,
-  useLabelDistances = TRUE, normalizeSamplesPerLabel = TRUE)
+segmentationRefinement.predict(segmentationImage, labelSet, labelModels,
+  featureImages, featureImageNames, dilationRadius = 2,
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
 }
 \arguments{
 \item{segmentationImage}{image to refine via corrective learning.}
 
 \item{labelSet}{a vector specifying the labels of interest.  Must be specified.}
 
-\item{labelModelsStage1}{a list of models for stage 1 (prediction of misclassifed voxels).
+\item{labelModels}{a list of models.
 Each element of the labelSet requires a model.}
 
-\item{featureImagesStage1}{a list of lists of feature images for Stage 1.  Each list of
+\item{featureImages}{a list of lists of feature images.  Each list of label-specific
 feature images corresponds to a single subject.  Possibilities are outlined in
 the above-cited paper.}
 
-\item{featureImageNamesStage1}{a vector of character strings naming the set of features.
-Must be specified.}
-
-\item{labelModelsStage2}{a list of models for stage 2 (prediction of background/foreground).
-Each element of the labelSet requires a model.}
-
-\item{featureImagesStage2}{a list of lists of feature images for Stage 2.  Each list of
-feature images corresponds to a single subject.  Possibilities are outlined in
-the above-cited paper.}
-
-\item{featureImageNamesStage2}{a vector of character strings naming the set of features.
+\item{featureImageNames}{is a vector of character strings naming the set of features.
 Must be specified.}
 
 \item{dilationRadius}{specifies the dilation radius for determining the ROI for
 each label.}
 
-\item{neighborhoodRadiusStage1}{specifies which voxel neighbors should be included in
-prediction for Stage 1.  The user can specify a scalar or vector but it must match
+\item{neighborhoodRadius}{specifies which voxel neighbors should be included in
+prediction.  The user can specify a scalar or vector but it must match
 with what was used for training.}
-
-\item{neighborhoodRadiusStage2}{specifies which voxel neighbors should be included in
-prediction for Stage 2.  The user can specify a scalar or vector but it must match
-with what was used for training.}
-
-\item{useLabelDistances}{if TRUE, Euclidean distance maps for each label are
-created and added to the list of featureImages.  This feature image type
-was recommended in Wang et al.}
 
 \item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are normalized
-by the mean of the voxels in that ROI}
+by the mean of the voxels in that ROI.  Can be a vector (one element per feature).}
 }
 \value{
 a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
@@ -60,10 +40,71 @@ a list consisting of the refined segmentation estimate (RefinedSegmentationImage
 \description{
 A random forest implementation of the corrective learning wrapper introduced
 in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
-The prediction process involves using the two-stage training models (per label)
-to refine an initial segmentation.  The two stages of refinement are:
-    Stage 1:  Predict potentially misclassified voxels per label
-    Stage 2:  Predict background/foreground voxels per label
+The prediction process involves using the label-specific training models
+to refine an initial segmentation.
+}
+\examples{
+\dontrun{
+
+ library( ANTsR )
+ library( ggplot2 )
+
+ imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
+
+ # Perform simple 3-tissue segmentation.  For convenience we are going to use
+ # atropos segmentation to define the "ground-truth" segmentations and the kmeans
+ # to define the segmentation we want to "correct".  We collect feature images for
+ # each image.  The gradient and laplacian images chosen below as feature images
+ # are simply selected for convenience.
+
+ segmentationLabels <- c( 1, 2, 3 )
+
+ featureImageNames <- c( 'T1', 'Gradient', 'Laplacian' )
+
+ images <- list()
+ kmeansSegs <- list()
+ atroposSegs <- list()
+ featureImages <- list()
+
+ for( i in 1:length( imageIDs ) )
+   {
+   cat( "Processing image", imageIDs[i], "\\n" )
+   images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
+   mask <- getMask( images[[i]] )
+   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], length( segmentationLabels ), mask, mrf = 0.0 )$segmentation
+   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]", m = "[0.25,1x1]", c = "[5,0]" )$segmentation
+
+   featureImageSetPerImage <- list()
+   featureImageSetPerImage[[1]] <- images[[i]]
+   featureImageSetPerImage[[2]] <- iMath( images[[i]], "Grad", 1.0 )
+   featureImageSetPerImage[[3]] <- iMath( images[[i]], "Laplacian", 1.0 )
+   featureImages[[i]] <- featureImageSetPerImage
+   }
+
+ # Perform training.  We train on images "r27", "r30", "r62", "r64", "r85" and
+ # test/predict on image "r16".
+
+ cat( "\\nTraining\\n\\n" )
+
+ segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
+   truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
+   featureImageNames = featureImageNames, labelSet = segmentationLabels,
+   maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
+   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
+
+ cat( "\\nPrediction\\n\\n" )
+
+ refinement <- segmentationRefinement.predict(
+   segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
+   segLearning$LabelModels, featureImages[[1]], featureImageNames,
+   dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
+   normalizeSamplesPerLabel = TRUE )
+
+ # Compare "ground truth" = atroposSegs[[1]] with refinement$RefinedSegmentationImage
+
+  antsImageWrite( refinement$RefinedSegmentationImage, "r16RefinedSegmentation.nii.gz" )
+
+}
 }
 \author{
 Tustison NJ
