@@ -24,7 +24,10 @@ the above-cited paper.}
 Must be specified.}
 
 \item{dilationRadius}{specifies the dilation radius for determining the ROI for
-each label.}
+each label using binary morphology.  Alternatively, the user can specify a
+float distance value, e.g., "dilationRadius = '2.75mm'", to employ an isotropic
+dilation based on physical distance.  For the latter, the distance value followed
+by the character string 'mm' (for millimeters) is necessary.}
 
 \item{neighborhoodRadius}{specifies which voxel neighbors should be included in
 prediction.  The user can specify a scalar or vector but it must match

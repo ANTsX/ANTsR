@@ -20,7 +20,10 @@
 #' @param maximumNumberOfSamplesPerClass specified the maximum number of samples
 #'        used to build the model for each element of the labelSet.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
-#'        each label.
+#'        each label using binary morphology.  Alternatively, the user can specify a
+#'        float distance value, e.g., "dilationRadius = '2.75mm'", to employ an isotropic
+#'        dilation based on physical distance.  For the latter, the distance value followed
+#'        by the character string 'mm' (for millimeters) is necessary.
 #' @param neighborhoodRadius specifies which voxel neighbors should be included in
 #'        building the model.  The user can specify a scalar or vector.
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
@@ -205,7 +208,15 @@ for( l in 1:length( labelSet ) )
     segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImages[[i]], 'float' ), label, label, 1, 0 )
     segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
 
-    maskImage <- iMath( segmentationSingleLabelImage, "MD", dilationRadius )
+    maskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
+    if( ! is.character( dilationRadius ) )
+      {
+      maskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+      } else {
+      dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
+      distanceImage <- iMath( segmentationSingleLabelImage, "D" )
+      maskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
+      }
     maskArray <- as.array( maskImage )
 
     if( length( which( maskArray != 0 ) ) == 0 )
@@ -350,7 +361,10 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param featureImageNames is a vector of character strings naming the set of features.
 #'        Must be specified.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
-#'        each label.
+#'        each label using binary morphology.  Alternatively, the user can specify a
+#'        float distance value, e.g., "dilationRadius = '2.75mm'", to employ an isotropic
+#'        dilation based on physical distance.  For the latter, the distance value followed
+#'        by the character string 'mm' (for millimeters) is necessary.
 #' @param neighborhoodRadius specifies which voxel neighbors should be included in
 #'        prediction.  The user can specify a scalar or vector but it must match
 #'        with what was used for training.
@@ -513,7 +527,15 @@ for( l in 1:length( labelSet ) )
   segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImage, 'float' ), label, label, 1, 0 )
   segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
 
-  maskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+  maskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
+  if( ! is.character( dilationRadius ) )
+    {
+    maskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+    } else {
+    dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
+    distanceImage <- iMath( segmentationSingleLabelImage, "D" )
+    maskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
+    }
   maskArray <- as.array( maskImage )
   maskArrayIndices <- which( maskArray != 0 )
 
