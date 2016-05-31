@@ -579,7 +579,7 @@ for( l in 1:length( labelSet ) )
   matchedVoxelProbabilities <- subjectProbabilitiesPerLabel[, 2]
 
   foregroundProbabilitiesPerLabel[l, maskArrayIndices] <- mismatchedVoxelProbabilities
-  foregroundProbabilitiesPerLabel[l, maskArrayIndices[which( matchedVoxelProbabilities > 0.5 & segmentationSingleLabelArray == 1 )]] <- matchedVoxelProbabilities
+  foregroundProbabilitiesPerLabel[l, maskArrayIndices[which( foregroundProbabilitiesPerLabel[l,] <= 0.5 & segmentationSingleLabelArray == 1 )]] <- matchedVoxelProbabilities
 
   foregroundProbabilityImages[[l]] <- as.antsImage( array( foregroundProbabilitiesPerLabel[l,], dim = dim( segmentationArray ) ), reference = segmentationImage )
   }
