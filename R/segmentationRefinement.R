@@ -229,8 +229,13 @@ for( l in 1:length( labelSet ) )
     truthSingleLabelArray <- as.array( truthSingleLabelImage )
 
     mislabeledVoxelsMaskArray <- ( truthSingleLabelArray - segmentationSingleLabelArray )
-    mislabeledVoxelsMaskArray[which( mislabeledVoxelsMaskArray != 0 )] <- binaryLabelSet[1]
-    mislabeledVoxelsMaskArray[which( mislabeledVoxelsMaskArray == 0 )] <- binaryLabelSet[2]
+    mislabeledForegroundIndices <- which( mislabeledVoxelsMaskArray > 0 )
+    mislabeledBackgroundIndices <- which( mislabeledVoxelsMaskArray < 0 )
+    correctlyLabeledIndices <- which( mislabeledVoxelsMaskArray == 0 )
+
+    mislabeledVoxelsMaskArray[mislabeledForegroundIndices] <- binaryLabelSet[1]
+    mislabeledVoxelsMaskArray[correctlyLabeledIndices] <- binaryLabelSet[2]
+    mislabeledVoxelsMaskArray[mislabeledBackgroundIndices] <- 0
     mislabeledVoxelsMaskArray <- mislabeledVoxelsMaskArray * maskArray
 
     binaryMaskArray <- maskArray
