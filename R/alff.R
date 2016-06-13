@@ -22,7 +22,7 @@ alffmap <- function( x, flo=0.01, fhi=0.1, tr=1, detrend=TRUE )
   {
   temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE, detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
   fselect = ( temp$freq >= flo & temp$freq <= fhi )
-  denom = sum( temp$spec )
-  numer = sum( temp$spec[ fselect ] )
+  denom = sqrt( sum( temp$spec ) )
+  numer = sqrt( sum( temp$spec[ fselect ] ) )
   return( c( numer, numer/denom ) )
   }
