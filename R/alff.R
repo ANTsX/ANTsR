@@ -10,6 +10,7 @@
 #' @param fhi high frequency, typically 0.1
 #' @param tr the period associated with the vector x (inverse of frequency)
 #' @param detrend detrend the input time series
+#' @param takesqrt take the sqrt of the computed values
 #' @return vector is output showing ALFF and fALFF values
 #' @author Avants BB
 #' @examples
@@ -18,11 +19,13 @@
 #' fallf = apply( mat, FUN=alffmap, MARGIN=2 )
 #'
 #' @export alffmap
-alffmap <- function( x, flo=0.01, fhi=0.1, tr=1, detrend=TRUE )
+alffmap <- function( x, flo=0.01, fhi=0.1, tr=1, detrend=TRUE, takesqrt=FALSE )
   {
-  temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE, detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
+  temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE,
+    detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
   fselect = ( temp$freq >= flo & temp$freq <= fhi )
-  denom = sqrt( sum( temp$spec ) )
-  numer = sqrt( sum( temp$spec[ fselect ] ) )
+  if ( takesqrt ) denom = sqrt( sum( temp$spec ) ) else denom = sum( temp$spec )
+  if ( takesqrt )
+    numer = sqrt( sum( temp$spec[ fselect ] ) ) else numer = sum( temp$spec[ fselect ] )
   return( c( numer, numer/denom ) )
   }

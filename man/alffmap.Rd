@@ -4,7 +4,8 @@
 \alias{alffmap}
 \title{alffmap}
 \usage{
-alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE)
+alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE,
+  takesqrt = FALSE)
 }
 \arguments{
 \item{x}{input vector for the time series of interest}
@@ -16,6 +17,8 @@ alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE)
 \item{tr}{the period associated with the vector x (inverse of frequency)}
 
 \item{detrend}{detrend the input time series}
+
+\item{takesqrt}{take the sqrt of the computed values}
 }
 \value{
 vector is output showing ALFF and fALFF values
