@@ -199,53 +199,58 @@ for( l in 1:length( labelSet ) )
     message( "  Sampling data from subject ", i )
 
     # Get the ROI mask from the segmentation image for the current label.  Within that ROI,
-    # find which voxels are mislabeled.  Within that ROI mask, the mislabeled voxels are
-    # given the '-1' label while correctly labeled voxels are given the '1' label.  These
-    # mislabeled and correctly labeled voxels are given in the variable "mislabeledVoxelsMaskArray"
+    # find which voxels are mislabeled.  These mislabeled and correctly labeled voxels are
+    # given in the variable "mislabeledVoxelsMaskArray"
 
-    binaryLabelSet <- c( -1, 1 )
+    truePositiveLabel <- 2
+    trueNegativeLabel <- 1
+    falseNegativeLabel <- -1       # type II
+    falsePositiveLabel <- -2       # type I
 
     segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImages[[i]], 'float' ), label, label, 1, 0 )
     segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
 
-    maskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
-    if( ! is.character( dilationRadius ) )
-      {
-      maskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-      } else {
-      dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
-      distanceImage <- iMath( segmentationSingleLabelImage, "D" )
-      maskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
-      }
-    maskArray <- as.array( maskImage )
-
-    if( length( which( maskArray != 0 ) ) == 0 )
+    if( length( which( segmentationSingleLabelArray == 1 ) ) == 0 )
       {
       warning( "Warning:  No voxels exist for label ", label, " of subject ", i )
       next
       }
 
+    roiMaskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
+    if( ! is.character( dilationRadius ) )
+      {
+      roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+      roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
+      roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+      } else {
+      dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
+      distanceImage <- iMath( roiMaskImage, "MaurerDistance" )
+      roiMaskImage <- thresholdImage( distanceImage, -dilationRadiusValue, dilationRadiusValue, 1, 0 )
+      }
+    roiMaskArray <- as.array( roiMaskImage )
+
     truthSingleLabelImage <- thresholdImage( antsImageClone( truthLabelImages[[i]], 'float' ), label, label, 1, 0 )
     truthSingleLabelArray <- as.array( truthSingleLabelImage )
 
     mislabeledVoxelsMaskArray <- ( truthSingleLabelArray - segmentationSingleLabelArray )
-    mislabeledForegroundIndices <- which( mislabeledVoxelsMaskArray > 0 )
-    mislabeledBackgroundIndices <- which( mislabeledVoxelsMaskArray < 0 )
-    correctlyLabeledIndices <- which( mislabeledVoxelsMaskArray == 0 )
+    falseNegativeIndices <- which( mislabeledVoxelsMaskArray > 0 )
+    falsePositiveIndices <- which( mislabeledVoxelsMaskArray < 0 )
+    truePositiveIndices <- which( mislabeledVoxelsMaskArray == 0 & truthSingleLabelArray == 1 )
+    trueNegativeIndices <- which( mislabeledVoxelsMaskArray == 0 & truthSingleLabelArray == 0 )
 
-    mislabeledVoxelsMaskArray[mislabeledForegroundIndices] <- binaryLabelSet[1]
-    mislabeledVoxelsMaskArray[correctlyLabeledIndices] <- binaryLabelSet[2]
-    mislabeledVoxelsMaskArray[mislabeledBackgroundIndices] <- 0
-    mislabeledVoxelsMaskArray <- mislabeledVoxelsMaskArray * maskArray
+    mislabeledVoxelsMaskArray[falseNegativeIndices] <- falseNegativeLabel
+    mislabeledVoxelsMaskArray[falsePositiveIndices] <- falsePositiveLabel
+    mislabeledVoxelsMaskArray[trueNegativeIndices] <- trueNegativeLabel
+    mislabeledVoxelsMaskArray[truePositiveIndices] <- truePositiveLabel
+    mislabeledVoxelsMaskArray <- mislabeledVoxelsMaskArray * roiMaskArray
 
-    binaryMaskArray <- maskArray
-    binaryTruthArray <- mislabeledVoxelsMaskArray
+    binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
 
     # Ensure that the samples per label are balanced in each subject
     minimumNumberOfSamplesInSubjectData <- maximumNumberOfSamplesPerClass
     for( n in 1:length( binaryLabelSet ) )
       {
-      labelIndices <- which( binaryTruthArray == binaryLabelSet[n] & binaryMaskArray == 1 )
+      labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
       numberOfLabelIndices <- length( labelIndices )
       message( "    Number of label indices (label ", binaryLabelSet[n], ") = ", numberOfLabelIndices )
       if( numberOfLabelIndices < minimumNumberOfSamplesInSubjectData )
@@ -259,7 +264,7 @@ for( l in 1:length( labelSet ) )
     numberOfSamplesPerLabelInSubjectData <- rep( 0, length( binaryLabelSet ) )
     for( n in 1:length( binaryLabelSet ) )
       {
-      labelIndices <- which( binaryTruthArray == binaryLabelSet[n] & binaryMaskArray == 1 )
+      labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
       numberOfLabelIndices <- length( labelIndices )
 
       numberOfSamplesPerLabelInSubjectData[n] <- min( minimumNumberOfSamplesInSubjectData, numberOfLabelIndices )
@@ -532,24 +537,25 @@ for( l in 1:length( labelSet ) )
   segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImage, 'float' ), label, label, 1, 0 )
   segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
 
-  maskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
+  if( length( which( segmentationSingleLabelArray == 1 ) ) == 0 )
+    {
+    warning( "Warning:  No voxels exist for label ", label, " of subject ", i )
+    next
+    }
+
+  roiMaskImage <- antsImageClone( segmentationSingleLabelImage, 'float' )
   if( ! is.character( dilationRadius ) )
     {
-    maskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+    roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
+    roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
+    roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
     } else {
     dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
-    distanceImage <- iMath( segmentationSingleLabelImage, "D" )
-    maskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
+    distanceImage <- iMath( roiMaskImage, "D" )
+    roiMaskImage <- thresholdImage( distanceImage, -dilationRadiusValue, dilationRadiusValue, 1, 0 )
     }
-  maskArray <- as.array( maskImage )
-  maskArrayIndices <- which( maskArray != 0 )
-
-  if( length( maskArrayIndices ) == 0 )
-    {
-    warning( "No voxels exist for label ", label, ".\n" )
-    # we initialized the foreground probabilities to 0 so we simply go on to the next label.
-    next;
-    }
+  roiMaskArray <- as.array( roiMaskImage )
+  roiMaskArrayIndices <- which( roiMaskArray != 0 )
 
   wholeMaskImage <- segmentationSingleLabelArray
   wholeMaskImage[which( wholeMaskImage != 1 )] <- 1
@@ -557,11 +563,11 @@ for( l in 1:length( labelSet ) )
 
   # Accumulate data for prediction
 
-  subjectDataPerLabel <- matrix( NA, nrow = length( maskArrayIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
+  subjectDataPerLabel <- matrix( NA, nrow = length( roiMaskArrayIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
   for( j in 1:length( featureImages ) )
     {
     featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
-    values <- featureImageNeighborhoodValues[, maskArrayIndices]
+    values <- featureImageNeighborhoodValues[, roiMaskArrayIndices]
     if( normalizeSamplesPerLabel[j] )
       {
       featureImagesArray <- as.array( featureImages[[j]] )
@@ -580,15 +586,20 @@ for( l in 1:length( labelSet ) )
 
   subjectProbabilitiesPerLabel <- predict( labelModels[[l]], subjectDataPerLabel, type = "prob" )
 
-  mismatchedVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
-  mismatchedVoxelArray[maskArrayIndices] <- subjectProbabilitiesPerLabel[, 1]
-  matchedVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
-  matchedVoxelArray[maskArrayIndices] <- subjectProbabilitiesPerLabel[, 2]
+  foregroundChangeVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
+  foregroundChangeVoxelArray[roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 1]
+  noChangeVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
+  noChangeVoxelArray[roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 2] + subjectProbabilitiesPerLabel[, 3]
 
-  foregroundProbabilitiesPerLabel[l,] <- mismatchedVoxelArray
+#   truePositiveLabel <- 2
+#   trueNegativeLabel <- 1
+#   falseNegativeLabel <- -1       # type II
+#   falsePositiveLabel <- -2       # type I
 
-  matchedVoxelIndices <-  which( segmentationSingleLabelArray == 1 )
-  foregroundProbabilitiesPerLabel[l, matchedVoxelIndices] <- matchedVoxelArray[matchedVoxelIndices]
+#  binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
+
+  foregroundProbabilitiesPerLabel[l,] <- segmentationSingleLabelArray # + truePositives + falseNegatives
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 4] + subjectProbabilitiesPerLabel[, 2]
 
   foregroundProbabilityImages[[l]] <- as.antsImage( array( foregroundProbabilitiesPerLabel[l,], dim = dim( segmentationArray ) ), reference = segmentationImage )
   }
