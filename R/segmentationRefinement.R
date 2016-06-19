@@ -596,11 +596,6 @@ for( l in 1:length( labelSet ) )
 
   subjectProbabilitiesPerLabel <- predict( labelModels[[l]], subjectDataPerLabel, type = "prob" )
 
-  foregroundChangeVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
-  foregroundChangeVoxelArray[roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 1]
-  noChangeVoxelArray <- array( 0, dim = length( segmentationSingleLabelArray ) )
-  noChangeVoxelArray[roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 2] + subjectProbabilitiesPerLabel[, 3]
-
 #   truePositiveLabel <- 2
 #   trueNegativeLabel <- 1
 #   falseNegativeLabel <- -1       # type II
