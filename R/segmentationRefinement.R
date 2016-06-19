@@ -225,7 +225,12 @@ for( l in 1:length( labelSet ) )
       } else {
       dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
       distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-      roiMaskImage <- thresholdImage( distanceImage, 0, dilationRadiusValue, 1, 0 )
+
+      segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
+      distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
+
+      roiMaskImage <- thresholdImage( distanceImage, 1e-10, dilationRadiusValue, 1, 0 ) +
+                      thresholdImage( distanceInverseImage, 1e-10, dilationRadiusValue, 1, 0 )
       }
     roiMaskArray <- as.array( roiMaskImage )
 
@@ -552,7 +557,12 @@ for( l in 1:length( labelSet ) )
     } else {
     dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
     distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-    roiMaskImage <- thresholdImage( distanceImage, 0, dilationRadiusValue, 1, 0 )
+
+    segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
+    distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
+
+    roiMaskImage <- thresholdImage( distanceImage, 1e-10, dilationRadiusValue, 1, 0 ) +
+                    thresholdImage( distanceInverseImage, 1e-10, dilationRadiusValue, 1, 0 )
     }
   roiMaskArray <- as.array( roiMaskImage )
   roiMaskArrayIndices <- which( roiMaskArray != 0 )
