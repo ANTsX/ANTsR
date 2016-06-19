@@ -598,8 +598,12 @@ for( l in 1:length( labelSet ) )
 
 #  binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
 
-  foregroundProbabilitiesPerLabel[l,] <- segmentationSingleLabelArray # + truePositives + falseNegatives
-  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices] <- subjectProbabilitiesPerLabel[, 4] + subjectProbabilitiesPerLabel[, 2]
+  roiMaskArrayTruePositiveIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 1 )
+  roiMaskArrayFalseNegativeIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 0 )
+
+  foregroundProbabilitiesPerLabel[l,] <- segmentationSingleLabelArray
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayTruePositiveIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayTruePositiveIndices, 4]
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayFalseNegativeIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayFalseNegativeIndices, 2]
 
   foregroundProbabilityImages[[l]] <- as.antsImage( array( foregroundProbabilitiesPerLabel[l,], dim = dim( segmentationArray ) ), reference = segmentationImage )
   }
