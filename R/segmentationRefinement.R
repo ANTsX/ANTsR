@@ -17,8 +17,9 @@
 #'        importance of specific features.
 #' @param labelSet a vector specifying the labels of interest.  If not specified,
 #'         the full set is determined from the truthLabelImages.
-#' @param maximumNumberOfSamplesPerClass specified the maximum number of samples
-#'        used to build the model for each element of the labelSet.
+#' @param maximumNumberOfSamplesOrProportionPerClass specified the maximum number of samples
+#'        used to build the model for each element of the labelSet.  If <= 1, we use it as
+#'        as a proportion of the total number of voxels.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
 #'        each label using binary morphology.  Alternatively, the user can specify a
 #'        float distance value, e.g., "dilationRadius = '2.75mm'", to employ an isotropic
@@ -81,7 +82,7 @@
 #'  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-#'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
+#'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
 #'    normalizeSamplesPerLabel = TRUE )
 #'
 #'  cat( "\nGenerating importance plots.\n\n" )
@@ -110,7 +111,7 @@
 
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
-  maximumNumberOfSamplesPerClass = 500, dilationRadius = 2,
+  maximumNumberOfSamplesOrProportionPerClass = 1, dilationRadius = 2,
   neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
 {
 
@@ -250,29 +251,51 @@ for( l in 1:length( labelSet ) )
     mislabeledVoxelsMaskArray <- mislabeledVoxelsMaskArray * roiMaskArray
 
     binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
+    binaryLabelSetNames <- c( "false positive", "false negative", "true negative", "true positive" )
 
-    # Ensure that the samples per label are balanced in each subject
-    minimumNumberOfSamplesInSubjectData <- maximumNumberOfSamplesPerClass
-    for( n in 1:length( binaryLabelSet ) )
+    numberOfSamplesPerLabelInSubjectData <- rep( 0, length( binaryLabelSet ) )
+
+    if( maximumNumberOfSamplesOrProportionPerClass <= 1 )
       {
-      labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
-      numberOfLabelIndices <- length( labelIndices )
-      message( "    Number of label indices (label ", binaryLabelSet[n], ") = ", numberOfLabelIndices )
-      if( numberOfLabelIndices < minimumNumberOfSamplesInSubjectData )
+
+      for( n in 1:length( binaryLabelSet ) )
         {
-        minimumNumberOfSamplesInSubjectData <- numberOfLabelIndices
+        labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
+        numberOfLabelIndices <- length( labelIndices )
+        numberOfSamplesPerLabelInSubjectData[n] <- floor( numberOfLabelIndices * maximumNumberOfSamplesOrProportionPerClass )
+        message( "    Number of ", binaryLabelSetNames[n], " voxels = ", numberOfLabelIndices, "  (n samples = ", numberOfSamplesPerLabelInSubjectData[n], ")" )
         }
+
+      } else {
+
+      # Ensure that the samples per label are balanced in each subject
+      minimumNumberOfSamplesInSubjectData <- maximumNumberOfSamplesOrProportionPerClass
+
+      for( n in 1:length( binaryLabelSet ) )
+        {
+        labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
+        numberOfLabelIndices <- length( labelIndices )
+        message( "    Number of ", binaryLabelSetNames[n], " voxels = ", numberOfLabelIndices )
+        if( numberOfLabelIndices < minimumNumberOfSamplesInSubjectData )
+          {
+          minimumNumberOfSamplesInSubjectData <- numberOfLabelIndices
+          }
+        }
+
+      for( n in 1:length( binaryLabelSet ) )
+        {
+        numberOfSamplesPerLabelInSubjectData[n] <- min( minimumNumberOfSamplesInSubjectData, numberOfLabelIndices )
+        }
+
+      message( "    Number of samples per class = ",  minimumNumberOfSamplesInSubjectData )
       }
-    message( "    Number of samples per label = ",  minimumNumberOfSamplesInSubjectData )
 
     truthLabelIndices <- list()
-    numberOfSamplesPerLabelInSubjectData <- rep( 0, length( binaryLabelSet ) )
     for( n in 1:length( binaryLabelSet ) )
       {
       labelIndices <- which( mislabeledVoxelsMaskArray == binaryLabelSet[n] & roiMaskArray == 1 )
       numberOfLabelIndices <- length( labelIndices )
 
-      numberOfSamplesPerLabelInSubjectData[n] <- min( minimumNumberOfSamplesInSubjectData, numberOfLabelIndices )
       if( numberOfLabelIndices > 0 )
         {
         truthLabelIndices[[n]] <- labelIndices[sample.int( numberOfLabelIndices, numberOfSamplesPerLabelInSubjectData[n], replace = FALSE )]
@@ -437,7 +460,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #'  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-#'    maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
+#'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
 #'    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
 #'
 #'  cat( "\nPrediction\n\n" )

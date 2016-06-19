@@ -6,7 +6,7 @@
 \usage{
 segmentationRefinement.train(featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
-  maximumNumberOfSamplesPerClass = 500, dilationRadius = 2,
+  maximumNumberOfSamplesOrProportionPerClass = 1, dilationRadius = 2,
   neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
 }
 \arguments{
@@ -27,8 +27,9 @@ importance of specific features.}
 \item{labelSet}{a vector specifying the labels of interest.  If not specified,
 the full set is determined from the truthLabelImages.}
 
-\item{maximumNumberOfSamplesPerClass}{specified the maximum number of samples
-used to build the model for each element of the labelSet.}
+\item{maximumNumberOfSamplesOrProportionPerClass}{specified the maximum number of samples
+used to build the model for each element of the labelSet.  If <= 1, we use it as
+as a proportion of the total number of voxels.}
 
 \item{dilationRadius}{specifies the dilation radius for determining the ROI for
 each label using binary morphology.  Alternatively, the user can specify a
@@ -99,7 +100,7 @@ for each label in the initial segmentation data.
  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-   maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
+   maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
    normalizeSamplesPerLabel = TRUE )
 
  cat( "\\nGenerating importance plots.\\n\\n" )
