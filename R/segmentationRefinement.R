@@ -630,6 +630,7 @@ for( l in 1:length( labelSet ) )
   roiMaskArrayFalseNegativeIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 0 )
 
   foregroundProbabilitiesPerLabel[l,] <- segmentationSingleLabelArray
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices] <- 0
   foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayTruePositiveIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayTruePositiveIndices, 4]
   foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayFalseNegativeIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayFalseNegativeIndices, 2]
 
@@ -643,8 +644,6 @@ if( ! is.element( 0, labelSet ) )
   }
 
 refinedSegmentationArray <- appendedLabelSet[max.col( t( foregroundProbabilitiesPerLabel ), ties.method = 'last' )]
-
-refinedSegmentationArray[which( refinedSegmentationArray == 0 )] <- segmentationArray[which( refinedSegmentationArray == 0 )]
 refinedSegmentationImage <- as.antsImage( array( refinedSegmentationArray, dim = dim( segmentationArray ) ), reference = segmentationImage )
 
 return ( list( RefinedSegmentationImage = refinedSegmentationImage, ForegroundProbabilityImages = foregroundProbabilityImages ) )
