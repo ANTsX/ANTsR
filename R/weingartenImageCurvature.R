@@ -27,5 +27,5 @@ weingartenImageCurvature <- function( image, sigma=1.0, opt='mean' ) {
   if ( opt == 'gaussian' ) optnum=6
   if ( opt == 'characterize' ) optnum=5
   .Call("weingartenImageCurvature",
-    image, sigma, optnum, PACKAGE = "ANTsR")
+    antsImageClone(image), sigma, optnum, PACKAGE = "ANTsR")
 }
