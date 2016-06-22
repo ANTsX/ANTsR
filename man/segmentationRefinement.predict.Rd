@@ -92,7 +92,7 @@ to refine an initial segmentation.
  segLearning <- segmentationRefinement.train( featureImages = featureImages[2:6],
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
-   maximumNumberOfSamplesPerClass = 100, dilationRadius = 1,
+   maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
 
  cat( "\\nPrediction\\n\\n" )
