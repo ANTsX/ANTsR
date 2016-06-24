@@ -33,7 +33,7 @@ invariantImageSimilarity <- function(
   thetas3 = seq( from = 0, to = 360, length.out = 5 ),
   scaleImage = 1,
   doReflection = 0,
-  txfn = "") {
+  txfn = NA ) {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)
@@ -42,12 +42,9 @@ invariantImageSimilarity <- function(
     print("input images must have float pixeltype")
     return(NA)
   }
+  if ( is.na( txfn ) )
+    txfn = tempfile( fileext = ".mat" )
   # convert to radians
-  if ( in_image1@dimension == 3 )
-    {
-    if ( all( is.na( thetas2 ) ) ) thetas2 = 0
-    if ( all( is.na( thetas3 ) ) ) thetas3 = 0
-    }
   thetain <- thetas
   thetain <- (thetas * pi)/180   # convert to radians
   thetain2 <- (thetas2 * pi)/180
@@ -84,8 +81,7 @@ invariantImageSimilarity <- function(
   r4 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 3, txfn4, PACKAGE = "ANTsR")
-  ww <- which.min(c(min(r1), min(r2), min(r3), min(r4)))
-  print(ww)
+  ww <- which.min(c(min(r1[,1]), min(r2[,1]), min(r3[,1]), min(r4[,1])))
   if (ww == 1) {
     return(list(r1, txfn1))
   }
