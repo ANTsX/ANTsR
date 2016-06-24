@@ -24,7 +24,7 @@
 #' mapped = antsApplyTransforms( fi, mi, transformlist=mival[[2]] )
 #' areg = antsRegistration( fi, mi, typeofTransform="Affine",
 #'   initialTransform=mival[[2]] )
-#' bestInd = which.min( mival[[1]][1] )
+#' bestInd = which.min( mival[[1]]$MetricValue )
 #' affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
 #'   parameters = mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ],
 #'   fixed.parameters = mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
@@ -76,7 +76,7 @@ invariantImageSimilarity <- function(
     pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
     pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
     colnames( r1 ) = c( "MetricValue", pnames )
-    return( list( r1, txfn ) )
+    return( list( data.frame( r1 ), txfn ) )
   }
   txfn1 <- tempfile(fileext = ".mat")
   txfn2 <- tempfile(fileext = ".mat")
@@ -102,15 +102,15 @@ invariantImageSimilarity <- function(
   colnames( r4 ) = c( "MetricValue", pnames )
   ww <- which.min(c(min(r1[,1]), min(r2[,1]), min(r3[,1]), min(r4[,1])))
   if (ww == 1) {
-    return(list(r1, txfn1))
+    return(list( data.frame( r1 ), txfn1))
   }
   if (ww == 2) {
-    return(list(r2, txfn2))
+    return(list( data.frame( r2 ), txfn2))
   }
   if (ww == 3) {
-    return(list(r3, txfn3))
+    return(list( data.frame( r3 ), txfn3))
   }
   if (ww == 4) {
-    return(list(r4, txfn4))
+    return(list( data.frame( r4 ), txfn4))
   }
 }

@@ -44,7 +44,7 @@ mival<-invariantImageSimilarity( fi, mi, thetas = c(0,10,20) )
 mapped = antsApplyTransforms( fi, mi, transformlist=mival[[2]] )
 areg = antsRegistration( fi, mi, typeofTransform="Affine",
   initialTransform=mival[[2]] )
-bestInd = which.min( mival[[1]][1] )
+bestInd = which.min( mival[[1]]$MetricValue )
 affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
   parameters = mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ],
   fixed.parameters = mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
