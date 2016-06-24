@@ -63,7 +63,9 @@ invariantImageSimilarity <- function(
     r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
       thetain, thetain2, thetain3, localSearchIterations,
       metric, scaleImage, doReflection, txfn, PACKAGE = "ANTsR")
-    return( list(r1, txfn ) )
+    pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
+    colnames( r1 ) = c( "MetricValue", pnames )
+    return( list( r1, txfn ) )
   }
   txfn1 <- tempfile(fileext = ".mat")
   txfn2 <- tempfile(fileext = ".mat")
@@ -72,15 +74,20 @@ invariantImageSimilarity <- function(
   r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 0, txfn1, PACKAGE = "ANTsR")
+  pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
+  colnames( r1 ) = c( "MetricValue", pnames )
   r2 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 1, txfn2, PACKAGE = "ANTsR")
+  colnames( r2 ) = c( "MetricValue", pnames )
   r3 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 2, txfn3, PACKAGE = "ANTsR")
+  colnames( r3 ) = c( "MetricValue", pnames )
   r4 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 3, txfn4, PACKAGE = "ANTsR")
+  colnames( r4 ) = c( "MetricValue", pnames )
   ww <- which.min(c(min(r1[,1]), min(r2[,1]), min(r3[,1]), min(r4[,1])))
   if (ww == 1) {
     return(list(r1, txfn1))
