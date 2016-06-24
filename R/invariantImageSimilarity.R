@@ -5,25 +5,35 @@
 #'
 #' @param in_image1 reference image
 #' @param in_image2 moving image
-#' @param thetas numeric vector of search angles
 #' @param localSearchIterations integer controlling local search in multistart
 #' @param metric which metric MI or GC (string)
+#' @param thetas numeric vector of search angles in degrees
+#' @param thetas2 numeric vector of search angles in degrees around principal axis 2 (3D)
+#' @param thetas3 numeric vector of search angles in degrees around principal axis 3 (3D)
 #' @param scaleImage global scale
 #' @param doReflection reflect image about principal axis
 #' @param txfn if present, write optimal tx to .mat file
-#' @return vector of similarity values
+#' @return dataframe with metric values and transformation parameters
 #' @author Brian B. Avants
 #' @keywords image similarity
 #' @examples
 #
-#' fi<-antsImageRead( getANTsRData("r16"))
-#' mi<-antsImageRead( getANTsRData("r64"))
-#' mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
+#' fi<-antsImageRead( getANTsRData("r16") )
+#' mi<-antsImageRead( getANTsRData("r64") )
+#' mival<-invariantImageSimilarity( fi, mi, thetas = c(0,10,20) )
 #'
 #' @export invariantImageSimilarity
-invariantImageSimilarity <- function(in_image1, in_image2,
-   thetas, localSearchIterations = 0,
-  metric = "MI", scaleImage = 1, doReflection = 0, txfn = "") {
+invariantImageSimilarity <- function(
+  in_image1,
+  in_image2,
+  localSearchIterations = 0,
+  metric = "MI",
+  thetas  = seq( from = 0, to = 360, length.out = 5 ),
+  thetas2 = seq( from = 0, to = 360, length.out = 5 ),
+  thetas3 = seq( from = 0, to = 360, length.out = 5 ),
+  scaleImage = 1,
+  doReflection = 0,
+  txfn = "") {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)
@@ -32,10 +42,16 @@ invariantImageSimilarity <- function(in_image1, in_image2,
     print("input images must have float pixeltype")
     return(NA)
   }
-  # convert to radians if necessary
+  # convert to radians
+  if ( in_image1@dimension == 3 )
+    {
+    if ( all( is.na( thetas2 ) ) ) thetas2 = 0
+    if ( all( is.na( thetas3 ) ) ) thetas3 = 0
+    }
   thetain <- thetas
-  if (max(abs(thetas)) > 2)
-    thetain <- (thetas * pi)/180
+  thetain <- (thetas * pi)/180   # convert to radians
+  thetain2 <- (thetas2 * pi)/180
+  thetain3 <- (thetas3 * pi)/180
   in_image1 = iMath(in_image1, "Normalize")
   in_image2 = iMath(in_image2, "Normalize")
   if (class(localSearchIterations) != "numeric") {
@@ -47,21 +63,26 @@ invariantImageSimilarity <- function(in_image1, in_image2,
     return(NA)
   }
   if (doReflection == 0) {
-    r1 <- .Call("invariantImageSimilarity", in_image1, in_image2, thetain, localSearchIterations,
+    r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+      thetain, thetain2, thetain3, localSearchIterations,
       metric, scaleImage, doReflection, txfn, PACKAGE = "ANTsR")
-    return(r1)
+    return( list(r1, txfn ) )
   }
   txfn1 <- tempfile(fileext = ".mat")
   txfn2 <- tempfile(fileext = ".mat")
   txfn3 <- tempfile(fileext = ".mat")
   txfn4 <- tempfile(fileext = ".mat")
-  r1 <- .Call("invariantImageSimilarity", in_image1, in_image2, thetain, localSearchIterations,
+  r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+    thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 0, txfn1, PACKAGE = "ANTsR")
-  r2 <- .Call("invariantImageSimilarity", in_image1, in_image2, thetain, localSearchIterations,
+  r2 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+    thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 1, txfn2, PACKAGE = "ANTsR")
-  r3 <- .Call("invariantImageSimilarity", in_image1, in_image2, thetain, localSearchIterations,
+  r3 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+    thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 2, txfn3, PACKAGE = "ANTsR")
-  r4 <- .Call("invariantImageSimilarity", in_image1, in_image2, thetain, localSearchIterations,
+  r4 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+    thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 3, txfn4, PACKAGE = "ANTsR")
   ww <- which.min(c(min(r1), min(r2), min(r3), min(r4)))
   print(ww)

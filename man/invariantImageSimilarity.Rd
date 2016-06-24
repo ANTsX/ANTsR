@@ -4,8 +4,8 @@
 \alias{invariantImageSimilarity}
 \title{similarity metrics between two images as a function of geometry}
 \usage{
-invariantImageSimilarity(in_image1, in_image2, thetas,
-  localSearchIterations = 0, metric = "MI", scaleImage = 1,
+invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
+  metric = "MI", thetas, thetas2, thetas3, scaleImage = 1,
   doReflection = 0, txfn = "")
 }
 \arguments{
@@ -13,11 +13,15 @@ invariantImageSimilarity(in_image1, in_image2, thetas,
 
 \item{in_image2}{moving image}
 
-\item{thetas}{numeric vector of search angles}
-
 \item{localSearchIterations}{integer controlling local search in multistart}
 
 \item{metric}{which metric MI or GC (string)}
+
+\item{thetas}{numeric vector of search angles in degrees}
+
+\item{thetas2}{numeric vector of search angles in degrees around principal axis 2 (3D)}
+
+\item{thetas3}{numeric vector of search angles in degrees around principal axis 3 (3D)}
 
 \item{scaleImage}{global scale}
 
@@ -26,16 +30,16 @@ invariantImageSimilarity(in_image1, in_image2, thetas,
 \item{txfn}{if present, write optimal tx to .mat file}
 }
 \value{
-vector of similarity values
+dataframe with metric values and transformation parameters
 }
 \description{
 compute similarity metric between two images as image is rotated about its
 center w/or w/o optimization
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16"))
-mi<-antsImageRead( getANTsRData("r64"))
-mival<-invariantImageSimilarity( fi, mi, c(0,10,20) )
+fi<-antsImageRead( getANTsRData("r16") )
+mi<-antsImageRead( getANTsRData("r64") )
+mival<-invariantImageSimilarity( fi, mi, thetas = c(0,10,20) )
 
 }
 \author{

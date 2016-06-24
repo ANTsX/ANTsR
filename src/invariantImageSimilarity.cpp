@@ -138,7 +138,8 @@ template< unsigned int ImageDimension >
 SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   typename itk::Image< float , ImageDimension >::Pointer image2,
-  SEXP r_thetas, SEXP r_lsits, SEXP r_WM, SEXP r_scale,
+  SEXP r_thetas, SEXP r_thetas2, SEXP r_thetas3,
+  SEXP r_lsits, SEXP r_WM, SEXP r_scale,
   SEXP r_doreflection, SEXP r_txfn  )
 {
   unsigned int mibins = 20;
@@ -151,8 +152,9 @@ SEXP invariantSimilarityHelper(
     maskimagetype;
   typename maskimagetype::Pointer mask = ITK_NULLPTR;
   Rcpp::NumericVector thetas( r_thetas );
+  Rcpp::NumericVector thetas2( r_thetas2 );
+  Rcpp::NumericVector thetas3( r_thetas3 );
   Rcpp::IntegerVector doReflection( r_doreflection );
-  unsigned int vecsize = thetas.size();
   typedef float  PixelType;
   typedef double RealType;
   RealType bestscale = Rcpp::as< RealType >( r_scale ) ;
@@ -422,19 +424,19 @@ SEXP invariantSimilarityHelper(
     affinesearch->SetIdentity();
     affinesearch->SetCenter( trans2 );
     affinesearch->SetOffset( trans );
-    for ( unsigned int i = 0; i < vecsize; i++ )
+    for ( unsigned int i = 0; i < thetas.size(); i++ )
       {
       RealType ang1 = thetas[i];
       RealType ang2 = 0; // FIXME should be psi
       RealType ang3 = 0; // FIXME should be psi
       if( ImageDimension == 3 )
         {
-        for ( unsigned int jj = 0; jj < vecsize; jj++ )
+        for ( unsigned int jj = 0; jj < thetas2.size(); jj++ )
         {
-        ang2=thetas[jj];
-        for ( unsigned int kk = 0; kk < vecsize; kk++ )
+        ang2=thetas2[jj];
+        for ( unsigned int kk = 0; kk < thetas3.size(); kk++ )
         {
-        ang3=thetas[kk];
+        ang3=thetas3[kk];
         affinesearch->SetIdentity();
         affinesearch->SetCenter( trans2 );
         affinesearch->SetOffset( trans );
@@ -492,25 +494,33 @@ SEXP invariantSimilarityHelper(
       transformWriter->Update();
       }
     metricvalues = mstartOptimizer->GetMetricValuesList();
-    Rcpp::NumericVector vector_r( metricvalues.size() ) ;
+    unsigned int ncols = mstartOptimizer->GetBestParameters().Size() + 1;
+//      1 + ImageDimension;
+    Rcpp::NumericMatrix outMat( metricvalues.size(), ncols );
     for ( unsigned int k = 0; k < metricvalues.size(); k++ )
       {
-      vector_r[k] = metricvalues[k];
+      outMat( k, 0 ) = metricvalues[ k ];
+      typename MetricType::ParametersType resultParams =
+        mstartOptimizer->GetParametersList( )[ k ];
+      for ( unsigned int kp = 0; kp < resultParams.Size(); kp++ )
+        {
+        outMat( k, kp + 1 ) = resultParams[ kp ];
+        }
       }
-    vector_r.attr( "dim" ) = metricvalues.size();
-    return Rcpp::wrap( vector_r );
+    return Rcpp::wrap( outMat );
     }
   else
     {
-    Rcpp::NumericVector vector_r( 1 ) ;
-    vector_r[ 0 ] = 0;
-    return Rcpp::wrap( vector_r );
+    Rcpp::NumericMatrix outMat( 1, 1 );
+    outMat( 0, 0 ) = 0;
+    return Rcpp::wrap( outMat );
     }
 }
 
 // [[myRcpp::export]]
 RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
-  SEXP r_in_image2, SEXP thetas, SEXP localSearchIterations,
+  SEXP r_in_image2, SEXP thetas, SEXP thetas2, SEXP thetas3,
+  SEXP localSearchIterations,
   SEXP whichMetric, SEXP r_scale, SEXP r_doref, SEXP txfn )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
@@ -546,6 +556,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap( invariantSimilarityHelper<2>(
       *antsimage_xptr1, *antsimage_xptr2, thetas,
+      thetas2, thetas3,
       localSearchIterations, whichMetric, r_scale,
       r_doref, txfn ) );
   }
@@ -559,6 +570,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<3>(
       *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
+      thetas2, thetas3,
       localSearchIterations, whichMetric, r_scale,
       r_doref, txfn ) );
     }
@@ -572,6 +584,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
     return Rcpp::wrap(  invariantSimilarityHelper<4>(
       *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
+      thetas2, thetas3,
       localSearchIterations, whichMetric, r_scale,
       r_doref, txfn ) );
     }
