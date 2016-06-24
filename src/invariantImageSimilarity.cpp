@@ -367,7 +367,7 @@ SEXP invariantSimilarityHelper(
       for( It.GoToBegin(); !It.IsAtEnd(); ++It )
         {
         // take every N^th point
-        if ( ct % 10 == 0  )
+        if ( ct % 4 == 0  )
           {
           PointType pt;
           image1->TransformIndexToPhysicalPoint( It.GetIndex(), pt);
