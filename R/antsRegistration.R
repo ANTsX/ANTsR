@@ -138,6 +138,8 @@ antsRegistration <- function( fixed = NA, moving = NA,
         if ( class( initx ) == "antsrTransform" )
           {
           tempTXfilename = tempfile( fileext = ".mat" )
+          initx = invertAntsrTransform( initialTransform )
+          initx = invertAntsrTransform( initx )
           writeAntsrTransform( initx, tempTXfilename )
           initx = tempTXfilename
           }
