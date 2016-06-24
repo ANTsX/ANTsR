@@ -45,9 +45,10 @@ mapped = antsApplyTransforms( fi, mi, transformlist=mival[[2]] )
 areg = antsRegistration( fi, mi, typeofTransform="Affine",
   initialTransform=mival[[2]] )
 bestInd = which.min( mival[[1]]$MetricValue )
+txparams = as.numeric( mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ] )
+txfixedparams = as.numeric( mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
 affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
-  parameters = mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ],
-  fixed.parameters = mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
+  parameters = txparams, fixed.parameters = txfixedparams )
 mapped2 = applyAntsrTransformToImage( affTx, mi, fi )
 
 }
