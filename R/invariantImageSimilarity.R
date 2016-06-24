@@ -21,6 +21,14 @@
 #' fi<-antsImageRead( getANTsRData("r16") )
 #' mi<-antsImageRead( getANTsRData("r64") )
 #' mival<-invariantImageSimilarity( fi, mi, thetas = c(0,10,20) )
+#' mapped = antsApplyTransforms( fi, mi, transformlist=mival[[2]] )
+#' areg = antsRegistration( fi, mi, typeofTransform="Affine",
+#'   initialTransform=mival[[2]] )
+#' bestInd = which.min( mival[[1]][1] )
+#' affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
+#'   parameters = mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ],
+#'   fixed.parameters = mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
+#' mapped2 = applyAntsrTransformToImage( affTx, mi, fi )
 #'
 #' @export invariantImageSimilarity
 invariantImageSimilarity <- function(
@@ -59,11 +67,14 @@ invariantImageSimilarity <- function(
     print("wrong input: metric is not numeric")
     return(NA)
   }
+  idim = in_image1@dimension
+  fpname = paste("FixedParam",1:idim,sep='')
   if (doReflection == 0) {
     r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
       thetain, thetain2, thetain3, localSearchIterations,
       metric, scaleImage, doReflection, txfn, PACKAGE = "ANTsR")
     pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
+    pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
     colnames( r1 ) = c( "MetricValue", pnames )
     return( list( r1, txfn ) )
   }
@@ -75,6 +86,7 @@ invariantImageSimilarity <- function(
     thetain, thetain2, thetain3, localSearchIterations,
     metric, scaleImage, 0, txfn1, PACKAGE = "ANTsR")
   pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
+  pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
   colnames( r1 ) = c( "MetricValue", pnames )
   r2 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,

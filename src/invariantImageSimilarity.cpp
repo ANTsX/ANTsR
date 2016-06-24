@@ -494,8 +494,8 @@ SEXP invariantSimilarityHelper(
       transformWriter->Update();
       }
     metricvalues = mstartOptimizer->GetMetricValuesList();
-    unsigned int ncols = mstartOptimizer->GetBestParameters().Size() + 1;
-//      1 + ImageDimension;
+    unsigned int ncols = mstartOptimizer->GetBestParameters().Size() +
+      1 + ImageDimension;
     Rcpp::NumericMatrix outMat( metricvalues.size(), ncols );
     for ( unsigned int k = 0; k < metricvalues.size(); k++ )
       {
@@ -506,6 +506,10 @@ SEXP invariantSimilarityHelper(
         {
         outMat( k, kp + 1 ) = resultParams[ kp ];
         }
+      // set the fixed parameters
+      unsigned int baseind = resultParams.Size() + 1;
+      for ( unsigned int kp = 0; kp < ImageDimension; kp++ )
+        outMat( k, baseind + kp ) = bestaffine->GetFixedParameters()[ kp ];
       }
     return Rcpp::wrap( outMat );
     }

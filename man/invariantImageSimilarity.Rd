@@ -5,8 +5,9 @@
 \title{similarity metrics between two images as a function of geometry}
 \usage{
 invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
-  metric = "MI", thetas, thetas2, thetas3, scaleImage = 1,
-  doReflection = 0, txfn = "")
+  metric = "MI", thetas = seq(from = 0, to = 360, length.out = 5),
+  thetas2 = seq(from = 0, to = 360, length.out = 5), thetas3 = seq(from = 0,
+  to = 360, length.out = 5), scaleImage = 1, doReflection = 0, txfn = NA)
 }
 \arguments{
 \item{in_image1}{reference image}
@@ -40,6 +41,14 @@ center w/or w/o optimization
 fi<-antsImageRead( getANTsRData("r16") )
 mi<-antsImageRead( getANTsRData("r64") )
 mival<-invariantImageSimilarity( fi, mi, thetas = c(0,10,20) )
+mapped = antsApplyTransforms( fi, mi, transformlist=mival[[2]] )
+areg = antsRegistration( fi, mi, typeofTransform="Affine",
+  initialTransform=mival[[2]] )
+bestInd = which.min( mival[[1]][1] )
+affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
+  parameters = mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ],
+  fixed.parameters = mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
+mapped2 = applyAntsrTransformToImage( affTx, mi, fi )
 
 }
 \author{
