@@ -151,11 +151,8 @@ SEXP invariantSimilarityHelper(
     maskimagetype;
   typename maskimagetype::Pointer mask = ITK_NULLPTR;
   Rcpp::NumericVector thetas( r_thetas );
-  Rcpp::NumericVector vector_r( r_thetas ) ;
-  Rcpp::IntegerVector dims( 1 );
   Rcpp::IntegerVector doReflection( r_doreflection );
   unsigned int vecsize = thetas.size();
-  dims[0]=0;
   typedef float  PixelType;
   typedef double RealType;
   RealType bestscale = Rcpp::as< RealType >( r_scale ) ;
@@ -427,7 +424,6 @@ SEXP invariantSimilarityHelper(
       {
       RealType ang1 = thetas[i];
       RealType ang2 = 0; // FIXME should be psi
-      vector_r[ i ]=0;
       if( ImageDimension == 3 )
         {
         for ( unsigned int jj = 0; jj < vecsize; jj++ )
@@ -488,16 +484,18 @@ SEXP invariantSimilarityHelper(
       transformWriter->Update();
       }
     metricvalues = mstartOptimizer->GetMetricValuesList();
+    Rcpp::NumericVector vector_r( metricvalues.size() ) ;
     for ( unsigned int k = 0; k < metricvalues.size(); k++ )
       {
       vector_r[k] = metricvalues[k];
       }
-    dims[0] = vecsize;
-    vector_r.attr( "dim" ) = vecsize;
+    vector_r.attr( "dim" ) = metricvalues.size();
     return Rcpp::wrap( vector_r );
     }
   else
     {
+    Rcpp::NumericVector vector_r( 1 ) ;
+    vector_r[ 0 ] = 0;
     return Rcpp::wrap( vector_r );
     }
 }

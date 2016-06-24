@@ -135,6 +135,12 @@ antsRegistration <- function( fixed = NA, moving = NA,
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
+        if ( class( initx ) == "antsrTransform" )
+          {
+          tempTXfilename = tempfile( fileext = ".mat" )
+          writeAntsrTransform( initx, tempTXfilename )
+          initx = tempTXfilename
+          }
         moving <- antsImageClone(moving, "float")
         fixed <- antsImageClone(fixed, "float")
         warpedfixout <- antsImageClone(moving)
