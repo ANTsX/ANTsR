@@ -298,12 +298,14 @@ SEXP invariantSimilarityHelper(
       evec_tert = evec1_2ndary;
       evec1_2ndary = evec1_primary;
       }
-    itk::Vector<RealType, ImageDimension> axis2;
     itk::Vector<RealType, ImageDimension> axis1;
+    itk::Vector<RealType, ImageDimension> axis2;
+    itk::Vector<RealType, ImageDimension> axis3;
     for( unsigned int d = 0; d < ImageDimension; d++ )
       {
       axis1[d] = evec_tert[d];
       axis2[d] = evec1_2ndary[d];
+      axis3[d] = evec1_primary[d];
       }
     typename AffineType::Pointer simmer = AffineType::New();
     simmer->SetIdentity();
@@ -367,7 +369,7 @@ SEXP invariantSimilarityHelper(
       for( It.GoToBegin(); !It.IsAtEnd(); ++It )
         {
         // take every N^th point
-        if ( ct % 4 == 0  )
+        if ( ct % 10 == 0  )
           {
           PointType pt;
           image1->TransformIndexToPhysicalPoint( It.GetIndex(), pt);
@@ -424,11 +426,15 @@ SEXP invariantSimilarityHelper(
       {
       RealType ang1 = thetas[i];
       RealType ang2 = 0; // FIXME should be psi
+      RealType ang3 = 0; // FIXME should be psi
       if( ImageDimension == 3 )
         {
         for ( unsigned int jj = 0; jj < vecsize; jj++ )
         {
         ang2=thetas[jj];
+        for ( unsigned int kk = 0; kk < vecsize; kk++ )
+        {
+        ang3=thetas[kk];
         affinesearch->SetIdentity();
         affinesearch->SetCenter( trans2 );
         affinesearch->SetOffset( trans );
@@ -438,9 +444,11 @@ SEXP invariantSimilarityHelper(
           }
         affinesearch->Rotate3D(axis1, ang1, 1);
         affinesearch->Rotate3D(axis2, ang2, 1);
+        affinesearch->Rotate3D(axis3, ang3, 1);
         affinesearch->Scale( bestscale );
         simmer->SetMatrix(  affinesearch->GetMatrix() );
         parametersList.push_back( simmer->GetParameters() );
+        } // kk
         }
         }
       if( ImageDimension == 2 )
