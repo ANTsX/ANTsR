@@ -56,7 +56,9 @@ Apply imaage morphological operations
 
 fi<-antsImageRead( getANTsRData("r16") , 2 )
 mask<-getMask( fi )
-
+dilatedBall = morphology( mask, operation="dilate", radius=3, type="binary", shape="ball")
+erodedBox = morphology( mask, operation="close", radius=3, type="binary", shape="box")
+openedAnnulus = morphology( mask, operation="open", radius=5, type="binary", shape="annulus", thickness=2)
 
 }
 \author{
