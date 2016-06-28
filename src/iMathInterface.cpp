@@ -160,8 +160,22 @@ SEXP iMathMC( Rcpp::List args )
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
   PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+  unsigned int shape = Rcpp::as<unsigned int>( args[4] );
+  bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+  unsigned int lines = iMathGetFlatStructuringElementLines;
+  if (shape == 5)
+    {
+    lines = Rcpp::as<unsigned int>( args[5] );
+    }
+  else
+    {
+    parametric = Rcpp::as<bool>( args[5] );
+    }
+  unsigned int thickness = Rcpp::as<unsigned int>( args[6] );
+  bool center = Rcpp::as<bool>( args[7] );
 
-  ImagePointerType output = ants::iMathMC<ImageType>( input, radius, value );
+  ImagePointerType output = ants::iMathMC<ImageType>( input, radius, value, shape,
+                                                      parametric, lines, thickness, center );
 
   return Rcpp::wrap(output);
 }
@@ -175,8 +189,22 @@ SEXP iMathMD( Rcpp::List args )
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
   PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+  unsigned int shape = Rcpp::as<unsigned int>( args[4] );
+  bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+  unsigned int lines = iMathGetFlatStructuringElementLines;
+  if (shape == 5)
+    {
+    lines = Rcpp::as<unsigned int>( args[5] );
+    }
+  else
+    {
+    parametric = Rcpp::as<bool>( args[5] );
+    }
+  unsigned int thickness = Rcpp::as<unsigned int>( args[6] );
+  bool center = Rcpp::as<bool>( args[7] );
 
-  ImagePointerType output = ants::iMathMD<ImageType>( input, radius, value );
+  ImagePointerType output = ants::iMathMD<ImageType>( input, radius, value, shape,
+                                                      parametric, lines, thickness, center );
 
   return Rcpp::wrap(output);
  }
@@ -190,8 +218,22 @@ SEXP iMathME( Rcpp::List args )
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
   PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+  unsigned int shape = Rcpp::as<unsigned int>( args[4] );
+  bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+  unsigned int lines = iMathGetFlatStructuringElementLines;
+  if (shape == 5)
+    {
+    lines = Rcpp::as<unsigned int>( args[5] );
+    }
+  else
+    {
+    parametric = Rcpp::as<bool>( args[5] );
+    }
+  unsigned int thickness = Rcpp::as<unsigned int>( args[6] );
+  bool center = Rcpp::as<bool>( args[7] );
 
-  ImagePointerType output = ants::iMathME<ImageType>( input, radius, value );
+  ImagePointerType output = ants::iMathME<ImageType>( input, radius, value, shape,
+                                                      parametric, lines, thickness, center );
 
   return Rcpp::wrap(output);
  }
@@ -205,8 +247,22 @@ SEXP iMathMO( Rcpp::List args )
   ImagePointerType input = Rcpp::as<ImagePointerType>( args[0] );
   unsigned long radius = Rcpp::as<unsigned long>( args[2] );
   PixelType value = (PixelType) Rcpp::as<double>( args[3] );
+  unsigned int shape = Rcpp::as<unsigned int>( args[4] );
+  bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+  unsigned int lines = iMathGetFlatStructuringElementLines;
+  if (shape == 5)
+    {
+    lines = Rcpp::as<unsigned int>( args[5] );
+    }
+  else
+    {
+    parametric = Rcpp::as<bool>( args[5] );
+    }
+  unsigned int thickness = Rcpp::as<unsigned int>( args[6] );
+  bool center = Rcpp::as<bool>( args[7] );
 
-  ImagePointerType output = ants::iMathMO<ImageType>( input, radius, value );
+  ImagePointerType output = ants::iMathMO<ImageType>( input, radius, value, shape,
+                                                      parametric, lines, thickness, center );
 
   return Rcpp::wrap(output);
  }
@@ -1416,6 +1472,7 @@ try
       }
 
     // Optional parameters with default values
+    unsigned int shape = iMathGetFlatStructuringElementShape;
     if ( args.size() < 3 )
       {
       unsigned long radius = iMathMCRadius;
@@ -1425,6 +1482,37 @@ try
       {
       double value = iMathMCValue;
       args.push_back( Rcpp::wrap(value));
+      }
+    if ( args.size() < 5)
+      {
+      args.push_back( Rcpp::wrap(shape));
+      }
+    else
+      {
+      shape = Rcpp::as<unsigned int>( args[5] );
+      }
+    if ( args.size() < 6)
+      {
+      if ( shape==5 )
+        {
+        unsigned int lines = iMathGetFlatStructuringElementLines;
+        args.push_back( Rcpp::wrap(lines));
+        }
+      else
+        {
+        bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+        args.push_back(Rcpp::wrap(parametric));
+        }
+      }
+    if ( args.size() < 7)
+      {
+      unsigned int thickness = iMathGetFlatStructuringElementThickness;
+      args.push_back( Rcpp::wrap(thickness));
+      }
+    if ( args.size() < 8)
+      {
+      bool center = iMathGetFlatStructuringElementIncludeCenter;
+      args.push_back( Rcpp::wrap(center));
       }
 
     if ( pixeltype == "double" )
@@ -1521,6 +1609,7 @@ try
       }
 
     // Optional parameters with default values
+    unsigned int shape = iMathGetFlatStructuringElementShape;
     if ( args.size() < 3 )
       {
       unsigned long radius = iMathMDRadius;
@@ -1530,6 +1619,37 @@ try
       {
       double value = iMathMDValue;
       args.push_back( Rcpp::wrap(value));
+      }
+    if ( args.size() < 5)
+      {
+      args.push_back( Rcpp::wrap(shape));
+      }
+    else
+      {
+      shape = Rcpp::as<unsigned int>( args[5] );
+      }
+    if ( args.size() < 6)
+      {
+      if ( shape==5 )
+        {
+        unsigned int lines = iMathGetFlatStructuringElementLines;
+        args.push_back( Rcpp::wrap(lines));
+        }
+      else
+        {
+        bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+        args.push_back(Rcpp::wrap(parametric));
+        }
+      }
+    if ( args.size() < 7)
+      {
+      unsigned int thickness = iMathGetFlatStructuringElementThickness;
+      args.push_back( Rcpp::wrap(thickness));
+      }
+    if ( args.size() < 8)
+      {
+      bool center = iMathGetFlatStructuringElementIncludeCenter;
+      args.push_back( Rcpp::wrap(center));
       }
 
     if ( pixeltype == "double" )
@@ -1626,6 +1746,7 @@ try
       }
 
     // Optional parameters with default values
+    unsigned int shape = iMathGetFlatStructuringElementShape;
     if ( args.size() < 3 )
       {
       unsigned long radius = iMathMERadius;
@@ -1635,6 +1756,37 @@ try
       {
       double value = iMathMDValue;
       args.push_back( Rcpp::wrap(value));
+      }
+    if ( args.size() < 5)
+      {
+      args.push_back( Rcpp::wrap(shape) );
+      }
+    else
+      {
+      shape = Rcpp::as<unsigned int>( args[4] );
+      }
+    if ( args.size() < 6)
+      {
+      if ( shape==5 )
+        {
+        unsigned int lines = iMathGetFlatStructuringElementLines;
+        args.push_back( Rcpp::wrap(lines));
+        }
+      else
+        {
+        bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+        args.push_back(Rcpp::wrap(parametric));
+        }
+      }
+    if ( args.size() < 7)
+      {
+      unsigned int thickness = iMathGetFlatStructuringElementThickness;
+      args.push_back( Rcpp::wrap(thickness));
+      }
+    if ( args.size() < 8)
+      {
+      bool center = iMathGetFlatStructuringElementIncludeCenter;
+      args.push_back( Rcpp::wrap(center));
       }
 
     if ( pixeltype == "double" )
@@ -1731,6 +1883,7 @@ try
       }
 
     // Optional parameters with default values
+    unsigned int shape = iMathGetFlatStructuringElementShape;
     if ( args.size() < 3 )
       {
       unsigned long radius = iMathMORadius;
@@ -1740,6 +1893,37 @@ try
       {
       double value = iMathMDValue;
       args.push_back( Rcpp::wrap(value));
+      }
+    if ( args.size() < 5)
+      {
+      args.push_back( Rcpp::wrap(shape));
+      }
+    else
+      {
+      shape = Rcpp::as<unsigned int>( args[5] );
+      }
+    if ( args.size() < 6)
+      {
+      if ( shape==5 )
+        {
+        unsigned int lines = iMathGetFlatStructuringElementLines;
+        args.push_back( Rcpp::wrap(lines));
+        }
+      else
+        {
+        bool parametric = iMathGetFlatStructuringElementRadiusIsParametric;
+        args.push_back(Rcpp::wrap(parametric));
+        }
+      }
+    if ( args.size() < 7)
+      {
+      unsigned int thickness = iMathGetFlatStructuringElementThickness;
+      args.push_back( Rcpp::wrap(thickness));
+      }
+    if ( args.size() < 8)
+      {
+      bool center = iMathGetFlatStructuringElementIncludeCenter;
+      args.push_back( Rcpp::wrap(center));
       }
 
     if ( pixeltype == "double" )

@@ -7,10 +7,10 @@ Grad;Filter;sigma;"iMath(i,op,1)";gradient magnitude;0
 Laplacian;Filter;sigma;"iMath(i,op,1)";laplacian of intensity;0
 Canny;Filter;sigma;"iMath(i,op,1,5,12)";canny edge detector;0
 HistogramEqualization;Filter;alpha-beta-radius;"iMath(i,op,alpha,beta,5)";adaptiveHistogramEqualizationImageFilter;0
-MD;Morphology;element radius;"iMath(i,op,1)";dilation;0
-ME;Morphology;element radius;"iMath(i,op,1)";erosion;0
-MO;Morphology;element radius;"iMath(i,op,1)";opening;0
-MC;Morphology;element radius;"iMath(i,op,1)";closing;0
+MD;Morphology;element radius,value,shape,parametric/lines,thickness,includeCenter;"iMath(i,op,1)";dilation;0
+ME;Morphology;element radius,value,shape,parametric/lines,thickness,includeCenter;"iMath(i,op,1)";erosion;0
+MO;Morphology;element radius,value,shape,parametric/lines,thickness,includeCenter;"iMath(i,op,1)";opening;0
+MC;Morphology;element radius,value,shape,parametric/lines,thickness,includeCenter;"iMath(i,op,1)";closing;0
 GD;Morphology;element radius;"iMath(i,op,1)";grayscale dilation;0
 GE;Morphology;element radius;"iMath(i,op,1)";grayscale erosion;0
 GO;Morphology;element radius;"iMath(i,op,1)";grayscale opening;0
