@@ -62,8 +62,10 @@ typetx = "Rigid"
 petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx, verbose = debug )
 petmask = antsApplyTransforms( anatomicalImage, petmask,
   transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
-temp = antsApplyTransforms( anatomicalImage, temp,
-  transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
+if ( idim == 4 )
+  temp = antsApplyTransforms( anatomicalImage, temp,
+    transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
+if ( idim == 3 ) temp = antsImageClone( petreg$warpedmovout )
 # NOTE: here, the pet image is now in the anatomical space
 pets = petreg$warpedmovout
 if ( labelValue > 0 )
