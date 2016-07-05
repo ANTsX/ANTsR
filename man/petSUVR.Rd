@@ -9,7 +9,7 @@ petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
   debug = FALSE)
 }
 \arguments{
-\item{petTime}{pet time series antsImage}
+\item{petTime}{pet time series antsImage or 3D image}
 
 \item{anatomicalImage}{antsImage}
 

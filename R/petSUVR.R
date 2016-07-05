@@ -8,7 +8,7 @@
 #' a mask, a motion corrected image and a PET suvr image mapped to the reference
 #' anatomical space.
 #'
-#' @param petTime pet time series antsImage
+#' @param petTime pet time series antsImage or 3D image
 #' @param anatomicalImage antsImage
 #' @param anatomicalSegmentation antsImage in the same space as anatomicalImage
 #' @param smoothingParameter physical space smoothing parameter see \code{smoothImage}
@@ -37,15 +37,20 @@ petSUVR <- function(
   subtractBackground = FALSE,
   debug = FALSE )
 {
-petTime = petTime - min( petTime )
-pet = getAverageOfTimeSeries( petTime )
-if ( pet@dimension == 3 )
-  petRef = as.antsImage( as.array( petTime )[,,,1] )
-if ( pet@dimension == 2 )
-  petRef = as.antsImage( as.array( petTime )[,,1] )
-petRef = antsCopyImageInfo( pet, petRef )
-temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
-pet = getAverageOfTimeSeries( temp )
+idim = petTime@dimension
+# petTime = petTime - min( petTime )
+if ( idim == 4 ) pet = getAverageOfTimeSeries( petTime )
+if ( idim == 3 ) pet = antsImageClone( petTime )
+if ( idim == 4 )
+  {
+  if ( pet@dimension == 3 )
+    petRef = as.antsImage( as.array( petTime )[,,,1] )
+  if ( pet@dimension == 2 )
+    petRef = as.antsImage( as.array( petTime )[,,1] )
+  petRef = antsCopyImageInfo( pet, petRef )
+  temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
+  pet = getAverageOfTimeSeries( temp )
+  }
 petmask = getMask( pet )
 if ( subtractBackground )
   {
