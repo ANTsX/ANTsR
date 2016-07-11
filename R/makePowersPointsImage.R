@@ -65,7 +65,7 @@ makePowersPointsImage <- function( pts, mask, radius = 5 )
 #' \dontrun{
 #' mni <- antsImageRead( getANTsRData( "mni" ) ) %>% getMask()
 #' data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-#' powersLabels = makePowersPointsImage( powers_areal_mni_itk, mni )
+#' powersLabels = makePointsImage( powers_areal_mni_itk[,1:3], mni, radius=3 )
 #' }
 #'
 #' @export makePointsImage
