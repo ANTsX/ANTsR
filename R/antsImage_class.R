@@ -73,6 +73,11 @@ setMethod(f = "var", signature(x = "antsImage"), definition = function(x) {
 })
 
 #' @describeIn antsImage
+setMethod(f = "range", signature(x = "antsImage"), definition = function(x) {
+  return(range(as.array(x)))
+})
+
+#' @describeIn antsImage
 setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
   return(sd(as.array(x)))
 })
