@@ -95,6 +95,7 @@ return( nvecs )
 #' @param positivity return unsigned eigenanatomy vectors
 #' @param priors external initialization matrix.
 #' @param priorWeight weight on priors in range 0 to 1.
+#' @param sparEpsilon threshold that controls initial sparseness estimate
 #' @param verbose controls whether computation is silent or not.
 #' @return matrix is output, analogous to \code{svd(mat,nu=0,nv=nvecs)}
 #' @author Avants BB, Tustison NJ
@@ -126,12 +127,13 @@ return( nvecs )
 #'   priorWeight=0.15, eps=0.1 )
 #' }
 #'
-#' @seealso \code{\link{eanatSelect}}
+#' @seealso \code{\link{eanatSelect}} \url{https://github.com/stnava/blindSourceSeparationInANTsR}
 #'
 #' @export eanatDef
 eanatDef <- function( inmat, nvecs=0, mask=NA,
   smoother=0, cthresh=0, its=5, eps=0.1,
   positivity = FALSE, priors=NA, priorWeight=0,
+  sparEpsilon = 0,
   verbose=FALSE )
 {
 mat = ( inmat )
@@ -171,7 +173,11 @@ for ( sol in 1:nrow(solutionmatrix))
   }
 sparvals = rep( NA, nvecs )
 for ( i in 1:nvecs )
-  sparvals[i] = sum( abs(solutionmatrix[i,]) > 0  ) / ncol( mat ) * keeppos
+  sparvals[i] = sum( abs(solutionmatrix[i,]) > sparEpsilon ) / ncol( mat ) * keeppos
+if ( verbose ) {
+  print( "sparseness estimates")
+  print( sparvals )
+  }
 allsols = solutionmatrix[1,] * 0
 for ( sol in 1:nrow(solutionmatrix))
   {

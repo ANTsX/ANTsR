@@ -23,7 +23,7 @@ library(ANTsR)
 arithmetics (e.g., add, subtract), are built into the `antsImage` class capabilities, and are similar to
 array operations in R:
 
-    ```{r basic}
+```{r basic}
     fi  <- antsImageRead(getANTsRData("r16"), 2)
     sumfi <- fi + fi
     mulfi <- fi * 2
@@ -31,7 +31,7 @@ array operations in R:
     logfi <- log(fi[fi>0])
     expfi <- exp(fi[fi>0])
     divfi <- sumfi / mulfi
-    ```
+```
 
 ##Morphological operations on masks and images
 
