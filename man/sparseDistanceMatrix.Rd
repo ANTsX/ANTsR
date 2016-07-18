@@ -21,7 +21,10 @@ matrix sparse matrix is output
 }
 \description{
 Exploit k-nearest neighbor algorithms to estimate a sparse similarity matrix.
-See relevant publications by Mauro Maggioni and other authors.
+Critical to the validity of this function is the basic mathematical
+relationships between euclidean distance and correlation and between
+correlation and covariance.  For applications of such matrices, one may see
+relevant publications by Mauro Maggioni and other authors.
 }
 \examples{
 

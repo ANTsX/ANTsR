@@ -1,7 +1,10 @@
 #' Create sparse distance, covariance or correlation matrix
 #'
 #' Exploit k-nearest neighbor algorithms to estimate a sparse similarity matrix.
-#' See relevant publications by Mauro Maggioni and other authors.
+#' Critical to the validity of this function is the basic mathematical
+#' relationships between euclidean distance and correlation and between
+#' correlation and covariance.  For applications of such matrices, one may see
+#' relevant publications by Mauro Maggioni and other authors.
 #'
 #' @param x input matrix, should be n (samples) by p (measurements)
 #' @param k number of neighbors
@@ -22,6 +25,9 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
 {
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
+  # and from correlation to covariance   diag(sd) %*% corrMat %*% diag(sd)
+  # and from euclidean distance of standardized data to correlation
+  # 1.0 - dist^2 / ( 2 * nrow( x ) )
   # TODO / FIXME - implement covariance
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")

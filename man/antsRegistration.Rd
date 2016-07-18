@@ -66,6 +66,7 @@ typeofTransform can be one of:
     aligned by an inital transformation. Can be useful if you want to run
     an unmasked affine followed by masked deformable registration.}
   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
+  \item{"SyNabp": }{SyN optimized for abpBrainExtraction.}
   \item{"SyNBold": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
   \item{"SyNBoldAff": }{SyN, but optimized for registrations between
