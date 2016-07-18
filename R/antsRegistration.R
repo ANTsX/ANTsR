@@ -37,6 +37,7 @@
 #'     aligned by an inital transformation. Can be useful if you want to run
 #'     an unmasked affine followed by masked deformable registration.}
 #'   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
+#'   \item{"SyNabp": }{SyN optimized for abpBrainExtraction.}
 #'   \item{"SyNBold": }{SyN, but optimized for registrations between
 #'     BOLD and T1 images.}
 #'   \item{"SyNBoldAff": }{SyN, but optimized for registrations between
@@ -76,8 +77,8 @@
 #'
 #' @export antsRegistration
 antsRegistration <- function( fixed = NA, moving = NA,
-  typeofTransform = "SyN", initialTransform = NA,
-  outprefix = "", mask = NA, gradStep=NA, verbose=FALSE, ... ) {
+                              typeofTransform = "SyN", initialTransform = NA,
+                              outprefix = "", mask = NA, gradStep=NA, verbose=FALSE, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
     .Call("antsRegistration", .int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")
@@ -88,8 +89,8 @@ antsRegistration <- function( fixed = NA, moving = NA,
   if (nchar(outprefix) == 0)
     outprefix = tempfile()
   if ( numargs < 1 | missing(fixed) | missing(moving)
-        | missing(typeofTransform) | missing(outprefix) )
-    {
+       | missing(typeofTransform) | missing(outprefix) )
+  {
     cat("for simplified mode: \n")
     cat(" antsRegistration( fixed , moving , typeofTransform = c(\"Rigid\",\"Affine\",\"AffineFast\",\"SyN\",\"SyNCC\"),  outputPrefix=\"./antsRegOut\" \n")
     cat("")
@@ -130,19 +131,19 @@ antsRegistration <- function( fixed = NA, moving = NA,
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Translation","Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC",
-        "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ","ElasticSyN")
+      allowableTx <- c("Translation","Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC","SyNabp",
+                       "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ","ElasticSyN")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
         if ( class( initx ) == "antsrTransform" )
-          {
+        {
           tempTXfilename = tempfile( fileext = ".mat" )
           initx = invertAntsrTransform( initialTransform )
           initx = invertAntsrTransform( initx )
           writeAntsrTransform( initx, tempTXfilename )
           initx = tempTXfilename
-          }
+        }
         moving <- antsImageClone(moving, "float")
         fixed <- antsImageClone(fixed, "float")
         warpedfixout <- antsImageClone(moving)
@@ -162,195 +163,220 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNBold") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
-          "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
-          "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
-          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
+                       "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
+                       "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
+                       "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyNBoldAff") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
-          "-f", "4x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "[200x20,1e-6,5]", "-s", "1x0",
-          "-f", "2x1",
-          "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
-          "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
-          "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
+                       "-f", "4x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "[200x20,1e-6,5]", "-s", "1x0",
+                       "-f", "2x1",
+                       "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
+                       "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "[200x10,1e-6,5]",
+                       "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "ElasticSyN") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
-          "-t", paste("SyN[0.25,3,0.5]", sep = ""),
-          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
-            wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "2100x1200x200x0", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-t", paste("SyN[0.25,3,0.5]", sep = ""),
+                       "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+                       "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
+                                                              wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyN") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
-          "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
-          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
-            wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
+                       "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+                       "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
+                                                              wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyNRA") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x2x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
-          "-t", paste("SyN[0.25,3,0]", sep = ""),
-          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
-            wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-t", paste("SyN[0.25,3,0]", sep = ""),
+                       "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+                       "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
+                                                              wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyNOnly") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
-          "-t", paste("SyN[0.25,3,0]", sep = ""),
-          "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
-          "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
-            wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-t", paste("SyN[0.25,3,0]", sep = ""),
+                       "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
+                       "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
+                                                              wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyNAggro") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
-          "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
-            sep = ""), "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
+                                                    sep = ""), "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "2100x1200x1200x20",
+                       "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if (typeofTransform == "SyNCC") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Rigid[1]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
-          "-f", "4x4x2x1",
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[1]", "-c", "1200x1200x100", "-s", "2x1x0",
-          "-f", "4x2x1",
-          "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
-          "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Rigid[1]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
+                       "-f", "4x4x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[1]", "-c", "1200x1200x100", "-s", "2x1x0",
+                       "-f", "4x2x1",
+                       "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
+                       "-t", paste("SyN[0.15,3,0]", sep = ""), "-c", "2100x1200x1200x20",
+                       "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
+        
+        
+        if (typeofTransform == "SyNabp") {
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.25]", sep = ""),
+                       "-t", "Rigid[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
+                       "-f", "8x4x2x1",
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.25]", sep = ""),
+                       "-t", "Affine[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
+                       "-f", "8x4x2x1",
+                       "-m", paste("CC[", f, ",", m, ",0.5,4]", sep = ""),
+                       "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "50x10x0",
+                       "-s", "2x1x0", "-f", "4x2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend( list( "-x", maskopt ), args )
+          fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+        }
+        
+        
+        
+        
         if (typeofTransform == "SyNLessAggro") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
-          "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
-            sep = ""), "-t", paste("SyN[0.1,3,0.5]", sep = ""), "-c", "2100x1200x1200x20",
-          "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
+                       "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
+                                                    sep = ""), "-t", paste("SyN[0.1,3,0.5]", sep = ""), "-c", "2100x1200x1200x20",
+                       "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
         if ( typeofTransform == "TVMSQ" ) {
           if ( is.na(gradStep) ) gradStep=1.0
           tvtx=paste("TimeVaryingVelocityField[",
-            gradStep,", 4, 0.0,0.0, 0.5,0 ]",sep='')
+                     gradStep,", 4, 0.0,0.0, 0.5,0 ]",sep='')
           args <- list("-d", as.character(fixed@dimension), # "-r", initx,
-            "-m", paste("meansquares[", f, ",", m, ",1,0]", sep = ""),
-            "-t", tvtx,
-            "-c", "[100,1.e-5,5]",
-            "-s", "0",
-            "-f", "1",
-            "-u", "1", "-z", "1", "-l", myl,
-            "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("meansquares[", f, ",", m, ",1,0]", sep = ""),
+                       "-t", tvtx,
+                       "-c", "[100,1.e-5,5]",
+                       "-s", "0",
+                       "-f", "1",
+                       "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
-          paste(outprefix, "0GenericAffine.mat", sep = ""))
+                             paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
-          paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
+                             paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
           fwdtransforms <- c( paste( outprefix, "0Warp.nii.gz", sep = "") )
           invtransforms <- c( paste(outprefix, "0InverseWarp.nii.gz", sep = ""))
         }
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" |
-             typeofTransform == "Translation" )
-          {
+               typeofTransform == "Translation" )
+        {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-          "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
-          "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
-          "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
+                       "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
-          }
+        }
         args[[ length(args)+1]]="--float"
         args[[ length(args)+1]]="1"
         if ( verbose ) {
           args[[ length(args)+1]]="-v"
           args[[ length(args)+1]]="1"
-          }
+        }
         args = .int_antsProcessArguments(c(args))
         .Call("antsRegistration", args, PACKAGE = "ANTsR")
         # unlink(ffn) unlink(mfn) outvar<-basename(outprefix) outpath<-dirname(outprefix)
@@ -363,7 +389,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
                 warpedfixout = antsImageClone(warpedfixout, inpixeltype),
                 fwdtransforms = fwdtransforms,
                 invtransforms = invtransforms )
-              )
+        )
       }
       if (!ttexists) {
         stop("Unrecognized transform type.")
@@ -376,7 +402,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
   if ( verbose ) {
     args[[ length(args)+1]]="-v"
     args[[ length(args)+1]]="1"
-    }
+  }
   args = .int_antsProcessArguments(c(args))
   .Call("antsRegistration", args, PACKAGE = "ANTsR")
 }
@@ -388,7 +414,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
   randomString <- c(1:n)  # initialize vector
   for (i in 1:n) {
     randomString[i] <- paste(sample(c(0:9, letters, LETTERS), mylength, replace = TRUE),
-      collapse = "")
+                             collapse = "")
   }
   return(randomString)
 }
