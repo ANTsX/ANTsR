@@ -27,10 +27,10 @@ correlation and covariance.  For applications of such matrices, one may see
 relevant publications by Mauro Maggioni and other authors.
 }
 \examples{
-
-mat = matrix(rnorm(300),ncol=50)
-smat = sparseDistanceMatrix( mat )
-
+\dontrun{
+mat = matrix( rnorm(60), ncol=10 )
+smat = sparseDistanceMatrix( mat, 2 )
+}
 }
 \author{
 Avants BB

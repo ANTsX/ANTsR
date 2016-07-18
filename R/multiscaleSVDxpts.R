@@ -15,10 +15,10 @@
 #' @references
 #' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 #' @examples
-#'
-#' mat = matrix(rnorm(300),ncol=50)
-#' smat = sparseDistanceMatrix( mat )
-#'
+#' \dontrun{
+#' mat = matrix( rnorm(60), ncol=10 )
+#' smat = sparseDistanceMatrix( mat, 2 )
+#' }
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   kmetric = c("euclidean", "correlation", "covariance"  ) )
