@@ -7,7 +7,7 @@ A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well 
 
 ## Description
 
-Version: 0.3.2
+Version: 0.3.3
 
 License: GPL (>=2)
 
