@@ -26,7 +26,7 @@
 #'
 #' @export abpBrainExtraction
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
-                               temregmask = NA, regtype='SyN'. tdir = NA) {
+                               temregmask = NA, regtype='SyN', tdir = NA) {
   if (missing(img) | missing(tem) | missing(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")
