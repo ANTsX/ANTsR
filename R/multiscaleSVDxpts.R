@@ -83,7 +83,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   )
   if ( cometric )
     {
-    if ( kmetric == "covariance" )  diag( kmatSparse ) = mycov
+    if ( kmetric == "covariance" )  diag( kmatSparse ) = mycov^2
     if ( kmetric == "correlation" ) diag( kmatSparse ) = 1
     kmatSparse[ kmatSparse < r ] = 0
     }  else {
