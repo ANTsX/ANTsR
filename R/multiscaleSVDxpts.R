@@ -28,16 +28,17 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   if ( ! usePkg("FNN") )
     stop("Please install the FNN package")
   kmetric <- match.arg( kmetric )
-  if ( kmetric == "covariance" ) stop("covariance not implemented yet")
-  if ( kmetric == "correlation" & r == Inf ) r = -Inf
+  cometric = ( kmetric == "correlation" | kmetric == "covariance" )
+  if ( cometric & r == Inf ) r = -Inf
 #  if ( ! usePkg("irlba") )
 #    stop("Please install the irlba package")
 # see http://www.analytictech.com/mb876/handouts/distance_and_correlation.htm
 # euclidean distance to correlation - xin contains correlations
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
-  if ( kmetric == "correlation" ) x = scale( x )
+  if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
+  if ( cometric ) x = scale( x )
   bknn  = FNN::get.knn( t( x ), k=k, algo="kd_tree" )
-  if ( kmetric == "correlation" ) bknn$nn.dist = ecor( bknn$nn.dist )
+  if ( cometric ) bknn$nn.dist = ecor( bknn$nn.dist )
   tct = 0
   for ( i in 1:ncol( x ) )
     {
@@ -55,6 +56,11 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
     locd = bknn$nn.dist[i,]
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
+    if ( kmetric == "covariance" )
+      {
+      loccov = mycov[ i ] * mycov[  inds ]
+      locd = locd * loccov
+      }
     if ( tctinc > 0 )
       {
       upinds = tct2:(tct2+tctinc-1)
@@ -69,12 +75,12 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
     j=myijmat[,2],
     x=myijmat[,3], symmetric = TRUE
   )
-  if ( kmetric == "correlation" )
+  if ( cometric )
     {
-    diag( kmatSparse ) = 1
+    if ( kmetric == "covariance" )  diag( kmatSparse ) = mycov
+    if ( kmetric == "correlation" ) diag( kmatSparse ) = 1
     kmatSparse[ kmatSparse < r ] = 0
     }  else {
-#    diag( kmatSparse ) = 0
     kmatSparse[ kmatSparse > r ] = 0
     }
   return( kmatSparse )
