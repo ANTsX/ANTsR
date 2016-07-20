@@ -10,6 +10,7 @@
 #' @param k number of neighbors
 #' @param r radius of epsilon-ball
 #' @param kmetric similarity or distance metric determining k nearest neighbors
+#' @param eps epsilon error for rapid knn
 #' @return matrix sparse matrix is output
 #' @author Avants BB
 #' @references
@@ -21,7 +22,8 @@
 #' }
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf,
-  kmetric = c("euclidean", "correlation", "covariance"  ) )
+  kmetric = c("euclidean", "correlation", "covariance"  ),
+  eps = 1.e-6 )
 {
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
@@ -31,8 +33,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   # TODO / FIXME - implement covariance
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
-  if ( ! usePkg("FNN") )
-    stop("Please install the FNN package")
+  if ( ! usePkg("nabor") )
+    stop("Please install the nabor package")
   kmetric <- match.arg( kmetric )
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
   if ( cometric & r == Inf ) r = -Inf
@@ -43,13 +45,13 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
   if ( cometric ) x = scale( x )
-  bknn  = FNN::get.knn( t( x ), k=k, algo="kd_tree" )
-  if ( cometric ) bknn$nn.dist = ecor( bknn$nn.dist )
+  bknn = nabor::knn( t( x ) , k=k, eps=eps )
+  if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
   for ( i in 1:ncol( x ) )
     {
-    inds = bknn$nn.index[i,]
-    locd = bknn$nn.dist[i,]
+    inds = bknn$nn.idx[i,]    # index
+    locd = bknn$nn.dists[i,]  # dist
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tct = tct + sum( !is.na(inds) )
     }
@@ -58,8 +60,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   tct2 = 1
   for ( i in 1:ncol( x ) )
     {
-    inds = bknn$nn.index[i,]
-    locd = bknn$nn.dist[i,]
+    inds = bknn$nn.idx[i,]
+    locd = bknn$nn.dists[i,]
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
