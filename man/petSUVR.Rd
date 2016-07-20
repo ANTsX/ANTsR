@@ -6,14 +6,16 @@
 \usage{
 petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
   smoothingParameter = 2.5, labelValue = 0, subtractBackground = FALSE,
-  debug = FALSE)
+  mapToPet = FALSE, debug = FALSE)
 }
 \arguments{
 \item{petTime}{pet time series antsImage or 3D image}
 
 \item{anatomicalImage}{antsImage}
 
-\item{anatomicalSegmentation}{antsImage in the same space as anatomicalImage}
+\item{anatomicalSegmentation}{antsImage in the same space as anatomicalImage.
+This image should contain a whole brain mask in addition to a labeled
+reference region for computing SUVR.}
 
 \item{smoothingParameter}{physical space smoothing parameter see \code{smoothImage}}
 
@@ -24,6 +26,9 @@ appears in anatomicalSegmentation.  If not set, we assume a binary segmentation.
 background (non-anatomical) activation levels before computing SUVR. In this
 case, SUVR will be computed after subtracting this background value from the
 mean activation image.}
+
+\item{mapToPet}{boolean option causing pet to be used as fixed image in the
+rigid registration between anatomical and pet}
 
 \item{debug}{boolean option activating simple and fast approach}
 }

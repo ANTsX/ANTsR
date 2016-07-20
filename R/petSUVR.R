@@ -10,7 +10,9 @@
 #'
 #' @param petTime pet time series antsImage or 3D image
 #' @param anatomicalImage antsImage
-#' @param anatomicalSegmentation antsImage in the same space as anatomicalImage
+#' @param anatomicalSegmentation antsImage in the same space as anatomicalImage.
+#' This image should contain a whole brain mask in addition to a labeled
+#' reference region for computing SUVR.
 #' @param smoothingParameter physical space smoothing parameter see \code{smoothImage}
 #' @param labelValue the integer value of the reference region as it
 #' appears in anatomicalSegmentation.  If not set, we assume a binary segmentation.
@@ -18,6 +20,8 @@
 #' background (non-anatomical) activation levels before computing SUVR. In this
 #' case, SUVR will be computed after subtracting this background value from the
 #' mean activation image.
+#' @param mapToPet boolean option causing pet to be used as fixed image in the
+#' rigid registration between anatomical and pet
 #' @param debug boolean option activating simple and fast approach
 #' @return suvr antsImage
 #' @author Avants BB
@@ -35,6 +39,7 @@ petSUVR <- function(
   smoothingParameter = 2.5,
   labelValue = 0,
   subtractBackground = FALSE,
+  mapToPet = FALSE,
   debug = FALSE )
 {
 idim = petTime@dimension
@@ -51,19 +56,31 @@ if ( idim == 4 )
   temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
   pet = getAverageOfTimeSeries( temp )
   }
-petmask = getMask( pet )
+petmaskOrig = getMask( pet )
 if ( subtractBackground )
   {
-  petbkgd = mean( pet[ petmask == 0 ]  )
+  petbkgd = mean( pet[ petmaskOrig == 0 ]  )
   pet = pet - petbkgd
   }
 typetx = "Rigid"
-# if ( debug ) typetx = "QuickRigid"
-petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx, verbose = debug )
-petmask = antsApplyTransforms( anatomicalImage, petmask,
+if ( mapToPet )
+  {
+  petreg = antsRegistration( pet, anatomicalImage, typeofTransform = typetx,
+    mask = petmaskOrig, verbose = debug )
+  wti = TRUE
+  }
+else {
+  brainmask = getMask( anatomicalSegmentation )
+  petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx,
+    mask = brainmask, verbose = debug )
+  wti = FALSE
+  }
+petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
+  whichtoinvert = c( wti ),
   transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
 if ( idim == 4 )
   temp = antsApplyTransforms( anatomicalImage, temp,
+    whichtoinvert = c( wti ),
     transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
 if ( idim == 3 ) temp = antsImageClone( petreg$warpedmovout )
 # NOTE: here, the pet image is now in the anatomical space
