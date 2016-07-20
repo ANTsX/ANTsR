@@ -56,13 +56,14 @@ if ( idim == 4 )
   temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
   pet = getAverageOfTimeSeries( temp )
   }
-petmaskOrig = getMask( pet )
+typetx = "Rigid"
+pets = smoothImage(  pet, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
+petmaskOrig = getMask( pets )
 if ( subtractBackground )
   {
   petbkgd = mean( pet[ petmaskOrig == 0 ]  )
   pet = pet - petbkgd
   }
-typetx = "Rigid"
 if ( mapToPet )
   {
   petreg = antsRegistration( pet, anatomicalImage, typeofTransform = typetx,
@@ -77,7 +78,7 @@ else {
   }
 petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
   whichtoinvert = c( wti ),
-  transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
+  transformlist = petreg$invtransforms, interpolator='NearestNeighbor' )
 if ( idim == 4 )
   temp = antsApplyTransforms( anatomicalImage, temp,
     whichtoinvert = c( wti ),
