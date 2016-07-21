@@ -56,10 +56,13 @@ if ( idim == 4 )
   if ( pet@dimension == 2 )
     petRef = as.antsImage( as.array( petTime )[,,1] )
   petRef = antsCopyImageInfo( pet, petRef )
-  petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
+  typetx = "Rigid"
+  if ( debug ) typetx = "QuickRigid"
+  petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
   pet = getAverageOfTimeSeries( petMoco )
   }
 typetx = "Rigid"
+if ( debug ) typetx = "QuickRigid"
 pets = smoothImage(  pet, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
 petmaskOrig = getMask( pets )
 if ( subtractBackground )
