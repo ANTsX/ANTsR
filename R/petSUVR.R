@@ -59,11 +59,19 @@ if ( idim == 4 )
   petRef = antsCopyImageInfo( pet, petRef )
   typetx = "Rigid"
   if ( noMotionCorr ) petMoco = antsImageClone( petTime )
-  if ( !noMotionCorr ) petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
+  if ( !noMotionCorr ) {
+    if ( length( smoothingParameter ) == 1 & idim == 4 )
+      smoothingParameterT = c( rep( smoothingParameter, 3 ), 0 )
+    petTimeSmoothed = smoothImage(  petTime, smoothingParameterT,
+      sigmaInPhysicalCoordinates = TRUE )
+    petMoco = antsrMotionCalculation( petTimeSmoothed, petRef,
+      typeofTransform = typetx, verbose=F )$moco_img
+    }
   pet = getAverageOfTimeSeries( petMoco )
   }
 typetx = "Rigid"
-pets = smoothImage(  pet, smoothingParameter*0.5, sigmaInPhysicalCoordinates = TRUE )
+pets = smoothImage(  getAverageOfTimeSeries( petTime ),
+  smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
 petmaskOrig = getMask( pets )
 if ( subtractBackground )
   {

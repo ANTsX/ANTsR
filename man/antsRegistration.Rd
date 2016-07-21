@@ -49,6 +49,8 @@ typeofTransform can be one of:
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
   May be useful for quick visualization fixes.'}
+  \item{"DenseRigid": }{Rigid transformation: Only rotation and translation.
+  Employs dense sampling during metric estimation.'}
   \item{"BOLDRigid": }{Rigid transformation: Parameters typical for BOLD
   to BOLD intrasubject registration'.'}
   \item{"Affine": }{Affine transformation: Rigid + scaling.}

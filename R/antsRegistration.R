@@ -20,6 +20,8 @@
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
 #'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
 #'   May be useful for quick visualization fixes.'}
+#'   \item{"DenseRigid": }{Rigid transformation: Only rotation and translation.
+#'   Employs dense sampling during metric estimation.'}
 #'   \item{"BOLDRigid": }{Rigid transformation: Parameters typical for BOLD
 #'   to BOLD intrasubject registration'.'}
 #'   \item{"Affine": }{Affine transformation: Rigid + scaling.}
@@ -102,8 +104,9 @@ antsRegistration <- function( fixed = NA, moving = NA,
   }
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
   myl=0
-  myfAff="6x4x2x1"
-  mysAff="3x2x1x0"
+  myfAff = "6x4x2x1"
+  mysAff = "3x2x1x0"
+  metsam = 0.2
   myiterations <- "2100x1200x1200x10"
   if ( typeofTransform == "AffineFast" ) {
     typeofTransform <- "Affine"
@@ -119,6 +122,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
   if ( typeofTransform == "QuickRigid" ) {
     typeofTransform <- "Rigid"
     myiterations <- "20x20x0x0"
+  }
+  if ( typeofTransform == "DenseRigid" ) {
+    typeofTransform <- "Rigid"
+    metsam = 0.8
   }
   if ( typeofTransform == "BOLDRigid" ) {
     typeofTransform <- "Rigid"
@@ -297,8 +304,8 @@ antsRegistration <- function( fixed = NA, moving = NA,
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
                              paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
-        
-        
+
+
         if (typeofTransform == "SyNabp") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
                        "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.25]", sep = ""),
@@ -318,10 +325,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
                              paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
-        
-        
-        
-        
+
+
+
+
         if (typeofTransform == "SyNLessAggro") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
                        "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
@@ -361,11 +368,12 @@ antsRegistration <- function( fixed = NA, moving = NA,
         if ( typeofTransform == "Rigid" | typeofTransform == "Affine" |
                typeofTransform == "Translation" )
         {
-          args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
-                       "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
-                       "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
-                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          args <- list(
+            "-d", as.character(fixed@dimension), "-r", initx,
+            "-m", paste("mattes[", f, ",", m, ",1,32,regular,",metsam,"]", sep = ""),
+            "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
+            "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
+            "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
             args=lappend( list( "-x", maskopt ), args )
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
