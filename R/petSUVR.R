@@ -45,7 +45,10 @@ petSUVR <- function(
 idim = petTime@dimension
 # petTime = petTime - min( petTime )
 if ( idim == 4 ) pet = getAverageOfTimeSeries( petTime )
-if ( idim == 3 ) pet = antsImageClone( petTime )
+if ( idim == 3 ) {
+  pet = antsImageClone( petTime )
+  petMoco = antsImageClone( petTime )
+}
 if ( idim == 4 )
   {
   if ( pet@dimension == 3 )
@@ -53,8 +56,8 @@ if ( idim == 4 )
   if ( pet@dimension == 2 )
     petRef = as.antsImage( as.array( petTime )[,,1] )
   petRef = antsCopyImageInfo( pet, petRef )
-  temp = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
-  pet = getAverageOfTimeSeries( temp )
+  petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = "Rigid", verbose=F )$moco_img
+  pet = getAverageOfTimeSeries( petMoco )
   }
 typetx = "Rigid"
 pets = smoothImage(  pet, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
@@ -66,13 +69,13 @@ if ( subtractBackground )
   }
 if ( mapToPet )
   {
-  petreg = antsRegistration( pet, anatomicalImage, typeofTransform = typetx,
+  petreg = antsRegistration( pets, anatomicalImage, typeofTransform = typetx,
     mask = petmaskOrig, verbose = debug )
   wti = TRUE
   }
 else {
   brainmask = getMask( anatomicalSegmentation )
-  petreg = antsRegistration( anatomicalImage, pet, typeofTransform = typetx,
+  petreg = antsRegistration( anatomicalImage, pets, typeofTransform = typetx,
     mask = brainmask, verbose = debug )
   wti = FALSE
   }
@@ -80,12 +83,20 @@ petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
   whichtoinvert = c( wti ),
   transformlist = petreg$invtransforms, interpolator='NearestNeighbor' )
 if ( idim == 4 )
-  temp = antsApplyTransforms( anatomicalImage, temp,
+  {
+  temp = antsApplyTransforms( anatomicalImage, petMoco,
     whichtoinvert = c( wti ),
     transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
-if ( idim == 3 ) temp = antsImageClone( petreg$warpedmovout )
+  pets = getAverageOfTimeSeries( temp )
+  }
+if ( idim == 3 )
+  {
+  temp = antsApplyTransforms( anatomicalImage, petMoco,
+    whichtoinvert = c( wti ),
+    transformlist = petreg$fwdtransforms, interpolator='Linear' )
+  pets = antsImageClone( temp )
+  }
 # NOTE: here, the pet image is now in the anatomical space
-pets = petreg$warpedmovout
 if ( labelValue > 0 )
   {
   cerebellum = thresholdImage( anatomicalSegmentation, labelValue, labelValue )
