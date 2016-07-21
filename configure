@@ -36,7 +36,7 @@ echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
 if [[ ${needVCL_CAN_STATIC_CONST_INIT_FLOAT} -eq 1 ]]; then
 echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
   -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
-  -I\${myantssource}/Tensor/ -DVCL_CAN_STATIC_CONST_INIT_FLOAT=1" >> Makevars
+  -I\${myantssource}/Tensor/ " >> Makevars
 else
 echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
   -I\${myantssource}/Utilities -I\${myantssource}/Examples/ \
