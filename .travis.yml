@@ -84,7 +84,7 @@ install:
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
 #  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
   - cd ~/
-  - itkrrel=0.0
+  - itkrrel=0.0.1
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then osxitkr=ITKR_${itkrrel}.tgz; Rscript -e 'download.file("https://github.com/stnava/ITKR/releases/download/latest/ITKR_0.0.tgz", "ITKR_0.0.tgz", quiet = FALSE, mode = "wb")'; R CMD INSTALL --library=~/Rlib ${osxitkr}; fi
   - cd ${basedir}
