@@ -9,6 +9,7 @@
 #' @import Rcpp
 #' @import methods
 #' @import tools
+#' @import stats
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
 

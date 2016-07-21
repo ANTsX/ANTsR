@@ -369,8 +369,8 @@ for( l in 1:length( labelSet ) )
   # Start the clock
   ptm <- proc.time()
 
-  modelForest <- randomForest( modelFormula, modelDataPerLabel, ntree = 1000,
-    type = classification, importance = TRUE, na.action = na.omit )
+  modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
+    ntree = 1000, type = "classification", importance = TRUE, na.action = na.omit )
 
   # Stop the clock
   elapsedTime <- proc.time() - ptm
@@ -648,4 +648,3 @@ refinedSegmentationImage <- as.antsImage( array( refinedSegmentationArray, dim =
 
 return ( list( RefinedSegmentationImage = refinedSegmentationImage, ForegroundProbabilityImages = foregroundProbabilityImages ) )
 }
-

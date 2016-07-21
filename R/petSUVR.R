@@ -84,7 +84,7 @@ else {
   }
 petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
   whichtoinvert = c( wti ),
-  transformlist = petreg$invtransforms, interpolator='NearestNeighbor' )
+  transformlist = petreg$fwdtransforms, interpolator='NearestNeighbor' )
 if ( idim == 4 )
   {
   temp = antsApplyTransforms( anatomicalImage, petMoco,

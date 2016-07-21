@@ -38,6 +38,7 @@ Suggests:
     knitr,
     magic,
     MASS,
+    Matrix,
     mFilter,
     misc3d,
     moments,
