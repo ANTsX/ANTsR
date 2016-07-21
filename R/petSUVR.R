@@ -49,6 +49,7 @@ if ( idim == 3 ) {
   pet = antsImageClone( petTime )
   petMoco = antsImageClone( petTime )
 }
+if ( debug ) print("starting")
 if ( idim == 4 )
   {
   if ( pet@dimension == 3 )
@@ -57,13 +58,14 @@ if ( idim == 4 )
     petRef = as.antsImage( as.array( petTime )[,,1] )
   petRef = antsCopyImageInfo( pet, petRef )
   typetx = "Rigid"
-  if ( debug ) typetx = "QuickRigid"
-  petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
+  if ( debug ) petMoco = antsImageClone( petTime )
+  if ( !debug ) petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
   pet = getAverageOfTimeSeries( petMoco )
   }
+if ( debug ) print("begin rigid")
 typetx = "Rigid"
-if ( debug ) typetx = "QuickRigid"
-pets = smoothImage(  pet, smoothingParameter, sigmaInPhysicalCoordinates = TRUE )
+# if ( debug ) typetx = "QuickRigid"
+pets = smoothImage(  pet, smoothingParameter*0.5, sigmaInPhysicalCoordinates = TRUE )
 petmaskOrig = getMask( pets )
 if ( subtractBackground )
   {
@@ -78,8 +80,15 @@ if ( mapToPet )
   }
 else {
   brainmask = getMask( anatomicalSegmentation )
-  petreg = antsRegistration( anatomicalImage, pets, typeofTransform = typetx,
-    mask = brainmask, verbose = debug )
+#  petreg = antsRegistration( anatomicalImage, pets, typeofTransform = typetx,
+#    mask = brainmask, verbose = debug )
+  petreg = antsRegistration( anatomicalImage, pets,
+    typeofTransform = typetx, verbose = debug )
+  tempmask = antsApplyTransforms( pets, brainmask,
+      whichtoinvert = c( TRUE ), transformlist = petreg$fwdtransforms )
+  petreg = antsRegistration( anatomicalImage * brainmask, pets * tempmask,
+    typeofTransform = typetx, verbose = debug,
+    initialTransform = petreg$fwdtransforms )
   wti = FALSE
   }
 petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
@@ -91,6 +100,11 @@ if ( idim == 4 )
     whichtoinvert = c( wti ),
     transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
   pets = getAverageOfTimeSeries( temp )
+  if ( debug )
+    {
+    print( "return intermediate")
+    return( list( pets, petreg ) )
+    }
   }
 if ( idim == 3 )
   {
