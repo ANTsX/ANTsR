@@ -6,7 +6,7 @@
 \usage{
 petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
   smoothingParameter = 2.5, labelValue = 0, subtractBackground = FALSE,
-  mapToPet = FALSE, debug = FALSE)
+  mapToPet = FALSE, noMotionCorr = FALSE)
 }
 \arguments{
 \item{petTime}{pet time series antsImage or 3D image}
@@ -30,7 +30,8 @@ mean activation image.}
 \item{mapToPet}{boolean option causing pet to be used as fixed image in the
 rigid registration between anatomical and pet}
 
-\item{debug}{boolean option activating simple and fast approach}
+\item{noMotionCorr}{boolean option activating simple and fast approach that
+may be better for dynamic data with insufficient per-frame information}
 }
 \value{
 suvr antsImage

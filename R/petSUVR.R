@@ -22,7 +22,8 @@
 #' mean activation image.
 #' @param mapToPet boolean option causing pet to be used as fixed image in the
 #' rigid registration between anatomical and pet
-#' @param debug boolean option activating simple and fast approach
+#' @param noMotionCorr boolean option activating simple and fast approach that
+#' may be better for dynamic data with insufficient per-frame information
 #' @return suvr antsImage
 #' @author Avants BB
 #' @examples
@@ -40,7 +41,7 @@ petSUVR <- function(
   labelValue = 0,
   subtractBackground = FALSE,
   mapToPet = FALSE,
-  debug = FALSE )
+  noMotionCorr = FALSE )
 {
 idim = petTime@dimension
 # petTime = petTime - min( petTime )
@@ -49,7 +50,6 @@ if ( idim == 3 ) {
   pet = antsImageClone( petTime )
   petMoco = antsImageClone( petTime )
 }
-if ( debug ) print("starting")
 if ( idim == 4 )
   {
   if ( pet@dimension == 3 )
@@ -58,13 +58,11 @@ if ( idim == 4 )
     petRef = as.antsImage( as.array( petTime )[,,1] )
   petRef = antsCopyImageInfo( pet, petRef )
   typetx = "Rigid"
-  if ( debug ) petMoco = antsImageClone( petTime )
-  if ( !debug ) petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
+  if ( noMotionCorr ) petMoco = antsImageClone( petTime )
+  if ( !noMotionCorr ) petMoco = antsrMotionCalculation( petTime, petRef, typeofTransform = typetx, verbose=F )$moco_img
   pet = getAverageOfTimeSeries( petMoco )
   }
-if ( debug ) print("begin rigid")
 typetx = "Rigid"
-# if ( debug ) typetx = "QuickRigid"
 pets = smoothImage(  pet, smoothingParameter*0.5, sigmaInPhysicalCoordinates = TRUE )
 petmaskOrig = getMask( pets )
 if ( subtractBackground )
@@ -75,20 +73,20 @@ if ( subtractBackground )
 if ( mapToPet )
   {
   petreg = antsRegistration( pets, anatomicalImage, typeofTransform = typetx,
-    mask = petmaskOrig, verbose = debug )
+    mask = petmaskOrig, verbose = FALSE )
   wti = TRUE
   }
 else {
   brainmask = getMask( anatomicalSegmentation )
 #  petreg = antsRegistration( anatomicalImage, pets, typeofTransform = typetx,
-#    mask = brainmask, verbose = debug )
-  petreg = antsRegistration( anatomicalImage, pets,
-    typeofTransform = typetx, verbose = debug )
+#    mask = brainmask, verbose = FALSE )
+  petreg1 = antsRegistration( anatomicalImage, pets,
+    typeofTransform = typetx, verbose = FALSE )
   tempmask = antsApplyTransforms( pets, brainmask,
-      whichtoinvert = c( TRUE ), transformlist = petreg$fwdtransforms )
+      whichtoinvert = c( TRUE ), transformlist = petreg1$fwdtransforms )
   petreg = antsRegistration( anatomicalImage * brainmask, pets * tempmask,
-    typeofTransform = typetx, verbose = debug,
-    initialTransform = petreg$fwdtransforms )
+    typeofTransform = typetx, verbose = FALSE,
+    initialTransform = petreg1$fwdtransforms )
   wti = FALSE
   }
 petmask = antsApplyTransforms( anatomicalImage, petmaskOrig,
@@ -100,11 +98,6 @@ if ( idim == 4 )
     whichtoinvert = c( wti ),
     transformlist = petreg$fwdtransforms, interpolator='Linear', imagetype=3 )
   pets = getAverageOfTimeSeries( temp )
-  if ( debug )
-    {
-    print( "return intermediate")
-    return( list( pets, petreg ) )
-    }
   }
 if ( idim == 3 )
   {
