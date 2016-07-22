@@ -61,7 +61,7 @@ if ( idim == 4 )
   if ( noMotionCorr ) petMoco = antsImageClone( petTime )
   if ( !noMotionCorr ) {
     if ( length( smoothingParameter ) == 1 & idim == 4 )
-      smoothingParameterT = c( rep( smoothingParameter, 3 ), 0 )
+      smoothingParameterT = c( rep( 1, 3 ), 0 )
     petTimeSmoothed = smoothImage(  petTime, smoothingParameterT,
       sigmaInPhysicalCoordinates = TRUE )
     petMoco = antsrMotionCalculation( petTimeSmoothed, petRef,
