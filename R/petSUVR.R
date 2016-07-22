@@ -92,7 +92,8 @@ else {
     typeofTransform = typetx, verbose = FALSE )
   tempmask = antsApplyTransforms( pets, brainmask,
       whichtoinvert = c( TRUE ), transformlist = petreg1$fwdtransforms )
-  petreg = antsRegistration( anatomicalImage * brainmask, pets * tempmask,
+  petreg = antsRegistration( anatomicalImage, pets,
+    mask = brainmask,
     typeofTransform = typetx, verbose = FALSE,
     initialTransform = petreg1$fwdtransforms )
   wti = FALSE
