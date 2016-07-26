@@ -186,7 +186,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
     i=myijmat[,1],
     j=myijmat[,2],
     x=myijmat[,3],
-    dims = c( ncol( x ), ncol( y ) ), sparse = FALSE
+    dims = c( ncol( x ), ncol( y ) ), symmetric = FALSE
   )
   if ( cometric )
     {
