@@ -157,7 +157,6 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
     tct = tct + sum( !is.na(inds) )
     }
   # build triplet representation for sparse matrix
-  print( max(  bknn$nn.idx ) )
   myijmat = matrix( nrow=(tct), ncol=3 )
   tct2 = 1
   for ( i in 1:ncol( x ) )
