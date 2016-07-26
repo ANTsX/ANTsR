@@ -43,11 +43,9 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
 # see http://www.analytictech.com/mb876/handouts/distance_and_correlation.htm
 # euclidean distance to correlation - xin contains correlations
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
-  if ( cometric ) {
-    x = scale( x )
-    y = scale( y )
-    }
-  bknn = nabor::knn( t( x ), t( y ) , k=k, eps=eps )
+  if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
+  if ( cometric ) x = scale( x )
+  bknn = nabor::knn( t( x ) , k=k, eps=eps )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
   for ( i in 1:ncol( x ) )
@@ -106,7 +104,6 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
 
 
 
-
 #' Create sparse distance, covariance or correlation matrix from x, y
 #'
 #' Exploit k-nearest neighbor algorithms to estimate a sparse matrix measuring
@@ -145,13 +142,11 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
   kmetric <- match.arg( kmetric )
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
   if ( cometric & r == Inf ) r = -Inf
-#  if ( ! usePkg("irlba") )
-#    stop("Please install the irlba package")
-# see http://www.analytictech.com/mb876/handouts/distance_and_correlation.htm
-# euclidean distance to correlation - xin contains correlations
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
-  if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
-  if ( cometric ) x = scale( x )
+  if ( cometric ) {
+    x = scale( x )
+    y = scale( y )
+    }
   bknn = nabor::knn( t( y ) , t( x ), k=k, eps=eps )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
