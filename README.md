@@ -83,7 +83,8 @@ In general, these **assume** you have [git](http://git-scm.com/) installed / acc
 
 Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
 
-You may need to install R packages that ANTsR requires. For example, minimally:
+You will need to install R packages that ANTsR requires. Minimally:
+**Install ITKR** [here](https://github.com/stnava/ITKR/releases) then do:
 ```
 mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
