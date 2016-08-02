@@ -29,7 +29,7 @@
     <div class="container">
       <section id="main_content">
         <h1>
-<a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>ANTsR</h1>
+<a id="antsr" class="anchor" href="#antsr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ANTsR</h1>
 
 <p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Travis Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a>
 <a href="https://codeship.com/projects/79732"> <img src="https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master" alt="Codeship Build Status"></a></p>
@@ -37,9 +37,9 @@
 <p>A package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.</p>
 
 <h2>
-<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h2>
 
-<p>Version: 0.3.2</p>
+<p>Version: 0.3.3</p>
 
 <p>License: GPL (&gt;=2)</p>
 
@@ -49,7 +49,7 @@
 
 <p>LinkingTo:  Rcpp, ITKR</p>
 
-<p>Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison</p>
+<p>Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison, Dorian Pustina</p>
 
 <p>Maintainer: <a href="http://stnava.github.io/">Brian B. Avants</a></p>
 
@@ -62,11 +62,11 @@
 <p>Travis checks:  <a href="https://travis-ci.org/stnava/ANTsR">ANTsR results</a></p>
 
 <h2>
-<a id="downloads" class="anchor" href="#downloads" aria-hidden="true"><span class="octicon octicon-link"></span></a>Downloads</h2>
+<a id="downloads" class="anchor" href="#downloads" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Downloads</h2>
 
-<p>Reference manual:   <a href="https://github.com/stnava/ANTsR/releases/download/v0.3.1/ANTsR-manual.pdf">ANTsR.pdf</a></p>
+<p>Reference manual:   <a href="https://github.com/stnava/ANTsR/releases/">ANTsR.pdf</a></p>
 
-<p>Vignettes:</p>
+<p><a href="https://github.com/stnava/ANTsR/releases/">Vignettes</a>:</p>
 
 <ul>
 <li><p><a href="http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/ANTsR.html">ANTsR</a></p></li>
@@ -89,7 +89,7 @@
 </code></pre>
 
 <h2>
-<a id="research-using-antsr" class="anchor" href="#research-using-antsr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Research using ANTsR</h2>
+<a id="research-using-antsr" class="anchor" href="#research-using-antsr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Research using ANTsR</h2>
 
 <ul>
 <li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25449745">Inter-modality inference</a> yet to be added RIPMMARC</p></li>
@@ -100,10 +100,11 @@
 <li><p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p></li>
 <li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24683960">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p></li>
 <li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24852460">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p></li>
+<li><p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/">Corrective learning for segmentation</a> functions <code>segmentationRefinement.train</code> and <code>segmentationRefinement.predict</code>.</p></li>
 </ul>
 
 <h2>
-<a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation from source</h2>
+<a id="installation-from-source" class="anchor" href="#installation-from-source" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation from source</h2>
 
 <p>Please read this entire section before choosing which method you prefer.</p>
 
@@ -111,7 +112,8 @@
 
 <p>Windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.</p>
 
-<p>You may need to install R packages that ANTsR requires. For example, minimally:</p>
+<p>You will need to install R packages that ANTsR requires. Minimally:
+<strong>Install ITKR</strong> <a href="https://github.com/stnava/ITKR/releases">here</a> then do:</p>
 
 <pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
@@ -156,7 +158,7 @@ $ R CMD INSTALL ANTsR</pre></div>
 <p>The <a href="https://github.com/stnava/ANTsR/blob/master/.travis.yml"><code>travis.yml</code> file</a> also shows a way to install from Linux command line.</p>
 
 <h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
 <p>Load the package:</p>
 
@@ -172,7 +174,7 @@ $ R CMD INSTALL ANTsR</pre></div>
 via  <code>args(functionName)</code></p>
 
 <h2>
-<a id="overview-of-antsr-functionality-and-useful-tools" class="anchor" href="#overview-of-antsr-functionality-and-useful-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview of ANTsR functionality and useful tools</h2>
+<a id="overview-of-antsr-functionality-and-useful-tools" class="anchor" href="#overview-of-antsr-functionality-and-useful-tools" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview of ANTsR functionality and useful tools</h2>
 
 <p>If nothing else, ANTsR makes it easy to read and write medical images
 and to map them into a format compatible with R.</p>
@@ -331,7 +333,7 @@ github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
 <p>A good visualization alternative is <a href="https://github.com/stnava/antsSurf">antsSurf</a>.</p>
 
 <h2>
-<a id="direct-access-to-ants-tools" class="anchor" href="#direct-access-to-ants-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>Direct access to ANTs tools</h2>
+<a id="direct-access-to-ants-tools" class="anchor" href="#direct-access-to-ants-tools" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Direct access to ANTs tools</h2>
 
 <p>Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.</p>
 
@@ -343,14 +345,17 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 </code></pre>
 
 <h1>
-<a id="release-notes" class="anchor" href="#release-notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Release notes</h1>
+<a id="release-notes" class="anchor" href="#release-notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Release notes</h1>
 
 <p>More like <em>development highlights</em>, as opposed to <em>release notes</em>.  See <code>git log</code> for the complete history.  We try to follow <a href="http://yihui.name/en/2013/06/r-package-versioning/">these versioning recommendations for R packages</a>.  Under these guidelines, only <code>major.minor</code> is an official release.</p>
 
 <h2>
-<a id="032" class="anchor" href="#032" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.2</h2>
+<a id="032" class="anchor" href="#032" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>0.3.2</h2>
 
 <ul>
+<li><p>ENH: added domainImg option to plot.antsImage which can standardize plot.</p></li>
+<li><p>COMP: test for DVCL define requirement to improve clang and gcc compilations</p></li>
+<li><p>WIP: transform objects can be created on the fly and manipulated thanks to jeff duda</p></li>
 <li><p>ENH: automation for eigenanatomy</p></li>
 <li><p>ENH: reworked SCCAN and eanat</p></li>
 <li><p>ENH: mrvnrfs</p></li>
@@ -361,7 +366,7 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 </ul>
 
 <h2>
-<a id="031" class="anchor" href="#031" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.1</h2>
+<a id="031" class="anchor" href="#031" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>0.3.1</h2>
 
 <ul>
 <li><p>WIP: iMath improvements</p></li>
@@ -379,7 +384,7 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 </ul>
 
 <h2>
-<a id="030" class="anchor" href="#030" aria-hidden="true"><span class="octicon octicon-link"></span></a>0.3.0</h2>
+<a id="030" class="anchor" href="#030" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>0.3.0</h2>
 
 <p>First official release.</p>
       </section>
