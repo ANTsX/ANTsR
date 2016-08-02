@@ -1,7 +1,6 @@
 # ANTsR
 
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
-[ ![Codeship Build Status](https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master)](https://codeship.com/projects/79732)
 
 A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.
 
