@@ -1,3 +1,5 @@
+![ants edie](http://i.imgur.com/nkFc4hn.png)
+
 # ANTsR
 
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
