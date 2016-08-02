@@ -1,5 +1,6 @@
 ![ants edie](http://i.imgur.com/DcV1NVT.png)
-![ants babe](http://i.imgur.com/I6KSEus.png)
+![ants babe](http://i.imgur.com/gwoxI5M.png)
+![ants brain](http://i.imgur.com/I2VNWpA.png)
 
 # ANTsR
 
