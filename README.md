@@ -1,4 +1,4 @@
-![ants edie](http://i.imgur.com/nkFc4hn.png)
+![ants edie](http://i.imgur.com/DcV1NVT.png)
 
 # ANTsR
 
