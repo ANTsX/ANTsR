@@ -1,7 +1,8 @@
+![ants brain](http://i.imgur.com/I2VNWpA.png)
+<!--
 ![ants edie](http://i.imgur.com/DcV1NVT.png)
 ![ants babe](http://i.imgur.com/gwoxI5M.png)
-![ants brain](http://i.imgur.com/I2VNWpA.png)
-
+-->
 # ANTsR
 
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
