@@ -253,7 +253,7 @@ for ( myscl in 1:length( r ) )
     {
     sel = calcRowMatDist( x, x[ locsam[i], ] ) < myr
     if ( sum( sel ) >  1 ) {
-      lcov = cov( spherEmbed[sel,] )
+      lcov = cov( x[sel,] )
       temp = svd( lcov )$d[ 1:nev ] # * embeddDim / sum(sel)
       } else temp = rep( 0, nev )
     myevs[ i, 1:nev ] = temp
