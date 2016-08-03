@@ -267,12 +267,12 @@ rownames( mresponse ) = paste("Scale",1:length(r),sep='')
 if ( plot )
   {
   mycols = rainbow( nev )
-  growthRate1 = magic::shift(mresponse[,1],0)-magic::shift(mresponse[,1],1)*0
+  growthRate1 = mresponse[,1]
   plot( r, growthRate1, type='l', col = mycols[1], main='Evals by scale',
         ylim=c(0.00, max( mresponse[,1]) ), xlab='ball-radius', ylab='Expected Eval' )
   for ( i in 2:ncol(mresponse) )
     {
-    growthRatek = magic::shift(mresponse[,i],0)-magic::shift(mresponse[,i],1)*0
+    growthRatek = mresponse[,i] # magic :: shift(mresponse[,i],1)*0
     points( r, growthRatek, type='l',col=mycols[i])
     }
   }
