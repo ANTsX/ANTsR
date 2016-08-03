@@ -1,8 +1,13 @@
 ---
 title: "multivariate template coordinates example for eigenanatomy"
 author: "Brian B. Avants"
-date: "August 3, 2016"
-output: pdf_document
+date: "`r Sys.Date()`"
+bibliography: REFERENCES.bib
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{Transformations and statistical representations for images in R}
+    \usepackage[utf8]{inputenc}
 ---
 
 How to make a table and plot coordinates of a multivariate (soft) region of interest as produced
