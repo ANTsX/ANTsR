@@ -197,3 +197,83 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
     }
   return( kmatSparse )
 }
+
+
+
+
+#' Multi-scale svd
+#'
+#' Maggioni's multi-scale SVD algorithm explores the dimensionality of a dataset
+#' by investigating the change in eigenvalues with respect to a scale parameter.
+#' The scale parameter is defined by the radius of a ball that sits at each
+#' point in the data.  The ball, at each scale, is moved across the dataset
+#' and SVD is computed within the intersection of the ball and the data at each
+#' point.  The shape in this collection of eigenvalues, with respect to scale,
+#' enables us to estimate both signal and noise dimensionality and scale.  The
+#' estimate can be computed efficiently on large datasets if the sampling is
+#' chosen appropriately.
+#'
+#' @param x input matrix, should be n (samples) by p (measurements)
+#' @param r radii to explore
+#' @param locn number of local samples to take at each scale
+#' @param nev maximum number of eigenvalues to compute
+#' @param plot boolean to control whether we plot results
+#' @return dataframe containing the estimated eigenvalues across scale
+#' @author Avants BB
+#' @references
+#' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+#' @examples
+#' \dontrun{
+#' sphereDim = 9
+#' embeddDim = 100
+#' n = 1000
+#' sphereData = pracma::rands( n, sphereDim, 1. )
+#' mysig = 0.1
+#' spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
+#' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
+#' mymssvd = multiscaleSVD( spherEmbed, myxaxis, locn=40, nev=20, plot=TRUE )
+#' }
+#' @export multiscaleSVD
+multiscaleSVD <- function( x, r, locn, nev, plot=FALSE )
+{
+mresponse = matrix( ncol = nev, nrow = length( r ) )
+n = nrow( x )
+calcRowMatDist <- function( xmat, xrow )
+  {
+  locmag <- function( x, xrow ) sqrt( sum( ( x - xrow )^2 ) )
+  apply( xmat, FUN=locmag, MARGIN=1, xrow=xrow )
+  }
+for ( myscl in 1:length( r ) )
+  {
+  myr = r[ myscl ]
+  locsam = sample( 1:n , locn )
+  myevs = matrix( nrow=locn, ncol=nev )
+  for ( i in 1:locn )
+    {
+    sel = calcRowMatDist( x, x[ locsam[i], ] ) < myr
+    if ( sum( sel ) >  1 ) {
+      lcov = cov( spherEmbed[sel,] )
+      temp = svd( lcov )$d[ 1:nev ] # * embeddDim / sum(sel)
+      } else temp = rep( 0, nev )
+    myevs[ i, 1:nev ] = temp
+    if ( i == locn ) {
+      mresponse[ myscl, ] = colMeans( myevs, na.rm=T )
+      }
+    }
+  }
+colnames( mresponse ) = paste("EV",1:nev,sep='')
+rownames( mresponse ) = paste("Scale",1:length(myxaxis),sep='')
+if ( plot )
+  {
+  mycols = rainbow( nev )
+  growthRate1 = magic::shift(mresponse[,1],0)-magic::shift(mresponse[,1],1)*0
+  plot( myxaxis, growthRate1, type='l', col = mycols[1], main='Evals by scale',
+        ylim=c(0.00, max( mresponse[,1]) ), xlab='ball-radius', ylab='Expected Eval' )
+  for ( i in 2:ncol(mresponse) )
+    {
+    growthRatek = magic::shift(mresponse[,i],0)-magic::shift(mresponse[,i],1)*0
+    points( myxaxis, growthRatek, type='l',col=mycols[i])
+    }
+  }
+return( mresponse )
+}
