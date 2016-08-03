@@ -231,7 +231,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' mysig = 0.1
 #' spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
-#' mymssvd = multiscaleSVD( spherEmbed, myxaxis, locn=40, nev=20, plot=TRUE )
+#' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
+#' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=TRUE )
 #' }
 #' @export multiscaleSVD
 multiscaleSVD <- function( x, r, locn, nev, plot=FALSE )
@@ -262,17 +263,17 @@ for ( myscl in 1:length( r ) )
     }
   }
 colnames( mresponse ) = paste("EV",1:nev,sep='')
-rownames( mresponse ) = paste("Scale",1:length(myxaxis),sep='')
+rownames( mresponse ) = paste("Scale",1:length(r),sep='')
 if ( plot )
   {
   mycols = rainbow( nev )
   growthRate1 = magic::shift(mresponse[,1],0)-magic::shift(mresponse[,1],1)*0
-  plot( myxaxis, growthRate1, type='l', col = mycols[1], main='Evals by scale',
+  plot( r, growthRate1, type='l', col = mycols[1], main='Evals by scale',
         ylim=c(0.00, max( mresponse[,1]) ), xlab='ball-radius', ylab='Expected Eval' )
   for ( i in 2:ncol(mresponse) )
     {
     growthRatek = magic::shift(mresponse[,i],0)-magic::shift(mresponse[,i],1)*0
-    points( myxaxis, growthRatek, type='l',col=mycols[i])
+    points( r, growthRatek, type='l',col=mycols[i])
     }
   }
 return( mresponse )
