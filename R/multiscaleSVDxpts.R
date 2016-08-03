@@ -217,7 +217,10 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' @param r radii to explore
 #' @param locn number of local samples to take at each scale
 #' @param nev maximum number of eigenvalues to compute
-#' @param plot boolean to control whether we plot results
+#' @param knn randomly sample neighbors to assist with large datasets. set k with this value.
+#' @param verbose boolean to control verbosity of output
+#' @param plot boolean to control whether we plot results.  its value determines
+#' which eigenvector off which to base the scale of the y-axis.'
 #' @return dataframe containing the estimated eigenvalues across scale
 #' @author Avants BB
 #' @references
@@ -232,10 +235,10 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
-#' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=TRUE )
+#' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
 #' }
 #' @export multiscaleSVD
-multiscaleSVD <- function( x, r, locn, nev, plot=FALSE )
+multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 {
 mresponse = matrix( ncol = nev, nrow = length( r ) )
 n = nrow( x )
@@ -252,24 +255,38 @@ for ( myscl in 1:length( r ) )
   for ( i in 1:locn )
     {
     sel = calcRowMatDist( x, x[ locsam[i], ] ) < myr
-    if ( sum( sel ) >  1 ) {
-      lcov = cov( x[sel,] )
-      temp = svd( lcov )$d[ 1:nev ] # * embeddDim / sum(sel)
+    if ( sum( sel ) >  2 ) {
+      if ( knn > 0 & sum( sel ) > knn ) # take a subset of sel
+        {
+        selinds = sample( 1:length( sel ), knn )
+        sel[ -selinds ] = FALSE
+        }
+      lmat = x[sel,]
+      if ( nrow( lmat ) < ncol( lmat ) ) lcov = cov( t( lmat ) ) else lcov = cov( lmat )
+      temp = svd( lcov, nv=(nrow(lcov)-1) )$d # * embeddDim / sum(sel)
+       # lcov = sparseDistanceMatrix( x, k = knn, kmetric = "cov" )
+       #  temp = irlba::irlba( lcov, nv=(nrow(lcov)-1) )$d
+      temp = temp[ 1:min( c(nev,length(temp)) ) ]
+      if ( length( temp ) < nev ) temp = c( temp, rep(0,nev-length(temp)) )
       } else temp = rep( 0, nev )
     myevs[ i, 1:nev ] = temp
     if ( i == locn ) {
       mresponse[ myscl, ] = colMeans( myevs, na.rm=T )
+      if ( verbose ) {
+        print( paste( i, "r", myr, "localN", sum(sel) ) )
+        print( mresponse[ myscl, ] )
+        }
       }
     }
   }
 colnames( mresponse ) = paste("EV",1:nev,sep='')
 rownames( mresponse ) = paste("Scale",1:length(r),sep='')
-if ( plot )
+if ( plot > 0 )
   {
   mycols = rainbow( nev )
   growthRate1 = mresponse[,1]
   plot( r, growthRate1, type='l', col = mycols[1], main='Evals by scale',
-        ylim=c(0.00, max( mresponse[,1]) ), xlab='ball-radius', ylab='Expected Eval' )
+        ylim=c(0.00, max( mresponse[,plot]) ), xlab='ball-radius', ylab='Expected Eval' )
   for ( i in 2:ncol(mresponse) )
     {
     growthRatek = mresponse[,i] # magic :: shift(mresponse[,i],1)*0

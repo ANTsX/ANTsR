@@ -4,7 +4,7 @@
 \alias{multiscaleSVD}
 \title{Multi-scale svd}
 \usage{
-multiscaleSVD(x, r, locn, nev, plot = FALSE)
+multiscaleSVD(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}
@@ -15,7 +15,12 @@ multiscaleSVD(x, r, locn, nev, plot = FALSE)
 
 \item{nev}{maximum number of eigenvalues to compute}
 
-\item{plot}{boolean to control whether we plot results}
+\item{knn}{randomly sample neighbors to assist with large datasets. set k with this value.}
+
+\item{verbose}{boolean to control verbosity of output}
+
+\item{plot}{boolean to control whether we plot results.  its value determines
+which eigenvector off which to base the scale of the y-axis.'}
 }
 \value{
 dataframe containing the estimated eigenvalues across scale
@@ -41,7 +46,7 @@ mysig = 0.1
 spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
 spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
-mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=TRUE )
+mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
 }
 }
 \author{
