@@ -226,7 +226,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' @references
 #' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 #' @examples
-#' 
+#'
 #' sphereDim = 9
 #' embeddDim = 100
 #' n = 1000
@@ -236,7 +236,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 #' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-#' 
+#'
 #' @export multiscaleSVD
 multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 {
@@ -267,7 +267,7 @@ for ( myscl in 1:length( r ) )
        # lcov = sparseDistanceMatrix( x, k = knn, kmetric = "cov" )
        #  temp = irlba::irlba( lcov, nv=(nrow(lcov)-1) )$d
       temp = temp[ 1:min( c(nev,length(temp)) ) ]
-      if ( length( temp ) < nev ) temp = c( temp, rep(0,nev-length(temp)) )
+      if ( length( temp ) < nev ) temp = c( temp, rep(NA,nev-length(temp)) )
       } else temp = rep( 0, nev )
     myevs[ i, 1:nev ] = temp
     if ( i == locn ) {
