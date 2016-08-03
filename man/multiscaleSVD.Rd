@@ -37,7 +37,7 @@ estimate can be computed efficiently on large datasets if the sampling is
 chosen appropriately.
 }
 \examples{
-\dontrun{
+
 sphereDim = 9
 embeddDim = 100
 n = 1000
@@ -47,7 +47,7 @@ spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDi
 spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-}
+
 }
 \author{
 Avants BB
