@@ -23,7 +23,17 @@ multiscaleSVD(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0)
 which eigenvector off which to base the scale of the y-axis.'}
 }
 \value{
-dataframe containing the estimated eigenvalues across scale
+list with a vector of tangent, curvature, noise dimensionality and a
+a dataframe containing eigenvalues across scale, in correspondence with r:
+\itemize{
+  \item{dim: }{The tangent, curvature and noise dimensionality vector.  The
+data dimensionality is the first entry, the curvature dimensionality exists
+from the second to the first entry of the noise vector.}
+  \item{noiseCutoffs: }{Dimensionalities where the noise may begin.  These
+are candidate cutoffs but may contain some curvature information.'}
+  \item{evalsVsScale: }{eigenvalues across scale}
+  \item{evalClustering:}{data-driven clustering of the eigenvalues}
+}
 }
 \description{
 Maggioni's multi-scale SVD algorithm explores the dimensionality of a dataset
@@ -34,7 +44,9 @@ and SVD is computed within the intersection of the ball and the data at each
 point.  The shape in this collection of eigenvalues, with respect to scale,
 enables us to estimate both signal and noise dimensionality and scale.  The
 estimate can be computed efficiently on large datasets if the sampling is
-chosen appropriately.
+chosen appropriately.  The challenge, in this algorithm, is classifying the
+dimensions of noise, curvature and data.  This classification currently uses
+variations on heuristics suggested in work by Maggioni et al.
 }
 \examples{
 

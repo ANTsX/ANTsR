@@ -211,7 +211,9 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' point.  The shape in this collection of eigenvalues, with respect to scale,
 #' enables us to estimate both signal and noise dimensionality and scale.  The
 #' estimate can be computed efficiently on large datasets if the sampling is
-#' chosen appropriately.
+#' chosen appropriately.  The challenge, in this algorithm, is classifying the
+#' dimensions of noise, curvature and data.  This classification currently uses
+#' variations on heuristics suggested in work by Maggioni et al.
 #'
 #' @param x input matrix, should be n (samples) by p (measurements)
 #' @param r radii to explore
@@ -221,7 +223,17 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
 #' @param verbose boolean to control verbosity of output
 #' @param plot boolean to control whether we plot results.  its value determines
 #' which eigenvector off which to base the scale of the y-axis.'
-#' @return dataframe containing the estimated eigenvalues across scale
+#' @return list with a vector of tangent, curvature, noise dimensionality and a
+#' a dataframe containing eigenvalues across scale, in correspondence with r:
+#' \itemize{
+#'   \item{dim: }{The tangent, curvature and noise dimensionality vector.  The
+#' data dimensionality is the first entry, the curvature dimensionality exists
+#' from the second to the first entry of the noise vector.}
+#'   \item{noiseCutoffs: }{Dimensionalities where the noise may begin.  These
+#' are candidate cutoffs but may contain some curvature information.'}
+#'   \item{evalsVsScale: }{eigenvalues across scale}
+#'   \item{evalClustering:}{data-driven clustering of the eigenvalues}
+#' }
 #' @author Avants BB
 #' @references
 #' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
@@ -254,8 +266,9 @@ for ( myscl in 1:length( r ) )
   myevs = matrix( nrow=locn, ncol=nev )
   for ( i in 1:locn )
     {
-    sel = calcRowMatDist( x, x[ locsam[i], ] ) < myr
-    if ( sum( sel ) >  2 ) {
+    rowdist = calcRowMatDist( x, x[ locsam[i], ] )
+    sel = rowdist < myr
+    if ( sum( sel , na.rm = T ) >  2 ) {
       if ( knn > 0 & sum( sel ) > knn ) # take a subset of sel
         {
         selinds = sample( 1:length( sel ), knn )
@@ -268,7 +281,7 @@ for ( myscl in 1:length( r ) )
        #  temp = irlba::irlba( lcov, nv=(nrow(lcov)-1) )$d
       temp = temp[ 1:min( c(nev,length(temp)) ) ]
       if ( length( temp ) < nev ) temp = c( temp, rep(NA,nev-length(temp)) )
-      } else temp = rep( 0, nev )
+      } else temp = rep( NA, nev )
     myevs[ i, 1:nev ] = temp
     if ( i == locn ) {
       mresponse[ myscl, ] = colMeans( myevs, na.rm=T )
@@ -281,17 +294,75 @@ for ( myscl in 1:length( r ) )
   }
 colnames( mresponse ) = paste("EV",1:nev,sep='')
 rownames( mresponse ) = paste("Scale",1:length(r),sep='')
+# just use pam to cluster the eigenvalues
+goodscales = !is.na( rowMeans( mresponse ) )
+temp = t(mresponse)[1:nev,goodscales] # remove top evec
+pamk = NA
+krng = 5:min( dim(temp) - 1 ) # force a min of 4 clusters
+if ( usePkg("fpc") )
+  pamk = fpc::pamk( temp, krange=krng )$pamobject$clustering
+############################################################
+# noise dimensionality
+scaleEvalCorrs = rep( NA, ncol( mresponse ) )
+for ( i in 1:nev )
+  {
+  mylm = lm(  mresponse[,i] ~ stats::poly(r^2, 2 ) )
+  coffs = coefficients( summary( mylm ) )
+  scaleEvalCorrs[ i ] = summary( mylm )$r.squared # coffs[2,4]
+  }
+delt = scaleEvalCorrs - magic::shift(scaleEvalCorrs,-1)
+qdelt = quantile( delt[2:length(delt)], 0.9 )
+noiseDim = which( delt > qdelt ) + 1
+# curvature dimensionality
+# find the dimensionality that maximizes the t-test difference across
+# the multi-scale eigenvalues
+myt = rep( NA,  nev )
+for ( i in 3:( nev - 2 ) )
+  {
+  lowinds = 2:i
+  hiinds  = (i+1):nev
+  myt[ i ] = t.test( mresponse[,lowinds], mresponse[,hiinds], paired=FALSE )$sta
+#  myt[ i ] = t.test( scaleEvalCorrs[lowinds], scaleEvalCorrs[hiinds], paired=FALSE )$sta
+   }
+dataDimCurv = which.max( myt )
+# find singular values that do not grow with scale ( radius )
+if ( length( r ) > 4 )
+{
+scaleEvalCorrs = rep( NA, ncol( mresponse ) )
+ply = 4 # power for polynomial model
+for ( i in 1:dataDimCurv )
+  {
+  mylm = lm(  mresponse[,i] ~ stats::poly(r, ply ) )
+  coffs = coefficients( summary( mylm ) )
+#  print( summary( mylm ) )
+#  print( paste("EV",i) )
+#  Sys.sleep( 3 )
+  # linear term coffs[2,4]
+  # quadratic term coffs[3,4]
+  # noise term coffs[5,4]
+  scaleEvalCorrs[ i ] = coffs[2,4]
+  }
+dataDim = max( which( scaleEvalCorrs < 0.05 ) )
+}  else dataDim = 4
+############################################################
 if ( plot > 0 )
   {
   mycols = rainbow( nev )
   growthRate1 = mresponse[,1]
   plot( r, growthRate1, type='l', col = mycols[1], main='Evals by scale',
-        ylim=c(0.00, max( mresponse[,plot]) ), xlab='ball-radius', ylab='Expected Eval' )
+        ylim=c(0.00, max( mresponse[,plot], na.rm=T) ),
+        xlab='ball-radius', ylab='Expected Eval' )
   for ( i in 2:ncol(mresponse) )
     {
     growthRatek = mresponse[,i] # magic :: shift(mresponse[,i],1)*0
     points( r, growthRatek, type='l',col=mycols[i])
     }
   }
-return( mresponse )
+return(
+  list(
+    dim            = c(dataDim,dataDimCurv),
+    noiseCutoffs   = noiseDim,
+    evalClustering = pamk,
+    evalsVsScale   = mresponse )
+    )
 }
