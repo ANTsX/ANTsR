@@ -310,7 +310,8 @@ for ( i in 1:nev )
   coffs = coefficients( summary( mylm ) )
   scaleEvalCorrs[ i ] = summary( mylm )$r.squared # coffs[2,4]
   }
-delt = scaleEvalCorrs - magic::shift(scaleEvalCorrs,-1)
+shiftinds = c(2:ncol( mresponse ), ncol( mresponse ) )
+delt = scaleEvalCorrs - scaleEvalCorrs[shiftinds]
 qdelt = quantile( delt[2:length(delt)], 0.9 )
 noiseDim = which( delt > qdelt ) + 1
 # curvature dimensionality
