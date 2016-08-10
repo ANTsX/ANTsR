@@ -49,6 +49,8 @@ typeofTransform can be one of:
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
   May be useful for quick visualization fixes.'}
+  \item{"DenseRigid": }{Rigid transformation: Only rotation and translation.
+  Employs dense sampling during metric estimation.'}
   \item{"BOLDRigid": }{Rigid transformation: Parameters typical for BOLD
   to BOLD intrasubject registration'.'}
   \item{"Affine": }{Affine transformation: Rigid + scaling.}
@@ -66,6 +68,7 @@ typeofTransform can be one of:
     aligned by an inital transformation. Can be useful if you want to run
     an unmasked affine followed by masked deformable registration.}
   \item{"SyNCC": }{SyN, but with cross-correlation as the metric.}
+  \item{"SyNabp": }{SyN optimized for abpBrainExtraction.}
   \item{"SyNBold": }{SyN, but optimized for registrations between
     BOLD and T1 images.}
   \item{"SyNBoldAff": }{SyN, but optimized for registrations between

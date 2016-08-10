@@ -1,13 +1,17 @@
+![ants brain](http://i.imgur.com/I2VNWpA.png)
+<!--
+![ants edie](http://i.imgur.com/DcV1NVT.png)
+![ants babe](http://i.imgur.com/gwoxI5M.png)
+-->
 # ANTsR
 
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
-[ ![Codeship Build Status](https://codeship.com/projects/5280bf10-dbb9-0132-084e-428a02316898/status?branch=master)](https://codeship.com/projects/79732)
 
 A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.
 
 ## Description
 
-Version: 0.3.2
+Version: 0.3.3
 
 License: GPL (>=2)
 
@@ -83,7 +87,8 @@ In general, these **assume** you have [git](http://git-scm.com/) installed / acc
 
 Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
 
-You may need to install R packages that ANTsR requires. For example, minimally:
+You will need to install R packages that ANTsR requires. Minimally:
+**Install ITKR** [here](https://github.com/stnava/ITKR/releases) then do:
 ```
 mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )

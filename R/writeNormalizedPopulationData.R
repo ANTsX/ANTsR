@@ -58,17 +58,17 @@ if ( file.exists( filename ) )
 #  )
 # return( TRUE )
 #
-file <- h5file( filename )
+file <- h5::h5file( filename )
 file["antsrpopdata/demographics"] <- data.matrix( demographics )
-h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
+h5::h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
 file["antsrpopdata/imageMat"] <- imageMat
 file["antsrpopdata/imageMask"] <- as.array( imageMask )
-h5attr(file["antsrpopdata/imageMask"], "spacing") <- antsGetSpacing( imageMask )
-h5attr(file["antsrpopdata/imageMask"], "direction") <- antsGetDirection( imageMask )
-h5attr(file["antsrpopdata/imageMask"], "origin") <- antsGetOrigin( imageMask )
+h5::h5attr(file["antsrpopdata/imageMask"], "spacing") <- antsGetSpacing( imageMask )
+h5::h5attr(file["antsrpopdata/imageMask"], "direction") <- antsGetDirection( imageMask )
+h5::h5attr(file["antsrpopdata/imageMask"], "origin") <- antsGetOrigin( imageMask )
 file["antsrpopdata/imageBoolean"] <- imageBoolean
 file["antsrpopdata/filename"] <- filename
-h5close(file)
+h5::h5close(file)
 return( TRUE )
 }
 
@@ -98,21 +98,21 @@ readNormalizedPopulationData <- function( filename )
 {
   if ( ! usePkg( "h5" ) )
     stop( "Please install package h5 in order to use this function." )
-  file <- h5file( filename )
+  file <- h5::h5file( filename )
   demog <- file["antsrpopdata/demographics"]
   demographics <- demog[]
-  h5attr( demog, "colnames" )
-  colnames( demographics ) <- h5attr( demog, "colnames" )
+  h5::h5attr( demog, "colnames" )
+  colnames( demographics ) <- h5::h5attr( demog, "colnames" )
   temp <- file["antsrpopdata/imageMat"]
   imageMat <- temp[]
   temp <- file["antsrpopdata/imageMask"]
   imageMask <- as.antsImage( temp[] )
-  k=antsSetSpacing( imageMask, h5attr( temp, "spacing" ) )
-  k=antsSetOrigin( imageMask, h5attr( temp, "origin" ) )
-  k=antsSetDirection( imageMask, h5attr( temp, "direction" ) )
+  k=antsSetSpacing( imageMask, h5::h5attr( temp, "spacing" ) )
+  k=antsSetOrigin( imageMask, h5::h5attr( temp, "origin" ) )
+  k=antsSetDirection( imageMask, h5::h5attr( temp, "direction" ) )
   temp <- file["antsrpopdata/imageBoolean"]
   imageBoolean <- temp[]
-  h5close(file)
+  h5::h5close(file)
   return(
       list(
         demographics   = data.frame( demographics ),

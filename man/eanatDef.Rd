@@ -6,7 +6,7 @@
 \usage{
 eanatDef(inmat, nvecs = 0, mask = NA, smoother = 0, cthresh = 0,
   its = 5, eps = 0.1, positivity = FALSE, priors = NA,
-  priorWeight = 0, verbose = FALSE)
+  priorWeight = 0, sparEpsilon = 1e-04, verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}
@@ -29,6 +29,8 @@ eanatDef(inmat, nvecs = 0, mask = NA, smoother = 0, cthresh = 0,
 \item{priors}{external initialization matrix.}
 
 \item{priorWeight}{weight on priors in range 0 to 1.}
+
+\item{sparEpsilon}{threshold that controls initial sparseness estimate}
 
 \item{verbose}{controls whether computation is silent or not.}
 }
@@ -77,6 +79,6 @@ Subject-specific functional parcellation via Prior Based Eigenanatomy
 NeuroImage, 2014, 99, 14-27.
 }
 \seealso{
-\code{\link{eanatSelect}}
+\code{\link{eanatSelect}} \url{https://github.com/stnava/blindSourceSeparationInANTsR}
 }
 

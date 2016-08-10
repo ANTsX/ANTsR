@@ -4,7 +4,8 @@
 \alias{abpBrainExtraction}
 \title{An ants-based brain extraction script.}
 \usage{
-abpBrainExtraction(img = NA, tem = NA, temmask = NA, tdir = NA)
+abpBrainExtraction(img = NA, tem = NA, temmask = NA, temregmask = NA,
+  regtype = "SyN", tdir = NA)
 }
 \arguments{
 \item{img}{whole head image to which we map a brain mask}
@@ -12,6 +13,10 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA, tdir = NA)
 \item{tem}{Template image (the whole head) which has an associated label mask.}
 
 \item{temmask}{Template's antsImage brain mask.}
+
+\item{temregmask}{Template's registration mask including skull but not the face}
+
+\item{regtype}{registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)}
 
 \item{tdir}{temporary directory (optional)}
 }
