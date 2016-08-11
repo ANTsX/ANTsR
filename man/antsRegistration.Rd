@@ -5,8 +5,8 @@
 \title{Perform registration between two images.}
 \usage{
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
-  initialTransform = NA, outprefix = "", mask = NA, gradStep = NA,
-  verbose = FALSE, ...)
+  initialTransform = NA, outprefix = "", mask = NA, gradStep = 0.2,
+  flowSigma = 3, totalSigma = 0, verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -23,6 +23,10 @@ information metric by default. See \code{Details.}}
 \item{mask}{mask the registration.}
 
 \item{gradStep}{gradient step size (not for all tx)}
+
+\item{flowSigma}{smoothing for update field}
+
+\item{totalSigma}{smoothing for total field}
 
 \item{verbose}{request verbose output (useful for debugging)}
 
@@ -76,6 +80,7 @@ typeofTransform can be one of:
   \item{"SyNAggro": }{SyN, but with more aggressive registration
     (fine-scale matching and more deformation).  Takes more time than \code{SyN}.}
   \item{"TVMSQ": }{time-varying diffeomorphism with mean square metric}
+  \item{"TVMSQC": }{time-varying diffeomorphism with mean square metric for very large deformation}
 }
 }
 \examples{
