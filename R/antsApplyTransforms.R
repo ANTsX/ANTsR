@@ -82,9 +82,20 @@ antsApplyTransforms <- function(
     cat("use .Call( \"antsApplyTransforms\", .int_antsProcessArguments( c(list(\"--help\")) ), PACKAGE=\"ANTsR\" );\n\n")
     return( NA )
   }
-  interpolator = paste( tolower( substring( interpolator, 1, 1 ) ),
-    substring( interpolator, 2 ),sep="", collapse=" ")
-  interpolator <- match.arg( interpolator )
+  interpolator[1] = paste( tolower( substring( interpolator[1], 1, 1 ) ),
+    substring( interpolator[1], 2 ),sep="", collapse=" ")
+  interpOpts = c(
+    "linear",
+    "nearestNeighbor",
+    "multiLabel",
+    "gaussian",
+    "bSpline",
+    "cosineWindowedSinc",
+    "welchWindowedSinc",
+    "hammingWindowedSinc",
+    "lanczosWindowedSinc",
+    "genericLabel" )
+  interpolator <- match.arg( interpolator, interpOpts )
   args <- list(fixed, moving, transformlist, interpolator, ...)
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
