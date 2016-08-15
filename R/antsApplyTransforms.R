@@ -15,16 +15,16 @@
 #' each transform is a filename.
 #' @param interpolator Choice of interpolator.  Supports partial matching.
 #' \itemize{
-#' \item{linear}{basic linear interpolator}
-#' \item{nearestNeighbor}{basic Nearest Neighbor}
-#' \item{multiLabel}{for label images but genericlabel is preferred}
+#' \item{linear}{}
+#' \item{nearestNeighbor}{}
+#' \item{multiLabel}{ for label images but genericlabel is preferred}
 #' \item{gaussian}{}
 #' \item{bSpline}{}
 #' \item{cosineWindowedSinc}{}
 #' \item{welchWindowedSinc}{}
 #' \item{hammingWindowedSinc}{}
 #' \item{lanczosWindowedSinc}{}
-#' \item{genericLabel}{use this for label images}
+#' \item{genericLabel}{ use this for label images}
 #' }
 #' @param imagetype choose 0/1/2/3 mapping to scalar/vector/tensor/time-series
 #' @param whichtoinvert optional list of booleans, same length as transforms.

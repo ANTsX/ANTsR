@@ -19,16 +19,16 @@ each transform is a filename.}
 
 \item{interpolator}{Choice of interpolator.  Supports partial matching.
 \itemize{
-\item{linear}{basic linear interpolator}
-\item{nearestNeighbor}{basic Nearest Neighbor}
-\item{multiLabel}{for label images but genericlabel is preferred}
+\item{linear}{}
+\item{nearestNeighbor}{}
+\item{multiLabel}{ for label images but genericlabel is preferred}
 \item{gaussian}{}
 \item{bSpline}{}
 \item{cosineWindowedSinc}{}
 \item{welchWindowedSinc}{}
 \item{hammingWindowedSinc}{}
 \item{lanczosWindowedSinc}{}
-\item{genericLabel}{use this for label images}
+\item{genericLabel}{ use this for label images}
 }}
 
 \item{imagetype}{choose 0/1/2/3 mapping to scalar/vector/tensor/time-series}
