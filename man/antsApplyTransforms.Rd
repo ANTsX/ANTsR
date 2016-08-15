@@ -5,7 +5,9 @@
 \title{Apply transforms to images.}
 \usage{
 antsApplyTransforms(fixed, moving, transformlist = "",
-  interpolator = "linear", imagetype = 0, whichtoinvert = NA,
+  interpolator = c("linear", "nearestNeighbor", "multiLabel", "gaussian",
+  "bSpline", "cosineWindowedSinc", "welchWindowedSinc", "hammingWindowedSinc",
+  "lanczosWindowedSinc", "genericLabel"), imagetype = 0, whichtoinvert = NA,
   verbose = FALSE, ...)
 }
 \arguments{
