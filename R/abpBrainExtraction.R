@@ -34,7 +34,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   }
   tempriors <- 3
   npriors <- 3
-  
+
   # file I/O - all stored in temp dir
   if (is.na(tdir)) {
     tdir <- tempdir()
@@ -54,7 +54,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
 #   ANTS_METRIC <- "CC"
 #   ANTS_METRIC_PARAMS <- "1,4"
 #   # ANTs parameters end
-  
+
   # atropos params
   locmrf<-paste(rep(1,img@dimension),collapse='x')
   ATROPOS_BRAIN_EXTRACTION_INITIALIZATION <- "kmeans[3]"
@@ -68,7 +68,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION <- "Socrates"
   ATROPOS_SEGMENTATION_MRF <- paste("[0.11,",locmrf,"]")
   # atropos params end
-  
+
   imgsmall <- resampleImage(img , rep(4, img@dimension) )
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
@@ -84,11 +84,11 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
               searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
               localSearchIterations=10, txfn=initafffn, mask=temregmask )
   }
-  
+
   # get laplacian images
   lapi = iMath(img, "Laplacian", 1.5, 1)
   lapt = iMath(tem, "Laplacian", 1.5, 1)
-  
+
   # FIXME should add mask to below via -x option
   dtem <- antsImageClone(tem, "double")
   dimg <- antsImageClone(img, "double")
@@ -107,10 +107,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   invtransforms <- mytx$invtransforms
   temmaskwarped <- antsApplyTransforms( img, temmask,
                                         transformlist = invtransforms,
-                                        interpolator = c("nearestNeighbor") )
+                                        interpolator = "nearestNeighbor" )
   temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
-  
+
   tmp = iMath(temmaskwarped, "MD", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
   tmp = iMath(tmp, "FillHoles")
@@ -142,7 +142,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   finalseg[segcsf > 0.5 & seggm < 0.5 & segwm < 0.5] <- 1
   # BA - finalseg looks good! could stop here
   tmp<-thresholdImage( finalseg, 2, 3)
-  
+
   tmp = iMath(tmp, "ME", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
   tmp = iMath(tmp, "MD", 4)
@@ -151,7 +151,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   tmp = iMath(tmp, "MD", 5)
   tmp = iMath(tmp, "ME", 5)
   finalseg2 = iMath(tmp, "FillHoles")
-  
+
   # FIXME - steps above should all be checked again ...
   dseg = iMath(finalseg2, "ME", 5)
   dseg = iMath(dseg, "MaurerDistance")

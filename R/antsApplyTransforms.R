@@ -61,7 +61,17 @@ antsApplyTransforms <- function(
   fixed,
   moving,
   transformlist = "",
-  interpolator = "linear",
+  interpolator = c(
+    "linear",
+    "nearestNeighbor",
+    "multiLabel",
+    "gaussian",
+    "bSpline",
+    "cosineWindowedSinc",
+    "welchWindowedSinc",
+    "hammingWindowedSinc",
+    "lanczosWindowedSinc",
+    "genericLabel" ),
   imagetype = 0, whichtoinvert = NA, verbose = FALSE, ... ) {
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
     cat(" warpedimg<-antsApplyTransforms( fixed=img1 , moving=img2 , transformlist=c(\"my0GenericAffine.mat\",\"my1Warp.nii.gz\") ) ")
