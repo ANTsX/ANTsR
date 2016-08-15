@@ -16,6 +16,16 @@ fi
 if [[ $TRAVIS -eq true ]] ; then
   CMAKE_BUILD_TYPE=Release
 fi
+
+gitcmd=`which git`
+if [[ ! -x $gitcmd ]] ; then # try install git
+  apt-get install -y git-core
+fi
+gitcmd=`which git`
+if [[ ! -x $gitcmd ]] ; then # try install git
+  exit 1
+fi
+
 cd ./src
 # platform-specific Makevars
 echo "myantssource=\${PWD}/ants/" > Makevars

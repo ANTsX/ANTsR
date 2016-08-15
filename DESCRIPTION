@@ -60,6 +60,7 @@ Suggests:
     wmtsa
 LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
+Remotes: stnava/ITKR
 NeedsCompilation: yes
 OS_type: unix
 Additional_repositories: https://github.com/InsightSoftwareConsortium/ITK.git,
