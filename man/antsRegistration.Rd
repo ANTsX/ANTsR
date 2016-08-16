@@ -7,7 +7,8 @@
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
   initialTransform = NA, outprefix = "", mask = NA, gradStep = 0.2,
   flowSigma = 3, totalSigma = 0, affMetric = "mattes", affSampling = 32,
-  synMetric = "mattes", synSampling = 32, verbose = FALSE, ...)
+  synMetric = "mattes", synSampling = 32, synIterations = c(100, 100, 20),
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -36,6 +37,9 @@ information metric by default. See \code{Details.}}
 \item{synMetric}{the metric for the syn part (CC, mattes, meansquares, demons)}
 
 \item{synSampling}{the nbins or radius parameter for the syn metric}
+
+\item{synIterations}{vector of iterations for syn.  we will set the smoothing
+and multi-resolution parameters based on the length of this vector.}
 
 \item{verbose}{request verbose output (useful for debugging)}
 
@@ -94,8 +98,8 @@ typeofTransform can be one of:
 }
 \examples{
 
-fi <- antsImageRead(getANTsRData("r16") ,2)
-mi <- antsImageRead(getANTsRData("r64") ,2)
+fi <- antsImageRead(getANTsRData("r16") )
+mi <- antsImageRead(getANTsRData("r64") )
 fi<-resampleImage(fi,c(60,60),1,0)
 mi<-resampleImage(mi,c(60,60),1,0) # speed up
 mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
