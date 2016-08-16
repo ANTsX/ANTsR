@@ -84,6 +84,14 @@
 #'   moving=strokt1,
 #'   typeofTransform = "QuickRigid",verbose=TRUE )
 #'  plot(  strokt1reg$warpedmovout, axis=3, nslices=20)
+#' # now - how to use a mask
+#' fi <- antsImageRead(getANTsRData("r16") )
+#' fiseg = kmeansSegmentation( fi, 3 )
+#' mi <- antsImageRead(getANTsRData("r64") )
+#' msk = thresholdImage(fiseg$segmentation, 0, 0 )
+#' mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyNCC'),
+#'   mask=msk, verbose=F )
+#' jac = createJacobianDeterminantImage( fi, mytx$fwdtransforms[1] )
 #' }
 #'
 #' @export antsRegistration
@@ -198,7 +206,7 @@ antsRegistration <- function(
           maskScale = mask - min( mask )
           maskScale = maskScale / max( maskScale ) * 255
           charmask <- antsImageClone( maskScale , "unsigned char")
-          maskopt <- antsrGetPointerName(charmask)
+          maskopt <- paste("[",antsrGetPointerName(charmask),",NA]",sep='')
         } else maskopt=NA
         if (is.na(initx)) {
           initx = paste("[", f, ",", m, ",1]", sep = "")
@@ -342,11 +350,11 @@ antsRegistration <- function(
                        "-c", "2100x1200x1200x0",
                        "-s", "3x2x1x0",
                        "-f", "4x4x2x1",
-                       "-x", "[NULL,NULL]",
+                       "-x", "[NA,NA]",
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[1]", "-c", "1200x1200x100", "-s", "2x1x0",
                        "-f", "4x2x1",
-                       "-x", "[NULL,NULL]",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -354,7 +362,7 @@ antsRegistration <- function(
                        "-f", shrinkfactors, "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NULL,NULL]" ) )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),

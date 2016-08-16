@@ -114,6 +114,14 @@ strokt1reg=antsRegistration(
   moving=strokt1,
   typeofTransform = "QuickRigid",verbose=TRUE )
  plot(  strokt1reg$warpedmovout, axis=3, nslices=20)
+# now - how to use a mask
+fi <- antsImageRead(getANTsRData("r16") )
+fiseg = kmeansSegmentation( fi, 3 )
+mi <- antsImageRead(getANTsRData("r64") )
+msk = thresholdImage(fiseg$segmentation, 0, 0 )
+mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyNCC'),
+  mask=msk, verbose=F )
+jac = createJacobianDeterminantImage( fi, mytx$fwdtransforms[1] )
 }
 
 }
