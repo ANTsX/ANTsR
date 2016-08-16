@@ -7,7 +7,7 @@
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
   initialTransform = NA, outprefix = "", mask = NA, gradStep = 0.2,
   flowSigma = 3, totalSigma = 0, affMetric = "mattes", affSampling = 32,
-  synMetric = "mattes", synSampling = 32, synIterations = c(40, 20, 0),
+  synMetric = "mattes", synSampling = 32, regIterations = c(40, 20, 0),
   verbose = FALSE, ...)
 }
 \arguments{
@@ -38,7 +38,7 @@ information metric by default. See \code{Details.}}
 
 \item{synSampling}{the nbins or radius parameter for the syn metric}
 
-\item{synIterations}{vector of iterations for syn.  we will set the smoothing
+\item{regIterations}{vector of iterations for syn.  we will set the smoothing
 and multi-resolution parameters based on the length of this vector.}
 
 \item{verbose}{request verbose output (useful for debugging)}
@@ -74,6 +74,9 @@ typeofTransform can be one of:
   \item{"AffineFast": }{Fast version of \code{Affine}.}
   \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
   to BOLD intrasubject registration'.'}
+  \item{"TRSAA": }{translation, rigid, similarity, affine (twice). please set
+    \code{regIterations} if using this option.  this would be used in cases
+    where you want a really high quality affine mapping (perhaps with mask).}
   \item{"ElasticSyN": }{Symmetric normalization: Affine + deformable transformation,
     with mutual information as optimization metric and elastic regularization.}
   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,

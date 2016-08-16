@@ -17,7 +17,7 @@
 #' @param affSampling the nbins or radius parameter for the syn metric
 #' @param synMetric the metric for the syn part (CC, mattes, meansquares, demons)
 #' @param synSampling the nbins or radius parameter for the syn metric
-#' @param synIterations vector of iterations for syn.  we will set the smoothing
+#' @param regIterations vector of iterations for syn.  we will set the smoothing
 #' and multi-resolution parameters based on the length of this vector.
 #' @param verbose request verbose output (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
@@ -36,6 +36,9 @@
 #'   \item{"AffineFast": }{Fast version of \code{Affine}.}
 #'   \item{"BOLDAffine": }{Affine transformation: Parameters typical for BOLD
 #'   to BOLD intrasubject registration'.'}
+#'   \item{"TRSAA": }{translation, rigid, similarity, affine (twice). please set
+#'     \code{regIterations} if using this option.  this would be used in cases
+#'     where you want a really high quality affine mapping (perhaps with mask).}
 #'   \item{"ElasticSyN": }{Symmetric normalization: Affine + deformable transformation,
 #'     with mutual information as optimization metric and elastic regularization.}
 #'   \item{"SyN": }{Symmetric normalization: Affine + deformable transformation,
@@ -109,7 +112,7 @@ antsRegistration <- function(
   affSampling=32,
   synMetric = "mattes",
   synSampling=32,
-  synIterations = c(40,20,0),
+  regIterations = c(40,20,0),
   verbose=FALSE, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
@@ -165,24 +168,25 @@ antsRegistration <- function(
     myl=1
   }
   mysyn = paste("SyN[",gradStep,",",flowSigma,",",totalSigma,"]", sep = "")
-  itlen = length( synIterations )-1
+  itlen = length( regIterations )-1
   if ( itlen == 0 ) {
     smoothingsigmas = 0
     shrinkfactors   = 1
-    synits = synIterations
+    synits = regIterations
   } else {
     smoothingsigmas = itlen:0
     shrinkfactors   = 2^smoothingsigmas
     smoothingsigmas = paste( smoothingsigmas, collapse='x' )
     shrinkfactors = paste( shrinkfactors, collapse='x' )
-    synits = paste( synIterations, collapse='x')
+    synits = paste( regIterations, collapse='x')
   }
   if (!is.character(fixed)) {
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Translation","Rigid", "Affine", "SyN","SyNRA","SyNOnly","SyNCC","SyNabp",
-                       "SyNBold", "SyNBoldAff", "SyNAggro", "SyNLessAggro", "TVMSQ","TVMSQC","ElasticSyN")
+      allowableTx <- c("Translation","Rigid", "Affine", "TRSAA",
+        "SyN","SyNRA","SyNOnly","SyNCC","SyNabp", "SyNBold", "SyNBoldAff",
+        "SyNAggro", "SyNLessAggro", "TVMSQ","TVMSQC","ElasticSyN")
       ttexists <- typeofTransform %in% allowableTx
       if (ttexists) {
         initx = initialTransform
@@ -216,12 +220,13 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
                        "-f", "4x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn, "-c", paste("[",synits,",1e-7,8]",collapse=''),
                        "-s", smoothingsigmas, "-f", shrinkfactors, "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -232,16 +237,18 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
                        "-f", "4x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "[200x20,1e-6,5]", "-s", "1x0",
                        "-f", "2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
                        "-s", smoothingsigmas, "-f", shrinkfactors, "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na( maskopt )  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -252,6 +259,7 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -259,7 +267,7 @@ antsRegistration <- function(
                        "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",",wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -270,6 +278,7 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -277,7 +286,7 @@ antsRegistration <- function(
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
                                                               wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -288,9 +297,11 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -298,7 +309,7 @@ antsRegistration <- function(
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
                                                               wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -313,7 +324,7 @@ antsRegistration <- function(
                        "-u","1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
                                                               wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -324,6 +335,7 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -331,7 +343,7 @@ antsRegistration <- function(
                        "-f", shrinkfactors, "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -369,21 +381,68 @@ antsRegistration <- function(
                              paste(outprefix, "1InverseWarp.nii.gz", sep = ""))
         }
 
+        if (typeofTransform == "TRSAA") {
+          itlen  = length( regIterations )
+          itlenlow  = round( itlen/2 + 0.0001 )
+          dlen   = itlen - itlenlow
+          myconvlow = paste(
+            c( rep( 2000, itlenlow ), rep(    0, dlen  ) ), collapse = 'x' )
+          myconvhi = paste( regIterations, collapse='x')
+          myconvhi = paste("[",myconvhi,",1.e-7,10]",sep='')
+          args <- list("-d", as.character(fixed@dimension), "-r", initx,
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.3]", sep = ""),
+                       "-t", "Translation[1]",
+                       "-c", myconvlow,
+                       "-s", smoothingsigmas,
+                       "-f", shrinkfactors,
+                       "-x", "[NA,NA]",
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.3]", sep = ""),
+                       "-t", "Rigid[1]",
+                       "-c", myconvlow,
+                       "-s", smoothingsigmas,
+                       "-f", shrinkfactors,
+                       "-x", "[NA,NA]",
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.3]", sep = ""),
+                       "-t", "Similarity[1]",
+                       "-c", myconvlow,
+                       "-s", smoothingsigmas,
+                       "-f", shrinkfactors,
+                       "-x", "[NA,NA]",
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.3]", sep = ""),
+                       "-t", "Affine[1]",
+                       "-c", myconvhi,
+                       "-s", smoothingsigmas,
+                       "-f", shrinkfactors,
+                       "-x", "[NA,NA]",
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.3]", sep = ""),
+                       "-t", "Affine[1]",
+                       "-c", myconvhi,
+                       "-s", smoothingsigmas,
+                       "-f", shrinkfactors,
+                       "-u", "1", "-z", "1", "-l", myl,
+                       "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
+          if ( !is.na(maskopt)  )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
+          fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
+          invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
+        }
 
         if (typeofTransform == "SyNabp") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
                        "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.25]", sep = ""),
                        "-t", "Rigid[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
                        "-f", "8x4x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.25]", sep = ""),
                        "-t", "Affine[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
                        "-f", "8x4x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste("CC[", f, ",", m, ",0.5,4]", sep = ""),
                        "-t", paste("SyN[0.1,3,0]", sep = ""), "-c", "50x10x0",
                        "-s", "2x1x0", "-f", "4x2x1", "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -398,6 +457,7 @@ antsRegistration <- function(
                        "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
+                       "-x", "[NA,NA]",
                        "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", paste("[",synits,",1e-7,8]",collapse=''),
@@ -405,7 +465,7 @@ antsRegistration <- function(
                        "-f", shrinkfactors, "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -424,7 +484,7 @@ antsRegistration <- function(
                        "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -446,7 +506,7 @@ antsRegistration <- function(
                        "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "1Warp.nii.gz", sep = ""),
                              paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""),
@@ -464,7 +524,7 @@ antsRegistration <- function(
             "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
             "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
           if ( !is.na(maskopt)  )
-            args=lappend( list( "-x", maskopt ), args )
+            args=lappend(  args, list( "-x", maskopt ) ) else args=lappend( args, list( "-x", "[NA,NA]" ) )
           fwdtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
           invtransforms <- c(paste(outprefix, "0GenericAffine.mat", sep = ""))
         }
