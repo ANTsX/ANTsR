@@ -13,6 +13,10 @@
 #' @param gradStep gradient step size (not for all tx)
 #' @param flowSigma smoothing for update field
 #' @param totalSigma smoothing for total field
+#' @param affMetric the metric for the affine part (GC, mattes, meansquares)
+#' @param affSampling the nbins or radius parameter for the syn metric
+#' @param synMetric the metric for the syn part (CC, mattes, meansquares, demons)
+#' @param synSampling the nbins or radius parameter for the syn metric
 #' @param verbose request verbose output (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
 #' @details
@@ -85,6 +89,8 @@ antsRegistration <- function( fixed = NA, moving = NA,
                               typeofTransform = "SyN", initialTransform = NA,
                               outprefix = "", mask = NA, gradStep=0.2,
                               flowSigma=3, totalSigma=0,
+                              affMetric = "mattes", affSampling=32,
+                              synMetric = "mattes", synSampling=32,
                               verbose=FALSE, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
@@ -176,9 +182,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNBold") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
-                       "-f", "4x2x1", "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
+                       "-f", "4x2x1",
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn, "-c", "[200x10,1e-6,5]",
                        "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
@@ -191,13 +198,13 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNBoldAff") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "[1200x1200x100,1e-6,5]", "-s", "2x1x0",
                        "-f", "4x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "[200x20,1e-6,5]", "-s", "1x0",
                        "-f", "2x1",
-                       "-m", paste("cc[", f, ",", m, ",1,2]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn, "-c", "[200x10,1e-6,5]",
                        "-s", "1x0", "-f", "2x1", "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
@@ -210,10 +217,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "ElasticSyN") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
@@ -227,10 +234,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyN") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", paste(typeofTransform, "[0.25,3,0]", sep = ""),
                        "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
@@ -244,13 +251,13 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNRA") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
@@ -264,7 +271,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNOnly") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-u",
                        "1", "-z", "1", "-l", myl, "-o", paste("[", outprefix, ",",
@@ -278,10 +285,11 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNAggro") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
-                       "-f", "4x2x2x1", "-m", paste("meansquares[", f, ",", m, ",1,2]",
-                                                    sep = ""), "-t", mysyn,
+                       "-f", "4x2x2x1",
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
+                       "-t", mysyn,
                        "-c", "2100x1200x1200x20",
                        "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
@@ -294,13 +302,13 @@ antsRegistration <- function( fixed = NA, moving = NA,
         }
         if (typeofTransform == "SyNCC") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Rigid[1]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0",
                        "-f", "4x4x2x1",
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[1]", "-c", "1200x1200x100", "-s", "2x1x0",
                        "-f", "4x2x1",
-                       "-m", paste("CC[", f, ",", m, ",1,3]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn, "-c", "2100x1200x1200x20",
                        "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
                        "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))
@@ -338,10 +346,10 @@ antsRegistration <- function( fixed = NA, moving = NA,
 
         if (typeofTransform == "SyNLessAggro") {
           args <- list("-d", as.character(fixed@dimension), "-r", initx,
-                       "-m", paste("mattes[", f, ",", m, ",1,32,regular,0.2]", sep = ""),
+                       "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,0.2]", sep = ""),
                        "-t", "Affine[0.25]", "-c", "2100x1200x1200x100", "-s", "3x2x1x0",
                        "-f", "4x2x2x1",
-                       "-m", paste("meansquares[", f, ",", m, ",1,2]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", mysyn,
                        "-c", "2100x1200x1200x20",
                        "-s", "3x2x1x0", "-f", "4x3x2x1", "-u", "1", "-z", "1", "-l", myl,
@@ -358,7 +366,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
           tvtx=paste("TimeVaryingVelocityField[",
                      gradStep,", 4, 0.0,0.0, 0.5,0 ]",sep='')
           args <- list("-d", as.character(fixed@dimension), # "-r", initx,
-                       "-m", paste("meansquares[", f, ",", m, ",1,0]", sep = ""),
+                       "-m", paste(synMetric,"[", f, ",", m, ",1,",synSampling,"]", sep = ""),
                        "-t", tvtx,
                        "-c", "[100,1.e-5,5]",
                        "-s", "0",
@@ -401,7 +409,7 @@ antsRegistration <- function( fixed = NA, moving = NA,
         {
           args <- list(
             "-d", as.character(fixed@dimension), "-r", initx,
-            "-m", paste("mattes[", f, ",", m, ",1,32,regular,",metsam,"]", sep = ""),
+            "-m", paste(affMetric,"[", f, ",", m, ",1,",affSampling,",regular,",metsam,"]", sep = ""),
             "-t", paste(typeofTransform, "[0.25]", sep = ""), "-c", myiterations,
             "-s", mysAff, "-f", myfAff, "-u", "1", "-z", "1", "-l", myl,
             "-o", paste("[", outprefix, ",", wmo, ",", wfo, "]", sep = ""))

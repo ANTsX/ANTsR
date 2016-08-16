@@ -6,7 +6,8 @@
 \usage{
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
   initialTransform = NA, outprefix = "", mask = NA, gradStep = 0.2,
-  flowSigma = 3, totalSigma = 0, verbose = FALSE, ...)
+  flowSigma = 3, totalSigma = 0, affMetric = "mattes", affSampling = 32,
+  synMetric = "mattes", synSampling = 32, verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image to which we register the moving image.}
@@ -27,6 +28,14 @@ information metric by default. See \code{Details.}}
 \item{flowSigma}{smoothing for update field}
 
 \item{totalSigma}{smoothing for total field}
+
+\item{affMetric}{the metric for the affine part (GC, mattes, meansquares)}
+
+\item{affSampling}{the nbins or radius parameter for the syn metric}
+
+\item{synMetric}{the metric for the syn part (CC, mattes, meansquares, demons)}
+
+\item{synSampling}{the nbins or radius parameter for the syn metric}
 
 \item{verbose}{request verbose output (useful for debugging)}
 
