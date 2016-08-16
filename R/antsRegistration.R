@@ -87,14 +87,22 @@
 #' }
 #'
 #' @export antsRegistration
-antsRegistration <- function( fixed = NA, moving = NA,
-                              typeofTransform = "SyN", initialTransform = NA,
-                              outprefix = "", mask = NA, gradStep=0.2,
-                              flowSigma=3, totalSigma=0,
-                              affMetric = "mattes", affSampling=32,
-                              synMetric = "mattes", synSampling=32,
-                              synIterations = c(40,20,0),
-                              verbose=FALSE, ... ) {
+antsRegistration <- function(
+  fixed = NA,
+  moving = NA,
+  typeofTransform = "SyN",
+  initialTransform = NA,
+  outprefix = "",
+  mask = NA,
+  gradStep=0.2,
+  flowSigma=3,
+  totalSigma=0,
+  affMetric = "mattes",
+  affSampling=32,
+  synMetric = "mattes",
+  synSampling=32,
+  synIterations = c(40,20,0),
+  verbose=FALSE, ... ) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
     .Call("antsRegistration", .int_antsProcessArguments(c(fixed)), PACKAGE = "ANTsR")
