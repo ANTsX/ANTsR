@@ -7,7 +7,7 @@
 antsRegistration(fixed = NA, moving = NA, typeofTransform = "SyN",
   initialTransform = NA, outprefix = "", mask = NA, gradStep = 0.2,
   flowSigma = 3, totalSigma = 0, affMetric = "mattes", affSampling = 32,
-  synMetric = "mattes", synSampling = 32, synIterations = c(100, 100, 20),
+  synMetric = "mattes", synSampling = 32, synIterations = c(40, 20, 0),
   verbose = FALSE, ...)
 }
 \arguments{
