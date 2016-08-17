@@ -53,6 +53,7 @@ variations on heuristics suggested in work by Maggioni et al.
 sphereDim = 9
 embeddDim = 100
 n = 1000
+if ( ! usePkg( "pracma"  ) ) stop( "need pracma" )
 sphereData = pracma::rands( n, sphereDim, 1. )
 mysig = 0.1
 spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )

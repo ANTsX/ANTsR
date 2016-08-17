@@ -46,6 +46,7 @@ Suggests:
     networkD3,
     pixmap,
     png,
+    pracma,
     psych,
     randomForest,
     rgl,
