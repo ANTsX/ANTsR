@@ -53,7 +53,7 @@ makePowersPointsImage <- function( pts, mask, radius = 5 )
 #' Creates spherical points in the coordinate space of the target image based
 #' on the n-dimensional matrix of points that the user supplies. The image
 #' defines the dimensionality of the data so if the input image is 3D then
-#' the input points should be 3D.
+#' the input points should be 2D or 3D.
 #'
 #' @param pts input powers points
 #' @param mask antsImage mask defining target space
@@ -83,16 +83,30 @@ makePointsImage <- function( pts, mask, radius = 5 )
     idx = antsTransformPhysicalPointToIndex(mask,pt)
     for ( i in c(-n[1]:n[1]) ) {
       for (j in c(-n[2]:n[2])) {
-        for (k in c(-n[3]:n[3])) {
-          local = idx + c(i,j,k)
+        if ( dim == 3 )
+          {
+          for (k in c(-n[3]:n[3])) {
+            local = idx + c(i,j,k)
+            localpt = antsTransformIndexToPhysicalPoint(mask,local)
+            dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
+            inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
+            if ( (dist <= rad) && ( inImage == TRUE ) ) {
+              if ( powersLabels[ local[1], local[2], local[3] ] < 0.5 )
+                powersLabels[ local[1], local[2], local[3] ] = r
+             }
+            }
+          } # if dim == 3
+        if ( dim == 2 )
+          {
+          local = idx + c(i,j)
           localpt = antsTransformIndexToPhysicalPoint(mask,local)
           dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
           inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
           if ( (dist <= rad) && ( inImage == TRUE ) ) {
-            if ( powersLabels[ local[1], local[2], local[3] ] < 0.5 )
-              powersLabels[ local[1], local[2], local[3] ] = r
-           }
-          }
+              if ( powersLabels[ local[1], local[2] ] < 0.5 )
+                powersLabels[ local[1], local[2] ] = r
+              }
+          } # if dim == 2
         }
       }
     }

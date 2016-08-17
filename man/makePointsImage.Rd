@@ -20,7 +20,7 @@ antsImage is output
 Creates spherical points in the coordinate space of the target image based
 on the n-dimensional matrix of points that the user supplies. The image
 defines the dimensionality of the data so if the input image is 3D then
-the input points should be 3D.
+the input points should be 2D or 3D.
 }
 \examples{
 
