@@ -35,7 +35,7 @@ is on processing the BOLD signal, here we start with the the following data
 
 * A set of labels identifying anatomical regions of interest (the network to analyze)
 
-```{r data ,message=FALSE,warnings=FALSE}
+```{r data ,message=FALSE,warnings=FALSE,eval=FALSE}
 fdthresh = 0.1 # threshold for throwing out bad data, typically between 0.1 and 0.5
 # based on ACT output or sample data
 id = "BAvants"
@@ -64,7 +64,7 @@ if ( file.exists( fn ) )
 ```
 
 
-```{r mapT1toMNI}
+```{r mapT1toMNI,eval=FALSE}
 t1brain = t1 * thresholdImage( seg, 1, 6 )
 if ( ! exists("boldmap") )
   boldmap = antsRegistration( meanbold, t1brain, typeofTransform='SyNBoldAff' )
@@ -111,7 +111,7 @@ It is typical to exclude any data obtained during the first 10 seconds as shown 
 The choice of 10s is based on an informal review of current literature of 3T human data [@Power2012].
 For other applications, be sure to check the relevant literature.
 
-```{r steadystate ,message=FALSE,warnings=FALSE}
+```{r steadystate ,message=FALSE,warnings=FALSE,eval=FALSE}
 # Find first steady state timepoint
 tr = antsGetSpacing(img)[4]
 steady = floor(10.0 / tr) + 1
@@ -129,7 +129,7 @@ In the plot below, mean global
 signal in the brain is plotted with a red box indicating the points at which the
 system has non yet reached the steady state. Data in this range are discarded.
 
-```{r ssplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
+```{r ssplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 # exclusion area
 noss.data = data.frame(Start=0)
 noss.data$Stop = (steady-1)*tr
@@ -149,7 +149,7 @@ print(ssPlot)
 
 The temporal mean of the original time series data:
 
-```{r rawplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
+```{r rawplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 invisible(plot(origmean, axis=3, slices=1:30, ncolumns=10))
 ```
 
@@ -171,7 +171,7 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 
 * Identify "bad" time points for removal
 
-```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
 if ( ! exists("moco") )
   {
   meanbold <- apply.antsImage(img, c(1,2,3), mean)
@@ -183,7 +183,7 @@ if ( ! exists("moco") )
   }
 ```
 
-```{r mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
+```{r mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 invisible(plot(moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10))
 ```
 
@@ -191,7 +191,7 @@ It can also be informative to plot the data as a matrix, where each row is the
 time-series for a voxels. Due to the large number of voxels however, using
 just a sample of the voxels is much faster
 
-```{r mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+```{r mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
 nVox = length(which(as.array(mask)==1))
 vox = sample(1:nVox, 1000)
 invisible(plot(as.antsImage( t(timeseries2matrix(img,mask)[,vox]))))
@@ -203,7 +203,7 @@ qualitative feel for how much motion is in the data. In addition to the
 registration parameters, we plot the mean framewise displacement, which measures
 the average displacement of voxels, between consecutive time points.
 
-```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 # extract just the transform parameters
 reg_params <- as.matrix(moco$moco_params[,3:8])
 
@@ -226,13 +226,13 @@ VARS for RMS variance over voxels) which illustrates the BOLD signal change acro
 the brain between consecutive time points. First the BOLD signal is adjusted to have
 mean=1000 so that 10 units of BOLD value change = 1% signal change. While not necessary
 for a single-subject examination, this helps in inter-subject comparisons.
-```{r dvar,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r dvar,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 scaling <- 1000.0 / mean(moco$moco_avg_img[mask>0])
 dvars <- scaling * computeDVARS(timeseries2matrix(moco$moco_img, mask))
 orig_dvars <- scaling * computeDVARS(timeseries2matrix(img, mask))
 ```
 
-```{r dvarplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
+```{r dvarplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 dvarType <- c(rep("Original",length(orig_dvars)), rep("Moco",length(dvars)) )
 dvarTime <- c(1:length(orig_dvars), 1:length(dvars))*tr
 dvar.data <- data.frame(DVARS=c(orig_dvars, dvars), Type=dvarType, Time=dvarTime)
@@ -252,14 +252,14 @@ greater than 0.2mm is a common threshold used in human data. For illustrative pu
 0.1 mm. Because the displacement is a measure of motion between two timepoints, both timepoints
 associated with the displacement are marked as bad.
 
-```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3}
+```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
 badtimes = which(moco$fd$MeanDisplacement > fdthresh )
 if ( length( badtimes ) == 0 ) badtimes = c(1)
 badtimes = sort(c(badtimes, badtimes+1))
 goodtimes = (1:nTimes)[-badtimes]
 ```
 
-```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE}
+```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 badstarts = which(moco$fd$MeanDisplacement > fdthresh )
 if ( length( badstarts ) == 0 ) badstarts = c(1)
 
@@ -294,7 +294,7 @@ The time-series data is detrended while excluding the bad timepoints
 identified earlier. The global signal (mean signal over the whole brain)
 is used to illustrate the effect of the demeaning & detrending.
 
-```{r detrend,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r detrend,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 global_pre <- rowMeans(timeseries2matrix(img, mask))
 global_moco <- rowMeans(timeseries2matrix(moco$moco_img, mask))
 
@@ -307,7 +307,7 @@ global_pre[badtimes] = NA
 global_moco[badtimes] = NA
 ```
 
-```{r detrendplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r detrendplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 trend.dat = data.frame( Time=rep(1:nTimes,3) )
 trendType = c( rep("Original", nTimes), rep("Motion-corrected",nTimes) )
 trendType = c(trendType, rep("Moco & Detrended",nTimes) )
@@ -346,7 +346,7 @@ be interpreted as an implied endorsement of one camp over the other. The
 values at "bad" timepoints are interpolated with splines so that derivatives
 may be calculated without "spreading" the influence of the bad time points.
 
-```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 # white matter is labeled as 3
 wmMask = seg2bold*1*mask
 wmMask[ wmMask != 3] = 0
@@ -381,7 +381,7 @@ if ( length(badtimes) > 0 ) {
 tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
 ```
 
-```{r nuissanceplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r nuissanceplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 tissueType = c( rep("Global", nTimes), rep("White matter",nTimes), rep("CSF",nTimes) )
 tissueType = c(tissueType, rep("CompCor1",nTimes), rep("CompCor2",nTimes))
 tissueType = c(tissueType, rep("CompCor3",nTimes), rep("CompCor4",nTimes) )
@@ -413,7 +413,7 @@ ctxMean = rowMeans(boldMat[,ctxVox])
 
 The nuisance parameters are now regressed out the signal. This is illustrated by looking
 at the mean signal in the cortex before and after the regression.
-```{r regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 mocoNuis = cbind(reg_params, reg_params*reg_params)
 mocoNuis = detrend(mocoNuis)
 mocoDeriv = rbind( rep(0,dim(mocoNuis)[2]), diff(mocoNuis,1) )
@@ -423,7 +423,7 @@ nuissance = cbind( mocoNuis, mocoDeriv, tissueNuis, tissueDeriv, compcorNuis )
 boldMat[goodtimes,] <- residuals( lm( boldMat[goodtimes,] ~ nuissance[goodtimes,] ) )
 ```
 
-```{r regressionplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r regressionplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 ctxMeanRegressed = rowMeans(boldMat[,ctxVox])
 
 cortex.dat =  data.frame( Time=rep(1:nTimes,2) )
@@ -444,7 +444,7 @@ non-evenly sampled time-series data. This bad timepoints will be again removed a
 the frequency filtering. Frequencies with the range of 0.009 Hz - 0.08 Hz are retained.
 In some cases it may be interesting to examine smaller subranges of frequencies to
 look for phenomena that occur at specific frequencies.
-```{r frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r frequency,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 if ( length(badtimes) > 0 ) {
   for ( v in c(1:nVox) ) {
     boldMat[badtimes,v]=spline( c(1:nTimes)[goodtimes], boldMat[goodtimes,v],
@@ -465,14 +465,14 @@ ctxMeanFiltered[badtimes] = NA
 Smoothing should be applied to all spatial dimensions, but the time dimension
 should be left alone. It is common to smooth with a Gaussian kernel with
 FWHM=6.0mm.
-```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 img = matrix2timeseries( img, mask, boldMat )
 sptl = sqrt( sum( antsGetSpacing(img)[1:3]^2  ))
 img = smoothImage(img, c(rep(sptl,3),0), FWHM=TRUE )
 boldMat = timeseries2matrix(img, mask)
 ```
 
-```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5}
+```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 ctxMeanSmoothed = rowMeans(boldMat[,ctxVox])
 ctxMeanSmoothed[badtimes] = NA
 
@@ -499,7 +499,7 @@ more common to define ROIs that contain many voxels and represent regions for wh
 is some a priori knowledge regarding the functional network to which each region belongs. The
 provided network definition used here lists the center point of each ROI so we must first create an
 image where each ROI is a sphere of radius=5mm centered on the provided point.
-```{r networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 data(powers_areal_mni_itk)
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
 pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
@@ -535,7 +535,7 @@ Now that we have roi labels, we want to find the mean time signal for each ROI
 and then find the correlation matrix that give the correlation between each
 of these ROI signals. We need to be careful in the case where ROIs did
 not map into the image space and thus have 0 voxels.
-```{r roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 labelMask = labelImg*1
 labelMask[labelMask > 0] = 1
 labelMask[mask == 0] = 0
@@ -556,7 +556,7 @@ nActualTimes = dim(roiMat)[1]
 
 Plot of the ROI averaged signals
 
-```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=FALSE}
+```{r roiplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=FALSE,eval=FALSE}
 plotMat = roiMat + min(roiMat)
 plotMat = plotMat / max(plotMat)
 
@@ -578,7 +578,7 @@ signal between systems provides some hints about how much those systems are work
 together, while the standard deviation ribbons indicate how cohesively the
 components of a given system are working.
 
-```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE}
+```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE,eval=FALSE}
 systemNames = levels(pts$SystemName)
 
 nSystems = length(systemNames)
@@ -598,7 +598,7 @@ for ( i in 1:nSystems ) {
 }
 ```
 
-```{r sysmeanplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=15, echo=FALSE}
+```{r sysmeanplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=15, echo=FALSE,eval=FALSE}
 
 systemNickNames = c("Motor/Hand", "Motor/Mouth", "CO-Task", "Auditory", "Default", "Memory", "Visual", "FP-Task", "Salience", "Subcortical", "V Attention", "D Attention", "Cerebellar", "Uncertain" )
 
@@ -624,7 +624,7 @@ print(sysPlot)
 
 
 Create correlation matrix
-```{r corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 missingROIs = which(colMeans(roiMat)==0)
 goodROIs = (1:nLabels)
 if ( length(missingROIs) > 0 ) {
@@ -645,7 +645,7 @@ a network with density=0.1, we binarize the correlation matrix to retain 10% of
 the edges, favoring the egdes with the highest correlation values. The resulting
 adjacency matrix is then used to create a graph.
 
-```{r adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5}
+```{r adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5,eval=FALSE}
 
 density = 0.1
 nEdges = length(upper.tri(connMat))*density
@@ -670,7 +670,7 @@ the network, include system identifies. In the plot, connections within a system
 connections between systems are gray. For this type of plot, the order of the rows are
 sorted, so that nodes in the same system are clustered together.
 
-```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 
 pts$SystemName = factor(pts$SystemName, levels=c("Sensory/Somatomotor Hand", "Sensory/Somatomotor Mouth", "Cingulo-opercular Task Control", "Auditory", "Default Mode", "Memory Retrieval", "Visual", "Fronto-parietal Task Control", "Salience", "Subcortical", "Ventral Attention", "Dorsal Attention", "Cerebellar", "Uncertain"))
 
@@ -714,7 +714,7 @@ In the example, the node colors are retained and
 edges for intra-system connections are colored the same as their nodes, while
 inter-system edges are gray.
 
-```{r graphml,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r graphml,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 
 # Retain only the largest connected component
 bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
@@ -781,7 +781,7 @@ following is a non-comprehensive list of possible node metrics
 
 * Page-rank - Google page rank measure
 
-```{r constnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=7}
+```{r constnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=7,eval=FALSE}
 
 graph = graph.adjacency( adj, mode="undirected", weighted=NULL )
 
@@ -821,7 +821,7 @@ leff[which(is.na(deg)==TRUE)] = NA
 
 ```
 
-```{r cnodeplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+```{r cnodeplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 nNodes = length(deg)
 
 cnode.dat = data.frame(Node=rep(1:nNodes,5))
@@ -845,7 +845,7 @@ be meaned over all nodes to obtain a global metric. Additional metrics include
 
 * Clustering coefficient - same as node based, but using entire graph as neighborhood
 
-```{r globalnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r globalnode,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 
 geff<-1/(shortest.paths(graph))
 geff[!is.finite(geff)]<-NA
@@ -858,7 +858,7 @@ cc = transitivity(graph)
 
 
 Finally, make a dense map of the default mode network, using regression.
-```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5}
+```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 # get priors for different networks
 if ( ! exists( "networkPriors" ) )
