@@ -7,7 +7,8 @@
 invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
   metric = "MI", thetas = seq(from = 0, to = 360, length.out = 5),
   thetas2 = seq(from = 0, to = 360, length.out = 5), thetas3 = seq(from = 0,
-  to = 360, length.out = 5), scaleImage = 1, doReflection = 0, txfn = NA)
+  to = 360, length.out = 5), scaleImage = 1, doReflection = 0, txfn = NA,
+  transform = c("Affine", "Similarity"))
 }
 \arguments{
 \item{in_image1}{reference image}
@@ -29,6 +30,8 @@ invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
 \item{doReflection}{reflect image about principal axis}
 
 \item{txfn}{if present, write optimal tx to .mat file}
+
+\item{transform}{either Affine or Similarity transform (rigid possible in future)}
 }
 \value{
 dataframe with metric values and transformation parameters
@@ -50,6 +53,20 @@ txfixedparams = as.numeric( mival[[1]][ bestInd,(ncol( mival[[1]] )-2+1):ncol( m
 affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
   parameters = txparams, fixed.parameters = txfixedparams )
 mapped2 = applyAntsrTransformToImage( affTx, mi, fi )
+
+scaleMat = diag( 2 ) * 0.75
+affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
+     matrix = scaleMat, fixed.parameters = c(125.2706, 129.2100) )
+temp = applyAntsrTransformToImage( affTx, mi, mi )
+mival<-invariantImageSimilarity( fi, temp, thetas = c(0,10,20),
+  localSearchIterations = 10, transform='Similarity'  )
+mapped = antsApplyTransforms( fi, temp, transformlist=mival[[2]] )
+mival<-invariantImageSimilarity( fi, temp, thetas = c(0,10,20),
+  localSearchIterations = 10, transform='Affine'  )
+mapped2 = antsApplyTransforms( fi, temp, transformlist=mival[[2]] )
+print( cor( fi[ fi > 0 ], temp[fi>0] ))
+print( cor( fi[ fi > 0 ], mapped[fi>0] ))
+print( cor( fi[ fi > 0 ], mapped2[fi>0] ))
 
 }
 \author{
