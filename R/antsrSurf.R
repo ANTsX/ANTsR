@@ -267,7 +267,9 @@ if ( length( cvt ) == 0  ) stop("This function needs ConvertScalarImageToRGB in 
 ass = paste(myantspath,"antsVol",sep='/')
 cvt = paste(myantspath,"ConvertScalarImageToRGB",sep='/')
 xfn = tempfile( fileext = ".nii.gz" )
-xmod = iMath( x, "TruncateIntensity", intensityTruncation[1], intensityTruncation[2] )
+xmod = antsImageClone( x )
+if ( intensityTruncation[1] > 0 | intensityTruncation[2] < 1 )
+  xmod = iMath( x, "TruncateIntensity", intensityTruncation[1], intensityTruncation[2] )
 antsImageWrite( xmod, xfn )
 if ( is.na( filename ) ) filename = tempfile( )
 if ( ! is.matrix( rotationParams ) )
@@ -328,14 +330,13 @@ assvcmd = paste( assvcmd ,
   pngfnloc = paste( filename, pngext, ".png", sep='' )
   system( paste( "rm", pngfnloc ) )
   assvcmd = paste( assvcmd ,  " -d ", pngfnloc,
-    "[",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] ",sep='' )
+    "[",magnificationFactor,",",
+    paste( rotationParams[myrot,], collapse='x' ),",255x255x255] ",sep='' )
 }
 if ( verbose ) print( assvcmd )
 sss = system( assvcmd )
-Sys.sleep( 3 )
 if ( nrow( rotationParams ) > 1 ) pngs[ myrot ] = pngfnloc
 }
-Sys.sleep( 3 )
 if ( nrow( rotationParams ) > 1 )
   {
   mypng = png::readPNG( pngs[ 1 ] )
