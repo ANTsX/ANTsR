@@ -446,7 +446,7 @@ SEXP invariantSimilarityHelper(
         affinesearch->Rotate3D(axis1, ang1, 1);
         affinesearch->Rotate3D(axis2, ang2, 1);
         affinesearch->Rotate3D(axis3, ang3, 1);
-        affinesearch->Scale( bestscale );
+//        affinesearch->Scale( bestscale ); // BUG: annoying, cant do for rigid
         simmer->SetMatrix(  affinesearch->GetMatrix() );
         parametersList.push_back( simmer->GetParameters() );
         } // kk
