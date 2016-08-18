@@ -6,7 +6,7 @@
 \usage{
 antsrSurf(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
   inflationFactor = 25, rotationParams = c(270, 0, 270),
-  overlayLimits = NA, filename = NA, verbose = FALSE)
+  overlayLimits = NA, filename = NA, antspath = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
@@ -30,6 +30,8 @@ levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.}
 
 \item{filename}{prefix filename for output pngs}
 
+\item{antspath}{pass the ANTSPATH here otherwise we try to detect it from environment}
+
 \item{verbose}{prints the command used to call \code{antsSurf}}
 }
 \value{
@@ -37,7 +39,7 @@ no output
 }
 \description{
 Use a system call to \code{antsSurf} in order to render a function onto
-a surface.  This requires \code{antsSurf} to be in the enviornment as well
+a surface.  This requires \code{antsSurf} to be in the environment as well
 as \code{ConvertScalarImageToRGB}, both available in Advanced Normalization
 Tools software on github.
 }
