@@ -233,13 +233,13 @@ if ( nrow( rotationParams ) > 1 )
 #' ch2i = antsImageRead( getANTsRData("mni") )
 #' ch2seg = thresholdImage( ch2i, "Otsu", 3 )
 #' wm   = thresholdImage( ch2seg, 3, 3 )
-#' wm2 = smoothImage( wm, 1 ) %>% thresholdImage( 0.2, Inf )
 #' kimg = weingartenImageCurvature( ch2i, 1.5  ) %>% smoothImage( 1 )
-#' rp1 = matrix( c(90,180,90), ncol = 3 )
-#' rp2 = matrix( c(90,180,270), ncol = 3 )
-#' rp3 = matrix( c(90,180,180), ncol = 3 )
-#' rp  = rbind( rp1, rp3, rp2 )
-#' antsrVol( wm2, list( kimg ), quantlimits=c(0.01,0.99),rotationParams = rp )
+#' ap = path.expand( "~/code/ants-src/bin/" )
+#' rp0 = matrix( c(90,180,90), ncol = 3 )
+#' rp2 = matrix( c(0,0,0), ncol = 3 )
+#' rp3 = matrix( c(270,90,90), ncol = 3 )
+#' rp  = rbind( rp0, rp2, rp3 ) # pass these as rotationParams
+#' antsrVol( wm, list( kimg ), quantlimits=c(0.01,0.99) )
 #' }
 #'
 #' @export antsrVol
@@ -319,7 +319,7 @@ for ( overlay in y )
   assvcmd = paste( assvcmd , "-f [ ",overlayrgbfn,", ",kblobfn," ] ")
   }
 }
-if ( nrow( rotationParams ) == 1 )
+if ( is.na( filename ) )
 {
 assvcmd = paste( assvcmd ,
   " -d [",magnificationFactor,",",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] " )

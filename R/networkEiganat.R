@@ -205,11 +205,10 @@ networkEiganat <- function(
 lowrankRowMatrix <- function(A, k = 2, faster=FALSE ) {
   if (k > nrow(A))
     return(A)
-  if ( usePkg("RRedsvd") & faster )
+  if ( usePkg("rsvd") & faster )
   {
-    x<-as(A,"CsparseMatrix")
-    s <- RRedsvd::redsvd( x, k )
-    K <- t(s$U) # %*% diag(s$D[1:k]))
+    s <- rsvd::rsvd( x, k )
+    K <- t(s$u) # %*% diag(s$D[1:k]))
   } else {
     s <- svd(A, nu = k, nv = 0)
     K <- t(s$u) # %*% diag(s$d[1:k]) )
