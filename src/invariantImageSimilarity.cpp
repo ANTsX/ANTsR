@@ -163,7 +163,6 @@ SEXP invariantSimilarityHelper(
     {
     typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
     typedef itk::AffineTransform<RealType, ImageDimension> AffineType0;
-//    typedef itk::AffineTransform<RealType, ImageDimension> AffineType; // FIXME
     typedef typename ImageCalculatorType::MatrixType       MatrixType;
     typedef itk::Vector<float, ImageDimension>  VectorType;
     VectorType ccg1;
@@ -463,12 +462,10 @@ SEXP invariantSimilarityHelper(
           affinesearch->SetMatrix( A_solution );
           }
         affinesearch->Rotate2D( ang1, 1);
-        affinesearch->Scale( bestscale );
+//        affinesearch->Scale( bestscale );
         simmer->SetMatrix(  affinesearch->GetMatrix() );
         typename AffineType::ParametersType pp =
           simmer->GetParameters();
-        //pp[1]=ang1;
-        //pp[0]=bestscale;
         parametersList.push_back( simmer->GetParameters() );
         }
       }
@@ -555,7 +552,10 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   typedef itk::AffineTransform<double, 4> AffineType4D;
   typedef itk::Similarity2DTransform<double> SimilarityType2D;
   typedef itk::Similarity3DTransform<double> SimilarityType3D;
-  unsigned int whichTx = Rcpp::as< unsigned int >( whichTransform ); // 1 = similarity
+  typedef itk::Euler2DTransform<double> RigidType2D;
+  typedef itk::Euler3DTransform<double> RigidType3D;
+  // 0=affine, 1 = similarity, 2 = rigid
+  unsigned int whichTx = Rcpp::as< unsigned int >( whichTransform );
   if ( dimension == 2 )
     {
     typedef itk::Image< float , 2 > ImageType;
@@ -572,6 +572,12 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
         r_doref, txfn ) );
     if ( whichTx == 1 )
       return Rcpp::wrap( invariantSimilarityHelper<2,SimilarityType2D>(
+        *antsimage_xptr1, *antsimage_xptr2, thetas,
+        thetas2, thetas3,
+        localSearchIterations, whichMetric, r_scale,
+        r_doref, txfn ) );
+    if ( whichTx == 2 )
+      return Rcpp::wrap( invariantSimilarityHelper<2,RigidType2D>(
         *antsimage_xptr1, *antsimage_xptr2, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
@@ -597,6 +603,12 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
         r_doref, txfn ) );
+    if ( whichTx == 2 )
+      return Rcpp::wrap(  invariantSimilarityHelper<3,RigidType3D>(
+        *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
+        thetas2, thetas3,
+        localSearchIterations, whichMetric, r_scale,
+        r_doref, txfn ) );
     }
   else if ( dimension == 4 )
     {
@@ -612,10 +624,10 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
         r_doref, txfn ) );
-    if ( whichTx == 1 )
+    if ( ( whichTx == 1 ) || ( whichTx == 2 ) )
       {
       Rcpp::Rcout << " In dimension " << dimension <<
-          " similarity is not supported " << std::endl;
+          " rigid/similarity is not supported " << std::endl;
         return Rcpp::wrap( 1 );
       }
     }

@@ -13,7 +13,7 @@
 #' @param scaleImage global scale
 #' @param doReflection reflect image about principal axis
 #' @param txfn if present, write optimal tx to .mat file
-#' @param transform either Affine or Similarity transform (rigid possible in future)
+#' @param transform Rigid, Similarity or Affine transform
 #' @return dataframe with metric values and transformation parameters
 #' @author Brian B. Avants
 #' @keywords image similarity
@@ -45,7 +45,17 @@
 #' print( cor( fi[ fi > 0 ], temp[fi>0] ))
 #' print( cor( fi[ fi > 0 ], mapped[fi>0] ))
 #' print( cor( fi[ fi > 0 ], mapped2[fi>0] ))
-#' 
+#'
+#' cos45 = cos(pi*45/180)
+#' sin45 = sin(pi*45/180)
+#' txRotate <- createAntsrTransform( precision="float", type="AffineTransform", dim=2 )
+#' setAntsrTransformParameters(txRotate, c(cos45,-sin45,sin45,cos45,0,0) )
+#' setAntsrTransformFixedParameters(txRotate, c(128,128))
+#' rotatedImage = applyAntsrTransform(txRotate, mi, mi)
+#' mival<-invariantImageSimilarity( fi, rotatedImage, thetas = c(0,10,20,30,40,50),
+#'   localSearchIterations = 10, transform='Rigid'  )
+#' mapped2 = antsApplyTransforms( fi, rotatedImage, transformlist=mival[[2]] )
+#'
 #' @export invariantImageSimilarity
 invariantImageSimilarity <- function(
   in_image1,
@@ -58,7 +68,7 @@ invariantImageSimilarity <- function(
   scaleImage = 1,
   doReflection = 0,
   txfn = NA,
-  transform = c("Affine", "Similarity") ) {
+  transform = c("Affine", "Similarity","Rigid") ) {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)
@@ -70,6 +80,7 @@ invariantImageSimilarity <- function(
   transform = match.arg( transform )
   if ( transform == "Affine" ) transform = 0
   if ( transform == "Similarity" ) transform = 1
+  if ( transform == "Rigid" ) transform = 2
   if ( is.na( txfn ) )
     txfn = tempfile( fileext = ".mat" )
   # convert to radians

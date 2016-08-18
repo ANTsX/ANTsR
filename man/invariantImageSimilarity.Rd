@@ -8,7 +8,7 @@ invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
   metric = "MI", thetas = seq(from = 0, to = 360, length.out = 5),
   thetas2 = seq(from = 0, to = 360, length.out = 5), thetas3 = seq(from = 0,
   to = 360, length.out = 5), scaleImage = 1, doReflection = 0, txfn = NA,
-  transform = c("Affine", "Similarity"))
+  transform = c("Affine", "Similarity", "Rigid"))
 }
 \arguments{
 \item{in_image1}{reference image}
@@ -31,7 +31,7 @@ invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
 
 \item{txfn}{if present, write optimal tx to .mat file}
 
-\item{transform}{either Affine or Similarity transform (rigid possible in future)}
+\item{transform}{Rigid, Similarity or Affine transform}
 }
 \value{
 dataframe with metric values and transformation parameters
@@ -67,6 +67,16 @@ mapped2 = antsApplyTransforms( fi, temp, transformlist=mival[[2]] )
 print( cor( fi[ fi > 0 ], temp[fi>0] ))
 print( cor( fi[ fi > 0 ], mapped[fi>0] ))
 print( cor( fi[ fi > 0 ], mapped2[fi>0] ))
+
+cos45 = cos(pi*45/180)
+sin45 = sin(pi*45/180)
+txRotate <- createAntsrTransform( precision="float", type="AffineTransform", dim=2 )
+setAntsrTransformParameters(txRotate, c(cos45,-sin45,sin45,cos45,0,0) )
+setAntsrTransformFixedParameters(txRotate, c(128,128))
+rotatedImage = applyAntsrTransform(txRotate, mi, mi)
+mival<-invariantImageSimilarity( fi, rotatedImage, thetas = c(0,10,20,30,40,50),
+  localSearchIterations = 10, transform='Rigid'  )
+mapped2 = antsApplyTransforms( fi, rotatedImage, transformlist=mival[[2]] )
 
 }
 \author{
