@@ -11,7 +11,9 @@ imageListToMatrix(imageList, mask)
 read, in order - these are image objects, not file names.}
 
 \item{mask}{An \code{antsImage} containing a binary mask, voxels in the mask
-are placed in the matrix. If not provided, estimated from first image in list.}
+are placed in the matrix. If not provided, estimated from first image in list.
+If the mask is a different size than the image, the images will be downsampled
+and smoothed to the size of the mask.}
 }
 \value{
 A matrix containing the masked data, the result of calling
@@ -21,14 +23,14 @@ A matrix containing the masked data, the result of calling
 Read images into rows of a matrix.
 }
 \examples{
- img <- antsImageRead(getANTsRData('r16'), 2)
+ img <- antsImageRead(getANTsRData('r16') )
  imglist <- list()
  nvox <- dim(img)[1] * dim(img)[2]
  nsubj <- 50
  for(ii in 1:nsubj){
    imglist[ii] <- img + rnorm(nvox, sd=mean(img[img!=0]))
  }
- mask <- getMask(img)
+ mask <- getMask(img) \%>\% resampleImage( c( 2,2 ) )
  imgmat <- imageListToMatrix(imglist, mask)
 
 }
