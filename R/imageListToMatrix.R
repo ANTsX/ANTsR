@@ -44,14 +44,14 @@ imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
     as.numeric(x, mask > epsilon )
   }
   dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
-  tempImage = antsImageClone( imageList[[ 1 ]] )
   doSmooth = !any( is.na( sigma ) )
   for ( i in 1:length( imageList ) )
     {
     if ( doSmooth )
-      tempImage = smoothImage( imageList[[ i ]], sigma,
-        sigmaInPhysicalCoordinates = T ) else tempImage = imageList[[ i ]]
-    dataMatrix[ i, ] = listfunc( tempImage )
+      dataMatrix[ i, ] = listfunc(
+         smoothImage( imageList[[ i ]], sigma,
+           sigmaInPhysicalCoordinates = T ) )
+    else dataMatrix[ i, ] = listfunc( imageList[[ i ]] )
     }
   return( dataMatrix )
 }
