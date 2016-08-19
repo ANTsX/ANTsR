@@ -4,7 +4,7 @@
 \alias{imageListToMatrix}
 \title{Read Images into a Matrix}
 \usage{
-imageListToMatrix(imageList, mask, epsilon = 0)
+imageListToMatrix(imageList, mask, sigma = NA, epsilon = 0)
 }
 \arguments{
 \item{imageList}{A character vector containing a list of image files to
@@ -14,6 +14,8 @@ read, in order - these are image objects, not file names.}
 are placed in the matrix. If not provided, estimated from first image in list.
 If the mask is a different size than the image, the images will be downsampled
 and smoothed to the size of the mask.}
+
+\item{sigma}{smoothing operation in physical space.  See \code{smoothImage}.}
 
 \item{epsilon}{threshold value determining what is included in the mask}
 }

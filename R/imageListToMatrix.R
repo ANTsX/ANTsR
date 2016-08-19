@@ -9,6 +9,7 @@
 #' are placed in the matrix. If not provided, estimated from first image in list.
 #' If the mask is a different size than the image, the images will be downsampled
 #' and smoothed to the size of the mask.
+#' @param sigma smoothing operation in physical space.  See \code{smoothImage}.
 #' @param epsilon threshold value determining what is included in the mask
 #' @return A matrix containing the masked data, the result of calling
 #' \code{as.numeric(image, mask)} on each input image.
@@ -26,7 +27,7 @@
 #'  imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
-imageListToMatrix <- function(imageList, mask, epsilon = 0 ) {
+imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
   if(missing(mask))
@@ -43,7 +44,14 @@ imageListToMatrix <- function(imageList, mask, epsilon = 0 ) {
     as.numeric(x, mask > epsilon )
   }
   dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
+  tempImage = antsImageClone( imageList[[ 1 ]] )
+  doSmooth = !any( is.na( sigma ) )
   for ( i in 1:length( imageList ) )
-    dataMatrix[ i, ] = listfunc( imageList[[ i ]] )
+    {
+    if ( doSmooth )
+      tempImage = smoothImage( imageList[[ i ]], sigma,
+        sigmaInPhysicalCoordinates = T ) else tempImage = imageList[[ i ]]
+    dataMatrix[ i, ] = listfunc( tempImage )
+    }
   return( dataMatrix )
 }
