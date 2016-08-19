@@ -4,7 +4,7 @@
 \alias{imageListToMatrix}
 \title{Read Images into a Matrix}
 \usage{
-imageListToMatrix(imageList, mask)
+imageListToMatrix(imageList, mask, epsilon = 0)
 }
 \arguments{
 \item{imageList}{A character vector containing a list of image files to
@@ -14,6 +14,8 @@ read, in order - these are image objects, not file names.}
 are placed in the matrix. If not provided, estimated from first image in list.
 If the mask is a different size than the image, the images will be downsampled
 and smoothed to the size of the mask.}
+
+\item{epsilon}{threshold value determining what is included in the mask}
 }
 \value{
 A matrix containing the masked data, the result of calling
@@ -28,7 +30,7 @@ Read images into rows of a matrix.
  nvox <- dim(img)[1] * dim(img)[2]
  nsubj <- 50
  for(ii in 1:nsubj){
-   imglist[ii] <- img + rnorm(nvox, sd=mean(img[img!=0]))
+   imglist[[ ii ]] <- img + rnorm(nvox, sd=mean(img[img!=0]))
  }
  mask <- getMask(img) \%>\% resampleImage( c( 2,2 ) )
  imgmat <- imageListToMatrix(imglist, mask)

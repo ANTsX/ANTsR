@@ -9,6 +9,7 @@
 #' are placed in the matrix. If not provided, estimated from first image in list.
 #' If the mask is a different size than the image, the images will be downsampled
 #' and smoothed to the size of the mask.
+#' @param epsilon threshold value determining what is included in the mask
 #' @return A matrix containing the masked data, the result of calling
 #' \code{as.numeric(image, mask)} on each input image.
 #' @author Cook PA, Avants B, Kandel BM
@@ -19,13 +20,13 @@
 #'  nvox <- dim(img)[1] * dim(img)[2]
 #'  nsubj <- 50
 #'  for(ii in 1:nsubj){
-#'    imglist[ii] <- img + rnorm(nvox, sd=mean(img[img!=0]))
+#'    imglist[[ ii ]] <- img + rnorm(nvox, sd=mean(img[img!=0]))
 #'  }
 #'  mask <- getMask(img) %>% resampleImage( c( 2,2 ) )
 #'  imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
-imageListToMatrix <- function(imageList, mask) {
+imageListToMatrix <- function(imageList, mask, epsilon = 0 ) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
   if(missing(mask))
@@ -33,18 +34,16 @@ imageListToMatrix <- function(imageList, mask) {
 
   numImages <- length(imageList)
 
-  numVoxels <- length(which(mask > 0))
+  numVoxels <- length(which(mask > epsilon ))
 
   listfunc <- function(x) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
       x = resampleImageToTarget( x, mask, 2 ) # gaussian interpolation
     }
-    as.numeric(x, mask > 0)
+    as.numeric(x, mask > epsilon )
   }
-
-  dataMatrix <- t( matrix(
-    unlist(lapply(imageList, listfunc)),
-    ncol = numImages, nrow = numVoxels) )
-
-  return(dataMatrix)
+  dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
+  for ( i in 1:length( imageList ) )
+    dataMatrix[ i, ] = listfunc( imageList[[ i ]] )
+  return( dataMatrix )
 }
