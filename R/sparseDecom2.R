@@ -131,6 +131,13 @@ sparseDecom2 <- function(
       robustMatrixTransform( inmatrix[[2]] )
     )
     } else inputMatrices = inmatrix
+  # safety 1 & 2
+  if ( ! is.na( inmask[1] ) )
+    if ( ncol( inputMatrices[[1]] )  !=  sum( inmask[[1]] ) )
+      stop("Number of columns in matrix X must equal the size of the maskx")
+  if ( ! is.na( inmask[2] ) )
+    if ( ncol( inputMatrices[[2]] )  !=  sum( inmask[[2]] ) )
+      stop("Number of columns in matrix X must equal the size of the maskx")
   # helper function allows easier R-based permutation
   sccaner=.sparseDecom2helper2(
     inputMatrices,
