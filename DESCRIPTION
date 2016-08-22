@@ -1,7 +1,8 @@
 Package: ANTsR
 Type: Package
-Title: ANTs in R
+Title: ANTs in R: quantification tools for biomedical images
 Version: 0.3.3
+Date: 2016-08-22
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
@@ -10,6 +11,9 @@ Description: ANTsR interfaces state of the art image processing with R
     Pennsylvania, to develop large-scale analytics pipelines that track provenance
     from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp
     to access these frameworks from within R and support reproducible analyses.
+    Specialized functionality in ANTsR includes image segmentation and
+    registration along imaging specific variations of principal component
+    and canonical correlation analysis.
 License: GPL (>=2)
 LazyLoad: yes
 Depends:

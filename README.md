@@ -320,6 +320,10 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 
 More like *development highlights*, as opposed to *release notes*.  See `git log` for the complete history.  We try to follow [these versioning recommendations for R packages](http://yihui.name/en/2013/06/r-package-versioning/).  Under these guidelines, only `major.minor` is an official release.
 
+## 0.3.3
+
+* ENH: spare distance matrix, multi scale svd
+
 ## 0.3.2
 
 * ENH: added domainImg option to plot.antsImage which can standardize plot.
