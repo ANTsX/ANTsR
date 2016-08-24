@@ -422,7 +422,7 @@ if ( usePkg( "corpcor" ) )
 # get priors for different networks
 networkPriors2Bold=NA
 betasI = NA
-if ( ! exists( "networkPriors" ) ) # & notemplateMap )
+if ( ! exists( "networkPriors" ) & FALSE ) # & notemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
   networkPriors2Bold = networkPriors$images
