@@ -1,16 +1,14 @@
-#' Shape analysis of deformation fields based on PCA
+#' Shape analysis of multichannel images based on PCA
 #'
-#' Converts a set of deformation fields to a matrix in order to
-#' enable various forms of PCA.  Returns the components of shape
-#' variability and variance explained.  Can optionally employ
-#' a few different types of decomposition.
+#' Converts a set of multichannel images (e.g. deformation fields ) to a matrix
+#' to enable various forms of PCA.  Returns the components of shape variability
+#' and variance explained.  May employ different decomposition methods (WIP).
 #'
-#' @param x list containing deformation fields
-#' @param mask mask to apply to the deformation field
+#' @param x list containing multichannel images all of the same size
+#' @param mask mask to apply to the multichannel images
 #' @param k rank to use
-#' @param pcaOption currently only PCA and randPCA,
-#' the latter being much faster.
-#' @return matrix is output
+#' @param pcaOption currently only PCA and randPCA, latter being much faster.
+#' @return list of the pca output and conversion to multichannel images
 #' @author Avants BB
 #' @examples
 #'
@@ -30,32 +28,29 @@
 #' w3 = antsImageRead( reg3$fwdtransforms[1] )
 #' mask = getMask( img1 )
 #' x = list( w1, w2, w3 )
-#' dpca = deformationFieldPCA( x, mask )
+#' dpca = multichannelPCA( x, mask )
 #' warpTx = antsrTransformFromDisplacementField( dpca$pcaWarps[[1]] )
 #' warped = applyAntsrTransform( warpTx, data = img1, reference = img1)
 #'
-#' @export deformationFieldPCA
-deformationFieldPCA <- function(
+#' @export multichannelPCA
+multichannelPCA <- function(
   x,
   mask,
   k = NA,
   pcaOption = "PCA") {
 n = length( x )
-dim = mask@dimension
+idim = mask@dimension
 p   = sum( mask >= 1 )
-vecmat = matrix( nrow = n, ncol = p*dim )
+# check the size of the inputs matches the mask
+for ( i in 1:n )
+  if ( !all( dim( x[[n]] ) == dim(mask)  ) )
+    stop( paste("dimensionality of input number",i,
+    "does not match the mask dimensionality."))
+nchannels = x[[ 1 ]]@components
+vecmat = matrix( nrow = n, ncol = p*nchannels )
 for ( i in 1:n )
   {
-  temp = as.array( x[[ i ]] )
-  vv = 0
-  for ( d in 1:dim )
-    {
-    tempimg = as.antsImage( temp[d,,] )
-    a = antsCopyImageInfo( mask, tempimg )
-    if ( length( vv ) == 1 ) vv = tempimg[ mask == 1 ] else
-      vv = c( vv, tempimg[ mask == 1 ] )
-    }
-  vecmat[ i, ] = vv
+  vecmat[ i, ] = multichanneltovector( x[[ i ]] , mask )
   }
   if ( is.numeric( pcaOption ) ) {
     pcak = pcaOption
@@ -74,9 +69,9 @@ for ( i in 1:n )
       # FIXME - implement mask for regularization
       # need to bind mask in proper order to make
       # regularization work
-      arr = abind::abind( as.array( mask ), as.array( mask ), along=dim )
-      if ( dim == 3 )
-        arr = abind::abind( arr,  as.array( mask ), along=dim )
+      arr = abind::abind( as.array( mask ), as.array( mask ), along=idim )
+      if ( idim == 3 )
+        arr = abind::abind( arr,  as.array( mask ), along=idim )
       maska = as.antsImage( arr )
       a = antsCopyImageInfo( mask, maska )
       eanat = sparseDecom( cx, inmask=maska, sparseness = 1/k, nvecs=k,
@@ -88,27 +83,87 @@ for ( i in 1:n )
     }
   #  plot( vpca$u[, 1], vpca$u[, 2] )
   # now convert the vectors back to warps
-  vectortowarp <- function( v, mask ) {
-    dd = mask@dimension
-    p = sum( mask >= 1 )
-    if ( length( vv ) != dd*p ) stop("dimensions do not match")
-    mylist = list( )
-    maxn = (dd*p)
-    myinds = seq( from=1, to=maxn, by=(p-1) )
-    for ( k in 1:( length( myinds )-1 ) )
-      {
-      temp = antsImageClone( mask )
-      temp[ mask == 1 ] = v[ myinds[k]:(myinds[k+1])]
-      mylist[[ k ]] = temp
-      }
-    vecimg = mergeChannels( mylist )
-    a=antsCopyImageInfo( mask, vecimg )
-    return( vecimg * (1) ) # invert the field
-  }
   pcaWarps = list( )
   for ( i in 1:k )
     {
-    pcaWarps[[ i ]] = vectortowarp( vpca$v[,i], mask )
+    pcaWarps[[ i ]] = vectortomultichannel( vpca$v[,i], mask )
     }
   return( list( pca = vpca, pcaWarps=pcaWarps ) )
+}
+
+
+#' Convert multichannel \code{antsImage} to a vector.
+#'
+#' Employs a mask to flatten each channel of a multi-channel image into a
+#' contiguous piece of a vector.
+#'
+#' @param multichannelimage input multichannel image
+#' @param mask mask of same dimensionality as multichannelimage
+#' @return vector is output
+#' @author Avants BB
+#' @examples
+#'
+#' # see vectortomultichannel
+#'
+#' @export multichanneltovector
+multichanneltovector <- function( multichannelimage, mask )
+{
+  dd = mask@dimension
+  p = sum( mask >= 1 )
+  nchannels = multichannelimage@components
+  temp = splitChannels( multichannelimage )
+  maxn = (nchannels*p)
+  myinds = seq( from=1, to=maxn, by=(p-1) )
+  v = rep( NA, maxn )
+  for ( k in 1:( length( myinds )-1 ) )
+    v[ myinds[k]:(myinds[k+1]) ] = temp[[k]][ mask >= 1 ]
+  rm( temp )
+  gc()
+  v
+}
+
+
+#' Convert vector to multichannel \code{antsImage}.
+#'
+#' Converts a vector of size n-entries in mask times number of channels to
+#' a multi-channel image with the same dimensionality as the mask.
+#'
+#' @param v input multichannel vector
+#' @param mask mask of same dimensionality as multichannelimage
+#' @return multichannelimage is output
+#' @author Avants BB
+#' @examples
+#'
+#' fi <- antsImageRead(getANTsRData("r16") ) %>%
+#'   resampleImage(c(60,60),1,0)
+#' mi <- antsImageRead(getANTsRData("r64") ) %>%
+#'   resampleImage(c(60,60),1,0)
+#' mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
+#' mcimg = antsImageRead( mytx$fwd[1] )
+#' msk = getMask( fi )
+#' vv=multichanneltovector(mcimg,msk)
+#' mcimg2=vectortomultichannel( vv, msk )
+#' vv2=multichanneltovector(mcimg2,msk)
+#' cor.test(vv2,vv)
+#' stopifnot( all( mcimg2[30,30] == mcimg[30,30] ) )
+#'
+#' @export vectortomultichannel
+vectortomultichannel <- function( v, mask ) {
+  dd = mask@dimension
+  p = sum( mask >= 1 )
+  nchannels = round( length( v ) / p )
+  if ( length( v ) != (nchannels*p) ) stop("dimensions do not match")
+  maxn = (nchannels*p)
+  myinds = seq( from=1, to=maxn, by=(p-1) )
+  mylist = list( )
+  for ( k in 1:( length( myinds )-1 ) )
+    {
+    temp = antsImageClone( mask )
+    temp[ mask >= 1 ] = v[ myinds[k]:(myinds[k+1])]
+    mylist[[ k ]] = temp
+    rm( temp )
+    }
+  vecimg = mergeChannels( mylist )
+  gc()
+  return( vecimg )
 }
