@@ -8,6 +8,7 @@
 #' @param mask mask to apply to the multichannel images
 #' @param k rank to use
 #' @param pcaOption currently only PCA and randPCA, latter being much faster.
+#' @param verbose produces more explanatory output.
 #' @return list of the pca output and conversion to multichannel images
 #' @author Avants BB
 #' @examples
@@ -37,7 +38,8 @@ multichannelPCA <- function(
   x,
   mask,
   k = NA,
-  pcaOption = "PCA") {
+  pcaOption = "PCA",
+  verbose = FALSE ) {
 n = length( x )
 idim = mask@dimension
 p   = sum( mask >= 1 )
@@ -56,6 +58,7 @@ for ( i in 1:n )
     pcak = pcaOption
     pcaOption = "kPCA"
   }
+  if ( verbose ) print( paste( "begin PCA option",pcaOption) )
   if ( is.na( k ) ) k = nrow( vecmat ) - 1
   cx   = sweep( vecmat, 2, colMeans(vecmat), "-")
   if ( pcaOption == "randPCA" ) {
@@ -81,6 +84,8 @@ for ( i in 1:n )
     } else {
       vpca = svd(cx, nv=k, nu=k )
     }
+  if ( !verbose ) { rm( vecmat ); vecmat=NA }
+  if ( verbose ) print( paste( "convert back to multichannel" ) )
   #  plot( vpca$u[, 1], vpca$u[, 2] )
   # now convert the vectors back to warps
   pcaWarps = list( )
@@ -88,7 +93,23 @@ for ( i in 1:n )
     {
     pcaWarps[[ i ]] = vectortomultichannel( vpca$v[,i], mask )
     }
-  return( list( pca = vpca, pcaWarps=pcaWarps ) )
+  datatopcacorrs = NA
+  mylms = NA
+  if ( verbose ) print( paste( "regression and correlation" ) )
+  if ( verbose )
+    {
+    datatopcacorrs = cor( t( vecmat ) , vpca$v )
+    # can also explore regressing the basis against the data
+    mydf = data.frame( vpca$v )
+    mylms = summary(lm( t( vecmat ) ~ .,data=mydf))
+    } else rm( vecmat )
+  gc( )
+  return( list(
+    pca = vpca,
+    pcaWarps = pcaWarps,
+    vecmat = vecmat,
+    datatopcacorrs = datatopcacorrs,
+    mylms = mylms ) )
 }
 
 
@@ -122,6 +143,8 @@ multichanneltovector <- function( multichannelimage, mask )
     locinds = myinds[k]: maxind
     v[ locinds ] = temp[[k]][ mask >= 1 ]
     }
+  rm( temp )
+  gc()
   return( v )
 }
 
@@ -170,5 +193,7 @@ vectortomultichannel <- function( v, mask ) {
     mylist[[ k ]] = temp
     }
   vecimg = mergeChannels( mylist )
+  rm( temp, mylist )
+  gc()
   return( vecimg )
 }

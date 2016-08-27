@@ -4,7 +4,7 @@
 \alias{multichannelPCA}
 \title{Shape analysis of multichannel images based on PCA}
 \usage{
-multichannelPCA(x, mask, k = NA, pcaOption = "PCA")
+multichannelPCA(x, mask, k = NA, pcaOption = "PCA", verbose = FALSE)
 }
 \arguments{
 \item{x}{list containing multichannel images all of the same size}
@@ -14,6 +14,8 @@ multichannelPCA(x, mask, k = NA, pcaOption = "PCA")
 \item{k}{rank to use}
 
 \item{pcaOption}{currently only PCA and randPCA, latter being much faster.}
+
+\item{verbose}{produces more explanatory output.}
 }
 \value{
 list of the pca output and conversion to multichannel images
