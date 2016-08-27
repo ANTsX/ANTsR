@@ -13,7 +13,8 @@ multichannelPCA(x, mask, k = NA, pcaOption = "PCA", verbose = FALSE)
 
 \item{k}{rank to use}
 
-\item{pcaOption}{currently only PCA and randPCA, latter being much faster.}
+\item{pcaOption}{currently only PCA and randPCA, latter being much faster.
+We also allow fastICA.}
 
 \item{verbose}{produces more explanatory output.}
 }

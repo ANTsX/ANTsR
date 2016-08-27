@@ -8,6 +8,7 @@
 #' @param mask mask to apply to the multichannel images
 #' @param k rank to use
 #' @param pcaOption currently only PCA and randPCA, latter being much faster.
+#' We also allow fastICA.
 #' @param verbose produces more explanatory output.
 #' @return list of the pca output and conversion to multichannel images
 #' @author Avants BB
@@ -68,6 +69,11 @@ for ( i in 1:n )
       if ( ! usePkg( "irlba" ) ) stop("please install irlba")
       tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric='cov' )
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
+    } else if ( pcaOption == "fastICA" ) {
+      if ( ! usePkg( "fastICA" ) ) stop("please install irlba")
+      tempica = fastICA( t( cx ), k )
+      vpca = list( d=NA,  u=NA,
+        v=( tempica$S ) )
     } else if ( pcaOption == "eanat" ) {
       # FIXME - implement mask for regularization
       # need to bind mask in proper order to make
