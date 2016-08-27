@@ -103,7 +103,7 @@ for ( i in 1:n )
       }
     vecimg = mergeChannels( mylist )
     a=antsCopyImageInfo( mask, vecimg )
-    return( vecimg * (-1) ) # invert the field
+    return( vecimg * (1) ) # invert the field
   }
   pcaWarps = list( )
   for ( i in 1:k )
