@@ -113,13 +113,16 @@ multichanneltovector <- function( multichannelimage, mask )
   nchannels = multichannelimage@components
   temp = splitChannels( multichannelimage )
   maxn = (nchannels*p)
-  myinds = seq( from=1, to=maxn, by=(p-1) )
-  v = rep( NA, maxn )
-  for ( k in 1:( length( myinds )-1 ) )
-    v[ myinds[k]:(myinds[k+1]) ] = temp[[k]][ mask >= 1 ]
-  rm( temp )
-  gc()
-  v
+  myinds = seq( from=1, to=maxn, by=(p) )
+  myinds[ nchannels+1 ] = maxn
+  v = rep( 0, maxn )
+  for ( k in 1:nchannels ) {
+    maxind = (myinds[k+1]-1)
+    if ( k == nchannels ) maxind = maxn
+    locinds = myinds[k]: maxind
+    v[ locinds ] = temp[[k]][ mask >= 1 ]
+    }
+  return( v )
 }
 
 
@@ -154,16 +157,18 @@ vectortomultichannel <- function( v, mask ) {
   nchannels = round( length( v ) / p )
   if ( length( v ) != (nchannels*p) ) stop("dimensions do not match")
   maxn = (nchannels*p)
-  myinds = seq( from=1, to=maxn, by=(p-1) )
+  myinds = seq( from=1, to=maxn, by=(p) )
+  myinds[ nchannels+1 ] = maxn
   mylist = list( )
-  for ( k in 1:( length( myinds )-1 ) )
+  for ( k in 1:nchannels )
     {
+    maxind = (myinds[k+1]-1)
+    if ( k == nchannels ) maxind = maxn
+    locinds = myinds[k]: maxind
     temp = antsImageClone( mask )
-    temp[ mask >= 1 ] = v[ myinds[k]:(myinds[k+1])]
+    temp[ mask >= 1 ] = v[ locinds ]
     mylist[[ k ]] = temp
-    rm( temp )
     }
   vecimg = mergeChannels( mylist )
-  gc()
   return( vecimg )
 }
