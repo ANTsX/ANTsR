@@ -70,7 +70,20 @@ for ( i in 1:n )
       if ( ! usePkg( "irlba" ) ) stop("please install irlba")
       tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric='cov' )
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
-    }else {
+    } else if ( pcaOption == "eanat" ) {
+      # FIXME - implement mask for regularization
+      # need to bind mask in proper order to make
+      # regularization work
+      arr = abind::abind( as.array( mask ), as.array( mask ), along=dim )
+      if ( dim == 3 )
+        arr = abind::abind( arr,  as.array( mask ), along=dim )
+      maska = as.antsImage( arr )
+      a = antsCopyImageInfo( mask, maska )
+      eanat = sparseDecom( cx, inmask=maska, sparseness = 1/k, nvecs=k,
+        cthresh=0, smooth=0.5, verbose=TRUE )
+      vpca = list( d=eanat$varex,  u=eanat$umatrix,
+        v=t(eanat$eigenanatomyimages ) )
+    } else {
       vpca = svd(cx, nv=k, nu=k )
     }
   #  plot( vpca$u[, 1], vpca$u[, 2] )
