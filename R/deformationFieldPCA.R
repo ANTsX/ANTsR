@@ -102,7 +102,7 @@ for ( i in 1:n )
     # can also explore regressing the basis against the data
     mydf = data.frame( vpca$v )
     mylms = summary(lm( t( vecmat ) ~ .,data=mydf))
-    } else rm( vecmat )
+    }
   gc( )
   return( list(
     pca = vpca,
