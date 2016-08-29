@@ -83,16 +83,25 @@ for ( i in 1:n )
         arr = abind::abind( arr,  as.array( mask ), along=idim )
       maska = as.antsImage( arr )
       a = antsCopyImageInfo( mask, maska )
-      eanat = sparseDecom( cx, inmask=maska, sparseness = 1/k, nvecs=k,
-        cthresh=0, smooth=0.5, verbose=TRUE )
-      vpca = list( d=eanat$varex,  u=eanat$umatrix,
-        v=t(eanat$eigenanatomyimages ) )
+#      eanat = sparseDecom( cx, inmask=maska, sparseness = -1/k, nvecs=k,
+#        cthresh=0, smooth=0.5, verbose=TRUE )
+#      vpca = list( d=eanat$varex,  u=eanat$umatrix,
+#        v=t(eanat$eigenanatomyimages ) )
+      eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)), 
+                              nvecs = k, cthresh=10, verbose=TRUE )
+      vpca = list( d=0,  u=0, v=t( eanatD ) )
+      k = ncol( vpca$v )
     } else {
       vpca = svd(cx, nv=k, nu=k )
     }
   if ( !verbose ) { rm( vecmat ); vecmat=NA }
-  if ( verbose ) print( paste( "convert back to multichannel" ) )
-  #  plot( vpca$u[, 1], vpca$u[, 2] )
+  if ( verbose ) {
+    print( paste( "convert back to multichannel" ) )
+#    print( dim( vpca$v ) )
+#    print( dim(mask) )
+#    print( sum( mask ) )
+#    print( k )
+    }
   # now convert the vectors back to warps
   pcaWarps = list( )
   for ( i in 1:k )
