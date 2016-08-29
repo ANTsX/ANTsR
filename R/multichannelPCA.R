@@ -83,13 +83,13 @@ for ( i in 1:n )
         arr = abind::abind( arr,  as.array( mask ), along=idim )
       maska = as.antsImage( arr )
       a = antsCopyImageInfo( mask, maska )
-      eanat = sparseDecom( cx, inmask=maska, sparseness = 1.0/k, nvecs=k,
-        cthresh=10, smooth=0.5, verbose=TRUE )
-      vpca = list( d=eanat$varex,  u=eanat$umatrix,
-        v=t(eanat$eigenanatomyimages ) )
-#      eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)), 
-#        positivity=TRUE, nvecs = k, cthresh=10, verbose=TRUE )
-#      vpca = list( d=0,  u=0, v=t( eanatD ) )
+#      eanat = sparseDecom( cx, inmask=maska, sparseness = 1.0/k, nvecs=k,
+#        cthresh=10, smooth=0.5, verbose=TRUE )
+#      vpca = list( d=eanat$varex,  u=eanat$umatrix,
+#       v=t(eanat$eigenanatomyimages ) )
+      eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)), 
+        positivity=TRUE, nvecs = k, cthresh=0, verbose=TRUE )
+      vpca = list( d=NA,  u=NA, v=t( eanatD ) )
       k = ncol( vpca$v )
     } else {
       vpca = svd(cx, nv=k, nu=k )
