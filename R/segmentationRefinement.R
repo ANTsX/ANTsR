@@ -389,9 +389,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param labelSet a vector specifying the labels of interest.  Must be specified.
 #' @param labelModels a list of models.
 #'        Each element of the labelSet requires a model.
-#' @param featureImages a list of feature images.  Each list of label-specific
-#'        feature images corresponds to a single subject.  Possibilities are outlined in
-#'        the above-cited paper.
+#' @param featureImages a list of feature images.
 #' @param featureImageNames is a vector of character strings naming the set of features.
 #'        Must be specified.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
