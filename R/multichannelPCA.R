@@ -88,7 +88,7 @@ for ( i in 1:n )
 #      vpca = list( d=eanat$varex,  u=eanat$umatrix,
 #        v=t(eanat$eigenanatomyimages ) )
       eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)), 
-                              nvecs = k, cthresh=10, verbose=TRUE )
+        positivity=TRUE, nvecs = k, cthresh=10, verbose=TRUE )
       vpca = list( d=0,  u=0, v=t( eanatD ) )
       k = ncol( vpca$v )
     } else {
