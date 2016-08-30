@@ -16,9 +16,7 @@ segmentationRefinement.predict(segmentationImage, labelSet, labelModels,
 \item{labelModels}{a list of models.
 Each element of the labelSet requires a model.}
 
-\item{featureImages}{a list of lists of feature images.  Each list of label-specific
-feature images corresponds to a single subject.  Possibilities are outlined in
-the above-cited paper.}
+\item{featureImages}{a list of feature images.}
 
 \item{featureImageNames}{is a vector of character strings naming the set of features.
 Must be specified.}
