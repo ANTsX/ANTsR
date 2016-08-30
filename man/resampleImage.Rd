@@ -20,7 +20,8 @@ resampleImage(image, resampleParams, useVoxels = 0, interpType = 1)
 output antsImage
 }
 \description{
-Resample image by spacing or number of voxels with various interpolators
+Resample image by spacing or number of voxels with various interpolators.
+Works with multi-channel images.
 }
 \examples{
 
