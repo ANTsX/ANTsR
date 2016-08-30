@@ -9,6 +9,8 @@
 #' @param k rank to use
 #' @param pcaOption currently only PCA and randPCA, latter being much faster.
 #' We also allow fastICA.
+#' @param auxiliaryModality if you pass this matrix, then will do CCA.  This
+#' will only work with one option.
 #' @param verbose produces more explanatory output.
 #' @return list of the pca output and conversion to multichannel images
 #' @author Avants BB
@@ -40,6 +42,7 @@ multichannelPCA <- function(
   mask,
   k = NA,
   pcaOption = "PCA",
+  auxiliaryModality,
   verbose = FALSE ) {
 n = length( x )
 idim = mask@dimension
@@ -67,7 +70,13 @@ for ( i in 1:n )
     vpca = rsvd::rsvd( cx, k )
     } else if ( pcaOption == "kPCA" ) {
       if ( ! usePkg( "irlba" ) ) stop("please install irlba")
-      tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric='cov' )
+      if ( missing( "auxiliaryModality") )
+        tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric='cov' )
+      if ( !missing( "auxiliaryModality") )
+        {
+        cy   = sweep( auxiliaryModality, 2, colMeans(auxiliaryModality), "-")
+        tempdistmat = sparseDistanceMatrixXY( cx, cy, pcak, kmetric='cov' )
+        }
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
     } else if ( pcaOption == "fastICA" ) {
       if ( ! usePkg( "fastICA" ) ) stop("please install irlba")
@@ -87,7 +96,7 @@ for ( i in 1:n )
 #        cthresh=10, smooth=0.5, verbose=TRUE )
 #      vpca = list( d=eanat$varex,  u=eanat$umatrix,
 #       v=t(eanat$eigenanatomyimages ) )
-      eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)), 
+      eanatD = eanatDef( cx, mask = maska, smoother = mean(antsGetSpacing(mask)),
         positivity=TRUE, nvecs = k, cthresh=0, verbose=TRUE )
       vpca = list( d=NA,  u=NA, v=t( eanatD ) )
       k = ncol( vpca$v )

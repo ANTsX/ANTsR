@@ -4,7 +4,8 @@
 \alias{multichannelPCA}
 \title{Shape analysis of multichannel images based on PCA}
 \usage{
-multichannelPCA(x, mask, k = NA, pcaOption = "PCA", verbose = FALSE)
+multichannelPCA(x, mask, k = NA, pcaOption = "PCA", auxiliaryModality,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{list containing multichannel images all of the same size}
@@ -15,6 +16,9 @@ multichannelPCA(x, mask, k = NA, pcaOption = "PCA", verbose = FALSE)
 
 \item{pcaOption}{currently only PCA and randPCA, latter being much faster.
 We also allow fastICA.}
+
+\item{auxiliaryModality}{if you pass this matrix, then will do CCA.  This
+will only work with one option.}
 
 \item{verbose}{produces more explanatory output.}
 }
