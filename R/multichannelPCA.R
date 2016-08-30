@@ -120,7 +120,7 @@ for ( i in 1:n )
   datatopcacorrs = NA
   mylms = NA
   if ( verbose ) print( paste( "regression and correlation" ) )
-  if ( verbose )
+  if ( verbose & missing( "auxiliaryModality") )
     {
     datatopcacorrs = cor( t( vecmat ) , vpca$v )
     # can also explore regressing the basis against the data
