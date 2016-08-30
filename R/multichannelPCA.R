@@ -75,7 +75,7 @@ for ( i in 1:n )
       if ( !missing( "auxiliaryModality") )
         {
         cy   = sweep( auxiliaryModality, 2, colMeans(auxiliaryModality), "-")
-        tempdistmat = sparseDistanceMatrixXY( cx, cy, pcak, kmetric='cov' )
+        tempdistmat = sparseDistanceMatrixXY( cy, cx, pcak, kmetric='cov' )
         }
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
     } else if ( pcaOption == "fastICA" ) {
@@ -120,7 +120,7 @@ for ( i in 1:n )
   datatopcacorrs = NA
   mylms = NA
   if ( verbose ) print( paste( "regression and correlation" ) )
-  if ( verbose & missing( "auxiliaryModality") )
+  if ( verbose )
     {
     datatopcacorrs = cor( t( vecmat ) , vpca$v )
     # can also explore regressing the basis against the data
