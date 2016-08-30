@@ -221,17 +221,13 @@ for( l in 1:length( labelSet ) )
     if( ! is.character( dilationRadius ) )
       {
       roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-      roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
-      roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+      roiMaskImage <- roiDilationMaskImage
       } else {
       dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
       distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-
-      segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
-      distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
-
-      roiMaskImage <- thresholdImage( distanceImage, 1e-10, dilationRadiusValue, 1, 0 ) +
-                      thresholdImage( distanceInverseImage, 1e-10, dilationRadiusValue, 1, 0 )
+      minSpacing <- min( antsGetSpacing( distanceImage ) )
+      roiMaskImage <- segmentationSingleLabelImage +
+        thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
       }
     roiMaskArray <- as.array( roiMaskImage )
 
@@ -393,9 +389,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #' @param labelSet a vector specifying the labels of interest.  Must be specified.
 #' @param labelModels a list of models.
 #'        Each element of the labelSet requires a model.
-#' @param featureImages a list of lists of feature images.  Each list of label-specific
-#'        feature images corresponds to a single subject.  Possibilities are outlined in
-#'        the above-cited paper.
+#' @param featureImages a list of feature images.
 #' @param featureImageNames is a vector of character strings naming the set of features.
 #'        Must be specified.
 #' @param dilationRadius specifies the dilation radius for determining the ROI for
@@ -575,17 +569,13 @@ for( l in 1:length( labelSet ) )
   if( ! is.character( dilationRadius ) )
     {
     roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-    roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
-    roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+    roiMaskImage <- roiDilationMaskImage
     } else {
     dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
     distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-
-    segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
-    distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
-
-    roiMaskImage <- thresholdImage( distanceImage, 1e-10, dilationRadiusValue, 1, 0 ) +
-                    thresholdImage( distanceInverseImage, 1e-10, dilationRadiusValue, 1, 0 )
+    minSpacing <- min( antsGetSpacing( distanceImage ) )
+    roiMaskImage <- segmentationSingleLabelImage +
+      thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
     }
   roiMaskArray <- as.array( roiMaskImage )
   roiMaskArrayIndices <- which( roiMaskArray != 0 )
