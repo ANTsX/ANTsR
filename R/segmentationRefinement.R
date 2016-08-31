@@ -365,9 +365,9 @@ for( l in 1:length( labelSet ) )
   modelDataPerLabel <- as.data.frame( modelDataPerLabel )
   modelDataPerLabel$Labels <- as.factor( modelDataPerLabel$Labels )
 
-  ## Create the random forest model
+  ## Create the random forest models
 
-  message( "  \nCreating the RF model for label ", label, ".  ", sep = "" )
+  message( "  \nCreating the RF models for label ", label, ".  ", sep = "" )
 
   modelFormula <- as.formula( "Labels ~ . " )
 
@@ -390,16 +390,10 @@ for( l in 1:length( labelSet ) )
 
   labelForegroundModels[[l]] <- modelForegroundForest;
 
-#   modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
-#     ntree = 1000, type = "classification", importance = TRUE, na.action = na.omit )
-#   labelModels[[l]] <- modelForest;
-
   # Stop the clock
   elapsedTime <- proc.time() - ptm
   message( "  Done (", as.numeric( elapsedTime[3] ), " seconds).\n", sep = "" )
   }
-
-# return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames = featureImageNames ) )
 
   return ( list( LabelForegroundModels = labelForegroundModels,
                  LabelBackgroundModels = labelBackgroundModels,
