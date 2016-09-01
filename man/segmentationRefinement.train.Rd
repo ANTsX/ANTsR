@@ -45,14 +45,17 @@ by the mean of the voxels in that ROI.  Can also specify as a vector to normaliz
 per feature image.}
 }
 \value{
-list with the models per label (LabelModels), the label set (LabelSet), and
-        the feature image names (FeatureImageNames).
+list with two models per label (LabelForegroundModels and labelBackgroundModels),
+        the label set (LabelSet), and the feature image names (FeatureImageNames).
 }
 \description{
 A random forest implementation of the corrective learning wrapper introduced
 in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
 The training process involves building two sets of models from training data
-for each label in the initial segmentation data.
+for each label in the initial segmentation data.  For each label, we build
+two models:  one model is for misclassification of 'positive' or 'foreground'
+voxels (false vs. true) and one model for misclassification of 'negative' or
+'background' voxels (false vs. true).
 }
 \examples{
 \dontrun{
@@ -107,7 +110,7 @@ for each label in the initial segmentation data.
 
  for( m in 1:length( segLearning$LabelModels ) )
    {
-   forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
+   forestImp <- importance( segLearning$LabelForegroundModels[[m]], type = 1 )
    forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
    forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
 
@@ -122,7 +125,7 @@ for each label in the initial segmentation data.
             theme( axis.text.y = element_text( size = 10 ) ) +
             theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
             theme( legend.position = "none" )
-   ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
+   ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], 'Foreground.pdf' ), plot = iPlot, width = 4, height = 6 )
    }
 
 }
