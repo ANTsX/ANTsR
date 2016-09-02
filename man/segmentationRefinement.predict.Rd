@@ -4,21 +4,17 @@
 \alias{segmentationRefinement.predict}
 \title{Segmentation refinement using corrective learning (prediction)}
 \usage{
-segmentationRefinement.predict(segmentationImage, labelSet,
-  labelForegroundModels, labelBackgroundModels, featureImages,
-  featureImageNames, dilationRadius = 2, neighborhoodRadius = 0,
-  normalizeSamplesPerLabel = TRUE)
+segmentationRefinement.predict(segmentationImage, labelSet, labelModels,
+  featureImages, featureImageNames, dilationRadius = 2,
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
 }
 \arguments{
 \item{segmentationImage}{image to refine via corrective learning.}
 
 \item{labelSet}{a vector specifying the labels of interest.  Must be specified.}
 
-\item{labelForegroundModels}{a list of all foreground models.
-Each element of the labelSet requires a foreground model.}
-
-\item{labelBackgroundModels}{a list of all background models.
-Each element of the labelSet requires a background model.}
+\item{labelModels}{a list of models.
+Each element of the labelSet requires a model.}
 
 \item{featureImages}{a list of feature images.}
 
@@ -101,8 +97,7 @@ to refine an initial segmentation.
 
  refinement <- segmentationRefinement.predict(
    segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
-   segLearning$LabelForegroundModels, segLearning$LabelBackgroundModels,
-   featureImages[[1]], featureImageNames,
+   segLearning$LabelModels, featureImages[[1]], featureImageNames,
    dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
    normalizeSamplesPerLabel = TRUE )
 

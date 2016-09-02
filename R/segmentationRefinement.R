@@ -3,10 +3,7 @@
 #' A random forest implementation of the corrective learning wrapper introduced
 #' in Wang, et al., Neuroimage 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
 #' The training process involves building two sets of models from training data
-#' for each label in the initial segmentation data.  For each label, we build
-#' two models:  one model is for misclassification of 'positive' or 'foreground'
-#' voxels (false vs. true) and one model for misclassification of 'negative' or
-#' 'background' voxels (false vs. true).
+#' for each label in the initial segmentation data.
 #'
 #' @param featureImages a list of lists of feature images.  Each list of feature images
 #'        corresponds to a single subject.  Possibilities are outlined in the above-cited
@@ -34,8 +31,8 @@
 #'        by the mean of the voxels in that ROI.  Can also specify as a vector to normalize
 #'        per feature image.
 #'
-#' @return list with two models per label (LabelForegroundModels and labelBackgroundModels),
-#'         the label set (LabelSet), and the feature image names (FeatureImageNames).
+#' @return list with the models per label (LabelModels), the label set (LabelSet), and
+#'         the feature image names (FeatureImageNames).
 #'
 #' @author Tustison NJ
 #'
@@ -92,7 +89,7 @@
 #'
 #'  for( m in 1:length( segLearning$LabelModels ) )
 #'    {
-#'    forestImp <- importance( segLearning$LabelForegroundModels[[m]], type = 1 )
+#'    forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
 #'    forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
 #'    forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
 #'
@@ -107,7 +104,7 @@
 #'             theme( axis.text.y = element_text( size = 10 ) ) +
 #'             theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
 #'             theme( legend.position = "none" )
-#'    ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], 'Foreground.pdf' ), plot = iPlot, width = 4, height = 6 )
+#'    ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
 #'    }
 #'
 #' }
@@ -189,8 +186,7 @@ labelSet <- sort( labelSet )
 
 ## Create the models per label
 
-labelBackgroundModels <- list()
-labelForegroundModels <- list()
+labelModels <- list()
 
 for( l in 1:length( labelSet ) )
   {
@@ -365,39 +361,26 @@ for( l in 1:length( labelSet ) )
   modelDataPerLabel <- as.data.frame( modelDataPerLabel )
   modelDataPerLabel$Labels <- as.factor( modelDataPerLabel$Labels )
 
-  ## Create the random forest models
+  ## Create the random forest model
 
-  message( "  \nCreating the RF models for label ", label, ".  ", sep = "" )
+  message( "  \nCreating the RF model for label ", label, ".  ", sep = "" )
 
   modelFormula <- as.formula( "Labels ~ . " )
 
   # Start the clock
   ptm <- proc.time()
 
-  modelBackgroundDataPerLabel <-
-    modelDataPerLabel[which( modelDataPerLabel$Labels == falseNegativeLabel | modelDataPerLabel$Labels == trueNegativeLabel ),]
-  modelBackgroundDataPerLabel$Labels <- factor( modelBackgroundDataPerLabel$Labels )
-  modelBackgroundForest <- randomForest::randomForest( modelFormula, modelBackgroundDataPerLabel,
+  modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
     ntree = 1000, type = "classification", importance = TRUE, na.action = na.omit )
-
-  labelBackgroundModels[[l]] <- modelBackgroundForest;
-
-  modelForegroundDataPerLabel <-
-    modelDataPerLabel[which( modelDataPerLabel$Labels == falsePositiveLabel | modelDataPerLabel$Labels == truePositiveLabel ),]
-  modelForegroundDataPerLabel$Labels <- factor( modelForegroundDataPerLabel$Labels )
-  modelForegroundForest <- randomForest::randomForest( modelFormula, modelForegroundDataPerLabel,
-    ntree = 1000, type = "classification", importance = TRUE, na.action = na.omit )
-
-  labelForegroundModels[[l]] <- modelForegroundForest;
 
   # Stop the clock
   elapsedTime <- proc.time() - ptm
   message( "  Done (", as.numeric( elapsedTime[3] ), " seconds).\n", sep = "" )
+
+  labelModels[[l]] <- modelForest;
   }
 
-  return ( list( LabelForegroundModels = labelForegroundModels,
-                 LabelBackgroundModels = labelBackgroundModels,
-                 LabelSet = labelSet, FeatureImageNames = featureImageNames ) )
+return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames = featureImageNames ) )
 }
 
 #' Segmentation refinement using corrective learning (prediction)
@@ -409,10 +392,8 @@ for( l in 1:length( labelSet ) )
 #'
 #' @param segmentationImage image to refine via corrective learning.
 #' @param labelSet a vector specifying the labels of interest.  Must be specified.
-#' @param labelForegroundModels a list of all foreground models.
-#'        Each element of the labelSet requires a foreground model.
-#' @param labelBackgroundModels a list of all background models.
-#'        Each element of the labelSet requires a background model.
+#' @param labelModels a list of models.
+#'        Each element of the labelSet requires a model.
 #' @param featureImages a list of feature images.
 #' @param featureImageNames is a vector of character strings naming the set of features.
 #'        Must be specified.
@@ -485,8 +466,7 @@ for( l in 1:length( labelSet ) )
 #'
 #'  refinement <- segmentationRefinement.predict(
 #'    segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
-#'    segLearning$LabelForegroundModels, segLearning$LabelBackgroundModels,
-#'    featureImages[[1]], featureImageNames,
+#'    segLearning$LabelModels, featureImages[[1]], featureImageNames,
 #'    dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
 #'    normalizeSamplesPerLabel = TRUE )
 #'
@@ -497,8 +477,7 @@ for( l in 1:length( labelSet ) )
 #' }
 
 segmentationRefinement.predict <- function( segmentationImage, labelSet,
-  labelForegroundModels, labelBackgroundModels,
-  featureImages, featureImageNames, dilationRadius = 2,
+  labelModels, featureImages, featureImageNames, dilationRadius = 2,
   neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
 {
 
@@ -516,19 +495,10 @@ if( missing( labelSet ) )
   stop( "The label set is missing." )
   }
 
-if( missing( labelForegroundModels ) )
+if( missing( labelModels ) )
   {
-  stop( "The label models for false/true positive classification are missing." )
+  stop( "The label models are missing." )
   }
-if( missing( labelBackgroundModels ) )
-  {
-  stop( "The label models for false/true positive classification are missing." )
-  }
-if( length( labelForegroundModels ) != length( labelBackgroundModels ) )
-  {
-  stop( "The number of label models (positive vs. negative) are not equal." )
-  }
-
 if( missing( featureImages ) )
   {
   stop( "The list of features images is missing." )
@@ -537,7 +507,7 @@ if( missing( featureImageNames ) )
   {
   stop( "The list of feature image names is missing." )
   }
-if( length( labelSet ) != length( labelForegroundModels ) )
+if( length( labelSet ) != length( labelModels ) )
   {
   stop( "The number of labels must match the number of models." )
   }
@@ -620,21 +590,17 @@ for( l in 1:length( labelSet ) )
   roiMaskArray <- as.array( roiMaskImage )
   roiMaskArrayIndices <- which( roiMaskArray != 0 )
 
-  roiMaskArrayForegroundIndices <- roiMaskArrayIndices[which( segmentationSingleLabelArray[roiMaskArrayIndices] == 1 )]
-  roiMaskArrayBackgroundIndices <- roiMaskArrayIndices[which( segmentationSingleLabelArray[roiMaskArrayIndices] == 0 )]
-
   wholeMaskImage <- segmentationSingleLabelArray
   wholeMaskImage[which( wholeMaskImage != 1 )] <- 1
   wholeMaskImage <- as.antsImage( wholeMaskImage )
 
   # Accumulate data for prediction
 
-  ## true/false positive
-  subjectForegroundDataPerLabel <- matrix( NA, nrow = length( roiMaskArrayForegroundIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
+  subjectDataPerLabel <- matrix( NA, nrow = length( roiMaskArrayIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
   for( j in 1:length( featureImages ) )
     {
     featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
-    values <- featureImageNeighborhoodValues[, roiMaskArrayForegroundIndices]
+    values <- featureImageNeighborhoodValues[, roiMaskArrayIndices]
     if( normalizeSamplesPerLabel[j] )
       {
       featureImagesArray <- as.array( featureImages[[j]] )
@@ -644,30 +610,14 @@ for( l in 1:length( labelSet ) )
         values <- values / meanValue
         }
       }
-    subjectForegroundDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
+    subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
     }
-  colnames( subjectForegroundDataPerLabel ) <- c( featureNeighborhoodNames )
-  subjectForegroundDataPerLabel <- as.data.frame( subjectForegroundDataPerLabel )
+  colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNames )
+  subjectDataPerLabel <- as.data.frame( subjectDataPerLabel )
 
-  ## true/false negative
-  subjectBackgroundDataPerLabel <- matrix( NA, nrow = length( roiMaskArrayBackgroundIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
-  for( j in 1:length( featureImages ) )
-    {
-    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
-    values <- featureImageNeighborhoodValues[, roiMaskArrayBackgroundIndices]
-    if( normalizeSamplesPerLabel[j] )
-      {
-      featureImagesArray <- as.array( featureImages[[j]] )
-      meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-      if( meanValue != 0 )
-        {
-        values <- values / meanValue
-        }
-      }
-    subjectBackgroundDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
-    }
-  colnames( subjectBackgroundDataPerLabel ) <- c( featureNeighborhoodNames )
-  subjectBackgroundDataPerLabel <- as.data.frame( subjectBackgroundDataPerLabel )
+  # Do prediction
+
+  subjectProbabilitiesPerLabel <- predict( labelModels[[l]], subjectDataPerLabel, type = "prob" )
 
 #   truePositiveLabel <- 2
 #   trueNegativeLabel <- 1
@@ -676,18 +626,13 @@ for( l in 1:length( labelSet ) )
 
 #  binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
 
-  # Do prediction
-
-  subjectForegroundProbabilitiesPerLabel <- predict( labelForegroundModels[[l]], subjectForegroundDataPerLabel, type = "prob" )
-  subjectBackgroundProbabilitiesPerLabel <- predict( labelBackgroundModels[[l]], subjectBackgroundDataPerLabel, type = "prob" )
-
-  # The foreground probability at a voxel is a 'false negative' if the initial estimate is
-  # 'background' and 'true positive' if the initial estimate is 'foreground'.
+  roiMaskArrayTruePositiveIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 1 )
+  roiMaskArrayFalseNegativeIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 0 )
 
   foregroundProbabilitiesPerLabel[l,] <- segmentationSingleLabelArray
   foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices] <- 0
-  foregroundProbabilitiesPerLabel[l, roiMaskArrayForegroundIndices] <- subjectForegroundProbabilitiesPerLabel[, 2]
-  foregroundProbabilitiesPerLabel[l, roiMaskArrayBackgroundIndices] <- subjectBackgroundProbabilitiesPerLabel[, 1]
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayTruePositiveIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayTruePositiveIndices, 4]
+  foregroundProbabilitiesPerLabel[l, roiMaskArrayIndices[roiMaskArrayFalseNegativeIndices]] <- subjectProbabilitiesPerLabel[roiMaskArrayFalseNegativeIndices, 2]
 
   foregroundProbabilityImages[[l]] <- as.antsImage( array( foregroundProbabilitiesPerLabel[l,], dim = dim( segmentationArray ) ), reference = segmentationImage )
   }

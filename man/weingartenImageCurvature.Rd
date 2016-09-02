@@ -2,7 +2,7 @@
 % Please edit documentation in R/weingartenImageCurvature.R
 \name{weingartenImageCurvature}
 \alias{weingartenImageCurvature}
-\title{image curvature for 3D}
+\title{image curvature for 2D or 3D}
 \usage{
 weingartenImageCurvature(image, sigma = 1, opt = "mean")
 }
