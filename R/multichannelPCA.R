@@ -11,6 +11,7 @@
 #' We also allow fastICA.
 #' @param auxiliaryModality if you pass this matrix, then will do CCA.  This
 #' will only work with one option.
+#' @param center subtract the mean column vector.
 #' @param verbose produces more explanatory output.
 #' @return list of the pca output and conversion to multichannel images
 #' @author Avants BB
@@ -43,6 +44,7 @@ multichannelPCA <- function(
   k = NA,
   pcaOption = "PCA",
   auxiliaryModality,
+  center = TRUE,
   verbose = FALSE ) {
 n = length( x )
 idim = mask@dimension
@@ -64,7 +66,7 @@ for ( i in 1:n )
   }
   if ( verbose ) print( paste( "begin PCA option",pcaOption) )
   if ( is.na( k ) ) k = nrow( vecmat ) - 1
-  cx   = sweep( vecmat, 2, colMeans(vecmat), "-")
+  if ( center ) cx   = sweep( vecmat, 2, colMeans(vecmat), "-") else cx=vecmat
   if ( pcaOption == "randPCA" ) {
     if ( ! usePkg( "rsvd" ) ) stop("please install rsvd")
     vpca = rsvd::rsvd( cx, k )
@@ -74,7 +76,8 @@ for ( i in 1:n )
         tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric='cov' )
       if ( !missing( "auxiliaryModality") )
         {
-        cy   = sweep( auxiliaryModality, 2, colMeans(auxiliaryModality), "-")
+        if ( center ) cy = sweep( auxiliaryModality, 2, colMeans(auxiliaryModality), "-")
+        if ( !center ) cy = auxiliaryModality
         tempdistmat = sparseDistanceMatrixXY( cy, cx, pcak, kmetric='cov' )
         }
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
