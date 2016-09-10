@@ -74,18 +74,16 @@ for ( i in 1:n )
     vpca = rsvd::rsvd( cx, k )
     } else if ( pcaOption == "kPCA" ) {
       kpcaopt = 'cov'
-      if ( ! is.na( sigma ) ) kpcaopt = 'euc'
+      if ( ! is.na( sigma ) ) kpcaopt = 'gaussian'
       if ( ! usePkg( "irlba" ) ) stop("please install irlba")
       if ( missing( "auxiliaryModality") )
-        tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric=kpcaopt )
+        tempdistmat = sparseDistanceMatrix( cx, pcak, kmetric=kpcaopt, sigma=sigma )
       if ( !missing( "auxiliaryModality") )
         {
         if ( center ) cy = sweep( auxiliaryModality, 2, colMeans(auxiliaryModality), "-")
         if ( !center ) cy = auxiliaryModality
-        tempdistmat = sparseDistanceMatrixXY( cy, cx, pcak, kmetric=kpcaopt )
+        tempdistmat = sparseDistanceMatrixXY( cy, cx, pcak, kmetric=kpcaopt, sigma=sigma )
         }
-      if ( ! is.na( sigma ) )
-        tempdistmat = -1.0 * ( tempdistmat^2 ) / ( 2.0 * sigma ^2 )
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
     } else if ( pcaOption == "fastICA" ) {
       if ( ! usePkg( "fastICA" ) ) stop("please install irlba")
