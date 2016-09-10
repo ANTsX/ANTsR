@@ -5,7 +5,7 @@
 \title{Shape analysis of multichannel images based on PCA}
 \usage{
 multichannelPCA(x, mask, k = NA, pcaOption = "PCA", auxiliaryModality,
-  center = TRUE, verbose = FALSE)
+  center = TRUE, sigma = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{list containing multichannel images all of the same size}
@@ -21,6 +21,8 @@ We also allow fastICA.}
 will only work with one option.}
 
 \item{center}{subtract the mean column vector.}
+
+\item{sigma}{parameter for kernel PCA.}
 
 \item{verbose}{produces more explanatory output.}
 }
