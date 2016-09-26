@@ -1,4 +1,4 @@
-struct ArgumentType
+struct patchAnalysisArgumentType
 {
   std::string inputName;           // -i option
   std::string maskName;            // -m option
@@ -20,8 +20,8 @@ template < class ImageType, const int dimension >
 class TPatchAnalysis
 {
 public:
-	TPatchAnalysis( ArgumentType &  );
-	void SetArguments( ArgumentType & );
+	TPatchAnalysis( patchAnalysisArgumentType &  );
+	void SetArguments( patchAnalysisArgumentType & );
 	void ReadInputImage( void );
 	void ReadMaskImage( void );
 	void GetSamplePatchLocations( void );
@@ -38,7 +38,7 @@ public:
 	void WriteProjections( void );
 
 private:
-	ArgumentType args;
+	patchAnalysisArgumentType args;
 	typename ImageType::Pointer                 canonicalFrame; // frame to rotate all patches to
 	typename ImageType::Pointer                 inputImage;
 	typename ImageType::Pointer                 maskImage;

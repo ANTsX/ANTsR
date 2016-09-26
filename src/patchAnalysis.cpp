@@ -45,7 +45,7 @@ SEXP patchAnalysisHelper(
   typename ImageType::Pointer outimg =
     Rcpp::as< ImagePointerType >( r_outimg );
 
-    ArgumentType args;
+    patchAnalysisArgumentType args;
     args.inputName               = "";
     args.maskName                = "";
     args.outProjectionName       = "projectedPatches";
