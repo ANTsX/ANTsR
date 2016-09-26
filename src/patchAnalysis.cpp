@@ -27,8 +27,7 @@
 #include "itkCovariantVector.h"
 #include "itkGradientRecursiveGaussianImageFilter.h"
 #include "itkBSplineInterpolateImageFunction.h"
-#include "PatchAnalysis.h"
-#include "PatchAnalysis.hxx"
+#include "itkRIPMMARCImageFilter.h"
 
 template< class ImageType >
 SEXP patchAnalysisHelper(
@@ -38,32 +37,18 @@ SEXP patchAnalysisHelper(
     bool sigmaInPhysicalCoordinates,
     unsigned int kernelwidth)
 {
-  typedef float InputPixelType;
+
   typedef typename ImageType::Pointer ImagePointerType;
   typename ImageType::Pointer inimg =
     Rcpp::as< ImagePointerType >( r_inimg );
   typename ImageType::Pointer outimg =
     Rcpp::as< ImagePointerType >( r_outimg );
 
-    patchAnalysisArgumentType args;
-    args.inputName               = "";
-    args.maskName                = "";
-    args.outProjectionName       = "projectedPatches";
-    args.eigvecName              = "";
-    args.patchSize               = 3;
-    args.targetVarianceExplained = 0.95;
-    args.outEigvecMatrixName     = "";
-    args.inEigvecMatrixName      = "";
-    args.numberOfSamplePatches   = 1000;
-    args.verbose                 = 0;
-    args.orientationInvariant    = false;
-    args.outPatchName            = "";
-    args.meanCenter              = true;
-    args.help                    = 0;
-
-    PatchAnalysis< InputPixelType, 2 >( args );
-
-//  outimg = filter->GetOutput();
+  typedef itk::RIPMMARCImageFilter< ImageType >
+      filterType;
+  typename filterType::Pointer filter = filterType::New();
+  filter->Update();
+//  outimg = filter->GetOutput(); // what should the output be?
 //  r_outimg = Rcpp::wrap( outimg );
   return( r_outimg );
 }
