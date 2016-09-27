@@ -42,6 +42,9 @@ is similar to patch-based dictionary learning in N-dimensions.
 img <- antsImageRead( getANTsRData( "r16" ) )
 msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
+mdl = lm( t(ripped$imagePatchMat) ~ t( ripped$basisMat  ) )
+bmdl = bigLMStats( mdl )
+img[msk==1]=bmdl$beta.t[2,]
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
 ripped2 <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000,
   canonicalFrame = ripped$canonicalFrame,
