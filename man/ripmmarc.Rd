@@ -4,7 +4,8 @@
 \alias{ripmmarc}
 \title{Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture}
 \usage{
-ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000)
+ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
+  patchVarEx = 0.95, verbose = TRUE)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -14,18 +15,25 @@ ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000)
 \item{patchRadius}{Scalar radius defining the patch size.}
 
 \item{patchSamples}{Scalar defining the number of random patches to sample.}
+
+\item{patchVarEx}{Scalar defining the target variance explained.  If this is
+greater than one, then it defines the number of eigenvectors.  Otherwise, it
+defines the target variance explained.}
+
+\item{verbose}{boolean sets verbosity.}
 }
 \value{
 antsImage decomposed bases
 }
 \description{
 Patch-based and rotation invariant image decomposition.  This
-is similar patch-based dictionary learning in N-dimensions.
+is similar to patch-based dictionary learning in N-dimensions.
 }
 \examples{
 img <- antsImageRead( getANTsRData( "r16" ) )
 msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
-ripped <- ripmmarc( img, msk, 3 )
+ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=0.95  )
+ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=4  )
 }
 \author{
 Kandel BM, Avants BB

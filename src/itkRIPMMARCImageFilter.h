@@ -168,6 +168,13 @@ public:
   itkBooleanMacro( RotationInvariant );
 
   /**
+   * Employ verbose output.
+   * Default = true.
+   */
+  itkSetMacro( Verbose, bool );
+  itkGetConstMacro( Verbose, bool );
+  itkBooleanMacro( Verbose );
+  /**
    * Mean center the patches.
    * Default = true.
    */
@@ -190,6 +197,14 @@ public:
    */
   itkSetMacro( NumberOfSamplePatches, unsigned int );
   itkGetConstMacro( NumberOfSamplePatches, unsigned int );
+
+  /**
+   * Set target variance explained.
+   * If greater than zero, sets number of eignevectors.
+   * If less than zero, sets target variance explained.
+   */
+  itkSetMacro( TargetVarianceExplained, RealType );
+  itkGetConstMacro( TargetVarianceExplained, RealType );
 
   /**
    * Patch radius in real physical space (FIXME check this).
@@ -238,9 +253,9 @@ private:
   bool                                        m_RotationInvariant;
   bool                                        m_MeanCenterPatches;
   bool                                        m_LearnPatchBasis;
-  bool                                        m_Debug;
+  bool                                        m_Verbose;
   RealType                                    m_PatchRadius;
-  RealType                                    m_targetVarianceExplained;
+  RealType                                    m_TargetVarianceExplained;
 
 // internal data
   typename InputImageType::Pointer            m_canonicalFrame; // frame to rotate all patches to

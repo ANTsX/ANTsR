@@ -36,7 +36,7 @@
 
 namespace itk {
 
-template <class TImage>
+template< class TImage >
 bool IsInside( typename TImage::Pointer input, typename TImage::IndexType index )
 {
   /** FIXME - should use StartIndex - */
@@ -355,14 +355,15 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
 ::RIPMMARCImageFilter() :
   m_RotationInvariant( true ),
   m_MeanCenterPatches( true ),
-  m_LearnPatchBasis( false ),
+  m_LearnPatchBasis( true ),
+  m_Verbose( true ),
   m_PatchRadius( 3 ),
   m_numberOfVoxelsWithinMask( 0 ),
   m_paddingVoxels( 2 ),
   m_NumberOfSamplePatches( 0 )
 {
   this->SetNumberOfRequiredInputs( 2 ); // image of interest and mask
-  this->m_targetVarianceExplained = 0.95;
+  this->m_TargetVarianceExplained = 0.95;
   this->m_canonicalFrame = ITK_NULLPTR;
 }
 
@@ -378,7 +379,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	typename InputImageType::SizeType inputSize =
 			this->GetInput()->GetLargestPossibleRegion().GetSize();
   const MaskImageType* mask = this->GetMaskImage();
-	if( this->m_Debug )
+	if( this->m_Verbose )
 	  {
 		std::cout << "Attempting to find seed points. Looking for " << this->m_NumberOfSamplePatches <<
 				" points out of " << inputSize << " possible points." << std::endl;
@@ -398,7 +399,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		  }
 		++patchSeedAttemptIterator;
 	  }
-	if( this->m_Debug )
+	if( this->m_Verbose )
 	  {
 		std::cout << "Found " << patchSeedIterator <<
 				" points in " << patchSeedAttemptIterator <<
@@ -445,10 +446,11 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 			this->m_weights.push_back( 1.0 );
 		}
 	}
-	std::cout << "Iterator.Size() is " << Iterator.Size() << std::endl;
-	std::cout << "IndicesWithinSphere.size() is " << this->m_indicesWithinSphere.size() << std::endl;
-
-	  // populate matrix with patch values from points in image
+  if ( this->m_Verbose ) {
+  	std::cout << "Iterator.Size() is " << Iterator.Size() << std::endl;
+	  std::cout << "IndicesWithinSphere.size() is " << this->m_indicesWithinSphere.size() << std::endl;
+    }
+	// populate matrix with patch values from points in image
 	this->m_vectorizedSamplePatchMatrix.set_size(
 			this->m_NumberOfSamplePatches , this->m_indicesWithinSphere.size() );
 	this->m_vectorizedSamplePatchMatrix.fill( 0 );
@@ -495,11 +497,11 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		}
 	}
 	this->m_numberOfVoxelsWithinMask = maskImagePointIter;
-	if ( this->m_Debug ) std::cout << "Number of points within mask is " << this->m_numberOfVoxelsWithinMask << std::endl;
+	if ( this->m_Verbose ) std::cout << "Number of points within mask is " << this->m_numberOfVoxelsWithinMask << std::endl;
 
 	this->m_patchesForAllPointsWithinMask.set_size(
 			this->m_indicesWithinSphere.size(),  this->m_numberOfVoxelsWithinMask);
-	if( this->m_Debug )
+	if( this->m_Verbose )
 	{
 		std::cout << "PatchesForAllPointsWithinMask is " << this->m_patchesForAllPointsWithinMask.rows() << "x" <<
 				this->m_patchesForAllPointsWithinMask.columns() << "." << std::endl;
@@ -528,7 +530,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 					this->m_patchesForAllPointsWithinMask.get_column(i).mean());
 		}
 	}
-	if( this->m_Debug ) std::cout << "Recorded patches for all points." << std::endl;
+	if( this->m_Verbose ) std::cout << "Recorded patches for all points." << std::endl;
 }
 
 template<typename TInputImage, typename TOutputImage>
@@ -544,24 +546,38 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     }
   RealType partialSumOfEigenvalues = 0.0;
   RealType percentVarianceExplained = 0.0;
-	int  i = 0;
-	if ( this->m_targetVarianceExplained < 1 ) // FIXME
+	unsigned int  i = 0;
+	if ( this->m_TargetVarianceExplained < 1 ) // FIXME
 	  {
-		while( ( percentVarianceExplained <= this->m_targetVarianceExplained ) && ( i < svd.rank() ) )
+		while( ( percentVarianceExplained <= this->m_TargetVarianceExplained ) && ( i < svd.rank() ) )
 		  {
 			partialSumOfEigenvalues += svd.W(i, i);
 			percentVarianceExplained = partialSumOfEigenvalues /
 											  sumOfEigenvalues;
 			i++;
 		  }
-		int numberOfSignificantEigenvectors = i;
-		if  ( this->m_Debug )
+		unsigned int numberOfSignificantEigenvectors = i;
+		if  ( this->m_Verbose )
 		  {
 			std::cout << "It took " << numberOfSignificantEigenvectors << " eigenvectors to reach " <<
-					this->m_targetVarianceExplained * 100 << "% variance explained." << std::endl;
+					this->m_TargetVarianceExplained * 100 << "% variance explained." << std::endl;
 		  }
 	} else {
-		i = svd.rank() - 1; // FIXME int(args.targetVarianceExplained);
+		i = static_cast< unsigned int >( this->m_TargetVarianceExplained  );
+    unsigned int numberOfSignificantEigenvectors = i;
+    unsigned int j = 0;
+    while(  ( j < i ) && ( j < svd.rank() ) )
+		  {
+			partialSumOfEigenvalues += svd.W(j, j);
+			percentVarianceExplained = partialSumOfEigenvalues /
+											  sumOfEigenvalues;
+			j++;
+		  }
+		if  ( this->m_Verbose )
+		  {
+			std::cout << "With " << numberOfSignificantEigenvectors << " eigenvectors, we have " <<
+					percentVarianceExplained * 100 << "% variance explained." << std::endl;
+		  }
 	}
 	this->m_significantPatchEigenvectors.set_size( patchEigenvectors.rows(), i);
 	this->m_significantPatchEigenvectors = patchEigenvectors.get_n_columns(0, i);
@@ -603,7 +619,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   fixedGradientFilter->Update();
   typename GradientImageType::Pointer fixedGradientImage = fixedGradientFilter->GetOutput();
 
-  std::cout << "vectorizedSamplePatchMatrix is " << this->m_vectorizedSamplePatchMatrix.rows() <<
+  if ( this->m_Verbose )
+    std::cout << "vectorizedSamplePatchMatrix is " << this->m_vectorizedSamplePatchMatrix.rows() <<
       "x" << this->m_vectorizedSamplePatchMatrix.columns() << std::endl;
   for( long int ii = 0; ii < this->m_vectorizedSamplePatchMatrix.rows(); ii++)
     {
@@ -698,7 +715,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   // (number of indices within patch x 1).
   // output, eigenvectorCoefficients, is then number of eigenvectors
   // x number of patches ('x' solutions for all patches).
-  if ( this->m_Debug ) std::cout << "Computing regression." << std::endl;
+  if ( this->m_Verbose ) std::cout << "Computing regression." << std::endl;
   this->m_eigenvectorCoefficients.set_size( this->m_significantPatchEigenvectors.columns(),
     this->m_numberOfVoxelsWithinMask );
   this->m_eigenvectorCoefficients.fill( 0 );
@@ -724,7 +741,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     percentError(i) = error.get_column(i).two_norm() /
         (this->m_patchesForAllPointsWithinMask.get_column(i).two_norm() + 1e-10);
     }
-  if( this->m_Debug )
+  if( this->m_Verbose )
     {
     std::cout << "Average percent error is " << percentError.mean() * 100 << "%, with max of " <<
         percentError.max_value() * 100 << "%." <<  std::endl;
@@ -787,6 +804,8 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
     }
 
   os << indent << "PatchRadius = " << this->m_PatchRadius << std::endl;
+
+  os << indent << "TargetVarianceExplained = " << this->m_TargetVarianceExplained << std::endl;
 }
 
 

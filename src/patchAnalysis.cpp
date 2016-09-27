@@ -35,7 +35,9 @@ SEXP patchAnalysisHelper(
     SEXP r_inmaskimg,
     SEXP r_outimg,
     SEXP r_patchRadius,
-    SEXP r_patchSamples )
+    SEXP r_patchSamples,
+    SEXP r_patchVar,
+    SEXP r_verbose )
 {
   typedef typename ImageType::Pointer ImagePointerType;
   typename ImageType::Pointer inimg =
@@ -45,7 +47,9 @@ SEXP patchAnalysisHelper(
   typename ImageType::Pointer outimg =
     Rcpp::as< ImagePointerType >( r_outimg );
   float patchRadius = Rcpp::as< float >( r_patchRadius );
-  unsigned int patchSamples = Rcpp::as< float >( r_patchSamples );
+  float patchVar = Rcpp::as< float >( r_patchVar );
+  unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
+  unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
 
   typedef itk::RIPMMARCImageFilter< ImageType > filterType;
   typename filterType::Pointer filter = filterType::New();
@@ -56,7 +60,9 @@ SEXP patchAnalysisHelper(
   filter->SetMeanCenterPatches( true );
   filter->SetPatchRadius( patchRadius );
   filter->SetNumberOfSamplePatches( patchSamples );
-  filter->DebugOn( );
+  filter->SetTargetVarianceExplained( patchVar );
+  filter->SetVerbose( verbose );
+  if ( verbose > 0 ) std::cout << filter << std::endl;
   filter->Update( );
 //  outimg = filter->GetOutput(); // what should the output be?
 //  r_outimg = Rcpp::wrap( outimg );
@@ -68,7 +74,9 @@ RcppExport SEXP patchAnalysis(
   SEXP r_maskimg,
   SEXP r_outimg,
   SEXP r_patchRadius,
-  SEXP r_patchSamples )
+  SEXP r_patchSamples,
+  SEXP r_patchVar,
+  SEXP r_verbose )
 {
 try
   {
@@ -82,7 +90,8 @@ try
     const unsigned int dim = 2;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = patchAnalysisHelper< ImageType >(
-        r_inimg, r_maskimg, r_outimg, r_patchRadius, r_patchSamples );
+        r_inimg, r_maskimg, r_outimg, r_patchRadius,
+        r_patchSamples, r_patchVar, r_verbose );
     return( outimg );
     }
   else
