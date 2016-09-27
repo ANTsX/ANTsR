@@ -46,7 +46,7 @@ ripmmarc <- function(
   canonicalFrame = NA,
   evecBasis    = NA,
   verbose = FALSE  ) {
-  print("WARNING: WIP, ripmmarc is not yet implemented all the way!!")
+  print("WARNING: WIP, this implementation of ripmmarc is not validated!!")
   inimg.float <- antsImageClone( img, "float" )
   mask.float <- antsImageClone( mask, "float" )
   outimg <- antsImageClone( inimg.float )

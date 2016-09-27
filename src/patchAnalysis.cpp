@@ -136,7 +136,7 @@ SEXP patchAnalysisHelper(
         Rcpp::Named("canonicalFrame") = r_outimg,
         Rcpp::Named("basisMat") = ripMat,
         Rcpp::Named("imagePatchMat") = iripMat,
-        Rcpp::Named("evecCoeffs") = eripMat,
+        Rcpp::Named("evecCoeffs") = NA_REAL,
         Rcpp::Named("varex") = varx )
       );
 

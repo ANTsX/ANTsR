@@ -763,30 +763,33 @@ template<typename TInputImage, typename TOutputImage>
 void RIPMMARCImageFilter<TInputImage, TOutputImage>
 ::GenerateData(  )
 {
-// FIXME - the logic below could be cleaned up
-	this->GetSamplePatchLocations( ); // identify points from random mask
-	this->ExtractSamplePatches( );     // convert sample points to the matrix
+// FIXME - the logic below could be cleaned up e.g. do we really need sample
+// patches if we already have a basis?
+  this->GetSamplePatchLocations( ); // identify points from random mask
+  this->ExtractSamplePatches( );     // convert sample points to the matrix
 	if ( this->m_LearnPatchBasis )  // determines if we are learning or not
-	{
-		this->LearnEigenPatches( );  // learn the patches
-	} else {
-    // use existing significantPatchEigenvectors as reference // FIXME - need this to work
+	  {
+  	this->LearnEigenPatches( );  // learn the patches
+	  }
+  else
+    {
+    // use existing significantPatchEigenvectors as reference
     // check the eigenpatches have the correct dimensionality then
     // just apply the learning, given the eigenpatch
-	}
+    // FIXME - need to implement these checks
+	  }
 	this->ExtractAllPatches( );
 	// because all patches are reoriented to the first (non-rotationally invariant)
 	// eigenpatch, we must learn the eigenpatches even if we will in the end use
 	// rotationally invariant features.
 	if ( this->m_RotationInvariant )
-	{
+	  {
 		this->ReorientSamplePatches();
 		this->ReorientAllPatches();
 		if ( this->m_LearnPatchBasis )
 			this->LearnEigenPatches(); // learn the patches
-	}
-	this->ProjectOnEigenPatches( );
-
+	  }
+  // this->ProjectOnEigenPatches( ); // in practice, we do this in R
 }
 
 template<typename TInputImage, typename TOutputImage>
