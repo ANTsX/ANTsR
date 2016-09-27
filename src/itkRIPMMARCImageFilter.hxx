@@ -359,7 +359,7 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
   m_PatchRadius( 3 ),
   m_numberOfVoxelsWithinMask( 0 ),
   m_paddingVoxels( 2 ),
-  m_numberOfSamplePatches( 0 )
+  m_NumberOfSamplePatches( 0 )
 {
   this->SetNumberOfRequiredInputs( 2 ); // image of interest and mask
   this->m_targetVarianceExplained = 0.95;
@@ -370,7 +370,7 @@ template<typename TInputImage, typename TOutputImage>
 void RIPMMARCImageFilter<TInputImage, TOutputImage>
 ::GetSamplePatchLocations()
 {
-  this->m_patchSeedPoints.set_size( this->m_numberOfSamplePatches , ImageDimension );
+  this->m_patchSeedPoints.set_size( this->m_NumberOfSamplePatches , ImageDimension );
 	vnl_vector< int > testPatchSeed( ImageDimension );
 	int  patchSeedIterator = 0;
 	int  patchSeedAttemptIterator = 0;
@@ -380,12 +380,12 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   const MaskImageType* mask = this->GetMaskImage();
 	if( this->m_Debug )
 	  {
-		std::cout << "Attempting to find seed points. Looking for " << this->m_numberOfSamplePatches <<
+		std::cout << "Attempting to find seed points. Looking for " << this->m_NumberOfSamplePatches <<
 				" points out of " << inputSize << " possible points." << std::endl;
 	  }
 
 	srand( time( NULL) );
-	while( patchSeedIterator < this->m_numberOfSamplePatches )
+	while( patchSeedIterator < this->m_NumberOfSamplePatches )
 	  {
 		for( int i = 0; i < ImageDimension; ++i)
 		  {
@@ -450,9 +450,9 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 
 	  // populate matrix with patch values from points in image
 	this->m_vectorizedSamplePatchMatrix.set_size(
-			this->m_numberOfSamplePatches , this->m_indicesWithinSphere.size() );
+			this->m_NumberOfSamplePatches , this->m_indicesWithinSphere.size() );
 	this->m_vectorizedSamplePatchMatrix.fill( 0 );
-	for( int i = 0; i < this->m_numberOfSamplePatches ; ++i)
+	for( int i = 0; i < this->m_NumberOfSamplePatches ; ++i)
 	  {
 		for( int j = 0; j < ImageDimension; ++j)
 		  {

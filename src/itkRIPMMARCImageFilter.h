@@ -184,6 +184,13 @@ public:
   itkGetConstMacro( LearnPatchBasis, bool );
   itkBooleanMacro( LearnPatchBasis );
 
+
+  /**
+   * Number of samples to randomly select from the mask (FIXME replace with random mask).
+   */
+  itkSetMacro( NumberOfSamplePatches, unsigned int );
+  itkGetConstMacro( NumberOfSamplePatches, unsigned int );
+
   /**
    * Patch radius in real physical space (FIXME check this).
    */
@@ -247,8 +254,8 @@ private:
   long unsigned int                           m_numberOfVoxelsWithinMask;
   vnlMatrixType                               m_eigenvectorCoefficients;
   // amount of padding around eigenvector for constructing images
-  int                                         m_paddingVoxels;
-  int                                         m_numberOfSamplePatches;
+  unsigned int                                m_paddingVoxels;
+  unsigned int                                m_NumberOfSamplePatches;
 
 };
 
