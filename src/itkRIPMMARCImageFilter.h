@@ -95,12 +95,13 @@ public:
   typedef typename InputImageType::PixelType             InputPixelType;
   typedef TOutputImage                                   OutputImageType;
   typedef typename InputImageType::RegionType            RegionType;
+  typedef typename InputImageType::IndexType             InputIndexType;
 
   typedef InputImageType                                 MaskImageType;
   typedef typename MaskImageType::PixelType              MaskPixelType;
   typedef typename MaskImageType::PixelType              LabelType;
 
-  typedef double                                         RealValueType;
+  typedef float                                          RealValueType;
   typedef float                                          RealType;
   typedef Image<RealType, ImageDimension>                RealImageType;
   typedef typename RealImageType::Pointer                RealImagePointer;
@@ -111,6 +112,28 @@ public:
   typedef typename ConstNeighborhoodIteratorType::OffsetType   NeighborhoodOffsetType;
 
   typedef vnl_matrix< RealValueType >                    vnlMatrixType;
+
+  typedef itk::ConstNeighborhoodIterator< InputImageType >
+    NeighborhoodIteratorType;
+  typedef typename itk::CovariantVector< typename InputImageType::PixelType,
+      ImageDimension>                                                  GradientPixelType;
+  typedef typename itk::Image< GradientPixelType, ImageDimension >       GradientImageType;
+  typedef typename itk::GradientRecursiveGaussianImageFilter< InputImageType,
+      GradientImageType >                                          GradientImageFilterType;
+  typedef typename GradientImageFilterType::Pointer                  GradientImageFilterPointer;
+  typedef typename itk::NeighborhoodIterator< GradientImageType >    GradientNeighborhoodIteratorType;
+  typedef typename itk::LinearInterpolateImageFunction< InputImageType,
+      typename InputImageType::PixelType>                             ScalarInterpolatorType;
+  typedef typename itk::SmartPointer< GradientImageType >            GradientImagePointer;
+  typedef typename ScalarInterpolatorType::Pointer                   InterpPointer;
+
+  typename InputImageType::RegionType               sphereRegion;
+  typename InputImageType::IndexType                beginningOfSphereRegion;
+  typename InputImageType::SizeType                 sizeOfSphereRegion;
+
+  typedef typename InputImageType::PointType PointType;
+  typedef vnl_vector< RealType > VectorType;
+
 
   /**
    * The image expected for input for noise correction.
@@ -173,13 +196,23 @@ public:
   itkSetMacro( significantPatchEigenvectors, vnlMatrixType );
   itkGetConstMacro( significantPatchEigenvectors, vnlMatrixType );
 
-  void GetSamplePatchLocations( void ); // FIXME
-  void ExtractSamplePatches( void ); // FIXME
+  void GetSamplePatchLocations( ); // FIXME
+  void ExtractSamplePatches( ); // FIXME
   void ExtractAllPatches( void ); // FIXME
   void LearnEigenPatches( void ); // FIXME
   void ReorientSamplePatches( void ); // FIXME
   void ReorientAllPatches( void ); // FIXME
   void ProjectOnEigenPatches( void ); // FIXME
+
+
+  vnl_vector< float > ReorientPatchToReferenceFrame(
+    itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood1,
+    itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood2,
+    const typename TInputImage::Pointer MaskImage,
+    const typename GradientImageType::Pointer GradientImage1,
+    const typename GradientImageType::Pointer GradientImage2,
+    InterpPointer Interpolator );
+
 
 protected:
   RIPMMARCImageFilter();
@@ -198,7 +231,9 @@ private:
   bool                                        m_RotationInvariant;
   bool                                        m_MeanCenterPatches;
   bool                                        m_LearnPatchBasis;
+  bool                                        m_Debug;
   RealType                                    m_PatchRadius;
+  RealType                                    m_targetVarianceExplained;
 
 // internal data
   typename InputImageType::Pointer            m_canonicalFrame; // frame to rotate all patches to
@@ -218,21 +253,6 @@ private:
 };
 
 // FIXME temporarily adding implementation externally below
-
-template< unsigned int ImageDimension, class TRealType, class TImageType,
-  class TGradientImageType, class TInterpolator >
-vnl_vector< TRealType > ReorientPatchToReferenceFrame(
-    itk::NeighborhoodIterator< TImageType > GradientImageNeighborhood1,
-    itk::NeighborhoodIterator< TImageType > GradientImageNeighborhood2,
-    const typename TImageType::Pointer MaskImage,
-    std::vector< unsigned int > IndicesWithinSphere,
-    std::vector< double > IndexWeights,
-    const typename TGradientImageType::Pointer GradientImage1,
-    const typename TGradientImageType::Pointer GradientImage2,
-    unsigned int NumberOfValuesPerVoxel,
-    TInterpolator Interpolator
-    );
-
 template< class ImageType >
 typename ImageType::Pointer ConvertVectorToSpatialImage(
     vnl_vector< double > &Vector,
