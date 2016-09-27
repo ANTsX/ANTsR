@@ -53,7 +53,7 @@ ripmmarc <- function(
   else if ( !any( is.na( evecBasis ) ) & is.na( canonicalFrame ) )
     stop("The user must also pass in a canonical frame.")
   if ( is.na( canonicalFrame ) ) {
-    canonicalFrame = makeImage( c(1,1), 0 )
+    canonicalFrame = makeImage( rep( 1, img@dimension ), 0 )
     }
   # FIXME not sure why transpose is needed below ....
   outstruct <- .Call("patchAnalysis",
