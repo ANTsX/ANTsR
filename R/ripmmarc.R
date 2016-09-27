@@ -21,9 +21,7 @@
 #' img <- antsImageRead( getANTsRData( "r16" ) )
 #' msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
 #' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
-#' mdl = lm( t(ripped$imagePatchMat) ~ t( ripped$basisMat  ) )
-#' bmdl = bigLMStats( mdl )
-#' img[msk==1]=bmdl$beta.t[2,]
+#' # img[ msk == 1 ] = ripped$evecCoeffs[2,]; plot( img )
 #' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
 #' ripped2 <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000,
 #'   canonicalFrame = ripped$canonicalFrame,
@@ -63,5 +61,9 @@ ripmmarc <- function(
     inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
     meanCenter, canonicalFrame, t(evecBasis), verbose, PACKAGE = "ANTsR")
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
+  # overwrite the C++ patch computation with R results
+  mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
+  bmdl = bigLMStats( mdl )
+  outstruct$evecCoeffs = bmdl$beta
   return( outstruct )
 }
