@@ -4,7 +4,7 @@
 \alias{ripmmarc}
 \title{Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture}
 \usage{
-ripmmarc(img, mask, patchRadius = 3)
+ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -12,6 +12,8 @@ ripmmarc(img, mask, patchRadius = 3)
 \item{mask}{Binary mask defining regions in which to decompose.}
 
 \item{patchRadius}{Scalar radius defining the patch size.}
+
+\item{patchSamples}{Scalar defining the number of random patches to sample.}
 }
 \value{
 antsImage decomposed bases

@@ -32,56 +32,63 @@
 template< class ImageType >
 SEXP patchAnalysisHelper(
     SEXP r_inimg,
+    SEXP r_inmaskimg,
     SEXP r_outimg,
-    Rcpp::NumericVector sigma,
-    bool sigmaInPhysicalCoordinates,
-    unsigned int kernelwidth)
+    SEXP r_patchRadius,
+    SEXP r_patchSamples )
 {
-
   typedef typename ImageType::Pointer ImagePointerType;
   typename ImageType::Pointer inimg =
     Rcpp::as< ImagePointerType >( r_inimg );
+  typename ImageType::Pointer inmaskimg =
+    Rcpp::as< ImagePointerType >( r_inmaskimg );
   typename ImageType::Pointer outimg =
     Rcpp::as< ImagePointerType >( r_outimg );
+  float patchRadius = Rcpp::as< float >( r_patchRadius );
+  unsigned int patchSamples = Rcpp::as< float >( r_patchSamples );
 
-  typedef itk::RIPMMARCImageFilter< ImageType >
-      filterType;
+  typedef itk::RIPMMARCImageFilter< ImageType > filterType;
   typename filterType::Pointer filter = filterType::New();
-  filter->Update();
+  filter->SetInput( inimg );
+  filter->SetMaskImage( inmaskimg );
+  filter->SetLearnPatchBasis(   true );
+  filter->SetRotationInvariant( true );
+  filter->SetMeanCenterPatches( true );
+  filter->SetPatchRadius( patchRadius );
+  filter->SetNumberOfSamplePatches( patchSamples );
+  filter->DebugOn( );
+  filter->Update( );
 //  outimg = filter->GetOutput(); // what should the output be?
 //  r_outimg = Rcpp::wrap( outimg );
   return( r_outimg );
 }
 
-RcppExport SEXP patchAnalysis( SEXP r_inimg,
-    SEXP r_outimg,
-    SEXP r_sigma,
-    SEXP sigmaInPhysicalCoordinates,
-    SEXP r_kernelwidth )
+RcppExport SEXP patchAnalysis(
+  SEXP r_inimg,
+  SEXP r_maskimg,
+  SEXP r_outimg,
+  SEXP r_patchRadius,
+  SEXP r_patchSamples )
 {
 try
-{
-
+  {
   Rcpp::S4 antsImage( r_inimg );
   std::string pixeltype = Rcpp::as< std::string >( antsImage.slot( "pixeltype" ));
   unsigned int dimension = Rcpp::as< int >( antsImage.slot( "dimension" ) );
-  bool physicalSpacing = Rcpp::as< bool >( sigmaInPhysicalCoordinates );
-  Rcpp::NumericVector sigma( r_sigma );
-  unsigned int kernelwidth = Rcpp::as< unsigned int >( r_kernelwidth );
 
   if ( (pixeltype == "float") & ( dimension == 2 ) )
-  {
+    {
     typedef float PixelType;
     const unsigned int dim = 2;
     typedef itk::Image< PixelType, dim > ImageType;
     SEXP outimg = patchAnalysisHelper< ImageType >(
-        r_inimg, r_outimg, sigma, physicalSpacing, kernelwidth);
+        r_inimg, r_maskimg, r_outimg, r_patchRadius, r_patchSamples );
     return( outimg );
-  }
+    }
   else
-  {
+    {
     Rcpp::stop("Unsupported image dimension or pixel type.");
-  }
+    }
 }
 
 catch( itk::ExceptionObject & err )
