@@ -5,7 +5,8 @@
 \title{Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture}
 \usage{
 ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
-  patchVarEx = 0.95, meanCenter = FALSE, verbose = FALSE)
+  patchVarEx = 0.95, meanCenter = FALSE, canonicalFrame = NA,
+  evecBasis = NA, verbose = FALSE)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -21,6 +22,10 @@ greater than one, then it defines the number of eigenvectors.  Otherwise, it
 defines the target variance explained.}
 
 \item{meanCenter}{boolean whether we mean center the patches.}
+
+\item{canonicalFrame}{pass in an existing canonicalFrame.}
+
+\item{evecBasis}{pass in an existing eigenvector basis.}
 
 \item{verbose}{boolean sets verbosity.}
 }
@@ -38,6 +43,9 @@ img <- antsImageRead( getANTsRData( "r16" ) )
 msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
+ripped2 <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000,
+  canonicalFrame = ripped$canonicalFrame,
+  evecBasis = ripped$basisMat )
 \dontrun{
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=10 )
 mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )

@@ -38,6 +38,8 @@ SEXP patchAnalysisHelper(
     SEXP r_patchSamples,
     SEXP r_patchVar,
     SEXP r_meanCenter,
+    SEXP r_canonicalFrame,
+    SEXP r_evecBasis,
     SEXP r_verbose )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -52,17 +54,38 @@ SEXP patchAnalysisHelper(
   unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
   bool meanCenter = Rcpp::as< bool >( r_meanCenter );
   unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
-
+  Rcpp::NumericMatrix X =
+    Rcpp::as< Rcpp::NumericMatrix >( r_evecBasis );
+  typename ImageType::Pointer canFram =
+    Rcpp::as< ImagePointerType >( r_canonicalFrame );
+  bool setcanfram = TRUE;
+  if ( canFram->GetLargestPossibleRegion().GetSize()[ 0 ] == 1 )
+    setcanfram = FALSE;
+  if ( verbose > 0 ) std::cout << " setcanfram " << setcanfram << std::endl;
   typedef itk::RIPMMARCImageFilter< ImageType > filterType;
   typename filterType::Pointer filter = filterType::New();
   filter->SetInput( inimg );
   filter->SetMaskImage( inmaskimg );
-  filter->SetLearnPatchBasis(   true );
+  filter->SetLearnPatchBasis( true );
   filter->SetRotationInvariant( true );
   filter->SetMeanCenterPatches( meanCenter );
   filter->SetPatchRadius( patchRadius );
   filter->SetNumberOfSamplePatches( patchSamples );
   filter->SetTargetVarianceExplained( patchVar );
+  if ( X.rows() > 1 & X.cols() > 1 ) {
+    std::vector<double> xdat =
+        Rcpp::as< std::vector<double> >( X );
+    const double* _xdata = &xdat[0];
+    typename filterType::vnlMatrixType vnlX( _xdata , X.cols(), X.rows()  );
+    vnlX = vnlX.transpose();
+    if ( verbose > 0 ) std::cout << " Let us initialize with " << vnlX.rows()
+      <<  " by "  << vnlX.cols() << std::endl;
+    filter->SetSignificantPatchEigenvectors( vnlX  );
+    filter->SetLearnPatchBasis( false );
+    }
+  if ( setcanfram ) {
+    filter->SetCanonicalFrame( canFram );
+    }
   filter->SetVerbose( verbose );
   if ( verbose > 0 ) std::cout << filter << std::endl;
   filter->Update( );
@@ -128,6 +151,8 @@ RcppExport SEXP patchAnalysis(
   SEXP r_patchSamples,
   SEXP r_patchVar,
   SEXP r_meanCenter,
+  SEXP r_canonicalFrame,
+  SEXP r_evecBasis,
   SEXP r_verbose )
 {
 try
@@ -144,7 +169,8 @@ try
     return Rcpp::wrap(
       patchAnalysisHelper< ImageType >(
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
-        r_patchSamples, r_patchVar, r_meanCenter, r_verbose )
+        r_patchSamples, r_patchVar, r_meanCenter,
+        r_canonicalFrame, r_evecBasis, r_verbose )
       );
     }
   else if ( (pixeltype == "float") & ( dimension == 3 ) )
@@ -154,8 +180,9 @@ try
     typedef itk::Image< PixelType, dim > ImageType3D;
     return Rcpp::wrap(
       patchAnalysisHelper< ImageType3D >(
-          r_inimg, r_maskimg, r_outimg, r_patchRadius,
-          r_patchSamples, r_patchVar, r_meanCenter, r_verbose )
+        r_inimg, r_maskimg, r_outimg, r_patchRadius,
+        r_patchSamples, r_patchVar, r_meanCenter,
+        r_canonicalFrame, r_evecBasis, r_verbose )
       );
     }
   else

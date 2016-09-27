@@ -92,6 +92,7 @@ public:
 
   /** Some convenient typedefs. */
   typedef TInputImage                                    InputImageType;
+  typedef typename InputImageType::Pointer               InputImagePointer;
   typedef typename InputImageType::PixelType             InputPixelType;
   typedef TOutputImage                                   OutputImageType;
   typedef typename InputImageType::RegionType            RegionType;
@@ -101,7 +102,7 @@ public:
   typedef typename MaskImageType::PixelType              MaskPixelType;
   typedef typename MaskImageType::PixelType              LabelType;
 
-  typedef float                                          RealValueType;
+  typedef double                                         RealValueType;
   typedef float                                          RealType;
   typedef Image<RealType, ImageDimension>                RealImageType;
   typedef typename RealImageType::Pointer                RealImagePointer;
@@ -132,7 +133,7 @@ public:
   typename InputImageType::SizeType                 sizeOfSphereRegion;
 
   typedef typename InputImageType::PointType PointType;
-  typedef vnl_vector< RealType > VectorType;
+  typedef vnl_vector< RealValueType > VectorType;
 
 
   /**
@@ -159,24 +160,21 @@ public:
     return static_cast<const MaskImageType*>( this->ProcessObject::GetInput( 1 ) );
     }
 
-    /**
-     * Get canonical frame image function.
-     */
-    InputImageType* GetCanonicalFrame() const
-      {
-      return this->m_CanonicalFrame;
-      }
+  /**
+   * Get canonical frame image function.
+   */
+  InputImageType* GetCanonicalFrame() const
+    {
+    return this->m_CanonicalFrame;
+    }
 
-    /**
-     * Set canonical frame image function.  FIXME this should prevent the frame
-     * from being overwritten.
-     */
-    void SetCanonicalFrame( InputImageType* canfram ) const
-      {
-      this->m_CanonicalFrame = canfram;
-      return;
-      }
-
+  /**
+   * Set canonical frame image function.
+   */
+  void SetCanonicalFrame( InputImageType* canfram )
+    {
+    this->m_CanonicalFrame = canfram;
+    }
 
   /**
    * Employ rotation invariance.
@@ -263,13 +261,17 @@ public:
   void ProjectOnEigenPatches( void ); // FIXME
 
 
-  vnl_vector< float > ReorientPatchToReferenceFrame(
+  vnl_vector< RealValueType > ReorientPatchToReferenceFrame(
     itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood1,
     itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood2,
     const typename TInputImage::Pointer MaskImage,
     const typename GradientImageType::Pointer GradientImage1,
     const typename GradientImageType::Pointer GradientImage2,
     InterpPointer Interpolator );
+
+  InputImagePointer ConvertVectorToSpatialImage(
+      vnl_vector< RealValueType > &Vector,
+      InputImagePointer Mask );
 
 
 protected:
