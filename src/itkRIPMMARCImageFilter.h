@@ -68,8 +68,7 @@ namespace itk {
  * \ingroup ITKNoiseFiltering
  */
 
-template<typename TInputImage,
-  typename TOutputImage = Image<double, 2>  >
+template< typename TInputImage, typename TOutputImage >
 class RIPMMARCImageFilter :
   public ImageToImageFilter<TInputImage, TOutputImage>
 {

@@ -62,7 +62,7 @@ SEXP patchAnalysisHelper(
   if ( canFram->GetLargestPossibleRegion().GetSize()[ 0 ] == 1 )
     setcanfram = FALSE;
   if ( verbose > 0 ) std::cout << " setcanfram " << setcanfram << std::endl;
-  typedef itk::RIPMMARCImageFilter< ImageType > filterType;
+  typedef itk::RIPMMARCImageFilter< ImageType, ImageType > filterType;
   typename filterType::Pointer filter = filterType::New();
   filter->SetInput( inimg );
   filter->SetMaskImage( inmaskimg );
