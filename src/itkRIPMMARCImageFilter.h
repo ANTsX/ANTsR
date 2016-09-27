@@ -159,6 +159,25 @@ public:
     return static_cast<const MaskImageType*>( this->ProcessObject::GetInput( 1 ) );
     }
 
+    /**
+     * Get canonical frame image function.
+     */
+    InputImageType* GetCanonicalFrame() const
+      {
+      return this->m_CanonicalFrame;
+      }
+
+    /**
+     * Set canonical frame image function.  FIXME this should prevent the frame
+     * from being overwritten.
+     */
+    void SetCanonicalFrame( InputImageType* canfram ) const
+      {
+      this->m_CanonicalFrame = canfram;
+      return;
+      }
+
+
   /**
    * Employ rotation invariance.
    * Default = true.
@@ -207,6 +226,11 @@ public:
   itkGetConstMacro( TargetVarianceExplained, RealType );
 
   /**
+   * Get achieved variance explained.
+   */
+  itkGetConstMacro( AchievedVarianceExplained, RealType );
+
+  /**
    * Patch radius in real physical space (FIXME check this).
    */
   itkSetMacro( PatchRadius, RealType );
@@ -215,8 +239,20 @@ public:
   /**
    * Set or get the reference patch basis.
    */
-  itkSetMacro( significantPatchEigenvectors, vnlMatrixType );
-  itkGetConstMacro( significantPatchEigenvectors, vnlMatrixType );
+  itkSetMacro( SignificantPatchEigenvectors, vnlMatrixType );
+  itkGetConstMacro( SignificantPatchEigenvectors, vnlMatrixType );
+
+  /**
+   * Set or get the patch basis for the full image.
+   */
+  itkSetMacro( PatchesForAllPointsWithinMask, vnlMatrixType );
+  itkGetConstMacro( PatchesForAllPointsWithinMask, vnlMatrixType );
+
+  /**
+   * Get the eigenvector coefficients for the full image.
+   */
+  itkSetMacro( EigenvectorCoefficients, vnlMatrixType );
+  itkGetConstMacro( EigenvectorCoefficients, vnlMatrixType );
 
   void GetSamplePatchLocations( ); // FIXME
   void ExtractSamplePatches( ); // FIXME
@@ -249,25 +285,24 @@ private:
   RIPMMARCImageFilter( const Self& ) ITK_DELETE_FUNCTION;
   void operator=( const Self& ) ITK_DELETE_FUNCTION;
 
-// external function access
   bool                                        m_RotationInvariant;
   bool                                        m_MeanCenterPatches;
   bool                                        m_LearnPatchBasis;
   bool                                        m_Verbose;
   RealType                                    m_PatchRadius;
   RealType                                    m_TargetVarianceExplained;
+  RealType                                    m_AchievedVarianceExplained;
 
-// internal data
-  typename InputImageType::Pointer            m_canonicalFrame; // frame to rotate all patches to
+  typename InputImageType::Pointer            m_CanonicalFrame; // frame to rotate all patches to
+  vnlMatrixType                               m_EigenvectorCoefficients;
+  vnlMatrixType                               m_SignificantPatchEigenvectors;
+  vnlMatrixType                               m_PatchesForAllPointsWithinMask;
+  vnlMatrixType                               m_vectorizedPatchMatrix;
   vnl_matrix< int >                           m_patchSeedPoints;
   vnlMatrixType                               m_vectorizedSamplePatchMatrix;
   std::vector< unsigned int >                 m_indicesWithinSphere;
   std::vector< RealValueType >                m_weights;
-  vnlMatrixType                               m_vectorizedPatchMatrix;
-  vnlMatrixType                               m_significantPatchEigenvectors;
-  vnlMatrixType                               m_patchesForAllPointsWithinMask;
   long unsigned int                           m_numberOfVoxelsWithinMask;
-  vnlMatrixType                               m_eigenvectorCoefficients;
   // amount of padding around eigenvector for constructing images
   unsigned int                                m_paddingVoxels;
   unsigned int                                m_NumberOfSamplePatches;

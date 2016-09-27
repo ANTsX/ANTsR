@@ -37,6 +37,7 @@ SEXP patchAnalysisHelper(
     SEXP r_patchRadius,
     SEXP r_patchSamples,
     SEXP r_patchVar,
+    SEXP r_meanCenter,
     SEXP r_verbose )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -49,6 +50,7 @@ SEXP patchAnalysisHelper(
   float patchRadius = Rcpp::as< float >( r_patchRadius );
   float patchVar = Rcpp::as< float >( r_patchVar );
   unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
+  bool meanCenter = Rcpp::as< bool >( r_meanCenter );
   unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
 
   typedef itk::RIPMMARCImageFilter< ImageType > filterType;
@@ -57,7 +59,7 @@ SEXP patchAnalysisHelper(
   filter->SetMaskImage( inmaskimg );
   filter->SetLearnPatchBasis(   true );
   filter->SetRotationInvariant( true );
-  filter->SetMeanCenterPatches( true );
+  filter->SetMeanCenterPatches( meanCenter );
   filter->SetPatchRadius( patchRadius );
   filter->SetNumberOfSamplePatches( patchSamples );
   filter->SetTargetVarianceExplained( patchVar );
@@ -66,6 +68,55 @@ SEXP patchAnalysisHelper(
   filter->Update( );
 //  outimg = filter->GetOutput(); // what should the output be?
 //  r_outimg = Rcpp::wrap( outimg );
+  outimg = filter->GetCanonicalFrame(); // what should the output be?
+  r_outimg = Rcpp::wrap( outimg );
+
+  // solutions should be much smaller so may not be a big deal to copy
+  // FIXME - should not copy, should map memory
+  typename filterType::vnlMatrixType solV =
+    filter->GetSignificantPatchEigenvectors();
+  Rcpp::NumericMatrix ripMat( solV.cols(), solV.rows() );
+  unsigned long rows = solV.rows();
+  for( unsigned long c = 0; c < solV.cols(); c++ )
+    {
+    for( unsigned int r = 0; r < rows; r++ )
+      {
+      ripMat( c, r ) = solV( r, c );
+      }
+    }
+  // get the full image patch matrix
+  solV = filter->GetPatchesForAllPointsWithinMask();
+  Rcpp::NumericMatrix iripMat( solV.cols(), solV.rows() );
+  rows = solV.rows();
+  for( unsigned long c = 0; c < solV.cols(); c++ )
+    {
+    for( unsigned int r = 0; r < rows; r++ )
+      {
+      iripMat( c, r ) = solV( r, c );
+      }
+    }
+
+  // get the full image eigenvectorCoefficients matrix
+  solV = filter->GetEigenvectorCoefficients();
+  Rcpp::NumericMatrix eripMat( solV.cols(), solV.rows() );
+  rows = solV.rows();
+  for( unsigned long c = 0; c < solV.cols(); c++ )
+    {
+    for( unsigned int r = 0; r < rows; r++ )
+      {
+      eripMat( c, r ) = solV( r, c );
+      }
+    }
+  float varx = filter->GetAchievedVarianceExplained();
+  return(
+      Rcpp::List::create(
+        Rcpp::Named("canonicalFrame") = r_outimg,
+        Rcpp::Named("basisMat") = ripMat,
+        Rcpp::Named("imagePatchMat") = iripMat,
+        Rcpp::Named("evecCoeffs") = eripMat,
+        Rcpp::Named("varex") = varx )
+      );
+
   return( r_outimg );
 }
 
@@ -76,6 +127,7 @@ RcppExport SEXP patchAnalysis(
   SEXP r_patchRadius,
   SEXP r_patchSamples,
   SEXP r_patchVar,
+  SEXP r_meanCenter,
   SEXP r_verbose )
 {
 try
@@ -89,10 +141,22 @@ try
     typedef float PixelType;
     const unsigned int dim = 2;
     typedef itk::Image< PixelType, dim > ImageType;
-    SEXP outimg = patchAnalysisHelper< ImageType >(
+    return Rcpp::wrap(
+      patchAnalysisHelper< ImageType >(
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
-        r_patchSamples, r_patchVar, r_verbose );
-    return( outimg );
+        r_patchSamples, r_patchVar, r_meanCenter, r_verbose )
+      );
+    }
+  else if ( (pixeltype == "float") & ( dimension == 3 ) )
+    {
+    typedef float PixelType;
+    const unsigned int dim = 3;
+    typedef itk::Image< PixelType, dim > ImageType3D;
+    return Rcpp::wrap(
+      patchAnalysisHelper< ImageType3D >(
+          r_inimg, r_maskimg, r_outimg, r_patchRadius,
+          r_patchSamples, r_patchVar, r_meanCenter, r_verbose )
+      );
     }
   else
     {

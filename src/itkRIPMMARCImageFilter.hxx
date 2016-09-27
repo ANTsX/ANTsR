@@ -364,7 +364,8 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
 {
   this->SetNumberOfRequiredInputs( 2 ); // image of interest and mask
   this->m_TargetVarianceExplained = 0.95;
-  this->m_canonicalFrame = ITK_NULLPTR;
+  this->m_AchievedVarianceExplained = 0.0;
+  this->m_CanonicalFrame = ITK_NULLPTR;
 }
 
 template<typename TInputImage, typename TOutputImage>
@@ -499,12 +500,12 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	this->m_numberOfVoxelsWithinMask = maskImagePointIter;
 	if ( this->m_Verbose ) std::cout << "Number of points within mask is " << this->m_numberOfVoxelsWithinMask << std::endl;
 
-	this->m_patchesForAllPointsWithinMask.set_size(
+	this->m_PatchesForAllPointsWithinMask.set_size(
 			this->m_indicesWithinSphere.size(),  this->m_numberOfVoxelsWithinMask);
 	if( this->m_Verbose )
 	{
-		std::cout << "PatchesForAllPointsWithinMask is " << this->m_patchesForAllPointsWithinMask.rows() << "x" <<
-				this->m_patchesForAllPointsWithinMask.columns() << "." << std::endl;
+		std::cout << "PatchesForAllPointsWithinMask is " << this->m_PatchesForAllPointsWithinMask.rows() << "x" <<
+				this->m_PatchesForAllPointsWithinMask.columns() << "." << std::endl;
 	}
 	// extract patches
 	typedef typename itk::ConstNeighborhoodIterator< InputImageType > IteratorType;
@@ -512,7 +513,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	radius.Fill( this->m_PatchRadius );
 	IteratorType iterator( radius, inputImage,
 			inputImage->GetRequestedRegion() );
-	this->m_patchesForAllPointsWithinMask.fill( 0 );
+	this->m_PatchesForAllPointsWithinMask.fill( 0 );
 	for( long unsigned int i = 0; i < this->m_numberOfVoxelsWithinMask; ++i)
 	{
 		patchIndex = nonZeroMaskIndices[ i ];
@@ -520,14 +521,14 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		// get indices within N-d sphere
 		for( int j = 0; j < this->m_indicesWithinSphere.size(); ++j)
 		{
-			this->m_patchesForAllPointsWithinMask( j, i ) =
+			this->m_PatchesForAllPointsWithinMask( j, i ) =
         iterator.GetPixel( this->m_indicesWithinSphere[ j ] );
 		}
 		// mean-center
 		if( this->m_MeanCenterPatches ) {
-			this->m_patchesForAllPointsWithinMask.set_column(i,
-					this->m_patchesForAllPointsWithinMask.get_column(i) -
-					this->m_patchesForAllPointsWithinMask.get_column(i).mean());
+			this->m_PatchesForAllPointsWithinMask.set_column(i,
+					this->m_PatchesForAllPointsWithinMask.get_column(i) -
+					this->m_PatchesForAllPointsWithinMask.get_column(i).mean());
 		}
 	}
 	if( this->m_Verbose ) std::cout << "Recorded patches for all points." << std::endl;
@@ -579,8 +580,9 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 					percentVarianceExplained * 100 << "% variance explained." << std::endl;
 		  }
 	}
-	this->m_significantPatchEigenvectors.set_size( patchEigenvectors.rows(), i);
-	this->m_significantPatchEigenvectors = patchEigenvectors.get_n_columns(0, i);
+  this->m_AchievedVarianceExplained = percentVarianceExplained;
+	this->m_SignificantPatchEigenvectors.set_size( patchEigenvectors.rows(), i);
+	this->m_SignificantPatchEigenvectors = patchEigenvectors.get_n_columns(0, i);
 }
 
 template<typename TInputImage, typename TOutputImage>
@@ -609,12 +611,12 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     this->m_indicesWithinSphere, this->m_PatchRadius, ImageDimension, this->m_paddingVoxels);
   //NeighborhoodIteratorType regionIterator()
   vnl_vector< RealValueType > canonicalEigenPatchAsVector =
-      this->m_significantPatchEigenvectors.get_column( 0 );
-  this->m_canonicalFrame = ConvertVectorToSpatialImage< ImageType >(
+      this->m_SignificantPatchEigenvectors.get_column( 0 );
+  this->m_CanonicalFrame = ConvertVectorToSpatialImage< ImageType >(
       canonicalEigenPatchAsVector, eigenvecMaskImage );
-  NeighborhoodIteratorType fixedIterator(radius, this->m_canonicalFrame, sphereRegion);
+  NeighborhoodIteratorType fixedIterator(radius, this->m_CanonicalFrame, sphereRegion);
   // compute gradient of canonical frame once, outside the loop
-  fixedGradientFilter->SetInput( this->m_canonicalFrame );
+  fixedGradientFilter->SetInput( this->m_CanonicalFrame );
   fixedGradientFilter->SetSigma( gradientSigma );
   fixedGradientFilter->Update();
   typename GradientImageType::Pointer fixedGradientImage = fixedGradientFilter->GetOutput();
@@ -670,21 +672,22 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   eigenvecMaskImage = GenerateMaskImageFromPatch< ImageType >(
       this->m_indicesWithinSphere, this->m_PatchRadius, ImageDimension, this->m_paddingVoxels);
   vnl_vector< float > canonicalEigenPatchAsVector =
-      this->m_significantPatchEigenvectors.get_column( 1 );
+      this->m_SignificantPatchEigenvectors.get_column( 1 );
   // the SECOND eigenvector is canonical--1st is constant
-  this->m_canonicalFrame = ConvertVectorToSpatialImage< ImageType >(
+  // FIXME - is this always the case?  what if you mean center?
+  this->m_CanonicalFrame = ConvertVectorToSpatialImage< ImageType >(
       canonicalEigenPatchAsVector, eigenvecMaskImage );
-  NeighborhoodIteratorType fixedIterator( radius, this->m_canonicalFrame, sphereRegion);
+  NeighborhoodIteratorType fixedIterator( radius, this->m_CanonicalFrame, sphereRegion);
   // compute gradient of canonical frame once, outside the loop
-  fixedGradientFilter->SetInput( this->m_canonicalFrame );
+  fixedGradientFilter->SetInput( this->m_CanonicalFrame );
   fixedGradientFilter->SetSigma( gradientSigma );
   fixedGradientFilter->Update();
   typename GradientImageType::Pointer fixedGradientImage = fixedGradientFilter->GetOutput();
 
-  for( long int ii = 0; ii < this->m_patchesForAllPointsWithinMask.columns(); ii++)
+  for( long int ii = 0; ii < this->m_PatchesForAllPointsWithinMask.columns(); ii++)
     {
     vnl_vector< float > vectorizedPatch =
-        this->m_patchesForAllPointsWithinMask.get_column( ii );
+        this->m_PatchesForAllPointsWithinMask.get_column( ii );
     typename ImageType::Pointer movingImage = ConvertVectorToSpatialImage< ImageType >(
         vectorizedPatch, eigenvecMaskImage);
     NeighborhoodIteratorType movingIterator( radius, movingImage, sphereRegion );
@@ -699,7 +702,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
             fixedGradientImage,
             movingGradientImage,
             interp1 );
-    this->m_patchesForAllPointsWithinMask.set_column( ii, rotatedPatchAsVector );
+    this->m_PatchesForAllPointsWithinMask.set_column( ii, rotatedPatchAsVector );
   }
 
 }
@@ -709,37 +712,37 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 ::ProjectOnEigenPatches()
 {
   // perform regression from eigenvectors to images
-  // Ax = b, where A is eigenvector matrix (number of indices
+  // Ax = b, whProjectOnEigenPatchesere A is eigenvector matrix (number of indices
   // within patch x number of eigenvectors), x is coefficients
   // (number of eigenvectors x 1), b is patch values for a given index
   // (number of indices within patch x 1).
   // output, eigenvectorCoefficients, is then number of eigenvectors
   // x number of patches ('x' solutions for all patches).
   if ( this->m_Verbose ) std::cout << "Computing regression." << std::endl;
-  this->m_eigenvectorCoefficients.set_size( this->m_significantPatchEigenvectors.columns(),
+  this->m_EigenvectorCoefficients.set_size( this->m_SignificantPatchEigenvectors.columns(),
     this->m_numberOfVoxelsWithinMask );
-  this->m_eigenvectorCoefficients.fill( 0 );
-  vnl_svd< float > RegressionSVD( this->m_significantPatchEigenvectors );
+  this->m_EigenvectorCoefficients.fill( 0 );
+  vnl_svd< float > RegressionSVD( this->m_SignificantPatchEigenvectors );
   //  EigenvectorCoefficients =  RegressionSVD.solve(PatchesForAllPointsWithinMask);
   //  not feasible for large matrices
   for( long unsigned int i = 0; i < this->m_numberOfVoxelsWithinMask; ++i )
     {
     vnl_vector< float > PatchOfInterest =
-        this->m_patchesForAllPointsWithinMask.get_column( i );
-    vnl_vector< float > x( this->m_significantPatchEigenvectors.columns() );
+        this->m_PatchesForAllPointsWithinMask.get_column( i );
+    vnl_vector< float > x( this->m_SignificantPatchEigenvectors.columns() );
     x.fill( 0 );
     x = RegressionSVD.solve( PatchOfInterest );
-    this->m_eigenvectorCoefficients.set_column( i, x );
+    this->m_EigenvectorCoefficients.set_column( i, x );
     }
   vnl_matrix< float > reconstructedPatches =
-      this->m_significantPatchEigenvectors * this->m_eigenvectorCoefficients;
+      this->m_SignificantPatchEigenvectors * this->m_EigenvectorCoefficients;
   vnl_matrix< float > error =
-      reconstructedPatches - this->m_patchesForAllPointsWithinMask;
+      reconstructedPatches - this->m_PatchesForAllPointsWithinMask;
   vnl_vector< float > percentError(error.columns() );
   for( int i = 0; i < error.columns(); ++i)
     {
     percentError(i) = error.get_column(i).two_norm() /
-        (this->m_patchesForAllPointsWithinMask.get_column(i).two_norm() + 1e-10);
+        (this->m_PatchesForAllPointsWithinMask.get_column(i).two_norm() + 1e-10);
     }
   if( this->m_Verbose )
     {

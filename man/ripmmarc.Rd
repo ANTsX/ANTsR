@@ -5,7 +5,7 @@
 \title{Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture}
 \usage{
 ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
-  patchVarEx = 0.95, verbose = TRUE)
+  patchVarEx = 0.95, meanCenter = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -20,10 +20,14 @@ ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
 greater than one, then it defines the number of eigenvectors.  Otherwise, it
 defines the target variance explained.}
 
+\item{meanCenter}{boolean whether we mean center the patches.}
+
 \item{verbose}{boolean sets verbosity.}
 }
 \value{
-antsImage decomposed bases
+list including the canonical frame, the matrix basis, the patches for
+the full image, the projection coefficients for the full image and the
+variance explained.
 }
 \description{
 Patch-based and rotation invariant image decomposition.  This
@@ -32,8 +36,17 @@ is similar to patch-based dictionary learning in N-dimensions.
 \examples{
 img <- antsImageRead( getANTsRData( "r16" ) )
 msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
-ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=0.95  )
-ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=4  )
+ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
+ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
+\dontrun{
+ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=10 )
+mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
+mm2 = antsImageClone( mm )
+for (k in 1:nrow( ripped$basisMat ) ) {
+  mm2[mm==1] =  ripped$basisMat[k,]
+  plot( mm2, doCropping=F )
+  }
+}
 }
 \author{
 Kandel BM, Avants BB

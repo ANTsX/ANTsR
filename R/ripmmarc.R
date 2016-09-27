@@ -9,28 +9,42 @@
 #' @param patchVarEx Scalar defining the target variance explained.  If this is
 #' greater than one, then it defines the number of eigenvectors.  Otherwise, it
 #' defines the target variance explained.
+#' @param meanCenter boolean whether we mean center the patches.
 #' @param verbose boolean sets verbosity.
-#' @return antsImage decomposed bases
+#' @return list including the canonical frame, the matrix basis, the patches for
+#' the full image, the projection coefficients for the full image and the
+#' variance explained.
 #' @author Kandel BM, Avants BB
 #' @examples
 #' img <- antsImageRead( getANTsRData( "r16" ) )
 #' msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
-#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=0.95  )
-#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=200, patchVarEx=4  )
-#' @export smoothImage
+#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
+#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
+#' \dontrun{
+#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=10 )
+#' mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
+#' mm2 = antsImageClone( mm )
+#' for (k in 1:nrow( ripped$basisMat ) ) {
+#'   mm2[mm==1] =  ripped$basisMat[k,]
+#'   plot( mm2, doCropping=F )
+#'   }
+#' }
+#' @export ripmmarc
 ripmmarc <- function(
   img,
   mask,
   patchRadius = 3,
   patchSamples = 1000,
   patchVarEx   = 0.95,
-  verbose = TRUE  ) {
-  print("WARNING: ripmmarc is not yet implemented-WIP all the way!!")
+  meanCenter   = FALSE,
+  verbose = FALSE  ) {
+  print("WARNING: WIP, ripmmarc is not yet implemented all the way!!")
   inimg.float <- antsImageClone( img, "float" )
   mask.float <- antsImageClone( mask, "float" )
   outimg <- antsImageClone( inimg.float )
-  outimg <- .Call("patchAnalysis",
+  outstruct <- .Call("patchAnalysis",
     inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
-    verbose, PACKAGE = "ANTsR")
-  return( antsImageClone( outimg, img@pixeltype ) )
+    meanCenter, verbose, PACKAGE = "ANTsR")
+  outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
+  return( outstruct )
 }
