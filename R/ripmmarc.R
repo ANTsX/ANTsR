@@ -14,8 +14,8 @@
 #' @param evecBasis pass in an existing eigenvector basis.
 #' @param verbose boolean sets verbosity.
 #' @return list including the canonical frame, the matrix basis, the patches for
-#' the full image, the projection coefficients for the full image and the
-#' variance explained.
+#' the full image, the projection coefficients for the full image, the
+#' variance explained and a reconstructed image.
 #' @author Kandel BM, Avants BB
 #' @examples
 #' img <- antsImageRead( getANTsRData( "r16" ) )
@@ -61,9 +61,15 @@ ripmmarc <- function(
     inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
     meanCenter, canonicalFrame, t(evecBasis), verbose, PACKAGE = "ANTsR")
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
+  # mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
+  # bmdl = bigLMStats( mdl, includeIntercept = F )
   # overwrite the C++ patch computation with R results
-  mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
-  bmdl = bigLMStats( mdl )
-  outstruct$evecCoeffs = bmdl$beta
+  # outstruct$evecCoeffs = t( bmdl$beta )
+  i1v = img[ mask == 1 ]
+  mydf = data.frame( ( outstruct$evecCoeffs  ) )
+  mylmdl = glm( i1v ~ . , data=mydf , family = 'gaussian' )
+  mypred = img * 0
+  mypred[ mask == 1 ] = as.numeric( predict( mylmdl ) )
+  outstruct$recon = mypred
   return( outstruct )
 }

@@ -31,8 +31,8 @@ defines the target variance explained.}
 }
 \value{
 list including the canonical frame, the matrix basis, the patches for
-the full image, the projection coefficients for the full image and the
-variance explained.
+the full image, the projection coefficients for the full image, the
+variance explained and a reconstructed image.
 }
 \description{
 Patch-based and rotation invariant image decomposition.  This

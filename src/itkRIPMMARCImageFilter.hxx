@@ -789,7 +789,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		if ( this->m_LearnPatchBasis )
 			this->LearnEigenPatches(); // learn the patches
 	  }
-  // this->ProjectOnEigenPatches( ); // in practice, we do this in R
+  this->ProjectOnEigenPatches( ); // in practice, we might prefer this in R
 }
 
 template<typename TInputImage, typename TOutputImage>
