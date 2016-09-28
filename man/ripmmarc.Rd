@@ -48,6 +48,18 @@ ripped2 <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000,
   canonicalFrame = ripped$canonicalFrame,
   evecBasis = ripped$basisMat )
 \dontrun{
+ch2 = antsImageRead( getANTsRData( 'ch2' ) )
+msk2 <- thresholdImage( ch2, quantile( ch2[ ch2 > 0 ] )[1], max( ch2 ) ) \%>\%
+  iMath( "ME", 30 )
+ripped <- ripmmarc( ch2, msk2, patchRadius=5, patchSamples=1000,
+  meanCenter = TRUE, patchVarEx=10, verbose=TRUE )
+mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
+mm2 = antsImageClone( mm )
+ch2ev = ch2 * 0
+k = 7
+ch2ev[ msk2 == 1 ] =  ripped$evecCoeffs[ , k]
+plot( ch2ev, doCropping=F, slices=90 )
+mm2[ mm == 1 ] = ripped$basisMat[k,]
 ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=10 )
 mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
 mm2 = antsImageClone( mm )
