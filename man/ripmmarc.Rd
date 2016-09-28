@@ -38,7 +38,9 @@ variance explained and a reconstructed image.
 }
 \description{
 Patch-based and rotation invariant image decomposition.  This
-is similar to patch-based dictionary learning in N-dimensions.
+is similar to patch-based dictionary learning in N-dimensions.  Warning:
+there may be an overlow/underflow error in the C++ underlying this function
+that appears to occur when insufficient \code{patchSamples} are selected.
 }
 \examples{
 img <- antsImageRead( getANTsRData( "r16" ) )
