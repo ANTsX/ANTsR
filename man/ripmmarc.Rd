@@ -6,7 +6,7 @@
 \usage{
 ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
   patchVarEx = 0.95, meanCenter = FALSE, canonicalFrame = NA,
-  evecBasis = NA, verbose = FALSE)
+  evecBasis = NA, rotationInvariant = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -26,6 +26,8 @@ defines the target variance explained.}
 \item{canonicalFrame}{pass in an existing canonicalFrame.}
 
 \item{evecBasis}{pass in an existing eigenvector basis.}
+
+\item{rotationInvariant}{boolean sets whether patches are rotationInvariant.}
 
 \item{verbose}{boolean sets verbosity.}
 }

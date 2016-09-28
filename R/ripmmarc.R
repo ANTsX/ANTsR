@@ -12,6 +12,7 @@
 #' @param meanCenter boolean whether we mean center the patches.
 #' @param canonicalFrame pass in an existing canonicalFrame.
 #' @param evecBasis pass in an existing eigenvector basis.
+#' @param rotationInvariant boolean sets whether patches are rotationInvariant.
 #' @param verbose boolean sets verbosity.
 #' @return list including the canonical frame, the matrix basis, the patches for
 #' the full image, the projection coefficients for the full image, the
@@ -57,6 +58,7 @@ ripmmarc <- function(
   meanCenter   = FALSE,
   canonicalFrame = NA,
   evecBasis    = NA,
+  rotationInvariant = TRUE,
   verbose = FALSE  ) {
   print("WARNING: WIP, this implementation of ripmmarc is not validated!!")
   inimg.float <- antsImageClone( img, "float" )
@@ -71,7 +73,8 @@ ripmmarc <- function(
   # FIXME not sure why transpose is needed below ....
   outstruct <- .Call("patchAnalysis",
     inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
-    meanCenter, canonicalFrame, t(evecBasis), verbose, PACKAGE = "ANTsR")
+    meanCenter, canonicalFrame, t(evecBasis),
+    rotationInvariant, verbose, PACKAGE = "ANTsR")
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
   # mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
   # bmdl = bigLMStats( mdl, includeIntercept = F )

@@ -168,6 +168,20 @@ public:
     }
 
   /**
+   * Get canonical frame image function.
+   */
+  InputImagePointer GetCanonicalFrameK( unsigned int k )
+    {
+    InputImagePointer eigenvecMaskImage;
+    eigenvecMaskImage = this->GenerateMaskImageFromPatch( );
+    VectorType canonicalEigenPatchAsVector =
+        this->m_SignificantPatchEigenvectors.get_column( k );
+    InputImagePointer ivec = this->ConvertVectorToSpatialImage(
+            canonicalEigenPatchAsVector, eigenvecMaskImage );
+    return ivec;
+    }
+
+  /**
    * Set canonical frame image function.
    */
   void SetCanonicalFrame( InputImageType* canfram )
@@ -272,6 +286,7 @@ public:
       vnl_vector< RealValueType > &Vector,
       InputImagePointer Mask );
 
+  InputImagePointer GenerateMaskImageFromPatch( );
 
 protected:
   RIPMMARCImageFilter();
@@ -301,20 +316,15 @@ private:
   vnlMatrixType                               m_vectorizedPatchMatrix;
   vnl_matrix< int >                           m_patchSeedPoints;
   vnlMatrixType                               m_vectorizedSamplePatchMatrix;
-  std::vector< unsigned int >                 m_indicesWithinSphere;
+  std::vector< unsigned int >                 m_IndicesWithinSphere;
   std::vector< RealValueType >                m_weights;
   long unsigned int                           m_numberOfVoxelsWithinMask;
   // amount of padding around eigenvector for constructing images
-  unsigned int                                m_paddingVoxels;
+  unsigned int                                m_PaddingVoxels;
   unsigned int                                m_NumberOfSamplePatches;
 
 };
 
-// FIXME temporarily adding implementation externally below
-template< class ImageType >
-typename ImageType::Pointer ConvertVectorToSpatialImage(
-    vnl_vector< double > &Vector,
-    typename ImageType::Pointer Mask);
 
 } // end namespace itk
 

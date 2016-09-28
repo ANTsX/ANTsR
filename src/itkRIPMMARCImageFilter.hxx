@@ -54,56 +54,55 @@ bool IsInside( typename TImage::Pointer input, typename TImage::IndexType index 
   return isinside;
 }
 
-template< class ImageType >
-typename ImageType::Pointer GenerateMaskImageFromPatch(
-    std::vector< unsigned int > &indicesWithinSphere,
-    float &radiusOfPatch,
-    const  int dimension,
-    int paddingVoxels = 2)
+template<typename TInputImage, typename TOutputImage>
+typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
+::GenerateMaskImageFromPatch( )
 {
-  int sizeOfImage = 2 * radiusOfPatch  + 2 *  paddingVoxels + 1;
-  typename ImageType::Pointer maskImage = ImageType::New();
-  typename ImageType::IndexType   start;
-  typename ImageType::IndexType   beginningOfSphereRegion;
-  typename ImageType::SizeType    sizeOfSphereRegion;
-  typename ImageType::SizeType    size;
-  typename ImageType::SpacingType spacing;
-  typename ImageType::PointType   originPoint;
-  typename ImageType::IndexType   originIndex;
+  unsigned int sizeOfImage = 2 * this->m_PatchRadius +
+    2 *  this->m_PaddingVoxels + 1;
+  InputImagePointer maskImage = InputImageType::New();
+  IndexType   start;
+  IndexType   beginningOfSphereRegion;
+  typename InputImageType::SizeType    sizeOfSphereRegion;
+  typename InputImageType::SizeType    size;
+  typename InputImageType::SpacingType spacing;
+  typename InputImageType::PointType   originPoint;
+  typename InputImageType::IndexType   originIndex;
 
-  for( int dd = 0; dd < dimension; dd++ )
-  {
+  for( unsigned int dd = 0; dd < ImageDimension; dd++ )
+    {
     start[ dd ]   = 0;
     size[ dd ]    = sizeOfImage;
     spacing[ dd ] = 1.0;
     originPoint[ dd ] = originIndex[ dd ]  = 0;
-    beginningOfSphereRegion[ dd ] = paddingVoxels + radiusOfPatch; // one for each side--this is correct
-    sizeOfSphereRegion[ dd ] = radiusOfPatch * 2 + 1;
-  }
-  typename ImageType::RegionType region;
+    // one for each side--this is correct
+    beginningOfSphereRegion[ dd ] = this->m_PaddingVoxels + this->m_PatchRadius;
+    sizeOfSphereRegion[ dd ] = this->m_PatchRadius * 2 + 1;
+    }
+  typename InputImageType::RegionType region;
   region.SetSize( size );
   region.SetIndex( originIndex );
   maskImage->SetRegions( region );
   maskImage->Allocate( );
   maskImage->SetSpacing( spacing );
   maskImage->SetOrigin( originPoint );
-  typedef typename itk::ImageRegionIterator< ImageType > RegionIteratorType;
+  typedef typename itk::ImageRegionIterator< InputImageType > RegionIteratorType;
   RegionIteratorType regionIterator( maskImage, region );
   for ( regionIterator.GoToBegin(); !regionIterator.IsAtEnd(); ++regionIterator)
-  {
+    {
     regionIterator.Set( 0.0 );
-  }
-  typename ImageType::RegionType sphereRegion;
+    }
+  typename InputImageType::RegionType sphereRegion;
   sphereRegion.SetSize( sizeOfSphereRegion );
   sphereRegion.SetIndex( beginningOfSphereRegion );
-  typedef itk::NeighborhoodIterator< ImageType > NeighborhoodIteratorType;
+  typedef itk::NeighborhoodIterator< InputImageType > NeighborhoodIteratorType;
   typename NeighborhoodIteratorType::RadiusType radius;
-  radius.Fill( radiusOfPatch );
+  radius.Fill( this->m_PatchRadius );
   NeighborhoodIteratorType SphereRegionIterator( radius, maskImage, sphereRegion );
 
-  for( unsigned int ii = 0; ii < indicesWithinSphere.size(); ii++)
+  for( unsigned int ii = 0; ii < this->m_IndicesWithinSphere.size(); ii++)
     {
-    SphereRegionIterator.SetPixel( indicesWithinSphere[ ii ],  1.0 );
+    SphereRegionIterator.SetPixel( this->m_IndicesWithinSphere[ ii ],  1.0 );
     }
 
   return maskImage;
@@ -128,7 +127,7 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
    * entries in the eigenvector on a blank background.  The output of this function
    * then is the moving neighborhood reoriented to match the input eigenvector. */
 
-  unsigned int NumberOfIndicesWithinSphere = this->m_indicesWithinSphere.size();
+  unsigned int NumberOfIndicesWithinSphere = this->m_IndicesWithinSphere.size();
   std::vector< PointType > ImagePatch1;
   std::vector< PointType > ImagePatch2;
   VectorType VectorizedImagePatch1( NumberOfIndicesWithinSphere, 0 );
@@ -146,10 +145,10 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
   RealType MeanNormalizingConstant = 1.0 / ( RealType ) NumberOfIndicesWithinSphere;
   for( unsigned int ii = 0; ii < NumberOfIndicesWithinSphere; ii++ )
     {
-    VectorizedImagePatch1[ ii ] = GradientImageNeighborhood1.GetPixel( this->m_indicesWithinSphere[ ii ] );
-    VectorizedImagePatch2[ ii ] = GradientImageNeighborhood2.GetPixel( this->m_indicesWithinSphere[ ii ] );
-    IndexType GradientImageIndex1 = GradientImageNeighborhood1.GetIndex( this->m_indicesWithinSphere[ ii ] );
-    IndexType GradientImageIndex2 = GradientImageNeighborhood2.GetIndex( this->m_indicesWithinSphere[ ii ] );
+    VectorizedImagePatch1[ ii ] = GradientImageNeighborhood1.GetPixel( this->m_IndicesWithinSphere[ ii ] );
+    VectorizedImagePatch2[ ii ] = GradientImageNeighborhood2.GetPixel( this->m_IndicesWithinSphere[ ii ] );
+    IndexType GradientImageIndex1 = GradientImageNeighborhood1.GetIndex( this->m_IndicesWithinSphere[ ii ] );
+    IndexType GradientImageIndex2 = GradientImageNeighborhood2.GetIndex( this->m_IndicesWithinSphere[ ii ] );
     if( ( IsInside< GradientImageType >( GradientImage1, GradientImageIndex1) ) &&
 	( IsInside< GradientImageType >( GradientImage2, GradientImageIndex2 ) ) )
     {
@@ -316,7 +315,7 @@ typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
   typename TInputImage::Pointer Mask )
 {
   InputImagePointer VectorAsSpatialImage = InputImageType::New();
-  VectorAsSpatialImage->SetOrigin(Mask->GetOrigin() );
+  VectorAsSpatialImage->SetOrigin(  Mask->GetOrigin() );
   VectorAsSpatialImage->SetSpacing( Mask->GetSpacing() );
   VectorAsSpatialImage->SetRegions( Mask->GetLargestPossibleRegion() );
   VectorAsSpatialImage->SetDirection( Mask-> GetDirection() );
@@ -361,7 +360,7 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
   m_Verbose( true ),
   m_PatchRadius( 3 ),
   m_numberOfVoxelsWithinMask( 0 ),
-  m_paddingVoxels( 2 ),
+  m_PaddingVoxels( 2 ),
   m_NumberOfSamplePatches( 0 )
 {
   this->SetNumberOfRequiredInputs( 2 ); // image of interest and mask
@@ -445,17 +444,17 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		distanceFromPatchCenter = sqrt( distanceFromPatchCenter );
 		if( distanceFromPatchCenter <= this->m_PatchRadius )
 		{
-			this->m_indicesWithinSphere.push_back( ii );
+			this->m_IndicesWithinSphere.push_back( ii );
 			this->m_weights.push_back( 1.0 );
 		}
 	}
   if ( this->m_Verbose ) {
   	std::cout << "Iterator.Size() is " << Iterator.Size() << std::endl;
-	  std::cout << "IndicesWithinSphere.size() is " << this->m_indicesWithinSphere.size() << std::endl;
+	  std::cout << "IndicesWithinSphere.size() is " << this->m_IndicesWithinSphere.size() << std::endl;
     }
 	// populate matrix with patch values from points in image
 	this->m_vectorizedSamplePatchMatrix.set_size(
-			this->m_NumberOfSamplePatches , this->m_indicesWithinSphere.size() );
+			this->m_NumberOfSamplePatches , this->m_IndicesWithinSphere.size() );
 	this->m_vectorizedSamplePatchMatrix.fill( 0 );
 	for( int i = 0; i < this->m_NumberOfSamplePatches ; ++i)
 	  {
@@ -465,10 +464,10 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		  }
 		Iterator.SetLocation( patchCenterIndex );
 		// get indices within N-d sphere
-		for( int j = 0; j < this->m_indicesWithinSphere.size(); ++j)
+		for( int j = 0; j < this->m_IndicesWithinSphere.size(); ++j)
 		  {
 			this->m_vectorizedSamplePatchMatrix( i, j ) =
-					Iterator.GetPixel( this->m_indicesWithinSphere[ j ] );
+					Iterator.GetPixel( this->m_IndicesWithinSphere[ j ] );
 		  }
 		// mean-center all patches
 		if( this->m_MeanCenterPatches ) {
@@ -503,7 +502,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	if ( this->m_Verbose ) std::cout << "Number of points within mask is " << this->m_numberOfVoxelsWithinMask << std::endl;
 
 	this->m_PatchesForAllPointsWithinMask.set_size(
-			this->m_indicesWithinSphere.size(),  this->m_numberOfVoxelsWithinMask);
+			this->m_IndicesWithinSphere.size(),  this->m_numberOfVoxelsWithinMask);
 	if( this->m_Verbose )
 	{
 		std::cout << "PatchesForAllPointsWithinMask is " << this->m_PatchesForAllPointsWithinMask.rows() << "x" <<
@@ -521,10 +520,10 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 		patchIndex = nonZeroMaskIndices[ i ];
 		iterator.SetLocation( patchIndex );
 		// get indices within N-d sphere
-		for( int j = 0; j < this->m_indicesWithinSphere.size(); ++j)
+		for( int j = 0; j < this->m_IndicesWithinSphere.size(); ++j)
 		{
 			this->m_PatchesForAllPointsWithinMask( j, i ) =
-        iterator.GetPixel( this->m_indicesWithinSphere[ j ] );
+        iterator.GetPixel( this->m_IndicesWithinSphere[ j ] );
 		}
 		// mean-center
 		if( this->m_MeanCenterPatches ) {
@@ -605,21 +604,15 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   radius.Fill( this->m_PatchRadius );
   for( int ii = 0; ii < ImageDimension; ii++)
     {
-    beginningOfSphereRegion[ii] = this->m_paddingVoxels + this->m_PatchRadius;
+    beginningOfSphereRegion[ii] = this->m_PaddingVoxels + this->m_PatchRadius;
     sizeOfSphereRegion[ii]      = this->m_PatchRadius * 2 + 1;
     }
   sphereRegion.SetSize( sizeOfSphereRegion );
   sphereRegion.SetIndex( beginningOfSphereRegion );
 
   typename ImageType::Pointer eigenvecMaskImage;
-  eigenvecMaskImage = GenerateMaskImageFromPatch< ImageType >(
-    this->m_indicesWithinSphere, this->m_PatchRadius, ImageDimension, this->m_paddingVoxels);
+  eigenvecMaskImage = this->GenerateMaskImageFromPatch( );
   //NeighborhoodIteratorType regionIterator()
-  vnl_vector< RealValueType > canonicalEigenPatchAsVector =
-      this->m_SignificantPatchEigenvectors.get_column( 0 );
-  if ( this->m_CanonicalFrame.IsNull() )
-    this->m_CanonicalFrame = this->ConvertVectorToSpatialImage(
-      canonicalEigenPatchAsVector, eigenvecMaskImage );
   NeighborhoodIteratorType fixedIterator(radius, this->m_CanonicalFrame, sphereRegion);
   // compute gradient of canonical frame once, outside the loop
   fixedGradientFilter->SetInput( this->m_CanonicalFrame );
@@ -668,22 +661,14 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   radius.Fill( this->m_PatchRadius );
   for( int ii = 0; ii < ImageDimension; ii++)
     {
-    beginningOfSphereRegion[ii] = this->m_paddingVoxels + this->m_PatchRadius;
+    beginningOfSphereRegion[ii] = this->m_PaddingVoxels + this->m_PatchRadius;
     sizeOfSphereRegion[ii]      = this->m_PatchRadius * 2 + 1;
     }
   sphereRegion.SetSize( sizeOfSphereRegion );
   sphereRegion.SetIndex( beginningOfSphereRegion );
 
   typename ImageType::Pointer eigenvecMaskImage;
-  eigenvecMaskImage = GenerateMaskImageFromPatch< ImageType >(
-      this->m_indicesWithinSphere, this->m_PatchRadius, ImageDimension, this->m_paddingVoxels);
-  VectorType canonicalEigenPatchAsVector =
-      this->m_SignificantPatchEigenvectors.get_column( 1 );
-  // the SECOND eigenvector is canonical--1st is constant
-  // FIXME - is this always the case?  what if you mean center?
-  if ( this->m_CanonicalFrame.IsNull() )
-    this->m_CanonicalFrame = this->ConvertVectorToSpatialImage(
-      canonicalEigenPatchAsVector, eigenvecMaskImage );
+  eigenvecMaskImage = this->GenerateMaskImageFromPatch( );
   NeighborhoodIteratorType fixedIterator( radius, this->m_CanonicalFrame, sphereRegion);
   // compute gradient of canonical frame once, outside the loop
   fixedGradientFilter->SetInput( this->m_CanonicalFrame );
@@ -765,11 +750,15 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 {
 // FIXME - the logic below could be cleaned up e.g. do we really need sample
 // patches if we already have a basis?
+  unsigned int canonicalEvecIndex = 1;
+  if ( this->m_MeanCenterPatches ) canonicalEvecIndex = 0;
   this->GetSamplePatchLocations( ); // identify points from random mask
   this->ExtractSamplePatches( );     // convert sample points to the matrix
 	if ( this->m_LearnPatchBasis )  // determines if we are learning or not
 	  {
   	this->LearnEigenPatches( );  // learn the patches
+    // the SECOND eigenvector is canonical--1st is constant
+    this->m_CanonicalFrame = this->GetCanonicalFrameK( canonicalEvecIndex );
 	  }
   else
     {
@@ -784,12 +773,17 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	// rotationally invariant features.
 	if ( this->m_RotationInvariant )
 	  {
-		this->ReorientSamplePatches();
+    this->ReorientSamplePatches();
 		this->ReorientAllPatches();
 		if ( this->m_LearnPatchBasis )
-			this->LearnEigenPatches(); // learn the patches
+      {
+			this->LearnEigenPatches(); // learn the patches after reorientation
+      // the SECOND eigenvector is canonical--1st is constant if we do not mean center
+      this->m_CanonicalFrame = this->GetCanonicalFrameK( canonicalEvecIndex );
+      }
 	  }
   this->ProjectOnEigenPatches( ); // in practice, we might prefer this in R
+  this->SetNthOutput( 0, this->GetCanonicalFrame() );
 }
 
 template<typename TInputImage, typename TOutputImage>

@@ -40,6 +40,7 @@ SEXP patchAnalysisHelper(
     SEXP r_meanCenter,
     SEXP r_canonicalFrame,
     SEXP r_evecBasis,
+    SEXP r_rotationInvt,
     SEXP r_verbose )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -53,6 +54,7 @@ SEXP patchAnalysisHelper(
   float patchVar = Rcpp::as< float >( r_patchVar );
   unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
   bool meanCenter = Rcpp::as< bool >( r_meanCenter );
+  bool rotInvar = Rcpp::as< bool >( r_rotationInvt );
   unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
   Rcpp::NumericMatrix X =
     Rcpp::as< Rcpp::NumericMatrix >( r_evecBasis );
@@ -67,7 +69,7 @@ SEXP patchAnalysisHelper(
   filter->SetInput( inimg );
   filter->SetMaskImage( inmaskimg );
   filter->SetLearnPatchBasis( true );
-  filter->SetRotationInvariant( true );
+  filter->SetRotationInvariant( rotInvar );
   filter->SetMeanCenterPatches( meanCenter );
   filter->SetPatchRadius( patchRadius );
   filter->SetNumberOfSamplePatches( patchSamples );
@@ -89,8 +91,6 @@ SEXP patchAnalysisHelper(
   filter->SetVerbose( verbose );
   if ( verbose > 0 ) std::cout << filter << std::endl;
   filter->Update( );
-//  outimg = filter->GetOutput(); // what should the output be?
-//  r_outimg = Rcpp::wrap( outimg );
   outimg = filter->GetCanonicalFrame(); // what should the output be?
   r_outimg = Rcpp::wrap( outimg );
 
@@ -152,6 +152,7 @@ RcppExport SEXP patchAnalysis(
   SEXP r_meanCenter,
   SEXP r_canonicalFrame,
   SEXP r_evecBasis,
+  SEXP r_rotInvar,
   SEXP r_verbose )
 {
 try
@@ -169,7 +170,8 @@ try
       patchAnalysisHelper< ImageType >(
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
         r_patchSamples, r_patchVar, r_meanCenter,
-        r_canonicalFrame, r_evecBasis, r_verbose )
+        r_canonicalFrame, r_evecBasis,
+        r_rotInvar, r_verbose )
       );
     }
   else if ( (pixeltype == "float") & ( dimension == 3 ) )
@@ -181,7 +183,8 @@ try
       patchAnalysisHelper< ImageType3D >(
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
         r_patchSamples, r_patchVar, r_meanCenter,
-        r_canonicalFrame, r_evecBasis, r_verbose )
+        r_canonicalFrame, r_evecBasis,
+        r_rotInvar, r_verbose )
       );
     }
   else
