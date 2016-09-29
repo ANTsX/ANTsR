@@ -109,6 +109,8 @@ vnl_vector< TComputation > RIPMMARCImageFilter<TInputImage, TOutputImage, TCompu
    * entries in the eigenvector on a blank background.  The output of this function
    * then is the moving neighborhood reoriented to match the input eigenvector. */
 
+  ComputationType regularizer = 1.e-4;
+  vnl_diag_matrix< ComputationType > mudiag( ImageDimension, regularizer );
   unsigned int NumberOfIndicesWithinSphere = this->m_IndicesWithinSphere.size();
   std::vector< PointType > ImagePatch1;
   std::vector< PointType > ImagePatch2;
@@ -197,7 +199,7 @@ vnl_vector< TComputation > RIPMMARCImageFilter<TInputImage, TOutputImage, TCompu
     B = outer_product( Image1Eigvec1, Image2Eigvec1 ) +
         outer_product( Image1Eigvec2, Image2Eigvec2 );
   }
-  vnl_svd< ComputationType > WahbaSVD( B );
+  vnl_svd< ComputationType > WahbaSVD( B + mudiag );
   vnl_matrix< ComputationType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
   // Now rotate the points to the same frame and sample neighborhoods again.
   for( unsigned int ii = 0; ii < NumberOfIndicesWithinSphere; ii++ )
@@ -241,7 +243,7 @@ vnl_vector< TComputation > RIPMMARCImageFilter<TInputImage, TOutputImage, TCompu
 		  B = outer_product( Image1Eigvec1, Image2Eigvec1 ) +
 				  outer_product( Image1Eigvec2, Image2Eigvec2 );
 	  }
-	  vnl_svd< ComputationType > WahbaSVD( B );
+    vnl_svd< ComputationType > WahbaSVD( B + mudiag );
 	  vnl_matrix< ComputationType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
           vnl_matrix< ComputationType > rotationMat;
           if(ImageDimension == 2)
@@ -522,9 +524,6 @@ template <typename TInputImage, typename TOutputImage, class TComputation>
 void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::LearnEigenPatches()
 {
-  if ( this->m_Verbose )
-    std::cout << "Learn eigen patches with TargetVarianceExplained " <<
-      this->m_TargetVarianceExplained << std::endl;
   vnl_svd< ComputationType > svd( this->m_vectorizedSamplePatchMatrix );
 	vnlMatrixType patchEigenvectors = svd.V();
   RealType sumOfEigenvalues = 0.0;
@@ -532,6 +531,14 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
     {
     sumOfEigenvalues += svd.W(i, i);
     }
+  if ( this->m_TargetVarianceExplained > 1 )
+    if ( this->m_TargetVarianceExplained > svd.rank() )
+      this->m_TargetVarianceExplained = svd.rank() - 1;
+
+  if ( this->m_Verbose )
+    std::cout << "Learn eigen patches with TargetVarianceExplained " <<
+      this->m_TargetVarianceExplained << std::endl;
+
   RealType partialSumOfEigenvalues = 0.0;
   RealType percentVarianceExplained = 0.0;
 	unsigned int  i = 0;

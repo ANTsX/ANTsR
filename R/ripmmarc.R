@@ -22,35 +22,28 @@
 #' variance explained and a reconstructed image.
 #' @author Kandel BM, Avants BB
 #' @examples
+#'
 #' img <- antsImageRead( getANTsRData( "r16" ) )
-#' msk <- thresholdImage( img, quantile( img[ img > 0 ] )[1], max( img ) )
-#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=0.95  )
-#' # img[ msk == 1 ] = ripped$evecCoeffs[2,]; plot( img )
-#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=4  )
-#' ripped2 <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000,
-#'   canonicalFrame = ripped$canonicalFrame,
-#'   evecBasis = ripped$basisMat )
-#' \dontrun{
-#' ch2 = antsImageRead( getANTsRData( 'ch2' ) )
-#' msk2 <- thresholdImage( ch2, quantile( ch2[ ch2 > 0 ] )[1], max( ch2 ) ) %>%
-#'   iMath( "ME", 30 )
-#' ripped <- ripmmarc( ch2, msk2, patchRadius=5, patchSamples=1000,
-#'   meanCenter = TRUE, patchVarEx=10, verbose=TRUE )
-#' mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
-#' mm2 = antsImageClone( mm )
-#' ch2ev = ch2 * 0
-#' k = 7
-#' ch2ev[ msk2 == 1 ] =  ripped$evecCoeffs[ , k]
-#' plot( ch2ev, doCropping=F, slices=90 )
-#' mm2[ mm == 1 ] = ripped$basisMat[k,]
-#' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=10 )
-#' mm = thresholdImage( abs( ripped$canonicalFrame ), 1.e-20, Inf )
-#' mm2 = antsImageClone( mm )
-#' for (k in 1:nrow( ripped$basisMat ) ) {
-#'   mm2[mm==1] =  ripped$basisMat[k,]
-#'   plot( mm2, doCropping=F )
-#'   }
-#' }
+#' msk <- getMask( img ) %>% iMath("ME",1)
+#' lap = iMath( img, "Laplacian", 2 )
+#' mskTestTrain = antsImageClone( msk )
+#' mskTestTrain[1:128,1:256]=2
+#' mskTestTrain = mskTestTrain * msk
+#' pr = 2
+#' nv = 15
+#' ripped <- ripmmarc( img, thresholdImage(mskTestTrain,2,2), patchRadius=pr,
+#'   patchSamples=5000, patchVarEx=nv, rotationInvariant = F )
+#' rippedTest <- ripmmarc( img, thresholdImage(mskTestTrain,1,1), patchRadius=pr,
+#'   evecBasis = ripped$basisMat, canonicalFrame = ripped$canonicalFrame,
+#'   patchSamples=500, patchVarEx=nv, rotationInvariant = F )
+#' lapTrainVox = lap[ mskTestTrain == 2 ]
+#' lapTestVox = lap[ mskTestTrain == 1 ]
+#' mydftr = data.frame( lap=lapTrainVox, t1feats=ripped$evecCoeffs )
+#' mydfte = data.frame( lap=lapTestVox, t1feats=rippedTest$evecCoeffs )
+#' mdl = lm( lap ~ . , data = mydftr )
+#' preds = predict( mdl, newdata = mydfte )
+#' # cor.test( preds, mydfte$lap )
+#'
 #' @export ripmmarc
 ripmmarc <- function(
   img,
@@ -82,17 +75,10 @@ ripmmarc <- function(
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
   if ( regressProjections ) {
     mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
-    bmdl = bigLMStats( mdl, includeIntercept = T )
+    bmdl = bigLMStats( mdl, lambda = 1.e-4, includeIntercept = T )
     outstruct$evecCoeffs = t( bmdl$beta )
-    }
-  if ( nrow( outstruct$evecCoeffs ) > 0 )
-    {
-    i1v = img[ mask == 1 ]
-    mydf = data.frame( ( outstruct$evecCoeffs  ) )
-    mylmdl = lm( i1v ~ . , data=mydf )
-    mypred = img * 0
-    mypred[ mask == 1 ] = as.numeric( predict( mylmdl ) )
-    outstruct$recon = mypred
+    mdl = predict( mdl )
+    outstruct$recon = makeImage( mask, mdl[ round( nrow( mdl ) / 2 ) + 1, ] )
     }
   invisible( gc() )
   return( outstruct )
