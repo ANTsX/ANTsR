@@ -64,7 +64,8 @@ SEXP patchAnalysisHelper(
   if ( canFram->GetLargestPossibleRegion().GetSize()[ 0 ] == 1 )
     setcanfram = FALSE;
   if ( verbose > 0 ) std::cout << " setcanfram " << setcanfram << std::endl;
-  typedef itk::RIPMMARCImageFilter< ImageType, ImageType > filterType;
+  typedef float TComp;
+  typedef itk::RIPMMARCImageFilter< ImageType, ImageType, TComp > filterType;
   typename filterType::Pointer filter = filterType::New();
   filter->SetInput( inimg );
   filter->SetMaskImage( inmaskimg );
@@ -75,9 +76,9 @@ SEXP patchAnalysisHelper(
   filter->SetNumberOfSamplePatches( patchSamples );
   filter->SetTargetVarianceExplained( patchVar );
   if ( X.rows() > 1 & X.cols() > 1 ) {
-    std::vector<double> xdat =
-        Rcpp::as< std::vector<double> >( X );
-    const double* _xdata = &xdat[0];
+    std::vector<TComp> xdat =
+        Rcpp::as< std::vector<TComp> >( X );
+    const TComp* _xdata = &xdat[0];
     typename filterType::vnlMatrixType vnlX( _xdata , X.cols(), X.rows()  );
     vnlX = vnlX.transpose();
     if ( verbose > 0 ) std::cout << " Let us initialize with " << vnlX.rows()
@@ -120,6 +121,7 @@ SEXP patchAnalysisHelper(
     }
 
   // get the full image eigenvectorCoefficients matrix
+//  if ( true ) {
   solV = filter->GetEigenvectorCoefficients();
   Rcpp::NumericMatrix eripMat( solV.cols(), solV.rows() );
   rows = solV.rows();
@@ -130,6 +132,7 @@ SEXP patchAnalysisHelper(
       eripMat( c, r ) = solV( r, c );
       }
     }
+//  } // fi
   float varx = filter->GetAchievedVarianceExplained();
   return(
       Rcpp::List::create(

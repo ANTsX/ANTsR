@@ -84,10 +84,11 @@ ripmmarc <- function(
   # outstruct$evecCoeffs = t( bmdl$beta )
   i1v = img[ mask == 1 ]
   mydf = data.frame( ( outstruct$evecCoeffs  ) )
-  mylmdl = glm( i1v ~ . , data=mydf , family = 'gaussian' )
+  mylmdl = lm( i1v ~ . , data=mydf )
   mypred = img * 0
   mypred[ mask == 1 ] = as.numeric( predict( mylmdl ) )
   outstruct$recon = mypred
+  invisible( gc() )
   return( outstruct )
 }
 

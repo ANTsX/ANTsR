@@ -68,7 +68,7 @@ namespace itk {
  * \ingroup ITKNoiseFiltering
  */
 
-template< typename TInputImage, typename TOutputImage >
+template< typename TInputImage, typename TOutputImage, class TComputation=double >
 class RIPMMARCImageFilter :
   public ImageToImageFilter<TInputImage, TOutputImage>
 {
@@ -101,8 +101,8 @@ public:
   typedef typename MaskImageType::PixelType              MaskPixelType;
   typedef typename MaskImageType::PixelType              LabelType;
 
-  typedef double                                         RealValueType;
-  typedef float                                          RealType;
+  typedef TComputation                                   ComputationType;
+  typedef InputPixelType                                 RealType;
   typedef Image<RealType, ImageDimension>                RealImageType;
   typedef typename RealImageType::Pointer                RealImagePointer;
   typedef typename RealImageType::IndexType              IndexType;
@@ -111,7 +111,7 @@ public:
   typedef typename ConstNeighborhoodIteratorType::RadiusType   NeighborhoodRadiusType;
   typedef typename ConstNeighborhoodIteratorType::OffsetType   NeighborhoodOffsetType;
 
-  typedef vnl_matrix< RealValueType >                    vnlMatrixType;
+  typedef vnl_matrix< ComputationType >                    vnlMatrixType;
 
   typedef itk::ConstNeighborhoodIterator< InputImageType >
     NeighborhoodIteratorType;
@@ -132,7 +132,7 @@ public:
   typename InputImageType::SizeType                 sizeOfSphereRegion;
 
   typedef typename InputImageType::PointType PointType;
-  typedef vnl_vector< RealValueType > VectorType;
+  typedef vnl_vector< ComputationType > VectorType;
 
 
   /**
@@ -274,7 +274,7 @@ public:
   void ProjectOnEigenPatches( void ); // FIXME
 
 
-  vnl_vector< RealValueType > ReorientPatchToReferenceFrame(
+  vnl_vector< ComputationType > ReorientPatchToReferenceFrame(
     itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood1,
     itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood2,
     const typename TInputImage::Pointer MaskImage,
@@ -283,7 +283,7 @@ public:
     InterpPointer Interpolator );
 
   InputImagePointer ConvertVectorToSpatialImage(
-      vnl_vector< RealValueType > &Vector,
+      vnl_vector< ComputationType > &Vector,
       InputImagePointer Mask );
 
   InputImagePointer GenerateMaskImageFromPatch( );
@@ -317,7 +317,7 @@ private:
   vnl_matrix< int >                           m_patchSeedPoints;
   vnlMatrixType                               m_vectorizedSamplePatchMatrix;
   std::vector< unsigned int >                 m_IndicesWithinSphere;
-  std::vector< RealValueType >                m_weights;
+  std::vector< ComputationType >                m_weights;
   long unsigned int                           m_numberOfVoxelsWithinMask;
   // amount of padding around eigenvector for constructing images
   unsigned int                                m_PaddingVoxels;

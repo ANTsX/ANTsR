@@ -54,8 +54,8 @@ bool IsInside( typename TImage::Pointer input, typename TImage::IndexType index 
   return isinside;
 }
 
-template<typename TInputImage, typename TOutputImage>
-typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::GenerateMaskImageFromPatch( )
 {
   unsigned int sizeOfImage = 2 * this->m_PatchRadius +
@@ -108,8 +108,8 @@ typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
   return maskImage;
 }
 
-template<typename TInputImage, typename TOutputImage>
-vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME should replace double with comptype
+template <typename TInputImage, typename TOutputImage, class TComputation>
+vnl_vector< TComputation > RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation> // FIXME should replace double with comptype
 ::ReorientPatchToReferenceFrame(
   itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood1,
   itk::ConstNeighborhoodIterator< TInputImage > GradientImageNeighborhood2,
@@ -132,8 +132,8 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
   std::vector< PointType > ImagePatch2;
   VectorType VectorizedImagePatch1( NumberOfIndicesWithinSphere, 0 );
   VectorType VectorizedImagePatch2( NumberOfIndicesWithinSphere, 0 );
-  vnl_matrix< RealValueType > GradientMatrix1( NumberOfIndicesWithinSphere, ImageDimension );
-  vnl_matrix< RealValueType > GradientMatrix2( NumberOfIndicesWithinSphere, ImageDimension );
+  vnl_matrix< ComputationType > GradientMatrix1( NumberOfIndicesWithinSphere, ImageDimension );
+  vnl_matrix< ComputationType > GradientMatrix2( NumberOfIndicesWithinSphere, ImageDimension );
   GradientMatrix1.fill( 0 );
   GradientMatrix2.fill( 0 );
 
@@ -171,7 +171,7 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
       ImagePatch1.push_back( Point1 );
       ImagePatch2.push_back( Point2 );
     }
-    else return vnl_vector< RealValueType > (1, 0.0 );
+    else return vnl_vector< ComputationType > (1, 0.0 );
   }
   RealType MeanOfImagePatch1 = VectorizedImagePatch1.mean();
   RealType MeanOfImagePatch2 = VectorizedImagePatch2.mean();
@@ -187,19 +187,19 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
   std::cout << "VectorizedImagePatch2 is (before rotation) " << VectorizedImagePatch2 << std::endl;*/
 /*  std::cout << "GradientMatrix1 is " << GradientMatrix1 << std::endl;
   std::cout << "GradientMatrix2 is " << GradientMatrix2 << std::endl; */
-  vnl_matrix< RealValueType > CovarianceMatrixOfImage1 = GradientMatrix1.transpose() * GradientMatrix1;
-  vnl_matrix< RealValueType > CovarianceMatrixOfImage2 = GradientMatrix2.transpose() * GradientMatrix2;
-  vnl_symmetric_eigensystem< RealValueType > EigOfImage1( CovarianceMatrixOfImage1 );
-  vnl_symmetric_eigensystem< RealValueType > EigOfImage2( CovarianceMatrixOfImage2 );
+  vnl_matrix< ComputationType > CovarianceMatrixOfImage1 = GradientMatrix1.transpose() * GradientMatrix1;
+  vnl_matrix< ComputationType > CovarianceMatrixOfImage2 = GradientMatrix2.transpose() * GradientMatrix2;
+  vnl_symmetric_eigensystem< ComputationType > EigOfImage1( CovarianceMatrixOfImage1 );
+  vnl_symmetric_eigensystem< ComputationType > EigOfImage2( CovarianceMatrixOfImage2 );
 /*  std::cout << "CovarianceMatrixOfImage1 is " << CovarianceMatrixOfImage1 << std::endl;
   std::cout << "CovarianceMatrixOfImage2 is " << CovarianceMatrixOfImage2 << std::endl;*/
   int NumberOfEigenvectors = EigOfImage1.D.cols();
   // FIXME: needs bug checking to make sure this is right
   // not sure how many eigenvectors there are or how they're indexed
-  vnl_vector< RealValueType > Image1Eigvec1 = EigOfImage1.get_eigenvector( NumberOfEigenvectors - 1 ); // 0-indexed
-  vnl_vector< RealValueType > Image1Eigvec2 = EigOfImage1.get_eigenvector( NumberOfEigenvectors - 2 );
-  vnl_vector< RealValueType > Image2Eigvec1 = EigOfImage2.get_eigenvector( NumberOfEigenvectors - 1 );
-  vnl_vector< RealValueType > Image2Eigvec2 = EigOfImage2.get_eigenvector( NumberOfEigenvectors - 2 );
+  vnl_vector< ComputationType > Image1Eigvec1 = EigOfImage1.get_eigenvector( NumberOfEigenvectors - 1 ); // 0-indexed
+  vnl_vector< ComputationType > Image1Eigvec2 = EigOfImage1.get_eigenvector( NumberOfEigenvectors - 2 );
+  vnl_vector< ComputationType > Image2Eigvec1 = EigOfImage2.get_eigenvector( NumberOfEigenvectors - 1 );
+  vnl_vector< ComputationType > Image2Eigvec2 = EigOfImage2.get_eigenvector( NumberOfEigenvectors - 2 );
 
   /* Solve Wahba's problem using Kabsch algorithm:
    * arg_min(Q) \sum_k || w_k - Q v_k ||^2
@@ -209,20 +209,20 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
    * Then Q = U * M * V^T, where M = diag[ 1 1 det(U) det(V) ]
    * Refs: http://journals.iucr.org/a/issues/1976/05/00/a12999/a12999.pdf
    *       http://www.control.auc.dk/~tb/best/aug23-Bak-svdalg.pdf */
-  vnl_matrix< RealValueType > B = outer_product( Image1Eigvec1, Image2Eigvec1 );
+  vnl_matrix< ComputationType > B = outer_product( Image1Eigvec1, Image2Eigvec1 );
   if( ImageDimension == 3)
   {
     B = outer_product( Image1Eigvec1, Image2Eigvec1 ) +
         outer_product( Image1Eigvec2, Image2Eigvec2 );
   }
-  vnl_svd< RealValueType > WahbaSVD( B );
-  vnl_matrix< RealValueType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
+  vnl_svd< ComputationType > WahbaSVD( B );
+  vnl_matrix< ComputationType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
   // Now rotate the points to the same frame and sample neighborhoods again.
   for( unsigned int ii = 0; ii < NumberOfIndicesWithinSphere; ii++ )
   {
     PointType RotatedPoint = ImagePatch2[ ii ];
     // We also need vector representation of the point values
-    vnl_vector< RealValueType > RotatedPointVector( RotatedPoint.Size(), 0 );
+    vnl_vector< ComputationType > RotatedPointVector( RotatedPoint.Size(), 0 );
     // First move center of Patch 1 to center of Patch 2
     for( unsigned int dd = 0; dd < ImageDimension; dd++ )
     {
@@ -253,24 +253,24 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
   if(inner_product(CenteredVectorizedImagePatch1, CenteredVectorizedImagePatch2) < 0)
   {
 
-	  vnl_matrix< RealValueType > B = outer_product( Image1Eigvec1, Image2Eigvec1 );
+	  vnl_matrix< ComputationType > B = outer_product( Image1Eigvec1, Image2Eigvec1 );
 	  if( ImageDimension == 3)
 	  {
 		  B = outer_product( Image1Eigvec1, Image2Eigvec1 ) +
 				  outer_product( Image1Eigvec2, Image2Eigvec2 );
 	  }
-	  vnl_svd< RealValueType > WahbaSVD( B );
-	  vnl_matrix< RealValueType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
-          vnl_matrix< RealValueType > rotationMat;
+	  vnl_svd< ComputationType > WahbaSVD( B );
+	  vnl_matrix< ComputationType > Q_solution = WahbaSVD.V() * WahbaSVD.U().transpose();
+          vnl_matrix< ComputationType > rotationMat;
           if(ImageDimension == 2)
             {
-            const RealValueType values[4] = {-1.0,0.0,0.0,-1.0};
+            const ComputationType values[4] = {-1.0,0.0,0.0,-1.0};
             rotationMat.set_size(2, 2);
             rotationMat.set(values);
             }
           else if( ImageDimension == 3)
             {
-            const RealValueType values[9] = {1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0};
+            const ComputationType values[9] = {1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0};
             rotationMat.set_size(3, 3);
             rotationMat.set(values);
             }
@@ -282,7 +282,7 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
 	  {
 		  PointType RotatedPoint = ImagePatch2[ ii ];
 		  // We also need vector representation of the point values
-		  vnl_vector< RealValueType > RotatedPointVector( RotatedPoint.Size(), 0 );
+		  vnl_vector< ComputationType > RotatedPointVector( RotatedPoint.Size(), 0 );
 		  // First move center of Patch 1 to center of Patch 2
 		  for( unsigned int dd = 0; dd < ImageDimension; dd++ )
 		  {
@@ -308,10 +308,10 @@ vnl_vector< double > RIPMMARCImageFilter<TInputImage, TOutputImage> // FIXME sho
 }
 
 
-template<typename TInputImage, typename TOutputImage>
-typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ConvertVectorToSpatialImage(
-  vnl_vector< double > &Vector,
+  vnl_vector< TComputation > &Vector,
   typename TInputImage::Pointer Mask )
 {
   InputImagePointer VectorAsSpatialImage = InputImageType::New();
@@ -351,8 +351,8 @@ typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage>
 };
 
 
-template <typename TInputImage, typename TOutputImage>
-RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::RIPMMARCImageFilter() :
   m_RotationInvariant( true ),
   m_MeanCenterPatches( true ),
@@ -369,8 +369,8 @@ RIPMMARCImageFilter<TInputImage, TOutputImage>
   this->m_CanonicalFrame = ITK_NULLPTR;
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::GetSamplePatchLocations()
 {
   this->m_patchSeedPoints.set_size( this->m_NumberOfSamplePatches , ImageDimension );
@@ -409,8 +409,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	  }
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ExtractSamplePatches()
 {
   // allocate matrix based on radial size of patch
@@ -478,8 +478,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	}
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ExtractAllPatches()
 {
   const MaskImageType* mask = this->GetMaskImage();
@@ -535,14 +535,14 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	if( this->m_Verbose ) std::cout << "Recorded patches for all points." << std::endl;
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::LearnEigenPatches()
 {
   if ( this->m_Verbose )
     std::cout << "Learn eigen patches with TargetVarianceExplained " <<
       this->m_TargetVarianceExplained << std::endl;
-  vnl_svd< RealValueType > svd( this->m_vectorizedSamplePatchMatrix );
+  vnl_svd< ComputationType > svd( this->m_vectorizedSamplePatchMatrix );
 	vnlMatrixType patchEigenvectors = svd.V();
   RealType sumOfEigenvalues = 0.0;
   for( int i = 0; i < svd.rank(); i++)
@@ -589,8 +589,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 	this->m_SignificantPatchEigenvectors = patchEigenvectors.get_n_columns(0, i);
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ReorientSamplePatches()
 {
   typedef InputImageType ImageType;
@@ -625,7 +625,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
       "x" << this->m_vectorizedSamplePatchMatrix.columns() << std::endl;
   for( long int ii = 0; ii < this->m_vectorizedSamplePatchMatrix.rows(); ii++)
     {
-    vnl_vector< RealValueType > vectorizedPatch =
+    vnl_vector< ComputationType > vectorizedPatch =
         this->m_vectorizedSamplePatchMatrix.get_row(ii);
     typename ImageType::Pointer movingImage = this->ConvertVectorToSpatialImage(
         vectorizedPatch, eigenvecMaskImage );
@@ -635,7 +635,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     movingGradientFilter->Update();
     interp1->SetInputImage(movingImage);
     typename GradientImageType::Pointer movingGradientImage = movingGradientFilter->GetOutput();
-    vnl_vector< RealValueType > rotatedPatchAsVector =
+    vnl_vector< ComputationType > rotatedPatchAsVector =
         this->ReorientPatchToReferenceFrame(
             fixedIterator, movingIterator, eigenvecMaskImage,
             fixedGradientImage,
@@ -646,12 +646,12 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ReorientAllPatches()
 {
   typedef InputImageType ImageType;
-  float gradientSigma =                          1.0;
+  ComputationType gradientSigma = 1.0;
   typename NeighborhoodIteratorType::RadiusType radius;
 
   GradientImageFilterPointer    movingGradientFilter = GradientImageFilterType::New();
@@ -678,7 +678,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 
   for( long int ii = 0; ii < this->m_PatchesForAllPointsWithinMask.columns(); ii++)
     {
-    vnl_vector< RealValueType > vectorizedPatch =
+    vnl_vector< ComputationType > vectorizedPatch =
         this->m_PatchesForAllPointsWithinMask.get_column( ii );
     typename ImageType::Pointer movingImage =
       this->ConvertVectorToSpatialImage( vectorizedPatch, eigenvecMaskImage);
@@ -688,7 +688,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     movingGradientFilter->Update();
     interp1->SetInputImage( movingImage );
     typename GradientImageType::Pointer movingGradientImage = movingGradientFilter->GetOutput();
-    vnl_vector< RealValueType > rotatedPatchAsVector =
+    vnl_vector< ComputationType > rotatedPatchAsVector =
         this->ReorientPatchToReferenceFrame(
             fixedIterator, movingIterator, eigenvecMaskImage,
             fixedGradientImage,
@@ -699,8 +699,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 
 }
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ProjectOnEigenPatches()
 {
   // perform regression from eigenvectors to images
@@ -714,7 +714,7 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   this->m_EigenvectorCoefficients.set_size( this->m_SignificantPatchEigenvectors.columns(),
     this->m_numberOfVoxelsWithinMask );
   this->m_EigenvectorCoefficients.fill( 0 );
-  vnl_svd< RealValueType > RegressionSVD( this->m_SignificantPatchEigenvectors );
+  vnl_svd< ComputationType > RegressionSVD( this->m_SignificantPatchEigenvectors );
   //  EigenvectorCoefficients =  RegressionSVD.solve(PatchesForAllPointsWithinMask);
   //  not feasible for large matrices
   for( long unsigned int i = 0; i < this->m_numberOfVoxelsWithinMask; ++i )
@@ -726,11 +726,11 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
     x = RegressionSVD.solve( PatchOfInterest );
     this->m_EigenvectorCoefficients.set_column( i, x );
     }
-  vnl_matrix< RealValueType > reconstructedPatches =
+  vnl_matrix< ComputationType > reconstructedPatches =
       this->m_SignificantPatchEigenvectors * this->m_EigenvectorCoefficients;
-  vnl_matrix< RealValueType > error =
+  vnl_matrix< ComputationType > error =
       reconstructedPatches - this->m_PatchesForAllPointsWithinMask;
-  vnl_vector< RealValueType > percentError(error.columns() );
+  vnl_vector< ComputationType > percentError(error.columns() );
   for( int i = 0; i < error.columns(); ++i)
     {
     percentError(i) = error.get_column(i).two_norm() /
@@ -744,8 +744,8 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
 }
 
 
-template<typename TInputImage, typename TOutputImage>
-void RIPMMARCImageFilter<TInputImage, TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
+void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::GenerateData(  )
 {
 // FIXME - the logic below could be cleaned up e.g. do we really need sample
@@ -786,9 +786,9 @@ void RIPMMARCImageFilter<TInputImage, TOutputImage>
   this->SetNthOutput( 0, this->GetCanonicalFrame() );
 }
 
-template<typename TInputImage, typename TOutputImage>
+template <typename TInputImage, typename TOutputImage, class TComputation>
 void
-RIPMMARCImageFilter<TInputImage, TOutputImage>
+RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::PrintSelf( std::ostream &os, Indent indent ) const
 {
   Superclass::PrintSelf( os, indent );
