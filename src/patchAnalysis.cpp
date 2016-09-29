@@ -56,7 +56,7 @@ SEXP patchAnalysisHelper(
   unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
   bool meanCenter = Rcpp::as< bool >( r_meanCenter );
   bool rotInvar = Rcpp::as< bool >( r_rotationInvt );
-  bool doprojection = Rcpp::as< bool >( r_doProj );
+  // bool doprojection = Rcpp::as< bool >( r_doProj );
   unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
   Rcpp::NumericMatrix X =
     Rcpp::as< Rcpp::NumericMatrix >( r_evecBasis );

@@ -36,24 +36,6 @@
 
 namespace itk {
 
-template< class TImage >
-bool IsInside( typename TImage::Pointer input, typename TImage::IndexType index )
-{
-  /** FIXME - should use StartIndex - */
-  typedef TImage ImageType;
-  enum { ImageDimension = ImageType::ImageDimension };
-  bool isinside = true;
-  for( unsigned int i = 0; i < ImageDimension; i++ )
-    {
-    float shifted = index[i];
-    if( shifted < 0 || shifted >  input->GetLargestPossibleRegion().GetSize()[i] - 1  )
-      {
-      isinside = false;
-      }
-    }
-  return isinside;
-}
-
 template <typename TInputImage, typename TOutputImage, class TComputation>
 typename TInputImage::Pointer RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::GenerateMaskImageFromPatch( )
@@ -149,8 +131,8 @@ vnl_vector< TComputation > RIPMMARCImageFilter<TInputImage, TOutputImage, TCompu
     VectorizedImagePatch2[ ii ] = GradientImageNeighborhood2.GetPixel( this->m_IndicesWithinSphere[ ii ] );
     IndexType GradientImageIndex1 = GradientImageNeighborhood1.GetIndex( this->m_IndicesWithinSphere[ ii ] );
     IndexType GradientImageIndex2 = GradientImageNeighborhood2.GetIndex( this->m_IndicesWithinSphere[ ii ] );
-    if( ( IsInside< GradientImageType >( GradientImage1, GradientImageIndex1) ) &&
-	( IsInside< GradientImageType >( GradientImage2, GradientImageIndex2 ) ) )
+    if ( ( this->IsInside( GradientImage1, GradientImageIndex1) ) &&
+	       ( this->IsInside( GradientImage2, GradientImageIndex2 ) ) )
     {
       GradientPixelType GradientPixel1 = GradientImage1->GetPixel( GradientImageIndex1 ) * this->m_weights[ ii ];
       GradientPixelType GradientPixel2 = GradientImage2->GetPixel( GradientImageIndex2 ) * this->m_weights[ ii ];

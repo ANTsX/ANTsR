@@ -304,6 +304,21 @@ protected:
 
   void GenerateData() ITK_OVERRIDE;
 
+  bool IsInside( GradientImagePointer input, IndexType index )
+  {
+    /** FIXME - should use StartIndex - */
+    bool isinside = true;
+    for( unsigned int i = 0; i < ImageDimension; i++ )
+      {
+      ComputationType shifted = index[i];
+      if( shifted < 0 || shifted >  input->GetLargestPossibleRegion().GetSize()[i] - 1  )
+        {
+        isinside = false;
+        }
+      }
+    return isinside;
+  }
+
 private:
 
   RIPMMARCImageFilter( const Self& ) ITK_DELETE_FUNCTION;
