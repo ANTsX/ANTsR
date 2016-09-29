@@ -313,7 +313,6 @@ private:
   vnlMatrixType                               m_EigenvectorCoefficients;
   vnlMatrixType                               m_SignificantPatchEigenvectors;
   vnlMatrixType                               m_PatchesForAllPointsWithinMask;
-  vnlMatrixType                               m_vectorizedPatchMatrix;
   vnl_matrix< int >                           m_patchSeedPoints;
   vnlMatrixType                               m_vectorizedSamplePatchMatrix;
   std::vector< unsigned int >                 m_IndicesWithinSphere;

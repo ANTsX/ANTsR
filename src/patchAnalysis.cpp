@@ -108,6 +108,7 @@ SEXP patchAnalysisHelper(
       ripMat( c, r ) = solV( r, c );
       }
     }
+  filter->GetSignificantPatchEigenvectors().clear();
   // get the full image patch matrix
   solV = filter->GetPatchesForAllPointsWithinMask();
   Rcpp::NumericMatrix iripMat( solV.cols(), solV.rows() );
@@ -119,7 +120,7 @@ SEXP patchAnalysisHelper(
       iripMat( c, r ) = solV( r, c );
       }
     }
-
+  filter->GetPatchesForAllPointsWithinMask().clear();
   // get the full image eigenvectorCoefficients matrix
 //  if ( true ) {
   solV = filter->GetEigenvectorCoefficients();
@@ -132,6 +133,7 @@ SEXP patchAnalysisHelper(
       eripMat( c, r ) = solV( r, c );
       }
     }
+  filter->GetEigenvectorCoefficients().clear();
 //  } // fi
   float varx = filter->GetAchievedVarianceExplained();
   return(
