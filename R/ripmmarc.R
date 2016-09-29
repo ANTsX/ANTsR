@@ -32,10 +32,19 @@
 #' pr = 2
 #' nv = 15
 #' ripped <- ripmmarc( img, thresholdImage(mskTestTrain,2,2), patchRadius=pr,
-#'   patchSamples=5000, patchVarEx=nv, rotationInvariant = F )
+#'   patchSamples=5000, patchVarEx=nv, rotationInvariant = FALSE )
+#' ipatches = ripped$imagePatchMat
+#' ibasis   = scale( ripped$basisMat )
+#' k = 2233
+#' kk = lm( ipatches[k,] ~ t( ibasis[1:10,] ) )
+#' rimg = ripmmarcBasisImage( ripped$canonicalFrame, ipatches[k,] )
+#' # plot( rimg, doCropping=F )
+#' bimg = ripmmarcBasisImage( ripped$canonicalFrame, ibasis[5,] )
+#' # plot( bimg, doCropping=F )
+#'
 #' rippedTest <- ripmmarc( img, thresholdImage(mskTestTrain,1,1), patchRadius=pr,
 #'   evecBasis = ripped$basisMat, canonicalFrame = ripped$canonicalFrame,
-#'   patchSamples=500, patchVarEx=nv, rotationInvariant = F )
+#'   patchSamples=500, patchVarEx=nv, rotationInvariant = FALSE )
 #' lapTrainVox = lap[ mskTestTrain == 2 ]
 #' lapTestVox = lap[ mskTestTrain == 1 ]
 #' mydftr = data.frame( lap=lapTrainVox, t1feats=ripped$evecCoeffs )
