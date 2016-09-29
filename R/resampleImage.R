@@ -13,17 +13,18 @@
 #' @examples
 #'
 #' fi<-antsImageRead( getANTsRData("r16"))
-#' finn<-resampleImage(fi,c(50,60),1,0)
-#' filin<-resampleImage(fi,c(1.5,1.5),0,1)
+#' finn<-resampleImage(fi,c(50,60),TRUE,0)
+#' filin<-resampleImage(fi,c(1.5,1.5),FALSE,1)
 #'
 #' @export resampleImage
-resampleImage <- function(image, resampleParams, useVoxels = 0, interpType = 1) {
+resampleImage <- function(image, resampleParams, useVoxels = FALSE, interpType = 1) {
   if ( image@components == 1 )
     {
     inimg <- antsImageClone(image, "double")
     outimg <- antsImageClone(image, "double")
     rsampar <- paste(resampleParams, collapse = "x")
-    args <- list(image@dimension, inimg, outimg, rsampar, useVoxels, interpType)
+    args <- list(image@dimension, inimg, outimg, rsampar,
+      as.numeric(useVoxels), interpType)
     k <- .int_antsProcessArguments(args)
     retval <- .Call("ResampleImage", k)
     outimg <- antsImageClone(outimg, image@pixeltype)
@@ -37,7 +38,8 @@ resampleImage <- function(image, resampleParams, useVoxels = 0, interpType = 1) 
       inimg <- antsImageClone( mychanns[[k]], "double")
       outimg <- antsImageClone( mychanns[[k]], "double")
       rsampar <- paste(resampleParams, collapse = "x")
-      args <- list( image@dimension, inimg, outimg, rsampar, useVoxels, interpType)
+      args <- list( image@dimension, inimg, outimg, rsampar,
+        as.numeric(useVoxels), interpType)
       temp <- .int_antsProcessArguments(args)
       retval <- .Call("ResampleImage", temp)
       mychanns[[k]] <- antsImageClone(outimg, image@pixeltype)
