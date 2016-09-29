@@ -357,6 +357,7 @@ RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
   m_RotationInvariant( true ),
   m_MeanCenterPatches( true ),
   m_LearnPatchBasis( true ),
+  m_ProjectOnEigenPatches( true ),
   m_Verbose( true ),
   m_PatchRadius( 3 ),
   m_numberOfVoxelsWithinMask( 0 ),
@@ -703,6 +704,7 @@ template <typename TInputImage, typename TOutputImage, class TComputation>
 void RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
 ::ProjectOnEigenPatches()
 {
+  if ( ! this->m_ProjectOnEigenPatches ) return;
   // perform regression from eigenvectors to images
   // Ax = b, whProjectOnEigenPatchesere A is eigenvector matrix (number of indices
   // within patch x number of eigenvectors), x is coefficients
@@ -814,6 +816,9 @@ RIPMMARCImageFilter<TInputImage, TOutputImage, TComputation>
   os << indent << "PatchRadius = " << this->m_PatchRadius << std::endl;
 
   os << indent << "TargetVarianceExplained = " << this->m_TargetVarianceExplained << std::endl;
+
+  os << indent << "ProjectOnEigenPatches = " << this->m_ProjectOnEigenPatches << std::endl;
+
 }
 
 

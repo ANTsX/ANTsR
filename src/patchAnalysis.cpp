@@ -41,6 +41,7 @@ SEXP patchAnalysisHelper(
     SEXP r_canonicalFrame,
     SEXP r_evecBasis,
     SEXP r_rotationInvt,
+    SEXP r_doProj,
     SEXP r_verbose )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -55,6 +56,7 @@ SEXP patchAnalysisHelper(
   unsigned int patchSamples = Rcpp::as< unsigned int >( r_patchSamples );
   bool meanCenter = Rcpp::as< bool >( r_meanCenter );
   bool rotInvar = Rcpp::as< bool >( r_rotationInvt );
+  bool doprojection = Rcpp::as< bool >( r_doProj );
   unsigned int verbose = Rcpp::as< unsigned int >( r_verbose );
   Rcpp::NumericMatrix X =
     Rcpp::as< Rcpp::NumericMatrix >( r_evecBasis );
@@ -89,6 +91,7 @@ SEXP patchAnalysisHelper(
   if ( setcanfram ) {
     filter->SetCanonicalFrame( canFram );
     }
+  filter->SetProjectOnEigenPatches( false );
   filter->SetVerbose( verbose );
   if ( verbose > 0 ) std::cout << filter << std::endl;
   filter->Update( );
@@ -122,7 +125,6 @@ SEXP patchAnalysisHelper(
     }
   filter->GetPatchesForAllPointsWithinMask().clear();
   // get the full image eigenvectorCoefficients matrix
-//  if ( true ) {
   solV = filter->GetEigenvectorCoefficients();
   Rcpp::NumericMatrix eripMat( solV.cols(), solV.rows() );
   rows = solV.rows();
@@ -134,7 +136,6 @@ SEXP patchAnalysisHelper(
       }
     }
   filter->GetEigenvectorCoefficients().clear();
-//  } // fi
   float varx = filter->GetAchievedVarianceExplained();
   return(
       Rcpp::List::create(
@@ -158,6 +159,7 @@ RcppExport SEXP patchAnalysis(
   SEXP r_canonicalFrame,
   SEXP r_evecBasis,
   SEXP r_rotInvar,
+  SEXP r_doProj,
   SEXP r_verbose )
 {
 try
@@ -176,7 +178,8 @@ try
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
         r_patchSamples, r_patchVar, r_meanCenter,
         r_canonicalFrame, r_evecBasis,
-        r_rotInvar, r_verbose )
+        r_rotInvar, r_doProj,
+        r_verbose )
       );
     }
   else if ( (pixeltype == "float") & ( dimension == 3 ) )
@@ -189,7 +192,8 @@ try
         r_inimg, r_maskimg, r_outimg, r_patchRadius,
         r_patchSamples, r_patchVar, r_meanCenter,
         r_canonicalFrame, r_evecBasis,
-        r_rotInvar, r_verbose )
+        r_rotInvar, r_doProj,
+        r_verbose )
       );
     }
   else

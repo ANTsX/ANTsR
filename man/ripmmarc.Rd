@@ -6,7 +6,8 @@
 \usage{
 ripmmarc(img, mask, patchRadius = 3, patchSamples = 1000,
   patchVarEx = 0.95, meanCenter = FALSE, canonicalFrame = NA,
-  evecBasis = NA, rotationInvariant = TRUE, verbose = FALSE)
+  evecBasis = NA, rotationInvariant = TRUE, regressProjections = TRUE,
+  verbose = FALSE)
 }
 \arguments{
 \item{img}{Image to decompose}
@@ -28,6 +29,8 @@ defines the target variance explained.}
 \item{evecBasis}{pass in an existing eigenvector basis.}
 
 \item{rotationInvariant}{boolean sets whether patches are rotationInvariant.}
+
+\item{regressProjections}{boolean return reconstruction parameters.}
 
 \item{verbose}{boolean sets verbosity.}
 }

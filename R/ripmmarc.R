@@ -15,6 +15,7 @@
 #' @param canonicalFrame pass in an existing canonicalFrame.
 #' @param evecBasis pass in an existing eigenvector basis.
 #' @param rotationInvariant boolean sets whether patches are rotationInvariant.
+#' @param regressProjections boolean return reconstruction parameters.
 #' @param verbose boolean sets verbosity.
 #' @return list including the canonical frame, the matrix basis, the patches for
 #' the full image, the projection coefficients for the full image, the
@@ -61,6 +62,7 @@ ripmmarc <- function(
   canonicalFrame = NA,
   evecBasis    = NA,
   rotationInvariant = TRUE,
+  regressProjections = TRUE,
   verbose = FALSE  ) {
   print("WARNING: WIP, this implementation of ripmmarc is not validated!!")
   inimg.float <- antsImageClone( img, "float" )
@@ -76,18 +78,22 @@ ripmmarc <- function(
   outstruct <- .Call("patchAnalysis",
     inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
     meanCenter, canonicalFrame, t(evecBasis),
-    rotationInvariant, verbose, PACKAGE = "ANTsR")
+    rotationInvariant, regressProjections, verbose, PACKAGE = "ANTsR")
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
-  # mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
-  # bmdl = bigLMStats( mdl, includeIntercept = F )
-  # overwrite the C++ patch computation with R results
-  # outstruct$evecCoeffs = t( bmdl$beta )
-  i1v = img[ mask == 1 ]
-  mydf = data.frame( ( outstruct$evecCoeffs  ) )
-  mylmdl = lm( i1v ~ . , data=mydf )
-  mypred = img * 0
-  mypred[ mask == 1 ] = as.numeric( predict( mylmdl ) )
-  outstruct$recon = mypred
+  if ( regressProjections ) {
+    mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
+    bmdl = bigLMStats( mdl, includeIntercept = T )
+    outstruct$evecCoeffs = t( bmdl$beta )
+    }
+  if ( nrow( outstruct$evecCoeffs ) > 0 )
+    {
+    i1v = img[ mask == 1 ]
+    mydf = data.frame( ( outstruct$evecCoeffs  ) )
+    mylmdl = lm( i1v ~ . , data=mydf )
+    mypred = img * 0
+    mypred[ mask == 1 ] = as.numeric( predict( mylmdl ) )
+    outstruct$recon = mypred
+    }
   invisible( gc() )
   return( outstruct )
 }

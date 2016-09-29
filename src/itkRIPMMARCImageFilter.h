@@ -190,6 +190,14 @@ public:
     }
 
   /**
+   * Compute the projection on the eignevectors.  This can take time.
+   * Default = true.
+   */
+  itkSetMacro( ProjectOnEigenPatches, bool );
+  itkGetConstMacro( ProjectOnEigenPatches, bool );
+  itkBooleanMacro( ProjectOnEigenPatches );
+
+  /**
    * Employ rotation invariance.
    * Default = true.
    */
@@ -304,6 +312,7 @@ private:
   bool                                        m_RotationInvariant;
   bool                                        m_MeanCenterPatches;
   bool                                        m_LearnPatchBasis;
+  bool                                        m_ProjectOnEigenPatches;
   bool                                        m_Verbose;
   RealType                                    m_PatchRadius;
   RealType                                    m_TargetVarianceExplained;
