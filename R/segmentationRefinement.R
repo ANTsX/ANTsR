@@ -333,9 +333,10 @@ for( l in 1:length( labelSet ) )
           {
           featureImagesArray <- as.array( featureImages[[i]][[j]] )
           meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-          if( meanValue != 0 )
+          sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+          if( sdValue != 0 )
             {
-            values <- values / meanValue
+            values <- ( values - meanValue ) / sdValue
             }
           }
 
@@ -370,14 +371,22 @@ for( l in 1:length( labelSet ) )
   # Start the clock
   ptm <- proc.time()
 
+#   capture.output( modelForestTuneRF <- randomForest::tuneRF(
+#     modelDataPerLabel[, !( colnames( modelDataPerLabel ) == 'Labels' )], modelDataPerLabel$Labels,
+#     plot = FALSE
+#     ) )
+#   minMtry <- modelForestTuneRF[which( modelForestTuneRF[,2] == min( modelForestTuneRF[,2] ) ), 1]
+#   numberOfPredictors <- ncol( modelDataPerLabel[, !( colnames( modelDataPerLabel ) == 'Labels' )] )
+#   message( "  mtry min = ", minMtry, " (number of total predictors = ", numberOfPredictors, ")\n", sep = "" )
+
   modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
-    ntree = 1000, type = "classification", importance = TRUE, na.action = na.omit )
+    ntree = 500, type = "classification", importance = TRUE, na.action = na.omit )
 
   # Stop the clock
   elapsedTime <- proc.time() - ptm
   message( "  Done (", as.numeric( elapsedTime[3] ), " seconds).\n", sep = "" )
 
-  labelModels[[l]] <- modelForest;
+  labelModels[[l]] <- modelForest
   }
 
 return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames = featureImageNames ) )
@@ -605,9 +614,10 @@ for( l in 1:length( labelSet ) )
       {
       featureImagesArray <- as.array( featureImages[[j]] )
       meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-      if( meanValue != 0 )
+      sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+      if( sdValue != 0 )
         {
-        values <- values / meanValue
+        values <- ( values - meanValue ) / sdValue
         }
       }
     subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
