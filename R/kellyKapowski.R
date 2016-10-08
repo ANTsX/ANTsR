@@ -26,8 +26,8 @@
 kellyKapowski <- function( s = NA, g = NA, w = NA,
    its = 50, r = 0.025,
    m = 1.5,  ...) {
-  if (missing(s) | missing(g) | missing(w) | missing(its) | missing(r) |
-    missing(m)  ) {
+  if (missing(s) | missing(g) | missing(w) |
+    is.na(s) | is.na(g) | is.na(w)) {
     print("Input error - check params & usage")
     return(NULL)
   }
@@ -37,8 +37,10 @@ kellyKapowski <- function( s = NA, g = NA, w = NA,
   # kellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
   d=s@dimension
   outimg=antsImageClone(g)
-  kkargs <- list(d = d, s = s, g = g, w = w, c = its, r = 0.5, m = 1,
-    o = outimg)
+  kkargs <- list(d = d, s = s, g = g, w = w, 
+    c = its, r = r, m = m,
+    o = outimg,
+    ...)
   temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
     PACKAGE = "ANTsR" )
   return(outimg)
