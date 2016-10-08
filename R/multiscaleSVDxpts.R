@@ -11,6 +11,7 @@
 #' @param r radius of epsilon-ball
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
+#' @param sigma parameter for kernel PCA.
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -19,10 +20,15 @@
 #' \dontrun{
 #' mat = matrix( rnorm(60), ncol=10 )
 #' smat = sparseDistanceMatrix( mat, 2 )
+#' r16 = antsImageRead( getANTsRData( 'r16' ) )
+#' mask = getMask( r16 )
+#' mat <- getNeighborhoodInMask(image = r16, mask = mask, radius = c(0,0),
+#'   physical.coordinates=TRUE, spatial.info=TRUE )
+#' smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
 #' }
 #' @export sparseDistanceMatrix
-sparseDistanceMatrix <- function( x, k = 3, r = Inf,
-  kmetric = c("euclidean", "correlation", "covariance"  ),
+sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
+  kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
   eps = 1.e-6 )
 {
   # note that we can convert from distance to covariance
@@ -36,6 +42,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
   if ( ! usePkg("nabor") )
     stop("Please install the nabor package")
   kmetric <- match.arg( kmetric )
+  if ( kmetric == "gaussian" & is.na( sigma ) )
+    stop("Please set the sigma parameter")
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
   if ( cometric & r == Inf ) r = -Inf
 #  if ( ! usePkg("irlba") )
@@ -62,6 +70,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
     {
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
+    if ( kmetric == "gaussian" & !is.na( sigma ) )
+      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
@@ -83,6 +93,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
     j=myijmat[,2],
     x=myijmat[,3], symmetric = TRUE
   )
+  if ( kmetric == "gaussian" ) diag( kmatSparse ) = 1
   if ( cometric )
     {
     if ( kmetric == "covariance" )  diag( kmatSparse ) = mycov^2
@@ -131,8 +142,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf,
 #' smat2 = sparseDistanceMatrixXY( mat2, mat, 3 )
 #' }
 #' @export sparseDistanceMatrixXY
-sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
-  kmetric = c("euclidean", "correlation", "covariance"  ),
+sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
+  kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
   eps = 1.e-6 )
 {
   if ( ! usePkg("Matrix") )
@@ -140,6 +151,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
   if ( ! usePkg("nabor") )
     stop("Please install the nabor package")
   kmetric <- match.arg( kmetric )
+  if ( kmetric == "gaussian" & is.na( sigma ) )
+    stop("Please set the sigma parameter")
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
   if ( cometric & r == Inf ) r = -Inf
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
@@ -163,6 +176,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf,
     {
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
+    if ( kmetric == "gaussian" & !is.na( sigma ) )
+      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
       {

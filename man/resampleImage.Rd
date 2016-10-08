@@ -4,7 +4,7 @@
 \alias{resampleImage}
 \title{resampleImage}
 \usage{
-resampleImage(image, resampleParams, useVoxels = 0, interpType = 1)
+resampleImage(image, resampleParams, useVoxels = FALSE, interpType = 1)
 }
 \arguments{
 \item{image}{input antsImage matrix}
@@ -20,13 +20,14 @@ resampleImage(image, resampleParams, useVoxels = 0, interpType = 1)
 output antsImage
 }
 \description{
-Resample image by spacing or number of voxels with various interpolators
+Resample image by spacing or number of voxels with various interpolators.
+Works with multi-channel images.
 }
 \examples{
 
 fi<-antsImageRead( getANTsRData("r16"))
-finn<-resampleImage(fi,c(50,60),1,0)
-filin<-resampleImage(fi,c(1.5,1.5),0,1)
+finn<-resampleImage(fi,c(50,60),TRUE,0)
+filin<-resampleImage(fi,c(1.5,1.5),FALSE,1)
 
 }
 \author{

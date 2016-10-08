@@ -18,9 +18,13 @@
 #' @export createJacobianDeterminantImage
 createJacobianDeterminantImage <- function( domainImg, tx, doLog = 0) {
   dim<-domainImg@dimension
-  args <- list(dim, tx, doLog)
+  if ( class( tx ) == "antsImage" ) {
+    txuse = tempfile( fileext = c(".nii.gz") )
+    antsImageWrite( tx, txuse )
+    } else txuse = tx
+  args <- list(dim, txuse, doLog)
   dimg <- antsImageClone( domainImg, "double" )
-  args2 <- list(dim, tx, dimg, doLog, 1)
+  args2 <- list(dim, txuse, dimg, doLog, 1)
   k <- .int_antsProcessArguments(args2)
   retval <- (.Call("CreateJacobianDeterminantImage", k, PACKAGE = "ANTsR"))
   jimg <- antsImageClone(args2[[3]], "float")

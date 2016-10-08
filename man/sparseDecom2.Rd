@@ -27,7 +27,9 @@ unsigned 99 percent and 90 percent sparse solution for each respective view}
 
 \item{statdir}{temporary directory if you want to look at full output}
 
-\item{perms}{number of permutations}
+\item{perms}{number of permutations. settings permutations greater than 0
+will estimate significance per vector empirically. For small datasets, these
+may be conservative.  p-values depend on how one scales the input matrices.}
 
 \item{uselong}{enforce solutions of both views to be the same - requires
 matrices to be the same size}
@@ -67,14 +69,11 @@ We leave scaling choices to the user.
 mat<-replicate(100, rnorm(20))
 mat2<-replicate(100, rnorm(20))
 mat<-scale(mat)
-mat<-mat-min(mat)
 mat2<-scale(mat2)
-mat2<-mat2-min(mat2)
 mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
   sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
 wt<-0.666
 mat3<-mat*wt+mat2*(1-wt)
-mat3<-mat3-min(mat3)
 mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=5 )
 

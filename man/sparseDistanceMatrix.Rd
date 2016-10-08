@@ -4,8 +4,9 @@
 \alias{sparseDistanceMatrix}
 \title{Create sparse distance, covariance or correlation matrix}
 \usage{
-sparseDistanceMatrix(x, k = 3, r = Inf, kmetric = c("euclidean",
-  "correlation", "covariance"), eps = 1e-06)
+sparseDistanceMatrix(x, k = 3, r = Inf, sigma = NA,
+  kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
+  eps = 1e-06)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}
@@ -13,6 +14,8 @@ sparseDistanceMatrix(x, k = 3, r = Inf, kmetric = c("euclidean",
 \item{k}{number of neighbors}
 
 \item{r}{radius of epsilon-ball}
+
+\item{sigma}{parameter for kernel PCA.}
 
 \item{kmetric}{similarity or distance metric determining k nearest neighbors}
 
@@ -32,6 +35,11 @@ relevant publications by Mauro Maggioni and other authors.
 \dontrun{
 mat = matrix( rnorm(60), ncol=10 )
 smat = sparseDistanceMatrix( mat, 2 )
+r16 = antsImageRead( getANTsRData( 'r16' ) )
+mask = getMask( r16 )
+mat <- getNeighborhoodInMask(image = r16, mask = mask, radius = c(0,0),
+  physical.coordinates=TRUE, spatial.info=TRUE )
+smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
 }
 }
 \author{

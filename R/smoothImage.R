@@ -1,6 +1,6 @@
 #' @name smoothImage
 #' @title Smooth image
-#' @description Smooth image
+#' @description Smooth image or multi-channel image
 #' @param inimg Image to smooth
 #' @param sigma Smoothing factor.  Can be scalar, in which case the same sigma
 #' is applied to each dimension, or a vector of length \code{dim(inimg)} to
@@ -18,22 +18,37 @@
 #' @export smoothImage
 smoothImage <- function(inimg, sigma, sigmaInPhysicalCoordinates=TRUE,
     FWHM=FALSE, max_kernel_width = 70) {
-  smoothingparams<-sigma
-  outimg<-antsImageClone(inimg)
-  sigma <- as.vector(sigma)
-  if ( (length(sigma) != 1) & (length(sigma) != length(dim(inimg))) ) {
-    stop(paste("Length of sigma must be either 1 or the",
-               "dimensionality of input image."))
-  }
-  inimg.float <- antsImageClone(inimg, "float")
-  outimg <- antsImageClone(inimg.float)
-  if (FWHM) {
-    sigma <- sigma / 2.355
-  }
-  max_kernel_width = as.integer(ceiling(max_kernel_width))
-  outimg <- .Call("smoothImage",
-    inimg.float, outimg, sigma, sigmaInPhysicalCoordinates,
-    max_kernel_width,
-    PACKAGE = "ANTsR")
-  return(antsImageClone(outimg, inimg@pixeltype))
+  if ( inimg@components == 1 )
+    return( .smoothImageHelper(   inimg, sigma, sigmaInPhysicalCoordinates,
+      FWHM, max_kernel_width ) ) else {
+        iList = splitChannels( inimg )
+        return( mergeChannels( lapply( iList, function(x) {
+          .smoothImageHelper(  x, sigma, sigmaInPhysicalCoordinates,
+            FWHM, max_kernel_width )
+           } )
+           )
+        )
+      }
+}
+
+
+.smoothImageHelper <- function(inimg, sigma, sigmaInPhysicalCoordinates=TRUE,
+    FWHM=FALSE, max_kernel_width = 70) {
+outimg<-antsImageClone(inimg)
+sigma <- as.vector(sigma)
+if ( (length(sigma) != 1) & (length(sigma) != length(dim(inimg))) ) {
+  stop(paste("Length of sigma must be either 1 or the",
+             "dimensionality of input image."))
+}
+inimg.float <- antsImageClone(inimg, "float")
+outimg <- antsImageClone(inimg.float)
+if (FWHM) {
+  sigma <- sigma / 2.355
+}
+max_kernel_width = as.integer(ceiling(max_kernel_width))
+outimg <- .Call("smoothImage",
+  inimg.float, outimg, sigma, sigmaInPhysicalCoordinates,
+  max_kernel_width,
+  PACKAGE = "ANTsR")
+return(antsImageClone(outimg, inimg@pixeltype))
 }

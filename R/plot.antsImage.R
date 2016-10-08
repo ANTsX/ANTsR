@@ -87,7 +87,10 @@ plot.antsImage <- function(x, y,
   useAbsoluteScale = FALSE,
   doCropping = TRUE,
   ... ) {
-
+if ( x@components > 1 )
+  {
+  stop("Cannot plot multichannel image: splitChannels, then plot as overlays.")
+  }
 if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
 interpStyle = 'NearestNeighbor'
 interpStyle = 'Linear'

@@ -26,7 +26,7 @@ of the filter, not the sigma of a Gaussian kernel.}
 antsImage smoothed image
 }
 \description{
-Smooth image
+Smooth image or multi-channel image
 }
 \examples{
 img <- makeImage(c(5,5), rnorm(25))
