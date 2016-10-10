@@ -30,6 +30,10 @@
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
 #'        by the mean of the voxels in that ROI.  Can also specify as a vector to normalize
 #'        per feature image.
+#' @param useEntireLabeledRegion if TRUE, samples are taken from the full dilated ROI for
+#'        each label.  If FALSE, samples are taken only from the combined inner and outer
+#'        boundary region determined by the neighborhoodRadius parameter. Can also specify
+#'        as a vector to determine per label.
 #'
 #' @return list with the models per label (LabelModels), the label set (LabelSet), and
 #'         the feature image names (FeatureImageNames).
@@ -83,7 +87,7 @@
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
 #'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-#'    normalizeSamplesPerLabel = TRUE )
+#'    normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 #'
 #'  cat( "\nGenerating importance plots.\n\n" )
 #'
@@ -112,7 +116,7 @@
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
   maximumNumberOfSamplesOrProportionPerClass = 1, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = TRUE )
 {
 
 # check inputs
@@ -184,6 +188,13 @@ if( length( labelSet ) == 0 )
   }
 labelSet <- sort( labelSet )
 
+if( length( useEntireLabeledRegion ) == 1 )
+  {
+  useEntireLabeledRegion <- rep( useEntireLabeledRegion[1], length( labelSet ) )
+  } else if ( length( useEntireLabeledRegion ) > 1 && length( useEntireLabeledRegion ) != length( labelSet ) ) {
+  stop( "The size of the variable useEntireLabeledRegion does not match the number of labels." );
+  }
+
 ## Create the models per label
 
 labelModels <- list()
@@ -221,18 +232,28 @@ for( l in 1:length( labelSet ) )
     if( ! is.character( dilationRadius ) )
       {
       roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-      roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
-      roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+
+      if( useEntireLabeledRegion[l] )
+        {
+        roiMaskImage <- roiDilationMaskImage
+        } else {
+        roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
+        roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+        }
       } else {
       dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
       distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-      minSpacing <- min( antsGetSpacing( distanceImage ) )
 
-      segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
-      distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
-
-      roiMaskImage <- thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 ) +
-                      thresholdImage( distanceInverseImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
+      if( useEntireLabeledRegion[l] )
+        {
+        roiMaskImage <- thresholdImage( distanceImage, -1e6, dilationRadiusValue, 1, 0 )
+        } else {
+        minSpacing <- min( antsGetSpacing( distanceImage ) )
+        segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
+        distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
+        roiMaskImage <- thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 ) +
+                        thresholdImage( distanceInverseImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
+        }
       }
     roiMaskArray <- as.array( roiMaskImage )
 
@@ -416,6 +437,10 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #'        with what was used for training.
 #' @param normalizeSamplesPerLabel if TRUE, the samples from each ROI are normalized
 #'        by the mean of the voxels in that ROI.  Can be a vector (one element per feature).
+#' @param useEntireLabeledRegion if TRUE, estimation is performed on the full dilated ROI for
+#'        each label.  If FALSE, estimation is performed on the combined inner and outer
+#'        boundary region determined by the neighborhoodRadius parameter.  Can also specify
+#'        as a vector to determine per label.
 #'
 #' @return a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
 #'         and a list of the foreground probability images (ForegroundProbabilityImages).
@@ -469,7 +494,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 #'    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
 #'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-#'    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
+#'    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 #'
 #'  cat( "\nPrediction\n\n" )
 #'
@@ -550,6 +575,13 @@ if( length( normalizeSamplesPerLabel ) == 1 )
   stop( "The size of the variable normalizeSamplesPerLabel does not match the number of features." );
   }
 
+if( length( useEntireLabeledRegion ) == 1 )
+  {
+  useEntireLabeledRegion <- rep( useEntireLabeledRegion[1], length( labelSet ) )
+  } else if ( length( useEntireLabeledRegion ) > 1 && length( useEntireLabeledRegion ) != length( labelSet ) ) {
+  stop( "The size of the variable useEntireLabeledRegion does not match the number of labels." );
+  }
+
 segmentationArray <- as.array( segmentationImage )
 
 # we add a row of zeros to use with max.col to stand in for a '0' label (i.e. background)
@@ -583,18 +615,27 @@ for( l in 1:length( labelSet ) )
   if( ! is.character( dilationRadius ) )
     {
     roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-    roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
-    roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+    if( useEntireLabeledRegion[l] )
+      {
+      roiMaskImage <- roiDilationMaskImage
+      } else {
+      roiErosionMaskImage <- iMath( segmentationSingleLabelImage, "ME" , dilationRadius )
+      roiMaskImage <- roiDilationMaskImage - roiErosionMaskImage
+      }
     } else {
     dilationRadiusValue <- as.numeric( gsub( 'mm', '', dilationRadius ) )
     distanceImage <- iMath( segmentationSingleLabelImage, "MaurerDistance" )
-    minSpacing <- min( antsGetSpacing( distanceImage ) )
 
-    segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
-    distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
-
-    roiMaskImage <- thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 ) +
-                    thresholdImage( distanceInverseImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
+    if( useEntireLabeledRegion[l] )
+      {
+      roiMaskImage <- thresholdImage( distanceImage, -1e6, dilationRadiusValue, 1, 0 )
+      } else {
+      minSpacing <- min( antsGetSpacing( distanceImage ) )
+      segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
+      distanceInverseImage <- iMath( segmentationSingleLabelInverseImage, "MaurerDistance" )
+      roiMaskImage <- thresholdImage( distanceImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 ) +
+                      thresholdImage( distanceInverseImage, 0.1 * minSpacing, dilationRadiusValue, 1, 0 )
+      }
     }
   roiMaskArray <- as.array( roiMaskImage )
   roiMaskArrayIndices <- which( roiMaskArray != 0 )
