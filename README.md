@@ -51,7 +51,7 @@ OS X Mavericks, Yosemite binaries:	[OSX](http://github.com/stnava/ANTsR/releases
 
 Linux binaries: [Ubuntu](http://github.com/stnava/ANTsR/releases/)
 
-We are working toward Windows binaries.
+*Windows* installation option [here](https://github.com/stnava/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).)
 
 Install the binary, after downloading, via command line:
 
