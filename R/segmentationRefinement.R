@@ -512,7 +512,7 @@ return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames
 
 segmentationRefinement.predict <- function( segmentationImage, labelSet,
   labelModels, featureImages, featureImageNames, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE )
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = TRUE )
 {
 
 if ( ! usePkg( "randomForest" ) )
