@@ -246,7 +246,7 @@ for( l in 1:length( labelSet ) )
 
       if( useEntireLabeledRegion[l] )
         {
-        roiMaskImage <- thresholdImage( distanceImage, 0, dilationRadiusValue, 1, 0 )
+        roiMaskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
         } else {
         minSpacing <- min( antsGetSpacing( distanceImage ) )
         segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
@@ -628,7 +628,7 @@ for( l in 1:length( labelSet ) )
 
     if( useEntireLabeledRegion[l] )
       {
-      roiMaskImage <- thresholdImage( distanceImage, 0, dilationRadiusValue, 1, 0 )
+      roiMaskImage <- thresholdImage( distanceImage, -10000, dilationRadiusValue, 1, 0 )
       } else {
       minSpacing <- min( antsGetSpacing( distanceImage ) )
       segmentationSingleLabelInverseImage <- thresholdImage( segmentationSingleLabelImage, 0, 0, 1, 0 )
