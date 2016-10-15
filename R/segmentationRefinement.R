@@ -333,7 +333,7 @@ for( l in 1:length( labelSet ) )
     subjectDataPerLabel <- matrix( NA, nrow = sum( numberOfSamplesPerLabelInSubjectData ), ncol = length( featureImageNames ) * numberOfNeighborhoodVoxels + 1 )
     for( j in 1:length( featureImageNames ) )
       {
-      featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[i]][[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
+      featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[i]][[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "mean" )
 
       for( n in 1:length( binaryLabelSet ) )
         {
@@ -649,7 +649,7 @@ for( l in 1:length( labelSet ) )
   subjectDataPerLabel <- matrix( NA, nrow = length( roiMaskArrayIndices ), ncol = length( featureImages ) * numberOfNeighborhoodVoxels )
   for( j in 1:length( featureImages ) )
     {
-    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "image" )
+    featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "mean" )
     values <- featureImageNeighborhoodValues[, roiMaskArrayIndices]
     if( normalizeSamplesPerLabel[j] )
       {
