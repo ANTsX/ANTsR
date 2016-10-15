@@ -88,29 +88,6 @@
 #'    featureImageNames = featureImageNames, labelSet = segmentationLabels,
 #'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
 #'    normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
-#'
-#'  cat( "\nGenerating importance plots.\n\n" )
-#'
-#'  for( m in 1:length( segLearning$LabelModels ) )
-#'    {
-#'    forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
-#'    forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
-#'    forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
-#'
-#'    forestImp.df$Statistic <- factor( x = forestImp.df$Statistic, levels = forestImp.df$Statistic )
-#'
-#'    iPlot <- ggplot( data = forestImp.df, aes( x = Importance, y = Statistic ) ) +
-#'             geom_point( aes( color = Importance ) ) +
-#'             labs( title = paste0( 'Label ', segLearning$LabelSet[m] ) ) +
-#'             ylab( "" ) +
-#'             xlab( "MeanDecreaseAccuracy" ) +
-#'             scale_color_continuous( low = "navyblue", high = "darkred" ) +
-#'             theme( axis.text.y = element_text( size = 10 ) ) +
-#'             theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
-#'             theme( legend.position = "none" )
-#'    ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
-#'    }
-#'
 #' }
 
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
@@ -124,6 +101,11 @@ segmentationRefinement.train <- function( featureImages, truthLabelImages,
 if ( ! usePkg( "randomForest" ) )
   {
   stop( "Please install the randomForest package." )
+  }
+
+if ( ! usePkg( "xgboost" ) )
+  {
+  stop( "Please install the xgboost package." )
   }
 
 totalNumberOfSubjects <- length( truthLabelImages )
@@ -214,10 +196,10 @@ for( l in 1:length( labelSet ) )
     # find which voxels are mislabeled.  These mislabeled and correctly labeled voxels are
     # given in the variable "mislabeledVoxelsMaskArray"
 
-    truePositiveLabel <- 2
-    trueNegativeLabel <- 1
-    falseNegativeLabel <- -1       # type II
-    falsePositiveLabel <- -2       # type I
+    truePositiveLabel <- 3
+    trueNegativeLabel <- 2
+    falseNegativeLabel <- 1       # type II
+    falsePositiveLabel <- 0       # type I
 
     segmentationSingleLabelImage <- thresholdImage( antsImageClone( segmentationImages[[i]], 'float' ), label, label, 1, 0 )
     segmentationSingleLabelArray <- as.array( segmentationSingleLabelImage )
@@ -385,13 +367,27 @@ for( l in 1:length( labelSet ) )
 
   ## Create the random forest model
 
-  message( "  \nCreating the RF model for label ", label, ".  ", sep = "" )
-
-  modelFormula <- as.formula( "Labels ~ . " )
+  message( "  \nCreating the prediction model for label ", label, ".  ", sep = "" )
 
   # Start the clock
   ptm <- proc.time()
 
+#   ** xgboost modeling **
+
+  modelData <- modelDataPerLabel
+  modelData$Labels <- NULL
+  modelData <- as.matrix( modelData )
+  modelLabels <- as.character( modelDataPerLabel$Labels )
+
+  modelDataPerLabelXgb <- xgb.DMatrix( modelData, label = modelLabels )
+
+  paramXgb <- list( max.depth = 6, eta = 0.3, silent = 0, objective = "multi:softprob", num_class = length( binaryLabelSet ) )
+  modelXgb <- xgboost::xgb.train( paramXgb, modelDataPerLabelXgb, nrounds = 2, nthread = 2, verbose = 0 )
+
+  labelModels[[l]] <- modelXgb
+
+#   ** randomForest modeling **
+#
 #   capture.output( modelForestTuneRF <- randomForest::tuneRF(
 #     modelDataPerLabel[, !( colnames( modelDataPerLabel ) == 'Labels' )], modelDataPerLabel$Labels,
 #     plot = FALSE
@@ -399,15 +395,17 @@ for( l in 1:length( labelSet ) )
 #   minMtry <- modelForestTuneRF[which( modelForestTuneRF[,2] == min( modelForestTuneRF[,2] ) ), 1]
 #   numberOfPredictors <- ncol( modelDataPerLabel[, !( colnames( modelDataPerLabel ) == 'Labels' )] )
 #   message( "  mtry min = ", minMtry, " (number of total predictors = ", numberOfPredictors, ")\n", sep = "" )
-
-  modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
-    ntree = 500, type = "classification", importance = TRUE, na.action = na.omit )
+#
+#   modelFormula <- as.formula( "Labels ~ . " )
+#   modelForest <- randomForest::randomForest( modelFormula, modelDataPerLabel,
+#     ntree = 500, type = "classification", importance = TRUE, na.action = na.omit )
+#
+#   labelModels[[l]] <- modelForest
 
   # Stop the clock
   elapsedTime <- proc.time() - ptm
   message( "  Done (", as.numeric( elapsedTime[3] ), " seconds).\n", sep = "" )
 
-  labelModels[[l]] <- modelForest
   }
 
 return ( list( LabelModels = labelModels, LabelSet = labelSet, FeatureImageNames = featureImageNames ) )
@@ -664,18 +662,22 @@ for( l in 1:length( labelSet ) )
     subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
     }
   colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNames )
-  subjectDataPerLabel <- as.data.frame( subjectDataPerLabel )
 
   # Do prediction
 
-  subjectProbabilitiesPerLabel <- predict( labelModels[[l]], subjectDataPerLabel, type = "prob" )
-
-#   truePositiveLabel <- 2
-#   trueNegativeLabel <- 1
-#   falseNegativeLabel <- -1       # type II
-#   falsePositiveLabel <- -2       # type I
+#   truePositiveLabel <- 3
+#   trueNegativeLabel <- 2
+#   falseNegativeLabel <- 1       # type II
+#   falsePositiveLabel <- 0       # type I
 
 #  binaryLabelSet <- c( falsePositiveLabel, falseNegativeLabel, trueNegativeLabel, truePositiveLabel )
+
+#   ** xgboost prediction **
+  subjectProbabilitiesPerLabelVector <- predict( labelModels[[l]], subjectDataPerLabel )
+  subjectProbabilitiesPerLabel <- matrix( subjectProbabilitiesPerLabelVector, ncol = 4, byrow = TRUE )
+
+#   ** randomForest prediction **
+#  subjectProbabilitiesPerLabel <- predict( labelModels[[l]], as.data.frame( subjectDataPerLabel ), type = "prob" )
 
   roiMaskArrayTruePositiveIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 1 )
   roiMaskArrayFalseNegativeIndices <- which( segmentationSingleLabelArray[roiMaskArrayIndices] == 0 )
