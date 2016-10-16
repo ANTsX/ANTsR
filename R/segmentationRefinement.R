@@ -98,10 +98,10 @@ segmentationRefinement.train <- function( featureImages, truthLabelImages,
 
 # check inputs
 
-if ( ! usePkg( "randomForest" ) )
-  {
-  stop( "Please install the randomForest package." )
-  }
+# if ( ! usePkg( "randomForest" ) )
+#   {
+#   stop( "Please install the randomForest package." )
+#   }
 
 if ( ! usePkg( "xgboost" ) )
   {
@@ -513,9 +513,14 @@ segmentationRefinement.predict <- function( segmentationImage, labelSet,
   neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = TRUE )
 {
 
-if ( ! usePkg( "randomForest" ) )
+# if ( ! usePkg( "randomForest" ) )
+#   {
+#   stop( "Please install the randomForest package." )
+#   }
+
+if ( ! usePkg( "xgboost" ) )
   {
-  stop( "Please install the randomForest package." )
+  stop( "Please install the xgboost package." )
   }
 
 if( missing( segmentationImage ) )
