@@ -381,12 +381,22 @@ for( l in 1:length( labelSet ) )
 
   modelDataPerLabelXgb <- xgb.DMatrix( modelData, label = modelLabels )
 
+#      * xgboost tuning using cross validation
+#
+#  http://www.slideshare.net/odsc/owen-zhangopen-sourcetoolsanddscompetitions1 (slide 23)
+#
+#  xgb.cv.history <- xgb.cv( data = modelDataPerLabelXgb, nround = 500, nthread = 2,
+#                             nfold = 5, metrics = list ( "merror" ), max.delspth = 3,
+#                             eta = 0.3, objective = "multi:softprob", num_class = 4 )
+#
   paramXgb <- list( max.depth = 6, eta = 0.3, silent = 0, objective = "multi:softprob", num_class = length( binaryLabelSet ) )
   modelXgb <- xgboost::xgb.train( paramXgb, modelDataPerLabelXgb, nrounds = 2, nthread = 2, verbose = 0 )
 
   labelModels[[l]] <- modelXgb
 
 #   ** randomForest modeling **
+#
+#      * randomForest tuning
 #
 #   capture.output( modelForestTuneRF <- randomForest::tuneRF(
 #     modelDataPerLabel[, !( colnames( modelDataPerLabel ) == 'Labels' )], modelDataPerLabel$Labels,
