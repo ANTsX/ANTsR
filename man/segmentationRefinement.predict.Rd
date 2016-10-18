@@ -6,7 +6,8 @@
 \usage{
 segmentationRefinement.predict(segmentationImage, labelSet, labelModels,
   featureImages, featureImageNames, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE,
+  useEntireLabeledRegion = TRUE)
 }
 \arguments{
 \item{segmentationImage}{image to refine via corrective learning.}
@@ -33,6 +34,11 @@ with what was used for training.}
 
 \item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are normalized
 by the mean of the voxels in that ROI.  Can be a vector (one element per feature).}
+
+\item{useEntireLabeledRegion}{if TRUE, estimation is performed on the full dilated ROI for
+each label.  If FALSE, estimation is performed on the combined inner and outer
+boundary region determined by the neighborhoodRadius parameter.  Can also specify
+as a vector to determine per label.}
 }
 \value{
 a list consisting of the refined segmentation estimate (RefinedSegmentationImage)
@@ -91,7 +97,7 @@ to refine an initial segmentation.
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE )
+   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 
  cat( "\\nPrediction\\n\\n" )
 

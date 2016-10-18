@@ -39,6 +39,7 @@ Suggests:
     grid,
     h5,
     igraph,
+    irlba,
     knitr,
     magic,
     MASS,
@@ -62,7 +63,8 @@ Suggests:
     sna,
     testthat,
     visreg,
-    wmtsa
+    wmtsa,
+    xgboost
 LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR

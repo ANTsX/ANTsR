@@ -7,7 +7,8 @@
 segmentationRefinement.train(featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
   maximumNumberOfSamplesOrProportionPerClass = 1, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE)
+  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE,
+  useEntireLabeledRegion = TRUE)
 }
 \arguments{
 \item{featureImages}{a list of lists of feature images.  Each list of feature images
@@ -43,6 +44,11 @@ building the model.  The user can specify a scalar or vector.}
 \item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are normalized
 by the mean of the voxels in that ROI.  Can also specify as a vector to normalize
 per feature image.}
+
+\item{useEntireLabeledRegion}{if TRUE, samples are taken from the full dilated ROI for
+each label.  If FALSE, samples are taken only from the combined inner and outer
+boundary region determined by the neighborhoodRadius parameter. Can also specify
+as a vector to determine per label.}
 }
 \value{
 list with the models per label (LabelModels), the label set (LabelSet), and
@@ -101,30 +107,7 @@ for each label in the initial segmentation data.
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-   normalizeSamplesPerLabel = TRUE )
-
- cat( "\\nGenerating importance plots.\\n\\n" )
-
- for( m in 1:length( segLearning$LabelModels ) )
-   {
-   forestImp <- importance( segLearning$LabelModels[[m]], type = 1 )
-   forestImp.df <- data.frame( Statistic = names( forestImp[,1] ), Importance = as.numeric( forestImp[,1] )  )
-   forestImp.df <- forestImp.df[order( forestImp.df$Importance ),]
-
-   forestImp.df$Statistic <- factor( x = forestImp.df$Statistic, levels = forestImp.df$Statistic )
-
-   iPlot <- ggplot( data = forestImp.df, aes( x = Importance, y = Statistic ) ) +
-            geom_point( aes( color = Importance ) ) +
-            labs( title = paste0( 'Label ', segLearning$LabelSet[m] ) ) +
-            ylab( "" ) +
-            xlab( "MeanDecreaseAccuracy" ) +
-            scale_color_continuous( low = "navyblue", high = "darkred" ) +
-            theme( axis.text.y = element_text( size = 10 ) ) +
-            theme( plot.margin = unit( c( 0.1, 0.1, 0.1, -0.5 ), "cm" ) ) +
-            theme( legend.position = "none" )
-   ggsave( file = paste0( 'importancePlotsLabel', segLearning$LabelSet[m], '.pdf' ), plot = iPlot, width = 4, height = 6 )
-   }
-
+   normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 }
 }
 \author{

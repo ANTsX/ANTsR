@@ -66,3 +66,56 @@ composeTransformsToField <- function(
     }
 mergeChannels( vecimglist )
 }
+
+
+
+
+#' Image domain to spatial position
+#'
+#' Transform a d-dimensional image into a d by p matrix that encodes the spatial
+#' coordinates of the image domain.
+#'
+#' @param image input image
+#' @param mask optional input mask
+#' @return matrix is output
+#' @author Avants BB
+#' @examples
+#'
+#' img = antsImageRead( getANTsRData( 'r16' ) )
+#' spmat = imageDomainToSpatialMatrix( img )
+#'
+#' @export imageDomainToSpatialMatrix
+imageDomainToSpatialMatrix <- function( image, mask ) {
+  if ( missing( mask ) ) {
+    mask = antsImageClone( image ) * 0
+    mask = mask + 1
+  }
+  mydim = image@dimension
+  if ( TRUE ) {
+  n = getNeighborhoodInMask( image, mask, rep(0,mydim),
+      physical.coordinates = TRUE,
+      boundary.condition = "mean", spatial.info = TRUE, get.gradient = FALSE)
+  n = n$indices
+  for ( i in 1:nrow( n ) )
+    {
+    n[ i, ] = as.numeric( antsTransformIndexToPhysicalPoint( image, n[ i, ] ) )
+    }
+  return( n )
+  }
+  # above approach is slower but does not return physical space
+  outmat = matrix( nrow = sum( mask ), ncol = mydim )
+  it = antsImageIterator( mask )
+  ct = 1
+  while ( !antsImageIteratorIsAtEnd( it ) )
+    {
+    value <- antsImageIteratorGet( it )
+    if ( value >= 0.5 ) {
+      idx = as.numeric( antsImageIteratorGetIndex( it ) )
+      point = as.numeric( antsTransformIndexToPhysicalPoint( image, idx ) )
+      outmat[ ct, ] = point
+      ct = ct + 1
+      }
+    it <- antsImageIteratorNext( it )
+    }
+  return( outmat )
+}
