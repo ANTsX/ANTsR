@@ -54,6 +54,7 @@ Suggests:
     pracma,
     psych,
     randomForest,
+    RANN,
     rgl,
     rmarkdown,
     robust,

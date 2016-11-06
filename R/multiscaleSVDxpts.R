@@ -9,9 +9,10 @@
 #' @param x input matrix, should be n (samples) by p (measurements)
 #' @param k number of neighbors
 #' @param r radius of epsilon-ball
+#' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-#' @param sigma parameter for kernel PCA.
+#' @param mypkg set either nabor or RANN
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -29,7 +30,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6 )
+  eps = 1.e-6, mypkg = "nabor"  )
 {
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
@@ -39,8 +40,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   # TODO / FIXME - implement covariance
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
-  if ( ! usePkg("nabor") )
-    stop("Please install the nabor package")
+  if ( ! usePkg( mypkg ) )
+    stop( paste("Please install the",mypkg,"package") )
   kmetric <- match.arg( kmetric )
   if ( kmetric == "gaussian" & is.na( sigma ) )
     stop("Please set the sigma parameter")
@@ -52,8 +53,11 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 # euclidean distance to correlation - xin contains correlations
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
-  if ( cometric ) x = scale( x )
-  bknn = nabor::knn( t( x ) , k=k, eps=eps )
+  if ( cometric ) {
+    x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
+    }
+  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
+  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
   for ( i in 1:ncol( x ) )
@@ -128,8 +132,10 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param y input matrix second view, should be n (samples) by q (measurements)
 #' @param k number of neighbors
 #' @param r radius of epsilon-ball
+#' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
+#' @param mypkg set either nabor or RANN
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -144,12 +150,12 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6 )
+  eps = 1.e-6, mypkg = "nabor" )
 {
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
-  if ( ! usePkg("nabor") )
-    stop("Please install the nabor package")
+  if ( ! usePkg( mypkg ) )
+    stop( paste("Please install the",mypkg,"package") )
   kmetric <- match.arg( kmetric )
   if ( kmetric == "gaussian" & is.na( sigma ) )
     stop("Please set the sigma parameter")
@@ -157,10 +163,11 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( cometric & r == Inf ) r = -Inf
   ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
   if ( cometric ) {
-    x = scale( x )
-    y = scale( y )
+    x = scale( x, center=TRUE, scale = (kmetric == "correlation" )  )
+    y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
     }
-  bknn = nabor::knn( t( y ) , t( x ), k=k, eps=eps )
+  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
+  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
   for ( i in 1:ncol( x ) )
