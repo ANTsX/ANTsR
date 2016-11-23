@@ -21,3 +21,4 @@ LabelStats;LabelOp;roiImage;"iMath(i,op,roiImg)";summarizes ROI values;NA
 Normalize;Intensity;None;"iMath(i,op)";normalize intensity into 0 1 range;0
 TruncateIntensity;Intensity;lower and upper quantile;"iMath(i,op,0.05,0.95)";trim intensities by quantiles;0
 Sharpen;Intensity;None;"iMath(i,op)";makes edges sharper;0
+PropagateLabelsThroughMask;Filter;labelImage,stoppingValue,propagationMethod;iMath(mask,op,labels);Propagates labels to labels all voxels in the mask;0

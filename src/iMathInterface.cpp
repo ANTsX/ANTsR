@@ -322,6 +322,20 @@ SEXP iMathPeronaMalik( Rcpp::List args )
 }
 
 template <class ImageType>
+SEXP iMathPropagateLabelsThroughMask( Rcpp::List args )
+{
+  typedef typename ImageType::Pointer ImagePointerType;
+
+  ImagePointerType mask = Rcpp::as<ImagePointerType>( args[0] );
+  ImagePointerType labels = Rcpp::as<ImagePointerType>( args[2] );
+  double stoppingValue = Rcpp::as<double>( args[3] );
+  unsigned int propagationMethod = Rcpp::as<unsigned int>( args[4] );
+
+  ImagePointerType output = ants::iMathPropagateLabelsThroughMask<ImageType>( mask, labels, stoppingValue, propagationMethod );
+  return Rcpp::wrap(output);
+}
+
+template <class ImageType>
 SEXP iMathSharpen( Rcpp::List args )
 {
   typedef typename ImageType::Pointer ImagePointerType;
@@ -2396,6 +2410,111 @@ try
         {
         typedef itk::Image<ValueType,4>       ImageType;
         return iMathPeronaMalik<ImageType>( args );
+        }
+      }
+    }
+  else if ( operation == "PropagateLabelsThroughMask" )
+    {
+    Rcpp::S4 image( args[0] );
+    dim = Rcpp::as< int >( image.slot( "dimension" ) );
+    components = Rcpp::as< int >( image.slot( "components" ) );
+    pixeltype = Rcpp::as<std::string>( image.slot( "pixeltype") );
+
+    if ( components > 1 )
+      {
+      Rcpp::stop("PropagateLabelsThroughMask only supports scalar images");
+      }
+
+    // Optional parameters with default values
+     if ( args.size() < 4 )
+       {
+       double stoppingValue = iMathPropagateLabelsThroughMaskStoppingValue;
+       args.push_back( Rcpp::wrap(stoppingValue) );
+       }
+    if ( args.size() < 5 )
+       {
+       unsigned int method = iMathPropagateLabelsThroughMaskMethod;
+       args.push_back( Rcpp::wrap(method) );
+       }
+
+    if ( pixeltype == "double" )
+      {
+      typedef double ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "float" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned int" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      }
+    else if ( pixeltype == "unsigned char" )
+      {
+      typedef float ValueType;
+
+      if ( dim == 2 )
+        {
+        typedef itk::Image<ValueType,2>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 3)
+        {
+        typedef itk::Image<ValueType,3>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
+        }
+      else if ( dim == 4 )
+        {
+        typedef itk::Image<ValueType,4>       ImageType;
+        return iMathPropagateLabelsThroughMask<ImageType>( args );
         }
       }
     }
