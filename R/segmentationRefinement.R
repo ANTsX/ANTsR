@@ -332,18 +332,20 @@ for( l in 1:length( labelSet ) )
         endIndex <- startIndex + length( truthLabelIndices[[n]] ) - 1
 
         values <- featureImageNeighborhoodValues[,truthLabelIndices[[n]]]
-        if( normalizeSamplesPerLabel[j] )
+        if( length( values ) > 0 )
           {
-          featureImagesArray <- as.array( featureImages[[i]][[j]] )
-          meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-          sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-          if( sdValue != 0 )
+          if( normalizeSamplesPerLabel[j] )
             {
-            values <- ( values - meanValue ) / sdValue
+            featureImagesArray <- as.array( featureImages[[i]][[j]] )
+            meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+            sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+            if( sdValue != 0 )
+              {
+              values <- ( values - meanValue ) / sdValue
+              }
             }
+          subjectDataPerLabel[startIndex:endIndex, ( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
           }
-
-        subjectDataPerLabel[startIndex:endIndex, ( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
 
         if( j == 1 )
           {
@@ -383,7 +385,7 @@ for( l in 1:length( labelSet ) )
 
 #      * xgboost tuning using cross validation
 #
-#  http://www.slideshare.net/odsc/owen-zhangopen-sourcetoolsanddscompetitions1 (slide 23)
+#  http://www.slideshare.net/odsc/owen-zhangopen-sourcetoolsanddscompetitions1 (slide 13)
 #
 #  xgb.cv.history <- xgb.cv( data = modelDataPerLabelXgb, nround = 500, nthread = 2,
 #                             nfold = 5, metrics = list ( "merror" ), max.delspth = 3,
@@ -664,17 +666,20 @@ for( l in 1:length( labelSet ) )
     {
     featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "mean" )
     values <- featureImageNeighborhoodValues[, roiMaskArrayIndices]
-    if( normalizeSamplesPerLabel[j] )
+    if( length( values ) > 0 )
       {
-      featureImagesArray <- as.array( featureImages[[j]] )
-      meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-      sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-      if( sdValue != 0 )
+      if( normalizeSamplesPerLabel[j] )
         {
-        values <- ( values - meanValue ) / sdValue
+        featureImagesArray <- as.array( featureImages[[j]] )
+        meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+        sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
+        if( sdValue != 0 )
+          {
+          values <- ( values - meanValue ) / sdValue
+          }
         }
+      subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
       }
-    subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
     }
   colnames( subjectDataPerLabel ) <- c( featureNeighborhoodNames )
 
