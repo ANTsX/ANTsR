@@ -206,7 +206,7 @@ for( l in 1:length( labelSet ) )
 
     if( length( which( segmentationSingleLabelArray == 1 ) ) == 0 )
       {
-      warning( "Warning:  No voxels exist for label ", label, " of subject ", i )
+      message( "    Warning:  No voxels exist for label ", label, " of subject ", i )
       next
       }
 
@@ -214,7 +214,6 @@ for( l in 1:length( labelSet ) )
     if( ! is.character( dilationRadius ) )
       {
       roiDilationMaskImage <- iMath( segmentationSingleLabelImage, "MD" , dilationRadius )
-
       if( useEntireLabeledRegion[l] )
         {
         roiMaskImage <- roiDilationMaskImage
@@ -332,16 +331,19 @@ for( l in 1:length( labelSet ) )
         endIndex <- startIndex + length( truthLabelIndices[[n]] ) - 1
 
         values <- featureImageNeighborhoodValues[,truthLabelIndices[[n]]]
-        if( length( values ) > 0 )
+        if( length( truthLabelIndices[[n]] ) > 0 )
           {
           if( normalizeSamplesPerLabel[j] )
             {
             featureImagesArray <- as.array( featureImages[[i]][[j]] )
             meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
             sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-            if( sdValue != 0 )
+            if( ! is.na( sdValue ) )
               {
-              values <- ( values - meanValue ) / sdValue
+              if( sdValue != 0 )
+                {
+                values <- ( values - meanValue ) / sdValue
+                }
               }
             }
           subjectDataPerLabel[startIndex:endIndex, ( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
@@ -622,7 +624,7 @@ for( l in 1:length( labelSet ) )
 
   if( length( which( segmentationSingleLabelArray == 1 ) ) == 0 )
     {
-    warning( "Warning:  No voxels exist for label ", label, " of subject ", i )
+    message( "    Warning:  No voxels exist for label ", label, " of subject ", i )
     next
     }
 
@@ -666,16 +668,19 @@ for( l in 1:length( labelSet ) )
     {
     featureImageNeighborhoodValues <- getNeighborhoodInMask( featureImages[[j]], wholeMaskImage, neighborhoodRadius, boundary.condition = "mean" )
     values <- featureImageNeighborhoodValues[, roiMaskArrayIndices]
-    if( length( values ) > 0 )
+    if( length( roiMaskArrayIndices ) > 0 )
       {
       if( normalizeSamplesPerLabel[j] )
         {
         featureImagesArray <- as.array( featureImages[[j]] )
         meanValue <- mean( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
         sdValue <- sd( featureImagesArray[which( segmentationSingleLabelArray != 0 )], na.rm = TRUE )
-        if( sdValue != 0 )
+        if( ! is.na( sdValue ) )
           {
-          values <- ( values - meanValue ) / sdValue
+          if( sdValue != 0 )
+            {
+            values <- ( values - meanValue ) / sdValue
+            }
           }
         }
       subjectDataPerLabel[,( ( j - 1 ) * numberOfNeighborhoodVoxels + 1 ):( j * numberOfNeighborhoodVoxels )] <- t( values )
