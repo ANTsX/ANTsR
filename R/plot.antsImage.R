@@ -264,10 +264,10 @@ if ( ! any( is.na( domainImageMap ) ) )
   if ( imagedim == 2 )
     slices <- 1
   nslices <- length(slices)
-  winrows <- round(length(slices) / ncolumns ) # controls number of rows
+  winrows <- ceiling(length(slices) / ncolumns ) # controls number of rows
   if (winrows < 1)
     winrows <- 1
-  wincols <- round(nslices/winrows) # controls number of rows
+  wincols <- ncolumns # controls number of columns
   if (length(slices) < wincols )
     wincols <- length(slices)
   reoSlice <- function( inimg )
