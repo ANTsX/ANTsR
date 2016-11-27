@@ -55,6 +55,7 @@ Suggests:
     psych,
     randomForest,
     RANN,
+    rflann,
     rgl,
     rmarkdown,
     robust,
