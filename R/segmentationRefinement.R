@@ -624,7 +624,8 @@ for( l in 1:length( labelSet ) )
 
   if( length( which( segmentationSingleLabelArray == 1 ) ) == 0 )
     {
-    message( "    Warning:  No voxels exist for label ", label, " of subject ", i )
+    foregroundProbabilityImages[[l]] <- as.antsImage( array( 0, dim = dim( segmentationArray ) ), reference = segmentationImage )
+    message( "    Warning:  No voxels exist for label ", label, "." )
     next
     }
 
