@@ -8,7 +8,7 @@ antsApplyTransforms(fixed, moving, transformlist = "",
   interpolator = c("linear", "nearestNeighbor", "multiLabel", "gaussian",
   "bSpline", "cosineWindowedSinc", "welchWindowedSinc", "hammingWindowedSinc",
   "lanczosWindowedSinc", "genericLabel"), imagetype = 0, whichtoinvert = NA,
-  compose = FALSE, verbose = FALSE, ...)
+  compose = NA, verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image defining domain into which the moving image is
@@ -42,7 +42,8 @@ be inverted. If transformlist[i] is a warp field, whichtoinvert[i] must be FALSE
 If the transform list is a matrix followed by a warp field, whichtoinvert
 defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).}
 
-\item{compose}{if TRUE, returns a composite transformation filename.}
+\item{compose}{if it is a character string pointing to a valid file location,
+this will force the function to return a composite transformation filename.}
 
 \item{verbose}{print command and run verbose application of transform.}
 

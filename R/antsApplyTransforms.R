@@ -33,7 +33,8 @@
 #'
 #' If the transform list is a matrix followed by a warp field, whichtoinvert
 #' defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).
-#' @param compose if TRUE, returns a composite transformation filename.
+#' @param compose if it is a character string pointing to a valid file location,
+#' this will force the function to return a composite transformation filename.
 #' @param verbose print command and run verbose application of transform.
 #' @param ... extra parameters
 #' @return an antsImage or transformation filename is output. 1 -- Failure
@@ -74,7 +75,7 @@ antsApplyTransforms <- function(
     "lanczosWindowedSinc",
     "genericLabel" ),
   imagetype = 0, whichtoinvert = NA,
-  compose = FALSE, verbose = FALSE, ... ) {
+  compose = NA, verbose = FALSE, ... ) {
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
     print("missig inputs")
     return( NA )
@@ -144,11 +145,11 @@ antsApplyTransforms <- function(
         }
 
       }
-      if ( compose == FALSE )
+      if ( is.na( compose ) )
         args <- list(d = fixed@dimension, i = m, o = wmo, r = f, n = interpolator,
                    unlist(mytx))
-      tfn <- paste( tempdir(), "comptx.nii.gz", sep = "")
-      if ( compose == TRUE ) {
+      tfn <- paste( compose, "comptx.nii.gz", sep='' )
+      if ( !is.na( compose ) ) {
         mycompo = paste("[", tfn, ",1]", sep = "")
         args <- list(d = fixed@dimension, i = m, o = mycompo, r = f,
           n = interpolator, unlist(mytx))
@@ -169,8 +170,8 @@ antsApplyTransforms <- function(
       .Call("antsApplyTransforms",
         c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype),
         PACKAGE = "ANTsR")
-      if ( compose == FALSE ) return(antsImageClone(warpedmovout, inpixeltype))
-      if ( compose == TRUE ) return( tfn )
+      if ( is.na( compose ) ) return(antsImageClone(warpedmovout, inpixeltype))
+      if ( !is.na( compose ) ) if ( file.exists( tfn ) ) return( tfn ) else return( NA )
     }
     # Get here if fixed, moving, transformlist are not missing, fixed is not of type character,
     # and fixed and moving are not both of type antsImage
