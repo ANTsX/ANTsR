@@ -8,7 +8,7 @@ antsApplyTransforms(fixed, moving, transformlist = "",
   interpolator = c("linear", "nearestNeighbor", "multiLabel", "gaussian",
   "bSpline", "cosineWindowedSinc", "welchWindowedSinc", "hammingWindowedSinc",
   "lanczosWindowedSinc", "genericLabel"), imagetype = 0, whichtoinvert = NA,
-  verbose = FALSE, ...)
+  compose = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{fixed}{fixed image defining domain into which the moving image is
@@ -42,12 +42,14 @@ be inverted. If transformlist[i] is a warp field, whichtoinvert[i] must be FALSE
 If the transform list is a matrix followed by a warp field, whichtoinvert
 defaults to c(TRUE,FALSE). Otherwise it defaults to rep(FALSE, length(transformlist)).}
 
+\item{compose}{if TRUE, returns a composite transformation filename.}
+
 \item{verbose}{print command and run verbose application of transform.}
 
 \item{...}{extra parameters}
 }
 \value{
-an antsImage is output. 1 -- Failure
+an antsImage or transformation filename is output. 1 -- Failure
 }
 \description{
 Apply a transform list to map an image from one domain to another. In image
