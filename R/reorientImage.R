@@ -58,7 +58,9 @@ reorientImage <- function(img, axis1, axis2 = NA,
 #' @examples
 #'
 #' fi<-antsImageRead( getANTsRData("r16"))
-#' com<-getCenterOfMass( fi )
+#' com1<-getCenterOfMass( fi )
+#' fi<-antsImageRead( getANTsRData("r64"))
+#' com2<-getCenterOfMass( fi )
 #'
 #' @export getCenterOfMass
 getCenterOfMass <- function( img ) {
@@ -69,5 +71,8 @@ getCenterOfMass <- function( img ) {
     print("input images must have float pixeltype")
     return(NA)
   }
-  .Call("centerOfMass", img, PACKAGE = "ANTsR")
+  print("begin")
+  mycom = .Call("centerOfMass", img, PACKAGE = "ANTsR")
+  print("end")
+  return( mycom )
 }
