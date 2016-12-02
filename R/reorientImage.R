@@ -42,3 +42,32 @@ reorientImage <- function(img, axis1, axis2 = NA,
   img2 <- antsApplyTransforms(img, img, transformlist = c(txfn))
   return(list(reoimg = img2, txfn = txfn))
 }
+
+
+
+
+#' center of mass
+#'
+#' compute an image center of mass in physical space which is defined as the
+#' mean of the intensity weighted voxel coordinate system.
+#'
+#' @param img antsImage
+#' @return vector center of mass
+#' @author Brian B. Avants
+#' @keywords geometry image
+#' @examples
+#'
+#' fi<-antsImageRead( getANTsRData("r16"))
+#' com<-getCenterOfMass( fi )
+#'
+#' @export getCenterOfMass
+getCenterOfMass <- function( img ) {
+  if (length(dim(img)) == 1)
+    if (dim(img)[1] == 1)
+      return(NULL)
+  if ( img@pixeltype != "float" ) {
+    print("input images must have float pixeltype")
+    return(NA)
+  }
+  .Call("centerOfMass", img, PACKAGE = "ANTsR")
+}

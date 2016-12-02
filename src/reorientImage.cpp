@@ -152,6 +152,43 @@ void antsReoHelper(
 }
 
 
+template< unsigned int ImageDimension >
+void antsCoMHelper(
+  typename itk::Image< float , ImageDimension >::Pointer image1  )
+{
+  typedef double RealType;
+  typedef itk::Image< float , ImageDimension > ImageType;
+  Rcpp::NumericVector myCoM( ImageDimension, 0.0 );
+  typename ImageCalculatorType::VectorType com( ImageDimension );
+  com.fill( 0 );
+  if( image1.IsNotNull()  )
+    {
+    typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
+    typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
+    typedef typename ImageCalculatorType::MatrixType       MatrixType;
+    typedef itk::Vector<float, ImageDimension>  VectorType;
+    typename ImageCalculatorType::Pointer calculator1 =
+      ImageCalculatorType::New();
+    calculator1->SetImage(  image1 );
+    try
+      {
+      calculator1->Compute();
+      com = calculator1->GetCenterOfGravity();
+      for ( unsigned int k = 0; k < ImageDimension; k++ ) myCoM[ k ] = com[ k ];
+      }
+    catch( ... )
+      {
+      // Rcpp::Rcerr << " zero image1 error ";
+      }
+      return Rcpp::wrap( myCoM );
+  }
+  else
+  {
+    return Rcpp::wrap( myCoM );
+  }
+}
+
+
 RcppExport SEXP reorientImage( SEXP r_in_image1, SEXP r_txfn,
   SEXP r_axis1, SEXP r_axis2, SEXP rrfl, SEXP rscl )
 {
@@ -191,6 +228,48 @@ RcppExport SEXP reorientImage( SEXP r_in_image1, SEXP r_txfn,
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     antsReoHelper<4>(*antsimage_xptr1_4, r_txfn,
       r_axis1, r_axis2, rrfl, rscl );
+    }
+  else Rcpp::Rcout << " Dimension " << dimension << " not supported " << std::endl;
+  return 0;
+}
+
+
+
+RcppExport SEXP centerOfMass( SEXP r_in_image1  )
+{
+  if( r_in_image1 == NULL  )
+    {
+      Rcpp::Rcout << "Invalid Arguments: pass 1 image in " << std::endl ;
+      Rcpp::wrap( 1 ) ;
+    }
+  Rcpp::S4 in_image1( r_in_image1 ) ;
+  std::string in_pixeltype = Rcpp::as< std::string >(
+    in_image1.slot( "pixeltype" ) ) ;
+  unsigned int dimension = Rcpp::as< unsigned int >(
+    in_image1.slot( "dimension" ) ) ;
+  if ( dimension == 2 )
+    {
+    typedef itk::Image< float , 2 > ImageType;
+    typedef ImageType::Pointer ImagePointerType;
+    Rcpp::XPtr< ImagePointerType > antsimage_xptr1(
+      static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
+    Rcpp::wrap( antsCoMHelper<2>( *antsimage_xptr1  ) );
+    }
+  else if ( dimension == 3 )
+    {
+    typedef itk::Image< float , 3 > ImageType3;
+    typedef ImageType3::Pointer ImagePointerType3;
+    Rcpp::XPtr< ImagePointerType3 > antsimage_xptr1_3(
+    static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
+    Rcpp::wrap( antsCoMHelper<3>( *antsimage_xptr1_3 ) );
+    }
+  else if ( dimension == 4 )
+    {
+    typedef itk::Image< float , 4 > ImageType4;
+    typedef ImageType4::Pointer ImagePointerType4;
+    Rcpp::XPtr< ImagePointerType4 > antsimage_xptr1_4(
+    static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
+    Rcpp::wrap( antsCoMHelper<4>( *antsimage_xptr1_4  ) );
     }
   else Rcpp::Rcout << " Dimension " << dimension << " not supported " << std::endl;
   return 0;
