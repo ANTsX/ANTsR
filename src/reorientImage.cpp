@@ -153,20 +153,17 @@ void antsReoHelper(
 
 
 template< unsigned int ImageDimension >
-void antsCoMHelper(
+SEXP antsCoMHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1  )
 {
   typedef double RealType;
   typedef itk::Image< float , ImageDimension > ImageType;
+  typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
   Rcpp::NumericVector myCoM( ImageDimension, 0.0 );
   typename ImageCalculatorType::VectorType com( ImageDimension );
-  com.fill( 0 );
+  com.Fill( 0 );
   if( image1.IsNotNull()  )
     {
-    typedef typename itk::ImageMomentsCalculator<ImageType> ImageCalculatorType;
-    typedef itk::AffineTransform<RealType, ImageDimension> AffineType;
-    typedef typename ImageCalculatorType::MatrixType       MatrixType;
-    typedef itk::Vector<float, ImageDimension>  VectorType;
     typename ImageCalculatorType::Pointer calculator1 =
       ImageCalculatorType::New();
     calculator1->SetImage(  image1 );
