@@ -71,8 +71,6 @@ getCenterOfMass <- function( img ) {
     print("input images must have float pixeltype")
     return(NA)
   }
-  print("begin")
   mycom = .Call("centerOfMass", img, PACKAGE = "ANTsR")
-  print("end")
   return( mycom )
 }
