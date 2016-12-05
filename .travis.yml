@@ -1,5 +1,5 @@
 # use containers
-sudo: false
+sudo: required
 
 os:
   - linux
@@ -73,14 +73,14 @@ before_install:
   - export CC=clang
 
 # Build and check package
-# script:
-#  - cd ..
-#  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
-#  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-#  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
-#  - mydir=${PWD}
-#  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100  R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
-#
+script:
+  - cd ..
+  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
+  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
+  - mydir=${PWD}
+  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100  R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
+
 
 # report coverage rate to coveralls
 after_success:
