@@ -18,47 +18,28 @@ matrix:
    allow_failures:
     - os: osx
 
-# only run for pushes to master branch
-# branches:
-#  only:
-#   - master
-
-
 cran: http://cran.rstudio.com
 
-addons:
-  apt:
-    sources:
-    - r-packages-precise
-    packages:
-    - cmake
-    - r-base-dev
-    - r-recommended
-    - pandoc
-    r_github_packages:
-    - stringi
-    r_packages:
-    - covr
-    - wesanderson
-    - RColorBrewer
-    - magrittr
-    r_binary_packages:
-    - devtools
-    - testthat
-    - ggplot2
-    - png
-    - Rcpp
-    - dplyr
-    - dbscan
-    - knitr
-    - rmarkdown
+github_packages:
+  - gagolews/stringi
+
+packages:
+  - covr
+  - wesanderson
+  - RColorBrewer
+  - magrittr
+
+binary_packages:
+  - devtools
+  - testthat
+  - ggplot2
+  - Rcpp
+  - dplyr
+  - knitr
+  - rmarkdown
 
 # cache local R libraries directory:
-cache:
-  apt: true
-  directories:
-    - ~/Rlib
-
+cache: packages
 
 before_install:
   - basedir=${PWD}
@@ -86,9 +67,6 @@ install:
   - echo "CXX1X=clang++" >> ~/.R/Makevars
   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
   - source ~/.R/Makevars
-  - mkdir -p ~/Rlib
-  - echo 'R_LIBS=~/Rlib' > .Renviron
-  - echo 'R_LIBS_USER="~/Rlib"' >>  $HOME/.Renviron
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
   - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
@@ -107,10 +85,8 @@ install:
   - Rscript -e 'if(!"psych" %in% rownames(installed.packages())) { install.packages("psych", dependencies = TRUE) }'
   - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
   - Rscript -e 'if(!"magic" %in% rownames(installed.packages())) { install.packages("magic", dependencies = TRUE) }'
-#  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
-#  - Rscript -e 'devtools::install_deps(pkg = ".", dependencies = TRUE)'
   - cd ~/
   - itkrrel=0.0.1
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
@@ -133,7 +109,7 @@ script:
 # report coverage rate to coveralls
 after_success:
   - cd $mydir
-#  - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
+  - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
 
 after_failure:
   - cat ~/build/stnava/ANTsR.Rcheck/00install.out
