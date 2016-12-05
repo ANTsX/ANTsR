@@ -1,5 +1,5 @@
 # use containers
-sudo: required
+sudo: false
 
 os:
   - linux
