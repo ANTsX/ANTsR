@@ -30,7 +30,6 @@ r_github_packages:
   - stnava/ITKR
 
 r_binary_packages:
-  - extremevalues
   - stringi
   - magrittr
   - devtools
