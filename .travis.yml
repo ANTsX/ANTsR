@@ -10,31 +10,22 @@ r:
   - release
   - devel
 
-compiler:
-  - clang
-  - gcc
-
 matrix:
    allow_failures:
     - os: osx
 
 cran: http://cran.rstudio.com
 
-github_packages:
-  - gagolews/stringi
-
 r_github_packages:
   - gagolews/stringi
-
-packages:
-  - covr
-  - wesanderson
-  - magrittr
 
 r_packages:
   - covr
   - wesanderson
   - magrittr
+  - mFilter
+  - igraph
+  - magic
 
 r_binary_packages:
   - magrittr
@@ -45,16 +36,10 @@ r_binary_packages:
   - dplyr
   - knitr
   - rmarkdown
-
-binary_packages:
-  - magrittr
-  - devtools
-  - testthat
-  - ggplot2
-  - Rcpp
+  - randomForest
   - dplyr
-  - knitr
-  - rmarkdown
+  - psych
+  - pracma
 
 # cache local R libraries directory:
 cache: packages
