@@ -8,7 +8,7 @@ os:
 language: r
 r:
   - release
-  - devel
+#  - devel # stringi dependency makes this fail
 
 matrix:
    allow_failures:
