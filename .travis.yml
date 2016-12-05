@@ -53,18 +53,6 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
-#  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sed -i 's|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=1|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=0|g' src/Makevars; fi
-
-# install the package and dependencies:
-# - create directory for R libraries (if not already exists)
-# - create .Renviron with location of R libraries
-# - define R repository in .Rprofile
-# - add .travis.yml to .Rbuildignore
-# - install devtools if not already installed
-# - install covr if not already installed
-# - update all installed packages
-# - install package with dependencies
-install:
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
@@ -99,19 +87,19 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
   - cd ${basedir}
-
-# Build and check package
-script:
   - source ~/.R/Makevars
   - export CXX=clang++
   - export CC=clang
-  - cd ..
-  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
-  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
-  - mydir=${PWD}
-  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100  R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
 
+# Build and check package
+# script:
+#  - cd ..
+#  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
+#  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+#  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
+#  - mydir=${PWD}
+#  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100  R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
+#
 
 # report coverage rate to coveralls
 after_success:
@@ -121,11 +109,6 @@ after_success:
 after_failure:
   - cat ~/build/stnava/ANTsR.Rcheck/00install.out
   - cat ~/build/stnava/ANTsR.Rcheck/00check.log
-#  - ./travis-tool.sh dump_logs
-#  - cat /home/travis/build/stnava/ANTsR.Rcheck/00install.out
-#  - cat /home/travis/build/stnava/ANTsR.Rcheck/00check.log  LINUX
-#  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00install.out
-#  - cat /Users/travis/build/stnava/ANTsR.Rcheck/00check.log OSX
 
 # send e-mails if stuff changes
 notifications:
