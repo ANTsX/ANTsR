@@ -8,7 +8,7 @@ os:
 language: r
 r:
   - release
-#  - devel # stringi dependency makes this fail
+  - devel # stringi dependency makes this fail
 
 compiler:
   - clang
@@ -17,10 +17,13 @@ matrix:
    allow_failures:
     - os: osx
 
-cran: http://cran.rstudio.com
+repos:
+  CRAN: https://cloud.r-project.org
+  ropensci: http://packages.ropensci.org
 
 r_github_packages:
   - gagolews/stringi
+  - stnava/ITKR
 
 r_packages:
   - covr
@@ -65,8 +68,8 @@ before_install:
   - echo '.travis.yml' > .Rbuildignore
   - cd ~/
   - itkrrel=0.0.1
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
+#  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+#  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
   - cd ${basedir}
   - source ~/.R/Makevars
   - export CXX=clang++
