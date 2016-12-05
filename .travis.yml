@@ -8,10 +8,11 @@ os:
 language: r
 r:
   - release
-  - devel
+#  - devel
 
 compiler:
   - clang
+  - gcc
 
 matrix:
    allow_failures:
@@ -34,6 +35,7 @@ addons:
 
 # cache local R libraries directory:
 cache:
+  apt: true
   directories:
     - ~/Rlib
 
@@ -41,7 +43,6 @@ before_install:
   - basedir=${PWD}
   - cd ..
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
-  - # if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version;  curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh ; chmod 755 ./travis-tool.sh;  ./travis-tool.sh bootstrap; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
 #  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sed -i 's|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=1|-DVCL_CAN_STATIC_CONST_INIT_FLOAT=0|g' src/Makevars; fi
