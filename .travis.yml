@@ -23,6 +23,9 @@ matrix:
 #  only:
 #   - master
 
+
+cran: http://cran.rstudio.com
+
 addons:
   apt:
     sources:
@@ -32,30 +35,23 @@ addons:
     - r-base-dev
     - r-recommended
     - pandoc
-
-cran: http://cran.rstudio.com
-
-r_github_packages:
-   - stringi
-
-r_packages:
-  - covr
-  - wesanderson
-  - RColorBrewer
-  - magrittr
-
-r_binary_packages:
-  - devtools
-  - testthat
-  - ggplot2
-  - png
-  - Rcpp
-  - RcppArmadillo
-  - RcppProgress
-  - dplyr
-  - dbscan
-  - knitr
-  - rmarkdown
+    r_github_packages:
+    - stringi
+    r_packages:
+    - covr
+    - wesanderson
+    - RColorBrewer
+    - magrittr
+    r_binary_packages:
+    - devtools
+    - testthat
+    - ggplot2
+    - png
+    - Rcpp
+    - dplyr
+    - dbscan
+    - knitr
+    - rmarkdown
 
 # cache local R libraries directory:
 cache:
@@ -95,6 +91,8 @@ install:
   - echo 'R_LIBS_USER="~/Rlib"' >>  $HOME/.Renviron
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
+  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
+  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
   - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) { install.packages("Rcpp", dependencies = TRUE) }'
   - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
   - Rscript -e 'if(!"ggplot2" %in% rownames(installed.packages())) { install.packages("ggplot2", dependencies = TRUE) }'
