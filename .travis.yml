@@ -1,5 +1,5 @@
 # use containers
-sudo: false
+sudo: required
 
 os:
   - linux
@@ -16,6 +16,7 @@ compiler:
 matrix:
    allow_failures:
     - os: osx
+    - r: devel
 
 repos:
   CRAN: https://cloud.r-project.org
@@ -25,15 +26,8 @@ r_github_packages:
   - gagolews/stringi
   - stnava/ITKR
 
-r_packages:
-  - covr
-  - wesanderson
-  - magrittr
-  - mFilter
-  - igraph
-  - magic
-
 r_binary_packages:
+  - stringi
   - magrittr
   - devtools
   - testthat
@@ -46,6 +40,14 @@ r_binary_packages:
   - dplyr
   - psych
   - pracma
+
+r_packages:
+  - covr
+  - wesanderson
+  - magrittr
+  - mFilter
+  - igraph
+  - magic
 
 # cache local R libraries directory:
 cache: packages
