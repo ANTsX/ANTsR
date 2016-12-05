@@ -1,5 +1,5 @@
 # use containers
-sudo: required
+sudo: false
 
 os:
   - linux
@@ -10,13 +10,16 @@ r:
   - release
   - devel # stringi dependency makes this fail
 
+# cache local R libraries directory:
+cache: packages
+
 compiler:
   - clang
 
 matrix:
    allow_failures:
-    - os: osx
     - r: devel
+#    - os: osx
 
 repos:
   CRAN: https://cloud.r-project.org
@@ -49,8 +52,6 @@ r_packages:
   - igraph
   - magic
 
-# cache local R libraries directory:
-cache: packages
 
 before_install:
   - basedir=${PWD}
