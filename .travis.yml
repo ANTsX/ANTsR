@@ -10,6 +10,9 @@ r:
   - release
 #  - devel # stringi dependency makes this fail
 
+compiler:
+  - clang
+
 matrix:
    allow_failures:
     - os: osx
