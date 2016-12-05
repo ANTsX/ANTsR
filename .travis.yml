@@ -72,11 +72,11 @@ install:
   - source ~/.R/Makevars
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
+  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
   - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
   - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) { install.packages("Rcpp", dependencies = TRUE) }'
   - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
   - Rscript -e 'if(!"tools" %in% rownames(installed.packages())) { install.packages("tools", dependencies = TRUE) }'
-#  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"ggplot2" %in% rownames(installed.packages())) { install.packages("ggplot2", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"igraph" %in% rownames(installed.packages())) { install.packages("igraph", dependencies = TRUE) }'
