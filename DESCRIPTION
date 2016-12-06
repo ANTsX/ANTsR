@@ -30,6 +30,7 @@ Suggests:
     corpcor,
     DMwR,
     e1071,
+    extremevalues,
     fastICA,
     fpc,
     ggplot2,
