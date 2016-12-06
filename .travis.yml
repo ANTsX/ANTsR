@@ -6,9 +6,35 @@ os:
   - osx
 
 language: cpp
-# r:
+#  r:
 #  - release
 #  - devel # stringi dependency makes this fail
+
+
+addons:
+  apt:
+    sources:
+    - r-packages-precise
+    packages:
+    - cmake
+    - r-base-dev
+    - r-recommended
+    - pandoc
+    r_binary_packages:
+    - stringi
+    - magrittr
+    - devtools
+    - testthat
+    - ggplot2
+    - Rcpp
+    - dplyr
+    - knitr
+    - rmarkdown
+    - randomForest
+    - dplyr
+    - psych
+    - pracma
+
 
 # cache local R libraries directory:
 cache: packages
