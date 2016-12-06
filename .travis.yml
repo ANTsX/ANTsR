@@ -1,4 +1,3 @@
-# use containers
 sudo: false
 
 os:
@@ -6,10 +5,13 @@ os:
   - osx
 
 language: cpp
-#  r:
-#  - release
-#  - devel # stringi dependency makes this fail
 
+compiler:
+  - clang
+
+matrix:
+   allow_failures:
+    - os: osx
 
 addons:
   apt:
@@ -20,68 +22,17 @@ addons:
     - r-base-dev
     - r-recommended
     - pandoc
-    r_binary_packages:
-    - stringi
-    - magrittr
-    - devtools
-    - testthat
-    - ggplot2
-    - Rcpp
-    - dplyr
-    - knitr
-    - rmarkdown
-    - randomForest
-    - dplyr
-    - psych
-    - pracma
-
 
 # cache local R libraries directory:
-cache: packages
-
-compiler:
-  - clang
-
-matrix:
-   allow_failures:
-    - r: devel
-    - os: osx
-
-repos:
-  CRAN: https://cloud.r-project.org
-  ropensci: http://packages.ropensci.org
-
-r_github_packages:
-#  - stnava/ITKR
-
-r_binary_packages:
-  - stringi
-  - magrittr
-  - devtools
-  - testthat
-  - ggplot2
-  - Rcpp
-  - dplyr
-  - knitr
-  - rmarkdown
-  - randomForest
-  - dplyr
-  - psych
-  - pracma
-
-r_packages:
-  - covr
-  - wesanderson
-  - magrittr
-  - mFilter
-  - igraph
-  - magic
-
+cache:
+  directories:
+    - ~/Rlib
 
 before_install:
   - basedir=${PWD}
   - cd ..
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  then cmake --version;  curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh ; chmod 755 ./travis-tool.sh;  ./travis-tool.sh bootstrap; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
   - mkdir -p ~/.R
@@ -92,19 +43,40 @@ before_install:
   - echo "CXX1X=clang++" >> ~/.R/Makevars
   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
   - source ~/.R/Makevars
+  - mkdir -p ~/Rlib
+  - echo 'R_LIBS=~/Rlib' > .Renviron
+  - echo 'R_LIBS_USER="~/Rlib"' >>  $HOME/.Renviron
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
+  - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) { install.packages("Rcpp", dependencies = TRUE) }'
+  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { install.packages("stringi", dependencies = TRUE) }'
+  - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"ggplot2" %in% rownames(installed.packages())) { install.packages("ggplot2", dependencies = TRUE) }'
+  - Rscript -e 'if(!"igraph" %in% rownames(installed.packages())) { install.packages("igraph", dependencies = TRUE) }'
+  - Rscript -e 'if(!"pracma" %in% rownames(installed.packages())) { install.packages("pracma", dependencies = TRUE) }'
+  - Rscript -e 'if(!"dplyr" %in% rownames(installed.packages())) { install.packages("dplyr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"mFilter" %in% rownames(installed.packages())) { install.packages("mFilter", dependencies = TRUE) }'
+  - Rscript -e 'if(!"rmarkdown" %in% rownames(installed.packages())) { install.packages("rmarkdown", dependencies = TRUE) }'
+  - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"testthat" %in% rownames(installed.packages())) { install.packages("testthat", dependencies = TRUE) }'
+  - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
+  - Rscript -e 'if(!"psych" %in% rownames(installed.packages())) { install.packages("psych", dependencies = TRUE) }'
+  - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"magic" %in% rownames(installed.packages())) { install.packages("magic", dependencies = TRUE) }'
+  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
+  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
   - cd ~/
   - itkrrel=0.0.1
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL --library=~/Rlib ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL --library=~/Rlib ITKR_${itkrrel}.tgz; fi
   - cd ${basedir}
-  - source ~/.R/Makevars
-  - export CXX=clang++
-  - export CC=clang
 
 # Build and check package
 script:
+  - source ~/.R/Makevars
+  - export CXX=clang++
+  - export CC=clang
   - cd ..
   - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
