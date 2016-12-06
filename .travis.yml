@@ -8,11 +8,12 @@ os:
 language: r
 r:
   - release
-#  - devel # stringi dependency makes this fail
+  - devel # stringi dependency makes this fail
 
 matrix:
    allow_failures:
     - os: osx
+    - r: devel
 
 cran: http://cran.rstudio.com
 
