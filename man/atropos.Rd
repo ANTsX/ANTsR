@@ -48,16 +48,16 @@ multivariate segmentation if you pass a list of images in: e.g.
 img <- antsImageRead( getANTsRData("r16") , 2 )
 img <- resampleImage( img, c(64,64), 1, 0 )
 mask <- getMask(img)
-segs1 <- atropos( d = 2, a = img, m = '[0.2,1x1]',
+segs1 <- atropos( a = img, m = '[0.2,1x1]',
    c = '[2,0]',  i = 'kmeans[3]', x = mask )
 
 # Use probabilities from k-means seg as priors
 
-segs2 <- atropos( d = 2, a = img, m = '[0.2,1x1]',
+segs2 <- atropos( a = img, m = '[0.2,1x1]',
    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
 
 feats <- list(img, iMath(img,"Laplacian"), iMath(img,"Grad") )
-segs3 <- atropos( d = 2, a = feats, m = '[0.2,1x1]',
+segs3 <- atropos( a = feats, m = '[0.2,1x1]',
    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
 
 }
