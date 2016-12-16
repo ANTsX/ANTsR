@@ -22,7 +22,7 @@
 #' @export antsImageRead
 antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   components=1
-  
+
   if (class(filename) != "character" || length(filename) != 1) {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
@@ -38,7 +38,12 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
       }
     }
   else {
-    imageInfo = antsImageHeaderInfo( filename )
+    if ( file.access( filename, 4 ) == -1 )
+      stop( paste("image is not readable, check permissions to", filename) )
+    imageInfo = tryCatch(
+      antsImageHeaderInfo( filename ), error = function(e) return(NA) )
+    if ( any( is.na( imageInfo ) ) )
+      stop( paste("image may not be readable, check permissions to", filename) )
     dimension = imageInfo$nDimensions
     components = imageInfo$nComponents
     }
@@ -47,6 +52,7 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
     stop("only images of dimensions 2,3,4 are supported")
   }
 
-  rval <- (.Call("antsImageRead", filename, pixeltype, dimension, components, PACKAGE = "ANTsR"))
+  tryCatch( rval <- (.Call("antsImageRead", filename, pixeltype,
+    dimension, components, PACKAGE = "ANTsR")), error = function(e) return(NA))
   return(rval)
 }
