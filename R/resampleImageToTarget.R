@@ -43,7 +43,7 @@ resampleImageToTarget <- function (image, target, interpType = 'linear',
   moving = image
   compose = NA
   transformlist = 'identity'
-  interpolator = interptype
+  interpolator = interpType
   
   ## compatibility with previous version's integer interpolator
   interpolator.oldoptions = c('linear','nearestNeighbor',
