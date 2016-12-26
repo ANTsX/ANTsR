@@ -5,7 +5,7 @@
 #' joint label fusion. this version is more efficient,
 #' memory-wise, for 3D images. it is a thin wrapper
 #' that goes slice-by-slice but produces the same results.
-#' This program is for research.  For studies, please use jointLabelFusion in 
+#' This program is for research.  For studies, please use jointLabelFusion in
 #' ANTs or in ANTsR.
 #'
 #' @param targetI antsImage to be approximated
@@ -37,6 +37,7 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   usecor=FALSE, rSearch=0, slices=NA )
 {
+  stop("Do not use this function. Use jointLabelFusion instead.")
   if (nargs() == 0)
     {
     print(args(jointLabelFusion3D))

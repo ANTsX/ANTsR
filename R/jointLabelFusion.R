@@ -1,7 +1,8 @@
-#' joint label fusion
+#' joint label and intensity fusion
 #'
 #' A multiple atlas voting scheme to customize labels for a new subject. This
-#' calls the ANTs executable so is much faster than other variants in ANTsR.
+#' function will also perform intensity fusion. It almost directlly calls the
+#' C++ in the ANTs executable so is much faster than other variants in ANTsR.
 #' One may want to normalize image intensities for each input image before
 #' passing to this function.
 #'
@@ -49,6 +50,26 @@
 #' r<-2
 #' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
 #'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+#'
+#' \dontrun{
+#' ref = antsImageRead( getANTsRData("ch2") )
+#' n = 50
+#' ref = resampleImage(ref,c(n,n,n),1,0)
+#' ref = iMath(ref,"Normalize")
+#' refmask = getMask(ref)
+#' ilist = list()
+#' seglist = list()
+#' for ( k in 1:5 ) {
+#' mi = antsImageClone( ref ) + rnorm( n^3, 0, 0.1 )
+#' mykseg = kmeansSegmentation( mi, 3, refmask )$segmentation
+#' ilist[[ k ]] = mi
+#' seglist[[ k ]] = mykseg
+#' }
+#' pp = jointLabelFusion( ref, refmask,ilist, rSearch=2,
+#'  labelList=seglist, rad=rep(2, length(dim(ref)) ), verbose=TRUE )
+#' plot( ref, pp$segmentation )
+#' plot( pp$intensity  )
+#' }
 #'
 #' @export jointLabelFusion
 jointLabelFusion <- function(
