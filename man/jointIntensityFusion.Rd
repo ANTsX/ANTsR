@@ -47,6 +47,8 @@ approximated image, segmentation and probabilities
 \description{
 Estimates an image from another set of images - intensity generalization of
 joint label fusion.  Search radius used only when employing labels.
+This program is for research.  For studies, please use jointLabelFusion in 
+ANTs or in ANTsR.
 }
 \examples{
 
