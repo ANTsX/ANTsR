@@ -1,26 +1,24 @@
 #' joint label fusion
 #'
-#' A multiple atlas voting scheme to customize labels for a new subject.
+#' A multiple atlas voting scheme to customize labels for a new subject. This
+#' calls the ANTs executable so is much faster than other variants in ANTsR.
+#' One may want to normalize image intensities for each input image before
+#' passing to this function.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
 #' @param atlasList list containing antsImages
 #' @param beta weight sharpness, default to 2
-#' @param rad neighborhood radius, default to 4
+#' @param rad neighborhood radius, default to 2
 #' @param labelList list containing antsImages
-#' @param doscale scale neighborhood intensities
-#' @param doNormalize normalize each image range to 0, 1
-#' @param maxAtlasAtVoxel min/max n atlases to use at each voxel
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
 #' @param usecor employ correlation as local similarity
-#' @param rSearch radius of search, default is 2
-#' @param boundary.condition one of 'image' 'mean' 'NA'
-#' @param segvals list of labels to expect
-#' @param probimgs list of probability images (to help slice by slice estimate)
-#' @param jifImage the current estimated jif image (helps speed slice by slice)
+#' @param rSearch radius of search, default is 3
+#' @param nonnegative constrain weights to be non-negative
+#' @param verbose boolean
 #' @return approximated image, segmentation and probabilities
-#' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich
+#' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 #' @keywords fusion, template
 #' @examples
 #'
@@ -53,163 +51,103 @@
 #'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
 #'
 #' @export jointLabelFusion
-jointLabelFusion <- function( targetI, targetIMask, atlasList,
-  beta=4, rad=NA, labelList=NA, doscale = TRUE,
-  doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
-  usecor=FALSE, boundary.condition='image',
-  rSearch=2, segvals=NA, probimgs=NA, jifImage=NA )
+jointLabelFusion <- function(
+  targetI,
+  targetIMask,
+  atlasList,
+  beta=4,
+  rad=2,
+  labelList=NA,
+  rho=0.01,
+  usecor=FALSE,
+  rSearch=3,
+  nonnegative = FALSE,
+  verbose = FALSE )
 {
-  haveLabels=FALSE
-  BC=boundary.condition
-  nvox = sum( targetIMask == 1 )
+  segpixtype = 'unsigned int'
   if ( length(labelList) != length(atlasList) )
     stop("length(labelList) != length(atlasList)")
-  includezero = TRUE
-  if ( is.na( jifImage ) ) jifImage = targetI * 0
-  if ( !( all( is.na(labelList) ) ) )
-    {
-    haveLabels=TRUE
-    if ( all( is.na(segvals) ) )
-      {
-      segmat<-imageListToMatrix( labelList, targetIMask )
-      segvals<-c(sort( unique( as.numeric(segmat)) ))
-      if ( includezero )
-        if ( ! ( 0 %in% segvals ) ) segvals<-c(0,segvals)
-      if ( !includezero )
-        segvals<-segvals[  segvals != 0 ]
-      }
+  inlabs = sort( unique(  labelList[[ 1 ]][ targetIMask == 1 ]  ) )
+  labsum = labelList[[1]]
+  for ( n in 2:length( labelList ) ) {
+    inlabs = sort( unique( c( inlabs, labelList[[ n ]][ targetIMask == 1 ]  ) ) )
+    labsum = labsum + labelList[[ n ]]
     }
-  if ( all(  is.na(probimgs) ) )
+  mymask = antsImageClone( targetIMask )
+  mymask[ labsum == 0 ] = 0
+  tdir <- tempdir()
+  segdir <- tempdir()
+  osegfn <- tempfile(pattern = "antsr", tmpdir = segdir, fileext = "myseg.nii.gz")
+  if ( file.exists( osegfn ) ) file.remove( osegfn )
+  probs <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = "prob%02d.nii.gz")
+  probsbase <- basename( probs )
+  searchpattern <- sub("%02d", "*", probsbase)
+  mydim <- as.numeric( targetIMask@dimension )
+  outimg <- new("antsImage", segpixtype, mydim)
+  outimgi <- new("antsImage", 'float', mydim)
+  outs <- paste("[",
+    antsrGetPointerName(outimg),",",
+    antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
+  # this is a temporary FIXME for some type issue i cant figure out right now
+#  outs <- paste("[",
+#    osegfn,",",
+#    antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
+  mymask <- antsImageClone( mymask, segpixtype)
+  if ( length( rad ) == 1 ) myrad = rep( rad, mydim ) else myrad = rad
+  if ( length( myrad ) != mydim )
+    stop("patch radius dimensionality must equal image dimensionality")
+  myrad = paste( myrad, collapse='x')
+  if ( verbose == TRUE ) vnum = 1 else vnum = 0
+  if ( nonnegative == TRUE ) nnum = 1 else nnum = 0
+  myargs <- list(
+    d = mydim,
+    t = targetI,
+    a = rho, # or alpha in the paper
+    b = beta,
+    r = 1,  # retain posteriors
+    f = 0,  # voting weights
+    c = nnum,  # constrain non-negative
+    p = myrad, # patch radius
+    m = "PC",
+    s = rSearch,
+#    e =     # -e, --exclusion-image label[exclusionImage] # FIXME
+    x = mymask,
+    o = outs,
+    v = vnum )
+  # now add the intensity and label images
+  kct = length( myargs )
+  for ( k in 1:length( atlasList ) )
     {
-    probimgs=list() # weight for each label
-    for ( i in 1:length(segvals) )
-      probimgs[[ i ]] = targetI * 0
+    kct = kct + 1
+    myargs[[ kct ]] = atlasList[[ k ]]
+    names( myargs  )[[ kct ]]  = "g"
+    kct = kct + 1
+    castseg = antsImageClone( labelList[[ k ]], segpixtype )
+    myargs[[ kct ]] = castseg
+    names( myargs )[[ kct ]]  = "l"
     }
-  dim<-targetI@dimension
-  if ( doNormalize )
-    {
-    for ( i in atlasList ) i = iMath(i,"Normalize")
-    targetI = iMath(targetI,"Normalize")
+  .Call("antsJointFusion", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
+  probsout <- list.files(path = tdir,
+    pattern = glob2rx(searchpattern), full.names = TRUE,
+    recursive = FALSE)
+  outimg = antsImageClone( outimg, 'float' )
+  pimg <- antsImageRead( probsout[1] )
+  probimgs <- c( pimg )
+  for (x in c( 2:length( probsout ) ) ) {
+    probimgs <- c( probimgs, antsImageRead( probsout[x] ) )
+  }
+  segmat = imageListToMatrix( probimgs, targetIMask )
+  finalsegvec = apply( segmat, FUN=which.max , MARGIN=2 )
+  finalsegvec2 = finalsegvec
+  # map finalsegvec to original labels
+  for ( i in 1:max( finalsegvec ) ) {
+    finalsegvec2[ finalsegvec == i ] = inlabs[ i ]
     }
-  if ( all(is.na(rad)) ) rad<-rep(3,dim)
-  n<-1
-  for ( k in 1:length(rad)) n<-n*(rad[k]*2+1)
-  wmat<-t(replicate(length(atlasList), rep(0.0,n) ) )
-  matcenter<-round(n/2)+1
-  targetIvStruct<-getNeighborhoodInMask(targetI,
-    targetIMask,rad,boundary.condition=BC,spatial.info=T)
-  targetIv<-targetIvStruct$values
-  indices<-targetIvStruct$indices
-  rm( targetIvStruct )
-  if ( doscale ) targetIv<-scale(targetIv)
-  m<-length(atlasList)
-  ct<-1
-  natlas<-length(atlasList)
-  atlasLabels<-1:natlas
-  if ( maxAtlasAtVoxel[2] > natlas ) maxAtlasAtVoxel[2]<-natlas
-  progress <- txtProgressBar(min = 0,
-                max = ncol(targetIv), style = 3)
-  badct<-0
-  basewmat<-t( replicate(length(atlasList), rep(0.0,n) ) )
-  for ( voxel in 1:ncol( targetIv ) )
-    {
-    zsd<-rep(1,natlas)
-    wmat<-basewmat
-    targetint<-targetIv[,voxel]
-    cent<-indices[voxel,]
-    segmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
-    intmat<-matrix( 0, ncol=length(targetint)  , nrow=natlas )
-    for ( ct in 1:natlas)
-      {
-      nhsearch = .Call("jointLabelFusionNeighborhoodSearch",
-        targetint, cent, max(rad), rSearch,
-        atlasList[[ct]],
-        labelList[[ct]], PACKAGE="ANTsR" )
-      segval = nhsearch[[ 1 ]]
-      v = nhsearch[[ 2 ]]
-      vmean = nhsearch[[ 3 ]]
-      sdv = nhsearch[[ 4 ]]
-      bestcor = nhsearch[[ 5 ]]
-      segmat[ct, ] = nhsearch[[ 6 ]]
-      intmat[ct, ] = v
-      if ( sdv == 0 ) {
-        zsd[ct]<-0 # assignment
-        sdv<-1
-        } else sdv=sd(v)
-      if ( doscale ) {
-        v<-( v - mean(v) )/sdv
-        }
-      if ( !usecor )
-        wmat[ct,]<-abs(v-(targetint)) # assignment
-      else {
-        ip<- ( v * targetint )
-        wmat[ct,]<-( ip*(-1.0))  # assignment
-        }
-      } # for all atlases
-    if ( maxAtlasAtVoxel[2] < natlas ) {
-      ords<-order(rowMeans(abs(wmat)))
-      inds<-maxAtlasAtVoxel[1]:maxAtlasAtVoxel[2]
-      # zsd[ ords[-inds] ]<-0
-      }
-    if ( sum(zsd) > (2) )
-      {
-      cormat = ( ( (wmat) %*% t(wmat) ) / ( ncol(wmat) - 1 ) )^beta
-      tempmat = ( antsrimpute(cormat) + diag(ncol(cormat)) * rho )
-      onev<-rep(1,ncol(cormat))
-      wts = solve( tempmat, onev )
-      #  wts = as.numeric( NMF::fcnnls( tempmat, onev )$x )
-      wts = wts / sum( wts )
-      if ( ! is.na( mean(wts)) ) {
-        # hongzhi method
-        segct = 1
-        skipped=0
-        for ( lseg in segvals )
-          {
-          if ( sum( segmat == lseg ) > 0  )
-            {
-            lsegmat = segmat * 0
-            lsegmat[ segmat == lseg ] = 1
-            lsegprobs = wts %*% lsegmat
-            lsegprobs[ lsegprobs <  0 ] = 0
-            .Call("addNeighborhoodToImage",
-              probimgs[[segct]], cent, rad, lsegprobs,
-              package="ANTsR" )
-            } else skipped=skipped+1
-          segct = segct + 1
-          }
-        pwts = wts
-        pwts[ wts < 0 ] = 0
-        pwts = pwts / sum( pwts )
-        lintensity = pwts %*% intmat
-        .Call("addNeighborhoodToImage",
-              jifImage, cent, rad, lintensity,
-              package="ANTsR" )
-      } else badct<-badct+1
-    }
-  } # loop over voxels
-  totalImage = targetIMask * 0
-  for ( poo in 1:length(probimgs) )
-    totalImage = totalImage + probimgs[[poo]]
-  selector = totalImage > 0
-  for ( poo in 1:length(probimgs) )
-    {
-    probimgs[[poo]][ selector ] =
-      probimgs[[poo]][ selector ] /
-      totalImage[ selector ]
-    }
-  close( progress )
-  rm( segmat )
-  rm( targetIv )
-  rm( indices )
-  finalseg=imageListToMatrix( probimgs, targetIMask  )
-  finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
-  segimg = makeImage( targetIMask , finalsegvec  )
-  # finally, remap to original segmentation labels
-  rsegimg = segimg * 0
-  for ( ct in 1:length(segvals) )
-    rsegimg[  segimg == ct ] = segvals[ ct ]
-  rm( segimg )
-  return( list( segimg=rsegimg, probimgs=probimgs,
-    predimg=jifImage,
-    badct=badct, segvals=segvals  ) )
+  outimg = targetI * 0.0
+  outimg[ targetIMask == 1 ] = finalsegvec2
+  return( list(
+    segmentation = outimg,
+    intensity = outimgi,
+    probabilityimages = probimgs )
+    )
 }

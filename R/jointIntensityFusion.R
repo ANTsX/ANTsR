@@ -1,6 +1,7 @@
 #' joint intensity fusion
 #'
-#' Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
+#' Estimates an image from another set of images - intensity generalization of
+#' joint label fusion.  Search radius used only when employing labels.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1

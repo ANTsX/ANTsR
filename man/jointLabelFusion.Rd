@@ -4,11 +4,9 @@
 \alias{jointLabelFusion}
 \title{joint label fusion}
 \usage{
-jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
-  labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, usecor = FALSE,
-  boundary.condition = "image", rSearch = 2, segvals = NA,
-  probimgs = NA, jifImage = NA)
+jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = 2,
+  labelList = NA, rho = 0.01, usecor = FALSE, rSearch = 3,
+  nonnegative = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -19,36 +17,29 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{beta}{weight sharpness, default to 2}
 
-\item{rad}{neighborhood radius, default to 4}
+\item{rad}{neighborhood radius, default to 2}
 
 \item{labelList}{list containing antsImages}
-
-\item{doscale}{scale neighborhood intensities}
-
-\item{doNormalize}{normalize each image range to 0, 1}
-
-\item{maxAtlasAtVoxel}{min/max n atlases to use at each voxel}
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
 
 \item{usecor}{employ correlation as local similarity}
 
-\item{boundary.condition}{one of 'image' 'mean' 'NA'}
+\item{rSearch}{radius of search, default is 3}
 
-\item{rSearch}{radius of search, default is 2}
+\item{nonnegative}{constrain weights to be non-negative}
 
-\item{segvals}{list of labels to expect}
-
-\item{probimgs}{list of probability images (to help slice by slice estimate)}
-
-\item{jifImage}{the current estimated jif image (helps speed slice by slice)}
+\item{verbose}{boolean}
 }
 \value{
 approximated image, segmentation and probabilities
 }
 \description{
-A multiple atlas voting scheme to customize labels for a new subject.
+A multiple atlas voting scheme to customize labels for a new subject. This
+calls the ANTs executable so is much faster than other variants in ANTsR.
+One may want to normalize image intensities for each input image before
+passing to this function.
 }
 \examples{
 
@@ -82,7 +73,7 @@ pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
 
 }
 \author{
-Brian B. Avants, Hongzhi Wang, Paul Yushkevich
+Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 }
 \keyword{fusion,}
 \keyword{template}

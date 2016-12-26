@@ -45,7 +45,8 @@ makes image converge to average}
 approximated image, segmentation and probabilities
 }
 \description{
-Estimates an image from another set of images - intensity generalization of joint label fusion.  Search radius used only when employing labels - WIP to speed it up.
+Estimates an image from another set of images - intensity generalization of
+joint label fusion.  Search radius used only when employing labels.
 }
 \examples{
 
