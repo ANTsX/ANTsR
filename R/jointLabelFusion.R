@@ -2,9 +2,13 @@
 #'
 #' A multiple atlas voting scheme to customize labels for a new subject. This
 #' function will also perform intensity fusion. It almost directlly calls the
-#' C++ in the ANTs executable so is much faster than other variants in ANTsR.
+#' \code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
 #' One may want to normalize image intensities for each input image before
-#' passing to this function.
+#' passing to this function.  Note on computation time: the underlying \code{C++}
+#' is multithreaded.  You can control the number of threads by setting the
+#' environment variable \code{ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS} e.g. to use all or
+#' some of your CPUs.  This will improve performance substantially. For instance,
+#' on a macbook pro from 2015, 8 cores improves speed by about 5x.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
