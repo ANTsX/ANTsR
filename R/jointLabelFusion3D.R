@@ -5,6 +5,8 @@
 #' joint label fusion. this version is more efficient,
 #' memory-wise, for 3D images. it is a thin wrapper
 #' that goes slice-by-slice but produces the same results.
+#' This program is for research.  For studies, please use jointLabelFusion in 
+#' ANTs or in ANTsR.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
