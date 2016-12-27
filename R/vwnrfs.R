@@ -349,7 +349,7 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
   chunk.seq = seq(1, nnz, by=voxchunk )
   chunk.seq[ length(chunk.seq) ] = nnz
   
-  voxels = imageListToMatrix(list(mask), mask)
+  voxels = imageListToMatrix(list(mask), thresholdImage(mask, 0.5, Inf) )
   for ( ch in 1:( length(chunk.seq)-1 ) ) {
     # set end of this chunk
     chnxt = chunk.seq[ ch + 1 ] - 1
@@ -357,7 +357,7 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
     voxels[ chunk.seq[ch]:chnxt ] = ch
   }
   smask = mask * 0
-  smask[mask==1] = voxels
+  smask[mask>=0.5] = voxels
   if ( sum( mask >= 0.5 ) != sum(smask >= 0.5 ) ) {
     stop("submask non-zero entries should be the same as input mask" )
   }
