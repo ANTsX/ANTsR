@@ -349,7 +349,7 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
   chunk.seq = seq(1, nnz, by=voxchunk )
   chunk.seq[ length(chunk.seq) ] = nnz
   
-  voxels = imageListToMatrix(list(mask), thresholdImage(mask, 0.5, Inf) )
+  voxels = rep(NA, sum(mask>=0.5) )
   for ( ch in 1:( length(chunk.seq)-1 ) ) {
     # set end of this chunk
     chnxt = chunk.seq[ ch + 1 ] - 1
