@@ -23,7 +23,7 @@ sparseDistanceMatrixXY(x, y, k = 3, r = Inf, sigma = NA,
 
 \item{eps}{epsilon error for rapid knn}
 
-\item{mypkg}{set either nabor, RANN, rflann or naborpar}
+\item{mypkg}{set either nabor, RANN, rflann}
 }
 \value{
 matrix sparse p by q matrix is output with p by k nonzero entries

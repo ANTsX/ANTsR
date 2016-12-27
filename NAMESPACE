@@ -132,4 +132,20 @@ import(Rcpp)
 import(tools)
 import(methods)
 importFrom(magrittr, "%>%")
+importFrom("grDevices", "colorRampPalette", "dev.new", "dev.off",
+             "heat.colors", "hsv", "jpeg", "png", "rainbow", "rgb")
+importFrom("graphics", "box", "hist", "image", "layout", "lcm", "par",
+             "plot", "plot.new", "plot.window", "points", "rect",
+             "title")
+importFrom("stats", "ar", "as.formula", "coefficients", "convolve",
+             "cor", "cor.test", "cov", "dist", "formula", "glm", "lm",
+             "lm.fit", "loess", "median", "model.frame", "model.matrix",
+             "model.response", "na.omit", "optimize", "p.adjust",
+             "pchisq", "pf", "pnorm", "ppois", "predict", "pt", "qchisq",
+             "qf", "qnorm", "qt", "quantile", "residuals", "rnorm",
+             "spec.pgram", "spline", "stl", "t.test", "toeplitz", "ts")
+importFrom("utils", "capture.output", "data", "download.file",
+             "glob2rx", "install.packages", "read.csv",
+             "setTxtProgressBar", "tail", "txtProgressBar", "unzip",
+             "write.csv")
 useDynLib(ANTsR)
