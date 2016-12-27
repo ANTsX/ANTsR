@@ -2,13 +2,11 @@
 % Please edit documentation in R/jointLabelFusion.R
 \name{jointLabelFusion}
 \alias{jointLabelFusion}
-\title{joint label fusion}
+\title{joint label and intensity fusion}
 \usage{
-jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
-  labelList = NA, doscale = TRUE, doNormalize = TRUE,
-  maxAtlasAtVoxel = c(1, Inf), rho = 0.01, usecor = FALSE,
-  boundary.condition = "image", rSearch = 2, segvals = NA,
-  probimgs = NA, jifImage = NA)
+jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = 2,
+  labelList = NA, rho = 0.01, usecor = FALSE, rSearch = 3,
+  nonnegative = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{targetI}{antsImage to be approximated}
@@ -19,36 +17,34 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = NA,
 
 \item{beta}{weight sharpness, default to 2}
 
-\item{rad}{neighborhood radius, default to 4}
+\item{rad}{neighborhood radius, default to 2}
 
 \item{labelList}{list containing antsImages}
-
-\item{doscale}{scale neighborhood intensities}
-
-\item{doNormalize}{normalize each image range to 0, 1}
-
-\item{maxAtlasAtVoxel}{min/max n atlases to use at each voxel}
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
 
 \item{usecor}{employ correlation as local similarity}
 
-\item{boundary.condition}{one of 'image' 'mean' 'NA'}
+\item{rSearch}{radius of search, default is 3}
 
-\item{rSearch}{radius of search, default is 2}
+\item{nonnegative}{constrain weights to be non-negative}
 
-\item{segvals}{list of labels to expect}
-
-\item{probimgs}{list of probability images (to help slice by slice estimate)}
-
-\item{jifImage}{the current estimated jif image (helps speed slice by slice)}
+\item{verbose}{boolean}
 }
 \value{
 approximated image, segmentation and probabilities
 }
 \description{
-A multiple atlas voting scheme to customize labels for a new subject.
+A multiple atlas voting scheme to customize labels for a new subject. This
+function will also perform intensity fusion. It almost directlly calls the
+\code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
+One may want to normalize image intensities for each input image before
+passing to this function.  Note on computation time: the underlying \code{C++}
+is multithreaded.  You can control the number of threads by setting the
+environment variable \code{ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS} e.g. to use all or
+some of your CPUs.  This will improve performance substantially. For instance,
+on a macbook pro from 2015, 8 cores improves speed by about 5x.
 }
 \examples{
 
@@ -80,9 +76,29 @@ r<-2
 pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
 
+\dontrun{
+ref = antsImageRead( getANTsRData("ch2") )
+n = 50
+ref = resampleImage(ref,c(n,n,n),1,0)
+ref = iMath(ref,"Normalize")
+refmask = getMask(ref)
+ilist = list()
+seglist = list()
+for ( k in 1:5 ) {
+mi = antsImageClone( ref ) + rnorm( n^3, 0, 0.1 )
+mykseg = kmeansSegmentation( mi, 3, refmask )$segmentation
+ilist[[ k ]] = mi
+seglist[[ k ]] = mykseg
+}
+pp = jointLabelFusion( ref, refmask,ilist, rSearch=2,
+ labelList=seglist, rad=rep(2, length(dim(ref)) ), verbose=TRUE )
+plot( ref, pp$segmentation )
+plot( pp$intensity  )
+}
+
 }
 \author{
-Brian B. Avants, Hongzhi Wang, Paul Yushkevich
+Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 }
 \keyword{fusion,}
 \keyword{template}

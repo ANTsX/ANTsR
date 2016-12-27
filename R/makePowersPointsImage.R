@@ -29,9 +29,9 @@ makePowersPointsImage <- function( pts, mask, radius = 5 )
   for ( r in 1:nPts) {
     pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
     idx = antsTransformPhysicalPointToIndex(mask,pt)
-    for ( i in c(-n[1]:n[1]) ) {
-      for (j in c(-n[2]:n[2])) {
-        for (k in c(-n[3]:n[3])) {
+    for ( i in seq(-n[1],n[1],by=0.5) ) {
+      for (j in seq(-n[2],n[2],by=0.5)) {
+        for (k in seq(-n[3],n[3],by=0.5)) {
           local = idx + c(i,j,k)
           localpt = antsTransformIndexToPhysicalPoint(mask,local)
           dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
@@ -81,11 +81,11 @@ makePointsImage <- function( pts, mask, radius = 5 )
   for ( r in 1:nPts) {
     pt = as.numeric(c(pts[r,1:dim]))
     idx = antsTransformPhysicalPointToIndex(mask,pt)
-    for ( i in c(-n[1]:n[1]) ) {
-      for (j in c(-n[2]:n[2])) {
+    for ( i in seq(-n[1],n[1],by=0.5) ) {
+      for (j in seq(-n[2],n[2],by=0.5) )  {
         if ( dim == 3 )
           {
-          for (k in c(-n[3]:n[3])) {
+          for (k in seq(-n[3],n[3],by=0.5)) {
             local = idx + c(i,j,k)
             localpt = antsTransformIndexToPhysicalPoint(mask,local)
             dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))

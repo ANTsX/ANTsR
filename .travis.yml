@@ -17,8 +17,8 @@ matrix:
 
 cran: http://cran.rstudio.com
 
-r_github_packages:
-  - gagolews/stringi
+# r_github_packages:
+#  - gagolews/stringi
 
 r_packages:
   - covr

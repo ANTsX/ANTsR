@@ -4,28 +4,45 @@
 \alias{resampleImageToTarget}
 \title{resampleImageToTarget}
 \usage{
-resampleImageToTarget(image, target, interpType = 1)
+resampleImageToTarget(image, target, interpType = "linear", imagetype = 0,
+  verbose = FALSE, ...)
 }
 \arguments{
-\item{image}{input antsImage matrix}
+\item{image}{image to resample}
 
-\item{target}{reference image to use for voxel size and header info}
+\item{target}{image of reference, the output will be in this space}
 
-\item{interpType}{one of 0 (linear), 1 (nearest neighbor),
-2 (gaussian), 3 (windowed sinc), 4 (bspline)}
+\item{interpType}{Choice of interpolator. Supports partial matching.
+\itemize{
+\item{linear}{}
+\item{nearestNeighbor}{}
+\item{multiLabel}{ for label images but genericlabel is preferred}
+\item{gaussian}{}
+\item{bSpline}{}
+\item{cosineWindowedSinc}{}
+\item{welchWindowedSinc}{}
+\item{hammingWindowedSinc}{}
+\item{lanczosWindowedSinc}{}
+\item{genericLabel}{ use this for label images}
+}}
+
+\item{imagetype}{choose 0/1/2/3 mapping to scalar/vector/tensor/time-series}
+
+\item{verbose}{print command and run verbose application of transform.}
 }
 \value{
-output antsImage
+output antsImage resampled with target's resolution/origin/orientation/direction
 }
 \description{
 Resample image by using another image as target reference.
+This function uses antsApplyTransform with an identity 
+matrix to achieve proper resampling.
 }
 \examples{
 
 fi<-antsImageRead( getANTsRData("r16"))
-fi.ref<-antsImageRead( getANTsRData("r64"))
-fi <- resampleImage(fi, c(2.2, 2.2, 2.2), useVoxels = 0, interpType = 1)
-finew <- resampleImageToTarget(fi, fi.ref)
+fi2mm <- resampleImage(fi, c(2, 2), useVoxels = 0, interpType = 'linear')
+resampled <- resampleImageToTarget(fi2mm, fi)
 
 }
 \author{

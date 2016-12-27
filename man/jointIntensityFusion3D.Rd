@@ -45,6 +45,8 @@ Estimates an image/labelset from another set of 3D images
 intensity generalization of joint label fusion, does not support segmentation.
 this version is more efficient, memory-wise, for 3D images. it is a thin
 wrapper that goes slice-by-slice but produces the same results.
+This program is for research.  For studies, please use jointLabelFusion in 
+ANTs or in ANTsR.
 }
 \examples{
 

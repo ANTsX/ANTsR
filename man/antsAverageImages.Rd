@@ -7,7 +7,7 @@
 antsAverageImages(imageList, normalize = FALSE)
 }
 \arguments{
-\item{imageList}{list of antsImages}
+\item{imageList}{list of antsImages or a character vector of filenames}
 
 \item{normalize}{boolean determines if image is divided by mean before
 averaging}
