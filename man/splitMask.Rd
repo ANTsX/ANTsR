@@ -4,12 +4,14 @@
 \alias{splitMask}
 \title{split a mask into n labeled sub-masks}
 \usage{
-splitMask(mask, n)
+splitMask(mask, n = NA, voxchunk = NA)
 }
 \arguments{
 \item{mask}{antsImage mask}
 
-\item{n}{number of mask chunks}
+\item{n}{number of mask chunks (if voxchunk is not set)}
+
+\item{voxchunk}{number of voxels per chunk (if n is not set)}
 }
 \value{
 relabeledMask
@@ -23,6 +25,6 @@ smask = splitMask( mask, 10 )
 
 }
 \author{
-Avants BB, Tustison NJ
+Avants BB, Tustison NJ, Pustina D
 }
 
