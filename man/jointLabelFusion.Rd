@@ -13,13 +13,13 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = 2,
 
 \item{targetIMask}{mask with value 1}
 
-\item{atlasList}{list containing antsImages}
+\item{atlasList}{list containing antsImages with intensity images}
 
 \item{beta}{weight sharpness, default to 2}
 
 \item{rad}{neighborhood radius, default to 2}
 
-\item{labelList}{optional list containing antsImages}
+\item{labelList}{optional list containing antsImages with segmentation labels}
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
