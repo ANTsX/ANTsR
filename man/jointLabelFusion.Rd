@@ -19,7 +19,7 @@ jointLabelFusion(targetI, targetIMask, atlasList, beta = 4, rad = 2,
 
 \item{rad}{neighborhood radius, default to 2}
 
-\item{labelList}{list containing antsImages}
+\item{labelList}{optional list containing antsImages}
 
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
@@ -40,11 +40,12 @@ A multiple atlas voting scheme to customize labels for a new subject. This
 function will also perform intensity fusion. It almost directlly calls the
 \code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
 One may want to normalize image intensities for each input image before
-passing to this function.  Note on computation time: the underlying \code{C++}
+passing to this function.  If no labels are passed, we do intensity fusion.
+Note on computation time: the underlying \code{C++}
 is multithreaded.  You can control the number of threads by setting the
 environment variable \code{ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS} e.g. to use all or
 some of your CPUs.  This will improve performance substantially. For instance,
-on a macbook pro from 2015, 8 cores improves speed by about 5x.
+on a macbook pro from 2015, 8 cores improves speed by about 4x.
 }
 \examples{
 
@@ -75,6 +76,8 @@ for ( i in 1:length(ilist) )
 r<-2
 pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+  rad=rep(r, length(dim(ref)) ) )
 
 \dontrun{
 ref = antsImageRead( getANTsRData("ch2") )

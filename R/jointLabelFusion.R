@@ -4,18 +4,19 @@
 #' function will also perform intensity fusion. It almost directlly calls the
 #' \code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
 #' One may want to normalize image intensities for each input image before
-#' passing to this function.  Note on computation time: the underlying \code{C++}
+#' passing to this function.  If no labels are passed, we do intensity fusion.
+#' Note on computation time: the underlying \code{C++}
 #' is multithreaded.  You can control the number of threads by setting the
 #' environment variable \code{ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS} e.g. to use all or
 #' some of your CPUs.  This will improve performance substantially. For instance,
-#' on a macbook pro from 2015, 8 cores improves speed by about 5x.
+#' on a macbook pro from 2015, 8 cores improves speed by about 4x.
 #'
 #' @param targetI antsImage to be approximated
 #' @param targetIMask mask with value 1
-#' @param atlasList list containing antsImages
+#' @param atlasList list containing antsImages with intensity images
 #' @param beta weight sharpness, default to 2
 #' @param rad neighborhood radius, default to 2
-#' @param labelList list containing antsImages
+#' @param labelList optional list containing antsImages with segmentation labels
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
 #' @param usecor employ correlation as local similarity
@@ -54,6 +55,8 @@
 #' r<-2
 #' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
 #'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+#'   rad=rep(r, length(dim(ref)) ) )
 #'
 #' \dontrun{
 #' ref = antsImageRead( getANTsRData("ch2") )
@@ -90,16 +93,19 @@ jointLabelFusion <- function(
   verbose = FALSE )
 {
   segpixtype = 'unsigned int'
-  if ( length(labelList) != length(atlasList) )
-    stop("length(labelList) != length(atlasList)")
-  inlabs = sort( unique(  labelList[[ 1 ]][ targetIMask == 1 ]  ) )
-  labsum = labelList[[1]]
-  for ( n in 2:length( labelList ) ) {
-    inlabs = sort( unique( c( inlabs, labelList[[ n ]][ targetIMask == 1 ]  ) ) )
-    labsum = labsum + labelList[[ n ]]
-    }
-  mymask = antsImageClone( targetIMask )
-  mymask[ labsum == 0 ] = 0
+  if ( any( is.na( labelList ) ) ) doJif = TRUE else doJif = FALSE
+  if ( ! doJif ) {
+    if ( length(labelList) != length(atlasList) )
+      stop("length(labelList) != length(atlasList)")
+    inlabs = sort( unique(  labelList[[ 1 ]][ targetIMask == 1 ]  ) )
+    labsum = labelList[[1]]
+    for ( n in 2:length( labelList ) ) {
+      inlabs = sort( unique( c( inlabs, labelList[[ n ]][ targetIMask == 1 ]  ) ) )
+      labsum = labsum + labelList[[ n ]]
+      }
+    mymask = antsImageClone( targetIMask )
+    mymask[ labsum == 0 ] = 0
+    } else mymask = ( targetIMask )
   tdir <- tempdir()
   segdir <- tempdir()
   osegfn <- tempfile(pattern = "antsr", tmpdir = segdir, fileext = "myseg.nii.gz")
@@ -108,11 +114,16 @@ jointLabelFusion <- function(
   probsbase <- basename( probs )
   searchpattern <- sub("%02d", "*", probsbase)
   mydim <- as.numeric( targetIMask@dimension )
-  outimg <- new("antsImage", segpixtype, mydim)
-  outimgi <- new("antsImage", 'float', mydim)
-  outs <- paste("[",
-    antsrGetPointerName(outimg),",",
-    antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
+  if ( ! doJif ) {
+    outimg <- new("antsImage", segpixtype, mydim)
+    outimgi <- new("antsImage", 'float', mydim)
+    outs <- paste("[",
+      antsrGetPointerName(outimg),",",
+      antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
+    } else {
+      outimgi <- new("antsImage", 'float', mydim)
+      outs <- antsrGetPointerName(outimgi)
+    }
   # this is a temporary FIXME for some type issue i cant figure out right now
 #  outs <- paste("[",
 #    osegfn,",",
@@ -146,12 +157,15 @@ jointLabelFusion <- function(
     kct = kct + 1
     myargs[[ kct ]] = atlasList[[ k ]]
     names( myargs  )[[ kct ]]  = "g"
-    kct = kct + 1
-    castseg = antsImageClone( labelList[[ k ]], segpixtype )
-    myargs[[ kct ]] = castseg
-    names( myargs )[[ kct ]]  = "l"
+    if ( ! doJif ) {
+      kct = kct + 1
+      castseg = antsImageClone( labelList[[ k ]], segpixtype )
+      myargs[[ kct ]] = castseg
+      names( myargs )[[ kct ]]  = "l"
+      }
     }
   .Call("antsJointFusion", .int_antsProcessArguments(c(myargs)), PACKAGE = "ANTsR")
+  if ( doJif ) return( outimgi )
   probsout <- list.files(path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)

@@ -13,7 +13,8 @@ try
     {
       return Rcpp::wrap( 1 ) ;
     }
-  return Rcpp::wrap( ants::antsJointFusion( args , &Rcpp::Rcout ) ) ;
+  ants::antsJointFusion( args , &Rcpp::Rcout );
+  return 0;
 }
  catch( const std::exception& exc )
    {
