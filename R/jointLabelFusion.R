@@ -169,7 +169,6 @@ jointLabelFusion <- function(
   probsout <- list.files(path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)
-  outimg = antsImageClone( outimg, 'float' )
   pimg <- antsImageRead( probsout[1] )
   probimgs <- c( pimg )
   for (x in c( 2:length( probsout ) ) ) {
@@ -182,8 +181,7 @@ jointLabelFusion <- function(
   for ( i in 1:max( finalsegvec ) ) {
     finalsegvec2[ finalsegvec == i ] = inlabs[ i ]
     }
-  outimg = targetI * 0.0
-  outimg[ targetIMask == 1 ] = finalsegvec2
+  outimg = makeImage( targetIMask, finalsegvec2 )
   return( list(
     segmentation = outimg,
     intensity = outimgi,
