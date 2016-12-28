@@ -321,37 +321,44 @@ vwnrfs.predict = function(rfm, x, labelmasks, rad=NA,
 #' split a mask into n labeled sub-masks
 #'
 #' @param mask antsImage mask
-#' @param n number of mask chunks
+#' @param n number of mask chunks (if voxchunk is not set)
+#' @param voxchunk number of voxels per chunk (if n is not set)
 #' @return relabeledMask
-#' @author Avants BB, Tustison NJ
+#' @author Avants BB, Tustison NJ, Pustina D
 #'
 #' @examples
 #' mask = getMask( antsImageRead( getANTsRData("r16" ) ) )
 #' smask = splitMask( mask, 10 )
 #'
 #' @export splitMask
-splitMask <- function( mask, n )
-{
-  # first compute chunk size
+splitMask <- function( mask, n = NA, voxchunk = NA ) {
+  if ( is.na(n) & is.na(voxchunk) ) {
+    stop('Arguments n or voxchunk are required for splitMask')
+  }
+  if ( class(mask) != 'antsImage') stop('Mask must be a single antsImage')
+  
   hasvalues = mask >= 0.5
   nnz = sum( hasvalues )
-  voxchunk = round( nnz / n ) - 1
+  
+  if ( is.numeric(n) ) {
+    # if voxchunk not set compute chunk size
+    nnz = sum( hasvalues )
+    voxchunk = round( nnz / n ) - 1
+  }
+  
   chunk.seq = seq(1, nnz, by=voxchunk )
   chunk.seq[ length(chunk.seq) ] = nnz
-  smask = mask * 0
-  for ( ch in 1:( length(chunk.seq)-1 ) )
-  {
+  
+  voxels = rep(NA, sum(mask>=0.5) )
+  for ( ch in 1:( length(chunk.seq)-1 ) ) {
     # set end of this chunk
     chnxt = chunk.seq[ ch + 1 ] - 1
     if ( ch ==  ( length(chunk.seq)-1 ) ) chnxt = nnz
-    # create mask for this chunk
-    temp = which( hasvalues, arr.ind=T )[ chunk.seq[ch]:chnxt ]
-    tnnz = hasvalues
-    tnnz[ -temp ] = FALSE
-    smask[ tnnz ] = ch
+    voxels[ chunk.seq[ch]:chnxt ] = ch
   }
-  if ( sum( mask >= 0.5 ) != sum(smask >= 0.5 ) )
-  {
+  smask = mask * 0
+  smask[mask>=0.5] = voxels
+  if ( sum( mask >= 0.5 ) != sum(smask >= 0.5 ) ) {
     stop("submask non-zero entries should be the same as input mask" )
   }
   return( smask )
