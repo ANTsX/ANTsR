@@ -86,8 +86,8 @@ for ( i in 1:n )
         }
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
     } else if ( pcaOption == "fastICA" ) {
-      if ( ! usePkg( "fastICA" ) ) stop("please install irlba")
-      tempica = fastICA( t( cx ), k )
+      if ( ! usePkg( "fastICA" ) ) stop("please install fastICA")
+      tempica = fastICA::fastICA( t( cx ), k )
       vpca = list( d=NA,  u=NA,
         v=( tempica$S ) )
     } else if ( pcaOption == "eanat" ) {

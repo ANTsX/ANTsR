@@ -37,7 +37,7 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
   doNormalize=TRUE, maxAtlasAtVoxel=c(1,Inf), rho=0.01, # debug=F,
   usecor=FALSE, rSearch=0, slices=NA )
 {
-  stop("Do not use this function. Use jointLabelFusion instead.")
+  stop("Probably should not use this function. Use jointLabelFusion instead.")
   if (nargs() == 0)
     {
     print(args(jointLabelFusion3D))
@@ -86,15 +86,16 @@ jointLabelFusion3D <- function( targetI, targetIMask, atlasList,
       maskout[ mask2d == 1 ]<-1
       oo2d<-jointLabelFusion( targetI=targetI,
         targetIMask=mask2d, atlasList=atlasList,
-        beta=beta, rad=rad, labelList=labelList,
-        doscale=doscale, doNormalize=doNormalize,
-        maxAtlasAtVoxel=maxAtlasAtVoxel, rho=rho, segvals=segvals,
-        usecor=usecor, probimgs=probimgs, jifImage=jifImage
+        beta=beta, rad=rad, labelList=labelList, rho=rho
+#        doscale=doscale, doNormalize=doNormalize,
+#        maxAtlasAtVoxel=maxAtlasAtVoxel, segvals=segvals,
+#        usecor=usecor, probimgs=probimgs, jifImage=jifImage
         )
       whichMaskSlice<-whichMaskSlice+1
       }
     } # endfor
-  finalseg=imageListToMatrix( oo2d$probimgs, targetIMask  )
+#  finalseg=imageListToMatrix( allprobimgs, targetIMask  )
+  finalseg=imageListToMatrix( oo2d$probimgs, targetIMask  ) # FIXME see above
   finalsegvec = apply( finalseg, FUN=which.max , MARGIN=2 )
   segimg = makeImage( targetIMask , finalsegvec  )
   # finally, remap to original segmentation labels

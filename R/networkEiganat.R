@@ -207,7 +207,7 @@ lowrankRowMatrix <- function(A, k = 2, faster=FALSE ) {
     return(A)
   if ( usePkg("rsvd") & faster )
   {
-    s <- rsvd::rsvd( x, k )
+    s <- rsvd::rsvd( A, k )
     K <- t(s$u) # %*% diag(s$D[1:k]))
   } else {
     s <- svd(A, nu = k, nv = 0)
