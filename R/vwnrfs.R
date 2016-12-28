@@ -346,6 +346,10 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
     voxchunk = round( nnz / n ) - 1
   }
   
+  if (voxchunk > sum(mask>=0.5)) {
+    return(thresholdImage(mask, 0.5, 1))
+  }
+  
   chunk.seq = seq(1, nnz, by=voxchunk )
   chunk.seq[ length(chunk.seq) ] = nnz
   
