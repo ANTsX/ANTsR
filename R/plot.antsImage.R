@@ -509,7 +509,7 @@ if ( ! any( is.na( domainImageMap ) ) )
     if (min(biglab) != max(biglab))
       {
       invisible( suppressWarnings(
-        plot(
+        pixmap::plot(
           pixmap::pixmapIndexed(biglab,
             col = heatvals, bbox = bbox), add = TRUE) ) )
       }
