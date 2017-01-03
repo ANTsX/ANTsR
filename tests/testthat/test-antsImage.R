@@ -194,7 +194,7 @@ test_that("dim of as.array on multichannel", {
 })
 
 test_that("mean of multichannel antsImage", {
-  expect_true(mean(mimg)==mean(mvalues))
+  expect_equal( mean(mimg), mean(mvalues), tolerance = 1.e-7 )
 })
 
 test_that("max of multichannel antsImage", {
