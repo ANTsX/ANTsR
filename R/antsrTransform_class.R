@@ -198,6 +198,10 @@ getAntsrTransformFixedParameters <- function(transform) {
   return(.Call("antsrTransform_GetFixedParameters", transform, PACKAGE = "ANTsR"))
 }
 
+#' @title getAntsrTransformParameters
+#' @description Convert deformation field (multiChannel image) to antsrTransform
+#' @param field deformation field (multiChannel image)
+#' @return antsrTransform'
 antsrTransformFromDisplacementField <- function( field ) {
   return(.Call("antsrTransform_FromDisplacementField", field, PACKAGE="ANTsR"))
 }

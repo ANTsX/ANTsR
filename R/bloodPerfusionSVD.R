@@ -106,7 +106,8 @@ residueFunction[residueFunction < 0.0] <- 0.0
 
 # cbf is the maximum of the residue function at each voxel
 
-cbf <- colMax( residueFunction )
+.colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
+cbf <- .colMax( residueFunction )
 cbfOutputImage <- matrixToImages( as.matrix( t( cbf ) ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
 
 # cbv is area under the curve at each voxel using the trapezoidal rule
@@ -157,8 +158,6 @@ if( is.vector( y ) )
   return ( 0.5 * ( ( x[idx] - x[idx-1] ) %*% ( y[idx,] + y[idx-1,] ) ) )
   }
 }
-
-colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
 
 #' Regularize SVD (deconvolution) solution of cerebral blood flow.
 #'
