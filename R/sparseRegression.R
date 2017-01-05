@@ -29,8 +29,7 @@
 #' literature/web site here ~
 #' @examples
 #'
-#' \dontrun{
-#' nsubj <- 1000
+#' nsubj <- 50
 #' prop.train <- 1/2
 #' subj.train <- sample(1:nsubj, prop.train*nsubj, replace=F)
 #' input <- t(replicate(nsubj, rnorm(125)))
@@ -49,7 +48,7 @@
 #' sample[40:60] <-1
 #' signal.img <- as.antsImage(array(rep(0,125), dim=c(5, 5, 5)))
 #' signal.img[signal.img >= 0 ] <- sample
-#' plot( signal.img, axis=2, slices='1x5x1') # actual source of signal
+#' # plot( signal.img, axis=2, slices='1x5x1') # actual source of signal
 #' # compare against first learned regression vector
 #' myimgs <- list()
 #' for( i in 1:5){
@@ -58,12 +57,11 @@
 #'   myimgs[[ i ]] <- antsImageClone(myregression$eigenanatomyimages[[ i ]])
 #'   myimgs[[ i ]][mymask > 0] <- myarray
 #' }
-#' plot(myimgs[[1]], axis=2, slices='1x5x1')
+#' # plot(myimgs[[1]], axis=2, slices='1x5x1')
 #' # use learned eigenvectors for prediction
 #' result <- regressProjections(input.train, input.test, demog.train,
 #'     demog.test, myregression$eigenanatomyimages, mymask, 'outcome')
-#' plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
-#' }
+#' # plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 #'
 #' @export sparseRegression
 sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05,
@@ -90,7 +88,7 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
   args <- list("--svd", paste("network[", matname, ",", mfn, ",", sparseness, ",",
     demog.name, "]", sep = ""), "--l1", 1, "-i", its, "--PClusterThresh", cthresh,
     "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth)
-  .Call("sccan", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
+  .Call("sccanX", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
   if (!is.na(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
@@ -109,7 +107,6 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
       recursive = T)
     fnl <- read.csv(fnl)
   }
-
   glb <- paste("spcaprojectionsView1vec.csv", sep = "")
   fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
   fnu <- read.csv(fnu)
