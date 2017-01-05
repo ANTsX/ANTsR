@@ -31,7 +31,7 @@
 #'
 #' nsubj <- 50
 #' prop.train <- 1/2
-#' subj.train <- sample(1:nsubj, prop.train*nsubj, replace=F)
+#' subj.train <- sample(1:nsubj, prop.train*nsubj, replace = FALSE )
 #' input <- t(replicate(nsubj, rnorm(125)))
 #' outcome <- seq(1, 5, length.out=nsubj)
 #' demog <- data.frame(outcome=outcome)
