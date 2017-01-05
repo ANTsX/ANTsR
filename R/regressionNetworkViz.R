@@ -21,10 +21,10 @@
 #' @examples
 #'
 #' \dontrun{
-#' # colnames(brainpreds)<-paste('Vox',c(1:ncol(brainpreds)),sep='')
-#' # colnames( mylm$beta.pval )<-colnames(brainpreds)
-#' # demognames<-rownames(mylm$beta.pval)
-#' # regressionNetworkViz( mylm , sigthresh=0.05, outfile='temp2.html')
+#' colnames(brainpreds)<-paste('Vox',c(1:ncol(brainpreds)),sep='')
+#' colnames( mylm$beta.pval )<-colnames(brainpreds)
+#' demognames<-rownames(mylm$beta.pval)
+#' myout = regressionNetworkViz( mylm , sigthresh=0.05, outfile='temp2.html')
 #' }
 #'
 #' @export regressionNetworkViz
@@ -81,12 +81,13 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   JJLinks <- data.frame(source = jjsources, target = jjtargets, value = jjvalues)
   if (whichviz == "Sankey") {
     networkD3::sankeyNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
-      Value = "value", NodeID = "name", fontsize = 12, nodeWidth = 30, width = 700,
-      file = outfile)
+      Value = "value", NodeID = "name", nodeWidth = 30, width = 700 ) %>%
+        saveNetwork( file = outfile )
   } else {
     networkD3::forceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", Group = "group", width = 550, height = 400,
-      zoom = zoom, opacity = 0.9, file = outfile)
+      zoom = TRUE, opacity = 0.9) %>%
+        saveNetwork( file = outfile )
   }
   return(list(mynodes = JJNodes, mylinks = JJLinks))
 }
