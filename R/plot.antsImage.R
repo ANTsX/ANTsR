@@ -131,6 +131,7 @@ if ( ! any( is.na( domainImageMap ) ) )
   if ( length( dim( x ) ) < axis ) axis = length( dim( x ) )
   if(missing(slices)){
     plotimask<-getMask(x, cleanup=0)
+    if ( max( plotimask ) == 0 ) plotimask = plotimask + 1
     if ( doCropping ) x <- cropImage(x, plotimask )
     slices <- round(seq(1, dim(x)[axis], length.out=nslices))
   }
