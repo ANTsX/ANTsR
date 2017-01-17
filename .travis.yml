@@ -27,6 +27,7 @@ r_packages:
   - mFilter
   - igraph
   - magic
+  - randomForest
 
 r_binary_packages:
   - magrittr
@@ -80,7 +81,7 @@ install:
 #  - Rscript -e 'if(!"psych" %in% rownames(installed.packages())) { install.packages("psych", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"magic" %in% rownames(installed.packages())) { install.packages("magic", dependencies = TRUE) }'
-#  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
 #  - Rscript -e 'update.packages( ask = FALSE )'
   - cd ~/
   - itkrrel=0.0.1
@@ -104,6 +105,7 @@ script:
 # report coverage rate to coveralls
 after_success:
   - cd $mydir
+  - cd ANTsR
   - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
 
 after_failure:
