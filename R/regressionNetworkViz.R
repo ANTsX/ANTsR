@@ -82,12 +82,12 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   if (whichviz == "Sankey") {
     networkD3::sankeyNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", nodeWidth = 30, width = 700 ) %>%
-        saveNetwork( file = outfile )
+        networkD3::saveNetwork( file = outfile )
   } else {
     networkD3::forceNetwork(Links = JJLinks, Nodes = JJNodes, Source = "source", Target = "target",
       Value = "value", NodeID = "name", Group = "group", width = 550, height = 400,
       zoom = TRUE, opacity = 0.9) %>%
-        saveNetwork( file = outfile )
+        networkD3::saveNetwork( file = outfile )
   }
   return(list(mynodes = JJNodes, mylinks = JJLinks))
 }
