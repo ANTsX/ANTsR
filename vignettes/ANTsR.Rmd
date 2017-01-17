@@ -190,15 +190,15 @@ statistical processing.  Here, we generate a simulated set of these
 images and then proceed to smooth them, store them in a list and convert
 them to a matrix after extracting the information of each image within
 a data-driven mask.
-```{r image list}
+```{r imagelist}
 nimages<-100
 ilist<-list()
 for ( i in 1:nimages )
-{
+  {
   simimg<-makeImage( c(50,50) , rnorm(2500) )
   simimg<-smoothImage(simimg,1.5)
-  ilist[i]<-simimg
-}
+  ilist[[ i  ]] = simimg
+  }
 # get a mask from the first image
 mask<-getMask( ilist[[1]],
   lowThresh=mean(ilist[[1]]), cleanup=TRUE )
