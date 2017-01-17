@@ -105,8 +105,9 @@ script:
 # report coverage rate to coveralls
 after_success:
   - cd $mydir
-  - cd ANTsR
-  - Rscript -e 'covr::coveralls(exclusions = "src/RcppExports.cpp")'
+#  - cd ANTsR
+#  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
+# takes too long, should add to matrix
 
 after_failure:
   - cat ~/build/stnava/ANTsR.Rcheck/00install.out
