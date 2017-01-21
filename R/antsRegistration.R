@@ -26,6 +26,7 @@
 #' \itemize{
 #'   \item{"Translation": }{Translation transformation.}
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+#'   \item{"Similarity": }{Rigid transformation: Only rotation and translation.}
 #'   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
 #'   May be useful for quick visualization fixes.'}
 #'   \item{"DenseRigid": }{Rigid transformation: Only rotation and translation.
@@ -184,7 +185,7 @@ antsRegistration <- function(
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       inpixeltype <- fixed@pixeltype
       ttexists <- FALSE
-      allowableTx <- c("Translation","Rigid", "Affine", "TRSAA",
+      allowableTx <- c("Translation","Rigid", "Similarity", "Affine", "TRSAA",
         "SyN","SyNRA","SyNOnly","SyNCC","SyNabp", "SyNBold", "SyNBoldAff",
         "SyNAggro", "SyNLessAggro", "TVMSQ","TVMSQC","ElasticSyN")
       ttexists <- typeofTransform %in% allowableTx
@@ -514,8 +515,10 @@ antsRegistration <- function(
           fwdtransforms <- c( paste( outprefix, "0Warp.nii.gz", sep = "") )
           invtransforms <- c( paste(outprefix, "0InverseWarp.nii.gz", sep = ""))
         }
-        if ( typeofTransform == "Rigid" | typeofTransform == "Affine" |
-               typeofTransform == "Translation" )
+        if ( typeofTransform == "Rigid" |
+             typeofTransform == "Similarity" |
+             typeofTransform == "Translation" |
+             typeofTransform == "Affine"  )
         {
           args <- list(
             "-d", as.character(fixed@dimension), "-r", initx,

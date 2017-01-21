@@ -64,6 +64,7 @@ typeofTransform can be one of:
 \itemize{
   \item{"Translation": }{Translation transformation.}
   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
+  \item{"Similarity": }{Rigid transformation: Only rotation and translation.}
   \item{"QuickRigid": }{Rigid transformation: Only rotation and translation.
   May be useful for quick visualization fixes.'}
   \item{"DenseRigid": }{Rigid transformation: Only rotation and translation.
