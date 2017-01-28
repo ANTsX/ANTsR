@@ -347,7 +347,7 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
   }
   
   if (voxchunk > sum(mask>=0.5)) {
-    return(thresholdImage(mask, 0.5, 1))
+    return(thresholdImage(mask, 0.5, Inf))
   }
   
   chunk.seq = seq(1, nnz, by=voxchunk )
