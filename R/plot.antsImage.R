@@ -217,14 +217,12 @@ if ( ! any( is.na( domainImageMap ) ) )
     image(rotate270.matrix(z), ...)
   }
   makePalette <- function( mpcolor, nlevels=15){
+    if (mpcolor == "viridis") return( viridis::viridis( nlevels ) )
     if (mpcolor == "white"){
       colorfun <- colorRampPalette(c("black", "white"), interpolate = c("spline"),
         space = "Lab")
     } else if (mpcolor != "jet"){
       colorfun <- colorRampPalette(c("white", mpcolor), interpolate = c("spline"),
-        space = "Lab")
-    } else if (mpcolor == "viridis"){
-      colorfun <- colorRampPalette( viridis::viridis( nlevels ), interpolate = c("spline"),
         space = "Lab")
     } else {
       colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
@@ -332,7 +330,7 @@ if ( ! any( is.na( domainImageMap ) ) )
     window.img[ 1 ]<-min( x )
   bigslice[bigslice<window.img[1]] <- window.img[1]
   bigslice[bigslice>window.img[2]] <- window.img[2]
-  if(colorbar & missing(y)){
+  if ( colorbar & missing( y ) ){
     nlev = 50
     levels <- seq(window.img[1], window.img[2], length.out=nlev)
     # code taken from filled.contour
