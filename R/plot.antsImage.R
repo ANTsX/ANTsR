@@ -485,9 +485,10 @@ if ( ! any( is.na( domainImageMap ) ) )
     }
     if (minind > 1)
       minind <- minind - 1
+    colorfun = rainbow
     heatvals <- heat.colors(nlevels, alpha = alpha)
     heatvals <- rainbow(nlevels, alpha = alpha)
-    if ( color.overlay[ind] != "jet" & color.overlay[ind] != "viridis" )
+    if ( color.overlay[ind] != "jet" & color.overlay[ind] != "viridis" & color.overlay[ind] != "magma" & color.overlay[ind] != "plasma" & color.overlay[ind] != "inferno"   )
       colorfun <- colorRampPalette(c("white", color.overlay[ind]), interpolate = c("spline"),
         space = "Lab")
     if (color.overlay[ind] == "jet") {
