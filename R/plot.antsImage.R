@@ -68,7 +68,7 @@
 #' @export
 plot.antsImage <- function(x, y,
   color.img = "white",
-  color.overlay = c("jet", "red", "blue",  "green", "yellow", "viridis"),
+  color.overlay = c("jet", "red", "blue",  "green", "yellow", "viridis", "magma", "plasma", "inferno"),
   axis = 2,
   slices,
   colorbar = missing(y),
@@ -217,7 +217,10 @@ if ( ! any( is.na( domainImageMap ) ) )
     image(rotate270.matrix(z), ...)
   }
   makePalette <- function( mpcolor, nlevels=15){
-    if (mpcolor == "viridis") return( viridis::viridis( nlevels ) )
+    if ( mpcolor == "viridis") return( viridis::viridis( nlevels ) )
+    if ( mpcolor == "magma") return( viridis::magma( nlevels ) )
+    if ( mpcolor == "plasma") return( viridis::plasma( nlevels ) )
+    if ( mpcolor == "inferno") return( viridis::inferno( nlevels ) )
     if (mpcolor == "white"){
       colorfun <- colorRampPalette(c("black", "white"), interpolate = c("spline"),
         space = "Lab")
@@ -499,6 +502,9 @@ if ( ! any( is.na( domainImageMap ) ) )
     }
     heatvals <- colorfun(nlevels)
     if ( color.overlay[ind] == "viridis" ) heatvals <- viridis::viridis( nlevels )
+    if ( color.overlay[ind] == "magma" ) heatvals <- viridis::magma( nlevels )
+    if ( color.overlay[ind] == "plasma" ) heatvals <- viridis::plasma( nlevels )
+    if ( color.overlay[ind] == "inferno" ) heatvals <- viridis::inferno( nlevels )
     # fix to get alpha transparency correct
     if (nchar(heatvals[1]) == 7 & alpha != 1) heatvals = paste0(heatvals,round(alpha*100,0))
     if (locthresh[1] > 1)
