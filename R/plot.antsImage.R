@@ -68,7 +68,7 @@
 #' @export
 plot.antsImage <- function(x, y,
   color.img = "white",
-  color.overlay = c("jet", "red", "blue",  "green", "yellow"),
+  color.overlay = c("jet", "red", "blue",  "green", "yellow", "viridis"),
   axis = 2,
   slices,
   colorbar = missing(y),
@@ -222,6 +222,9 @@ if ( ! any( is.na( domainImageMap ) ) )
         space = "Lab")
     } else if (mpcolor != "jet"){
       colorfun <- colorRampPalette(c("white", mpcolor), interpolate = c("spline"),
+        space = "Lab")
+    } else if (mpcolor == "viridis"){
+      colorfun <- colorRampPalette( viridis::viridis( nlevels ), interpolate = c("spline"),
         space = "Lab")
     } else {
       colorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
@@ -483,7 +486,7 @@ if ( ! any( is.na( domainImageMap ) ) )
       minind <- minind - 1
     heatvals <- heat.colors(nlevels, alpha = alpha)
     heatvals <- rainbow(nlevels, alpha = alpha)
-    if (color.overlay[ind] != "jet")
+    if ( color.overlay[ind] != "jet" & color.overlay[ind] != "viridis" )
       colorfun <- colorRampPalette(c("white", color.overlay[ind]), interpolate = c("spline"),
         space = "Lab")
     if (color.overlay[ind] == "jet") {
@@ -492,7 +495,12 @@ if ( ! any( is.na( domainImageMap ) ) )
         "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
         space = "Lab")
     }
+    if (color.overlay[ind] == "viridis") {
+      colorfun <- colorRampPalette( viridis::viridis( nlevels ) , interpolate = c("spline"),
+        space = "Lab")
+    }
     heatvals <- colorfun(nlevels)
+    if ( color.overlay[ind] == "viridis" ) heatvals <- viridis::viridis( nlevels )
     # fix to get alpha transparency correct
     if (nchar(heatvals[1]) == 7 & alpha != 1) heatvals = paste0(heatvals,round(alpha*100,0))
     if (locthresh[1] > 1)

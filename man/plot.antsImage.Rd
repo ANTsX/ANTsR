@@ -5,7 +5,7 @@
 \title{Plotting an image slice or multi-slice with optional color overlay.}
 \usage{
 \method{plot}{antsImage}(x, y, color.img = "white", color.overlay = c("jet",
-  "red", "blue", "green", "yellow"), axis = 2, slices,
+  "red", "blue", "green", "yellow", "viridis"), axis = 2, slices,
   colorbar = missing(y), title.colorbar, title.img, color.colorbar,
   window.img, window.overlay, quality = 2, outname = NA, alpha = 1,
   newwindow = FALSE, nslices = 10, domainImageMap = NA, ncolumns = 4,
