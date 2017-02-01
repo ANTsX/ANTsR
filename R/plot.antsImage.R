@@ -288,7 +288,7 @@ if ( ! any( is.na( domainImageMap ) ) )
   bigslice <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
   rowsl <- 0
   # convert to 0 255
-  nlevels <- 2^10
+  nlevels <- 2^8
   reoSlice2 <- function( inimg, insl )
     {
       if (axis != 2 & imagedim > 2)
