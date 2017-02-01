@@ -151,7 +151,6 @@ if ( ! any( is.na( domainImageMap ) ) )
     y <- NA
   if (is.antsImage(y))
     y <- list(y)
-  functional <- y
   imagedim <- length(dim(myantsimage))
   hvpx <- usePkg("pixmap")
   hvmsc <- usePkg("misc3d")
@@ -235,9 +234,7 @@ if ( ! any( is.na( domainImageMap ) ) )
     colorfun(nlevels)
   }
 
-  if (all(is.na(functional))) {
-    # print(paste('functional image file', functional, 'does not exist. no overlay
-    # will be produced.'))
+  if (all(is.na(y))) {
     thresh <- "1.e9x1.e9"
   }
   # .................................................
@@ -291,7 +288,7 @@ if ( ! any( is.na( domainImageMap ) ) )
   bigslice <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
   rowsl <- 0
   # convert to 0 255
-  nlevels <- 2^8
+  nlevels <- 2^10
   reoSlice2 <- function( inimg, insl )
     {
       if (axis != 2 & imagedim > 2)
@@ -359,6 +356,11 @@ if ( ! any( is.na( domainImageMap ) ) )
     mar[4L] <- 1
     par(mar = mar)
   }
+  if ( ! missing( window.overlay ) ) {
+    eps = 1.e-3
+    window.overlay[1] = window.overlay[1] - eps
+    window.overlay[2] = window.overlay[2] + eps
+    }
   if(colorbar & !missing(y)){
     nlev = 50
     levels <- seq(window.overlay[1], window.overlay[2], length.out=nlev )
@@ -409,23 +411,25 @@ if ( ! any( is.na( domainImageMap ) ) )
   }
   if ( ! missing( window.overlay ) )
   if ( ( window.overlay[1] > window.overlay[2] ) |
-         all( is.na( functional ) ) ) {
+         all( is.na( y ) ) ) {
     if (!is.na(outname))
       dev.off()
     invisible(return())
   }
-  if ( ! all( is.na(functional) ) )
+  if ( ! all( is.na( y ) ) )
   {
-  for (ind in 1:length(functional)) {
+  for (ind in 1:length( y )) {
 
     biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
     if ( exists("plotimask") ) { # the label image
       if ( doCropping )
         {
-        fimg = cropImage(functional[[ind]], plotimask )
+        fimg = cropImage(y[[ind]], plotimask )
         labimg <- as.array(  fimg )
-        } else labimg <- as.array( functional[[ind]] )
-    } else labimg <- as.array(functional[[ind]])  # the label image
+        } else labimg <- as.array( y[[ind]] )
+    } else labimg <- as.array(y[[ind]])  # the label image
+    labimg[ labimg < window.overlay[1] ] = 0
+    labimg[ labimg > window.overlay[2] ] = 0
     if (imagedim == 2) {
       labimg <- rotate270.matrix(labimg)
     }
@@ -528,7 +532,7 @@ if ( ! any( is.na( domainImageMap ) ) )
             col = heatvals, bbox = bbox), add = TRUE) ) )
       }
   } # for loop
-  } # if not all na functional
+  } # if not all na y
   # g<-biglab ; g[]<-0 ; b<-biglab ; b[]<-0 print('try rgb')
   # dd<-pixmapRGB(c(biglab,g,b),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   par( mar = startpar )  # set margins to zero ! less wasted space
