@@ -357,7 +357,7 @@ if ( ! any( is.na( domainImageMap ) ) )
     par(mar = mar)
   }
   if ( ! missing( window.overlay ) ) {
-    eps = 1.e-3
+    eps = 1.e-8
     window.overlay[1] = window.overlay[1] - eps
     window.overlay[2] = window.overlay[2] + eps
     }
