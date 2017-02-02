@@ -180,16 +180,19 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( y ), t( x ) , k=k, eps=eps  )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
-  for ( i in 1:ncol( x ) )
+  nna = rep( FALSE, nrow( bknn$nn.idx ) )
+  #
+  for ( i in 1:nrow( bknn$nn.idx ) )
     {
     inds = bknn$nn.idx[i,]    # index
     locd = bknn$nn.dists[i,]  # dist
+    nna[ i ] = any( is.na( inds ) )
     tct = tct + sum( !is.na(inds) )
     }
   # build triplet representation for sparse matrix
   myijmat = matrix( nrow=(tct), ncol=3 )
   tct2 = 1
-  for ( i in 1:ncol( x ) )
+  for ( i in 1:ncol( y ) )
     {
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
@@ -198,11 +201,11 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
       {
-      locd = cov( x[,i], y[,inds] )
+      locd = cov( y[,i], x[,inds] )
       }
     else if ( kmetric == "covariance" )
       {
-      locd = cor( x[,i], y[,inds] )
+      locd = cor( y[,i], x[,inds] )
       }
     if ( tctinc > 0 )
       {
@@ -217,7 +220,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     i=myijmat[,1],
     j=myijmat[,2],
     x=myijmat[,3],
-    dims = c( ncol( x ), ncol( y ) ), symmetric = FALSE
+    dims = c( ncol( y ), ncol( x ) ), symmetric = FALSE
   )
   if ( cometric )
     {
