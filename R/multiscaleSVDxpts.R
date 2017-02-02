@@ -12,7 +12,7 @@
 #' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-#' @param mypkg set either nabor, RANN, rflann
+# #' @param mypkg set either nabor, RANN, rflann
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -30,8 +30,9 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, mypkg = "nabor"  )
+  eps = 1.e-6 ) # , mypkg = "nabor"  )
 {
+  mypkg = 'rflann'
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
   # and from correlation to covariance   diag(sd) %*% corrMat %*% diag(sd)
@@ -139,7 +140,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-#' @param mypkg set either nabor, RANN, rflann
+# #' @param mypkg set either nabor, RANN, rflann
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -154,8 +155,9 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, mypkg = "nabor" )
+  eps = 1.e-6 ) # , mypkg = "nabor" )
 {
+  mypkg = 'rflann'
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
   if ( ! usePkg( mypkg ) )
