@@ -34,6 +34,7 @@
 eanatSelect <- function( inmat, mask=NA, cthresh=0, smooth=0,
   maxNEvec = 0, selectorScale=1.1, verbose=FALSE )
 {
+if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
 mat = scale( inmat )
 if ( is.na(mask) ) {
   mask = makeImage( c(3,ncol(mat)+2), voxval=0 )
@@ -43,7 +44,8 @@ if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
 if ( selectorScale < 1 ) selectorScale = 1.1
 mxn = nrow(mat)-1
 if ( maxNEvec > 1 & maxNEvec < mxn ) mxn = maxNEvec
-solutionmatrix = t( svd( mat, nu=0, nv=mxn )$v )
+if ( fastsvd ) solutionmatrix = t( rsvd( mat, nu=0, nv=mxn )$v )
+if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=mxn )$v )
 mycorrs = rep( NA, mxn )
 if ( verbose ) progress <- txtProgressBar(min = 2, max = mxn, style = 3)
 foundNA = FALSE
@@ -149,7 +151,9 @@ if ( all( is.na( priors ) ) )
 {
 if ( nvecs == 0 ) stop("Must set nvecs.  See eanatSelect function.")
 havePriors = FALSE
-solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
+if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
+if ( fastsvd ) solutionmatrix = t( rsvd( mat, nu=0, nv=nvecs )$v )
+if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
 pp1 = mat %*% t( solutionmatrix )
 ilist = matrixToImages( solutionmatrix, mask )
 eseg = eigSeg( mask, ilist,  TRUE )
