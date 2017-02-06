@@ -85,7 +85,7 @@ domainImageMap = NA
 # #' @param domainImageMap resamples surf and func to this domain FIXME
 # check for needed programs
 # first get antspath
-myantspath = Sys.getenv(c("ANTSPATH"))
+if ( is.na( antspath) ) myantspath = Sys.getenv(c("ANTSPATH")) else myantspath = antspath
 if ( nchar( myantspath ) == 0 & is.na( antspath ) )
   stop("Please set ANTSPATH in your environment")
 if ( ! is.na( antspath ) ) myantspath = antspath
