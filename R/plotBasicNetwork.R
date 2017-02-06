@@ -106,7 +106,8 @@ plotBasicNetwork <- function(
   nSurfaceVerts <- dim(mesh$vertices)[1]
   mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
   labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts
-  if ( !any(is.na( weights ) )  & showOnlyConnectedNodes & is.na( radius ) ) { # node scaled by strength
+  if ( !any(is.na( weights ) )  & showOnlyConnectedNodes & any( is.na( radius ) ) ) {
+    # node scaled by strength
     radiusw <- rep(0, nrow(centroids))
     gg <- which(apply(weights, FUN = mean, MARGIN = 1, na.rm = T) > 0 | apply(weights,
       FUN = mean, MARGIN = 2, na.rm = T) > 0)
@@ -116,7 +117,7 @@ plotBasicNetwork <- function(
     radiusw <- (radius * radiusscale)
     radius <- radiusw
   }
-  if ( is.na( radius ) ) radius = 3
+  if ( any( is.na( radius ) ) ) radius = 3
   if ( !any(is.na( weights ) ) )
     {
     ggg = weights
@@ -132,11 +133,12 @@ plotBasicNetwork <- function(
   rgl::spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
   edgelocations <- c()
   edgeweights <- c()
-  if ( !any(is.na( weights ) )  )
+  if ( !any( is.na( weights ) )  )
     for (i in c(1:nrow(weights))) {
       for (j in c(1:ncol(weights))) {
-        if (is.na(weights))
-          edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j)) else if (weights[i, j] > 0 & weights[i, j] < Inf) {
+        if ( is.na(weights[i,j])) {
+            edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
+          } else if ( weights[i, j] > 0 & weights[i, j] < Inf ) {
           edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
           edgeweights <- c(edgeweights, weights[i, j])
         }
