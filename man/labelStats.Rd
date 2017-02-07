@@ -12,18 +12,19 @@ labelStats(image, labelImage)
 \item{labelImage}{Label image.}
 }
 \value{
-Data frame with columns : 
+Data frame with one row per label (including zero) and columns :
   LabelValues, Mean, Min, Max, Variance, Count, Volume
 }
 \description{
 Get label statistics from image.
 }
 \examples{
+
 img <- antsImageRead( getANTsRData("r16") , 2 )
 img <- resampleImage( img, c(64,64), 1, 0 )
 mask <- getMask(img)
-segs1 <- atropos( d = 2, a = img, m = '[0.2,1x1]',
- c = '[2,0]',  i = 'kmeans[3]', x = mask )
+segs1 = kmeansSegmentation( img, 3 )
 labelStats(img, segs1$segmentation)
+
 }
 
