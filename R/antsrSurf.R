@@ -7,16 +7,21 @@
 #'
 #' @param x input antsImage defining the surface on which to render
 #' @param y input antsImage list defining the function to render
-#' on the surface. these image(s) should be in the same space as \code{surf}.
+#' on the surface. these image(s) should be in the same space as \code{x}.
+#' @param z input antsImage list mask for each \code{y} function to render
+#' on the surface. these image(s) should be in the same space as \code{y}.
 #' @param quantlimits lower and upper quantile limits for overlay
 #' @param colormap character, one of: grey, red, green, blue, copper, jet, hsv,
 #' spring, summer, autumn, winter, hot, cool, overunder, custom
+#' @param alpha transparency vector for underlay and each overlay, default zero
 #' @param inflationFactor number of inflation iterations to run
+#' @param smoothingSigma gaussian smooth the overlay by this sigma
 #' @param rotationParams 3 Rotation angles expressed in degrees or a matrix of
 #' rotation parameters that will be applied in sequence.
 #' @param overlayLimits absolute lower and upper limits for functional overlay.
 #' this parameter will override \code{quantlimits}.  Currently, this will set
-#' levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.
+#' levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
+#' list of length of y.
 #' @param filename prefix filename for output pngs
 #' @param antspath pass the ANTSPATH here otherwise we try to detect it from environment
 #' @param verbose prints the command used to call \code{antsSurf}
@@ -25,56 +30,56 @@
 #' @examples
 #'
 #' \dontrun{
-#' ch2i = antsImageRead( getANTsRData("mni") )
+#'
+#' ch2i = antsImageRead( getANTsRData("ch2") )
 #' ch2seg = thresholdImage( ch2i, "Otsu", 3 )
 #' wm   = thresholdImage( ch2seg, 3, 3 )
-#' wm2 = smoothImage( wm, 1 ) %>% thresholdImage( 0.2, Inf )
+#' wm2 = smoothImage( wm, 1 ) %>% thresholdImage( 0.5, Inf )
 #' kimg = weingartenImageCurvature( ch2i, 1.5  ) %>% smoothImage( 1 )
 #' rp1 = matrix( c(90,180,90), ncol = 3 )
 #' rp2 = matrix( c(90,180,270), ncol = 3 )
 #' rp3 = matrix( c(90,180,180), ncol = 3 )
 #' rp  = rbind( rp1, rp3, rp2 )
-#' antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
+#' antsrSurf( x=wm2, y=list( kimg ), z=list( wm2 %>% iMath("MD",3) ),
+#'   inflationFactor=255, overlayLimits=c(-0.3,0.3), verbose = TRUE,
+#'   rotationParams = rp, filename=tempfile() )
 #'
-#' # show how to use absolute scales to allow comparison across renderings
-#' kimg = thresholdImage( ch2seg , 1, Inf )
-#' nvox = sum( ch2seg > 0 )
-#' voxvalsmat = cbind(
-#'     rnorm( nvox, 2.5, 2 ),
-#'     rnorm( nvox, 3.0, 2 ),
-#'     rnorm( nvox, 3.5, 2 ) )
-#' qq = quantile( voxvalsmat, 0.9 )
-#' for ( mmm in 1:3 )
-#' {
-#' kimg[ ch2seg > 0 ] = as.numeric(voxvalsmat[,mmm])
-#' kimg = smoothImage( kimg, 3 )
-#' antsrSurf( wm2, list( kimg ), inflationFactor=55, overlayLimits=c( 2.0, qq ),
-#'     rotationParams = rp, filename=paste('~/Downloads/ztempX',mmm,sep=''),
-#'     verbose=TRUE )
-#' }
-#'
-#' fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
+#' fn = getANTsRData( "surf" )
 #' img = antsImageRead( fn ) # see antsSurf on github for data
 #' wm   = thresholdImage( img, 3, 4 )
-#' # just the surface
-#' antsrSurf( x=wm, rotationParams = c(270, 0, 90) )
-#' # surface and one overlay
 #' wm = thresholdImage(img, 3, 4) %>% iMath("FillHoles")
 #' wms = smoothImage( wm, 1.0 )
 #' wmk = weingartenImageCurvature( wms, 1.5, 0 )
-#' antsrSurf( x=wm, y = list( wmk ), rotationParams = c(270, 0, 90), quantlimits=c(-0.5,0.5) )
-#' # surface and two overlays
-#' blob = antsImageRead( "manualBlob.nii.gz" ) %>% smoothImage( 1 )
-#' antsrSurf( x=wm, y = list( wmk, blob ), colormap=c("red","blue"),
-#'   rotationParams = c(270, 0, 90),  quantlimits=c(0.1,0.9))
+#' # will display to screen
+#' antsrSurf( x=wm, y = list( wmk %>% smoothImage(1)), z=list( wm %>% iMath("MD",1)),
+#'  rotationParams = c(270, 0, 90), overlayLimits=c(-0.4,0.4) )
+# surface and two overlays
+#' blob = antsImageRead( getANTsRData( "blob") )
+#' blob[1:266,1:266,1:100] = 0
+#' z = list(  wm %>% iMath("MD",1) ,  blob %>% smoothImage( 1 ) )
+#' antsrSurf( x=wm, y = list( wmk%>% smoothImage(1), blob ), z = z,
+#'  colormap=c("jet","blue"), alpha=c(1,0.5,1),
+#'  rotationParams = c(270, 0, 90),
+#'  overlayLimits = list( c(-0.4,0.4) , c(0.9,1.001)) )
+#'# separate pos and neg curvature
+#' y = list( thresholdImage( wmk, 0.00, Inf ) ,
+#'           thresholdImage( wmk, -100, -0.00 ) )
+#' z = list( y[[1]] %>% iMath("MD",1) ,
+#'           y[[2]] %>% iMath("MD",1) )
+#' antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
+#'     colormap=c("red","blue"),
+#'     inflationFactor=155, overlayLimits=list( c(0.5,1.0001), c(0.5,1.0001) ),
+#'     verbose = TRUE, rotationParams = rp[1,] )
 #'
 #' }
 #'
 #' @export antsrSurf
-antsrSurf <- function( x, y,
+antsrSurf <- function( x, y, z,
   quantlimits = c(0.1,0.9),
   colormap = 'jet',
+  alpha = NA,
   inflationFactor = 25,
+  smoothingSigma = 0.0,
   rotationParams = c(270,0,270),
   overlayLimits = NA,
   filename = NA,
@@ -82,6 +87,12 @@ antsrSurf <- function( x, y,
   verbose = FALSE )
 {
 domainImageMap = NA
+if ( any( is.na( alpha ) ) ) {
+  alpha = rep( 1, length(x)+length(y) )
+}
+if ( length( z ) != length( y ) ) stop("each y must have a mask in z")
+if ( class( overlayLimits ) == 'numeric' )
+  overlayLimits = list( overlayLimits )
 # #' @param domainImageMap resamples surf and func to this domain FIXME
 # check for needed programs
 # first get antspath
@@ -126,9 +137,10 @@ if ( nrow( rotationParams ) > 1 )
     }
   }
 pngs = rep( NA, nrow( rotationParams ) )
+backgroundColor = paste("255x255x255x",alpha[1],sep='')
 for( myrot in 1:nrow( rotationParams ) )
 {
-asscmd = paste( "antsSurf -s [ ",xfn,",255x255x255] ")
+asscmd = paste( "antsSurf -s [ ",xfn,",",backgroundColor,"] ")
 if ( ! missing( y ) )
 {
 ct = 0
@@ -137,20 +149,33 @@ if ( length( colormap ) != length( y ) )
 for ( overlay in y )
   {
   ct = ct + 1
-  wms = smoothImage( overlay, 1.0 )
-  myquants = quantile( overlay[ abs(overlay) > 0 ], quantlimits )
+  wms = smoothImage( overlay, smoothingSigma  )
+  myquants = quantile( wms[ abs(wms) > 0 ], quantlimits )
   if ( ! all( is.na( overlayLimits ) ) )
     {
-    myquants = overlayLimits
-    overlay[ overlay < myquants[1] ] = 0
-    overlay[ overlay > myquants[2] ] = myquants[2]
-    if ( verbose ) print( myquants )
+    myquants = overlayLimits[[ ct ]]
+    if ( all( myquants < 0 ) ) {
+#      wms = wms * -1.0
+#      myquants = rev( myquants ) * ( -1.0 )
+#      wms = wms * thresholdImage( wms, myquants[1] , myquants[2] )
+      }
+    if ( all( myquants > 0 ) ) {
+#      wms = wms * thresholdImage( wms, myquants[1] , myquants[2] )
+      }
+    } else {
+#      wms[ wms <  quantlimits[1] ] = quantlimits[1]
+#      wms[ wms >  quantlimits[2] ] = quantlimits[2]
     }
-  kblob = thresholdImage( wms, myquants[1], Inf )
+  if ( verbose ) {
+    print( paste( "overlay quantiles for overlay" , ct  ) )
+    print( myquants )
+    print( 'range')
+    print( range( wms ) )
+    }
   kblobfn = tempfile( fileext = ".nii.gz" )
-  antsImageWrite( kblob, kblobfn )
+  antsImageWrite( z[[ ct ]], kblobfn )
   overlayfn = tempfile(fileext = ".nii.gz" )
-  antsImageWrite( overlay, overlayfn )
+  antsImageWrite( wms, overlayfn )
   csvlutfn = tempfile(fileext = ".csv" )
   overlayrgbfn = tempfile(fileext = ".nii.gz" )
   if ( verbose ) print( colormap[ct] )
@@ -159,7 +184,9 @@ for ( overlay in y )
   sss = system( cvtcmd )
   if ( verbose ) print( cvtcmd )
   if ( verbose ) cat( "\n" )
-  asscmd = paste( asscmd , "-f [ ",overlayrgbfn,", ",kblobfn,", 0.5 ] ")
+  alphaloc = alpha[ min( c( ct + 1, length(alpha) ) ) ]
+  if ( verbose ) print( paste( "alpha", alphaloc ) )
+  asscmd = paste( asscmd , "-f [ ",overlayrgbfn,", ",kblobfn,", ", alphaloc, " ] ")
   }
 }
 if ( nrow( rotationParams ) == 1 )

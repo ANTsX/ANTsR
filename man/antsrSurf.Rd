@@ -4,29 +4,38 @@
 \alias{antsrSurf}
 \title{Render a function onto a surface.}
 \usage{
-antsrSurf(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
-  inflationFactor = 25, rotationParams = c(270, 0, 270),
-  overlayLimits = NA, filename = NA, antspath = NA, verbose = FALSE)
+antsrSurf(x, y, z, quantlimits = c(0.1, 0.9), colormap = "jet",
+  alpha = NA, inflationFactor = 25, smoothingSigma = 0,
+  rotationParams = c(270, 0, 270), overlayLimits = NA, filename = NA,
+  antspath = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
 
 \item{y}{input antsImage list defining the function to render
-on the surface. these image(s) should be in the same space as \code{surf}.}
+on the surface. these image(s) should be in the same space as \code{x}.}
+
+\item{z}{input antsImage list mask for each \code{y} function to render
+on the surface. these image(s) should be in the same space as \code{y}.}
 
 \item{quantlimits}{lower and upper quantile limits for overlay}
 
 \item{colormap}{character, one of: grey, red, green, blue, copper, jet, hsv,
 spring, summer, autumn, winter, hot, cool, overunder, custom}
 
+\item{alpha}{transparency vector for underlay and each overlay, default zero}
+
 \item{inflationFactor}{number of inflation iterations to run}
+
+\item{smoothingSigma}{gaussian smooth the overlay by this sigma}
 
 \item{rotationParams}{3 Rotation angles expressed in degrees or a matrix of
 rotation parameters that will be applied in sequence.}
 
 \item{overlayLimits}{absolute lower and upper limits for functional overlay.
 this parameter will override \code{quantlimits}.  Currently, this will set
-levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}.}
+levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
+list of length of y.}
 
 \item{filename}{prefix filename for output pngs}
 
@@ -46,48 +55,45 @@ Tools software on github.
 \examples{
 
 \dontrun{
-ch2i = antsImageRead( getANTsRData("mni") )
+
+ch2i = antsImageRead( getANTsRData("ch2") )
 ch2seg = thresholdImage( ch2i, "Otsu", 3 )
 wm   = thresholdImage( ch2seg, 3, 3 )
-wm2 = smoothImage( wm, 1 ) \%>\% thresholdImage( 0.2, Inf )
+wm2 = smoothImage( wm, 1 ) \%>\% thresholdImage( 0.5, Inf )
 kimg = weingartenImageCurvature( ch2i, 1.5  ) \%>\% smoothImage( 1 )
 rp1 = matrix( c(90,180,90), ncol = 3 )
 rp2 = matrix( c(90,180,270), ncol = 3 )
 rp3 = matrix( c(90,180,180), ncol = 3 )
 rp  = rbind( rp1, rp3, rp2 )
-antsrSurf( wm2, list( kimg ), inflationFactor=55, quantlimits=c(0.01,0.99),rotationParams = rp )
+antsrSurf( x=wm2, y=list( kimg ), z=list( wm2 \%>\% iMath("MD",3) ),
+  inflationFactor=255, overlayLimits=c(-0.3,0.3), verbose = TRUE,
+  rotationParams = rp, filename=tempfile() )
 
-# show how to use absolute scales to allow comparison across renderings
-kimg = thresholdImage( ch2seg , 1, Inf )
-nvox = sum( ch2seg > 0 )
-voxvalsmat = cbind(
-    rnorm( nvox, 2.5, 2 ),
-    rnorm( nvox, 3.0, 2 ),
-    rnorm( nvox, 3.5, 2 ) )
-qq = quantile( voxvalsmat, 0.9 )
-for ( mmm in 1:3 )
-{
-kimg[ ch2seg > 0 ] = as.numeric(voxvalsmat[,mmm])
-kimg = smoothImage( kimg, 3 )
-antsrSurf( wm2, list( kimg ), inflationFactor=55, overlayLimits=c( 2.0, qq ),
-    rotationParams = rp, filename=paste('~/Downloads/ztempX',mmm,sep=''),
-    verbose=TRUE )
-}
-
-fn = 'ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz'
+fn = getANTsRData( "surf" )
 img = antsImageRead( fn ) # see antsSurf on github for data
 wm   = thresholdImage( img, 3, 4 )
-# just the surface
-antsrSurf( x=wm, rotationParams = c(270, 0, 90) )
-# surface and one overlay
 wm = thresholdImage(img, 3, 4) \%>\% iMath("FillHoles")
 wms = smoothImage( wm, 1.0 )
 wmk = weingartenImageCurvature( wms, 1.5, 0 )
-antsrSurf( x=wm, y = list( wmk ), rotationParams = c(270, 0, 90), quantlimits=c(-0.5,0.5) )
-# surface and two overlays
-blob = antsImageRead( "manualBlob.nii.gz" ) \%>\% smoothImage( 1 )
-antsrSurf( x=wm, y = list( wmk, blob ), colormap=c("red","blue"),
-  rotationParams = c(270, 0, 90),  quantlimits=c(0.1,0.9))
+# will display to screen
+antsrSurf( x=wm, y = list( wmk \%>\% smoothImage(1)), z=list( wm \%>\% iMath("MD",1)),
+ rotationParams = c(270, 0, 90), overlayLimits=c(-0.4,0.4) )
+blob = antsImageRead( getANTsRData( "blob") )
+blob[1:266,1:266,1:100] = 0
+z = list(  wm \%>\% iMath("MD",1) ,  blob \%>\% smoothImage( 1 ) )
+antsrSurf( x=wm, y = list( wmk\%>\% smoothImage(1), blob ), z = z,
+ colormap=c("jet","blue"), alpha=c(1,0.5,1),
+ rotationParams = c(270, 0, 90),
+ overlayLimits = list( c(-0.4,0.4) , c(0.9,1.001)) )
+# separate pos and neg curvature
+y = list( thresholdImage( wmk, 0.00, Inf ) ,
+          thresholdImage( wmk, -100, -0.00 ) )
+z = list( y[[1]] \%>\% iMath("MD",1) ,
+          y[[2]] \%>\% iMath("MD",1) )
+antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
+    colormap=c("red","blue"),
+    inflationFactor=155, overlayLimits=list( c(0.5,1.0001), c(0.5,1.0001) ),
+    verbose = TRUE, rotationParams = rp[1,], filename='~/Downloads/king' )
 
 }
 

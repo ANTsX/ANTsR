@@ -24,7 +24,7 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     "mni","mnia","mnib","mnit","mninat","mnijhu1","mnijhu2","mnidfn","mniyeo",
     "atroposseg","simple","fmrinetworks",
     "rsbold", "rsboldmask", "rsboldseg", "rsboldpts", "decslice", "dtislice",
-    "adfmri", "population", "show" )
+    "adfmri", "population", "surf", "blob", "show" )
   if (  sum( validlist == fileid ) == 0 )
     stop("no data with that id - try show to get list of valid ids")
   if ( fileid == "show" )
@@ -86,7 +86,9 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
     decslice = "https://ndownloader.figshare.com/files/2156224",
     dtislice = "https://ndownloader.figshare.com/files/2157786" ,
     fmrinetworks = "https://ndownloader.figshare.com/files/3639108",
-    adfmri      = "https://ndownloader.figshare.com/files/4901371" )
+    adfmri      = "https://ndownloader.figshare.com/files/4901371",
+    surf        = "https://github.com/stnava/antsSurf/blob/master/ADNI_137_S_0158_MR_MPR__GradWarp__N3__Scaled_Br_20070306171702344_S20209_I42985BrainSegmentation.nii.gz?raw=true",
+    blob      = "https://github.com/stnava/antsSurf/blob/master/blob.nii.gz?raw=true" )
 
   myext <- ".nii.gz"
   if (fileid == "ADNI" | fileid == "K1" | fileid == "nki" |
@@ -128,7 +130,8 @@ getANTsRData <- function(fileid, usefixedlocation = FALSE, verbose=FALSE ) {
       networkNames=inms[selinds],
       images=ilist[selinds] ) )
     }
-  if (fileid == "ADNI" | fileid == "K1" | fileid == "nki") {
+  if ( fileid == "surf" | fileid == "blob" |fileid == "ADNI" | fileid == "K1" |
+       fileid == "nki" ) {
     return(tfn)
   }
   # could use md5sum
