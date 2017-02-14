@@ -3,7 +3,7 @@
 #' reflects an image along its axis
 #'
 #' @param img1 input object, an antsImage
-#' @param axis which dimension to reflect across
+#' @param axis which dimension to reflect across, numbered from 0 to imageDimension-1
 #' @param tx transformation type to estimate after reflection
 #' @author BB Avants
 #' @examples

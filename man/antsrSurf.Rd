@@ -93,7 +93,7 @@ z = list( y[[1]] \%>\% iMath("MD",1) ,
 antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
     colormap=c("red","blue"),
     inflationFactor=155, overlayLimits=list( c(0.5,1.0001), c(0.5,1.0001) ),
-    verbose = TRUE, rotationParams = rp[1,], filename='~/Downloads/king' )
+    verbose = TRUE, rotationParams = rp[1,] )
 
 }
 

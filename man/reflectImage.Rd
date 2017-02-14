@@ -9,7 +9,7 @@ reflectImage(img1, axis = NA, tx = NA)
 \arguments{
 \item{img1}{input object, an antsImage}
 
-\item{axis}{which dimension to reflect across}
+\item{axis}{which dimension to reflect across, numbered from 0 to imageDimension-1}
 
 \item{tx}{transformation type to estimate after reflection}
 }
