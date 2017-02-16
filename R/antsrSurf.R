@@ -140,7 +140,7 @@ pngs = rep( NA, nrow( rotationParams ) )
 backgroundColor = paste("255x255x255x",alpha[1],sep='')
 for( myrot in 1:nrow( rotationParams ) )
 {
-asscmd = paste( "antsSurf -s [ ",xfn,",",backgroundColor,"] ")
+asscmd = paste( ass," -s [ ",xfn,",",backgroundColor,"] ")
 if ( ! missing( y ) )
 {
 ct = 0
@@ -179,7 +179,7 @@ for ( overlay in y )
   csvlutfn = tempfile(fileext = ".csv" )
   overlayrgbfn = tempfile(fileext = ".nii.gz" )
   if ( verbose ) print( colormap[ct] )
-  cvtcmd = paste( "ConvertScalarImageToRGB 3 ",overlayfn, overlayrgbfn,
+  cvtcmd = paste( cvt," 3 ",overlayfn, overlayrgbfn,
     kblobfn, colormap[ct]," none ", myquants[1],myquants[2]," 0 255", csvlutfn )
   sss = system( cvtcmd )
   if ( verbose ) print( cvtcmd )
