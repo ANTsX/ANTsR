@@ -1012,7 +1012,7 @@ SEXP antsImage_GetNeighborhoodMatrix( typename itk::Image< PixelType , Dimension
           }
         else
           {
-          indices(col,i) = it.GetIndex()[i];
+          indices(col,i) = it.GetIndex()[i] + 1;
           }
         }
 
