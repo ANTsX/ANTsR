@@ -1,4 +1,4 @@
-[ANTsR Instagram]](https://www.instagram.com/antsrx/)
+[ANTsR Instagram](https://www.instagram.com/antsrx/)
 
 ![ants brain](http://i.imgur.com/I2VNWpA.png)
 <!--
