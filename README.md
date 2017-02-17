@@ -6,7 +6,7 @@
 # ANTsR
 
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
-
+[![Instagram]](https://instagram.fbos1-1.fna.fbcdn.net/t51.2885-19/s320x320/16788559_372087546506069_6528970732305645568_a.jpg)[https://www.instagram.com/antsrx/]
 A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.  See also the **Neuroconductor** [site](https://www.neuroconductor.org/package/details/12).
 
 ## Description
