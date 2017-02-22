@@ -5,7 +5,7 @@
 \title{alffmap}
 \usage{
 alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE,
-  takesqrt = FALSE)
+  takesqrt = FALSE, kernel)
 }
 \arguments{
 \item{x}{input vector for the time series of interest}
@@ -19,6 +19,8 @@ alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE,
 \item{detrend}{detrend the input time series}
 
 \item{takesqrt}{take the sqrt of the computed values}
+
+\item{kernel}{smoothing kernel in estimate, see \code{spec.pgram}}
 }
 \value{
 vector is output showing ALFF and fALFF values
@@ -33,6 +35,8 @@ oscillations (LFOs).  This function outputs ALFF and fALFF for the input.
 
 mat <- matrix(rnorm(3000),ncol=50)
 fallf = apply( mat, FUN=alffmap, MARGIN=2 )
+k = kernel("daniell", rep( 2, 3 ) )
+fallf2 = apply( mat, FUN=alffmap, MARGIN=2, kernel=k )
 
 }
 \author{
