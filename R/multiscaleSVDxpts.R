@@ -13,6 +13,7 @@
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
 # #' @param mypkg set either nabor, RANN, rflann
+#' @param ncores number of cores to use
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -30,7 +31,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6 ) # , mypkg = "nabor"  )
+  eps = 1.e-6, ncores=NA ) # , mypkg = "nabor"  )
 {
   mypkg = 'rflann'
   # note that we can convert from distance to covariance
@@ -61,6 +62,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
   if ( mypkg[1] == "rflann" )  {
     myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
+    if ( !is.na( ncores  ) ) myncores = ncores
     bknn = rflann::Neighbour( t(x), t(x), k=k, "kdtree", cores=myncores, 1 )
     names( bknn ) = c( "nn.idx", "nn.dists" )
     }
@@ -141,6 +143,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
 # #' @param mypkg set either nabor, RANN, rflann
+#' @param ncores number of cores to use
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -155,7 +158,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6 ) # , mypkg = "nabor" )
+  eps = 1.e-6, ncores=NA ) # , mypkg = "nabor" )
 {
   mypkg = 'rflann'
   if ( ! usePkg("Matrix") )
@@ -176,6 +179,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "rflann" )  {
     myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
+    if ( !is.na( ncores  ) ) myncores = ncores
     bknn = rflann::Neighbour( t(y), t(x), k=k, "kdtree", cores=myncores, 1 )
     names( bknn ) = c( "nn.idx", "nn.dists" )
     }

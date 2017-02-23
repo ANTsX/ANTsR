@@ -6,7 +6,7 @@
 \usage{
 sparseDistanceMatrix(x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06)
+  eps = 1e-06, ncores = NA)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}
@@ -20,6 +20,8 @@ sparseDistanceMatrix(x, k = 3, r = Inf, sigma = NA,
 \item{kmetric}{similarity or distance metric determining k nearest neighbors}
 
 \item{eps}{epsilon error for rapid knn}
+
+\item{ncores}{number of cores to use}
 }
 \value{
 matrix sparse p by p matrix is output with p by k nonzero entries
