@@ -1,8 +1,8 @@
 [ANTsR Instagram](https://www.instagram.com/antsrx/)
 
-![ants edie](http://i.imgur.com/DcV1NVT.png)
-<!--
 ![ants brain](http://i.imgur.com/I2VNWpA.png)
+<!--
+![ants edie](http://i.imgur.com/DcV1NVT.png)
 ![ants babe](http://i.imgur.com/gwoxI5M.png)
 -->
 # ANTsR
