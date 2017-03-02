@@ -20,5 +20,8 @@ labelGeometryMeasures <- function( labelImage, intensityImage=NA ) {
   pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer) )
   pp = read.csv( outcsv )
   pp$Label = sort( unique( labelImage[ labelImage > 0 ] ) )
+  names( pp )[2] = "VolumeInMillimeters"
+  spc = prod( antsGetSpacing( labelImage ) )
+  pp$VolumeInMillimeters = pp$VolumeInMillimeters * spc
   return( pp )
 }
