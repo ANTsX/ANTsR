@@ -389,7 +389,7 @@ pseudo-eigenvectors [@Kandel2014a,@Cook2014]. This is the point of
 "eigenanatomy" which is a variation of sparse PCA that uses (optionally)
 biologically-motivated smoothness, locality or sparsity constraints.
 
-```{r eanat,echo=TRUE,message=FALSE,warning=FALSE}
+```{r eanat,echo=TRUE,message=FALSE,warning=FALSE,eval=FALSE}
 # assume you ran the population example above
 eanat<-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
 eanatimages = matrixToImages( eanat$eig, mask )
