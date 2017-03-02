@@ -140,8 +140,6 @@ jointLabelFusion <- function(
     t = targetI,
     a = rho, # or alpha in the paper
     b = beta,
-    r = 1,  # retain posteriors
-    f = 0,  # voting weights
     c = nnum,  # constrain non-negative
     p = myrad, # patch radius
     m = "PC",
