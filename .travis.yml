@@ -59,7 +59,7 @@ before_install:
 
 # cache local R libraries directory:
 cache: packages
- directories:
+  directories:
     - $TRAVIS_BUILD_DIR/packrat/src
     - $TRAVIS_BUILD_DIR/packrat/lib
   packages: true
