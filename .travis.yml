@@ -95,7 +95,7 @@ os:
       - export CXX=clang++
       - export CC=clang
       - cd
-      - arel=0.3.4
+      - arel=0.3.2
       - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsR/releases/download/latest/ANTsR_${arel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsR_${arel}_R_x86_64-pc-linux-gnu.tar.gz; fi
       - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget https://github.com/stnava/ANTsR/releases/download/latest/ANTsR_${arel}.tgz; R CMD INSTALL ANTsR_${arel}.tgz; fi
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
