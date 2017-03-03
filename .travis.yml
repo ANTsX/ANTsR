@@ -3,7 +3,7 @@ sudo: false
 
 dist: trusty
 
-osx_image: xcode8.2
+# osx_image: xcode8.2
 
 os:
   - linux
