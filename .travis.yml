@@ -47,12 +47,6 @@ r_binary_packages:
   - psych
   - pracma
 
-# cache local R libraries directory:
-cache:
- directories:
-    - $TRAVIS_BUILD_DIR/packrat/src
-    - $TRAVIS_BUILD_DIR/packrat/lib
-  packages: true
 
 before_install:
   - basedir=${PWD}
@@ -60,9 +54,18 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
+  - R -e "0" --args --bootstrap-packrat
+
+
+# cache local R libraries directory:
+cache: packages
+ directories:
+    - $TRAVIS_BUILD_DIR/packrat/src
+    - $TRAVIS_BUILD_DIR/packrat/lib
+  packages: true
+
 
 install:
-  - R -e "0" --args --bootstrap-packrat
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
