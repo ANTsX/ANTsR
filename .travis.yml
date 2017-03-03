@@ -1,6 +1,10 @@
 # use containers
 sudo: false
 
+dist: trusty
+
+osx_image: xcode8.2
+
 os:
   - linux
   - osx
@@ -44,7 +48,11 @@ r_binary_packages:
   - pracma
 
 # cache local R libraries directory:
-cache: packages
+cache:
+ directories:
+    - $TRAVIS_BUILD_DIR/packrat/src
+    - $TRAVIS_BUILD_DIR/packrat/lib
+  packages: true
 
 before_install:
   - basedir=${PWD}
@@ -54,6 +62,7 @@ before_install:
   - cd $basedir
 
 install:
+  - R -e "0" --args --bootstrap-packrat
   - mkdir -p ~/.R
   - export CC=clang
   - export CXX=clang++
