@@ -5,6 +5,8 @@ os:
   - linux
   - osx
 
+osx_image: xcode8.2
+
 language: r
 r:
   - release
@@ -16,9 +18,6 @@ matrix:
 #    - r: devel
 
 cran: http://cran.rstudio.com
-
-# r_github_packages:
-#  - gagolews/stringi
 
 r_packages:
   - covr
@@ -66,7 +65,7 @@ install:
   - echo '.travis.yml' > .Rbuildignore
 #  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools") }'
 #  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
-  - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) { install.packages("Rcpp", dependencies = TRUE) }'
+  - Rscript -e 'install.packages("Rcpp", dependencies = TRUE)'
   - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
   - Rscript -e 'if(!"tools" %in% rownames(installed.packages())) { install.packages("tools", dependencies = TRUE) }'
   - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
