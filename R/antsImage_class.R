@@ -919,14 +919,16 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x) )
   } else if ((class(e2) == "numeric" | class(e2) == "integer") && length(e2) == 1) {
     if(class(e2) == "integer")
       e2 <- as.numeric(e2)
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region,
-      operator, PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2, region,
+      operator, PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
@@ -943,11 +945,13 @@ setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x) )
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
@@ -963,11 +967,13 @@ setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
@@ -983,11 +989,13 @@ setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    x = .Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
@@ -1003,11 +1011,13 @@ setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x=.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return(array(dim=dim(e1), data=x))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    x=.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR")
+    return(array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
@@ -1023,11 +1033,13 @@ setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
     if (class(e2$region) != "antsRegion") {
       stop("region argument not of class 'antsRegion'")
     }
-    return(.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
-      PACKAGE = "ANTsR"))
+    x =.Call("antsImage_RelationalOperators", e1, e2$value, e2$region, operator,
+      PACKAGE = "ANTsR")
+    return( array(dim=dim(e1), data=x))
   } else if (class(e2) == "numeric" && length(e2) == 1) {
     region <- new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR"))
+    x=.Call("antsImage_RelationalOperators", e1, e2, region, operator, PACKAGE = "ANTsR")
+    return(array(dim=dim(e1), data=x))
   } else {
     stop("rhs must be a scalar or a list( <scalar> , <antsRegion> )")
   }
