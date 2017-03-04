@@ -20,7 +20,7 @@ Depends:	R (≥ 3.0), methods
 
 Imports:	Rcpp, tools, magrittr
 
-LinkingTo:	Rcpp, ITKR
+LinkingTo:	Rcpp, ITKR, ANTsRCore
 
 Author:	Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison, Dorian Pustina
 
@@ -89,7 +89,7 @@ In general, these **assume** you have [git](http://git-scm.com/) installed / acc
 Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
 
 You will need to install R packages that ANTsR requires. Minimally:
-**Install ITKR** [here](https://github.com/stnava/ITKR/releases) then do:
+**Install ITKR and ANTsRCore** [here](https://github.com/stnava/ITKR/releases) and [here](https://github.com/stnava/ANTsRCore/releases) then do:
 ```
 mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
@@ -113,6 +113,7 @@ Thanks to [zarquon42b](https://github.com/zarquon42b).
 library( devtools )
 # install_github("stnava/cmaker") # if you do not have cmake
 install_github("stnava/ITKR")
+install_github("stnava/ANTsRCore")
 install_github("stnava/ANTsR")
 ```
 
@@ -123,12 +124,14 @@ Assumes git, cmake and compilers are available in your environment (as above).
 First, clone the repository:
 ```sh
 $ git clone https://github.com/stnava/ITKR.git
+$ git clone https://github.com/stnava/ANTsRCore.git
 $ git clone https://github.com/stnava/ANTsR.git
 ```
 
 Install the package as follows:
 ```sh
 $ R CMD INSTALL ITKR
+$ R CMD INSTALL ANTsRCore
 $ R CMD INSTALL ANTsR
 ```
 
