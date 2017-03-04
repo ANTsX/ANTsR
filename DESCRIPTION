@@ -68,7 +68,7 @@ Suggests:
     visreg,
     wmtsa,
     xgboost
-LinkingTo: Rcpp, ITKR
+LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR
 NeedsCompilation: yes

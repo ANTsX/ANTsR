@@ -43,19 +43,13 @@ else # just try gcc directly
   fi
 fi
 echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
-if [[ ${needVCL_CAN_STATIC_CONST_INIT_FLOAT} -eq 1 ]]; then
-echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
-  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ -I../inst/include/\
-  -I\${myantssource}/Tensor/ " >> Makevars
-else
-echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD} -I\${myantssource}/Examples/include/ \
-  -I\${myantssource}/Utilities -I\${myantssource}/Examples/ -I../inst/include\
-  -I\${myantssource}/Tensor/" >> Makevars
-fi
+echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD}  \
+  -I`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsIncludes()'` \
+  -I../inst/include/ " >> Makevars
 
 echo "CXX_STD = CXX11" >> Makevars
 
-echo "myantslib=\${PWD}/antb/lib/" >> Makevars
+echo "myantslib=`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsLibs()'` " >> Makevars
 
 echo "libants=\`find \${myantslib} -name \"lib*.a\"\`" >> Makevars
 
@@ -72,34 +66,4 @@ echo "all: \$(SHLIB)" >> Makevars
 
 echo "\$(SHLIB): libs" >> Makevars
 
-echo "tlibs: ; cd \${PWD}/antb" >> Makevars
-
-echo "libs: ; cd \${PWD}/antb && \$(MAKE) -j 2" >> Makevars
-
-#  cat Makevars.in >> Makevars
-
-# get / set up ANTs code
-antsgit=https://github.com/stnava/ANTs.git
-antstag=09b89fe44ad5406c6ce0f9070c3d96aae37025b5 # patch reconfigure and label geometry
-if [[ ! -s ants/CMakeLists.txt  ]] ; then
-    git clone $antsbranch $antsgit ants
-fi
-cd ants
-if [[ -d .git ]]; then
-    git checkout master;  git pull;  git checkout $antstag
-fi
-cd ../
-if [[ ! -s antb ]] ; then
-  mkdir antb
-fi
-cd ./antb
-${cmaker} -DITK_DIR:PATH=${ITKDIR} \
-    -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} ${compflags} -DNDEBUG  "\
-    -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} ${compflags} -DNDEBUG  "\
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_ALL_ANTS_APPS=OFF \
-    -DUSE_SYSTEM_ITK=OFF \
-    -DBUILD_TESTING=OFF \
-    -DCOPY_SCRIPT_FILES_TO_BIN_DIR=OFF \
-    -DCMAKE_BUILD_TYPE:STRING="${CMAKE_BUILD_TYPE}"  ../ants
-cd ../
+echo "libs: ; cd \${PWD}" >> Makevars
