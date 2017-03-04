@@ -1,9 +1,9 @@
 #!/bin/bash
 CXX_STD=CXX11
-ITKRCMAKE=`${R_DIR}Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
-ITKRLIB=`${R_DIR}Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
-compflags=`${R_DIR}Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
-ITKDIR=`${R_DIR}Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
+ITKRCMAKE=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
+ITKRLIB=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
+compflags=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
+ITKDIR=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
 
 # get a version of cmake
 cmaker=`which cmake`
@@ -80,7 +80,7 @@ echo "libs: ; cd \${PWD}/antb && \$(MAKE) -j 2" >> Makevars
 
 # get / set up ANTs code
 antsgit=https://github.com/stnava/ANTs.git
-antstag=36624544936d4838b662aa7b0a8dd994ec2f0b9a # surface area bug and hans update
+antstag=09b89fe44ad5406c6ce0f9070c3d96aae37025b5 # patch reconfigure and label geometry
 if [[ ! -s ants/CMakeLists.txt  ]] ; then
     git clone $antsbranch $antsgit ants
 fi
