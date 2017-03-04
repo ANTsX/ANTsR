@@ -319,10 +319,26 @@ ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,
 ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
 ```
 
+# Tagging
+
+```
+git tag -d latest
+git push origin :refs/tags/latest
+git tag latest
+git push  --tags origin
+```
+
 
 # Release notes
 
 More like *development highlights*, as opposed to *release notes*.  See `git log` for the complete history.  We try to follow [these versioning recommendations for R packages](http://yihui.name/en/2013/06/r-package-versioning/).  Under these guidelines, only `major.minor` is an official release.
+
+## 0.4.0
+
+* ENH: better compilation and release style.
+* ENH: return boolean same size as image
+* ENH: improved decomposition methods
+* ENH: easier to use antsrSurf and antsrVol
 
 ## 0.3.3
 
