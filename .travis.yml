@@ -144,6 +144,8 @@ deploy:
     secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
   file: ${PKG_FILE_NAME}
   skip_cleanup: true
+  overwrite: true
   on:
-    tags: true
     repo: stnava/ANTsR
+    tags: true
+    all_branches: true
