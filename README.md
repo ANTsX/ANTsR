@@ -12,9 +12,9 @@ A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well 
 
 ## Description
 
-Version: 0.3.3
+Version: 0.4.0
 
-License: GPL (>=2)
+License: Apache License 2.0
 
 Depends:	R (≥ 3.0), methods
 

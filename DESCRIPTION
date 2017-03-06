@@ -14,7 +14,7 @@ Description: ANTsR interfaces state of the art image processing with R
     Specialized functionality in ANTsR includes image segmentation and
     registration along imaging specific variations of principal component
     and canonical correlation analysis.
-License: GPL (>=2)
+License: Apache License 2.0
 LazyLoad: yes
 Depends:
     methods
@@ -73,7 +73,10 @@ SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
 OS_type: unix
-Additional_repositories: https://github.com/InsightSoftwareConsortium/ITK.git,
-    https://github.com/stnava/ANTs.git
+Additional_repositories:
+  https://github.com/InsightSoftwareConsortium/ITK.git,
+  https://github.com/stnava/ANTs.git
+  https://github.com/stnava/ITKR.git,
+  https://github.com/stnava/ANTsR.git
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
