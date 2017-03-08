@@ -96,3 +96,69 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = F) {
   list(fstat = fstat, pval.model = pval.model, beta = beta, beta.std = beta.std,
     beta.t = beta.t, beta.pval = beta.pval)
 }
+
+
+
+
+#' Efficiently compute a voxel-wise varying linear regression model
+#'
+#' This function simplifies calculating p-values from linear models in which
+#' there is a similar formula that is applied many times with a change in only
+#' one predictor.  The outcome variable is constant.  The changing variable
+#' should be named \code{vox} in the input formula.
+#'
+#' @param dataFrame This data frame contains all relevant predictors except for
+#' the matrix associated with the changing variable, heretofore named \code{vox}.
+#' @param voxmat The matrix that contains the changing predictor named \code{vox}.
+#' @param myFormula This is a character string that defines a valid regression formula.
+#' @return A list of different matrices that contain names derived from the
+#' formula and the coefficients of the regression model.
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 100
+#' outcome = rnorm( nsub )
+#' covar = rnorm( nsub )
+#' mat = replicate( nsub, rnorm( nsub ) )
+#' myform = " outcome ~ covar + vox "
+#' df = data.frame( outcome = outcome, covar = covar )
+#' result = bigLMStats2( df, mat, myform)
+#' print( names( result ) )
+#' print( rownames( result$pValue ) )
+#'
+#' @export bigLMStats2
+bigLMStats2 <- function( dataFrame,  voxmat, myFormula ) {
+  vdf = data.frame( dataFrame, vox = voxmat[,1] )
+  temp = summary( lm( myFormula  , data=vdf))
+  myrownames = rownames(temp$coefficients)
+  mycolnames = colnames( voxmat )
+  mypvs = matrix( rep( NA, ncol( voxmat ) * length( myrownames ) ),
+    nrow = length( myrownames ) )
+  myestvs = mypvs
+  myervs = mypvs
+  mytvs = mypvs
+  colnames( myestvs ) = colnames( myervs ) = colnames( mypvs ) = colnames( mytvs ) = mycolnames
+  rownames( myestvs ) = rownames( myervs ) = rownames( mypvs ) = rownames( mytvs ) = myrownames
+  if ( ! usePkg( "RcppEigen" ) ) {
+    print("Need RcppEigen package")
+    } else {
+    loform = as.formula( myFormula )
+    for ( n in 1:ncol( voxmat ) ) {
+      vdf$vox = voxmat[,n]
+      flmmod <- fastLm( loform, data=vdf )
+      mysumm = summary( flmmod )
+      mycoef = coefficients( mysumm )
+      myestvs[ , n ] = mycoef[,1]
+      myervs[ , n ] = mycoef[,2]
+      mytvs[ , n ] = mycoef[,3]
+      mypvs[ , n ] = mycoef[,4]
+    }
+  }
+  return(
+    list(
+      estimate=myestvs,
+      stdError=myervs,
+      tValue=mytvs,
+      pValue=mypvs ) )
+}

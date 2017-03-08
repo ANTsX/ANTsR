@@ -55,6 +55,7 @@ Suggests:
     psych,
     randomForest,
     RANN,
+    RcppEigen,
     rflann,
     rgl,
     rmarkdown,
@@ -75,7 +76,7 @@ NeedsCompilation: yes
 OS_type: unix
 Additional_repositories:
   https://github.com/InsightSoftwareConsortium/ITK.git,
-  https://github.com/stnava/ANTs.git
+  https://github.com/stnava/ANTs.git,
   https://github.com/stnava/ITKR.git,
   https://github.com/stnava/ANTsR.git
 VignetteBuilder: knitr
