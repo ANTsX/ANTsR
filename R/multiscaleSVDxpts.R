@@ -33,6 +33,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
   eps = 1.e-6, ncores=NA ) # , mypkg = "nabor"  )
 {
+  if ( any( is.na( x ) ) ) stop("input matrix has NA values")
   mypkg = 'rflann'
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
@@ -160,6 +161,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
   eps = 1.e-6, ncores=NA ) # , mypkg = "nabor" )
 {
+  if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
+  if ( any( is.na( y ) ) ) stop("input matrix y has NA values")
   mypkg = 'rflann'
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
