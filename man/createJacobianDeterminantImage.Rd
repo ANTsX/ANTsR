@@ -4,7 +4,7 @@
 \alias{createJacobianDeterminantImage}
 \title{createJacobianDeterminantImage}
 \usage{
-createJacobianDeterminantImage(domainImg, tx, doLog = 0)
+createJacobianDeterminantImage(domainImg, tx, doLog = FALSE, geom = FALSE)
 }
 \arguments{
 \item{domainImg}{image that defines transformation domain}
@@ -12,6 +12,8 @@ createJacobianDeterminantImage(domainImg, tx, doLog = 0)
 \item{tx}{deformation transformation file name}
 
 \item{doLog}{return the log jacobian}
+
+\item{geom}{use the geometric jacobian calculation (boolean)}
 }
 \value{
 jacobianImage

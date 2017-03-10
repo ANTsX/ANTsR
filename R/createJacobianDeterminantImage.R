@@ -5,6 +5,7 @@
 #' @param domainImg image that defines transformation domain
 #' @param tx deformation transformation file name
 #' @param doLog return the log jacobian
+#' @param geom use the geometric jacobian calculation (boolean)
 #' @return jacobianImage
 #' @author BB Avants
 #' @examples
@@ -16,7 +17,12 @@
 #' jac<-createJacobianDeterminantImage(fi,mytx$fwdtransforms[[1]],1)
 #' # plot(jac)
 #' @export createJacobianDeterminantImage
-createJacobianDeterminantImage <- function( domainImg, tx, doLog = 0) {
+createJacobianDeterminantImage <- function(
+  domainImg,
+  tx,
+  doLog = FALSE,
+  geom = FALSE
+  ) {
   dim<-domainImg@dimension
   if ( class( tx ) == "antsImage" ) {
     txuse = tempfile( fileext = c(".nii.gz") )
@@ -24,7 +30,7 @@ createJacobianDeterminantImage <- function( domainImg, tx, doLog = 0) {
     } else txuse = tx
   args <- list(dim, txuse, doLog)
   dimg <- antsImageClone( domainImg, "double" )
-  args2 <- list(dim, txuse, dimg, doLog, 0)
+  args2 <- list(dim, txuse, dimg, as.numeric( doLog ), as.numeric( geom ))
   k <- .int_antsProcessArguments(args2)
   retval <- (.Call("CreateJacobianDeterminantImage", k, PACKAGE = "ANTsR"))
   jimg <- antsImageClone(args2[[3]], "float")
