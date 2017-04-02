@@ -13,7 +13,8 @@
 #' @param slices vector of slices to plot (e.g., c(10, 15, 20))
 #' @param colorbar make colorbar?
 #' @param title.colorbar title for colorbar
-#' @param title.img title for main image
+#' @param title.img title for main image (not displayed when file is saved with outname)
+#' @param title.line title vertical displacement (irrelevant when a file is saved with outname)
 #' @param color.colorbar color scale to use for colorbar
 #' @param window.img lower and upper thresholds for display of main image
 #' @param window.overlay lower and upper thresholds for display of overlay.
@@ -74,6 +75,7 @@ plot.antsImage <- function(x, y,
   colorbar = missing(y),
   title.colorbar,
   title.img,
+  title.line=NA,
   color.colorbar,
   window.img,
   window.overlay,
@@ -389,12 +391,13 @@ if ( ! any( is.na( domainImageMap ) ) )
   }
   img.plot <- suppressWarnings(pixmap::pixmapGrey(
     bigslice, bbox=bbox ) )
-  if (!missing(title.img))
-    title(title.img)
   # dd<-pixmapRGB(c(bigslice,bigslice,bigslice),nrow=nrow(bigslice),ncol=ncol(bigslice),bbox=c(0,0,wincols,winrows))
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
   pixmap::plot(img.plot, bg = "white")
+    
+  if (!missing(title.img))
+    title(title.img, line=title.line)
 
   if (missing(window.overlay) & !all(is.na(y))) {
     window.overlay <- quantile(y[[1]][y[[1]] != 0], c(0.05, 0.95))
