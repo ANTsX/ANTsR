@@ -402,6 +402,7 @@ if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
 fusedImgFilt = matrix2timeseries( fusedImg, mask, boldMat )
 #################
 connMatNodes = NA
+dmnnodes = NA
 if ( ! is.na( structuralNodes ) )
   {
   dmnnodes = antsApplyTransforms(
@@ -476,6 +477,7 @@ if ( !is.na( templateImage ) & havetemplateMap )
 ## FIXME - this only works if maps are to MNI space ##
 ######################################################
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
+pts = NA
 if ( havetemplateMap ) {
   data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
   pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
