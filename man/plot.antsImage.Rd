@@ -7,9 +7,10 @@
 \method{plot}{antsImage}(x, y, color.img = "white", color.overlay = c("jet",
   "red", "blue", "green", "yellow", "viridis", "magma", "plasma", "inferno"),
   axis = 2, slices, colorbar = missing(y), title.colorbar, title.img,
-  color.colorbar, window.img, window.overlay, quality = 2, outname = NA,
-  alpha = 1, newwindow = FALSE, nslices = 10, domainImageMap = NA,
-  ncolumns = 4, useAbsoluteScale = FALSE, doCropping = TRUE, ...)
+  title.line = NA, color.colorbar, window.img, window.overlay, quality = 2,
+  outname = NA, alpha = 1, newwindow = FALSE, nslices = 10,
+  domainImageMap = NA, ncolumns = 4, useAbsoluteScale = FALSE,
+  doCropping = TRUE, ...)
 }
 \arguments{
 \item{x}{the reference image on which to overlay.}
@@ -29,7 +30,9 @@ of this list should match the image list.}
 
 \item{title.colorbar}{title for colorbar}
 
-\item{title.img}{title for main image}
+\item{title.img}{title for main image (not displayed when file is saved with outname)}
+
+\item{title.line}{title vertical displacement (irrelevant when a file is saved with outname)}
 
 \item{color.colorbar}{color scale to use for colorbar}
 
