@@ -255,14 +255,15 @@ if ( ! exists("boldmap") )
   if ( verbose ) print("boldmap to structure done")
   }
 
-notemplateMap = FALSE
+havetemplateMap = TRUE
 if ( any( is.na( templateMap ) ) )
   {
-  notemplateMap = TRUE
-  mni = antsImageRead( getANTsRData( "mni" ) )
-  if ( verbose ) print("boldmap to template")
-  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
-    verbose = FALSE )
+  havetemplateMap = FALSE
+  templateMap = list( fwdtransforms=NA, invtransforms=NA )
+#  mni = antsImageRead( getANTsRData( "mni" ) )
+#  if ( verbose ) print("boldmap to template")
+#  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
+#    verbose = FALSE )
   }
 
 mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
@@ -422,7 +423,7 @@ if ( usePkg( "corpcor" ) & ! any( is.na( connMatNodes ) ) )
 # get priors for different networks
 networkPriors2Bold=NA
 betasI = NA
-if ( ! exists( "networkPriors" ) & FALSE ) # & notemplateMap )
+if ( ! exists( "networkPriors" ) & FALSE & havetemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
   networkPriors2Bold = networkPriors$images
@@ -445,10 +446,12 @@ if ( ! exists( "networkPriors" ) & FALSE ) # & notemplateMap )
     }
   }
 
-concatenatedMaps =
-  list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
-        toTemplate =  mni2boldmapsInv,
-        toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
+concatenatedMaps = NA
+if ( havetemplateMap )
+  concatenatedMaps =
+    list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
+          toTemplate =  mni2boldmapsInv,
+          toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
 
 boldToTemplate = NA
 dmnAtBOLDres = NA
