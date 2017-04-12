@@ -416,7 +416,7 @@ if ( ! is.na( structuralNodes ) )
   }
 
 connMatNodesPartialCorr = NA
-if ( usePkg( "corpcor" ) )
+if ( usePkg( "corpcor" ) & ! any( is.na( connMatNodes ) ) )
   connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
 
 # get priors for different networks
