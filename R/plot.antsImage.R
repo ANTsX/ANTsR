@@ -94,8 +94,17 @@ if ( x@components > 1 )
   stop("Cannot plot multichannel image: splitChannels, then plot as overlays.")
   }
 if ( ! is.antsImage( x ) ) stop("input x should be an antsImage.")
-interpStyle = 'NearestNeighbor'
+interpNN = 'NearestNeighbor'
 interpStyle = 'Linear'
+if ( ! missing( "y" ) )
+  {
+  if ( is.antsImage( y ) ) y <- list(y)
+  for ( i in 1:length( y ) ) {
+    if ( antsImagePhysicalSpaceConsistency( x, y[[i]] ) == FALSE ) {
+      y[[ i ]] = resampleImageToTarget( x, y[[i]], interpType = interpNN )
+      }
+    }
+  }
 if ( ! any( is.na( domainImageMap ) ) )
   {
   if ( is.antsImage( domainImageMap ) )
@@ -395,7 +404,7 @@ if ( ! any( is.na( domainImageMap ) ) )
   # plot(dd)
   par(mar = c(0, 0, 0, 0) + 0)  # set margins to zero ! less wasted space
   pixmap::plot(img.plot, bg = "white")
-    
+
   if (!missing(title.img))
     title(title.img, line=title.line)
 
@@ -455,6 +464,8 @@ if ( ! any( is.na( domainImageMap ) ) )
     labimg <- temp
     locthresh <- round((window.overlay[1:2] - mncl) /
                       (mxcl - mncl) * (nlevels - 1))
+    if ( ( min(locthresh) == max(locthresh) ) | any(is.na(locthresh) ) )
+      locthresh=c(0,1)
     labslice = reoSlice( labimg )
     slicerow <- nrow(slice)
     slicecol <- ncol(slice)
@@ -527,7 +538,7 @@ if ( ! any( is.na( domainImageMap ) ) )
       biglab[1]=255
       biglab[2]=0
       }
-    if (min(biglab) != max(biglab))
+    if (min(biglab,na.rm=T) != max(biglab,na.rm=T))
       {
       invisible( suppressWarnings(
         pixmap::plot(
