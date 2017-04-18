@@ -83,7 +83,8 @@ if ( subtractBackground )
 if ( mapToPet )
   {
   petreg = antsRegistration( pets, anatomicalImage, typeofTransform = typetx,
-    mask = petmaskOrig, verbose = FALSE )
+    # mask = petmaskOrig, 
+    verbose = FALSE )
   wti = TRUE
   }
 else {
