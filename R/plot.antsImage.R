@@ -101,7 +101,7 @@ if ( ! missing( "y" ) )
   if ( is.antsImage( y ) ) y <- list(y)
   for ( i in 1:length( y ) ) {
     if ( antsImagePhysicalSpaceConsistency( x, y[[i]] ) == FALSE ) {
-      y[[ i ]] = resampleImageToTarget( x, y[[i]], interpType = interpNN )
+      y[[ i ]] = resampleImageToTarget( y[[i]], x, interpType = interpNN )
       }
     }
   }
