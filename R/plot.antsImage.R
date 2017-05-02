@@ -538,7 +538,9 @@ if ( ! any( is.na( domainImageMap ) ) )
       biglab[1]=255
       biglab[2]=0
       }
-    if (min(biglab,na.rm=T) != max(biglab,na.rm=T))
+    mn = min(biglab,na.rm=T)
+    mx = max(biglab,na.rm=T)
+    if ( ( mn != mx ) & ( mn < mx ) )
       {
       invisible( suppressWarnings(
         pixmap::plot(
