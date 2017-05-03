@@ -6,12 +6,14 @@
 \usage{
 petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
   smoothingParameter = 2.5, labelValue = 0, subtractBackground = FALSE,
-  mapToPet = FALSE, noMotionCorr = FALSE)
+  mapToPet = TRUE, noMotionCorr = FALSE)
 }
 \arguments{
 \item{petTime}{pet time series antsImage or 3D image}
 
-\item{anatomicalImage}{antsImage}
+\item{anatomicalImage}{antsImage that indicates the target anatomical image.
+one should choose this image carefully, as it will impact results. one might
+compare results with, for example, either whole head or whole brain targets.}
 
 \item{anatomicalSegmentation}{antsImage in the same space as anatomicalImage.
 This image should contain a whole brain mask in addition to a labeled

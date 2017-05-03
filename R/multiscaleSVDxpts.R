@@ -212,7 +212,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
       {
       locd = cov( y[,i], x[,inds] )
       }
-    else if ( kmetric == "covariance" )
+    else if ( kmetric == "correlation" )
       {
       locd = cor( y[,i], x[,inds] )
       }

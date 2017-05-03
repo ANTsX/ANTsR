@@ -9,7 +9,9 @@
 #' anatomical space.
 #'
 #' @param petTime pet time series antsImage or 3D image
-#' @param anatomicalImage antsImage
+#' @param anatomicalImage antsImage that indicates the target anatomical image.
+#' one should choose this image carefully, as it will impact results. one might
+#' compare results with, for example, either whole head or whole brain targets.
 #' @param anatomicalSegmentation antsImage in the same space as anatomicalImage.
 #' This image should contain a whole brain mask in addition to a labeled
 #' reference region for computing SUVR.
@@ -40,7 +42,7 @@ petSUVR <- function(
   smoothingParameter = 2.5,
   labelValue = 0,
   subtractBackground = FALSE,
-  mapToPet = FALSE,
+  mapToPet = TRUE,
   noMotionCorr = FALSE )
 {
 idim = petTime@dimension
@@ -81,7 +83,8 @@ if ( subtractBackground )
 if ( mapToPet )
   {
   petreg = antsRegistration( pets, anatomicalImage, typeofTransform = typetx,
-    mask = petmaskOrig, verbose = FALSE )
+    # mask = petmaskOrig, 
+    verbose = FALSE )
   wti = TRUE
   }
 else {

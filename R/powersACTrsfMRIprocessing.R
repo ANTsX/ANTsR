@@ -255,14 +255,15 @@ if ( ! exists("boldmap") )
   if ( verbose ) print("boldmap to structure done")
   }
 
-notemplateMap = FALSE
+havetemplateMap = TRUE
 if ( any( is.na( templateMap ) ) )
   {
-  notemplateMap = TRUE
-  mni = antsImageRead( getANTsRData( "mni" ) )
-  if ( verbose ) print("boldmap to template")
-  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
-    verbose = FALSE )
+  havetemplateMap = FALSE
+  templateMap = list( fwdtransforms=NA, invtransforms=NA )
+#  mni = antsImageRead( getANTsRData( "mni" ) )
+#  if ( verbose ) print("boldmap to template")
+#  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
+#    verbose = FALSE )
   }
 
 mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
@@ -401,6 +402,7 @@ if (  ( length( freqLimits ) == 2  ) & ( freqLimits[1] < freqLimits[2] ) )
 fusedImgFilt = matrix2timeseries( fusedImg, mask, boldMat )
 #################
 connMatNodes = NA
+dmnnodes = NA
 if ( ! is.na( structuralNodes ) )
   {
   dmnnodes = antsApplyTransforms(
@@ -416,13 +418,13 @@ if ( ! is.na( structuralNodes ) )
   }
 
 connMatNodesPartialCorr = NA
-if ( usePkg( "corpcor" ) )
+if ( usePkg( "corpcor" ) & ! any( is.na( connMatNodes ) ) )
   connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
 
 # get priors for different networks
 networkPriors2Bold=NA
 betasI = NA
-if ( ! exists( "networkPriors" ) & FALSE ) # & notemplateMap )
+if ( ! exists( "networkPriors" ) & FALSE & havetemplateMap )
   {
   networkPriors = getANTsRData( "fmrinetworks" )
   networkPriors2Bold = networkPriors$images
@@ -445,17 +447,19 @@ if ( ! exists( "networkPriors" ) & FALSE ) # & notemplateMap )
     }
   }
 
-concatenatedMaps =
-  list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
-        toTemplate =  mni2boldmapsInv,
-        toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
+concatenatedMaps = NA
+if ( havetemplateMap )
+  concatenatedMaps =
+    list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
+          toTemplate =  mni2boldmapsInv,
+          toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
 
 boldToTemplate = NA
 dmnAtBOLDres = NA
 seg2template = NA
 if ( exists("mni") & is.na( templateImage ) )
   templateImage = resampleImage( mni, rep( 2.0 , 3 ) )
-if ( !is.na( templateImage ) )
+if ( !is.na( templateImage ) & havetemplateMap )
   {
   ## map the fusedImg to the common template space
   boldToTemplate = antsApplyTransforms( fixed = templateImage, moving = fusedImg,
@@ -473,14 +477,17 @@ if ( !is.na( templateImage ) )
 ## FIXME - this only works if maps are to MNI space ##
 ######################################################
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
-data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
-         transformlist = concatenatedMaps$toTemplate,
-         whichtoinvert = concatenatedMaps$toTemplateInversion )
-powersLabels = makePowersPointsImage( pts, mask, radius = 1 )
-if ( verbose )
-  plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
-    window.overlay = c( 1, max(powersLabels) ) )
+pts = NA
+if ( havetemplateMap ) {
+  data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
+  pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
+           transformlist = concatenatedMaps$toTemplate,
+           whichtoinvert = concatenatedMaps$toTemplateInversion )
+  powersLabels = makePowersPointsImage( pts, mask, radius = 1 )
+  if ( verbose )
+    plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
+      window.overlay = c( 1, max(powersLabels) ) )
+    }
 
 return(
       list(
