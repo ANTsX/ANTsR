@@ -203,9 +203,9 @@ if ( ! all( is.na( extraRuns ) ) )
 # now use polynomial regressors to match images across runs #
 #############################################################
 polyNuis = NA
+boldMat = timeseries2matrix( moco$moco_img, mask )
 if ( !is.na( polydegree ) ) # polynomial regressors
   {
-  boldMat = timeseries2matrix( moco$moco_img, mask )
   meanmat = boldMat * 0
   rboldMat = boldMat * 0
   mycolmean = colMeans( boldMat )
