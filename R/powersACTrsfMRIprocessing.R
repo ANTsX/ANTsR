@@ -478,6 +478,8 @@ if ( !is.na( templateImage ) & havetemplateMap )
 ######################################################
 ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
 pts = NA
+powersLabels = NA
+
 if ( havetemplateMap ) {
   data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
   pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
@@ -487,7 +489,7 @@ if ( havetemplateMap ) {
   if ( verbose )
     plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
       window.overlay = c( 1, max(powersLabels) ) )
-    }
+  }
 
 return(
       list(
