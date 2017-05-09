@@ -187,15 +187,14 @@ preprocessRestingBOLD <- function(boldImage,
 
   if (spatialSmoothingType == "gaussian") {
     if (length(spatialSmoothingParameters) == 1) {
-      sigmaVector <- paste0(spatialSmoothingParameters[1], "x", spatialSmoothingParameters[1],
-        "x", spatialSmoothingParameters[1], "x0")
-      smoothCleanBoldImage = smoothImage(cleanBoldImage, sigmaVector)
+      sigmaVector <- c( rep( spatialSmoothingParameters[1], 3, ), 0 )
+      smoothCleanBoldImage <- smoothImage(cleanBoldImage, sigmaVector)
     } else {
       stop("Expecting a single scalar parameter.")
     }
   } else if (spatialSmoothingType == "perona-malik") {
     if (length(spatialSmoothingParameters) == 2) {
-      smoothCleanBoldImage = iMath(cleanBoldImage, "PeronaMalik", spatialSmoothingParameters[1],
+      smoothCleanBoldImage <- iMath(cleanBoldImage, "PeronaMalik", spatialSmoothingParameters[1],
         spatialSmoothingParameters[2])
     } else {
       stop("Expecting a two element vector.")
