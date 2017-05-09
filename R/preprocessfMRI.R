@@ -157,7 +157,7 @@ preprocessfMRI <- function(boldImage,
   DVARSpostCleaning <- computeDVARS(boldMatrix)
 
   # Convert the cleaned matrix back to a 4-D image
-  globalSignal <- apply(boldMatrix, FUN = mean, MARGIN = 2)
+  globalSignal <- apply(boldMatrix, FUN = mean, MARGIN = 1)
   cleanBoldImage <- matrix2timeseries(boldImage, maskImage, boldMatrix)
 
   # anisotropically smooth the 4-D image, if desired
