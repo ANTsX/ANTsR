@@ -19,7 +19,8 @@ reflects an image along its axis
 \examples{
 
 fi<-antsImageRead( getANTsRData("r16") , 2 )
-asym<-reflectImage( fi, 1, "Affine" )$warpedmovout
+axis = 2
+asym<-reflectImage( fi, axis, "Affine" )$warpedmovout
 asym<-asym-fi
 
 }
