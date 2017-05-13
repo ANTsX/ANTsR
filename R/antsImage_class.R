@@ -1058,114 +1058,114 @@ is.antsImage <- function(x){
   inherits(x, 'antsImage')
 }
 
-#' @title arith.antsImage
-#' @description Atomic arithmetic operators for antsImages
-#' @param x antsImage
-#' @param y antsImage or numeric
-#' @param mask antsImage logical mask (optional)
-#' @examples
-#' r16 <- antsImageRead(getANTsRData('r16'), 2)
-#' r64 <- antsImageRead(getANTsRData('r64'), 2)
-#' r16 + r64
-#' r16 + 5
-#' r16 / 10
-#' @name antsImageArith
-"+.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgsum <- as.antsImage(as.array(x) + as.array(y), reference=x)
-  } else{
-    imgsum <- as.antsImage(as.array(x) + y, reference=x)
-  }
-  antsCopyImageInfo(x, imgsum)
-}
-
-#' @rdname antsImageArith
-"-.antsImage" <- function(x, y){
-  if(missing(y)) {
-    imgdif <- as.antsImage(0 - as.array(x), reference=x)
-  } else if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgdif <- as.antsImage(as.array(x) - as.array(y), reference=x)
-  } else {
-    imgdif <- as.antsImage(as.array(x) - y, reference=x)
-  }
-  antsCopyImageInfo(x, imgdif)
-}
-
-#' @rdname antsImageArith
-"/.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgfrac <- as.antsImage(as.array(x) / as.array(y), reference=x)
-  } else{
-    imgfrac <- as.antsImage(as.array(x) / y, reference=x)
-  }
-  antsCopyImageInfo(x, imgfrac)
-}
-
-#' @rdname antsImageArith
-"*.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgmult <- as.antsImage(as.array(x) * as.array(y), reference=x)
-  } else{
-    imgmult <- as.antsImage(as.array(x) * y, reference=x)
-  }
-  antsCopyImageInfo(x, imgmult)
-}
-
-#' @rdname antsImageArith
-"^.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgpow <- as.antsImage(as.array(x) ^ as.array(y), reference=x)
-  } else{
-    imgpow <- as.antsImage(as.array(x) ^ y, reference=x)
-  }
-  antsCopyImageInfo(x, imgpow)
-}
-
-#' @rdname antsImageArith
-"%%.antsImage" <- function(x, y){
-  if(is.antsImage(y)){
-    if ( !antsImagePhysicalSpaceConsistency(x,y) ){
-      stop("Images do not occupy the same physical space")
-    }
-    imgmod <- as.antsImage(as.array(x) %% as.array(y), reference=x)
-  } else {
-    imgmod <- as.antsImage(as.array(x) %% y, reference=x)
-  }
-  antsCopyImageInfo(x, imgmod)
-}
-
-#' @param ... Additional arguments passed to underlying R operator
-#' @examples
-#' log(r16, base=10)
-#' @rdname antsImageArith
-"log.antsImage" <- function(x, ...){
-  imglog <- as.antsImage(log(as.array(x), ...), reference=x)
-  antsCopyImageInfo(x, imglog)
-}
-
-#' @rdname antsImageArith
-"exp.antsImage" <- function(x){
-  imgexp <- as.antsImage(exp(as.array(x)), reference=x)
-  antsCopyImageInfo(x, imgexp)
-}
-
-#' @rdname antsImageArith
-"abs.antsImage" <- function(x){
-  imgabs <- as.antsImage(abs(as.array(x)), reference=x)
-  antsCopyImageInfo(x, imgabs)
-}
+# #' @title arith.antsImage
+# #' @description Atomic arithmetic operators for antsImages
+# #' @param x antsImage
+# #' @param y antsImage or numeric
+# #' @param mask antsImage logical mask (optional)
+# #' @examples
+# #' r16 <- antsImageRead(getANTsRData('r16'), 2)
+# #' r64 <- antsImageRead(getANTsRData('r64'), 2)
+# #' r16 + r64
+# #' r16 + 5
+# #' r16 / 10
+# #' @name antsImageArith
+# "+.antsImage" <- function(x, y){
+#   if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgsum <- as.antsImage(as.array(x) + as.array(y), reference=x)
+#   } else{
+#     imgsum <- as.antsImage(as.array(x) + y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgsum)
+# }
+# 
+# #' @rdname antsImageArith
+# "-.antsImage" <- function(x, y){
+#   if(missing(y)) {
+#     imgdif <- as.antsImage(0 - as.array(x), reference=x)
+#   } else if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgdif <- as.antsImage(as.array(x) - as.array(y), reference=x)
+#   } else {
+#     imgdif <- as.antsImage(as.array(x) - y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgdif)
+# }
+# 
+# #' @rdname antsImageArith
+# "/.antsImage" <- function(x, y){
+#   if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgfrac <- as.antsImage(as.array(x) / as.array(y), reference=x)
+#   } else{
+#     imgfrac <- as.antsImage(as.array(x) / y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgfrac)
+# }
+# 
+# #' @rdname antsImageArith
+# "*.antsImage" <- function(x, y){
+#   if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgmult <- as.antsImage(as.array(x) * as.array(y), reference=x)
+#   } else{
+#     imgmult <- as.antsImage(as.array(x) * y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgmult)
+# }
+# 
+# #' @rdname antsImageArith
+# "^.antsImage" <- function(x, y){
+#   if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgpow <- as.antsImage(as.array(x) ^ as.array(y), reference=x)
+#   } else{
+#     imgpow <- as.antsImage(as.array(x) ^ y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgpow)
+# }
+# 
+# #' @rdname antsImageArith
+# "%%.antsImage" <- function(x, y){
+#   if(is.antsImage(y)){
+#     if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+#       stop("Images do not occupy the same physical space")
+#     }
+#     imgmod <- as.antsImage(as.array(x) %% as.array(y), reference=x)
+#   } else {
+#     imgmod <- as.antsImage(as.array(x) %% y, reference=x)
+#   }
+#   antsCopyImageInfo(x, imgmod)
+# }
+# 
+# #' @param ... Additional arguments passed to underlying R operator
+# #' @examples
+# #' log(r16, base=10)
+# #' @rdname antsImageArith
+# "log.antsImage" <- function(x, ...){
+#   imglog <- as.antsImage(log(as.array(x), ...), reference=x)
+#   antsCopyImageInfo(x, imglog)
+# }
+# 
+# #' @rdname antsImageArith
+# "exp.antsImage" <- function(x){
+#   imgexp <- as.antsImage(exp(as.array(x)), reference=x)
+#   antsCopyImageInfo(x, imgexp)
+# }
+# 
+# #' @rdname antsImageArith
+# "abs.antsImage" <- function(x){
+#   imgabs <- as.antsImage(abs(as.array(x)), reference=x)
+#   antsCopyImageInfo(x, imgabs)
+# }
