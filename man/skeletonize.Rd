@@ -4,10 +4,12 @@
 \alias{skeletonize}
 \title{Skeletonize a binary segmentation.}
 \usage{
-skeletonize(x, propagationOption = 1)
+skeletonize(x, laplacianThreshold = 0.25, propagationOption = 1)
 }
 \arguments{
 \item{x}{input binary image}
+
+\item{laplacianThreshold}{between zero and one, controls the speed image}
 
 \item{propagationOption}{either 0 (none), 1 (well-composed) or 2 (topological) constraint}
 }
