@@ -73,7 +73,6 @@ LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
-OS_type: unix
 Additional_repositories:
   https://github.com/InsightSoftwareConsortium/ITK.git,
   https://github.com/stnava/ANTs.git,
