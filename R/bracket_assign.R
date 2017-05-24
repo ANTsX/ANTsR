@@ -78,6 +78,26 @@ setMethod(
 )
 
 #' @describeIn as.antsImage
+#' @aliases [<-,antsImage,antsImage-method
+setMethod(
+  f = "[<-",
+  signature(x = "antsImage", i = "antsImage"),
+  definition = function(x, i, j, ..., value) {
+    i = as.array(i)
+    if (all(i %in% c(0, 1, NaN, NA))) {
+      i = i != 0
+    }
+    if (typeof(i) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    region <-
+      new("antsRegion", index = integer(), size = integer())
+    return(.Call("antsImage_SetRegion", x, i, region, value, PACKAGE = "ANTsR"))
+  }
+)
+
+
+#' @describeIn as.antsImage
 #' @aliases [<-,antsImage,NULL,antsRegion-method
 setMethod(
   f = "[<-",
