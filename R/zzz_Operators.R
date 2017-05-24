@@ -107,6 +107,24 @@ setMethod("Ops", signature(e1 = "array", e2 = "antsImage"),
             return(res)
           })
 
+#' @rdname antsImageops
+#' @aliases Ops,list,antsImage-method
+setMethod("Ops", signature(e1 = "list", e2 = "antsImage"),
+          function(e1, e2) {
+            ## either use drop_img_dim and validObject or take out both
+            # a2 = as.array(e1)
+            stop("antsRegions not done yet!")
+})
+
+#' @rdname antsImageops
+#' @aliases Ops,antsImage,list-method
+setMethod("Ops", signature(e1 = "antsImage", e2 = "list"),
+          function(e1, e2) {
+            ## either use drop_img_dim and validObject or take out both
+            # a2 = as.array(e1)
+            stop("antsRegions not done yet!")
+          })
+
 #' @title Math for antsImage Objects
 #' @description Overloaded math for antsImage objects
 #' @name antsImage-math
