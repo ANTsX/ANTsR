@@ -39,4 +39,3 @@ r2 <- crossvalidatedR2(x, y, covariates=covariate)
 \author{
 Brian B Avants, Benjamin M. Kandel
 }
-

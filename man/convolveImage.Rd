@@ -33,4 +33,3 @@ Brian B. Avants
 }
 \keyword{convolution}
 \keyword{convolve,}
-

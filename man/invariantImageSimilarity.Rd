@@ -84,4 +84,3 @@ Brian B. Avants
 }
 \keyword{image}
 \keyword{similarity}
-

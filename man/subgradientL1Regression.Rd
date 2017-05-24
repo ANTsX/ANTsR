@@ -39,4 +39,3 @@ print( wmat$resultcorr )
 \author{
 Avants BB
 }
-

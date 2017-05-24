@@ -120,9 +120,6 @@ results5 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
                        
 }
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Chumbley J., (2010) Topological FDR for neuroimaging
 
@@ -130,4 +127,6 @@ Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference 
 
 Worsley K.J., (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
 }
-
+\author{
+Zachary P. Christensen
+}

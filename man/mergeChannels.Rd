@@ -27,4 +27,3 @@ merge images into a multiChannel antsImage
 \author{
 Duda, JT
 }
-

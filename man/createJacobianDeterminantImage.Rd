@@ -33,4 +33,3 @@ jac<-createJacobianDeterminantImage(fi,mytx$fwdtransforms[[1]],1)
 \author{
 BB Avants
 }
-

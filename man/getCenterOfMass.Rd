@@ -29,4 +29,3 @@ Brian B. Avants
 }
 \keyword{geometry}
 \keyword{image}
-

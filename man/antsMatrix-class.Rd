@@ -23,6 +23,8 @@ An S4 class to hold an antsMatrix imported from ITK types
 \section{Slots}{
 
 \describe{
+\item{\code{elementtype}}{string of the type of storage of the matrix e.g. "float"}
+
 \item{\code{pointer}}{the memory location}
 }}
 

@@ -84,12 +84,11 @@ boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
 # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 cleanfMRI <- preprocessRestingBOLD(boldImage)
 }
-\author{
-Tustison NJ, Avants BB
-}
 \references{
 Power et al. 2012, "Spurious but systematic correlations
 in functional connectivity MRI networks arise from subject motion."
 NeuroImage 59, 2142-2154.
 }
-
+\author{
+Tustison NJ, Avants BB
+}

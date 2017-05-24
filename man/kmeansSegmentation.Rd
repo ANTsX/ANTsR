@@ -31,4 +31,3 @@ seg<-kmeansSegmentation( fi, 3 )
 \author{
 Brian B. Avants
 }
-

@@ -127,4 +127,3 @@ plot( preddf, testdf$bmi )
 \author{
 Avants BB
 }
-

@@ -27,4 +27,3 @@ wmat<-temporalwhiten( mat )
 \author{
 Avants BB
 }
-

@@ -80,9 +80,6 @@ thresh_image <- statFieldThresh(timg, .05, 10, 1, mysmooth$fwhm,
                                threshType = pRFT)
 }
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Chumbley J., (2010) Topological FDR for neuroimaging
 
@@ -90,4 +87,6 @@ Friston K.J., (1994) Assessing the Significance of Focal Activations Using Their
 
 Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power
 }
-
+\author{
+Zachary P. Christensen
+}

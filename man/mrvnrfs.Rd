@@ -83,4 +83,3 @@ if ( predtype == "scalar" )
 \author{
 Avants BB, Tustison NJ, Pustina D
 }
-

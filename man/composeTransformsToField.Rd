@@ -34,4 +34,3 @@ wrped = applyAntsrTransformToImage( atx, mi, fi )
 \author{
 Avants BB, Duda JT
 }
-

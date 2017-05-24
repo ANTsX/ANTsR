@@ -28,4 +28,3 @@ wmat<-icawhiten( mat, 2 )
 \author{
 Avants BB, fastICA package (see CRAN)
 }
-

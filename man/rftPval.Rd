@@ -72,9 +72,6 @@ setP <- rftPval(3, numberOfClusters, minimumClusterSize, u, 1, resels, df,
                 fieldType = "T")$Pcor
 }
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Friston K.J., (1994) Assessing the Significance of Focal Activations Using Their Spatial Extent.
 
@@ -85,4 +82,6 @@ Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant 
 \seealso{
 rftResults, resels
 }
-
+\author{
+Zachary P. Christensen
+}

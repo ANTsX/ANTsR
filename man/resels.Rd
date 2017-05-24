@@ -28,13 +28,12 @@ mask <- getMask(antsImageRead(getANTsRData('mni')))
 myresels <- resels(mask, c(1, 1, 1))
 
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
 }
 \seealso{
 rftPval, euler, rftResults
 }
-
+\author{
+Zachary P. Christensen
+}

@@ -27,13 +27,12 @@ fi <- antsImageRead( getANTsRData( "mni" ) )
 fik <- weingartenImageCurvature( fi )
 }
 }
-\author{
-Brian B. Avants
-}
 \references{
 Avants, B, J. Gee, and B. Avants.
 Shape operator for differential image analysis
 Information Processing in Medical Imaging, 2003.
 }
+\author{
+Brian B. Avants
+}
 \keyword{curvature}
-

@@ -29,4 +29,3 @@ wmat2<-whiten( mat, 2, TRUE )
 \author{
 Avants BB
 }
-

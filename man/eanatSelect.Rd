@@ -50,4 +50,3 @@ print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
 \author{
 Avants BB, Tustison NJ
 }
-

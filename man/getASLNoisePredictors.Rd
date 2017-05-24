@@ -51,4 +51,3 @@ noise <- getASLNoisePredictors(aslmat, tc, k=2, npreds=2, noisefrac=0.5 )
 \author{
 Brian B. Avants, Benjamin M. Kandel
 }
-

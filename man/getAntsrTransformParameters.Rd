@@ -19,4 +19,3 @@ Get parameters of transform
 tx = new("antsrTransform")
 params = getAntsrTransformParameters(tx)
 }
-

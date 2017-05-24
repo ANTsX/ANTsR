@@ -52,4 +52,3 @@ Brian Beaumont Avants and Benjamin M. Kandel
 \keyword{blood}
 \keyword{cerebral}
 \keyword{flow,}
-

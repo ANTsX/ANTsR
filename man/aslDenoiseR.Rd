@@ -123,4 +123,3 @@ antsImageWrite( betaImg, 'dmnBetas.nii.gz' )
 \author{
 Avants BB
 }
-

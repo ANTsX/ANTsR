@@ -38,4 +38,3 @@ pseg = priorBasedSegmentation( fi, seg$probabilityimages, msk, 0.25, 0.1, 3 )
 \author{
 Brian B. Avants
 }
-

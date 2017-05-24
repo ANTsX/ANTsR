@@ -143,4 +143,3 @@ plot( ref, eseg )
 \author{
 Avants BB
 }
-

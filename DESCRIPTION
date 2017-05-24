@@ -80,4 +80,4 @@ Additional_repositories:
   https://github.com/stnava/ITKR.git,
   https://github.com/stnava/ANTsR.git
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

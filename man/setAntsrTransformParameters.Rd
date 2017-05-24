@@ -22,4 +22,3 @@ tx = new("antsrTransform")
 params = getAntsrTransformParameters(tx)
 setAntsrTransformParameters(tx, params*2)
 }
-

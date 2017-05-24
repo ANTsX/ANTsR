@@ -67,4 +67,3 @@ result <- cvEigenanatomy(demog, input, 'outcome', ratio=5, mask,
 \author{
 Kandel BM and Avants B
 }
-

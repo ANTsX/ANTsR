@@ -4,14 +4,14 @@
 \alias{as.antsMatrix}
 \title{as.antsMatrix}
 \usage{
-as.antsMatrix(object, ...)
+as.antsMatrix(object, elementtype = "float", ...)
 }
 \arguments{
 \item{object}{An object}
 
-\item{...}{other parameters}
-
 \item{elementtype}{e.g. "float" or "double"}
+
+\item{...}{other parameters}
 }
 \description{
 convert types to an antsMatrix
@@ -19,4 +19,3 @@ convert types to an antsMatrix
 \examples{
 as.antsMatrix(matrix(rnorm(10), nrow=2))
 }
-

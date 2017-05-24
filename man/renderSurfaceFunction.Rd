@@ -58,10 +58,9 @@ functional).
           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
        }
 }
-\author{
-Avants B, Kandel B
-}
 \seealso{
 \code{\link{plotBasicNetwork}}
 }
-
+\author{
+Avants B, Kandel B
+}

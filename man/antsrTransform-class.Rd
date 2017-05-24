@@ -26,6 +26,12 @@ C++ type used to represent an ITK image transform.
 
 \item{\code{precision}}{math precision is float or double'}
 
+\item{\code{type}}{The type of transform: usually one of 
+AffineTransform, CenteredAffineTransform, CenteredEuler3DTransform,
+CenteredRigid2DTransform, CenteredSimilarity2DTransform, Euler2DTransform, 
+Euler3DTransform, QuaternionRigidTransform, Rigid2DTransform, 
+Similarity2DTransform, Similarity3DTransform}
+
 \item{\code{pointer}}{to the memory location of the itk object}
 }}
 

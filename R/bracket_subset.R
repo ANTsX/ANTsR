@@ -7,7 +7,8 @@
 #' @param drop method for missing data
 #' @param k not used or k-th dimension
 #' @param l not used or l-th dimension
-#' @param value ok
+#' @param ... not used
+#' @param value value to assign to the subset in assignment operator
 #' @describeIn as.antsImage
 #' @aliases [,antsImage,NULL,ANY,ANY-method
 setMethod(

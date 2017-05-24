@@ -31,4 +31,3 @@ img.int <- antsImageClone(img , "unsigned int")
 \author{
 Shrinidhi KL
 }
-

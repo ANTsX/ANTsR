@@ -45,4 +45,3 @@ mask<-getMask( img )
 Shrinidhi KL, Cook PA, Avants BB
 }
 \keyword{mask}
-

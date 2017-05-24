@@ -32,10 +32,9 @@ antsImageWrite( fi, tempfile( fileext = ".mrc" )  )
 antsImageWrite( fi, tempfile( fileext = ".hd5" )  )
 
 }
-\author{
-Shrinidhi KL
-}
 \seealso{
 \code{\link{antsImageRead}}
 }
-
+\author{
+Shrinidhi KL
+}

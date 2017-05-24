@@ -47,4 +47,3 @@ if ( usePkg("igraph") ) {
 \author{
 Avants BB, Christopher DeSante and David Sparks
 }
-

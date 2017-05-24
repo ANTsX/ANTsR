@@ -30,4 +30,3 @@ img2 <- apply.antsImage(img, c(1,2), mean)
 \author{
 Duda JT
 }
-

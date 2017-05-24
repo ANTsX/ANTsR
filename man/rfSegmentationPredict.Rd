@@ -41,4 +41,3 @@ rfseg2<-rfSegmentationPredict(  rfsegs$rfModel , fmat2 , mask2 )
 \author{
 Tustison NJ, Avants BB
 }
-

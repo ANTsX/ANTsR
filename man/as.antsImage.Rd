@@ -4,12 +4,14 @@
 \alias{as.antsImage}
 \title{as.antsImage}
 \usage{
-as.antsImage(object, ...)
+as.antsImage(object, pixeltype = "float", spacing = as.numeric(seq.int(from
+  = 1, by = 0, length.out = length(dim(object)))),
+  origin = as.numeric(seq.int(from = 0, by = 0, length.out =
+  length(dim(object)))), direction = diag(length(dim(object))),
+  components = FALSE, reference = NA, ...)
 }
 \arguments{
 \item{object}{An object}
-
-\item{...}{Extra named arguments passed to FUN}
 
 \item{pixeltype}{a character string e.g. "float"}
 
@@ -22,8 +24,9 @@ as.antsImage(object, ...)
 \item{components}{number of components per voxel, e.g. 1}
 
 \item{reference}{optional reference antsImage providing all header info}
+
+\item{...}{Extra named arguments passed to FUN}
 }
 \description{
 convert types to antsImage
 }
-

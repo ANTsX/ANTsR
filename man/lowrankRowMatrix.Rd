@@ -28,4 +28,3 @@ lrmat <- lowrankRowMatrix( mat , 2 )
 \author{
 Avants BB
 }
-

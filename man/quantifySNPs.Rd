@@ -35,4 +35,3 @@ wmat<-quantifySNPs( mat , freqthresh=0)
 \author{
 Avants BB
 }
-

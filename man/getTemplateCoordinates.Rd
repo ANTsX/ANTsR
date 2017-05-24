@@ -72,4 +72,3 @@ Avants, BB
 \keyword{Coordinates}
 \keyword{Talairach,}
 \keyword{Template,}
-

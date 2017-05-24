@@ -37,4 +37,3 @@ make3ViewPNG(  diag(4), diag(4), diag(4),  tempfile( fileext='.png') )
 \author{
 Avants BB
 }
-

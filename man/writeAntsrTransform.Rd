@@ -22,4 +22,3 @@ trans= c(3,4,5)
 tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
 writeAntsrTransform(tx,"trans.mat")
 }
-

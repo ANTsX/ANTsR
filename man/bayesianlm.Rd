@@ -124,4 +124,3 @@ on the multivariate distribution of the parameters.
 \author{
 Avants BB
 }
-

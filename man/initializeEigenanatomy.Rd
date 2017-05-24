@@ -63,4 +63,3 @@ eanat<-sparseDecom2( list(dmat,dmat2), inmask=c(initdf$mask,NA),
 \author{
 Avants BB
 }
-

@@ -68,11 +68,10 @@ voxvals[, , , 5] <- voxvals[, , , 5] + 600
 asl <- makeImage(dims, voxvals)
 censored <- aslCensoring(asl)
 }
-\author{
-Kandel BM
-}
 \references{
 Tan H. et al., ``A Fast, Effective Filtering Method
 for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 }
-
+\author{
+Kandel BM
+}

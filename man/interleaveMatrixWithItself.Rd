@@ -27,4 +27,3 @@ wmat<-interleaveMatrixWithItself( mat , 5 )
 \author{
 Avants BB
 }
-

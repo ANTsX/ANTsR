@@ -64,4 +64,3 @@ openedAnnulus = morphology( mask, operation="open", radius=5, type="binary", sha
 \author{
 Avants BB
 }
-

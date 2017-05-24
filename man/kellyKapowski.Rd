@@ -42,4 +42,3 @@ thk<-kellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
 \author{
 Shrinidhi KL, Avants BB
 }
-
