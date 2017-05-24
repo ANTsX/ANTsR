@@ -22,6 +22,8 @@ Coordinates have been modified from nifti space to ITK space
     \item{\code{b}}{ blue value for system }
     \item{\code{Anatomy}}{ anatomical location as determined by OASIS labeling }
     \item{\code{Lobe}}{ lobe location of node }
+    \item{\code{Broadmann}}{ Broadmann area number }
+    \item{\code{AAL}}{ AAL region label }
   }
 }
 \references{

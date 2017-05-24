@@ -89,6 +89,7 @@
 #'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
 #'    normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 #' }
+#' @importFrom xgboost xgb.train xgb.DMatrix
 
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),
@@ -383,7 +384,7 @@ for( l in 1:length( labelSet ) )
   modelData <- as.matrix( modelData )
   modelLabels <- as.character( modelDataPerLabel$Labels )
 
-  modelDataPerLabelXgb <- xgb.DMatrix( modelData, label = modelLabels )
+  modelDataPerLabelXgb <- xgboost::xgb.DMatrix( modelData, label = modelLabels )
 
 #      * xgboost tuning using cross validation
 #

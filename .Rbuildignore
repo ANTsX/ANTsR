@@ -11,3 +11,5 @@ src/ants/.git
 .gitignore
 ^.*\.Rproj$
 ^\.Rproj\.user$
+R/obsolete_operators\.R
+data/*\.csv$

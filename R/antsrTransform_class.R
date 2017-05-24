@@ -15,11 +15,18 @@
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
 #' @slot precision math precision is float or double'
+#' @slot type The type of transform: usually one of 
+#' AffineTransform, CenteredAffineTransform, CenteredEuler3DTransform,
+#' CenteredRigid2DTransform, CenteredSimilarity2DTransform, Euler2DTransform, 
+#' Euler3DTransform, QuaternionRigidTransform, Rigid2DTransform, 
+#' Similarity2DTransform, Similarity3DTransform
 #' @slot pointer to the memory location of the itk object
-setClass(Class = "antsrTransform", representation(precision= "character", dimension = "integer",
+setClass(Class = "antsrTransform", 
+         representation(precision= "character", dimension = "integer",
   type = "character", pointer = "externalptr"))
 
 #' @describeIn antsrTransforms
+#' @aliases show,antsrTransform-method
 setMethod(f = "show", "antsrTransform", function(object){
     cat("antsrTransform\n")
     cat("  Dimensions    :", object@dimension, "\n")
@@ -29,6 +36,7 @@ setMethod(f = "show", "antsrTransform", function(object){
 })
 
 #' @describeIn antsrTransform
+#' @aliases initialize,antsrTransform-method
 setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = function(.Object,
   precision = "float", dimension = 3, type = "AffineTransform", parameters=NA) {
   tx = .Call("antsrTransform", precision, dimension, type, PACKAGE = "ANTsR")

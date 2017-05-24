@@ -4,7 +4,6 @@
 #' @description Overloaded operators for antsImage objects
 #' @name antsImage-operators
 #' @rdname antsImageops
-#' @aliases Ops,antsImage,antsImage-method
 #' @param e1 is an object of class \code{antsImage}.
 #' @param e2 is an object of class \code{antsImage}.
 #' @author John Muschellli \email{muschellij2@@gmail.com}
@@ -15,6 +14,7 @@
 #' is.antsImage(img01 + img02)
 #' is.antsImage(sqrt(2) * img01)
 #' is.antsImage(img02 / pi)
+#' @aliases Ops,antsImage,antsImage-method
 setMethod("Ops", signature(e1="antsImage", e2="antsImage"),
           function(e1, e2) {
             ## either use drop_img_dim and validObject or take out both
@@ -118,8 +118,8 @@ setMethod("Ops", signature(e1="array", e2="antsImage"),
 #' @description Overloaded math for antsImage objects
 #' @name antsImage-math
 #' @rdname antsImagemath
-#' @aliases Math,antsImage-method
 #' @param x is an object of class \code{antsImage}.
+#' @aliases Math,antsImage-method
 setMethod("Math", signature(x="antsImage"),
           function(x) {
             ## either use drop_img_dim and validObject or take out both
