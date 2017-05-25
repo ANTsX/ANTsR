@@ -219,6 +219,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 #' @param x antsImage to access, of dimensionality \code{d}.
 #' @return For \code{get} methods, vector of length \code{d} (origin, spacing) or matrix of size \code{d * d} (direction).
 #' For \code{set} methods, 0 to indicate success.
+#' @export
 antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -228,6 +229,7 @@ antsGetSpacing <- function(x) {
 }
 #' @rdname antsImageGetSet
 #' @param spacing numeric vector of length \code{d}.
+#' @export
 antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -246,6 +248,7 @@ antsSetSpacing <- function(x, spacing) {
 
 #' @rdname antsImageGetSet
 #' @usage antsGetOrigin(x)
+#' @export
 antsGetOrigin <- function(x) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -255,6 +258,7 @@ antsGetOrigin <- function(x) {
 #' @rdname antsImageGetSet
 #' @usage antsSetOrigin(x, origin)
 #' @param origin numeric vector of length \code{d}.
+#' @export
 antsSetOrigin <- function(x, origin) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -272,6 +276,7 @@ antsSetOrigin <- function(x, origin) {
 
 #' @rdname antsImageGetSet
 #' @usage antsGetDirection(x)
+#' @export
 antsGetDirection <- function(x) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -282,6 +287,7 @@ antsGetDirection <- function(x) {
 #' @rdname antsImageGetSet
 #' @usage antsSetDirection(x, direction)
 #' @param direction matrix of size \code{d * d}.
+#' @export
 antsSetDirection <- function(x, direction) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
