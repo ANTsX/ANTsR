@@ -1,6 +1,6 @@
-#' Computes average of image list 
+#' @title Computes average of image list 
 #'
-#' Calculate the mean of a list of antsImages 
+#' @description Calculate the mean of a list of antsImages 
 #' @param imageList list of antsImages or a character vector of filenames
 #' @param normalize boolean determines if image is divided by mean before
 #' averaging
@@ -10,6 +10,7 @@
 #' r64 <- antsImageRead(getANTsRData('r64'))
 #' mylist <- list(r16, r64)
 #' antsAverageImages(mylist)
+#' @export
 antsAverageImages <- function( imageList, normalize = FALSE)
   {
   

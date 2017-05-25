@@ -145,6 +145,8 @@ setMethod("Math", signature(x = "antsImage"),
 #' @name antsImage-summary
 #' @rdname antsImageSummary
 #' @param x is an object of class \code{antsImage}.
+#' @param ... further arguments passed to summary methods
+#' @param na.rm logical: should missing values be removed?
 #' @aliases Summary,antsImage-method
 setMethod("Summary", signature(x = "antsImage"),
           function(x, ..., na.rm = FALSE) {
@@ -154,3 +156,20 @@ setMethod("Summary", signature(x = "antsImage"),
             # res = as.antsImage(res, reference = x)
             return(res)
           })
+
+
+#' @title Mean for antsImage Objects
+#' @description Overloaded Mean for antsImage objects
+#' @rdname antsImageSummary
+#' @param x is an object of class \code{antsImage}.
+#' @aliases Summary,antsImage-method
+mean.antsImage = function(x, ...) {
+  # if (missing(mask)) {
+  #   x = img_data(x)
+  #   x = c(x)
+  # } else {
+  #   x = mask_vals(object = x, mask)
+  # }
+  mean(x, ...)
+}
+ 

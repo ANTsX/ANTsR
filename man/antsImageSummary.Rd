@@ -4,13 +4,25 @@
 \name{antsImage-summary}
 \alias{antsImage-summary}
 \alias{Summary,antsImage-method}
+\alias{mean.antsImage}
+\alias{Summary,antsImage-method}
 \title{Summary for antsImage Objects}
 \usage{
 \S4method{Summary}{antsImage}(x, ..., na.rm = FALSE)
+
+\method{mean}{antsImage}(x, ...)
 }
 \arguments{
+\item{x}{is an object of class \code{antsImage}.}
+
+\item{...}{further arguments passed to summary methods}
+
+\item{na.rm}{logical: should missing values be removed?}
+
 \item{x}{is an object of class \code{antsImage}.}
 }
 \description{
 Overloaded Summary for antsImage objects
+
+Overloaded Mean for antsImage objects
 }
