@@ -21,8 +21,7 @@
 #' img<-antsImageRead( getANTsRData("r16"))
 #' randmask<-randomMask(img,200)
 #'
-#'@export randomMask
-
+#' @export
 randomMask = function(img, nsamples, perLabel=F) {
   randmask = img*0 # set empty output image
   

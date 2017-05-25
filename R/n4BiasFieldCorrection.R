@@ -19,7 +19,7 @@
 #'  img<-makeImage( c(50,50), rnorm(2500) )
 #'  n4img<-n4BiasFieldCorrection(img)
 #'
-#' @export n4BiasFieldCorrection
+#' @export
 n4BiasFieldCorrection<-function( img , mask=NA, shrinkFactor=4, 
   convergence=list(iters=c(50,50,50,50), tol=0.0000001), 
   splineParam=200, 

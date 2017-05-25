@@ -90,6 +90,7 @@
 #'    normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 #' }
 #' @importFrom xgboost xgb.train xgb.DMatrix
+#' @export
 
 segmentationRefinement.train <- function( featureImages, truthLabelImages,
   segmentationImages, featureImageNames = c(), labelSet = c(),

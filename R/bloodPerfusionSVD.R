@@ -40,6 +40,7 @@
 #' antsImageWrite( results$mttImage, paste0( 'mtt.nii.gz' ) );
 #'
 #' }
+#' @export
 bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
   thresholdSVD = 0.2, deltaTime = 1.0 )
 {
@@ -146,7 +147,7 @@ return( list( cbfImage = cbfOutputImage,
 #'
 #' # Compare with true area of exp( 1 ) - 1 = 1.718282...
 #' areaEstimate <- trapz( x, y )
-#'
+#' @export
 
 trapz <- function( x, y )
 {
@@ -182,7 +183,7 @@ if( is.vector( y ) )
 #'
 #' dSVD <- deconvolutionSVD( Caif, 0.2 )
 #'
-
+#' @export
 deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 {
   if( ! is.vector( arterialInputFunction ) )

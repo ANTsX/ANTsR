@@ -4,6 +4,7 @@
 #' @param x antsImage object
 #'
 #' @return Array, logical if all values within 0, 1, \code{NA}, and \code{NaN}
+#' @export
 coerce_mask = function(x) {
   x = as.array(x)
   ux = unique(x)
