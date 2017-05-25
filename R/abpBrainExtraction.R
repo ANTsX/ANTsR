@@ -20,8 +20,8 @@
 #' tem<-antsImageRead(tf)
 #' tem<-resampleImage(tem,c(128,128),1,0)
 #' temmask<-antsImageClone( tem )
-#' temmask[ tem  > 20 ]<-1
-#' temmask[ tem  <= 20 ]<-0
+#' temmask[ tem  > 20 ] <- 1
+#' temmask[ tem  <= 20 ] <- 0
 #' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 #'
 #' @export abpBrainExtraction

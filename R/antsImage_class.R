@@ -104,7 +104,7 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
 })
 
 #' @describeIn antsImage
-#' @export as.array.antsImage
+#' @export 
 #' @aliases as.array,antsImage-method 
 setMethod(f = "as.array", signature(x = "antsImage"),
  definition = function(x, mask = logical(),

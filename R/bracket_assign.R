@@ -4,7 +4,7 @@
 # standardGeneric for "[<-" defined from package "base"
 # function (x, i, j, ..., value)
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,NULL-method
 setMethod(
   f = "[<-",
@@ -17,7 +17,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,logical-method
 setMethod(
   f = "[<-",
@@ -28,7 +28,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,array-method
 setMethod(
   f = "[<-",
@@ -44,7 +44,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,matrix-method
 setMethod(
   f = "[<-",
@@ -59,7 +59,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,list-method
 setMethod(
   f = "[<-",
@@ -77,7 +77,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,antsImage-method
 setMethod(
   f = "[<-",
@@ -97,7 +97,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,NULL,antsRegion-method
 setMethod(
   f = "[<-",
@@ -108,7 +108,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,logical,antsRegion-method
 setMethod(
   f = "[<-",
@@ -119,7 +119,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,array,antsRegion-method
 setMethod(
   f = "[<-",
@@ -132,7 +132,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,matrix,antsRegion-method
 setMethod(
   f = "[<-",
@@ -146,7 +146,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,NULL,NULL,numeric-method
 setMethod(
   f = "[<-",
@@ -162,7 +162,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,numeric,numeric,numeric-method
 setMethod(
   f = "[<-",
@@ -178,7 +178,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,numeric,NULL,numeric-method
 setMethod(
   f = "[<-",
@@ -195,7 +195,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [<-,antsImage,NULL,numeric,numeric-method
 setMethod(
   f = "[<-",

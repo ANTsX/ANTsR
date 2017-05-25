@@ -1,6 +1,10 @@
 # see https://github.com/klutometis/roxygen/issues/272
 
-#' ants image substitutions
+#' @title Extract or Replace Parts of antsImage Object
+#' @description Operators acting on antsImage objects 
+#' to extract or replace parts.
+#' @rdname brackets
+#' 
 #' @param x antsImage
 #' @param i logical or i-th dimension
 #' @param j not used or j-th dimension
@@ -9,7 +13,7 @@
 #' @param l not used or l-th dimension
 #' @param ... not used
 #' @param value value to assign to the subset in assignment operator
-#' @describeIn as.antsImage
+#' 
 #' @aliases [,antsImage,NULL,ANY,ANY-method
 setMethod(
   "[",
@@ -22,21 +26,41 @@ setMethod(
   }
 )
 
-# #' @describeIn as.antsImage
-# #' @aliases [,antsImage,NULL,ANY-method
-# setMethod(
-#   "[",
-#   c("antsImage", "NULL", "ANY"),
-#   definition = function(x, i, j, ..., drop) {
-#     mask <- logical(0)
-#     region <-
-#       new("antsRegion", index = integer(), size = integer())
-#     return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
-#   }
-# )
+
+#' @rdname brackets
+#' @aliases [,antsImage,NULL,ANY-method
+setMethod(
+  "[",
+  c("antsImage", "NULL", "ANY"),
+  definition = function(x, i, j, ..., drop) {
+    mask <- logical(0)
+    region <-
+      new("antsRegion", index = integer(), size = integer())
+    return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+  }
+)
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
+#' @aliases [,antsImage,antsImage,ANY,ANY-method
+setMethod(
+  f = "[",
+  signature(x = "antsImage", i = "antsImage", j = "ANY", "ANY"),
+  definition = function(x, i, j, ..., drop) {
+    i = c(as.array(i))
+    if (all(i %in% c(0, 1, NaN, NA))) {
+      i = i != 0
+    }
+    if (typeof(i) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    region <- new("antsRegion", index = integer(), size = integer())
+    return(.Call("antsImage_asVector", x, i, region, PACKAGE = "ANTsR"))
+  }
+)
+
+
+#' @rdname brackets
 #' @aliases [,antsImage,logical,ANY,ANY-method
 setMethod(
   f = "[",
@@ -47,7 +71,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,logical,ANY-method
 setMethod(
   f = "[",
@@ -59,7 +83,7 @@ setMethod(
 )
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,ANY,ANY,ANY-method
 setMethod(
   f = "[",
@@ -74,7 +98,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,ANY,ANY-method
 setMethod(
   f = "[",
@@ -91,7 +115,7 @@ setMethod(
 
 
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,NULL,NULL,ANY-method
 setMethod(
   f = "[",
@@ -107,7 +131,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,NULL,NULL-method
 setMethod(
   f = "[",
@@ -123,7 +147,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,numeric,numeric,ANY-method
 setMethod(
   "[",
@@ -139,7 +163,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,numeric,numeric-method
 setMethod(
   "[",
@@ -155,7 +179,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,numeric,NULL,ANY-method
 setMethod(
   f = "[",
@@ -171,7 +195,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,numeric,NULL-method
 setMethod(
   f = "[",
@@ -187,7 +211,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,NULL,numeric,ANY-method
 setMethod(
   f = "[",
@@ -203,7 +227,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,NULL,numeric-method
 setMethod(
   f = "[",
@@ -219,7 +243,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,missing,numeric-method
 setMethod(
   f = "[",
@@ -236,7 +260,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,numeric,missing-method
 setMethod(
   f = "[",
@@ -253,7 +277,7 @@ setMethod(
   }
 )
 
-#' @describeIn as.antsImage
+#' @rdname brackets
 #' @aliases [,antsImage,missing,missing-method
 setMethod(
   f = "[",
