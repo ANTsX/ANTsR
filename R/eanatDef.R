@@ -148,17 +148,17 @@ if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
 if ( nvecs >= nrow(mat) ) nvecs = nrow( mat ) - 1
 havePriors = TRUE
 if ( all( is.na( priors ) ) )
-{
-if ( nvecs == 0 ) stop("Must set nvecs.  See eanatSelect function.")
-havePriors = FALSE
-if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
-if ( fastsvd ) solutionmatrix = t( rsvd( mat, nu=0, nv=nvecs )$v )
-if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
-pp1 = mat %*% t( solutionmatrix )
-ilist = matrixToImages( solutionmatrix, mask )
-eseg = eigSeg( mask, ilist,  TRUE )
-solutionmatrix = imageListToMatrix( ilist, mask )
-} else {
+  {
+  if ( nvecs == 0 ) stop("Must set nvecs.  See eanatSelect function.")
+  havePriors = FALSE
+  if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
+  if ( fastsvd ) solutionmatrix = t( rsvd( mat, nu=0, nv=nvecs )$v )
+  if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
+  pp1 = mat %*% t( solutionmatrix )
+  ilist = matrixToImages( solutionmatrix, mask )
+  eseg = eigSeg( mask, ilist,  TRUE )
+  solutionmatrix = imageListToMatrix( ilist, mask )
+  } else {
   nvecs = nrow( priors )
   for ( sol in 1:nrow(priors))
     {
@@ -185,7 +185,7 @@ if ( verbose ) {
 allsols = solutionmatrix[1,] * 0
 for ( sol in 1:nrow(solutionmatrix))
   {
-  if ( sol == 1 ) rmat = mat else {
+  if ( sol == 1 | class( inmat )[1] == "dgCMatrix" ) rmat = mat else {
     pp = mat %*% t( solutionmatrix )
     rmat = residuals( lm( mat ~ pp[ ,1:(sol-1)] ) )
     }
@@ -222,11 +222,13 @@ for ( sol in 1:nrow(solutionmatrix))
     }
   allsols = allsols + abs( vec )
   pp = mat %*% t( solutionmatrix )
-  errn = mean( abs(  mat -  predict( lm( mat ~ pp[,1:sol] ) ) ) )
-  errni = mean( abs(  mat -  predict( lm( mat ~ pp1[,1:sol] ) ) ) )
+  if ( class( inmat )[1] != "dgCMatrix" ) {
+    errn = mean( abs(  mat -  predict( lm( mat ~ pp[,1:sol] ) ) ) )
+    errni = mean( abs(  mat -  predict( lm( mat ~ pp1[,1:sol] ) ) ) )
+    } else {  errn = errni = 0 }
   if ( verbose ) print(paste("sol",sol,"err",errn,"erri",errni))
   }
-if ( verbose )
+if ( verbose &  class( inmat )[1] != "dgCMatrix" )
   print( paste( "MeanCor", mean(abs( cor( mat %*% t( solutionmatrix ) ) ) ) ))
 sparvals2 = rep( NA, nvecs )
 for ( i in 1:nvecs )
