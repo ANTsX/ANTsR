@@ -35,6 +35,15 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 })
 
 #' @rdname as.array
+#' @export
+as.data.frame.antsMatrix = function(x) {
+  lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
+  names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
+  lst[[length(lst)]] <- NULL
+  return(as.data.frame(lst))
+}
+
+#' @rdname as.array
 #' @aliases as.matrix,antsMatrix-method
 setMethod(f = "as.matrix", signature(x = "antsMatrix"), definition = function(x) {
   as.matrix.data.frame(as.data.frame(x))

@@ -16,22 +16,6 @@
 \item{object}{input object to convert}
 
 \item{.Object}{input object to convert}
-
-\item{pixeltype}{string e.g. "float" "unsigned char" "int"}
-
-\item{dimension}{dimensionality of the image}
-
-\item{components}{number of components per pixel}
-
-\item{x}{input object to convert}
-
-\item{mask}{mask for the region}
-
-\item{region}{antsRegion for the image}
-
-\item{e1}{internal control for types}
-
-\item{e2}{internal control for types}
 }
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the

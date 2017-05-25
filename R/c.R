@@ -5,7 +5,7 @@
 #' @param ... additional objects
 #' @param recursive if \code{TRUE}, the function recursively descends 
 #' through lists (and pairlists) combining all their elements into a vector.
-#' @rdname as.antsImage
+#' @rdname as.array
 #' @aliases c,antsImage,NULL,ANY,ANY-method
 setMethod(
   "c",
