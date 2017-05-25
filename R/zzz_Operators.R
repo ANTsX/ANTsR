@@ -139,3 +139,18 @@ setMethod("Math", signature(x = "antsImage"),
             # res = as.antsImage(res, reference = x)
             return(res)
           })
+
+#' @title Summary for antsImage Objects
+#' @description Overloaded Summary for antsImage objects
+#' @name antsImage-summary
+#' @rdname antsImageSummary
+#' @param x is an object of class \code{antsImage}.
+#' @aliases Summary,antsImage-method
+setMethod("Summary", signature(x = "antsImage"),
+          function(x, ..., na.rm = FALSE) {
+            ## either use drop_img_dim and validObject or take out both
+            a1 = as.array(x)
+            res = callGeneric(a1, ..., na.rm = na.rm)
+            # res = as.antsImage(res, reference = x)
+            return(res)
+          })
