@@ -207,6 +207,9 @@ sd.antsImage = function(x, ...) {
 }
 
 #' @rdname var
+#' @title Variance of Image
+#' @description Calculates the variance of an image
+#' 
 #' @param x antsImage object
 #' @param y antsImage object, but likely null
 #' @param ... additional arguments passed to \code{\link{var}}

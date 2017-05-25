@@ -30,8 +30,9 @@
 imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
-  if(missing(mask))
+  if(missing(mask)) {
     mask <- getMask(imageList[[1]])
+  }
 
   numImages <- length(imageList)
 

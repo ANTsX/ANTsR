@@ -7,7 +7,6 @@
 \alias{mean.antsImage}
 \alias{Summary,antsImage-method}
 \alias{sd.antsImage}
-\alias{var.antsImage}
 \title{Summary for antsImage Objects}
 \usage{
 \S4method{Summary}{antsImage}(x, ..., na.rm = FALSE)
@@ -15,8 +14,6 @@
 \method{mean}{antsImage}(x, ...)
 
 sd.antsImage(x, ...)
-
-var.antsImage(x, ...)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
