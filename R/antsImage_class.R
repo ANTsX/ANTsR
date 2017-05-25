@@ -37,7 +37,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   components = "integer", pointer = "externalptr"))
 
-#' @describeIn antsImage
+#' @rdname antsImage
 #' @aliases show,antsImage-method 
 setMethod(f = "show", "antsImage", function(object){
     cat("antsImage\n")
@@ -49,7 +49,7 @@ setMethod(f = "show", "antsImage", function(object){
     cat("  Direction           :", antsGetDirection(object), "\n")
     cat("\n")
 })
-#' @describeIn antsImage
+#' @rdname antsImage
 #' @aliases initialize,antsImage-method 
 setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
   pixeltype = "float", dimension = 3, components = 1) {
@@ -64,7 +64,7 @@ setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
 
 
 
-###  @  describeIn antsImage # this doesnt work b/c nnz is not a generic
+###  @  rdname antsImage # this doesnt work b/c nnz is not a generic
 # setGeneric("nnz",function(x){standardGeneric("nnz")})
 # setMethod(f = "nnz", signature(x = "antsImage"), definition = function(x) {
 #   return(length( which( as.array(x) != 0)))
@@ -104,6 +104,8 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
+#' @title Coerce antsImage objects to array 
+#' @description Converts antsImage, antsImage object to different data types
 #' @rdname as.array
 #' @param x object of class \code{\link{antsImage}} or \code{\link{antsMatrix}}
 #' @aliases as.array,antsImage-method 
@@ -576,9 +578,10 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
 }
 
 
-#' as.antsImage
+#' @rdname as.antsImage
+#' @title Convert Objects into antsImage objects
 #'
-#' convert types to antsImage
+#' @description Convert types to antsImage
 #'
 #' @param object An object
 #' @param pixeltype a character string e.g. "float"
@@ -588,7 +591,6 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
 #' @param components number of components per voxel, e.g. 1
 #' @param reference optional reference antsImage providing all header info
 #' @param ... Extra named arguments passed to FUN
-#' @rdname as.antsImage
 #' @export
 setGeneric(name = "as.antsImage", def = function(
   object, 
@@ -642,7 +644,7 @@ setMethod(f = "as.antsImage", signature(object = "array"), definition = function
 #' @return TRUE if \code{object} is antsImage; FALSE otherwise.
 #' @examples
 #' is.antsImage(antsImageRead(getANTsRData('r16'), 2))
-#' @export is.antsImage
+#' @export 
 is.antsImage <- function(x){
   inherits(x, 'antsImage')
 }

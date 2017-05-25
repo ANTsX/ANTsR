@@ -62,7 +62,6 @@
 #' Worsley K.J., (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
 #' 
 #' @author Zachary P. Christensen
-#' @kewords rftPval
 #' @examples
 #' \dontrun{
 #' mnit1 <- antsImageRead(getANTsRData('mni'))

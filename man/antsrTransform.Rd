@@ -3,7 +3,15 @@
 \docType{class}
 \name{antsrTransform-class}
 \alias{antsrTransform-class}
+\alias{show,antsrTransform-method}
+\alias{initialize,antsrTransform-method}
 \title{An S4 class for an antsrTransform}
+\usage{
+\S4method{show}{antsrTransform}(object)
+
+\S4method{initialize}{antsrTransform}(.Object, precision = "float",
+  dimension = 3, type = "AffineTransform", parameters = NA)
+}
 \arguments{
 \item{object}{input object to convert}
 

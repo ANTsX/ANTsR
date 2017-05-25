@@ -3,10 +3,11 @@
 \docType{class}
 \name{antsMatrix-class}
 \alias{antsMatrix-class}
-\title{An S4 class to hold an antsMatrix imported from ITK types
- C++ type used to represent an element of the matrix pointer
- to the actual image
- C++ type 'itk::image< pixeltype , dimension >::Pointer'}
+\alias{initialize,antsMatrix-method}
+\title{antsMatrix Class}
+\usage{
+\S4method{initialize}{antsMatrix}(.Object, elementtype)
+}
 \arguments{
 \item{.Object}{input object to convert}
 

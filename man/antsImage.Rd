@@ -3,7 +3,15 @@
 \docType{class}
 \name{antsImage-class}
 \alias{antsImage-class}
+\alias{show,antsImage-method}
+\alias{initialize,antsImage-method}
 \title{An S4 class for an antsImage}
+\usage{
+\S4method{show}{antsImage}(object)
+
+\S4method{initialize}{antsImage}(.Object, pixeltype = "float",
+  dimension = 3, components = 1)
+}
 \arguments{
 \item{object}{input object to convert}
 

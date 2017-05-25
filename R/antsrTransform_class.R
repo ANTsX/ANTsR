@@ -3,9 +3,10 @@
 
 
 
-#' An S4 class for an antsrTransform
+#' @rdname antsrTransform
+#' @title An S4 class for an antsrTransform
 #'
-#' C++ type used to represent an ITK image transform.
+#' @description C++ type used to represent an ITK image transform.
 #'
 #' @param object input object to convert
 #' @param .Object input object to convert
@@ -25,7 +26,7 @@ setClass(Class = "antsrTransform",
          representation(precision= "character", dimension = "integer",
   type = "character", pointer = "externalptr"))
 
-#' @describeIn antsrTransforms
+#' @rdname antsrTransform
 #' @aliases show,antsrTransform-method
 setMethod(f = "show", "antsrTransform", function(object){
     cat("antsrTransform\n")
@@ -35,7 +36,7 @@ setMethod(f = "show", "antsrTransform", function(object){
     cat("\n")
 })
 
-#' @describeIn antsrTransform
+#' @rdname antsrTransform
 #' @aliases initialize,antsrTransform-method
 setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = function(.Object,
   precision = "float", dimension = 3, type = "AffineTransform", parameters=NA) {
@@ -304,7 +305,7 @@ applyAntsrTransformToImage <- function(transform, image, reference, interpolatio
 #' @examples
 #' \dontrun {
 #' tx = readAntsrTransform( "yourtx.mat")
-#' }'
+#' }
 readAntsrTransform <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsrTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
 }

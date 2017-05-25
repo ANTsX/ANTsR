@@ -10,6 +10,8 @@
 \alias{Ops,logical,antsImage-method}
 \alias{Ops,antsImage,array-method}
 \alias{Ops,array,antsImage-method}
+\alias{Ops,list,antsImage-method}
+\alias{Ops,antsImage,list-method}
 \title{Operations for antsImage Objects}
 \usage{
 \S4method{Ops}{antsImage,antsImage}(e1, e2)
@@ -25,6 +27,10 @@
 \S4method{Ops}{antsImage,array}(e1, e2)
 
 \S4method{Ops}{array,antsImage}(e1, e2)
+
+\S4method{Ops}{list,antsImage}(e1, e2)
+
+\S4method{Ops}{antsImage,list}(e1, e2)
 }
 \arguments{
 \item{e1}{is an object of class \code{antsImage}.}

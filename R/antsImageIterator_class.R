@@ -3,9 +3,10 @@
 
 
 
-#' An S4 class for an antsImageIterator
+#' @rdname antsImageIterator_class
+#' @title An S4 class for an antsImageIterator
 #'
-#' C++ type used to represent an ITK image iterator. the
+#' @description C++ type used to represent an ITK image iterator. the
 #' actual iterator is of C++ type
 #' 'itk::ImageRegionIteratorWithIndex< itk::image< pixeltype, dimension > >'
 #'
@@ -23,7 +24,7 @@
 setClass(Class = "antsImageIterator", representation(pixeltype = "character", dimension = "integer",
   components = "integer", pointer = "externalptr"))
 
-#' @describeIn antsImageIterator
+#' @rdname antsImageIterator_class
 #' @aliases show,antsImageIterator-method
 setMethod(f = "show", "antsImageIterator", function(object){
     cat("antsImageIterator\n")
@@ -33,7 +34,7 @@ setMethod(f = "show", "antsImageIterator", function(object){
     cat("\n")
 })
 
-#' @describeIn antsImageIterator
+#' @rdname antsImageIterator_class
 #' @aliases initialize,antsImageIterator-method
 setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(.Object,
   pixeltype = "float", dimension = 3, components = 1) {

@@ -3,7 +3,9 @@
 # C++ type used to represent an element of the matrix pointer to the actual image
 # of C++ type 'itk::image< pixeltype , dimension >::Pointer'
 
-#' An S4 class to hold an antsMatrix imported from ITK types
+#' @rdname antsMatrix_class 
+#' @title antsMatrix Class
+#' @description An S4 class to hold an antsMatrix imported from ITK types
 #'  C++ type used to represent an element of the matrix pointer
 #'  to the actual image
 #'  C++ type 'itk::image< pixeltype , dimension >::Pointer'
@@ -16,7 +18,7 @@
 setClass(Class = "antsMatrix", representation(
   elementtype = "character", pointer = "externalptr"))
 
-#' @describeIn antsMatrix
+#' @rdname antsMatrix_class
 #' @aliases initialize,antsMatrix-method 
 setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(.Object,
   elementtype) {
