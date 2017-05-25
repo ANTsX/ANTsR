@@ -11,6 +11,6 @@ src/ants/.git
 .gitignore
 ^.*\.Rproj$
 ^\.Rproj\.user$
-obsolete_operators\.R
+obsolete_operators\.R$
 data/*\.csv$
 OLD_NAMESPACE
