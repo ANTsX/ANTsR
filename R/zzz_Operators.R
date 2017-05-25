@@ -160,10 +160,12 @@ setMethod("Summary", signature(x = "antsImage"),
 
 #' @title Mean for antsImage Objects
 #' @description Overloaded Mean for antsImage objects
-#' @rdname antsImageSummary
 #' @param x is an object of class \code{antsImage}.
 #' @aliases Summary,antsImage-method
+#' @rdname antsImageSummary
+#' @export
 mean.antsImage = function(x, ...) {
+  x = as.array(x)
   # if (missing(mask)) {
   #   x = img_data(x)
   #   x = c(x)
@@ -173,3 +175,29 @@ mean.antsImage = function(x, ...) {
   mean(x, ...)
 }
  
+
+#' @rdname antsImageSummary
+#' @export
+sd.antsImage = function(x, ...) {
+  x = as.array(x)
+  # if (missing(mask)) {
+  #   x = img_data(x)
+  #   x = c(x)
+  # } else {
+  #   x = mask_vals(object = x, mask)
+  # }
+  sd(x, ...)
+}
+
+#' @rdname antsImageSummary
+#' @export
+var.antsImage = function(x, ...) {
+  x = as.array(x)
+  # if (missing(mask)) {
+  #   x = img_data(x)
+  #   x = c(x)
+  # } else {
+  #   x = mask_vals(object = x, mask)
+  # }
+  var(x, ...)
+}
