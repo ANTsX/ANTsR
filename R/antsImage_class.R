@@ -58,6 +58,7 @@ setMethod(f = "initialize", signature(.Object = "antsImage"), definition = funct
 
 #' @rdname as.array
 #' @aliases dim,antsImage-method 
+#' @export dim.antsImage 
 setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
   return(.Call("antsImage_dim", x, PACKAGE = "ANTsR"))
 })
@@ -71,7 +72,8 @@ setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
 # })
 
 #' @rdname as.array
-#' @aliases is.na,antsImage-method 
+#' @aliases is.na,antsImage-method .
+#' @export is.na.antsImage 
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   val <- .Call("antsImage_isna", x, PACKAGE = "ANTsR")
   if (val > 0) {
@@ -82,16 +84,20 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
 
 #' @rdname as.array
 #' @aliases as.numeric,antsImage-method 
+#' @export  
 setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
   mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
-  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+  num = .Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR")
+  num = as.numeric(num)
+  return(num)
 })
 
 #' @rdname as.array
 #' @aliases as.matrix,antsImage-method 
+#' @export  
 setMethod(f = "as.matrix", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer())) {
@@ -103,6 +109,20 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
   }
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
+
+#' @rdname as.array
+#' @export
+as.matrix.antsImage = function(x, mask = logical(),
+                              region = new("antsRegion", index = integer(), 
+                                           size = integer())) {
+  if (typeof(mask) != "logical") {
+    stop("'mask' provided is not of type 'logical'")
+  }
+  if (x@dimension != 2) {
+    stop("image dimension must be 2")
+  }
+  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+}
 
 #' @title Coerce antsImage objects to array 
 #' @description Converts antsImage, antsImage object to different data types
@@ -117,6 +137,17 @@ setMethod(f = "as.array", signature(x = "antsImage"),
   }
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
+
+#' @rdname as.array
+#' @export
+as.array.antsImage = function(x, mask = logical(),
+                              region = new("antsRegion", index = integer(), 
+                                           size = integer())) {
+  if (typeof(mask) != "logical") {
+    stop("'mask' provided is not of type 'logical'")
+  }
+  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+}
 
 #' Get Pixels
 #'

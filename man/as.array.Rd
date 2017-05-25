@@ -4,9 +4,12 @@
 \name{dim,antsImage-method}
 \alias{dim,antsImage-method}
 \alias{is.na,antsImage-method}
+\alias{.}
 \alias{as.numeric,antsImage-method}
 \alias{as.matrix,antsImage-method}
+\alias{as.matrix.antsImage}
 \alias{as.array,antsImage-method}
+\alias{as.array.antsImage}
 \alias{as.data.frame,antsMatrix-method}
 \alias{as.matrix,antsMatrix-method}
 \alias{as.list,antsMatrix-method}
@@ -22,8 +25,14 @@
 \S4method{as.matrix}{antsImage}(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer()))
 
+as.matrix.antsImage(x, mask = logical(), region = new("antsRegion", index =
+  integer(), size = integer()))
+
 \S4method{as.array}{antsImage}(x, mask = logical(),
   region = new("antsRegion", index = integer(), size = integer()))
+
+as.array.antsImage(x, mask = logical(), region = new("antsRegion", index =
+  integer(), size = integer()))
 
 \S4method{as.data.frame}{antsMatrix}(x)
 

@@ -7,6 +7,8 @@ os:
   - linux
   - osx
 
+r_build_args: --no-build-vignettes --no-manual
+
 osx_image: xcode8.2
 
 language: r

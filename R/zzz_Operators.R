@@ -136,6 +136,6 @@ setMethod("Math", signature(x = "antsImage"),
             ## either use drop_img_dim and validObject or take out both
             a1 = as.array(x)
             res = callGeneric(a1)
-            res = as.antsImage(res, reference = x)
+            # res = as.antsImage(res, reference = x)
             return(res)
           })

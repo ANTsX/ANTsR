@@ -71,7 +71,6 @@ Suggests:
     wmtsa
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
-Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
 OS_type: unix
 Additional_repositories:
