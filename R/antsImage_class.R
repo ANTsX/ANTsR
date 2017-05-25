@@ -79,15 +79,20 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
 #' @rdname as.array
 #' @aliases as.numeric,antsImage-method 
 #' @export  
-setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
-                                                                              mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
-  if (typeof(mask) != "logical") {
-    stop("'mask' provided is not of type 'logical'")
-  }
-  num = .Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR")
-  num = as.numeric(num)
-  return(num)
-})
+setMethod(f = "as.numeric", signature(x = "antsImage"), 
+          definition = function(x,
+                                mask = logical(), 
+                                region = new("antsRegion", 
+                                             index = integer(), size = integer())
+                                ) {
+            mask = c(coerce_mask(mask))
+            if (typeof(mask) != "logical") {
+              stop("'mask' provided is not of type 'logical'")
+            }
+            num = .Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR")
+            num = as.numeric(num)
+            return(num)
+          })
 
 #' @rdname as.array
 #' @aliases as.matrix,antsImage-method 
@@ -95,6 +100,7 @@ setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
 setMethod(f = "as.matrix", signature(x = "antsImage"),
           definition = function(x, mask = logical(),
                                 region = new("antsRegion", index = integer(), size = integer())) {
+            mask = c(coerce_mask(mask))
             if (typeof(mask) != "logical") {
               stop("'mask' provided is not of type 'logical'")
             }
@@ -110,6 +116,7 @@ as.matrix.antsImage = function(x, ...,
                                mask = logical(),
                                region = new("antsRegion", index = integer(), 
                                             size = integer())) {
+  mask = c(coerce_mask(mask))
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
@@ -128,6 +135,7 @@ as.matrix.antsImage = function(x, ...,
 setMethod(f = "as.array", signature(x = "antsImage"),
           definition = function(x, ..., mask = logical(),
                                 region = new("antsRegion", index = integer(), size = integer())) {
+            mask = c(coerce_mask(mask))
             if (typeof(mask) != "logical") {
               stop("'mask' provided is not of type 'logical'")
             }
@@ -139,6 +147,7 @@ setMethod(f = "as.array", signature(x = "antsImage"),
 as.array.antsImage = function(x, ..., mask = logical(),
                               region = new("antsRegion", index = integer(), 
                                            size = integer())) {
+  mask = c(coerce_mask(mask))
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }

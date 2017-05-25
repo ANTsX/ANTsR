@@ -3,6 +3,7 @@
 S3method(apply,antsImage)
 S3method(mean,antsImage)
 S3method(plot,antsImage)
+S3method(unique,antsImage)
 export("%>%")
 export(abpBrainExtraction)
 export(abpN4)

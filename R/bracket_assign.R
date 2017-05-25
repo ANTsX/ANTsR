@@ -83,10 +83,7 @@ setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "antsImage"),
   definition = function(x, i, j, ..., value) {
-    i = as.array(i)
-    if (all(i %in% c(0, 1, NaN, NA))) {
-      i = i != 0
-    }
+    i = coerce_mask(i)
     if (typeof(i) != "logical") {
       stop("'mask' provided is not of type 'logical'")
     }

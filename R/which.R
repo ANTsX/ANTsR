@@ -17,9 +17,6 @@ setGeneric("which", function(x, arr.ind = FALSE, useNames = TRUE) {
 #' @aliases which,antsImage-method
 setMethod("which", signature(x = "antsImage"),
           function(x, arr.ind = FALSE, useNames = TRUE) {
-            x = c(as.array(x))
-            if (all(x %in% c(0, 1, NaN, NA))) {
-              x = x != 0
-            }
+            x = coerce_mask(x)
             which(x = x, arr.ind = arr.ind, useNames = useNames)
           })

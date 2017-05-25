@@ -5,7 +5,6 @@
 \alias{antsImage-summary}
 \alias{Summary,antsImage-method}
 \alias{mean.antsImage}
-\alias{Summary,antsImage-method}
 \alias{sd.antsImage}
 \title{Summary for antsImage Objects}
 \usage{

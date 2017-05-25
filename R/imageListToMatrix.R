@@ -42,7 +42,7 @@ imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
       x = resampleImageToTarget( x, mask, 2 ) # gaussian interpolation
     }
-    as.numeric(x, mask > epsilon )
+    as.numeric(x, mask = mask > epsilon )
   }
   dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
   doSmooth = !any( is.na( sigma ) )

@@ -178,7 +178,6 @@ setMethod(f = "!", signature(x = "antsImage"), definition = function(x) {
 #' @title Mean for antsImage Objects
 #' @description Overloaded Mean for antsImage objects
 #' @param x is an object of class \code{antsImage}.
-#' @aliases Summary,antsImage-method
 #' @rdname antsImageSummary
 #' @export
 mean.antsImage = function(x, ...) {
@@ -190,6 +189,18 @@ mean.antsImage = function(x, ...) {
   #   x = mask_vals(object = x, mask)
   # }
   mean(x, ...)
+}
+
+#' @title Mean for antsImage Objects
+#' @description Overloaded Mean for antsImage objects
+#' @param x is an object of class \code{antsImage}.
+#' @param incomparables a vector of values that cannot be compared. 
+#' @param ... additional arguments passed to \code{\link{unique}}
+#' @rdname unique
+#' @export
+unique.antsImage = function(x, incomparables = FALSE, ...) {
+  x = as.array(x)
+  unique(x, incomparables = incomparables, ...)
 }
 
 
