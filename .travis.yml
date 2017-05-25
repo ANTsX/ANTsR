@@ -136,8 +136,9 @@ after_success:
 
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
-  - cat ${basedir}/ANTsR.Rcheck/00install.out
-  - cat ${basedir}/ANTsR.Rcheck/00check.log
+  - dn=`dirname ${basedir}`
+  - cat ${dn}/ANTsR.Rcheck/00install.out
+  - cat ${dn}/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
