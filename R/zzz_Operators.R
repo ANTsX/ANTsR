@@ -218,27 +218,26 @@ sd.antsImage = function(x, ...) {
 }
 
 #' @rdname var
-#' @title Variance of Image
+#' @title Variance generic
 #' @description Calculates the variance of an image
-#' 
-#' @param x antsImage object
-#' @param y antsImage object, but likely null
-#' @param ... additional arguments passed to \code{\link{var}}
-#' 
+#'
+#' @param x an object for which we want to compute the variance
+#' @param \dots Any additional arguments to be passed to \code{var}.
 #' @export
-setGeneric("var", function(x, y = NULL, ...) { 
-  standardGeneric("var") 
+var = function(x, ...){
+  UseMethod("var")
 }
-)
+
+#' @export
+#' @importFrom stats var
+var.default = function(x, ...){
+  stats::var(x, ...)
+}
 
 #' @rdname var
-#' @aliases var,antsImage-method
-setMethod("var", signature(x = "antsImage"),
-          function(x, y = NULL, ...) {
-            ## either use drop_img_dim and validObject or take out both
-            x = as.array(x)
-            if (!is.null(y)) {
-              y = as.array(y)
-            }
-            var(x = x, y = y,  ...)
-          })
+#' @method var antsImage
+var.antsImage = function(x, ...) {
+  ## either use drop_img_dim and validObject or take out both
+  x = as.array(x)
+  var(x = x, ...)
+}
