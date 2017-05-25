@@ -157,7 +157,9 @@ img<-as.antsImage( arrayimg )
 print( max(img) )
 print( mean(img[ img > 50  ]))
 print( max(img[ img >= 50 & img <= 99  ]))
-print( mean( gaussimg[ img >= 50 & img <= 99  ]) )
+# if using SUBSET using an antsImage, you must be explicit
+sub = as.array(img >= 50 & img <= 99) > 0
+print( mean( gaussimg[ sub  ]) )
 ```
 
 **Convert a 4D image to a matrix**

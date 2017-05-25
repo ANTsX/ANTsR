@@ -4,9 +4,12 @@
 \name{antsImage-math}
 \alias{antsImage-math}
 \alias{Math,antsImage-method}
+\alias{!,antsImage-method}
 \title{Math for antsImage Objects}
 \usage{
 \S4method{Math}{antsImage}(x)
+
+\S4method{!}{antsImage}(x)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}

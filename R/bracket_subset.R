@@ -46,10 +46,10 @@ setMethod(
 )
 
 #' @rdname brackets
-#' @aliases [,array,antsImage,ANY,ANY-method
+#' @aliases [,ANY,antsImage,ANY,ANY-method
 setMethod(
   f = "[",
-  signature(x = "array", i = "antsImage", j = "ANY", "ANY"),
+  signature(x = "ANY", i = "antsImage", j = "ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
     i = c(as.array(i))
     if (all(i %in% c(0, 1, NaN, NA))) {

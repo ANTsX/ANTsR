@@ -157,6 +157,23 @@ setMethod("Summary", signature(x = "antsImage"),
             return(res)
           })
 
+#' @rdname antsImagemath
+#' @aliases !,antsImage-method
+setMethod(f = "!", signature(x = "antsImage"), definition = function(x) {
+  a2 = as.array(x)
+  !a2
+})
+
+#' #' @rdname antsImagemath
+#' #' @aliases xor,antsImage-method
+#' setMethod(f = "xor", signature(x = "antsImage",
+#'                              y = "antsImage"), definition = function(x) {
+#'   xx = as.array(x)
+#'   yy = as.array(y)
+#'   xor(xx, yy)
+#'   !a2
+#' })
+
 
 #' @title Mean for antsImage Objects
 #' @description Overloaded Mean for antsImage objects
