@@ -21,7 +21,10 @@ Depends:
 Imports:
     Rcpp,
     tools,
-    magrittr
+    magrittr,
+    RcppEigen,
+    xgboost,
+    rsvd
 Suggests:
     abind,
     BGLR,
@@ -55,20 +58,17 @@ Suggests:
     psych,
     randomForest,
     RANN,
-    RcppEigen,
     rflann,
     rgl,
     rmarkdown,
     robust,
     robustbase,
-    rsvd,
     signal,
     sna,
     testthat,
     viridis,
     visreg,
-    wmtsa,
-    xgboost
+    wmtsa
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
