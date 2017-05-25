@@ -15,3 +15,4 @@ obsolete_operators\.R$
 data/*\.csv$
 OLD_NAMESPACE
 vignettes/\.build\.timestamp
+^appveyor\.yml$
