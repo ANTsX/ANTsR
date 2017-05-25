@@ -1,5 +1,7 @@
 # use containers
-sudo: required
+sudo: false
+# cache local R libraries directory:
+cache: packages
 
 os:
   - linux
@@ -27,28 +29,25 @@ cran: http://cran.rstudio.com
 #   - magic
 #   - randomForest
 
-r_binary_packages:
-  - magrittr
-  - covr
-  - igraph
-  - mFilter
-  - devtools
-  - testthat
-  - ggplot2
-  - Rcpp
-  - dplyr
-  - knitr
-  - rmarkdown
-  - randomForest
-  - dplyr
-  - psych
-  - pracma
-  - xgboost
-  - RcppEigen
-  - rsvd  
-
-# cache local R libraries directory:
-cache: packages
+# r_binary_packages:
+#   - magrittr
+#   - covr
+#   - igraph
+#   - mFilter
+#   - devtools
+#   - testthat
+#   - ggplot2
+#   - Rcpp
+#   - dplyr
+#   - knitr
+#   - rmarkdown
+#   - randomForest
+#   - dplyr
+#   - psych
+#   - pracma
+#   - xgboost
+#   - RcppEigen
+#   - rsvd  
 
 before_install:
   - basedir=${PWD}
@@ -65,6 +64,7 @@ before_install:
   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
   - source ~/.R/Makevars  
   - cd ~/
+  - Rscript -e 'if (!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
   - itkrrel=0.0.1
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
@@ -88,7 +88,7 @@ before_install:
 # #  - echo '.travis.yml' > .Rbuildignore
 # #  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools") }'
 # #  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
-#   - Rscript -e 'install.packages("Rcpp", dependencies = TRUE)'
+#   - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
 #   - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
 #   - Rscript -e 'if(!"tools" %in% rownames(installed.packages())) { install.packages("tools", dependencies = TRUE) }'
 #   - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
