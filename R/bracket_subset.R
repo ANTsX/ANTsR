@@ -28,20 +28,6 @@ setMethod(
 
 
 #' @rdname brackets
-#' @aliases [,antsImage,NULL,ANY-method
-setMethod(
-  "[",
-  c("antsImage", "NULL", "ANY"),
-  definition = function(x, i, j, ..., drop) {
-    mask <- logical(0)
-    region <-
-      new("antsRegion", index = integer(), size = integer())
-    return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
-  }
-)
-
-
-#' @rdname brackets
 #' @aliases [,antsImage,antsImage,ANY,ANY-method
 setMethod(
   f = "[",

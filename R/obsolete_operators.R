@@ -1,28 +1,28 @@
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases min,antsImage-method
 setMethod(f = "min", signature(x = "antsImage"), definition = function(x) {
   return(min(as.array(x)))
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases max,antsImage-method
 setMethod(f = "max", signature(x = "antsImage"), definition = function(x) {
   return(max(as.array(x)))
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases var,antsImage-method
 setMethod(f = "var", signature(x = "antsImage"), definition = function(x) {
   return(var(as.vector(as.array(x))))
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases range,antsImage-method
 setMethod(f = "range", signature(x = "antsImage"), definition = function(x) {
   return(range(as.array(x)))
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases sd,antsImage-method
 setMethod(f = "sd", signature(x = "antsImage"), definition = function(x) {
   return(sd(as.array(x)))
@@ -60,7 +60,7 @@ setMethod(f = "sum", signature(x = "antsImage"), definition = function(x, mask =
 })
 
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases ==,antsImage-method
 setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "=="
@@ -87,7 +87,7 @@ setMethod(f = "==", signature(e1 = "antsImage"), definition = function(e1, e2) {
 })
 
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases !=,antsImage-method
 setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "!="
@@ -110,7 +110,7 @@ setMethod(f = "!=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   }
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases <=,antsImage-method
 setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "<="
@@ -133,7 +133,7 @@ setMethod(f = "<=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   }
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases >=,antsImage-method
 setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- ">="
@@ -156,7 +156,7 @@ setMethod(f = ">=", signature(e1 = "antsImage"), definition = function(e1, e2) {
   }
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases <,antsImage-method
 setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- "<"
@@ -179,7 +179,7 @@ setMethod(f = "<", signature(e1 = "antsImage"), definition = function(e1, e2) {
   }
 })
 
-#' @describeIn antsImage
+#' @rdname ops
 #' @aliases >,antsImage-method
 setMethod(f = ">", signature(e1 = "antsImage"), definition = function(e1, e2) {
   operator <- ">"

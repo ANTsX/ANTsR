@@ -33,6 +33,7 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @slot dimension usually 2 or 3 but can be 4
 #' @slot components number of pixel components
 #' @slot pointer the memory location
+#' @rdname antsImage
 setClass(Class = "antsImage", representation(pixeltype = "character", dimension = "integer",
   components = "integer", pointer = "externalptr"))
 
@@ -55,7 +56,7 @@ setMethod(f = "initialize", signature(.Object = "antsImage"), definition = funct
   return(.Call("antsImage", pixeltype, dimension, components, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn antsImage
+#' @rdname as.array
 #' @aliases dim,antsImage-method 
 setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
   return(.Call("antsImage_dim", x, PACKAGE = "ANTsR"))
@@ -69,7 +70,7 @@ setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
 #   return(length( which( as.array(x) != 0)))
 # })
 
-#' @describeIn antsImage
+#' @rdname as.array
 #' @aliases is.na,antsImage-method 
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   val <- .Call("antsImage_isna", x, PACKAGE = "ANTsR")
@@ -79,7 +80,7 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   return(FALSE)
 })
 
-#' @describeIn antsImage
+#' @rdname as.array
 #' @aliases as.numeric,antsImage-method 
 setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
   mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
@@ -89,7 +90,7 @@ setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn antsImage
+#' @rdname as.array
 #' @aliases as.matrix,antsImage-method 
 setMethod(f = "as.matrix", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
@@ -103,8 +104,8 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
   return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn antsImage
-#' @export 
+#' @rdname as.array
+#' @param x object of class \code{\link{antsImage}} or \code{\link{antsMatrix}}
 #' @aliases as.array,antsImage-method 
 setMethod(f = "as.array", signature(x = "antsImage"),
  definition = function(x, mask = logical(),
@@ -599,7 +600,7 @@ setGeneric(name = "as.antsImage", def = function(
   standardGeneric("as.antsImage")
 })
 
-#' @describeIn as.antsImage
+#' @rdname as.antsImage
 #' @aliases as.antsImage,matrix-method
 setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
@@ -616,7 +617,7 @@ setMethod(f = "as.antsImage", signature(object = "matrix"), definition = functio
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, direction, components, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn as.antsImage
+#' @rdname as.antsImage
 #' @aliases as.antsImage,array-method
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),

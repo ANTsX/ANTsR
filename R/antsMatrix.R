@@ -23,7 +23,7 @@ setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = func
   .Call("antsMatrix", elementtype, PACKAGE = "ANTsR")
 })
 
-#' @describeIn antsMatrix
+#' @rdname as.array
 #' @aliases as.data.frame,antsMatrix-method 
 setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = function(x) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
@@ -32,14 +32,14 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
   return(as.data.frame(lst))
 })
 
-#' @describeIn antsMatrix
+#' @rdname as.array
 #' @aliases as.matrix,antsMatrix-method
 setMethod(f = "as.matrix", signature(x = "antsMatrix"), definition = function(x) {
   as.matrix.data.frame(as.data.frame(x))
 })
 
 
-#' @describeIn antsMatrix
+#' @rdname as.array
 #' @aliases as.list,antsMatrix-method
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
@@ -49,9 +49,10 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
 })
 
 
-#' as.antsMatrix
+#' @rdname as.antsMatrix
+#' @title Coerce Object to as.antsMatrix
 #'
-#' convert types to an antsMatrix
+#' @description convert types to an antsMatrix
 #'
 #' @param object An object
 #' @param elementtype e.g. "float" or "double"
@@ -64,14 +65,14 @@ setGeneric(name = "as.antsMatrix", def = function(object,
                                                   elementtype="float", ...)
   standardGeneric("as.antsMatrix"))
 
-#' @describeIn as.antsMatrix
+#' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,list-method
 setMethod(f = "as.antsMatrix", signature(object = "list"),
   definition = function(object, elementtype="float") {
   return(.Call("antsMatrix_asantsMatrix", object, elementtype, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn as.antsMatrix
+#' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,data.frame-method
 setMethod(f = "as.antsMatrix", signature(object = "data.frame"),
   definition = function(object, elementtype="float") {
@@ -79,7 +80,7 @@ setMethod(f = "as.antsMatrix", signature(object = "data.frame"),
     elementtype, PACKAGE = "ANTsR"))
 })
 
-#' @describeIn as.antsMatrix
+#' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,matrix-method
 setMethod(f = "as.antsMatrix", signature(object = "matrix"),
   definition = function(object, elementtype="float") {
