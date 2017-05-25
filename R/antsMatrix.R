@@ -12,7 +12,7 @@
 #'
 #' @param .Object input object to convert
 #' @param elementtype string e.g. "float"
-#' @param x input object to convert
+#' 
 #' @slot elementtype string of the type of storage of the matrix e.g. "float"
 #' @slot pointer the memory location
 setClass(Class = "antsMatrix", representation(
@@ -35,24 +35,28 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 })
 
 #' @rdname as.array
+#' @param row.names NULL or a character vector giving the row names for the 
+#' data frame. 
+#' @param optional passsed to \code{\link{as.data.frame}}
 #' @export
-as.data.frame.antsMatrix = function(x) {
+as.data.frame.antsMatrix = function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL
-  return(as.data.frame(lst))
+  return(as.data.frame(lst, row.names = row.names, optional = optional, ...))
 }
 
 #' @rdname as.array
 #' @aliases as.matrix,antsMatrix-method
-setMethod(f = "as.matrix", signature(x = "antsMatrix"), definition = function(x) {
-  as.matrix.data.frame(as.data.frame(x))
+setMethod(f = "as.matrix", signature(x = "antsMatrix"), 
+          definition = function(x, ...) {
+  as.matrix.data.frame(as.data.frame(x), ...)
 })
 
 
 #' @rdname as.array
 #' @aliases as.list,antsMatrix-method
-setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x) {
+setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
   lst[[length(lst)]] <- NULL

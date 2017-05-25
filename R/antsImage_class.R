@@ -29,24 +29,24 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @rdname antsImage
 setClass(Class = "antsImage", 
          representation(pixeltype = "character", dimension = "integer",
-  components = "integer", pointer = "externalptr"))
+                        components = "integer", pointer = "externalptr"))
 
 #' @rdname antsImage
 #' @aliases show,antsImage-method 
 setMethod(f = "show", "antsImage", function(object){
-    cat("antsImage\n")
-    cat("  Pixel Type          :", object@pixeltype, "\n")
-    cat("  Components Per Pixel:", object@components, "\n")
-    cat("  Dimensions          :", paste(dim(object), collapse="x"), "\n")
-    cat("  Voxel Spacing       :", paste(antsGetSpacing(object), collapse="x"), "\n")
-    cat("  Origin              :", antsGetOrigin(object), "\n")
-    cat("  Direction           :", antsGetDirection(object), "\n")
-    cat("\n")
+  cat("antsImage\n")
+  cat("  Pixel Type          :", object@pixeltype, "\n")
+  cat("  Components Per Pixel:", object@components, "\n")
+  cat("  Dimensions          :", paste(dim(object), collapse="x"), "\n")
+  cat("  Voxel Spacing       :", paste(antsGetSpacing(object), collapse="x"), "\n")
+  cat("  Origin              :", antsGetOrigin(object), "\n")
+  cat("  Direction           :", antsGetDirection(object), "\n")
+  cat("\n")
 })
 #' @rdname antsImage
 #' @aliases initialize,antsImage-method 
 setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
-  pixeltype = "float", dimension = 3, components = 1) {
+                                                                                    pixeltype = "float", dimension = 3, components = 1) {
   return(.Call("antsImage", pixeltype, dimension, components, PACKAGE = "ANTsR"))
 })
 
@@ -80,7 +80,7 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
 #' @aliases as.numeric,antsImage-method 
 #' @export  
 setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
-  mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
+                                                                              mask = logical(), region = new("antsRegion", index = integer(), size = integer())) {
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
@@ -93,22 +93,23 @@ setMethod(f = "as.numeric", signature(x = "antsImage"), definition = function(x,
 #' @aliases as.matrix,antsImage-method 
 #' @export  
 setMethod(f = "as.matrix", signature(x = "antsImage"),
- definition = function(x, mask = logical(),
-  region = new("antsRegion", index = integer(), size = integer())) {
-  if (typeof(mask) != "logical") {
-    stop("'mask' provided is not of type 'logical'")
-  }
-  if (x@dimension != 2) {
-    stop("image dimension must be 2")
-  }
-  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
-})
+          definition = function(x, mask = logical(),
+                                region = new("antsRegion", index = integer(), size = integer())) {
+            if (typeof(mask) != "logical") {
+              stop("'mask' provided is not of type 'logical'")
+            }
+            if (x@dimension != 2) {
+              stop("image dimension must be 2")
+            }
+            return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+          })
 
 #' @rdname as.array
 #' @export
-as.matrix.antsImage = function(x, mask = logical(),
-                              region = new("antsRegion", index = integer(), 
-                                           size = integer())) {
+as.matrix.antsImage = function(x, ..., 
+                               mask = logical(),
+                               region = new("antsRegion", index = integer(), 
+                                            size = integer())) {
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
@@ -121,20 +122,21 @@ as.matrix.antsImage = function(x, mask = logical(),
 #' @title Coerce antsImage objects to array 
 #' @description Converts antsImage, antsImage object to different data types
 #' @rdname as.array
-#' @param x object of class \code{\link{antsImage}} or \code{\link{antsMatrix}}
+#' @param x object of class \code{antsImage} or \code{antsMatrix}
+#' @param ... additional arguments passed to functions
 #' @aliases as.array,antsImage-method 
 setMethod(f = "as.array", signature(x = "antsImage"),
- definition = function(x, mask = logical(),
-  region = new("antsRegion", index = integer(), size = integer())) {
-  if (typeof(mask) != "logical") {
-    stop("'mask' provided is not of type 'logical'")
-  }
-  return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
-})
+          definition = function(x, ..., mask = logical(),
+                                region = new("antsRegion", index = integer(), size = integer())) {
+            if (typeof(mask) != "logical") {
+              stop("'mask' provided is not of type 'logical'")
+            }
+            return(.Call("antsImage_asVector", x, mask, region, PACKAGE = "ANTsR"))
+          })
 
 #' @rdname as.array
 #' @export
-as.array.antsImage = function(x, mask = logical(),
+as.array.antsImage = function(x, ..., mask = logical(),
                               region = new("antsRegion", index = integer(), 
                                            size = integer())) {
   if (typeof(mask) != "logical") {
@@ -172,7 +174,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
@@ -182,7 +184,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
@@ -192,7 +194,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
@@ -224,7 +226,7 @@ antsGetSpacing <- function(x) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
   }
-
+  
   return(.Call("antsImage_GetSpacing", x, PACKAGE = "ANTsR"))
 }
 #' @rdname antsImageGetSet
@@ -234,15 +236,15 @@ antsSetSpacing <- function(x, spacing) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
   }
-
+  
   if ((class(spacing) != "numeric") && (class(spacing) != "array")) {
     stop("spacing must be of class 'numeric'")
   }
-
+  
   if (length(spacing) != length(dim(x))) {
     stop("spacing must be of same dimensions as image")
   }
-
+  
   return(.Call("antsImage_SetSpacing", x, spacing, PACKAGE = "ANTsR"))
 }
 
@@ -266,11 +268,11 @@ antsSetOrigin <- function(x, origin) {
   if ((class(origin) != "numeric") && (class(origin) != "array")) {
     stop("spacing must be of class 'numeric' or 'array'")
   }
-
+  
   if (length(origin) != length(dim(x))) {
     stop("spacing must be of same dimensions as image")
   }
-
+  
   return(.Call("antsImage_SetOrigin", x, origin, PACKAGE = "ANTsR"))
 }
 
@@ -329,31 +331,31 @@ antsSetDirection <- function(x, direction) {
 #'
 #' @export getNeighborhoodAtVoxel
 getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates = FALSE ) {
-
+  
   if (class(image)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
   }
-
+  
   if ((class(center) != "numeric")) {
     stop("center must be of class 'numeric'")
   }
-
+  
   radius = dim(kernel)
   if ( is.null(radius) ) {
     kernelSize = 2*kernel+1
     kernel = rep(1, prod(kernelSize))
     dim(kernel) = kernelSize
     radius = (kernelSize-1)/2
-    }
+  }
   else {
     # Check that all sizes are odd
     radius = (dim(kernel)-1)/2
   }
-
+  
   if ( length(dim(kernel)) != image@dimension ) {
     stop("kernel must have same number of dimensions as 'image'")
   }
-
+  
   return(.Call("antsImage_GetNeighborhood", image, center, kernel, radius,
                physical.coordinates, PACKAGE="ANTsR"))
 }
@@ -409,24 +411,24 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #'
 #' @export getNeighborhoodInMask
 getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FALSE,
-  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
-
+                                  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
+  
   if (class(image)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
   }
-
+  
   if ((class(mask) != "antsImage")) {
     stop("center must be of class 'antsImage'")
   }
-
+  
   if ((class(radius) != "numeric")) {
     stop("radius must be of class 'numeric'")
   }
-
+  
   if ((prod(radius * 2 + 1) * sum(as.array(mask))) > (2^31 - 1)) {
     stop("Requested matrix size is too large for Rcpp")
   }
-
+  
   boundary = 0
   if (boundary.condition == "image") {
     boundary = 1
@@ -434,10 +436,10 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
   if (boundary.condition == "mean") {
     boundary = 2
   }
-
+  
   return(.Call("antsImage_GetNeighborhoodMatrix", image, mask, radius, physical.coordinates,
-    boundary, spatial.info, get.gradient ))
-
+               boundary, spatial.info, get.gradient ))
+  
 }
 
 .getValueAtPoint <- function(x, point) {
@@ -447,12 +449,12 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
   if ((class(point) != "numeric")) {
     stop("point must be of class 'numeric'")
   }
-
+  
   idx <- as.numeric(antsTransformPhysicalPointToIndex(x, point))
   idx <- floor(idx)
-
+  
   dims <- length(idx)
-
+  
   value <- NA
   if (dims == 2) {
     value <- getPixels(x, i = idx[1], j = idx[2])
@@ -461,9 +463,9 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
   } else if (dims == 4) {
     value <- getPixels(x, i = idx[1], j = idx[2], k = idx[3], l = idx[4])
   }
-
+  
   return(value[[1]])
-
+  
 }
 
 
@@ -489,16 +491,16 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
   if ((class(index) != "numeric") && (class(index) != "matrix")) {
     stop("index must be of class 'numeric' or 'matrix'")
   }
-
+  
   if (class(index) == "numeric") {
     index <- t(as.matrix(index))
   }
-
+  
   imgdim <- length(dim(x))
   if (dim(index)[2] != imgdim) {
     stop(paste("Index matrix must be of size N x", imgdim))
   }
-
+  
   return(.Call("antsImage_TransformIndexToPhysicalPoint", x, index, PACKAGE = "ANTsR"))
 }
 
@@ -526,16 +528,16 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
   if ((class(point) != "numeric") && (class(point) != "matrix")) {
     stop("point must be of class 'numeric' or 'matrix'")
   }
-
+  
   if (class(point) == "numeric") {
     point <- t(as.matrix(point))
   }
-
+  
   imgdim <- length(dim(x))
   if (dim(point)[2] != imgdim) {
     stop(paste("Point matrix must be of size N x", imgdim))
   }
-
+  
   return(.Call("antsImage_TransformPhysicalPointToIndex", x, point, PACKAGE = "ANTsR"))
 }
 
@@ -570,7 +572,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
@@ -580,7 +582,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
@@ -590,7 +592,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-
+  
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
@@ -601,7 +603,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     }
   }
   returnList <- (.Call("antsImage_SetPixels", x, lst, value, PACKAGE = "ANTsR"))
-
+  
   if ( returnList$flag > 0 ) {
     warning( returnList$error )
   }
@@ -636,34 +638,34 @@ setGeneric(name = "as.antsImage", def = function(
 #' @rdname as.antsImage
 #' @aliases as.antsImage,matrix-method
 setMethod(f = "as.antsImage", signature(object = "matrix"), definition = function(object,
-  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
-  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
-  direction = diag(length(dim(object))), components = FALSE, reference = NA) {
+                                                                                  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
+                                                                                  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
+                                                                                  direction = diag(length(dim(object))), components = FALSE, reference = NA) {
   if ( is.antsImage(reference) )
-    {
+  {
     pixeltype = reference@pixeltype
     components = (reference@components > 1)
     spacing = antsGetSpacing(reference)
     origin = antsGetOrigin(reference)
     direction = antsGetDirection(reference)
-    }
+  }
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, direction, components, PACKAGE = "ANTsR"))
 })
 
 #' @rdname as.antsImage
 #' @aliases as.antsImage,array-method
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
-  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
-  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
-  direction = diag(length(dim(object))), components = FALSE, reference = NA) {
+                                                                                 pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
+                                                                                 origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
+                                                                                 direction = diag(length(dim(object))), components = FALSE, reference = NA) {
   if ( is.antsImage(reference) )
-    {
+  {
     pixeltype = reference@pixeltype
     components = (reference@components > 1)
     spacing = antsGetSpacing(reference)
     origin = antsGetOrigin(reference)
     direction = antsGetDirection(reference)
-    }
+  }
   return(.Call("antsImage_asantsImage", object, pixeltype, spacing, origin, direction, components, PACKAGE = "ANTsR"))
 })
 

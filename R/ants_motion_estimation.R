@@ -7,6 +7,7 @@
 #' @param fixed target fixed image
 #' @param moreaccurate 0, 1 or 2 with higher values being more accurte
 #'  (use 2 for real applications, 0 for testing)
+#' @param txtype Transformation type
 #' @param verbose verbosity boolean
 #' @return list of outputs
 #' @author Avants BB
