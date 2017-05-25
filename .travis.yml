@@ -67,6 +67,7 @@ before_install:
   - source ~/.R/Makevars  
   - cd ~/
   - Rscript -e 'if (!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
+  - Rscript -e 'if (!"devtools" %in% rownames(installed.packages())) install.packages("devtools", dependencies = TRUE)'
   - itkrrel=0.0.1
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
