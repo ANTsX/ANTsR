@@ -75,6 +75,8 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
   - cd ${basedir}  
+  - Rscript -e 'devtools::source_url("https://gist.githubusercontent.com/muschellij2/69c48f469ab34cc05752361645ffa8e0/raw/57e7d3b22907699d260f863a0d337a12567ffc30/rewrite_dcf.R"); rewrite_dcf(drop_remotes = c("ANTsRCore", "ITKR"));'
+  
 
 # install:
 #   - mkdir -p ~/.R

@@ -71,6 +71,7 @@ Suggests:
     wmtsa
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
+Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
