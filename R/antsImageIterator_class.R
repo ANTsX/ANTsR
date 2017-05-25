@@ -15,7 +15,6 @@
 #' @param pixeltype string e.g. "float" "unsigned char" "int"
 #' @param dimension dimensionality of the image
 #' @param components number of components per pixel
-#' @param x input object to convert
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4

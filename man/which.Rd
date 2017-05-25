@@ -13,10 +13,10 @@ which(x, arr.ind = FALSE, useNames = TRUE)
 \arguments{
 \item{x}{antsImage object}
 
+\item{arr.ind}{logical; should array indices be returned when x is an array?}
+
 \item{useNames}{logical indicating if the value of arrayInd() 
 should have (non-null) dimnames at all.}
-
-\item{y}{logical; should array indices be returned when x is an array?}
 }
 \description{
 Give the TRUE indices of a logical object, allowing for array indices.

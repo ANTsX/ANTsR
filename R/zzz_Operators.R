@@ -178,7 +178,7 @@ setMethod(f = "!", signature(x = "antsImage"), definition = function(x) {
 #' @title Mean for antsImage Objects
 #' @description Overloaded Mean for antsImage objects
 #' @param x is an object of class \code{antsImage}.
-#' @rdname antsImageSummary
+#' @rdname mean
 #' @export
 mean.antsImage = function(x, ...) {
   x = as.array(x)
@@ -204,7 +204,7 @@ unique.antsImage = function(x, incomparables = FALSE, ...) {
 }
 
 
-#' @rdname antsImageSummary
+#' @rdname mean
 #' @export
 sd.antsImage = function(x, ...) {
   x = as.array(x)

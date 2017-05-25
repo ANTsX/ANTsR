@@ -3,7 +3,7 @@
 #' @description Give the TRUE indices of a logical object, allowing for array indices.
 #' #' 
 #' @param x antsImage object
-#' @param y logical; should array indices be returned when x is an array?
+#' @param arr.ind logical; should array indices be returned when x is an array?
 #' @param useNames logical indicating if the value of arrayInd() 
 #' should have (non-null) dimnames at all.
 #' 

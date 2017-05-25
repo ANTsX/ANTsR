@@ -39,6 +39,7 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 #' data frame. 
 #' @param optional passsed to \code{\link{as.data.frame}}
 #' @export
+#' @method as.data.frame antsMatrix 
 as.data.frame.antsMatrix = function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
   names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]

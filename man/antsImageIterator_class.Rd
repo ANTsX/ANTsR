@@ -22,8 +22,6 @@
 \item{dimension}{dimensionality of the image}
 
 \item{components}{number of components per pixel}
-
-\item{x}{input object to convert}
 }
 \description{
 C++ type used to represent an ITK image iterator. the

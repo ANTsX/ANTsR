@@ -32,5 +32,12 @@ etc noting that short is not supported}
 \item{\code{components}}{number of pixel components}
 
 \item{\code{pointer}}{the memory location}
+
+\item{\code{pixeltype}}{usually float, can be other types unsigned char, int, double
+etc noting that short is not supported}
+
+\item{\code{dimension}}{usually 2 or 3 but can be 4}
+
+\item{\code{components}}{number of pixel components}
 }}
 

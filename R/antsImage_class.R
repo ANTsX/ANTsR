@@ -45,12 +45,18 @@ setMethod(f = "show", "antsImage", function(object){
 })
 #' @rdname antsImage
 #' @aliases initialize,antsImage-method 
-setMethod(f = "initialize", signature(.Object = "antsImage"), definition = function(.Object,
-                                                                                    pixeltype = "float", dimension = 3, components = 1) {
-  return(.Call("antsImage", pixeltype, dimension, components, PACKAGE = "ANTsR"))
-})
+#' @slot pixeltype usually float, can be other types unsigned char, int, double
+#' etc noting that short is not supported
+#' @slot dimension usually 2 or 3 but can be 4
+#' @slot components number of pixel components 
+setMethod(f = "initialize", signature(.Object = "antsImage"), 
+          definition = function(.Object,
+                                pixeltype = "float", dimension = 3, components = 1) {
+            return(.Call("antsImage", pixeltype, dimension, components, PACKAGE = "ANTsR"))
+          })
 
 #' @rdname as.array
+#' @name as.array
 #' @aliases dim,antsImage-method 
 #' @export 
 setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
@@ -78,13 +84,15 @@ setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
 
 #' @rdname as.array
 #' @aliases as.numeric,antsImage-method 
+#' @param mask a logical vector/array or binary antsImage object
+#' @param region a \code{antsRegion} object
 #' @export  
 setMethod(f = "as.numeric", signature(x = "antsImage"), 
           definition = function(x,
                                 mask = logical(), 
                                 region = new("antsRegion", 
                                              index = integer(), size = integer())
-                                ) {
+          ) {
             mask = c(coerce_mask(mask))
             if (typeof(mask) != "logical") {
               stop("'mask' provided is not of type 'logical'")
@@ -112,6 +120,7 @@ setMethod(f = "as.matrix", signature(x = "antsImage"),
 
 #' @rdname as.array
 #' @export
+#' @method as.matrix antsImage
 as.matrix.antsImage = function(x, ..., 
                                mask = logical(),
                                region = new("antsRegion", index = integer(), 
@@ -144,6 +153,7 @@ setMethod(f = "as.array", signature(x = "antsImage"),
 
 #' @rdname as.array
 #' @export
+#' @method as.array antsImage
 as.array.antsImage = function(x, ..., mask = logical(),
                               region = new("antsRegion", index = integer(), 
                                            size = integer())) {
@@ -171,7 +181,7 @@ as.array.antsImage = function(x, ..., mask = logical(),
 #' pixel<-getPixels(img,i=c(1,2),j=1)
 #'
 #'
-#' @export getPixels
+#' @export
 getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
@@ -338,7 +348,7 @@ antsSetDirection <- function(x, direction) {
 #' dim(kernel) <- c(7,7)
 #' randlist <- getNeighborhoodAtVoxel(img,center,kernel)
 #'
-#' @export getNeighborhoodAtVoxel
+#' @export
 getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates = FALSE ) {
   
   if (class(image)[1] != "antsImage") {
@@ -418,7 +428,7 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #' mat <- getNeighborhoodInMask(r16,mask,radius)
 #'
 #'
-#' @export getNeighborhoodInMask
+#' @export
 getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FALSE,
                                   boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
   
@@ -492,7 +502,7 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
 #' pt <- antsTransformIndexToPhysicalPoint(img, c(2,2))
 #'
 #'
-#' @export antsTransformIndexToPhysicalPoint
+#' @export 
 antsTransformIndexToPhysicalPoint <- function(x, index) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -529,7 +539,7 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
 #' pt<-antsTransformPhysicalPointToIndex(img,c(2,2))
 #'
 #'
-#' @export antsTransformPhysicalPointToIndex
+#' @export
 antsTransformPhysicalPointToIndex <- function(x, point) {
   if (class(x)[1] != "antsImage") {
     stop("Input must be of class 'antsImage'")
@@ -569,7 +579,7 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
 #' antsSetPixels(img,2,3,value=Inf)
 #'
 #'
-#' @export antsTransformPhysicalPointToIndex
+#' @export
 antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   lst <- NULL
   if (length(i) != 1 || !is.na(i)) {
