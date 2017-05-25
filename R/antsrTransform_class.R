@@ -303,7 +303,7 @@ applyAntsrTransformToImage <- function(transform, image, reference, interpolatio
 #' @param precision numerical precision of transform
 #' @return antsrTransform
 #' @examples
-#' \dontrun {
+#' \dontrun{
 #' tx = readAntsrTransform( "yourtx.mat")
 #' }
 readAntsrTransform <- function( filename, dimension=3, precision="float" )  {

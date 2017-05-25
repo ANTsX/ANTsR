@@ -20,7 +20,7 @@ antsrTransform
 read a transform from file
 }
 \examples{
-\dontrun {
+\dontrun{
 tx = readAntsrTransform( "yourtx.mat")
 }
 }

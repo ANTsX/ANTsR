@@ -21,7 +21,7 @@ cran: http://cran.rstudio.com
 
 r_packages:
   - covr
-  - wesanderson
+  # - wesanderson
   - magrittr
   - mFilter
   - igraph
@@ -41,6 +41,9 @@ r_binary_packages:
   - dplyr
   - psych
   - pracma
+  - xgboost
+  - RcppEigen
+  - rsvd  
 
 # cache local R libraries directory:
 cache: packages
@@ -62,7 +65,7 @@ install:
   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
   - source ~/.R/Makevars
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
-  - echo '.travis.yml' > .Rbuildignore
+#  - echo '.travis.yml' > .Rbuildignore
 #  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools") }'
 #  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
   - Rscript -e 'install.packages("Rcpp", dependencies = TRUE)'
@@ -81,6 +84,9 @@ install:
 #  - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
 #  - Rscript -e 'if(!"magic" %in% rownames(installed.packages())) { install.packages("magic", dependencies = TRUE) }'
   - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"xgboost" %in% rownames(installed.packages())) { install.packages("xgboost", dependencies = TRUE) }'
+  - Rscript -e 'if(!"rsvd" %in% rownames(installed.packages())) { install.packages("rsvd", dependencies = TRUE) }'
+  - Rscript -e 'if(!"RcppEigen" %in% rownames(installed.packages())) { install.packages("RcppEigen", dependencies = TRUE) }'
 #  - Rscript -e 'update.packages( ask = FALSE )'
   - cd ~/
   - itkrrel=0.0.1
