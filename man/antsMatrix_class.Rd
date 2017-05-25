@@ -12,8 +12,6 @@
 \item{.Object}{input object to convert}
 
 \item{elementtype}{string e.g. "float"}
-
-\item{x}{input object to convert}
 }
 \description{
 An S4 class to hold an antsMatrix imported from ITK types

@@ -18,6 +18,8 @@
 \item{moreaccurate}{0, 1 or 2 with higher values being more accurte
 (use 2 for real applications, 0 for testing)}
 
+\item{txtype}{Transformation type}
+
 \item{verbose}{verbosity boolean}
 }
 \value{

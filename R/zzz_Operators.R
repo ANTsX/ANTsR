@@ -114,7 +114,7 @@ setMethod("Ops", signature(e1 = "list", e2 = "antsImage"),
             ## either use drop_img_dim and validObject or take out both
             # a2 = as.array(e1)
             stop("antsRegions not done yet!")
-})
+          })
 
 #' @rdname antsImageops
 #' @aliases Ops,antsImage,list-method
@@ -136,7 +136,7 @@ setMethod("Math", signature(x = "antsImage"),
             ## either use drop_img_dim and validObject or take out both
             a1 = as.array(x)
             res = callGeneric(a1)
-            # res = as.antsImage(res, reference = x)
+            res = as.antsImage(res, reference = x)
             return(res)
           })
 
@@ -191,7 +191,7 @@ mean.antsImage = function(x, ...) {
   # }
   mean(x, ...)
 }
- 
+
 
 #' @rdname antsImageSummary
 #' @export
@@ -206,15 +206,25 @@ sd.antsImage = function(x, ...) {
   sd(x, ...)
 }
 
-#' @rdname antsImageSummary
+#' @rdname var
+#' @param x antsImage object
+#' @param y antsImage object, but likely null
+#' @param ... additional arguments passed to \code{\link{var}}
+#' 
 #' @export
-var.antsImage = function(x, ...) {
-  x = as.array(x)
-  # if (missing(mask)) {
-  #   x = img_data(x)
-  #   x = c(x)
-  # } else {
-  #   x = mask_vals(object = x, mask)
-  # }
-  var(x, ...)
+setGeneric("var", function(x, y = NULL, ...) { 
+  standardGeneric("var") 
 }
+)
+
+#' @rdname var
+#' @aliases var,antsImage-method
+setMethod("var", signature(x = "antsImage"),
+          function(x, y = NULL, ...) {
+            ## either use drop_img_dim and validObject or take out both
+            x = as.array(x)
+            if (!is.null(y)) {
+              y = as.array(y)
+            }
+            var(x = x, y = y,  ...)
+          })
