@@ -26,7 +26,11 @@ Imports:
     xgboost,
     rsvd,
     psych,
-    magic
+    magic,
+    stats,
+    graphics,
+    grDevices,
+    utils
 Suggests:
     abind,
     BGLR,
