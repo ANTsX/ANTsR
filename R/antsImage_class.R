@@ -58,7 +58,7 @@ setMethod(f = "initialize", signature(.Object = "antsImage"), definition = funct
 
 #' @rdname as.array
 #' @aliases dim,antsImage-method 
-#' @export dim.antsImage 
+#' @export 
 setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
   return(.Call("antsImage_dim", x, PACKAGE = "ANTsR"))
 })
@@ -73,7 +73,7 @@ setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
 
 #' @rdname as.array
 #' @aliases is.na,antsImage-method .
-#' @export is.na.antsImage 
+#' @export 
 setMethod(f = "is.na", signature(x = "antsImage"), definition = function(x) {
   val <- .Call("antsImage_isna", x, PACKAGE = "ANTsR")
   if (val > 0) {
