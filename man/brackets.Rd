@@ -28,6 +28,7 @@
 \alias{[<-,antsImage,NULL,numeric,numeric-method}
 \alias{[,antsImage,NULL,ANY,ANY-method}
 \alias{[,antsImage,antsImage,ANY,ANY-method}
+\alias{[,array,antsImage,ANY,ANY-method}
 \alias{[,antsImage,logical,ANY,ANY-method}
 \alias{[,antsImage,logical,ANY,ANY-method}
 \alias{[,antsImage,logical,ANY-method}
@@ -85,6 +86,8 @@
 \S4method{[}{antsImage,`NULL`,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{antsImage,antsImage,ANY,ANY}(x, i, j, ..., drop = TRUE)
+
+\S4method{[}{array,antsImage,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{antsImage,logical,ANY,ANY}(x, i, j, ..., drop = TRUE)
 

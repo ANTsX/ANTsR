@@ -45,6 +45,27 @@ setMethod(
   }
 )
 
+#' @rdname brackets
+#' @aliases [,array,antsImage,ANY,ANY-method
+setMethod(
+  f = "[",
+  signature(x = "array", i = "antsImage", j = "ANY", "ANY"),
+  definition = function(x, i, j, ..., drop) {
+    i = c(as.array(i))
+    if (all(i %in% c(0, 1, NaN, NA))) {
+      i = i != 0
+    }
+    if (typeof(i) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    args = list(x = x, i = i, ... = ..., drop = drop)
+    if (!missing(j)) {
+      args$j = j
+    }
+    do.call("[", args)
+  }
+)
+
 
 #' @rdname brackets
 #' @aliases [,antsImage,logical,ANY,ANY-method
