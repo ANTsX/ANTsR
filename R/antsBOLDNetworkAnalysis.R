@@ -33,19 +33,21 @@
 #' result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
 #' }
 #' @export antsBOLDNetworkAnalysis
+#' @importFrom magic ashift
+#' @importFrom psych winsor
 antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   labels = NA, motion ,
   gdens = 0.2, threshLo = 1, threshHi = 90,
   freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
   throwaway ) {
-  myscale <- function(x, doscale = F) {
+  myscale <- function(x, doscale = FALSE) {
     if (doscale)
       return(scale(x))
     return(x)
   }
-  if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
-  if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
-  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+  # if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
+  # if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
+  # if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   mytimes <- dim(bold)[4]
   aalm <- labels
   aalmask <- antsImageClone(aalm)

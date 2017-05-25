@@ -24,7 +24,9 @@ Imports:
     magrittr,
     RcppEigen,
     xgboost,
-    rsvd
+    rsvd,
+    psych,
+    magic
 Suggests:
     abind,
     BGLR,
@@ -44,7 +46,6 @@ Suggests:
     igraph,
     irlba,
     knitr,
-    magic,
     MASS,
     Matrix,
     mFilter,
@@ -55,7 +56,6 @@ Suggests:
     pixmap,
     png,
     pracma,
-    psych,
     randomForest,
     RANN,
     rflann,
@@ -72,11 +72,5 @@ Suggests:
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 NeedsCompilation: yes
-OS_type: unix
-Additional_repositories:
-  https://github.com/InsightSoftwareConsortium/ITK.git,
-  https://github.com/stnava/ANTs.git,
-  https://github.com/stnava/ITKR.git,
-  https://github.com/stnava/ANTsR.git
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

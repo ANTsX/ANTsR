@@ -133,8 +133,8 @@ after_success:
 # takes too long, should add to matrix
 
 after_failure:
-  - cat ~/build/stnava/ANTsR.Rcheck/00install.out
-  - cat ~/build/stnava/ANTsR.Rcheck/00check.log
+  - cat ~/build/${USER}/ANTsR.Rcheck/00install.out
+  - cat ~/build/${USER}/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
