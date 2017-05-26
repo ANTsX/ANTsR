@@ -18,3 +18,4 @@ vignettes/\.build\.timestamp
 ^appveyor\.yml$
 which\.R
 c\.R
+_config\.yml
