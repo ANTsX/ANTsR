@@ -193,7 +193,7 @@ getMultiResFeatureMatrix <- function(
     for ( lab in ulabs )
       {
       randmask = locmask * 0
-      ulabvec<-( locmask == as.numeric( lab ) )
+      ulabvec<- ( as.array(locmask) == as.numeric( lab ) )
       randvec<-rep( FALSE, length( ulabvec ) )
       k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
       n<-sum( ulabvec == TRUE )

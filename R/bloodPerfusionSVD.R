@@ -42,89 +42,89 @@
 #' }
 #' @export
 bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
-  thresholdSVD = 0.2, deltaTime = 1.0 )
+                               thresholdSVD = 0.2, deltaTime = 1.0 )
 {
-
-if( missing( perfusionImage ) )
+  
+  if( missing( perfusionImage ) )
   {
-  stop( "Error:  The perfusion image is not specified.\n" )
+    stop( "Error:  The perfusion image is not specified.\n" )
   }
-
-if( missing( voiMaskImage ) )
+  
+  if( missing( voiMaskImage ) )
   {
-  stop( "Error:  The VOI mask image is not specified.\n" )
+    stop( "Error:  The VOI mask image is not specified.\n" )
   }
-
-if( missing( aifMaskImage ) )
+  
+  if( missing( aifMaskImage ) )
   {
-  stop( "Error:  The arterial input function mask image is not specified.\n" )
+    stop( "Error:  The arterial input function mask image is not specified.\n" )
   }
-
-# The AIF signal is defined as the mean intensity value over the AIF region of interest
-# at each time point
-
-aifMatrix <- timeseries2matrix( perfusionImage, aifMaskImage )
-Saif <- rowMeans( aifMatrix, na.rm = TRUE )
-
-# Automatically find start of the AIF signal by finding the point at which the signal
-# intensity curve exceeds 10% of the maximum
-
-SaifMaxIndex = which( Saif == max( Saif ) )
-SaifStartIndex = tail( which( Saif[1:SaifMaxIndex] < 0.1 * ( max( Saif ) - min( Saif ) ) ), n = 1 ) + 1
-
-S0aif <- mean( Saif[1:( SaifStartIndex - 1 )], na.rm = TRUE )
-
-# See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
-# we exclude the constant of proportionality, k, and the TE parameters as they cancel
-# out in estimating the residue function.
-
-Caif <- -log( Saif / S0aif )
-
-# If we can estimate the product CBF * R(t) we obtain an estimate for CBF because R(0) = 1.
-# CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi (cf http://www.ncbi.nlm.nih.gov/pubmed/8916023,
-# page 713, equation (9)).
-
-dSVD <- deconvolutionSVD( Caif, thresholdSVD )
-
-# Measured signal over the entire region of interest
-
-Svoi <- timeseries2matrix( perfusionImage, voiMaskImage )
-numberOfTimePoints <- nrow( Svoi )
-
-# Baseline signal
-
-S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = TRUE )
-S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
-
-# See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
-# we exclude the constant of proportionality, k, and the TE parameters as they cancel
-# out in estimating the residue function.
-
-Cvoi <- -log( Svoi / S0voi )
-
-residueFunction <- dSVD %*% Cvoi / deltaTime
-residueFunction[residueFunction < 0.0] <- 0.0
-
-# cbf is the maximum of the residue function at each voxel
-
-.colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
-cbf <- .colMax( residueFunction )
-cbfOutputImage <- matrixToImages( as.matrix( t( cbf ) ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
-
-# cbv is area under the curve at each voxel using the trapezoidal rule
-
-cbv <- trapz( seq( from = 0.0, by = deltaTime, length.out = nrow( residueFunction ) ), residueFunction )
-cbvOutputImage <- matrixToImages( as.matrix( cbv ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
-
-mtt <- cbv / cbf
-mtt[which( is.na( mtt ) )] <- 0.0
-mttOutputImage <- matrixToImages( as.matrix( mtt ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
-
-return( list( cbfImage = cbfOutputImage,
-              cbvImage = cbvOutputImage,
-              mttImage = mttOutputImage,
-              aifSignal = Saif,
-              aifConcentration = Caif ) )
+  
+  # The AIF signal is defined as the mean intensity value over the AIF region of interest
+  # at each time point
+  
+  aifMatrix <- timeseries2matrix( perfusionImage, aifMaskImage )
+  Saif <- rowMeans( aifMatrix, na.rm = TRUE )
+  
+  # Automatically find start of the AIF signal by finding the point at which the signal
+  # intensity curve exceeds 10% of the maximum
+  
+  SaifMaxIndex = which( Saif == max( Saif ) )
+  SaifStartIndex = tail( which( Saif[1:SaifMaxIndex] < 0.1 * ( max( Saif ) - min( Saif ) ) ), n = 1 ) + 1
+  
+  S0aif <- mean( Saif[1:( SaifStartIndex - 1 )], na.rm = TRUE )
+  
+  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
+  # we exclude the constant of proportionality, k, and the TE parameters as they cancel
+  # out in estimating the residue function.
+  
+  Caif <- -log( Saif / S0aif )
+  
+  # If we can estimate the product CBF * R(t) we obtain an estimate for CBF because R(0) = 1.
+  # CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi (cf http://www.ncbi.nlm.nih.gov/pubmed/8916023,
+  # page 713, equation (9)).
+  
+  dSVD <- deconvolutionSVD( Caif, thresholdSVD )
+  
+  # Measured signal over the entire region of interest
+  
+  Svoi <- timeseries2matrix( perfusionImage, voiMaskImage )
+  numberOfTimePoints <- nrow( Svoi )
+  
+  # Baseline signal
+  
+  S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = TRUE )
+  S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
+  
+  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
+  # we exclude the constant of proportionality, k, and the TE parameters as they cancel
+  # out in estimating the residue function.
+  
+  Cvoi <- -log( Svoi / S0voi )
+  
+  residueFunction <- dSVD %*% Cvoi / deltaTime
+  residueFunction[residueFunction < 0.0] <- 0.0
+  
+  # cbf is the maximum of the residue function at each voxel
+  
+  .colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
+  cbf <- .colMax( residueFunction )
+  cbfOutputImage <- matrixToImages( as.matrix( t( cbf ) ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  
+  # cbv is area under the curve at each voxel using the trapezoidal rule
+  
+  cbv <- trapz( seq( from = 0.0, by = deltaTime, length.out = nrow( residueFunction ) ), residueFunction )
+  cbvOutputImage <- matrixToImages( as.matrix( cbv ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  
+  mtt <- cbv / cbf
+  mtt[which( is.na( mtt ) )] <- 0.0
+  mttOutputImage <- matrixToImages( as.matrix( mtt ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  
+  return( list( cbfImage = cbfOutputImage,
+                cbvImage = cbvOutputImage,
+                mttImage = mttOutputImage,
+                aifSignal = Saif,
+                aifConcentration = Caif ) )
 }
 
 #' Calculate the area under a sampled curve (or set of curves).
@@ -151,12 +151,12 @@ return( list( cbfImage = cbfOutputImage,
 
 trapz <- function( x, y )
 {
-idx = 2:length( x )
-if( is.vector( y ) )
+  idx = 2:length( x )
+  if( is.vector( y ) )
   {
-  return ( 0.5 * ( ( x[idx] - x[idx-1] ) %*% ( y[idx] + y[idx-1] ) ) )
+    return ( 0.5 * ( ( x[idx] - x[idx-1] ) %*% ( y[idx] + y[idx-1] ) ) )
   } else {
-  return ( 0.5 * ( ( x[idx] - x[idx-1] ) %*% ( y[idx,] + y[idx-1,] ) ) )
+    return ( 0.5 * ( ( x[idx] - x[idx-1] ) %*% ( y[idx,] + y[idx-1,] ) ) )
   }
 }
 
@@ -187,21 +187,21 @@ if( is.vector( y ) )
 deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 {
   if( ! is.vector( arterialInputFunction ) )
-    {
+  {
     stop( "Expecting a vector." )
-    }
-
+  }
+  
   N <- length( arterialInputFunction )
   Caif <- mat.or.vec( N, N )
-
+  
   for( j in 1:N )
-    {
+  {
     Caif[j:N,j] <- arterialInputFunction[1:(N-j+1)]
-    }
+  }
   S <- svd( Caif )
   Dinv <- 1.0 / S$d
-
+  
   Dinv[which( S$d < thresholdSVD * max( S$d ) )] <- 0.0
-
+  
   dSVD <- S$v %*% diag( Dinv ) %*% t( S$u )
 }

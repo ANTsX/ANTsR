@@ -25,8 +25,9 @@ quantifySNPs <- function(snps, freqthresh = 0.1 ,
   qsnps<-snps
   okrow<-rep(FALSE,ncol(qsnps))
   traitvec<-as.numeric( traitvecin )
-  progress <- txtProgressBar(min = 0, max = ncol(qsnps), style = 3)
-  for ( y in 1:ncol(qsnps) ) # or dd for ADNI_SNPS
+  NN = ncol(qsnps)
+  progress <- txtProgressBar(min = 0, max = NN, style = 3)
+  for ( y in 1: NN) # or dd for ADNI_SNPS
     {
     temp<-snps[,y]
     if ( sum( is.na( as.numeric(temp) ) ) == 0 ) okrow[y]<-TRUE
@@ -59,10 +60,13 @@ quantifySNPs <- function(snps, freqthresh = 0.1 ,
           qsnps[t3,y]<-mean( traitvec[t3tr] )
       }
     }
-    if (y%%100 == 0) {
+    if (y%%100 == 0 || y == NN) {
       setTxtProgressBar(progress, y)
     }
   }
+  on.exit({
+    close(progress)
+  })
   qsnps<-qsnps[,okrow]
   if ( shiftit & usePkg("magic") ) {
     qsnps<-qsnps+magic::ashift(qsnps,c(0,1))+magic::ashift(qsnps,c(0,-1))

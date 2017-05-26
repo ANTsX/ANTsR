@@ -70,8 +70,10 @@ mat<-replicate(100, rnorm(20))
 mat2<-replicate(100, rnorm(20))
 mat<-scale(mat)
 mat2<-scale(mat2)
-mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
-  sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
+mydecom<-sparseDecom2(
+inmatrix = list(mat,mat2),
+sparseness=c(0.1,0.3),
+nvecs=3, its=3, perms=0)
 wt<-0.666
 mat3<-mat*wt+mat2*(1-wt)
 mydecom<-sparseDecom2( inmatrix=list(mat,mat3),

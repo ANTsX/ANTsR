@@ -29,7 +29,7 @@ setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = func
 #' @aliases as.data.frame,antsMatrix-method 
 setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = function(x) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
-  names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
+  names(lst)[1:(length(lst) - 1)] <- lst[[length(lst)]]
   lst[[length(lst)]] <- NULL
   return(as.data.frame(lst))
 })
@@ -42,7 +42,7 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 #' @method as.data.frame antsMatrix 
 as.data.frame.antsMatrix = function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
-  names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
+  names(lst)[1:(length(lst) - 1)] <- lst[[length(lst)]]
   lst[[length(lst)]] <- NULL
   return(as.data.frame(lst, row.names = row.names, optional = optional, ...))
 }
@@ -59,7 +59,7 @@ setMethod(f = "as.matrix", signature(x = "antsMatrix"),
 #' @aliases as.list,antsMatrix-method
 setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x, ...) {
   lst <- .Call("antsMatrix_asList", x, PACKAGE = "ANTsR")
-  names(lst)[1:(length(lst) - 1)] <- lst[length(lst)]
+  names(lst)[1:(length(lst) - 1)] <- lst[[length(lst)]]
   lst[[length(lst)]] <- NULL
   return(lst)
 })

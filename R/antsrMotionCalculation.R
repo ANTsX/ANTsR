@@ -44,7 +44,7 @@ antsrMotionCalculation <- function(
   ntimes = dim( img )[ img@dimension ]
   if ( is.na( fixed )  )
     {
-    fixed <- apply( img, c(1:(subdim)), mean, na.rm=T  )
+    fixed <- apply( img, c(1:(subdim)), mean, na.rm = TRUE  )
     }
   if ( is.na( mask ) ) mask = getMask( fixed )
   extractSubImage <- function( img, vin )

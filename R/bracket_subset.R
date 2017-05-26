@@ -295,3 +295,22 @@ setMethod(
     return(getPixels(x, i, j, k, l))
   }
 )
+
+
+#' @rdname subset
+#' @title Subsetting antsImage Objects
+#' @description Returns subsets of antsImage objects as vectors
+#' 
+#' @param x antsImage object
+#' @param subset logical expression of subset
+#' @param ... further arguments to be passed to or from other methods.
+#' 
+#' @export
+#' @method subset antsImage
+subset.antsImage = function(x, subset, ...) {
+  if (is.antsImage(subset)) {
+    subset = c(coerce_mask(subset))
+  }
+  x = as.array(x)
+  base::subset(x = x, subset = subset, ...)
+}

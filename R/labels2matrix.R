@@ -26,8 +26,9 @@ labels2matrix <- function( img, mask, targetLabels = NA, missingVal = NA )
   if ( any( dim( img ) != dim( mask ) ) )
     {
     stop("image and mask must be same size")
-    }
-  vec <- subset( img, mask > 0 )
+  }
+  # vec <- subset( img, mask > 0 )
+  vec = img[ mask > 0 ]
   theLabels <- sort( unique( vec ) )
   if ( ! all( is.na( targetLabels ) ) ) theLabels = targetLabels
   mylabelnames = as.character( theLabels )

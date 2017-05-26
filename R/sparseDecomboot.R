@@ -55,6 +55,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = NA, sparseness = 0.01,
   its = 5, cthresh = 250, z = 0, smooth = 0,
   initializationList = list(),
   mycoption = 0, nboot = 10, nsamp = 0.9, robust = 0, doseg = TRUE) {
+  
   numargs <- nargs()
   nsubj <- nrow(inmatrix)
   mysize <- round(nsamp * nsubj)
@@ -93,7 +94,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = NA, sparseness = 0.01,
       }
       # find the best match and reorder appropriately
       for (ct in 1:(ncol(cca1))) {
-        arrind <- which(mymult == min(mymult), arr.ind = T)
+        arrind <- which(mymult == min(mymult), arr.ind = TRUE)
         cca1copy[, arrind[1]] <- cca1[, arrind[2]]
         mymult[arrind[1], ] <- 0
         mymult[, arrind[2]] <- 0

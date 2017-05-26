@@ -282,7 +282,8 @@ applyAntsrTransformToPoint <- function(transform, point) {
 #' }
 #' @export
 applyAntsrTransformToVector <- function(transform, vector) {
-  return(.Call("antsrTransform_TransformVector", transform, vector, PACKAGE = "ANTsR"))
+  return(.Call("antsrTransform_TransformVector", transform,
+               vector, PACKAGE = "ANTsR"))
 }
 
 #' @title applyAntsrTransformToImage
@@ -330,7 +331,8 @@ readAntsrTransform <- function( filename, dimension=3, precision="float" )  {
 #' @examples
 #' trans= c(3,4,5)
 #' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-#' writeAntsrTransform(tx,"trans.mat")
+#' txfile = tempfile(fileext = ".mat")
+#' writeAntsrTransform(tx, txfile)
 #' @export
 writeAntsrTransform <- function(transform, filename )  {
   return(.Call("antsrTransform_Write", transform ,filename, PACKAGE="ANTsR"))
