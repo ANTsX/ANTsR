@@ -16,3 +16,6 @@ data/*\.csv$
 OLD_NAMESPACE
 vignettes/\.build\.timestamp
 ^appveyor\.yml$
+
+R/which\.R
+R/c\.R

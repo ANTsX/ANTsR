@@ -96,7 +96,7 @@
 #' @export sparseDecom2
 sparseDecom2 <- function(
   inmatrix,
-  inmask = c(NA, NA),
+  inmask = list(NA, NA),
   sparseness = c(0.01, 0.01),
   nvecs = 3,
   its = 20,
@@ -130,7 +130,7 @@ sparseDecom2 <- function(
      masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
   if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
     stop("Matrices must have same number of rows")
-  inmask = c( maskx, masky )
+  inmask = list(maskx, masky )
   verbose = as.numeric( verbose )
   if ( robust > 0 )
     {

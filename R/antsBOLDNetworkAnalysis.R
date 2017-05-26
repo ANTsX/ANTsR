@@ -30,7 +30,12 @@
 #' warpedParcellation <- antsApplyTransforms( avgbold, mylab,
 #'     transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
 #' mask <- getMask( avgbold )
+#' old = NA;
+#' labels = warpedParcellation; 
+#' gdens = 0.2; threshLo = 1; threshHi = 90;
+#' freqLo = 0.01; freqHi = 0.1; winsortrim = 0.02;
 #' result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
+#' 
 #' }
 #' @export antsBOLDNetworkAnalysis
 #' @importFrom magic ashift
