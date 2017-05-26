@@ -15,6 +15,7 @@
 #' is.antsImage(sqrt(2) * img01)
 #' is.antsImage(img02 / pi)
 #' @aliases Ops,antsImage,antsImage-method
+#' @export
 setMethod("Ops", signature(e1 = "antsImage", e2 = "antsImage"),
           function(e1, e2) {
             ## either use drop_img_dim and validObject or take out both
@@ -147,7 +148,7 @@ setMethod("Ops", signature(e1 = "antsImage", e2 = "list"),
 #' @examples
 #' img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
 #' abs(img01)
-#' 
+#' @export
 setMethod("Math", signature(x = "antsImage"),
           function(x) {
             ## either use drop_img_dim and validObject or take out both
