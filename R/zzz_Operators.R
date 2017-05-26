@@ -153,6 +153,54 @@ setMethod("Math", signature(x = "antsImage"),
             return(res)
           })
 
+
+# From http://r.789695.n4.nabble.com/trouble-with-S4-methods-for-
+# group-quot-Summary-quot-td790541.html
+.max_def <-
+  function(x, ..., na.rm = FALSE)
+    base::max(x, ..., na.rm = na.rm)
+.min_def <-
+  function(x, ..., na.rm = FALSE)
+    base::min(x, ..., na.rm = na.rm)
+.range_def <-
+  function(x, ..., na.rm = FALSE)
+    base::range(x, ..., na.rm = na.rm)
+.prod_def <-
+  function(x, ..., na.rm = FALSE)
+    base::prod(x, ..., na.rm = na.rm)
+.sum_def <-
+  function(x, ..., na.rm = FALSE)
+    base::sum(x, ..., na.rm = na.rm)
+.any_def <-
+  function(x, ..., na.rm = FALSE)
+    base::any(x, ..., na.rm = na.rm)
+.all_def <-
+  function(x, ..., na.rm = FALSE)
+    base::all(x, ..., na.rm = na.rm)
+
+setGeneric("max", function(x, ..., na.rm = FALSE)
+  standardGeneric("max"),
+  useAsDefault = .max_def, group = "Summary")
+setGeneric("min", function(x, ..., na.rm = FALSE)
+  standardGeneric("min"),
+  useAsDefault = .min_def, group = "Summary")
+setGeneric("range", function(x, ..., na.rm = FALSE)
+  standardGeneric("range"),
+  useAsDefault = .range_def, group = "Summary")
+setGeneric("prod", function(x, ..., na.rm = FALSE)
+  standardGeneric("prod"),
+  useAsDefault = .prod_def, group = "Summary")
+setGeneric("sum", function(x, ..., na.rm = FALSE)
+  standardGeneric("sum"),
+  useAsDefault = .sum_def, group = "Summary")
+setGeneric("any", function(x, ..., na.rm = FALSE)
+  standardGeneric("any"),
+  useAsDefault = .any_def, group = "Summary")
+setGeneric("all", function(x, ..., na.rm = FALSE)
+  standardGeneric("all"),
+  useAsDefault = .all_def, group = "Summary") 
+
+
 #' @title Summary for antsImage Objects
 #' @description Overloaded Summary for antsImage objects
 #' @name antsImage-summary
