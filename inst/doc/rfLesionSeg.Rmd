@@ -1,0 +1,185 @@
+---
+title: "Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation"
+author: "Brian B. Avants, Dorian Pustina, Nicholas J. Tustison"
+date: "February 22, 2015"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{mrvnrfs}
+    \usepackage[utf8]{inputenc}
+---
+
+# Lesion segmentation
+
+## Background
+
+We build on the [BRATS 2013 challenge](http://www.ncbi.nlm.nih.gov/pubmed/25494501) to segment areas of the brain that have been damaged by stroke.  We also refer to a [more recent publication](http://onlinelibrary.wiley.com/doi/10.1002/hbm.23110/abstract) that implements a more complex version of what we do here.
+
+## Simulation
+
+We define a function that will help us simulate large, lateralized lesions on the fly.
+```{r simfun}
+library(ANTsR)
+simLesion<-function(  img, s , w, thresh=0.01, mask=NA, myseed )
+{
+  set.seed(myseed)
+  img<-iMath(img,"Normalize")
+  if ( is.na(mask) ) mask<-getMask(img)
+  i<-makeImage( dim(img) , rnorm( length(as.array(img))  ) )
+  i[ mask==0 ]<-0
+  ni<-smoothImage(i,s)
+  ni[mask==0]<-0
+  i<-thresholdImage(ni,thresh,Inf)
+  i<-iMath(i,"GetLargestComponent")
+  ti<-antsImageClone(i)
+  i[i>0]<-ti[i>0]
+  i<-smoothImage(i,w)
+  i[ mask != 1  ] <- 0
+  i[ 1:(dim(img)[1]/2), 1:(dim(img)[2]-1) ]<-0
+  limg<-( antsImageClone(img) * (-i)  %>% iMath("Normalize") )
+  return( list(limg=limg, lesion=i ) )
+}
+```
+
+
+## Generate test data
+
+Now let's apply this function to generate a test dataset.
+```{r testsub}
+ti<-antsImageRead( getANTsRData("r27") )
+timask=getMask(ti)
+seg2<-kmeansSegmentation( ti, 3 )$segmentation
+ll2<-simLesion( ti, 10, 6, myseed=919 ) # different sized lesion
+seg2[ ll2$lesion > 0.5 & seg2 > 0.5 ]<-4
+```
+
+## Generate test data
+
+Now let's apply this function to generate a test dataset.
+```{r testsub2,echo=FALSE}
+invisible( plot(ll2$limg) )
+```
+
+
+## Make training data
+
+Create training data and map to the test subject.  Note that
+a "real" application of this type would use cost function masking.  
+But let's ignore that aspect of the problem here.
+
+## Make training data
+
+```{r runsim}
+img<-antsImageRead( getANTsRData("r16") )
+seg<-kmeansSegmentation( img, 3 )$segmentation
+ll<-simLesion( img, 12, 5, myseed=1 )
+seg[ ll$lesion > 0.5 & seg > 0.5 ]<-4
+```
+
+
+## Make training data
+
+```{r runsim2,echo=FALSE}
+invisible( plot(ll$limg) )
+```
+
+## Pseudo-ground truth
+
+This gives us a subject with a "ground truth" segmentation.
+
+Now we get a new subject and map to the space of the arbitrarily chosen reference space.
+
+## Pseudo-ground truth
+
+```{r runsim1}
+img<-antsImageRead( getANTsRData("r30") , 2  )
+seg1<-kmeansSegmentation( img, 3 )$segmentation
+ll1<-simLesion( img, 9, 5,  myseed=2 ) # different sized lesion
+seg1[ ll1$lesion > 0.5 & seg1 > 0.5 ]<-4
+```
+
+
+## Pseudo-ground truth
+
+```{r runsim3,echo=FALSE}
+invisible( plot( ll1$limg ) )
+```
+
+
+# The study
+
+## Perform training step
+
+Now use these to train a model.
+```{r buildmodel}
+rad<-c(1,1) # fast setting
+mr<-c(1,2,4,2,1) # multi-res schedule, U-style schedule
+masks=list(   getMask(seg), getMask(seg1) )
+rfm<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
+  masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
+  voxchunk=500 )
+```
+
+
+## Combine with additional training runs
+
+```{r combiner,eval=FALSE}
+newrflist<-list()
+temp<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
+    masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
+    voxchunk=500 )
+for ( k in 1:length( mr ) )
+  if ( length( rfm$rflist[[k]]$classes  ) ==
+       length( temp$rflist[[k]]$classes )   )
+    newrflist[[k]]<-combine( rfm$rflist[[k]], temp$rflist[[k]] )
+rfm$rflist<-newrflist
+```
+
+## Apply the model to new data
+
+We apply the learned model to segment the new data.
+```{r applymodel}
+mmseg<-mrvnrfs.predict( rfm$rflist, list(list(ll2$limg)),
+  timask, rad=rad, multiResSchedule=mr, voxchunk=500  )
+```
+
+## Apply the model to new data
+```{r vizmodel,echo=FALSE}
+invisible( plot(mmseg$seg[[1]], window.img=c(0,max(mmseg$seg[[1]]) ) ) )
+```
+
+
+# Evaluation
+
+## Show ground truth
+
+Here is the ground truth.
+```{r gtseg,echo=FALSE}
+invisible( plot( seg2, window.img=c(0,max(seg2) ) ) )
+```
+
+
+## Lesion probability
+
+Take a quick look at the lesion probability.
+```{r vizprob,echo=FALSE}
+invisible( plot( mmseg$probs[[1]][[ max(mmseg$seg[[1]])  ]] ) )
+```
+
+
+## Dice overlap
+
+Now we compute the overlap.
+```{r eval}
+dicenumer<-sum(  mmseg$seg[[1]] == max(mmseg$seg[[1]]) & seg2 == max(seg2) )
+dicedenom<-sum( mmseg$seg[[1]] == max(mmseg$seg[[1]]) ) + sum( seg2 == max(seg2)  )
+dice <- 2.0 * dicenumer / dicedenom
+if ( dice < 0.87 ) stop("suggests performance regression in mrvnrfs")
+```
+
+## Summary
+
+The Dice overlap is `r dice`.  We might consider model selection
+as well where we do a quick estimate of lesion size based on the
+volume of left hemisphere csf.  Then build the model from
+subjects that "match" with respect to the coarse amount of lesion.
