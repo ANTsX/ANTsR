@@ -2,12 +2,21 @@
 sudo: false
 # cache local R libraries directory:
 cache: packages
-
 os:
   - linux
   - osx
 
 r_build_args: --no-build-vignettes --no-manual
+env:
+  global:
+  - R_BUILD_ARGS="--no-build-vignettes --no-manual"
+  - R_CHECK_ARGS=" --timings --as-cran"
+  - R_CHECK_TIME="TRUE"
+  - R_CHECK_TESTS="TRUE"
+  - _R_CHECK_TIMINGS_="0"
+  - _R_CHECK_FORCE_SUGGESTS_="0"
+  - BOOTSTRAP_LATEX=1
+  # - WARNINGS_ARE_ERRORS=0
 
 osx_image: xcode8.2
 
@@ -22,34 +31,6 @@ matrix:
 #    - r: devel
 
 cran: http://cran.rstudio.com
-
-# r_packages:
-#   - covr
-#   # - wesanderson
-#   - mFilter
-#   - igraph
-#   - magic
-#   - randomForest
-
-# r_binary_packages:
-#   - magrittr
-#   - covr
-#   - igraph
-#   - mFilter
-#   - devtools
-#   - testthat
-#   - ggplot2
-#   - Rcpp
-#   - dplyr
-#   - knitr
-#   - rmarkdown
-#   - randomForest
-#   - dplyr
-#   - psych
-#   - pracma
-#   - xgboost
-#   - RcppEigen
-#   - rsvd  
 
 before_install:
   - basedir=${PWD}
@@ -76,43 +57,8 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
   - cd ${basedir}  
+  # removing remotes
   - Rscript -e 'devtools::source_url("https://gist.githubusercontent.com/muschellij2/69c48f469ab34cc05752361645ffa8e0/raw/57e7d3b22907699d260f863a0d337a12567ffc30/rewrite_dcf.R"); rewrite_dcf(drop_remotes = c("ANTsRCore", "ITKR"));'
-  
-
-# install:
-#   - mkdir -p ~/.R
-#   - export CC=clang
-#   - export CXX=clang++
-#   - echo "CC=clang" >  ~/.R/Makevars
-#   - echo "CXX=clang++" >> ~/.R/Makevars
-#   - echo "CXX1X=clang++" >> ~/.R/Makevars
-#   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
-#   - source ~/.R/Makevars
-#   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
-# #  - echo '.travis.yml' > .Rbuildignore
-# #  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools") }'
-# #  - Rscript -e 'if(!"stringi" %in% rownames(installed.packages())) { devtools::install_github("gagolews/stringi", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
-#   - Rscript -e 'if(!"magrittr" %in% rownames(installed.packages())) { install.packages("magrittr", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"tools" %in% rownames(installed.packages())) { install.packages("tools", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"knitr" %in% rownames(installed.packages())) { install.packages("knitr", dependencies = TRUE) }'
-# #  - Rscript -e 'if(!"ggplot2" %in% rownames(installed.packages())) { install.packages("ggplot2", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"igraph" %in% rownames(installed.packages())) { install.packages("igraph", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"pracma" %in% rownames(installed.packages())) { install.packages("pracma", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"dplyr" %in% rownames(installed.packages())) { install.packages("dplyr", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"mFilter" %in% rownames(installed.packages())) { install.packages("mFilter", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"rmarkdown" %in% rownames(installed.packages())) { install.packages("rmarkdown", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"testthat" %in% rownames(installed.packages())) { install.packages("testthat", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"psych" %in% rownames(installed.packages())) { install.packages("psych", dependencies = TRUE) }'
-# #  - Rscript -e 'if(!"plyr" %in% rownames(installed.packages())) { install.packages("plyr", dependencies = TRUE) }'
-# #  - Rscript -e 'if(!"magic" %in% rownames(installed.packages())) { install.packages("magic", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"xgboost" %in% rownames(installed.packages())) { install.packages("xgboost", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"rsvd" %in% rownames(installed.packages())) { install.packages("rsvd", dependencies = TRUE) }'
-#   - Rscript -e 'if(!"RcppEigen" %in% rownames(installed.packages())) { install.packages("RcppEigen", dependencies = TRUE) }'
-# #  - Rscript -e 'update.packages( ask = FALSE )'
-
 
 # Build and check package
 script:
@@ -120,16 +66,16 @@ script:
   - export CXX=clang++
   - export CC=clang
   - cd ..
-  - travis_wait 100 R CMD build ANTsR --no-build-vignettes --no-manual
+  - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
+  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
   - mydir=${PWD}
-  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100  R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
+  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100 R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
 
 
 # report coverage rate to coveralls
-after_success:
-  - cd $mydir
+# after_success:
+  # - cd $mydir
 #  - cd ANTsR
 #  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
 # takes too long, should add to matrix
@@ -149,17 +95,6 @@ notifications:
     - jeff.duda@gmail.com
     on_success: change
     on_failure: always
-
-env:
-  global:
-  - R_BUILD_ARGS=" "
-  - R_CHECK_ARGS=" --timings"
-  - R_CHECK_TIME="TRUE"
-  - R_CHECK_TESTS="TRUE"
-  - _R_CHECK_TIMINGS_="0"
-  - _R_CHECK_FORCE_SUGGESTS_="0"
-  - BOOTSTRAP_LATEX=1
-  - WARNINGS_ARE_ERRORS=0
 
 deploy:
   provider: releases
