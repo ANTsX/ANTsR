@@ -216,7 +216,8 @@ setGeneric("all", function(x, ..., na.rm = FALSE)
 #' @examples
 #' img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
 #' max(img01)
-setMethod("Summary", signature(x = "antsImage"),
+#' @export
+setMethod("Summary", "antsImage",
           function(x, ..., na.rm = FALSE) {
             args = as.list(...)
             mask = args$mask
