@@ -121,7 +121,7 @@ steady = floor( steadyT / tr) + 1
 
 
 # Global signal before cropping (save for visualization)
-origmean = apply.antsImage(img, c(1,2,3), mean)
+origmean = apply(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
 allTimes = dim(img)[4]
 
@@ -158,14 +158,14 @@ mocoTxType = "BOLDRigid"
 for ( i in 1:repeatMotionEst )
   {
   moco <- antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
-  meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+  meanbold = apply( moco$moco_img, c(1,2,3), mean)
   }
 if ( repeatMotionEst < 1 )
   {
   mocoTxType = "QuickRigid"
   moco = antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
-meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+meanbold = apply( moco$moco_img, c(1,2,3), mean)
 
 # at this point, we might map meanbold to the structural image
 # and then motion correct all runs to that. this approach would be less
@@ -180,7 +180,7 @@ if ( ! all( is.na( extraRuns ) ) )
     # do a more accurate registration for this stage b/c it's a different run
     if ( verbose ) print( paste( "motion correction ", i ) )
     mocoTemp <- antsrMotionCalculation( timg, fixed=meanbold, typeofTransform=mocoTxType )
-    meanbold2 = apply.antsImage( timg, c(1,2,3), mean)
+    meanbold2 = apply( timg, c(1,2,3), mean)
     mocoTempToSelf <- antsrMotionCalculation( timg, fixed=meanbold2, typeofTransform=mocoTxType )
     if ( verbose ) print( "merge corrected image ( and tsDisplacement? )" )
     if ( usePkg("abind") )

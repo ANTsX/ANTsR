@@ -11,11 +11,10 @@
 #' @examples
 #'
 #' img <- makeImage(c(4,4,4), rnorm(4*4*4))
-#' img2 <- apply.antsImage(img, c(1,2), mean)
+#' img2 <- apply(img, c(1,2), mean)
 #'
 #' @method apply antsImage
 #' @export
-
 apply.antsImage <- function( X, MARGIN, FUN, ... )
 {
 

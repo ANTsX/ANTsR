@@ -140,7 +140,7 @@ preprocessRestingBOLD <- function(boldImage,
     }
   }
 
-  averageImage <- apply.antsImage(boldImage, c(1,2,3), mean)
+  averageImage <- apply(boldImage, c(1,2,3), mean)
 
   # Calculate the mask, if not supplied.
   if (is.na(maskImage)) {

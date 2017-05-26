@@ -117,7 +117,7 @@ tr = antsGetSpacing(img)[4]
 steady = floor(10.0 / tr) + 1
 
 # Global signal before cropping (save for visualization)
-origmean = apply.antsImage(img, c(1,2,3), mean)
+origmean = apply(img, c(1,2,3), mean)
 fullmean = rowMeans(timeseries2matrix(img, mask))
 allTimes = dim(img)[4]
 
@@ -174,11 +174,11 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 ```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
 if ( ! exists("moco") )
   {
-  meanbold <- apply.antsImage(img, c(1,2,3), mean)
+  meanbold <- apply(img, c(1,2,3), mean)
   for ( i in 1:testData )
     {
     moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
-    meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+    meanbold = apply( moco$moco_img, c(1,2,3), mean)
     }
   }
 ```
