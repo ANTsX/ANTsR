@@ -4,7 +4,7 @@
 \alias{unique.antsImage}
 \title{Mean for antsImage Objects}
 \usage{
-\method{unique}{antsImage}(x, incomparables = FALSE, ...)
+\method{unique}{antsImage}(x, incomparables = FALSE, ..., mask)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
@@ -12,6 +12,8 @@
 \item{incomparables}{a vector of values that cannot be compared.}
 
 \item{...}{additional arguments passed to \code{\link{unique}}}
+
+\item{mask}{binary mask of values to subset}
 }
 \description{
 Overloaded Mean for antsImage objects

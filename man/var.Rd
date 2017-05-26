@@ -10,12 +10,14 @@ var(x, ...)
 
 \method{var}{default}(x, ...)
 
-\method{var}{antsImage}(x, ...)
+\method{var}{antsImage}(x, ..., mean)
 }
 \arguments{
 \item{x}{an object for which we want to compute the variance}
 
 \item{\dots}{Any additional arguments to be passed to \code{var}.}
+
+\item{mask}{binary mask of values to subset}
 }
 \description{
 Calculates the variance of an image

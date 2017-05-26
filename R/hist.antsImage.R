@@ -1,10 +1,18 @@
-.mask_values = function(x, mask) {
-  if (missing(mask)) {
-    x = as.numeric(x)
-  } else {
-    x = x[ coerce_mask(mask) ]
-  }
-  x = c(x)
+#' @title Simple Value extractor for antsImage Values
+#' @description Takes in a mask and an image and then returns the values
+#' 
+#' @param x Object of class \code{antsImage}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are plotted.
+#'
+#' @return Vector of values
+mask_values = function(x, mask) {
+  if (!missing(mask)) {
+    if (!is.null(mask)) { # need this for Summary
+      x = x[ coerce_mask(mask, error = TRUE) ]
+    }
+  } 
+  x = as.numeric(x)
 }
 
 #' @title Histogram of Values in an Image
@@ -21,15 +29,10 @@
 #' @examples 
 #' img = makeImage(c(10,10),rnorm(100))
 #' mask = img > 0
+#' hist(img)
 #' hist(img, mask = mask)
 hist.antsImage = function(x, ..., mask) {
-  x = .mask_values(x, mask)
-  # if (missing(mask)) {
-  #   x = as.numeric(x)
-  # } else {
-  #   x = x[ coerce_mask(mask) ]
-  # }
-  # x = c(x)
+  x = mask_values(x, mask)
   hist(x, ...)
 }
 
@@ -50,7 +53,7 @@ hist.antsImage = function(x, ..., mask) {
 #' mask = img > 0
 #' quantile(img, mask = mask)
 quantile.antsImage = function(x, ..., mask) {
-  x = .mask_values(x, mask)
+  x = mask_values(x, mask)
   quantile(x, ...)
 }
 
@@ -70,7 +73,7 @@ quantile.antsImage = function(x, ..., mask) {
 #' mask = img > 0
 #' density(img, mask = mask)
 density.antsImage = function(x, ..., mask) {
-  x = .mask_values(x, mask)
+  x = mask_values(x, mask)
   density(x, ...)
 }
 
@@ -91,7 +94,7 @@ density.antsImage = function(x, ..., mask) {
 #' mask = img > 0
 #' boxplot(img, mask = mask)
 boxplot.antsImage = function(x, ..., mask) {
-  x = .mask_values(x, mask)
+  x = mask_values(x, mask)
   boxplot(x, ...)
 }
 
@@ -121,7 +124,7 @@ cut.antsImage = function(
   ...,
   mask){
   ximg = x
-  x = .mask_values(x, mask)
+  x = mask_values(x, mask)
   cuts = cut(x, breaks = breaks, ...)
   levs = levels(cuts)
   cuts = as.numeric(cuts)

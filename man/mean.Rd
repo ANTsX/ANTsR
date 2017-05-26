@@ -5,14 +5,16 @@
 \alias{sd.antsImage}
 \title{Mean for antsImage Objects}
 \usage{
-\method{mean}{antsImage}(x, ...)
+\method{mean}{antsImage}(x, ..., mask)
 
-sd.antsImage(x, ...)
+sd.antsImage(x, ..., mask)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
 
 \item{...}{additional arguments to pass to \code{\link{mean}}}
+
+\item{mask}{binary mask of values to subset}
 }
 \description{
 Overloaded Mean for antsImage objects

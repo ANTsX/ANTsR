@@ -163,9 +163,11 @@ setMethod("Math", signature(x = "antsImage"),
 #' @aliases Summary,antsImage-method
 setMethod("Summary", signature(x = "antsImage"),
           function(x, ..., na.rm = FALSE) {
-            ## either use drop_img_dim and validObject or take out both
-            a1 = as.array(x)
-            res = callGeneric(a1, ..., na.rm = na.rm)
+            L = as.list(...)
+            mask = L$mask
+            rm(list = "L"); gc();
+            x = mask_values(x, mask)
+            res = callGeneric(x, ..., na.rm = na.rm)
             # res = as.antsImage(res, reference = x)
             return(res)
           })
@@ -192,16 +194,11 @@ setMethod(f = "!", signature(x = "antsImage"), definition = function(x) {
 #' @description Overloaded Mean for antsImage objects
 #' @param x is an object of class \code{antsImage}.
 #' @param ... additional arguments to pass to \code{\link{mean}}
+#' @param mask binary mask of values to subset
 #' @rdname mean
 #' @export
-mean.antsImage = function(x, ...) {
-  x = as.array(x)
-  # if (missing(mask)) {
-  #   x = img_data(x)
-  #   x = c(x)
-  # } else {
-  #   x = mask_vals(object = x, mask)
-  # }
+mean.antsImage = function(x, ..., mask) {
+  x = mask_values(x, mask)
   mean(x, ...)
 }
 
@@ -210,24 +207,19 @@ mean.antsImage = function(x, ...) {
 #' @param x is an object of class \code{antsImage}.
 #' @param incomparables a vector of values that cannot be compared. 
 #' @param ... additional arguments passed to \code{\link{unique}}
+#' @param mask binary mask of values to subset
 #' @rdname unique
 #' @export
-unique.antsImage = function(x, incomparables = FALSE, ...) {
-  x = as.array(x)
+unique.antsImage = function(x, incomparables = FALSE, ..., mask) {
+  x = mask_values(x, mask)
   unique(x, incomparables = incomparables, ...)
 }
 
 
 #' @rdname mean
 #' @export
-sd.antsImage = function(x, ...) {
-  x = as.array(x)
-  # if (missing(mask)) {
-  #   x = img_data(x)
-  #   x = c(x)
-  # } else {
-  #   x = mask_vals(object = x, mask)
-  # }
+sd.antsImage = function(x, ..., mask) {
+  x = mask_values(x, mask)
   sd(x, ...)
 }
 
@@ -250,10 +242,10 @@ var.default = function(x, ...){
 }
 
 #' @rdname var
+#' @param mask binary mask of values to subset
 #' @export
 #' @method var antsImage
-var.antsImage = function(x, ...) {
-  ## either use drop_img_dim and validObject or take out both
-  x = c(as.array(x))
+var.antsImage = function(x, ..., mean ) {
+  x = mask_values(x, mask)
   var(x = x, ...)
 }
