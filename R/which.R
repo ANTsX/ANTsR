@@ -14,7 +14,7 @@ which = function(x, arr.ind = FALSE, useNames = TRUE) {
 
 #' @export
 which.default = function(x, arr.ind = FALSE, useNames = TRUE) {
-  which(x, arr.ind = FALSE, useNames = TRUE)
+  base::which(x, arr.ind = FALSE, useNames = TRUE)
 }
 
 #' @rdname which

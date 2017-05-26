@@ -14,18 +14,18 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
     cat("This function is for 4D images.  Returning reference image.\n")
     return(referenceImage)
   }
-  indexMask <- (maskImage == 1)
-  newImageArray <- as.array(referenceImage)
+  indexMask <- as.array(maskImage == 1)
+  # newImageArray <- as.array(referenceImage)
 
   # set everything to zero so that only non-zero mask elements are non-zero
-  newImageArray <- newImageArray * 0
+  newImageArray <- array(0, dim = dim(referenceImage))
 
   for (i in 1:nrow(timeSeriesMatrix)) {
     newImageArray[, , , i][indexMask] <- timeSeriesMatrix[i, ]
   }
   newImageArray <- newImageArray[, , , 1:nrow(timeSeriesMatrix)]
-  newImage <- as.antsImage(newImageArray)
-  antsCopyImageInfo(referenceImage, newImage)
+  newImage <- as.antsImage(newImageArray, reference = referenceImage)
+  # antsCopyImageInfo(referenceImage, newImage)
   newImage <- antsImageClone(newImage, out_pixeltype = referenceImage@pixeltype)
   return(newImage)
 }
