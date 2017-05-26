@@ -73,6 +73,7 @@ Suggests:
     viridis,
     visreg,
     wmtsa
+LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore

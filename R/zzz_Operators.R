@@ -249,6 +249,7 @@ var.default = function(x, ...){
 }
 
 #' @rdname var
+#' @export
 #' @method var antsImage
 var.antsImage = function(x, ...) {
   ## either use drop_img_dim and validObject or take out both

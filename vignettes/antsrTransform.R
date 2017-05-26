@@ -164,3 +164,47 @@ stretchFirst = composeAntsrTransforms(list(txRotate, txStretch))
 order2 = applyAntsrTransform(stretchFirst, img, img)
 plotColor(order2)
 
+## ----warp,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+
+x = img*0
+y = img*0
+it = antsImageIterator(img)
+center = dim(img)/2
+while ( !antsImageIteratorIsAtEnd(it) )
+{
+  idx = antsImageIteratorGetIndex(it)
+  vec = idx - center
+  x[idx[1],idx[2]] = vec[1]
+  y[idx[1],idx[2]] = vec[2]
+  it = antsImageIteratorNext(it)
+}
+
+x = (x/max(x))*10
+y = (y/max(y))*4
+x[x<0] = 0
+y[y<0] = 0
+field = mergeChannels(list(x,y))
+subimg = as.antsImage(img[110:150,110:150])
+subx = as.antsImage(x[110:150,110:150])
+suby = as.antsImage(y[110:150,110:150])
+invisible(plotColor(subimg, vectors=list(subx,-suby)))
+
+warpTx = antsrTransformFromDisplacementField( field )
+warped = applyAntsrTransform(warpTx,data=img,reference=img)
+invisible(plotColor(warped))
+invisible(plotColor(abs(img-warped)))
+
+warped2 = applyAntsrTransform(transform=list(warpTx,tx), data=img, reference=img)
+invisible(plotColor(warped2))
+invisible(plotColor(abs(warped2-img2)))
+
+warped3 = applyAntsrTransform(transform=list(tx,warpTx), data=img, reference=img)
+invisible(plotColor(warped3))
+invisible(plotColor(abs(warped3-img2)))
+
+## ----io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+# Don't run until we have test files
+#linTx = readAntsrTransform("yourfile.mat")
+#warpImage = antsImageRead("yourfield.nii.gz")
+#warpTx = antsrTransformFromDisplacementField(warpImage)
+

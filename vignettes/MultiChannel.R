@@ -1,16 +1,4 @@
----
-title: "Multichannel image proccessing"
-author: "Jeffrey T. Duda"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-bibliography: REFERENCES.bib
-vignette: >
-    %\VignetteEngine{knitr::rmarkdown}
-    %\VignetteIndexEntry{Multichannel images}
-    \usepackage[utf8]{inputenc}
----
-
-```{r, echo = FALSE, message = FALSE, include = FALSE}
+## ---- echo = FALSE, message = FALSE, include = FALSE---------------------
 library( knitr )
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
@@ -21,15 +9,8 @@ if("parallel" %in% rownames(installed.packages()) == TRUE) {
   library(parallel)
 }  
 
-```
 
-## Overview
-This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR)
-may be used to work with multi channel images, such as rgb (i.e. color) data. This
-is still an extremely new feature and much of ANTsR does not yet support this image type.
-Examples will be added to this document as new functionality is implemented.
-
-```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+## ----plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
 # How to plot a 2D color image
 plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL) {
 
@@ -106,13 +87,8 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
 
   suppressWarnings(print(g))
 }
-```
 
-## Basics
-Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in.
-Basic conversions and math operations work as expected.
-
-```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 # Read in and display header info
 img = antsImageRead( getANTsRData("decslice"))
 img
@@ -133,12 +109,8 @@ img2
 # Basic math ops work the same as for scalar images
 2 * sum(img)
 sum(img * 2)
-```
 
-Many functions only work on scalar images, so here we split a multichannel image into a list
-of scalar images, then the `lapply` function provides a convenient way to process all channels.
-
-```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 # Convert to list of scalar images
 iList = splitChannels(img)
 plotColor(iList)
@@ -151,13 +123,8 @@ simg = mergeChannels(sList)
 
 # Write to file
 # antsImageWrite(simg, "smoothslice.nii.gz")
-```
 
-It is worth mentioning that ANTsR is not yet compatible with `mclapply` as provided
-in the "parallel" package. It's something we will be looking into in the future. The
-main problem has to do with allocating new images, some functions that only access
-existing data will work, however it does not guarantee a faster execution time.
-```{r mclapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----mclapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 iMeans = 0
 time1 = 0
 timeParallel = NA
@@ -175,10 +142,8 @@ unlist(iMeans)
 
 timeParallel
 timeSerial
-```
 
-## Working with diffusion tensor images
-```{r dti1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 dt = antsImageRead(getANTsRData("dtislice"))
 dtList = splitChannels(dt)
 
@@ -186,29 +151,18 @@ dtList = splitChannels(dt)
 trace = dtList[[1]] + dtList[[4]] + dtList[[6]]
 trace[trace<0] = 0
 plotColor( trace )
-```
 
-We only want to deal with voxels in the brain, so the `getMask` function is used
-to obtain rough estimate of the brain, and the image is plotted with background voxels
-tinted red.
-
-```{r dti2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 mask = getMask(trace)
 plotColor( list(trace, trace*mask, trace*mask))
-```
 
-Since we are only interested in voxels in the brain, a matrix
-is created where each row is voxel in the brain and each column in a tensor component,
-listed in upper.tri order. This allows us to quickly calculate the eigen
-decomposition for each tensor.
-
-```{r dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 # list-based call to convert values to an array
-mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
+# mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
 
 # simplest convesion to array
-# mat = as.array(dt, mask == 1)
-
+mat = as.array(dt, mask == 1)
+mat = aperm(as.array(dt), c(2, 3, 1))
 # convert tensor from vector to matrix
 initTensor <- function(x) {
   tens = diag(3)
@@ -228,20 +182,20 @@ getFractionalAnisotropy <- function(evs) {
   }
 
 # Eigen decomposition for each tensor
-# eigs = unlist( apply(mat, 2, function(x) {
-#   eigen( initTensor(x) )
-#   } )
+# eigs = unlist( apply(mat, 2, function(x) { 
+#   eigen( initTensor(x) ) 
+#   } ) 
 #   )
 
-all_eigs = apply(mat, 2, function(x) { 
-  eigen( initTensor(x) )
+eigs = apply(mat, c(1, 2), function(x) { 
+  list(eigen( initTensor(x) )$values)
   } )
-
-eigs = lapply(all_eigs, function(x) {
-  x$values
-})
 eigs = lapply(eigs, unlist)
 evalMat = do.call(rbind, eigs)
+
+# evalMat = as.numeric(eigs[names(eigs)=="values1"])
+# evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values2"]))
+# evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values3"]))
 evalMat[evalMat < 0 ] = 0
 
 # Create images from the eigenvalues
@@ -250,72 +204,41 @@ eval2 = makeImage(mask, evalMat[,2])
 eval3 = makeImage(mask, evalMat[,3])
 
 plotColor( list(eval1, eval2, eval3))
-```
 
-The Fractional Anisotropy (FA) is typically used to measure how directionally specific
-the diffusion of water is within a voxel. This values is plotted below
-
-```{r dti4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 faValues = apply(evalMat, 1, getFractionalAnisotropy )
 faValues[faValues < 0] = 0
 fa = makeImage(mask, faValues)
 plotColor( fa )
-```
 
-Also of great interest is the eigenvector associated with the largest eigenvalue, this
-estimates the primary direction of diffusion (PDD) and in white matter this corresponds to
-the direction that is parallel to the myelinated axons in a fiber bundle
+## ----dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+evec1 = as.numeric(eigs[names(eigs)=="vectors1"])
+evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors2"]))
+evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors3"]))
 
-```{r dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-eig_vecs = lapply(all_eigs, function(x) {
-  x$vectors
-})
-eig_vecs = lapply(eig_vecs, c)
-vecMat = do.call(rbind, eig_vecs)
-
-
-evecx = makeImage(mask, vecMat[,1])
-evecy = makeImage(mask, vecMat[,2])
-evecz = makeImage(mask, vecMat[,3])
+evecx = makeImage(mask, evec1[,1])
+evecy = makeImage(mask, evec1[,2])
+evecz = makeImage(mask, evec1[,3])
 decList = list(evecx, evecy, evecz)
 decList = lapply(decList, abs)
 
 plotColor( decList )
-```
 
-Weighting the magnitude of the PDD by the FA is standard practice as it highlights
-regions with high directional specificity (i.e. white matter).
-This is known as a directional encoded colormap (DEC) [@Pajevic1999]
-
-```{r dti6,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti6,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 decList = lapply( decList, function(x){ fa*x } )
 plotColor(decList)
-```
 
-To verify our processing, it can be useful to plot line segments showing the direction
-of some of the vectors. This is done in a subset of the image to avoid too much visual
-clutter.
-
-```{r dti7,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----dti7,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 lower = c(40,80)
 upper = c(80,120)
-subfa = cropIndices(fa, lowerind = lower, upperind = upper)
+subfa = cropIndices(fa, lower=lower, upper=upper)
 subVecList = list(evecx, evecy, evecz)
-subVecList = lapply( subVecList, function(x){ cropIndices(x, lowerind = lower, upperind = upper)})
+subVecList = lapply( subVecList, function(x){ cropIndices(x, lower=lower, upper=upper)})
 subDecList = lapply( subVecList, function(x){ abs(subfa*x) })
 
 plotColor( subDecList, vectors=list(subVecList[[1]], subVecList[[2]]) )
-```
 
-## Deterministic Fiber tractography
-
-A common use for DTI is fiber tractography [@Basser2000]. Here we give a simplified example in which
-we restrict the tracts to lie within the slice. The first step is define a set of seeds
-which serve as the starting points for our tractography. Often, all points in the white
-matter are used as seed for "whole-brain tracking." Here we manually define a small set
-of seed points for illustration.
-
-```{r seeds,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----seeds,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 
 # indices of seed points
 seedIndices = rbind( c(61,92), c(62,92), c(63,92) )
@@ -326,10 +249,8 @@ seedIndices = rbind( seedIndices, c(64,93), c(65,93), c(65,93) )
 # convert to physical space points
 seedPts = antsTransformIndexToPhysicalPoint(fa, seedIndices)
 plotColor( subfa, points=seedPts )
-```
 
-
-```{r tracking,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+## ----tracking,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
 trackFromSeed <- function(vecs, fa, seed) {
   stepSize = 0.2
   faThresh = 0.2
@@ -398,8 +319,4 @@ ldat = data.frame(x=trackx, y=tracky, id=factor(trackid))
 plotColor(subDecList, paths=ldat, points=seedPts, vectors=list(subVecList[[1]], subVecList[[2]]))
 plotColor(subfa, paths=ldat, points=seedPts)
 
-```
 
-
-
-## References

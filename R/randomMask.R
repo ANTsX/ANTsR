@@ -26,7 +26,9 @@ randomMask = function(img, nsamples, perLabel=F) {
   randmask = img*0 # set empty output image
   
   # img can be continuous, search mask is all non zeros
-  if (perLabel == F) img[ img!=0 ] = 1
+  if (perLabel == FALSE) {
+    img[ as.array(img) != 0 ] = 1
+  }
   
   # get label vector except 0
   ulabs<-sort( unique( c( as.numeric( img ) ) ) )
@@ -36,7 +38,7 @@ randomMask = function(img, nsamples, perLabel=F) {
     ulabvec<-( img == as.numeric( ulab ) ) # logical of this label
     n<-sum( ulabvec == TRUE ) # total available voxels for label
     k<-min( c( nsamples, n ) ) # reduce nsample if not enough voxels
-    ulabvec[ -(sample(which(ulabvec==T), k)) ] = F # k random voxels from ulabvec
+    ulabvec[ -(sample(which(ulabvec==T), k)) ] = FALSE # k random voxels from ulabvec
     randmask[ulabvec] = 1
   }
   return(randmask)
