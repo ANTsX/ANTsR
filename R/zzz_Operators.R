@@ -41,6 +41,19 @@ setMethod("Ops", signature(e1 = "antsImage", e2 = "numeric"),
             return(res)
           })
 
+
+#' @rdname antsImageops
+#' @aliases Ops,antsImage,numeric-method
+setMethod("Ops", signature(e1 = "antsImage", e2 = "missing"),
+          function(e1, e2) {
+            ## This is for unary operators
+            a1 = as.array(e1)
+            
+            res <- callGeneric(a1)
+            res = as.antsImage(res, reference = e1)
+            return(res)
+          })
+
 #' @rdname antsImageops
 #' @aliases Ops,numeric,antsImage-method
 setMethod("Ops", signature(e1 = "numeric", e2 = "antsImage"),

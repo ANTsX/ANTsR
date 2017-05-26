@@ -88,3 +88,79 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
   suppressWarnings(print(g))
 }
 
+## ----basics1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+tx <- createAntsrTransform( precision="float", type="AffineTransform", dimension=2)
+setAntsrTransformParameters(tx, c(0,-1,1,0,0,0))
+setAntsrTransformFixedParameters(tx, c(128,128))
+print(tx)
+
+point = c(80,40)
+outpoint = applyAntsrTransform(tx, point)
+print(outpoint)
+
+## ----basics2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+ptsMat = rbind(c(80,40), c(20,30))
+t(apply( ptsMat, 1, function(x) {applyAntsrTransform(tx, x)}))
+
+ptsList = list(c(80,40), c(20,30))
+lapply( ptsList, function(x) {applyAntsrTransform(tx, x)})
+
+## ----basics3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+itx = invertAntsrTransform(tx)
+applyAntsrTransform( itx, outpoint )
+
+## ----basics4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+vector = c(80,40)
+applyAntsrTransform(tx, vector, dataType="vector")
+
+## ----images1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+img <- antsImageRead(getANTsRData("r16"))
+invisible(plotColor(img))
+
+moveX1 = createAntsrTransform(dimension=2, type="Euler2DTransform", translation=c(20,0) )
+shift1 = applyAntsrTransform(transform=moveX1, data=img, reference=img)
+plotColor(shift1)
+
+## ----images2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+moveX2 = createAntsrTransform(dimension=2, type="Euler2DTransform", translation=c(128,0) )
+shift2 = applyAntsrTransform(transform=moveX2, data=img, reference=img)
+plotColor(shift2)
+
+## ----images3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+refImg = antsImageClone(img)
+antsSetOrigin(refImg, c(-128,0))
+shift3 = applyAntsrTransform(transform=moveX2, data=img, reference=refImg)
+plotColor(shift3)
+print(img)
+print(refImg)
+
+## ----imagesInterp,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+img2 = applyAntsrTransform(tx, data=img, reference=img)
+invisible(plotColor(img2))
+img3 = applyAntsrTransform(tx, data=img, reference=img, interpolation="Gaussian")
+invisible(plotColor(img3))
+img4 = applyAntsrTransform(tx, data=img, reference=img, interpolation="NearestNeighbor")
+invisible(plotColor(img4))
+img5 = applyAntsrTransform(tx, data=img, reference=img, interpolation="HammingWindowedSinc")
+invisible(plotColor(img5))
+
+## ----compose,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE----
+txStretch = createAntsrTransform( "AffineTransform", dim=2 )
+params = getAntsrTransformParameters( txStretch )
+params[1] = 0.8
+setAntsrTransformParameters(txStretch, params)
+
+cos45 = cos(pi*45/180)
+sin45 = sin(pi*45/180)
+txRotate <- createAntsrTransform( precision="float", type="AffineTransform", dim=2 )
+setAntsrTransformParameters(txRotate, c(cos45,-sin45,sin45,cos45,0,0) )
+setAntsrTransformFixedParameters(txRotate, c(128,128))
+
+rotateFirst = composeAntsrTransforms(list(txStretch, txRotate))
+order1 = applyAntsrTransform(rotateFirst, img, img)
+plotColor(order1)
+
+stretchFirst = composeAntsrTransforms(list(txRotate, txStretch))
+order2 = applyAntsrTransform(stretchFirst, img, img)
+plotColor(order2)
+

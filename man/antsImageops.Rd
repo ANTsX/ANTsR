@@ -5,6 +5,8 @@
 \alias{antsImage-operators}
 \alias{Ops,antsImage,antsImage-method}
 \alias{Ops,antsImage,numeric-method}
+\alias{Ops,antsImage,missing-method}
+\alias{Ops,antsImage,numeric-method}
 \alias{Ops,numeric,antsImage-method}
 \alias{Ops,antsImage,logical-method}
 \alias{Ops,logical,antsImage-method}
@@ -17,6 +19,8 @@
 \S4method{Ops}{antsImage,antsImage}(e1, e2)
 
 \S4method{Ops}{antsImage,numeric}(e1, e2)
+
+\S4method{Ops}{antsImage,missing}(e1, e2)
 
 \S4method{Ops}{numeric,antsImage}(e1, e2)
 
