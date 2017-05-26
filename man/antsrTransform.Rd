@@ -23,6 +23,9 @@
 
 \item{type}{type of transform'
 etc noting that short is not supported}
+
+\item{parameters}{transformation parameters to send to 
+\code{\link{setAntsrTransformParameters}}}
 }
 \description{
 C++ type used to represent an ITK image transform.

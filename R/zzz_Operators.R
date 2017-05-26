@@ -178,6 +178,7 @@ setMethod(f = "!", signature(x = "antsImage"), definition = function(x) {
 #' @title Mean for antsImage Objects
 #' @description Overloaded Mean for antsImage objects
 #' @param x is an object of class \code{antsImage}.
+#' @param ... additional arguments to pass to \code{\link{mean}}
 #' @rdname mean
 #' @export
 mean.antsImage = function(x, ...) {

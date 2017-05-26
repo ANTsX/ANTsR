@@ -8,15 +8,18 @@
 #' should have (non-null) dimnames at all.
 #' 
 #' @export
-setGeneric("which", function(x, arr.ind = FALSE, useNames = TRUE) { 
-  standardGeneric("which") 
+which = function(x, arr.ind = FALSE, useNames = TRUE) {
+  UseMethod("which")
 }
-)
+
+#' @export
+which.default = function(x, arr.ind = FALSE, useNames = TRUE) {
+  which(x, arr.ind = FALSE, useNames = TRUE)
+}
 
 #' @rdname which
-#' @aliases which,antsImage-method
-setMethod("which", signature(x = "antsImage"),
-          function(x, arr.ind = FALSE, useNames = TRUE) {
-            x = coerce_mask(x)
-            which(x = x, arr.ind = arr.ind, useNames = useNames)
-          })
+#' @method which antsImage
+which.antsImage = function(x, arr.ind = FALSE, useNames = TRUE) {
+  x = coerce_mask(x)
+  which(x = x, arr.ind = arr.ind, useNames = useNames)
+}

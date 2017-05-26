@@ -20,6 +20,10 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #'
 #' @param object input object to convert
 #' @param .Object input object to convert
+#' @param pixeltype usually float, can be other types unsigned char, int, double
+#' etc noting that short is not supported
+#' @param dimension usually 2 or 3 but can be 4
+#' @param components number of pixel components 
 #' 
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported

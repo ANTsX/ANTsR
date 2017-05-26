@@ -16,6 +16,13 @@
 \item{object}{input object to convert}
 
 \item{.Object}{input object to convert}
+
+\item{pixeltype}{usually float, can be other types unsigned char, int, double
+etc noting that short is not supported}
+
+\item{dimension}{usually 2 or 3 but can be 4}
+
+\item{components}{number of pixel components}
 }
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the

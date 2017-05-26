@@ -11,6 +11,8 @@ sd.antsImage(x, ...)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
+
+\item{...}{additional arguments to pass to \code{\link{mean}}}
 }
 \description{
 Overloaded Mean for antsImage objects
