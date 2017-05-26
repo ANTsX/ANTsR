@@ -23,7 +23,8 @@
 #'
 #' @export
 randomMask = function(img, nsamples, perLabel=F) {
-  randmask = img*0 # set empty output image
+  # set empty output image
+  randmask = as.antsImage( array(0, dim = dim(img)), reference = img)
   
   # img can be continuous, search mask is all non zeros
   if (perLabel == FALSE) {
@@ -31,14 +32,14 @@ randomMask = function(img, nsamples, perLabel=F) {
   }
   
   # get label vector except 0
-  ulabs<-sort( unique( c( as.numeric( img ) ) ) )
-  ulabs<-ulabs[ ulabs > 0 ]
+  ulabs <- sort( unique( c( as.numeric( img ) ) ) )
+  ulabs <- ulabs[ ulabs > 0 ]
   
-  for ( ulab in ulabs ) {
-    ulabvec<-( img == as.numeric( ulab ) ) # logical of this label
-    n<-sum( ulabvec == TRUE ) # total available voxels for label
-    k<-min( c( nsamples, n ) ) # reduce nsample if not enough voxels
-    ulabvec[ -(sample(which(ulabvec==T), k)) ] = FALSE # k random voxels from ulabvec
+  for (ulab in ulabs) {
+    ulabvec <- as.array(img) == as.numeric( ulab )  # logical of this label
+    n <- sum( ulabvec ) # total available voxels for label
+    k <- min( c( nsamples, n ) ) # reduce nsample if not enough voxels
+    ulabvec[ -(sample(which(ulabvec), k)) ] = FALSE # k random voxels from ulabvec
     randmask[ulabvec] = 1
   }
   return(randmask)
