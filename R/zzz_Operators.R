@@ -220,14 +220,15 @@ setGeneric("all", function(x, ..., na.rm = FALSE)
 #' @export
 setMethod("Summary", "antsImage",
           function(x, ..., na.rm = FALSE) {
-            args = as.list(...)
+            args = list(...)
             mask = args$mask
             args$mask = NULL
             x = mask_values(x, mask)
             args$x = x
             args$na.rm = na.rm
+            
             res = do.call(callGeneric, args = args)
-            # L = as.list(...)
+            # L = list(...)
             # mask = L$mask
             # rm(list = "L"); gc();
             # x = mask_values(x, mask)
@@ -283,7 +284,7 @@ unique.antsImage = function(x, incomparables = FALSE, ..., mask) {
 #' @rdname mean
 #' @export
 sd.antsImage = function(x, ...) {
-  args = as.list(...)
+  args = list(...)
   mask = args$mask
   args$mask = NULL
   x = mask_values(x, mask)
@@ -314,7 +315,7 @@ var.default = function(x, ...){
 #' @export
 #' @method var antsImage
 var.antsImage = function(x, ...) {
-  args = as.list(...)
+  args = list(...)
   mask = args$mask
   args$mask = NULL
   x = mask_values(x, mask)

@@ -20,5 +20,4 @@ Overloaded math for antsImage objects
 \examples{
 img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
 abs(img01)
-
 }
