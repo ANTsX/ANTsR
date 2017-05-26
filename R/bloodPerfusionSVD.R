@@ -1,23 +1,34 @@
 #' Calculate blood perfusion using deconvolution.
 #'
 #' Implementation of the deconvolution technique of Ostergaard et al.
-#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral (or pulmonary)
-#' blood flow.  Other relevant references include http://www.ncbi.nlm.nih.gov/pubmed/16261573,
-#' http://www.ncbi.nlm.nih.gov/pubmed/8916023, and http://www.ncbi.nlm.nih.gov/pubmed/15332240.
+#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral 
+#' (or pulmonary)
+#' blood flow.  Other relevant references include 
+#' http://www.ncbi.nlm.nih.gov/pubmed/16261573,
+#' http://www.ncbi.nlm.nih.gov/pubmed/8916023, and 
+#' http://www.ncbi.nlm.nih.gov/pubmed/15332240.
 #'
 #' @param perfusionImage time series (n-D + time) perfusion acquisition.
-#' @param voiMaskImage n-D mask image indicating where the cerebral blood flow parameter
+#' @param voiMaskImage n-D mask image indicating where the cerebral blood 
+#' flow parameter
 #'        images are calculated.
-#' @param aifMaskImage n-D mask image indicating where the arterial input function is
+#' @param aifMaskImage n-D mask image indicating where the arterial input 
+#' function is
 #'        calculated.
-#' @param thresholdSVD is used to threshold the smaller elements of the diagonal matrix
-#'        during the SVD regularization.  0.2 is a common choice (cf. page 571, end of
+#' @param thresholdSVD is used to threshold the smaller elements of the 
+#' diagonal matrix
+#'        during the SVD regularization.  0.2 is a common choice (cf. page 
+#'        571, end of
 #'        column 2 in http://www.ncbi.nlm.nih.gov/pubmed/16971140).
-#' @param deltaTime time between volumetric acquisitions.  We assume a uniform time sampling.
+#' @param deltaTime time between volumetric acquisitions.  We assume a uniform 
+#' time sampling.
 #'
-#' @return list with the cerebral blood flow image (cbfImage), cerebral blood volume image
-#'         (cbvImage), mean transit time (mttImage), and arterial input function signal
-#'         from the image (aifSignal) and the calculated arterial input function
+#' @return list with the cerebral blood flow image (cbfImage), cerebral blood 
+#' volume image
+#'         (cbvImage), mean transit time (mttImage), and arterial input 
+#'         function signal
+#'         from the image (aifSignal) and the calculated arterial input 
+#'         function
 #'         concentration (aifConcentration).
 #'
 #' @author Tustison NJ
@@ -25,15 +36,19 @@
 #' @examples
 #' \dontrun{
 #'
-#' perfusionImage <- antsImageRead( filename = perfusionFileName, dimension = 4, pixeltype = 'float' )
-#' voiMaskImage <- antsImageRead( filename = voiMaskFileName, dimension = 3, pixeltype = 'unsigned int' )
-#' aifMaskImage <- antsImageRead( filename = aifMaskFileName, dimension = 3, pixeltype = 'unsigned int' )
+#' perfusionImage <- antsImageRead( filename = perfusionFileName, 
+#' dimension = 4, pixeltype = 'float' )
+#' voiMaskImage <- antsImageRead( filename = voiMaskFileName, 
+#' dimension = 3, pixeltype = 'unsigned int' )
+#' aifMaskImage <- antsImageRead( filename = aifMaskFileName, 
+#' dimension = 3, pixeltype = 'unsigned int' )
 #'
 #'
 #' deltaTime <- 3.4
 #'
-#' results <- bloodPerfusionSVD( perfusionImage, voiMaskImage, aifMaskImage,
-#'                              thresholdSVD = 0.2, deltaTime = deltaTime )
+#' results <- bloodPerfusionSVD( perfusionImage, 
+#' voiMaskImage, aifMaskImage,
+#' thresholdSVD = 0.2, deltaTime = deltaTime )
 #'
 #' antsImageWrite( results$cbfImage, paste0( 'cbf.nii.gz' ) );
 #' antsImageWrite( results$cbvImage, paste0( 'cpbv.nii.gz' ) );
@@ -41,9 +56,9 @@
 #'
 #' }
 #' @export
-bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
-                               thresholdSVD = 0.2, deltaTime = 1.0 )
-{
+bloodPerfusionSVD <- function( 
+  perfusionImage, voiMaskImage, aifMaskImage,
+  thresholdSVD = 0.2, deltaTime = 1.0 ){
   
   if( missing( perfusionImage ) )
   {
@@ -57,31 +72,41 @@ bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
   
   if( missing( aifMaskImage ) )
   {
-    stop( "Error:  The arterial input function mask image is not specified.\n" )
+    stop( paste0("Error:  The arterial input function mask image", 
+                 " is not specified.\n" )
+    )
   }
   
-  # The AIF signal is defined as the mean intensity value over the AIF region of interest
+  # The AIF signal is defined as the mean intensity value over the AIF 
+  # region of interest
   # at each time point
   
   aifMatrix <- timeseries2matrix( perfusionImage, aifMaskImage )
   Saif <- rowMeans( aifMatrix, na.rm = TRUE )
   
-  # Automatically find start of the AIF signal by finding the point at which the signal
+  # Automatically find start of the AIF signal by finding the point at 
+  # which the signal
   # intensity curve exceeds 10% of the maximum
   
   SaifMaxIndex = which( Saif == max( Saif ) )
-  SaifStartIndex = tail( which( Saif[1:SaifMaxIndex] < 0.1 * ( max( Saif ) - min( Saif ) ) ), n = 1 ) + 1
+  SaifStartIndex = tail( 
+    which( Saif[1:SaifMaxIndex] < 0.1 * ( max( Saif ) - min( Saif ) ) ), n = 1 
+  ) + 1
   
   S0aif <- mean( Saif[1:( SaifStartIndex - 1 )], na.rm = TRUE )
   
-  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
-  # we exclude the constant of proportionality, k, and the TE parameters as they cancel
+  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, 
+  # equation (3).  Note that
+  # we exclude the constant of proportionality, k, and the TE parameters 
+  # as they cancel
   # out in estimating the residue function.
   
   Caif <- -log( Saif / S0aif )
   
-  # If we can estimate the product CBF * R(t) we obtain an estimate for CBF because R(0) = 1.
-  # CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi (cf http://www.ncbi.nlm.nih.gov/pubmed/8916023,
+  # If we can estimate the product CBF * R(t) we 
+  # obtain an estimate for CBF because R(0) = 1.
+  # CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi 
+  # (cf http://www.ncbi.nlm.nih.gov/pubmed/8916023,
   # page 713, equation (9)).
   
   dSVD <- deconvolutionSVD( Caif, thresholdSVD )
@@ -94,10 +119,13 @@ bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
   # Baseline signal
   
   S0voi <- colMeans( Svoi[1:SaifStartIndex,], na.rm = TRUE )
-  S0voi <- matrix( rep( S0voi, numberOfTimePoints ), nrow = numberOfTimePoints, byrow = TRUE )
+  S0voi <- matrix( rep( S0voi, numberOfTimePoints ), 
+                   nrow = numberOfTimePoints, byrow = TRUE )
   
-  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  Note that
-  # we exclude the constant of proportionality, k, and the TE parameters as they cancel
+  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).  
+  # Note that
+  # we exclude the constant of proportionality, k, and the TE parameters as 
+  # they cancel
   # out in estimating the residue function.
   
   Cvoi <- -log( Svoi / S0voi )
@@ -109,16 +137,23 @@ bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
   
   .colMax <- function( data ) apply( data, 2, max, na.rm = TRUE )
   cbf <- .colMax( residueFunction )
-  cbfOutputImage <- matrixToImages( as.matrix( t( cbf ) ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  cbfOutputImage <- matrixToImages( 
+    as.matrix( t( cbf ) ), 
+    antsImageClone( voiMaskImage, 'float' ) )[[1]]
   
   # cbv is area under the curve at each voxel using the trapezoidal rule
   
-  cbv <- trapz( seq( from = 0.0, by = deltaTime, length.out = nrow( residueFunction ) ), residueFunction )
-  cbvOutputImage <- matrixToImages( as.matrix( cbv ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  cbv <- trapz( seq( from = 0.0, by = deltaTime, 
+                     length.out = nrow( residueFunction ) ), residueFunction )
+  cbvOutputImage <- matrixToImages( 
+    as.matrix( cbv ), 
+    antsImageClone( voiMaskImage, 'float' ) )[[1]]
   
   mtt <- cbv / cbf
   mtt[which( is.na( mtt ) )] <- 0.0
-  mttOutputImage <- matrixToImages( as.matrix( mtt ), antsImageClone( voiMaskImage, 'float' ) )[[1]]
+  mttOutputImage <- matrixToImages( 
+    as.matrix( mtt ), 
+    antsImageClone( voiMaskImage, 'float' ) )[[1]]
   
   return( list( cbfImage = cbfOutputImage,
                 cbvImage = cbvOutputImage,
@@ -129,11 +164,13 @@ bloodPerfusionSVD <- function( perfusionImage, voiMaskImage, aifMaskImage,
 
 #' Calculate the area under a sampled curve (or set of curves).
 #'
-#' Given a vector (or a matrix) representing a curve (or set of curves, columnwise),
+#' Given a vector (or a matrix) representing a curve (or set of 
+#' curves, columnwise),
 #' the area (or set of areas) is calculated using the trapezoidal rule.
 #'
 #' @param x vector of samples for the dependent variable.
-#' @param y vector or matrix of samples for the independent variable.  In the case of the
+#' @param y vector or matrix of samples for the independent variable.  
+#' In the case of the
 #'        latter, curves are organized column-wise.
 #'
 #' @return area (areas) under the sampled curve (curves).
@@ -162,12 +199,17 @@ trapz <- function( x, y )
 
 #' Regularize SVD (deconvolution) solution of cerebral blood flow.
 #'
-#' Ostergaard's regularization approach for a model independent solution of cerebral
-#' blood flow using a blood pool contrast agent (http://www.ncbi.nlm.nih.gov/pubmed/8916023).
+#' Ostergaard's regularization approach for a model independent solution of 
+#' cerebral
+#' blood flow using a blood pool contrast agent 
+#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023).
 #'
-#' @param arterialInputFunction vector specifying the arterial input function over time.
-#' @param thresholdSVD is used to threshold the smaller elements of the diagonal matrix
-#'        during the SVD regularization.  0.2 is a common choice (cf. page 571, end of
+#' @param arterialInputFunction vector specifying the arterial input function 
+#' over time.
+#' @param thresholdSVD is used to threshold the smaller elements of the 
+#' diagonal matrix
+#'        during the SVD regularization.  0.2 is a common choice (cf. page 
+#'        571, end of
 #'        column 2 in http://www.ncbi.nlm.nih.gov/pubmed/16971140).
 #'
 #' @return regularized residue function, i.e. the right-hand side of
@@ -178,7 +220,8 @@ trapz <- function( x, y )
 #' @examples
 #'
 #' S0aif <- 17.62
-#' Saif <- c( 16.25, 16.37, 20.22, 78.96, 230.5, 249.79, 198.58, 147.76, 110.39, 111.64, 129.43 )
+#' Saif <- c( 16.25, 16.37, 20.22, 78.96, 230.5, 249.79, 198.58, 147.76, 
+#' 110.39, 111.64, 129.43 )
 #' Caif <- -log( Saif / S0aif )
 #'
 #' dSVD <- deconvolutionSVD( Caif, 0.2 )

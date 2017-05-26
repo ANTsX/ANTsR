@@ -15,7 +15,8 @@ rftResults(x, resels, fwhm, df, fieldType, RPVImg = NULL, k = 1,
 
 \item{fwhm}{full width at half maxima}
 
-\item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
+\item{df}{degrees of freedom expressed as df = c(degrees of 
+interest, degrees of error)}
 
 \item{fieldType}{\itemize{
 \item{T: } {T-field} 
@@ -28,26 +29,34 @@ rftResults(x, resels, fwhm, df, fieldType, RPVImg = NULL, k = 1,
 
 \item{k}{minimum desired cluster size (default = 1)}
 
-\item{threshType}{a numeric value to threshTypeold the statistical field or a character of the following methods:
+\item{threshType}{a numeric value to threshTypeold the statistical 
+field or a character of the following methods:
 \itemize{
-\item{cRFT: } {computes a threshTypeold per expected cluster level probability }
-\item{pRFT: } {uses the mask and pval calculates the minimum statistical threshTypeold}
-\item{cFDR: } {uses an uncorrected threshTypeold at the alpha level and then computes and FDR threshTypeold based on cluster maxima}
-\item{pFDR: } {computes the fdr threshTypeold for the entire field of voxels}
+\item{cRFT: } {computes a threshTypeold per expected cluster level 
+probability }
+\item{pRFT: } {uses the mask and pval calculates the minimum statistical 
+threshTypeold}
+\item{cFDR: } {uses an uncorrected threshTypeold at the alpha level and 
+then computes and FDR threshTypeold based on cluster maxima}
+\item{pFDR: } {computes the fdr threshTypeold for the entire field of 
+voxels}
 }}
 
 \item{pval}{the p-value for estimating the threshTypeold (default = .05)}
 
-\item{pp}{the primary (initial) p-value for threshTypeolding (only used for FDR methods; default = .001)}
+\item{pp}{the primary (initial) p-value for threshTypeolding (only used for
+FDR methods; default = .001)}
 
 \item{n}{number of images in conjunction}
 
-\item{statdir}{directory where output is saved (if not specified images are not saved)}
+\item{statdir}{directory where output is saved (if not specified 
+images are not saved)}
 
 \item{verbose}{enables verbose output}
 }
 \value{
-Outputs a statistical value to be used for threshTypeold a statistical field image
+Outputs a statistical value to be used for threshTypeold a 
+statistical field image
 \itemize{
 \item{SetStats: } {set-level statistics and number of clusters}
 \item{ClusterStats: } {cluster-level statistics and descriptors}
@@ -65,7 +74,8 @@ statistics while \code{p.adjust} is used to compute all false-discovery rate
 based statistics. All statistics herein involve implementation of random 
 field theory (RFT) to some extent.
 
-Both cluster-level and peak-level statistics are described by the uncorrected
+Both cluster-level and peak-level statistics are described by the 
+uncorrected
  p-value along with the FDR and FWE corrected p-values for each cluster. 
 Peak-level statistics are described by the maximum statistical value in each
 cluster and the comparable Z statistic. The ClusterStats table also contains
@@ -73,7 +83,8 @@ coordinates for each cluster and the number of voxels therein. By default
 \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a 
 specific numeric value for threshTypeolding the statistical field. 
 \code{statFieldThresh} more fully describes using appropriate threshTypeolds
-for statistical fields and how \code{pp} plays a role in FDR threshTypeolding.
+for statistical fields and how \code{pp} plays a role in FDR 
+threshTypeolding.
 }
 \examples{
 \dontrun{
@@ -108,12 +119,12 @@ results2 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
 # p-value of .05
 results3 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
                        threshType = "pFDR", pval = .05, pp=.01)
-                                                                                                                
+ 
 # initial threshold at p-value of .001 followed by cluster FDR threshold at 
 # p-value of .05
 results4 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T", 
                        threshType = "cFDR", pval = .05, pp = .01)
-                                                                                                             
+ 
 # correcting for non-isotropic
 results5 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
                        fwhm$RPVImg)
@@ -123,9 +134,11 @@ results5 <- rftResults(timg, res, myfwhm$fwhm, df, fieldType = "T",
 \references{
 Chumbley J., (2010) Topological FDR for neuroimaging
 
-Friston K.J., (1996) Detecting Activations in PET and fMRI: Levels of Inference and Power
+Friston K.J., (1996) Detecting Activations in PET and 
+fMRI: Levels of Inference and Power
 
-Worsley K.J., (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
+Worsley K.J., (1992) A Three-Dimensional Statistical Analysis for 
+CBF Activation Studies in Human Brain.
 }
 \author{
 Zachary P. Christensen
