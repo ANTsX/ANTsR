@@ -242,10 +242,12 @@ var.default = function(x, ...){
 }
 
 #' @rdname var
-#' @param mask binary mask of values to subset
 #' @export
 #' @method var antsImage
-var.antsImage = function(x, ..., mean ) {
+var.antsImage = function(x, ...) {
+  L = as.list(...)
+  mask = L$mask
+  rm(list = "L"); gc();
   x = mask_values(x, mask)
   var(x = x, ...)
 }
