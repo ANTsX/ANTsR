@@ -1,0 +1,141 @@
+.mask_values = function(x, mask) {
+  if (missing(mask)) {
+    x = as.numeric(x)
+  } else {
+    x = x[ coerce_mask(mask) ]
+  }
+  x = c(x)
+}
+
+#' @title Histogram of Values in an Image
+#' @description Computes and displays a histogram of the values
+#' of an image with the option for a mask.
+#' 
+#' @param x Object of class \code{antsImage}
+#' @param ... Arguments passed to \code{\link{hist.default}}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are plotted.
+#'
+#' @return Output of \code{\link{hist}}
+#' @export
+#' @examples 
+#' img = makeImage(c(10,10),rnorm(100))
+#' mask = img > 0
+#' hist(img, mask = mask)
+hist.antsImage = function(x, ..., mask) {
+  x = .mask_values(x, mask)
+  # if (missing(mask)) {
+  #   x = as.numeric(x)
+  # } else {
+  #   x = x[ coerce_mask(mask) ]
+  # }
+  # x = c(x)
+  hist(x, ...)
+}
+
+
+#' @title Sample Quantiles
+#' @description Computes sample 
+#' quantiles for an image, with the option of a mask.
+#' 
+#' @param x Object of class \code{antsImage}
+#' @param ... Arguments passed to \code{\link{quantile}}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are used
+#'
+#' @return Output of \code{\link{quantile}}
+#' @export
+#' @examples 
+#' img = makeImage(c(10,10),rnorm(100))
+#' mask = img > 0
+#' quantile(img, mask = mask)
+quantile.antsImage = function(x, ..., mask) {
+  x = .mask_values(x, mask)
+  quantile(x, ...)
+}
+
+#' @title Density of Values in an Image
+#' @description Computes the density of values
+#' of an image with the option for a mask.
+#'  
+#' @param x Object of class \code{antsImage}
+#' @param ... Arguments passed to \code{\link{density.default}}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are plotted.
+#'
+#' @return Output of \code{\link{density}}
+#' @export
+#' @examples 
+#' img = makeImage(c(10,10),rnorm(100))
+#' mask = img > 0
+#' density(img, mask = mask)
+density.antsImage = function(x, ..., mask) {
+  x = .mask_values(x, mask)
+  density(x, ...)
+}
+
+
+#' @title Boxplot of Values in an Image
+#' @description Computes the boxplot of values
+#' of an image with the option for a mask.
+#'  
+#' @param x Object of class \code{antsImage}
+#' @param ... Arguments passed to \code{\link{boxplot.default}}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are plotted.
+#'
+#' @return Output of \code{\link{boxplot}}
+#' @export
+#' @examples 
+#' img = makeImage(c(10,10),rnorm(100))
+#' mask = img > 0
+#' boxplot(img, mask = mask)
+boxplot.antsImage = function(x, ..., mask) {
+  x = .mask_values(x, mask)
+  boxplot(x, ...)
+}
+
+
+#' @title Perform Cut on an image
+#' @description Cuts a numeric image into an integer factor,
+#'  with the option of a mask.
+#' 
+#' @param x Object of class \code{antsImage}
+#' @param breaks either a numeric vector of two or more unique cut points 
+#' or a single number (greater than or equal to 2) 
+#' giving the number of intervals into which x is to be cut. 
+#' Passed to \code{\link{cut}})
+#' @param ... Arguments passed to \code{\link{cut}}
+#' @param mask object to subset the image.  If missing, then all 
+#' values of the image are used
+#'
+#' @return Object of class \code{antsImage} with an \code{attribute} of levels
+#' @export
+#' @examples 
+#' img = makeImage(c(10,10),rnorm(100))
+#' mask = img > 0
+#' cut(img, mask = mask, breaks = 4)
+cut.antsImage = function(
+  x, 
+  breaks,
+  ...,
+  mask){
+  ximg = x
+  x = .mask_values(x, mask)
+  cuts = cut(x, breaks = breaks, ...)
+  levs = levels(cuts)
+  cuts = as.numeric(cuts)
+  
+  if (!missing(mask)) {
+    arr = array(0, dim = dim(ximg))
+    m = coerce_mask(mask)
+    arr[ m ] = cuts
+  } else {
+    arr = array(cuts, dim = dim(ximg))
+  }
+  x = as.antsImage(arr, reference = ximg)
+  gc();
+  
+  attr(x, "levels") = levs
+  return(x)
+} 

@@ -1,4 +1,3 @@
-#' @name ripmmarc
 #' @title Rotation Invariant Patch-based Multi-Modality Analysis aRChitecture
 #' @description Patch-based and rotation invariant image decomposition.  This
 #' is similar to patch-based dictionary learning in N-dimensions.  Warning:
@@ -53,7 +52,7 @@
 #' preds = predict( mdl, newdata = mydfte )
 #' # cor.test( preds, mydfte$lap )
 #'
-#' @export ripmmarc
+#' @export
 ripmmarc <- function(
   img,
   mask,
@@ -75,12 +74,14 @@ ripmmarc <- function(
     stop("The user must also pass in a canonical frame.")
   if ( is.na( canonicalFrame ) ) {
     canonicalFrame = makeImage( rep( 1, img@dimension ), 0 )
-    }
+  }
   # FIXME not sure why transpose is needed below ....
   outstruct <- .Call("patchAnalysis",
-    inimg.float, mask.float, outimg, patchRadius, patchSamples, patchVarEx,
-    meanCenter, canonicalFrame, t(evecBasis),
-    rotationInvariant, regressProjections, verbose, PACKAGE = "ANTsR")
+                     inimg.float, mask.float, outimg, patchRadius, 
+                     patchSamples, patchVarEx,
+                     meanCenter, canonicalFrame, t(evecBasis),
+                     rotationInvariant, regressProjections, verbose, 
+                     PACKAGE = "ANTsR")
   outstruct[[1]] = antsImageClone( outstruct[[1]], img@pixeltype )
   if ( regressProjections ) {
     mdl = lm( t( outstruct$imagePatchMat) ~ t( outstruct$basisMat  ) )
@@ -88,7 +89,7 @@ ripmmarc <- function(
     outstruct$evecCoeffs = t( bmdl$beta )
     mdl = predict( mdl )
     outstruct$recon = makeImage( mask, mdl[ round( nrow( mdl ) / 2 ) + 1, ] )
-    }
+  }
   invisible( gc() )
   return( outstruct )
 }
@@ -96,7 +97,6 @@ ripmmarc <- function(
 
 
 
-#' @name ripmmarcBasisImage
 #' @title Generate an antsImage from ripmmarc basis data
 #' @description This function converts a vectorized image patch back into an
 #' antsImage such that it may be displayed in its extrinsic dimensionality.
@@ -112,13 +112,14 @@ ripmmarc <- function(
 #' ripped <- ripmmarc( img, msk, patchRadius=3, patchSamples=2000, patchVarEx=5)
 #' bimg = ripmmarcBasisImage( ripped$canonicalFrame, ripped$basisMat[4,] )
 #'
-#' @export ripmmarcBasisImage
-ripmmarcBasisImage <- function( canonicalFrame, patchBasisVector, eps = 1.e-12)
+#' @export
+ripmmarcBasisImage <- function( canonicalFrame, 
+                                patchBasisVector, eps = 1.e-12)
 {
-newimg = canonicalFrame * 0
-frameMask = thresholdImage( abs( canonicalFrame ), eps, Inf )
-if ( sum( frameMask ) != length( patchBasisVector ) )
-  stop("Size of mask does not appear to match length of basis vector" )
-newimg[ frameMask == 1 ] = patchBasisVector
-return( newimg )
+  newimg = canonicalFrame * 0
+  frameMask = thresholdImage( abs( canonicalFrame ), eps, Inf )
+  if ( sum( frameMask ) != length( patchBasisVector ) )
+    stop("Size of mask does not appear to match length of basis vector" )
+  newimg[ frameMask == 1 ] = patchBasisVector
+  return( newimg )
 }
