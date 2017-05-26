@@ -254,6 +254,6 @@ var.default = function(x, ...){
 #' @method var antsImage
 var.antsImage = function(x, ...) {
   ## either use drop_img_dim and validObject or take out both
-  x = as.array(x)
+  x = c(as.array(x))
   var(x = x, ...)
 }
