@@ -29,7 +29,7 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' set.seed( 123 )
+#' set.seed( 2017 )
 #' boldImages <- list()
 #' n=16
 #' nvox <- n*n*n*12
