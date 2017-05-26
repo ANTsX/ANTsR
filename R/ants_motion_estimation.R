@@ -16,6 +16,7 @@
 #' testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
 #' testimg<-iMath(testimg,"PadImage",5)
 #' mocorr<-.motion_correction( testimg )
+#' @export
 .motion_correction <- function( img, fixed = NA, moreaccurate = 1,
                                 txtype = "Affine", verbose=FALSE )
 {
