@@ -2,6 +2,7 @@ context("antsImage Basic Operations")
 
 # Use pixeltype=="double" for tests, if using the default pixeltype=="float"
 # then all test will fail due loss of precision
+set.seed(20170525)
 
 values = rnorm(100)
 img = makeImage(c(10, 10), values, pixeltype = "double")  # this get changed
@@ -32,6 +33,26 @@ test_that("Array operations give back antsImages", {
   expect_true(is.antsImage( img1 + arr))
   expect_true(is.antsImage( arr + img ))
   expect_true(is.antsImage( img1 == arr))
+})
+
+test_that("Masks are in summary measures", {
+  expect_equal( mean(img1), -0.12205608476102992876)
+  expect_equal( mean(img1, mask = img1 > 2), 2.1914957678592390522)
+  expect_silent(sum(img1))
+  expect_silent(sum(img1, mask = img > 4))
+  
+  expect_warning(all(img1))
+  expect_warning(all(img1 > 5))
+  expect_silent(all(coerce_mask(img1 > 5)))
+  
+  expect_silent(prod(img1))
+  expect_silent(prod(img1, mask = img > 1))
+  
+  expect_silent(range(img1))
+  expect_silent(range(img1, mask = img > 1))
+  
+  #nothign greater than 5
+  expect_warning(range(img1, mask = img > 5))  
 })
 
 test_that("dim of antsImage", {
