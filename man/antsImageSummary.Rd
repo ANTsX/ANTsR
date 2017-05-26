@@ -18,3 +18,7 @@
 \description{
 Overloaded Summary for antsImage objects
 }
+\examples{
+img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
+max(img01)
+}

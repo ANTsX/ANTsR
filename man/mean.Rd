@@ -7,7 +7,7 @@
 \usage{
 \method{mean}{antsImage}(x, ..., mask)
 
-sd.antsImage(x, ..., mask)
+sd.antsImage(x, ...)
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}

@@ -144,6 +144,10 @@ setMethod("Ops", signature(e1 = "antsImage", e2 = "list"),
 #' @rdname antsImagemath
 #' @param x is an object of class \code{antsImage}.
 #' @aliases Math,antsImage-method
+#' @examples
+#' img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
+#' abs(img01)
+#' 
 setMethod("Math", signature(x = "antsImage"),
           function(x) {
             ## either use drop_img_dim and validObject or take out both
@@ -209,14 +213,24 @@ setGeneric("all", function(x, ..., na.rm = FALSE)
 #' @param ... further arguments passed to summary methods
 #' @param na.rm logical: should missing values be removed?
 #' @aliases Summary,antsImage-method
+#' @examples
+#' img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
+#' max(img01)
 setMethod("Summary", signature(x = "antsImage"),
           function(x, ..., na.rm = FALSE) {
-            L = as.list(...)
-            mask = L$mask
-            rm(list = "L"); gc();
+            args = as.list(...)
+            mask = args$mask
+            args$mask = NULL
             x = mask_values(x, mask)
-            res = callGeneric(x, ..., na.rm = na.rm)
-            # res = as.antsImage(res, reference = x)
+            args$x = x
+            args$na.rm = na.rm
+            res = do.call(callGeneric, args = args)
+            # L = as.list(...)
+            # mask = L$mask
+            # rm(list = "L"); gc();
+            # x = mask_values(x, mask)
+            # res = callGeneric(x, ..., na.rm = na.rm)
+            # # res = as.antsImage(res, reference = x)
             return(res)
           })
 
@@ -266,9 +280,14 @@ unique.antsImage = function(x, incomparables = FALSE, ..., mask) {
 
 #' @rdname mean
 #' @export
-sd.antsImage = function(x, ..., mask) {
+sd.antsImage = function(x, ...) {
+  args = as.list(...)
+  mask = args$mask
+  args$mask = NULL
   x = mask_values(x, mask)
-  sd(x, ...)
+  args$x = x
+  do.call(sd, args = args)
+  # sd(x, ...)
 }
 
 #' @rdname var
@@ -293,9 +312,10 @@ var.default = function(x, ...){
 #' @export
 #' @method var antsImage
 var.antsImage = function(x, ...) {
-  L = as.list(...)
-  mask = L$mask
-  rm(list = "L"); gc();
+  args = as.list(...)
+  mask = args$mask
+  args$mask = NULL
   x = mask_values(x, mask)
-  var(x = x, ...)
+  args$x = x
+  do.call(var, args = args)
 }
