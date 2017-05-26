@@ -60,7 +60,7 @@ for( i in 1:length( boldImages ) )
   if( i == 1 ) maskImage <- fmri$maskImage
   cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }
-
+boldImages = cleanBoldImages
 icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
   numberOfICAComponents = 2 )
 

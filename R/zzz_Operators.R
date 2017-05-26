@@ -242,6 +242,7 @@ var = function(x, ...){
   UseMethod("var")
 }
 
+#' @rdname var
 #' @export
 #' @importFrom stats var
 var.default = function(x, ...){

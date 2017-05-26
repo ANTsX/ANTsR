@@ -12,6 +12,7 @@ which = function(x, arr.ind = FALSE, useNames = TRUE) {
   UseMethod("which")
 }
 
+#' @rdname which
 #' @export
 which.default = function(x, arr.ind = FALSE, useNames = TRUE) {
   base::which(x, arr.ind = FALSE, useNames = TRUE)
@@ -19,6 +20,7 @@ which.default = function(x, arr.ind = FALSE, useNames = TRUE) {
 
 #' @rdname which
 #' @method which antsImage
+#' @export
 which.antsImage = function(x, arr.ind = FALSE, useNames = TRUE) {
   x = coerce_mask(x)
   which(x = x, arr.ind = arr.ind, useNames = useNames)

@@ -2,10 +2,13 @@
 % Please edit documentation in R/which.R
 \name{which}
 \alias{which}
+\alias{which.default}
 \alias{which.antsImage}
 \title{Which values are TRUE}
 \usage{
 which(x, arr.ind = FALSE, useNames = TRUE)
+
+\method{which}{default}(x, arr.ind = FALSE, useNames = TRUE)
 
 \method{which}{antsImage}(x, arr.ind = FALSE, useNames = TRUE)
 }

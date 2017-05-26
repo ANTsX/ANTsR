@@ -2,10 +2,13 @@
 % Please edit documentation in R/zzz_Operators.R
 \name{var}
 \alias{var}
+\alias{var.default}
 \alias{var.antsImage}
 \title{Variance generic}
 \usage{
 var(x, ...)
+
+\method{var}{default}(x, ...)
 
 \method{var}{antsImage}(x, ...)
 }
