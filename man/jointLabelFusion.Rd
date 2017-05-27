@@ -105,4 +105,3 @@ Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 }
 \keyword{fusion,}
 \keyword{template}
-

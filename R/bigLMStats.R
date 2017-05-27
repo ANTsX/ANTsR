@@ -128,6 +128,7 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = F) {
 #' print( rownames( result$pValue ) )
 #'
 #' @export bigLMStats2
+#' @importFrom RcppEigen fastLm
 bigLMStats2 <- function( dataFrame,  voxmat, myFormula ) {
   vdf = data.frame( dataFrame, vox = voxmat[,1] )
   temp = summary( lm( myFormula  , data=vdf))
@@ -146,7 +147,7 @@ bigLMStats2 <- function( dataFrame,  voxmat, myFormula ) {
     loform = as.formula( myFormula )
     for ( n in 1:ncol( voxmat ) ) {
       vdf$vox = voxmat[,n]
-      flmmod <- fastLm( loform, data=vdf )
+      flmmod <- RcppEigen::fastLm( loform, data=vdf )
       mysumm = summary( flmmod )
       mycoef = coefficients( mysumm )
       myestvs[ , n ] = mycoef[,1]

@@ -21,6 +21,7 @@
 #' }
 #' @param imagetype choose 0/1/2/3 mapping to scalar/vector/tensor/time-series
 #' @param verbose print command and run verbose application of transform.
+#' @param ... additional arugment passed to \code{antsApplyTransforms} C code
 #' @return output antsImage resampled with target's resolution/origin/orientation/direction
 #' @author Pustina D
 #' @examples

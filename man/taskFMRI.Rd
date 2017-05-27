@@ -51,4 +51,3 @@ derived from global residual signal. Estimate final glm.
 \author{
 Avants BB
 }
-

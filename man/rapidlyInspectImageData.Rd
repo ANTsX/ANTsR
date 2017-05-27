@@ -39,4 +39,3 @@ if ( !usePkg("DMwR") | ! usePkg("fpc") )
 \author{
 Avants BB
 }
-

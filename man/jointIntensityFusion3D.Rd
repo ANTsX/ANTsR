@@ -59,4 +59,3 @@ Brian B. Avants, Hongzhi Wang, Paul Yushkevich
 }
 \keyword{fusion,}
 \keyword{template}
-

@@ -41,9 +41,6 @@ activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5)
 activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
 
 }
-\author{
-Kandel BM %% ~~who you are~~
-}
 \references{
 Method: Pattern of cerebral hypoperfusion in Alzheimer disease
 and mild cognitive impairment measured with arterial spin-labeling MR
@@ -54,4 +51,6 @@ Ratio of GM to WM activity: Quantitative magnetic resonance imaging of human
 brain perfusion at 1.5 T using steady-state inversion of arterial water.
 Roberts DA, Detre JA, Bolinger L, Insko EK, Leigh JS Jr. PNAS 1994.
 }
-
+\author{
+Kandel BM %% ~~who you are~~
+}

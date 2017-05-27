@@ -36,4 +36,3 @@ Brian B. Avants, Nicholas J. Tustison
 \keyword{crop,}
 \keyword{extract}
 \keyword{sub-image}
-

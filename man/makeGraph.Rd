@@ -44,4 +44,3 @@ gobj<-makeGraph( mat , 0.5 )
 \author{
 Avants BB
 }
-

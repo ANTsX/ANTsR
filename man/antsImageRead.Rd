@@ -31,10 +31,9 @@ img <- antsImageRead( fn , dimension = 2  )
 img <- antsImageRead( fn , dimension = 2 , 'double' )
 
 }
-\author{
-Shrinidhi KL
-}
 \seealso{
 \code{\link{antsImageWrite}}
 }
-
+\author{
+Shrinidhi KL
+}

@@ -27,4 +27,3 @@ smask = splitMask( mask, 10 )
 \author{
 Avants BB, Tustison NJ, Pustina D
 }
-

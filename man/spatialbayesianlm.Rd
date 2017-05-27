@@ -57,4 +57,3 @@ regularity.
 \author{
 Avants BB
 }
-

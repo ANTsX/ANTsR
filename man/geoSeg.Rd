@@ -54,4 +54,3 @@ seg = geoSeg( img, bmk, priors )
 \author{
 Brian B. Avants
 }
-

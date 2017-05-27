@@ -57,7 +57,7 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
   bayesianPerfusion <- function(asl, xideal, nuisance, segmentation, tissuelist,
    myPriorStrength=30.0,
   useDataDrivenMask=3,
-  localweights=F, priorBetas=NA) {
+  localweights=FALSE, priorBetas=NA) {
     mask <- thresholdImage(segmentation, 1, Inf)
     aslmat <- timeseries2matrix(asl, mask)
     perfdf <- data.frame( xideal=xideal,

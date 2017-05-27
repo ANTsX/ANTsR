@@ -39,4 +39,3 @@ Split data into testing and training sets for cross-validation.
 \author{
 Kandel BM and Avants B
 }
-

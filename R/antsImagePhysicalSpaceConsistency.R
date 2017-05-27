@@ -16,7 +16,7 @@
 #' check <- antsImagePhysicalSpaceConsistency(img1, img2)
 #'
 #'
-#' @export antsCopyImageInfo
+#' @export
 # This implementation mimics: itkImageToImageFilter.hxx
 antsImagePhysicalSpaceConsistency <- function(img1, img2, coordinate.tolerance=1e-2, direction.tolerance=1e-2,
     data.type=FALSE ) {

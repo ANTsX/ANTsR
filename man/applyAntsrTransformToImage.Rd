@@ -29,4 +29,3 @@ setAntsrTransformParameters(tx, c(0.9,0,0,1.1,10,11) )
 img2 = applyAntsrTransformToImage(tx, img, img)
 # plot(img,img2)
 }
-

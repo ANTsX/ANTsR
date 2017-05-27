@@ -3,7 +3,15 @@
 \docType{class}
 \name{antsrTransform-class}
 \alias{antsrTransform-class}
+\alias{show,antsrTransform-method}
+\alias{initialize,antsrTransform-method}
 \title{An S4 class for an antsrTransform}
+\usage{
+\S4method{show}{antsrTransform}(object)
+
+\S4method{initialize}{antsrTransform}(.Object, precision = "float",
+  dimension = 3, type = "AffineTransform", parameters = NA)
+}
 \arguments{
 \item{object}{input object to convert}
 
@@ -15,6 +23,9 @@
 
 \item{type}{type of transform'
 etc noting that short is not supported}
+
+\item{parameters}{transformation parameters to send to 
+\code{\link{setAntsrTransformParameters}}}
 }
 \description{
 C++ type used to represent an ITK image transform.
@@ -25,6 +36,12 @@ C++ type used to represent an ITK image transform.
 \item{\code{dimension}}{usually 2 or 3 but can be 4}
 
 \item{\code{precision}}{math precision is float or double'}
+
+\item{\code{type}}{The type of transform: usually one of 
+AffineTransform, CenteredAffineTransform, CenteredEuler3DTransform,
+CenteredRigid2DTransform, CenteredSimilarity2DTransform, Euler2DTransform, 
+Euler3DTransform, QuaternionRigidTransform, Rigid2DTransform, 
+Similarity2DTransform, Similarity3DTransform}
 
 \item{\code{pointer}}{to the memory location of the itk object}
 }}

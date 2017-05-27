@@ -107,9 +107,6 @@ print("ground truth")
 print( yvec[-trn] )
 }
 }
-\author{
-Avants BB, Tustison NJ
-}
 \references{
 Pustina, D, et al.  Automated segmentation of chronic stroke
 lesions using LINDA: Lesion Identification with Neighborhood Data Analysis,
@@ -118,4 +115,6 @@ Human Brain Mapping, 2016. (related work, not identical)
 \seealso{
 \code{\link{getMultiResFeatureMatrix}} \code{\link{mrvnrfs}}
 }
-
+\author{
+Avants BB, Tustison NJ
+}

@@ -15,4 +15,3 @@ antsrTransform'
 \description{
 Convert deformation field (multiChannel image) to antsrTransform
 }
-

@@ -1,8 +1,8 @@
 Package: ANTsR
 Type: Package
-Title: ANTs in R: quantification tools for biomedical images
-Version: 0.4.1
-Date: 2017-05-03
+Title: ANTs in R: Quantification Tools for Biomedical Images
+Version: 0.5.4
+Date: 2017-05-25
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
@@ -21,7 +21,16 @@ Depends:
 Imports:
     Rcpp,
     tools,
-    magrittr
+    magrittr,
+    RcppEigen,
+    xgboost,
+    rsvd,
+    psych,
+    magic,
+    stats,
+    graphics,
+    grDevices,
+    utils
 Suggests:
     abind,
     BGLR,
@@ -29,6 +38,7 @@ Suggests:
     cluster,
     corpcor,
     DMwR,
+    dplyr,
     e1071,
     extremevalues,
     fastICA,
@@ -41,7 +51,6 @@ Suggests:
     igraph,
     irlba,
     knitr,
-    magic,
     MASS,
     Matrix,
     mFilter,
@@ -52,32 +61,23 @@ Suggests:
     pixmap,
     png,
     pracma,
-    psych,
     randomForest,
     RANN,
-    RcppEigen,
     rflann,
     rgl,
     rmarkdown,
     robust,
     robustbase,
-    rsvd,
     signal,
     sna,
     testthat,
     viridis,
     visreg,
-    wmtsa,
-    xgboost
+    wmtsa
+LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
-OS_type: unix
-Additional_repositories:
-  https://github.com/InsightSoftwareConsortium/ITK.git,
-  https://github.com/stnava/ANTs.git,
-  https://github.com/stnava/ITKR.git,
-  https://github.com/stnava/ANTsR.git
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

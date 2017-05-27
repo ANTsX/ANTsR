@@ -34,4 +34,3 @@ powersLabels = makePointsImage( powers_areal_mni_itk[,1:3], mni, radius=3 )
 \author{
 Avants BB, Duda JT
 }
-

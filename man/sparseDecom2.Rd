@@ -4,7 +4,7 @@
 \alias{sparseDecom2}
 \title{Convenience wrapper for 2-view eigenanatomy decomposition.}
 \usage{
-sparseDecom2(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
+sparseDecom2(inmatrix, inmask = list(NA, NA), sparseness = c(0.01, 0.01),
   nvecs = 3, its = 20, cthresh = c(0, 0), statdir = NA, perms = 0,
   uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 0,
   initializationList = list(), initializationList2 = list(), ell1 = 10,
@@ -70,8 +70,10 @@ mat<-replicate(100, rnorm(20))
 mat2<-replicate(100, rnorm(20))
 mat<-scale(mat)
 mat2<-scale(mat2)
-mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
-  sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
+mydecom<-sparseDecom2(
+inmatrix = list(mat,mat2),
+sparseness=c(0.1,0.3),
+nvecs=3, its=3, perms=0)
 wt<-0.666
 mat3<-mat*wt+mat2*(1-wt)
 mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
@@ -127,4 +129,3 @@ plot( preddf, testdf$bmi )
 \author{
 Avants BB
 }
-

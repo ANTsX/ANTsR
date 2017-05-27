@@ -51,10 +51,9 @@ plot( img, eseg )
 }
 }
 }
-\author{
-Tustison NJ, Avants BB
-}
 \seealso{
 \code{\link{mrvnrfs}}
 }
-
+\author{
+Tustison NJ, Avants BB
+}

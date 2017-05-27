@@ -27,11 +27,10 @@ dr=randsvd(A,k)$d[1:k]
 dt=svd(A)$d[1:k]
 cor(dr,dt)
 }
-\author{
-Avants BB
-}
 \references{
 N. Halko, P.G. Martinsson, J. Tropp "Finding structure with randomness: Stochastic algorithms for constructing approximate matrix decompositions" arXiv 0909.4061
 }
+\author{
+Avants BB
+}
 \keyword{svd}
-

@@ -73,10 +73,9 @@ plot(moving,labimgm  \%>\% iMath("GD",2)  )
 }
 
 }
-\author{
-Avants BB
-}
 \seealso{
 \code{\link{antsRegistration}}
 }
-
+\author{
+Avants BB
+}

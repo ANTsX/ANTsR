@@ -29,6 +29,8 @@ resampleImageToTarget(image, target, interpType = "linear", imagetype = 0,
 \item{imagetype}{choose 0/1/2/3 mapping to scalar/vector/tensor/time-series}
 
 \item{verbose}{print command and run verbose application of transform.}
+
+\item{...}{additional arugment passed to \code{antsApplyTransforms} C code}
 }
 \value{
 output antsImage resampled with target's resolution/origin/orientation/direction
@@ -48,4 +50,3 @@ resampled <- resampleImageToTarget(fi2mm, fi)
 \author{
 Pustina D
 }
-

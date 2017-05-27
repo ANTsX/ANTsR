@@ -23,19 +23,34 @@
 #'
 #' @export alffmap
 alffmap <- function( x, flo=0.01, fhi=0.1, tr=1,
-  detrend = TRUE,
-  takesqrt = FALSE,
-  kernel )
-  {
-  if ( missing( "kernel") )
-    temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE,
-      detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
-  if ( ! missing( "kernel") )
-    temp = spec.pgram( ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE,
-      detrend = detrend, demean = FALSE, log = "n", plot = FALSE, kernel = kernel )
-  fselect = ( temp$freq >= flo & temp$freq <= fhi )
-  if ( takesqrt ) denom = sqrt( sum( temp$spec ) ) else denom = sum( temp$spec )
-  if ( takesqrt )
-    numer = sqrt( sum( temp$spec[ fselect ] ) ) else numer = sum( temp$spec[ fselect ] )
-  return( c( numer, numer/denom ) )
+                     detrend = TRUE,
+                     takesqrt = FALSE,
+                     kernel )
+{
+  args = list(x = stats::ts( x, frequency = 1.0 / tr ), 
+           taper = 0, fast = TRUE,
+          detrend = detrend, demean = FALSE, log = "n", plot = FALSE)
+  if (!missing(kernel)) {
+    args$kernel = kernel
   }
+  temp = do.call(stats::spec.pgram, args)
+  # if ( missing( "kernel") ) {
+  #   temp = stats::spec.pgram( 
+  #     stats::ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE,
+  #     detrend = detrend, demean = FALSE, log = "n", plot = FALSE )
+  # } else {
+  #   temp = stats::spec.pgram( 
+  #     stats::ts( x, frequency = 1.0 / tr ), taper = 0, fast = TRUE,
+  #     detrend = detrend, demean = FALSE, log = "n", plot = FALSE, 
+  #     kernel = kernel )
+  # }
+  fselect = ( temp$freq >= flo & temp$freq <= fhi )
+  denom = sum( temp$spec )
+  numer = sum( temp$spec[ fselect ] )
+  
+  if ( takesqrt ) {
+    denom = sqrt( denom ) 
+    numer = sqrt( numer )
+  }
+  return( c( numer, numer/denom ) )
+}

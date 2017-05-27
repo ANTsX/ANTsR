@@ -40,4 +40,3 @@ dissimilarity is returned in the matrix.
 \author{
 Avants BB
 }
-

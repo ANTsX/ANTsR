@@ -19,4 +19,8 @@ antsrTransform
 \description{
 read a transform from file
 }
-
+\examples{
+\dontrun{
+tx = readAntsrTransform( "yourtx.mat")
+}
+}

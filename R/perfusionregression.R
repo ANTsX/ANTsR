@@ -50,6 +50,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
   }
   mycbfmodel <- lm(cbfform)  # standard regression
   cbfi <- antsImageClone(mask_img)
+  ## May want a PR for this
   betaideal <- ((mycbfmodel$coeff)[2, ])
   if (mean(betaideal) < 0)
     betaideal <- (betaideal) * (-1)

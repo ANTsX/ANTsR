@@ -30,4 +30,3 @@ params = getAntsrTransformParameters(tx)
 setAntsrTransformParameters(tx, params*2)
 pt2 = applyAntsrTransform(tx, c(1,2,3))
 }
-

@@ -67,9 +67,6 @@ esol <- eanatDef( boldMat,
 }
 
 }
-\author{
-Avants BB, Tustison NJ
-}
 \references{
 Kandel, B. M.; Wang, D. J. J.; Gee, J. C. & Avants, B. B.
 Eigenanatomy: sparse dimensionality reduction for multi-modal medical
@@ -81,4 +78,6 @@ NeuroImage, 2014, 99, 14-27.
 \seealso{
 \code{\link{eanatSelect}} \url{https://github.com/stnava/blindSourceSeparationInANTsR}
 }
-
+\author{
+Avants BB, Tustison NJ
+}

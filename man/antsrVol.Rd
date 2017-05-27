@@ -65,4 +65,3 @@ antsrVol( wm, list( kimg ), quantlimits=c(0.01,0.99) )
 \author{
 Avants BB, Tustison NJ
 }
-

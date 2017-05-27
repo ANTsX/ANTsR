@@ -48,4 +48,3 @@ Uses clustering methods to split a time series into similar subsets.
 \author{
 Avants BB
 }
-

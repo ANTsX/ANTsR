@@ -32,4 +32,3 @@ antsSetPixels(img,2,3,value=Inf)
 
 
 }
-

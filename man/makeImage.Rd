@@ -37,4 +37,3 @@ outimg<-makeImage( outimg ,  c(2,10) )
 \author{
 Avants BB
 }
-

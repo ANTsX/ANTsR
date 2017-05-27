@@ -113,4 +113,3 @@ Uses a target function to denoise resting bold data
 \author{
 Avants BB
 }
-

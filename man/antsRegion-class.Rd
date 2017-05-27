@@ -7,4 +7,11 @@
 \description{
 An S4 class to hold a region of an antsImage
 }
+\section{Slots}{
+
+\describe{
+\item{\code{index}}{indices of the region}
+
+\item{\code{size}}{size of the region}
+}}
 

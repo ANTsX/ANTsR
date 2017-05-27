@@ -22,19 +22,27 @@
 #' 
 #' @export timeseries2matrix
 timeseries2matrix <- function(img, mask) {
-  labs <- sort(unique(mask[mask > 0.001]))
+  m = as.array(mask)
+  
+  labs <- sort(unique(m[m > 0.001]))
 
   if (!all( labs == round(labs) ))
     stop("Mask image must be binary or integer labels")
 
-  if (length(labs) == 1) 
-    logmask <- (mask == 1) else logmask <- (mask > 0)
+  if (length(labs) == 1) {
+    logmask <- (m == 1)  
+  } else {
+    logmask <- (m > 0)
+  }
+  i = as.array(img)
+  mat = apply(i, 4, function(x) x[logmask])
+  
   mat <- img[logmask]
   dim(mat) <- c(sum(logmask), dim(img)[length(dim(img))])
   mat <- t(mat)
   if (length(labs) == 1) 
     return(mat)
-  maskvec <- mask[logmask]
+  maskvec <- m[logmask]
   mmat <- matrix(apply(mat[, maskvec == labs[1]], FUN = mean, MARGIN = 1), ncol = 1)
   for (i in 2:length(labs)) {
     newmat <- matrix(apply(mat[, maskvec == labs[i]], FUN = mean, MARGIN = 1), 

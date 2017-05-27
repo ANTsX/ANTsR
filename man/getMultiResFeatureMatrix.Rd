@@ -49,4 +49,3 @@ featMat <- getMultiResFeatureMatrix( flist, seg, rad=c(1,1),
 \author{
 Avants BB, Tustison NJ
 }
-

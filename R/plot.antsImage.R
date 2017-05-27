@@ -67,6 +67,18 @@
 #'
 #' @method plot antsImage
 #' @export
+#' @importFrom grDevices colorRampPalette dev.new dev.off heat.colors hsv 
+#' @importFrom grDevices jpeg png rainbow rgb
+#' @importFrom graphics box hist image layout lcm par plot plot.new 
+#' @importFrom graphics plot.window points rect title
+#' @importFrom stats ar as.formula coefficients convolve cor cor.test cov dist 
+#' @importFrom stats formula glm lm lm.fit loess median model.frame model.matrix 
+#' @importFrom stats model.response na.omit optimize p.adjust pchisq pf pnorm 
+#' @importFrom stats ppois predict pt qchisq qf qnorm qt quantile residuals rnorm 
+#' @importFrom stats spec.pgram spline stl t.test toeplitz ts
+#' @importFrom utils capture.output data download.file glob2rx install.packages 
+#' @importFrom utils read.csv setTxtProgressBar tail txtProgressBar unzip 
+#' @importFrom utils write.csv
 plot.antsImage <- function(x, y,
   color.img = "white",
   color.overlay = c("jet", "red", "blue",  "green", "yellow", "viridis", "magma", "plasma", "inferno"),

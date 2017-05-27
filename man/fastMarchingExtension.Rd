@@ -33,4 +33,3 @@ extendedImg = fastMarchingExtension( speed, mask, img )
 \author{
 Duda, JT
 }
-

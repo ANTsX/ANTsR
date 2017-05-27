@@ -57,4 +57,3 @@ noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 \author{
 Benjamin M. Kandel, Brian B. Avants
 }
-

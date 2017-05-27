@@ -37,7 +37,7 @@
 #'   plot(  meancbf, slices="1x50x1" )
 #'   }
 #'
-#' @export quantifyCBF
+#' @export
 quantifyCBF <- function(perfusion,
   mask, parameters, M0val = NA, outlierValue = 0.02) {
 

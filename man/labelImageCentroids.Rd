@@ -30,4 +30,3 @@ labelImageCentroids(labelImage)
 \author{
 Avants BB, Duda JT
 }
-

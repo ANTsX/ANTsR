@@ -77,4 +77,3 @@ for ( i in 1:nv )
 \author{
 Avants BB
 }
-

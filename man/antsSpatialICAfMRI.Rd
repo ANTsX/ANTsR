@@ -43,7 +43,7 @@ be performed prior to calling this function (cf preprocessfMRI.R).
 }
 \examples{
 
-set.seed( 123 )
+set.seed( 2017 )
 boldImages <- list()
 n=16
 nvox <- n*n*n*12
@@ -60,7 +60,7 @@ for( i in 1:length( boldImages ) )
   if( i == 1 ) maskImage <- fmri$maskImage
   cleanBoldImages[[i]] <- fmri$cleanBoldImage
   }
-
+boldImages = cleanBoldImages
 icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
   numberOfICAComponents = 2 )
 
@@ -68,4 +68,3 @@ icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
 \author{
 Tustison NJ, Avants BB
 }
-

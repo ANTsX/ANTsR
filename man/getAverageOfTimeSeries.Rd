@@ -22,4 +22,3 @@ avg<-getAverageOfTimeSeries( img )
 \author{
 Avants BB
 }
-

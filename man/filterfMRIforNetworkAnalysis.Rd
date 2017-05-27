@@ -75,4 +75,3 @@ myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask =
 \author{
 Avants BB
 }
-

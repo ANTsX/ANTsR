@@ -40,11 +40,10 @@ mymdl<-lm( mat ~ a + g , data=mydf )
 nv = testEanat( mymdl, myvar="g1" )
 
 }
-\author{
-Avants BB, Tustison NJ
-}
 \references{
 Avants BB, Hackman D, LM Betancourt, GM Lawson, H Hurt, MJ Farah #' Relation of Childhood Home Environment to Cortical Thickness in
 Late Adolescence: Specificity of Experience and Timing, PloS one, 2015
 }
-
+\author{
+Avants BB, Tustison NJ
+}

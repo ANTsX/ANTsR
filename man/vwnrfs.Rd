@@ -77,4 +77,3 @@ for ( i in inds ) {
 \author{
 Avants BB, Tustison NJ, Pustina D
 }
-
