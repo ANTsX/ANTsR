@@ -252,7 +252,8 @@ sparseDecom2 <- function(
   initializationList2,
   ell1,
   priorWeight,
-  verbose) {
+  verbose,
+  maxBased=FALSE ) {
   outval = .Call( "sccanCpp",
     inputMatrices[[1]],
     inputMatrices[[2]],
