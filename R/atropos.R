@@ -111,7 +111,7 @@ atropos <- function( a, x,
     pattern = glob2rx(searchpattern), full.names = TRUE,
     recursive = FALSE)
   pimg <- antsImageRead(probsout[1], mydim)
-  probimgs <- c(pimg)
+  probimgs <- list(pimg)
   for (x in c(2:length(probsout))) {
     probimgs <- c(probimgs, antsImageRead(probsout[x], mydim))
   }

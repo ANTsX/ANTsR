@@ -49,7 +49,6 @@ labelsDilated = multiLabelMorphology(labels, 'MD', 2)
 # should see original label regions preserved in dilated version
 # label N should have mean N and 0 variance
 labelStats(labelsDilated, labels)
-
 }
 \author{
 Cook PA

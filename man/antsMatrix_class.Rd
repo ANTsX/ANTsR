@@ -3,16 +3,15 @@
 \docType{class}
 \name{antsMatrix-class}
 \alias{antsMatrix-class}
-\title{An S4 class to hold an antsMatrix imported from ITK types
- C++ type used to represent an element of the matrix pointer
- to the actual image
- C++ type 'itk::image< pixeltype , dimension >::Pointer'}
+\alias{initialize,antsMatrix-method}
+\title{antsMatrix Class}
+\usage{
+\S4method{initialize}{antsMatrix}(.Object, elementtype)
+}
 \arguments{
 \item{.Object}{input object to convert}
 
 \item{elementtype}{string e.g. "float"}
-
-\item{x}{input object to convert}
 }
 \description{
 An S4 class to hold an antsMatrix imported from ITK types
@@ -23,6 +22,8 @@ An S4 class to hold an antsMatrix imported from ITK types
 \section{Slots}{
 
 \describe{
+\item{\code{elementtype}}{string of the type of storage of the matrix e.g. "float"}
+
 \item{\code{pointer}}{the memory location}
 }}
 

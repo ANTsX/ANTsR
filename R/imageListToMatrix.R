@@ -30,18 +30,19 @@
 imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
-  if(missing(mask))
+  if(missing(mask)) {
     mask <- getMask(imageList[[1]])
+  }
 
   numImages <- length(imageList)
-
-  numVoxels <- length(which(mask > epsilon ))
+  mask_arr = as.array(mask) > epsilon
+  numVoxels <- length(which(mask_arr))
 
   listfunc <- function(x) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
       x = resampleImageToTarget( x, mask, 2 ) # gaussian interpolation
     }
-    as.numeric(x, mask > epsilon )
+    as.numeric(x, mask = mask_arr)
   }
   dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
   doSmooth = !any( is.na( sigma ) )

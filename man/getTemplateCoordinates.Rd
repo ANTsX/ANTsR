@@ -41,9 +41,10 @@ This is a standard approach but it's not very accurate.
 #
   tem<-antsImageRead(getANTsRData("ch2"),3)
   clust <- antsImageClone( tem )
-  clust[ tem < 80 ]<- 0
-  clust[ tem > 90 ]<- 0
-  clust[  tem > 80 & tem < 90 ]<- 1
+  atem = as.array(tem)
+  clust[ atem < 80 ]<- 0
+  clust[ atem > 90 ]<- 0
+  clust[  atem > 80 & atem < 90 ]<- 1
   clust<-iMath(clust,"ME",1)  # erosion
   clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
   if ( ! exists("mymni") ) {

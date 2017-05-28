@@ -42,7 +42,7 @@
 #' # just use 1 image, so no regression is performed
 #' painted3<-exemplarInpainting(fi,mask2, list(ilist[[1]]))
 #'
-#' @export exemplarInpainting
+#' @export
 exemplarInpainting <- function(img, paintMask, imageList,
   featureRadius = 2, scaleInpaintIntensity = 0,
   sharpen = FALSE, feather = 1, predalgorithm = "lm", debug = FALSE) {

@@ -23,7 +23,7 @@
 #' shp[ shp != 1 ]<-0
 #' fimg<-segmentShapeFromImage(fi,shp,mask)
 #'
-#' @export segmentShapeFromImage
+#' @export
 segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun,
   maskZeroes=TRUE ) {
   if (nargs() == 0) {

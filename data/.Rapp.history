@@ -1,0 +1,3 @@
+load("/Users/johnmuschelli/Dropbox/Packages/ANTsR/data/iMathOps.rda")
+ls()
+iMathOps

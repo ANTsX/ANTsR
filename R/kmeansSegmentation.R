@@ -22,7 +22,7 @@ kmeansSegmentation <- function(img, k, kmask = NA, mrf = 0.1) {
     kmask <- getMask(kmimg, 0.01, 1, cleanup = 2)
   kmask = iMath(kmask, "FillHoles")
   nhood <- paste(rep(1, dim), collapse = "x")
-  mrf <- paste("[", mrf, ",", nhood, "]")
+  mrf <- paste("[", mrf, ",", nhood, "]", sep = "")
   kmimg <- atropos( a = kmimg, m = mrf, c = "[5,0]",
     i = paste("kmeans[",k, "]", sep = ""), x = kmask)
   kmimg$segmentation <- antsImageClone(kmimg$segmentation, img@pixeltype)

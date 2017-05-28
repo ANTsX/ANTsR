@@ -9,7 +9,7 @@ setAntsrTransformParameters(transform, parameters)
 \arguments{
 \item{transform}{antsrTransform}
 
-\item{parameters}{array of parameters'}
+\item{parameters}{array of parameters}
 }
 \value{
 TRUE

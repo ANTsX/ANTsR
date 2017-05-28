@@ -34,6 +34,7 @@
 #' # mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
 #' # plot(mm2)
 #' }
+#' @export
 basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05) {
   if (nargs() == 0) {
     print(args(basicInPaint))

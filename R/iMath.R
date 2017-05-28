@@ -38,19 +38,18 @@ iMath <- function( img, operation, param=NA, ... ) {
     stop("operation must be a character string")
     }
 
-  iMathOps = NULL
-  data( "iMathOps", package="ANTsR", envir=environment() )
+  # data( "iMathOps", package="ANTsR", envir=environment() )
 
   if ( operation == "GetOperations" | operation == "GetOperationsFull")
     {
 
     if ( operation == "GetOperationsFull")
       {
-      return( iMathOps )
+      return( ANTsR::iMathOps )
       }
     else
       {
-      return( iMathOps$Operation)
+      return( ANTsR::iMathOps$Operation)
       }
     }
   else
@@ -63,7 +62,7 @@ iMath <- function( img, operation, param=NA, ... ) {
       operation = "TruncateIntensity"
       }
 
-    if ( ! ( operation  %in% iMathOps$Operation ) )
+    if ( ! ( operation  %in% ANTsR::iMathOps$Operation ) )
       {
       stop(paste("'operation'",operation," not recognized"))
       }

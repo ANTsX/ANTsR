@@ -3,7 +3,15 @@
 \docType{class}
 \name{antsImageIterator-class}
 \alias{antsImageIterator-class}
+\alias{show,antsImageIterator-method}
+\alias{initialize,antsImageIterator-method}
 \title{An S4 class for an antsImageIterator}
+\usage{
+\S4method{show}{antsImageIterator}(object)
+
+\S4method{initialize}{antsImageIterator}(.Object, pixeltype = "float",
+  dimension = 3, components = 1)
+}
 \arguments{
 \item{object}{input object to convert}
 
@@ -14,8 +22,6 @@
 \item{dimension}{dimensionality of the image}
 
 \item{components}{number of components per pixel}
-
-\item{x}{input object to convert}
 }
 \description{
 C++ type used to represent an ITK image iterator. the

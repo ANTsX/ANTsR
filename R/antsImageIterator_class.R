@@ -3,9 +3,10 @@
 
 
 
-#' An S4 class for an antsImageIterator
+#' @rdname antsImageIterator_class
+#' @title An S4 class for an antsImageIterator
 #'
-#' C++ type used to represent an ITK image iterator. the
+#' @description C++ type used to represent an ITK image iterator. the
 #' actual iterator is of C++ type
 #' 'itk::ImageRegionIteratorWithIndex< itk::image< pixeltype, dimension > >'
 #'
@@ -14,7 +15,6 @@
 #' @param pixeltype string e.g. "float" "unsigned char" "int"
 #' @param dimension dimensionality of the image
 #' @param components number of components per pixel
-#' @param x input object to convert
 #' @slot pixeltype usually float, can be other types unsigned char, int, double
 #' etc noting that short is not supported
 #' @slot dimension usually 2 or 3 but can be 4
@@ -23,7 +23,8 @@
 setClass(Class = "antsImageIterator", representation(pixeltype = "character", dimension = "integer",
   components = "integer", pointer = "externalptr"))
 
-#' @describeIn antsImageIterator
+#' @rdname antsImageIterator_class
+#' @aliases show,antsImageIterator-method
 setMethod(f = "show", "antsImageIterator", function(object){
     cat("antsImageIterator\n")
     cat("  Pixel Type          :", object@pixeltype, "\n")
@@ -32,7 +33,8 @@ setMethod(f = "show", "antsImageIterator", function(object){
     cat("\n")
 })
 
-#' @describeIn antsImageIterator
+#' @rdname antsImageIterator_class
+#' @aliases initialize,antsImageIterator-method
 setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(.Object,
   pixeltype = "float", dimension = 3, components = 1) {
   return(.Call("antsImageIterator", pixeltype, dimension, components, PACKAGE = "ANTsR"))
@@ -45,6 +47,7 @@ setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition
 #' @examples
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
+#' @export
 antsImageIterator <- function(x) {
   return(.Call("antsImageIterator", x))
 }
@@ -57,6 +60,7 @@ antsImageIterator <- function(x) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' value <- antsImageIteratorGet( it )
+#' @export
 antsImageIteratorGet <- function(x) {
   return(.Call("antsImageIterator_Get", x, PACKAGE = "ANTsR"))
 }
@@ -70,6 +74,7 @@ antsImageIteratorGet <- function(x) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' flag <- antsImageIteratorSet( it, 2.0 )
+#' @export
 antsImageIteratorSet <- function(x, value) {
   invisible(return(.Call("antsImageIterator_Set", x, value, PACKAGE = "ANTsR")))
 }
@@ -82,6 +87,7 @@ antsImageIteratorSet <- function(x, value) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' index <- antsImageIteratorGetIndex( it )
+#' @export
 antsImageIteratorGetIndex <- function(x) {
   return(.Call("antsImageIterator_GetIndex", x, PACKAGE = "ANTsR"))
 }
@@ -95,6 +101,7 @@ antsImageIteratorGetIndex <- function(x) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' flag <- antsImageIteratorSetIndex( it, c(2,3) )
+#' @export
 antsImageIteratorSetIndex <- function(x, index) {
   invisible(return(.Call("antsImageIterator_SetIndex", x, index, PACKAGE = "ANTsR")))
 }
@@ -107,6 +114,8 @@ antsImageIteratorSetIndex <- function(x, index) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorNext( it )
+#' @export
+#' 
 antsImageIteratorNext<- function(x) {
   return(.Call("antsImageIterator_Next", x, PACKAGE = "ANTsR"))
 }
@@ -119,6 +128,7 @@ antsImageIteratorNext<- function(x) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorPrevious( it )
+#' @export
 antsImageIteratorPrevious<- function(x) {
   return(.Call("antsImageIterator_Previous", x, PACKAGE = "ANTsR"))
 }
@@ -132,6 +142,7 @@ antsImageIteratorPrevious<- function(x) {
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorNext( it )
 #' it <- antsImageIteratorGoToBegin( it )
+#' @export
 antsImageIteratorGoToBegin<- function(x) {
   return(.Call("antsImageIterator_GoToBegin", x, PACKAGE = "ANTsR"))
 }
@@ -145,6 +156,7 @@ antsImageIteratorGoToBegin<- function(x) {
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorNext( it )
 #' flag <- antsImageIteratorIsAtEnd( it )
+#' @export
 antsImageIteratorIsAtEnd<- function(x) {
   return(.Call("antsImageIterator_IsAtEnd", x, PACKAGE = "ANTsR"))
 }
@@ -157,6 +169,7 @@ antsImageIteratorIsAtEnd<- function(x) {
 #' img <- makeImage(c(5,5), rnorm(25))
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorGoToReverseBegin( it )
+#' @export
 antsImageIteratorGoToReverseBegin<- function(x) {
   return(.Call("antsImageIterator_GoToReverseBegin", x, PACKAGE = "ANTsR"))
 }
@@ -171,6 +184,7 @@ antsImageIteratorGoToReverseBegin<- function(x) {
 #' it <- antsImageIteratorGoToReverseBegin( it )
 #' it <- antsImageIteratorPrevious( it )
 #' flag <- antsImageIteratorIsAtReverseEnd( it )
+#' @export
 antsImageIteratorIsAtReverseEnd<- function(x) {
   return(.Call("antsImageIterator_IsAtReverseEnd", x, PACKAGE = "ANTsR"))
 }
@@ -184,6 +198,7 @@ antsImageIteratorIsAtReverseEnd<- function(x) {
 #' it <- antsImageIterator( img )
 #' it <- antsImageIteratorNext( it )
 #' flag <- antsImageIteratorRemaining( it )
+#' @export
 antsImageIteratorRemaining<- function(x) {
   return(.Call("antsImageIterator_Remaining", x, PACKAGE = "ANTsR"))
 }

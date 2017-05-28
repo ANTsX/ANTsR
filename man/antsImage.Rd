@@ -3,27 +3,26 @@
 \docType{class}
 \name{antsImage-class}
 \alias{antsImage-class}
+\alias{show,antsImage-method}
+\alias{initialize,antsImage-method}
 \title{An S4 class for an antsImage}
+\usage{
+\S4method{show}{antsImage}(object)
+
+\S4method{initialize}{antsImage}(.Object, pixeltype = "float",
+  dimension = 3, components = 1)
+}
 \arguments{
 \item{object}{input object to convert}
 
 \item{.Object}{input object to convert}
 
-\item{pixeltype}{string e.g. "float" "unsigned char" "int"}
+\item{pixeltype}{usually float, can be other types unsigned char, int, double
+etc noting that short is not supported}
 
-\item{dimension}{dimensionality of the image}
+\item{dimension}{usually 2 or 3 but can be 4}
 
-\item{components}{number of components per pixel}
-
-\item{x}{input object to convert}
-
-\item{mask}{mask for the region}
-
-\item{region}{antsRegion for the image}
-
-\item{e1}{internal control for types}
-
-\item{e2}{internal control for types}
+\item{components}{number of pixel components}
 }
 \description{
 C++ type used to represent an ITK image pointed to by 'pointer'. the
@@ -40,5 +39,12 @@ etc noting that short is not supported}
 \item{\code{components}}{number of pixel components}
 
 \item{\code{pointer}}{the memory location}
+
+\item{\code{pixeltype}}{usually float, can be other types unsigned char, int, double
+etc noting that short is not supported}
+
+\item{\code{dimension}}{usually 2 or 3 but can be 4}
+
+\item{\code{components}}{number of pixel components}
 }}
 

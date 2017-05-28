@@ -55,7 +55,7 @@
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 #' cleanfMRI <- preprocessRestingBOLD(boldImage)
-#' @export preprocessRestingBOLD
+#' @export
 preprocessRestingBOLD <- function(boldImage,
   maskImage = NA,
   maskingMeanRatioThreshold = 0.75,
@@ -140,7 +140,7 @@ preprocessRestingBOLD <- function(boldImage,
     }
   }
 
-  averageImage <- apply.antsImage(boldImage, c(1,2,3), mean)
+  averageImage <- apply(boldImage, c(1,2,3), mean)
 
   # Calculate the mask, if not supplied.
   if (is.na(maskImage)) {

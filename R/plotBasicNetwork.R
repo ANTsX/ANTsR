@@ -29,7 +29,8 @@
 #'   mnit<-iMath(mnit,"FillHoles")
 #'   cnt<-getCentroids( mnia, clustparam = 0 )
 #'   aalcnt<-cnt[1:90,1:3]
-#'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , alphasurf=0.1 ,smoothsval = 1.5 )
+#'   brain<-renderSurfaceFunction( surfimg =list( mnit ) , 
+#'   alphasurf=0.1 ,smoothsval = 1.5 )
 #'   testweights<-matrix( rep( 0, 90*90 ) ,nrow=90)
 #'   testweights[31,37]<-1  # ant cingulate to hipp
 #'   testweights[31,36]<-2  # ant cingulate to post cingulate
@@ -48,9 +49,12 @@
 #' mnit<-thresholdImage( mni, 1, max(mni) )
 #' mnit<-iMath(mnit,"FillHoles")
 #' mniseg = kmeansSegmentation( mni, 3 )$segmentation
-#' wmbkgd = thresholdImage( mniseg, 3, 3 ) %>% iMath( "GetLargestComponent" ) %>% iMath( "FillHoles" )
+#' wmbkgd = thresholdImage( mniseg, 3, 3 ) %>% 
+#' iMath( "GetLargestComponent" ) %>% 
+#' iMath( "FillHoles" )
 #' wmbkgd = smoothImage( iMath( wmbkgd, "MD", 1 ), 2.0 )
-#' brain<-renderSurfaceFunction( surfimg =list( wmbkgd ) , alphasurf=0.8 ,smoothsval = 1.0 )
+#' brain<-renderSurfaceFunction( surfimg =list( wmbkgd ) , 
+#' alphasurf=0.8 ,smoothsval = 1.0 )
 #' data( powers_areal_mni_itk )
 #' coords = powers_areal_mni_itk[,1:3]
 #' id<-rgl::par3d('userMatrix')
@@ -58,7 +62,10 @@
 #' rid2<-rotate3d( id , pi/2, 0, 0, 1 )
 #' rid3<-rotate3d( id , -pi/2, 0, 0, 1 )
 #' rgl::par3d(userMatrix = id )
-#' handMat2 = t( matrix(  c(-0.9998656511 , 0.01626961,  0.00198165 ,   0 ,-0.0163816363, -0.99584705 ,-0.08955579   , 0, 0.0005163439, -0.08957647,  0.99597979 ,   0,  0.0000000000,  0.00000000,  0.00000000  ,  1),  ncol = 4) )
+#' handMat2 = t( matrix(  c(-0.9998656511 , 0.01626961,  0.00198165 ,   
+#' 0 ,-0.0163816363, -0.99584705 ,-0.08955579   , 0, 0.0005163439, 
+#' -0.08957647,  0.99597979 ,   0,  0.0000000000,  0.00000000,  
+#' 0.00000000  ,  1),  ncol = 4) )
 #' loccolor = as.character( powers_areal_mni_itk$Color )
 #' loccolor[ loccolor == "Peach" ] = "sienna1"
 #' loccolor[ loccolor == "Cyan" ] = "cyan"
@@ -74,7 +81,8 @@
 #' loccolor[ loccolor == "Brown" ] = "brown"
 #' loccolor[ loccolor == "Pale blue" ] = "steelblue1"
 #' loccolor[ loccolor == "Green" ] = "green"
-#' tt = plotBasicNetwork( centroids = coords, brain, nodecolors = loccolor, radius=3 )
+#' tt = plotBasicNetwork( centroids = coords, brain, 
+#' nodecolors = loccolor, radius=3 )
 #' dd<-make3ViewPNG(  handMat2, id, rid2, tempfile( fileext='.png' ) )
 #' rgl::par3d(userMatrix = id )
 #' }

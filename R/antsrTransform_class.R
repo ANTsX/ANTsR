@@ -3,9 +3,10 @@
 
 
 
-#' An S4 class for an antsrTransform
+#' @rdname antsrTransform
+#' @title An S4 class for an antsrTransform
 #'
-#' C++ type used to represent an ITK image transform.
+#' @description C++ type used to represent an ITK image transform.
 #'
 #' @param object input object to convert
 #' @param .Object input object to convert
@@ -13,13 +14,22 @@
 #' @param dimension dimensionality of the transform (2,3,or 4)
 #' @param type type of transform'
 #' etc noting that short is not supported
+#' @param parameters transformation parameters to send to 
+#' \code{\link{setAntsrTransformParameters}}
 #' @slot dimension usually 2 or 3 but can be 4
 #' @slot precision math precision is float or double'
+#' @slot type The type of transform: usually one of 
+#' AffineTransform, CenteredAffineTransform, CenteredEuler3DTransform,
+#' CenteredRigid2DTransform, CenteredSimilarity2DTransform, Euler2DTransform, 
+#' Euler3DTransform, QuaternionRigidTransform, Rigid2DTransform, 
+#' Similarity2DTransform, Similarity3DTransform
 #' @slot pointer to the memory location of the itk object
-setClass(Class = "antsrTransform", representation(precision= "character", dimension = "integer",
+setClass(Class = "antsrTransform", 
+         representation(precision= "character", dimension = "integer",
   type = "character", pointer = "externalptr"))
 
-#' @describeIn antsrTransforms
+#' @rdname antsrTransform
+#' @aliases show,antsrTransform-method
 setMethod(f = "show", "antsrTransform", function(object){
     cat("antsrTransform\n")
     cat("  Dimensions    :", object@dimension, "\n")
@@ -28,7 +38,8 @@ setMethod(f = "show", "antsrTransform", function(object){
     cat("\n")
 })
 
-#' @describeIn antsrTransform
+#' @rdname antsrTransform
+#' @aliases initialize,antsrTransform-method
 setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = function(.Object,
   precision = "float", dimension = 3, type = "AffineTransform", parameters=NA) {
   tx = .Call("antsrTransform", precision, dimension, type, PACKAGE = "ANTsR")
@@ -153,12 +164,13 @@ createAntsrTransform <- function( type="AffineTransform", precision="float", dim
 #' @title setAntsrTransformParameters
 #' @description Set parameters of transform
 #' @param transform antsrTransform
-#' @param parameters array of parameters'
+#' @param parameters array of parameters
 #' @return TRUE
 #' @examples
 #' tx = new("antsrTransform")
 #' params = getAntsrTransformParameters(tx)
 #' setAntsrTransformParameters(tx, params*2)
+#' @export
 setAntsrTransformParameters <- function(transform, parameters) {
   invisible(.Call("antsrTransform_SetParameters", transform, parameters, PACKAGE = "ANTsR"))
 }
@@ -170,6 +182,7 @@ setAntsrTransformParameters <- function(transform, parameters) {
 #' @examples
 #' tx = new("antsrTransform")
 #' params = getAntsrTransformParameters(tx)
+#' @export
 getAntsrTransformParameters <- function(transform) {
   return(.Call("antsrTransform_GetParameters", transform, PACKAGE = "ANTsR"))
 }
@@ -183,6 +196,7 @@ getAntsrTransformParameters <- function(transform) {
 #' tx = new("antsrTransform")
 #' params = getAntsrTransformFixedParameters(tx)
 #' setAntsrTransformFixedParameters(tx, params*2)
+#' @export
 setAntsrTransformFixedParameters <- function(transform, parameters) {
   invisible(.Call("antsrTransform_SetFixedParameters", transform, parameters, PACKAGE = "ANTsR"))
 }
@@ -194,6 +208,7 @@ setAntsrTransformFixedParameters <- function(transform, parameters) {
 #' @examples
 #' tx = new("antsrTransform")
 #' params = getAntsrTransformFixedParameters(tx)
+#' @export
 getAntsrTransformFixedParameters <- function(transform) {
   return(.Call("antsrTransform_GetFixedParameters", transform, PACKAGE = "ANTsR"))
 }
@@ -202,6 +217,7 @@ getAntsrTransformFixedParameters <- function(transform) {
 #' @description Convert deformation field (multiChannel image) to antsrTransform
 #' @param field deformation field (multiChannel image)
 #' @return antsrTransform'
+#' @export
 antsrTransformFromDisplacementField <- function( field ) {
   return(.Call("antsrTransform_FromDisplacementField", field, PACKAGE="ANTsR"))
 }
@@ -219,6 +235,7 @@ antsrTransformFromDisplacementField <- function( field ) {
 #' params = getAntsrTransformParameters(tx)
 #' setAntsrTransformParameters(tx, params*2)
 #' pt2 = applyAntsrTransform(tx, c(1,2,3))
+#' @export
 applyAntsrTransform <- function(transform, data, dataType="point", reference=NA, ...) {
 
   if ( class(data) == "antsImage" ) {
@@ -249,6 +266,7 @@ applyAntsrTransform <- function(transform, data, dataType="point", reference=NA,
 #' params = getAntsrTransformParameters(tx)
 #' setAntsrTransformParameters(tx, params*2)
 #' pt2 = applyAntsrTransformToPoint(tx, c(1,2,3))
+#' @export
 applyAntsrTransformToPoint <- function(transform, point) {
   return(.Call("antsrTransform_TransformPoint", transform, point, PACKAGE = "ANTsR"))
 }
@@ -262,8 +280,10 @@ applyAntsrTransformToPoint <- function(transform, point) {
 #' \dontrun{
 #' vec2 = applyAntsrTransformToVector(transform, c(1,2,3))
 #' }
+#' @export
 applyAntsrTransformToVector <- function(transform, vector) {
-  return(.Call("antsrTransform_TransformVector", transform, vector, PACKAGE = "ANTsR"))
+  return(.Call("antsrTransform_TransformVector", transform,
+               vector, PACKAGE = "ANTsR"))
 }
 
 #' @title applyAntsrTransformToImage
@@ -279,6 +299,7 @@ applyAntsrTransformToVector <- function(transform, vector) {
 #' setAntsrTransformParameters(tx, c(0.9,0,0,1.1,10,11) )
 #' img2 = applyAntsrTransformToImage(tx, img, img)
 #' # plot(img,img2)
+#' @export
 applyAntsrTransformToImage <- function(transform, image, reference, interpolation="linear") {
   if ( typeof(transform) == "list")
   {
@@ -294,9 +315,10 @@ applyAntsrTransformToImage <- function(transform, image, reference, interpolatio
 #' @param precision numerical precision of transform
 #' @return antsrTransform
 #' @examples
-#' \dontrun {
+#' \dontrun{
 #' tx = readAntsrTransform( "yourtx.mat")
-#' }'
+#' }
+#' @export
 readAntsrTransform <- function( filename, dimension=3, precision="float" )  {
   return(.Call("antsrTransform_Read", filename, dimension, precision, PACKAGE="ANTsR"))
 }
@@ -309,7 +331,9 @@ readAntsrTransform <- function( filename, dimension=3, precision="float" )  {
 #' @examples
 #' trans= c(3,4,5)
 #' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-#' writeAntsrTransform(tx,"trans.mat")
+#' txfile = tempfile(fileext = ".mat")
+#' writeAntsrTransform(tx, txfile)
+#' @export
 writeAntsrTransform <- function(transform, filename )  {
   return(.Call("antsrTransform_Write", transform ,filename, PACKAGE="ANTsR"))
 }
@@ -323,6 +347,7 @@ writeAntsrTransform <- function(transform, filename )  {
 #' tx = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
 #' setAntsrTransformParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 #' txinv =  invertAntsrTransform(tx)
+#' @export
 invertAntsrTransform <- function( transform ) {
   return(.Call("antsrTransform_Inverse", transform))
 }
@@ -337,6 +362,7 @@ invertAntsrTransform <- function( transform ) {
 #' tx2 = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
 #' setAntsrTransformParameters(tx2, c(0,-1,1,0,0,0) )
 #' tx3 = composeAntsrTransforms( list(tx, tx2) )
+#' @export
 composeAntsrTransforms <- function( transformList ) {
 
   # check for type consistency
