@@ -17,7 +17,8 @@ Description: ANTsR interfaces state of the art image processing with R
 License: Apache License 2.0
 LazyLoad: yes
 Depends:
-    methods
+    methods,
+    ANTsRCore
 Imports:
     Rcpp,
     tools,
@@ -75,7 +76,7 @@ Suggests:
     visreg,
     wmtsa
 LazyData: TRUE
-LinkingTo: Rcpp, ITKR, ANTsRCore
+LinkingTo: Rcpp, ITKR
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
