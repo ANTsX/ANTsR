@@ -157,7 +157,8 @@ sparseDecom2 <- function(
     initializationList2,
     ell1,
     priorWeight,
-    verbose
+    verbose,
+    maxBased
     )
   ccasummary = data.frame(
     corrs = sccaner$corrs,
@@ -189,7 +190,8 @@ sparseDecom2 <- function(
     initializationList2,
     ell1,
     priorWeight,
-    verbose
+    verbose,
+    maxBased
     )
     counter = as.numeric( abs(ccasummary$corrs) < abs(sccanerp$corrs)   )
     ccasummary$pvalues = ccasummary$pvalues + counter
@@ -253,7 +255,7 @@ sparseDecom2 <- function(
   ell1,
   priorWeight,
   verbose,
-  maxBased=FALSE ) {
+  maxBased ) {
   outval = .Call( "sccanCpp",
     inputMatrices[[1]],
     inputMatrices[[2]],
