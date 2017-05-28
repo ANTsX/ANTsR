@@ -36,4 +36,3 @@ myimg.mask <- maskImage(myimg, seg$segmentation, c(1,3))
 \author{
 Kandel BM and Avants B.
 }
-

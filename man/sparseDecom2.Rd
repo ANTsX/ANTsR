@@ -8,7 +8,7 @@ sparseDecom2(inmatrix, inmask = c(NA, NA), sparseness = c(0.01, 0.01),
   nvecs = 3, its = 20, cthresh = c(0, 0), statdir = NA, perms = 0,
   uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 0,
   initializationList = list(), initializationList2 = list(), ell1 = 10,
-  priorWeight = 0, verbose = FALSE, rejector = 0)
+  priorWeight = 0, verbose = FALSE, rejector = 0, maxBased = FALSE)
 }
 \arguments{
 \item{inmatrix}{input as inmatrix=list(mat1,mat2). n by p input matrix and n
@@ -55,6 +55,8 @@ and 1 (prior is strong).  Only engaged if initialization is used}
 \item{verbose}{activates verbose output to screen}
 
 \item{rejector}{rejects small correlation solutions}
+
+\item{maxBased}{boolean that chooses max-based thresholding}
 }
 \value{
 outputs a decomposition of a pair of matrices
@@ -127,4 +129,3 @@ plot( preddf, testdf$bmi )
 \author{
 Avants BB
 }
-

@@ -21,4 +21,3 @@ tx = new("antsrTransform", precision="float", type="AffineTransform", dimension=
 setAntsrTransformParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
 txinv =  invertAntsrTransform(tx)
 }
-

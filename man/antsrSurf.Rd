@@ -101,4 +101,3 @@ antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
 \author{
 Avants BB, Tustison NJ
 }
-

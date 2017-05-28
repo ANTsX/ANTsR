@@ -65,4 +65,3 @@ mat <- getNeighborhoodInMask(r16,mask,radius)
 \author{
 Duda JT
 }
-

@@ -42,4 +42,3 @@ ee<-getfMRInuisanceVariables( pcasl, mask = aslmask ,
 \author{
 Avants BB
 }
-

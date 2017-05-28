@@ -30,6 +30,7 @@
 #' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param verbose activates verbose output to screen
 #' @param rejector rejects small correlation solutions
+#' @param maxBased boolean that chooses max-based thresholding
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -111,7 +112,8 @@ sparseDecom2 <- function(
   ell1 = 10,
   priorWeight = 0,
   verbose = FALSE,
-  rejector=0  ) {
+  rejector=0,
+  maxBased=FALSE  ) {
   idim=3
   # safety 1 & 2
   if ( ! is.na( inmask[1] ) )
@@ -270,6 +272,7 @@ sparseDecom2 <- function(
     ell1,
     verbose,
     priorWeight,
+    maxBased,
     PACKAGE="ANTsR" )
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)

@@ -62,9 +62,6 @@ mask <- getMask(mnit1)
 fwhm1 <- estSmooth(mnit1, mask)
 
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Hayasaka (2004) Nonstationary cluster-size inference with random field and permutation methods.
 
@@ -79,4 +76,6 @@ Stefan J.K. (1999) Robust Smoothness Estimation in Statistical Parametric Maps U
 \seealso{
 resels
 }
-
+\author{
+Zachary P. Christensen
+}

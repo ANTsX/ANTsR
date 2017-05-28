@@ -116,4 +116,3 @@ to refine an initial segmentation.
 \author{
 Tustison NJ
 }
-

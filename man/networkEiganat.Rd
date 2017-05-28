@@ -119,4 +119,3 @@ mymdl<-lm( PredictedBMIfromSNPs ~ RealBMI, data=mydf)
 \author{
 Avants BB
 }
-

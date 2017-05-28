@@ -28,11 +28,10 @@ regional homogeneity for a time series image
 rehoimg = reho( rsfmri )
 }
 }
-\author{
-Tustison, N.
-}
 \references{
 Zang, Y., Jiang, T., Lu, Y., He, Y., Tian, L., 2004. Regional
 homogeneity approach to fMRI data analysis. Neuroimage 22, 394-400.
 }
-
+\author{
+Tustison, N.
+}

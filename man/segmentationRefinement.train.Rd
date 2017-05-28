@@ -113,4 +113,3 @@ for each label in the initial segmentation data.
 \author{
 Tustison NJ
 }
-

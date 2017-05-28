@@ -84,4 +84,3 @@ emat<-eanat2$eigenanatomyimages
 \author{
 Avants BB
 }
-

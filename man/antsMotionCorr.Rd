@@ -44,4 +44,3 @@ motiondf <- as.data.frame( mocoParams )
 \author{
 Shrinidhi KL
 }
-

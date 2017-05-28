@@ -22,4 +22,3 @@ Apply transform to spatial vector
 vec2 = applyAntsrTransformToVector(transform, c(1,2,3))
 }
 }
-

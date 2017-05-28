@@ -29,4 +29,3 @@ cents<-getCentroids( img  )
 \author{
 Avants BB
 }
-

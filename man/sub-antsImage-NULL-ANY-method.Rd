@@ -25,4 +25,3 @@
 \description{
 ants image substitutions
 }
-

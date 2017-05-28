@@ -24,4 +24,3 @@ pt <- antsTransformIndexToPhysicalPoint(img, c(2,2))
 
 
 }
-

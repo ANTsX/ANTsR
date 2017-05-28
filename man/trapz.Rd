@@ -31,4 +31,3 @@ areaEstimate <- trapz( x, y )
 \author{
 Tustison NJ
 }
-

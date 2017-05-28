@@ -58,4 +58,3 @@ result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
 \author{
 BB Avants
 }
-

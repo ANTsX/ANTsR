@@ -56,4 +56,3 @@ antsImageWrite( results$mttImage, paste0( 'mtt.nii.gz' ) );
 \author{
 Tustison NJ
 }
-

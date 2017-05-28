@@ -104,4 +104,3 @@ rgl::par3d(userMatrix = id )
 \author{
 Avants BB and Duda JT
 }
-

@@ -23,4 +23,3 @@ rmat<-robustMatrixTransform( mat )
 \author{
 Avants BB
 }
-

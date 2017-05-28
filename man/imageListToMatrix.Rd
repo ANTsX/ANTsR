@@ -38,10 +38,9 @@ Read images into rows of a matrix.
  imgmat <- imageListToMatrix(imglist, mask)
 
 }
-\author{
-Cook PA, Avants B, Kandel BM
-}
 \seealso{
 \code{\link{matrixToImages}, \link{getMask}}
 }
-
+\author{
+Cook PA, Avants B, Kandel BM
+}

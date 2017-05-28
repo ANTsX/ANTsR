@@ -37,13 +37,12 @@ ez <- euler(3, df, fieldType = "T") # we thresholded at 3
 pvox <- sum(ec * myresels)/sum(ez * myresels)
 
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
 }
 \seealso{
 rftPval, resels
 }
-
+\author{
+Zachary P. Christensen
+}

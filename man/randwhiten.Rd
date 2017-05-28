@@ -26,11 +26,10 @@ k=10
 Aw=randwhiten(A,k)
 # (Aw) \%*\% t(Aw)
 }
-\author{
-Avants BB
-}
 \references{
 N. Halko, P.G. Martinsson, J. Tropp "Finding structure with randomness: Stochastic algorithms for constructing approximate matrix decompositions" arXiv 0909.4061
 }
+\author{
+Avants BB
+}
 \keyword{whiten}
-

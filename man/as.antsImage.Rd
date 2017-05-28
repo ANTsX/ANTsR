@@ -26,4 +26,3 @@ as.antsImage(object, ...)
 \description{
 convert types to antsImage
 }
-

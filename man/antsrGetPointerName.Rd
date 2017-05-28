@@ -26,4 +26,3 @@ antsrGetPointerName( antsImageClone( img ))
 \author{
 Avants BB
 }
-

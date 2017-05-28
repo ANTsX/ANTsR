@@ -32,14 +32,13 @@ None
   hrf <- blockStimulus(107, c(18, 48, 78), 15, 2)
 
 }
-\author{
-b avants \email{stnava@gmail.com}
-}
 \references{
 Worsley, K.J., Liao, C., Aston, J., Petre, V., Duncan, G.H.,
 Morales, F., Evans, A.C. (2002). A general statistical analysis for fMRI
 data. NeuroImage, 15:1-15.
 }
+\author{
+b avants \email{stnava@gmail.com}
+}
 \keyword{design}
 \keyword{regression}
-

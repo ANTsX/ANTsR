@@ -25,4 +25,3 @@ my3Dlist = splitNDImageToList( my4Dimage )
 \author{
 Pustina D, Avants B
 }
-

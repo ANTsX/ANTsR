@@ -2,18 +2,18 @@
 % Please edit documentation in R/antsImage_class.R
 \docType{methods}
 \name{mean,antsImage-method}
-\alias{*.antsImage}
+\alias{mean,antsImage-method}
+\alias{sum,antsImage-method}
+\alias{antsImageArith}
 \alias{+.antsImage}
 \alias{-.antsImage}
 \alias{/.antsImage}
-\alias{\%\%.antsImage}
+\alias{*.antsImage}
 \alias{^.antsImage}
-\alias{abs.antsImage}
-\alias{antsImageArith}
-\alias{exp.antsImage}
+\alias{\%\%.antsImage}
 \alias{log.antsImage}
-\alias{mean,antsImage-method}
-\alias{sum,antsImage-method}
+\alias{exp.antsImage}
+\alias{abs.antsImage}
 \title{arith.antsImage}
 \usage{
 \S4method{mean}{antsImage}(x, mask = logical())
@@ -58,4 +58,3 @@ r16 + 5
 r16 / 10
 log(r16, base=10)
 }
-

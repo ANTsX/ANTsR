@@ -68,4 +68,3 @@ icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
 \author{
 Tustison NJ, Avants BB
 }
-

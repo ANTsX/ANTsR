@@ -18,4 +18,3 @@ Tests if object is antsImage
 \examples{
 is.antsImage(antsImageRead(getANTsRData('r16'), 2))
 }
-

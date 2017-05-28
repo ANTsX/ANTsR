@@ -62,10 +62,9 @@ myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
 
 }
-\author{
-Avants BB
-}
 \references{
 \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 }
-
+\author{
+Avants BB
+}

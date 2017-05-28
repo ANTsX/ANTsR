@@ -81,4 +81,3 @@ preds = predict( mdl, newdata = mydfte )
 \author{
 Kandel BM, Avants BB
 }
-

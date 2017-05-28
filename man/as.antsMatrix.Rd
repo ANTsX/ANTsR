@@ -19,4 +19,3 @@ convert types to an antsMatrix
 \examples{
 as.antsMatrix(matrix(rnorm(10), nrow=2))
 }
-

@@ -44,10 +44,9 @@ mat <- getNeighborhoodInMask(image = r16, mask = mask, radius = c(0,0),
 smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
 }
 }
-\author{
-Avants BB
-}
 \references{
 \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 }
-
+\author{
+Avants BB
+}

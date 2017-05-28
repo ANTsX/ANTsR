@@ -50,4 +50,3 @@ if ( usePkg("igraph") ) {
 \author{
 Avants BB
 }
-

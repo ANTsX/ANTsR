@@ -36,4 +36,3 @@ rplist2<-renormalizeProbabilityImages( plist, mask , 2 )
 \author{
 Avants BB
 }
-

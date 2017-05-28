@@ -27,4 +27,3 @@ tx = fsl2antsrTransform(fslMat, img, img)
 \author{
 JT Duda
 }
-

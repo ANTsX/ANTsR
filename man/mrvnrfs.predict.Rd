@@ -36,4 +36,3 @@ to apply a random forest segmentation model to a new image
 \author{
 Avants BB, Tustison NJ, Pustina D
 }
-

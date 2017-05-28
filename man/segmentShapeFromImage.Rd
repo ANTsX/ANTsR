@@ -44,4 +44,3 @@ Brian B. Avants
 }
 \keyword{shape}
 \keyword{template}
-

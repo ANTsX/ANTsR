@@ -22,4 +22,3 @@ matrix2timeseriess converts a matrix to a 4D image.
 \author{
 Avants BB
 }
-

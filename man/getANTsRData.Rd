@@ -28,4 +28,3 @@ fi <- getANTsRData( "r16" )
 \author{
 Avants BB
 }
-

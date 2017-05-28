@@ -28,4 +28,3 @@ split a multichannel antsImage into a list of scalar antsImages
 \author{
 Duda, JT
 }
-

@@ -60,4 +60,3 @@ warped = applyAntsrTransform( warpTx, data = img1, reference = img1)
 \author{
 Avants BB
 }
-

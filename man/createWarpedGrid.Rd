@@ -49,4 +49,3 @@ plot( fi, mywarpedgrid, alpha=0.75, color.overlay='blue' )
 \author{
 Avants BB
 }
-

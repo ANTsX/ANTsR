@@ -51,4 +51,3 @@ if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool,
 \author{
 Avants BB
 }
-

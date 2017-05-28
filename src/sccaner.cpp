@@ -90,7 +90,8 @@ SEXP eigenanatomyCppHelper(
   RealType ell1,
   IntType verbose,
   IntType powerit,
-  RealType priorWeight )
+  RealType priorWeight,
+  IntType useMaxBasedThresh )
 {
   enum { Dimension = ImageType::ImageDimension };
   typename ImageType::RegionType region;
@@ -134,6 +135,7 @@ SEXP eigenanatomyCppHelper(
     }
   sccanobj->SetPriorWeight( priorWeight );
   sccanobj->SetLambda( priorWeight );
+  sccanobj->SetMaxBasedThresholding( useMaxBasedThresh );
 // cast hack from Rcpp type to sccan type
   std::vector<double> xdat =
       Rcpp::as< std::vector<double> >( X );
@@ -254,7 +256,8 @@ RcppExport SEXP eigenanatomyCpp(
   SEXP r_ell1,
   SEXP r_verbose,
   SEXP r_powerit,
-  SEXP r_priorWeight )
+  SEXP r_priorWeight,
+  SEXP r_maxBasedThresh )
 {
 try
 {
@@ -275,6 +278,7 @@ try
   IntType verbose = Rcpp::as< RealType >( r_verbose );
   IntType powerit = Rcpp::as< RealType >( r_powerit );
   RealType priorWeight = Rcpp::as< RealType >( r_priorWeight );
+  IntType maxBasedThresh = Rcpp::as< IntType >( r_maxBasedThresh );
 
 //[1] "projections"        "eigenanatomyimages" "umatrix"
   typedef itk::Image<RealType,3> Image3Type;
@@ -295,7 +299,8 @@ try
         ell1,
         verbose,
         powerit,
-        priorWeight
+        priorWeight,
+        maxBasedThresh
         )
       );
   if ( dimension == 3 )
@@ -314,7 +319,8 @@ try
         ell1,
         verbose,
         powerit,
-        priorWeight
+        priorWeight,
+        maxBasedThresh
         )
       );
 }
@@ -360,7 +366,8 @@ SEXP sccanCppHelper(
   IntType covering,
   RealType ell1,
   IntType verbose,
-  RealType priorWeight )
+  RealType priorWeight,
+  IntType useMaxBasedThresh )
 {
   enum { Dimension = ImageType::ImageDimension };
   typename ImageType::RegionType region;
@@ -370,7 +377,7 @@ SEXP sccanCppHelper(
   typedef itk::ants::antsSCCANObject<ImageType, Scalar> SCCANType;
   typedef typename SCCANType::MatrixType                vMatrix;
   typename SCCANType::Pointer sccanobj = SCCANType::New();
-
+  sccanobj->SetMaxBasedThresholding( useMaxBasedThresh );
   typename ImageType::Pointer maskx = Rcpp::as<ImagePointerType>( r_maskx );
   typename ImageType::Pointer masky = Rcpp::as<ImagePointerType>( r_masky );
 
@@ -527,7 +534,8 @@ RcppExport SEXP sccanCpp(
   SEXP r_mycoption,
   SEXP r_ell1,
   SEXP r_verbose,
-  SEXP r_priorWeight )
+  SEXP r_priorWeight,
+  SEXP r_maxBasedThresh )
 {
 try
 {
@@ -548,6 +556,7 @@ try
   Rcpp::List initializationListx( r_initializationListx );
   Rcpp::List initializationListy( r_initializationListy );
   IntType mycoption = Rcpp::as< IntType >( r_mycoption );
+  IntType maxBasedThresh = Rcpp::as< IntType >( r_maxBasedThresh );
   RealType ell1 = Rcpp::as< RealType >( r_ell1 );
   IntType verbose = Rcpp::as< RealType >( r_verbose );
   RealType priorWeight = Rcpp::as< RealType >( r_priorWeight );
@@ -573,7 +582,8 @@ try
         mycoption,
         ell1,
         verbose,
-        priorWeight
+        priorWeight,
+        maxBasedThresh
         )
       );
   if ( dimension == 3 )
@@ -596,7 +606,8 @@ try
         mycoption,
         ell1,
         verbose,
-        priorWeight
+        priorWeight,
+        maxBasedThresh
         )
       );
 }

@@ -44,4 +44,3 @@ bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 \author{
 Tustison N, Avants BB
 }
-
