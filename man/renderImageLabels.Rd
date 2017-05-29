@@ -37,4 +37,3 @@ renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3  )
 \author{
 Duda, J
 }
-

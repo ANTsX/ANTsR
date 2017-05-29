@@ -33,4 +33,3 @@ median.impute <- antsrimpute(mydat, median)
 \author{
 Kandel BM, Avants BB
 }
-

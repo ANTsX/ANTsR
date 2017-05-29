@@ -24,4 +24,3 @@ compute the DVARS quality control metric
 \author{
 Tustison NJ, Avants BB
 }
-

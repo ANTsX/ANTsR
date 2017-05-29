@@ -37,7 +37,7 @@ one should not reuse this file as the reference demographics file.
 }
 \examples{
 
-
+\dontrun{
 ilist = getANTsRData( "population" )
 mask = getMask( ilist[[ 1 ]] )
 imat = imageListToMatrix( ilist, mask )
@@ -46,9 +46,8 @@ demog = data.frame( id = c("A","B","C",NA),
 ibool = c( TRUE, TRUE, TRUE, FALSE )
 if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool,
   tempfile(fileext=".h5") )
-
+}
 }
 \author{
 Avants BB
 }
-

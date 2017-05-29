@@ -37,4 +37,3 @@ labmat = labels2matrix( labs, mask )
 \author{
 Avants BB
 }
-

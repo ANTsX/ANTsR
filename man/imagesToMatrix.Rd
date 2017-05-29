@@ -39,10 +39,9 @@ datasets as it is based on C++ implementations.
 
 
 }
-\author{
-Cook PA, Avants BB (C++ version)
-}
 \seealso{
 \code{\link{matrixToImages}, \link{getMask}}
 }
-
+\author{
+Cook PA, Avants BB (C++ version)
+}

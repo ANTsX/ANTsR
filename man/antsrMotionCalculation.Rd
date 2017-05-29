@@ -41,4 +41,3 @@ antsrMotionCalculation( simimg )
 \author{
 BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 }
-

@@ -22,7 +22,7 @@
 #' @author Avants BB
 #' @examples
 #'
-#'
+#' \dontrun{
 #' ilist = getANTsRData( "population" )
 #' mask = getMask( ilist[[ 1 ]] )
 #' imat = imageListToMatrix( ilist, mask )
@@ -31,7 +31,7 @@
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
 #' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool,
 #'   tempfile(fileext=".h5") )
-#'
+#' }
 #' @export writeNormalizedPopulationData
 writeNormalizedPopulationData <- function(
   demographics,
@@ -83,7 +83,7 @@ return( TRUE )
 #' @return list containing demographics, imageMat, imageMask and imageBoolean
 #' @author Avants BB
 #' @examples
-#'
+#' \dontrun{
 #' ilist = getANTsRData( "population" )
 #' mask = getMask( ilist[[ 1 ]] )
 #' imat = imageListToMatrix( ilist, mask )
@@ -92,7 +92,7 @@ return( TRUE )
 #' tfn = tempfile(fileext=".h5")
 #' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
 #' if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
-#'
+#' }
 #' @export readNormalizedPopulationData
 readNormalizedPopulationData <- function( filename )
 {

@@ -23,12 +23,11 @@ This is a standard approach but it's not very accurate.
 mni2tal( c(10,12,14) )
 
 }
-\author{
-Matthew Brett, adapted for ANTsR by B Avants
-}
 \references{
 \url{http://bioimagesuite.yale.edu/mni2tal/501_95733_More\%20Accurate\%20Talairach\%20Coordinates\%20SLIDES.pdf}, 
 \url{http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach}
 }
+\author{
+Matthew Brett, adapted for ANTsR by B Avants
+}
 \keyword{Talairach}
-

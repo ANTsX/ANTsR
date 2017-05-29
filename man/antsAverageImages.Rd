@@ -24,4 +24,3 @@ antsAverageImages(mylist)
 \author{
 Avants BB, Pustina D
 }
-

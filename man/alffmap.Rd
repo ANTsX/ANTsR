@@ -42,4 +42,3 @@ fallf2 = apply( mat, FUN=alffmap, MARGIN=2, kernel=k )
 \author{
 Avants BB
 }
-

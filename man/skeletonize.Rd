@@ -30,4 +30,3 @@ skel = skeletonize( thresholdImage( img, 3, 3 ) )
 \author{
 Avants BB
 }
-

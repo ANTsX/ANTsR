@@ -26,9 +26,10 @@
 #' #
 #'   tem<-antsImageRead(getANTsRData("ch2"),3)
 #'   clust <- antsImageClone( tem )
-#'   clust[ tem < 80 ]<- 0
-#'   clust[ tem > 90 ]<- 0
-#'   clust[  tem > 80 & tem < 90 ]<- 1
+#'   atem = as.array(tem)
+#'   clust[ atem < 80 ]<- 0
+#'   clust[ atem > 90 ]<- 0
+#'   clust[  atem > 80 & atem < 90 ]<- 1
 #'   clust<-iMath(clust,"ME",1)  # erosion
 #'   clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
 #'   if ( ! exists("mymni") ) {
@@ -110,7 +111,7 @@ getTemplateCoordinates <- function(
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
       if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
-      templateLab[i] <- .getValueAtPoint(filab, mypoint)
+      templateLab[i] <- ANTsRCore:::.getValueAtPoint(filab, mypoint)
     }
     if (mylab == 2)
       mypoints <- cbind(mypoints, Brodmann = templateLab)

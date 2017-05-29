@@ -46,4 +46,3 @@ compcorrdf<-compcor( mat )
 \author{
 Avants BB
 }
-

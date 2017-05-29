@@ -44,4 +44,3 @@ tx <- affineInitializer( fi, mi )
 \author{
 Avants BB
 }
-

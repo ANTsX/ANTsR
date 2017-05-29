@@ -36,4 +36,3 @@ imageclusterlist<-image2ClusterImages( img )
 \author{
 Avants BB
 }
-

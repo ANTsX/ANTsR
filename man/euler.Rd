@@ -12,9 +12,9 @@ euler(u, df, fieldType)
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
 \item{fieldType}{\itemize{
-\item{T: } {T-field} 
-\item{F: } {F-field} 
-\item{X: } {Chi-square field'} 
+\item{T: } {T-field}
+\item{F: } {F-field}
+\item{X: } {Chi-square field'}
 \item{Z: } {Gaussian field}
 }}
 }
@@ -26,10 +26,11 @@ Mostly an for internal use in conjunction with \code{resels}. Calculates the
 euler characteristic at a threshold level.
 }
 \examples{
-mask <- getMask(antsImageRead(getANTsRData('mni')))
-myresels <- resels(mask, c(1, 1, 1))
+
+mask <- getMask(  antsImageRead( getANTsRData( 'r16' )  ) )
+myresels <- resels(mask, c(1, 1))
 # pretend these results are from a t-statistical field fitted with 10 df to
-# find a peak value. 
+# find a peak value.
 df <- c(1, 10) # made up degrees of freedom
 ec <- euler(4, df, fieldType = "T") # peak value is 4
 ez <- euler(3, df, fieldType = "T") # we thresholded at 3
@@ -37,13 +38,12 @@ ez <- euler(3, df, fieldType = "T") # we thresholded at 3
 pvox <- sum(ec * myresels)/sum(ez * myresels)
 
 }
-\author{
-Zachary P. Christensen
-}
 \references{
 Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
 }
 \seealso{
 rftPval, resels
 }
-
+\author{
+Zachary P. Christensen
+}

@@ -41,4 +41,3 @@ myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 \author{
 Avants BB
 }
-

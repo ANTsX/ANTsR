@@ -29,7 +29,7 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' set.seed( 123 )
+#' set.seed( 2017 )
 #' boldImages <- list()
 #' n=16
 #' nvox <- n*n*n*12
@@ -37,17 +37,8 @@
 #' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 )
 #' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 )
 #' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 )
-#'
-#' cleanBoldImages <- list()
-#' for( i in 1:length( boldImages ) )
-#'   {
-#'   fmri <- preprocessfMRI( boldImages[[i]], residualizeMatrix=FALSE,
-#'     doMotionCorrection = FALSE )
-#'   if( i == 1 ) maskImage <- fmri$maskImage
-#'   cleanBoldImages[[i]] <- fmri$cleanBoldImage
-#'   }
-#'
-#' icaResults <- antsSpatialICAfMRI( cleanBoldImages, maskImage,
+#' maskImage = getAverageOfTimeSeries( boldImages[[1]] ) * 0 + 1
+#' icaResults <- antsSpatialICAfMRI( boldImages, maskImage,
 #'   numberOfICAComponents = 2 )
 #'
 #' @export antsSpatialICAfMRI

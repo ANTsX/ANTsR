@@ -44,10 +44,9 @@ smat = sparseDistanceMatrixXY( mat, mat2, 3 )
 smat2 = sparseDistanceMatrixXY( mat2, mat, 3 )
 }
 }
-\author{
-Avants BB
-}
 \references{
 \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 }
-
+\author{
+Avants BB
+}

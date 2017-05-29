@@ -31,4 +31,3 @@ img2 <- abpN4( img )
 \author{
 Tustison N, Avants BB
 }
-

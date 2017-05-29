@@ -6,10 +6,10 @@ compflags=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
 ITKDIR=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkDir(); cat(a)'`
 
 # get a version of cmake
-cmaker=`which cmake`
-if [[ ! -x $cmaker ]] ; then # try r version
-  cmaker=`${R_HOME}/bin/Rscript -e 'a<-cmaker::cmake()'`
-fi
+# cmaker=`which cmake`
+# if [[ ! -x $cmaker ]] ; then # try r version
+#   cmaker=`${R_HOME}/bin/Rscript -e 'a<-cmaker::cmake()'`
+# fi
 if [[ `uname` -eq Darwin ]] ; then
   CMAKE_BUILD_TYPE=Release
 fi
@@ -29,7 +29,9 @@ fi
 cd ./src
 # platform-specific Makevars
 echo "myantssource=\${PWD}/ants/" > Makevars
-echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
+# echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
+echo "ITK=${ITKRCMAKE}" >> Makevars
+
 needVCL_CAN_STATIC_CONST_INIT_FLOAT=0
 if [[ ${#CC} -gt 0 ]] ; then # test the requested compiler
   temp=$(${CC} --version | grep clang)
@@ -43,21 +45,30 @@ else # just try gcc directly
   fi
 fi
 echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
-echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD}  \
-  -I`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsIncludes()'` \
-  -I../inst/include/ " >> Makevars
 
+aincludes=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsIncludes(); cat(a)'`
+
+# echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD}  \
+#   -I`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsIncludes()'` \
+#   -I../inst/include/ " >> Makevars
+echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD}  \
+  -I${aincludes} \
+  -I../inst/include/ " >> Makevars
+  
 echo "CXX_STD = CXX11" >> Makevars
 
-echo "myantslib=`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsLibs()'` " >> Makevars
+myantslib=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsLibs(); cat(a)'`
 
-echo "libants=\`find \${myantslib} -name \"lib*.a\"\`" >> Makevars
+# echo "myantslib=`\${R_HOME}/bin/Rscript -e 'ANTsRCore:::antsLibs()'` " >> Makevars
+echo "myantslib=${myantslib}" >> Makevars
 
-echo "libitk=\`find \\\`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkLibs()'\\\` -name \"lib*.a\"\` " >> Makevars
+echo "libants=\`find ${myantslib} -name \"lib*.a\"\`" >> Makevars
 
-echo "PKG_LIBS = \${libitk}  \${libants} \${libitk} \${libants} \${libitk} \
-                 \${libants} \${libitk} \${libants} \${itklib}  \${libants} \
-                 \${libitk} \${libants} \${itklib}   \${libants} \${itklib} \
+echo "libitk=\`find ${ITKRLIB} -name \"lib*.a\"\`" >> Makevars
+
+echo "PKG_LIBS=\${libitk} \${libants} \${libitk} \${libants} \${libitk} \
+                 \${libants} \${libitk} \${libants} \${itklib} \${libants} \
+                 \${libitk} \${libants} \${itklib} \${libants} \${itklib} \
                  \${libants} \${libitk} \${libants} \${itklib}" >> Makevars
 
 echo ".PHONY: all libs" >> Makevars

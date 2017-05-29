@@ -69,4 +69,3 @@ bayesAvg <- aslAveraging(asl, tc=tc, method='bayesian',
 \author{
 Kandel BM, Avants BB
 }
-

@@ -98,10 +98,9 @@ result <- regressProjections(input[data.split$rows.in, ],
   mask, 'outcome')
 
 }
-\author{
-Kandel BM and Avants B
-}
 \seealso{
 \code{\link{sparseDecom2}}
 }
-
+\author{
+Kandel BM and Avants B
+}

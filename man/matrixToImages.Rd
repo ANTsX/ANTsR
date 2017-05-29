@@ -24,10 +24,9 @@ Unmasks rows of a matrix and writes as images.
 
 
 }
-\author{
-Cook PA
-}
 \seealso{
 \code{\link{imagesToMatrix}, \link{getMask}}
 }
-
+\author{
+Cook PA
+}

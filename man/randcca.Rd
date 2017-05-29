@@ -36,4 +36,3 @@ dr=randcca(x,y,k,1)
 \author{
 Avants BB
 }
-

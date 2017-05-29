@@ -37,7 +37,7 @@
 #' # should see original label regions preserved in dilated version
 #' # label N should have mean N and 0 variance
 #' labelStats(labelsDilated, labels)
-#' 
+#' @export
 multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, labelList=NA ) {
 
   # If no label list supplied, get a list of labels in the image

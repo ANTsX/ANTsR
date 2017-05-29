@@ -48,4 +48,3 @@ for ( ftype in c("butt","stl","trig") ) {
 \author{
 Avants BB
 }
-

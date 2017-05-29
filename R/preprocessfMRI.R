@@ -47,11 +47,10 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #' set.seed(123)
-#' n=16
-#' nvox <- n*n*n*12
-#' dims <- c(n,n,n,12)
+#' n=8
+#' nvox <- n*n*n*6
+#' dims <- c(n,n,n,6)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
-#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 #' cleanfMRI <- preprocessfMRI(boldImage)
 #' @export preprocessfMRI
 preprocessfMRI <- function(boldImage,

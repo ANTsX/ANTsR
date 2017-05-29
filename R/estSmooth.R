@@ -11,51 +11,51 @@
 #' @return Outputs the estimated FWHM and RPV image
 #' @details
 #' The partial derivatives of an image in x, y, and z directions are used to
-#' create a covariance matrix which in turn is used to calculate the 
+#' create a covariance matrix which in turn is used to calculate the
 #' full-widths at half maxima (FWHM). The FWHM is equivalent to the estimated
 #' image smoothness.
-#' 
+#'
 #' The resels per voxel image (\code{RPVImg}) represents the estimated resel at
-#' each individual voxel throughout the search region. This may be used in 
+#' each individual voxel throughout the search region. This may be used in
 #' place of volumetric measurements (or sum voxel measurements) when estimating
-#' the p-value of a cluster using \code{rftPval}. The intent behind using the 
+#' the p-value of a cluster using \code{rftPval}. The intent behind using the
 #' RPV image to estimate cluster level statistics is to offset the natural
-#' probability of obtaining significant clusters solely by chance in very 
+#' probability of obtaining significant clusters solely by chance in very
 #' smooth regions at low thresholds.
 #'
-#' It is possible to use a single statistical field image to estimate the FWHM. 
-#' However, it's recommended that FWHM estimates are obtained from the scaled 
-#' residuals of statistical models (Stefan J.K et al., 1999). Therefore, this 
-#' function is optimized to estimate the pooled smoothness of the residual 
+#' It is possible to use a single statistical field image to estimate the FWHM.
+#' However, it's recommended that FWHM estimates are obtained from the scaled
+#' residuals of statistical models (Stefan J.K et al., 1999). Therefore, this
+#' function is optimized to estimate the pooled smoothness of the residual
 #' images from a fitted model. By default residuals are scaled
 #' (\code{scaleResid = TRUE}).
-#' 
-#' A scaling factor is used to correct for differences when using the 
-#' \code{sample} option. Scaling isn't effective when the number of images is 
+#'
+#' A scaling factor is used to correct for differences when using the
+#' \code{sample} option. Scaling isn't effective when the number of images is
 #' very low and typically results in an overestimation of the the FWHM. If only
-#' one image or numeric vector is entered then the scaling factor is not used. 
-#' If a numeric vector is entered the \code{imageMake} function is used to 
+#' one image or numeric vector is entered then the scaling factor is not used.
+#' If a numeric vector is entered the \code{imageMake} function is used to
 #' prepare it for smoothness estimation (see Worsley et al., 1999).
-#' 
+#'
 #' Any NA values in \code{object} will be set to zero.
 #' @references
 #' Hayasaka (2004) Nonstationary cluster-size inference with random field and permutation methods.
-#' 
+#'
 #' Worsley K.J. (1992) A Three-Dimensional Statistical Analysis for CBF Activation Studies in Human Brain.
-#' 
+#'
 #' Worsley K.J. (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
-#' 
+#'
 #' Worsley K.J. (1999) Detecting Changes in Nonisotropic Images
-#' 
+#'
 #' Stefan J.K. (1999) Robust Smoothness Estimation in Statistical Parametric Maps Using Standardized Residual from the General Linear Model
 #' @author Zachary P. Christensen
 #' @seealso resels
 #' @examples
 #' # estimate individual image
-#' mnit1 <- antsImageRead(getANTsRData('mni'))
-#' mask <- getMask(mnit1)
-#' fwhm1 <- estSmooth(mnit1, mask)
-#' 
+#' mnit1 <- antsImageRead(getANTsRData('r16'))
+#' mask <- getMask( mnit1 )
+#' fwhm1 <- estSmooth( mnit1, mask )
+#'
 #' @export estSmooth
 estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE) {
   if (missing(mask))
@@ -74,7 +74,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     dimz <- 1:dim(mask)[3]
     dimz1 <- 2:(dim(mask)[3] + 1)
   }
-  
+
   # image matrix or antsImage--------------------------------------------------
   if (class(x) == "antsImage") {
     scale <- 1
@@ -105,7 +105,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
   } else if (D == 2) {
     d1 <- m1 <- matrix(0, dim(mask)[1] + 1, dim(mask)[2] + 1)
     maskar <- as.matrix(mask)
-    m1[dimx1, dimy1, dimz1] <- maskar
+    m1[dimx1, dimy1] <- maskar
     m3 <- ((m1[dimx1, dimy1] * m1[dimx, dimy1])) *
           ((m1[dimx1, dimy1] * m1[dimx1, dimy]))
     Vxx <- Vyy <- Vxy <- matrix(0, dim(mask)[1], dim(mask)[2])
@@ -147,7 +147,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
       dy <- (d1[dimx1, dimy1, dimz1] - d1[dimx1, dimy, dimz1]) * m3
       dz <- (d1[dimx1, dimy1, dimz1] - d1[dimx1, dimy1, dimz]) * m3
     }
-    
+
     Vxx <- Vxx + (dx * dx)
     if (D > 1) {
       Vyy <- Vyy + (dy * dy)
@@ -158,7 +158,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
       Vxz <- Vxz + (dx * dz)
       Vyz <- Vyz + (dy * dz)
     }
-    
+
     if (verbose)
       setTxtProgressBar(progress, i)
   }

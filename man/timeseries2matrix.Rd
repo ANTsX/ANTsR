@@ -34,4 +34,3 @@ mat <- timeseries2matrix( img , mask )
 \author{
 Shrinidhi KL
 }
-

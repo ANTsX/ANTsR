@@ -48,14 +48,16 @@
 #' NeuroImage 59, 2142-2154.
 #' @author Tustison NJ, Avants BB
 #' @examples
+#'
 #' set.seed(123)
-#' n=16
-#' nvox <- n*n*n*12
-#' dims <- c(n,n,n,12)
+#' n=8
+#' nvox <- n*n*n*6
+#' dims <- c(n,n,n,6)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
 #' cleanfMRI <- preprocessRestingBOLD(boldImage)
-#' @export preprocessRestingBOLD
+#'
+#' @export
 preprocessRestingBOLD <- function(boldImage,
   maskImage = NA,
   maskingMeanRatioThreshold = 0.75,
@@ -90,7 +92,8 @@ preprocessRestingBOLD <- function(boldImage,
 
     # Iterative motion correction
     for ( iter in 1:motionCorrectionIterations ) {
-      motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
+      motionCorrectionResults <- .motion_correction(boldImage,
+        fixed = meanBoldFixedImageForMotionCorrection,
         moreaccurate = motionCorrectionAccuracyLevel)
       }
 
@@ -140,7 +143,7 @@ preprocessRestingBOLD <- function(boldImage,
     }
   }
 
-  averageImage <- apply.antsImage(boldImage, c(1,2,3), mean)
+  averageImage <- getAverageOfTimeSeries( boldImage )
 
   # Calculate the mask, if not supplied.
   if (is.na(maskImage)) {

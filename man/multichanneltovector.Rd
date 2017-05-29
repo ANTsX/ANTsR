@@ -26,4 +26,3 @@ contiguous piece of a vector.
 \author{
 Avants BB
 }
-

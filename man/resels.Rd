@@ -24,12 +24,9 @@ nature of voxels when undergoing RFT based statistical analyses. Optimized for t
 dimensions (2D has not yet been tested yet).
 }
 \examples{
-mask <- getMask(antsImageRead(getANTsRData('mni')))
-myresels <- resels(mask, c(1, 1, 1))
+mask <- getMask(antsImageRead(getANTsRData('r16')))
+myresels <- resels(mask, c(1, 1))
 
-}
-\author{
-Zachary P. Christensen
 }
 \references{
 Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant Signals in Images of Cerebral Activation.
@@ -37,4 +34,6 @@ Worlsey K.J., (1996) A Unified Statistical Approach for Determining Significant 
 \seealso{
 rftPval, euler, rftResults
 }
-
+\author{
+Zachary P. Christensen
+}

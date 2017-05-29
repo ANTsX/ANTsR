@@ -27,4 +27,3 @@ geom<-labelGeometryMeasures(seg,fi)
 \author{
 Avants BB, Tustison NJ
 }
-

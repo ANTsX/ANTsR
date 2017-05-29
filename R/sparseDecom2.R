@@ -30,6 +30,7 @@
 #' and 1 (prior is strong).  Only engaged if initialization is used
 #' @param verbose activates verbose output to screen
 #' @param rejector rejects small correlation solutions
+#' @param maxBased boolean that chooses max-based thresholding
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
@@ -38,8 +39,10 @@
 #' mat2<-replicate(100, rnorm(20))
 #' mat<-scale(mat)
 #' mat2<-scale(mat2)
-#' mydecom<-sparseDecom2( inmatrix=list(mat,mat2),
-#'   sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
+#' mydecom<-sparseDecom2(
+#' inmatrix = list(mat,mat2),
+#' sparseness=c(0.1,0.3),
+#' nvecs=3, its=3, perms=0)
 #' wt<-0.666
 #' mat3<-mat*wt+mat2*(1-wt)
 #' mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
@@ -94,7 +97,7 @@
 #' @export sparseDecom2
 sparseDecom2 <- function(
   inmatrix,
-  inmask = c(NA, NA),
+  inmask = list(NA, NA),
   sparseness = c(0.01, 0.01),
   nvecs = 3,
   its = 20,
@@ -111,7 +114,8 @@ sparseDecom2 <- function(
   ell1 = 10,
   priorWeight = 0,
   verbose = FALSE,
-  rejector=0  ) {
+  rejector=0,
+  maxBased=FALSE  ) {
   idim=3
   # safety 1 & 2
   if ( ! is.na( inmask[1] ) )
@@ -128,7 +132,7 @@ sparseDecom2 <- function(
      masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
   if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
     stop("Matrices must have same number of rows")
-  inmask = c( maskx, masky )
+  inmask = list(maskx, masky )
   verbose = as.numeric( verbose )
   if ( robust > 0 )
     {
@@ -155,7 +159,8 @@ sparseDecom2 <- function(
     initializationList2,
     ell1,
     priorWeight,
-    verbose
+    verbose,
+    maxBased
     )
   ccasummary = data.frame(
     corrs = sccaner$corrs,
@@ -187,7 +192,8 @@ sparseDecom2 <- function(
     initializationList2,
     ell1,
     priorWeight,
-    verbose
+    verbose,
+    maxBased
     )
     counter = as.numeric( abs(ccasummary$corrs) < abs(sccanerp$corrs)   )
     ccasummary$pvalues = ccasummary$pvalues + counter
@@ -250,7 +256,8 @@ sparseDecom2 <- function(
   initializationList2,
   ell1,
   priorWeight,
-  verbose) {
+  verbose,
+  maxBased ) {
   outval = .Call( "sccanCpp",
     inputMatrices[[1]],
     inputMatrices[[2]],
@@ -270,6 +277,7 @@ sparseDecom2 <- function(
     ell1,
     verbose,
     priorWeight,
+    maxBased,
     PACKAGE="ANTsR" )
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)

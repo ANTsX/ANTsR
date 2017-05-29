@@ -49,4 +49,3 @@ antsMotionCalculation(simimg,moreaccurate=0)
 \author{
 Benjamin M. Kandel
 }
-

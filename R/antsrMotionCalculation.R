@@ -39,12 +39,12 @@ antsrMotionCalculation <- function(
     print( validTx )
     stop( paste( typeofTransform, "not in valid transform list." ) )
     }
-  imgdim = img@dimension
+  imgdim = length( dim( img ) )
   subdim = imgdim - 1
-  ntimes = dim( img )[ img@dimension ]
+  ntimes = dim( img )[ imgdim ]
   if ( is.na( fixed )  )
     {
-    fixed <- apply.antsImage( img, c(1:(subdim)), mean, na.rm=T  )
+    fixed <- getAverageOfTimeSeries( img )
     }
   if ( is.na( mask ) ) mask = getMask( fixed )
   extractSubImage <- function( img, vin )
@@ -93,7 +93,7 @@ antsrMotionCalculation <- function(
   mocodir = diag( imgdim )
   mocodir[ 1:subdim, 1:subdim ] = antsGetDirection( fixed )
   antsSetDirection( moco_img, mocodir )
-  meanout <- apply.antsImage( moco_img, c(1:(subdim)), mean, na.rm=T )
+  meanout <- apply( moco_img, c(1:(subdim)), mean, na.rm=T )
   tempmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS( tempmat )
   rm( tempmat )

@@ -27,4 +27,3 @@ spmat = imageDomainToSpatialMatrix( img )
 \author{
 Avants BB
 }
-

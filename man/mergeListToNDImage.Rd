@@ -28,4 +28,3 @@ my4DimageR = mergeListToNDImage( my4Dimage, my3Dlist )
 \author{
 Pustina D, Avants B
 }
-

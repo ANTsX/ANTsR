@@ -55,4 +55,3 @@ Computes CBF from ASL - pasl or pcasl
 \author{
 Avants BB, Kandel B, Duda JT
 }
-

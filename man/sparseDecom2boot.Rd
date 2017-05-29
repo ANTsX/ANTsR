@@ -87,4 +87,3 @@ mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3),
 \author{
 Avants BB
 }
-

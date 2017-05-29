@@ -29,4 +29,3 @@ Repeatedly run N3 on slices of time series and return image
 \author{
 Avants BB
 }
-

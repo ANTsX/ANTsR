@@ -16,32 +16,33 @@
 #' @author Cook PA, Avants B, Kandel BM
 #' @seealso \code{\link{matrixToImages}, \link{getMask}}
 #' @examples
-#'  img <- antsImageRead(getANTsRData('r16') )
+#'  img <- antsImageRead(getANTsRData('r16') ) %>% resampleImage( c(32,32))
 #'  imglist <- list()
 #'  nvox <- dim(img)[1] * dim(img)[2]
-#'  nsubj <- 50
+#'  nsubj <- 5
 #'  for(ii in 1:nsubj){
 #'    imglist[[ ii ]] <- img + rnorm(nvox, sd=mean(img[img!=0]))
 #'  }
-#'  mask <- getMask(img) %>% resampleImage( c( 2,2 ) )
+#'  mask <- getMask(img)
 #'  imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
 imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
-  if(missing(mask))
+  if(missing(mask)) {
     mask <- getMask(imageList[[1]])
+  }
 
   numImages <- length(imageList)
-
-  numVoxels <- length(which(mask > epsilon ))
+  mask_arr = as.array(mask) > epsilon
+  numVoxels <- length(which(mask_arr))
 
   listfunc <- function(x) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
       x = resampleImageToTarget( x, mask, 2 ) # gaussian interpolation
     }
-    as.numeric(x, mask > epsilon )
+    as.numeric(x, mask = mask_arr)
   }
   dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
   doSmooth = !any( is.na( sigma ) )

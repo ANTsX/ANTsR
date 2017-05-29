@@ -37,4 +37,3 @@ stopifnot( all( mcimg2[30,30] == mcimg[30,30] ) )
 \author{
 Avants BB
 }
-

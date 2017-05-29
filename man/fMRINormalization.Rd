@@ -113,4 +113,3 @@ antsApplyTransforms( getAverageOfTimeSeries( img ), mni,
 \author{
 Avants BB, Duda JT
 }
-

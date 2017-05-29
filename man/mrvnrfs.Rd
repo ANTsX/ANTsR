@@ -46,7 +46,7 @@ mask[ 3:6, 3:6 ]<-1
 mask[ 5, 5:6]<-2
 ilist<-list()
 lablist<-list()
-inds<-1:50
+inds<-1:8
 scl<-0.33 # a noise parameter
 for ( predtype in c("label","scalar") )
 {
@@ -83,4 +83,3 @@ if ( predtype == "scalar" )
 \author{
 Avants BB, Tustison NJ, Pustina D
 }
-

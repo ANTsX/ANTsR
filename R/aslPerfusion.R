@@ -41,11 +41,13 @@
 #' aslmat<-timeseries2matrix( asl, aslmask )
 #' for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
 #' asl<-matrix2timeseries( asl, aslmask, aslmat )
+#' # NOT WORKING
+#' \dontrun{
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0 )
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, ncompcor=2 )
 #' # allow some rejection
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0.925 )
-#'
+#' }
 #' @export aslPerfusion
 aslPerfusion <- function(
   asl,
@@ -116,8 +118,8 @@ aslPerfusion <- function(
      "Might be wrong for your data! Please check!"))
     ctllabs<-c(1:(dim(asl)[4]/2)) * 2 # TC - jj data
     taglabs<-ctllabs-1
-    mvals2 <- apply(mat[ctllabs, ], 2, mean)
-    mvals1 <- apply(mat[taglabs, ], 2, mean)
+    mvals2 <- apply(mat[ctllabs, , drop = FALSE], 2, mean)
+    mvals1 <- apply(mat[taglabs, , drop = FALSE], 2, mean)
     if (verbose) print(paste("Mean-1st-label",mean(mvals1)))
     if (verbose) print(paste("Mean-2nd-label",mean(mvals2)))
     # mean control should exceed mean tag

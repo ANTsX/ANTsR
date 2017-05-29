@@ -52,4 +52,3 @@ myout = regressionNetworkViz( mylm , sigthresh=0.05, outfile='temp2.html')
 \author{
 Avants BB
 }
-

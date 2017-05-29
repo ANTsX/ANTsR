@@ -7,7 +7,8 @@
 sparseDecom(inmatrix = NA, inmask = NA, sparseness = 0.1, nvecs = 10,
   its = 5, cthresh = 50, statdir = NA, z = 0, smooth = 0,
   initializationList = list(), mycoption = 0, robust = 0, ell1 = 1,
-  getSmall = 0, verbose = FALSE, powerit = 0, priorWeight = 0)
+  getSmall = 0, verbose = FALSE, powerit = 0, priorWeight = 0,
+  maxBased = FALSE)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,
@@ -45,6 +46,8 @@ of 1 (spatial orthogonality) and 2 (subject space orthogonality)}
 \item{powerit}{alternative power iteration implementation, faster}
 
 \item{priorWeight}{scalar weight typically in range zero to two}
+
+\item{maxBased}{boolean that chooses max-based thresholding}
 }
 \value{
 outputs a decomposition of a population or time series matrix
@@ -143,4 +146,3 @@ plot( ref, eseg )
 \author{
 Avants BB
 }
-

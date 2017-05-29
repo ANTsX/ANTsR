@@ -24,4 +24,3 @@ compute the DVARS quality control metric at every voxel
 \author{
 Tustison NJ, Avants BB
 }
-

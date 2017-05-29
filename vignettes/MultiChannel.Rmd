@@ -163,7 +163,7 @@ time1 = 0
 timeParallel = NA
 if("parallel" %in% rownames(installed.packages()) == TRUE) {
   ptm = proc.time()
-  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),3) )
+  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2) )
   timeParallel = proc.time() - ptm
   unlist(iMeans)
 }
@@ -204,10 +204,10 @@ decomposition for each tensor.
 
 ```{r dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 # list-based call to convert values to an array
-# mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
+mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
 
 # simplest convesion to array
-mat = as.array(dt, mask==1)
+# mat = as.array(dt, mask == 1)
 
 # convert tensor from vector to matrix
 initTensor <- function(x) {
@@ -223,15 +223,25 @@ getFractionalAnisotropy <- function(evs) {
   fa = 0
   if ( denom > 0 ) {
     fa = sqrt(0.5) * numer/denom
-    }
+  }
+  fa
   }
 
 # Eigen decomposition for each tensor
-eigs = unlist( apply(mat, 2, function(x) { eigen( initTensor(x) ) } ) )
+# eigs = unlist( apply(mat, 2, function(x) {
+#   eigen( initTensor(x) )
+#   } )
+#   )
 
-evalMat = as.numeric(eigs[names(eigs)=="values1"])
-evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values2"]))
-evalMat = cbind(evalMat, as.numeric(eigs[names(eigs)=="values3"]))
+all_eigs = apply(mat, 2, function(x) {
+  eigen( initTensor(x) )
+  } )
+
+eigs = lapply(all_eigs, function(x) {
+  x$values
+})
+eigs = lapply(eigs, unlist)
+evalMat = do.call(rbind, eigs)
 evalMat[evalMat < 0 ] = 0
 
 # Create images from the eigenvalues
@@ -257,13 +267,16 @@ estimates the primary direction of diffusion (PDD) and in white matter this corr
 the direction that is parallel to the myelinated axons in a fiber bundle
 
 ```{r dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
-evec1 = as.numeric(eigs[names(eigs)=="vectors1"])
-evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors2"]))
-evec1 = cbind(evec1, as.numeric(eigs[names(eigs)=="vectors3"]))
+eig_vecs = lapply(all_eigs, function(x) {
+  x$vectors
+})
+eig_vecs = lapply(eig_vecs, c)
+vecMat = do.call(rbind, eig_vecs)
 
-evecx = makeImage(mask, evec1[,1])
-evecy = makeImage(mask, evec1[,2])
-evecz = makeImage(mask, evec1[,3])
+
+evecx = makeImage(mask, vecMat[,1])
+evecy = makeImage(mask, vecMat[,2])
+evecz = makeImage(mask, vecMat[,3])
 decList = list(evecx, evecy, evecz)
 decList = lapply(decList, abs)
 
@@ -286,9 +299,9 @@ clutter.
 ```{r dti7,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
 lower = c(40,80)
 upper = c(80,120)
-subfa = cropIndices(fa, lower=lower, upper=upper)
+subfa = cropIndices(fa, lowerind = lower, upperind = upper)
 subVecList = list(evecx, evecy, evecz)
-subVecList = lapply( subVecList, function(x){ cropIndices(x, lower=lower, upper=upper)})
+subVecList = lapply( subVecList, function(x){ cropIndices(x, lowerind = lower, upperind = upper)})
 subDecList = lapply( subVecList, function(x){ abs(subfa*x) })
 
 plotColor( subDecList, vectors=list(subVecList[[1]], subVecList[[2]]) )

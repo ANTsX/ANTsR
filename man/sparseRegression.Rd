@@ -82,13 +82,12 @@ result <- regressProjections(input.train, input.test, demog.train,
 # plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 
 }
-\author{
-Kandel BM, Avants BB.
-}
 \references{
 Kandel B.M., D. Wolk, J. Gee, and B. Avants. Predicting
 Cognitive Data from Medical Images Using Sparse Linear Regression.
 Information Processing in Medical Imaging, 2013.  %% ~put references to the
 literature/web site here ~
 }
-
+\author{
+Kandel BM, Avants BB.
+}

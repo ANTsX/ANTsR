@@ -27,4 +27,3 @@ wcmat<-corw( mat , weights = abs( nrorm( nrow(mat) ) ) )
 \author{
 Avants BB
 }
-
