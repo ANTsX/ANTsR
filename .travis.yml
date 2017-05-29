@@ -39,6 +39,7 @@ before_install:
   - export PATH=$HOME/bin/:$PATH
   - cd $basedir
   - mkdir -p ~/.R
+  - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
   - export CC=clang
   - export CXX=clang++
   - echo "CC=clang" >  ~/.R/Makevars

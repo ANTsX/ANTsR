@@ -79,8 +79,8 @@
 #'  mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
 #'    transformlist=mytx$fwdtransforms)
 #'  ilist[[i]]=mywarpedimage
-#'  seg<-kmeansSegmentation( ilist[[i]], k=3, kmask = refmask)
-#'  seglist[[i]]<-seg$segmentation
+#'  seg<-thresholdImage( ilist[[i]],"Otsu", 3)
+#'  seglist[[i]]<-seg
 #'  }
 #' r<-2
 #' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
