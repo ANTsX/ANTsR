@@ -90,7 +90,8 @@ preprocessRestingBOLD <- function(boldImage,
 
     # Iterative motion correction
     for ( iter in 1:motionCorrectionIterations ) {
-      motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
+      motionCorrectionResults <- .motion_correction(boldImage,
+        fixed = meanBoldFixedImageForMotionCorrection,
         moreaccurate = motionCorrectionAccuracyLevel)
       }
 
@@ -140,7 +141,7 @@ preprocessRestingBOLD <- function(boldImage,
     }
   }
 
-  averageImage <- apply(boldImage, c(1,2,3), mean)
+  averageImage <- getAverageOfTimeSeries( boldImage )
 
   # Calculate the mask, if not supplied.
   if (is.na(maskImage)) {
