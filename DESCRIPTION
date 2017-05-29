@@ -20,7 +20,6 @@ Depends:
     methods,
     ANTsRCore
 Imports:
-    ANTsRCore,
     graphics,
     grDevices,
     magic,

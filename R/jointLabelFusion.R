@@ -26,6 +26,33 @@
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 #' @keywords fusion, template
+#' @importFrom ANTsRCore antsRegistration atropos thresholdImage labelClusters
+#' usePkg antsApplyTransforms antsApplyTransformsToPoints
+#'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
+#'   antsImageClone antsImageIterator antsImageIteratorGet
+#'   antsImageIteratorGetIndex antsImageIteratorIsAtEnd
+#'   antsImageIteratorNext antsImageIteratorSet antsImageRead
+#'   antsImageWrite antsRegistration antsSetDirection antsSetOrigin
+#'   antsSetSpacing antsTransformIndexToPhysicalPoint
+#'   antsTransformPhysicalPointToIndex antsrGetPointerName
+#'   antsrTransformFromDisplacementField applyAntsrTransform
+#'   applyAntsrTransformToImage as.antsImage atropos
+#'   bigLMStats composeAntsrTransforms
+#'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
+#'   getNeighborhoodAtVoxel getNeighborhoodInMask
+#'   iMath is.antsImage kmeansSegmentation labelClusters
+#'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
+#' @importFrom grDevices colorRampPalette dev.off heat.colors hsv png rainbow rgb
+#' @importFrom graphics hist par plot points
+#' @importFrom methods is new
+#' @importFrom stats ar as.formula coefficients convolve
+#' @importFrom stats cor cor.test cov dist formula glm lm
+#' @importFrom stats lm.fit loess median model.matrix na.omit
+#' @importFrom stats optimize p.adjust pchisq pf pnorm ppois
+#' @importFrom stats predict pt qchisq qf qnorm qt quantile
+#' @importFrom stats residuals rnorm sd spec.pgram spline stl
+#' @importFrom stats t.test toeplitz ts var
+#' @importFrom utils data glob2rx read.csv setTxtProgressBar tail txtProgressBar write.csv
 #' @examples
 #'
 #' set.seed(123)
