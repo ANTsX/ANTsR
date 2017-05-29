@@ -71,6 +71,7 @@ Suggests:
     signal,
     sna,
     testthat,
+    tools,
     viridis,
     visreg,
     wmtsa
