@@ -37,7 +37,7 @@ approximated image, segmentation and probabilities
 }
 \description{
 A multiple atlas voting scheme to customize labels for a new subject. This
-function will also perform intensity fusion. It almost directlly calls the
+function will also perform intensity fusion. It almost directly calls the
 \code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
 One may want to normalize image intensities for each input image before
 passing to this function.  If no labels are passed, we do intensity fusion.

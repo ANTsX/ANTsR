@@ -1,7 +1,7 @@
 #' joint label and intensity fusion
 #'
 #' A multiple atlas voting scheme to customize labels for a new subject. This
-#' function will also perform intensity fusion. It almost directlly calls the
+#' function will also perform intensity fusion. It almost directly calls the
 #' \code{C++} in the ANTs executable so is much faster than other variants in ANTsR.
 #' One may want to normalize image intensities for each input image before
 #' passing to this function.  If no labels are passed, we do intensity fusion.
@@ -46,6 +46,7 @@
 #'   splitChannels thresholdImage usePkg
 #' @importFrom grDevices colorRampPalette dev.off heat.colors hsv png rainbow rgb
 #' @importFrom graphics hist par plot points
+#' @importFrom magrittr %>%
 #' @importFrom methods is new
 #' @importFrom stats ar as.formula coefficients convolve
 #' @importFrom stats cor cor.test cov dist formula glm lm
