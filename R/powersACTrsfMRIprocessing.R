@@ -457,8 +457,10 @@ if ( havetemplateMap )
 boldToTemplate = NA
 dmnAtBOLDres = NA
 seg2template = NA
-if ( exists("mni") & is.na( templateImage ) )
-  templateImage = resampleImage( mni, rep( 2.0 , 3 ) )
+# if ( exists("mni") & is.na( templateImage ) ) {
+#  mni = antsImageRead( getANTsRData( "mni" ) )
+#  templateImage = resampleImage( mni, rep( 2.0 , 3 ) )
+#  }
 if ( !is.na( templateImage ) & havetemplateMap )
   {
   ## map the fusedImg to the common template space
