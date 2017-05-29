@@ -41,10 +41,10 @@ antsrMotionCalculation <- function(
     }
   imgdim = length( dim( img ) )
   subdim = imgdim - 1
-  ntimes = dim( img )[ img@dimension ]
+  ntimes = dim( img )[ imgdim ]
   if ( is.na( fixed )  )
     {
-    fixed <- apply( img, c(1:(subdim)), mean, na.rm = TRUE  )
+    fixed <- getAverageOfTimeSeries( img )
     }
   if ( is.na( mask ) ) mask = getMask( fixed )
   extractSubImage <- function( img, vin )
