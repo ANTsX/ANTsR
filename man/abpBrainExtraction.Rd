@@ -29,12 +29,13 @@ image.  Should be preceded by abpN4.
 }
 \examples{
 
+n = 64
 fn<-getANTsRData("r16")
 img<-antsImageRead(fn)
-img<-resampleImage(img,c(128,128),1,0)
+img<-resampleImage(img,c(n,n),1,0)
 tf<-getANTsRData("r27")
 tem<-antsImageRead(tf)
-tem<-resampleImage(tem,c(128,128),1,0)
+tem<-resampleImage(tem,c(n,n),1,0)
 temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ] <- 1
 temmask[ tem  <= 20 ] <- 0

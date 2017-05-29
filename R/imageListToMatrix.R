@@ -16,14 +16,14 @@
 #' @author Cook PA, Avants B, Kandel BM
 #' @seealso \code{\link{matrixToImages}, \link{getMask}}
 #' @examples
-#'  img <- antsImageRead(getANTsRData('r16') )
+#'  img <- antsImageRead(getANTsRData('r16') ) %>% resampleImage( c(32,32))
 #'  imglist <- list()
 #'  nvox <- dim(img)[1] * dim(img)[2]
-#'  nsubj <- 50
+#'  nsubj <- 5
 #'  for(ii in 1:nsubj){
 #'    imglist[[ ii ]] <- img + rnorm(nvox, sd=mean(img[img!=0]))
 #'  }
-#'  mask <- getMask(img) %>% resampleImage( c( 2,2 ) )
+#'  mask <- getMask(img)
 #'  imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix

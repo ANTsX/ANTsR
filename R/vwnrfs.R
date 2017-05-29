@@ -26,7 +26,7 @@
 #' ilist<-list()
 #' lablist<-list()
 #' masklist<-list()
-#' inds<-1:50
+#' inds<-1:8
 #' scl<-0.33 # a noise parameter
 #' for ( predtype in c("label","scalar") )
 #' {
@@ -336,23 +336,23 @@ splitMask <- function( mask, n = NA, voxchunk = NA ) {
     stop('Arguments n or voxchunk are required for splitMask')
   }
   if ( class(mask) != 'antsImage') stop('Mask must be a single antsImage')
-  
+
   hasvalues = mask >= 0.5
   nnz = sum( hasvalues )
-  
+
   if ( is.numeric(n) ) {
     # if voxchunk not set compute chunk size
     nnz = sum( hasvalues )
     voxchunk = round( nnz / n ) - 1
   }
-  
+
   if (voxchunk > sum(mask>=0.5)) {
     return(thresholdImage(mask, 0.5, Inf))
   }
-  
+
   chunk.seq = seq(1, nnz, by=voxchunk )
   chunk.seq[ length(chunk.seq) ] = nnz
-  
+
   voxels = rep(NA, sum(mask>=0.5) )
   for ( ch in 1:( length(chunk.seq)-1 ) ) {
     # set end of this chunk
