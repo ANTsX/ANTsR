@@ -25,11 +25,8 @@ Imports:
     magic,
     magrittr,
     psych,
-    Rcpp,
-    RcppEigen,
     rsvd,
     stats,
-    tools,
     utils,
     xgboost
 Suggests:
@@ -64,6 +61,8 @@ Suggests:
     pracma,
     randomForest,
     RANN,
+    Rcpp,
+    RcppEigen,
     rflann,
     rgl,
     rmarkdown,
