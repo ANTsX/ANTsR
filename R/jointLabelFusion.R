@@ -27,7 +27,7 @@
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 #' @keywords fusion, template
 #' @importFrom ANTsRCore antsRegistration atropos thresholdImage labelClusters
-#' usePkg antsApplyTransforms antsApplyTransformsToPoints
+#'   antsApplyTransforms antsApplyTransformsToPoints
 #'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
 #'   antsImageClone antsImageIterator antsImageIteratorGet
 #'   antsImageIteratorGetIndex antsImageIteratorIsAtEnd
@@ -42,6 +42,8 @@
 #'   getNeighborhoodAtVoxel getNeighborhoodInMask
 #'   iMath is.antsImage kmeansSegmentation labelClusters
 #'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
+#'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
+#'   splitChannels thresholdImage usePkg
 #' @importFrom grDevices colorRampPalette dev.off heat.colors hsv png rainbow rgb
 #' @importFrom graphics hist par plot points
 #' @importFrom methods is new
