@@ -39,7 +39,7 @@ antsrMotionCalculation <- function(
     print( validTx )
     stop( paste( typeofTransform, "not in valid transform list." ) )
     }
-  imgdim = img@dimension
+  imgdim = length( dim( img ) )
   subdim = imgdim - 1
   ntimes = dim( img )[ img@dimension ]
   if ( is.na( fixed )  )
