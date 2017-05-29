@@ -16,7 +16,7 @@ list containing demographics, imageMat, imageMask and imageBoolean
 This function reads a file created by \code{writeNormalizedPopulationData}.
 }
 \examples{
-
+\dontrun{
 ilist = getANTsRData( "population" )
 mask = getMask( ilist[[ 1 ]] )
 imat = imageListToMatrix( ilist, mask )
@@ -25,7 +25,7 @@ ibool = c( TRUE, TRUE, TRUE, FALSE )
 tfn = tempfile(fileext=".h5")
 if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
 if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
-
+}
 }
 \author{
 Avants BB
