@@ -20,18 +20,19 @@ Depends:
     methods,
     ANTsRCore
 Imports:
-    Rcpp,
-    tools,
-    magrittr,
-    RcppEigen,
-    xgboost,
-    rsvd,
-    psych,
-    magic,
-    stats,
+    ANTsRCore,
     graphics,
     grDevices,
-    utils
+    magic,
+    magrittr,
+    psych,
+    Rcpp,
+    RcppEigen,
+    rsvd,
+    stats,
+    tools,
+    utils,
+    xgboost
 Suggests:
     abind,
     BGLR,
