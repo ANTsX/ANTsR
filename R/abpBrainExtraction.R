@@ -26,7 +26,7 @@
 #' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 #'
 #' @export abpBrainExtraction
-#' @useDynLib ANTsR
+#' @useDynLib ANTsR, .registration = TRUE
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA) {
   if (missing(img) | missing(tem) | missing(temmask)) {
