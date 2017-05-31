@@ -1,11 +1,12 @@
-\name{antsVersions}
-\alias{antsVersions}
+\name{antsrVersions}
+\alias{antsrVersions}
 \docType{data}
-\title{antsVersions}
+\title{antsrVersions}
 \description{
-A data frame defining the git tag for the current ANTsRCore version of ANTs.
+A data frame defining the git tag for the current ANTsR version.  One can also
+see antsrVersions from ANTsRCore to get the git tag for those dependencies.
 }
-\usage{data(antsVersions)}
+\usage{data(antsrVersions)}
 \format{
   A data frame listing the following variables.
   \describe{
@@ -17,6 +18,6 @@ A data frame defining the git tag for the current ANTsRCore version of ANTs.
 \url{https://github.com/stnava/ANTs}
 }
 \examples{
-data(antsVersions)
+data(antsrVersions)
 }
 \keyword{datasets}

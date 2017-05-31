@@ -3,8 +3,10 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
-/* FIXME: 
+/* FIXME:
    Check these declarations against the C/Fortran source code.
+   this is generated from running within ANTsR dir
+   tools::package_native_routine_registration_skeleton(".")
 */
 
 /* .Call calls */
