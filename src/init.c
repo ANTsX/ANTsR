@@ -22,7 +22,6 @@ extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, S
 extern SEXP itkConvolveImage(SEXP, SEXP);
 extern SEXP KellyKapowski(SEXP);
 extern SEXP LabelGeometryMeasures(SEXP);
-extern SEXP N4BiasFieldCorrection(SEXP);
 extern SEXP reflectionMatrix(SEXP, SEXP, SEXP, SEXP);
 extern SEXP reorientImage(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP robustMatrixTransform(SEXP);
@@ -46,7 +45,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"itkConvolveImage",               (DL_FUNC) &itkConvolveImage,                2},
     {"KellyKapowski",                  (DL_FUNC) &KellyKapowski,                   1},
     {"LabelGeometryMeasures",          (DL_FUNC) &LabelGeometryMeasures,           1},
-    {"N4BiasFieldCorrection",          (DL_FUNC) &N4BiasFieldCorrection,           1},
     {"reflectionMatrix",               (DL_FUNC) &reflectionMatrix,                4},
     {"reorientImage",                  (DL_FUNC) &reorientImage,                   6},
     {"robustMatrixTransform",          (DL_FUNC) &robustMatrixTransform,           1},
