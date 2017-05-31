@@ -42,20 +42,20 @@ test_that("Masks are in summary measures", {
   expect_equal( mean(img1), 0.5, tolerance = 1.e-6)
   expect_equal( mean(img1, mask = img1 > 0), 25.5, tolerance = 0.01)
   expect_silent( sum( img1 ) )
-  expect_silent( sum( img1, mask = img > 4 ) )
+  expect_silent( sum( img1, mask = img1 > 4 ) )
 
   expect_warning(all(img1))
-  expect_warning(all(img1 > 5))
-  expect_silent(all(coerce_mask(img1 > 5)))
+  expect_warning(all(img1 > max(img1)))
+  expect_silent(all(coerce_mask(img1 > max(img1))))
 
   expect_silent(prod(img1))
-  expect_silent(prod(img1, mask = img > 1))
+  expect_silent(prod(img1, mask = img1 > 1))
 
   expect_silent(range(img1))
-  expect_silent(range(img1, mask = img > 1))
+  expect_silent(range(img1, mask = img1 > 1))
 
-  #nothign greater than 5
-  expect_warning(range(img1, mask = img > 5))
+  #nothign greater than max of img1
+  expect_warning(range(img1, mask = img1 > max(img1)))
 })
 
 test_that("dim of antsImage", {
