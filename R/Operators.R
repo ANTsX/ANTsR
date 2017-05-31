@@ -15,10 +15,12 @@
 #' is.antsImage(img01 + img02)
 #' is.antsImage(sqrt(2) * img01)
 #' is.antsImage(img02 / pi)
+#' @importFrom methods callGeneric
+#' @importFrom ANTsRCore antsImagePhysicalSpaceConsistency
 setMethod("Ops", signature(e1="antsImage", e2="antsImage"),
           function(e1, e2) {
             ## either use drop_img_dim and validObject or take out both
-            if ( !antsImagePhysicalSpaceConsistency(e1,e2) ){
+            if ( !ANTsRCore::antsImagePhysicalSpaceConsistency(e1,e2) ){
               stop("Images do not occupy the same physical space")
             }            
             a1 = as.array(e1)
