@@ -51,10 +51,11 @@ before_install:
   - itkrrel=0.0.1
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
+  - gh_user=stnava
   - ANTsRCorerel=0.1.1
   - reldir=latest
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
   - cd ${basedir}
   # removing remotes
   - Rscript -e 'devtools::source_url("https://gist.githubusercontent.com/muschellij2/69c48f469ab34cc05752361645ffa8e0/raw/57e7d3b22907699d260f863a0d337a12567ffc30/rewrite_dcf.R"); rewrite_dcf(drop_remotes = c("ANTsRCore", "ITKR"));'
