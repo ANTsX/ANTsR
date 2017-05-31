@@ -261,9 +261,9 @@ test_that("min of multichannel antsImage", {
   expect_true(min(mimg) == min(mvalues))
 })
 
-# test_that("var of multichannel antsImage", {
-#   expect_equal(var(mimg), var(mvalues), tolerance = 1.e-7)
-# })
+test_that("var of multichannel antsImage", {
+  expect_equal(var(mimg), var(mvalues), tolerance = 1.e-7)
+})
 
 test_that("sd of multichannel antsImage", {
   expect_equal(sd(mimg), sd(mvalues), tolerance = 1.e-7)
