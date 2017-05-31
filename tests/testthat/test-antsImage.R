@@ -45,7 +45,7 @@ test_that("Masks are in summary measures", {
   expect_silent( sum( img1, mask = img1 > 4 ) )
 
   expect_warning(all(img1))
-  expect_warning(all(img1 > max(img1)))
+  expect_false(all(img1 > max(img1)))
   expect_silent(all(coerce_mask(img1 > max(img1))))
 
   expect_silent(prod(img1))
