@@ -26,9 +26,11 @@
 #' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
 #'
 #' @export abpBrainExtraction
-#' @useDynLib ANTsR, .registration = TRUE
+#' @useDynLib ANTsR
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA) {
+### @useDynLib ANTsR, .registration = TRUE
+  
   if (missing(img) | missing(tem) | missing(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")

@@ -45,7 +45,7 @@ test_that("Masks are in summary measures", {
   expect_silent( sum( img1, mask = img > 4 ) )
 
   expect_warning(all(img1))
-  expect_warning(all(img1 > 5))
+  expect_silent(all(img1 > 5))
   expect_silent(all(coerce_mask(img1 > 5)))
 
   expect_silent(prod(img1))
@@ -78,9 +78,9 @@ test_that("min of antsImage", {
   expect_true(min(img) == min(values))
 })
 
-# test_that("var of antsImage", {
-#   expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
-# })
+test_that("var of antsImage", {
+  expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
+})
 
 test_that("sd of antsImage", {
   expect_true(sd(img) == sd(values))
