@@ -18,7 +18,7 @@
 setMethod("Ops", signature(e1="antsImage", e2="antsImage"),
           function(e1, e2) {
             ## either use drop_img_dim and validObject or take out both
-            if ( !antsImagePhysicalSpaceConsistency(x,y) ){
+            if ( !antsImagePhysicalSpaceConsistency(e1,e2) ){
               stop("Images do not occupy the same physical space")
             }            
             a1 = as.array(e1)
