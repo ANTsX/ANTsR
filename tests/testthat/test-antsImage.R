@@ -85,6 +85,7 @@ test_that("var of antsImage", {
   # print(search())
   # print(var)  
   expect_equal( ANTsRCore::var(varimg), var(varvalues), tolerance = 1.e-7 )
+  expect_equal( var(as.numeric(varimg)), var(varvalues), tolerance = 1.e-7 )
   # expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
 })
 
