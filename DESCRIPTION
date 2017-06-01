@@ -18,7 +18,7 @@ License: Apache License 2.0
 LazyLoad: yes
 Depends:
     methods,
-    ANTsRCore
+    ANTsRCore (>= 0.2)
 Imports:
     graphics,
     grDevices,
