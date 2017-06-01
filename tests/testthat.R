@@ -1,7 +1,5 @@
-library(stats)
-library(testthat)
 library(methods)
-library(ANTsRCore)
+library(testthat)
 library(ANTsR)
 
 test_check("ANTsR")

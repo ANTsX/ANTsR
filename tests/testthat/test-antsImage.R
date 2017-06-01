@@ -1,4 +1,3 @@
-library(ANTsRCore)
 context("antsImage Basic Operations")
 
 # Use pixeltype=="double" for tests, if using the default pixeltype=="float"
