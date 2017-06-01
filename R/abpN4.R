@@ -8,6 +8,7 @@
 #' @param usen3 Use N3 algorithm instead of N4
 #' @return outputs a bias corrected image. 1 indicates failure.
 #' @author Tustison N, Avants BB
+#' @importFrom ANTsRCore n4BiasFieldCorrection
 #' @examples
 #'
 #' img <- antsImageRead(getANTsRData("r16"))
@@ -24,8 +25,8 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
     cat("length( intensityTruncation ) should = 3 \n")
     return(1)
   }
-  outimg = iMath(img, "TruncateIntensity", 
-                 intensityTruncation[1], intensityTruncation[2], 
+  outimg = iMath(img, "TruncateIntensity",
+                 intensityTruncation[1], intensityTruncation[2],
                  intensityTruncation[3])
   if (usen3 == TRUE) {
     outimg <- n3BiasFieldCorrection( outimg, 4 )
