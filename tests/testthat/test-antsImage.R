@@ -1,3 +1,4 @@
+library(ANTsRCore)
 context("antsImage Basic Operations")
 
 # Use pixeltype=="double" for tests, if using the default pixeltype=="float"
@@ -79,7 +80,12 @@ test_that("min of antsImage", {
 })
 
 test_that("var of antsImage", {
-  expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
+  expect_s4_class(varimg, "antsImage")  
+  expect_is(varvalues, "numeric")
+  # print(search())
+  # print(var)  
+  expect_equal( ANTsRCore::var(varimg), var(varvalues), tolerance = 1.e-7 )
+  # expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
 })
 
 test_that("sd of antsImage", {
@@ -262,7 +268,7 @@ test_that("min of multichannel antsImage", {
 })
 
 test_that("var of multichannel antsImage", {
-  expect_equal(var(mimg), var(mvalues), tolerance = 1.e-7)
+  expect_equal(ANTsRCore::var(mimg), var(mvalues), tolerance = 1.e-7)
 })
 
 test_that("sd of multichannel antsImage", {
