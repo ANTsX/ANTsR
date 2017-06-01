@@ -55,6 +55,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; 
     then wget -O ITKR.tgz http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; 
     R CMD INSTALL ITKR.tgz; fi
+  - Rscript -e 'p = c("RcppEigen", "magrittr"); p = setdiff(p, installed.packages()); if (length(p)) install.packages(p);'
   - gh_user=stnava
   - ANTsRCorerel=0.2
   - reldir=latest
