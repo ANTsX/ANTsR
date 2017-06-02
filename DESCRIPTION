@@ -1,7 +1,7 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.5.4
+Version: 0.5.5
 Date: 2017-05-25
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
@@ -18,7 +18,7 @@ License: Apache License 2.0
 LazyLoad: yes
 Depends:
     methods,
-    ANTsRCore
+    ANTsRCore (>= 0.2)
 Imports:
     graphics,
     grDevices,
@@ -76,7 +76,7 @@ Suggests:
     visreg,
     wmtsa
 LazyData: TRUE
-LinkingTo: Rcpp, ITKR
+LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
