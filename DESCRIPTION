@@ -1,8 +1,8 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.5.5
-Date: 2017-05-25
+Version: 0.5.6
+Date: 2017-06-06
 Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook,
     Nicholas J. Tustison, Shrinidhi KL
 Maintainer: Brian B. Avants <stnava@gmail.com>
@@ -27,8 +27,7 @@ Imports:
     psych,
     rsvd,
     stats,
-    utils,
-    xgboost
+    utils
 Suggests:
     abind,
     BGLR,
@@ -74,7 +73,8 @@ Suggests:
     tools,
     viridis,
     visreg,
-    wmtsa
+    wmtsa,
+    xgboost
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang (recommended)
