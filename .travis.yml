@@ -31,11 +31,6 @@ matrix:
 cran: http://cran.rstudio.com
 
 before_install:
-  - basedir=${PWD}
-  - cd ..
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cmake --version; wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; sh cmake-3.4.0-rc1-Linux-x86_64.sh --skip-license --prefix=${HOME}; export PATH=$HOME/bin/:$PATH; fi
-  - export PATH=$HOME/bin/:$PATH
-  - cd $basedir
   - mkdir -p ~/.R
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
   - export CC=clang
@@ -44,30 +39,50 @@ before_install:
   - echo "CXX=clang++" >> ~/.R/Makevars
   - echo "CXX1X=clang++" >> ~/.R/Makevars
   - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
-  - source ~/.R/Makevars
-  - cd ~/
-  - Rscript -e 'if (!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
-  - Rscript -e 'if (!"devtools" %in% rownames(installed.packages())) install.packages("devtools", dependencies = TRUE)'
-  - itkrrel=0.0.1
+  - source ~/.R/Makevars 
+  # New stuff  
+  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
+  - source travis_helpers.sh
+  - rm travis_helpers.sh
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
-    then wget -O ITKR.tar.gz https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; 
-    R CMD INSTALL ITKR.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; 
-    then wget -O ITKR.tgz http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; 
-    R CMD INSTALL ITKR.tgz; fi
-  - Rscript -e 'p = c("RcppEigen", "magrittr"); p = setdiff(p, installed.packages()); if (length(p)) install.packages(p);'
+    then cmake --version; 
+    wget -O cmake.sh --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh; 
+    sh cmake.sh --skip-license --prefix=${HOME}; 
+    fi
+  - export PATH=$HOME/bin/:$PATH  
+  - Rscript -e 'if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")'  
+  - itkrrel=0.0.1
+  - gh_binary_install ITKR stnava ${itkrrel} latest
   - gh_user=stnava
   - ANTsRCorerel=0.2
-  - reldir=latest
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
-    then wget -O ANTsRCore.tar.gz https://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; 
-    R CMD INSTALL ANTsRCore.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; 
-    then wget -O ANTsRCore.tgz http://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; 
-    R CMD INSTALL ANTsRCore.tgz; fi
-  - cd ${basedir}
-  # removing remotes
-  - Rscript -e 'devtools::source_url("https://gist.githubusercontent.com/muschellij2/69c48f469ab34cc05752361645ffa8e0/raw/57e7d3b22907699d260f863a0d337a12567ffc30/rewrite_dcf.R"); rewrite_dcf(drop_remotes = c("ANTsRCore", "ITKR"));'
+  - reldir=latest  
+  - gh_binary_install ANTsR ${gh_user} ${antsrrel} latest
+  # - basedir=${PWD}
+  # - cd ..
+  # - cd $basedir
+  # - cd ~/
+  # - Rscript -e 'if (!"Rcpp" %in% rownames(installed.packages())) install.packages("Rcpp", dependencies = TRUE)'
+  # - Rscript -e 'if (!"devtools" %in% rownames(installed.packages())) install.packages("devtools", dependencies = TRUE)'
+  # - itkrrel=0.0.1
+  # - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
+  #   then wget -O ITKR.tar.gz https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; 
+  #   R CMD INSTALL ITKR.tar.gz; fi
+  # - if [ "$TRAVIS_OS_NAME" == "osx" ]; 
+  #   then wget -O ITKR.tgz http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; 
+  #   R CMD INSTALL ITKR.tgz; fi
+  # - Rscript -e 'p = c("RcppEigen", "magrittr"); p = setdiff(p, installed.packages()); if (length(p)) install.packages(p);'
+  # - gh_user=stnava
+  # - ANTsRCorerel=0.2
+  # - reldir=latest
+  # - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
+  #   then wget -O ANTsRCore.tar.gz https://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; 
+  #   R CMD INSTALL ANTsRCore.tar.gz; fi
+  # - if [ "$TRAVIS_OS_NAME" == "osx" ]; 
+  #   then wget -O ANTsRCore.tgz http://github.com/${gh_user}/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; 
+  #   R CMD INSTALL ANTsRCore.tgz; fi
+  # - cd ${basedir}
+  # # removing remotes
+  # - Rscript -e 'devtools::source_url("https://gist.githubusercontent.com/muschellij2/69c48f469ab34cc05752361645ffa8e0/raw/57e7d3b22907699d260f863a0d337a12567ffc30/rewrite_dcf.R"); rewrite_dcf(drop_remotes = c("ANTsRCore", "ITKR"));'
 
 # Build and check package
 script:
