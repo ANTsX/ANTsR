@@ -56,7 +56,7 @@ before_install:
   - gh_user=stnava
   - ANTsRCorerel=0.2
   - reldir=latest  
-  - gh_binary_install ANTsR ${gh_user} ${antsrrel} latest
+  - gh_binary_install ANTsRCore ${gh_user} ${ANTsRCorerel} ${reldir}
   # - basedir=${PWD}
   # - cd ..
   # - cd $basedir
