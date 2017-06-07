@@ -119,8 +119,8 @@
 #'    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
 #'    normalizeSamplesPerLabel = TRUE, useEntireLabeledRegion = FALSE )
 #' }
-#' @importFrom xgboost xgb.train xgb.DMatrix
 #' @export
+# @importFrom xgboost xgb.train xgb.DMatrix
 
 segmentationRefinement.train <- function( 
   featureImages, truthLabelImages,
