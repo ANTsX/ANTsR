@@ -35,6 +35,7 @@
 eanatSelect <- function( inmat, mask=NA, cthresh=0, smooth=0,
   maxNEvec = 0, selectorScale=1.1, whiten=FALSE, verbose=FALSE )
 {
+fastsvd = FALSE
 if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
 mat = scale( inmat )
 if ( is.na(mask) ) {
@@ -143,6 +144,7 @@ eanatDef <- function( inmat, nvecs=0, mask=NA,
   whiten = FALSE,
   verbose=FALSE )
 {
+fastsvd = FALSE
 mat = ( inmat )
 if ( !positivity ) keeppos = (-1.0) else keeppos = (1.0)
 if ( is.na(mask) ) {
