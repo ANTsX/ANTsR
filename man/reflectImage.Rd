@@ -4,7 +4,7 @@
 \alias{reflectImage}
 \title{reflectImage}
 \usage{
-reflectImage(img1, axis = NA, tx = NA)
+reflectImage(img1, axis = NA, tx = NA, metric = "mattes")
 }
 \arguments{
 \item{img1}{input object, an antsImage}
@@ -12,6 +12,8 @@ reflectImage(img1, axis = NA, tx = NA)
 \item{axis}{which dimension to reflect across, numbered from 0 to imageDimension-1}
 
 \item{tx}{transformation type to estimate after reflection}
+
+\item{metric}{similarity metric for image registration.  see \code{antsRegistration}.}
 }
 \description{
 reflects an image along its axis
@@ -23,6 +25,9 @@ axis = 2
 asym<-reflectImage( fi, axis, "Affine" )$warpedmovout
 asym<-asym-fi
 
+}
+\seealso{
+\code{\link{antsRegistration}}
 }
 \author{
 BB Avants

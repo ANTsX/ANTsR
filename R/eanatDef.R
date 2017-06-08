@@ -20,6 +20,7 @@
 #' less sparse eigenanatomy pseudo-eigenvectors as its value increases.  Its
 #' minimum value is 1 and a reasonable range is between 1 and 2.  The user
 #' should look at the plot produced when verbosity is turned on.
+#' @param whiten use ICA style whitening.
 #' @param verbose controls whether computation is silent or not.
 #' @return nvecs is output, analogous to \code{nvecs} in
 #' \code{svd(mat,nu=0,nv=nvecs)}
@@ -32,7 +33,7 @@
 #' print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
 #' @export eanatSelect
 eanatSelect <- function( inmat, mask=NA, cthresh=0, smooth=0,
-  maxNEvec = 0, selectorScale=1.1, verbose=FALSE )
+  maxNEvec = 0, selectorScale=1.1, whiten=FALSE, verbose=FALSE )
 {
 if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
 mat = scale( inmat )
@@ -44,8 +45,9 @@ if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
 if ( selectorScale < 1 ) selectorScale = 1.1
 mxn = nrow(mat)-1
 if ( maxNEvec > 1 & maxNEvec < mxn ) mxn = maxNEvec
-if ( fastsvd ) solutionmatrix = t( rsvd::rsvd( mat, nu=0, nv=mxn )$v )
-if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=mxn )$v )
+if ( fastsvd & !whiten ) solutionmatrix = t( rsvd::rsvd( mat, nu=0, nv=mxn )$v )
+if ( !fastsvd & !whiten ) solutionmatrix = t( svd( mat, nu=0, nv=mxn )$v )
+if ( whiten ) solutionmatrix = icawhiten( mat, mxn )
 mycorrs = rep( NA, mxn )
 if ( verbose ) progress <- txtProgressBar(min = 2, max = mxn, style = 3)
 foundNA = FALSE
@@ -98,6 +100,7 @@ return( nvecs )
 #' @param priors external initialization matrix.
 #' @param priorWeight weight on priors in range 0 to 1.
 #' @param sparEpsilon threshold that controls initial sparseness estimate
+#' @param whiten use ICA style whitening.
 #' @param verbose controls whether computation is silent or not.
 #' @return matrix is output, analogous to \code{svd(mat,nu=0,nv=nvecs)}
 #' @author Avants BB, Tustison NJ
@@ -137,6 +140,7 @@ eanatDef <- function( inmat, nvecs=0, mask=NA,
   smoother=0, cthresh=0, its=5, eps=0.1,
   positivity = FALSE, priors=NA, priorWeight=0,
   sparEpsilon = 1.e-4,
+  whiten = FALSE,
   verbose=FALSE )
 {
 mat = ( inmat )
@@ -152,9 +156,9 @@ if ( all( is.na( priors ) ) )
   {
   if ( nvecs == 0 ) stop("Must set nvecs.  See eanatSelect function.")
   havePriors = FALSE
-  if ( usePkg( "rsvd" ) ) fastsvd = TRUE else fastsvd = FALSE
-  if ( fastsvd ) solutionmatrix = t( rsvd( mat, nu=0, nv=nvecs )$v )
-  if ( !fastsvd ) solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
+  if ( fastsvd & !whiten ) solutionmatrix = t( rsvd::rsvd( mat, nu=0, nv=nvecs )$v )
+  if ( !fastsvd & !whiten ) solutionmatrix = t( svd( mat, nu=0, nv=nvecs )$v )
+  if ( whiten ) solutionmatrix = icawhiten( mat, nvecs )
   pp1 = mat %*% t( solutionmatrix )
   ilist = matrixToImages( solutionmatrix, mask )
   eseg = eigSeg( mask, ilist,  TRUE )

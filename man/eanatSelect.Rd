@@ -5,7 +5,7 @@
 \title{Selection of n eigenvectors and sparsity for eigenanatomy}
 \usage{
 eanatSelect(inmat, mask = NA, cthresh = 0, smooth = 0, maxNEvec = 0,
-  selectorScale = 1.1, verbose = FALSE)
+  selectorScale = 1.1, whiten = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}
@@ -25,6 +25,8 @@ to find the knee in the correlation plot. This parameter produces fewer,
 less sparse eigenanatomy pseudo-eigenvectors as its value increases.  Its
 minimum value is 1 and a reasonable range is between 1 and 2.  The user
 should look at the plot produced when verbosity is turned on.}
+
+\item{whiten}{use ICA style whitening.}
 
 \item{verbose}{controls whether computation is silent or not.}
 }
