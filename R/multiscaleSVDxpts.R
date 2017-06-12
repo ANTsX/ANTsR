@@ -435,3 +435,143 @@ return(
     evalsVsScale   = mresponse )
     )
 }
+
+
+
+
+#' k-nearest neighbors constrained smoothing
+#'
+#' Compute a smoothing matrix based on an input matrix of point coordinates
+#'
+#' @param x input matrix of point coordinates of dimensions n-spatial
+#' spatial dimensions by p points
+#' @param k number of neighbors, higher causes more smoothing
+#' @param sigma sigma for the gaussian function
+#' @return sparse matrix is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoothingMatrix = knnSmoothingMatrix( spatmat, k = 25, sigma = 3.0 )
+#' rvec = rnorm( nrow( smoothingMatrix ) )
+#' srvec = smoothingMatrix %*% rvec
+#' rvi = makeImage( mask, rvec )
+#' srv = makeImage( mask,  as.numeric( srvec ) )
+#' }
+#' @export knnSmoothingMatrix
+knnSmoothingMatrix <- function( x, k, sigma ) {
+  usePkg( "Matrix" )
+  temp = sparseDistanceMatrix( x, k = k,
+    kmetric = "gaussian", sigma = sigma )
+  return( temp / Matrix::rowSums( temp ) )
+}
+
+
+
+
+
+
+#' smooth matrix prediction
+#'
+#' Reconstruct a n by p matrix given n by k basis functions or predictors.
+#' The reconstruction can be regularized.
+#' # norm( x - uv^t )
+#' # d/dv ... leads to ( -u, x - uv^t  )
+#' # u^t u v^t - u^t x
+#'
+#' @param x input matrix to be predicted.
+#' @param basisDf data frame for basis predictors
+#' @param iterations number of gradient descent iterations
+#' @param gamma step size for gradient descent
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param smoothingMatrix allows parameter smoothing, should be square and same
+#' size as input matrix
+#' @param repeatedMeasures list of repeated measurement identifiers. this will
+#' allow estimates of per identifier intercept.
+#' @param verbose boolean option
+#' @return matrix of size p by k is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoomat = knnSmoothingMatrix( spatmat, k = 5, sigma = 1.0 )
+#' mat <- matrix(rnorm(sum(mask)*50),ncol=sum(mask),nrow=50)
+#' mat[ 1:25,100:10000]=mat[ 1:25,100:10000]+1
+#' age = rnorm( 1:nrow(mat))
+#' for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
+#'   mat[ , i ] = age*0.1 + mat[,i]
+#'   }
+#' gen = c( rep("M",25), rep("F",12 ) , rep("T",13 ) )
+#' repmeas = rep( c("A","B","C","D","E","F","G"), nrow( mat ) )[1:nrow(mat)]
+#' mydf = data.frame( age = scale( age ), gen = gen )
+#' fit = smoothMatrixPrediction( mat, mydf, iterations = 10,
+#'   gamma = 1.e-6, sparsenessQuantile = 0.5,
+#'   smoothingMatrix = smoomat, repeatedMeasures=repmeas,
+#'   verbose=T )
+#' tt = mat %*% fit$v
+#' print( cor.test( mydf$age, tt[,1] ) )
+#' print( cor.test( fit$u[,"genM"], tt[,2] ) )
+#' vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
+#' plot( mask, vimg, window.overlay=range(abs(vimg)))
+#' vimg = makeImage( mask, (fit$v[,2] ) ); print(range(vimg)*10)
+#' plot( mask, vimg, window.overlay=range(abs(vimg)))
+#' }
+#' @export smoothMatrixPrediction
+smoothMatrixPrediction <- function(
+  x,
+  basisDf,
+  iterations = 10,
+  gamma = 1.e-6,
+  sparsenessQuantile = 0.5,
+  smoothingMatrix = NA,
+  repeatedMeasures = NA,
+  verbose = FALSE
+  )
+{
+if ( ! any( is.na( repeatedMeasures ) ) ) {
+  usubs = unique( repeatedMeasures )
+  }
+mdl = lm( x ~  . , data = basisDf )
+bmdl = bigLMStats( mdl )
+u = model.matrix( mdl )
+intercept = u[,1]
+u = u[,-1]
+v = t( bmdl$beta.t )
+err = mean( abs( x - ( u %*% t(v) + intercept ) ) )
+if ( verbose ) print( paste( "iteration",0, "err",  err ) )
+tu = t( u )
+tuu = t( u ) %*% u
+errs = rep( NA, length( iterations ) )
+i = 1
+while ( i <= iterations ) {
+  v = as.matrix( smoothingMatrix %*% v )
+  v[ abs(v) < quantile( abs(v) , 0.5 ) ] = 0
+  dedv = t( tuu %*% t( v ) - tu %*% x )
+  v = v + dedv * gamma
+  v[ abs(v) < quantile( abs(v) , sparsenessQuantile ) ] = 0
+#   intercept = rowMeans(  ( x - ( u %*% t(v) ) ) %*% smoothingMatrix )
+  intercept = rowMeans( x - ( u %*% t(v) ) )
+  if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
+    for ( s in usubs ) {
+      usel = repeatedMeasures == s
+      intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
+      }
+    }
+  err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
+  errs[ i ] = err
+  if ( i > 1 )
+    if ( errs[ i ] > errs[ i - 1 ] ) {
+      i=iterations
+    }
+  i = i + 1
+  if ( verbose ) print( paste( i,  err ) )
+}
+if ( verbose ) print( paste( "end",  err ) )
+# v = data.frame( as.matrix( v ) )
+colnames( v ) = colnames( u )
+return( list( u = u, v=v, intercept = intercept ) )
+}
