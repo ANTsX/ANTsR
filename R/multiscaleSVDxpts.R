@@ -481,6 +481,8 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' # d/dv ... leads to ( -u, x - uv^t  )
 #' # u^t u v^t - u^t x
 #'
+#' @param modelFormula a formula object which has, on the left, the variable x
+#' and the prediction formula on the right.
 #' @param x input matrix to be predicted.
 #' @param basisDf data frame for basis predictors
 #' @param iterations number of gradient descent iterations
@@ -508,7 +510,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' gen = c( rep("M",25), rep("F",12 ) , rep("T",13 ) )
 #' repmeas = rep( c("A","B","C","D","E","F","G"), nrow( mat ) )[1:nrow(mat)]
 #' mydf = data.frame( age = scale( age ), gen = gen )
-#' fit = smoothMatrixPrediction( mat, mydf, iterations = 10,
+#' fit = smoothMatrixPrediction( x=mat, basisDf=mydf, iterations = 10,
 #'   gamma = 1.e-6, sparsenessQuantile = 0.5,
 #'   smoothingMatrix = smoomat, repeatedMeasures=repmeas,
 #'   verbose=T )
@@ -524,6 +526,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 smoothMatrixPrediction <- function(
   x,
   basisDf,
+  modelFormula=as.formula( " x ~ ." ),
   iterations = 10,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
@@ -535,7 +538,7 @@ smoothMatrixPrediction <- function(
 if ( ! any( is.na( repeatedMeasures ) ) ) {
   usubs = unique( repeatedMeasures )
   }
-mdl = lm( x ~  . , data = basisDf )
+mdl = lm( modelFormula, data = basisDf )
 bmdl = bigLMStats( mdl )
 u = model.matrix( mdl )
 intercept = u[,1]
