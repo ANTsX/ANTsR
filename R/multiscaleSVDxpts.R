@@ -526,7 +526,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 smoothMatrixPrediction <- function(
   x,
   basisDf,
-  modelFormula=as.formula( " x ~ ." ),
+  modelFormula = as.formula( " x ~ ." ),
   iterations = 10,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
@@ -574,7 +574,6 @@ while ( i <= iterations ) {
   if ( verbose ) print( paste( i,  err ) )
 }
 if ( verbose ) print( paste( "end",  err ) )
-# v = data.frame( as.matrix( v ) )
 colnames( v ) = colnames( u )
 return( list( u = u, v=v, intercept = intercept ) )
 }

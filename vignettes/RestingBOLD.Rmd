@@ -46,16 +46,16 @@ if ( file.exists( fn ) )
   {
   fdthresh = 0.2 # threshold for throwing out bad data, typically between 0.1 and 0.5
   testData = 3
-  img  = antsImageRead( fn  )
-  meanbold = getAverageOfTimeSeries( img )
+  imgIn  = antsImageRead( fn  )
+  meanbold = getAverageOfTimeSeries( imgIn )
   mask = getMask( meanbold )
   sfn = path.expand( paste( pre, "/act/", id,"_STRUCTURAL_BrainSegmentation.nii.gz", sep='' ) )
   seg = antsImageRead( sfn   )
   t1fn = path.expand( paste( pre, "/act/", id,"_STRUCTURAL_BrainSegmentation0N4.nii.gz", sep='' ) )
   t1 = antsImageRead( t1fn   )
   } else { # use sample data
-  img = antsImageRead(getANTsRData("rsbold"))
-  meanbold = getAverageOfTimeSeries( img )
+  imgIn = antsImageRead(getANTsRData("rsbold"))
+  meanbold = getAverageOfTimeSeries( imgIn )
   mask = antsImageRead(getANTsRData("rsboldmask"))
   seg = antsImageRead(getANTsRData("rsboldseg"))
   t1 = antsImageClone( seg )
@@ -113,16 +113,16 @@ For other applications, be sure to check the relevant literature.
 
 ```{r steadystate ,message=FALSE,warnings=FALSE,eval=FALSE}
 # Find first steady state timepoint
-tr = antsGetSpacing(img)[4]
+tr = antsGetSpacing(imgIn)[4]
 steady = floor(10.0 / tr) + 1
 
 # Global signal before cropping (save for visualization)
-origmean = apply.antsImage(img, c(1,2,3), mean)
-fullmean = rowMeans(timeseries2matrix(img, mask))
-allTimes = dim(img)[4]
+origmean = getAverageOfTimeSeries( imgIn )
+fullmean = rowMeans(timeseries2matrix(imgIn, mask))
+allTimes = dim(imgIn)[4]
 
 # Eliminate non steady-state timepoints
-img = cropIndices(img, c(1,1,1,steady), dim(img) )
+img = cropIndices(imgIn, c(1,1,1,steady), dim(imgIn) )
 ```
 
 In the plot below, mean global
@@ -174,11 +174,11 @@ The default for `txtype` is "Affine", but for this type of analyses it is typica
 ```{r moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
 if ( ! exists("moco") )
   {
-  meanbold <- apply.antsImage(img, c(1,2,3), mean)
+  meanbold <- getAverageOfTimeSeries( img )
   for ( i in 1:testData )
     {
-    moco <- antsMotionCalculation( img, fixed=meanbold, txtype="Rigid" )
-    meanbold = apply.antsImage( moco$moco_img, c(1,2,3), mean)
+    moco <- antsrMotionCalculation( img, fixed=meanbold, typeofTransform="Rigid" )
+    meanbold = getAverageOfTimeSeries( moco$moco_img )
     }
   }
 ```
@@ -205,7 +205,7 @@ the average displacement of voxels, between consecutive time points.
 
 ```{r mocoplots,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 # extract just the transform parameters
-reg_params <- as.matrix(moco$moco_params[,3:8])
+reg_params <- as.matrix(moco$moco_params )
 
 nTimes = dim(reg_params)[1]
 orderedBreaks = c("Framewise", "X", "Y", "Z", "Pitch", "Roll", "Yaw" )
@@ -227,7 +227,7 @@ the brain between consecutive time points. First the BOLD signal is adjusted to 
 mean=1000 so that 10 units of BOLD value change = 1% signal change. While not necessary
 for a single-subject examination, this helps in inter-subject comparisons.
 ```{r dvar,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
-scaling <- 1000.0 / mean(moco$moco_avg_img[mask>0])
+scaling <- 1000.0 / mean(moco$moco_avg_img)# [ moco$moco_mask > 0 ])
 dvars <- scaling * computeDVARS(timeseries2matrix(moco$moco_img, mask))
 orig_dvars <- scaling * computeDVARS(timeseries2matrix(img, mask))
 ```
@@ -455,10 +455,10 @@ if ( length(badtimes) > 0 ) {
 # save interpolated values for plotting
 ctxMeanSpline = rowMeans(boldMat[,ctxVox])
 
-boldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=0.009, freqHi=0.08, opt="trig" )
+fboldMat <- frequencyFilterfMRI( boldMat, tr=tr, freqLo=0.009, freqHi=0.08, opt="trig" )
 
 # save filtered values for plotting
-ctxMeanFiltered = rowMeans(boldMat[,ctxVox])
+ctxMeanFiltered = rowMeans(fboldMat[,ctxVox])
 ctxMeanFiltered[badtimes] = NA
 ```
 ### Spatial smoothing
@@ -466,14 +466,14 @@ Smoothing should be applied to all spatial dimensions, but the time dimension
 should be left alone. It is common to smooth with a Gaussian kernel with
 FWHM=6.0mm.
 ```{r smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
-img = matrix2timeseries( img, mask, boldMat )
+fimg = matrix2timeseries( img, mask, fboldMat )
 sptl = sqrt( sum( antsGetSpacing(img)[1:3]^2  ))
-img = smoothImage(img, c(rep(sptl,3),0), FWHM=TRUE )
-boldMat = timeseries2matrix(img, mask)
+simg = smoothImage( fimg, c(rep(sptl,3),0), FWHM=TRUE )
+sboldMat = timeseries2matrix(simg, mask)
 ```
 
 ```{r smoothplot,message=FALSE,warnings=FALSE, echo=FALSE, fig.width=7, fig.height=5,eval=FALSE}
-ctxMeanSmoothed = rowMeans(boldMat[,ctxVox])
+ctxMeanSmoothed = rowMeans( sboldMat[,ctxVox] )
 ctxMeanSmoothed[badtimes] = NA
 
 freq.dat =  data.frame( Time=rep(1:nTimes,3) )
@@ -579,7 +579,7 @@ together, while the standard deviation ribbons indicate how cohesively the
 components of a given system are working.
 
 ```{r sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE,eval=FALSE}
-systemNames = levels(pts$SystemName)
+systemNames = unique(pts$SystemName)
 
 nSystems = length(systemNames)
 sysMatMean = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
@@ -605,7 +605,7 @@ systemNickNames = c("Motor/Hand", "Motor/Mouth", "CO-Task", "Auditory", "Default
 lut = list("Motor/Hand"="cyan3", "Motor/Mouth"="orange", "CO-Task"="purple", "Auditory"="pink2", "Default"="red", "Memory"="gray50", "Visual"="blue", "FP-Task"="yellow2", "Salience"="black", "Subcortical"="chocolate4", "V Attention"="aquamarine4", "D Attention"="green", "Cerebellar"="cadetblue1", "Uncertain"="peachpuff2" )
 
 
-sys.dat = data.frame(Time=rep( (1:nActualTimes)*tr, nSystems))
+sys.dat = data.frame( Time=rep( (1:nActualTimes)*tr, length(systemNickNames ) ) )
 sys.dat$Signal = as.vector(sysMatMean)
 sys.dat$System = factor( rep( systemNickNames, foreach=nActualTimes), levels=systemNickNames)
 sys.dat$Lower = as.vector(sysMatMean) - as.vector(sysMatSD)
@@ -636,6 +636,28 @@ diag(connMat) = rep(0, length(diag(connMat)) )
 if ( length(missingROIs) > 0 ) {
   connMat[missingROIs,] = 0
   connMat[,missingROIs] = 0
+}
+```
+
+
+
+Create mutual information matrix
+```{r mi,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
+if ( usePkg( "entropy" ) ) {
+  miMat = connMat * 0
+  nb = 10 # can have a strong influence on results
+  rr1 = rr2 = range( roiMat ) 
+  for ( i in goodROIs )
+    for ( j in goodROIs[ goodROIs > i ] ) {
+      if ( i != j) {
+        rr1 = range(roiMat[,i])
+        rr2 = range(roiMat[,j])
+        y2d = discretize2d( roiMat[,i], roiMat[,j] , nb, nb, r1=rr1, r2=rr2 )
+#        miMat[ i, j ] =  mi.Dirichlet( y2d, a=1/8)
+        miMat[ i, j ] =  mi.empirical( y2d )
+        }
+    }
+  image( miMat + t(miMat) )
 }
 ```
 
@@ -869,15 +891,36 @@ if ( ! exists( "networkPriors" ) )
     ilist[[i]] = antsApplyTransforms( meanbold, ilist[[i]], mni2boldmaps )
   }
 pr = imageListToMatrix( ilist, mask )
-refSignal = ( boldMat %*% t(pr) )
-networkDf = data.frame( ROI=refSignal[goodtimes,1],  nuissance[goodtimes,] )
-mdl = lm( boldMat[goodtimes,] ~ . , data=networkDf )
+refSignal = ( sboldMat %*% t(pr) )
+networkDf = data.frame( ROI=refSignal[goodtimes,2],  
+                        nuissance[goodtimes,grep("compcor",colnames(nuissance))]  )
+mdl = lm( sboldMat[goodtimes,] ~ . , data=networkDf )
 bmdl = bigLMStats( mdl, 1.e-4 )
 betas = bmdl$beta.t["ROI",]
 betasI = makeImage( mask, betas )
 loth = quantile(  betas, probs=0.8 )
 plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
         window.overlay = c( loth, max(betas) ) )
+###### test this for later
+refSignal = ( fboldMat %*% t(pr) )
+dnz = aslDenoiseR( fboldMat[goodtimes,], refSignal[goodtimes,1], 
+  polydegree = 2, crossvalidationgroups=8, verbose=T )
+spatmat = t( imageDomainToSpatialMatrix( ctxMask*mask, ctxMask*mask ) )
+smoomat = knnSmoothingMatrix( spatmat, k = 100, sigma = 250.0 )
+# intensitymat = getNeighborhoodInMask( meanbold, mask, rep(2,3), boundary.condition = 'mean' )
+# ismoomat = knnSmoothingMatrix( intensitymat, k = 10, sigma = 100250.0 )
+# ismoomat[1000:1002,1000:1002]
+image( smoomat[1000:1100,1000:1100])
+scl = TRUE
+networkDf = data.frame( ROI=scale(refSignal[goodtimes,1], scale=scl ),   
+                        scale( dnz$noiseu, scale=scl ) )
+test = smoothMatrixPrediction( scale(fboldMat[goodtimes,ctxVox], scale=scl), networkDf, 
+  sparsenessQuantile=0.5, smoothingMatrix = smoomat, verbose=T, gamma=1.e-4, iterations=20 )
+k=1
+print(range(test$v[,k]))
+betasI = makeImage( ctxMask*mask, test$v[,k] )
+plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
+        window.overlay = c( 2, max(test$v[,k]) ) )
 ```
 
 
