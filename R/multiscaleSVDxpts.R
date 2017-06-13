@@ -491,6 +491,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param positivity restrict to positive weights
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
+#' @param smoothingWeight between zero and one, increases smoothing.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param verbose boolean option
@@ -533,6 +534,7 @@ smoothMatrixPrediction <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
+  smoothingWeight = 0.5,
   repeatedMeasures = NA,
   verbose = FALSE
   )
@@ -552,10 +554,15 @@ tu = t( u )
 tuu = t( u ) %*% u
 errs = rep( NA, length( iterations ) )
 i = 1
+if ( smoothingWeight > 1 ) smoothingWeight = smoothingWeight = 1.0
+if ( smoothingWeight < 0 ) smoothingWeight = smoothingWeight = 0.0
+wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
-  v = as.matrix( smoothingMatrix %*% v )
+#  v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
+  dedv = as.matrix( smoothingMatrix %*% dedv )
   v = v + dedv * gamma
+  v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
     if ( positivity ) {
