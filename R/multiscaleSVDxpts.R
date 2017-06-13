@@ -488,6 +488,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive weights
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
@@ -530,6 +531,7 @@ smoothMatrixPrediction <- function(
   iterations = 10,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
+  positivity = FALSE,
   smoothingMatrix = NA,
   repeatedMeasures = NA,
   verbose = FALSE
@@ -552,11 +554,17 @@ errs = rep( NA, length( iterations ) )
 i = 1
 while ( i <= iterations ) {
   v = as.matrix( smoothingMatrix %*% v )
-  v[ abs(v) < quantile( abs(v) , 0.5 ) ] = 0
   dedv = t( tuu %*% t( v ) - tu %*% x )
   v = v + dedv * gamma
-  v[ abs(v) < quantile( abs(v) , sparsenessQuantile ) ] = 0
-#   intercept = rowMeans(  ( x - ( u %*% t(v) ) ) %*% smoothingMatrix )
+  for ( vv in 1:ncol( v ) ) {
+    localv = v[ , vv ]
+    if ( positivity ) {
+      localv[ localv < quantile( localv , sparsenessQuantile ) ] = 0
+    } else {
+      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile ) ] = 0
+    }
+    v[ , vv ] = localv
+  }
   intercept = rowMeans( x - ( u %*% t(v) ) )
   if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
     for ( s in usubs ) {
