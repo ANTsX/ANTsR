@@ -54,8 +54,8 @@ before_install:
   - itkrrel=0.0.1
   - gh_binary_install ITKR stnava ${itkrrel} latest
   - gh_user=stnava
-  - ANTsRCorerel=0.2
-  - reldir=latest
+  - ANTsRCorerel=latest
+  - reldir=0.2
   - gh_binary_install ANTsRCore ${gh_user} ${ANTsRCorerel} ${reldir}
   # - basedir=${PWD}
   # - cd ..
