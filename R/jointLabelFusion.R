@@ -40,7 +40,7 @@
 #'   bigLMStats composeAntsrTransforms
 #'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
 #'   getNeighborhoodAtVoxel getNeighborhoodInMask
-#'   iMath is.antsImage kmeansSegmentation labelClusters
+#'   iMath is.antsImage kmeansSegmentation labelClusters randomMask
 #'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
 #'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
 #'   splitChannels thresholdImage usePkg
