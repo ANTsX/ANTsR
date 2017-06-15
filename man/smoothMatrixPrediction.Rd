@@ -7,7 +7,7 @@
 smoothMatrixPrediction(x, basisDf, modelFormula = as.formula(" x ~ ."),
   iterations = 10, gamma = 1e-06, sparsenessQuantile = 0.5,
   positivity = FALSE, smoothingMatrix = NA, smoothingWeight = 0.5,
-  repeatedMeasures = NA, verbose = FALSE)
+  repeatedMeasures = NA, rowWeights = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix to be predicted.}
@@ -23,7 +23,7 @@ and the prediction formula on the right.}
 
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
 
-\item{positivity}{restrict to positive weights}
+\item{positivity}{restrict to positive solution (beta) weights}
 
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}
@@ -32,6 +32,8 @@ size as input matrix}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{rowWeights}{vectors of weights with size n (assumes diagonal covariance)}
 
 \item{verbose}{boolean option}
 }

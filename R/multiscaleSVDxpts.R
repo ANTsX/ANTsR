@@ -488,12 +488,13 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
-#' @param positivity restrict to positive weights
+#' @param positivity restrict to positive solution (beta) weights
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param smoothingWeight between zero and one, increases smoothing.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
+#' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
 #' @param verbose boolean option
 #' @return matrix of size p by k is output
 #' @author Avants BB
@@ -536,18 +537,42 @@ smoothMatrixPrediction <- function(
   smoothingMatrix = NA,
   smoothingWeight = 0.5,
   repeatedMeasures = NA,
+  rowWeights = NA,
   verbose = FALSE
   )
 {
+if ( missing( "x") | missing("basisDf") ) {
+  message("this function needs input")
+  return( NA )
+  }
 if ( ! any( is.na( repeatedMeasures ) ) ) {
   usubs = unique( repeatedMeasures )
   }
-mdl = lm( modelFormula, data = basisDf )
-bmdl = bigLMStats( mdl )
+hasweights =  ! all( is.na( rowWeights ) )
+if ( hasweights ) {
+  bdf = basisDf
+  bdf$wts = rowWeights
+  mdl = lm( modelFormula, data = bdf, weights = wts )
+  rm( bdf )
+  } else mdl = lm( modelFormula, data = basisDf )
+# bmdl = bigLMStats( mdl )
 u = model.matrix( mdl )
 intercept = u[,1]
 u = u[,-1]
-v = t( bmdl$beta.t )
+v = t( mdl$coefficients[-1, ] )
+# v = t( bmdl$beta.t )
+# print( dim(v ))
+# print("gett")
+# mycoefs = mdl$coefficients[-1, ]
+# beta.std <- t(sqrt(as.vector(colSums((mdl$residuals)^2)/mdl$df.residual) %o% mycoefs))
+# beta.t <- mylm$coefficients[-1]/beta.std
+# v = t( beta.t )
+# print("gott")
+if ( hasweights ) {
+  u = diag( sqrt( rowWeights ) ) %*% u
+  x = diag( sqrt( rowWeights ) ) %*% x
+  }
+intercept = rowMeans( x - ( u %*% t(v) ) )
 err = mean( abs( x - ( u %*% t(v) + intercept ) ) )
 if ( verbose ) print( paste( "iteration",0, "err",  err ) )
 tu = t( u )
