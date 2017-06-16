@@ -617,3 +617,28 @@ if ( verbose ) print( paste( "end",  err ) )
 colnames( v ) = colnames( u )
 return( list( u = u, v=v, intercept = intercept ) )
 }
+
+
+knnSmoothImage <- function( img, mask, radius,
+  intensitySigma = 50000.0,
+  spatialSigma = 20.0,
+  iterations = 1 )
+{
+  if ( radius <= 0 ) return( img )
+  spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+  r = radius
+  imat = getNeighborhoodInMask( img, mask, rep( r, img@dimension), boundary.condition='image' )
+  imat = knnSmoothingMatrix( imat, k = 5*(r*2+1)^2, sigma = intensitySigma )
+  smoothingMatrix = knnSmoothingMatrix( spatmat, k = (r*2+1)^2, sigma = spatialSigma )
+  imat = imat / Matrix::rowSums( imat )
+  jmat = imat * smoothingMatrix
+  for ( i in 1:10 ) { # sinkhorn
+    jmat = jmat / Matrix::rowSums( jmat )
+    jmat = t( t(jmat) / Matrix::rowSums( t(jmat) ) )
+    }
+  ivec = img[ mask == 1 ]
+  for ( i in 1:iterations ) {
+    ivec = jmat %*% ivec
+  }
+return(  makeImage( mask, as.numeric( ivec ) ) )
+}
