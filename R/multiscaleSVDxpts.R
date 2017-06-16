@@ -619,7 +619,33 @@ return( list( u = u, v=v, intercept = intercept ) )
 }
 
 
-knnSmoothImage <- function( img, mask, radius,
+#' k-nearest neighbors constrained image smoothing
+#'
+#' Compute a smoothing matrix based on an input matrix of point coordinates as
+#' well as neighborhood intensity patterns.  this performs a form of edge
+#' preserving smoothing.
+#'
+#' @param img input image to smooth
+#' @param mask input image mask
+#' @param radius number of neighbors, higher causes more smoothing
+#' @param intensitySigma sigma for gaussian defining intensity differences
+#' @param spatialSigma for gaussian defining spatial distances
+#' @param iterations number of iterations over which to apply smoothing kernel
+#' @return antsImage is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' img = antsImageRead( getANTsRData( 'r16' ) )
+#' mask = getMask( img )
+#' simg = knnSmoothImage( img=img, mask=mask, radius=2, intensitySigma=5000,
+#'   spatialSigma=1.5, iterations=1 )
+#' }
+#' @export knnSmoothImage
+knnSmoothImage <- function(
+  img,
+  mask,
+  radius,
   intensitySigma = 50000.0,
   spatialSigma = 20.0,
   iterations = 1 )
