@@ -552,7 +552,7 @@ hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
   bdf = basisDf
   bdf$wts = rowWeights
-  mdl = lm( modelFormula, data = bdf, weights = wts )
+  mdl = lm( modelFormula, data = bdf, weights = bdf$wts )
   rm( bdf )
   } else mdl = lm( modelFormula, data = basisDf )
 # bmdl = bigLMStats( mdl )
