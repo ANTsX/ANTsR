@@ -52,7 +52,7 @@ before_install:
   - export PATH=$HOME/bin/:$PATH
   - remote_binary_install ITKR ANTsRCore
   - install_remotes_no_dep
-  
+
 # Build and check package
 script:
   - source ~/.R/Makevars
@@ -77,8 +77,8 @@ after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
   # - dn=/home/travis/build/stnava/
-  - cat ${dn}/ANTsR.Rcheck/00install.out
-  - cat ${dn}/ANTsR.Rcheck/00check.log
+  - cat ${mydir}/ANTsR.Rcheck/00install.out
+  - cat ${mydir}/ANTsR.Rcheck/00check.log
 
 # send e-mails if stuff changes
 notifications:
