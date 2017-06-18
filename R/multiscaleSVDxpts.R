@@ -668,14 +668,12 @@ knnSmoothImage <- function(
 #  imat = antsrimpute(
 #    getNeighborhoodInMask( img, mask, rep( r, img@dimension), boundary.condition='image' ) )
 #  imat = knnSmoothingMatrix( imat, k = 2*(r*2+1)^2, sigma = intensitySigma )
-print("a")
   jmat = knnSmoothingMatrix( spatmat, k = (r*2+1)^2, sigma = spatialSigma )
 #  return( jmat )
 #  image( jmat[4000:4500,4000:4500] )
 #  print( jmat[4000:4010,4000:4010] )
 #  imat = imat / Matrix::rowSums( imat )
 #  jmat = imat * smoothingMatrix
-print("b")
   for ( i in 1:4 ) { # sinkhorn
     jmat = jmat / Matrix::rowSums( jmat )
     jmat = Matrix::t( Matrix::t(jmat) / Matrix::rowSums( Matrix::t(jmat) ) )
