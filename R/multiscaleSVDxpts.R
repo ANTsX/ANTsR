@@ -628,7 +628,8 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' @param img input image to smooth
 #' @param mask input image mask
 #' @param radius number of neighbors, higher causes more smoothing
-#' @param intensitySigma sigma for gaussian defining intensity differences
+#' @param intensityWeight weight for intensity component, value 1 will weight
+#' local voxel intensity roughly equally to spatial component
 #' @param spatialSigma for gaussian defining spatial distances
 #' @param iterations number of iterations over which to apply smoothing kernel
 #' @return antsImage is output
@@ -638,7 +639,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' \dontrun{
 #' img = antsImageRead( getANTsRData( 'r16' ) )
 #' mask = getMask( img )
-#' simg = knnSmoothImage( img=img, mask=mask, radius=2, intensitySigma=5000,
+#' simg = knnSmoothImage( img=img, mask=mask, radius=2, intensityWeight=1,
 #'   spatialSigma=1.5, iterations=1 )
 #' }
 #' @export knnSmoothImage
@@ -646,23 +647,34 @@ knnSmoothImage <- function(
   img,
   mask,
   radius,
-  intensitySigma = 50000.0,
+  intensityWeight = 0.1,
   spatialSigma = 20.0,
   iterations = 1 )
 {
   if ( radius <= 0 ) return( img )
+  ivec = img[ mask == 1 ]
   spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+  spatrange = range( spatmat, na.rm = TRUE )
+  intrange = range( ivec, na.rm = TRUE )
+  idelt = ( intrange[2] - intrange[1] )
+  if ( idelt <= 0 ) {
+    scl = 1
+  } else {
+    scl = ( spatrange[2] - spatrange[1] ) / idelt * intensityWeight
+  }
+  ivec2 = ivec * scl
+  spatmat = rbind( spatmat, ivec2 )
   r = radius
-  imat = getNeighborhoodInMask( img, mask, rep( r, img@dimension), boundary.condition='image' )
-  imat = knnSmoothingMatrix( imat, k = 5*(r*2+1)^2, sigma = intensitySigma )
-  smoothingMatrix = knnSmoothingMatrix( spatmat, k = (r*2+1)^2, sigma = spatialSigma )
-  imat = imat / Matrix::rowSums( imat )
-  jmat = imat * smoothingMatrix
+#  imat = antsrimpute(
+#    getNeighborhoodInMask( img, mask, rep( r, img@dimension), boundary.condition='image' ) )
+#  imat = knnSmoothingMatrix( imat, k = 2*(r*2+1)^2, sigma = intensitySigma )
+  jmat = knnSmoothingMatrix( spatmat, k = (r*2+1)^2, sigma = spatialSigma )
+#  imat = imat / Matrix::rowSums( imat )
+#  jmat = imat * smoothingMatrix
   for ( i in 1:10 ) { # sinkhorn
     jmat = jmat / Matrix::rowSums( jmat )
     jmat = t( t(jmat) / Matrix::rowSums( t(jmat) ) )
     }
-  ivec = img[ mask == 1 ]
   for ( i in 1:iterations ) {
     ivec = jmat %*% ivec
   }

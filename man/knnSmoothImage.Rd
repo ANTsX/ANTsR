@@ -4,7 +4,7 @@
 \alias{knnSmoothImage}
 \title{k-nearest neighbors constrained image smoothing}
 \usage{
-knnSmoothImage(img, mask, radius, intensitySigma = 50000, spatialSigma = 20,
+knnSmoothImage(img, mask, radius, intensityWeight = 0.1, spatialSigma = 20,
   iterations = 1)
 }
 \arguments{
@@ -14,7 +14,8 @@ knnSmoothImage(img, mask, radius, intensitySigma = 50000, spatialSigma = 20,
 
 \item{radius}{number of neighbors, higher causes more smoothing}
 
-\item{intensitySigma}{sigma for gaussian defining intensity differences}
+\item{intensityWeight}{weight for intensity component, value 1 will weight
+local voxel intensity roughly equally to spatial component}
 
 \item{spatialSigma}{for gaussian defining spatial distances}
 
@@ -33,7 +34,7 @@ preserving smoothing.
 \dontrun{
 img = antsImageRead( getANTsRData( 'r16' ) )
 mask = getMask( img )
-simg = knnSmoothImage( img=img, mask=mask, radius=2, intensitySigma=5000,
+simg = knnSmoothImage( img=img, mask=mask, radius=2, intensityWeight=1,
   spatialSigma=1.5, iterations=1 )
 }
 }
