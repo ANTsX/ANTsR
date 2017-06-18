@@ -632,6 +632,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' local voxel intensity roughly equally to spatial component
 #' @param spatialSigma for gaussian defining spatial distances
 #' @param iterations number of iterations over which to apply smoothing kernel
+#' @param returnMatrix boolean, will return smoothing matrix instead of image.
 #' @return antsImage is output
 #' @author Avants BB
 #' @examples
@@ -649,7 +650,8 @@ knnSmoothImage <- function(
   radius,
   intensityWeight = 0.1,
   spatialSigma = 20.0,
-  iterations = 1 )
+  iterations = 1,
+  returnMatrix = FALSE )
 {
   if ( radius <= 0 ) return( img )
   ivec = img[ mask == 1 ]
@@ -678,6 +680,7 @@ knnSmoothImage <- function(
     jmat = jmat / Matrix::rowSums( jmat )
     jmat = Matrix::t( Matrix::t(jmat) / Matrix::rowSums( Matrix::t(jmat) ) )
     }
+  if ( returnMatrix ) return( jmat )
   for ( i in 1:iterations ) {
     ivec = jmat %*% ivec
   }

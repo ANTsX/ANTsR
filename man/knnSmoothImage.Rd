@@ -5,7 +5,7 @@
 \title{k-nearest neighbors constrained image smoothing}
 \usage{
 knnSmoothImage(img, mask, radius, intensityWeight = 0.1, spatialSigma = 20,
-  iterations = 1)
+  iterations = 1, returnMatrix = FALSE)
 }
 \arguments{
 \item{img}{input image to smooth}
@@ -20,6 +20,8 @@ local voxel intensity roughly equally to spatial component}
 \item{spatialSigma}{for gaussian defining spatial distances}
 
 \item{iterations}{number of iterations over which to apply smoothing kernel}
+
+\item{returnMatrix}{boolean, will return smoothing matrix instead of image.}
 }
 \value{
 antsImage is output
