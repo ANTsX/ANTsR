@@ -21,6 +21,7 @@ env:
 osx_image: xcode8.2
 
 language: r
+
 r:
   - release
 
@@ -61,9 +62,20 @@ script:
   - cd ..
   - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
+  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; 
+    then 
+      travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual; 
+    fi # --as-cran
   - mydir=${PWD}
-  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100 R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
+  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; 
+    then 
+      travis_wait 100 R CMD INSTALL --build ANTsR; 
+      PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); 
+    fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];  
+    then  
+      PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  
+    fi
 
 
 # report coverage rate to coveralls
@@ -76,7 +88,6 @@ script:
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  # - dn=/home/travis/build/stnava/
   - cat ${dn}/ANTsR.Rcheck/00install.out
   - cat ${dn}/ANTsR.Rcheck/00check.log
 
