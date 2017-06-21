@@ -68,7 +68,7 @@ script:
     fi # --as-cran
   - mydir=${PWD}
   - cd ANTsR # code below changes dir
-  - install_build_with_tag();  
+  - install_build_with_tag  
   # - if [[ ${#TRAVIS_TAG} -gt 0 ]]; 
   #   then 
   #     travis_wait 100 R CMD INSTALL --build ANTsR; 
