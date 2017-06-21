@@ -88,7 +88,6 @@ script:
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
-
   - cat ${dn}/ANTsR.Rcheck/00install.out
   - cat ${dn}/ANTsR.Rcheck/00check.log
 # send e-mails if stuff changes
