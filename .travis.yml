@@ -67,15 +67,17 @@ script:
       travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual; 
     fi # --as-cran
   - mydir=${PWD}
-  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; 
-    then 
-      travis_wait 100 R CMD INSTALL --build ANTsR; 
-      PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); 
-    fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ];  
-    then  
-      PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  
-    fi
+  - cd ANTsR # code below changes dir
+  - install_build_with_tag();  
+  # - if [[ ${#TRAVIS_TAG} -gt 0 ]]; 
+  #   then 
+  #     travis_wait 100 R CMD INSTALL --build ANTsR; 
+  #     PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); 
+  #   fi
+  # - if [ "$TRAVIS_OS_NAME" == "osx" ];  
+  #   then  
+  #     PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  
+  #   fi
 
 
 # report coverage rate to coveralls
@@ -105,7 +107,7 @@ deploy:
   provider: releases
   api_key:
     secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-  file: ${PKG_FILE_NAME}
+  file: ANTsR*.t*gz
   skip_cleanup: true
   overwrite: true
   on:
