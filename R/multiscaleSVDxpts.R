@@ -617,3 +617,69 @@ if ( verbose ) print( paste( "end",  err ) )
 colnames( v ) = colnames( u )
 return( list( u = u, v=v, intercept = intercept ) )
 }
+
+
+#' k-nearest neighbors constrained image smoothing
+#'
+#' Compute a smoothing matrix based on an input matrix of point coordinates as
+#' well as neighborhood intensity patterns.  this performs a form of edge
+#' preserving smoothing.
+#'
+#' @param img input image to smooth
+#' @param mask input image mask
+#' @param radius number of neighbors, higher causes more smoothing
+#' @param intensityWeight weight for intensity component, value 1 will weight
+#' local voxel intensity roughly equally to spatial component
+#' @param spatialSigma for gaussian defining spatial distances
+#' @param iterations number of iterations over which to apply smoothing kernel
+#' @return antsImage is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' img = antsImageRead( getANTsRData( 'r16' ) )
+#' mask = getMask( img )
+#' simg = knnSmoothImage( img=img, mask=mask, radius=2, intensityWeight=1,
+#'   spatialSigma=1.5, iterations=1 )
+#' }
+#' @export knnSmoothImage
+knnSmoothImage <- function(
+  img,
+  mask,
+  radius,
+  intensityWeight = 0.1,
+  spatialSigma = 20.0,
+  iterations = 1 )
+{
+  if ( radius <= 0 ) return( img )
+  ivec = img[ mask == 1 ]
+  spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+  spatrange = range( spatmat, na.rm = TRUE )
+  intrange = range( ivec, na.rm = TRUE )
+  idelt = ( intrange[2] - intrange[1] )
+  if ( idelt <= 0 ) {
+    scl = 1
+  } else {
+    scl = ( spatrange[2] - spatrange[1] ) / idelt * intensityWeight
+  }
+  ivec2 = ivec * scl
+  spatmat = rbind( spatmat, ivec2 )
+  r = radius
+#  imat = antsrimpute(
+#    getNeighborhoodInMask( img, mask, rep( r, img@dimension), boundary.condition='image' ) )
+#  imat = knnSmoothingMatrix( imat, k = 2*(r*2+1)^2, sigma = intensitySigma )
+  jmat = knnSmoothingMatrix( spatmat, k = (r*2+1)^2, sigma = spatialSigma )
+#  return( jmat )
+#  image( jmat[4000:4500,4000:4500] )
+#  print( jmat[4000:4010,4000:4010] )
+#  imat = imat / Matrix::rowSums( imat )
+#  jmat = imat * smoothingMatrix
+  for ( i in 1:4 ) { # sinkhorn
+    jmat = jmat / Matrix::rowSums( jmat )
+    jmat = Matrix::t( Matrix::t(jmat) / Matrix::rowSums( Matrix::t(jmat) ) )
+    }
+  for ( i in 1:iterations ) {
+    ivec = jmat %*% ivec
+  }
+return(  makeImage( mask, as.numeric( ivec ) ) )
+}
