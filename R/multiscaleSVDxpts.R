@@ -805,6 +805,7 @@ jointSmoothMatrixReconstruction <- function(
     ilist[[ i ]] = u[,1] # intercept
     u = u[,-1]
     v = mdl$coefficients[-1, ]
+    v = matrix( rep( 1, length( v ) ), nrow = nrow( v ), ncol = ncol( v ) )
     v = v / rowSums( v )
     ulist[[ i ]] = u
     vlist[[ i ]] = t( v )
