@@ -692,7 +692,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 
 
 
-.xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
+xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
   smoothingMatrix, repeatedMeasures, intercept,
   positivity, gamma, sparsenessQuantile, usubs, verbose ) {
   i = 1
@@ -742,8 +742,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' @param x input list of matrices to be jointly predicted.
 #' @param parameters should be a ncomparisons by 3 matrix where the first two
 #' columns define the pair to be matched and the last column defines the weight
-#' in the objective function.  e.g. if x contains two matrices, this may have
-#' either one or two rows.
+#' in the objective function.
 #' @param nvecs number of basis vectors to compute
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
@@ -794,10 +793,12 @@ jointSmoothMatrixReconstruction <- function(
   ulist = list()
   vlist = list()
   ilist = list()
-  modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
+
   for ( i in 1:nrow( parameters ) ) {
+
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
+    modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
     basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
@@ -807,19 +808,9 @@ jointSmoothMatrixReconstruction <- function(
     v = v / rowSums( v )
     ulist[[ i ]] = u
     vlist[[ i ]] = t( v )
-    errs = rep( NA, length( iterations ) )
-    if ( class( smoothingMatrix[[i]] ) == 'logical' )
-      smoothingMatrix = diag( ncol( x[[ m2 ]] ) )
-    temp = .xuvtHelper( x[[ m2 ]],
-      ulist[[i]], vlist[[i]], 1-smoothingWeight,
-      smoothingWeight=smoothingWeight,
-      errs, iterations=1,
-      smoothingMatrix[[i]], repeatedMeasures=repeatedMeasures, ilist[[ i ]],
-      positivity=positivity, (-1.0)*gamma * parameters[i,3],
-      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
-    vlist[[ i ]] = temp$v
-    ilist[[ i ]] = temp$intercept
+
     }
+errs = rep( NA, length( iterations ) )
 if ( verbose ) print("part II")
 perr = matrix( nrow = iterations, ncol = nrow( parameters ) )
 k = 1
@@ -827,16 +818,24 @@ while ( k <= iterations ) {
   for ( i in 1:nrow( parameters ) ) {
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
-    temp = t( vlist[[ i ]] )
+    whichv = NA
+    for ( pp in 1:nrow( parameters ) )
+      {
+      if ( parameters[pp,2] == m1 & parameters[pp,1] == m2  )
+        whichv = pp
+      }
+    temp = t( vlist[[ whichv ]] )
     temp = t( temp / rowSums( temp ) )
-    ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
+    if ( ! is.na( whichv ) )
+      ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
-      smoothingMatrix = diag( ncol( mmm ) )
-    temp = .xuvtHelper( x[[ m2 ]],
+      loSmoo = diag( ncol( x[[ m2 ]] ) ) else loSmoo = smoothingMatrix[[ i ]]
+    temp = xuvtHelper( x[[ m2 ]],
       ulist[[i]], vlist[[i]], 1-smoothingWeight,
       smoothingWeight=smoothingWeight,
       errs, iterations=1,
-      smoothingMatrix[[i]], repeatedMeasures=repeatedMeasures, ilist[[ i ]],
+      smoothingMatrix=loSmoo,
+      repeatedMeasures=repeatedMeasures, ilist[[ i ]],
       positivity=positivity, (-1.0)*gamma * parameters[i,3],
       sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
     vlist[[ i ]] = temp$v

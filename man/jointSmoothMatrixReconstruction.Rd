@@ -16,8 +16,7 @@ jointSmoothMatrixReconstruction(x, nvecs, parameters, iterations = 10,
 
 \item{parameters}{should be a ncomparisons by 3 matrix where the first two
 columns define the pair to be matched and the last column defines the weight
-in the objective function.  e.g. if x contains two matrices, this may have
-either one or two rows.}
+in the objective function.}
 
 \item{iterations}{number of gradient descent iterations}
 
