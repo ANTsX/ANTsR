@@ -550,10 +550,10 @@ if ( ! any( is.na( repeatedMeasures ) ) ) {
   }
 hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
-  bdf = basisDf
-  bdf$wts = rowWeights
-  mdl = lm( modelFormula, data = bdf, weights = bdf$wts )
-  rm( bdf )
+  locdf = basisDf
+  locdf$wts = rowWeights
+  mdl = lm( modelFormula, data = locdf, weights = wts )
+  rm( locdf )
   } else mdl = lm( modelFormula, data = basisDf )
 # bmdl = bigLMStats( mdl )
 u = model.matrix( mdl )
@@ -685,4 +685,169 @@ knnSmoothImage <- function(
     ivec = jmat %*% ivec
   }
 return(  makeImage( mask, as.numeric( ivec ) ) )
+}
+
+
+
+
+
+
+xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
+  smoothingMatrix, repeatedMeasures, intercept,
+  positivity, gamma, sparsenessQuantile, usubs, verbose ) {
+  i = 1
+  tu = t( u )
+  tuu = t( u ) %*% u
+  while ( i <= iterations ) {
+  #  v = as.matrix( smoothingMatrix %*% v )
+    dedv = t( tuu %*% t( v ) - tu %*% x )
+    dedv = as.matrix( smoothingMatrix %*% dedv )
+    v = v + dedv * gamma
+    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
+    for ( vv in 1:ncol( v ) ) {
+      localv = v[ , vv ]
+      if ( positivity ) {
+        localv[ localv < quantile( localv , sparsenessQuantile ) ] = 0
+      } else {
+        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile ) ] = 0
+      }
+      v[ , vv ] = localv
+    }
+    intercept = rowMeans( x - ( u %*% t(v) ) )
+    if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
+      for ( s in usubs ) {
+        usel = repeatedMeasures == s
+        intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
+        }
+      }
+    err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
+    errs[ i ] = err
+    if ( i > 1 )
+      if ( errs[ i ] > errs[ i - 1 ] ) {
+        i=iterations
+      }
+    i = i + 1
+    if ( verbose ) print( paste( i,  err ) )
+  }
+  return( list( v = v, intercept = intercept ) )
+}
+
+
+#' joint smooth matrix prediction
+#'
+#' Joints reconstruct a n by p, q, etc matrices or predictors.
+#' The reconstruction can be regularized.
+#' # norm( x - u_x v_x^t ) + norm( y - u_y v_y^t) + .... etc
+#'
+#' @param x input list of matrices to be jointly predicted.
+#' @param parameters should be a ncomparisons by 3 matrix where the first two
+#' columns define the pair to be matched and the last column defines the weight
+#' in the objective function.  e.g. if x contains two matrices, this may have
+#' either one or two rows.
+#' @param nvecs number of basis vectors to compute
+#' @param iterations number of gradient descent iterations
+#' @param gamma step size for gradient descent
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive solution (beta) weights
+#' @param smoothingMatrix a list containing smoothing matrices of the same
+#' length as x.
+#' @param smoothingWeight between zero and one, increases smoothing.
+#' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
+#' @param repeatedMeasures list of repeated measurement identifiers. this will
+#' allow estimates of per identifier intercept.
+#' @param verbose boolean option
+#' @return matrix list each of size p by k is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' mat<-replicate(100, rnorm(20))
+#' mat2<-replicate(100, rnorm(20))
+#' mat<-scale(mat)
+#' mat2<-scale(mat2)
+#' wt<-0.666
+#' mat3<-mat*wt+mat2*(1-wt)
+#' params = matrix( nrow = 2, ncol = 3 )
+#' params[1,] = c(1,2,1)
+#' params[2,] = c(2,1,1)
+#' x = list( (mat), (mat3 ))
+#' jj = jointSmoothMatrixReconstruction( x, 2, params,
+#'  gamma = 1e-4, sparsenessQuantile=0.5, iterations=10,
+#'  smoothingMatrix = list(NA,NA), verbose=TRUE )
+#' }
+#' @export jointSmoothMatrixReconstruction
+jointSmoothMatrixReconstruction <- function(
+  x,
+  nvecs,
+  parameters,
+  iterations = 10,
+  gamma = 1.e-6,
+  sparsenessQuantile = 0.5,
+  positivity = FALSE,
+  smoothingMatrix = NA,
+  smoothingWeight = 0.5,
+  rowWeights = NA,
+  repeatedMeasures = NA,
+  verbose = FALSE
+  )
+{
+  ulist = list()
+  vlist = list()
+  ilist = list()
+  modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
+  for ( i in 1:nrow( parameters ) ) {
+    m1 = parameters[ i, 1 ]
+    m2 = parameters[ i, 2 ]
+    basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    mdl = lm( modelFormula, data = basisDf )
+    u = model.matrix( mdl )
+    ilist[[ i ]] = u[,1] # intercept
+    u = u[,-1]
+    v = mdl$coefficients[-1, ]
+    v = v / rowSums( v )
+    ulist[[ i ]] = u
+    vlist[[ i ]] = t( v )
+    errs = rep( NA, length( iterations ) )
+    if ( class( smoothingMatrix[[i]] ) == 'logical' )
+      smoothingMatrix = diag( ncol( x[[ m2 ]] ) )
+    temp = xuvtHelper( x[[ m2 ]],
+      ulist[[i]], vlist[[i]], 1-smoothingWeight,
+      smoothingWeight=smoothingWeight,
+      errs, iterations=2,
+      smoothingMatrix, repeatedMeasures=repeatedMeasures, ilist[[ i ]],
+      positivity=positivity, (-1.0)*gamma * parameters[i,3],
+      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
+    vlist[[ i ]] = temp$v
+    ilist[[ i ]] = temp$intercept
+    }
+if ( verbose ) print("part II")
+perr = matrix( nrow = iterations, ncol = nrow( parameters ) )
+k = 1
+while ( k <= iterations ) {
+  for ( i in 1:nrow( parameters ) ) {
+    m1 = parameters[ i, 1 ]
+    m2 = parameters[ i, 2 ]
+    temp = t( vlist[[ i ]] )
+    temp = t( temp / rowSums( temp ) )
+    ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
+    if ( class( smoothingMatrix[[i]] ) == 'logical' )
+      smoothingMatrix = diag( ncol( mmm ) )
+    temp = xuvtHelper( x[[ m2 ]],
+      ulist[[i]], vlist[[i]], 1-smoothingWeight,
+      smoothingWeight=smoothingWeight,
+      errs, iterations=2,
+      smoothingMatrix, repeatedMeasures=repeatedMeasures, ilist[[ i ]],
+      positivity=positivity, (-1.0)*gamma * parameters[i,3],
+      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
+    vlist[[ i ]] = temp$v
+    ilist[[ i ]] = temp$intercept
+    perr[ k, i ] = mean( abs( x[[ m2 ]] - ( ulist[[i]] %*% t( vlist[[i]] ) + ilist[[ i ]]  ) ) )
+    }
+    if ( verbose ) print( perr[ k,  ] )
+    if ( k > 1 ) {
+      if ( mean(  perr[k,]  ) > mean(  perr[k-1,]  ) ) k = iterations
+    }
+    k = k + 1
+  }
+  return( list( u=ulist, v=vlist, intercepts=ilist ) )
 }
