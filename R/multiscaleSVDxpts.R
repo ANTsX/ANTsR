@@ -380,7 +380,7 @@ for ( i in 1:nev )
   }
 shiftinds = c(2:ncol( mresponse ), ncol( mresponse ) )
 delt = scaleEvalCorrs - scaleEvalCorrs[shiftinds]
-qdelt = quantile( delt[2:length(delt)], 0.9 )
+qdelt = quantile( delt[2:length(delt)], 0.9, na.rm=T )
 noiseDim = which( delt > qdelt ) + 1
 # curvature dimensionality
 # find the dimensionality that maximizes the t-test difference across
@@ -591,9 +591,9 @@ while ( i <= iterations ) {
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
     if ( positivity ) {
-      localv[ localv < quantile( localv , sparsenessQuantile ) ] = 0
+      localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
     } else {
-      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile ) ] = 0
+      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
     v[ , vv ] = localv
   }
@@ -692,7 +692,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 
 
 
-xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
+.xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
   smoothingMatrix, repeatedMeasures, intercept,
   positivity, gamma, sparsenessQuantile, usubs, verbose ) {
   i = 1
@@ -707,9 +707,9 @@ xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
     for ( vv in 1:ncol( v ) ) {
       localv = v[ , vv ]
       if ( positivity ) {
-        localv[ localv < quantile( localv , sparsenessQuantile ) ] = 0
+        localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T  ) ] = 0
       } else {
-        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile ) ] = 0
+        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
       }
       v[ , vv ] = localv
     }
@@ -830,7 +830,7 @@ while ( k <= iterations ) {
       ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
       loSmoo = diag( ncol( x[[ m2 ]] ) ) else loSmoo = smoothingMatrix[[ i ]]
-    temp = xuvtHelper( x[[ m2 ]],
+    temp = .xuvtHelper( x[[ m2 ]],
       ulist[[i]], vlist[[i]], 1-smoothingWeight,
       smoothingWeight=smoothingWeight,
       errs, iterations=1,
@@ -844,7 +844,9 @@ while ( k <= iterations ) {
     }
     if ( verbose ) print( perr[ k,  ] )
     if ( k > 1 ) {
-      if ( mean(  perr[k,]  ) > mean(  perr[k-1,]  ) ) k = iterations
+      e1 =  perr[k,]  * parameters[,3]
+      e2 =  perr[k-1,]  * parameters[,3]
+      if ( mean( e1 ) > mean( e2 ) ) k = iterations
     }
     k = k + 1
   }
