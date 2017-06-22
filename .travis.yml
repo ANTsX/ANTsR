@@ -45,12 +45,18 @@ before_install:
   - wget -O travis_helpers.sh http://bit.ly/travis_helpers
   - source travis_helpers.sh
   - rm travis_helpers.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ];
-    then cmake --version;
-    wget -O cmake.sh --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh;
-    sh cmake.sh --skip-license --prefix=${HOME};
+  - export cmake_version="3.4"
+  - export cmake_url=https://cmake.org/files/v${cmake_version}/cmake-${cmake_version}.0-rc1
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
+    then 
+    cmake_url=${cmake_url}-Linux-x86_64.sh ;
+    wget -O cmake.sh --no-check-certificate ${cmake_url} ;
+    sh cmake.sh --skip-license --prefix=${HOME};    
+    rm cmake.sh ;   
     fi
-  - export PATH=$HOME/bin/:$PATH
+  - cmake --version
+  - export PATH=$PATH:${HOME}/bin/
+  - cmake --version
   - remote_binary_install ITKR ANTsRCore
   - install_remotes_no_dep
 
