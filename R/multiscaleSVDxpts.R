@@ -692,7 +692,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 
 
 
-xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
+.xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
   smoothingMatrix, repeatedMeasures, intercept,
   positivity, gamma, sparsenessQuantile, usubs, verbose ) {
   i = 1
@@ -810,11 +810,11 @@ jointSmoothMatrixReconstruction <- function(
     errs = rep( NA, length( iterations ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
       smoothingMatrix = diag( ncol( x[[ m2 ]] ) )
-    temp = xuvtHelper( x[[ m2 ]],
+    temp = .xuvtHelper( x[[ m2 ]],
       ulist[[i]], vlist[[i]], 1-smoothingWeight,
       smoothingWeight=smoothingWeight,
-      errs, iterations=2,
-      smoothingMatrix, repeatedMeasures=repeatedMeasures, ilist[[ i ]],
+      errs, iterations=1,
+      smoothingMatrix[[i]], repeatedMeasures=repeatedMeasures, ilist[[ i ]],
       positivity=positivity, (-1.0)*gamma * parameters[i,3],
       sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
     vlist[[ i ]] = temp$v
@@ -832,11 +832,11 @@ while ( k <= iterations ) {
     ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
       smoothingMatrix = diag( ncol( mmm ) )
-    temp = xuvtHelper( x[[ m2 ]],
+    temp = .xuvtHelper( x[[ m2 ]],
       ulist[[i]], vlist[[i]], 1-smoothingWeight,
       smoothingWeight=smoothingWeight,
-      errs, iterations=2,
-      smoothingMatrix, repeatedMeasures=repeatedMeasures, ilist[[ i ]],
+      errs, iterations=1,
+      smoothingMatrix[[i]], repeatedMeasures=repeatedMeasures, ilist[[ i ]],
       positivity=positivity, (-1.0)*gamma * parameters[i,3],
       sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
     vlist[[ i ]] = temp$v
