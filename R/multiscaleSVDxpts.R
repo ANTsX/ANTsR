@@ -773,6 +773,59 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' jj = jointSmoothMatrixReconstruction( x, 2, params,
 #'  gamma = 1e-4, sparsenessQuantile=0.5, iterations=10,
 #'  smoothingMatrix = list(NA,NA), verbose=TRUE )
+#'
+#' # a 2nd example with 3 modalities
+#' imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
+#' images <- list()
+#' feature1Images <- list()
+#' feature2Images <- list()
+#' feature3Images <- list()
+#' ref = antsImageRead( getANTsRData('r16') )
+#' for( i in 1:length( imageIDs ) )
+#'   {
+#'   cat( "Processing image", imageIDs[i], "\n" )
+#'   tar = antsRegistration( ref, antsImageRead( getANTsRData( imageIDs[i] ) ),
+#'     typeofTransform='Affine' )$warpedmov
+#'   images[[i]] <- tar
+#'   feature1Images[[i]] <- iMath( images[[i]], "Grad", 1.0 )
+#'   feature2Images[[i]] <- iMath( images[[i]], "Laplacian", 1.0 )
+#'   feature3Images[[i]] <- reflectImage(tar,axis=0,tx='Affine')$warpedmovout
+#'   }
+#' i=1
+#' mask=getMask( antsImageRead(  getANTsRData( imageIDs[i] ) ))
+#' mask2 = iMath( mask, "ME", 2 )
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoomat = knnSmoothingMatrix( spatmat, k = 125, sigma = 100.0 )
+#' spatmat2 = t( imageDomainToSpatialMatrix( mask2, mask2 ) )
+#' smoomat2 = knnSmoothingMatrix( spatmat2, k = 125, sigma = 100.0 )
+#' params = matrix( nrow = 6, ncol = 3 )
+#' params[1,] = c(1,2,1)
+#' params[2,] = c(2,1,1)
+#' params[3,] = c(1,3,1)
+#' params[4,] = c(3,1,1)
+#' params[5,] = c(2,3,1)
+#' params[6,] = c(3,2,1)
+#' mat = imageListToMatrix( feature1Images, mask )
+#' mat2 = imageListToMatrix( feature2Images, mask2 )
+#' mat3 = imageListToMatrix( feature3Images, mask )
+#' scl=F
+#' x = list( scale(mat, scale=scl), scale(mat2, scale=scl ), scale(mat3, scale=scl ))
+#' slist = list(smoomat2,smoomat,smoomat,smoomat,smoomat,smoomat2)
+#'
+#' jj = jointSmoothMatrixReconstruction( x, 4, params, positivity=T,
+#'  gamma = 1e-6, sparsenessQuantile=0.9, iterations=10,
+#'  smoothingMatrix = slist, verbose=TRUE )
+#' mm=makeImage( mask, abs(jj$v[[2]][,1]) ) %>% iMath("Normalize")
+#' plot( ref, mm, doCropping=F, window.overlay=c(0.1,1) )
+#'
+#' p1 = mat2 %*% jj$v[[1]]
+#' p2 = mat  %*% jj$v[[2]]
+#' diag( cor( p1, p2 ) )
+#'
+#' p1 = mat3 %*% jj$v[[5]]
+#' p2 = mat2  %*% jj$v[[6]]
+#' diag( cor( p1, p2 ) )
+#'
 #' }
 #' @export jointSmoothMatrixReconstruction
 jointSmoothMatrixReconstruction <- function(
@@ -799,14 +852,15 @@ jointSmoothMatrixReconstruction <- function(
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
-    basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=rsvd::rsvd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept
     u = u[,-1]
-    v = mdl$coefficients[-1, ]
-    v = matrix( rep( 1, length( v ) ), nrow = nrow( v ), ncol = ncol( v ) )
-    v = v / rowSums( v )
+    v = mdl$coefficients[-1, ] * 0.01
+    #    v = matrix( rnorm( length( v ) ), nrow = nrow( v ), ncol = ncol( v ) )
+    #    v = t( rsvd::rsvd(  x[[ m2 ]], nu = 0, nv = nvecs  )$v )
+    #    v = v / rowSums( v )
     ulist[[ i ]] = u
     vlist[[ i ]] = t( v )
 
