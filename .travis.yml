@@ -55,7 +55,6 @@ before_install:
   - install_remotes_no_dep
   # - gh_binary_install ITKR ANTsRCore
 
-
 # Build and check package
 script:
   - source ~/.R/Makevars
