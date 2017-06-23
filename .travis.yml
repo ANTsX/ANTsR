@@ -50,8 +50,10 @@ before_install:
   - cmake --version
   - cmake_setup    
   - cmake --version
-  - remote_binary_install ITKR ANTsRCore
+  - gh_binary_install stnava/ITKR
+  - gh_binary_install stnava/ANTsRCore
   - install_remotes_no_dep
+  # - gh_binary_install ITKR ANTsRCore
 
 
 # Build and check package
