@@ -32,6 +32,7 @@ matrix:
 cran: http://cran.rstudio.com
 
 before_install:
+  - export ORIG_PATH=${PATH}
   - mkdir -p ~/.R
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
   - export CC=clang
@@ -46,16 +47,8 @@ before_install:
   - source travis_helpers.sh
   - rm travis_helpers.sh
   - export cmake_version="3.4"
-  - export cmake_url=https://cmake.org/files/v${cmake_version}/cmake-${cmake_version}.0-rc1
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; 
-    then 
-    cmake_url=${cmake_url}-Linux-x86_64.sh ;
-    wget -O cmake.sh --no-check-certificate ${cmake_url} ;
-    sh cmake.sh --skip-license --prefix=${HOME};    
-    rm cmake.sh ;   
-    fi
   - cmake --version
-  - export PATH=$PATH:${HOME}/bin/
+  - cmake_setup    
   - cmake --version
   - remote_binary_install ITKR ANTsRCore
   - install_remotes_no_dep
@@ -93,6 +86,9 @@ script:
 #  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
 # takes too long, should add to matrix
 
+after_success:
+  - export PATH=${ORIG_PATH}
+  
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
