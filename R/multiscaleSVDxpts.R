@@ -545,9 +545,21 @@ if ( missing( "x") | missing("basisDf") ) {
   message("this function needs input")
   return( NA )
   }
+#
 if ( ! any( is.na( repeatedMeasures ) ) ) {
   usubs = unique( repeatedMeasures )
+  wtdf = data.frame( table( usubs ) )
+  # rowWeights should scale with counts
+  repWeights = rep( 0, length( repeatedMeasures ) )
+  for ( u in wtdf$usubs ) {
+    repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$usubs == u ]
   }
+  rm( wtdf )
+  if ( all( is.na( rowWeights ) ) ) {
+    rowWeights = repWeights
+    } else rowWeights = rowWeights * repWeights
+  }
+
 hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
   locdf = basisDf
@@ -846,6 +858,19 @@ jointSmoothMatrixReconstruction <- function(
   ulist = list()
   vlist = list()
   ilist = list()
+  if ( ! any( is.na( repeatedMeasures ) ) ) {
+    usubs = unique( repeatedMeasures )
+    wtdf = data.frame( table( usubs ) )
+    # rowWeights should scale with counts
+    repWeights = rep( 0, length( repeatedMeasures ) )
+    for ( u in wtdf$usubs ) {
+      repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$usubs == u ]
+    }
+    rm( wtdf )
+    if ( all( is.na( rowWeights ) ) ) {
+      rowWeights = repWeights
+      } else rowWeights = rowWeights * repWeights
+    }
 
   for ( i in 1:nrow( parameters ) ) {
 

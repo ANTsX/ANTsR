@@ -51,7 +51,14 @@ before_install:
     rm cmake.sh;
     fi
   - export PATH=$HOME/bin/:$PATH
-  - remote_binary_install ITKR ANTsRCore
+#  - remote_binary_install ITKR ANTsRCore
+  - itkrrel=0.4.12
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
+  - ANTsRCorerel=0.3.7.2
+  - reldir=latest
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
   - install_remotes_no_dep
 
 # Build and check package
