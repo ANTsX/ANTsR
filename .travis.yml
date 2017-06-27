@@ -37,6 +37,8 @@ before_install:
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
   - export CC=clang
   - export CXX=clang++
+  - export CXX1X=clang++
+  - export CXX1XSTD=-std=c++11  
   - echo "CC=clang" >  ~/.R/Makevars
   - echo "CXX=clang++" >> ~/.R/Makevars
   - echo "CXX1X=clang++" >> ~/.R/Makevars
