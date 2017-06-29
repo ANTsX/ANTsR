@@ -35,19 +35,11 @@ before_install:
   - export ORIG_PATH=${PATH}
   - mkdir -p ~/.R
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - export CC=clang
-  - export CXX=clang++
-  - export CXX1X=clang++
-  - export CXX1XSTD=-std=c++11  
-  - echo "CC=clang" >  ~/.R/Makevars
-  - echo "CXX=clang++" >> ~/.R/Makevars
-  - echo "CXX1X=clang++" >> ~/.R/Makevars
-  - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
-  - source ~/.R/Makevars
   # New stuff
   - wget -O travis_helpers.sh http://bit.ly/travis_helpers
   - source travis_helpers.sh
   - rm travis_helpers.sh
+  - clang_cxx
   - export cmake_version="3.4"
   - cmake --version
   - cmake_setup    
@@ -60,8 +52,6 @@ before_install:
 # Build and check package
 script:
   - source ~/.R/Makevars
-  - export CXX=clang++
-  - export CC=clang
   - cd ..
   - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
