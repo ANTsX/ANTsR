@@ -41,10 +41,12 @@ List containing:
 Correct 4D time-series data for motion.
 }
 \examples{
+\dontrun{
 set.seed(120)
 simimg<-makeImage(rep(5,4), rnorm(5^4))
 # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
 antsMotionCalculation(simimg,moreaccurate=0)
+}
 }
 \author{
 Benjamin M. Kandel
