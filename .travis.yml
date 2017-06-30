@@ -6,10 +6,13 @@ os:
   - linux
   - osx
 
+compiler: clang
+osx_image: xcode8.2
+
 r_build_args: --no-build-vignettes --no-manual
 env:
   global:
-  - R_BUILD_ARGS="--no-build-vignettes --no-manual"
+  - R_BUILD_ARGS=" "
   - R_CHECK_ARGS=" --timings --as-cran"
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
@@ -18,61 +21,113 @@ env:
   - BOOTSTRAP_LATEX=1
   # - WARNINGS_ARE_ERRORS=0
 
-osx_image: xcode8.2
-
 language: r
 r:
   - release
 
-matrix:
-   allow_failures:
-    - os: osx
-
 cran: http://cran.rstudio.com
 
 before_install:
-  - mkdir -p ~/.R
+  - export ORIG_PATH=${PATH}
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - export CC=clang
-  - export CXX=clang++
-  - echo "CC=clang" >  ~/.R/Makevars
-  - echo "CXX=clang++" >> ~/.R/Makevars
-  - echo "CXX1X=clang++" >> ~/.R/Makevars
-  - echo "CXX1XSTD=-std=c++11" >> ~/.R/Makevars
-  - source ~/.R/Makevars
-  # New stuff
   - wget -O travis_helpers.sh http://bit.ly/travis_helpers
   - source travis_helpers.sh
   - rm travis_helpers.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ];
-    then cmake --version;
-    wget -O cmake.sh --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc1-Linux-x86_64.sh;
-    sh cmake.sh --skip-license --prefix=${HOME};
-    rm cmake.sh;
-    fi
-  - export PATH=$HOME/bin/:$PATH
-#  - remote_binary_install ITKR ANTsRCore
-  - itkrrel=0.4.12
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ITKR_${itkrrel}_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ITKR/releases/download/latest/ITKR_${itkrrel}.tgz; R CMD INSTALL ITKR_${itkrrel}.tgz; fi
-  - ANTsRCorerel=0.3.7.2
-  - reldir=latest
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then wget https://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}_R_x86_64-pc-linux-gnu.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget http://github.com/stnava/ANTsRCore/releases/download/${reldir}/ANTsRCore_${ANTsRCorerel}.tgz; R CMD INSTALL ANTsRCore_${ANTsRCorerel}.tgz; fi
+  # does all the clang exports  
+  - clang_cxx
+  - export cmake_version="3.4"
+  - cmake --version
+  - cmake_setup    
+  - cmake --version
+  - gh_binary_install stnava/ITKR
+  - gh_binary_install stnava/ANTsRCore
   - install_remotes_no_dep
+  # - gh_binary_install ITKR ANTsRCore
 
 # Build and check package
 script:
-  - source ~/.R/Makevars
-  - export CXX=clang++
-  - export CC=clang
-  - cd ..
-  - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
-  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-  - if [[ ${#TRAVIS_TAG} -eq 0 ]]; then travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual; fi # --as-cran
-  - mydir=${PWD}
-  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then travis_wait 100 R CMD INSTALL --build ANTsR; PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1); if [ "$TRAVIS_OS_NAME" == "osx" ];  then  PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);  fi; fi
+  - echo "Overriding travis R script"
 
+jobs:
+  include:
+    - script:
+      - cat ~/.R/Makevars
+      - source ~/.R/Makevars
+      - export_clang_cxx    
+      - cd ..
+      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
+      os: linux
+    - script:
+      - cat ~/.R/Makevars
+      - source ~/.R/Makevars
+      - export_clang_cxx    
+      - cd ..
+      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
+      os: osx
+    - stage: "Deployment"
+      script:
+      - cat ~/.R/Makevars
+      - source ~/.R/Makevars
+      - export_clang_cxx
+      - cd ..
+      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - if [[ ${#TRAVIS_TAG} -gt 0 ]];
+        then
+          R CMD INSTALL --debug --build ANTsR; 
+          PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
+          if [ "$TRAVIS_OS_NAME" == "osx" ];
+            then
+              PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);
+          fi;
+        fi
+      deploy:
+        provider: releases
+        api_key:
+          secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+        file: ${PKG_FILE_NAME}
+        skip_cleanup: true
+        overwrite: true
+        on:
+          repo: stnava/ANTsR
+          tags: true
+          all_branches: true
+      os: linux
+    - stage: "Deployment"
+      script:
+      - cat ~/.R/Makevars
+      - source ~/.R/Makevars
+      - export_clang_cxx     
+      - cd ..
+      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
+      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
+      - if [[ ${#TRAVIS_TAG} -gt 0 ]];
+        then
+          R CMD INSTALL --debug --build ANTsR; 
+          PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
+          if [ "$TRAVIS_OS_NAME" == "osx" ];
+            then
+              PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);
+          fi;
+        fi
+      deploy:
+        provider: releases
+        api_key:
+          secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+        file: ${PKG_FILE_NAME}
+        skip_cleanup: true
+        overwrite: true
+        on:
+          repo: stnava/ANTsR
+          tags: true
+          all_branches: true
+      os: osx
+  allow_failures:
+    - os: osx
 
 # report coverage rate to coveralls
 # after_success:
@@ -81,14 +136,20 @@ script:
 #  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
 # takes too long, should add to matrix
 
+after_success:
+  - echo ${TRAVIS_BUILD_DIR}
+  - dn=`dirname ${TRAVIS_BUILD_DIR}`
+  - cat ${dn}/ANTsR.Rcheck/00check.log  
+  - cat ${dn}/ANTsR.Rcheck/00install.out
+  - export PATH=${ORIG_PATH}
+  
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  # - dn=/home/travis/build/stnava/
-  - cat ${mydir}/ANTsR.Rcheck/00install.out
-  - cat ${mydir}/ANTsR.Rcheck/00check.log
-
+  - cat ${dn}/ANTsR.Rcheck/00install.out
+  - cat ${dn}/ANTsR.Rcheck/00check.log
 # send e-mails if stuff changes
+
 notifications:
   email:
     recipients:
@@ -98,14 +159,4 @@ notifications:
     on_success: change
     on_failure: always
 
-deploy:
-  provider: releases
-  api_key:
-    secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-  file: ${PKG_FILE_NAME}
-  skip_cleanup: true
-  overwrite: true
-  on:
-    repo: stnava/ANTsR
-    tags: true
-    all_branches: true
+# secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
