@@ -487,8 +487,10 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param basisDf data frame for basis predictors
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
-#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
-#' @param positivity restrict to positive solution (beta) weights
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' the sign restriction is determined by \code{sparsenessQuantile} being greater
+#' or lesser than 0.5.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param smoothingWeight between zero and one, increases smoothing.
@@ -559,14 +561,13 @@ if ( ! any( is.na( repeatedMeasures ) ) ) {
     rowWeights = repWeights
     } else rowWeights = rowWeights * repWeights
   }
-
 hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
   locdf = basisDf
   locdf$wts = rowWeights
-  mdl = lm( modelFormula, data = locdf, weights = wts )
+  mdl = lm( modelFormula, data = locdf, weights = wts, , na.action="na.exclude"  )
   rm( locdf )
-  } else mdl = lm( modelFormula, data = basisDf )
+  } else mdl = lm( modelFormula, data = basisDf, na.action="na.exclude" )
 # bmdl = bigLMStats( mdl )
 u = model.matrix( mdl )
 intercept = u[,1]
@@ -597,14 +598,20 @@ wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
 #  v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
-  dedv = as.matrix( smoothingMatrix %*% dedv )
+#  dedv = as.matrix( smoothingMatrix %*% dedv )
   v = v + dedv * gamma
   v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
-    if ( positivity ) {
+    if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-    } else {
+      localv[ localv < 0 ] = 0
+    }
+    if ( positivity & sparsenessQuantile < 0.5 ) {
+      localv[ localv > quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
+      localv[ localv > 0 ] = 0
+    }
+    if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
     v[ , vv ] = localv
