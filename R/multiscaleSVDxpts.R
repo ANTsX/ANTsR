@@ -565,7 +565,8 @@ hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
   locdf = basisDf
   locdf$wts = rowWeights
-  mdl = lm( modelFormula, data = locdf, weights = locdf$wts, na.action="na.exclude"  )
+  wts = "this is just a placeholder"
+  mdl = lm( modelFormula, data = locdf, weights = wts, na.action="na.exclude"  )
   rm( locdf )
   } else mdl = lm( modelFormula, data = basisDf, na.action="na.exclude" )
 # bmdl = bigLMStats( mdl )
