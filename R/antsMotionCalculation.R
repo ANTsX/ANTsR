@@ -24,10 +24,12 @@
 #' }
 #' @author Benjamin M. Kandel
 #' @examples
+#' \dontrun{
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
 #' # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
 #' antsMotionCalculation(simimg,moreaccurate=0)
+#' }
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
                    txtype = "Affine", framewise = 1, verbose=FALSE ) {
