@@ -574,6 +574,7 @@ u = model.matrix( mdl )
 intercept = u[,1]
 u = u[,-1]
 v = t( mdl$coefficients[-1, ] )
+v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
 # v = t( bmdl$beta.t )
 # print( dim(v ))
 # print("gett")
