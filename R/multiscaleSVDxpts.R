@@ -574,7 +574,7 @@ u = scale( model.matrix( mdl ) )
 intercept = u[,1]
 u = u[,-1]
 v = t( mdl$coefficients[-1, ] )
-v = v + matrix( rnorm( length( v ), 0, 0.1 ), nrow = nrow( v ), ncol = ncol( v ) )
+v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
 # v = t( bmdl$beta.t )
 # print( dim(v ))
 # print("gett")
@@ -628,15 +628,18 @@ while ( i <= iterations ) {
   err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
   errs[ i ] = err
   if ( i > 1 ) {
-    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 2 ) )
+    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
       {
-      message("flipping sign of gradient step")
+      message(paste("flipping sign of gradient step:", gamma))
       gamma = gamma * ( -1.0 )
       }
-    else if ( ( errs[ i ] > errs[ i - 1 ] ) & ( i > 2 ) )
+    else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
-      i = iterations
+      gamma = gamma * ( 0.5 )
+      message(paste("reducing gradient step:", gamma))
+#      i = iterations
       }
+    else if ( ( errs[ i ] > errs[ i - 1 ] ) & i > 10 ) i = iterations
     }
   i = i + 1
   if ( verbose ) print( paste( i,  err ) )
