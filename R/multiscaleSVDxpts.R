@@ -598,11 +598,12 @@ if ( smoothingWeight > 1 ) smoothingWeight = smoothingWeight = 1.0
 if ( smoothingWeight < 0 ) smoothingWeight = smoothingWeight = 0.0
 wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
-#  v = as.matrix( smoothingMatrix %*% v )
+  v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
 #  dedv = as.matrix( smoothingMatrix %*% dedv )
   v = v + dedv * gamma
-  v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
+  if ( wt1 < 1 )
+    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
@@ -637,9 +638,8 @@ while ( i <= iterations ) {
       {
       gamma = gamma * ( 0.5 )
       message(paste("reducing gradient step:", gamma))
-#      i = iterations
       }
-    else if ( ( errs[ i ] > errs[ i - 1 ] ) & i > 10 ) i = iterations
+    else if ( abs(gamma) < 1.e-9 ) i = iterations
     }
   i = i + 1
   if ( verbose ) print( paste( i,  err ) )
