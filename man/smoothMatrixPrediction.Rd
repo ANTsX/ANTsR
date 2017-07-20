@@ -7,7 +7,7 @@
 smoothMatrixPrediction(x, basisDf, modelFormula = as.formula(" x ~ ."),
   iterations = 10, gamma = 1e-06, sparsenessQuantile = 0.5,
   positivity = FALSE, smoothingMatrix = NA, smoothingWeight = 0.5,
-  repeatedMeasures = NA, rowWeights = NA, verbose = FALSE)
+  repeatedMeasures = NA, rowWeights = NA, LRR = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix to be predicted.}
@@ -36,6 +36,8 @@ size as input matrix}
 allow estimates of per identifier intercept.}
 
 \item{rowWeights}{vectors of weights with size n (assumes diagonal covariance)}
+
+\item{LRR}{integer value sets rank for fast version exploiting matrix approximation}
 
 \item{verbose}{boolean option}
 }

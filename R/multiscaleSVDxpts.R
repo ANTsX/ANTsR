@@ -497,6 +497,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
+#' @param LRR integer value sets rank for fast version exploiting matrix approximation
 #' @param verbose boolean option
 #' @return matrix of size p by k is output
 #' @author Avants BB
@@ -540,6 +541,7 @@ smoothMatrixPrediction <- function(
   smoothingWeight = 0.5,
   repeatedMeasures = NA,
   rowWeights = NA,
+  LRR = NA,
   verbose = FALSE
   )
 {
@@ -575,15 +577,12 @@ intercept = u[,1]
 u = u[,-1]
 v = t( mdl$coefficients[-1, ] )
 v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
-# v = t( bmdl$beta.t )
-# print( dim(v ))
-# print("gett")
-# mycoefs = mdl$coefficients[-1, ]
-# beta.std <- t(sqrt(as.vector(colSums((mdl$residuals)^2)/mdl$df.residual) %o% mycoefs))
-# beta.t <- mylm$coefficients[-1]/beta.std
-# v = t( beta.t )
-# print("gott")
-if ( hasweights ) {
+if ( !is.na( LRR ) ) {
+  u = lowrankRowMatrix( u, LRR )
+  v = t(lowrankRowMatrix( t(v), LRR ))
+  x = lowrankRowMatrix( x, LRR )
+  }
+if ( hasweights & is.na( LRR ) ) {
   u = diag( sqrt( rowWeights ) ) %*% u
   x = diag( sqrt( rowWeights ) ) %*% x
   }
@@ -600,10 +599,9 @@ wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
   v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
-#  dedv = as.matrix( smoothingMatrix %*% dedv )
   v = v + dedv * gamma
-  if ( wt1 < 1 )
-    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
+#  if ( wt1 < 1 )
+#    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
@@ -620,7 +618,7 @@ while ( i <= iterations ) {
     v[ , vv ] = localv
   }
   intercept = rowMeans( x - ( u %*% t(v) ) )
-  if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
+  if ( ! any( is.na( repeatedMeasures ) ) & is.na( LRR ) ) { # estimate random intercepts
     for ( s in usubs ) {
       usel = repeatedMeasures == s
       intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
