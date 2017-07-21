@@ -228,9 +228,8 @@ quantifyCBF <- function(perfusion,
   }
 
   # appy mask to mean cbf image
-  meancbfimg <- antsImageClone(mask)
+  meancbfimg <- antsImageClone( meancbf )
   meancbfimg[(mask < 1)] <- 0
-  meancbfimg[(mask == 1)] <- meancbf[(mask == 1)]
 
   epckg <- usePkg("extremevalues")
   if (epckg) {
