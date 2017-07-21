@@ -487,14 +487,17 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param basisDf data frame for basis predictors
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
-#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
-#' @param positivity restrict to positive solution (beta) weights
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' the sign restriction is determined by \code{sparsenessQuantile} being greater
+#' or lesser than 0.5.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param smoothingWeight between zero and one, increases smoothing.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
+#' @param LRR integer value sets rank for fast version exploiting matrix approximation
 #' @param verbose boolean option
 #' @return matrix of size p by k is output
 #' @author Avants BB
@@ -538,6 +541,7 @@ smoothMatrixPrediction <- function(
   smoothingWeight = 0.5,
   repeatedMeasures = NA,
   rowWeights = NA,
+  LRR = NA,
   verbose = FALSE
   )
 {
@@ -559,28 +563,26 @@ if ( ! any( is.na( repeatedMeasures ) ) ) {
     rowWeights = repWeights
     } else rowWeights = rowWeights * repWeights
   }
-
 hasweights =  ! all( is.na( rowWeights ) )
 if ( hasweights ) {
   locdf = basisDf
   locdf$wts = rowWeights
-  mdl = lm( modelFormula, data = locdf, weights = locdf$wts )
+  wts = "this is just a placeholder"
+  mdl = lm( modelFormula, data = locdf, weights = wts, na.action="na.exclude"  )
   rm( locdf )
-  } else mdl = lm( modelFormula, data = basisDf )
+  } else mdl = lm( modelFormula, data = basisDf, na.action="na.exclude" )
 # bmdl = bigLMStats( mdl )
-u = model.matrix( mdl )
+u = scale( model.matrix( mdl ) )
 intercept = u[,1]
 u = u[,-1]
 v = t( mdl$coefficients[-1, ] )
-# v = t( bmdl$beta.t )
-# print( dim(v ))
-# print("gett")
-# mycoefs = mdl$coefficients[-1, ]
-# beta.std <- t(sqrt(as.vector(colSums((mdl$residuals)^2)/mdl$df.residual) %o% mycoefs))
-# beta.t <- mylm$coefficients[-1]/beta.std
-# v = t( beta.t )
-# print("gott")
-if ( hasweights ) {
+v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
+if ( !is.na( LRR ) ) {
+  u = lowrankRowMatrix( u, LRR )
+  v = t(lowrankRowMatrix( t(v), LRR ))
+  x = icawhiten( x, LRR )
+  }
+if ( hasweights & is.na( LRR ) ) {
   u = diag( sqrt( rowWeights ) ) %*% u
   x = diag( sqrt( rowWeights ) ) %*% x
   }
@@ -595,22 +597,28 @@ if ( smoothingWeight > 1 ) smoothingWeight = smoothingWeight = 1.0
 if ( smoothingWeight < 0 ) smoothingWeight = smoothingWeight = 0.0
 wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
-#  v = as.matrix( smoothingMatrix %*% v )
+  v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
-  dedv = as.matrix( smoothingMatrix %*% dedv )
   v = v + dedv * gamma
-  v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
+#  if ( wt1 < 1 )
+#    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
   for ( vv in 1:ncol( v ) ) {
     localv = v[ , vv ]
-    if ( positivity ) {
+    if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-    } else {
+      localv[ localv < 0 ] = 0
+    }
+    if ( positivity & sparsenessQuantile < 0.5 ) {
+      localv[ localv > quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
+      localv[ localv > 0 ] = 0
+    }
+    if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
     v[ , vv ] = localv
   }
   intercept = rowMeans( x - ( u %*% t(v) ) )
-  if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
+  if ( ! any( is.na( repeatedMeasures ) ) & is.na( LRR ) ) { # estimate random intercepts
     for ( s in usubs ) {
       usel = repeatedMeasures == s
       intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
@@ -618,9 +626,18 @@ while ( i <= iterations ) {
     }
   err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
   errs[ i ] = err
-  if ( i > 1 )
-    if ( errs[ i ] > errs[ i - 1 ] ) {
-      i=iterations
+  if ( i > 1 ) {
+    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
+      {
+      message(paste("flipping sign of gradient step:", gamma))
+      gamma = gamma * ( -1.0 )
+      }
+    else if ( ( errs[ i ] > errs[ i - 1 ] ) )
+      {
+      gamma = gamma * ( 0.5 )
+      message(paste("reducing gradient step:", gamma))
+      }
+    else if ( abs(gamma) < 1.e-9 ) i = iterations
     }
   i = i + 1
   if ( verbose ) print( paste( i,  err ) )

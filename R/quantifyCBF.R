@@ -118,8 +118,7 @@ quantifyCBF <- function(perfusion,
     cbf[!is.finite(cbf)] <- 0
 
     if (hasTime) {
-      meancbf <- apply(cbf, c(1, 2, 3), mean)
-      dim(meancbf) <- dim(mask)
+      meancbf <- getAverageOfTimeSeries( cbf )
     } else {
       meancbf <- cbf
     }
@@ -207,8 +206,7 @@ quantifyCBF <- function(perfusion,
     cbf[!is.finite(cbf)] <- 0
 
     if (hasTime) {
-      meancbf <- apply(cbf, c(1, 2, 3), mean)
-      dim(meancbf) <- dim(mask)
+      meancbf <- getAverageOfTimeSeries( cbf )
     } else {
       meancbf <- cbf
     }
@@ -228,9 +226,7 @@ quantifyCBF <- function(perfusion,
   }
 
   # appy mask to mean cbf image
-  meancbfimg <- antsImageClone(mask)
-  meancbfimg[(mask < 1)] <- 0
-  meancbfimg[(mask == 1)] <- meancbf[(mask == 1)]
+  meancbfimg <- meancbf * mask
 
   epckg <- usePkg("extremevalues")
   if (epckg) {
