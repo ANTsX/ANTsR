@@ -580,7 +580,7 @@ v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v 
 if ( !is.na( LRR ) ) {
   u = lowrankRowMatrix( u, LRR )
   v = t(lowrankRowMatrix( t(v), LRR ))
-  x = lowrankRowMatrix( x, LRR )
+  x = icawhiten( x, LRR )
   }
 if ( hasweights & is.na( LRR ) ) {
   u = diag( sqrt( rowWeights ) ) %*% u
