@@ -538,13 +538,14 @@ smoothMatrixPrediction <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
-  smoothingWeight = 0.5,
+#  smoothingWeight = 0.5,
   repeatedMeasures = NA,
   rowWeights = NA,
   LRR = NA,
   verbose = FALSE
   )
 {
+smoothingWeight = 1.0
 if ( missing( "x") | missing("basisDf") ) {
   message("this function needs input")
   return( NA )
@@ -579,8 +580,9 @@ v = t( mdl$coefficients[-1, ] )
 v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
 if ( !is.na( LRR ) ) {
   u = lowrankRowMatrix( u, LRR )
-  v = t(lowrankRowMatrix( t(v), LRR ))
+  v = t( lowrankRowMatrix( t(v), LRR ) )
   x = icawhiten( x, LRR )
+#  x = lowrankRowMatrix( x, LRR )
   }
 if ( hasweights & is.na( LRR ) ) {
   u = diag( sqrt( rowWeights ) ) %*% u

@@ -6,8 +6,8 @@
 \usage{
 smoothMatrixPrediction(x, basisDf, modelFormula = as.formula(" x ~ ."),
   iterations = 10, gamma = 1e-06, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrix = NA, smoothingWeight = 0.5,
-  repeatedMeasures = NA, rowWeights = NA, LRR = NA, verbose = FALSE)
+  positivity = FALSE, smoothingMatrix = NA, repeatedMeasures = NA,
+  rowWeights = NA, LRR = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix to be predicted.}
@@ -30,8 +30,6 @@ or lesser than 0.5.}
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}
 
-\item{smoothingWeight}{between zero and one, increases smoothing.}
-
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
 
@@ -40,6 +38,8 @@ allow estimates of per identifier intercept.}
 \item{LRR}{integer value sets rank for fast version exploiting matrix approximation}
 
 \item{verbose}{boolean option}
+
+\item{smoothingWeight}{between zero and one, increases smoothing.}
 }
 \value{
 matrix of size p by k is output
