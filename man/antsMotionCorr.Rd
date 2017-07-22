@@ -4,10 +4,10 @@
 \alias{antsMotionCorr}
 \title{Motion Correction}
 \usage{
-antsMotionCorr(...)
+antsMotionCorr(paramList)
 }
 \arguments{
-\item{...}{antsMotionCorr parameters, as in ANTs. this is a direct call to
+\item{paramList}{antsMotionCorr parameters, as in ANTs. this is a direct call to
 the low level \code{c++} and as such has non-standard parameters.}
 }
 \value{

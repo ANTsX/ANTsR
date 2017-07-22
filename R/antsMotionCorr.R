@@ -7,7 +7,7 @@
 #' for 4D time series data: fixed image is 3D, moving image should be the 4D
 #' time series. Fixed image is a reference space or time slice.
 #'
-#' @param ... antsMotionCorr parameters, as in ANTs. this is a direct call to
+#' @param paramList antsMotionCorr parameters, as in ANTs. this is a direct call to
 #' the low level \code{c++} and as such has non-standard parameters.
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
@@ -31,6 +31,6 @@
 #' motiondf <- as.data.frame( mocoParams )
 #'
 #' @export antsMotionCorr
-antsMotionCorr <- function(...) {
-  .Call("antsMotionCorr", .int_antsProcessArguments(c(...)), PACKAGE = "ANTsR")
+antsMotionCorr <- function( paramList ) {
+  returnval = .Call("antsMotionCorr", .int_antsProcessArguments( paramList ), PACKAGE = "ANTsR")
 }
