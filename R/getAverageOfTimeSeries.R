@@ -12,10 +12,9 @@ getAverageOfTimeSeries <- function(img) {
   if (nargs() == 0) {
     return(1)
   }
-  if (img@dimension != 4) {
-    stop("FAILED--your input image is not 4D")
-  }
-  averageImage <- new("antsImage", img@pixeltype, 3)
-  antsMotionCorr(list(d = 3, a = img, o = averageImage))
-  return(averageImage)
-} 
+  myilist = splitNDImageToList( img )
+  averageImage = myilist[[ 1 ]]
+  for ( i in 2:length( myilist ) )
+    averageImage = averageImage + myilist[[ i ]]
+  return( averageImage / length( myilist ) )
+}
