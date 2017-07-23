@@ -5,8 +5,8 @@
 \title{joint smooth matrix prediction}
 \usage{
 jointSmoothMatrixReconstruction(x, nvecs, parameters, iterations = 10,
-  gamma = 1e-06, sparsenessQuantile = 0.5, positivity = FALSE,
-  smoothingMatrix = NA, smoothingWeight = 0.5, rowWeights = NA,
+  subIterations = 5, gamma = 1e-06, sparsenessQuantile = 0.5,
+  positivity = FALSE, smoothingMatrix = NA, rowWeights = NA,
   repeatedMeasures = NA, verbose = FALSE)
 }
 \arguments{
@@ -20,6 +20,8 @@ in the objective function.}
 
 \item{iterations}{number of gradient descent iterations}
 
+\item{subIterations}{number of gradient descent iterations in sub-algorithm}
+
 \item{gamma}{step size for gradient descent}
 
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
@@ -29,14 +31,14 @@ in the objective function.}
 \item{smoothingMatrix}{a list containing smoothing matrices of the same
 length as x.}
 
-\item{smoothingWeight}{between zero and one, increases smoothing.}
-
 \item{rowWeights}{vectors of weights with size n (assumes diagonal covariance)}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
 
 \item{verbose}{boolean option}
+
+\item{smoothingWeight}{between zero and one, increases smoothing.}
 }
 \value{
 matrix list each of size p by k is output
