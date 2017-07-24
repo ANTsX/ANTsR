@@ -38,8 +38,6 @@ allow estimates of per identifier intercept.}
 \item{LRR}{integer value sets rank for fast version exploiting matrix approximation}
 
 \item{verbose}{boolean option}
-
-\item{smoothingWeight}{between zero and one, increases smoothing.}
 }
 \value{
 matrix of size p by k is output

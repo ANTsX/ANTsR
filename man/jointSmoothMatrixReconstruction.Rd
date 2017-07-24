@@ -37,8 +37,6 @@ length as x.}
 allow estimates of per identifier intercept.}
 
 \item{verbose}{boolean option}
-
-\item{smoothingWeight}{between zero and one, increases smoothing.}
 }
 \value{
 matrix list each of size p by k is output
@@ -64,6 +62,30 @@ x = list( (mat), (mat3 ))
 jj = jointSmoothMatrixReconstruction( x, 2, params,
  gamma = 1e-4, sparsenessQuantile=0.5, iterations=10,
  smoothingMatrix = list(NA,NA), verbose=TRUE )
+
+# latent feature
+mask=getMask( antsImageRead(  getANTsRData( "r16" ) ))
+spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+smoomat = knnSmoothingMatrix( spatmat, k = 27, sigma = 120.0 )
+lfeats = t( replicate(100, rnorm(3)) )
+# map these - via matrix - to observed features
+n = sum( mask )
+ofeats1 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) \%*\% rbind( rnorm(n), rnorm(n),rnorm(n) )
+ofeats2 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) \%*\% rbind( rnorm(n),rnorm(n),rnorm(n) )
+# only half of the matrix contains relevant data
+ofeats1[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+ofeats2[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+x = list( (ofeats1), ( ofeats2 ))
+jj = jointSmoothMatrixReconstruction( x, 2, params,
+  gamma = 0.0001, sparsenessQuantile=0.75, iterations=19,
+  subIterations=11,
+  smoothingMatrix = list(smoomat,smoomat), verbose=TRUE )
+p1 = ofeats2 \%*\% jj$v[[2]]
+p2 = ofeats1  \%*\% jj$v[[1]]
+cor( p1, lfeats )
+cor( p2, lfeats )
+print( cor( rowMeans(ofeats1), lfeats ) )
+print( cor( rowMeans(ofeats2), lfeats ) )
 
 # a 2nd example with 3 modalities
 imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )

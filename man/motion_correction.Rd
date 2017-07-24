@@ -2,13 +2,10 @@
 % Please edit documentation in R/ants_motion_estimation.R
 \name{.motion_correction}
 \alias{.motion_correction}
-\alias{.ants_motion_estimation}
-\title{Simple .motion_correction function.}
+\title{Simple motion_correction function.}
 \usage{
 .motion_correction(img, fixed = NA, moreaccurate = 1, txtype = "Affine",
   verbose = FALSE)
-
-.ants_motion_estimation(img = "")
 }
 \arguments{
 \item{img}{4D antsImage}

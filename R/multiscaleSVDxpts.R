@@ -493,7 +493,6 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' or lesser than 0.5.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
-#' @param smoothingWeight between zero and one, increases smoothing.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
@@ -798,7 +797,6 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' @param positivity restrict to positive solution (beta) weights
 #' @param smoothingMatrix a list containing smoothing matrices of the same
 #' length as x.
-#' @param smoothingWeight between zero and one, increases smoothing.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -821,6 +819,30 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' jj = jointSmoothMatrixReconstruction( x, 2, params,
 #'  gamma = 1e-4, sparsenessQuantile=0.5, iterations=10,
 #'  smoothingMatrix = list(NA,NA), verbose=TRUE )
+#'
+#' # latent feature
+#' mask=getMask( antsImageRead(  getANTsRData( "r16" ) ))
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoomat = knnSmoothingMatrix( spatmat, k = 27, sigma = 120.0 )
+#' lfeats = t( replicate(100, rnorm(3)) )
+#' # map these - via matrix - to observed features
+#' n = sum( mask )
+#' ofeats1 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) %*% rbind( rnorm(n), rnorm(n),rnorm(n) )
+#' ofeats2 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) %*% rbind( rnorm(n),rnorm(n),rnorm(n) )
+#' # only half of the matrix contains relevant data
+#' ofeats1[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+#' ofeats2[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+#' x = list( (ofeats1), ( ofeats2 ))
+#' jj = jointSmoothMatrixReconstruction( x, 2, params,
+#'   gamma = 0.0001, sparsenessQuantile=0.75, iterations=19,
+#'   subIterations=11,
+#'   smoothingMatrix = list(smoomat,smoomat), verbose=TRUE )
+#' p1 = ofeats2 %*% jj$v[[2]]
+#' p2 = ofeats1  %*% jj$v[[1]]
+#' cor( p1, lfeats )
+#' cor( p2, lfeats )
+#' print( cor( rowMeans(ofeats1), lfeats ) )
+#' print( cor( rowMeans(ofeats2), lfeats ) )
 #'
 #' # a 2nd example with 3 modalities
 #' imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
