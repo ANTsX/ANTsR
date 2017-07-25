@@ -493,7 +493,6 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' or lesser than 0.5.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
-#' @param smoothingWeight between zero and one, increases smoothing.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
@@ -538,13 +537,14 @@ smoothMatrixPrediction <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
-  smoothingWeight = 0.5,
+#  smoothingWeight = 0.5,
   repeatedMeasures = NA,
   rowWeights = NA,
   LRR = NA,
   verbose = FALSE
   )
 {
+smoothingWeight = 1.0
 if ( missing( "x") | missing("basisDf") ) {
   message("this function needs input")
   return( NA )
@@ -579,8 +579,9 @@ v = t( mdl$coefficients[-1, ] )
 v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
 if ( !is.na( LRR ) ) {
   u = lowrankRowMatrix( u, LRR )
-  v = t(lowrankRowMatrix( t(v), LRR ))
+  v = t( lowrankRowMatrix( t(v), LRR ) )
   x = icawhiten( x, LRR )
+#  x = lowrankRowMatrix( x, LRR )
   }
 if ( hasweights & is.na( LRR ) ) {
   u = diag( sqrt( rowWeights ) ) %*% u
@@ -721,26 +722,33 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 
 
 
-.xuvtHelper <- function( x, u, v, wt1, smoothingWeight, errs, iterations,
+.xuvtHelper <- function( x, u, v, errs, iterations,
   smoothingMatrix, repeatedMeasures, intercept,
   positivity, gamma, sparsenessQuantile, usubs, verbose ) {
   i = 1
   tu = t( u )
   tuu = t( u ) %*% u
+  if ( is.na( gamma ) ) gamma = 1.e-6
   while ( i <= iterations ) {
-  #  v = as.matrix( smoothingMatrix %*% v )
+    v = as.matrix( smoothingMatrix %*% v )
     dedv = t( tuu %*% t( v ) - tu %*% x )
-    dedv = as.matrix( smoothingMatrix %*% dedv )
     v = v + dedv * gamma
-    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
     for ( vv in 1:ncol( v ) ) {
+#      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
       localv = v[ , vv ]
-      if ( positivity ) {
-        localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T  ) ] = 0
-      } else {
+      if ( positivity & sparsenessQuantile >= 0.5 ) {
+        localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
+        localv[ localv < 0 ] = 0
+      }
+      if ( positivity & sparsenessQuantile < 0.5 ) {
+        localv[ localv > quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
+        localv[ localv > 0 ] = 0
+      }
+      if ( !positivity ) {
         localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
       }
       v[ , vv ] = localv
+#      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
     }
     intercept = rowMeans( x - ( u %*% t(v) ) )
     if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
@@ -751,14 +759,23 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
       }
     err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
     errs[ i ] = err
-    if ( i > 1 )
-      if ( errs[ i ] > errs[ i - 1 ] ) {
-        i=iterations
+    if ( i > 1 ) {
+      if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
+        {
+#        message(paste("flipping sign of gradient step:", gamma))
+        gamma = gamma * ( -1.0 )
+        }
+      else if ( ( errs[ i ] > errs[ i - 1 ] ) )
+        {
+        gamma = gamma * ( 0.5 )
+#        message(paste("reducing gradient step:", gamma))
+        }
+      else if ( abs(gamma) < 1.e-9 ) i = iterations
       }
     i = i + 1
     if ( verbose ) print( paste( i,  err ) )
   }
-  return( list( v = v, intercept = intercept ) )
+  return( list( v = v, intercept = intercept, gamma=gamma*1.1 ) )
 }
 
 
@@ -774,12 +791,12 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' in the objective function.
 #' @param nvecs number of basis vectors to compute
 #' @param iterations number of gradient descent iterations
+#' @param subIterations number of gradient descent iterations in sub-algorithm
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
 #' @param positivity restrict to positive solution (beta) weights
 #' @param smoothingMatrix a list containing smoothing matrices of the same
 #' length as x.
-#' @param smoothingWeight between zero and one, increases smoothing.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -802,6 +819,30 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' jj = jointSmoothMatrixReconstruction( x, 2, params,
 #'  gamma = 1e-4, sparsenessQuantile=0.5, iterations=10,
 #'  smoothingMatrix = list(NA,NA), verbose=TRUE )
+#'
+#' # latent feature
+#' mask=getMask( antsImageRead(  getANTsRData( "r16" ) ))
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoomat = knnSmoothingMatrix( spatmat, k = 27, sigma = 120.0 )
+#' lfeats = t( replicate(100, rnorm(3)) )
+#' # map these - via matrix - to observed features
+#' n = sum( mask )
+#' ofeats1 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) %*% rbind( rnorm(n), rnorm(n),rnorm(n) )
+#' ofeats2 = ( lfeats + rnorm( length(lfeats), 0.0, 1.0 ) ) %*% rbind( rnorm(n),rnorm(n),rnorm(n) )
+#' # only half of the matrix contains relevant data
+#' ofeats1[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+#' ofeats2[,1:round(n/2)] = matrix( rnorm(round(n/2)*100), nrow=100 )
+#' x = list( (ofeats1), ( ofeats2 ))
+#' jj = jointSmoothMatrixReconstruction( x, 2, params,
+#'   gamma = 0.0001, sparsenessQuantile=0.75, iterations=19,
+#'   subIterations=11,
+#'   smoothingMatrix = list(smoomat,smoomat), verbose=TRUE )
+#' p1 = ofeats2 %*% jj$v[[2]]
+#' p2 = ofeats1  %*% jj$v[[1]]
+#' cor( p1, lfeats )
+#' cor( p2, lfeats )
+#' print( cor( rowMeans(ofeats1), lfeats ) )
+#' print( cor( rowMeans(ofeats2), lfeats ) )
 #'
 #' # a 2nd example with 3 modalities
 #' imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
@@ -862,16 +903,18 @@ jointSmoothMatrixReconstruction <- function(
   nvecs,
   parameters,
   iterations = 10,
+  subIterations = 5,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
-  smoothingWeight = 0.5,
   rowWeights = NA,
   repeatedMeasures = NA,
   verbose = FALSE
   )
 {
+  for ( k in 1:length(x) ) x[[ k ]] = x[[ k ]] / max( abs(x[[k]]) )
+  gammas = rep( gamma, nrow( parameters ) )
   ulist = list()
   vlist = list()
   ilist = list()
@@ -928,22 +971,25 @@ while ( k <= iterations ) {
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
       loSmoo = diag( ncol( x[[ m2 ]] ) ) else loSmoo = smoothingMatrix[[ i ]]
     temp = .xuvtHelper( x[[ m2 ]],
-      ulist[[i]], vlist[[i]], 1-smoothingWeight,
-      smoothingWeight=smoothingWeight,
-      errs, iterations=1,
+      ulist[[i]], vlist[[i]],
+      errs, iterations=subIterations,
       smoothingMatrix=loSmoo,
       repeatedMeasures=repeatedMeasures, ilist[[ i ]],
-      positivity=positivity, (-1.0)*gamma * parameters[i,3],
-      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=FALSE )
+      positivity=positivity, gammas[i] * parameters[i,3],
+      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=F )
+    gammas[i] = temp$gamma
     vlist[[ i ]] = temp$v
     ilist[[ i ]] = temp$intercept
     perr[ k, i ] = mean( abs( x[[ m2 ]] - ( ulist[[i]] %*% t( vlist[[i]] ) + ilist[[ i ]]  ) ) )
     }
-    if ( verbose ) print( perr[ k,  ] )
+    if ( verbose ) {
+      print( perr[ k,  ] )
+      print( paste( "overall", mean(perr[k,]) ) )
+      }
     if ( k > 1 ) {
       e1 =  perr[k,]  * parameters[,3]
       e2 =  perr[k-1,]  * parameters[,3]
-      if ( mean( e1 ) > mean( e2 ) ) k = iterations
+      if ( mean( e1 ) > mean( e2 ) ) gammas = gammas * 0.9 # k = iterations
     }
     k = k + 1
   }
