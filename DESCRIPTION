@@ -77,7 +77,7 @@ Suggests:
     xgboost
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
-SystemRequirements: cmake, git, clang (recommended)
+SystemRequirements: cmake, git, clang
 Remotes: stnava/ITKR, stnava/ANTsRCore
 NeedsCompilation: yes
 VignetteBuilder: knitr
