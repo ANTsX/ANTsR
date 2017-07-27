@@ -23,7 +23,7 @@ fi
 
 cd ./src
 # platform-specific Makevars
-echo "myantssource=\${PWD}/ants" > Makevars
+echo "myantssource=\${PWD}/ants/" > Makevars
 # echo "ITK = \`\$(R_HOME)/bin/Rscript -e 'ITKR:::itkIncludes()'\`" >> Makevars
 echo "ITK=${ITKRCMAKE}" >> Makevars
 
