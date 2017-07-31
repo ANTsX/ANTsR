@@ -638,7 +638,7 @@ while ( i <= iterations ) {
       gamma = gamma * ( 0.5 )
       message(paste("reducing gradient step:", gamma))
       }
-    else if ( abs(gamma) < 1.e-9 ) i = iterations
+    if ( abs(gamma) < 1.e-9 ) i = iterations
     }
   i = i + 1
   if ( verbose ) print( paste( i,  err ) )
@@ -937,7 +937,7 @@ jointSmoothMatrixReconstruction <- function(
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
-    basisDf = data.frame( u=rsvd::rsvd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=RSpectra::svds( x[[ m1 ]], k = nvecs, nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept
@@ -965,7 +965,7 @@ while ( k <= iterations ) {
         whichv = pp
       }
     temp = t( vlist[[ whichv ]] )
-    temp = t( temp / rowSums( temp ) )
+    temp = t( temp ) #/ rowSums( temp ) )
     if ( ! is.na( whichv ) )
       ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
@@ -977,7 +977,7 @@ while ( k <= iterations ) {
       repeatedMeasures=repeatedMeasures, ilist[[ i ]],
       positivity=positivity, gammas[i] * parameters[i,3],
       sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=F )
-    gammas[i] = temp$gamma
+#    gammas[i] = temp$gamma * 1.0 # 5
     vlist[[ i ]] = temp$v
     ilist[[ i ]] = temp$intercept
     perr[ k, i ] = mean( abs( x[[ m2 ]] - ( ulist[[i]] %*% t( vlist[[i]] ) + ilist[[ i ]]  ) ) )
@@ -991,7 +991,25 @@ while ( k <= iterations ) {
       e2 =  perr[k-1,]  * parameters[,3]
       if ( mean( e1 ) > mean( e2 ) ) gammas = gammas * 0.9 # k = iterations
     }
+
+    for ( i in 1:nrow( parameters ) ) {
+      m1 = parameters[ i, 1 ]
+      m2 = parameters[ i, 2 ]
+      whichv = NA
+      for ( pp in 1:nrow( parameters ) )
+        {
+        if ( parameters[pp,2] == m1 & parameters[pp,1] == m2  )
+          whichv = pp
+        }
+      temp = t( vlist[[ whichv ]] )
+      temp = t( temp / rowSums( temp ) )
+      if ( ! is.na( whichv ) )
+        ulist[[ i ]] =  svd( x[[ m1 ]] %*% ( temp  ) )$u
+      }
+
     k = k + 1
   }
+
+
   return( list( u=ulist, v=vlist, intercepts=ilist ) )
 }
