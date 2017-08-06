@@ -937,7 +937,7 @@ jointSmoothMatrixReconstruction <- function(
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
-    basisDf = data.frame( u=RSpectra::svds( x[[ m1 ]], k = nvecs, nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept

@@ -72,6 +72,12 @@ for ( i in 1:n )
   if ( pcaOption == "randPCA" ) {
     if ( ! usePkg( "rsvd" ) ) stop("please install rsvd")
     vpca = rsvd::rsvd( cx, k )
+    } else if ( pcaOption == "rrPCAL" ) {
+    vpca = rsvd::rrpca( cx, k=k  )
+    vpca = list( d=NA,  u = cx %*% t(vpca$L), v=t( vpca$L ) )
+    } else if ( pcaOption == "rrPCAS" ) {
+    vpca = rsvd::rrpca( cx, k=k  )
+    vpca = list( d=NA,  u = cx %*% t(vpca$S), v=t( vpca$S ) )
     } else if ( pcaOption == "kPCA" ) {
       kpcaopt = 'cov'
       if ( ! is.na( sigma ) ) kpcaopt = 'gaussian'
@@ -88,8 +94,7 @@ for ( i in 1:n )
     } else if ( pcaOption == "fastICA" ) {
       if ( ! usePkg( "fastICA" ) ) stop("please install fastICA")
       tempica = fastICA::fastICA( t( cx ), k )
-      vpca = list( d=NA,  u=NA,
-        v=( tempica$S ) )
+      vpca = list( d=NA,  u = cx %*% tempica$S, v=( tempica$S ) )
     } else if ( pcaOption == "eanat" ) {
       # FIXME - implement mask for regularization
       # need to bind mask in proper order to make
@@ -113,10 +118,6 @@ for ( i in 1:n )
   if ( !verbose ) { rm( vecmat ); vecmat=NA }
   if ( verbose ) {
     print( paste( "convert back to multichannel" ) )
-#    print( dim( vpca$v ) )
-#    print( dim(mask) )
-#    print( sum( mask ) )
-#    print( k )
     }
   # now convert the vectors back to warps
   pcaWarps = list( )
