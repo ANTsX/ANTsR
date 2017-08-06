@@ -91,6 +91,7 @@ for ( i in 1:n )
         tempdistmat = sparseDistanceMatrixXY( cy, cx, pcak, kmetric=kpcaopt, sigma=sigma )
         }
       vpca = irlba::irlba( tempdistmat, nu=k, nv=k )
+      vpca$u = cx %*% vpca$v
     } else if ( pcaOption == "fastICA" ) {
       if ( ! usePkg( "fastICA" ) ) stop("please install fastICA")
       tempica = fastICA::fastICA( t( cx ), k )
