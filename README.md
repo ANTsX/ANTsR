@@ -100,26 +100,14 @@ You can gain additional functionality by installing packages that
 are listed in the [`DESCRIPTION` file](https://github.com/stnava/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
 A complete list of recommended ancillary packages [here](https://github.com/stnava/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality).
 
-**Method 1: [drat](https://github.com/cran/drat)**
-See full instructions [here](https://github.com/ANTs-R/drat) but briefly:
-```
-install.packages("drat")
-drat::addRepo("ANTs-R")
-install.packages("ANTsR")
-```
-Thanks to [zarquon42b](https://github.com/zarquon42b).
-
-
-**Method 2: with devtools in R**
+**Method 1: with devtools in R**
 ```
 library( devtools )
 # install_github("stnava/cmaker") # if you do not have cmake
-install_github("stnava/ITKR")
-install_github("stnava/ANTsRCore")
 install_github("stnava/ANTsR")
 ```
 
-**Method 3: from command line (most traditional method)**
+**Method 2: from command line (most traditional method)**
 
 Assumes git, cmake and compilers are available in your environment (as above).
 
@@ -138,6 +126,20 @@ $ R CMD INSTALL ANTsR
 ```
 
 The [`travis.yml` file](https://github.com/stnava/ANTsR/blob/master/.travis.yml) also shows a way to install from Linux command line.
+
+
+**Method 3: from binaries**
+
+Note that version numbers will change over time.
+
+```
+wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
+R CMD INSTALL ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
+wget https://github.com/stnava/ANTsRCore/releases/download/v0.4.2.1/ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
+R CMD INSTALL ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
+wget https://github.com/stnava/ANTsR/releases/download/latest/ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
+R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
+```
 
 ## Usage
 Load the package:
@@ -171,13 +173,12 @@ print(max(img))
 
 **Index an image with a label**
 ```
-gaussimg<-array( data=rnorm(125), dim=c(5,5,5))
 arrayimg<-array( data=(1:125), dim=c(5,5,5))
 img<-as.antsImage( arrayimg )
 print( max(img) )
 print( mean(img[ img > 50  ]))
 print( max(img[ img >= 50 & img <= 99  ]))
-print( mean( gaussimg[ img >= 50 & img <= 99  ]) )
+print( mean( img[ img >= 50 & img <= 99  ]) )
 ```
 
 **Convert a 4D image to a matrix**
@@ -187,9 +188,7 @@ gaussimg<-as.antsImage(gaussimg)
 print(dim(gaussimg))
 mask<-getAverageOfTimeSeries( gaussimg )
 voxelselect <- mask < 0
-mask[ voxelselect  ]<-0
-mask[ !voxelselect  ]<-1
-gmat<-timeseries2matrix( gaussimg, mask )
+gmat<-timeseries2matrix( gaussimg, voxelselect )
 print(dim(gmat))
 ```
 
