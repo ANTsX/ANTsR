@@ -141,6 +141,23 @@ wget https://github.com/stnava/ANTsR/releases/download/latest/ANTsR_0.6_R_x86_64
 R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
 ```
 
+
+**Method 4: platform independent via docker and kitematic**
+
+This is a beta operation that is in flux but may be convenient for some users.
+
+* create a docker username
+
+* download and install kitematic
+
+* login to kitematic with your docker username
+
+* search for `stnava/antsr` in the kitematic repository search bar
+
+* create a new container from `stnava/antsr`
+
+* execute the container
+
 ## Usage
 Load the package:
 ```
