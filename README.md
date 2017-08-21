@@ -152,9 +152,9 @@ This is a beta operation that is in flux but may be convenient for some users.
 
 * login to kitematic with your docker username
 
-* search for `stnava antsr` in the kitematic repository search bar
+* search for `antsr` in the kitematic repository search bar
 
-* create a new container from `stnava antsr`
+* create a new container from the `stnava` version of `antsr`
 
 * start the container
 
