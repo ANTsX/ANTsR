@@ -161,6 +161,9 @@ This is a beta operation that is in flux but may be convenient for some users.
 * type the "access url" address into a browser to run rstudio with antsr.
 it should be something like `http://192.168.99.100:32989/`
 
+* you can also add your home folders to the container instance by adjusting
+the "volumes" option under the settings tab.  then you can access local data.
+
 ## Usage
 Load the package:
 ```
