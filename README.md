@@ -146,6 +146,8 @@ R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
 
 This is a beta operation that is in flux but may be convenient for some users.
 
+* based on [this approach](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image)
+
 * create a docker username
 
 * download and install kitematic
