@@ -152,11 +152,14 @@ This is a beta operation that is in flux but may be convenient for some users.
 
 * login to kitematic with your docker username
 
-* search for `stnava/antsr` in the kitematic repository search bar
+* search for `stnava antsr` in the kitematic repository search bar
 
-* create a new container from `stnava/antsr`
+* create a new container from `stnava antsr`
 
-* execute the container
+* start the container
+
+* type the "access url" address into a browser to run rstudio with antsr.
+it should be something like `http://192.168.99.100:32989/`
 
 ## Usage
 Load the package:
