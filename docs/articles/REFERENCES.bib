@@ -1,0 +1,1708 @@
+% This file was created with JabRef 2.9.2.
+% Encoding: UTF8
+
+@ARTICLE{Avants2012,
+  author = {Avants, Brian and Dhillon, Paramveer and Kandel, Benjamin M. and
+	Cook, Philip A. and McMillan, Corey T. and Grossman, Murray and Gee,
+	James C.},
+  title = {Eigenanatomy improves detection power for longitudinal cortical change.},
+  journal = {Med Image Comput Comput Assist Interv},
+  year = {2012},
+  volume = {15},
+  pages = {206--213},
+  number = {Pt 3},
+  abstract = {We contribute a novel and interpretable dimensionality reduction strategy,
+	eigenanatomy, that is tuned for neuroimaging data. The method approximates
+	the eigendecomposition of an image set with basis functions (the
+	eigenanatomy vectors) that are sparse, unsigned and are anatomically
+	clustered. We employ the eigenanatomy vectors as anatomical predictors
+	to improve detection power in morphometry. Standard voxel-based morphometry
+	(VBM) analyzes imaging data voxel-by-voxel--and follows this with
+	cluster-based or voxel-wise multiple comparisons correction methods
+	to determine significance. Eigenanatomy reverses the standard order
+	of operations by first clustering the voxel data and then using standard
+	linear regression in this reduced dimensionality space. As with traditional
+	region-of-interest (ROI) analysis, this strategy can greatly improve
+	detection power. Our results show that eigenanatomy provides a principled
+	objective function that leads to localized, data-driven regions of
+	interest. These regions improve our ability to quantify biologically
+	plausible rates of cortical change in two distinct forms of neurodegeneration.
+	We detail the algorithm and show experimental evidence of its efficacy.},
+  institution = {Department of Radiology, University of Pennsylvania, Philadelphia,
+	PA 19104, USA.},
+  keywords = {Aging, physiology; Algorithms; Brain, anatomy /&/ histology/physiology;
+	Humans; Image Enhancement, methods; Image Interpretation, Computer-Assisted,
+	methods; Information Storage and Retrieval, methods; Longitudinal
+	Studies; Magnetic Resonance Imaging, methods; Pattern Recognition,
+	Automated, methods; Reproducibility of Results; Sensitivity and Specificity},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {23286132},
+  timestamp = {2014.06.29}
+}
+
+@ARTICLE{Avants2014,
+  author = {Avants, Brian B. and Libon, David J. and Rascovsky, Katya and Boller,
+	Ashley and McMillan, Corey T. and Massimo, Lauren and Coslett, H
+	Branch and Chatterjee, Anjan and Gross, Rachel G. and Grossman, Murray},
+  title = {Sparse canonical correlation analysis relates network-level atrophy
+	to multivariate cognitive measures in a neurodegenerative population.},
+  journal = {Neuroimage},
+  year = {2014},
+  volume = {84},
+  pages = {698--711},
+  month = {Jan},
+  abstract = {This study establishes that sparse canonical correlation analysis
+	(SCCAN) identifies generalizable, structural MRI-derived cortical
+	networks that relate to five distinct categories of cognition. We
+	obtain multivariate psychometrics from the domain-specific sub-scales
+	of the Philadelphia Brief Assessment of Cognition (PBAC). By using
+	a training and separate testing stage, we find that PBAC-defined
+	cognitive domains of language, visuospatial functioning, episodic
+	memory, executive control, and social functioning correlate with
+	unique and distributed areas of gray matter (GM). In contrast, a
+	parallel univariate framework fails to identify, from the training
+	data, regions that are also significant in the left-out test dataset.
+	The cohort includes164 patients with Alzheimer's disease, behavioral-variant
+	frontotemporal dementia, semantic variant primary progressive aphasia,
+	non-fluent/agrammatic primary progressive aphasia, or corticobasal
+	syndrome. The analysis is implemented with open-source software for
+	which we provide examples in the text. In conclusion, we show that
+	multivariate techniques identify biologically-plausible brain regions
+	supporting specific cognitive domains. The findings are identified
+	in training data and confirmed in test data.},
+  doi = {10.1016/j.neuroimage.2013.09.048},
+  institution = {Department of Radiology, University of Pennsylvania School of Medicine,
+	Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(13)00984-1},
+  pmid = {24096125},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2013.09.048}
+}
+
+@ARTICLE{Avants2011a,
+  author = {Avants, Brian B. and Tustison, Nicholas J. and Song, Gang and Cook,
+	Philip A. and Klein, Arno and Gee, James C.},
+  title = {A reproducible evaluation of ANTs similarity metric performance in
+	brain image registration.},
+  journal = {Neuroimage},
+  year = {2011},
+  volume = {54},
+  pages = {2033--2044},
+  number = {3},
+  month = {Feb},
+  abstract = {The United States National Institutes of Health (NIH) commit significant
+	support to open-source data and software resources in order to foment
+	reproducibility in the biomedical imaging sciences. Here, we report
+	and evaluate a recent product of this commitment: Advanced Neuroimaging
+	Tools (ANTs), which is approaching its 2.0 release. The ANTs open
+	source software library consists of a suite of state-of-the-art image
+	registration, segmentation and template building tools for quantitative
+	morphometric analysis. In this work, we use ANTs to quantify, for
+	the first time, the impact of similarity metrics on the affine and
+	deformable components of a template-based normalization study. We
+	detail the ANTs implementation of three similarity metrics: squared
+	intensity difference, a new and faster cross-correlation, and voxel-wise
+	mutual information. We then use two-fold cross-validation to compare
+	their performance on openly available, manually labeled, T1-weighted
+	MRI brain image data of 40 subjects (UCLA's LPBA40 dataset). We report
+	evaluation results on cortical and whole brain labels for both the
+	affine and deformable components of the registration. Results indicate
+	that the best ANTs methods are competitive with existing brain extraction
+	results (Jaccard=0.958) and cortical labeling approaches. Mutual
+	information affine mapping combined with cross-correlation diffeomorphic
+	mapping gave the best cortical labeling results (Jaccard=0.669±0.022).
+	Furthermore, our two-fold cross-validation allows us to quantify
+	the similarity of templates derived from different subgroups. Our
+	open code, data and evaluation scripts set performance benchmark
+	parameters for this state-of-the-art toolkit. This is the first study
+	to use a consistent transformation framework to provide a reproducible
+	evaluation of the isolated effect of the similarity metric on optimal
+	template construction and brain labeling.},
+  doi = {10.1016/j.neuroimage.2010.09.025},
+  institution = {Penn Image Computing and Science Laboratory, University of Pennsylvania,
+	Philadelphia, PA 19104, USA. avants@grasp.cis.upenn.edu},
+  keywords = {Algorithms; Brain, anatomy /&/ histology; Databases, Factual; Diagnostic
+	Imaging, methods; Head, anatomy /&/ histology; Humans; Image Processing,
+	Computer-Assisted, methods; Linear Models; Models, Anatomic; Models,
+	Neurological; Population; Reproducibility of Results; Software},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(10)01206-1},
+  pmid = {20851191},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2010.09.025}
+}
+
+@ARTICLE{Avants2014a,
+  author = {Avants, Brian B. and Tustison, Nicholas J. and Stauffer, Michael
+	and Song, Gang and Wu, Baohua and Gee, James C.},
+  title = {The Insight ToolKit image registration framework.},
+  journal = {Front Neuroinform},
+  year = {2014},
+  volume = {8},
+  pages = {44},
+  abstract = {Publicly available scientific resources help establish evaluation
+	standards, provide a platform for teaching and improve reproducibility.
+	Version 4 of the Insight ToolKit (ITK(4)) seeks to establish new
+	standards in publicly available image registration methodology. ITK(4)
+	makes several advances in comparison to previous versions of ITK.
+	ITK(4) supports both multivariate images and objective functions;
+	it also unifies high-dimensional (deformation field) and low-dimensional
+	(affine) transformations with metrics that are reusable across transform
+	types and with composite transforms that allow arbitrary series of
+	geometric mappings to be chained together seamlessly. Metrics and
+	optimizers take advantage of multi-core resources, when available.
+	Furthermore, ITK(4) reduces the parameter optimization burden via
+	principled heuristics that automatically set scaling across disparate
+	parameter types (rotations vs. translations). A related approach
+	also constrains steps sizes for gradient-based optimizers. The result
+	is that tuning for different metrics and/or image pairs is rarely
+	necessary allowing the researcher to more easily focus on design/comparison
+	of registration strategies. In total, the ITK(4) contribution is
+	intended as a structure to support reproducible research practices,
+	will provide a more extensive foundation against which to evaluate
+	new work in image registration and also enable application level
+	programmers a broad suite of tools on which to build. Finally, we
+	contextualize this work with a reference registration evaluation
+	study with application to pediatric brain labeling.},
+  doi = {10.3389/fninf.2014.00044},
+  institution = {Penn Image Computing and Science Laboratory, Department of Radiology,
+	University of Pennsylvania Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pmid = {24817849},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.3389/fninf.2014.00044}
+}
+
+@ARTICLE{Avants2011,
+  author = {Avants, Brian B. and Tustison, Nicholas J. and Wu, Jue and Cook,
+	Philip A. and Gee, James C.},
+  title = {An open source multivariate framework for n-tissue segmentation with
+	evaluation on public data.},
+  journal = {Neuroinformatics},
+  year = {2011},
+  volume = {9},
+  pages = {381--400},
+  number = {4},
+  month = {Dec},
+  abstract = {We introduce Atropos, an ITK-based multivariate n-class open source
+	segmentation algorithm distributed with ANTs ( http://www.picsl.upenn.edu/ANTs).
+	The Bayesian formulation of the segmentation problem is solved using
+	the Expectation Maximization (EM) algorithm with the modeling of
+	the class intensities based on either parametric or non-parametric
+	finite mixtures. Atropos is capable of incorporating spatial prior
+	probability maps (sparse), prior label maps and/or Markov Random
+	Field (MRF) modeling. Atropos has also been efficiently implemented
+	to handle large quantities of possible labelings (in the experimental
+	section, we use up to 69 classes) with a minimal memory footprint.
+	This work describes the technical and implementation aspects of Atropos
+	and evaluates its performance on two different ground-truth datasets.
+	First, we use the BrainWeb dataset from Montreal Neurological Institute
+	to evaluate three-tissue segmentation performance via (1) K-means
+	segmentation without use of template data; (2) MRF segmentation with
+	initialization by prior probability maps derived from a group template;
+	(3) Prior-based segmentation with use of spatial prior probability
+	maps derived from a group template. We also evaluate Atropos performance
+	by using spatial priors to drive a 69-class EM segmentation problem
+	derived from the Hammers atlas from University College London. These
+	evaluation studies, combined with illustrative examples that exercise
+	Atropos options, demonstrate both performance and wide applicability
+	of this new platform-independent open source segmentation tool.},
+  doi = {10.1007/s12021-011-9109-y},
+  institution = {Penn Image Computing and Science Laboratory, University of Pennsylvania,
+	3600 Market Street, Suite 370, Philadelphia, PA 19104, USA. stnava@gmail.com},
+  keywords = {Access to Information; Algorithms; Bayes Theorem; Databases, Factual,
+	standards; Humans; Image Processing, Computer-Assisted, methods;
+	Internet, standards; Magnetic Resonance Imaging, methods; Models,
+	Statistical; Pattern Recognition, Automated, methods; Software, standards},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {21373993},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.1007/s12021-011-9109-y}
+}
+
+@ARTICLE{Avants2010,
+  author = {Avants, Brian B. and Yushkevich, Paul and Pluta, John and Minkoff,
+	David and Korczykowski, Marc and Detre, John and Gee, James C.},
+  title = {The optimal template effect in hippocampus studies of diseased populations.},
+  journal = {Neuroimage},
+  year = {2010},
+  volume = {49},
+  pages = {2457--2466},
+  number = {3},
+  month = {Feb},
+  abstract = {We evaluate the impact of template choice on template-based segmentation
+	of the hippocampus in epilepsy. Four dataset-specific strategies
+	are quantitatively contrasted: the "closest to average" individual
+	template, the average shape version of the closest to average template,
+	a best appearance template and the best appearance and shape template
+	proposed here and implemented in the open source toolkit Advanced
+	Normalization Tools (ANTS). The cross-correlation similarity metric
+	drives the correspondence model and is used consistently to determine
+	the optimal appearance. Minimum shape distance in the diffeomorphic
+	space determines optimal shape. Our evaluation results show that,
+	with respect to gold-standard manual labeling of hippocampi in epilepsy,
+	optimal shape and appearance template construction outperforms the
+	other strategies for gaining data-derived templates. Our results
+	also show the improvement is most significant on the diseased side
+	and insignificant on the healthy side. Thus, the importance of the
+	template increases when used to study pathology and may be less critical
+	for normal control studies. Furthermore, explicit geometric optimization
+	of the shape component of the unbiased template positively impacts
+	the study of diseased hippocampi.},
+  doi = {10.1016/j.neuroimage.2009.09.062},
+  institution = {Department of Radiology, University of Pennsylvania, Philadelphia,
+	PA 19104, USA. avants@grasp.cis.upenn.edu},
+  keywords = {Algorithms; Atlases as Topic; Epilepsy, pathology; Hippocampus, pathology;
+	Humans; Image Interpretation, Computer-Assisted},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(09)01061-1},
+  pmid = {19818860},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2009.09.062}
+}
+
+@ARTICLE{Avants2015,
+  author = {Avants, Brian B. et al.},
+  title = {The pediatric template of brain perfusion},
+  journal = {Sci. Data},
+  year = {2015}
+}
+
+@ARTICLE{Basser2000,
+  author = {Basser, P. J. and Pajevic, S. and Pierpaoli, C. and Duda, J. and
+	Aldroubi, A.},
+  title = {In vivo fiber tractography using DT-MRI data.},
+  journal = {Magn Reson Med},
+  year = {2000},
+  volume = {44},
+  pages = {625--632},
+  number = {4},
+  month = {Oct},
+  __markedentry = {[jtduda:6]},
+  abstract = {Fiber tract trajectories in coherently organized brain white matter
+	pathways were computed from in vivo diffusion tensor magnetic resonance
+	imaging (DT-MRI) data. First, a continuous diffusion tensor field
+	is constructed from this discrete, noisy, measured DT-MRI data. Then
+	a Frenet equation, describing the evolution of a fiber tract, was
+	solved. This approach was validated using synthesized, noisy DT-MRI
+	data. Corpus callosum and pyramidal tract trajectories were constructed
+	and found to be consistent with known anatomy. The method's reliability,
+	however, degrades where the distribution of fiber tract directions
+	is nonuniform. Moreover, background noise in diffusion-weighted MRIs
+	can cause a computed trajectory to hop from tract to tract. Still,
+	this method can provide quantitative information with which to visualize
+	and study connectivity and continuity of neural pathways in the central
+	and peripheral nervous systems in vivo, and holds promise for elucidating
+	architectural features in other fibrous tissues and ordered media.},
+  institution = {Section on Tissue Biophysics and Biomimetics, NICHD, Bethesda, Maryland
+	20892-5772, USA. pjbasser@helix.nih.gov},
+  keywords = {Artifacts; Brain, anatomy /&/ histology; Humans; Image Processing,
+	Computer-Assisted; Magnetic Resonance Imaging, methods; Nerve Fibers},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {jtduda},
+  pii = {3.0.CO;2-O},
+  pmid = {11025519},
+  timestamp = {2015.07.02}
+}
+
+@ARTICLE{Behzadi2007,
+  author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas
+	T.},
+  title = {A component based noise correction method (CompCor) for BOLD and
+	perfusion based fMRI.},
+  journal = {Neuroimage},
+  year = {2007},
+  volume = {37},
+  pages = {90--101},
+  number = {1},
+  month = {Aug},
+  abstract = {A component based method (CompCor) for the reduction of noise in both
+	blood oxygenation level-dependent (BOLD) and perfusion-based functional
+	magnetic resonance imaging (fMRI) data is presented. In the proposed
+	method, significant principal components are derived from noise regions-of-interest
+	(ROI) in which the time series data are unlikely to be modulated
+	by neural activity. These components are then included as nuisance
+	parameters within general linear models for BOLD and perfusion-based
+	fMRI time series data. Two approaches for the determination of the
+	noise ROI are considered. The first method uses high-resolution anatomical
+	data to define a region of interest composed primarily of white matter
+	and cerebrospinal fluid, while the second method defines a region
+	based upon the temporal standard deviation of the time series data.
+	With the application of CompCor, the temporal standard deviation
+	of resting-state perfusion and BOLD data in gray matter regions was
+	significantly reduced as compared to either no correction or the
+	application of a previously described retrospective image based correction
+	scheme (RETROICOR). For both functional perfusion and BOLD data,
+	the application of CompCor significantly increased the number of
+	activated voxels as compared to no correction. In addition, for functional
+	BOLD data, there were significantly more activated voxels detected
+	with CompCor as compared to RETROICOR. In comparison to RETROICOR,
+	CompCor has the advantage of not requiring external monitoring of
+	physiological fluctuations.},
+  doi = {10.1016/j.neuroimage.2007.04.042},
+  institution = {UCSD Center for Functional Magnetic Resonance Imaging and Department
+	of Radiology, 9500 Gilman Drive, MC 0677, La Jolla, CA 92093-0677,
+	USA.},
+  keywords = {Adult; Algorithms; Artifacts; Cerebral Cortex, blood supply/physiology;
+	Energy Metabolism, physiology; Fourier Analysis; Humans; Image Enhancement,
+	methods; Image Processing, Computer-Assisted, methods; Linear Models;
+	Magnetic Resonance Imaging, methods; Oxygen, blood; Photic Stimulation;
+	Principal Component Analysis; Regional Blood Flow, physiology; Software;
+	Visual Perception, physiology},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(07)00383-7},
+  pmid = {17560126},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2007.04.042}
+}
+
+@ARTICLE{Cook2014,
+  author = {Cook, Philip A. and McMillan, Corey T. and Avants, Brian B. and Peelle,
+	Jonathan E. and Gee, James C. and Grossman, Murray},
+  title = {Relating brain anatomy and cognitive ability using a multivariate
+	multimodal framework.},
+  journal = {Neuroimage},
+  year = {2014},
+  month = {May},
+  abstract = {Linking structural neuroimaging data from multiple modalities to cognitive
+	performance is an important challenge for cognitive neuroscience.
+	In this study we examined the relationship between verbal fluency
+	performance and neuroanatomy in 54 patients with frontotemporal degeneration
+	(FTD) and 15 age-matched controls, all of whom had T1- and diffusion-weighted
+	imaging. Our goal was to incorporate measures of both gray matter
+	(voxel-based cortical thickness) and white matter (fractional anisotropy)
+	into a single statistical model that relates to behavioral performance.
+	We first used eigenanatomy to define data-driven regions of interest
+	(DD-ROIs) for both gray matter and white matter. Eigenanatomy is
+	a multivariate dimensionality reduction approach that identifies
+	spatially smooth, unsigned principal components that explain the
+	maximal amount of variance across subjects. We then used a statistical
+	model selection procedure to see which of these DD-ROIs best modeled
+	performance on verbal fluency tasks hypothesized to rely on distinct
+	components of a large-scale neural network that support language:
+	category fluency requires a semantic-guided search and is hypothesized
+	to rely primarily on temporal cortices that support lexical-semantic
+	representations; letter-guided fluency requires a strategic mental
+	search and is hypothesized to require executive resources to support
+	a more demanding search process, which depends on prefrontal cortex
+	in addition to temporal network components that support lexical representations.
+	We observed that both types of verbal fluency performance are best
+	described by a network that includes a combination of gray matter
+	and white matter. For category fluency, the identified regions included
+	bilateral temporal cortex and a white matter region including left
+	inferior longitudinal fasciculus and frontal-occipital fasciculus.
+	For letter fluency, a left temporal lobe region was also selected,
+	and also regions of frontal cortex. These results are consistent
+	with our hypothesized neuroanatomical models of language processing
+	and its breakdown in FTD. We conclude that clustering the data with
+	eigenanatomy before performing linear regression is a promising tool
+	for multimodal data analysis.},
+  doi = {10.1016/j.neuroimage.2014.05.008},
+  institution = {Penn Frontotemporal Degeneration Center, Department of Neurology,
+	Perelman School of Medicine, University of Pennsylvania, Philadelphia,
+	PA 19104, USA.},
+  language = {eng},
+  medline-pst = {aheadofprint},
+  owner = {stnava},
+  pii = {S1053-8119(14)00373-5},
+  pmid = {24830834},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2014.05.008}
+}
+
+@ARTICLE{Danielsson1980,
+  author = {Danielsson, P.},
+  title = {Euclidean distance mapping},
+  journal = {Computer Graphics and Image Processing},
+  year = {1980},
+  volume = {14},
+  pages = {227-248},
+  owner = {jtduda},
+  timestamp = {2015.06.04}
+}
+
+@ARTICLE{deMarvao2014,
+  author = {{de Marvao}, Antonio and Dawes, Timothy J W. and Shi, Wenzhe and
+	Minas, Christopher and Keenan, Niall G. and Diamond, Tamara and Durighel,
+	Giuliana and Montana, Giovanni and Rueckert, Daniel and Cook, Stuart
+	A. and O'Regan, Declan P.},
+  title = {Population-based studies of myocardial hypertrophy: high resolution
+	cardiovascular magnetic resonance atlases improve statistical power.},
+  journal = {J Cardiovasc Magn Reson},
+  year = {2014},
+  volume = {16},
+  pages = {16},
+  abstract = {Cardiac phenotypes, such as left ventricular (LV) mass, demonstrate
+	high heritability although most genes associated with these complex
+	traits remain unidentified. Genome-wide association studies (GWAS)
+	have relied on conventional 2D cardiovascular magnetic resonance
+	(CMR) as the gold-standard for phenotyping. However this technique
+	is insensitive to the regional variations in wall thickness which
+	are often associated with left ventricular hypertrophy and require
+	large cohorts to reach significance. Here we test whether automated
+	cardiac phenotyping using high spatial resolution CMR atlases can
+	achieve improved precision for mapping wall thickness in healthy
+	populations and whether smaller sample sizes are required compared
+	to conventional methods.LV short-axis cine images were acquired in
+	138 healthy volunteers using standard 2D imaging and 3D high spatial
+	resolution CMR. A multi-atlas technique was used to segment and co-register
+	each image. The agreement between methods for end-diastolic volume
+	and mass was made using Bland-Altman analysis in 20 subjects. The
+	3D and 2D segmentations of the LV were compared to manual labeling
+	by the proportion of concordant voxels (Dice coefficient) and the
+	distances separating corresponding points. Parametric and nonparametric
+	data were analysed with paired t-tests and Wilcoxon signed-rank test
+	respectively. Voxelwise power calculations used the interstudy variances
+	of wall thickness.The 3D volumetric measurements showed no bias compared
+	to 2D imaging. The segmented 3D images were more accurate than 2D
+	images for defining the epicardium (Dice: 0.95 vs 0.93, P<0.001;
+	mean error 1.3 mm vs 2.2 mm, P<0.001) and endocardium (Dice 0.95
+	vs 0.93, P<0.001; mean error 1.1 mm vs 2.0 mm, P<0.001). The 3D technique
+	resulted in significant differences in wall thickness assessment
+	at the base, septum and apex of the LV compared to 2D (P<0.001).
+	Fewer subjects were required for 3D imaging to detect a 1 mm difference
+	in wall thickness (72 vs 56, P<0.001).High spatial resolution CMR
+	with automated phenotyping provides greater power for mapping wall
+	thickness than conventional 2D imaging and enables a reduction in
+	the sample size required for studies of environmental and genetic
+	determinants of LV wall thickness.},
+  doi = {10.1186/1532-429X-16-16},
+  institution = {th Hospital Campus, Du Cane Road, London W12 0NN, UK. antonio.de-marvao10@imperial.ac.uk.},
+  keywords = {Adult; Atlases as Topic; Feasibility Studies; Female; Genetic Predisposition
+	to Disease; Heart Ventricles, anatomy /&/ histology; Humans; Hypertrophy,
+	Left Ventricular, genetics/pathology/physiopathology; Image Interpretation,
+	Computer-Assisted; Imaging, Three-Dimensional; Magnetic Resonance
+	Imaging, Cine; Male; Phenotype; Predictive Value of Tests; Prospective
+	Studies; Reference Values; Ventricular Function, Left; Young Adult},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pii = {1532-429X-16-16},
+  pmid = {24490638},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1186/1532-429X-16-16}
+}
+
+@ARTICLE{Dhillon2014,
+  author = {Dhillon, Paramveer S. and Wolk, David A. and Das, Sandhitsu R. and
+	Ungar, Lyle H. and Gee, James C. and Avants, Brian B.},
+  title = {Subject-specific functional parcellation via Prior Based Eigenanatomy.},
+  journal = {Neuroimage},
+  year = {2014},
+  month = {May},
+  abstract = {We present a new framework for prior-constrained sparse decomposition
+	of matrices derived from the neuroimaging data and apply this method
+	to functional network analysis of a clinically relevant population.
+	Matrix decomposition methods are powerful dimensionality reduction
+	tools that have found widespread use in neuroimaging. However, the
+	unconstrained nature of these totally data-driven techniques makes
+	it difficult to interpret the results in a domain where network-specific
+	hypotheses may exist. We propose a novel approach, Prior Based Eigenanatomy
+	(p-Eigen), which seeks to identify a data-driven matrix decomposition
+	but at the same time constrains the individual components by spatial
+	anatomical priors (probabilistic ROIs). We formulate our novel solution
+	in terms of prior-constrained ℓ1 penalized (sparse) principal component
+	analysis. p-Eigen starts with a common functional parcellation for
+	all the subjects and refines it with subject-specific information.
+	This enables modeling of the inter-subject variability in the functional
+	parcel boundaries and allows us to construct subject-specific networks
+	with reduced sensitivity to ROI placement. We show that while still
+	maintaining correspondence across subjects, p-Eigen extracts biologically-relevant
+	and patient-specific functional parcels that facilitate hypothesis-driven
+	network analysis. We construct default mode network (DMN) connectivity
+	graphs using p-Eigen refined ROIs and use them in a classification
+	paradigm. Our results show that the functional connectivity graphs
+	derived from p-Eigen significantly aid classification of mild cognitive
+	impairment (MCI) as well as the prediction of scores in a Delayed
+	Recall memory task when compared to graph metrics derived from 1)
+	standard registration-based seed ROI definitions, 2) totally data-driven
+	ROIs, 3) a model based on standard demographics plus hippocampal
+	volume as covariates, and 4) Ward Clustering based data-driven ROIs.
+	In summary, p-Eigen incarnates a new class of prior-constrained dimensionality
+	reduction tools that may improve our understanding of the relationship
+	between MCI and functional connectivity.},
+  doi = {10.1016/j.neuroimage.2014.05.026},
+  institution = {Penn Image Computing and Science Laboratory (PICSL), Department of
+	Radiology, University of Pennsylvania, Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {aheadofprint},
+  owner = {stnava},
+  pii = {S1053-8119(14)00391-7},
+  pmid = {24852460},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2014.05.026}
+}
+
+@BOOK{dirksbook,
+  title = {Seamless {R} and {C++} Integration with {Rcpp}},
+  publisher = {Springer},
+  year = {2013},
+  author = {Dirk Eddelbuettel},
+  address = {New York},
+  note = {ISBN 978-1-4614-6867-7}
+}
+
+@ARTICLE{French1947,
+  author = {French, N. R. and Steinberg, J. C.},
+  title = {Factors Governing the Intelligibility of Speech Sounds},
+  journal = {The Journal of the Acoustical Society of America},
+  year = {1947},
+  volume = {19},
+  pages = {90-119},
+  number = {1},
+  doi = {http://dx.doi.org/10.1121/1.1916407},
+  url = {http://scitation.aip.org/content/asa/journal/jasa/19/1/10.1121/1.1916407}
+}
+
+@ARTICLE{Johnson2010,
+  author = {Johnson, G Allan and Badea, Alexandra and Brandenburg, Jeffrey and
+	Cofer, Gary and Fubara, Boma and Liu, Song and Nissanov, Jonathan},
+  title = {Waxholm space: an image-based reference for coordinating mouse brain
+	research.},
+  journal = {Neuroimage},
+  year = {2010},
+  volume = {53},
+  pages = {365--372},
+  number = {2},
+  month = {Nov},
+  abstract = {We describe an atlas of the C57BL/6 mouse brain based on MRI and conventional
+	Nissl histology. Magnetic resonance microscopy was performed on a
+	total of 14 specimens that were actively stained to enhance tissue
+	contrast. Images were acquired with three different MR protocols
+	yielding contrast dependent on spin lattice relaxation (T1), spin
+	spin relaxation (T2), and magnetic susceptibility (T2*). Spatial
+	resolution was 21.5 mum (isotropic). Conventional histology (Nissl)
+	was performed on a limited set of these same specimens and the Nissl
+	images were registered (3D-to-3D) to the MR data. Probabilistic atlases
+	for 37 structures are provided, along with average atlases. The availability
+	of three different MR protocols, the Nissl data, and the labels provides
+	a rich set of options for registration of other atlases to the same
+	coordinate system, thus facilitating data-sharing. All the data is
+	available for download via the web.},
+  doi = {10.1016/j.neuroimage.2010.06.067},
+  institution = {Duke Center for In Vivo Microscopy, Radiology, Duke University Medical
+	Center, Durham, NC 27710, USA. gjohnson@duke.edu},
+  keywords = {Animals; Atlases as Topic; Brain, anatomy /&/ histology; Databases,
+	Factual; Histology; Image Processing, Computer-Assisted, standards;
+	Imaging, Three-Dimensional, methods; Magnetic Resonance Imaging;
+	Male; Mice, Inbred C57BL; Mice, anatomy /&/ histology; Reference
+	Standards; Staining and Labeling; Thalamus, anatomy /&/ histology},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(10)00927-4},
+  pmid = {20600960},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2010.06.067}
+}
+
+@ARTICLE{Kandel2015,
+  author = {Kandel, Benjamin M. and Wang, Danny J J. and Detre, John A. and Gee,
+	James C. and Avants, Brian B.},
+  title = {Decomposing cerebral blood flow MRI into functional and structural
+	components: a non-local approach based on prediction.},
+  journal = {Neuroimage},
+  year = {2015},
+  volume = {105},
+  pages = {156--170},
+  month = {Jan},
+  abstract = {We present RIPMMARC (Rotation Invariant Patch-based Multi-Modality
+	Analysis aRChitecture), a flexible and widely applicable method for
+	extracting information unique to a given modality from a multi-modal
+	data set. We use RIPMMARC to improve the interpretation of arterial
+	spin labeling (ASL) perfusion images by removing the component of
+	perfusion that is predicted by the underlying anatomy. Using patch-based,
+	rotation invariant descriptors derived from the anatomical image,
+	we learn a predictive relationship between local neuroanatomical
+	structure and the corresponding perfusion image. This relation allows
+	us to produce an image of perfusion that would be predicted given
+	only the underlying anatomy and a residual image that represents
+	perfusion information that cannot be predicted by anatomical features.
+	Our learned structural features are significantly better at predicting
+	brain perfusion than tissue probability maps, which are the input
+	to standard partial volume correction techniques. Studies in test-retest
+	data show that both the anatomically predicted and residual perfusion
+	signals are highly replicable for a given subject. In a pediatric
+	population, both the raw perfusion and structurally predicted images
+	are tightly linked to age throughout adolescence throughout the brain.
+	Interestingly, the residual perfusion also shows a strong correlation
+	with age in selected regions including the hippocampi (corr = 0.38,
+	p-value <10(-6)), precuneus (corr = -0.44, p < 10(-5)), and combined
+	default mode network regions (corr = -0.45, p < 10(-8)) that is independent
+	of global anatomy-perfusion trends. This finding suggests that there
+	is a regionally heterogeneous pattern of functional specialization
+	that is distinct from that of cortical structural development.},
+  doi = {10.1016/j.neuroimage.2014.10.052},
+  institution = {Penn Image Computing and Science Laboratory, University of Pennsylvania,
+	Philadelphia, PA, USA; Department of Radiology, Hospital of the University
+	of Pennsylvania, Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(14)00891-X},
+  pmid = {25449745},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2014.10.052}
+}
+
+@ARTICLE{Kandel2014,
+  author = {Kandel, Benjamin M. and Wang, Danny J J. and Gee, James C. and Avants,
+	Brian B.},
+  title = {Single-subject structural networks with closed-form rotation invariant
+	matching mprove power in developmental studies of the cortex.},
+  journal = {Med Image Comput Comput Assist Interv},
+  year = {2014},
+  volume = {17},
+  pages = {137--144},
+  number = {Pt 3},
+  abstract = {Although much attention has recently been focused on single-subject
+	functional networks, using methods such as resting-state functional
+	MRI, methods for constructing single-subject structural networks
+	are in their infancy. Single-subject cortical networks aim to describe
+	the self-similarity across the cortical structure, possibly signifying
+	convergent developmental pathways. Previous methods for constructing
+	single-subject cortical networks have used patch-based correlations
+	and distance metrics based on curvature and thickness. We present
+	here a method for constructing similarity-based cortical structural
+	networks that utilizes a rotation-invariant representation of structure.
+	The resulting graph metrics are closely linked to age and indicate
+	an increasing degree of closeness throughout development in nearly
+	all brain regions, perhaps corresponding to a more regular structure
+	as the brain matures. The derived graph metrics demonstrate a four-fold
+	increase in power for detecting age as compared to cortical thickness.
+	This proof of concept study indicates that the proposed metric may
+	be useful in identifying biologically relevant cortical patterns.},
+  keywords = {Cerebral Cortex, anatomy /&/ histology/growth /&/ development; Child;
+	Connectome, methods; Humans; Image Enhancement, methods; Image Interpretation,
+	Computer-Assisted, methods; Magnetic Resonance Imaging, methods;
+	Nerve Net, growth /&/ development/physiology; Reproducibility of
+	Results; Rotation; Sensitivity and Specificity},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {25320792},
+  timestamp = {2015.02.08}
+}
+
+@ARTICLE{Kandel2014a,
+  author = {Kandel, Benjamin M. and Wang, Danny J J. and Gee, James C. and Avants,
+	Brian B.},
+  title = {Eigenanatomy: Sparse dimensionality reduction for multi-modal medical
+	image analysis.},
+  journal = {Methods},
+  year = {2014},
+  month = {Oct},
+  abstract = {Rigorous statistical analysis of multimodal imaging datasets is challenging.
+	Mass-univariate methods for extracting correlations between image
+	voxels and outcome measurements are not ideal for multimodal datasets,
+	as they do not account for interactions between the different modalities.
+	The extremely high dimensionality of medical images necessitates
+	dimensionality reduction, such as principal component analysis (PCA)
+	or independent component analysis (ICA). These dimensionality reduction
+	techniques, however, consist of contributions from every region in
+	the brain and are therefore difficult to interpret. Recent advances
+	in sparse dimensionality reduction have enabled construction of a
+	set of image regions that explain the variance of the images while
+	still maintaining anatomical interpretability. The projections of
+	the original data on the sparse eigenvectors, however, are highly
+	collinear and therefore difficult to incorporate into multi-modal
+	image analysis pipelines. We propose here a method for clustering
+	sparse eigenvectors and selecting a subset of the eigenvectors to
+	make interpretable predictions from a multi-modal dataset. Evaluation
+	on a publicly available dataset shows that the proposed method outperforms
+	PCA and ICA-based regressions while still maintaining anatomical
+	meaning. To facilitate reproducibility, the complete dataset used
+	and all source code is publicly available.},
+  doi = {10.1016/j.ymeth.2014.10.016},
+  institution = {Penn Image Computing and Science Laboratory, University of Pennsylvania,
+	Philadelphia, PA, United States; Department of Radiology, Hospital
+	of the University of Pennsylvania, Philadelphia, PA, United States.},
+  language = {eng},
+  medline-pst = {aheadofprint},
+  owner = {stnava},
+  pii = {S1046-2023(14)00333-8},
+  pmid = {25448483},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1016/j.ymeth.2014.10.016}
+}
+
+@ARTICLE{Kay2008,
+  author = {Kay, Kendrick N. and David, Stephen V. and Prenger, Ryan J. and Hansen,
+	Kathleen A. and Gallant, Jack L.},
+  title = {Modeling low-frequency fluctuation and hemodynamic response timecourse
+	in event-related fMRI.},
+  journal = {Hum Brain Mapp},
+  year = {2008},
+  volume = {29},
+  pages = {142--156},
+  number = {2},
+  month = {Feb},
+  abstract = {Functional magnetic resonance imaging (fMRI) suffers from many problems
+	that make signal estimation difficult. These include variation in
+	the hemodynamic response across voxels and low signal-to-noise ratio
+	(SNR). We evaluate several analysis techniques that address these
+	problems for event-related fMRI. (1) Many fMRI analyses assume a
+	canonical hemodynamic response function, but this assumption may
+	lead to inaccurate data models. By adopting the finite impulse response
+	model, we show that voxel-specific hemodynamic response functions
+	can be estimated directly from the data. (2) There is a large amount
+	of low-frequency noise fluctuation (LFF) in blood oxygenation level
+	dependent (BOLD) time-series data. To compensate for this problem,
+	we use polynomials as regressors for LFF. We show that this technique
+	substantially improves SNR and is more accurate than high-pass filtering
+	of the data. (3) Model overfitting is a problem for the finite impulse
+	response model because of the low SNR of the BOLD response. To reduce
+	overfitting, we estimate a hemodynamic response timecourse for each
+	voxel and incorporate the constraint of time-event separability,
+	the constraint that hemodynamic responses across event types are
+	identical up to a scale factor. We show that this technique substantially
+	improves the accuracy of hemodynamic response estimates and can be
+	computed efficiently. For the analysis techniques we present, we
+	evaluate improvement in modeling accuracy via 10-fold cross-validation.},
+  doi = {10.1002/hbm.20379},
+  institution = {Department of Psychology, University of California, Berkeley, CA
+	94720, USA.},
+  keywords = {Artifacts; Brain Mapping; Brain, blood supply/physiology; Cerebrovascular
+	Circulation, physiology; Humans; Magnetic Resonance Imaging; Models,
+	Neurological; Models, Theoretical; Photic Stimulation; Time},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {17394212},
+  timestamp = {2014.08.11},
+  url = {http://dx.doi.org/10.1002/hbm.20379}
+}
+
+@ARTICLE{Kay2013,
+  author = {Kay, Kendrick N. and Rokem, Ariel and Winawer, Jonathan and Dougherty,
+	Robert F. and Wandell, Brian A.},
+  title = {GLMdenoise: a fast, automated technique for denoising task-based
+	fMRI data.},
+  journal = {Front Neurosci},
+  year = {2013},
+  volume = {7},
+  pages = {247},
+  abstract = {In task-based functional magnetic resonance imaging (fMRI), researchers
+	seek to measure fMRI signals related to a given task or condition.
+	In many circumstances, measuring this signal of interest is limited
+	by noise. In this study, we present GLMdenoise, a technique that
+	improves signal-to-noise ratio (SNR) by entering noise regressors
+	into a general linear model (GLM) analysis of fMRI data. The noise
+	regressors are derived by conducting an initial model fit to determine
+	voxels unrelated to the experimental paradigm, performing principal
+	components analysis (PCA) on the time-series of these voxels, and
+	using cross-validation to select the optimal number of principal
+	components to use as noise regressors. Due to the use of data resampling,
+	GLMdenoise requires and is best suited for datasets involving multiple
+	runs (where conditions repeat across runs). We show that GLMdenoise
+	consistently improves cross-validation accuracy of GLM estimates
+	on a variety of event-related experimental datasets and is accompanied
+	by substantial gains in SNR. To promote practical application of
+	methods, we provide MATLAB code implementing GLMdenoise. Furthermore,
+	to help compare GLMdenoise to other denoising methods, we present
+	the Denoise Benchmark (DNB), a public database and architecture for
+	evaluating denoising methods. The DNB consists of the datasets described
+	in this paper, a code framework that enables automatic evaluation
+	of a denoising method, and implementations of several denoising methods,
+	including GLMdenoise, the use of motion parameters as noise regressors,
+	ICA-based denoising, and RETROICOR/RVHRCOR. Using the DNB, we find
+	that GLMdenoise performs best out of all of the denoising methods
+	we tested.},
+  doi = {10.3389/fnins.2013.00247},
+  institution = {Department of Psychology, Stanford University Stanford, CA, USA.},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pmid = {24381539},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.3389/fnins.2013.00247}
+}
+
+@ARTICLE{Kim2008,
+  author = {Kim, Junghoon and Avants, Brian and Patel, Sunil and Whyte, John
+	and Coslett, Branch H. and Pluta, John and Detre, John A. and Gee,
+	James C.},
+  title = {Structural consequences of diffuse traumatic brain injury: a large
+	deformation tensor-based morphometry study.},
+  journal = {Neuroimage},
+  year = {2008},
+  volume = {39},
+  pages = {1014--1026},
+  number = {3},
+  month = {Feb},
+  abstract = {Traumatic brain injury (TBI) is one of the most common causes of long-term
+	disability. Despite the importance of identifying neuropathology
+	in individuals with chronic TBI, methodological challenges posed
+	at the stage of inter-subject image registration have hampered previous
+	voxel-based MRI studies from providing a clear pattern of structural
+	atrophy after TBI. We used a novel symmetric diffeomorphic image
+	normalization method to conduct a tensor-based morphometry (TBM)
+	study of TBI. The key advantage of this method is that it simultaneously
+	estimates an optimal template brain and topology preserving deformations
+	between this template and individual subject brains. Detailed patterns
+	of atrophies are then revealed by statistically contrasting control
+	and subject deformations to the template space. Participants were
+	29 survivors of TBI and 20 control subjects who were matched in terms
+	of age, gender, education, and ethnicity. Localized volume losses
+	were found most prominently in white matter regions and the subcortical
+	nuclei including the thalamus, the midbrain, the corpus callosum,
+	the mid- and posterior cingulate cortices, and the caudate. Significant
+	voxel-wise volume loss clusters were also detected in the cerebellum
+	and the frontal/temporal neocortices. Volume enlargements were identified
+	largely in ventricular regions. A similar pattern of results was
+	observed in a subgroup analysis where we restricted our analysis
+	to the 17 TBI participants who had no macroscopic focal lesions (total
+	lesion volume >1.5 cm(3)). The current study confirms, extends, and
+	partly challenges previous structural MRI studies in chronic TBI.
+	By demonstrating that a large deformation image registration technique
+	can be successfully combined with TBM to identify TBI-induced diffuse
+	structural changes with greater precision, our approach is expected
+	to increase the sensitivity of future studies examining brain-behavior
+	relationships in the TBI population.},
+  doi = {10.1016/j.neuroimage.2007.10.005},
+  institution = {Moss Rehabilitation Research Institute, Albert Einstein Healthcare
+	Network, Philadelphia, PA 19141, USA. kimj@einstein.edu},
+  keywords = {Adolescent; Adult; Algorithms; Brain Injuries, pathology; Brain, pathology;
+	Data Interpretation, Statistical; Diffusion Magnetic Resonance Imaging;
+	Female; Humans; Image Processing, Computer-Assisted; Male; Middle
+	Aged; Nonlinear Dynamics; Reference Values},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(07)00901-9},
+  pmid = {17999940},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2007.10.005}
+}
+
+@ARTICLE{Klein2012,
+  author = {Klein, Arno and Tourville, Jason},
+  title = {101 labeled brain images and a consistent human cortical labeling
+	protocol.},
+  journal = {Front Neurosci},
+  year = {2012},
+  volume = {6},
+  pages = {171},
+  abstract = {We introduce the Mindboggle-101 dataset, the largest and most complete
+	set of free, publicly accessible, manually labeled human brain images.
+	To manually label the macroscopic anatomy in magnetic resonance images
+	of 101 healthy participants, we created a new cortical labeling protocol
+	that relies on robust anatomical landmarks and minimal manual edits
+	after initialization with automated labels. The "Desikan-Killiany-Tourville"
+	(DKT) protocol is intended to improve the ease, consistency, and
+	accuracy of labeling human cortical areas. Given how difficult it
+	is to label brains, the Mindboggle-101 dataset is intended to serve
+	as brain atlases for use in labeling other brains, as a normative
+	dataset to establish morphometric variation in a healthy population
+	for comparison against clinical populations, and contribute to the
+	development, training, testing, and evaluation of automated registration
+	and labeling algorithms. To this end, we also introduce benchmarks
+	for the evaluation of such algorithms by comparing our manual labels
+	with labels automatically generated by probabilistic and multi-atlas
+	registration-based approaches. All data and related software and
+	updated information are available on the http://mindboggle.info/data
+	website.},
+  doi = {10.3389/fnins.2012.00171},
+  institution = {of Medicine Stony Brook, NY, USA ; Department of Psychiatry, Columbia
+	University New York, NY, USA.},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pmid = {23227001},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.3389/fnins.2012.00171}
+}
+
+@ARTICLE{Majka2013,
+  author = {Majka, Piotr and Kowalski, Jakub M. and Chlodzinska, Natalia and
+	W{\'{o}}jcik, Daniel K.},
+  title = {3D brain atlas reconstructor service--online repository of three-dimensional
+	models of brain structures.},
+  journal = {Neuroinformatics},
+  year = {2013},
+  volume = {11},
+  pages = {507--518},
+  number = {4},
+  month = {Oct},
+  abstract = {Brain atlases are important tools of neuroscience. Traditionally prepared
+	in paper book format, more and more commonly they take digital form
+	which extends their utility. To simplify work with different atlases,
+	to lay the ground for developing universal tools which could abstract
+	from the origin of the atlas, efforts are being made to provide common
+	interfaces to these atlases. 3D Brain Atlas Reconstructor service
+	(3dBARs) described here is a repository of digital representations
+	of different brain atlases in CAF format which we recently proposed
+	and a repository of 3D models of brain structures. A graphical front-end
+	is provided for creating and viewing the reconstructed models as
+	well as the underlying 2D atlas data. An application programming
+	interface (API) facilitates programmatic access to the service contents
+	from other websites. From a typical user's point of view, 3dBARs
+	offers an accessible way to mine publicly available atlasing data
+	with a convenient browser based interface, without the need to install
+	extra software. For a developer of services related to brain atlases,
+	3dBARs supplies mechanisms for enhancing functionality of other software.
+	The policy of the service is to accept new datasets as delivered
+	by interested parties and we work with the researchers who obtain
+	original data to make them available to the neuroscience community
+	at large. The functionality offered by the 3dBARs situates it at
+	the core of present and future general atlasing services tying it
+	strongly to the global atlasing neuroinformatics infrastructure.},
+  doi = {10.1007/s12021-013-9199-9},
+  institution = {Nencki Institute of Experimental Biology, 3 Pasteur Street, 02-093,
+	Warsaw, Poland, p.majka@nencki.gov.pl.},
+  keywords = {Brain, anatomy /&/ histology; Humans; Imaging, Three-Dimensional;
+	Models, Biological; Online Systems},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {23943281},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1007/s12021-013-9199-9}
+}
+
+@ARTICLE{Maurer2003,
+  author = {Maurer, C.R. and Qi, R. and Raghavan, V.},
+  title = {A linear time algorithm for computing exact {E}uclidean distance
+	transforms of binary images in arbitrary dimensions},
+  journal = {PAMI},
+  year = {2003},
+  volume = {25},
+  pages = {265--270},
+  number = {2},
+  doi = {10.1109/TPAMI.2003.1177156},
+  owner = {jtduda},
+  timestamp = {2015.06.04},
+  url = {http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=1177156}
+}
+
+@ARTICLE{McMillan2014,
+  author = {McMillan, Corey T. and Avants, Brian B. and Cook, Philip and Ungar,
+	Lyle and Trojanowski, John Q. and Grossman, Murray},
+  title = {The power of neuroimaging biomarkers for screening frontotemporal
+	dementia.},
+  journal = {Hum Brain Mapp},
+  year = {2014},
+  month = {Mar},
+  abstract = {Frontotemporal dementia (FTD) is a clinically and pathologically heterogeneous
+	neurodegenerative disease that can result from either frontotemporal
+	lobar degeneration (FTLD) or Alzheimer's disease (AD) pathology.
+	It is critical to establish statistically powerful biomarkers that
+	can achieve substantial cost-savings and increase the feasibility
+	of clinical trials. We assessed three broad categories of neuroimaging
+	methods to screen underlying FTLD and AD pathology in a clinical
+	FTD series: global measures (e.g., ventricular volume), anatomical
+	volumes of interest (VOIs) (e.g., hippocampus) using a standard atlas,
+	and data-driven VOIs using Eigenanatomy. We evaluated clinical FTD
+	patients (N = 93) with cerebrospinal fluid, gray matter (GM) magnetic
+	resonance imaging (MRI), and diffusion tensor imaging (DTI) to assess
+	whether they had underlying FTLD or AD pathology. Linear regression
+	was performed to identify the optimal VOIs for each method in a training
+	dataset and then we evaluated classification sensitivity and specificity
+	in an independent test cohort. Power was evaluated by calculating
+	minimum sample sizes required in the test classification analyses
+	for each model. The data-driven VOI analysis using a multimodal combination
+	of GM MRI and DTI achieved the greatest classification accuracy (89\%
+	sensitive and 89\% specific) and required a lower minimum sample
+	size (N = 26) relative to anatomical VOI and global measures. We
+	conclude that a data-driven VOI approach using Eigenanatomy provides
+	more accurate classification, benefits from increased statistical
+	power in unseen datasets, and therefore provides a robust method
+	for screening underlying pathology in FTD patients for entry into
+	clinical trials. Hum Brain Mapp, 2014. © 2014 Wiley Periodicals,
+	Inc.},
+  doi = {10.1002/hbm.22515},
+  institution = {nter, University of Pennsylvania Perelman School of Medicine, Philadelphia,
+	Pennsylvania.},
+  language = {eng},
+  medline-pst = {aheadofprint},
+  owner = {stnava},
+  pmid = {24687814},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1002/hbm.22515}
+}
+
+@ARTICLE{McMillan2013,
+  author = {McMillan, Corey T. and Irwin, David J. and Avants, Brian B. and Powers,
+	John and Cook, Philip A. and Toledo, Jon B. and {McCarty Wood}, Elisabeth
+	and {Van Deerlin}, Vivianna M. and Lee, Virginia M-Y. and Trojanowski,
+	John Q. and Grossman, Murray},
+  title = {White matter imaging helps dissociate tau from TDP-43 in frontotemporal
+	lobar degeneration.},
+  journal = {J Neurol Neurosurg Psychiatry},
+  year = {2013},
+  volume = {84},
+  pages = {949--955},
+  number = {9},
+  month = {Sep},
+  abstract = {Frontotemporal lobar degeneration (FTLD) is most commonly associated
+	with TAR-DNA binding protein (TDP-43) or tau pathology at autopsy,
+	but there are no in vivo biomarkers reliably discriminating between
+	sporadic cases. As disease-modifying treatments emerge, it is critical
+	to accurately identify underlying pathology in living patients so
+	that they can be entered into appropriate etiology-directed clinical
+	trials. Patients with tau inclusions (FTLD-TAU) appear to have relatively
+	greater white matter (WM) disease at autopsy than those patients
+	with TDP-43 (FTLD-TDP). In this paper, we investigate the ability
+	of white matter (WM) imaging to help discriminate between FTLD-TAU
+	and FTLD-TDP during life using diffusion tensor imaging (DTI).Patients
+	with autopsy-confirmed disease or a genetic mutation consistent with
+	FTLD-TDP or FTLD-TAU underwent multimodal T1 volumetric MRI and diffusion
+	weighted imaging scans. We quantified cortical thickness in GM and
+	fractional anisotropy (FA) in WM. We performed Eigenanatomy, a statistically
+	robust dimensionality reduction algorithm, and used leave-one-out
+	cross-validation to predict underlying pathology. Neuropathological
+	assessment of GM and WM disease burden was performed in the autopsy-cases
+	to confirm our findings of an ante-mortem GM and WM dissociation
+	in the neuroimaging cohort.ROC curve analyses evaluated classification
+	accuracy in individual patients and revealed 96\% sensitivity and
+	100\% specificity for WM analyses. FTLD-TAU had significantly more
+	WM degeneration and inclusion severity at autopsy relative to FTLD-TDP.These
+	neuroimaging and neuropathological investigations provide converging
+	evidence for greater WM burden associated with FTLD-TAU, and emphasise
+	the role of WM neuroimaging for in vivo discrimination between FTLD-TAU
+	and FTLD-TDP.},
+  doi = {10.1136/jnnp-2012-304418},
+  institution = {Department of Neurology, Perelman School of Medicine, Frontotemporal
+	Degeneration Center, University of Pennsylvania, Philadelphia, Pennsylvania
+	19104, USA. mcmillac@mail.med.upenn.edu},
+  keywords = {Aged; Anisotropy; Autopsy; Brain, pathology; Cohort Studies; Corpus
+	Callosum, pathology; DNA-Binding Proteins, metabolism; Diagnosis,
+	Differential; Diffusion Tensor Imaging; Educational Status; Female;
+	Frontotemporal Lobar Degeneration, diagnosis/pathology; Humans; Image
+	Processing, Computer-Assisted; Male; Middle Aged; Neuroimaging; Neuropsychological
+	Tests; ROC Curve; TDP-43 Proteinopathies, metabolism/pathology; tau
+	Proteins, metabolism},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {jnnp-2012-304418},
+  pmid = {23475817},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1136/jnnp-2012-304418}
+}
+
+@ARTICLE{McMillan2014a,
+  author = {McMillan, Corey T. and Toledo, Jon B. and Avants, Brian B. and Cook,
+	Philip A. and Wood, Elisabeth M. and Suh, Eunran and Irwin, David
+	J. and Powers, John and Olm, Christopher and Elman, Lauren and McCluskey,
+	Leo and Schellenberg, Gerard D. and Lee, Virginia M-Y. and Trojanowski,
+	John Q. and {Van Deerlin}, Vivianna M. and Grossman, Murray},
+  title = {Genetic and neuroanatomic associations in sporadic frontotemporal
+	lobar degeneration.},
+  journal = {Neurobiol Aging},
+  year = {2014},
+  volume = {35},
+  pages = {1473--1482},
+  number = {6},
+  month = {Jun},
+  abstract = {Genome-wide association studies have identified single nucleotide
+	polymorphisms (SNPs) that are sensitive for tau or TDP-43 pathology
+	in frontotemporal lobar degeneration (FTLD). Neuroimaging analyses
+	have revealed distinct distributions of disease in FTLD patients
+	with genetic mutations. However, genetic influences on neuroanatomic
+	structure in sporadic FTLD have not been assessed. In this report,
+	we use novel multivariate tools, Eigenanatomy, and sparse canonical
+	correlation analysis to identify associations between SNPs and neuroanatomic
+	structure in sporadic FTLD. Magnetic resonance imaging analyses revealed
+	that rs8070723 (MAPT) was associated with gray matter variance in
+	the temporal cortex. Diffusion tensor imaging analyses revealed that
+	rs1768208 (MOBP), rs646776 (near SORT1), and rs5848 (PGRN) were associated
+	with white matter variance in the midbrain and superior longitudinal
+	fasciculus. In an independent autopsy series, we observed that rs8070723
+	and rs1768208 conferred significant risk of tau pathology relative
+	to TDP-43, and rs646776 conferred increased risk of TDP-43 pathology
+	relative to tau. Identified brain regions and SNPs may help provide
+	an in vivo screen for underlying pathology in FTLD and contribute
+	to our understanding of sporadic FTLD.},
+  doi = {10.1016/j.neurobiolaging.2013.11.029},
+  institution = {Department of Neurology, University of Pennsylvania Perelman School
+	of Medicine, Philadelphia, PA, USA; Penn Frontotemporal Degeneration
+	Center, University of Pennsylvania Perelman School of Medicine, Philadelphia,
+	PA, USA.},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S0197-4580(13)00613-1},
+  pmid = {24373676},
+  timestamp = {2014.06.29},
+  url = {http://dx.doi.org/10.1016/j.neurobiolaging.2013.11.029}
+}
+
+@ARTICLE{Pajevic1999,
+  author = {Pajevic, S. and Pierpaoli, C.},
+  title = {Color schemes to represent the orientation of anisotropic tissues
+	from diffusion tensor data: application to white matter fiber tract
+	mapping in the human brain.},
+  journal = {Magn Reson Med},
+  year = {1999},
+  volume = {42},
+  pages = {526--540},
+  number = {3},
+  month = {Sep},
+  __markedentry = {[jtduda:]},
+  abstract = {This paper investigates the use of color to represent the directional
+	information contained in the diffusion tensor. Ideally, one wants
+	to take into account both the properties of human color vision and
+	of the given display hardware to produce a representation in which
+	differences in the orientation of anisotropic structures are proportional
+	to the perceived differences in color. It is argued here that such
+	a goal cannot be achieved in general and therefore, empirical or
+	heuristic schemes, which avoid some of the common artifacts of previously
+	proposed approaches, are implemented. Directionally encoded color
+	(DEC) maps of the human brain obtained using these schemes clearly
+	show the main association, projection, and commissural white matter
+	pathways. In the brainstem, motor and sensory pathways are easily
+	identified and can be differentiated from the transverse pontine
+	fibers and the cerebellar peduncles. DEC maps obtained from diffusion
+	tensor imaging data provide a simple and effective way to visualize
+	fiber direction, useful for investigating the structural anatomy
+	of different organs. Magn Reson Med 42:526-540, 1999.},
+  institution = {Mathematical and Statistical Computing Laboratory, Center for Information
+	Technology, National Institutes of Health, Bethesda, Maryland, USA.},
+  keywords = {Anisotropy; Brain Mapping, methods; Color; Color Perception; Diffusion;
+	Humans; Image Processing, Computer-Assisted, methods; Magnetic Resonance
+	Imaging, methods; Nerve Fibers, physiology},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {jtduda},
+  pii = {3.0.CO;2-J},
+  pmid = {10467297},
+  timestamp = {2015.07.02}
+}
+
+@INPROCEEDINGS{dhillon_icml12_tscca,
+  author = {Paramveer S. Dhillon, Jordan Rodu, Dean P. Foster and Lyle H. Ungar},
+  title = {Two Step CCA: A new spectral method for estimating vector models
+	of words},
+  booktitle = {Proceedings of the 29th International Conference on Machine learning},
+  year = {2012},
+  series = {ICML'12},
+  location = {Edinburgh, U.K.}
+}
+
+@MISC{ANTsR,
+  author = {PICSL},
+  title = {ANTsR: ANTs with R},
+  year = {2014},
+  owner = {stnava},
+  timestamp = {2014.08.09},
+  url = {https://github.com/stnava/ANTsR}
+}
+
+@ARTICLE{Power2012,
+  author = {Power, Jonathan D. and Barnes, Kelly A. and Snyder, Abraham Z. and
+	Schlaggar, Bradley L. and Petersen, Steven E.},
+  title = {Spurious but systematic correlations in functional connectivity MRI
+	networks arise from subject motion.},
+  journal = {Neuroimage},
+  year = {2012},
+  volume = {59},
+  pages = {2142--2154},
+  number = {3},
+  month = {Feb},
+  abstract = {Here, we demonstrate that subject motion produces substantial changes
+	in the timecourses of resting state functional connectivity MRI (rs-fcMRI)
+	data despite compensatory spatial registration and regression of
+	motion estimates from the data. These changes cause systematic but
+	spurious correlation structures throughout the brain. Specifically,
+	many long-distance correlations are decreased by subject motion,
+	whereas many short-distance correlations are increased. These changes
+	in rs-fcMRI correlations do not arise from, nor are they adequately
+	countered by, some common functional connectivity processing steps.
+	Two indices of data quality are proposed, and a simple method to
+	reduce motion-related effects in rs-fcMRI analyses is demonstrated
+	that should be flexibly implementable across a variety of software
+	platforms. We demonstrate how application of this technique impacts
+	our own data, modifying previous conclusions about brain development.
+	These results suggest the need for greater care in dealing with subject
+	motion, and the need to critically revisit previous rs-fcMRI work
+	that may not have adequately controlled for effects of transient
+	subject movements.},
+  doi = {10.1016/j.neuroimage.2011.10.018},
+  institution = {Department of Neurology, Washington University School of Medicine,
+	St. Louis, MO 63110, USA. powerj@wusm.wustl.edu},
+  keywords = {Algorithms; Artifacts; Brain, anatomy /&/ histology; Cohort Studies;
+	Head Movements; Humans; Image Processing, Computer-Assisted, methods;
+	Magnetic Resonance Imaging, instrumentation/methods; Motion; Oxygen,
+	blood; Software},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {jtduda},
+  pii = {S1053-8119(11)01181-5},
+  pmid = {22019881},
+  timestamp = {2015.06.24},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2011.10.018}
+}
+
+@ARTICLE{Power2014,
+  author = {Power, Jonathan D. and Mitra, Anish and Laumann, Timothy O. and Snyder,
+	Abraham Z. and Schlaggar, Bradley L. and Petersen, Steven E.},
+  title = {Methods to detect, characterize, and remove motion artifact in resting
+	state fMRI.},
+  journal = {Neuroimage},
+  year = {2014},
+  volume = {84},
+  pages = {320--341},
+  month = {Jan},
+  abstract = {Head motion systematically alters correlations in resting state functional
+	connectivity fMRI (RSFC). In this report we examine impact of motion
+	on signal intensity and RSFC correlations. We find that motion-induced
+	signal changes (1) are often complex and variable waveforms, (2)
+	are often shared across nearly all brain voxels, and (3) often persist
+	more than 10s after motion ceases. These signal changes, both during
+	and after motion, increase observed RSFC correlations in a distance-dependent
+	manner. Motion-related signal changes are not removed by a variety
+	of motion-based regressors, but are effectively reduced by global
+	signal regression. We link several measures of data quality to motion,
+	changes in signal intensity, and changes in RSFC correlations. We
+	demonstrate that improvements in data quality measures during processing
+	may represent cosmetic improvements rather than true correction of
+	the data. We demonstrate a within-subject, censoring-based artifact
+	removal strategy based on volume censoring that reduces group differences
+	due to motion to chance levels. We note conditions under which group-level
+	regressions do and do not correct motion-related effects.},
+  doi = {10.1016/j.neuroimage.2013.08.048},
+  institution = {Dept. of Neurology, Washington University School of Medicine in St.
+	Louis, 660 S. Euclid Ave., St. Louis, MO 63110, USA. Electronic address:
+	powerj@wusm.wustl.edu.},
+  keywords = {Adolescent; Adult; Algorithms; Artifacts; Brain Mapping, methods;
+	Brain, physiology; Female; Head Movements, physiology; Humans; Image
+	Enhancement, methods; Image Interpretation, Computer-Assisted, methods;
+	Magnetic Resonance Imaging, methods; Male; Motion; Pattern Recognition,
+	Automated, methods; Reproducibility of Results; Rest, physiology;
+	Sensitivity and Specificity; Subtraction Technique; Young Adult},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {jtduda},
+  pii = {S1053-8119(13)00911-7},
+  pmid = {23994314},
+  timestamp = {2015.06.04},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2013.08.048}
+}
+
+@ARTICLE{Rubinov2010,
+  author = {Rubinov, Mikail and Sporns, Olaf},
+  title = {Complex network measures of brain connectivity: uses and interpretations.},
+  journal = {Neuroimage},
+  year = {2010},
+  volume = {52},
+  pages = {1059--1069},
+  number = {3},
+  month = {Sep},
+  abstract = {Brain connectivity datasets comprise networks of brain regions connected
+	by anatomical tracts or by functional associations. Complex network
+	analysis-a new multidisciplinary approach to the study of complex
+	systems-aims to characterize these brain networks with a small number
+	of neurobiologically meaningful and easily computable measures. In
+	this article, we discuss construction of brain networks from connectivity
+	data and describe the most commonly used network measures of structural
+	and functional connectivity. We describe measures that variously
+	detect functional integration and segregation, quantify centrality
+	of individual brain regions or pathways, characterize patterns of
+	local anatomical circuitry, and test resilience of networks to insult.
+	We discuss the issues surrounding comparison of structural and functional
+	network connectivity, as well as comparison of networks across subjects.
+	Finally, we describe a Matlab toolbox (http://www.brain-connectivity-toolbox.net)
+	accompanying this article and containing a collection of complex
+	network measures and large-scale neuroanatomical connectivity datasets.},
+  doi = {10.1016/j.neuroimage.2009.10.003},
+  institution = {Black Dog Institute and School of Psychiatry, University of New South
+	Wales, Sydney, Australia.},
+  keywords = {Brain, physiology; Models, Neurological; Nerve Net, physiology; Neural
+	Networks (Computer)},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {jtduda},
+  pii = {S1053-8119(09)01074-X},
+  pmid = {19819337},
+  timestamp = {2015.06.30},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2009.10.003}
+}
+
+@ARTICLE{TALAIRACH1958,
+  author = {TALAIRACH, J. and TOURNOUX, P.},
+  title = {[Stereotaxic localization of central gray nuclei].},
+  journal = {Neurochirurgia (Stuttg)},
+  year = {1958},
+  volume = {1},
+  pages = {88--93},
+  number = {1},
+  month = {Jun},
+  doi = {10.1055/s-0028-1095515},
+  keywords = {Brain, anatomy /&/ histology},
+  language = {fre},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {13578055},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1055/s-0028-1095515}
+}
+
+@ARTICLE{Tustison2013,
+  author = {Tustison, Nicholas J. and Avants, Brian B.},
+  title = {Explicit B-spline regularization in diffeomorphic image registration.},
+  journal = {Front Neuroinform},
+  year = {2013},
+  volume = {7},
+  pages = {39},
+  abstract = {Diffeomorphic mappings are central to image registration due largely
+	to their topological properties and success in providing biologically
+	plausible solutions to deformation and morphological estimation problems.
+	Popular diffeomorphic image registration algorithms include those
+	characterized by time-varying and constant velocity fields, and symmetrical
+	considerations. Prior information in the form of regularization is
+	used to enforce transform plausibility taking the form of physics-based
+	constraints or through some approximation thereof, e.g., Gaussian
+	smoothing of the vector fields [a la Thirion's Demons (Thirion, 1998)].
+	In the context of the original Demons' framework, the so-called directly
+	manipulated free-form deformation (DMFFD) (Tustison et al., 2009)
+	can be viewed as a smoothing alternative in which explicit regularization
+	is achieved through fast B-spline approximation. This characterization
+	can be used to provide B-spline "flavored" diffeomorphic image registration
+	solutions with several advantages. Implementation is open source
+	and available through the Insight Toolkit and our Advanced Normalization
+	Tools (ANTs) repository. A thorough comparative evaluation with the
+	well-known SyN algorithm (Avants et al., 2008), implemented within
+	the same framework, and its B-spline analog is performed using open
+	labeled brain data and open source evaluation tools.},
+  doi = {10.3389/fninf.2013.00039},
+  institution = {Penn Image Computing and Science Laboratory, Department of Radiology,
+	University of Pennsylvania Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pmid = {24409140},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.3389/fninf.2013.00039}
+}
+
+@ARTICLE{Tustison2010,
+  author = {Tustison, Nicholas J. and Avants, Brian B. and Cook, Philip A. and
+	Zheng, Yuanjie and Egan, Alexander and Yushkevich, Paul A. and Gee,
+	James C.},
+  title = {N4ITK: improved N3 bias correction.},
+  journal = {IEEE Trans Med Imaging},
+  year = {2010},
+  volume = {29},
+  pages = {1310--1320},
+  number = {6},
+  month = {Jun},
+  abstract = {A variant of the popular nonparametric nonuniform intensity normalization
+	(N3) algorithm is proposed for bias field correction. Given the superb
+	performance of N3 and its public availability, it has been the subject
+	of several evaluation studies. These studies have demonstrated the
+	importance of certain parameters associated with the B-spline least-squares
+	fitting. We propose the substitution of a recently developed fast
+	and robust B-spline approximation routine and a modified hierarchical
+	optimization scheme for improved bias field correction over the original
+	N3 algorithm. Similar to the N3 algorithm, we also make the source
+	code, testing, and technical documentation of our contribution, which
+	we denote as "N4ITK," available to the public through the Insight
+	Toolkit of the National Institutes of Health. Performance assessment
+	is demonstrated using simulated data from the publicly available
+	Brainweb database, hyperpolarized (3)He lung image data, and 9.4T
+	postmortem hippocampus data.},
+  doi = {10.1109/TMI.2010.2046908},
+  institution = {Department of Radiology, University of Pennsylvania, Philadelphia,
+	PA 19140, USA. ntustison@wustl.edu},
+  keywords = {Algorithms; Artifacts; Brain, anatomy /&/ histology; Humans; Image
+	Enhancement, methods; Image Interpretation, Computer-Assisted, methods;
+	Magnetic Resonance Imaging, methods; Reproducibility of Results;
+	Sensitivity and Specificity},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {20378467},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1109/TMI.2010.2046908}
+}
+
+@ARTICLE{Tustison2014,
+  author = {Tustison, Nicholas J. and Cook, Philip A. and Klein, Arno and Song,
+	Gang and Das, Sandhitsu R. and Duda, Jeffrey T. and Kandel, Benjamin
+	M. and {van Strien}, Niels and Stone, James R. and Gee, James C.
+	and Avants, Brian B.},
+  title = {Large-scale evaluation of ANTs and FreeSurfer cortical thickness
+	measurements.},
+  journal = {Neuroimage},
+  year = {2014},
+  volume = {99},
+  pages = {166--179},
+  month = {Oct},
+  abstract = {Many studies of the human brain have explored the relationship between
+	cortical thickness and cognition, phenotype, or disease. Due to the
+	subjectivity and time requirements in manual measurement of cortical
+	thickness, scientists have relied on robust software tools for automation
+	which facilitate the testing and refinement of neuroscientific hypotheses.
+	The most widely used tool for cortical thickness studies is the publicly
+	available, surface-based FreeSurfer package. Critical to the adoption
+	of such tools is a demonstration of their reproducibility, validity,
+	and the documentation of specific implementations that are robust
+	across large, diverse imaging datasets. To this end, we have developed
+	the automated, volume-based Advanced Normalization Tools (ANTs) cortical
+	thickness pipeline comprising well-vetted components such as SyGN
+	(multivariate template construction), SyN (image registration), N4
+	(bias correction), Atropos (n-tissue segmentation), and DiReCT (cortical
+	thickness estimation). In this work, we have conducted the largest
+	evaluation of automated cortical thickness measures in publicly available
+	data, comparing FreeSurfer and ANTs measures computed on 1205 images
+	from four open data sets (IXI, MMRR, NKI, and OASIS), with parcellation
+	based on the recently proposed Desikan-Killiany-Tourville (DKT) cortical
+	labeling protocol. We found good scan-rescan repeatability with both
+	FreeSurfer and ANTs measures. Given that such assessments of precision
+	do not necessarily reflect accuracy or an ability to make statistical
+	inferences, we further tested the neurobiological validity of these
+	approaches by evaluating thickness-based prediction of age and gender.
+	ANTs is shown to have a higher predictive performance than FreeSurfer
+	for both of these measures. In promotion of open science, we make
+	all of our scripts, data, and results publicly available which complements
+	the use of open image data sets and the open source availability
+	of the proposed ANTs cortical thickness pipeline.},
+  doi = {10.1016/j.neuroimage.2014.05.044},
+  institution = {Penn Image Computing and Science Laboratory, University of Pennsylvania,
+	Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053-8119(14)00409-1},
+  pmid = {24879923},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.1016/j.neuroimage.2014.05.044}
+}
+
+@ARTICLE{Tustison2014a,
+  author = {Tustison, Nicholas J. and Shrinidhi, K. L. and Wintermark, Max and
+	Durst, Christopher R. and Kandel, Benjamin M. and Gee, James C. and
+	Grossman, Murray C. and Avants, Brian B.},
+  title = {Optimal Symmetric Multimodal Templates and Concatenated Random Forests
+	for Supervised Brain Tumor Segmentation (Simplified) with ANTsR.},
+  journal = {Neuroinformatics},
+  year = {2014},
+  month = {Nov},
+  abstract = {Segmenting and quantifying gliomas from MRI is an important task for
+	diagnosis, planning intervention, and for tracking tumor changes
+	over time. However, this task is complicated by the lack of prior
+	knowledge concerning tumor location, spatial extent, shape, possible
+	displacement of normal tissue, and intensity signature. To accommodate
+	such complications, we introduce a framework for supervised segmentation
+	based on multiple modality intensity, geometry, and asymmetry feature
+	sets. These features drive a supervised whole-brain and tumor segmentation
+	approach based on random forest-derived probabilities. The asymmetry-related
+	features (based on optimal symmetric multimodal templates) demonstrate
+	excellent discriminative properties within this framework. We also
+	gain performance by generating probability maps from random forest
+	models and using these maps for a refining Markov random field regularized
+	probabilistic segmentation. This strategy allows us to interface
+	the supervised learning capabilities of the random forest model with
+	regularized probabilistic segmentation using the recently developed
+	ANTsR package-a comprehensive statistical and visualization interface
+	between the popular Advanced Normalization Tools (ANTs) and the R
+	statistical project. The reported algorithmic framework was the top-performing
+	entry in the MICCAI 2013 Multimodal Brain Tumor Segmentation challenge.
+	The challenge data were widely varying consisting of both high-grade
+	and low-grade glioma tumor four-modality MRI from five different
+	institutions. Average Dice overlap measures for the final algorithmic
+	assessment were 0.87, 0.78, and 0.74 for "complete", "core", and
+	"enhanced" tumor components, respectively.},
+  doi = {10.1007/s12021-014-9245-2},
+  institution = {Department of Radiology and Medical Imaging, University of Virginia,
+	Charlottesville, VA, USA, ntustison@virginia.edu.},
+  language = {eng},
+  medline-pst = {aheadofprint},
+  owner = {stnava},
+  pmid = {25433513},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.1007/s12021-014-9245-2}
+}
+
+@ARTICLE{Tzourio-Mazoyer2002,
+  author = {Tzourio-Mazoyer, N. and Landeau, B. and Papathanassiou, D. and Crivello,
+	F. and Etard, O. and Delcroix, N. and Mazoyer, B. and Joliot, M.},
+  title = {Automated anatomical labeling of activations in SPM using a macroscopic
+	anatomical parcellation of the MNI MRI single-subject brain.},
+  journal = {Neuroimage},
+  year = {2002},
+  volume = {15},
+  pages = {273--289},
+  number = {1},
+  month = {Jan},
+  abstract = {An anatomical parcellation of the spatially normalized single-subject
+	high-resolution T1 volume provided by the Montreal Neurological Institute
+	(MNI) (D. L. Collins et al., 1998, Trans. Med. Imag. 17, 463-468)
+	was performed. The MNI single-subject main sulci were first delineated
+	and further used as landmarks for the 3D definition of 45 anatomical
+	volumes of interest (AVOI) in each hemisphere. This procedure was
+	performed using a dedicated software which allowed a 3D following
+	of the sulci course on the edited brain. Regions of interest were
+	then drawn manually with the same software every 2 mm on the axial
+	slices of the high-resolution MNI single subject. The 90 AVOI were
+	reconstructed and assigned a label. Using this parcellation method,
+	three procedures to perform the automated anatomical labeling of
+	functional studies are proposed: (1) labeling of an extremum defined
+	by a set of coordinates, (2) percentage of voxels belonging to each
+	of the AVOI intersected by a sphere centered by a set of coordinates,
+	and (3) percentage of voxels belonging to each of the AVOI intersected
+	by an activated cluster. An interface with the Statistical Parametric
+	Mapping package (SPM, J. Ashburner and K. J. Friston, 1999, Hum.
+	Brain Mapp. 7, 254-266) is provided as a freeware to researchers
+	of the neuroimaging community. We believe that this tool is an improvement
+	for the macroscopical labeling of activated area compared to labeling
+	assessed using the Talairach atlas brain in which deformations are
+	well known. However, this tool does not alleviate the need for more
+	sophisticated labeling strategies based on anatomical or cytoarchitectonic
+	probabilistic maps.},
+  doi = {10.1006/nimg.2001.0978},
+  institution = {Groupe d'Imagerie Neurofonctionnelle, UMR 6095 CNRS CEA, Université
+	de Caen, Université de Paris 5, France.},
+  keywords = {Brain Mapping; Brain, anatomy /&/ histology; Computer Graphics; Dominance,
+	Cerebral, physiology; Humans; Image Processing, Computer-Assisted;
+	Imaging, Three-Dimensional; Magnetic Resonance Imaging; Reference
+	Values},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pii = {S1053811901909784},
+  pmid = {11771995},
+  timestamp = {2014.08.09},
+  url = {http://dx.doi.org/10.1006/nimg.2001.0978}
+}
+
+@ARTICLE{Wang2011,
+  author = {Wang, Hongzhi and Das, Sandhitsu R. and Suh, Jung Wook and Altinay,
+	Murat and Pluta, John and Craige, Caryne and Avants, Brian and Yushkevich,
+	Paul A. and , Alzheimer's Disease Neuroimaging Initiative},
+  title = {A learning-based wrapper method to correct systematic errors in automatic
+	image segmentation: consistently improved performance in hippocampus,
+	cortex and brain segmentation.},
+  journal = {Neuroimage},
+  year = {2011},
+  volume = {55},
+  pages = {968--985},
+  number = {3},
+  month = {Apr},
+  abstract = {We propose a simple but generally applicable approach to improving
+	the accuracy of automatic image segmentation algorithms relative
+	to manual segmentations. The approach is based on the hypothesis
+	that a large fraction of the errors produced by automatic segmentation
+	are systematic, i.e., occur consistently from subject to subject,
+	and serves as a wrapper method around a given host segmentation method.
+	The wrapper method attempts to learn the intensity, spatial and contextual
+	patterns associated with systematic segmentation errors produced
+	by the host method on training data for which manual segmentations
+	are available. The method then attempts to correct such errors in
+	segmentations produced by the host method on new images. One practical
+	use of the proposed wrapper method is to adapt existing segmentation
+	tools, without explicit modification, to imaging data and segmentation
+	protocols that are different from those on which the tools were trained
+	and tuned. An open-source implementation of the proposed wrapper
+	method is provided, and can be applied to a wide range of image segmentation
+	problems. The wrapper method is evaluated with four host brain MRI
+	segmentation methods: hippocampus segmentation using FreeSurfer (Fischl
+	et al., 2002); hippocampus segmentation using multi-atlas label fusion
+	(Artaechevarria et al., 2009); brain extraction using BET (Smith,
+	2002); and brain tissue segmentation using FAST (Zhang et al., 2001).
+	The wrapper method generates 72\%, 14\%, 29\% and 21\% fewer erroneously
+	segmented voxels than the respective host segmentation methods. In
+	the hippocampus segmentation experiment with multi-atlas label fusion
+	as the host method, the average Dice overlap between reference segmentations
+	and segmentations produced by the wrapper method is 0.908 for normal
+	controls and 0.893 for patients with mild cognitive impairment. Average
+	Dice overlaps of 0.964, 0.905 and 0.951 are obtained for brain extraction,
+	white matter segmentation and gray matter segmentation, respectively.},
+  institution = {Penn Image Computing and Science Laboratory, Department of Radiology,
+	University of Pennsylvania, Philadelphia, PA, USA. hongzhiw@mail.med.upenn.edu},
+  keywords = {Aged; Algorithms; Alzheimer Disease, pathology; Artificial Intelligence;
+	Atlases as Topic; Brain, anatomy /&/ histology/pathology; Cerebral
+	Cortex, anatomy /&/ histology/pathology; Databases, Factual; Female;
+	Hippocampus, anatomy /&/ histology/pathology; Humans; Image Enhancement,
+	methods; Image Processing, Computer-Assisted, methods; Male; Middle
+	Aged; Software},
+  language = {eng},
+  medline-pst = {ppublish},
+  owner = {stnava},
+  pmid = {21237273},
+  timestamp = {2015.02.08}
+}
+
+@ARTICLE{Wang2013a,
+  author = {Wang, Hongzhi and Yushkevich, Paul A.},
+  title = {Multi-atlas segmentation with joint label fusion and corrective learning-an
+	open source implementation.},
+  journal = {Front Neuroinform},
+  year = {2013},
+  volume = {7},
+  pages = {27},
+  abstract = {Label fusion based multi-atlas segmentation has proven to be one of
+	the most competitive techniques for medical image segmentation. This
+	technique transfers segmentations from expert-labeled images, called
+	atlases, to a novel image using deformable image registration. Errors
+	produced by label transfer are further reduced by label fusion that
+	combines the results produced by all atlases into a consensus solution.
+	Among the proposed label fusion strategies, weighted voting with
+	spatially varying weight distributions derived from atlas-target
+	intensity similarity is a simple and highly effective label fusion
+	technique. However, one limitation of most weighted voting methods
+	is that the weights are computed independently for each atlas, without
+	taking into account the fact that different atlases may produce similar
+	label errors. To address this problem, we recently developed the
+	joint label fusion technique and the corrective learning technique,
+	which won the first place of the 2012 MICCAI Multi-Atlas Labeling
+	Challenge and was one of the top performers in 2013 MICCAI Segmentation:
+	Algorithms, Theory and Applications (SATA) challenge. To make our
+	techniques more accessible to the scientific research community,
+	we describe an Insight-Toolkit based open source implementation of
+	our label fusion methods. Our implementation extends our methods
+	to work with multi-modality imaging data and is more suitable for
+	segmentation problems with multiple labels. We demonstrate the usage
+	of our tools through applying them to the 2012 MICCAI Multi-Atlas
+	Labeling Challenge brain image dataset and the 2013 SATA challenge
+	canine leg image dataset. We report the best results on these two
+	datasets so far.},
+  doi = {10.3389/fninf.2013.00027},
+  institution = {Department of Radiology, PICSL, Perelman School of Medicine at the
+	University of Pennsylvania Philadelphia, PA, USA.},
+  language = {eng},
+  medline-pst = {epublish},
+  owner = {stnava},
+  pmid = {24319427},
+  timestamp = {2015.02.08},
+  url = {http://dx.doi.org/10.3389/fninf.2013.00027}
+}
+
+@ARTICLE{neuRosim,
+  author = {Marijke Welvaert and Joke Durnez and Beatrijs Moerkerke and Geert
+	Berdoolaege and Yves Rosseel},
+  title = {neuRosim: An R Package for Generating fMRI Data},
+  journal = {Journal of Statistical Software},
+  year = {2011},
+  volume = {44},
+  pages = {1--18},
+  number = {10},
+  month = {10},
+  accepted = {2011-06-21},
+  bibdate = {2011-06-21},
+  coden = {JSSOBK},
+  day = {31},
+  issn = {1548-7660},
+  owner = {stnava},
+  submitted = {2010-10-31},
+  timestamp = {2014.08.09},
+  url = {http://www.jstatsoft.org/v44/i10}
+}
+

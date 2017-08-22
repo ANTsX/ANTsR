@@ -19,3 +19,4 @@ vignettes/\.build\.timestamp
 which\.R
 c\.R
 _config\.yml
+^docs$
