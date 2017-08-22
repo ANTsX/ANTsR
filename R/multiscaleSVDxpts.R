@@ -903,7 +903,7 @@ jointSmoothMatrixReconstruction <- function(
   nvecs,
   parameters,
   iterations = 10,
-  subIterations = 5,
+  subIterations = 1,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
   positivity = FALSE,
@@ -937,13 +937,14 @@ jointSmoothMatrixReconstruction <- function(
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
-    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+#    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept
     u = u[,-1]
-    v = mdl$coefficients[-1, ] * 0.01
-    #    v = matrix( rnorm( length( v ) ), nrow = nrow( v ), ncol = ncol( v ) )
+    v = mdl$coefficients[-1, ]
+    v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
     #    v = t( rsvd::rsvd(  x[[ m2 ]], nu = 0, nv = nvecs  )$v )
     #    v = v / rowSums( v )
     ulist[[ i ]] = u
@@ -965,7 +966,7 @@ while ( k <= iterations ) {
         whichv = pp
       }
     temp = t( vlist[[ whichv ]] )
-    temp = t( temp ) #/ rowSums( temp ) )
+    temp = t( temp ) # / rowSums( temp )
     if ( ! is.na( whichv ) )
       ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
     if ( class( smoothingMatrix[[i]] ) == 'logical' )
