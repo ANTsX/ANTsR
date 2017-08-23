@@ -86,7 +86,7 @@
       <h1>Transformations and statistical representations for images in R</h1>
                         <h4 class="author">Brian B. Avants</h4>
             
-            <h4 class="date">2017-08-22</h4>
+            <h4 class="date">2017-08-23</h4>
           </div>
 
     
@@ -205,7 +205,7 @@ img&lt;-<span class="kw">as.antsImage</span>( arrayimg )
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># if using SUBSET using an antsImage, you must be explicit</span>
 sub =<span class="st"> </span><span class="kw">as.array</span>(img &gt;=<span class="st"> </span><span class="dv">50</span> &amp;<span class="st"> </span>img &lt;=<span class="st"> </span><span class="dv">99</span>) &gt;<span class="st"> </span><span class="dv">0</span>
 <span class="kw">print</span>( <span class="kw">mean</span>( gaussimg[ sub  ]) )</code></pre></div>
-<pre><code>## [1] 0.007057543</code></pre>
+<pre><code>## [1] 0.05322147</code></pre>
 <p><strong>Convert a 4D image to a matrix</strong></p>
 <p>Four dimensional images are generated and used in the same way. One can easily transform from 4D image to matrix and back.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gaussimg&lt;-<span class="kw">makeImage</span>(<span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">10</span>), <span class="dt">voxval =</span> <span class="kw">rnorm</span>(<span class="dv">125</span>*<span class="dv">10</span>)  )
@@ -215,7 +215,7 @@ sub =<span class="st"> </span><span class="kw">as.array</span>(img &gt;=<span cl
 mask &lt;-<span class="st"> </span>avg3d &lt;<span class="st"> </span><span class="fl">0.25</span>
 gmat&lt;-<span class="kw"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span>( gaussimg, mask )
 <span class="kw">print</span>(<span class="kw">dim</span>(gmat))</code></pre></div>
-<pre><code>## [1] 10 96</code></pre>
+<pre><code>## [1]  10 101</code></pre>
 <p>If one has a mask, then one can use <code>makeImage</code> to generate a new image from a scalar or vector.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">newimg&lt;-<span class="kw">makeImage</span>( mask, <span class="kw">mean</span>(avg3d) )    <span class="co"># from scalar</span>
 newimg&lt;-<span class="kw">makeImage</span>( mask, <span class="kw">colMeans</span>(gmat) ) <span class="co"># from vector</span></code></pre></div>
@@ -234,7 +234,7 @@ mask&lt;-<span class="kw">getMask</span>( ilist[[<span class="dv">1</span>]],
   <span class="dt">lowThresh=</span><span class="kw">mean</span>(ilist[[<span class="dv">1</span>]]), <span class="dt">cleanup=</span><span class="ot">TRUE</span> )
 mat&lt;-<span class="kw"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span>( ilist, mask )
 <span class="kw">print</span>(<span class="kw">dim</span>(mat))</code></pre></div>
-<pre><code>## [1] 100 757</code></pre>
+<pre><code>## [1] 100 368</code></pre>
 <p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask. Then we look at some summary statistics.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mat&lt;-<span class="kw"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span>( ilist, mask )
 age&lt;-<span class="kw">rnorm</span>( <span class="kw">nrow</span>(mat) ) <span class="co"># simulated age</span>
@@ -249,9 +249,9 @@ mdli&lt;-<span class="kw">bigLMStats</span>( mdl, <span class="fl">1.e-4</span> 
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">rownames</span>(mdli$beta.t))</code></pre></div>
 <pre><code>## [1] "age"     "genderM"</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">"age"</span>,<span class="kw">min</span>(<span class="kw">p.adjust</span>(mdli$beta.pval[<span class="dv">1</span>,]))))</code></pre></div>
-<pre><code>## [1] "age 2.58057766149147e-06"</code></pre>
+<pre><code>## [1] "age 5.38228142646716e-05"</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">paste</span>(<span class="st">"gen"</span>,<span class="kw">min</span>(<span class="kw">p.adjust</span>(mdli$beta.pval[<span class="dv">2</span>,]))))</code></pre></div>
-<pre><code>## [1] "gen 0.853661154727844"</code></pre>
+<pre><code>## [1] "gen 0.957119078163056"</code></pre>
 <p><strong>Write out a statistical map</strong></p>
 <p>We might also write out the images so that we can save them for later or look at them with other software.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">agebetas&lt;-<span class="kw">makeImage</span>( mask , mdli$beta.t[<span class="dv">1</span>,] )

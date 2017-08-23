@@ -157,7 +157,7 @@ are placed in the matrix.</p></td>
   <span class='no'>imageList</span> <span class='kw'>=</span> <span class='fu'>list.files</span>(<span class='no'>tdir</span>, <span class='kw'>pattern</span> <span class='kw'>=</span> <span class='st'>".mha"</span>, <span class='kw'>full.names</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
   <span class='no'>mask</span> <span class='kw'>=</span> <span class='fu'>getMask</span>( <span class='fu'>antsImageRead</span>( <span class='no'>imageList</span>[<span class='fl'>1</span>] ) )
   <span class='no'>mat</span> <span class='kw'>=</span> <span class='fu'>imagesToMatrix</span>(<span class='no'>imageList</span>, <span class='no'>mask</span>)
-  <span class='fu'>print</span>(<span class='fu'>dim</span>(<span class='no'>mat</span>))</div><div class='output co'>#&gt; [1]   2 102</div><div class='input'>
+  <span class='fu'>print</span>(<span class='fu'>dim</span>(<span class='no'>mat</span>))</div><div class='output co'>#&gt; [1]   2 142</div><div class='input'>
 
 </div></pre>
   </div>
