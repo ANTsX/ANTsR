@@ -10,6 +10,11 @@
 [![Travis Build Status](https://travis-ci.org/stnava/ANTsR.png?branch=master)](https://travis-ci.org/stnava/ANTsR) [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stnava/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/stnava/ANTsR)
 
+
+muschellij2 badges:
+[![Travis Build Status](https://travis-ci.org/muschellij2/ANTsR.png?branch=master)](https://travis-ci.org/muschellij2/ANTsR) [![Coverage Status](https://coveralls.io/repos/muschellij2/ANTsR/badge.svg)](https://coveralls.io/r/muschellij2/ANTsR)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/muschellij2/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/muschellij2/ANTsR)
+
 A package providing [ANTs](http://stnava.github.io/ANTs/) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.  See also the **Neuroconductor** [site](https://www.neuroconductor.org/package/details/ANTsR).
 
 ## Description
