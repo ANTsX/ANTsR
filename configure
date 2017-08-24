@@ -43,10 +43,11 @@ echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
 
 aincludes=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsIncludes(); cat(a)'`
 
-echo "PKG_CPPFLAGS = ${PKG_CPPFLAGS} -I\${ITK} -I\${PWD}  \
+
+echo "PKG_CPPFLAGS =${PKG_CPPFLAGS} -I\${ITK} -I\${PWD}  \
   -I${aincludes} \
   -I../inst/include/ " >> Makevars
-  
+
 echo "CXX_STD = CXX11" >> Makevars
 
 myantslib=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsLibs(); cat(a)'`
@@ -58,8 +59,8 @@ echo "libants=\`find ${myantslib} -name \"lib*.a\"\`" >> Makevars
 
 echo "libitk=\`find ${ITKRLIB} -name \"lib*.a\"\`" >> Makevars
 
-echo "PKG_LIBS=${PKG_LIBS} \${libitk} \${libants} \${libitk} \${libants} \
-	\${libitk} \${libants}" >> Makevars
+echo "PKG_LIBS=${PKG_LIBS} \${libants} \${libitk} \${libants} \${libitk} \
+	\${libants} \${libitk} " >> Makevars
 
 echo ".PHONY: all libs" >> Makevars
 

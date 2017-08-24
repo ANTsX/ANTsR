@@ -33,11 +33,11 @@ before_install:
   - wget -O travis_helpers.sh http://bit.ly/travis_helpers
   - source travis_helpers.sh
   - rm travis_helpers.sh
-  # does all the clang exports  
+  # does all the clang exports
   - clang_cxx
   - export cmake_version="3.4"
   - cmake --version
-  - cmake_setup    
+  - cmake_setup
   - cmake --version
   - gh_binary_install stnava/ITKR
   - gh_binary_install stnava/ANTsRCore
@@ -53,7 +53,7 @@ jobs:
     - script:
       - cat ~/.R/Makevars
       - source ~/.R/Makevars
-      - export_clang_cxx    
+      - export_clang_cxx
       - cd ..
       - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
@@ -62,7 +62,7 @@ jobs:
     - script:
       - cat ~/.R/Makevars
       - source ~/.R/Makevars
-      - export_clang_cxx    
+      - export_clang_cxx
       - cd ..
       - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
@@ -78,7 +78,7 @@ jobs:
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - if [[ ${#TRAVIS_TAG} -gt 0 ]];
         then
-          R CMD INSTALL --debug --build ANTsR; 
+          R CMD INSTALL --debug --build ANTsR;
           PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
           if [ "$TRAVIS_OS_NAME" == "osx" ];
             then
@@ -101,13 +101,13 @@ jobs:
       script:
       - cat ~/.R/Makevars
       - source ~/.R/Makevars
-      - export_clang_cxx     
+      - export_clang_cxx
       - cd ..
       - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - if [[ ${#TRAVIS_TAG} -gt 0 ]];
         then
-          R CMD INSTALL --debug --build ANTsR; 
+          R CMD INSTALL --debug --build ANTsR;
           PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
           if [ "$TRAVIS_OS_NAME" == "osx" ];
             then
@@ -139,10 +139,10 @@ jobs:
 after_success:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  - cat ${dn}/ANTsR.Rcheck/00check.log  
+  - cat ${dn}/ANTsR.Rcheck/00check.log
   - cat ${dn}/ANTsR.Rcheck/00install.out
   - export PATH=${ORIG_PATH}
-  
+
 after_failure:
   - echo ${TRAVIS_BUILD_DIR}
   - dn=`dirname ${TRAVIS_BUILD_DIR}`

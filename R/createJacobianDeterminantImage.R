@@ -28,11 +28,11 @@ createJacobianDeterminantImage <- function(
     txuse = tempfile( fileext = c(".nii.gz") )
     antsImageWrite( tx, txuse )
     } else txuse = tx
-  args <- list(dim, txuse, doLog)
-  dimg <- antsImageClone( domainImg, "double" )
-  args2 <- list(dim, txuse, dimg, as.numeric( doLog ), as.numeric( geom ))
-  k <- .int_antsProcessArguments(args2)
-  retval <- (.Call("CreateJacobianDeterminantImage", k, PACKAGE = "ANTsR"))
-  jimg <- antsImageClone(args2[[3]], "float")
-  return(jimg)
+
+  outimg <- .Call("createJacobianDeterminantImageR",
+      antsImageClone( domainImg ), txuse,
+      as.numeric( doLog ),
+      as.numeric( geom ),
+      PACKAGE = "ANTsR")
+  return( outimg )
 }
