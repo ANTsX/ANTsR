@@ -938,7 +938,8 @@ jointSmoothMatrixReconstruction <- function(
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
 #    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
-    basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=rsvd::rsvd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+#    basisDf = data.frame( u=svd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept
@@ -1005,7 +1006,8 @@ while ( k <= iterations ) {
       temp = t( vlist[[ whichv ]] )
       temp = t( temp / rowSums( temp ) )
       if ( ! is.na( whichv ) )
-        ulist[[ i ]] =  svd( x[[ m1 ]] %*% ( temp  ) )$u
+        ulist[[ i ]] =  svd( x[[ m1 ]] %*% ( temp  ), nv=0 )$u
+#        ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
       }
 
     k = k + 1
