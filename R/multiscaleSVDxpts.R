@@ -601,9 +601,16 @@ while ( i <= iterations ) {
   v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
   v = v + dedv * gamma
-#  if ( wt1 < 1 )
-#    v = v * wt1 + as.matrix( smoothingMatrix %*% v ) * smoothingWeight
+#  v = rsvd::rsvd( v )$v
   for ( vv in 1:ncol( v ) ) {
+    v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
+    if ( vv > 1 )
+      for ( vk in 1:(vv-1) ) {
+        temp = v[,vk]
+        denom = sum( temp * temp , na.rm=T )
+        if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+        v[ , vv ] = v[, vv ] - temp * ip
+        }
     localv = v[ , vv ]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
@@ -630,8 +637,8 @@ while ( i <= iterations ) {
   if ( i > 1 ) {
     if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
       {
-      message(paste("flipping sign of gradient step:", gamma))
-      gamma = gamma * ( -1.0 )
+#      message(paste("flipping sign of gradient step:", gamma))
+#      gamma = gamma * ( -1.0 )
       }
     else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
@@ -733,8 +740,17 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
     v = as.matrix( smoothingMatrix %*% v )
     dedv = t( tuu %*% t( v ) - tu %*% x )
     v = v + dedv * gamma
+#    v = A.qr <- qr( v )
+#    v = qr.Q( v )
     for ( vv in 1:ncol( v ) ) {
-#      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
+      v[ , vv ] = v[ , vv ] / as.numeric( sqrt(  v[ , vv ] %*% v[ , vv ] ) )
+      if ( vv > 1 )
+        for ( vk in 1:(vv-1) ) {
+          temp = v[,vk]
+          denom = as.numeric( temp  %*%  temp )
+          if ( denom > 0 ) ip = as.numeric( temp %*%  v[,vv] ) / denom else ip = 1
+          v[ , vv ] = v[, vv ] - temp * ip
+          }
       localv = v[ , vv ]
       if ( positivity & sparsenessQuantile >= 0.5 ) {
         localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
@@ -763,7 +779,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
       if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
         {
 #        message(paste("flipping sign of gradient step:", gamma))
-        gamma = gamma * ( -1.0 )
+#        gamma = gamma * ( -1.0 )
         }
       else if ( ( errs[ i ] > errs[ i - 1 ] ) )
         {
@@ -903,7 +919,7 @@ jointSmoothMatrixReconstruction <- function(
   nvecs,
   parameters,
   iterations = 10,
-  subIterations = 1,
+  subIterations = 5,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
   positivity = FALSE,
@@ -1006,8 +1022,8 @@ while ( k <= iterations ) {
       temp = t( vlist[[ whichv ]] )
       temp = t( temp / rowSums( temp ) )
       if ( ! is.na( whichv ) )
-        ulist[[ i ]] =  svd( x[[ m1 ]] %*% ( temp  ), nv=0 )$u
-#        ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
+#        ulist[[ i ]] =  svd( x[[ m1 ]] %*% ( temp  ), nv=0 )$u
+        ulist[[ i ]] =  ( x[[ m1 ]] %*% ( temp  ) )
       }
 
     k = k + 1
