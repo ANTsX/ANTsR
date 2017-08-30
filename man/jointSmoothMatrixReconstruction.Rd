@@ -7,7 +7,7 @@
 jointSmoothMatrixReconstruction(x, nvecs, parameters, iterations = 10,
   subIterations = 5, gamma = 1e-06, sparsenessQuantile = 0.5,
   positivity = FALSE, smoothingMatrix = NA, rowWeights = NA,
-  repeatedMeasures = NA, verbose = FALSE)
+  repeatedMeasures = NA, doOrth = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{input list of matrices to be jointly predicted.}
@@ -35,6 +35,8 @@ length as x.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{doOrth}{boolean enforce gram-schmidt orthonormality}
 
 \item{verbose}{boolean option}
 }

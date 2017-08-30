@@ -497,6 +497,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' allow estimates of per identifier intercept.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
 #' @param LRR integer value sets rank for fast version exploiting matrix approximation
+#' @param doOrth boolean enforce gram-schmidt orthonormality
 #' @param verbose boolean option
 #' @return matrix of size p by k is output
 #' @author Avants BB
@@ -537,15 +538,15 @@ smoothMatrixPrediction <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
-#  smoothingWeight = 0.5,
   repeatedMeasures = NA,
   rowWeights = NA,
   LRR = NA,
+  doOrth = FALSE,
   verbose = FALSE
   )
 {
 smoothingWeight = 1.0
-if ( missing( "x") | missing("basisDf") ) {
+if ( missing( "x" ) | missing( "basisDf" ) ) {
   message("this function needs input")
   return( NA )
   }
@@ -600,7 +601,7 @@ wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
   v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
-  v = v + dedv * gamma
+  v = v - dedv * gamma
 #  v = rsvd::rsvd( v )$v
   for ( vv in 1:ncol( v ) ) {
     v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
@@ -654,6 +655,7 @@ if ( verbose ) print( paste( "end",  err ) )
 colnames( v ) = colnames( u )
 return( list( u = u, v=v, intercept = intercept ) )
 }
+
 
 
 #' k-nearest neighbors constrained image smoothing
@@ -731,7 +733,8 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 
 .xuvtHelper <- function( x, u, v, errs, iterations,
   smoothingMatrix, repeatedMeasures, intercept,
-  positivity, gamma, sparsenessQuantile, usubs, verbose ) {
+  positivity, gamma, sparsenessQuantile, usubs,
+  doOrth, verbose ) {
   i = 1
   tu = t( u )
   tuu = t( u ) %*% u
@@ -740,11 +743,14 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
     v = as.matrix( smoothingMatrix %*% v )
     dedv = t( tuu %*% t( v ) - tu %*% x )
     v = v + dedv * gamma
-#    v = A.qr <- qr( v )
-#    v = qr.Q( v )
+#    if ( abs( doOrth ) >  Inf ) {
+#      vOrth = A.qr <- qr( v )
+#      vOrth = qr.Q( vOrth )
+#      v = v * ( 1 - doOrth ) - vOrth * doOrth
+#    }
     for ( vv in 1:ncol( v ) ) {
       v[ , vv ] = v[ , vv ] / as.numeric( sqrt(  v[ , vv ] %*% v[ , vv ] ) )
-      if ( vv > 1 )
+      if ( vv > 1  &  doOrth )
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
           denom = as.numeric( temp  %*%  temp )
@@ -779,7 +785,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
       if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
         {
 #        message(paste("flipping sign of gradient step:", gamma))
-#        gamma = gamma * ( -1.0 )
+        gamma = gamma * ( -1.0 )
         }
       else if ( ( errs[ i ] > errs[ i - 1 ] ) )
         {
@@ -816,6 +822,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
+#' @param doOrth boolean enforce gram-schmidt orthonormality
 #' @param verbose boolean option
 #' @return matrix list each of size p by k is output
 #' @author Avants BB
@@ -926,6 +933,7 @@ jointSmoothMatrixReconstruction <- function(
   smoothingMatrix = NA,
   rowWeights = NA,
   repeatedMeasures = NA,
+  doOrth = FALSE,
   verbose = FALSE
   )
 {
@@ -994,7 +1002,8 @@ while ( k <= iterations ) {
       smoothingMatrix=loSmoo,
       repeatedMeasures=repeatedMeasures, ilist[[ i ]],
       positivity=positivity, gammas[i] * parameters[i,3],
-      sparsenessQuantile=sparsenessQuantile, usubs=usubs, verbose=F )
+      sparsenessQuantile=sparsenessQuantile, usubs=usubs,
+      doOrth=doOrth, verbose=F )
 #    gammas[i] = temp$gamma * 1.0 # 5
     vlist[[ i ]] = temp$v
     ilist[[ i ]] = temp$intercept
