@@ -92,8 +92,11 @@
 <div id="antsr" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#antsr" class="anchor"></a>ANTsR</h1></div>
-<p><a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Travis Build Status"></a> <a href="https://coveralls.io/r/stnava/ANTsR"><img src="https://coveralls.io/repos/stnava/ANTsR/badge.svg" alt="Coverage Status"></a> <a href="https://ci.appveyor.com/project/stnava/ANTsR"><img src="https://ci.appveyor.com/api/projects/status/github/stnava/ANTsR?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></p>
-<p>A package providing <a href="http://stnava.github.io/ANTs/">ANTs</a> features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools. See also the <strong>Neuroconductor</strong> <a href="https://www.neuroconductor.org/package/details/ANTsR">site</a>.</p>
+<p><a href="https://travis-ci.org/ANTsX/ANTsR"><img src="https://travis-ci.org/ANTsX/ANTsR.png?branch=master" alt="Travis Build Status"></a></p>
+<!-- commenting out because we moved to antsx
+[![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stnava/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/stnava/ANTsR) -->
+<p>A package providing <a href="https://github.com/ANTsX/ANTs">ANTs</a> features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools. See also the <strong>Neuroconductor</strong> <a href="https://www.neuroconductor.org/package/details/ANTsR">site</a>.</p>
 <div id="description" class="section level2">
 <h2 class="hasAnchor">
 <a href="#description" class="anchor"></a>Description</h2>
@@ -105,24 +108,24 @@
 <p>Author: Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison, Dorian Pustina</p>
 <p>Maintainer: <a href="http://stnava.github.io/">Brian B. Avants</a></p>
 <p>URL: <a href="http://stnava.github.io/ANTsR/">homepage</a></p>
-<p>BugReports: <a href="http://github.com/stnava/ANTsR/issues">github issues</a></p>
+<p>BugReports: <a href="http://github.com/ANTsX/ANTsR/issues">github issues</a></p>
 <p>NeedsCompilation: yes</p>
-<p>Travis checks: <a href="https://travis-ci.org/stnava/ANTsR">ANTsR results</a></p>
+<p>Travis checks: <a href="https://travis-ci.org/ANTsX/ANTsR">ANTsR results</a></p>
 </div>
 <div id="downloads" class="section level2">
 <h2 class="hasAnchor">
 <a href="#downloads" class="anchor"></a>Downloads</h2>
-<p>Reference manual: <a href="https://github.com/stnava/ANTsR/releases/">ANTsR.pdf</a></p>
-<p><a href="https://github.com/stnava/ANTsR/releases/">Vignettes</a>:</p>
+<p>Reference manual: <a href="https://github.com/ANTsX/ANTsR/releases/">ANTsR.pdf</a></p>
+<p><a href="https://github.com/ANTsX/ANTsR/releases/">Vignettes</a>:</p>
 <ul>
-<li><p><a href="http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/ANTsR.html">ANTsR</a></p></li>
-<li><p><a href="http://htmlpreview.github.io/?https://github.com/stnava/ANTsDoc/blob/master/html/iMath.html">iMath</a></p></li>
+<li><p><a href="http://htmlpreview.github.io/?https://github.com/ANTsX/ANTsDoc/blob/master/html/ANTsR.html">ANTsR</a></p></li>
+<li><p><a href="http://htmlpreview.github.io/?https://github.com/ANTsX/ANTsDoc/blob/master/html/iMath.html">iMath</a></p></li>
 </ul>
-<p>Wiki: <a href="https://github.com/stnava/ANTsR/wiki">Notes and work in progress examples</a></p>
-<p>Package source: <a href="https://github.com/stnava/ANTsR/zipball/master">from github</a></p>
-<p>OS X Mavericks, Yosemite binaries: <a href="http://github.com/stnava/ANTsR/releases/">OSX</a></p>
-<p>Linux binaries: <a href="http://github.com/stnava/ANTsR/releases/">Ubuntu</a></p>
-<p><em>Windows</em> installation option <a href="https://github.com/stnava/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).">here</a></p>
+<p>Wiki: <a href="https://github.com/ANTsX/ANTsR/wiki">Notes and work in progress examples</a></p>
+<p>Package source: <a href="https://github.com/ANTsX/ANTsR/zipball/master">from github</a></p>
+<p>OS X Mavericks, Yosemite binaries: <a href="http://github.com/ANTsX/ANTsR/releases/">OSX</a></p>
+<p>Linux binaries: <a href="http://github.com/ANTsX/ANTsR/releases/">Ubuntu</a></p>
+<p><em>Windows</em> installation option <a href="https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).">here</a></p>
 <p>Install the binary, after downloading, via command line:</p>
 <pre><code>R CMD INSTALL ANTsR_*.tgz</code></pre>
 </div>
@@ -147,10 +150,10 @@
 <p>Please read this entire section before choosing which method you prefer.</p>
 <p>In general, these <strong>assume</strong> you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>. you may also need <a href="http://www.cmake.org">cmake</a> if you do/can not install <code>cmaker</code>.</p>
 <p>Windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too). To my knowledge, there are no recorded instances of ANTsR being installed on Windows. If someone does so, we would like to know.</p>
-<p>You will need to install R packages that ANTsR requires. Minimally: <strong>Install ITKR and ANTsRCore</strong> <a href="https://github.com/stnava/ITKR/releases">here</a> and <a href="https://github.com/stnava/ANTsRCore/releases">here</a> then do:</p>
+<p>You will need to install R packages that ANTsR requires. Minimally: <strong>Install ITKR and ANTsRCore</strong> <a href="https://github.com/stnava/ITKR/releases">here</a> and <a href="https://github.com/ANTsX/ANTsRCore/releases">here</a> then do:</p>
 <pre><code>mydeps &lt;- c( "Rcpp", "tools", "methods", "magrittr" )
 install.packages( pkgs = mydeps, dependencies = TRUE )</code></pre>
-<p>You can gain additional functionality by installing packages that are listed in the <a href="https://github.com/stnava/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>. A complete list of recommended ancillary packages <a href="https://github.com/stnava/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality">here</a>.</p>
+<p>You can gain additional functionality by installing packages that are listed in the <a href="https://github.com/ANTsX/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>. A complete list of recommended ancillary packages <a href="https://github.com/ANTsX/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality">here</a>.</p>
 <p><strong>Method 1: with devtools in R</strong></p>
 <pre><code>library( devtools )
 # install_github("stnava/cmaker") # if you do not have cmake
@@ -158,21 +161,21 @@ install_github("stnava/ANTsR")</code></pre>
 <p><strong>Method 2: from command line (most traditional method)</strong></p>
 <p>Assumes git, cmake and compilers are available in your environment (as above).</p>
 <p>First, clone the repository:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/stnava/ITKR.git
-$ <span class="kw">git</span> clone https://github.com/stnava/ANTsRCore.git
-$ <span class="kw">git</span> clone https://github.com/stnava/ANTsR.git</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/ANTsX/ITKR.git
+$ <span class="kw">git</span> clone https://github.com/ANTsX/ANTsRCore.git
+$ <span class="kw">git</span> clone https://github.com/ANTsX/ANTsR.git</code></pre></div>
 <p>Install the package as follows:</p>
 <div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash">$ <span class="kw">R</span> CMD INSTALL ITKR
 $ <span class="kw">R</span> CMD INSTALL ANTsRCore
 $ <span class="kw">R</span> CMD INSTALL ANTsR</code></pre></div>
-<p>The <a href="https://github.com/stnava/ANTsR/blob/master/.travis.yml"><code>travis.yml</code> file</a> also shows a way to install from Linux command line.</p>
+<p>The <a href="https://github.com/ANTsX/ANTsR/blob/master/.travis.yml"><code>travis.yml</code> file</a> also shows a way to install from Linux command line.</p>
 <p><strong>Method 3: from binaries</strong></p>
 <p>Note that version numbers will change over time.</p>
 <pre><code>wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
 R CMD INSTALL ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
-wget https://github.com/stnava/ANTsRCore/releases/download/v0.4.2.1/ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
+wget https://github.com/ANTsX/ANTsRCore/releases/download/v0.4.2.1/ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
 R CMD INSTALL ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
-wget https://github.com/stnava/ANTsR/releases/download/latest/ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
+wget https://github.com/ANTsX/ANTsR/releases/download/latest/ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
 R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz</code></pre>
 <p><strong>Method 4: platform independent via docker and kitematic</strong></p>
 <p>This is a beta operation that is in flux but may be convenient for some users.</p>
@@ -240,8 +243,7 @@ mask&lt;-getMask( ilist[[1]],
 mat&lt;-imageListToMatrix( ilist, mask )
 print(dim(mat))</code></pre>
 <p><strong>Do fast statistics on a big matrix</strong></p>
-<p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask.<br>
-Then we look at some summary statistics.</p>
+<p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask. Then we look at some summary statistics.</p>
 <pre><code>mat&lt;-imageListToMatrix( ilist, mask )
 age&lt;-rnorm( nrow(mat) ) # simulated age
 gender&lt;-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
@@ -258,8 +260,7 @@ print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))</code></pre>
 <pre><code>agebetas&lt;-makeImage( mask , mdli$beta.t[1,] )
 antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )</code></pre>
 <p><strong>Neighborhood operations</strong></p>
-<p>Images neighborhoods contain rich shape and texture information.<br>
-We can extract neighborhoods for further analysis at a given scale.</p>
+<p>Images neighborhoods contain rich shape and texture information. We can extract neighborhoods for further analysis at a given scale.</p>
 <pre><code>mnit&lt;-getANTsRData("mni")
 mnit&lt;-antsImageRead(mnit)
 mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
