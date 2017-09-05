@@ -72,8 +72,7 @@ bloodPerfusionSVD <- function(
   
   if( missing( aifMaskImage ) )
   {
-    stop( paste0("Error:  The arterial input function mask image", 
-                 " is not specified.\n" )
+    stop( "Error:  The arterial input function mask image is not specified.\n" )
     )
   }
   
