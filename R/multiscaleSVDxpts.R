@@ -770,7 +770,7 @@ while ( i <= iterations ) {
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-    v[k,] = localv
+    v[k,] = localv / sum(abs(localv))
     }
   proj = ( x %*% t(v) )
   intercept = colMeans( y - ( proj ) )
