@@ -674,6 +674,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param nv number of predictor spatial vectors
+#' @param extraPredictors additional column predictors
 #' @param verbose boolean option
 #' @return vector of size p is output
 #' @author Avants BB
@@ -707,7 +708,8 @@ smoothRegression <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
-  nv = 1,
+  nv = 2,
+  extraPredictors,
   verbose = FALSE
   )
 {
@@ -717,6 +719,17 @@ if ( missing( "x" ) | missing( "y" ) ) {
   return( NA )
   }
 #
+originalN = ncol( x )
+if ( ! missing( "extraPredictors" ) ) {
+  temp = lm( y ~ . , data=data.frame(extraPredictors))
+  mdlmatrix = model.matrix( temp )[,-1]
+  n = nrow( smoomat ) + ncol( mdlmatrix )
+  newsmoo = sparseMatrix( 1:n, 1:n, x=1)
+  newsmoo[ 1:nrow( smoomat ), 1:nrow( smoomat ) ] = smoomat
+  smoothingMatrix = newsmoo
+  x = cbind( x, mdlmatrix )
+  rm( newsmoo )
+  }
 xgy = y %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
 for ( k in 1:nv )
@@ -773,6 +786,7 @@ while ( i <= iterations ) {
   if ( verbose ) print( paste( i,  err ) )
   }
 if ( verbose ) print( paste( "end",  err ) )
+v = v[ , 1:originalN ]
 return( list( v=as.matrix(t(v))  ) )
 }
 
