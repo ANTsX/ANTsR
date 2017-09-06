@@ -725,7 +725,7 @@ if ( ! missing( "extraPredictors" ) ) {
   mdlmatrix = model.matrix( temp )[,-1]
   n = nrow( smoomat ) + ncol( mdlmatrix )
   newsmoo = sparseMatrix( 1:n, 1:n, x=1)
-  newsmoo[ 1:nrow( smoomat ), 1:nrow( smoomat ) ] = smoomat
+  newsmoo[ 1:originalN, 1:originalN ] = smoothingMatrix
   smoothingMatrix = newsmoo
   x = cbind( x, mdlmatrix )
   rm( newsmoo )
