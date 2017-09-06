@@ -756,7 +756,7 @@ while ( i <= iterations ) {
         v[k ,  ] = v[k, ] - temp * ip
         }
       }
-#  v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
+  v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
   for ( k in 1:nv ) {
     localv = v[k,]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
