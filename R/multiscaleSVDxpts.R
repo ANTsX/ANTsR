@@ -722,10 +722,13 @@ if ( missing( "x" ) | missing( "y" ) ) {
 originalN = ncol( x )
 if ( ! missing( "extraPredictors" ) ) {
   temp = lm( y ~ . , data=data.frame(extraPredictors))
-  mdlmatrix = model.matrix( temp )[,-1]
-  n = nrow( smoomat ) + ncol( mdlmatrix )
-  newsmoo = sparseMatrix( 1:n, 1:n, x=1)
-  newsmoo[ 1:originalN, 1:originalN ] = smoothingMatrix
+  mdlmatrix = scale( model.matrix( temp )[,-1], scale=TRUE )
+  n = nrow( smoothingMatrix ) + ncol( mdlmatrix )
+  newsmoo = Matrix::sparseMatrix(
+    i = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
+    j = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
+#    p = c(smoothingMatrix@p, c(length(smoothingMatrix@x):(length(smoothingMatrix@x)+ncol( mdlmatrix )))),
+    x = c( smoothingMatrix@x, rep(1,ncol( mdlmatrix ))), symmetric=TRUE )
   smoothingMatrix = newsmoo
   x = cbind( x, mdlmatrix )
   rm( newsmoo )
