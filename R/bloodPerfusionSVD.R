@@ -73,13 +73,6 @@ bloodPerfusionSVD <- function(
   if( missing( aifMaskImage ) )
   {
     stop( "Error:  The arterial input function mask image is not specified.\n" )
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 21b450c70c613303eb92b925c568774cca884490
-    )
->>>>>>> 21b450c7... DOC:  Fix minor documentation.
   }
   
   # The AIF signal is defined as the mean intensity value over the AIF 
