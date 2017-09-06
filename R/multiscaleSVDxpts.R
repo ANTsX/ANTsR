@@ -673,6 +673,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' or lesser than 0.5.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
+#' @param nv number of predictor spatial vectors
 #' @param verbose boolean option
 #' @return vector of size p is output
 #' @author Avants BB
@@ -706,6 +707,7 @@ smoothRegression <- function(
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
+  nv = 1,
   verbose = FALSE
   )
 {
@@ -715,19 +717,27 @@ if ( missing( "x" ) | missing( "y" ) ) {
   return( NA )
   }
 #
-xg = as.matrix( x %*% smoothingMatrix )
-xgy = y %*% xg
-v = xgy + matrix( rnorm( ncol( x ), 0, 0.01 ), nrow = 1, ncol = ncol( x ) )
-intercept = mean( y - ( xg %*% t(v) ) )
-err = mean( abs( y - (  xg %*% t(v) + intercept ) ) )
-if ( verbose ) print( paste( "iteration",0, "err",  err ) )
+xgy = y %*% x
+v = matrix( 0, nrow = nv, ncol = ncol( x ) )
+for ( k in 1:nv )
+  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 0.01 ), nrow = 1, ncol = ncol( x ) )
 errs = rep( NA, length( iterations ) )
-i = 1
+i = 0
 while ( i <= iterations ) {
-  temp = t( x %*% t( as.matrix( v %*% smoothingMatrix ) ) ) %*% xg
-  dedv = xgy - temp
+  temp = t( x %*% t( as.matrix( v ) ) ) %*% x
+  dedv = temp * 0
+  for ( k in 1:nv )
+    dedv[k,] = xgy - temp[k,]
   v = ( v + dedv * gamma ) %*% smoothingMatrix
-  localv = v
+  for ( k in 1:nv ) {
+    if ( k > 1 )
+      for ( vk in 1:(k-1) ) {
+        temp = v[vk,]
+        denom = as.numeric( temp  %*%  temp )
+        if ( denom > 0 ) ip = as.numeric( temp %*%  v[k,] ) / denom else ip = 1
+        v[k ,  ] = v[k, ] - temp * ip
+        }
+    localv = v[k,]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
       localv[ localv < 0 ] = 0
@@ -739,9 +749,12 @@ while ( i <= iterations ) {
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-  v = matrix(localv,nrow=1)
-  intercept = mean( y - ( xg %*% t(v) ) )
-  err = mean( abs( y - (  xg %*% t(v) + intercept ) ) )
+    v[k,] = localv
+    }
+  proj = ( x %*% t(v) )
+  intercept = colMeans( y - ( proj ) )
+  for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[k]
+  err = mean( abs( y - (  proj ) ) )
   errs[ i ] = err
   if ( i > 1 ) {
     if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
@@ -760,7 +773,7 @@ while ( i <= iterations ) {
   if ( verbose ) print( paste( i,  err ) )
   }
 if ( verbose ) print( paste( "end",  err ) )
-return( list( v=t(v), intercept = intercept ) )
+return( list( v=as.matrix(t(v))  ) )
 }
 
 

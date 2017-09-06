@@ -6,7 +6,7 @@
 \usage{
 smoothRegression(x, y, iterations = 10, gamma = 1e-06,
   sparsenessQuantile = 0.5, positivity = FALSE, smoothingMatrix = NA,
-  verbose = FALSE)
+  nv = 1, verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix on which prediction is based}
@@ -25,6 +25,8 @@ or lesser than 0.5.}
 
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}
+
+\item{nv}{number of predictor spatial vectors}
 
 \item{verbose}{boolean option}
 }
