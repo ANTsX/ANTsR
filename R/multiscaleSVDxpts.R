@@ -713,7 +713,6 @@ smoothRegression <- function(
   verbose = FALSE
   )
 {
-smoothingWeight = 1.0
 if ( missing( "x" ) | missing( "y" ) ) {
   message("this function needs input")
   return( NA )
@@ -723,15 +722,17 @@ originalN = ncol( x )
 if ( ! missing( "extraPredictors" ) ) {
   temp = lm( y ~ . , data=data.frame(extraPredictors))
   mdlmatrix = scale( model.matrix( temp )[,-1], scale=TRUE )
-  n = nrow( smoothingMatrix ) + ncol( mdlmatrix )
-  newsmoo = Matrix::sparseMatrix(
-    i = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
-    j = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
-#    p = c(smoothingMatrix@p, c(length(smoothingMatrix@x):(length(smoothingMatrix@x)+ncol( mdlmatrix )))),
-    x = c( smoothingMatrix@x, rep(1,ncol( mdlmatrix ))), symmetric=TRUE )
-  smoothingMatrix = newsmoo
+  extraN = originalN + ncol( mdlmatrix )
+  if ( FALSE ) { # old approach below
+    newsmoo = Matrix::sparseMatrix(
+      i = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
+      j = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
+  #    p = c(smoothingMatrix@p, c(length(smoothingMatrix@x):(length(smoothingMatrix@x)+ncol( mdlmatrix )))),
+      x = c( smoothingMatrix@x, rep(1,ncol( mdlmatrix ))), symmetric=TRUE )
+    smoothingMatrix = newsmoo
+    rm( newsmoo )
+    }
   x = cbind( x, mdlmatrix )
-  rm( newsmoo )
   }
 xgy = y %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
@@ -744,7 +745,8 @@ while ( i <= iterations ) {
   dedv = temp * 0
   for ( k in 1:nv )
     dedv[k,] = xgy - temp[k,]
-  v = ( v + dedv * gamma ) %*% smoothingMatrix
+  v = ( v + dedv * gamma )
+  v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
   for ( k in 1:nv ) {
     if ( k > 1 )
       for ( vk in 1:(k-1) ) {
@@ -753,6 +755,9 @@ while ( i <= iterations ) {
         if ( denom > 0 ) ip = as.numeric( temp %*%  v[k,] ) / denom else ip = 1
         v[k ,  ] = v[k, ] - temp * ip
         }
+      }
+#  v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
+  for ( k in 1:nv ) {
     localv = v[k,]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
