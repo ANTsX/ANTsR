@@ -737,7 +737,7 @@ if ( ! missing( "extraPredictors" ) ) {
 xgy = y %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
 for ( k in 1:nv )
-  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 1.e-6 ), nrow = 1, ncol = ncol( x ) )
+  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 1.e-3 ), nrow = 1, ncol = ncol( x ) )
 errs = rep( NA, length( iterations ) )
 i = 1
 while ( i <= iterations ) {
@@ -774,14 +774,14 @@ while ( i <= iterations ) {
     v[k,] = localv / sum(abs(localv))
     v[k,] = localv / sqrt(sum(localv*localv))
     }
-  if ( i == 1 ) gamma = max( abs( v ) ) * 1.e-4
+  if ( i < 3 ) gamma = quantile( v[ abs(v) > 0 ] , 0.5 , na.rm=TRUE ) * 1.e-4
   proj = x %*% t( v )
   intercept = colMeans( y - ( proj ) )
   for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
   ymdl = lm( y ~ proj )
   err = mean( abs( y - ( proj ) ) )
   errs[ i ] = err # summary(ymdl)$r.squared * ( -1 )
-  if ( verbose ) print( paste("it/err/rsq", i,  errs[ i ], summary(ymdl)$r.squared  ) )
+  if ( verbose ) print( paste("it/err/rsq", i,  errs[ i ], summary(ymdl)$r.squared, "gamma", gamma  ) )
 #  coefwts = coefficients( ymdl )
 #  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
 #  proj = x %*% t( v ) # + coefwts[1]
@@ -796,7 +796,7 @@ while ( i <= iterations ) {
       gamma = gamma * ( 0.5 )
       message(paste("reducing gradient step:", gamma))
       }
-    if ( abs(gamma) < 1.e-9 ) i = iterations
+#    if ( abs(gamma) < 1.e-9 ) i = iterations
   }
   i = i + 1
   }
