@@ -613,13 +613,11 @@ while ( i <= iterations ) {
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
-    if ( positivity & sparsenessQuantile >= 0.5 ) {
-      localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-      localv[ localv < 0 ] = 0
-    }
-    if ( positivity & sparsenessQuantile < 0.5 ) {
-      localv[ localv > quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-      localv[ localv > 0 ] = 0
+    if ( positivity ) {
+      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+      if ( myquant < 0)
+        localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
+#      localv[ localv > 0 ] = 0
     }
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
@@ -760,10 +758,6 @@ while ( i <= iterations ) {
   v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
   for ( k in 1:nv ) { # make sparse
     localv = v[k,]
-#    if ( positivity & sparsenessQuantile >= 0.5 ) {
-#      localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-#      localv[ localv < 0 ] = 0
-#    }
     if ( positivity ) {
       myquant = quantile( localv , sparsenessQuantile, na.rm=T )
       if ( myquant < 0)
@@ -916,13 +910,11 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
           v[ , vv ] = v[, vv ] - temp * ip
           }
       localv = v[ , vv ]
-      if ( positivity & sparsenessQuantile >= 0.5 ) {
-        localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-        localv[ localv < 0 ] = 0
-      }
-      if ( positivity & sparsenessQuantile < 0.5 ) {
-        localv[ localv > quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
-        localv[ localv > 0 ] = 0
+      if ( positivity ) {
+        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+        if ( myquant < 0)
+          localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
+  #      localv[ localv > 0 ] = 0
       }
       if ( !positivity ) {
         localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
