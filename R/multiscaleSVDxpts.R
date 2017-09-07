@@ -774,8 +774,7 @@ while ( i <= iterations ) {
     v[k,] = localv / sum(abs(localv))
     v[k,] = localv / sqrt(sum(localv*localv))
     }
-  # if ( i == 1 )
-  gamma = max( abs( v ) ) * 1.e-6
+  if ( i == 1 ) gamma = max( abs( v ) ) * 1.e-4
   proj = x %*% t( v )
   intercept = colMeans( y - ( proj ) )
   for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
@@ -787,17 +786,17 @@ while ( i <= iterations ) {
 #  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
 #  proj = x %*% t( v ) # + coefwts[1]
   if ( i > 1 ) {
-    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
+    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 5 ) )
       {
 #      message(paste("flipping sign of gradient step:", gamma))
-#      gamma = gamma * ( -1.0 )
+      gamma = gamma * ( -1.0 )
       }
     else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
-      gamma = gamma * ( 0.9 )
+      gamma = gamma * ( 0.5 )
       message(paste("reducing gradient step:", gamma))
       }
-#    if ( abs(gamma) < 1.e-9 ) i = iterations
+    if ( abs(gamma) < 1.e-9 ) i = iterations
   }
   i = i + 1
   }
