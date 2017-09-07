@@ -737,7 +737,7 @@ if ( ! missing( "extraPredictors" ) ) {
 xgy = y %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
 for ( k in 1:nv )
-  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 0.01 ), nrow = 1, ncol = ncol( x ) )
+  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 0.1 ), nrow = 1, ncol = ncol( x ) )
 errs = rep( NA, length( iterations ) )
 i = 0
 while ( i <= iterations ) {
@@ -770,12 +770,15 @@ while ( i <= iterations ) {
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-    v[k,] = localv / sum(abs(localv))
+    v[k,] = localv # / sum(abs(localv)) # sqrt(sum(localv*localv)) #
     }
-  proj = ( x %*% t(v) )
-  intercept = colMeans( y - ( proj ) )
-  for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[k]
-  err = mean( abs( y - (  proj ) ) )
+  proj = x %*% t( v )
+  ymdl = lm( y ~ proj )
+  coefwts = coefficients( ymdl )
+  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
+  intercept = coefwts[1]
+#  for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[k]
+  err = mean( abs( y - predict( ymdl ) ) )
   errs[ i ] = err
   if ( i > 1 ) {
     if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
@@ -794,8 +797,13 @@ while ( i <= iterations ) {
   if ( verbose ) print( paste( i,  err ) )
   }
 if ( verbose ) print( paste( "end",  err ) )
-v = v[ , 1:originalN ]
-return( list( v=as.matrix(t(v))  ) )
+imagev = v[ , 1:originalN ]
+return(
+  list(
+    v = as.matrix( t( imagev ) ),
+    fullv = as.matrix( t( v ) )
+    )
+  )
 }
 
 
