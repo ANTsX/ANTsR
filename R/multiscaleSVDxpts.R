@@ -774,8 +774,8 @@ while ( i <= iterations ) {
     v[k,] = localv / sum(abs(localv))
     v[k,] = localv / sqrt(sum(localv*localv))
     }
-  # if ( i == 1 ) 
-  gamma = norm( v ) * 1.e-6
+  # if ( i == 1 )
+  gamma = max( abs( v ) ) * 1.e-6
   proj = x %*% t( v )
   intercept = colMeans( y - ( proj ) )
   for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
