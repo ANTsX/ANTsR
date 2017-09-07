@@ -704,7 +704,6 @@ smoothRegression <- function(
   x,
   y,
   iterations = 10,
-  gamma = 1.e-6,
   sparsenessQuantile = 0.5,
   positivity = FALSE,
   smoothingMatrix = NA,
@@ -713,6 +712,7 @@ smoothRegression <- function(
   verbose = FALSE
   )
 {
+gamma = 1.e-8
 if ( missing( "x" ) | missing( "y" ) ) {
   message("this function needs input")
   return( NA )
@@ -737,9 +737,9 @@ if ( ! missing( "extraPredictors" ) ) {
 xgy = y %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
 for ( k in 1:nv )
-  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 0.1 ), nrow = 1, ncol = ncol( x ) )
+  v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 1.e-6 ), nrow = 1, ncol = ncol( x ) )
 errs = rep( NA, length( iterations ) )
-i = 0
+i = 1
 while ( i <= iterations ) {
   temp = t( x %*% t( as.matrix( v ) ) ) %*% x
   dedv = temp * 0
@@ -757,7 +757,7 @@ while ( i <= iterations ) {
         }
       }
   v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
-  for ( k in 1:nv ) {
+  for ( k in 1:nv ) { # make sparse
     localv = v[k,]
     if ( positivity & sparsenessQuantile >= 0.5 ) {
       localv[ localv < quantile( localv , sparsenessQuantile, na.rm=T ) ] = 0
@@ -770,16 +770,22 @@ while ( i <= iterations ) {
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-    v[k,] = localv # / sum(abs(localv)) # sqrt(sum(localv*localv)) #
+    v[k,] = localv
+    v[k,] = localv / sum(abs(localv))
+    v[k,] = localv / sqrt(sum(localv*localv))
     }
+  # if ( i == 1 ) 
+  gamma = norm( v ) * 1.e-6
   proj = x %*% t( v )
+  intercept = colMeans( y - ( proj ) )
+  for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
   ymdl = lm( y ~ proj )
-  coefwts = coefficients( ymdl )
-  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
-  intercept = coefwts[1]
-#  for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[k]
-  err = mean( abs( y - predict( ymdl ) ) )
-  errs[ i ] = err
+  err = mean( abs( y - ( proj ) ) )
+  errs[ i ] = err # summary(ymdl)$r.squared * ( -1 )
+  if ( verbose ) print( paste("it/err/rsq", i,  errs[ i ], summary(ymdl)$r.squared  ) )
+#  coefwts = coefficients( ymdl )
+#  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
+#  proj = x %*% t( v ) # + coefwts[1]
   if ( i > 1 ) {
     if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 3 ) )
       {
@@ -788,15 +794,14 @@ while ( i <= iterations ) {
       }
     else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
-      gamma = gamma * ( 0.5 )
+      gamma = gamma * ( 0.9 )
       message(paste("reducing gradient step:", gamma))
       }
-    if ( abs(gamma) < 1.e-9 ) i = iterations
+#    if ( abs(gamma) < 1.e-9 ) i = iterations
   }
   i = i + 1
-  if ( verbose ) print( paste( i,  err ) )
   }
-if ( verbose ) print( paste( "end",  err ) )
+if ( verbose ) print( paste( "end",  errs[ i  -  1 ]  ) )
 imagev = v[ , 1:originalN ]
 return(
   list(

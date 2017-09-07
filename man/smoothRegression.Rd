@@ -4,9 +4,9 @@
 \alias{smoothRegression}
 \title{smooth matrix-based regression}
 \usage{
-smoothRegression(x, y, iterations = 10, gamma = 1e-06,
-  sparsenessQuantile = 0.5, positivity = FALSE, smoothingMatrix = NA,
-  nv = 2, extraPredictors, verbose = FALSE)
+smoothRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
+  positivity = FALSE, smoothingMatrix = NA, nv = 2, extraPredictors,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix on which prediction is based}
@@ -14,8 +14,6 @@ smoothRegression(x, y, iterations = 10, gamma = 1e-06,
 \item{y}{target vector}
 
 \item{iterations}{number of gradient descent iterations}
-
-\item{gamma}{step size for gradient descent}
 
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser.}
 
@@ -31,6 +29,8 @@ size as input matrix}
 \item{extraPredictors}{additional column predictors}
 
 \item{verbose}{boolean option}
+
+\item{gamma}{step size for gradient descent}
 }
 \value{
 vector of size p is output
