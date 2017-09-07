@@ -52,7 +52,7 @@ for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
   }
 sel = 1:25
 fit = smoothRegression( x=mat[sel,], y=age[sel], iterations = 10,
-  gamma = 1.e-6, sparsenessQuantile = 0.5,
+  sparsenessQuantile = 0.5,
   smoothingMatrix = smoomat, verbose=T )
 tt = mat \%*\% fit$v
 print( cor.test( age[-sel], tt[-sel,1] ) )

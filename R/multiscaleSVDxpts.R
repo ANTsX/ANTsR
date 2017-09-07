@@ -692,7 +692,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #'   }
 #' sel = 1:25
 #' fit = smoothRegression( x=mat[sel,], y=age[sel], iterations = 10,
-#'   gamma = 1.e-6, sparsenessQuantile = 0.5,
+#'   sparsenessQuantile = 0.5,
 #'   smoothingMatrix = smoomat, verbose=T )
 #' tt = mat %*% fit$v
 #' print( cor.test( age[-sel], tt[-sel,1] ) )
