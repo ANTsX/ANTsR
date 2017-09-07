@@ -734,7 +734,8 @@ if ( ! missing( "extraPredictors" ) ) {
     }
   x = cbind( x, mdlmatrix )
   }
-xgy = y %*% x
+scaledY = as.numeric( scale( y ) )
+xgy = scaledY %*% x
 v = matrix( 0, nrow = nv, ncol = ncol( x ) )
 for ( k in 1:nv )
   v[k,]= xgy + matrix( rnorm( ncol( x ), 0, 1.e-3 ), nrow = 1, ncol = ncol( x ) )
@@ -776,10 +777,10 @@ while ( i <= iterations ) {
     }
   if ( i < 3 ) gamma = quantile( v[ abs(v) > 0 ] , 0.5 , na.rm=TRUE ) * 1.e-4
   proj = x %*% t( v )
-  intercept = colMeans( y - ( proj ) )
+  intercept = colMeans( scaledY - ( proj ) )
   for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
-  ymdl = lm( y ~ proj )
-  err = mean( abs( y - ( proj ) ) )
+  ymdl = lm( scaledY ~ proj )
+  err = mean( abs( scaledY - ( proj ) ) )
   errs[ i ] = err # summary(ymdl)$r.squared * ( -1 )
   if ( verbose ) print( paste("it/err/rsq", i,  errs[ i ], summary(ymdl)$r.squared, "gamma", gamma  ) )
 #  coefwts = coefficients( ymdl )
