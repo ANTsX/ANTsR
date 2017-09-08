@@ -96,7 +96,7 @@ Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/)
 You will need to install R packages that ANTsR requires. Minimally:
 **Install ITKR and ANTsRCore** [here](https://github.com/stnava/ITKR/releases) and [here](https://github.com/ANTsX/ANTsRCore/releases) then do:
 ```
-mydeps <- c( "Rcpp", "tools", "methods", "magrittr" )
+mydeps <- c( "Rcpp", "RcppEigen", "tools", "methods", "magrittr", "rsvd" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
 ```
 You can gain additional functionality by installing packages that
@@ -116,7 +116,7 @@ Assumes git, cmake and compilers are available in your environment (as above).
 
 First, clone the repository:
 ```sh
-$ git clone https://github.com/ANTsX/ITKR.git
+$ git clone https://github.com/stnava/ITKR.git
 $ git clone https://github.com/ANTsX/ANTsRCore.git
 $ git clone https://github.com/ANTsX/ANTsR.git
 ```
