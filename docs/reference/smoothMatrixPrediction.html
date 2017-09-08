@@ -122,7 +122,7 @@ The reconstruction can be regularized.
     <pre class="usage"><span class='fu'>smoothMatrixPrediction</span>(<span class='no'>x</span>, <span class='no'>basisDf</span>, <span class='kw'>modelFormula</span> <span class='kw'>=</span> <span class='fu'>as.formula</span>(<span class='st'>" x ~ ."</span>),
   <span class='kw'>iterations</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>gamma</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>sparsenessQuantile</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
   <span class='kw'>positivity</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>smoothingMatrix</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>repeatedMeasures</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>rowWeights</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>LRR</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+  <span class='kw'>rowWeights</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>LRR</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>doOrth</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
     <table class="ref-arguments">
@@ -175,6 +175,10 @@ allow estimates of per identifier intercept.</p></td>
     <tr>
       <th>LRR</th>
       <td><p>integer value sets rank for fast version exploiting matrix approximation</p></td>
+    </tr>
+    <tr>
+      <th>doOrth</th>
+      <td><p>boolean enforce gram-schmidt orthonormality</p></td>
     </tr>
     <tr>
       <th>verbose</th>
