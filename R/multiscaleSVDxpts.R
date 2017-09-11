@@ -545,19 +545,23 @@ smoothMatrixPrediction <- function(
   verbose = FALSE
   )
 {
+
 smoothingWeight = 1.0
 if ( missing( "x" ) | missing( "basisDf" ) ) {
   message("this function needs input")
   return( NA )
   }
-#
+if ( nrow( x ) != nrow( basisDf ) ) {
+  message("inconsistent row numbers between x and basisDf")
+  return( NA )
+  }
 if ( ! any( is.na( repeatedMeasures ) ) ) {
   usubs = unique( repeatedMeasures )
-  wtdf = data.frame( table( usubs ) )
+  wtdf = data.frame( table( repeatedMeasures ) )
   # rowWeights should scale with counts
   repWeights = rep( 0, length( repeatedMeasures ) )
-  for ( u in wtdf$usubs ) {
-    repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$usubs == u ]
+  for ( u in usubs ) {
+    repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$repeatedMeasures == u ]
   }
   rm( wtdf )
   if ( all( is.na( rowWeights ) ) ) {
@@ -617,7 +621,6 @@ while ( i <= iterations ) {
       myquant = quantile( localv , sparsenessQuantile, na.rm=T )
       if ( myquant < 0)
         localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-#      localv[ localv > 0 ] = 0
     }
     if ( !positivity ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
@@ -1094,11 +1097,11 @@ jointSmoothMatrixReconstruction <- function(
   ilist = list()
   if ( ! any( is.na( repeatedMeasures ) ) ) {
     usubs = unique( repeatedMeasures )
-    wtdf = data.frame( table( usubs ) )
+    wtdf = data.frame( table( repeatedMeasures ) )
     # rowWeights should scale with counts
     repWeights = rep( 0, length( repeatedMeasures ) )
     for ( u in wtdf$usubs ) {
-      repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$usubs == u ]
+      repWeights[ repeatedMeasures == u ] = 1.0 / wtdf$Freq[ wtdf$repeatedMeasures == u ]
     }
     rm( wtdf )
     if ( all( is.na( rowWeights ) ) ) {
