@@ -804,7 +804,7 @@ while ( i <= iterations ) {
       {
       gamma = gamma * ( 0.5 )
       message(paste("reducing gradient step:", gamma))
-      }
+      } else gamma = gamma * 1.05
     if ( abs(gamma) < 1.e-12 ) i = iterations
   }
   i = i + 1
