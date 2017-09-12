@@ -489,8 +489,7 @@ knnSmoothingMatrix <- function( x, k, sigma ) {
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
-#' the sign restriction is determined by \code{sparsenessQuantile} being greater
-#' or lesser than 0.5.
+#' choices are positive, negative or either as expressed as a string.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
@@ -536,7 +535,7 @@ smoothMatrixPrediction <- function(
   iterations = 10,
   gamma = 1.e-6,
   sparsenessQuantile = 0.5,
-  positivity = FALSE,
+  positivity = c("positive","negative","either"),
   smoothingMatrix = NA,
   repeatedMeasures = NA,
   rowWeights = NA,
@@ -545,7 +544,11 @@ smoothMatrixPrediction <- function(
   verbose = FALSE
   )
 {
-
+poschoices = c("positive","negative","either", TRUE, FALSE )
+if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+  stop( 'choice of positivity parameter is not good - see documentation')
+if ( positivity == TRUE ) positivity = "positive"
+if ( positivity == FALSE ) positivity = "either"
 smoothingWeight = 1.0
 if ( missing( "x" ) | missing( "basisDf" ) ) {
   message("this function needs input")
@@ -599,9 +602,6 @@ tu = t( u )
 tuu = t( u ) %*% u
 errs = rep( NA, length( iterations ) )
 i = 1
-if ( smoothingWeight > 1 ) smoothingWeight = smoothingWeight = 1.0
-if ( smoothingWeight < 0 ) smoothingWeight = smoothingWeight = 0.0
-wt1 = 1.0 - smoothingWeight
 while ( i <= iterations ) {
   v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% x )
@@ -617,12 +617,12 @@ while ( i <= iterations ) {
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
-    if ( positivity ) {
-      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-      if ( myquant < 0)
-        localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-    }
-    if ( !positivity ) {
+    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+    if ( positivity == 'positive') {
+      localv[ localv <= myquant ] = 0
+    } else if ( positivity == 'negative' ) {
+      localv[ localv > myquant ] = 0
+    } else if ( positivity == 'either' ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
     v[ , vv ] = localv
@@ -670,8 +670,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
-#' the sign restriction is determined by \code{sparsenessQuantile} being greater
-#' or lesser than 0.5.
+#' choices are positive, negative or either as expressed as a string.
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param nv number of predictor spatial vectors
@@ -713,6 +712,12 @@ smoothRegression <- function(
   verbose = FALSE
   )
 {
+x = scale( x, scale = FALSE )
+poschoices = c("positive","negative","either", TRUE, FALSE )
+if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+  stop( 'choice of positivity parameter is not good - see documentation')
+if ( positivity == TRUE ) positivity = "positive"
+if ( positivity == FALSE ) positivity = "either"
 gamma = 1.e-8
 if ( missing( "x" ) | missing( "y" ) ) {
   message("this function needs input")
@@ -761,20 +766,24 @@ while ( i <= iterations ) {
   v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
   for ( k in 1:nv ) { # make sparse
     localv = v[k,]
-    if ( positivity ) {
-      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-      if ( myquant < 0)
-        localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-#      localv[ localv > 0 ] = 0
-    }
-    if ( !positivity ) {
+    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+    if ( positivity == 'positive') {
+      localv[ localv <= myquant ] = 0
+    } else if ( positivity == 'negative' ) {
+      localv[ localv > myquant ] = 0
+    } else if ( positivity == 'either' ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
+#    if ( positivity ) {
+#      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+#      if ( myquant < 0)
+#        localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
+#    }
     v[k,] = localv
-    v[k,] = localv / sum(abs(localv))
-    v[k,] = localv / sqrt(sum(localv*localv))
+#    v[k,] = localv / sum(abs(localv))
+#    v[k,] = localv / sqrt(sum(localv*localv))
     }
-  if ( i < 3 ) gamma = quantile( v[ abs(v) > 0 ] , 0.5 , na.rm=TRUE ) * 1.e-4
+  if ( i < 3 ) gamma = quantile( v[ abs(v) > 0 ] , 0.5 , na.rm=TRUE ) * 1.e-2
   proj = x %*% t( v )
   intercept = colMeans( scaledY - ( proj ) )
   for ( k in 1:nv ) proj[,k] = proj[,k] + intercept[ k ]
@@ -913,15 +922,17 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
           v[ , vv ] = v[, vv ] - temp * ip
           }
       localv = v[ , vv ]
-      if ( positivity ) {
-        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-        if ( myquant < 0)
-          localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-  #      localv[ localv > 0 ] = 0
-      }
-      if ( !positivity ) {
+      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+      if ( positivity == 'positive') {
+        localv[ localv <= myquant ] = 0
+      } else if ( positivity == 'negative' ) {
+        localv[ localv > myquant ] = 0
+      } else if ( positivity == 'either' ) {
         localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
       }
+#        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+#        if ( myquant < 0)
+#          localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
       v[ , vv ] = localv
       v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
     }
@@ -969,7 +980,8 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
 #' @param subIterations number of gradient descent iterations in sub-algorithm
 #' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
-#' @param positivity restrict to positive solution (beta) weights
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
 #' @param smoothingMatrix a list containing smoothing matrices of the same
 #' length as x.
 #' @param rowWeights vectors of weights with size n (assumes diagonal covariance)
@@ -1090,6 +1102,12 @@ jointSmoothMatrixReconstruction <- function(
   verbose = FALSE
   )
 {
+  poschoices = c("positive","negative","either", TRUE, FALSE )
+  if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+    stop( 'choice of positivity parameter is not good - see documentation')
+  if ( positivity == TRUE ) positivity = "positive"
+  if ( positivity == FALSE ) positivity = "either"
+
   for ( k in 1:length(x) ) x[[ k ]] = x[[ k ]] / max( abs(x[[k]]) )
   gammas = rep( gamma, nrow( parameters ) )
   ulist = list()

@@ -26,7 +26,8 @@ in the objective function.}
 
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
 
-\item{positivity}{restrict to positive solution (beta) weights}
+\item{positivity}{restrict to positive or negative solution (beta) weights.
+choices are positive, negative or either as expressed as a string.}
 
 \item{smoothingMatrix}{a list containing smoothing matrices of the same
 length as x.}
