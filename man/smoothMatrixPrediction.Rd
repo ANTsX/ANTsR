@@ -6,8 +6,9 @@
 \usage{
 smoothMatrixPrediction(x, basisDf, modelFormula = as.formula(" x ~ ."),
   iterations = 10, gamma = 1e-06, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrix = NA, repeatedMeasures = NA,
-  rowWeights = NA, LRR = NA, doOrth = FALSE, verbose = FALSE)
+  positivity = c("positive", "negative", "either"), smoothingMatrix = NA,
+  repeatedMeasures = NA, rowWeights = NA, LRR = NA, doOrth = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix to be predicted.}
@@ -24,8 +25,7 @@ and the prediction formula on the right.}
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser.}
 
 \item{positivity}{restrict to positive or negative solution (beta) weights.
-the sign restriction is determined by \code{sparsenessQuantile} being greater
-or lesser than 0.5.}
+choices are positive, negative or either as expressed as a string.}
 
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}

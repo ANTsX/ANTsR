@@ -18,8 +18,7 @@ smoothRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser.}
 
 \item{positivity}{restrict to positive or negative solution (beta) weights.
-the sign restriction is determined by \code{sparsenessQuantile} being greater
-or lesser than 0.5.}
+choices are positive, negative or either as expressed as a string.}
 
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}
