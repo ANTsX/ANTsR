@@ -1295,6 +1295,7 @@ smoothAppGradCCA <- function( x , y,
   sparsenessQuantile=0.5,
   positivity = 'either',
   k=2, iterations=100, verbose=FALSE ) {
+  if ( nrow(x) != nrow(y)) stop("nrow x should equal nrow y")
   x = scale( icawhiten(x,nrow(x)), scale=T )
   y = scale( icawhiten(y,nrow(y)), scale=T )
   errs = rep( NA, iterations )
