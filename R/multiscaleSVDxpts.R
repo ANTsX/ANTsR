@@ -724,20 +724,12 @@ if ( missing( "x" ) | missing( "y" ) ) {
   return( NA )
   }
 #
+if ( is.na( smoothingMatrix[1] ) ) smoothingMatrix = diag( ncol( x ) )
 originalN = ncol( x )
 if ( ! missing( "extraPredictors" ) ) {
   temp = lm( y ~ . , data=data.frame(extraPredictors))
   mdlmatrix = scale( model.matrix( temp )[,-1], scale=TRUE )
   extraN = originalN + ncol( mdlmatrix )
-  if ( FALSE ) { # old approach below
-    newsmoo = Matrix::sparseMatrix(
-      i = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
-      j = c(smoothingMatrix@i, (originalN:(n-1)) )+1,
-  #    p = c(smoothingMatrix@p, c(length(smoothingMatrix@x):(length(smoothingMatrix@x)+ncol( mdlmatrix )))),
-      x = c( smoothingMatrix@x, rep(1,ncol( mdlmatrix ))), symmetric=TRUE )
-    smoothingMatrix = newsmoo
-    rm( newsmoo )
-    }
   x = cbind( x, mdlmatrix )
   }
 scaledY = as.numeric( scale( y ) )
@@ -764,25 +756,7 @@ while ( i <= iterations ) {
         }
       }
   v[ , 1:originalN ] = as.matrix( v[ , 1:originalN ] %*% smoothingMatrix )
-  for ( k in 1:nv ) { # make sparse
-    localv = v[k,]
-    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-    if ( positivity == 'positive') {
-      localv[ localv <= myquant ] = 0
-    } else if ( positivity == 'negative' ) {
-      localv[ localv > myquant ] = 0
-    } else if ( positivity == 'either' ) {
-      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
-    }
-#    if ( positivity ) {
-#      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-#      if ( myquant < 0)
-#        localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-#    }
-    v[k,] = localv
-#    v[k,] = localv / sum(abs(localv))
-#    v[k,] = localv / sqrt(sum(localv*localv))
-    }
+  v = t( orthogonalizeAndQSparsify( t(v), sparsenessQuantile, positivity ) )
   if ( i < 3 ) gamma = quantile( v[ abs(v) > 0 ] , 0.5 , na.rm=TRUE ) * 1.e-2
   proj = x %*% t( v )
   intercept = colMeans( scaledY - ( proj ) )
@@ -818,6 +792,94 @@ return(
     )
   )
 }
+
+
+#' Reconstruct a n by k vector given n by p matrix of predictors.
+#'
+#' @param x input matrix on which prediction is based
+#' @param y target matrix
+#' @param iterations number of gradient descent iterations
+#' @param gamma step size for gradient descent
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param smoothingMatrixX allows parameter smoothing, should be square and same
+#' size as input matrix
+#' @param smoothingMatrixY allows parameter smoothing, should be square and same
+#' size as input matrix
+#' @param smoothingMatrix allows parameter smoothing, should be square and same
+#' size as input matrix
+#' @param smoothingMatrix allows parameter smoothing, should be square and same
+#' size as input matrix
+
+#' @param nv number of predictor spatial vectors
+#' @param extraPredictors additional column predictors
+#' @param verbose boolean option
+#' @return vector of size p is output
+#' @author Avants BB
+#' @examples
+#'
+#' \dontrun{
+#' mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
+#' spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
+#' smoomat = knnSmoothingMatrix( spatmat, k = 200, sigma = 1.0 )
+#' mat <- matrix(rnorm(sum(mask)*50),ncol=sum(mask),nrow=50)
+#' mat[ 1:25,100:10000]=mat[ 1:25,100:10000]+1
+#' age = matrix( rnorm( nrow(mat)*2 ), ncol=2 )
+#' for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
+#'   mat[ , i ] = age[,1]*0.1 + mat[,i]
+#'   }
+#' sel = 1:25
+#' fit = smoothMultiRegression( x=mat[sel,], y=age[sel,], iterations = 10,
+#'   sparsenessQuantile = 0.5,
+#'   smoothingMatrixX = smoomat, smoothingMatrixY = diag(ncol(y)), verbose=T )
+#' tt = mat %*% fit$v
+#' print( cor.test( age[-sel,1], tt[-sel,1] ) )
+#' vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
+#' plot( mask, vimg, window.overlay=range(abs(vimg)))
+#' }
+#' @export smoothMultiRegression
+smoothMultiRegression <- function(
+  x,
+  y,
+  iterations = 10,
+  sparsenessQuantile = 0.5,
+  positivity = FALSE,
+  smoothingMatrixX = NA,  smoothingMatrixY = NA,
+  nv = 2,
+  extraPredictors,
+  verbose = FALSE
+  )
+{
+x = scale( x, scale = FALSE )
+y = scale( y, scale = FALSE )
+poschoices = c("positive","negative","either", TRUE, FALSE )
+if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+  stop( 'choice of positivity parameter is not good - see documentation')
+if ( missing( "x" ) | missing( "y" ) ) {
+  message("this function needs input")
+  return( NA )
+  }
+  svdy = scale( rsvd::rsvd( y, nu=nv )$u )
+  loy = as.numeric( svdy[,1] )
+  ox = smoothRegression(  x, loy, iterations = iterations,
+     sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+     smoothingMatrix = smoothingMatrixX, nv = 2, verbose = FALSE )
+
+  for ( k in 1:iterations ) {
+   print(paste("k",k))
+   lox = scale( x %*% ( ox$v ) )
+   oy = smoothRegression(  y, lox[,1], iterations = 10,
+     sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+     smoothingMatrix = NA, nv = 2, verbose = verbose )
+   loy = scale( y %*% ( oy$v ) )
+   ox = smoothRegression(  x, loy[,1], iterations = 10,
+     sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+     smoothingMatrix = NA, nv = 2, verbose = verbose )
+   }
+}
+
+
 
 
 
