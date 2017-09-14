@@ -795,7 +795,7 @@ while ( i <= iterations ) {
 #  for ( k in 1:nv ) v[k,] = v[k,] * coefwts[k+1]
 #  proj = x %*% t( v ) # + coefwts[1]
   if ( i > 1 ) {
-    if ( ( errs[ i ] > errs[ i - 1 ] ) &  ( i == 5 ) )
+    if ( ( mean(errs[ 4:5 ]) > mean(errs[ 1:3 ])  ) &  ( i == 5 ) )
       {
 #      message(paste("flipping sign of gradient step:", gamma))
       gamma = gamma * ( -1.0 )
@@ -1217,3 +1217,128 @@ while ( k <= iterations ) {
 
   return( list( u=ulist, v=vlist, intercepts=ilist ) )
 }
+
+
+
+#' sparsify a matrix
+#'
+#' This implements a quantile based sparsification operation
+#'
+#' @param x input matrix
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @return matrix
+#' @author Avants BB
+#' @examples
+#'
+#' mat<-replicate(100, rnorm(20))
+#' mat = orthogonalizeAndQSparsify( mat )
+#'
+#' @export orthogonalizeAndQSparsify
+orthogonalizeAndQSparsify <- function( v,
+  sparsenessQuantile = 0.5, positivity='either' ) {
+  for ( vv in 1:ncol( v ) ) {
+#    v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
+    if ( vv > 1 )
+      for ( vk in 1:(vv-1) ) {
+        temp = v[,vk]
+        denom = sum( temp * temp , na.rm=T )
+        if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+        v[ , vv ] = v[, vv ] - temp * ip
+        }
+    localv = v[ , vv ]
+    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+    if ( positivity == 'positive') {
+      localv[ localv <= myquant ] = 0
+    } else if ( positivity == 'negative' ) {
+      localv[ localv > myquant ] = 0
+    } else if ( positivity == 'either' ) {
+      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+    }
+    v[ , vv ] = localv
+  }
+  return( v )
+}
+
+
+#' cca via sparse smooth matrix prediction
+#'
+#' This implements a sparse and graph-regularized version of CCA based on the
+#' AppGrad style of implementation by Ma, Lu and Foster, 2015.
+#'
+#' @param x input view 1 matrix
+#' @param y input view 2 matrix
+#' @param smoox smoothingMatrix for x
+#' @param smooy smoothingMatrix for y
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param k number of basis vectors to compute
+#' @param iterations number of gradient descent iterations
+#' @param verbose boolean option
+#' @return list with matrices each of size p or q by k
+#' @author Avants BB
+#' @examples
+#'
+#' mat<-replicate(100, rnorm(20))
+#' mat2<-replicate(100, rnorm(20))
+#' mat<-scale(mat)
+#' mat2<-scale(mat2)
+#' wt<-0.666
+#' mat3<-mat*wt+mat2*(1-wt)
+#' jj = smoothAppGradCCA( mat, mat3 )
+#'
+#' @export smoothAppGradCCA
+smoothAppGradCCA <- function( x , y,
+  smoox=NA, smooy=NA,
+  sparsenessQuantile=0.5,
+  positivity = 'either',
+  k=2, iterations=100, verbose=FALSE ) {
+  x = scale( icawhiten(x,nrow(x)), scale=T )
+  y = scale( icawhiten(y,nrow(y)), scale=T )
+  errs = rep( NA, iterations )
+  poschoices = c("positive","negative","either", TRUE, FALSE )
+  if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+    stop( 'choice of positivity parameter is not good - see documentation')
+  if ( positivity == TRUE ) positivity = "positive"
+  if ( positivity == FALSE ) positivity = "either"
+  ratio = norm( x ) / norm( y )
+  x = x / norm( x )
+  y = y / norm( y )
+  if ( any(is.na(smoox))) smoox = diag( ncol( x ) )
+  if ( any(is.na(smooy))) smooy = diag( ncol( y ) )
+#  phix = RSpectra::svds( x, k=k )$v
+#  phiy = RSpectra::svds( y, k=k )$v
+#  phix = t( y ) %*% irlba::irlba( x, nu=k, nv=0, maxit=1000, tol=1.e-6 )$u
+#  phiy = t( x ) %*% irlba::irlba( y, nu=k, nv=0, maxit=1000, tol=1.e-6 )$u
+#  phix = t( y ) %*% svd( x, nu=k, nv=0  )$u
+#  phiy = t( x ) %*% svd( y, nu=k, nv=0  )$u
+  phix = svd( x, nv=k, nu=0  )$v
+  phiy = svd( y, nv=k, nu=0  )$v
+#  phix = matrix( rnorm( k * ncol(x), 0, 1e-4 ), ncol=k )
+#  phiy = matrix( rnorm( k * ncol(y), 0, 1e-4 ), ncol=k )
+  i = 1
+  while ( i < iterations ) {
+  if ( i < 3 ) gx =  1.e-6 # quantile( phix[ abs(phix) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
+  if ( i < 3 ) gy =  1.e-6 # quantile( phiy[ abs(phiy) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
+# gradient calculation
+    delta = t(x) %*% ( x %*% phix - y %*% phiy )
+    phix1 = phix - delta * gx
+    delta = t(y) %*% ( y %*% phiy - x %*% phix )
+    phiy1 = phiy - delta * gy
+    phix1 = as.matrix( smoox %*% orthogonalizeAndQSparsify( phix1, sparsenessQuantile=sparsenessQuantile, positivity=positivity ) )
+    phiy1 = as.matrix( smooy %*% orthogonalizeAndQSparsify( phiy1, sparsenessQuantile=sparsenessQuantile, positivity=positivity ) )
+# now update
+    phix =  phix1 / norm( x %*% phix1 )
+    phiy =  phiy1 / norm( y %*% phiy1 )
+    errs[ i ] = norm( y %*% phiy - x %*% phix )
+    if ( verbose ) print( paste( i, errs[ i ], sum( abs(  diag(  cor( y %*% phiy,  x %*% phix  ) ) ) )  ) )
+#    if ( i > 110 ) if ( errs[ i ]  > errs[i-1] ) i = iterations+1
+    i = i + 1
+    }
+#  print( cor( x %*% phix ) )
+#  print( cor( y %*% phiy ) )
+#  print( cor( y %*% phiy,  x %*% phix  ) )
+  return( list( phix = phix, phiy = phiy ) )
+  }
