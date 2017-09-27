@@ -4,12 +4,10 @@
 \alias{rapidlyInspectImageData}
 \title{Simple rapidlyInspectImageData function.}
 \usage{
-rapidlyInspectImageData(myfiles, dimension = 3)
+rapidlyInspectImageData(myfiles)
 }
 \arguments{
 \item{myfiles}{input list of filenames}
-
-\item{dimension}{image dimensionality}
 }
 \value{
 matrix is output
