@@ -5,8 +5,8 @@
 \title{Reconstruct a n by k vector given n by p matrix of predictors.}
 \usage{
 smoothMultiRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrix = NA, nv = 2, extraPredictors,
-  verbose = FALSE)
+  positivity = FALSE, smoothingMatrixX = NA, smoothingMatrixY = NA,
+  nv = 2, extraPredictors, verbose = FALSE)
 }
 \arguments{
 \item{x}{input matrix on which prediction is based}
@@ -20,7 +20,10 @@ smoothMultiRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
 \item{positivity}{restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
 
-\item{smoothingMatrix}{allows parameter smoothing, should be square and same
+\item{smoothingMatrixX}{allows parameter smoothing, should be square and same
+size as input matrix}
+
+\item{smoothingMatrixY}{allows parameter smoothing, should be square and same
 size as input matrix}
 
 \item{nv}{number of predictor spatial vectors}
@@ -30,6 +33,12 @@ size as input matrix}
 \item{verbose}{boolean option}
 
 \item{gamma}{step size for gradient descent}
+
+\item{smoothingMatrix}{allows parameter smoothing, should be square and same
+size as input matrix}
+
+\item{smoothingMatrix}{allows parameter smoothing, should be square and same
+size as input matrix}
 }
 \value{
 vector of size p is output
@@ -50,9 +59,9 @@ for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
   mat[ , i ] = age[,1]*0.1 + mat[,i]
   }
 sel = 1:25
-fit = smoothRegression( x=mat[sel,], y=age[sel,], iterations = 10,
+fit = smoothMultiRegression( x=mat[sel,], y=age[sel,], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrix = smoomat, verbose=T )
+  smoothingMatrixX = smoomat, smoothingMatrixY = diag(ncol(y)), verbose=T )
 tt = mat \%*\% fit$v
 print( cor.test( age[-sel,1], tt[-sel,1] ) )
 vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
