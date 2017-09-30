@@ -667,7 +667,6 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' @param x input matrix on which prediction is based
 #' @param y target vector
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -700,6 +699,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' plot( mask, vimg, window.overlay=range(abs(vimg)))
 #' }
 #' @export smoothRegression
+## #' @param gamma step size for gradient descent
 smoothRegression <- function(
   x,
   y,
@@ -799,7 +799,6 @@ return(
 #' @param x input matrix on which prediction is based
 #' @param y target matrix
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -807,11 +806,6 @@ return(
 #' size as input matrix
 #' @param smoothingMatrixY allows parameter smoothing, should be square and same
 #' size as input matrix
-#' @param smoothingMatrix allows parameter smoothing, should be square and same
-#' size as input matrix
-#' @param smoothingMatrix allows parameter smoothing, should be square and same
-#' size as input matrix
-
 #' @param nv number of predictor spatial vectors
 #' @param extraPredictors additional column predictors
 #' @param verbose boolean option
@@ -839,6 +833,7 @@ return(
 #' plot( mask, vimg, window.overlay=range(abs(vimg)))
 #' }
 #' @export smoothMultiRegression
+## #' @param gamma step size for gradient descent
 smoothMultiRegression <- function(
   x,
   y,
@@ -1286,7 +1281,7 @@ while ( k <= iterations ) {
 #'
 #' This implements a quantile based sparsification operation
 #'
-#' @param x input matrix
+#' @param v input matrix
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.

@@ -28,8 +28,6 @@ size as input matrix}
 \item{extraPredictors}{additional column predictors}
 
 \item{verbose}{boolean option}
-
-\item{gamma}{step size for gradient descent}
 }
 \value{
 vector of size p is output

@@ -8,12 +8,12 @@ orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
   positivity = "either")
 }
 \arguments{
+\item{v}{input matrix}
+
 \item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
 
 \item{positivity}{restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
-
-\item{x}{input matrix}
 }
 \value{
 matrix

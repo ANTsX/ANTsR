@@ -31,14 +31,6 @@ size as input matrix}
 \item{extraPredictors}{additional column predictors}
 
 \item{verbose}{boolean option}
-
-\item{gamma}{step size for gradient descent}
-
-\item{smoothingMatrix}{allows parameter smoothing, should be square and same
-size as input matrix}
-
-\item{smoothingMatrix}{allows parameter smoothing, should be square and same
-size as input matrix}
 }
 \value{
 vector of size p is output
