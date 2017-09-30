@@ -39,6 +39,8 @@ before_install:
   - cmake --version
   - cmake_setup
   - cmake --version
+  - export PACKAGE_NAME=`package_name`
+  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck    
   - gh_binary_install muschellij2/ITKR
   - gh_binary_install muschellij2/ANTsRCore
   - install_remotes_no_dep
@@ -58,6 +60,8 @@ jobs:
       - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
+      - check_fail
+      - check_warnings 
       os: linux
     - script:
       - cat ~/.R/Makevars
@@ -67,6 +71,8 @@ jobs:
       - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
+      - check_fail
+      - check_warnings       
       os: osx
     - stage: "Deployment"
       script:
