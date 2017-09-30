@@ -4,7 +4,6 @@
 #' in a dataframe.
 #'
 #' @param myfiles input list of filenames
-#' @param dimension image dimensionality
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
@@ -25,7 +24,7 @@
 #' }
 #'
 #' @export rapidlyInspectImageData
-rapidlyInspectImageData <- function(myfiles, dimension=3 ) {
+rapidlyInspectImageData <- function( myfiles ) {
   if (nargs() == 0) {
     print(args(rapidlyInspectImageData))
     return(1)
@@ -33,12 +32,11 @@ rapidlyInspectImageData <- function(myfiles, dimension=3 ) {
   if ( !usePkg("moments") ) { print("Need moments package"); return(NULL) }
   measnames <- c("mean1", "mean2", "sd1", "sd2", "kurt1", "kurt2")
   nmeas <- length(measnames)
-  idim <- 3
   nfn <- length(myfiles)
   mymat <- matrix(rep(0, nfn * nmeas), nrow = nfn)
   colnames(mymat) <- measnames
   for (i in 1:nfn) {
-    img <- antsImageRead(myfiles[i], idim)
+    img <- antsImageRead(myfiles[i])
     thresh <- mean(img[img > min(img)])
     mymat[i, 1] <- thresh
     mymat[i, 2] <- mean(img[img > thresh])
