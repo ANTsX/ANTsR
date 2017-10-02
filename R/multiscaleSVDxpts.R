@@ -645,7 +645,7 @@ while ( i <= iterations ) {
     else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
       gamma = gamma * ( 0.5 )
-      message(paste("reducing gradient step:", gamma))
+      if ( verbose ) message(paste("reducing gradient step:", gamma))
       }
     if ( abs(gamma) < 1.e-9 ) i = iterations
     }
@@ -667,7 +667,6 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' @param x input matrix on which prediction is based
 #' @param y target vector
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -777,7 +776,7 @@ while ( i <= iterations ) {
     else if ( ( errs[ i ] > errs[ i - 1 ] ) )
       {
       gamma = gamma * ( 0.5 )
-      message(paste("reducing gradient step:", gamma))
+      if ( verbose ) message(paste("reducing gradient step:", gamma))
       } else gamma = gamma * 1.05
     if ( abs(gamma) < 1.e-12 ) i = iterations
   }
@@ -799,7 +798,6 @@ return(
 #' @param x input matrix on which prediction is based
 #' @param y target matrix
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser.
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -807,11 +805,6 @@ return(
 #' size as input matrix
 #' @param smoothingMatrixY allows parameter smoothing, should be square and same
 #' size as input matrix
-#' @param smoothingMatrix allows parameter smoothing, should be square and same
-#' size as input matrix
-#' @param smoothingMatrix allows parameter smoothing, should be square and same
-#' size as input matrix
-
 #' @param nv number of predictor spatial vectors
 #' @param extraPredictors additional column predictors
 #' @param verbose boolean option
@@ -832,7 +825,7 @@ return(
 #' sel = 1:25
 #' fit = smoothMultiRegression( x=mat[sel,], y=age[sel,], iterations = 10,
 #'   sparsenessQuantile = 0.5,
-#'   smoothingMatrixX = smoomat, smoothingMatrixY = diag(ncol(y)), verbose=T )
+#'   smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose=T )
 #' tt = mat %*% fit$v
 #' print( cor.test( age[-sel,1], tt[-sel,1] ) )
 #' vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
@@ -862,21 +855,35 @@ if ( missing( "x" ) | missing( "y" ) ) {
   }
   svdy = scale( rsvd::rsvd( y, nu=nv )$u )
   loy = as.numeric( svdy[,1] )
-  ox = smoothRegression(  x, loy, iterations = iterations,
+  ox = smoothRegression(  x, loy, iterations = 50,
      sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-     smoothingMatrix = smoothingMatrixX, nv = 2, verbose = FALSE )
-
+     smoothingMatrix = smoothingMatrixX, nv = nv, verbose = FALSE )$v
+  oy = matrix( nrow = ncol( y ), ncol = nv )
   for ( k in 1:iterations ) {
-   print(paste("k",k))
-   lox = scale( x %*% ( ox$v ) )
-   oy = smoothRegression(  y, lox[,1], iterations = 10,
-     sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-     smoothingMatrix = NA, nv = 2, verbose = verbose )
-   loy = scale( y %*% ( oy$v ) )
-   ox = smoothRegression(  x, loy[,1], iterations = 10,
-     sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-     smoothingMatrix = NA, nv = 2, verbose = verbose )
+   lox = scale( x %*% ( ox ) )
+   for ( j in 1:nv ) {
+     if ( j == 1 ) rx = x else rx = residuals( lm( x ~ x %*% ox[,1:(j-1)] ) )
+     if ( j == 1 ) ry = y else ry = residuals( lm( y ~ y %*% oy[,1:(j-1)] ) )
+     lox = ( rx %*% ( ox ) )
+     oy[,j] = smoothRegression(  ry, lox[,j], iterations = 50,
+       sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+       smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+     loy = ( ry %*% ( oy ) )
+     ox[,j] = smoothRegression(  rx, loy[,j], iterations = 50,
+       sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+       smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+     }
+   tt = x %*% ox
+   ss = y %*% oy
+   print( k )
+   print( cor( tt, ss ) )
    }
+   return(
+     list(
+       vx = ox,
+       vy = oy
+       )
+     )
 }
 
 
@@ -1016,7 +1023,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
       else if ( ( errs[ i ] > errs[ i - 1 ] ) )
         {
         gamma = gamma * ( 0.5 )
-#        message(paste("reducing gradient step:", gamma))
+        if ( verbose ) message(paste("reducing gradient step:", gamma))
         }
       else if ( abs(gamma) < 1.e-9 ) i = iterations
       }
@@ -1194,9 +1201,9 @@ jointSmoothMatrixReconstruction <- function(
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
-#    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
+    basisDf = data.frame( u=irlba::irlba( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
 #    basisDf = data.frame( u=rsvd::rsvd( x[[ m1 ]], nu = nvecs, nv = 0 )$u )
-    basisDf = data.frame( u=RSpectra::svds( x[[ m1 ]], nvecs )$u )
+#    basisDf = data.frame( u=RSpectra::svds( x[[ m1 ]], nvecs )$u )
     mdl = lm( modelFormula, data = basisDf )
     u = model.matrix( mdl )
     ilist[[ i ]] = u[,1] # intercept
@@ -1286,7 +1293,7 @@ while ( k <= iterations ) {
 #'
 #' This implements a quantile based sparsification operation
 #'
-#' @param x input matrix
+#' @param v input matrix
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -1356,10 +1363,15 @@ smoothAppGradCCA <- function( x , y,
   smoox=NA, smooy=NA,
   sparsenessQuantile=0.5,
   positivity = 'either',
-  k=2, iterations=100, verbose=FALSE ) {
+  k=2, iterations=10,
+  stochastic = NA,
+  initialization = 'randxy',
+  verbose=FALSE ) {
   if ( nrow(x) != nrow(y)) stop("nrow x should equal nrow y")
-  x = scale( icawhiten(x,nrow(x)), scale=T )
-  y = scale( icawhiten(y,nrow(y)), scale=T )
+#  x = scale( icawhiten(x,nrow(x)), scale=T )
+#  y = scale( icawhiten(y,nrow(y)), scale=T )
+  x = scale( x, scale=T )
+  y = scale( y, scale=T )
   errs = rep( NA, iterations )
   poschoices = c("positive","negative","either", TRUE, FALSE )
   if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
@@ -1377,29 +1389,42 @@ smoothAppGradCCA <- function( x , y,
 #  phiy = t( x ) %*% irlba::irlba( y, nu=k, nv=0, maxit=1000, tol=1.e-6 )$u
 #  phix = t( y ) %*% svd( x, nu=k, nv=0  )$u
 #  phiy = t( x ) %*% svd( y, nu=k, nv=0  )$u
-  phix = svd( x, nv=k, nu=0  )$v
-  phiy = svd( y, nv=k, nu=0  )$v
+  if ( initialization == 'randxy' ) {
+    phiy = t( y ) %*%  ( x  %*% matrix( rnorm( k * ncol(x), 0, 1 ), ncol=k ) )
+    phix = t( x ) %*%  ( y  %*% matrix( rnorm( k * ncol(y), 0, 1 ), ncol=k ) )
+    }
+  else if ( initialization == 'svd' ) {
+    phix = svd( x, nv=k, nu=0  )$v
+    phiy = svd( y, nv=k, nu=0  )$v
+    }
 #  phix = matrix( rnorm( k * ncol(x), 0, 1e-4 ), ncol=k )
 #  phiy = matrix( rnorm( k * ncol(y), 0, 1e-4 ), ncol=k )
+
   i = 1
+  if ( is.na( stochastic ) ) stoke = FALSE else stoke = TRUE
   while ( i < iterations ) {
-  if ( i < 3 ) gx =  1.e-6 # quantile( phix[ abs(phix) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
-  if ( i < 3 ) gy =  1.e-6 # quantile( phiy[ abs(phiy) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
-# gradient calculation
-    delta = t(x) %*% ( x %*% phix - y %*% phiy )
+    if ( stoke ) ind = sample( 1:nrow( x ) )[1:stochastic] else ind = 1:nrow( x )
+    if ( i < 3 ) gx = -1e-4 # quantile( phix[ abs(phix) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
+    if ( i < 3 ) gy = -1e-4 # quantile( phiy[ abs(phiy) > 0 ] , 0.5 , na.rm=TRUE ) * ( -1.e4 )
+  # gradient calculation
+    delta = t(x[ind,]) %*% ( x[ind,] %*% phix - y[ind,] %*% phiy )
     phix1 = phix - delta * gx
-    delta = t(y) %*% ( y %*% phiy - x %*% phix )
+    delta = t(y[ind,]) %*% ( y[ind,] %*% phiy - x[ind,] %*% phix )
     phiy1 = phiy - delta * gy
+#    phix1 = phix1 %*% dx
+#    phiy1 = phiy1 %*% dy
     phix1 = as.matrix( smoox %*% orthogonalizeAndQSparsify( phix1, sparsenessQuantile=sparsenessQuantile, positivity=positivity ) )
     phiy1 = as.matrix( smooy %*% orthogonalizeAndQSparsify( phiy1, sparsenessQuantile=sparsenessQuantile, positivity=positivity ) )
-# now update
+  # now update
     phix =  phix1 / norm( x %*% phix1 )
     phiy =  phiy1 / norm( y %*% phiy1 )
     errs[ i ] = norm( y %*% phiy - x %*% phix )
-    if ( verbose ) print( paste( i, errs[ i ], sum( abs(  diag(  cor( y %*% phiy,  x %*% phix  ) ) ) )  ) )
-#    if ( i > 110 ) if ( errs[ i ]  > errs[i-1] ) i = iterations+1
+  #  print(  sum( abs(  diag(  cor( y %*% phiy,  x %*% phix  ) ) ) ) )
+    if ( verbose ) print( paste( i, errs[ i ] ) )
+  #    if ( i > 15 ) if ( errs[ i ]  < errs[i-1] ) i = iterations+1
     i = i + 1
     }
+
 #  print( cor( x %*% phix ) )
 #  print( cor( y %*% phiy ) )
 #  print( cor( y %*% phiy,  x %*% phix  ) )
