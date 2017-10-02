@@ -1345,6 +1345,9 @@ orthogonalizeAndQSparsify <- function( v,
 #' choices are positive, negative or either as expressed as a string.
 #' @param k number of basis vectors to compute
 #' @param iterations number of gradient descent iterations
+#' @param stochastic size of subset to use for stocastic gradient descent
+#' @param initialization type of initialization, currently only supports a
+#' character \code{randxy}
 #' @param verbose boolean option
 #' @return list with matrices each of size p or q by k
 #' @author Avants BB

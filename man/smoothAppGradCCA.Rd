@@ -26,6 +26,11 @@ choices are positive, negative or either as expressed as a string.}
 
 \item{iterations}{number of gradient descent iterations}
 
+\item{stochastic}{size of subset to use for stocastic gradient descent}
+
+\item{initialization}{type of initialization, currently only supports a
+character \code{randxy}}
+
 \item{verbose}{boolean option}
 }
 \value{
