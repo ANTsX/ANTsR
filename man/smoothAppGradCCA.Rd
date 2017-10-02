@@ -5,7 +5,8 @@
 \title{cca via sparse smooth matrix prediction}
 \usage{
 smoothAppGradCCA(x, y, smoox = NA, smooy = NA, sparsenessQuantile = 0.5,
-  positivity = "either", k = 2, iterations = 100, verbose = FALSE)
+  positivity = "either", k = 2, iterations = 10, stochastic = NA,
+  initialization = "randxy", verbose = FALSE)
 }
 \arguments{
 \item{x}{input view 1 matrix}
@@ -24,6 +25,11 @@ choices are positive, negative or either as expressed as a string.}
 \item{k}{number of basis vectors to compute}
 
 \item{iterations}{number of gradient descent iterations}
+
+\item{stochastic}{size of subset to use for stocastic gradient descent}
+
+\item{initialization}{type of initialization, currently only supports a
+character \code{randxy}}
 
 \item{verbose}{boolean option}
 }

@@ -53,7 +53,7 @@ for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
 sel = 1:25
 fit = smoothMultiRegression( x=mat[sel,], y=age[sel,], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrixX = smoomat, smoothingMatrixY = diag(ncol(y)), verbose=T )
+  smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose=T )
 tt = mat \%*\% fit$v
 print( cor.test( age[-sel,1], tt[-sel,1] ) )
 vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
