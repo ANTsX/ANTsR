@@ -160,5 +160,6 @@ notifications:
   email:
     recipients:
     - muschellij2@gmail.com
+    - stnava@gmail.com
     on_success: change
     on_failure: always
