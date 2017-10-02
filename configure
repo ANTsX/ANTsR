@@ -22,20 +22,20 @@ if [[ ! -x $gitcmd ]] ; then # try install git
 fi
 
 # get a version of cmake
-cmaker=`command -v cmake`
-if [[ -z "${cmaker}" ]]; then
-	res=`Rscript -e "cat(('cmaker' %in% installed.packages())*1)"`
-	if [[ $res -eq 0 ]]; 
-		then
-	    git clone https://github.com/stnava/cmaker ;
-	    R CMD INSTALL cmaker ;
-	    rm -rf cmaker ;
-	fi
-    cmaker=`Rscript -e "x=cmaker::cmake()"`
+cmaker=`${R_HOME}/bin/Rscript.exe -e "x=Sys.which('cmake'); cat(x)"`
+if [ -z "${cmaker}" ]; then
+    res=`${R_HOME}/bin/Rscript.exe -e "cat(('cmaker' %in% installed.packages())*1)"`
+    if [ $res -eq 0 ]; 
+    then     
+        git clone https://github.com/stnava/cmaker ;
+        R CMD INSTALL cmaker ;
+        rm -rf cmaker ;
+    fi
+    cmaker=`${R_HOME}/bin/Rscript.exe -e "x=cmaker::cmake()"`
 	if [[ -n "${cmaker}" ]]; then
     	cmake_path=`dirname ${cmaker}`
     	export PATH=${PATH}:"${cmake_path}"
-    fi
+    fi 
 fi
 
 cd ./src
