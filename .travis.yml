@@ -41,8 +41,8 @@ before_install:
   - cmake --version
   - export PACKAGE_NAME=`package_name`
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck    
-  - gh_binary_install muschellij2/ITKR
-  - gh_binary_install muschellij2/ANTsRCore
+  - gh_binary_install stnava/ITKR
+  - gh_binary_install stnava/ANTsRCore
   - install_remotes_no_dep
   # - gh_binary_install ITKR ANTsRCore
 
@@ -94,12 +94,12 @@ jobs:
       deploy:
         provider: releases
         api_key:
-          secure: qYN5fyhnulu35DVfh5gmhR35AMLs486cFl1MkQCQ58owdX33hV6dzPM/ERKeQTchNZ29zIiKbvB75/g5QeLR5z3ywpm4San2hlywWQtYXzGyDK3+k9l9I1LY5AKgQhhPMPxKCmEXJOhG/2hF041rSYpPUfcGb+9coQZea8EO9Tub1eziHV3OqKbe2Bh7k5YM0b6vDw934SDFOhV2hXmR8uG52eBC2g30rbnkUy4byAYyf2do1fFRiaMNnkWlA15FM/o0HLsAFKJgmXHi48l6yiRA/1lQBquCfVvW8c27fnVqV95/1oTrt+cLoGIRwxz7cLeO+kZniY9qCFrxEcOMFx82ODsUHLSliWMs1G6v8ZCzHzSFZE8yJdPyoj70cSmq9I296cMKCjpEGDb5eQ2MtbK/DlMLpUaOmI8IS+DANYYetJU415Br3WO31HhMNrQ6hm8QPrFVZs2uHamlZYn1R4gwuiRc4ln3V5gvVpKYxf0hr7wbu9ZiA8Oe2FeuvC2J6mNAkCnKUXrbpVntI00hFdhotzzssyGmGdJDDZI7Kuu42w8E2AXaZ2tC4o/i7fwJsCSgXrlM97cPInylCegmR19yiP3oUPrnifedFY/UHqjgyajQX0QukUggf9p/KBT4iEtUGyET+/QwSokj3aAOa7aMFJo/Ybp7Z/8Bgny30b4=
+          secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
         file: ${PKG_FILE_NAME}
         skip_cleanup: true
         overwrite: true
         on:
-          repo: muschellij2/ANTsR
+          repo: ANTsX/ANTsR
           tags: true
           all_branches: true
       os: linux
@@ -123,18 +123,22 @@ jobs:
       deploy:
         provider: releases
         api_key:
-          secure: qYN5fyhnulu35DVfh5gmhR35AMLs486cFl1MkQCQ58owdX33hV6dzPM/ERKeQTchNZ29zIiKbvB75/g5QeLR5z3ywpm4San2hlywWQtYXzGyDK3+k9l9I1LY5AKgQhhPMPxKCmEXJOhG/2hF041rSYpPUfcGb+9coQZea8EO9Tub1eziHV3OqKbe2Bh7k5YM0b6vDw934SDFOhV2hXmR8uG52eBC2g30rbnkUy4byAYyf2do1fFRiaMNnkWlA15FM/o0HLsAFKJgmXHi48l6yiRA/1lQBquCfVvW8c27fnVqV95/1oTrt+cLoGIRwxz7cLeO+kZniY9qCFrxEcOMFx82ODsUHLSliWMs1G6v8ZCzHzSFZE8yJdPyoj70cSmq9I296cMKCjpEGDb5eQ2MtbK/DlMLpUaOmI8IS+DANYYetJU415Br3WO31HhMNrQ6hm8QPrFVZs2uHamlZYn1R4gwuiRc4ln3V5gvVpKYxf0hr7wbu9ZiA8Oe2FeuvC2J6mNAkCnKUXrbpVntI00hFdhotzzssyGmGdJDDZI7Kuu42w8E2AXaZ2tC4o/i7fwJsCSgXrlM97cPInylCegmR19yiP3oUPrnifedFY/UHqjgyajQX0QukUggf9p/KBT4iEtUGyET+/QwSokj3aAOa7aMFJo/Ybp7Z/8Bgny30b4=
+          secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
         file: ${PKG_FILE_NAME}
         skip_cleanup: true
         overwrite: true
         on:
-          repo: muschellij2/ANTsR
+          repo: ANTsX/ANTsR
           tags: true
           all_branches: true
       os: osx
   allow_failures:
     - os: osx
 
+## muschelli secure
+## qYN5fyhnulu35DVfh5gmhR35AMLs486cFl1MkQCQ58owdX33hV6dzPM/ERKeQTchNZ29zIiKbvB75/g5QeLR5z3ywpm4San2hlywWQtYXzGyDK3+k9l9I1LY5AKgQhhPMPxKCmEXJOhG/2hF041rSYpPUfcGb+9coQZea8EO9Tub1eziHV3OqKbe2Bh7k5YM0b6vDw934SDFOhV2hXmR8uG52eBC2g30rbnkUy4byAYyf2do1fFRiaMNnkWlA15FM/o0HLsAFKJgmXHi48l6yiRA/1lQBquCfVvW8c27fnVqV95/1oTrt+cLoGIRwxz7cLeO+kZniY9qCFrxEcOMFx82ODsUHLSliWMs1G6v8ZCzHzSFZE8yJdPyoj70cSmq9I296cMKCjpEGDb5eQ2MtbK/DlMLpUaOmI8IS+DANYYetJU415Br3WO31HhMNrQ6hm8QPrFVZs2uHamlZYn1R4gwuiRc4ln3V5gvVpKYxf0hr7wbu9ZiA8Oe2FeuvC2J6mNAkCnKUXrbpVntI00hFdhotzzssyGmGdJDDZI7Kuu42w8E2AXaZ2tC4o/i7fwJsCSgXrlM97cPInylCegmR19yiP3oUPrnifedFY/UHqjgyajQX0QukUggf9p/KBT4iEtUGyET+/QwSokj3aAOa7aMFJo/Ybp7Z/8Bgny30b4=
+## ANTsX secure
+## VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
 # report coverage rate to coveralls
 # after_success:
   # - cd $mydir
@@ -161,5 +165,7 @@ notifications:
     recipients:
     - muschellij2@gmail.com
     - stnava@gmail.com
+    - arman.eshaghi@gmail.com    
+    - jeff.duda@gmail.com    
     on_success: change
     on_failure: always
