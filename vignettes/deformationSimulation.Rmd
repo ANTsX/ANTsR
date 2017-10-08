@@ -53,6 +53,37 @@ grid = createWarpedGrid( img, gridStep = 10, gridWidth = 2,
 plot( grid )
 ```
 
+Compute a population mean warp.
+
+```{r popmean,eval=FALSE}
+poplist = list( 
+  antsImageRead( getANTsRData( "r16" ) ),
+  antsImageRead( getANTsRData( "r27" ) ),
+  antsImageRead( getANTsRData( "r30" ) ),
+  antsImageRead( getANTsRData( "r62" ) ),
+  antsImageRead( getANTsRData( "r64" ) ),
+  antsImageRead( getANTsRData( "r85" ) )
+  )
+template = antsImageClone( poplist[[ 1 ]] )
+if ( !exists( "reglist" ) ) {
+  reglist = list( )
+  for ( i in 1:length( poplist ) ) {
+    reglist[[ i ]] = antsRegistration( template, poplist[[ i ]], typeofTransform = "SyN" )
+  }
+}
+awrp = antsImageRead( reglist[[ 1 ]]$fwdtransforms[1] )
+for ( i in 2:length( reglist ) )
+  awrp = awrp + antsImageRead( reglist[[ i ]]$fwdtransforms[1] )
+awrp = awrp * ( -1.0 * gradstep ) / length( reglist )
+warpTx = antsrTransformFromDisplacementField( awrp )
+txlist = list( )
+ncomp = 10
+for ( i in 1:ncomp ) txlist[[ i ]] = warpTx
+warped = applyAntsrTransform(
+  txlist, data = template, reference = template )
+plot( warped )
+```
+
 Curvature flow.
 
 ```{r curvflow,eval=FALSE}
