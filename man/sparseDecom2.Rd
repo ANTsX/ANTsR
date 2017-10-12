@@ -84,16 +84,14 @@ mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
 \dontrun{
 # a masked example
 im<-antsImageRead( getANTsRData("r64"))
-dd<- im > 250
-mask<-antsImageClone( im )
-mask[ !dd ]<-0
-mask[ dd ]<-1
-mat1<-matrix( rnorm(sum(dd)*10) , nrow=10 )
-mat2<-matrix( rnorm(sum(dd)*10) , nrow=10 )
+mask<-thresholdImage( im, 250, Inf )
+dd = sum( mask == 1 )
+mat1<-matrix( rnorm(dd*10) , nrow=10 )
+mat2<-matrix( rnorm(dd*10) , nrow=10 )
 initlist<-list()
 for ( nvecs in 1:2 ) {
   init1<-antsImageClone( mask )
-  init1[dd]<-rnorm(sum(dd))
+  init1[ mask == 1 ]<-rnorm( dd )
   initlist<-lappend( initlist, init1 )
 }
 ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
