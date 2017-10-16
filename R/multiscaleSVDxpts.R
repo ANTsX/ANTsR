@@ -576,9 +576,12 @@ if ( hasweights ) {
   locdf = basisDf
   locdf$wts = rowWeights
   wts = "this is just a placeholder"
-  mdl = lm( modelFormula, data = locdf, weights = wts, na.action="na.exclude"  )
+  mdl = lm( as.formula( modelFormula ),
+    data = locdf, weights = wts, na.action="na.exclude"  )
   rm( locdf )
-  } else mdl = lm( modelFormula, data = basisDf, na.action="na.exclude" )
+  } else {
+    mdl = lm( as.formula( modelFormula ), data = basisDf, na.action="na.exclude" )
+  }
 # bmdl = bigLMStats( mdl )
 u = scale( model.matrix( mdl ) )
 intercept = u[,1]
