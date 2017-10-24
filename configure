@@ -21,6 +21,23 @@ if [[ ! -x $gitcmd ]] ; then # try install git
   exit 1
 fi
 
+# get a version of cmake
+cmaker=`${R_HOME}/bin/Rscript.exe -e "x=Sys.which('cmake'); cat(x)"`
+if [ -z "${cmaker}" ]; then
+    res=`${R_HOME}/bin/Rscript.exe -e "cat(('cmaker' %in% installed.packages())*1)"`
+    if [ $res -eq 0 ]; 
+    then     
+        git clone https://github.com/stnava/cmaker ;
+        R CMD INSTALL cmaker ;
+        rm -rf cmaker ;
+    fi
+    cmaker=`${R_HOME}/bin/Rscript.exe -e "x=cmaker::cmake()"`
+	if [[ -n "${cmaker}" ]]; then
+    	cmake_path=`dirname ${cmaker}`
+    	export PATH=${PATH}:"${cmake_path}"
+    fi 
+fi
+
 cd ./src
 # platform-specific Makevars
 echo "myantssource=\${PWD}/ants/" > Makevars
@@ -43,6 +60,7 @@ echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
 
 aincludes=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsIncludes(); cat(a)'`
 
+
 echo "PKG_CPPFLAGS =${PKG_CPPFLAGS} -I\${ITK} -I\${PWD}  \
   -I${aincludes} \
   -I../inst/include/ " >> Makevars
@@ -61,7 +79,7 @@ echo "libitk=\`find ${ITKRLIB} -name \"lib*.a\"\`" >> Makevars
 echo "PKG_LIBS=${PKG_LIBS} \${libitk} \${libants} \${libitk} \${libants} \
   \${libitk} \${libants} \${libitk} \${libants} \
   \${libitk} \${libants} \${libitk} \${libants} \
-	\${libitk} \${libants}" >> Makevars
+  \${libitk} \${libants}" >> Makevars
 
 echo ".PHONY: all libs" >> Makevars
 

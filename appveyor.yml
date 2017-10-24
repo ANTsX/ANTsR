@@ -17,7 +17,7 @@ cache:
 
 environment:
   global:
-    WARNINGS_ARE_ERORRS: 1
+    WARNINGS_ARE_ERRORS: 1
 
 build_script:
   - travis-tool.sh install_deps

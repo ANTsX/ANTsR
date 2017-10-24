@@ -702,6 +702,7 @@ return( list( u = u, v=v, intercept = intercept ) )
 #' plot( mask, vimg, window.overlay=range(abs(vimg)))
 #' }
 #' @export smoothRegression
+## #' @param gamma step size for gradient descent
 smoothRegression <- function(
   x,
   y,
@@ -835,6 +836,7 @@ return(
 #' plot( mask, vimg, window.overlay=range(abs(vimg)))
 #' }
 #' @export smoothMultiRegression
+## #' @param gamma step size for gradient descent
 smoothMultiRegression <- function(
   x,
   y,
