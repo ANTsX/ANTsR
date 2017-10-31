@@ -3,20 +3,33 @@
 #' takes an object output from renderSurfaceFunction and a list of centroids
 #' and plots the centroid network over the rendering object
 #'
-#' @param centroids input matrix of size number of 3D points ( in rows ) by 3 (
-#' in columns )
-#' @param brain input rendering object which is output of renderSurfaceFunction
-#' or a function derived from renderSurfaceFunction
-#' @param weights edge weights
-#' @param edgecolors a color(map) for edges
-#' @param nodecolors a color(map) for nodes
-#' @param nodetype sphere or other node type
-#' @param scaling controls functional range
-#' @param lwd line width
-#' @param radius for nodes
-#' @param showOnlyConnectedNodes boolean
+#' If \code{edgecolors} is not specified, edge weights are quantile transformed to improve contrast and a heat-like color
+#' palette is used. 
+#'
+#' @param centroids input matrix of size N 3D points ( in rows ) by 3 (
+#' in columns ), for N nodes.
+#' @param brain input rendering object which is output of renderSurfaceFunction.
+#' or a function derived from renderSurfaceFunction.
+#' @param weights edge weights, a symmetric matrix of size N. Weights should be non-negative.
+#' @param backgroundColor background color.
+#' @param edgecolors a color(map) for edges. If a color map function, weights will be transformed to the range [0,1], which is compatible with functions returned by \code{colorRamp}.
+#' @param nodecolors a color or color vector for nodes.
+#' @param nodetype sphere or other node type.
+#' @param edgeContrast a vector of length 2, specifying the contrast range for edge colors. Weights are normalized to the range [0,1].
+#' The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)} would stretch the contrast
+#' over the middle 90% of normalized weight values.
+#' @param quantileTransformWeights quantile transform the weights.
+#' @param lwd line width for drawing edges.
+#' @param minRadius minimum node radius. Ignored if the radius is specified explicitly with \code{radius}.
+#' @param maxRadius maximum node radius. The node radius between \code{minRadius} and \code{maxRadius} is
+#' determined from the sum of the edge weights connecting the node. Ignored if the radius is specified explicitly
+#' with \code{radius}.
+#' @param radius a constant radius or vector of length nrow(centroids). If not specified, node radius is
+#' determined by the sum of edge weights connected to the node.
+#' @param showOnlyConnectedNodes boolean, if \code{TRUE}, only nodes with non-zero edge weights are plotted.
+#' 
 #' @return None
-#' @author Avants BB and Duda JT
+#' @author Avants BB, Duda JT, Cook PA
 #' @examples
 #'
 #' \dontrun{
@@ -35,7 +48,7 @@
 #'   testweights[31,37]<-1  # ant cingulate to hipp
 #'   testweights[31,36]<-2  # ant cingulate to post cingulate
 #'   testweights[11,65]<-3  # broca to angular
-#'   plotBasicNetwork( centroids = aalcnt , brain , weights=testweights )
+#'   plotBasicNetwork( centroids = aalcnt , brain , weights=testweights, edgecolors = "red" )
 #'   id<-rgl::par3d('userMatrix')
 #'   rid<-rotate3d( id , -pi/2, 1, 0, 0 )
 #'   rid2<-rotate3d( id , pi/2, 0, 0, 1 )
@@ -89,112 +102,169 @@
 #'
 #' @export plotBasicNetwork
 plotBasicNetwork <- function(
-  centroids,
-  brain,
-  weights = NA,
-  edgecolors = 0,
-  nodecolors = "blue",
-  nodetype = "s",
-  scaling = c(0, 0),
-  lwd = 2,
-  radius = NA,
-  showOnlyConnectedNodes = TRUE ) {
-  if (missing(centroids) | missing(brain)) {
-    print(args(plotBasicNetwork))
-    return(1)
-  }
-  if(!usePkg('rgl')){
-    print("rgl is necessary for this function.")
-    return(NULL)
-  }
-  nLabels <- nrow(centroids)
-  rgl::rgl.bg(color = "white")
-  rgl::par3d(windowRect = c(100, 100, 600, 600))
-  mesh <- .getvertices(brain[[1]])
-  nSurfaceVerts <- dim(mesh$vertices)[1]
-  mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
-  labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts
-  if ( !any(is.na( weights ) )  & showOnlyConnectedNodes & any( is.na( radius ) ) ) {
-    # node scaled by strength
-    radiusw <- rep(0, nrow(centroids))
-    gg <- which(apply(weights, FUN = mean, MARGIN = 1, na.rm = T) > 0 | apply(weights,
-      FUN = mean, MARGIN = 2, na.rm = T) > 0)
-    radiusscale <- as.numeric(apply(weights, FUN = sum, MARGIN = 1, na.rm = T) +
-      apply(weights, FUN = sum, MARGIN = 2, na.rm = T))
-    radiusscale <- (radiusscale/max(radiusscale))
-    radiusw <- (radius * radiusscale)
-    radius <- radiusw
-  }
-  if ( any( is.na( radius ) ) ) radius = 3
-  if ( !any(is.na( weights ) ) )
-    {
-    ggg = weights
-    luniqvals = length( unique( ggg ) )
-    if ( luniqvals > 250 ) ncuts = 1.0 / 250.0 else ncuts = 1.0 / ( luniqvals*0.5 )
-    qqq = quantile(ggg[ ggg > 0 ], probs=seq(0, 1, by=ncuts), na.rm=TRUE, names=FALSE, type=7 )
-    qqq = unique( qqq )
-    myquartile <- cut(ggg, breaks = qqq, include.lowest=TRUE )
-    myquartile = as.numeric( myquartile )
-    myquartile[ is.na( myquartile) ] = 0
-    weights = matrix( myquartile, nrow=nrow(weights) )
+                             centroids,
+                             brain,
+                             weights = NA,
+                             edgecolors = -1,
+                             backgroundColor = "white",
+                             nodecolors = "blue",
+                             nodetype = "s",
+                             edgeContrast = c(0, 1),
+                             quantileTransformWeights = FALSE,
+                             lwd = 2,
+                             minRadius=0,
+                             maxRadius=3,
+                             radius = NA,
+                             showOnlyConnectedNodes = TRUE ) {
+    if (missing(centroids) | missing(brain)) {
+        print(args(plotBasicNetwork))
+        return(1)
     }
-  rgl::spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
-  edgelocations <- c()
-  edgeweights <- c()
-  if ( !any( is.na( weights ) )  )
-    for (i in c(1:nrow(weights))) {
-      for (j in c(1:ncol(weights))) {
-        if ( is.na(weights[i,j])) {
-            edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
-          } else if ( weights[i, j] > 0 & weights[i, j] < Inf ) {
-          edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
-          edgeweights <- c(edgeweights, weights[i, j])
+    if(!usePkg('rgl')){
+        print("rgl is necessary for this function.")
+        return(NULL)
+    }
+
+    edgeColorsIsFunction <- is.function(edgecolors)
+
+    # Test if weights are all NA here. Then use this boolean in place of (is.na(weights), which
+    # causes warnings in scalar contexts like if statements
+    weightsNA <- all(is.na(weights))
+
+    numNodes <- nrow(centroids)
+    
+    rgl::rgl.bg(color = backgroundColor)
+    rgl::par3d(windowRect = c(100, 100, 600, 600))
+    mesh <- .getvertices(brain[[1]])
+    nSurfaceVerts <- dim(mesh$vertices)[1]
+    mesh$vertices <- rbind(mesh$vertices, as.matrix(centroids))
+    labelVerts <- c(1:nrow(centroids)) + nSurfaceVerts
+    
+    if (weightsNA) {
+        if ( all(is.na( radius )) ) radius = 3
+        rgl::spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
+        return(1)
+    }
+  
+    if ( !(length(dim(weights) == 2 && dim(weights)[1] == numNodes && dim(weights)[2] == numNodes)) ) {
+        stop("Weights must be a 2D symmetric matrix with one entry for each pair of nodes")
+    }
+    
+    if ( all(is.na(radius)) ) { # node scaled by strength
+        radiusw <- rep(0, nrow(centroids))
+        radiusscale <- as.numeric(apply(weights, FUN = sum, MARGIN = 1, na.rm = T) +
+                                  apply(weights, FUN = sum, MARGIN = 2, na.rm = T))
+        radiusscale <- ( radiusscale/max(radiusscale) )
+        nodeMask <- 1 * (radiusscale > 0) # unconnected nodes stay at 0 if showOnlyConnectedNodes
+        radiusw <- (minRadius + (maxRadius - minRadius) * radiusscale)
+
+        if (showOnlyConnectedNodes) {
+            radiusq <- radiusw * nodeMask
         }
-      }
-  }
-  if ( any(is.na(weights) )) {
-    rgl::segments3d(mesh$vertices[edgelocations, ], col = "red", lwd = 2)
-    return(1)
-  }
+      
+        radius <- radiusw
+    }
+   
+    ggg <- weights
+    luniqvals <- length( unique( ggg[ggg > 0] ) )
+    
+    binaryWeights <- FALSE
+    
+    if (luniqvals == 1) {
+        binaryWeights <- TRUE
+        # If some constant that is not binary, convert to binary so that we don't mess up
+        # color mapping
+        weights <- weights / max(weights)
+    }
+    else if (quantileTransformWeights) {
+        if ( luniqvals > 250 ) ncuts = 1.0 / 250.0 else ncuts = 1.0 / ( luniqvals*0.5 )
+        
+        qqq = quantile(ggg[ ggg > 0 ], probs=seq(0, 1, by=ncuts), na.rm=TRUE, names=FALSE, type=7 )
+        qqq = unique( qqq )
+        myquartile <- cut(ggg, breaks = qqq, include.lowest=TRUE )
+        myquartile <- as.numeric( myquartile )
+        myquartile[ is.na( myquartile) ] = 0
+        myquartile[ is.nan( myquartile) ] = 0
+        weights <- matrix( myquartile, nrow=nrow(weights) )
+    }
+    
+    rgl::spheres3d(mesh$vertices[labelVerts, ], color = nodecolors, type = nodetype, radius = radius)
 
-  if ((length(edgecolors) == 1) && (edgecolors[1] == 0)) {
-    if ((scaling[1] == scaling[2])) {
-      scaling[1] <- min(edgeweights)
-      scaling[2] <- max(edgeweights) - min(edgeweights)
-      if (scaling[2] == 0)
-        scaling[2] <- 1
+    edgelocations <- c()
+    edgeweights <- c()
+    
+    
+    for (i in c(1:nrow(weights))) {
+        for (j in c(1:ncol(weights))) {
+            if (weights[i, j] > 0 & weights[i, j] < Inf) {
+                # Draw each edge once only
+                if (i < j) { 
+                    edgelocations <- c(edgelocations, nSurfaceVerts + c(i, j))
+                    edgeweights <- c(edgeweights, weights[i, j])
+                }
+            }
+        }
     }
 
-    edgeweights <- edgeweights - scaling[1] + 1
-    edgeweights <- edgeweights/scaling[2]
-    edgeweights <- edgeweights * 0.75  # prevent 'wrapping' of colors
-    edgeweights <- (edgeweights * 400)
-    # colormap <- topo.colors(512)
-    colormap <- rainbow(512)
-    colormap <- heat.colors( 512, alpha = 0.5 )
-    jetcolorfun <- colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
-        "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"), interpolate = c("spline"),
-        space = "Lab")
-#    colormap <- colorfun( 255 )
-    edgecolors <- edgeweights
-    for (i in c(1:length(edgeweights))) {
-      colind <- floor(edgeweights[i])
-      if (colind < 1)
-        colind <- 1
-      edgecolors[i] <- colormap[colind]
+    # normalize weights to range [0-1]
+    edgeweightsNorm <- edgeweights
+    
+    if (!binaryWeights) {
+        minWeight <- min(edgeweights)
+        maxWeight <- max(edgeweights)
+        
+        edgeweightsNorm <- (edgeweights - minWeight) / (maxWeight - minWeight)
+        
+        # user defined contrast stretch
+        # Want to map (0.05, 0.95) to (0,1)
+        # then clip values outside this range
+        edgeweightsNorm <- (edgeweightsNorm - edgeContrast[1]) / (edgeContrast[2] - edgeContrast[1])
+        
+        edgeweightsNorm[edgeweightsNorm > 1] <- 1
+        edgeweightsNorm[edgeweightsNorm < 0] <- 0
     }
-  }
-  rgl::segments3d(mesh$vertices[edgelocations, ], col = rep(edgecolors, each = 2), lwd = lwd)
+    
+    # Map colors unless color map or other explicit color scheme provided.
+    if (!edgeColorsIsFunction && (length(edgecolors) == 1) && (edgecolors[1] == -1)) {
+        # heat.colors makes high end white, which is invisible with default background
+        
+        colormap <- colorRampPalette(c("#650000","dark red", "red", "darkorange", "orange", "yellow", "#FAFAD0"))
+        
+        edgecolors <- edgeweightsNorm
+        
+        colorArr <- colormap(256)
+        
+        for (i in c(1:length(edgeweightsNorm))) {
+            edgecolors[i] <- colorArr[1 + floor(edgeweightsNorm[i] * 255)]
+        }
+        
+    }
+    if (edgeColorsIsFunction) {
+        # Convert function to color array
+        colSeq <- seq(0,1,1/255)
+        
+        colorArr <- rgb(edgecolors(colSeq), maxColorValue = 255)
+
+        edgecolors <- edgeweightsNorm
+        
+        for (i in c(1:length(edgeweightsNorm))) {
+            edgecolors[i] <- colorArr[1 + floor(edgeweightsNorm[i] * 255)]
+        }
+        
+    }
+    
+    rgl::segments3d(mesh$vertices[edgelocations, ], col = edgecolors, lwd = lwd)
+    
 }
 
 
 .getvertices <- function(inrglmesh) {
-  cter <- nrow(inrglmesh[[1]])
-  vertices <- matrix(NA, nrow = 3 * cter, ncol = 3)
-  inds <- c(1:cter)
-  vertices[(3 * inds - 2), ] <- inrglmesh[[1]]
-  vertices[(3 * inds - 1), ] <- inrglmesh[[2]]
-  vertices[(3 * inds - 0), ] <- inrglmesh[[3]]
-  indices <- rep(NA, nrow(vertices))
-  return(list(vertices = vertices, indices = indices))
+    cter <- nrow(inrglmesh[[1]])
+    vertices <- matrix(NA, nrow = 3 * cter, ncol = 3)
+    inds <- c(1:cter)
+    vertices[(3 * inds - 2), ] <- inrglmesh[[1]]
+    vertices[(3 * inds - 1), ] <- inrglmesh[[2]]
+    vertices[(3 * inds - 0), ] <- inrglmesh[[3]]
+    indices <- rep(NA, nrow(vertices))
+    return(list(vertices = vertices, indices = indices))
 }
