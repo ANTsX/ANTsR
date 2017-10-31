@@ -4,32 +4,47 @@
 \alias{plotBasicNetwork}
 \title{Simple plotBasicNetwork function.}
 \usage{
-plotBasicNetwork(centroids, brain, weights = NA, edgecolors = 0,
-  nodecolors = "blue", nodetype = "s", scaling = c(0, 0), lwd = 2,
-  radius = NA, showOnlyConnectedNodes = TRUE)
+plotBasicNetwork(centroids, brain, weights = NA, edgecolors = -1,
+  backgroundColor = "white", nodecolors = "blue", nodetype = "s",
+  edgeContrast = c(0, 1), quantileTransformWeights = FALSE, lwd = 2,
+  minRadius = 0, maxRadius = 3, radius = NA,
+  showOnlyConnectedNodes = TRUE)
 }
 \arguments{
-\item{centroids}{input matrix of size number of 3D points ( in rows ) by 3 (
-in columns )}
+\item{centroids}{input matrix of size N 3D points ( in rows ) by 3 (
+in columns ), for N nodes.}
 
-\item{brain}{input rendering object which is output of renderSurfaceFunction
-or a function derived from renderSurfaceFunction}
+\item{brain}{input rendering object which is output of renderSurfaceFunction.
+or a function derived from renderSurfaceFunction.}
 
-\item{weights}{edge weights}
+\item{weights}{edge weights, a symmetric matrix of size N. Weights should be non-negative.}
 
-\item{edgecolors}{a color(map) for edges}
+\item{edgecolors}{a color(map) for edges. If a color map function, weights will be transformed to the range [0,1], which is compatible with functions returned by \code{colorRamp}.}
 
-\item{nodecolors}{a color(map) for nodes}
+\item{backgroundColor}{background color.}
 
-\item{nodetype}{sphere or other node type}
+\item{nodecolors}{a color or color vector for nodes.}
 
-\item{scaling}{controls functional range}
+\item{nodetype}{sphere or other node type.}
 
-\item{lwd}{line width}
+\item{edgeContrast}{a vector of length 2, specifying the contrast range for edge colors. Weights are normalized to the range [0,1].
+The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)} would stretch the contrast
+over the middle 90% of normalized weight values.}
 
-\item{radius}{for nodes}
+\item{quantileTransformWeights}{quantile transform the weights.}
 
-\item{showOnlyConnectedNodes}{boolean}
+\item{lwd}{line width for drawing edges.}
+
+\item{minRadius}{minimum node radius. Ignored if the radius is specified explicitly with \code{radius}.}
+
+\item{maxRadius}{maximum node radius. The node radius between \code{minRadius} and \code{maxRadius} is
+determined from the sum of the edge weights connecting the node. Ignored if the radius is specified explicitly
+with \code{radius}.}
+
+\item{radius}{a constant radius or vector of length nrow(centroids). If not specified, node radius is
+determined by the sum of edge weights connected to the node.}
+
+\item{showOnlyConnectedNodes}{boolean, if \code{TRUE}, only nodes with non-zero edge weights are plotted.}
 }
 \value{
 None
@@ -37,6 +52,10 @@ None
 \description{
 takes an object output from renderSurfaceFunction and a list of centroids
 and plots the centroid network over the rendering object
+}
+\details{
+If \code{edgecolors} is not specified, edge weights are quantile transformed to improve contrast and a heat-like color
+palette is used.
 }
 \examples{
 
@@ -56,7 +75,7 @@ and plots the centroid network over the rendering object
   testweights[31,37]<-1  # ant cingulate to hipp
   testweights[31,36]<-2  # ant cingulate to post cingulate
   testweights[11,65]<-3  # broca to angular
-  plotBasicNetwork( centroids = aalcnt , brain , weights=testweights )
+  plotBasicNetwork( centroids = aalcnt , brain , weights=testweights, edgecolors = "red" )
   id<-rgl::par3d('userMatrix')
   rid<-rotate3d( id , -pi/2, 1, 0, 0 )
   rid2<-rotate3d( id , pi/2, 0, 0, 1 )
@@ -110,5 +129,5 @@ rgl::par3d(userMatrix = id )
 
 }
 \author{
-Avants BB and Duda JT
+Avants BB, Duda JT, Cook PA
 }
