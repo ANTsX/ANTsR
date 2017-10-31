@@ -3,27 +3,32 @@
 #' takes an object output from renderSurfaceFunction and a list of centroids
 #' and plots the centroid network over the rendering object
 #'
-#' If \code{edgecolors} is not specified, edge weights are quantile transformed to improve contrast and a heat-like color
-#' palette is used. 
+#' If \code{edgecolors} is not specified, a heat-like color palette is used. Weights
+#' can be quantile transformed or clipped at a given quantile in order to improve
+#' contrast.
+#'
+#' If weights are not specified, only the nodes are plotted.
 #'
 #' @param centroids input matrix of size N 3D points ( in rows ) by 3 (
 #' in columns ), for N nodes.
 #' @param brain input rendering object which is output of renderSurfaceFunction.
 #' or a function derived from renderSurfaceFunction.
 #' @param weights edge weights, a symmetric matrix of size N. Weights should be non-negative.
-#' @param backgroundColor background color.
-#' @param edgecolors a color(map) for edges. If a color map function, weights will be transformed to the range [0,1], which is compatible with functions returned by \code{colorRamp}.
 #' @param nodecolors a color or color vector for nodes.
-#' @param nodetype sphere or other node type.
-#' @param edgeContrast a vector of length 2, specifying the contrast range for edge colors. Weights are normalized to the range [0,1].
-#' The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)} would stretch the contrast
-#' over the middle 90% of normalized weight values.
+#' @param edgecolors a color(map) for edges. If a color map function, weights will be transformed
+#' to the range [0,1], which is compatible with functions returned by \code{colorRamp}.
+#' @param backgroundColor background color.
+#' @param nodetype sphere or other node type supported by RGL.
+#' @param edgeContrast a vector of length 2, specifying the contrast range for edge colors.
+#' Weights are normalized to the range [0,1].
+#' The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)}
+#' would stretch the contrast over the middle 90\% of normalized weight values.
 #' @param quantileTransformWeights quantile transform the weights.
 #' @param lwd line width for drawing edges.
 #' @param minRadius minimum node radius. Ignored if the radius is specified explicitly with \code{radius}.
 #' @param maxRadius maximum node radius. The node radius between \code{minRadius} and \code{maxRadius} is
-#' determined from the sum of the edge weights connecting the node. Ignored if the radius is specified explicitly
-#' with \code{radius}.
+#' determined from the sum of the edge weights connecting the node. Ignored if the radius is specified
+#' explicitly with \code{radius}.
 #' @param radius a constant radius or vector of length nrow(centroids). If not specified, node radius is
 #' determined by the sum of edge weights connected to the node.
 #' @param showOnlyConnectedNodes boolean, if \code{TRUE}, only nodes with non-zero edge weights are plotted.
@@ -32,7 +37,7 @@
 #' @author Avants BB, Duda JT, Cook PA
 #' @examples
 #'
-#' \dontrun{
+#' \dontrun{ 
 #' # more complete example
 #'   mnit<-getANTsRData("mni")
 #'   mnit<-antsImageRead(mnit)
@@ -56,7 +61,7 @@
 #'   rgl::par3d(userMatrix = id )
 #'   dd<-make3ViewPNG(  rid, id, rid2,  paste('network1',sep='') )
 #'   rgl::par3d(userMatrix = id )
-#' # another example
+#' # another example 
 #' mni<-getANTsRData("mni")
 #' mni<-antsImageRead(mni)
 #' mnit<-thresholdImage( mni, 1, max(mni) )

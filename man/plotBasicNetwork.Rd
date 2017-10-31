@@ -19,17 +19,19 @@ or a function derived from renderSurfaceFunction.}
 
 \item{weights}{edge weights, a symmetric matrix of size N. Weights should be non-negative.}
 
-\item{edgecolors}{a color(map) for edges. If a color map function, weights will be transformed to the range [0,1], which is compatible with functions returned by \code{colorRamp}.}
+\item{edgecolors}{a color(map) for edges. If a color map function, weights will be transformed
+to the range [0,1], which is compatible with functions returned by \code{colorRamp}.}
 
 \item{backgroundColor}{background color.}
 
 \item{nodecolors}{a color or color vector for nodes.}
 
-\item{nodetype}{sphere or other node type.}
+\item{nodetype}{sphere or other node type supported by RGL.}
 
-\item{edgeContrast}{a vector of length 2, specifying the contrast range for edge colors. Weights are normalized to the range [0,1].
-The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)} would stretch the contrast
-over the middle 90% of normalized weight values.}
+\item{edgeContrast}{a vector of length 2, specifying the contrast range for edge colors.
+Weights are normalized to the range [0,1].
+The normalized weights can be rescaled with this parameter, eg \code{c(0.05,0.95)}
+would stretch the contrast over the middle 90\% of normalized weight values.}
 
 \item{quantileTransformWeights}{quantile transform the weights.}
 
@@ -38,8 +40,8 @@ over the middle 90% of normalized weight values.}
 \item{minRadius}{minimum node radius. Ignored if the radius is specified explicitly with \code{radius}.}
 
 \item{maxRadius}{maximum node radius. The node radius between \code{minRadius} and \code{maxRadius} is
-determined from the sum of the edge weights connecting the node. Ignored if the radius is specified explicitly
-with \code{radius}.}
+determined from the sum of the edge weights connecting the node. Ignored if the radius is specified
+explicitly with \code{radius}.}
 
 \item{radius}{a constant radius or vector of length nrow(centroids). If not specified, node radius is
 determined by the sum of edge weights connected to the node.}
@@ -54,12 +56,15 @@ takes an object output from renderSurfaceFunction and a list of centroids
 and plots the centroid network over the rendering object
 }
 \details{
-If \code{edgecolors} is not specified, edge weights are quantile transformed to improve contrast and a heat-like color
-palette is used.
+If \code{edgecolors} is not specified, a heat-like color palette is used. Weights
+can be quantile transformed or clipped at a given quantile in order to improve
+contrast.
+
+If weights are not specified, only the nodes are plotted.
 }
 \examples{
 
-\dontrun{
+\dontrun{ 
 # more complete example
   mnit<-getANTsRData("mni")
   mnit<-antsImageRead(mnit)
@@ -83,7 +88,7 @@ palette is used.
   rgl::par3d(userMatrix = id )
   dd<-make3ViewPNG(  rid, id, rid2,  paste('network1',sep='') )
   rgl::par3d(userMatrix = id )
-# another example
+# another example 
 mni<-getANTsRData("mni")
 mni<-antsImageRead(mni)
 mnit<-thresholdImage( mni, 1, max(mni) )
