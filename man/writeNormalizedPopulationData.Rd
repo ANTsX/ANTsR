@@ -2,7 +2,7 @@
 % Please edit documentation in R/writeNormalizedPopulationData.R
 \name{writeNormalizedPopulationData}
 \alias{writeNormalizedPopulationData}
-\title{Save normalized population data to a h5 file}
+\title{Save normalized population data to a directory or h5 file}
 \usage{
 writeNormalizedPopulationData(demographics, imageMat, imageMask, imageBoolean,
   filename)
@@ -18,16 +18,15 @@ writeNormalizedPopulationData(demographics, imageMat, imageMask, imageBoolean,
 rows in the demographics data frame and number of true values equal to the
 number of rows in the image matrix.}
 
-\item{filename}{output filename for hdf5 file.}
+\item{filename}{output filename for hdf5 file (if .h5) or directory name.}
 }
 \value{
 successOrFailure boolean
 }
 \description{
 This function simplifies the steps of saving a population (image) analysis
-into an efficient hdf5 file, using the h5 library.  The population image data
-is stored as a matrix.  Along with the matrix will be a data frame that
-contains the population demographics.  The number of matrix columns will be
+into an efficient hdf5 file, using the h5 library or to a directory.  The
+data frame with population demographics. The number of matrix columns will be
 defined by a mask that the user should also supply.  Finally, a boolean
 vector should be passed in that matches the images to the demographics. This
 function cannot check if the matching between demographics and images is

@@ -2,7 +2,7 @@
 % Please edit documentation in R/writeNormalizedPopulationData.R
 \name{readNormalizedPopulationData}
 \alias{readNormalizedPopulationData}
-\title{Read normalized population from h5 file}
+\title{Read normalized population from h5 file or directory}
 \usage{
 readNormalizedPopulationData(filename)
 }

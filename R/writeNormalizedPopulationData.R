@@ -1,9 +1,9 @@
-#' Save normalized population data to a h5 file
+#' Save normalized population data to a directory or h5 file
 #'
 #' This function simplifies the steps of saving a population (image) analysis
-#' into an efficient hdf5 file, using the h5 library.  The population image data
-#' is stored as a matrix.  Along with the matrix will be a data frame that
-#' contains the population demographics.  The number of matrix columns will be
+#' into an efficient hdf5 file, using the h5 library or to a directory.  The
+# 'population image data is stored as a matrix.  Along with the matrix will be a
+#' data frame with population demographics. The number of matrix columns will be
 #' defined by a mask that the user should also supply.  Finally, a boolean
 #' vector should be passed in that matches the images to the demographics. This
 #' function cannot check if the matching between demographics and images is
@@ -17,7 +17,7 @@
 #' @param imageBoolean a vector of booleans with length equal to the number of
 #' rows in the demographics data frame and number of true values equal to the
 #' number of rows in the image matrix.
-#' @param filename output filename for hdf5 file.
+#' @param filename output filename for hdf5 file (if .h5) or directory name.
 #' @return successOrFailure boolean
 #' @author Avants BB
 #' @examples
@@ -40,7 +40,8 @@ writeNormalizedPopulationData <- function(
   imageBoolean,
   filename )
 {
-if ( ! usePkg( "h5" ) )
+outputToDir = length( grep( "h5", filename ) ) == 0
+if ( !outputToDir ) if ( ! usePkg( "h5" ) )
   stop( "Please install package h5 in order to use this function." )
 if ( sum( imageMask > 0.5 ) != ncol( imageMat ) )
   stop( "stopping because sum( imageMask > 0.5 ) != ncol( imageMat )" )
@@ -50,14 +51,15 @@ if ( length( imageBoolean ) != nrow( demographics ) )
   stop( "stopping because length( imageBoolean ) != nrow( demographics )" )
 if ( file.exists( filename ) )
   stop( "stopping because file.exists( filename )" )
-#
-# save.ANTsR(
-#  filename = filename,
-#  objects = c( "demographics", "imageMat", "imageMask", "imageBoolean" ),
-#  overwrite = F, clonediskfiles=T
-#  )
-# return( TRUE )
-#
+if ( outputToDir )  {
+  dir.create( filename, showWarnings = TRUE, recursive = FALSE, mode = "0777")
+  write.csv( demog, paste( filename, 'demog.csv', sep=''), row.names = FALSE )
+  haveImageDf = data.frame( haveImage = imageBoolean )
+  write.csv( haveImageDf, paste( filename, 'haveImage.csv', sep=''), row.names = FALSE )
+  antsImageWrite( imageMask, paste( filename, 'imageMask.nii.gz', sep='') )
+  antsImageWrite( as.antsImage( imageMat ), paste( filename, 'imageMat.mha', sep='') )
+  return( TRUE )
+  }
 file <- h5::h5file( filename )
 file["antsrpopdata/demographics"] <- data.matrix( demographics )
 h5::h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
@@ -75,7 +77,7 @@ return( TRUE )
 
 
 
-#' Read normalized population from h5 file
+#' Read normalized population from h5 file or directory
 #'
 #' This function reads a file created by \code{writeNormalizedPopulationData}.
 #'
@@ -96,23 +98,33 @@ return( TRUE )
 #' @export readNormalizedPopulationData
 readNormalizedPopulationData <- function( filename )
 {
-  if ( ! usePkg( "h5" ) )
+  outputToDir = length( grep( "h5", filename ) ) == 0
+  if ( !outputToDir ) if ( ! usePkg( "h5" ) )
     stop( "Please install package h5 in order to use this function." )
-  file <- h5::h5file( filename )
-  demog <- file["antsrpopdata/demographics"]
-  demographics <- demog[]
-  h5::h5attr( demog, "colnames" )
-  colnames( demographics ) <- h5::h5attr( demog, "colnames" )
-  temp <- file["antsrpopdata/imageMat"]
-  imageMat <- temp[]
-  temp <- file["antsrpopdata/imageMask"]
-  imageMask <- as.antsImage( temp[] )
-  k=antsSetSpacing( imageMask, h5::h5attr( temp, "spacing" ) )
-  k=antsSetOrigin( imageMask, h5::h5attr( temp, "origin" ) )
-  k=antsSetDirection( imageMask, h5::h5attr( temp, "direction" ) )
-  temp <- file["antsrpopdata/imageBoolean"]
-  imageBoolean <- temp[]
-  h5::h5close(file)
+  if ( outputToDir ) {
+    if ( ! dir.exists( filename ) )
+      stop( paste( filename, "directory does not exist." ) )
+    demographics = read.csv( paste( filename, 'demog.csv', sep='')  )
+    imageBoolean = read.csv( paste( filename,  'haveImage.csv', sep='') )$haveImage
+    imageMask = antsImageRead( paste( filename, 'imageMask.nii.gz', sep='') )
+    imageMat = as.matrix( antsImageRead( paste( filename, 'imageMat.mha', sep='') ) )
+  } else {
+    file <- h5::h5file( filename )
+    demog <- file["antsrpopdata/demographics"]
+    demographics <- demog[]
+    h5::h5attr( demog, "colnames" )
+    colnames( demographics ) <- h5::h5attr( demog, "colnames" )
+    temp <- file["antsrpopdata/imageMat"]
+    imageMat <- temp[]
+    temp <- file["antsrpopdata/imageMask"]
+    imageMask <- as.antsImage( temp[] )
+    k=antsSetSpacing( imageMask, h5::h5attr( temp, "spacing" ) )
+    k=antsSetOrigin( imageMask, h5::h5attr( temp, "origin" ) )
+    k=antsSetDirection( imageMask, h5::h5attr( temp, "direction" ) )
+    temp <- file["antsrpopdata/imageBoolean"]
+    imageBoolean <- temp[]
+    h5::h5close(file)
+    }
   return(
       list(
         demographics   = data.frame( demographics ),
