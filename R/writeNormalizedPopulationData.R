@@ -53,11 +53,11 @@ if ( file.exists( filename ) )
   stop( "stopping because file.exists( filename )" )
 if ( outputToDir )  {
   dir.create( filename, showWarnings = TRUE, recursive = FALSE, mode = "0777")
-  write.csv( demog, paste( filename, 'demog.csv', sep=''), row.names = FALSE )
+  write.csv( demog, paste( filename, '/demog.csv', sep=''), row.names = FALSE )
   haveImageDf = data.frame( haveImage = imageBoolean )
-  write.csv( haveImageDf, paste( filename, 'haveImage.csv', sep=''), row.names = FALSE )
-  antsImageWrite( imageMask, paste( filename, 'imageMask.nii.gz', sep='') )
-  antsImageWrite( as.antsImage( imageMat ), paste( filename, 'imageMat.mha', sep='') )
+  write.csv( haveImageDf, paste( filename, '/haveImage.csv', sep=''), row.names = FALSE )
+  antsImageWrite( imageMask, paste( filename, '/imageMask.nii.gz', sep='') )
+  antsImageWrite( as.antsImage( imageMat ), paste( filename, '/imageMat.mha', sep='') )
   return( TRUE )
   }
 file <- h5::h5file( filename )
@@ -104,10 +104,10 @@ readNormalizedPopulationData <- function( filename )
   if ( outputToDir ) {
     if ( ! dir.exists( filename ) )
       stop( paste( filename, "directory does not exist." ) )
-    demographics = read.csv( paste( filename, 'demog.csv', sep='')  )
-    imageBoolean = read.csv( paste( filename,  'haveImage.csv', sep='') )$haveImage
-    imageMask = antsImageRead( paste( filename, 'imageMask.nii.gz', sep='') )
-    imageMat = as.matrix( antsImageRead( paste( filename, 'imageMat.mha', sep='') ) )
+    demographics = read.csv( paste( filename, '/demog.csv', sep='')  )
+    imageBoolean = read.csv( paste( filename,  '/haveImage.csv', sep='') )$haveImage
+    imageMask = antsImageRead( paste( filename, '/imageMask.nii.gz', sep='') )
+    imageMat = as.matrix( antsImageRead( paste( filename, '/imageMat.mha', sep='') ) )
   } else {
     file <- h5::h5file( filename )
     demog <- file["antsrpopdata/demographics"]
