@@ -585,8 +585,9 @@ if ( hasweights ) {
 # bmdl = bigLMStats( mdl )
 u = scale( model.matrix( mdl ) )
 intercept = u[,1]
+if ( any( is.na( intercept ) ) ) intercept = rep( 0, length( intercept ) )
 u = u[,-1]
-v = t( mdl$coefficients[-1, ] )
+v = antsrimpute( t( mdl$coefficients[-1, ] ) )
 v = v + matrix( rnorm( length( v ), 0, 0.01 ), nrow = nrow( v ), ncol = ncol( v ) )
 if ( !is.na( LRR ) ) {
   u = lowrankRowMatrix( u, LRR )
