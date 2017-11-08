@@ -53,7 +53,7 @@ if ( file.exists( filename ) )
   stop( "stopping because file.exists( filename )" )
 if ( outputToDir )  {
   dir.create( filename, showWarnings = TRUE, recursive = FALSE, mode = "0777")
-  write.csv( demog, paste( filename, '/demog.csv', sep=''), row.names = FALSE )
+  write.csv( demographics, paste( filename, '/demog.csv', sep=''), row.names = FALSE )
   haveImageDf = data.frame( haveImage = imageBoolean )
   write.csv( haveImageDf, paste( filename, '/haveImage.csv', sep=''), row.names = FALSE )
   antsImageWrite( imageMask, paste( filename, '/imageMask.nii.gz', sep='') )
