@@ -1536,7 +1536,6 @@ smoothAppGradCCA <- function( x , y,
 #' }
 #'
 #' @export milr
-#' @importFrom RcppEigen fastLm
 milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   iterations = 10, gamma = 1.e-6,
   sparsenessQuantile,
@@ -1610,7 +1609,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     v = v - dedv * gamma
     if ( !missing( sparsenessQuantile ) ) {
       for ( vv in 1:ncol( v ) ) {
-        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
+#        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
         if ( vv > 1 )
           for ( vk in 1:(vv-1) ) {
             temp = v[,vk]
