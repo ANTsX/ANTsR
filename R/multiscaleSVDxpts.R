@@ -1584,7 +1584,8 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   tu = t( u )
   tuu = t( u ) %*% u
   v = matrix( rnorm( p * ncol(u), 0.0, 0.001 ), nrow = p )
-  v = as.matrix( smoothingMatrix %*% v )
+  for ( i in 1:3 )
+    v = as.matrix( smoothingMatrix %*% v )
   dedv = t( tuu %*% t( v ) - tu %*% voxmats[[ outcomevarum ]] )
   # now fix dedv with the correct voxels
   lvx = length( voxmats )
@@ -1593,6 +1594,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   for ( iter in 1:iterations ) {
     err = 0
     predicted = voxmats[[ outcomevarum ]] * 0
+    v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
       for ( k in 1:length(predictormatrixnames) )
         u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
@@ -1606,7 +1608,6 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
-    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       for ( vv in 1:ncol( v ) ) {
         v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
