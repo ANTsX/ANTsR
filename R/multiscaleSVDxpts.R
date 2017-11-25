@@ -1617,6 +1617,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
+    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       for ( vv in 1:ncol( v ) ) {
 #        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
@@ -1639,8 +1640,109 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
         v[ , vv ] = localv
       }
       }
+#    v = as.matrix( smoothingMatrix %*% v )
     if ( verbose ) print( err / p )
     }
   colnames( v ) = unms
   return( list( u = u, v = v, prediction = predicted ) )
+}
+
+
+
+
+
+#' Predict from a milr output
+#'
+#' This function computes a prediction, given \code{milr} output.
+#'
+#' @param milrResult This output form milr
+#' @param dataFrameTrain This data frame contains all relevant predictors
+#' in the training data except for the matrices associated with the image variables.
+#' @param voxmatsTrain The named list of matrices that contains the changing predictors.
+#' @param dataFrameTest This data frame contains all relevant predictors
+#' in the training data except for the matrices associated with the image variables in test data.
+#' @param voxmatsTest The named list of matrices that contains the changing predictors in test data.
+#' @param myFormula This is a character string that defines a valid regression formula.
+#' @return the predicted matrix.
+#' @author BB Avants.
+#' @examples
+#'
+#' nsub = 24
+#' npix = 100
+#' outcome = rnorm( nsub )
+#' covar = rnorm( nsub )
+#' mat = replicate( npix, rnorm( nsub ) )
+#' mat2 = replicate( npix, rnorm( nsub ) )
+#' mat3 = replicate( npix, rnorm( nsub ) )
+#' myform = " vox2 ~ covar + vox + vox3 "
+#' istr = c( rep( TRUE, round(nsub*2/3) ), rep( FALSE, nsub - round(nsub*2/3)) )
+#' df = data.frame( outcome = outcome, covar = covar )
+#' ltr = list( vox = mat[ istr,], vox2 = mat2[istr,], vox3 = mat3[istr,] )
+#' lte = list( vox = mat[!istr,], vox2 = mat2[!istr,], vox3 = mat3[!istr,]  )
+#' result = milr( df[istr,], ltr, myform)
+#' pred = milr.predict( result, df[istr,],ltr, df[!istr,], lte, myform )
+#'
+#' @seealso \code{\link{milr}}
+#' @export milr.predict
+milr.predict <- function(
+  milrResult,
+  dataFrameTrain,
+  voxmatsTrain,
+  dataFrameTest,
+  voxmatsTest,
+  myFormula )
+{
+  matnames = names( voxmatsTrain )
+  vdf = data.frame( dataFrameTrain )
+  vdfTe = data.frame( dataFrameTest )
+  if ( length( matnames ) == 0 ) stop( 'please name the input list entries')
+  outcomevarname = trimws( unlist( strsplit( myFormula, "~" ) )[1] )
+  outcomevarum = which( outcomevarname == matnames  )
+  outcomeisconstant = FALSE
+  if ( length( outcomevarum ) == 0 ) {
+    outcomeisconstant = TRUE
+    outcomevarum = which( colnames(vdf) == outcomevarname  )
+  }
+# first build a unified training and testing dataFrame
+  n = nrow( voxmatsTrain[[1]] )
+  p = ncol( voxmatsTrain[[1]] )
+  for ( k in 1:length( voxmatsTrain ) ) {
+    vdf = cbind( vdf, voxmatsTrain[[k]][,1] )
+    names( vdf )[  ncol( vdf ) ] = matnames[k]
+    if ( ncol( voxmatsTrain[[k]] ) != p  )
+      stop( paste( "train matrix ", matnames[k], " does not have ", p, "entries" ) )
+    vdfTe = cbind( vdfTe, voxmatsTest[[k]][,1] )
+    names( vdfTe )[  ncol( vdfTe ) ] = matnames[k]
+    if ( ncol( voxmatsTest[[k]] ) != p  )
+      stop( paste( "test matrix ", matnames[k], " does not have ", p, "entries" ) )
+    }
+
+    # get names from the standard lm
+    temp = summary( lm( myFormula  , data=vdf))
+    myrownames = rownames(temp$coefficients)
+    mylm = lm( myFormula , data = vdf )
+    u = model.matrix( mylm )
+    unms = colnames( u )[-1]
+    u = ( u[,-1] )
+    colnames( u ) = unms
+    lvx = length( voxmatsTrain )
+    predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
+    myks = which( matnames %in% predictormatrixnames )
+    # compute low-dimensional representations from the milr result for train-test
+    for ( k in 1:length(predictormatrixnames) ) {
+      vdf[ ,  predictormatrixnames[k] ] =
+        voxmatsTrain[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
+      vdfTe[ ,  predictormatrixnames[k] ] =
+        voxmatsTest[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
+      }
+# pretty much done at this point
+    trmdl = lm( myFormula, data = vdf )
+    return(
+      list(
+        predictionTrain = predict( trmdl ),
+        predictionTest = predict( trmdl, vdfTe ),
+        lowDimensionalProjectionTrain = vdf[ ,  predictormatrixnames ],
+        lowDimensionalProjectionTest = vdfTe[ ,  predictormatrixnames ]
+        )
+      )
 }
