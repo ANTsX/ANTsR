@@ -26,7 +26,10 @@ in the training data except for the matrices associated with the image variables
 the predicted matrix.
 }
 \description{
-This function computes a prediction, given \code{milr} output.
+This function computes a prediction or low-dimensional embedding, given
+\code{milr} output.  It will return a predictive model if the outcome variable
+is a scalar.  Otherwise, it will return a low-dimensional embedding without
+a specific predictive model.
 }
 \examples{
 

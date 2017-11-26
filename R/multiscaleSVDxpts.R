@@ -1588,8 +1588,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0
   v = as.matrix( smoothingMatrix %*% v )
   for ( i in 1:p ) {
-    for ( k in 1:length(predictormatrixnames) )
-      u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+    if ( length( myks ) > 0 )
+      for ( k in 1:length(predictormatrixnames) ) {
+        u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+        }
     tu = t( u )
     tuu = t( u ) %*% u
     if ( outcomeisconstant )
@@ -1605,8 +1607,9 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     predicted = voxmats[[ outcomevarum ]] * 0
     v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
-      for ( k in 1:length(predictormatrixnames) )
-        u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+      if ( length( myks ) > 0 )
+        for ( k in 1:length(predictormatrixnames) )
+          u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
       tu = t( u )
       tuu = t( u ) %*% u
       if ( outcomeisconstant )
@@ -1620,7 +1623,6 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       for ( vv in 1:ncol( v ) ) {
-#        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
         if ( vv > 1 )
           for ( vk in 1:(vv-1) ) {
             temp = v[,vk]
@@ -1653,7 +1655,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
 
 #' Predict from a milr output
 #'
-#' This function computes a prediction, given \code{milr} output.
+#' This function computes a prediction or low-dimensional embedding, given
+#' \code{milr} output.  It will return a predictive model if the outcome variable
+#' is a scalar.  Otherwise, it will return a low-dimensional embedding without
+#' a specific predictive model.
 #'
 #' @param milrResult This output form milr
 #' @param dataFrameTrain This data frame contains all relevant predictors
@@ -1729,20 +1734,34 @@ milr.predict <- function(
     predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
     myks = which( matnames %in% predictormatrixnames )
     # compute low-dimensional representations from the milr result for train-test
-    for ( k in 1:length(predictormatrixnames) ) {
-      vdf[ ,  predictormatrixnames[k] ] =
-        voxmatsTrain[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
-      vdfTe[ ,  predictormatrixnames[k] ] =
-        voxmatsTest[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
+    if ( length( myks ) > 0 ) {
+      for ( k in 1:length(predictormatrixnames) ) {
+        vdf[ ,  predictormatrixnames[k] ] =
+          voxmatsTrain[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
+        vdfTe[ ,  predictormatrixnames[k] ] =
+          voxmatsTest[[ myks[k] ]] %*% milrResult$v[ , predictormatrixnames[k] ]
+        }
       }
-# pretty much done at this point
-    trmdl = lm( myFormula, data = vdf )
-    return(
-      list(
-        predictionTrain = predict( trmdl ),
-        predictionTest = predict( trmdl, vdfTe ),
-        lowDimensionalProjectionTrain = vdf[ ,  predictormatrixnames ],
-        lowDimensionalProjectionTest = vdfTe[ ,  predictormatrixnames ]
+    if ( outcomevarname %in% matnames ) {
+      vdf = voxmatsTrain[[ outcomevarname ]] %*% milrResult$v
+      vdfTe = voxmatsTest[[ outcomevarname ]] %*% milrResult$v
+      return(
+        list(
+          predictionTrain = NA,
+          predictionTest = NA,
+          lowDimensionalProjectionTrain = vdf,
+          lowDimensionalProjectionTest = vdfTe
+          )
         )
-      )
+      } else {
+      trmdl = lm( myFormula, data = vdf )
+      return(
+        list(
+          predictionTrain = predict( trmdl ),
+          predictionTest = predict( trmdl, vdfTe ),
+          lowDimensionalProjectionTrain = vdf[ ,  predictormatrixnames ],
+          lowDimensionalProjectionTest = vdfTe[ ,  predictormatrixnames ]
+          )
+        )
+      }
 }
