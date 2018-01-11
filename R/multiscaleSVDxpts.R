@@ -1447,7 +1447,10 @@ smoothAppGradCCA <- function( x , y,
 #' linear models.  Image-based variables are stored in the input
 #' matrix list. They should be named consistently in the input formula and
 #' in the image list.  If they are not, an error will be thrown.  All input
-#' matrices should have the same number of rows and columns.
+#' matrices should have the same number of rows and columns.  The model will
+#' minimize a matrix energy similar to norm( X - UVt - UranVrant ) where the U
+#' are standard design and random effect (intercept) design matrices.  The
+#' random intercept matrix is only included if repeated measures are indicated.
 #'
 #' @param dataFrame This data frame contains all relevant predictors except for
 #' the matrices associated with the image variables.
