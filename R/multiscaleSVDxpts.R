@@ -1589,27 +1589,27 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     if ( length( repeatedMeasures ) != nrow( dataFrame ) )
       stop( "The length of the repeatedMeasures vector should equal the number of rows in the data frame." )
     ranEff = factor( repeatedMeasures )
-    zRan = model.matrix(  rnorm( nrow( dataFrame ) ) ~ ranEff ) # [ , -1 ]
+    zRan = scale( model.matrix(  rnorm( nrow( dataFrame ) ) ~ ranEff )[ , -1 ] )
     tz = t( zRan )
     tzz = tz %*% zRan
     rm( ranEff )
   }
   mylm = lm( myFormula , data = vdf )
-  u = model.matrix( mylm )
+  u = ( model.matrix( mylm )[ , ] )
   unms = colnames( u )
   colnames( u ) = unms
   lvx = length( voxmats )
   predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
   myks = which( matnames %in% predictormatrixnames )
-  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0
+  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
   v = as.matrix( smoothingMatrix %*% v )
   if ( hasRanEff ) {
-    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0
+    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
+    dedrv = vRan * 0
   }
   colnames( v ) = unms
   hasIntercept = "(Intercept)" %in% colnames( v )
-  # if ( hasIntercept ) dospar = 2:ncol( v ) else
-  dospar = 1:ncol( v )
+  if ( hasIntercept ) dospar = 2:ncol( v ) else dospar = 1:ncol( v )
   for ( i in 1:p ) {
     if ( length( myks ) > 0 )
       for ( k in 1:length(predictormatrixnames) ) {
@@ -1620,27 +1620,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     if ( outcomeisconstant )
       myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
     term2 = tu %*% myoc
-    v[ i, ] = tuu %*% v[i,] - term2
+    v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
     }
   v = as.matrix( smoothingMatrix %*% v ) * (-1)
   dedv = v * 0
   predicted = voxmats[[ 1 ]] * 0
-  if ( hasRanEff ) {
-    # initialize random effects
-    dedrv = vRan * 0
-    for ( i in 1:p ) {
-      if ( length( myks ) > 0 )
-        for ( k in 1:length(predictormatrixnames) )
-          u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
-      tu = t( u )
-      tuu = t( u ) %*% u
-      if ( outcomeisconstant )
-        myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
-      predicted[ , i ] = u %*% (v[i,])
-      rterm2 = tz %*% ( myoc - predicted[ , i ] )
-      vRan[ i, ] = tzz %*% vRan[ i ,  ] - rterm2
-      }
-    }
   # now fix dedv with the correct voxels
   for ( iter in 1:iterations ) {
     err = 0
@@ -1662,10 +1646,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
-    v = as.matrix( smoothingMatrix %*% v )
+#    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
+      doOrth = FALSE
       for ( vv in dospar ) {
-        if ( vv > 1 )
+        if ( vv > 1 & doOrth )
           for ( vk in 1:(vv-1) ) {
             temp = v[,vk]
             denom = sum( temp * temp , na.rm=T )
@@ -1673,7 +1658,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
             v[ , vv ] = v[, vv ] - temp * ip
             }
         localv = v[ , vv ]
-        localv = as.matrix( smoothingMatrix %*% localv )
+#        localv = as.matrix( smoothingMatrix %*% localv )
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
         if ( positivity == 'positive') {
           localv[ localv <= myquant ] = 0
@@ -1686,6 +1671,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       }
     }
     if ( hasRanEff ) {
+      vRan = as.matrix( smoothingMatrix %*% vRan )
       # update random effects
       for ( i in 1:p ) {
         if ( length( myks ) > 0 )
@@ -1700,7 +1686,6 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
         dedrv[ i, ] = ( tz %*% u ) %*% v[ i ,  ] + tzz %*% vRan[ i ,  ] - rterm2
         }
       vRan = vRan - dedrv * gamma
-      vRan = as.matrix( smoothingMatrix %*% vRan )
       }
     if ( verbose ) print( err / p )
     }
@@ -1786,8 +1771,8 @@ milr.predict <- function(
     myrownames = rownames(temp$coefficients)
     mylm = lm( myFormula , data = vdf )
     u = model.matrix( mylm )
-    unms = colnames( u ) # [-1]
-#    u = ( u[,-1] )
+    unms = colnames( u[,] )
+    u[,-1] = scale( u[,-1] )
     colnames( u ) = unms
     lvx = length( voxmatsTrain )
     predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
