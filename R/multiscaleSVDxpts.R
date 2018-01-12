@@ -1589,7 +1589,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     if ( length( repeatedMeasures ) != nrow( dataFrame ) )
       stop( "The length of the repeatedMeasures vector should equal the number of rows in the data frame." )
     ranEff = factor( repeatedMeasures )
-    zRan = scale( model.matrix(  rnorm( nrow( dataFrame ) ) ~ ranEff )[ , -1 ] )
+    temp = lm( rnorm( nrow( dataFrame ) ) ~ ranEff )
+    temp = model.matrix(  temp )
+    ranEffNames = colnames( temp )[-1]
+    zRan = scale( temp[ , -1 ] )
     tz = t( zRan )
     tzz = tz %*% zRan
     rm( ranEff )
@@ -1606,6 +1609,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   if ( hasRanEff ) {
     vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
     dedrv = vRan * 0
+    colnames( vRan ) = ranEffNames
   }
   colnames( v ) = unms
   hasIntercept = "(Intercept)" %in% colnames( v )
