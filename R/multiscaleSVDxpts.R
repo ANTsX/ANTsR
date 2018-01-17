@@ -1604,8 +1604,9 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   lvx = length( voxmats )
   predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
   myks = which( matnames %in% predictormatrixnames )
-  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
-  v = as.matrix( smoothingMatrix %*% v )
+#  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
+#  v = as.matrix( smoothingMatrix %*% v )
+  v = matrix( 0.0, nrow = p, ncol = ncol(u) )
   if ( hasRanEff ) {
     vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
     dedrv = vRan * 0
@@ -1624,7 +1625,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     if ( outcomeisconstant )
       myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
     term2 = tu %*% myoc
-    v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
+    v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.1
     }
   v = as.matrix( smoothingMatrix %*% v ) * (-1)
   dedv = v * 0
