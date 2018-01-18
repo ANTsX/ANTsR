@@ -48,13 +48,13 @@ application and also based on observing algorithm behavior when
 \code{verbose=TRUE}.
 }
 \examples{
+\dontrun{
 mat <- matrix(rnorm(2000),ncol=50)
 nv <- eanatSelect( mat, selectorScale = 1.2 )
 esol <- eanatDef( mat, nvecs=nv )
 es2 <- sparseDecom( mat, nvecs = nv )
 print( paste( "selected", nrow(esol),'pseudo-eigenvectors') )
 print( mean( abs( cor( mat \%*\% t(esol)) ) ) ) # what we use to select nvecs
-\dontrun{
 networkPriors = getANTsRData("fmrinetworks")
 ilist = networkPriors$images
 mni = antsImageRead( getANTsRData("mni") )

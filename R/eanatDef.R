@@ -27,10 +27,12 @@
 #' @author Avants BB, Tustison NJ
 #'
 #' @examples
+#' \dontrun{
 #' mat <- matrix(rnorm(2000),ncol=50)
 #' nvecsSel<-eanatSelect( mat, selectorScale = 1.2, maxNEvec = 4 )
 #' esol <- sparseDecom( mat, nvecs = nvecsSel )
 #' print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
+#' }
 #' @export eanatSelect
 eanatSelect <- function( inmat, mask=NA, cthresh=0, smooth=0,
   maxNEvec = 0, selectorScale=1.1, whiten=FALSE, verbose=FALSE )
@@ -113,13 +115,13 @@ return( nvecs )
 #' NeuroImage, 2014, 99, 14-27.
 #'
 #' @examples
+#' \dontrun{
 #' mat <- matrix(rnorm(2000),ncol=50)
 #' nv <- eanatSelect( mat, selectorScale = 1.2 )
 #' esol <- eanatDef( mat, nvecs=nv )
 #' es2 <- sparseDecom( mat, nvecs = nv )
 #' print( paste( "selected", nrow(esol),'pseudo-eigenvectors') )
 #' print( mean( abs( cor( mat %*% t(esol)) ) ) ) # what we use to select nvecs
-#' \dontrun{
 #' networkPriors = getANTsRData("fmrinetworks")
 #' ilist = networkPriors$images
 #' mni = antsImageRead( getANTsRData("mni") )
