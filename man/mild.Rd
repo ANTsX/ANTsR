@@ -72,6 +72,9 @@ result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
   initializationStrategy = list( seed = NA, matrix = myumat, voxels = NA ) )
 
 }
+\seealso{
+\code{\link{milr}}
+}
 \author{
 BB Avants.
 }
