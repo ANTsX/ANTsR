@@ -1575,11 +1575,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   myervs = mypvs
   mytvs = mypvs
   outcomevarname = trimws( unlist( strsplit( myFormula, "~" ) )[1] )
-  outcomevarum = which( outcomevarname == matnames  )
+  outcomevarnum = which( outcomevarname == matnames  )
   outcomeisconstant = FALSE
-  if ( length( outcomevarum ) == 0 ) {
+  if ( length( outcomevarnum ) == 0 ) {
     outcomeisconstant = TRUE
-    outcomevarum = which( colnames(vdf) == outcomevarname  )
+    outcomevarnum = which( colnames(vdf) == outcomevarname  )
   }
   hasRanEff = FALSE
   vRan = NA
@@ -1622,7 +1622,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     tu = t( u )
     tuu = t( u ) %*% u
     if ( outcomeisconstant )
-      myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
+      myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
     term2 = tu %*% myoc
     v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
     }
@@ -1632,7 +1632,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   # now fix dedv with the correct voxels
   for ( iter in 1:iterations ) {
     err = 0
-    predicted = voxmats[[ outcomevarum ]] * 0
+    predicted = voxmats[[ outcomevarnum ]] * 0
     v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
       if ( length( myks ) > 0 )
@@ -1641,7 +1641,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       tu = t( u )
       tuu = t( u ) %*% u
       if ( outcomeisconstant )
-        myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
+        myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
       term2 = tu %*% myoc
       dedv[ i, ] = tuu %*% v[i,] - term2
       if ( hasRanEff  ) dedv[ i,  ] = dedv[ i, ] + ( tu %*% zRan ) %*% vRan[i,]
@@ -1684,7 +1684,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
         tu = t( u )
         tuu = t( u ) %*% u
         if ( outcomeisconstant )
-          myoc = vdf[ ,outcomevarum ] else myoc = voxmats[[ outcomevarum ]][,i]
+          myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
         predicted[ , i ] = u %*% (v[i,]) + zRan %*% vRan[i,]
         rterm2 = tz %*% ( myoc - predicted[ , i ] )
         dedrv[ i, ] = ( tz %*% u ) %*% v[ i ,  ] + tzz %*% vRan[ i ,  ] - rterm2
@@ -1750,11 +1750,11 @@ milr.predict <- function(
   vdfTe = data.frame( dataFrameTest )
   if ( length( matnames ) == 0 ) stop( 'please name the input list entries')
   outcomevarname = trimws( unlist( strsplit( myFormula, "~" ) )[1] )
-  outcomevarum = which( outcomevarname == matnames  )
+  outcomevarnum = which( outcomevarname == matnames  )
   outcomeisconstant = FALSE
-  if ( length( outcomevarum ) == 0 ) {
+  if ( length( outcomevarnum ) == 0 ) {
     outcomeisconstant = TRUE
-    outcomevarum = which( colnames(vdf) == outcomevarname  )
+    outcomevarnum = which( colnames(vdf) == outcomevarname  )
   }
 # first build a unified training and testing dataFrame
   n = nrow( voxmatsTrain[[1]] )
@@ -1812,4 +1812,243 @@ milr.predict <- function(
           )
         )
       }
+}
+
+
+
+
+#' Efficiently compute a multivariate, image-based (mixed) linear decompositition (mild)
+#'
+#' This function simplifies calculating image-wide multivariate PCA maps.
+#' The model will minimize a matrix energy similar to
+#' norm( X - UVt - UranVrant ) where the U
+#' are standard design and random effect (intercept) design matrices.  The
+#' random intercept matrix is only included if repeated measures are indicated.
+#'
+#' @param dataFrame This data frame contains all relevant predictors except for
+#' the matrices associated with the image variables.
+#' @param voxmats The named list of matrices that contains the changing predictors.
+#' @param basisK an integer determining the size of the basis.
+#' @param myFormula This is a character string that defines a valid regression formula.
+#' @param smoothingMatrix allows parameter smoothing, should be square and same
+#' size as input matrix
+#' @param iterations number of gradient descent iterations
+#' @param gamma step size for gradient descent
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param initializationStrategy initialization can be seed, matrix or voxels.
+#' seed should be a single number, voxels should be a length basisK list of
+#' integers with value less than the number of columns in the matrix, matrix
+#' should be a n by k matrix.  The first non-NA of these options will be used.
+#' @param repeatedMeasures list of repeated measurement identifiers. this will
+#' allow estimates of per identifier intercept.
+#' @param verbose boolean to control verbosity of output
+#' @return A list of different matrices that contain names derived from the
+#' formula and the coefficients of the regression model.
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 12
+#' npix = 100
+#' outcome = rnorm( nsub )
+#' covar = rnorm( nsub )
+#' mat = replicate( npix, rnorm( nsub ) )
+#' mat2 = replicate( npix, rnorm( nsub ) )
+#' myform = " vox2 ~ covar + vox " # optional covariates
+#' df = data.frame( outcome = outcome, covar = covar )
+#' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
+#'   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+#' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
+#'   initializationStrategy = list( seed = NA, matrix = NA, voxels = c( 88, 15, 66 )) )
+#' myumat = svd( mat2, nv=0, nu=3 )$u
+#' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
+#'   initializationStrategy = list( seed = NA, matrix = myumat, voxels = NA ) )
+#'
+#' @export mild
+mild <- function( dataFrame,  voxmats, basisK,
+  myFormula, smoothingMatrix,
+  iterations = 10, gamma = 1.e-6,
+  sparsenessQuantile,
+  positivity = c("positive","negative","either"),
+  initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
+  repeatedMeasures = NA,
+  verbose = FALSE ) {
+  vdf = data.frame( dataFrame )
+  matnames = names( voxmats )
+  if ( length( matnames ) == 0 ) stop( 'please name the input list entries')
+  n = nrow( voxmats[[1]] )
+  p = ncol( voxmats[[1]] )
+  if ( missing( smoothingMatrix ) ) smoothingMatrix = diag( p )
+  poschoices = c("positive","negative","either", TRUE, FALSE )
+  if ( ! missing( positivity ) ) {
+    if ( sum( positivity == poschoices ) != 1 | length( positivity ) != 1 )
+      stop( 'choice of positivity parameter is not good - see documentation')
+    if ( positivity == TRUE ) positivity = "positive"
+    if ( positivity == FALSE ) positivity = "either"
+    }
+  for ( k in 1:length( voxmats ) ) {
+    vdf = cbind( vdf, voxmats[[k]][,1] )
+    names( vdf )[  ncol( vdf ) ] = matnames[k]
+    if ( ncol( voxmats[[k]] ) != p  )
+      stop( paste( "matrix ", matnames[k], " does not have ", p, "entries" ) )
+  }
+  outcomevarname = trimws( unlist( strsplit( myFormula, "~" ) )[1] )
+  outcomevarnum = which( outcomevarname == matnames  )
+  if ( ! is.na( initializationStrategy[[ 'seed' ]] ) )
+    set.seed( initializationStrategy[[ 'seed' ]] )
+  for ( k in 1:basisK ) {
+#    vdf = cbind( vdf, rnorm( nrow( vdf ), 0, 1 ) )
+    if ( ! is.na( initializationStrategy[[ 'seed' ]]  ) )
+      initvec = rnorm( nrow( vdf ), 0, 1 )
+    else if ( ! is.na( initializationStrategy[[ 'voxels' ]][k]  ) ) {
+      initval = initializationStrategy[[ 'voxels' ]][k]
+      initvec = voxmats[[ outcomevarnum ]][, initval ]
+      }
+    else if ( ! all( is.na( initializationStrategy[[ 'matrix' ]]  ) ) ) {
+      if ( k == 1 ) { # check matrix size
+        stopifnot( nrow( initializationStrategy[[ 'matrix' ]] ) == nrow( vdf ) )
+        stopifnot( ncol( initializationStrategy[[ 'matrix' ]] ) == basisK )
+        }
+      initvec = initializationStrategy[[ 'matrix' ]][,k]
+      }
+    vdf = cbind( vdf, initvec )
+    names( vdf )[  ncol( vdf ) ] = paste0( "mildBasis", k )
+  }
+  # augment the formula with the k-basis
+  knames = paste0( "mildBasis",1:basisK )
+  kform = paste0( "mildBasis",1:basisK, collapse = " + " )
+  myFormulaK = paste( myFormula, " + ", kform, collapse='+' )
+  # get names from the standard lm
+  temp = summary( lm( myFormulaK  , data=vdf))
+  myrownames = rownames(temp$coefficients)
+  mypvs = matrix( rep( NA, p * length( myrownames ) ),
+    nrow = length( myrownames ) )
+  myestvs = mypvs
+  myervs = mypvs
+  mytvs = mypvs
+  outcomeisconstant = FALSE
+  if ( length( outcomevarnum ) == 0 ) {
+    outcomeisconstant = TRUE
+    outcomevarnum = which( colnames(vdf) == outcomevarname  )
+  }
+  hasRanEff = FALSE
+  vRan = NA
+  if ( ! any( is.na( repeatedMeasures ) ) ) {
+    hasRanEff = TRUE
+    usubs = unique( repeatedMeasures )
+    if ( length( repeatedMeasures ) != nrow( dataFrame ) )
+      stop( "The length of the repeatedMeasures vector should equal the number of rows in the data frame." )
+    ranEff = factor( repeatedMeasures )
+    temp = lm( rnorm( nrow( dataFrame ) ) ~ ranEff )
+    temp = model.matrix(  temp )
+    ranEffNames = colnames( temp )[-1]
+    zRan = scale( temp[ , -1 ] )
+    tz = t( zRan )
+    tzz = tz %*% zRan
+    rm( ranEff )
+  }
+  mylm = lm( myFormulaK , data = vdf )
+  u = ( model.matrix( mylm )[ , ] )
+  unms = colnames( u )
+  colnames( u ) = unms
+  lvx = length( voxmats )
+  predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
+  myks = which( matnames %in% predictormatrixnames )
+  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
+  v = as.matrix( smoothingMatrix %*% v )
+  if ( hasRanEff ) {
+    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
+    dedrv = vRan * 0
+    colnames( vRan ) = ranEffNames
+  }
+  colnames( v ) = unms
+  hasIntercept = "(Intercept)" %in% colnames( v )
+  if ( hasIntercept ) dospar = 2:ncol( v ) else dospar = 1:ncol( v )
+  for ( i in 1:p ) {
+    if ( length( myks ) > 0 )
+      for ( k in 1:length(predictormatrixnames) ) {
+        u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+        }
+    tu = t( u )
+    tuu = t( u ) %*% u
+    if ( outcomeisconstant )
+      myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+    term2 = tu %*% myoc
+    v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
+    }
+  v = as.matrix( smoothingMatrix %*% v ) * (-1)
+  dedv = v * 0
+  predicted = voxmats[[ 1 ]] * 0
+  # now fix dedv with the correct voxels
+  for ( iter in 1:iterations ) {
+    err = 0
+    predicted = voxmats[[ outcomevarnum ]] * 0
+    v = as.matrix( smoothingMatrix %*% v )
+    for ( i in 1:p ) {
+      if ( length( myks ) > 0 )
+        for ( k in 1:length(predictormatrixnames) )
+          u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+      tu = t( u )
+      tuu = t( u ) %*% u
+      if ( outcomeisconstant )
+        myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+      term2 = tu %*% myoc
+      dedv[ i, ] = tuu %*% v[i,] - term2
+      if ( hasRanEff  ) dedv[ i,  ] = dedv[ i, ] + ( tu %*% zRan ) %*% vRan[i,]
+      predicted[ , i ] = u %*% (v[i,])
+      if ( hasRanEff  ) predicted[ , i ] = predicted[ , i ] + zRan %*% vRan[i,]
+      err = err + mean( abs( myoc - predicted[ , i ]  ) )
+      }
+    v = v - dedv * gamma
+    if ( !missing( sparsenessQuantile ) ) {
+      doOrth = FALSE
+      for ( vv in dospar ) {
+        if ( vv > 1 & doOrth )
+          for ( vk in 1:(vv-1) ) {
+            temp = v[,vk]
+            denom = sum( temp * temp , na.rm=T )
+            if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+            v[ , vv ] = v[, vv ] - temp * ip
+            }
+        localv = v[ , vv ]
+#        localv = as.matrix( smoothingMatrix %*% localv )
+        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+        if ( positivity == 'positive') {
+          localv[ localv <= myquant ] = 0
+        } else if ( positivity == 'negative' ) {
+          localv[ localv > myquant ] = 0
+        } else if ( positivity == 'either' ) {
+          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+        }
+        v[ , vv ] = localv
+      }
+    }
+    if ( hasRanEff ) {
+      vRan = as.matrix( smoothingMatrix %*% vRan )
+      # update random effects
+      for ( i in 1:p ) {
+        if ( length( myks ) > 0 )
+          for ( k in 1:length(predictormatrixnames) )
+            u[ ,  predictormatrixnames[k] ] = voxmats[[ myks[k] ]][,i]
+        tu = t( u )
+        tuu = t( u ) %*% u
+        if ( outcomeisconstant )
+          myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+        predicted[ , i ] = u %*% (v[i,]) + zRan %*% vRan[i,]
+        rterm2 = tz %*% ( myoc - predicted[ , i ] )
+        dedrv[ i, ] = ( tz %*% u ) %*% v[ i ,  ] + tzz %*% vRan[ i ,  ] - rterm2
+        }
+      vRan = vRan - dedrv * gamma
+      }
+    # reset the u variables
+    for ( k in 1:length( knames ) ) {
+      u[ ,  knames[k] ] = voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ]
+#      print( paste( "did u", knames[k] ) )
+      }
+    if ( verbose ) print( err / p )
+    }
+  colnames( v ) = unms
+  return( list( u = u, v = v, prediction = predicted, vRan = vRan ) )
 }
