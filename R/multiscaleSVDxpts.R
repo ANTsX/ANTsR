@@ -1829,7 +1829,8 @@ milr.predict <- function(
 #' the matrices associated with the image variables.
 #' @param voxmats The named list of matrices that contains the changing predictors.
 #' @param basisK an integer determining the size of the basis.
-#' @param myFormula This is a character string that defines a valid regression formula.
+#' @param myFormulaK This is a character string that defines a valid regression
+#' which in this case should include predictors named as \code{paste0("mildBasis",1:basisK)}
 #' @param smoothingMatrix allows parameter smoothing, should be square and same
 #' size as input matrix
 #' @param iterations number of gradient descent iterations
@@ -1856,7 +1857,9 @@ milr.predict <- function(
 #' covar = rnorm( nsub )
 #' mat = replicate( npix, rnorm( nsub ) )
 #' mat2 = replicate( npix, rnorm( nsub ) )
-#' myform = " vox2 ~ covar + vox " # optional covariates
+#' nk = 3
+#' myform = paste(" vox2 ~ covar + vox + ",
+#'   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 #' df = data.frame( outcome = outcome, covar = covar )
 #' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
 #'   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
@@ -1869,7 +1872,7 @@ milr.predict <- function(
 #' @seealso \code{\link{milr}}
 #' @export mild
 mild <- function( dataFrame,  voxmats, basisK,
-  myFormula, smoothingMatrix,
+  myFormulaK, smoothingMatrix,
   iterations = 10, gamma = 1.e-6,
   sparsenessQuantile,
   positivity = c("positive","negative","either"),
@@ -1895,7 +1898,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     if ( ncol( voxmats[[k]] ) != p  )
       stop( paste( "matrix ", matnames[k], " does not have ", p, "entries" ) )
   }
-  outcomevarname = trimws( unlist( strsplit( myFormula, "~" ) )[1] )
+  outcomevarname = trimws( unlist( strsplit( myFormulaK, "~" ) )[1] )
   outcomevarnum = which( outcomevarname == matnames  )
   if ( ! is.na( initializationStrategy[[ 'seed' ]] ) )
     set.seed( initializationStrategy[[ 'seed' ]] )
@@ -1918,12 +1921,10 @@ mild <- function( dataFrame,  voxmats, basisK,
     names( vdf )[  ncol( vdf ) ] = paste0( "mildBasis", k )
   }
   # augment the formula with the k-basis
-  knames = paste0( "mildBasis",1:basisK )
-  kform = paste0( "mildBasis",1:basisK, collapse = " + " )
-  myFormulaK = paste( myFormula, " + ", kform, collapse='+' )
   # get names from the standard lm
   temp = summary( lm( myFormulaK  , data=vdf))
   myrownames = rownames(temp$coefficients)
+  knames = myrownames[ grep("mildBasis", myrownames ) ]
   mypvs = matrix( rep( NA, p * length( myrownames ) ),
     nrow = length( myrownames ) )
   myestvs = mypvs

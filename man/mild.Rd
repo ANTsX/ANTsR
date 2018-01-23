@@ -4,7 +4,7 @@
 \alias{mild}
 \title{Efficiently compute a multivariate, image-based (mixed) linear decompositition (mild)}
 \usage{
-mild(dataFrame, voxmats, basisK, myFormula, smoothingMatrix, iterations = 10,
+mild(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrix, iterations = 10,
   gamma = 1e-06, sparsenessQuantile, positivity = c("positive", "negative",
   "either"), initializationStrategy = list(seed = 0, matrix = NA, voxels =
   NA), repeatedMeasures = NA, verbose = FALSE)
@@ -17,7 +17,8 @@ the matrices associated with the image variables.}
 
 \item{basisK}{an integer determining the size of the basis.}
 
-\item{myFormula}{This is a character string that defines a valid regression formula.}
+\item{myFormulaK}{This is a character string that defines a valid regression
+which in this case should include predictors named as \code{paste0("mildBasis",1:basisK)}}
 
 \item{smoothingMatrix}{allows parameter smoothing, should be square and same
 size as input matrix}
@@ -61,7 +62,9 @@ outcome = rnorm( nsub )
 covar = rnorm( nsub )
 mat = replicate( npix, rnorm( nsub ) )
 mat2 = replicate( npix, rnorm( nsub ) )
-myform = " vox2 ~ covar + vox " # optional covariates
+nk = 3
+myform = paste(" vox2 ~ covar + vox + ",
+  paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 df = data.frame( outcome = outcome, covar = covar )
 result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
