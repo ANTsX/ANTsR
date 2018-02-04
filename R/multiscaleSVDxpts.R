@@ -2054,3 +2054,127 @@ mild <- function( dataFrame,  voxmats, basisK,
   colnames( v ) = unms
   return( list( u = u, v = v, prediction = predicted, vRan = vRan ) )
 }
+
+
+
+#' Symmetric multivariate, penalized image-based linear regression model (symilr)
+#'
+#' This function simplifies calculating image-wide multivariate beta maps from
+#' that is similar to CCA.
+#'
+#' @param dataFrame This data frame contains all relevant predictors except for
+#' the matrices associated with the image variables.
+#' @param voxmats The named list of matrices that contains the changing predictors.
+#' @param basisK an integer determining the size of the basis.
+#' @param myFormulaK This is a character string that defines a valid regression
+#' which in this case should include predictors named as \code{paste0("mildBasis",1:basisK)}
+#' @param smoothingMatrixX allows parameter smoothing, should be square and same
+#' size as input matrix on left side of equation
+#' @param smoothingMatrixY allows parameter smoothing, should be square and same
+#' size as input matrix on right side of equation
+#' @param iterations number of gradient descent iterations
+#' @param gamma step size for gradient descent
+#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
+#' @param positivity restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param initializationStrategy initialization can be seed, matrix or voxels.
+#' seed should be a single number, voxels should be a length basisK list of
+#' integers with value less than the number of columns in the matrix, matrix
+#' should be a n by k matrix.  The first non-NA of these options will be used.
+#' @param repeatedMeasures list of repeated measurement identifiers. this will
+#' allow estimates of per identifier intercept.
+#' @param verbose boolean to control verbosity of output
+#' @return A list of different matrices that contain names derived from the
+#' formula and the coefficients of the regression model.
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 12
+#' npix = 100
+#' outcome = rnorm( nsub )
+#' covar = rnorm( nsub )
+#' mat = replicate( npix, rnorm( nsub ) )
+#' mat2 = replicate( npix + 10, rnorm( nsub ) )
+#' nk = 3
+#' myform = paste(" ~ covar + ",
+#'   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
+#' df = data.frame( outcome = outcome, covar = covar )
+#' result = symilr( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
+#'   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+#'
+#' @seealso \code{\link{milr}}
+#' @export symilr
+symilr <- function( dataFrame,
+  voxmats,
+  basisK,
+  myFormulaK,
+  smoothingMatrixX,
+  smoothingMatrixY,
+  iterations = 10, gamma = 1.e-6,
+  sparsenessQuantile,
+  positivity = c("positive","negative","either"),
+  initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
+  repeatedMeasures = NA,
+  verbose = FALSE ) {
+################################
+n = nrow( voxmats[[1]] )
+p = ncol( voxmats[[1]] )
+q = ncol( voxmats[[2]] )
+if ( missing( smoothingMatrixX ) ) smoothingMatrixX = diag( p )
+if ( missing( smoothingMatrixY ) ) smoothingMatrixY = diag( q )
+xmatname = names( voxmats )[ 1 ]
+ymatname = names( voxmats )[ 2 ]
+formx = paste( xmatname, myFormulaK )
+formy = paste( ymatname, myFormulaK )
+xlist = list(  voxmats[[1]] )
+names( xlist ) = xmatname
+locits = 3
+mildx = mild( dataFrame,
+  xlist, basisK, formx, smoothingMatrixX,
+  iterations = locits, gamma = gamma,
+  sparsenessQuantile = sparsenessQuantile,
+  positivity = positivity[[1]],
+  initializationStrategy = initializationStrategy,
+  repeatedMeasures = repeatedMeasures,
+  verbose = verbose )
+##
+ylist = list(  voxmats[[2]] )
+names( ylist ) = ymatname
+mildy = mild( dataFrame,
+  ylist, basisK, formy, smoothingMatrixY,
+  iterations = locits, gamma = gamma,
+  sparsenessQuantile = sparsenessQuantile,
+  positivity = positivity[[1]],
+  initializationStrategy = initializationStrategy,
+  repeatedMeasures = repeatedMeasures,
+  verbose = verbose )
+colinds = (ncol(mildy$u)-basisK + 1):ncol(mildy$u)
+for ( i in 1:iterations ) {
+  initx = list( seed = NA, matrix = mildy$u[ , colinds], voxels = NA )
+  inity = list( seed = NA, matrix = mildx$u[ , colinds], voxels = NA )
+  mildx = mild( dataFrame,
+    xlist, basisK, formx, smoothingMatrixX,
+    iterations = locits, gamma = gamma,
+    sparsenessQuantile = sparsenessQuantile,
+    positivity = positivity[[1]],
+    initializationStrategy = initx,
+    repeatedMeasures = repeatedMeasures,
+    verbose = verbose )
+  mildy = mild( dataFrame,
+    ylist, basisK, formy, smoothingMatrixY,
+    iterations = locits, gamma = gamma,
+    sparsenessQuantile = sparsenessQuantile,
+    positivity = positivity[[1]],
+    initializationStrategy = inity,
+    repeatedMeasures = repeatedMeasures,
+    verbose = verbose )
+  locor = cor( mildx$u[ , colinds], mildy$u[ , colinds] )
+  overall = mean( abs( diag(locor)))
+  if ( verbose ) {
+    print( paste( "it:", i, ">", overall ) )
+    print( locor )
+    }
+  }
+return( list( symilrX = mildx, symilrY = mildy ) )
+}
