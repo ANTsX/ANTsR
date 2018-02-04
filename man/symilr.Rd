@@ -10,7 +10,7 @@ symilr(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrixX,
   positivityY = c("positive", "negative", "either"),
   initializationStrategyX = list(seed = 0, matrix = NA, voxels = NA),
   initializationStrategyY = list(seed = 0, matrix = NA, voxels = NA),
-  repeatedMeasures = NA, verbose = FALSE)
+  repeatedMeasures = NA, orthogonalizeBasis = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for
@@ -55,6 +55,9 @@ should be a n by k matrix.  The first non-NA of these options will be used.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{orthogonalizeBasis}{boolean to allow user to perform svd on basis in
+order to force more linearly independent representations}
 
 \item{verbose}{boolean to control verbosity of output}
 }

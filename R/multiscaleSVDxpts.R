@@ -2092,6 +2092,8 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param verbose boolean to control verbosity of output
+#' @param orthogonalizeBasis boolean to allow user to perform svd on basis in
+#' order to force more linearly independent representations
 #' @return A list of different matrices that contain names derived from the
 #' formula and the coefficients of the regression model.
 #' @author BB Avants.
@@ -2128,6 +2130,7 @@ symilr <- function( dataFrame,
   initializationStrategyX = list( seed = 0, matrix = NA, voxels = NA ),
   initializationStrategyY = list( seed = 0, matrix = NA, voxels = NA ),
   repeatedMeasures = NA,
+  orthogonalizeBasis = FALSE,
   verbose = FALSE ) {
 ################################
 n = nrow( voxmats[[1]] )
@@ -2189,10 +2192,13 @@ if ( FALSE ) {
   mildy$u[,colinds] = yOrth[,colinds] = scale( voxmats[[1]] %*% ( xv ) )[,colinds]
   mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
   }
-  if ( TRUE ) {
-
-  xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )$u
-  yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )$u
+  if ( orthogonalizeBasis ) {
+    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )$u
+    yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )$u
+  } else {
+    xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )
+    yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )
+  }
   dataFramex = cbind( dataFrame, xOrth )
   names( dataFramex )[ colinds - 1 ] = colnames( mildx$u[, colinds ] )
   dataFramey = cbind( dataFrame, yOrth )
@@ -2213,7 +2219,7 @@ if ( FALSE ) {
     positivity = positivityY[[1]],
     repeatedMeasures = repeatedMeasures,
     verbose = F )
-  }
+
   locor = cor( mildx$u[ , -1 ], mildy$u[ , -1 ] )
   overall = mean( abs( diag(locor)))
   if ( verbose & i > 0 ) {
