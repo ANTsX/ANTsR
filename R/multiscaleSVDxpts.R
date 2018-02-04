@@ -2144,7 +2144,7 @@ formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
 xlist = list(  voxmats[[1]] )
 names( xlist ) = xmatname
-locits = 1
+locits = 2
 mildx = mild( dataFrame,
   xlist, basisK, formx, smoothingMatrixX,
   iterations = locits, gamma = gamma,
@@ -2193,17 +2193,16 @@ if ( FALSE ) {
   mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
   }
   if ( orthogonalizeBasis ) {
-    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )$u
-    yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )$u
+    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
+    yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
   } else {
-    xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )
-    yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )
+    xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )
+    yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
   }
   dataFramex = cbind( dataFrame, xOrth )
-  names( dataFramex )[ colinds - 1 ] = colnames( mildx$u[, colinds ] )
+  names( dataFramex )[ -c(1:ncol(dataFrame)) ] = colnames( mildx$u[, colinds ] )
   dataFramey = cbind( dataFrame, yOrth )
-  names( dataFramey )[ colinds - 1 ] = colnames( mildx$u[, colinds ] )
-
+  names( dataFramey )[ -c(1:ncol(dataFrame)) ] = colnames( mildx$u[, colinds ] )
   mildx = milr( dataFramex,
     xlist, formx, smoothingMatrixX,
     iterations = locits, gamma = gamma * (1),
