@@ -5,9 +5,11 @@
 \title{Symmetric multivariate, penalized image-based linear regression model (symilr)}
 \usage{
 symilr(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrixX,
-  smoothingMatrixY, iterations = 10, gamma = 1e-06, sparsenessQuantile,
-  positivity = c("positive", "negative", "either"),
-  initializationStrategy = list(seed = 0, matrix = NA, voxels = NA),
+  smoothingMatrixY, iterations = 10, gamma = 1e-06, sparsenessQuantileX,
+  sparsenessQuantileY, positivityX = c("positive", "negative", "either"),
+  positivityY = c("positive", "negative", "either"),
+  initializationStrategyX = list(seed = 0, matrix = NA, voxels = NA),
+  initializationStrategyY = list(seed = 0, matrix = NA, voxels = NA),
   repeatedMeasures = NA, verbose = FALSE)
 }
 \arguments{
@@ -31,12 +33,22 @@ size as input matrix on right side of equation}
 
 \item{gamma}{step size for gradient descent}
 
-\item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
+\item{sparsenessQuantileX}{quantile to control sparseness - higher is sparser}
 
-\item{positivity}{restrict to positive or negative solution (beta) weights.
+\item{sparsenessQuantileY}{quantile to control sparseness - higher is sparser}
+
+\item{positivityX}{restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
 
-\item{initializationStrategy}{initialization can be seed, matrix or voxels.
+\item{positivityY}{restrict to positive or negative solution (beta) weights.
+choices are positive, negative or either as expressed as a string.}
+
+\item{initializationStrategyX}{initialization can be seed, matrix or voxels.
+seed should be a single number, voxels should be a length basisK list of
+integers with value less than the number of columns in the matrix, matrix
+should be a n by k matrix.  The first non-NA of these options will be used.}
+
+\item{initializationStrategyY}{initialization can be seed, matrix or voxels.
 seed should be a single number, voxels should be a length basisK list of
 integers with value less than the number of columns in the matrix, matrix
 should be a n by k matrix.  The first non-NA of these options will be used.}
@@ -68,11 +80,12 @@ myform = paste(" ~ covar + ",
   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 df = data.frame( outcome = outcome, covar = covar )
 result = symilr( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+  initializationStrategyX = list( seed = 10, matrix = NA, voxels = NA ),
+  initializationStrategyY = list( seed = 10, matrix = NA, voxels = NA ) )
 
 }
 \seealso{
-\code{\link{milr}}
+\code{\link{milr}} \code{\link{mild}}
 }
 \author{
 BB Avants.

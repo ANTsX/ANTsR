@@ -1967,7 +1967,8 @@ mild <- function( dataFrame,  voxmats, basisK,
   }
   colnames( v ) = unms
   hasIntercept = "(Intercept)" %in% colnames( v )
-  if ( hasIntercept ) dospar = 2:ncol( v ) else dospar = 1:ncol( v )
+  if ( hasIntercept ) dospar = 2:ncol( v ) else
+  # dospar = 1:ncol( v )
   for ( i in 1:p ) {
     if ( length( myks ) > 0 )
       for ( k in 1:length(predictormatrixnames) ) {
@@ -2074,10 +2075,17 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' size as input matrix on right side of equation
 #' @param iterations number of gradient descent iterations
 #' @param gamma step size for gradient descent
-#' @param sparsenessQuantile quantile to control sparseness - higher is sparser
-#' @param positivity restrict to positive or negative solution (beta) weights.
+#' @param sparsenessQuantileX quantile to control sparseness - higher is sparser
+#' @param sparsenessQuantileY quantile to control sparseness - higher is sparser
+#' @param positivityX restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
-#' @param initializationStrategy initialization can be seed, matrix or voxels.
+#' @param positivityY restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param initializationStrategyX initialization can be seed, matrix or voxels.
+#' seed should be a single number, voxels should be a length basisK list of
+#' integers with value less than the number of columns in the matrix, matrix
+#' should be a n by k matrix.  The first non-NA of these options will be used.
+#' @param initializationStrategyY initialization can be seed, matrix or voxels.
 #' seed should be a single number, voxels should be a length basisK list of
 #' integers with value less than the number of columns in the matrix, matrix
 #' should be a n by k matrix.  The first non-NA of these options will be used.
@@ -2101,9 +2109,10 @@ mild <- function( dataFrame,  voxmats, basisK,
 #'   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 #' df = data.frame( outcome = outcome, covar = covar )
 #' result = symilr( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-#'   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+#'   initializationStrategyX = list( seed = 10, matrix = NA, voxels = NA ),
+#'   initializationStrategyY = list( seed = 10, matrix = NA, voxels = NA ) )
 #'
-#' @seealso \code{\link{milr}}
+#' @seealso \code{\link{milr}} \code{\link{mild}}
 #' @export symilr
 symilr <- function( dataFrame,
   voxmats,
@@ -2112,9 +2121,12 @@ symilr <- function( dataFrame,
   smoothingMatrixX,
   smoothingMatrixY,
   iterations = 10, gamma = 1.e-6,
-  sparsenessQuantile,
-  positivity = c("positive","negative","either"),
-  initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
+  sparsenessQuantileX,
+  sparsenessQuantileY,
+  positivityX = c("positive","negative","either"),
+  positivityY = c("positive","negative","either"),
+  initializationStrategyX = list( seed = 0, matrix = NA, voxels = NA ),
+  initializationStrategyY = list( seed = 0, matrix = NA, voxels = NA ),
   repeatedMeasures = NA,
   verbose = FALSE ) {
 ################################
@@ -2129,51 +2141,84 @@ formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
 xlist = list(  voxmats[[1]] )
 names( xlist ) = xmatname
-locits = 3
+locits = 1
 mildx = mild( dataFrame,
   xlist, basisK, formx, smoothingMatrixX,
   iterations = locits, gamma = gamma,
-  sparsenessQuantile = sparsenessQuantile,
-  positivity = positivity[[1]],
-  initializationStrategy = initializationStrategy,
+  sparsenessQuantile = sparsenessQuantileX,
+  positivity = positivityX[[1]],
+  initializationStrategy = initializationStrategyX,
   repeatedMeasures = repeatedMeasures,
-  verbose = verbose )
+  verbose = FALSE )
+colinds = (ncol(mildx$u)-basisK + 1):ncol(mildx$u)
 ##
 ylist = list(  voxmats[[2]] )
 names( ylist ) = ymatname
 mildy = mild( dataFrame,
   ylist, basisK, formy, smoothingMatrixY,
   iterations = locits, gamma = gamma,
-  sparsenessQuantile = sparsenessQuantile,
-  positivity = positivity[[1]],
-  initializationStrategy = initializationStrategy,
+  sparsenessQuantile = sparsenessQuantileY,
+  positivity = positivityY[[1]],
+  initializationStrategy = initializationStrategyY,
   repeatedMeasures = repeatedMeasures,
-  verbose = verbose )
-colinds = (ncol(mildy$u)-basisK + 1):ncol(mildy$u)
+  verbose = FALSE )
 for ( i in 1:iterations ) {
-  initx = list( seed = NA, matrix = mildy$u[ , colinds], voxels = NA )
-  inity = list( seed = NA, matrix = mildx$u[ , colinds], voxels = NA )
-  mildx = mild( dataFrame,
-    xlist, basisK, formx, smoothingMatrixX,
-    iterations = locits, gamma = gamma,
-    sparsenessQuantile = sparsenessQuantile,
-    positivity = positivity[[1]],
-    initializationStrategy = initx,
+if ( FALSE ) {
+  xv = mildx$v
+  yv = mildy$v
+  xvup = t( xOrth ) %*% voxmats[[1]]
+  yvup = t( yOrth ) %*% voxmats[[2]]
+  xvup[,-colinds] = 0
+  yvup[,-colinds] = 0
+  xvup = xvup / norm( xvup )
+  yvup = yvup / norm( yvup )
+  # now make the above sparse
+  xvup = as.matrix( xvup[ , ] %*% smoothingMatrixX )
+  xv = xv + t( xvup ) * gamma
+  xv = as.matrix( smoothingMatrixX %*% xv[ , ] )
+  xv = orthogonalizeAndQSparsify( xv, sparsenessQuantileX, positivityX[[1]] )
+  xv = as.matrix( smoothingMatrixX %*% xv[ , ] )
+
+  # now make the above sparse
+  yvup = as.matrix( yvup[ , ] %*% smoothingMatrixY )
+  yv = yv + t( yvup ) * gamma
+  yv = as.matrix( smoothingMatrixY %*% yv[ , ]  )
+  yv = orthogonalizeAndQSparsify( yv, sparsenessQuantileY, positivityY[[1]] )
+  yv = as.matrix( smoothingMatrixY %*% yv[ , ]  )
+
+  mildy$u[,colinds] = yOrth[,colinds] = scale( voxmats[[1]] %*% ( xv ) )[,colinds]
+  mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
+  }
+  if ( TRUE ) {
+
+  xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,] ) )$u
+  yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,] ) )$u
+  dataFramex = cbind( dataFrame, xOrth )
+  names( dataFramex )[ colinds - 1 ] = colnames( mildx$u[, colinds ] )
+  dataFramey = cbind( dataFrame, yOrth )
+  names( dataFramey )[ colinds - 1 ] = colnames( mildx$u[, colinds ] )
+
+  mildx = milr( dataFramex,
+    xlist, formx, smoothingMatrixX,
+    iterations = locits, gamma = gamma * (1),
+    sparsenessQuantile = sparsenessQuantileX,
+    positivity = positivityX[[1]],
     repeatedMeasures = repeatedMeasures,
-    verbose = verbose )
-  mildy = mild( dataFrame,
-    ylist, basisK, formy, smoothingMatrixY,
-    iterations = locits, gamma = gamma,
-    sparsenessQuantile = sparsenessQuantile,
-    positivity = positivity[[1]],
-    initializationStrategy = inity,
+    verbose = F )
+
+  mildy = milr( dataFramey,
+    ylist, formy, smoothingMatrixY,
+    iterations = locits, gamma = gamma * (1),
+    sparsenessQuantile = sparsenessQuantileY,
+    positivity = positivityY[[1]],
     repeatedMeasures = repeatedMeasures,
-    verbose = verbose )
-  locor = cor( mildx$u[ , colinds], mildy$u[ , colinds] )
+    verbose = F )
+  }
+  locor = cor( mildx$u[ , -1 ], mildy$u[ , -1 ] )
   overall = mean( abs( diag(locor)))
-  if ( verbose ) {
-    print( paste( "it:", i, ">", overall ) )
-    print( locor )
+  if ( verbose & i > 0 ) {
+    print( paste( "it:", i - 1, ">", overall ) )
+    print( diag( locor ) )
     }
   }
 return( list( symilrX = mildx, symilrY = mildy ) )
