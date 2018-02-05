@@ -2164,10 +2164,10 @@ formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
 xlist = list(  voxmats[[1]] )
 names( xlist ) = xmatname
-locits = 2
+locits = 3
 mildx = mild( dataFrame,
   xlist, basisK, formx, smoothingMatrixX,
-  iterations = locits, gamma = gamma,
+  iterations = 1, gamma = gamma,
   sparsenessQuantile = sparsenessQuantileX,
   positivity = positivityX[[1]],
   initializationStrategy = initializationStrategyX,
@@ -2179,7 +2179,7 @@ ylist = list(  voxmats[[2]] )
 names( ylist ) = ymatname
 mildy = mild( dataFrame,
   ylist, basisK, formy, smoothingMatrixY,
-  iterations = locits, gamma = gamma,
+  iterations = 1, gamma = gamma,
   sparsenessQuantile = sparsenessQuantileY,
   positivity = positivityY[[1]],
   initializationStrategy = initializationStrategyY,
@@ -2187,6 +2187,8 @@ mildy = mild( dataFrame,
   verbose = FALSE )
 xOrth = mildy$u[,-1]
 yOrth = mildx$u[,-1]
+#    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
+#    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
 for ( i in 1:iterations ) {
 if ( FALSE ) {
   xv = mildx$v
@@ -2228,10 +2230,13 @@ if ( FALSE ) {
       xOrth = xOrth * wt1 + xOrthN * wt2
       yOrth = yOrth * wt1 + yOrthN * wt2
     }
-# print( dim( xOrth ) )
-# print( dim( xOrthN ) )
 #    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
 #    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
+    if ( FALSE ) {
+    xOrth = yOrth = svd(
+      cbind( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ),
+             antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
+       )$u[,1:ncol(xOrth)] }
   } else {
     xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )
     yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
@@ -2259,8 +2264,10 @@ if ( FALSE ) {
     positivity = positivityY[[1]],
     repeatedMeasures = repeatedMeasures,
     verbose = F )
-
-  locor = cor( mildx$u[ , -1 ], mildy$u[ , -1 ] )
+  ###############################################
+  p1 = antsrimpute( xlist[[1]] %*% mildx$v[,-1] )
+  p2 = antsrimpute( ylist[[1]] %*% mildy$v[,-1] )
+  locor = cor( p1, p2 )
   overall = mean( abs( diag(locor)))
   if ( verbose & i > 0 ) {
     print( paste( "it:", i - 1, "=>", overall ) )
