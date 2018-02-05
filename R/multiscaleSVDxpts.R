@@ -2114,8 +2114,6 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param verbose boolean to control verbosity of output
-#' @param orthogonalizeBasis boolean to allow user to perform QR on basis in
-#' order to force more linearly independent representations
 #' @return A list of different matrices that contain names derived from the
 #' formula and the coefficients of the regression model.
 #' @author BB Avants.
@@ -2152,9 +2150,9 @@ symilr <- function( dataFrame,
   initializationStrategyX = list( seed = 0, matrix = NA, voxels = NA ),
   initializationStrategyY = list( seed = 0, matrix = NA, voxels = NA ),
   repeatedMeasures = NA,
-  orthogonalizeBasis = TRUE,
   verbose = FALSE ) {
 ################################
+orthogonalizeBasis = TRUE
 n = nrow( voxmats[[1]] )
 p = ncol( voxmats[[1]] )
 q = ncol( voxmats[[2]] )
@@ -2166,7 +2164,7 @@ formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
 xlist = list(  voxmats[[1]] )
 names( xlist ) = xmatname
-locits = 5
+locits = 2
 mildx = mild( dataFrame,
   xlist, basisK, formx, smoothingMatrixX,
   iterations = locits, gamma = gamma,
@@ -2187,6 +2185,8 @@ mildy = mild( dataFrame,
   initializationStrategy = initializationStrategyY,
   repeatedMeasures = repeatedMeasures,
   verbose = FALSE )
+xOrth = mildy$u[,-1]
+yOrth = mildx$u[,-1]
 for ( i in 1:iterations ) {
 if ( FALSE ) {
   xv = mildx$v
@@ -2215,10 +2215,21 @@ if ( FALSE ) {
   mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
   } # end if
   if ( orthogonalizeBasis ) {
-    xOrth = A.qr <- qr( ylist[[1]] %*% mildy$v[,-1] )
-    xOrth = qr.Q( xOrth )
-    yOrth = A.qr <- qr( xlist[[1]] %*% mildx$v[,-1] )
-    yOrth = qr.Q( yOrth )
+    xOrthN = A.qr <- qr( ylist[[1]] %*% mildy$v[,-1] )
+    xOrthN = qr.Q( xOrthN )
+    yOrthN = A.qr <- qr( xlist[[1]] %*% mildx$v[,-1] )
+    yOrthN = qr.Q( yOrthN )
+    if ( i == 1  ) {
+      xOrth = xOrthN
+      yOrth = yOrthN
+    } else  {
+      wt1 = 0.5
+      wt2 = 1.0 - wt1
+      xOrth = xOrth * wt1 + xOrthN * wt2
+      yOrth = yOrth * wt1 + yOrthN * wt2
+    }
+# print( dim( xOrth ) )
+# print( dim( xOrthN ) )
 #    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
 #    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
   } else {
@@ -2252,7 +2263,7 @@ if ( FALSE ) {
   locor = cor( mildx$u[ , -1 ], mildy$u[ , -1 ] )
   overall = mean( abs( diag(locor)))
   if ( verbose & i > 0 ) {
-    print( paste( "it:", i - 1, ">", overall ) )
+    print( paste( "it:", i - 1, "=>", overall ) )
     print( ( locor ) )
 #    print( diag( locor ) )
     }
