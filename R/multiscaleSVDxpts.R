@@ -621,8 +621,10 @@ while ( i <= iterations ) {
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
+    doflip = FALSE
     if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-#      localv = localv * (-1)
+      localv = localv * (-1)
+      doflip = TRUE
       }
     myquant = quantile( localv , sparsenessQuantile, na.rm=T )
     if ( positivity == 'positive') {
@@ -632,7 +634,7 @@ while ( i <= iterations ) {
     } else if ( positivity == 'either' ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-    v[ , vv ] = localv
+    if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
   }
   intercept = rowMeans( x - ( u %*% t(v) ) )
   if ( ! any( is.na( repeatedMeasures ) ) & is.na( LRR ) ) { # estimate random intercepts
@@ -1000,8 +1002,10 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
           v[ , vv ] = v[, vv ] - temp * ip
           }
       localv = v[ , vv ]
+      doflip = FALSE
       if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-#        localv = localv * (-1)
+        localv = localv * (-1)
+        doflip = TRUE
         }
       myquant = quantile( localv , sparsenessQuantile, na.rm=T )
       if ( positivity == 'positive') {
@@ -1011,10 +1015,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
       } else if ( positivity == 'either' ) {
         localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
       }
-#        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-#        if ( myquant < 0)
-#          localv[ localv > myquant ] = 0 else localv[ localv <= myquant ] = 0
-      v[ , vv ] = localv
+      if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
       v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
     }
     intercept = rowMeans( x - ( u %*% t(v) ) )
@@ -1329,8 +1330,10 @@ orthogonalizeAndQSparsify <- function( v,
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
+    doflip = FALSE
     if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-#      localv = localv * (-1)
+      localv = localv * (-1)
+      doflip = TRUE
       }
     myquant = quantile( localv , sparsenessQuantile, na.rm=T )
     if ( positivity == 'positive') {
@@ -1340,7 +1343,7 @@ orthogonalizeAndQSparsify <- function( v,
     } else if ( positivity == 'either' ) {
       localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
     }
-    v[ , vv ] = localv
+    if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
   }
   return( v )
 }
@@ -1672,8 +1675,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
             v[ , vv ] = v[, vv ] - temp * ip
             }
         localv = v[ , vv ]
+        doflip = FALSE
         if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
           localv = localv * (-1)
+          doflip = TRUE
           }
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
         if ( positivity == 'positive') {
@@ -1684,7 +1689,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
         } else if ( positivity == 'either' ) {
           localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
         }
-        v[ , vv ] = localv
+        if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
       }
     }
     if ( hasRanEff ) {
@@ -2029,8 +2034,10 @@ mild <- function( dataFrame,  voxmats, basisK,
             v[ , vv ] = v[, vv ] - temp * ip
             }
         localv = v[ , vv ]
+        doflip = FALSE
         if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-#          localv = localv * (-1)
+          localv = localv * (-1)
+          doflip = TRUE
           }
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
         if ( positivity == 'positive' ) {
@@ -2040,7 +2047,7 @@ mild <- function( dataFrame,  voxmats, basisK,
         } else if ( positivity == 'either' ) {
           localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
         }
-        v[ , vv ] = localv
+        if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
       }
     }
     if ( hasRanEff ) {
