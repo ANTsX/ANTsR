@@ -621,9 +621,12 @@ while ( i <= iterations ) {
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
+    if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
+#      localv = localv * (-1)
+      }
     myquant = quantile( localv , sparsenessQuantile, na.rm=T )
     if ( positivity == 'positive') {
-      localv[ localv <= myquant ] = 0
+      if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
     } else if ( positivity == 'negative' ) {
       localv[ localv > myquant ] = 0
     } else if ( positivity == 'either' ) {
@@ -997,9 +1000,12 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
           v[ , vv ] = v[, vv ] - temp * ip
           }
       localv = v[ , vv ]
+      if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
+#        localv = localv * (-1)
+        }
       myquant = quantile( localv , sparsenessQuantile, na.rm=T )
       if ( positivity == 'positive') {
-        localv[ localv <= myquant ] = 0
+        if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
       } else if ( positivity == 'negative' ) {
         localv[ localv > myquant ] = 0
       } else if ( positivity == 'either' ) {
@@ -1323,9 +1329,12 @@ orthogonalizeAndQSparsify <- function( v,
         v[ , vv ] = v[, vv ] - temp * ip
         }
     localv = v[ , vv ]
+    if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
+#      localv = localv * (-1)
+      }
     myquant = quantile( localv , sparsenessQuantile, na.rm=T )
     if ( positivity == 'positive') {
-      localv[ localv <= myquant ] = 0
+      if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
     } else if ( positivity == 'negative' ) {
       localv[ localv > myquant ] = 0
     } else if ( positivity == 'either' ) {
@@ -1662,10 +1671,12 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
             v[ , vv ] = v[, vv ] - temp * ip
             }
         localv = v[ , vv ]
-#        localv = as.matrix( smoothingMatrix %*% localv )
+        if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
+#          localv = localv * (-1)
+          }
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
         if ( positivity == 'positive') {
-          localv[ localv <= myquant ] = 0
+          if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
         } else if ( positivity == 'negative' ) {
           localv[ localv > myquant ] = 0
         } else if ( positivity == 'either' ) {
@@ -1967,8 +1978,8 @@ mild <- function( dataFrame,  voxmats, basisK,
   }
   colnames( v ) = unms
   hasIntercept = "(Intercept)" %in% colnames( v )
-  if ( hasIntercept ) dospar = 2:ncol( v ) else
-  # dospar = 1:ncol( v )
+  if ( hasIntercept ) dospar = 2:ncol( v ) else dospar = 1:ncol( v )
+
   for ( i in 1:p ) {
     if ( length( myks ) > 0 )
       for ( k in 1:length(predictormatrixnames) ) {
@@ -2016,10 +2027,12 @@ mild <- function( dataFrame,  voxmats, basisK,
             v[ , vv ] = v[, vv ] - temp * ip
             }
         localv = v[ , vv ]
-#        localv = as.matrix( smoothingMatrix %*% localv )
+        if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
+#          localv = localv * (-1)
+          }
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-        if ( positivity == 'positive') {
-          localv[ localv <= myquant ] = 0
+        if ( positivity == 'positive' ) {
+          if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
         } else if ( positivity == 'negative' ) {
           localv[ localv > myquant ] = 0
         } else if ( positivity == 'either' ) {
@@ -2144,7 +2157,7 @@ formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
 xlist = list(  voxmats[[1]] )
 names( xlist ) = xmatname
-locits = 1
+locits = 5
 mildx = mild( dataFrame,
   xlist, basisK, formx, smoothingMatrixX,
   iterations = locits, gamma = gamma,
@@ -2191,22 +2204,26 @@ if ( FALSE ) {
 
   mildy$u[,colinds] = yOrth[,colinds] = scale( voxmats[[1]] %*% ( xv ) )[,colinds]
   mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
-  }
+  } # end if
   if ( orthogonalizeBasis ) {
     xOrth = A.qr <- qr( ylist[[1]] %*% mildy$v[,-1] )
     xOrth = qr.Q( xOrth )
     yOrth = A.qr <- qr( xlist[[1]] %*% mildx$v[,-1] )
     yOrth = qr.Q( yOrth )
-##    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
-#    yOrth = svd(  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
+#    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
+#    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
   } else {
     xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )
     yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
   }
-  dataFramex = cbind( dataFrame, xOrth )
-  names( dataFramex )[ -c(1:ncol(dataFrame)) ] = colnames( mildx$u[, colinds ] )
-  dataFramey = cbind( dataFrame, yOrth )
-  names( dataFramey )[ -c(1:ncol(dataFrame)) ] = colnames( mildx$u[, colinds ] )
+  xorthinds = c( ( ncol(xOrth) - basisK + 1):ncol( xOrth ) )
+  colnames( xOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
+  colnames( yOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
+  dataFramex = cbind( dataFrame, xOrth[ , xorthinds  ] )
+  dataFramey = cbind( dataFrame, yOrth[ , xorthinds  ] )
+  dfinds = c( ( ncol(dataFramex) - basisK + 1):ncol(dataFramex) )
+  colnames( dataFramex )[dfinds] = colnames( mildx$u[, colinds ] )
+  colnames( dataFramey )[dfinds] = colnames( mildy$u[, colinds ] )
   mildx = milr( dataFramex,
     xlist, formx, smoothingMatrixX,
     iterations = locits, gamma = gamma * (1),
