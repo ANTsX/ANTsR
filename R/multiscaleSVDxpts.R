@@ -1661,6 +1661,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     v = v - dedv * gamma
 #    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
+#      print( paste( "doing sparseness", sparsenessQuantile ) )
       doOrth = FALSE
       for ( vv in dospar ) {
         if ( vv > 1 & doOrth )
@@ -1672,10 +1673,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
             }
         localv = v[ , vv ]
         if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-#          localv = localv * (-1)
+          localv = localv * (-1)
           }
         myquant = quantile( localv , sparsenessQuantile, na.rm=T )
         if ( positivity == 'positive') {
+#          print( paste( myquant, vv, colnames( vv )[vv] ) )
           if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
         } else if ( positivity == 'negative' ) {
           localv[ localv > myquant ] = 0
