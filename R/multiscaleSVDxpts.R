@@ -2162,11 +2162,10 @@ xmatname = names( voxmats )[ 1 ]
 ymatname = names( voxmats )[ 2 ]
 formx = paste( xmatname, myFormulaK )
 formy = paste( ymatname, myFormulaK )
-xlist = list(  voxmats[[1]] )
-names( xlist ) = xmatname
-locits = 3
+locits = 1
+########################
 mildx = mild( dataFrame,
-  xlist, basisK, formx, smoothingMatrixX,
+  voxmats[1], basisK, formx, smoothingMatrixX,
   iterations = 1, gamma = gamma,
   sparsenessQuantile = sparsenessQuantileX,
   positivity = positivityX[[1]],
@@ -2174,11 +2173,9 @@ mildx = mild( dataFrame,
   repeatedMeasures = repeatedMeasures,
   verbose = FALSE )
 colinds = (ncol(mildx$u)-basisK + 1):ncol(mildx$u)
-##
-ylist = list(  voxmats[[2]] )
-names( ylist ) = ymatname
+########################
 mildy = mild( dataFrame,
-  ylist, basisK, formy, smoothingMatrixY,
+  voxmats[2], basisK, formy, smoothingMatrixY,
   iterations = 1, gamma = gamma,
   sparsenessQuantile = sparsenessQuantileY,
   positivity = positivityY[[1]],
@@ -2187,9 +2184,64 @@ mildy = mild( dataFrame,
   verbose = FALSE )
 xOrth = mildy$u[,-1]
 yOrth = mildx$u[,-1]
-#    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
-#    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
+#    xOrth = svd( antsrimpute( voxmats[[2]] %*% mildy$v[,-1] ) )$u
+#    yOrth = svd( antsrimpute( voxmats[[1]] %*% mildx$v[,-1] ) )$u
+# mildy$v = matrix(  rnorm( length( mildy$v ) ), nrow = nrow( mildy$v ) )
+# mildx$v = matrix(  rnorm( length( mildx$v ) ), nrow = nrow( mildx$v ) )
+myorth <- function( x ) {
+  qr.Q(  qr( x ) )
+}
 for ( i in 1:iterations ) {
+  if ( orthogonalizeBasis == TRUE ) {
+    xOrthN = myorth( voxmats[[2]] %*% mildy$v[,-1] )
+    yOrthN = myorth( voxmats[[1]] %*% mildx$v[,-1] )
+    if ( i == 1  ) {
+      xOrth = xOrthN
+      yOrth = yOrthN
+    } else  {
+      wt1 = 0.95
+      wt2 = 1.0 - wt1
+      xOrth = xOrth * wt1 + xOrthN * wt2
+      yOrth = yOrth * wt1 + yOrthN * wt2
+    }
+  }
+  xorthinds = c( ( ncol(xOrth) - basisK + 1):ncol( xOrth ) )
+  colnames( xOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
+  colnames( yOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
+  dataFramex = cbind( dataFrame, xOrth[ , xorthinds  ] )
+  dataFramey = cbind( dataFrame, yOrth[ , xorthinds  ] )
+  dfinds = c( ( ncol(dataFramex) - basisK + 1):ncol(dataFramex) )
+  colnames( dataFramex )[dfinds] = colnames( mildx$u[, colinds ] )
+  colnames( dataFramey )[dfinds] = colnames( mildy$u[, colinds ] )
+  mildx = milr( dataFramex,
+    voxmats[1], formx, smoothingMatrixX,
+    iterations = locits, gamma = gamma * (1),
+    sparsenessQuantile = sparsenessQuantileX,
+    positivity = positivityX[[1]],
+    repeatedMeasures = repeatedMeasures,
+    verbose = F )
+
+  mildy = milr( dataFramey,
+    voxmats[2], formy, smoothingMatrixY,
+    iterations = locits, gamma = gamma * (1),
+    sparsenessQuantile = sparsenessQuantileY,
+    positivity = positivityY[[1]],
+    repeatedMeasures = repeatedMeasures,
+    verbose = F )
+  ###############################################
+  p1 = antsrimpute( voxmats[[1]] %*% mildx$v[,-1] )
+  p2 = antsrimpute( voxmats[[2]] %*% mildy$v[,-1] )
+  locor = cor( p1, p2 )
+  overall = mean( abs( diag(locor)))
+  if ( verbose & i > 0 ) {
+    print( paste( "it:", i - 1, "=>", overall ) )
+#    print( ( locor ) )
+#    print( diag( locor ) )
+    }
+  }
+return( list( symilrX = mildx, symilrY = mildy ) )
+
+
 if ( FALSE ) {
   xv = mildx$v
   yv = mildy$v
@@ -2216,64 +2268,6 @@ if ( FALSE ) {
   mildy$u[,colinds] = yOrth[,colinds] = scale( voxmats[[1]] %*% ( xv ) )[,colinds]
   mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
   } # end if
-  if ( orthogonalizeBasis ) {
-    xOrthN = A.qr <- qr( ylist[[1]] %*% mildy$v[,-1] )
-    xOrthN = qr.Q( xOrthN )
-    yOrthN = A.qr <- qr( xlist[[1]] %*% mildx$v[,-1] )
-    yOrthN = qr.Q( yOrthN )
-    if ( i == 1  ) {
-      xOrth = xOrthN
-      yOrth = yOrthN
-    } else  {
-      wt1 = 0.5
-      wt2 = 1.0 - wt1
-      xOrth = xOrth * wt1 + xOrthN * wt2
-      yOrth = yOrth * wt1 + yOrthN * wt2
-    }
-#    xOrth = svd( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )$u
-#    yOrth = svd( antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )$u
-    if ( FALSE ) {
-    xOrth = yOrth = svd(
-      cbind( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ),
-             antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
-       )$u[,1:ncol(xOrth)] }
-  } else {
-    xOrth = ( antsrimpute( ylist[[1]] %*% mildy$v[,-1] ) )
-    yOrth = (  antsrimpute( xlist[[1]] %*% mildx$v[,-1] ) )
-  }
-  xorthinds = c( ( ncol(xOrth) - basisK + 1):ncol( xOrth ) )
-  colnames( xOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
-  colnames( yOrth[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
-  dataFramex = cbind( dataFrame, xOrth[ , xorthinds  ] )
-  dataFramey = cbind( dataFrame, yOrth[ , xorthinds  ] )
-  dfinds = c( ( ncol(dataFramex) - basisK + 1):ncol(dataFramex) )
-  colnames( dataFramex )[dfinds] = colnames( mildx$u[, colinds ] )
-  colnames( dataFramey )[dfinds] = colnames( mildy$u[, colinds ] )
-  mildx = milr( dataFramex,
-    xlist, formx, smoothingMatrixX,
-    iterations = locits, gamma = gamma * (1),
-    sparsenessQuantile = sparsenessQuantileX,
-    positivity = positivityX[[1]],
-    repeatedMeasures = repeatedMeasures,
-    verbose = F )
 
-  mildy = milr( dataFramey,
-    ylist, formy, smoothingMatrixY,
-    iterations = locits, gamma = gamma * (1),
-    sparsenessQuantile = sparsenessQuantileY,
-    positivity = positivityY[[1]],
-    repeatedMeasures = repeatedMeasures,
-    verbose = F )
-  ###############################################
-  p1 = antsrimpute( xlist[[1]] %*% mildx$v[,-1] )
-  p2 = antsrimpute( ylist[[1]] %*% mildy$v[,-1] )
-  locor = cor( p1, p2 )
-  overall = mean( abs( diag(locor)))
-  if ( verbose & i > 0 ) {
-    print( paste( "it:", i - 1, "=>", overall ) )
-    print( ( locor ) )
-#    print( diag( locor ) )
-    }
-  }
-return( list( symilrX = mildx, symilrY = mildy ) )
+
 }
