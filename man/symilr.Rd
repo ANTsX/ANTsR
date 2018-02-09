@@ -5,7 +5,7 @@
 \title{Symmetric multivariate, penalized image-based linear regression model (symilr)}
 \usage{
 symilr(voxmats, basisK, smoothingMatrixX, smoothingMatrixY, iterations = 10,
-  gamma = 1e-06, sparsenessQuantileX, sparsenessQuantileY,
+  gamma = 1e-06, sparsenessQuantileX = 0.5, sparsenessQuantileY = 0.5,
   positivityX = c("positive", "negative", "either"),
   positivityY = c("positive", "negative", "either"), initialUMatrix,
   repeatedMeasures = NA, verbose = FALSE)
