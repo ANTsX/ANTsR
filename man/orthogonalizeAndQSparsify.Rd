@@ -5,7 +5,7 @@
 \title{sparsify a matrix}
 \usage{
 orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
-  positivity = "either")
+  positivity = "either", orthogonalize = TRUE)
 }
 \arguments{
 \item{v}{input matrix}
@@ -14,6 +14,8 @@ orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
 
 \item{positivity}{restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
+
+\item{orthogonalize}{run gram-schmidt if TRUE.}
 }
 \value{
 matrix
