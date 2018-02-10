@@ -2570,8 +2570,8 @@ symilr <- function(
     ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umat = matrix(  rnorm( n * basisK ), nrow=n  )
-  } else umat = initialUMatrix
+    umatX = umatY = matrix(  rnorm( n * basisK ), nrow=n  )
+  } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
   if ( hasRanEff ) {
@@ -2583,21 +2583,22 @@ symilr <- function(
   }
   gammamx = gamma * 0.01
   for ( i in 1:iterations ) {
-    vmat1 = smoothingMatrixX %*% ( t( voxmats[[1]] /  matnorms[1] ) %*% umat )
-    vmat2 = smoothingMatrixY %*% ( t( voxmats[[2]] /  matnorms[2]  ) %*% umat )
+    vmat1 = smoothingMatrixX %*% ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY )
+    vmat2 = smoothingMatrixY %*% ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX )
     vmat1 = orthogonalizeAndQSparsify( vmat1, sparsenessQuantileX, positivityX,
-      orthogonalize = FALSE )
+      orthogonalize = T )
     vmat2 = orthogonalizeAndQSparsify( vmat2, sparsenessQuantileY, positivityY,
-      orthogonalize = FALSE )
+      orthogonalize = T )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
-    dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umat %*% t(vmat1) ) %*% vmat1
-    dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umat %*% t(vmat2) ) %*% vmat2
+    dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
+    dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2
     if ( hasRanEff ) {
       dedu1 = dedu1 + zRan %*% ( t( vRanX ) %*% vmat1 )
       dedu2 = dedu2 + zRan %*% ( t( vRanY ) %*% vmat2 )
     }
     # the gradient update - could be weighted
-    umat = umat + ( dedu1  + dedu2 ) * gamma
+    umatX = umatX + ( dedu1 ) * gamma
+    umatY = umatY + ( dedu2 ) * gamma
 
     # the energy term for the regression model is:
     #   norm( x - uvt ) =>  grad update is wrt u is  xv - uvtv
@@ -2611,11 +2612,11 @@ symilr <- function(
 
     if ( hasRanEff  ) {
       dedrvX = vRanX %*% ( t( zRan ) %*% zRan ) # t1
-      dedrvX = dedrvX + vmat1 %*% ( t( umat ) %*% zRan ) # t2
+      dedrvX = dedrvX + vmat1 %*% ( t( umatX ) %*% zRan ) # t2
       dedrvX = dedrvX - t( voxmats[[1]] ) %*% zRan # t3
 
       dedrvY = vRanY %*% ( t( zRan ) %*% zRan ) # t1
-      dedrvY = dedrvY + vmat2 %*% ( t( umat ) %*% zRan ) # t2
+      dedrvY = dedrvY + vmat2 %*% ( t( umatY ) %*% zRan ) # t2
       dedrvY = dedrvY - t( voxmats[[2]] ) %*% zRan # t3
 
       vRanX = smoothingMatrixX %*% ( vRanX + dedrvX * gammamx )
@@ -2624,18 +2625,19 @@ symilr <- function(
 
     if ( verbose & hasRanEff ) {
     print( paste(i, "=>",
-      norm(  voxmats[[1]] /  matnorms[1] - umat %*% t( vmat1 ) - zRan %*% t(vRanX) ),
-      norm(  voxmats[[2]] /  matnorms[2] - umat %*% t( vmat2 ) - zRan %*% t(vRanY) ) ) )
+      norm(  voxmats[[1]] /  matnorms[1] - umatX %*% t( vmat1 ) - zRan %*% t(vRanX) ),
+      norm(  voxmats[[2]] /  matnorms[2] - umatY %*% t( vmat2 ) - zRan %*% t(vRanY) ) ) )
     }
     if ( verbose & !hasRanEff ) {
       print( paste(i, "=>",
-        norm(  voxmats[[1]] /  matnorms[1] - umat %*% t( vmat1 ) ),
-        norm(  voxmats[[2]] /  matnorms[2] - umat %*% t( vmat2 ) ) ) )
+        norm(  voxmats[[1]] /  matnorms[1] - umatX %*% t( vmat1 ) ),
+        norm(  voxmats[[2]] /  matnorms[2] - umatY %*% t( vmat2 ) ) ) )
     }
  }
 return(
   list(
-    u  = as.matrix( umat ),
+    uX  = as.matrix( umatX ),
+    uY  = as.matrix( umatY ),
     vX = as.matrix( vmat1 ),
     vY = as.matrix( vmat2 ),
     vRanX = vRanX,
