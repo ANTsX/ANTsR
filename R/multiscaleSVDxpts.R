@@ -1649,7 +1649,6 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   # now fix dedv with the correct voxels
   for ( iter in 1:iterations ) {
     err = 0
-    predicted = voxmats[[ outcomevarnum ]] * 0
     v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
       if ( length( myks ) > 0 )
@@ -2034,7 +2033,6 @@ mild <- function( dataFrame,  voxmats, basisK,
   # now fix dedv with the correct voxels
   for ( iter in 1:iterations ) {
     err = 0
-    predicted = voxmats[[ outcomevarnum ]] * 0
     v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
       if ( length( myks ) > 0 )
