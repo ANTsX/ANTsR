@@ -5,9 +5,9 @@
 \title{Efficiently compute a multivariate, image-based (mixed) linear decompositition (mild)}
 \usage{
 mild(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrix, iterations = 10,
-  gamma = 1e-06, sparsenessQuantile, positivity = c("positive", "negative",
-  "either"), initializationStrategy = list(seed = 0, matrix = NA, voxels =
-  NA), repeatedMeasures = NA, verbose = FALSE)
+  gamma = 1e-06, sparsenessQuantile = 0.5, positivity = c("positive",
+  "negative", "either"), initializationStrategy = list(seed = 0, matrix = NA,
+  voxels = NA), repeatedMeasures = NA, verbose = FALSE)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for

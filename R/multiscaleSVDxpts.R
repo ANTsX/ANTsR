@@ -1900,7 +1900,7 @@ milr.predict <- function(
 mild <- function( dataFrame,  voxmats, basisK,
   myFormulaK, smoothingMatrix,
   iterations = 10, gamma = 1.e-6,
-  sparsenessQuantile,
+  sparsenessQuantile = 0.5,
   positivity = c("positive","negative","either"),
   initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
   repeatedMeasures = NA,
