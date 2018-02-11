@@ -988,8 +988,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
     dedv = t( tuu %*% t( v ) - tu %*% x )
     v = v + dedv * gamma
 #    if ( abs( doOrth ) >  Inf ) {
-#      vOrth = A.qr <- qr( v )
-#      vOrth = qr.Q( vOrth )
+#      vOrth = qr.Q( qr( v ) )
 #      v = v * ( 1 - doOrth ) - vOrth * doOrth
 #    }
     for ( vv in 1:ncol( v ) ) {
@@ -1321,30 +1320,35 @@ while ( k <= iterations ) {
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either', orthogonalize = TRUE ) {
+#  if ( orthogonalize ) v = qr.Q( qr( v ) )
   for ( vv in 1:ncol( v ) ) {
-#    v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
-    if ( vv > 1 & orthogonalize )
-      for ( vk in 1:(vv-1) ) {
-        temp = v[,vk]
-        denom = sum( temp * temp , na.rm=T )
-        if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
-        v[ , vv ] = v[, vv ] - temp * ip
+    if ( var( v[ , vv ] ) >  .Machine$double.eps ) {
+      if ( vv > 1 & orthogonalize  ) {
+#        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
+        for ( vk in 1:(vv-1) ) {
+          temp = v[,vk]
+#          temp = temp / sqrt( sum( temp * temp ) )
+          denom = sum( temp * temp , na.rm=T )
+          if ( denom > .Machine$double.eps ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+          v[ , vv ] = v[, vv ] - temp * ip
+          }
         }
-    localv = v[ , vv ]
-    doflip = FALSE
-    if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-      localv = localv * (-1)
-      doflip = TRUE
+      localv = v[ , vv ] # zerka
+      doflip = FALSE
+      if ( sum( localv > 0, na.rm=T ) < sum( localv < 0, na.rm=T ) ) {
+        localv = localv * (-1)
+        doflip = TRUE
+        }
+      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+      if ( positivity == 'positive') {
+        if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
+      } else if ( positivity == 'negative' ) {
+        localv[ localv > myquant ] = 0
+      } else if ( positivity == 'either' ) {
+        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
       }
-    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-    if ( positivity == 'positive') {
-      if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
-    } else if ( positivity == 'negative' ) {
-      localv[ localv > myquant ] = 0
-    } else if ( positivity == 'either' ) {
-      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+      if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
     }
-    if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
   }
   return( v )
 }
@@ -1478,6 +1482,7 @@ smoothAppGradCCA <- function( x , y,
 #' choices are positive, negative or either as expressed as a string.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
+#' @param orthogonalize boolean to control whether we orthogonalize the v
 #' @param verbose boolean to control verbosity of output
 #' @return A list of different matrices that contain names derived from the
 #' formula and the coefficients of the regression model.
@@ -1559,7 +1564,9 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   sparsenessQuantile,
   positivity = c("positive","negative","either"),
   repeatedMeasures = NA,
+  orthogonalize = FALSE,
   verbose = FALSE ) {
+  milrorth = orthogonalize
   vdf = data.frame( dataFrame )
   matnames = names( voxmats )
   if ( length( matnames ) == 0 ) stop( 'please name the input list entries')
@@ -1621,9 +1628,9 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   lvx = length( voxmats )
   predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
   myks = which( matnames %in% predictormatrixnames )
-  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
+  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.0
   if ( hasRanEff ) {
-    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
+    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.01
     dedrv = vRan * 0
     colnames( vRan ) = ranEffNames
   }
@@ -1640,14 +1647,18 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     if ( outcomeisconstant )
       myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
     term2 = tu %*% myoc
-    v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
+    v[ i, ] = ( tuu %*% v[i,] - term2 )
     }
+  if ( !missing( sparsenessQuantile ) ) {
+    v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
+      orthogonalize = milrorth )
+    }
+  v = as.matrix( smoothingMatrix %*% v )
   dedv = v * 0
   predicted = voxmats[[ 1 ]] * 0
   # now fix dedv with the correct voxels
   for ( iter in 1:iterations ) {
     err = 0
-    v = as.matrix( smoothingMatrix %*% v )
     for ( i in 1:p ) {
       if ( length( myks ) > 0 )
         for ( k in 1:length(predictormatrixnames) )
@@ -1673,36 +1684,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
-#    v = as.matrix( smoothingMatrix %*% v )
+    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
-#      print( paste( "doing sparseness", sparsenessQuantile ) )
-      doOrth = FALSE
-      for ( vv in dospar ) {
-        if ( vv > 1 & doOrth )
-          for ( vk in 1:(vv-1) ) {
-            temp = v[,vk]
-            denom = sum( temp * temp , na.rm=T )
-            if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
-            v[ , vv ] = v[, vv ] - temp * ip
-            }
-        localv = v[ , vv ]
-        doflip = FALSE
-        if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-          localv = localv * (-1)
-          doflip = TRUE
-          }
-        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-        if ( positivity == 'positive') {
-#          print( paste( myquant, vv, colnames( vv )[vv] ) )
-          if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
-        } else if ( positivity == 'negative' ) {
-          localv[ localv > myquant ] = 0
-        } else if ( positivity == 'either' ) {
-          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
-        }
-        if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
+      v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity, orthogonalize = milrorth )
+#      v = as.matrix( smoothingMatrix %*% v )
       }
-    }
 
     gammamx = gamma * 0.1 # go a bit slower
     # simplified model here
@@ -2002,8 +1988,7 @@ mild <- function( dataFrame,  voxmats, basisK,
   lvx = length( voxmats )
   predictormatrixnames = colnames( u )[  colnames( u ) %in% matnames ]
   myks = which( matnames %in% predictormatrixnames )
-  v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.01
-  v = as.matrix( smoothingMatrix %*% v )
+  v = t( voxmats[[outcomevarnum]] ) %*% u
   if ( hasRanEff ) {
     vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
     dedrv = vRan * 0
@@ -2025,7 +2010,10 @@ mild <- function( dataFrame,  voxmats, basisK,
     term2 = tu %*% myoc
     v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
     }
-  v = as.matrix( smoothingMatrix %*% v ) * (-1)
+  mildorth = TRUE
+  v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
+    orthogonalize = mildorth )
+  v = as.matrix( smoothingMatrix %*% v )
   dedv = v * 0
   predicted = voxmats[[ 1 ]] * 0
   # now fix dedv with the correct voxels
@@ -2048,32 +2036,10 @@ mild <- function( dataFrame,  voxmats, basisK,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
+    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
-      doOrth = FALSE
-      for ( vv in dospar ) {
-        if ( vv > 1 & doOrth )
-          for ( vk in 1:(vv-1) ) {
-            temp = v[,vk]
-            denom = sum( temp * temp , na.rm=T )
-            if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
-            v[ , vv ] = v[, vv ] - temp * ip
-            }
-        localv = v[ , vv ]
-        doflip = FALSE
-        if ( sum( localv > 0 ) < sum( localv < 0 ) ) {
-          localv = localv * (-1)
-          doflip = TRUE
-          }
-        myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-        if ( positivity == 'positive' ) {
-          if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
-        } else if ( positivity == 'negative' ) {
-          localv[ localv > myquant ] = 0
-        } else if ( positivity == 'either' ) {
-          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
-        }
-        if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
-      }
+      v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
+        orthogonalize = mildorth )
     }
     gammamx = gamma * 0.1 # go a bit slower
     if ( hasRanEff ) {
