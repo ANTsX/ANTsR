@@ -7,7 +7,8 @@
 mild(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrix, iterations = 10,
   gamma = 1e-06, sparsenessQuantile = 0.5, positivity = c("positive",
   "negative", "either"), initializationStrategy = list(seed = 0, matrix = NA,
-  voxels = NA), repeatedMeasures = NA, verbose = FALSE)
+  voxels = NA), repeatedMeasures = NA, orthogonalize = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for
@@ -39,6 +40,8 @@ should be a n by k matrix.  The first non-NA of these options will be used.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{orthogonalize}{boolean to control whether we orthogonalize the v}
 
 \item{verbose}{boolean to control verbosity of output}
 }

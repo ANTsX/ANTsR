@@ -1870,6 +1870,7 @@ milr.predict <- function(
 #' should be a n by k matrix.  The first non-NA of these options will be used.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
+#' @param orthogonalize boolean to control whether we orthogonalize the v
 #' @param verbose boolean to control verbosity of output
 #' @return A list of different matrices that contain names derived from the
 #' formula and the coefficients of the regression model.
@@ -1904,9 +1905,12 @@ mild <- function( dataFrame,  voxmats, basisK,
   positivity = c("positive","negative","either"),
   initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
   repeatedMeasures = NA,
+  orthogonalize = FALSE,
   verbose = FALSE ) {
+  mildorth = orthogonalize
   vdf = data.frame( dataFrame )
   matnames = names( voxmats )
+  matnorm  = norm( voxmats[[1]] )
   if ( length( matnames ) == 0 ) stop( 'please name the input list entries')
   n = nrow( voxmats[[1]] )
   p = ncol( voxmats[[1]] )
@@ -2006,11 +2010,10 @@ mild <- function( dataFrame,  voxmats, basisK,
     tu = t( u )
     tuu = t( u ) %*% u
     if ( outcomeisconstant )
-      myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+      myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]/matnorm
     term2 = tu %*% myoc
     v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
     }
-  mildorth = TRUE
   v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
     orthogonalize = mildorth )
   v = as.matrix( smoothingMatrix %*% v )
@@ -2027,7 +2030,7 @@ mild <- function( dataFrame,  voxmats, basisK,
       tu = t( u )
       tuu = t( u ) %*% u
       if ( outcomeisconstant )
-        myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+        myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]/matnorm
       term2 = tu %*% myoc
       dedv[ i, ] = tuu %*% v[i,] - term2
       if ( hasRanEff  ) dedv[ i,  ] = dedv[ i, ] + ( tu %*% zRan ) %*% vRan[i,]
@@ -2052,7 +2055,7 @@ mild <- function( dataFrame,  voxmats, basisK,
         tu = t( u )
         tuu = t( u ) %*% u
         if ( outcomeisconstant )
-          myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]
+          myoc = vdf[ ,outcomevarnum ] else myoc = voxmats[[ outcomevarnum ]][,i]/matnorm
         predicted[ , i ] = u %*% (v[i,]) + zRan %*% vRan[i,]
         rterm2 = tz %*% ( myoc )
         dedrv[ i, ] = ( tz %*% u ) %*% v[ i ,  ] + tzz %*% vRan[ i ,  ] - rterm2
@@ -2061,7 +2064,7 @@ mild <- function( dataFrame,  voxmats, basisK,
       }
     # reset the u variables
     for ( k in 1:length( knames ) ) {
-      u[ ,  knames[k] ] = voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ]
+      u[ ,  knames[k] ] = ( voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ] )/matnorm
 #      print( paste( "did u", knames[k] ) )
       }
     if ( verbose ) print( err / p )
