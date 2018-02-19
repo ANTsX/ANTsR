@@ -1684,12 +1684,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
-    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity, orthogonalize = milrorth )
-#      v = as.matrix( smoothingMatrix %*% v )
       }
-
+    v = as.matrix( smoothingMatrix %*% v )
     gammamx = gamma * 0.1 # go a bit slower
     # simplified model here
 #      dedrv = t( ( t(zRan) %*% zRan ) %*% t( vRanX ) ) # t1
@@ -2039,11 +2037,11 @@ mild <- function( dataFrame,  voxmats, basisK,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
-    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
         orthogonalize = mildorth )
     }
+    v = as.matrix( smoothingMatrix %*% v )
     gammamx = gamma * 0.1 # go a bit slower
     if ( hasRanEff ) {
       vRan = as.matrix( smoothingMatrix %*% vRan )
@@ -2067,6 +2065,7 @@ mild <- function( dataFrame,  voxmats, basisK,
       u[ ,  knames[k] ] = ( voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ] )/matnorm
 #      print( paste( "did u", knames[k] ) )
       }
+      u[ , knames ] =  qr.Q(  qr( u[ , knames ] ) )
     if ( verbose ) print( err / p )
     }
   colnames( v ) = unms
@@ -2548,11 +2547,11 @@ symilr <- function(
   }
   gammamx = gamma * 0.01
   for ( i in 1:iterations ) {
-    vmat1 = smoothingMatrixX %*% ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY )
-    vmat2 = smoothingMatrixY %*% ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX )
-    vmat1 = orthogonalizeAndQSparsify( vmat1, sparsenessQuantileX, positivityX,
+    vmat1 = ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY )
+    vmat2 = ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX )
+    vmat1 = smoothingMatrixX %*% orthogonalizeAndQSparsify( vmat1, sparsenessQuantileX, positivityX,
       orthogonalize = T )
-    vmat2 = orthogonalizeAndQSparsify( vmat2, sparsenessQuantileY, positivityY,
+    vmat2 = smoothingMatrixY %*% orthogonalizeAndQSparsify( vmat2, sparsenessQuantileY, positivityY,
       orthogonalize = T )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
@@ -2564,6 +2563,9 @@ symilr <- function(
     # the gradient update - could be weighted
     umatX = umatX + ( dedu1 ) * gamma
     umatY = umatY + ( dedu2 ) * gamma
+#    umatX =  qr.Q(  qr( umatX ) )
+#    umatY =  qr.Q(  qr( umatY ) )
+
 
     # the energy term for the regression model is:
     #   norm( x - uvt ) =>  grad update is wrt u is  xv - uvtv
