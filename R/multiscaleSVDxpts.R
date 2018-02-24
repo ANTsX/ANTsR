@@ -1862,10 +1862,8 @@ milr.predict <- function(
 #' @param sparsenessQuantile quantile to control sparseness - higher is sparser
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
-#' @param initializationStrategy initialization can be seed, matrix or voxels.
-#' seed should be a single number, voxels should be a length basisK list of
-#' integers with value less than the number of columns in the matrix, matrix
-#' should be a n by k matrix.  The first non-NA of these options will be used.
+#' @param initializationStrategy optional initialization matrix or seed.
+#' seed should be a single number; matrix should be a n by k matrix.
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param orthogonalize boolean to control whether we orthogonalize the v
@@ -1887,12 +1885,12 @@ milr.predict <- function(
 #'   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 #' df = data.frame( outcome = outcome, covar = covar )
 #' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-#'   initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+#'   initializationStrategy = 10 )
 #' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-#'   initializationStrategy = list( seed = NA, matrix = NA, voxels = c( 88, 15, 66 )) )
+#'   initializationStrategy = 4 )
 #' myumat = svd( mat2, nv=0, nu=3 )$u
 #' result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-#'   initializationStrategy = list( seed = NA, matrix = myumat, voxels = NA ) )
+#'   initializationStrategy = 0 )
 #'
 #' @seealso \code{\link{milr}}
 #' @export mild
@@ -1901,10 +1899,11 @@ mild <- function( dataFrame,  voxmats, basisK,
   iterations = 10, gamma = 1.e-6,
   sparsenessQuantile = 0.5,
   positivity = c("positive","negative","either"),
-  initializationStrategy = list( seed = 0, matrix = NA, voxels = NA ),
+  initializationStrategy = 0,
   repeatedMeasures = NA,
   orthogonalize = FALSE,
   verbose = FALSE ) {
+  positivity = positivity[1]
   mildorth = orthogonalize
   vdf = data.frame( dataFrame )
   matnames = names( voxmats )
@@ -1928,23 +1927,18 @@ mild <- function( dataFrame,  voxmats, basisK,
   }
   outcomevarname = trimws( unlist( strsplit( myFormulaK, "~" ) )[1] )
   outcomevarnum = which( outcomevarname == matnames  )
-  if ( ! is.na( initializationStrategy[[ 'seed' ]] ) )
-    set.seed( initializationStrategy[[ 'seed' ]] )
+  if ( class(initializationStrategy) == "numeric" ) {
+    set.seed( initializationStrategy )
+    initializationStrategy = replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) )
+    }
+  if ( class(initializationStrategy) != "matrix" )
+    stop("Please set valid initializationStrategy.")
   for ( k in 1:basisK ) {
-#    vdf = cbind( vdf, rnorm( nrow( vdf ), 0, 1 ) )
-    if ( ! is.na( initializationStrategy[[ 'seed' ]]  ) )
-      initvec = rnorm( nrow( vdf ), 0, 1 )
-    else if ( ! is.na( initializationStrategy[[ 'voxels' ]][k]  ) ) {
-      initval = initializationStrategy[[ 'voxels' ]][k]
-      initvec = voxmats[[ outcomevarnum ]][, initval ]
+    if ( k == 1 ) { # check matrix size
+      stopifnot( nrow( initializationStrategy  ) == nrow( vdf ) )
+      stopifnot( ncol( initializationStrategy ) == basisK )
       }
-    else if ( ! all( is.na( initializationStrategy[[ 'matrix' ]]  ) ) ) {
-      if ( k == 1 ) { # check matrix size
-        stopifnot( nrow( initializationStrategy[[ 'matrix' ]] ) == nrow( vdf ) )
-        stopifnot( ncol( initializationStrategy[[ 'matrix' ]] ) == basisK )
-        }
-      initvec = initializationStrategy[[ 'matrix' ]][,k]
-      }
+    initvec = initializationStrategy[,k]
     vdf = cbind( vdf, initvec )
     names( vdf )[  ncol( vdf ) ] = paste0( "mildBasis", k )
   }
@@ -2065,7 +2059,8 @@ mild <- function( dataFrame,  voxmats, basisK,
       u[ ,  knames[k] ] = ( voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ] )/matnorm
 #      print( paste( "did u", knames[k] ) )
       }
-      u[ , knames ] =  qr.Q(  qr( u[ , knames ] ) )
+      if ( iter < iterations )
+        u[ , knames ] =  qr.Q(  qr( u[ , knames ] ) )
     if ( verbose ) print( err / p )
     }
   colnames( v ) = unms

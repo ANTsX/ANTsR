@@ -6,9 +6,8 @@
 \usage{
 mild(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrix, iterations = 10,
   gamma = 1e-06, sparsenessQuantile = 0.5, positivity = c("positive",
-  "negative", "either"), initializationStrategy = list(seed = 0, matrix = NA,
-  voxels = NA), repeatedMeasures = NA, orthogonalize = FALSE,
-  verbose = FALSE)
+  "negative", "either"), initializationStrategy = 0, repeatedMeasures = NA,
+  orthogonalize = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for
@@ -33,10 +32,8 @@ size as input matrix}
 \item{positivity}{restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
 
-\item{initializationStrategy}{initialization can be seed, matrix or voxels.
-seed should be a single number, voxels should be a length basisK list of
-integers with value less than the number of columns in the matrix, matrix
-should be a n by k matrix.  The first non-NA of these options will be used.}
+\item{initializationStrategy}{optional initialization matrix or seed.
+seed should be a single number; matrix should be a n by k matrix.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
@@ -70,12 +67,12 @@ myform = paste(" vox2 ~ covar + vox + ",
   paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
 df = data.frame( outcome = outcome, covar = covar )
 result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = list( seed = 10, matrix = NA, voxels = NA ) )
+  initializationStrategy = 10 )
 result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = list( seed = NA, matrix = NA, voxels = c( 88, 15, 66 )) )
+  initializationStrategy = 4 )
 myumat = svd( mat2, nv=0, nu=3 )$u
 result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = list( seed = NA, matrix = myumat, voxels = NA ) )
+  initializationStrategy = 0 )
 
 }
 \seealso{
