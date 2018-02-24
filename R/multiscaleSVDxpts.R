@@ -1929,7 +1929,8 @@ mild <- function( dataFrame,  voxmats, basisK,
   outcomevarnum = which( outcomevarname == matnames  )
   if ( class(initializationStrategy) == "numeric" ) {
     set.seed( initializationStrategy )
-    initializationStrategy = replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) )
+    initializationStrategy = qr.Q( qr(
+      replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) )
     }
   if ( class(initializationStrategy) != "matrix" )
     stop("Please set valid initializationStrategy.")
