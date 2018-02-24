@@ -2056,12 +2056,12 @@ mild <- function( dataFrame,  voxmats, basisK,
       vRan = vRan - dedrv * gammamx
       }
     # reset the u variables
-    for ( k in 1:length( knames ) ) {
-      u[ ,  knames[k] ] = ( voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ] )/matnorm
-#      print( paste( "did u", knames[k] ) )
+    if ( iter < iterations ) {
+      for ( k in 1:length( knames ) ) {
+        u[ ,  knames[k] ] = ( voxmats[[ outcomevarnum ]] %*% v[ , knames[k] ] )/matnorm
+        }
+      u[ , knames ] =  qr.Q(  qr( u[ , knames ] ) )
       }
-      if ( iter < iterations )
-        u[ , knames ] =  qr.Q(  qr( u[ , knames ] ) )
     if ( verbose ) print( err / p )
     }
   colnames( v ) = unms
