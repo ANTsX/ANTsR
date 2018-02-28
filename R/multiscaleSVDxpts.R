@@ -2497,8 +2497,8 @@ symilr <- function(
   initialUMatrix,
   repeatedMeasures = NA,
   verbose = FALSE ) {
-  if ( positivityX == TRUE ) positivityX = 'positive' else positivityX = 'either'
-  if ( positivityY == TRUE ) positivityY = 'positive' else positivityY = 'either'
+  if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
+  if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
     matnorms = c( norm( voxmats[[ 2 ]] ), norm( voxmats[[ 2 ]] ) )
     n = nrow( voxmats[[1]] )
     p = ncol( voxmats[[1]] )
@@ -2531,7 +2531,7 @@ symilr <- function(
     ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = matrix(  rnorm( n * basisK ), nrow=n  )
+    umatX = umatY = qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) )
   } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
@@ -2560,10 +2560,13 @@ symilr <- function(
     # the gradient update - could be weighted
     umatX = umatX + ( dedu1 ) * gamma
     umatY = umatY + ( dedu2 ) * gamma
+#    umatX = scale( umatX + ( dedu1 ) * gamma, center=TRUE, scale=TRUE )
+#    umatY = scale(umatY + ( dedu2 ) * gamma, center=TRUE, scale=TRUE )
+#    umatY =  scale( ( umatX %*% t(umatX ) ) %*% umatY, center=TRUE, scale=TRUE )
     orthogonalizesymilr = FALSE
     if ( orthogonalizesymilr ) {
       umatX =  qr.Q(  qr( umatX ) )
-      umatY =  qr.Q(  qr( umatY ) )
+      umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
     }
 
     # the energy term for the regression model is:
