@@ -2497,7 +2497,8 @@ symilr <- function(
   initialUMatrix,
   repeatedMeasures = NA,
   verbose = FALSE ) {
-
+  if ( positivityX == TRUE ) positivityX = 'positive' else positivityX = 'either'
+  if ( positivityY == TRUE ) positivityY = 'positive' else positivityY = 'either'
     matnorms = c( norm( voxmats[[ 2 ]] ), norm( voxmats[[ 2 ]] ) )
     n = nrow( voxmats[[1]] )
     p = ncol( voxmats[[1]] )
@@ -2543,12 +2544,12 @@ symilr <- function(
   }
   gammamx = gamma * 0.01
   for ( i in 1:iterations ) {
-    vmat1 = ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY )
-    vmat2 = ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX )
-    vmat1 = smoothingMatrixX %*% orthogonalizeAndQSparsify( vmat1, sparsenessQuantileX, positivityX,
-      orthogonalize = T )
-    vmat2 = smoothingMatrixY %*% orthogonalizeAndQSparsify( vmat2, sparsenessQuantileY, positivityY,
-      orthogonalize = T )
+    vmat1 = as.matrix( ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY ) )
+    vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
+    vmat1 = smoothingMatrixX %*% orthogonalizeAndQSparsify( (vmat1), sparsenessQuantileX,
+      orthogonalize = TRUE, positivity = positivityX  )
+    vmat2 = smoothingMatrixY %*% orthogonalizeAndQSparsify( (vmat2), sparsenessQuantileY,
+      orthogonalize = TRUE, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
     dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2
@@ -2559,9 +2560,11 @@ symilr <- function(
     # the gradient update - could be weighted
     umatX = umatX + ( dedu1 ) * gamma
     umatY = umatY + ( dedu2 ) * gamma
-#    umatX =  qr.Q(  qr( umatX ) )
-#    umatY =  qr.Q(  qr( umatY ) )
-
+    orthogonalizesymilr = FALSE
+    if ( orthogonalizesymilr ) {
+      umatX =  qr.Q(  qr( umatX ) )
+      umatY =  qr.Q(  qr( umatY ) )
+    }
 
     # the energy term for the regression model is:
     #   norm( x - uvt ) =>  grad update is wrt u is  xv - uvtv
