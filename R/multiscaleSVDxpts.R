@@ -2531,7 +2531,7 @@ symilr <- function(
     ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) )
+    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), T, T )
   } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
