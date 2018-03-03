@@ -1929,8 +1929,8 @@ mild <- function( dataFrame,  voxmats, basisK,
   outcomevarnum = which( outcomevarname == matnames  )
   if ( class(initializationStrategy) == "numeric" ) {
     set.seed( initializationStrategy )
-    initializationStrategy = qr.Q( qr(
-      replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) )
+    initializationStrategy = scale( qr.Q( qr(
+      replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) ) )
     }
   if ( class(initializationStrategy) != "matrix" )
     stop("Please set valid initializationStrategy.")
@@ -2547,9 +2547,9 @@ symilr <- function(
     vmat1 = as.matrix( ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY ) )
     vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
     vmat1 = smoothingMatrixX %*% orthogonalizeAndQSparsify( (vmat1), sparsenessQuantileX,
-      orthogonalize = TRUE, positivity = positivityX  )
+      orthogonalize = T, positivity = positivityX  )
     vmat2 = smoothingMatrixY %*% orthogonalizeAndQSparsify( (vmat2), sparsenessQuantileY,
-      orthogonalize = TRUE, positivity = positivityY  )
+      orthogonalize = T, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
     dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2
@@ -2563,7 +2563,7 @@ symilr <- function(
 #    umatX = scale( umatX + ( dedu1 ) * gamma, center=TRUE, scale=TRUE )
 #    umatY = scale(umatY + ( dedu2 ) * gamma, center=TRUE, scale=TRUE )
 #    umatY =  scale( ( umatX %*% t(umatX ) ) %*% umatY, center=TRUE, scale=TRUE )
-    orthogonalizesymilr = FALSE
+    orthogonalizesymilr = F
     if ( orthogonalizesymilr ) {
       umatX =  qr.Q(  qr( umatX ) )
       umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
