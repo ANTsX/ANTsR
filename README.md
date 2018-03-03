@@ -101,10 +101,10 @@ architectures ported to the R language.
         * AlexNet (2-D, 3-D)
         * Vgg16/Vgg19 (2-D, 3-D)
         * ResNet/ResNeXt (2-D, 3-D)
-        * GoogLeNet (2-D )
+        * GoogLeNet (2-D)
         * DenseNet (2-D, 3-D)
     * Object detection
-        * Single Shot MultiBox Detector (2-D)
+        * Single Shot MultiBox Detector (2-D, 3-D)
 
 ## Installation from source
 
