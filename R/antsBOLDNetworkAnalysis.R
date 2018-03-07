@@ -30,6 +30,7 @@
 #' warpedParcellation <- antsApplyTransforms( avgbold, mylab,
 #'     transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
 #' mask <- getMask( avgbold )
+#' warpedParcellation = maskImage(warpedParcellation, mask)
 #' old = NA;
 #' labels = warpedParcellation; 
 #' gdens = 0.2; threshLo = 1; threshHi = 90;
