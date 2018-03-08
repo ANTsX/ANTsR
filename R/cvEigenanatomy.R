@@ -58,11 +58,25 @@ cvEigenanatomy <- function(demog, images, outcome, ratio = 10, mask = NA, sparse
     demog.split <- splitData(demog, ratio, return.rows = TRUE)
     result <- list()
     for (i in 1:ratio) {
-      mydecom <- sparseDecom(images[demog.split[[i]]$rows.in, ], mask, sparseness, 
-        nvecs, its, cthresh)
-      result[[paste("fold", i, sep = "")]] <- regressProjections(images[demog.split[[i]]$rows.in, 
-        ], images[demog.split[[i]]$rows.out, ], demog.split[[i]]$data.in, 
-        demog.split[[i]]$data.out, mydecom$eigenanatomyimages, mask, outcome, 
+      mydecom <- sparseDecom(
+        inmatrix = images[demog.split[[i]]$rows.in, ],
+        inmask = mask, 
+        sparseness = sparseness, 
+        nvecs = nvecs, 
+        its = its, 
+        cthresh = cthresh)
+      eanatimages = mydecom$eigenanatomyimages
+      if (is.matrix(eanatimages)){
+        eanatimages <- matrixToImages( eanatimages, mask = mask)
+      }
+      result[[paste("fold", i, sep = "")]] <- regressProjections(
+        images[demog.split[[i]]$rows.in, ], 
+        images[demog.split[[i]]$rows.out, ], 
+        demog.split[[i]]$data.in, 
+        demog.split[[i]]$data.out, 
+        eigenvectors = eanatimages, 
+        mask = mask, 
+        outcome = outcome, 
         ...)
     }
   }
