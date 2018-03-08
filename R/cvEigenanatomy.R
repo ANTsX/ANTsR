@@ -66,7 +66,7 @@ cvEigenanatomy <- function(demog, images, outcome, ratio = 10, mask = NA, sparse
         its = its, 
         cthresh = cthresh)
       eanatimages = mydecom$eigenanatomyimages
-      if (is.matrix(eanatimages)){
+      if (is.matrix(eanatimages)) {
         eanatimages <- matrixToImages( eanatimages, mask = mask)
       }
       result[[paste("fold", i, sep = "")]] <- regressProjections(

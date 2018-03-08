@@ -58,8 +58,9 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   aalm <- labels
   aalmask <- antsImageClone(aalm)
   mylog <- (aalm >= threshLo & aalm <= threshHi & mask > 0.5)
-  aalmask[mylog] <- 1
-  aalmask[!mylog] <- 0
+  # aalmask[mylog] <- 1
+  # aalmask[!mylog] <- 0
+  aalmask = mylog
   aalm[!mylog] <- 0
   omat <- myscale(timeseries2matrix(bold, aalmask))
   if ( missing( motion ) )

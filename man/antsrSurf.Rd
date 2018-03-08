@@ -56,6 +56,9 @@ Tools software on github.
 
 \dontrun{
 
+myantspath = Sys.getenv("ANTSPATH")
+surf_ex = file.path(myantspath, "antsSurf")
+if (file.exists(surf_ex)) {
 ch2i = antsImageRead( getANTsRData("ch2") )
 ch2seg = thresholdImage( ch2i, "Otsu", 3 )
 wm   = thresholdImage( ch2seg, 3, 3 )
@@ -94,7 +97,7 @@ antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
     colormap=c("red","blue"),
     inflationFactor=155, overlayLimits=list( c(0.5,1.0001), c(0.5,1.0001) ),
     verbose = TRUE, rotationParams = rp[1,] )
-
+}
 }
 
 }
