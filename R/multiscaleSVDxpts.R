@@ -2546,9 +2546,11 @@ symilr <- function(
   for ( i in 1:iterations ) {
     vmat1 = as.matrix( ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY ) )
     vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
-    vmat1 = orthogonalizeAndQSparsify( smoothingMatrixX %*% (vmat1), sparsenessQuantileX,
+    vmat1 = orthogonalizeAndQSparsify(
+      as.matrix( smoothingMatrixX %*% (vmat1) ), sparsenessQuantileX,
       orthogonalize = T, positivity = positivityX  )
-    vmat2 = orthogonalizeAndQSparsify( smoothingMatrixY %*% (vmat2), sparsenessQuantileY,
+    vmat2 = orthogonalizeAndQSparsify(
+      as.matrix( smoothingMatrixY %*% (vmat2) ), sparsenessQuantileY,
       orthogonalize = T, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
