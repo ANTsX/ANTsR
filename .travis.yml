@@ -1,10 +1,9 @@
 language: r
 sudo: false
 cache:
+  - timeout: 1000  
   - packages
   - ccache
-cache:
-  timeout: 1000  
 warnings_are_errors: true
 bioc_required: false
 cran: http://cran.rstudio.com
@@ -31,7 +30,7 @@ env:
 
 before_install:
   - export CCACHE=ccache
-  - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`  
+  - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
   - fname=travis_helpers.sh
   - wget -O ${fname} http://bit.ly/travis_helpers
@@ -41,24 +40,28 @@ before_install:
   - echo "CC=${CC}, CXX=${CXX}, CXX1X=${CXX1X}"
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
+  - cat ~/.R/Makevars
   - export cmake_version="3.4"
   - cmake --version
   - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version
-  - ./cleanup  
+  - ./cleanup
   - export PACKAGE_NAME=`package_name`
-  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck    
+  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck  
   - gh_binary_install stnava/ITKR
-  - gh_binary_install stnava/ANTsRCore
+  - export ants_user=ANTsX
+  - gh_binary_install ${ants_user}/ANTsRCore  
+  - echo "Done Binary Installs"  
+  - cat DESCRIPTION  
   - install_remotes_no_dep
+  - cat DESCRIPTION  
   - echo $PATH ;
   - if [ "$TRAVIS_OS_NAME" == "osx" ];
     then
       brew install ccache;
       export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
-  - travis_run_cache  
-  # - gh_binary_install ITKR ANTsRCore
+  - travis_run_cache
 
 before_script:
   - cat ~/.R/Makevars
@@ -116,18 +119,7 @@ jobs:
           all_branches: true
       os: osx
 
-## muschelli secure
-## qYN5fyhnulu35DVfh5gmhR35AMLs486cFl1MkQCQ58owdX33hV6dzPM/ERKeQTchNZ29zIiKbvB75/g5QeLR5z3ywpm4San2hlywWQtYXzGyDK3+k9l9I1LY5AKgQhhPMPxKCmEXJOhG/2hF041rSYpPUfcGb+9coQZea8EO9Tub1eziHV3OqKbe2Bh7k5YM0b6vDw934SDFOhV2hXmR8uG52eBC2g30rbnkUy4byAYyf2do1fFRiaMNnkWlA15FM/o0HLsAFKJgmXHi48l6yiRA/1lQBquCfVvW8c27fnVqV95/1oTrt+cLoGIRwxz7cLeO+kZniY9qCFrxEcOMFx82ODsUHLSliWMs1G6v8ZCzHzSFZE8yJdPyoj70cSmq9I296cMKCjpEGDb5eQ2MtbK/DlMLpUaOmI8IS+DANYYetJU415Br3WO31HhMNrQ6hm8QPrFVZs2uHamlZYn1R4gwuiRc4ln3V5gvVpKYxf0hr7wbu9ZiA8Oe2FeuvC2J6mNAkCnKUXrbpVntI00hFdhotzzssyGmGdJDDZI7Kuu42w8E2AXaZ2tC4o/i7fwJsCSgXrlM97cPInylCegmR19yiP3oUPrnifedFY/UHqjgyajQX0QukUggf9p/KBT4iEtUGyET+/QwSokj3aAOa7aMFJo/Ybp7Z/8Bgny30b4=
-## ANTsX secure
-## VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-# report coverage rate to coveralls
-# after_success:
-  # - cd $mydir
-#  - cd ANTsR
-#  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
-# takes too long, should add to matrix
-
-after_success:
+after_failure:
   - cat ${PACKAGE_NAME}.Rcheck/00install.out
   - cat ${PACKAGE_NAME}.Rcheck/00check.log
   - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
@@ -136,7 +128,6 @@ after_success:
 after_success:
   - cat ${PACKAGE_NAME}.Rcheck/00install.out
   - cat ${PACKAGE_NAME}.Rcheck/00check.log
-
 
 notifications:
   email:
