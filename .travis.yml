@@ -5,14 +5,18 @@ sudo: false
 cache:
   - packages
   - ccache
-os:
-  - linux
-  - osx
 cache:
   timeout: 1000  
 warnings_are_errors: true
 bioc_required: false
 cran: http://cran.rstudio.com
+# dist: precise
+allow_failures:
+  - os: osx
+
+os:
+  - linux
+  - osx
 
 latex: false
 compiler: clang
@@ -22,7 +26,7 @@ r_build_args: --no-build-vignettes --no-manual
 env:
   global:
   - R_BUILD_ARGS=" --no-build-vignettes --no-manual "
-  - R_CHECK_ARGS=" --timings --as-cran"
+  - R_CHECK_ARGS=" --timings --as-cran --no-manual"
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
@@ -30,10 +34,6 @@ env:
   - BOOTSTRAP_LATEX=1
   # - WARNINGS_ARE_ERRORS=0
 
-r:
-  - release
-
-cran: http://cran.rstudio.com
 
 before_install:
   - export ORIG_PATH=${PATH}
@@ -58,6 +58,13 @@ before_install:
   - gh_binary_install stnava/ITKR
   - gh_binary_install stnava/ANTsRCore
   - install_remotes_no_dep
+  - echo $PATH ;
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];
+    then
+      brew install ccache;
+      export PATH="/usr/local/opt/ccache/libexec:$PATH";
+    fi
+  - travis_run_cache  
   # - gh_binary_install ITKR ANTsRCore
 
 before_script:
@@ -129,17 +136,16 @@ jobs:
 # takes too long, should add to matrix
 
 after_success:
-  - echo ${TRAVIS_BUILD_DIR}
-  - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  - cat ${dn}/ANTsR.Rcheck/00check.log
-  - cat ${dn}/ANTsR.Rcheck/00install.out
-  - export PATH=${ORIG_PATH}
+  - cat ${PACKAGE_NAME}.Rcheck/00install.out
+  - cat ${PACKAGE_NAME}.Rcheck/00check.log
+  - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
 
-after_failure:
-  - echo ${TRAVIS_BUILD_DIR}
-  - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  - cat ${dn}/ANTsR.Rcheck/00install.out
-  - cat ${dn}/ANTsR.Rcheck/00check.log
+after_success:
+  - cat ${PACKAGE_NAME}.Rcheck/00install.out
+  - cat ${PACKAGE_NAME}.Rcheck/00check.log
+  - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
+
+
 # send e-mails if stuff changes
 
 notifications:
