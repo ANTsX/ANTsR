@@ -1649,11 +1649,11 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     term2 = tu %*% myoc
     v[ i, ] = ( tuu %*% v[i,] - term2 )
     }
+  v = as.matrix( smoothingMatrix %*% v )
   if ( !missing( sparsenessQuantile ) ) {
     v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
       orthogonalize = milrorth )
     }
-  v = as.matrix( smoothingMatrix %*% v )
   dedv = v * 0
   predicted = voxmats[[ 1 ]] * 0
   # now fix dedv with the correct voxels
@@ -1684,10 +1684,10 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
+    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity, orthogonalize = milrorth )
       }
-    v = as.matrix( smoothingMatrix %*% v )
     gammamx = gamma * 0.1 # go a bit slower
     # simplified model here
 #      dedrv = t( ( t(zRan) %*% zRan ) %*% t( vRanX ) ) # t1
@@ -1929,8 +1929,8 @@ mild <- function( dataFrame,  voxmats, basisK,
   outcomevarnum = which( outcomevarname == matnames  )
   if ( class(initializationStrategy) == "numeric" ) {
     set.seed( initializationStrategy )
-    initializationStrategy = qr.Q( qr(
-      replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) )
+    initializationStrategy = scale( qr.Q( qr(
+      replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) ) )
     }
   if ( class(initializationStrategy) != "matrix" )
     stop("Please set valid initializationStrategy.")
@@ -2007,9 +2007,9 @@ mild <- function( dataFrame,  voxmats, basisK,
     term2 = tu %*% myoc
     v[ i, ] = ( tuu %*% v[i,] - term2 ) * 0.01
     }
+  v = as.matrix( smoothingMatrix %*% v )
   v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
     orthogonalize = mildorth )
-  v = as.matrix( smoothingMatrix %*% v )
   dedv = v * 0
   predicted = voxmats[[ 1 ]] * 0
   # now fix dedv with the correct voxels
@@ -2032,11 +2032,11 @@ mild <- function( dataFrame,  voxmats, basisK,
       err = err + mean( abs( myoc - predicted[ , i ]  ) )
       }
     v = v - dedv * gamma
+    v = as.matrix( smoothingMatrix %*% v )
     if ( !missing( sparsenessQuantile ) ) {
       v = orthogonalizeAndQSparsify( v, sparsenessQuantile, positivity,
         orthogonalize = mildorth )
     }
-    v = as.matrix( smoothingMatrix %*% v )
     gammamx = gamma * 0.1 # go a bit slower
     if ( hasRanEff ) {
       vRan = as.matrix( smoothingMatrix %*% vRan )
@@ -2531,7 +2531,7 @@ symilr <- function(
     ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) )
+    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), T, T )
   } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
@@ -2546,10 +2546,12 @@ symilr <- function(
   for ( i in 1:iterations ) {
     vmat1 = as.matrix( ( t( voxmats[[1]] /  matnorms[1] ) %*% umatY ) )
     vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
-    vmat1 = smoothingMatrixX %*% orthogonalizeAndQSparsify( (vmat1), sparsenessQuantileX,
-      orthogonalize = TRUE, positivity = positivityX  )
-    vmat2 = smoothingMatrixY %*% orthogonalizeAndQSparsify( (vmat2), sparsenessQuantileY,
-      orthogonalize = TRUE, positivity = positivityY  )
+    vmat1 = orthogonalizeAndQSparsify(
+      as.matrix( smoothingMatrixX %*% (vmat1) ), sparsenessQuantileX,
+      orthogonalize = T, positivity = positivityX  )
+    vmat2 = orthogonalizeAndQSparsify(
+      as.matrix( smoothingMatrixY %*% (vmat2) ), sparsenessQuantileY,
+      orthogonalize = T, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
     dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2
@@ -2563,7 +2565,7 @@ symilr <- function(
 #    umatX = scale( umatX + ( dedu1 ) * gamma, center=TRUE, scale=TRUE )
 #    umatY = scale(umatY + ( dedu2 ) * gamma, center=TRUE, scale=TRUE )
 #    umatY =  scale( ( umatX %*% t(umatX ) ) %*% umatY, center=TRUE, scale=TRUE )
-    orthogonalizesymilr = FALSE
+    orthogonalizesymilr = F
     if ( orthogonalizesymilr ) {
       umatX =  qr.Q(  qr( umatX ) )
       umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
