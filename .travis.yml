@@ -10,10 +10,6 @@ cran: http://cran.rstudio.com
 allow_failures:
   - os: osx
 
-os:
-  - linux
-  - osx
-
 latex: false
 compiler: clang
 osx_image: xcode9
