@@ -48,6 +48,8 @@ http://www.ncbi.nlm.nih.gov/pubmed/15332240.
 \examples{
 \dontrun{
 
+perfusionFileName = ""
+if (file.exists(perfusionFileName)) {
 perfusionImage <- antsImageRead( filename = perfusionFileName, 
 dimension = 4, pixeltype = 'float' )
 voiMaskImage <- antsImageRead( filename = voiMaskFileName, 
@@ -65,7 +67,7 @@ thresholdSVD = 0.2, deltaTime = deltaTime )
 antsImageWrite( results$cbfImage, paste0( 'cbf.nii.gz' ) );
 antsImageWrite( results$cbvImage, paste0( 'cpbv.nii.gz' ) );
 antsImageWrite( results$mttImage, paste0( 'mtt.nii.gz' ) );
-
+}
 }
 }
 \author{
