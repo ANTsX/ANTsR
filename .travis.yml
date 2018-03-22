@@ -54,6 +54,7 @@ before_install:
   - echo $PATH ;
   - if [ "$TRAVIS_OS_NAME" == "osx" ];
     then
+      no_open_mp ;    
       brew install ccache;
       export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
