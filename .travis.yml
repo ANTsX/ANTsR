@@ -34,7 +34,6 @@ env:
   - BOOTSTRAP_LATEX=1
   # - WARNINGS_ARE_ERRORS=0
 
-
 before_install:
   - export ORIG_PATH=${PATH}
   - export CCACHE=ccache
