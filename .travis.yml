@@ -1,7 +1,5 @@
 language: r
-# use containers
 sudo: false
-# cache local R libraries directory:
 cache:
   - packages
   - ccache
@@ -10,7 +8,6 @@ cache:
 warnings_are_errors: true
 bioc_required: false
 cran: http://cran.rstudio.com
-# dist: precise
 allow_failures:
   - os: osx
 
@@ -22,7 +19,6 @@ latex: false
 compiler: clang
 osx_image: xcode9
 
-r_build_args: --no-build-vignettes --no-manual
 env:
   global:
   - R_BUILD_ARGS=" --no-build-vignettes --no-manual "
