@@ -28,7 +28,6 @@ env:
   - _R_CHECK_TIMINGS_="0"
   - _R_CHECK_FORCE_SUGGESTS_="0"
   - BOOTSTRAP_LATEX=1
-  # - WARNINGS_ARE_ERRORS=0
 
 before_install:
   - export CCACHE=ccache
@@ -67,7 +66,6 @@ before_script:
   - x=`export_clang_cxx`; eval ${x}
   - cd ..
 
-# Build and check package
 script:
   - travis_wait 100 R CMD build ${PROJ_DIR} ${R_BUILD_ARGS}
   - rm -f travis_wait*.log
@@ -134,13 +132,11 @@ after_success:
   - cat ${PACKAGE_NAME}.Rcheck/00check.log
   - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
 
+
 after_success:
   - cat ${PACKAGE_NAME}.Rcheck/00install.out
   - cat ${PACKAGE_NAME}.Rcheck/00check.log
-  - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
 
-
-# send e-mails if stuff changes
 
 notifications:
   email:
