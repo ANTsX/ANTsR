@@ -22,6 +22,7 @@ Description: ANTsR interfaces state of the art image processing with R
 License: Apache License 2.0
 LazyLoad: yes
 Depends:
+    R (>= 2.10),
     methods,
     ANTsRCore (>= 0.2)
 Imports:
