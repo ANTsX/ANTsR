@@ -33,6 +33,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
   eps = 1.e-6, ncores=NA ) # , mypkg = "nabor"  )
 {
+  myn = nrow( x )
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
   mypkg = 'rflann'
   # note that we can convert from distance to covariance
@@ -54,7 +55,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #    stop("Please install the irlba package")
 # see http://www.analytictech.com/mb876/handouts/distance_and_correlation.htm
 # euclidean distance to correlation - xin contains correlations
-  ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
+  ecor <- function( xin, nn ) { 1.0 - xin / ( 2 * nn ) }
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
   if ( cometric ) {
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
@@ -68,7 +69,9 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     names( bknn ) = c( "nn.idx", "nn.dists" )
     }
 #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( x ), t( x ) , k=k, eps=eps  )
-  if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
+  if ( cometric ) {
+    bknn$nn.dists = ecor( bknn$nn.dists, myn )
+  }
   tct = 0
   for ( i in 1:ncol( x ) )
     {
@@ -85,7 +88,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
     if ( kmetric == "gaussian" & !is.na( sigma ) )
-      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
+      locd = exp( -1.0 * locd / ( 2.0 * sigma^2 ) )
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
@@ -172,8 +175,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( kmetric == "gaussian" & is.na( sigma ) )
     stop("Please set the sigma parameter")
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
-  if ( cometric & r == Inf ) r = -Inf
-  ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
+  ecor <- function( xin ) { 1.0 - xin / ( 2 * nrow( x ) ) }
   if ( cometric ) {
     x = scale( x, center=TRUE, scale = (kmetric == "correlation" )  )
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
@@ -206,7 +208,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
     if ( kmetric == "gaussian" & !is.na( sigma ) )
-      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
+      locd = exp( -1.0 * locd / ( 2.0 * sigma^2 ) )
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
       {
