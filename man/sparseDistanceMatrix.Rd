@@ -6,7 +6,7 @@
 \usage{
 sparseDistanceMatrix(x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06, ncores = NA)
+  eps = 1e-06, ncores = NA, sinkhorn = TRUE)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}
@@ -22,6 +22,8 @@ sparseDistanceMatrix(x, k = 3, r = Inf, sigma = NA,
 \item{eps}{epsilon error for rapid knn}
 
 \item{ncores}{number of cores to use}
+
+\item{sinkhorn}{boolean}
 }
 \value{
 matrix sparse p by p matrix is output with p by k nonzero entries

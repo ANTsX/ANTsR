@@ -14,6 +14,7 @@
 #' @param eps epsilon error for rapid knn
 # #' @param mypkg set either nabor, RANN, rflann
 #' @param ncores number of cores to use
+#' @param sinkhorn boolean
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -31,7 +32,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA ) # , mypkg = "nabor"  )
+  eps = 1.e-6, ncores=NA, sinkhorn = TRUE ) # , mypkg = "nabor"  )
 {
   myn = nrow( x )
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
@@ -119,6 +120,11 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     }  else {
     kmatSparse[ kmatSparse > r ] = 0
     }
+  if ( sinkhorn )
+    for ( i in 1:4 ) {
+      kmatSparse = kmatSparse / Matrix::colSums( kmatSparse )
+      kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
+      }
   return( kmatSparse )
 #
 #  mysvd = irlba::partial_eigen( kmatSparse, nvec )
