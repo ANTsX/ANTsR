@@ -35,6 +35,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   eps = 1.e-6, ncores=NA, sinkhorn = TRUE ) # , mypkg = "nabor"  )
 {
   myn = nrow( x )
+  if ( k >= ncol( x ) ) k = ncol( x ) - 1
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
   mypkg = 'rflann'
   # note that we can convert from distance to covariance
@@ -122,6 +123,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     }
   if ( sinkhorn )
     for ( i in 1:4 ) {
+#      kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
+#      kmatSparse = Matrix::t( Matrix::t(kmatSparse) / Matrix::rowSums( Matrix::t(kmatSparse) ) )
       kmatSparse = kmatSparse / Matrix::colSums( kmatSparse )
       kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
       }
@@ -1638,7 +1641,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   myks = which( matnames %in% predictormatrixnames )
   v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.0
   if ( hasRanEff ) {
-    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.01
+    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
     dedrv = vRan * 0
     colnames( vRan ) = ranEffNames
   }
