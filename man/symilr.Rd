@@ -8,7 +8,7 @@ symilr(voxmats, basisK, smoothingMatrixX, smoothingMatrixY, iterations = 10,
   gamma = 1e-06, sparsenessQuantileX = 0.5, sparsenessQuantileY = 0.5,
   positivityX = c("positive", "negative", "either"),
   positivityY = c("positive", "negative", "either"), initialUMatrix,
-  repeatedMeasures = NA, verbose = FALSE)
+  orthogonalize = TRUE, repeatedMeasures = NA, verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named x and y matrices.}
@@ -37,6 +37,8 @@ choices are positive, negative or either as expressed as a string.}
 
 \item{initialUMatrix}{initialization matrix size \code{n} by \code{k}.
 If this is missing, a random matrix will be used.}
+
+\item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}

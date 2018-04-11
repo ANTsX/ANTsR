@@ -2474,6 +2474,7 @@ for ( i in 1:iterations ) {
 #' choices are positive, negative or either as expressed as a string.
 #' @param initialUMatrix initialization matrix size \code{n} by \code{k}.
 #' If this is missing, a random matrix will be used.
+#' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param verbose boolean to control verbosity of output
@@ -2506,6 +2507,7 @@ symilr <- function(
   positivityX = c("positive","negative","either"),
   positivityY = c("positive","negative","either"),
   initialUMatrix,
+  orthogonalize = TRUE,
   repeatedMeasures = NA,
   verbose = FALSE ) {
   if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
@@ -2559,10 +2561,10 @@ symilr <- function(
     vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
     vmat1 = orthogonalizeAndQSparsify(
       as.matrix( smoothingMatrixX %*% (vmat1) ), sparsenessQuantileX,
-      orthogonalize = T, positivity = positivityX  )
+      orthogonalize = orthogonalize, positivity = positivityX  )
     vmat2 = orthogonalizeAndQSparsify(
       as.matrix( smoothingMatrixY %*% (vmat2) ), sparsenessQuantileY,
-      orthogonalize = T, positivity = positivityY  )
+      orthogonalize = orthogonalize, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
     dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2
