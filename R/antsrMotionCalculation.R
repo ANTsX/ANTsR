@@ -146,3 +146,7 @@ antsrMotionCalculation <- function(
 	return(c(dx, dy, dz, rotx, roty, rotz))
 
 }
+
+
+
+# FIXME - read and write function for momo objects
