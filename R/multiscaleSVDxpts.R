@@ -2512,7 +2512,8 @@ symilr <- function(
   verbose = FALSE ) {
   if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
   if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
-    matnorms = c( norm( voxmats[[ 2 ]] ), norm( voxmats[[ 2 ]] ) )
+    matnorms = rep( NA, length( voxmats ) )
+    for ( i in 1:length( voxmats ) ) matnorms[ i ] = norm( voxmats[[ i ]] )
     n = nrow( voxmats[[1]] )
     p = ncol( voxmats[[1]] )
     q = ncol( voxmats[[2]] )
