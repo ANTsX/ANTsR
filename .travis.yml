@@ -23,6 +23,7 @@ env:
 
 language: r
 r:
+  - release
   - devel
 
 cran: http://cran.rstudio.com
@@ -41,10 +42,8 @@ before_install:
   - cmake --version
   - export PACKAGE_NAME=`package_name`
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
-  - gh_binary_install neuroconductor/ITKR
-  - gh_binary_install neuroconductor/ANTsRCore
+  - gh_binary_install neuroconductor/ITKR neuroconductor/ANTsRCore
   - install_remotes_no_dep
-  # - gh_binary_install ITKR ANTsRCore
 
 # Build and check package
 script:
