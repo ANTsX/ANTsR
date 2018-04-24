@@ -23,7 +23,7 @@ env:
 
 language: r
 r:
-  - release
+  - devel
 
 cran: http://cran.rstudio.com
 
