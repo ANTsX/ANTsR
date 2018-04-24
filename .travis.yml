@@ -40,9 +40,9 @@ before_install:
   - cmake_setup
   - cmake --version
   - export PACKAGE_NAME=`package_name`
-  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck    
-  - gh_binary_install stnava/ITKR
-  - gh_binary_install stnava/ANTsRCore
+  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
+  - gh_binary_install neuroconductor/ITKR
+  - gh_binary_install neuroconductor/ANTsRCore
   - install_remotes_no_dep
   # - gh_binary_install ITKR ANTsRCore
 
@@ -61,7 +61,7 @@ jobs:
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
       - check_fail
-      - check_warnings 
+      - check_warnings
       os: linux
     - script:
       - cat ~/.R/Makevars
@@ -72,7 +72,7 @@ jobs:
       - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
       - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
       - check_fail
-      - check_warnings       
+      - check_warnings
       os: osx
     - stage: "Deployment"
       script:
@@ -165,7 +165,7 @@ notifications:
     recipients:
     - muschellij2@gmail.com
     - stnava@gmail.com
-    - arman.eshaghi@gmail.com    
-    - jeff.duda@gmail.com    
+    - arman.eshaghi@gmail.com
+    - jeff.duda@gmail.com
     on_success: change
     on_failure: always
