@@ -22,9 +22,6 @@ env:
   # - WARNINGS_ARE_ERRORS=0
 
 language: r
-r:
-  - release
-  - devel
 
 cran: http://cran.rstudio.com
 
