@@ -1,13 +1,18 @@
-# use containers
+language: r
 sudo: false
-# cache local R libraries directory:
-cache: packages
-os:
-  - linux
-  - osx
+cache:
+  - packages
+  - ccache
+warnings_are_errors: true
+bioc_required: false
+cran: http://cran.rstudio.com
+allow_failures:
+  - os: osx
 
+latex: false
 compiler: clang
-osx_image: xcode8.2
+osx_image: xcode9
+
 
 r_build_args: --no-build-vignettes --no-manual
 env:
@@ -39,7 +44,7 @@ before_install:
   - cmake --version
   - export PACKAGE_NAME=`package_name`
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
-  - gh_binary_install neuroconductor/ITKR neuroconductor/ANTsRCore
+  - gh_binary_install stnava/ITKR stnava/ANTsRCore
   - install_remotes_no_dep
 
 # Build and check package
