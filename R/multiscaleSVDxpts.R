@@ -14,6 +14,7 @@
 #' @param eps epsilon error for rapid knn
 # #' @param mypkg set either nabor, RANN, rflann
 #' @param ncores number of cores to use
+#' @param sinkhorn boolean
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -31,8 +32,10 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA ) # , mypkg = "nabor"  )
+  eps = 1.e-6, ncores=NA, sinkhorn = TRUE ) # , mypkg = "nabor"  )
 {
+  myn = nrow( x )
+  if ( k >= ncol( x ) ) k = ncol( x ) - 1
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
   mypkg = 'rflann'
   # note that we can convert from distance to covariance
@@ -54,7 +57,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #    stop("Please install the irlba package")
 # see http://www.analytictech.com/mb876/handouts/distance_and_correlation.htm
 # euclidean distance to correlation - xin contains correlations
-  ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
+  ecor <- function( xin, nn ) { 1.0 - xin / ( 2 * nn ) }
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
   if ( cometric ) {
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
@@ -68,7 +71,9 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     names( bknn ) = c( "nn.idx", "nn.dists" )
     }
 #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( x ), t( x ) , k=k, eps=eps  )
-  if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
+  if ( cometric ) {
+    bknn$nn.dists = ecor( bknn$nn.dists, myn )
+  }
   tct = 0
   for ( i in 1:ncol( x ) )
     {
@@ -85,7 +90,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
     if ( kmetric == "gaussian" & !is.na( sigma ) )
-      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
+      locd = exp( -1.0 * locd / ( 2.0 * sigma^2 ) )
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
@@ -116,6 +121,13 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     }  else {
     kmatSparse[ kmatSparse > r ] = 0
     }
+  if ( sinkhorn )
+    for ( i in 1:4 ) {
+#      kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
+#      kmatSparse = Matrix::t( Matrix::t(kmatSparse) / Matrix::rowSums( Matrix::t(kmatSparse) ) )
+      kmatSparse = kmatSparse / Matrix::colSums( kmatSparse )
+      kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
+      }
   return( kmatSparse )
 #
 #  mysvd = irlba::partial_eigen( kmatSparse, nvec )
@@ -172,8 +184,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( kmetric == "gaussian" & is.na( sigma ) )
     stop("Please set the sigma parameter")
   cometric = ( kmetric == "correlation" | kmetric == "covariance" )
-  if ( cometric & r == Inf ) r = -Inf
-  ecor <- function( xin ) { 1.0 - xin^2 / ( 2 * nrow( x ) ) }
+  ecor <- function( xin ) { 1.0 - xin / ( 2 * nrow( x ) ) }
   if ( cometric ) {
     x = scale( x, center=TRUE, scale = (kmetric == "correlation" )  )
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
@@ -206,7 +217,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
     if ( kmetric == "gaussian" & !is.na( sigma ) )
-      locd = exp( -1.0 * locd^2 / ( 2.0 * sigma^2 ) )
+      locd = exp( -1.0 * locd / ( 2.0 * sigma^2 ) )
     tctinc = sum( !is.na(inds) )
     if ( kmetric == "covariance" )
       {
@@ -1630,7 +1641,7 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
   myks = which( matnames %in% predictormatrixnames )
   v = matrix( rnorm( ncol(u)*p, 1, 1 ), nrow = p, ncol = ncol(u) ) * 0.0
   if ( hasRanEff ) {
-    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.01
+    vRan = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
     dedrv = vRan * 0
     colnames( vRan ) = ranEffNames
   }
@@ -2463,6 +2474,7 @@ for ( i in 1:iterations ) {
 #' choices are positive, negative or either as expressed as a string.
 #' @param initialUMatrix initialization matrix size \code{n} by \code{k}.
 #' If this is missing, a random matrix will be used.
+#' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param verbose boolean to control verbosity of output
@@ -2495,11 +2507,13 @@ symilr <- function(
   positivityX = c("positive","negative","either"),
   positivityY = c("positive","negative","either"),
   initialUMatrix,
+  orthogonalize = TRUE,
   repeatedMeasures = NA,
   verbose = FALSE ) {
   if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
   if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
-    matnorms = c( norm( voxmats[[ 2 ]] ), norm( voxmats[[ 2 ]] ) )
+    matnorms = rep( NA, length( voxmats ) )
+    for ( i in 1:length( voxmats ) ) matnorms[ i ] = norm( voxmats[[ i ]] )
     n = nrow( voxmats[[1]] )
     p = ncol( voxmats[[1]] )
     q = ncol( voxmats[[2]] )
@@ -2548,10 +2562,10 @@ symilr <- function(
     vmat2 = as.matrix( ( t( voxmats[[2]] /  matnorms[2]  ) %*% umatX ) )
     vmat1 = orthogonalizeAndQSparsify(
       as.matrix( smoothingMatrixX %*% (vmat1) ), sparsenessQuantileX,
-      orthogonalize = T, positivity = positivityX  )
+      orthogonalize = orthogonalize, positivity = positivityX  )
     vmat2 = orthogonalizeAndQSparsify(
       as.matrix( smoothingMatrixY %*% (vmat2) ), sparsenessQuantileY,
-      orthogonalize = T, positivity = positivityY  )
+      orthogonalize = orthogonalize, positivity = positivityY  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
     dedu1 = ( voxmats[[1]] /  matnorms[1]  ) %*% vmat1 - ( umatX %*% t(vmat1) ) %*% vmat1
     dedu2 = ( voxmats[[2]] /  matnorms[2]  ) %*% vmat2 - ( umatY %*% t(vmat2) ) %*% vmat2

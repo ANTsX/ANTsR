@@ -20,7 +20,7 @@ extern SEXP eigenanatomyCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP fastMarchingExtension(SEXP, SEXP, SEXP);
 extern SEXP fsl2antsrTransform(SEXP, SEXP, SEXP, SEXP);
 extern SEXP imagesToMatrix(SEXP, SEXP, SEXP);
-extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP itkConvolveImage(SEXP, SEXP);
 extern SEXP KellyKapowski(SEXP);
 extern SEXP LabelGeometryMeasures(SEXP);
@@ -43,7 +43,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"fastMarchingExtension",          (DL_FUNC) &fastMarchingExtension,           3},
     {"fsl2antsrTransform",             (DL_FUNC) &fsl2antsrTransform,              4},
     {"imagesToMatrix",                 (DL_FUNC) &imagesToMatrix,                  3},
-    {"invariantImageSimilarity",       (DL_FUNC) &invariantImageSimilarity,       11},
+    {"invariantImageSimilarity",       (DL_FUNC) &invariantImageSimilarity,       12},
     {"itkConvolveImage",               (DL_FUNC) &itkConvolveImage,                2},
     {"KellyKapowski",                  (DL_FUNC) &KellyKapowski,                   1},
     {"LabelGeometryMeasures",          (DL_FUNC) &LabelGeometryMeasures,           1},

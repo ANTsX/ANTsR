@@ -131,7 +131,7 @@ notifications:
     recipients:
     - muschellij2@gmail.com
     - stnava@gmail.com
-    - arman.eshaghi@gmail.com    
-    - jeff.duda@gmail.com    
+    - arman.eshaghi@gmail.com
+    - jeff.duda@gmail.com
     on_success: change
     on_failure: always

@@ -12,6 +12,9 @@ A data frame label numbers and names for the neuroanatomical DesikanKillianyTour
     \item{\code{label_num}}{ Numerical label value. }
     \item{\code{label_name}}{ Shorthand anatomical value. }
     \item{\code{tissue}}{ Shorthand tissue value. }
+    \item{\code{contralateral}}{ contralateral anatomical value. }
+    \item{\code{lobe}}{ which lobe: temporal, parietal, occipital, frontal. }
+    \item{\code{hemisphere}}{ left or right hemisphere. }
   }
 }
 \references{
