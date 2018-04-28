@@ -1,6 +1,7 @@
 language: r
 sudo: false
 cache:
+  - timeout: 1000  
   - packages
   - ccache
 warnings_are_errors: true
@@ -13,153 +14,117 @@ latex: false
 compiler: clang
 # osx_image: xcode9
 
-
-r_build_args: --no-build-vignettes --no-manual
 env:
   global:
   - R_BUILD_ARGS=" --no-build-vignettes --no-manual "
-  - R_CHECK_ARGS=" --timings --as-cran"
+  - R_CHECK_ARGS=" --timings --as-cran --no-manual"
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
   - _R_CHECK_FORCE_SUGGESTS_="0"
   - BOOTSTRAP_LATEX=1
-  # - WARNINGS_ARE_ERRORS=0
-
-language: r
-
-cran: http://cran.rstudio.com
 
 before_install:
-  - export ORIG_PATH=${PATH}
+  - export CCACHE=ccache
+  - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
-  - source travis_helpers.sh
-  - rm travis_helpers.sh
+  - fname=travis_helpers.sh
+  - wget -O ${fname} http://bit.ly/travis_helpers
+  - cat ${fname}; source ${fname}; rm ${fname}
   # does all the clang exports
+  - x=`export_clang_cxx`; eval ${x}
+  - echo "CC=${CC}, CXX=${CXX}, CXX1X=${CXX1X}"
+  - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
+  - cat ~/.R/Makevars
   - export cmake_version="3.4"
   - cmake --version
-  - cmake_setup
+  - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version
+  - ./cleanup
   - export PACKAGE_NAME=`package_name`
-  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
-  - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
+  - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck  
+  - gh_binary_install stnava/ITKR
+  - export ants_user=ANTsX
+  - gh_binary_install ${ants_user}/ANTsRCore  
+  - echo "Done Binary Installs"  
+  - cat DESCRIPTION  
   - install_remotes_no_dep
+  - cat DESCRIPTION  
+  - echo $PATH ;
+  - if [ "$TRAVIS_OS_NAME" == "osx" ];
+    then
+      no_open_mp ;    
+      brew install ccache;
+      export PATH="/usr/local/opt/ccache/libexec:$PATH";
+    fi
+  - travis_run_cache
 
-# Build and check package
+before_script:
+  - cat ~/.R/Makevars
+  # - source ~/.R/Makevars
+  - x=`export_clang_cxx`; eval ${x}
+  - cd ..
+
 script:
-  - echo "Overriding travis R script"
+  - travis_wait 100 R CMD build ${PROJ_DIR} ${R_BUILD_ARGS}
+  - rm -f travis_wait*.log
+  - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)  
+  - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}";
+  - rm -f travis_wait*.log
+  - check_fail
+  - check_warnings
 
 jobs:
   include:
-    - script:
-      - cat ~/.R/Makevars
-      - source ~/.R/Makevars
-      - export_clang_cxx
-      - cd ..
-      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
-      - check_fail
-      - check_warnings
+    - name: "linux"
       os: linux
-    - script:
-      - cat ~/.R/Makevars
-      - source ~/.R/Makevars
-      - export_clang_cxx
-      - cd ..
-      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_FILE_NAME}" --no-manual;
-      - check_fail
-      - check_warnings
+    - name: "OSX"
       os: osx
     - stage: "Deployment"
+      if: tag IS present
       script:
-      - cat ~/.R/Makevars
-      - source ~/.R/Makevars
-      - export_clang_cxx
-      - cd ..
-      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - if [[ ${#TRAVIS_TAG} -gt 0 ]];
-        then
-          R CMD INSTALL --debug --build ANTsR;
-          PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
-          if [ "$TRAVIS_OS_NAME" == "osx" ];
-            then
-              PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);
-          fi;
-        fi
+        - travis_wait 100 R CMD INSTALL --debug --build ${PROJ_DIR};
       deploy:
         provider: releases
         api_key:
           secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-        file: ${PKG_FILE_NAME}
+        file_glob: true    
+        file: ${PROJ_DIR}*.t*gz
         skip_cleanup: true
         overwrite: true
         on:
-          repo: ANTsX/ANTsR
+          repo: ANTsX/${PROJ_DIR}
           tags: true
           all_branches: true
       os: linux
     - stage: "Deployment"
+      if: tag IS present
       script:
-      - cat ~/.R/Makevars
-      - source ~/.R/Makevars
-      - export_clang_cxx
-      - cd ..
-      - travis_wait 100 R CMD build ANTsR ${R_BUILD_ARGS}
-      - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
-      - if [[ ${#TRAVIS_TAG} -gt 0 ]];
-        then
-          R CMD INSTALL --debug --build ANTsR;
-          PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
-          if [ "$TRAVIS_OS_NAME" == "osx" ];
-            then
-              PKG_FILE_NAME=$(ls -1t *.tgz | head -n  1);
-          fi;
-        fi
+        - travis_wait 100 R CMD INSTALL --debug --build ${PROJ_DIR};
       deploy:
         provider: releases
         api_key:
           secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-        file: ${PKG_FILE_NAME}
+        file_glob: true    
+        file: ${PROJ_DIR}*.t*gz
         skip_cleanup: true
         overwrite: true
         on:
-          repo: ANTsX/ANTsR
+          repo: ANTsX/${PROJ_DIR}
           tags: true
           all_branches: true
       os: osx
-  allow_failures:
-    - os: osx
-
-## muschelli secure
-## qYN5fyhnulu35DVfh5gmhR35AMLs486cFl1MkQCQ58owdX33hV6dzPM/ERKeQTchNZ29zIiKbvB75/g5QeLR5z3ywpm4San2hlywWQtYXzGyDK3+k9l9I1LY5AKgQhhPMPxKCmEXJOhG/2hF041rSYpPUfcGb+9coQZea8EO9Tub1eziHV3OqKbe2Bh7k5YM0b6vDw934SDFOhV2hXmR8uG52eBC2g30rbnkUy4byAYyf2do1fFRiaMNnkWlA15FM/o0HLsAFKJgmXHi48l6yiRA/1lQBquCfVvW8c27fnVqV95/1oTrt+cLoGIRwxz7cLeO+kZniY9qCFrxEcOMFx82ODsUHLSliWMs1G6v8ZCzHzSFZE8yJdPyoj70cSmq9I296cMKCjpEGDb5eQ2MtbK/DlMLpUaOmI8IS+DANYYetJU415Br3WO31HhMNrQ6hm8QPrFVZs2uHamlZYn1R4gwuiRc4ln3V5gvVpKYxf0hr7wbu9ZiA8Oe2FeuvC2J6mNAkCnKUXrbpVntI00hFdhotzzssyGmGdJDDZI7Kuu42w8E2AXaZ2tC4o/i7fwJsCSgXrlM97cPInylCegmR19yiP3oUPrnifedFY/UHqjgyajQX0QukUggf9p/KBT4iEtUGyET+/QwSokj3aAOa7aMFJo/Ybp7Z/8Bgny30b4=
-## ANTsX secure
-## VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-# report coverage rate to coveralls
-# after_success:
-  # - cd $mydir
-#  - cd ANTsR
-#  - travis_wait 100 Rscript -e 'covr::coveralls( type = "examples" )'
-# takes too long, should add to matrix
-
-after_success:
-  - echo ${TRAVIS_BUILD_DIR}
-  - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  - cat ${dn}/ANTsR.Rcheck/00check.log
-  - cat ${dn}/ANTsR.Rcheck/00install.out
-  - export PATH=${ORIG_PATH}
 
 after_failure:
-  - echo ${TRAVIS_BUILD_DIR}
-  - dn=`dirname ${TRAVIS_BUILD_DIR}`
-  - cat ${dn}/ANTsR.Rcheck/00install.out
-  - cat ${dn}/ANTsR.Rcheck/00check.log
-# send e-mails if stuff changes
+  - cat ${PACKAGE_NAME}.Rcheck/00install.out
+  - cat ${PACKAGE_NAME}.Rcheck/00check.log
+  - cat ${PACKAGE_NAME}.Rcheck/00_pkg_src/${PACKAGE_NAME}/src/Makevars
+
+
+after_success:
+  - cat ${PACKAGE_NAME}.Rcheck/00install.out
+  - cat ${PACKAGE_NAME}.Rcheck/00check.log
 
 notifications:
   email:

@@ -30,6 +30,7 @@
 #' warpedParcellation <- antsApplyTransforms( avgbold, mylab,
 #'     transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
 #' mask <- getMask( avgbold )
+#' warpedParcellation = maskImage(warpedParcellation, img.mask = mask)
 #' old = NA;
 #' labels = warpedParcellation; 
 #' gdens = 0.2; threshLo = 1; threshHi = 90;
@@ -57,8 +58,9 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   aalm <- labels
   aalmask <- antsImageClone(aalm)
   mylog <- (aalm >= threshLo & aalm <= threshHi & mask > 0.5)
-  aalmask[mylog] <- 1
-  aalmask[!mylog] <- 0
+  # aalmask[mylog] <- 1
+  # aalmask[!mylog] <- 0
+  aalmask = mylog
   aalm[!mylog] <- 0
   omat <- myscale(timeseries2matrix(bold, aalmask))
   if ( missing( motion ) )
@@ -108,12 +110,12 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   bkgd <- TRUE
   if (bkgd) {
     negmask <- antsImageClone(mask)
-    backgroundvoxels <- negmask == 0
-    neginds <- which(backgroundvoxels)
-    negmask[negmask >= 0] <- 0
-    backgroundvoxels[] <- FALSE
-    backgroundvoxels[neginds] <- TRUE
-    negmask[backgroundvoxels] <- 1
+    negmask <- negmask == 0
+    # neginds <- which(as.array(backgroundvoxels))
+    # negmask[negmask >= 0] <- 0
+    # backgroundvoxels[] <- FALSE
+    # backgroundvoxels[neginds] <- TRUE
+    # negmask[backgroundvoxels] <- 1
     negmask = iMath(negmask, "ME", 1)
     tempmat <- myscale(timeseries2matrix(bold, negmask)[keepinds, ])
     bgsvd <- svd(tempmat)
