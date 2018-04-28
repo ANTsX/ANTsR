@@ -4,7 +4,7 @@
 #'
 #' @param image antsImage
 #' @param sigma smoothing parameter
-#' @param opt mean by default, otherwise gaussian or characterize
+#' @param opt mean by default, otherwise use string gaussian or characterize
 #' @return image
 #' @author Brian B. Avants
 #' @references Avants, B, J. Gee, and B. Avants.
@@ -22,6 +22,9 @@
 weingartenImageCurvature <- function( image, sigma=1.0, opt='mean' ) {
   if ( image@dimension != 3 & image@dimension != 2 ) {
     stop("input image must be 2D or 3D")
+  }
+  if ( ! opt %in% c('mean','gaussian','characterize' ) ) {
+    stop("choose mean gaussian or characterize as option")
   }
   if ( image@dimension == 2 )
     {

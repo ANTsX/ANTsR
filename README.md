@@ -92,6 +92,20 @@ R CMD INSTALL ANTsR_*.tgz
 
 * [Corrective learning for segmentation](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/) functions `segmentationRefinement.train` and `segmentationRefinement.predict`.
 
+* [ANTsRNet](https://github.com/ntustison/ANTsRNet)  A growing collection of well-known deep learning
+architectures ported to the R language.
+    * Image segmentation
+        * U-Net (2-D) 
+        * V-Net (3-D)
+    * Image classification  
+        * AlexNet (2-D, 3-D)
+        * Vgg16/Vgg19 (2-D, 3-D)
+        * ResNet/ResNeXt (2-D, 3-D)
+        * GoogLeNet (2-D)
+        * DenseNet (2-D, 3-D)
+    * Object detection
+        * Single Shot MultiBox Detector (2-D, 3-D)
+
 ## Installation from source
 
 Please read this entire section before choosing which method you prefer.

@@ -11,7 +11,7 @@ weingartenImageCurvature(image, sigma = 1, opt = "mean")
 
 \item{sigma}{smoothing parameter}
 
-\item{opt}{mean by default, otherwise gaussian or characterize}
+\item{opt}{mean by default, otherwise use string gaussian or characterize}
 }
 \value{
 image

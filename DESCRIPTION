@@ -1,7 +1,7 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.7.1.9000
+Version: 0.7.2.0
 Date: 2018-01-11
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
@@ -22,6 +22,7 @@ Description: ANTsR interfaces state of the art image processing with R
 License: Apache License 2.0
 LazyLoad: yes
 Depends:
+    R (>= 2.10),
     methods,
     ANTsRCore (>= 0.2)
 Imports:

@@ -19,8 +19,8 @@ SEXP cdjHelper(
     SEXP r_inimg,
     SEXP r_outimg,
     std::string txfn,
-    bool dogeom,
-    bool dolog )
+    bool dolog,
+    bool dogeom )
 {
   enum { ImageDimension = ImageType::ImageDimension };
   typedef typename ImageType::Pointer       ImagePointerType;

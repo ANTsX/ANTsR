@@ -6,7 +6,8 @@
 \usage{
 renderSurfaceFunction(surfimg, funcimg, surfval = 0.5, basefval, offsetfval,
   smoothsval = 0, smoothfval = 0, blobrender = TRUE, alphasurf = 1,
-  alphafunc = 1, outdir = "./", outfn = NA, mycol, physical = TRUE)
+  alphafunc = 1, outdir = "./", outfn = NA, mycol, physical = TRUE,
+  movieDuration = 6, zoom = 1.1)
 }
 \arguments{
 \item{surfimg}{Input image to use as rendering substrate.}
@@ -38,6 +39,10 @@ functional image}
 \item{mycol}{name of color or colors}
 
 \item{physical}{boolean}
+
+\item{movieDuration}{in seconds}
+
+\item{zoom}{magnification factor}
 }
 \value{
 0 -- Success\cr 1 -- Failure

@@ -93,7 +93,8 @@ antsrMotionCalculation <- function(
   mocodir = diag( imgdim )
   mocodir[ 1:subdim, 1:subdim ] = antsGetDirection( fixed )
   antsSetDirection( moco_img, mocodir )
-  meanout <- apply( moco_img, c(1:(subdim)), mean, na.rm=T )
+  #  meanout <- apply( moco_img, c(1:(subdim)), mean, na.rm=T )
+  meanout = getAverageOfTimeSeries( moco_img )
   tempmat <- timeseries2matrix( img, mask)
   dvars <- computeDVARS( tempmat )
   rm( tempmat )
@@ -145,3 +146,7 @@ antsrMotionCalculation <- function(
 	return(c(dx, dy, dz, rotx, roty, rotz))
 
 }
+
+
+
+# FIXME - read and write function for momo objects

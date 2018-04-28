@@ -140,7 +140,8 @@ SEXP invariantSimilarityHelper(
   typename itk::Image< float , ImageDimension >::Pointer image2,
   SEXP r_thetas, SEXP r_thetas2, SEXP r_thetas3,
   SEXP r_lsits, SEXP r_WM, SEXP r_scale,
-  SEXP r_doreflection, SEXP r_txfn  )
+  SEXP r_doreflection, SEXP r_txfn,
+  typename itk::Image< float , ImageDimension >::Pointer imageMask = ITK_NULLPTR )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
@@ -335,8 +336,13 @@ SEXP invariantSimilarityHelper(
     mimetric->SetMovingImage( image2 );
     mimetric->SetMovingTransform( simmer );
     mimetric->SetParameters( newparams );
-    if( mask.IsNotNull() )
+    if( imageMask.IsNotNull() )
       {
+      typedef itk::CastImageFilter<ImageType, maskimagetype> CasterType;
+      typename CasterType::Pointer caster = CasterType::New();
+      caster->SetInput( imageMask );
+      caster->Update();
+      mask = caster->GetOutput();
       typename itk::ImageMaskSpatialObject<ImageDimension>::Pointer so =
         itk::ImageMaskSpatialObject<ImageDimension>::New();
       so->SetImage( const_cast<maskimagetype *>( mask.GetPointer() ) );
@@ -523,7 +529,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
   SEXP r_in_image2, SEXP thetas, SEXP thetas2, SEXP thetas3,
   SEXP localSearchIterations,
   SEXP whichMetric, SEXP r_scale, SEXP r_doref, SEXP txfn,
-  SEXP whichTransform )
+  SEXP whichTransform, SEXP r_mask )
 {
   if( r_in_image1 == NULL || r_in_image2 == NULL )
     {
@@ -532,6 +538,7 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     }
   Rcpp::S4 in_image1( r_in_image1 ) ;
   Rcpp::S4 in_image2( r_in_image2 ) ;
+  Rcpp::S4 in_mask( r_mask ) ;
   std::string in_pixeltype = Rcpp::as< std::string >(
     in_image1.slot( "pixeltype" ) ) ;
   unsigned int dimension = Rcpp::as< unsigned int >(
@@ -564,24 +571,26 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
       static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType > antsimage_xptr2(
       static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
+    Rcpp::XPtr< ImagePointerType > mask_xptr(
+        static_cast< SEXP >( in_mask.slot( "pointer" ) ) ) ;
     if ( whichTx == 0 )
       return Rcpp::wrap( invariantSimilarityHelper<2,AffineType2D>(
         *antsimage_xptr1, *antsimage_xptr2, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn, *mask_xptr  ) );
     if ( whichTx == 1 )
       return Rcpp::wrap( invariantSimilarityHelper<2,SimilarityType2D>(
         *antsimage_xptr1, *antsimage_xptr2, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn, *mask_xptr  ) );
     if ( whichTx == 2 )
       return Rcpp::wrap( invariantSimilarityHelper<2,RigidType2D>(
         *antsimage_xptr1, *antsimage_xptr2, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn, *mask_xptr  ) );
   }
   else if ( dimension == 3 )
     {
@@ -591,24 +600,26 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType3 > antsimage_xptr2_3(
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
+    Rcpp::XPtr< ImagePointerType3 > mask_xptr(
+        static_cast< SEXP >( in_mask.slot( "pointer" ) ) ) ;
     if ( whichTx == 0 )
       return Rcpp::wrap(  invariantSimilarityHelper<3,AffineType3D>(
         *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn , *mask_xptr ) );
     if ( whichTx == 1 )
       return Rcpp::wrap(  invariantSimilarityHelper<3,SimilarityType3D>(
         *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn , *mask_xptr ) );
     if ( whichTx == 2 )
       return Rcpp::wrap(  invariantSimilarityHelper<3,RigidType3D>(
         *antsimage_xptr1_3, *antsimage_xptr2_3, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn , *mask_xptr ) );
     }
   else if ( dimension == 4 )
     {
@@ -618,12 +629,14 @@ RcppExport SEXP invariantImageSimilarity( SEXP r_in_image1 ,
     static_cast< SEXP >( in_image1.slot( "pointer" ) ) ) ;
     Rcpp::XPtr< ImagePointerType4 > antsimage_xptr2_4(
     static_cast< SEXP >( in_image2.slot( "pointer" ) ) ) ;
+    Rcpp::XPtr< ImagePointerType4 > mask_xptr(
+        static_cast< SEXP >( in_mask.slot( "pointer" ) ) );
     if ( whichTx == 0 )
       return Rcpp::wrap(  invariantSimilarityHelper<4,AffineType4D>(
         *antsimage_xptr1_4, *antsimage_xptr2_4, thetas,
         thetas2, thetas3,
         localSearchIterations, whichMetric, r_scale,
-        r_doref, txfn ) );
+        r_doref, txfn, *mask_xptr  ) );
     if ( ( whichTx == 1 ) || ( whichTx == 2 ) )
       {
       Rcpp::Rcout << " In dimension " << dimension <<

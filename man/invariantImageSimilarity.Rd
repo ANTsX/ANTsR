@@ -8,7 +8,7 @@ invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
   metric = "MI", thetas = seq(from = 0, to = 360, length.out = 5),
   thetas2 = seq(from = 0, to = 360, length.out = 5), thetas3 = seq(from = 0,
   to = 360, length.out = 5), scaleImage = 1, doReflection = 0, txfn = NA,
-  transform = c("Affine", "Similarity", "Rigid"))
+  transform = c("Affine", "Similarity", "Rigid"), mask)
 }
 \arguments{
 \item{in_image1}{reference image}
@@ -32,6 +32,8 @@ invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
 \item{txfn}{if present, write optimal tx to .mat file}
 
 \item{transform}{Rigid, Similarity or Affine transform}
+
+\item{mask}{optional fixed image mask}
 }
 \value{
 dataframe with metric values and transformation parameters
@@ -49,7 +51,7 @@ areg = antsRegistration( fi, mi, typeofTransform="Affine",
   initialTransform=mival[[2]] )
 bestInd = which.min( mival[[1]]$MetricValue )
 txparams = as.numeric( mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ] )
-txfixedparams = as.numeric( mival[[1]][ bestInd, 
+txfixedparams = as.numeric( mival[[1]][ bestInd,
 (ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
 affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
   parameters = txparams, fixed.parameters = txfixedparams )

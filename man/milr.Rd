@@ -6,7 +6,8 @@
 \usage{
 milr(dataFrame, voxmats, myFormula, smoothingMatrix, iterations = 10,
   gamma = 1e-06, sparsenessQuantile, positivity = c("positive", "negative",
-  "either"), repeatedMeasures = NA, verbose = FALSE)
+  "either"), repeatedMeasures = NA, orthogonalize = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for
@@ -30,6 +31,8 @@ choices are positive, negative or either as expressed as a string.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{orthogonalize}{boolean to control whether we orthogonalize the v}
 
 \item{verbose}{boolean to control verbosity of output}
 }

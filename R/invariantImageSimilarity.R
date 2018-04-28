@@ -14,6 +14,7 @@
 #' @param doReflection reflect image about principal axis
 #' @param txfn if present, write optimal tx to .mat file
 #' @param transform Rigid, Similarity or Affine transform
+#' @param mask optional fixed image mask
 #' @return dataframe with metric values and transformation parameters
 #' @author Brian B. Avants
 #' @keywords image similarity
@@ -26,7 +27,7 @@
 #'   initialTransform=mival[[2]] )
 #' bestInd = which.min( mival[[1]]$MetricValue )
 #' txparams = as.numeric( mival[[1]][ bestInd,2:(ncol( mival[[1]] )-2) ] )
-#' txfixedparams = as.numeric( mival[[1]][ bestInd, 
+#' txfixedparams = as.numeric( mival[[1]][ bestInd,
 #' (ncol( mival[[1]] )-2+1):ncol( mival[[1]] )] )
 #' affTx = createAntsrTransform( type = "AffineTransform", dimension = 2,
 #'   parameters = txparams, fixed.parameters = txfixedparams )
@@ -68,7 +69,8 @@ invariantImageSimilarity <- function(
   scaleImage = 1,
   doReflection = 0,
   txfn = NA,
-  transform = c("Affine", "Similarity","Rigid") ) {
+  transform = c("Affine", "Similarity","Rigid"),
+  mask ) {
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)
@@ -90,6 +92,8 @@ invariantImageSimilarity <- function(
   thetain3 <- (thetas3 * pi)/180
   in_image1 = iMath(in_image1, "Normalize")
   in_image2 = iMath(in_image2, "Normalize")
+  if ( missing( mask ) )
+    mask = getMask( in_image1 )
   if (class(localSearchIterations) != "numeric") {
     print("wrong input: localSearchIterations is not numeric")
     return(NA)
@@ -103,7 +107,7 @@ invariantImageSimilarity <- function(
   if (doReflection == 0) {
     r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
       thetain, thetain2, thetain3, localSearchIterations,
-      metric, scaleImage, doReflection, txfn, transform, PACKAGE = "ANTsR")
+      metric, scaleImage, doReflection, txfn, transform, mask , PACKAGE = "ANTsR")
     pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
     pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
     colnames( r1 ) = c( "MetricValue", pnames )
@@ -115,21 +119,21 @@ invariantImageSimilarity <- function(
   txfn4 <- tempfile(fileext = ".mat")
   r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 0, txfn1, transform, PACKAGE = "ANTsR")
+    metric, scaleImage, 0, txfn1, transform, mask , PACKAGE = "ANTsR")
   pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
   pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
   colnames( r1 ) = c( "MetricValue", pnames )
   r2 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 1, txfn2, transform, PACKAGE = "ANTsR")
+    metric, scaleImage, 1, txfn2, transform, mask ,  PACKAGE = "ANTsR")
   colnames( r2 ) = c( "MetricValue", pnames )
   r3 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 2, txfn3, transform, PACKAGE = "ANTsR")
+    metric, scaleImage, 2, txfn3, transform, mask ,  PACKAGE = "ANTsR")
   colnames( r3 ) = c( "MetricValue", pnames )
   r4 <- .Call("invariantImageSimilarity", in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 3, txfn4, transform, PACKAGE = "ANTsR")
+    metric, scaleImage, 3, txfn4, transform, mask ,  PACKAGE = "ANTsR")
   colnames( r4 ) = c( "MetricValue", pnames )
   ww <- which.min(c(min(r1[,1]), min(r2[,1]), min(r3[,1]), min(r4[,1])))
   if (ww == 1) {

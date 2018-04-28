@@ -19,6 +19,8 @@
 #' @param outfn  output file name
 #' @param mycol  name of color or colors
 #' @param physical boolean
+#' @param movieDuration in seconds
+#' @param zoom magnification factor
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Avants B, Kandel B
 #' @seealso \code{\link{plotBasicNetwork}}
@@ -48,7 +50,9 @@ renderSurfaceFunction <- function(
   outdir = "./",
   outfn = NA,
   mycol,
-  physical = TRUE) {
+  physical = TRUE,
+  movieDuration = 6,
+  zoom = 1.1 ) {
   if (missing(surfimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( list(an_ants_image) ) \n ")
   }
@@ -135,10 +139,11 @@ renderSurfaceFunction <- function(
   # smaller
   misc3d::drawScene.rgl(mylist)  # surface render
   rgl::par3d(windowRect = c(0, 0, 500, 500))  # make the window large
-  rgl::par3d(zoom = 1.1)  # larger values make the image smaller
+  rgl::par3d(zoom = zoom )  # larger values make the image smaller
   misc3d::drawScene.rgl(mylist)  # surface render
   if (!is.na(outfn))
-    rgl::movie3d(rgl::spin3d(), duration = 15, dir = outdir, movie = outfn, clean = F)
+    rgl::movie3d(rgl::spin3d(), duration = movieDuration,
+    dir = outdir, movie = outfn, clean = T )
   return(mylist)
 }
 
