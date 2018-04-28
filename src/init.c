@@ -19,6 +19,7 @@ extern SEXP createJacobianDeterminantImageR(SEXP, SEXP, SEXP, SEXP);
 extern SEXP eigenanatomyCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP fastMarchingExtension(SEXP, SEXP, SEXP);
 extern SEXP fsl2antsrTransform(SEXP, SEXP, SEXP, SEXP);
+extern SEXP histogramMatchImageR(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP imagesToMatrix(SEXP, SEXP, SEXP);
 extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP itkConvolveImage(SEXP, SEXP);
@@ -42,6 +43,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"eigenanatomyCpp",                (DL_FUNC) &eigenanatomyCpp,                15},
     {"fastMarchingExtension",          (DL_FUNC) &fastMarchingExtension,           3},
     {"fsl2antsrTransform",             (DL_FUNC) &fsl2antsrTransform,              4},
+    {"histogramMatchImageR",           (DL_FUNC) &histogramMatchImageR,            5},
     {"imagesToMatrix",                 (DL_FUNC) &imagesToMatrix,                  3},
     {"invariantImageSimilarity",       (DL_FUNC) &invariantImageSimilarity,       12},
     {"itkConvolveImage",               (DL_FUNC) &itkConvolveImage,                2},
