@@ -6,7 +6,7 @@
 \usage{
 sparseDistanceMatrixXY(x, y, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06, ncores = NA)
+  eps = 0.000001, ncores = NA)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}
