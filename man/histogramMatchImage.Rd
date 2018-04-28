@@ -27,7 +27,7 @@ Match intensity profile with a reference image.
 \examples{
 sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
 referenceImage <- antsImageRead( getANTsRData( "r64" ), 2 )
-matchedImage <- histogramMatchImageFilter( sourceImage, referenceImage )
+matchedImage <- histogramMatchImage( sourceImage, referenceImage )
 
 }
 \author{
