@@ -5,7 +5,7 @@
 \title{joint smooth matrix prediction}
 \usage{
 jointSmoothMatrixReconstruction(x, nvecs, parameters, iterations = 10,
-  subIterations = 5, gamma = 0.000001, sparsenessQuantile = 0.5,
+  subIterations = 5, gamma = 1e-06, sparsenessQuantile = 0.5,
   positivity = FALSE, smoothingMatrix = NA, rowWeights = NA,
   repeatedMeasures = NA, doOrth = FALSE, verbose = FALSE)
 }

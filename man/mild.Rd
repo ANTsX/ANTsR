@@ -5,7 +5,7 @@
 \title{Efficiently compute a multivariate, image-based (mixed) linear decompositition (mild)}
 \usage{
 mild(dataFrame, voxmats, basisK, myFormulaK, smoothingMatrix, iterations = 10,
-  gamma = 0.000001, sparsenessQuantile = 0.5, positivity = c("positive",
+  gamma = 1e-06, sparsenessQuantile = 0.5, positivity = c("positive",
   "negative", "either"), initializationStrategy = 0, repeatedMeasures = NA,
   orthogonalize = FALSE, verbose = FALSE)
 }

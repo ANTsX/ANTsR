@@ -4,7 +4,7 @@
 \alias{image2ClusterImages}
 \title{Converts an image to several independent images.}
 \usage{
-image2ClusterImages(x, minClusterSize = 50, minThresh = 0.000001,
+image2ClusterImages(x, minClusterSize = 50, minThresh = 1e-06,
   maxThresh = 1)
 }
 \arguments{
