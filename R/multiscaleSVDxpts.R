@@ -2744,16 +2744,28 @@ symilr <- function(
   }
   gammamx = gamma * 0.01
   basisK = ncol( initialUMatrix[[ 1 ]] )
-
+  vmats = list()
+  dedu = list()
+  for ( i in 1:length( voxmats ) )
+    vmats[[ i ]] = matrix( 0, nrow = p[ i ], ncol = basisK )
+################################################################################
   for ( myit in 1:iterations ) {
-    vmats = list()
-    dedu = list()
     errterm = rep( 0.0, length(voxmats) )
     for ( i in 1:length( voxmats ) ) {
-      vmats[[ i ]] = matrix( 0, nrow = p[ i ], ncol = basisK )
       for ( j in 1:length(voxmats)) {
-        if ( i != j )
-          vmats[[ i ]] = vmats[[ i ]] + as.matrix( ( t( voxmats[[i]] /
+        # < x - uvt , x - uvt >
+        # utuvt - ux
+        # utuvt - t(x) %*% u
+        if ( ( i != j ) & myit > 1 )
+          vmats[[ i ]] = vmats[[ i ]] - gamma * (
+            vmats[[ i ]] %*% (  t(initialUMatrix[[ j ]]) %*% initialUMatrix[[ j ]] )
+            - as.matrix( ( t( voxmats[[i]] / matnorms[i] ) %*%
+              initialUMatrix[[ j ]] ) ) )
+        # below is an alternative approach that uses a hard constraint
+        # and does not directly optimize the v via gradient descent
+        # we use this just for initialization of first iteration solution
+        if ( ( i != j ) & myit == 1 )
+          vmats[[ i ]] = as.matrix( ( t( voxmats[[i]] /
              matnorms[i] ) %*% initialUMatrix[[ j ]] ) )
         }
       vmats[[i]] = orthogonalizeAndQSparsify(
