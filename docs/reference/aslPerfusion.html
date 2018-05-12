@@ -18,13 +18,30 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="ASL-based Perfusion from PASL, CASL or pCASL. — aslPerfusion" />
+
+<meta property="og:description" content="This function will estimate perfusion from an ASL time series using a
+(robust) regression approach. It will do motion correction, compcorr, factor
+out nuisance variables and use regression to estimate the perfusion itself.
+It will mask the image too based on a simple procedure ( should fix this in
+the future by allowing the user to optionally pass a mask in from the
+outside ).  WARNING: the function will estimate the m0 image from the mean
+of the control tags assuming that the data is acquired T C T C as is most of
+JJ's data.  Quantitative CBF can be obtained by mutiplying the output of
+this function by a scalar." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +64,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +92,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +107,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +119,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +127,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>ASL-based Perfusion from PASL, CASL or pCASL.</h1>
+    
+    <div class="hidden name"><code>aslPerfusion.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>This function will estimate perfusion from an ASL time series using a
 (robust) regression approach. It will do motion correction, compcorr, factor
@@ -122,13 +147,14 @@ of the control tags assuming that the data is acquired T C T C as is most of
 JJ's data.  Quantitative CBF can be obtained by mutiplying the output of
 this function by a scalar.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>aslPerfusion</span>(<span class='no'>asl</span>, <span class='kw'>maskThresh</span> <span class='kw'>=</span> <span class='fl'>0.75</span>, <span class='kw'>moreaccurate</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>dorobust</span> <span class='kw'>=</span> <span class='fl'>0.92</span>,
   <span class='kw'>m0</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>skip</span> <span class='kw'>=</span> <span class='fl'>20</span>, <span class='kw'>mask</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>checkmeansignal</span> <span class='kw'>=</span> <span class='fl'>100</span>,
   <span class='kw'>moco_results</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>regweights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>useDenoiser</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>useBayesian</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>ncompcor</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>N3</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -242,11 +268,14 @@ Avants BB
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

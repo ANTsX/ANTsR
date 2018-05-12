@@ -18,13 +18,27 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Eigenanatomy with deflation — eanatDef" />
+
+<meta property="og:description" content="Simplified, low-parameter eigenanatomy implemented with deflation. The
+algorithm is able to automatically select hidden sparseness
+parameters, given the key parameter nvecs.  The user should select the
+cthresh and  smoother regularization parameters for a given
+application and also based on observing algorithm behavior when
+verbose=TRUE." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +61,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +89,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +104,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +116,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +124,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Eigenanatomy with deflation</h1>
+    
+    <div class="hidden name"><code>eanatDef.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Simplified, low-parameter eigenanatomy implemented with deflation. The
 algorithm is able to automatically select hidden <code>sparseness</code>
@@ -119,12 +141,13 @@ parameters, given the key parameter <code>nvecs</code>.  The user should select 
 application and also based on observing algorithm behavior when
 <code>verbose=TRUE</code>.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>eanatDef</span>(<span class='no'>inmat</span>, <span class='kw'>nvecs</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>mask</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>smoother</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>cthresh</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='kw'>its</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>eps</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>positivity</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>priors</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>priorWeight</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sparEpsilon</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>whiten</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -197,14 +220,17 @@ NeuroImage, 2014, 99, 14-27.</p>
     
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <p><code><a href='eanatSelect.html'>eanatSelect</a></code> <a href='https://github.com/stnava/blindSourceSeparationInANTsR'>https://github.com/stnava/blindSourceSeparationInANTsR</a></p>
+    <div class='dont-index'><p><code><a href='eanatSelect.html'>eanatSelect</a></code> <a href='https://github.com/stnava/blindSourceSeparationInANTsR'>https://github.com/stnava/blindSourceSeparationInANTsR</a></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>2000</span>),<span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>50</span>)
-<span class='no'>nv</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='eanatSelect.html'>eanatSelect</a></span>( <span class='no'>mat</span>, <span class='kw'>selectorScale</span> <span class='kw'>=</span> <span class='fl'>1.2</span> )</div><div class='output co'>#&gt; <span class='warning'>Warning: the standard deviation is zero</span></div><div class='input'><span class='no'>esol</span> <span class='kw'>&lt;-</span> <span class='fu'>eanatDef</span>( <span class='no'>mat</span>, <span class='kw'>nvecs</span><span class='kw'>=</span><span class='no'>nv</span> )
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>2000</span>),<span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>50</span>)
+<span class='no'>nv</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='eanatSelect.html'>eanatSelect</a></span>( <span class='no'>mat</span>, <span class='kw'>selectorScale</span> <span class='kw'>=</span> <span class='fl'>1.2</span> )
+<span class='no'>esol</span> <span class='kw'>&lt;-</span> <span class='fu'>eanatDef</span>( <span class='no'>mat</span>, <span class='kw'>nvecs</span><span class='kw'>=</span><span class='no'>nv</span> )
 <span class='no'>es2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='sparseDecom.html'>sparseDecom</a></span>( <span class='no'>mat</span>, <span class='kw'>nvecs</span> <span class='kw'>=</span> <span class='no'>nv</span> )
-<span class='fu'>print</span>( <span class='fu'>paste</span>( <span class='st'>"selected"</span>, <span class='fu'>nrow</span>(<span class='no'>esol</span>),<span class='st'>'pseudo-eigenvectors'</span>) )</div><div class='output co'>#&gt; [1] "selected 10 pseudo-eigenvectors"</div><div class='input'><span class='fu'>print</span>( <span class='fu'>mean</span>( <span class='fu'>abs</span>( <span class='fu'>cor</span>( <span class='no'>mat</span> <span class='kw'>%*%</span> <span class='fu'>t</span>(<span class='no'>esol</span>)) ) ) ) <span class='co'># what we use to select nvecs</span></div><div class='output co'>#&gt; [1] 0.1912551</div><span class='co'># NOT RUN {</span>
+<span class='fu'>print</span>( <span class='fu'>paste</span>( <span class='st'>"selected"</span>, <span class='fu'>nrow</span>(<span class='no'>esol</span>),<span class='st'>'pseudo-eigenvectors'</span>) )
+<span class='fu'>print</span>( <span class='fu'>mean</span>( <span class='fu'>abs</span>( <span class='fu'>cor</span>( <span class='no'>mat</span> <span class='kw'>%*%</span> <span class='fu'>t</span>(<span class='no'>esol</span>)) ) ) ) <span class='co'># what we use to select nvecs</span>
 <span class='no'>networkPriors</span> <span class='kw'>=</span> <span class='fu'>getANTsRData</span>(<span class='st'>"fmrinetworks"</span>)
 <span class='no'>ilist</span> <span class='kw'>=</span> <span class='no'>networkPriors</span>$<span class='no'>images</span>
 <span class='no'>mni</span> <span class='kw'>=</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>(<span class='st'>"mni"</span>) )
@@ -246,11 +272,14 @@ Avants BB, Tustison NJ
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

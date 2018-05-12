@@ -24,21 +24,11 @@ A package providing [ANTs](https://github.com/ANTsX/ANTs) features in R as well 
 
 ## Description
 
-Version: 0.4.0
-
 License: Apache License 2.0
-
-Depends:	R (≥ 3.0), methods
-
-Imports:	Rcpp, tools, magrittr
-
-LinkingTo:	Rcpp, ITKR, ANTsRCore
-
-Author:	Brian B. Avants, Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison, Dorian Pustina
 
 Maintainer:	[Brian B. Avants](http://stnava.github.io/)
 
-URL:	[homepage](http://stnava.github.io/ANTsR/)
+URL:	[homepage](https://antsx.github.io/ANTsR/)
 
 BugReports: [github issues](http://github.com/ANTsX/ANTsR/issues)
 
@@ -46,23 +36,19 @@ NeedsCompilation:	yes
 
 Travis checks:	[ANTsR results](https://travis-ci.org/ANTsX/ANTsR)
 
+Documentation: [https://antsx.github.io/ANTsR/](https://antsx.github.io/ANTsR/).
+
 ## Downloads
 
-Reference manual:	[ANTsR.pdf](https://github.com/ANTsX/ANTsR/releases/)
+Reference manual:	[ANTsR](https://antsx.github.io/ANTsR/reference/index.html)
 
-[Vignettes](https://github.com/ANTsX/ANTsR/releases/):
-
-*	[ANTsR](http://htmlpreview.github.io/?https://github.com/ANTsX/ANTsDoc/blob/master/html/ANTsR.html)
-
-* [iMath](http://htmlpreview.github.io/?https://github.com/ANTsX/ANTsDoc/blob/master/html/iMath.html)
+[Vignettes](https://antsx.github.io/ANTsR/articles/):
 
 Wiki: [Notes and work in progress examples](https://github.com/ANTsX/ANTsR/wiki)
 
 Package source:	[from github](https://github.com/ANTsX/ANTsR/zipball/master)
 
-OS X Mavericks, Yosemite binaries:	[OSX](http://github.com/ANTsX/ANTsR/releases/)
-
-Linux binaries: [Ubuntu](http://github.com/ANTsX/ANTsR/releases/)
+Binaries:	[here](http://github.com/ANTsX/ANTsR/releases/)
 
 *Windows* installation option [here](https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).)
 
@@ -95,7 +81,7 @@ R CMD INSTALL ANTsR_*.tgz
 * [ANTsRNet](https://github.com/ntustison/ANTsRNet)  A growing collection of well-known deep learning
 architectures ported to the R language.
     * Image segmentation
-        * U-Net (2-D) 
+        * U-Net (2-D)
         * V-Net (3-D)
     * Image classification  
         * AlexNet (2-D, 3-D)

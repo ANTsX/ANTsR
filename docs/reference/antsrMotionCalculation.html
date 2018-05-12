@@ -18,13 +18,22 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="antsrMotionCalculation — antsrMotionCalculation" />
+
+<meta property="og:description" content="Correct time-series data for motion." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +56,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +84,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +99,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +111,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,20 +119,24 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>antsrMotionCalculation</h1>
+    
+    <div class="hidden name"><code>antsrMotionCalculation.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Correct time-series data for motion.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>antsrMotionCalculation</span>(<span class='no'>img</span>, <span class='kw'>fixed</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>mask</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='st'>"Rigid"</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -171,58 +189,21 @@
 #&gt; 
 #&gt; 
 #&gt; $moco_params
-#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
-#&gt; [1,]  0.8070312 -2.7196524 -7.7220206  0.0000000  0.0000000  0.0000000
-#&gt; [2,]  0.9038927  0.6305127  0.3272048  0.7352214  3.6290603 -2.7033328
-#&gt; [3,] -3.5773988  0.7025864 -1.7924935  0.0000000  0.0000000  0.0000000
-#&gt; [4,]  3.4404235 -2.8812182  2.7187538  0.0000000  0.0000000  0.0000000
-#&gt; [5,]  2.6747820 -0.1178063  2.9770582  2.9075628 -0.8582569 -0.7678292
+#&gt;      MOCOparam1 MOCOparam2  MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
+#&gt; [1,]  0.8070312 -2.7196524 -7.72202063   0.000000   0.000000  0.0000000
+#&gt; [2,]  0.3139714  0.4282850  0.05930662   4.260457   1.883377  0.4505765
+#&gt; [3,] -3.5773988  0.7025864 -1.79249346   0.000000   0.000000  0.0000000
+#&gt; [4,]  3.4404235 -2.8812182  2.71875381   0.000000   0.000000  0.0000000
+#&gt; [5,]  2.5139089  0.2271850  2.98710775   0.000000   0.000000  0.0000000
 #&gt; 
 #&gt; $moco_avg_img
-#&gt; , , 1
-#&gt; 
-#&gt;             [,1]        [,2]        [,3]        [,4]        [,5]
-#&gt; [1,] -0.38703482 -0.16908413 -0.08006296 -0.08231312  0.32906255
-#&gt; [2,]  0.19255258  0.34414065 -0.05451072 -0.20864867 -0.09288118
-#&gt; [3,]  0.03307791  0.02933266  0.23796430  0.19256462  0.00000000
-#&gt; [4,] -0.26378908  0.05654728  0.16284900 -0.05411493  0.00000000
-#&gt; [5,]  0.00000000  0.00000000  0.00000000  0.00000000  0.00000000
-#&gt; 
-#&gt; , , 2
-#&gt; 
-#&gt;            [,1]        [,2]        [,3]         [,4]      [,5]
-#&gt; [1,] 0.23991392  0.16631711  0.08014318 -0.001838611 0.3270149
-#&gt; [2,] 0.04666689 -0.01291729  0.32075218 -0.022261584 0.2551763
-#&gt; [3,] 0.11656928 -0.05869234  0.14788551  0.130658567 0.0000000
-#&gt; [4,] 0.12158890  0.11959128 -0.07727780 -0.033026427 0.0000000
-#&gt; [5,] 0.00000000  0.00000000  0.00000000  0.000000000 0.0000000
-#&gt; 
-#&gt; , , 3
-#&gt; 
-#&gt;             [,1]        [,2]        [,3]        [,4] [,5]
-#&gt; [1,] -0.02129596  0.09160689  0.06651349 -0.06090941    0
-#&gt; [2,]  0.10113672  0.06075891 -0.01663342 -0.03907113    0
-#&gt; [3,] -0.02424148 -0.06658955  0.07531998  0.06868818    0
-#&gt; [4,]  0.04476487 -0.07355078 -0.09404293 -0.03232983    0
-#&gt; [5,] -0.04758732  0.16808683  0.06848537  0.11646118    0
-#&gt; 
-#&gt; , , 4
-#&gt; 
-#&gt;             [,1]         [,2]         [,3]        [,4]        [,5]
-#&gt; [1,] -0.12392869 -0.093122149 -0.089571655 -0.09205006  0.00000000
-#&gt; [2,]  0.04685037  0.134128845  0.109990442  0.02237949  0.00000000
-#&gt; [3,]  0.05728886 -0.004980552  0.001341817 -0.03336850  0.00000000
-#&gt; [4,]  0.02152299 -0.163968813 -0.011303284  0.03480042 -0.04924032
-#&gt; [5,]  0.02759869  0.142608964  0.154434693 -0.09042306  0.00000000
-#&gt; 
-#&gt; , , 5
-#&gt; 
-#&gt;              [,1]         [,2]        [,3]        [,4]       [,5]
-#&gt; [1,]  0.111624074  0.048202235 -0.10655755 -0.10112098 0.00000000
-#&gt; [2,] -0.048998439 -0.005710851  0.06431068  0.11495880 0.00000000
-#&gt; [3,]  0.023432738  0.175418413  0.10943669  0.22651145 0.24091585
-#&gt; [4,] -0.140569222 -0.207688236 -0.03804380  0.17474645 0.09146799
-#&gt; [5,]  0.007643363  0.052072024  0.07719682  0.03496366 0.00000000
+#&gt; antsImage
+#&gt;   Pixel Type          : float 
+#&gt;   Components Per Pixel: 1 
+#&gt;   Dimensions          : 5x5x5 
+#&gt;   Voxel Spacing       : 1x1x1 
+#&gt;   Origin              : 0 0 0 
+#&gt;   Direction           : 1 0 0 0 1 0 0 0 1 
 #&gt; 
 #&gt; 
 #&gt; $moco_mask
@@ -237,10 +218,10 @@
 #&gt; 
 #&gt; $fd
 #&gt;   MeanDisplacement MaxDisplacement
-#&gt; 1         8.774198        8.916809
-#&gt; 2         5.085690        5.249992
+#&gt; 1         8.597359        8.809562
+#&gt; 2         4.260991        4.429925
 #&gt; 3         9.079914        9.079914
-#&gt; 4         2.913918        2.980291
+#&gt; 4         3.254630        3.254630
 #&gt; 5         0.000000        0.000000
 #&gt; 
 #&gt; $dvars
@@ -270,11 +251,14 @@ BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

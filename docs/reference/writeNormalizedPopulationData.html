@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Save normalized population data to a h5 file — writeNormalizedPopulationData • ANTsR</title>
+<title>Save normalized population data to a directory or h5 file — writeNormalizedPopulationData • ANTsR</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -18,13 +18,30 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Save normalized population data to a directory or h5 file — writeNormalizedPopulationData" />
+
+<meta property="og:description" content="This function simplifies the steps of saving a population (image) analysis
+into an efficient hdf5 file, using the h5 library or to a directory.  The
+data frame with population demographics. The number of matrix columns will be
+defined by a mask that the user should also supply.  Finally, a boolean
+vector should be passed in that matches the images to the demographics. This
+function cannot check if the matching between demographics and images is
+correct and, as such, the user should take care in creating the inputs.
+WARNING: the demographics file will currently be cast to a data.matrix so
+one should not reuse this file as the reference demographics file." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +64,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +92,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +107,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +119,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,17 +127,19 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Save normalized population data to a h5 file</h1>
+    <h1>Save normalized population data to a directory or h5 file</h1>
+    
+    <div class="hidden name"><code>writeNormalizedPopulationData.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>This function simplifies the steps of saving a population (image) analysis
-into an efficient hdf5 file, using the h5 library.  The population image data
-is stored as a matrix.  Along with the matrix will be a data frame that
-contains the population demographics.  The number of matrix columns will be
+into an efficient hdf5 file, using the h5 library or to a directory.  The
+data frame with population demographics. The number of matrix columns will be
 defined by a mask that the user should also supply.  Finally, a boolean
 vector should be passed in that matches the images to the demographics. This
 function cannot check if the matching between demographics and images is
@@ -123,11 +147,12 @@ correct and, as such, the user should take care in creating the inputs.
 WARNING: the demographics file will currently be cast to a data.matrix so
 one should not reuse this file as the reference demographics file.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>writeNormalizedPopulationData</span>(<span class='no'>demographics</span>, <span class='no'>imageMat</span>, <span class='no'>imageMask</span>, <span class='no'>imageBoolean</span>,
   <span class='no'>filename</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -150,7 +175,7 @@ number of rows in the image matrix.</p></td>
     </tr>
     <tr>
       <th>filename</th>
-      <td><p>output filename for hdf5 file.</p></td>
+      <td><p>output filename for hdf5 file (if .h5) or directory name.</p></td>
     </tr>
     </table>
     
@@ -195,11 +220,14 @@ Avants BB
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

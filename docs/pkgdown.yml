@@ -1,0 +1,13 @@
+pandoc: 1.19.2.1
+pkgdown: 1.0.0
+pkgdown_sha: ~
+articles:
+  ANTsR: ANTsR.html
+  MultiChannel: MultiChannel.html
+  RestingBOLD: RestingBOLD.html
+  antsrTransform: antsrTransform.html
+  deformationSimulation: deformationSimulation.html
+  iMath: iMath.html
+  multivarTemplateCoordinates: multivarTemplateCoordinates.html
+  rfLesionSeg: rfLesionSeg.html
+

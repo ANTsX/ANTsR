@@ -18,13 +18,32 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Multi-scale svd — multiscaleSVD" />
+
+<meta property="og:description" content="Maggioni's multi-scale SVD algorithm explores the dimensionality of a dataset
+by investigating the change in eigenvalues with respect to a scale parameter.
+The scale parameter is defined by the radius of a ball that sits at each
+point in the data.  The ball, at each scale, is moved across the dataset
+and SVD is computed within the intersection of the ball and the data at each
+point.  The shape in this collection of eigenvalues, with respect to scale,
+enables us to estimate both signal and noise dimensionality and scale.  The
+estimate can be computed efficiently on large datasets if the sampling is
+chosen appropriately.  The challenge, in this algorithm, is classifying the
+dimensions of noise, curvature and data.  This classification currently uses
+variations on heuristics suggested in work by Maggioni et al." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +66,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +94,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +109,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +121,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +129,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Multi-scale svd</h1>
+    
+    <div class="hidden name"><code>multiscaleSVD.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Maggioni's multi-scale SVD algorithm explores the dimensionality of a dataset
 by investigating the change in eigenvalues with respect to a scale parameter.
@@ -124,10 +151,11 @@ chosen appropriately.  The challenge, in this algorithm, is classifying the
 dimensions of noise, curvature and data.  This classification currently uses
 variations on heuristics suggested in work by Maggioni et al.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>multiscaleSVD</span>(<span class='no'>x</span>, <span class='no'>r</span>, <span class='no'>locn</span>, <span class='no'>nev</span>, <span class='kw'>knn</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>0</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -185,13 +213,10 @@ are candidate cutoffs but may contain some curvature information.'</p></li>
 <span class='no'>sphereDim</span> <span class='kw'>=</span> <span class='fl'>9</span>
 <span class='no'>embeddDim</span> <span class='kw'>=</span> <span class='fl'>100</span>
 <span class='no'>n</span> <span class='kw'>=</span> <span class='fl'>1000</span>
-<span class='kw'>if</span> ( ! <span class='fu'>usePkg</span>( <span class='st'>"pracma"</span>  ) ) <span class='fu'>stop</span>( <span class='st'>"need pracma"</span> )
-<span class='no'>sphereData</span> <span class='kw'>=</span> <span class='kw pkg'>pracma</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/pracma/topics/rand'>rands</a></span>( <span class='no'>n</span>, <span class='no'>sphereDim</span>, <span class='fl'>1.</span> )
-<span class='no'>mysig</span> <span class='kw'>=</span> <span class='fl'>0.1</span>
+<span class='kw'>if</span> ( ! <span class='fu'>usePkg</span>( <span class='st'>"pracma"</span>  ) ) <span class='fu'>stop</span>( <span class='st'>"need pracma"</span> )</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): need pracma</span></div><div class='input'><span class='no'>sphereData</span> <span class='kw'>=</span> <span class='kw pkg'>pracma</span><span class='kw ns'>::</span><span class='fu'>rands</span>( <span class='no'>n</span>, <span class='no'>sphereDim</span>, <span class='fl'>1.</span> )</div><div class='output co'>#&gt; <span class='error'>Error in loadNamespace(name): there is no package called ‘pracma’</span></div><div class='input'><span class='no'>mysig</span> <span class='kw'>=</span> <span class='fl'>0.1</span>
 <span class='no'>spherEmbed</span> <span class='kw'>=</span> <span class='fu'>matrix</span>( <span class='fu'>rnorm</span>( <span class='no'>n</span> * <span class='no'>embeddDim</span>, <span class='fl'>0</span>, <span class='no'>mysig</span> ), <span class='kw'>nrow</span> <span class='kw'>=</span> <span class='no'>n</span>, <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='no'>embeddDim</span> )
-<span class='no'>spherEmbed</span>[ , <span class='fl'>1</span>:<span class='fu'>ncol</span>( <span class='no'>sphereData</span> ) ] <span class='kw'>=</span> <span class='no'>spherEmbed</span>[ , <span class='fl'>1</span>:<span class='fu'>ncol</span>( <span class='no'>sphereData</span> ) ] + <span class='no'>sphereData</span>
-<span class='no'>myr</span> <span class='kw'>=</span> <span class='fu'>seq</span>( <span class='fl'>1.0</span>, <span class='fl'>2.2</span>, <span class='fl'>0.05</span> ) <span class='co'># scales at which to sample</span>
-<span class='no'>mymssvd</span> <span class='kw'>=</span> <span class='fu'>multiscaleSVD</span>( <span class='no'>spherEmbed</span>, <span class='no'>myr</span>, <span class='kw'>locn</span><span class='kw'>=</span><span class='fl'>5</span>, <span class='kw'>nev</span><span class='kw'>=</span><span class='fl'>20</span>, <span class='kw'>plot</span><span class='kw'>=</span><span class='fl'>1</span> )</div><div class='img'><img src='multiscaleSVD-1.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
+<span class='no'>spherEmbed</span>[ , <span class='fl'>1</span>:<span class='fu'>ncol</span>( <span class='no'>sphereData</span> ) ] <span class='kw'>=</span> <span class='no'>spherEmbed</span>[ , <span class='fl'>1</span>:<span class='fu'>ncol</span>( <span class='no'>sphereData</span> ) ] + <span class='no'>sphereData</span></div><div class='output co'>#&gt; <span class='error'>Error in ncol(sphereData): object 'sphereData' not found</span></div><div class='input'><span class='no'>myr</span> <span class='kw'>=</span> <span class='fu'>seq</span>( <span class='fl'>1.0</span>, <span class='fl'>2.2</span>, <span class='fl'>0.05</span> ) <span class='co'># scales at which to sample</span>
+<span class='no'>mymssvd</span> <span class='kw'>=</span> <span class='fu'>multiscaleSVD</span>( <span class='no'>spherEmbed</span>, <span class='no'>myr</span>, <span class='kw'>locn</span><span class='kw'>=</span><span class='fl'>5</span>, <span class='kw'>nev</span><span class='kw'>=</span><span class='fl'>20</span>, <span class='kw'>plot</span><span class='kw'>=</span><span class='fl'>1</span> )</div><div class='img'><img src='multiscaleSVD-1.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -219,11 +244,14 @@ Avants BB
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

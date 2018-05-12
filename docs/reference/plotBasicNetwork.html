@@ -18,13 +18,23 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Simple plotBasicNetwork function. — plotBasicNetwork" />
+
+<meta property="og:description" content="takes an object output from renderSurfaceFunction and a list of centroids
+and plots the centroid network over the rendering object" />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +57,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +85,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +100,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +112,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,71 +120,107 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Simple plotBasicNetwork function.</h1>
+    
+    <div class="hidden name"><code>plotBasicNetwork.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>takes an object output from renderSurfaceFunction and a list of centroids
 and plots the centroid network over the rendering object</p>
     
+    </div>
 
-    <pre class="usage"><span class='fu'>plotBasicNetwork</span>(<span class='no'>centroids</span>, <span class='no'>brain</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>edgecolors</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>nodecolors</span> <span class='kw'>=</span> <span class='st'>"blue"</span>, <span class='kw'>nodetype</span> <span class='kw'>=</span> <span class='st'>"s"</span>, <span class='kw'>scaling</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>0</span>), <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>showOnlyConnectedNodes</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>plotBasicNetwork</span>(<span class='no'>centroids</span>, <span class='no'>brain</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>edgecolors</span> <span class='kw'>=</span> -<span class='fl'>1</span>,
+  <span class='kw'>backgroundColor</span> <span class='kw'>=</span> <span class='st'>"white"</span>, <span class='kw'>nodecolors</span> <span class='kw'>=</span> <span class='st'>"blue"</span>, <span class='kw'>nodetype</span> <span class='kw'>=</span> <span class='st'>"s"</span>,
+  <span class='kw'>edgeContrast</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>1</span>), <span class='kw'>quantileTransformWeights</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+  <span class='kw'>minRadius</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>maxRadius</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>showOnlyConnectedNodes</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>centroids</th>
-      <td><p>input matrix of size number of 3D points ( in rows ) by 3 (
-in columns )</p></td>
+      <td><p>input matrix of size N 3D points ( in rows ) by 3 (
+in columns ), for N nodes.</p></td>
     </tr>
     <tr>
       <th>brain</th>
-      <td><p>input rendering object which is output of renderSurfaceFunction
-or a function derived from renderSurfaceFunction</p></td>
+      <td><p>input rendering object which is output of renderSurfaceFunction.
+or a function derived from renderSurfaceFunction.</p></td>
     </tr>
     <tr>
       <th>weights</th>
-      <td><p>edge weights</p></td>
+      <td><p>edge weights, a symmetric matrix of size N. Weights should be non-negative.</p></td>
     </tr>
     <tr>
       <th>edgecolors</th>
-      <td><p>a color(map) for edges</p></td>
+      <td><p>a color(map) for edges. If a color map function, weights will be transformed
+to the range [0,1], which is compatible with functions returned by <code>colorRamp</code>.</p></td>
+    </tr>
+    <tr>
+      <th>backgroundColor</th>
+      <td><p>background color.</p></td>
     </tr>
     <tr>
       <th>nodecolors</th>
-      <td><p>a color(map) for nodes</p></td>
+      <td><p>a color or color vector for nodes.</p></td>
     </tr>
     <tr>
       <th>nodetype</th>
-      <td><p>sphere or other node type</p></td>
+      <td><p>sphere or other node type supported by RGL.</p></td>
     </tr>
     <tr>
-      <th>scaling</th>
-      <td><p>controls functional range</p></td>
+      <th>edgeContrast</th>
+      <td><p>a vector of length 2, specifying the contrast range for edge colors.
+Weights are normalized to the range [0,1].
+The normalized weights can be rescaled with this parameter, eg <code>c(0.05,0.95)</code>
+would stretch the contrast over the middle 90% of normalized weight values.</p></td>
+    </tr>
+    <tr>
+      <th>quantileTransformWeights</th>
+      <td><p>quantile transform the weights.</p></td>
     </tr>
     <tr>
       <th>lwd</th>
-      <td><p>line width</p></td>
+      <td><p>line width for drawing edges.</p></td>
+    </tr>
+    <tr>
+      <th>minRadius</th>
+      <td><p>minimum node radius. Ignored if the radius is specified explicitly with <code>radius</code>.</p></td>
+    </tr>
+    <tr>
+      <th>maxRadius</th>
+      <td><p>maximum node radius. The node radius between <code>minRadius</code> and <code>maxRadius</code> is
+determined from the sum of the edge weights connecting the node. Ignored if the radius is specified
+explicitly with <code>radius</code>.</p></td>
     </tr>
     <tr>
       <th>radius</th>
-      <td><p>for nodes</p></td>
+      <td><p>a constant radius or vector of length nrow(centroids). If not specified, node radius is
+determined by the sum of edge weights connected to the node.</p></td>
     </tr>
     <tr>
       <th>showOnlyConnectedNodes</th>
-      <td><p>boolean</p></td>
+      <td><p>boolean, if <code>TRUE</code>, only nodes with non-zero edge weights are plotted.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>None</p>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>If <code>edgecolors</code> is not specified, a heat-like color palette is used. Weights
+can be quantile transformed or clipped at a given quantile in order to improve
+contrast.</p>
+<p>If weights are not specified, only the nodes are plotted.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -190,7 +241,7 @@ or a function derived from renderSurfaceFunction</p></td>
   <span class='no'>testweights</span>[<span class='fl'>31</span>,<span class='fl'>37</span>]<span class='kw'>&lt;-</span><span class='fl'>1</span>  <span class='co'># ant cingulate to hipp</span>
   <span class='no'>testweights</span>[<span class='fl'>31</span>,<span class='fl'>36</span>]<span class='kw'>&lt;-</span><span class='fl'>2</span>  <span class='co'># ant cingulate to post cingulate</span>
   <span class='no'>testweights</span>[<span class='fl'>11</span>,<span class='fl'>65</span>]<span class='kw'>&lt;-</span><span class='fl'>3</span>  <span class='co'># broca to angular</span>
-  <span class='fu'>plotBasicNetwork</span>( <span class='kw'>centroids</span> <span class='kw'>=</span> <span class='no'>aalcnt</span> , <span class='no'>brain</span> , <span class='kw'>weights</span><span class='kw'>=</span><span class='no'>testweights</span> )
+  <span class='fu'>plotBasicNetwork</span>( <span class='kw'>centroids</span> <span class='kw'>=</span> <span class='no'>aalcnt</span> , <span class='no'>brain</span> , <span class='kw'>weights</span><span class='kw'>=</span><span class='no'>testweights</span>, <span class='kw'>edgecolors</span> <span class='kw'>=</span> <span class='st'>"red"</span> )
   <span class='no'>id</span><span class='kw'>&lt;-</span><span class='kw pkg'>rgl</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/rgl/topics/par3d'>par3d</a></span>(<span class='st'>'userMatrix'</span>)
   <span class='no'>rid</span><span class='kw'>&lt;-</span><span class='fu'>rotate3d</span>( <span class='no'>id</span> , -<span class='no'>pi</span>/<span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>0</span>, <span class='fl'>0</span> )
   <span class='no'>rid2</span><span class='kw'>&lt;-</span><span class='fu'>rotate3d</span>( <span class='no'>id</span> , <span class='no'>pi</span>/<span class='fl'>2</span>, <span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>1</span> )
@@ -198,7 +249,7 @@ or a function derived from renderSurfaceFunction</p></td>
   <span class='kw pkg'>rgl</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/rgl/topics/par3d'>par3d</a></span>(<span class='kw'>userMatrix</span> <span class='kw'>=</span> <span class='no'>id</span> )
   <span class='no'>dd</span><span class='kw'>&lt;-</span><span class='fu'><a href='make3ViewPNG.html'>make3ViewPNG</a></span>(  <span class='no'>rid</span>, <span class='no'>id</span>, <span class='no'>rid2</span>,  <span class='fu'>paste</span>(<span class='st'>'network1'</span>,<span class='kw'>sep</span><span class='kw'>=</span><span class='st'>''</span>) )
   <span class='kw pkg'>rgl</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/rgl/topics/par3d'>par3d</a></span>(<span class='kw'>userMatrix</span> <span class='kw'>=</span> <span class='no'>id</span> )
-<span class='co'># another example</span>
+<span class='co'># another example </span>
 <span class='no'>mni</span><span class='kw'>&lt;-</span><span class='fu'>getANTsRData</span>(<span class='st'>"mni"</span>)
 <span class='no'>mni</span><span class='kw'>&lt;-</span><span class='fu'>antsImageRead</span>(<span class='no'>mni</span>)
 <span class='no'>mnit</span><span class='kw'>&lt;-</span><span class='fu'>thresholdImage</span>( <span class='no'>mni</span>, <span class='fl'>1</span>, <span class='fu'>max</span>(<span class='no'>mni</span>) )
@@ -249,13 +300,15 @@ or a function derived from renderSurfaceFunction</p></td>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#details">Details</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>
 
     <h2>Author</h2>
     
-Avants BB and Duda JT
+Avants BB, Duda JT, Cook PA
 
   </div>
 </div>
@@ -266,11 +319,14 @@ Avants BB and Duda JT
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+
