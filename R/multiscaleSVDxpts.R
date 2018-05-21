@@ -2646,7 +2646,8 @@ return(
 #' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
 #' @param positivities vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
-#' @param initialUMatrix list of initialization matrix size \code{n} by \code{k} for each modality.
+#' @param initialUMatrix list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
+#' number of basis functions in which case random initialization occurs.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
@@ -2728,9 +2729,12 @@ symilr <- function(
 
   if ( missing( initialUMatrix ) )
     initialUMatrix = length( voxmats )
-  if ( length( initialUMatrix ) != length( voxmats ) ) {
-    message("length( initialUMatrix ) != length( voxmats ) -- initializing with random matrix")
-    randmat = scale( qr.Q( qr( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+  if ( length( initialUMatrix ) != length( voxmats ) &
+    !is.matrix(initialUMatrix) ) {
+    message(paste("length( initialUMatrix ) != length( voxmats ) -- initializing with random matrix with",initialUMatrix,'columns'))
+    randmat = scale(
+      qr.Q( qr(
+        matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
@@ -2752,7 +2756,8 @@ symilr <- function(
   for ( i in 1:length( voxmats ) )
     vmats[[ i ]] = matrix( 0, nrow = p[ i ], ncol = basisK )
 ################################################################################
-#  matnorms = p
+  matnorms = p
+  matnorms = rep( 1, length(matnorms))
   for ( myit in 1:iterations ) {
     errterm = rep( 0.0, length(voxmats) )
     for ( i in 1:length( voxmats ) ) {

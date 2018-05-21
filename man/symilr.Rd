@@ -23,7 +23,8 @@ size as input matrices}
 \item{positivities}{vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
 choices are positive, negative or either as expressed as a string.}
 
-\item{initialUMatrix}{list of initialization matrix size \code{n} by \code{k} for each modality.
+\item{initialUMatrix}{list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
+number of basis functions in which case random initialization occurs.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
