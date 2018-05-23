@@ -2811,8 +2811,8 @@ symilr <- function(
           commonTerm = commonTerm +
             vmats[[ i ]] %*% (  t( avgU ) %*% initialUMatrix[[ j ]] )
         }
-#      if ( myit <= itThresh )
-#        gradnorms[ i ] = norm( voxmats[[i]] ) / norm( commonTerm )
+#     if ( myit <= itThresh )
+#       gradnorms[ i ] = norm( voxmats[[i]] ) / norm( commonTerm )
       vmats[[ i ]] = vmats[[ i ]] - ( gradnorms[ i ] * gamma[i] ) * commonTerm
       vmats[[i]] = orthogonalizeAndQSparsify(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
@@ -2835,8 +2835,8 @@ symilr <- function(
           dedrvX = ( t( voxmats[[i]] ) %*% zRan ) * (-1.0)
           dedrvX = dedrvX + vmats[[i]] %*% ( t( avgU ) %*% zRan )
           dedrvX = dedrvX + vRan[[i]] %*% ( t( zRan ) %*% zRan )
-#          if ( myit <= itThresh )
-#            gradnormsRanEff[ i ] = norm( voxmats[[i]] ) / norm( dedrvX )
+          if ( myit <= itThresh )
+            gradnormsRanEff[ i ] = ( norm(voxmats[[i]]) / norm( dedrvX ) )
           vRan[[i]] = smoothingMatrices[[i]] %*%
             ( vRan[[i]] - gradnormsRanEff[ i ] * gamma[i] * dedrvX  )
           }
