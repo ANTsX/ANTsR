@@ -2642,7 +2642,7 @@ return(
 #' @param smoothingMatrices list of matrices, allows parameter smoothing, should be square and same
 #' size as input matrices
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent
+#' @param gamma step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.
 #' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
 #' @param positivities vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -2682,6 +2682,11 @@ symilr <- function(
   orthogonalize = TRUE,
   repeatedMeasures = NA,
   verbose = FALSE ) {
+# \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
+# \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
+
+  if ( length( gamma ) != length( voxmats ) )
+    gamma = rep( gamma, length(voxmats) )
   if  ( missing( positivities ) )
     positivities = rep( "positive", length( voxmats ) )
   if ( any( ( positivities %in%  c("positive","negative","either") ) == FALSE  ) )
@@ -2694,6 +2699,7 @@ symilr <- function(
     sparsenessQuantiles = rep( 0.5, length( voxmats ) )
   for ( i in 1:length( voxmats ) ) {
     matnorms[ i ] = norm( voxmats[[ i ]] )
+#    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[i]
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
     }
@@ -2726,99 +2732,152 @@ symilr <- function(
   for ( i in 1:length( smoothingMatrices ) )
      smoothingMatrices[[ i ]] = smoothingMatrices[[i]] /
        Matrix::rowSums( smoothingMatrices[[i]] )
+       # some gram schmidt code
+       localGS <- function( x, orthogonalize = TRUE ) {
+         if ( !orthogonalize ) return( x )
+         n <- dim(x)[1]
+         m <- dim(x)[2]
+         q <- matrix(0,n,m)
+         r <- matrix(0,m,m)
+         qi <- x[,1]
+         si <- sqrt(sum(qi ^ 2))
+         q[,1] <- qi / si
+         r[1,1] <- si
+         for (i in 2:m) {
+           xi <- x[,i]
+           qj <- q[,1:(i - 1)]
+           rj <- t(qj) %*% xi
+           qi <- xi - qj %*% rj
+           r[1:(i - 1),i] <- rj
+           si <- sqrt(sum(qi ^ 2))
+           q[,i] <- qi / si
+           r[i,i] <- si
+         }
+       return( q )
+       return(list(q = q,r = r))
+       }
 
   if ( missing( initialUMatrix ) )
     initialUMatrix = length( voxmats )
   if ( length( initialUMatrix ) != length( voxmats ) &
     !is.matrix(initialUMatrix) ) {
-    message(paste("length( initialUMatrix ) != length( voxmats ) -- initializing with random matrix with",initialUMatrix,'columns'))
+    message(paste("initializing with random matrix
+      with",initialUMatrix,'columns'))
     randmat = scale(
-      qr.Q( qr(
-        matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+      (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+    randmat = localGS( randmat, orthogonalize )
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
     }
-
+#
+#  for ( i in 1:length( voxmats ) )
+#  initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]])
+#
   vRan = list( )
   dedrv = list( )
   if ( hasRanEff ) {
     for ( i in 1:length( voxmats ) ) {
-      vRan[[ i ]] = matrix( rnorm( ncol( zRan ) * p[i], 1, 1 ), nrow = p[i], ncol = ncol( zRan ) ) * 0.0
+      vRan[[ i ]] = matrix( rnorm( ncol( zRan ) * p[i], 1, 1 ),
+        nrow = p[i], ncol = ncol( zRan ) ) * 0.0
       dedrv[[ i ]] = vRan[[ i ]]
       colnames(  vRan[[ i ]] ) = ranEffNames
     }
   }
-  gammamx = gamma * 0.5
   basisK = ncol( initialUMatrix[[ 1 ]] )
   vmats = list()
   dedu = list()
   for ( i in 1:length( voxmats ) )
     vmats[[ i ]] = matrix( 0, nrow = p[ i ], ncol = basisK )
+  matnorms = rep( 1, length(matnorms) )
+  gradnorms = matnorms
+  gradnormsRanEff = matnorms
+  itThresh = 1
 ################################################################################
-  matnorms = p
-  matnorms = rep( 1, length(matnorms))
+# below is the primary optimization loop - grad for v then for vran
+################################################################################
   for ( myit in 1:iterations ) {
     errterm = rep( 0.0, length(voxmats) )
     for ( i in 1:length( voxmats ) ) {
+      avgU = initialUMatrix[[ 1 ]] * 0.0
+      for ( j in 1:length(voxmats) )
+        if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+      if ( hasRanEff )
+        commonTerm = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]])) else
+          commonTerm = 0
+      commonTerm = commonTerm - t( voxmats[[i]] ) %*% avgU
       for ( j in 1:length(voxmats)) {
-        # < x - uvt , x - uvt >
-        # utuvt - ux
-        # utuvt - t(x) %*% u
-        if (  myit > 1 )
-          vmats[[ i ]] = vmats[[ i ]] - gamma * (
-            vmats[[ i ]] %*% (  t(initialUMatrix[[ j ]]) %*% initialUMatrix[[ j ]] )
-            - as.matrix( ( t( voxmats[[i]] / matnorms[i] ) %*%
-              initialUMatrix[[ j ]] ) ) )
-        # below is an alternative approach that uses a hard constraint
-        # and does not directly optimize the v via gradient descent
-        # we use this just for initialization of first iteration solution
-        if (  myit == 1 )
-          vmats[[ i ]] = vmats[[ i ]] + as.matrix( ( t( voxmats[[i]] /
-             matnorms[i] ) %*% initialUMatrix[[ j ]] ) )
+        if ( j != i )
+          commonTerm = commonTerm +
+            vmats[[ i ]] %*% (  t( avgU ) %*% initialUMatrix[[ j ]] )
         }
+#      if ( myit <= itThresh )
+#        gradnorms[ i ] = norm( voxmats[[i]] ) / norm( commonTerm )
+      vmats[[ i ]] = vmats[[ i ]] - ( gradnorms[ i ] * gamma[i] ) * commonTerm
       vmats[[i]] = orthogonalizeAndQSparsify(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
         sparsenessQuantiles[i],
         orthogonalize = orthogonalize, positivity = positivities[i] )
-      dedu[[i]] = ( voxmats[[i]] /  matnorms[i]  ) %*% vmats[[i]] -
-        ( initialUMatrix[[ i ]] %*% t(vmats[[i]]) ) %*% vmats[[i]]
       }
-    # dEnergy / du = -vt ( x - uvt ) = xv - uvtv
-    if ( hasRanEff ) {
-      dedu[[i]] = dedu[[i]] +  zRan %*% ( t( vRan[[i]] ) %*% vmats[[i]] )
-    }
-    # the gradient update - could be weighted
+
+    # project down to the basis U
     for ( i in 1:length( voxmats ) ) {
-      initialUMatrix[[i]] = initialUMatrix[[i]] + ( dedu[[i]] ) * gamma
-      errterm[ i ] = norm(  voxmats[[i]] /  matnorms[i] -
-        initialUMatrix[[i]] %*% t( vmats[[i]] ) )
+      initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T,T)
+      initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
       }
-
-    # the energy term for the regression model is:
-    #   norm( x - uvt ) =>  grad update is wrt u is  xv - uvtv
-    # the energy term for the mixed regression model is:
-    #   norm( x - uvt - z_ran v_rant ) =>
-    #   grad update wrt u is  xv - uvtv -  zRan * vRan * tv
-    #   grad update wrt vran is  tzz * vran + tz * uvt - tz * x
-    #   t1= tzz * vran +
-    #   t2 = tz * uvt -
-    #   t3 = tz * x
 
     if ( hasRanEff ) {
-      for ( i in 1:length( voxmats ) ) {
-        dedrvX = vRan[[i]] %*% ( t( zRan ) %*% zRan ) # t1
-        dedrvX = dedrvX + vmats[[i]] %*% ( t( initialUMatrix[[i]] ) %*% zRan )
-        dedrvX = dedrvX - t( voxmats[[i]] ) %*% zRan # t3
-        vRan[[i]] = smoothingMatrices[[i]] %*% ( vRan[[i]] + dedrvX * gammamx )
+      for ( kk in 1:1 ) {
+        for ( i in 1:length( voxmats ) ) {
+          avgU = initialUMatrix[[ 1 ]] * 0.0
+          for ( j in 1:length(voxmats) )
+            if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+          dedrvX = ( t( voxmats[[i]] ) %*% zRan ) * (-1.0)
+          dedrvX = dedrvX + vmats[[i]] %*% ( t( avgU ) %*% zRan )
+          dedrvX = dedrvX + vRan[[i]] %*% ( t( zRan ) %*% zRan )
+#          if ( myit <= itThresh )
+#            gradnormsRanEff[ i ] = norm( voxmats[[i]] ) / norm( dedrvX )
+          vRan[[i]] = smoothingMatrices[[i]] %*%
+            ( vRan[[i]] - gradnormsRanEff[ i ] * gamma[i] * dedrvX  )
+          }
         }
-      }
-      if ( verbose ) print( paste( "myit =", myit, mean(errterm)) )
- } # iterations
-return(
+      } # hasRanEff
+      predictions = list()
+      for ( i in 1:length( voxmats ) ) {
+        errterm[ i ] = 0
+        if ( !hasRanEff ) {
+          commonTerm = voxmats[[i]]
+          predictions[[i]] = 0
+          } else {
+        #  predictions[[i]] = zRan %*% t(vRan[[i]])
+          commonTerm = voxmats[[i]] - zRan %*% t(vRan[[i]])
+          }
+        for ( j in 1:length( voxmats ) )
+          if ( i != j ) {
+            commonTerm = commonTerm  - initialUMatrix[[j]] %*% t( vmats[[i]] )
+            # predictions[[i]] = predictions[[i]] + initialUMatrix[[j]] %*% t( vmats[[i]] )
+            }
+        errterm[ i ] = norm( commonTerm )
+        }
+      if ( myit == 1 ) { errterm1=errterm2=errterm }
+      if ( myit > 1 &  mean(errterm/errterm2) > 1 ) {
+        message("multiply gradient step size by 0.1")
+        gamma = gamma * 0.1
+        errterm2=errterm
+        }
+
+      if ( verbose ) {
+        print( paste( "myit =", myit, mean(errterm/errterm1) ))
+        cat(errterm)
+        cat("\n")
+        }
+
+      } # iterations
+ return(
   list(
     u  = initialUMatrix,
     v  = vmats,
     vRan = vRan )
+#    predictions = predictions )
     )
 }

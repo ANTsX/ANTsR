@@ -16,7 +16,7 @@ size as input matrices}
 
 \item{iterations}{number of gradient descent iterations}
 
-\item{gamma}{step size for gradient descent}
+\item{gamma}{step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.}
 
 \item{sparsenessQuantiles}{vector of quantiles to control sparseness - higher is sparser}
 
