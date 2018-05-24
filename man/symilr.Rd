@@ -4,19 +4,18 @@
 \alias{symilr}
 \title{Symmetric multivariate, penalized image-based linear regression model (symilr) for N modalities}
 \usage{
-symilr(voxmats, smoothingMatrices, iterations = 10, gamma = 1e-06,
+symilr(voxmats, smoothingMatrices, iterations = 10, gamma = 1.5,
   sparsenessQuantiles, positivities, initialUMatrix, orthogonalize = TRUE,
   repeatedMeasures = NA, verbose = FALSE)
 }
 \arguments{
-\item{voxmats}{A list that contains the named x and y matrices.}
+\item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
 
-\item{smoothingMatrices}{list of matrices, allows parameter smoothing, should be square and same
-size as input matrices}
+\item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}
 
 \item{iterations}{number of gradient descent iterations}
 
-\item{gamma}{step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.}
+\item{gamma}{step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.  it is reasonable to simply set this to 1 and allow automated gradient step scaling to work out the practical value.  Set verbose mode to get feedback.}
 
 \item{sparsenessQuantiles}{vector of quantiles to control sparseness - higher is sparser}
 

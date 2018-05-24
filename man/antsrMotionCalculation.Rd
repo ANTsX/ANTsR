@@ -4,8 +4,8 @@
 \alias{antsrMotionCalculation}
 \title{antsrMotionCalculation}
 \usage{
-antsrMotionCalculation(img, fixed = NA, mask = NA,
-  typeofTransform = "Rigid", verbose = FALSE)
+antsrMotionCalculation(img, fixed, mask, typeofTransform = "Rigid",
+  getMotionDescriptors = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{img}{antsImage, usually ND where D=4.}
@@ -16,6 +16,9 @@ antsrMotionCalculation(img, fixed = NA, mask = NA,
 
 \item{typeofTransform}{One of \code{"Affine"}, \code{"Rigid"},
 '\code{"BOLDAffine"}, \code{"BOLDRigid"}, \code{"QuickRigid"}.}
+
+\item{getMotionDescriptors}{computes dvars and framewise displacement.  May
+take additional memory.}
 
 \item{verbose}{enables verbose output.}
 }

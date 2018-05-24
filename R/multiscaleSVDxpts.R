@@ -2638,11 +2638,10 @@ return(
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
 #'
-#' @param voxmats A list that contains the named x and y matrices.
-#' @param smoothingMatrices list of matrices, allows parameter smoothing, should be square and same
-#' size as input matrices
+#' @param voxmats A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' @param smoothingMatrices list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.
+#' @param gamma step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.  it is reasonable to simply set this to 1 and allow automated gradient step scaling to work out the practical value.  Set verbose mode to get feedback.
 #' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
 #' @param positivities vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
@@ -2675,7 +2674,7 @@ symilr <- function(
   voxmats,
   smoothingMatrices,
   iterations = 10,
-  gamma = 1.e-6,
+  gamma = 1.5,
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
@@ -2802,6 +2801,7 @@ symilr <- function(
       avgU = initialUMatrix[[ 1 ]] * 0.0
       for ( j in 1:length(voxmats) )
         if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+      avgU = localGS( avgU , FALSE )
       if ( hasRanEff )
         commonTerm = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]])) else
           commonTerm = 0
@@ -2832,6 +2832,7 @@ symilr <- function(
           avgU = initialUMatrix[[ 1 ]] * 0.0
           for ( j in 1:length(voxmats) )
             if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+          avgU = localGS( avgU , FALSE )
           dedrvX = ( t( voxmats[[i]] ) %*% zRan ) * (-1.0)
           dedrvX = dedrvX + vmats[[i]] %*% ( t( avgU ) %*% zRan )
           dedrvX = dedrvX + vRan[[i]] %*% ( t( zRan ) %*% zRan )
