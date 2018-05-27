@@ -51,6 +51,8 @@ library(ANTsR)
 ?antsRegistration
 ```
 
+To learn more, open and run the Rmd files in the directory "/cloud/project/RL/ANTsR/doc"
+
 ## Downloads
 
 Reference manual:	[ANTsR](https://antsx.github.io/ANTsR/reference/index.html)
