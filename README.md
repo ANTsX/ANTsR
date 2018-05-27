@@ -53,6 +53,8 @@ library(ANTsR)
 
 To learn more, open and run the Rmd files in the directory "/cloud/project/RL/ANTsR/doc"
 
+Note: as of this writing, memory is very limited on this cloud preview so some examples may not run successfully.
+
 ## Downloads
 
 Reference manual:	[ANTsR](https://antsx.github.io/ANTsR/reference/index.html)
