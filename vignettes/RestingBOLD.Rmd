@@ -253,11 +253,13 @@ greater than 0.2mm is a common threshold used in human data. For illustrative pu
 associated with the displacement are marked as bad.
 
 ```{r badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3,eval=FALSE}
+fdthresh = quantile( moco$fd$MeanDisplacement, 0.98 )
 badtimes = which(moco$fd$MeanDisplacement > fdthresh )
 if ( length( badtimes ) == 0 ) badtimes = c(1)
 badtimes = sort(c(badtimes, badtimes+1))
 goodtimes = (1:nTimes)[-badtimes]
 ```
+
 
 ```{r badtimesplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE,eval=FALSE}
 badstarts = which(moco$fd$MeanDisplacement > fdthresh )
@@ -306,6 +308,8 @@ global_moco_detrend = rowMeans(boldMat)
 global_pre[badtimes] = NA
 global_moco[badtimes] = NA
 ```
+
+
 
 ```{r detrendplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 trend.dat = data.frame( Time=rep(1:nTimes,3) )
@@ -380,6 +384,8 @@ if ( length(badtimes) > 0 ) {
   }
 tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
 ```
+
+
 
 ```{r nuissanceplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE,eval=FALSE}
 tissueType = c( rep("Global", nTimes), rep("White matter",nTimes), rep("CSF",nTimes) )
@@ -503,30 +509,8 @@ image where each ROI is a sphere of radius=5mm centered on the provided point.
 data(powers_areal_mni_itk)
 pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk, transformlist = mni2boldmapsInv )
 pts[ , 4:ncol(pts) ] = powers_areal_mni_itk[ , 4:ncol(pts) ]
-labelImg = mask*0
+labelImg = makePointsImage( pts, mask )
 nPts = dim(pts)[1]
-rad = 5
-n = ceiling(rad / antsGetSpacing(mask))
-
-for ( r in 1:nPts) {
-  pt = as.numeric(c(pts$x[r], pts$y[r], pts$z[r] ))
-  idx = antsTransformPhysicalPointToIndex(mask,pt)
-
-  for ( i in c(-n[1]:n[1]) ) {
-    for (j in c(-n[2]:n[2])) {
-      for (k in c(-n[3]:n[3])) {
-        local = idx + c(i,j,k)
-        localpt = antsTransformIndexToPhysicalPoint(mask,local)
-        dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
-        inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
-        if ( (dist <= rad) && ( inImage == TRUE ) ) {
-          rlocal = round( local )
-          labelImg[ rlocal[1], rlocal[2], rlocal[3] ] = pts$ROI[r]
-         }
-        }
-      }
-    }
-  }
 plot( meanbold, labelImg, axis=3, nslices=30, ncolumns=10,
         window.overlay = c( 1, max(labelImg) ) )
 ```
@@ -646,7 +630,7 @@ Create mutual information matrix
 if ( usePkg( "entropy" ) ) {
   miMat = connMat * 0
   nb = 10 # can have a strong influence on results
-  rr1 = rr2 = range( roiMat ) 
+  rr1 = rr2 = range( roiMat )
   for ( i in goodROIs )
     for ( j in goodROIs[ goodROIs > i ] ) {
       if ( i != j) {
@@ -880,6 +864,7 @@ cc = transitivity(graph)
 
 
 Finally, make a dense map of the default mode network, using regression.
+
 ```{r dmnMap,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5,eval=FALSE}
 refSignal = sysMatMean[ , systemNames == "Default Mode"  ]
 # get priors for different networks
@@ -891,36 +876,31 @@ if ( ! exists( "networkPriors" ) )
     ilist[[i]] = antsApplyTransforms( meanbold, ilist[[i]], mni2boldmaps )
   }
 pr = imageListToMatrix( ilist, mask )
-refSignal = ( sboldMat %*% t(pr) )
-networkDf = data.frame( ROI=refSignal[goodtimes,2],  
+refSignal = ( sboldMat %*% t(pr) )[,1]
+networkDf = data.frame( ROI=refSignal[goodtimes],  
                         nuissance[goodtimes,grep("compcor",colnames(nuissance))]  )
 mdl = lm( sboldMat[goodtimes,] ~ . , data=networkDf )
 bmdl = bigLMStats( mdl, 1.e-4 )
 betas = bmdl$beta.t["ROI",]
 betasI = makeImage( mask, betas )
-loth = quantile(  betas, probs=0.8 )
+loth = quantile(  betas, probs=0.5 )
 plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
-        window.overlay = c( loth, max(betas) ) )
-###### test this for later
-refSignal = ( fboldMat %*% t(pr) )
-dnz = aslDenoiseR( fboldMat[goodtimes,], refSignal[goodtimes,1], 
+        window.overlay = c( 2, max(betas) ) )
+
+# same thing, different denoising strategy
+dnz = aslDenoiseR( fboldMat[goodtimes,], refSignal[goodtimes],
   polydegree = 2, crossvalidationgroups=8, verbose=T )
-spatmat = t( imageDomainToSpatialMatrix( ctxMask*mask, ctxMask*mask ) )
-smoomat = knnSmoothingMatrix( spatmat, k = 100, sigma = 250.0 )
-# intensitymat = getNeighborhoodInMask( meanbold, mask, rep(2,3), boundary.condition = 'mean' )
-# ismoomat = knnSmoothingMatrix( intensitymat, k = 10, sigma = 100250.0 )
-# ismoomat[1000:1002,1000:1002]
-image( smoomat[1000:1100,1000:1100])
-scl = TRUE
-networkDf = data.frame( ROI=scale(refSignal[goodtimes,1], scale=scl ),   
-                        scale( dnz$noiseu, scale=scl ) )
-test = smoothMatrixPrediction( scale(fboldMat[goodtimes,ctxVox], scale=scl), networkDf, 
-  sparsenessQuantile=0.5, smoothingMatrix = smoomat, verbose=T, gamma=1.e-4, iterations=20 )
-k=1
-print(range(test$v[,k]))
-betasI = makeImage( ctxMask*mask, test$v[,k] )
+networkDf = data.frame(
+  ROI=refSignal[goodtimes],
+  dnz$noiseu, dnz$covariates )
+mdl = lm( sboldMat[goodtimes,] ~ . , data=networkDf )
+bmdl = bigLMStats( mdl, 1.e-4 )
+betas = bmdl$beta.t["ROI",]
+betasI = makeImage( mask, betas )
+loth = quantile(  betas, probs=0.5 )
 plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
-        window.overlay = c( 2, max(test$v[,k]) ) )
+        window.overlay = c( 2, max(betas) ) )
+
 ```
 
 
