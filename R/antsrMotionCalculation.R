@@ -52,7 +52,10 @@ antsrMotionCalculation <- function(
   if ( missing( mask ) ) mask = getMask( fixed )
   extractSubImage <- function( img, vin )
     {
-    extractSlice(img, vin, img@dimension )
+    temp = extractSlice( img, vin, img@dimension )
+    subdim = img@dimension - 1
+    xxx=antsSetDirection( temp, antsGetDirection( img )[ 1:subdim, 1:subdim ] )
+    return( temp )
     }
   # now loop over all time points and register to the fixed images
   # create array holder for deformed images
