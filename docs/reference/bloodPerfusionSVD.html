@@ -18,13 +18,28 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Calculate blood perfusion using deconvolution. — bloodPerfusionSVD" />
+
+<meta property="og:description" content="Implementation of the deconvolution technique of Ostergaard et al.
+(http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral 
+(or pulmonary)
+blood flow.  Other relevant references include 
+http://www.ncbi.nlm.nih.gov/pubmed/16261573,
+http://www.ncbi.nlm.nih.gov/pubmed/8916023, and 
+http://www.ncbi.nlm.nih.gov/pubmed/15332240." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +62,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +90,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +105,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +117,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +125,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Calculate blood perfusion using deconvolution.</h1>
+    
+    <div class="hidden name"><code>bloodPerfusionSVD.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Implementation of the deconvolution technique of Ostergaard et al.
 (http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral 
@@ -120,11 +143,12 @@ http://www.ncbi.nlm.nih.gov/pubmed/16261573,
 http://www.ncbi.nlm.nih.gov/pubmed/8916023, and 
 http://www.ncbi.nlm.nih.gov/pubmed/15332240.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>bloodPerfusionSVD</span>(<span class='no'>perfusionImage</span>, <span class='no'>voiMaskImage</span>, <span class='no'>aifMaskImage</span>,
   <span class='kw'>thresholdSVD</span> <span class='kw'>=</span> <span class='fl'>0.2</span>, <span class='kw'>deltaTime</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -171,6 +195,8 @@ volume image
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='no'>perfusionFileName</span> <span class='kw'>=</span> <span class='st'>""</span>
+<span class='kw'>if</span> (<span class='fu'>file.exists</span>(<span class='no'>perfusionFileName</span>)) {
 <span class='no'>perfusionImage</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='kw'>filename</span> <span class='kw'>=</span> <span class='no'>perfusionFileName</span>,
 <span class='kw'>dimension</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>pixeltype</span> <span class='kw'>=</span> <span class='st'>'float'</span> )
 <span class='no'>voiMaskImage</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='kw'>filename</span> <span class='kw'>=</span> <span class='no'>voiMaskFileName</span>,
@@ -188,7 +214,7 @@ volume image
 <span class='fu'>antsImageWrite</span>( <span class='no'>results</span>$<span class='no'>cbfImage</span>, <span class='fu'>paste0</span>( <span class='st'>'cbf.nii.gz'</span> ) );
 <span class='fu'>antsImageWrite</span>( <span class='no'>results</span>$<span class='no'>cbvImage</span>, <span class='fu'>paste0</span>( <span class='st'>'cpbv.nii.gz'</span> ) );
 <span class='fu'>antsImageWrite</span>( <span class='no'>results</span>$<span class='no'>mttImage</span>, <span class='fu'>paste0</span>( <span class='st'>'mtt.nii.gz'</span> ) );
-
+}
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -214,11 +240,14 @@ Tustison NJ
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

@@ -18,13 +18,28 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Selection of n eigenvectors and sparsity for eigenanatomy — eanatSelect" />
+
+<meta property="og:description" content="The algorithm automatically selects the key nvecs and hidden
+sparseness parameters.  The user should select the cthresh
+regularization parameters for his or her application. The principle used
+here is that we want few but sparse pseudo-eigenvectors that are minimally
+correlated in row-space. true left and right eigenvectors are uncorrelated
+in both row and column (left and right eigenvector) spaces, but this is not
+the case when we impose sparsity." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +62,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +90,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +105,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +117,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +125,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Selection of n eigenvectors and sparsity for eigenanatomy</h1>
+    
+    <div class="hidden name"><code>eanatSelect.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>The algorithm automatically selects the key <code>nvecs</code> and hidden
 <code>sparseness</code> parameters.  The user should select the <code>cthresh</code>
@@ -120,11 +143,12 @@ correlated in row-space. true left and right eigenvectors are uncorrelated
 in both row and column (left and right eigenvector) spaces, but this is not
 the case when we impose sparsity.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>eanatSelect</span>(<span class='no'>inmat</span>, <span class='kw'>mask</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>cthresh</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>smooth</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>maxNEvec</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='kw'>selectorScale</span> <span class='kw'>=</span> <span class='fl'>1.1</span>, <span class='kw'>whiten</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -174,10 +198,12 @@ should look at the plot produced when verbosity is turned on.</p></td>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>2000</span>),<span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>50</span>)
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='no'>mat</span> <span class='kw'>&lt;-</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>2000</span>),<span class='kw'>ncol</span><span class='kw'>=</span><span class='fl'>50</span>)
 <span class='no'>nvecsSel</span><span class='kw'>&lt;-</span><span class='fu'>eanatSelect</span>( <span class='no'>mat</span>, <span class='kw'>selectorScale</span> <span class='kw'>=</span> <span class='fl'>1.2</span>, <span class='kw'>maxNEvec</span> <span class='kw'>=</span> <span class='fl'>4</span> )
 <span class='no'>esol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='sparseDecom.html'>sparseDecom</a></span>( <span class='no'>mat</span>, <span class='kw'>nvecs</span> <span class='kw'>=</span> <span class='no'>nvecsSel</span> )
-<span class='fu'>print</span>(<span class='fu'>paste</span>(<span class='st'>"selected"</span>, <span class='no'>nvecsSel</span>,<span class='st'>'pseudo-eigenvectors'</span>))</div><div class='output co'>#&gt; [1] "selected 4 pseudo-eigenvectors"</div></pre>
+<span class='fu'>print</span>(<span class='fu'>paste</span>(<span class='st'>"selected"</span>, <span class='no'>nvecsSel</span>,<span class='st'>'pseudo-eigenvectors'</span>))
+<span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -202,11 +228,14 @@ Avants BB, Tustison NJ
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

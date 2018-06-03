@@ -18,13 +18,22 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Band pass filtering for BOLD image. — frequencyFilterfMRI" />
+
+<meta property="og:description" content="This function works for a BOLD time-series data" />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +56,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +84,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +99,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +111,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,20 +119,24 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Band pass filtering for BOLD image.</h1>
+    
+    <div class="hidden name"><code>frequencyFilterfMRI.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>This function works for a BOLD time-series data</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>frequencyFilterfMRI</span>(<span class='no'>boldmat</span>, <span class='no'>tr</span>, <span class='kw'>freqLo</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>freqHi</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
   <span class='kw'>opt</span> <span class='kw'>=</span> <span class='st'>"butt"</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -166,15 +184,7 @@ trigonometric, stl.</p></td>
   <span class='co'># plot( temp$freq, temp$spec, type='l' )</span>
   <span class='co'># temp = spectrum( ts(myres[,k], frequency=1/tr ) )</span>
   <span class='co'># plot( temp$freq, temp$spec, type='l' )</span>
-}</div><div class='output co'>#&gt; [1] "Need signal package"</div><div class='img'><img src='frequencyFilterfMRI-1.png' alt='' width='700' height='432.632880098887' /></div><div class='img'><img src='frequencyFilterfMRI-2.png' alt='' width='700' height='432.632880098887' /></div><div class='output co'>#&gt; 
-#&gt;     ‘mFilter’ version: 0.1-3
-#&gt; 
-#&gt;     ‘mFilter’ is a package for time series filtering
-#&gt; 
-#&gt;     See ‘library(help="mFilter")’ for details
-#&gt; 
-#&gt;     Author: Mehmet Balcilar, mbalcilar@yahoo.com
-#&gt; </div><div class='img'><img src='frequencyFilterfMRI-3.png' alt='' width='700' height='432.632880098887' /></div><div class='input'>
+}</div><div class='output co'>#&gt; [1] "Need signal package"</div><div class='img'><img src='frequencyFilterfMRI-1.png' alt='' width='700' height='433' /></div><div class='img'><img src='frequencyFilterfMRI-2.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; [1] "Need mFilter package"</div><div class='img'><img src='frequencyFilterfMRI-3.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -200,11 +210,14 @@ Avants BB
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

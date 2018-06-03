@@ -18,13 +18,30 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Multi-run normalization, filtering and nuisance estimation for fMRI. — fMRINormalization" />
+
+<meta property="og:description" content="This function leverages structural image processing based on ANTs
+cortical thickness to implement standard functional image processing
+recommendations.  The function will crop out the first k time frames,
+do motion correction and produce a variety of nuisance regressors.  It will
+also do spatial and temporal filtering as well as interpolation between
+time frames that exceed a given framewise displacement.  Finally, we return
+maps to the common coordinate system.  Output may be trimmed in the future
+but currently provides access at different stages: merging versus filtering
+and normalized, fused BOLD images in both subject and template space." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,18 +64,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">ANTsR</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">ANTsR</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="..//index.html">
+  <a href="../index.html">
     <span class="fa fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/ANTsR.html">Get Started</a>
+  <a href="../articles/ANTsR.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -71,6 +92,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
+    </li>
+    <li>
+      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
+    </li>
+    <li>
       <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
@@ -80,13 +107,7 @@
       <a href="../articles/iMath.html">iMath (mathematical operations inside ANTsR)</a>
     </li>
     <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
-    </li>
-    <li>
-      <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
     </li>
     <li>
       <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
@@ -98,6 +119,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -105,12 +127,15 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Multi-run normalization, filtering and nuisance estimation for fMRI.</h1>
+    
+    <div class="hidden name"><code>fMRINormalization.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>This function leverages structural image processing based on ANTs
 cortical thickness to implement standard functional image processing
@@ -122,6 +147,7 @@ maps to the common coordinate system.  Output may be trimmed in the future
 but currently provides access at different stages: merging versus filtering
 and normalized, fused BOLD images in both subject and template space.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>fMRINormalization</span>(<span class='no'>img</span>, <span class='kw'>steadyT</span> <span class='kw'>=</span> <span class='fl'>20</span>, <span class='kw'>fdthresh</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>repeatMotionEst</span> <span class='kw'>=</span> <span class='fl'>2</span>,
   <span class='kw'>freqLimits</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.01</span>, <span class='fl'>0.1</span>), <span class='kw'>nCompCor</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>polydegree</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
@@ -129,7 +155,7 @@ and normalized, fused BOLD images in both subject and template space.</p>
   <span class='kw'>templateMap</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>templateImage</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>smoothingSigmas</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>extraRuns</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -277,11 +303,14 @@ Avants BB, Duda JT
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

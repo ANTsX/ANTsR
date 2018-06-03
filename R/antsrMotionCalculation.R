@@ -7,6 +7,8 @@
 #' @param mask mask for image (ND-1).  If not provided, estimated from data.
 #' @param typeofTransform One of \code{"Affine"}, \code{"Rigid"},
 #' '\code{"BOLDAffine"}, \code{"BOLDRigid"}, \code{"QuickRigid"}.
+#' @param getMotionDescriptors computes dvars and framewise displacement.  May
+#' take additional memory.
 #' @param verbose enables verbose output.
 #' @return List containing:
 #' \itemize{
@@ -25,9 +27,10 @@
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
   img,
-  fixed = NA,
-  mask  = NA,
+  fixed,
+  mask,
   typeofTransform = "Rigid",
+  getMotionDescriptors = TRUE,
   verbose=FALSE
   )
 {
@@ -42,39 +45,28 @@ antsrMotionCalculation <- function(
   imgdim = length( dim( img ) )
   subdim = imgdim - 1
   ntimes = dim( img )[ imgdim ]
-  if ( is.na( fixed )  )
+  if ( missing( fixed )  )
     {
     fixed <- getAverageOfTimeSeries( img )
     }
-  if ( is.na( mask ) ) mask = getMask( fixed )
+  if ( missing( mask ) ) mask = getMask( fixed )
   extractSubImage <- function( img, vin )
     {
-    subdim = img@dimension-1
-    subimg = makeImage(
-      dim( img )[ 1:subdim ],
-      voxval    = vin,
-      spacing   = antsGetSpacing( img )[1:subdim],
-      origin    = antsGetOrigin( img )[1:subdim],
-      direction = antsGetDirection( img )[1:subdim,1:subdim]
-      )
+    temp = extractSlice( img, vin, img@dimension )
+    subdim = img@dimension - 1
+    xxx=antsSetDirection( temp, antsGetDirection( img )[ 1:subdim, 1:subdim ] )
+    return( temp )
     }
   # now loop over all time points and register to the fixed images
-  imgarr = as.array( img )
   # create array holder for deformed images
-  fixarr = array( dim = c( dim( fixed ), ntimes ) )
+  warpedSlices = list()
   if ( verbose )
     progress <- txtProgressBar(min = 1, max = ntimes, style = 3)
-  for ( i in 1:ntimes )
-    {
-    if ( imgdim == 2 ) localImg = extractSubImage( img, imgarr[ ,       i] )
-    if ( imgdim == 3 ) localImg = extractSubImage( img, imgarr[ ,  ,    i] )
-    if ( imgdim == 4 ) localImg = extractSubImage( img, imgarr[ ,  ,  , i] )
+  for ( i in 1:ntimes ) {
+    localImg = extractSubImage( img, i )
     locreg = antsRegistration( fixed = fixed, moving = localImg,
       typeofTransform = typeofTransform )
-    if ( imgdim == 2 ) fixarr[ ,       i] = as.array( locreg$warpedmovout )
-    if ( imgdim == 3 ) fixarr[ ,  ,    i] = as.array( locreg$warpedmovout )
-    if ( imgdim == 4 ) fixarr[ ,  ,  , i] = as.array( locreg$warpedmovout )
-#    localtxp = R.matlab::readMat( locreg$fwdtransforms )[[1]]
+    warpedSlices[[i]] = locreg$warpedmovout
     localtxp = readAntsrTransform( locreg$fwdtransforms, subdim )
     localtxp = getAntsrTransformParameters( localtxp )
     if ( i ==  1 ) {
@@ -83,26 +75,26 @@ antsrMotionCalculation <- function(
       }
     mocoparams[i, ] = localtxp
     if ( verbose ) setTxtProgressBar(progress, i )
+    gc()
     }
   if ( verbose ) close( progress )
-  moco_img = as.antsImage( fixarr )
-  antsSetSpacing( moco_img, c( antsGetSpacing(fixed),
-    antsGetSpacing(img)[imgdim]) )
-  antsSetOrigin( moco_img, c( antsGetOrigin(fixed),
-    antsGetOrigin(img)[imgdim]) )
-  mocodir = diag( imgdim )
-  mocodir[ 1:subdim, 1:subdim ] = antsGetDirection( fixed )
-  antsSetDirection( moco_img, mocodir )
-  #  meanout <- apply( moco_img, c(1:(subdim)), mean, na.rm=T )
+  moco_img = mergeListToNDImage( img, warpedSlices )
+  rm( warpedSlices )
+  gc()
   meanout = getAverageOfTimeSeries( moco_img )
-  tempmat <- timeseries2matrix( img, mask)
-  dvars <- computeDVARS( tempmat )
-  rm( tempmat )
-  # finally, get framewise displacement
-  tsimg <- antsImageClone( img, "double" )
-  mocostats <- .antsMotionCorrStats0( tsimg, mask, mocoparams )
-  fd <- as.data.frame( mocostats$Displacements )
-  names(fd) <- c( "MeanDisplacement", "MaxDisplacement" )
+  if ( getMotionDescriptors ) {
+    tempmat <- timeseries2matrix( img, mask)
+    dvars <- computeDVARS( tempmat )
+    rm( tempmat )
+    # finally, get framewise displacement
+    tsimg <- antsImageClone( img, "double" )
+    mocostats <- .antsMotionCorrStats0( tsimg, mask, mocoparams )
+    fd <- as.data.frame( mocostats$Displacements )
+    names(fd) <- c( "MeanDisplacement", "MaxDisplacement" )
+  } else {
+    fd=NA
+    dvars=NA
+  }
   # now do a posthoc mapping of the motion parameters to roll pitch yaw
   # in the special case of rigid mapping in 3D
   if ( ( grep( "Rigid", typeofTransform ) == 1 ) & ( imgdim == 4 ) )

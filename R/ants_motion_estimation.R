@@ -43,8 +43,7 @@
   }
 
   if (is.na(fixed)) {
-    fixed <- new("antsImage", "float", 3)
-    antsMotionCorr(list(d = 3, a = img, o = fixed))
+    fixed <- getAverageOfTimeSeries( img )
   } else {
     if (is.character(fixed)) {
       if (length(fixed) != 1) {
@@ -71,9 +70,9 @@
   if (n > 10) {
     n <- 10
   }
-  avg_img <- new("antsImage", "float", 3)
+  avg_img <- getAverageOfTimeSeries( img )
   moco_img <- new("antsImage", "float", 4)
-  moco_params <- new("antsMatrix", "double")
+  moco_params <- new( "antsMatrix", "double" )
   mibins = 20
   if ( moreaccurate == 3 ) {
     antsMotionCorr(list(d = 3, o = list(moco_params, moco_img, avg_img),
