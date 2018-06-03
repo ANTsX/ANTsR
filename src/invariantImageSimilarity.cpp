@@ -665,7 +665,7 @@ typename ImageType::Pointer convolveImageHelper(
     convolutionFilter->Update();
     return convolutionFilter->GetOutput();
     }
-  return NULL;
+  return nullptr;
 }
 
 // [[myRcpp::export]]
