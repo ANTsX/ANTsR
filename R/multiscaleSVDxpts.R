@@ -2755,24 +2755,32 @@ symilr <- function(
        return( q )
        return(list(q = q,r = r))
        }
+  randmat = 0
 
   if ( missing( initialUMatrix ) )
     initialUMatrix = length( voxmats )
+
+  if ( class(initialUMatrix) == 'matrix' ) {
+    randmat = initialUMatrix
+    initialUMatrix = list( )
+    for ( i in 1:length( voxmats ) )
+      initialUMatrix[[ i ]] = randmat
+    }
+
   if ( length( initialUMatrix ) != length( voxmats ) &
     !is.matrix(initialUMatrix) ) {
     message(paste("initializing with random matrix
       with",initialUMatrix,'columns'))
     randmat = scale(
       (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
-    randmat = localGS( randmat, orthogonalize )
+#    randmat = scale(
+#      (( matrix(  runif( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+#    randmat = localGS( randmat, orthogonalize )
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
     }
-#
-#  for ( i in 1:length( voxmats ) )
-#  initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]])
-#
+
   vRan = list( )
   dedrv = list( )
   if ( hasRanEff ) {
@@ -2878,7 +2886,8 @@ symilr <- function(
   list(
     u  = initialUMatrix,
     v  = vmats,
-    vRan = vRan )
+    vRan = vRan,
+    initialRandomMatrix = randmat )
 #    predictions = predictions )
     )
 }
