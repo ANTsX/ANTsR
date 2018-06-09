@@ -2769,8 +2769,7 @@ symilr <- function(
 
   if ( length( initialUMatrix ) != length( voxmats ) &
     !is.matrix(initialUMatrix) ) {
-    message(paste("initializing with random matrix
-      with",initialUMatrix,'columns'))
+    message(paste("initializing with random matrix: ",initialUMatrix,'columns'))
     randmat = scale(
       (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
 #    randmat = scale(
