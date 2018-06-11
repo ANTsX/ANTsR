@@ -4,9 +4,10 @@
 \alias{symilr}
 \title{Symmetric multivariate, penalized image-based linear regression model (symilr) for N modalities}
 \usage{
-symilr(voxmats, smoothingMatrices, iterations = 10, gamma = 1.5,
-  sparsenessQuantiles, positivities, initialUMatrix, orthogonalize = TRUE,
-  repeatedMeasures = NA, verbose = FALSE)
+symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
+  positivities, initialUMatrix, orthogonalize = TRUE, repeatedMeasures = NA,
+  lineSearchRange = c(-10, 10), lineSearchTolerance = 0.001,
+  verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -14,8 +15,6 @@ symilr(voxmats, smoothingMatrices, iterations = 10, gamma = 1.5,
 \item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}
 
 \item{iterations}{number of gradient descent iterations}
-
-\item{gamma}{step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.  it is reasonable to simply set this to 1 and allow automated gradient step scaling to work out the practical value.  Set verbose mode to get feedback.}
 
 \item{sparsenessQuantiles}{vector of quantiles to control sparseness - higher is sparser}
 
@@ -30,6 +29,10 @@ If this is set to a scalar, or is missing, a random matrix will be used.}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
+
+\item{lineSearchRange}{lower and upper limit used in \code{optimize}}
+
+\item{lineSearchTolerance}{tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data}
 
 \item{verbose}{boolean to control verbosity of output}
 }
