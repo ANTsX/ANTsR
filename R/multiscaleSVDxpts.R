@@ -2857,7 +2857,7 @@ getSyMG <- function( v, i )  {
   avgU = initialUMatrix[[ 1 ]] * 0.0
   for ( j in 1:length(voxmats) )
     if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
-  avgU = localGS( avgU , F )
+  avgU = localGS( avgU , T )
   temperv = 0
   if ( hasRanEff )
     temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
