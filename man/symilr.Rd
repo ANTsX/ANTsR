@@ -5,9 +5,9 @@
 \title{Symmetric multivariate, penalized image-based linear regression model (symilr) for N modalities}
 \usage{
 symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
-  positivities, initialUMatrix, orthogonalize = TRUE, repeatedMeasures = NA,
-  lineSearchRange = c(-10, 10), lineSearchTolerance = 0.001,
-  verbose = FALSE)
+  positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
+  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
+  lineSearchTolerance = 0.001, verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -24,6 +24,8 @@ choices are positive, negative or either as expressed as a string.}
 \item{initialUMatrix}{list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
 number of basis functions in which case random initialization occurs.
 If this is set to a scalar, or is missing, a random matrix will be used.}
+
+\item{mixAlg}{'svd', 'ica' or 'avg' denotes the algorithm mixing bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 

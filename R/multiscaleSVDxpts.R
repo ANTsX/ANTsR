@@ -2658,6 +2658,7 @@ return(
 #' @param initialUMatrix list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
 #' number of basis functions in which case random initialization occurs.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
+#' @param mixAlg 'svd', 'ica' or 'avg' denotes the algorithm mixing bases
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -2689,6 +2690,7 @@ symilr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
+  mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
   lineSearchRange = c( -10, 10 ),
@@ -2696,7 +2698,8 @@ symilr <- function(
   verbose = FALSE ) {
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
-
+  mixAlgs = c( 'svd', 'ica', 'avg' )
+  if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
 # 0.0 adjust length of input data
   gamma = rep( 1, length(voxmats) )
   if  ( missing( positivities ) )
@@ -2836,8 +2839,27 @@ getSyME <- function( tempv, i, returnEnergy=TRUE )  {
           norm( prediction, "F" ) )
   }
 
+nc = ncol( initialUMatrix[[ 1 ]] )
+myw = matrix( rnorm( nc^2), nc, nc )
+getAvgU <- function( i, myw, mixAlg ) {
+  avgU = NULL
+  if ( mixAlg == 'avg' ) {
+    avgU = initialUMatrix[[ 1 ]] * 0.0
+    for ( j in 1:length(voxmats) )
+      if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+    return( avgU )
+  }
+  nc = ncol( initialUMatrix[[ 1 ]] )
+  for ( j in 1:length(voxmats) )
+    if ( i != j ) avgU = cbind( avgU, initialUMatrix[[ j ]] )
+  if ( mixAlg == 'ica' )
+    return( fastICA::fastICA( avgU,  method = 'C', w.init = myw,
+      n.comp=nc )$S ) else   # return( localGS( avgU , T )[, 1:nc] )
+#  avgU = localGS( avgU , T )
+  return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
+}
 
-getSyME2 <- function( lineSearch, gradient )  {
+getSyME2 <- function( lineSearch, gradient, myw, mixAlg  )  {
     prediction = 0
     myenergysearchv = ( vmats[[i]]+gradient * lineSearch )
     myenergysearchv = orthogonalizeAndQSparsify(
@@ -2845,19 +2867,13 @@ getSyME2 <- function( lineSearch, gradient )  {
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
-    for ( j in 1:length( voxmats ) ) {
-      if ( i != j ) {
-        prediction = prediction + initialUMatrix[[j]] %*% t( myenergysearchv )
-        }
-      }
+    avgU = getAvgU( i, myw, mixAlg)
+    prediction = prediction + avgU %*% t( myenergysearchv )
     return( norm( prediction - voxmats[[i]], "F" )  )
     }
 
-getSyMG <- function( v, i )  {
-  avgU = initialUMatrix[[ 1 ]] * 0.0
-  for ( j in 1:length(voxmats) )
-    if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
-  avgU = localGS( avgU , T )
+getSyMG <- function( v, i, myw, mixAlg )  {
+  avgU = getAvgU( i, myw, mixAlg )
   temperv = 0
   if ( hasRanEff )
     temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
@@ -2876,11 +2892,14 @@ getSyMG <- function( v, i )  {
     for ( i in 1:length( voxmats ) ) {
       if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
       mytol = datanorm[ i ] * lineSearchTolerance / myit^2
-      temperv = getSyMG( vmats[[i]], i ) # initialize gradient line search
-      temp = optimize( getSyME2, # computes the energy
-        interval = lineSearchRange, tol = mytol, gradient = temperv )
-      errterm[ i ] = temp$objective
-      gamma[i] = temp$minimum
+      temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
+      if ( myit <= iterations ) {
+        temp = optimize( getSyME2, # computes the energy
+          interval = lineSearchRange, tol = mytol, gradient = temperv,
+          myw=myw, mixAlg = mixAlg )
+        errterm[ i ] = temp$objective
+        gamma[i] = temp$minimum
+      } else errterm[ i ] = getSyME2( gamma[i], temperv )
       vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
 #      temp = optim(
 #        vmats[[i]], fn=getSyME, gr=getSyMG, method='CG', i=i  )
@@ -2890,12 +2909,12 @@ getSyMG <- function( v, i )  {
               as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
               sparsenessQuantiles[i],
               orthogonalize = FALSE, positivity = positivities[i] )
+      vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
       }
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T, T )
-#        initialUMatrix[[i]] = svd( initialUMatrix[[i]] )$u
         initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 
