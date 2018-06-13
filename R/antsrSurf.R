@@ -22,6 +22,7 @@
 #' this parameter will override \code{quantlimits}.  Currently, this will set
 #' levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
 #' list of length of y.
+#' @param backgroundColor a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels.
 #' @param filename prefix filename for output pngs
 #' @param antspath pass the ANTSPATH here otherwise we try to detect it from environment
 #' @param verbose prints the command used to call \code{antsSurf}
@@ -30,7 +31,7 @@
 #' @examples
 #'
 #' \dontrun{
-#' 
+#'
 #' myantspath = Sys.getenv("ANTSPATH")
 #' surf_ex = file.path(myantspath, "antsSurf")
 #' if (file.exists(surf_ex)) {
@@ -85,6 +86,7 @@ antsrSurf <- function( x, y, z,
                        smoothingSigma = 0.0,
                        rotationParams = c(270,0,270),
                        overlayLimits = NA,
+                       backgroundColor,
                        filename = NA,
                        antspath = NA,
                        verbose = FALSE )
@@ -100,7 +102,7 @@ antsrSurf <- function( x, y, z,
   # check for needed programs
   # first get antspath
   if ( is.na( antspath) ) {
-    myantspath = Sys.getenv(c("ANTSPATH")) 
+    myantspath = Sys.getenv(c("ANTSPATH"))
   } else {
     myantspath = antspath
   }
@@ -149,10 +151,19 @@ antsrSurf <- function( x, y, z,
     }
   }
   pngs = rep( NA, nrow( rotationParams ) )
-  backgroundColor = paste("255x255x255x",alpha[1],sep='')
+  if ( missing( backgroundColor ) )
+    backgroundColor = "white"
+  if  ( any( backgroundColor == 'black' ) )
+    backgroundColor = paste("0x0x0x",alpha[1],sep='')
+  else if  ( any( backgroundColor == 'white') )
+    backgroundColor = paste("255x255x255x",alpha[1],sep='')
+  else backgroundColor =
+    paste( c(backgroundColor,alpha[1]),collapse='x')
+
+  backgroundColorS = "255x255x255x1"
   for( myrot in 1:nrow( rotationParams ) )
   {
-    asscmd = paste( ass," -s [ ",xfn,",",backgroundColor,"] ")
+    asscmd = paste( ass," -s [ ",xfn,",",backgroundColorS,"] ")
     if ( ! missing( y ) )
     {
       ct = 0
@@ -204,7 +215,7 @@ antsrSurf <- function( x, y, z,
     if ( nrow( rotationParams ) == 1 )
     {
       asscmd = paste( asscmd , " -i ", inflationFactor,
-                      " -d [",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] " )
+                      " -d [",paste( rotationParams[myrot,], collapse='x' ),",",backgroundColor,"]" )
     } else {
       pngext = myrot
       if ( myrot < 10 ) pngext = paste( "0",pngext,sep='' )
@@ -212,7 +223,7 @@ antsrSurf <- function( x, y, z,
       pngfnloc = paste( filename, pngext, ".png", sep='' )
       system( paste( "rm", pngfnloc ) )
       asscmd = paste( asscmd , " -i ", inflationFactor, " -d ", pngfnloc,
-                      "[",paste( rotationParams[myrot,], collapse='x' ),",255x255x255] ",sep='' )
+                      "[",paste( rotationParams[myrot,], collapse='x' ),",",backgroundColor,"] ",sep='' )
     }
     if ( verbose ) print( asscmd )
     sss = system( asscmd )
