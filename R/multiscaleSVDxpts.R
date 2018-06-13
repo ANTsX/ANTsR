@@ -2681,6 +2681,25 @@ return(
 #' result = symilr(
 #'   list( vox = mat, vox2 = mat2, vox3 = mat3 ), initialUMatrix = nk  )
 #'
+#' \dontrun{
+#' # compare to permuted data
+#' s1 = sample( 1:nrow(mat))
+#' s2 = sample( 1:nrow(mat))
+#' result = symilr(list( vox = mat, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#'    initialUMatrix = nk , verbose=T, iterations=15  )
+#' p1 = mat %*% (result$v[[1]])
+#' p2 = mat2 %*% (result$v[[2]])
+#' p3 = mat3 %*% (result$v[[3]])
+#' diag(cor(p1,p2))
+#' diag(cor(p1,p3))
+#' diag(cor(p3,p2))
+#'
+#' # compare to SVD
+#' svd1 = svd( mat, nu=nk, nv=0 )$u
+#' svd2 = svd( mat2, nu=nk, nv=0 )$u
+#' svd3 = svd( mat3, nu=nk, nv=0 )$u
+#' print( cor( svd1,svd2) )
+#' }
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
 #' @export symilr
 symilr <- function(
@@ -2718,8 +2737,6 @@ symilr <- function(
     matnorms[ i ] = norm( voxmats[[ i ]] )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
-#    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[i]
-#    voxmats[[ i ]] = voxmats[[ i ]] / ( sqrt( p[i] ) * matnorms[i] )
     }
 
 # 2.0 setup random effects
@@ -2915,7 +2932,7 @@ getSyMG <- function( v, i, myw, mixAlg )  {
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T, T )
-        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+#        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 
     if ( hasRanEff ) {
