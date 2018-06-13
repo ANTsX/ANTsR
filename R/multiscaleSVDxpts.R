@@ -2871,8 +2871,7 @@ getAvgU <- function( i, myw, mixAlg ) {
     if ( i != j ) avgU = cbind( avgU, initialUMatrix[[ j ]] )
   if ( mixAlg == 'ica' )
     return( fastICA::fastICA( avgU,  method = 'C', w.init = myw,
-      n.comp=nc )$S ) else   # return( localGS( avgU , T )[, 1:nc] )
-#  avgU = localGS( avgU , T )
+      n.comp=nc )$S ) else
   return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
 }
 
@@ -2932,7 +2931,7 @@ getSyMG <- function( v, i, myw, mixAlg )  {
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T, T )
-#        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 
     if ( hasRanEff ) {
