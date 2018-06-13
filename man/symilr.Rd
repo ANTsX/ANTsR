@@ -22,10 +22,11 @@ symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
 choices are positive, negative or either as expressed as a string.}
 
 \item{initialUMatrix}{list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
-number of basis functions in which case random initialization occurs.
+number of basis functions in which case random initialization occurs. One
+may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica' or 'avg' denotes the algorithm mixing bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
@@ -42,42 +43,65 @@ allow estimates of per identifier intercept.}
 A list of u, x, y, z etc related matrices.
 }
 \description{
-This function simplifies calculating image-wide multivariate beta maps from
-that is similar to CCA.
+SyMILR minimizes reconstruction error across related modalities.  That is,
+SyMILR will reconstruct each modality matrix from a basis set derived from
+the other modalities.  The basis set can be derived from SVD, ICA or a
+simple sum of basis representations.
+This function produces dataset-wide multivariate beta maps for each of the
+related matrices.  The multivariate beta maps are regularized by user
+input matrices that encode relationships between variables.  The idea is
+overall similar to canonical correlation analysis but generalizes the basis
+construction and to arbitrary numbers of modalities.
 }
 \examples{
 
 set.seed(1500)
-nsub = 12
-npix = 100
-outcome = rnorm( nsub )
-covar = rnorm( nsub )
-mat = replicate( npix, rnorm( nsub ) )
-mat2 = replicate( npix + 10, rnorm( nsub ) )
-mat3 = replicate( npix + 10, rnorm( nsub ) )
-nk = 3
-result = symilr(
-  list( vox = mat, vox2 = mat2, vox3 = mat3 ), initialUMatrix = nk  )
-
-\dontrun{
-# compare to permuted data
-s1 = sample( 1:nrow(mat))
-s2 = sample( 1:nrow(mat))
-result = symilr(list( vox = mat, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
-   initialUMatrix = nk , verbose=T, iterations=15  )
-p1 = mat \%*\% (result$v[[1]])
+nsub = 25
+npix = c(100,200,133)
+nk = 5
+outcome = matrix(rnorm( nsub * nk ),ncol=nk)
+outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
+outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
+outcome3 = matrix(rnorm( nsub * nk ),ncol=nk)
+view1tx = matrix( rnorm( npix[1]  * nk ), nrow=nk )
+view2tx = matrix( rnorm( npix[2]  * nk ), nrow=nk )
+view3tx = matrix( rnorm( npix[3]  * nk ), nrow=nk )
+mat1 = (outcome \%*\% t(outcome1) \%*\% (outcome1)) \%*\% view1tx
+mat2 = (outcome \%*\% t(outcome2) \%*\% (outcome2)) \%*\% view2tx
+mat3 = (outcome \%*\% t(outcome3) \%*\% (outcome3)) \%*\% view3tx
+result = symilr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
+   initialUMatrix = nk , verbose=T, iterations=5  )
+p1 = mat1 \%*\% (result$v[[1]])
 p2 = mat2 \%*\% (result$v[[2]])
 p3 = mat3 \%*\% (result$v[[3]])
-diag(cor(p1,p2))
-diag(cor(p1,p3))
-diag(cor(p3,p2))
+
+# compare to permuted data
+s1 = sample( 1:nsub)
+s2 = sample( 1:nsub)
+resultp = symilr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+   initialUMatrix = nk , verbose=T, iterations=5  )
+p1p = mat1 \%*\% (resultp$v[[1]])
+p2p = mat2[s1,] \%*\% (resultp$v[[2]])
+p3p = mat3[s2,] \%*\% (resultp$v[[3]])
 
 # compare to SVD
-svd1 = svd( mat, nu=nk, nv=0 )$u
+svd1 = svd( mat1, nu=nk, nv=0 )$u
 svd2 = svd( mat2, nu=nk, nv=0 )$u
 svd3 = svd( mat3, nu=nk, nv=0 )$u
-print( cor( svd1,svd2) )
-}
+
+# real
+range(cor(p1,p2))
+range(cor(p1,p3))
+range(cor(p3,p2))
+
+# permuted
+range(cor(p1p,p2p))
+range(cor(p1p,p3p))
+range(cor(p3p,p2p))
+
+# svd
+print( range(cor( svd1,svd2) ))
+
 }
 \seealso{
 \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
