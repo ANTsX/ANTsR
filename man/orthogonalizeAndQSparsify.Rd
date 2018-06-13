@@ -5,7 +5,7 @@
 \title{sparsify a matrix}
 \usage{
 orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
-  positivity = "either", orthogonalize = TRUE)
+  positivity = "either", orthogonalize = TRUE, softThresholding = FALSE)
 }
 \arguments{
 \item{v}{input matrix}
@@ -16,6 +16,8 @@ orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
 choices are positive, negative or either as expressed as a string.}
 
 \item{orthogonalize}{run gram-schmidt if TRUE.}
+
+\item{softThresholding}{use soft thresholding}
 }
 \value{
 matrix

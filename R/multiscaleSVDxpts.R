@@ -1321,6 +1321,7 @@ while ( k <= iterations ) {
 #' @param positivity restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
 #' @param orthogonalize run gram-schmidt if TRUE.
+#' @param softThresholding use soft thresholding
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1330,12 +1331,13 @@ while ( k <= iterations ) {
 #'
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
-  sparsenessQuantile = 0.5, positivity='either', orthogonalize = TRUE ) {
+  sparsenessQuantile = 0.5, positivity='either',
+  orthogonalize = TRUE, softThresholding = FALSE ) {
 #  if ( orthogonalize ) v = qr.Q( qr( v ) )
   for ( vv in 1:ncol( v ) ) {
     if ( var( v[ , vv ] ) >  .Machine$double.eps ) {
+#      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
       if ( vv > 1 & orthogonalize  ) {
-#        v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
 #          temp = temp / sqrt( sum( temp * temp ) )
@@ -1351,12 +1353,21 @@ orthogonalizeAndQSparsify <- function( v,
         doflip = TRUE
         }
       myquant = quantile( localv , sparsenessQuantile, na.rm=T )
-      if ( positivity == 'positive') {
-        if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
-      } else if ( positivity == 'negative' ) {
-        localv[ localv > myquant ] = 0
-      } else if ( positivity == 'either' ) {
-        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+      if ( ! softThresholding ) {
+        if ( positivity == 'positive') {
+          if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
+        } else if ( positivity == 'negative' ) {
+          localv[ localv > myquant ] = 0
+        } else if ( positivity == 'either' ) {
+          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+        }
+      } else {
+        if ( positivity == 'positive' ) localv[ localv < 0 ] = 0
+        mysign = sign( localv )
+        myquant = quantile( abs(localv) , sparsenessQuantile, na.rm=T )
+        temp = abs( localv ) - myquant
+        temp[ temp < 0 ] = 0
+        localv = mysign * temp
       }
       if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
     }
@@ -2635,38 +2646,83 @@ return(
 
 #' Symmetric multivariate, penalized image-based linear regression model (symilr) for N modalities
 #'
-#' This function simplifies calculating image-wide multivariate beta maps from
-#' that is similar to CCA.
+#' SyMILR minimizes reconstruction error across related modalities.  That is,
+#' SyMILR will reconstruct each modality matrix from a basis set derived from
+#' the other modalities.  The basis set can be derived from SVD, ICA or a
+#' simple sum of basis representations.
+#' This function produces dataset-wide multivariate beta maps for each of the
+#' related matrices.  The multivariate beta maps are regularized by user
+#' input matrices that encode relationships between variables.  The idea is
+#' overall similar to canonical correlation analysis but generalizes the basis
+#' construction and to arbitrary numbers of modalities.
 #'
 #' @param voxmats A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
 #' @param smoothingMatrices list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.
 #' @param iterations number of gradient descent iterations
-#' @param gamma step size for gradient descent.  gamma can be of length n-matrices to control the speed of gradient descent per modality.  it is reasonable to simply set this to 1 and allow automated gradient step scaling to work out the practical value.  Set verbose mode to get feedback.
 #' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
 #' @param positivities vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
 #' choices are positive, negative or either as expressed as a string.
 #' @param initialUMatrix list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
-#' number of basis functions in which case random initialization occurs.
+#' number of basis functions in which case random initialization occurs. One
+#' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
+#' @param lineSearchRange lower and upper limit used in \code{optimize}
+#' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
 #' @examples
 #'
 #' set.seed(1500)
-#' nsub = 12
-#' npix = 100
-#' outcome = rnorm( nsub )
-#' covar = rnorm( nsub )
-#' mat = replicate( npix, rnorm( nsub ) )
-#' mat2 = replicate( npix + 10, rnorm( nsub ) )
-#' mat3 = replicate( npix + 10, rnorm( nsub ) )
-#' nk = 3
-#' result = symilr(
-#'   list( vox = mat, vox2 = mat2, vox3 = mat3 ), initialUMatrix = nk  )
+#' nsub = 25
+#' npix = c(100,200,133)
+#' nk = 5
+#' outcome = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome3 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' view1tx = matrix( rnorm( npix[1]  * nk ), nrow=nk )
+#' view2tx = matrix( rnorm( npix[2]  * nk ), nrow=nk )
+#' view3tx = matrix( rnorm( npix[3]  * nk ), nrow=nk )
+#' mat1 = (outcome %*% t(outcome1) %*% (outcome1)) %*% view1tx
+#' mat2 = (outcome %*% t(outcome2) %*% (outcome2)) %*% view2tx
+#' mat3 = (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
+#' result = symilr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
+#'    initialUMatrix = nk , verbose=T, iterations=5  )
+#' p1 = mat1 %*% (result$v[[1]])
+#' p2 = mat2 %*% (result$v[[2]])
+#' p3 = mat3 %*% (result$v[[3]])
+#'
+#' # compare to permuted data
+#' s1 = sample( 1:nsub)
+#' s2 = sample( 1:nsub)
+#' resultp = symilr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#'    initialUMatrix = nk , verbose=T, iterations=5  )
+#' p1p = mat1 %*% (resultp$v[[1]])
+#' p2p = mat2[s1,] %*% (resultp$v[[2]])
+#' p3p = mat3[s2,] %*% (resultp$v[[3]])
+#'
+#' # compare to SVD
+#' svd1 = svd( mat1, nu=nk, nv=0 )$u
+#' svd2 = svd( mat2, nu=nk, nv=0 )$u
+#' svd3 = svd( mat3, nu=nk, nv=0 )$u
+#'
+#' # real
+#' range(cor(p1,p2))
+#' range(cor(p1,p3))
+#' range(cor(p3,p2))
+#'
+#' # permuted
+#' range(cor(p1p,p2p))
+#' range(cor(p1p,p3p))
+#' range(cor(p3p,p2p))
+#'
+#' # svd
+#' print( range(cor( svd1,svd2) ))
 #'
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
 #' @export symilr
@@ -2674,18 +2730,25 @@ symilr <- function(
   voxmats,
   smoothingMatrices,
   iterations = 10,
-  gamma = 1.5,
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
+  mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
+  lineSearchRange = c( -10, 10 ),
+  lineSearchTolerance = 0.001,
   verbose = FALSE ) {
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
-
-  if ( length( gamma ) != length( voxmats ) )
-    gamma = rep( gamma, length(voxmats) )
+  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s' )
+  if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
+  if ( ! mixAlg %in% mixAlgs ) {
+    message( paste(mixAlgs, collapse=' or ' ) )
+    stop("pass valid mixing method")
+  }
+# 0.0 adjust length of input data
+  gamma = rep( 1, length(voxmats) )
   if  ( missing( positivities ) )
     positivities = rep( "positive", length( voxmats ) )
   if ( any( ( positivities %in%  c("positive","negative","either") ) == FALSE  ) )
@@ -2696,13 +2759,15 @@ symilr <- function(
   n = nrow( voxmats[[1]] )
   if ( missing( sparsenessQuantiles ) )
     sparsenessQuantiles = rep( 0.5, length( voxmats ) )
+
+# 1.0 adjust matrix norms
   for ( i in 1:length( voxmats ) ) {
     matnorms[ i ] = norm( voxmats[[ i ]] )
-#    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[i]
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
     }
 
+# 2.0 setup random effects
   hasRanEff = FALSE
   zRan = NA
   if ( ! any( is.na( repeatedMeasures ) ) ) {
@@ -2723,6 +2788,8 @@ symilr <- function(
       tzz = tz %*% zRan
       rm( ranEff )
     }
+
+# 3.0 setup regularization
     if ( missing( smoothingMatrices ) ) {
       smoothingMatrices = list( )
       for ( i in 1:length( voxmats ) )
@@ -2755,24 +2822,29 @@ symilr <- function(
        return( q )
        return(list(q = q,r = r))
        }
+  randmat = 0
 
+# 4.0 setup initialization
   if ( missing( initialUMatrix ) )
     initialUMatrix = length( voxmats )
-  if ( length( initialUMatrix ) != length( voxmats ) &
-    !is.matrix(initialUMatrix) ) {
-    message(paste("initializing with random matrix
-      with",initialUMatrix,'columns'))
-    randmat = scale(
-      (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
-    randmat = localGS( randmat, orthogonalize )
+
+  if ( class(initialUMatrix) == 'matrix' ) {
+    randmat = initialUMatrix
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
     }
-#
-#  for ( i in 1:length( voxmats ) )
-#  initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]])
-#
+
+  if ( length( initialUMatrix ) != length( voxmats ) &
+    !is.matrix(initialUMatrix) ) {
+    message(paste("initializing with random matrix: ",initialUMatrix,'columns'))
+    randmat = scale(
+      (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+    initialUMatrix = list( )
+    for ( i in 1:length( voxmats ) )
+      initialUMatrix[[ i ]] = randmat
+    }
+
   vRan = list( )
   dedrv = list( )
   if ( hasRanEff ) {
@@ -2791,40 +2863,108 @@ symilr <- function(
   matnorms = rep( 1, length(matnorms) )
   gradnorms = matnorms
   gradnormsRanEff = matnorms
-  itThresh = 1
+  itThresh = 1 # scales random effects gradient
+# function for computing error term
+npower = "F"
+getSyME <- function( tempv, i, returnEnergy=TRUE )  {
+  tempvmat = matrix( tempv, ncol = ncol( vmats[[1]] ) )
+  tempvmat = orthogonalizeAndQSparsify(
+          as.matrix( smoothingMatrices[[i]] %*% tempvmat),
+          sparsenessQuantiles[i],
+          orthogonalize = FALSE, positivity = positivities[i] )
+  prediction = 0
+  if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
+  for ( j in 1:length( voxmats ) ) {
+    if ( i != j ) {
+      prediction = prediction + initialUMatrix[[j]] %*% t( tempvmat )
+      }
+    }
+  if ( returnEnergy ) return( norm( prediction - voxmats[[i]], "F" )  )
+  return( norm( voxmats[[i]], "F" ) /
+          norm( prediction, "F" ) )
+  }
+
+nc = ncol( initialUMatrix[[ 1 ]] )
+myw = matrix( rnorm( nc^2), nc, nc )
+getAvgU <- function( i, myw, mixAlg ) {
+  avgU = NULL
+  if ( mixAlg == 'avg' ) {
+    avgU = initialUMatrix[[ 1 ]] * 0.0
+    for ( j in 1:length(voxmats) )
+      if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
+    return( avgU )
+  }
+  nc = ncol( initialUMatrix[[ 1 ]] )
+  for ( j in 1:length(voxmats) )
+    if ( i != j ) avgU = cbind( avgU, initialUMatrix[[ j ]] )
+  if ( mixAlg == 'rrpca-l' )
+    return( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+  else if ( mixAlg == 'rrpca-s' )
+    return( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+  else if ( mixAlg == 'ica' )
+    return( fastICA::fastICA( avgU,  method = 'C', w.init = myw,
+      n.comp=nc )$S )
+  return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
+}
+
+getSyME2 <- function( lineSearch, gradient, myw, mixAlg  )  {
+    prediction = 0
+    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )
+    myenergysearchv = orthogonalizeAndQSparsify(
+      as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
+      sparsenessQuantiles[i],
+      orthogonalize = FALSE, positivity = positivities[i] )
+    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
+    avgU = getAvgU( i, myw, mixAlg)
+    prediction = prediction + avgU %*% t( myenergysearchv )
+    return( norm( prediction - voxmats[[i]], "F" )  )
+    }
+
+getSyMG <- function( v, i, myw, mixAlg )  {
+  avgU = getAvgU( i, myw, mixAlg )
+  temperv = 0
+  if ( hasRanEff )
+    temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
+  temperv = temperv + t( voxmats[[i]] ) %*% avgU
+  temperv = temperv - v %*% (  t( avgU ) %*% avgU )
+  return( temperv )
+}
+
 ################################################################################
 # below is the primary optimization loop - grad for v then for vran
 ################################################################################
+  datanorm = rep( 0.0, length(voxmats) )
   for ( myit in 1:iterations ) {
-    errterm = rep( 0.0, length(voxmats) )
+    errterm = rep( 1.0, length(voxmats) )
+    prednorm = rep( 0.0, length(voxmats) )
     for ( i in 1:length( voxmats ) ) {
-      avgU = initialUMatrix[[ 1 ]] * 0.0
-      for ( j in 1:length(voxmats) )
-        if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
-      avgU = localGS( avgU , FALSE )
-      if ( hasRanEff )
-        commonTerm = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]])) else
-          commonTerm = 0
-      commonTerm = commonTerm - t( voxmats[[i]] ) %*% avgU
-      for ( j in 1:length(voxmats)) {
-        if ( j != i )
-          commonTerm = commonTerm +
-            vmats[[ i ]] %*% (  t( avgU ) %*% initialUMatrix[[ j ]] )
-        }
-#     if ( myit <= itThresh )
-#       gradnorms[ i ] = norm( voxmats[[i]] ) / norm( commonTerm )
-      vmats[[ i ]] = vmats[[ i ]] - ( gradnorms[ i ] * gamma[i] ) * commonTerm
+      if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
+      mytol = datanorm[ i ] * lineSearchTolerance / myit^2
+      temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
+      if ( myit <= iterations ) {
+        temp = optimize( getSyME2, # computes the energy
+          interval = lineSearchRange, tol = mytol, gradient = temperv,
+          myw=myw, mixAlg = mixAlg )
+        errterm[ i ] = temp$objective
+        gamma[i] = temp$minimum
+      } else errterm[ i ] = getSyME2( gamma[i], temperv )
+      vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
+#      temp = optim(
+#        vmats[[i]], fn=getSyME, gr=getSyMG, method='CG', i=i  )
+#      vmats[[i]] = temp$par
+#      print( paste( i, temp$value ) )
       vmats[[i]] = orthogonalizeAndQSparsify(
-        as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
-        sparsenessQuantiles[i],
-        orthogonalize = orthogonalize, positivity = positivities[i] )
+              as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
+              sparsenessQuantiles[i],
+              orthogonalize = FALSE, positivity = positivities[i] )
+      vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
       }
-
     # project down to the basis U
-    for ( i in 1:length( voxmats ) ) {
-      initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T,T)
-      initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
-      }
+    if ( myit <= ( iterations ) )
+      for ( i in 1:length( voxmats ) ) {
+        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T, T )
+        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+        }
 
     if ( hasRanEff ) {
       for ( kk in 1:1 ) {
@@ -2844,33 +2984,47 @@ symilr <- function(
         }
       } # hasRanEff
       predictions = list()
+      if ( FALSE ) {
       for ( i in 1:length( voxmats ) ) {
-        errterm[ i ] = 0
         if ( !hasRanEff ) {
           commonTerm = voxmats[[i]]
           predictions[[i]] = 0
           } else {
-        #  predictions[[i]] = zRan %*% t(vRan[[i]])
+          predictions[[i]] = zRan %*% t(vRan[[i]])
           commonTerm = voxmats[[i]] - zRan %*% t(vRan[[i]])
           }
         for ( j in 1:length( voxmats ) )
           if ( i != j ) {
             commonTerm = commonTerm  - initialUMatrix[[j]] %*% t( vmats[[i]] )
-            # predictions[[i]] = predictions[[i]] + initialUMatrix[[j]] %*% t( vmats[[i]] )
+            predictions[[i]] = predictions[[i]] + initialUMatrix[[j]] %*% t( vmats[[i]] )
             }
-        errterm[ i ] = norm( commonTerm )
+        errterm[ i ] = norm( voxmats[[i]] - predictions[[i]], npower )
+        prednorm[ i ] = norm( predictions[[i]], npower )
+        datanorm[ i ] = norm( voxmats[[i]], npower )
         }
-      if ( myit == 1 ) { errterm1=errterm2=errterm }
-      if ( myit > 1 &  mean(errterm/errterm2) > 1 ) {
-        message("multiply gradient step size by 0.1")
-        gamma = gamma * 0.1
-        errterm2=errterm
-        }
-
+      } else if ( FALSE ) {
+        for ( jj in 1:(length( voxmats )-1) )
+          for ( kk in (jj+1):length( voxmats ) ) {
+            p1 = voxmats[[jj]] %*% vmats[[jj]]
+            p2 = voxmats[[kk]] %*% vmats[[kk]]
+            locr=abs(cor(p1,p2))
+            print( paste( jj, kk ) )
+            print( diag( locr ) )
+          }
+      }
+      merr = mean(errterm)
+      nzct = 0
+      for ( loi in 1:length(vmats) )
+        nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
+      tot = merr+nzct
       if ( verbose ) {
-        print( paste( "myit =", myit, mean(errterm/errterm1) ))
-        cat(errterm)
+        print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
+        cat(c("e",errterm))
         cat("\n")
+#        cat(c("p",prednorm))
+#        cat("\n")
+#        cat(c("d",datanorm))
+#        cat("\n")
         }
 
       } # iterations
@@ -2878,7 +3032,9 @@ symilr <- function(
   list(
     u  = initialUMatrix,
     v  = vmats,
-    vRan = vRan )
-#    predictions = predictions )
+    vRan = vRan,
+    initialRandomMatrix = randmat,
+    predictions = predictions,
+    finalError = errterm )
     )
 }
