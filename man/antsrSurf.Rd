@@ -37,7 +37,7 @@ this parameter will override \code{quantlimits}.  Currently, this will set
 levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
 list of length of y.}
 
-\item{backgroundColor}{a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels.}
+\item{backgroundColor}{a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels. Alternatively, pass a string white or black.}
 
 \item{filename}{prefix filename for output pngs}
 

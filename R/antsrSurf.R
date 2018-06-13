@@ -22,7 +22,7 @@
 #' this parameter will override \code{quantlimits}.  Currently, this will set
 #' levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
 #' list of length of y.
-#' @param backgroundColor a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels.
+#' @param backgroundColor a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels. Alternatively, pass a string white or black.
 #' @param filename prefix filename for output pngs
 #' @param antspath pass the ANTSPATH here otherwise we try to detect it from environment
 #' @param verbose prints the command used to call \code{antsSurf}
