@@ -42,7 +42,7 @@ SEXP cdjHelper(
   reader->SetFileName( txfn.c_str() );
   reader->Update();
 
-  typename RealImageType::Pointer jacobian = ITK_NULLPTR;
+  typename RealImageType::Pointer jacobian;
 
   typename RealImageType::Pointer minimumConstantImage = RealImageType::New();
   minimumConstantImage->CopyInformation( reader->GetOutput() );

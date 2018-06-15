@@ -141,7 +141,7 @@ SEXP invariantSimilarityHelper(
   SEXP r_thetas, SEXP r_thetas2, SEXP r_thetas3,
   SEXP r_lsits, SEXP r_WM, SEXP r_scale,
   SEXP r_doreflection, SEXP r_txfn,
-  typename itk::Image< float , ImageDimension >::Pointer imageMask = ITK_NULLPTR )
+  typename itk::Image< float , ImageDimension >::Pointer imageMask=NULL  )
 {
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
@@ -151,7 +151,7 @@ SEXP invariantSimilarityHelper(
   bool useprincaxis = true;
   typedef typename itk::ImageMaskSpatialObject<ImageDimension>::ImageType
     maskimagetype;
-  typename maskimagetype::Pointer mask = ITK_NULLPTR;
+  typename maskimagetype::Pointer mask;
   Rcpp::NumericVector thetas( r_thetas );
   Rcpp::NumericVector thetas2( r_thetas2 );
   Rcpp::NumericVector thetas3( r_thetas3 );
