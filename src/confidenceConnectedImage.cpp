@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include "RcppANTsR.h"
+#include "itkImage.h"
 #include <ants.h>
 #include "itkConfidenceConnectedImageFilter.h"
 
