@@ -1,4 +1,4 @@
-#' @name connectedThreshold
+#' @name connectedThresholdImage
 #' @title Grow image using connected threshold filter
 #' @description Grow image using connected threshold  filter
 #'
@@ -14,11 +14,11 @@
 #' img <- makeImage(c(20, 20, 20), rnorm(20^3))
 #' img[2:5, 3:5, 4:8] = 2
 #' seed = xyz(as.array(img) == 2)
-#' simg <- connectedThreshold(img, seed = seed,
+#' simg <- connectedThresholdImage(img, seed = seed,
 #' upper = 2.5, lower = 1.5)
 #' # ortho2(simg, xyz=xyz(as.array(simg) ==1))
-#' @export connectedThreshold
-connectedThreshold <- function(inimg, seed,
+#' @export connectedThresholdImage
+connectedThresholdImage <- function(inimg, seed,
                                upper = 1, lower = 0) {
   if (is.character(inimg)) {
     inimg = antsImageRead(inimg)
