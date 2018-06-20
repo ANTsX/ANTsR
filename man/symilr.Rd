@@ -70,7 +70,7 @@ mat1 = (outcome \%*\% t(outcome1) \%*\% (outcome1)) \%*\% view1tx
 mat2 = (outcome \%*\% t(outcome2) \%*\% (outcome2)) \%*\% view2tx
 mat3 = (outcome \%*\% t(outcome3) \%*\% (outcome3)) \%*\% view3tx
 result = symilr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
-   initialUMatrix = nk , verbose=T, iterations=5  )
+   initialUMatrix = nk , verbose=TRUE, iterations=5  )
 p1 = mat1 \%*\% (result$v[[1]])
 p2 = mat2 \%*\% (result$v[[2]])
 p3 = mat3 \%*\% (result$v[[3]])

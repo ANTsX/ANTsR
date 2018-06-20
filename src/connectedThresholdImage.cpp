@@ -1,9 +1,10 @@
 #include <exception>
 #include <algorithm>
 #include <vector>
+#include <string>
 #include "RcppANTsR.h"
-#include "itkImage.h"
 #include <ants.h>
+#include "itkImage.h"
 #include "itkConnectedThresholdImageFilter.h"
 
 template< class ImageType >

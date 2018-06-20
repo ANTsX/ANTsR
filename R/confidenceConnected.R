@@ -26,7 +26,7 @@
 #' img <- makeImage(c(20, 20, 20), 0)
 #' img[1:5, 1:5, 1:2] = 2
 #' img[8:10, 9:14, 3:5] = 5
-#' seed = xyz(as.array(img) == 2)
+#' seed = floor(colMeans(which(as.array(img) == 2, arr.ind = TRUE)))
 #' simg <- confidenceConnected(img, seed = seed, iterations = 20L)
 #' @export confidenceConnected
 confidenceConnected <- function(inimg, seed,

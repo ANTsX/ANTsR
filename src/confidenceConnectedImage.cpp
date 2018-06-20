@@ -1,14 +1,13 @@
 #include <exception>
 #include <algorithm>
 #include <vector>
-#include "RcppANTsR.h"
+#include <string>
+#include <RcppANTsR.h>
 #include "itkImage.h"
-#include <ants.h>
 #include "itkConfidenceConnectedImageFilter.h"
 
 template< class ImageType >
-SEXP confidenceConnectedImageHelper(
-    SEXP r_inimg,
+SEXP confidenceConnectedImageHelper( SEXP r_inimg,
     SEXP r_outimg,
     Rcpp::IntegerVector seed,
     Rcpp::NumericVector radius,
@@ -44,72 +43,69 @@ SEXP confidenceConnectedImageHelper(
   return( r_outimg );
 }
 
-RcppExport SEXP confidenceConnectedImage( 
-    SEXP r_inimg,
+RcppExport SEXP confidenceConnectedImage( SEXP r_inimg,
     SEXP r_outimg,
     SEXP r_seed,
     SEXP r_radius,
     SEXP r_multiplier,
-    SEXP r_iterations)
+    SEXP r_iterations )
 {
-try
-{
-  Rcpp::S4 antsImage( r_inimg );
-  std::string pixeltype = Rcpp::as< std::string >( antsImage.slot( "pixeltype" ));
-  unsigned int dimension = Rcpp::as< int >( antsImage.slot( "dimension" ) );
-  Rcpp::IntegerVector seed( r_seed );
-  Rcpp::NumericVector radius( r_radius );
-  Rcpp::NumericVector multiplier( r_multiplier );
-  Rcpp::IntegerVector iterations( r_iterations );
+  try
+  {
+    Rcpp::S4 antsImage( r_inimg );
+    std::string pixeltype = Rcpp::as< std::string >( antsImage.slot( "pixeltype" ));
+    unsigned int dimension = Rcpp::as< int >( antsImage.slot( "dimension" ) );
+    Rcpp::IntegerVector seed( r_seed );
+    Rcpp::NumericVector radius( r_radius );
+    Rcpp::NumericVector multiplier( r_multiplier );
+    Rcpp::IntegerVector iterations( r_iterations );
 
-  
+    if ( (pixeltype == "float") & ( dimension == 2 ) )
+    {
+      typedef float PixelType;
+      const unsigned int dim = 2;
+      typedef itk::Image< PixelType, dim > ImageType;
+      SEXP outimg = confidenceConnectedImageHelper< ImageType >(
+          r_inimg, r_outimg, seed, multiplier, radius, iterations);
+      return( outimg );
+    }
+    else if ( ( pixeltype == "float" ) & ( dimension == 3 ) )
+    {
+      typedef float PixelType;
+      const unsigned int dim = 3;
+      typedef itk::Image< PixelType, dim > ImageType;
+      SEXP outimg = confidenceConnectedImageHelper< ImageType >(
+          r_inimg, r_outimg, seed, multiplier, radius, iterations);
+      return( outimg );
+    }
+    else if ( ( pixeltype == "float" ) & ( dimension  == 4 ) )
+    {
+      typedef float PixelType;
+      const unsigned int dim = 4;
+      typedef itk::Image< PixelType, dim > ImageType;
+      SEXP outimg = confidenceConnectedImageHelper< ImageType >(
+          r_inimg, r_outimg, seed, multiplier, radius, iterations);
+      return (outimg);
+    }
+    else
+    {
+      Rcpp::stop("Unsupported image dimension or pixel type.");
+    }
+  }
 
-  if ( (pixeltype == "float") & ( dimension == 2 ) )
+  catch( itk::ExceptionObject & err )
   {
-    typedef float PixelType;
-    const unsigned int dim = 2;
-    typedef itk::Image< PixelType, dim > ImageType;
-    SEXP outimg = confidenceConnectedImageHelper< ImageType >(
-        r_inimg, r_outimg, seed, multiplier, radius, iterations);
-    return( outimg );
+    Rcpp::Rcout << "ITK ExceptionObject caught!" << std::endl;
+    forward_exception_to_r( err );
   }
-  else if ( ( pixeltype == "float" ) & ( dimension == 3 ) )
+  catch( const std::exception& exc )
   {
-    typedef float PixelType;
-    const unsigned int dim = 3;
-    typedef itk::Image< PixelType, dim > ImageType;
-    SEXP outimg = confidenceConnectedImageHelper< ImageType >(
-        r_inimg, r_outimg, seed, multiplier, radius, iterations);
-    return( outimg );
+    Rcpp::Rcout << "STD ExceptionObject caught!" << std::endl;
+    forward_exception_to_r( exc );
   }
-  else if ( ( pixeltype == "float" ) & ( dimension  == 4 ) )
+  catch( ... )
   {
-    typedef float PixelType;
-    const unsigned int dim = 4;
-    typedef itk::Image< PixelType, dim > ImageType;
-    SEXP outimg = confidenceConnectedImageHelper< ImageType >(
-        r_inimg, r_outimg, seed, multiplier, radius, iterations);
-    return (outimg);
+    Rcpp::stop( "C++ exception (unknown reason)");
   }
-  else
-  {
-    Rcpp::stop("Unsupported image dimension or pixel type.");
-  }
-}
-
-catch( itk::ExceptionObject & err )
-{
-  Rcpp::Rcout << "ITK ExceptionObject caught!" << std::endl;
-  forward_exception_to_r( err );
-}
-catch( const std::exception& exc )
-{
-  Rcpp::Rcout << "STD ExceptionObject caught!" << std::endl;
-  forward_exception_to_r( exc );
-}
-catch( ... )
-{
-  Rcpp::stop( "C++ exception (unknown reason)");
-}
- return Rcpp::wrap(NA_REAL); // should not be reached
+  return Rcpp::wrap(NA_REAL); // should not be reached
 }
