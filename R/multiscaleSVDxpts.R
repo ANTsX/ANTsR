@@ -29,6 +29,7 @@
 #'   physical.coordinates=TRUE, spatial.info=TRUE )
 #' smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
 #' }
+#' @importFrom ANTsRCore antsrimpute
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
@@ -347,7 +348,7 @@ for ( myscl in 1:length( r ) )
     {
     rowdist = calcRowMatDist( x, x[ locsam[i], ] )
     sel = rowdist < myr
-    if ( sum( sel , na.rm = T ) >  2 ) {
+    if ( sum( sel , na.rm = TRUE ) >  2 ) {
       if ( knn > 0 & sum( sel ) > knn ) # take a subset of sel
         {
         selinds = sample( 1:length( sel ), knn )
@@ -363,7 +364,7 @@ for ( myscl in 1:length( r ) )
       } else temp = rep( NA, nev )
     myevs[ i, 1:nev ] = temp
     if ( i == locn ) {
-      mresponse[ myscl, ] = colMeans( myevs, na.rm=T )
+      mresponse[ myscl, ] = colMeans( myevs, na.rm=TRUE )
       if ( verbose ) {
         print( paste( i, "r", myr, "localN", sum(sel) ) )
         print( mresponse[ myscl, ] )
@@ -391,7 +392,7 @@ for ( i in 1:nev )
   }
 shiftinds = c(2:ncol( mresponse ), ncol( mresponse ) )
 delt = scaleEvalCorrs - scaleEvalCorrs[shiftinds]
-qdelt = quantile( delt[2:length(delt)], 0.9, na.rm=T )
+qdelt = quantile( delt[2:length(delt)], 0.9, na.rm=TRUE )
 noiseDim = which( delt > qdelt ) + 1
 # curvature dimensionality
 # find the dimensionality that maximizes the t-test difference across
@@ -430,7 +431,7 @@ if ( plot > 0 )
   mycols = rainbow( nev )
   growthRate1 = mresponse[,1]
   plot( r, growthRate1, type='l', col = mycols[1], main='Evals by scale',
-        ylim=c(0.00, max( mresponse[,plot], na.rm=T) ),
+        ylim=c(0.00, max( mresponse[,plot], na.rm=TRUE) ),
         xlab='ball-radius', ylab='Expected Eval' )
   for ( i in 2:ncol(mresponse) )
     {
@@ -627,7 +628,7 @@ while ( i <= iterations ) {
     if ( vv > 1 )
       for ( vk in 1:(vv-1) ) {
         temp = v[,vk]
-        denom = sum( temp * temp , na.rm=T )
+        denom = sum( temp * temp , na.rm=TRUE )
         if ( denom > 0 ) ip = sum( temp * v[,vv] ) / denom else ip = 1
         v[ , vv ] = v[, vv ] - temp * ip
         }
@@ -637,13 +638,13 @@ while ( i <= iterations ) {
       localv = localv * (-1)
       doflip = TRUE
       }
-    myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+    myquant = quantile( localv , sparsenessQuantile, na.rm=TRUE )
     if ( positivity == 'positive') {
       if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
     } else if ( positivity == 'negative' ) {
       localv[ localv > myquant ] = 0
     } else if ( positivity == 'either' ) {
-      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+      localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=TRUE  ) ] = 0
     }
     if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
   }
@@ -651,7 +652,7 @@ while ( i <= iterations ) {
   if ( ! any( is.na( repeatedMeasures ) ) & is.na( LRR ) ) { # estimate random intercepts
     for ( s in usubs ) {
       usel = repeatedMeasures == s
-      intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
+      intercept[ usel ] = mean( intercept[ usel ], na.rm=TRUE  )
       }
     }
   err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
@@ -1017,13 +1018,13 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
         localv = localv * (-1)
         doflip = TRUE
         }
-      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+      myquant = quantile( localv , sparsenessQuantile, na.rm=TRUE )
       if ( positivity == 'positive') {
         if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
       } else if ( positivity == 'negative' ) {
         localv[ localv > myquant ] = 0
       } else if ( positivity == 'either' ) {
-        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+        localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=TRUE  ) ] = 0
       }
       if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
       v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
@@ -1032,7 +1033,7 @@ return(  makeImage( mask, as.numeric( ivec ) ) )
     if ( ! any( is.na( repeatedMeasures ) ) ) { # estimate random intercepts
       for ( s in usubs ) {
         usel = repeatedMeasures == s
-        intercept[ usel ] = mean( intercept[ usel ], na.rm=T  )
+        intercept[ usel ] = mean( intercept[ usel ], na.rm=TRUE  )
         }
       }
     err = mean( abs( x - ( u %*% t(v) + intercept  ) ) )
@@ -1341,30 +1342,30 @@ orthogonalizeAndQSparsify <- function( v,
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
 #          temp = temp / sqrt( sum( temp * temp ) )
-          denom = sum( temp * temp , na.rm=T )
+          denom = sum( temp * temp , na.rm=TRUE )
           if ( denom > .Machine$double.eps ) ip = sum( temp * v[,vv] ) / denom else ip = 1
           v[ , vv ] = v[, vv ] - temp * ip
           }
         }
       localv = v[ , vv ] # zerka
       doflip = FALSE
-      if ( sum( localv > 0, na.rm=T ) < sum( localv < 0, na.rm=T ) ) {
+      if ( sum( localv > 0, na.rm=TRUE ) < sum( localv < 0, na.rm=TRUE ) ) {
         localv = localv * (-1)
         doflip = TRUE
         }
-      myquant = quantile( localv , sparsenessQuantile, na.rm=T )
+      myquant = quantile( localv , sparsenessQuantile, na.rm=TRUE )
       if ( ! softThresholding ) {
         if ( positivity == 'positive') {
           if ( myquant > 0 ) localv[ localv <= myquant ] = 0 else localv[ localv >= myquant ] = 0
         } else if ( positivity == 'negative' ) {
           localv[ localv > myquant ] = 0
         } else if ( positivity == 'either' ) {
-          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=T  ) ] = 0
+          localv[ abs(localv) < quantile( abs(localv) , sparsenessQuantile, na.rm=TRUE  ) ] = 0
         }
       } else {
         if ( positivity == 'positive' ) localv[ localv < 0 ] = 0
         mysign = sign( localv )
-        myquant = quantile( abs(localv) , sparsenessQuantile, na.rm=T )
+        myquant = quantile( abs(localv) , sparsenessQuantile, na.rm=TRUE )
         temp = abs( localv ) - myquant
         temp[ temp < 0 ] = 0
         localv = mysign * temp
@@ -2701,7 +2702,7 @@ return(
 #' s1 = sample( 1:nsub)
 #' s2 = sample( 1:nsub)
 #' resultp = symilr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
-#'    initialUMatrix = nk , verbose=T, iterations=5  )
+#'    initialUMatrix = nk , verbose=TRUE, iterations=5  )
 #' p1p = mat1 %*% (resultp$v[[1]])
 #' p2p = mat2[s1,] %*% (resultp$v[[2]])
 #' p3p = mat3[s2,] %*% (resultp$v[[3]])
@@ -2839,7 +2840,7 @@ symilr <- function(
     !is.matrix(initialUMatrix) ) {
     message(paste("initializing with random matrix: ",initialUMatrix,'columns'))
     randmat = scale(
-      (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), T, T )
+      (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), TRUE, TRUE )
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
@@ -2962,7 +2963,7 @@ getSyMG <- function( v, i, myw, mixAlg )  {
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
-        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], T, T )
+        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
         initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 

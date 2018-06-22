@@ -79,7 +79,7 @@ p3 = mat3 \%*\% (result$v[[3]])
 s1 = sample( 1:nsub)
 s2 = sample( 1:nsub)
 resultp = symilr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
-   initialUMatrix = nk , verbose=T, iterations=5  )
+   initialUMatrix = nk , verbose=TRUE, iterations=5  )
 p1p = mat1 \%*\% (resultp$v[[1]])
 p2p = mat2[s1,] \%*\% (resultp$v[[2]])
 p3p = mat3[s2,] \%*\% (resultp$v[[3]])

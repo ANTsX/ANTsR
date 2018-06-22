@@ -56,10 +56,10 @@ makeGraph <- function( mat, graphdensity = 1,
   adjacencyMatrix <- as.matrix(adjmat, nrow = numberOfNeighbors, ncol = numberOfNeighbors)
   g1 <- igraph::graph_from_adjacency_matrix( adjacencyMatrix,
     mode = c("undirected"), weighted = TRUE, diag = FALSE )
-  edgeWeights <- antsrimpute( igraph::E(g1)$weight )
+  edgeWeights <- ANTsRCore::antsrimpute( igraph::E(g1)$weight )
   if ( !inverseValuesAsWeights )
     {
-    edgeWeights <- antsrimpute( psych::fisherz( igraph::E(g1)$weight ) )
+    edgeWeights <- ANTsRCore::antsrimpute( psych::fisherz( igraph::E(g1)$weight ) )
     igraph::E(g1)$weight = edgeWeights
     }
   # compute local efficiency

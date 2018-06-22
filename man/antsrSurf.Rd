@@ -6,8 +6,8 @@
 \usage{
 antsrSurf(x, y, z, quantlimits = c(0.1, 0.9), colormap = "jet",
   alpha = NA, inflationFactor = 25, smoothingSigma = 0,
-  rotationParams = c(270, 0, 270), overlayLimits = NA, filename = NA,
-  antspath = NA, verbose = FALSE)
+  rotationParams = c(270, 0, 270), overlayLimits = NA, backgroundColor,
+  filename = NA, antspath = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}
@@ -36,6 +36,8 @@ rotation parameters that will be applied in sequence.}
 this parameter will override \code{quantlimits}.  Currently, this will set
 levels above \code{overlayLimits[2]} to \code{overlayLimits[2]}. Can be a
 list of length of y.}
+
+\item{backgroundColor}{a three entry vector where each entry is in the range of 0 to 255 and corresponds to red green and blue color channels. Alternatively, pass a string white or black.}
 
 \item{filename}{prefix filename for output pngs}
 
