@@ -5,7 +5,7 @@
 \title{Compute cortical thickness using the DiReCT algorithm.}
 \usage{
 kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
-  ...)
+  e = FALSE, verbose = FALSE, ...)
 }
 \arguments{
 \item{s}{segmentation image}
@@ -19,6 +19,10 @@ kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
 \item{r}{gradient descent update parameter}
 
 \item{m}{gradient field smoothing parameter}
+
+\item{e}{restrict deformation boolean}
+
+\item{verbose}{boolean}
 
 \item{...}{anything else, see KK help in ANTs}
 }
