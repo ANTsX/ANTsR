@@ -10,6 +10,7 @@
 #' @param its convergence params - controls iterations
 #' @param r gradient descent update parameter
 #' @param m gradient field smoothing parameter
+#' @param x matrix-based smoothing
 #' @param e restrict deformation boolean
 #' @param verbose boolean
 #' @param ... anything else, see KK help in ANTs
@@ -27,7 +28,8 @@
 #' @export kellyKapowski
 kellyKapowski <- function( s = NA, g = NA, w = NA,
    its = 50, r = 0.025,
-   m = 1.5,  e = FALSE, verbose = FALSE, ...) {
+   m = 1.5,  x = TRUE,
+   e = FALSE, verbose = FALSE, ...) {
   if (missing(s) | missing(g) | missing(w) |
     is.na(s) | is.na(g) | is.na(w)) {
     print("Input error - check params & usage")
@@ -41,7 +43,7 @@ kellyKapowski <- function( s = NA, g = NA, w = NA,
   outimg=antsImageClone(g)
   itsstring = paste0( "[",its,",0,6]" )
   kkargs <- list(d = d, s = s, g = g, w = w,
-    c = itsstring, r = r, m = m, e = as.numeric( e ),
+    c = itsstring, r = r, m = m, e = as.numeric( e ), x = as.numeric( x ),
     o = outimg, v = as.numeric( verbose ),
     ...)
   temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
