@@ -5,7 +5,7 @@
 \title{Compute cortical thickness using the DiReCT algorithm.}
 \usage{
 kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
-  x = TRUE, e = FALSE, verbose = FALSE, ...)
+  x = TRUE, e = FALSE, t, timeSigma = 1, verbose = FALSE, ...)
 }
 \arguments{
 \item{s}{segmentation image}
@@ -23,6 +23,10 @@ kellyKapowski(s = NA, g = NA, w = NA, its = 50, r = 0.025, m = 1.5,
 \item{x}{matrix-based smoothing}
 
 \item{e}{restrict deformation boolean}
+
+\item{t}{time spacing, a vector equal to the number of time dimensions}
+
+\item{timeSigma, }{a scalar sigma value for distances between time points}
 
 \item{verbose}{boolean}
 
