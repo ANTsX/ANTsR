@@ -9,7 +9,7 @@
 
 [![Travis Build Status](https://travis-ci.org/ANTsX/ANTsR.png?branch=master)](https://travis-ci.org/ANTsX/ANTsR)
 
-DOI 10.17605/osf.io/d7b8c
+[DOI 10.17605/osf.io/bsq5v](https://osf.io/bsq5v/)
 
 muschellij2 badges:
 [![Travis Build Status](https://travis-ci.org/muschellij2/ANTsR.png?branch=master)](https://travis-ci.org/muschellij2/ANTsR) [![Coverage Status](https://coveralls.io/repos/muschellij2/ANTsR/badge.svg)](https://coveralls.io/r/muschellij2/ANTsR)
