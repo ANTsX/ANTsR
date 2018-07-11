@@ -20,3 +20,5 @@ which\.R
 c\.R
 _config\.yml
 ^docs$
+R/confidenceConnected.R
+R/connectedThresholdImage.R
