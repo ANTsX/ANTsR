@@ -15,6 +15,22 @@ list containing demographics, imageMat, imageMask and imageBoolean
 \description{
 This function reads a file created by \code{writeNormalizedPopulationData}.
 }
+\examples{
+tfn = system.file("extdata", "normpop.h5", package = "ANTsR")
+if (file.exists(tfn)) {
+    dlist = readNormalizedPopulationData( tfn)
+}
+\dontrun{
+ilist = getANTsRData( "population" )
+mask = getMask( ilist[[ 1 ]] )
+imat = imageListToMatrix( ilist, mask )
+demog = data.frame( age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
+ibool = c( TRUE, TRUE, TRUE, FALSE )
+tfn = tempfile(fileext=".h5")
+if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
+if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
+}
+}
 \author{
 Avants BB
 }

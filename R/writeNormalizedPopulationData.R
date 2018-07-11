@@ -30,8 +30,10 @@
 #'   age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
 #' tfn = tempfile(fileext=".h5")
-#' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool,
+#' if ( usePkg( "h5" ) ) {
+#' writeNormalizedPopulationData( demog, imat, mask, ibool,
 #'   tfn )
+#'   }
 #' }
 #' @export writeNormalizedPopulationData
 writeNormalizedPopulationData <- function(
@@ -99,6 +101,7 @@ writeNormalizedPopulationData <- function(
 #' tfn = tempfile(fileext=".h5")
 #' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
 #' if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
+#' }
 #' @export readNormalizedPopulationData
 readNormalizedPopulationData <- function( filename )
 {
