@@ -5,7 +5,7 @@
 \title{An ants-based brain extraction script.}
 \usage{
 abpBrainExtraction(img = NA, tem = NA, temmask = NA, temregmask = NA,
-  regtype = "SyN", tdir = NA)
+  regtype = "SyN", tdir = NA, reproducible = TRUE)
 }
 \arguments{
 \item{img}{whole head image to which we map a brain mask}
@@ -19,6 +19,12 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA, temregmask = NA,
 \item{regtype}{registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)}
 
 \item{tdir}{temporary directory (optional)}
+
+\item{reproducible}{if \code{TRUE}, will execute 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.}
 }
 \value{
 outputs a brain image and brain mask.
@@ -29,6 +35,7 @@ image.  Should be preceded by abpN4.
 }
 \examples{
 
+set.seed(1)
 n = 64
 fn<-getANTsRData("r16")
 img<-antsImageRead(fn)
@@ -39,8 +46,8 @@ tem<-resampleImage(tem,c(n,n),1,0)
 temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ] <- 1
 temmask[ tem  <= 20 ] <- 0
-bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
-stopifnot( sum(bm$bmask) == 1226)
+bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, reproducible = TRUE)
+stopifnot( sum(bm$bmask) == 1175)
 
 }
 \author{

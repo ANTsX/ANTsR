@@ -6,7 +6,7 @@
 \usage{
 affineInitializer(fixedImage, movingImage, searchFactor = 20,
   radianFraction = 0.1, usePrincipalAxis = FALSE,
-  localSearchIterations = 10, mask, txfn)
+  localSearchIterations = 10, mask, txfn, reproducible = TRUE)
 }
 \arguments{
 \item{fixedImage}{the fixed reference image}
@@ -24,14 +24,24 @@ affineInitializer(fixedImage, movingImage, searchFactor = 20,
 \item{mask}{optional mask to restrict registration}
 
 \item{txfn}{filename for the transformation}
+
+\item{reproducible}{if \code{TRUE}, will execute 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.}
 }
 \value{
 transformationMatrix
 }
 \description{
 Searches over the sphere to find a good initialization for further
-registration refinement, if needed.  This is a arapper for the ANTs
+registration refinement, if needed.  This is a wrapper for the ANTs
 function antsAffineInitializer.
+}
+\note{
+See 
+\url{https://github.com/ANTsX/ANTs/issues/444} for reproducibility discussion
 }
 \examples{
 

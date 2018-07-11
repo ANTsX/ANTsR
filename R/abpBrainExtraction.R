@@ -9,10 +9,16 @@
 #' @param temregmask Template's registration mask including skull but not the face
 #' @param regtype registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)
 #' @param tdir temporary directory (optional)
+#' @param reproducible if \code{TRUE}, will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion. 
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
 #'
+#' set.seed(1)
 #' n = 64
 #' fn<-getANTsRData("r16")
 #' img<-antsImageRead(fn)
@@ -23,14 +29,23 @@
 #' temmask<-antsImageClone( tem )
 #' temmask[ tem  > 20 ] <- 1
 #' temmask[ tem  <= 20 ] <- 0
-#' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
-#' stopifnot( sum(bm$bmask) == 1226)
+#' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, reproducible = TRUE)
+#' stopifnot( sum(bm$bmask) == 1175)
 #'
 #' @export abpBrainExtraction
 #' @useDynLib ANTsR
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
-                               temregmask = NA, regtype='SyN', tdir = NA) {
+                               temregmask = NA, regtype='SyN', tdir = NA,
+                               reproducible = TRUE) {
 ### @useDynLib ANTsR, .registration = TRUE
+
+  if (reproducible) {
+    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    on.exit({
+      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
+    })
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
+  }  
   
   if (missing(img) | missing(tem) | missing(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
@@ -82,7 +97,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
       temp<-affineInitializer(
               fixedImage=temsmall, movingImage=imgsmall,
               searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
-              localSearchIterations=10, txfn=initafffn )
+              localSearchIterations=10, txfn=initafffn)
     else
       temp<-affineInitializer(
               fixedImage=temsmall, movingImage=imgsmall,
