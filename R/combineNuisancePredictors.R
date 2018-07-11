@@ -28,7 +28,8 @@
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
-#' moco <- antsMotionCalculation( simimg , moreaccurate=0)
+#' moco <- antsMotionCalculation( simimg , moreaccurate=0,
+#' reproducible = TRUE)
 #' # for real data use below
 #' # moco <- antsMotionCalculation(getANTsRData("pcasl"))
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
@@ -36,15 +37,18 @@
 #' noise <- getASLNoisePredictors(aslmat, tc, 0.5 )
 #' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 #' @export combineNuisancePredictors
-combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxpreds = 4,
-  localpredictors = NA, method = "cv", k = 5, covariates = NA, ordered = F) {
+combineNuisancePredictors <- function(
+  inmat, target, globalpredictors = NA, 
+  maxpreds = 4,
+  localpredictors = NA, method = "cv", k = 5, covariates = NA, ordered = FALSE) {
   avgR2 <- function(inmat, target, k, covariates) {
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
     r2max <- apply(r2, FUN = median, MARGIN = 2)
     r2pos <- r2max[r2max > 0]
     median(r2pos)
   }
-  bestPredictors <- function(inmat, noisemat, target = target, maxpreds = maxpreds,
+  bestPredictors <- function(
+    inmat, noisemat, target = target, maxpreds = maxpreds,
     method = method, k = k, covariates = covariates, ordered = ordered) {
     if (method == "svd") {
       noise <- svd(noisemat, nv = 0, nu = maxpreds)$u
@@ -65,14 +69,14 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
         r2sum <- matrix(rep(0, ncol(globalpredictors) * maxpreds), ncol = maxpreds)
         for (ii in 1:maxpreds) {
           if (is.null(bestpreds)) {
-          preds.remain <- 1:ncol(globalpredictors)
+            preds.remain <- 1:ncol(globalpredictors)
           } else {
-          preds.remain <- (1:ncol(globalpredictors))[-bestpreds]
+            preds.remain <- (1:ncol(globalpredictors))[-bestpreds]
           }
           for (jj in preds.remain) {
-          residmat <- residuals(lm(inmat ~ as.matrix(globalpredictors[, c(bestpreds,
-            jj)])))
-          r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
+            residmat <- residuals(lm(inmat ~ as.matrix(globalpredictors[, c(bestpreds,
+                                                                            jj)])))
+            r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
           }
           bestpreds <- c(bestpreds, which.max(r2sum[, ii]))
         }
@@ -81,8 +85,8 @@ combineNuisancePredictors <- function(inmat, target, globalpredictors = NA, maxp
     }
     noise
   }
-
+  
   noise <- bestPredictors(inmat, globalpredictors, target, maxpreds, method, k,
-    covariates, ordered)
+                          covariates, ordered)
   noise
 }

@@ -26,6 +26,7 @@ Truncate outlier intensities and bias correct with the N4 algorithm.
 
 img <- antsImageRead(getANTsRData("r16"))
 img2 <- abpN4( img )
+stopifnot(abs(mean(img2) - 49.9181819403311) < 1e-13)
 
 }
 \author{

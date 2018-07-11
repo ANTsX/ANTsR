@@ -71,6 +71,7 @@ asl<-matrix2timeseries( asl, aslmask, aslmat )
 # NOT WORKING
 \dontrun{
 pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0 )
+stopifnot(abs(mean(pcasl.processing$m1)- 62.2115522470984) < 1e-10)
 pcasl.processing <- aslPerfusion( asl, moreaccurate=1, ncompcor=2 )
 # allow some rejection
 pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0.925 )

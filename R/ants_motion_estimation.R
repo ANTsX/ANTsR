@@ -9,17 +9,36 @@
 #'  (use 2 for real applications, 0 for testing)
 #' @param txtype Transformation type
 #' @param verbose verbosity boolean
+#' @param reproducible if \code{TRUE}, will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion. 
 #' @return list of outputs
 #' @author Avants BB
 #' @examples
-#'
+#' set.seed(1000)
 #' testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
 #' testimg<-iMath(testimg,"PadImage",5)
 #' mocorr<-.motion_correction( testimg )
+#' testvec = c(0, -0.219743416647826, 0.98429985593235, 0.00324529763548236, 
+#' 0.00585625164092566, 0.00210732580386263, 0.987878230925204, 
+#' 0.00198985578078656, 0.00047686018359226, 0.00564825158188133, 
+#' 0.993011682775743, 0.0387403451117311, 0.0451764455096186, -0.00831937541351318
+#' )
+#' stopifnot(all(abs(colMeans(mocorr$moco_params) - testvec) < 1e-10))
 #' @export
 .motion_correction <- function( img, fixed = NA, moreaccurate = 1,
-                                txtype = "Affine", verbose=FALSE )
+                                txtype = "Affine", verbose=FALSE,
+                                reproducible = TRUE)
 {
+  if (reproducible) {
+    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    on.exit({
+      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
+    })
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
+  }  
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")

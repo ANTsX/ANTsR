@@ -61,12 +61,16 @@ Three options are currently provided, with different additional arguments:
 }
 }
 \examples{
+set.seed(1)
 nvox <- 5 * 5 * 5 * 30
 dims <- c(5, 5, 5, 30)
 voxvals <- array(rnorm(nvox) + 500, dim=dims)
 voxvals[, , , 5] <- voxvals[, , , 5] + 600
 asl <- makeImage(dims, voxvals)
 censored <- aslCensoring(asl)
+stopifnot(abs(mean(censored$asl.inlier) - 248.071606610979) < 1e-10)
+stopifnot(all(censored$which.outliers == c(5L, 6L)))
+
 }
 \references{
 Tan H. et al., ``A Fast, Effective Filtering Method

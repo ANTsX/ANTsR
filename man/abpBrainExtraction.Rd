@@ -40,6 +40,7 @@ temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ] <- 1
 temmask[ tem  <= 20 ] <- 0
 bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask)
+stopifnot( sum(bm$bmask) == 1226)
 
 }
 \author{

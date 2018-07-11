@@ -5,7 +5,8 @@
 \title{antsMotionCalculation}
 \usage{
 antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
-  txtype = "Affine", framewise = 1, verbose = FALSE)
+  txtype = "Affine", framewise = 1, verbose = FALSE,
+  reproducible = TRUE)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}
@@ -24,6 +25,12 @@ method for intraSubjectBOLD.}
 \item{framewise}{Calculate framewise displacement?}
 
 \item{verbose}{enables verbose output.}
+
+\item{reproducible}{if \code{TRUE}, will execute 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.}
 }
 \value{
 List containing:

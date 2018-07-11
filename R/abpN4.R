@@ -13,6 +13,7 @@
 #'
 #' img <- antsImageRead(getANTsRData("r16"))
 #' img2 <- abpN4( img )
+#' stopifnot(abs(mean(img2) - 49.9181819403311) < 1e-13)
 #'
 #' @export abpN4
 abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),

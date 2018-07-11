@@ -41,12 +41,16 @@
 #'  1 indicating the corresponding timepoint is included and 0 indicating exclusion.
 #' @author Kandel BM
 #' @examples
+#' set.seed(1)
 #' nvox <- 5 * 5 * 5 * 30
 #' dims <- c(5, 5, 5, 30)
 #' voxvals <- array(rnorm(nvox) + 500, dim=dims)
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
 #' asl <- makeImage(dims, voxvals)
 #' censored <- aslCensoring(asl)
+#' stopifnot(abs(mean(censored$asl.inlier) - 248.071606610979) < 1e-10)
+#' stopifnot(all(censored$which.outliers == c(5L, 6L)))
+#' 
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslCensoring

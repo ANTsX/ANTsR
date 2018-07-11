@@ -12,6 +12,11 @@
 #' \code{"SyN"}.
 #' @param framewise Calculate framewise displacement?
 #' @param verbose enables verbose output.
+#' @param reproducible if \code{TRUE}, will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion. 
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -32,13 +37,15 @@
 #' }
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(img, mask = NA, fixed = NA, moreaccurate = 1,
-                   txtype = "Affine", framewise = 1, verbose=FALSE ) {
+                   txtype = "Affine", framewise = 1, verbose=FALSE,
+                   reproducible = TRUE) {
   if ( is.na( fixed )  )
   {
   fixed <- getAverageOfTimeSeries( img )
   }
   moco <- .motion_correction( img, fixed = fixed,
-    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
+    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose,
+    reproducible = reproducible)
 #  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
 #    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
   mocoparams <- moco$moco_params

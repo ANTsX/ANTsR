@@ -10,6 +10,11 @@
 #' @param getMotionDescriptors computes dvars and framewise displacement.  May
 #' take additional memory.
 #' @param verbose enables verbose output.
+#' @param reproducible if \code{TRUE}, will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion.
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -19,29 +24,42 @@
 #'  \item{fd}{ Time-series mean and max displacements.}
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
+#' 
+#' @note For reproducible results, you should run
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)}, 
+#' which is what the \code{reproducible = TRUE} flag will do.
+#' See \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' and \url{https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054}
+#' for discussion
 #' @author BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
-#' antsrMotionCalculation( simimg )
+#' stopifnot(abs(mean(simimg) - 0.0427369860965759) < 1e-10)
+#' res = antsrMotionCalculation( simimg, reproducible = TRUE)
+#' check = abs(colMeans(res$fd) - c(MeanDisplacement = 5.16324474446418, 
+#' MaxDisplacement = 5.16324474446417))
+#' stopifnot(all(check < 1e-10))
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
   img,
   fixed,
   mask,
-  typeofTransform = "Rigid",
+  typeofTransform = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
+                       "AffineFast", "BOLDAffine" ),
   getMotionDescriptors = TRUE,
-  verbose=FALSE
+  verbose = FALSE,
+  reproducible = TRUE
   )
 {
-  validTx = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
-     "AffineFast", "BOLDAffine" )
-  if ( sum( typeofTransform  %in%  validTx ) == 0 )
-    {
-    print( "valid transform list:" )
-    print( validTx )
-    stop( paste( typeofTransform, "not in valid transform list." ) )
-    }
+  if (reproducible) {
+    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    on.exit({
+      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
+    })
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
+  }
+  typeofTransform = match.arg(typeofTransform)
   imgdim = length( dim( img ) )
   subdim = imgdim - 1
   ntimes = dim( img )[ imgdim ]
@@ -49,7 +67,9 @@ antsrMotionCalculation <- function(
     {
     fixed <- getAverageOfTimeSeries( img )
     }
-  if ( missing( mask ) ) mask = getMask( fixed )
+  if ( missing( mask ) ) {
+    mask = getMask( fixed )
+  }
   extractSubImage <- function( img, vin )
     {
     temp = ANTsRCore::extractSlice( img, vin, img@dimension )
