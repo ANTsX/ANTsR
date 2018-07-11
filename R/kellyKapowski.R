@@ -10,6 +10,11 @@
 #' @param its convergence params - controls iterations
 #' @param r gradient descent update parameter
 #' @param m gradient field smoothing parameter
+#' @param x matrix-based smoothing
+#' @param e restrict deformation boolean
+#' @param t time spacing, a vector equal to the number of time dimensions
+#' @param timeSigma, a scalar sigma value for distances between time points
+#' @param verbose boolean
 #' @param ... anything else, see KK help in ANTs
 #' @return thickness antsImage
 #' @author Shrinidhi KL, Avants BB
@@ -25,7 +30,11 @@
 #' @export kellyKapowski
 kellyKapowski <- function( s = NA, g = NA, w = NA,
    its = 50, r = 0.025,
-   m = 1.5,  ...) {
+   m = 1.5,  x = TRUE,
+   e = FALSE,
+   t,
+   timeSigma = 1,
+   verbose = FALSE, ...) {
   if (missing(s) | missing(g) | missing(w) |
     is.na(s) | is.na(g) | is.na(w)) {
     print("Input error - check params & usage")
@@ -34,12 +43,25 @@ kellyKapowski <- function( s = NA, g = NA, w = NA,
   if (class(s)[1] == "antsImage") {
     s <- antsImageClone(s, "unsigned int")
   }
+
+  timestring = 0
+  if ( ! missing( t ) ) {
+    timedim = dim(  g  )[ g@dimension ]
+    timestring = paste0( t, collapse='x')
+    if ( length(t) != timedim ) {
+      message( paste("timedim is",timedim, "and timestring is",timestring,  ":these should be of equal length."))
+      }
+    timestring = paste0( "[",timestring,",",timeSigma,"]" )
+  }
+
   # kellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
   d=s@dimension
   outimg=antsImageClone(g)
-  kkargs <- list(d = d, s = s, g = g, w = w, 
-    c = its, r = r, m = m,
-    o = outimg,
+  itsstring = paste0( "[",its,",0,6]" )
+  kkargs <- list(d = d, s = s, g = g, w = w,
+    c = itsstring, r = r, m = m, e = as.numeric( e ), x = as.numeric( x ),
+    p = timestring,
+    o = outimg, v = as.numeric( verbose ),
     ...)
   temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
     PACKAGE = "ANTsR" )

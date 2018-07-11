@@ -9,7 +9,7 @@
 
 [![Travis Build Status](https://travis-ci.org/ANTsX/ANTsR.png?branch=master)](https://travis-ci.org/ANTsX/ANTsR)
 
-
+[DOI 10.17605/osf.io/bsq5v](https://osf.io/bsq5v/)
 
 muschellij2 badges:
 [![Travis Build Status](https://travis-ci.org/muschellij2/ANTsR.png?branch=master)](https://travis-ci.org/muschellij2/ANTsR) [![Coverage Status](https://coveralls.io/repos/muschellij2/ANTsR/badge.svg)](https://coveralls.io/r/muschellij2/ANTsR)
@@ -120,7 +120,7 @@ Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/)
 You will need to install R packages that ANTsR requires. Minimally:
 **Install ITKR and ANTsRCore** [here](https://github.com/stnava/ITKR/releases) and [here](https://github.com/ANTsX/ANTsRCore/releases) then do:
 ```
-mydeps <- c( "Rcpp", "RcppEigen", "tools", "methods", "magrittr", "rsvd" )
+mydeps <- c( "Rcpp", "RcppEigen", "magrittr", "rsvd", "magic", "psych" )
 install.packages( pkgs = mydeps, dependencies = TRUE )
 ```
 You can gain additional functionality by installing packages that
