@@ -13,7 +13,7 @@
 #' library(ANTsR)
 #' img <- makeImage(c(20, 20, 20), rnorm(20^3))
 #' img[2:5, 3:5, 4:8] = 2
-#' seed = xyz(as.array(img) == 2)
+#' seed = floor(colMeans(which(as.array(img) == 2, arr.ind = TRUE)))
 #' simg <- connectedThresholdImage(img, seed = seed,
 #' upper = 2.5, lower = 1.5)
 #' # ortho2(simg, xyz=xyz(as.array(simg) ==1))

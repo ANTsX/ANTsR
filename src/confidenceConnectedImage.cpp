@@ -2,12 +2,14 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include <RcppANTsR.h>
-#include "itkImage.h"
+#include <ants.h>
 #include "itkConfidenceConnectedImageFilter.h"
+#include "itkImage.h"
+#include "RcppANTsR.h"
 
 template< class ImageType >
-SEXP confidenceConnectedImageHelper( SEXP r_inimg,
+SEXP confidenceConnectedImageHelper( 
+    SEXP r_inimg,
     SEXP r_outimg,
     Rcpp::IntegerVector seed,
     Rcpp::NumericVector radius,
@@ -43,7 +45,8 @@ SEXP confidenceConnectedImageHelper( SEXP r_inimg,
   return( r_outimg );
 }
 
-RcppExport SEXP confidenceConnectedImage( SEXP r_inimg,
+RcppExport SEXP confidenceConnectedImage( 
+    SEXP r_inimg,
     SEXP r_outimg,
     SEXP r_seed,
     SEXP r_radius,

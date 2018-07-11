@@ -2,10 +2,10 @@
 #include <algorithm>
 #include <vector>
 #include <string>
-#include "RcppANTsR.h"
 #include <ants.h>
-#include "itkImage.h"
 #include "itkConnectedThresholdImageFilter.h"
+#include "itkImage.h"
+#include "RcppANTsR.h"
 
 template< class ImageType >
 SEXP connectedThresholdImageHelper(
