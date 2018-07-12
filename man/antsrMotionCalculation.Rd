@@ -6,7 +6,8 @@
 \usage{
 antsrMotionCalculation(img, fixed, mask, typeofTransform = c("Rigid",
   "QuickRigid", "BOLDRigid", "Affine", "AffineFast", "BOLDAffine"),
-  getMotionDescriptors = TRUE, verbose = FALSE, num_threads = 1)
+  getMotionDescriptors = TRUE, verbose = FALSE, num_threads = 1,
+  seed = NULL)
 }
 \arguments{
 \item{img}{antsImage, usually ND where D=4.}
@@ -25,6 +26,12 @@ take additional memory.}
 
 \item{num_threads}{will execute 
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.  If \code{NULL}, will not set anything.}
+
+\item{seed}{will execute 
+\code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
@@ -53,12 +60,19 @@ for discussion
 }
 \examples{
 Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
+Sys.setenv(ANTS_RANDOM_SEED = 1)
 set.seed(120)
 simimg<-makeImage(rep(5,4), rnorm(5^4))
 testthat::expect_equal(mean(simimg), 0.0427369860965759)
 res = antsrMotionCalculation( simimg )
+res2 = antsrMotionCalculation( simimg )
+testthat::expect_equal(res$moco_img, res2$moco_img)
+testthat::expect_equal(res$dvars, res$dvars)
+print(res$fd)
+print(res2$fd)
+# testthat::expect_equal(res$fd, res2$fd)
 # testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
-MaxDisplacement = 5.16324474446417))
+# MaxDisplacement = 5.16324474446417))
 }
 \author{
 BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
