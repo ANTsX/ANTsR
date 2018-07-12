@@ -40,7 +40,7 @@
   ants_random_seed = itk_threads = NULL
   if (!is.null(seed)) {
     ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
-    Sys.setenv(ANTS_RANDOM_SEED = num_threads)    
+    Sys.setenv(ANTS_RANDOM_SEED = seed)    
   }
   if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
