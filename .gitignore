@@ -7,6 +7,9 @@
 src/Makevars
 extdata/
 src/*.o
+src/*.o
+src/*.gcda
+src/*.gcno
 src/*.o-*
 src/*.so
 src/symbols.rds
