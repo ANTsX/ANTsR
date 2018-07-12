@@ -56,8 +56,8 @@ Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
 set.seed(120)
 simimg<-makeImage(rep(5,4), rnorm(5^4))
 testthat::expect_equal(mean(simimg), 0.0427369860965759)
-res = antsrMotionCalculation( simimg, num_threads = 1)
-testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
+res = antsrMotionCalculation( simimg )
+# testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
 MaxDisplacement = 5.16324474446417))
 }
 \author{

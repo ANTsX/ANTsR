@@ -37,8 +37,14 @@
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
 #' testthat::expect_equal(mean(simimg), 0.0427369860965759)
-#' res = antsrMotionCalculation( simimg, num_threads = 1)
-#' testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
+#' res = antsrMotionCalculation( simimg )
+#' res2 = antsrMotionCalculation( simimg )
+#' testthat::expect_equal(res$moco_img, res2$moco_img)
+#' testthat::expect_equal(res$dvars, res$dvars)
+#' print(res$fd)
+#' print(res2$fd)
+#' # testthat::expect_equal(res$fd, res2$fd)
+#' # testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
 #' MaxDisplacement = 5.16324474446417))
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
