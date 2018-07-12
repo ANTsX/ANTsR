@@ -11,6 +11,9 @@
 #' the low level \code{c++} and as such has non-standard parameters.
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
+#' 
+#' @note This function may give different results on multiple runs.
+#' 
 #' @examples
 #'
 #' # boldfn <- getANTsRData( "pcasl" )

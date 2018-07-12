@@ -66,8 +66,9 @@ for ( i in 1:length(ilist) )
  {
  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-   typeofTransform = c("Affine") )
- mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
+   typeofTransform = c("Affine"), verbose = TRUE )
+ mywarpedimage<-antsApplyTransforms(fixed=ref,
+ moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage
  seg<-thresholdImage( ilist[[i]],"Otsu", 3)

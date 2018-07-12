@@ -6,7 +6,7 @@
 \usage{
 affineInitializer(fixedImage, movingImage, searchFactor = 20,
   radianFraction = 0.1, usePrincipalAxis = FALSE,
-  localSearchIterations = 10, mask, txfn, reproducible = TRUE)
+  localSearchIterations = 10, mask, txfn, num_threads = 1)
 }
 \arguments{
 \item{fixedImage}{the fixed reference image}
@@ -25,11 +25,11 @@ affineInitializer(fixedImage, movingImage, searchFactor = 20,
 
 \item{txfn}{filename for the transformation}
 
-\item{reproducible}{if \code{TRUE}, will execute 
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+\item{num_threads}{will execute 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.}
+for discussion.  If \code{NULL}, will not set anything.}
 }
 \value{
 transformationMatrix

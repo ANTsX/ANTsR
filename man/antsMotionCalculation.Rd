@@ -5,32 +5,29 @@
 \title{antsMotionCalculation}
 \usage{
 antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
-  txtype = "Affine", framewise = 1, verbose = FALSE,
-  reproducible = TRUE)
+  txtype = "Affine", framewise = 1, verbose = FALSE, ...)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}
 
 \item{mask}{mask for image (3D).  If not provided, estimated from data.}
 
-\item{fixed}{Fixed image to register all timepoints to.  If not provided, mean image is used.}
+\item{fixed}{Fixed image to register all timepoints to.
+If not provided, mean image is used.}
 
 \item{moreaccurate}{strategy desired for motion correction.  One of 0 (test)
 1 (high-res only), 2 (multi-level inter-subject), 3 (FIXME), or a special
 method for intraSubjectBOLD.}
 
-\item{txtype}{Type of transform.  One of \code{"Affine"}, \code{"Rigid"}, or
+\item{txtype}{Type of transform.  One of \code{"Affine"}, 
+\code{"Rigid"}, or
 \code{"SyN"}.}
 
 \item{framewise}{Calculate framewise displacement?}
 
 \item{verbose}{enables verbose output.}
 
-\item{reproducible}{if \code{TRUE}, will execute 
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
-running to attempt a more reproducible result.  See
-\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.}
+\item{...}{additional argument to \code{\link{.motion_correction}}}
 }
 \value{
 List containing:

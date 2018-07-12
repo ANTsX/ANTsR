@@ -1,7 +1,6 @@
 #' @title save.ANTsR
 #' @description Save and load ANTsR sessions.
-#' @usage save.ANTsR(filename=file.path('.','.ANTsRsession'), objects=NA,
-#'   env=as.environment(1), overwrite=F, clonediskfiles=T, ...)
+#' 
 #' @param filename Prefix for folder to store data.
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
 #' @param env Environment to save from or load to.
@@ -26,8 +25,8 @@
 save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        objects=NA,
                        env=as.environment(1),
-                       overwrite=F, 
-                       clonediskfiles=T,
+                       overwrite=FALSE, 
+                       clonediskfiles=TRUE,
                        ...) {
   # convert to absolute path
   filename = suppressWarnings(file.path(dirname(normalizePath(filename)),basename(filename)))

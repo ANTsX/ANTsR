@@ -2,8 +2,6 @@
 #' @title Combine and reduce dimensionality of nuisance predictors.
 #' @description Combine and select nuisance predictors to maximize
 #' correlation between \code{inmat} and \code{target}.
-#' @usage combineNuisancePredictors(inmat, target, globalpredictors=NA,
-#'   maxpreds=4, localpredictors=NA, method="cv", k=5, covariates=NA, ordered=F)
 #' @param inmat Input predictor matrix.
 #' @param target Target outcome matrix.
 #' @param globalpredictors Global predictors of size \code{nrow(inmat)}
@@ -28,8 +26,7 @@
 #' @examples
 #' set.seed(120)
 #' simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
-#' moco <- antsMotionCalculation( simimg , moreaccurate=0,
-#' reproducible = TRUE)
+#' moco <- antsMotionCalculation( simimg , moreaccurate=0)
 #' # for real data use below
 #' # moco <- antsMotionCalculation(getANTsRData("pcasl"))
 #' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
@@ -40,7 +37,8 @@
 combineNuisancePredictors <- function(
   inmat, target, globalpredictors = NA, 
   maxpreds = 4,
-  localpredictors = NA, method = "cv", k = 5, covariates = NA, ordered = FALSE) {
+  localpredictors = NA, method = "cv", k = 5, 
+  covariates = NA, ordered = FALSE) {
   avgR2 <- function(inmat, target, k, covariates) {
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
     r2max <- apply(r2, FUN = median, MARGIN = 2)

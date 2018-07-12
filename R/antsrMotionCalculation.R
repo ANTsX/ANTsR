@@ -10,11 +10,11 @@
 #' @param getMotionDescriptors computes dvars and framewise displacement.  May
 #' take additional memory.
 #' @param verbose enables verbose output.
-#' @param reproducible if \code{TRUE}, will execute 
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)} before
+#' @param num_threads will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.
+#' for discussion.  If \code{NULL}, will not set anything. 
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -27,19 +27,19 @@
 #' 
 #' @note For reproducible results, you should run
 #' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)}, 
-#' which is what the \code{reproducible = TRUE} flag will do.
+#' which is what the \code{num_threads = 1} flag will do.
 #' See \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 #' and \url{https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054}
 #' for discussion
 #' @author BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 #' @examples
+#' Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
-#' stopifnot(abs(mean(simimg) - 0.0427369860965759) < 1e-10)
-#' res = antsrMotionCalculation( simimg, reproducible = TRUE)
-#' check = abs(colMeans(res$fd) - c(MeanDisplacement = 5.16324474446418, 
+#' testthat::expect_equal(mean(simimg), 0.0427369860965759)
+#' res = antsrMotionCalculation( simimg, num_threads = 1)
+#' testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
 #' MaxDisplacement = 5.16324474446417))
-#' stopifnot(all(check < 1e-10))
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
   img,
@@ -49,16 +49,16 @@ antsrMotionCalculation <- function(
                        "AffineFast", "BOLDAffine" ),
   getMotionDescriptors = TRUE,
   verbose = FALSE,
-  reproducible = TRUE
+  num_threads = 1
   )
 {
-  if (reproducible) {
+  if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     on.exit({
       Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
     })
-    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
-  }
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
+  }  
   typeofTransform = match.arg(typeofTransform)
   imgdim = length( dim( img ) )
   subdim = imgdim - 1

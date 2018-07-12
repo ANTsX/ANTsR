@@ -4,8 +4,9 @@
 \alias{combineNuisancePredictors}
 \title{Combine and reduce dimensionality of nuisance predictors.}
 \usage{
-combineNuisancePredictors(inmat, target, globalpredictors=NA,
-  maxpreds=4, localpredictors=NA, method="cv", k=5, covariates=NA, ordered=F)
+combineNuisancePredictors(inmat, target, globalpredictors = NA,
+  maxpreds = 4, localpredictors = NA, method = "cv", k = 5,
+  covariates = NA, ordered = FALSE)
 }
 \arguments{
 \item{inmat}{Input predictor matrix.}
@@ -46,8 +47,7 @@ correlation between \code{inmat} and \code{target}.
 \examples{
 set.seed(120)
 simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
-moco <- antsMotionCalculation( simimg , moreaccurate=0,
-reproducible = TRUE)
+moco <- antsMotionCalculation( simimg , moreaccurate=0)
 # for real data use below
 # moco <- antsMotionCalculation(getANTsRData("pcasl"))
 aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)

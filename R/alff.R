@@ -22,7 +22,7 @@
 #' fallf = apply( mat, FUN=alffmap, MARGIN=2 )
 #' k = kernel("daniell", rep( 2, 3 ) )
 #' fallf2 = apply( mat, FUN=alffmap, MARGIN=2, kernel=k )
-#' stopifnot(abs(mean(fallf2) - 3.00367017972746) < 1e-13)
+#' testthat::expect_equal(mean(fallf2), 3.00367017972746)
 #' 
 #'
 #' @export alffmap

@@ -21,6 +21,9 @@ iterations, shrink factors, and smoothing sigmas for each level. Specialized
 for 4D time series data: fixed image is 3D, moving image should be the 4D
 time series. Fixed image is a reference space or time slice.
 }
+\note{
+This function may give different results on multiple runs.
+}
 \examples{
 
 # boldfn <- getANTsRData( "pcasl" )
