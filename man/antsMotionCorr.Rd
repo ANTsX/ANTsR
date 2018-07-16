@@ -36,6 +36,8 @@ aimg <- new("antsImage", "float", 3)
 mocoImg <- new("antsImage", "float", 4)
 mocoParams <- new("antsMatrix", "double")
 antsMotionCorr( list( d = 3 , a = bold , o = aimg ) )
+aimg2 <- new("antsImage", "float", 3)
+antsMotionCorr( list( d = 3 , a = bold , o = aimg2 ) )
 antsMotionCorr( list( d = 3 ,
   o = list( mocoParams , mocoImg , aimg ) ,
   m = list( name = "MI" , aimg , bold , 1 , 32 , "Regular", 0.1 ) ,

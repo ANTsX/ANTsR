@@ -11,7 +11,8 @@ preprocessRestingBOLD(boldImage, maskImage = NA,
   motionCorrectionAccuracyLevel = 1, motionCorrectionIterations = 1,
   meanBoldFixedImageForMotionCorrection = NA, frequencyLowThreshold = NA,
   frequencyHighThreshold = NA, spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0, residualizeMatrix = TRUE)
+  spatialSmoothingParameters = 0, residualizeMatrix = TRUE,
+  num_threads = 1, seed = NULL)
 }
 \arguments{
 \item{boldImage}{4-D ANTs image fMRI data.}
@@ -58,6 +59,18 @@ needs to be specified with the conductance parameter and the number of
 iterations, e.g. \code{c(0.25, 5)}.}
 
 \item{residualizeMatrix}{boolean}
+
+\item{num_threads}{will execute 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.  If \code{NULL}, will not set anything.}
+
+\item{seed}{will execute 
+\code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
+running to attempt a more reproducible result.  See
+\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+for discussion.  If \code{NULL}, will not set anything.}
 }
 \value{
 List of:

@@ -64,15 +64,16 @@ Sys.setenv(ANTS_RANDOM_SEED = 1)
 set.seed(120)
 simimg<-makeImage(rep(5,4), rnorm(5^4))
 testthat::expect_equal(mean(simimg), 0.0427369860965759)
-res = antsrMotionCalculation( simimg )
-res2 = antsrMotionCalculation( simimg )
-testthat::expect_equal(res$moco_img, res2$moco_img)
-testthat::expect_equal(res$dvars, res$dvars)
+res = antsrMotionCalculation( simimg , seed = 1234)
+res2 = antsrMotionCalculation( simimg , seed = 1234)
+res3 = antsrMotionCalculation( simimg, num_threads = 1, seed = 1 )
+	testthat::expect_equal(res, res2)
+testthat::expect_failure(testthat::expect_equal(res, res3))
 print(res$fd)
-print(res2$fd)
-# testthat::expect_equal(res$fd, res2$fd)
-# testthat::expect_equal(colMeans(res$fd), c(MeanDisplacement = 5.16324474446418, 
-# MaxDisplacement = 5.16324474446417))
+print(res3$fd)
+print(res$moco_params)
+print(res3$moco_params)
+
 }
 \author{
 BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
