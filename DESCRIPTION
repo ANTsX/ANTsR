@@ -1,7 +1,7 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.4.4
+Version: 0.4.4.1
 Date: 2018-07-11
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
@@ -24,7 +24,7 @@ LazyLoad: yes
 Depends:
     R (>= 3.0),
     methods,
-    ANTsRCore (>= 0.5.2.9000)
+    ANTsRCore (>= 0.5.5)
 Imports:
     graphics,
     grDevices,
@@ -65,6 +65,7 @@ Suggests:
     png,
     pracma,
     randomForest,
+    R.matlab,
     RANN,
     Rcpp,
     RcppEigen,

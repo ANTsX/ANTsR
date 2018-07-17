@@ -49,6 +49,21 @@ fi <- antsImageRead(getANTsRData("r16"))
 mi <- antsImageRead(getANTsRData("r27"))
 tx <- affineInitializer( fi, mi )
 
+mi2 = resampleImage(mi, c(1.25, 1.25))
+tx <- affineInitializer( fi, mi2 )
+tx2 <- affineInitializer( fi, mi2 )
+if ('R.matlab' \%in\% installed.packages()) {
+tx_hdr = R.matlab::readMat(tx)
+trans = tx_hdr$AffineTransform.double.2.2
+fixed = tx_hdr$fixed
+
+tx2_hdr = R.matlab::readMat(tx2)
+trans2 = tx2_hdr$AffineTransform.double.2.2
+fixed2 = tx2_hdr$fixed
+
+testthat::expect_equal(tx_hdr, tx2_hdr)
+}
+
 
 }
 \author{
