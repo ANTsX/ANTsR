@@ -10,6 +10,16 @@
 #' @param getMotionDescriptors computes dvars and framewise displacement.  May
 #' take additional memory.
 #' @param verbose enables verbose output.
+#' @param num_threads will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion.  If \code{NULL}, will not set anything. 
+#' @param seed will execute 
+#' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion.  If \code{NULL}, will not set anything. 
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -19,29 +29,62 @@
 #'  \item{fd}{ Time-series mean and max displacements.}
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
+#' 
+#' @note For reproducible results, you should run
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)}, 
+#' which is what the \code{num_threads = 1} flag will do.
+#' See \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' and \url{https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054}
+#' for discussion
 #' @author BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 #' @examples
+#' Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
+#' Sys.setenv(ANTS_RANDOM_SEED = 1)
 #' set.seed(120)
 #' simimg<-makeImage(rep(5,4), rnorm(5^4))
-#' antsrMotionCalculation( simimg )
+#' testthat::expect_equal(mean(simimg), 0.0427369860965759)
+#' res = antsrMotionCalculation( simimg , seed = 1234)
+#' res2 = antsrMotionCalculation( simimg , seed = 1234)
+#' res3 = antsrMotionCalculation( simimg, num_threads = 1, seed = 1 )
+#' 	testthat::expect_equal(res, res2)
+#' testthat::expect_failure(testthat::expect_equal(res, res3))
+#' print(res$fd)
+#' print(res3$fd)
+#' print(res$moco_params)
+#' print(res3$moco_params)
+#' 
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
   img,
   fixed,
   mask,
-  typeofTransform = "Rigid",
+  typeofTransform = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
+                       "AffineFast", "BOLDAffine" ),
   getMotionDescriptors = TRUE,
-  verbose=FALSE
+  verbose = FALSE,
+  num_threads = 1,
+  seed = NULL
   )
 {
-  validTx = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
-     "AffineFast", "BOLDAffine" )
-  if ( sum( typeofTransform  %in%  validTx ) == 0 )
-    {
-    print( "valid transform list:" )
-    print( validTx )
-    stop( paste( typeofTransform, "not in valid transform list." ) )
+  
+  ants_random_seed = itk_threads = NULL
+  if (!is.null(seed)) {
+    ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
+    Sys.setenv(ANTS_RANDOM_SEED = seed)    
+  }
+  if (!is.null(num_threads)) {
+    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
+  }  
+  on.exit({
+    if (!is.null(ants_random_seed)) {
+      Sys.setenv(ANTS_RANDOM_SEED = ants_random_seed)
     }
+    if (!is.null(itk_threads)) {
+      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
+    }    
+  })  
+  typeofTransform = match.arg(typeofTransform)
   imgdim = length( dim( img ) )
   subdim = imgdim - 1
   ntimes = dim( img )[ imgdim ]
@@ -49,7 +92,9 @@ antsrMotionCalculation <- function(
     {
     fixed <- getAverageOfTimeSeries( img )
     }
-  if ( missing( mask ) ) mask = getMask( fixed )
+  if ( missing( mask ) ) {
+    mask = getMask( fixed )
+  }
   extractSubImage <- function( img, vin )
     {
     temp = ANTsRCore::extractSlice( img, vin, img@dimension )

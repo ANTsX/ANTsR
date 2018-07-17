@@ -15,6 +15,8 @@ extern SEXP antsJointFusion(SEXP);
 extern SEXP antsMotionCorr(SEXP);
 extern SEXP antsMotionCorrStats(SEXP, SEXP, SEXP, SEXP);
 extern SEXP centerOfMass(SEXP);
+//extern SEXP confidenceConnectedImage(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+//extern SEXP connectedThresholdImage(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP createJacobianDeterminantImageR(SEXP, SEXP, SEXP, SEXP);
 extern SEXP eigenanatomyCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP fastMarchingExtension(SEXP, SEXP, SEXP);
@@ -34,28 +36,30 @@ extern SEXP timeSeriesSubtraction(SEXP, SEXP);
 extern SEXP weingartenImageCurvature(SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"antsAffineInitializer",          (DL_FUNC) &antsAffineInitializer,           1},
-    {"antsJointFusion",                (DL_FUNC) &antsJointFusion,                 1},
-    {"antsMotionCorr",                 (DL_FUNC) &antsMotionCorr,                  1},
-    {"antsMotionCorrStats",            (DL_FUNC) &antsMotionCorrStats,             4},
-    {"centerOfMass",                   (DL_FUNC) &centerOfMass,                    1},
-    {"createJacobianDeterminantImageR",(DL_FUNC) &createJacobianDeterminantImageR, 4},
-    {"eigenanatomyCpp",                (DL_FUNC) &eigenanatomyCpp,                15},
-    {"fastMarchingExtension",          (DL_FUNC) &fastMarchingExtension,           3},
-    {"fsl2antsrTransform",             (DL_FUNC) &fsl2antsrTransform,              4},
-    {"histogramMatchImageR",           (DL_FUNC) &histogramMatchImageR,            5},
-    {"imagesToMatrix",                 (DL_FUNC) &imagesToMatrix,                  3},
-    {"invariantImageSimilarity",       (DL_FUNC) &invariantImageSimilarity,       12},
-    {"itkConvolveImage",               (DL_FUNC) &itkConvolveImage,                2},
-    {"KellyKapowski",                  (DL_FUNC) &KellyKapowski,                   1},
-    {"LabelGeometryMeasures",          (DL_FUNC) &LabelGeometryMeasures,           1},
-    {"reflectionMatrix",               (DL_FUNC) &reflectionMatrix,                4},
-    {"reorientImage",                  (DL_FUNC) &reorientImage,                   6},
-    {"robustMatrixTransform",          (DL_FUNC) &robustMatrixTransform,           1},
-    {"sccanCpp",                       (DL_FUNC) &sccanCpp,                       19},
-    {"sccanX",                         (DL_FUNC) &sccanX,                          1},
-    {"timeSeriesSubtraction",          (DL_FUNC) &timeSeriesSubtraction,           2},
-    {"weingartenImageCurvature",       (DL_FUNC) &weingartenImageCurvature,        3},
+    {"antsAffineInitializer",           (DL_FUNC) &antsAffineInitializer,            1},
+    {"antsJointFusion",                 (DL_FUNC) &antsJointFusion,                  1},
+    {"antsMotionCorr",                  (DL_FUNC) &antsMotionCorr,                   1},
+    {"antsMotionCorrStats",             (DL_FUNC) &antsMotionCorrStats,              4},
+    {"centerOfMass",                    (DL_FUNC) &centerOfMass,                     1},
+//    {"confidenceConnectedImage",        (DL_FUNC) &confidenceConnectedImage,         6},
+//    {"connectedThresholdImage",         (DL_FUNC) &connectedThresholdImage,          5},
+    {"createJacobianDeterminantImageR", (DL_FUNC) &createJacobianDeterminantImageR,  4},
+    {"eigenanatomyCpp",                 (DL_FUNC) &eigenanatomyCpp,                 15},
+    {"fastMarchingExtension",           (DL_FUNC) &fastMarchingExtension,            3},
+    {"fsl2antsrTransform",              (DL_FUNC) &fsl2antsrTransform,               4},
+    {"histogramMatchImageR",            (DL_FUNC) &histogramMatchImageR,             5},
+    {"imagesToMatrix",                  (DL_FUNC) &imagesToMatrix,                   3},
+    {"invariantImageSimilarity",        (DL_FUNC) &invariantImageSimilarity,        12},
+    {"itkConvolveImage",                (DL_FUNC) &itkConvolveImage,                 2},
+    {"KellyKapowski",                   (DL_FUNC) &KellyKapowski,                    1},
+    {"LabelGeometryMeasures",           (DL_FUNC) &LabelGeometryMeasures,            1},
+    {"reflectionMatrix",                (DL_FUNC) &reflectionMatrix,                 4},
+    {"reorientImage",                   (DL_FUNC) &reorientImage,                    6},
+    {"robustMatrixTransform",           (DL_FUNC) &robustMatrixTransform,            1},
+    {"sccanCpp",                        (DL_FUNC) &sccanCpp,                        19},
+    {"sccanX",                          (DL_FUNC) &sccanX,                           1},
+    {"timeSeriesSubtraction",           (DL_FUNC) &timeSeriesSubtraction,            2},
+    {"weingartenImageCurvature",        (DL_FUNC) &weingartenImageCurvature,         3},
     {NULL, NULL, 0}
 };
 

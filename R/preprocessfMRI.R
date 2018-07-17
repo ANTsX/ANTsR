@@ -31,6 +31,16 @@
 #' needs to be specified with the conductance parameter and the number of
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
+#' @param num_threads will execute 
+#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion.  If \code{NULL}, will not set anything. 
+#' @param seed will execute 
+#' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
+#' running to attempt a more reproducible result.  See
+#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
+#' for discussion.  If \code{NULL}, will not set anything.  
 #' @return List of:
 #' \itemize{
 #'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
@@ -66,8 +76,33 @@ preprocessfMRI <- function(boldImage,
   frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
   spatialSmoothingParameters = 0,
-  residualizeMatrix = TRUE) {
+  residualizeMatrix = TRUE,
+  num_threads = 1,
+  seed = NULL  ) {
 
+  ###################################
+  # set for reproducibility
+  ###################################
+  ants_random_seed = itk_threads = NULL
+  if (!is.null(seed)) {
+    ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
+    Sys.setenv(ANTS_RANDOM_SEED = seed)    
+  }
+  if (!is.null(num_threads)) {
+    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
+  }  
+  on.exit({
+    if (!is.null(ants_random_seed)) {
+      Sys.setenv(ANTS_RANDOM_SEED = ants_random_seed)
+    }
+    if (!is.null(itk_threads)) {
+      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
+    }    
+  })
+  
+  
+  
   nuisanceVariables <- initialNuisanceVariables
 
   numberOfTimePoints <- dim(boldImage)[4]
@@ -77,7 +112,9 @@ preprocessfMRI <- function(boldImage,
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
     motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
-      moreaccurate = motionCorrectionAccuracyLevel)
+      moreaccurate = motionCorrectionAccuracyLevel,
+      num_threads = num_threads,
+      seed = seed)
     motionCorrectionParameters <- motionCorrectionResults$moco_params
     nuisanceVariables <- as.matrix(motionCorrectionParameters)[, 3:ncol(motionCorrectionParameters)]
     for (i in 2:numberOfTimePoints) {

@@ -21,7 +21,7 @@
 #' @return successOrFailure boolean
 #' @author Avants BB
 #' @examples
-#'
+#' # read below will test out writing as well
 #' \dontrun{
 #' ilist = getANTsRData( "population" )
 #' mask = getMask( ilist[[ 1 ]] )
@@ -29,8 +29,11 @@
 #' demog = data.frame( id = c("A","B","C",NA),
 #'   age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
-#' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool,
-#'   tempfile(fileext=".h5") )
+#' tfn = tempfile(fileext=".h5")
+#' if ( usePkg( "h5" ) ) {
+#' writeNormalizedPopulationData( demog, imat, mask, ibool,
+#'   tfn )
+#'   }
 #' }
 #' @export writeNormalizedPopulationData
 writeNormalizedPopulationData <- function(
@@ -40,38 +43,38 @@ writeNormalizedPopulationData <- function(
   imageBoolean,
   filename )
 {
-outputToDir = length( grep( "h5", filename ) ) == 0
-if ( !outputToDir ) if ( ! usePkg( "h5" ) )
-  stop( "Please install package h5 in order to use this function." )
-if ( sum( imageMask > 0.5 ) != ncol( imageMat ) )
-  stop( "stopping because sum( imageMask > 0.5 ) != ncol( imageMat )" )
-if ( sum( imageBoolean ) != nrow( imageMat ) )
-  stop( "stopping because sum( imageBoolean ) != nrow( imageMat )" )
-if ( length( imageBoolean ) != nrow( demographics ) )
-  stop( "stopping because length( imageBoolean ) != nrow( demographics )" )
-if ( file.exists( filename ) )
-  stop( "stopping because file.exists( filename )" )
-if ( outputToDir )  {
-  dir.create( filename, showWarnings = TRUE, recursive = FALSE, mode = "0777")
-  write.csv( demographics, paste( filename, '/demog.csv', sep=''), row.names = FALSE )
-  haveImageDf = data.frame( haveImage = imageBoolean )
-  write.csv( haveImageDf, paste( filename, '/haveImage.csv', sep=''), row.names = FALSE )
-  antsImageWrite( imageMask, paste( filename, '/imageMask.nii.gz', sep='') )
-  antsImageWrite( as.antsImage( imageMat ), paste( filename, '/imageMat.mha', sep='') )
-  return( TRUE )
+  outputToDir = length( grep( "h5", filename ) ) == 0
+  if ( !outputToDir ) if ( ! usePkg( "h5" ) )
+    stop( "Please install package h5 in order to use this function." )
+  if ( sum( imageMask > 0.5 ) != ncol( imageMat ) )
+    stop( "stopping because sum( imageMask > 0.5 ) != ncol( imageMat )" )
+  if ( sum( imageBoolean ) != nrow( imageMat ) )
+    stop( "stopping because sum( imageBoolean ) != nrow( imageMat )" )
+  if ( length( imageBoolean ) != nrow( demographics ) )
+    stop( "stopping because length( imageBoolean ) != nrow( demographics )" )
+  if ( file.exists( filename ) )
+    stop( "stopping because file.exists( filename )" )
+  if ( outputToDir )  {
+    dir.create( filename, showWarnings = TRUE, recursive = FALSE, mode = "0777")
+    write.csv( demographics, paste( filename, '/demog.csv', sep=''), row.names = FALSE )
+    haveImageDf = data.frame( haveImage = imageBoolean )
+    write.csv( haveImageDf, paste( filename, '/haveImage.csv', sep=''), row.names = FALSE )
+    antsImageWrite( imageMask, paste( filename, '/imageMask.nii.gz', sep='') )
+    antsImageWrite( as.antsImage( imageMat ), paste( filename, '/imageMat.mha', sep='') )
+    return( TRUE )
   }
-file <- h5::h5file( filename )
-file["antsrpopdata/demographics"] <- data.matrix( demographics )
-h5::h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
-file["antsrpopdata/imageMat"] <- imageMat
-file["antsrpopdata/imageMask"] <- as.array( imageMask )
-h5::h5attr(file["antsrpopdata/imageMask"], "spacing") <- antsGetSpacing( imageMask )
-h5::h5attr(file["antsrpopdata/imageMask"], "direction") <- antsGetDirection( imageMask )
-h5::h5attr(file["antsrpopdata/imageMask"], "origin") <- antsGetOrigin( imageMask )
-file["antsrpopdata/imageBoolean"] <- imageBoolean
-file["antsrpopdata/filename"] <- filename
-h5::h5close(file)
-return( TRUE )
+  file <- h5::h5file( filename )
+  file["antsrpopdata/demographics"] <- data.matrix( demographics )
+  h5::h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
+  file["antsrpopdata/imageMat"] <- imageMat
+  file["antsrpopdata/imageMask"] <- as.array( imageMask )
+  h5::h5attr(file["antsrpopdata/imageMask"], "spacing") <- antsGetSpacing( imageMask )
+  h5::h5attr(file["antsrpopdata/imageMask"], "direction") <- antsGetDirection( imageMask )
+  h5::h5attr(file["antsrpopdata/imageMask"], "origin") <- antsGetOrigin( imageMask )
+  file["antsrpopdata/imageBoolean"] <- imageBoolean
+  file["antsrpopdata/filename"] <- filename
+  h5::h5close(file)
+  return( TRUE )
 }
 
 
@@ -85,6 +88,10 @@ return( TRUE )
 #' @return list containing demographics, imageMat, imageMask and imageBoolean
 #' @author Avants BB
 #' @examples
+#' tfn = system.file("extdata", "normpop.h5", package = "ANTsR")
+#' if (file.exists(tfn)) {
+#'     dlist = readNormalizedPopulationData( tfn)
+#' }
 #' \dontrun{
 #' ilist = getANTsRData( "population" )
 #' mask = getMask( ilist[[ 1 ]] )
@@ -124,13 +131,13 @@ readNormalizedPopulationData <- function( filename )
     temp <- file["antsrpopdata/imageBoolean"]
     imageBoolean <- temp[]
     h5::h5close(file)
-    }
+  }
   return(
-      list(
-        demographics   = data.frame( demographics ),
-        imageMat       = imageMat,
-        imageMask      = imageMask,
-        imageBoolean   = imageBoolean
-        )
+    list(
+      demographics   = data.frame( demographics ),
+      imageMat       = imageMat,
+      imageMask      = imageMask,
+      imageBoolean   = imageBoolean
     )
+  )
 }

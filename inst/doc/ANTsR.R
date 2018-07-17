@@ -37,10 +37,7 @@ print( mean( gaussimg[ sub  ]) )
 gaussimg<-makeImage(c(5,5,5,10), voxval = rnorm(125*10)  )
 print(dim(gaussimg))
 avg3d<-getAverageOfTimeSeries( gaussimg )
-voxelselect <- avg3d < 0.25
-mask<-antsImageClone( avg3d )
-mask[ voxelselect  ]<-0
-mask[ !voxelselect  ]<-1
+mask <- avg3d < 0.25
 gmat<-timeseries2matrix( gaussimg, mask )
 print(dim(gmat))
 

@@ -37,7 +37,7 @@ before_install:
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
   - cat ~/.R/Makevars
-  - export cmake_version="3.4"
+  - export cmake_version="3.11"
   - cmake --version
   - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version

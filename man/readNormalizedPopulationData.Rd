@@ -16,6 +16,10 @@ list containing demographics, imageMat, imageMask and imageBoolean
 This function reads a file created by \code{writeNormalizedPopulationData}.
 }
 \examples{
+tfn = system.file("extdata", "normpop.h5", package = "ANTsR")
+if (file.exists(tfn)) {
+    dlist = readNormalizedPopulationData( tfn)
+}
 \dontrun{
 ilist = getANTsRData( "population" )
 mask = getMask( ilist[[ 1 ]] )

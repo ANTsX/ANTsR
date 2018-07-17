@@ -11,6 +11,9 @@
 #' the low level \code{c++} and as such has non-standard parameters.
 #' @return 0 -- Success\cr 1 -- Failure
 #' @author Shrinidhi KL
+#' 
+#' @note This function may give different results on multiple runs.
+#' 
 #' @examples
 #'
 #' # boldfn <- getANTsRData( "pcasl" )
@@ -23,6 +26,8 @@
 #' mocoImg <- new("antsImage", "float", 4)
 #' mocoParams <- new("antsMatrix", "double")
 #' antsMotionCorr( list( d = 3 , a = bold , o = aimg ) )
+#' aimg2 <- new("antsImage", "float", 3)
+#' antsMotionCorr( list( d = 3 , a = bold , o = aimg2 ) )
 #' antsMotionCorr( list( d = 3 ,
 #'   o = list( mocoParams , mocoImg , aimg ) ,
 #'   m = list( name = "MI" , aimg , bold , 1 , 32 , "Regular", 0.1 ) ,

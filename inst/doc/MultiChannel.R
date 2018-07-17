@@ -130,7 +130,7 @@ time1 = 0
 timeParallel = NA
 if("parallel" %in% rownames(installed.packages()) == TRUE) {
   ptm = proc.time()
-  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),3) )
+  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2) )
   timeParallel = proc.time() - ptm
   unlist(iMeans)
 }
@@ -187,7 +187,7 @@ getFractionalAnisotropy <- function(evs) {
 #   } )
 #   )
 
-all_eigs = apply(mat, 2, function(x) { 
+all_eigs = apply(mat, 2, function(x) {
   eigen( initTensor(x) )
   } )
 

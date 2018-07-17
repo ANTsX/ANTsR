@@ -57,6 +57,7 @@ on the multivariate distribution of the parameters.
   precisionMat[2,2]<-precisionMat[2,2]*1.e3 # heavy prior on age
   precisionMat[3,3]<-precisionMat[3,3]*1.e2 # some prior on noise
   bmdl<-bayesianlm( X2, wt2, priorMean=priorcoeffs, precisionMat )
+testthat::expect_equal(bmdl$beta, c(0.157536274628774, -0.224079937323326))
   bmdlNoPrior<-bayesianlm( X2, wt2 )
   print(priorcoeffs)
   print(bmdl$beta)

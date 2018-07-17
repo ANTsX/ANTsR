@@ -44,6 +44,7 @@
 #' # NOT WORKING
 #' \dontrun{
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0 )
+#' testthat::expect_equal(mean(pcasl.processing$m1), 62.2115522470984)
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, ncompcor=2 )
 #' # allow some rejection
 #' pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0.925 )

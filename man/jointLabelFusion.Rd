@@ -66,8 +66,9 @@ for ( i in 1:length(ilist) )
  {
  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-   typeofTransform = c("Affine") )
- mywarpedimage<-antsApplyTransforms(fixed=ref,moving=ilist[[i]],
+   typeofTransform = c("Affine"), verbose = TRUE )
+ mywarpedimage<-antsApplyTransforms(fixed=ref,
+ moving=ilist[[i]],
    transformlist=mytx$fwdtransforms)
  ilist[[i]]=mywarpedimage
  seg<-thresholdImage( ilist[[i]],"Otsu", 3)
@@ -76,6 +77,9 @@ for ( i in 1:length(ilist) )
 r<-2
 pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+pp2<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
+  labelList=seglist, rad=rep(r, length(dim(ref)) ) )   
+testthat::expect_equal(pp2$segmentation, pp$segmentation)
 pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
   rad=rep(r, length(dim(ref)) ) )
 

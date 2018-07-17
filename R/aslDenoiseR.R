@@ -32,6 +32,8 @@
 #' dv<-computeDVARS(aslmat)
 #' dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
 #'   maxnoisepreds=c(1:2), polydegree=2, crossvalidationgroups=2 )
+#' testthat::expect_equal(dnz$R2atBestN, 8.89615004728184)
+#'   
 #' \dontrun{
 #' # a classic regression approach to estimating perfusion
 #' # not recommended, but shows the basic idea.

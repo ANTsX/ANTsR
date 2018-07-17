@@ -2,8 +2,10 @@
 library( ANTsR )
 img    = antsImageRead( getANTsRData( "r16" ) )
 ptmat = matrix( c( 95.5, 95.5, 63.5, 63.5 ), ncol=2 )
-aa = makePointsImage( ptmat, mask = img * 0 + 1, radius = 16  )
-aaDist = iMath( aa, "MaurerDistance") + rnorm( sum( aa>=0  ), sd=5 )
+mymask = img * 0 + 1
+aa = makePointsImage( ptmat, mask = mymask, radius = 16  )
+aaDist = iMath( aa, "MaurerDistance") +
+  makeImage( mymask, rnorm( sum( mymask  ), sd=5 ))
 plot( aaDist )
 bb = iMath( aa, "MD", 5 )
 areg = antsRegistration( aa, aaDist * bb, typeofTransform = "SyNOnly",
@@ -30,6 +32,34 @@ f = areg$fwdtransforms[ 1 ]
 grid = createWarpedGrid( img, gridStep = 10, gridWidth = 2,
   fixedReferenceImage = img, transform = rep( f, ncomp ) )
 plot( grid )
+
+## ----popmean,eval=FALSE--------------------------------------------------
+#  poplist = list(
+#    antsImageRead( getANTsRData( "r16" ) ),
+#    antsImageRead( getANTsRData( "r27" ) ),
+#    antsImageRead( getANTsRData( "r30" ) ),
+#    antsImageRead( getANTsRData( "r62" ) ),
+#    antsImageRead( getANTsRData( "r64" ) ),
+#    antsImageRead( getANTsRData( "r85" ) )
+#    )
+#  template = antsImageClone( poplist[[ 1 ]] )
+#  if ( !exists( "reglist" ) ) {
+#    reglist = list( )
+#    for ( i in 1:length( poplist ) ) {
+#      reglist[[ i ]] = antsRegistration( template, poplist[[ i ]], typeofTransform = "SyN" )
+#    }
+#  }
+#  awrp = antsImageRead( reglist[[ 1 ]]$fwdtransforms[1] )
+#  for ( i in 2:length( reglist ) )
+#    awrp = awrp + antsImageRead( reglist[[ i ]]$fwdtransforms[1] )
+#  awrp = awrp * ( -1.0 * gradstep ) / length( reglist )
+#  warpTx = antsrTransformFromDisplacementField( awrp )
+#  txlist = list( )
+#  ncomp = 10
+#  for ( i in 1:ncomp ) txlist[[ i ]] = warpTx
+#  warped = applyAntsrTransform(
+#    txlist, data = template, reference = template )
+#  plot( warped )
 
 ## ----curvflow,eval=FALSE-------------------------------------------------
 #  img = antsImageRead( "precuneus.nii.gz" )
