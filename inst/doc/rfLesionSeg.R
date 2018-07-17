@@ -27,8 +27,27 @@ seg2<-kmeansSegmentation( ti, 3 )$segmentation
 ll2<-simLesion( ti, 10, 6, myseed=919 ) # different sized lesion
 seg2[ ll2$lesion > 0.5 & seg2 > 0.5 ]<-4
 
+## ----buildmodel----------------------------------------------------------
+rad<-c(1,1) # fast setting
+mr<-c(1,2,4,2,1) # multi-res schedule, U-style schedule
+masks=list(   getMask(seg), getMask(seg1) )
+rfm<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
+  masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
+  voxchunk=500 )
+
 ## ----testsub2,echo=FALSE-------------------------------------------------
 invisible( plot(ll2$limg) )
+
+## ----combiner,eval=FALSE-------------------------------------------------
+#  newrflist<-list()
+#  temp<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
+#      masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
+#      voxchunk=500 )
+#  for ( k in 1:length( mr ) )
+#    if ( length( rfm$rflist[[k]]$classes  ) ==
+#         length( temp$rflist[[k]]$classes )   )
+#      newrflist[[k]]<-combine( rfm$rflist[[k]], temp$rflist[[k]] )
+#  rfm$rflist<-newrflist
 
 ## ----runsim--------------------------------------------------------------
 img<-antsImageRead( getANTsRData("r16") )
