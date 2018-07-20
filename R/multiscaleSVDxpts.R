@@ -2951,20 +2951,22 @@ getSyMG <- function( v, i, myw, mixAlg )  {
       } else errterm[ i ] = getSyME2( gamma[i], temperv )
       vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
 #      temp = optim(
-#        vmats[[i]], fn=getSyME, gr=getSyMG, method='CG', i=i  )
+#        vmats[[i]], fn=getSyME2, gr=getSyMG,
+#        method='BFGS', mixAlg=mixAlg, myw=myw  )
 #      vmats[[i]] = temp$par
 #      print( paste( i, temp$value ) )
       vmats[[i]] = orthogonalizeAndQSparsify(
               as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
               sparsenessQuantiles[i],
-              orthogonalize = FALSE, positivity = positivities[i] )
+              orthogonalize = orthogonalize, positivity = positivities[i] )
       vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
       }
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
-        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
-        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+        initialUMatrix[[i]] = voxmats[[i]] %*% vmats[[i]]
+#        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
+#        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 
     if ( hasRanEff ) {
