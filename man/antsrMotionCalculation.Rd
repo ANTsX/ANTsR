@@ -7,7 +7,7 @@
 antsrMotionCalculation(img, fixed, mask, typeofTransform = c("Rigid",
   "QuickRigid", "BOLDRigid", "Affine", "AffineFast", "BOLDAffine", "SyN",
   "SyNOnly"), getMotionDescriptors = TRUE, verbose = FALSE,
-  num_threads = 1, seed = NULL)
+  num_threads = 1, seed = NULL, ...)
 }
 \arguments{
 \item{img}{antsImage, usually ND where D=4.}
@@ -35,6 +35,8 @@ for discussion.  If \code{NULL}, will not set anything.}
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
+
+\item{...}{extra parameters passed to antsRegistration}
 }
 \value{
 List containing:

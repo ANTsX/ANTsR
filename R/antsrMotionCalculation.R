@@ -20,6 +20,7 @@
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 #' for discussion.  If \code{NULL}, will not set anything.
+#' @param ... extra parameters passed to antsRegistration
 #' @return List containing:
 #' \itemize{
 #'  \item{moco_img}{ Motion corrected time-series image.}
@@ -63,7 +64,8 @@ antsrMotionCalculation <- function(
   getMotionDescriptors = TRUE,
   verbose = FALSE,
   num_threads = 1,
-  seed = NULL
+  seed = NULL,
+  ...
   )
 {
 
@@ -110,7 +112,7 @@ antsrMotionCalculation <- function(
   for ( i in 1:ntimes ) {
     localImg = extractSubImage( img, i )
     locreg = antsRegistration( fixed = fixed, moving = localImg,
-      typeofTransform = typeofTransform )
+      typeofTransform = typeofTransform, ... )
     warpedSlices[[i]] = locreg$warpedmovout
     localtxp = readAntsrTransform(
       locreg$fwdtransforms[ length( locreg$fwdtransforms ) ], subdim )
@@ -143,7 +145,8 @@ antsrMotionCalculation <- function(
   }
   # now do a posthoc mapping of the motion parameters to roll pitch yaw
   # in the special case of rigid mapping in 3D
-  if ( ( grep( "Rigid", typeofTransform ) == 1 ) & ( imgdim == 4 ) )
+  isRigid = length( grep( "Rigid", typeofTransform ) ) == 1
+  if ( isRigid & ( imgdim == 4 ) )
     {
     mocoparamsR = matrix( nrow=ntimes, ncol=6 )
     for ( i in 1:ntimes )
