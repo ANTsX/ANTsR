@@ -5,9 +5,9 @@
 \title{antsrMotionCalculation}
 \usage{
 antsrMotionCalculation(img, fixed, mask, typeofTransform = c("Rigid",
-  "QuickRigid", "BOLDRigid", "Affine", "AffineFast", "BOLDAffine"),
-  getMotionDescriptors = TRUE, verbose = FALSE, num_threads = 1,
-  seed = NULL)
+  "QuickRigid", "BOLDRigid", "Affine", "AffineFast", "BOLDAffine", "SyN",
+  "SyNOnly"), getMotionDescriptors = TRUE, verbose = FALSE,
+  num_threads = 1, seed = NULL)
 }
 \arguments{
 \item{img}{antsImage, usually ND where D=4.}
@@ -24,13 +24,13 @@ take additional memory.}
 
 \item{verbose}{enables verbose output.}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
 
-\item{seed}{will execute 
+\item{seed}{will execute
 \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
@@ -52,7 +52,7 @@ Correct time-series data for motion.
 }
 \note{
 For reproducible results, you should run
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)}, 
+\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)},
 which is what the \code{num_threads = 1} flag will do.
 See \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 and \url{https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054}

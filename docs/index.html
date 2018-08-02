@@ -8,8 +8,8 @@
 <title>ANTs in R: Quantification Tools for Biomedical Images • ANTsR</title>
 <!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="jquery.sticky-kit.min.js"></script><script src="pkgdown.js"></script><meta property="og:title" content="ANTs in R: Quantification Tools for Biomedical Images">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="pkgdown.js"></script><meta property="og:title" content="ANTs in R: Quantification Tools for Biomedical Images">
 <meta property="og:description" content="ANTsR interfaces state of the art image processing with R
     statistical methods. The project grew out of the need, at University of
     Pennsylvania, to develop large-scale analytics pipelines that track provenance
@@ -36,7 +36,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ANTsR</a>
-        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.7.2.0</span>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.4.4.1</span>
       </span>
     </div>
 
@@ -107,6 +107,7 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#antsr" class="anchor"></a>ANTsR</h1></div>
 <p><a href="https://travis-ci.org/ANTsX/ANTsR"><img src="https://travis-ci.org/ANTsX/ANTsR.png?branch=master" alt="Travis Build Status"></a></p>
+<p><a href="https://osf.io/bsq5v/">DOI 10.17605/osf.io/bsq5v</a></p>
 <p>muschellij2 badges: <a href="https://travis-ci.org/muschellij2/ANTsR"><img src="https://travis-ci.org/muschellij2/ANTsR.png?branch=master" alt="Travis Build Status"></a> <a href="https://coveralls.io/r/muschellij2/ANTsR"><img src="https://coveralls.io/repos/muschellij2/ANTsR/badge.svg" alt="Coverage Status"></a> <a href="https://ci.appveyor.com/project/muschellij2/ANTsR"><img src="https://ci.appveyor.com/api/projects/status/github/muschellij2/ANTsR?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></p>
 <!-- commenting out because we moved to antsx
 [![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
@@ -122,6 +123,18 @@
 <p>NeedsCompilation: yes</p>
 <p>Travis checks: <a href="https://travis-ci.org/ANTsX/ANTsR">ANTsR results</a></p>
 <p>Documentation: <a href="https://antsx.github.io/ANTsR/" class="uri">https://antsx.github.io/ANTsR/</a>.</p>
+</div>
+<div id="preview-antsr-on-the-cloud" class="section level2">
+<h2 class="hasAnchor">
+<a href="#preview-antsr-on-the-cloud" class="anchor"></a>Preview ANTsR on the cloud</h2>
+<p>Here: <a href="https://rstudio.cloud/project/38492" class="uri">https://rstudio.cloud/project/38492</a></p>
+<p>Then try:</p>
+<pre><code>.libPaths('/cloud/project/RL/')
+library(ANTsR)
+?plot.antsImage
+?antsRegistration</code></pre>
+<p>To learn more, open and run the Rmd files in the directory “/cloud/project/RL/ANTsR/doc”</p>
+<p>Note: as of this writing, memory is very limited on this cloud preview so some examples may not run successfully.</p>
 </div>
 <div id="downloads" class="section level2">
 <h2 class="hasAnchor">
@@ -182,7 +195,7 @@
 <p>In general, these <strong>assume</strong> you have <a href="http://git-scm.com/">git</a> installed / accessible in your environment, as well as a compiler, preferably <code>clang</code>. you may also need <a href="http://www.cmake.org">cmake</a> if you do/can not install <code>cmaker</code>.</p>
 <p>Windows users should see <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> and maybe, also, <a href="https://github.com/talgalili/installr">installr</a> for assistance in setting up their environment for building (must have a compiler too). To my knowledge, there are no recorded instances of ANTsR being installed on Windows. If someone does so, we would like to know.</p>
 <p>You will need to install R packages that ANTsR requires. Minimally: <strong>Install ITKR and ANTsRCore</strong> <a href="https://github.com/stnava/ITKR/releases">here</a> and <a href="https://github.com/ANTsX/ANTsRCore/releases">here</a> then do:</p>
-<pre><code>mydeps &lt;- c( "Rcpp", "RcppEigen", "tools", "methods", "magrittr", "rsvd" )
+<pre><code>mydeps &lt;- c( "Rcpp", "RcppEigen", "magrittr", "rsvd", "magic", "psych" )
 install.packages( pkgs = mydeps, dependencies = TRUE )</code></pre>
 <p>You can gain additional functionality by installing packages that are listed in the <a href="https://github.com/ANTsX/ANTsR/blob/master/DESCRIPTION"><code>DESCRIPTION</code> file</a> under <code>Suggests</code>. A complete list of recommended ancillary packages <a href="https://github.com/ANTsX/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality">here</a>.</p>
 <p><strong>Method 1: with devtools in R</strong></p>
@@ -230,114 +243,6 @@ R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz</code></pre>
 <p>List the available functions in the namespace ANTsR:</p>
 <pre><code>ANTsR::&lt;double-tab&gt;</code></pre>
 <p>Call help on a function via ?functionName or see function arguments via <code>args(functionName)</code></p>
-</div>
-<div id="overview-of-antsr-functionality-and-useful-tools" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview-of-antsr-functionality-and-useful-tools" class="anchor"></a>Overview of ANTsR functionality and useful tools</h2>
-<p>If nothing else, ANTsR makes it easy to read and write medical images and to map them into a format compatible with R.</p>
-<p><strong>Read, write, access an image</strong></p>
-<pre><code>mnifilename&lt;-getANTsRData("mni")
-img&lt;-antsImageRead(mnifilename)
-antsImageWrite(img,mnifilename)
-antsGetSpacing(img)
-antsGetDirection(img)
-antsGetOrigin(img)
-print( img[50,60,44] )
-print(max(img))</code></pre>
-<p><strong>Index an image with a label</strong></p>
-<pre><code>arrayimg&lt;-array( data=(1:125), dim=c(5,5,5))
-img&lt;-as.antsImage( arrayimg )
-print( max(img) )
-print( mean(img[ img &gt; 50  ]))
-print( max(img[ img &gt;= 50 &amp; img &lt;= 99  ]))
-print( mean( img[ img &gt;= 50 &amp; img &lt;= 99  ]) )</code></pre>
-<p><strong>Convert a 4D image to a matrix</strong></p>
-<pre><code>gaussimg&lt;-array( data=rnorm(125*10), dim=c(5,5,5,10))
-gaussimg&lt;-as.antsImage(gaussimg)
-print(dim(gaussimg))
-mask&lt;-getAverageOfTimeSeries( gaussimg )
-voxelselect &lt;- mask &lt; 0
-gmat&lt;-timeseries2matrix( gaussimg, voxelselect )
-print(dim(gmat))</code></pre>
-<p><strong>Convert a list of images to a matrix</strong></p>
-<pre><code>nimages&lt;-100
-ilist&lt;-list()
-for ( i in 1:nimages )
-{
-  simimg&lt;-makeImage( c(50,50) , rnorm(2500) )
-  simimg&lt;-smoothImage(simimg,1.5)
-  ilist[i]&lt;-simimg
-}
-# get a mask from the first image
-mask&lt;-getMask( ilist[[1]],
-  lowThresh=mean(ilist[[1]]), cleanup=TRUE )
-mat&lt;-imageListToMatrix( ilist, mask )
-print(dim(mat))</code></pre>
-<p><strong>Do fast statistics on a big matrix</strong></p>
-<p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask. Then we look at some summary statistics.</p>
-<pre><code>mat&lt;-imageListToMatrix( ilist, mask )
-age&lt;-rnorm( nrow(mat) ) # simulated age
-gender&lt;-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
-# this creates "real" but noisy effects to detect
-mat&lt;-mat*(age^2+rnorm(nrow(mat)))
-mdl&lt;-lm( mat ~ age + gender )
-mdli&lt;-bigLMStats( mdl, 1.e-4 )
-print(names(mdli))
-print(rownames(mdli$beta.t))
-print(paste("age",min(p.adjust(mdli$beta.pval[1,]))))
-print(paste("gen",min(p.adjust(mdli$beta.pval[2,]))))</code></pre>
-<p><strong>Write out a statistical map</strong></p>
-<p>We might also write out the images so that we can save them for later or look at them with other software.</p>
-<pre><code>agebetas&lt;-makeImage( mask , mdli$beta.t[1,] )
-antsImageWrite( agebetas, tempfile(fileext ='.nii.gz') )</code></pre>
-<p><strong>Neighborhood operations</strong></p>
-<p>Images neighborhoods contain rich shape and texture information. We can extract neighborhoods for further analysis at a given scale.</p>
-<pre><code>mnit&lt;-getANTsRData("mni")
-mnit&lt;-antsImageRead(mnit)
-mnit &lt;- resampleImage( mnit , rep(4, mnit@dimension) )
-mask2&lt;-getMask(mnit,lowThresh=mean(mnit),cleanup=TRUE)
-radius &lt;- rep(2,mnit@dimension)
-mat2&lt;-getNeighborhoodInMask(mnit, mask2, radius,
-  physical.coordinates = FALSE,
-  boundary.condition = "mean" )</code></pre>
-<p>The <code>boundary.condition</code> says how to treat data that is outside of the mask or the image boundaries. Here, we replace this data with the mean in-mask value of the local neighborhood.</p>
-<p><strong>Eigenanatomy &amp; SCCAN</strong></p>
-<p>Images often have many voxels ($p$-voxels) and, in medical applications, this means that $p&gt;n$ or even $p&gt;&gt;n$, where $n$ is the number of subjects. Therefore, we often want to “intelligently” reduce the dimensionality of the data. However, we want to retain spatial locality. This is the point of “eigenanatomy” which is a variation of sparse PCA that uses (optionally) biologically-motivated smoothness, locality or sparsity constraints.</p>
-<pre><code># assume you ran the population example above
-eanat&lt;-sparseDecom( mat, mask, 0.2, 5, cthresh=2, its=2 )
-eseg&lt;-eigSeg(mask,eanat$eig,F)</code></pre>
-<p>The parameters for the example above are set for fast processing. You can see our paper for some theory on these methods[@Kandel2014a].</p>
-<p>More information is available within the examples that can be seen within the help for <code>sparseDecom</code>, <code>sparseDecom2</code> and the helper function <code>initializeEigenanatomy</code>. You might also see the <a href="http://stnava.github.io/sccanTutorial/">sccan tutorial</a>.</p>
-<p><strong>Other useful tools</strong></p>
-<pre><code>?iMath
-?ThresholdImage
-?quantifyCBF
-?antsPreprocessfMRI
-?aslPerfusion
-?computeDVARS
-?getROIValues
-?hemodynamicRF
-?inspectImageData3D
-?makeGraph
-?matrixToImages
-?antsRegistration
-?plotPrettyGraph
-?plotBasicNetwork
-?getTemplateCoordinates
-?antsSet*</code></pre>
-<p>Parts of <code>ImageMath</code> from ANTs are accessible via</p>
-<pre><code>?iMath</code></pre>
-<p>for more fMRI focused tools, see <a href="http://stnava.github.io/RKRNS/">RKRNS</a> and its github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
-<p>A good visualization alternative is <a href="https://github.com/stnava/antsSurf">antsSurf</a>.</p>
-</div>
-<div id="direct-access-to-ants-tools" class="section level2">
-<h2 class="hasAnchor">
-<a href="#direct-access-to-ants-tools" class="anchor"></a>Direct access to ANTs tools</h2>
-<p>Alternatively, one can use any function in the namespace by providing arguments exactly same as one provides to the corresponding command-line version.</p>
-<p>For example, to call the antsRegistration routine:</p>
-<pre><code>ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1","-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )
-
-ANTsR::antsRegistration( "-d", "2", "-m", "mi[r16slice.nii.gz,r64slice.nii.gz,1,20,Regular,0.05]", "-t", "affine[1.0]", "-c", "2100x1200x1200x0", "-s", "3x2x1x0", "-f", "4x3x2x1", "-m", "cc[r16slice.nii.gz,r64slice.nii.gz,1,4]", "-t", "syn[5.0,3,0.0]", "-i", "100x100x0", "-s", "2x1x0", "-f", "3x2x1", "-u", "1", "-o", "[xtest,xtest.nii.gz,xtest_inv.nii.gz]" )</code></pre>
 </div>
 </div>
 <div id="tagging-a-beta-release" class="section level1">

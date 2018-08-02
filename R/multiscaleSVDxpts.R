@@ -1372,6 +1372,10 @@ orthogonalizeAndQSparsify <- function( v,
       }
       if ( doflip ) v[ , vv ] = localv * (-1) else v[ , vv ] = localv
     }
+    cthresh = 100
+    if ( cthresh >  0 ) {
+#      temp = makeImage( , )
+    }
   }
   return( v )
 }
@@ -2737,7 +2741,7 @@ symilr <- function(
   mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
-  lineSearchRange = c( -10, 10 ),
+  lineSearchRange = c( 0, 10 ),
   lineSearchTolerance = 0.001,
   verbose = FALSE ) {
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
@@ -2961,6 +2965,7 @@ getSyMG <- function( v, i, myw, mixAlg )  {
               orthogonalize = orthogonalize, positivity = positivities[i] )
       vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
       }
+    if ( verbose ) print( gamma )
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {

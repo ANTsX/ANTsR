@@ -6,7 +6,7 @@
 \usage{
 symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
+  repeatedMeasures = NA, lineSearchRange = c(0, 10),
   lineSearchTolerance = 0.001, verbose = FALSE)
 }
 \arguments{

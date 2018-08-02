@@ -4,7 +4,6 @@
 \name{reexports}
 \alias{reexports}
 \alias{getCentroids}
-\alias{reexports}
 \alias{maskImage}
 \title{Objects exported from other packages}
 \keyword{internal}
