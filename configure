@@ -60,7 +60,6 @@ echo $OSTYPE $needVCL_CAN_STATIC_CONST_INIT_FLOAT
 
 aincludes=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsIncludes(); cat(a)'`
 
-
 echo "PKG_CPPFLAGS =${PKG_CPPFLAGS} -I\${ITK} -I\${PWD}  \
   -I${aincludes} \
   -I../inst/include/ " >> Makevars
