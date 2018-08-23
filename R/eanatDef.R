@@ -48,8 +48,8 @@ if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
 if ( selectorScale < 1 ) selectorScale = 1.1
 mxn = nrow(mat)-1
 if ( maxNEvec > 1 & maxNEvec < mxn ) mxn = maxNEvec
-if ( fastsvd & !whiten ) solutionmatrix = t( rsvd::rsvd( mat, nu=0, nv=mxn )$v )
-if ( !fastsvd & !whiten ) solutionmatrix = t( svd( mat, nu=0, nv=mxn )$v )
+if ( fastsvd & !whiten ) solutionmatrix = t( rsvd::rsvd( mat, nu=1, nv=mxn )$v )
+if ( !fastsvd & !whiten ) solutionmatrix = t( svd( mat, nu=1, nv=mxn )$v )
 if ( whiten ) solutionmatrix = icawhiten( mat, mxn )
 mycorrs = rep( NA, mxn )
 if ( verbose ) progress <- txtProgressBar(min = 2, max = mxn, style = 3)
