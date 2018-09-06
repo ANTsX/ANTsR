@@ -136,6 +136,6 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    repo: stnava/${PROJ_DIR}
+    repo: ANTsX/${PROJ_DIR}
     all_branches: true
 
