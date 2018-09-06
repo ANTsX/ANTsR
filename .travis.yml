@@ -36,7 +36,7 @@ env:
   - _R_CHECK_TIMINGS_="0"
   - BOOTSTRAP_LATEX=1
   - DISPLAY=:99.0  
-  # - _R_CHECK_FORCE_SUGGESTS_="0"
+  - _R_CHECK_FORCE_SUGGESTS_="0"
 
 before_install:
   - sudo apt-get update
@@ -82,6 +82,7 @@ before_install:
       brew install ccache;
       export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
+  - install_deps
   - travis_run_cache
 
 
