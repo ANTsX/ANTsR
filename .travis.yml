@@ -42,7 +42,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install libhdf5-dev
   - ulimit -n 2048  
-  - export CCACHE=ccache
   - export LD_LIBRARY_PATH=/usr/local/clang/lib:${LD_LIBRARY_PATH}
   - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
@@ -58,8 +57,6 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ];
     then
       no_open_mp ; 
-      brew install ccache;
-      export PATH="/usr/local/opt/ccache/libexec:$PATH";      
     fi      
   - echo "CC=${CC}, CXX=${CXX}, CXX1X=${CXX1X}"
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
