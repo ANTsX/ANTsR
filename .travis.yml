@@ -94,6 +94,13 @@ script:
       check_warnings ;      
       travis_terminate 1;
     fi
+
+
+after_failure:
+  - dump_logs
+
+after_success:
+  - dump_logs
   - ls
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1);
   - PKG_TARBALL_WITH_R=`echo $PKG_FILE_NAME | sed 's/.tar.gz/_'"R${rver}"'.tar.gz/'` ;
@@ -102,13 +109,7 @@ script:
       PKG_TARBALL_WITH_R=`echo $PKG_FILE_NAME | sed 's/.tgz/_'"R${rver}"'.tgz/'` ;
     fi
   - mv ${PKG_FILE_NAME} ${PKG_TARBALL_WITH_R} ;      
-  - PKG_FILE_NAME=${PKG_TARBALL_WITH_R}
-
-after_failure:
-  - dump_logs
-
-after_success:
-  - dump_logs
+  - PKG_FILE_NAME=${PKG_TARBALL_WITH_R}  
 
 notifications:
   email:
