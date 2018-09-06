@@ -70,8 +70,9 @@ writeNormalizedPopulationData <- function(
   }
   file <- hdf5r::h5file( filename )
   file$create_group("antsrpopdata")
-  file[["antsrpopdata/demographics"]] <- data.matrix( demographics )
-  hdf5r::h5attr(file[["antsrpopdata/demographics"]], "colnames") <- colnames(demographics)
+  # file[["antsrpopdata/demographics"]] <- data.matrix( demographics )
+  file[["antsrpopdata/demographics"]] = demographics
+  # hdf5r::h5attr(file[["antsrpopdata/demographics"]], "colnames") <- colnames(demographics)
   file[["antsrpopdata/imageMat"]] <- imageMat
   file[["antsrpopdata/imageMask"]] <- as.array( imageMask )
   hdf5r::h5attr(file[["antsrpopdata/imageMask"]], "spacing") <- antsGetSpacing( imageMask )
@@ -106,7 +107,10 @@ writeNormalizedPopulationData <- function(
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
 #' tfn = tempfile(fileext=".h5")
 #' if ( usePkg( "hdf5r" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
-#' if ( usePkg( "hdf5r" ) ) dlist = readNormalizedPopulationData( tfn )
+#' if ( usePkg( "hdf5r" ) ) {
+#' dlist = readNormalizedPopulationData( tfn )
+#' all.equal(as.data.frame(dlist$demographics), demog)
+#' }
 #' }
 #' @export readNormalizedPopulationData
 readNormalizedPopulationData <- function( filename )
@@ -125,12 +129,12 @@ readNormalizedPopulationData <- function( filename )
     file <- hdf5r::h5file( filename )
     demog <- file[["antsrpopdata/demographics"]]
     demographics <- demog$read()
-    hdf5r::h5attr( demog, "colnames" )
-    colnames( demographics ) <- hdf5r::h5attr( demog, "colnames" )
+    # hdf5r::h5attr( demog, "colnames" )
+    # colnames( demographics ) <- hdf5r::h5attr( demog, "colnames" )
     temp <- file[["antsrpopdata/imageMat"]]
     imageMat <- temp$read()
     temp <- file[["antsrpopdata/imageMask"]]
-    imageMask <- as.antsImage( temp[,] )
+    imageMask <- as.antsImage( temp$read() )
     k=antsSetSpacing( imageMask, hdf5r::h5attr( temp, "spacing" ) )
     k=antsSetOrigin( imageMask, hdf5r::h5attr( temp, "origin" ) )
     k=antsSetDirection( imageMask, hdf5r::h5attr( temp, "direction" ) )
