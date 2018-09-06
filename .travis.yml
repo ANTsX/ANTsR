@@ -77,8 +77,6 @@ before_install:
   - install_remotes_no_dep
   - cat DESCRIPTION  
   - install_deps
-  - travis_run_cache
-
 
 script:
   - x=`export_clang_cxx`; eval ${x}
