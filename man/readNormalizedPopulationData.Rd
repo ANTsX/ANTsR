@@ -30,7 +30,10 @@ tfn = tempfile(fileext=".h5")
 if ( usePkg( "hdf5r" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
 if ( usePkg( "hdf5r" ) ) {
 dlist = readNormalizedPopulationData( tfn )
-all.equal(as.data.frame(dlist$demographics), demog)
+all.equal(dlist$demographics, demog)
+all.equal(dlist$imageMat, imat)
+all.equal(as.array(dlist$imageMask), as.array(mask))
+all.equal(dlist$imageBool, ibool)
 }
 }
 }
