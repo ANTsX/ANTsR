@@ -50,7 +50,7 @@ Suggests:
     glasso,
     glmnet,
     grid,
-    h5,
+    hdf5r,
     igraph,
     irlba,
     knitr,

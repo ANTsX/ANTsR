@@ -27,8 +27,8 @@ imat = imageListToMatrix( ilist, mask )
 demog = data.frame( age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 ibool = c( TRUE, TRUE, TRUE, FALSE )
 tfn = tempfile(fileext=".h5")
-if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
-if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
+if ( usePkg( "hdf5r" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
+if ( usePkg( "hdf5r" ) ) dlist = readNormalizedPopulationData( tfn )
 }
 }
 \author{
