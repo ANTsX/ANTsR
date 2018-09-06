@@ -45,6 +45,11 @@ demog = data.frame( id = c("A","B","C",NA),
 ibool = c( TRUE, TRUE, TRUE, FALSE )
 tfn = tempfile(fileext=".h5")
 if ( usePkg( "hdf5r" ) ) {
+demographics = demog
+imageMat = imat 
+imageMask = mask
+imageBoolean = ibool
+filename = tfn
 writeNormalizedPopulationData( demog, imat, mask, ibool,
   tfn )
   }
