@@ -67,6 +67,7 @@ before_install:
   - cmake --version
   - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version
+  - ls
   - ./cleanup 
   - Rscript -e "install.packages('Rcpp', type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"    
   - gh_binary_install stnava/ITKR
