@@ -76,7 +76,7 @@ before_install:
   - cat DESCRIPTION  
   - install_remotes_no_dep
   - cat DESCRIPTION  
-  - install_deps
+  - install_deps_all
 
 script:
   - x=`export_clang_cxx`; eval ${x}
