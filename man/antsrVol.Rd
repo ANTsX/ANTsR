@@ -6,8 +6,8 @@
 \usage{
 antsrVol(x, y, quantlimits = c(0.1, 0.9), colormap = "jet",
   rotationParams = c(270, 0, 270), overlayLimits = NA,
-  magnificationFactor = 1, intensityTruncation = c(0, 1), filename = NA,
-  antspath = NA, verbose = FALSE)
+  magnificationFactor = 1, intensityTruncation = c(0, 1),
+  filename = NA, antspath = NA, verbose = FALSE)
 }
 \arguments{
 \item{x}{input antsImage defining the image to render}

@@ -5,8 +5,8 @@
 \title{Linear Model for FMRI Data}
 \usage{
 hemodynamicRF(scans = 1, onsets = c(1), durations = c(1), rt = 3,
-  times = NULL, mean = TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9,
-  cc = 0.35)
+  times = NULL, mean = TRUE, a1 = 6, a2 = 12, b1 = 0.9,
+  b2 = 0.9, cc = 0.35)
 }
 \arguments{
 \item{scans}{number of scans}

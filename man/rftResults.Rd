@@ -5,8 +5,8 @@
 \title{RFT Statistical Results}
 \usage{
 rftResults(x, resels, fwhm, df, fieldType, RPVImg = NULL, k = 1,
-  threshType = "pRFT", pval = 0.05, pp = 0.001, n = 1, statdir = NULL,
-  verbose = FALSE)
+  threshType = "pRFT", pval = 0.05, pp = 0.001, n = 1,
+  statdir = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{statistical field image of class antsImage}

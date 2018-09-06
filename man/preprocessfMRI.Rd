@@ -4,14 +4,14 @@
 \alias{preprocessfMRI}
 \title{Preprocess BOLD fMRI image data.}
 \usage{
-preprocessfMRI(boldImage, maskImage = NA, maskingMeanRatioThreshold = 0.75,
-  initialNuisanceVariables = NA, numberOfCompCorComponents = 6,
-  doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
-  motionCorrectionAccuracyLevel = 1,
-  meanBoldFixedImageForMotionCorrection = NA, frequencyLowThreshold = NA,
-  frequencyHighThreshold = NA, spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0, residualizeMatrix = TRUE,
-  num_threads = 1, seed = NULL)
+preprocessfMRI(boldImage, maskImage = NA,
+  maskingMeanRatioThreshold = 0.75, initialNuisanceVariables = NA,
+  numberOfCompCorComponents = 6, doMotionCorrection = TRUE,
+  useMotionCorrectedImage = FALSE, motionCorrectionAccuracyLevel = 1,
+  meanBoldFixedImageForMotionCorrection = NA,
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
+  spatialSmoothingType = "none", spatialSmoothingParameters = 0,
+  residualizeMatrix = TRUE, num_threads = 1, seed = NULL)
 }
 \arguments{
 \item{boldImage}{4-D ANTs image fMRI data.}

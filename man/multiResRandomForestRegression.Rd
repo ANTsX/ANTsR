@@ -4,8 +4,8 @@
 \alias{multiResRandomForestRegression}
 \title{multiple resolution neighborhood random forest regression}
 \usage{
-multiResRandomForestRegression(y, x, labelmasks, rad = NA, nsamples = 10,
-  multiResSchedule = c(0), ntrees = 500)
+multiResRandomForestRegression(y, x, labelmasks, rad = NA,
+  nsamples = 10, multiResSchedule = c(0), ntrees = 500)
 }
 \arguments{
 \item{y}{vector of scalar values or labels.  if a factor, do classification,

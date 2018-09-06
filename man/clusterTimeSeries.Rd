@@ -4,7 +4,8 @@
 \alias{clusterTimeSeries}
 \title{Split time series image into k distinct images}
 \usage{
-clusterTimeSeries(mat, krange = 2:10, nsvddims = NA, criterion = "asw")
+clusterTimeSeries(mat, krange = 2:10, nsvddims = NA,
+  criterion = "asw")
 }
 \arguments{
 \item{mat}{input time series matrix}

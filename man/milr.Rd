@@ -5,8 +5,8 @@
 \title{Efficiently compute a multivariate, penalized image-based linear regression model (milr)}
 \usage{
 milr(dataFrame, voxmats, myFormula, smoothingMatrix, iterations = 10,
-  gamma = 1e-06, sparsenessQuantile, positivity = c("positive", "negative",
-  "either"), repeatedMeasures = NA, orthogonalize = FALSE,
+  gamma = 1e-06, sparsenessQuantile, positivity = c("positive",
+  "negative", "either"), repeatedMeasures = NA, orthogonalize = FALSE,
   verbose = FALSE)
 }
 \arguments{

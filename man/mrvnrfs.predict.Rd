@@ -4,8 +4,8 @@
 \alias{mrvnrfs.predict}
 \title{multi-res voxelwise neighborhood random forest segmentation}
 \usage{
-mrvnrfs.predict(rflist, x, labelmasks, rad = NA, multiResSchedule = c(4, 2,
-  1), asFactors = TRUE, voxchunk = 60000)
+mrvnrfs.predict(rflist, x, labelmasks, rad = NA,
+  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 60000)
 }
 \arguments{
 \item{rflist}{a list of random forest models from mrvnrfs}

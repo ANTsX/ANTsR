@@ -5,8 +5,8 @@
 \title{antsMotionCalculation}
 \usage{
 antsMotionCalculation(img, mask = NA, fixed = NA, moreaccurate = 1,
-  txtype = "Affine", framewise = 1, verbose = FALSE, num_threads = 1,
-  seed = NULL, ...)
+  txtype = "Affine", framewise = 1, verbose = FALSE,
+  num_threads = 1, seed = NULL, ...)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}

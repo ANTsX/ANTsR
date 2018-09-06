@@ -4,8 +4,8 @@
 \alias{bayesianlm}
 \title{Simple bayesian regression function.}
 \usage{
-bayesianlm(X, y, priorMean, priorPrecision, priorIntercept = 0, regweights,
-  includeIntercept = F)
+bayesianlm(X, y, priorMean, priorPrecision, priorIntercept = 0,
+  regweights, includeIntercept = F)
 }
 \arguments{
 \item{X}{data matrix}

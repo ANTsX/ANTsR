@@ -5,9 +5,10 @@
 \title{Convenience wrapper for eigenanatomy decomposition.}
 \usage{
 networkEiganat(Xin, sparseness = c(0.1, 0.1), nvecs = 5, its = 5,
-  gradparam = 1, mask = NA, v, prior, pgradparam = 0.1, clustval = 0,
-  downsample = 0, doscale = T, domin = T, verbose = F, dowhite = 0,
-  timeme = T, addb = T, useregression = T)
+  gradparam = 1, mask = NA, v, prior, pgradparam = 0.1,
+  clustval = 0, downsample = 0, doscale = T, domin = T,
+  verbose = F, dowhite = 0, timeme = T, addb = T,
+  useregression = T)
 }
 \arguments{
 \item{Xin}{n by p input images , subjects or time points by row ,

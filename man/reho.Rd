@@ -4,7 +4,8 @@
 \alias{reho}
 \title{REHO}
 \usage{
-reho(rsfmri, mask, shifter = 1, method = "kendall", maxDistance = 1.1)
+reho(rsfmri, mask, shifter = 1, method = "kendall",
+  maxDistance = 1.1)
 }
 \arguments{
 \item{rsfmri}{antsImage usually 4D}

@@ -5,7 +5,8 @@
 \title{sparsify a matrix}
 \usage{
 orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
-  positivity = "either", orthogonalize = TRUE, softThresholding = FALSE)
+  positivity = "either", orthogonalize = TRUE,
+  softThresholding = FALSE)
 }
 \arguments{
 \item{v}{input matrix}

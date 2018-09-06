@@ -4,8 +4,8 @@
 \alias{knnSmoothImage}
 \title{k-nearest neighbors constrained image smoothing}
 \usage{
-knnSmoothImage(img, mask, radius, intensityWeight = 0.1, spatialSigma = 20,
-  iterations = 1, returnMatrix = FALSE)
+knnSmoothImage(img, mask, radius, intensityWeight = 0.1,
+  spatialSigma = 20, iterations = 1, returnMatrix = FALSE)
 }
 \arguments{
 \item{img}{input image to smooth}

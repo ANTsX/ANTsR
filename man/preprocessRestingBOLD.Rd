@@ -9,10 +9,10 @@ preprocessRestingBOLD(boldImage, maskImage = NA,
   denseFramewise = FALSE, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1, motionCorrectionIterations = 1,
-  meanBoldFixedImageForMotionCorrection = NA, frequencyLowThreshold = NA,
-  frequencyHighThreshold = NA, spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0, residualizeMatrix = TRUE,
-  num_threads = 1, seed = NULL)
+  meanBoldFixedImageForMotionCorrection = NA,
+  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
+  spatialSmoothingType = "none", spatialSmoothingParameters = 0,
+  residualizeMatrix = TRUE, num_threads = 1, seed = NULL)
 }
 \arguments{
 \item{boldImage}{4-D ANTs image fMRI data.}
