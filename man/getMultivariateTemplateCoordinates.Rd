@@ -4,9 +4,10 @@
 \alias{getMultivariateTemplateCoordinates}
 \title{Label multivariate components by an anatomical coordinate system.}
 \usage{
-getMultivariateTemplateCoordinates(imageSetToBeLabeledIn, templateWithLabels,
-  labelnames = NA, outprefix = NA, convertToTal = FALSE, pvals = NA,
-  threshparam = 1, clustparam = 250, identifier)
+getMultivariateTemplateCoordinates(imageSetToBeLabeledIn,
+  templateWithLabels, labelnames = NA, outprefix = NA,
+  convertToTal = FALSE, pvals = NA, threshparam = 1,
+  clustparam = 250, identifier)
 }
 \arguments{
 \item{imageSetToBeLabeledIn}{a template paired with (most likely) the output

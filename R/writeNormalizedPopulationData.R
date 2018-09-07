@@ -30,7 +30,12 @@
 #'   age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
 #' tfn = tempfile(fileext=".h5")
-#' if ( usePkg( "h5" ) ) {
+#' if ( usePkg( "hdf5r" ) ) {
+#' demographics = demog
+#' imageMat = imat 
+#' imageMask = mask
+#' imageBoolean = ibool
+#' filename = tfn
 #' writeNormalizedPopulationData( demog, imat, mask, ibool,
 #'   tfn )
 #'   }
@@ -44,8 +49,8 @@ writeNormalizedPopulationData <- function(
   filename )
 {
   outputToDir = length( grep( "h5", filename ) ) == 0
-  if ( !outputToDir ) if ( ! usePkg( "h5" ) )
-    stop( "Please install package h5 in order to use this function." )
+  if ( !outputToDir ) if ( ! usePkg( "hdf5r" ) )
+    stop( "Please install package hdf5r in order to use this function." )
   if ( sum( imageMask > 0.5 ) != ncol( imageMat ) )
     stop( "stopping because sum( imageMask > 0.5 ) != ncol( imageMat )" )
   if ( sum( imageBoolean ) != nrow( imageMat ) )
@@ -63,17 +68,19 @@ writeNormalizedPopulationData <- function(
     antsImageWrite( as.antsImage( imageMat ), paste( filename, '/imageMat.mha', sep='') )
     return( TRUE )
   }
-  file <- h5::h5file( filename )
-  file["antsrpopdata/demographics"] <- data.matrix( demographics )
-  h5::h5attr(file["antsrpopdata/demographics"], "colnames") <- colnames(demographics)
-  file["antsrpopdata/imageMat"] <- imageMat
-  file["antsrpopdata/imageMask"] <- as.array( imageMask )
-  h5::h5attr(file["antsrpopdata/imageMask"], "spacing") <- antsGetSpacing( imageMask )
-  h5::h5attr(file["antsrpopdata/imageMask"], "direction") <- antsGetDirection( imageMask )
-  h5::h5attr(file["antsrpopdata/imageMask"], "origin") <- antsGetOrigin( imageMask )
-  file["antsrpopdata/imageBoolean"] <- imageBoolean
-  file["antsrpopdata/filename"] <- filename
-  h5::h5close(file)
+  file <- hdf5r::h5file( filename )
+  file$create_group("antsrpopdata")
+  # file[["antsrpopdata/demographics"]] <- data.matrix( demographics )
+  file[["antsrpopdata/demographics"]] = demographics
+  # hdf5r::h5attr(file[["antsrpopdata/demographics"]], "colnames") <- colnames(demographics)
+  file[["antsrpopdata/imageMat"]] <- imageMat
+  file[["antsrpopdata/imageMask"]] <- as.array( imageMask )
+  hdf5r::h5attr(file[["antsrpopdata/imageMask"]], "spacing") <- antsGetSpacing( imageMask )
+  hdf5r::h5attr(file[["antsrpopdata/imageMask"]], "direction") <- antsGetDirection( imageMask )
+  hdf5r::h5attr(file[["antsrpopdata/imageMask"]], "origin") <- antsGetOrigin( imageMask )
+  file[["antsrpopdata/imageBoolean"]] <- imageBoolean
+  file[["antsrpopdata/filename"]] <- filename
+  hdf5r::h5close(file)
   return( TRUE )
 }
 
@@ -99,15 +106,21 @@ writeNormalizedPopulationData <- function(
 #' demog = data.frame( age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 #' ibool = c( TRUE, TRUE, TRUE, FALSE )
 #' tfn = tempfile(fileext=".h5")
-#' if ( usePkg( "h5" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
-#' if ( usePkg( "h5" ) ) dlist = readNormalizedPopulationData( tfn )
+#' if ( usePkg( "hdf5r" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
+#' if ( usePkg( "hdf5r" ) ) {
+#' dlist = readNormalizedPopulationData( tfn )
+#' all.equal(dlist$demographics, demog)
+#' all.equal(dlist$imageMat, imat)
+#' all.equal(as.array(dlist$imageMask), as.array(mask))
+#' all.equal(dlist$imageBool, ibool)
+#' }
 #' }
 #' @export readNormalizedPopulationData
 readNormalizedPopulationData <- function( filename )
 {
   outputToDir = length( grep( "h5", filename ) ) == 0
-  if ( !outputToDir ) if ( ! usePkg( "h5" ) )
-    stop( "Please install package h5 in order to use this function." )
+  if ( !outputToDir ) if ( ! usePkg( "hdf5r" ) )
+    stop( "Please install package hdf5r in order to use this function." )
   if ( outputToDir ) {
     if ( ! dir.exists( filename ) )
       stop( paste( filename, "directory does not exist." ) )
@@ -116,21 +129,21 @@ readNormalizedPopulationData <- function( filename )
     imageMask = antsImageRead( paste( filename, '/imageMask.nii.gz', sep='') )
     imageMat = as.matrix( antsImageRead( paste( filename, '/imageMat.mha', sep='') ) )
   } else {
-    file <- h5::h5file( filename )
-    demog <- file["antsrpopdata/demographics"]
-    demographics <- demog[]
-    h5::h5attr( demog, "colnames" )
-    colnames( demographics ) <- h5::h5attr( demog, "colnames" )
-    temp <- file["antsrpopdata/imageMat"]
-    imageMat <- temp[]
-    temp <- file["antsrpopdata/imageMask"]
-    imageMask <- as.antsImage( temp[] )
-    k=antsSetSpacing( imageMask, h5::h5attr( temp, "spacing" ) )
-    k=antsSetOrigin( imageMask, h5::h5attr( temp, "origin" ) )
-    k=antsSetDirection( imageMask, h5::h5attr( temp, "direction" ) )
-    temp <- file["antsrpopdata/imageBoolean"]
-    imageBoolean <- temp[]
-    h5::h5close(file)
+    file <- hdf5r::h5file( filename )
+    demog <- file[["antsrpopdata/demographics"]]
+    demographics <- demog$read()
+    # hdf5r::h5attr( demog, "colnames" )
+    # colnames( demographics ) <- hdf5r::h5attr( demog, "colnames" )
+    temp <- file[["antsrpopdata/imageMat"]]
+    imageMat <- temp$read()
+    temp <- file[["antsrpopdata/imageMask"]]
+    imageMask <- as.antsImage( temp$read() )
+    k=antsSetSpacing( imageMask, hdf5r::h5attr( temp, "spacing" ) )
+    k=antsSetOrigin( imageMask, hdf5r::h5attr( temp, "origin" ) )
+    k=antsSetDirection( imageMask, hdf5r::h5attr( temp, "direction" ) )
+    temp <- file[["antsrpopdata/imageBoolean"]]
+    imageBoolean <- temp$read()
+    hdf5r::h5close(file)
   }
   return(
     list(

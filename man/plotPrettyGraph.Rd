@@ -4,8 +4,8 @@
 \alias{plotPrettyGraph}
 \title{Simple plotPrettyGraph function saves to png.}
 \usage{
-plotPrettyGraph(adjacencyMatrix, functionToPlot, pngfn = tempfile(fileext =
-  ".png"), scaleText = 0.5, vertexSize = NA, figScale = 11,
+plotPrettyGraph(adjacencyMatrix, functionToPlot, pngfn = tempfile(fileext
+  = ".png"), scaleText = 0.5, vertexSize = NA, figScale = 11,
   layoutmode = "eigen", hueval = 0)
 }
 \arguments{

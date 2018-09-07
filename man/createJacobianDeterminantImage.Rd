@@ -4,7 +4,8 @@
 \alias{createJacobianDeterminantImage}
 \title{createJacobianDeterminantImage}
 \usage{
-createJacobianDeterminantImage(domainImg, tx, doLog = FALSE, geom = FALSE)
+createJacobianDeterminantImage(domainImg, tx, doLog = FALSE,
+  geom = FALSE)
 }
 \arguments{
 \item{domainImg}{image that defines transformation domain}

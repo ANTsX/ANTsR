@@ -6,7 +6,8 @@
 \title{save.ANTsR}
 \usage{
 save.ANTsR(filename = file.path(".", ".ANTsRsession"), objects = NA,
-  env = as.environment(1), overwrite = FALSE, clonediskfiles = TRUE, ...)
+  env = as.environment(1), overwrite = FALSE, clonediskfiles = TRUE,
+  ...)
 
 load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
 }

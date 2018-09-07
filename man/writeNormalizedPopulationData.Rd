@@ -4,8 +4,8 @@
 \alias{writeNormalizedPopulationData}
 \title{Save normalized population data to a directory or h5 file}
 \usage{
-writeNormalizedPopulationData(demographics, imageMat, imageMask, imageBoolean,
-  filename)
+writeNormalizedPopulationData(demographics, imageMat, imageMask,
+  imageBoolean, filename)
 }
 \arguments{
 \item{demographics}{data frame that identifies the variables of interest.}
@@ -44,7 +44,12 @@ demog = data.frame( id = c("A","B","C",NA),
   age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
 ibool = c( TRUE, TRUE, TRUE, FALSE )
 tfn = tempfile(fileext=".h5")
-if ( usePkg( "h5" ) ) {
+if ( usePkg( "hdf5r" ) ) {
+demographics = demog
+imageMat = imat 
+imageMask = mask
+imageBoolean = ibool
+filename = tfn
 writeNormalizedPopulationData( demog, imat, mask, ibool,
   tfn )
   }

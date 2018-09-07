@@ -4,8 +4,8 @@
 \alias{abpBrainExtraction}
 \title{An ants-based brain extraction script.}
 \usage{
-abpBrainExtraction(img = NA, tem = NA, temmask = NA, temregmask = NA,
-  regtype = "SyN", tdir = NA, num_threads = 1)
+abpBrainExtraction(img = NA, tem = NA, temmask = NA,
+  temregmask = NA, regtype = "SyN", tdir = NA, num_threads = 1)
 }
 \arguments{
 \item{img}{whole head image to which we map a brain mask}

@@ -4,9 +4,9 @@
 \alias{sparseRegression}
 \title{Sparse regression on input images.}
 \usage{
-sparseRegression(inmatrix, demog, outcome, mask = NA, sparseness = 0.05,
-  nvecs = 10, its = 5, cthresh = 250, statdir = NA, z = 0,
-  smooth = 0)
+sparseRegression(inmatrix, demog, outcome, mask = NA,
+  sparseness = 0.05, nvecs = 10, its = 5, cthresh = 250,
+  statdir = NA, z = 0, smooth = 0)
 }
 \arguments{
 \item{inmatrix}{Input data matrix, with dimension number of subjects by

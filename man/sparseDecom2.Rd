@@ -4,11 +4,12 @@
 \alias{sparseDecom2}
 \title{Convenience wrapper for 2-view eigenanatomy decomposition.}
 \usage{
-sparseDecom2(inmatrix, inmask = list(NA, NA), sparseness = c(0.01, 0.01),
-  nvecs = 3, its = 20, cthresh = c(0, 0), statdir = NA, perms = 0,
-  uselong = 0, z = 0, smooth = 0, robust = 0, mycoption = 0,
-  initializationList = list(), initializationList2 = list(), ell1 = 10,
-  priorWeight = 0, verbose = FALSE, rejector = 0, maxBased = FALSE)
+sparseDecom2(inmatrix, inmask = list(NA, NA), sparseness = c(0.01,
+  0.01), nvecs = 3, its = 20, cthresh = c(0, 0), statdir = NA,
+  perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0,
+  mycoption = 0, initializationList = list(),
+  initializationList2 = list(), ell1 = 10, priorWeight = 0,
+  verbose = FALSE, rejector = 0, maxBased = FALSE)
 }
 \arguments{
 \item{inmatrix}{input as inmatrix=list(mat1,mat2). n by p input matrix and n

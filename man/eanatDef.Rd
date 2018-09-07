@@ -6,7 +6,8 @@
 \usage{
 eanatDef(inmat, nvecs = 0, mask = NA, smoother = 0, cthresh = 0,
   its = 5, eps = 0.1, positivity = FALSE, priors = NA,
-  priorWeight = 0, sparEpsilon = 1e-04, whiten = FALSE, verbose = FALSE)
+  priorWeight = 0, sparEpsilon = 1e-04, whiten = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{inmat}{input matrix}

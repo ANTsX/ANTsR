@@ -4,8 +4,8 @@
 \alias{priorBasedSegmentation}
 \title{spatial prior-based image segmentation.}
 \usage{
-priorBasedSegmentation(img, priors, mask, priorWeight = 0.25, mrf = 0.1,
-  iterations = 25)
+priorBasedSegmentation(img, priors, mask, priorWeight = 0.25,
+  mrf = 0.1, iterations = 25)
 }
 \arguments{
 \item{img}{input image or image list for multivariate segmentation}
