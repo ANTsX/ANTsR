@@ -206,7 +206,7 @@ jointLabelFusion <- function(
   for (x in c( 2:length( probsout ) ) ) {
     probimgs <- c( probimgs, antsImageRead( probsout[x] ) )
   }
-  segmat = imageListToMatrix( probimgs, targetIMask )
+  segmat = imageListToMatrix( probimgs, mymask )
   finalsegvec = apply( segmat, FUN=which.max , MARGIN=2 )
   finalsegvec2 = finalsegvec * 0
   # map finalsegvec to original labels
@@ -214,7 +214,7 @@ jointLabelFusion <- function(
   for ( i in sort( unique( finalsegvec ) ) ) {
     finalsegvec2[ finalsegvec == i ] = inlabsNz[ i ]
     }
-  outimg = makeImage( targetIMask, finalsegvec2 ) 
+  outimg = makeImage( mymask, finalsegvec2 ) * mymask
   return( list(
     segmentation = outimg,
     intensity = outimgi,
