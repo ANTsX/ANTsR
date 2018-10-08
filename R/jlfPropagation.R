@@ -49,7 +49,7 @@
 #' pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
 #'   labelList=seglist, rad = rep( 2, length( dim( ref ) ) ) )
 #' }
-#' @export jlfProp
+#' @export 
 jlfProp <- function(
  targetI,
  targetIMask,
