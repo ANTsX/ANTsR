@@ -64,12 +64,12 @@ splitNDImageToList = function( img ) {
 mergeListToNDImage = function( img, imgList ) {
   # check input is good
   if ( class(img) != 'antsImage' ) stop('Input is not antsImage.')
-  mydimv = dim( img )
+  mydimv = c( dim( imgList[[1]] ), length( imgList ) )
   mydim  = img@dimension
   if ( img@dimension < 3 )
     stop('Input image dimensionality needs to be 3 or greater')
 
-  iarr = array( data = NA, dim = c( dim( imgList[[1]] ), length( imgList ) ) )
+  iarr = array( data = NA, dim = mydimv )
   for ( i in 1:length( imgList ) )
     {
     if ( mydim == 3 ) {
