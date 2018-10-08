@@ -70,7 +70,7 @@ before_install:
   - ls
   - ./cleanup
   - Rscript -e "install.packages('Rcpp', type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
-  - Rscript -e "install.packages( c('magrittr','magic','knitr','rmarkdown','RcppEigen','testthat','rsvd', 'psych'), repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages( c('magrittr','magic','knitr','rmarkdown','RcppEigen','testthat','rsvd', 'psych','ggplot2','randomForest'), repos=c(CRAN='https://cran.rstudio.com'))"
   - gh_binary_install stnava/ITKR
   - export ants_user=ANTsX
   - gh_binary_install ${ants_user}/ANTsRCore
