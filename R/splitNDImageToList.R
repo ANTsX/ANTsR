@@ -83,4 +83,8 @@ mergeListToNDImage = function( img, imgList ) {
     }
   iarr = as.antsImage( iarr )
   antsCopyImageInfo( img, iarr )
+  antsSetSpacing( iarr,
+    c( antsGetSpacing( imgList[[1]] ), tail( antsGetSpacing( img ), 1 ) ) )
+  antsSetOrigin( iarr,
+    c( antsGetOrigin( imgList[[1]] ), tail( antsGetOrigin( img ), 1 ) ) )
 }
