@@ -69,7 +69,7 @@ before_install:
   - cmake --version
   - ls
   - ./cleanup
-  - Rscript -e "install.packages(c('Rcpp', 'RcppEigen') type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e "install.packages( c('magrittr','magic','knitr','rmarkdown','testthat','rsvd', 'psych','ggplot2','randomForest','pracma','igraph'), repos=c(CRAN='https://cran.rstudio.com'))"
   - gh_binary_install stnava/ITKR
   - export ants_user=ANTsX
