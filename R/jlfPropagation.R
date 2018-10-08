@@ -10,6 +10,7 @@
 #' @param labelList optional list containing antsImages with segmentation labels
 #' @param rSearch radius of search, default is 3
 #' @param lagValue number of prior images to use to fwd propagate JLF solution
+#' @param verbose boolean
 #' @return segmentation of time series
 #' @author Brian B. Avants
 #' @keywords fusion, template
@@ -57,7 +58,8 @@ jlfProp <- function(
  rad = 2,
  labelList = NA,
  rSearch = 3,
- lagValue = 3
+ lagValue = 3,
+ verbose = FALSE
  )
 {
   nonnegative = TRUE
@@ -69,6 +71,7 @@ jlfProp <- function(
   newAtlas = list( )
   newLabs = list( )
   for ( k in 1:lagValue ) {
+    if ( verbose ) print( paste0( "Pre: Lag ", k ) )
     jlfk = jointLabelFusion(
       targetI = targetI[[ k ]],
       targetIMask = targetIMask,
@@ -76,12 +79,13 @@ jlfProp <- function(
       beta = beta,
       rad = rad,
       labelList = labelList, rho = rho, usecor = FALSE,
-      rSearch = rSearch )
+      rSearch = rSearch, verbose=verbose )
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
     }
   #  2. compute JLF at t+k including the result from (t+k-lagValue) as atlas
   for ( k in (lagValue+1):length( targetI ) ) {
+    if ( verbose ) print( paste0( "Prop: Lag ", k , " of ", length( targetI ) ) )
     jlfk = jointLabelFusion(
       targetI = targetI[[ k ]],
       targetIMask = targetIMask,
@@ -90,7 +94,7 @@ jlfProp <- function(
       rad = rad,
       labelList =  newLabs[   (k-lagValue):(k-1)  ],
       rho = rho, usecor = FALSE,
-      rSearch = rSearch )
+      rSearch = rSearch, verbose=verbose )
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
   }
