@@ -10,6 +10,7 @@
 #' @param labelList optional list containing antsImages with segmentation labels
 #' @param rSearch radius of search, default is 3
 #' @param lagValue number of prior images to use to fwd propagate JLF solution
+#' @param ... arguments to pass to \code{\link{jointLabelFusion}}
 #' @return segmentation of time series
 #' @author Brian B. Avants
 #' @keywords fusion, template
@@ -57,13 +58,12 @@ jlfProp <- function(
  rad = 2,
  labelList = NA,
  rSearch = 3,
- lagValue = 3
+ lagValue = 3,
+ ...
  )
 {
+  # #' @param constrain weights to be non-negative
   nonnegative = TRUE
-  usecor = FALSE
-  beta = 4
-  rho = 0.01
   # algorithm:
   #  1. compute JLF at time point1
   newAtlas = list( )
@@ -75,8 +75,10 @@ jlfProp <- function(
       atlasList = atlasList,
       beta = beta,
       rad = rad,
-      labelList = labelList, rho = rho, usecor = FALSE,
-      rSearch = rSearch )
+      labelList = labelList, 
+      rho = rho, 
+      usecor = usecor,
+      rSearch = rSearch, ...)
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
     }
@@ -89,8 +91,9 @@ jlfProp <- function(
       beta = beta,
       rad = rad,
       labelList =  newLabs[   (k-lagValue):(k-1)  ],
-      rho = rho, usecor = FALSE,
-      rSearch = rSearch )
+      rho = rho, 
+      usecor = usecor,
+      rSearch = rSearch, ... )
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
   }
