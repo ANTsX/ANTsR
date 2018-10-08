@@ -30,7 +30,8 @@ makeGraph <- function( mat, graphdensity = 1,
   communityMethod=NA, getEfficiency = FALSE,
   inverseValuesAsWeights = FALSE ) {
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
-  if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
+  myfisherz <- function( rho ) return( 0.5 * log((1 + rho)/(1 - rho)) )
+
   myrsfnetworkcorrs <- mat
   if (typeof(myrsfnetworkcorrs) == "list") {
     myrsfnetworkcorrs <- data.matrix(mat)
@@ -59,7 +60,7 @@ makeGraph <- function( mat, graphdensity = 1,
   edgeWeights <- ANTsRCore::antsrimpute( igraph::E(g1)$weight )
   if ( !inverseValuesAsWeights )
     {
-    edgeWeights <- ANTsRCore::antsrimpute( psych::fisherz( igraph::E(g1)$weight ) )
+    edgeWeights <- ANTsRCore::antsrimpute( myfisherz( igraph::E(g1)$weight ) )
     igraph::E(g1)$weight = edgeWeights
     }
   # compute local efficiency
