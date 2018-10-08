@@ -78,6 +78,9 @@ before_install:
 #  - install_remotes_no_dep # takes forever
 #  - install_deps_no_suggests
 
+install:
+  - R -e 'devtools::install_deps(dep = F)'  # TRUE was killing us - try this out
+
 script:
   - x=`export_clang_cxx`; eval ${x}
   - travis_wait 100 R CMD build ${R_BUILD_ARGS} .
