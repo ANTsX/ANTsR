@@ -76,8 +76,7 @@ before_install:
   - echo "Done Binary Installs"
   - cat DESCRIPTION
 #  - install_remotes_no_dep # takes forever
-  - cat DESCRIPTION
-  - install_deps_no_suggests
+#  - install_deps_no_suggests
 
 script:
   - x=`export_clang_cxx`; eval ${x}
