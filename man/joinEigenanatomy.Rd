@@ -29,7 +29,7 @@ joinEigenanatomy joins the input matrix using a community membership
 approach.
 }
 \examples{
-
+\dontrun{
 # if you dont have images
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
@@ -45,7 +45,7 @@ if ( usePkg("igraph") ) {
   mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist ,
     sparseness=0, nvecs=length(kki$fusedlist) )
  }
-
+}
 }
 \author{
 Avants BB

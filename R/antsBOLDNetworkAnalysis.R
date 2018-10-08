@@ -39,8 +39,6 @@
 #' 
 #' }
 #' @export antsBOLDNetworkAnalysis
-#' @importFrom magic ashift
-#' @importFrom psych winsor
 antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   labels = NA, motion ,
   gdens = 0.2, threshLo = 1, threshHi = 90,

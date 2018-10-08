@@ -60,7 +60,7 @@ before_install:
   - echo "CC=${CC}, CXX=${CXX}, CXX1X=${CXX1X}"
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
-  - hdf5_install ;
+#  - hdf5_install ;
   - echo $PATH ;
   - cat ~/.R/Makevars
   - export cmake_version="3.11"
@@ -70,6 +70,10 @@ before_install:
   - ls
   - ./cleanup
   - Rscript -e "install.packages('Rcpp', type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages('magrittr', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages('psych', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages('rsvd', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages( c('magic','knitr','rmarkdown','RcppEigen'), repos=c(CRAN='https://cran.rstudio.com'))"
   - gh_binary_install stnava/ITKR
   - export ants_user=ANTsX
   - gh_binary_install ${ants_user}/ANTsRCore
@@ -79,6 +83,7 @@ before_install:
   - cat DESCRIPTION
   - Rscript -e "install.packages(c('testthat', 'knitr'), repos=c(CRAN='https://cran.rstudio.com'))"
   - install_deps_no_suggests
+#  - install_deps_no_suggests
 
 script:
   - x=`export_clang_cxx`; eval ${x}

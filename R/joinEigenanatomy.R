@@ -14,7 +14,7 @@
 #' communitymembership , graph=gg, bestdensity=graphdensity ))
 #' @author Avants BB
 #' @examples
-#'
+#' \dontrun{
 #' # if you dont have images
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
@@ -30,7 +30,7 @@
 #'   mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist ,
 #'     sparseness=0, nvecs=length(kki$fusedlist) )
 #'  }
-#'
+#' }
 #' @export joinEigenanatomy
 joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
   graphdensity = 0.65,
