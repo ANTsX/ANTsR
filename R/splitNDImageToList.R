@@ -69,9 +69,7 @@ mergeListToNDImage = function( img, imgList ) {
   if ( img@dimension < 3 )
     stop('Input image dimensionality needs to be 3 or greater')
 
-  iarr = as.array( img )
-  if ( mydim == 3 ) iarr = iarr[,,1:length(imgList)]
-  if ( mydim == 4 ) iarr = iarr[,,,1:length(imgList)]
+  iarr = array( data = NA, dim = c( dim( imgList[[1]] ), length( imgList ) ) )
   for ( i in 1:length( imgList ) )
     {
     if ( mydim == 3 ) {

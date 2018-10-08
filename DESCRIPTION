@@ -28,13 +28,13 @@ Depends:
 Imports:
     graphics,
     grDevices,
-    magic,
     magrittr,
-    psych,
-    rsvd,
     stats,
     utils
 Suggests:
+    magic,
+    psych,
+    rsvd,
     abind,
     BGLR,
     caret,
