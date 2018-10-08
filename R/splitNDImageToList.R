@@ -87,4 +87,5 @@ mergeListToNDImage = function( img, imgList ) {
     c( antsGetSpacing( imgList[[1]] ), tail( antsGetSpacing( img ), 1 ) ) )
   antsSetOrigin( iarr,
     c( antsGetOrigin( imgList[[1]] ), tail( antsGetOrigin( img ), 1 ) ) )
+  return( iarr )
 }
