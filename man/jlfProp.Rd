@@ -30,9 +30,9 @@ The JLF initialization is reused throughout a time series with an additional
 lag argument.
 }
 \examples{
-
+\dontrun{
 set.seed(123)
-ref = ri( 1 ) \%>\% resampleImage(  2  ) \%>\% iMath( "Normalize" )
+ref = ri( 1 ) \%>\% resampleImage(  4  ) \%>\% iMath( "Normalize" )
 mi1 = ri( 2 )
 mi2 = ri( 3 )
 mi3 = ri( 4 )
@@ -64,7 +64,7 @@ for ( i in 1:length(ilist) )
    iMath( ref, "GE", 3) )
 pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
   labelList=seglist, rad = rep( 2, length( dim( ref ) ) ) )
-
+}
 }
 \author{
 Brian B. Avants
