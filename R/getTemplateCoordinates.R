@@ -66,6 +66,35 @@ getTemplateCoordinates <- function(
     print(" labelnames <-c(\"HippocampusL\",\"HippocampusR\") ")
     return(1)
   }
+
+
+  getValueAtPoint <- function(x, point) {
+    if (class(x)[1] != "antsImage") {
+      stop("Input must be of class 'antsImage'")
+    }
+    if ((class(point) != "numeric")) {
+      stop("point must be of class 'numeric'")
+    }
+
+    idx <- as.numeric(ANTsRCore::antsTransformPhysicalPointToIndex(x, point))
+    idx <- floor(idx)
+
+    dims <- length(idx)
+
+    value <- NA
+    if (dims == 2) {
+      value <- ANTsRCore::getPixels(x, i = idx[1], j = idx[2])
+    } else if (dims == 3) {
+      value <- ANTsRCore::getPixels(x, i = idx[1], j = idx[2], k = idx[3])
+    } else if (dims == 4) {
+      value <- ANTsRCore::getPixels(x, i = idx[1], j = idx[2], k = idx[3], l = idx[4])
+    }
+
+    return(value[[1]])
+
+  }
+
+
   fi <- templatePairWithLabels[[1]]
   mi <- imagePairToBeLabeled[[1]]
   if (class(fi)[[1]] != "antsImage") {
@@ -111,7 +140,7 @@ getTemplateCoordinates <- function(
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
       if (imagedim == 3)
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
-      templateLab[i] <- .getValueAtPoint(filab, mypoint)
+      templateLab[i] <- getValueAtPoint(filab, mypoint)
     }
     if (mylab == 2)
       mypoints <- cbind(mypoints, Brodmann = templateLab)
