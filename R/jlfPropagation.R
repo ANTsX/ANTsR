@@ -15,6 +15,8 @@
 #' @return segmentation of time series
 #' @author Brian B. Avants
 #' @keywords fusion, template
+#' @export 
+#' 
 #' @examples
 #' \dontrun{
 #' set.seed(123)
@@ -48,10 +50,9 @@
 #'    iMath( ref, "GE", 1),
 #'    iMath( ref, "GE", 2),
 #'    iMath( ref, "GE", 3) )
-#' pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
+#'   pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
 #'   labelList=seglist, rad = rep( 2, length( dim( ref ) ) ) )
 #' }
-#' @export 
 jlfProp <- function(
  targetI,
  targetIMask,
