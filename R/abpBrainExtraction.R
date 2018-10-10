@@ -34,6 +34,24 @@
 #' bm2<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
 #'
 #' @export abpBrainExtraction
+#' @importFrom ANTsRCore antsRegistration atropos thresholdImage labelClusters
+#'   antsApplyTransforms antsApplyTransformsToPoints
+#'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
+#'   antsImageClone antsImageIterator antsImageIteratorGet
+#'   antsImageIteratorGetIndex antsImageIteratorIsAtEnd
+#'   antsImageIteratorNext antsImageIteratorSet antsImageRead
+#'   antsImageWrite antsRegistration antsSetDirection antsSetOrigin
+#'   antsSetSpacing antsTransformIndexToPhysicalPoint
+#'   antsTransformPhysicalPointToIndex antsrGetPointerName
+#'   antsrTransformFromDisplacementField applyAntsrTransform
+#'   applyAntsrTransformToImage as.antsImage atropos
+#'   bigLMStats composeAntsrTransforms
+#'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
+#'   getNeighborhoodAtVoxel getNeighborhoodInMask
+#'   iMath is.antsImage kmeansSegmentation labelClusters randomMask
+#'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
+#'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
+#'   splitChannels thresholdImage usePkg
 #' @useDynLib ANTsR
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA,
