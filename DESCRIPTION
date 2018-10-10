@@ -24,7 +24,7 @@ LazyLoad: yes
 Depends:
     R (>= 3.0),
     methods,
-    ANTsRCore (>= 0.5.7.4)
+    ANTsRCore (>= 0.5.8)
 Imports:
     graphics,
     grDevices,
