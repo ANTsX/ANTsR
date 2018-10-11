@@ -11,7 +11,6 @@
 
 /* .Call calls */
 extern SEXP antsAffineInitializer(SEXP);
-// extern SEXP antsJointFusion(SEXP);
 extern SEXP antsMotionCorr(SEXP);
 extern SEXP antsMotionCorrStats(SEXP, SEXP, SEXP, SEXP);
 extern SEXP centerOfMass(SEXP);
@@ -37,7 +36,6 @@ extern SEXP weingartenImageCurvature(SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"antsAffineInitializer",           (DL_FUNC) &antsAffineInitializer,            1},
-    // {"antsJointFusion",                 (DL_FUNC) &antsJointFusion,                  1},
     {"antsMotionCorr",                  (DL_FUNC) &antsMotionCorr,                   1},
     {"antsMotionCorrStats",             (DL_FUNC) &antsMotionCorrStats,              4},
     {"centerOfMass",                    (DL_FUNC) &centerOfMass,                     1},
