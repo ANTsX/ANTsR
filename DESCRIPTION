@@ -86,7 +86,7 @@ Suggests:
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang
-Remotes: stnava/ITKR, stnava/ANTsRCore, muschellij2/mFilter, muschellij2/rflann
+Remotes: stnava/ITKR, ANTsX/ANTsRCore, muschellij2/mFilter, muschellij2/rflann
 NeedsCompilation: yes
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
