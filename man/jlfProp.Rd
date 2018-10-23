@@ -5,7 +5,7 @@
 \title{Propagate Joint Label Fusion (JLF) solutions through a time series}
 \usage{
 jlfProp(targetI, targetIMask, atlasList, rad = 2, labelList = NA,
-  rSearch = 3, lagValue = 3, verbose = FALSE)
+  rSearch = 3, lagValue = 3, verbose = FALSE, ...)
 }
 \arguments{
 \item{targetI}{antsImage list to be approximated}
@@ -23,6 +23,8 @@ jlfProp(targetI, targetIMask, atlasList, rad = 2, labelList = NA,
 \item{lagValue}{number of prior images to use to fwd propagate JLF solution}
 
 \item{verbose}{boolean}
+
+\item{...}{arguments to pass to \code{\link{jointLabelFusion}}}
 }
 \value{
 segmentation of time series
@@ -64,7 +66,7 @@ for ( i in 1:length(ilist) )
    iMath( ref, "GE", 1),
    iMath( ref, "GE", 2),
    iMath( ref, "GE", 3) )
-pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
+  pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
   labelList=seglist, rad = rep( 2, length( dim( ref ) ) ) )
 }
 }

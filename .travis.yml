@@ -60,27 +60,23 @@ before_install:
   - echo "CC=${CC}, CXX=${CXX}, CXX1X=${CXX1X}"
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
-#  - hdf5_install ;
-  - echo $PATH ;
-  - cat ~/.R/Makevars
+  - hdf5_install ;
   - export cmake_version="3.11"
   - cmake --version
   - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version
-  - ls
   - ./cleanup
-  - Rscript -e "install.packages(c('Rcpp','RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
-  - Rscript -e "install.packages( c('magrittr','magic','knitr','rmarkdown','testthat','rsvd', 'psych','ggplot2','randomForest','pracma','igraph','dplyr'), repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat'), repos=c(CRAN='https://cran.rstudio.com'))"
   - gh_binary_install stnava/ITKR
   - export ants_user=ANTsX
   - gh_binary_install ${ants_user}/ANTsRCore
   - echo "Done Binary Installs"
   - cat DESCRIPTION
 #  - install_remotes_no_dep # takes forever
+  - cat DESCRIPTION
+  - install_deps_no_suggests
 #  - install_deps_no_suggests
-
-install:
-  - R -e 'devtools::install_deps(dep = F)'  # TRUE was killing us - try this out
 
 script:
   - x=`export_clang_cxx`; eval ${x}

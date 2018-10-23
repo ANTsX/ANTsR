@@ -10,10 +10,13 @@
 #' @param labelList optional list containing antsImages with segmentation labels
 #' @param rSearch radius of search, default is 3
 #' @param lagValue number of prior images to use to fwd propagate JLF solution
+#' @param ... arguments to pass to \code{\link{jointLabelFusion}}
 #' @param verbose boolean
 #' @return segmentation of time series
 #' @author Brian B. Avants
 #' @keywords fusion, template
+#' @export 
+#' 
 #' @examples
 #' \dontrun{
 #' set.seed(123)
@@ -47,10 +50,9 @@
 #'    iMath( ref, "GE", 1),
 #'    iMath( ref, "GE", 2),
 #'    iMath( ref, "GE", 3) )
-#' pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
+#'   pp = jlfProp( tarlist, refmask, ilist, rSearch=2,
 #'   labelList=seglist, rad = rep( 2, length( dim( ref ) ) ) )
 #' }
-#' @export jlfProp
 jlfProp <- function(
  targetI,
  targetIMask,
@@ -59,13 +61,12 @@ jlfProp <- function(
  labelList = NA,
  rSearch = 3,
  lagValue = 3,
- verbose = FALSE
+ verbose = FALSE,
+ ...
  )
 {
+  # #' @param constrain weights to be non-negative
   nonnegative = TRUE
-  usecor = FALSE
-  beta = 4
-  rho = 0.01
   # algorithm:
   #  1. compute JLF at time point1
   newAtlas = list( )
@@ -76,10 +77,9 @@ jlfProp <- function(
       targetI = targetI[[ k ]],
       targetIMask = targetIMask,
       atlasList = atlasList,
-      beta = beta,
       rad = rad,
-      labelList = labelList, rho = rho, usecor = FALSE,
-      rSearch = rSearch, verbose=verbose )
+      labelList = labelList, 
+      rSearch = rSearch, ..., verbose=verbose )
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
     }
@@ -90,11 +90,10 @@ jlfProp <- function(
       targetI = targetI[[ k ]],
       targetIMask = targetIMask,
       atlasList = newAtlas[   (k-lagValue):(k-1)  ],
-      beta = beta,
       rad = rad,
       labelList =  newLabs[   (k-lagValue):(k-1)  ],
-      rho = rho, usecor = FALSE,
-      rSearch = rSearch, verbose=verbose )
+      rSearch = rSearch, ...,
+      verbose=verbose )
     newAtlas[[ k ]] = targetI[[ k ]]
     newLabs[[ k ]] = jlfk$segmentation
   }
