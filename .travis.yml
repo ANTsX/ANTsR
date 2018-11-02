@@ -43,10 +43,6 @@ before_install:
   - export LD_LIBRARY_PATH=/usr/local/clang/lib:${LD_LIBRARY_PATH}
   - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - fname=travis_helpers.sh
-  - wget -O ${fname} http://bit.ly/travis_helpers
-  - cat ${fname}; source ${fname}; rm ${fname}
-  - start_xvfb ;
   - export rver=`r_version`;
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
@@ -68,11 +64,13 @@ before_install:
   - ./cleanup
   - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat'), repos=c(CRAN='https://cran.rstudio.com'))"
-#  - cd ..
-#  - git clone https://github.com/muschellij2/ghtravis
-#  - R CMD INSTALL ghtravis
-#  - cd ANTsR
-#  - Rscript -e " ghtravis::install_remote_binaries('DESCRIPTION') "
+  #
+  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
+  - source travis_helpers.sh
+  - rm travis_helpers.sh
+  - Rscript -e 'install.packages("rsvd")'
+  - Rscript -e 'install.packages("magic")'
+  - Rscript -e 'install.packages("psych")'
   - gh_binary_install  stnava/ITKR ANTsX/ANTsRCore
   - export ants_user=ANTsX
   - echo "Done Binary Installs"
