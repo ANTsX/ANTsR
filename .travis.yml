@@ -68,8 +68,8 @@ before_install:
   - ./cleanup
   - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat','remotes'), repos=c(CRAN='https://cran.rstudio.com'))"
-  - Rscript -e " remotes::install_github( "muschellij2/ghtravis" ) "
-  - Rscript -e " ghtravis::install_remote_binaries("DESCRIPTION") "
+  - Rscript -e " remotes::install_github( 'muschellij2/ghtravis' ) "
+  - Rscript -e " ghtravis::install_remote_binaries('DESCRIPTION') "
   - export ants_user=ANTsX
   - echo "Done Binary Installs"
 
