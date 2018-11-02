@@ -69,7 +69,7 @@ before_install:
   - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat'), repos=c(CRAN='https://cran.rstudio.com'))"
   - cd ..
-  - git clone https://github.com/stnava/ghtravis
+  - git clone https://github.com/muschellij2/ghtravis
   - R CMD INSTALL ghtravis
   - cd ANTsR
   - Rscript -e " ghtravis::install_remote_binaries('DESCRIPTION') "
