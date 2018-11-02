@@ -43,6 +43,9 @@ before_install:
   - export LD_LIBRARY_PATH=/usr/local/clang/lib:${LD_LIBRARY_PATH}
   - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
+  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
+  - source travis_helpers.sh
+  - rm travis_helpers.sh  
   - export rver=`r_version`;
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
@@ -64,10 +67,6 @@ before_install:
   - ./cleanup
   - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat'), repos=c(CRAN='https://cran.rstudio.com'))"
-  #
-  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
-  - source travis_helpers.sh
-  - rm travis_helpers.sh
   - Rscript -e 'install.packages("rsvd")'
   - Rscript -e 'install.packages("magic")'
   - Rscript -e 'install.packages("psych")'
