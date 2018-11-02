@@ -71,6 +71,10 @@ before_install:
   - Rscript -e 'install.packages("rsvd")'
   - Rscript -e 'install.packages("magic")'
   - Rscript -e 'install.packages("psych")'
+  - cd ..
+  - git clone https://github.com/muschellij2/ghtravis.git
+  - R CMD INSTALL ghtravis
+  - cd ANTsR
   - gh_binary_install  stnava/ITKR ANTsX/ANTsRCore
   - export ants_user=ANTsX
   - echo "Done Binary Installs"
