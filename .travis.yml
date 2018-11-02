@@ -75,8 +75,11 @@ before_install:
   - cat DESCRIPTION
 #  - install_remotes_no_dep # takes forever
   - cat DESCRIPTION
-  - install_deps_no_suggests
 #  - install_deps_no_suggests
+#  - install_deps_no_suggests
+
+install:
+  - echo "skip this"
 
 script:
   - x=`export_clang_cxx`; eval ${x}
