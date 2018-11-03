@@ -1,0 +1,405 @@
+---
+title: "Multichannel image proccessing"
+author: "Jeffrey T. Duda"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteIndexEntry{Multichannel images}
+    \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+library( knitr )
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(ANTsR)
+library(ggplot2)
+library(grid)
+
+if("parallel" %in% rownames(installed.packages()) == TRUE) {
+  library(parallel)
+}  
+
+```
+
+## Overview
+This document provides some examples illustrating how [ANTsR](https://github.com/stnava/ANTsR)
+may be used to work with multi channel images, such as rgb (i.e. color) data. This
+is still an extremely new feature and much of ANTsR does not yet support this image type.
+Examples will be added to this document as new functionality is implemented.
+
+```{r plotColor,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE}
+# How to plot a 2D color image
+plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL) {
+
+  if (class(imgList) == "antsImage") {
+    imgList = list(imgList, imgList, imgList)
+  }
+
+  direction = antsGetDirection( imgList[[1]] )
+
+  # max in all images
+  maxi = 1.0
+  if ( scale )
+    {
+    maxi = max( unlist( lapply( imgList, function(x) { max(x) } ) ) )
+    }
+
+  rgbList = lapply( imgList, function(x) { apply(t(as.matrix(x)),2,rev) / maxi })
+  rgbList = lapply( imgList, function(x) { t(as.matrix(x)) / maxi })
+
+  col <- rgb(rgbList[[1]], rgbList[[2]], rgbList[[3]])
+
+  d = dim(rgbList[[1]])
+
+  x = rep(1:d[2],each=d[1])
+  y = rep(1:d[1], d[2])
+  pts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x,y) )
+
+  dat = data.frame(x=pts[,1], y=pts[,2], col=col)
+  x1 = min(pts[,1])
+  x2 = max(pts[,1])
+  y1 = min(pts[,2])
+  y2 = max(pts[,2])
+
+  g = ggplot(dat) + geom_raster(aes(x=x, y=y, fill=col), hjust=0, vjust=0, alpha=1) + theme(legend.position="none", aspect.ratio=1,text=element_blank(),axis.ticks=element_blank(), panel.grid=element_blank() ) + scale_fill_manual(values=as.character(levels(factor(col))) )
+
+  g = g + coord_cartesian( xlim=c(x1,x2), ylim=c(y1,y2) )
+  if ( direction[1,1] > 0 ) {
+    g = g + scale_x_continuous( lim=c(x1,x2) )
+    }
+  else {
+    g = g + scale_x_reverse( lim=c(x2,x1) )  
+   }
+  if ( direction[2,2] > 0 ) {
+    g = g + scale_y_continuous( lim=c(y1,y2) )
+    }
+  else {
+    g = g + scale_y_reverse( lim=c(y2,y1) )  
+   }
+
+  if ( !is.null(points) ) {
+    pdat = data.frame( x=points[,1], y=points[,2], id=factor(1:dim(points)[1]) )
+    g = g + geom_point( data=pdat, aes(x=x, y=y, colour=id ))
+  }
+
+  if ( !is.null(paths) ) {
+    g = g + geom_path(data=paths, aes(x=x,y=y,group=id,colour=id))
+    }
+
+  if ( !is.null(vectors) ) {
+    xvec = as.vector( t(as.matrix(vectors[[1]])) )
+    yvec = as.vector( -t(as.matrix(vectors[[2]])) )
+    vpts = antsTransformIndexToPhysicalPoint( imgList[[1]], cbind(x+0.5,y+0.5) )
+
+    mag = sqrt(xvec*xvec + yvec*yvec)
+    elim = which(mag < 0.01)
+    if (length(elim) > 0 ) {
+      xvec = xvec[-elim]
+      yvec = yvec[-elim]
+      vpts = vpts[-elim,]
+      }
+    vdat = data.frame(x=vpts[,1]-xvec, y=vpts[,2]-yvec, xend=vpts[,1]+xvec, yend=vpts[,2]+yvec)
+    g = g + geom_segment(data=vdat, aes(x=x,y=y,xend=xend,yend=yend), colour="white", alpha=0.5)
+  }
+
+  suppressWarnings(print(g))
+}
+```
+
+## Basics
+Because ANTsR relies upon [ITK](http://www.itk.org) for image IO, multichannel support is inherently built in.
+Basic conversions and math operations work as expected.
+
+```{r io,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# Read in and display header info
+img = antsImageRead( getANTsRData("decslice"))
+img
+img[64,64]
+
+# Convert to an array
+arr = as.array(img)
+dim(arr)
+
+# Convert array to multichannel antsImage
+img2 = as.antsImage(arr, components=TRUE)
+img2
+
+# Convert array to antsImage and set header info via reference image
+img2 = as.antsImage(arr, components=TRUE, reference=img )
+img2
+
+# Basic math ops work the same as for scalar images
+2 * sum(img)
+sum(img * 2)
+```
+
+Many functions only work on scalar images, so here we split a multichannel image into a list
+of scalar images, then the `lapply` function provides a convenient way to process all channels.
+
+```{r lapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# Convert to list of scalar images
+iList = splitChannels(img)
+plotColor(iList)
+
+sList = lapply( iList, function(x) { smoothImage(x, 1.5) } )
+plotColor(sList)
+
+# Merge back into multichannel image
+simg = mergeChannels(sList)
+
+# Write to file
+# antsImageWrite(simg, "smoothslice.nii.gz")
+```
+
+It is worth mentioning that ANTsR is not yet compatible with `mclapply` as provided
+in the "parallel" package. It's something we will be looking into in the future. The
+main problem has to do with allocating new images, some functions that only access
+existing data will work, however it does not guarantee a faster execution time.
+```{r mclapply,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+iMeans = 0
+time1 = 0
+timeParallel = NA
+if("parallel" %in% rownames(installed.packages()) == TRUE) {
+  ptm = proc.time()
+  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2) )
+  timeParallel = proc.time() - ptm
+  unlist(iMeans)
+}
+
+ptm = proc.time()
+iMeans = lapply(iList, function(x) mean(x) )
+timeSerial = proc.time() - ptm
+unlist(iMeans)
+
+timeParallel
+timeSerial
+```
+
+## Working with diffusion tensor images
+```{r dti1,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+dt = antsImageRead(getANTsRData("dtislice"))
+dtList = splitChannels(dt)
+
+# Component of tensor are stored as: XX, XY, XZ, YY, YZ, ZZ
+trace = dtList[[1]] + dtList[[4]] + dtList[[6]]
+trace[trace<0] = 0
+plotColor( trace )
+```
+
+We only want to deal with voxels in the brain, so the `getMask` function is used
+to obtain rough estimate of the brain, and the image is plotted with background voxels
+tinted red.
+
+```{r dti2,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+mask = getMask(trace)
+plotColor( list(trace, trace*mask, trace*mask))
+```
+
+Since we are only interested in voxels in the brain, a matrix
+is created where each row is voxel in the brain and each column in a tensor component,
+listed in upper.tri order. This allows us to quickly calculate the eigen
+decomposition for each tensor.
+
+```{r dti3,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+# list-based call to convert values to an array
+mat = do.call(rbind, lapply( dtList, function(x) { x[mask>0] } ) )
+
+# simplest convesion to array
+# mat = as.array(dt, mask == 1)
+
+# convert tensor from vector to matrix
+initTensor <- function(x) {
+  tens = diag(3)
+  tens[lower.tri(tens, diag=TRUE)] = x
+  tens = tens + t(tens) - diag(diag(tens))
+  return(tens)
+  }
+
+getFractionalAnisotropy <- function(evs) {
+  numer = sqrt( (evs[1]-evs[2])^2 + (evs[2]-evs[3])^2 + (evs[3]-evs[1])^2 )
+  denom = sqrt( sum(evs*evs) )
+  fa = 0
+  if ( denom > 0 ) {
+    fa = sqrt(0.5) * numer/denom
+  }
+  fa
+  }
+
+# Eigen decomposition for each tensor
+# eigs = unlist( apply(mat, 2, function(x) {
+#   eigen( initTensor(x) )
+#   } )
+#   )
+
+all_eigs = apply(mat, 2, function(x) {
+  eigen( initTensor(x) )
+  } )
+
+eigs = lapply(all_eigs, function(x) {
+  x$values
+})
+eigs = lapply(eigs, unlist)
+evalMat = do.call(rbind, eigs)
+evalMat[evalMat < 0 ] = 0
+
+# Create images from the eigenvalues
+eval1 = makeImage(mask, evalMat[,1])
+eval2 = makeImage(mask, evalMat[,2])
+eval3 = makeImage(mask, evalMat[,3])
+
+plotColor( list(eval1, eval2, eval3))
+```
+
+The Fractional Anisotropy (FA) is typically used to measure how directionally specific
+the diffusion of water is within a voxel. This values is plotted below
+
+```{r dti4,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+faValues = apply(evalMat, 1, getFractionalAnisotropy )
+faValues[faValues < 0] = 0
+fa = makeImage(mask, faValues)
+plotColor( fa )
+```
+
+Also of great interest is the eigenvector associated with the largest eigenvalue, this
+estimates the primary direction of diffusion (PDD) and in white matter this corresponds to
+the direction that is parallel to the myelinated axons in a fiber bundle
+
+```{r dti5,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+eig_vecs = lapply(all_eigs, function(x) {
+  x$vectors
+})
+eig_vecs = lapply(eig_vecs, c)
+vecMat = do.call(rbind, eig_vecs)
+
+
+evecx = makeImage(mask, vecMat[,1])
+evecy = makeImage(mask, vecMat[,2])
+evecz = makeImage(mask, vecMat[,3])
+decList = list(evecx, evecy, evecz)
+decList = lapply(decList, abs)
+
+plotColor( decList )
+```
+
+Weighting the magnitude of the PDD by the FA is standard practice as it highlights
+regions with high directional specificity (i.e. white matter).
+This is known as a directional encoded colormap (DEC) [@Pajevic1999]
+
+```{r dti6,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+decList = lapply( decList, function(x){ fa*x } )
+plotColor(decList)
+```
+
+To verify our processing, it can be useful to plot line segments showing the direction
+of some of the vectors. This is done in a subset of the image to avoid too much visual
+clutter.
+
+```{r dti7,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+lower = c(40,80)
+upper = c(80,120)
+subfa = cropIndices(fa, lowerind = lower, upperind = upper)
+subVecList = list(evecx, evecy, evecz)
+subVecList = lapply( subVecList, function(x){ cropIndices(x, lowerind = lower, upperind = upper)})
+subDecList = lapply( subVecList, function(x){ abs(subfa*x) })
+
+plotColor( subDecList, vectors=list(subVecList[[1]], subVecList[[2]]) )
+```
+
+## Deterministic Fiber tractography
+
+A common use for DTI is fiber tractography [@Basser2000]. Here we give a simplified example in which
+we restrict the tracts to lie within the slice. The first step is define a set of seeds
+which serve as the starting points for our tractography. Often, all points in the white
+matter are used as seed for "whole-brain tracking." Here we manually define a small set
+of seed points for illustration.
+
+```{r seeds,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+
+# indices of seed points
+seedIndices = rbind( c(61,92), c(62,92), c(63,92) )
+seedIndices = rbind( seedIndices, c(64,92), c(65,92), c(65,92) )
+seedIndices = rbind( seedIndices, c(61,93), c(62,93), c(63,93) )
+seedIndices = rbind( seedIndices, c(64,93), c(65,93), c(65,93) )
+
+# convert to physical space points
+seedPts = antsTransformIndexToPhysicalPoint(fa, seedIndices)
+plotColor( subfa, points=seedPts )
+```
+
+
+```{r tracking,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=TRUE}
+trackFromSeed <- function(vecs, fa, seed) {
+  stepSize = 0.2
+  faThresh = 0.2
+  iPt = seed
+  pts = iPt
+  idx =  antsTransformPhysicalPointToIndex(fa, seed)
+  faValue = fa[idx[1], idx[2]]
+  ppdx = vecs[[1]][ idx[1], idx[2] ]
+  ppdy = vecs[[2]][ idx[1], idx[2] ]
+  lastVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  iVec = lastVec
+
+  while ( faValue > faThresh ) {
+    iVec = iVec / sqrt(sum(iVec*iVec))
+    if ( sum(iVec*lastVec) <  0 ) { iVec = -iVec }
+
+    iPt = iPt + stepSize*iVec
+    pts = rbind(pts, iPt)
+    idx =  antsTransformPhysicalPointToIndex(fa, iPt)
+    faValue = fa[idx[1], idx[2]]
+    lastVec = iVec
+
+    ppdx = vecs[[1]][ idx[1], idx[2] ]
+    ppdy = vecs[[2]][ idx[1], idx[2] ]
+    iVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  }
+
+  iPt = seed
+  idx =  antsTransformPhysicalPointToIndex(fa, seed)
+  faValue = fa[idx[1], idx[2]]
+  vecs = lapply( vecs, function(x){ -x })
+  ppdx = vecs[[1]][ idx[1], idx[2] ]
+  ppdy = vecs[[2]][ idx[1], idx[2] ]
+  lastVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  iVec = lastVec
+
+  while ( faValue > faThresh ) {
+    iVec = iVec / sqrt(sum(iVec*iVec))
+    if ( sum(iVec*lastVec) <  0 ) { iVec = -iVec }
+
+    iPt = iPt + stepSize*iVec
+    pts = rbind(iPt, pts)
+    idx =  antsTransformPhysicalPointToIndex(fa, iPt)
+    faValue = fa[idx[1], idx[2]]
+    lastVec = iVec
+
+    ppdx = vecs[[1]][ idx[1], idx[2] ]
+    ppdy = vecs[[2]][ idx[1], idx[2] ]
+    iVec = as.vector(antsGetDirection(fa) %*% as.matrix(c(ppdx,ppdy)))
+  }
+
+  return(data.frame(x=pts[,1],y=pts[,2]))
+
+}
+
+trackx = c()
+tracky = c()
+trackid = c()
+for ( i in 1:dim(seedPts)[1] ) {
+  track = trackFromSeed(list(evecx,evecy), fa, seedPts[i,])
+  trackx = c(trackx,track$x)
+  tracky = c(tracky,track$y)
+  trackid = c(trackid, rep(i, length(track$x)))  
+}
+ldat = data.frame(x=trackx, y=tracky, id=factor(trackid))
+plotColor(subDecList, paths=ldat, points=seedPts, vectors=list(subVecList[[1]], subVecList[[2]]))
+plotColor(subfa, paths=ldat, points=seedPts)
+
+```
+
+
+
+## References

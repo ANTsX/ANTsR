@@ -72,6 +72,7 @@ before_install:
   - Rscript -e 'install.packages("magic")'
   - Rscript -e 'install.packages("ggplot2")'
   - Rscript -e 'install.packages("psych")'
+  - Rscript -e 'install.packages("randomForest")'
   - cd ..
   - git clone https://github.com/muschellij2/ghtravis.git
   - R CMD INSTALL ghtravis

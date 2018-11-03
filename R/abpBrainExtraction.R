@@ -46,7 +46,7 @@
 #'   antsTransformPhysicalPointToIndex antsrGetPointerName
 #'   antsrTransformFromDisplacementField applyAntsrTransform
 #'   applyAntsrTransformToImage as.antsImage atropos
-#'   bigLMStats composeAntsrTransforms
+#'   bigLMStats composeAntsrTransforms imageListToMatrix matrixToImages
 #'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
 #'   getNeighborhoodAtVoxel getNeighborhoodInMask
 #'   iMath is.antsImage kmeansSegmentation labelClusters randomMask
