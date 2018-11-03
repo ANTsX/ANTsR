@@ -20,6 +20,6 @@ which\.R
 c\.R
 _config\.yml
 ^docs$
-*\.log$
+*.log
 R/confidenceConnected.R
 R/connectedThresholdImage.R
