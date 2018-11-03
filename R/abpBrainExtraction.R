@@ -45,7 +45,7 @@
 #'   antsSetSpacing antsTransformIndexToPhysicalPoint
 #'   antsTransformPhysicalPointToIndex antsrGetPointerName
 #'   antsrTransformFromDisplacementField applyAntsrTransform
-#'   applyAntsrTransformToImage as.antsImage atropos
+#'   applyAntsrTransformToImage as.antsImage atropos jointLabelFusion
 #'   bigLMStats composeAntsrTransforms imageListToMatrix matrixToImages
 #'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
 #'   getNeighborhoodAtVoxel getNeighborhoodInMask
