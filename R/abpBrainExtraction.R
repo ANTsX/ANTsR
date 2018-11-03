@@ -9,11 +9,11 @@
 #' @param temregmask Template's registration mask including skull but not the face
 #' @param regtype registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)
 #' @param tdir temporary directory (optional)
-#' @param num_threads will execute 
+#' @param num_threads will execute
 #' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything. 
+#' for discussion.  If \code{NULL}, will not set anything.
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
@@ -34,6 +34,7 @@
 #' bm2<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
 #'
 #' @export abpBrainExtraction
+#' @importFrom magrittr %>%
 #' @importFrom ANTsRCore antsRegistration atropos thresholdImage labelClusters
 #'   antsApplyTransforms antsApplyTransformsToPoints
 #'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
@@ -52,6 +53,18 @@
 #'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
 #'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
 #'   splitChannels thresholdImage usePkg
+#' @importFrom graphics hist par plot points
+#' @importFrom grDevices colorRampPalette dev.off hsv png rainbow rgb
+#' @importFrom methods new
+#' @importFrom stats ar as.formula coefficients convolve
+#'   cor cor.test cov dist formula glm lm
+#'   lm.fit loess median model.matrix na.omit
+#'   optimize p.adjust pchisq pf pnorm ppois
+#'   predict pt qchisq qf qnorm qt quantile
+#'   residuals rnorm sd spec.pgram spline stl
+#'   t.test toeplitz ts var
+#' @importFrom utils data glob2rx read.csv setTxtProgressBar tail
+#'   txtProgressBar write.csv
 #' @useDynLib ANTsR
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA,
@@ -64,8 +77,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
       Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
     })
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
-  }  
-  
+  }
+
   if (missing(img) | missing(tem) | missing(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")

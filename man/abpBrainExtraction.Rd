@@ -20,7 +20,7 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA,
 
 \item{tdir}{temporary directory (optional)}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
