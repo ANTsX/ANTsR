@@ -3,13 +3,13 @@ library( knitr )
 library( rmarkdown )
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(ANTsR)
-library(ggplot2)
-library(igraph)
-library(pracma)
-library(dplyr)
-library(mFilter)
 
 ## ----data ,message=FALSE,warnings=FALSE,eval=FALSE-----------------------
+#  library(ggplot2)
+#  library(igraph)
+#  library(pracma)
+#  library(dplyr)
+#  library(mFilter)
 #  fdthresh = 0.1 # threshold for throwing out bad data, typically between 0.1 and 0.5
 #  # based on ACT output or sample data
 #  id = "BAvants"

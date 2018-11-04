@@ -321,14 +321,14 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #' sphereDim = 9
 #' embeddDim = 100
 #' n = 1000
-#' if ( ! usePkg( "pracma"  ) ) stop( "need pracma" )
+#' if ( usePkg( "pracma"  ) ) {
 #' sphereData = pracma::rands( n, sphereDim, 1. )
 #' mysig = 0.1
 #' spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 #' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-#'
+#' }
 #' @export multiscaleSVD
 multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 {
