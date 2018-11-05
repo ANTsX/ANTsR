@@ -173,7 +173,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
 
   tmp = iMath(temmaskwarped, "MD", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
-  tmp = iMath(tmp, "FillHoles")
+  tmp = iMath(tmp, "FillHoles") %>% thresholdImage( 1, 2 )
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
@@ -191,7 +191,7 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   segcsf<-thresholdImage( fseg, 1, 1)
   segwm = iMath(segwm, "GetLargestComponent")
   seggm = iMath(seggm, "GetLargestComponent")
-  seggm = iMath(seggm, "FillHoles")
+  seggm = iMath(seggm, "FillHoles")  %>% thresholdImage( 1, 2 )
   segwm[segwm > 0.5] <- 3
   tmp = iMath(segcsf, "ME", 10)
   seggm[seggm < 0.5 & tmp > 0.5] <- 2
@@ -207,11 +207,11 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   tmp = iMath(tmp, "ME", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
   tmp = iMath(tmp, "MD", 4)
-  tmp = iMath(tmp, "FillHoles")
+  tmp = iMath(tmp, "FillHoles")  %>% thresholdImage( 1, 2 )
   tmp[tmp > 0 | temmaskwarped > 0.25] <- 1
   tmp = iMath(tmp, "MD", 5)
   tmp = iMath(tmp, "ME", 5)
-  finalseg2 = iMath(tmp, "FillHoles")
+  finalseg2 = iMath(tmp, "FillHoles")  %>% thresholdImage( 1, 2 )
 
   # FIXME - steps above should all be checked again ...
   dseg = iMath(finalseg2, "ME", 5)
