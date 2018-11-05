@@ -5,7 +5,8 @@
 \title{An ants-based brain extraction script.}
 \usage{
 abpBrainExtraction(img = NA, tem = NA, temmask = NA,
-  temregmask = NA, regtype = "SyN", tdir = NA, num_threads = 1)
+  temregmask = NA, regtype = "SyN", tdir = NA, num_threads = 1,
+  verbose = FALSE)
 }
 \arguments{
 \item{img}{whole head image to which we map a brain mask}
@@ -25,6 +26,8 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA,
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
+
+\item{verbose}{print diagnostic messages}
 }
 \value{
 outputs a brain image and brain mask.
@@ -48,7 +51,9 @@ temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ] <- 1
 temmask[ tem  <= 20 ] <- 0
 bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+stopifnot(sum(bm$bmask) != prod(dim(bm$brain)))
 bm2<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+stopifnot(sum(bm2$bmask) != prod(dim(bm2$brain)))
 
 }
 \author{

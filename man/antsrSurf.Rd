@@ -78,6 +78,7 @@ fn = getANTsRData( "surf" )
 img = antsImageRead( fn ) # see antsSurf on github for data
 wm   = thresholdImage( img, 3, 4 )
 wm = thresholdImage(img, 3, 4) \%>\% iMath("FillHoles")
+wm = wm  \%>\% thresholdImage(1, 2)
 wms = smoothImage( wm, 1.0 )
 wmk = weingartenImageCurvature( wms, 1.5, 0 )
 # will display to screen

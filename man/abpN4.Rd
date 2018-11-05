@@ -5,7 +5,7 @@
 \title{MR image bias correction based on the N4 algorithm.}
 \usage{
 abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
-  usen3 = FALSE)
+  usen3 = FALSE, ...)
 }
 \arguments{
 \item{img}{image to be bias corrected}
@@ -15,6 +15,9 @@ abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
 \item{mask}{optional antsImage mask}
 
 \item{usen3}{Use N3 algorithm instead of N4}
+
+\item{...}{additional arguments to pass to 
+\code{\link{n4BiasFieldCorrection}}}
 }
 \value{
 outputs a bias corrected image. 1 indicates failure.
