@@ -2942,7 +2942,9 @@ getSyMG <- function( v, i, myw, mixAlg )  {
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
-    for ( i in 1:length( voxmats ) ) {
+    matrange = 1:length( voxmats )
+#    if ( myit > 1 ) matrange = 1 # length( voxmats ):length( voxmats )
+    for ( i in matrange ) {
       if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
       mytol = datanorm[ i ] * lineSearchTolerance / myit^2
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
@@ -2962,16 +2964,16 @@ getSyMG <- function( v, i, myw, mixAlg )  {
       vmats[[i]] = orthogonalizeAndQSparsify(
               as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
               sparsenessQuantiles[i],
-              orthogonalize = orthogonalize, positivity = positivities[i] )
+              orthogonalize = FALSE, positivity = positivities[i] )
       vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
       }
     if ( verbose ) print( gamma )
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
-        initialUMatrix[[i]] = voxmats[[i]] %*% vmats[[i]]
-#        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
-#        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+#        initialUMatrix[[i]] = voxmats[[i]] %*% vmats[[i]]
+        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
+        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
         }
 
     if ( hasRanEff ) {
