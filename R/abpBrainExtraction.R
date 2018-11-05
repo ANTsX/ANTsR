@@ -14,6 +14,7 @@
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 #' for discussion.  If \code{NULL}, will not set anything.
+#' @param verbose print diagnostic messages
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
@@ -31,7 +32,9 @@
 #' temmask[ tem  > 20 ] <- 1
 #' temmask[ tem  <= 20 ] <- 0
 #' bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+#' stopifnot(sum(bm$bmask) != prod(dim(bm$brain)))
 #' bm2<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+#' stopifnot(sum(bm2$bmask) != prod(dim(bm2$brain)))
 #'
 #' @export abpBrainExtraction
 #' @importFrom magrittr %>%
@@ -68,7 +71,8 @@
 #' @useDynLib ANTsR
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA,
-                               num_threads = 1) {
+                               num_threads = 1,
+                               verbose = FALSE) {
 ### @useDynLib ANTsR, .registration = TRUE
 
   if (!is.null(num_threads)) {
@@ -156,12 +160,14 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
 #                         f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX
   mytx<-antsRegistration( tem, img, typeofTransform = regtype,
-                          initialTransform=initafffn, mask=temregmask )
+                          initialTransform=initafffn, mask=temregmask,
+                          verbose = verbose)
   fwdtransforms <- mytx$fwdtransforms
   invtransforms <- mytx$invtransforms
   temmaskwarped <- antsApplyTransforms( img, temmask,
                                         transformlist = invtransforms,
-                                        interpolator = "nearestNeighbor" )
+                                        interpolator = "nearestNeighbor",
+                                        verbose = verbose )
   temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
 
@@ -176,7 +182,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                      o = seg, x = tmpi,
                      i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION,
                      c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE,
-                     k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD)
+                     k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD,
+                     v = as.integer( verbose > 0))
   atropos(atroparams)
   fseg <- antsImageClone(  seg, "float")
   segwm<-thresholdImage(  fseg, 3, 3 )
