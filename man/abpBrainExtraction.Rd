@@ -50,9 +50,9 @@ tem<-resampleImage(tem,c(n,n),1,0)
 temmask<-antsImageClone( tem )
 temmask[ tem  > 20 ] <- 1
 temmask[ tem  <= 20 ] <- 0
-bm<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+bm<-ANTsR::abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
 stopifnot(sum(bm$bmask) != prod(dim(bm$brain)))
-bm2<-abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
+bm2<-ANTsR::abpBrainExtraction(img=img,tem=tem,temmask=temmask, num_threads = 1)
 stopifnot(sum(bm2$bmask) != prod(dim(bm2$brain)))
 
 }

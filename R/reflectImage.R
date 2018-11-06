@@ -8,6 +8,7 @@
 #' @param metric similarity metric for image registration.  see \code{antsRegistration}.
 #' @param verbose print diagnostic messages, passed to 
 #' \code{\link{antsRegistration}} and \code{\link{antsApplyTransforms}}
+#' 
 #' @author BB Avants
 #' @seealso \code{\link{antsRegistration}}
 #' @examples
