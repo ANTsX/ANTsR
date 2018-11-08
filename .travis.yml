@@ -139,10 +139,10 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+    secure: Y+JfKm3oXRUxpxyWjBtXimuBcuv3+D5iakzCwMJLqEDPjd+w9ow1x5a4GN/LfFg8Lbhflc8Uaz2bpxRuD5enk+RRmFtcXBB/IsnxkXBEM3fA2eT4ZIxq/aTt4HisOdXclyZc5PxAXFOVO8/QWcjh3boqSpOjscS0kYCWkm4KT9M=
   file: ${PKG_FILE_NAME}
   skip_cleanup: true
   on:
     tags: true
-    repo: ANTsX/${PROJ_DIR}
+    repo: muschellij2/${PROJ_DIR}
     all_branches: true
