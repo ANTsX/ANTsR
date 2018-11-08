@@ -4,7 +4,8 @@
 \alias{reflectImage}
 \title{reflectImage}
 \usage{
-reflectImage(img1, axis = NA, tx = NA, metric = "mattes")
+reflectImage(img1, axis = NA, tx = NA, metric = "mattes",
+  verbose = FALSE)
 }
 \arguments{
 \item{img1}{input object, an antsImage}
@@ -14,6 +15,9 @@ reflectImage(img1, axis = NA, tx = NA, metric = "mattes")
 \item{tx}{transformation type to estimate after reflection}
 
 \item{metric}{similarity metric for image registration.  see \code{antsRegistration}.}
+
+\item{verbose}{print diagnostic messages, passed to 
+\code{\link{antsRegistration}} and \code{\link{antsApplyTransforms}}}
 }
 \description{
 reflects an image along its axis

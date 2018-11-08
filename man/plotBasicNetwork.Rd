@@ -71,7 +71,8 @@ If weights are not specified, only the nodes are plotted.
   mnia<-getANTsRData("mnia")
   mnia<-antsImageRead(mnia)
   mnit<-thresholdImage( mnit, 1, max(mnit) )
-  mnit<-iMath(mnit,"FillHoles")
+  mnit<-iMath(mnit,"FillHoles") 
+  mnit = thresholdImage(mnit,  1, 2 )
   cnt<-getCentroids( mnia, clustparam = 0 )
   aalcnt<-cnt[1:90,1:3]
   brain<-renderSurfaceFunction( surfimg =list( mnit ) , 

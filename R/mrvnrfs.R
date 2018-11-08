@@ -65,13 +65,13 @@
 mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
                      ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE,
                      voxchunk=50000) {
-
+  
   # check if Y is antsImage or a number
   yisimg<-TRUE
   if ( typeof(y[[1]]) == "integer" | typeof(y[[1]]) == "double") yisimg<-FALSE
   rflist<-list()
   rfct<-1
-
+  
   # for a single labelmask create a list with it
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
@@ -80,16 +80,16 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     useFirstMask = TRUE
   }
-
+  
   # loop of resolutions
   verbose = FALSE # need to add this option to command line if you want messages
   mrcount=0
   for ( mr in multiResSchedule ) {
     mrcount=mrcount+1
     if ( verbose ) message(paste(mrcount,'of',length(multiResSchedule)))
-
+    
     invisible(gc())
-
+    
     # add newprobs from previous run, already correct dimension
     if ( rfct > 1 ) {
       for ( kk in 1:length(x) ) {
@@ -100,35 +100,35 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
       }
       rm(newprobs); invisible(gc())
     }
-
+    
     invisible(gc())
-
+    
     # build model for this mr
     if (!useFirstMask) sol<-vwnrfs( y, x, labelmasks, rad, nsamples, ntrees, asFactors, reduceFactor = mr )
     if (useFirstMask)  sol<-vwnrfs( y, x, labelmasks[[1]], rad, nsamples, ntrees, asFactors, reduceFactor = mr )
-
+    
     sol$fm = sol$tv = sol$randmask = NULL
-
+    
     invisible(gc())
-
+    
     # if not last mr, predict new features for next round
     if (mrcount < length(multiResSchedule)) {
       predme = vwnrfs.predict(rfm=sol$rfm, x=x, labelmasks=labelmasks,
-                          rad=rad, asFactors=asFactors, voxchunk=voxchunk,
-                            reduceFactor = mr)
-
+                              rad=rad, asFactors=asFactors, voxchunk=voxchunk,
+                              reduceFactor = mr)
+      
       newprobs=predme$probs
       rm(predme); invisible(gc())
       for ( tt1 in 1:length(newprobs) )
         for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[tt1]]), useVoxels=1, 0 )
     }
-
+    
     invisible(gc())
     rflist[[rfct]]<-sol$rfm
     rfct<-rfct+1
   } # mr loop
-
+  
   return( list(rflist=rflist) )
 }
 

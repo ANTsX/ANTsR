@@ -169,7 +169,7 @@ easily transform from 4D image to matrix and back.
 ```{r fourd}
 gaussimg<-makeImage(c(5,5,5,10), voxval = rnorm(125*10)  )
 print(dim(gaussimg))
-avg3d<-getAverageOfTimeSeries( gaussimg )
+avg3d<-ANTsR::getAverageOfTimeSeries( gaussimg )
 mask <- avg3d < 0.25
 gmat<-timeseries2matrix( gaussimg, mask )
 print(dim(gmat))
