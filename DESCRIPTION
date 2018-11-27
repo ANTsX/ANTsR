@@ -8,7 +8,8 @@ Authors@R: c(
     person(c("Benjamin", "M"), "Kandel", role = "ctb", email = "NA"),
     person(c("Jeff", "T"), "Duda", role = "ctb", email = "NA"),
     person(c("Philip", "A"), "Cook", role = "ctb", email = "NA"),
-    person(c("Nicholas", "J"), "Tustison", role = "ctb", email = "NA")
+    person(c("Nicholas", "J"), "Tustison", role = "ctb", email = "NA"),
+    person(c("Dorian", ""), "Pustina", role = "ctb", email = "NA")
     )
 Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: ANTsR interfaces state of the art image processing with R
