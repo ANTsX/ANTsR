@@ -95,6 +95,10 @@ R CMD INSTALL ANTsR_*.tgz
 
 * [Corrective learning for segmentation](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/) functions `segmentationRefinement.train` and `segmentationRefinement.predict`.
 
+* [LINDA: automated segmentation of stroke lesions](https://www.ncbi.nlm.nih.gov/pubmed/26756101) function `mrvnrfs`.
+
+* [LESYMAP: lesion to symptom mapping](https://www.ncbi.nlm.nih.gov/pubmed/28882479) function `sparseDecom2`.
+
 * [ANTsRNet](https://github.com/ntustison/ANTsRNet)  A growing collection of well-known deep learning
 architectures ported to the R language.
     * Image segmentation
