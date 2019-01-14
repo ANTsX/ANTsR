@@ -6,7 +6,7 @@
 \usage{
 abpBrainExtraction(img = NA, tem = NA, temmask = NA,
   temregmask = NA, regtype = "SyN", tdir = NA, num_threads = 1,
-  verbose = FALSE)
+  pad = 0, verbose = FALSE)
 }
 \arguments{
 \item{img}{whole head image to which we map a brain mask}
@@ -26,6 +26,9 @@ abpBrainExtraction(img = NA, tem = NA, temmask = NA,
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
+
+\item{pad}{argument passed to \code{\link{iMath}} for how much to
+zero-pad the image}
 
 \item{verbose}{print diagnostic messages}
 }
