@@ -158,7 +158,7 @@ SEXP eigenanatomyCppHelper(
     {
     sccanobj->SetUseL1( false );
     }
-  sccanobj->SetGradStep( vnl_math_abs( ell1 ) );
+  sccanobj->SetGradStep( std::abs( ell1 ) );
   sccanobj->SetMaximumNumberOfIterations( its );
   sccanobj->SetRowSparseness( z );
   sccanobj->SetSmoother( smooth );
@@ -466,7 +466,7 @@ SEXP sccanCppHelper(
     {
     sccanobj->SetUseL1( false );
     }
-  sccanobj->SetGradStep( vnl_math_abs( ell1 ) );
+  sccanobj->SetGradStep( std::abs( ell1 ) );
   sccanobj->SetMaximumNumberOfIterations( its );
   sccanobj->SetRowSparseness( z );
   sccanobj->SetSmoother( smooth );

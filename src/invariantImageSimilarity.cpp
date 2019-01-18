@@ -206,7 +206,7 @@ SEXP invariantSimilarityHelper(
       {
       // Rcpp::Rcerr << " zero image1 error ";
       }
-    if ( vnl_math_abs( bestscale - 1.0 ) < 1.e-6 )
+    if ( std::abs( bestscale - 1.0 ) < 1.e-6 )
       {
       RealType volelt1 = 1;
       RealType volelt2 = 1;
@@ -219,7 +219,7 @@ SEXP invariantSimilarityHelper(
         ( calculator2->GetTotalMass() * volelt2 )/
         ( calculator1->GetTotalMass() * volelt1 );
       RealType powlev = 1.0 / static_cast<RealType>(ImageDimension);
-      bestscale = vcl_pow( bestscale , powlev );
+      bestscale = std::pow( bestscale , powlev );
     }
     unsigned int eigind1 = 1;
     unsigned int eigind2 = 1;
@@ -385,10 +385,10 @@ SEXP invariantSimilarityHelper(
           }
           ct++;
         }
-      mimetric->SetFixedSampledPointSet( pset );
-      mimetric->SetUseFixedSampledPointSet( true );
-      gcmetric->SetFixedSampledPointSet( pset );
-      gcmetric->SetUseFixedSampledPointSet( true );
+      mimetric->SetUseSampledPointSet( pset );
+      mimetric->SetUseSampledPointSet( true );
+      gcmetric->SetUseSampledPointSet( pset );
+      gcmetric->SetUseSampledPointSet( true );
     }
     if ( whichMetric.compare("MI") == 0  ) {
       mimetric->Initialize();
