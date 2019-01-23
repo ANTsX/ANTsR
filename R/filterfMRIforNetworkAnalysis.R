@@ -86,6 +86,7 @@ filterfMRIforNetworkAnalysis <- function(
   freqHi <- freqHi * tr
   # network analysis
   wb <- (mask > 0)  # whole brain
+  if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }
   leftinds <- magic::shift(c(1:nrow(aslmat)), 1)
   rightinds <- magic::shift(c(1:nrow(aslmat)), -1)
   oaslmat <- aslmat

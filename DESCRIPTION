@@ -31,9 +31,9 @@ Imports:
     grDevices,
     magrittr,
     stats,
+    magic,    
     utils
 Suggests:
-    magic,
     psych,
     rsvd,
     abind,
