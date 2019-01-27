@@ -128,6 +128,7 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   ##################################################
   classiccompcor <- compcor(omat, mask = mask, ncompcor = 4)
   omotionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
+  if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }  
   motnuisshift <- magic::ashift(omotionnuis, c(1, 0))
   motmag <- apply(omotionnuis, FUN = mean, MARGIN = 2)
   matmag <- sqrt(sum(motmag[1:9] * motmag[1:9]))
