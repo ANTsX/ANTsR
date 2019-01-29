@@ -25,8 +25,8 @@ fi
 cmaker=`${R_HOME}/bin/Rscript -e "x=Sys.which('cmake'); cat(x)"`
 if [ -z "${cmaker}" ]; then
     res=`${R_HOME}/bin/Rscript -e "cat(('cmaker' %in% installed.packages())*1)"`
-    if [ $res -eq 0 ]; 
-    then     
+    if [ $res -eq 0 ];
+    then
         git clone https://github.com/stnava/cmaker ;
         R CMD INSTALL cmaker ;
         rm -rf cmaker ;
@@ -35,7 +35,7 @@ if [ -z "${cmaker}" ]; then
 	if [[ -n "${cmaker}" ]]; then
     	cmake_path=`dirname ${cmaker}`
     	export PATH=${PATH}:"${cmake_path}"
-    fi 
+    fi
 fi
 
 cd ./src

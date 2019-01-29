@@ -15,6 +15,8 @@
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 #' for discussion.  If \code{NULL}, will not set anything.
 #' @param verbose print diagnostic messages
+#' @param pad argument passed to \code{\link{iMath}} for how much to  
+#' zero-pad the image 
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
@@ -38,7 +40,8 @@
 #'
 #' @export abpBrainExtraction
 #' @importFrom magrittr %>%
-#' @importFrom ANTsRCore antsRegistration atropos thresholdImage labelClusters
+#' @importFrom ANTsRCore check_ants
+#'   antsRegistration atropos thresholdImage labelClusters
 #'   antsApplyTransforms antsApplyTransformsToPoints
 #'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
 #'   antsImageClone antsImageIterator antsImageIteratorGet
@@ -72,6 +75,7 @@
 abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
                                temregmask = NA, regtype='SyN', tdir = NA,
                                num_threads = 1,
+                               pad = 0,
                                verbose = FALSE) {
 ### @useDynLib ANTsR, .registration = TRUE
 
@@ -91,6 +95,10 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   tempriors <- 3
   npriors <- 3
 
+  img = ANTsRCore::check_ants(img)
+  if (pad > 0) {
+    img = iMath(img, "PadImage", pad)
+  }
   # file I/O - all stored in temp dir
   if (is.na(tdir)) {
     tdir <- tempdir()
@@ -235,9 +243,15 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   bmask<-thresholdImage( dseg, mindval, dthresh )
   brain <- antsImageClone(img)
   brain[finalseg2 < 0.5] <- 0
+  if (pad > 0) {
+    brain = iMath(brain, "PadImage", -pad)
+    finalseg2 = iMath(finalseg2, "PadImage", -pad)
+    seg = iMath(seg, "PadImage", -pad)
+  }
   return(list(brain = brain, bmask = finalseg2,
               kmeansseg = seg, fwdtransforms = fwdtransforms,
               invtransforms = invtransforms,
               temmaskwarped = temmaskwarped, distmeans = distmeans,
-              dsearchvals = dsearchvals))
+              dsearchvals = dsearchvals, 
+              pad = pad))
 }
