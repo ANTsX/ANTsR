@@ -36,7 +36,7 @@ env:
   - _R_CHECK_TIMINGS_="0"
   - BOOTSTRAP_LATEX=1
   - DISPLAY=:99.0
-  - _R_CHECK_FORCE_SUGGESTS_=true
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_install:
   - ulimit -n 2048
