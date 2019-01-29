@@ -49,7 +49,9 @@ before_install:
   - wget -O travis_helpers.sh http://bit.ly/travis_helpers
   - source travis_helpers.sh
   - rm travis_helpers.sh  
+  - start_xvfb ;  
   - export rver=`r_version`;
+  - export gh_user=`get_gh_user` ; echo $gh_user ;    
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
@@ -144,5 +146,6 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    repo: ANTsX/${PROJ_DIR}
+    repo: ${gh_user}/${PROJ_DIR}
     all_branches: true
+
