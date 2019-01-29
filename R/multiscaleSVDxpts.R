@@ -2677,6 +2677,7 @@ return(
 #' allow estimates of per identifier intercept.
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
+#' @param randomSeed controls repeatability of ica-based decomposition
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
@@ -2743,7 +2744,9 @@ symilr <- function(
   repeatedMeasures = NA,
   lineSearchRange = c( 0, 10 ),
   lineSearchTolerance = 0.001,
+  randomSeed,
   verbose = FALSE ) {
+  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
 # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s' )
