@@ -54,6 +54,7 @@ before_install:
   - export gh_user=`get_gh_user` ; echo $gh_user ;    
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
+  - echo ${PACKAGE_NAME};
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
   # does all the clang exports
   - x=`export_clang_cxx`; eval ${x}
