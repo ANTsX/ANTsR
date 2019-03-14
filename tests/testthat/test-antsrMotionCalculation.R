@@ -15,8 +15,8 @@ test_that(
 
 
 test_that(
-	"antsrMotionCalculation gives different result w/diff seed", {
-  testthat::expect_failure(testthat::expect_equal(res, res3))
+	"antsrMotionCalculation gives same result w/diff seed", {
+         testthat::expect_equal(res, res3)
 })
 
 
