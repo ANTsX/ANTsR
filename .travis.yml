@@ -40,16 +40,14 @@ env:
 
 before_install:
   - ulimit -n 2048
-  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
-  - source travis_helpers.sh
-  - rm travis_helpers.sh
   - export LD_LIBRARY_PATH=/usr/local/clang/lib:${LD_LIBRARY_PATH}
   - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - wget -O travis_helpers.sh http://bit.ly/travis_helpers
-  - source travis_helpers.sh
-  - rm travis_helpers.sh  
-  - start_xvfb ;  
+  - fname=travis_helpers.sh
+  - wget -O ${fname} http://bit.ly/travis_helpers
+  - cat ${fname}; source ${fname}; rm ${fname}
+  - start_xvfb ;
+  - v8_install ;
   - export rver=`r_version`;
   - export gh_user=`get_gh_user` ; echo $gh_user ;    
   - cat DESCRIPTION
@@ -72,7 +70,7 @@ before_install:
   - cmake --version
   - ./cleanup
   - Rscript -e "install.packages(c('Rcpp', 'RcppEigen'), type = 'source', repos=c(CRAN='https://cran.rstudio.com'))"
-  - Rscript -e "install.packages( c('magrittr','knitr','rmarkdown','testthat'), repos=c(CRAN='https://cran.rstudio.com'))"
+  - Rscript -e "install.packages( c('magrittr','testthat','knitr','rmarkdown','covr','devtools', 'desc',  'remotes', 'colormap' ), repos=c(CRAN='https://cran.rstudio.com'))"
   - Rscript -e 'install.packages("rsvd")'
   - Rscript -e 'install.packages("magic")'
   - Rscript -e 'install.packages("ggplot2")'
@@ -96,6 +94,7 @@ script:
   - PKG_TARBALL=$(ls -1t *.tar.gz | head -n 1)
   - ls
   - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_TARBALL}"; CHECK_RET=$? ;
+  - cat /home/travis/build/ANTsX/ANTsR/ANTsR.Rcheck/00install.out
   - rm -f travis_wait*.log
   - if [[ $CHECK_RET -ne 0 ]];
     then
