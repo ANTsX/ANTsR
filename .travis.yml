@@ -140,13 +140,23 @@ before_deploy:
     fi
 
 deploy:
-  provider: releases
-  api_key:
-    secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-  file: ${PKG_FILE_NAME}
-  skip_cleanup: true
-  on:
-    tags: true
-    repo: ${gh_user}/${PROJ_DIR}
-    all_branches: true
-
+  - provider: releases
+    api_key:
+      secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+    file: ${PKG_FILE_NAME}
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: ${gh_user}/${PROJ_DIR}
+      all_branches: true
+      condition: "${gh_user} = ANTsX"
+  - provider: releases
+    api_key:
+      secure: "r7FsUfP8EozlZBDTIHzAE5ENqyeuopoWxxpKoAxkhGkDwB6rLDkNhjmFk3SZxP/8Sx51CeO1oFDUC/G5QWpfYdSYRIkq0GoubhGTDdOk3S1F6z4ncsi6DO24MkxxZbAb4e7lyK1bBaVla/SKm0QQivzqNn5g+jNLAjek4Yc2hBCUdtbyYk++fuGKsBVSC/VeahE9I6SsHQAZMViOAVgR6Y80cxeIzsVk6yFljOmc/EQxCVG8M1Rq/VZYnkZfLB5E35bbCehcdwHWjPvsP1TfbBDFo4DsyHhmIe1L6k7AtuFOrBl9zK0rBAMJznwHsI0D4SsNAwdFYrqK/tSMB7pTxDR90KfkQpFjt2JxBdz5msFVZAQqcuvbbNlrbnf0m5wtX2DPB6wuPwdRxmCMrXyT5EZE4bbYmKhF4l3DDX0snncZvusSwrHD+r90kriwgZm7ogWSRFATOLRXtEVrWGyQYCjZoAFM9vB8lL+/8yQbB80e3gYexyYI+AFzgmiNTPc+6TYF8UUKMUiBsdN5iqbdYYrmuTexKDC0So23XuBO3vlRLQLhjmtFwY/FNywneOpEfwVZfxIMeleuF0T7z0XDgPpFQ4PmXtpXqKQiAxI18dplxfG8vsyACeLnVfslF8H2/bWdRgMukDUlLyKFBLVHUFoSyo8zPAcBM+7P+mS9SbQ="
+    file: ${PKG_FILE_NAME}
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: muschellij2/ANTsR
+      all_branches: true
+      condition: "${gh_user} = muschellij2"
