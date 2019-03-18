@@ -80,7 +80,8 @@ before_install:
   - git clone https://github.com/muschellij2/ghtravis.git
   - R CMD INSTALL ghtravis
   - cd ANTsR
-  - gh_binary_install  stnava/ITKR ANTsX/ANTsRCore
+  # - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
+  - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
   - export ants_user=ANTsX
   - echo "Done Binary Installs"
 
