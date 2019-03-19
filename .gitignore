@@ -8,7 +8,6 @@ src/Makevars
 extdata/
 src/*.o
 src/*.o.macbook*
-src/*.o
 src/*.gcda
 src/*.gcno
 src/*.o-*
@@ -23,9 +22,7 @@ src/itki/
 # inst/doc
 vignettes/*pdf
 vignettes/*html
-
 .Rhistory
 R/.Rhistory
-
 .DS_Store
 .Rproj.user

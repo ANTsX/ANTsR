@@ -6,7 +6,8 @@ output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{mrvnrfs}
-    \usepackage[utf8]{inputenc}
+    %\VignetteEncoding{UTF-8}
+    %\usepackage[utf8]{inputenc}
 ---
 
 A binary image defines the "potential" for deformation.
