@@ -1,3 +1,4 @@
+^Meta$
 ^\.travis\.yml$
 src/Makevars
 src/ants/
