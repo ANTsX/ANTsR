@@ -95,7 +95,6 @@ script:
   - PKG_TARBALL=$(ls -1t *.tar.gz | head -n 1)
   - ls
   - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_TARBALL}"; CHECK_RET=$? ;
-  - cat /home/travis/build/ANTsX/ANTsR/ANTsR.Rcheck/00install.out
   - rm -f travis_wait*.log
   - if [[ $CHECK_RET -ne 0 ]];
     then
