@@ -2,14 +2,11 @@
 % Please edit documentation in R/save.ANTsR.R
 \name{save.ANTsR}
 \alias{save.ANTsR}
-\alias{load.ANTsR}
-\title{save.ANTsR}
+\title{Save R sessions including ANTsR objects}
 \usage{
 save.ANTsR(filename = file.path(".", ".ANTsRsession"), objects = NA,
   env = as.environment(1), overwrite = FALSE, clonediskfiles = TRUE,
   ...)
-
-load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
 }
 \arguments{
 \item{filename}{Prefix for folder to store data.}
@@ -28,7 +25,15 @@ FALSE if you save temporary sessions to continue later on the same computer.}
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{
-Save and load ANTsR sessions.
+Use this funnction to save an object or a full R session for 
+later use. Any object can be saved (list, antsImage, data frame,
+etc.). The function will save all antsImage objects as nifti
+files with random filenames (to avoid using (sub)variable names, 
+which can be identical). These files is what load.ANTsR uses
+later to fill back the original antsImage variables. For variables
+that contain filenames, you can choose to copy those files
+in your saved folder so you can completely recreate the environment
+even if you change computer or the temporary folder is deleted.
 }
 \examples{
 \dontrun{ # causes problems with devtools::run_examples()
@@ -37,7 +42,8 @@ Save and load ANTsR sessions.
 # save.ANTsR(objects=c('b', 'a'))
 # load.ANTsR("./.ANTsRsession")
 }
+
 }
 \author{
-Pustina D
+Dorian Pustina
 }
