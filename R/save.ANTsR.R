@@ -1,5 +1,15 @@
-#' @title save.ANTsR
-#' @description Save and load ANTsR sessions.
+#' @rdname save.ANTsR
+#' @title Save R sessions including ANTsR objects
+#' @description
+#' Use this function to save an object or a full R session for 
+#' later use. Any object can be saved (list, antsImage, data frame,
+#' etc.). The function will save all antsImage objects as nifti
+#' files with random filenames (to avoid using (sub)variable names, 
+#' which can be identical). These files is what load.ANTsR uses
+#' later to fill back the original antsImage variables. For variables
+#' that contain filenames, you can choose to copy those files
+#' in your saved folder so you can completely recreate the environment
+#' even if you change computer or the temporary folder is deleted.
 #' 
 #' @param filename Prefix for folder to store data.
 #' @param objects Vector of character names of objects to store.  Can be antsImages.
@@ -11,7 +21,7 @@
 #'      FALSE if you save temporary sessions to continue later on the same computer.
 #' @param ... Additional arguments to pass to \code{save}.
 #' 
-#' @author Pustina D
+#' @author Dorian Pustina
 #' 
 #' @examples
 #' \dontrun{ # causes problems with devtools::run_examples()
@@ -20,7 +30,7 @@
 #' # save.ANTsR(objects=c('b', 'a'))
 #' # load.ANTsR("./.ANTsRsession")
 #' }
-#' @rdname save.ANTsR
+#' 
 #' @export
 save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        objects=NA,
@@ -94,10 +104,25 @@ save.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
 }
 
 
-
-
-#' @usage load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
-#' @rdname save.ANTsR
+#' @rdname load.ANTsR
+#' @title Load R sessions with ANTsR objects
+#' @description
+#' Loads a previously saved ANTsR session or object. Simply
+#' point the function to the folder where you previously
+#' saved the data with save.ANTsR.
+#' 
+#' @param filename path of the saved ANTsR session. If not
+#' specified, the default behavior is to search for the 
+#' folder \".ANTsRsesssion\" in the current working directory.
+#' 
+#' @param env the environment level. Don't change unless you know
+#' what are you doing.
+#' 
+#' @usage
+#' load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
+#' 
+#' @author Dorian Pustina
+#' 
 #' @export
 load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
                        env=as.environment(1)) {
@@ -111,7 +136,12 @@ load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
       x = antsImageRead(fn)
       return(x)
     } 
-    x = file.path(fold,gsub('^ANTSrepl','',x))
+    
+    # here we replace file names in variables
+    # starting with ANTSrepl, which were filename vectors
+    # when the data were saved with save.ANTsR
+    # 
+    if ( any(grepl('^ANTSrepl', x)) ) x = file.path(fold,gsub('^ANTSrepl','',x))
     return(x)
   }
   
