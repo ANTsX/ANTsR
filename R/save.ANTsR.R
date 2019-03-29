@@ -1,7 +1,7 @@
 #' @rdname save.ANTsR
 #' @title Save R sessions including ANTsR objects
 #' @description
-#' Use this funnction to save an object or a full R session for 
+#' Use this function to save an object or a full R session for 
 #' later use. Any object can be saved (list, antsImage, data frame,
 #' etc.). The function will save all antsImage objects as nifti
 #' files with random filenames (to avoid using (sub)variable names, 
@@ -136,7 +136,12 @@ load.ANTsR <- function(filename=file.path('.','.ANTsRsession'),
       x = antsImageRead(fn)
       return(x)
     } 
-    x = file.path(fold,gsub('^ANTSrepl','',x))
+    
+    # here we replace file names in variables
+    # starting with ANTSrepl, which were filename vectors
+    # when the data were saved with save.ANTsR
+    # 
+    if ( any(grepl('^ANTSrepl', x)) ) x = file.path(fold,gsub('^ANTSrepl','',x))
     return(x)
   }
   

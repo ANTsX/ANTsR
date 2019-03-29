@@ -25,7 +25,7 @@ FALSE if you save temporary sessions to continue later on the same computer.}
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{
-Use this funnction to save an object or a full R session for 
+Use this function to save an object or a full R session for 
 later use. Any object can be saved (list, antsImage, data frame,
 etc.). The function will save all antsImage objects as nifti
 files with random filenames (to avoid using (sub)variable names, 
