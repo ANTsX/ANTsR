@@ -113,9 +113,9 @@ void antsReoHelper(
         A_solution = A_solution * id;
         }
       det = vnl_determinant( A_solution  );
-      Rcpp::Rcout << " det " << det << std::endl;
-      Rcpp::Rcout << " A_solution " << std::endl;
-      Rcpp::Rcout << A_solution << std::endl;
+      // Rcpp::Rcout << " det " << det << std::endl;
+      // Rcpp::Rcout << " A_solution " << std::endl;
+      // Rcpp::Rcout << A_solution << std::endl;
       typename AffineType::Pointer affine1 = AffineType::New();
       typename AffineType::OffsetType trans = affine1->GetOffset();
       itk::Point<RealType, ImageDimension> trans2;
