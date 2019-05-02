@@ -7,7 +7,7 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Simulate a deformation field with ANTsR}
     %\VignetteEncoding{UTF-8}
-    %\usepackage[utf8]{inputenc}
+    \usepackage[utf8]{inputenc}
 ---
 
 A binary image defines the "potential" for deformation.

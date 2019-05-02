@@ -6,7 +6,7 @@ bibliography: REFERENCES.bib
 output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
-    %\VignetteIndexEntry{multivariate template coordinates}
+    %\VignetteIndexEntry{multivariate template coordinates example for eigenanatomy}
     %\VignetteEncoding{UTF-8}
     \usepackage[utf8]{inputenc}
 ---
