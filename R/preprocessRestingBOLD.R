@@ -177,7 +177,7 @@ preprocessRestingBOLD <- function(boldImage,
   if (numberOfCompCorComponents > 0) {
     compCorNuisanceVariables <- compcor(boldImage, maskImage, ncompcor = numberOfCompCorComponents,
       variance_extreme = 0.975)
-    if (is.na(nuisanceVariables) || is.null(dim(nuisanceVariables))) {
+    if (all(is.na(nuisanceVariables)) || is.null(dim(nuisanceVariables))) {
       nuisanceVariables <- compCorNuisanceVariables
     } else {
       nuisanceVariables <- cbind(nuisanceVariables, compCorNuisanceVariables)
