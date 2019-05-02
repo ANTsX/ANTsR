@@ -33,17 +33,17 @@
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
 #' @param denseFramewise boolean for dense framewise stats
-#' @param num_threads will execute 
+#' @param num_threads will execute
 #' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything. 
-#' @param seed will execute 
+#' for discussion.  If \code{NULL}, will not set anything.
+#' @param seed will execute
 #' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.  
-#' 
+#' for discussion.  If \code{NULL}, will not set anything.
+#'
 #' @return List of:
 #' \itemize{
 #'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
@@ -66,13 +66,13 @@
 #' dims <- c(n,n,n,6)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
-#' # cleanfMRI <- preprocessRestingBOLD(boldImage)
+#' cleanfMRI <- preprocessRestingBOLD(boldImage)
 #'
 #' @export
 preprocessRestingBOLD <- function(boldImage,
   maskImage = NA,
   maskingMeanRatioThreshold = 0.75,
-  initialNuisanceVariables = NA,
+  initialNuisanceVariables,
   denseFramewise = FALSE,
   numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE,
@@ -88,7 +88,9 @@ preprocessRestingBOLD <- function(boldImage,
   num_threads = 1,
   seed = NULL  ) {
 
-  nuisanceVariables <- initialNuisanceVariables
+  nuisanceVariables <- NULL
+  if ( ! missing(  initialNuisanceVariables  ) )
+    nuisanceVariables <- initialNuisanceVariables
 
   numberOfTimePoints <- dim(boldImage)[4]
 
@@ -177,11 +179,7 @@ preprocessRestingBOLD <- function(boldImage,
   if (numberOfCompCorComponents > 0) {
     compCorNuisanceVariables <- compcor(boldImage, maskImage, ncompcor = numberOfCompCorComponents,
       variance_extreme = 0.975)
-    if (is.na(nuisanceVariables) || is.null(dim(nuisanceVariables))) {
-      nuisanceVariables <- compCorNuisanceVariables
-    } else {
-      nuisanceVariables <- cbind(nuisanceVariables, compCorNuisanceVariables)
-    }
+    nuisanceVariables <- cbind(nuisanceVariables, compCorNuisanceVariables)
   }
 
   # replace boldMatrix in place with residualized version

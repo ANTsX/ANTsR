@@ -5,7 +5,7 @@
 \title{Preprocess resting BOLD fMRI image data.}
 \usage{
 preprocessRestingBOLD(boldImage, maskImage = NA,
-  maskingMeanRatioThreshold = 0.75, initialNuisanceVariables = NA,
+  maskingMeanRatioThreshold = 0.75, initialNuisanceVariables,
   denseFramewise = FALSE, numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1, motionCorrectionIterations = 1,
@@ -60,13 +60,13 @@ iterations, e.g. \code{c(0.25, 5)}.}
 
 \item{residualizeMatrix}{boolean}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
 
-\item{seed}{will execute 
+\item{seed}{will execute
 \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
@@ -96,7 +96,7 @@ nvox <- n*n*n*6
 dims <- c(n,n,n,6)
 boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
 # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
-# cleanfMRI <- preprocessRestingBOLD(boldImage)
+cleanfMRI <- preprocessRestingBOLD(boldImage)
 
 }
 \references{
