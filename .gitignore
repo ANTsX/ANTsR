@@ -20,7 +20,7 @@ src/ants/
 src/itkb/
 src/antb/
 src/itki/
-# inst/doc
+inst/doc
 vignettes/*pdf
 vignettes/*html
 .Rhistory
