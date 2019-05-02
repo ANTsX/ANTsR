@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
-    %\VignetteIndexEntry{mrvnrfs}
+    %\VignetteIndexEntry{Simulate a deformation field with ANTsR}
     %\VignetteEncoding{UTF-8}
     %\usepackage[utf8]{inputenc}
 ---

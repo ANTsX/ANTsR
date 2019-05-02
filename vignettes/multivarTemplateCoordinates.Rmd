@@ -6,7 +6,7 @@ bibliography: REFERENCES.bib
 output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
-    %\VignetteIndexEntry{Transformations and statistical representations for images in R}
+    %\VignetteIndexEntry{multivariate template coordinates}
     %\VignetteEncoding{UTF-8}
     \usepackage[utf8]{inputenc}
 ---
