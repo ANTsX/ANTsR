@@ -23,7 +23,6 @@ matrix:
     - r: devel
     - os: osx
 
-latex: false
 compiler: clang
 osx_image: xcode9
 
