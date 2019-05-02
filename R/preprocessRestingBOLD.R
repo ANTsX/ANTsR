@@ -66,7 +66,7 @@
 #' dims <- c(n,n,n,6)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
-#' cleanfMRI <- preprocessRestingBOLD(boldImage)
+#' # cleanfMRI <- preprocessRestingBOLD(boldImage)
 #'
 #' @export
 preprocessRestingBOLD <- function(boldImage,
