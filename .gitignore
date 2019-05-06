@@ -8,6 +8,7 @@ Meta
 src/Makevars
 extdata/
 src/*.o
+src/*.o.tmp
 src/*.o.macbook*
 src/*.gcda
 src/*.gcno
