@@ -71,7 +71,7 @@ construction and to arbitrary numbers of modalities." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -270,20 +270,20 @@ allow estimates of per identifier intercept.</p></td>
 <span class='no'>s2</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>( <span class='fl'>1</span>:<span class='no'>nsub</span>)
 <span class='no'>resultp</span> <span class='kw'>=</span> <span class='fu'>symilr</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>( <span class='kw'>vox</span> <span class='kw'>=</span> <span class='no'>mat1</span>, <span class='kw'>vox2</span> <span class='kw'>=</span> <span class='no'>mat2</span>[<span class='no'>s1</span>,], <span class='kw'>vox3</span> <span class='kw'>=</span> <span class='no'>mat3</span>[<span class='no'>s2</span>,] ),
    <span class='kw'>initialUMatrix</span> <span class='kw'>=</span> <span class='no'>nk</span> , <span class='kw'>verbose</span><span class='kw'>=</span><span class='fl'>TRUE</span>, <span class='kw'>iterations</span><span class='kw'>=</span><span class='fl'>5</span>  )</div><div class='output co'>#&gt; <span class='message'>initializing with random matrix:  5 columns</span></div><div class='output co'>#&gt; [1] 1.391035 2.360680 1.242802
-#&gt; [1] "myit = 1 data-term 3222.35367804401 Reg 1.6033511538354e-05 tot 3222.35369407752"
-#&gt; e 2757.31806901683 3780.40038705901 3129.34257805619
-#&gt; [1] 1.0659954 0.9216132 0.9041055
-#&gt; [1] "myit = 2 data-term 3065.31888989045 Reg 1.65933310918985e-05 tot 3065.31890648378"
-#&gt; e 2713.63312365308 3329.90546090226 3152.418085116
-#&gt; [1] 0.9988125 0.9976307 0.9976741
-#&gt; [1] "myit = 3 data-term 3063.93082180422 Reg 1.65933311377807e-05 tot 3063.93083839755"
-#&gt; e 2712.74818519651 3328.55275252066 3150.49152769547
-#&gt; [1] 0.9988125 0.9976307 0.9976740
-#&gt; [1] "myit = 4 data-term 3063.93082180977 Reg 1.65933311375769e-05 tot 3063.9308384031"
-#&gt; e 2712.74818520284 3328.55275252368 3150.49152770279
-#&gt; [1] 0.9988125 0.9976307 0.9976740
-#&gt; [1] "myit = 5 data-term 3063.93082180977 Reg 1.65933311375769e-05 tot 3063.9308384031"
-#&gt; e 2712.74818520284 3328.55275252369 3150.49152770279</div><div class='input'><span class='no'>p1p</span> <span class='kw'>=</span> <span class='no'>mat1</span> <span class='kw'>%*%</span> (<span class='no'>resultp</span>$<span class='no'>v</span><span class='kw'>[[</span><span class='fl'>1</span>]])
+#&gt; [1] "myit = 1 data-term 3175.48862484192 Reg 1.53880905870509e-05 tot 3175.48864023001"
+#&gt; e 2647.91099475885 3679.43465731052 3199.1202224564
+#&gt; [1] 0.9315468 0.8686307 1.0254046
+#&gt; [1] "myit = 2 data-term 3092.08292174134 Reg 1.63143524673817e-05 tot 3092.08293805569"
+#&gt; e 2763.36438061065 3297.14226526535 3215.74211934803
+#&gt; [1] 0.9963565 0.9993582 0.9956598
+#&gt; [1] "myit = 3 data-term 3090.33154238513 Reg 1.63143524488387e-05 tot 3090.33155869949"
+#&gt; e 2762.66290191192 3292.67791303262 3215.65381221086
+#&gt; [1] 0.9963564 0.9993582 0.9956598
+#&gt; [1] "myit = 4 data-term 3090.33154238807 Reg 1.63143524394315e-05 tot 3090.33155870242"
+#&gt; e 2762.66290191976 3292.67791303395 3215.65381221051
+#&gt; [1] 0.9963564 0.9993582 0.9956598
+#&gt; [1] "myit = 5 data-term 3090.33154238604 Reg 1.63143524361086e-05 tot 3090.33155870039"
+#&gt; e 2762.66290191368 3292.67791303394 3215.65381221051</div><div class='input'><span class='no'>p1p</span> <span class='kw'>=</span> <span class='no'>mat1</span> <span class='kw'>%*%</span> (<span class='no'>resultp</span>$<span class='no'>v</span><span class='kw'>[[</span><span class='fl'>1</span>]])
 <span class='no'>p2p</span> <span class='kw'>=</span> <span class='no'>mat2</span>[<span class='no'>s1</span>,] <span class='kw'>%*%</span> (<span class='no'>resultp</span>$<span class='no'>v</span><span class='kw'>[[</span><span class='fl'>2</span>]])
 <span class='no'>p3p</span> <span class='kw'>=</span> <span class='no'>mat3</span>[<span class='no'>s2</span>,] <span class='kw'>%*%</span> (<span class='no'>resultp</span>$<span class='no'>v</span><span class='kw'>[[</span><span class='fl'>3</span>]])
 
@@ -295,7 +295,7 @@ allow estimates of per identifier intercept.</p></td>
 <span class='co'># real</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1</span>,<span class='no'>p2</span>))</div><div class='output co'>#&gt; [1] -0.7955653  0.8157355</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1</span>,<span class='no'>p3</span>))</div><div class='output co'>#&gt; [1] -0.9444966  0.8492672</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p3</span>,<span class='no'>p2</span>))</div><div class='output co'>#&gt; [1] -0.7307740  0.6799381</div><div class='input'>
 <span class='co'># permuted</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1p</span>,<span class='no'>p2p</span>))</div><div class='output co'>#&gt; [1] -0.4417842  0.4479953</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1p</span>,<span class='no'>p3p</span>))</div><div class='output co'>#&gt; [1] -0.5256528  0.4614072</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p3p</span>,<span class='no'>p2p</span>))</div><div class='output co'>#&gt; [1] -0.4988755  0.4728194</div><div class='input'>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1p</span>,<span class='no'>p2p</span>))</div><div class='output co'>#&gt; [1] -0.5608970  0.5390083</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p1p</span>,<span class='no'>p3p</span>))</div><div class='output co'>#&gt; [1] -0.1526784  0.2263507</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='no'>p3p</span>,<span class='no'>p2p</span>))</div><div class='output co'>#&gt; [1] -0.4962038  0.4820394</div><div class='input'>
 <span class='co'># svd</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/range'>range</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>( <span class='no'>svd1</span>,<span class='no'>svd2</span>) ))</div><div class='output co'>#&gt; [1] -0.6848291  0.6203092</div><div class='input'>
 </div></pre>

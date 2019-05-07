@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
       <h1>Transformations and statistical representations for images in R</h1>
                         <h4 class="author">Brian B. Avants</h4>
             
-            <h4 class="date">2019-03-10</h4>
+            <h4 class="date">2019-05-06</h4>
       
       
       <div class="hidden name"><code>ANTsR.Rmd</code></div>
@@ -142,7 +142,7 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 ##   Voxel Spacing       : 1x1 
 ##   Origin              : 0 0 
 ##   Direction           : 1 0 0 1 
-##   Filename           : /Users/stnava/code/RLibs/ANTsRCore/extdata/r16slice.jpg</code></pre>
+##   Filename           : /Library/Frameworks/R.framework/Versions/3.6/Resources/library/ANTsRCore/extdata/r16slice.jpg</code></pre>
 <p>Take a quick look at the image.</p>
 <p><img src="ANTsR_files/figure-html/basic_plot-1.png" width="700"></p>
 </div>
@@ -189,7 +189,7 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 ##   Voxel Spacing       : 1x1 
 ##   Origin              : 0 0 
 ##   Direction           : 1 0 0 1 
-##   Filename           : /Users/stnava/code/RLibs/ANTsRCore/extdata/r27slice.jpg</code></pre>
+##   Filename           : /Library/Frameworks/R.framework/Versions/3.6/Resources/library/ANTsRCore/extdata/r27slice.jpg</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">retval&lt;-<span class="kw">antsImageWrite</span>(img,mnifilename)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw">antsGetSpacing</span>(img)</a></code></pre></div>
 <pre><code>## [1] 1 1</code></pre>
@@ -218,7 +218,7 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" data-line-number="1"><span class="co"># if using SUBSET using an antsImage, you must be explicit</span></a>
 <a class="sourceLine" id="cb21-2" data-line-number="2">sub =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/array">as.array</a></span>(img <span class="op">&gt;=</span><span class="st"> </span><span class="dv">50</span> <span class="op">&amp;</span><span class="st"> </span>img <span class="op">&lt;=</span><span class="st"> </span><span class="dv">99</span>) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span></a>
 <a class="sourceLine" id="cb21-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>( <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>( gaussimg[ sub  ]) )</a></code></pre></div>
-<pre><code>## [1] -0.1954668</code></pre>
+<pre><code>## [1] -0.2068316</code></pre>
 <p><strong>Convert a 4D image to a matrix</strong></p>
 <p>Four dimensional images are generated and used in the same way. One can easily transform from 4D image to matrix and back.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1">gaussimg&lt;-<span class="kw">makeImage</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">10</span>), <span class="dt">voxval =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Normal">rnorm</a></span>(<span class="dv">125</span><span class="op">*</span><span class="dv">10</span>)  )</a>
@@ -228,7 +228,7 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 <a class="sourceLine" id="cb25-2" data-line-number="2">mask &lt;-<span class="st"> </span>avg3d <span class="op">&lt;</span><span class="st"> </span><span class="fl">0.25</span></a>
 <a class="sourceLine" id="cb25-3" data-line-number="3">gmat&lt;-<span class="kw"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span>( gaussimg, mask )</a>
 <a class="sourceLine" id="cb25-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(gmat))</a></code></pre></div>
-<pre><code>## [1] 10 98</code></pre>
+<pre><code>## [1] 10 95</code></pre>
 <p>If one has a mask, then one can use <code>makeImage</code> to generate a new image from a scalar or vector.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1">newimg&lt;-<span class="kw">makeImage</span>( mask, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(avg3d) )    <span class="co"># from scalar</span></a>
 <a class="sourceLine" id="cb27-2" data-line-number="2">newimg&lt;-<span class="kw">makeImage</span>( mask, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colSums">colMeans</a></span>(gmat) ) <span class="co"># from vector</span></a></code></pre></div>
@@ -247,7 +247,7 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 <a class="sourceLine" id="cb28-11" data-line-number="11">  <span class="dt">lowThresh=</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(ilist[[<span class="dv">1</span>]]), <span class="dt">cleanup=</span><span class="ot">TRUE</span> )</a>
 <a class="sourceLine" id="cb28-12" data-line-number="12">mat&lt;-<span class="kw">imageListToMatrix</span>( ilist, mask )</a>
 <a class="sourceLine" id="cb28-13" data-line-number="13"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/dim">dim</a></span>(mat))</a></code></pre></div>
-<pre><code>## [1] 100 274</code></pre>
+<pre><code>## [1] 100 231</code></pre>
 <p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask. Then we look at some summary statistics.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">mat&lt;-<span class="kw">imageListToMatrix</span>( ilist, mask )</a>
 <a class="sourceLine" id="cb30-2" data-line-number="2">age&lt;-<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Normal">rnorm</a></span>( <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(mat) ) <span class="co"># simulated age</span></a>
@@ -262,9 +262,9 @@ A few example images are built into ANTs<em>R</em>, but more can be downloaded. 
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(mdli<span class="op">$</span>beta.t))</a></code></pre></div>
 <pre><code>## [1] "age"     "genderM"</code></pre>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"age"</span>,<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/p.adjust">p.adjust</a></span>(mdli<span class="op">$</span>beta.pval[<span class="dv">1</span>,]))))</a></code></pre></div>
-<pre><code>## [1] "age 0.0016761899889764"</code></pre>
+<pre><code>## [1] "age 0.00254183222665977"</code></pre>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"gen"</span>,<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/p.adjust">p.adjust</a></span>(mdli<span class="op">$</span>beta.pval[<span class="dv">2</span>,]))))</a></code></pre></div>
-<pre><code>## [1] "gen 1"</code></pre>
+<pre><code>## [1] "gen 0.27839912216445"</code></pre>
 <p><strong>Write out a statistical map</strong></p>
 <p>We might also write out the images so that we can save them for later or look at them with other software.</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1">agebetas&lt;-<span class="kw">makeImage</span>( mask , mdli<span class="op">$</span>beta.t[<span class="dv">1</span>,] )</a>
@@ -396,67 +396,67 @@ An example BOLD correlation matrix is available in <code>bold_correlation_matrix
 <p>Avants, Brian B. et al. 2015. “The Pediatric Template of Brain Perfusion.” <em>Sci. Data</em>.</p>
 </div>
 <div id="ref-Avants2014">
-<p>Avants, Brian B., David J. Libon, Katya Rascovsky, Ashley Boller, Corey T. McMillan, Lauren Massimo, H Branch Coslett, Anjan Chatterjee, Rachel G. Gross, and Murray Grossman. 2014. “Sparse Canonical Correlation Analysis Relates Network-Level Atrophy to Multivariate Cognitive Measures in a Neurodegenerative Population.” <em>Neuroimage</em> 84 (January). Department of Radiology, University of Pennsylvania School of Medicine, Philadelphia, PA, USA.: 698–711. <a href="https://doi.org/10.1016/j.neuroimage.2013.09.048" class="uri">https://doi.org/10.1016/j.neuroimage.2013.09.048</a>.</p>
+<p>Avants, Brian B., David J. Libon, Katya Rascovsky, Ashley Boller, Corey T. McMillan, Lauren Massimo, H Branch Coslett, Anjan Chatterjee, Rachel G. Gross, and Murray Grossman. 2014. “Sparse Canonical Correlation Analysis Relates Network-Level Atrophy to Multivariate Cognitive Measures in a Neurodegenerative Population.” <em>Neuroimage</em> 84 (January). Department of Radiology, University of Pennsylvania School of Medicine, Philadelphia, PA, USA.: 698–711. <a href="https://doi.org/10.1016/j.neuroimage.2013.09.048">https://doi.org/10.1016/j.neuroimage.2013.09.048</a>.</p>
 </div>
 <div id="ref-Avants2014a">
-<p>Avants, Brian B., Nicholas J. Tustison, Michael Stauffer, Gang Song, Baohua Wu, and James C. Gee. 2014. “The Insight Toolkit Image Registration Framework.” <em>Front Neuroinform</em> 8. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 44. <a href="https://doi.org/10.3389/fninf.2014.00044" class="uri">https://doi.org/10.3389/fninf.2014.00044</a>.</p>
+<p>Avants, Brian B., Nicholas J. Tustison, Michael Stauffer, Gang Song, Baohua Wu, and James C. Gee. 2014. “The Insight Toolkit Image Registration Framework.” <em>Front Neuroinform</em> 8. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 44. <a href="https://doi.org/10.3389/fninf.2014.00044">https://doi.org/10.3389/fninf.2014.00044</a>.</p>
 </div>
 <div id="ref-Avants2011">
-<p>Avants, Brian B., Nicholas J. Tustison, Jue Wu, Philip A. Cook, and James C. Gee. 2011. “An Open Source Multivariate Framework for N-Tissue Segmentation with Evaluation on Public Data.” <em>Neuroinformatics</em> 9 (4). Penn Image Computing; Science Laboratory, University of Pennsylvania, 3600 Market Street, Suite 370, Philadelphia, PA 19104, USA. stnava@gmail.com: 381–400. <a href="https://doi.org/10.1007/s12021-011-9109-y" class="uri">https://doi.org/10.1007/s12021-011-9109-y</a>.</p>
+<p>Avants, Brian B., Nicholas J. Tustison, Jue Wu, Philip A. Cook, and James C. Gee. 2011. “An Open Source Multivariate Framework for N-Tissue Segmentation with Evaluation on Public Data.” <em>Neuroinformatics</em> 9 (4). Penn Image Computing; Science Laboratory, University of Pennsylvania, 3600 Market Street, Suite 370, Philadelphia, PA 19104, USA. stnava@gmail.com: 381–400. <a href="https://doi.org/10.1007/s12021-011-9109-y">https://doi.org/10.1007/s12021-011-9109-y</a>.</p>
 </div>
 <div id="ref-Avants2012">
 <p>Avants, Brian, Paramveer Dhillon, Benjamin M. Kandel, Philip A. Cook, Corey T. McMillan, Murray Grossman, and James C. Gee. 2012. “Eigenanatomy Improves Detection Power for Longitudinal Cortical Change.” <em>Med Image Comput Comput Assist Interv</em> 15 (Pt 3). Department of Radiology, University of Pennsylvania, Philadelphia, PA 19104, USA.: 206–13.</p>
 </div>
 <div id="ref-Cook2014">
-<p>Cook, Philip A., Corey T. McMillan, Brian B. Avants, Jonathan E. Peelle, James C. Gee, and Murray Grossman. 2014. “Relating Brain Anatomy and Cognitive Ability Using a Multivariate Multimodal Framework.” <em>Neuroimage</em>, May. Penn Frontotemporal Degeneration Center, Department of Neurology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA 19104, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.008" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.008</a>.</p>
+<p>Cook, Philip A., Corey T. McMillan, Brian B. Avants, Jonathan E. Peelle, James C. Gee, and Murray Grossman. 2014. “Relating Brain Anatomy and Cognitive Ability Using a Multivariate Multimodal Framework.” <em>Neuroimage</em>, May. Penn Frontotemporal Degeneration Center, Department of Neurology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA 19104, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.008">https://doi.org/10.1016/j.neuroimage.2014.05.008</a>.</p>
 </div>
 <div id="ref-deMarvao2014">
-<p>de Marvao, Antonio, Timothy J W. Dawes, Wenzhe Shi, Christopher Minas, Niall G. Keenan, Tamara Diamond, Giuliana Durighel, et al. 2014. “Population-Based Studies of Myocardial Hypertrophy: High Resolution Cardiovascular Magnetic Resonance Atlases Improve Statistical Power.” <em>J Cardiovasc Magn Reson</em> 16. th Hospital Campus, Du Cane Road, London W12 0NN, UK. antonio.de-marvao10@imperial.ac.uk.: 16. <a href="https://doi.org/10.1186/1532-429X-16-16" class="uri">https://doi.org/10.1186/1532-429X-16-16</a>.</p>
+<p>de Marvao, Antonio, Timothy J W. Dawes, Wenzhe Shi, Christopher Minas, Niall G. Keenan, Tamara Diamond, Giuliana Durighel, et al. 2014. “Population-Based Studies of Myocardial Hypertrophy: High Resolution Cardiovascular Magnetic Resonance Atlases Improve Statistical Power.” <em>J Cardiovasc Magn Reson</em> 16. th Hospital Campus, Du Cane Road, London W12 0NN, UK. antonio.de-marvao10@imperial.ac.uk.: 16. <a href="https://doi.org/10.1186/1532-429X-16-16">https://doi.org/10.1186/1532-429X-16-16</a>.</p>
 </div>
 <div id="ref-Dhillon2014">
-<p>Dhillon, Paramveer S., David A. Wolk, Sandhitsu R. Das, Lyle H. Ungar, James C. Gee, and Brian B. Avants. 2014. “Subject-Specific Functional Parcellation via Prior Based Eigenanatomy.” <em>Neuroimage</em>, May. Penn Image Computing; Science Laboratory (PICSL), Department of Radiology, University of Pennsylvania, Philadelphia, PA, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.026" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.026</a>.</p>
+<p>Dhillon, Paramveer S., David A. Wolk, Sandhitsu R. Das, Lyle H. Ungar, James C. Gee, and Brian B. Avants. 2014. “Subject-Specific Functional Parcellation via Prior Based Eigenanatomy.” <em>Neuroimage</em>, May. Penn Image Computing; Science Laboratory (PICSL), Department of Radiology, University of Pennsylvania, Philadelphia, PA, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.026">https://doi.org/10.1016/j.neuroimage.2014.05.026</a>.</p>
 </div>
 <div id="ref-dirksbook">
 <p>Eddelbuettel, Dirk. 2013. <em>Seamless R and C++ Integration with Rcpp</em>. New York: Springer.</p>
 </div>
 <div id="ref-Johnson2010">
-<p>Johnson, G Allan, Alexandra Badea, Jeffrey Brandenburg, Gary Cofer, Boma Fubara, Song Liu, and Jonathan Nissanov. 2010. “Waxholm Space: An Image-Based Reference for Coordinating Mouse Brain Research.” <em>Neuroimage</em> 53 (2). Duke Center for In Vivo Microscopy, Radiology, Duke University Medical Center, Durham, NC 27710, USA. gjohnson@duke.edu: 365–72. <a href="https://doi.org/10.1016/j.neuroimage.2010.06.067" class="uri">https://doi.org/10.1016/j.neuroimage.2010.06.067</a>.</p>
+<p>Johnson, G Allan, Alexandra Badea, Jeffrey Brandenburg, Gary Cofer, Boma Fubara, Song Liu, and Jonathan Nissanov. 2010. “Waxholm Space: An Image-Based Reference for Coordinating Mouse Brain Research.” <em>Neuroimage</em> 53 (2). Duke Center for In Vivo Microscopy, Radiology, Duke University Medical Center, Durham, NC 27710, USA. gjohnson@duke.edu: 365–72. <a href="https://doi.org/10.1016/j.neuroimage.2010.06.067">https://doi.org/10.1016/j.neuroimage.2010.06.067</a>.</p>
 </div>
 <div id="ref-Kandel2015">
-<p>Kandel, Benjamin M., Danny J J. Wang, John A. Detre, James C. Gee, and Brian B. Avants. 2015. “Decomposing Cerebral Blood Flow Mri into Functional and Structural Components: A Non-Local Approach Based on Prediction.” <em>Neuroimage</em> 105 (January). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, USA.: 156–70. <a href="https://doi.org/10.1016/j.neuroimage.2014.10.052" class="uri">https://doi.org/10.1016/j.neuroimage.2014.10.052</a>.</p>
+<p>Kandel, Benjamin M., Danny J J. Wang, John A. Detre, James C. Gee, and Brian B. Avants. 2015. “Decomposing Cerebral Blood Flow Mri into Functional and Structural Components: A Non-Local Approach Based on Prediction.” <em>Neuroimage</em> 105 (January). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, USA.: 156–70. <a href="https://doi.org/10.1016/j.neuroimage.2014.10.052">https://doi.org/10.1016/j.neuroimage.2014.10.052</a>.</p>
 </div>
 <div id="ref-Kandel2014a">
-<p>Kandel, Benjamin M., Danny J J. Wang, James C. Gee, and Brian B. Avants. 2014. “Eigenanatomy: Sparse Dimensionality Reduction for Multi-Modal Medical Image Analysis.” <em>Methods</em>, October. Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, United States; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, United States. <a href="https://doi.org/10.1016/j.ymeth.2014.10.016" class="uri">https://doi.org/10.1016/j.ymeth.2014.10.016</a>.</p>
+<p>Kandel, Benjamin M., Danny J J. Wang, James C. Gee, and Brian B. Avants. 2014. “Eigenanatomy: Sparse Dimensionality Reduction for Multi-Modal Medical Image Analysis.” <em>Methods</em>, October. Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, United States; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, United States. <a href="https://doi.org/10.1016/j.ymeth.2014.10.016">https://doi.org/10.1016/j.ymeth.2014.10.016</a>.</p>
 </div>
 <div id="ref-Kim2008">
-<p>Kim, Junghoon, Brian Avants, Sunil Patel, John Whyte, Branch H. Coslett, John Pluta, John A. Detre, and James C. Gee. 2008. “Structural Consequences of Diffuse Traumatic Brain Injury: A Large Deformation Tensor-Based Morphometry Study.” <em>Neuroimage</em> 39 (3). Moss Rehabilitation Research Institute, Albert Einstein Healthcare Network, Philadelphia, PA 19141, USA. kimj@einstein.edu: 1014–26. <a href="https://doi.org/10.1016/j.neuroimage.2007.10.005" class="uri">https://doi.org/10.1016/j.neuroimage.2007.10.005</a>.</p>
+<p>Kim, Junghoon, Brian Avants, Sunil Patel, John Whyte, Branch H. Coslett, John Pluta, John A. Detre, and James C. Gee. 2008. “Structural Consequences of Diffuse Traumatic Brain Injury: A Large Deformation Tensor-Based Morphometry Study.” <em>Neuroimage</em> 39 (3). Moss Rehabilitation Research Institute, Albert Einstein Healthcare Network, Philadelphia, PA 19141, USA. kimj@einstein.edu: 1014–26. <a href="https://doi.org/10.1016/j.neuroimage.2007.10.005">https://doi.org/10.1016/j.neuroimage.2007.10.005</a>.</p>
 </div>
 <div id="ref-Klein2012">
-<p>Klein, Arno, and Jason Tourville. 2012. “101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol.” <em>Front Neurosci</em> 6. of Medicine Stony Brook, NY, USA ; Department of Psychiatry, Columbia University New York, NY, USA.: 171. <a href="https://doi.org/10.3389/fnins.2012.00171" class="uri">https://doi.org/10.3389/fnins.2012.00171</a>.</p>
+<p>Klein, Arno, and Jason Tourville. 2012. “101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol.” <em>Front Neurosci</em> 6. of Medicine Stony Brook, NY, USA ; Department of Psychiatry, Columbia University New York, NY, USA.: 171. <a href="https://doi.org/10.3389/fnins.2012.00171">https://doi.org/10.3389/fnins.2012.00171</a>.</p>
 </div>
 <div id="ref-Majka2013">
-<p>Majka, Piotr, Jakub M. Kowalski, Natalia Chlodzinska, and Daniel K. Wójcik. 2013. “3D Brain Atlas Reconstructor Service–Online Repository of Three-Dimensional Models of Brain Structures.” <em>Neuroinformatics</em> 11 (4). Nencki Institute of Experimental Biology, 3 Pasteur Street, 02-093, Warsaw, Poland, p.majka@nencki.gov.pl.: 507–18. <a href="https://doi.org/10.1007/s12021-013-9199-9" class="uri">https://doi.org/10.1007/s12021-013-9199-9</a>.</p>
+<p>Majka, Piotr, Jakub M. Kowalski, Natalia Chlodzinska, and Daniel K. Wójcik. 2013. “3D Brain Atlas Reconstructor Service–Online Repository of Three-Dimensional Models of Brain Structures.” <em>Neuroinformatics</em> 11 (4). Nencki Institute of Experimental Biology, 3 Pasteur Street, 02-093, Warsaw, Poland, p.majka@nencki.gov.pl.: 507–18. <a href="https://doi.org/10.1007/s12021-013-9199-9">https://doi.org/10.1007/s12021-013-9199-9</a>.</p>
 </div>
 <div id="ref-TALAIRACH1958">
-<p>TALAIRACH, J., and P. TOURNOUX. 1958. “[Stereotaxic Localization of Central Gray Nuclei].” <em>Neurochirurgia (Stuttg)</em> 1 (1): 88–93. <a href="https://doi.org/10.1055/s-0028-1095515" class="uri">https://doi.org/10.1055/s-0028-1095515</a>.</p>
+<p>TALAIRACH, J., and P. TOURNOUX. 1958. “[Stereotaxic Localization of Central Gray Nuclei].” <em>Neurochirurgia (Stuttg)</em> 1 (1): 88–93. <a href="https://doi.org/10.1055/s-0028-1095515">https://doi.org/10.1055/s-0028-1095515</a>.</p>
 </div>
 <div id="ref-Tustison2013">
-<p>Tustison, Nicholas J., and Brian B. Avants. 2013. “Explicit B-Spline Regularization in Diffeomorphic Image Registration.” <em>Front Neuroinform</em> 7. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 39. <a href="https://doi.org/10.3389/fninf.2013.00039" class="uri">https://doi.org/10.3389/fninf.2013.00039</a>.</p>
+<p>Tustison, Nicholas J., and Brian B. Avants. 2013. “Explicit B-Spline Regularization in Diffeomorphic Image Registration.” <em>Front Neuroinform</em> 7. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 39. <a href="https://doi.org/10.3389/fninf.2013.00039">https://doi.org/10.3389/fninf.2013.00039</a>.</p>
 </div>
 <div id="ref-Tustison2010">
-<p>Tustison, Nicholas J., Brian B. Avants, Philip A. Cook, Yuanjie Zheng, Alexander Egan, Paul A. Yushkevich, and James C. Gee. 2010. “N4ITK: Improved N3 Bias Correction.” <em>IEEE Trans Med Imaging</em> 29 (6). Department of Radiology, University of Pennsylvania, Philadelphia, PA 19140, USA. ntustison@wustl.edu: 1310–20. <a href="https://doi.org/10.1109/TMI.2010.2046908" class="uri">https://doi.org/10.1109/TMI.2010.2046908</a>.</p>
+<p>Tustison, Nicholas J., Brian B. Avants, Philip A. Cook, Yuanjie Zheng, Alexander Egan, Paul A. Yushkevich, and James C. Gee. 2010. “N4ITK: Improved N3 Bias Correction.” <em>IEEE Trans Med Imaging</em> 29 (6). Department of Radiology, University of Pennsylvania, Philadelphia, PA 19140, USA. ntustison@wustl.edu: 1310–20. <a href="https://doi.org/10.1109/TMI.2010.2046908">https://doi.org/10.1109/TMI.2010.2046908</a>.</p>
 </div>
 <div id="ref-Tustison2014">
-<p>Tustison, Nicholas J., Philip A. Cook, Arno Klein, Gang Song, Sandhitsu R. Das, Jeffrey T. Duda, Benjamin M. Kandel, et al. 2014. “Large-Scale Evaluation of Ants and Freesurfer Cortical Thickness Measurements.” <em>Neuroimage</em> 99 (October). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA.: 166–79. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.044" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.044</a>.</p>
+<p>Tustison, Nicholas J., Philip A. Cook, Arno Klein, Gang Song, Sandhitsu R. Das, Jeffrey T. Duda, Benjamin M. Kandel, et al. 2014. “Large-Scale Evaluation of Ants and Freesurfer Cortical Thickness Measurements.” <em>Neuroimage</em> 99 (October). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA.: 166–79. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.044">https://doi.org/10.1016/j.neuroimage.2014.05.044</a>.</p>
 </div>
 <div id="ref-Tustison2014a">
-<p>Tustison, Nicholas J., K. L. Shrinidhi, Max Wintermark, Christopher R. Durst, Benjamin M. Kandel, James C. Gee, Murray C. Grossman, and Brian B. Avants. 2014. “Optimal Symmetric Multimodal Templates and Concatenated Random Forests for Supervised Brain Tumor Segmentation (Simplified) with Antsr.” <em>Neuroinformatics</em>, November. Department of Radiology; Medical Imaging, University of Virginia, Charlottesville, VA, USA, ntustison@virginia.edu. <a href="https://doi.org/10.1007/s12021-014-9245-2" class="uri">https://doi.org/10.1007/s12021-014-9245-2</a>.</p>
+<p>Tustison, Nicholas J., K. L. Shrinidhi, Max Wintermark, Christopher R. Durst, Benjamin M. Kandel, James C. Gee, Murray C. Grossman, and Brian B. Avants. 2014. “Optimal Symmetric Multimodal Templates and Concatenated Random Forests for Supervised Brain Tumor Segmentation (Simplified) with Antsr.” <em>Neuroinformatics</em>, November. Department of Radiology; Medical Imaging, University of Virginia, Charlottesville, VA, USA, ntustison@virginia.edu. <a href="https://doi.org/10.1007/s12021-014-9245-2">https://doi.org/10.1007/s12021-014-9245-2</a>.</p>
 </div>
 <div id="ref-Tzourio-Mazoyer2002">
-<p>Tzourio-Mazoyer, N., B. Landeau, D. Papathanassiou, F. Crivello, O. Etard, N. Delcroix, B. Mazoyer, and M. Joliot. 2002. “Automated Anatomical Labeling of Activations in Spm Using a Macroscopic Anatomical Parcellation of the Mni Mri Single-Subject Brain.” <em>Neuroimage</em> 15 (1). Groupe d’Imagerie Neurofonctionnelle, UMR 6095 CNRS CEA, Université de Caen, Université de Paris 5, France.: 273–89. <a href="https://doi.org/10.1006/nimg.2001.0978" class="uri">https://doi.org/10.1006/nimg.2001.0978</a>.</p>
+<p>Tzourio-Mazoyer, N., B. Landeau, D. Papathanassiou, F. Crivello, O. Etard, N. Delcroix, B. Mazoyer, and M. Joliot. 2002. “Automated Anatomical Labeling of Activations in Spm Using a Macroscopic Anatomical Parcellation of the Mni Mri Single-Subject Brain.” <em>Neuroimage</em> 15 (1). Groupe d’Imagerie Neurofonctionnelle, UMR 6095 CNRS CEA, Université de Caen, Université de Paris 5, France.: 273–89. <a href="https://doi.org/10.1006/nimg.2001.0978">https://doi.org/10.1006/nimg.2001.0978</a>.</p>
 </div>
 <div id="ref-Wang2013a">
-<p>Wang, Hongzhi, and Paul A. Yushkevich. 2013. “Multi-Atlas Segmentation with Joint Label Fusion and Corrective Learning-an Open Source Implementation.” <em>Front Neuroinform</em> 7. Department of Radiology, PICSL, Perelman School of Medicine at the University of Pennsylvania Philadelphia, PA, USA.: 27. <a href="https://doi.org/10.3389/fninf.2013.00027" class="uri">https://doi.org/10.3389/fninf.2013.00027</a>.</p>
+<p>Wang, Hongzhi, and Paul A. Yushkevich. 2013. “Multi-Atlas Segmentation with Joint Label Fusion and Corrective Learning-an Open Source Implementation.” <em>Front Neuroinform</em> 7. Department of Radiology, PICSL, Perelman School of Medicine at the University of Pennsylvania Philadelphia, PA, USA.: 27. <a href="https://doi.org/10.3389/fninf.2013.00027">https://doi.org/10.3389/fninf.2013.00027</a>.</p>
 </div>
 </div>
 </div>

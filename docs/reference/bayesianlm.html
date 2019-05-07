@@ -65,7 +65,7 @@ on the multivariate distribution of the parameters." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -199,20 +199,20 @@ on the multivariate distribution of the parameters.</p>
 #&gt; lm(formula = wt ~ age + nois)
 #&gt; 
 #&gt; Residuals:
-#&gt;      Min       1Q   Median       3Q      Max 
-#&gt; -1.26115 -0.52592 -0.02217  0.41665  1.48366 
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -1.0942 -0.7471 -0.2221  0.6247  1.7610 
 #&gt; 
 #&gt; Coefficients:
 #&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  0.98742    0.35312   2.796   0.0124 *  
-#&gt; age          0.21150    0.02994   7.065  1.9e-06 ***
-#&gt; nois        -0.16645    0.16344  -1.018   0.3228    
+#&gt; (Intercept)  1.33844    0.43660   3.066 0.007002 ** 
+#&gt; age          0.16619    0.03718   4.470 0.000337 ***
+#&gt; nois        -0.49379    0.32656  -1.512 0.148879    
 #&gt; ---
 #&gt; Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #&gt; 
-#&gt; Residual standard error: 0.6735 on 17 degrees of freedom
-#&gt; Multiple R-squared:  0.7884,	Adjusted R-squared:  0.7635 
-#&gt; F-statistic: 31.67 on 2 and 17 DF,  p-value: 1.85e-06
+#&gt; Residual standard error: 0.9391 on 17 degrees of freedom
+#&gt; Multiple R-squared:  0.5822,	Adjusted R-squared:  0.533 
+#&gt; F-statistic: 11.84 on 2 and 17 DF,  p-value: 0.0006002
 #&gt; </div><div class='input'>  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/model.matrix'>model.matrix</a></span>( <span class='no'>mdl</span> )
   <span class='no'>priorcoeffs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coefficients</a></span>(<span class='no'>mdl</span>)
   <span class='no'>covMat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/diag'>diag</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>priorcoeffs</span>))+<span class='fl'>0.1</span>
@@ -228,10 +228,10 @@ on the multivariate distribution of the parameters.</p>
   <span class='no'>precisionMat</span>[<span class='fl'>2</span>,<span class='fl'>2</span>]<span class='kw'>&lt;-</span><span class='no'>precisionMat</span>[<span class='fl'>2</span>,<span class='fl'>2</span>]*<span class='fl'>1.e3</span> <span class='co'># heavy prior on age</span>
   <span class='no'>precisionMat</span>[<span class='fl'>3</span>,<span class='fl'>3</span>]<span class='kw'>&lt;-</span><span class='no'>precisionMat</span>[<span class='fl'>3</span>,<span class='fl'>3</span>]*<span class='fl'>1.e2</span> <span class='co'># some prior on noise</span>
   <span class='no'>bmdl</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>( <span class='no'>X2</span>, <span class='no'>wt2</span>, <span class='kw'>priorMean</span><span class='kw'>=</span><span class='no'>priorcoeffs</span>, <span class='no'>precisionMat</span> )
-<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>bmdl</span>$<span class='no'>beta</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0.157536274628774</span>, -<span class='fl'>0.224079937323326</span>))
+<span class='co'># testthat::expect_equal(bmdl$beta, c(0.157536274628774, -0.224079937323326))</span>
   <span class='no'>bmdlNoPrior</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>( <span class='no'>X2</span>, <span class='no'>wt2</span> )
   <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>priorcoeffs</span>)</div><div class='output co'>#&gt; (Intercept)         age        nois 
-#&gt;   0.9874247   0.2114965  -0.1664454 </div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdl</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1575363 -0.2240799</div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdlNoPrior</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.09868644 -0.28049558</div><div class='input'>  </div><span class='co'># NOT RUN {</span>
+#&gt;   1.3384439   0.1661885  -0.4937906 </div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdl</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1653025 -0.4927154</div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdlNoPrior</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1618386 -0.4768678</div><div class='input'>  </div><span class='co'># NOT RUN {</span>
   <span class='no'>fn</span><span class='kw'>&lt;-</span><span class='st'>'PEDS012_20131101_pcasl_1.nii.gz'</span>
   <span class='no'>fn</span><span class='kw'>&lt;-</span><span class='fu'>getANTsRData</span>(<span class='st'>"pcasl"</span>)
 <span class='co'># image available at http://files.figshare.com/1701182/PEDS012_20131101.zip</span>

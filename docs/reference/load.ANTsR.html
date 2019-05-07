@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>getAverageOfTimeSeries — getAverageOfTimeSeries • ANTsR</title>
+<title>Load R sessions with ANTsR objects — load.ANTsR • ANTsR</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,11 @@
 
 
 
-<meta property="og:title" content="getAverageOfTimeSeries — getAverageOfTimeSeries" />
+<meta property="og:title" content="Load R sessions with ANTsR objects — load.ANTsR" />
 
-<meta property="og:description" content="Returns a 3D average of a 4D time series." />
+<meta property="og:description" content="Loads a previously saved ANTsR session or object. Simply
+point the function to the folder where you previously
+saved the data with save.ANTsR." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -127,49 +129,47 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>getAverageOfTimeSeries</h1>
+    <h1>Load R sessions with ANTsR objects</h1>
     
-    <div class="hidden name"><code>getAverageOfTimeSeries.Rd</code></div>
+    <div class="hidden name"><code>load.ANTsR.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Returns a 3D average of a 4D time series.</p>
+    <p>Loads a previously saved ANTsR session or object. Simply
+point the function to the folder where you previously
+saved the data with save.ANTsR.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>getAverageOfTimeSeries</span>(<span class='no'>img</span>)</pre>
+    <pre class="usage"><span class='fu'>load.ANTsR</span>(<span class='kw'>filename</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/file.path'>file.path</a></span>(<span class='st'>'.'</span>,<span class='st'>'.ANTsRsession'</span>), <span class='kw'>env</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/as.environment'>as.environment</a></span>(<span class='fl'>1</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>img</th>
-      <td><p>input 4D image</p></td>
+      <th>filename</th>
+      <td><p>path of the saved ANTsR session. If not
+specified, the default behavior is to search for the 
+folder \".ANTsRsesssion\" in the current working directory.</p></td>
+    </tr>
+    <tr>
+      <th>env</th>
+      <td><p>the environment level. Don't change unless you know
+what are you doing.</p></td>
     </tr>
     </table>
     
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>3D ants image is output</p>
-    
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>img</span><span class='kw'>&lt;-</span><span class='fu'>as.antsImage</span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/array'>array</a></span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>0</span>,<span class='fl'>10</span>^<span class='fl'>4</span>), <span class='kw'>dim</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>) ) )
-<span class='no'>avg</span><span class='kw'>&lt;-</span><span class='fu'>getAverageOfTimeSeries</span>( <span class='no'>img</span> )</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+                </ul>
 
     <h2>Author</h2>
-    <p>Avants BB</p>
+    <p>Dorian Pustina</p>
   </div>
 </div>
 

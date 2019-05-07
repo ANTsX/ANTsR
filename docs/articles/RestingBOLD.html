@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
       <h1>Resting BOLD (basic analyses using ANTsR)</h1>
                         <h4 class="author">Jeffrey T. Duda, Brian B. Avants</h4>
             
-            <h4 class="date">2019-03-10</h4>
+            <h4 class="date">2019-05-06</h4>
       
       
       <div class="hidden name"><code>RestingBOLD.Rmd</code></div>
@@ -212,7 +212,7 @@
 <a class="sourceLine" id="cb4-9" data-line-number="9">  }</a></code></pre></div>
 <p>It can also be informative to plot the data as a matrix, where each row is the time-series for a voxels. Due to the large number of voxels however, using just a sample of the voxels is much faster</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">nVox =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/array">as.array</a></span>(mask)<span class="op">==</span><span class="dv">1</span>))</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">vox =<span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/sample.html">sample</a></span>(<span class="dv">1</span><span class="op">:</span>nVox, <span class="dv">1000</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">vox =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sample">sample</a></span>(<span class="dv">1</span><span class="op">:</span>nVox, <span class="dv">1000</span>)</a>
 <a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/invisible">invisible</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(<span class="kw">as.antsImage</span>( <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/t">t</a></span>(<span class="kw"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span>(img,mask)[,vox]))))</a>
 <a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/invisible">invisible</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(<span class="kw">as.antsImage</span>( <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/t">t</a></span>(<span class="kw"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span>(moco<span class="op">$</span>moco_img,mask)[,vox]))))</a></code></pre></div>
 <p>Plotting the registration parameters from the motion correction provides a qualitative feel for how much motion is in the data. In addition to the registration parameters, we plot the mean framewise displacement, which measures the average displacement of voxels, between consecutive time points.</p>
@@ -599,13 +599,13 @@
 <a href="#references" class="anchor"></a>References</h2>
 <div id="refs" class="references">
 <div id="ref-Power2012">
-<p>Power, Jonathan D., Kelly A. Barnes, Abraham Z. Snyder, Bradley L. Schlaggar, and Steven E. Petersen. 2012. “Spurious but Systematic Correlations in Functional Connectivity Mri Networks Arise from Subject Motion.” <em>Neuroimage</em> 59 (3). Department of Neurology, Washington University School of Medicine, St. Louis, MO 63110, USA. powerj@wusm.wustl.edu: 2142–54. <a href="https://doi.org/10.1016/j.neuroimage.2011.10.018" class="uri">https://doi.org/10.1016/j.neuroimage.2011.10.018</a>.</p>
+<p>Power, Jonathan D., Kelly A. Barnes, Abraham Z. Snyder, Bradley L. Schlaggar, and Steven E. Petersen. 2012. “Spurious but Systematic Correlations in Functional Connectivity Mri Networks Arise from Subject Motion.” <em>Neuroimage</em> 59 (3). Department of Neurology, Washington University School of Medicine, St. Louis, MO 63110, USA. powerj@wusm.wustl.edu: 2142–54. <a href="https://doi.org/10.1016/j.neuroimage.2011.10.018">https://doi.org/10.1016/j.neuroimage.2011.10.018</a>.</p>
 </div>
 <div id="ref-Power2014">
-<p>Power, Jonathan D., Anish Mitra, Timothy O. Laumann, Abraham Z. Snyder, Bradley L. Schlaggar, and Steven E. Petersen. 2014. “Methods to Detect, Characterize, and Remove Motion Artifact in Resting State fMRI.” <em>Neuroimage</em> 84 (January). Dept. of Neurology, Washington University School of Medicine in St. Louis, 660 S. Euclid Ave., St. Louis, MO 63110, USA. Electronic address: powerj@wusm.wustl.edu.: 320–41. <a href="https://doi.org/10.1016/j.neuroimage.2013.08.048" class="uri">https://doi.org/10.1016/j.neuroimage.2013.08.048</a>.</p>
+<p>Power, Jonathan D., Anish Mitra, Timothy O. Laumann, Abraham Z. Snyder, Bradley L. Schlaggar, and Steven E. Petersen. 2014. “Methods to Detect, Characterize, and Remove Motion Artifact in Resting State fMRI.” <em>Neuroimage</em> 84 (January). Dept. of Neurology, Washington University School of Medicine in St. Louis, 660 S. Euclid Ave., St. Louis, MO 63110, USA. Electronic address: powerj@wusm.wustl.edu.: 320–41. <a href="https://doi.org/10.1016/j.neuroimage.2013.08.048">https://doi.org/10.1016/j.neuroimage.2013.08.048</a>.</p>
 </div>
 <div id="ref-Rubinov2010">
-<p>Rubinov, Mikail, and Olaf Sporns. 2010. “Complex Network Measures of Brain Connectivity: Uses and Interpretations.” <em>Neuroimage</em> 52 (3). Black Dog Institute; School of Psychiatry, University of New South Wales, Sydney, Australia.: 1059–69. <a href="https://doi.org/10.1016/j.neuroimage.2009.10.003" class="uri">https://doi.org/10.1016/j.neuroimage.2009.10.003</a>.</p>
+<p>Rubinov, Mikail, and Olaf Sporns. 2010. “Complex Network Measures of Brain Connectivity: Uses and Interpretations.” <em>Neuroimage</em> 52 (3). Black Dog Institute; School of Psychiatry, University of New South Wales, Sydney, Australia.: 1059–69. <a href="https://doi.org/10.1016/j.neuroimage.2009.10.003">https://doi.org/10.1016/j.neuroimage.2009.10.003</a>.</p>
 </div>
 </div>
 </div>

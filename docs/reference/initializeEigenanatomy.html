@@ -67,7 +67,7 @@ The user then only chooses nvecs and optional regularization parameters." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -201,22 +201,22 @@ alternatively, this can be an antsImage which contains labeled regions.</p></td>
 #&gt; lm(formula = dependentvariable ~ myEigenanatomyRegionAverages)
 #&gt; 
 #&gt; Residuals:
-#&gt;      Min       1Q   Median       3Q      Max 
-#&gt; -2.19334 -0.54403 -0.08531  0.47484  2.27317 
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -1.5471 -0.7817  0.1856  0.7615  1.2461 
 #&gt; 
-#&gt; Coefficients: (3 not defined because of singularities)
+#&gt; Coefficients: (1 not defined because of singularities)
 #&gt;                                Estimate Std. Error t value Pr(&gt;|t|)
-#&gt; (Intercept)                   -0.009777   0.259435  -0.038    0.970
-#&gt; myEigenanatomyRegionAverages1        NA         NA      NA       NA
-#&gt; myEigenanatomyRegionAverages2 -0.069847   0.288303  -0.242    0.812
-#&gt; myEigenanatomyRegionAverages3  0.346265   0.301176   1.150    0.267
-#&gt; myEigenanatomyRegionAverages4        NA         NA      NA       NA
-#&gt; myEigenanatomyRegionAverages5 -0.226210   0.319867  -0.707    0.490
-#&gt; myEigenanatomyRegionAverages6        NA         NA      NA       NA
+#&gt; (Intercept)                   -0.005678   0.256690  -0.022    0.983
+#&gt; myEigenanatomyRegionAverages1 -0.733521   2.057987  -0.356    0.727
+#&gt; myEigenanatomyRegionAverages2  0.558452   1.969882   0.283    0.781
+#&gt; myEigenanatomyRegionAverages3 -2.957976  14.121203  -0.209    0.837
+#&gt; myEigenanatomyRegionAverages4  3.282327  14.377400   0.228    0.823
+#&gt; myEigenanatomyRegionAverages5        NA         NA      NA       NA
+#&gt; myEigenanatomyRegionAverages6 -0.408361   0.482746  -0.846    0.412
 #&gt; 
-#&gt; Residual standard error: 1.154 on 16 degrees of freedom
-#&gt; Multiple R-squared:  0.1573,	Adjusted R-squared:  -0.0006978 
-#&gt; F-statistic: 0.9956 on 3 and 16 DF,  p-value: 0.4201
+#&gt; Residual standard error: 1.056 on 14 degrees of freedom
+#&gt; Multiple R-squared:  0.09468,	Adjusted R-squared:  -0.2287 
+#&gt; F-statistic: 0.2928 on 5 and 14 DF,  p-value: 0.909
 #&gt; </div><div class='input'>
 <span class='no'>nvox</span><span class='kw'>&lt;-</span><span class='fl'>1000</span>
 <span class='no'>dmat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>replicate</a></span>(<span class='no'>nvox</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>20</span>))

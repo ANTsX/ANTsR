@@ -64,7 +64,7 @@ tag-control image pairs to estimate perfusion." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -205,7 +205,7 @@ sample usage.</p>
 <span class='no'>asl</span> <span class='kw'>&lt;-</span> <span class='fu'>makeImage</span>(<span class='no'>dims</span>, <span class='no'>voxvals</span>)
 <span class='no'>tc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>0.5</span>, <span class='fl'>0.5</span>), <span class='no'>dims</span>[<span class='fl'>4</span>]/<span class='fl'>2</span>)
 <span class='no'>avg</span> <span class='kw'>&lt;-</span> <span class='fu'>aslAveraging</span>(<span class='no'>asl</span>, <span class='kw'>tc</span><span class='kw'>=</span><span class='no'>tc</span>)
-<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>avg</span>), <span class='fl'>0.00739</span> , <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>.002</span> )
+<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>avg</span>), <span class='fl'>0.00739</span> , <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>.1</span> )
 <span class='no'>slice</span> <span class='kw'>&lt;-</span> <span class='fu'>extractSlice</span>(<span class='no'>asl</span>, <span class='fl'>4</span>, <span class='fl'>4</span>)
 <span class='no'>mask</span> <span class='kw'>&lt;-</span><span class='fu'>getMask</span>(<span class='no'>slice</span>)
 <span class='no'>seg</span> <span class='kw'>&lt;-</span> <span class='fu'>atropos</span>(<span class='kw'>d</span><span class='kw'>=</span><span class='fl'>3</span>, <span class='kw'>a</span><span class='kw'>=</span><span class='no'>slice</span>, <span class='kw'>x</span><span class='kw'>=</span><span class='no'>mask</span>, <span class='kw'>i</span><span class='kw'>=</span><span class='st'>'kmeans[6]'</span>, <span class='kw'>m</span><span class='kw'>=</span><span class='st'>'[0.0,1x1x1]'</span>)

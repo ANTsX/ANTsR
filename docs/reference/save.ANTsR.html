@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>save.ANTsR — save.ANTsR • ANTsR</title>
+<title>Save R sessions including ANTsR objects — save.ANTsR • ANTsR</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,17 @@
 
 
 
-<meta property="og:title" content="save.ANTsR — save.ANTsR" />
+<meta property="og:title" content="Save R sessions including ANTsR objects — save.ANTsR" />
 
-<meta property="og:description" content="Save and load ANTsR sessions." />
+<meta property="og:description" content="Use this function to save an object or a full R session for 
+later use. Any object can be saved (list, antsImage, data frame,
+etc.). The function will save all antsImage objects as nifti
+files with random filenames (to avoid using (sub)variable names, 
+which can be identical). These files is what load.ANTsR uses
+later to fill back the original antsImage variables. For variables
+that contain filenames, you can choose to copy those files
+in your saved folder so you can completely recreate the environment
+even if you change computer or the temporary folder is deleted." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -63,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -127,22 +135,28 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>save.ANTsR</h1>
+    <h1>Save R sessions including ANTsR objects</h1>
     
     <div class="hidden name"><code>save.ANTsR.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Save and load ANTsR sessions.</p>
+    <p>Use this function to save an object or a full R session for 
+later use. Any object can be saved (list, antsImage, data frame,
+etc.). The function will save all antsImage objects as nifti
+files with random filenames (to avoid using (sub)variable names, 
+which can be identical). These files is what load.ANTsR uses
+later to fill back the original antsImage variables. For variables
+that contain filenames, you can choose to copy those files
+in your saved folder so you can completely recreate the environment
+even if you change computer or the temporary folder is deleted.</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>save.ANTsR</span>(<span class='kw'>filename</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/file.path'>file.path</a></span>(<span class='st'>"."</span>, <span class='st'>".ANTsRsession"</span>), <span class='kw'>objects</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>env</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/as.environment'>as.environment</a></span>(<span class='fl'>1</span>), <span class='kw'>overwrite</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>clonediskfiles</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='no'>...</span>)
-
-<span class='fu'>load.ANTsR</span>(<span class='kw'>filename</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/file.path'>file.path</a></span>(<span class='st'>'.'</span>,<span class='st'>'.ANTsRsession'</span>), <span class='kw'>env</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/as.environment'>as.environment</a></span>(<span class='fl'>1</span>))</pre>
+  <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -185,7 +199,8 @@ FALSE if you save temporary sessions to continue later on the same computer.</p>
 # save.ANTsR(objects=c('b', 'a'))
 # load.ANTsR("./.ANTsRsession")
 # }
-</pre>
+<div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -196,7 +211,7 @@ FALSE if you save temporary sessions to continue later on the same computer.</p>
     </ul>
 
     <h2>Author</h2>
-    <p>Pustina D</p>
+    <p>Dorian Pustina</p>
   </div>
 </div>
 
