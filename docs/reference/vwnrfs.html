@@ -64,7 +64,7 @@ to build a random forest prediction from an image population" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -225,8 +225,8 @@ and the random mask</p>
     <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sum'>sum</a></span>( <span class='no'>rfm</span>$<span class='no'>tv</span> <span class='kw'>!=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>rfm</span>$<span class='no'>rfm</span>) ) )
   <span class='kw'>if</span> ( <span class='no'>predtype</span> <span class='kw'>==</span> <span class='st'>"scalar"</span> )
     <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cor</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/numeric'>as.numeric</a></span>(<span class='no'>rfm</span>$<span class='no'>tv</span>) , <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/numeric'>as.numeric</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>rfm</span>$<span class='no'>rfm</span>) ) ) )
-} <span class='co'># end predtype loop</span></div><div class='output co'>#&gt; [1] 1
-#&gt; [1] 0.6640783</div><div class='input'>
+} <span class='co'># end predtype loop</span></div><div class='output co'>#&gt; [1] 4
+#&gt; [1] 0.5285711</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

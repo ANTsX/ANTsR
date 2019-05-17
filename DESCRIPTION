@@ -46,6 +46,7 @@ Suggests:
     e1071,
     extremevalues,
     fastICA,
+    FNN,
     fpc,
     ggplot2,
     glasso,
@@ -71,7 +72,6 @@ Suggests:
     Rcpp,
     RcppEigen,
     RSpectra,
-    rflann,
     rgl,
     rmarkdown,
     robust,
@@ -87,7 +87,7 @@ Suggests:
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang
-Remotes: stnava/ITKR, ANTsX/ANTsRCore, muschellij2/rflann
+Remotes: stnava/ITKR, ANTsX/ANTsRCore
 NeedsCompilation: yes
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1.9000

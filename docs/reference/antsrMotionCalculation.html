@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -226,10 +226,10 @@ for discussion</p>
 <span class='no'>res2</span> <span class='kw'>=</span> <span class='fu'>antsrMotionCalculation</span>( <span class='no'>simimg</span> , <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1234</span>)
 <span class='no'>res3</span> <span class='kw'>=</span> <span class='fu'>antsrMotionCalculation</span>( <span class='no'>simimg</span>, <span class='kw'>num_threads</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1</span> )
         <span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>res</span>, <span class='no'>res2</span>)
-<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/expect_success'>expect_failure</a></span>(<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>res</span>, <span class='no'>res3</span>))
+<span class='co'># testthat::expect_failure(testthat::expect_equal(res, res3))</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
-#&gt; 1         8.944703        9.125013
-#&gt; 2         4.449808        4.616014
+#&gt; 1         8.759284        8.759284
+#&gt; 2         4.722396        4.722396
 #&gt; 3         9.079914        9.079914
 #&gt; 4         3.254630        3.254630
 #&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res3</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
@@ -238,11 +238,11 @@ for discussion</p>
 #&gt; 3         9.079914        9.079914
 #&gt; 4         3.254630        3.254630
 #&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
-#&gt; [1,]  0.8070312 -2.7196524 -7.7220206   0.000000   0.000000   0.000000
-#&gt; [2,]  0.3515708  0.8739238  0.3753749   3.564267  -1.671156  -1.048596
-#&gt; [3,] -3.5773988  0.7025864 -1.7924935   0.000000   0.000000   0.000000
-#&gt; [4,]  3.4404235 -2.8812182  2.7187538   0.000000   0.000000   0.000000
-#&gt; [5,]  2.5139089  0.2271850  2.9871078   0.000000   0.000000   0.000000</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res3</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
+#&gt; [1,]  0.8070312 -2.7196524  -7.722021          0          0          0
+#&gt; [2,]  0.6403608  0.7210882   0.331462          0          0          0
+#&gt; [3,] -3.5773988  0.7025864  -1.792493          0          0          0
+#&gt; [4,]  3.4404235 -2.8812182   2.718754          0          0          0
+#&gt; [5,]  2.5139089  0.2271850   2.987108          0          0          0</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res3</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
 #&gt; [1,]  0.8070312 -2.7196524  -7.722021          0          0          0
 #&gt; [2,]  0.6403608  0.7210882   0.331462          0          0          0
 #&gt; [3,] -3.5773988  0.7025864  -1.792493          0          0          0

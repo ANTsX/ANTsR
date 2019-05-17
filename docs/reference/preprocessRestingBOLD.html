@@ -64,7 +64,7 @@ regression, band-pass filtering, and spatial smoothing." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -141,7 +141,7 @@ regression, band-pass filtering, and spatial smoothing.</p>
     </div>
 
     <pre class="usage"><span class='fu'>preprocessRestingBOLD</span>(<span class='no'>boldImage</span>, <span class='kw'>maskImage</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>maskingMeanRatioThreshold</span> <span class='kw'>=</span> <span class='fl'>0.75</span>, <span class='kw'>initialNuisanceVariables</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>maskingMeanRatioThreshold</span> <span class='kw'>=</span> <span class='fl'>0.75</span>, <span class='no'>initialNuisanceVariables</span>,
   <span class='kw'>denseFramewise</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>numberOfCompCorComponents</span> <span class='kw'>=</span> <span class='fl'>6</span>,
   <span class='kw'>doMotionCorrection</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>useMotionCorrectedImage</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>motionCorrectionAccuracyLevel</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>motionCorrectionIterations</span> <span class='kw'>=</span> <span class='fl'>1</span>,
@@ -232,7 +232,7 @@ iterations, e.g. <code><a href='https://www.rdocumentation.org/packages/base/top
     </tr>
     <tr>
       <th>num_threads</th>
-      <td><p>will execute 
+      <td><p>will execute
 <code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</a></code> before
 running to attempt a more reproducible result.  See
 <a href='https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues'>https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
@@ -240,7 +240,7 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></td>
     </tr>
     <tr>
       <th>seed</th>
-      <td><p>will execute 
+      <td><p>will execute
 <code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv(ANTS_RANDOM_SEED = seed)</a></code> before
 running to attempt a more reproducible result.  See
 <a href='https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues'>https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>

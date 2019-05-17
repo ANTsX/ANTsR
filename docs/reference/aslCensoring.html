@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -220,11 +220,8 @@ for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.</p>
 <span class='no'>voxvals</span>[, , , <span class='fl'>5</span>] <span class='kw'>&lt;-</span> <span class='no'>voxvals</span>[, , , <span class='fl'>5</span>] + <span class='fl'>600</span>
 <span class='no'>asl</span> <span class='kw'>&lt;-</span> <span class='fu'>makeImage</span>(<span class='no'>dims</span>, <span class='no'>voxvals</span>)
 <span class='no'>censored</span> <span class='kw'>&lt;-</span> <span class='fu'>aslCensoring</span>(<span class='no'>asl</span>)
-<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>censored</span>$<span class='no'>asl.inlier</span>), <span class='fl'>248.071606610979</span>)</div><div class='output co'>#&gt; <span class='error'>Error: mean(censored$asl.inlier) not equal to 248.0716.</span>
-#&gt; <span class='error'>1/1 mismatches</span>
-#&gt; <span class='error'>[1] 236 - 248 == -12.1</span></div><div class='input'><span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>censored</span>$<span class='no'>which.outliers</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5L</span>, <span class='fl'>6L</span>))</div><div class='output co'>#&gt; <span class='error'>Error: censored$which.outliers not equal to c(5L, 6L).</span>
-#&gt; <span class='error'>Lengths differ: 4 is not 2</span></div><div class='input'>
-</div></pre>
+<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>censored</span>$<span class='no'>asl.inlier</span>), <span class='fl'>248.071606610979</span>)
+<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>censored</span>$<span class='no'>which.outliers</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5L</span>, <span class='fl'>6L</span>))</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

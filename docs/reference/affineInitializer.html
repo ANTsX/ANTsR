@@ -65,7 +65,7 @@ function antsAffineInitializer." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -211,11 +211,11 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></td>
 <span class='no'>tx</span> <span class='kw'>&lt;-</span> <span class='fu'>affineInitializer</span>( <span class='no'>fi</span>, <span class='no'>mi2</span> )
 <span class='no'>tx2</span> <span class='kw'>&lt;-</span> <span class='fu'>affineInitializer</span>( <span class='no'>fi</span>, <span class='no'>mi2</span> )
 <span class='kw'>if</span> (<span class='st'>'R.matlab'</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/installed.packages'>installed.packages</a></span>()) {
-<span class='no'>tx_hdr</span> <span class='kw'>=</span> <span class='kw pkg'>R.matlab</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/R.matlab/topics/readMat'>readMat</a></span>(<span class='no'>tx</span>)
+<span class='no'>tx_hdr</span> <span class='kw'>=</span> <span class='kw pkg'>R.matlab</span><span class='kw ns'>::</span><span class='fu'>readMat</span>(<span class='no'>tx</span>)
 <span class='no'>trans</span> <span class='kw'>=</span> <span class='no'>tx_hdr</span>$<span class='no'>AffineTransform.double.2.2</span>
 <span class='no'>fixed</span> <span class='kw'>=</span> <span class='no'>tx_hdr</span>$<span class='no'>fixed</span>
 
-<span class='no'>tx2_hdr</span> <span class='kw'>=</span> <span class='kw pkg'>R.matlab</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/R.matlab/topics/readMat'>readMat</a></span>(<span class='no'>tx2</span>)
+<span class='no'>tx2_hdr</span> <span class='kw'>=</span> <span class='kw pkg'>R.matlab</span><span class='kw ns'>::</span><span class='fu'>readMat</span>(<span class='no'>tx2</span>)
 <span class='no'>trans2</span> <span class='kw'>=</span> <span class='no'>tx2_hdr</span>$<span class='no'>AffineTransform.double.2.2</span>
 <span class='no'>fixed2</span> <span class='kw'>=</span> <span class='no'>tx2_hdr</span>$<span class='no'>fixed</span>
 

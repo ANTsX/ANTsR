@@ -64,7 +64,7 @@ in a dataframe." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -168,7 +168,7 @@ in a dataframe.</p>
 <span class='kw'>if</span> ( !<span class='fu'>usePkg</span>(<span class='st'>"DMwR"</span>) <span class='kw'>|</span> ! <span class='fu'>usePkg</span>(<span class='st'>"fpc"</span>) )
    { <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='st'>"Need DMwR and fpc packages"</span>) } <span class='kw'>else</span> {
   <span class='no'>pamres</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>fpc</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/fpc/topics/pamk'>pamk</a></span>(<span class='no'>mm</span>,<span class='fl'>1</span>:<span class='fl'>4</span>)
-  <span class='no'>outlier.scores</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>DMwR</span><span class='kw ns'>::</span><span class='fu'>lofactor</span>( <span class='no'>mm</span>, <span class='kw'>k</span><span class='kw'>=</span><span class='fl'>3</span> )
+  <span class='no'>outlier.scores</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>DMwR</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/DMwR/topics/lofactor'>lofactor</a></span>( <span class='no'>mm</span>, <span class='kw'>k</span><span class='kw'>=</span><span class='fl'>3</span> )
   <span class='no'>outliers</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/order'>order</a></span>(<span class='no'>outlier.scores</span>)
   }
 <span class='co'># }</span><div class='input'>

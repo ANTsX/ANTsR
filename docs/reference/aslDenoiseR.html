@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
       </span>
     </div>
 
@@ -213,7 +213,8 @@ estimation</p></td>
 <span class='no'>tc</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/factor'>as.factor</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"C"</span>,<span class='st'>"T"</span>),<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>aslmat</span>)/<span class='fl'>2</span>))
 <span class='no'>dv</span><span class='kw'>&lt;-</span><span class='fu'><a href='computeDVARS.html'>computeDVARS</a></span>(<span class='no'>aslmat</span>)
 <span class='no'>dnz</span><span class='kw'>&lt;-</span><span class='fu'>aslDenoiseR</span>( <span class='no'>aslmat</span>, <span class='no'>tc</span>, <span class='kw'>covariates</span><span class='kw'>=</span><span class='no'>dv</span>, <span class='kw'>selectionthresh</span><span class='kw'>=</span><span class='fl'>0.1</span>,
-  <span class='kw'>maxnoisepreds</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>:<span class='fl'>2</span>), <span class='kw'>polydegree</span><span class='kw'>=</span><span class='fl'>2</span>, <span class='kw'>crossvalidationgroups</span><span class='kw'>=</span><span class='fl'>2</span> )</div><div class='output co'>#&gt; <span class='warning'>Warning: replacing previous import ‘ggplot2::empty’ by ‘plyr::empty’ when loading ‘caret’</span></div><div class='input'><span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>dnz</span>$<span class='no'>R2atBestN</span>, <span class='fl'>7</span>, <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>0.5</span> )</div><span class='co'># NOT RUN {</span>
+  <span class='kw'>maxnoisepreds</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>:<span class='fl'>2</span>), <span class='kw'>polydegree</span><span class='kw'>=</span><span class='fl'>2</span>, <span class='kw'>crossvalidationgroups</span><span class='kw'>=</span><span class='fl'>2</span> )
+<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>dnz</span>$<span class='no'>R2atBestN</span>, <span class='fl'>7</span>, <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>0.5</span> )</div><span class='co'># NOT RUN {</span>
 <span class='co'># a classic regression approach to estimating perfusion</span>
 <span class='co'># not recommended, but shows the basic idea.</span>
 <span class='co'># see ?quantifyCBF for a better approach</span>

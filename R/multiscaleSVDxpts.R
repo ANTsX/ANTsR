@@ -38,7 +38,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
-  mypkg = 'rflann'
+  mypkg = 'FNN'  # 'rflann'
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
   # and from correlation to covariance   diag(sd) %*% corrMat %*% diag(sd)
@@ -62,6 +62,10 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
   if ( cometric ) {
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
+  }
+  if ( mypkg[1] == "FNN" ) {
+    bknn = FNN::get.knn( t( x ), k=k, algorithm = "cover_tree"  )
+    names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
@@ -176,7 +180,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
   if ( any( is.na( y ) ) ) stop("input matrix y has NA values")
-  mypkg = 'rflann'
+  mypkg = 'FNN'
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
   if ( ! usePkg( mypkg ) )
@@ -189,6 +193,10 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( cometric ) {
     x = scale( x, center=TRUE, scale = (kmetric == "correlation" )  )
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
+  }
+  if ( mypkg[1] == "FNN" ) {
+    bknn = FNN::get.knnx( t( x ), t( y ), k=k, algorithm = "cover_tree" )
+    names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
