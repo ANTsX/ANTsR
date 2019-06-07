@@ -42,18 +42,7 @@ Documentation: [https://antsx.github.io/ANTsR/](https://antsx.github.io/ANTsR/).
 
 ## Preview ANTsR on the cloud
 
-Here: [https://rstudio.cloud/project/38492](https://rstudio.cloud/project/38492)
-
-Then try:
-
-```
-.libPaths('/cloud/project/RL/')
-library(ANTsR)
-?plot.antsImage
-?antsRegistration
-```
-
-To learn more, open and run the Rmd files in the directory "/cloud/project/RL/ANTsR/doc"
+Try the binder link above.
 
 Note: as of this writing, memory is very limited on this cloud preview so some examples may not run successfully.
 
@@ -70,6 +59,8 @@ Package source:	[from github](https://github.com/ANTsX/ANTsR/zipball/master)
 Binaries:	[here](http://github.com/ANTsX/ANTsR/releases/)
 
 *Windows* installation option [here](https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).)
+
+**Suggested packages** [https://github.com/stnava/ANTsRDocker/blob/master/install.R](https://github.com/stnava/ANTsRDocker/blob/master/install.R)
 
 Install the binary, after downloading, via command line:
 
