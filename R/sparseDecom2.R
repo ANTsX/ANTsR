@@ -117,14 +117,14 @@ sparseDecom2 <- function(
   idim=3
   # safety 1 & 2
   if ( ! is.null( inmask[[1]] ) ) {
-    if (!is.na(inmask[[1]])) {
+    if (!is.antsImage(inmask[[1]]) && !is.na(inmask[[1]])) {
       if ( ncol( inmatrix[[1]] )  !=  sum( inmask[[1]] ) ) {
         stop("Number of columns in matrix X must equal the size of the maskx")
       }
     }
   }
   if ( ! is.null( inmask[[2]] ) ) {
-    if (!is.na(inmask[[2]])) {    
+    if (!is.antsImage(inmask[[2]]) && !is.na(inmask[[2]])) {    
       if ( ncol( inmatrix[[2]] )  !=  sum( inmask[[2]] ) ) {
         stop("Number of columns in matrix Y must equal the size of the masky")
       }
