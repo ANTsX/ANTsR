@@ -203,12 +203,14 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
-  if ( mypkg[1] == "rflann" )  {
-    myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
-    if ( !is.na( ncores  ) ) myncores = ncores
-    bknn = rflann::Neighbour( t(y), t(x), k=k, "kdtree", cores=myncores, 1 )
-    names( bknn ) = c( "nn.idx", "nn.dists" )
-  }
+  
+  # if ( mypkg[1] == "rflann" )  {
+  #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
+  #   if ( !is.na( ncores  ) ) myncores = ncores
+  #   bknn = rflann::Neighbour( t(y), t(x), k=k, "kdtree", cores=myncores, 1 )
+  #   names( bknn ) = c( "nn.idx", "nn.dists" )
+  # }
+  
   #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( y ), t( x ) , k=k, eps=eps  )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
