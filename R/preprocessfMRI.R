@@ -112,8 +112,9 @@ preprocessfMRI <- function(boldImage,
 
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
-    stopifnot(!is.null(meanBoldFixedImageForMotionCorrection))
-    motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
+    motionCorrectionResults <- .motion_correction(
+      boldImage, 
+      fixed = meanBoldFixedImageForMotionCorrection,
       moreaccurate = motionCorrectionAccuracyLevel,
       num_threads = num_threads,
       seed = seed)
