@@ -2539,8 +2539,22 @@ symilr2 <- function(
   orthogonalize = TRUE,
   repeatedMeasures = NA,
   verbose = FALSE ) {
-  if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
-  if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
+  if (length(positivityX) == 1 && isTRUE(positivityX)) {
+    positivityX = "positive"
+  }
+  if (length(positivityY) == 1 && isTRUE(positivityY)) {
+    positivityY = "positive"
+  }  
+  positivityX = match.arg(positivityX, choices = c("positive","negative","either"))
+  positivityY = match.arg(positivityY, choices = c("positive","negative","either"))
+  if (positivityX == "negative") {
+    positivityX = "either"
+  }
+  if (positivityY == "negative") {
+    positivityY = "either"
+  }  
+  # if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
+  # if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
   matnorms = rep( NA, length( voxmats ) )
   for ( i in 1:length( voxmats ) ) matnorms[ i ] = norm( voxmats[[ i ]] )
   n = nrow( voxmats[[1]] )
