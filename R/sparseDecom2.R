@@ -116,124 +116,132 @@ sparseDecom2 <- function(
   maxBased=FALSE  ) {
   idim=3
   # safety 1 & 2
-  if ( ! is.null( inmask[[1]] ) )
-    if ( ncol( inmatrix[[1]] )  !=  sum( inmask[[1]] ) )
-      stop("Number of columns in matrix X must equal the size of the maskx")
-  if ( ! is.null( inmask[[2]] ) )
-    if ( ncol( inmatrix[[2]] )  !=  sum( inmask[[2]] ) )
-      stop("Number of columns in matrix Y must equal the size of the masky")
+  if ( ! is.null( inmask[[1]] ) ) {
+    if (!is.na(inmask[[1]])) {
+      if ( ncol( inmatrix[[1]] )  !=  sum( inmask[[1]] ) ) {
+        stop("Number of columns in matrix X must equal the size of the maskx")
+      }
+    }
+  }
+  if ( ! is.null( inmask[[2]] ) ) {
+    if (!is.na(inmask[[2]])) {    
+      if ( ncol( inmatrix[[2]] )  !=  sum( inmask[[2]] ) ) {
+        stop("Number of columns in matrix Y must equal the size of the masky")
+      }
+    }
+  }
   if (is.antsImage(inmask[[1]])) idim=inmask[[1]]@dimension
   if (is.antsImage(inmask[[2]])) idim=inmask[[2]]@dimension
   if (!is.antsImage(inmask[[1]]))
-     maskx = new("antsImage", "float",idim) else maskx = antsImageClone( inmask[[1]] )
-  if (!is.antsImage(inmask[[2]]))
-     masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
-  if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
-    stop("Matrices must have same number of rows")
-  inmask = list(maskx, masky )
-  verbose = as.numeric( verbose )
-  if ( robust > 0 )
-    {
-    inputMatrices = list(
-      robustMatrixTransform( inmatrix[[1]] ),
-      robustMatrixTransform( inmatrix[[2]] )
-    )
-    } else inputMatrices = inmatrix
-  # helper function allows easier R-based permutation
-  sccaner=.sparseDecom2helper2(
-    inputMatrices,
-    inmask,
-    sparseness,
-    nvecs,
-    its,
-    cthresh,
-    statdir,
-    uselong,
-    z,
-    smooth,
-    robust,
-    mycoption,
-    initializationList,
-    initializationList2,
-    ell1,
-    priorWeight,
-    verbose,
-    maxBased
-    )
-  ccasummary = data.frame(
-    corrs = sccaner$corrs,
-    pvalues = rep(NA,nvecs)
-    )
-  if ( perms >  0 )
-  {
-  ccasummary$pvalues = rep(0 , nvecs )
-  nsubs = nrow( inputMatrices[[1]] )
-  for ( permer in 1:perms )
-  {
-  m1 = data.matrix( inputMatrices[[1]][ sample( 1:nsubs ) ,  ] )
-  m2 = data.matrix( inputMatrices[[2]][ sample( 1:nsubs ) ,  ] )
-  permmatrix = list( m1, m2 )
-  sccanerp=.sparseDecom2helper2(
-    permmatrix,
-    inmask,
-    sparseness,
-    nvecs,
-    its,
-    cthresh,
-    statdir,
-    uselong,
-    z,
-    smooth,
-    robust,
-    mycoption,
-    initializationList,
-    initializationList2,
-    ell1,
-    priorWeight,
-    verbose,
-    maxBased
-    )
-    counter = as.numeric( abs(ccasummary$corrs) < abs(sccanerp$corrs)   )
-    ccasummary$pvalues = ccasummary$pvalues + counter
-    }
-    ccasummary$pvalues = ccasummary$pvalues / perms
-  }
-  mynames = paste(0:(nvecs-1),sep='')
-  if ( length(mynames) <= 10 ) mynames = paste( "00", mynames, sep='')
-  if ( length(mynames) >10 ) {
-    mynames[1:10] = paste( "00", mynames[1:10], sep='')
-    tt = nvecs
-    if ( tt > 99 ) tt = 99
-    mynames[11:tt] = paste( "0", mynames[11:tt], sep='')
-  }
-  mynames=paste("Variate",mynames,sep='')
-  if ( nvecs > 1 )
-    {
-    colnames( sccaner$eig1 ) = mynames[1:nvecs]
-    colnames( sccaner$eig2 ) = mynames[1:nvecs]
-    colnames( sccaner$projections ) = mynames[1:nvecs]
-    colnames( sccaner$projections2 ) = mynames[1:nvecs]
-    }
-  if ( rejector > 0 )
-    {
-    selector=abs(ccasummary$corrs) > rejector
-    if ( sum( selector ) > 1 )
+    maskx = new("antsImage", "float",idim) else maskx = antsImageClone( inmask[[1]] )
+    if (!is.antsImage(inmask[[2]]))
+      masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
+      if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
+        stop("Matrices must have same number of rows")
+      inmask = list(maskx, masky )
+      verbose = as.numeric( verbose )
+      if ( robust > 0 )
       {
-      sccaner$eig1 = sccaner$eig1[ , selector ]
-      sccaner$eig2 = sccaner$eig2[ , selector ]
-      ccasummary = ccasummary[ selector, ]
-      }
-    }
-  return(
-    list(
-      projections = sccaner$projections,
-      projections2 = sccaner$projections2,
-      eig1 = sccaner$eig1,
-      eig2 = sccaner$eig2,
-      ccasummary = ccasummary,
-      sparseness = sparseness
+        inputMatrices = list(
+          robustMatrixTransform( inmatrix[[1]] ),
+          robustMatrixTransform( inmatrix[[2]] )
+        )
+      } else inputMatrices = inmatrix
+      # helper function allows easier R-based permutation
+      sccaner=.sparseDecom2helper2(
+        inputMatrices,
+        inmask,
+        sparseness,
+        nvecs,
+        its,
+        cthresh,
+        statdir,
+        uselong,
+        z,
+        smooth,
+        robust,
+        mycoption,
+        initializationList,
+        initializationList2,
+        ell1,
+        priorWeight,
+        verbose,
+        maxBased
       )
-    )
+      ccasummary = data.frame(
+        corrs = sccaner$corrs,
+        pvalues = rep(NA,nvecs)
+      )
+      if ( perms >  0 )
+      {
+        ccasummary$pvalues = rep(0 , nvecs )
+        nsubs = nrow( inputMatrices[[1]] )
+        for ( permer in 1:perms )
+        {
+          m1 = data.matrix( inputMatrices[[1]][ sample( 1:nsubs ) ,  ] )
+          m2 = data.matrix( inputMatrices[[2]][ sample( 1:nsubs ) ,  ] )
+          permmatrix = list( m1, m2 )
+          sccanerp=.sparseDecom2helper2(
+            permmatrix,
+            inmask,
+            sparseness,
+            nvecs,
+            its,
+            cthresh,
+            statdir,
+            uselong,
+            z,
+            smooth,
+            robust,
+            mycoption,
+            initializationList,
+            initializationList2,
+            ell1,
+            priorWeight,
+            verbose,
+            maxBased
+          )
+          counter = as.numeric( abs(ccasummary$corrs) < abs(sccanerp$corrs)   )
+          ccasummary$pvalues = ccasummary$pvalues + counter
+        }
+        ccasummary$pvalues = ccasummary$pvalues / perms
+      }
+      mynames = paste(0:(nvecs-1),sep='')
+      if ( length(mynames) <= 10 ) mynames = paste( "00", mynames, sep='')
+      if ( length(mynames) >10 ) {
+        mynames[1:10] = paste( "00", mynames[1:10], sep='')
+        tt = nvecs
+        if ( tt > 99 ) tt = 99
+        mynames[11:tt] = paste( "0", mynames[11:tt], sep='')
+      }
+      mynames=paste("Variate",mynames,sep='')
+      if ( nvecs > 1 )
+      {
+        colnames( sccaner$eig1 ) = mynames[1:nvecs]
+        colnames( sccaner$eig2 ) = mynames[1:nvecs]
+        colnames( sccaner$projections ) = mynames[1:nvecs]
+        colnames( sccaner$projections2 ) = mynames[1:nvecs]
+      }
+      if ( rejector > 0 )
+      {
+        selector=abs(ccasummary$corrs) > rejector
+        if ( sum( selector ) > 1 )
+        {
+          sccaner$eig1 = sccaner$eig1[ , selector ]
+          sccaner$eig2 = sccaner$eig2[ , selector ]
+          ccasummary = ccasummary[ selector, ]
+        }
+      }
+      return(
+        list(
+          projections = sccaner$projections,
+          projections2 = sccaner$projections2,
+          eig1 = sccaner$eig1,
+          eig2 = sccaner$eig2,
+          ccasummary = ccasummary,
+          sparseness = sparseness
+        )
+      )
 }
 
 
@@ -257,45 +265,45 @@ sparseDecom2 <- function(
   verbose,
   maxBased ) {
   outval = .Call( "sccanCpp",
-    inputMatrices[[1]],
-    inputMatrices[[2]],
-    inmask[[1]],
-    inmask[[2]],
-    sparseness[1],
-    sparseness[2],
-    nvecs,
-    its,
-    cthresh[1],
-    cthresh[2],
-    z,
-    smooth,
-    initializationList,
-    initializationList2,
-    mycoption,
-    ell1,
-    verbose,
-    priorWeight,
-    maxBased,
-    PACKAGE="ANTsR" )
+                  inputMatrices[[1]],
+                  inputMatrices[[2]],
+                  inmask[[1]],
+                  inmask[[2]],
+                  sparseness[1],
+                  sparseness[2],
+                  nvecs,
+                  its,
+                  cthresh[1],
+                  cthresh[2],
+                  z,
+                  smooth,
+                  initializationList,
+                  initializationList2,
+                  mycoption,
+                  ell1,
+                  verbose,
+                  priorWeight,
+                  maxBased,
+                  PACKAGE="ANTsR" )
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)
   outcorrs = diag( cor( p1 , p2  ) )
   if ( priorWeight < 1.e-10 )
-    {
+  {
     myord = rev( order( abs( outcorrs ) ) )
     outcorrs = outcorrs[ myord ]
     p1 = p1[ , myord ]
     p2 = p2[ , myord ]
     outval$eig1 = outval$eig1[ myord, ]
     outval$eig2 = outval$eig2[ myord, ]
-    }
+  }
   return(
-      list(
-        projections = p1,
-        projections2 = p2,
-        eig1 = t(outval$eig1),
-        eig2 = t(outval$eig2),
-        corrs = outcorrs
-        )
-      )
+    list(
+      projections = p1,
+      projections2 = p2,
+      eig1 = t(outval$eig1),
+      eig2 = t(outval$eig2),
+      corrs = outcorrs
+    )
+  )
 }
