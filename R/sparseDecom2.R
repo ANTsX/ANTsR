@@ -95,7 +95,7 @@
 #' @export sparseDecom2
 sparseDecom2 <- function(
   inmatrix,
-  inmask = list(NA, NA),
+  inmask = list(NULL, NULL),
   sparseness = c(0.01, 0.01),
   nvecs = 3,
   its = 20,
@@ -116,17 +116,17 @@ sparseDecom2 <- function(
   maxBased=FALSE  ) {
   idim=3
   # safety 1 & 2
-  if ( ! is.na( inmask[1] ) )
+  if ( ! is.null( inmask[[1]] ) )
     if ( ncol( inmatrix[[1]] )  !=  sum( inmask[[1]] ) )
       stop("Number of columns in matrix X must equal the size of the maskx")
-  if ( ! is.na( inmask[2] ) )
+  if ( ! is.null( inmask[[2]] ) )
     if ( ncol( inmatrix[[2]] )  !=  sum( inmask[[2]] ) )
       stop("Number of columns in matrix Y must equal the size of the masky")
-  if (class(inmask[[1]])[[1]] == "antsImage" ) idim=inmask[[1]]@dimension
-  if (class(inmask[[2]])[[1]] == "antsImage" ) idim=inmask[[2]]@dimension
-  if (class(inmask[[1]])[[1]] != "antsImage")
+  if (is.antsImage(inmask[[1]])) idim=inmask[[1]]@dimension
+  if (is.antsImage(inmask[[2]])) idim=inmask[[2]]@dimension
+  if (!is.antsImage(inmask[[1]]))
      maskx = new("antsImage", "float",idim) else maskx = antsImageClone( inmask[[1]] )
-  if (class(inmask[[2]])[[1]] != "antsImage")
+  if (!is.antsImage(inmask[[2]]))
      masky = new("antsImage", "float",idim) else masky = antsImageClone( inmask[[2]] )
   if ( nrow(inmatrix[[1]]) != nrow(inmatrix[[2]]) )
     stop("Matrices must have same number of rows")

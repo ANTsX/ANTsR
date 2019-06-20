@@ -4,8 +4,8 @@
 \alias{antsBOLDNetworkAnalysis}
 \title{a basic framework for network analysis that produces graph metrics}
 \usage{
-antsBOLDNetworkAnalysis(bold = NA, mask = NA, labels = NA, motion,
-  gdens = 0.2, threshLo = 1, threshHi = 90, freqLo = 0.01,
+antsBOLDNetworkAnalysis(bold = NULL, mask = NULL, labels = NULL,
+  motion, gdens = 0.2, threshLo = 1, threshHi = 90, freqLo = 0.01,
   freqHi = 0.1, winsortrim = 0.02, throwaway)
 }
 \arguments{

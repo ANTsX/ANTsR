@@ -4,7 +4,7 @@
 \alias{sparseRegression}
 \title{Sparse regression on input images.}
 \usage{
-sparseRegression(inmatrix, demog, outcome, mask = NA,
+sparseRegression(inmatrix, demog, outcome, mask = NULL,
   sparseness = 0.05, nvecs = 10, its = 5, cthresh = 250,
   statdir = NA, z = 0, smooth = 0)
 }

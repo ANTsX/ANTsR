@@ -28,7 +28,7 @@
 #' @export getfMRInuisanceVariables
 getfMRInuisanceVariables <- function(
   fmri, maskThresh = 500, moreaccurate = 1,
-  mask = NA) {
+  mask = NULL) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -72,8 +72,9 @@ getfMRInuisanceVariables <- function(
   moco_results <- .motion_correction(fmri, moreaccurate = moreaccurate)
   moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09,
     cleanup = TRUE)
-  if (!is.na(mask))
+  if (!is.null(mask)) {
     moco_mask_img <- mask
+  } 
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   motionparams <- as.data.frame(moco_results$moco_params)
   predictors <- .get_perfusion_predictors(mat, motionparams, NULL, 1, 3)

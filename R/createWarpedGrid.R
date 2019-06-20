@@ -28,7 +28,7 @@
 #'
 #' @export createWarpedGrid
 createWarpedGrid <- function( img, gridStep=10, gridWidth=2,
-  gridDirections = c(TRUE, TRUE), fixedReferenceImage=NA, transform=NA,
+  gridDirections = c(TRUE, TRUE), fixedReferenceImage=NULL, transform=NA,
   foreground=1, background=0 )
   {
   if ( length( gridDirections ) != img@dimension )
@@ -55,7 +55,11 @@ createWarpedGrid <- function( img, gridStep=10, gridWidth=2,
     }
   gimg = as.antsImage( garr )
   antsCopyImageInfo( img, gimg )
-  if ( ! any( is.na( transform )) & !is.na( fixedReferenceImage ) )
-    antsApplyTransforms( fixed=fixedReferenceImage, moving=gimg,
-      transformlist=transform ) else return( gimg )
+  if ( ! any( is.na( transform )) & !is.null( fixedReferenceImage ) ) {
+    fixedReferenceImage = check_ants(fixedReferenceImage)
+    return(antsApplyTransforms( fixed=fixedReferenceImage, moving=gimg,
+      transformlist=transform ) )
+  } else {
+    return( gimg )
+  }
 }

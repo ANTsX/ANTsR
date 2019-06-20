@@ -1,6 +1,6 @@
 .get_perfusion_predictors <- function(mat,
-  motionparams, xideal = NULL, labelfirst = 1,
-  ncompcorparameters = 3, useDenoiser = NA) {
+                                      motionparams, xideal = NULL, labelfirst = 1,
+                                      ncompcorparameters = 3, useDenoiser = NULL) {
   myusage <- "usage: .get_perfusion_predictors(  mat , motionparams , xideal = NULL , labelfirst = 1 , ncompcorparameters = 3 ) "
   if (nargs() == 0) {
     print(myusage)
@@ -27,7 +27,7 @@
   metricnuis <- motionnuis[1, ]
   globalsignal <- rowMeans(mat)
   globalsignalASL <- residuals(lm(globalsignal ~ xideal))
-
+  
   # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top
   # 3 components
   msvd <- svd(t(motionnuis[2:nrow(motionnuis), ]))
@@ -42,36 +42,36 @@
   nuis <- t( motionnuis )
   colnames(nuis) <- motnames
   dnz<-NA
-  if ( ncompcorparameters > 0 | !(all(is.na(useDenoiser))) ) {
+  if ( ncompcorparameters > 0 | ! is.null(useDenoiser)) {
     if (  ncompcorparameters > 0 ) {
       rmat<-residuals(lm( mat ~ xideal + nuis ))
       denoisingParams <- compcor(mat, ncompcorparameters)
-      }
-    if (!(all(is.na(useDenoiser)))) {
+    }
+    if (!is.null(useDenoiser)) {
       # include t(motionnuis) if you want to model motion
       DVARS <- computeDVARS(mat)
-#      dnz <- aslDenoiseR(mat, xideal, motionparams = NA,
-#        selectionthresh = 0.2,
-#        maxnoisepreds = useDenoiser, polydegree = 8,
-#        crossvalidationgroups = 6,
-#        scalemat = F, noisepoolfun = max)
-#      clustasl<-(clusterTimeSeries( mat,  8 )$clusters)
+      #      dnz <- aslDenoiseR(mat, xideal, motionparams = NA,
+      #        selectionthresh = 0.2,
+      #        maxnoisepreds = useDenoiser, polydegree = 8,
+      #        crossvalidationgroups = 6,
+      #        scalemat = F, noisepoolfun = max)
+      #      clustasl<-(clusterTimeSeries( mat,  8 )$clusters)
       clustasl<-8
       dnz<-aslDenoiseR( mat, xideal, covariates=DVARS,
-        selectionthresh=0.05, crossvalidationgroups=clustasl,
-        maxnoisepreds=useDenoiser, polydegree='loess' )
+                        selectionthresh=0.05, crossvalidationgroups=clustasl,
+                        maxnoisepreds=useDenoiser, polydegree='loess' )
       denoisingParams <- data.matrix(data.frame(dnz$noiseu))
       dnz<-dnz$R2final
     }
     if ( exists("denoisingParams") )
-      {
+    {
       compcorrnames <- paste("denoisingParams",
-        c(1:ncol(denoisingParams)), sep = "")
+                             c(1:ncol(denoisingParams)), sep = "")
       colnames(denoisingParams) <- c(compcorrnames)
-      }
+    }
   } else denoisingParams<-NA
   return( list(xideal = xideal, nuis = denoisingParams,
-    motion = t( motionnuis ),
-    globalsignal = globalsignal,
-    globalsignalASL = globalsignalASL, dnz=dnz ))
+               motion = t( motionnuis ),
+               globalsignal = globalsignal,
+               globalsignalASL = globalsignalASL, dnz=dnz ))
 }

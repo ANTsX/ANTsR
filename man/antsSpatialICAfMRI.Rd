@@ -4,7 +4,7 @@
 \alias{antsSpatialICAfMRI}
 \title{Perform spatial ICA on fMRI bold data.}
 \usage{
-antsSpatialICAfMRI(boldImages, maskImage = NA,
+antsSpatialICAfMRI(boldImages, maskImage = NULL,
   numberOfICAComponents = 20, normalizeComponentImages = TRUE,
   verbose = FALSE)
 }

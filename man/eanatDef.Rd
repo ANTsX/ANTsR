@@ -4,7 +4,7 @@
 \alias{eanatDef}
 \title{Eigenanatomy with deflation}
 \usage{
-eanatDef(inmat, nvecs = 0, mask = NA, smoother = 0, cthresh = 0,
+eanatDef(inmat, nvecs = 0, mask = NULL, smoother = 0, cthresh = 0,
   its = 5, eps = 0.1, positivity = FALSE, priors = NA,
   priorWeight = 0, sparEpsilon = 1e-04, whiten = FALSE,
   verbose = FALSE)

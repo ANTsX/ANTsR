@@ -5,7 +5,8 @@
 \title{Convert a matrix to a form that can be used to initialize sparse cca and
 pca.}
 \usage{
-initializeEigenanatomy(initmat, mask = NA, nreps = 1, smoothing = 0)
+initializeEigenanatomy(initmat, mask = NULL, nreps = 1,
+  smoothing = 0)
 }
 \arguments{
 \item{initmat}{input matrix where rows provide initial vector values.

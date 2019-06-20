@@ -92,7 +92,7 @@ antsrSurf <- function( x, y, z,
                        antspath = NA,
                        verbose = FALSE )
 {
-  domainImageMap = NA
+  domainImageMap = NULL
   if ( any( is.na( alpha ) ) ) {
     alpha = rep( 1, length(x)+length(y) )
   }
@@ -121,7 +121,7 @@ antsrSurf <- function( x, y, z,
     stop("This function needs ConvertScalarImageToRGB in the environment.")
   }
 
-  if ( ! any( is.na( domainImageMap ) ) )
+  if ( ! is.null( domainImageMap ) ) 
   {
     if ( is.antsImage( domainImageMap ) )
     {

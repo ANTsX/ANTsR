@@ -4,7 +4,7 @@
 \alias{segmentShapeFromImage}
 \title{convolution-based shape identification}
 \usage{
-segmentShapeFromImage(img, shape, mask = NA, rad = NA, scfun,
+segmentShapeFromImage(img, shape, mask = NULL, rad = NA, scfun,
   maskZeroes = TRUE)
 }
 \arguments{

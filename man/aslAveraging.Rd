@@ -4,7 +4,7 @@
 \alias{aslAveraging}
 \title{Average ASL tag-control pairs to estimate perfusion}
 \usage{
-aslAveraging(asl, mask = NA, tc = NA, nuisance = NA,
+aslAveraging(asl, mask = NULL, tc = NA, nuisance = NA,
   method = "regression", ...)
 }
 \arguments{

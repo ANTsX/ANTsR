@@ -4,7 +4,8 @@
 \alias{basicInPaint}
 \title{Inpaints missing imaging data from boundary data}
 \usage{
-basicInPaint(img, paintMask, speedimage = NA, its = 0, gparam = 0.05)
+basicInPaint(img, paintMask, speedimage = NULL, its = 0,
+  gparam = 0.05)
 }
 \arguments{
 \item{img}{antsImage to be approximated / painted}

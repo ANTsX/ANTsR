@@ -4,7 +4,7 @@
 \alias{.motion_correction}
 \title{Simple motion_correction function.}
 \usage{
-.motion_correction(img, fixed = NA, moreaccurate = 1,
+.motion_correction(img, fixed = NULL, moreaccurate = 1,
   txtype = "Affine", verbose = FALSE, num_threads = 1, seed = NULL)
 }
 \arguments{

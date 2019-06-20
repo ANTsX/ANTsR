@@ -14,12 +14,12 @@
 #' wmat2<-whiten( mat, 2, TRUE )
 #'
 #' @export whiten
-whiten <- function(x, k = NA, reducex = FALSE) {
+whiten <- function(x, k = NULL, reducex = FALSE) {
   if (nargs() == 0) {
     print("Usage:  x_whitened<-whiten( x ) ")
     return(1)
   }
-  if (is.na(k)) {
+  if (is.null(k)) {
     svdx <- svd(scale(x %*% t(x)))
     dd <- (svdx$d)^(-1/2)
     xw <- ((svdx$u %*% diag(dd)) %*% t(svdx$v)) %*% x

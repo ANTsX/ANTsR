@@ -24,8 +24,11 @@
 #' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
 #'
 #' @export eigSeg
-eigSeg <- function( mask = NA, imgList = NA, applySegmentationToImages = FALSE,
+eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
   cthresh=0, smooth=1 ) {
+  if (!is.null(mask)) {
+    mask = check_ants(mask)
+  }
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
     return(1)
@@ -41,7 +44,7 @@ eigSeg <- function( mask = NA, imgList = NA, applySegmentationToImages = FALSE,
         mydata <- imageListToMatrix(imgList, mask)
   if ( ! exists('mydata') )
     stop("wrong input type - see help")
-  if ( smooth > 0 & !is.na(mask) )
+  if ( smooth > 0 & !is.null(mask) )
     {
     for ( i in 1:nrow(mydata) )
       {

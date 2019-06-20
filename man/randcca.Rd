@@ -4,7 +4,7 @@
 \alias{randcca}
 \title{randomized cca function.}
 \usage{
-randcca(x, y, k, seed)
+randcca(x, y, k, seed = NA)
 }
 \arguments{
 \item{x}{input matrix}

@@ -6,9 +6,9 @@
 \usage{
 fMRINormalization(img, steadyT = 20, fdthresh = Inf,
   repeatMotionEst = 2, freqLimits = c(0.01, 0.1), nCompCor = 0,
-  polydegree = NA, structuralImage = NA, structuralSeg = NA,
-  structuralNodes = NA, templateMap = NA, templateImage = NA,
-  smoothingSigmas = NA, extraRuns = NA, verbose = FALSE)
+  polydegree = NA, structuralImage = NULL, structuralSeg = NULL,
+  structuralNodes = NULL, templateMap = NULL, templateImage = NULL,
+  smoothingSigmas = NA, extraRuns = list(), verbose = FALSE)
 }
 \arguments{
 \item{img}{input time series antsImage.}

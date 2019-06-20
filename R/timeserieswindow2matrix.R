@@ -67,7 +67,7 @@
 #'
 #' @export timeserieswindow2matrix
 timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindow,
-  zeropadvalue = 0, spacing = NA) {
+                                    zeropadvalue = 0, spacing = NA) {
   if (length(dim(timeseriesmatrix)) != 2) {
     print("Mask should be of dimensionality 3")
     return(NA)
@@ -84,9 +84,10 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindo
     mask4d[, , , i] <- maskvec
   }
   mask4d <- as.antsImage(mask4d)
-  if (!is.na(spacing))
-    if (length(spacing) == 4)
-      antsSetSpacing(mask4d, spacing)
+  if (!is.na(spacing)) {
+    stopifnot(length(spacing) == 4)
+    antsSetSpacing(mask4d, spacing)
+  }
   nvox4dmask <- sum(mask4d == 1)
   if (ncol(timeseriesmatrix) * timewindow != nvox4dmask) {
     print("ERROR: ncol(timeseriesmatrix)*timewindow !=  nvox4dmask")

@@ -33,7 +33,7 @@ subjectDataToGroupDataFrame <- function(csvlist, usecol, mycolname = NA, datarow
     mycol <- which(colnames(data1) == usecol) else mycol <- usecol
   if (is.na(mycol)) {
     print(paste("poorly chosen column name", mycol))
-    return
+    return()
   }
   if (is.na(mycolname))
     mycolname <- colnames(data1)[mycol]

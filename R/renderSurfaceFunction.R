@@ -143,7 +143,7 @@ renderSurfaceFunction <- function(
   misc3d::drawScene.rgl(mylist)  # surface render
   if (!is.na(outfn))
     rgl::movie3d(rgl::spin3d(), duration = movieDuration,
-    dir = outdir, movie = outfn, clean = T )
+    dir = outdir, movie = outfn, clean = TRUE )
   return(mylist)
 }
 

@@ -38,10 +38,11 @@
 #' # label N should have mean N and 0 variance
 #' labelStats(labelsDilated, labels)
 #' @export
-multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, labelList=NA ) {
+multiLabelMorphology <- function(labelsIn, operation, radius, 
+                                 dilationMask=NULL, labelList=NA ) {
 
   # If no label list supplied, get a list of labels in the image
-  if (length(labelList) == 1 && is.na(labelList)) {
+  if (all(is.na(labelList))) {
     labelList <- sort(unique(labelsIn[labelsIn > 0]))
   }
 
@@ -62,7 +63,8 @@ multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, l
   }
 
   # If we have a dilation mask, quickly check it's not some non-binary label(s)
-  if (!is.na(dilationMask)) {
+  if (!is.null(dilationMask)) {
+    dilationMask = check_ants(dilationMask)
     if (max(dilationMask) != 1) {
       stop("Mask is empty or not binary")
     }
@@ -83,7 +85,7 @@ multiLabelMorphology <- function(labelsIn, operation, radius, dilationMask=NA, l
     cLabBinaryMorphed <- iMath(currentLabelRegion, operation, radius, 1)
 
     # Mask probably useful only for dilation
-    if (operation == 'MD' && !is.na(dilationMask)) {
+    if (operation == 'MD' && !is.null(dilationMask)) {
       # This must be formulated so that it works whether the dilation mask includes currentLabelRegion or not
       cLabBinaryMorphedNoOverlap <- thresholdImage(currentLabelRegion + dilationMask * cLabBinaryMorphed - otherLabels, 1, 2)
     }

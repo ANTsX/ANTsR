@@ -5,10 +5,10 @@
 \title{ASL-based Perfusion from PASL, CASL or pCASL.}
 \usage{
 aslPerfusion(asl, maskThresh = 0.75, moreaccurate = 1,
-  dorobust = 0.92, m0 = NA, skip = 20, mask = NA,
+  dorobust = 0.92, m0 = NA, skip = 20, mask = NULL,
   checkmeansignal = 100, moco_results = NULL, regweights = NULL,
-  useDenoiser = NA, useBayesian = 0, verbose = FALSE, ncompcor = 0,
-  N3 = FALSE)
+  useDenoiser = NULL, useBayesian = 0, verbose = FALSE,
+  ncompcor = 0, N3 = FALSE)
 }
 \arguments{
 \item{asl}{input asl image}

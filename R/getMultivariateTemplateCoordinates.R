@@ -41,7 +41,7 @@
 getMultivariateTemplateCoordinates <- function(
   imageSetToBeLabeledIn,
   templateWithLabels,
-  labelnames = NA,
+  labelnames = NULL,
   outprefix = NA,
   convertToTal = FALSE,
   pvals = NA,

@@ -4,7 +4,7 @@
 \alias{labelGeometryMeasures}
 \title{labelGeometryMeasures}
 \usage{
-labelGeometryMeasures(labelImage, intensityImage = NA)
+labelGeometryMeasures(labelImage, intensityImage = NULL)
 }
 \arguments{
 \item{labelImage}{on which to compute geometry}

@@ -4,7 +4,7 @@
 \alias{eigSeg}
 \title{Segmentation for eigenanatomy.}
 \usage{
-eigSeg(mask = NA, imgList = NA, applySegmentationToImages = FALSE,
+eigSeg(mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
   cthresh = 0, smooth = 1)
 }
 \arguments{

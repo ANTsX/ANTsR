@@ -5,7 +5,7 @@
 \title{Extract generic fMRI nuisance variables for ASL or BOLD}
 \usage{
 getfMRInuisanceVariables(fmri, maskThresh = 500, moreaccurate = 1,
-  mask = NA)
+  mask = NULL)
 }
 \arguments{
 \item{fmri}{input antsImage or filename}

@@ -5,8 +5,8 @@
 \title{Basic pre-processing for BOLD or ASL-based network analysis.}
 \usage{
 filterfMRIforNetworkAnalysis(aslmat, tr, freqLo = 0.01, freqHi = 0.1,
-  cbfnetwork = "ASLCBF", mask = NA, labels = NA,
-  graphdensity = 0.5, seg = NA, useglasso = NA, nuisancein = NA,
+  cbfnetwork = "ASLCBF", mask = NULL, labels = NULL,
+  graphdensity = 0.5, seg = NULL, useglasso = NA, nuisancein = NA,
   usesvd = FALSE, robustcorr = FALSE)
 }
 \arguments{

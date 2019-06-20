@@ -4,7 +4,7 @@
 \alias{whiten}
 \title{Simple whitening function.}
 \usage{
-whiten(x, k = NA, reducex = FALSE)
+whiten(x, k = NULL, reducex = FALSE)
 }
 \arguments{
 \item{x}{input matrix}

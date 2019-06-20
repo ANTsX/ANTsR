@@ -139,7 +139,8 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       tocol = fromcol + neigh - 1
 
       # get neighborhood
-      m1<-t(getNeighborhoodInMask( xfactor[[k]], randmask, rad, spatial.info=F, boundary.condition='image' ))
+      m1<-t(getNeighborhoodInMask( xfactor[[k]], randmask, rad, 
+                                   spatial.info=FALSE, boundary.condition='image' ))
 
       # make sure neiborhood is not out of image
       if (any(is.na(m1)))
