@@ -145,6 +145,7 @@ abpBrainExtraction <- function(img, tem, temmask,
               localSearchIterations=10, txfn=initafffn,
               num_threads = num_threads)
     else
+      temregmask = check_ants(temregmask)
       temp<-affineInitializer(
               fixedImage=temsmall, movingImage=imgsmall,
               searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
