@@ -118,7 +118,7 @@ mr<-c(1,2,4,2,1) # multi-res schedule, U-style schedule
 masks=list(   getMask(seg), getMask(seg1) )
 rfm<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
   masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
-  voxchunk=500 )
+  voxchunk=500, do.trace = 100)
 ```
 
 

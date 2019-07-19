@@ -24,3 +24,4 @@ _config\.yml
 ^.*\.log$
 R/confidenceConnected.R
 R/connectedThresholdImage.R
+^doc$
