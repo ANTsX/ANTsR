@@ -5,7 +5,7 @@
 \title{voxelwise neighborhood random forest segmentation and prediction}
 \usage{
 vwnrfs(y, x, labelmasks, rad = NA, nsamples = 8, ntrees = 500,
-  asFactors = TRUE, reduceFactor = 1)
+  asFactors = TRUE, reduceFactor = 1, ...)
 }
 \arguments{
 \item{y}{list of training label images, can be a factor or numeric vector
@@ -26,6 +26,8 @@ multi-label masks will try to balance sampling for each label.}
 \item{asFactors}{boolean - treat the y entries as factors}
 
 \item{reduceFactor}{integer factor by which to reduce (imaging) data resolution}
+
+\item{...}{arguments to pass to \code{randomForest}}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix
