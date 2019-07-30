@@ -31,7 +31,7 @@ bayesianCBF<-function( pcasl, segmentation, tissuelist,
                        useDataDrivenMask=3,
                        denoisingComponents=1:8,
                        robustnessvalue=0.95, # higher rejects more data. 0.9 or less - keep all
-                       localweights=F, priorBetas=NA
+                       localweights=FALSE, priorBetas=NA
 )
 {
   compcorComponents<-0
@@ -72,7 +72,7 @@ bayesianCBF<-function( pcasl, segmentation, tissuelist,
   }
   if ( all( is.na( priorBetas ) ) )
   {
-    blm<-bigLMStats( perfmodel, includeIntercept=T )
+    blm<-bigLMStats( perfmodel, includeIntercept=TRUE )
     bayespriormatfull<-blm$beta
   }
   if ( ! all( is.na( priorBetas ) ) )

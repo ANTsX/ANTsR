@@ -5,7 +5,7 @@
 \title{Simple quantifySNPs function.}
 \usage{
 quantifySNPs(snps, freqthresh = 0.1, shiftit = FALSE,
-  replaceWithF = T, traitvecin = NA, trainvec = NA)
+  replaceWithF = TRUE, traitvecin = NA, trainvec = NA)
 }
 \arguments{
 \item{snps}{input matrix}

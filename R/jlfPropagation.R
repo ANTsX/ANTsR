@@ -58,7 +58,7 @@ jlfProp <- function(
  targetIMask,
  atlasList,
  rad = 2,
- labelList = NA,
+ labelList = NULL,
  rSearch = 3,
  lagValue = 3,
  verbose = FALSE,

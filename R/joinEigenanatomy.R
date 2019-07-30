@@ -18,9 +18,9 @@
 #' # if you dont have images
 #' mat<-replicate(100, rnorm(20))
 #' mydecom<-sparseDecom( mat )
-#' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
+#' kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , 0.1 )
 #' # or select optimal parameter from a list
-#' kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
+#' kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , c(1:10)/50 )
 #' # something similar may be done with images
 #' mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
 #' mydecom<-sparseDecom( mat, inmask=mask )
@@ -32,7 +32,7 @@
 #'  }
 #' }
 #' @export joinEigenanatomy
-joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
+joinEigenanatomy <- function(datamatrix, mask = NULL, listEanatImages,
   graphdensity = 0.65,
   joinMethod = 'walktrap', verbose = F) {
   if (nargs() == 0) {
@@ -41,8 +41,12 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
     return(1)
   }
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
-  if (!is.na(mask))
-    decom <- imageListToMatrix(listEanatImages, mask) else decom <- (listEanatImages)
+  if (!is.null(mask)) {
+    mask = check_ants(mask)
+    decom <- imageListToMatrix(listEanatImages, mask) 
+  } else {
+    decom <- (listEanatImages)
+  }
   for (i in 1:nrow(decom)) {
     if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0)
       decom[i, ] <- decom[i, ] * (-1)
@@ -54,7 +58,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
   for (gd in graphdensity) {
     gg <- makeGraph(mycor, gd, communityMethod = joinMethod)
     communitymembership <- gg$community$membership
-    if (!is.na(mask)) {
+    if (!is.null(mask)) {
       newelist <- list()
       for (cl in 1:max(communitymembership)) {
         newe <- antsImageClone(listEanatImages[[1]])
@@ -70,7 +74,7 @@ joinEigenanatomy <- function(datamatrix, mask = NA, listEanatImages,
       }
       decom2 <- imageListToMatrix(newelist, mask)
     }
-    if (is.na(mask)) {
+    if (is.null(mask)) {
       newdecom <- matrix(rep(0, ncol(datamatrix) * max(communitymembership)),
         nrow = max(communitymembership))
       for (cl in 1:max(communitymembership)) {

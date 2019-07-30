@@ -1,4 +1,4 @@
-#' Preprocess BOLD fMRI image data.
+maskImage#' Preprocess BOLD fMRI image data.
 #'
 #' Preprocess fMRI data by performing compcor/motion correction, nuisance
 #' regression, band-pass filtering, and spatial smoothing.
@@ -64,14 +64,14 @@
 #' cleanfMRI <- preprocessfMRI(boldImage)
 #' @export preprocessfMRI
 preprocessfMRI <- function(boldImage,
-  maskImage = NA,
+  maskImage = NULL,
   maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables,
   numberOfCompCorComponents = 6,
   doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1,
-  meanBoldFixedImageForMotionCorrection = NA,
+  meanBoldFixedImageForMotionCorrection = NULL,
   frequencyLowThreshold = NA,
   frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
@@ -112,7 +112,9 @@ preprocessfMRI <- function(boldImage,
 
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
-    motionCorrectionResults <- .motion_correction(boldImage, fixed = meanBoldFixedImageForMotionCorrection,
+    motionCorrectionResults <- .motion_correction(
+      boldImage, 
+      fixed = meanBoldFixedImageForMotionCorrection,
       moreaccurate = motionCorrectionAccuracyLevel,
       num_threads = num_threads,
       seed = seed)
@@ -160,8 +162,10 @@ preprocessfMRI <- function(boldImage,
   antsMotionCorr(list(d = 3, a = boldImage, o = averageImage))
   # Calculate the mask, if not supplied.
 
-  if (is.na(maskImage)) {
+  if (is.null(maskImage)) {
     maskImage <- getMask( averageImage )
+  } else {
+    maskImage = check_ants(maskImage)
   }
   averageImage[maskImage == 0] <- 0
 

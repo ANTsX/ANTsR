@@ -145,7 +145,7 @@ randwhiten <- function( A, k, seed=NA ) {
 #' dr=randcca(x,y,k,1)
 #'
 #' @export randcca
-randcca <- function( x, y, k, seed ) {
+randcca <- function( x, y, k, seed = NA ) {
   if ( !is.na(seed) ) set.seed(seed)
   xw = randwhiten( x , k )
   yw = randwhiten( y , k )

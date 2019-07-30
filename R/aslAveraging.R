@@ -53,16 +53,17 @@
 #'   segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
 #'
 #' @export
-aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression", ...) {
-# define helper function
+aslAveraging <- function(asl, mask=NULL, tc=NA,  nuisance=NA, method="regression", ...) {
+  # define helper function
   bayesianPerfusion <- function(asl, xideal, nuisance, segmentation, tissuelist,
-   myPriorStrength=30.0,
-  useDataDrivenMask=3,
-  localweights=FALSE, priorBetas=NA) {
+                                myPriorStrength=30.0,
+                                useDataDrivenMask=3,
+                                localweights=FALSE, priorBetas=NA) {
+    segmentation = check_ants(segmentation)
     mask <- thresholdImage(segmentation, 1, Inf)
     aslmat <- timeseries2matrix(asl, mask)
     perfdf <- data.frame( xideal=xideal,
-                nuis=nuisance)
+                          nuis=nuisance)
     perfdf <- as.matrix(perfdf[,!is.na(colMeans(perfdf))])
     perfmodel<-lm(aslmat ~ perfdf)
     getpriors<-function(img, segmentation) {
@@ -85,9 +86,9 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
     for(i in 1:ncol(bayespriormat)) {
       bayespriormat[, i] <- getpriors(bayespriormatfull[i, ], segmentation)
     }
-#   set 4 to equal 2 - dgm = gm
+    #   set 4 to equal 2 - dgm = gm
     bayespriormat[4, ] <- bayespriormat[2, ]
-#   set csf to zero perfusion
+    #   set csf to zero perfusion
     bayespriormat[1, 2] <- 0
     X <- model.matrix(perfmodel)
     localtissuemat <- imageListToMatrix(tissuelist, mask)
@@ -98,14 +99,14 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
     bayesianperfusionloc <- localtissuemat * 0
     bayesianperfusionlocp <- localtissuemat * 0
     for (i in 1:ncol(aslmat)) {
-    # here is where we get really bayesian
-    # average over all tissue models ...
+      # here is where we get really bayesian
+      # average over all tissue models ...
       localtissuemat[,i]<-abs(localtissuemat[,i]) / sum(abs(localtissuemat[,i]))
       for ( segval in 1:max(segmentation) ) {
         tissueprior<-localtissuemat[segval,i]
         localprior<-bayespriormat[segval,]
         blm<-bayesianlm(  X, aslmat[,i], localprior, priorwt,
-           includeIntercept=T)
+                          includeIntercept=T)
         locbeta<-blm$beta[2]
         bayesianperfusionloc[segval,i]<-locbeta
         bayesianperfusionlocp[segval,i]<-locbeta*tissueprior
@@ -114,7 +115,7 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
     bperfimg <- makeImage(mask,colSums(bayesianperfusionlocp))
     bperfimg
   }
-
+  
   if ( (method == "regression" | method == "bayesian") & all(is.na(tc)) ) {
     warning(paste("Using regression to estimate perfusion, but not provided",
                   "with \n tag-control labels.  Assuming first image is tag, \n",
@@ -128,12 +129,12 @@ aslAveraging <- function(asl, mask=NA, tc=NA,  nuisance=NA, method="regression",
                  dim(asl)[4])[1:dim(asl)[4]] - 0.5)  # tag minus control
     }
   }
-
+  
   if (length(grep("Subtract", method)) > 0) {
     avg <- .Call("timeSeriesSubtraction", asl, method)
   } else if (method == "regression"){
     labelfirst <- TRUE
-    if (is.na(mask)){
+    if (is.null(mask)){
       myar <- apply(as.array(asl), c(1, 2, 3), mean)
       img <- makeImage(dim(myar), myar)
       antsSetSpacing(img, antsGetSpacing(asl)[1:3])

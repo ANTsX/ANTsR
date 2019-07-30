@@ -4,7 +4,7 @@
 \alias{eanatSelect}
 \title{Selection of n eigenvectors and sparsity for eigenanatomy}
 \usage{
-eanatSelect(inmat, mask = NA, cthresh = 0, smooth = 0,
+eanatSelect(inmat, mask = NULL, cthresh = 0, smooth = 0,
   maxNEvec = 0, selectorScale = 1.1, whiten = FALSE,
   verbose = FALSE)
 }

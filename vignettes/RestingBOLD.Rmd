@@ -8,6 +8,7 @@ vignette: >
     %\VignetteIndexEntry{Resting BOLD processing images in R}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
+    \usepackage[utf8]{inputenc}
 ---
 
 ```{r, echo = FALSE, message = FALSE, include = FALSE}

@@ -27,7 +27,7 @@
 #'   print(mean(meancbf[ pcasl.bayesian$mask==1 ]))
 #'   antsImageWrite( meancbf , "temp.nii.gz")
 #'   pcasl.processing <- aslPerfusion( asl, moreaccurate=0,
-#'     dorobust=0.95, useDenoiser=NA, skip=5,  useBayesian=0 )
+#'     dorobust=0.95, useDenoiser=NULL, skip=5,  useBayesian=0 )
 #'   # user might compare to useDenoiser=FALSE
 #'   pcasl.parameters <- list( sequence="pcasl", m0=pcasl.processing$m0 )
 #'   cbf <- quantifyCBF( pcasl.processing$perfusion, pcasl.processing$mask, pcasl.parameters )

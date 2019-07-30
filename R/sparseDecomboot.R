@@ -50,7 +50,7 @@
 #' } # end dontrun
 #'
 #' @export sparseDecomboot
-sparseDecomboot <- function(inmatrix = NA, inmask = NA, sparseness = 0.01,
+sparseDecomboot <- function(inmatrix, inmask = NULL, sparseness = 0.01,
   nvecs = 50,
   its = 5, cthresh = 250, z = 0, smooth = 0,
   initializationList = list(),
@@ -128,7 +128,7 @@ sparseDecomboot <- function(inmatrix = NA, inmask = NA, sparseness = 0.01,
     if (mynorm > 0)
       cca1outAuto[, i] <- cca1outAuto[, i]/mynorm
   }
-  if ( is.na( inmask ) ) usefakemask <- TRUE
+  if ( is.null( inmask ) ) usefakemask <- TRUE
   fakemask1 <- makeImage(c(1, 1, ncol(mat1)), 1)
   locmask <- inmask
   if (usefakemask) {

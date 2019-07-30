@@ -55,7 +55,7 @@
 getTemplateCoordinates <- function(
   imagePairToBeLabeled,
   templatePairWithLabels,
-  labelnames = NA,
+  labelnames = NULL,
   outprefix = NA,
   convertToTal = FALSE) {
   if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) <

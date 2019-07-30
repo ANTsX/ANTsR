@@ -35,7 +35,7 @@
 #' # plot(mm2)
 #' }
 #' @export
-basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05) {
+basicInPaint <- function(img, paintMask, speedimage = NULL, its = 0, gparam = 0.05) {
   if (nargs() == 0) {
     print(args(basicInPaint))
     return(1)
@@ -49,10 +49,12 @@ basicInPaint <- function(img, paintMask, speedimage = NA, its = 0, gparam = 0.05
   paintMaskUse[temp == 1 & paintMaskUse == 1] <- 2
   healthymask <- antsImageClone(paintMaskUse)
   healthymask[paintMaskUse == 2] <- 0
-  if (is.na(speedimage)) {
+  if (is.null(speedimage)) {
     speedimage <- antsImageClone(img)
     upit <- mean(img[paintMaskUse == 2])
     speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
+  } else {
+    speedimage = check_ants(speedimage)
   }
   inpainted = fastMarchingExtension( speedimage, healthymask, img )
   outimg <- antsImageClone(img)

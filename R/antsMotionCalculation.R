@@ -46,13 +46,13 @@
 #' }
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(
-  img, mask = NA, fixed = NA, moreaccurate = 1,
+  img, mask = NULL, fixed = NULL, moreaccurate = 1,
   txtype = "Affine", framewise = 1, verbose=FALSE,
   num_threads = 1,
   seed = NULL,  
   ...) {
   
-  if ( is.na( fixed )  )
+  if ( is.null( fixed )  )
   {
     fixed <- getAverageOfTimeSeries( img )
   }
@@ -65,7 +65,7 @@ antsMotionCalculation <- function(
   #  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
   #    moreaccurate = moreaccurate, txtype=txtype, verbose=verbose )
   mocoparams <- moco$moco_params
-  if (is.na(mask)) {
+  if (is.null(mask)) {
     mask <- getMask(moco$moco_avg_img, mean(moco$moco_avg_img),
                     Inf, cleanup = 2)
   }

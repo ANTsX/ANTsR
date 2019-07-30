@@ -45,7 +45,7 @@
 #' # without setting the seed
 #' @export
 .motion_correction <- function(img,
-                               fixed = NA,
+                               fixed = NULL,
                                moreaccurate = 1,
                                txtype = "Affine",
                                verbose = FALSE,
@@ -92,7 +92,7 @@
     return(NULL)
   }
 
-  if (is.na(fixed)) {
+  if (is.null(fixed)) {
     fixed <- getAverageOfTimeSeries( img )
   } else {
     if (is.character(fixed)) {
@@ -101,7 +101,7 @@
         return(NULL)
       }
       fixed <- antsImageRead(fixed, dimension = 3, "float")
-    } else if (class(fixed) == "antsImage") {
+    } else if (is.antsImage(fixed)) {
       if (fixed@pixeltype != "float") {
         print("'fixed' must have pixeltype  'float' ")
         fixed <- antsImageClone(fixed, "float")

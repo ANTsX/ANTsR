@@ -53,19 +53,22 @@ filterfMRIforNetworkAnalysis <- function(
   aslmat,
   tr, freqLo = 0.01, freqHi = 0.1,
   cbfnetwork = "ASLCBF",
-  mask = NA,
-  labels = NA,
+  mask = NULL,
+  labels = NULL,
   graphdensity = 0.5,
-  seg = NA,
+  seg = NULL,
   useglasso = NA,
   nuisancein=NA,
   usesvd = FALSE ,
   robustcorr = FALSE  ) {
   pixtype <- "float"
-  myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NA,  graphdensity = 0.5 )"
+  myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NULL,  graphdensity = 0.5 )"
   if (nargs() == 0) {
     print(myusage)
     return(NULL)
+  }
+  if (!is.null(mask)) {
+    mask = check_ants(mask)
   }
   if (!is.numeric(tr) | missing(tr)) {
     print("TR parameter is missing or not numeric type - is typically between 2 and 4 , depending on your fMRI acquisition")
@@ -85,7 +88,7 @@ filterfMRIforNetworkAnalysis <- function(
   freqLo <- freqLo * tr
   freqHi <- freqHi * tr
   # network analysis
-  wb <- (mask > 0)  # whole brain
+  # wb <- (mask > 0)  # whole brain
   if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }
   leftinds <- magic::shift(c(1:nrow(aslmat)), 1)
   rightinds <- magic::shift(c(1:nrow(aslmat)), -1)
@@ -114,7 +117,8 @@ filterfMRIforNetworkAnalysis <- function(
   for (x in wh) {
     filteredTimeSeries[, x] <- sample(filteredTimeSeries, nrow(filteredTimeSeries))
   }
-  if (!is.na(labels)) {
+  if (!is.null(labels)) {
+    stopifnot(!is.null(mask))
     # do some network thing here
     oulabels <- sort(unique(labels[labels > 0]))
     whvec <- (mask == 1)
@@ -122,12 +126,12 @@ filterfMRIforNetworkAnalysis <- function(
     if (ulabels[1] == 0)
       ulabels <- ulabels[2:length(ulabels)]
     labelvec <- labels[whvec]
-    if (!is.na(seg))
+    if (!is.null(seg))
       segvec <- seg[whvec] else segvec <- NA
     labmat <- matrix(data = rep(NA, length(oulabels) * nrow(filteredTimeSeries)), nrow = length(oulabels))
     nrowts <- nrow(filteredTimeSeries)
     for (mylab in ulabels) {
-      if (!is.na(seg)) {
+      if (!is.null(seg)) {
         dd <- (labelvec == mylab & segvec == 2)
       } else {
         dd <- labelvec == mylab
@@ -196,9 +200,14 @@ filterfMRIforNetworkAnalysis <- function(
     if ( ! is.na( nuisancein ) ) cormat<-cormat[1:nbrainregions,1:nbrainregions]
     if ( ! is.na( nuisancein ) ) ocormat<-ocormat[1:nbrainregions,1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
-    return( list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar, network = labmat,
-      graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat,rcormat=rcormat ))
+    L = list(filteredTimeSeries = filteredTimeSeries, 
+             temporalvar = temporalvar, network = labmat,
+             graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat,rcormat=rcormat )
+    L$mask = mask
+    return(L )
   } else {
-    return(list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar))
+    L = list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar)
+    L$mask = mask
+    return(L)
   }
 }

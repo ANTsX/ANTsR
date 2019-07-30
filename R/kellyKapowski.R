@@ -28,24 +28,28 @@
 #'   w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
 #'
 #' @export kellyKapowski
-kellyKapowski <- function( s = NA, g = NA, w = NA,
+kellyKapowski <- function( s, g, w,
    its = 50, r = 0.025,
    m = 1.5,  x = TRUE,
    e = FALSE,
-   t,
+   t = NULL,
    timeSigma = 1,
    verbose = FALSE, ...) {
+  s = check_ants(s)
+  g = check_ants(g)
+  w = check_ants(w)
   if (missing(s) | missing(g) | missing(w) |
-    is.na(s) | is.na(g) | is.na(w)) {
+    is.null(s) | is.null(g) | is.null(w)) {
     print("Input error - check params & usage")
     return(NULL)
   }
-  if (class(s)[1] == "antsImage") {
+  # if (class(s)[1] == "antsImage") {
+  if (is.antsImage(s)) {
     s <- antsImageClone(s, "unsigned int")
   }
 
   timestring = 0
-  if ( ! missing( t ) ) {
+  if ( ! is.null(t) ) {
     timedim = dim(  g  )[ g@dimension ]
     timestring = paste0( t, collapse='x')
     if ( length(t) != timedim ) {

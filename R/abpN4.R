@@ -22,7 +22,7 @@
 #'
 #' @export abpN4
 abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
-  mask = NA,  usen3 = FALSE, 
+  mask = NULL,  usen3 = FALSE, 
   ...) {
   numargs <- nargs()
   if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
@@ -40,13 +40,7 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
     outimg <- n3BiasFieldCorrection( outimg, 2 )
     return(outimg)
   }
-  if (is.na(mask)) {
-    outimg<-n4BiasFieldCorrection(img, ...)
-    return(outimg)
-  }
-  if (!is.na(mask)) {
-    outimg<-n4BiasFieldCorrection(img,mask, ...)
-    return(outimg)
-  }
+  outimg<-n4BiasFieldCorrection(img, mask = mask, ...)
+
   return(outimg)
 }

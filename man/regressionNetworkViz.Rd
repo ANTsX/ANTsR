@@ -7,7 +7,7 @@
 regressionNetworkViz(mylm, sigthresh = 0.05, whichviz = "Sankey",
   outfile = "temp.html", mygroup = 0, logvals = TRUE,
   verbose = FALSE, correlateMyOutcomes = NA, corthresh = 0.9,
-  zoom = F, doFDR = TRUE)
+  zoom = FALSE, doFDR = TRUE)
 }
 \arguments{
 \item{mylm}{lm model output from bigLMStats}

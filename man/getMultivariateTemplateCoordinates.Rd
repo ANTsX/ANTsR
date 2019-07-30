@@ -5,7 +5,7 @@
 \title{Label multivariate components by an anatomical coordinate system.}
 \usage{
 getMultivariateTemplateCoordinates(imageSetToBeLabeledIn,
-  templateWithLabels, labelnames = NA, outprefix = NA,
+  templateWithLabels, labelnames = NULL, outprefix = NA,
   convertToTal = FALSE, pvals = NA, threshparam = 1,
   clustparam = 250, identifier)
 }

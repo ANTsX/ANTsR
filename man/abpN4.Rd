@@ -4,7 +4,7 @@
 \alias{abpN4}
 \title{MR image bias correction based on the N4 algorithm.}
 \usage{
-abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NA,
+abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NULL,
   usen3 = FALSE, ...)
 }
 \arguments{

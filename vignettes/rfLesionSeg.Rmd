@@ -6,6 +6,7 @@ output: rmarkdown::html_vignette
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{mrvnrfs}
+    %\VignetteEncoding{UTF-8}
     \usepackage[utf8]{inputenc}
 ---
 
@@ -111,13 +112,13 @@ invisible( plot( ll1$limg ) )
 ## Perform training step
 
 Now use these to train a model.
-```{r buildmodel}
+```{r buildmodel, eval = TRUE}
 rad<-c(1,1) # fast setting
 mr<-c(1,2,4,2,1) # multi-res schedule, U-style schedule
 masks=list(   getMask(seg), getMask(seg1) )
 rfm<-mrvnrfs( list(seg,seg1) , list(list(ll$limg), list(ll1$limg) ),
   masks, rad=rad, nsamples = 500, ntrees=1000, multiResSchedule=mr,
-  voxchunk=500 )
+  voxchunk=500, do.trace = 100)
 ```
 
 
@@ -138,13 +139,13 @@ rfm$rflist<-newrflist
 ## Apply the model to new data
 
 We apply the learned model to segment the new data.
-```{r applymodel}
+```{r applymodel, eval = TRUE}
 mmseg<-mrvnrfs.predict( rfm$rflist, list(list(ll2$limg)),
   timask, rad=rad, multiResSchedule=mr, voxchunk=500  )
 ```
 
 ## Apply the model to new data
-```{r vizmodel,echo=FALSE}
+```{r vizmodel,echo=FALSE, eval = TRUE}
 invisible( plot(mmseg$seg[[1]], window.img=c(0,max(mmseg$seg[[1]]) ) ) )
 ```
 
@@ -162,7 +163,7 @@ invisible( plot( seg2, window.img=c(0,max(seg2) ) ) )
 ## Lesion probability
 
 Take a quick look at the lesion probability.
-```{r vizprob,echo=FALSE}
+```{r vizprob,echo=FALSE, eval = TRUE}
 invisible( plot( mmseg$probs[[1]][[ max(mmseg$seg[[1]])  ]] ) )
 ```
 
@@ -170,7 +171,7 @@ invisible( plot( mmseg$probs[[1]][[ max(mmseg$seg[[1]])  ]] ) )
 ## Dice overlap
 
 Now we compute the overlap.
-```{r eval}
+```{r eval, eval = TRUE}
 dicenumer<-sum(  mmseg$seg[[1]] == max(mmseg$seg[[1]]) & seg2 == max(seg2) )
 dicedenom<-sum( mmseg$seg[[1]] == max(mmseg$seg[[1]]) ) + sum( seg2 == max(seg2)  )
 dice <- 2.0 * dicenumer / dicedenom

@@ -32,7 +32,7 @@ regressionNetworkViz <- function(mylm, sigthresh = 0.05,
   whichviz = "Sankey", outfile = "temp.html",
   mygroup = 0, logvals = TRUE, verbose = FALSE,
   correlateMyOutcomes = NA, corthresh = 0.9,
-  zoom = F, doFDR = TRUE) {
+  zoom = FALSE, doFDR = TRUE) {
   if (nargs() == 0) {
     return(1)
   }

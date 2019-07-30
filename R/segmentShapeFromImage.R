@@ -24,15 +24,18 @@
 #' fimg<-segmentShapeFromImage(fi,shp,mask)
 #'
 #' @export
-segmentShapeFromImage <- function(img, shape, mask = NA, rad = NA, scfun,
+segmentShapeFromImage <- function(img, shape, mask = NULL, rad = NA, scfun,
   maskZeroes=TRUE ) {
   if (nargs() == 0) {
     print(args(segmentShapeFromImage))
     return(1)
   }
   dim <- img@dimension
-  if (is.na(mask))
+  if (is.null(mask)) {
     mask <- getMask(img)
+  } else {
+    mask = check_ants(mask)
+  }
   shapemask<-getMask(shape)
   shape<-cropImage( shape, shapemask )
   shapemask<-cropImage( shapemask, shapemask )

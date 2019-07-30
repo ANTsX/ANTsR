@@ -1,3 +1,4 @@
+^Meta$
 ^\.travis\.yml$
 src/Makevars
 src/ants/
@@ -23,3 +24,4 @@ _config\.yml
 ^.*\.log$
 R/confidenceConnected.R
 R/connectedThresholdImage.R
+^doc$

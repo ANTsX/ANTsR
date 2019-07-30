@@ -13,8 +13,12 @@
 #'
 #'
 #' @export labelGeometryMeasures
-labelGeometryMeasures <- function( labelImage, intensityImage=NA ) {
-  if ( missing( intensityImage )) intensityImage <- labelImage
+labelGeometryMeasures <- function( labelImage, intensityImage=NULL ) {
+  labelImage = check_ants(labelImage)
+  if ( missing( intensityImage ) | 
+       is.null(intensityImage)) {
+    intensityImage <- labelImage
+  }
   outcsv<-tempfile( fileext='.csv' )
   veccer<-list( labelImage@dimension, labelImage, intensityImage, outcsv )
   pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer) )

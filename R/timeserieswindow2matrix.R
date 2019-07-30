@@ -41,7 +41,7 @@
 #' img <- as.antsImage( arr )
 #' mat<-timeseries2matrix( img, msk )
 #' eanat<-sparseDecom(  mat, msk, sparseness=0.1, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( mat, NA, sparseness=0.1,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+#' eanat2<-sparseDecom( mat,  sparseness=0.1,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
 #' enomask<-eanat2$eigenanatomyimages[1,]
 #' emask<-eanat$eigenanatomyimages[1,]
 #' print( enomask[31:40] )
@@ -51,7 +51,7 @@
 #' ttt<-timeserieswindow2matrix( mat, msk, c(20,40,60,70) , 6, 0 )
 #' tte<-ttt$eventmatrix
 #' eanat<-sparseDecom(  tte, ttt$mask4d, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( tte,          NA, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
+#' eanat2<-sparseDecom( tte,  sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
 #' enomask<-eanat2$eigenanatomyimages[,1]
 #' # back to timematrix
 #' tmat<-matrix( enomask,  nrow=6 )
@@ -67,7 +67,7 @@
 #'
 #' @export timeserieswindow2matrix
 timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindow,
-  zeropadvalue = 0, spacing = NA) {
+                                    zeropadvalue = 0, spacing = NA) {
   if (length(dim(timeseriesmatrix)) != 2) {
     print("Mask should be of dimensionality 3")
     return(NA)
@@ -84,9 +84,10 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindo
     mask4d[, , , i] <- maskvec
   }
   mask4d <- as.antsImage(mask4d)
-  if (!is.na(spacing))
-    if (length(spacing) == 4)
-      antsSetSpacing(mask4d, spacing)
+  if (!is.na(spacing)) {
+    stopifnot(length(spacing) == 4)
+    antsSetSpacing(mask4d, spacing)
+  }
   nvox4dmask <- sum(mask4d == 1)
   if (ncol(timeseriesmatrix) * timewindow != nvox4dmask) {
     print("ERROR: ncol(timeseriesmatrix)*timewindow !=  nvox4dmask")

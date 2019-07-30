@@ -39,8 +39,8 @@
 #' 
 #' }
 #' @export antsBOLDNetworkAnalysis
-antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
-  labels = NA, motion ,
+antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
+  labels = NULL, motion ,
   gdens = 0.2, threshLo = 1, threshHi = 90,
   freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
   throwaway ) {
@@ -52,8 +52,11 @@ antsBOLDNetworkAnalysis <- function(bold = NA, mask = NA,
   # if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
   # if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
   # if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+  stopifnot(!is.null(bold))
+  bold = check_ants(bold)
   mytimes <- dim(bold)[4]
-  aalm <- labels
+  aalm <- check_ants(labels)
+  mask = check_ants(mask)
   aalmask <- antsImageClone(aalm)
   mylog <- (aalm >= threshLo & aalm <= threshHi & mask > 0.5)
   # aalmask[mylog] <- 1

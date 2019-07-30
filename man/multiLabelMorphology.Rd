@@ -4,7 +4,7 @@
 \alias{multiLabelMorphology}
 \title{Morphology on multi label images.}
 \usage{
-multiLabelMorphology(labelsIn, operation, radius, dilationMask = NA,
+multiLabelMorphology(labelsIn, operation, radius, dilationMask = NULL,
   labelList = NA)
 }
 \arguments{

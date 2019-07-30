@@ -55,8 +55,8 @@
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslCensoring
 
-aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',
-                         reject.pairs=F, ...) {
+aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
+                         reject.pairs=FALSE, ...) {
   # Supporting functions for censoring data: robSelection and scor.
   robSelection <- function(mat, xideal, mask, nuis=NA,  robthresh=0.95, skip=20) {
     cbfform <- formula(mat ~ xideal)
@@ -129,9 +129,9 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',
     indstozero
   }
 
-  aslOutlierRejection <- function(asl, mask = NA, centralTendency = median,
+  aslOutlierRejection <- function(asl, mask = NULL, centralTendency = median,
     sigma.mean = 2.5, sigma.sd = 2) {
-    if (is.na(mask)) {
+    if (is.null(mask)) {
       avg <- getAverageOfTimeSeries(asl)
       avg<-n3BiasFieldCorrection( avg, 2 )
       avg<-n3BiasFieldCorrection( avg, 2 )
@@ -193,13 +193,15 @@ aslCensoring <- function(asl, mask=NA, nuis=NA, method='outlier',
     which(indices.out == 0)
   }
 
-  if (is.na(mask)){
+  if (is.null(mask)){
     myar <- apply(as.array(asl), c(1, 2, 3), mean)
     img <- makeImage(dim(myar), myar)
     antsSetSpacing(img, antsGetSpacing(asl)[1:3])
     antsSetOrigin(img, antsGetOrigin(asl)[1:3])
     antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
     mask <- getMask(img)
+  } else {
+    mask = check_ants(mask)
   }
   ts <- timeseries2matrix(asl, mask)
 

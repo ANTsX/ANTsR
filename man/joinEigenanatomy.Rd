@@ -4,7 +4,7 @@
 \alias{joinEigenanatomy}
 \title{Simple joinEigenanatomy function.}
 \usage{
-joinEigenanatomy(datamatrix, mask = NA, listEanatImages,
+joinEigenanatomy(datamatrix, mask = NULL, listEanatImages,
   graphdensity = 0.65, joinMethod = "walktrap", verbose = F)
 }
 \arguments{
@@ -33,9 +33,9 @@ approach.
 # if you dont have images
 mat<-replicate(100, rnorm(20))
 mydecom<-sparseDecom( mat )
-kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , 0.1 )
+kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , 0.1 )
 # or select optimal parameter from a list
-kk<-joinEigenanatomy( mat, mask=NA, mydecom$eigenanatomyimages , c(1:10)/50 )
+kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , c(1:10)/50 )
 # something similar may be done with images
 mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
 mydecom<-sparseDecom( mat, inmask=mask )

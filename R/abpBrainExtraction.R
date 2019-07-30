@@ -72,8 +72,8 @@
 #' @importFrom utils data glob2rx read.csv setTxtProgressBar tail
 #'   txtProgressBar write.csv
 #' @useDynLib ANTsR
-abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
-                               temregmask = NA, regtype='SyN', tdir = NA,
+abpBrainExtraction <- function(img, tem, temmask,
+                               temregmask = NULL, regtype="SyN", tdir = NA,
                                num_threads = 1,
                                pad = 0,
                                verbose = FALSE) {
@@ -87,7 +87,8 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
   }
 
-  if (missing(img) | missing(tem) | missing(temmask)) {
+  if (missing(img) | missing(tem) | missing(temmask) |
+      is.null(img) | is.null(tem) | is.null(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
     cat(" if no priors are passed, or a numerical prior is passed, then use kmeans \n")
     return(NULL)
@@ -137,13 +138,14 @@ abpBrainExtraction <- function(img = NA, tem = NA, temmask = NA,
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
   if (!file.exists(initafffn)) {
-    if (is.na(temregmask))
+    if (is.null(temregmask))
       temp<-affineInitializer(
               fixedImage=temsmall, movingImage=imgsmall,
               searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
               localSearchIterations=10, txfn=initafffn,
               num_threads = num_threads)
     else
+      temregmask = check_ants(temregmask)
       temp<-affineInitializer(
               fixedImage=temsmall, movingImage=imgsmall,
               searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
