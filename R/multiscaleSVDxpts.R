@@ -2950,15 +2950,19 @@ symilr <- function(
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
-    avgU = symilrU( initialUMatrix, i, mixAlg, myw )        # get U for this prediction
-    prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
-    return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
+#    prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
+#    return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
-    return( norm( prediction - voxmats[[i]], "F" )  )  # old way, slower
+    return(
+      norm(
+        prediction/norm(prediction,'F') -
+        voxmats[[i]]/norm(voxmats[[i]],'F'),
+          "F" )  )  # old way, slower
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
-    avgU = symilrU( initialUMatrix, i, mixAlg, myw ) # getAvgU( i, myw, mixAlg )
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
     temperv = 0
     if ( hasRanEff )
       temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
@@ -3097,6 +3101,7 @@ symilr <- function(
 #' @param mixingAlgorithm the elected mixing algorithm.  see \code{symilr}.  can
 #' be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
+#' @param orthogonalize boolean
 #' @return u matrix for modality i
 #' @author BB Avants.
 #' @examples
@@ -3112,7 +3117,31 @@ symilr <- function(
 #'
 #' @seealso \code{\link{symilr}}
 #' @export
-symilrU <- function( projections, i, mixingAlgorithm, initialW ) {
+symilrU <- function( projections, i, mixingAlgorithm, initialW,
+  orthogonalize = FALSE ) {
+  # some gram schmidt code
+  localGS <- function( x, orthogonalize = TRUE ) {
+    if ( !orthogonalize ) return( x )
+    n <- dim(x)[1]
+    m <- dim(x)[2]
+    q <- matrix(0,n,m)
+    r <- matrix(0,m,m)
+    qi <- x[,1]
+    si <- sqrt(sum(qi ^ 2))
+    q[,1] <- qi / si
+    r[1,1] <- si
+    for (i in 2:m) {
+      xi <- x[,i]
+      qj <- q[,1:(i - 1)]
+      rj <- t(qj) %*% xi
+      qi <- xi - qj %*% rj
+      r[1:(i - 1),i] <- rj
+      si <- sqrt(sum(qi ^ 2))
+      q[,i] <- qi / si
+      r[i,i] <- si
+    }
+    return( q )
+  }
   avgU = NULL
   mixAlg = mixingAlgorithm
   nComponents = ncol( projections[[1]] )
@@ -3128,13 +3157,15 @@ symilrU <- function( projections, i, mixingAlgorithm, initialW ) {
   for ( j in wtobind )
     avgU = cbind( avgU, projections[[ j ]] )
   if ( mixAlg == 'rrpca-l' )
-    return( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+    basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
   else if ( mixAlg == 'rrpca-s' )
-    return( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+    basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
   else if ( mixAlg == 'ica' & ! missing( initialW ) )
-    return( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
+    basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
                               n.comp=nc )$S )
   else if ( mixAlg == 'ica' & missing( initialW ) )
-    return( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
-  return( svd( avgU, nu = nc, nv=0 )$u )
+    basis = ( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
+  basis = ( svd( avgU, nu = nc, nv=0 )$u )
+  if ( ! orthogonalize ) return( basis )
+  return( localGS( basis ) )
 }

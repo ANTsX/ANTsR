@@ -4,7 +4,7 @@
 \alias{symilrU}
 \title{Compute the low-dimensional u matrix for symilr}
 \usage{
-symilrU(projections, i, mixingAlgorithm, initialW)
+symilrU(projections, i, mixingAlgorithm, initialW, orthogonalize = FALSE)
 }
 \arguments{
 \item{projections}{A list that contains the low-dimensional projections.}
@@ -15,6 +15,8 @@ symilrU(projections, i, mixingAlgorithm, initialW)
 be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.}
 
 \item{initialW}{initialization matrix size \code{n} by \code{k} for fastICA.}
+
+\item{orthogonalize}{boolean}
 }
 \value{
 u matrix for modality i
