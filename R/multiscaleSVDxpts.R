@@ -2738,7 +2738,7 @@ symilr2 <- function(
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
-#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
+#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}  \code{\link{symilrU}}
 #' @export symilr
 symilr <- function(
   voxmats,
@@ -2750,7 +2750,7 @@ symilr <- function(
   mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
-  lineSearchRange = c( 0, 10 ),
+  lineSearchRange = c( -10, 10 ),
   lineSearchTolerance = 0.001,
   randomSeed,
   verbose = FALSE ) {
@@ -2925,19 +2925,21 @@ symilr <- function(
 
   getSyME2 <- function( lineSearch, gradient, myw, mixAlg  )  {
     prediction = 0
-    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )
-    myenergysearchv = orthogonalizeAndQSparsify(
+    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
+    myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
       as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
-    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
-    avgU = getAvgU( i, myw, mixAlg)
-    prediction = prediction + avgU %*% t( myenergysearchv )
-    return( norm( prediction - voxmats[[i]], "F" )  )
+    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw )        # get U for this prediction
+    prediction = predict( lm( voxmats[[i]] %*% vmats[[i]] ~ avgU ) )
+    return( norm( prediction - initialUMatrix[[i]], "F" )  )  # new way, faster
+#    prediction = avgU %*% t( myenergysearchv ) # old way, slower
+#    return( norm( prediction - voxmats[[i]], "F" )  )  # old way, slower
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
-    avgU = getAvgU( i, myw, mixAlg )
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw ) # getAvgU( i, myw, mixAlg )
     temperv = 0
     if ( hasRanEff )
       temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
@@ -3058,4 +3060,62 @@ symilr <- function(
       predictions = predictions,
       finalError = errterm )
   )
+}
+
+
+
+
+
+
+#' Compute the low-dimensional u matrix for symilr
+#'
+#' SyMILR minimizes reconstruction error across related modalities.  One crucial
+#' component of the reconstruction is the low-dimensional cross-modality basis.
+#' This function computes that basis, given a mixing algorithm.
+#'
+#' @param projections A list that contains the low-dimensional projections.
+#' @param i which modality to predict from the others.
+#' @param mixingAlgorithm the elected mixing algorithm.  see \code{symilr}.  can
+#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.
+#' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
+#' @return u matrix for modality i
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 25
+#' npix = c(100,200,133)
+#' nk = 5
+#' outcome = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' u = symilrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
+#'
+#' @seealso \code{\link{symilr}}
+#' @export
+symilrU <- function( projections, i, mixingAlgorithm, initialW ) {
+  avgU = NULL
+  mixAlg = mixingAlgorithm
+  nComponents = ncol( projections[[1]] )
+  nmodalities = length( projections )
+  wtobind = (1:nmodalities)[ -i ]
+  if ( mixAlg == 'avg' ) {
+    avgU = projections[[1]] * 0.0
+    for ( j in wtobind )
+      avgU = avgU + projections[[ j ]] / ( nmodalities - 1 )
+    return( avgU )
+  }
+  nc = ncol( projections[[ 1 ]] )
+  for ( j in wtobind )
+    avgU = cbind( avgU, projections[[ j ]] )
+  if ( mixAlg == 'rrpca-l' )
+    return( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+  else if ( mixAlg == 'rrpca-s' )
+    return( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+  else if ( mixAlg == 'ica' & ! missing( initialW ) )
+    return( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
+                              n.comp=nc )$S )
+  else if ( mixAlg == 'ica' & missing( initialW ) )
+    return( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
+  return( svd( avgU, nu = nc, nv=0 )$u )
 }

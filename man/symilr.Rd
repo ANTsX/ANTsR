@@ -6,7 +6,7 @@
 \usage{
 symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(0, 10),
+  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
   lineSearchTolerance = 0.001, randomSeed, verbose = FALSE)
 }
 \arguments{
@@ -106,7 +106,7 @@ print( range(cor( svd1,svd2) ))
 
 }
 \seealso{
-\code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
+\code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}  \code{\link{symilrU}}
 }
 \author{
 BB Avants.
