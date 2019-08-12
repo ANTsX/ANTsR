@@ -5,7 +5,8 @@
 \title{multi-res voxelwise neighborhood random forest segmentation learning}
 \usage{
 mrvnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
-  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 50000)
+  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 50000,
+  ...)
 }
 \arguments{
 \item{y}{list of training labels. either an image or numeric value}
@@ -30,6 +31,8 @@ samples are selected randomly within 1 values.}
 \item{voxchunk}{value of maximal voxels to predict at once. This value
 is used to split the prediction into smaller chunks such that memory
 requirements do not become too big}
+
+\item{...}{arguments to pass to \code{\link{vwnrfs}}}
 }
 \value{
 list a 4-list with the rf model, training vector, feature matrix

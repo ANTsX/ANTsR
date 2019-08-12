@@ -23,34 +23,36 @@ matrix:
     - r: devel
     - os: osx
 
-latex: false
 compiler: clang
 osx_image: xcode9
 
+
 env:
   global:
-  - R_BUILD_ARGS=" --no-build-vignettes --no-manual "
+  - R_BUILD_ARGS=" --no-manual "
   - R_CHECK_ARGS=" --timings --as-cran --no-manual --install-args=--build"
   - R_CHECK_TIME="TRUE"
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
   - BOOTSTRAP_LATEX=1
   - DISPLAY=:99.0
-  - _R_CHECK_FORCE_SUGGESTS_="0"
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_install:
   - ulimit -n 2048
   - export LD_LIBRARY_PATH=/usr/local/clang/lib:${LD_LIBRARY_PATH}
   - export PROJ_DIR=`basename ${TRAVIS_BUILD_DIR}`
   - export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
-  - export rver=`r_version`;
   - fname=travis_helpers.sh
   - wget -O ${fname} http://bit.ly/travis_helpers
   - cat ${fname}; source ${fname}; rm ${fname}
   - start_xvfb ;
   - v8_install ;
+  - export rver=`r_version`;
+  - export gh_user=`get_gh_user` ; echo $gh_user ;    
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
+  - echo ${PACKAGE_NAME};
   - export RCHECK_DIR=${PACKAGE_NAME}.Rcheck
   # does all the clang exports
   - x=`export_clang_cxx`; eval ${x}
@@ -62,7 +64,7 @@ before_install:
   - echo "CXX1XSTD=${CXX1XSTD}, CXX11=${CXX11}"
   - clang_cxx
   - hdf5_install ;
-  - export cmake_version="3.11"
+  - export cmake_version="3.14"
   - cmake --version
   - x=`cmake_setup`; echo "${x}"; eval ${x};
   - cmake --version
@@ -78,7 +80,8 @@ before_install:
   - git clone https://github.com/muschellij2/ghtravis.git
   - R CMD INSTALL ghtravis
   - cd ANTsR
-  - gh_binary_install  stnava/ITKR ANTsX/ANTsRCore
+  - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
+  # - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
   - export ants_user=ANTsX
   - echo "Done Binary Installs"
 
@@ -92,6 +95,7 @@ script:
   - PKG_TARBALL=$(ls -1t *.tar.gz | head -n 1)
   - ls
   - travis_wait 100 R CMD check ${R_CHECK_ARGS} "${PKG_TARBALL}"; CHECK_RET=$? ;
+  - rm -f travis_wait*.log
   - if [[ $CHECK_RET -ne 0 ]];
     then
       echo "R CMD check failed";
@@ -135,12 +139,22 @@ before_deploy:
     fi
 
 deploy:
-  provider: releases
-  api_key:
-    secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
-  file: ${PKG_FILE_NAME}
-  skip_cleanup: true
-  on:
-    tags: true
-    repo: ANTsX/${PROJ_DIR}
-    all_branches: true
+  - provider: releases
+    api_key:
+      secure: VevZHK5WDwd2mFSrF3+b2jTRzImb6juOgewcOvZ8LJ2S70khn64Kx4+JGUvk5miKWVbKnHIhPxOJY50muO9sT15ApP+HFZYpiVpx4l/hEypk9zmJD+f+ERuN7j8elCzUZqet3v77XD+pBcYMxFARew4gGDkG2LO5casij0YNiyQ=
+    file: ${PKG_FILE_NAME}
+    skip_cleanup: true
+    on:
+      tags: true
+      repo: ${gh_user}/${PROJ_DIR}
+      all_branches: true
+      condition: "${gh_user} = ANTsX"
+  - provider: releases
+    api_key:
+      secure: r7FsUfP8EozlZBDTIHzAE5ENqyeuopoWxxpKoAxkhGkDwB6rLDkNhjmFk3SZxP/8Sx51CeO1oFDUC/G5QWpfYdSYRIkq0GoubhGTDdOk3S1F6z4ncsi6DO24MkxxZbAb4e7lyK1bBaVla/SKm0QQivzqNn5g+jNLAjek4Yc2hBCUdtbyYk++fuGKsBVSC/VeahE9I6SsHQAZMViOAVgR6Y80cxeIzsVk6yFljOmc/EQxCVG8M1Rq/VZYnkZfLB5E35bbCehcdwHWjPvsP1TfbBDFo4DsyHhmIe1L6k7AtuFOrBl9zK0rBAMJznwHsI0D4SsNAwdFYrqK/tSMB7pTxDR90KfkQpFjt2JxBdz5msFVZAQqcuvbbNlrbnf0m5wtX2DPB6wuPwdRxmCMrXyT5EZE4bbYmKhF4l3DDX0snncZvusSwrHD+r90kriwgZm7ogWSRFATOLRXtEVrWGyQYCjZoAFM9vB8lL+/8yQbB80e3gYexyYI+AFzgmiNTPc+6TYF8UUKMUiBsdN5iqbdYYrmuTexKDC0So23XuBO3vlRLQLhjmtFwY/FNywneOpEfwVZfxIMeleuF0T7z0XDgPpFQ4PmXtpXqKQiAxI18dplxfG8vsyACeLnVfslF8H2/bWdRgMukDUlLyKFBLVHUFoSyo8zPAcBM+7P+mS9SbQ=
+    file: ${PKG_FILE_NAME}
+    skip_cleanup: true
+    on:
+      repo: muschellij2/ANTsR
+      all_branches: true
+      condition: "${gh_user} = muschellij2"

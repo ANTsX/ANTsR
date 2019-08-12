@@ -64,7 +64,7 @@
 #' # plot(result$outcome.comparison$real, result$outcome.comparison$predicted)
 #'
 #' @export sparseRegression
-sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0.05,
+sparseRegression <- function(inmatrix, demog, outcome, mask = NULL, sparseness = 0.05,
   nvecs = 10, its = 5, cthresh = 250, statdir = NA, z = 0, smooth = 0) {
   if (missing(inmatrix))
     stop("Missing input image matrix.")
@@ -81,7 +81,8 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
   demog.name <- paste(statdir, "demog.csv", sep = "")
   write.csv(demog[, outcome], demog.name, row.names = FALSE)
   mfn <- NA
-  if (!is.na(mask)) {
+  if (!is.null(mask)) {
+    mask = check_ants(mask)
     mfn <- paste(statdir, "spcamask.nii.gz", sep = "")
     antsImageWrite(mask, mfn)
   }
@@ -90,10 +91,10 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
     "-n", nvecs, "-o", outfn, "-z", z, "-s", smooth)
   .Call("sccanX", .int_antsProcessArguments(c(args)), PACKAGE = "ANTsR")
   mydecomp <- read.csv(decomp)
-  if (!is.na(mask)) {
+  if (!is.null(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
     fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
-      recursive = T)[1:nvecs]
+      recursive = TRUE)[1:nvecs]
     fnll <- list()
     for (i in 1:length(fnl)) {
       img <- antsImageRead(fnl[i], length(dim(mask)))
@@ -101,10 +102,11 @@ sparseRegression <- function(inmatrix, demog, outcome, mask = NA, sparseness = 0
     }
     fnl <- fnll
   }
-  if (is.na(mask)) {
+  if (is.null(mask)) {
     glb <- paste("spcaprojectionsView1vec.csv", sep = "")
-    fnl <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T,
-      recursive = T)
+    fnl <- list.files(path = statdir, pattern = glob2rx(glb), 
+                      full.names = TRUE,
+                      recursive = TRUE)
     fnl <- read.csv(fnl)
   }
   glb <- paste("spcaprojectionsView1vec.csv", sep = "")

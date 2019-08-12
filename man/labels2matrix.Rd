@@ -4,7 +4,7 @@
 \alias{labels2matrix}
 \title{Convert label image to a matrix}
 \usage{
-labels2matrix(img, mask, targetLabels = NA, missingVal = NA)
+labels2matrix(img, mask, targetLabels = NULL, missingVal = NA)
 }
 \arguments{
 \item{img}{input label image}

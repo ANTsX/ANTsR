@@ -185,6 +185,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       # follows isotropic image assumptions
       K <- tmp * vox2res
     } else {
+      RPVImg = check_ants(RPVImg)
       # extract resels per voxel in cluster (for non-isotropic image)
       cmask <- antsImageClone(clust)
       cmask[cmask != tmp] <- 0

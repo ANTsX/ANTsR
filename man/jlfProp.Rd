@@ -4,7 +4,7 @@
 \alias{jlfProp}
 \title{Propagate Joint Label Fusion (JLF) solutions through a time series}
 \usage{
-jlfProp(targetI, targetIMask, atlasList, rad = 2, labelList = NA,
+jlfProp(targetI, targetIMask, atlasList, rad = 2, labelList = NULL,
   rSearch = 3, lagValue = 3, verbose = FALSE, ...)
 }
 \arguments{

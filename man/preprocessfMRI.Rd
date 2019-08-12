@@ -4,11 +4,11 @@
 \alias{preprocessfMRI}
 \title{Preprocess BOLD fMRI image data.}
 \usage{
-preprocessfMRI(boldImage, maskImage = NA,
+preprocessfMRI(boldImage, maskImage = NULL,
   maskingMeanRatioThreshold = 0.75, initialNuisanceVariables,
   numberOfCompCorComponents = 6, doMotionCorrection = TRUE,
   useMotionCorrectedImage = FALSE, motionCorrectionAccuracyLevel = 1,
-  meanBoldFixedImageForMotionCorrection = NA,
+  meanBoldFixedImageForMotionCorrection = NULL,
   frequencyLowThreshold = NA, frequencyHighThreshold = NA,
   spatialSmoothingType = "none", spatialSmoothingParameters = 0,
   residualizeMatrix = TRUE, num_threads = 1, seed = NULL)

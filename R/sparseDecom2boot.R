@@ -49,7 +49,7 @@
 #' }
 #'
 #' @export sparseDecom2boot
-sparseDecom2boot <- function(inmatrix, inmask = c(NA, NA),
+sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
   sparseness = c(0.01, 0.01),
   nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0,
   uselong = 0,

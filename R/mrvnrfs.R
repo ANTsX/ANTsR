@@ -17,6 +17,7 @@
 #' @param voxchunk value of maximal voxels to predict at once. This value
 #' is used to split the prediction into smaller chunks such that memory
 #' requirements do not become too big
+#' @param ... arguments to pass to \code{\link{vwnrfs}}
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ, Pustina D
@@ -64,7 +65,7 @@
 #' @export mrvnrfs
 mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
                      ntrees=500, multiResSchedule=c(4,2,1), asFactors=TRUE,
-                     voxchunk=50000) {
+                     voxchunk=50000, ...) {
   
   # check if Y is antsImage or a number
   yisimg<-TRUE
@@ -104,8 +105,34 @@ mrvnrfs <- function( y, x, labelmasks, rad=NA, nsamples=1,
     invisible(gc())
     
     # build model for this mr
-    if (!useFirstMask) sol<-vwnrfs( y, x, labelmasks, rad, nsamples, ntrees, asFactors, reduceFactor = mr )
-    if (useFirstMask)  sol<-vwnrfs( y, x, labelmasks[[1]], rad, nsamples, ntrees, asFactors, reduceFactor = mr )
+    if (!useFirstMask) {
+      sol <- vwnrfs(
+        y = y,
+        x = x,
+        labelmasks = labelmasks,
+        rad = rad,
+        nsamples = nsamples,
+        ntrees = ntrees,
+        asFactors = asFactors,
+        reduceFactor = mr,
+        ...
+      )
+    }
+    
+    if (useFirstMask) {
+      sol <- vwnrfs(
+        y = y,
+        x = x,
+        labelmasks = labelmasks[[1]],
+        rad = rad,
+        nsamples = nsamples,
+        ntrees = ntrees,
+        asFactors = asFactors,
+        reduceFactor = mr,
+        ...
+      )
+    }
+
     
     sol$fm = sol$tv = sol$randmask = NULL
     
@@ -159,8 +186,8 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
                              voxchunk=60000) {
   if ( ! usePkg("randomForest") )
     stop("Please install the randomForest package, example: install.packages('randomForest')")
-
-
+  
+  
   # for a single labelmask create a list the same
   useFirstMask=FALSE
   if ( typeof(labelmasks) != "list" ) {
@@ -169,13 +196,13 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
     for ( i in 1:length(x) ) labelmasks[[i]] = inmask
     useFirstMask = TRUE
   }
-
+  
   predtype<-'response'
   if ( asFactors ) predtype<-'prob'
-
+  
   rfct<-1
   for ( mr in multiResSchedule ){
-
+    
     if ( rfct > 1 ) {
       for ( kk in 1:length(x) ) {
         p1<-unlist( x[[kk]] )
@@ -185,12 +212,12 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
       }
       rm(newprobs); invisible(gc())
     }
-
-
+    
+    
     predme = vwnrfs.predict(rflist[[rfct]], x=x, labelmasks=labelmasks,
-                              rad=rad, asFactors=asFactors, voxchunk=voxchunk,
-                              reduceFactor = mr)
-
+                            rad=rad, asFactors=asFactors, voxchunk=voxchunk,
+                            reduceFactor = mr)
+    
     newprobs = predme$probs
     newseg = predme$seg
     if (rfct < length(multiResSchedule)) {
@@ -198,7 +225,7 @@ mrvnrfs.predict <- function( rflist, x, labelmasks, rad=NA,
         for (tt2 in 1:length(newprobs[[tt1]]))
           newprobs[[tt1]][[tt2]]<-resampleImage( newprobs[[tt1]][[tt2]], dim(labelmasks[[1]]), useVoxels=1, 0 )
     }
-
+    
     rfct<-rfct+1
   } # mr loop
   return(list(seg=newseg, probs=newprobs))

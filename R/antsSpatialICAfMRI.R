@@ -42,11 +42,11 @@
 #'   numberOfICAComponents = 2 )
 #'
 #' @export antsSpatialICAfMRI
-antsSpatialICAfMRI <- function(boldImages, maskImage = NA,
+antsSpatialICAfMRI <- function(boldImages, maskImage = NULL,
   numberOfICAComponents = 20,
   normalizeComponentImages = TRUE, verbose=FALSE ) {
 
-  if (is.na(maskImage)) {
+  if (is.null(maskImage)) {
     stop("No mask image specified. \n\n")
   }
   if ( !usePkg("fastICA") ) { print("Need fastICA package"); return(NULL) }

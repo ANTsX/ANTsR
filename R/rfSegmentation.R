@@ -38,7 +38,7 @@
 #' }
 #' @export rfSegmentation
 rfSegmentation <- function( featureMatrix,
-  mask, labelimg=NA,
+  mask, labelimg=NULL,
   ntrees = 100, verbose = FALSE) {
   if (nargs() == 0) {
     print("Usage:  probs<-rfSegmentation( x, x2 ) ")
@@ -49,9 +49,11 @@ rfSegmentation <- function( featureMatrix,
     print("need randomForest package for this function")
     return(NA)
   }
-  haveLabels = !is.na( labelimg )
+  mask = check_ants(mask)
+  haveLabels = !is.null( labelimg )
   if ( haveLabels )
     {
+    labelimg = check_ants(labelimg)
     labels <- as.factor(labelimg[mask == 1])
     mydf <- data.frame(labels = labels, featureMatrix)
     myrf <- randomForest::randomForest(y=labels,x=featureMatrix, ntree = ntrees, type = "classification",

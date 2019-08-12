@@ -14,6 +14,7 @@
 #' @param ntrees (for the random forest model)
 #' @param asFactors boolean - treat the y entries as factors
 #' @param reduceFactor integer factor by which to reduce (imaging) data resolution
+#' @param ... arguments to pass to \code{randomForest}
 #' @return list a 4-list with the rf model, training vector, feature matrix
 #' and the random mask
 #' @author Avants BB, Tustison NJ, Pustina D
@@ -58,7 +59,8 @@
 #'
 #' @export vwnrfs
 vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
-                    ntrees=500, asFactors=TRUE, reduceFactor=1) {
+                    ntrees=500, asFactors=TRUE, reduceFactor=1,
+                    ...) {
 
   if ( ! usePkg("randomForest") )
     stop("Please install the randomForest package, example: install.packages('randomForest')")
@@ -139,7 +141,8 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
       tocol = fromcol + neigh - 1
 
       # get neighborhood
-      m1<-t(getNeighborhoodInMask( xfactor[[k]], randmask, rad, spatial.info=F, boundary.condition='image' ))
+      m1<-t(getNeighborhoodInMask( xfactor[[k]], randmask, rad, 
+                                   spatial.info=FALSE, boundary.condition='image' ))
 
       # make sure neiborhood is not out of image
       if (any(is.na(m1)))
@@ -162,9 +165,11 @@ vwnrfs <- function( y, x, labelmasks, rad=NA, nsamples=8,
 
   invisible(gc())
 
-  rfm <- randomForest::randomForest(y=tv,x=fm, ntree = ntrees,
-                                    importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
-                                    keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
+  rfm <- randomForest::randomForest(
+    y=tv,x=fm, ntree = ntrees,
+    importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
+    keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE,
+    ...)
 
   invisible(gc())
   return( list(rfm=rfm, tv=tv, fm=fm, randmask=randmask ) )

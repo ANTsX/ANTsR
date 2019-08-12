@@ -41,18 +41,25 @@
 #' dmat2<-replicate(30, rnorm(20))
 #' mat<-t(replicate(3, rnorm(nvox)) )
 #' initdf<-initializeEigenanatomy( mat )
-#' eanat<-sparseDecom2( list(dmat,dmat2), inmask=list(initdf$mask,NA),
-#'   sparseness=c( -0.1, -0.2 ), smooth=0,
-#'   initializationList=initdf$initlist, cthresh=c(0,0),
+#' eanat<-sparseDecom2(
+#'  inmatrix = list(dmat,dmat2), 
+#'  inmask=list(initdf$mask,NA),
+#'   sparseness=c( -0.1, -0.2 ), 
+#'   smooth=0,
+#'   initializationList=initdf$initlist, 
+#'   cthresh=c(0,0),
 #'   nvecs=length(initdf$initlist), priorWeight = 0.1 )
 #'
 #' @export initializeEigenanatomy
-initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1,
+initializeEigenanatomy <- function(initmat, mask = NULL, nreps = 1,
   smoothing = 0 ) {
   if ( class(initmat)[1] == 'antsImage' )
     {
     selectvec = initmat > 0
-    if ( ! is.na( mask ) ) selectvec = mask > 0
+    if ( ! is.null( mask ) ) {
+      mask = check_ants(mask)
+      selectvec = mask > 0
+    }
     initmatvec = initmat[ selectvec ]
     ulabs = sort( unique( initmatvec ) )
     ulabs = ulabs[ ulabs > 0 ]
@@ -73,7 +80,7 @@ initializeEigenanatomy <- function(initmat, mask = NA, nreps = 1,
   if (is.null(classlabels))
     classlabels <- paste("init", 1:nclasses, sep = "")
   initlist <- list()
-  if (is.na(mask)) {
+  if (is.null(mask)) {
     maskmat <- initmat * 0
     maskmat[1, ] <- 1
     mask <- as.antsImage(maskmat)

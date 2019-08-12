@@ -73,7 +73,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
   }
   rgw <- regweights
   myct <- 0
-  if (!all(is.na(selectionValsForRegweights))) {
+  if (!is.null(selectionValsForRegweights)) {
     vissel <- selectionValsForRegweights[visitvals]
     visselThresh <- 0.8 * max(vissel)
   } else {

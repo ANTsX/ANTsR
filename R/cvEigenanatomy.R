@@ -45,7 +45,7 @@
 #' }
 #' 
 #' @export cvEigenanatomy
-cvEigenanatomy <- function(demog, images, outcome, ratio = 10, mask = NA, sparseness = 0.01, 
+cvEigenanatomy <- function(demog, images, outcome, ratio = 10, mask = NULL, sparseness = 0.01, 
   nvecs = 50, its = 5, cthresh = 250, ...) {
   if (ratio < 1) {
     demog.split <- splitData(demog, ratio, return.rows = TRUE)

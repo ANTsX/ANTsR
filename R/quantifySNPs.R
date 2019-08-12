@@ -17,7 +17,7 @@
 #'
 #' @export quantifySNPs
 quantifySNPs <- function(snps, freqthresh = 0.1 ,
-  shiftit = FALSE, replaceWithF=T, traitvecin=NA, trainvec=NA ) {
+  shiftit = FALSE, replaceWithF=TRUE, traitvecin=NA, trainvec=NA ) {
   if (nargs() == 0) {
     print("Usage:  x_b<-quantifySNPs( x ) ")
     return(1)

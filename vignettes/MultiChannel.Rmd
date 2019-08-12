@@ -7,6 +7,7 @@ bibliography: REFERENCES.bib
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteIndexEntry{Multichannel images}
+    %\VignetteEncoding{UTF-8}
     \usepackage[utf8]{inputenc}
 ---
 
@@ -17,7 +18,7 @@ library(ANTsR)
 library(ggplot2)
 library(grid)
 
-if("parallel" %in% rownames(installed.packages()) == TRUE) {
+if (requireNamespace("parallel", quietly = TRUE)) {
   library(parallel)
 }  
 
@@ -161,10 +162,11 @@ existing data will work, however it does not guarantee a faster execution time.
 iMeans = 0
 time1 = 0
 timeParallel = NA
-if("parallel" %in% rownames(installed.packages()) == TRUE) {
+if (requireNamespace("pbapply", quietly = TRUE)) {
   ptm = proc.time()
-  iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2) )
-  timeParallel = proc.time() - ptm
+  # iMeans = pbapply::pblapply( iList, function(x) mean(x))
+  # iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2L) )
+  # timeParallel = proc.time() - ptm
   unlist(iMeans)
 }
 

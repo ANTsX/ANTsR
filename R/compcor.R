@@ -22,7 +22,7 @@
 #' @export compcor
 compcor <- function(fmri, ncompcor = 4,
   variance_extreme = 0.975,
-  mask = NA, randomSamples = 1,
+  mask = NULL, randomSamples = 1,
   returnv = FALSE, returnhighvarmat = FALSE,
   returnhighvarmatinds = FALSE,
   highvarmatinds = NA,
@@ -31,15 +31,16 @@ compcor <- function(fmri, ncompcor = 4,
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
   }
-  if (class(fmri)[1] == "antsImage" & is.na(mask)) {
+  if (is.antsImage(fmri) & is.null(mask)) {
     print("Need to input a mask too")
     print(args(compcor))
     return(NULL)
   }
-  if (class(fmri)[1] == "antsImage" & !is.na(mask)) {
+  if (is.antsImage(fmri) & !is.null(mask)) {
+    mask = check_ants(mask)
     mat <- timeseries2matrix(fmri, mask)
   }
-  if ( length(grep("matrix",class(fmri) ) ) > 0 ) {
+  if ( inherits(fmri, "matrix")) {
     mat <- fmri
   }
   if (is.na(highvarmatinds)) {

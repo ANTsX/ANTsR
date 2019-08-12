@@ -5,7 +5,8 @@
 \title{Convert a matrix to a form that can be used to initialize sparse cca and
 pca.}
 \usage{
-initializeEigenanatomy(initmat, mask = NA, nreps = 1, smoothing = 0)
+initializeEigenanatomy(initmat, mask = NULL, nreps = 1,
+  smoothing = 0)
 }
 \arguments{
 \item{initmat}{input matrix where rows provide initial vector values.
@@ -54,9 +55,13 @@ dmat<-replicate(nvox, rnorm(20))
 dmat2<-replicate(30, rnorm(20))
 mat<-t(replicate(3, rnorm(nvox)) )
 initdf<-initializeEigenanatomy( mat )
-eanat<-sparseDecom2( list(dmat,dmat2), inmask=list(initdf$mask,NA),
-  sparseness=c( -0.1, -0.2 ), smooth=0,
-  initializationList=initdf$initlist, cthresh=c(0,0),
+eanat<-sparseDecom2(
+ inmatrix = list(dmat,dmat2), 
+ inmask=list(initdf$mask,NA),
+  sparseness=c( -0.1, -0.2 ), 
+  smooth=0,
+  initializationList=initdf$initlist, 
+  cthresh=c(0,0),
   nvecs=length(initdf$initlist), priorWeight = 0.1 )
 
 }

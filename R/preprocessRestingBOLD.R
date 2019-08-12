@@ -70,7 +70,7 @@
 #'
 #' @export
 preprocessRestingBOLD <- function(boldImage,
-  maskImage = NA,
+  maskImage = NULL,
   maskingMeanRatioThreshold = 0.75,
   initialNuisanceVariables,
   denseFramewise = FALSE,
@@ -79,7 +79,7 @@ preprocessRestingBOLD <- function(boldImage,
   useMotionCorrectedImage = FALSE,
   motionCorrectionAccuracyLevel = 1,
   motionCorrectionIterations = 1,
-  meanBoldFixedImageForMotionCorrection = NA,
+  meanBoldFixedImageForMotionCorrection = NULL,
   frequencyLowThreshold = NA,
   frequencyHighThreshold = NA,
   spatialSmoothingType = "none",
@@ -101,8 +101,10 @@ preprocessRestingBOLD <- function(boldImage,
 
     # Reference image for motion correction
     motionCorrectionResults  = NA
-    if ( is.na(meanBoldFixedImageForMotionCorrection) ) {
+    if ( is.null(meanBoldFixedImageForMotionCorrection) ) {
       meanBoldFixedImageForMotionCorrection <- getAverageOfTimeSeries(boldImage)
+    } else {
+      meanBoldFixedImageForMotionCorrection = check_ants(meanBoldFixedImageForMotionCorrection)
     }
 
     # Iterative motion correction
@@ -163,8 +165,10 @@ preprocessRestingBOLD <- function(boldImage,
   averageImage <- getAverageOfTimeSeries( boldImage )
 
   # Calculate the mask, if not supplied.
-  if (is.na(maskImage)) {
+  if (is.null(maskImage)) {
     maskImage <- getMask( averageImage )
+  } else {
+    maskImage = check_ants(maskImage)
   }
   averageImage[maskImage == 0] <- 0
 
@@ -187,7 +191,7 @@ preprocessRestingBOLD <- function(boldImage,
     boldMatrix <- residuals(lm(boldMatrix ~ scale(nuisanceVariables)))
   }
   # replace boldMatrix in place with frequency filtered version
-  if (!is.na(frequencyHighThreshold) & !is.na(frequencyHighThreshold) & (frequencyLowThreshold !=
+  if (!is.na(frequencyLowThreshold) & !is.na(frequencyHighThreshold) & (frequencyLowThreshold !=
     frequencyHighThreshold)) {
     boldMatrix <- frequencyFilterfMRI(boldMatrix, tr = antsGetSpacing(boldImage)[4],
       freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig")

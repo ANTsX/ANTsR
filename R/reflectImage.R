@@ -31,7 +31,7 @@ reflectImage<-function(img1, axis=NA, tx=NA, metric="mattes",
   rflct<-tempfile(fileext = ".mat")
   catchout = .Call( "reflectionMatrix", img1, axis, rflct, package="ANTsR")
   
-  if ( ! is.na(tx) )
+  if ( ! all(is.na(tx) ))
   {
     rfi <- antsRegistration( img1, img1, typeofTransform = tx,
                              synMetric = metric,

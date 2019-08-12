@@ -62,7 +62,7 @@ plotPrettyGraph <- function(  adjacencyMatrix, functionToPlot,
                            label.border = "#ffffff00",  # To hide borders
                            vertex.border = "#ffffff00" )  # To hide borders
   if ( !is.na( pngfn ) ) dev.off()
-  detach('package:sna',unload=T)
+  detach('package:sna',unload=TRUE)
   if (!is.na(pngfn)) {
     return(pngfn)
   } else { 

@@ -4,7 +4,7 @@
 \alias{rfSegmentation}
 \title{A rfSegmentation function.}
 \usage{
-rfSegmentation(featureMatrix, mask, labelimg = NA, ntrees = 100,
+rfSegmentation(featureMatrix, mask, labelimg = NULL, ntrees = 100,
   verbose = FALSE)
 }
 \arguments{

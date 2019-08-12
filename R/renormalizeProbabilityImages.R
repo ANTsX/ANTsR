@@ -24,7 +24,7 @@
 renormalizeProbabilityImages <- function( probs, mask, k=NA )
 {
   if ( is.na( k ) )
-    {
+  {
     np = length( probs )
     pmat=imageListToMatrix( probs, mask )
     pmat[ pmat < 0 ] = 0
@@ -35,7 +35,7 @@ renormalizeProbabilityImages <- function( probs, mask, k=NA )
       else pmat[,i]=1.0/np
     }
     return( matrixToImages( pmat, mask ) )
-    }
+  }
   indvec=1:length(probs)
   ink= indvec %in% k
   ncsf=indvec[ !ink ]

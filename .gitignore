@@ -1,3 +1,4 @@
+Meta
 # ignore all the backup files created by editors
 *~
 *.so
@@ -7,8 +8,8 @@
 src/Makevars
 extdata/
 src/*.o
+src/*.o.tmp
 src/*.o.macbook*
-src/*.o
 src/*.gcda
 src/*.gcno
 src/*.o-*
@@ -20,12 +21,11 @@ src/ants/
 src/itkb/
 src/antb/
 src/itki/
-# inst/doc
+inst/doc
 vignettes/*pdf
 vignettes/*html
-
 .Rhistory
 R/.Rhistory
-
 .DS_Store
 .Rproj.user
+doc
