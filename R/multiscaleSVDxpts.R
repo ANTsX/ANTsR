@@ -69,15 +69,13 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
-  
-  
+
   # if ( mypkg[1] == "rflann" )  {
   #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
   #   if ( !is.na( ncores  ) ) myncores = ncores
   #   bknn = rflann::Neighbour( t(x), t(x), k=k, "kdtree", cores=myncores, 1 )
   #   names( bknn ) = c( "nn.idx", "nn.dists" )
   # }
-  
   #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( x ), t( x ) , k=k, eps=eps  )
   if ( cometric ) {
     bknn$nn.dists = ecor( bknn$nn.dists, myn )
@@ -203,14 +201,14 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
   if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
-  
   # if ( mypkg[1] == "rflann" )  {
   #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
   #   if ( !is.na( ncores  ) ) myncores = ncores
   #   bknn = rflann::Neighbour( t(y), t(x), k=k, "kdtree", cores=myncores, 1 )
   #   names( bknn ) = c( "nn.idx", "nn.dists" )
   # }
-  
+
+
   #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( y ), t( x ) , k=k, eps=eps  )
   if ( cometric ) bknn$nn.dists = ecor( bknn$nn.dists )
   tct = 0
@@ -2545,6 +2543,7 @@ symilr2 <- function(
   if (length(positivityY) == 1 && isTRUE(positivityY)) {
     positivityY = "positive"
   }  
+
   positivityX = match.arg(positivityX, choices = c("positive","negative","either"))
   positivityY = match.arg(positivityY, choices = c("positive","negative","either"))
   if (positivityX == "negative") {
@@ -2552,7 +2551,7 @@ symilr2 <- function(
   }
   if (positivityY == "negative") {
     positivityY = "either"
-  }  
+  }
   # if ( positivityX == TRUE | positivityX == 'positive' ) positivityX = 'positive' else positivityX = 'either'
   # if ( positivityY == TRUE | positivityY == 'positive' ) positivityY = 'positive' else positivityY = 'either'
   matnorms = rep( NA, length( voxmats ) )
@@ -2705,6 +2704,7 @@ symilr2 <- function(
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
+#' @param lowDimensionalError development option
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
@@ -2757,7 +2757,7 @@ symilr2 <- function(
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
-#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
+#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}  \code{\link{symilrU}}
 #' @export symilr
 symilr <- function(
   voxmats,
@@ -2769,9 +2769,10 @@ symilr <- function(
   mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
-  lineSearchRange = c( 0, 10 ),
+  lineSearchRange = c( -10, 10 ),
   lineSearchTolerance = 0.001,
   randomSeed,
+  lowDimensionalError = FALSE,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
@@ -2941,22 +2942,29 @@ symilr <- function(
                                 n.comp=nc )$S )
     return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
   }
-  
-  getSyME2 <- function( lineSearch, gradient, myw, mixAlg  )  {
+  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError )  {
     prediction = 0
-    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )
-    myenergysearchv = orthogonalizeAndQSparsify(
+    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
+    myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
       as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
-    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
-    avgU = getAvgU( i, myw, mixAlg)
-    prediction = prediction + avgU %*% t( myenergysearchv )
-    return( norm( prediction - voxmats[[i]], "F" )  )
+    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
+    if ( lowDimensionalError ) {
+      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
+      return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
+      }
+    prediction = avgU %*% t( myenergysearchv ) # old way, slower
+    return(
+      norm(
+        prediction/norm(prediction,'F') -
+        voxmats[[i]]/norm(voxmats[[i]],'F'),
+          "F" )  )  # old way, slower
   }
   
   getSyMG <- function( v, i, myw, mixAlg )  {
-    avgU = getAvgU( i, myw, mixAlg )
+    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
     temperv = 0
     if ( hasRanEff )
       temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
@@ -2981,10 +2989,10 @@ symilr <- function(
       if ( myit <= iterations ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
-                         myw=myw, mixAlg = mixAlg )
+                         myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError )
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
-      } else errterm[ i ] = getSyME2( gamma[i], temperv )
+      } else errterm[ i ] = getSyME2( gamma[i], temperv, lowDimensionalError = lowDimensionalError  )
       vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
       #      temp = optim(
       #        vmats[[i]], fn=getSyME2, gr=getSyMG,
@@ -3077,4 +3085,89 @@ symilr <- function(
       predictions = predictions,
       finalError = errterm )
   )
+}
+
+
+
+
+
+
+#' Compute the low-dimensional u matrix for symilr
+#'
+#' SyMILR minimizes reconstruction error across related modalities.  One crucial
+#' component of the reconstruction is the low-dimensional cross-modality basis.
+#' This function computes that basis, given a mixing algorithm.
+#'
+#' @param projections A list that contains the low-dimensional projections.
+#' @param i which modality to predict from the others.
+#' @param mixingAlgorithm the elected mixing algorithm.  see \code{symilr}.  can
+#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.
+#' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
+#' @param orthogonalize boolean
+#' @return u matrix for modality i
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 25
+#' npix = c(100,200,133)
+#' nk = 5
+#' outcome = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
+#' u = symilrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
+#'
+#' @seealso \code{\link{symilr}}
+#' @export
+symilrU <- function( projections, i, mixingAlgorithm, initialW,
+  orthogonalize = FALSE ) {
+  # some gram schmidt code
+  localGS <- function( x, orthogonalize = TRUE ) {
+    if ( !orthogonalize ) return( x )
+    n <- dim(x)[1]
+    m <- dim(x)[2]
+    q <- matrix(0,n,m)
+    r <- matrix(0,m,m)
+    qi <- x[,1]
+    si <- sqrt(sum(qi ^ 2))
+    q[,1] <- qi / si
+    r[1,1] <- si
+    for (i in 2:m) {
+      xi <- x[,i]
+      qj <- q[,1:(i - 1)]
+      rj <- t(qj) %*% xi
+      qi <- xi - qj %*% rj
+      r[1:(i - 1),i] <- rj
+      si <- sqrt(sum(qi ^ 2))
+      q[,i] <- qi / si
+      r[i,i] <- si
+    }
+    return( q )
+  }
+  avgU = NULL
+  mixAlg = mixingAlgorithm
+  nComponents = ncol( projections[[1]] )
+  nmodalities = length( projections )
+  wtobind = (1:nmodalities)[ -i ]
+  if ( mixAlg == 'avg' ) {
+    avgU = projections[[1]] * 0.0
+    for ( j in wtobind )
+      avgU = avgU + projections[[ j ]] / ( nmodalities - 1 )
+    return( avgU )
+  }
+  nc = ncol( projections[[ 1 ]] )
+  for ( j in wtobind )
+    avgU = cbind( avgU, projections[[ j ]] )
+  if ( mixAlg == 'rrpca-l' )
+    basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+  else if ( mixAlg == 'rrpca-s' )
+    basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+  else if ( mixAlg == 'ica' & ! missing( initialW ) )
+    basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
+                              n.comp=nc )$S )
+  else if ( mixAlg == 'ica' & missing( initialW ) )
+    basis = ( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
+  basis = ( svd( avgU, nu = nc, nv=0 )$u )
+  if ( ! orthogonalize ) return( basis )
+  return( localGS( basis ) )
 }

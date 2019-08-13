@@ -6,8 +6,9 @@
 \usage{
 symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(0, 10),
-  lineSearchTolerance = 0.001, randomSeed, verbose = FALSE)
+  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
+  lineSearchTolerance = 0.001, randomSeed, lowDimensionalError = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -38,6 +39,8 @@ allow estimates of per identifier intercept.}
 \item{lineSearchTolerance}{tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data}
 
 \item{randomSeed}{controls repeatability of ica-based decomposition}
+
+\item{lowDimensionalError}{development option}
 
 \item{verbose}{boolean to control verbosity of output}
 }
@@ -106,7 +109,7 @@ print( range(cor( svd1,svd2) ))
 
 }
 \seealso{
-\code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}
+\code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}  \code{\link{symilrU}}
 }
 \author{
 BB Avants.
