@@ -2705,6 +2705,7 @@ symilr2 <- function(
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
+#' @param lowDimensionalError development option
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
@@ -2772,6 +2773,7 @@ symilr <- function(
   lineSearchRange = c( -10, 10 ),
   lineSearchTolerance = 0.001,
   randomSeed,
+  lowDimensionalError = FALSE,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
@@ -2942,7 +2944,7 @@ symilr <- function(
     return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
   }
 
-  getSyME2 <- function( lineSearch, gradient, myw, mixAlg  )  {
+  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError )  {
     prediction = 0
     myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
     myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
@@ -2951,8 +2953,10 @@ symilr <- function(
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
-#    prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
-#    return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
+    if ( lowDimensionalError ) {
+      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
+      return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
+      }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
     return(
       norm(
@@ -2987,10 +2991,10 @@ symilr <- function(
       if ( myit <= iterations ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
-                         myw=myw, mixAlg = mixAlg )
+                         myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError )
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
-      } else errterm[ i ] = getSyME2( gamma[i], temperv )
+      } else errterm[ i ] = getSyME2( gamma[i], temperv, lowDimensionalError = lowDimensionalError  )
       vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
       #      temp = optim(
       #        vmats[[i]], fn=getSyME2, gr=getSyMG,
