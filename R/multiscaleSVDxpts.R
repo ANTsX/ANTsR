@@ -2800,7 +2800,7 @@ symilr <- function(
   # 1.0 adjust matrix norms
   for ( i in 1:length( voxmats ) ) {
     if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
-      stop( paste( "voxmat", i, "is null or NA." ) )
+      stop( paste( "input matrix", i, "is null or NA." ) )
     matnorms[ i ] = norm( voxmats[[ i ]] )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
@@ -2836,7 +2836,7 @@ symilr <- function(
   }
   for ( i in 1:length( smoothingMatrices ) ) {
     if ( any( is.null( smoothingMatrices[[ i ]] ) ) | any( is.na( smoothingMatrices[[ i ]] ) ) )
-      stop( paste( "voxmat", i, "is null or NA." ) )
+      stop( paste( "smoothing-matrix", i, "is null or NA." ) )
     smoothingMatrices[[ i ]] = smoothingMatrices[[i]] /
       Matrix::rowSums( smoothingMatrices[[i]] )
     }
