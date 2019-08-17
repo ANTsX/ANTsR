@@ -2799,6 +2799,7 @@ symilr <- function(
 
   # 1.0 adjust matrix norms
   for ( i in 1:length( voxmats ) ) {
+    if ( is.null( voxmats[[ i ]] ) ) stop( paste( "voxmat", i, "is null" ) )
     matnorms[ i ] = norm( voxmats[[ i ]] )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
@@ -2829,6 +2830,8 @@ symilr <- function(
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {
     smoothingMatrices = list( )
+    if ( is.null( smoothingMatrices[[ i ]] ) )
+    message( paste( "smoothingMatrices", i, "is null, setting to diagonal." ) )
     for ( i in 1:length( voxmats ) )
       smoothingMatrices[[ i ]] = diag( p[ i ] )
   }
