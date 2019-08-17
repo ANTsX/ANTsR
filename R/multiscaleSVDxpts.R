@@ -2799,7 +2799,8 @@ symilr <- function(
 
   # 1.0 adjust matrix norms
   for ( i in 1:length( voxmats ) ) {
-    if ( is.null( voxmats[[ i ]] ) ) stop( paste( "voxmat", i, "is null" ) )
+    if ( is.null( voxmats[[ i ]] ) | is.na( voxmats[[ i ]] ) ) 
+      stop( paste( "voxmat", i, "is null" ) )
     matnorms[ i ] = norm( voxmats[[ i ]] )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
@@ -2830,14 +2831,15 @@ symilr <- function(
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {
     smoothingMatrices = list( )
-    if ( is.null( smoothingMatrices[[ i ]] ) )
-    message( paste( "smoothingMatrices", i, "is null, setting to diagonal." ) )
     for ( i in 1:length( voxmats ) )
       smoothingMatrices[[ i ]] = diag( p[ i ] )
   }
-  for ( i in 1:length( smoothingMatrices ) )
+  for ( i in 1:length( smoothingMatrices ) ) {
+    if ( is.null( smoothingMatrices[[ i ]] ) is.na( smoothingMatrices[[ i ]] ) | )
+      message( paste( "smoothingMatrices", i, "is null or NA." ) )
     smoothingMatrices[[ i ]] = smoothingMatrices[[i]] /
-    Matrix::rowSums( smoothingMatrices[[i]] )
+      Matrix::rowSums( smoothingMatrices[[i]] )
+    }
   # some gram schmidt code
   localGS <- function( x, orthogonalize = TRUE ) {
     if ( !orthogonalize ) return( x )
