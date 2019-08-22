@@ -8,6 +8,7 @@ cache:
 warnings_are_errors: true
 bioc_required: false
 cran: http://cran.rstudio.com
+dist: xenial
 
 os:
   - linux
