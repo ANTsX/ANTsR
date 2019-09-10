@@ -83,10 +83,6 @@ before_install:
   - Rscript -e 'install.packages("ggplot2")'
   - Rscript -e 'install.packages("psych")'
   - Rscript -e 'install.packages("randomForest")'
-  - cd ..
-  - git clone https://github.com/muschellij2/ghtravis.git
-  - R CMD INSTALL ghtravis
-  - cd ANTsR
   - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
   # - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
   - export ants_user=ANTsX
