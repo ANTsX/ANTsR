@@ -55,6 +55,8 @@ before_install:
       start_xvfb ;
     fi
   - v8_install ;
+#  - start_xvfb ;
+#  - v8_install ;
   - export rver=`r_version`;
   - export gh_user=`get_gh_user` ; echo $gh_user ;    
   - cat DESCRIPTION
