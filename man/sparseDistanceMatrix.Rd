@@ -37,6 +37,7 @@ relevant publications by Mauro Maggioni and other authors.
 }
 \examples{
 \dontrun{
+set.seed(120)
 mat = matrix( rnorm(60), ncol=10 )
 smat = sparseDistanceMatrix( mat, 2 )
 r16 = antsImageRead( getANTsRData( 'r16' ) )
@@ -44,6 +45,9 @@ mask = getMask( r16 )
 mat <- getNeighborhoodInMask(image = r16, mask = mask, radius = c(0,0),
   physical.coordinates=TRUE, spatial.info=TRUE )
 smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
+testthat::expect_is(smat, "Matrix")
+testthat::expect_is(smat, "dgCMatrix")
+testthat::expect_equal(sum(smat), 18017)
 }
 }
 \references{

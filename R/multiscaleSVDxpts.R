@@ -21,6 +21,7 @@
 #' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 #' @examples
 #' \dontrun{
+#' set.seed(120)
 #' mat = matrix( rnorm(60), ncol=10 )
 #' smat = sparseDistanceMatrix( mat, 2 )
 #' r16 = antsImageRead( getANTsRData( 'r16' ) )
@@ -28,6 +29,9 @@
 #' mat <- getNeighborhoodInMask(image = r16, mask = mask, radius = c(0,0),
 #'   physical.coordinates=TRUE, spatial.info=TRUE )
 #' smat = sparseDistanceMatrix( t(mat$indices), 10 ) # close points
+#' testthat::expect_is(smat, "Matrix")
+#' testthat::expect_is(smat, "dgCMatrix")
+#' testthat::expect_equal(sum(smat), 18017)
 #' }
 #' @importFrom ANTsRCore antsrimpute
 #' @export sparseDistanceMatrix
@@ -169,10 +173,17 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
 #' @examples
 #' \dontrun{
+#' set.seed(120)
 #' mat = matrix( rnorm(60), nrow=6 )
 #' mat2 = matrix( rnorm(120), nrow=6 )
 #' smat = sparseDistanceMatrixXY( mat, mat2, 3 )
 #' smat2 = sparseDistanceMatrixXY( mat2, mat, 3 )
+#' testthat::expect_is(smat, "Matrix")
+#' testthat::expect_is(smat, "dgCMatrix")
+#' testthat::expect_is(smat2, "Matrix")
+#' testthat::expect_is(smat2, "dgCMatrix")
+#' testthat::expect_equal(sum(smat), 154.628961265087)
+#' testthat::expect_equal(sum(smat2), 63.7344262003899)
 #' }
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
@@ -333,12 +344,22 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #' embeddDim = 100
 #' n = 1000
 #' if ( usePkg( "pracma"  ) ) {
+#' set.seed(20190919)
 #' sphereData = pracma::rands( n, sphereDim, 1. )
 #' mysig = 0.1
 #' spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 #' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
+#' testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
+#' cm = unname(colMeans(mymssvd$evalsVsScale[11:25,]))
+#' testthat::expect_equal(cm,
+#' c(0.133651668406975, 0.0985695151401464, 0.0914110478052329, 
+#' 0.086272017653314, 0.081188302173622, 0.0766100356616153, 0.0719736252996842, 
+#' 0.067588745051721, 0.0622331185687704, 0.0415236318358749, 0.0192976885668337, 
+#' 0.0183063537558787, 0.0174990088862745, 0.0170012938275551, 0.0163859378707545, 
+#' 0.0158265354487181, 0.0153357773252783, 0.0147933538908736, 0.0143510807701235, 
+#' 0.0140473978346935))
 #' }
 #' @export multiscaleSVD
 multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )

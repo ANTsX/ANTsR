@@ -27,7 +27,14 @@
 #' aslmat <- timeseries2matrix( img, mask )
 #' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 #' noise <- getASLNoisePredictors(aslmat, tc, k=2, npreds=2, noisefrac=0.5 )
+#' cm = colMeans(noise)
+#' if (getRversion() < "3.5.0") {
+#'     testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642))
+#' } else {
+#'     testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999))
+#' }
 #'
+#' 
 #' @export getASLNoisePredictors
 getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 'loess', k = 5,
   npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
