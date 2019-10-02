@@ -9,19 +9,19 @@
 #'  (use 2 for real applications, 0 for testing)
 #' @param txtype Transformation type
 #' @param verbose verbosity boolean
-#' @param num_threads will execute 
+#' @param num_threads will execute
 #' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 #' for discussion.  If \code{NULL}, will not set anything.
-#' @param seed will execute 
+#' @param seed will execute
 #' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 #' running to attempt a more reproducible result.  See
 #' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.  
-#' 
+#' for discussion.  If \code{NULL}, will not set anything.
+#'
 #' @note This function may give different results on multiple runs.
-#' 
+#'
 #' @return list of outputs
 #' @author Avants BB
 #' @examples
@@ -40,7 +40,7 @@
 #' amocorr2 = lapply(mocorr2, aimg_to_array)
 #' testthat::expect_equal(mocorr, mocorr2)
 #' testthat::expect_equal(amocorr, amocorr2)
-#' 
+#'
 #' # This function may give different results on multiple runs
 #' # without setting the seed
 #' @export
@@ -56,20 +56,20 @@
   ants_random_seed = itk_threads = NULL
   if (!is.null(seed)) {
     ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
-    Sys.setenv(ANTS_RANDOM_SEED = seed)    
+    Sys.setenv(ANTS_RANDOM_SEED = seed)
   }
   if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
-  }  
+  }
   on.exit({
     if (!is.null(ants_random_seed)) {
       Sys.setenv(ANTS_RANDOM_SEED = ants_random_seed)
     }
     if (!is.null(itk_threads)) {
       Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
-    }    
-  })   
+    }
+  })
   if (is.character(img)) {
     if (length(img) != 1) {
       print("'img' should be only one filename")
