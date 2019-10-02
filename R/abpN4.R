@@ -6,7 +6,7 @@
 #' @param intensityTruncation quantiles for image truncation.
 #' @param mask optional antsImage mask
 #' @param usen3 Use N3 algorithm instead of N4
-#' @param ... additional arguments to pass to 
+#' @param ... additional arguments to pass to
 #' \code{\link{n4BiasFieldCorrection}}
 #' @return outputs a bias corrected image. 1 indicates failure.
 #' @author Tustison N, Avants BB
@@ -22,7 +22,7 @@
 #'
 #' @export abpN4
 abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
-  mask = NULL,  usen3 = FALSE, 
+  mask,  usen3 = FALSE,
   ...) {
   numargs <- nargs()
   if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
@@ -40,7 +40,11 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
     outimg <- n3BiasFieldCorrection( outimg, 2 )
     return(outimg)
   }
-  outimg<-n4BiasFieldCorrection(img, mask = mask, ...)
+  if ( ! missing( mask ) ) {
+    outimg<-n4BiasFieldCorrection(img, mask = mask, ...)
+  } else {
+    outimg<-n4BiasFieldCorrection(img, ...)
+  }
 
   return(outimg)
 }
