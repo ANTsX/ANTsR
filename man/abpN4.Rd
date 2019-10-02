@@ -4,7 +4,7 @@
 \alias{abpN4}
 \title{MR image bias correction based on the N4 algorithm.}
 \usage{
-abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NULL,
+abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask,
   usen3 = FALSE, ...)
 }
 \arguments{
@@ -16,7 +16,7 @@ abpN4(img, intensityTruncation = c(0.025, 0.975, 256), mask = NULL,
 
 \item{usen3}{Use N3 algorithm instead of N4}
 
-\item{...}{additional arguments to pass to 
+\item{...}{additional arguments to pass to
 \code{\link{n4BiasFieldCorrection}}}
 }
 \value{
