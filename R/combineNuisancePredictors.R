@@ -25,7 +25,7 @@
 #' @author Benjamin M. Kandel, Brian B. Avants
 #' @examples
 #' set.seed(120)
-#' simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
+#' simimg <- makeImage( c(10,10,10,20) , rnorm( 10*10*10*20)+1 )
 #' moco <- antsMotionCalculation( simimg , moreaccurate=0)
 #' # for real data use below
 #' # moco <- antsMotionCalculation(getANTsRData("pcasl"))
@@ -35,9 +35,9 @@
 #' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 #' @export combineNuisancePredictors
 combineNuisancePredictors <- function(
-  inmat, target, globalpredictors = NA, 
+  inmat, target, globalpredictors = NA,
   maxpreds = 4,
-  localpredictors = NA, method = "cv", k = 5, 
+  localpredictors = NA, method = "cv", k = 5,
   covariates = NA, ordered = FALSE) {
   avgR2 <- function(inmat, target, k, covariates) {
     r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
@@ -83,7 +83,7 @@ combineNuisancePredictors <- function(
     }
     noise
   }
-  
+
   noise <- bestPredictors(inmat, globalpredictors, target, maxpreds, method, k,
                           covariates, ordered)
   noise

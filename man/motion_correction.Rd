@@ -19,13 +19,13 @@
 
 \item{verbose}{verbosity boolean}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
 
-\item{seed}{will execute 
+\item{seed}{will execute
 \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}

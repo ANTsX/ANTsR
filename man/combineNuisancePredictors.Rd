@@ -46,7 +46,7 @@ correlation between \code{inmat} and \code{target}.
 }
 \examples{
 set.seed(120)
-simimg<-makeImage( c(10,10,10,20), rnorm(1000*20) )
+simimg <- makeImage( c(10,10,10,20) , rnorm( 10*10*10*20)+1 )
 moco <- antsMotionCalculation( simimg , moreaccurate=0)
 # for real data use below
 # moco <- antsMotionCalculation(getANTsRData("pcasl"))
