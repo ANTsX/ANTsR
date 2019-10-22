@@ -26,14 +26,14 @@ global time-series trends.}
 \item{method}{Method of selecting noisy voxels.  One of 'compcor' or
 'noisepool'. See \code{Details}.}
 
-\item{covariates}{Covariates to be considered when assessing prediction of
-tc pattern.}
+\item{covariates}{Covariates to be considered when assessing prediction of tc
+pattern.}
 
 \item{noisepoolfun}{Function used for aggregating R^2 values.}
 }
 \value{
 Matrix of size \code{nrow(aslmat)} by \code{npreds}, containing a
-timeseries of all the nuisance predictors.
+  timeseries of all the nuisance predictors.
 }
 \description{
 Get nuisance predictors from ASL images
@@ -47,7 +47,8 @@ aslmat <- timeseries2matrix( img, mask )
 tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
 noise <- getASLNoisePredictors(aslmat, tc, k=2, npreds=2, noisefrac=0.5 )
 cm = colMeans(noise)
-if (getRversion() < "3.5.0") {
+rounding_type = RNGkind()[3]
+if (getRversion() < "3.6.0" || rounding_type == "Rounding") {
     testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642))
 } else {
     testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999))
