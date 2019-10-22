@@ -25,3 +25,4 @@ _config\.yml
 R/confidenceConnected.R
 R/connectedThresholdImage.R
 ^doc$
+^\.github$
