@@ -30,9 +30,9 @@
 #' cm = colMeans(noise)
 #' rounding_type = RNGkind()[3]
 #' if (getRversion() < "3.6.0" || rounding_type == "Rounding") {
-#'     testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642))
+#'     testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642), tolerance = .01 )
 #' } else {
-#'     testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999))
+#'     testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999), tolerance = .01)
 #' }
 #'
 #'
