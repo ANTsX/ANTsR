@@ -43,6 +43,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
   mypkg = 'FNN'  # 'rflann'
+  mypkg = 'RcppHNSW'
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
   # and from correlation to covariance   diag(sd) %*% corrMat %*% diag(sd)
@@ -66,6 +67,10 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   if ( kmetric == "covariance" ) mycov = apply( x, FUN=sd, MARGIN=2 )
   if ( cometric ) {
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
+  }
+  if ( mypkg[1] == "RcppHNSW" ) {
+    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, distance = "euclidean")
+    names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
     bknn = FNN::get.knn( t( x ), k=k, algorithm = "cover_tree"  )
@@ -192,7 +197,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
   if ( any( is.na( y ) ) ) stop("input matrix y has NA values")
-  mypkg = 'FNN'
+  mypkg = 'RcppHNSW'
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
   if ( ! usePkg( mypkg ) )
@@ -205,6 +210,11 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( cometric ) {
     x = scale( x, center=TRUE, scale = (kmetric == "correlation" )  )
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
+  }
+  if ( mypkg[1] == "RcppHNSW" ) {
+    ann <- hnsw_build( t( x ), distance = "euclidean" )
+    bknn <- hnsw_search( t(y), ann, k = k, ef = 200 )
+    names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
     bknn = FNN::get.knnx( t( x ), t( y ), k=k, algorithm = "cover_tree" )
@@ -355,20 +365,20 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #' testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
 #' cm = unname(colMeans(mymssvd$evalsVsScale[11:25,]))
 #' testthat::expect_equal(cm,
-#' c(0.133651668406975, 0.0985695151401464, 0.0914110478052329, 
-#' 0.086272017653314, 0.081188302173622, 0.0766100356616153, 0.0719736252996842, 
-#' 0.067588745051721, 0.0622331185687704, 0.0415236318358749, 0.0192976885668337, 
-#' 0.0183063537558787, 0.0174990088862745, 0.0170012938275551, 0.0163859378707545, 
-#' 0.0158265354487181, 0.0153357773252783, 0.0147933538908736, 0.0143510807701235, 
+#' c(0.133651668406975, 0.0985695151401464, 0.0914110478052329,
+#' 0.086272017653314, 0.081188302173622, 0.0766100356616153, 0.0719736252996842,
+#' 0.067588745051721, 0.0622331185687704, 0.0415236318358749, 0.0192976885668337,
+#' 0.0183063537558787, 0.0174990088862745, 0.0170012938275551, 0.0163859378707545,
+#' 0.0158265354487181, 0.0153357773252783, 0.0147933538908736, 0.0143510807701235,
 #' 0.0140473978346935))
 #' } else {
 #' testthat::expect_equal(mymssvd$noiseCutoffs, c(11, 15))
 #' cm = unname(colMeans(mymssvd$evalsVsScale[13:25,]))
-#' testthat::expect_equal(cm, 
-#' c(0.138511257441516, 0.106071822485487, 0.0989441114152412, 0.092910922851038, 
-#' 0.0877970523897918, 0.0832570763653118, 0.0782599820599334, 0.0734433988152632, 
-#' 0.0678992413676906, 0.0432283615430504, 0.0202481578919003, 0.0191747572787057, 
-#' 0.0185718929604774, 0.0178301092823977, 0.0172423799670431, 0.0166981650233669, 
+#' testthat::expect_equal(cm,
+#' c(0.138511257441516, 0.106071822485487, 0.0989441114152412, 0.092910922851038,
+#' 0.0877970523897918, 0.0832570763653118, 0.0782599820599334, 0.0734433988152632,
+#' 0.0678992413676906, 0.0432283615430504, 0.0202481578919003, 0.0191747572787057,
+#' 0.0185718929604774, 0.0178301092823977, 0.0172423799670431, 0.0166981650233669,
 #' 0.0162072551503541, 0.015784555784915, 0.0153600119986575, 0.0149084240854556
 #' ))
 #' }
@@ -1244,7 +1254,7 @@ jointSmoothMatrixReconstruction <- function(
     stop( 'choice of positivity parameter is not good - see documentation')
   if ( positivity == TRUE ) positivity = "positive"
   if ( positivity == FALSE ) positivity = "either"
-  
+
   for ( k in 1:length(x) ) x[[ k ]] = x[[ k ]] / max( abs(x[[k]]) )
   gammas = rep( gamma, nrow( parameters ) )
   ulist = list()
@@ -1263,9 +1273,9 @@ jointSmoothMatrixReconstruction <- function(
       rowWeights = repWeights
     } else rowWeights = rowWeights * repWeights
   }
-  
+
   for ( i in 1:nrow( parameters ) ) {
-    
+
     m1 = parameters[ i, 1 ]
     m2 = parameters[ i, 2 ]
     modelFormula = as.formula( " x[[ m2 ]]  ~ ." )
@@ -1283,7 +1293,7 @@ jointSmoothMatrixReconstruction <- function(
       v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
     ulist[[ i ]] = u
     vlist[[ i ]] = v
-    
+
   }
   errs = rep( NA, length( iterations ) )
   if ( verbose ) print("part II")
@@ -1329,7 +1339,7 @@ jointSmoothMatrixReconstruction <- function(
       e2 =  perr[k-1,]  * parameters[,3]
       if ( mean( e1 ) > mean( e2 ) ) gammas = gammas * 0.9 # k = iterations
     }
-    
+
     for ( i in 1:nrow( parameters ) ) {
       m1 = parameters[ i, 1 ]
       m2 = parameters[ i, 2 ]
@@ -1347,11 +1357,11 @@ jointSmoothMatrixReconstruction <- function(
         vlist[[ i ]] = t( t( ulist[[ m2 ]] ) %*% x[[m2]] )
       }
     }
-    
+
     k = k + 1
   }
-  
-  
+
+
   return( list( u=ulist, v=vlist, intercepts=ilist ) )
 }
 
@@ -1496,7 +1506,7 @@ smoothAppGradCCA <- function( x , y,
   }
   #  phix = matrix( rnorm( k * ncol(x), 0, 1e-4 ), ncol=k )
   #  phiy = matrix( rnorm( k * ncol(y), 0, 1e-4 ), ncol=k )
-  
+
   i = 1
   if ( is.na( stochastic ) ) stoke = FALSE else stoke = TRUE
   while ( i < iterations ) {
@@ -1521,7 +1531,7 @@ smoothAppGradCCA <- function( x , y,
     #    if ( i > 15 ) if ( errs[ i ]  < errs[i-1] ) i = iterations+1
     i = i + 1
   }
-  
+
   #  print( cor( x %*% phix ) )
   #  print( cor( y %*% phiy ) )
   #  print( cor( y %*% phiy,  x %*% phix  ) )
@@ -1765,8 +1775,8 @@ milr <- function( dataFrame,  voxmats, myFormula, smoothingMatrix,
     #      dedrv = dedrvX + t( ( t(zRan) %*%  umat ) %*% t( vmat1 )  ) # t2
     #      dedrv = dedrv -  t( t(zRan) %*% voxmats[[1]] ) # t3
     #      vRan = smoothingMatrix %*% ( vRan + dedrvX * gammamx )
-    
-    
+
+
     if ( hasRanEff ) {
       vRan = as.matrix( smoothingMatrix %*% vRan )
       # update random effects
@@ -1864,7 +1874,7 @@ milr.predict <- function(
     if ( ncol( voxmatsTest[[k]] ) != p  )
       stop( paste( "test matrix ", matnames[k], " does not have ", p, "entries" ) )
   }
-  
+
   # get names from the standard lm
   temp = summary( lm( myFormula  , data=vdf))
   myrownames = rownames(temp$coefficients)
@@ -2065,7 +2075,7 @@ mild <- function( dataFrame,  voxmats, basisK,
   colnames( v ) = unms
   hasIntercept = "(Intercept)" %in% colnames( v )
   if ( hasIntercept ) dospar = 2:ncol( v ) else dospar = 1:ncol( v )
-  
+
   for ( i in 1:p ) {
     if ( length( myks ) > 0 )
       for ( k in 1:length(predictormatrixnames) ) {
@@ -2183,7 +2193,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     #  print( cor( u ) )
     return( u )
   }
-  
+
   myorth2 <- function( x ) {  qr.Q(  qr( x ) ) }
   myorth3 <- function( u = NULL, basis = TRUE, norm = TRUE)
   {
@@ -2291,7 +2301,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
                   verbose = F )
-    
+
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
                   iterations = locits, gamma = gamma * (1),
@@ -2311,8 +2321,8 @@ mild <- function( dataFrame,  voxmats, basisK,
     }
   }
   return( list( symilrX = mildx, symilrY = mildy ) )
-  
-  
+
+
   if ( FALSE ) {
     xv = mildx$v
     yv = mildy$v
@@ -2328,19 +2338,19 @@ mild <- function( dataFrame,  voxmats, basisK,
     xv = as.matrix( smoothingMatrixX %*% xv[ , ] )
     xv = orthogonalizeAndQSparsify( xv, sparsenessQuantileX, positivityX[[1]] )
     xv = as.matrix( smoothingMatrixX %*% xv[ , ] )
-    
+
     # now make the above sparse
     yvup = as.matrix( yvup[ , ] %*% smoothingMatrixY )
     yv = yv + t( yvup ) * gamma
     yv = as.matrix( smoothingMatrixY %*% yv[ , ]  )
     yv = orthogonalizeAndQSparsify( yv, sparsenessQuantileY, positivityY[[1]] )
     yv = as.matrix( smoothingMatrixY %*% yv[ , ]  )
-    
+
     mildy$u[,colinds] = yOrth[,colinds] = scale( voxmats[[1]] %*% ( xv ) )[,colinds]
     mildx$u[,colinds] = xOrth[,colinds] = scale( voxmats[[2]] %*% ( yv ) )[,colinds]
   } # end if
-  
-  
+
+
 }
 
 
@@ -2386,7 +2396,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     }
     return( scale( u ) )
   }
-  
+
   myorthx <- function( x ) {
     scale( qr.Q(  qr( x ) )  )
   }
@@ -2462,7 +2472,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                 verbose = FALSE )
   umat = myorth( ( mildy$u[,-1] +  mildx$u[,-1] ) * 0.5 )
   for ( i in 1:iterations ) {
-    
+
     xorthinds = c( ( ncol(umat) - basisK + 1):ncol( umat ) )
     colnames( umat[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
     colnames( umat[ , xorthinds  ] ) = colnames( mildx$u[, colinds ] )
@@ -2471,7 +2481,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     dfinds = c( ( ncol(dataFramex) - basisK + 1):ncol(dataFramex) )
     colnames( dataFramex )[dfinds] = colnames( mildx$u[, colinds ] )
     colnames( dataFramey )[dfinds] = colnames( mildy$u[, colinds ] )
-    
+
     ###############################################
     mildx = milr( dataFramex,
                   voxmats[1], formx, smoothingMatrixX,
@@ -2480,7 +2490,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
                   verbose = F )
-    
+
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
                   iterations = locits, gamma = gamma * (1),
@@ -2489,7 +2499,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   repeatedMeasures = repeatedMeasures,
                   verbose = F )
     ###############################################
-    
+
     vmat1 = mildx$v[,-1] # matrix(  rnorm( p * basisK ), nrow=p  )
     vmat2 = mildy$v[,-1] # matrix(  rnorm( q * basisK ), nrow=q  )
     # dEnergy / du = -vt ( x - uvt ) = xv - uvv
@@ -2498,13 +2508,13 @@ mild <- function( dataFrame,  voxmats, basisK,
     umup = ( dedu1 + dedu2 )
     #  umup[,-colinds]=0
     umat = myorth( umat + umup/norm(umup)*gamma )
-    
+
     if ( verbose & i > 0 )
       print( paste(  "it:", i - 1, "=>",
                      norm(  voxmats[[1]] - umat %*% t(vmat1 ) ),
                      norm(  voxmats[[2]] - umat %*% t(vmat2 ) ) ) )
-    
-    
+
+
   }
   return( list( symilrX = mildx, symilrY = mildy ) )
 }
@@ -2575,7 +2585,7 @@ symilr2 <- function(
   }
   if (length(positivityY) == 1 && isTRUE(positivityY)) {
     positivityY = "positive"
-  }  
+  }
 
   positivityX = match.arg(positivityX, choices = c("positive","negative","either"))
   positivityY = match.arg(positivityY, choices = c("positive","negative","either"))
@@ -2592,7 +2602,7 @@ symilr2 <- function(
   n = nrow( voxmats[[1]] )
   p = ncol( voxmats[[1]] )
   q = ncol( voxmats[[2]] )
-  
+
   hasRanEff = FALSE
   zRan = NA
   if ( ! any( is.na( repeatedMeasures ) ) ) {
@@ -2613,16 +2623,16 @@ symilr2 <- function(
     tzz = tz %*% zRan
     rm( ranEff )
   }
-  
+
   if ( missing( smoothingMatrixX ) ) smoothingMatrixX = diag( p )
   if ( missing( smoothingMatrixY ) ) smoothingMatrixY = diag( q )
   xmatname = names( voxmats )[ 1 ]
   ymatname = names( voxmats )[ 2 ]
-  
+
   if ( missing( initialUMatrix ) ) {
     umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), T, T )
   } else { umatX = umatY = initialUMatrix }
-  
+
   vRanX = vRanY = NA
   if ( hasRanEff ) {
     vRanX = matrix( rnorm( ncol( zRan ) * p, 1, 1 ), nrow = p, ncol = ncol( zRan ) ) * 0.0
@@ -2659,7 +2669,7 @@ symilr2 <- function(
       umatX =  qr.Q(  qr( umatX ) )
       umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
     }
-    
+
     # the energy term for the regression model is:
     #   norm( x - uvt ) =>  grad update is wrt u is  xv - uvtv
     # the energy term for the mixed regression model is:
@@ -2669,20 +2679,20 @@ symilr2 <- function(
     #   t1= tzz * vran +
     #   t2 = tz * uvt -
     #   t3 = tz * x
-    
+
     if ( hasRanEff  ) {
       dedrvX = vRanX %*% ( t( zRan ) %*% zRan ) # t1
       dedrvX = dedrvX + vmat1 %*% ( t( umatX ) %*% zRan ) # t2
       dedrvX = dedrvX - t( voxmats[[1]] ) %*% zRan # t3
-      
+
       dedrvY = vRanY %*% ( t( zRan ) %*% zRan ) # t1
       dedrvY = dedrvY + vmat2 %*% ( t( umatY ) %*% zRan ) # t2
       dedrvY = dedrvY - t( voxmats[[2]] ) %*% zRan # t3
-      
+
       vRanX = smoothingMatrixX %*% ( vRanX + dedrvX * gammamx )
       vRanY = smoothingMatrixY %*% ( vRanY + dedrvY * gammamx )
     }
-    
+
     if ( verbose & hasRanEff ) {
       print( paste(i, "=>",
                    norm(  voxmats[[1]] /  matnorms[1] - umatX %*% t( vmat1 ) - zRan %*% t(vRanX) ),
@@ -2828,7 +2838,7 @@ symilr <- function(
   n = nrow( voxmats[[1]] )
   if ( missing( sparsenessQuantiles ) )
     sparsenessQuantiles = rep( 0.5, length( voxmats ) )
-  
+
   # 1.0 adjust matrix norms
   for ( i in 1:length( voxmats ) ) {
     if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
@@ -2837,7 +2847,7 @@ symilr <- function(
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
   }
-  
+
   # 2.0 setup random effects
   hasRanEff = FALSE
   zRan = NA
@@ -2859,7 +2869,7 @@ symilr <- function(
     tzz = tz %*% zRan
     rm( ranEff )
   }
-  
+
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {
     smoothingMatrices = list( )
@@ -2897,18 +2907,18 @@ symilr <- function(
     return(list(q = q,r = r))
   }
   randmat = 0
-  
+
   # 4.0 setup initialization
   if ( missing( initialUMatrix ) )
     initialUMatrix = length( voxmats )
-  
+
   if ( class(initialUMatrix) == 'matrix' ) {
     randmat = initialUMatrix
     initialUMatrix = list( )
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
   }
-  
+
   if ( length( initialUMatrix ) != length( voxmats ) &
        !is.matrix(initialUMatrix) ) {
     message(paste("initializing with random matrix: ",initialUMatrix,'columns'))
@@ -2918,7 +2928,7 @@ symilr <- function(
     for ( i in 1:length( voxmats ) )
       initialUMatrix[[ i ]] = randmat
   }
-  
+
   vRan = list( )
   dedrv = list( )
   if ( hasRanEff ) {
@@ -2957,7 +2967,7 @@ symilr <- function(
     return( norm( voxmats[[i]], "F" ) /
               norm( prediction, "F" ) )
   }
-  
+
   nc = ncol( initialUMatrix[[ 1 ]] )
   myw = matrix( rnorm( nc^2), nc, nc )
   getAvgU <- function( i, myw, mixAlg ) {
@@ -3000,7 +3010,7 @@ symilr <- function(
         voxmats[[i]]/norm(voxmats[[i]],'F'),
           "F" )  )  # old way, slower
   }
-  
+
   getSyMG <- function( v, i, myw, mixAlg )  {
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
     temperv = 0
@@ -3010,7 +3020,7 @@ symilr <- function(
     temperv = temperv - v %*% (  t( avgU ) %*% avgU )
     return( temperv )
   }
-  
+
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
@@ -3051,7 +3061,7 @@ symilr <- function(
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
         initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
       }
-    
+
     if ( hasRanEff ) {
       for ( kk in 1:1 ) {
         for ( i in 1:length( voxmats ) ) {
@@ -3112,7 +3122,7 @@ symilr <- function(
       #        cat(c("d",datanorm))
       #        cat("\n")
     }
-    
+
   } # iterations
   return(
     list(
