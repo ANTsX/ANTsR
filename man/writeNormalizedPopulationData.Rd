@@ -26,12 +26,13 @@ successOrFailure boolean
 \description{
 This function simplifies the steps of saving a population (image) analysis
 into an efficient hdf5 file, using the h5 library or to a directory.  The
+population image data is stored as a matrix.  Along with the matrix will be a
 data frame with population demographics. The number of matrix columns will be
 defined by a mask that the user should also supply.  Finally, a boolean
 vector should be passed in that matches the images to the demographics. This
 function cannot check if the matching between demographics and images is
 correct and, as such, the user should take care in creating the inputs.
-WARNING: the demographics file will currently be cast to a data.matrix so
+WARNING: when using h5, the demographics file will currently be cast to a data.matrix so
 one should not reuse this file as the reference demographics file.
 }
 \examples{
