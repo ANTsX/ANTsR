@@ -83,7 +83,8 @@ Suggests:
     wmtsa,
     xgboost,
     FNN,
-    nabor
+    nabor,
+    RANN
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang
