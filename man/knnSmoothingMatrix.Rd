@@ -4,7 +4,7 @@
 \alias{knnSmoothingMatrix}
 \title{k-nearest neighbors constrained smoothing}
 \usage{
-knnSmoothingMatrix(x, k, sigma)
+knnSmoothingMatrix(x, k, sigma, segmentation)
 }
 \arguments{
 \item{x}{input matrix of point coordinates of dimensions n-spatial
@@ -13,6 +13,8 @@ spatial dimensions by p points}
 \item{k}{number of neighbors, higher causes more smoothing}
 
 \item{sigma}{sigma for the gaussian function}
+
+\item{segmentation}{optional boolean to restrict specific rows to have minimal respons}
 }
 \value{
 sparse matrix is output

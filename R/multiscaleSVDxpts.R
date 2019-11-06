@@ -36,8 +36,8 @@
 #' @importFrom ANTsRCore antsrimpute
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
-                                  kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-                                  eps = 1.e-6, ncores=NA, sinkhorn = TRUE ) # , mypkg = "nabor"  )
+  kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
+  eps = 1.e-6, ncores=NA, sinkhorn = TRUE )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
@@ -98,30 +98,31 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     tct = tct + sum( !is.na(inds) )
   }
   # build triplet representation for sparse matrix
-  myijmat = matrix( nrow=(tct), ncol=3 )
+  myijmat = matrix( NA, nrow=(tct), ncol=3 )
   tct2 = 1
   for ( i in 1:ncol( x ) )
   {
     inds = bknn$nn.idx[i,]
     locd = bknn$nn.dists[i,]
-    if ( kmetric == "gaussian" & !is.na( sigma ) )
+    if ( kmetric == "gaussian" & !is.na( sigma ) ) {
       locd = exp( -1.0 * locd / ( 2.0 * sigma^2 ) )
+      }
     inds[ inds <= i ] = NA # we want a symmetric matrix
     tctinc = sum( !is.na(inds) )
-    if ( kmetric == "covariance" )
-    {
+    if ( kmetric == "covariance"  )
+      {
       loccov = mycov[ i ] * mycov[  inds ]
       locd = locd * loccov
-    }
+      }
     if ( tctinc > 0 )
-    {
+      {
       upinds = tct2:(tct2+tctinc-1)
       myijmat[ upinds, 1 ] = i
       myijmat[ upinds, 2 ] = inds[ !is.na( inds ) ]
       myijmat[ upinds, 3 ] = locd[ !is.na( inds ) ]
       tct2 = tct2 + tctinc
+      }
     }
-  }
   kmatSparse = Matrix::sparseMatrix(
     i=myijmat[,1],
     j=myijmat[,2],
@@ -129,13 +130,13 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   )
   if ( kmetric == "gaussian" ) diag( kmatSparse ) = 1
   if ( cometric )
-  {
+    {
     if ( kmetric == "covariance" )  diag( kmatSparse ) = mycov^2
     if ( kmetric == "correlation" ) diag( kmatSparse ) = 1
     kmatSparse[ kmatSparse < r ] = 0
-  }  else {
-    kmatSparse[ kmatSparse > r ] = 0
-  }
+    } else {
+      kmatSparse[ kmatSparse > r ] = 0
+    }
   if ( sinkhorn )
     for ( i in 1:4 ) {
       #      kmatSparse = kmatSparse / Matrix::rowSums( kmatSparse )
@@ -513,6 +514,7 @@ multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 #' spatial dimensions by p points
 #' @param k number of neighbors, higher causes more smoothing
 #' @param sigma sigma for the gaussian function
+#' @param segmentation optional boolean to restrict specific rows to have minimal respons
 #' @return sparse matrix is output
 #' @author Avants BB
 #' @examples
@@ -527,14 +529,17 @@ multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 #' srv = makeImage( mask,  as.numeric( srvec ) )
 #' }
 #' @export knnSmoothingMatrix
-knnSmoothingMatrix <- function( x, k, sigma ) {
+knnSmoothingMatrix <- function( x, k, sigma, segmentation ) {
   usePkg( "Matrix" )
-  temp = sparseDistanceMatrix( x, k = k,
-                               kmetric = "gaussian", sigma = sigma )
-  return( temp / Matrix::rowSums( temp ) )
+  temp = sparseDistanceMatrix( x, k = k, kmetric = "gaussian", sigma = sigma,
+       sinkhorn = FALSE )
+  normalizer = Matrix::rowSums( temp )
+  normalizer[ normalizer == 0 ] = Inf
+  if ( ! missing( segmentation ) )
+    normalizer[ !segmentation ] = 1e9
+  derka = temp / normalizer
+  return( derka )
 }
-
-
 
 
 
