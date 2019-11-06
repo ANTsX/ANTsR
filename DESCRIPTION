@@ -90,4 +90,3 @@ NeedsCompilation: yes
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1.9000
 Encoding: UTF-8
-
