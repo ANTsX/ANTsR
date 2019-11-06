@@ -531,14 +531,35 @@ multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 #' @export knnSmoothingMatrix
 knnSmoothingMatrix <- function( x, k, sigma, segmentation ) {
   usePkg( "Matrix" )
-  temp = sparseDistanceMatrix( x, k = k, kmetric = "gaussian", sigma = sigma,
+  jmat = sparseDistanceMatrix( x, k = k, kmetric = "gaussian", sigma = sigma,
        sinkhorn = FALSE )
-  normalizer = Matrix::rowSums( temp )
+  if ( !missing( segmentation ) & FALSE ) {
+    diagSparse = Matrix::sparseMatrix(
+      i=1:length(segmentation),
+      j=1:length(segmentation),
+      x=as.numeric(segmentation), symmetric = TRUE )
+    jmat = diagSparse %*% jmat
+    }
+  if ( FALSE ) {
+    for ( i in 1:4 ) { # sinkhorn
+      normalizer = Matrix::rowSums( jmat )
+      normalizer[ normalizer == 0 ] = Inf
+      if ( ! missing( segmentation ) )
+        normalizer[ !segmentation ] = 1e9
+      jmat = jmat / normalizer
+      normalizer2 = Matrix::rowSums( Matrix::t(jmat) )
+      normalizer2[ normalizer2 == 0 ] = Inf
+      if ( ! missing( segmentation ) )
+        normalizer2[ !segmentation ] = 1e9
+      jmat = Matrix::t( Matrix::t(jmat) / normalizer2 )
+      }
+    }
+  normalizer = Matrix::rowSums( jmat )
   normalizer[ normalizer == 0 ] = Inf
   if ( ! missing( segmentation ) )
     normalizer[ !segmentation ] = 1e9
-  derka = temp / normalizer
-  return( derka )
+  jmat = jmat / normalizer
+  return( jmat )
 }
 
 
