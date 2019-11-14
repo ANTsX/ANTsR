@@ -362,7 +362,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 #' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-#' if (getRversion() < "3.5.0") {
+#' if (getRversion() < "3.6.0") {
 #' testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
 #' cm = unname(colMeans(mymssvd$evalsVsScale[11:25,]))
 #' testthat::expect_equal(cm,
