@@ -3051,6 +3051,7 @@ symilr <- function(
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
   datanorm = rep( 0.0, length(voxmats) )
+  bestTot = Inf
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
@@ -3139,6 +3140,11 @@ symilr <- function(
     for ( loi in 1:length(vmats) )
       nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
     tot = merr+nzct
+    if ( tot < bestTot ) {
+      bestTot = tot
+      bestU = initialUMatrix
+      bestV = vmats
+    }
     if ( verbose ) {
       print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
       cat(c("e",errterm))
@@ -3152,13 +3158,13 @@ symilr <- function(
   } # iterations
   return(
     list(
-      u  = initialUMatrix,
-      v  = vmats,
+      u  = bestU,
+      v  = bestV,
       vRan = vRan,
       initialRandomMatrix = randmat,
       predictions = predictions,
       finalError = errterm,
-      totalEnergy = tot )
+      totalEnergy = bestTot )
   )
 }
 
