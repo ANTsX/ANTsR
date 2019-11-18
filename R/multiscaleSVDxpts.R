@@ -213,8 +213,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    ann <- hnsw_build( t( x ), distance = "euclidean" )
-    bknn <- hnsw_search( t(y), ann, k = k, ef = 200 )
+    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean" )
+    bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = 200 )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
@@ -362,7 +362,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
 #' spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
 #' myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
 #' mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-#' if (getRversion() < "3.5.0") {
+#' if (getRversion() < "3.6.0") {
 #' testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
 #' cm = unname(colMeans(mymssvd$evalsVsScale[11:25,]))
 #' testthat::expect_equal(cm,

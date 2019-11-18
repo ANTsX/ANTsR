@@ -1,8 +1,8 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.5.4
-Date: 2019-10-22
+Version: 0.5.4.2
+Date: 2019-11-06
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
     person(c("Benjamin", "M"), "Kandel", role = "ctb", email = "NA"),
@@ -33,7 +33,7 @@ Imports:
     stats,
     utils
 Suggests:
-    magic,    
+    magic,
     psych,
     rsvd,
     abind,
@@ -81,7 +81,10 @@ Suggests:
     viridis,
     visreg,
     wmtsa,
-    xgboost
+    xgboost,
+    FNN,
+    nabor,
+    RANN
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang
