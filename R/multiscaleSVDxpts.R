@@ -3147,7 +3147,7 @@ symilr <- function(
       #        cat("\n")
       #        cat(c("d",datanorm))
       #        cat("\n")
-    }
+      }
 
   } # iterations
   return(
@@ -3157,7 +3157,8 @@ symilr <- function(
       vRan = vRan,
       initialRandomMatrix = randmat,
       predictions = predictions,
-      finalError = errterm )
+      finalError = errterm,
+      totalEnergy = tot )
   )
 }
 
