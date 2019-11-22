@@ -7,8 +7,8 @@
 symilr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
   repeatedMeasures = NA, lineSearchRange = c(-10, 10),
-  lineSearchTolerance = 0.001, randomSeed, lowDimensionalError = FALSE,
-  verbose = FALSE)
+  lineSearchTolerance = 0.001, randomSeed, lowDimensionalError = 0,
+  constraint = "none", verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -40,7 +40,9 @@ allow estimates of per identifier intercept.}
 
 \item{randomSeed}{controls repeatability of ica-based decomposition}
 
-\item{lowDimensionalError}{development option}
+\item{lowDimensionalError}{development option - integer sampling of matrix columns}
+
+\item{constraint}{one of none, Grassmann or Stiefel}
 
 \item{verbose}{boolean to control verbosity of output}
 }

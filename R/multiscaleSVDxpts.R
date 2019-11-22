@@ -2773,7 +2773,8 @@ symilr2 <- function(
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
-#' @param lowDimensionalError development option
+#' @param lowDimensionalError development option - integer sampling of matrix columns
+#' @param constraint one of none, Grassmann or Stiefel
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
@@ -2841,9 +2842,12 @@ symilr <- function(
   lineSearchRange = c( -10, 10 ),
   lineSearchTolerance = 0.001,
   randomSeed,
-  lowDimensionalError = FALSE,
+  lowDimensionalError = 0,
+  constraint = "none",
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+  if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
+    stop( "Constraint should be one of none, Grassmann or Stiefel" )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s' )
@@ -2869,7 +2873,7 @@ symilr <- function(
   for ( i in 1:length( voxmats ) ) {
     if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
       stop( paste( "input matrix", i, "is null or NA." ) )
-    matnorms[ i ] = norm( voxmats[[ i ]] )
+    matnorms[ i ] = norm( voxmats[[ i ]], type = "F" )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
   }
@@ -3025,16 +3029,32 @@ symilr <- function(
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
-    if ( lowDimensionalError ) {
+    if ( lowDimensionalError > 0 ) {
+      # randomly sample some voxels to speed this up
+      vsam = sample(1:ncol(voxmats[[i]]), lowDimensionalError )
+      prediction = predict( lm( voxmats[[i]][,vsam] ~ avgU ) )  # new way, faster
+      return( norm( prediction - voxmats[[i]][,vsam] , "F" ) )  # new way, faster
       prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
       return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
       }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
     return(
-      norm(
-        prediction/norm(prediction,'F') -
-        voxmats[[i]]/norm(voxmats[[i]],'F'),
-          "F" )  )  # old way, slower
+      norm( prediction  - voxmats[[i]], "F" ) )
+#        prediction/norm(prediction,'F') -
+#        voxmats[[i]]/norm(voxmats[[i]],'F'),
+#          "F" )  )  # old way, slower
+  }
+
+  constrainG <- function( vgrad, i, constraint ) {
+    if ( constraint == "Grassmann") {
+      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
+      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
+      projjer = diag( ncol( vgrad ) ) - t( vmats[[i]] ) %*% vmats[[i]]
+      temperv = temperv %*% projjer
+    }
+    if ( constraint == "Stiefel" ) # stiefel manifold
+      vgrad = vgrad - vmats[[i]] %*% ( t( vgrad ) %*% ( vmats[[i]] ) )
+    return( vgrad )
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
@@ -3061,6 +3081,7 @@ symilr <- function(
       if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
       mytol = datanorm[ i ] * lineSearchTolerance / myit^2
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
+      temperv = constrainG( temperv, i, constraint = constraint )
       if ( myit <= iterations ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
@@ -3069,11 +3090,6 @@ symilr <- function(
         gamma[i] = temp$minimum
       } else errterm[ i ] = getSyME2( gamma[i], temperv, lowDimensionalError = lowDimensionalError  )
       vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
-      #      temp = optim(
-      #        vmats[[i]], fn=getSyME2, gr=getSyMG,
-      #        method='BFGS', mixAlg=mixAlg, myw=myw  )
-      #      vmats[[i]] = temp$par
-      #      print( paste( i, temp$value ) )
       vmats[[i]] = orthogonalizeAndQSparsify(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
         sparsenessQuantiles[i],
