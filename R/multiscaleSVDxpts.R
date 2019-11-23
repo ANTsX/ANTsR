@@ -2773,7 +2773,8 @@ symilr2 <- function(
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
-#' @param lowDimensionalError development option - integer sampling of matrix columns
+#' @param lowDimensionalError development option - integer sampling of matrix columns or a
+#' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
@@ -3031,7 +3032,10 @@ symilr <- function(
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 0 ) {
       # randomly sample some voxels to speed this up
-      vsam = sample(1:ncol(voxmats[[i]]), lowDimensionalError )
+      if ( lowDimensionalError < 1 )
+        vsam = sample(1:ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) )
+      if ( lowDimensionalError >= 1 )
+        vsam = sample(1:ncol(voxmats[[i]]), lowDimensionalError )
       prediction = predict( lm( voxmats[[i]][,vsam] ~ avgU ) )  # new way, faster
       return( norm( prediction - voxmats[[i]][,vsam] , "F" ) )  # new way, faster
       prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
@@ -3039,10 +3043,9 @@ symilr <- function(
       }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
     return(
-      norm( prediction  - voxmats[[i]], "F" ) )
-#        prediction/norm(prediction,'F') -
-#        voxmats[[i]]/norm(voxmats[[i]],'F'),
-#          "F" )  )  # old way, slower
+      norm( #prediction  - voxmats[[i]], "F" ) )
+        prediction/norm(prediction,'F') -
+        voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )  )  # old way, slower
   }
 
   constrainG <- function( vgrad, i, constraint ) {
@@ -3156,7 +3159,7 @@ symilr <- function(
     for ( loi in 1:length(vmats) )
       nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
     tot = merr+nzct
-    if ( tot < bestTot ) {
+    if ( tot < bestTot | lowDimensionalError == 0 ) {
       bestTot = tot
       bestU = initialUMatrix
       bestV = vmats

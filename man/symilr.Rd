@@ -40,7 +40,8 @@ allow estimates of per identifier intercept.}
 
 \item{randomSeed}{controls repeatability of ica-based decomposition}
 
-\item{lowDimensionalError}{development option - integer sampling of matrix columns}
+\item{lowDimensionalError}{development option - integer sampling of matrix columns or a
+float value greater than 0 less than 1 that indicates fraction of columns for each matrix.}
 
 \item{constraint}{one of none, Grassmann or Stiefel}
 
