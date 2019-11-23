@@ -3030,7 +3030,7 @@ symilr <- function(
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
-    if ( lowDimensionalError > 0 ) {
+    if ( lowDimensionalError > 1e-10 ) {
       # randomly sample some voxels to speed this up
       if ( lowDimensionalError < 1 )
         vsam = sample(1:ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) )
@@ -3159,7 +3159,7 @@ symilr <- function(
     for ( loi in 1:length(vmats) )
       nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
     tot = merr+nzct
-    if ( tot < bestTot | lowDimensionalError == 0 ) {
+    if ( tot < bestTot ) {
       bestTot = tot
       bestU = initialUMatrix
       bestV = vmats
