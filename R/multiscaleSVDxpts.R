@@ -69,7 +69,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    efval = min( c( 50, ncol(x) ) )
+    efval = min( c( 4, ncol(x) ) )
     bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval, distance = "euclidean")
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
@@ -217,8 +217,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    efval = min( c( 100, ncol(x) ) )
-    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean", M=16, ef=efval )
+    efval = min( c( 4, ncol(x) ) )
+    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean", M=12, ef=efval )
     efval = min( c( 100, ncol(y) ) )
     bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = efval )
     names( bknn ) = c( "nn.idx", "nn.dists" )
