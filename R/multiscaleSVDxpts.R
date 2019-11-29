@@ -15,6 +15,7 @@
 # #' @param mypkg set either nabor, RANN, rflann
 #' @param ncores number of cores to use
 #' @param sinkhorn boolean
+#' @param kPackage name of package to use for knn
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -37,13 +38,12 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA, sinkhorn = TRUE )
+  eps = 1.e-6, ncores=NA, sinkhorn = TRUE, kPackage = "FNN" )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
   if ( any( is.na( x ) ) ) stop("input matrix has NA values")
-  mypkg = 'FNN'  # 'rflann'
-  mypkg = 'RcppHNSW'
+  if ( kPackage == "RcppHNSW" ) mypkg = 'RcppHNSW' else mypkg = 'FNN'
   # note that we can convert from distance to covariance
   #   d_ij^2 = sigma_i^2 +  \sigma_j^2  - 2 * cov_ij
   # and from correlation to covariance   diag(sd) %*% corrMat %*% diag(sd)
@@ -69,11 +69,12 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, distance = "euclidean")
+    efval = min( c( 50, ncol(x) ) )
+    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval, distance = "euclidean")
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
-    bknn = FNN::get.knn( t( x ), k=k, algorithm = "cover_tree"  )
+    bknn = FNN::get.knn( t( x ), k=k, algorithm = "kd_tree"  )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
@@ -172,6 +173,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
 # #' @param mypkg set either nabor, RANN, rflann
+#' @param kPackage name of package to use for knn
 #' @param ncores number of cores to use
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
@@ -194,11 +196,13 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
                                     kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-                                    eps = 1.e-6, ncores=NA ) # , mypkg = "nabor" )
+                                    eps = 1.e-6,
+                                    kPackage = 'FNN',
+                                    ncores=NA ) # , mypkg = "nabor" )
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
   if ( any( is.na( y ) ) ) stop("input matrix y has NA values")
-  mypkg = 'RcppHNSW'
+  if ( kPackage == "RcppHNSW" ) mypkg = 'RcppHNSW' else mypkg = 'FNN'
   if ( ! usePkg("Matrix") )
     stop("Please install the Matrix package")
   if ( ! usePkg( mypkg ) )
@@ -213,12 +217,15 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean" )
-    bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = 200 )
+    efval = min( c( 100, ncol(x) ) )
+    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean", M=16, ef=efval )
+    efval = min( c( 100, ncol(y) ) )
+    bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = efval )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
-    bknn = FNN::get.knnx( t( x ), t( y ), k=k, algorithm = "cover_tree" )
+    knnalgs = c( "kd_tree", "brute" )
+    bknn = FNN::get.knnx( t( x ), t( y ), k=k, algorithm = knnalgs[1] )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
