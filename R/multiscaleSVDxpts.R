@@ -522,6 +522,7 @@ multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 #' @param k number of neighbors, higher causes more smoothing
 #' @param sigma sigma for the gaussian function
 #' @param segmentation optional boolean to restrict specific rows to have minimal respons
+#' @param ... arguments passed to \code{sparseDistanceMatrix}
 #' @return sparse matrix is output
 #' @author Avants BB
 #' @examples
@@ -536,10 +537,10 @@ multiscaleSVD <- function( x, r, locn, nev, knn = 0, verbose=FALSE, plot=0 )
 #' srv = makeImage( mask,  as.numeric( srvec ) )
 #' }
 #' @export knnSmoothingMatrix
-knnSmoothingMatrix <- function( x, k, sigma, segmentation ) {
+knnSmoothingMatrix <- function( x, k, sigma, segmentation, ... ) {
   usePkg( "Matrix" )
   jmat = sparseDistanceMatrix( x, k = k, kmetric = "gaussian", sigma = sigma,
-       sinkhorn = FALSE )
+       sinkhorn = FALSE, ... )
   if ( !missing( segmentation ) & FALSE ) {
     diagSparse = Matrix::sparseMatrix(
       i=1:length(segmentation),
