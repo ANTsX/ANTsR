@@ -3043,6 +3043,7 @@ symilr <- function(
       sampleN = min( c(lowDimensionalError, ncol(voxmats[[i]]) ) )
       if ( lowDimensionalError < 1 )
         sampleN = min( c( ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) ) )
+      if ( sampleN < 2 ) sampleN = 2
       vsam = sample(1:ncol(voxmats[[i]]), sampleN )
       return( norm( lm( voxmats[[i]][,vsam] ~ avgU )$residuals , "F" ) )  # new way, faster
 #      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
