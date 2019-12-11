@@ -3040,10 +3040,10 @@ symilr <- function(
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 1e-10 ) {
       # randomly sample some voxels to speed this up
+      sampleN = min( c(lowDimensionalError, ncol(voxmats[[i]]) ) )
       if ( lowDimensionalError < 1 )
-        vsam = sample(1:ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) )
-      if ( lowDimensionalError >= 1 )
-        vsam = sample(1:ncol(voxmats[[i]]), lowDimensionalError )
+        sampleN = min( c( ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) ) )
+      vsam = sample(1:ncol(voxmats[[i]]), sampleN )
       return( norm( lm( voxmats[[i]][,vsam] ~ avgU )$residuals , "F" ) )  # new way, faster
 #      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
 #      return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
