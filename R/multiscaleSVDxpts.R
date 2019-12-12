@@ -38,7 +38,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA, sinkhorn = TRUE, kPackage = "FNN" )
+  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "FNN" )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
@@ -3040,12 +3040,18 @@ symilr <- function(
     avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 1e-10 ) {
       # randomly sample some voxels to speed this up
-      sampleN = min( c(lowDimensionalError, ncol(voxmats[[i]]) ) )
-      if ( lowDimensionalError < 1 )
-        sampleN = min( c( ncol(voxmats[[i]]), round( lowDimensionalError * ncol(voxmats[[i]]) ) ) )
-      if ( sampleN < 2 ) sampleN = 2
-      vsam = sample(1:ncol(voxmats[[i]]), sampleN )
-      return( norm( lm( voxmats[[i]][,vsam] ~ avgU )$residuals , "F" ) )  # new way, faster
+      nmaxc = sampleNc = ncol(voxmats[[i]])
+      nmaxr = sampleNr = nrow(voxmats[[i]])
+      if ( lowDimensionalError < 1 ) {
+        sampleNc = min( c( nmaxc, round( lowDimensionalError * nmaxc ) ) )
+        sampleNr = min( c( nmaxr, round( lowDimensionalError * nmaxr ) ) )
+        }
+      if ( sampleNc < 2 ) sampleNc = 2
+      if ( sampleNr < 5 ) sampleNr = 5
+      vsamc = sample(1:nmaxc, sampleNc )
+      vsamr = 1:nmaxr # sample(1:nmaxr, sampleNr )
+      return( norm( lm( voxmats[[i]][vsamr,vsamc] ~ avgU[vsamr,] )$residuals , "F" ) )  # new way, faster
+#      return( norm( lm( voxmats[[i]][,vsam] ~ avgU )$residuals , "F" ) )  # new way, faster
 #      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
 #      return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
       }
