@@ -85,6 +85,7 @@ before_install:
   - Rscript -e 'install.packages("ggplot2")'
   - Rscript -e 'install.packages("psych")'
   - Rscript -e 'install.packages("randomForest")'
+  - Rscript -e 'install.packages("xgboost")'
   - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
   # - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
   - export ants_user=ANTsX
