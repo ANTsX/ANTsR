@@ -264,7 +264,7 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #'
 #' @examples
 #' \dontrun{
-#' maskImage <- generateAifMaskImage( perfusionImage, voiMaskImage )
+#'
 #' }
 #' @export
 generateAifMaskImage <- function( perfusionImage, voiMaskImage,
