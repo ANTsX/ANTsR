@@ -37,9 +37,9 @@ arterial input function using the method described in
 https://www.ncbi.nlm.nih.gov/pubmed/15956519.
 }
 \examples{
+\dontrun{
 
-maskImage <- generateAifMaskImage( perfusionImage, voiMaskImage )
-
+}
 }
 \author{
 Tustison NJ
