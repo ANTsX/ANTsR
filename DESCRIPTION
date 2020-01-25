@@ -31,7 +31,8 @@ Imports:
     grDevices,
     magrittr,
     stats,
-    utils
+    utils,
+    xgboost
 Suggests:
     magic,
     psych,
@@ -81,7 +82,6 @@ Suggests:
     viridis,
     visreg,
     wmtsa,
-    xgboost,
     FNN,
     nabor,
     RANN
