@@ -264,10 +264,6 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #'
 #' @author Tustison NJ
 #'
-#' @examples
-#' \dontrun{
-#'
-#' }
 #' @export
 generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   maxNumberOfVoxelsToPlot = 0, plotDirectory = tempdir(), index = NA )
