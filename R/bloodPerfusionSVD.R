@@ -51,6 +51,7 @@
 #' }
 #' }
 #' @export
+
 bloodPerfusionSVD <- function(
   perfusionImage, voiMaskImage, aifMaskImage,
   thresholdSVD = 0.2, deltaTime = 1.0 ){
@@ -69,7 +70,6 @@ bloodPerfusionSVD <- function(
     {
     aifOutput <- generateAifMaskImage( perfusionImage, voiMaskImage )
     aifMaskImage <- aifOutput$aifMaskImage
-    # stop( "Error:  The arterial input function mask image is not specified.\n" )
     }
 
   # The AIF signal is defined as the mean intensity value over the AIF
@@ -260,6 +260,8 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #'
 #' @return list( mask image, fitting results )
 #'
+#' @importFrom stats optim chisq.test
+#'
 #' @author Tustison NJ
 #'
 #' @examples
@@ -270,6 +272,11 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   maxNumberOfVoxelsToPlot = 0, plotDirectory = tempdir(), index = NA )
 {
+  if( ! usePkg( "ggplot2" ) )
+    {
+    stop( "Need ggplot2." )
+    }
+
   fitGaussianFunction <- function( x, y, mean, standardDeviation, scale, offset )
     {
     f <- function( p )

@@ -27,17 +27,17 @@ Each element of the labelSet requires a model.}
 
 \item{featureImages}{a list of feature images.}
 
-\item{featureImageNames}{is a vector of character strings naming the set 
+\item{featureImageNames}{is a vector of character strings naming the set
 of features.
        Must be specified.}
 
-\item{dilationRadius}{specifies the dilation radius for determining the 
+\item{dilationRadius}{specifies the dilation radius for determining the
 ROI for
-       each label using binary morphology.  Alternatively, the user can 
+       each label using binary morphology.  Alternatively, the user can
        specify a
-       float distance value, e.g., "dilationRadius = '2.75mm'", to employ 
+       float distance value, e.g., "dilationRadius = '2.75mm'", to employ
        an isotropic
-       dilation based on physical distance.  For the latter, the distance 
+       dilation based on physical distance.  For the latter, the distance
        value followed
        by the character string 'mm' (for millimeters) is necessary.}
 
@@ -45,31 +45,31 @@ ROI for
 prediction.  The user can specify a scalar or vector but it must match
 with what was used for training.}
 
-\item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are 
+\item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are
 normalized
-       by the mean of the voxels in that ROI.  Can be a vector (one 
+       by the mean of the voxels in that ROI.  Can be a vector (one
        element per feature).}
 
-\item{useEntireLabeledRegion}{if TRUE, estimation is performed on the 
+\item{useEntireLabeledRegion}{if TRUE, estimation is performed on the
 full dilated ROI for
-       each label.  If FALSE, estimation is performed on the combined 
+       each label.  If FALSE, estimation is performed on the combined
        inner and outer
-       boundary region determined by the neighborhoodRadius parameter.  
+       boundary region determined by the neighborhoodRadius parameter.
        Can also specify
        as a vector to determine per label.}
 }
 \value{
-a list consisting of the refined segmentation estimate 
+a list consisting of the refined segmentation estimate
 (RefinedSegmentationImage)
-        and a list of the foreground probability images 
+        and a list of the foreground probability images
         (ForegroundProbabilityImages).
 }
 \description{
-A random forest implementation of the corrective learning wrapper 
+A random forest implementation of the corrective learning wrapper
 introduced
-in Wang, et al., Neuroimage 2011 
+in Wang, et al., Neuroimage 2011
 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
-The prediction process involves using the label-specific training 
+The prediction process involves using the label-specific training
 models
 to refine an initial segmentation.
 }
@@ -81,13 +81,13 @@ to refine an initial segmentation.
 
  imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
 
- # Perform simple 3-tissue segmentation.  For convenience we are 
+ # Perform simple 3-tissue segmentation.  For convenience we are
  going to use
- # atropos segmentation to define the "ground-truth" segmentations 
+ # atropos segmentation to define the "ground-truth" segmentations
  and the kmeans
- # to define the segmentation we want to "correct".  We collect 
+ # to define the segmentation we want to "correct".  We collect
  feature images for
- # each image.  The gradient and laplacian images chosen below as 
+ # each image.  The gradient and laplacian images chosen below as
  feature images
  # are simply selected for convenience.
 
@@ -105,9 +105,9 @@ to refine an initial segmentation.
    cat( "Processing image", imageIDs[i], "\n" )
    images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
    mask <- getMask( images[[i]] )
-   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], 
+   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]],
    length( segmentationLabels ), mask, mrf = 0.0 )$segmentation
-   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]", 
+   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]",
    m = "[0.25,1x1]", c = "[5,0]" )$segmentation
 
    featureImageSetPerImage <- list()
@@ -117,18 +117,18 @@ to refine an initial segmentation.
    featureImages[[i]] <- featureImageSetPerImage
    }
 
- # Perform training.  We train on images "r27", "r30", 
+ # Perform training.  We train on images "r27", "r30",
  # "r62", "r64", "r85" and
  # test/predict on image "r16".
 
  cat( "\nTraining\n\n" )
 
- segLearning <- segmentationRefinement.train( 
+ segLearning <- segmentationRefinement.train(
  featureImages = featureImages[2:6],
    truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE, 
+   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE,
    useEntireLabeledRegion = FALSE )
 
  cat( "\nPrediction\n\n" )
@@ -139,10 +139,10 @@ to refine an initial segmentation.
    dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
    normalizeSamplesPerLabel = TRUE )
 
- # Compare "ground truth" = atroposSegs[[1]] with 
+ # Compare "ground truth" = atroposSegs[[1]] with
  # refinement$RefinedSegmentationImage
 
-  antsImageWrite( refinement$RefinedSegmentationImage, 
+  antsImageWrite( refinement$RefinedSegmentationImage,
   "r16RefinedSegmentation.nii.gz" )
 
 }

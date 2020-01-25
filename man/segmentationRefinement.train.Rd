@@ -18,72 +18,72 @@ segmentationRefinement.train(
 )
 }
 \arguments{
-\item{featureImages}{a list of lists of feature images.  Each list of 
+\item{featureImages}{a list of lists of feature images.  Each list of
 feature images
        corresponds to a single subject.  Possibilities are outlined in the
         above-cited
        paper.}
 
-\item{truthLabelImages}{a list of "ground-truth" segmentation images, one 
+\item{truthLabelImages}{a list of "ground-truth" segmentation images, one
 for each
        set of feature images.}
 
-\item{segmentationImages}{a list of estimated segmentation images, one for 
+\item{segmentationImages}{a list of estimated segmentation images, one for
 each set of
        feature images}
 
-\item{featureImageNames}{a vector of character strings naming the set of 
+\item{featureImageNames}{a vector of character strings naming the set of
 features.
-       This parameter is optional but does help in investigating the 
+       This parameter is optional but does help in investigating the
        relative
        importance of specific features.}
 
-\item{labelSet}{a vector specifying the labels of interest.  If not 
+\item{labelSet}{a vector specifying the labels of interest.  If not
 specified,
         the full set is determined from the truthLabelImages.}
 
-\item{maximumNumberOfSamplesOrProportionPerClass}{specified the maximum 
+\item{maximumNumberOfSamplesOrProportionPerClass}{specified the maximum
 number of samples
-       used to build the model for each element of the labelSet.  If 
+       used to build the model for each element of the labelSet.  If
        <= 1, we use it as
        as a proportion of the total number of voxels.}
 
-\item{dilationRadius}{specifies the dilation radius for determining the 
+\item{dilationRadius}{specifies the dilation radius for determining the
 ROI for
-       each label using binary morphology.  Alternatively, the user can 
+       each label using binary morphology.  Alternatively, the user can
        specify a
-       float distance value, e.g., "dilationRadius = '2.75mm'", to employ 
+       float distance value, e.g., "dilationRadius = '2.75mm'", to employ
        an isotropic
-       dilation based on physical distance.  For the latter, the distance 
+       dilation based on physical distance.  For the latter, the distance
        value followed
        by the character string 'mm' (for millimeters) is necessary.}
 
-\item{neighborhoodRadius}{specifies which voxel neighbors should be 
+\item{neighborhoodRadius}{specifies which voxel neighbors should be
 included in
        building the model.  The user can specify a scalar or vector.}
 
-\item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are 
+\item{normalizeSamplesPerLabel}{if TRUE, the samples from each ROI are
 normalized
-       by the mean of the voxels in that ROI.  Can also specify as a 
+       by the mean of the voxels in that ROI.  Can also specify as a
        vector to normalize
        per feature image.}
 
-\item{useEntireLabeledRegion}{if TRUE, samples are taken from the full 
+\item{useEntireLabeledRegion}{if TRUE, samples are taken from the full
 dilated ROI for
-       each label.  If FALSE, samples are taken only from the combined 
+       each label.  If FALSE, samples are taken only from the combined
        inner and outer
-       boundary region determined by the neighborhoodRadius parameter. 
+       boundary region determined by the neighborhoodRadius parameter.
        Can also specify
        as a vector to determine per label.}
 }
 \value{
-list with the models per label (LabelModels), the label set 
+list with the models per label (LabelModels), the label set
 (LabelSet), and
         the feature image names (FeatureImageNames).
 }
 \description{
 A random forest implementation of the corrective learning wrapper introduced
-in Wang, et al., Neuroimage 2011 
+in Wang, et al., Neuroimage 2011
 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
 The training process involves building two sets of models from training data
 for each label in the initial segmentation data.
@@ -96,13 +96,13 @@ for each label in the initial segmentation data.
 
  imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
 
- # Perform simple 3-tissue segmentation.  For convenience we are 
+ # Perform simple 3-tissue segmentation.  For convenience we are
  going to use
- # atropos segmentation to define the "ground-truth" segmentations 
+ # atropos segmentation to define the "ground-truth" segmentations
  and the kmeans
- # to define the segmentation we want to "correct".  We collect feature 
+ # to define the segmentation we want to "correct".  We collect feature
  images for
- # each image.  The gradient and laplacian images chosen below as feature 
+ # each image.  The gradient and laplacian images chosen below as feature
  images
  # are simply selected for convenience.
 
@@ -120,9 +120,9 @@ for each label in the initial segmentation data.
    cat( "Processing image", imageIDs[i], "\n" )
    images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
    mask <- getMask( images[[i]] )
-   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], 
+   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]],
    length( segmentationLabels ), mask, mrf = 0.0 )$segmentation
-   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]", 
+   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]",
    m = "[0.25,1x1]", c = "[5,0]" )$segmentation
 
    featureImageSetPerImage <- list()
@@ -132,15 +132,15 @@ for each label in the initial segmentation data.
    featureImages[[i]] <- featureImageSetPerImage
    }
 
- # Perform training.  We train on images "r27", "r30", "r62", "r64", 
+ # Perform training.  We train on images "r27", "r30", "r62", "r64",
  # "r85" and test/predict
  #  on image "r16".
 
  cat( "\nTraining\n\n" )
 
- segLearning <- segmentationRefinement.train( 
+ segLearning <- segmentationRefinement.train(
  featureImages = featureImages[2:6],
-   truthLabelImages = atroposSegs[2:6], 
+   truthLabelImages = atroposSegs[2:6],
    segmentationImages = kmeansSegs[2:6],
    featureImageNames = featureImageNames, labelSet = segmentationLabels,
    maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
