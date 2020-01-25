@@ -67,7 +67,8 @@ bloodPerfusionSVD <- function(
 
   if( missing( aifMaskImage ) )
     {
-    aifMaskImage <- generateAifMaskImage( perfusionImage, voiMaskImage )
+    aifOutput <- generateAifMaskImage( perfusionImage, voiMaskImage )
+    aifMaskImage <- aifOutput$aifMaskImage
     # stop( "Error:  The arterial input function mask image is not specified.\n" )
     }
 
@@ -325,8 +326,6 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   count <- 1
   for( i in seq_len( ncol( voiPerfusionMatrix ) ) )
     {
-    setTxtProgressBar( pb, i )
-
     # convert signal to concentration (ignore 1/TE factor).
     concentrationData <- -log( ( voiPerfusionMatrix[, i] ) /
       ( voiPerfusionMatrix[1, i] ) )

@@ -10,14 +10,13 @@ trapz(x, y)
 \item{x}{vector of samples for the dependent variable.}
 
 \item{y}{vector or matrix of samples for the independent variable.
-In the case of the
-       latter, curves are organized column-wise.}
+In the case of the latter, curves are organized column-wise.}
 }
 \value{
 area (areas) under the sampled curve (curves).
 }
 \description{
-Given a vector (or a matrix) representing a curve (or set of 
+Given a vector (or a matrix) representing a curve (or set of
 curves, columnwise),
 the area (or set of areas) is calculated using the trapezoidal rule.
 }
