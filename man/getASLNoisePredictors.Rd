@@ -4,9 +4,17 @@
 \alias{getASLNoisePredictors}
 \title{Get nuisance predictors from ASL images}
 \usage{
-getASLNoisePredictors(aslmat, tc, noisefrac = 0.1,
-  polydegree = "loess", k = 5, npreds = 12, method = "noisepool",
-  covariates = NA, noisepoolfun = max)
+getASLNoisePredictors(
+  aslmat,
+  tc,
+  noisefrac = 0.1,
+  polydegree = "loess",
+  k = 5,
+  npreds = 12,
+  method = "noisepool",
+  covariates = NA,
+  noisepoolfun = max
+)
 }
 \arguments{
 \item{aslmat}{ASL input matrix.}

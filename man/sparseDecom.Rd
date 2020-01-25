@@ -4,11 +4,26 @@
 \alias{sparseDecom}
 \title{Convenience wrapper for eigenanatomy decomposition.}
 \usage{
-sparseDecom(inmatrix = NA, inmask = NULL, sparseness = 0.1,
-  nvecs = 10, its = 5, cthresh = 50, statdir = NA, z = 0,
-  smooth = 0, initializationList = list(), mycoption = 0,
-  robust = 0, ell1 = 1, getSmall = 0, verbose = FALSE,
-  powerit = 0, priorWeight = 0, maxBased = FALSE)
+sparseDecom(
+  inmatrix = NA,
+  inmask = NULL,
+  sparseness = 0.1,
+  nvecs = 10,
+  its = 5,
+  cthresh = 50,
+  statdir = NA,
+  z = 0,
+  smooth = 0,
+  initializationList = list(),
+  mycoption = 0,
+  robust = 0,
+  ell1 = 1,
+  getSmall = 0,
+  verbose = FALSE,
+  powerit = 0,
+  priorWeight = 0,
+  maxBased = FALSE
+)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,

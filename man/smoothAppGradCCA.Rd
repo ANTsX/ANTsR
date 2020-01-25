@@ -4,10 +4,19 @@
 \alias{smoothAppGradCCA}
 \title{cca via sparse smooth matrix prediction}
 \usage{
-smoothAppGradCCA(x, y, smoox = NA, smooy = NA,
-  sparsenessQuantile = 0.5, positivity = "either", k = 2,
-  iterations = 10, stochastic = NA, initialization = "randxy",
-  verbose = FALSE)
+smoothAppGradCCA(
+  x,
+  y,
+  smoox = NA,
+  smooy = NA,
+  sparsenessQuantile = 0.5,
+  positivity = "either",
+  k = 2,
+  iterations = 10,
+  stochastic = NA,
+  initialization = "randxy",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input view 1 matrix}

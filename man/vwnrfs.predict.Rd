@@ -4,8 +4,15 @@
 \alias{vwnrfs.predict}
 \title{voxelwise neighborhood random forest prediction}
 \usage{
-vwnrfs.predict(rfm, x, labelmasks, rad = NA, asFactors = TRUE,
-  voxchunk = 30000, reduceFactor = 1)
+vwnrfs.predict(
+  rfm,
+  x,
+  labelmasks,
+  rad = NA,
+  asFactors = TRUE,
+  voxchunk = 30000,
+  reduceFactor = 1
+)
 }
 \arguments{
 \item{rfm}{random forest model trained with vwnrfs with certain

@@ -4,11 +4,23 @@
 \alias{fMRINormalization}
 \title{Multi-run normalization, filtering and nuisance estimation for fMRI.}
 \usage{
-fMRINormalization(img, steadyT = 20, fdthresh = Inf,
-  repeatMotionEst = 2, freqLimits = c(0.01, 0.1), nCompCor = 0,
-  polydegree = NA, structuralImage = NULL, structuralSeg = NULL,
-  structuralNodes = NULL, templateMap = NULL, templateImage = NULL,
-  smoothingSigmas = NA, extraRuns = list(), verbose = FALSE)
+fMRINormalization(
+  img,
+  steadyT = 20,
+  fdthresh = Inf,
+  repeatMotionEst = 2,
+  freqLimits = c(0.01, 0.1),
+  nCompCor = 0,
+  polydegree = NA,
+  structuralImage = NULL,
+  structuralSeg = NULL,
+  structuralNodes = NULL,
+  templateMap = NULL,
+  templateImage = NULL,
+  smoothingSigmas = NA,
+  extraRuns = list(),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{img}{input time series antsImage.}

@@ -4,10 +4,19 @@
 \alias{milr}
 \title{Efficiently compute a multivariate, penalized image-based linear regression model (milr)}
 \usage{
-milr(dataFrame, voxmats, myFormula, smoothingMatrix, iterations = 10,
-  gamma = 1e-06, sparsenessQuantile, positivity = c("positive",
-  "negative", "either"), repeatedMeasures = NA, orthogonalize = FALSE,
-  verbose = FALSE)
+milr(
+  dataFrame,
+  voxmats,
+  myFormula,
+  smoothingMatrix,
+  iterations = 10,
+  gamma = 0.000001,
+  sparsenessQuantile,
+  positivity = c("positive", "negative", "either"),
+  repeatedMeasures = NA,
+  orthogonalize = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{dataFrame}{This data frame contains all relevant predictors except for
@@ -73,7 +82,7 @@ feature3Images <- list()
 ref = antsImageRead( getANTsRData('r16') )
 mask = ref * 0
 for( i in 1:length( imageIDs ) )  {
-  cat( "Processing image", imageIDs[i], "\\n" )
+  cat( "Processing image", imageIDs[i], "\n" )
   tar = antsImageRead( getANTsRData( imageIDs[i] ) )
   images[[i]] <- tar
   mask = mask + tar

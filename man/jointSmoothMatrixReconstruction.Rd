@@ -4,10 +4,21 @@
 \alias{jointSmoothMatrixReconstruction}
 \title{joint smooth matrix prediction}
 \usage{
-jointSmoothMatrixReconstruction(x, nvecs, parameters, iterations = 10,
-  subIterations = 5, gamma = 1e-06, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrix = NA, rowWeights = NA,
-  repeatedMeasures = NA, doOrth = FALSE, verbose = FALSE)
+jointSmoothMatrixReconstruction(
+  x,
+  nvecs,
+  parameters,
+  iterations = 10,
+  subIterations = 5,
+  gamma = 0.000001,
+  sparsenessQuantile = 0.5,
+  positivity = FALSE,
+  smoothingMatrix = NA,
+  rowWeights = NA,
+  repeatedMeasures = NA,
+  doOrth = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input list of matrices to be jointly predicted.}
@@ -99,7 +110,7 @@ feature3Images <- list()
 ref = antsImageRead( getANTsRData('r16') )
 for( i in 1:length( imageIDs ) )
   {
-  cat( "Processing image", imageIDs[i], "\\n" )
+  cat( "Processing image", imageIDs[i], "\n" )
   tar = antsRegistration( ref, antsImageRead( getANTsRData( imageIDs[i] ) ),
     typeofTransform='Affine' )$warpedmov
   images[[i]] <- tar

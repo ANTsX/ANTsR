@@ -4,9 +4,16 @@
 \alias{petSUVR}
 \title{Compute SUVR from PET time series images}
 \usage{
-petSUVR(petTime, anatomicalImage, anatomicalSegmentation,
-  smoothingParameter = 2.5, labelValue = 0,
-  subtractBackground = FALSE, mapToPet = TRUE, noMotionCorr = FALSE)
+petSUVR(
+  petTime,
+  anatomicalImage,
+  anatomicalSegmentation,
+  smoothingParameter = 2.5,
+  labelValue = 0,
+  subtractBackground = FALSE,
+  mapToPet = TRUE,
+  noMotionCorr = FALSE
+)
 }
 \arguments{
 \item{petTime}{pet time series antsImage or 3D image}

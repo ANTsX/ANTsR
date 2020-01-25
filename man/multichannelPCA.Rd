@@ -4,8 +4,16 @@
 \alias{multichannelPCA}
 \title{Shape analysis of multichannel images based on PCA}
 \usage{
-multichannelPCA(x, mask, k = NA, pcaOption = "PCA", auxiliaryModality,
-  center = TRUE, sigma = NA, verbose = FALSE)
+multichannelPCA(
+  x,
+  mask,
+  k = NA,
+  pcaOption = "PCA",
+  auxiliaryModality,
+  center = TRUE,
+  sigma = NA,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{list containing multichannel images all of the same size}

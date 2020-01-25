@@ -4,9 +4,18 @@
 \alias{compcor}
 \title{Compcors the input matrix using SVD and returns the result.}
 \usage{
-compcor(fmri, ncompcor = 4, variance_extreme = 0.975, mask = NULL,
-  randomSamples = 1, returnv = FALSE, returnhighvarmat = FALSE,
-  returnhighvarmatinds = FALSE, highvarmatinds = NA, scale = TRUE)
+compcor(
+  fmri,
+  ncompcor = 4,
+  variance_extreme = 0.975,
+  mask = NULL,
+  randomSamples = 1,
+  returnv = FALSE,
+  returnhighvarmat = FALSE,
+  returnhighvarmatinds = FALSE,
+  highvarmatinds = NA,
+  scale = TRUE
+)
 }
 \arguments{
 \item{fmri}{input fmri image or matrix}

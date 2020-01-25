@@ -4,8 +4,7 @@
 \alias{estSmooth}
 \title{Estimate image smoothness}
 \usage{
-estSmooth(x, mask, rdf, scaleResid = TRUE, sample = NULL,
-  verbose = TRUE)
+estSmooth(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE)
 }
 \arguments{
 \item{x}{may be an image of class "antsImage" or an image matrix}

@@ -4,9 +4,13 @@
 \alias{orthogonalizeAndQSparsify}
 \title{sparsify a matrix}
 \usage{
-orthogonalizeAndQSparsify(v, sparsenessQuantile = 0.5,
-  positivity = "either", orthogonalize = TRUE,
-  softThresholding = FALSE)
+orthogonalizeAndQSparsify(
+  v,
+  sparsenessQuantile = 0.5,
+  positivity = "either",
+  orthogonalize = TRUE,
+  softThresholding = FALSE
+)
 }
 \arguments{
 \item{v}{input matrix}

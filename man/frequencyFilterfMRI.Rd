@@ -4,8 +4,7 @@
 \alias{frequencyFilterfMRI}
 \title{Band pass filtering for BOLD image.}
 \usage{
-frequencyFilterfMRI(boldmat, tr, freqLo = 0.01, freqHi = 0.1,
-  opt = "butt")
+frequencyFilterfMRI(boldmat, tr, freqLo = 0.01, freqHi = 0.1, opt = "butt")
 }
 \arguments{
 \item{boldmat}{Time series matrix for bold image}

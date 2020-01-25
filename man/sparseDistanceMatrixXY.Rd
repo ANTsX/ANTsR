@@ -4,9 +4,17 @@
 \alias{sparseDistanceMatrixXY}
 \title{Create sparse distance, covariance or correlation matrix from x, y}
 \usage{
-sparseDistanceMatrixXY(x, y, k = 3, r = Inf, sigma = NA,
+sparseDistanceMatrixXY(
+  x,
+  y,
+  k = 3,
+  r = Inf,
+  sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06, kPackage = "FNN", ncores = NA)
+  eps = 0.000001,
+  kPackage = "FNN",
+  ncores = NA
+)
 }
 \arguments{
 \item{x}{input matrix, should be n (samples) by p (measurements)}

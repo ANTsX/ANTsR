@@ -4,8 +4,14 @@
 \alias{milr.predict}
 \title{Predict from a milr output}
 \usage{
-milr.predict(milrResult, dataFrameTrain, voxmatsTrain, dataFrameTest,
-  voxmatsTest, myFormula)
+milr.predict(
+  milrResult,
+  dataFrameTrain,
+  voxmatsTrain,
+  dataFrameTest,
+  voxmatsTest,
+  myFormula
+)
 }
 \arguments{
 \item{milrResult}{This output form milr}

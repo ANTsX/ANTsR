@@ -4,8 +4,14 @@
 \alias{aslAveraging}
 \title{Average ASL tag-control pairs to estimate perfusion}
 \usage{
-aslAveraging(asl, mask = NULL, tc = NA, nuisance = NA,
-  method = "regression", ...)
+aslAveraging(
+  asl,
+  mask = NULL,
+  tc = NA,
+  nuisance = NA,
+  method = "regression",
+  ...
+)
 }
 \arguments{
 \item{asl}{input asl image}

@@ -4,9 +4,17 @@
 \alias{affineInitializer}
 \title{a multi-start optimizer for affine registration}
 \usage{
-affineInitializer(fixedImage, movingImage, searchFactor = 20,
-  radianFraction = 0.1, usePrincipalAxis = FALSE,
-  localSearchIterations = 10, mask, txfn, num_threads = 1)
+affineInitializer(
+  fixedImage,
+  movingImage,
+  searchFactor = 20,
+  radianFraction = 0.1,
+  usePrincipalAxis = FALSE,
+  localSearchIterations = 10,
+  mask,
+  txfn,
+  num_threads = 1
+)
 }
 \arguments{
 \item{fixedImage}{the fixed reference image}

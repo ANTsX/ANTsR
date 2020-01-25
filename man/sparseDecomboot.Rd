@@ -4,10 +4,22 @@
 \alias{sparseDecomboot}
 \title{Convenience wrapper for eigenanatomy decomposition.}
 \usage{
-sparseDecomboot(inmatrix, inmask = NULL, sparseness = 0.01,
-  nvecs = 50, its = 5, cthresh = 250, z = 0, smooth = 0,
-  initializationList = list(), mycoption = 0, nboot = 10,
-  nsamp = 0.9, robust = 0, doseg = TRUE)
+sparseDecomboot(
+  inmatrix,
+  inmask = NULL,
+  sparseness = 0.01,
+  nvecs = 50,
+  its = 5,
+  cthresh = 250,
+  z = 0,
+  smooth = 0,
+  initializationList = list(),
+  mycoption = 0,
+  nboot = 10,
+  nsamp = 0.9,
+  robust = 0,
+  doseg = TRUE
+)
 }
 \arguments{
 \item{inmatrix}{n by p input images , subjects or time points by row ,

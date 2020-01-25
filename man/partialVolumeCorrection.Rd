@@ -4,8 +4,7 @@
 \alias{partialVolumeCorrection}
 \title{Perform partial volume correction for ASL images.}
 \usage{
-partialVolumeCorrection(img, img.gm, img.wm, mask = NULL,
-  proportion = 0.4)
+partialVolumeCorrection(img, img.gm, img.wm, mask = NULL, proportion = 0.4)
 }
 \arguments{
 \item{img}{Low-resolution image to be corrected.  All input images can be

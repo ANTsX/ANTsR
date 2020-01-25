@@ -4,8 +4,16 @@
 \alias{spatialbayesianlm}
 \title{spatially constrained bayesian regression function.}
 \usage{
-spatialbayesianlm(mylm, ymat, mask, smth = 1, priorWeight = 1,
-  nhood = NA, regweights = NA, smoothcoeffmat = NA)
+spatialbayesianlm(
+  mylm,
+  ymat,
+  mask,
+  smth = 1,
+  priorWeight = 1,
+  nhood = NA,
+  regweights = NA,
+  smoothcoeffmat = NA
+)
 }
 \arguments{
 \item{mylm}{standard lm result of the form mylm<-lm(ymat~.)}

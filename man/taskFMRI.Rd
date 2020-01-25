@@ -4,8 +4,14 @@
 \alias{taskFMRI}
 \title{Simple taskFMRI function.}
 \usage{
-taskFMRI(mat, hrf, myvars, correctautocorr = FALSE,
-  residualizedesignmatrix = FALSE, myformula = NA)
+taskFMRI(
+  mat,
+  hrf,
+  myvars,
+  correctautocorr = FALSE,
+  residualizedesignmatrix = FALSE,
+  myformula = NA
+)
 }
 \arguments{
 \item{mat}{input matrix}

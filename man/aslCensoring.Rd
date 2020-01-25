@@ -4,8 +4,14 @@
 \alias{aslCensoring}
 \title{Censor bad volumes from ASL data.}
 \usage{
-aslCensoring(asl, mask = NULL, nuis = NA, method = "outlier",
-  reject.pairs = FALSE, ...)
+aslCensoring(
+  asl,
+  mask = NULL,
+  nuis = NA,
+  method = "outlier",
+  reject.pairs = FALSE,
+  ...
+)
 }
 \arguments{
 \item{asl}{input asl image}

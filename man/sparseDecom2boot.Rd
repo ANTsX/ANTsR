@@ -5,13 +5,30 @@
 \title{Convenience wrapper for 2-view eigenanatomy decomposition w/bootstrap
 initialization.}
 \usage{
-sparseDecom2boot(inmatrix, inmask = c(NULL, NULL), sparseness = c(0.01,
-  0.01), nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA,
-  perms = 0, uselong = 0, z = 0, smooth = 0, robust = 0,
-  mycoption = 1, initializationList = list(),
-  initializationList2 = list(), ell1 = 0.05, nboot = 10, nsamp = 1,
-  doseg = FALSE, priorWeight = 0, verbose = FALSE,
-  estimateSparseness = 0.2)
+sparseDecom2boot(
+  inmatrix,
+  inmask = c(NULL, NULL),
+  sparseness = c(0.01, 0.01),
+  nvecs = 50,
+  its = 5,
+  cthresh = c(0, 0),
+  statdir = NA,
+  perms = 0,
+  uselong = 0,
+  z = 0,
+  smooth = 0,
+  robust = 0,
+  mycoption = 1,
+  initializationList = list(),
+  initializationList2 = list(),
+  ell1 = 0.05,
+  nboot = 10,
+  nsamp = 1,
+  doseg = FALSE,
+  priorWeight = 0,
+  verbose = FALSE,
+  estimateSparseness = 0.2
+)
 }
 \arguments{
 \item{inmatrix}{input as inmatrix=list(mat1,mat2). n by p input matrix and n

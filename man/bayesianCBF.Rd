@@ -4,9 +4,17 @@
 \alias{bayesianCBF}
 \title{Uses probabilistic segmentation to constrain pcasl-based cbf computation.}
 \usage{
-bayesianCBF(pcasl, segmentation, tissuelist, myPriorStrength = 30,
-  useDataDrivenMask = 3, denoisingComponents = 1:8,
-  robustnessvalue = 0.95, localweights = FALSE, priorBetas = NA)
+bayesianCBF(
+  pcasl,
+  segmentation,
+  tissuelist,
+  myPriorStrength = 30,
+  useDataDrivenMask = 3,
+  denoisingComponents = 1:8,
+  robustnessvalue = 0.95,
+  localweights = FALSE,
+  priorBetas = NA
+)
 }
 \arguments{
 \item{pcasl}{img antsImage for cbf}
