@@ -250,10 +250,6 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #' @param perfusionImage time series (n-D + time) perfusion acquisition.
 #' @param voiMaskImage n-D mask image indicating where the cerebral blood
 #' flow parameter images are calculated.
-#' @param maxNumberOfVoxelsToPlot Given that several voxels might survive
-#' the criteria for selection, we permit the user to write the fitting
-#' plots and masks to a directory for manual selection.
-#' @param plotDirectory Directory for writing the manual inspectionfiles.
 #' @param index If the user prefers a specific voxel if looking at the
 #' plots, they can simply specify the index (gleaned from the file names)
 #' and the corresponding AIF mask image is created.
@@ -261,13 +257,12 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #' @return list( mask image, fitting results )
 #'
 #' @importFrom stats optim chisq.test dnorm
-#' @importFrom ggplot2 ggplot geom_line aes geom_point ggtitle xlab ylab ggsave
 #'
 #' @author Tustison NJ
 #'
 #' @export
 generateAifMaskImage <- function( perfusionImage, voiMaskImage,
-  maxNumberOfVoxelsToPlot = 0, plotDirectory = tempdir(), index = NA )
+  index = NA )
 {
 
   fitGaussianFunction <- function( x, y, mean, standardDeviation, scale, offset )
@@ -383,47 +378,6 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   aifMatrix <- matrix( voiPerfusionMatrix[1, ], nrow = 1 ) * 0
   aifMatrix[1, fittingResults$Index[1]] <- 1
   aifMaskImage <- matrixToImages( aifMatrix, voiMaskImage )[[1]]
-
-  if( maxNumberOfVoxelsToPlot > 0 )
-    {
-    number <- min( maxNumberOfVoxelsToPlot, nrow( fittingResults ) )
-
-    avgPerfusionImage <- matrixToImages(
-      matrix( apply( voiPerfusionMatrix, 2, mean ), nrow = 1 ),
-      voiMaskImage )[[1]]
-
-    for( i in seq_len( number )  )
-      {
-      index <- fittingResults$Index[i]
-      concentrationData <- -log( ( voiPerfusionMatrix[, index] ) /
-        ( voiPerfusionMatrix[1, index] ) )
-      modelData <- fittingResults$GaussianFitScale[i] * dnorm( timePoints,
-        mean = fittingResults$GaussianFitMean[i],
-        sd = fittingResults$GaussianFitStd[i] ) +
-        fittingResults$GaussianFitOffset[i]
-
-      fittingDataFrame <- data.frame( "TimePoint" = timePoints,
-        "Perfusion" = concentrationData, "GaussianModel" = modelData )
-      fittingPlot <- ggplot( data = fittingDataFrame ) +
-        geom_line( aes( x = TimePoint, y = GaussianModel ),
-          colour = 'red', linetype = 'longdash' ) +
-        geom_point( aes( x = TimePoint, y = Perfusion ), size = 1 ) +
-        ggtitle( paste( "Index", index ) ) +
-        xlab( "Timepoint" ) +
-        ylab( "Perfusion" ) # + ylim( yMin, yMax )
-      ggsave( paste0( plotDirectory, "/ConcentrationAndFittedModel",
-        index, ".pdf" ), fittingPlot, width = 5, height = 3, units = "in" )
-
-      aifMatrixTmp <- aifMatrix * 0
-      aifMatrixTmp[1, index] <- 1
-      aifMaskImageTmp <- matrixToImages( aifMatrixTmp, voiMaskImage )[[1]]
-      dilatedMask <- iMath( aifMaskImageTmp, "MD", 3 )
-
-      # Plot the mask
-      plot( avgPerfusionImage, dilatedMask, axis = 3,
-        outname = paste0( plotDirectory, "/AveragePerfusionWithDilatedVoxelMask", index, ".jpg" ) )
-      }
-    }
 
   return( list( aifMaskImage = aifMaskImage, fittingResults = fittingResults ) )
 }
