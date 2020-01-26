@@ -260,7 +260,8 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 #'
 #' @return list( mask image, fitting results )
 #'
-#' @importFrom stats optim chisq.test
+#' @importFrom stats optim chisq.test dnorm
+#' @importFrom ggplot2 ggplot geom_line aes geom_point ggtitle xlab ylab ggsave
 #'
 #' @author Tustison NJ
 #'
@@ -268,10 +269,6 @@ deconvolutionSVD <- function( arterialInputFunction, thresholdSVD = 0.2 )
 generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   maxNumberOfVoxelsToPlot = 0, plotDirectory = tempdir(), index = NA )
 {
-  if( ! usePkg( "ggplot2" ) )
-    {
-    stop( "Need ggplot2." )
-    }
 
   fitGaussianFunction <- function( x, y, mean, standardDeviation, scale, offset )
     {
@@ -405,8 +402,8 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
         sd = fittingResults$GaussianFitStd[i] ) +
         fittingResults$GaussianFitOffset[i]
 
-      fittingDataFrame <- data.frame( TimePoint = timePoints,
-        Perfusion = concentrationData, GaussianModel = modelData )
+      fittingDataFrame <- data.frame( "TimePoint" = timePoints,
+        "Perfusion" = concentrationData, "GaussianModel" = modelData )
       fittingPlot <- ggplot( data = fittingDataFrame ) +
         geom_line( aes( x = TimePoint, y = GaussianModel ),
           colour = 'red', linetype = 'longdash' ) +
@@ -414,8 +411,8 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
         ggtitle( paste( "Index", index ) ) +
         xlab( "Timepoint" ) +
         ylab( "Perfusion" ) # + ylim( yMin, yMax )
-      ggsave( paste0( plotDirectory, "/ConcentrationAndFittedModel", index, ".pdf" ),
-        fittingPlot, width = 5, height = 3, units = "in" )
+      ggsave( paste0( plotDirectory, "/ConcentrationAndFittedModel",
+        index, ".pdf" ), fittingPlot, width = 5, height = 3, units = "in" )
 
       aifMatrixTmp <- aifMatrix * 0
       aifMatrixTmp[1, index] <- 1
