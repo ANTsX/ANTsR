@@ -4,25 +4,13 @@
 \alias{generateAifMaskImage}
 \title{Automatically generate an arterial input function mask.}
 \usage{
-generateAifMaskImage(
-  perfusionImage,
-  voiMaskImage,
-  maxNumberOfVoxelsToPlot = 0,
-  plotDirectory = tempdir(),
-  index = NA
-)
+generateAifMaskImage(perfusionImage, voiMaskImage, index = NA)
 }
 \arguments{
 \item{perfusionImage}{time series (n-D + time) perfusion acquisition.}
 
 \item{voiMaskImage}{n-D mask image indicating where the cerebral blood
 flow parameter images are calculated.}
-
-\item{maxNumberOfVoxelsToPlot}{Given that several voxels might survive
-the criteria for selection, we permit the user to write the fitting
-plots and masks to a directory for manual selection.}
-
-\item{plotDirectory}{Directory for writing the manual inspectionfiles.}
 
 \item{index}{If the user prefers a specific voxel if looking at the
 plots, they can simply specify the index (gleaned from the file names)
