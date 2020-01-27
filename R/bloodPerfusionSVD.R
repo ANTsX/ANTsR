@@ -265,16 +265,16 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
   index = NA )
 {
 
-  fitGaussianFunction <- function( x, y, mean, standardDeviation, scale, offset )
+  fitGaussianFunction <- function( x, y, mean, logStd, scale, offset )
     {
     f <- function( p )
       {
-      d = p[3] * dnorm( x, mean = p[1], sd = p[2] ) + p[4]
-      error <- sum( ( d - y )^2 ) / length( d )
-      return( error )
+      d = p[3] * dnorm( x, mean = p[1], sd = exp( p[2] ) ) + p[4]
+      error <- sum( ( d - y )^2, na.rm = TRUE ) / length( d )
+      return( error )       
       }
 
-    optimization <- optim( c( mean, standardDeviation, scale, offset ), f )
+    optimization <- optim( c( mean, logStd, scale, offset ), f )
     return( optimization )
     }
 
@@ -329,23 +329,38 @@ generateAifMaskImage <- function( perfusionImage, voiMaskImage,
       next
       }
 
-    gauss <- fitGaussianFunction( x = timePoints, y = concentrationData,
-      mean = initialMean, standardDeviation = initialStandardDeviation,
-      scale = 0.5 * max( concentrationData ), offset = initialOffset )
+    gauss <- 
+      tryCatch(
+        { 
+        fitGaussianFunction( x = timePoints, y = concentrationData,
+          mean = initialMean, logStd = log( initialStandardDeviation ),
+          scale = 0.5 * max( concentrationData ), offset = initialOffset )
+        },
+      error = function( cond )
+        {
+        return( NA )  
+        }
+      )
 
+    if( length( gauss ) == 1 && is.na( gauss ) )  
+      {
+      next  
+      }
+
+    gauss$par[2] <- exp( gauss$par[2] )
     if( gauss$par[1] < minTime || gauss$par[1] > maxTime ||
         gauss$par[2] < 1.5 || gauss$par[2] > 5.0 ||
         gauss$par[3] < 10 || gauss$par[4] < 0 )
       {
-      next
+      next 
       }
 
     modelData <- gauss$par[3] * dnorm( timePoints,
       mean = gauss$par[1], sd = gauss$par[2] ) +
       gauss$par[4]
 
-    goodnessOfFit <- chisq.test( x = concentrationData,
-      p = modelData, rescale.p = TRUE )
+    goodnessOfFit <- suppressWarnings( chisq.test( x = concentrationData,
+      p = modelData, rescale.p = TRUE, simulate.p.value = TRUE ) )
 
     if( goodnessOfFit$p.value < 0.1 )
       {
