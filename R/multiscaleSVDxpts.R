@@ -2184,7 +2184,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 }
 
 
-.symilr3 <- function( dataFrame,
+.symlr3 <- function( dataFrame,
                       voxmats,
                       basisK,
                       myFormulaK,
@@ -2354,7 +2354,7 @@ mild <- function( dataFrame,  voxmats, basisK,
       #    print( diag( locor ) )
     }
   }
-  return( list( symilrX = mildx, symilrY = mildy ) )
+  return( list( symlrX = mildx, symlrY = mildy ) )
 
 
   if ( FALSE ) {
@@ -2389,7 +2389,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
 
-.symilr2 <- function( dataFrame,
+.symlr2 <- function( dataFrame,
                       voxmats,
                       basisK,
                       myFormulaK,
@@ -2550,14 +2550,14 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
   }
-  return( list( symilrX = mildx, symilrY = mildy ) )
+  return( list( symlrX = mildx, symlrY = mildy ) )
 }
 
 
 
 
 
-#' Symmetric multivariate, penalized image-based linear regression model (symilr2) for two modalities
+#' Symmetric multivariate, penalized image-based linear regression model (symlr2) for two modalities
 #'
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
@@ -2595,11 +2595,11 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' mat2 = replicate( npix + 10, rnorm( nsub ) )
 #' mat3 = replicate( npix + 10, rnorm( nsub ) )
 #' nk = 3
-#' result = symilr2( list( vox = mat, vox2 = mat2, vox3 = mat3 ), basisK = 3 )
+#' result = symlr2( list( vox = mat, vox2 = mat2, vox3 = mat3 ), basisK = 3 )
 #'
 #' @seealso \code{\link{milr}} \code{\link{mild}}
-#' @export symilr2
-symilr2 <- function(
+#' @export symlr2
+symlr2 <- function(
   voxmats,
   basisK,
   smoothingMatrixX,
@@ -2698,8 +2698,8 @@ symilr2 <- function(
     #    umatX = scale( umatX + ( dedu1 ) * gamma, center=TRUE, scale=TRUE )
     #    umatY = scale(umatY + ( dedu2 ) * gamma, center=TRUE, scale=TRUE )
     #    umatY =  scale( ( umatX %*% t(umatX ) ) %*% umatY, center=TRUE, scale=TRUE )
-    orthogonalizesymilr = F
-    if ( orthogonalizesymilr ) {
+    orthogonalizesymlr = F
+    if ( orthogonalizesymlr ) {
       umatX =  qr.Q(  qr( umatX ) )
       umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
     }
@@ -2752,10 +2752,10 @@ symilr2 <- function(
 
 
 
-#' Symmetric multivariate, penalized image-based linear regression model (symilr) for N modalities
+#' Symmetric multivariate linear regression model (symlr) for N modalities
 #'
-#' SyMILR minimizes reconstruction error across related modalities.  That is,
-#' SyMILR will reconstruct each modality matrix from a basis set derived from
+#' symlr minimizes reconstruction error across related modalities.  That is,
+#' symlr will reconstruct each modality matrix from a basis set derived from
 #' the other modalities.  The basis set can be derived from SVD, ICA or a
 #' simple sum of basis representations.
 #' This function produces dataset-wide multivariate beta maps for each of the
@@ -2803,7 +2803,7 @@ symilr2 <- function(
 #' mat1 = (outcome %*% t(outcome1) %*% (outcome1)) %*% view1tx
 #' mat2 = (outcome %*% t(outcome2) %*% (outcome2)) %*% view2tx
 #' mat3 = (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
-#' result = symilr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
+#' result = symlr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
 #'    initialUMatrix = nk , verbose=TRUE, iterations=5  )
 #' p1 = mat1 %*% (result$v[[1]])
 #' p2 = mat2 %*% (result$v[[2]])
@@ -2812,7 +2812,7 @@ symilr2 <- function(
 #' # compare to permuted data
 #' s1 = sample( 1:nsub)
 #' s2 = sample( 1:nsub)
-#' resultp = symilr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#' resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
 #'    initialUMatrix = nk , verbose=TRUE, iterations=5  )
 #' p1p = mat1 %*% (resultp$v[[1]])
 #' p2p = mat2[s1,] %*% (resultp$v[[2]])
@@ -2836,9 +2836,9 @@ symilr2 <- function(
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
-#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symilr2}}  \code{\link{symilrU}}
-#' @export symilr
-symilr <- function(
+#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}
+#' @export symlr
+symlr <- function(
   voxmats,
   smoothingMatrices,
   iterations = 10,
@@ -2981,8 +2981,15 @@ symilr <- function(
   basisK = ncol( initialUMatrix[[ 1 ]] )
   vmats = list()
   dedu = list()
-  for ( i in 1:length( voxmats ) )
-    vmats[[ i ]] = matrix( 0, nrow = p[ i ], ncol = basisK )
+  initialEnergy = 0
+  for ( i in 1:length( voxmats ) ) {
+    vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK )
+    prediction = initialUMatrix[[i]] %*% t( vmats[[ i ]] ) # old way, slower
+    initialEnergy = initialEnergy + 1.0 / length( voxmats ) *
+      norm( prediction/norm(prediction,'F') -
+           voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
+    }
+  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
   matnorms = rep( 1, length(matnorms) )
   gradnorms = matnorms
   gradnormsRanEff = matnorms
@@ -3037,7 +3044,7 @@ symilr <- function(
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
-    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
+    avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 1e-10 ) {
       # randomly sample some voxels to speed this up
       nmaxc = sampleNc = ncol(voxmats[[i]])
@@ -3075,7 +3082,7 @@ symilr <- function(
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
-    avgU = symilrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
+    avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
     temperv = 0
     if ( hasRanEff )
       temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
@@ -3206,15 +3213,15 @@ symilr <- function(
 
 
 
-#' Compute the low-dimensional u matrix for symilr
+#' Compute the low-dimensional u matrix for symlr
 #'
-#' SyMILR minimizes reconstruction error across related modalities.  One crucial
+#' symlr minimizes reconstruction error across related modalities.  One crucial
 #' component of the reconstruction is the low-dimensional cross-modality basis.
 #' This function computes that basis, given a mixing algorithm.
 #'
 #' @param projections A list that contains the low-dimensional projections.
 #' @param i which modality to predict from the others.
-#' @param mixingAlgorithm the elected mixing algorithm.  see \code{symilr}.  can
+#' @param mixingAlgorithm the elected mixing algorithm.  see \code{symlr}.  can
 #' be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
 #' @param orthogonalize boolean
@@ -3229,11 +3236,11 @@ symilr <- function(
 #' outcome = matrix(rnorm( nsub * nk ),ncol=nk)
 #' outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
 #' outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
-#' u = symilrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
+#' u = symlrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
 #'
-#' @seealso \code{\link{symilr}}
+#' @seealso \code{\link{symlr}}
 #' @export
-symilrU <- function( projections, i, mixingAlgorithm, initialW,
+symlrU <- function( projections, i, mixingAlgorithm, initialW,
   orthogonalize = FALSE ) {
   # some gram schmidt code
   localGS <- function( x, orthogonalize = TRUE ) {
