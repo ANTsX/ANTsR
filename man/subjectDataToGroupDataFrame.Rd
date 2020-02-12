@@ -4,8 +4,7 @@
 \alias{subjectDataToGroupDataFrame}
 \title{convert subject matrix data to a row in a dataframe.}
 \usage{
-subjectDataToGroupDataFrame(csvlist, usecol, mycolname = NA,
-  datarownames = NA)
+subjectDataToGroupDataFrame(csvlist, usecol, mycolname = NA, datarownames = NA)
 }
 \arguments{
 \item{csvlist}{input list of csv files eg by Sys.glob ...}

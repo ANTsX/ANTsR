@@ -4,9 +4,14 @@
 \alias{save.ANTsR}
 \title{Save R sessions including ANTsR objects}
 \usage{
-save.ANTsR(filename = file.path(".", ".ANTsRsession"), objects = NA,
-  env = as.environment(1), overwrite = FALSE, clonediskfiles = TRUE,
-  ...)
+save.ANTsR(
+  filename = file.path(".", ".ANTsRsession"),
+  objects = NA,
+  env = as.environment(1),
+  overwrite = FALSE,
+  clonediskfiles = TRUE,
+  ...
+)
 }
 \arguments{
 \item{filename}{Prefix for folder to store data.}

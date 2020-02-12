@@ -4,11 +4,22 @@
 \alias{plotBasicNetwork}
 \title{Simple plotBasicNetwork function.}
 \usage{
-plotBasicNetwork(centroids, brain, weights = NA, edgecolors = -1,
-  backgroundColor = "white", nodecolors = "blue", nodetype = "s",
-  edgeContrast = c(0, 1), quantileTransformWeights = FALSE, lwd = 2,
-  minRadius = 0, maxRadius = 3, radius = NA,
-  showOnlyConnectedNodes = TRUE)
+plotBasicNetwork(
+  centroids,
+  brain,
+  weights = NA,
+  edgecolors = -1,
+  backgroundColor = "white",
+  nodecolors = "blue",
+  nodetype = "s",
+  edgeContrast = c(0, 1),
+  quantileTransformWeights = FALSE,
+  lwd = 2,
+  minRadius = 0,
+  maxRadius = 3,
+  radius = NA,
+  showOnlyConnectedNodes = TRUE
+)
 }
 \arguments{
 \item{centroids}{input matrix of size N 3D points ( in rows ) by 3 (

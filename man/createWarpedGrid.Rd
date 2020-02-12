@@ -4,9 +4,16 @@
 \alias{createWarpedGrid}
 \title{Create a warped grid for visualization.}
 \usage{
-createWarpedGrid(img, gridStep = 10, gridWidth = 2,
-  gridDirections = c(TRUE, TRUE), fixedReferenceImage = NULL,
-  transform = NA, foreground = 1, background = 0)
+createWarpedGrid(
+  img,
+  gridStep = 10,
+  gridWidth = 2,
+  gridDirections = c(TRUE, TRUE),
+  fixedReferenceImage = NULL,
+  transform = NA,
+  foreground = 1,
+  background = 0
+)
 }
 \arguments{
 \item{img}{input image}

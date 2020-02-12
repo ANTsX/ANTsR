@@ -4,8 +4,13 @@
 \alias{eigSeg}
 \title{Segmentation for eigenanatomy.}
 \usage{
-eigSeg(mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
-  cthresh = 0, smooth = 1)
+eigSeg(
+  mask = NULL,
+  imgList = NA,
+  applySegmentationToImages = FALSE,
+  cthresh = 0,
+  smooth = 1
+)
 }
 \arguments{
 \item{mask}{D-dimensional mask > 0 defining segmentation region.}

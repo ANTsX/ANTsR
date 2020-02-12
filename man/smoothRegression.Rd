@@ -4,9 +4,17 @@
 \alias{smoothRegression}
 \title{smooth matrix-based regression}
 \usage{
-smoothRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrix = NA, nv = 2, extraPredictors,
-  verbose = FALSE)
+smoothRegression(
+  x,
+  y,
+  iterations = 10,
+  sparsenessQuantile = 0.5,
+  positivity = FALSE,
+  smoothingMatrix = NA,
+  nv = 2,
+  extraPredictors,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input matrix on which prediction is based}

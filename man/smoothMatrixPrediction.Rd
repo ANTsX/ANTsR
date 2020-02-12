@@ -4,11 +4,21 @@
 \alias{smoothMatrixPrediction}
 \title{smooth matrix prediction}
 \usage{
-smoothMatrixPrediction(x, basisDf, modelFormula = as.formula(" x ~ ."),
-  iterations = 10, gamma = 1e-06, sparsenessQuantile = 0.5,
+smoothMatrixPrediction(
+  x,
+  basisDf,
+  modelFormula = as.formula(" x ~ ."),
+  iterations = 10,
+  gamma = 1e-06,
+  sparsenessQuantile = 0.5,
   positivity = c("positive", "negative", "either"),
-  smoothingMatrix = NA, repeatedMeasures = NA, rowWeights = NA,
-  LRR = NA, doOrth = FALSE, verbose = FALSE)
+  smoothingMatrix = NA,
+  repeatedMeasures = NA,
+  rowWeights = NA,
+  LRR = NA,
+  doOrth = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input matrix to be predicted.}

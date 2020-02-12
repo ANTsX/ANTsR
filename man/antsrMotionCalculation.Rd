@@ -4,10 +4,18 @@
 \alias{antsrMotionCalculation}
 \title{antsrMotionCalculation}
 \usage{
-antsrMotionCalculation(img, fixed, mask, typeofTransform = c("Rigid",
-  "QuickRigid", "BOLDRigid", "Affine", "AffineFast", "BOLDAffine", "SyN",
-  "SyNOnly"), getMotionDescriptors = TRUE, verbose = FALSE,
-  num_threads = 1, seed = NULL, ...)
+antsrMotionCalculation(
+  img,
+  fixed,
+  mask,
+  typeofTransform = c("Rigid", "QuickRigid", "BOLDRigid", "Affine", "AffineFast",
+    "BOLDAffine", "SyN", "SyNOnly"),
+  getMotionDescriptors = TRUE,
+  verbose = FALSE,
+  num_threads = 1,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{img}{antsImage, usually ND where D=4.}

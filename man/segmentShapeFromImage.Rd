@@ -4,8 +4,14 @@
 \alias{segmentShapeFromImage}
 \title{convolution-based shape identification}
 \usage{
-segmentShapeFromImage(img, shape, mask = NULL, rad = NA, scfun,
-  maskZeroes = TRUE)
+segmentShapeFromImage(
+  img,
+  shape,
+  mask = NULL,
+  rad = NA,
+  scfun,
+  maskZeroes = TRUE
+)
 }
 \arguments{
 \item{img}{antsImage}

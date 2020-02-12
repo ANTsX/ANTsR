@@ -4,8 +4,18 @@
 \alias{cvEigenanatomy}
 \title{Cross-validation method for eigenanatomy decompositions.}
 \usage{
-cvEigenanatomy(demog, images, outcome, ratio = 10, mask = NULL,
-  sparseness = 0.01, nvecs = 50, its = 5, cthresh = 250, ...)
+cvEigenanatomy(
+  demog,
+  images,
+  outcome,
+  ratio = 10,
+  mask = NULL,
+  sparseness = 0.01,
+  nvecs = 50,
+  its = 5,
+  cthresh = 250,
+  ...
+)
 }
 \arguments{
 \item{demog}{Demographics information that includes outcome and (optional)

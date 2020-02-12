@@ -4,15 +4,26 @@
 \alias{preprocessRestingBOLD}
 \title{Preprocess resting BOLD fMRI image data.}
 \usage{
-preprocessRestingBOLD(boldImage, maskImage = NULL,
-  maskingMeanRatioThreshold = 0.75, initialNuisanceVariables,
-  denseFramewise = FALSE, numberOfCompCorComponents = 6,
-  doMotionCorrection = TRUE, useMotionCorrectedImage = FALSE,
-  motionCorrectionAccuracyLevel = 1, motionCorrectionIterations = 1,
+preprocessRestingBOLD(
+  boldImage,
+  maskImage = NULL,
+  maskingMeanRatioThreshold = 0.75,
+  initialNuisanceVariables,
+  denseFramewise = FALSE,
+  numberOfCompCorComponents = 6,
+  doMotionCorrection = TRUE,
+  useMotionCorrectedImage = FALSE,
+  motionCorrectionAccuracyLevel = 1,
+  motionCorrectionIterations = 1,
   meanBoldFixedImageForMotionCorrection = NULL,
-  frequencyLowThreshold = NA, frequencyHighThreshold = NA,
-  spatialSmoothingType = "none", spatialSmoothingParameters = 0,
-  residualizeMatrix = TRUE, num_threads = 1, seed = NULL)
+  frequencyLowThreshold = NA,
+  frequencyHighThreshold = NA,
+  spatialSmoothingType = "none",
+  spatialSmoothingParameters = 0,
+  residualizeMatrix = TRUE,
+  num_threads = 1,
+  seed = NULL
+)
 }
 \arguments{
 \item{boldImage}{4-D ANTs image fMRI data.}

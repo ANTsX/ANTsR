@@ -4,9 +4,18 @@
 \alias{smoothMultiRegression}
 \title{Reconstruct a n by k vector given n by p matrix of predictors.}
 \usage{
-smoothMultiRegression(x, y, iterations = 10, sparsenessQuantile = 0.5,
-  positivity = FALSE, smoothingMatrixX = NA, smoothingMatrixY = NA,
-  nv = 2, extraPredictors, verbose = FALSE)
+smoothMultiRegression(
+  x,
+  y,
+  iterations = 10,
+  sparsenessQuantile = 0.5,
+  positivity = FALSE,
+  smoothingMatrixX = NA,
+  smoothingMatrixY = NA,
+  nv = 2,
+  extraPredictors,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input matrix on which prediction is based}

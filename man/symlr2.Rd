@@ -4,12 +4,22 @@
 \alias{symlr2}
 \title{Symmetric multivariate, penalized image-based linear regression model (symlr2) for two modalities}
 \usage{
-symlr2(voxmats, basisK, smoothingMatrixX, smoothingMatrixY,
-  iterations = 10, gamma = 1e-06, sparsenessQuantileX = 0.5,
-  sparsenessQuantileY = 0.5, positivityX = c("positive", "negative",
-  "either"), positivityY = c("positive", "negative", "either"),
-  initialUMatrix, orthogonalize = TRUE, repeatedMeasures = NA,
-  verbose = FALSE)
+symlr2(
+  voxmats,
+  basisK,
+  smoothingMatrixX,
+  smoothingMatrixY,
+  iterations = 10,
+  gamma = 1e-06,
+  sparsenessQuantileX = 0.5,
+  sparsenessQuantileY = 0.5,
+  positivityX = c("positive", "negative", "either"),
+  positivityY = c("positive", "negative", "either"),
+  initialUMatrix,
+  orthogonalize = TRUE,
+  repeatedMeasures = NA,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{voxmats}{A list that contains the named x and y matrices.}

@@ -4,9 +4,19 @@
 \alias{regressProjections}
 \title{Regression on image set projection}
 \usage{
-regressProjections(input.train, input.test, demog.train, demog.test,
-  eigenvectors, mask, outcome, covariates = "1", model.function = glm,
-  which.eigenvectors = "all", ...)
+regressProjections(
+  input.train,
+  input.test,
+  demog.train,
+  demog.test,
+  eigenvectors,
+  mask,
+  outcome,
+  covariates = "1",
+  model.function = glm,
+  which.eigenvectors = "all",
+  ...
+)
 }
 \arguments{
 \item{input.train}{Masked imaging data from training set of type

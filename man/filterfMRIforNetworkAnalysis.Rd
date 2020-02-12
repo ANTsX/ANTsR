@@ -4,10 +4,21 @@
 \alias{filterfMRIforNetworkAnalysis}
 \title{Basic pre-processing for BOLD or ASL-based network analysis.}
 \usage{
-filterfMRIforNetworkAnalysis(aslmat, tr, freqLo = 0.01, freqHi = 0.1,
-  cbfnetwork = "ASLCBF", mask = NULL, labels = NULL,
-  graphdensity = 0.5, seg = NULL, useglasso = NA, nuisancein = NA,
-  usesvd = FALSE, robustcorr = FALSE)
+filterfMRIforNetworkAnalysis(
+  aslmat,
+  tr,
+  freqLo = 0.01,
+  freqHi = 0.1,
+  cbfnetwork = "ASLCBF",
+  mask = NULL,
+  labels = NULL,
+  graphdensity = 0.5,
+  seg = NULL,
+  useglasso = NA,
+  nuisancein = NA,
+  usesvd = FALSE,
+  robustcorr = FALSE
+)
 }
 \arguments{
 \item{aslmat}{The filename to an antsr image or pointer

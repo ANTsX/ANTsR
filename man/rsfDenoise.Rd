@@ -4,10 +4,19 @@
 \alias{rsfDenoise}
 \title{WIP: data-driven denoising for resting state fMRI}
 \usage{
-rsfDenoise(boldmatrix, targety, motionparams = NA,
-  selectionthresh = 0.1, maxnoisepreds = 1:12, debug = FALSE,
-  polydegree = 4, crossvalidationgroups = 4, tr = 1, scalemat = F,
-  noisepoolfun = max)
+rsfDenoise(
+  boldmatrix,
+  targety,
+  motionparams = NA,
+  selectionthresh = 0.1,
+  maxnoisepreds = 1:12,
+  debug = FALSE,
+  polydegree = 4,
+  crossvalidationgroups = 4,
+  tr = 1,
+  scalemat = F,
+  noisepoolfun = max
+)
 }
 \arguments{
 \item{boldmatrix}{input bold matrix}

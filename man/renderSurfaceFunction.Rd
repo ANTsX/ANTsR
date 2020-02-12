@@ -4,10 +4,24 @@
 \alias{renderSurfaceFunction}
 \title{3D surface-based rendering of volume images.}
 \usage{
-renderSurfaceFunction(surfimg, funcimg, surfval = 0.5, basefval,
-  offsetfval, smoothsval = 0, smoothfval = 0, blobrender = TRUE,
-  alphasurf = 1, alphafunc = 1, outdir = "./", outfn = NA, mycol,
-  physical = TRUE, movieDuration = 6, zoom = 1.1)
+renderSurfaceFunction(
+  surfimg,
+  funcimg,
+  surfval = 0.5,
+  basefval,
+  offsetfval,
+  smoothsval = 0,
+  smoothfval = 0,
+  blobrender = TRUE,
+  alphasurf = 1,
+  alphafunc = 1,
+  outdir = "./",
+  outfn = NA,
+  mycol,
+  physical = TRUE,
+  movieDuration = 6,
+  zoom = 1.1
+)
 }
 \arguments{
 \item{surfimg}{Input image to use as rendering substrate.}

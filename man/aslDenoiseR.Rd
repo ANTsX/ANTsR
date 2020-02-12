@@ -4,10 +4,19 @@
 \alias{aslDenoiseR}
 \title{WIP: data-driven denoising for ASL MRI}
 \usage{
-aslDenoiseR(boldmatrix, targety, covariates = NA,
-  selectionthresh = 0.1, maxnoisepreds = 2:12, polydegree = "loess",
-  crossvalidationgroups = 4, scalemat = F, noisepoolfun = max,
-  usecompcor = F, verbose = F)
+aslDenoiseR(
+  boldmatrix,
+  targety,
+  covariates = NA,
+  selectionthresh = 0.1,
+  maxnoisepreds = 2:12,
+  polydegree = "loess",
+  crossvalidationgroups = 4,
+  scalemat = F,
+  noisepoolfun = max,
+  usecompcor = F,
+  verbose = F
+)
 }
 \arguments{
 \item{boldmatrix}{input bold matrix}

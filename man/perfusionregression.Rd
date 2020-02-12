@@ -4,8 +4,16 @@
 \alias{perfusionregression}
 \title{Perfusion Regression}
 \usage{
-perfusionregression(mask_img, mat, xideal, nuis = NA, dorobust = 0,
-  skip = 20, selectionValsForRegweights = NULL, useBayesian = 0)
+perfusionregression(
+  mask_img,
+  mat,
+  xideal,
+  nuis = NA,
+  dorobust = 0,
+  skip = 20,
+  selectionValsForRegweights = NULL,
+  useBayesian = 0
+)
 }
 \arguments{
 \item{mask_img}{Mask image selects the voxels where CBF will be estimated.

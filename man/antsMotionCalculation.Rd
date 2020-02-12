@@ -4,9 +4,18 @@
 \alias{antsMotionCalculation}
 \title{antsMotionCalculation}
 \usage{
-antsMotionCalculation(img, mask = NULL, fixed = NULL,
-  moreaccurate = 1, txtype = "Affine", framewise = 1,
-  verbose = FALSE, num_threads = 1, seed = NULL, ...)
+antsMotionCalculation(
+  img,
+  mask = NULL,
+  fixed = NULL,
+  moreaccurate = 1,
+  txtype = "Affine",
+  framewise = 1,
+  verbose = FALSE,
+  num_threads = 1,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{img}{antsImage, usually 4D.}

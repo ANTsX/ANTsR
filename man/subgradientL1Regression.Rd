@@ -4,8 +4,15 @@
 \alias{subgradientL1Regression}
 \title{Simple subgradientL1Regression function.}
 \usage{
-subgradientL1Regression(y, x, s = 0.01, percentvals = 0.1,
-  nits = 100, betas = NA, sparval = NA)
+subgradientL1Regression(
+  y,
+  x,
+  s = 0.01,
+  percentvals = 0.1,
+  nits = 100,
+  betas = NA,
+  sparval = NA
+)
 }
 \arguments{
 \item{y}{outcome variable}

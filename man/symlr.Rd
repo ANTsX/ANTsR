@@ -4,11 +4,23 @@
 \alias{symlr}
 \title{Symmetric multivariate linear regression model (symlr) for N modalities}
 \usage{
-symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
-  positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
-  lineSearchTolerance = 0.001, randomSeed, lowDimensionalError = 0,
-  constraint = "none", verbose = FALSE)
+symlr(
+  voxmats,
+  smoothingMatrices,
+  iterations = 10,
+  sparsenessQuantiles,
+  positivities,
+  initialUMatrix,
+  mixAlg,
+  orthogonalize = TRUE,
+  repeatedMeasures = NA,
+  lineSearchRange = c(-10, 10),
+  lineSearchTolerance = 0.001,
+  randomSeed,
+  lowDimensionalError = 0,
+  constraint = "none",
+  verbose = FALSE
+)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
