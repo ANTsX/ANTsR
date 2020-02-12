@@ -1420,16 +1420,26 @@ jointSmoothMatrixReconstruction <- function(
 #'
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
-                                       sparsenessQuantile = 0.5, positivity='either',
-                                       orthogonalize = TRUE, softThresholding = FALSE ) {
+  sparsenessQuantile = 0.5, positivity='either',
+  orthogonalize = TRUE, softThresholding = FALSE ) {
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
+  binaryOrth <- function( x ) { # BROKEN => DONT USE
+    minormax <- function( x ) {
+      if ( max( x ) == 0 ) return( which.min( x ) )
+      return( which.max( x ) )
+    }
+    b = x*0
+    wm = apply( abs(x), FUN=minormax, MARGIN=2 )
+    for ( i in 1:ncol(x)) b[wm[i],i] = x[wm[i],i]
+    for ( i in 1:nrow(b)) b[i,]=b[i,]/sqrt( sum(b[i,]^2))
+    b
+    }
   for ( vv in 1:ncol( v ) ) {
     if ( var( v[ , vv ] ) >  .Machine$double.eps ) {
       #      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
       if ( vv > 1 & orthogonalize  ) {
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
-          #          temp = temp / sqrt( sum( temp * temp ) )
           denom = sum( temp * temp , na.rm=TRUE )
           if ( denom > .Machine$double.eps ) ip = sum( temp * v[,vv] ) / denom else ip = 1
           v[ , vv ] = v[, vv ] - temp * ip
@@ -1465,6 +1475,10 @@ orthogonalizeAndQSparsify <- function( v,
       #      temp = makeImage( , )
     }
   }
+#  for ( i in 1:ncol(v)) {
+#    locnorm = sqrt( sum(v[,i]^2) )
+#    if ( locnorm > 0 ) v[,i]=v[,i]/locnorm
+#  }
   return( v )
 }
 
@@ -2885,6 +2899,7 @@ symlr <- function(
     matnorms[ i ] = norm( voxmats[[ i ]], type = "F" )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
+    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[i]
   }
 
   # 2.0 setup random effects
@@ -2983,11 +2998,12 @@ symlr <- function(
   dedu = list()
   initialEnergy = 0
   for ( i in 1:length( voxmats ) ) {
-    vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK )
+    vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
+      localGS( orthogonalize = T )
     prediction = initialUMatrix[[i]] %*% t( vmats[[ i ]] ) # old way, slower
     initialEnergy = initialEnergy + 1.0 / length( voxmats ) *
-      norm( prediction/norm(prediction,'F') -
-           voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
+      norm( prediction/norm(prediction,'F') - voxmats[[i]],  "F" )
+        #   voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
     }
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
   matnorms = rep( 1, length(matnorms) )
@@ -3036,13 +3052,15 @@ symlr <- function(
                                 n.comp=nc )$S )
     return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
   }
-  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError )  {
+  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError, doSpar = TRUE )  {
     prediction = 0
     myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
-    myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
-      as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
-      sparsenessQuantiles[i],
-      orthogonalize = FALSE, positivity = positivities[i] )
+    if ( doSpar ) {
+      myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
+        as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
+        sparsenessQuantiles[i],
+        orthogonalize = FALSE, positivity = positivities[i] )
+      }
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
     avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 1e-10 ) {
@@ -3064,9 +3082,8 @@ symlr <- function(
       }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
     return(
-      norm( #prediction  - voxmats[[i]], "F" ) )
-        prediction/norm(prediction,'F') -
-        voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )  )  # old way, slower
+      norm( prediction/norm(prediction,'F') - voxmats[[i]], "F" )
+      )
   }
 
   constrainG <- function( vgrad, i, constraint ) {
@@ -3087,7 +3104,9 @@ symlr <- function(
     if ( hasRanEff )
       temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
     temperv = temperv + t( voxmats[[i]] ) %*% avgU
-    temperv = temperv - v %*% (  t( avgU ) %*% avgU )
+    scl = norm( t( voxmats[[i]] ) %*% avgU, "F" )
+    scl = scl^(-3.0/2.0) / (2.0*scl) # this comes from the derivative wrt the norm constraint
+    temperv = temperv - v %*% (  t( avgU ) %*% avgU ) * ( scl + 1 )
     return( temperv )
   }
 
@@ -3096,6 +3115,7 @@ symlr <- function(
   ################################################################################
   datanorm = rep( 0.0, length(voxmats) )
   bestTot = Inf
+  bestErr = Inf
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
@@ -3103,7 +3123,7 @@ symlr <- function(
     #    if ( myit > 1 ) matrange = 1 # length( voxmats ):length( voxmats )
     for ( i in matrange ) {
       if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
-      mytol = datanorm[ i ] * lineSearchTolerance / myit^2
+      mytol = lineSearchTolerance # datanorm[ i ] * lineSearchTolerance / myit^2
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
       if ( myit <= iterations ) {
@@ -3118,9 +3138,8 @@ symlr <- function(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
         sparsenessQuantiles[i],
         orthogonalize = FALSE, positivity = positivities[i] )
-      vmats[[i]] = vmats[[i]] / norm( voxmats[[i]] %*% vmats[[i]], "F" )
     }
-    if ( verbose ) print( gamma )
+#    if ( verbose ) print( gamma )
     # project down to the basis U
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
@@ -3184,11 +3203,12 @@ symlr <- function(
       bestTot = tot
       bestU = initialUMatrix
       bestV = vmats
+      bestErr = errterm
     }
     if ( verbose ) {
       print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
-      cat(c("e",errterm))
-      cat("\n")
+#      cat(c("e",errterm))
+#      cat("\n")
       #        cat(c("p",prednorm))
       #        cat("\n")
       #        cat(c("d",datanorm))
@@ -3203,7 +3223,7 @@ symlr <- function(
       vRan = vRan,
       initialRandomMatrix = randmat,
       predictions = predictions,
-      finalError = errterm,
+      finalError = bestErr,
       totalEnergy = bestTot )
   )
 }
