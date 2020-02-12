@@ -3120,7 +3120,7 @@ symlr <- function(
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
     matrange = 1:length( voxmats )
-    #    if ( myit > 1 ) matrange = 1 # length( voxmats ):length( voxmats )
+    # this loop updates the V variables, given fixed U
     for ( i in matrange ) {
       if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
       mytol = lineSearchTolerance # datanorm[ i ] * lineSearchTolerance / myit^2
@@ -3139,14 +3139,14 @@ symlr <- function(
         sparsenessQuantiles[i],
         orthogonalize = FALSE, positivity = positivities[i] )
     }
-#    if ( verbose ) print( gamma )
+
     # project down to the basis U
+    # this loop updates the U variables, given fixed V
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
-        #        initialUMatrix[[i]] = voxmats[[i]] %*% vmats[[i]]
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
         initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
-      }
+        }
 
     if ( hasRanEff ) {
       for ( kk in 1:1 ) {
