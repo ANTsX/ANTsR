@@ -6,9 +6,9 @@
 \usage{
 symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(-10, 10),
-  lineSearchTolerance = 0.001, randomSeed, lowDimensionalError = 0,
-  constraint = "none", verbose = FALSE)
+  repeatedMeasures = NA, lineSearchRange = c(0, 1e+06),
+  lineSearchTolerance = 0.01, randomSeed, lowDimensionalError = 0,
+  constraint = "none", normalized = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -44,6 +44,8 @@ allow estimates of per identifier intercept.}
 float value greater than 0 less than 1 that indicates fraction of columns for each matrix.}
 
 \item{constraint}{one of none, Grassmann or Stiefel}
+
+\item{normalized}{boolean to control whether we use normalized energy or not}
 
 \item{verbose}{boolean to control verbosity of output}
 }

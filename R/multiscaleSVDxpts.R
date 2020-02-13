@@ -2768,6 +2768,7 @@ symlr2 <- function(
 
 
 
+
 #' Symmetric multivariate linear regression model (symlr) for N modalities
 #'
 #' symlr minimizes reconstruction error across related modalities.  That is,
@@ -2800,6 +2801,7 @@ symlr2 <- function(
 #' @param lowDimensionalError development option - integer sampling of matrix columns or a
 #' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
+#' @param normalized boolean to control whether we use normalized energy or not
 #' @param verbose boolean to control verbosity of output
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
@@ -2864,11 +2866,12 @@ symlr <- function(
   mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
-  lineSearchRange = c( -10, 10 ),
-  lineSearchTolerance = 0.001,
+  lineSearchRange = c( 0, 1e6 ),
+  lineSearchTolerance = 0.01,
   randomSeed,
   lowDimensionalError = 0,
   constraint = "none",
+  normalized = TRUE,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
@@ -2901,7 +2904,7 @@ symlr <- function(
     matnorms[ i ] = norm( voxmats[[ i ]], type = "F" )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
-    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[i]
+    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[ i ]
   }
 
   # 2.0 setup random effects
@@ -3001,11 +3004,11 @@ symlr <- function(
   initialEnergy = 0
   for ( i in 1:length( voxmats ) ) {
     vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
-      localGS( orthogonalize = T )
+      localGS()
     prediction = initialUMatrix[[i]] %*% t( vmats[[ i ]] ) # old way, slower
     initialEnergy = initialEnergy + 1.0 / length( voxmats ) *
-      norm( prediction/norm(prediction,'F') - voxmats[[i]],  "F" )
-        #   voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
+      norm( prediction/norm(prediction,'F') -
+           voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
     }
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
   matnorms = rep( 1, length(matnorms) )
@@ -3054,15 +3057,14 @@ symlr <- function(
                                 n.comp=nc )$S )
     return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
   }
-  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError, doSpar = TRUE )  {
+
+  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError )  {
     prediction = 0
     myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
-    if ( doSpar ) {
-      myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
-        as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
-        sparsenessQuantiles[i],
-        orthogonalize = FALSE, positivity = positivities[i] )
-      }
+    myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
+      as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
+      sparsenessQuantiles[i],
+      orthogonalize = FALSE, positivity = positivities[i] )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
     avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
     if ( lowDimensionalError > 1e-10 ) {
@@ -3078,15 +3080,15 @@ symlr <- function(
       vsamc = sample(1:nmaxc, sampleNc )
       vsamr = 1:nmaxr # sample(1:nmaxr, sampleNr )
       return( norm( lm( voxmats[[i]][vsamr,vsamc] ~ avgU[vsamr,] )$residuals , "F" ) )  # new way, faster
-#      return( norm( lm( voxmats[[i]][,vsam] ~ avgU )$residuals , "F" ) )  # new way, faster
-#      prediction = predict( lm( voxmats[[i]] %*% myenergysearchv ~ avgU ) )  # new way, faster
-#      return( norm( prediction - voxmats[[i]]  %*% myenergysearchv, "F" ) )  # new way, faster
       }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
-    return(
-#      norm( prediction - voxmats[[i]], "F" )
-      norm( prediction/norm(prediction,'F') - voxmats[[i]], "F" )
-      )
+    if ( normalized ) {
+      return(
+        norm( prediction/norm(prediction,'F') - voxmats[[i]],  "F" ) )
+    } else {
+      return(
+        norm( prediction                      - voxmats[[i]], "F" ) )
+    }
   }
 
   constrainG <- function( vgrad, i, constraint ) {
@@ -3102,31 +3104,38 @@ symlr <- function(
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
-    avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  ) # getAvgU( i, myw, mixAlg )
-    temperv = 0
-    if ( hasRanEff )
-      temperv = t(( t(avgU) %*% zRan ) %*% t(vRan[[i]]))
-    temperv = temperv + t( voxmats[[i]] ) %*% avgU
-    scl = norm( t( voxmats[[i]] ) %*% avgU, "F" )
-    scl = scl^(-3.0/2.0) / (2.0*scl) # this comes from the derivative wrt the norm constraint
-    temperv = temperv - v %*% (  t( avgU ) %*% avgU ) * ( scl + 1 )
-    return( temperv )
-  }
+      u = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
+      x = voxmats[[i]]
+      nrmuv = norm( u %*% t( v ), "F" )
+      common1 = t(x) - 1.0/nrmuv * ( v %*% t(u) )
+      traceTerm = sum( diag(  u %*% ( t( v ) %*% common1 ) ) )
+      term1 = 2.0 / nrmuv * ( t(x) %*% u - 1.0 / nrmuv * v ) # utu = identity matrix
+      # (t( u ) %*% u ) = identity
+      # term2 below is a "damping" term subtracting a scaled version of v from the data gradient
+      term2 = 2.0 / nrmuv^3 * traceTerm * v # %*% ( t( u ) %*% u )
+      gradV = 1.0 * (  term1 - term2 )
+      return( gradV )
+    }
+  if ( ! normalized )
+    getSyMG <- function( v, i, myw, mixAlg )  {
+      u = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
+      x = voxmats[[i]]
+      2.0 * ( t( x ) %*% u - v ) # pure data-term
+    }
 
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
   datanorm = rep( 0.0, length(voxmats) )
   bestTot = Inf
-  bestErr = Inf
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
     matrange = 1:length( voxmats )
-    # this loop updates the V variables, given fixed U
     for ( i in matrange ) {
-      if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
-      mytol = lineSearchTolerance # datanorm[ i ] * lineSearchTolerance / myit^2
+#      if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
+#      mytol = datanorm[ i ] * lineSearchTolerance / myit^2
+      mytol = lineSearchTolerance / myit^2
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
       if ( myit <= iterations ) {
@@ -3141,15 +3150,15 @@ symlr <- function(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
         sparsenessQuantiles[i],
         orthogonalize = FALSE, positivity = positivities[i] )
+      vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
     }
-
+    if ( verbose ) print( gamma )
     # project down to the basis U
-    # this loop updates the U variables, given fixed V
     if ( myit <= ( iterations ) )
       for ( i in 1:length( voxmats ) ) {
         initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
         initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
-        }
+      }
 
     if ( hasRanEff ) {
       for ( kk in 1:1 ) {
@@ -3200,15 +3209,12 @@ symlr <- function(
     merr = mean(errterm)
     nzct = 0
     for ( loi in 1:length(vmats) )
-      nzct = nzct+sum(abs(vmats[[loi]]>0))/length(vmats[[loi]])
-    nzct = nzct / length(vmats)
-        #mean(abs(vmats[[loi]])) / length(vmats)
+      nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
     tot = merr+nzct
-    if ( tot < bestTot ) {
-      bestTot = tot
+    if ( merr < bestTot ) {
+      bestTot = merr
       bestU = initialUMatrix
       bestV = vmats
-      bestErr = errterm
     }
     if ( verbose ) {
       print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
@@ -3228,14 +3234,10 @@ symlr <- function(
       vRan = vRan,
       initialRandomMatrix = randmat,
       predictions = predictions,
-      finalError = bestErr,
+      finalError = errterm,
       totalEnergy = bestTot )
   )
 }
-
-
-
-
 
 
 #' Compute the low-dimensional u matrix for symlr
