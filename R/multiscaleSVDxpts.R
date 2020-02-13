@@ -1411,6 +1411,7 @@ jointSmoothMatrixReconstruction <- function(
 #' choices are positive, negative or either as expressed as a string.
 #' @param orthogonalize run gram-schmidt if TRUE.
 #' @param softThresholding use soft thresholding
+#' @param unitNorm set each vector to unit norm
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1421,7 +1422,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
-  orthogonalize = TRUE, softThresholding = FALSE ) {
+  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE ) {
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
   binaryOrth <- function( x ) { # BROKEN => DONT USE
     minormax <- function( x ) {
@@ -1475,10 +1476,11 @@ orthogonalizeAndQSparsify <- function( v,
       #      temp = makeImage( , )
     }
   }
-#  for ( i in 1:ncol(v)) {
-#    locnorm = sqrt( sum(v[,i]^2) )
-#    if ( locnorm > 0 ) v[,i]=v[,i]/locnorm
-#  }
+  if ( unitNorm )
+    for ( i in 1:ncol(v)) {
+      locnorm = sqrt( sum(v[,i]^2) )
+      if ( locnorm > 0 ) v[,i]=v[,i]/locnorm
+      }
   return( v )
 }
 
@@ -3082,6 +3084,7 @@ symlr <- function(
       }
     prediction = avgU %*% t( myenergysearchv ) # old way, slower
     return(
+#      norm( prediction - voxmats[[i]], "F" )
       norm( prediction/norm(prediction,'F') - voxmats[[i]], "F" )
       )
   }
@@ -3197,7 +3200,9 @@ symlr <- function(
     merr = mean(errterm)
     nzct = 0
     for ( loi in 1:length(vmats) )
-      nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
+      nzct = nzct+sum(abs(vmats[[loi]]>0))/length(vmats[[loi]])
+    nzct = nzct / length(vmats)
+        #mean(abs(vmats[[loi]])) / length(vmats)
     tot = merr+nzct
     if ( tot < bestTot ) {
       bestTot = tot
