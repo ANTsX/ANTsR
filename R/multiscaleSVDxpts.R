@@ -2802,7 +2802,8 @@ symlr2 <- function(
 #' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
 #' @param normalized boolean to control whether we use normalized energy or not
-#' @param verbose boolean to control verbosity of output
+#' @param verbose boolean to control verbosity of output - set to level \code{2}
+#' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
 #' @author BB Avants.
 #' @examples
@@ -3001,76 +3002,26 @@ symlr <- function(
   basisK = ncol( initialUMatrix[[ 1 ]] )
   vmats = list()
   dedu = list()
-  initialEnergy = 0
   for ( i in 1:length( voxmats ) ) {
     vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
       localGS()
-    prediction = initialUMatrix[[i]] %*% t( vmats[[ i ]] ) # old way, slower
-    initialEnergy = initialEnergy + 1.0 / length( voxmats ) *
-      norm( prediction/norm(prediction,'F') -
-           voxmats[[i]]/norm(voxmats[[i]],'F'),  "F" )
     }
-  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
   matnorms = rep( 1, length(matnorms) )
-  gradnorms = matnorms
-  gradnormsRanEff = matnorms
-  itThresh = 1 # scales random effects gradient
-  # function for computing error term
-  npower = "F"
-  getSyME <- function( tempv, i, returnEnergy=TRUE )  {
-    tempvmat = matrix( tempv, ncol = ncol( vmats[[1]] ) )
-    tempvmat = orthogonalizeAndQSparsify(
-      as.matrix( smoothingMatrices[[i]] %*% tempvmat),
-      sparsenessQuantiles[i],
-      orthogonalize = FALSE, positivity = positivities[i] )
-    prediction = 0
-    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])
-    for ( j in 1:length( voxmats ) ) {
-      if ( i != j ) {
-        prediction = prediction + initialUMatrix[[j]] %*% t( tempvmat )
-      }
-    }
-    if ( returnEnergy ) return( norm( prediction - voxmats[[i]], "F" )  )
-    return( norm( voxmats[[i]], "F" ) /
-              norm( prediction, "F" ) )
-  }
-
   nc = ncol( initialUMatrix[[ 1 ]] )
-  myw = matrix( rnorm( nc^2), nc, nc )
-  getAvgU <- function( i, myw, mixAlg ) {
-    avgU = NULL
-    if ( mixAlg == 'avg' ) {
-      avgU = initialUMatrix[[ 1 ]] * 0.0
-      for ( j in 1:length(voxmats) )
-        if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
-        return( avgU )
-    }
-    nc = ncol( initialUMatrix[[ 1 ]] )
-    for ( j in 1:length(voxmats) )
-      if ( i != j ) avgU = cbind( avgU, initialUMatrix[[ j ]] )
-    if ( mixAlg == 'rrpca-l' )
-      return( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
-    else if ( mixAlg == 'rrpca-s' )
-      return( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
-    else if ( mixAlg == 'ica' )
-      return( fastICA::fastICA( avgU,  method = 'C', w.init = myw,
-                                n.comp=nc )$S )
-    return( svd( avgU, nu = ncol( initialUMatrix[[1]] ), nv=0 )$u )
-  }
-
-  getSyME2 <- function( lineSearch, gradient, myw, mixAlg, lowDimensionalError )  {
+  myw = matrix( rnorm( nc^2), nc, nc ) # initialization for fastICA
+  getSyME2 <- function( lineSearch, gradient, myw, mixAlg,
+      lowDimensionalError, avgU, whichModality )  {
     prediction = 0
-    myenergysearchv = ( vmats[[i]]+gradient * lineSearch )  # update the i^th v matrix
+    myenergysearchv = ( vmats[[whichModality]]+gradient * lineSearch )  # update the i^th v matrix
     myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
-      as.matrix( smoothingMatrices[[i]] %*% myenergysearchv ),
+      as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
       sparsenessQuantiles[i],
       orthogonalize = FALSE, positivity = positivities[i] )
-    if ( hasRanEff ) prediction = zRan %*% t(vRan[[i]])     # FIXME - need to check this
-    avgU = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize ) # get U for this prediction
-    if ( lowDimensionalError > 1e-10 ) {
+    if ( hasRanEff ) prediction = zRan %*% t(vRan[[whichModality]])     # FIXME - need to check this
+    if ( lowDimensionalError > 1e-10 ) { # PROBABLY NEEDS WORK
       # randomly sample some voxels to speed this up
-      nmaxc = sampleNc = ncol(voxmats[[i]])
-      nmaxr = sampleNr = nrow(voxmats[[i]])
+      nmaxc = sampleNc = ncol(voxmats[[whichModality]])
+      nmaxr = sampleNr = nrow(voxmats[[whichModality]])
       if ( lowDimensionalError < 1 ) {
         sampleNc = min( c( nmaxc, round( lowDimensionalError * nmaxc ) ) )
         sampleNr = min( c( nmaxr, round( lowDimensionalError * nmaxr ) ) )
@@ -3079,17 +3030,25 @@ symlr <- function(
       if ( sampleNr < 5 ) sampleNr = 5
       vsamc = sample(1:nmaxc, sampleNc )
       vsamr = 1:nmaxr # sample(1:nmaxr, sampleNr )
-      return( norm( lm( voxmats[[i]][vsamr,vsamc] ~ avgU[vsamr,] )$residuals , "F" ) )  # new way, faster
+      prediction = voxmats[[whichModality]] %*% ( myenergysearchv )
+      loclm = lm( voxmats[[whichModality]][vsamr,vsamc] ~ prediction[vsamr,] )
+      locnorm = norm( loclm$residuals , "F" )
+      return( locnorm )
       }
-    prediction = avgU %*% t( myenergysearchv ) # old way, slower
-    if ( normalized ) {
-      return(
-        norm( prediction/norm(prediction,'F') - voxmats[[i]],  "F" ) )
-    } else {
-      return(
-        norm( prediction                      - voxmats[[i]], "F" ) )
+    prediction = avgU %*% t( myenergysearchv )
+    if ( normalized ) prediction = prediction/norm(prediction,'F')
+    prediction = prediction - rowMeans(prediction) - rowMeans( voxmats[[whichModality]] )
+    return( norm( prediction - voxmats[[whichModality]], "F" ) )
     }
+
+  initialEnergy = 0
+  for ( i in 1:length( voxmats ) ) {
+    loki = getSyME2( 1, 0, myw=myw, mixAlg=mixAlg,
+      lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
+      whichModality = i  )
+    initialEnergy = initialEnergy + loki /length( voxmats )
   }
+  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
 
   constrainG <- function( vgrad, i, constraint ) {
     if ( constraint == "Grassmann") {
@@ -3104,7 +3063,7 @@ symlr <- function(
   }
 
   getSyMG <- function( v, i, myw, mixAlg )  {
-      u = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
+      u = initialUMatrix[[i]]
       x = voxmats[[i]]
       nrmuv = norm( u %*% t( v ), "F" )
       common1 = t(x) - 1.0/nrmuv * ( v %*% t(u) )
@@ -3118,10 +3077,10 @@ symlr <- function(
     }
   if ( ! normalized )
     getSyMG <- function( v, i, myw, mixAlg )  {
-      u = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
+      u = initialUMatrix[[i]]
       x = voxmats[[i]]
       2.0 * ( t( x ) %*% u - v ) # pure data-term
-    }
+      }
 
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
@@ -3132,80 +3091,39 @@ symlr <- function(
     errterm = rep( 1.0, length(voxmats) )
     prednorm = rep( 0.0, length(voxmats) )
     matrange = 1:length( voxmats )
-    for ( i in matrange ) {
-#      if ( myit == 1 ) datanorm[ i ] = norm( voxmats[[ i ]], "F" )
-#      mytol = datanorm[ i ] * lineSearchTolerance / myit^2
-      mytol = lineSearchTolerance / myit^2
+    for ( i in matrange ) { # get update for each V_i
+      mytol = lineSearchTolerance / myit^2 # seek more accuracy over iterations
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( myit <= iterations ) {
+      if ( myit == 1 | ( myit %% 8 == 0 ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
-                         myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError )
+                         myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError,
+                         avgU = initialUMatrix[[i]], whichModality = i )
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
-      } else errterm[ i ] = getSyME2( gamma[i], temperv, lowDimensionalError = lowDimensionalError  )
-      vmats[[i]] = ( vmats[[i]] + temperv * gamma[i]  )
+      } else {
+        errterm[ i ] = getSyME2( gamma[i], temperv, myw=myw, mixAlg=mixAlg,
+          lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
+          whichModality = i  )
+      }
+      vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
+#      vmats[[i]] = localGS( vmats[[i]] )
       vmats[[i]] = orthogonalizeAndQSparsify(
         as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
         sparsenessQuantiles[i],
-        orthogonalize = FALSE, positivity = positivities[i] )
-      vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
+        orthogonalize = FALSE, positivity = positivities[i], unitNorm = F )
+      if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
     }
-    if ( verbose ) print( gamma )
-    # project down to the basis U
-    if ( myit <= ( iterations ) )
-      for ( i in 1:length( voxmats ) ) {
-        initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
-        initialUMatrix[[i]] = localGS( initialUMatrix[[i]], orthogonalize )
+    if ( verbose == 2 ) print( gamma )
+    # use the V to project down to the U bases
+    for ( i in 1:length( voxmats ) ) {
+      initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
       }
-
-    if ( hasRanEff ) {
-      for ( kk in 1:1 ) {
-        for ( i in 1:length( voxmats ) ) {
-          avgU = initialUMatrix[[ 1 ]] * 0.0
-          for ( j in 1:length(voxmats) )
-            if ( i != j ) avgU = avgU + initialUMatrix[[ j ]]
-            avgU = localGS( avgU , FALSE )
-            dedrvX = ( t( voxmats[[i]] ) %*% zRan ) * (-1.0)
-            dedrvX = dedrvX + vmats[[i]] %*% ( t( avgU ) %*% zRan )
-            dedrvX = dedrvX + vRan[[i]] %*% ( t( zRan ) %*% zRan )
-            if ( myit <= itThresh )
-              gradnormsRanEff[ i ] = ( norm(voxmats[[i]]) / norm( dedrvX ) )
-            vRan[[i]] = smoothingMatrices[[i]] %*%
-              ( vRan[[i]] - gradnormsRanEff[ i ] * gamma[i] * dedrvX  )
-        }
+    # run the basis calculation for each U_i
+    for ( i in 1:length( voxmats ) ) {
+      initialUMatrix[[i]] = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
       }
-    } # hasRanEff
-    predictions = list()
-    if ( FALSE ) {
-      for ( i in 1:length( voxmats ) ) {
-        if ( !hasRanEff ) {
-          commonTerm = voxmats[[i]]
-          predictions[[i]] = 0
-        } else {
-          predictions[[i]] = zRan %*% t(vRan[[i]])
-          commonTerm = voxmats[[i]] - zRan %*% t(vRan[[i]])
-        }
-        for ( j in 1:length( voxmats ) )
-          if ( i != j ) {
-            commonTerm = commonTerm  - initialUMatrix[[j]] %*% t( vmats[[i]] )
-            predictions[[i]] = predictions[[i]] + initialUMatrix[[j]] %*% t( vmats[[i]] )
-          }
-        errterm[ i ] = norm( voxmats[[i]] - predictions[[i]], npower )
-        prednorm[ i ] = norm( predictions[[i]], npower )
-        datanorm[ i ] = norm( voxmats[[i]], npower )
-      }
-    } else if ( FALSE ) {
-      for ( jj in 1:(length( voxmats )-1) )
-        for ( kk in (jj+1):length( voxmats ) ) {
-          p1 = voxmats[[jj]] %*% vmats[[jj]]
-          p2 = voxmats[[kk]] %*% vmats[[kk]]
-          locr=abs(cor(p1,p2))
-          print( paste( jj, kk ) )
-          print( diag( locr ) )
-        }
-    }
     merr = mean(errterm)
     nzct = 0
     for ( loi in 1:length(vmats) )
@@ -3233,7 +3151,7 @@ symlr <- function(
       v  = bestV,
       vRan = vRan,
       initialRandomMatrix = randmat,
-      predictions = predictions,
+      predictions = NULL,
       finalError = errterm,
       totalEnergy = bestTot )
   )

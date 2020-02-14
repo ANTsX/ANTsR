@@ -47,7 +47,8 @@ float value greater than 0 less than 1 that indicates fraction of columns for ea
 
 \item{normalized}{boolean to control whether we use normalized energy or not}
 
-\item{verbose}{boolean to control verbosity of output}
+\item{verbose}{boolean to control verbosity of output - set to level \code{2}
+in order to see more output, specifically the gradient descent parameters.}
 }
 \value{
 A list of u, x, y, z etc related matrices.
