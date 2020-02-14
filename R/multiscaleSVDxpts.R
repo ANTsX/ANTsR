@@ -2867,8 +2867,8 @@ symlr <- function(
   mixAlg,
   orthogonalize = TRUE,
   repeatedMeasures = NA,
-  lineSearchRange = c( 0, 1e6 ),
-  lineSearchTolerance = 0.01,
+  lineSearchRange = c( -1, 1 ),
+  lineSearchTolerance = 0.1,
   randomSeed,
   lowDimensionalError = 0,
   constraint = "none",
@@ -3037,7 +3037,7 @@ symlr <- function(
       }
     prediction = avgU %*% t( myenergysearchv )
     if ( normalized ) prediction = prediction/norm(prediction,'F')
-    prediction = prediction - rowMeans(prediction) - rowMeans( voxmats[[whichModality]] )
+#    prediction = prediction - rowMeans(prediction) - rowMeans( voxmats[[whichModality]] )
     return( norm( prediction - voxmats[[whichModality]], "F" ) )
     }
 

@@ -6,8 +6,8 @@
 \usage{
 symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
-  repeatedMeasures = NA, lineSearchRange = c(0, 1e+06),
-  lineSearchTolerance = 0.01, randomSeed, lowDimensionalError = 0,
+  repeatedMeasures = NA, lineSearchRange = c(-1, 1),
+  lineSearchTolerance = 0.1, randomSeed, lowDimensionalError = 0,
   constraint = "none", normalized = TRUE, verbose = FALSE)
 }
 \arguments{
