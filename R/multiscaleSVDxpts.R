@@ -3049,7 +3049,8 @@ symlr <- function(
     initialEnergy = initialEnergy + loki /length( voxmats )
   }
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
-
+  energyPath = rep( NA, iterations + 0 )
+#  energyPath[ 1 ] = initialEnergy
   constrainG <- function( vgrad, i, constraint ) {
     if ( constraint == "Grassmann") {
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
@@ -3089,13 +3090,12 @@ symlr <- function(
   bestTot = Inf
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, length(voxmats) )
-    prednorm = rep( 0.0, length(voxmats) )
     matrange = 1:length( voxmats )
     for ( i in matrange ) { # get update for each V_i
       mytol = lineSearchTolerance / myit^2 # seek more accuracy over iterations
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( myit == 1 | ( myit %% 8 == 0 ) ) {
+      if ( myit == 1 | ( myit %% 1 == 0 ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
                          myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError,
@@ -3103,6 +3103,7 @@ symlr <- function(
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
       } else {
+        gamma[i] = gamma[i] * 1.0
         errterm[ i ] = getSyME2( gamma[i], temperv, myw=myw, mixAlg=mixAlg,
           lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
           whichModality = i  )
@@ -3136,14 +3137,8 @@ symlr <- function(
     }
     if ( verbose ) {
       print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
-#      cat(c("e",errterm))
-#      cat("\n")
-      #        cat(c("p",prednorm))
-      #        cat("\n")
-      #        cat(c("d",datanorm))
-      #        cat("\n")
       }
-
+  energyPath[ myit ] = merr
   } # iterations
   return(
     list(
@@ -3151,7 +3146,7 @@ symlr <- function(
       v  = bestV,
       vRan = vRan,
       initialRandomMatrix = randmat,
-      predictions = NULL,
+      energyPath = energyPath,
       finalError = errterm,
       totalEnergy = bestTot )
   )
