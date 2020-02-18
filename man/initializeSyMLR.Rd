@@ -4,7 +4,7 @@
 \alias{initializeSyMLR}
 \title{Initialize SyMLR}
 \usage{
-initializeSyMLR(voxmats, k, jointReduction = FALSE, zeroUpper = FALSE,
+initializeSyMLR(voxmats, k, jointReduction = TRUE, zeroUpper = FALSE,
   uAlgorithm = "pca")
 }
 \arguments{
@@ -38,7 +38,8 @@ nk = 2
 outcome = initializeSyMLR(
   list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
         matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
-        matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 2 )
+        matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 
+  k = 2, uAlgorithm = 'pca' )
 
 }
 \author{
