@@ -2,13 +2,13 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{symlr}
 \alias{symlr}
-\title{Symmetric multivariate linear regression model (symlr) for N modalities}
+\title{Symmetric multiview linear reconstruction model (symlr) for N modalities}
 \usage{
 symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
   repeatedMeasures = NA, lineSearchRange = c(-1, 1),
-  lineSearchTolerance = 0.1, randomSeed, lowDimensionalError = 0,
-  constraint = "none", normalized = TRUE, verbose = FALSE)
+  lineSearchTolerance = 1e-08, randomSeed, lowDimensionalError = 0,
+  constraint = "none", normalized = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}

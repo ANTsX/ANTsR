@@ -2573,7 +2573,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
 
-#' Symmetric multivariate, penalized image-based linear regression model (symlr2) for two modalities
+#' Symmetric multiview linear reconstruction model (symlr) for two modalities
 #'
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
@@ -2767,9 +2767,60 @@ symlr2 <- function(
 
 
 
+#' Initialize SyMLR
+#'
+#' Four initialization approaches for SyMLR.  Returns either a single matrix
+#' derived from dimensionality reduction on all matrices
+#' (\code{jointReduction=TRUE}) or a list of reduced
+#' dimensionality matrices, one for each input.  Either PCA or ICA can be used
+#' as the reduction method.
+#'
+#' @param voxmats list that contains the named matrices.
+#' @param k rank of U matrix
+#' @param jointReduction boolean determining whether one or length of list bases are
+#' @param zeroUpper boolean determining whether upper triangular part of
+#' initialization is zeroed out
+#' @param uAlgorithm either \code{"pca"} (default) or \code{"ica"}
+#'
+#' @return A single matrix or list of matrices
+#' @author BB Avants.
+#' @examples
+#'
+#' set.seed(1500)
+#' nsub = 3
+#' npix = c(10,6,13)
+#' nk = 2
+#' outcome = initializeSyMLR(
+#'   list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
+#'         matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
+#'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 2 )
+#'
+#' @export
+initializeSyMLR <- function( voxmats, k, jointReduction = FALSE,
+  zeroUpper = FALSE, uAlgorithm = 'pca' ) {
+  if ( jointReduction ) {
+    X <- Reduce( cbind, voxmats ) # bind all matrices
+    if ( uAlgorithm == 'pca' ) {
+      X.pcr <- prcomp( t(X), rank. = k )          # PCA
+      u <- ( X.pcr$rotation )
+    } else {
+      u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
+    }
+    if ( zeroUpper ) u[ upper.tri( u ) ] <- 0
+    return( u )
+    }
+  uOut = list()
+  for ( s in 1:length(voxmats)) {
+    if ( uAlgorithm == 'pca ') {
+      uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
+    } else uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
+    if ( zeroUpper ) uOut[[s]][upper.tri(uOut[[s]])] <- 0
+    }
+  return( uOut )
+  }
 
 
-#' Symmetric multivariate linear regression model (symlr) for N modalities
+#' Symmetric multiview linear reconstruction model (symlr) for N modalities
 #'
 #' symlr minimizes reconstruction error across related modalities.  That is,
 #' symlr will reconstruct each modality matrix from a basis set derived from
@@ -2868,11 +2919,11 @@ symlr <- function(
   orthogonalize = TRUE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1, 1 ),
-  lineSearchTolerance = 0.1,
+  lineSearchTolerance = 1e-8,
   randomSeed,
   lowDimensionalError = 0,
   constraint = "none",
-  normalized = TRUE,
+  normalized = FALSE,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
@@ -3013,10 +3064,11 @@ symlr <- function(
       lowDimensionalError, avgU, whichModality )  {
     prediction = 0
     myenergysearchv = ( vmats[[whichModality]]+gradient * lineSearch )  # update the i^th v matrix
-    myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
-      as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
-      sparsenessQuantiles[i],
-      orthogonalize = FALSE, positivity = positivities[i] )
+    if ( sparsenessQuantiles[i] != 0 )
+      myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
+        as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
+        sparsenessQuantiles[i],
+        orthogonalize = FALSE, positivity = positivities[i], softThresholding = F )
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[whichModality]])     # FIXME - need to check this
     if ( lowDimensionalError > 1e-10 ) { # PROBABLY NEEDS WORK
       # randomly sample some voxels to speed this up
@@ -3037,7 +3089,7 @@ symlr <- function(
       }
     prediction = avgU %*% t( myenergysearchv )
     if ( normalized ) prediction = prediction/norm(prediction,'F')
-#    prediction = prediction - rowMeans(prediction) - rowMeans( voxmats[[whichModality]] )
+#    prediction = prediction - colMeans(prediction) - colMeans( voxmats[[whichModality]] )
     return( norm( prediction - voxmats[[whichModality]], "F" ) )
     }
 
@@ -3080,7 +3132,7 @@ symlr <- function(
     getSyMG <- function( v, i, myw, mixAlg )  {
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
-      2.0 * ( t( x ) %*% u - v ) # pure data-term
+      2.0 * ( t( x ) %*% u - v ) # + sign( v ) * 0.001 # pure data-term
       }
 
   ################################################################################
@@ -3109,11 +3161,11 @@ symlr <- function(
           whichModality = i  )
       }
       vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
-#      vmats[[i]] = localGS( vmats[[i]] )
-      vmats[[i]] = orthogonalizeAndQSparsify(
-        as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
-        sparsenessQuantiles[i],
-        orthogonalize = FALSE, positivity = positivities[i], unitNorm = F )
+      if ( sparsenessQuantiles[i] != 0 )
+        vmats[[i]] = orthogonalizeAndQSparsify(
+          as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
+          sparsenessQuantiles[i],
+          orthogonalize = FALSE, positivity = positivities[i], unitNorm = F, softThresholding = F  )
       if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
     }
     if ( verbose == 2 ) print( gamma )
