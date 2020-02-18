@@ -12,7 +12,7 @@ symlrU(projections, i, mixingAlgorithm, initialW, orthogonalize = FALSE)
 \item{i}{which modality to predict from the others.}
 
 \item{mixingAlgorithm}{the elected mixing algorithm.  see \code{symlr}.  can
-be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.}
+be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca' or 'avg'.}
 
 \item{initialW}{initialization matrix size \code{n} by \code{k} for fastICA.}
 

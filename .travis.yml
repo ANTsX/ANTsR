@@ -15,7 +15,7 @@ os:
   - osx
 
 services:
-  - xvfb 
+  - xvfb
 r:
   - oldrel
   - release
@@ -38,7 +38,7 @@ env:
   - R_CHECK_TESTS="TRUE"
   - _R_CHECK_TIMINGS_="0"
   - BOOTSTRAP_LATEX=1
-  - WARNINGS_ARE_ERRORS=1   
+  - WARNINGS_ARE_ERRORS=1
   - DISPLAY=:99.0
   - _R_CHECK_FORCE_SUGGESTS_=false
 
@@ -58,7 +58,7 @@ before_install:
 #  - start_xvfb ;
 #  - v8_install ;
   - export rver=`r_version`;
-  - export gh_user=`get_gh_user` ; echo $gh_user ;    
+  - export gh_user=`get_gh_user` ; echo $gh_user ;
   - cat DESCRIPTION
   - export PACKAGE_NAME=`package_name`
   - echo ${PACKAGE_NAME};
@@ -84,6 +84,7 @@ before_install:
   - Rscript -e 'install.packages("magic")'
   - Rscript -e 'install.packages("ggplot2")'
   - Rscript -e 'install.packages("psych")'
+  - Rscript -e 'install.packages("fastICA")'
   - Rscript -e 'install.packages("randomForest")'
   - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
   # - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
@@ -163,4 +164,3 @@ deploy:
       repo: muschellij2/ANTsR
       all_branches: true
       condition: "${gh_user} = muschellij2"
-

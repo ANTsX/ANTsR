@@ -23,7 +23,11 @@ initialization is zeroed out}
 A single matrix or list of matrices
 }
 \description{
-Initialize SyMLR
+Four initialization approaches for SyMLR.  Returns either a single matrix
+derived from dimensionality reduction on all matrices
+(\code{jointReduction=TRUE}) or a list of reduced
+dimensionality matrices, one for each input.  Either PCA or ICA can be used
+as the reduction method.
 }
 \examples{
 

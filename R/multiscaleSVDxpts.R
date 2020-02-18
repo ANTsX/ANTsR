@@ -2793,10 +2793,11 @@ symlr2 <- function(
 #' outcome = initializeSyMLR(
 #'   list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
 #'         matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
-#'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 2 )
+#'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 
+#'   k = 2, uAlgorithm = 'pca' )
 #'
 #' @export
-initializeSyMLR <- function( voxmats, k, jointReduction = FALSE,
+initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   zeroUpper = FALSE, uAlgorithm = 'pca' ) {
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
@@ -2930,7 +2931,7 @@ symlr <- function(
     stop( "Constraint should be one of none, Grassmann or Stiefel" )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
-  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s' )
+  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca' )
   if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
   if ( ! mixAlg %in% mixAlgs ) {
     message( paste(mixAlgs, collapse=' or ' ) )
@@ -3214,7 +3215,7 @@ symlr <- function(
 #' @param projections A list that contains the low-dimensional projections.
 #' @param i which modality to predict from the others.
 #' @param mixingAlgorithm the elected mixing algorithm.  see \code{symlr}.  can
-#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.
+#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
 #' @param orthogonalize boolean
 #' @return u matrix for modality i
