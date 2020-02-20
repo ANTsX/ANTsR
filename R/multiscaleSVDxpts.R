@@ -2793,7 +2793,7 @@ symlr2 <- function(
 #' outcome = initializeSyMLR(
 #'   list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
 #'         matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
-#'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ), 
+#'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ),
 #'   k = 2, uAlgorithm = 'pca' )
 #'
 #' @export
@@ -3090,8 +3090,9 @@ symlr <- function(
       }
     prediction = avgU %*% t( myenergysearchv )
     if ( normalized ) prediction = prediction/norm(prediction,'F')
-#    prediction = prediction - colMeans(prediction) - colMeans( voxmats[[whichModality]] )
-    return( norm( prediction - voxmats[[whichModality]], "F" ) )
+    prediction = prediction - ( colMeans(prediction) - colMeans( voxmats[[whichModality]] ) )
+    energy = norm( prediction - voxmats[[whichModality]], "F" )
+    return( energy )
     }
 
   initialEnergy = 0
@@ -3129,12 +3130,18 @@ symlr <- function(
       gradV = 1.0 * (  term1 - term2 )
       return( gradV )
     }
-  if ( ! normalized )
-    getSyMG <- function( v, i, myw, mixAlg )  {
-      u = initialUMatrix[[i]]
-      x = voxmats[[i]]
-      2.0 * ( t( x ) %*% u - v ) # + sign( v ) * 0.001 # pure data-term
+  if ( ! normalized ) {
+    getSyMG <- function( v, i, myw, mixAlg, useRegression = TRUE )  {
+      if ( ! useRegression ) {
+        u = initialUMatrix[[i]]
+        x = voxmats[[i]]
+        return(  2.0 * ( t( x ) %*% u - v ) ) # + sign( v ) * 0.001 # pure data-term
       }
+      mdl = lm( voxmats[[i]] ~ initialUMatrix[[i]] )
+      intercept = coefficients( mdl )[1,]
+      return( t(coefficients( mdl )[-1,]) * 0.05 ) # move toward these coefficients
+      }
+    }
 
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
