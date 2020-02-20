@@ -2853,7 +2853,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param lowDimensionalError development option - integer sampling of matrix columns or a
 #' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
-#' @param normalized boolean to control whether we use normalized energy or not
+#' @param energyType one of regression, cca or normalized
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2924,13 +2924,25 @@ symlr <- function(
   randomSeed,
   lowDimensionalError = 0,
   constraint = "none",
-  normalized = FALSE,
+  energyType = 'regression',
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+  if ( ! any( energyType %in% c("regression","cca","normalized" ) ) )
+    stop( "energyType should be one of regression, cca or normalized" )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
     stop( "Constraint should be one of none, Grassmann or Stiefel" )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
+  normalized = FALSE
+  ccaEnergy = FALSE
+  if ( energyType == 'normalized' ) {
+    normalized = TRUE
+    ccaEnergy = FALSE
+  }
+  if ( energyType == 'cca' ) {
+    normalized = FALSE
+    ccaEnergy = TRUE
+  }
   mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca' )
   if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
   if ( ! mixAlg %in% mixAlgs ) {
@@ -3055,8 +3067,9 @@ symlr <- function(
   vmats = list()
   dedu = list()
   for ( i in 1:length( voxmats ) ) {
-    vmats[[ i ]] = matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
-      localGS()
+    vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
+    # matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
+      # localGS()
     }
   matnorms = rep( 1, length(matnorms) )
   nc = ncol( initialUMatrix[[ 1 ]] )
@@ -3070,6 +3083,18 @@ symlr <- function(
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
         sparsenessQuantiles[i],
         orthogonalize = FALSE, positivity = positivities[i], softThresholding = F )
+
+      if ( ccaEnergy ) {
+      #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
+        t0 = norm( voxmats[[whichModality]] %*% myenergysearchv , "F" )
+        t1 = norm( avgU, "F" )
+        mynorm  = -1.0/(t0*t1)
+        return( mynorm *
+          sum( diag(  t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv ) ) ) )
+          # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
+        }
+
+
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[whichModality]])     # FIXME - need to check this
     if ( lowDimensionalError > 1e-10 ) { # PROBABLY NEEDS WORK
       # randomly sample some voxels to speed this up
@@ -3131,15 +3156,46 @@ symlr <- function(
       return( gradV )
     }
   if ( ! normalized ) {
-    getSyMG <- function( v, i, myw, mixAlg, useRegression = TRUE )  {
-      if ( ! useRegression ) {
-        u = initialUMatrix[[i]]
-        x = voxmats[[i]]
+    wm = 'matrix'
+    if ( ccaEnergy ) wm = 'ccag'
+    getSyMG <- function( v, i, myw, mixAlg, whichModel = wm )  {
+      u = initialUMatrix[[i]]
+      x = voxmats[[i]]
+      if (  whichModel == 'matrix' ) {
         return(  2.0 * ( t( x ) %*% u - v ) ) # + sign( v ) * 0.001 # pure data-term
       }
-      mdl = lm( voxmats[[i]] ~ initialUMatrix[[i]] )
-      intercept = coefficients( mdl )[1,]
-      return( t(coefficients( mdl )[-1,]) * 0.05 ) # move toward these coefficients
+      if (  whichModel == 'regression' ) {
+        mdl = lm( x ~ u )
+        intercept = coefficients( mdl )[1,]
+        return( t(coefficients( mdl )[-1,]) * 0.05 ) # move toward these coefficients
+      }
+      if (  whichModel == 'cca' ) { # THIS IS WIP / not recommended
+        # ( x'*X'*Y*y )/( norm2(X*x ) * norm2( Y*x ) ) # CCA objective
+        sccan <- sparseDecom2(
+          inmatrix = list( x, u ),
+            nvecs = ncol( u ), sparseness=c( -1, -1 ),
+            its = 2, ell1=0.1, z=-1, verbose = F, maxBased = F, robust = F )
+        return( ( sccan$eig1 )*0.5 )
+        return( ( t( x ) %*% u ) * ( 0.1 )  ) # power iteration
+        }
+      if (  whichModel == 'ccag' ) { # THIS IS WIP / not recommended
+        # ( v'*X'*u)/( norm2(X*v ) * norm2( u ) ) # CCA objective
+        t0 = norm( x %*% v , "F" )
+        t1 = norm( u, "F" )
+        mytr = sum(diag( t(u)%*% (x %*% v ) ))
+        return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1.0/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) * 0.5 )
+        }
+      if (  whichModel == 'ccag2' ) { # THIS IS WIP / not recommended
+        # tr( (x'*X'/norm2(X*x ))*(Y/norm2( Y )))
+        t0 = x %*% v
+        poster = t( t(x) %*% t0 )
+        preposter = ( t(u) %*% (t0) )
+        t1 = norm( t0, "F" )
+        t2 = norm( u, "F" )
+        mytr = sum(diag( t(u)%*% (x %*% v ) ))
+        ( 1.0   / ( t1   * t2 ) * ( t( x ) %*% u ) -
+            1.0 / ( t1^3 * t2 ) * t( preposter %*% poster ) ) * 0.5
+        }
       }
     }
 
@@ -3155,7 +3211,7 @@ symlr <- function(
       mytol = lineSearchTolerance / myit^2 # seek more accuracy over iterations
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( myit == 1 | ( myit %% 1 == 0 ) ) {
+      if ( myit <= 3 ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
                          myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError,
@@ -3163,7 +3219,7 @@ symlr <- function(
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
       } else {
-        gamma[i] = gamma[i] * 1.0
+        gamma[i] = gamma[i] * 0.9
         errterm[ i ] = getSyME2( gamma[i], temperv, myw=myw, mixAlg=mixAlg,
           lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
           whichModality = i  )

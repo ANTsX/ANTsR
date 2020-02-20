@@ -8,7 +8,7 @@ symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
   repeatedMeasures = NA, lineSearchRange = c(-1, 1),
   lineSearchTolerance = 1e-08, randomSeed, lowDimensionalError = 0,
-  constraint = "none", normalized = FALSE, verbose = FALSE)
+  constraint = "none", energyType = "regression", verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -45,7 +45,7 @@ float value greater than 0 less than 1 that indicates fraction of columns for ea
 
 \item{constraint}{one of none, Grassmann or Stiefel}
 
-\item{normalized}{boolean to control whether we use normalized energy or not}
+\item{energyType}{one of regression, cca or normalized}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
