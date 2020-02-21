@@ -2860,7 +2860,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param lowDimensionalError development option - integer sampling of matrix columns or a
 #' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
-#' @param energyType one of regression, cca or normalized
+#' @param energyType one of regression, normalized, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
@@ -2936,7 +2936,7 @@ symlr <- function(
   vmats,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
-  if ( ! any( energyType %in% c("regression","cca","normalized" ) ) )
+  if ( ! any( energyType %in% c("regression","cca","normalized", "ucca" ) ) )
     stop( "energyType should be one of regression, cca or normalized" )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
     stop( "Constraint should be one of none, Grassmann or Stiefel" )
@@ -2948,7 +2948,7 @@ symlr <- function(
     normalized = TRUE
     ccaEnergy = FALSE
   }
-  if ( energyType == 'cca' ) {
+  if ( energyType == 'cca' | energyType == 'ucca' ) {
     normalized = FALSE
     ccaEnergy = TRUE
   }
@@ -3200,7 +3200,7 @@ symlr <- function(
           mytr = sum(diag( t(u)%*% (x %*% v ) ))
           return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1.0/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) * 0.5 )
           }
-        return( subg( x, u, v ) )
+        if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
         for ( j in 1:length( voxmats ) )
           if ( j != i ) gradder = gradder +

@@ -46,7 +46,7 @@ float value greater than 0 less than 1 that indicates fraction of columns for ea
 
 \item{constraint}{one of none, Grassmann or Stiefel}
 
-\item{energyType}{one of regression, cca or normalized}
+\item{energyType}{one of regression, normalized, cca or ucca}
 
 \item{vmats}{optional initial \code{v} matrix list}
 
