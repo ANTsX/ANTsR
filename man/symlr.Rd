@@ -8,7 +8,8 @@ symlr(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles,
   positivities, initialUMatrix, mixAlg, orthogonalize = TRUE,
   repeatedMeasures = NA, lineSearchRange = c(-1, 1),
   lineSearchTolerance = 1e-08, randomSeed, lowDimensionalError = 0,
-  constraint = "none", energyType = "regression", verbose = FALSE)
+  constraint = "none", energyType = "regression", vmats,
+  verbose = FALSE)
 }
 \arguments{
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -27,7 +28,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
@@ -46,6 +47,8 @@ float value greater than 0 less than 1 that indicates fraction of columns for ea
 \item{constraint}{one of none, Grassmann or Stiefel}
 
 \item{energyType}{one of regression, cca or normalized}
+
+\item{vmats}{optional initial \code{v} matrix list}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}

@@ -17,7 +17,7 @@ initializeSyMLR(voxmats, k, jointReduction = TRUE, zeroUpper = FALSE,
 \item{zeroUpper}{boolean determining whether upper triangular part of
 initialization is zeroed out}
 
-\item{uAlgorithm}{either \code{"pca"} (default) or \code{"ica"}}
+\item{uAlgorithm}{either \code{"random"} \code{"pca"} (default) or \code{"ica"}}
 }
 \value{
 A single matrix or list of matrices

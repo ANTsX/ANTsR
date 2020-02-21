@@ -1423,6 +1423,7 @@ jointSmoothMatrixReconstruction <- function(
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE ) {
+  if ( sparsenessQuantile == 0 ) return( v )
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
   binaryOrth <- function( x ) { # BROKEN => DONT USE
     minormax <- function( x ) {
@@ -2780,7 +2781,7 @@ symlr2 <- function(
 #' @param jointReduction boolean determining whether one or length of list bases are
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
-#' @param uAlgorithm either \code{"pca"} (default) or \code{"ica"}
+#' @param uAlgorithm either \code{"random"} \code{"pca"} (default) or \code{"ica"}
 #'
 #' @return A single matrix or list of matrices
 #' @author BB Avants.
@@ -2804,8 +2805,10 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     if ( uAlgorithm == 'pca' ) {
       X.pcr <- prcomp( t(X), rank. = k )          # PCA
       u <- ( X.pcr$rotation )
-    } else {
+    } else if ( uAlgorithm == 'ica' ) {
       u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
+    } else {
+      u = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
     if ( zeroUpper ) u[ upper.tri( u ) ] <- 0
     return( u )
@@ -2814,7 +2817,11 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   for ( s in 1:length(voxmats)) {
     if ( uAlgorithm == 'pca ') {
       uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
-    } else uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
+    } else if ( uAlgorithm == 'ica' ) {
+      uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
+    } else {
+      uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
+    }
     if ( zeroUpper ) uOut[[s]][upper.tri(uOut[[s]])] <- 0
     }
   return( uOut )
@@ -2843,7 +2850,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' number of basis functions in which case random initialization occurs. One
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
-#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -2854,6 +2861,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
 #' @param energyType one of regression, cca or normalized
+#' @param vmats optional initial \code{v} matrix list
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2925,6 +2933,7 @@ symlr <- function(
   lowDimensionalError = 0,
   constraint = "none",
   energyType = 'regression',
+  vmats,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( energyType %in% c("regression","cca","normalized" ) ) )
@@ -2943,7 +2952,7 @@ symlr <- function(
     normalized = FALSE
     ccaEnergy = TRUE
   }
-  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca' )
+  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' )
   if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
   if ( ! mixAlg %in% mixAlgs ) {
     message( paste(mixAlgs, collapse=' or ' ) )
@@ -3064,12 +3073,11 @@ symlr <- function(
     }
   }
   basisK = ncol( initialUMatrix[[ 1 ]] )
-  vmats = list()
-  dedu = list()
-  for ( i in 1:length( voxmats ) ) {
-    vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
-    # matrix( rnorm( p[ i ] * basisK ), nrow = p[ i ], ncol = basisK ) %>%
-      # localGS()
+  if ( missing( vmats ) ) {
+    vmats = list()
+    for ( i in 1:length( voxmats ) ) {
+      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
+      }
     }
   matnorms = rep( 1, length(matnorms) )
   nc = ncol( initialUMatrix[[ 1 ]] )
@@ -3127,9 +3135,8 @@ symlr <- function(
       whichModality = i  )
     initialEnergy = initialEnergy + loki /length( voxmats )
   }
-  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy ) )
+  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy, "<o> mixer:", mixAlg ) )
   energyPath = rep( NA, iterations + 0 )
-#  energyPath[ 1 ] = initialEnergy
   constrainG <- function( vgrad, i, constraint ) {
     if ( constraint == "Grassmann") {
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
@@ -3162,7 +3169,14 @@ symlr <- function(
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
-        return(  2.0 * ( t( x ) %*% u - v ) ) # + sign( v ) * 0.001 # pure data-term
+        term1 = 2.0 * ( t( x ) %*% u - v )
+        term2 = 0
+        if ( FALSE ) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
+          temp = ( x - ( x %*% v ) %*% t(v) ) # n by p
+          term2 = 2.0 * ( t( temp ) %*% ( x  %*% v ) ) -
+                  2.0 * t( x ) %*% ( temp %*% v )
+          }
+        return( term1 + term2  ) # + sign( v ) * 0.001 # pure data-term
       }
       if (  whichModel == 'regression' ) {
         mdl = lm( x ~ u )
@@ -3178,12 +3192,20 @@ symlr <- function(
         return( ( sccan$eig1 )*0.5 )
         return( ( t( x ) %*% u ) * ( 0.1 )  ) # power iteration
         }
-      if (  whichModel == 'ccag' ) { # THIS IS WIP / not recommended
+      if (  whichModel == 'ccag' ) {
         # ( v'*X'*u)/( norm2(X*v ) * norm2( u ) ) # CCA objective
-        t0 = norm( x %*% v , "F" )
-        t1 = norm( u, "F" )
-        mytr = sum(diag( t(u)%*% (x %*% v ) ))
-        return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1.0/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) * 0.5 )
+        subg <- function( x, u, v ) {
+          t0 = norm( x %*% v , "F" )
+          t1 = norm( u, "F" )
+          mytr = sum(diag( t(u)%*% (x %*% v ) ))
+          return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1.0/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) * 0.5 )
+          }
+        return( subg( x, u, v ) )
+        gradder = v * 0
+        for ( j in 1:length( voxmats ) )
+          if ( j != i ) gradder = gradder +
+            subg( x, scale( voxmats[[j]] %*% vmats[[j]] , T, T ) , v )
+        return( gradder/(length(voxmats)-1) )
         }
       if (  whichModel == 'ccag2' ) { # THIS IS WIP / not recommended
         # tr( (x'*X'/norm2(X*x ))*(Y/norm2( Y )))
@@ -3199,6 +3221,18 @@ symlr <- function(
       }
     }
 
+  lineSearchLogic<- function( x ) { # energy path is input
+    nna = sum( ! is.na( x ) )
+    if ( nna <= 1 ) return( TRUE )
+    xx = na.omit( x )
+    if (  ( xx[ length(xx) - 1 ] > xx[ length(xx) ] ) ) # &
+#          ( xx[ length(xx) - 2 ] > xx[ length(xx) ] ) &
+#          ( xx[ length(xx) - 2 ] > xx[ length(xx) - 1 ] ) )
+      return( FALSE )
+    return( TRUE )
+    # mdl = loess( xx ~ as.numeric(1:length(xx)) ) # for slope estimate
+    }
+
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
@@ -3208,10 +3242,10 @@ symlr <- function(
     errterm = rep( 1.0, length(voxmats) )
     matrange = 1:length( voxmats )
     for ( i in matrange ) { # get update for each V_i
-      mytol = lineSearchTolerance / myit^2 # seek more accuracy over iterations
+      mytol = lineSearchTolerance # / myit^2 # seek more accuracy over iterations
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( myit <= 3 ) {
+      if ( lineSearchLogic( energyPath ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
                          myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError,
@@ -3233,14 +3267,16 @@ symlr <- function(
       if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
     }
     if ( verbose == 2 ) print( gamma )
-    # use the V to project down to the U bases
+    # use the V to project down to the U bases => self-representations
     for ( i in 1:length( voxmats ) ) {
       initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
       }
-    # run the basis calculation for each U_i
+    # run the basis calculation for each U_i - convert self to other
+    janusU = list()
     for ( i in 1:length( voxmats ) ) {
-      initialUMatrix[[i]] = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
+      janusU[[i]] = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
       }
+    initialUMatrix = janusU # copy back
     merr = mean(errterm)
     nzct = 0
     for ( loi in 1:length(vmats) )
@@ -3278,7 +3314,7 @@ symlr <- function(
 #' @param projections A list that contains the low-dimensional projections.
 #' @param i which modality to predict from the others.
 #' @param mixingAlgorithm the elected mixing algorithm.  see \code{symlr}.  can
-#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca' or 'avg'.
+#' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
 #' @param orthogonalize boolean
 #' @return u matrix for modality i
@@ -3308,6 +3344,7 @@ symlrU <- function( projections, i, mixingAlgorithm, initialW,
     qi <- x[,1]
     si <- sqrt(sum(qi ^ 2))
     q[,1] <- qi / si
+    if ( si < .Machine$double.eps ) si = 1
     r[1,1] <- si
     for (i in 2:m) {
       xi <- x[,i]
@@ -3316,6 +3353,7 @@ symlrU <- function( projections, i, mixingAlgorithm, initialW,
       qi <- xi - qj %*% rj
       r[1:(i - 1),i] <- rj
       si <- sqrt(sum(qi ^ 2))
+      if ( si < .Machine$double.eps ) si = 1
       q[,i] <- qi / si
       r[i,i] <- si
     }
@@ -3325,16 +3363,24 @@ symlrU <- function( projections, i, mixingAlgorithm, initialW,
   mixAlg = mixingAlgorithm
   nComponents = ncol( projections[[1]] )
   nmodalities = length( projections )
-  wtobind = (1:nmodalities)[ -i ]
+  wtobind = ( 1:nmodalities )[ -i ]
   if ( mixAlg == 'avg' ) {
     avgU = projections[[1]] * 0.0
     for ( j in wtobind )
       avgU = avgU + projections[[ j ]] / ( nmodalities - 1 )
     return( avgU )
   }
+  if ( mixAlg == 'stochastic' ) { # FIXME
+    avgU = Reduce( cbind, projections[ wtobind ] )
+    G = scale(replicate(nComponents, rnorm(nrow(avgU))),F,F)
+    Y = localGS(t(avgU) %*% G) # project onto random basis - no localGS because of numerical issues when self-mapping
+    avgU = scale( avgU %*% Y, F, F )
+    return( avgU )
+  }
   nc = ncol( projections[[ 1 ]] )
-  for ( j in wtobind )
-    avgU = cbind( avgU, projections[[ j ]] )
+  avgU = Reduce( cbind, projections[ wtobind ] )
+  if ( mixAlg == 'pca' )
+    basis = stats::prcomp( avgU, retx=F, rank.=nc, scale.=T )$rotation
   if ( mixAlg == 'rrpca-l' )
     basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
   else if ( mixAlg == 'rrpca-s' )
