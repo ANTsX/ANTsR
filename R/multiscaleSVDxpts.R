@@ -2768,6 +2768,7 @@ symlr2 <- function(
 
 
 
+
 #' Initialize SyMLR
 #'
 #' Four initialization approaches for SyMLR.  Returns either a single matrix
@@ -2781,7 +2782,7 @@ symlr2 <- function(
 #' @param jointReduction boolean determining whether one or length of list bases are
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
-#' @param uAlgorithm either \code{"random"} \code{"pca"} (default) or \code{"ica"}
+#' @param uAlgorithm either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}
 #'
 #' @return A single matrix or list of matrices
 #' @author BB Avants.
@@ -2807,6 +2808,11 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
       u <- ( X.pcr$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
+    } else if ( uAlgorithm == 'cca' ) {
+      X <- Reduce( cbind, voxmats[-1] ) # bind all matrices
+#      u = randcca( voxmats[[1]], X, k )$svd$u
+      u = sparseDecom2( list(voxmats[[1]],X ),
+        sparseness = c(0.5,0.5), nvecs = k, its = 3, ell1=0.1 )$projections2
     } else {
       u = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
@@ -2819,6 +2825,9 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
       uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
+    } else if ( uAlgorithm == 'cca' ) {
+      uOut[[s]] = sparseDecom2( list(voxmats[[1]], voxmats[[s]]),
+        sparseness = c(0.5,0.5), nvecs = k, its = 3, ell1=0.1  )$projections2
     } else {
       uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
@@ -2857,8 +2866,6 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
-#' @param lowDimensionalError development option - integer sampling of matrix columns or a
-#' float value greater than 0 less than 1 that indicates fraction of columns for each matrix.
 #' @param constraint one of none, Grassmann or Stiefel
 #' @param energyType one of regression, normalized, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
@@ -2930,7 +2937,6 @@ symlr <- function(
   lineSearchRange = c( -1, 1 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
-  lowDimensionalError = 0,
   constraint = "none",
   energyType = 'regression',
   vmats,
@@ -3024,6 +3030,7 @@ symlr <- function(
     r <- matrix(0,m,m)
     qi <- x[,1]
     si <- sqrt(sum(qi ^ 2))
+    if ( si < .Machine$double.eps ) si = 1
     q[,1] <- qi / si
     r[1,1] <- si
     for (i in 2:m) {
@@ -3033,6 +3040,7 @@ symlr <- function(
       qi <- xi - qj %*% rj
       r[1:(i - 1),i] <- rj
       si <- sqrt(sum(qi ^ 2))
+      if ( si < .Machine$double.eps ) si = 1
       q[,i] <- qi / si
       r[i,i] <- si
     }
@@ -3062,65 +3070,50 @@ symlr <- function(
       initialUMatrix[[ i ]] = randmat
   }
 
-  vRan = list( )
-  dedrv = list( )
-  if ( hasRanEff ) {
-    for ( i in 1:length( voxmats ) ) {
-      vRan[[ i ]] = matrix( rnorm( ncol( zRan ) * p[i], 1, 1 ),
-                            nrow = p[i], ncol = ncol( zRan ) ) * 0.0
-      dedrv[[ i ]] = vRan[[ i ]]
-      colnames(  vRan[[ i ]] ) = ranEffNames
-    }
-  }
   basisK = ncol( initialUMatrix[[ 1 ]] )
   if ( missing( vmats ) ) {
     vmats = list()
     for ( i in 1:length( voxmats ) ) {
-      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
+#      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
+      vmats[[ i ]] = matrix( rnorm( ncol( voxmats[[i]] ) * basisK ), ncol = basisK )
+      vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
       }
     }
-  matnorms = rep( 1, length(matnorms) )
+
   nc = ncol( initialUMatrix[[ 1 ]] )
   myw = matrix( rnorm( nc^2), nc, nc ) # initialization for fastICA
   getSyME2 <- function( lineSearch, gradient, myw, mixAlg,
-      lowDimensionalError, avgU, whichModality )  {
+      avgU, whichModality, verbose = FALSE )  {
     prediction = 0
     myenergysearchv = ( vmats[[whichModality]]+gradient * lineSearch )  # update the i^th v matrix
-    if ( sparsenessQuantiles[i] != 0 )
+    if ( verbose ) {
+      print(paste("getSyME2",whichModality) )
+      print( dim( vmats[[whichModality]]))
+    }
+    if ( sparsenessQuantiles[whichModality] != 0 )
       myenergysearchv = orthogonalizeAndQSparsify(            # make sparse
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
-        sparsenessQuantiles[i],
-        orthogonalize = FALSE, positivity = positivities[i], softThresholding = F )
+        sparsenessQuantiles[whichModality],
+        orthogonalize = FALSE,
+        positivity = positivities[whichModality], softThresholding = F )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
         t0 = norm( voxmats[[whichModality]] %*% myenergysearchv , "F" )
         t1 = norm( avgU, "F" )
         mynorm  = -1.0/(t0*t1)
+        if ( verbose ) {
+          print("CCA")
+          print( dim( avgU ) )
+          print( dim( voxmats[[whichModality]] ) )
+        }
         return( mynorm *
-          sum( diag(  t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv ) ) ) )
+          sum( abs( diag(  t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv ) ) ) ))
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
 
     if ( hasRanEff ) prediction = zRan %*% t(vRan[[whichModality]])     # FIXME - need to check this
-    if ( lowDimensionalError > 1e-10 ) { # PROBABLY NEEDS WORK
-      # randomly sample some voxels to speed this up
-      nmaxc = sampleNc = ncol(voxmats[[whichModality]])
-      nmaxr = sampleNr = nrow(voxmats[[whichModality]])
-      if ( lowDimensionalError < 1 ) {
-        sampleNc = min( c( nmaxc, round( lowDimensionalError * nmaxc ) ) )
-        sampleNr = min( c( nmaxr, round( lowDimensionalError * nmaxr ) ) )
-        }
-      if ( sampleNc < 2 ) sampleNc = 2
-      if ( sampleNr < 5 ) sampleNr = 5
-      vsamc = sample(1:nmaxc, sampleNc )
-      vsamr = 1:nmaxr # sample(1:nmaxr, sampleNr )
-      prediction = voxmats[[whichModality]] %*% ( myenergysearchv )
-      loclm = lm( voxmats[[whichModality]][vsamr,vsamc] ~ prediction[vsamr,] )
-      locnorm = norm( loclm$residuals , "F" )
-      return( locnorm )
-      }
     prediction = avgU %*% t( myenergysearchv )
     if ( normalized ) prediction = prediction/norm(prediction,'F')
     prediction = prediction - ( colMeans(prediction) - colMeans( voxmats[[whichModality]] ) )
@@ -3128,15 +3121,20 @@ symlr <- function(
     return( energy )
     }
 
+  nModalities = length( voxmats )
+  energyPath = matrix( nrow = iterations + 1, ncol = nModalities )
+#  initialUMatrix = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
   initialEnergy = 0
   for ( i in 1:length( voxmats ) ) {
-    loki = getSyME2( 1, 0, myw=myw, mixAlg=mixAlg,
-      lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
+    loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
+      avgU = initialUMatrix[[i]],
       whichModality = i  )
+    energyPath[1,i] = loki
     initialEnergy = initialEnergy + loki /length( voxmats )
   }
+  bestU = initialUMatrix
+  bestV = vmats
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy, "<o> mixer:", mixAlg ) )
-  energyPath = rep( NA, iterations + 0 )
   constrainG <- function( vgrad, i, constraint ) {
     if ( constraint == "Grassmann") {
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
@@ -3183,23 +3181,28 @@ symlr <- function(
         intercept = coefficients( mdl )[1,]
         return( t(coefficients( mdl )[-1,]) * 0.05 ) # move toward these coefficients
       }
-      if (  whichModel == 'cca' ) { # THIS IS WIP / not recommended
-        # ( x'*X'*Y*y )/( norm2(X*x ) * norm2( Y*x ) ) # CCA objective
-        sccan <- sparseDecom2(
-          inmatrix = list( x, u ),
-            nvecs = ncol( u ), sparseness=c( -1, -1 ),
-            its = 2, ell1=0.1, z=-1, verbose = F, maxBased = F, robust = F )
-        return( ( sccan$eig1 )*0.5 )
-        return( ( t( x ) %*% u ) * ( 0.1 )  ) # power iteration
-        }
       if (  whichModel == 'ccag' ) {
         # ( v'*X'*u)/( norm2(X*v ) * norm2( u ) ) # CCA objective
         subg <- function( x, u, v ) {
           t0 = norm( x %*% v , "F" )
           t1 = norm( u, "F" )
-          mytr = sum(diag( t(u)%*% (x %*% v ) ))
-          return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1.0/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) * 0.5 )
+          mytr = sum( diag( t(u)%*% (x %*% v ) ))
+          return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) +
+            sign( v ) * 0.0 )
           }
+          # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA objective
+          if ( energyType == 'ucca' | TRUE )
+            subg <- function( x, u, v ) {
+              t0 = norm( x %*% v , "F" )
+              t1 = norm( u, "F" )
+              t2 = t(u)%*% (x %*% v )
+              mytr = sum( abs( diag( t2 ) ) )
+              signer = t2 * 0
+              diag( signer ) = sign( diag( t2 ) )
+              return( 1 / ( t0 * t1 ) * ( t( x ) %*% u ) %*% signer -
+                1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) )  +
+                  sign( v ) * 0.0 )
+              }
         if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
         for ( j in 1:length( voxmats ) )
@@ -3242,67 +3245,90 @@ symlr <- function(
     errterm = rep( 1.0, length(voxmats) )
     matrange = 1:length( voxmats )
     for ( i in matrange ) { # get update for each V_i
+      if ( ccaEnergy ) {
+        vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
+        initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]], "F" )
+      }
       mytol = lineSearchTolerance # / myit^2 # seek more accuracy over iterations
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( lineSearchLogic( energyPath ) ) {
+      if ( lineSearchLogic( energyPath[,i] ) | myit < 3 ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange, tol = mytol, gradient = temperv,
-                         myw=myw, mixAlg = mixAlg, lowDimensionalError = lowDimensionalError,
+                         myw=myw, mixAlg = mixAlg,
                          avgU = initialUMatrix[[i]], whichModality = i )
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
       } else {
         gamma[i] = gamma[i] * 0.9
         errterm[ i ] = getSyME2( gamma[i], temperv, myw=myw, mixAlg=mixAlg,
-          lowDimensionalError = lowDimensionalError, avgU = initialUMatrix[[i]],
+          avgU = initialUMatrix[[i]],
           whichModality = i  )
       }
-      vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
-      if ( sparsenessQuantiles[i] != 0 )
-        vmats[[i]] = orthogonalizeAndQSparsify(
-          as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
-          sparsenessQuantiles[i],
-          orthogonalize = FALSE, positivity = positivities[i], unitNorm = F, softThresholding = F  )
-      if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
+      noRand = TRUE
+      randresult = rnorm( 1 ) < 0
+      if ( noRand ) randresult = FALSE
+      if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) | randresult )
+      { # ok to update
+        vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
+        if ( sparsenessQuantiles[i] != 0 )
+          vmats[[i]] = orthogonalizeAndQSparsify(
+            as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
+            sparsenessQuantiles[i],
+            orthogonalize = FALSE, positivity = positivities[i], unitNorm = F, softThresholding = F  )
+        if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
+      }
+      if ( ccaEnergy ) {
+        vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
+        initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]], "F" )
+      }
     }
     if ( verbose == 2 ) print( gamma )
+
     # use the V to project down to the U bases => self-representations
-    for ( i in 1:length( voxmats ) ) {
-      initialUMatrix[[i]] = scale(voxmats[[i]] %*% vmats[[i]], TRUE, TRUE )
-      }
+    for ( jj in 1:length( voxmats ) )
+      initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], F, F )
     # run the basis calculation for each U_i - convert self to other
-    janusU = list()
-    for ( i in 1:length( voxmats ) ) {
-      janusU[[i]] = symlrU( initialUMatrix, i, mixAlg, myw, orthogonalize = orthogonalize  )
-      }
-    initialUMatrix = janusU # copy back
-    merr = mean(errterm)
-    nzct = 0
-    for ( loi in 1:length(vmats) )
-      nzct = nzct+mean(abs(vmats[[loi]])) / length(vmats)
-    tot = merr+nzct
-    if ( merr < bestTot ) {
-      bestTot = merr
-      bestU = initialUMatrix
-      bestV = vmats
+    initialUMatrix = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
+
+    # evaluate new energies
+    for ( jj in 1:length( voxmats ) ) {
+      loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
+        avgU = initialUMatrix[[jj]],
+        whichModality = jj, verbose = F )
+      energyPath[myit+1,jj] = loki
+    } # matrix loop
+    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
+    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
+    randresult = rnorm( 1 ) < 0
+    if ( noRand ) randresult = FALSE
+    if ( mean( energyPath[myit+1,] ) <= bestEv  | randresult )
+      {
+      for ( jj in 1:length( voxmats ) ) {
+        bestU[[jj]] = initialUMatrix[[jj]]
+        bestV[[jj]] = vmats[[jj]]
+      } # matrix loop
+    } else {
+      initialUMatrix = bestU
+      vmats = bestV
     }
     if ( verbose ) {
-      print( paste( "myit =", myit, 'data-term', merr, 'Reg', nzct, 'tot', tot ))
+      print( paste( "Iteration:", myit, "bestEv", bestEv, 'bestIt', bestRow-1 ) )
+      print( paste( energyPath[myit+1,], collapse = ' / ' ) )
+#      print( paste( apply( energyPath, FUN=min,MARGIN=2,na.rm=T) , collapse = ' / ' ) )
       }
-  energyPath[ myit ] = merr
   } # iterations
   return(
     list(
       u  = bestU,
       v  = bestV,
-      vRan = vRan,
       initialRandomMatrix = randmat,
       energyPath = energyPath,
-      finalError = errterm,
-      totalEnergy = bestTot )
+      finalError = bestEv,
+      totalEnergy = bestEv )
   )
 }
+
 
 
 #' Compute the low-dimensional u matrix for symlr
@@ -3312,7 +3338,6 @@ symlr <- function(
 #' This function computes that basis, given a mixing algorithm.
 #'
 #' @param projections A list that contains the low-dimensional projections.
-#' @param i which modality to predict from the others.
 #' @param mixingAlgorithm the elected mixing algorithm.  see \code{symlr}.  can
 #' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
@@ -3332,9 +3357,13 @@ symlr <- function(
 #'
 #' @seealso \code{\link{symlr}}
 #' @export
-symlrU <- function( projections, i, mixingAlgorithm, initialW,
+symlrU <- function( projections, mixingAlgorithm, initialW,
   orthogonalize = FALSE ) {
   # some gram schmidt code
+  projectionsU = projections
+  for ( kk in 1:length( projections ) )
+    projectionsU[[kk]] = projectionsU[[kk]]/norm(projectionsU[[kk]],"F")
+
   localGS <- function( x, orthogonalize = TRUE ) {
     if ( !orthogonalize ) return( x )
     n <- dim(x)[1]
@@ -3359,38 +3388,47 @@ symlrU <- function( projections, i, mixingAlgorithm, initialW,
     }
     return( q )
   }
-  avgU = NULL
-  mixAlg = mixingAlgorithm
-  nComponents = ncol( projections[[1]] )
-  nmodalities = length( projections )
-  wtobind = ( 1:nmodalities )[ -i ]
-  if ( mixAlg == 'avg' ) {
-    avgU = projections[[1]] * 0.0
-    for ( j in wtobind )
-      avgU = avgU + projections[[ j ]] / ( nmodalities - 1 )
-    return( avgU )
+  subU <- function( projectionsU, mixingAlgorithm, initialW,
+    orthogonalize, i ) {
+    avgU = NULL
+    mixAlg = mixingAlgorithm
+    nComponents = ncol( projectionsU[[1]] )
+    nmodalities = length( projectionsU )
+    wtobind = ( 1:nmodalities )[ -i ]
+    if ( mixAlg == 'avg' ) {
+      avgU = projectionsU[[1]] * 0.0
+      for ( j in wtobind )
+        avgU = avgU + projectionsU[[ j ]] / ( nmodalities - 1 )
+      return( avgU )
+    }
+    if ( mixAlg == 'stochastic' ) { # FIXME
+      avgU = Reduce( cbind, projectionsU[ wtobind ] )
+      G = scale(replicate(nComponents, rnorm(nrow(avgU))),F,F)
+      Y = localGS(t(avgU) %*% G) # project onto random basis - no localGS because of numerical issues when self-mapping
+      avgU = scale( avgU %*% Y, F, F )
+      return( avgU )
+    }
+    nc = ncol( projectionsU[[ 1 ]] )
+    avgU = Reduce( cbind, projectionsU[ wtobind ] )
+    if ( mixAlg == 'pca' )
+      basis = stats::prcomp( avgU, retx=F, rank.=nc, scale.=T )$rotation
+    if ( mixAlg == 'rrpca-l' )
+      basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+    else if ( mixAlg == 'rrpca-s' )
+      basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+    else if ( mixAlg == 'ica' & ! missing( initialW ) )
+      basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
+                                n.comp=nc )$S )
+    else if ( mixAlg == 'ica' & missing( initialW ) )
+      basis = ( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
+    basis = ( svd( avgU, nu = nc, nv=0 )$u )
+    if ( ! orthogonalize ) return( basis )
+    return( localGS( basis ) )
   }
-  if ( mixAlg == 'stochastic' ) { # FIXME
-    avgU = Reduce( cbind, projections[ wtobind ] )
-    G = scale(replicate(nComponents, rnorm(nrow(avgU))),F,F)
-    Y = localGS(t(avgU) %*% G) # project onto random basis - no localGS because of numerical issues when self-mapping
-    avgU = scale( avgU %*% Y, F, F )
-    return( avgU )
-  }
-  nc = ncol( projections[[ 1 ]] )
-  avgU = Reduce( cbind, projections[ wtobind ] )
-  if ( mixAlg == 'pca' )
-    basis = stats::prcomp( avgU, retx=F, rank.=nc, scale.=T )$rotation
-  if ( mixAlg == 'rrpca-l' )
-    basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
-  else if ( mixAlg == 'rrpca-s' )
-    basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
-  else if ( mixAlg == 'ica' & ! missing( initialW ) )
-    basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
-                              n.comp=nc )$S )
-  else if ( mixAlg == 'ica' & missing( initialW ) )
-    basis = ( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
-  basis = ( svd( avgU, nu = nc, nv=0 )$u )
-  if ( ! orthogonalize ) return( basis )
-  return( localGS( basis ) )
+
+  outU = list( )
+  for ( i in 1:length( projectionsU ) ) {
+    outU[[i]] = subU( projectionsU, mixingAlgorithm, initialW, orthogonalize, i )
+    }
+  return( outU )
 }
