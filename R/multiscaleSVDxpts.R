@@ -2932,7 +2932,7 @@ symlr <- function(
   positivities,
   initialUMatrix,
   mixAlg,
-  orthogonalize = TRUE,
+  orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1, 1 ),
   lineSearchTolerance = 1e-8,
@@ -2972,7 +2972,7 @@ symlr <- function(
     stop( "positivities must be one of positive, negative, either" )
   if ( length( positivities ) ==  1 )
     positivities = rep( positivities[1], length( voxmats ) )
-  matnames = matnorms = p = rep( NA, length( voxmats ) )
+  matnames = p = rep( NA, length( voxmats ) )
   n = nrow( voxmats[[1]] )
   if ( missing( sparsenessQuantiles ) )
     sparsenessQuantiles = rep( 0.5, length( voxmats ) )
@@ -2981,32 +2981,9 @@ symlr <- function(
   for ( i in 1:length( voxmats ) ) {
     if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
       stop( paste( "input matrix", i, "is null or NA." ) )
-    matnorms[ i ] = norm( voxmats[[ i ]], type = "F" )
     p[ i ] = ncol( voxmats[[ i ]] )
     matnames =  names( voxmats )[ i ]
-    voxmats[[ i ]] = voxmats[[ i ]] / matnorms[ i ]
-  }
-
-  # 2.0 setup random effects
-  hasRanEff = FALSE
-  zRan = NA
-  if ( ! any( is.na( repeatedMeasures ) ) ) {
-    hasRanEff = TRUE
-    usubs = unique( repeatedMeasures )
-    if ( length( repeatedMeasures ) != n )
-      stop( "The length of the repeatedMeasures vector should equal the number of rows in the data." )
-    ranEff = factor( repeatedMeasures )
-    temp = lm( rnorm( n ) ~ ranEff )
-    temp = model.matrix(  temp )
-    ranEffNames = colnames( temp )
-    ranEffNames[ 1 ] = paste0( "ranEff", as.character( levels( ranEff )[1] ) )
-    temp[ ranEff == levels( ranEff )[1] ,1] = 1
-    temp[ ranEff != levels( ranEff )[1] ,1] = 0
-    zRan = ( temp[ , ] )
-    colnames( zRan ) = ranEffNames
-    tz = t( zRan )
-    tzz = tz %*% zRan
-    rm( ranEff )
+    voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
   }
 
   # 3.0 setup regularization
@@ -3071,7 +3048,10 @@ symlr <- function(
   }
 
   basisK = ncol( initialUMatrix[[ 1 ]] )
-  if ( missing( vmats ) ) {
+  buildV = FALSE
+  if ( missing( vmats ) ) buildV = TRUE else if ( is.null( vmats ) ) buildV = TRUE
+  if ( buildV ) {
+    if ( verbose ) print("     <0> BUILD-V <0> BUILD-V <0> BUILD-V <0> BUILD-V <0>    ")
     vmats = list()
     for ( i in 1:length( voxmats ) ) {
 #      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
@@ -3112,8 +3092,6 @@ symlr <- function(
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
-
-    if ( hasRanEff ) prediction = zRan %*% t(vRan[[whichModality]])     # FIXME - need to check this
     prediction = avgU %*% t( myenergysearchv )
     if ( normalized ) prediction = prediction/norm(prediction,'F')
     prediction = prediction - ( colMeans(prediction) - colMeans( voxmats[[whichModality]] ) )
@@ -3123,7 +3101,6 @@ symlr <- function(
 
   nModalities = length( voxmats )
   energyPath = matrix( nrow = iterations + 1, ncol = nModalities )
-#  initialUMatrix = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
   initialEnergy = 0
   for ( i in 1:length( voxmats ) ) {
     loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
@@ -3134,7 +3111,8 @@ symlr <- function(
   }
   bestU = initialUMatrix
   bestV = vmats
-  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy, "<o> mixer:", mixAlg ) )
+  if ( verbose ) print( paste( "initialDataTerm:", initialEnergy,
+    " <o> mixer:", mixAlg, " <o> E: ", energyType ) )
   constrainG <- function( vgrad, i, constraint ) {
     if ( constraint == "Grassmann") {
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
@@ -3228,9 +3206,7 @@ symlr <- function(
     nna = sum( ! is.na( x ) )
     if ( nna <= 1 ) return( TRUE )
     xx = na.omit( x )
-    if (  ( xx[ length(xx) - 1 ] > xx[ length(xx) ] ) ) # &
-#          ( xx[ length(xx) - 2 ] > xx[ length(xx) ] ) &
-#          ( xx[ length(xx) - 2 ] > xx[ length(xx) - 1 ] ) )
+    if (  ( xx[ length(xx) - 1 ] > xx[ length(xx) ] ) )
       return( FALSE )
     return( TRUE )
     # mdl = loess( xx ~ as.numeric(1:length(xx)) ) # for slope estimate
@@ -3249,47 +3225,58 @@ symlr <- function(
         vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
         initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]], "F" )
       }
-      mytol = lineSearchTolerance # / myit^2 # seek more accuracy over iterations
-      temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg ) # initialize gradient line search
+      # initialize gradient line search
+      temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg )
       temperv = constrainG( temperv, i, constraint = constraint )
       if ( lineSearchLogic( energyPath[,i] ) | myit < 3 ) {
         temp = optimize( getSyME2, # computes the energy
-                         interval = lineSearchRange, tol = mytol, gradient = temperv,
+                         interval = lineSearchRange,
+                         tol = lineSearchTolerance,
+                         gradient = temperv,
                          myw=myw, mixAlg = mixAlg,
                          avgU = initialUMatrix[[i]], whichModality = i )
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
       } else {
-        gamma[i] = gamma[i] * 0.9
-        errterm[ i ] = getSyME2( gamma[i], temperv, myw=myw, mixAlg=mixAlg,
+        gamma[i] = gamma[i] * 0.99
+        errterm[ i ] = getSyME2(
+          gamma[i], temperv, myw=myw, mixAlg=mixAlg,
           avgU = initialUMatrix[[i]],
-          whichModality = i  )
+          whichModality = i )
       }
       noRand = TRUE
-      randresult = rnorm( 1 ) < 0
+      randresult = rnorm( 1 ) < -0.5
       if ( noRand ) randresult = FALSE
       if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) | randresult )
-      { # ok to update
+        { # ok to update
         vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
         if ( sparsenessQuantiles[i] != 0 )
           vmats[[i]] = orthogonalizeAndQSparsify(
             as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
             sparsenessQuantiles[i],
-            orthogonalize = FALSE, positivity = positivities[i], unitNorm = F, softThresholding = F  )
+            orthogonalize = FALSE, positivity = positivities[i], unitNorm = F,
+            softThresholding = FALSE  )
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
-      }
+        }
       if ( ccaEnergy ) {
         vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
         initialUMatrix[[ i ]] = initialUMatrix[[ i ]] / norm( initialUMatrix[[ i ]], "F" )
-      }
-    }
+        }
+      } # matrange
     if ( verbose == 2 ) print( gamma )
 
-    # use the V to project down to the U bases => self-representations
-    for ( jj in 1:length( voxmats ) )
-      initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], F, F )
     # run the basis calculation for each U_i - convert self to other
-    initialUMatrix = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
+    nn = !ccaEnergy
+    if ( ( myit %% 5 == 0 & myit >= 5 ) | (ccaEnergy) | myit <= 2 ) {
+      for ( jj in 1:length( voxmats ) )
+        initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
+      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
+      wt = 0.0 # sticky ...
+      for ( jj in 1:length( voxmats ) ) {
+        initialUMatrix[[jj]] =
+          localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt) )
+        }
+    }
 
     # evaluate new energies
     for ( jj in 1:length( voxmats ) ) {
@@ -3298,26 +3285,27 @@ symlr <- function(
         whichModality = jj, verbose = F )
       energyPath[myit+1,jj] = loki
     } # matrix loop
+
     bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
     bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
-    randresult = rnorm( 1 ) < 0
-    if ( noRand ) randresult = FALSE
-    if ( mean( energyPath[myit+1,] ) <= bestEv  | randresult )
+    if ( mean( energyPath[myit+1,] ) <= bestEv )
       {
       for ( jj in 1:length( voxmats ) ) {
         bestU[[jj]] = initialUMatrix[[jj]]
         bestV[[jj]] = vmats[[jj]]
-      } # matrix loop
-    } else {
-      initialUMatrix = bestU
-      vmats = bestV
+        } # matrix loop
+    } else { # FIXME - open question - should we reset or not?
+#      initialUMatrix = bestU
+#      vmats = bestV
     }
     if ( verbose ) {
       print( paste( "Iteration:", myit, "bestEv", bestEv, 'bestIt', bestRow-1 ) )
       print( paste( energyPath[myit+1,], collapse = ' / ' ) )
-#      print( paste( apply( energyPath, FUN=min,MARGIN=2,na.rm=T) , collapse = ' / ' ) )
       }
+    if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
   } # iterations
+
+  energyPath = na.omit( energyPath )
   return(
     list(
       u  = bestU,
@@ -3325,7 +3313,7 @@ symlr <- function(
       initialRandomMatrix = randmat,
       energyPath = energyPath,
       finalError = bestEv,
-      totalEnergy = bestEv )
+      totalEnergy = rowMeans( energyPath ) )
   )
 }
 
