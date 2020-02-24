@@ -55,6 +55,9 @@ allow estimates of per identifier intercept.}
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
 
+\item{connectors}{a list ( length of projections or number of modalities )
+that indicates which modalities should be paired with current modality}
+
 \item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
 
 \item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}

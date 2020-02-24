@@ -18,6 +18,9 @@ be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.}
 
 \item{orthogonalize}{boolean}
 
+\item{connectors}{a list ( length of projections or number of modalities )
+that indicates which modalities should be paired with current modality}
+
 \item{projections}{A list that contains the low-dimensional projections.}
 
 \item{mixingAlgorithm}{the elected mixing algorithm.  see \code{symlr}.  can

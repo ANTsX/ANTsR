@@ -2869,6 +2869,8 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param constraint one of none, Grassmann or Stiefel
 #' @param energyType one of regression, normalized, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
+#' @param connectors a list ( length of projections or number of modalities )
+#' that indicates which modalities should be paired with current modality
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2940,6 +2942,7 @@ symlr <- function(
   constraint = "none",
   energyType = 'regression',
   vmats,
+  connectors = NULL,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( energyType %in% c("regression","cca","normalized", "ucca" ) ) )
@@ -3270,7 +3273,8 @@ symlr <- function(
     if ( ( myit %% 5 == 0 & myit >= 5 ) | (ccaEnergy) | myit <= 2 ) {
       for ( jj in 1:length( voxmats ) )
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
-      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize  )
+      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize,
+        connectors = connectors )
       wt = 0.0 # sticky ...
       for ( jj in 1:length( voxmats ) ) {
         initialUMatrix[[jj]] =
@@ -3330,6 +3334,8 @@ symlr <- function(
 #' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
 #' @param orthogonalize boolean
+#' @param connectors a list ( length of projections or number of modalities )
+#' that indicates which modalities should be paired with current modality
 #' @return u matrix for modality i
 #' @author BB Avants.
 #' @examples
@@ -3346,12 +3352,15 @@ symlr <- function(
 #' @seealso \code{\link{symlr}}
 #' @export
 symlrU <- function( projections, mixingAlgorithm, initialW,
-  orthogonalize = FALSE ) {
+  orthogonalize = FALSE, connectors = NULL ) {
   # some gram schmidt code
   projectionsU = projections
   for ( kk in 1:length( projections ) )
     projectionsU[[kk]] = projectionsU[[kk]]/norm(projectionsU[[kk]],"F")
-
+  if ( ! is.null( connectors ) ) {
+    if ( length( connectors ) != length( projections ) )
+      stop( "length( connectors ) should equal length( projections )" )
+    }
   localGS <- function( x, orthogonalize = TRUE ) {
     if ( !orthogonalize ) return( x )
     n <- dim(x)[1]
@@ -3377,12 +3386,12 @@ symlrU <- function( projections, mixingAlgorithm, initialW,
     return( q )
   }
   subU <- function( projectionsU, mixingAlgorithm, initialW,
-    orthogonalize, i ) {
+    orthogonalize, i, wtobind ) {
     avgU = NULL
     mixAlg = mixingAlgorithm
     nComponents = ncol( projectionsU[[1]] )
     nmodalities = length( projectionsU )
-    wtobind = ( 1:nmodalities )[ -i ]
+    if ( missing( wtobind ) ) wtobind = ( 1:nmodalities )[ -i ]
     if ( mixAlg == 'avg' ) {
       avgU = projectionsU[[1]] * 0.0
       for ( j in wtobind )
@@ -3416,7 +3425,11 @@ symlrU <- function( projections, mixingAlgorithm, initialW,
 
   outU = list( )
   for ( i in 1:length( projectionsU ) ) {
-    outU[[i]] = subU( projectionsU, mixingAlgorithm, initialW, orthogonalize, i )
+    if ( is.null( connectors ) )
+      outU[[i]] = subU( projectionsU, mixingAlgorithm, initialW, orthogonalize, i )
+    if ( ! is.null( connectors ) )
+      outU[[i]] = subU( projectionsU, mixingAlgorithm, initialW, orthogonalize,
+        i, wtobind = connectors[[i]] )
     }
   return( outU )
 }
