@@ -9,7 +9,8 @@ orthogonalizeAndQSparsify(
   sparsenessQuantile = 0.5,
   positivity = "either",
   orthogonalize = TRUE,
-  softThresholding = FALSE
+  softThresholding = FALSE,
+  unitNorm = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ choices are positive, negative or either as expressed as a string.}
 \item{orthogonalize}{run gram-schmidt if TRUE.}
 
 \item{softThresholding}{use soft thresholding}
+
+\item{unitNorm}{set each vector to unit norm}
 }
 \value{
 matrix

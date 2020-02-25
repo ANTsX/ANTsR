@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{symlr2}
 \alias{symlr2}
-\title{Symmetric multivariate, penalized image-based linear regression model (symlr2) for two modalities}
+\title{Symmetric multiview linear reconstruction model (symlr) for two modalities}
 \usage{
 symlr2(
   voxmats,

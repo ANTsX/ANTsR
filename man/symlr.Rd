@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{symlr}
 \alias{symlr}
-\title{Symmetric multivariate linear regression model (symlr) for N modalities}
+\title{Symmetric multiview linear reconstruction model (symlr) for N modalities}
 \usage{
 symlr(
   voxmats,
@@ -12,13 +12,15 @@ symlr(
   positivities,
   initialUMatrix,
   mixAlg,
-  orthogonalize = TRUE,
+  orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c(-10, 10),
-  lineSearchTolerance = 0.001,
+  lineSearchRange = c(-1, 1),
+  lineSearchTolerance = 1e-08,
   randomSeed,
-  lowDimensionalError = 0,
   constraint = "none",
+  energyType = "regression",
+  vmats,
+  connectors = NULL,
   verbose = FALSE
 )
 }
@@ -39,7 +41,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
@@ -52,12 +54,17 @@ allow estimates of per identifier intercept.}
 
 \item{randomSeed}{controls repeatability of ica-based decomposition}
 
-\item{lowDimensionalError}{development option - integer sampling of matrix columns or a
-float value greater than 0 less than 1 that indicates fraction of columns for each matrix.}
-
 \item{constraint}{one of none, Grassmann or Stiefel}
 
-\item{verbose}{boolean to control verbosity of output}
+\item{energyType}{one of regression, normalized, cca or ucca}
+
+\item{vmats}{optional initial \code{v} matrix list}
+
+\item{connectors}{a list ( length of projections or number of modalities )
+that indicates which modalities should be paired with current modality}
+
+\item{verbose}{boolean to control verbosity of output - set to level \code{2}
+in order to see more output, specifically the gradient descent parameters.}
 }
 \value{
 A list of u, x, y, z etc related matrices.

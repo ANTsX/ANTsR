@@ -4,19 +4,26 @@
 \alias{symlrU}
 \title{Compute the low-dimensional u matrix for symlr}
 \usage{
-symlrU(projections, i, mixingAlgorithm, initialW, orthogonalize = FALSE)
+symlrU(
+  projections,
+  mixingAlgorithm,
+  initialW,
+  orthogonalize = FALSE,
+  connectors = NULL
+)
 }
 \arguments{
 \item{projections}{A list that contains the low-dimensional projections.}
 
-\item{i}{which modality to predict from the others.}
-
 \item{mixingAlgorithm}{the elected mixing algorithm.  see \code{symlr}.  can
-be 'svd', 'ica', 'rrpca-l', 'rrpca-s' or 'avg'.}
+be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.}
 
 \item{initialW}{initialization matrix size \code{n} by \code{k} for fastICA.}
 
 \item{orthogonalize}{boolean}
+
+\item{connectors}{a list ( length of projections or number of modalities )
+that indicates which modalities should be paired with current modality}
 }
 \value{
 u matrix for modality i
