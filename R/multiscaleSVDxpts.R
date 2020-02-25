@@ -3121,6 +3121,7 @@ symlr <- function(
   }
   bestU = initialUMatrix
   bestV = vmats
+  totalEnergy = c( initialEnergy )
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy,
     " <o> mixer:", mixAlg, " <o> E: ", energyType ) )
   constrainG <- function( vgrad, i, constraint ) {
@@ -3228,7 +3229,6 @@ symlr <- function(
   ################################################################################
   datanorm = rep( 0.0, nModalities )
   bestTot = Inf
-  totalEnergy = c()
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, nModalities )
     matrange = 1:nModalities
