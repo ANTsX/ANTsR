@@ -2805,7 +2805,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
     if ( uAlgorithm == 'pca' ) {
-      X.pcr <- prcomp( t(X), rank. = k )          # PCA
+      X.pcr <- stats::prcomp( t(X), rank. = k )          # PCA
       u <- ( X.pcr$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
@@ -2823,7 +2823,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   uOut = list()
   for ( s in 1:nModalities) {
     if ( uAlgorithm == 'pca ') {
-      uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
+      uOut[[s]] = t( stats::prcomp( t(voxmats[[s]]), rank. = k )$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
     } else if ( uAlgorithm == 'cca' ) {
@@ -2925,6 +2925,9 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
+#' resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#'    initialUMatrix = nk , verbose=TRUE, iterations=5,
+#'    energyType = "normalized" )
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}
 #' @export symlr
 symlr <- function(

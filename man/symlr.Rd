@@ -129,6 +129,9 @@ range(cor(p3p,p2p))
 # svd
 print( range(cor( svd1,svd2) ))
 
+resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+   initialUMatrix = nk , verbose=TRUE, iterations=5,
+   energyType = "normalized" )
 }
 \seealso{
 \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}
