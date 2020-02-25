@@ -2872,6 +2872,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param vmats optional initial \code{v} matrix list
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
+#' @param optimizationStyle one of \code{c("mixed","greedy","linesearch")}
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2944,8 +2945,11 @@ symlr <- function(
   energyType = 'regression',
   vmats,
   connectors = NULL,
+  optimizationStyle = 'mixed',
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+  if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
+    stop( "optimizationStyle should be one of  mixed greedy or lineSearch" )
   if ( ! any( energyType %in% c("regression","cca","normalized", "ucca" ) ) )
     stop( "energyType should be one of regression, cca or normalized" )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
@@ -3136,7 +3140,7 @@ symlr <- function(
     return( vgrad )
   }
 
-  getSyMG <- function( v, i, myw, mixAlg )  {
+  getSyMGnorm <- function( v, i, myw, mixAlg )  {
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       nrmuv = norm( u %*% t( v ), "F" )
@@ -3149,10 +3153,9 @@ symlr <- function(
       gradV = 1.0 * (  term1 - term2 )
       return( gradV )
     }
-  if ( ! normalized ) {
-    wm = 'matrix'
-    if ( ccaEnergy ) wm = 'ccag'
-    getSyMG <- function( v, i, myw, mixAlg, whichModel = wm )  {
+  wm = 'matrix'
+  if ( ccaEnergy ) wm = 'ccag'
+  getSyMGccamse <- function( v, i, myw, mixAlg, whichModel = wm )  {
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
@@ -3177,22 +3180,22 @@ symlr <- function(
           t0 = norm( x %*% v , "F" )
           t1 = norm( u, "F" )
           mytr = sum( diag( t(u)%*% (x %*% v ) ))
-          return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) - 1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) +
+          return( 1.0 / ( t0 * t1 ) * ( t( x ) %*% u ) -
+                  1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) +
             sign( v ) * 0.0 )
           }
           # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA objective
-          if ( energyType == 'ucca' | TRUE )
-            subg <- function( x, u, v ) {
-              t0 = norm( x %*% v , "F" )
-              t1 = norm( u, "F" )
-              t2 = t(u)%*% (x %*% v )
-              mytr = sum( abs( diag( t2 ) ) )
-              signer = t2 * 0
-              diag( signer ) = sign( diag( t2 ) )
-              return( 1 / ( t0 * t1 ) * ( t( x ) %*% u ) %*% signer -
+        subg <- function( x, u, v ) {
+          t0 = norm( x %*% v , "F" )
+          t1 = norm( u, "F" )
+          t2 = t(u)%*% (x %*% v )
+          mytr = sum( abs( diag( t2 ) ) )
+          signer = t2 * 0
+          diag( signer ) = sign( diag( t2 ) )
+          return( 1 / ( t0 * t1 ) * ( t( x ) %*% u ) %*% signer -
                 1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) )  +
                   sign( v ) * 0.0 )
-              }
+          }
         if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
         for ( j in 1:nModalities )
@@ -3212,7 +3215,7 @@ symlr <- function(
             1.0 / ( t1^3 * t2 ) * t( preposter %*% poster ) ) * 0.5
         }
       }
-    }
+  if ( normalized ) getSyMG = getSyMGnorm else getSyMG = getSyMGccamse
 
   lineSearchLogic<- function( x ) { # energy path is input
     nna = sum( ! is.na( x ) )
@@ -3224,6 +3227,20 @@ symlr <- function(
     # mdl = loess( xx ~ as.numeric(1:length(xx)) ) # for slope estimate
     }
 
+  optimizationLogic <-function( energy, iteration, i ) {
+    if ( optimizationStyle == 'greedy' & iteration < 3 ) {
+      return( TRUE )
+    }
+    if ( optimizationStyle == 'greedy' & iteration >= 3 ) {
+      return( FALSE )
+    }
+    if ( optimizationStyle == 'mixed' ) {
+      return( lineSearchLogic( energy[,i] ) | iteration < 3 )
+    }
+    if ( optimizationStyle == 'lineSearch'  ) {
+      return( TRUE )
+    }
+  }
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
@@ -3240,7 +3257,7 @@ symlr <- function(
       # initialize gradient line search
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg )
       temperv = constrainG( temperv, i, constraint = constraint )
-      if ( lineSearchLogic( energyPath[,i] ) | myit < 3 ) {
+      if ( optimizationLogic( energyPath, myit, i ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange,
                          tol = lineSearchTolerance,
@@ -3256,11 +3273,9 @@ symlr <- function(
           avgU = initialUMatrix[[i]],
           whichModality = i )
       }
-      noRand = TRUE
-      randresult = rnorm( 1 ) < -0.5
-      if ( noRand ) randresult = FALSE
-      if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) | randresult )
-        { # ok to update
+      if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) |
+            optimizationStyle == 'greedy'  ) # ok to update
+        {
         vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
         if ( sparsenessQuantiles[i] != 0 )
           vmats[[i]] = orthogonalizeAndQSparsify(
@@ -3300,9 +3315,13 @@ symlr <- function(
     } # matrix loop
 
     bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
-    totalEnergy[ myit + 1 ] = bestEv
     bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
-    if ( mean( energyPath[myit+1,] ) <= bestEv )
+    if ( optimizationStyle == 'greedy' ) {
+      bestEv = ( mean( energyPath[(myit+1),], na.rm = T ) )
+      bestRow = myit + 1
+    }
+    totalEnergy[ myit + 1 ] = bestEv
+    if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv )
       {
       bestU = initialUMatrix
       bestV = vmats
@@ -3327,7 +3346,8 @@ symlr <- function(
       finalError = bestEv,
       totalEnergy = totalEnergy,
       connectors = connectors,
-      energyType = energyType
+      energyType = energyType,
+      optimizationStyle = optimizationStyle
     )
   )
 }
