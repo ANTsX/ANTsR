@@ -2801,6 +2801,7 @@ symlr2 <- function(
 #' @export
 initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   zeroUpper = FALSE, uAlgorithm = 'pca' ) {
+  nModalities = length( voxmats )
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
     if ( uAlgorithm == 'pca' ) {
@@ -2820,7 +2821,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     return( u )
     }
   uOut = list()
-  for ( s in 1:length(voxmats)) {
+  for ( s in 1:nModalities) {
     if ( uAlgorithm == 'pca ') {
       uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
     } else if ( uAlgorithm == 'ica' ) {
@@ -2953,6 +2954,13 @@ symlr <- function(
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
   ccaEnergy = FALSE
+  nModalities = length( voxmats )
+  if ( missing( connectors ) ) {
+    temp = 1:nModalities
+    connectors = list()
+    for ( i in temp )
+      connectors[[i]] = temp[ -i ]
+  }
   if ( energyType == 'normalized' ) {
     normalized = TRUE
     ccaEnergy = FALSE
@@ -2968,20 +2976,20 @@ symlr <- function(
     stop("pass valid mixing method")
   }
   # 0.0 adjust length of input data
-  gamma = rep( 1, length(voxmats) )
+  gamma = rep( 1, nModalities )
   if  ( missing( positivities ) )
-    positivities = rep( "positive", length( voxmats ) )
+    positivities = rep( "positive", nModalities )
   if ( any( ( positivities %in%  c("positive","negative","either") ) == FALSE  ) )
     stop( "positivities must be one of positive, negative, either" )
   if ( length( positivities ) ==  1 )
-    positivities = rep( positivities[1], length( voxmats ) )
-  matnames = p = rep( NA, length( voxmats ) )
+    positivities = rep( positivities[1], nModalities )
+  matnames = p = rep( NA, nModalities )
   n = nrow( voxmats[[1]] )
   if ( missing( sparsenessQuantiles ) )
-    sparsenessQuantiles = rep( 0.5, length( voxmats ) )
+    sparsenessQuantiles = rep( 0.5, nModalities )
 
   # 1.0 adjust matrix norms
-  for ( i in 1:length( voxmats ) ) {
+  for ( i in 1:nModalities ) {
     if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
       stop( paste( "input matrix", i, "is null or NA." ) )
     p[ i ] = ncol( voxmats[[ i ]] )
@@ -2992,7 +3000,7 @@ symlr <- function(
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {
     smoothingMatrices = list( )
-    for ( i in 1:length( voxmats ) )
+    for ( i in 1:nModalities )
       smoothingMatrices[[ i ]] = diag( p[ i ] )
   }
   for ( i in 1:length( smoothingMatrices ) ) {
@@ -3031,22 +3039,22 @@ symlr <- function(
 
   # 4.0 setup initialization
   if ( missing( initialUMatrix ) )
-    initialUMatrix = length( voxmats )
+    initialUMatrix = nModalities
 
   if ( class(initialUMatrix) == 'matrix' ) {
     randmat = initialUMatrix
     initialUMatrix = list( )
-    for ( i in 1:length( voxmats ) )
+    for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
   }
 
-  if ( length( initialUMatrix ) != length( voxmats ) &
+  if ( length( initialUMatrix ) != nModalities &
        !is.matrix(initialUMatrix) ) {
     message(paste("initializing with random matrix: ",initialUMatrix,'columns'))
     randmat = scale(
       (( matrix(  rnorm( n * initialUMatrix ), nrow=n  ) ) ), TRUE, TRUE )
     initialUMatrix = list( )
-    for ( i in 1:length( voxmats ) )
+    for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
   }
 
@@ -3056,7 +3064,7 @@ symlr <- function(
   if ( buildV ) {
     if ( verbose ) print("     <0> BUILD-V <0> BUILD-V <0> BUILD-V <0> BUILD-V <0>    ")
     vmats = list()
-    for ( i in 1:length( voxmats ) ) {
+    for ( i in 1:nModalities ) {
 #      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
       vmats[[ i ]] = matrix( rnorm( ncol( voxmats[[i]] ) * basisK ), ncol = basisK )
       vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
@@ -3102,15 +3110,14 @@ symlr <- function(
     return( energy )
     }
 
-  nModalities = length( voxmats )
   energyPath = matrix( nrow = iterations + 1, ncol = nModalities )
   initialEnergy = 0
-  for ( i in 1:length( voxmats ) ) {
+  for ( i in 1:nModalities ) {
     loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
       avgU = initialUMatrix[[i]],
       whichModality = i  )
     energyPath[1,i] = loki
-    initialEnergy = initialEnergy + loki /length( voxmats )
+    initialEnergy = initialEnergy + loki /nModalities
   }
   bestU = initialUMatrix
   bestV = vmats
@@ -3150,12 +3157,13 @@ symlr <- function(
       if (  whichModel == 'matrix' ) {
         term1 = 2.0 * ( t( x ) %*% u - v )
         term2 = 0
-        if ( FALSE ) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
+        if ( i %in% connectors[i] ) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
           temp = ( x - ( x %*% v ) %*% t(v) ) # n by p
-          term2 = 2.0 * ( t( temp ) %*% ( x  %*% v ) ) -
-                  2.0 * t( x ) %*% ( temp %*% v )
+          term2 = ( t( temp ) %*% ( x  %*% v ) ) -
+                  t( x ) %*% ( temp %*% v )
+          term1 = term1 * 0.5
           }
-        return( term1 + term2  ) # + sign( v ) * 0.001 # pure data-term
+        return( term1 + term2 ) # + sign( v ) * 0.001 # pure data-term
       }
       if (  whichModel == 'regression' ) {
         mdl = lm( x ~ u )
@@ -3186,10 +3194,10 @@ symlr <- function(
               }
         if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
-        for ( j in 1:length( voxmats ) )
+        for ( j in 1:nModalities )
           if ( j != i ) gradder = gradder +
             subg( x, scale( voxmats[[j]] %*% vmats[[j]] , T, T ) , v )
-        return( gradder/(length(voxmats)-1) )
+        return( gradder/(nModalities-1) )
         }
       if (  whichModel == 'ccag2' ) { # THIS IS WIP / not recommended
         # tr( (x'*X'/norm2(X*x ))*(Y/norm2( Y )))
@@ -3218,11 +3226,12 @@ symlr <- function(
   ################################################################################
   # below is the primary optimization loop - grad for v then for vran
   ################################################################################
-  datanorm = rep( 0.0, length(voxmats) )
+  datanorm = rep( 0.0, nModalities )
   bestTot = Inf
+  totalEnergy = c()
   for ( myit in 1:iterations ) {
-    errterm = rep( 1.0, length(voxmats) )
-    matrange = 1:length( voxmats )
+    errterm = rep( 1.0, nModalities )
+    matrange = 1:nModalities
     for ( i in matrange ) { # get update for each V_i
       if ( ccaEnergy ) {
         vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
@@ -3241,7 +3250,7 @@ symlr <- function(
         errterm[ i ] = temp$objective
         gamma[i] = temp$minimum
       } else {
-        gamma[i] = gamma[i] * 0.99
+        gamma[i] = gamma[i] * 0.5
         errterm[ i ] = getSyME2(
           gamma[i], temperv, myw=myw, mixAlg=mixAlg,
           avgU = initialUMatrix[[i]],
@@ -3271,19 +3280,19 @@ symlr <- function(
     # run the basis calculation for each U_i - convert self to other
     nn = !ccaEnergy
     if ( ( myit %% 5 == 0 & myit >= 5 ) | (ccaEnergy) | myit <= 2 ) {
-      for ( jj in 1:length( voxmats ) )
+      for ( jj in 1:nModalities )
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
       temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize,
         connectors = connectors )
-      wt = 0.0 # sticky ...
-      for ( jj in 1:length( voxmats ) ) {
+      if ( myit >= 5 ) wt = 0.0 else wt = 0 # sticky ...
+      for ( jj in 1:nModalities ) {
         initialUMatrix[[jj]] =
           localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt) )
         }
     }
 
     # evaluate new energies
-    for ( jj in 1:length( voxmats ) ) {
+    for ( jj in 1:nModalities ) {
       loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
         avgU = initialUMatrix[[jj]],
         whichModality = jj, verbose = F )
@@ -3291,13 +3300,12 @@ symlr <- function(
     } # matrix loop
 
     bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
+    totalEnergy[ myit + 1 ] = bestEv
     bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
     if ( mean( energyPath[myit+1,] ) <= bestEv )
       {
-      for ( jj in 1:length( voxmats ) ) {
-        bestU[[jj]] = initialUMatrix[[jj]]
-        bestV[[jj]] = vmats[[jj]]
-        } # matrix loop
+      bestU = initialUMatrix
+      bestV = vmats
     } else { # FIXME - open question - should we reset or not?
 #      initialUMatrix = bestU
 #      vmats = bestV
@@ -3317,7 +3325,10 @@ symlr <- function(
       initialRandomMatrix = randmat,
       energyPath = energyPath,
       finalError = bestEv,
-      totalEnergy = rowMeans( energyPath ) )
+      totalEnergy = totalEnergy,
+      connectors = connectors,
+      energyType = energyType
+    )
   )
 }
 
