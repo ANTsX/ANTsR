@@ -4,8 +4,14 @@
 \alias{timeserieswindow2matrix}
 \title{Time-series image to matrix of time windows around user-specified events}
 \usage{
-timeserieswindow2matrix(timeseriesmatrix, mask, eventlist, timewindow,
-  zeropadvalue = 0, spacing = NA)
+timeserieswindow2matrix(
+  timeseriesmatrix,
+  mask,
+  eventlist,
+  timewindow,
+  zeropadvalue = 0,
+  spacing = NA
+)
 }
 \arguments{
 \item{timeseriesmatrix}{Input timeseriesmatrix from timeseries2matrix}

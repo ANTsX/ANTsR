@@ -4,9 +4,13 @@
 \alias{histogramMatchImage}
 \title{histogramMatchImage}
 \usage{
-histogramMatchImage(sourceImage, referenceImage,
-  numberOfHistogramBins = 255, numberOfMatchPoints = 64,
-  useThresholdAtMeanIntensity = FALSE)
+histogramMatchImage(
+  sourceImage,
+  referenceImage,
+  numberOfHistogramBins = 255,
+  numberOfMatchPoints = 64,
+  useThresholdAtMeanIntensity = FALSE
+)
 }
 \arguments{
 \item{sourceImage}{image to undergo intensity transformation.}

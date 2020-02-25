@@ -4,8 +4,15 @@
 \alias{alffmap}
 \title{alffmap}
 \usage{
-alffmap(x, flo = 0.01, fhi = 0.1, tr = 1, detrend = TRUE,
-  takesqrt = FALSE, kernel)
+alffmap(
+  x,
+  flo = 0.01,
+  fhi = 0.1,
+  tr = 1,
+  detrend = TRUE,
+  takesqrt = FALSE,
+  kernel
+)
 }
 \arguments{
 \item{x}{input vector for the time series of interest}

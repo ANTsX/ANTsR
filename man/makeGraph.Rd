@@ -4,8 +4,13 @@
 \alias{makeGraph}
 \title{Simple function to create and measure a graph from a square input matrix.}
 \usage{
-makeGraph(mat, graphdensity = 1, communityMethod = NA,
-  getEfficiency = FALSE, inverseValuesAsWeights = FALSE)
+makeGraph(
+  mat,
+  graphdensity = 1,
+  communityMethod = NA,
+  getEfficiency = FALSE,
+  inverseValuesAsWeights = FALSE
+)
 }
 \arguments{
 \item{mat}{input matrix}

@@ -4,9 +4,17 @@
 \alias{combineNuisancePredictors}
 \title{Combine and reduce dimensionality of nuisance predictors.}
 \usage{
-combineNuisancePredictors(inmat, target, globalpredictors = NA,
-  maxpreds = 4, localpredictors = NA, method = "cv", k = 5,
-  covariates = NA, ordered = FALSE)
+combineNuisancePredictors(
+  inmat,
+  target,
+  globalpredictors = NA,
+  maxpreds = 4,
+  localpredictors = NA,
+  method = "cv",
+  k = 5,
+  covariates = NA,
+  ordered = FALSE
+)
 }
 \arguments{
 \item{inmat}{Input predictor matrix.}

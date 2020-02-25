@@ -4,8 +4,7 @@
 \alias{reorientImage}
 \title{reorient image by its principal axis}
 \usage{
-reorientImage(img, axis1, axis2 = NA, doreflection = 0, doscale = 0,
-  txfn = NA)
+reorientImage(img, axis1, axis2 = NA, doreflection = 0, doscale = 0, txfn = NA)
 }
 \arguments{
 \item{img}{antsImage}

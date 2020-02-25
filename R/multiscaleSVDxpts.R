@@ -35,6 +35,7 @@
 #' testthat::expect_equal(sum(smat), 18017)
 #' }
 #' @importFrom ANTsRCore antsrimpute
+#' @importFrom stats prcomp
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
@@ -2873,6 +2874,8 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
 #' @param optimizationStyle one of \code{c("mixed","greedy","linesearch")}
+#' @param scale boolean standardize each matrix then divide by the square root
+#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998)
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2946,6 +2949,7 @@ symlr <- function(
   vmats,
   connectors = NULL,
   optimizationStyle = 'mixed',
+  scale = TRUE,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
@@ -2993,13 +2997,16 @@ symlr <- function(
     sparsenessQuantiles = rep( 0.5, nModalities )
 
   # 1.0 adjust matrix norms
-  for ( i in 1:nModalities ) {
-    if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
-      stop( paste( "input matrix", i, "is null or NA." ) )
-    p[ i ] = ncol( voxmats[[ i ]] )
-    matnames =  names( voxmats )[ i ]
-    voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
-  }
+  if ( scale )
+    for ( i in 1:nModalities ) {
+      if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
+        stop( paste( "input matrix", i, "is null or NA." ) )
+      p[ i ] = ncol( voxmats[[ i ]] )
+      matnames =  names( voxmats )[ i ]
+#      voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
+      np = prod( dim( voxmats[[i]]) )
+      voxmats[[ i ]] = scale( voxmats[[ i ]], T, T ) / sqrt( np )
+    }
 
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {

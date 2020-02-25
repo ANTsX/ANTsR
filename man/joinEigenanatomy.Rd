@@ -4,8 +4,14 @@
 \alias{joinEigenanatomy}
 \title{Simple joinEigenanatomy function.}
 \usage{
-joinEigenanatomy(datamatrix, mask = NULL, listEanatImages,
-  graphdensity = 0.65, joinMethod = "walktrap", verbose = F)
+joinEigenanatomy(
+  datamatrix,
+  mask = NULL,
+  listEanatImages,
+  graphdensity = 0.65,
+  joinMethod = "walktrap",
+  verbose = F
+)
 }
 \arguments{
 \item{datamatrix}{input matrix before decomposition}

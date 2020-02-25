@@ -4,9 +4,19 @@
 \alias{antsBOLDNetworkAnalysis}
 \title{a basic framework for network analysis that produces graph metrics}
 \usage{
-antsBOLDNetworkAnalysis(bold = NULL, mask = NULL, labels = NULL,
-  motion, gdens = 0.2, threshLo = 1, threshHi = 90, freqLo = 0.01,
-  freqHi = 0.1, winsortrim = 0.02, throwaway)
+antsBOLDNetworkAnalysis(
+  bold = NULL,
+  mask = NULL,
+  labels = NULL,
+  motion,
+  gdens = 0.2,
+  threshLo = 1,
+  threshHi = 90,
+  freqLo = 0.01,
+  freqHi = 0.1,
+  winsortrim = 0.02,
+  throwaway
+)
 }
 \arguments{
 \item{bold}{input 4D image}

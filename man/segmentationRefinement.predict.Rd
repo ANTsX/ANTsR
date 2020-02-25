@@ -4,10 +4,17 @@
 \alias{segmentationRefinement.predict}
 \title{Segmentation refinement using corrective learning (prediction)}
 \usage{
-segmentationRefinement.predict(segmentationImage, labelSet, labelModels,
-  featureImages, featureImageNames, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE,
-  useEntireLabeledRegion = TRUE)
+segmentationRefinement.predict(
+  segmentationImage,
+  labelSet,
+  labelModels,
+  featureImages,
+  featureImageNames,
+  dilationRadius = 2,
+  neighborhoodRadius = 0,
+  normalizeSamplesPerLabel = TRUE,
+  useEntireLabeledRegion = TRUE
+)
 }
 \arguments{
 \item{segmentationImage}{image to refine via corrective learning.}
@@ -95,7 +102,7 @@ to refine an initial segmentation.
 
  for( i in 1:length( imageIDs ) )
    {
-   cat( "Processing image", imageIDs[i], "\\n" )
+   cat( "Processing image", imageIDs[i], "\n" )
    images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
    mask <- getMask( images[[i]] )
    kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], 
@@ -114,7 +121,7 @@ to refine an initial segmentation.
  # "r62", "r64", "r85" and
  # test/predict on image "r16".
 
- cat( "\\nTraining\\n\\n" )
+ cat( "\nTraining\n\n" )
 
  segLearning <- segmentationRefinement.train( 
  featureImages = featureImages[2:6],
@@ -124,7 +131,7 @@ to refine an initial segmentation.
    neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE, 
    useEntireLabeledRegion = FALSE )
 
- cat( "\\nPrediction\\n\\n" )
+ cat( "\nPrediction\n\n" )
 
  refinement <- segmentationRefinement.predict(
    segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,

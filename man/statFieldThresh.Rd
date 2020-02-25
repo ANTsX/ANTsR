@@ -4,8 +4,19 @@
 \alias{statFieldThresh}
 \title{Produces a threshold value based on cluster or voxel level statistics}
 \usage{
-statFieldThresh(x, pval, nvox, n, fwhm, resels, df, fieldType, threshType,
-  pp = 0.001, verbose = FALSE)
+statFieldThresh(
+  x,
+  pval,
+  nvox,
+  n,
+  fwhm,
+  resels,
+  df,
+  fieldType,
+  threshType,
+  pp = 0.001,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{statistical map of class antsImage}

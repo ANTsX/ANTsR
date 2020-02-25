@@ -4,9 +4,18 @@
 \alias{mrvnrfs}
 \title{multi-res voxelwise neighborhood random forest segmentation learning}
 \usage{
-mrvnrfs(y, x, labelmasks, rad = NA, nsamples = 1, ntrees = 500,
-  multiResSchedule = c(4, 2, 1), asFactors = TRUE, voxchunk = 50000,
-  ...)
+mrvnrfs(
+  y,
+  x,
+  labelmasks,
+  rad = NA,
+  nsamples = 1,
+  ntrees = 500,
+  multiResSchedule = c(4, 2, 1),
+  asFactors = TRUE,
+  voxchunk = 50000,
+  ...
+)
 }
 \arguments{
 \item{y}{list of training labels. either an image or numeric value}

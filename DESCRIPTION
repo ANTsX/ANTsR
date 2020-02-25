@@ -91,5 +91,5 @@ SystemRequirements: cmake, git, clang
 Remotes: stnava/ITKR, ANTsX/ANTsRCore
 NeedsCompilation: yes
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1.9000
+RoxygenNote: 7.0.2
 Encoding: UTF-8

@@ -4,8 +4,13 @@
 \alias{getTemplateCoordinates}
 \title{Define an anatomical coordinate system in a new image based on a template}
 \usage{
-getTemplateCoordinates(imagePairToBeLabeled, templatePairWithLabels,
-  labelnames = NULL, outprefix = NA, convertToTal = FALSE)
+getTemplateCoordinates(
+  imagePairToBeLabeled,
+  templatePairWithLabels,
+  labelnames = NULL,
+  outprefix = NA,
+  convertToTal = FALSE
+)
 }
 \arguments{
 \item{imagePairToBeLabeled}{e.g. the template image and the activation map}

@@ -4,9 +4,13 @@
 \alias{antsSpatialICAfMRI}
 \title{Perform spatial ICA on fMRI bold data.}
 \usage{
-antsSpatialICAfMRI(boldImages, maskImage = NULL,
-  numberOfICAComponents = 20, normalizeComponentImages = TRUE,
-  verbose = FALSE)
+antsSpatialICAfMRI(
+  boldImages,
+  maskImage = NULL,
+  numberOfICAComponents = 20,
+  normalizeComponentImages = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{boldImages}{a list of 4-D ANTs image fMRI data.}

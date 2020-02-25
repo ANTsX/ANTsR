@@ -4,8 +4,7 @@
 \alias{reflectImage}
 \title{reflectImage}
 \usage{
-reflectImage(img1, axis = NA, tx = NA, metric = "mattes",
-  verbose = TRUE, ...)
+reflectImage(img1, axis = NA, tx = NA, metric = "mattes", verbose = TRUE, ...)
 }
 \arguments{
 \item{img1}{input object, an antsImage}

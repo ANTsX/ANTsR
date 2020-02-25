@@ -4,8 +4,13 @@
 \alias{writeNormalizedPopulationData}
 \title{Save normalized population data to a directory or h5 file}
 \usage{
-writeNormalizedPopulationData(demographics, imageMat, imageMask,
-  imageBoolean, filename)
+writeNormalizedPopulationData(
+  demographics,
+  imageMat,
+  imageMask,
+  imageBoolean,
+  filename
+)
 }
 \arguments{
 \item{demographics}{data frame that identifies the variables of interest.}

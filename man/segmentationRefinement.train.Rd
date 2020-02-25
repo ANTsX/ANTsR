@@ -4,11 +4,18 @@
 \alias{segmentationRefinement.train}
 \title{Segmentation refinement using corrective learning (training)}
 \usage{
-segmentationRefinement.train(featureImages, truthLabelImages,
-  segmentationImages, featureImageNames = c(), labelSet = c(),
-  maximumNumberOfSamplesOrProportionPerClass = 1, dilationRadius = 2,
-  neighborhoodRadius = 0, normalizeSamplesPerLabel = TRUE,
-  useEntireLabeledRegion = TRUE)
+segmentationRefinement.train(
+  featureImages,
+  truthLabelImages,
+  segmentationImages,
+  featureImageNames = c(),
+  labelSet = c(),
+  maximumNumberOfSamplesOrProportionPerClass = 1,
+  dilationRadius = 2,
+  neighborhoodRadius = 0,
+  normalizeSamplesPerLabel = TRUE,
+  useEntireLabeledRegion = TRUE
+)
 }
 \arguments{
 \item{featureImages}{a list of lists of feature images.  Each list of 
@@ -110,7 +117,7 @@ for each label in the initial segmentation data.
 
  for( i in 1:length( imageIDs ) )
    {
-   cat( "Processing image", imageIDs[i], "\\n" )
+   cat( "Processing image", imageIDs[i], "\n" )
    images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
    mask <- getMask( images[[i]] )
    kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], 
@@ -129,7 +136,7 @@ for each label in the initial segmentation data.
  # "r85" and test/predict
  #  on image "r16".
 
- cat( "\\nTraining\\n\\n" )
+ cat( "\nTraining\n\n" )
 
  segLearning <- segmentationRefinement.train( 
  featureImages = featureImages[2:6],

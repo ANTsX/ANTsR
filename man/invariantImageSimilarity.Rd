@@ -4,11 +4,20 @@
 \alias{invariantImageSimilarity}
 \title{similarity metrics between two images as a function of geometry}
 \usage{
-invariantImageSimilarity(in_image1, in_image2, localSearchIterations = 0,
-  metric = "MI", thetas = seq(from = 0, to = 360, length.out = 5),
-  thetas2 = seq(from = 0, to = 360, length.out = 5), thetas3 = seq(from
-  = 0, to = 360, length.out = 5), scaleImage = 1, doReflection = 0,
-  txfn = NA, transform = c("Affine", "Similarity", "Rigid"), mask)
+invariantImageSimilarity(
+  in_image1,
+  in_image2,
+  localSearchIterations = 0,
+  metric = "MI",
+  thetas = seq(from = 0, to = 360, length.out = 5),
+  thetas2 = seq(from = 0, to = 360, length.out = 5),
+  thetas3 = seq(from = 0, to = 360, length.out = 5),
+  scaleImage = 1,
+  doReflection = 0,
+  txfn = NA,
+  transform = c("Affine", "Similarity", "Rigid"),
+  mask
+)
 }
 \arguments{
 \item{in_image1}{reference image}

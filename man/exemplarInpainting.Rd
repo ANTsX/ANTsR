@@ -4,9 +4,17 @@
 \alias{exemplarInpainting}
 \title{Uses example images to inpaint or approximate an existing image.}
 \usage{
-exemplarInpainting(img, paintMask, imageList, featureRadius = 2,
-  scaleInpaintIntensity = 0, sharpen = FALSE, feather = 1,
-  predalgorithm = "lm", debug = FALSE)
+exemplarInpainting(
+  img,
+  paintMask,
+  imageList,
+  featureRadius = 2,
+  scaleInpaintIntensity = 0,
+  sharpen = FALSE,
+  feather = 1,
+  predalgorithm = "lm",
+  debug = FALSE
+)
 }
 \arguments{
 \item{img}{antsImage to be approximated / painted}

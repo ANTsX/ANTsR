@@ -4,8 +4,13 @@
 \alias{multiLabelMorphology}
 \title{Morphology on multi label images.}
 \usage{
-multiLabelMorphology(labelsIn, operation, radius, dilationMask = NULL,
-  labelList = NA)
+multiLabelMorphology(
+  labelsIn,
+  operation,
+  radius,
+  dilationMask = NULL,
+  labelList = NA
+)
 }
 \arguments{
 \item{labelsIn}{Input image should contain only 0 for background and positive integers for

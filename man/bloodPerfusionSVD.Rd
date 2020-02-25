@@ -4,8 +4,13 @@
 \alias{bloodPerfusionSVD}
 \title{Calculate blood perfusion using deconvolution.}
 \usage{
-bloodPerfusionSVD(perfusionImage, voiMaskImage, aifMaskImage,
-  thresholdSVD = 0.2, deltaTime = 1)
+bloodPerfusionSVD(
+  perfusionImage,
+  voiMaskImage,
+  aifMaskImage,
+  thresholdSVD = 0.2,
+  deltaTime = 1
+)
 }
 \arguments{
 \item{perfusionImage}{time series (n-D + time) perfusion acquisition.}

@@ -4,8 +4,20 @@
 \alias{kellyKapowski}
 \title{Compute cortical thickness using the DiReCT algorithm.}
 \usage{
-kellyKapowski(s, g, w, its = 50, r = 0.025, m = 1.5, x = TRUE,
-  e = FALSE, t = NULL, timeSigma = 1, verbose = FALSE, ...)
+kellyKapowski(
+  s,
+  g,
+  w,
+  its = 50,
+  r = 0.025,
+  m = 1.5,
+  x = TRUE,
+  e = FALSE,
+  t = NULL,
+  timeSigma = 1,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{s}{segmentation image}

@@ -4,10 +4,22 @@
 \alias{antsrSurf}
 \title{Render a function onto a surface.}
 \usage{
-antsrSurf(x, y, z, quantlimits = c(0.1, 0.9), colormap = "jet",
-  alpha = NA, inflationFactor = 25, smoothingSigma = 0,
-  rotationParams = c(270, 0, 270), overlayLimits = NA, backgroundColor,
-  filename = NA, antspath = NA, verbose = FALSE)
+antsrSurf(
+  x,
+  y,
+  z,
+  quantlimits = c(0.1, 0.9),
+  colormap = "jet",
+  alpha = NA,
+  inflationFactor = 25,
+  smoothingSigma = 0,
+  rotationParams = c(270, 0, 270),
+  overlayLimits = NA,
+  backgroundColor,
+  filename = NA,
+  antspath = NA,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{input antsImage defining the surface on which to render}

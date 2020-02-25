@@ -4,8 +4,13 @@
 \alias{getMultiResFeatureMatrix}
 \title{build multiple resolution predictor matrix from feature images}
 \usage{
-getMultiResFeatureMatrix(x, labelmask, rad = NA,
-  multiResSchedule = c(0), nsamples = 10)
+getMultiResFeatureMatrix(
+  x,
+  labelmask,
+  rad = NA,
+  multiResSchedule = c(0),
+  nsamples = 10
+)
 }
 \arguments{
 \item{x}{a list of feature images}

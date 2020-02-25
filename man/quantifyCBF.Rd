@@ -4,8 +4,7 @@
 \alias{quantifyCBF}
 \title{quantifyCBF}
 \usage{
-quantifyCBF(perfusion, mask, parameters, M0val = NA,
-  outlierValue = 0.02)
+quantifyCBF(perfusion, mask, parameters, M0val = NA, outlierValue = 0.02)
 }
 \arguments{
 \item{perfusion}{input asl matrix}

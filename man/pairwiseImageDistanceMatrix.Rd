@@ -4,8 +4,12 @@
 \alias{pairwiseImageDistanceMatrix}
 \title{Simple pairwiseImageDistanceMatrix function for images}
 \usage{
-pairwiseImageDistanceMatrix(dim, myFileList,
-  metrictype = "PearsonCorrelation", nclusters = NA)
+pairwiseImageDistanceMatrix(
+  dim,
+  myFileList,
+  metrictype = "PearsonCorrelation",
+  nclusters = NA
+)
 }
 \arguments{
 \item{dim}{imageDimension}

@@ -4,8 +4,12 @@
 \alias{rfSegmentationPredict}
 \title{A rfSegmentationPredict function.}
 \usage{
-rfSegmentationPredict(rfSegmentationModel, featureMatrix, mask,
-  verbose = FALSE)
+rfSegmentationPredict(
+  rfSegmentationModel,
+  featureMatrix,
+  mask,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{rfSegmentationModel}{input rf model}
