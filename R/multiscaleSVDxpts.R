@@ -2937,7 +2937,7 @@ symlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg,
+  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1, 1 ),
@@ -2970,12 +2970,7 @@ symlr <- function(
     normalized = FALSE
     ccaEnergy = TRUE
   }
-  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' )
-  if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
-  if ( ! mixAlg %in% mixAlgs ) {
-    message( paste(mixAlgs, collapse=' or ' ) )
-    stop("pass valid mixing method")
-  }
+  mixAlg = match.arg(mixAlg)
   # 0.0 adjust length of input data
   gamma = rep( 1, nModalities )
   if  ( missing( positivities ) )
