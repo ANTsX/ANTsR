@@ -2943,16 +2943,14 @@ symlr <- function(
   lineSearchRange = c( -1, 1 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
-  constraint = "none",
-  energyType = 'regression',
+  constraint = c("none","Grassmann","Stiefel"),
+  energyType = c('regression', 'normalized', 'cca', 'ucca'),
   vmats,
   connectors = NULL,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
-  if ( ! any( energyType %in% c("regression","cca","normalized", "ucca" ) ) )
-    stop( "energyType should be one of regression, cca or normalized" )
-  if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
-    stop( "Constraint should be one of none, Grassmann or Stiefel" )
+  energyType = match.arg(energyType)
+  constraint = match.arg(constraint)
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE

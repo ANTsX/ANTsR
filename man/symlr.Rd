@@ -17,8 +17,8 @@ symlr(
   lineSearchRange = c(-1, 1),
   lineSearchTolerance = 1e-08,
   randomSeed,
-  constraint = "none",
-  energyType = "regression",
+  constraint = c("none", "Grassmann", "Stiefel"),
+  energyType = c("regression", "normalized", "cca", "ucca"),
   vmats,
   connectors = NULL,
   verbose = FALSE
