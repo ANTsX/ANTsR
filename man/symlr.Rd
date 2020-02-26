@@ -58,7 +58,7 @@ allow estimates of per identifier intercept.}
 
 \item{constraint}{one of none, Grassmann or Stiefel}
 
-\item{energyType}{one of regression, normalized, cca or ucca}
+\item{energyType}{one of regression, normalized, lowRank, cca or ucca}
 
 \item{vmats}{optional initial \code{v} matrix list}
 

@@ -2868,7 +2868,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
 #' @param constraint one of none, Grassmann or Stiefel
-#' @param energyType one of regression, normalized, cca or ucca
+#' @param energyType one of regression, normalized, lowRank, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
@@ -2953,8 +2953,8 @@ symlr <- function(
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
     stop( "optimizationStyle should be one of  mixed greedy or lineSearch" )
-  if ( ! any( energyType %in% c("regression","cca","normalized", "ucca" ) ) )
-    stop( "energyType should be one of regression, cca or normalized" )
+  if ( ! any( energyType %in% c("regression","cca","normalized", "ucca", "lowRank" ) ) )
+    stop( "energyType should be one of regression, lowRank, cca or normalized" )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
     stop( "Constraint should be one of none, Grassmann or Stiefel" )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
@@ -3115,10 +3115,18 @@ symlr <- function(
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
+# low-dimensional error approximation
+    if ( energyType == 'lowRank' ) {
+      vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
+      # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
+      energy = norm( avgU/norm(avgU,"F") - vpro/norm(vpro,"F"), "F" )
+      return( energy )
+    }
+
     prediction = avgU %*% t( myenergysearchv )
-    if ( normalized ) prediction = prediction/norm(prediction,'F')
     prediction = prediction - ( colMeans(prediction) - colMeans( voxmats[[whichModality]] ) )
-    energy = norm( prediction - voxmats[[whichModality]], "F" )
+    if ( ! normalized ) energy = norm( prediction - voxmats[[whichModality]], "F" )
+    if (   normalized ) energy = norm( prediction/norm(prediction,"F") - voxmats[[whichModality]]/norm(voxmats[[whichModality]],"F"), "F" )
     return( energy )
     }
 
@@ -3167,7 +3175,9 @@ symlr <- function(
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
-        term1 = 2.0 * ( t( x ) %*% u - v )
+        if ( energyType == 'lowRank' )
+          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
+        else term1 = 2.0 * ( t( x ) %*% u - ( v %*% t(u) )  %*% u ) #  norm2( X - U * V' )^2
         term2 = 0
         if ( i %in% connectors[i] ) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
           temp = ( x - ( x %*% v ) %*% t(v) ) # n by p
