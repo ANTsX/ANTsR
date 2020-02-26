@@ -12,7 +12,6 @@
 #' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-# #' @param mypkg set either nabor, RANN, rflann
 #' @param ncores number of cores to use
 #' @param sinkhorn boolean
 #' @param kPackage name of package to use for knn
@@ -3000,7 +2999,9 @@ symlr <- function(
       matnames =  names( voxmats )[ i ]
 #      voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
       np = prod( dim( voxmats[[i]]) )
-      voxmats[[ i ]] = scale( voxmats[[ i ]], T, T ) / sqrt( np )
+      voxmats[[ i ]] = ( scale( voxmats[[ i ]], T, T ) ) / sqrt( np )
+      if ( any( is.na( voxmats[[ i ]] ) ) )
+        voxmats[[ i ]][ is.na(voxmats[[ i ]]) ] = mean( voxmats[[ i ]], na.rm=T)
     }
 
   # 3.0 setup regularization
@@ -3296,17 +3297,19 @@ symlr <- function(
 
     # run the basis calculation for each U_i - convert self to other
     nn = !ccaEnergy
-    if ( ( myit %% 5 == 0 & myit >= 5 ) | (ccaEnergy) | myit <= 2 ) {
+    if ( TRUE ) {
       for ( jj in 1:nModalities )
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
-      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize,
+      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = FALSE,
         connectors = connectors )
-      if ( myit >= 5 ) wt = 0.0 else wt = 0 # sticky ...
+      if ( myit >= 3 ) wt = 0.0 else wt = 0.0 # sticky ...
       for ( jj in 1:nModalities ) {
-        initialUMatrix[[jj]] =
-          localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt) )
+          initialUMatrix[[jj]] =
+            localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt),
+              orthogonalize = orthogonalize )
         }
     }
+
 
     # evaluate new energies
     for ( jj in 1:nModalities ) {
@@ -3319,7 +3322,7 @@ symlr <- function(
     bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
     bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
     if ( optimizationStyle == 'greedy' ) {
-      bestEv = ( mean( energyPath[(myit+1),], na.rm = T ) )
+#      bestEv = ( mean( energyPath[(myit+1),], na.rm = T ) )
       bestRow = myit + 1
     }
     totalEnergy[ myit + 1 ] = bestEv
@@ -3328,13 +3331,13 @@ symlr <- function(
       bestU = initialUMatrix
       bestV = vmats
     } else { # FIXME - open question - should we reset or not?
-#      initialUMatrix = bestU
-#      vmats = bestV
+#      initialUMatrix = bestU ; vmats = bestV
     }
     if ( verbose ) {
       print( paste( "Iteration:", myit, "bestEv", bestEv, 'bestIt', bestRow-1 ) )
-      print( paste( energyPath[myit+1,], collapse = ' / ' ) )
+#      print( paste( energyPath[myit+1,], collapse = ' / ' ) )
       }
+
     if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
   } # iterations
 
@@ -3453,7 +3456,7 @@ symlrU <- function( projections, mixingAlgorithm, initialW,
       basis = ( fastICA::fastICA( avgU,  method = 'C', n.comp=nc )$S )
     basis = ( svd( avgU, nu = nc, nv=0 )$u )
     if ( ! orthogonalize ) return( basis )
-    return( localGS( basis ) )
+    return( localGS( basis, orthogonalize = orthogonalize ) )
   }
 
   outU = list( )
