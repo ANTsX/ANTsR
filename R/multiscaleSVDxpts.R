@@ -2868,7 +2868,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
 #' @param constraint one of none, Grassmann or Stiefel
-#' @param energyType one of regression, normalized, cca or ucca
+#' @param energyType one of regression, normalized, lowRank, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
@@ -3110,10 +3110,18 @@ symlr <- function(
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
+# low-dimensional error approximation
+    if ( energyType == 'lowRank' ) {
+      vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
+      # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
+      energy = norm( avgU/norm(avgU,"F") - vpro/norm(vpro,"F"), "F" )
+      return( energy )
+    }
+
     prediction = avgU %*% t( myenergysearchv )
-    if ( normalized ) prediction = prediction/norm(prediction,'F')
     prediction = prediction - ( colMeans(prediction) - colMeans( voxmats[[whichModality]] ) )
-    energy = norm( prediction - voxmats[[whichModality]], "F" )
+    if ( ! normalized ) energy = norm( prediction - voxmats[[whichModality]], "F" )
+    if (   normalized ) energy = norm( prediction/norm(prediction,"F") - voxmats[[whichModality]]/norm(voxmats[[whichModality]],"F"), "F" )
     return( energy )
     }
 
@@ -3144,16 +3152,16 @@ symlr <- function(
   }
 
   getSyMGnorm <- function( v, i, myw, mixAlg )  {
+      # norm2( X/norm2(X) - U * V'/norm2(U * V') )^2
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
-      nrmuv = norm( u %*% t( v ), "F" )
-      common1 = t(x) - 1.0/nrmuv * ( v %*% t(u) )
-      traceTerm = sum( diag(  u %*% ( t( v ) %*% common1 ) ) )
-      term1 = 2.0 / nrmuv * ( t(x) %*% u - 1.0 / nrmuv * v ) # utu = identity matrix
-      # (t( u ) %*% u ) = identity
-      # term2 below is a "damping" term subtracting a scaled version of v from the data gradient
-      term2 = 2.0 / nrmuv^3 * traceTerm * v # %*% ( t( u ) %*% u )
-      gradV = 1.0 * (  term1 - term2 )
+      t0 = v %*% t(u)
+      t1 = u %*% t(v)
+      t2 = norm( t1, "F" )
+      t3 = t(x) / norm( x, "F" ) - t0 / norm( t0 )
+      tr <-function( x ) sum(diag(x))
+      gradV =  -2.0 / t2 * t3 %*% u +
+        2.0 / t2^3 * tr( t1 %*% t3 ) * ( t0  %*% u )
       return( gradV )
     }
   wm = 'matrix'
@@ -3162,7 +3170,21 @@ symlr <- function(
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
-        term1 = 2.0 * ( t( x ) %*% u - v )
+        if ( energyType == 'lowRank' ) {
+#          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
+          if ( TRUE ) {
+            t0 = x %*% v
+            t1 = norm( t0, "F" )
+            t2 = t( (u)/norm(u,"F") - (t0)/t1 )
+            tr <- function( x ) sum(diag(x))
+            vgrad1 = -2.0 / t1 * ( t2 %*% x )
+            lowx = ( t(x) %*% ( x %*% v ) )
+            vgrad2 = ( 2.0/t1^3 * tr( (t2) %*% (t0) ) * t(lowx) )
+            return( t( vgrad2 + vgrad1 ) )
+          }
+          return( term1 )
+          }
+        else term1 = 2.0 * ( t( x ) %*% u - ( v %*% t(u) )  %*% u ) #  norm2( X - U * V' )^2
         term2 = 0
         if ( i %in% connectors[i] ) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
           temp = ( x - ( x %*% v ) %*% t(v) ) # n by p
