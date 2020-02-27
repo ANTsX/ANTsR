@@ -22,7 +22,7 @@ symlr(
   vmats,
   connectors = NULL,
   optimizationStyle = "mixed",
-  scale = TRUE,
+  scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute"),
   verbose = FALSE
 )
 }
@@ -67,8 +67,9 @@ that indicates which modalities should be paired with current modality}
 
 \item{optimizationStyle}{one of \code{c("mixed","greedy","linesearch")}}
 
-\item{scale}{boolean standardize each matrix then divide by the square root
-of its number of variables (Westerhuis, Kourti, and MacGregor 1998)}
+\item{scale}{options to standardize each matrix. e.g. divide by the square root
+of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+by the number of variables or center or center and scale or ... (see code).}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}

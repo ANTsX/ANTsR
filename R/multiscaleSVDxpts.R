@@ -2873,8 +2873,9 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
 #' @param optimizationStyle one of \code{c("mixed","greedy","linesearch")}
-#' @param scale boolean standardize each matrix then divide by the square root
-#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998)
+#' @param scale options to standardize each matrix. e.g. divide by the square root
+#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+#' by the number of variables or center or center and scale or ... (see code).
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2948,7 +2949,7 @@ symlr <- function(
   vmats,
   connectors = NULL,
   optimizationStyle = 'mixed',
-  scale = TRUE,
+  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
@@ -2957,6 +2958,7 @@ symlr <- function(
     stop( "energyType should be one of regression, lowRank, cca or normalized" )
   if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
     stop( "Constraint should be one of none, Grassmann or Stiefel" )
+  scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
@@ -2996,17 +2998,23 @@ symlr <- function(
     sparsenessQuantiles = rep( 0.5, nModalities )
 
   # 1.0 adjust matrix norms
-  if ( scale )
+  if ( scale != "none" ) {
     for ( i in 1:nModalities ) {
       if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
         stop( paste( "input matrix", i, "is null or NA." ) )
       p[ i ] = ncol( voxmats[[ i ]] )
       matnames =  names( voxmats )[ i ]
-#      voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
-      np = prod( dim( voxmats[[i]]) )
-      voxmats[[ i ]] = ( scale( voxmats[[ i ]], T, T ) ) / sqrt( np )
-      if ( any( is.na( voxmats[[ i ]] ) ) )
+      if ( any( is.na( voxmats[[ i ]] ) ) ) {
         voxmats[[ i ]][ is.na(voxmats[[ i ]]) ] = mean( voxmats[[ i ]], na.rm=T)
+        }
+      if ( scale == 'norm' ) voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
+      if ( scale %in% c( "np", "sqrtnp", "centerAndScale" ) ) {
+        np = prod( dim( voxmats[[i]]) )
+        if ( scale == "sqrtnp" ) np = sqrt( np )
+        if ( scale == "centerAndScale" ) np = 1
+        voxmats[[ i ]] = ( scale( voxmats[[ i ]], T, T ) ) / np
+        }
+      }
     }
 
   # 3.0 setup regularization
@@ -3353,7 +3361,8 @@ symlr <- function(
       bestRow = myit + 1
     }
     totalEnergy[ myit + 1 ] = bestEv
-    if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv )
+    if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv |
+         optimizationStyle == 'greedy'  )
       {
       bestU = initialUMatrix
       bestV = vmats
@@ -3361,10 +3370,11 @@ symlr <- function(
 #      initialUMatrix = bestU ; vmats = bestV
     }
     if ( verbose ) {
-      print( paste( "Iteration:", myit, "bestEv", bestEv, 'bestIt', bestRow-1 ) )
-#      print( paste( energyPath[myit+1,], collapse = ' / ' ) )
+      outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
+      if ( optimizationStyle == 'greedy' )
+        outputString <- paste( outputString, "CE:", mean(energyPath[myit+1,]) )
       }
-
+      print( outputString )
     if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
   } # iterations
 
