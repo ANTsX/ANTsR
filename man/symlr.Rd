@@ -43,7 +43,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 

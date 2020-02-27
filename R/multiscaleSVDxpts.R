@@ -2860,7 +2860,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' number of basis functions in which case random initialization occurs. One
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
-#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -3234,6 +3234,16 @@ symlr <- function(
                 1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) )  +
                   sign( v ) * 0.0 )
           }
+
+#        detg <- function( x, u, v ) {
+#          t0 = x %*% v
+#          t1 = norm( t0, "F" )
+#          t2 = norm( u, "F" )
+#          term1 = 1.0/(t1*t2) * ( t(x) %*% u ) %*% matlib::adjoint( t(t0) %*% u )
+#          term2 = det( t( u ) %*% ( x %*% v ) ) / ( t1^3 * t2 ) * ( t(x) %*% ( x %*% v ) )
+#          return( term1 - term2 )
+#          }
+
         if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
         for ( j in 1:nModalities )
