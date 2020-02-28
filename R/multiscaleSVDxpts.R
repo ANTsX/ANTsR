@@ -1424,6 +1424,7 @@ orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE ) {
   if ( sparsenessQuantile == 0 ) return( v )
+  epsval = 1e-24 # .Machine$double.eps
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
   binaryOrth <- function( x ) { # BROKEN => DONT USE
     minormax <- function( x ) {
@@ -1437,13 +1438,14 @@ orthogonalizeAndQSparsify <- function( v,
     b
     }
   for ( vv in 1:ncol( v ) ) {
-    if ( var( v[ , vv ] ) >  .Machine$double.eps ) {
+    if ( var( v[ , vv ] ) >  epsval )
+      {
       #      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
       if ( vv > 1 & orthogonalize  ) {
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
           denom = sum( temp * temp , na.rm=TRUE )
-          if ( denom > .Machine$double.eps ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+          if ( denom > epsval ) ip = sum( temp * v[,vv] ) / denom else ip = 1
           v[ , vv ] = v[, vv ] - temp * ip
         }
       }
