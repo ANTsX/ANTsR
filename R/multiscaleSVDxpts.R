@@ -2785,6 +2785,8 @@ symlr2 <- function(
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
 #' @param uAlgorithm either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}
+#' @param addNoise scalar value that adds zero mean unit variance noise, multiplied
+#' by the value of \code{addNoise}
 #'
 #' @return A single matrix or list of matrices
 #' @author BB Avants.
@@ -2802,7 +2804,7 @@ symlr2 <- function(
 #'
 #' @export
 initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
-  zeroUpper = FALSE, uAlgorithm = 'pca' ) {
+  zeroUpper = FALSE, uAlgorithm = 'pca', addNoise = 0 ) {
   nModalities = length( voxmats )
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
@@ -2819,6 +2821,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     } else {
       u = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
+    if ( addNoise > 0 ) u = u + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if ( zeroUpper ) u[ upper.tri( u ) ] <- 0
     return( u )
     }
@@ -2834,6 +2837,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     } else {
       uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
+    if ( addNoise > 0 ) uOut[[s]] = uOut[[s]] + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if ( zeroUpper ) uOut[[s]][upper.tri(uOut[[s]])] <- 0
     }
   return( uOut )
@@ -2878,6 +2882,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param scale options to standardize each matrix. e.g. divide by the square root
 #' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
 #' by the number of variables or center or center and scale or ... (see code).
+#' @param beta if greater than zero, use exponential moving average on gradient.
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2952,6 +2957,7 @@ symlr <- function(
   connectors = NULL,
   optimizationStyle = 'mixed',
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
+  beta = 0,
   verbose = FALSE ) {
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
@@ -3224,7 +3230,7 @@ symlr <- function(
                   1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) +
             sign( v ) * 0.0 )
           }
-          # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA objective
+        # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA style objective
         subg <- function( x, u, v ) {
           t0 = norm( x %*% v , "F" )
           t1 = norm( u, "F" )
@@ -3232,8 +3238,8 @@ symlr <- function(
           mytr = sum( abs( diag( t2 ) ) )
           signer = t2 * 0
           diag( signer ) = sign( diag( t2 ) )
-          return( 1 / ( t0 * t1 ) * ( t( x ) %*% u ) %*% signer -
-                1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) )  +
+          return( 1.0 / ( t0  * t1 ) * ( t( x ) %*% u ) %*% signer -
+                  1.0 / (t0^3 * t1 ) * mytr * ( t(x) %*% ( x %*% v ) )  +
                   sign( v ) * 0.0 )
           }
 
@@ -3296,7 +3302,13 @@ symlr <- function(
   ################################################################################
   datanorm = rep( 0.0, nModalities )
   bestTot = Inf
+  lastV = list()
+  lastG = list()
+  lastU = list()
+#  m = list()
+#  v = list()
   for ( myit in 1:iterations ) {
+    if ( myit > 2 & beta > 0 ) wt = beta else wt = 0.0 # sticky ...
     errterm = rep( 1.0, nModalities )
     matrange = 1:nModalities
     for ( i in matrange ) { # get update for each V_i
@@ -3307,6 +3319,19 @@ symlr <- function(
       # initialize gradient line search
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg )
       temperv = constrainG( temperv, i, constraint = constraint )
+
+#      beta_1 = 0.9
+#      beta_2 = 0.99
+#      if( myit <= 1 ) { m[[i]] = temperv*0; v[[i]] = temperv*0 }
+#      m[[i]] = beta_1 * m[[i]] + (1 - beta_1) * temperv
+#      v[[i]] = beta_2 * v[[i]] + (1 - beta_2) * temperv^2.0
+#      m_hat = m[[i]] / (1 - beta_1^myit )
+#      v_hat = v[[i]] / (1 - beta_2^myit )
+      if ( beta > 0 )
+        if ( length( lastG ) < nModalities ) lastG[[i]] = temperv else {
+          temperv = temperv * ( 1.0 - wt ) + lastG[[i]] * ( wt )
+          lastG[[i]] = temperv
+        }
       if ( optimizationLogic( energyPath, myit, i ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange,
@@ -3326,7 +3351,10 @@ symlr <- function(
       if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) |
             optimizationStyle == 'greedy'  ) # ok to update
         {
+        if ( beta > 0 & FALSE ) lastV[[i]] = vmats[[i]]
         vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
+#        vmats[[i]] = vmats[[i]] - gamma[i] * m_hat / (sqrt(v_hat) + 1 ) # adam
+        if ( beta > 0 & FALSE  ) vmats[[ i ]] = vmats[[ i ]] * ( 1 - wt ) + lastV[[ i ]] * wt
         if ( sparsenessQuantiles[i] != 0 )
           vmats[[i]] = orthogonalizeAndQSparsify(
             as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
@@ -3345,15 +3373,19 @@ symlr <- function(
     # run the basis calculation for each U_i - convert self to other
     nn = !ccaEnergy
     if ( TRUE ) {
-      for ( jj in 1:nModalities )
+      for ( jj in 1:nModalities ) {
+        if ( beta > 0  & FALSE  ) lastU[[jj]] = initialUMatrix[[jj]]
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
+        }
       temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = FALSE,
         connectors = connectors )
-      if ( myit >= 3 ) wt = 0.0 else wt = 0.0 # sticky ...
       for ( jj in 1:nModalities ) {
+#        if ( beta <= 0 )
           initialUMatrix[[jj]] =
-            localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt),
-              orthogonalize = orthogonalize )
+            localGS( temp[[jj]], orthogonalize = orthogonalize )
+#        if ( beta > 0 )
+#          initialUMatrix[[jj]] =
+#            localGS( temp[[jj]] * (1-wt)+lastU[[jj]]*wt, orthogonalize = orthogonalize )
         }
     }
 
@@ -3374,7 +3406,7 @@ symlr <- function(
     }
     totalEnergy[ myit + 1 ] = bestEv
     if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv |
-         optimizationStyle == 'greedy'  )
+         optimizationStyle == 'greedy' )
       {
       bestU = initialUMatrix
       bestV = vmats
@@ -3383,7 +3415,7 @@ symlr <- function(
     }
     if ( verbose ) {
       outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
-      if ( optimizationStyle == 'greedy' )
+    #  if ( optimizationStyle == 'greedy' )
         outputString <- paste( outputString, "CE:", mean(energyPath[myit+1,]) )
       }
       print( outputString )
