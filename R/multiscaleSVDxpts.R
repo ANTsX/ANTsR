@@ -2576,7 +2576,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
 
-#' Symmetric multiview linear reconstruction model (symlr) for two modalities
+#' Similarity-driven multiview linear reconstruction model (symlr) for two modalities
 #'
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
@@ -2844,7 +2844,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   }
 
 
-#' Symmetric multiview linear reconstruction model (symlr) for N modalities
+#' Similarity-driven multiview linear reconstruction model (symlr) for N modalities
 #'
 #' symlr minimizes reconstruction error across related modalities.  That is,
 #' symlr will reconstruct each modality matrix from a basis set derived from

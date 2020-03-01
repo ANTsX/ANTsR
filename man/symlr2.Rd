@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{symlr2}
 \alias{symlr2}
-\title{Symmetric multiview linear reconstruction model (symlr) for two modalities}
+\title{Similarity-driven multiview linear reconstruction model (symlr) for two modalities}
 \usage{
 symlr2(
   voxmats,
