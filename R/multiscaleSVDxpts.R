@@ -2964,12 +2964,12 @@ symlr <- function(
   expBeta = 0,
   verbose = FALSE ) {
     
-    if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
-    energyType = match.arg(energyType)
-    constraint = match.arg(constraint)
-    optimizationStyle = match.arg(optimizationStyle)
-    scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
-    # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
+  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+  energyType = match.arg(energyType)
+  constraint = match.arg(constraint)
+  optimizationStyle = match.arg(optimizationStyle)
+  scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
+  # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
   ccaEnergy = FALSE
