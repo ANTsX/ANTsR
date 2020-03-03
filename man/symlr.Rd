@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{symlr}
 \alias{symlr}
-\title{Symmetric multiview linear reconstruction model (symlr) for N modalities}
+\title{Similarity-driven multiview linear reconstruction model (symlr) for N modalities}
 \usage{
 symlr(
   voxmats,
@@ -22,7 +22,8 @@ symlr(
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed", "greedy", "lineSearch"),
-  scale = TRUE,
+  scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute"),
+  expBeta = 0,
   verbose = FALSE
 )
 }
@@ -43,7 +44,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
@@ -67,8 +68,11 @@ that indicates which modalities should be paired with current modality}
 
 \item{optimizationStyle}{one of \code{c("mixed","greedy","linesearch")}}
 
-\item{scale}{boolean standardize each matrix then divide by the square root
-of its number of variables (Westerhuis, Kourti, and MacGregor 1998)}
+\item{scale}{options to standardize each matrix. e.g. divide by the square root
+of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+by the number of variables or center or center and scale or ... (see code).}
+
+\item{expBeta}{if greater than zero, use exponential moving average on gradient.}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}

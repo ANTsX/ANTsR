@@ -9,7 +9,8 @@ initializeSyMLR(
   k,
   jointReduction = TRUE,
   zeroUpper = FALSE,
-  uAlgorithm = "pca"
+  uAlgorithm = "pca",
+  addNoise = 0
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ initializeSyMLR(
 initialization is zeroed out}
 
 \item{uAlgorithm}{either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}}
+
+\item{addNoise}{scalar value that adds zero mean unit variance noise, multiplied
+by the value of \code{addNoise}}
 }
 \value{
 A single matrix or list of matrices

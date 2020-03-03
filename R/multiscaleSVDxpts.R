@@ -978,11 +978,11 @@ smoothMultiRegression <- function(
       lox = ( rx %*% ( ox ) )
       oy[,j] = smoothRegression(  ry, lox[,j], iterations = 50,
                                   sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-                                  smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE )$v[,1]
       loy = ( ry %*% ( oy ) )
       ox[,j] = smoothRegression(  rx, loy[,j], iterations = 50,
                                   sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-                                  smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE )$v[,1]
     }
     tt = x %*% ox
     ss = y %*% oy
@@ -1255,7 +1255,7 @@ knnSmoothImage <- function(
 #'  gamma = 1e-6, sparsenessQuantile=0.9, iterations=10,
 #'  smoothingMatrix = slist, verbose=TRUE )
 #' mm=makeImage( mask, abs(jj$v[[2]][,1]) ) %>% iMath("Normalize")
-#' plot( ref, mm, doCropping=F, window.overlay=c(0.1,1) )
+#' plot( ref, mm, doCropping=FALSE, window.overlay=c(0.1,1) )
 #'
 #' p1 = mat2 %*% jj$v[[1]]
 #' p2 = mat  %*% jj$v[[2]]
@@ -1424,6 +1424,7 @@ orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE ) {
   if ( sparsenessQuantile == 0 ) return( v )
+  epsval = 0.0 # .Machine$double.eps
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
   binaryOrth <- function( x ) { # BROKEN => DONT USE
     minormax <- function( x ) {
@@ -1437,13 +1438,14 @@ orthogonalizeAndQSparsify <- function( v,
     b
     }
   for ( vv in 1:ncol( v ) ) {
-    if ( var( v[ , vv ] ) >  .Machine$double.eps ) {
+    if ( var( v[ , vv ] ) >  epsval )
+      {
       #      v[ , vv ] = v[ , vv ] / sqrt( sum( v[ , vv ] * v[ , vv ] ) )
       if ( vv > 1 & orthogonalize  ) {
         for ( vk in 1:(vv-1) ) {
           temp = v[,vk]
           denom = sum( temp * temp , na.rm=TRUE )
-          if ( denom > .Machine$double.eps ) ip = sum( temp * v[,vv] ) / denom else ip = 1
+          if ( denom > epsval ) ip = sum( temp * v[,vv] ) / denom else ip = 1
           v[ , vv ] = v[, vv ] - temp * ip
         }
       }
@@ -1657,7 +1659,7 @@ smoothAppGradCCA <- function( x , y,
 #' mat = imageListToMatrix( images, mask )
 #' mat2 = imageListToMatrix( feature1Images, mask )
 #' mat3 = imageListToMatrix( feature3Images, mask )
-#' myscale <- function( x ) { return( scale(x, center=T,scale=T ) ) }
+#' myscale <- function( x ) { return( scale(x, center=TRUE,scale=T ) ) }
 #' x = list( x1=myscale(mat[-5,]), x2=myscale(mat2[-5,]), x3=myscale(mat3[-5,]) )
 #' df = data.frame( m1 = rowMeans( x$x1 ), m2 = rowMeans( x$x2 ), m3 = rowMeans( x$x3 ) )
 #' myform = " x1 ~ x2 + x3 + m2 + m3 "
@@ -2351,7 +2353,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileX,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
 
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
@@ -2359,7 +2361,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileY,
                   positivity = positivityY[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
     ###############################################
     p1 = antsrimpute( voxmats[[1]] %*% mildx$v[,-1] )
     p2 = antsrimpute( voxmats[[2]] %*% mildy$v[,-1] )
@@ -2540,7 +2542,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileX,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
 
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
@@ -2548,7 +2550,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileY,
                   positivity = positivityY[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
     ###############################################
 
     vmat1 = mildx$v[,-1] # matrix(  rnorm( p * basisK ), nrow=p  )
@@ -2574,7 +2576,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
 
-#' Symmetric multiview linear reconstruction model (symlr) for two modalities
+#' Similarity-driven multiview linear reconstruction model (symlr) for two modalities
 #'
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
@@ -2681,7 +2683,8 @@ symlr2 <- function(
   ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), T, T )
+    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), 
+                           TRUE, TRUE )
   } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
@@ -2783,6 +2786,8 @@ symlr2 <- function(
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
 #' @param uAlgorithm either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}
+#' @param addNoise scalar value that adds zero mean unit variance noise, multiplied
+#' by the value of \code{addNoise}
 #'
 #' @return A single matrix or list of matrices
 #' @author BB Avants.
@@ -2800,7 +2805,7 @@ symlr2 <- function(
 #'
 #' @export
 initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
-  zeroUpper = FALSE, uAlgorithm = 'pca' ) {
+  zeroUpper = FALSE, uAlgorithm = 'pca', addNoise = 0 ) {
   nModalities = length( voxmats )
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
@@ -2817,6 +2822,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     } else {
       u = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
+    if ( addNoise > 0 ) u = u + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if ( zeroUpper ) u[ upper.tri( u ) ] <- 0
     return( u )
     }
@@ -2832,13 +2838,14 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     } else {
       uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
+    if ( addNoise > 0 ) uOut[[s]] = uOut[[s]] + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if ( zeroUpper ) uOut[[s]][upper.tri(uOut[[s]])] <- 0
     }
   return( uOut )
   }
 
 
-#' Symmetric multiview linear reconstruction model (symlr) for N modalities
+#' Similarity-driven multiview linear reconstruction model (symlr) for N modalities
 #'
 #' symlr minimizes reconstruction error across related modalities.  That is,
 #' symlr will reconstruct each modality matrix from a basis set derived from
@@ -2860,7 +2867,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' number of basis functions in which case random initialization occurs. One
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
-#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
@@ -2873,8 +2880,10 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
 #' @param optimizationStyle one of \code{c("mixed","greedy","linesearch")}
-#' @param scale boolean standardize each matrix then divide by the square root
-#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998)
+#' @param scale options to standardize each matrix. e.g. divide by the square root
+#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+#' by the number of variables or center or center and scale or ... (see code).
+#' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2950,14 +2959,17 @@ symlr <- function(
   energyType = c('regression', 'normalized', 'cca', 'ucca'),
   vmats,
   connectors = NULL,
-  optimizationStyle = c("mixed","greedy","lineSearch" ),
-  scale = TRUE,
+  optimizationStyle = c("mixed","greedy","lineSearch") ,
+  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
+  expBeta = 0,
   verbose = FALSE ) {
-  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
-  energyType = match.arg(energyType)
-  constraint = match.arg(constraint)
-  optimizationStyle = match.arg(optimizationStyle)
-  # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
+    
+    if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+    energyType = match.arg(energyType)
+    constraint = match.arg(constraint)
+    optimizationStyle = match.arg(optimizationStyle)
+    scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
+    # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
   ccaEnergy = FALSE
@@ -2991,17 +3003,23 @@ symlr <- function(
     sparsenessQuantiles = rep( 0.5, nModalities )
 
   # 1.0 adjust matrix norms
-  if ( scale )
+  if ( scale != "none" ) {
     for ( i in 1:nModalities ) {
       if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
         stop( paste( "input matrix", i, "is null or NA." ) )
       p[ i ] = ncol( voxmats[[ i ]] )
       matnames =  names( voxmats )[ i ]
-#      voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
-      np = prod( dim( voxmats[[i]]) )
-      voxmats[[ i ]] = ( scale( voxmats[[ i ]], T, T ) ) / sqrt( np )
-      if ( any( is.na( voxmats[[ i ]] ) ) )
+      if ( any( is.na( voxmats[[ i ]] ) ) ) {
         voxmats[[ i ]][ is.na(voxmats[[ i ]]) ] = mean( voxmats[[ i ]], na.rm=T)
+        }
+      if ( scale == 'norm' ) voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
+      if ( scale %in% c( "np", "sqrtnp", "centerAndScale" ) ) {
+        np = prod( dim( voxmats[[i]]) )
+        if ( scale == "sqrtnp" ) np = sqrt( np )
+        if ( scale == "centerAndScale" ) np = 1
+        voxmats[[ i ]] = ( scale( voxmats[[ i ]], TRUE, TRUE ) ) / np
+        }
+      }
     }
 
   # 3.0 setup regularization
@@ -3093,7 +3111,7 @@ symlr <- function(
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
         sparsenessQuantiles[whichModality],
         orthogonalize = FALSE,
-        positivity = positivities[whichModality], softThresholding = F )
+        positivity = positivities[whichModality], softThresholding = FALSE )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3209,7 +3227,7 @@ symlr <- function(
                   1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) ) +
             sign( v ) * 0.0 )
           }
-          # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA objective
+        # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA style objective
         subg <- function( x, u, v ) {
           t0 = norm( x %*% v , "F" )
           t1 = norm( u, "F" )
@@ -3217,15 +3235,25 @@ symlr <- function(
           mytr = sum( abs( diag( t2 ) ) )
           signer = t2 * 0
           diag( signer ) = sign( diag( t2 ) )
-          return( 1 / ( t0 * t1 ) * ( t( x ) %*% u ) %*% signer -
-                1/(t0^3*t1) * mytr * ( t(x) %*% ( x %*% v ) )  +
+          return( 1.0 / ( t0  * t1 ) * ( t( x ) %*% u ) %*% signer -
+                  1.0 / (t0^3 * t1 ) * mytr * ( t(x) %*% ( x %*% v ) )  +
                   sign( v ) * 0.0 )
           }
+
+#        detg <- function( x, u, v ) {
+#          t0 = x %*% v
+#          t1 = norm( t0, "F" )
+#          t2 = norm( u, "F" )
+#          term1 = 1.0/(t1*t2) * ( t(x) %*% u ) %*% matlib::adjoint( t(t0) %*% u )
+#          term2 = det( t( u ) %*% ( x %*% v ) ) / ( t1^3 * t2 ) * ( t(x) %*% ( x %*% v ) )
+#          return( term1 - term2 )
+#          }
+
         if ( energyType == 'cca' ) return( subg( x, u, v ) )
         gradder = v * 0
         for ( j in 1:nModalities )
           if ( j != i ) gradder = gradder +
-            subg( x, scale( voxmats[[j]] %*% vmats[[j]] , T, T ) , v )
+            subg( x, scale( voxmats[[j]] %*% vmats[[j]] , TRUE, TRUE ) , v )
         return( gradder/(nModalities-1) )
         }
       if (  whichModel == 'ccag2' ) { # THIS IS WIP / not recommended
@@ -3271,6 +3299,8 @@ symlr <- function(
   ################################################################################
   datanorm = rep( 0.0, nModalities )
   bestTot = Inf
+  lastV = list()
+  lastG = list()
   for ( myit in 1:iterations ) {
     errterm = rep( 1.0, nModalities )
     matrange = 1:nModalities
@@ -3282,6 +3312,24 @@ symlr <- function(
       # initialize gradient line search
       temperv = getSyMG( vmats[[i]], i, myw=myw, mixAlg = mixAlg )
       temperv = constrainG( temperv, i, constraint = constraint )
+
+      useAdam = FALSE
+      if ( useAdam ) { # completely experimental hack that may be improved/used in future for batch opt
+        if ( myit == 1 & i == 1 ) { m = list(); v = list() }
+        beta_1 = 0.9
+        beta_2 = 0.99
+        if( myit <= 1 ) { m[[i]] = temperv*0; v[[i]] = temperv*0 }
+        m[[i]] = beta_1 * m[[i]] + (1 - beta_1) * temperv
+        v[[i]] = beta_2 * v[[i]] + (1 - beta_2) * temperv^2.0
+        m_hat = m[[i]] / (1 - beta_1^myit )
+        v_hat = v[[i]] / (1 - beta_2^myit )
+        }
+
+      if ( expBeta > 0 ) {
+        if ( myit == 1 ) lastG[[i]] = 0
+        temperv = temperv * ( 1.0 - expBeta ) + lastG[[i]] * ( expBeta )
+        lastG[[i]] = temperv
+        }
       if ( optimizationLogic( energyPath, myit, i ) ) {
         temp = optimize( getSyME2, # computes the energy
                          interval = lineSearchRange,
@@ -3301,12 +3349,14 @@ symlr <- function(
       if ( errterm[ i ] <= min(energyPath[,i],na.rm=T) |
             optimizationStyle == 'greedy'  ) # ok to update
         {
-        vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
+        if ( ! useAdam ) vmats[[i]] = ( vmats[[i]] + (temperv) * gamma[i]  )
+        if ( useAdam ) vmats[[i]] = vmats[[i]] - gamma[i] * m_hat / (sqrt(v_hat) + 1 ) # adam
         if ( sparsenessQuantiles[i] != 0 )
           vmats[[i]] = orthogonalizeAndQSparsify(
             as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
             sparsenessQuantiles[i],
-            orthogonalize = FALSE, positivity = positivities[i], unitNorm = F,
+            orthogonalize = FALSE, positivity = positivities[i], 
+            unitNorm = FALSE,
             softThresholding = FALSE  )
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
@@ -3320,15 +3370,14 @@ symlr <- function(
     # run the basis calculation for each U_i - convert self to other
     nn = !ccaEnergy
     if ( TRUE ) {
-      for ( jj in 1:nModalities )
+      for ( jj in 1:nModalities ) {
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
+        }
       temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = FALSE,
         connectors = connectors )
-      if ( myit >= 3 ) wt = 0.0 else wt = 0.0 # sticky ...
       for ( jj in 1:nModalities ) {
-          initialUMatrix[[jj]] =
-            localGS( initialUMatrix[[jj]] * wt + temp[[jj]] * (1-wt),
-              orthogonalize = orthogonalize )
+        initialUMatrix[[jj]] =
+            localGS( temp[[jj]], orthogonalize = orthogonalize )
         }
     }
 
@@ -3337,18 +3386,19 @@ symlr <- function(
     for ( jj in 1:nModalities ) {
       loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
         avgU = initialUMatrix[[jj]],
-        whichModality = jj, verbose = F )
+        whichModality = jj, verbose = FALSE )
       energyPath[myit+1,jj] = loki
     } # matrix loop
 
-    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
-    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
+    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = TRUE  ) )
+    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = TRUE  ) )
     if ( optimizationStyle == 'greedy' ) {
-#      bestEv = ( mean( energyPath[(myit+1),], na.rm = T ) )
+#      bestEv = ( mean( energyPath[(myit+1),], na.rm = TRUE  ) )
       bestRow = myit + 1
     }
     totalEnergy[ myit + 1 ] = bestEv
-    if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv )
+    if ( mean( energyPath[myit+1,], na.rm = TRUE   ) <= bestEv |
+         optimizationStyle == 'greedy' )
       {
       bestU = initialUMatrix
       bestV = vmats
@@ -3356,10 +3406,11 @@ symlr <- function(
 #      initialUMatrix = bestU ; vmats = bestV
     }
     if ( verbose ) {
-      print( paste( "Iteration:", myit, "bestEv", bestEv, 'bestIt', bestRow-1 ) )
-#      print( paste( energyPath[myit+1,], collapse = ' / ' ) )
+      outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
+    #  if ( optimizationStyle == 'greedy' )
+        outputString <- paste( outputString, "CE:", mean(energyPath[myit+1,]) )
       }
-
+      print( outputString )
     if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
   } # iterations
 
@@ -3458,19 +3509,19 @@ symlrU <- function( projections, mixingAlgorithm, initialW,
     }
     if ( mixAlg == 'stochastic' ) { # FIXME
       avgU = Reduce( cbind, projectionsU[ wtobind ] )
-      G = scale(replicate(nComponents, rnorm(nrow(avgU))),F,F)
+      G = scale(replicate(nComponents, rnorm(nrow(avgU))),FALSE,FALSE)
       Y = localGS(t(avgU) %*% G) # project onto random basis - no localGS because of numerical issues when self-mapping
-      avgU = scale( avgU %*% Y, F, F )
+      avgU = scale( avgU %*% Y, FALSE, FALSE )
       return( avgU )
     }
     nc = ncol( projectionsU[[ 1 ]] )
     avgU = Reduce( cbind, projectionsU[ wtobind ] )
     if ( mixAlg == 'pca' )
-      basis = stats::prcomp( avgU, retx=F, rank.=nc, scale.=T )$rotation
+      basis = stats::prcomp( avgU, retx=FALSE, rank.=nc, scale.=TRUE )$rotation
     if ( mixAlg == 'rrpca-l' )
-      basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+      basis = ( rsvd::rrpca( avgU, rand=FALSE )$L[,1:nc] )
     else if ( mixAlg == 'rrpca-s' )
-      basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+      basis = ( rsvd::rrpca( avgU, rand=FALSE )$S[,1:nc] )
     else if ( mixAlg == 'ica' & ! missing( initialW ) )
       basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
                                 n.comp=nc )$S )

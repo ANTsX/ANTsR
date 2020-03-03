@@ -143,7 +143,7 @@ jj = jointSmoothMatrixReconstruction( x, 4, params, positivity=T,
  gamma = 1e-6, sparsenessQuantile=0.9, iterations=10,
  smoothingMatrix = slist, verbose=TRUE )
 mm=makeImage( mask, abs(jj$v[[2]][,1]) ) \%>\% iMath("Normalize")
-plot( ref, mm, doCropping=F, window.overlay=c(0.1,1) )
+plot( ref, mm, doCropping=FALSE, window.overlay=c(0.1,1) )
 
 p1 = mat2 \%*\% jj$v[[1]]
 p2 = mat  \%*\% jj$v[[2]]
