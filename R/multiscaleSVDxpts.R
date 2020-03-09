@@ -3405,12 +3405,12 @@ symlr <- function(
     } else { # FIXME - open question - should we reset or not?
 #      initialUMatrix = bestU ; vmats = bestV
     }
-    if ( verbose ) {
+    if ( verbose > 0 ) {
       outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
     #  if ( optimizationStyle == 'greedy' )
         outputString <- paste( outputString, "CE:", mean(energyPath[myit+1,]) )
-      }
       print( outputString )
+      }
     if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
   } # iterations
 

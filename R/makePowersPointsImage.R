@@ -89,7 +89,7 @@ makePointsImage <- function( pts, mask, radius = 5 )
             local = idx + c(i,j,k)
             localpt = antsTransformIndexToPhysicalPoint(mask,local)
             dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
-            inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
+            inImage = all( local >= 1 & local <= dim( powersLabels ) )
             if ( (dist <= rad) && ( inImage == TRUE ) ) {
               if ( powersLabels[ local[1], local[2], local[3] ] < 0.5 )
                 powersLabels[ local[1], local[2], local[3] ] = r
@@ -101,7 +101,7 @@ makePointsImage <- function( pts, mask, radius = 5 )
           local = idx + c(i,j)
           localpt = antsTransformIndexToPhysicalPoint(mask,local)
           dist = sqrt( sum( (localpt-pt)*(localpt-pt) ))
-          inImage = ( prod(idx <= dim(mask))==1) && ( length(which(idx<1)) == 0 )
+          inImage = ( prod(local <= dim(mask))==1) && ( length(which(local<1)) == 0 )
           if ( (dist <= rad) && ( inImage == TRUE ) ) {
               if ( powersLabels[ local[1], local[2] ] < 0.5 )
                 powersLabels[ local[1], local[2] ] = r
