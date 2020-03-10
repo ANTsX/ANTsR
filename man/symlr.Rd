@@ -11,17 +11,17 @@ symlr(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg,
+  mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-1, 1),
   lineSearchTolerance = 1e-08,
   randomSeed,
-  constraint = "none",
-  energyType = "regression",
+  constraint = c("none", "Grassmann", "Stiefel"),
+  energyType = c("regression", "normalized", "cca", "ucca"),
   vmats,
   connectors = NULL,
-  optimizationStyle = "mixed",
+  optimizationStyle = c("mixed", "greedy", "lineSearch"),
   scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute"),
   expBeta = 0,
   verbose = FALSE
@@ -140,6 +140,9 @@ range(cor(p3p,p2p))
 # svd
 print( range(cor( svd1,svd2) ))
 
+resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+   initialUMatrix = nk , verbose=TRUE, iterations=5,
+   energyType = "normalized" )
 }
 \seealso{
 \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}

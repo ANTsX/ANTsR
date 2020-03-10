@@ -97,7 +97,7 @@ smoomat = knnSmoothingMatrix( spatmat, k = 23, sigma = 100.0 )
 mat = imageListToMatrix( images, mask )
 mat2 = imageListToMatrix( feature1Images, mask )
 mat3 = imageListToMatrix( feature3Images, mask )
-myscale <- function( x ) { return( scale(x, center=T,scale=T ) ) }
+myscale <- function( x ) { return( scale(x, center=TRUE,scale=T ) ) }
 x = list( x1=myscale(mat[-5,]), x2=myscale(mat2[-5,]), x3=myscale(mat3[-5,]) )
 df = data.frame( m1 = rowMeans( x$x1 ), m2 = rowMeans( x$x2 ), m3 = rowMeans( x$x3 ) )
 myform = " x1 ~ x2 + x3 + m2 + m3 "

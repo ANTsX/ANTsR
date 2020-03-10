@@ -978,11 +978,11 @@ smoothMultiRegression <- function(
       lox = ( rx %*% ( ox ) )
       oy[,j] = smoothRegression(  ry, lox[,j], iterations = 50,
                                   sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-                                  smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE )$v[,1]
       loy = ( ry %*% ( oy ) )
       ox[,j] = smoothRegression(  rx, loy[,j], iterations = 50,
                                   sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-                                  smoothingMatrix = NA, nv = 2, verbose = F )$v[,1]
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE )$v[,1]
     }
     tt = x %*% ox
     ss = y %*% oy
@@ -1255,7 +1255,7 @@ knnSmoothImage <- function(
 #'  gamma = 1e-6, sparsenessQuantile=0.9, iterations=10,
 #'  smoothingMatrix = slist, verbose=TRUE )
 #' mm=makeImage( mask, abs(jj$v[[2]][,1]) ) %>% iMath("Normalize")
-#' plot( ref, mm, doCropping=F, window.overlay=c(0.1,1) )
+#' plot( ref, mm, doCropping=FALSE, window.overlay=c(0.1,1) )
 #'
 #' p1 = mat2 %*% jj$v[[1]]
 #' p2 = mat  %*% jj$v[[2]]
@@ -1659,7 +1659,7 @@ smoothAppGradCCA <- function( x , y,
 #' mat = imageListToMatrix( images, mask )
 #' mat2 = imageListToMatrix( feature1Images, mask )
 #' mat3 = imageListToMatrix( feature3Images, mask )
-#' myscale <- function( x ) { return( scale(x, center=T,scale=T ) ) }
+#' myscale <- function( x ) { return( scale(x, center=TRUE,scale=T ) ) }
 #' x = list( x1=myscale(mat[-5,]), x2=myscale(mat2[-5,]), x3=myscale(mat3[-5,]) )
 #' df = data.frame( m1 = rowMeans( x$x1 ), m2 = rowMeans( x$x2 ), m3 = rowMeans( x$x3 ) )
 #' myform = " x1 ~ x2 + x3 + m2 + m3 "
@@ -2353,7 +2353,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileX,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
 
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
@@ -2361,7 +2361,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileY,
                   positivity = positivityY[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
     ###############################################
     p1 = antsrimpute( voxmats[[1]] %*% mildx$v[,-1] )
     p2 = antsrimpute( voxmats[[2]] %*% mildy$v[,-1] )
@@ -2542,7 +2542,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileX,
                   positivity = positivityX[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
 
     mildy = milr( dataFramey,
                   voxmats[2], formy, smoothingMatrixY,
@@ -2550,7 +2550,7 @@ mild <- function( dataFrame,  voxmats, basisK,
                   sparsenessQuantile = sparsenessQuantileY,
                   positivity = positivityY[[1]],
                   repeatedMeasures = repeatedMeasures,
-                  verbose = F )
+                  verbose = FALSE )
     ###############################################
 
     vmat1 = mildx$v[,-1] # matrix(  rnorm( p * basisK ), nrow=p  )
@@ -2683,7 +2683,8 @@ symlr2 <- function(
   ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), T, T )
+    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), 
+                           TRUE, TRUE )
   } else { umatX = umatY = initialUMatrix }
 
   vRanX = vRanY = NA
@@ -2809,7 +2810,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
     if ( uAlgorithm == 'pca' ) {
-      X.pcr <- prcomp( t(X), rank. = k )          # PCA
+      X.pcr <- stats::prcomp( t(X), rank. = k )          # PCA
       u <- ( X.pcr$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
@@ -2828,7 +2829,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   uOut = list()
   for ( s in 1:nModalities) {
     if ( uAlgorithm == 'pca ') {
-      uOut[[s]] = t( prcomp( t(voxmats[[s]]), rank. = k )$rotation )
+      uOut[[s]] = t( stats::prcomp( t(voxmats[[s]]), rank. = k )$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
     } else if ( uAlgorithm == 'cca' ) {
@@ -2936,6 +2937,9 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
+#' resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#'    initialUMatrix = nk , verbose=TRUE, iterations=5,
+#'    energyType = "normalized" )
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}
 #' @export symlr
 symlr <- function(
@@ -2945,27 +2949,25 @@ symlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg,
+  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1, 1 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
-  constraint = "none",
-  energyType = 'regression',
+  constraint = c("none","Grassmann","Stiefel"),
+  energyType = c('regression', 'normalized', 'cca', 'ucca'),
   vmats,
   connectors = NULL,
-  optimizationStyle = 'mixed',
+  optimizationStyle = c("mixed","greedy","lineSearch") ,
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
   expBeta = 0,
   verbose = FALSE ) {
+    
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
-  if ( ! any( optimizationStyle %in% c("mixed","greedy","lineSearch" ) ) )
-    stop( "optimizationStyle should be one of  mixed greedy or lineSearch" )
-  if ( ! any( energyType %in% c("regression","cca","normalized", "ucca", "lowRank" ) ) )
-    stop( "energyType should be one of regression, lowRank, cca or normalized" )
-  if ( ! any( constraint %in% c("none","Grassmann","Stiefel" ) ) )
-    stop( "Constraint should be one of none, Grassmann or Stiefel" )
+  energyType = match.arg(energyType)
+  constraint = match.arg(constraint)
+  optimizationStyle = match.arg(optimizationStyle)
   scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
@@ -2986,12 +2988,7 @@ symlr <- function(
     normalized = FALSE
     ccaEnergy = TRUE
   }
-  mixAlgs = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' )
-  if ( missing( mixAlg ) ) mixAlg = mixAlgs[1]
-  if ( ! mixAlg %in% mixAlgs ) {
-    message( paste(mixAlgs, collapse=' or ' ) )
-    stop("pass valid mixing method")
-  }
+  mixAlg = match.arg(mixAlg)
   # 0.0 adjust length of input data
   gamma = rep( 1, nModalities )
   if  ( missing( positivities ) )
@@ -3020,7 +3017,7 @@ symlr <- function(
         np = prod( dim( voxmats[[i]]) )
         if ( scale == "sqrtnp" ) np = sqrt( np )
         if ( scale == "centerAndScale" ) np = 1
-        voxmats[[ i ]] = ( scale( voxmats[[ i ]], T, T ) ) / np
+        voxmats[[ i ]] = ( scale( voxmats[[ i ]], TRUE, TRUE ) ) / np
         }
       }
     }
@@ -3114,7 +3111,7 @@ symlr <- function(
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
         sparsenessQuantiles[whichModality],
         orthogonalize = FALSE,
-        positivity = positivities[whichModality], softThresholding = F )
+        positivity = positivities[whichModality], softThresholding = FALSE )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3256,7 +3253,7 @@ symlr <- function(
         gradder = v * 0
         for ( j in 1:nModalities )
           if ( j != i ) gradder = gradder +
-            subg( x, scale( voxmats[[j]] %*% vmats[[j]] , T, T ) , v )
+            subg( x, scale( voxmats[[j]] %*% vmats[[j]] , TRUE, TRUE ) , v )
         return( gradder/(nModalities-1) )
         }
       if (  whichModel == 'ccag2' ) { # THIS IS WIP / not recommended
@@ -3358,7 +3355,8 @@ symlr <- function(
           vmats[[i]] = orthogonalizeAndQSparsify(
             as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
             sparsenessQuantiles[i],
-            orthogonalize = FALSE, positivity = positivities[i], unitNorm = F,
+            orthogonalize = FALSE, positivity = positivities[i], 
+            unitNorm = FALSE,
             softThresholding = FALSE  )
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
@@ -3388,18 +3386,18 @@ symlr <- function(
     for ( jj in 1:nModalities ) {
       loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
         avgU = initialUMatrix[[jj]],
-        whichModality = jj, verbose = F )
+        whichModality = jj, verbose = FALSE )
       energyPath[myit+1,jj] = loki
     } # matrix loop
 
-    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = T ) )
-    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = T ) )
+    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = TRUE  ) )
+    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = TRUE  ) )
     if ( optimizationStyle == 'greedy' ) {
-#      bestEv = ( mean( energyPath[(myit+1),], na.rm = T ) )
+#      bestEv = ( mean( energyPath[(myit+1),], na.rm = TRUE  ) )
       bestRow = myit + 1
     }
     totalEnergy[ myit + 1 ] = bestEv
-    if ( mean( energyPath[myit+1,], na.rm = T  ) <= bestEv |
+    if ( mean( energyPath[myit+1,], na.rm = TRUE   ) <= bestEv |
          optimizationStyle == 'greedy' )
       {
       bestU = initialUMatrix
@@ -3511,19 +3509,19 @@ symlrU <- function( projections, mixingAlgorithm, initialW,
     }
     if ( mixAlg == 'stochastic' ) { # FIXME
       avgU = Reduce( cbind, projectionsU[ wtobind ] )
-      G = scale(replicate(nComponents, rnorm(nrow(avgU))),F,F)
+      G = scale(replicate(nComponents, rnorm(nrow(avgU))),FALSE,FALSE)
       Y = localGS(t(avgU) %*% G) # project onto random basis - no localGS because of numerical issues when self-mapping
-      avgU = scale( avgU %*% Y, F, F )
+      avgU = scale( avgU %*% Y, FALSE, FALSE )
       return( avgU )
     }
     nc = ncol( projectionsU[[ 1 ]] )
     avgU = Reduce( cbind, projectionsU[ wtobind ] )
     if ( mixAlg == 'pca' )
-      basis = stats::prcomp( avgU, retx=F, rank.=nc, scale.=T )$rotation
+      basis = stats::prcomp( avgU, retx=FALSE, rank.=nc, scale.=TRUE )$rotation
     if ( mixAlg == 'rrpca-l' )
-      basis = ( rsvd::rrpca( avgU, rand=F )$L[,1:nc] )
+      basis = ( rsvd::rrpca( avgU, rand=FALSE )$L[,1:nc] )
     else if ( mixAlg == 'rrpca-s' )
-      basis = ( rsvd::rrpca( avgU, rand=F )$S[,1:nc] )
+      basis = ( rsvd::rrpca( avgU, rand=FALSE )$S[,1:nc] )
     else if ( mixAlg == 'ica' & ! missing( initialW ) )
       basis = ( fastICA::fastICA( avgU,  method = 'C', w.init = initialW,
                                 n.comp=nc )$S )
