@@ -26,9 +26,9 @@ template< class ImageType, class TransformMatrixType >
 TransformMatrixType GetVoxelSpaceToRASPhysicalSpaceMatrix(typename ImageType::Pointer image)
   {
   // Generate intermediate terms
-  vnl_matrix<double> m_dir, m_ras_matrix;
-  vnl_diag_matrix<double> m_scale, m_lps_to_ras;
-  vnl_vector<double> v_origin, v_ras_offset;
+  vnl_matrix_fixed<double, 3, 3> m_dir, m_ras_matrix;
+  vnl_diag_matrix_fixed<double, 3> m_scale, m_lps_to_ras;
+  vnl_vector_fixed<double, 3> v_origin, v_ras_offset;
 
   // Compute the matrix
   m_dir = image->GetDirection().GetVnlMatrix();
