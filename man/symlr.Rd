@@ -15,7 +15,7 @@ symlr(
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-1, 1),
-  lineSearchTolerance = 1e-08,
+  lineSearchTolerance = 0.00000001,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
   energyType = c("regression", "normalized", "cca", "ucca"),
