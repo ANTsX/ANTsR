@@ -4,13 +4,18 @@
 \alias{symlr}
 \title{Similarity-driven multiview linear reconstruction model (symlr) for N modalities}
 \usage{
+<<<<<<< HEAD:man/symlr.Rd
 symlr(
+=======
+symilr(
+>>>>>>> bad8920db739b12bd5ce18030bbabcb64ebbf350:man/symilr.Rd
   voxmats,
   smoothingMatrices,
   iterations = 10,
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
+<<<<<<< HEAD:man/symlr.Rd
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
@@ -24,6 +29,16 @@ symlr(
   optimizationStyle = c("mixed", "greedy", "lineSearch"),
   scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute"),
   expBeta = 0,
+=======
+  mixAlg,
+  orthogonalize = TRUE,
+  repeatedMeasures = NA,
+  lineSearchRange = c(-10, 10),
+  lineSearchTolerance = 0.001,
+  randomSeed,
+  lowDimensionalError = 0,
+  constraint = "none",
+>>>>>>> bad8920db739b12bd5ce18030bbabcb64ebbf350:man/symilr.Rd
   verbose = FALSE
 )
 }

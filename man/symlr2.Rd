@@ -4,7 +4,7 @@
 \alias{symlr2}
 \title{Similarity-driven multiview linear reconstruction model (symlr) for two modalities}
 \usage{
-symlr2(
+symilr2(
   voxmats,
   basisK,
   smoothingMatrixX,
