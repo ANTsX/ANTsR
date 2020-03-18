@@ -9,7 +9,7 @@ smoothMatrixPrediction(
   basisDf,
   modelFormula = as.formula(" x ~ ."),
   iterations = 10,
-  gamma = 1e-06,
+  gamma = 0.000001,
   sparsenessQuantile = 0.5,
   positivity = c("positive", "negative", "either"),
   smoothingMatrix = NA,

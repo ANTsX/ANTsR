@@ -15,39 +15,32 @@ bloodPerfusionSVD(
 \arguments{
 \item{perfusionImage}{time series (n-D + time) perfusion acquisition.}
 
-\item{voiMaskImage}{n-D mask image indicating where the cerebral blood 
-flow parameter
-       images are calculated.}
+\item{voiMaskImage}{n-D mask image indicating where the cerebral blood
+flow parameter images are calculated.}
 
-\item{aifMaskImage}{n-D mask image indicating where the arterial input 
-function is
-       calculated.}
+\item{aifMaskImage}{n-D mask image indicating where the arterial input
+function is calculated.}
 
-\item{thresholdSVD}{is used to threshold the smaller elements of the 
-diagonal matrix
-       during the SVD regularization.  0.2 is a common choice (cf. page 
-       571, end of
-       column 2 in http://www.ncbi.nlm.nih.gov/pubmed/16971140).}
+\item{thresholdSVD}{is used to threshold the smaller elements of the
+diagonal matrix during the SVD regularization.  0.2 is a common choice
+(cf. page 571, end of column 2 in
+http://www.ncbi.nlm.nih.gov/pubmed/16971140).}
 
-\item{deltaTime}{time between volumetric acquisitions.  We assume a uniform 
+\item{deltaTime}{time between volumetric acquisitions.  We assume a uniform
 time sampling.}
 }
 \value{
-list with the cerebral blood flow image (cbfImage), cerebral blood 
-volume image
-        (cbvImage), mean transit time (mttImage), and arterial input 
-        function signal
-        from the image (aifSignal) and the calculated arterial input 
-        function
-        concentration (aifConcentration).
+list with the cerebral blood flow image (cbfImage), cerebral blood
+volume image (cbvImage), mean transit time (mttImage), and arterial input
+function signal from the image (aifSignal) and the calculated arterial input
+function concentration (aifConcentration).
 }
 \description{
 Implementation of the deconvolution technique of Ostergaard et al.
-(http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral 
-(or pulmonary)
-blood flow.  Other relevant references include 
+(http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral
+(or pulmonary) blood flow.  Other relevant references include
 http://www.ncbi.nlm.nih.gov/pubmed/16261573,
-http://www.ncbi.nlm.nih.gov/pubmed/8916023, and 
+http://www.ncbi.nlm.nih.gov/pubmed/8916023, and
 http://www.ncbi.nlm.nih.gov/pubmed/15332240.
 }
 \examples{
@@ -55,17 +48,17 @@ http://www.ncbi.nlm.nih.gov/pubmed/15332240.
 
 perfusionFileName = ""
 if (file.exists(perfusionFileName)) {
-perfusionImage <- antsImageRead( filename = perfusionFileName, 
+perfusionImage <- antsImageRead( filename = perfusionFileName,
 dimension = 4, pixeltype = 'float' )
-voiMaskImage <- antsImageRead( filename = voiMaskFileName, 
+voiMaskImage <- antsImageRead( filename = voiMaskFileName,
 dimension = 3, pixeltype = 'unsigned int' )
-aifMaskImage <- antsImageRead( filename = aifMaskFileName, 
+aifMaskImage <- antsImageRead( filename = aifMaskFileName,
 dimension = 3, pixeltype = 'unsigned int' )
 
 
 deltaTime <- 3.4
 
-results <- bloodPerfusionSVD( perfusionImage, 
+results <- bloodPerfusionSVD( perfusionImage,
 voiMaskImage, aifMaskImage,
 thresholdSVD = 0.2, deltaTime = deltaTime )
 
