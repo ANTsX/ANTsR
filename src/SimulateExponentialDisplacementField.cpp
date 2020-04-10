@@ -12,57 +12,55 @@
 template<class PrecisionType, unsigned int Dimension>
 SEXP simulateExponentialDisplacementFieldHelper(
   SEXP r_domainImage,
-  SEXP r_outputDisplacementField,
+  SEXP r_antsrField,
   unsigned int numberOfRandomPoints,
   float standardDeviationDisplacementField,
   bool enforceStationaryBoundary,
   float standardDeviationSmoothing )
 {
-  using PixelType = PrecisionType;
-  using ImageType = itk::Image<PixelType, Dimension>;
+  using ImageType = itk::Image<PrecisionType, Dimension>;
   using VectorType = itk::Vector<PrecisionType, Dimension>;
   using DisplacementFieldType = itk::Image<VectorType, Dimension>;
   using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
-  using DisplacementFieldPointerType = typename DisplacementFieldType::Pointer;
-  using ANTsrFieldType = itk::VectorImage<PrecisionType, Dimension>;
   using IteratorType = itk::ImageRegionIteratorWithIndex<DisplacementFieldType>;
 
   using ImagePointerType = typename ImageType::Pointer;
-  using DisplacementFieldPointerType = typename DisplacementFieldType::Pointer;
   using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
   ImagePointerType domainImage = Rcpp::as<ImagePointerType>( r_domainImage );
-  ANTsRFieldPointerType outputDisplacementField = Rcpp::as<ANTsRFieldPointerType>( r_outputDisplacementField );
+  ANTsRFieldPointerType antsrField = Rcpp::as<ANTsRFieldPointerType>( r_antsrField );
 
   using ExponentialSimulatorType = itk::SimulatedExponentialDisplacementFieldSource<DisplacementFieldType>;
 
+  using RealImageType = typename ExponentialSimulatorType::RealImageType;
+  using CastImageFilterType = itk::CastImageFilter<ImageType, RealImageType>;
+  typename CastImageFilterType::Pointer caster = CastImageFilterType::New();
+  caster->SetInput( domainImage );
+  caster->Update();
+
   typename ExponentialSimulatorType::Pointer exponentialSimulator = ExponentialSimulatorType::New();
-  exponentialSimulator->SetDisplacementFieldDomainFromImage( domainImage );
+  exponentialSimulator->SetDisplacementFieldDomainFromImage( caster->GetOutput() );
   exponentialSimulator->SetNumberOfRandomPoints( numberOfRandomPoints );
   exponentialSimulator->SetEnforceStationaryBoundary( enforceStationaryBoundary );
   exponentialSimulator->SetDisplacementNoiseStandardDeviation( standardDeviationDisplacementField );
   exponentialSimulator->SetSmoothingStandardDeviation( standardDeviationSmoothing );
 
-  typename DisplacementFieldType::Pointer itkField = exponentialSimulator->GetOutput();
-  itkField->Update();
-  itkField->DisconnectPipeline();
-
-  IteratorType It( itkField, itkField->GetLargestPossibleRegion() );
-  while( !It.IsAtEnd() )
+  IteratorType It( exponentialSimulator->GetOutput(), 
+    exponentialSimulator->GetOutput()->GetRequestedRegion() );
+  for( It.GoToBegin(); !It.IsAtEnd(); ++It )
     {
-    VectorType itkVector = itkField->GetPixel( It.GetIndex() );
+    VectorType itkVector = It.Value();
 
-    typename ANTsrFieldType::PixelType antsrVector;
+    typename ANTsRFieldType::PixelType antsrVector( Dimension );
     for( unsigned int d = 0; d < Dimension; d++ )
       {
       antsrVector[d] = itkVector[d];
       }
-    outputDisplacementField->SetPixel( It.GetIndex(), antsrVector );
-    ++It;
+    antsrField->SetPixel( It.GetIndex(), antsrVector );
     }
 
-  r_outputDisplacementField = Rcpp::wrap( outputDisplacementField );
-  return( r_outputDisplacementField );
+  r_antsrField = Rcpp::wrap( antsrField );
+  return( r_antsrField );
 }
 
 RcppExport SEXP simulateExponentialDisplacementFieldR(
@@ -74,32 +72,116 @@ RcppExport SEXP simulateExponentialDisplacementFieldR(
 {
 try
   {
-  Rcpp::S4 domainImage( r_domainImage );
-  Rcpp::S4 r_outputDisplacementField( r_domainImage );
+  Rcpp::S4 s4_domainImage( r_domainImage );
+  unsigned int imageDimension = Rcpp::as<int>( s4_domainImage.slot( "dimension" ) );
+  std::string pixelType = Rcpp::as< std::string >( s4_domainImage.slot( "pixeltype" ) );
 
-  unsigned int imageDimension = Rcpp::as<int>( domainImage.slot( "dimension" ) );
   unsigned int numberOfRandomPoints = Rcpp::as<int>( r_numberOfRandomPoints );
   float standardDeviationDisplacementField = Rcpp::as<float>( r_standardDeviationDisplacementField );
   bool enforceStationaryBoundary = Rcpp::as<bool>( r_enforceStationaryBoundary );
-  float standardDeviationSmoothing = Rcpp::as<int>( r_standardDeviationSmoothing );
+  float standardDeviationSmoothing = Rcpp::as<float>( r_standardDeviationSmoothing );
 
-  if( imageDimension == 2 )
+  if( pixelType.compare( "float" ) == 0 && imageDimension == 2 )
     {
-    using PrecisionType = double;
-    const unsigned int imageDimension = 2;
+    using PrecisionType = float;
+    const unsigned int Dimension = 2;
+
+    using ImageType = itk::Image<PrecisionType, Dimension>;
+    using ImagePointerType = typename ImageType::Pointer;
+    using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
+    using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+    ImagePointerType domainImage = Rcpp::as<ImagePointerType>( s4_domainImage );
+
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->CopyInformation( domainImage );
+    antsrField->SetRegions( domainImage->GetRequestedRegion() );
+    antsrField->SetVectorLength( imageDimension );
+    antsrField->Allocate();
+
+    Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
     SEXP outputDisplacementField =
-      simulateExponentialDisplacementFieldHelper<PrecisionType, imageDimension>( domainImage,
-      r_outputDisplacementField, numberOfRandomPoints, standardDeviationDisplacementField,
+      simulateExponentialDisplacementFieldHelper<PrecisionType, Dimension>( s4_domainImage,
+      s4_antsrField, numberOfRandomPoints, standardDeviationDisplacementField,
       enforceStationaryBoundary, standardDeviationSmoothing );
     return( outputDisplacementField );
     }
-  else if( imageDimension == 3 )
+  else if( pixelType.compare( "float" ) == 0 && imageDimension == 3 )
+    {
+    using PrecisionType = float;
+    const unsigned int Dimension = 3;
+
+    using ImageType = itk::Image<PrecisionType, Dimension>;
+    using ImagePointerType = typename ImageType::Pointer;
+    using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
+    using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+    ImagePointerType domainImage = Rcpp::as<ImagePointerType>( s4_domainImage );
+
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->CopyInformation( domainImage );
+    antsrField->SetRegions( domainImage->GetRequestedRegion() );
+    antsrField->SetVectorLength( imageDimension );
+    antsrField->Allocate();
+
+    Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
+    SEXP outputDisplacementField =
+      simulateExponentialDisplacementFieldHelper<PrecisionType, Dimension>( s4_domainImage,
+      s4_antsrField, numberOfRandomPoints, standardDeviationDisplacementField,
+      enforceStationaryBoundary, standardDeviationSmoothing );
+    return( outputDisplacementField );
+    }
+  else if( pixelType.compare( "double" ) == 0 && imageDimension == 2 )
     {
     using PrecisionType = double;
-    const unsigned int imageDimension = 3;
+    const unsigned int Dimension = 2;
+
+    using ImageType = itk::Image<PrecisionType, Dimension>;
+    using ImagePointerType = typename ImageType::Pointer;
+    using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
+    using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+    ImagePointerType domainImage = Rcpp::as<ImagePointerType>( s4_domainImage );
+
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->CopyInformation( domainImage );
+    antsrField->SetRegions( domainImage->GetRequestedRegion() );
+    antsrField->SetVectorLength( imageDimension );
+    antsrField->Allocate();
+
+    Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
     SEXP outputDisplacementField =
-      simulateExponentialDisplacementFieldHelper<PrecisionType, imageDimension>( domainImage,
-      r_outputDisplacementField, numberOfRandomPoints, standardDeviationDisplacementField,
+      simulateExponentialDisplacementFieldHelper<PrecisionType, Dimension>( s4_domainImage,
+      s4_antsrField, numberOfRandomPoints, standardDeviationDisplacementField,
+      enforceStationaryBoundary, standardDeviationSmoothing );
+    return( outputDisplacementField );
+    }
+  else if( pixelType.compare( "double" ) == 0 && imageDimension == 3 )
+    {
+    using PrecisionType = double;
+    const unsigned int Dimension = 3;
+
+    using ImageType = itk::Image<PrecisionType, Dimension>;
+    using ImagePointerType = typename ImageType::Pointer;
+    using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
+    using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+    ImagePointerType domainImage = Rcpp::as<ImagePointerType>( s4_domainImage );
+
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->CopyInformation( domainImage );
+    antsrField->SetRegions( domainImage->GetRequestedRegion() );
+    antsrField->SetVectorLength( imageDimension );
+    antsrField->Allocate();
+
+    Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
+    SEXP outputDisplacementField =
+      simulateExponentialDisplacementFieldHelper<PrecisionType, Dimension>( s4_domainImage,
+      s4_antsrField, numberOfRandomPoints, standardDeviationDisplacementField,
       enforceStationaryBoundary, standardDeviationSmoothing );
     return( outputDisplacementField );
     }
