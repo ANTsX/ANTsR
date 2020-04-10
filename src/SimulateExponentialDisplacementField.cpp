@@ -44,6 +44,7 @@ SEXP simulateExponentialDisplacementFieldHelper(
   exponentialSimulator->SetEnforceStationaryBoundary( enforceStationaryBoundary );
   exponentialSimulator->SetDisplacementNoiseStandardDeviation( standardDeviationDisplacementField );
   exponentialSimulator->SetSmoothingStandardDeviation( standardDeviationSmoothing );
+  exponentialSimulator->Update();
 
   IteratorType It( exponentialSimulator->GetOutput(), 
     exponentialSimulator->GetOutput()->GetRequestedRegion() );
