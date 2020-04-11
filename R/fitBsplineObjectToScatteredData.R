@@ -45,18 +45,22 @@
 #'
 #' @examples
 #'
-#' r <- 1.0
-#' theta <- seq( from = 0.0, to = 2 * pi, by = 0.1 )
-#' x <- r * cos( theta ) + runif( length( theta ), min = -0.2, max = 0.2 )
-#' y <- r * sin( theta ) + runif( length( theta ), min = -0.2, max = 0.2 )
-#' u <- seq( from = 0.0, to = 1.0, length.out = length( theta ) )
+#' x <- seq( from = -4, to = 4, by = 0.1 )
+#' y <- exp( -(x * x) ) + runif( length( x ), min = -0.1, max = 0.1 )
+#' u <- seq( from = 0.0, to = 1.0, length.out = length( x ) )
 #' scatteredData <- cbind( x, y )
 #' parametricData <- as.matrix( u, ncol = 1 )
+#' numberOfSamplePoints <- 100
+#' spacing <- 1/(numberOfSamplePoints-1) * 1.0;
 #'
-#' bsplineCurve <- fitBSplineObjectToScatteredData( scatteredData, parametricData,
-#'   parametricDomainOrigin = c( 0.0 ), parametricDomainSpacing = c( 0.05 ),
-#'   parametricDomainSize = c( 21 ), isParametricDimensionClosed = c( TRUE ),
-#'   numberOfFittingLevels = 5, meshSize = 4 )
+#' bsplineCurve <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
+#'   parametricDomainOrigin = c( 0.0 ), parametricDomainSpacing = c( spacing ),
+#'   parametricDomainSize = c( numberOfSamplePoints ), isParametricDimensionClosed = c( FALSE ),
+#'   numberOfFittingLevels = 5, meshSize = 1 )
+#'
+#' plot( x, y, "p", col = "red" )
+#' points( scatteredData[,1], scatteredData[,2], col = "green" )
+#' lines( bsplineCurve[,1], bsplineCurve[,2], col = "blue" )
 #'
 #' @export fitBsplineObjectToScatteredData
 
