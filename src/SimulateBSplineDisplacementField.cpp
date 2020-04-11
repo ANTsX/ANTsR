@@ -86,7 +86,7 @@ try
   {
   Rcpp::S4 s4_domainImage( r_domainImage );
   unsigned int imageDimension = Rcpp::as<int>( s4_domainImage.slot( "dimension" ) );
-  std::string pixelType = Rcpp::as< std::string >( s4_domainImage.slot( "pixeltype" ) );
+  std::string pixelType = Rcpp::as<std::string>( s4_domainImage.slot( "pixeltype" ) );
 
   unsigned int numberOfRandomPoints = Rcpp::as<int>( r_numberOfRandomPoints );
   float standardDeviationDisplacementField = Rcpp::as<float>( r_standardDeviationDisplacementField );
