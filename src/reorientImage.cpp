@@ -31,8 +31,6 @@ void antsReoHelper(
     VectorType ccg1;
     VectorType cpm1;
     MatrixType cpa1;
-    VectorType ccg2;
-    VectorType cpm2;
     MatrixType cpa2;
     typename ImageCalculatorType::Pointer calculator1 =
       ImageCalculatorType::New();
