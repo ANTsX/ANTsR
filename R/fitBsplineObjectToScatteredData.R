@@ -6,8 +6,8 @@
 #' Possibilities include:
 #'
 #'     * 1/2/3/4-D curve
-#'     * 2-D surface in 3-D space
-#'     * 1/2/3/4-D scalar field
+#'     * 2-D surface in 3-D space (not available/templated)
+#'     * 2/3/4-D scalar field
 #'     * 2/3-D displacement field
 #'
 #' In order to understand the input parameters, it is important to understand
@@ -38,12 +38,13 @@
 #' @param numberOfFittingLevels integer specifying the number of fitting levels.
 #' @param meshSize vector defining the mesh size at the initial fitting level.
 #' @param splineOrder spline order of the B-spline object.  Default = 3.
-#' @param centerize subtract the mean data value before fitting.  Default = TRUE.
 #' @return Matrix for B-spline curve.  Otherwise, returns ANTsR image.
 #'
 #' @author NJ Tustison
 #'
 #' @examples
+#'
+#' # Perform 2-D curve example
 #'
 #' x <- seq( from = -4, to = 4, by = 0.1 )
 #' y <- exp( -(x * x) ) + runif( length( x ), min = -0.1, max = 0.1 )
@@ -62,6 +63,30 @@
 #' points( scatteredData[,1], scatteredData[,2], col = "green" )
 #' lines( bsplineCurve[,1], bsplineCurve[,2], col = "blue" )
 #'
+#' # Perform 2-D scalar field (i.e., image) example
+#' 
+#' numberOfRandomPoints <- 10000
+#'
+#' img <- antsImageRead( getANTsRData( "r16" ) )
+#' imgArray <- as.array( img )
+#' rowIndices <- sample( 2:(dim( imgArray )[1]-1), numberOfRandomPoints, replace = TRUE )
+#' colIndices <- sample( 2:(dim( imgArray )[2]-1), numberOfRandomPoints, replace = TRUE )
+#'
+#' scatteredData <- as.matrix( array( data = 0, dim = c( numberOfRandomPoints, 1 ) ) )
+#' parametricData <- as.matrix( array( data = 0, dim = c( numberOfRandomPoints, 2 ) ) )
+#' for( i in seq_len( numberOfRandomPoints ) )
+#'   {
+#'   scatteredData[i,1] <- imgArray[rowIndices[i], colIndices[i]]
+#'   parametricData[i,1] <- rowIndices[i]
+#'   parametricData[i,2] <- colIndices[i]
+#'   }
+#'
+#' bsplineImage <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
+#'   parametricDomainOrigin = c( 0.0, 0.0 ), parametricDomainSpacing = c( 1.0, 1.0 ),
+#'   parametricDomainSize = dim( img ), 
+#'   numberOfFittingLevels = 7, meshSize = c( 1, 1 ) )
+#' plot( bsplineImage )
+#' 
 #' @export fitBsplineObjectToScatteredData
 
 fitBsplineObjectToScatteredData <- function(
@@ -74,8 +99,7 @@ fitBsplineObjectToScatteredData <- function(
   dataWeights = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
-  splineOrder = 3,
-  centerize = TRUE
+  splineOrder = 3
   ) {
 
   if( missing( scatteredData ) )
@@ -87,14 +111,14 @@ fitBsplineObjectToScatteredData <- function(
     {
     stop( "Error: missing parametricData." )
     }
+  parametricDimension <- ncol( parametricData )
 
   if( is.null( isParametricDimensionClosed ) )
     {
-    isParametricDimensionClosed <- rep( TRUE, parametricDimension )
+    isParametricDimensionClosed <- rep( FALSE, parametricDimension )
     }
 
-  parametricDimension <- ncol( parametricData )
-  if( length( meshSize ) != 1 && length( meshSize ) != imageDimension )
+  if( length( meshSize ) != 1 && length( meshSize ) != parametricDimension )
     {
     stop( "Error:  incorrect specification for meshSize.")
     }
@@ -137,37 +161,12 @@ fitBsplineObjectToScatteredData <- function(
     stop( "Error:  number of weights is not the same as the number of points." )
     }
 
-  if( centerize == TRUE )
-    {
-    centerizeValues <- colMeans( scatteredData )
-
-    centeredData <- scatteredData
-    for( j in seq_len( length( centerizeValues ) ) )
-      {
-      centeredData[,j] <- scatteredData[,j] - centerizeValues[j]
-      }
-
-    bsplineObject <- .Call( "fitBsplineObjectToScatteredData",
-      centeredData, parametricData, dataWeights,
-      parametricDomainOrigin, parametricDomainSpacing,
-      parametricDomainSize, isParametricDimensionClosed,
-      numberOfFittingLevels, numberOfControlPoints,
-      splineOrder,
-      PACKAGE = "ANTsR" )
-
-    for( j in seq_len( length( centerizeValues ) ) )
-      {
-      bsplineObject[,j] <- bsplineObject[,j] + centerizeValues[j]
-      }
-    return( bsplineObject )  
-    } else {
-    bsplineObject <- .Call( "fitBsplineObjectToScatteredData",
-      scatteredData, parametricData, dataWeights,
-      parametricDomainOrigin, parametricDomainSpacing,
-      parametricDomainSize, isParametricDimensionClosed,
-      numberOfFittingLevels, numberOfControlPoints,
-      splineOrder,
-      PACKAGE = "ANTsR" )
-    return( bsplineObject )  
-    }
+  bsplineObject <- .Call( "fitBsplineObjectToScatteredData",
+    scatteredData, parametricData, dataWeights,
+    parametricDomainOrigin, parametricDomainSpacing,
+    parametricDomainSize, isParametricDimensionClosed,
+    numberOfFittingLevels, numberOfControlPoints,
+    splineOrder,
+    PACKAGE = "ANTsR" )
+  return( bsplineObject )  
 }

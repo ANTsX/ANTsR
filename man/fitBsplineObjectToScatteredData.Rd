@@ -14,8 +14,7 @@ fitBsplineObjectToScatteredData(
   dataWeights = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
-  splineOrder = 3,
-  centerize = TRUE
+  splineOrder = 3
 )
 }
 \arguments{
@@ -48,8 +47,6 @@ scattered data value.  Default = NULL meaning all values are weighted the same.}
 \item{meshSize}{vector defining the mesh size at the initial fitting level.}
 
 \item{splineOrder}{spline order of the B-spline object.  Default = 3.}
-
-\item{centerize}{subtract the mean data value before fitting.  Default = TRUE.}
 }
 \value{
 Matrix for B-spline curve.  Otherwise, returns ANTsR image.
@@ -62,8 +59,8 @@ Possibilities include:
 }
 \details{
 * 1/2/3/4-D curve
-    * 2-D surface in 3-D space
-    * 1/2/3/4-D scalar field
+    * 2-D surface in 3-D space (not available/templated)
+    * 2/3/4-D scalar field
     * 2/3-D displacement field
 
 In order to understand the input parameters, it is important to understand
@@ -75,6 +72,8 @@ the parametric point is the location of scattered data within the domain of
 the B-spline object.
 }
 \examples{
+
+# Perform 2-D curve example
 
 x <- seq( from = -4, to = 4, by = 0.1 )
 y <- exp( -(x * x) ) + runif( length( x ), min = -0.1, max = 0.1 )
@@ -92,6 +91,30 @@ bsplineCurve <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
 plot( x, y, "p", col = "red" )
 points( scatteredData[,1], scatteredData[,2], col = "green" )
 lines( bsplineCurve[,1], bsplineCurve[,2], col = "blue" )
+
+# Perform 2-D scalar field (i.e., image) example
+
+numberOfRandomPoints <- 10000
+
+img <- antsImageRead( getANTsRData( "r16" ) )
+imgArray <- as.array( img )
+rowIndices <- sample( 2:(dim( imgArray )[1]-1), numberOfRandomPoints, replace = TRUE )
+colIndices <- sample( 2:(dim( imgArray )[2]-1), numberOfRandomPoints, replace = TRUE )
+
+scatteredData <- as.matrix( array( data = 0, dim = c( numberOfRandomPoints, 1 ) ) )
+parametricData <- as.matrix( array( data = 0, dim = c( numberOfRandomPoints, 2 ) ) )
+for( i in seq_len( numberOfRandomPoints ) )
+  {
+  scatteredData[i,1] <- imgArray[rowIndices[i], colIndices[i]]
+  parametricData[i,1] <- rowIndices[i]
+  parametricData[i,2] <- colIndices[i]
+  }
+
+bsplineImage <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
+  parametricDomainOrigin = c( 0.0, 0.0 ), parametricDomainSpacing = c( 1.0, 1.0 ),
+  parametricDomainSize = dim( img ), 
+  numberOfFittingLevels = 7, meshSize = c( 1, 1 ) )
+plot( bsplineImage )
 
 }
 \author{
