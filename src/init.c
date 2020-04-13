@@ -14,8 +14,6 @@ extern SEXP antsAffineInitializer(SEXP);
 extern SEXP antsMotionCorr(SEXP);
 extern SEXP antsMotionCorrStats(SEXP, SEXP, SEXP, SEXP);
 extern SEXP centerOfMass(SEXP);
-//extern SEXP confidenceConnectedImage(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-//extern SEXP connectedThresholdImage(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP createJacobianDeterminantImageR(SEXP, SEXP, SEXP, SEXP);
 extern SEXP eigenanatomyCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP fastMarchingExtension(SEXP, SEXP, SEXP);
@@ -41,8 +39,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"antsMotionCorr",                          (DL_FUNC) &antsMotionCorr,                         1},
     {"antsMotionCorrStats",                     (DL_FUNC) &antsMotionCorrStats,                    4},
     {"centerOfMass",                            (DL_FUNC) &centerOfMass,                           1},
-//    {"confidenceConnectedImage",                (DL_FUNC) &confidenceConnectedImage,               6},
-//    {"connectedThresholdImage",                 (DL_FUNC) &connectedThresholdImage,                5},
     {"createJacobianDeterminantImageR",         (DL_FUNC) &createJacobianDeterminantImageR,        4},
     {"eigenanatomyCpp",                         (DL_FUNC) &eigenanatomyCpp,                       15},
     {"fastMarchingExtension",                   (DL_FUNC) &fastMarchingExtension,                  3},
