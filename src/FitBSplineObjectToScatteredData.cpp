@@ -529,7 +529,7 @@ try
     // 3-D vector field  
     else if( dataDimension == 3 ) 
       {
-      const unsigned int DataDimension = 2;  
+      const unsigned int DataDimension = 3;  
       using ANTsRFieldType = itk::VectorImage<PrecisionType, ParametricDimension>;
       using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
