@@ -4,7 +4,8 @@
 \name{DesikanKillianyTourville}
 \alias{DesikanKillianyTourville}
 \title{DesikanKillianyTourville}
-\format{A data frame listing the following variables.
+\format{
+A data frame listing the following variables.
 \describe{
    \item{\code{label_num}}{ Numerical label value. }
    \item{\code{label_name}}{ Shorthand anatomical value. }
@@ -12,7 +13,8 @@
    \item{\code{contralateral}}{ contralateral anatomical value. }
    \item{\code{lobe}}{ which lobe: temporal, parietal, occipital, frontal.}
    \item{\code{hemisphere}}{ left or right hemisphere. }
-}}
+}
+}
 \usage{
 DesikanKillianyTourville
 }

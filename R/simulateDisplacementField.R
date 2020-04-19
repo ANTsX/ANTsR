@@ -39,7 +39,7 @@ simulateDisplacementField <- function(
   sdSmoothing = 4.0
   ) {
 
-  fieldType = match.arg(fieldType)
+  fieldType = match.arg( fieldType )
   if( fieldType == 'bspline' )
     {
 

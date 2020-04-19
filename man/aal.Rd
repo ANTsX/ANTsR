@@ -4,7 +4,8 @@
 \name{aal}
 \alias{aal}
 \title{AAL Labels}
-\format{A data frame listing the following variables.
+\format{
+A data frame listing the following variables.
 \describe{
   \item{\code{label_num}}{ Numerical label value. }
   \item{\code{label_name}}{ Shorthand anatomical value. }
@@ -21,7 +22,8 @@
   \item{\code{right}}{binary value}
   \item{\code{temporal}}{binary value}
   \item{\code{unknown}}{binary value}
-}}
+}
+}
 \usage{
 aal
 }
