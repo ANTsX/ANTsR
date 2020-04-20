@@ -4,7 +4,8 @@
 \name{powers_areal_mni_itk}
 \alias{powers_areal_mni_itk}
 \title{powers_areal_mni_itk}
-\format{A data frame listing the following variables.
+\format{
+A data frame listing the following variables.
 \describe{
   \item{\code{x}}{ x coordinate }
   \item{\code{y}}{ y coordinate }
@@ -22,7 +23,8 @@
   \item{\code{Brodmann}}{ Broadmann area number }
   \item{\code{AAL}}{ AAL region label }
 }
-#' @references \url{http://www.nil.wustl.edu/labs/petersen/Resources.html}}
+#' @references \url{http://www.nil.wustl.edu/labs/petersen/Resources.html}
+}
 \usage{
 powers_areal_mni_itk
 }

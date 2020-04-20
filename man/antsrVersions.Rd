@@ -4,13 +4,15 @@
 \name{antsrVersions}
 \alias{antsrVersions}
 \title{antsrVersions}
-\format{A data frame listing the following variables.
+\format{
+A data frame listing the following variables.
 \describe{
   \item{\code{Dependency}}{ Name of software dependency. }
   \item{\code{GitTag}}{ The git tag.  This can also be used to 
   trace other dependencies, e.g. the ITK version used by the 
   current ANTs version. }
-}}
+}
+}
 \description{
 A data frame defining the git tag 
 for the current ANTsR version.  One can also see 

@@ -4,11 +4,13 @@
 \name{tracts}
 \alias{tracts}
 \title{tracts}
-\format{A data frame listing the following variables.
+\format{
+A data frame listing the following variables.
 \describe{
 \item{\code{label_num}}{ Numerical label value. } 
 \item{\code{label_name}}{ Shorthand anatomical value. }
-}}
+}
+}
 \usage{
 tracts
 }
