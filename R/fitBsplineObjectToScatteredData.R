@@ -139,7 +139,6 @@ fitBsplineObjectToScatteredData <- function(
     stop( "Error:  closed is not of length parametricDimension." )
     }
 
-  splineOrder <- 3
   numberOfControlPoints <- meshSize + splineOrder
 
   if( length( numberOfControlPoints ) == 1 )
@@ -158,7 +157,7 @@ fitBsplineObjectToScatteredData <- function(
     }
   if( length( dataWeights ) != nrow( parametricData ) )
     {
-    stop( "Error:  number of weights is not the same as the number of points." )
+    stop( "Error:  the number of weights is not the same as the number of points." )
     }
 
   bsplineObject <- .Call( "fitBsplineObjectToScatteredData",
