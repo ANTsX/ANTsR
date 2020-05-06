@@ -2683,7 +2683,7 @@ symlr2 <- function(
   ymatname = names( voxmats )[ 2 ]
 
   if ( missing( initialUMatrix ) ) {
-    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ), 
+    umatX = umatY = scale( qr.Q( qr( matrix(  rnorm( n * basisK ), nrow=n  ) ) ),
                            TRUE, TRUE )
   } else { umatX = umatY = initialUMatrix }
 
@@ -2963,7 +2963,7 @@ symlr <- function(
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
   expBeta = 0,
   verbose = FALSE ) {
-    
+
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
@@ -3143,13 +3143,13 @@ symlr <- function(
     return( energy )
     }
 
-  energyPath = matrix( nrow = iterations + 1, ncol = nModalities )
+  energyPath = matrix( Inf, nrow = iterations, ncol = nModalities )
   initialEnergy = 0
   for ( i in 1:nModalities ) {
     loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
       avgU = initialUMatrix[[i]],
       whichModality = i  )
-    energyPath[1,i] = loki
+#    energyPath[1,i] = loki
     initialEnergy = initialEnergy + loki /nModalities
   }
   bestU = initialUMatrix
@@ -3355,7 +3355,7 @@ symlr <- function(
           vmats[[i]] = orthogonalizeAndQSparsify(
             as.matrix( smoothingMatrices[[i]] %*% vmats[[i]] ),
             sparsenessQuantiles[i],
-            orthogonalize = FALSE, positivity = positivities[i], 
+            orthogonalize = FALSE, positivity = positivities[i],
             unitNorm = FALSE,
             softThresholding = FALSE  )
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
@@ -3387,7 +3387,7 @@ symlr <- function(
       loki = getSyME2( 0, 0, myw=myw, mixAlg=mixAlg,
         avgU = initialUMatrix[[jj]],
         whichModality = jj, verbose = FALSE )
-      energyPath[myit+1,jj] = loki
+      energyPath[myit,jj] = loki
     } # matrix loop
 
     bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = TRUE  ) )
@@ -3397,7 +3397,7 @@ symlr <- function(
       bestRow = myit + 1
     }
     totalEnergy[ myit + 1 ] = bestEv
-    if ( mean( energyPath[myit+1,], na.rm = TRUE   ) <= bestEv |
+    if ( mean( energyPath[myit,], na.rm = TRUE   ) <= bestEv |
          optimizationStyle == 'greedy' )
       {
       bestU = initialUMatrix
@@ -3408,7 +3408,7 @@ symlr <- function(
     if ( verbose > 0 ) {
       outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
     #  if ( optimizationStyle == 'greedy' )
-        outputString <- paste( outputString, "CE:", mean(energyPath[myit+1,]) )
+        outputString <- paste( outputString, "CE:", mean(energyPath[myit,]) )
       print( outputString )
       }
     if (  ( myit - bestRow-1 ) >= 5 ) break # consider converged
