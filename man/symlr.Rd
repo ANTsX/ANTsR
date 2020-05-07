@@ -22,7 +22,8 @@ symlr(
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed", "greedy", "lineSearch"),
-  scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute", "eigenvalue"),
+  scale = c("sqrtnp", "np", "centerAndScale", "center", "norm", "none", "impute",
+    "eigenvalue"),
   expBeta = 0,
   verbose = FALSE
 )
@@ -70,7 +71,8 @@ that indicates which modalities should be paired with current modality}
 
 \item{scale}{options to standardize each matrix. e.g. divide by the square root
 of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
-by the number of variables or center or center and scale or ... (see code).}
+by the number of variables or center or center and scale or ... (see code).
+can be a vector which will apply each strategy in order.}
 
 \item{expBeta}{if greater than zero, use exponential moving average on gradient.}
 

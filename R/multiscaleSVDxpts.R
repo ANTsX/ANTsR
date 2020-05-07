@@ -2887,6 +2887,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' @param scale options to standardize each matrix. e.g. divide by the square root
 #' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
 #' by the number of variables or center or center and scale or ... (see code).
+#' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
@@ -2964,7 +2965,7 @@ symlr <- function(
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed","greedy","lineSearch") ,
-  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute', 'eigenvalue'),
+  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue'),
   expBeta = 0,
   verbose = FALSE ) {
 
@@ -2972,7 +2973,16 @@ symlr <- function(
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
   optimizationStyle = match.arg(optimizationStyle)
-  scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute', 'eigenvalue') )
+  scaleList = c()
+  if ( length( scale ) == 1 )
+    scaleList[1] <- match.arg( scale[1], choices = c( 'sqrtnp', 'np', 'centerAndScale',
+    'norm', 'none', 'impute', 'eigenvalue', 'center') )
+  if ( length( scale ) > 1 ) {
+    for ( kk in 1:length(scale) )
+      scaleList[kk] <- match.arg( scale[kk],
+        choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none',
+        'impute', 'eigenvalue', 'center') )
+    }
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
@@ -3007,7 +3017,7 @@ symlr <- function(
     sparsenessQuantiles = rep( 0.5, nModalities )
 
   # 1.0 adjust matrix norms
-  if ( scale != "none" ) {
+  if ( ! ( any( scaleList  == "none" ) ) ) {
     for ( i in 1:nModalities ) {
       if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
         stop( paste( "input matrix", i, "is null or NA." ) )
@@ -3016,17 +3026,20 @@ symlr <- function(
       if ( any( is.na( voxmats[[ i ]] ) ) ) {
         voxmats[[ i ]][ is.na(voxmats[[ i ]]) ] = mean( voxmats[[ i ]], na.rm=T)
         }
-      if ( scale == 'norm' ) voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
-      if ( scale %in% c( "np", "sqrtnp", "centerAndScale" ) ) {
-        sccen = c( FALSE, FALSE )
-        np = prod( dim( voxmats[[i]]) )
-        if ( scale == "sqrtnp" ) np = sqrt( np )
-        if ( scale == "eigenvalue" ) np = sum( svd( voxmats[[ i ]] )$d[1:basisK] )
-        if ( scale == "centerAndScale" ) {
-          np = 1
-          sccen=c( TRUE, TRUE )
-        }
-        voxmats[[ i ]] = ( scale( voxmats[[ i ]], sccen[1], sccen[2] ) ) / np
+      for ( j in 1:length( scaleList ) ) {
+        if ( scaleList[j] == 'norm' )
+          voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
+        if ( scaleList[j] == 'np' )
+          voxmats[[ i ]] = voxmats[[ i ]] / prod( dim( voxmats[[i]]) )
+        if ( scaleList[j] == 'sqrtnp' )
+          voxmats[[ i ]] = voxmats[[ i ]] / sqrt( prod( dim( voxmats[[i]]) ) )
+        if ( scaleList[j] == 'center' )
+          voxmats[[ i ]] = base::scale( voxmats[[ i ]], center = TRUE, scale = FALSE )
+        if ( scaleList[j] == 'centerAndScale' )
+          voxmats[[ i ]] = base::scale( voxmats[[ i ]], center = TRUE, scale = TRUE )
+        if ( scaleList[j] == "eigenvalue" ) {
+          voxmats[[ i ]] = voxmats[[ i ]] / sum( svd( voxmats[[ i ]] )$d )
+          }
         }
       }
     }
@@ -3398,14 +3411,18 @@ symlr <- function(
         whichModality = jj, verbose = FALSE )
       energyPath[myit,jj] = loki
     } # matrix loop
-
-    bestEv = min( rowMeans( energyPath[1:(myit+1),], na.rm = TRUE  ) )
-    bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit+1),]), na.rm = TRUE  ) )
-    if ( optimizationStyle == 'greedy' ) {
-#      bestEv = ( mean( energyPath[(myit+1),], na.rm = TRUE  ) )
-      bestRow = myit + 1
+    if ( myit == 1 ) {
+      bestEv = mean( energyPath[1,], na.rm = TRUE  )
+      bestRow = 1
+    } else {
+      bestEv = min( rowMeans( energyPath[1:(myit),], na.rm = TRUE  ) )
+      bestRow = which.min( rowMeans( na.omit(energyPath[1:(myit),]), na.rm = TRUE  ) )
     }
-    totalEnergy[ myit + 1 ] = bestEv
+    if ( optimizationStyle == 'greedy' ) {
+#      bestEv = ( mean( energyPath[(myit),], na.rm = TRUE  ) )
+      bestRow = myit
+    }
+    totalEnergy[ myit ] = bestEv
     if ( mean( energyPath[myit,], na.rm = TRUE   ) <= bestEv |
          optimizationStyle == 'greedy' )
       {
