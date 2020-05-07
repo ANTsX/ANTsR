@@ -3021,7 +3021,6 @@ symlr <- function(
     for ( i in 1:nModalities ) {
       if ( any( is.null( voxmats[[ i ]] ) ) | any( is.na( voxmats[[ i ]] ) ) )
         stop( paste( "input matrix", i, "is null or NA." ) )
-      p[ i ] = ncol( voxmats[[ i ]] )
       matnames =  names( voxmats )[ i ]
       if ( any( is.na( voxmats[[ i ]] ) ) ) {
         voxmats[[ i ]][ is.na(voxmats[[ i ]]) ] = mean( voxmats[[ i ]], na.rm=T)
@@ -3042,6 +3041,9 @@ symlr <- function(
           }
         }
       }
+    } else {
+      for ( i in 1:nModalities )
+        p[ i ] = ncol( voxmats[[ i ]] )
     }
 
   # 3.0 setup regularization
