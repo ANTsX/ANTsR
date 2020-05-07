@@ -15,14 +15,14 @@ symlr(
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-1, 1),
-  lineSearchTolerance = 0.00000001,
+  lineSearchTolerance = 1e-08,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
-  energyType = c("regression", "normalized", "cca", "ucca"),
+  energyType = c("regression", "normalized", "cca", "ucca", "lowRank"),
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed", "greedy", "lineSearch"),
-  scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute"),
+  scale = c("sqrtnp", "np", "centerAndScale", "norm", "none", "impute", "eigenvalue"),
   expBeta = 0,
   verbose = FALSE
 )

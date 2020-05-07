@@ -23,7 +23,7 @@ initializeSyMLR(
 \item{zeroUpper}{boolean determining whether upper triangular part of
 initialization is zeroed out}
 
-\item{uAlgorithm}{either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}}
+\item{uAlgorithm}{either \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}}
 
 \item{addNoise}{scalar value that adds zero mean unit variance noise, multiplied
 by the value of \code{addNoise}}

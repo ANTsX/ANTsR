@@ -10,7 +10,7 @@ milr(
   myFormula,
   smoothingMatrix,
   iterations = 10,
-  gamma = 0.000001,
+  gamma = 1e-06,
   sparsenessQuantile,
   positivity = c("positive", "negative", "either"),
   repeatedMeasures = NA,

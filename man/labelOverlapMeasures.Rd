@@ -15,7 +15,20 @@ labelOverlapMeasures(sourceLabelImage, targetLabelImage)
 data frame with overlap measures
 }
 \description{
-Wrapper for the ANTs funtion LabelOverlapMeasures
+Wrapper for the ANTs funtion LabelOverlapMeasures.  More documentaiton
+available here:
+}
+\details{
+\url{https://www.insight-journal.org/browse/publication/707}
+}
+\examples{
+
+sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
+sourceSegmentation <- kmeansSegmentation( sourceImage, 3 )$segmentation
+referenceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
+referenceSegmentation <- kmeansSegmentation( referenceImage, 3 )$segmentation
+overlap <- labelOverlapMeasures( sourceSegmentation, referenceSegmentation )
+
 }
 \author{
 Avants BB, Tustison NJ

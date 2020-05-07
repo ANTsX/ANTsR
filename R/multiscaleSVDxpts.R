@@ -2785,7 +2785,7 @@ symlr2 <- function(
 #' @param jointReduction boolean determining whether one or length of list bases are
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
-#' @param uAlgorithm either \code{"random"} \code{"pca"} (default), \code{"ica"} or \code{"cca"}
+#' @param uAlgorithm either \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}
 #' @param addNoise scalar value that adds zero mean unit variance noise, multiplied
 #' by the value of \code{addNoise}
 #'
@@ -2827,6 +2827,7 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     return( u )
     }
   uOut = list()
+  uRand = replicate(k, rnorm(nrow(voxmats[[1]])))
   for ( s in 1:nModalities) {
     if ( uAlgorithm == 'pca ') {
       uOut[[s]] = t( stats::prcomp( t(voxmats[[s]]), rank. = k )$rotation )
@@ -2835,6 +2836,9 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
     } else if ( uAlgorithm == 'cca' ) {
       uOut[[s]] = sparseDecom2( list(voxmats[[1]], voxmats[[s]]),
         sparseness = c(0.5,0.5), nvecs = k, its = 3, ell1=0.1  )$projections2
+    } else if ( uAlgorithm == 'randomProjection' ) {
+      uOut[[s]] = t( ( t(uRand) %*% voxmats[[s]] ) %*%  t( voxmats[[s]] ) )
+      uOut[[s]] = uOut[[s]] / norm( uOut[[s]], "F" )
     } else {
       uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
     }
@@ -2956,11 +2960,11 @@ symlr <- function(
   lineSearchTolerance = 1e-8,
   randomSeed,
   constraint = c("none","Grassmann","Stiefel"),
-  energyType = c('regression', 'normalized', 'cca', 'ucca'),
+  energyType = c('regression', 'normalized', 'cca', 'ucca', 'lowRank'),
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed","greedy","lineSearch") ,
-  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute'),
+  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute', 'eigenvalue'),
   expBeta = 0,
   verbose = FALSE ) {
 
@@ -2968,7 +2972,7 @@ symlr <- function(
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
   optimizationStyle = match.arg(optimizationStyle)
-  scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute') )
+  scale <- match.arg( scale, choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none', 'impute', 'eigenvalue') )
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   normalized = FALSE
@@ -3014,10 +3018,15 @@ symlr <- function(
         }
       if ( scale == 'norm' ) voxmats[[ i ]] = voxmats[[ i ]] / norm( voxmats[[ i ]], type = "F" )
       if ( scale %in% c( "np", "sqrtnp", "centerAndScale" ) ) {
+        sccen = c( FALSE, FALSE )
         np = prod( dim( voxmats[[i]]) )
         if ( scale == "sqrtnp" ) np = sqrt( np )
-        if ( scale == "centerAndScale" ) np = 1
-        voxmats[[ i ]] = ( scale( voxmats[[ i ]], TRUE, TRUE ) ) / np
+        if ( scale == "eigenvalue" ) np = sum( svd( voxmats[[ i ]] )$d[1:basisK] )
+        if ( scale == "centerAndScale" ) {
+          np = 1
+          sccen=c( TRUE, TRUE )
+        }
+        voxmats[[ i ]] = ( scale( voxmats[[ i ]], sccen[1], sccen[2] ) ) / np
         }
       }
     }
