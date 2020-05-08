@@ -2979,8 +2979,8 @@ predictSimlr <- function( x, simsol ) {
 #' p3 = mat3 %*% (result$v[[3]])
 #' regs = regularizeSimlr( matlist )
 #' result2 = simlr( matlist )
-#' p1 = predictSimlr( matlist, result )
-#' p2 = predictSimlr( matlist, result2 )
+#' pred1 = predictSimlr( matlist, result )
+#' pred2 = predictSimlr( matlist, result2 )
 #'
 #' # compare to permuted data
 #' s1 = sample( 1:nsub)
@@ -3036,6 +3036,7 @@ simlr <- function(
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
   if (  missing( energyType ) ) energyType = "regression"
+  if (  missing( mixAlg ) ) mixAlg = "ica"
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)

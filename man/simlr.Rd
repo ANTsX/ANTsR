@@ -116,8 +116,8 @@ p2 = mat2 \%*\% (result$v[[2]])
 p3 = mat3 \%*\% (result$v[[3]])
 regs = regularizeSimlr( matlist )
 result2 = simlr( matlist )
-p1 = predictSimlr( matlist, result )
-p2 = predictSimlr( matlist, result2 )
+pred1 = predictSimlr( matlist, result )
+pred2 = predictSimlr( matlist, result2 )
 
 # compare to permuted data
 s1 = sample( 1:nsub)
