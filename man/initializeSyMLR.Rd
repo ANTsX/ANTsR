@@ -9,7 +9,7 @@ initializeSyMLR(
   k,
   jointReduction = TRUE,
   zeroUpper = FALSE,
-  uAlgorithm = "pca",
+  uAlgorithm = "ica",
   addNoise = 0
 )
 }

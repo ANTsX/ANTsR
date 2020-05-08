@@ -2805,7 +2805,7 @@ symlr2 <- function(
 #'
 #' @export
 initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
-  zeroUpper = FALSE, uAlgorithm = 'pca', addNoise = 0 ) {
+  zeroUpper = FALSE, uAlgorithm = 'ica', addNoise = 0 ) {
   nModalities = length( voxmats )
   if ( uAlgorithm == 'randomProjection' & jointReduction )
     jointReduction = FALSE
@@ -2970,7 +2970,8 @@ symlr <- function(
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0,
   verbose = FALSE ) {
-
+  if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
+  if (  missing( energyType ) ) energyType = "regression"
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
