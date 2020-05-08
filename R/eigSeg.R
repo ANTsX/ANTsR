@@ -36,9 +36,9 @@ eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE
   maskvox <- (mask > 0)
   maskseg <- antsImageClone(mask)
   maskseg[maskvox] <- 0
-  if ( class(imgList) == "matrix")
+  if ( class(imgList)[1] == "matrix")
     mydata <- imgList
-  if ( class(imgList) != "matrix")
+  if ( class(imgList)[1] != "matrix")
     if ( length(imgList) > 0 )
       if ( typeof(imgList) == "list")
         mydata <- imageListToMatrix(imgList, mask)
