@@ -23,7 +23,7 @@ symlr(
   connectors = NULL,
   optimizationStyle = c("mixed", "greedy", "lineSearch"),
   scale = c("sqrtnp", "np", "centerAndScale", "center", "norm", "none", "impute",
-    "eigenvalue"),
+    "eigenvalue", "robust"),
   expBeta = 0,
   verbose = FALSE
 )

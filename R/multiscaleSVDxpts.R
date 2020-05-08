@@ -2807,6 +2807,8 @@ symlr2 <- function(
 initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   zeroUpper = FALSE, uAlgorithm = 'pca', addNoise = 0 ) {
   nModalities = length( voxmats )
+  if ( uAlgorithm == 'randomProjection' & jointReduction )
+    jointReduction = FALSE
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
     if ( uAlgorithm == 'pca' ) {
@@ -2965,7 +2967,7 @@ symlr <- function(
   vmats,
   connectors = NULL,
   optimizationStyle = c("mixed","greedy","lineSearch") ,
-  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue'),
+  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0,
   verbose = FALSE ) {
 
@@ -2976,12 +2978,12 @@ symlr <- function(
   scaleList = c()
   if ( length( scale ) == 1 )
     scaleList[1] <- match.arg( scale[1], choices = c( 'sqrtnp', 'np', 'centerAndScale',
-    'norm', 'none', 'impute', 'eigenvalue', 'center') )
+    'norm', 'none', 'impute', 'eigenvalue', 'center', 'robust') )
   if ( length( scale ) > 1 ) {
     for ( kk in 1:length(scale) )
       scaleList[kk] <- match.arg( scale[kk],
         choices = c( 'sqrtnp', 'np', 'centerAndScale', 'norm', 'none',
-        'impute', 'eigenvalue', 'center') )
+        'impute', 'eigenvalue', 'center', 'robust') )
     }
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
@@ -3036,9 +3038,10 @@ symlr <- function(
           voxmats[[ i ]] = base::scale( voxmats[[ i ]], center = TRUE, scale = FALSE )
         if ( scaleList[j] == 'centerAndScale' )
           voxmats[[ i ]] = base::scale( voxmats[[ i ]], center = TRUE, scale = TRUE )
-        if ( scaleList[j] == "eigenvalue" ) {
+        if ( scaleList[j] == "eigenvalue" )
           voxmats[[ i ]] = voxmats[[ i ]] / sum( svd( voxmats[[ i ]] )$d )
-          }
+        if ( scaleList[j] == "robust" )
+          voxmats[[ i ]] = robustMatrixTransform( voxmats[[ i ]] )
         }
       }
     } else {
