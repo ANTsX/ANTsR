@@ -69,7 +69,6 @@ Suggests:
     Rcpp,
     RcppEigen,
     RcppHNSW,
-    RSpectra,
     rgl,
     rmarkdown,
     robust,
@@ -82,9 +81,7 @@ Suggests:
     visreg,
     wmtsa,
     xgboost,
-    FNN,
-    nabor,
-    RANN
+    FNN
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang

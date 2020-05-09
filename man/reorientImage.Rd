@@ -27,8 +27,7 @@ align along a specific axis
 }
 \examples{
 
-fi<-antsImageRead( getANTsRData("r16"))
-reofi<-reorientImage(fi,c(1,0))
+reofi<-reorientImage( ri(1),c(1,0))
 
 }
 \author{

@@ -77,8 +77,8 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     bknn = FNN::get.knn( t( x ), k=k, algorithm = "kd_tree"  )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
-  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
-  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
+#  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
+#  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
 
   # if ( mypkg[1] == "rflann" )  {
   #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
@@ -172,7 +172,6 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-# #' @param mypkg set either nabor, RANN, rflann
 #' @param kPackage name of package to use for knn
 #' @param ncores number of cores to use
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
@@ -228,8 +227,8 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     bknn = FNN::get.knnx( t( x ), t( y ), k=k, algorithm = knnalgs[1] )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
-  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
-  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
+#  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( y ), t( x ) , k=k, eps=eps )
+#  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( y ), t( x ) , k=k, eps=eps )
   # if ( mypkg[1] == "rflann" )  {
   #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
   #   if ( !is.na( ncores  ) ) myncores = ncores

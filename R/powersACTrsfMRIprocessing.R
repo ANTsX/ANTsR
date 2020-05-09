@@ -118,13 +118,13 @@ fMRINormalization <- function(
   # Find first steady state timepoint
   tr = antsGetSpacing(img)[4]
   steady = floor( steadyT / tr) + 1
-  
-  
+
+
   # Global signal before cropping (save for visualization)
   origmean = apply(img, c(1,2,3), mean)
   fullmean = rowMeans(timeseries2matrix(img, mask))
   allTimes = dim(img)[4]
-  
+
   # Eliminate non steady-state timepoints
   img = cropIndices(img, c(1,1,1,steady), dim(img) )
   runNuis = rep(1, dim(img)[4] )
@@ -152,7 +152,7 @@ fMRINormalization <- function(
       timevals = c( timevals, as.numeric( 1:sum( runNuis == runlev ) ) * tr )
     }
   }
-  
+
   ## ----moco,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3--------
   mocoTxType = "BOLDRigid"
   for ( i in 1:repeatMotionEst )
@@ -166,11 +166,11 @@ fMRINormalization <- function(
     moco = antsrMotionCalculation( img, fixed=meanbold, typeofTransform=mocoTxType )
   }
   meanbold = apply( moco$moco_img, c(1,2,3), mean)
-  
+
   # at this point, we might map meanbold to the structural image
   # and then motion correct all runs to that. this approach would be less
   # biased.  however, let us hold that thought for later. FIXME
-  
+
   # now add any additional runs and merge moco results
   if ( length( extraRuns ) > 0 )
   {
@@ -198,7 +198,7 @@ fMRINormalization <- function(
     }
     if ( verbose ) print( "fusion done" )
   }
-  
+
   #############################################################
   # now use polynomial regressors to match images across runs #
   #############################################################
@@ -225,11 +225,11 @@ fMRINormalization <- function(
   }
   if ( verbose ) print("polyNuis done")
   fusedImg = matrix2timeseries( moco$moco_img, mask, boldMat )
-  
+
   ## ----mocoimg,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3, echo=FALSE----
   if ( verbose )
     invisible( plot( moco$moco_avg_img, axis=3, slices=1:30, ncolumns=10 ) )
-  
+
   if ( is.null( structuralImage ) ) # here do a quick hack so we can process bold alone
   {
     structuralImage = antsImageClone( meanbold )
@@ -245,7 +245,7 @@ fMRINormalization <- function(
     structuralSeg = check_ants(structuralSeg)
     t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
   }
-  
+
   if ( ! exists("boldmap") )
   {
     if ( verbose ) print("boldmap to structure (no boldmap passed in)")
@@ -259,9 +259,9 @@ fMRINormalization <- function(
                                 typeofTransform='SyNBoldAff', verbose=FALSE )
     if ( verbose ) print("boldmap to structure done")
   }
-  
+
   havetemplateMap = TRUE
-  if ( is.null( templateMap ) ) 
+  if ( is.null( templateMap ) )
   {
     havetemplateMap = FALSE
     templateMap = list( fwdtransforms=NA, invtransforms=NA )
@@ -270,7 +270,7 @@ fMRINormalization <- function(
     #  templateMap = antsRegistration( t1brain, mni, typeofTransform='SyN',
     #    verbose = FALSE )
   }
-  
+
   mni2boldmaps = c( boldmap$fwdtransforms, templateMap$fwdtransforms )
   mni2boldmapsInv = c(  templateMap$invtransforms , boldmap$invtransforms )
   seg2bold = antsApplyTransforms( meanbold, structuralSeg, boldmap$fwdtransforms,
@@ -280,7 +280,7 @@ fMRINormalization <- function(
     plot( meanbold , boldmap$warpedmovout %>% iMath("Canny", 10, 1, 1) )
     plot( meanbold , maskImage( seg2bold, seg2bold, 2 ) )
   }
-  
+
   ## ----mocomatrix,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
   nVox = length(which(as.array(mask)==1))
   vox = sample(1:nVox, 1000)
@@ -293,7 +293,7 @@ fMRINormalization <- function(
   #########################################
   reg_params <- as.matrix( moco$moco_params )
   dvars <- computeDVARS( timeseries2matrix( fusedImg, mask ) )
-  
+
   ## ----badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
   goodtimes = (1:nrow( moco$moco_img ))
   badtimes = which(moco$fd$MeanDisplacement > fdthresh )
@@ -303,7 +303,7 @@ fMRINormalization <- function(
     goodtimes = goodtimes[-badtimes]
     haveBadTimes = TRUE
   } else badtimes = NA
-  
+
   boldMat = timeseries2matrix( fusedImg, mask )
   nTimes = nrow( boldMat )
   if ( haveBadTimes )
@@ -322,7 +322,7 @@ fMRINormalization <- function(
     haveBadTimes = FALSE
     goodtimes = ( 1:nTimes )
   }
-  
+
   ## ----nuisance,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
   # white matter is labeled as 3
   wmMask = seg2bold*1*mask
@@ -331,13 +331,13 @@ fMRINormalization <- function(
   wmMask = iMath( wmMask, "ME", 1)
   wmVox = which(subset(wmMask, mask > 0 )==1)
   wmMean = rowMeans(boldMat[,wmVox])
-  
+
   # CSF is labeled as 1
   csfMask = seg2bold*1
   csfMask[ csfMask != 1] = 0
   csfVox = which(subset(csfMask, mask > 0)==1)
   csfMean= rowMeans(boldMat[,csfVox])
-  
+
   globalMean = rowMeans(boldMat)
   tissueNuis = cbind( globalMean, wmMean, csfMean )
   if ( haveBadTimes ) {
@@ -348,14 +348,14 @@ fMRINormalization <- function(
     }
   }
   tissueDeriv = rbind( rep(0,dim(tissueNuis)[2]), diff(tissueNuis,1) )
-  
+
   # Save mean cortex signal for later plotting
   ctxMask = seg2bold*1
   ctxMask[ ctxMask != 2] = 0
   ctxMask[ ctxMask == 2 ] = 1
   ctxVox = which(subset(ctxMask, mask > 0)==1)
   ctxMean = rowMeans(boldMat[,ctxVox])
-  
+
   ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
   mocoNuis              = reg_params
   mocoNuis2             = reg_params * reg_params
@@ -379,7 +379,7 @@ fMRINormalization <- function(
     rm( tempMat  )
     rm( tempMask )
   }
-  
+
   ## ----smooth,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5------
   if ( any( is.na( smoothingSigmas ) ) )
   {
@@ -421,11 +421,11 @@ fMRINormalization <- function(
     dmnref = ( boldMat %*% t(dmnpr) )
     connMatNodes = cor( dmnref )
   }
-  
+
   connMatNodesPartialCorr = NA
   if ( usePkg( "corpcor" ) & ! any( is.na( connMatNodes ) ) )
     connMatNodesPartialCorr = corpcor::cor2pcor( connMatNodes ) # partial correlation
-  
+
   # get priors for different networks
   networkPriors2Bold=NA
   betasI = NA
@@ -451,14 +451,14 @@ fMRINormalization <- function(
               window.overlay = c( loth, max(betas) ) )
     }
   }
-  
+
   concatenatedMaps = NA
   if ( havetemplateMap )
     concatenatedMaps =
     list( toBold =  mni2boldmaps, toBoldInversion=rep(FALSE,4),
           toTemplate =  mni2boldmapsInv,
           toTemplateInversion = c( TRUE, FALSE, TRUE, FALSE ) )
-  
+
   boldToTemplate = NA
   dmnAtBOLDres = NA
   seg2template = NA
@@ -479,14 +479,14 @@ fMRINormalization <- function(
                                         templateMap$invtransforms,
                                         interpolator = "NearestNeighbor" )
   }
-  
+
   ######################################################
   ## FIXME - this only works if maps are to MNI space ##
   ######################################################
   ## ----networklabels,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
   pts = NA
   powersLabels = NA
-  
+
   if ( havetemplateMap ) {
     data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
     pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
@@ -497,7 +497,7 @@ fMRINormalization <- function(
       plot( meanbold, powersLabels, axis=3, nslices=30, ncolumns=10,
             window.overlay = c( 1, max(powersLabels) ) )
   }
-  
+
   return(
     list(
       fusedImg      = fusedImg,
@@ -524,16 +524,16 @@ fMRINormalization <- function(
       connMatNodesPartialCorr = connMatNodesPartialCorr
     )
   )
-  
+
   ## ----roimeans,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
   labelMask = powersLabels*1
   labelMask[labelMask > 0] = 1
   labelMask[mask == 0] = 0
   labelVox = which(subset(labelMask, mask > 0)==1)
-  
+
   labeledBoldMat = boldMat[goodtimes,labelVox]
   labels = powersLabels[labelMask > 0]
-  
+
   nLabels = max(labels)
   roiMat = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nLabels)
   for ( i in c(1:nLabels) ) {
@@ -542,15 +542,15 @@ fMRINormalization <- function(
     }
   }
   nActualTimes = dim(roiMat)[1]
-  
-  
+
+
   ## ----sysmean,message=FALSE,warnings=FALSE, fig.width=7, fig.height=10, echo=TRUE----
   systemNames = levels(pts$SystemName)
   nSystems = length(systemNames)
   sysMatMean = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
   sysMatSD = matrix(0, nrow=dim(labeledBoldMat)[1], ncol=nSystems)
   systems = pts$SystemName[labels]
-  
+
   for ( i in 1:nSystems ) {
     sys = systemNames[i]
     sysIdx = which(systems==sys)
@@ -560,38 +560,38 @@ fMRINormalization <- function(
       sysMatSD[,i] = apply(labeledBoldMat[,sysIdx], 1, sd)
     }
   }
-  
-  
+
+
   ## ----corr,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5--------
   missingROIs = which(colMeans(roiMat)==0)
   goodROIs = (1:nLabels)
   if ( length(missingROIs) > 0 ) {
     goodROIs = goodROIs[-missingROIs]
   }
-  
+
   connMat = suppressWarnings(cor(roiMat))
   diag(connMat) = rep(0, length(diag(connMat)) )
   if ( length(missingROIs) > 0 ) {
     connMat[missingROIs,] = 0
     connMat[,missingROIs] = 0
   }
-  
+
   ## ----adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5----
   density = 0.1
   nEdges = length( upper.tri( connMat ) ) * density
   thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
   adj = 1 * ( connMat >= thresh )
-  
+
   bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
   components = igraph::clusters(bingraph)
   maxID = which(components$csize == max(components$csize))[1]
-  
+
   adj[components$membership!=maxID,] = 0
   adj[,components$membership!=maxID] = 0
   bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
-  
+
   if ( verbose ) invisible(plot(as.antsImage(adj)))
-  
+
   ## ----adjacencyplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
   if ( verbose )
   {
@@ -600,11 +600,11 @@ fMRINormalization <- function(
     igraph::V(graph)$name = pts$ROI
     igraph::V(graph)$comm = pts$SystemName
     igraph::V(graph)$degree = igraph::degree(graph)
-    
+
     systems = levels(pts$SystemName)
     systemNames = as.character(systems)
   }
-  
+
   # Retain only the largest connected component
   bingraph = igraph::graph.adjacency(adj, mode="undirected", weighted=NULL)
   components = igraph::clusters(bingraph)
@@ -612,19 +612,19 @@ fMRINormalization <- function(
   adj[components$membership!=maxID,] = 0
   adj[,components$membership!=maxID] = 0
   graph = igraph::graph.adjacency( adj, mode="undirected", weighted=NULL )
-  
+
   # Set node colors
   graph = igraph::set.vertex.attribute(graph, "r", index=igraph::V(graph), value=as.double(pts$r))
   graph = igraph::set.vertex.attribute(graph, "g", index=igraph::V(graph), value=as.double(pts$g))
   graph = igraph::set.vertex.attribute(graph, "b", index=igraph::V(graph), value=as.double(pts$b))
-  
+
   # Set edge colors
   edges = igraph::get.edges( graph, igraph::E(graph) )
   nEdges = dim(edges)[1]
   er = rep(200, nEdges)
   eg = rep(200, nEdges)
   eb = rep(200, nEdges)
-  
+
   # colors for intra-system connections
   #  gray for inter-system connections
   for ( e in c(1:nEdges) )
@@ -636,11 +636,11 @@ fMRINormalization <- function(
       eb[e] = pts$b[edges[e,1]]
     }
   }
-  
+
   graph = igraph::set.edge.attribute(graph, "r", index=igraph::E(graph), value=as.double(er))
   graph = igraph::set.edge.attribute(graph, "g", index=igraph::E(graph), value=as.double(eg))
   graph = igraph::set.edge.attribute(graph, "b", index=igraph::E(graph), value=as.double(eb))
-  
+
   # uncomment line below to write out graph
   # write.graph(graph, "network.graphml", format="graphml", prefixAttr=FALSE)
   graph = igraph::graph.adjacency( adj, mode="undirected", weighted=NULL )
@@ -671,7 +671,7 @@ fMRINormalization <- function(
   )
   leff[ deg < 2 ] = NA
   leff[ which( is.na( deg ) == TRUE ) ] = NA
-  
+
   ## ----cnodeplot,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5, echo=FALSE----
   nNodes = length(deg)
   cnode.dat = data.frame(Node=rep(1:nNodes,5))
@@ -682,11 +682,11 @@ fMRINormalization <- function(
     rep("Local Efficiency", nNodes),
     rep("Clustering Coefficient", nNodes),
     rep("Page-Rank", nNodes) )
-  
+
   geff<-1/(igraph::shortest.paths(graph))
   geff[!is.finite(geff)]<-NA
   geff<-mean(geff,na.rm=TRUE)
   cc = igraph::transitivity(graph)
-  
-  
+
+
 }
