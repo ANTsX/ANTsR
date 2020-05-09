@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 CXX_STD=CXX11
 ITKRCMAKE=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkIncludes(); cat(a)'`
 ITKRLIB=`${R_HOME}/bin/Rscript -e 'a<-ITKR:::itkLibs(); cat(a)'`
