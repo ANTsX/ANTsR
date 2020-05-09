@@ -138,7 +138,7 @@ proper physical space representation necessary for mapping.  Below is an example
 mnifilename<-getANTsRData("r27")
 img<-antsImageRead(mnifilename, pixeltype="unsigned char")
 img
-retval<-antsImageWrite(img,mnifilename)
+# retval<-antsImageWrite(img,mnifilename)
 antsGetSpacing(img)
 antsGetDirection(img)
 antsGetOrigin(img)

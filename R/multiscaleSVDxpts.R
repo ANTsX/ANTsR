@@ -2066,7 +2066,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     initializationStrategy = scale( qr.Q( qr(
       replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) ) )
   }
-  if ( class(initializationStrategy) != "matrix" )
+  if ( class(initializationStrategy)[1] != "matrix" )
     stop("Please set valid initializationStrategy.")
   for ( k in 1:basisK ) {
     if ( k == 1 ) { # check matrix size
@@ -2203,7 +2203,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 }
 
 
-.symlr3 <- function( dataFrame,
+.simlr3 <- function( dataFrame,
                       voxmats,
                       basisK,
                       myFormulaK,
@@ -2373,7 +2373,7 @@ mild <- function( dataFrame,  voxmats, basisK,
       #    print( diag( locor ) )
     }
   }
-  return( list( symlrX = mildx, symlrY = mildy ) )
+  return( list( simlrX = mildx, simlrY = mildy ) )
 
 
   if ( FALSE ) {
@@ -2408,7 +2408,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
 
-.symlr2 <- function( dataFrame,
+.simlr2 <- function( dataFrame,
                       voxmats,
                       basisK,
                       myFormulaK,
@@ -2569,14 +2569,14 @@ mild <- function( dataFrame,  voxmats, basisK,
 
 
   }
-  return( list( symlrX = mildx, symlrY = mildy ) )
+  return( list( simlrX = mildx, simlrY = mildy ) )
 }
 
 
 
 
 
-#' Similarity-driven multiview linear reconstruction model (symlr) for two modalities
+#' Similarity-driven multiview linear reconstruction model (simlr) for two modalities
 #'
 #' This function simplifies calculating image-wide multivariate beta maps from
 #' that is similar to CCA.
@@ -2614,11 +2614,11 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' mat2 = replicate( npix + 10, rnorm( nsub ) )
 #' mat3 = replicate( npix + 10, rnorm( nsub ) )
 #' nk = 3
-#' result = symlr2( list( vox = mat, vox2 = mat2, vox3 = mat3 ), basisK = 3 )
+#' result = simlr2( list( vox = mat, vox2 = mat2, vox3 = mat3 ), basisK = 3 )
 #'
 #' @seealso \code{\link{milr}} \code{\link{mild}}
-#' @export symlr2
-symlr2 <- function(
+#' @export simlr2
+simlr2 <- function(
   voxmats,
   basisK,
   smoothingMatrixX,
@@ -2718,8 +2718,8 @@ symlr2 <- function(
     #    umatX = scale( umatX + ( dedu1 ) * gamma, center=TRUE, scale=TRUE )
     #    umatY = scale(umatY + ( dedu2 ) * gamma, center=TRUE, scale=TRUE )
     #    umatY =  scale( ( umatX %*% t(umatX ) ) %*% umatY, center=TRUE, scale=TRUE )
-    orthogonalizesymlr = F
-    if ( orthogonalizesymlr ) {
+    orthogonalizesimlr = F
+    if ( orthogonalizesimlr ) {
       umatX =  qr.Q(  qr( umatX ) )
       umatY =  ( umatX %*% t(umatX ) ) %*% qr.Q(  qr( umatY ) )
     }
@@ -2772,9 +2772,9 @@ symlr2 <- function(
 
 
 
-#' Initialize SyMLR
+#' Initialize simlr
 #'
-#' Four initialization approaches for SyMLR.  Returns either a single matrix
+#' Four initialization approaches for simlr.  Returns either a single matrix
 #' derived from dimensionality reduction on all matrices
 #' (\code{jointReduction=TRUE}) or a list of reduced
 #' dimensionality matrices, one for each input.  Either PCA or ICA can be used
@@ -2797,14 +2797,14 @@ symlr2 <- function(
 #' nsub = 3
 #' npix = c(10,6,13)
 #' nk = 2
-#' outcome = initializeSyMLR(
+#' outcome = initializeSimlr(
 #'   list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
 #'         matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
 #'         matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ),
 #'   k = 2, uAlgorithm = 'pca' )
 #'
 #' @export
-initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
+initializeSimlr <- function( voxmats, k, jointReduction = TRUE,
   zeroUpper = FALSE, uAlgorithm = 'ica', addNoise = 0 ) {
   nModalities = length( voxmats )
   if ( uAlgorithm == 'randomProjection' & jointReduction )
@@ -2850,11 +2850,72 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
   return( uOut )
   }
 
-
-#' Similarity-driven multiview linear reconstruction model (symlr) for N modalities
+#' Automatically produce regularization matrices for simlr
 #'
-#' symlr minimizes reconstruction error across related modalities.  That is,
-#' symlr will reconstruct each modality matrix from a basis set derived from
+#' @param x A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' @param knn A vector of knn values (integers, same length as matrices)
+#' @param fraction optional single scalar value to determine knn
+#' @param sigma optional sigma vector for regularization (same length as matrices)
+#' @return A list of regularization matrices.
+#' @author BB Avants.
+#' @examples
+#' # see simlr examples
+#' @export
+regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
+  if ( missing( knn ) ) {
+    knn = rep( NA, length( x ) )
+    for ( i in 1:length( x ) ) {
+      temp = round( fraction * ncol( x[[i]] ) )
+      if ( temp < 3 ) temp = 3
+      knn[i] = temp
+    }
+  }
+  if ( missing( sigma  ) ) sigma = rep( 10, length( x ) )
+  slist = list()
+  for ( i in 1:length( x ) ) {
+    slist[[ i ]] = knnSmoothingMatrix( scale(data.matrix(x[[i]]),T,T), k = knn[i],
+      sigma = sigma[i]   )
+  }
+  return( slist )
+}
+
+
+#' predict output matrices from simlr solution
+#'
+#' @param x A list that contains the named matrices.
+#' @param simsol the simlr solution
+#' @return A list of variance explained, predicted matrices and error metrics
+#' @author BB Avants.
+#' @examples
+#' # see simlr examples
+#' @export
+predictSimlr <- function( x, simsol ) {
+  varx = rep( 0, length( x ) )
+  initialErrors = rep( 0, length( x ) )
+  finalErrors = rep( 0, length( x ) )
+  predictions = list()
+  for ( i in 1:length( x ) ) {
+    mdl = lm( x[[i]] ~ simsol$u[[i]] )
+    predictions[[i]] = predict( mdl )
+    smdl = summary( mdl )
+    for ( j in 1:length( smdl ) )
+      varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[i]])
+    finalErrors[i] = norm( predictions[[i]] - x[[i]], "F")
+    initialErrors[i] = norm(  x[[i]], "F")
+  }
+  list(
+    varx = varx,
+    predictions = predictions,
+    initialErrors = initialErrors,
+    finalErrors = finalErrors  )
+}
+
+
+
+#' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
+#'
+#' simlr minimizes reconstruction error across related modalities.  That is,
+#' simlr will reconstruct each modality matrix from a basis set derived from
 #' the other modalities.  The basis set can be derived from SVD, ICA or a
 #' simple sum of basis representations.
 #' This function produces dataset-wide multivariate beta maps for each of the
@@ -2911,17 +2972,20 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' mat1 = (outcome %*% t(outcome1) %*% (outcome1)) %*% view1tx
 #' mat2 = (outcome %*% t(outcome2) %*% (outcome2)) %*% view2tx
 #' mat3 = (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
-#' result = symlr(list( vox = mat1, vox2 = mat2, vox3 = mat3 ),
-#'    initialUMatrix = nk , verbose=TRUE, iterations=5  )
+#' matlist = list( vox = mat1, vox2 = mat2, vox3 = mat3 )
+#' result = simlr( matlist )
 #' p1 = mat1 %*% (result$v[[1]])
 #' p2 = mat2 %*% (result$v[[2]])
 #' p3 = mat3 %*% (result$v[[3]])
+#' regs = regularizeSimlr( matlist )
+#' result2 = simlr( matlist )
+#' pred1 = predictSimlr( matlist, result )
+#' pred2 = predictSimlr( matlist, result2 )
 #'
 #' # compare to permuted data
 #' s1 = sample( 1:nsub)
 #' s2 = sample( 1:nsub)
-#' resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
-#'    initialUMatrix = nk , verbose=TRUE, iterations=5  )
+#' resultp = simlr( list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ) )
 #' p1p = mat1 %*% (resultp$v[[1]])
 #' p2p = mat2[s1,] %*% (resultp$v[[2]])
 #' p3p = mat3[s2,] %*% (resultp$v[[3]])
@@ -2944,12 +3008,12 @@ initializeSyMLR <- function( voxmats, k, jointReduction = TRUE,
 #' # svd
 #' print( range(cor( svd1,svd2) ))
 #'
-#' resultp = symlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
+#' resultp = simlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
 #'    initialUMatrix = nk , verbose=TRUE, iterations=5,
 #'    energyType = "normalized" )
-#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{symlr2}}  \code{\link{symlrU}}
-#' @export symlr
-symlr <- function(
+#' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{simlr2}}  \code{\link{simlrU}}
+#' @export simlr
+simlr <- function(
   voxmats,
   smoothingMatrices,
   iterations = 10,
@@ -2972,6 +3036,10 @@ symlr <- function(
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
   if (  missing( energyType ) ) energyType = "regression"
+<<<<<<< HEAD
+=======
+  if (  missing( mixAlg ) ) mixAlg = "ica"
+>>>>>>> 07eb64a299eb82b3ef359863efe9a49fb7044b64
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
@@ -3015,6 +3083,8 @@ symlr <- function(
   if ( length( positivities ) ==  1 )
     positivities = rep( positivities[1], nModalities )
   matnames = p = rep( NA, nModalities )
+  for ( i in 1:nModalities )
+    p[ i ] = ncol( voxmats[[ i ]] )
   n = nrow( voxmats[[1]] )
   if ( missing( sparsenessQuantiles ) )
     sparsenessQuantiles = rep( 0.5, nModalities )
@@ -3045,16 +3115,13 @@ symlr <- function(
           voxmats[[ i ]] = robustMatrixTransform( voxmats[[ i ]] )
         }
       }
-    } else {
-      for ( i in 1:nModalities )
-        p[ i ] = ncol( voxmats[[ i ]] )
     }
 
   # 3.0 setup regularization
   if ( missing( smoothingMatrices ) ) {
     smoothingMatrices = list( )
     for ( i in 1:nModalities )
-      smoothingMatrices[[ i ]] = diag( p[ i ] )
+      smoothingMatrices[[ i ]] = diag( ncol( voxmats[[ i ]] ) )
   }
   for ( i in 1:length( smoothingMatrices ) ) {
     if ( any( is.null( smoothingMatrices[[ i ]] ) ) | any( is.na( smoothingMatrices[[ i ]] ) ) )
@@ -3094,7 +3161,7 @@ symlr <- function(
   if ( missing( initialUMatrix ) )
     initialUMatrix = nModalities
 
-  if ( class(initialUMatrix) == 'matrix' ) {
+  if ( class(initialUMatrix)[1] == 'matrix' ) {
     randmat = initialUMatrix
     initialUMatrix = list( )
     for ( i in 1:nModalities )
@@ -3401,7 +3468,7 @@ symlr <- function(
       for ( jj in 1:nModalities ) {
         initialUMatrix[[jj]] = scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn )
         }
-      temp = symlrU( initialUMatrix, mixAlg, myw, orthogonalize = FALSE,
+      temp = simlrU( initialUMatrix, mixAlg, myw, orthogonalize = FALSE,
         connectors = connectors )
       for ( jj in 1:nModalities ) {
         initialUMatrix[[jj]] =
@@ -3464,14 +3531,14 @@ symlr <- function(
 
 
 
-#' Compute the low-dimensional u matrix for symlr
+#' Compute the low-dimensional u matrix for simlr
 #'
-#' symlr minimizes reconstruction error across related modalities.  One crucial
+#' simlr minimizes reconstruction error across related modalities.  One crucial
 #' component of the reconstruction is the low-dimensional cross-modality basis.
 #' This function computes that basis, given a mixing algorithm.
 #'
 #' @param projections A list that contains the low-dimensional projections.
-#' @param mixingAlgorithm the elected mixing algorithm.  see \code{symlr}.  can
+#' @param mixingAlgorithm the elected mixing algorithm.  see \code{simlr}.  can
 #' be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.
 #' @param initialW initialization matrix size \code{n} by \code{k} for fastICA.
 #' @param orthogonalize boolean
@@ -3488,11 +3555,11 @@ symlr <- function(
 #' outcome = matrix(rnorm( nsub * nk ),ncol=nk)
 #' outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
 #' outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
-#' u = symlrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
+#' u = simlrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
 #'
-#' @seealso \code{\link{symlr}}
+#' @seealso \code{\link{simlr}}
 #' @export
-symlrU <- function( projections, mixingAlgorithm, initialW,
+simlrU <- function( projections, mixingAlgorithm, initialW,
   orthogonalize = FALSE, connectors = NULL ) {
   # some gram schmidt code
   projectionsU = projections
