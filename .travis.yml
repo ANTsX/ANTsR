@@ -29,6 +29,10 @@ matrix:
 compiler: clang
 osx_image: xcode9.4
 
+addons:
+   apt:
+     packages:
+       - devscripts
 
 env:
   global:
