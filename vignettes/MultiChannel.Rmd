@@ -20,7 +20,7 @@ library(grid)
 
 if (requireNamespace("parallel", quietly = TRUE)) {
   library(parallel)
-}  
+}
 
 ```
 
@@ -71,13 +71,13 @@ plotColor <- function(imgList, scale=TRUE, vectors=NULL, points=NULL, paths=NULL
     g = g + scale_x_continuous( lim=c(x1,x2) )
     }
   else {
-    g = g + scale_x_reverse( lim=c(x2,x1) )  
+    g = g + scale_x_reverse( lim=c(x2,x1) )
    }
   if ( direction[2,2] > 0 ) {
     g = g + scale_y_continuous( lim=c(y1,y2) )
     }
   else {
-    g = g + scale_y_reverse( lim=c(y2,y1) )  
+    g = g + scale_y_reverse( lim=c(y2,y1) )
    }
 
   if ( !is.null(points) ) {
@@ -162,13 +162,13 @@ existing data will work, however it does not guarantee a faster execution time.
 iMeans = 0
 time1 = 0
 timeParallel = NA
-if (requireNamespace("pbapply", quietly = TRUE)) {
-  ptm = proc.time()
+# if (requireNamespace("pbapply", quietly = TRUE)) {
+#  ptm = proc.time()
   # iMeans = pbapply::pblapply( iList, function(x) mean(x))
   # iMeans = mclapply( iList, function(x) mean(x), mc.cores=min(detectCores(),2L) )
   # timeParallel = proc.time() - ptm
-  unlist(iMeans)
-}
+#  unlist(iMeans)
+# }
 
 ptm = proc.time()
 iMeans = lapply(iList, function(x) mean(x) )
@@ -394,7 +394,7 @@ for ( i in 1:dim(seedPts)[1] ) {
   track = trackFromSeed(list(evecx,evecy), fa, seedPts[i,])
   trackx = c(trackx,track$x)
   tracky = c(tracky,track$y)
-  trackid = c(trackid, rep(i, length(track$x)))  
+  trackid = c(trackid, rep(i, length(track$x)))
 }
 ldat = data.frame(x=trackx, y=tracky, id=factor(trackid))
 plotColor(subDecList, paths=ldat, points=seedPts, vectors=list(subVecList[[1]], subVecList[[2]]))
