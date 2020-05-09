@@ -2066,7 +2066,7 @@ mild <- function( dataFrame,  voxmats, basisK,
     initializationStrategy = scale( qr.Q( qr(
       replicate( basisK, rnorm( nrow( voxmats[[1]] ) ) ) ) ) )
   }
-  if ( class(initializationStrategy) != "matrix" )
+  if ( class(initializationStrategy)[1] != "matrix" )
     stop("Please set valid initializationStrategy.")
   for ( k in 1:basisK ) {
     if ( k == 1 ) { # check matrix size
