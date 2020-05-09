@@ -229,7 +229,7 @@ lowrankRowMatrix <- function(A, k = 2, faster=FALSE ) {
 }
 
 .eanatcolMaxs <- function(v) {
-  if (class(v) == "matrix") {
+  if (class(v)[1] == "matrix") {
     return(apply(v, FUN = max, MARGIN = 2))
   } else return(v)
 }
