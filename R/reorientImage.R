@@ -14,8 +14,7 @@
 #' @keywords geometry image
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData("r16"))
-#' reofi<-reorientImage(fi,c(1,0))
+#' reofi<-reorientImage( ri(1),c(1,0))
 #'
 #' @export reorientImage
 reorientImage <- function(img, axis1, axis2 = NA,
@@ -29,10 +28,15 @@ reorientImage <- function(img, axis1, axis2 = NA,
     print("input images must have float pixeltype")
     return(NA)
   }
-  if (is.na(axis2))
-    axis2 <- rep(0, img@dimension)
-  # img2<-antsImageClone(img)
-  axis1 <- axis1/sqrt(sum(axis1 * axis1)) * (-1)
+  ax1norm = sqrt(sum(axis1 * axis1))
+  if ( ax1norm == 0 ) ax1norm = 1
+  axis1 <- axis1/ax1norm * (-1)
+  if (is.na(axis2)) {
+    axis2 <- rnorm( img@dimension )
+    ax2norm = sqrt(sum(axis2 * axis2))
+    if ( ax2norm == 0 ) ax2norm = 1
+    axis2 <- axis2/ax2norm * (-1)
+    }
   axis2 <- axis2/sqrt(sum(axis2 * axis2)) * (-1)
   if (is.na(txfn))
     txfn = tempfile(fileext = ".mat")

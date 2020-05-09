@@ -85,6 +85,7 @@ before_install:
   - Rscript -e 'install.packages("ggplot2")'
   - Rscript -e 'install.packages("psych")'
   - Rscript -e 'install.packages("fastICA")'
+  - Rscript -e 'install.packages("FNN")'
   - Rscript -e 'install.packages("randomForest")'
   - gh_binary_install stnava/ITKR ANTsX/ANTsRCore
   # - gh_binary_install muschellij2/ITKR muschellij2/ANTsRCore
