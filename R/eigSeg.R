@@ -65,7 +65,7 @@ eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE
       maskseg[ maskseg == kk ] = timg[ maskseg == kk ]
       }
     }
-  if (applySegmentationToImages & class(imgList) != "matrix" ) {
+  if (applySegmentationToImages & class(imgList)[1] != "matrix" ) {
     for (i in 1:length(imgList)) {
       img <- imgList[[i]]
       img[maskseg != as.numeric(i)] <- 0
