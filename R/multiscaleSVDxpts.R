@@ -3036,10 +3036,7 @@ simlr <- function(
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
   if (  missing( energyType ) ) energyType = "regression"
-<<<<<<< HEAD
-=======
   if (  missing( mixAlg ) ) mixAlg = "ica"
->>>>>>> 07eb64a299eb82b3ef359863efe9a49fb7044b64
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
