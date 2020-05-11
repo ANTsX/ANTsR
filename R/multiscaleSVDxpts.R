@@ -3501,7 +3501,7 @@ simlr <- function(
 #      initialUMatrix = bestU ; vmats = bestV
     }
     if ( verbose > 0 ) {
-      outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow-1 )
+      outputString <- paste( "Iteration:", myit, "bestEv:", bestEv, 'bestIt:', bestRow )
     #  if ( optimizationStyle == 'greedy' )
         outputString <- paste( outputString, "CE:", mean(energyPath[myit,]) )
       print( outputString )
