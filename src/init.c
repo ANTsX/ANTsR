@@ -10,6 +10,7 @@
 */
 
 /* .Call calls */
+extern SEXP addNoiseToImageR(SEXP, SEXP, SEXP);
 extern SEXP antsAffineInitializer(SEXP);
 extern SEXP antsMotionCorr(SEXP);
 extern SEXP antsMotionCorrStats(SEXP, SEXP, SEXP, SEXP);
@@ -36,6 +37,7 @@ extern SEXP timeSeriesSubtraction(SEXP, SEXP);
 extern SEXP weingartenImageCurvature(SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
+    {"addNoiseToImageR",                        (DL_FUNC) &addNoiseToImageR,                       3},
     {"antsAffineInitializer",                   (DL_FUNC) &antsAffineInitializer,                  1},
     {"antsMotionCorr",                          (DL_FUNC) &antsMotionCorr,                         1},
     {"antsMotionCorrStats",                     (DL_FUNC) &antsMotionCorrStats,                    4},
