@@ -3,6 +3,7 @@
 export(.motion_correction)
 export(abpBrainExtraction)
 export(abpN4)
+export(addNoiseToImage)
 export(affineInitializer)
 export(alffmap)
 export(antsBOLDNetworkAnalysis)
