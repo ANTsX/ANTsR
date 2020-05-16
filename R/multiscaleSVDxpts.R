@@ -2883,7 +2883,15 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
 #'
 #' @param x A list that contains the named matrices.
 #' @param simsol the simlr solution
-#' @return A list of variance explained, predicted matrices and error metrics
+#' @return A list of variance explained, predicted matrices and error metrics:
+#' \itemize{
+#'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
+#'   \item{predictions: }{Predicted \code{x_i} matrix.}
+#'   \item{initialErrors: }{Initial matrix norm.}
+#'   \item{finalErrors: }{Matrix norm of the error term.}
+#'   \item{aggregateTstats: }{Summary t-stats for each matrix and each \code{u_i}.}
+#'   \item{uOrder: }{Estimated order of the \code{u_i} predictors aggregated over all terms.}
+#' }
 #' @author BB Avants.
 #' @examples
 #' # see simlr examples
@@ -2893,20 +2901,27 @@ predictSimlr <- function( x, simsol ) {
   initialErrors = rep( 0, length( x ) )
   finalErrors = rep( 0, length( x ) )
   predictions = list()
+  sortOrder = list()
+  myBetas = matrix( rep( 0, ncol( simsol$u[[1]] )*length( x ) ), ncol = ncol( simsol$u[[1]] ) )
   for ( i in 1:length( x ) ) {
     mdl = lm( x[[i]] ~ simsol$u[[i]] )
     predictions[[i]] = predict( mdl )
     smdl = summary( mdl )
+    blm = bigLMStats( mdl, 0.0001 )
+    myBetas[i,] = rowMeans(abs(blm$beta.t))
     for ( j in 1:length( smdl ) )
       varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[i]])
     finalErrors[i] = norm( predictions[[i]] - x[[i]], "F")
     initialErrors[i] = norm(  x[[i]], "F")
   }
+  uOrder = order( colSums( myBetas ), decreasing = TRUE )
   list(
     varx = varx,
     predictions = predictions,
     initialErrors = initialErrors,
-    finalErrors = finalErrors  )
+    finalErrors = finalErrors,
+    aggregateTstats = myBetas,
+    uOrder = uOrder  )
 }
 
 

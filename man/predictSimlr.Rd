@@ -12,7 +12,15 @@ predictSimlr(x, simsol)
 \item{simsol}{the simlr solution}
 }
 \value{
-A list of variance explained, predicted matrices and error metrics
+A list of variance explained, predicted matrices and error metrics:
+\itemize{
+  \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
+  \item{predictions: }{Predicted \code{x_i} matrix.}
+  \item{initialErrors: }{Initial matrix norm.}
+  \item{finalErrors: }{Matrix norm of the error term.}
+  \item{aggregateTstats: }{Summary t-stats for each matrix and each \code{u_i}.}
+  \item{uOrder: }{Estimated order of the \code{u_i} predictors aggregated over all terms.}
+}
 }
 \description{
 predict output matrices from simlr solution
