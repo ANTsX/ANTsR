@@ -3044,7 +3044,7 @@ simlr <- function(
   energyType = c('regression', 'normalized', 'cca', 'ucca', 'lowRank'),
   vmats,
   connectors = NULL,
-  optimizationStyle = c("mixed","greedy","lineSearch") ,
+  optimizationStyle = c("lineSearch","mixed","greedy") ,
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.5,
   verbose = FALSE ) {
