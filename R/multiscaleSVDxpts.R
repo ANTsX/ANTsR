@@ -3034,7 +3034,7 @@ simlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
+  mixAlg = c( 'ica', 'svd', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1e2, 1e2 ),
@@ -3051,6 +3051,7 @@ simlr <- function(
   if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
   if (  missing( energyType ) ) energyType = "regression"
   if (  missing( mixAlg ) ) mixAlg = "ica"
+  if (  missing( optimizationStyle ) ) optimizationStyle = "lineSearch"
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
