@@ -4,12 +4,15 @@
 \alias{predictSimlr}
 \title{predict output matrices from simlr solution}
 \usage{
-predictSimlr(x, simsol)
+predictSimlr(x, simsol, targetMatrix)
 }
 \arguments{
 \item{x}{A list that contains the named matrices.}
 
 \item{simsol}{the simlr solution}
+
+\item{targetMatrix}{an optional index that sets a fixed target (outcome) matrix.
+If not set, each basis set will be used to predict its corresponding matrix.}
 }
 \value{
 A list of variance explained, predicted matrices and error metrics:
