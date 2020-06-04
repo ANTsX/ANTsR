@@ -2885,6 +2885,8 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
 #' @param simsol the simlr solution
 #' @param targetMatrix an optional index that sets a fixed target (outcome) matrix.
 #' If not set, each basis set will be used to predict its corresponding matrix.
+#' @param sourceMatrices an optional index vector that sets predictor matrices.
+#' If not set, each basis set will be used to predict its corresponding matrix.
 #' @return A list of variance explained, predicted matrices and error metrics:
 #' \itemize{
 #'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
@@ -2898,16 +2900,22 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
 #' @examples
 #' # see simlr examples
 #' @export
-predictSimlr <- function( x, simsol, targetMatrix ) {
-  varx = rep( 0, length( x ) )
-  initialErrors = rep( 0, length( x ) )
-  finalErrors = rep( 0, length( x ) )
+predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
+  if ( missing( sourceMatrices ) ) sourceMatrices = 1:length( x ) else {
+    if ( ! any( sourceMatrices %in% 1:length( x ) ) )
+      stop( "sourceMatrices are not within the range of the number of input matrices" )
+  }
+  varx = rep( 0, length( sourceMatrices ) )
+  initialErrors = rep( 0, length( sourceMatrices ) )
+  finalErrors = rep( 0, length( sourceMatrices ) )
   predictions = list()
   sortOrder = list()
-  myBetas = matrix( rep( 0, ncol( simsol$u[[1]] )*length( x ) ), ncol = ncol( simsol$u[[1]] ) )
-  for ( i in 1:length( x ) ) {
+  myBetas = matrix( rep( 0, ncol( simsol$u[[1]] ) * length( sourceMatrices ) ),
+    ncol = ncol( simsol$u[[1]] ) )
+  ct = 1
+  for ( i in 1:length(sourceMatrices) ) {
     if ( missing( targetMatrix ) ) mytm = i else mytm = targetMatrix
-    mdl = lm( x[[ mytm ]] ~ simsol$u[[i]] )
+    mdl = lm( x[[ mytm ]] ~ simsol$u[[  sourceMatrices[i]  ]] )
     predictions[[i]] = predict( mdl )
     smdl = summary( mdl )
     blm = bigLMStats( mdl, 0.0001 )
