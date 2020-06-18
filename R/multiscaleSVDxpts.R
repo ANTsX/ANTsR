@@ -3048,7 +3048,7 @@ simlr <- function(
   mixAlg = c( 'ica', 'svd', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c( -1e2, 1e2 ),
+  lineSearchRange = c( -1e10, 1e10 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
   constraint = c("none","Grassmann","Stiefel"),

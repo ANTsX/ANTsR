@@ -14,7 +14,7 @@ simlr(
   mixAlg = c("ica", "svd", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c(-100, 100),
+  lineSearchRange = c(-1e+10, 1e+10),
   lineSearchTolerance = 1e-08,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
