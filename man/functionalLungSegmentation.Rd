@@ -24,6 +24,18 @@ this paper:
 \details{
 \url{https://pubmed.ncbi.nlm.nih.gov/21837781/}
 }
+\examples{
+\dontrun{
+
+library( ANTsR )
+
+image <- antsImageRead( "lung.nii.gz" )
+mask <- antsImageRead( "mask.nii.gz" )
+output <- functionalLungSegmentation( image, mask )
+antsImageWrite( output$segmentationImage, "outputSegmentation.nii.gz" )
+
+}
+}
 \author{
 Tustison NJ
 }

@@ -19,10 +19,9 @@
 #' image <- antsImageRead( "lung.nii.gz" )
 #' mask <- antsImageRead( "mask.nii.gz" )
 #' output <- functionalLungSegmentation( image, mask )
-#' antsImageWrite( output$segmentationImage, 'outputSegmentation.nii.gz" )
+#' antsImageWrite( output$segmentationImage, "outputSegmentation.nii.gz" )
 #'
 #' }
-#' @import keras
 #' @export
 functionalLungSegmentation <- function( image, mask, verbose = TRUE )
   {
