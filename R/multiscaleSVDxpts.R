@@ -2883,30 +2883,56 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
 #'
 #' @param x A list that contains the named matrices.
 #' @param simsol the simlr solution
-#' @return A list of variance explained, predicted matrices and error metrics
+#' @param targetMatrix an optional index that sets a fixed target (outcome) matrix.
+#' If not set, each basis set will be used to predict its corresponding matrix.
+#' @param sourceMatrices an optional index vector that sets predictor matrices.
+#' If not set, each basis set will be used to predict its corresponding matrix.
+#' @return A list of variance explained, predicted matrices and error metrics:
+#' \itemize{
+#'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
+#'   \item{predictions: }{Predicted \code{x_i} matrix.}
+#'   \item{initialErrors: }{Initial matrix norm.}
+#'   \item{finalErrors: }{Matrix norm of the error term.}
+#'   \item{aggregateTstats: }{Summary t-stats for each matrix and each \code{u_i}.}
+#'   \item{uOrder: }{Estimated order of the \code{u_i} predictors aggregated over all terms.}
+#' }
 #' @author BB Avants.
 #' @examples
 #' # see simlr examples
 #' @export
-predictSimlr <- function( x, simsol ) {
-  varx = rep( 0, length( x ) )
-  initialErrors = rep( 0, length( x ) )
-  finalErrors = rep( 0, length( x ) )
+predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
+  if ( missing( sourceMatrices ) ) sourceMatrices = 1:length( x ) else {
+    if ( ! any( sourceMatrices %in% 1:length( x ) ) )
+      stop( "sourceMatrices are not within the range of the number of input matrices" )
+  }
+  varx = rep( 0, length( sourceMatrices ) )
+  initialErrors = rep( 0, length( sourceMatrices ) )
+  finalErrors = rep( 0, length( sourceMatrices ) )
   predictions = list()
-  for ( i in 1:length( x ) ) {
-    mdl = lm( x[[i]] ~ simsol$u[[i]] )
+  sortOrder = list()
+  myBetas = matrix( rep( 0, ncol( simsol$u[[1]] ) * length( sourceMatrices ) ),
+    ncol = ncol( simsol$u[[1]] ) )
+  ct = 1
+  for ( i in 1:length(sourceMatrices) ) {
+    if ( missing( targetMatrix ) ) mytm = i else mytm = targetMatrix
+    mdl = lm( x[[ mytm ]] ~ simsol$u[[  sourceMatrices[i]  ]] )
     predictions[[i]] = predict( mdl )
     smdl = summary( mdl )
+    blm = bigLMStats( mdl, 0.0001 )
+    myBetas[i,] = rowMeans(abs(blm$beta.t))
     for ( j in 1:length( smdl ) )
-      varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[i]])
-    finalErrors[i] = norm( predictions[[i]] - x[[i]], "F")
-    initialErrors[i] = norm(  x[[i]], "F")
+      varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[mytm]])
+    finalErrors[i] = norm( predictions[[i]] - x[[mytm]], "F")
+    initialErrors[i] = norm(  x[[mytm]], "F")
   }
+  uOrder = order( colSums( myBetas ), decreasing = TRUE )
   list(
     varx = varx,
     predictions = predictions,
     initialErrors = initialErrors,
-    finalErrors = finalErrors  )
+    finalErrors = finalErrors,
+    aggregateTstats = myBetas,
+    uOrder = uOrder  )
 }
 
 
@@ -3019,23 +3045,24 @@ simlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
+  mixAlg = c( 'ica', 'svd', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c( -1, 1 ),
+  lineSearchRange = c( -1e10, 1e10 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
   constraint = c("none","Grassmann","Stiefel"),
   energyType = c('regression', 'normalized', 'cca', 'ucca', 'lowRank'),
   vmats,
   connectors = NULL,
-  optimizationStyle = c("mixed","greedy","lineSearch") ,
+  optimizationStyle = c("lineSearch","mixed","greedy") ,
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
-  expBeta = 0,
+  expBeta = 0.5,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
   if (  missing( energyType ) ) energyType = "regression"
   if (  missing( mixAlg ) ) mixAlg = "ica"
+  if (  missing( optimizationStyle ) ) optimizationStyle = "lineSearch"
   if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)

@@ -4,15 +4,29 @@
 \alias{predictSimlr}
 \title{predict output matrices from simlr solution}
 \usage{
-predictSimlr(x, simsol)
+predictSimlr(x, simsol, targetMatrix, sourceMatrices)
 }
 \arguments{
 \item{x}{A list that contains the named matrices.}
 
 \item{simsol}{the simlr solution}
+
+\item{targetMatrix}{an optional index that sets a fixed target (outcome) matrix.
+If not set, each basis set will be used to predict its corresponding matrix.}
+
+\item{sourceMatrices}{an optional index vector that sets predictor matrices.
+If not set, each basis set will be used to predict its corresponding matrix.}
 }
 \value{
-A list of variance explained, predicted matrices and error metrics
+A list of variance explained, predicted matrices and error metrics:
+\itemize{
+  \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
+  \item{predictions: }{Predicted \code{x_i} matrix.}
+  \item{initialErrors: }{Initial matrix norm.}
+  \item{finalErrors: }{Matrix norm of the error term.}
+  \item{aggregateTstats: }{Summary t-stats for each matrix and each \code{u_i}.}
+  \item{uOrder: }{Estimated order of the \code{u_i} predictors aggregated over all terms.}
+}
 }
 \description{
 predict output matrices from simlr solution
