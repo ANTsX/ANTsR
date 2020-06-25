@@ -7,6 +7,9 @@
 #'
 #' @param image input proton-weighted MRI.
 #' @param mask mask image designating the region to segment.
+#' 0/1 = background/foreground.
+#' @param numberOfIterations number of Atropos <--> N4 iterations.
+#' @param mrfParameters parameters for MRF in Atropos.
 #' @param verbose print progress to the screen.
 #' @return segmentation image, probability images, and processed input
 #' image.
@@ -23,7 +26,8 @@
 #'
 #' }
 #' @export
-functionalLungSegmentation <- function( image, mask, verbose = TRUE )
+functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
+  mrfParameters = "[0.3,2x2x2]", verbose = TRUE )
   {
 
   if( image@dimension != 3 )
@@ -59,15 +63,15 @@ functionalLungSegmentation <- function( image, mask, verbose = TRUE )
   dilatedMask <- mask %>% iMath( "MD", 5 )
   weightMask <- NULL
 
-  preprocessedImage <- antsImageClone( image )
-
-  numberOfAtroposN4Iterations <- 5
+  numberOfAtroposN4Iterations <- numberOfIterations
   for( i in seq.int( numberOfAtroposN4Iterations ) )
     {
     if( verbose == TRUE )
       {
       message( paste0( "Atropos/N4 iteration: ", i, " out of ", numberOfAtroposN4Iterations, "\n" ) )
       }
+
+    preprocessedImage <- antsImageClone( image )
 
     quantiles <- quantile( preprocessedImage, c( 0, 0.995 ) )
     preprocessedImage[preprocessedImage < quantiles[1]] <- quantiles[1]
@@ -95,9 +99,9 @@ functionalLungSegmentation <- function( image, mask, verbose = TRUE )
       posteriorFormulation = "Socrates[1]"
       }
     atroposOutput <- atropos( preprocessedImage, x = dilatedMask, i = atroposInitialization,
-      m = "[0.3,2x2x2]", c = "[5,0]", priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
+      m = mrfParameters, c = "[5,0]", priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
 
-    pureTissueWeightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:4] )
+    weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:4] )
     }
 
   maskedSegmentationImage <- atroposOutput$segmentation * mask
