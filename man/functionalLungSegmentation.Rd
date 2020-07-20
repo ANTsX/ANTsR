@@ -4,12 +4,23 @@
 \alias{functionalLungSegmentation}
 \title{Ventilation-based segmentation of hyperpolarized gas lung MRI.}
 \usage{
-functionalLungSegmentation(image, mask, verbose = TRUE)
+functionalLungSegmentation(
+  image,
+  mask,
+  numberOfIterations = 1,
+  mrfParameters = "[0.3,2x2x2]",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{image}{input proton-weighted MRI.}
 
-\item{mask}{mask image designating the region to segment.}
+\item{mask}{mask image designating the region to segment.
+0/1 = background/foreground.}
+
+\item{numberOfIterations}{number of Atropos <--> N4 iterations.}
+
+\item{mrfParameters}{parameters for MRF in Atropos.}
 
 \item{verbose}{print progress to the screen.}
 }

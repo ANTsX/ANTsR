@@ -49,6 +49,7 @@
 #' slice <- extractSlice(asl, 4, 4)
 #' mask <-getMask(slice)
 #' seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
+#' perfSurr <- aslAveraging( asl, mask = NULL, method = "surroundSubtract" )
 #' bayesAvg <- aslAveraging(asl, tc=tc, method='bayesian',
 #'   segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
 #'
