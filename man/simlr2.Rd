@@ -10,7 +10,7 @@ simlr2(
   smoothingMatrixX,
   smoothingMatrixY,
   iterations = 10,
-  gamma = 0.000001,
+  gamma = 1e-06,
   sparsenessQuantileX = 0.5,
   sparsenessQuantileY = 0.5,
   positivityX = c("positive", "negative", "either"),
