@@ -16,6 +16,7 @@ muschellij2 badges:
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/muschellij2/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/muschellij2/ANTsR)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stnava/ANTsRDocker/master)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
 
 <!-- commenting out because we moved to antsx
@@ -97,7 +98,7 @@ architectures ported to the R language.
     * Image segmentation
         * U-Net (2-D)
         * V-Net (3-D)
-    * Image classification  
+    * Image classification
         * AlexNet (2-D, 3-D)
         * Vgg16/Vgg19 (2-D, 3-D)
         * ResNet/ResNeXt (2-D, 3-D)
