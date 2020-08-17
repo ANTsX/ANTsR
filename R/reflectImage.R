@@ -46,3 +46,29 @@ verbose = TRUE,
     return( antsApplyTransforms( img1, img1, rflct, verbose = verbose)  )
   }
 }
+
+
+#' reflectionMatrix
+#'
+#' return a filename pointing to a reflection matrix
+#'
+#' @param img1 input object, an antsImage
+#' @param axis which dimension to reflect across, numbered from 0 to imageDimension-1
+#' @param reflectionMatrixFilename a filename ending in .mat
+#'
+#' @author BB Avants
+#' @export reflectionMatrix
+reflectionMatrix<-function( img1, axis=NA, reflectionMatrixFilename ) {
+  if ( is.na(axis) ) {
+    axis=( img1@dimension - 1 )
+  }
+  if ( axis > img1@dimension | axis < 0 ) {
+    axis=(img1@dimension-1)
+  }
+
+  if ( missing( reflectionMatrixFilename ) ) {
+    reflectionMatrixFilename<-tempfile(fileext = ".mat")
+  }
+  catchout = .Call( "reflectionMatrix", img1, axis, reflectionMatrixFilename, package="ANTsR")
+  return( reflectionMatrixFilename )
+}
