@@ -1,5 +1,5 @@
-pandoc: 2.3.1
-pkgdown: 1.3.0
+pandoc: 2.2.3.2
+pkgdown: 1.5.1
 pkgdown_sha: ~
 articles:
   ANTsR: ANTsR.html
@@ -10,4 +10,5 @@ articles:
   iMath: iMath.html
   multivarTemplateCoordinates: multivarTemplateCoordinates.html
   rfLesionSeg: rfLesionSeg.html
+last_built: 2020-08-18T21:00Z
 

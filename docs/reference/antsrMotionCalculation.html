@@ -8,21 +8,29 @@
 
 <title>antsrMotionCalculation — antsrMotionCalculation • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,10 +38,10 @@
 
 
 
-<meta property="og:title" content="antsrMotionCalculation — antsrMotionCalculation" />
 
+<meta property="og:title" content="antsrMotionCalculation — antsrMotionCalculation" />
 <meta property="og:description" content="Correct time-series data for motion." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -47,9 +55,10 @@
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -63,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -71,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -112,7 +121,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -122,6 +130,7 @@
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -133,16 +142,22 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Correct time-series data for motion.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>antsrMotionCalculation</span>(<span class='no'>img</span>, <span class='no'>fixed</span>, <span class='no'>mask</span>, <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Rigid"</span>,
-  <span class='st'>"QuickRigid"</span>, <span class='st'>"BOLDRigid"</span>, <span class='st'>"Affine"</span>, <span class='st'>"AffineFast"</span>, <span class='st'>"BOLDAffine"</span>, <span class='st'>"SyN"</span>,
-  <span class='st'>"SyNOnly"</span>), <span class='kw'>getMotionDescriptors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>num_threads</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>antsrMotionCalculation</span>(
+  <span class='no'>img</span>,
+  <span class='no'>fixed</span>,
+  <span class='no'>mask</span>,
+  <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Rigid"</span>, <span class='st'>"QuickRigid"</span>, <span class='st'>"BOLDRigid"</span>, <span class='st'>"Affine"</span>, <span class='st'>"AffineFast"</span>,
+    <span class='st'>"BOLDAffine"</span>, <span class='st'>"SyN"</span>, <span class='st'>"SyNOnly"</span>),
+  <span class='kw'>getMotionDescriptors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>num_threads</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -175,7 +190,7 @@ take additional memory.</p></td>
     <tr>
       <th>num_threads</th>
       <td><p>will execute
-<code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</a></code> before
+<code><a href='https://rdrr.io/r/base/Sys.setenv.html'>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</a></code> before
 running to attempt a more reproducible result.  See
 <a href='https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues'>https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
 for discussion.  If <code>NULL</code>, will not set anything.</p></td>
@@ -183,7 +198,7 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></td>
     <tr>
       <th>seed</th>
       <td><p>will execute
-<code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv(ANTS_RANDOM_SEED = seed)</a></code> before
+<code><a href='https://rdrr.io/r/base/Sys.setenv.html'>Sys.setenv(ANTS_RANDOM_SEED = seed)</a></code> before
 running to attempt a more reproducible result.  See
 <a href='https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues'>https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
 for discussion.  If <code>NULL</code>, will not set anything.</p></td>
@@ -193,7 +208,7 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></td>
       <td><p>extra parameters passed to antsRegistration</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>List containing:</p><ul>
@@ -205,44 +220,42 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></td>
 <li><p>dvars DVARS, derivative of frame-wise intensity changes.</p></li>
 </ul>
 
-    
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
     <p>For reproducible results, you should run
-<code><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)</a></code>,
+<code><a href='https://rdrr.io/r/base/Sys.setenv.html'>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)</a></code>,
 which is what the <code>num_threads = 1</code> flag will do.
 See <a href='https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues'>https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
 and <a href='https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054'>https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054</a>
 for discussion</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv</a></span>(<span class='kw'>ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Sys.setenv'>Sys.setenv</a></span>(<span class='kw'>ANTS_RANDOM_SEED</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>120</span>)
-<span class='no'>simimg</span><span class='kw'>&lt;-</span><span class='fu'>makeImage</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>5</span>,<span class='fl'>4</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>5</span>^<span class='fl'>4</span>))
-<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>simimg</span>), <span class='fl'>0.0427369860965759</span>)
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Sys.setenv.html'>Sys.setenv</a></span>(<span class='kw'>ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/Sys.setenv.html'>Sys.setenv</a></span>(<span class='kw'>ANTS_RANDOM_SEED</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>120</span>)
+<span class='no'>simimg</span><span class='kw'>&lt;-</span><span class='fu'>makeImage</span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>5</span>,<span class='fl'>4</span>), <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>5</span>^<span class='fl'>4</span>))
+<span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/equality-expectations.html'>expect_equal</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='no'>simimg</span>), <span class='fl'>0.0427369860965759</span>)
 <span class='no'>res</span> <span class='kw'>=</span> <span class='fu'>antsrMotionCalculation</span>( <span class='no'>simimg</span> , <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1234</span>)
 <span class='no'>res2</span> <span class='kw'>=</span> <span class='fu'>antsrMotionCalculation</span>( <span class='no'>simimg</span> , <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1234</span>)
 <span class='no'>res3</span> <span class='kw'>=</span> <span class='fu'>antsrMotionCalculation</span>( <span class='no'>simimg</span>, <span class='kw'>num_threads</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1</span> )
-        <span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/testthat/topics/equality-expectations'>expect_equal</a></span>(<span class='no'>res</span>, <span class='no'>res2</span>)
+        <span class='kw pkg'>testthat</span><span class='kw ns'>::</span><span class='fu'><a href='https://testthat.r-lib.org/reference/equality-expectations.html'>expect_equal</a></span>(<span class='no'>res</span>, <span class='no'>res2</span>)
 <span class='co'># testthat::expect_failure(testthat::expect_equal(res, res3))</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>res</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
 #&gt; 1         8.759284        8.759284
 #&gt; 2         4.722396        4.722396
 #&gt; 3         9.079914        9.079914
 #&gt; 4         3.254630        3.254630
-#&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res3</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
+#&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>res3</span>$<span class='no'>fd</span>)</div><div class='output co'>#&gt;   MeanDisplacement MaxDisplacement
 #&gt; 1         8.759284        8.759284
 #&gt; 2         4.722396        4.722396
 #&gt; 3         9.079914        9.079914
 #&gt; 4         3.254630        3.254630
-#&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
+#&gt; 5         0.000000        0.000000</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>res</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
 #&gt; [1,]  0.8070312 -2.7196524  -7.722021          0          0          0
 #&gt; [2,]  0.6403608  0.7210882   0.331462          0          0          0
 #&gt; [3,] -3.5773988  0.7025864  -1.792493          0          0          0
 #&gt; [4,]  3.4404235 -2.8812182   2.718754          0          0          0
-#&gt; [5,]  2.5139089  0.2271850   2.987108          0          0          0</div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res3</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
+#&gt; [5,]  2.5139089  0.2271850   2.987108          0          0          0</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>res3</span>$<span class='no'>moco_params</span>)</div><div class='output co'>#&gt;      MOCOparam1 MOCOparam2 MOCOparam3 MOCOparam4 MOCOparam5 MOCOparam6
 #&gt; [1,]  0.8070312 -2.7196524  -7.722021          0          0          0
 #&gt; [2,]  0.6403608  0.7210882   0.331462          0          0          0
 #&gt; [3,] -3.5773988  0.7025864  -1.792493          0          0          0
@@ -250,22 +263,13 @@ for discussion</p>
 #&gt; [5,]  2.5139089  0.2271850   2.987108          0          0          0</div><div class='input'>
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-
-      <li><a href="#note">Note</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -273,13 +277,16 @@ for discussion</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

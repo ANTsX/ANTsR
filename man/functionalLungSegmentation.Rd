@@ -7,7 +7,7 @@
 functionalLungSegmentation(
   image,
   mask,
-  numberOfIterations = 0,
+  numberOfIterations = 1,
   numberOfAtroposIterations = 0,
   mrfParameters = "[0.3,2x2x2]",
   verbose = TRUE
