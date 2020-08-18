@@ -3280,7 +3280,7 @@ simlr <- function(
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
       # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
       projjer = diag( ncol( vgrad ) ) - t( vmats[[i]] ) %*% vmats[[i]]
-      temperv = temperv %*% projjer
+      return( vgrad %*% projjer )
     }
     if ( constraint == "Stiefel" ) # stiefel manifold
       vgrad = vgrad - vmats[[i]] %*% ( t( vgrad ) %*% ( vmats[[i]] ) )
