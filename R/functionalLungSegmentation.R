@@ -29,7 +29,7 @@
 #'
 #' }
 #' @export
-functionalLungSegmentation <- function( image, mask, numberOfIterations = 0,
+functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
   numberOfAtroposIterations = 0, mrfParameters = "[0.3,2x2x2]", verbose = TRUE )
   {
 
@@ -41,6 +41,11 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 0,
   if( missing( mask ) )
     {
     stop( "Mask is missing." )
+    }
+
+  if( numberOfIterations < 1 )
+    {
+    stop( "numberOfIterations must be >= 1.")
     }
 
   generatePureTissueN4WeightMask <- function( probabilityImages )
