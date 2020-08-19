@@ -10,7 +10,7 @@ sparseDistanceMatrix(
   r = Inf,
   sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06,
+  eps = 0.000001,
   ncores = NA,
   sinkhorn = FALSE,
   kPackage = "FNN"

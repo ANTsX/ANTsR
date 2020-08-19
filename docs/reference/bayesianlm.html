@@ -8,21 +8,29 @@
 
 <title>Simple bayesian regression function. — bayesianlm • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,12 +38,12 @@
 
 
 
-<meta property="og:title" content="Simple bayesian regression function. — bayesianlm" />
 
+<meta property="og:title" content="Simple bayesian regression function. — bayesianlm" />
 <meta property="og:description" content="Take a prior mean and precision matrix for the regression solution and uses
 them to solve for the regression parameters.  The Bayesian model, here, is
 on the multivariate distribution of the parameters." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -49,9 +57,10 @@ on the multivariate distribution of the parameters." />
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -65,7 +74,7 @@ on the multivariate distribution of the parameters." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -73,7 +82,7 @@ on the multivariate distribution of the parameters." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -114,7 +123,6 @@ on the multivariate distribution of the parameters." />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -124,6 +132,7 @@ on the multivariate distribution of the parameters." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -135,16 +144,21 @@ on the multivariate distribution of the parameters." />
     </div>
 
     <div class="ref-description">
-    
     <p>Take a prior mean and precision matrix for the regression solution and uses
 them to solve for the regression parameters.  The Bayesian model, here, is
 on the multivariate distribution of the parameters.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>bayesianlm</span>(<span class='no'>X</span>, <span class='no'>y</span>, <span class='no'>priorMean</span>, <span class='no'>priorPrecision</span>, <span class='kw'>priorIntercept</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='no'>regweights</span>, <span class='kw'>includeIntercept</span> <span class='kw'>=</span> <span class='no'>F</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>bayesianlm</span>(
+  <span class='no'>X</span>,
+  <span class='no'>y</span>,
+  <span class='no'>priorMean</span>,
+  <span class='no'>priorPrecision</span>,
+  <span class='kw'>priorIntercept</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='no'>regweights</span>,
+  <span class='kw'>includeIntercept</span> <span class='kw'>=</span> <span class='no'>F</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -177,24 +191,23 @@ on the multivariate distribution of the parameters.</p>
       <td><p>include the intercept in the model</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>bayesian regression solution is output</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
   <span class='co'># make some simple data</span>
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>1</span>)
+  <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
   <span class='no'>n</span><span class='kw'>&lt;-</span><span class='fl'>20</span>
-  <span class='no'>rawvars</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fl'>1</span>:<span class='no'>n</span>)
-  <span class='no'>nois</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>)
+  <span class='no'>rawvars</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fl'>1</span>:<span class='no'>n</span>)
+  <span class='no'>nois</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>)
   <span class='co'># for some reason we dont know age is correlated w/noise</span>
-  <span class='no'>age</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/numeric'>as.numeric</a></span>(<span class='no'>rawvars</span>)+(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>abs</a></span>(<span class='no'>nois</span>))*<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sign'>sign</a></span>(<span class='no'>nois</span>)
-  <span class='no'>wt</span><span class='kw'>&lt;-</span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='no'>rawvars</span>) + <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>) )
-  <span class='no'>mdl</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></span>( <span class='no'>wt</span> ~ <span class='no'>age</span> + <span class='no'>nois</span> )
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary</a></span>(<span class='no'>mdl</span>)</div><div class='output co'>#&gt; 
+  <span class='no'>age</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='no'>rawvars</span>)+(<span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span>(<span class='no'>nois</span>))*<span class='fu'><a href='https://rdrr.io/r/base/sign.html'>sign</a></span>(<span class='no'>nois</span>)
+  <span class='no'>wt</span><span class='kw'>&lt;-</span>( <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span>(<span class='no'>rawvars</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>) )
+  <span class='no'>mdl</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>( <span class='no'>wt</span> ~ <span class='no'>age</span> + <span class='no'>nois</span> )
+  <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>mdl</span>)</div><div class='output co'>#&gt; 
 #&gt; Call:
 #&gt; lm(formula = wt ~ age + nois)
 #&gt; 
@@ -213,70 +226,70 @@ on the multivariate distribution of the parameters.</p>
 #&gt; Residual standard error: 0.9391 on 17 degrees of freedom
 #&gt; Multiple R-squared:  0.5822,	Adjusted R-squared:  0.533 
 #&gt; F-statistic: 11.84 on 2 and 17 DF,  p-value: 0.0006002
-#&gt; </div><div class='input'>  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/model.matrix'>model.matrix</a></span>( <span class='no'>mdl</span> )
-  <span class='no'>priorcoeffs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/coef'>coefficients</a></span>(<span class='no'>mdl</span>)
-  <span class='no'>covMat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/diag'>diag</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>priorcoeffs</span>))+<span class='fl'>0.1</span>
+#&gt; </div><div class='input'>  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span>( <span class='no'>mdl</span> )
+  <span class='no'>priorcoeffs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coefficients</a></span>(<span class='no'>mdl</span>)
+  <span class='no'>covMat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>priorcoeffs</span>))+<span class='fl'>0.1</span>
   <span class='co'># make some new data</span>
-  <span class='no'>rawvars2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample</a></span>(<span class='fl'>1</span>:<span class='no'>n</span>)
-  <span class='no'>nois2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>)
+  <span class='no'>rawvars2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span>(<span class='fl'>1</span>:<span class='no'>n</span>)
+  <span class='no'>nois2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>)
   <span class='co'># now age is correlated doubly w/noise</span>
-  <span class='no'>age2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/numeric'>as.numeric</a></span>(<span class='no'>rawvars2</span>)+(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>abs</a></span>(<span class='no'>nois2</span>))*<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/sign'>sign</a></span>(<span class='no'>nois2</span>)*<span class='fl'>2.0</span>
-  <span class='no'>wt2</span><span class='kw'>&lt;-</span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='no'>rawvars2</span>) + <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>n</span>) )
-  <span class='no'>mdl2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></span>( <span class='no'>wt2</span> ~ <span class='no'>age2</span> + <span class='no'>nois2</span> )
-  <span class='no'>X2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/model.matrix'>model.matrix</a></span>( <span class='no'>mdl2</span> )
-  <span class='no'>precisionMat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/solve'>solve</a></span>( <span class='no'>covMat</span> )
+  <span class='no'>age2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='no'>rawvars2</span>)+(<span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>abs</a></span>(<span class='no'>nois2</span>))*<span class='fu'><a href='https://rdrr.io/r/base/sign.html'>sign</a></span>(<span class='no'>nois2</span>)*<span class='fl'>2.0</span>
+  <span class='no'>wt2</span><span class='kw'>&lt;-</span>( <span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span>(<span class='no'>rawvars2</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>) )
+  <span class='no'>mdl2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>( <span class='no'>wt2</span> ~ <span class='no'>age2</span> + <span class='no'>nois2</span> )
+  <span class='no'>X2</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span>( <span class='no'>mdl2</span> )
+  <span class='no'>precisionMat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/solve.html'>solve</a></span>( <span class='no'>covMat</span> )
   <span class='no'>precisionMat</span>[<span class='fl'>2</span>,<span class='fl'>2</span>]<span class='kw'>&lt;-</span><span class='no'>precisionMat</span>[<span class='fl'>2</span>,<span class='fl'>2</span>]*<span class='fl'>1.e3</span> <span class='co'># heavy prior on age</span>
   <span class='no'>precisionMat</span>[<span class='fl'>3</span>,<span class='fl'>3</span>]<span class='kw'>&lt;-</span><span class='no'>precisionMat</span>[<span class='fl'>3</span>,<span class='fl'>3</span>]*<span class='fl'>1.e2</span> <span class='co'># some prior on noise</span>
   <span class='no'>bmdl</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>( <span class='no'>X2</span>, <span class='no'>wt2</span>, <span class='kw'>priorMean</span><span class='kw'>=</span><span class='no'>priorcoeffs</span>, <span class='no'>precisionMat</span> )
 <span class='co'># testthat::expect_equal(bmdl$beta, c(0.157536274628774, -0.224079937323326))</span>
   <span class='no'>bmdlNoPrior</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>( <span class='no'>X2</span>, <span class='no'>wt2</span> )
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>priorcoeffs</span>)</div><div class='output co'>#&gt; (Intercept)         age        nois 
-#&gt;   1.3384439   0.1661885  -0.4937906 </div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdl</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1653025 -0.4927154</div><div class='input'>  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>bmdlNoPrior</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1618386 -0.4768678</div><div class='input'>  </div><span class='co'># NOT RUN {</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>priorcoeffs</span>)</div><div class='output co'>#&gt; (Intercept)         age        nois 
+#&gt;   1.3384439   0.1661885  -0.4937906 </div><div class='input'>  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>bmdl</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1653025 -0.4927154</div><div class='input'>  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>bmdlNoPrior</span>$<span class='no'>beta</span>)</div><div class='output co'>#&gt; [1]  0.1618386 -0.4768678</div><div class='input'>  <span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
   <span class='no'>fn</span><span class='kw'>&lt;-</span><span class='st'>'PEDS012_20131101_pcasl_1.nii.gz'</span>
   <span class='no'>fn</span><span class='kw'>&lt;-</span><span class='fu'>getANTsRData</span>(<span class='st'>"pcasl"</span>)
 <span class='co'># image available at http://files.figshare.com/1701182/PEDS012_20131101.zip</span>
   <span class='no'>asl</span><span class='kw'>&lt;-</span><span class='fu'>antsImageRead</span>(<span class='no'>fn</span>,<span class='fl'>4</span>)
   <span class='no'>tr</span><span class='kw'>&lt;-</span><span class='fu'>antsGetSpacing</span>(<span class='no'>asl</span>)[<span class='fl'>4</span>]
   <span class='no'>aslmean</span><span class='kw'>&lt;-</span><span class='fu'><a href='getAverageOfTimeSeries.html'>getAverageOfTimeSeries</a></span>( <span class='no'>asl</span> )
-  <span class='no'>aslmask</span><span class='kw'>&lt;-</span><span class='fu'>getMask</span>(<span class='no'>aslmean</span>,<span class='kw'>lowThresh</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='no'>aslmean</span>),<span class='kw'>cleanup</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
+  <span class='no'>aslmask</span><span class='kw'>&lt;-</span><span class='fu'>getMask</span>(<span class='no'>aslmean</span>,<span class='kw'>lowThresh</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='no'>aslmean</span>),<span class='kw'>cleanup</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
   <span class='no'>aslmat</span><span class='kw'>&lt;-</span><span class='fu'><a href='timeseries2matrix.html'>timeseries2matrix</a></span>(<span class='no'>asl</span>,<span class='no'>aslmask</span>)
-  <span class='no'>tc</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/factor'>as.factor</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>'C'</span>,<span class='st'>'T'</span>),<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>aslmat</span>)/<span class='fl'>2</span>))
+  <span class='no'>tc</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>'C'</span>,<span class='st'>'T'</span>),<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>aslmat</span>)/<span class='fl'>2</span>))
   <span class='no'>dv</span><span class='kw'>&lt;-</span><span class='fu'><a href='computeDVARS.html'>computeDVARS</a></span>(<span class='no'>aslmat</span>)
   <span class='co'># do some comparison with a single y, no priors</span>
-  <span class='no'>y</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colSums'>rowMeans</a></span>(<span class='no'>aslmat</span>)
-  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></span>( <span class='no'>y</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> ) <span class='co'># standard model</span>
+  <span class='no'>y</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowMeans</a></span>(<span class='no'>aslmat</span>)
+  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>( <span class='no'>y</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> ) <span class='co'># standard model</span>
   <span class='no'>tlm</span><span class='kw'>&lt;-</span><span class='fu'>bigLMStats</span>( <span class='no'>perfmodel</span> )
-  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/model.matrix'>model.matrix</a></span>( <span class='no'>perfmodel</span> )
+  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span>( <span class='no'>perfmodel</span> )
   <span class='no'>blm</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>(  <span class='no'>X</span>, <span class='no'>y</span> )
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='no'>tlm</span>$<span class='no'>beta.p</span> )
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='no'>blm</span>$<span class='no'>beta.p</span> )
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='no'>tlm</span>$<span class='no'>beta.p</span> )
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='no'>blm</span>$<span class='no'>beta.p</span> )
   <span class='co'># do some bayesian learning based on the data</span>
-  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></span>( <span class='no'>aslmat</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> ) <span class='co'># standard model</span>
-  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/model.matrix'>model.matrix</a></span>( <span class='no'>perfmodel</span> )
-  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/lm'>lm</a></span>( <span class='no'>aslmat</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> )
-  <span class='no'>bayesianperfusionloc</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>0</span>,<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>ncol</a></span>(<span class='no'>aslmat</span>))
+  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>( <span class='no'>aslmat</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> ) <span class='co'># standard model</span>
+  <span class='no'>X</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span>( <span class='no'>perfmodel</span> )
+  <span class='no'>perfmodel</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span>( <span class='no'>aslmat</span> ~ <span class='no'>tc</span> + <span class='no'>dv</span> )
+  <span class='no'>bayesianperfusionloc</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>,<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>aslmat</span>))
   <span class='no'>smoothcoeffmat</span><span class='kw'>&lt;-</span><span class='no'>perfmodel</span>$<span class='no'>coefficients</span>
-  <span class='no'>nmatimgs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>()
-  <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>smoothcoeffmat</span>) )
+  <span class='no'>nmatimgs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+  <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>smoothcoeffmat</span>) )
     {
     <span class='no'>temp</span><span class='kw'>&lt;-</span><span class='fu'>antsImageClone</span>( <span class='no'>aslmask</span> )
     <span class='no'>temp</span>[ <span class='no'>aslmask</span> <span class='kw'>==</span> <span class='fl'>1</span> ] <span class='kw'>&lt;-</span> <span class='no'>smoothcoeffmat</span>[<span class='no'>i</span>,]
 <span class='co'>#   temp&lt;-iMath(temp,'PeronaMalik',150,10)</span>
     <span class='no'>temp</span><span class='kw'>&lt;-</span><span class='fu'>smoothImage</span>(<span class='no'>temp</span>,<span class='fl'>1.5</span>)
     <span class='no'>nmatimgs</span><span class='kw'>[[</span><span class='no'>i</span>]]<span class='kw'>&lt;-</span><span class='fu'>getNeighborhoodInMask</span>(<span class='no'>temp</span>,<span class='no'>aslmask</span>,
-      <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>2</span>,<span class='fl'>3</span>), <span class='kw'>boundary.condition</span> <span class='kw'>=</span> <span class='st'>'mean'</span>)
+      <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>2</span>,<span class='fl'>3</span>), <span class='kw'>boundary.condition</span> <span class='kw'>=</span> <span class='st'>'mean'</span>)
     <span class='no'>smoothcoeffmat</span>[<span class='no'>i</span>,]<span class='kw'>&lt;-</span><span class='no'>temp</span>[ <span class='no'>aslmask</span><span class='kw'>==</span><span class='fl'>1</span> ]
     }
-  <span class='no'>prior</span>  <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colSums'>rowMeans</a></span>( <span class='no'>smoothcoeffmat</span>  )
-  <span class='no'>invcov</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/solve'>solve</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cov</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/t'>t</a></span>( <span class='no'>smoothcoeffmat</span> ) ) )
+  <span class='no'>prior</span>  <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowMeans</a></span>( <span class='no'>smoothcoeffmat</span>  )
+  <span class='no'>invcov</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/solve.html'>solve</a></span>( <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cov</a></span>( <span class='fu'><a href='https://rdrr.io/r/base/t.html'>t</a></span>( <span class='no'>smoothcoeffmat</span> ) ) )
   <span class='no'>blm2</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>(  <span class='no'>X</span>, <span class='no'>y</span>, <span class='no'>prior</span>, <span class='no'>invcov</span>*<span class='fl'>1.e4</span> )
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='no'>blm2</span>$<span class='no'>beta.p</span> )
-  <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>ncol</a></span>(<span class='no'>aslmat</span>) )
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='no'>blm2</span>$<span class='no'>beta.p</span> )
+  <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>aslmat</span>) )
     {
     <span class='no'>parammat</span><span class='kw'>&lt;-</span><span class='no'>nmatimgs</span><span class='kw'>[[</span><span class='fl'>1</span>]][,<span class='no'>i</span>]
-    <span class='kw'>for</span> ( <span class='no'>k</span> <span class='kw'>in</span> <span class='fl'>2</span>:<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>nmatimgs</span>))
-      <span class='no'>parammat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/cbind'>cbind</a></span>( <span class='no'>parammat</span>, <span class='no'>nmatimgs</span><span class='kw'>[[</span><span class='no'>k</span>]][,<span class='no'>i</span>] )
-    <span class='no'>locinvcov</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/solve'>solve</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor'>cov</a></span>( <span class='no'>parammat</span> ) )
+    <span class='kw'>for</span> ( <span class='no'>k</span> <span class='kw'>in</span> <span class='fl'>2</span>:<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>nmatimgs</span>))
+      <span class='no'>parammat</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>( <span class='no'>parammat</span>, <span class='no'>nmatimgs</span><span class='kw'>[[</span><span class='no'>k</span>]][,<span class='no'>i</span>] )
+    <span class='no'>locinvcov</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/solve.html'>solve</a></span>( <span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cov</a></span>( <span class='no'>parammat</span> ) )
     <span class='no'>localprior</span><span class='kw'>&lt;-</span>(<span class='no'>smoothcoeffmat</span>[,<span class='no'>i</span>])
     <span class='no'>blm</span><span class='kw'>&lt;-</span><span class='fu'>bayesianlm</span>(  <span class='no'>X</span>, <span class='no'>aslmat</span>[,<span class='no'>i</span>], <span class='no'>localprior</span>, <span class='no'>locinvcov</span>*<span class='fl'>1.e4</span> )
     <span class='no'>bayesianperfusionloc</span>[<span class='no'>i</span>]<span class='kw'>&lt;-</span><span class='no'>blm</span>$<span class='no'>beta</span>[<span class='fl'>1</span>]
@@ -287,25 +300,16 @@ on the multivariate distribution of the parameters.</p>
   <span class='fu'>antsImageWrite</span>(<span class='no'>perfimg</span>,<span class='st'>'perf.nii.gz'</span>)
   <span class='no'>perfimg</span>[ <span class='no'>aslmask</span> <span class='kw'>==</span> <span class='fl'>1</span> ]<span class='kw'>&lt;-</span><span class='no'>bayesianperfusionloc</span>
   <span class='fu'>antsImageWrite</span>(<span class='no'>perfimg</span>,<span class='st'>'perf_bayes.nii.gz'</span>)
-  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/cor.test'>cor.test</a></span>(<span class='no'>basicperf</span>, <span class='no'>perfimg</span>[ <span class='no'>aslmask</span> <span class='kw'>==</span> <span class='fl'>1</span> ] ) )
-
-<span class='co'># }</span><div class='input'>
-</div></pre>
+  <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='fu'><a href='https://rdrr.io/r/stats/cor.test.html'>cor.test</a></span>(<span class='no'>basicperf</span>, <span class='no'>perfimg</span>[ <span class='no'>aslmask</span> <span class='kw'>==</span> <span class='fl'>1</span> ] ) )
+  }</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Avants BB</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -313,13 +317,16 @@ on the multivariate distribution of the parameters.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

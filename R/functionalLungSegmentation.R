@@ -8,7 +8,10 @@
 #' @param image input proton-weighted MRI.
 #' @param mask mask image designating the region to segment.
 #' 0/1 = background/foreground.
-#' @param numberOfIterations number of Atropos <--> N4 iterations.
+#' @param numberOfIterations number of Atropos <--> N4 iterations (outer loop).
+#' @param numberOfAtroposIterations number of Atropos iterations (inner loop).
+#' If \code{numberOfAtroposIterations = 0}, this is equivalent to K-means with
+#' no MRF priors.
 #' @param mrfParameters parameters for MRF in Atropos.
 #' @param verbose print progress to the screen.
 #' @return segmentation image, probability images, and processed input
@@ -27,7 +30,7 @@
 #' }
 #' @export
 functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
-  mrfParameters = "[0.3,2x2x2]", verbose = TRUE )
+  numberOfAtroposIterations = 0, mrfParameters = "[0.3,2x2x2]", verbose = TRUE )
   {
 
   if( image@dimension != 3 )
@@ -38,6 +41,11 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
   if( missing( mask ) )
     {
     stop( "Mask is missing." )
+    }
+
+  if( numberOfIterations < 1 )
+    {
+    stop( "numberOfIterations must be >= 1.")
     }
 
   generatePureTissueN4WeightMask <- function( probabilityImages )
@@ -98,8 +106,9 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
       atroposInitialization <- atroposOutput$probabilityimages
       posteriorFormulation = "Socrates[1]"
       }
+    iterations <- paste0( "[", numberOfAtroposIterations, ",0]" )
     atroposOutput <- atropos( preprocessedImage, x = dilatedMask, i = atroposInitialization,
-      m = mrfParameters, c = "[5,0]", priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
+      m = mrfParameters, c = iterations, priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
 
     weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:4] )
     }
