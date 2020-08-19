@@ -8,21 +8,29 @@
 
 <title>powers_areal_mni_itk — powers_areal_mni_itk • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,11 +38,12 @@
 
 
 
-<meta property="og:title" content="powers_areal_mni_itk — powers_areal_mni_itk" />
 
-<meta property="og:description" content="A data frame providing coordinates for the nodes identified by Powers at al.
-Coordinates have been modified from nifti space to ITK space" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="powers_areal_mni_itk — powers_areal_mni_itk" />
+<meta property="og:description" content="A data frame providing coordinates for the nodes 
+identified by Powers at al. Coordinates have been modified from nifti 
+space to ITK space" />
+
 
 
 
@@ -48,9 +57,10 @@ Coordinates have been modified from nifti space to ITK space" />
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -64,7 +74,7 @@ Coordinates have been modified from nifti space to ITK space" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -72,7 +82,7 @@ Coordinates have been modified from nifti space to ITK space" />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -113,7 +123,6 @@ Coordinates have been modified from nifti space to ITK space" />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -123,6 +132,7 @@ Coordinates have been modified from nifti space to ITK space" />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -134,66 +144,61 @@ Coordinates have been modified from nifti space to ITK space" />
     </div>
 
     <div class="ref-description">
-    
-    <p>A data frame providing coordinates for the nodes identified by Powers at al.
-Coordinates have been modified from nifti space to ITK space</p>
-    
+    <p>A data frame providing coordinates for the nodes 
+identified by Powers at al. Coordinates have been modified from nifti 
+space to ITK space</p>
     </div>
 
-    <pre class="usage"><span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>(<span class='no'>powers_areal_mni_itk</span>)</pre>
-        
+    <pre class="usage"><span class='no'>powers_areal_mni_itk</span></pre>
+
+
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A data frame listing the following variables.</p><dl class='dl-horizontal'>
-    <dt><code>x</code></dt><dd><p>x coordinate</p></dd>
-    <dt><code>y</code></dt><dd><p>y coordinate</p></dd>
-    <dt><code>z</code></dt><dd><p>z coordinate</p></dd>
-    <dt><code>ROI</code></dt><dd><p>unique integer for each node</p></dd>
-    <dt><code>SystemLabel</code></dt><dd><p>unique integer for each system</p></dd>
-    <dt><code>SystemName</code></dt><dd><p>unique name for each system</p></dd>
-    <dt><code>Color</code></dt><dd><p>name of color for system</p></dd>
-    <dt><code>r</code></dt><dd><p>red value for system</p></dd>
-    <dt><code>g</code></dt><dd><p>green value for system</p></dd>
-    <dt><code>b</code></dt><dd><p>blue value for system</p></dd>
-    <dt><code>Anatomy</code></dt><dd><p>anatomical location as determined by OASIS labeling</p></dd>
-    <dt><code>Lobe</code></dt><dd><p>lobe location of node</p></dd>
-    <dt><code>Brodmann</code></dt><dd><p>Broadmann area number</p></dd>
-    <dt><code>AAL</code></dt><dd><p>AAL region label</p></dd>
-  </dl>
-    
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <p>A data frame listing the following variables.</p><dl'>
+  <dt><code>x</code></dt><dd><p>x coordinate</p></dd>
+  <dt><code>y</code></dt><dd><p>y coordinate</p></dd>
+  <dt><code>z</code></dt><dd><p>z coordinate</p></dd>
+  <dt><code>ROI</code></dt><dd><p>unique integer for each node</p></dd>
+  <dt><code>SystemLabel</code></dt><dd><p>unique integer for each system</p></dd>
+  <dt><code>SystemName</code></dt><dd><p>unique name for each system</p></dd>
+  <dt><code>Color</code></dt><dd><p>name of color for system</p></dd>
+  <dt><code>r</code></dt><dd><p>red value for system</p></dd>
+  <dt><code>g</code></dt><dd><p>green value for system</p></dd>
+  <dt><code>b</code></dt><dd><p>blue value for system</p></dd>
+  <dt><code>Anatomy</code></dt><dd><p>anatomical location as 
+  determined by OASIS labeling</p></dd>
+  <dt><code>Lobe</code></dt><dd><p>lobe location of node</p></dd>
+  <dt><code>Brodmann</code></dt><dd><p>Broadmann area number</p></dd>
+  <dt><code>AAL</code></dt><dd><p>AAL region label</p></dd>
 
-    <p><a href='http://www.nil.wustl.edu/labs/petersen/Resources.html'>http://www.nil.wustl.edu/labs/petersen/Resources.html</a></p>
-    
+</dl><p>#' @references <a href='http://www.nil.wustl.edu/labs/petersen/Resources.html'>http://www.nil.wustl.edu/labs/petersen/Resources.html</a></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>(<span class='no'>powers_areal_mni_itk</span>)</div><span class='co'># NOT RUN {</span>
-<span class='no'>fixed</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>(<span class='st'>"ch2"</span>) )
-<span class='no'>moving</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>(<span class='st'>"mni"</span>) )
-<span class='no'>mytx</span> <span class='kw'>&lt;-</span> <span class='fu'>antsRegistration</span>( <span class='kw'>fixed</span><span class='kw'>=</span><span class='no'>fixed</span>, <span class='kw'>moving</span><span class='kw'>=</span><span class='no'>moving</span>, <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"SyN"</span>) )
-<span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/data'>data</a></span>( <span class='st'>"powers_areal_mni_itk"</span>, <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"ANTsR"</span>, <span class='kw'>envir</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/environment'>environment</a></span>() )
-<span class='no'>coords</span> <span class='kw'>=</span> <span class='no'>powers_areal_mni_itk</span>[,<span class='fl'>1</span>:<span class='fl'>3</span>]
-<span class='no'>ch2reg</span>   <span class='kw'>=</span> <span class='fu'>antsRegistration</span>( <span class='no'>fixed</span>, <span class='no'>moving</span>, <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='st'>"SyN"</span> )
-<span class='no'>coordsw</span> <span class='kw'>&lt;-</span> <span class='fu'>antsApplyTransformsToPoints</span>( <span class='kw'>dim</span><span class='kw'>=</span><span class='fl'>3</span>, <span class='kw'>points</span><span class='kw'>=</span><span class='no'>coords</span>,
-       <span class='kw'>transformlist</span><span class='kw'>=</span><span class='no'>ch2reg</span>$<span class='no'>fwdtransforms</span>, <span class='kw'>whichtoinvert</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>FALSE</span>,<span class='fl'>FALSE</span>) )
-<span class='no'>ptrd</span> <span class='kw'>=</span> <span class='fl'>3</span>
-<span class='no'>powersLabels</span> <span class='kw'>=</span> <span class='fu'><a href='makePointsImage.html'>makePointsImage</a></span>( <span class='no'>coordsw</span>, <span class='no'>moving</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='no'>pard</span> )
-<span class='fu'><a href='https://www.rdocumentation.org/packages/graphics/topics/plot'>plot</a></span>( <span class='no'>moving</span>, <span class='no'>powersLabels</span>, <span class='kw'>axis</span><span class='kw'>=</span><span class='fl'>3</span>, <span class='kw'>nslices</span><span class='kw'>=</span><span class='fl'>30</span> )
-<span class='co'># }</span></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>powers_areal_mni_itk</span>)
+<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+  <span class='no'>fixed</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>(<span class='st'>"ch2"</span>) )
+  <span class='no'>moving</span> <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>(<span class='st'>"mni"</span>) )
+  <span class='no'>mytx</span> <span class='kw'>&lt;-</span> <span class='fu'>antsRegistration</span>( <span class='kw'>fixed</span><span class='kw'>=</span><span class='no'>fixed</span>, <span class='kw'>moving</span><span class='kw'>=</span><span class='no'>moving</span>,
+  <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"SyN"</span>) )
+  <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>( <span class='st'>"powers_areal_mni_itk"</span>, <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"ANTsR"</span>, <span class='kw'>envir</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>environment</a></span>() )
+  <span class='no'>coords</span> <span class='kw'>=</span> <span class='no'>powers_areal_mni_itk</span>[,<span class='fl'>1</span>:<span class='fl'>3</span>]
+  <span class='no'>ch2reg</span>   <span class='kw'>=</span> <span class='fu'>antsRegistration</span>( <span class='no'>fixed</span>, <span class='no'>moving</span>, <span class='kw'>typeofTransform</span> <span class='kw'>=</span> <span class='st'>"SyN"</span> )
+  <span class='no'>coordsw</span> <span class='kw'>&lt;-</span> <span class='fu'>antsApplyTransformsToPoints</span>(
+  <span class='kw'>dim</span><span class='kw'>=</span><span class='fl'>3</span>, <span class='kw'>points</span><span class='kw'>=</span><span class='no'>coords</span>,
+  <span class='kw'>transformlist</span><span class='kw'>=</span><span class='no'>ch2reg</span>$<span class='no'>fwdtransforms</span>,
+  <span class='kw'>whichtoinvert</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>FALSE</span>,<span class='fl'>FALSE</span>) )
+  <span class='no'>ptrd</span> <span class='kw'>=</span> <span class='fl'>3</span>
+  <span class='no'>powersLabels</span> <span class='kw'>=</span> <span class='fu'><a href='makePointsImage.html'>makePointsImage</a></span>( <span class='no'>coordsw</span>, <span class='no'>moving</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='no'>pard</span> )
+  <span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>( <span class='no'>moving</span>, <span class='no'>powersLabels</span>, <span class='kw'>axis</span><span class='kw'>=</span><span class='fl'>3</span>, <span class='kw'>nslices</span><span class='kw'>=</span><span class='fl'>30</span> )
+}</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      
-      <li><a href="#format">Format</a></li>
-
-      <li><a href="#references">References</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -201,13 +206,16 @@ Coordinates have been modified from nifti space to ITK space</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

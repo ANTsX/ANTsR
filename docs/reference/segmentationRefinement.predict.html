@@ -8,21 +8,29 @@
 
 <title>Segmentation refinement using corrective learning (prediction) — segmentationRefinement.predict • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,16 +38,16 @@
 
 
 
-<meta property="og:title" content="Segmentation refinement using corrective learning (prediction) — segmentationRefinement.predict" />
 
-<meta property="og:description" content="A random forest implementation of the corrective learning wrapper 
+<meta property="og:title" content="Segmentation refinement using corrective learning (prediction) — segmentationRefinement.predict" />
+<meta property="og:description" content="A random forest implementation of the corrective learning wrapper
 introduced
-in Wang, et al., Neuroimage 2011 
+in Wang, et al., Neuroimage 2011
 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
-The prediction process involves using the label-specific training 
+The prediction process involves using the label-specific training
 models
 to refine an initial segmentation." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -53,9 +61,10 @@ to refine an initial segmentation." />
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +78,7 @@ to refine an initial segmentation." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -77,7 +86,7 @@ to refine an initial segmentation." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -118,7 +127,6 @@ to refine an initial segmentation." />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -128,6 +136,7 @@ to refine an initial segmentation." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -139,22 +148,27 @@ to refine an initial segmentation." />
     </div>
 
     <div class="ref-description">
-    
-    <p>A random forest implementation of the corrective learning wrapper 
+    <p>A random forest implementation of the corrective learning wrapper
 introduced
-in Wang, et al., Neuroimage 2011 
+in Wang, et al., Neuroimage 2011
 (http://www.ncbi.nlm.nih.gov/pubmed/21237273).
-The prediction process involves using the label-specific training 
+The prediction process involves using the label-specific training
 models
 to refine an initial segmentation.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>segmentationRefinement.predict</span>(<span class='no'>segmentationImage</span>, <span class='no'>labelSet</span>, <span class='no'>labelModels</span>,
-  <span class='no'>featureImages</span>, <span class='no'>featureImageNames</span>, <span class='kw'>dilationRadius</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>neighborhoodRadius</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>normalizeSamplesPerLabel</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>useEntireLabeledRegion</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>segmentationRefinement.predict</span>(
+  <span class='no'>segmentationImage</span>,
+  <span class='no'>labelSet</span>,
+  <span class='no'>labelModels</span>,
+  <span class='no'>featureImages</span>,
+  <span class='no'>featureImageNames</span>,
+  <span class='kw'>dilationRadius</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+  <span class='kw'>neighborhoodRadius</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>normalizeSamplesPerLabel</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>useEntireLabeledRegion</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -169,8 +183,8 @@ Must be specified.</p></td>
     </tr>
     <tr>
       <th>labelModels</th>
-      <td><p>a list of models.
-Each element of the labelSet requires a model.</p></td>
+      <td><p>a list of models. Each element of the labelSet
+requires a model.</p></td>
     </tr>
     <tr>
       <th>featureImages</th>
@@ -178,21 +192,17 @@ Each element of the labelSet requires a model.</p></td>
     </tr>
     <tr>
       <th>featureImageNames</th>
-      <td><p>is a vector of character strings naming the set 
-of features.
-       Must be specified.</p></td>
+      <td><p>is a vector of character strings naming the set
+of features. Must be specified.</p></td>
     </tr>
     <tr>
       <th>dilationRadius</th>
-      <td><p>specifies the dilation radius for determining the 
-ROI for
-       each label using binary morphology.  Alternatively, the user can 
-       specify a
-       float distance value, e.g., "dilationRadius = '2.75mm'", to employ 
-       an isotropic
-       dilation based on physical distance.  For the latter, the distance 
-       value followed
-       by the character string 'mm' (for millimeters) is necessary.</p></td>
+      <td><p>specifies the dilation radius for determining the
+ROI for each label using binary morphology.  Alternatively, the user can
+specify a float distance value, e.g., "dilationRadius = '2.75mm'", to
+employ an isotropic dilation based on physical distance.  For the latter,
+the distance value followed by the character string 'mm' (for millimeters)
+is necessary.</p></td>
     </tr>
     <tr>
       <th>neighborhoodRadius</th>
@@ -202,119 +212,104 @@ with what was used for training.</p></td>
     </tr>
     <tr>
       <th>normalizeSamplesPerLabel</th>
-      <td><p>if TRUE, the samples from each ROI are 
-normalized
-       by the mean of the voxels in that ROI.  Can be a vector (one 
-       element per feature).</p></td>
+      <td><p>if TRUE, the samples from each ROI are
+normalized by the mean of the voxels in that ROI.  Can be a vector (one
+element per feature).</p></td>
     </tr>
     <tr>
       <th>useEntireLabeledRegion</th>
-      <td><p>if TRUE, estimation is performed on the 
-full dilated ROI for
-       each label.  If FALSE, estimation is performed on the combined 
-       inner and outer
-       boundary region determined by the neighborhoodRadius parameter.  
-       Can also specify
-       as a vector to determine per label.</p></td>
+      <td><p>if TRUE, estimation is performed on the
+full dilated ROI for each label.  If FALSE, estimation is performed on the
+combined inner and outer boundary region determined by the
+<code>neighborhoodRadius</code> parameter. Can also specify as a vector to determine
+per label.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a list consisting of the refined segmentation estimate 
-(RefinedSegmentationImage)
-        and a list of the foreground probability images 
-        (ForegroundProbabilityImages).</p>
-    
+    <p>a list consisting of the refined segmentation estimate
+ (RefinedSegmentationImage) and a list of the foreground
+ probability images (ForegroundProbabilityImages).</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"># NOT RUN {
- library( ANTsR )
- library( ggplot2 )
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 
- imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
+ <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>( <span class='no'>ANTsR</span> )
+ <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>( <span class='no'>ggplot2</span> )
 
- # Perform simple 3-tissue segmentation.  For convenience we are 
- going to use
- # atropos segmentation to define the "ground-truth" segmentations 
- and the kmeans
- # to define the segmentation we want to "correct".  We collect 
- feature images for
- # each image.  The gradient and laplacian images chosen below as 
- feature images
- # are simply selected for convenience.
+ <span class='no'>imageIDs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='st'>"r16"</span>, <span class='st'>"r27"</span>, <span class='st'>"r30"</span>, <span class='st'>"r62"</span>, <span class='st'>"r64"</span>, <span class='st'>"r85"</span> )
 
- segmentationLabels <- c( 1, 2, 3 )
+ <span class='co'># Perform simple 3-tissue segmentation.  For convenience we are</span>
+ <span class='co'># going to use atropos segmentation to define the "ground-truth"</span>
+ <span class='co'># segmentations and the kmeans to define the segmentation we</span>
+ <span class='co'># want to "correct".  We collect feature images for each image.</span>
+ <span class='co'># The gradient and laplacian images chosen below as feature</span>
+ <span class='co'># images are simply selected for convenience.</span>
 
- featureImageNames <- c( 'T1', 'Gradient', 'Laplacian' )
+ <span class='no'>segmentationLabels</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span> )
 
- images <- list()
- kmeansSegs <- list()
- atroposSegs <- list()
- featureImages <- list()
+ <span class='no'>featureImageNames</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='st'>'T1'</span>, <span class='st'>'Gradient'</span>, <span class='st'>'Laplacian'</span> )
 
- for( i in 1:length( imageIDs ) )
+ <span class='no'>images</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+ <span class='no'>kmeansSegs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+ <span class='no'>atroposSegs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+ <span class='no'>featureImages</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+
+ <span class='kw'>for</span>( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>( <span class='no'>imageIDs</span> ) )
    {
-   cat( "Processing image", imageIDs[i], "\n" )
-   images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
-   mask <- getMask( images[[i]] )
-   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]], 
-   length( segmentationLabels ), mask, mrf = 0.0 )$segmentation
-   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]", 
-   m = "[0.25,1x1]", c = "[5,0]" )$segmentation
+   <span class='fu'><a href='https://rdrr.io/r/base/cat.html'>cat</a></span>( <span class='st'>"Processing image"</span>, <span class='no'>imageIDs</span>[<span class='no'>i</span>], <span class='st'>"\n"</span> )
+   <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>&lt;-</span> <span class='fu'>antsImageRead</span>( <span class='fu'>getANTsRData</span>( <span class='no'>imageIDs</span>[<span class='no'>i</span>] ) )
+   <span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'>getMask</span>( <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]] )
+   <span class='no'>kmeansSegs</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>&lt;-</span> <span class='fu'>kmeansSegmentation</span>( <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]],
+   <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>( <span class='no'>segmentationLabels</span> ), <span class='no'>mask</span>, <span class='kw'>mrf</span> <span class='kw'>=</span> <span class='fl'>0.0</span> )$<span class='no'>segmentation</span>
+   <span class='no'>atroposSegs</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>&lt;-</span> <span class='fu'>atropos</span>( <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='no'>mask</span>, <span class='kw'>i</span> <span class='kw'>=</span> <span class='st'>"KMeans[3]"</span>,
+   <span class='kw'>m</span> <span class='kw'>=</span> <span class='st'>"[0.25,1x1]"</span>, <span class='kw'>c</span> <span class='kw'>=</span> <span class='st'>"[5,0]"</span> )$<span class='no'>segmentation</span>
 
-   featureImageSetPerImage <- list()
-   featureImageSetPerImage[[1]] <- images[[i]]
-   featureImageSetPerImage[[2]] <- iMath( images[[i]], "Grad", 1.0 )
-   featureImageSetPerImage[[3]] <- iMath( images[[i]], "Laplacian", 1.0 )
-   featureImages[[i]] <- featureImageSetPerImage
+   <span class='no'>featureImageSetPerImage</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+   <span class='no'>featureImageSetPerImage</span><span class='kw'>[[</span><span class='fl'>1</span>]] <span class='kw'>&lt;-</span> <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]]
+   <span class='no'>featureImageSetPerImage</span><span class='kw'>[[</span><span class='fl'>2</span>]] <span class='kw'>&lt;-</span> <span class='fu'>iMath</span>( <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='st'>"Grad"</span>, <span class='fl'>1.0</span> )
+   <span class='no'>featureImageSetPerImage</span><span class='kw'>[[</span><span class='fl'>3</span>]] <span class='kw'>&lt;-</span> <span class='fu'>iMath</span>( <span class='no'>images</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='st'>"Laplacian"</span>, <span class='fl'>1.0</span> )
+   <span class='no'>featureImages</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>&lt;-</span> <span class='no'>featureImageSetPerImage</span>
    }
 
- # Perform training.  We train on images "r27", "r30", 
- # "r62", "r64", "r85" and
- # test/predict on image "r16".
+ <span class='co'># Perform training.  We train on images "r27", "r30",</span>
+ <span class='co'># "r62", "r64", "r85" and</span>
+ <span class='co'># test/predict on image "r16".</span>
 
- cat( "\nTraining\n\n" )
+ <span class='fu'><a href='https://rdrr.io/r/base/cat.html'>cat</a></span>( <span class='st'>"\nTraining\n\n"</span> )
 
- segLearning <- segmentationRefinement.train( 
- featureImages = featureImages[2:6],
-   truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
-   featureImageNames = featureImageNames, labelSet = segmentationLabels,
-   maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE, 
-   useEntireLabeledRegion = FALSE )
+ <span class='no'>segLearning</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='segmentationRefinement.train.html'>segmentationRefinement.train</a></span>(
+ <span class='kw'>featureImages</span> <span class='kw'>=</span> <span class='no'>featureImages</span>[<span class='fl'>2</span>:<span class='fl'>6</span>],
+   <span class='kw'>truthLabelImages</span> <span class='kw'>=</span> <span class='no'>atroposSegs</span>[<span class='fl'>2</span>:<span class='fl'>6</span>], <span class='kw'>segmentationImages</span> <span class='kw'>=</span> <span class='no'>kmeansSegs</span>[<span class='fl'>2</span>:<span class='fl'>6</span>],
+   <span class='kw'>featureImageNames</span> <span class='kw'>=</span> <span class='no'>featureImageNames</span>, <span class='kw'>labelSet</span> <span class='kw'>=</span> <span class='no'>segmentationLabels</span>,
+   <span class='kw'>maximumNumberOfSamplesOrProportionPerClass</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>dilationRadius</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+   <span class='kw'>neighborhoodRadius</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='fl'>1</span>, <span class='fl'>1</span> ), <span class='kw'>normalizeSamplesPerLabel</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+   <span class='kw'>useEntireLabeledRegion</span> <span class='kw'>=</span> <span class='fl'>FALSE</span> )
 
- cat( "\nPrediction\n\n" )
+ <span class='fu'><a href='https://rdrr.io/r/base/cat.html'>cat</a></span>( <span class='st'>"\nPrediction\n\n"</span> )
 
- refinement <- segmentationRefinement.predict(
-   segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
-   segLearning$LabelModels, featureImages[[1]], featureImageNames,
-   dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
-   normalizeSamplesPerLabel = TRUE )
+ <span class='no'>refinement</span> <span class='kw'>&lt;-</span> <span class='fu'>segmentationRefinement.predict</span>(
+   <span class='kw'>segmentationImage</span> <span class='kw'>=</span> <span class='no'>kmeansSegs</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='kw'>labelSet</span> <span class='kw'>=</span> <span class='no'>segmentationLabels</span>,
+   <span class='no'>segLearning</span>$<span class='no'>LabelModels</span>, <span class='no'>featureImages</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>featureImageNames</span>,
+   <span class='kw'>dilationRadius</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>neighborhoodRadius</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='fl'>1</span>, <span class='fl'>1</span> ),
+   <span class='kw'>normalizeSamplesPerLabel</span> <span class='kw'>=</span> <span class='fl'>TRUE</span> )
 
- # Compare "ground truth" = atroposSegs[[1]] with 
- # refinement$RefinedSegmentationImage
+ <span class='co'># Compare "ground truth" = atroposSegs[[1]] with</span>
+ <span class='co'># refinement$RefinedSegmentationImage</span>
 
-  antsImageWrite( refinement$RefinedSegmentationImage, 
-  "r16RefinedSegmentation.nii.gz" )
+  <span class='fu'>antsImageWrite</span>( <span class='no'>refinement</span>$<span class='no'>RefinedSegmentationImage</span>,
+  <span class='st'>"r16RefinedSegmentation.nii.gz"</span> )
 
-# }
-</pre>
+}</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Tustison NJ</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -322,13 +317,16 @@ full dilated ROI for
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

@@ -8,21 +8,29 @@
 
 <title>multiple resolution neighborhood random forest regression — multiResRandomForestRegression • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,14 +38,14 @@
 
 
 
-<meta property="og:title" content="multiple resolution neighborhood random forest regression — multiResRandomForestRegression" />
 
+<meta property="og:title" content="multiple resolution neighborhood random forest regression — multiResRandomForestRegression" />
 <meta property="og:description" content="Represents feature images as a neighborhood across scales
 to build a random forest prediction from an image population. A use case
 for this function is to predict cognition from multiple image features, e.g.
 from the voxelwise FA of the corpus callosum and, in parallel, voxelwise
 measurements of the volume of the inferior frontal gyrus." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -51,9 +59,10 @@ measurements of the volume of the inferior frontal gyrus." />
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -67,7 +76,7 @@ measurements of the volume of the inferior frontal gyrus." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -75,7 +84,7 @@ measurements of the volume of the inferior frontal gyrus." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -116,7 +125,6 @@ measurements of the volume of the inferior frontal gyrus." />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -126,6 +134,7 @@ measurements of the volume of the inferior frontal gyrus." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -137,18 +146,23 @@ measurements of the volume of the inferior frontal gyrus." />
     </div>
 
     <div class="ref-description">
-    
     <p>Represents feature images as a neighborhood across scales
 to build a random forest prediction from an image population. A use case
 for this function is to predict cognition from multiple image features, e.g.
 from the voxelwise FA of the corpus callosum and, in parallel, voxelwise
 measurements of the volume of the inferior frontal gyrus.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>multiResRandomForestRegression</span>(<span class='no'>y</span>, <span class='no'>x</span>, <span class='no'>labelmasks</span>, <span class='kw'>rad</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>nsamples</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>multiResSchedule</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0</span>), <span class='kw'>ntrees</span> <span class='kw'>=</span> <span class='fl'>500</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>multiResRandomForestRegression</span>(
+  <span class='no'>y</span>,
+  <span class='no'>x</span>,
+  <span class='no'>labelmasks</span>,
+  <span class='kw'>rad</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>nsamples</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>multiResSchedule</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>),
+  <span class='kw'>ntrees</span> <span class='kw'>=</span> <span class='fl'>500</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -185,110 +199,97 @@ in which case this should be a list of lists.  see examples.</p></td>
       <td><p>(for the random forest model)</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>list with a random forest model, a vector identifying which rows
 correspond to which subjects and a prediction vector.</p>
-    
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Pustina, D, et al.  Automated segmentation of chronic stroke
 lesions using LINDA: Lesion Identification with Neighborhood Data Analysis,
 Human Brain Mapping, 2016. (related work, not identical)</p>
-    
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='getMultiResFeatureMatrix.html'>getMultiResFeatureMatrix</a></code> <code><a href='mrvnrfs.html'>mrvnrfs</a></code></p></div>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>mask</span><span class='kw'>&lt;-</span><span class='fu'>makeImage</span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>100</span>,<span class='fl'>100</span>), <span class='fl'>0</span> )
+<span class='no'>mask</span><span class='kw'>&lt;-</span><span class='fu'>makeImage</span>( <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>100</span>,<span class='fl'>100</span>), <span class='fl'>0</span> )
 <span class='no'>mask</span>[ <span class='fl'>30</span>:<span class='fl'>60</span>, <span class='fl'>30</span>:<span class='fl'>60</span> ]<span class='kw'>&lt;-</span><span class='fl'>1</span>
 <span class='no'>mask</span>[ <span class='fl'>35</span>:<span class='fl'>45</span>, <span class='fl'>50</span>:<span class='fl'>60</span>]<span class='kw'>&lt;-</span><span class='fl'>2</span>
-<span class='no'>ilist</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>()
-<span class='no'>masklist</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>()
+<span class='no'>ilist</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+<span class='no'>masklist</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
 <span class='no'>inds</span><span class='kw'>&lt;-</span><span class='fl'>1</span>:<span class='fl'>8</span>
-<span class='no'>yvec</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>(<span class='fl'>0</span>,<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>inds</span>))
+<span class='no'>yvec</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>0</span>,<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>inds</span>))
 <span class='no'>scl</span><span class='kw'>&lt;-</span><span class='fl'>0.33</span> <span class='co'># a noise parameter</span>
 <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='no'>inds</span> ) {
   <span class='no'>img</span><span class='kw'>&lt;-</span><span class='fu'>antsImageClone</span>(<span class='no'>mask</span>)
   <span class='no'>imgb</span><span class='kw'>&lt;-</span><span class='fu'>antsImageClone</span>(<span class='no'>mask</span>)
   <span class='no'>limg</span><span class='kw'>&lt;-</span><span class='fu'>antsImageClone</span>(<span class='no'>mask</span>)
-  <span class='no'>img</span>[ <span class='fl'>3</span>:<span class='fl'>6</span>, <span class='fl'>3</span>:<span class='fl'>6</span> ]<span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>16</span>,<span class='fl'>1</span>)*<span class='no'>scl</span>*(<span class='no'>i</span>)+<span class='no'>scl</span>*<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>1</span>))
-  <span class='no'>imgb</span>[ <span class='fl'>3</span>:<span class='fl'>6</span>, <span class='fl'>3</span>:<span class='fl'>6</span> ]<span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>16</span>,<span class='fl'>1</span>)*<span class='no'>scl</span>*(<span class='no'>i</span>)+<span class='no'>scl</span>*<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/mean'>mean</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='fl'>1</span>))
-  <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]]<span class='kw'>&lt;-</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='no'>img</span>,<span class='no'>imgb</span>)  <span class='co'># two features</span>
+  <span class='no'>img</span>[ <span class='fl'>3</span>:<span class='fl'>6</span>, <span class='fl'>3</span>:<span class='fl'>6</span> ]<span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>16</span>,<span class='fl'>1</span>)*<span class='no'>scl</span>*(<span class='no'>i</span>)+<span class='no'>scl</span>*<span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>1</span>))
+  <span class='no'>imgb</span>[ <span class='fl'>3</span>:<span class='fl'>6</span>, <span class='fl'>3</span>:<span class='fl'>6</span> ]<span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>16</span>,<span class='fl'>1</span>)*<span class='no'>scl</span>*(<span class='no'>i</span>)+<span class='no'>scl</span>*<span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>1</span>))
+  <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]]<span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='no'>img</span>,<span class='no'>imgb</span>)  <span class='co'># two features</span>
   <span class='no'>yvec</span>[<span class='no'>i</span>]<span class='kw'>&lt;-</span><span class='no'>i</span>^<span class='fl'>2.0</span>  <span class='co'># a real outcome</span>
   <span class='no'>masklist</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>=</span> <span class='fu'>antsImageClone</span>( <span class='no'>mask</span> )
   }
-<span class='no'>r</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>1</span>)
-<span class='no'>mr</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>2</span>,<span class='fl'>0</span>)
+<span class='no'>r</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>1</span>)
+<span class='no'>mr</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>2</span>,<span class='fl'>0</span>)
 <span class='no'>featMat</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='getMultiResFeatureMatrix.html'>getMultiResFeatureMatrix</a></span>( <span class='no'>ilist</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>masklist</span><span class='kw'>[[</span><span class='fl'>1</span>]],
   <span class='kw'>rad</span><span class='kw'>=</span><span class='no'>r</span>, , <span class='kw'>multiResSchedule</span><span class='kw'>=</span><span class='no'>mr</span> )
 <span class='no'>rfm</span> <span class='kw'>&lt;-</span> <span class='fu'>multiResRandomForestRegression</span>(
   <span class='no'>yvec</span> , <span class='no'>ilist</span>, <span class='no'>masklist</span>, <span class='kw'>rad</span><span class='kw'>=</span><span class='no'>r</span>, <span class='kw'>multiResSchedule</span><span class='kw'>=</span><span class='no'>mr</span> )
-<span class='no'>preds</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>( <span class='no'>rfm</span>, <span class='kw'>newdata</span><span class='kw'>=</span><span class='no'>featMat</span> )</div><span class='co'># NOT RUN {</span>
+<span class='no'>preds</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>( <span class='no'>rfm</span>, <span class='kw'>newdata</span><span class='kw'>=</span><span class='no'>featMat</span> )
+<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 <span class='co'># data: https://github.com/stnava/ANTsTutorial/tree/master/phantomData</span>
-<span class='no'>fns</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Sys.glob'>Sys.glob</a></span>(<span class='st'>"phantom*wmgm.jpg"</span>)
+<span class='no'>fns</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.glob.html'>Sys.glob</a></span>(<span class='st'>"phantom*wmgm.jpg"</span>)
 <span class='no'>ilist</span> <span class='kw'>=</span> <span class='fu'>imageFileNames2ImageList</span>( <span class='no'>fns</span> )
-<span class='no'>masklist</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>( )
-<span class='no'>flist</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>( )
-<span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>(<span class='no'>fns</span>) )
+<span class='no'>masklist</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>( )
+<span class='no'>flist</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>( )
+<span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>1</span>:<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>fns</span>) )
   {
 <span class='co'># 2 labels means 2 sets of side by side predictors and features at each scale</span>
   <span class='no'>locseg</span> <span class='kw'>=</span> <span class='fu'>kmeansSegmentation</span>( <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='fl'>2</span> )$<span class='no'>segmentation</span>
-  <span class='no'>masklist</span><span class='kw'>[[</span> <span class='no'>i</span> ]] <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>( <span class='no'>locseg</span>, <span class='no'>locseg</span> <span class='kw'>%&gt;%</span> <span class='fu'>thresholdImage</span>(<span class='fl'>2</span>,<span class='fl'>2</span>), <span class='no'>locseg</span> )
-  <span class='no'>flist</span><span class='kw'>[[</span> <span class='no'>i</span> ]] <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>( <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>%&gt;%</span> <span class='fu'>iMath</span>(<span class='st'>"Laplacian"</span>,<span class='fl'>1</span>),
+  <span class='no'>masklist</span><span class='kw'>[[</span> <span class='no'>i</span> ]] <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>( <span class='no'>locseg</span>, <span class='no'>locseg</span> <span class='kw'>%&gt;%</span> <span class='fu'>thresholdImage</span>(<span class='fl'>2</span>,<span class='fl'>2</span>), <span class='no'>locseg</span> )
+  <span class='no'>flist</span><span class='kw'>[[</span> <span class='no'>i</span> ]] <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>( <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>%&gt;%</span> <span class='fu'>iMath</span>(<span class='st'>"Laplacian"</span>,<span class='fl'>1</span>),
     <span class='no'>ilist</span><span class='kw'>[[</span><span class='no'>i</span>]] <span class='kw'>%&gt;%</span> <span class='fu'>iMath</span>(<span class='st'>"Grad"</span>,<span class='fl'>1</span>)  )
   }
-<span class='no'>yvec</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/factor'>factor</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>( <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>2</span>), <span class='kw'>each</span> <span class='kw'>=</span> <span class='fl'>4</span> ) ) <span class='co'># classification</span>
-<span class='no'>r</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>( <span class='fl'>1</span>, <span class='fl'>1</span> )
-<span class='no'>mr</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>( <span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>0</span> )
+<span class='no'>yvec</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>( <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>( <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>2</span>), <span class='kw'>each</span> <span class='kw'>=</span> <span class='fl'>4</span> ) ) <span class='co'># classification</span>
+<span class='no'>r</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='fl'>1</span>, <span class='fl'>1</span> )
+<span class='no'>mr</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>( <span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>0</span> )
 <span class='no'>ns</span> <span class='kw'>=</span> <span class='fl'>50</span>
-<span class='no'>trn</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>:<span class='fl'>3</span>,<span class='fl'>6</span>:<span class='fl'>8</span>)
+<span class='no'>trn</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>:<span class='fl'>3</span>,<span class='fl'>6</span>:<span class='fl'>8</span>)
 <span class='no'>ytrain</span> <span class='kw'>=</span> <span class='no'>yvec</span>[ <span class='no'>trn</span> ]
 <span class='no'>ftrain</span> <span class='kw'>=</span> <span class='no'>flist</span>[ <span class='no'>trn</span> ]
 <span class='no'>mtrain</span> <span class='kw'>=</span> <span class='no'>masklist</span>[ <span class='no'>trn</span> ]
-<span class='no'>mrrfr</span> <span class='kw'>=</span> <span class='fu'>multiResRandomForestRegression</span>( <span class='no'>ytrain</span>, <span class='no'>ftrain</span>, <span class='no'>mtrain</span>, <span class='kw'>rad</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>1</span>),
+<span class='no'>mrrfr</span> <span class='kw'>=</span> <span class='fu'>multiResRandomForestRegression</span>( <span class='no'>ytrain</span>, <span class='no'>ftrain</span>, <span class='no'>mtrain</span>, <span class='kw'>rad</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>1</span>),
   <span class='kw'>nsamples</span> <span class='kw'>=</span> <span class='no'>ns</span>, <span class='kw'>multiResSchedule</span><span class='kw'>=</span><span class='no'>mr</span> )
-<span class='no'>mypreds</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/rep'>rep</a></span>( <span class='fl'>NA</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/length'>length</a></span>( <span class='no'>fns</span> ) )
+<span class='no'>mypreds</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>( <span class='fl'>NA</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>( <span class='no'>fns</span> ) )
 <span class='no'>mymode</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>x</span>) {
- <span class='no'>ux</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/unique'>unique</a></span>(<span class='no'>x</span>)
- <span class='no'>ux</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/which.min'>which.max</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/tabulate'>tabulate</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/match'>match</a></span>(<span class='no'>x</span>, <span class='no'>ux</span>)))]
+ <span class='no'>ux</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span>(<span class='no'>x</span>)
+ <span class='no'>ux</span>[<span class='fu'><a href='https://rdrr.io/r/base/which.min.html'>which.max</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/tabulate.html'>tabulate</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/match.html'>match</a></span>(<span class='no'>x</span>, <span class='no'>ux</span>)))]
 }
 <span class='kw'>for</span> ( <span class='no'>i</span> <span class='kw'>in</span> <span class='fl'>4</span>:<span class='fl'>5</span> ) <span class='co'># test set</span>
   {
   <span class='no'>fmat</span> <span class='kw'>=</span> <span class='fu'><a href='getMultiResFeatureMatrix.html'>getMultiResFeatureMatrix</a></span>( <span class='no'>flist</span><span class='kw'>[[</span><span class='no'>i</span>]], <span class='no'>masklist</span><span class='kw'>[[</span><span class='no'>i</span>]],
          <span class='kw'>rad</span><span class='kw'>=</span><span class='no'>r</span>,  <span class='kw'>multiResSchedule</span><span class='kw'>=</span><span class='no'>mr</span>, <span class='kw'>nsamples</span> <span class='kw'>=</span> <span class='no'>ns</span> )
-  <span class='no'>myp</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>( <span class='no'>mrrfr</span>, <span class='kw'>newdata</span><span class='kw'>=</span><span class='no'>fmat</span> )
+  <span class='no'>myp</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>( <span class='no'>mrrfr</span>, <span class='kw'>newdata</span><span class='kw'>=</span><span class='no'>fmat</span> )
   <span class='no'>mypreds</span>[ <span class='no'>i</span> ] <span class='kw'>=</span> <span class='fu'>mymode</span>( <span class='no'>myp</span> ) <span class='co'># get the most frequent observation</span>
   <span class='co'># use median or mean for continuous predictions</span>
   }
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='st'>"predicted"</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='no'>mypreds</span>[-<span class='no'>trn</span>] )
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='st'>"ground truth"</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>( <span class='no'>yvec</span>[-<span class='no'>trn</span>] )
-<span class='co'># }</span></pre>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='st'>"predicted"</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='no'>mypreds</span>[-<span class='no'>trn</span>] )
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='st'>"ground truth"</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>( <span class='no'>yvec</span>[-<span class='no'>trn</span>] )
+}</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-
-      <li><a href="#references">References</a></li>
-
-      <li><a href="#see-also">See also</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Avants BB, Tustison NJ</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -296,13 +297,16 @@ Human Brain Mapping, 2016. (related work, not identical)</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

@@ -8,21 +8,29 @@
 
 <title>WIP: data-driven denoising for resting state fMRI — rsfDenoise • ANTsR</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,10 +38,10 @@
 
 
 
-<meta property="og:title" content="WIP: data-driven denoising for resting state fMRI — rsfDenoise" />
 
+<meta property="og:title" content="WIP: data-driven denoising for resting state fMRI — rsfDenoise" />
 <meta property="og:description" content="Uses a target function to denoise resting bold data" />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -47,9 +55,10 @@
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -63,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
       </span>
     </div>
 
@@ -71,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -112,7 +121,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -122,6 +130,7 @@
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -133,16 +142,23 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Uses a target function to denoise resting bold data</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>rsfDenoise</span>(<span class='no'>boldmatrix</span>, <span class='no'>targety</span>, <span class='kw'>motionparams</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
-  <span class='kw'>selectionthresh</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>maxnoisepreds</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>12</span>, <span class='kw'>debug</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>polydegree</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>crossvalidationgroups</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>tr</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>scalemat</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>noisepoolfun</span> <span class='kw'>=</span> <span class='no'>max</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>rsfDenoise</span>(
+  <span class='no'>boldmatrix</span>,
+  <span class='no'>targety</span>,
+  <span class='kw'>motionparams</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
+  <span class='kw'>selectionthresh</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
+  <span class='kw'>maxnoisepreds</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>12</span>,
+  <span class='kw'>debug</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>polydegree</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>crossvalidationgroups</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>tr</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>scalemat</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>noisepoolfun</span> <span class='kw'>=</span> <span class='no'>max</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -192,99 +208,89 @@ estimation</p></td>
       <td><p>function to help select noise pool e.g. max</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>matrix is output</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-</div># NOT RUN {
-# if (!exists("fn") ) fn<-getANTsRData("pcasl")
-# bold <- antsImageRead( fn )
-# avgbold<-getAverageOfTimeSeries(bold)
-# boldmask<-getMask( avgbold )
-# roimask<-antsImageRead("roi.nii.gz")
-# timeselect<-10:(dim(bold)[4]-10)
-# # can do this if you like its approach
-# cleanfMRI <- preprocessfMRI( bold, maskImage=boldmask,
-#   frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,
-#   spatialSmoothingType = "gaussian", spatialSmoothingParameters = 2,
-#   residualizeMatrix=TRUE, numberOfCompCorComponents=2 )
-# boldmat<-timeseries2matrix( cleanfMRI$cleanBoldImage, cleanfMRI$maskImage )
-# roimat<-timeseries2matrix( cleanfMRI$cleanBoldImage, roimask )
-# roimean<-rowMeans( roimat ) # svd instead?
-# roimat<-matrix( roimean, ncol=1)
-# dnz<-rsfDenoise( boldmat[timeselect,] ,
-#   roimat[timeselect,1], motionparams=NA,
-#   polydegree=1, crossvalidationgroups = 8, maxnoisepreds=c(2:4), debug=F )
-# # might iterate over above to further refine noise variables
-# mdl<-bigLMStats( lm( boldmat[timeselect,] ~ roimean[timeselect] +
-#    dnz$polys + dnz$noiseu  ), 0.001 )
-# betas<-mdl$beta.t[1,]
-# sum(betas[betas > 3])
-# betaimg<-antsImageClone( boldmask )
-# betaimg[ boldmask == 1 ]<-betas
-# antsImageWrite( betaimg, "betas2.nii.gz" )
-#
-# # more complex
-# bold<-antsImageRead("bold.nii.gz")
-# boldmask<-antsImageRead("meanboldmask.nii.gz")
-# aalimg<-antsImageRead("meanboldAALmask.nii.gz")
-# data("aal",package="ANTsR")
-# dmnlabels<-aal$label_num[aal$isdmn>0]
-# aalvec<-aalimg > 0
-# whichregion<-3
-# for ( i in 1:max(aalimg) )
-#   {
-#   if ( ! ( i %in% dmnlabels[whichregion] ) )
-#     {
-#     aalimg[ aalimg == as.numeric(i) ]<-0
-#     }
-#   }
-# maskvec<-boldmask > 0 & aalimg == whichregion
-# boldmask[ maskvec ]<-0
-# timeselect<-10:dim(bold)[4]
-# if ( ! exists("moco") ) {
-#   moco<-.motion_correction(bold,moreaccurate=1)
-#   moco<-as.matrix( moco$moco_params )[timeselect,3:ncol(moco$moco_params)]
-# }
-# boldmat<-timeseries2matrix(bold,boldmask)
-# boldmat<-boldmat[timeselect,]
-# aalimg[aalimg > 0 ]<-1
-# dmnvec<-rowMeans(timeseries2matrix(bold,aalimg))[timeselect]
-# dmnvec<-(stl(ts(dmnvec, frequency = 4),"per")$time.series)[,2]
-# dmnvec2<-(stl(ts(dmnvec, frequency = 100),"per")$time.series)[,2]
-# dmnvec<-ts(as.numeric(dmnvec)-as.numeric(dmnvec2))
-# dmnmat<-matrix( dmnvec, ncol=1)
-# dnz<-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,
-#                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
-# print(paste("Best number of noise regressors",dnz$n))
-# # now recompute the matrix using the full mask
-# boldmask<-antsImageRead("meanboldmask.nii.gz")
-# boldmat<-timeseries2matrix(bold,boldmask)
-# boldmat<-boldmat[timeselect,]
-# mdl<-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )
-# betas<-mdl$beta.t[1,]
-# }
-<div class='input'>
-</div></pre>
+<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='co'># if (!exists("fn") ) fn&lt;-getANTsRData("pcasl")</span>
+<span class='co'># bold &lt;- antsImageRead( fn )</span>
+<span class='co'># avgbold&lt;-getAverageOfTimeSeries(bold)</span>
+<span class='co'># boldmask&lt;-getMask( avgbold )</span>
+<span class='co'># roimask&lt;-antsImageRead("roi.nii.gz")</span>
+<span class='co'># timeselect&lt;-10:(dim(bold)[4]-10)</span>
+<span class='co'># # can do this if you like its approach</span>
+<span class='co'># cleanfMRI &lt;- preprocessfMRI( bold, maskImage=boldmask,</span>
+<span class='co'>#   frequencyLowThreshold = 0.01, frequencyHighThreshold = 0.1,</span>
+<span class='co'>#   spatialSmoothingType = "gaussian", spatialSmoothingParameters = 2,</span>
+<span class='co'>#   residualizeMatrix=TRUE, numberOfCompCorComponents=2 )</span>
+<span class='co'># boldmat&lt;-timeseries2matrix( cleanfMRI$cleanBoldImage, cleanfMRI$maskImage )</span>
+<span class='co'># roimat&lt;-timeseries2matrix( cleanfMRI$cleanBoldImage, roimask )</span>
+<span class='co'># roimean&lt;-rowMeans( roimat ) # svd instead?</span>
+<span class='co'># roimat&lt;-matrix( roimean, ncol=1)</span>
+<span class='co'># dnz&lt;-rsfDenoise( boldmat[timeselect,] ,</span>
+<span class='co'>#   roimat[timeselect,1], motionparams=NA,</span>
+<span class='co'>#   polydegree=1, crossvalidationgroups = 8, maxnoisepreds=c(2:4), debug=F )</span>
+<span class='co'># # might iterate over above to further refine noise variables</span>
+<span class='co'># mdl&lt;-bigLMStats( lm( boldmat[timeselect,] ~ roimean[timeselect] +</span>
+<span class='co'>#    dnz$polys + dnz$noiseu  ), 0.001 )</span>
+<span class='co'># betas&lt;-mdl$beta.t[1,]</span>
+<span class='co'># sum(betas[betas &gt; 3])</span>
+<span class='co'># betaimg&lt;-antsImageClone( boldmask )</span>
+<span class='co'># betaimg[ boldmask == 1 ]&lt;-betas</span>
+<span class='co'># antsImageWrite( betaimg, "betas2.nii.gz" )</span>
+<span class='co'>#</span>
+<span class='co'># # more complex</span>
+<span class='co'># bold&lt;-antsImageRead("bold.nii.gz")</span>
+<span class='co'># boldmask&lt;-antsImageRead("meanboldmask.nii.gz")</span>
+<span class='co'># aalimg&lt;-antsImageRead("meanboldAALmask.nii.gz")</span>
+<span class='co'># data("aal",package="ANTsR")</span>
+<span class='co'># dmnlabels&lt;-aal$label_num[aal$isdmn&gt;0]</span>
+<span class='co'># aalvec&lt;-aalimg &gt; 0</span>
+<span class='co'># whichregion&lt;-3</span>
+<span class='co'># for ( i in 1:max(aalimg) )</span>
+<span class='co'>#   {</span>
+<span class='co'>#   if ( ! ( i %in% dmnlabels[whichregion] ) )</span>
+<span class='co'>#     {</span>
+<span class='co'>#     aalimg[ aalimg == as.numeric(i) ]&lt;-0</span>
+<span class='co'>#     }</span>
+<span class='co'>#   }</span>
+<span class='co'># maskvec&lt;-boldmask &gt; 0 &amp; aalimg == whichregion</span>
+<span class='co'># boldmask[ maskvec ]&lt;-0</span>
+<span class='co'># timeselect&lt;-10:dim(bold)[4]</span>
+<span class='co'># if ( ! exists("moco") ) {</span>
+<span class='co'>#   moco&lt;-.motion_correction(bold,moreaccurate=1)</span>
+<span class='co'>#   moco&lt;-as.matrix( moco$moco_params )[timeselect,3:ncol(moco$moco_params)]</span>
+<span class='co'># }</span>
+<span class='co'># boldmat&lt;-timeseries2matrix(bold,boldmask)</span>
+<span class='co'># boldmat&lt;-boldmat[timeselect,]</span>
+<span class='co'># aalimg[aalimg &gt; 0 ]&lt;-1</span>
+<span class='co'># dmnvec&lt;-rowMeans(timeseries2matrix(bold,aalimg))[timeselect]</span>
+<span class='co'># dmnvec&lt;-(stl(ts(dmnvec, frequency = 4),"per")$time.series)[,2]</span>
+<span class='co'># dmnvec2&lt;-(stl(ts(dmnvec, frequency = 100),"per")$time.series)[,2]</span>
+<span class='co'># dmnvec&lt;-ts(as.numeric(dmnvec)-as.numeric(dmnvec2))</span>
+<span class='co'># dmnmat&lt;-matrix( dmnvec, ncol=1)</span>
+<span class='co'># dnz&lt;-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,</span>
+<span class='co'>#                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )</span>
+<span class='co'># print(paste("Best number of noise regressors",dnz$n))</span>
+<span class='co'># # now recompute the matrix using the full mask</span>
+<span class='co'># boldmask&lt;-antsImageRead("meanboldmask.nii.gz")</span>
+<span class='co'># boldmat&lt;-timeseries2matrix(bold,boldmask)</span>
+<span class='co'># boldmat&lt;-boldmat[timeselect,]</span>
+<span class='co'># mdl&lt;-bigLMStats( lm( boldmat ~ dmnmat[,1] + dnz$polys + dnz$noiseu ), 0.001 )</span>
+<span class='co'># betas&lt;-mdl$beta.t[1,]</span>
+}</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Avants BB</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -292,13 +298,16 @@ estimation</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 
