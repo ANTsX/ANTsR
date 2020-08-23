@@ -59,7 +59,7 @@ Package source:	[from github](https://github.com/ANTsX/ANTsR/zipball/master)
 
 Binaries:	[here](http://github.com/ANTsX/ANTsR/releases/)
 
-*Windows* installation option [here](https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-in-Windows-10-(along-with-FSL,-Rstudio,-Freesurfer,-etc).)
+*Windows* installation option [here](https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-on-Windows-10-(using-WSL2))
 
 **Suggested packages** [https://github.com/stnava/ANTsRDocker/blob/master/install.R](https://github.com/stnava/ANTsRDocker/blob/master/install.R)
 
