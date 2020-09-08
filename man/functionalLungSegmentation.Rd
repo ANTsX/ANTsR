@@ -10,6 +10,8 @@ functionalLungSegmentation(
   numberOfIterations = 1,
   numberOfAtroposIterations = 0,
   mrfParameters = "[0.3,2x2x2]",
+  numberOfClusters = 4,
+  clusterCenters = NA,
   verbose = TRUE
 )
 }
@@ -26,6 +28,10 @@ If \code{numberOfAtroposIterations = 0}, this is equivalent to K-means with
 no MRF priors.}
 
 \item{mrfParameters}{parameters for MRF in Atropos.}
+
+\item{numberOfClusters}{number of tissue classes (default = 4)}
+
+\item{clusterCenters}{initialization centers for k-means}
 
 \item{verbose}{print progress to the screen.}
 }

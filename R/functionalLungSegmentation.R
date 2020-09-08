@@ -13,6 +13,8 @@
 #' If \code{numberOfAtroposIterations = 0}, this is equivalent to K-means with
 #' no MRF priors.
 #' @param mrfParameters parameters for MRF in Atropos.
+#' @param numberOfClusters number of tissue classes (default = 4)
+#' @param clusterCenters initialization centers for k-means
 #' @param verbose print progress to the screen.
 #' @return segmentation image, probability images, and processed input
 #' image.
@@ -30,7 +32,8 @@
 #' }
 #' @export
 functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
-  numberOfAtroposIterations = 0, mrfParameters = "[0.3,2x2x2]", verbose = TRUE )
+  numberOfAtroposIterations = 0, mrfParameters = "[0.3,2x2x2]",
+  numberOfClusters = 4, clusterCenters = NA, verbose = TRUE )
   {
 
   if( image@dimension != 3 )
@@ -99,7 +102,17 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
       {
       message( paste0( "Atropos/N4:  Atropos segmentation.\n" ) )
       }
-    atroposInitialization <- "Kmeans[4]"
+    atroposInitialization <- paste0( "Kmeans[", numberOfClusters, "]" )
+    if( ! is.na( clusterCenters ) )
+      {
+      if( length( clusterCenters ) != numberOfClusters )
+        {
+        stop( "numberOfClusters should match the vector size of the clusterCenters." )
+        } else {
+        clusterCentersString <- paste0( clusterCenters, collapse = "x" )
+        atroposInitialization <- paste0( "Kmeans[", numberOfClusters, ",", clusterCentersString, "]" )
+        }
+      }
     posteriorFormulation <- "Socrates[0]"
     if( i > 1 )
       {
