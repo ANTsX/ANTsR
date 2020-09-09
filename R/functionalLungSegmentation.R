@@ -123,7 +123,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
     atroposOutput <- atropos( preprocessedImage, x = dilatedMask, i = atroposInitialization,
       m = mrfParameters, c = iterations, priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
 
-    weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:4] )
+    weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:numberOfClusters] )
     }
 
   maskedSegmentationImage <- atroposOutput$segmentation * mask
