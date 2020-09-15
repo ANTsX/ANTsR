@@ -79,12 +79,13 @@ Suggests:
     tools,
     viridis,
     visreg,
+    wmtsa,
     xgboost,
     FNN
 LazyData: TRUE
 LinkingTo: Rcpp, ITKR, ANTsRCore
 SystemRequirements: cmake, git, clang
-Remotes: stnava/ITKR, ANTsX/ANTsRCore
+Remotes: stnava/ITKR, ANTsX/ANTsRCore, cran/wmtsa
 NeedsCompilation: yes
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0
