@@ -79,7 +79,6 @@ Suggests:
     tools,
     viridis,
     visreg,
-    wmtsa,
     xgboost,
     FNN
 LazyData: TRUE

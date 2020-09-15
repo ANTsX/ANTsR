@@ -37,10 +37,10 @@ c(
 "robust",
 "robustbase",
 "rsvd",
+"sessioninfo",
 "signal",
 "sna",
 "testthat",
 "viridis",
-"visreg",
-"wmtsa")
+"visreg")
 )

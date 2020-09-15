@@ -7,6 +7,12 @@ container. ITKR and ANTsRCore are cloned from Github, then all three packages
 are installed. The commit hash of the installed versions is stored in the
 container under `/opt`.
 
+Package information can additionally be found inside the container R by running 
+
+```
+sessioninfo::package_info("ANTsR")
+```
+
 To build, run
 
 ```
