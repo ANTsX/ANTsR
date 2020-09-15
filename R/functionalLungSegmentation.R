@@ -103,7 +103,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
       message( paste0( "Atropos/N4:  Atropos segmentation.\n" ) )
       }
     atroposInitialization <- paste0( "Kmeans[", numberOfClusters, "]" )
-    if( ! is.na( clusterCenters ) )
+    if( ! all( is.na( clusterCenters ) ) )
       {
       if( length( clusterCenters ) != numberOfClusters )
         {
@@ -123,7 +123,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
     atroposOutput <- atropos( preprocessedImage, x = dilatedMask, i = atroposInitialization,
       m = mrfParameters, c = iterations, priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
 
-    weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:4] )
+    weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:numberOfClusters] )
     }
 
   maskedSegmentationImage <- atroposOutput$segmentation * mask
