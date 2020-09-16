@@ -52,6 +52,7 @@ Suggests:
     glmnet,
     grid,
     hdf5r,
+    ifultools,
     igraph,
     irlba,
     knitr,
