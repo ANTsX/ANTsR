@@ -1,22 +1,32 @@
-# ANTsR docker script
+# ANTsR docker
 
-## Versioning
+This Dockerfile builds ANTsR using "method1" as described in the main README,
+with devtools and install_github.
 
-The Dockerfile copies the ANTsR source directory in which it resides to the
-container. ITKR and ANTsRCore are cloned from Github, then all three packages
-are installed. The commit hash of the installed versions is stored in the
-container under `/opt`.
+## Building and version information
 
-Package information can additionally be found inside the container R by running 
+The default is to build the main branch HEAD. You can build a specific version
+using build args (from ANTsR/docker): 
+
+```
+docker build --build-arg antsr_version="v0.5.6.4" -t antsr .
+```
+
+This allows you to control the ANTsR version, but ITKR and ANTsRCore will be
+built from the latest commit.
+
+From within the container, find the version of all packages and dependencies
+with 
 
 ```
 sessioninfo::package_info("ANTsR")
 ```
 
-To build, run
+By default, all dependencies are included. To build a minimal set of
+dependencies, run 
 
 ```
-docker build -t antsr .
+docker build --build-arg antsr_dependencies=NA -t antsr .
 ```
 
 ## Running R or Rscript
@@ -30,7 +40,7 @@ docker run --rm -it antsr
 To run Rscript:
 
 ```
-docker run --rm  antsr Rscript -e 'print("Hello")'
+docker run --rm antsr Rscript -e 'print("Hello")'
 ```
 
 ## Controlling threads
@@ -42,9 +52,3 @@ The default number of threads is 1, override by passing the
 docker run -e ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=2 ...
 ```
 
-## R package dependencies
-
-A full set of dependencies are included in `docker/installDependencies.R`. This
-list is sourced from the
-[https://github.com/ANTsX/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality](ANTsR
-wiki).
