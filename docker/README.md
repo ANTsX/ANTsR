@@ -6,11 +6,14 @@ with devtools and install_github.
 ## Building and version information
 
 The default is to build the main branch HEAD. You can build a specific version
-using build args (from ANTsR/docker): 
+using build args (from ANTsR/docker), for example
 
 ```
-docker build --build-arg antsr_version="v0.5.6.4" -t antsr .
+docker build --build-arg antsr_version="v0.5.6.5" -t antsr .
 ```
+
+The version can be a tag, commit, or branch. See the documentation for
+install_github in devools.
 
 This allows you to control the ANTsR version, but ITKR and ANTsRCore will be
 built from the latest commit.

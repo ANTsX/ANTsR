@@ -38,16 +38,15 @@ RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" >> /e
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN Rscript -e "install.packages(\"devtools\", repos = \"https://cloud.r-project.org\", dependencies = T)" \
-            -e "library(devtools)" \
-            -e "install_github(\"stnava/cmaker\")"
-# Saves build time but can merge these layers once build is stable
-#
 # The warnings variable is needed to suppress warnings from tcltk that turn into an
 # error about not finding DISPLAY
 #
-# Also suppresses missing dependencies
-RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true Rscript -e "library(devtools)" \
+# Also suppresses missing dependency errors
+RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true Rscript \
+            -e "install.packages(\"devtools\", repos = \"https://cloud.r-project.org\", dependencies = T)" \
+            -e "library(devtools)" \
+            -e "install_github(\"stnava/cmaker\")" \
+            -e "library(devtools)" \
             -e "install_github(\"cran/ifultools\")" \
             -e "install_github(\"ANTsX/ANTsR\", ref=\"${antsr_version}\", dependencies=${antsr_dependencies})"
 
