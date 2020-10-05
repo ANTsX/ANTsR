@@ -8,13 +8,15 @@
 #' @param image input proton-weighted MRI.
 #' @param mask mask image designating the region to segment.
 #' 0/1 = background/foreground.
-#' @param numberOfIterations number of Atropos <--> N4 iterations (outer loop).
+#' @param numberOfIterations number of Atropos <--> bias correction iterations
+#' (outer loop).
 #' @param numberOfAtroposIterations number of Atropos iterations (inner loop).
 #' If \code{numberOfAtroposIterations = 0}, this is equivalent to K-means with
 #' no MRF priors.
 #' @param mrfParameters parameters for MRF in Atropos.
 #' @param numberOfClusters number of tissue classes (default = 4)
 #' @param clusterCenters initialization centers for k-means
+#' @param biasCorrection apply n3, n4, or no bias correction (default = "n4").
 #' @param verbose print progress to the screen.
 #' @return segmentation image, probability images, and processed input
 #' image.
@@ -31,9 +33,10 @@
 #'
 #' }
 #' @export
-functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
-  numberOfAtroposIterations = 0, mrfParameters = "[0.3,2x2x2]",
-  numberOfClusters = 4, clusterCenters = NA, verbose = TRUE )
+functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
+  numberOfAtroposIterations = 5, mrfParameters = "[0.7,2x2x2]",
+  numberOfClusters = 6, clusterCenters = NA, biasCorrection = "n4",
+  verbose = TRUE )
   {
 
   if( image@dimension != 3 )
@@ -79,7 +82,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
     {
     if( verbose == TRUE )
       {
-      message( paste0( "Atropos/N4 iteration: ", i, " out of ", numberOfAtroposN4Iterations, "\n" ) )
+      message( paste0( "Outer: ", i, " out of ", numberOfAtroposN4Iterations, "\n" ) )
       }
 
     preprocessedImage <- antsImageClone( image )
@@ -90,17 +93,23 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 1,
 
     if( verbose == TRUE )
       {
-      message( paste0( "Atropos/N4:  N4 bias correction.\n" ) )
+      message( paste0( "Outer:  bias correction.\n" ) )
       }
-    preprocessedImage <- n4BiasFieldCorrection( preprocessedImage, mask = dilatedMask,
-      shrinkFactor = 2, convergence = list( iters = c( 50, 50, 50, 50 ), tol = 0.0000000001 ),
-      splineParam = 200, returnBiasField = FALSE, weight_mask = weightMask, verbose = verbose )
-    preprocessedImage <- 1000 * ( preprocessedImage - min( preprocessedImage ) ) /
+
+    if( tolower( biasCorrection ) == "n4" )
+      {
+      preprocessedImage <- n4BiasFieldCorrection( preprocessedImage, mask = dilatedMask,
+        shrinkFactor = 2, convergence = list( iters = c( 50, 50, 50, 50 ), tol = 0.0000000001 ),
+        splineParam = 200, returnBiasField = FALSE, weight_mask = weightMask, verbose = verbose )
+      } else if( tolower( biasCorrection ) == "n3" ) {
+      preprocessedImage <- n3BiasFieldCorrection( preprocessedImage, downsampleFactor = 2 )
+      }
+    preprocessedImage <- ( preprocessedImage - min( preprocessedImage ) ) /
       ( max( preprocessedImage ) - min( preprocessedImage) )
 
     if( verbose == TRUE )
       {
-      message( paste0( "Atropos/N4:  Atropos segmentation.\n" ) )
+      message( paste0( "Outer:  Atropos segmentation.\n" ) )
       }
     atroposInitialization <- paste0( "Kmeans[", numberOfClusters, "]" )
     if( ! all( is.na( clusterCenters ) ) )
