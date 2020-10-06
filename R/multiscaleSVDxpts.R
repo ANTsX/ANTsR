@@ -2442,7 +2442,7 @@ mild <- function( dataFrame,  voxmats, basisK,
 #'
 #' @export
 initializeSimlr <- function( voxmats, k, jointReduction = TRUE,
-  zeroUpper = FALSE, uAlgorithm = 'ica', addNoise = 0 ) {
+  zeroUpper = FALSE, uAlgorithm = 'svd', addNoise = 0 ) {
   nModalities = length( voxmats )
   if ( uAlgorithm == 'randomProjection' & jointReduction )
     jointReduction = FALSE
@@ -2683,7 +2683,7 @@ simlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg = c( 'ica', 'svd', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
+  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1e10, 1e10 ),
