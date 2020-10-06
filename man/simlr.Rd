@@ -11,7 +11,7 @@ simlr(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg = c("ica", "svd", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
+  mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-1e+10, 1e+10),
