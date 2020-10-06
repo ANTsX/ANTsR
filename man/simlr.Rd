@@ -24,7 +24,7 @@ simlr(
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
   scale = c("sqrtnp", "np", "centerAndScale", "center", "norm", "none", "impute",
     "eigenvalue", "robust"),
-  expBeta = 0.5,
+  expBeta = 0,
   verbose = FALSE
 )
 }
