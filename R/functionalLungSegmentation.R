@@ -74,8 +74,13 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
     return( pureTissueMask )
     }
 
-  dilatedMask <- mask %>% iMath( "MD", 5 )
   weightMask <- NULL
+
+  # This is a multiplicative factor for both the image
+  # and the cluster centers which shouldn't effect the
+  # user.  Otherwise, we'll get a singular covariance
+  # complaint from Atropos.
+  imageScaleFactor <- 1000.0
 
   numberOfAtroposN4Iterations <- numberOfIterations
   for( i in seq.int( numberOfAtroposN4Iterations ) )
@@ -98,13 +103,13 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
 
     if( tolower( biasCorrection ) == "n4" )
       {
-      preprocessedImage <- n4BiasFieldCorrection( preprocessedImage, mask = dilatedMask,
+      preprocessedImage <- n4BiasFieldCorrection( preprocessedImage, mask = mask,
         shrinkFactor = 2, convergence = list( iters = c( 50, 50, 50, 50 ), tol = 0.0000000001 ),
         splineParam = 200, returnBiasField = FALSE, weight_mask = weightMask, verbose = verbose )
       } else if( tolower( biasCorrection ) == "n3" ) {
       preprocessedImage <- n3BiasFieldCorrection( preprocessedImage, downsampleFactor = 2 )
       }
-    preprocessedImage <- ( preprocessedImage - min( preprocessedImage ) ) /
+    preprocessedImage <- imageScaleFactor * ( preprocessedImage - min( preprocessedImage ) ) /
       ( max( preprocessedImage ) - min( preprocessedImage) )
 
     if( verbose == TRUE )
@@ -118,7 +123,8 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
         {
         stop( "numberOfClusters should match the vector size of the clusterCenters." )
         } else {
-        clusterCentersString <- paste0( clusterCenters, collapse = "x" )
+        scaledClusterCenters <- imageScaleFactor * clusterCenters  
+        clusterCentersString <- paste0( scaledClusterCenters, collapse = "x" )
         atroposInitialization <- paste0( "Kmeans[", numberOfClusters, ",", clusterCentersString, "]" )
         }
       }
@@ -129,7 +135,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
       posteriorFormulation = "Socrates[1]"
       }
     iterations <- paste0( "[", numberOfAtroposIterations, ",0]" )
-    atroposOutput <- atropos( preprocessedImage, x = dilatedMask, i = atroposInitialization,
+    atroposOutput <- atropos( preprocessedImage, x = mask, i = atroposInitialization,
       m = mrfParameters, c = iterations, priorweight = 0.0, verbose = verbose, p = posteriorFormulation )
 
     weightMask <- generatePureTissueN4WeightMask( atroposOutput$probabilityimages[2:numberOfClusters] )
@@ -144,5 +150,5 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
 
   return( list( segmentationImage = maskedSegmentationImage,
                 probabilityImages = maskedProbabilityImages ,
-                processedImage = preprocessedImage ) )
+                processedImage = ( preprocessedImage / imageScaleFactor ) ) )
   }
