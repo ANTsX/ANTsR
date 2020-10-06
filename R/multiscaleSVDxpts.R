@@ -2689,7 +2689,7 @@ simlr <- function(
   lineSearchRange = c( -1e10, 1e10 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
-  constraint = c("none","Grassmann","Stiefel"),
+  constraint = c("Grassmann","none","Stiefel"),
   energyType = c('regression', 'normalized', 'cca', 'ucca', 'lowRank'),
   vmats,
   connectors = NULL,
