@@ -14,8 +14,8 @@ simlr(
   mixAlg = c("ica", "svd", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c(-10000000000, 10000000000),
-  lineSearchTolerance = 0.00000001,
+  lineSearchRange = c(-1e+10, 1e+10),
+  lineSearchTolerance = 1e-08,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
   energyType = c("regression", "normalized", "cca", "ucca", "lowRank"),
@@ -150,7 +150,7 @@ resultp = simlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
    energyType = "normalized" )
 }
 \seealso{
-\code{\link{milr}} \code{\link{mild}} \code{\link{simlr2}}  \code{\link{simlrU}}
+\code{\link{milr}} \code{\link{mild}} \code{\link{simlrU}}
 }
 \author{
 BB Avants.

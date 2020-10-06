@@ -44,7 +44,7 @@ segmentation image, probability images, and processed input
 image.
 }
 \description{
-Lung segmentation into four classes based on ventilation as described in
+Lung segmentation into classes based on ventilation as described in
 this paper:
 }
 \details{
