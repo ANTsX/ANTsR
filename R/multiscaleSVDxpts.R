@@ -2701,7 +2701,7 @@ simlr <- function(
   if (  missing( energyType ) ) energyType = "regression"
   if (  missing( mixAlg ) ) mixAlg = "ica"
   if (  missing( optimizationStyle ) ) optimizationStyle = "lineSearch"
-  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed ) else set.seed( 0 )
+  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
   optimizationStyle = match.arg(optimizationStyle)
