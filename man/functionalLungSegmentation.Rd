@@ -7,11 +7,12 @@
 functionalLungSegmentation(
   image,
   mask,
-  numberOfIterations = 1,
-  numberOfAtroposIterations = 0,
-  mrfParameters = "[0.3,2x2x2]",
-  numberOfClusters = 4,
+  numberOfIterations = 2,
+  numberOfAtroposIterations = 5,
+  mrfParameters = "[0.7,2x2x2]",
+  numberOfClusters = 6,
   clusterCenters = NA,
+  biasCorrection = "n4",
   verbose = TRUE
 )
 }
@@ -21,7 +22,8 @@ functionalLungSegmentation(
 \item{mask}{mask image designating the region to segment.
 0/1 = background/foreground.}
 
-\item{numberOfIterations}{number of Atropos <--> N4 iterations (outer loop).}
+\item{numberOfIterations}{number of Atropos <--> bias correction iterations
+(outer loop).}
 
 \item{numberOfAtroposIterations}{number of Atropos iterations (inner loop).
 If \code{numberOfAtroposIterations = 0}, this is equivalent to K-means with
@@ -33,6 +35,8 @@ no MRF priors.}
 
 \item{clusterCenters}{initialization centers for k-means}
 
+\item{biasCorrection}{apply n3, n4, or no bias correction (default = "n4").}
+
 \item{verbose}{print progress to the screen.}
 }
 \value{
@@ -40,7 +44,7 @@ segmentation image, probability images, and processed input
 image.
 }
 \description{
-Lung segmentation into four classes based on ventilation as described in
+Lung segmentation into classes based on ventilation as described in
 this paper:
 }
 \details{
