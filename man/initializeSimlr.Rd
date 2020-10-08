@@ -7,7 +7,7 @@
 initializeSimlr(
   voxmats,
   k,
-  jointReduction = TRUE,
+  jointReduction = FALSE,
   zeroUpper = FALSE,
   uAlgorithm = "svd",
   addNoise = 0

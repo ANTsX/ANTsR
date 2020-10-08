@@ -2441,15 +2441,20 @@ mild <- function( dataFrame,  voxmats, basisK,
 #'   k = 2, uAlgorithm = 'pca' )
 #'
 #' @export
-initializeSimlr <- function( voxmats, k, jointReduction = TRUE,
+initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
   zeroUpper = FALSE, uAlgorithm = 'svd', addNoise = 0 ) {
   nModalities = length( voxmats )
+  localAlgorithm = uAlgorithm
+  if ( uAlgorithm == 'avg' ) {
+    jointReduction = FALSE
+    localAlgorithm = 'pca'
+    }
   if ( uAlgorithm == 'randomProjection' & jointReduction )
     jointReduction = FALSE
   if ( jointReduction ) {
     X <- Reduce( cbind, voxmats ) # bind all matrices
-    if ( uAlgorithm == 'pca' ) {
-      X.pcr <- stats::prcomp( t(X), rank. = k )          # PCA
+    if ( uAlgorithm == 'pca' | uAlgorithm == 'svd' ) {
+      X.pcr <- stats::prcomp( t(X), rank. = k, scale. = uAlgorithm == 'svd' )          # PCA
       u <- ( X.pcr$rotation )
     } else if ( uAlgorithm == 'ica' ) {
       u = t( fastICA::fastICA( t(X),  method = 'C', n.comp=k )$A )
@@ -2468,18 +2473,19 @@ initializeSimlr <- function( voxmats, k, jointReduction = TRUE,
   uOut = list()
   uRand = replicate(k, rnorm(nrow(voxmats[[1]])))
   for ( s in 1:nModalities) {
-    if ( uAlgorithm == 'pca ') {
-      uOut[[s]] = t( stats::prcomp( t(voxmats[[s]]), rank. = k )$rotation )
-    } else if ( uAlgorithm == 'ica' ) {
-      uOut[[s]] = t( fastICA::fastICA( t(voxmats[[s]]),  method = 'C', n.comp=k )$A )
-    } else if ( uAlgorithm == 'cca' ) {
-      uOut[[s]] = sparseDecom2( list(voxmats[[1]], voxmats[[s]]),
+    X = Reduce( cbind, voxmats[ -s ] )
+    if ( localAlgorithm == 'pca ' | localAlgorithm == 'svd') {
+      uOut[[s]] = ( stats::prcomp( t( X ), rank. = k, scale. = uAlgorithm == 'svd'  )$rotation )
+    } else if ( localAlgorithm == 'ica' ) {
+      uOut[[s]] = t( fastICA::fastICA( t( X ),  method = 'C', n.comp=k )$A )
+    } else if ( localAlgorithm == 'cca' ) {
+      uOut[[s]] = sparseDecom2( list( X, voxmats[[s]]),
         sparseness = c(0.5,0.5), nvecs = k, its = 3, ell1=0.1  )$projections2
-    } else if ( uAlgorithm == 'randomProjection' ) {
+    } else if ( localAlgorithm == 'randomProjection' ) {
       uOut[[s]] = t( ( t(uRand) %*% voxmats[[s]] ) %*%  t( voxmats[[s]] ) )
       uOut[[s]] = uOut[[s]] / norm( uOut[[s]], "F" )
     } else {
-      uOut[[s]] = replicate(k, rnorm(nrow(voxmats[[1]])))
+      uOut[[s]] = ( stats::prcomp( t( X ), rank. = k, scale. = uAlgorithm == 'svd'  )$rotation )
     }
     if ( addNoise > 0 ) uOut[[s]] = uOut[[s]] + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if ( zeroUpper ) uOut[[s]][upper.tri(uOut[[s]])] <- 0
@@ -2683,25 +2689,25 @@ simlr <- function(
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
-  mixAlg = c( 'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
+  mixAlg = c(  'svd', 'ica', 'avg', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' ),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c( -1e10, 1e10 ),
   lineSearchTolerance = 1e-8,
   randomSeed,
-  constraint = c("Grassmann","none","Stiefel"),
-  energyType = c('regression', 'normalized', 'cca', 'ucca', 'lowRank'),
+  constraint = c("none","Grassmann","Stiefel"),
+  energyType = c('cca','regression', 'normalized',  'ucca', 'lowRank'),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch","mixed","greedy") ,
   scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
   verbose = FALSE ) {
-  if (  missing( scale ) ) scale = c( "centerAndScale", "np" )
-  if (  missing( energyType ) ) energyType = "regression"
-  if (  missing( mixAlg ) ) mixAlg = "ica"
+  if (  missing( scale ) ) scale = c( "centerAndScale" )
+  if (  missing( energyType ) ) energyType = "cca"
+  if (  missing( mixAlg ) ) mixAlg = "svd"
   if (  missing( optimizationStyle ) ) optimizationStyle = "lineSearch"
-  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed )
+  if ( ! missing( "randomSeed" ) ) set.seed( randomSeed ) #  else set.seed( 0 )
   energyType = match.arg(energyType)
   constraint = match.arg(constraint)
   optimizationStyle = match.arg(optimizationStyle)
@@ -2717,6 +2723,19 @@ simlr <- function(
     }
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
+  #
+  constrainG <- function( vgrad, i, constraint ) {
+    if ( constraint == "Grassmann") {
+      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
+      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
+      projjer = diag( ncol( vgrad ) ) - t( vmats[[i]] ) %*% vmats[[i]]
+      return( vgrad %*% projjer )
+    }
+    if ( constraint == "Stiefel" ) # stiefel manifold
+      vgrad = vgrad - vmats[[i]] %*% ( t( vgrad ) %*% ( vmats[[i]] ) )
+    return( vgrad )
+    }
+
   normalized = FALSE
   ccaEnergy = FALSE
   nModalities = length( voxmats )
@@ -2827,6 +2846,8 @@ simlr <- function(
     initialUMatrix = list( )
     for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
+  } else if ( class(initialUMatrix)[1] == 'numeric' ) {
+    initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = FALSE )
   }
 
   if ( length( initialUMatrix ) != nModalities &
@@ -2846,9 +2867,12 @@ simlr <- function(
     if ( verbose ) print("     <0> BUILD-V <0> BUILD-V <0> BUILD-V <0> BUILD-V <0>    ")
     vmats = list()
     for ( i in 1:nModalities ) {
-#      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
-      vmats[[ i ]] = matrix( rnorm( ncol( voxmats[[i]] ) * basisK ), ncol = basisK )
-      vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
+      vmats[[ i ]] = t(voxmats[[i]]) %*% initialUMatrix[[i]]
+      # 0 # svd( temp, nu=basisK, nv=0 )$u
+      # for ( kk in 1:nModalities ) vmats[[ i ]] = vmats[[ i ]] + t(voxmats[[i]]) %*% initialUMatrix[[kk]]
+#      vmats[[ i ]] = # svd( vmats[[ i ]], nu=basisK, nv=0 )$u
+#        ( stats::prcomp( vmats[[ i ]], retx=TRUE, rank.=basisK, scale.=TRUE )$x )
+#      vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
       }
     }
 
@@ -2867,7 +2891,7 @@ simlr <- function(
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
         sparsenessQuantiles[whichModality],
         orthogonalize = FALSE,
-        positivity = positivities[whichModality], softThresholding = FALSE )
+        positivity = positivities[whichModality], softThresholding = TRUE )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -2913,17 +2937,6 @@ simlr <- function(
   totalEnergy = c( initialEnergy )
   if ( verbose ) print( paste( "initialDataTerm:", initialEnergy,
     " <o> mixer:", mixAlg, " <o> E: ", energyType ) )
-  constrainG <- function( vgrad, i, constraint ) {
-    if ( constraint == "Grassmann") {
-      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
-      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
-      projjer = diag( ncol( vgrad ) ) - t( vmats[[i]] ) %*% vmats[[i]]
-      return( vgrad %*% projjer )
-    }
-    if ( constraint == "Stiefel" ) # stiefel manifold
-      vgrad = vgrad - vmats[[i]] %*% ( t( vgrad ) %*% ( vmats[[i]] ) )
-    return( vgrad )
-  }
 
   getSyMGnorm <- function( v, i, myw, mixAlg )  {
       # norm2( X/norm2(X) - U * V'/norm2(U * V') )^2
@@ -3113,7 +3126,7 @@ simlr <- function(
             sparsenessQuantiles[i],
             orthogonalize = FALSE, positivity = positivities[i],
             unitNorm = FALSE,
-            softThresholding = FALSE  )
+            softThresholding = TRUE  )
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
       if ( ccaEnergy ) {
@@ -3220,6 +3233,7 @@ simlr <- function(
 #'
 #' @seealso \code{\link{simlr}}
 #' @export
+
 simlrU <- function( projections, mixingAlgorithm, initialW,
   orthogonalize = FALSE, connectors = NULL ) {
   # some gram schmidt code
