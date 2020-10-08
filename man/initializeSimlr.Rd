@@ -18,12 +18,12 @@ initializeSimlr(
 
 \item{k}{rank of U matrix}
 
-\item{jointReduction}{boolean determining whether one or length of list bases are}
+\item{jointReduction}{boolean determining whether one or length of list bases are returned.}
 
 \item{zeroUpper}{boolean determining whether upper triangular part of
 initialization is zeroed out}
 
-\item{uAlgorithm}{either \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}}
+\item{uAlgorithm}{either \code{"svd"}, \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}}
 
 \item{addNoise}{scalar value that adds zero mean unit variance noise, multiplied
 by the value of \code{addNoise}}
@@ -33,10 +33,10 @@ A single matrix or list of matrices
 }
 \description{
 Four initialization approaches for simlr.  Returns either a single matrix
-derived from dimensionality reduction on all matrices
+derived from dimensionality reduction on all matrices bound together
 (\code{jointReduction=TRUE}) or a list of reduced
-dimensionality matrices, one for each input.  Either PCA or ICA can be used
-as the reduction method.
+dimensionality matrices, one for each input.  Primarily, a helper function
+for SiMLR.
 }
 \examples{
 

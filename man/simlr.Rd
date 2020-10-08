@@ -22,7 +22,7 @@ simlr(
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
-  scale = c("sqrtnp", "np", "centerAndScale", "center", "norm", "none", "impute",
+  scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute",
     "eigenvalue", "robust"),
   expBeta = 0,
   verbose = FALSE
