@@ -2412,17 +2412,17 @@ mild <- function( dataFrame,  voxmats, basisK,
 #' Initialize simlr
 #'
 #' Four initialization approaches for simlr.  Returns either a single matrix
-#' derived from dimensionality reduction on all matrices
+#' derived from dimensionality reduction on all matrices bound together
 #' (\code{jointReduction=TRUE}) or a list of reduced
-#' dimensionality matrices, one for each input.  Either PCA or ICA can be used
-#' as the reduction method.
+#' dimensionality matrices, one for each input.  Primarily, a helper function
+#' for SiMLR.
 #'
 #' @param voxmats list that contains the named matrices.
 #' @param k rank of U matrix
-#' @param jointReduction boolean determining whether one or length of list bases are
+#' @param jointReduction boolean determining whether one or length of list bases are returned.
 #' @param zeroUpper boolean determining whether upper triangular part of
 #' initialization is zeroed out
-#' @param uAlgorithm either \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}
+#' @param uAlgorithm either \code{"svd"}, \code{"random"}, \code{"randomProjection"}, \code{eigenvalue}, \code{"pca"} (default), \code{"ica"} or \code{"cca"}
 #' @param addNoise scalar value that adds zero mean unit variance noise, multiplied
 #' by the value of \code{addNoise}
 #'
@@ -2700,7 +2700,7 @@ simlr <- function(
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch","mixed","greedy") ,
-  scale = c( 'sqrtnp', 'np', 'centerAndScale', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
+  scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
@@ -2847,7 +2847,12 @@ simlr <- function(
     for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
   } else if ( class(initialUMatrix)[1] == 'numeric' ) {
-    initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = FALSE )
+    doJR = TRUE
+    if ( doJR ) {
+      temp = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
+      initialUMatrix = list( )
+      for ( i in 1:nModalities ) initialUMatrix[[i]] = temp
+    } else initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
   }
 
   if ( length( initialUMatrix ) != nModalities &
@@ -2872,7 +2877,7 @@ simlr <- function(
       # for ( kk in 1:nModalities ) vmats[[ i ]] = vmats[[ i ]] + t(voxmats[[i]]) %*% initialUMatrix[[kk]]
 #      vmats[[ i ]] = # svd( vmats[[ i ]], nu=basisK, nv=0 )$u
 #        ( stats::prcomp( vmats[[ i ]], retx=TRUE, rank.=basisK, scale.=TRUE )$x )
-#      vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
+      vmats[[ i ]] = vmats[[ i ]] / norm( vmats[[ i ]], "F" )
       }
     }
 
