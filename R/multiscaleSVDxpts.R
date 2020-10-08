@@ -2446,8 +2446,8 @@ initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
   nModalities = length( voxmats )
   localAlgorithm = uAlgorithm
   if ( uAlgorithm == 'avg' ) {
-    jointReduction = FALSE
-    localAlgorithm = 'pca'
+    uAlgorithm = 'svd'
+    localAlgorithm = 'svd'
     }
   if ( uAlgorithm == 'randomProjection' & jointReduction )
     jointReduction = FALSE
@@ -2621,6 +2621,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' by the number of variables or center or center and scale or ... (see code).
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
+#' @param jointInitialization boolean for initialization options, default TRUE
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2702,6 +2703,7 @@ simlr <- function(
   optimizationStyle = c("lineSearch","mixed","greedy") ,
   scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
+  jointInitialization = TRUE,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
   if (  missing( energyType ) ) energyType = "cca"
@@ -2847,12 +2849,11 @@ simlr <- function(
     for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
   } else if ( class(initialUMatrix)[1] == 'numeric' ) {
-    doJR = TRUE
-    if ( doJR ) {
-      temp = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
+    if ( jointInitialization ) {
+      temp = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = jointInitialization )
       initialUMatrix = list( )
       for ( i in 1:nModalities ) initialUMatrix[[i]] = temp
-    } else initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
+    } else initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = jointInitialization )
   }
 
   if ( length( initialUMatrix ) != nModalities &
