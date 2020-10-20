@@ -2914,6 +2914,8 @@ simlr <- function(
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
+# ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
+
 # low-dimensional error approximation
     if ( energyType == 'lowRank' ) {
       vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
