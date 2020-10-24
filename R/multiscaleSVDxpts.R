@@ -2697,7 +2697,7 @@ simlr <- function(
   lineSearchTolerance = 1e-8,
   randomSeed,
   constraint = c("none","Grassmann","Stiefel"),
-  energyType = c('cca','regression', 'normalized',  'ucca', 'lowRank'),
+  energyType = c('cca','regression', 'normalized',  'ucca', 'lowRank', 'lowRankRegression'),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch","mixed","greedy") ,
@@ -2965,6 +2965,10 @@ simlr <- function(
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
+        if ( energyType == 'lowRankRegression' ) {
+          xv = x %*% (v)
+          return( 1.0 / norm( xv - u, "F" ) * t( x ) %*% (  xv -  u ) )
+          }
         if ( energyType == 'lowRank' ) {
 #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
           if ( TRUE ) {
@@ -3153,8 +3157,11 @@ simlr <- function(
       temp = simlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize,
         connectors = connectors )
       for ( jj in 1:nModalities ) {
-        initialUMatrix[[jj]] =
+         initialUMatrix[[jj]] =
             localGS( temp[[jj]], orthogonalize = orthogonalize )
+         # below exp avg for u updates --- not tested
+#        initialUMatrix[[jj]] = initialUMatrix[[jj]] * 0.9 +
+#            localGS( temp[[jj]], orthogonalize = orthogonalize ) * 0.1
         }
     }
 
