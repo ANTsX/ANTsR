@@ -2889,7 +2889,7 @@ simlr <- function(
     prediction = 0
     myenergysearchv = ( vmats[[whichModality]]+gradient * lineSearch )  # update the i^th v matrix
     if ( verbose ) {
-      print(paste("getSyME2",whichModality) )
+      print( paste("getSyME2",whichModality) )
       print( dim( vmats[[whichModality]]))
     }
     if ( sparsenessQuantiles[whichModality] != 0 )
@@ -2921,6 +2921,13 @@ simlr <- function(
       vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
       # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
       energy = norm( avgU/norm(avgU,"F") - vpro/norm(vpro,"F"), "F" )
+      return( energy )
+    }
+#
+# low-dimensional error approximation
+    if ( energyType == 'lowRankRegression' ) {
+      vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
+      energy = norm( avgU -  vpro, "F" )
       return( energy )
     }
 
