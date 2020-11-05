@@ -1,4 +1,4 @@
-FROM ubuntu:bionic-20200713
+FROM ubuntu:focal-20201008
 
 # Default to build latest version
 ARG antsr_version="HEAD" 
@@ -29,7 +29,7 @@ RUN apt-get update && \
 # https://cran.r-project.org/bin/linux/ubuntu/README.html
 COPY ubuntuRKey.txt /opt
 
-RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran40/" >> /etc/apt/sources.list && \
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" >> /etc/apt/sources.list && \
     apt-key add /opt/ubuntuRKey.txt && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
