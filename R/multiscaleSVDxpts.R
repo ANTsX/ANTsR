@@ -38,7 +38,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "FNN" )
+  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "RcppHNSW" )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
@@ -69,9 +69,17 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    efval = min( c( 4, ncol(x) ) )
-    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval, distance = "euclidean")
+    nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
+    efval = min( c( 100, ncol(x) ) )
+    if ( verbose ) t0=Sys.time()
+    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval,
+      distance = "euclidean",
+      n_threads = nThreads,
+      grain_size = floor( ncol(x) / nThreads )
+      )
+    if ( verbose ) t1=Sys.time()
     names( bknn ) = c( "nn.idx", "nn.dists" )
+    if ( verbose ) print( difftime( t0,t1,units='mins') )
   }
   if ( mypkg[1] == "FNN" ) {
     bknn = FNN::get.knn( t( x ), k=k, algorithm = "kd_tree"  )
@@ -196,7 +204,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
                                     kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
                                     eps = 1.e-6,
-                                    kPackage = 'FNN',
+                                    kPackage = 'RcppHNSW',
                                     ncores=NA ) # , mypkg = "nabor" )
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
@@ -216,10 +224,23 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    efval = min( c( 4, ncol(x) ) )
-    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean", M=12, ef=efval )
+    efval = min( c( 100, ncol(x) ) )
+    nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
+    ann <- RcppHNSW::hnsw_build( t( x ),
+      distance = "euclidean",
+      M=12,
+      ef=efval,
+      n_threads = nThreads,
+      grain_size = floor( ncol(x) / nThreads ) )
+
     efval = min( c( 100, ncol(y) ) )
-    bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = efval )
+    bknn <- RcppHNSW::hnsw_search( t(y),
+      ann,
+      k = k,
+      ef = efval,
+      n_threads = nThreads,
+      grain_size = floor( ncol(y) / nThreads )
+     )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
