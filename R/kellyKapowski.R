@@ -29,7 +29,7 @@
 #'
 #' @export kellyKapowski
 kellyKapowski <- function( s, g, w,
-   its = 50, r = 0.025,
+   its = 45, r = 0.025,
    m = 1.5,  x = TRUE,
    e = FALSE,
    q = NULL,
