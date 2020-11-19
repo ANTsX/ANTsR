@@ -12,7 +12,7 @@
 #' @param m gradient field smoothing parameter
 #' @param x matrix-based smoothing
 #' @param e restrict deformation boolean
-#' @param t time spacing, a vector equal to the number of time dimensions
+#' @param q time spacing, a vector equal to the number of time dimensions
 #' @param timeSigma, a scalar sigma value for distances between time points
 #' @param verbose boolean
 #' @param ... anything else, see KK help in ANTs
@@ -32,7 +32,7 @@ kellyKapowski <- function( s, g, w,
    its = 50, r = 0.025,
    m = 1.5,  x = TRUE,
    e = FALSE,
-   t = NULL,
+   q = NULL,
    timeSigma = 1,
    verbose = FALSE, ...) {
   s = check_ants(s)
@@ -49,10 +49,10 @@ kellyKapowski <- function( s, g, w,
   }
 
   timestring = 0
-  if ( ! is.null(t) ) {
+  if ( ! is.null(q) ) {
     timedim = dim(  g  )[ g@dimension ]
-    timestring = paste0( t, collapse='x')
-    if ( length(t) != timedim ) {
+    timestring = paste0( q, collapse='x')
+    if ( length(q) != timedim ) {
       message( paste("timedim is",timedim, "and timestring is",timestring,  ":these should be of equal length."))
       }
     timestring = paste0( "[",timestring,",",timeSigma,"]" )
@@ -61,10 +61,10 @@ kellyKapowski <- function( s, g, w,
   # kellyKapowski( d=3, s=simg, g=gimg,w=wimg,c=10,r=0.5,m=1,o=oimg )
   d=s@dimension
   outimg=antsImageClone(g)
-  itsstring = paste0( "[",its,",0,6]" )
+  itsstring = paste0( "[",its,",0,10]" )
   kkargs <- list(d = d, s = s, g = g, w = w,
     c = itsstring, r = r, m = m, e = as.numeric( e ), x = as.numeric( x ),
-    p = timestring,
+    q = timestring,
     o = outimg, v = as.numeric( verbose ),
     ...)
   temp<-.Call( "KellyKapowski", .int_antsProcessArguments(c(kkargs)),
