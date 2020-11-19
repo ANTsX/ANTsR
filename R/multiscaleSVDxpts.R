@@ -70,7 +70,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "RcppHNSW" ) {
     nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
-    efval = min( c( 100, ncol(x) ) )
+    efval = min( c( 4, ncol(x) ) )
     if ( verbose ) t0=Sys.time()
     bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval,
       distance = "euclidean",
@@ -224,7 +224,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
     y = scale( y, center=TRUE, scale = (kmetric == "correlation" )  )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
-    efval = min( c( 100, ncol(x) ) )
+    efval = min( c( 4, ncol(x) ) )
     nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
     ann <- RcppHNSW::hnsw_build( t( x ),
       distance = "euclidean",
@@ -233,7 +233,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
       n_threads = nThreads,
       grain_size = floor( ncol(x) / nThreads ) )
 
-    efval = min( c( 100, ncol(y) ) )
+    efval = min( c( 4, ncol(y) ) )
     bknn <- RcppHNSW::hnsw_search( t(y),
       ann,
       k = k,
