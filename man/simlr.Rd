@@ -18,13 +18,15 @@ simlr(
   lineSearchTolerance = 1e-08,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
-  energyType = c("cca", "regression", "normalized", "ucca", "lowRank"),
+  energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
+    "lowRankRegression"),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
   scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute",
     "eigenvalue", "robust"),
   expBeta = 0,
+  jointInitialization = TRUE,
   verbose = FALSE
 )
 }
@@ -75,6 +77,8 @@ by the number of variables or center or center and scale or ... (see code).
 can be a vector which will apply each strategy in order.}
 
 \item{expBeta}{if greater than zero, use exponential moving average on gradient.}
+
+\item{jointInitialization}{boolean for initialization options, default TRUE}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}

@@ -38,7 +38,7 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "FNN" )
+  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "RcppHNSW" )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
@@ -69,9 +69,17 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
     x = scale( x, center = TRUE, scale = (kmetric == "correlation" ) )
   }
   if ( mypkg[1] == "RcppHNSW" ) {
+    nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
     efval = min( c( 4, ncol(x) ) )
-    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval, distance = "euclidean")
+    if ( verbose ) t0=Sys.time()
+    bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval,
+      distance = "euclidean",
+      n_threads = nThreads,
+      grain_size = floor( ncol(x) / nThreads )
+      )
+    if ( verbose ) t1=Sys.time()
     names( bknn ) = c( "nn.idx", "nn.dists" )
+    if ( verbose ) print( difftime( t0,t1,units='mins') )
   }
   if ( mypkg[1] == "FNN" ) {
     bknn = FNN::get.knn( t( x ), k=k, algorithm = "kd_tree"  )
@@ -196,7 +204,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
                                     kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
                                     eps = 1.e-6,
-                                    kPackage = 'FNN',
+                                    kPackage = 'RcppHNSW',
                                     ncores=NA ) # , mypkg = "nabor" )
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
@@ -217,9 +225,22 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "RcppHNSW" ) {
     efval = min( c( 4, ncol(x) ) )
-    ann <- RcppHNSW::hnsw_build( t( x ), distance = "euclidean", M=12, ef=efval )
-    efval = min( c( 100, ncol(y) ) )
-    bknn <- RcppHNSW::hnsw_search( t(y), ann, k = k, ef = efval )
+    nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
+    ann <- RcppHNSW::hnsw_build( t( x ),
+      distance = "euclidean",
+      M=12,
+      ef=efval,
+      n_threads = nThreads,
+      grain_size = floor( ncol(x) / nThreads ) )
+
+    efval = min( c( 4, ncol(y) ) )
+    bknn <- RcppHNSW::hnsw_search( t(y),
+      ann,
+      k = k,
+      ef = efval,
+      n_threads = nThreads,
+      grain_size = floor( ncol(y) / nThreads )
+     )
     names( bknn ) = c( "nn.idx", "nn.dists" )
   }
   if ( mypkg[1] == "FNN" ) {
@@ -2446,8 +2467,8 @@ initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
   nModalities = length( voxmats )
   localAlgorithm = uAlgorithm
   if ( uAlgorithm == 'avg' ) {
-    jointReduction = FALSE
-    localAlgorithm = 'pca'
+    uAlgorithm = 'svd'
+    localAlgorithm = 'svd'
     }
   if ( uAlgorithm == 'randomProjection' & jointReduction )
     jointReduction = FALSE
@@ -2621,6 +2642,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' by the number of variables or center or center and scale or ... (see code).
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
+#' @param jointInitialization boolean for initialization options, default TRUE
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2696,12 +2718,13 @@ simlr <- function(
   lineSearchTolerance = 1e-8,
   randomSeed,
   constraint = c("none","Grassmann","Stiefel"),
-  energyType = c('cca','regression', 'normalized',  'ucca', 'lowRank'),
+  energyType = c('cca','regression', 'normalized',  'ucca', 'lowRank', 'lowRankRegression'),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch","mixed","greedy") ,
   scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
+  jointInitialization = TRUE,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
   if (  missing( energyType ) ) energyType = "cca"
@@ -2847,12 +2870,11 @@ simlr <- function(
     for ( i in 1:nModalities )
       initialUMatrix[[ i ]] = randmat
   } else if ( class(initialUMatrix)[1] == 'numeric' ) {
-    doJR = TRUE
-    if ( doJR ) {
-      temp = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
+    if ( jointInitialization ) {
+      temp = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = jointInitialization )
       initialUMatrix = list( )
       for ( i in 1:nModalities ) initialUMatrix[[i]] = temp
-    } else initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = doJR )
+    } else initialUMatrix = initializeSimlr( voxmats, initialUMatrix, uAlgorithm=mixAlg, jointReduction = jointInitialization )
   }
 
   if ( length( initialUMatrix ) != nModalities &
@@ -2888,7 +2910,7 @@ simlr <- function(
     prediction = 0
     myenergysearchv = ( vmats[[whichModality]]+gradient * lineSearch )  # update the i^th v matrix
     if ( verbose ) {
-      print(paste("getSyME2",whichModality) )
+      print( paste("getSyME2",whichModality) )
       print( dim( vmats[[whichModality]]))
     }
     if ( sparsenessQuantiles[whichModality] != 0 )
@@ -2913,11 +2935,20 @@ simlr <- function(
           # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
         }
 
+# ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
+
 # low-dimensional error approximation
     if ( energyType == 'lowRank' ) {
       vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
       # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
       energy = norm( avgU/norm(avgU,"F") - vpro/norm(vpro,"F"), "F" )
+      return( energy )
+    }
+#
+# low-dimensional error approximation
+    if ( energyType == 'lowRankRegression' ) {
+      vpro = voxmats[[whichModality]] %*% ( myenergysearchv )
+      energy = norm( avgU -  vpro, "F" )
       return( energy )
     }
 
@@ -2962,6 +2993,10 @@ simlr <- function(
       u = initialUMatrix[[i]]
       x = voxmats[[i]]
       if (  whichModel == 'matrix' ) {
+        if ( energyType == 'lowRankRegression' ) {
+          xv = x %*% (v)
+          return( 1.0 / norm( xv - u, "F" ) * t( x ) %*% (  xv -  u ) )
+          }
         if ( energyType == 'lowRank' ) {
 #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
           if ( TRUE ) {
@@ -3150,8 +3185,11 @@ simlr <- function(
       temp = simlrU( initialUMatrix, mixAlg, myw, orthogonalize = orthogonalize,
         connectors = connectors )
       for ( jj in 1:nModalities ) {
-        initialUMatrix[[jj]] =
+         initialUMatrix[[jj]] =
             localGS( temp[[jj]], orthogonalize = orthogonalize )
+         # below exp avg for u updates --- not tested
+#        initialUMatrix[[jj]] = initialUMatrix[[jj]] * 0.9 +
+#            localGS( temp[[jj]], orthogonalize = orthogonalize ) * 0.1
         }
     }
 
