@@ -70,16 +70,14 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   }
   if ( mypkg[1] == "RcppHNSW" ) {
     nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
+    if ( !is.na( ncores ) ) nThreads = ncores
     efval = min( c( 4, ncol(x) ) )
-    if ( verbose ) t0=Sys.time()
     bknn = RcppHNSW::hnsw_knn( t( x ), k = k, M = 16, ef=efval,
       distance = "euclidean",
       n_threads = nThreads,
       grain_size = floor( ncol(x) / nThreads )
       )
-    if ( verbose ) t1=Sys.time()
     names( bknn ) = c( "nn.idx", "nn.dists" )
-    if ( verbose ) print( difftime( t0,t1,units='mins') )
   }
   if ( mypkg[1] == "FNN" ) {
     bknn = FNN::get.knn( t( x ), k=k, algorithm = "kd_tree"  )
@@ -226,6 +224,7 @@ sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
   if ( mypkg[1] == "RcppHNSW" ) {
     efval = min( c( 4, ncol(x) ) )
     nThreads = as.numeric( Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS") )
+    if ( !is.na( ncores ) ) nThreads = ncores
     ann <- RcppHNSW::hnsw_build( t( x ),
       distance = "euclidean",
       M=12,

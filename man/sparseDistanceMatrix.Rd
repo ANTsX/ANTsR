@@ -13,7 +13,7 @@ sparseDistanceMatrix(
   eps = 1e-06,
   ncores = NA,
   sinkhorn = FALSE,
-  kPackage = "FNN"
+  kPackage = "RcppHNSW"
 )
 }
 \arguments{
