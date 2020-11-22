@@ -38,7 +38,8 @@
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "RcppHNSW" )
+  eps = 1.e-6, ncores=NA, sinkhorn = FALSE, kPackage = "RcppHNSW",
+  verbose=FALSE )
 {
   myn = nrow( x )
   if ( k >= ncol( x ) ) k = ncol( x ) - 1
