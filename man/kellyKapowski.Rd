@@ -8,12 +8,12 @@ kellyKapowski(
   s,
   g,
   w,
-  its = 50,
+  its = 45,
   r = 0.025,
   m = 1.5,
   x = TRUE,
   e = FALSE,
-  t = NULL,
+  q = NULL,
   timeSigma = 1,
   verbose = FALSE,
   ...
@@ -36,7 +36,7 @@ kellyKapowski(
 
 \item{e}{restrict deformation boolean}
 
-\item{t}{time spacing, a vector equal to the number of time dimensions}
+\item{q}{time spacing, a vector equal to the number of time dimensions}
 
 \item{timeSigma, }{a scalar sigma value for distances between time points}
 
