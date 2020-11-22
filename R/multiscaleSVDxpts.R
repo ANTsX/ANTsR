@@ -15,6 +15,7 @@
 #' @param ncores number of cores to use
 #' @param sinkhorn boolean
 #' @param kPackage name of package to use for knn
+#' @param verbose verbose output
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -183,6 +184,7 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param eps epsilon error for rapid knn
 #' @param kPackage name of package to use for knn
 #' @param ncores number of cores to use
+#' @param verbose verbose output
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
 #' @references
@@ -204,9 +206,10 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @export sparseDistanceMatrixXY
 sparseDistanceMatrixXY <- function( x, y, k = 3, r = Inf, sigma = NA,
                                     kmetric = c("euclidean", "correlation", "covariance", "gaussian"  ),
-                                    eps = 1.e-6,
+                                    eps = 0.000001,
                                     kPackage = 'RcppHNSW',
-                                    ncores=NA ) # , mypkg = "nabor" )
+                                    ncores=NA,
+                                    verbose=FALSE ) # , mypkg = "nabor" )
 {
   if ( any( is.na( x ) ) ) stop("input matrix x has NA values")
   if ( any( is.na( y ) ) ) stop("input matrix y has NA values")

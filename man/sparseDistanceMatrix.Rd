@@ -35,6 +35,8 @@ sparseDistanceMatrix(
 \item{sinkhorn}{boolean}
 
 \item{kPackage}{name of package to use for knn}
+
+\item{verbose}{verbose output}
 }
 \value{
 matrix sparse p by p matrix is output with p by k nonzero entries
