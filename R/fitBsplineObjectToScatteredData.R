@@ -4,12 +4,12 @@
 #' for the ITK filter \url{https://itk.org/Doxygen/html/classitk_1_1BSplineScatteredDataPointSetToImageFilter.html}.
 #' This filter is flexible in the possible objects that can be approximated.
 #' Possibilities include:
-#'
-#'     * 1/2/3/4-D curve
-#'     * 2-D surface in 3-D space (not available/templated)
-#'     * 2/3/4-D scalar field
-#'     * 2/3-D displacement field
-#'
+#' \itemize{
+#'     \item{curve:}{1/2/3/4-D}
+#'     \item{surface:}{2-D surface in 3-D space (not available/templated)}
+#'     \item{scalar:}{2/3/4-D scalar field}
+#'     \item{displacement:}{2/3-D displacement field}
+#' }
 #' In order to understand the input parameters, it is important to understand
 #' the difference between the parametric and data dimensions.  A curve as one
 #' parametric dimension but the data dimension can be 1-D, 2-D, 3-D, or 4-D.
@@ -64,7 +64,7 @@
 #' lines( bsplineCurve[,1], bsplineCurve[,2], col = "blue" )
 #'
 #' # Perform 2-D scalar field (i.e., image) example
-#' 
+#'
 #' numberOfRandomPoints <- 10000
 #'
 #' img <- antsImageRead( getANTsRData( "r16" ) )
@@ -83,10 +83,10 @@
 #'
 #' bsplineImage <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
 #'   parametricDomainOrigin = c( 0.0, 0.0 ), parametricDomainSpacing = c( 1.0, 1.0 ),
-#'   parametricDomainSize = dim( img ), 
+#'   parametricDomainSize = dim( img ),
 #'   numberOfFittingLevels = 7, meshSize = c( 1, 1 ) )
 #' plot( bsplineImage )
-#' 
+#'
 #' @export fitBsplineObjectToScatteredData
 
 fitBsplineObjectToScatteredData <- function(
@@ -167,5 +167,5 @@ fitBsplineObjectToScatteredData <- function(
     numberOfFittingLevels, numberOfControlPoints,
     splineOrder,
     PACKAGE = "ANTsR" )
-  return( bsplineObject )  
+  return( bsplineObject )
 }
