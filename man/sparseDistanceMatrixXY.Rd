@@ -11,7 +11,7 @@ sparseDistanceMatrixXY(
   r = Inf,
   sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06,
+  eps = 0.000001,
   kPackage = "RcppHNSW",
   ncores = NA,
   verbose = FALSE
