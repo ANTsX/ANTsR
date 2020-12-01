@@ -85,10 +85,17 @@ fitBsplineDisplacementField <- function(
     stop( "Error: if the displacement field is not specified, one must fully specify the input physical domain." )
     }
 
+  if( ! is.null( displacementField ) && is.null( displacementWeightImage ) )
+    {
+    displacementWeightImage <- makeImage( dim( displacementField ), voxval = 1,
+      spacing = antsGetSpacing( displacementField ), origin = antsGetOrigin( displacementField ),
+      direction = antsGetDirection( displacementField ), components = FALSE )
+    }
+
   dimensionality <- NULL
   if( ! is.null( displacementField ) )
     {
-    dimensionality <- dim( displacementField )
+    dimensionality <- displacementField@dimension
     } else {
     dimensionality <- ncol( displacementOrigins )
     if( ncol( displacements ) != dimensionality )
@@ -97,28 +104,36 @@ fitBsplineDisplacementField <- function(
       }
     }
 
-  if( ! is.null( displacementWeights ) && ( length( displacementWeights ) != nrow( displacementOrigins ) ) )
+  if( ! is.null( displacementOrigins ) )
     {
-    stop( "Error:  length of displacement weights must match the number of displacement points." )
-    } else {
-    displacementWeights <- rep( 1.0, nrow( displacementOrigins ) )
+    if( ! is.null( displacementWeights ) && ( length( displacementWeights ) != nrow( displacementOrigins ) ) )
+      {
+      stop( "Error:  length of displacement weights must match the number of displacement points." )
+      } else {
+      displacementWeights <- rep( 1.0, nrow( displacementOrigins ) )
+      }
     }
 
   if( length( meshSize ) != 1 && length( meshSize ) != dimensionality )
     {
     stop( "Error:  incorrect specification for meshSize.")
     }
-  if( length( origin ) != dimensionality )
+  if( ! is.null( origin ) && length( origin ) != dimensionality )
     {
     stop( "Error:  origin is not of length dimensionality." )
     }
-  if( length( spacing ) != dimensionality )
+  if( ! is.null( spacing ) && length( spacing ) != dimensionality )
     {
     stop( "Error:  spacing is not of length dimensionality." )
     }
-  if( length( size ) != dimensionality )
+  if( ! is.null( size ) && length( size ) != dimensionality )
     {
     stop( "Error:  size is not of length dimensionality." )
+    }
+  if( ! is.null( direction ) &&
+    ( dim( direction )[1] != dimensionality || dim( direction )[2] != dimensionality ) )
+    {
+    stop( "Error:  direction is not of size dimensionality x dimensionality." )
     }
 
   numberOfControlPoints <- meshSize + splineOrder

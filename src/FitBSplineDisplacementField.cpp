@@ -222,6 +222,7 @@ RcppExport SEXP fitBsplineDisplacementField(
 {
 try
   {
+
   using PrecisionType = float;
 
   unsigned int dimensionality = Rcpp::as<int>( r_dimensionality );
@@ -234,34 +235,51 @@ try
     using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
     using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
-    Rcpp::NumericVector origin( r_origin );
-    Rcpp::NumericVector spacing( r_spacing );
-    Rcpp::NumericVector size( r_size );
-    Rcpp::NumericMatrix direction( r_direction );
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->SetVectorLength( Dimension );
 
-    typename ANTsRFieldType::PointType fieldOrigin;
-    typename ANTsRFieldType::SpacingType fieldSpacing;
-    typename ANTsRFieldType::SizeType fieldSize;
-    typename ANTsRFieldType::DirectionType fieldDirection;
-
-    for( unsigned int d = 0; d < Dimension; d++ )
+    if( Rf_isNull( r_origin ) || Rf_isNull( r_size ) || Rf_isNull( r_spacing ) || Rf_isNull( r_direction ) )
       {
-      fieldOrigin[d] = origin[d];
-      fieldSpacing[d] = spacing[d];
-      fieldSize[d] = size[d];
-      for( unsigned int e = 0; e < Dimension; e++ )
+      if( ! Rf_isNull( r_displacementField ) )
         {
-        fieldDirection(d, e) = direction(d, e);
+        ANTsRFieldPointerType inputANTsRField = Rcpp::as<ANTsRFieldPointerType>( r_displacementField );
+        antsrField->CopyInformation( inputANTsRField );
+        antsrField->SetRegions( inputANTsRField->GetRequestedRegion() );
+        antsrField->Allocate();
+        }
+      else
+        {
+        throw std::invalid_argument( "one or more b-spline domain definitions are not specified." );
         }
       }
+    else
+      {
+      Rcpp::NumericVector origin( r_origin );
+      Rcpp::NumericVector spacing( r_spacing );
+      Rcpp::NumericVector size( r_size );
+      Rcpp::NumericMatrix direction( r_direction );
 
-    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
-    antsrField->SetOrigin( fieldOrigin );
-    antsrField->SetRegions( fieldSize );
-    antsrField->SetSpacing( fieldSpacing );
-    antsrField->SetVectorLength( Dimension );
-    antsrField->SetDirection( fieldDirection );
-    antsrField->Allocate();
+      typename ANTsRFieldType::PointType fieldOrigin;
+      typename ANTsRFieldType::SpacingType fieldSpacing;
+      typename ANTsRFieldType::SizeType fieldSize;
+      typename ANTsRFieldType::DirectionType fieldDirection;
+
+      for( unsigned int d = 0; d < Dimension; d++ )
+        {
+        fieldOrigin[d] = origin[d];
+        fieldSpacing[d] = spacing[d];
+        fieldSize[d] = size[d];
+        for( unsigned int e = 0; e < Dimension; e++ )
+          {
+          fieldDirection(d, e) = direction(d, e);
+          }
+        }
+      antsrField->SetOrigin( fieldOrigin );
+      antsrField->SetRegions( fieldSize );
+      antsrField->SetSpacing( fieldSpacing );
+      antsrField->SetDirection( fieldDirection );
+      antsrField->Allocate();
+      }
 
     Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
@@ -281,34 +299,51 @@ try
     using ANTsRFieldType = itk::VectorImage<PrecisionType, Dimension>;
     using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
-    Rcpp::NumericVector origin( r_origin );
-    Rcpp::NumericVector spacing( r_spacing );
-    Rcpp::NumericVector size( r_size );
-    Rcpp::NumericMatrix direction( r_direction );
+    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+    antsrField->SetVectorLength( Dimension );
 
-    typename ANTsRFieldType::PointType fieldOrigin;
-    typename ANTsRFieldType::SpacingType fieldSpacing;
-    typename ANTsRFieldType::SizeType fieldSize;
-    typename ANTsRFieldType::DirectionType fieldDirection;
-
-    for( unsigned int d = 0; d < Dimension; d++ )
+    if( Rf_isNull( r_origin ) || Rf_isNull( r_size ) || Rf_isNull( r_spacing ) || Rf_isNull( r_direction ) )
       {
-      fieldOrigin[d] = origin[d];
-      fieldSpacing[d] = spacing[d];
-      fieldSize[d] = size[d];
-      for( unsigned int e = 0; e < Dimension; e++ )
+      if( ! Rf_isNull( r_displacementField ) )
         {
-        fieldDirection(d, e) = direction(d, e);
+        ANTsRFieldPointerType inputANTsRField = Rcpp::as<ANTsRFieldPointerType>( r_displacementField );
+        antsrField->CopyInformation( inputANTsRField );
+        antsrField->SetRegions( inputANTsRField->GetRequestedRegion() );
+        antsrField->Allocate();
+        }
+      else
+        {
+        throw std::invalid_argument( "one or more b-spline domain definitions are not specified." );
         }
       }
+    else
+      {
+      Rcpp::NumericVector origin( r_origin );
+      Rcpp::NumericVector spacing( r_spacing );
+      Rcpp::NumericVector size( r_size );
+      Rcpp::NumericMatrix direction( r_direction );
 
-    ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
-    antsrField->SetOrigin( fieldOrigin );
-    antsrField->SetRegions( fieldSize );
-    antsrField->SetSpacing( fieldSpacing );
-    antsrField->SetVectorLength( Dimension );
-    antsrField->SetDirection( fieldDirection );
-    antsrField->Allocate();
+      typename ANTsRFieldType::PointType fieldOrigin;
+      typename ANTsRFieldType::SpacingType fieldSpacing;
+      typename ANTsRFieldType::SizeType fieldSize;
+      typename ANTsRFieldType::DirectionType fieldDirection;
+
+      for( unsigned int d = 0; d < Dimension; d++ )
+        {
+        fieldOrigin[d] = origin[d];
+        fieldSpacing[d] = spacing[d];
+        fieldSize[d] = size[d];
+        for( unsigned int e = 0; e < Dimension; e++ )
+          {
+          fieldDirection(d, e) = direction(d, e);
+          }
+        }
+      antsrField->SetOrigin( fieldOrigin );
+      antsrField->SetRegions( fieldSize );
+      antsrField->SetSpacing( fieldSpacing );
+      antsrField->SetDirection( fieldDirection );
+      antsrField->Allocate();
+      }
 
     Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
