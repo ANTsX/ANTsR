@@ -16,7 +16,9 @@ fitBsplineDisplacementField(
   direction = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
-  splineOrder = 3
+  splineOrder = 3,
+  enforceStationaryBoundary = TRUE,
+  estimateInverse = FALSE
 )
 }
 \arguments{
@@ -60,6 +62,11 @@ Otherwise, the \code{displacementField} is used to define the domain parameters.
 \item{meshSize}{vector defining the mesh size at the initial fitting level.}
 
 \item{splineOrder}{spline order of the B-spline object.  Default = 3.}
+
+\item{enforceStationaryBoundary}{ensure no displacements on the image boundary.
+Default = TRUE.}
+
+\item{estimateInverse}{estimate the inverse displacement field.  Default = FALSE.}
 }
 \value{
 ANTsR image.

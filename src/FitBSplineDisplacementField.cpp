@@ -24,7 +24,9 @@ SEXP fitBSplineVectorImageHelper(
   SEXP r_direction,
   SEXP r_numberOfFittingLevels,
   SEXP r_numberOfControlPoints,
-  SEXP r_splineOrder )
+  SEXP r_splineOrder,
+  SEXP r_enforceStationaryBoundary,
+  SEXP r_estimateInverse )
 {
   using RealType = float;
 
@@ -160,6 +162,8 @@ SEXP fitBSplineVectorImageHelper(
   unsigned int numberOfFittingLevels = Rcpp::as<int>( r_numberOfFittingLevels );
   Rcpp::NumericVector numberOfControlPoints( r_numberOfControlPoints );
   unsigned int splineOrder = Rcpp::as<int>( r_splineOrder );
+  bool enforceStationaryBoundary = Rcpp::as<bool>( r_enforceStationaryBoundary );
+  bool estimateInverse = Rcpp::as<bool>( r_estimateInverse );
 
   typename BSplineFilterType::ArrayType ncps;
   for( unsigned int d = 0; d < Dimension; d++ )
@@ -170,6 +174,8 @@ SEXP fitBSplineVectorImageHelper(
   bsplineFilter->SetNumberOfControlPoints( ncps );
   bsplineFilter->SetSplineOrder( splineOrder );
   bsplineFilter->SetNumberOfFittingLevels( numberOfFittingLevels );
+  bsplineFilter->SetEnforceStationaryBoundary( enforceStationaryBoundary );
+  bsplineFilter->SetEstimateInverse( estimateInverse );
   bsplineFilter->Update();
 
   //////////////////////////
@@ -210,7 +216,9 @@ RcppExport SEXP fitBsplineDisplacementField(
   SEXP r_direction,
   SEXP r_numberOfFittingLevels,
   SEXP r_numberOfControlPoints,
-  SEXP r_splineOrder )
+  SEXP r_splineOrder,
+  SEXP r_enforceStationaryBoundary,
+  SEXP r_estimateInverse )
 {
 try
   {
@@ -262,7 +270,8 @@ try
       r_displacementOrigins, r_displacements, r_displacementWeights,
       s4_antsrField,
       r_origin, r_spacing, r_size, r_direction,
-      r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
+      r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder,
+      r_enforceStationaryBoundary, r_estimateInverse );
     return( outputBSplineField );
     }
   else if( dimensionality == 3 )
@@ -308,7 +317,8 @@ try
       r_displacementOrigins, r_displacements, r_displacementWeights,
       s4_antsrField,
       r_origin, r_spacing, r_size, r_direction,
-      r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
+      r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder,
+      r_enforceStationaryBoundary, r_estimateInverse );
     return( outputBSplineField );
     }
   else

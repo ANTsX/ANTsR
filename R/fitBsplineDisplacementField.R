@@ -36,6 +36,9 @@
 #' @param numberOfFittingLevels integer specifying the number of fitting levels.
 #' @param meshSize vector defining the mesh size at the initial fitting level.
 #' @param splineOrder spline order of the B-spline object.  Default = 3.
+#' @param enforceStationaryBoundary ensure no displacements on the image boundary.
+#' Default = TRUE.
+#' @param estimateInverse estimate the inverse displacement field.  Default = FALSE.
 #' @return ANTsR image.
 #'
 #' @author NJ Tustison
@@ -67,7 +70,9 @@ fitBsplineDisplacementField <- function(
   direction = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
-  splineOrder = 3
+  splineOrder = 3,
+  enforceStationaryBoundary = TRUE,
+  estimateInverse = FALSE
   ) {
 
   if( is.null( displacementField ) && ( is.null( displacementOrigins ) || is.null( displacements ) ) )
@@ -128,8 +133,8 @@ fitBsplineDisplacementField <- function(
     displacementField, displacementWeightImage,
     displacementOrigins, displacements, displacementWeights,
     origin, spacing, size, direction,
-    numberOfFittingLevels, numberOfControlPoints,
-    splineOrder,
+    numberOfFittingLevels, numberOfControlPoints, splineOrder,
+    enforceStationaryBoundary, estimateInverse,
     PACKAGE = "ANTsR" )
   return( bsplineField )
 }
