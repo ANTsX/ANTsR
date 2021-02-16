@@ -69,7 +69,7 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
     }
 
   segmentation <- antsImageClone( image ) * 0
-  probabilityImages <- list()
+  probabilityImages <- NULL
 
   iter <- 0
   diceValue <- 0
@@ -117,11 +117,10 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
     h <- matrix( data = 0, nrow = nrow( u ), ncol = ncol( u ) )
     for( i in seq.int( cc ) )
       {
-      uimage <- antsImageClone( image ) * 0
-      uimage[mask != 0] <- u[i,]
-      probabilityImages[[i]] <- uimage
-      uneighborhoods <- getNeighborhoodInMask( uimage, mask, radius )
-      h[i,] <- colSums( uneighborhoods, na.rm = TRUE )
+      uImage <- antsImageClone( image ) * 0
+      uImage[mask != 0] <- u[i,]
+      uNeighborhoods <- getNeighborhoodInMask( uImage, mask, radius )
+      h[i,] <- colSums( uNeighborhoods, na.rm = TRUE )
       }
 
     # u prime
@@ -129,13 +128,17 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
     d <- rep( 0, ncol( u ) )
     for( k in seq.int( cc ) )
       {
-      d <- ( d + u[k,] ^ p ) * ( h[k,] ^ q )
+      d <- d + ( u[k,] ^ p ) * ( h[k,] ^ q )
       }
 
+    probabilityImages <- list()
     uprime <- matrix( data = 0, nrow = nrow( u ), ncol = ncol( u ) )
     for( i in seq.int( cc ) )
       {
       uprime[i,] <- ( u[i,] ^ p * h[i,] ^ q ) / d
+      uprimeImage <- antsImageClone( image ) * 0
+      uprimeImage[mask != 0] <- uprime[i,]
+      probabilityImages[[i]] <- uprimeImage
       }
 
     tmpSegmentation <- antsImageClone( image ) * 0
