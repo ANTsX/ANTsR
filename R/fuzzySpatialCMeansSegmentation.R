@@ -19,7 +19,7 @@
 #' @param maxNumberOfIterations iteration limit (default = 20).
 #' @param convergenceThreshold Convergence between iterations is measured
 #' using the Dice coefficient (default = 0.02).
-#' @param verbose print diagnostics to the screen.
+#' @param verbose print progress.
 #' @return list containing segmentation and probability images
 #'
 #' @author NJ Tustison
@@ -47,6 +47,11 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
   v <- v * ( max( x ) - min( x ) ) + min( x )
   cc <- length( v )
 
+  if( verbose == TRUE )
+    {
+    cat( "Initial cluster centers: ", v, "\n" )
+    }
+
   xx <- matrix()
   for( i in seq.int( cc ) )
     {
@@ -56,11 +61,6 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
       } else {
       xx <- rbind( xx, x )
       }
-    }
-
-  if( verbose == TRUE )
-    {
-    cat( "Cluster centers: ", v, "\n" )
     }
 
   if( length( radius ) == 1 )
@@ -76,7 +76,7 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
   while( iter < maxNumberOfIterations && diceValue < 1.0 - convergenceThreshold )
     {
 
-    # update membership values
+    # Update membership values
 
     xv <- matrix()
     for( k in seq.int( cc ) )
@@ -107,7 +107,12 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
 
     v <- rowSums( ( u ^ m ) * xx, na.rm = TRUE ) / rowSums( u ^ m, na.rm = TRUE )
 
-    # spatial function
+    if( verbose == TRUE )
+      {
+      cat( "Updated cluster centers: ", v, "\n" )
+      }
+
+    # Spatial function
 
     h <- matrix( data = 0, nrow = nrow( u ), ncol = ncol( u ) )
     for( i in seq.int( cc ) )
