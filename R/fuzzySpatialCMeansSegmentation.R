@@ -52,15 +52,10 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
     cat( "Initial cluster centers: ", v, "\n" )
     }
 
-  xx <- matrix()
+  xx <- matrix( data = 0, nrow = cc, ncol = length( x ) )
   for( i in seq.int( cc ) )
     {
-    if( i == 1 )
-      {
-      xx <- x
-      } else {
-      xx <- rbind( xx, x )
-      }
+    xx[i,] <- x
     }
 
   if( length( radius ) == 1 )
@@ -78,15 +73,10 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
 
     # Update membership values
 
-    xv <- matrix()
+    xv <- matrix( data = 0, nrow = cc, ncol = length( x ) )
     for( k in seq.int( cc ) )
       {
-      if( k == 1 )
-        {
-        xv <- abs( x - v[k] )
-        } else {
-        xv <- rbind( xv, abs( x - v[k] ) )
-        }
+      xv[k,] = abs( x - v[k] )
       }
 
     u <- matrix( data = 0, nrow = nrow( xv ), ncol = ncol( xv ) )
@@ -102,6 +92,7 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
       u[i,] <- 1 / d
       }
     u[is.nan( u )] <- 1
+
 
     # Update cluster centers
 
@@ -135,7 +126,7 @@ fuzzySpatialCMeansSegmentation <- function( image, mask = NULL, numberOfClusters
     uprime <- matrix( data = 0, nrow = nrow( u ), ncol = ncol( u ) )
     for( i in seq.int( cc ) )
       {
-      uprime[i,] <- ( u[i,] ^ p * h[i,] ^ q ) / d
+      uprime[i,] <- ( u[i,] ^ p ) * ( h[i,] ^ q ) / d
       uprimeImage <- antsImageClone( image ) * 0
       uprimeImage[mask != 0] <- uprime[i,]
       probabilityImages[[i]] <- uprimeImage
