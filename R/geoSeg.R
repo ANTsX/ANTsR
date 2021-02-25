@@ -36,10 +36,10 @@ geoSeg <- function( img, brainmask, priors, seginit,
   if ( typeof( img ) == "S4" ) img=list( img )
   if ( ! exists("vesselopt") ) vesselopt="none"
   idim = img[[1]]@dimension
-  
+
   mrfterm=paste("[",mrfval,",",paste(rep(1,idim),collapse='x'),"]")
   atroposits=paste('[',atroposits,',0]')
-  
+
   # 1 vessels via bright / dark
   if ( vesselopt == 'bright' | vesselopt == 'dark' )
   {
@@ -49,7 +49,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
     if ( vesselopt == 'dark' )
       mask = thresholdImage( vseg$segmentation , 2, vesselk )
   } else mask = antsImageClone( brainmask )
-  
+
   # 2 wm / gm use topology to modify wm
   if ( missing(seginit) ) {
     seginit <- atropos( d = idim, a = img, m = mrfterm, priorweight=0.25,
@@ -61,13 +61,13 @@ geoSeg <- function( img, brainmask, priors, seginit,
   cort = thresholdImage( seginit$segmentation, 2, 2 )
   gm   = seginit$probabilityimages[[2]]
   gmp  = gm + wmp
-  
+
   # 3 wm / gm use diffeo to estimate gm
   if (  is.null( jacw ) )
   {
     tvreg = antsRegistration( gmp, wmp, typeofTransform = "TVMSQ",
                               gradStep=gradStep, mask=cort )
-    
+
     # 4 wm / gm / csf priors from jacobian
     #  jac    = createJacobianDeterminantImage( wmp, tvreg$fwdtransforms[[1]], 0)
     jacinv = createJacobianDeterminantImage( wmp, tvreg$invtransforms[[1]], 0)
@@ -75,7 +75,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
                                 transformlist=tvreg$fwdtransforms )
   }
   thkj   = jacw * gm
-  
+
   #####################################
   # 5 resegment with new priors begin #
   #####################################
@@ -93,12 +93,13 @@ geoSeg <- function( img, brainmask, priors, seginit,
   seginit$probabilityimages[[2]] = seginit$probabilityimages[[2]] * thksig %>%
     smoothImage( smv )
   #
+  negateImage <- function( x ) return( max( x ) - x )
   # csf topology constraint based on gm/wm jacobian
   if ( length(priors) > 3 )
-    thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" ) *
-    iMath( priors[[4]], "Neg" )
+    thkcsf = negateImage( thksig ) * negateImage( wm ) *
+    negateImage( priors[[4]] )
   if ( length(priors) <= 3 )
-    thkcsf = iMath( thksig, "Neg" ) * iMath( wm, "Neg" )
+    thkcsf = negateImage( thksig ) * negateImage( wm )
   thkcsf = smoothImage( thkcsf, 0.1 )
   temp = priors[[1]] + thkcsf
   temp[ temp > 1 ] = 1
@@ -108,7 +109,7 @@ geoSeg <- function( img, brainmask, priors, seginit,
   # wm topology constraint based on largest connected component
   # and excluding high gm-prob voxels
   seginit$probabilityimages[[3]] = priors[[3]] * wm %>% smoothImage( smv )
-  seginit$probabilityimages[[3]] = priors[[3]] * iMath( thksig, "Neg")
+  seginit$probabilityimages[[3]] = priors[[3]] * negateImage( thksig )
   #
   if ( length( seginit$probabilityimages ) > 3 )
     seginit$probabilityimages[[4]] = seginit$probabilityimages[[4]] *
