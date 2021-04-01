@@ -11,9 +11,10 @@ sparseDistanceMatrixXY(
   r = Inf,
   sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06,
-  kPackage = "FNN",
-  ncores = NA
+  eps = 0.000001,
+  kPackage = "RcppHNSW",
+  ncores = NA,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ sparseDistanceMatrixXY(
 \item{kPackage}{name of package to use for knn}
 
 \item{ncores}{number of cores to use}
+
+\item{verbose}{verbose output}
 }
 \value{
 matrix sparse p by q matrix is output with p by k nonzero entries

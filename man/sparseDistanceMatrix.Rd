@@ -10,10 +10,11 @@ sparseDistanceMatrix(
   r = Inf,
   sigma = NA,
   kmetric = c("euclidean", "correlation", "covariance", "gaussian"),
-  eps = 1e-06,
+  eps = 0.000001,
   ncores = NA,
   sinkhorn = FALSE,
-  kPackage = "FNN"
+  kPackage = "RcppHNSW",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ sparseDistanceMatrix(
 \item{sinkhorn}{boolean}
 
 \item{kPackage}{name of package to use for knn}
+
+\item{verbose}{verbose output}
 }
 \value{
 matrix sparse p by p matrix is output with p by k nonzero entries

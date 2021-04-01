@@ -37,6 +37,7 @@ rapidlyInspectImageData <- function( myfiles ) {
   colnames(mymat) <- measnames
   for (i in 1:nfn) {
     img <- antsImageRead(myfiles[i])
+    if ( img@components > 1 ) img = splitChannels( img ) %>% antsAverageImages(verbose=FALSE)
     thresh <- mean(img[img > min(img)])
     mymat[i, 1] <- thresh
     mymat[i, 2] <- mean(img[img > thresh])
