@@ -77,8 +77,8 @@ abpBrainExtraction <- function(img, tem, temmask,
                                num_threads = 1,
                                pad = 0,
                                verbose = FALSE) {
-### @useDynLib ANTsR, .registration = TRUE
-
+  ### @useDynLib ANTsR, .registration = TRUE
+  
   if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     on.exit({
@@ -86,7 +86,7 @@ abpBrainExtraction <- function(img, tem, temmask,
     })
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
   }
-
+  
   if (missing(img) | missing(tem) | missing(temmask) |
       is.null(img) | is.null(tem) | is.null(temmask)) {
     cat("usage: abpBrainExtraction( img=imgToBExtract, tem = template, temmask = mask ) \n")
@@ -95,9 +95,12 @@ abpBrainExtraction <- function(img, tem, temmask,
   }
   tempriors <- 3
   npriors <- 3
-
+  
   img = ANTsRCore::check_ants(img)
   if (pad > 0) {
+    if (verbose) {
+      message("Padding image")
+    }
     img = iMath(img, "PadImage", pad)
   }
   # file I/O - all stored in temp dir
@@ -110,16 +113,16 @@ abpBrainExtraction <- function(img, tem, temmask,
     initafffn <- paste(tdir, "antsr", "_InitialAff.mat", sep = "")
     EXTRACTION_WARP_OUTPUT_PREFIX <- paste(tdir, "antsr", "_PriorMap", sep = "")
   }
-#   # ANTs parameters begin
-#   ANTS_MAX_ITERATIONS <- "100x100x70x20"
-#   ANTS_TRANSFORMATION <- "SyN[0.1,3,0]"
-#   ANTS_LINEAR_METRIC_PARAMS <- "1,32,Regular,0.25"
-#   ANTS_LINEAR_CONVERGENCE <- "[1000x1000x1000x10,1e-7,15]"
-#   ANTS_LINEAR_CONVERGENCEFAST <- "[10x0x0x0,1e-7,10]"
-#   ANTS_METRIC <- "CC"
-#   ANTS_METRIC_PARAMS <- "1,4"
-#   # ANTs parameters end
-
+  #   # ANTs parameters begin
+  #   ANTS_MAX_ITERATIONS <- "100x100x70x20"
+  #   ANTS_TRANSFORMATION <- "SyN[0.1,3,0]"
+  #   ANTS_LINEAR_METRIC_PARAMS <- "1,32,Regular,0.25"
+  #   ANTS_LINEAR_CONVERGENCE <- "[1000x1000x1000x10,1e-7,15]"
+  #   ANTS_LINEAR_CONVERGENCEFAST <- "[10x0x0x0,1e-7,10]"
+  #   ANTS_METRIC <- "CC"
+  #   ANTS_METRIC_PARAMS <- "1,4"
+  #   # ANTs parameters end
+  
   # atropos params
   locmrf<-paste(rep(1,img@dimension),collapse='x')
   ATROPOS_BRAIN_EXTRACTION_INITIALIZATION <- "kmeans[3]"
@@ -133,68 +136,102 @@ abpBrainExtraction <- function(img, tem, temmask,
   ATROPOS_SEGMENTATION_POSTERIOR_FORMULATION <- "Socrates"
   ATROPOS_SEGMENTATION_MRF <- paste("[0.11,",locmrf,"]")
   # atropos params end
-
+  
   imgsmall <- resampleImage(img , rep(4, img@dimension) )
   temsmall <- resampleImage(tem , rep(4, img@dimension) )
   # careful initialization of affine mapping , result stored in initafffn
   if (!file.exists(initafffn)) {
-    if (is.null(temregmask))
+    if (verbose) {
+      message("Getting initial Affine Transformation")
+    }
+    if (is.null(temregmask)) {
       temp<-affineInitializer(
-              fixedImage=temsmall, movingImage=imgsmall,
-              searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
-              localSearchIterations=10, txfn=initafffn,
-              num_threads = num_threads)
-    else
+        fixedImage=temsmall, movingImage=imgsmall,
+        searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
+        localSearchIterations=10, txfn=initafffn,
+        num_threads = num_threads)
+    } else {
       temregmask = check_ants(temregmask)
       temp<-affineInitializer(
-              fixedImage=temsmall, movingImage=imgsmall,
-              searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
-              localSearchIterations=10, txfn=initafffn, mask=temregmask,
-              num_threads = num_threads)
+        fixedImage=temsmall, movingImage=imgsmall,
+        searchFactor=15, radianFraction=0.1, usePrincipalAxis=0,
+        localSearchIterations=10, txfn=initafffn, mask=temregmask,
+        num_threads = num_threads)
+    }
   }
+  
 
   # get laplacian images
-  lapi = iMath(img, "Laplacian", 1.5, 1)
-  lapt = iMath(tem, "Laplacian", 1.5, 1)
-
+  # FIXME the below antsregparams is the only part that uses these
+  # so remove the comments if need lapi and lapt, otherwise just 
+  # inefficient
+  # if (verbose) {
+  #   message("Getting Laplacian of image")
+  # }
+  # lapi = iMath(img, "Laplacian", 1.5, 1)
+  # if (verbose) {
+  #   message("Getting Laplacian of template")
+  # }
+  # lapt = iMath(tem, "Laplacian", 1.5, 1)
+  
   # FIXME should add mask to below via -x option
-  dtem <- antsImageClone(tem, "double")
-  dimg <- antsImageClone(img, "double")
-#   antsregparams <- list(d = img@dimension, u = 1,
-#                         o = EXTRACTION_WARP_OUTPUT_PREFIX,
-#                         r = initafffn, z = 1, w = "[0.025,0.975]",
-#                         m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt,
-#                                                                                 "double")), ",", antsrGetPointerName(antsImageClone(lapi, "double")),
-#                                   ",", "0.5,32]", sep = ""),
-#                         c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]",
-#                         f = "6x4x2x1", s = "4x2x1x0")
+  # dtem <- antsImageClone(tem, "double")
+  # dimg <- antsImageClone(img, "double")
+  
+  #   antsregparams <- list(d = img@dimension, u = 1,
+  #                         o = EXTRACTION_WARP_OUTPUT_PREFIX,
+  #                         r = initafffn, z = 1, w = "[0.025,0.975]",
+  #                         m = paste("mattes[", antsrGetPointerName(antsImageClone(lapt,
+  #                                                                                 "double")), ",", antsrGetPointerName(antsImageClone(lapi, "double")),
+  #                                   ",", "0.5,32]", sep = ""),
+  #                         c = "[50x50x50x10,1e-9,15]", t = "SyN[0.1,3,0]",
+  #                         f = "6x4x2x1", s = "4x2x1x0")
   outprefix <- EXTRACTION_WARP_OUTPUT_PREFIX
+  if (verbose) {
+    message("Running Registration")
+  }    
   mytx<-antsRegistration( tem, img, typeofTransform = regtype,
                           initialTransform=initafffn, mask=temregmask,
-                          verbose = verbose)
+                          verbose = verbose > 1)
   fwdtransforms <- mytx$fwdtransforms
   invtransforms <- mytx$invtransforms
+  rm(mytx)
+  if (verbose) {
+    message("Applying Transformations")
+  }        
   temmaskwarped <- antsApplyTransforms( img, temmask,
                                         transformlist = invtransforms,
                                         interpolator = "nearestNeighbor",
                                         verbose = verbose )
   temmaskwarped<-thresholdImage( temmaskwarped, 0.5, 1 )
   tmp <- antsImageClone(temmaskwarped)
-
+  
+  if (verbose) {
+    message("Dilating and filling holes")
+  }  
   tmp = iMath(temmaskwarped, "MD", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
   tmp = iMath(tmp, "FillHoles") %>% thresholdImage( 1, 2 )
   gc()
   seg <- antsImageClone(img, "unsigned int")
   tmpi <- antsImageClone(tmp, "unsigned int")
+  if (verbose) {
+    message("Running Atropos")
+  }    
   atroparams <- list(d = img@dimension, a = img,
                      m = ATROPOS_BRAIN_EXTRACTION_MRF,
-                     o = seg, x = tmpi,
+                     o = seg, 
+                     x = tmpi,
                      i = ATROPOS_BRAIN_EXTRACTION_INITIALIZATION,
                      c = ATROPOS_BRAIN_EXTRACTION_CONVERGENCE,
                      k = ATROPOS_BRAIN_EXTRACTION_LIKELIHOOD,
-                     v = as.integer( verbose > 0))
+                     v = as.integer(verbose > 1)
+                     )
   atropos(atroparams)
+  
+  if (verbose) {
+    message("Post-processing of atropos masks")
+  }   
   fseg <- antsImageClone(  seg, "float")
   segwm<-thresholdImage(  fseg, 3, 3 )
   seggm<-thresholdImage(  fseg, 2, 2)
@@ -211,9 +248,15 @@ abpBrainExtraction <- function(img, tem, temmask,
   finalseg[seggm > 0.5] <- 2
   finalseg[segwm > 0.5 & seggm < 0.5] <- 3
   finalseg[segcsf > 0.5 & seggm < 0.5 & segwm < 0.5] <- 1
+  rm(atroparams)
+  
   # BA - finalseg looks good! could stop here
   tmp<-thresholdImage( finalseg, 2, 3)
-
+  rm(finalseg)
+  
+  if (verbose) {
+    message("Post-processing final segmentation")
+  }   
   tmp = iMath(tmp, "ME", 2)
   tmp = iMath(tmp, "GetLargestComponent", 2)
   tmp = iMath(tmp, "MD", 4)
@@ -222,7 +265,11 @@ abpBrainExtraction <- function(img, tem, temmask,
   tmp = iMath(tmp, "MD", 5)
   tmp = iMath(tmp, "ME", 5)
   finalseg2 = iMath(tmp, "FillHoles")  %>% thresholdImage( 1, 2 )
-
+  rm(tmp)
+  
+  if (verbose) {
+    message("Calculating Maurer Distance")
+  }   
   # FIXME - steps above should all be checked again ...
   dseg = iMath(finalseg2, "ME", 5)
   dseg = iMath(dseg, "MaurerDistance")
@@ -246,6 +293,9 @@ abpBrainExtraction <- function(img, tem, temmask,
   brain <- antsImageClone(img)
   brain[finalseg2 < 0.5] <- 0
   if (pad > 0) {
+    if (verbose) {
+      message("De-Padding image")
+    }
     brain = iMath(brain, "PadImage", -pad)
     finalseg2 = iMath(finalseg2, "PadImage", -pad)
     seg = iMath(seg, "PadImage", -pad)
@@ -257,3 +307,4 @@ abpBrainExtraction <- function(img, tem, temmask,
               dsearchvals = dsearchvals, 
               pad = pad))
 }
+
