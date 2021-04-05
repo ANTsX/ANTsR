@@ -39,7 +39,7 @@ constraint.}
 \item{convergenceThreshold}{Convergence between iterations is measured
 using the Dice coefficient (default = 0.02).}
 
-\item{verbose}{print diagnostics to the screen.}
+\item{verbose}{print progress.}
 }
 \value{
 list containing segmentation and probability images
