@@ -4,7 +4,7 @@
 \alias{regularizeSimlr}
 \title{Automatically produce regularization matrices for simlr}
 \usage{
-regularizeSimlr(x, knn, fraction = 0.1, sigma)
+regularizeSimlr(x, knn, fraction = 0.1, sigma, kPackage = "FNN")
 }
 \arguments{
 \item{x}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
@@ -14,6 +14,11 @@ regularizeSimlr(x, knn, fraction = 0.1, sigma)
 \item{fraction}{optional single scalar value to determine knn}
 
 \item{sigma}{optional sigma vector for regularization (same length as matrices)}
+
+\item{kPackage}{name of package to use for knn.  FNN is reproducbile but
+RcppHNSW is much faster (with nthreads controlled by enviornment variable
+ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS) for larger problems.  For large problems,
+compute the regularization once and save to disk; load for repeatability.}
 }
 \value{
 A list of regularization matrices.

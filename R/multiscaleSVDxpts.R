@@ -2523,12 +2523,16 @@ initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
 #' @param knn A vector of knn values (integers, same length as matrices)
 #' @param fraction optional single scalar value to determine knn
 #' @param sigma optional sigma vector for regularization (same length as matrices)
+#' @param kPackage name of package to use for knn.  FNN is reproducbile but
+#' RcppHNSW is much faster (with nthreads controlled by enviornment variable
+#' ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS) for larger problems.  For large problems,
+#' compute the regularization once and save to disk; load for repeatability.
 #' @return A list of regularization matrices.
 #' @author BB Avants.
 #' @examples
 #' # see simlr examples
 #' @export
-regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
+regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
   if ( missing( knn ) ) {
     knn = rep( NA, length( x ) )
     for ( i in 1:length( x ) ) {
@@ -2541,7 +2545,7 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma ) {
   slist = list()
   for ( i in 1:length( x ) ) {
     slist[[ i ]] = knnSmoothingMatrix( scale(data.matrix(x[[i]]),T,T), k = knn[i],
-      sigma = sigma[i]   )
+      sigma = sigma[i], kPackage=kPackage   )
   }
   return( slist )
 }
