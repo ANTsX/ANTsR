@@ -34,7 +34,10 @@ sparseDistanceMatrix(
 
 \item{sinkhorn}{boolean}
 
-\item{kPackage}{name of package to use for knn}
+\item{kPackage}{name of package to use for knn.  FNN is reproducbile but
+RcppHNSW is much faster (with nthreads controlled by enviornment variable
+ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS) for larger problems.  For large problems,
+compute the regularization once and save to disk; load for repeatability.}
 
 \item{verbose}{verbose output}
 }

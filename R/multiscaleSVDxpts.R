@@ -14,7 +14,10 @@
 #' @param eps epsilon error for rapid knn
 #' @param ncores number of cores to use
 #' @param sinkhorn boolean
-#' @param kPackage name of package to use for knn
+#' @param kPackage name of package to use for knn.  FNN is reproducbile but
+#' RcppHNSW is much faster (with nthreads controlled by enviornment variable
+#' ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS) for larger problems.  For large problems,
+#' compute the regularization once and save to disk; load for repeatability.
 #' @param verbose verbose output
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
@@ -180,7 +183,10 @@ sparseDistanceMatrix <- function( x, k = 3, r = Inf, sigma = NA,
 #' @param sigma parameter for kernel PCA.
 #' @param kmetric similarity or distance metric determining k nearest neighbors
 #' @param eps epsilon error for rapid knn
-#' @param kPackage name of package to use for knn
+#' @param kPackage name of package to use for knn.  FNN is reproducbile but
+#' RcppHNSW is much faster (with nthreads controlled by enviornment variable
+#' ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS) for larger problems.  For large problems,
+#' compute the regularization once and save to disk; load for repeatability.
 #' @param ncores number of cores to use
 #' @param verbose verbose output
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
