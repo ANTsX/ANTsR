@@ -11,7 +11,7 @@ kellyKapowski(
   its = 45,
   r = 0.025,
   m = 1.5,
-  x = TRUE,
+  x = FALSE,
   e = FALSE,
   q = NULL,
   timeSigma = 1,

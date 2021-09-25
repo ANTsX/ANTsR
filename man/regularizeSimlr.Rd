@@ -7,7 +7,12 @@
 regularizeSimlr(x, knn, fraction = 0.1, sigma, kPackage = "FNN")
 }
 \arguments{
-\item{x}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
+\item{x}{A list that contains the named matrices.
+Note: the optimization will likely perform much more smoothly if the input
+matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+Note: x may also contain a mixture of raw matrix data and masks which are
+binary antsImages. If a mask is passed, this function will assume the user
+wants spatial regularization for that entry.}
 
 \item{knn}{A vector of knn values (integers, same length as matrices)}
 

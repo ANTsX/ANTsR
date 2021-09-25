@@ -2525,7 +2525,12 @@ initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
 
 #' Automatically produce regularization matrices for simlr
 #'
-#' @param x A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' @param x A list that contains the named matrices.
+#' Note: the optimization will likely perform much more smoothly if the input
+#' matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' Note: x may also contain a mixture of raw matrix data and masks which are
+#' binary antsImages. If a mask is passed, this function will assume the user
+#' wants spatial regularization for that entry.
 #' @param knn A vector of knn values (integers, same length as matrices)
 #' @param fraction optional single scalar value to determine knn
 #' @param sigma optional sigma vector for regularization (same length as matrices)
@@ -2539,6 +2544,14 @@ initializeSimlr <- function( voxmats, k, jointReduction = FALSE,
 #' # see simlr examples
 #' @export
 regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
+
+  getSpatialRegularization <- function( inmask, myk, mysig ) {
+    spatmat = t( imageDomainToSpatialMatrix( inmask, inmask ) )
+    regs = knnSmoothingMatrix( spatmat, k = myk^3,
+        sigma = mysig, kPackage='FNN'  )
+    return( regs )
+    }
+
   if ( missing( knn ) ) {
     knn = rep( NA, length( x ) )
     for ( i in 1:length( x ) ) {
@@ -2550,7 +2563,9 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
   if ( missing( sigma  ) ) sigma = rep( 10, length( x ) )
   slist = list()
   for ( i in 1:length( x ) ) {
-    slist[[ i ]] = knnSmoothingMatrix( scale(data.matrix(x[[i]]),T,T), k = knn[i],
+    if ( class( x[[i]] )[1] == "antsImage" ) {
+      slist[[ i ]] = getSpatialRegularization( x[[i]], knn[i], sigma[i] )
+    } else slist[[ i ]] = knnSmoothingMatrix( scale(data.matrix(x[[i]]),T,T), k = knn[i],
       sigma = sigma[i], kPackage=kPackage   )
   }
   return( slist )
