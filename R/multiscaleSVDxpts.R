@@ -2547,7 +2547,7 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
 
   getSpatialRegularization <- function( inmask, myk, mysig ) {
     spatmat = t( imageDomainToSpatialMatrix( inmask, inmask ) )
-    regs = knnSmoothingMatrix( spatmat, k = myk^3,
+    regs = knnSmoothingMatrix( spatmat, k = myk,
         sigma = mysig, kPackage='FNN'  )
     return( regs )
     }
