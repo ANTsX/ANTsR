@@ -1,202 +1,202 @@
-label_num;label_name;tissue
-1;"Unlabeled";None
-2;"aals";None
-3;"ahls";None
-4;"3rd Ventricle";CSF
-5;"calcarine";Cortex
-6;"central";Cortex
-7;"central_insular";Cortex
-8;"cingulate";Cortex
-9;"circular";Cortex
-10;"collateral";Cortex
-11;"4th Ventricle";CSF
-12;"first_transverse";Cortex
-13;"Heschls";Cortex
-14;"inferior_frontal";Cortex
-15;"5th Ventricle";CSF
-16;"intraparietal";Cortex
-17;"primary_inter";Cortex
-18;"lateral_occipital";Cortex
-19;"occ_temporal";Cortex
-20;"olfactory";Cortex
-21;"par_occipital";Cortex
-22;"pals";Cortex
-23;"Right Accumbens Area";Deep
-24;"phls";Cortex
-25;"postcentral";Cortex
-26;"precentral";Cortex
-27;"subparietal";Cortex
-28;"superior_frontal";Cortex
-29;"superior_temporal";Cortex
-30;"Left Accumbens Area";Deep
-31;"Right Amygdala";Deep
-32;"Left Amygdala";Deep
-33;"Right Amygdala Anterior";Deep
-34;"Left Amygdala Anterior";Deep
-35;"Brain Stem";Deep
-36;"Right Caudate";Deep
-37;"Left Caudate";Deep
-38;"Right Cerebellum Exterior";Cerebellum
-39;"Left Cerebellum Exterior";Cerebellum
-40;"Right Cerebellum White Matter";Cerebellum
-41;"Left Cerebellum White Matter";Cerebellum
-42;"Right Cerebral Exterior";Deep
-43;"Left Cerebral Exterior";Deep
-44;"Right Cerebral White Matter";WM
-45;"Left Cerebral White Matter";WM
-46;"CSF";CSF
-47;"Right Hippocampus";Deep
-48;"Left Hippocampus";Deep
-49;"Right Inf Lat Vent";CSF
-50;"Left Inf Lat Vent";CSF
-51;"Right Lateral Ventricle";CSF
-52;"Left Lateral Ventricle";CSF
-53;"Right Lesion";CSF
-54;"Left Lesion";CSF
-55;"Right Pallidum";Deep
-56;"Left Pallidum";Deep
-57;"Right Putamen";Deep
-58;"Left Putamen";Deep
-59;"Right Thalamus Proper";Deep
-60;"Left Thalamus Proper";Deep
-61;"Right Ventral DC";Deep
-62;"Left Ventral DC";Deep
-63;"Right vessel";Vessel
-64;"Left vessel";Vessel
-65;"Left Insula";Cortex
-66;"Right Insula";Cortex
-67;"Left Operculum";Cortex
-68;"Right Operculum";Cortex
-69;"Optic Chiasm";NA
-70;"Basal Forebrain";Deep
-71;"Cerebellar Vermal Lobules I-V";Cerebellum
-72;"Cerebellar Vermal Lobules VI-VII";Cerebellum
-73;"Cerebellar Vermal Lobules VIII-X";Cerebellum
-74;"Vitamin E Tablet";NA
-75;"Left Basal Forebrain";Deep
-76;"Right Basal Forebrain";Deep
-80;"frontomarginal";Cortex
-81;"inferior_rostral";Cortex
-82;"inferior_temporal";Cortex
-83;"lateral_orbital";Cortex
-84;"superior_rostral";Cortex
-85;"lateral";NA
-86;"anterior_occipital";Cortex
-87;"lhos";NA
-88;"mhos";NA
-89;"superior_vermal_sulcus";Cortex
-90;"central_vermal_sulcus";Cortex
-91;"inferior_vermal_sulcus";Cortex
-92;"lateral_vermal_sulcus";Cortex
-93;"thos";NA
-97;"RED";NA
-98;"YELLOW";NA
-99;"CYAN";NA
-100;"Right ACgG  anterior cingulate gyrus";Cortex
-101;"Left ACgG  anterior cingulate gyrus";Cortex
-102;"Right AIns  anterior insula";Cortex
-103;"Left AIns  anterior insula";Cortex
-104;"Right AOrG  anterior orbital gyrus";Cortex
-105;"Left AOrG  anterior orbital gyrus";Cortex
-106;"Right AnG   angular gyrus";Cortex
-107;"Left AnG   angular gyrus";Cortex
-108;"Right Calc  calcarine cortex";Cortex
-109;"Left Calc  calcarine cortex";Cortex
-110;"Right CgG   cingulate gyrus";Cortex
-111;"Left CgG   cingulate gyrus";Cortex
-112;"Right CO    central operculum";Cortex
-113;"Left CO    central operculum";Cortex
-114;"Right Cun   cuneus";Cortex
-115;"Left Cun   cuneus";Cortex
-116;"Right Ent   entorhinal area";Cortex
-117;"Left Ent   entorhinal area";Cortex
-118;"Right FO    frontal operculum";Cortex
-119;"Left FO    frontal operculum";Cortex
-120;"Right FRP   frontal pole";Cortex
-121;"Left FRP   frontal pole";Cortex
-122;"Right FuG   fusiform gyrus";Cortex
-123;"Left FuG   fusiform gyrus";Cortex
-124;"Right GRe   gyrus rectus";Cortex
-125;"Left GRe   gyrus rectus";Cortex
-126;"Right IFG   inferior frontal gyrus";Cortex
-127;"Left IFG   inferior frontal gyrus";Cortex
-128;"Right IOG   inferior occipital gyrus";Cortex
-129;"Left IOG   inferior occipital gyrus";Cortex
-130;"Right IOrG  intermediate orbital gyrus";Cortex
-131;"Left IOrG  intermediate orbital gyrus";Cortex
-132;"Right ITG   inferior temporal gyrus";Cortex
-133;"Left ITG   inferior temporal gyrus";Cortex
-134;"Right LiG   lingual gyrus";Cortex
-135;"Left LiG   lingual gyrus";Cortex
-136;"Right LOrG  lateral orbital gyrus";Cortex
-137;"Left LOrG  lateral orbital gyrus";Cortex
-138;"Right MCgG  middle cingulate gyrus";Cortex
-139;"Left MCgG  middle cingulate gyrus";Cortex
-140;"Right MFC   medial frontal cortex";Cortex
-141;"Left MFC   medial frontal cortex";Cortex
-142;"Right MFG   middle frontal gyrus";Cortex
-143;"Left MFG   middle frontal gyrus";Cortex
-144;"Right MOG   middle occipital gyrus";Cortex
-145;"Left MOG   middle occipital gyrus";Cortex
-146;"Right MOrG  medial orbital gyrus";Cortex
-147;"Left MOrG  medial orbital gyrus";Cortex
-148;"Right MPoG  postcentral gyrus medial segment";Cortex
-149;"Left MPoG  postcentral gyrus medial segment";Cortex
-150;"Right MPrG  precentral gyrus medial segment";Cortex
-151;"Left MPrG  precentral gyrus medial segment";Cortex
-152;"Right MSFG  superior frontal gyrus medial segment";Cortex
-153;"Left MSFG  superior frontal gyrus medial segment";Cortex
-154;"Right MTG   middle temporal gyrus";Cortex
-155;"Left MTG   middle temporal gyrus";Cortex
-156;"Right OCP   occipital pole";Cortex
-157;"Left OCP   occipital pole";Cortex
-158;"Right OFC   orbitofrontal cortex";Cortex
-159;"Left OFC   orbitofrontal cortex";Cortex
-160;"Right OFuG  occipital fusiform gyrus";Cortex
-161;"Left OFuG  occipital fusiform gyrus";Cortex
-162;"Right OpIFG opercular part of the inferior frontal gyrus";Cortex
-163;"Left OpIFG opercular part of the inferior frontal gyrus";Cortex
-164;"Right OrIFG orbital part of the inferior frontal gyrus";Cortex
-165;"Left OrIFG orbital part of the inferior frontal gyrus";Cortex
-166;"Right PCgG  posterior cingulate gyrus";Cortex
-167;"Left PCgG  posterior cingulate gyrus";Cortex
-168;"Right PCu   precuneus";Cortex
-169;"Left PCu   precuneus";Cortex
-170;"Right PHG   parahippocampal gyrus";Cortex
-171;"Left PHG   parahippocampal gyrus";Cortex
-172;"Right PIns  posterior insula";Cortex
-173;"Left PIns  posterior insula";Cortex
-174;"Right PO    parietal operculum";Cortex
-175;"Left PO    parietal operculum";Cortex
-176;"Right PoG   postcentral gyrus";Cortex
-177;"Left PoG   postcentral gyrus";Cortex
-178;"Right POrG  posterior orbital gyrus";Cortex
-179;"Left POrG  posterior orbital gyrus";Cortex
-180;"Right PP    planum polare";Cortex
-181;"Left PP    planum polare";Cortex
-182;"Right PrG   precentral gyrus";Cortex
-183;"Left PrG   precentral gyrus";Cortex
-184;"Right PT    planum temporale";Cortex
-185;"Left PT    planum temporale";Cortex
-186;"Right SCA   subcallosal area";Cortex
-187;"Left SCA   subcallosal area";Cortex
-188;"Right SCLC  supracalcarine cortex";Cortex
-189;"Left SCLC  supracalcarine cortex";Cortex
-190;"Right SFG   superior frontal gyrus";Cortex
-191;"Left SFG   superior frontal gyrus";Cortex
-192;"Right SMC   supplementary motor cortex";Cortex
-193;"Left SMC   supplementary motor cortex";Cortex
-194;"Right SMG   supramarginal gyrus";Cortex
-195;"Left SMG   supramarginal gyrus";Cortex
-196;"Right SOG   superior occipital gyrus";Cortex
-197;"Left SOG   superior occipital gyrus";Cortex
-198;"Right SPL   superior parietal lobule";Cortex
-199;"Left SPL   superior parietal lobule";Cortex
-200;"Right STG   superior temporal gyrus";Cortex
-201;"Left STG   superior temporal gyrus";Cortex
-202;"Right TMP   temporal pole";Cortex
-203;"Left TMP   temporal pole";Cortex
-204;"Right TrIFG triangular part of the inferior frontal gyrus";Cortex
-205;"Left TrIFG triangular part of the inferior frontal gyrus";Cortex
-206;"Right TTG   transverse temporal gyrus";Cortex
-207;"Left TTG   transverse temporal gyrus";Cortex
+label_num,label_name,tissue
+1,"Unlabeled",None
+2,"aals",None
+3,"ahls",None
+4,"3rd Ventricle",CSF
+5,"calcarine",Cortex
+6,"central",Cortex
+7,"central_insular",Cortex
+8,"cingulate",Cortex
+9,"circular",Cortex
+10,"collateral",Cortex
+11,"4th Ventricle",CSF
+12,"first_transverse",Cortex
+13,"Heschls",Cortex
+14,"inferior_frontal",Cortex
+15,"5th Ventricle",CSF
+16,"intraparietal",Cortex
+17,"primary_inter",Cortex
+18,"lateral_occipital",Cortex
+19,"occ_temporal",Cortex
+20,"olfactory",Cortex
+21,"par_occipital",Cortex
+22,"pals",Cortex
+23,"Right Accumbens Area",Deep
+24,"phls",Cortex
+25,"postcentral",Cortex
+26,"precentral",Cortex
+27,"subparietal",Cortex
+28,"superior_frontal",Cortex
+29,"superior_temporal",Cortex
+30,"Left Accumbens Area",Deep
+31,"Right Amygdala",Deep
+32,"Left Amygdala",Deep
+33,"Right Amygdala Anterior",Deep
+34,"Left Amygdala Anterior",Deep
+35,"Brain Stem",Deep
+36,"Right Caudate",Deep
+37,"Left Caudate",Deep
+38,"Right Cerebellum Exterior",Cerebellum
+39,"Left Cerebellum Exterior",Cerebellum
+40,"Right Cerebellum White Matter",Cerebellum
+41,"Left Cerebellum White Matter",Cerebellum
+42,"Right Cerebral Exterior",Deep
+43,"Left Cerebral Exterior",Deep
+44,"Right Cerebral White Matter",WM
+45,"Left Cerebral White Matter",WM
+46,"CSF",CSF
+47,"Right Hippocampus",Deep
+48,"Left Hippocampus",Deep
+49,"Right Inf Lat Vent",CSF
+50,"Left Inf Lat Vent",CSF
+51,"Right Lateral Ventricle",CSF
+52,"Left Lateral Ventricle",CSF
+53,"Right Lesion",CSF
+54,"Left Lesion",CSF
+55,"Right Pallidum",Deep
+56,"Left Pallidum",Deep
+57,"Right Putamen",Deep
+58,"Left Putamen",Deep
+59,"Right Thalamus Proper",Deep
+60,"Left Thalamus Proper",Deep
+61,"Right Ventral DC",Deep
+62,"Left Ventral DC",Deep
+63,"Right vessel",Vessel
+64,"Left vessel",Vessel
+65,"Left Insula",Cortex
+66,"Right Insula",Cortex
+67,"Left Operculum",Cortex
+68,"Right Operculum",Cortex
+69,"Optic Chiasm",NA
+70,"Basal Forebrain",Deep
+71,"Cerebellar Vermal Lobules I-V",Cerebellum
+72,"Cerebellar Vermal Lobules VI-VII",Cerebellum
+73,"Cerebellar Vermal Lobules VIII-X",Cerebellum
+74,"Vitamin E Tablet",NA
+75,"Left Basal Forebrain",Deep
+76,"Right Basal Forebrain",Deep
+80,"frontomarginal",Cortex
+81,"inferior_rostral",Cortex
+82,"inferior_temporal",Cortex
+83,"lateral_orbital",Cortex
+84,"superior_rostral",Cortex
+85,"lateral",NA
+86,"anterior_occipital",Cortex
+87,"lhos",NA
+88,"mhos",NA
+89,"superior_vermal_sulcus",Cortex
+90,"central_vermal_sulcus",Cortex
+91,"inferior_vermal_sulcus",Cortex
+92,"lateral_vermal_sulcus",Cortex
+93,"thos",NA
+97,"RED",NA
+98,"YELLOW",NA
+99,"CYAN",NA
+100,"Right ACgG  anterior cingulate gyrus",Cortex
+101,"Left ACgG  anterior cingulate gyrus",Cortex
+102,"Right AIns  anterior insula",Cortex
+103,"Left AIns  anterior insula",Cortex
+104,"Right AOrG  anterior orbital gyrus",Cortex
+105,"Left AOrG  anterior orbital gyrus",Cortex
+106,"Right AnG   angular gyrus",Cortex
+107,"Left AnG   angular gyrus",Cortex
+108,"Right Calc  calcarine cortex",Cortex
+109,"Left Calc  calcarine cortex",Cortex
+110,"Right CgG   cingulate gyrus",Cortex
+111,"Left CgG   cingulate gyrus",Cortex
+112,"Right CO    central operculum",Cortex
+113,"Left CO    central operculum",Cortex
+114,"Right Cun   cuneus",Cortex
+115,"Left Cun   cuneus",Cortex
+116,"Right Ent   entorhinal area",Cortex
+117,"Left Ent   entorhinal area",Cortex
+118,"Right FO    frontal operculum",Cortex
+119,"Left FO    frontal operculum",Cortex
+120,"Right FRP   frontal pole",Cortex
+121,"Left FRP   frontal pole",Cortex
+122,"Right FuG   fusiform gyrus",Cortex
+123,"Left FuG   fusiform gyrus",Cortex
+124,"Right GRe   gyrus rectus",Cortex
+125,"Left GRe   gyrus rectus",Cortex
+126,"Right IFG   inferior frontal gyrus",Cortex
+127,"Left IFG   inferior frontal gyrus",Cortex
+128,"Right IOG   inferior occipital gyrus",Cortex
+129,"Left IOG   inferior occipital gyrus",Cortex
+130,"Right IOrG  intermediate orbital gyrus",Cortex
+131,"Left IOrG  intermediate orbital gyrus",Cortex
+132,"Right ITG   inferior temporal gyrus",Cortex
+133,"Left ITG   inferior temporal gyrus",Cortex
+134,"Right LiG   lingual gyrus",Cortex
+135,"Left LiG   lingual gyrus",Cortex
+136,"Right LOrG  lateral orbital gyrus",Cortex
+137,"Left LOrG  lateral orbital gyrus",Cortex
+138,"Right MCgG  middle cingulate gyrus",Cortex
+139,"Left MCgG  middle cingulate gyrus",Cortex
+140,"Right MFC   medial frontal cortex",Cortex
+141,"Left MFC   medial frontal cortex",Cortex
+142,"Right MFG   middle frontal gyrus",Cortex
+143,"Left MFG   middle frontal gyrus",Cortex
+144,"Right MOG   middle occipital gyrus",Cortex
+145,"Left MOG   middle occipital gyrus",Cortex
+146,"Right MOrG  medial orbital gyrus",Cortex
+147,"Left MOrG  medial orbital gyrus",Cortex
+148,"Right MPoG  postcentral gyrus medial segment",Cortex
+149,"Left MPoG  postcentral gyrus medial segment",Cortex
+150,"Right MPrG  precentral gyrus medial segment",Cortex
+151,"Left MPrG  precentral gyrus medial segment",Cortex
+152,"Right MSFG  superior frontal gyrus medial segment",Cortex
+153,"Left MSFG  superior frontal gyrus medial segment",Cortex
+154,"Right MTG   middle temporal gyrus",Cortex
+155,"Left MTG   middle temporal gyrus",Cortex
+156,"Right OCP   occipital pole",Cortex
+157,"Left OCP   occipital pole",Cortex
+158,"Right OFC   orbitofrontal cortex",Cortex
+159,"Left OFC   orbitofrontal cortex",Cortex
+160,"Right OFuG  occipital fusiform gyrus",Cortex
+161,"Left OFuG  occipital fusiform gyrus",Cortex
+162,"Right OpIFG opercular part of the inferior frontal gyrus",Cortex
+163,"Left OpIFG opercular part of the inferior frontal gyrus",Cortex
+164,"Right OrIFG orbital part of the inferior frontal gyrus",Cortex
+165,"Left OrIFG orbital part of the inferior frontal gyrus",Cortex
+166,"Right PCgG  posterior cingulate gyrus",Cortex
+167,"Left PCgG  posterior cingulate gyrus",Cortex
+168,"Right PCu   precuneus",Cortex
+169,"Left PCu   precuneus",Cortex
+170,"Right PHG   parahippocampal gyrus",Cortex
+171,"Left PHG   parahippocampal gyrus",Cortex
+172,"Right PIns  posterior insula",Cortex
+173,"Left PIns  posterior insula",Cortex
+174,"Right PO    parietal operculum",Cortex
+175,"Left PO    parietal operculum",Cortex
+176,"Right PoG   postcentral gyrus",Cortex
+177,"Left PoG   postcentral gyrus",Cortex
+178,"Right POrG  posterior orbital gyrus",Cortex
+179,"Left POrG  posterior orbital gyrus",Cortex
+180,"Right PP    planum polare",Cortex
+181,"Left PP    planum polare",Cortex
+182,"Right PrG   precentral gyrus",Cortex
+183,"Left PrG   precentral gyrus",Cortex
+184,"Right PT    planum temporale",Cortex
+185,"Left PT    planum temporale",Cortex
+186,"Right SCA   subcallosal area",Cortex
+187,"Left SCA   subcallosal area",Cortex
+188,"Right SCLC  supracalcarine cortex",Cortex
+189,"Left SCLC  supracalcarine cortex",Cortex
+190,"Right SFG   superior frontal gyrus",Cortex
+191,"Left SFG   superior frontal gyrus",Cortex
+192,"Right SMC   supplementary motor cortex",Cortex
+193,"Left SMC   supplementary motor cortex",Cortex
+194,"Right SMG   supramarginal gyrus",Cortex
+195,"Left SMG   supramarginal gyrus",Cortex
+196,"Right SOG   superior occipital gyrus",Cortex
+197,"Left SOG   superior occipital gyrus",Cortex
+198,"Right SPL   superior parietal lobule",Cortex
+199,"Left SPL   superior parietal lobule",Cortex
+200,"Right STG   superior temporal gyrus",Cortex
+201,"Left STG   superior temporal gyrus",Cortex
+202,"Right TMP   temporal pole",Cortex
+203,"Left TMP   temporal pole",Cortex
+204,"Right TrIFG triangular part of the inferior frontal gyrus",Cortex
+205,"Left TrIFG triangular part of the inferior frontal gyrus",Cortex
+206,"Right TTG   transverse temporal gyrus",Cortex
+207,"Left TTG   transverse temporal gyrus",Cortex
