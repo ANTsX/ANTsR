@@ -33,8 +33,8 @@ renderImageLabels <- function(
     print("rgl and misc3d are necessary for this function.")
     return(NULL)
   }
-  nLabels <- max(as.array(labelsimg))
-
+  labelnums = sort(unique(segL))[-1]
+  nLabels <- length( labelnums )
   colors <- color
   if (length(colors) < 1) {
     colors <- .snapColors(nLabels)
@@ -42,19 +42,16 @@ renderImageLabels <- function(
   mylist <- list()
 
   for (i in 1:nLabels) {
-    labelsimg<-thresholdImage( labelsimg, i, i)
+    labelsimgloc<-thresholdImage( labelsimg, labelnums[i], labelnums[i] )
 
     if (smoothsval > 0) {
-      labelsimg<-smoothImage(labelsimg, smoothsval)
+      labelsimg<-smoothImage(labelsimgloc, smoothsval)
     }
 
-    print(sum(as.array(labelsimg)))
-
-    surf <- as.array(labelsimg)
+    surf <- as.array(labelsimgloc)
     brain <- misc3d::contour3d(surf, level = surfval, alpha = alphasurf, draw = FALSE,
       smooth = 1, color = colors[i])
 
-    print("convert points")
     if (physical == TRUE) {
       brain$v1 <- antsTransformIndexToPhysicalPoint(labelsimg, brain$v1)
       brain$v2 <- antsTransformIndexToPhysicalPoint(labelsimg, brain$v2)
@@ -62,7 +59,6 @@ renderImageLabels <- function(
     }
     mylist[[i]] <- brain
   }
-
   misc3d::drawScene.rgl(mylist, add = TRUE)
   return(mylist)
 }
