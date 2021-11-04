@@ -10,7 +10,8 @@ priorBasedSegmentation(
   mask,
   priorWeight = 0.25,
   mrf = 0.1,
-  iterations = 25
+  iterations = 25,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ priorBasedSegmentation(
 \item{mrf}{regularization, higher is smoother, a numerical value in range 0.0 to 0.2}
 
 \item{iterations}{maximum number of iterations.  could be a large value eg 25.}
+
+\item{verbose}{maximum number of iterations.  could be a large value eg 25.}
 }
 \value{
 segmentation and probability images
