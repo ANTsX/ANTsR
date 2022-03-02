@@ -92,6 +92,26 @@ fitBsplineDisplacementField <- function(
       direction = antsGetDirection( displacementField ), components = FALSE )
     }
 
+  if( ! is.null( displacementField ) && is.null( displacementWeightImage ) )
+    {
+    if( is.null( origin ) )
+      {
+      origin <- antsGetOrigin( displacementField )
+      }
+    if( is.null( spacing ) )
+      {
+      spacing <- antsGetSpacing( displacementField )
+      }
+    if( is.null( direction ) )
+      {
+      direction <- antsGetDirection( displacementField )
+      }
+    if( is.null( size ) )
+      {
+      size <- dim( displacementField )
+      }
+    }
+
   dimensionality <- NULL
   if( ! is.null( displacementField ) )
     {
