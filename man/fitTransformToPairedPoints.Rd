@@ -7,14 +7,17 @@
 fitTransformToPairedPoints(
   movingPoints,
   fixedPoints,
-  transformType = "Affine",
+  transformType = "affine",
   regularization = 0.000001,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
   splineOrder = 3,
   enforceStationaryBoundary = TRUE,
-  displacementWeights = NULL
+  displacementWeights = NULL,
+  numberOfIterations = 10,
+  gradientStep = 0.5,
+  smoothingFactor = 3
 )
 }
 \arguments{
@@ -24,7 +27,7 @@ matrix where \code{n} is the number of points and \code{d} is the dimensionality
 \item{fixedPoints}{fixed points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
-\item{transformType}{'Rigid', 'Similarity', "Affine', or 'BSpline'.}
+\item{transformType}{'rigid', 'similarity', "affine', 'bspline', or 'diffeo'.}
 
 \item{regularization}{ridge penalty in [0,1] for linear transforms.}
 
@@ -45,6 +48,12 @@ only).}
 \item{displacementWeights}{vector defining the individual weighting of the corresponding
 scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
 weighted the same.}
+
+\item{numberOfIterations}{total number of iterations for the diffeomorphic transform.}
+
+\item{gradientStep}{scalar multiplication factor for the diffeomorphic transform.}
+
+\item{sigma}{gaussian smoothing sigma (in mm) for the diffeomorphic transform.}
 }
 \value{
 object containing ANTsR transform, error, and scale (or displacement field)
@@ -55,7 +64,6 @@ Estimate a transform using paired point sets.  An ANTsR transform is returned.
 \examples{
 fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
 moving <- matrix( c( 75, 75, 175, 75, 75, 175 ), ncol = 2, byrow = TRUE )
-params <- getAntsrTransformParameters( xfrm )
 
 # Affine transform
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
@@ -75,6 +83,11 @@ params <- getAntsrTransformParameters( xfrm )
 # B-spline transform
 domainImage <- antsImageRead( getANTsRData( "r16" ) )
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5 )
+error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
+
+# Diffeo transform
+domainImage <- antsImageRead( getANTsRData( "r16" ) )
+xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
 error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 
 }

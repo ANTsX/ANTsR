@@ -22,7 +22,7 @@
 #' weighted the same.
 #' @param numberOfIterations total number of iterations for the diffeomorphic transform.
 #' @param gradientStep scalar multiplication factor for the diffeomorphic transform.
-#' @param smoothingFactor gaussian smoothing sigma (in mm) for the diffeomorphic transform.
+#' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
 #' @author B Avants
@@ -197,22 +197,28 @@ fitTransformToPairedPoints <- function(
 
     for( i in seq.int( numberOfIterations ) )
       {
-      updateFieldXfrm <- fitTransformToPairedPoints(
-        movingPoints,
-        updatedFixedPoints,
-        transformType = "bspline",
-        domainImage = domainImage,
+      updateField <- fitBsplineDisplacementField(
+        displacementOrigins = fixedPoints,
+        displacements = movingPoints - updatedFixedPoints,
+        displacementWeights = displacementWeights,
+        origin = antsGetOrigin( domainImage ),
+        spacing = antsGetSpacing( domainImage ),
+        size = dim( domainImage ),
+        direction = antsGetDirection( domainImage ),
         numberOfFittingLevels = numberOfFittingLevels,
         meshSize = meshSize,
         splineOrder = splineOrder,
         enforceStationaryBoundary = TRUE
-      )
+        )
 
-      updateField <- displacementFieldFromAntsrTransform( updateFieldXfrm )
-      updateFieldSmooth <- smoothImage( updateField * gradientStep, smoothingFactor )
+      updateFieldSmooth <- smoothImage( updateField * gradientStep, sigma )
       xfrmList[[i]] <- antsrTransformFromDisplacementField( updateFieldSmooth )
       totalFieldXfrm <- composeAntsrTransforms( xfrmList )
-      updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
+
+      if( i < numberOfIterations )
+        {
+        updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
+        }
       }
 
     return( totalFieldXfrm )
