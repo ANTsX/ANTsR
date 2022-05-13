@@ -70,7 +70,7 @@ fitTransformToPairedPoints <- function(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   gradientStep = 0.5,
-  smoothingFactor = 3.0
+  sigma = 3.0
   ) {
 
   polarDecomposition <- function( X )
