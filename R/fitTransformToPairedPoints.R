@@ -217,7 +217,7 @@ fitTransformToPairedPoints <- function(
         updateField <- smoothImage( updateField, sigma )
         }
 
-      xfrmList[[i]] <- antsrTransformFromDisplacementField( updateFieldSmooth )
+      xfrmList[[i]] <- antsrTransformFromDisplacementField( updateField )
       totalFieldXfrm <- composeAntsrTransforms( xfrmList )
 
       if( i < numberOfCompositions )
