@@ -20,7 +20,7 @@
 #' @param displacementWeights vector defining the individual weighting of the corresponding
 #' scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
 #' weighted the same.
-#' @param numberOfIterations total number of iterations for the diffeomorphic transform.
+#' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
 #' @param gradientStep scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
@@ -68,7 +68,7 @@ fitTransformToPairedPoints <- function(
   splineOrder = 3,
   enforceStationaryBoundary = TRUE,
   displacementWeights = NULL,
-  numberOfIterations = 10,
+  numberOfCompositions = 10,
   gradientStep = 0.5,
   smoothingFactor = 3.0
   ) {
@@ -195,7 +195,7 @@ fitTransformToPairedPoints <- function(
     xfrmList <- list()
     totalFieldXfrm <- NULL
 
-    for( i in seq.int( numberOfIterations ) )
+    for( i in seq.int( numberOfCompositions ) )
       {
       updateField <- fitBsplineDisplacementField(
         displacementOrigins = fixedPoints,
@@ -211,11 +211,16 @@ fitTransformToPairedPoints <- function(
         enforceStationaryBoundary = TRUE
         )
 
-      updateFieldSmooth <- smoothImage( updateField * gradientStep, sigma )
+      updateField <- updateField * gradientStep
+      if( sigma > 0 )
+        {
+        updateField <- smoothImage( updateField, sigma )
+        }
+
       xfrmList[[i]] <- antsrTransformFromDisplacementField( updateFieldSmooth )
       totalFieldXfrm <- composeAntsrTransforms( xfrmList )
 
-      if( i < numberOfIterations )
+      if( i < numberOfCompositions )
         {
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }

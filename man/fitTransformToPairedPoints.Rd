@@ -15,7 +15,7 @@ fitTransformToPairedPoints(
   splineOrder = 3,
   enforceStationaryBoundary = TRUE,
   displacementWeights = NULL,
-  numberOfIterations = 10,
+  numberOfCompositions = 10,
   gradientStep = 0.5,
   smoothingFactor = 3
 )
@@ -49,7 +49,7 @@ only).}
 scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
 weighted the same.}
 
-\item{numberOfIterations}{total number of iterations for the diffeomorphic transform.}
+\item{numberOfCompositions}{total number of compositions for the diffeomorphic transform.}
 
 \item{gradientStep}{scalar multiplication factor for the diffeomorphic transform.}
 
