@@ -21,7 +21,7 @@
 #' scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
 #' weighted the same.
 #' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
-#' @param gradientStep scalar multiplication factor for the diffeomorphic transform.
+#' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
@@ -69,7 +69,7 @@ fitTransformToPairedPoints <- function(
   enforceStationaryBoundary = TRUE,
   displacementWeights = NULL,
   numberOfCompositions = 10,
-  gradientStep = 0.5,
+  compositionStepSize = 0.5,
   sigma = 3.0
   ) {
 
@@ -211,7 +211,7 @@ fitTransformToPairedPoints <- function(
         enforceStationaryBoundary = TRUE
         )
 
-      updateField <- updateField * gradientStep
+      updateField <- updateField * compositionStepSize
       if( sigma > 0 )
         {
         updateField <- smoothImage( updateField, sigma )

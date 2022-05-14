@@ -16,8 +16,8 @@ fitTransformToPairedPoints(
   enforceStationaryBoundary = TRUE,
   displacementWeights = NULL,
   numberOfCompositions = 10,
-  gradientStep = 0.5,
-  smoothingFactor = 3
+  compositionStepSize = 0.5,
+  sigma = 3
 )
 }
 \arguments{
@@ -51,7 +51,7 @@ weighted the same.}
 
 \item{numberOfCompositions}{total number of compositions for the diffeomorphic transform.}
 
-\item{gradientStep}{scalar multiplication factor for the diffeomorphic transform.}
+\item{compositionStepSize}{scalar multiplication factor for the diffeomorphic transform.}
 
 \item{sigma}{gaussian smoothing sigma (in mm) for the diffeomorphic transform.}
 }
