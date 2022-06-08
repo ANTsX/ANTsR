@@ -105,7 +105,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
       {
       preprocessedImage <- n4BiasFieldCorrection( preprocessedImage, mask = mask,
         shrinkFactor = 2, convergence = list( iters = c( 50, 50, 50, 50 ), tol = 0.0000000001 ),
-        splineParam = 200, returnBiasField = FALSE, weight_mask = weightMask, verbose = verbose )
+        splineParam = 200, returnBiasField = FALSE, weightMask = weightMask, verbose = verbose )
       } else if( tolower( biasCorrection ) == "n3" ) {
       preprocessedImage <- n3BiasFieldCorrection( preprocessedImage, downsampleFactor = 2 )
       }
@@ -123,7 +123,7 @@ functionalLungSegmentation <- function( image, mask, numberOfIterations = 2,
         {
         stop( "numberOfClusters should match the vector size of the clusterCenters." )
         } else {
-        scaledClusterCenters <- imageScaleFactor * clusterCenters  
+        scaledClusterCenters <- imageScaleFactor * clusterCenters
         clusterCentersString <- paste0( scaledClusterCenters, collapse = "x" )
         atroposInitialization <- paste0( "Kmeans[", numberOfClusters, ",", clusterCentersString, "]" )
         }
