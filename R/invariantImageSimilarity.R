@@ -71,6 +71,10 @@ invariantImageSimilarity <- function(
   txfn = NA,
   transform = c("Affine", "Similarity","Rigid"),
   mask ) {
+
+  print("this function is currently disabled due to c++ compilation issues")
+  return(NA)
+
   if (length(dim(in_image1)) == 1)
     if (dim(in_image1)[1] == 1)
       return(NULL)

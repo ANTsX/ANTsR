@@ -143,6 +143,7 @@ SEXP invariantSimilarityHelper(
   SEXP r_doreflection, SEXP r_txfn,
   typename itk::Image< float , ImageDimension >::Pointer imageMask = nullptr  )
 {
+  /*
   unsigned int mibins = 20;
   unsigned int localSearchIterations =
     Rcpp::as< unsigned int >( r_lsits ) ;
@@ -233,7 +234,7 @@ SEXP invariantSimilarityHelper(
     EVectorType evec1_primary = cpa1.GetVnlMatrix().get_row( eigind1 );
     EVectorType evec2_2ndary  = cpa2.GetVnlMatrix().get_row( eigind2 );
     EVectorType evec2_primary = cpa2.GetVnlMatrix().get_row( eigind1 );
-    /** Solve Wahba's problem http://en.wikipedia.org/wiki/Wahba%27s_problem */
+    // Solve Wahba's problem http://en.wikipedia.org/wiki/Wahba%27s_problem
     EMatrixType B = outer_product( evec2_primary, evec1_primary );
     if( ImageDimension == 3 )
       {
@@ -522,6 +523,11 @@ SEXP invariantSimilarityHelper(
     outMat( 0, 0 ) = 0;
     return Rcpp::wrap( outMat );
     }
+    */
+    std::cout << " NOT WORKING RIGHT NOW " << std::endl;
+    Rcpp::NumericMatrix outMat( 1, 1 );
+    outMat( 0, 0 ) = 0;
+    return Rcpp::wrap( outMat );
 }
 
 // [[myRcpp::export]]

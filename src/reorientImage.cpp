@@ -16,6 +16,7 @@ void antsReoHelper(
   typename itk::Image< float , ImageDimension >::Pointer image1,
   SEXP r_txfn, SEXP r_axis , SEXP r_axis2, SEXP r_reflect, SEXP r_scale )
 {
+  /*
   typedef double RealType;
   Rcpp::NumericVector axis( r_axis );
   Rcpp::NumericVector axis2( r_axis2 );
@@ -63,7 +64,7 @@ void antsReoHelper(
     evec2_primary.fill(0);
     for ( unsigned int i = 0; i < ImageDimension; i++ )
       evec2_primary[i] = axis[i];
-    /** Solve Wahba's problem http://en.wikipedia.org/wiki/Wahba%27s_problem */
+    // Solve Wahba's problem http://en.wikipedia.org/wiki/Wahba%27s_problem
     EMatrixType B = outer_product( evec2_primary, evec1_primary );
     if( ImageDimension == 3 )
       {
@@ -132,21 +133,13 @@ void antsReoHelper(
       transformWriter->SetInput( affine1 );
       transformWriter->SetFileName( Rcpp::as< std::string >(r_txfn).c_str() );
       transformWriter->Update();
-      /*
-      typedef itk::ResampleImageFilter<ImageType, ImageType> ResampleFilterType;
-      typename ResampleFilterType::Pointer resample = ResampleFilterType::New();
-      resample->SetTransform( affine1 );
-      resample->SetInput( image1 );
-      resample->SetOutputParametersFromImage(  image1 );
-      resample->SetDefaultPixelValue( 0 );
-      resample->UpdateLargestPossibleRegion();
-      image2 = resample->GetOutput();
-      */
   }
   else
   {
     return;
   }
+  */
+  return;
 }
 
 
