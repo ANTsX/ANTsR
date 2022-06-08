@@ -1,5 +1,5 @@
 #!/bin/bash
-CXX_STD=CXX11
+CXX_STD=CXX14
 ITKRCMAKE=`${R_HOME}/bin/Rscript.exe -e 'a<-ITKR:::itkIncludes(); cat(a)'`
 ITKRLIB=`${R_HOME}/bin/Rscript.exe -e 'a<-ITKR:::itkLibs(); cat(a)'`
 compflags=`${R_HOME}/bin/Rscript.exe -e 'a<-ITKR:::itkCompileFlags(); cat(a)'`
@@ -25,8 +25,8 @@ aincludes=`${R_HOME}/bin/Rscript.exe -e 'a<-ANTsRCore:::antsIncludes(); cat(a)'`
 echo "PKG_CPPFLAGS = -I\${ITK} -I\${PWD}  \
   -I${aincludes} \
   -I../inst/include/ " >> Makevars
-  
-echo "CXX_STD = CXX11" >> Makevars
+
+echo "CXX_STD = CXX14" >> Makevars
 
 myantslib=`${R_HOME}/bin/Rscript.exe -e 'a<-ANTsRCore:::antsLibs(); cat(a)'`
 

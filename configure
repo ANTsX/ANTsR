@@ -64,7 +64,7 @@ echo "PKG_CPPFLAGS =${PKG_CPPFLAGS} -I\${ITK} -I\${PWD}  \
   -I${aincludes} \
   -I../inst/include/ " >> Makevars
 
-echo "CXX_STD = CXX11" >> Makevars
+echo "CXX_STD = CXX14" >> Makevars
 
 myantslib=`${R_HOME}/bin/Rscript -e 'a<-ANTsRCore:::antsLibs(); cat(a)'`
 
