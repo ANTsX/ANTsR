@@ -225,11 +225,10 @@ fitTransformToPairedPoints <- function(
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }
       }
+    return( totalFieldXfrm )
 
     } else {
       stop( "Unrecognized transformType." )
     }
 
-    return( totalFieldXfrm )
-    }
 }
