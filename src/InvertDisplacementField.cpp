@@ -10,7 +10,7 @@
 #include "RcppANTsR.h"
 
 template<unsigned int Dimension>
-SEXP fitBSplineVectorImageHelper(
+SEXP invertDisplacementFieldHelper(
   SEXP r_displacementField,
   SEXP r_inverseFieldInitialEstimate,
   SEXP r_antsrField,
@@ -136,7 +136,7 @@ try
 
     Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
-    SEXP inverseField = fitBSplineVectorImageHelper<Dimension>(
+    SEXP inverseField = invertDisplacementFieldHelper<Dimension>(
       r_displacementField, r_inverseFieldInitialEstimate, s4_antsrField,
       r_maxNumberOfIterations, r_meanErrorToleranceThreshold,
       r_maxErrorToleranceThreshold, r_enforceBoundaryCondition );
@@ -160,7 +160,7 @@ try
 
     Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
-    SEXP inverseField = fitBSplineVectorImageHelper<Dimension>(
+    SEXP inverseField = invertDisplacementFieldHelper<Dimension>(
       r_displacementField, r_inverseFieldInitialEstimate, s4_antsrField,
       r_maxNumberOfIterations, r_meanErrorToleranceThreshold,
       r_maxErrorToleranceThreshold, r_enforceBoundaryCondition );
