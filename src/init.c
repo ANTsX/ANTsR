@@ -24,6 +24,7 @@ extern SEXP fsl2antsrTransform(SEXP, SEXP, SEXP, SEXP);
 extern SEXP HausdorffDistanceR(SEXP, SEXP);
 extern SEXP histogramMatchImageR(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP invertDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP itkConvolveImage(SEXP, SEXP);
 extern SEXP KellyKapowski(SEXP);
 extern SEXP LabelGeometryMeasures(SEXP);
@@ -53,6 +54,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"HausdorffDistanceR",                      (DL_FUNC) &HausdorffDistanceR,                     2},
     {"histogramMatchImageR",                    (DL_FUNC) &histogramMatchImageR,                   5},
     {"invariantImageSimilarity",                (DL_FUNC) &invariantImageSimilarity,              12},
+    {"invertDisplacementField",                 (DL_FUNC) &invertDisplacementField,                7},
     {"itkConvolveImage",                        (DL_FUNC) &itkConvolveImage,                       2},
     {"KellyKapowski",                           (DL_FUNC) &KellyKapowski,                          1},
     {"LabelGeometryMeasures",                   (DL_FUNC) &LabelGeometryMeasures,                  1},
