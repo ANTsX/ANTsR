@@ -70,7 +70,7 @@ fitTransformToPairedPoints <- function(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
-  sigma = 3.0
+  sigma = 0.0
   ) {
 
   polarDecomposition <- function( X )
@@ -188,7 +188,7 @@ fitTransformToPairedPoints <- function(
 
     return( xfrm )
 
-    } else {
+    } else if( transformType == "diffeo" ) {
 
     updatedFixedPoints <- fixedPoints
 
@@ -225,6 +225,10 @@ fitTransformToPairedPoints <- function(
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }
       }
+
+    } else {
+      stop( "Unrecognized transformType." )
+    }
 
     return( totalFieldXfrm )
     }
