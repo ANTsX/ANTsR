@@ -10,7 +10,7 @@ invertDisplacementField(
   maximumNumberOfIterations = 20,
   meanErrorToleranceThreshold = 0.001,
   maxErrorToleranceThreshold = 0.1,
-  enforceBoundaryCondition = True
+  enforceBoundaryCondition = TRUE
 )
 }
 \arguments{
