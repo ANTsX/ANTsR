@@ -198,7 +198,7 @@ fitTransformToPairedPoints <- function(
     for( i in seq.int( numberOfCompositions ) )
       {
       updateField <- fitBsplineDisplacementField(
-        displacementOrigins = fixedPoints,
+        displacementOrigins = updatedFixedPoints,
         displacements = movingPoints - updatedFixedPoints,
         displacementWeights = displacementWeights,
         origin = antsGetOrigin( domainImage ),
