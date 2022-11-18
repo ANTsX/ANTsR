@@ -28,7 +28,7 @@
 #' @author B Avants
 #' @examples
 #' fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
-#' moving <- matrix( c( 75, 75, 175, 75, 75, 175 ), ncol = 2, byrow = TRUE )
+#' moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
 #'
 #' # Affine transform
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
@@ -55,6 +55,10 @@
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
 #' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #'
+#' # SyN transform
+#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
+#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #' @export fitTransformToPairedPoints
 
 fitTransformToPairedPoints <- function(
@@ -98,8 +102,19 @@ fitTransformToPairedPoints <- function(
       })
     }
 
+  createZeroDisplacementField <- function( domainImage )
+    {
+    components <- list()
+    for( i in seq.int( domainImage@dimension ) )
+      {
+      components <- append( components, domainImage * 0 )
+      } 
+    field <- mergeChannels( components )
+    return( field )
+    }  
+
   if( ! any( tolower( transformType ) %in%
-        c( "rigid", "affine", "similarity", "bspline", "diffeo" ) ) )
+        c( "rigid", "affine", "similarity", "bspline", "diffeo", "syn" ) ) )
     {
     stop( paste0( transformType, " transform not supported." ) )
     }
@@ -226,6 +241,88 @@ fitTransformToPairedPoints <- function(
         }
       }
     return( totalFieldXfrm )
+
+    } else if( transformType == "syn" ) {
+
+    updatedFixedPoints <- fixedPoints
+    updatedMovingPoints <- movingPoints
+
+    totalFieldFixedToMiddle <- createZeroDisplacementField( domainImage )
+    totalInverseFieldFixedToMiddle <- createZeroDisplacementField( domainImage )
+
+    totalFieldMovingToMiddle <- createZeroDisplacementField( domainImage )
+    totalInverseFieldMovingToMiddle <- createZeroDisplacementField( domainImage )
+
+    for( i in seq.int( numberOfCompositions ) )
+      {
+      updateFieldFixedToMiddle <- fitBsplineDisplacementField(
+        displacementOrigins = updatedFixedPoints,
+        displacements = updatedMovingPoints - updatedFixedPoints,
+        displacementWeights = displacementWeights,
+        origin = antsGetOrigin( domainImage ),
+        spacing = antsGetSpacing( domainImage ),
+        size = dim( domainImage ),
+        direction = antsGetDirection( domainImage ),
+        numberOfFittingLevels = numberOfFittingLevels,
+        meshSize = meshSize,
+        splineOrder = splineOrder,
+        enforceStationaryBoundary = TRUE
+        )
+
+      updateFieldMovingToMiddle <- fitBsplineDisplacementField(
+        displacementOrigins = updatedMovingPoints,
+        displacements = updatedFixedPoints - updatedMovingPoints,
+        displacementWeights = displacementWeights,
+        origin = antsGetOrigin( domainImage ),
+        spacing = antsGetSpacing( domainImage ),
+        size = dim( domainImage ),
+        direction = antsGetDirection( domainImage ),
+        numberOfFittingLevels = numberOfFittingLevels,
+        meshSize = meshSize,
+        splineOrder = splineOrder,
+        enforceStationaryBoundary = TRUE
+        )
+
+      updateFieldFixedToMiddle <- updateFieldFixedToMiddle * compositionStepSize
+      updateFieldMovingToMiddle <- updateFieldMovingToMiddle * compositionStepSize
+      if( sigma > 0 )
+        {
+        updateFieldFixedToMiddle <- smoothImage( updateFieldFixedToMiddle, sigma )
+        updateFieldMovingToMiddle <- smoothImage( updateFieldMovingToMiddle, sigma )
+        }
+      
+        # Add the update field to both forward displacement fields.
+
+        totalFieldFixedToMiddle <- composeDisplacementFields( updateFieldFixedToMiddle, totalFieldFixedToMiddle )
+        totalFieldMovingToMiddle <- composeDisplacementFields( updateFieldMovingToMiddle, totalFieldMovingToMiddle )
+
+        # Iteratively estimate the inverse fields.  
+
+        totalInverseFieldFixedToMiddle <- invertDisplacementField( totalFieldFixedToMiddle, totalInverseFieldFixedToMiddle )
+        totalInverseFieldMovingToMiddle <- invertDisplacementField( totalFieldMovingToMiddle, totalInverseFieldMovingToMiddle )
+
+        totalFieldFixedToMiddle <- invertDisplacementField( totalInverseFieldFixedToMiddle, totalFieldFixedToMiddle )
+        totalFieldMovingToMiddle <- invertDisplacementField( totalInverseFieldMovingToMiddle, totalFieldMovingToMiddle )
+
+        totalFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldFixedToMiddle )
+        totalFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldMovingToMiddle )
+      
+        if( i < numberOfCompositions )
+          {
+          updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldFixedToMiddleXfrm, fixedPoints )
+          updatedMovingPoints <- applyAntsrTransformToPoint( totalFieldMovingToMiddleXfrm, movingPoints )
+          } else {
+          totalInverseFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldFixedToMiddle )
+          totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
+          }
+      }
+     
+    xfrmForwardList <- list( totalFieldFixedToMiddleXfrm, totalInverseFieldMovingToMiddleXfrm )
+    totalForwardXfrm <- composeAntsrTransforms( xfrmForwardList )    
+    xfrmInverseList <- list( totalFieldMovingToMiddleXfrm, totalInverseFieldFixedToMiddleXfrm )
+    totalInverseXfrm <- composeAntsrTransforms( xfrmInverseList )    
+
+    return( list( totalForwardXfrm, totalInverseXfrm ) )
 
     } else {
       stop( "Unrecognized transformType." )
