@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <ants.h>
 #include "antsUtilities.h"
-#include "ReadWriteData.h"
+
 #include "itkComposeDisplacementFieldsImageFilter.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "RcppANTsR.h"
