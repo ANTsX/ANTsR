@@ -97,6 +97,7 @@ RcppExport SEXP integrateVelocityField(
   SEXP r_upperBound,
   SEXP r_numberOfIntegrationSteps )
 {
+
 try
   {
   using PrecisionType = float;
@@ -114,8 +115,6 @@ try
     using ANTsRVelocityFieldPointerType = typename ANTsRVelocityFieldType::Pointer;
 
     ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
-    antsrField->SetVectorLength( Dimension );
-
     ANTsRVelocityFieldPointerType inputANTsRVelocityField = Rcpp::as<ANTsRVelocityFieldPointerType>( r_velocityField );
 
     typename ANTsRFieldType::PointType fieldOrigin;
@@ -133,7 +132,7 @@ try
         fieldDirection(d, e) = inputANTsRVelocityField->GetDirection()(d, e);
         }
       }
- 
+
     antsrField->SetOrigin( fieldOrigin );
     antsrField->SetSpacing( fieldSpacing );
     antsrField->SetRegions( fieldSize );
@@ -146,6 +145,7 @@ try
     SEXP integratedField = integrateVelocityFieldHelper<Dimension>(
       r_velocityField, s4_antsrField, r_lowerBound, r_upperBound,
       r_numberOfIntegrationSteps );
+
     return( integratedField );
     }
   else if( dimensionality == 3 )

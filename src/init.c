@@ -24,7 +24,7 @@ extern SEXP fitBsplineDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP fsl2antsrTransform(SEXP, SEXP, SEXP, SEXP);
 extern SEXP HausdorffDistanceR(SEXP, SEXP);
 extern SEXP histogramMatchImageR(SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP integrateDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP integrateVelocityField(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP invariantImageSimilarity(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP invertDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP itkConvolveImage(SEXP, SEXP);
@@ -56,7 +56,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"fsl2antsrTransform",                      (DL_FUNC) &fsl2antsrTransform,                     4},
     {"HausdorffDistanceR",                      (DL_FUNC) &HausdorffDistanceR,                     2},
     {"histogramMatchImageR",                    (DL_FUNC) &histogramMatchImageR,                   5},
-    {"integrateVelocityField",                  (DL_FUNC) &invariantImageSimilarity,               5},
+    {"integrateVelocityField",                  (DL_FUNC) &integrateVelocityField,                 5},
     {"invariantImageSimilarity",                (DL_FUNC) &invariantImageSimilarity,              12},
     {"invertDisplacementField",                 (DL_FUNC) &invertDisplacementField,                7},
     {"itkConvolveImage",                        (DL_FUNC) &itkConvolveImage,                       2},
