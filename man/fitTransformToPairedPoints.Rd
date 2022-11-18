@@ -17,7 +17,7 @@ fitTransformToPairedPoints(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
-  sigma = 3
+  sigma = 0
 )
 }
 \arguments{
@@ -63,7 +63,7 @@ Estimate a transform using paired point sets.  An ANTsR transform is returned.
 }
 \examples{
 fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
-moving <- matrix( c( 75, 75, 175, 75, 75, 175 ), ncol = 2, byrow = TRUE )
+moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
 
 # Affine transform
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
@@ -90,6 +90,10 @@ domainImage <- antsImageRead( getANTsRData( "r16" ) )
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
 error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 
+# SyN transform
+domainImage <- antsImageRead( getANTsRData( "r16" ) )
+xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
+error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 }
 \author{
 B Avants
