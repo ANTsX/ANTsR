@@ -9,6 +9,7 @@
 #'     \item{surface:}{2-D surface in 3-D space (not available/templated)}
 #'     \item{scalar:}{2/3/4-D scalar field}
 #'     \item{displacement:}{2/3-D displacement field}
+#'     \item{displacement:}{2/3-D time-varying velocity field}
 #' }
 #' In order to understand the input parameters, it is important to understand
 #' the difference between the parametric and data dimensions.  A curve as one

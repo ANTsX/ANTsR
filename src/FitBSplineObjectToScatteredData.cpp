@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <ants.h>
 #include "antsUtilities.h"
-#include "ReadWriteData.h"
+
 #include "itkBSplineScatteredDataPointSetToImageFilter.h"
 #include "RcppANTsR.h"
 
@@ -115,7 +115,7 @@ SEXP fitBSplineCurveHelper(
       {
       bsplineCurve(count, d) = data[d];
       }
-    count++;  
+    count++;
     }
   return( Rcpp::wrap( bsplineCurve ) );
 }
@@ -412,12 +412,12 @@ try
       } else {
       Rcpp::stop( "Untemplated data dimension for parametric dimension = 1." );
       }
-    }    
+    }
   else if( parametricDimension == 2 )
-    { 
+    {
     const unsigned int ParametricDimension = 2;
-    // 2-D scalar field  
-    if( dataDimension == 1 ) 
+    // 2-D scalar field
+    if( dataDimension == 1 )
       {
       using ImageType = itk::Image<PrecisionType, ParametricDimension>;
       using ImagePointerType = typename ImageType::Pointer;
@@ -444,16 +444,16 @@ try
 
       Rcpp::S4 s4_image( Rcpp::wrap( image ) );
 
-      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>( 
-        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin, 
-        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed, 
+      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
         r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
       return( outputBSplineObject );
       }
-    // 2-D vector field  
-    else if( dataDimension == 2 ) 
+    // 2-D vector field
+    else if( dataDimension == 2 )
       {
-      const unsigned int DataDimension = 2;  
+      const unsigned int DataDimension = 2;
       using ANTsRFieldType = itk::VectorImage<PrecisionType, ParametricDimension>;
       using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
@@ -480,9 +480,9 @@ try
 
       Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
-      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>( 
-        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin, 
-        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed, 
+      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
         r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
       return( outputBSplineObject );
       } else {
@@ -490,10 +490,10 @@ try
       }
     }
   else if( parametricDimension == 3 )
-    { 
+    {
     const unsigned int ParametricDimension = 3;
-    // 3-D scalar field  
-    if( dataDimension == 1 ) 
+    // 3-D scalar field
+    if( dataDimension == 1 )
       {
       using ImageType = itk::Image<PrecisionType, ParametricDimension>;
       using ImagePointerType = typename ImageType::Pointer;
@@ -520,16 +520,16 @@ try
 
       Rcpp::S4 s4_image( Rcpp::wrap( image ) );
 
-      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>( 
-        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin, 
-        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed, 
+      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
         r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
       return( outputBSplineObject );
       }
-    // 3-D vector field  
-    else if( dataDimension == 3 ) 
+    // 3-D time-varying velocity field
+    else if( dataDimension == 2 )
       {
-      const unsigned int DataDimension = 3;  
+      const unsigned int DataDimension = 2;
       using ANTsRFieldType = itk::VectorImage<PrecisionType, ParametricDimension>;
       using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
 
@@ -556,9 +556,45 @@ try
 
       Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
 
-      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>( 
-        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin, 
-        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed, 
+      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
+        r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
+      return( outputBSplineObject );
+      }
+    // 3-D vector field
+    else if( dataDimension == 3 )
+      {
+      const unsigned int DataDimension = 3;
+      using ANTsRFieldType = itk::VectorImage<PrecisionType, ParametricDimension>;
+      using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+      typename ANTsRFieldType::PointType origin;
+      typename ANTsRFieldType::SpacingType spacing;
+      typename ANTsRFieldType::SizeType size;
+      typename ANTsRFieldType::DirectionType direction;
+
+      for( unsigned int d = 0; d < ParametricDimension; d++ )
+        {
+        origin[d] = parametricDomainOrigin[d];
+        spacing[d] = parametricDomainSpacing[d];
+        size[d] = parametricDomainSize[d];
+        }
+      direction.SetIdentity();
+
+      ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+      antsrField->SetOrigin( origin );
+      antsrField->SetRegions( size );
+      antsrField->SetSpacing( spacing );
+      antsrField->SetVectorLength( DataDimension );
+      antsrField->SetDirection( direction );
+      antsrField->Allocate();
+
+      Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
+      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
         r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
       return( outputBSplineObject );
       } else {
@@ -566,10 +602,10 @@ try
       }
     }
   else if( parametricDimension == 4 )
-    { 
+    {
     const unsigned int ParametricDimension = 4;
-    // 4-D scalar field  
-    if( dataDimension == 1 ) 
+    // 4-D scalar field
+    if( dataDimension == 1 )
       {
       using ImageType = itk::Image<PrecisionType, ParametricDimension>;
       using ImagePointerType = typename ImageType::Pointer;
@@ -596,16 +632,52 @@ try
 
       Rcpp::S4 s4_image( Rcpp::wrap( image ) );
 
-      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>( 
-        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin, 
-        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed, 
+      SEXP outputBSplineObject = fitBSplineImageHelper<ParametricDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_image, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
+        r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
+      return( outputBSplineObject );
+      }
+    // 4-D time-varying velocity field
+    else if( dataDimension == 3 )
+      {
+      const unsigned int DataDimension = 3;
+      using ANTsRFieldType = itk::VectorImage<PrecisionType, ParametricDimension>;
+      using ANTsRFieldPointerType = typename ANTsRFieldType::Pointer;
+
+      typename ANTsRFieldType::PointType origin;
+      typename ANTsRFieldType::SpacingType spacing;
+      typename ANTsRFieldType::SizeType size;
+      typename ANTsRFieldType::DirectionType direction;
+
+      for( unsigned int d = 0; d < ParametricDimension; d++ )
+        {
+        origin[d] = parametricDomainOrigin[d];
+        spacing[d] = parametricDomainSpacing[d];
+        size[d] = parametricDomainSize[d];
+        }
+      direction.SetIdentity();
+
+      ANTsRFieldPointerType antsrField = ANTsRFieldType::New();
+      antsrField->SetOrigin( origin );
+      antsrField->SetRegions( size );
+      antsrField->SetSpacing( spacing );
+      antsrField->SetVectorLength( DataDimension );
+      antsrField->SetDirection( direction );
+      antsrField->Allocate();
+
+      Rcpp::S4 s4_antsrField( Rcpp::wrap( antsrField ) );
+
+      SEXP outputBSplineObject = fitBSplineVectorImageHelper<ParametricDimension, DataDimension>(
+        r_scatteredData, r_parametricData, r_dataWeights, s4_antsrField, r_parametricDomainOrigin,
+        r_parametricDomainSpacing, r_parametricDomainSize, r_isParametricDimensionClosed,
         r_numberOfFittingLevels, r_numberOfControlPoints, r_splineOrder );
       return( outputBSplineObject );
       } else {
       Rcpp::stop( "Untemplated data dimension for parametric dimension = 4." );
       }
     }
-  else 
+  else
     {
     Rcpp::stop( "Untemplated parametric dimension." );
     }
