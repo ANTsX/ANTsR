@@ -354,11 +354,31 @@ fitTransformToPairedPoints <- function(
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
-      if( i == 0 )
+      for( n in seq.int( numberOfIntegrationPoints ) )
         {
+        t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
+
+        if( n > 1 )
+          {
+          integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+          integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+          updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, fixedPoints )
+          } else {
+          updatedFixedPoints <- fixedPoints
+          }
+
+        if( n < numberOfIntegrationPoints )
+          {
+          integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+          integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+          updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
+          } else {
+          updatedMovingPoints <- movingPoints
+          }
+
         updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
           displacementOrigins = updatedFixedPoints,
-          displacements = movingPoints - updatedFixedPoints,
+          displacements = updatedMovingPoints - updatedFixedPoints,
           displacementWeights = displacementWeights,
           origin = antsGetOrigin( domainImage ),
           spacing = antsGetSpacing( domainImage ),
@@ -375,79 +395,22 @@ fitTransformToPairedPoints <- function(
           }
 
         updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
-        maxNorm <- sqrt( max( base::rowSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+        maxNorm <- sqrt( max( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
         updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
-
-        for( n in seq.int( numberOfIntegrationPoints ) )
+        if( domainImage@dimension == 2 )
           {
-          if( domainImage@dimension == 2 )
-            {
-            updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
-            } else {
-            updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
-            }
+          updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
+          } else {
+          updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
           }
-        } else {
-
-        t <- 0.0
-        for( n in seq.int( numberOfIntegrationPoints ) )
-          {
-          t <- ( n - 1 ) * dt
-
-          if( n > 1 )
-            {
-            integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
-            integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
-            updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, fixedPoints )
-            } else {
-            updatedFixedPoints <- fixedPoints
-            }
-
-          if( n < numberOfIntegrationPoints )
-            {
-            integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
-            integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
-            updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
-            } else {
-            updatedMovingPoints <- movingPoints
-            }
-
-          updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
-            displacementOrigins = updatedFixedPoints,
-            displacements = movingPoints - updatedFixedPoints,
-            displacementWeights = displacementWeights,
-            origin = antsGetOrigin( domainImage ),
-            spacing = antsGetSpacing( domainImage ),
-            size = dim( domainImage ),
-            direction = antsGetDirection( domainImage ),
-            numberOfFittingLevels = numberOfFittingLevels,
-            meshSize = meshSize,
-            splineOrder = splineOrder,
-            enforceStationaryBoundary = TRUE
-            )
-          if( sigma > 0 )
-            {
-            updateDerivativeFieldAtTimePoint <- smoothImage( updateDerivativeFieldAtTimePoint, sigma )
-            }
-
-          updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
-          maxNorm <- sqrt( max( base::rowSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
-          updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
-          if( domainImage@dimension == 2 )
-            {
-            updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
-            } else {
-            updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
-            }
-          }
-        updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
-        lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
-
-        velocityFieldArray <- velocityFieldArray + updateDerivativeFieldArray * compositionStepSize
-        velocityField <- as.antsImage( velocityFieldArray, origin = antsGetOrigin( velocityField ),
-            spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
-            components = TRUE )
         }
+      updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
+      lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
+
+      velocityFieldArray <- velocityFieldArray + updateDerivativeFieldArray * compositionStepSize
+      velocityField <- as.antsImage( velocityFieldArray, origin = antsGetOrigin( velocityField ),
+          spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
+          components = TRUE )
       }
     return( velocityField )
 
