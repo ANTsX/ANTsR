@@ -347,8 +347,6 @@ fitTransformToPairedPoints <- function(
     lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
 
-    dt <- ( 1.0 - 0.0 ) / ( numberOfIntegrationPoints - 1.0 )
-
     for( i in seq.int( numberOfCompositions ) )
       {
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
