@@ -8,6 +8,7 @@
 #include "itkTimeVaryingVelocityFieldIntegrationImageFilter.h"
 #include "itkImageRegionIteratorWithIndex.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
+#include "itkImageFileWriter.h"
 
 #include "RcppANTsR.h"
 
@@ -43,7 +44,8 @@ SEXP integrateVelocityFieldHelper(
   inputITKVelocityField->SetRegions( inputANTsRVelocityField->GetRequestedRegion() );
   inputITKVelocityField->Allocate();
 
-  IteratorType It( inputITKVelocityField, inputITKVelocityField->GetRequestedRegion() );
+  IteratorType It( inputITKVelocityField,
+                   inputITKVelocityField->GetRequestedRegion() );
   for( It.GoToBegin(); !It.IsAtEnd(); ++It )
     {
     VectorType vector;
@@ -91,7 +93,7 @@ SEXP integrateVelocityFieldHelper(
 }
 
 RcppExport SEXP integrateVelocityField(
-  SEXP r_dimensionality,  
+  SEXP r_dimensionality,
   SEXP r_velocityField,
   SEXP r_lowerBound,
   SEXP r_upperBound,
@@ -178,7 +180,7 @@ try
         fieldDirection(d, e) = inputANTsRVelocityField->GetDirection()(d, e);
         }
       }
- 
+
     antsrField->SetOrigin( fieldOrigin );
     antsrField->SetSpacing( fieldSpacing );
     antsrField->SetRegions( fieldSize );
