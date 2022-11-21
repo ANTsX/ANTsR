@@ -23,6 +23,7 @@
 #' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
 #' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
+#' @param numberOfIntegrationPoints Time-varying velocity field parameter.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
 #' @author B Avants
@@ -74,7 +75,8 @@ fitTransformToPairedPoints <- function(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
-  sigma = 0.0
+  sigma = 0.0,
+  numberOfIntegrationPoints = 2
   ) {
 
   polarDecomposition <- function( X )
@@ -104,17 +106,27 @@ fitTransformToPairedPoints <- function(
 
   createZeroDisplacementField <- function( domainImage )
     {
-    components <- list()
-    for( i in seq.int( domainImage@dimension ) )
-      {
-      components <- append( components, domainImage * 0 )
-      } 
-    field <- mergeChannels( components )
+    fieldArray <- array( data = 0, dim = c( domainImage@dimension, dim( domainImage ) ) )
+    origin <- c( antsGetOrigin( domainImage ), 0.0 )
+    spacing <- c( antsGetSpacing( domainImage ), 1.0 )
+    direction <- antsGetDirection( domainImage )
+    field <- as.antsImage( fieldArray, origin = origin, spacing = spacing, direction = direction, components = TRUE )
     return( field )
-    }  
+    }
+
+  createZeroVelocityField <- function( domainImage, numberOfTimePoints = 2 )
+    {
+    fieldArray <- array( data = 0, dim = c( domainImage@dimension, dim( domainImage ), numberOfTimePoints ) )
+    origin <- c( antsGetOrigin( domainImage ), 0.0 )
+    spacing <- c( antsGetSpacing( domainImage ), 1.0 )
+    direction <- diag( domainImage@dimension + 1 )
+    direction[1:domainImage@dimension, 1:domainImage@dimension] <- antsGetDirection( domainImage )
+    field <- as.antsImage( fieldArray, origin = origin, spacing = spacing, direction = direction, components = TRUE )
+    return( field )
+    }
 
   if( ! any( tolower( transformType ) %in%
-        c( "rigid", "affine", "similarity", "bspline", "diffeo", "syn" ) ) )
+        c( "rigid", "affine", "similarity", "bspline", "diffeo", "syn", "tv", "time-varying" ) ) )
     {
     stop( paste0( transformType, " transform not supported." ) )
     }
@@ -290,13 +302,13 @@ fitTransformToPairedPoints <- function(
         updateFieldFixedToMiddle <- smoothImage( updateFieldFixedToMiddle, sigma )
         updateFieldMovingToMiddle <- smoothImage( updateFieldMovingToMiddle, sigma )
         }
-      
+
         # Add the update field to both forward displacement fields.
 
         totalFieldFixedToMiddle <- composeDisplacementFields( updateFieldFixedToMiddle, totalFieldFixedToMiddle )
         totalFieldMovingToMiddle <- composeDisplacementFields( updateFieldMovingToMiddle, totalFieldMovingToMiddle )
 
-        # Iteratively estimate the inverse fields.  
+        # Iteratively estimate the inverse fields.
 
         totalInverseFieldFixedToMiddle <- invertDisplacementField( totalFieldFixedToMiddle, totalInverseFieldFixedToMiddle )
         totalInverseFieldMovingToMiddle <- invertDisplacementField( totalFieldMovingToMiddle, totalInverseFieldMovingToMiddle )
@@ -306,7 +318,7 @@ fitTransformToPairedPoints <- function(
 
         totalFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldFixedToMiddle )
         totalFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldMovingToMiddle )
-      
+
         if( i < numberOfCompositions )
           {
           updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldFixedToMiddleXfrm, fixedPoints )
@@ -316,13 +328,128 @@ fitTransformToPairedPoints <- function(
           totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
           }
       }
-     
+
     xfrmForwardList <- list( totalFieldFixedToMiddleXfrm, totalInverseFieldMovingToMiddleXfrm )
-    totalForwardXfrm <- composeAntsrTransforms( xfrmForwardList )    
+    totalForwardXfrm <- composeAntsrTransforms( xfrmForwardList )
     xfrmInverseList <- list( totalFieldMovingToMiddleXfrm, totalInverseFieldFixedToMiddleXfrm )
-    totalInverseXfrm <- composeAntsrTransforms( xfrmInverseList )    
+    totalInverseXfrm <- composeAntsrTransforms( xfrmInverseList )
 
     return( list( totalForwardXfrm, totalInverseXfrm ) )
+
+    } else if( transformType == "tv" || transformType == "time-varying" ) {
+
+    updatedFixedPoints <- fixedPoints
+    updatedMovingPoints <- movingPoints
+
+    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    velocityFieldArray <- as.array( velocityField )
+
+    lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
+
+    dt <- ( 1.0 - 0.0 ) / ( numberOfIntegrationPoints - 1.0 )
+
+    for( i in seq.int( numberOfCompositions ) )
+      {
+      updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+      updateDerivativeFieldArray <- as.array( updateDerivativeField )
+
+      if( i == 0 )
+        {
+        updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
+          displacementOrigins = updatedFixedPoints,
+          displacements = movingPoints - updatedFixedPoints,
+          displacementWeights = displacementWeights,
+          origin = antsGetOrigin( domainImage ),
+          spacing = antsGetSpacing( domainImage ),
+          size = dim( domainImage ),
+          direction = antsGetDirection( domainImage ),
+          numberOfFittingLevels = numberOfFittingLevels,
+          meshSize = meshSize,
+          splineOrder = splineOrder,
+          enforceStationaryBoundary = TRUE
+          )
+        if( sigma > 0 )
+          {
+          updateDerivativeFieldAtTimePoint <- smoothImage( updateDerivativeFieldAtTimePoint, sigma )
+          }
+
+        updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
+        maxNorm <- sqrt( max( base::rowSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+        updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
+
+        for( n in seq.int( numberOfIntegrationPoints ) )
+          {
+          if( domainImage@dimension == 2 )
+            {
+            updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
+            } else {
+            updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
+            }
+          }
+        } else {
+
+        t <- 0.0
+        for( n in seq.int( numberOfIntegrationPoints ) )
+          {
+          t <- ( n - 1 ) * dt
+
+          if( t > 0.0 )
+            {
+            integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+            integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+            updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, fixedPoints )
+            } else {
+            updatedFixedPoints <- fixedPoints
+            }
+
+          if( t < 1.0 )
+            {
+            integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+            integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+            updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
+            } else {
+            updatedMovingPoints <- movingPoints
+            }
+
+          updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
+            displacementOrigins = updatedFixedPoints,
+            displacements = movingPoints - updatedFixedPoints,
+            displacementWeights = displacementWeights,
+            origin = antsGetOrigin( domainImage ),
+            spacing = antsGetSpacing( domainImage ),
+            size = dim( domainImage ),
+            direction = antsGetDirection( domainImage ),
+            numberOfFittingLevels = numberOfFittingLevels,
+            meshSize = meshSize,
+            splineOrder = splineOrder,
+            enforceStationaryBoundary = TRUE
+            )
+          if( sigma > 0 )
+            {
+            updateDerivativeFieldAtTimePoint <- smoothImage( updateDerivativeFieldAtTimePoint, sigma )
+            }
+
+          updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
+          maxNorm <- sqrt( max( base::rowSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+          updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
+          if( domainImage@dimension == 2 )
+            {
+            updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
+            } else {
+            updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
+            }
+          }
+        updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
+        lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
+
+        velocityFieldArray <- velocityFieldArray + updateDerivativeFieldArray * compositionStepSize
+        velocityField <- as.antsImage( velocityFieldArray, origin = antsGetOrigin( velocityField ),
+            spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
+            components = TRUE )
+        }
+      }
+    return( velocityField )
 
     } else {
       stop( "Unrecognized transformType." )
