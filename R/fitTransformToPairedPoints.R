@@ -394,7 +394,7 @@ fitTransformToPairedPoints <- function(
           {
           t <- ( n - 1 ) * dt
 
-          if( t > 0.0 )
+          if( n > 1 )
             {
             integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
             integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
@@ -403,7 +403,7 @@ fitTransformToPairedPoints <- function(
             updatedFixedPoints <- fixedPoints
             }
 
-          if( t < 1.0 )
+          if( n < numberOfIntegrationPoints )
             {
             integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
             integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
