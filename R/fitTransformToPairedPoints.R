@@ -6,7 +6,8 @@
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
 #' @param fixedPoints fixed points specified in physical space as a \code{n x d}
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
-#' @param transformType 'rigid', 'similarity', "affine', 'bspline', or 'diffeo'.
+#' @param transformType 'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
+#' or 'time-varying (tv)'.
 #' @param regularization ridge penalty in [0,1] for linear transforms.
 #' @param domainImage defines physical domain of the B-spline transform.
 #' @param numberOfFittingLevels integer specifying the number of fitting levels
