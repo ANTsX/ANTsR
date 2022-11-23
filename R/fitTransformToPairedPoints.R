@@ -25,6 +25,7 @@
 #' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
+#' @param verbose Print progress to the screen.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
 #' @author B Avants
@@ -77,7 +78,8 @@ fitTransformToPairedPoints <- function(
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
   sigma = 0.0,
-  numberOfIntegrationPoints = 2
+  numberOfIntegrationPoints = 2,
+  verbose = FALSE
   ) {
 
   polarDecomposition <- function( X )
@@ -252,6 +254,12 @@ fitTransformToPairedPoints <- function(
         {
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }
+
+      if( verbose )
+        {
+        error <- norm( movingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        cat( "Composition ", i, ": error = ", error, "\n" )
+        }
       }
     return( totalFieldXfrm )
 
@@ -304,30 +312,36 @@ fitTransformToPairedPoints <- function(
         updateFieldMovingToMiddle <- smoothImage( updateFieldMovingToMiddle, sigma )
         }
 
-        # Add the update field to both forward displacement fields.
+      # Add the update field to both forward displacement fields.
 
-        totalFieldFixedToMiddle <- composeDisplacementFields( updateFieldFixedToMiddle, totalFieldFixedToMiddle )
-        totalFieldMovingToMiddle <- composeDisplacementFields( updateFieldMovingToMiddle, totalFieldMovingToMiddle )
+      totalFieldFixedToMiddle <- composeDisplacementFields( updateFieldFixedToMiddle, totalFieldFixedToMiddle )
+      totalFieldMovingToMiddle <- composeDisplacementFields( updateFieldMovingToMiddle, totalFieldMovingToMiddle )
 
-        # Iteratively estimate the inverse fields.
+      # Iteratively estimate the inverse fields.
 
-        totalInverseFieldFixedToMiddle <- invertDisplacementField( totalFieldFixedToMiddle, totalInverseFieldFixedToMiddle )
-        totalInverseFieldMovingToMiddle <- invertDisplacementField( totalFieldMovingToMiddle, totalInverseFieldMovingToMiddle )
+      totalInverseFieldFixedToMiddle <- invertDisplacementField( totalFieldFixedToMiddle, totalInverseFieldFixedToMiddle )
+      totalInverseFieldMovingToMiddle <- invertDisplacementField( totalFieldMovingToMiddle, totalInverseFieldMovingToMiddle )
 
-        totalFieldFixedToMiddle <- invertDisplacementField( totalInverseFieldFixedToMiddle, totalFieldFixedToMiddle )
-        totalFieldMovingToMiddle <- invertDisplacementField( totalInverseFieldMovingToMiddle, totalFieldMovingToMiddle )
+      totalFieldFixedToMiddle <- invertDisplacementField( totalInverseFieldFixedToMiddle, totalFieldFixedToMiddle )
+      totalFieldMovingToMiddle <- invertDisplacementField( totalInverseFieldMovingToMiddle, totalFieldMovingToMiddle )
 
-        totalFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldFixedToMiddle )
-        totalFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldMovingToMiddle )
+      totalFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldFixedToMiddle )
+      totalFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldMovingToMiddle )
 
-        if( i < numberOfCompositions )
-          {
-          updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldFixedToMiddleXfrm, fixedPoints )
-          updatedMovingPoints <- applyAntsrTransformToPoint( totalFieldMovingToMiddleXfrm, movingPoints )
-          } else {
-          totalInverseFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldFixedToMiddle )
-          totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
-          }
+      if( i < numberOfCompositions )
+        {
+        updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldFixedToMiddleXfrm, fixedPoints )
+        updatedMovingPoints <- applyAntsrTransformToPoint( totalFieldMovingToMiddleXfrm, movingPoints )
+        } else {
+        totalInverseFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldFixedToMiddle )
+        totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
+        }
+
+      if( verbose )
+        {
+        error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        cat( "Composition ", i, ": error = ", error, "\n" )
+        }
       }
 
     xfrmForwardList <- list( totalFieldFixedToMiddleXfrm, totalInverseFieldMovingToMiddleXfrm )
@@ -335,7 +349,12 @@ fitTransformToPairedPoints <- function(
     xfrmInverseList <- list( totalFieldMovingToMiddleXfrm, totalInverseFieldFixedToMiddleXfrm )
     totalInverseXfrm <- composeAntsrTransforms( xfrmInverseList )
 
-    return( list( totalForwardXfrm, totalInverseXfrm ) )
+    return( list( forwardTransform = totalForwardXfrm,
+                  inverseTransform = totalInverseXfrm,
+                  fixedToMiddleTransform = totalFieldFixedToMiddleXfrm,
+                  middleToFixedTransform = totalInverseFieldFixedToMiddleXfrm,
+                  movingToMiddeTransform = totalFieldFixedToMiddleXfrm,
+                  middleToMovingTransform = totalInverseFieldMovingToMiddleXfrm ) )
 
     } else if( transformType == "tv" || transformType == "time-varying" ) {
 
@@ -352,6 +371,11 @@ fitTransformToPairedPoints <- function(
       {
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
+
+      if( verbose )
+        {
+        cat( "Composition ", i, "\n" )
+        }
 
       for( n in seq.int( numberOfIntegrationPoints ) )
         {
@@ -373,6 +397,12 @@ fitTransformToPairedPoints <- function(
           updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
           } else {
           updatedMovingPoints <- movingPoints
+          }
+
+        if( verbose )
+          {
+          error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+          cat( "Integration t = ", t, ": error = ", error, "\n" )
           }
 
         updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
@@ -411,7 +441,17 @@ fitTransformToPairedPoints <- function(
           spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
           components = TRUE )
       }
-    return( velocityField )
+
+    integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+    integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+
+    integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+    integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+
+    forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+    return( list( forwardTransform = integratedForwardFieldXfrm,
+                  inverseTransform = integratedInverseFieldXfrm,
+                  velocityField = velocityField ) )
 
     } else {
       stop( "Unrecognized transformType." )
