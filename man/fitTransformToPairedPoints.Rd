@@ -17,7 +17,10 @@ fitTransformToPairedPoints(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
-  sigma = 0
+  sigma = 0,
+  convergenceThreshold = 0,
+  numberOfIntegrationPoints = 2,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -27,7 +30,8 @@ matrix where \code{n} is the number of points and \code{d} is the dimensionality
 \item{fixedPoints}{fixed points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
-\item{transformType}{'rigid', 'similarity', "affine', 'bspline', or 'diffeo'.}
+\item{transformType}{'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
+or 'time-varying (tv)'.}
 
 \item{regularization}{ridge penalty in [0,1] for linear transforms.}
 
@@ -54,6 +58,13 @@ weighted the same.}
 \item{compositionStepSize}{scalar multiplication factor for the diffeomorphic transform.}
 
 \item{sigma}{gaussian smoothing sigma (in mm) for the diffeomorphic transform.}
+
+\item{convergenceThreshold}{Composition-based convergence parameter for the diff. transforms using a
+window size of 10 values.}
+
+\item{numberOfIntegrationPoints}{Time-varying velocity field parameter.}
+
+\item{verbose}{Print progress to the screen.}
 }
 \value{
 object containing ANTsR transform, error, and scale (or displacement field)

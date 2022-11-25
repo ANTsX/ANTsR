@@ -27,6 +27,11 @@ integrated field
 Integrate velocity field
 }
 \examples{
+fi <- antsImageRead( getANTsRData( "r16" ) )
+mi <- antsImageRead( getANTsRData( "r27" ) )
+reg <- antsRegistration( fi, mi, "TV[2]" )
+velocityField <- antsImageRead( reg$velocityfield )
+field <- integrateVelocityField( velocityField, 0.0, 1.0, 10 )
 
 }
 \author{

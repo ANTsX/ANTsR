@@ -24,6 +24,8 @@
 #' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
 #' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
+#' @param convergenceThreshold Composition-based convergence parameter for the diff. transforms using a
+#' window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
 #' @param verbose Print progress to the screen.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
@@ -78,6 +80,7 @@ fitTransformToPairedPoints <- function(
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
   sigma = 0.0,
+  convergenceThreshold = 0.0,
   numberOfIntegrationPoints = 2,
   verbose = FALSE
   ) {
@@ -126,6 +129,27 @@ fitTransformToPairedPoints <- function(
     direction[1:domainImage@dimension, 1:domainImage@dimension] <- antsGetDirection( domainImage )
     field <- as.antsImage( fieldArray, origin = origin, spacing = spacing, direction = direction, components = TRUE )
     return( field )
+    }
+
+  convergenceMonitoring <- function( values, windowSize = 10 )
+    {
+    if( length( values ) >= windowSize )
+      {
+      u <- seq( from = 0.0, to = 1.0, length.out = windowSize )
+      scatteredData <- as.matrix( tail( values, n = windowSize ), ncol = 1 )
+      parametricData <- as.matrix( u, ncol = 1 )
+      spacing <- 1.0 / ( windowSize - 1.0 )
+      bsplineLine <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
+          parametricDomainOrigin = c( 0.0 ), parametricDomainSpacing = c( spacing ),
+          parametricDomainSize = c( windowSize ), numberOfFittingLevels = 1, meshSize = 1,
+          splineOrder = 1 )
+      bsplineSlope <- -( bsplineLine[2, 1] - bsplineLine[1, 1] ) / spacing
+      return( bsplineSlope )
+      }
+    else
+      {
+      return( NA )
+      }
     }
 
   if( ! any( tolower( transformType ) %in%
@@ -225,6 +249,7 @@ fitTransformToPairedPoints <- function(
     xfrmList <- list()
     totalFieldXfrm <- NULL
 
+    errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
       updateField <- fitBsplineDisplacementField(
@@ -258,7 +283,13 @@ fitTransformToPairedPoints <- function(
       if( verbose )
         {
         error <- norm( movingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
-        cat( "Composition ", i, ": error = ", error, "\n" )
+        errorValues <- append( errorValues, error )
+        convergenceValue <- convergenceMonitoring( errorValues )
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        }
+      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+        {
+        break
         }
       }
     return( totalFieldXfrm )
@@ -274,6 +305,7 @@ fitTransformToPairedPoints <- function(
     totalFieldMovingToMiddle <- createZeroDisplacementField( domainImage )
     totalInverseFieldMovingToMiddle <- createZeroDisplacementField( domainImage )
 
+    errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
       updateFieldFixedToMiddle <- fitBsplineDisplacementField(
@@ -328,19 +360,25 @@ fitTransformToPairedPoints <- function(
       totalFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldFixedToMiddle )
       totalFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalFieldMovingToMiddle )
 
+      totalInverseFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldFixedToMiddle )
+      totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
+
       if( i < numberOfCompositions )
         {
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldFixedToMiddleXfrm, fixedPoints )
         updatedMovingPoints <- applyAntsrTransformToPoint( totalFieldMovingToMiddleXfrm, movingPoints )
-        } else {
-        totalInverseFieldFixedToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldFixedToMiddle )
-        totalInverseFieldMovingToMiddleXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseFieldMovingToMiddle )
         }
 
       if( verbose )
         {
         error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
-        cat( "Composition ", i, ": error = ", error, "\n" )
+        errorValues <- append( errorValues, error )
+        convergenceValue <- convergenceMonitoring( errorValues )
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        }
+      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+        {
+        break
         }
       }
 
@@ -367,15 +405,11 @@ fitTransformToPairedPoints <- function(
     lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
 
+    errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
-
-      if( verbose )
-        {
-        cat( "Composition ", i, "\n" )
-        }
 
       for( n in seq.int( numberOfIntegrationPoints ) )
         {
@@ -397,12 +431,6 @@ fitTransformToPairedPoints <- function(
           updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
           } else {
           updatedMovingPoints <- movingPoints
-          }
-
-        if( verbose )
-          {
-          error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
-          cat( "Integration t = ", t, ": error = ", error, "\n" )
           }
 
         updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
@@ -440,17 +468,28 @@ fitTransformToPairedPoints <- function(
       velocityField <- as.antsImage( velocityFieldArray, origin = antsGetOrigin( velocityField ),
           spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
           components = TRUE )
+
+      if( verbose )
+        {
+        error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        errorValues <- append( errorValues, error )
+        convergenceValue <- convergenceMonitoring( errorValues )
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        }
+      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+        {
+        break
+        }
       }
 
     integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
-    integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+    forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
 
     integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
-    integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+    inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
 
-    forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
-    return( list( forwardTransform = integratedForwardFieldXfrm,
-                  inverseTransform = integratedInverseFieldXfrm,
+    return( list( forwardTransform = forwardXfrm,
+                  inverseTransform = inverseXfrm,
                   velocityField = velocityField ) )
 
     } else {
