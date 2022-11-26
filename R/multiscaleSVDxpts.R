@@ -1435,6 +1435,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @param sparsenessQuantile a value in zero to one
 #' @param positivity one of positive, negative, either
 #' @param basic simplest keep top k-entries in each row
+#' @param transpose work on the transpose
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1443,7 +1444,8 @@ jointSmoothMatrixReconstruction <- function(
 #' matr=rankBasedMatrixSegmentation( mat, 0.9, basic=FALSE, positivity='positive' )
 #'
 #' @export rankBasedMatrixSegmentation
-rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, positivity='positive' ) {
+rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, positivity='positive', transpose=FALSE ) {
+  if ( transpose ) v = t( v )
   mycols = 1:ncol( v )
   ntokeep = round( quantile( mycols, 1.0 - sparsenessQuantile ) )
   outmat = matrix( 0, nrow=nrow(v), ncol=ncol(v))
@@ -1454,12 +1456,15 @@ rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, pos
       if ( positivity == "positive") locord = order( v[k,], decreasing=T)[1:ntokeep]
       outmat[k,locord]=v[k,locord]
     }
+    if ( transpose ) return( t(outmat ) )
     return( outmat )
   }
   tozero = c()
   for ( k in 1:nrow( v ) ) {
     vec = v[k,]
     if ( length( tozero ) > 0 ) vec[ tozero ] = 0
+    # adjust for weighted signs
+    if ( ( sum( vec[vec<0] ) - sum(  vec[vec > 0 ] ) ) < 0 ) vec = vec * (-1.0)
     if ( positivity == "either") {
       vec = abs( vec )
       locord = order( vec, decreasing=T)[1:ntokeep]
@@ -1470,6 +1475,7 @@ rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, pos
     tozero = c( tozero, locord )
     if ( all( mycols %in% tozero ) ) tozero = c()
   }
+  if ( transpose ) return( t(outmat ) )
   return( outmat )
 }
 
@@ -1502,8 +1508,8 @@ orthogonalizeAndQSparsify <- function( v,
       nmfobj = NMF::nmf( v - min(v), min(dim(v)), decomAlg )
       return( NMF::basis(nmfobj) )
     } else if ( decomAlg == 'orthorank' ) {
-      return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=FALSE, positivity=positivity ) )
-    } else return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity ) )
+      return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=FALSE, positivity=positivity, transpose=TRUE ) )
+    } else return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity, transpose=TRUE  ) )
   }
   if ( sparsenessQuantile == 0 ) return( v )
   epsval = 0.0 # .Machine$double.eps

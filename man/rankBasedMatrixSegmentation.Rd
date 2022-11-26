@@ -8,7 +8,8 @@ rankBasedMatrixSegmentation(
   v,
   sparsenessQuantile,
   basic = FALSE,
-  positivity = "positive"
+  positivity = "positive",
+  transpose = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ rankBasedMatrixSegmentation(
 \item{basic}{simplest keep top k-entries in each row}
 
 \item{positivity}{one of positive, negative, either}
+
+\item{transpose}{work on the transpose}
 }
 \value{
 matrix
