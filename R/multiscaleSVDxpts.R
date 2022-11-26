@@ -2727,7 +2727,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
-#' @param decomAlg string sets the NMF algorithm to estimate V
+#' @param decomAlg string sets the NMF algorithm to estimate V or basicrank or othorank
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.

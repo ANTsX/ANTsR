@@ -81,7 +81,7 @@ can be a vector which will apply each strategy in order.}
 
 \item{jointInitialization}{boolean for initialization options, default TRUE}
 
-\item{decomAlg}{string sets the NMF algorithm to estimate V}
+\item{decomAlg}{string sets the NMF algorithm to estimate V or basicrank or othorank}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
