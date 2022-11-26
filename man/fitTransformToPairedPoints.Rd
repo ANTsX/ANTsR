@@ -8,7 +8,7 @@ fitTransformToPairedPoints(
   movingPoints,
   fixedPoints,
   transformType = "affine",
-  regularization = 0.000001,
+  regularization = 1e-06,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,

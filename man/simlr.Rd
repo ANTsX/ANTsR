@@ -14,8 +14,8 @@ simlr(
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalize = FALSE,
   repeatedMeasures = NA,
-  lineSearchRange = c(-10000000000, 10000000000),
-  lineSearchTolerance = 0.00000001,
+  lineSearchRange = c(-1e+10, 1e+10),
+  lineSearchTolerance = 1e-08,
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
@@ -27,6 +27,7 @@ simlr(
     "eigenvalue", "robust"),
   expBeta = 0,
   jointInitialization = TRUE,
+  nmfAlg = NA,
   verbose = FALSE
 )
 }
@@ -79,6 +80,8 @@ can be a vector which will apply each strategy in order.}
 \item{expBeta}{if greater than zero, use exponential moving average on gradient.}
 
 \item{jointInitialization}{boolean for initialization options, default TRUE}
+
+\item{nmfAlg}{string sets the NMF algorithm to estimate V}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}

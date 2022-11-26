@@ -10,7 +10,8 @@ orthogonalizeAndQSparsify(
   positivity = "either",
   orthogonalize = TRUE,
   softThresholding = FALSE,
-  unitNorm = FALSE
+  unitNorm = FALSE,
+  nmfAlg = NA
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ choices are positive, negative or either as expressed as a string.}
 \item{softThresholding}{use soft thresholding}
 
 \item{unitNorm}{set each vector to unit norm}
+
+\item{nmfAlg}{string sets the NMF algorithm to estimate V}
 }
 \value{
 matrix

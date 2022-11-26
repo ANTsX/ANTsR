@@ -1441,6 +1441,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @param orthogonalize run gram-schmidt if TRUE.
 #' @param softThresholding use soft thresholding
 #' @param unitNorm set each vector to unit norm
+#' @param nmfAlg string sets the NMF algorithm to estimate V
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1451,7 +1452,11 @@ jointSmoothMatrixReconstruction <- function(
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
-  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE ) {
+  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, nmfAlg=NA ) {
+  if ( ! is.na( nmfAlg  ) ) {
+    nmfobj = NMF::nmf( v - min(v), min(dim(v)), nmfAlg )
+    return( NMF::basis(nmfobj) )
+  }
   if ( sparsenessQuantile == 0 ) return( v )
   epsval = 0.0 # .Machine$double.eps
   #  if ( orthogonalize ) v = qr.Q( qr( v ) )
@@ -2671,6 +2676,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
+#' @param nmfAlg string sets the NMF algorithm to estimate V
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2753,6 +2759,7 @@ simlr <- function(
   scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
   jointInitialization = TRUE,
+  nmfAlg = NA,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
   if (  missing( energyType ) ) energyType = "cca"
@@ -2946,7 +2953,9 @@ simlr <- function(
         as.matrix( smoothingMatrices[[whichModality]] %*% myenergysearchv ),
         sparsenessQuantiles[whichModality],
         orthogonalize = FALSE,
-        positivity = positivities[whichModality], softThresholding = TRUE )
+        positivity = positivities[whichModality],
+        softThresholding = TRUE,
+        nmfAlg=nmfAlg )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3194,7 +3203,8 @@ simlr <- function(
             sparsenessQuantiles[i],
             orthogonalize = FALSE, positivity = positivities[i],
             unitNorm = FALSE,
-            softThresholding = TRUE  )
+            softThresholding = TRUE,
+            nmfAlg=nmfAlg)
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
       if ( ccaEnergy ) {
