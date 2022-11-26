@@ -1429,6 +1429,50 @@ jointSmoothMatrixReconstruction <- function(
 }
 
 
+#' rank-based segmentation of a matrix
+#'
+#' @param v input matrix
+#' @param sparsenessQuantile a value in zero to one
+#' @param positivity one of positive, negative, either
+#' @param basic simplest keep top k-entries in each row
+#' @return matrix
+#' @author Avants BB
+#' @examples
+#'
+#' mat=replicate(100, rnorm(20))
+#' matr=rankBasedMatrixSegmentation( mat, 0.9, basic=FALSE, positivity='positive' )
+#'
+#' @export rankBasedMatrixSegmentation
+rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, positivity='positive' ) {
+  mycols = 1:ncol( v )
+  ntokeep = round( quantile( mycols, 1.0 - sparsenessQuantile ) )
+  outmat = matrix( 0, nrow=nrow(v), ncol=ncol(v))
+  if ( basic ) {
+    for ( k in 1:nrow( v ) ) {
+      if ( positivity == "either") locord = order( abs(v[k,]), decreasing=T)[1:ntokeep]
+      if ( positivity == "negative") locord = order( v[k,], decreasing=F)[1:ntokeep]
+      if ( positivity == "positive") locord = order( v[k,], decreasing=T)[1:ntokeep]
+      outmat[k,locord]=v[k,locord]
+    }
+    return( outmat )
+  }
+  tozero = c()
+  for ( k in 1:nrow( v ) ) {
+    vec = v[k,]
+    if ( length( tozero ) > 0 ) vec[ tozero ] = 0
+    if ( positivity == "either") {
+      vec = abs( vec )
+      locord = order( vec, decreasing=T)[1:ntokeep]
+    } else if ( positivity == "negative") {
+      locord = order( vec, decreasing=F)[1:ntokeep]
+    } else locord = order( vec, decreasing=T)[1:ntokeep]
+    outmat[k,locord]=v[k,locord]
+    tozero = c( tozero, locord )
+    if ( all( mycols %in% tozero ) ) tozero = c()
+  }
+  return( outmat )
+}
+
 
 #' sparsify a matrix
 #'
@@ -1441,7 +1485,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @param orthogonalize run gram-schmidt if TRUE.
 #' @param softThresholding use soft thresholding
 #' @param unitNorm set each vector to unit norm
-#' @param nmfAlg string sets the NMF algorithm to estimate V
+#' @param decomAlg string sets the NMF or algorithm to estimate V
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1452,9 +1496,16 @@ jointSmoothMatrixReconstruction <- function(
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
-  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, nmfAlg=NA ) {
-  if ( ! is.na( nmfAlg  ) ) {
-    nmfobj = NMF::nmf( v - min(v), min(dim(v)), nmfAlg )
+  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, decomAlg=NA ) {
+  if ( ! is.na( decomAlg  ) ) {
+    if ( decomAlg %in% c("offset","lee","brunet"))
+      nmfobj = NMF::nmf( v - min(v), min(dim(v)), decomAlg )
+    if ( decomAlg == 'orthorank' ) {
+      return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=FALSE, positivity=positivity ) )
+    }
+    if ( decomAlg == 'basicrank' ) {
+      return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity ) )
+    }
     return( NMF::basis(nmfobj) )
   }
   if ( sparsenessQuantile == 0 ) return( v )
@@ -2676,7 +2727,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
-#' @param nmfAlg string sets the NMF algorithm to estimate V
+#' @param decomAlg string sets the NMF algorithm to estimate V
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2759,7 +2810,7 @@ simlr <- function(
   scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
   jointInitialization = TRUE,
-  nmfAlg = NA,
+  decomAlg = NA,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
   if (  missing( energyType ) ) energyType = "cca"
@@ -2955,7 +3006,7 @@ simlr <- function(
         orthogonalize = FALSE,
         positivity = positivities[whichModality],
         softThresholding = TRUE,
-        nmfAlg=nmfAlg )
+        decomAlg=decomAlg )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3204,7 +3255,7 @@ simlr <- function(
             orthogonalize = FALSE, positivity = positivities[i],
             unitNorm = FALSE,
             softThresholding = TRUE,
-            nmfAlg=nmfAlg)
+            decomAlg=decomAlg)
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
       if ( ccaEnergy ) {
