@@ -11,7 +11,7 @@ orthogonalizeAndQSparsify(
   orthogonalize = TRUE,
   softThresholding = FALSE,
   unitNorm = FALSE,
-  decomAlg = NA
+  sparsenessAlg = NA
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ choices are positive, negative or either as expressed as a string.}
 
 \item{unitNorm}{set each vector to unit norm}
 
-\item{decomAlg}{string sets the NMF or algorithm to estimate V}
+\item{sparsenessAlg}{string sets the NMF or other algorithm to estimate V}
 }
 \value{
 matrix

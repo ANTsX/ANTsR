@@ -1491,7 +1491,7 @@ rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, pos
 #' @param orthogonalize run gram-schmidt if TRUE.
 #' @param softThresholding use soft thresholding
 #' @param unitNorm set each vector to unit norm
-#' @param decomAlg string sets the NMF or algorithm to estimate V
+#' @param sparsenessAlg string sets the NMF or other algorithm to estimate V
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -1502,12 +1502,12 @@ rankBasedMatrixSegmentation <- function( v, sparsenessQuantile, basic=FALSE, pos
 #' @export orthogonalizeAndQSparsify
 orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
-  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, decomAlg=NA ) {
-  if ( ! is.na( decomAlg  ) ) {
-    if ( decomAlg %in% c("offset","lee","brunet")) {
-      nmfobj = NMF::nmf( v - min(v), min(dim(v)), decomAlg )
+  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg=NA ) {
+  if ( ! is.na( sparsenessAlg  ) ) {
+    if ( sparsenessAlg %in% c("offset","lee","brunet")) {
+      nmfobj = NMF::nmf( v - min(v), min(dim(v)), sparsenessAlg )
       return( NMF::basis(nmfobj) )
-    } else if ( decomAlg == 'orthorank' ) {
+    } else if ( sparsenessAlg == 'orthorank' ) {
       return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=FALSE, positivity=positivity, transpose=TRUE ) )
     } else return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity, transpose=TRUE  ) )
   }
@@ -2730,7 +2730,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
-#' @param decomAlg string sets the NMF algorithm to estimate V or basicrank or othorank
+#' @param sparsenessAlg string sets the NMF algorithm to estimate V or basicrank or othorank
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -2813,7 +2813,7 @@ simlr <- function(
   scale = c( 'centerAndScale', 'sqrtnp', 'np', 'center', 'norm', 'none', 'impute', 'eigenvalue', 'robust'),
   expBeta = 0.0,
   jointInitialization = TRUE,
-  decomAlg = NA,
+  sparsenessAlg = NA,
   verbose = FALSE ) {
   if (  missing( scale ) ) scale = c( "centerAndScale" )
   if (  missing( energyType ) ) energyType = "cca"
@@ -3009,7 +3009,7 @@ simlr <- function(
         orthogonalize = FALSE,
         positivity = positivities[whichModality],
         softThresholding = TRUE,
-        decomAlg=decomAlg )
+        sparsenessAlg=sparsenessAlg )
 
       if ( ccaEnergy ) {
       #( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3258,7 +3258,7 @@ simlr <- function(
             orthogonalize = FALSE, positivity = positivities[i],
             unitNorm = FALSE,
             softThresholding = TRUE,
-            decomAlg=decomAlg)
+            sparsenessAlg=sparsenessAlg)
         if ( normalized ) vmats[[i]] = vmats[[i]] / norm( vmats[[i]], "F" )
         }
       if ( ccaEnergy ) {
