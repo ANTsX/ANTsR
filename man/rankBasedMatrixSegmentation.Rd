@@ -28,7 +28,7 @@ rank-based segmentation of a matrix
 }
 \examples{
 
-mat=replicate(100, rnorm(20))
+mat=matrix(1:200, nrow=10 )
 matr=rankBasedMatrixSegmentation( mat, 0.9, basic=FALSE, positivity='positive' )
 
 }

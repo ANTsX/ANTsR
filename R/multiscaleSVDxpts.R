@@ -1439,7 +1439,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @author Avants BB
 #' @examples
 #'
-#' mat=replicate(100, rnorm(20))
+#' mat=matrix(1:200, nrow=10 )
 #' matr=rankBasedMatrixSegmentation( mat, 0.9, basic=FALSE, positivity='positive' )
 #'
 #' @export rankBasedMatrixSegmentation
@@ -1498,15 +1498,12 @@ orthogonalizeAndQSparsify <- function( v,
   sparsenessQuantile = 0.5, positivity='either',
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, decomAlg=NA ) {
   if ( ! is.na( decomAlg  ) ) {
-    if ( decomAlg %in% c("offset","lee","brunet"))
+    if ( decomAlg %in% c("offset","lee","brunet")) {
       nmfobj = NMF::nmf( v - min(v), min(dim(v)), decomAlg )
-    if ( decomAlg == 'orthorank' ) {
+      return( NMF::basis(nmfobj) )
+    } else if ( decomAlg == 'orthorank' ) {
       return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=FALSE, positivity=positivity ) )
-    }
-    if ( decomAlg == 'basicrank' ) {
-      return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity ) )
-    }
-    return( NMF::basis(nmfobj) )
+    } else return( rankBasedMatrixSegmentation( v, sparsenessQuantile, basic=TRUE, positivity=positivity ) )
   }
   if ( sparsenessQuantile == 0 ) return( v )
   epsval = 0.0 # .Machine$double.eps
