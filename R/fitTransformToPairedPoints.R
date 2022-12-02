@@ -275,7 +275,7 @@ fitTransformToPairedPoints <- function(
 
       if( verbose )
         {
-        error <- norm( movingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
