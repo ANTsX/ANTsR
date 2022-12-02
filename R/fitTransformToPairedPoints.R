@@ -37,33 +37,27 @@
 #'
 #' # Affine transform
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #' params <- getAntsrTransformParameters( xfrm )
 #'
 #' # Rigid transform
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Rigid", regularization = 0 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #' params <- getAntsrTransformParameters( xfrm )
 #'
 #' # Similarity transform
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Similarity", regularization = 0 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #' params <- getAntsrTransformParameters( xfrm )
 #'
 #' # B-spline transform
 #' domainImage <- antsImageRead( getANTsRData( "r16" ) )
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #'
 #' # Diffeo transform
 #' domainImage <- antsImageRead( getANTsRData( "r16" ) )
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #'
 #' # SyN transform
 #' domainImage <- antsImageRead( getANTsRData( "r16" ) )
 #' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
-#' error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 #' @export fitTransformToPairedPoints
 
 fitTransformToPairedPoints <- function(
@@ -370,7 +364,7 @@ fitTransformToPairedPoints <- function(
 
       if( verbose )
         {
-        error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
@@ -470,7 +464,7 @@ fitTransformToPairedPoints <- function(
 
       if( verbose )
         {
-        error <- norm( updatedMovingPoints - updatedFixedPoints, "F" ) / nrow( updatedFixedPoints )
+        error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
