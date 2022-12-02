@@ -390,7 +390,7 @@ fitTransformToPairedPoints <- function(
                   inverseTransform = totalInverseXfrm,
                   fixedToMiddleTransform = totalFieldFixedToMiddleXfrm,
                   middleToFixedTransform = totalInverseFieldFixedToMiddleXfrm,
-                  movingToMiddleTransform = totalFieldFixedToMiddleXfrm,
+                  movingToMiddleTransform = totalFieldMovingToMiddleXfrm,
                   middleToMovingTransform = totalInverseFieldMovingToMiddleXfrm ) )
 
     } else if( transformType == "tv" || transformType == "time-varying" ) {
