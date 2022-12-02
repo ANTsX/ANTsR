@@ -201,13 +201,12 @@ fitTransformToPairedPoints <- function(
       xSvd <- svd( C * ( 1.0 - regularization ) + diag( dimensionality ) * regularization )
       xDet <- det( xSvd$u %*% t( xSvd$v ) )
 
-      if( xDet > 0 )
+      if( xDet < 0 )
         {
-        A <- xSvd$u %*% t( xSvd$v )
-        } else {
-        signAdj <- diag( c( -1, rep( 1, dimensionality - 1 ) ) )
-        A <- ( xSvd$u %*% signAdj ) %*% t( xSvd$v )
+        xSvd$v[dimensionality,] <- xSvd$v[dimensionality,] * -1
         }
+
+      A <- xSvd$u %*% t( xSvd$v )
 
       if ( transformType == "similarity" )
         {
