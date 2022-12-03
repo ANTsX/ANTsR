@@ -239,7 +239,7 @@ fitTransformToPairedPoints <- function(
 
     updatedFixedPoints <- fixedPoints
 
-    xfrmList <- list()
+    totalField <- createZeroDisplacementField( domainImage )
     totalFieldXfrm <- NULL
 
     errorValues <- c()
@@ -265,8 +265,8 @@ fitTransformToPairedPoints <- function(
         updateField <- smoothImage( updateField, sigma )
         }
 
-      xfrmList[[i]] <- antsrTransformFromDisplacementField( updateField )
-      totalFieldXfrm <- composeAntsrTransforms( xfrmList )
+      totalField <- composeDisplacementFields( updateField, totalField )
+      totalFieldXfrm <- antsrTransformFromDisplacementField( totalField )
 
       if( i < numberOfCompositions )
         {
@@ -375,10 +375,10 @@ fitTransformToPairedPoints <- function(
         }
       }
 
-    xfrmForwardList <- list( totalFieldFixedToMiddleXfrm, totalInverseFieldMovingToMiddleXfrm )
-    totalForwardXfrm <- composeAntsrTransforms( xfrmForwardList )
-    xfrmInverseList <- list( totalFieldMovingToMiddleXfrm, totalInverseFieldFixedToMiddleXfrm )
-    totalInverseXfrm <- composeAntsrTransforms( xfrmInverseList )
+    totalForwardField <- composeDisplacementFields( totalInverseFieldMovingToMiddle, totalFieldFixedToMiddle )
+    totalForwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalForwardField )
+    totalInverseField <- composeDisplacementFields( totalInverseFieldFixedToMiddle, totalFieldMovingToMiddle )
+    totalInverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseField )
 
     return( list( forwardTransform = totalForwardXfrm,
                   inverseTransform = totalInverseXfrm,
