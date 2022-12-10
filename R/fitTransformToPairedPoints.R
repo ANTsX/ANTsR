@@ -107,8 +107,8 @@ fitTransformToPairedPoints <- function(
   createZeroDisplacementField <- function( domainImage )
     {
     fieldArray <- array( data = 0, dim = c( domainImage@dimension, dim( domainImage ) ) )
-    origin <- c( antsGetOrigin( domainImage ), 0.0 )
-    spacing <- c( antsGetSpacing( domainImage ), 1.0 )
+    origin <- antsGetOrigin( domainImage )
+    spacing <- antsGetSpacing( domainImage )
     direction <- antsGetDirection( domainImage )
     field <- as.antsImage( fieldArray, origin = origin, spacing = spacing, direction = direction, components = TRUE )
     return( field )
