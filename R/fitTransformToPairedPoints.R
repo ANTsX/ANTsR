@@ -24,9 +24,11 @@
 #' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
 #' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
-#' @param convergenceThreshold Composition-based convergence parameter for the diff. transforms using a
-#' window size of 10 values.
+#' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic 
+#' transforms using a window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
+#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update 
+#' field (potential speed-up).
 #' @param verbose Print progress to the screen.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
@@ -76,6 +78,7 @@ fitTransformToPairedPoints <- function(
   sigma = 0.0,
   convergenceThreshold = 0.0,
   numberOfIntegrationPoints = 2,
+  rasterizePoints = FALSE,
   verbose = FALSE
   ) {
 
@@ -229,7 +232,8 @@ fitTransformToPairedPoints <- function(
       numberOfFittingLevels = numberOfFittingLevels,
       meshSize = meshSize,
       splineOrder = splineOrder,
-      enforceStationaryBoundary = enforceStationaryBoundary )
+      enforceStationaryBoundary = enforceStationaryBoundary,
+      rasterizePoints = rasterizePoints )
 
     xfrm <- antsrTransformFromDisplacementField( bsplineDisplacementField )
 
@@ -245,6 +249,10 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
+      if( verbose ) 
+        {
+        startTime <- Sys.time()      
+        }
       updateField <- fitBsplineDisplacementField(
         displacementOrigins = updatedFixedPoints,
         displacements = movingPoints - updatedFixedPoints,
@@ -256,8 +264,9 @@ fitTransformToPairedPoints <- function(
         numberOfFittingLevels = numberOfFittingLevels,
         meshSize = meshSize,
         splineOrder = splineOrder,
-        enforceStationaryBoundary = TRUE
-        )
+        enforceStationaryBoundary = TRUE,
+        rasterizePoints = rasterizePoints
+       )
 
       updateField <- updateField * compositionStepSize
       if( sigma > 0 )
@@ -278,7 +287,9 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        endTime <- Sys.time()      
+        diffTime <- endTime - startTime
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
       if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
         {
@@ -301,6 +312,10 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
+      if( verbose ) 
+        {
+        startTime <- Sys.time()      
+        }
       updateFieldFixedToMiddle <- fitBsplineDisplacementField(
         displacementOrigins = updatedFixedPoints,
         displacements = updatedMovingPoints - updatedFixedPoints,
@@ -312,7 +327,8 @@ fitTransformToPairedPoints <- function(
         numberOfFittingLevels = numberOfFittingLevels,
         meshSize = meshSize,
         splineOrder = splineOrder,
-        enforceStationaryBoundary = TRUE
+        enforceStationaryBoundary = TRUE,
+        rasterizePoints = rasterizePoints
         )
 
       updateFieldMovingToMiddle <- fitBsplineDisplacementField(
@@ -326,7 +342,8 @@ fitTransformToPairedPoints <- function(
         numberOfFittingLevels = numberOfFittingLevels,
         meshSize = meshSize,
         splineOrder = splineOrder,
-        enforceStationaryBoundary = TRUE
+        enforceStationaryBoundary = TRUE,
+        rasterizePoints = rasterizePoints
         )
 
       updateFieldFixedToMiddle <- updateFieldFixedToMiddle * compositionStepSize
@@ -367,7 +384,9 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        endTime <- Sys.time()      
+        diffTime <- endTime - startTime
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
       if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
         {
@@ -401,6 +420,10 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
+      if( verbose ) 
+        {
+        startTime <- Sys.time()      
+        }
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
@@ -437,7 +460,8 @@ fitTransformToPairedPoints <- function(
           numberOfFittingLevels = numberOfFittingLevels,
           meshSize = meshSize,
           splineOrder = splineOrder,
-          enforceStationaryBoundary = TRUE
+          enforceStationaryBoundary = TRUE,
+          rasterizePoints = rasterizePoints
           )
         if( sigma > 0 )
           {
@@ -467,7 +491,9 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ")\n", sep = "" )
+        endTime <- Sys.time()      
+        diffTime <- endTime - startTime
+        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
       if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
         {

@@ -39,6 +39,8 @@
 #' @param enforceStationaryBoundary ensure no displacements on the image boundary.
 #' Default = TRUE.
 #' @param estimateInverse estimate the inverse displacement field.  Default = FALSE.
+#' @param rasterizePoints distribute the displacements (and weights) to the image domain
+#' grid for speed-up.  Is only compatible for points only.
 #' @return ANTsR image.
 #'
 #' @author NJ Tustison
@@ -72,7 +74,8 @@ fitBsplineDisplacementField <- function(
   meshSize = 1,
   splineOrder = 3,
   enforceStationaryBoundary = TRUE,
-  estimateInverse = FALSE
+  estimateInverse = FALSE,
+  rasterizePoints = FALSE
   ) {
 
   if( is.null( displacementField ) && ( is.null( displacementOrigins ) || is.null( displacements ) ) )
@@ -169,7 +172,7 @@ fitBsplineDisplacementField <- function(
     displacementOrigins, displacements, displacementWeights,
     origin, spacing, size, direction,
     numberOfFittingLevels, numberOfControlPoints, splineOrder,
-    enforceStationaryBoundary, estimateInverse,
+    enforceStationaryBoundary, estimateInverse, rasterizePoints,
     PACKAGE = "ANTsR" )
   return( bsplineField )
 }

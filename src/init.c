@@ -20,7 +20,7 @@ extern SEXP createJacobianDeterminantImageR(SEXP, SEXP, SEXP, SEXP);
 extern SEXP eigenanatomyCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP fastMarchingExtension(SEXP, SEXP, SEXP);
 extern SEXP fitBsplineObjectToScatteredData(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP fitBsplineDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP fitBsplineDisplacementField(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP fsl2antsrTransform(SEXP, SEXP, SEXP, SEXP);
 extern SEXP HausdorffDistanceR(SEXP, SEXP);
 extern SEXP histogramMatchImageR(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -52,7 +52,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"eigenanatomyCpp",                         (DL_FUNC) &eigenanatomyCpp,                       15},
     {"fastMarchingExtension",                   (DL_FUNC) &fastMarchingExtension,                  3},
     {"fitBsplineObjectToScatteredData",         (DL_FUNC) &fitBsplineObjectToScatteredData,       10},
-    {"fitBsplineDisplacementField",             (DL_FUNC) &fitBsplineDisplacementField,           15},
+    {"fitBsplineDisplacementField",             (DL_FUNC) &fitBsplineDisplacementField,           16},
     {"fsl2antsrTransform",                      (DL_FUNC) &fsl2antsrTransform,                     4},
     {"HausdorffDistanceR",                      (DL_FUNC) &HausdorffDistanceR,                     2},
     {"histogramMatchImageR",                    (DL_FUNC) &histogramMatchImageR,                   5},
