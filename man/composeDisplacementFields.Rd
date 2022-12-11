@@ -17,6 +17,9 @@ composite displacement field
 \description{
 Compose displacement fields.
 }
+\examples{
+
+}
 \author{
 NJ Tustison
 }

@@ -18,7 +18,8 @@ fitBsplineDisplacementField(
   meshSize = 1,
   splineOrder = 3,
   enforceStationaryBoundary = TRUE,
-  estimateInverse = FALSE
+  estimateInverse = FALSE,
+  rasterizePoints = FALSE
 )
 }
 \arguments{
@@ -67,6 +68,9 @@ Otherwise, the \code{displacementField} is used to define the domain parameters.
 Default = TRUE.}
 
 \item{estimateInverse}{estimate the inverse displacement field.  Default = FALSE.}
+
+\item{rasterizePoints}{Use nearest neighbor rasterization of points for estimating update 
+field (potential speed-up).}
 }
 \value{
 ANTsR image.

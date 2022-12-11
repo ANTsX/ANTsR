@@ -8,7 +8,7 @@ fitTransformToPairedPoints(
   movingPoints,
   fixedPoints,
   transformType = "affine",
-  regularization = 1e-06,
+  regularization = 0.000001,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
@@ -20,6 +20,7 @@ fitTransformToPairedPoints(
   sigma = 0,
   convergenceThreshold = 0,
   numberOfIntegrationPoints = 2,
+  rasterizePoints = FALSE,
   verbose = FALSE
 )
 }
@@ -59,10 +60,13 @@ weighted the same.}
 
 \item{sigma}{gaussian smoothing sigma (in mm) for the diffeomorphic transform.}
 
-\item{convergenceThreshold}{Composition-based convergence parameter for the diff. transforms using a
-window size of 10 values.}
+\item{convergenceThreshold}{Composition-based convergence parameter for the diffeomorphic 
+transforms using a window size of 10 values.}
 
 \item{numberOfIntegrationPoints}{Time-varying velocity field parameter.}
+
+\item{rasterizePoints}{Use nearest neighbor rasterization of points for estimating update 
+field (potential speed-up).}
 
 \item{verbose}{Print progress to the screen.}
 }
@@ -78,33 +82,27 @@ moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
 
 # Affine transform
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 params <- getAntsrTransformParameters( xfrm )
 
 # Rigid transform
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Rigid", regularization = 0 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 params <- getAntsrTransformParameters( xfrm )
 
 # Similarity transform
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Similarity", regularization = 0 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 params <- getAntsrTransformParameters( xfrm )
 
 # B-spline transform
 domainImage <- antsImageRead( getANTsRData( "r16" ) )
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 
 # Diffeo transform
 domainImage <- antsImageRead( getANTsRData( "r16" ) )
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 
 # SyN transform
 domainImage <- antsImageRead( getANTsRData( "r16" ) )
 xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
-error <- norm( moving - applyAntsrTransformToPoint( xfrm, fixed ), "F" ) / nrow( fixed )
 }
 \author{
 B Avants

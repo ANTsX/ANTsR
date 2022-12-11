@@ -39,8 +39,8 @@
 #' @param enforceStationaryBoundary ensure no displacements on the image boundary.
 #' Default = TRUE.
 #' @param estimateInverse estimate the inverse displacement field.  Default = FALSE.
-#' @param rasterizePoints distribute the displacements (and weights) to the image domain
-#' grid for speed-up.  Is only compatible for points only.
+#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update 
+#' field (potential speed-up).
 #' @return ANTsR image.
 #'
 #' @author NJ Tustison
