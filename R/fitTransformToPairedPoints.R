@@ -24,10 +24,10 @@
 #' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
 #' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
 #' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
-#' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic 
+#' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
-#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update 
+#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
 #' field (potential speed-up).
 #' @param verbose Print progress to the screen.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
@@ -241,6 +241,11 @@ fitTransformToPairedPoints <- function(
 
     } else if( transformType == "diffeo" ) {
 
+    if( verbose )
+      {
+      startTotalTime <- Sys.time()
+      }
+
     updatedFixedPoints <- fixedPoints
 
     totalField <- createZeroDisplacementField( domainImage )
@@ -249,9 +254,9 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
-      if( verbose ) 
+      if( verbose )
         {
-        startTime <- Sys.time()      
+        startTime <- Sys.time()
         }
       updateField <- fitBsplineDisplacementField(
         displacementOrigins = updatedFixedPoints,
@@ -287,7 +292,7 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        endTime <- Sys.time()      
+        endTime <- Sys.time()
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
@@ -296,9 +301,22 @@ fitTransformToPairedPoints <- function(
         break
         }
       }
+
+    if( verbose )
+      {
+      endTotalTime <- Sys.time()
+      diffTotalTime <- endTotalTime - startTotalTime
+      cat( "Total elapsed time = ", diffTotalTime, ".\n", sep = "" )
+      }
+
     return( totalFieldXfrm )
 
     } else if( transformType == "syn" ) {
+
+    if( verbose )
+      {
+      startTotalTime <- Sys.time()
+      }
 
     updatedFixedPoints <- fixedPoints
     updatedMovingPoints <- movingPoints
@@ -312,9 +330,9 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
-      if( verbose ) 
+      if( verbose )
         {
-        startTime <- Sys.time()      
+        startTime <- Sys.time()
         }
       updateFieldFixedToMiddle <- fitBsplineDisplacementField(
         displacementOrigins = updatedFixedPoints,
@@ -384,7 +402,7 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        endTime <- Sys.time()      
+        endTime <- Sys.time()
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
@@ -399,6 +417,13 @@ fitTransformToPairedPoints <- function(
     totalInverseField <- composeDisplacementFields( totalInverseFieldFixedToMiddle, totalFieldMovingToMiddle )
     totalInverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = totalInverseField )
 
+    if( verbose )
+      {
+      endTotalTime <- Sys.time()
+      diffTotalTime <- endTotalTime - startTotalTime
+      cat( "Total elapsed time = ", diffTotalTime, ".\n", sep = "" )
+      }
+
     return( list( forwardTransform = totalForwardXfrm,
                   inverseTransform = totalInverseXfrm,
                   fixedToMiddleTransform = totalFieldFixedToMiddleXfrm,
@@ -407,6 +432,11 @@ fitTransformToPairedPoints <- function(
                   middleToMovingTransform = totalInverseFieldMovingToMiddleXfrm ) )
 
     } else if( transformType == "tv" || transformType == "time-varying" ) {
+
+    if( verbose )
+      {
+      startTotalTime <- Sys.time()
+      }
 
     updatedFixedPoints <- fixedPoints
     updatedMovingPoints <- movingPoints
@@ -420,9 +450,9 @@ fitTransformToPairedPoints <- function(
     errorValues <- c()
     for( i in seq.int( numberOfCompositions ) )
       {
-      if( verbose ) 
+      if( verbose )
         {
-        startTime <- Sys.time()      
+        startTime <- Sys.time()
         }
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
@@ -491,7 +521,7 @@ fitTransformToPairedPoints <- function(
         error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
         errorValues <- append( errorValues, error )
         convergenceValue <- convergenceMonitoring( errorValues )
-        endTime <- Sys.time()      
+        endTime <- Sys.time()
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
@@ -506,6 +536,13 @@ fitTransformToPairedPoints <- function(
 
     integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
     inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+
+    if( verbose )
+      {
+      endTotalTime <- Sys.time()
+      diffTotalTime <- endTotalTime - startTotalTime
+      cat( "Total elapsed time = ", diffTotalTime, ".\n", sep = "" )
+      }
 
     return( list( forwardTransform = forwardXfrm,
                   inverseTransform = inverseXfrm,
