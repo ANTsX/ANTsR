@@ -148,7 +148,7 @@ SEXP fitBSplineVectorImageHelper(
         }
 
       // First, distribute the weights and displacements to an image the same size as the b-spline domain.
- 
+
       WeightImagePointerType weightImage = WeightImageType::New();
       weightImage->SetOrigin( bsplineFilter->GetBSplineDomainOrigin() );
       weightImage->SetSpacing( bsplineFilter->GetBSplineDomainSpacing() );
@@ -157,12 +157,22 @@ SEXP fitBSplineVectorImageHelper(
       weightImage->Allocate();
       weightImage->FillBuffer( 0.0 );
 
+      WeightImagePointerType countImage = WeightImageType::New();
+      countImage->SetOrigin( bsplineFilter->GetBSplineDomainOrigin() );
+      countImage->SetSpacing( bsplineFilter->GetBSplineDomainSpacing() );
+      countImage->SetDirection( bsplineFilter->GetBSplineDomainDirection() );
+      countImage->SetRegions( bsplineFilter->GetBSplineDomainSize() );
+      countImage->Allocate();
+      countImage->FillBuffer( 0.0 );
+
+      VectorType zeroVector( 0.0 );
       ITKFieldPointerType rasterizedField = ITKFieldType::New();
       rasterizedField->SetOrigin( bsplineFilter->GetBSplineDomainOrigin() );
       rasterizedField->SetSpacing( bsplineFilter->GetBSplineDomainSpacing() );
       rasterizedField->SetDirection( bsplineFilter->GetBSplineDomainDirection() );
       rasterizedField->SetRegions( bsplineFilter->GetBSplineDomainSize() );
       rasterizedField->Allocate();
+      rasterizedField->FillBuffer( zeroVector );
 
       unsigned int numberOfPoints = displacements.nrow();
 
@@ -175,17 +185,37 @@ SEXP fitBSplineVectorImageHelper(
           imagePoint[d] = displacementOrigins(n, d);
           imageDisplacement[d] = displacements(n, d);
           }
-        typename ITKFieldType::IndexType imageIndex = 
+        typename ITKFieldType::IndexType imageIndex =
           weightImage->TransformPhysicalPointToIndex( imagePoint );
-        weightImage->SetPixel( imageIndex, displacementWeights[n] );
-        rasterizedField->SetPixel( imageIndex, imageDisplacement );
+        weightImage->SetPixel( imageIndex, displacementWeights[n] + weightImage->GetPixel( imageIndex ) );
+        rasterizedField->SetPixel( imageIndex, imageDisplacement + rasterizedField->GetPixel( imageIndex ) );
+        countImage->SetPixel( imageIndex, 1.0 + countImage->GetPixel( imageIndex ) );
         }
 
       // Second, iterate through the weight image and pull those indices/points which have non-zero weights.
 
-      unsigned count = 0;  
+      unsigned count = 0;
 
-      typename itk::ImageRegionIteratorWithIndex<WeightImageType> 
+    typename itk::ImageRegionIteratorWithIndex<WeightImageType>
+      ItC( countImage, countImage->GetLargestPossibleRegion() );
+    for( ItC.GoToBegin(); ! ItC.IsAtEnd(); ++ItC )
+      {
+      if( ItC.Get() > 0.0 )
+        {
+        typename ITKFieldType::PointType imagePoint;
+        weightImage->TransformIndexToPhysicalPoint( ItC.GetIndex(), imagePoint );
+        typename PointSetType::PointType point;
+        point.CastFrom( imagePoint );
+        pointSet->SetPoint( count, point );
+        VectorType imageDisplacement = rasterizedField->GetPixel( ItC.GetIndex() ) / ItC.Get();
+        RealType weight = weightImage->GetPixel( ItC.GetIndex() ) / ItC.Get();
+        pointSet->SetPointData( count, imageDisplacement );
+        weights->InsertElement( count, weight );
+        count++;
+        }
+      }
+
+      typename itk::ImageRegionIteratorWithIndex<WeightImageType>
         ItW( weightImage, weightImage->GetLargestPossibleRegion() );
       for( ItW.GoToBegin(); ! ItW.IsAtEnd(); ++ItW )
         {
@@ -200,9 +230,9 @@ SEXP fitBSplineVectorImageHelper(
           weights->InsertElement( count, ItW.Get() );
           count++;
           }
-        } 
-      } 
-    else 
+        }
+      }
+    else
       {
       unsigned int numberOfPoints = displacements.nrow();
 
