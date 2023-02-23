@@ -32,7 +32,7 @@
 #' @param verbose Print progress to the screen.
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
-#' @author B Avants
+#' @author B Avants, N Tustison
 #' @examples
 #' fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
 #' moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
@@ -551,5 +551,333 @@ fitTransformToPairedPoints <- function(
     } else {
       stop( "Unrecognized transformType." )
     }
-
 }
+
+
+#' fitTimeVaryingTransformToPointSets
+#'
+#' Estimate a time-varying transform from corresponding point sets (> 2).
+#'
+#' @param pointSets Corresponding points across sets specified in physical space as a
+#' \code{n x d} matrix where \code{n} is the number of points and \code{d} is the
+#' dimensionality.
+#' @param timePoints Set of scalar values, one for each point-set designating its time
+#' position in the velocity flow.  If not set, it defaults to equal spacing between 0
+#' and 1.
+#' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
+#' be equal to or greater than the number of point sets.  If not specified, it
+#' defaults to the number of point sets.
+#' @param domainImage defines physical domain of the nonlinear transforms.
+#' @param numberOfFittingLevels integer specifying the number of fitting levels
+#' @param meshSize scalar or vector defining the mesh size at the initial fitting level
+#' @param splineOrder spline order of the B-spline object.  Default = 3.
+#' @param displacementWeights vector defining the individual weighting of the corresponding
+#' scattered data value.  Default = NULL meaning all displacements are
+#' weighted the same.
+#' @param numberOfCompositions total number of compositions.
+#' @param compositionStepSize scalar multiplication factor.
+#' @param sigma gaussian smoothing sigma (in mm).
+#' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
+#' transforms using a window size of 10 values.
+#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
+#' field (potential speed-up).
+#' @param verbose Print progress to the screen.
+#' @return object containing ANTsR transform, error, and scale (or displacement field)
+#'
+#' @author B Avants, N Tustison
+#' @examples
+#' fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
+#' moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
+#'
+#' # Affine transform
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
+#' params <- getAntsrTransformParameters( xfrm )
+#'
+#' # Rigid transform
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Rigid", regularization = 0 )
+#' params <- getAntsrTransformParameters( xfrm )
+#'
+#' # Similarity transform
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Similarity", regularization = 0 )
+#' params <- getAntsrTransformParameters( xfrm )
+#'
+#' # B-spline transform
+#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5 )
+#'
+#' # Diffeo transform
+#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
+#'
+#' # SyN transform
+#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
+#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
+#' @export fitTransformToPairedPoints
+
+fitTimeVaryingTransformToPointSets <- function(
+  pointSets,
+  timePoints = NULL,
+  numberOfIntegrationPoints=NULL,
+  domainImage = NULL,
+  numberOfFittingLevels = 4,
+  meshSize = 1,
+  splineOrder = 3,
+  displacementWeights = NULL,
+  numberOfCompositions = 10,
+  compositionStepSize = 0.5,
+  sigma = 0.0,
+  convergenceThreshold = 0.0,
+  rasterizePoints = FALSE,
+  verbose = FALSE
+  ) {
+
+  createZeroVelocityField <- function( domainImage, numberOfTimePoints = 2 )
+    {
+    fieldArray <- array( data = 0, dim = c( domainImage@dimension, dim( domainImage ), numberOfTimePoints ) )
+    origin <- c( antsGetOrigin( domainImage ), 0.0 )
+    spacing <- c( antsGetSpacing( domainImage ), 1.0 )
+    direction <- diag( domainImage@dimension + 1 )
+    direction[1:domainImage@dimension, 1:domainImage@dimension] <- antsGetDirection( domainImage )
+    field <- as.antsImage( fieldArray, origin = origin, spacing = spacing, direction = direction, components = TRUE )
+    return( field )
+    }
+
+  convergenceMonitoring <- function( values, windowSize = 10 )
+    {
+    if( length( values ) >= windowSize )
+      {
+      u <- seq( from = 0.0, to = 1.0, length.out = windowSize )
+      scatteredData <- as.matrix( tail( values, n = windowSize ), ncol = 1 )
+      parametricData <- as.matrix( u, ncol = 1 )
+      spacing <- 1.0 / ( windowSize - 1.0 )
+      bsplineLine <- fitBsplineObjectToScatteredData( scatteredData, parametricData,
+          parametricDomainOrigin = c( 0.0 ), parametricDomainSpacing = c( spacing ),
+          parametricDomainSize = c( windowSize ), numberOfFittingLevels = 1, meshSize = 1,
+          splineOrder = 1 )
+      bsplineSlope <- -( bsplineLine[2, 1] - bsplineLine[1, 1] ) / spacing
+      return( bsplineSlope )
+      }
+    else
+      {
+      return( NA )
+      }
+    }
+
+  if( ! is.list( pointSets ) )
+    {
+    stop( "Point sets should be a list of corresponding point sets." )
+    }
+
+  numberOfPointSets <- length( pointSets )
+
+  if( ! is.null( timePoints ) && length( timePoints ) != numberOfPointSets )
+    {
+    stop( "The number of time points should be the same as the number of point sets." )
+    }
+
+  if( ! is.null( timePoints ) )
+    {
+    timePoints <- seq( from = 0.0, to = 1.0, length.out = numberOfPointSets )
+    }
+
+  if( any( timePoints < 0.0 ) || any( timePoints > 1.0 ) )
+    {
+    stop( "Time point values should be between 0 and 1." )
+    }
+
+  if( numberOfIntegrationPoints < numberOfPointSets )
+    {
+    stop( "The number of integration points should be at least as great as the number of point sets." )
+    }
+
+  if( numberOfPointSets < 3 )
+    {
+    stop( "Expecting three or greater point sets." )
+    }
+
+  numberOfPoints <- nrow( pointSets[[1]] )
+  dimensionality <- ncol( pointSets[[1]] )
+  for( i in seq.int( 2, numberOfPointSets ) )
+    {
+    if( nrow( pointSets[[i]] ) != numberOfPoints )
+      {
+      stop( "Point sets should match in terms of the number of points." )
+      }
+    if( ncol( pointSets[[i]] ) != dimensionality )
+      {
+      stop( "Point sets should match in terms of dimensionality." )
+      }
+    }
+
+  if( verbose )
+    {
+    startTotalTime <- Sys.time()
+    }
+
+  updatedFixedPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
+  updatedMovingPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
+
+  velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+  velocityFieldArray <- as.array( velocityField )
+
+  lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+  lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
+
+  errorValues <- c()
+  for( i in seq.int( numberOfCompositions ) )
+    {
+    if( verbose )
+      {
+      startTime <- Sys.time()
+      }
+    updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    updateDerivativeFieldArray <- as.array( updateDerivativeField )
+
+    for( n in seq.int( numberOfIntegrationPoints ) )
+      {
+      t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
+
+      tIndex <- 0
+      for( j in seq.int( from = 2, to = numberOfPointSets ) )
+        {
+        if( timePoints[j-1] <= t && timePoints[j] >= t )
+          {
+          tIndex <- j
+          break
+          }
+        }
+
+      if( n > 1 && n < number_of_integration_points && timePoints[tIndex-1] == t )
+        {
+        updatedFixedPoints <- pointSets[[tIndex-1]]
+        integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
+        integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+        updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, pointSets[[tIndex]] )
+
+        updateDerivativeFieldAtTimePointForward <- fitBsplineDisplacementField(
+          displacementOrigins = updatedFixedPoints,
+          displacements = updatedMovingPoints - updatedFixedPoints,
+          displacementWeights = displacementWeights,
+          origin = antsGetOrigin( domainImage ),
+          spacing = antsGetSpacing( domainImage ),
+          size = dim( domainImage ),
+          direction = antsGetDirection( domainImage ),
+          numberOfFittingLevels = numberOfFittingLevels,
+          meshSize = meshSize,
+          splineOrder = splineOrder,
+          enforceStationaryBoundary = TRUE,
+          rasterizePoints = rasterizePoints
+          )
+
+        updatedMovingPoints <- pointSets[[tIndex-1]]
+        integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-2], t, 100 )
+        integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+        updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, pointSets[[tIndex-2]] )
+
+        updateDerivativeFieldAtTimePointBack <- fitBsplineDisplacementField(
+          displacementOrigins = updatedFixedPoints,
+          displacements = updatedMovingPoints - updatedFixedPoints,
+          displacementWeights = displacementWeights,
+          origin = antsGetOrigin( domainImage ),
+          spacing = antsGetSpacing( domainImage ),
+          size = dim( domainImage ),
+          direction = antsGetDirection( domainImage ),
+          numberOfFittingLevels = numberOfFittingLevels,
+          meshSize = meshSize,
+          splineOrder = splineOrder,
+          enforceStationaryBoundary = TRUE,
+          rasterizePoints = rasterizePoints
+          )
+
+        updateDerivativeFieldAtTimePoint <- ( updateDerivativeFieldAtTimePointForward +
+                                              updateDerivativeFieldAtTimePointBack ) / 2.0
+
+        } else {
+        if( t == 0.0 && timePoints[tIndex-1] == 0.0 )
+          {
+          updatedFixedPoints <- pointSets[[1]]
+          } else {
+          integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-1], t, 100 )
+          integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+          updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, pointSets[[tIndex-1]] )
+          }
+
+        if( t == 1.0 && timePoints[tIndex] == 1.0 )
+          {
+          integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
+          integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+          updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, pointSets[[tIndex]] )
+          }
+
+        updateDerivativeFieldAtTimePoint <- fitBsplineDisplacementField(
+          displacementOrigins = updatedFixedPoints,
+          displacements = updatedMovingPoints - updatedFixedPoints,
+          displacementWeights = displacementWeights,
+          origin = antsGetOrigin( domainImage ),
+          spacing = antsGetSpacing( domainImage ),
+          size = dim( domainImage ),
+          direction = antsGetDirection( domainImage ),
+          numberOfFittingLevels = numberOfFittingLevels,
+          meshSize = meshSize,
+          splineOrder = splineOrder,
+          enforceStationaryBoundary = TRUE,
+          rasterizePoints = rasterizePoints
+          )
+        }
+      if( sigma > 0 )
+        {
+        updateDerivativeFieldAtTimePoint <- smoothImage( updateDerivativeFieldAtTimePoint, sigma )
+        }
+
+      updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
+      maxNorm <- sqrt( max( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+      updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
+      if( domainImage@dimension == 2 )
+        {
+        updateDerivativeFieldArray[,,,n] <- updateDerivativeFieldAtTimePointArray
+        } else {
+        updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
+        }
+      }
+    updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
+    lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
+
+    velocityFieldArray <- velocityFieldArray + updateDerivativeFieldArray * compositionStepSize
+    velocityField <- as.antsImage( velocityFieldArray, origin = antsGetOrigin( velocityField ),
+        spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
+        components = TRUE )
+
+    if( verbose )
+      {
+      error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
+      errorValues <- append( errorValues, error )
+      convergenceValue <- convergenceMonitoring( errorValues )
+      endTime <- Sys.time()
+      diffTime <- endTime - startTime
+      cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
+      }
+    if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+      {
+      break
+      }
+    }
+
+  integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+  forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
+
+  integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+  inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
+
+  if( verbose )
+    {
+    endTotalTime <- Sys.time()
+    diffTotalTime <- endTotalTime - startTotalTime
+    cat( "Total elapsed time = ", diffTotalTime, ".\n", sep = "" )
+    }
+
+  return( list( forwardTransform = forwardXfrm,
+                inverseTransform = inverseXfrm,
+                velocityField = velocityField ) )
+
+  }
+

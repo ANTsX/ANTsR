@@ -32,9 +32,6 @@ inverse displacement field
 \description{
 Invert displacement field.
 }
-\examples{
-
-}
 \author{
 NJ Tustison
 }
