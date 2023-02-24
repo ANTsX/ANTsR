@@ -2,28 +2,28 @@
 #'
 #' Estimate a transform using paired point sets.  An ANTsR transform is returned.
 #'
-#' @param movingPoints moving points specified in physical space as a \code{n x d}
+#' @param movingPoints Moving points specified in physical space as a \code{n x d}
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
-#' @param fixedPoints fixed points specified in physical space as a \code{n x d}
+#' @param fixedPoints Fixed points specified in physical space as a \code{n x d}
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
 #' @param transformType 'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
-#' or 'time-varying (tv)'.
-#' @param regularization ridge penalty in [0,1] for linear transforms.
-#' @param domainImage defines physical domain of the B-spline transform.
-#' @param numberOfFittingLevels integer specifying the number of fitting levels
+#' 'tv', or 'time-varying'.
+#' @param regularization Ridge penalty in [0,1] for linear transforms.
+#' @param domainImage Defines physical domain of the B-spline transform.  Must be defined
+#' for nonlinear transforms.
+#' @param numberOfFittingLevels Integer specifying the number of fitting levels for the
+#' B-spline interpolation of the displacement field.
+#' @param meshSize Defines the mesh size at the initial fitting level for the B-spline
+#' interpolation of the displacement field.
+#' @param splineOrder Spline order of the B-spline displacement field.
+#' @param enforceStationaryBoundary Ensure no displacements on the image boundary
 #' (B-spline only).
-#' @param meshSize scalar or vector defining the mesh size at the initial fitting level
-#' (B-spline only).
-#' @param splineOrder spline order of the B-spline object.  Default = 3 (B-spline
-#' only).
-#' @param enforceStationaryBoundary ensure no displacements on the image boundary
-#' (B-spline only).
-#' @param displacementWeights vector defining the individual weighting of the corresponding
-#' scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
-#' weighted the same.
-#' @param numberOfCompositions total number of compositions for the diffeomorphic transform.
-#' @param compositionStepSize scalar multiplication factor for the diffeomorphic transform.
-#' @param sigma gaussian smoothing sigma (in mm) for the diffeomorphic transform.
+#' @param displacementWeights Defines the individual weighting of the corresponding scattered
+#' data value.  Default = None meaning all displacements are weighted the same.
+#' @param numberOfCompositions Total number of compositions for the diffeomorphic transform.
+#' @param compositionStepSize Scalar multiplication factor of the weighting of the update field
+#' for the diffeomorphic transforms.
+#' @param sigma Gaussian smoothing standard deviation of the update field (in mm).
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
@@ -155,6 +155,11 @@ fitTransformToPairedPoints <- function(
     stop( paste0( transformType, " transform not supported." ) )
     }
   transformType <- tolower( transformType )
+
+  if( is.null( domainImage ) && any( tolower( transformType ) %in% c( "bspline", "diffeo", "syn", "tv", "time-varying" ) ) )
+    {
+    stop( "Domain image needs to be specified." )
+    }
 
   if( ! all( dim( fixedPoints ) == dim( movingPoints ) ) )
     {
@@ -567,16 +572,20 @@ fitTransformToPairedPoints <- function(
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
 #' be equal to or greater than the number of point sets.  If not specified, it
 #' defaults to the number of point sets.
-#' @param domainImage defines physical domain of the nonlinear transforms.
-#' @param numberOfFittingLevels integer specifying the number of fitting levels
-#' @param meshSize scalar or vector defining the mesh size at the initial fitting level
-#' @param splineOrder spline order of the B-spline object.  Default = 3.
+#' @param domainImage Defines physical domain of the B-spline transform.  Must be defined
+#' for nonlinear transforms.
+#' @param numberOfFittingLevels Integer specifying the number of fitting levels for the
+#' B-spline interpolation of the displacement field.
+#' @param meshSize Defines the mesh size at the initial fitting level for the B-spline
+#' interpolation of the displacement field.
+#' @param splineOrder Spline order of the B-spline displacement field.
 #' @param displacementWeights vector defining the individual weighting of the corresponding
 #' scattered data value.  Default = NULL meaning all displacements are
 #' weighted the same.
-#' @param numberOfCompositions total number of compositions.
-#' @param compositionStepSize scalar multiplication factor.
-#' @param sigma gaussian smoothing sigma (in mm).
+#' @param numberOfCompositions Total number of compositions for the diffeomorphic transform.
+#' @param compositionStepSize Scalar multiplication factor of the weighting of the update field
+#' for the diffeomorphic transforms.
+#' @param sigma Gaussian smoothing standard deviation of the update field (in mm).
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
@@ -670,6 +679,11 @@ fitTimeVaryingTransformToPointSets <- function(
   if( numberOfPointSets < 3 )
     {
     stop( "Expecting three or greater point sets." )
+    }
+
+  if( is.null( domainImage ) )
+    {
+    stop( "Domain image needs to be specified." )
     }
 
   numberOfPoints <- nrow( pointSets[[1]] )

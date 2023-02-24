@@ -25,40 +25,40 @@ fitTransformToPairedPoints(
 )
 }
 \arguments{
-\item{movingPoints}{moving points specified in physical space as a \code{n x d}
+\item{movingPoints}{Moving points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
-\item{fixedPoints}{fixed points specified in physical space as a \code{n x d}
+\item{fixedPoints}{Fixed points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
 \item{transformType}{'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
-or 'time-varying (tv)'.}
+'tv', or 'time-varying'.}
 
-\item{regularization}{ridge penalty in [0,1] for linear transforms.}
+\item{regularization}{Ridge penalty in [0,1] for linear transforms.}
 
-\item{domainImage}{defines physical domain of the B-spline transform.}
+\item{domainImage}{Defines physical domain of the B-spline transform.  Must be defined
+for nonlinear transforms.}
 
-\item{numberOfFittingLevels}{integer specifying the number of fitting levels
+\item{numberOfFittingLevels}{Integer specifying the number of fitting levels for the
+B-spline interpolation of the displacement field.}
+
+\item{meshSize}{Defines the mesh size at the initial fitting level for the B-spline
+interpolation of the displacement field.}
+
+\item{splineOrder}{Spline order of the B-spline displacement field.}
+
+\item{enforceStationaryBoundary}{Ensure no displacements on the image boundary
 (B-spline only).}
 
-\item{meshSize}{scalar or vector defining the mesh size at the initial fitting level
-(B-spline only).}
+\item{displacementWeights}{Defines the individual weighting of the corresponding scattered
+data value.  Default = None meaning all displacements are weighted the same.}
 
-\item{splineOrder}{spline order of the B-spline object.  Default = 3 (B-spline
-only).}
+\item{numberOfCompositions}{Total number of compositions for the diffeomorphic transform.}
 
-\item{enforceStationaryBoundary}{ensure no displacements on the image boundary
-(B-spline only).}
+\item{compositionStepSize}{Scalar multiplication factor of the weighting of the update field
+for the diffeomorphic transforms.}
 
-\item{displacementWeights}{vector defining the individual weighting of the corresponding
-scattered data value.  (B-spline only).  Default = NULL meaning all displacements are
-weighted the same.}
-
-\item{numberOfCompositions}{total number of compositions for the diffeomorphic transform.}
-
-\item{compositionStepSize}{scalar multiplication factor for the diffeomorphic transform.}
-
-\item{sigma}{gaussian smoothing sigma (in mm) for the diffeomorphic transform.}
+\item{sigma}{Gaussian smoothing standard deviation of the update field (in mm).}
 
 \item{convergenceThreshold}{Composition-based convergence parameter for the diffeomorphic
 transforms using a window size of 10 values.}

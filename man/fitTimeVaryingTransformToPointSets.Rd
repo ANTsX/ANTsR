@@ -34,23 +34,27 @@ and 1.}
 be equal to or greater than the number of point sets.  If not specified, it
 defaults to the number of point sets.}
 
-\item{domainImage}{defines physical domain of the nonlinear transforms.}
+\item{domainImage}{Defines physical domain of the B-spline transform.  Must be defined
+for nonlinear transforms.}
 
-\item{numberOfFittingLevels}{integer specifying the number of fitting levels}
+\item{numberOfFittingLevels}{Integer specifying the number of fitting levels for the
+B-spline interpolation of the displacement field.}
 
-\item{meshSize}{scalar or vector defining the mesh size at the initial fitting level}
+\item{meshSize}{Defines the mesh size at the initial fitting level for the B-spline
+interpolation of the displacement field.}
 
-\item{splineOrder}{spline order of the B-spline object.  Default = 3.}
+\item{splineOrder}{Spline order of the B-spline displacement field.}
 
 \item{displacementWeights}{vector defining the individual weighting of the corresponding
 scattered data value.  Default = NULL meaning all displacements are
 weighted the same.}
 
-\item{numberOfCompositions}{total number of compositions.}
+\item{numberOfCompositions}{Total number of compositions for the diffeomorphic transform.}
 
-\item{compositionStepSize}{scalar multiplication factor.}
+\item{compositionStepSize}{Scalar multiplication factor of the weighting of the update field
+for the diffeomorphic transforms.}
 
-\item{sigma}{gaussian smoothing sigma (in mm).}
+\item{sigma}{Gaussian smoothing standard deviation of the update field (in mm).}
 
 \item{convergenceThreshold}{Composition-based convergence parameter for the diffeomorphic
 transforms using a window size of 10 values.}
