@@ -8,8 +8,6 @@
 #'
 #' @author NJ Tustison
 #'
-#' @examples
-#' 
 #' @export composeDisplacementFields
 
 composeDisplacementFields <- function(
@@ -21,7 +19,7 @@ composeDisplacementFields <- function(
 
   compField <- .Call( "composeDisplacementFields",
     dimensionality,
-    displacementField, 
+    displacementField,
     warpingField,
     PACKAGE = "ANTsR" )
   return( compField )

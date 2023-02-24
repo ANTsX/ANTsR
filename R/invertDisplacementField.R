@@ -12,8 +12,6 @@
 #'
 #' @author NJ Tustison
 #'
-#' @examples
-#' 
 #' @export invertDisplacementField
 
 invertDisplacementField <- function(
@@ -29,9 +27,9 @@ invertDisplacementField <- function(
 
   inverseField <- .Call( "invertDisplacementField",
     dimensionality,
-    displacementField, 
+    displacementField,
     inverseFieldInitialEstimate,
-    as.numeric( maximumNumberOfIterations ), 
+    as.numeric( maximumNumberOfIterations ),
     as.numeric( meanErrorToleranceThreshold ),
     as.numeric( maxErrorToleranceThreshold ),
     as.numeric( enforceBoundaryCondition ),
