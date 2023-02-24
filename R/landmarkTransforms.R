@@ -457,7 +457,7 @@ fitTransformToPairedPoints <- function(
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
-      for( n in seq.int( numberOfIntegrationPoints ) )
+      for( n in seq_len( numberOfIntegrationPoints ) )
         {
         t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
 
@@ -585,35 +585,7 @@ fitTransformToPairedPoints <- function(
 #' @return object containing ANTsR transform, error, and scale (or displacement field)
 #'
 #' @author B Avants, N Tustison
-#' @examples
-#' fixed <- matrix( c( 50, 50, 200, 50, 50, 200 ), ncol = 2, byrow = TRUE )
-#' moving <- matrix( c( 50, 50, 50, 200, 200, 200 ), ncol = 2, byrow = TRUE )
-#'
-#' # Affine transform
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Affine", regularization = 0 )
-#' params <- getAntsrTransformParameters( xfrm )
-#'
-#' # Rigid transform
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Rigid", regularization = 0 )
-#' params <- getAntsrTransformParameters( xfrm )
-#'
-#' # Similarity transform
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Similarity", regularization = 0 )
-#' params <- getAntsrTransformParameters( xfrm )
-#'
-#' # B-spline transform
-#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5 )
-#'
-#' # Diffeo transform
-#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6 )
-#'
-#' # SyN transform
-#' domainImage <- antsImageRead( getANTsRData( "r16" ) )
-#' xfrm <- fitTransformToPairedPoints( moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01 )
-#' @export fitTransformToPairedPoints
-
+#' @export fitTimeVaryingTransformToPointSets
 fitTimeVaryingTransformToPointSets <- function(
   pointSets,
   timePoints = NULL,
@@ -675,7 +647,7 @@ fitTimeVaryingTransformToPointSets <- function(
     stop( "The number of time points should be the same as the number of point sets." )
     }
 
-  if( ! is.null( timePoints ) )
+  if( is.null( timePoints ) )
     {
     timePoints <- seq( from = 0.0, to = 1.0, length.out = numberOfPointSets )
     }
@@ -683,6 +655,11 @@ fitTimeVaryingTransformToPointSets <- function(
   if( any( timePoints < 0.0 ) || any( timePoints > 1.0 ) )
     {
     stop( "Time point values should be between 0 and 1." )
+    }
+
+  if( is.null( numberOfIntegrationPoints ) )
+    {
+    numberOfIntegrationPoints <- length( timePoints )
     }
 
   if( numberOfIntegrationPoints < numberOfPointSets )
@@ -733,7 +710,7 @@ fitTimeVaryingTransformToPointSets <- function(
     updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
-    for( n in seq.int( numberOfIntegrationPoints ) )
+    for( n in seq_len( numberOfIntegrationPoints ) )
       {
       t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
 
@@ -747,7 +724,7 @@ fitTimeVaryingTransformToPointSets <- function(
           }
         }
 
-      if( n > 1 && n < number_of_integration_points && timePoints[tIndex-1] == t )
+      if( n > 1 && n < numberOfIntegrationPoints && timePoints[tIndex-1] == t )
         {
         updatedFixedPoints <- pointSets[[tIndex-1]]
         integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
@@ -804,6 +781,8 @@ fitTimeVaryingTransformToPointSets <- function(
 
         if( t == 1.0 && timePoints[tIndex] == 1.0 )
           {
+          updatedMovingPoints <- pointSets[[length( pointSets )]]
+          } else {
           integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
           integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
           updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, pointSets[[tIndex]] )
@@ -862,10 +841,10 @@ fitTimeVaryingTransformToPointSets <- function(
       }
     }
 
-  integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+  integratedForwardField <- integrateVelocityField( velocityField, 0.0, 1.0, 100 )
   forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
 
-  integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+  integratedInverseField <- integrateVelocityField( velocityField, 1.0, 0.0, 100 )
   inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
 
   if( verbose )
