@@ -39,7 +39,7 @@
 #' @param enforceStationaryBoundary ensure no displacements on the image boundary.
 #' Default = TRUE.
 #' @param estimateInverse estimate the inverse displacement field.  Default = FALSE.
-#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update 
+#' @param rasterizePoints Use nearest neighbor rasterization of points for estimating the
 #' field (potential speed-up).
 #' @return ANTsR image.
 #'

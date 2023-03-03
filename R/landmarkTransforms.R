@@ -824,6 +824,10 @@ fitTimeVaryingTransformToPointSets <- function(
 
       updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
       maxNorm <- sqrt( max( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+      if( verbose )
+        {
+        cat("  integration point ", t, ": maxNorm = ", maxNorm, "\n", sep = "")
+        }
       updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
       if( domainImage@dimension == 2 )
         {

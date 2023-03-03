@@ -69,7 +69,7 @@ Default = TRUE.}
 
 \item{estimateInverse}{estimate the inverse displacement field.  Default = FALSE.}
 
-\item{rasterizePoints}{Use nearest neighbor rasterization of points for estimating update 
+\item{rasterizePoints}{Use nearest neighbor rasterization of points for estimating the
 field (potential speed-up).}
 }
 \value{
