@@ -292,11 +292,11 @@ fitTransformToPairedPoints <- function(
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }
 
+      error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
+      errorValues <- append( errorValues, error )
+      convergenceValue <- convergenceMonitoring( errorValues )
       if( verbose )
         {
-        error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
-        errorValues <- append( errorValues, error )
-        convergenceValue <- convergenceMonitoring( errorValues )
         endTime <- Sys.time()
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
