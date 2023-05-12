@@ -14,12 +14,75 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.3/cmake-3.25.3
     rm ./cmake-3.25.3-linux-x86_64.sh
 
 # Minimal dependencies, will not enable all functionality
-RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true Rscript -e "install.packages( pkgs = c(\"Rcpp\", \"RcppEigen\", \"magrittr\", \"rsvd\", \"magic\", \"psych\"), dependencies = TRUE )"
+# Some of these already exist in the rocker image, but install
+# anyway in case base image changes
+RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true \
+      Rscript -e "install.packages( \
+                   c('Rcpp', \
+                     'RcppEigen', \
+                     'magrittr',  \
+                     'rsvd',      \
+                     'magic',     \
+                     'psych'), dependencies = TRUE )"
 
 RUN R CMD INSTALL ITKR && \
     R CMD INSTALL ANTsRCore && \
     R CMD INSTALL ANTsR
 
+# Additional dependencies
+# Derived from remotes::local_package_deps
+
+# Some packages were removed from CRAN and need a github install
+RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true \
+      Rscript -e "library(devtools)" \
+              -e "install_github('cran/ifultools')" \
+              -e "install_github('cran/DMwR')"
+
+RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true \
+      Rscript -e "\
+      install.packages(c( \
+        'abind', \
+        'BGLR', \
+        'caret', \
+        'cluster', \
+        'corpcor', \
+        'dplyr', \
+        'e1071', \
+        'extremevalues', \
+        'fastICA', \
+        'FNN', \
+        'fpc', \
+        'ggplot2', \
+        'glasso', \
+        'glmnet', \
+        'grid', \
+        'hdf5r', \
+        'igraph', \
+        'irlba', \
+        'knitr', \
+        'mFilter', \
+        'misc3d', \
+        'moments', \
+        'networkD3', \
+        'pixmap', \
+        'png', \
+        'pracma', \
+        'R.matlab', \
+        'randomForest', \
+        'RcppHNSW', \
+        'rgl', \
+        'rmarkdown', \
+        'robust', \
+        'robustbase', \
+        'signal', \
+        'sna', \
+        'testthat', \
+        'viridis', \
+        'visreg', \
+        'wmtsa', \
+        'xgboost' \
+     ), repos = 'https://cloud.r-project.org')"
+ 
 ENV R_DEFAULT_PACKAGES="datasets,utils,grDevices,graphics,stats,methods,ANTsR"
 ENV ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=1
 
