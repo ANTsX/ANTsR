@@ -31,8 +31,8 @@ matrix where \code{n} is the number of points and \code{d} is the dimensionality
 \item{fixedPoints}{Fixed points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
-\item{transformType}{'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
-'tv', or 'time-varying'.}
+\item{transformType}{'rigid', 'similarity', 'affine', 'bspline', 'tps', 
+'diffeo', 'syn', 'tv', or 'time-varying'.}
 
 \item{regularization}{Ridge penalty in [0,1] for linear transforms.}
 
