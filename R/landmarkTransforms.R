@@ -6,8 +6,8 @@
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
 #' @param fixedPoints Fixed points specified in physical space as a \code{n x d}
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
-#' @param transformType 'rigid', 'similarity', "affine', 'bspline', 'diffeo', 'syn',
-#' 'tv', or 'time-varying'.
+#' @param transformType 'rigid', 'similarity', 'affine', 'bspline', 'tps', 
+#' 'diffeo', 'syn', 'tv', or 'time-varying'.
 #' @param regularization Ridge penalty in [0,1] for linear transforms.
 #' @param domainImage Defines physical domain of the B-spline transform.  Must be defined
 #' for nonlinear transforms.
@@ -150,13 +150,13 @@ fitTransformToPairedPoints <- function(
     }
 
   if( ! any( tolower( transformType ) %in%
-        c( "rigid", "affine", "similarity", "bspline", "diffeo", "syn", "tv", "time-varying" ) ) )
+        c( "rigid", "affine", "similarity", "bspline", "tps", "diffeo", "syn", "tv", "time-varying" ) ) )
     {
     stop( paste0( transformType, " transform not supported." ) )
     }
   transformType <- tolower( transformType )
 
-  if( is.null( domainImage ) && any( tolower( transformType ) %in% c( "bspline", "diffeo", "syn", "tv", "time-varying" ) ) )
+  if( is.null( domainImage ) && any( tolower( transformType ) %in% c( "bspline", "tps", "diffeo", "syn", "tv", "time-varying" ) ) )
     {
     stop( "Domain image needs to be specified." )
     }
@@ -241,6 +241,20 @@ fitTransformToPairedPoints <- function(
       rasterizePoints = rasterizePoints )
 
     xfrm <- antsrTransformFromDisplacementField( bsplineDisplacementField )
+
+    return( xfrm )
+
+    } else if( transformType == "tps" ) {
+
+    tpsDisplacementField <- fitThinPlateSplineDisplacementField(  
+      displacementOrigins = fixedPoints,
+      displacements = movingPoints - fixedPoints,
+      origin = antsGetOrigin( domainImage ),
+      spacing = antsGetSpacing( domainImage ),
+      size = dim( domainImage ),
+      direction = antsGetDirection( domainImage ) )
+
+    xfrm <- antsrTransformFromDisplacementField( tpsDisplacementField )
 
     return( xfrm )
 
