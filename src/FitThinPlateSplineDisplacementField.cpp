@@ -75,47 +75,33 @@ SEXP fitThinPlateSplineVectorImageHelper(
     field->Allocate();
     }
 
-  if( ! Rf_isNull( r_displacements ) && ! Rf_isNull( r_displacementOrigins ) )
+  auto sourceLandmarks = PointSetType::New();
+  auto targetLandmarks = PointSetType::New();
+  typename PointSetType::PointsContainer::Pointer sourceLandmarkContainer = sourceLandmarks->GetPoints();
+  typename PointSetType::PointsContainer::Pointer targetLandmarkContainer = targetLandmarks->GetPoints();
+
+  PointType sourcePoint;
+  PointType targetPoint;
+
+  Rcpp::NumericMatrix displacementOrigins( r_displacementOrigins );
+  Rcpp::NumericMatrix displacements( r_displacements );
+
+  unsigned int numberOfPoints = displacements.nrow();
+
+  for( unsigned int n = 0; n < numberOfPoints; n++ )
     {
-    auto sourceLandmarks = PointSetType::New();
-    auto targetLandmarks = PointSetType::New();
-    typename PointSetType::PointsContainer::Pointer sourceLandmarkContainer = sourceLandmarks->GetPoints();
-    typename PointSetType::PointsContainer::Pointer targetLandmarkContainer = targetLandmarks->GetPoints();
-
-    PointType sourcePoint;
-    PointType targetPoint;
-
-    Rcpp::NumericMatrix displacementOrigins( r_displacementOrigins );
-    Rcpp::NumericMatrix displacements( r_displacements );
-
-    unsigned int numberOfPoints = displacements.nrow();
-
-    for( unsigned int n = 0; n < numberOfPoints; n++ )
+    for( unsigned int d = 0; d < Dimension; d++ )
       {
-      for( unsigned int d = 0; d < Dimension; d++ )
-        {
-        sourcePoint[d] = displacementOrigins(n, d);
-        targetPoint[d] = displacementOrigins(n, d) + displacements(n, d);
-        }
-      sourceLandmarkContainer->InsertElement( n, sourcePoint );
-      targetLandmarkContainer->InsertElement( n, targetPoint );
+      sourcePoint[d] = displacementOrigins(n, d);
+      targetPoint[d] = displacementOrigins(n, d) + displacements(n, d);
       }
-
-    tps->SetSourceLandmarks( sourceLandmarks );
-    tps->SetTargetLandmarks( targetLandmarks );
-    tps->ComputeWMatrix();
-
-    for( unsigned int n = 0; n < numberOfPoints; n++ )
-      {
-      for( unsigned int d = 0; d < Dimension; d++ )
-        {
-        sourcePoint[d] = displacementOrigins(n, d);
-        targetPoint[d] = displacementOrigins(n, d) + displacements(n, d);
-        }      
-      }
+    sourceLandmarkContainer->InsertElement( n, sourcePoint );
+    targetLandmarkContainer->InsertElement( n, targetPoint );
     }
 
-
+  tps->SetSourceLandmarks( sourceLandmarks );
+  tps->SetTargetLandmarks( targetLandmarks );
+  tps->ComputeWMatrix();
 
   //////////////////////////
   //
