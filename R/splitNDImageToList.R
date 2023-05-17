@@ -24,12 +24,8 @@ splitNDImageToList = function( img ) {
   # put matrix to a list
   newimgs = list()
   for ( z in 1:mydimv[ mydim ] ) {
-    if ( mydim == 3 )
-      newimgs[[z]] = makeImage( mydimv[ -mydim ] , img[ 1:mydimv[1], 1:mydimv[2], z ] )
-    if ( mydim == 4 )
-      newimgs[[z]] = makeImage( mydimv[ -mydim ] ,
-        img[ 1:mydimv[1], 1:mydimv[2], 1:mydimv[3], z ] )
-    }
+   newimgs[[z]] = extractSlice(img, z, mydim)
+   }
 
   # copy headers to new images
   direction = antsGetDirection(img)[-mydim,-mydim]
