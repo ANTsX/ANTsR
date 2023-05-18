@@ -68,13 +68,12 @@ mergeListToNDImage = function( img, imgList ) {
   iarr = array( data = NA, dim = mydimv )
   for ( i in 1:length( imgList ) )
     {
+    temp = as.array( imgList[[ i ]] )
     if ( mydim == 3 ) {
-      iarr[ 1:mydimv[1], 1:mydimv[2], i ] =
-        imgList[[ i ]][ 1:mydimv[1], 1:mydimv[2]  ]
+      iarr[ , , i ] = temp
       }
     if ( mydim == 4 ) {
-      temp = imgList[[ i ]][ 1:mydimv[1], 1:mydimv[2], 1:mydimv[3] ]
-      iarr[ 1:mydimv[1], 1:mydimv[2], 1:mydimv[3], i ] = temp
+      iarr[ ,,, i ] = temp
       }
     }
   iarr = as.antsImage( iarr )
