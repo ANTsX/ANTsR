@@ -16,6 +16,7 @@ fitTimeVaryingTransformToPointSets(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
+  numberOfIntegrationSteps = 100,
   sigma = 0,
   convergenceThreshold = 0,
   rasterizePoints = FALSE,
@@ -57,6 +58,8 @@ weighted the same.}
 
 \item{compositionStepSize}{Scalar multiplication factor of the weighting of the update field
 for the diffeomorphic transforms.}
+
+\item{numberOfIntegrationSteps}{Number of steps used for integrating the velocity field.}
 
 \item{sigma}{Gaussian smoothing standard deviation of the update field (in mm).}
 

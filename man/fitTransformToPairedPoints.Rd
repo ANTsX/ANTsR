@@ -20,6 +20,7 @@ fitTransformToPairedPoints(
   sigma = 0,
   convergenceThreshold = 0,
   numberOfIntegrationPoints = 2,
+  numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
   verbose = FALSE
 )
@@ -64,6 +65,8 @@ for the diffeomorphic transforms.}
 transforms using a window size of 10 values.}
 
 \item{numberOfIntegrationPoints}{Time-varying velocity field parameter.}
+
+\item{numberOfIntegrationSteps}{Number of steps used for integrating the velocity field.}
 
 \item{rasterizePoints}{Use nearest neighbor rasterization of points for estimating update
 field (potential speed-up).}
