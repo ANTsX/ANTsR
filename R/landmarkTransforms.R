@@ -27,6 +27,7 @@
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
+#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.    
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
 #' field (potential speed-up).
 #' @param verbose Print progress to the screen.
@@ -78,6 +79,7 @@ fitTransformToPairedPoints <- function(
   sigma = 0.0,
   convergenceThreshold = 0.0,
   numberOfIntegrationPoints = 2,
+  numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
   verbose = FALSE
   ) {
@@ -482,7 +484,7 @@ fitTransformToPairedPoints <- function(
 
         if( n > 1 )
           {
-          integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+          integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, numberOfIntegrationSteps )
           integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
           updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, fixedPoints )
           } else {
@@ -491,7 +493,7 @@ fitTransformToPairedPoints <- function(
 
         if( n < numberOfIntegrationPoints )
           {
-          integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+          integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, numberOfIntegrationSteps )
           integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
           updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, movingPoints )
           } else {
@@ -550,10 +552,10 @@ fitTransformToPairedPoints <- function(
         }
       }
 
-    integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, 100 )
+    integratedForwardField <- integrateVelocityField( velocityField, 0.0, t, numberOfIntegrationSteps )
     forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
 
-    integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, 100 )
+    integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, numberOfIntegrationSteps )
     inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
 
     if( verbose )
@@ -583,6 +585,8 @@ fitTransformToPairedPoints <- function(
 #' @param timePoints Set of scalar values, one for each point-set designating its time
 #' position in the velocity flow.  If not set, it defaults to equal spacing between 0
 #' and 1.
+#' @param initialVelocityField Optional velocity field for initializing optimization.  
+#' Overrides the number of integration points.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
 #' be equal to or greater than the number of point sets.  If not specified, it
 #' defaults to the number of point sets.
@@ -600,6 +604,7 @@ fitTransformToPairedPoints <- function(
 #' @param compositionStepSize Scalar multiplication factor of the weighting of the update field
 #' for the diffeomorphic transforms.
 #' @param sigma Gaussian smoothing standard deviation of the update field (in mm).
+#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.    
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
@@ -612,6 +617,7 @@ fitTransformToPairedPoints <- function(
 fitTimeVaryingTransformToPointSets <- function(
   pointSets,
   timePoints = NULL,
+  initialVelocityField = NULL,
   numberOfIntegrationPoints=NULL,
   domainImage = NULL,
   numberOfFittingLevels = 4,
@@ -620,6 +626,7 @@ fitTimeVaryingTransformToPointSets <- function(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
+  numberOfIntegrationSteps = 100,
   sigma = 0.0,
   convergenceThreshold = 0.0,
   rasterizePoints = FALSE,
@@ -680,16 +687,6 @@ fitTimeVaryingTransformToPointSets <- function(
     stop( "Time point values should be between 0 and 1." )
     }
 
-  if( is.null( numberOfIntegrationPoints ) )
-    {
-    numberOfIntegrationPoints <- length( timePoints )
-    }
-
-  if( numberOfIntegrationPoints < numberOfPointSets )
-    {
-    stop( "The number of integration points should be at least as great as the number of point sets." )
-    }
-
   if( numberOfPointSets < 3 )
     {
     stop( "Expecting three or greater point sets." )
@@ -722,7 +719,22 @@ fitTimeVaryingTransformToPointSets <- function(
   updatedFixedPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
   updatedMovingPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
 
-  velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+  velocityField <- NULL
+  if( is.null( initialVelocityField ) )
+    {
+    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    if( is.null( numberOfIntegrationPoints ) )
+      {
+      numberOfIntegrationPoints <- length( timePoints )
+      }
+    if( numberOfIntegrationPoints < numberOfPointSets )
+      {
+      stop( "The number of integration points should be at least as great as the number of point sets." )
+      }
+    } else {
+    velocityField <- antsImageClone( initialVelocityField )
+    numberOfIntegrationPoints <- tail( dim( initialVelocityField ), 1 )
+    }
   velocityFieldArray <- as.array( velocityField )
 
   lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
@@ -755,7 +767,7 @@ fitTimeVaryingTransformToPointSets <- function(
       if( n > 1 && n < numberOfIntegrationPoints && timePoints[tIndex-1] == t )
         {
         updatedFixedPoints <- pointSets[[tIndex-1]]
-        integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
+        integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, numberOfIntegrationSteps )
         integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
         updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, pointSets[[tIndex]] )
 
@@ -775,7 +787,7 @@ fitTimeVaryingTransformToPointSets <- function(
           )
 
         updatedMovingPoints <- pointSets[[tIndex-1]]
-        integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-2], t, 100 )
+        integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-2], t, numberOfIntegrationSteps )
         integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
         updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, pointSets[[tIndex-2]] )
 
@@ -802,7 +814,7 @@ fitTimeVaryingTransformToPointSets <- function(
           {
           updatedFixedPoints <- pointSets[[1]]
           } else {
-          integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-1], t, 100 )
+          integratedForwardField <- integrateVelocityField( velocityField, timePoints[tIndex-1], t, numberOfIntegrationSteps )
           integratedForwardFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
           updatedFixedPoints <- applyAntsrTransformToPoint( integratedForwardFieldXfrm, pointSets[[tIndex-1]] )
           }
@@ -811,7 +823,7 @@ fitTimeVaryingTransformToPointSets <- function(
           {
           updatedMovingPoints <- pointSets[[length( pointSets )]]
           } else {
-          integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, 100 )
+          integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, numberOfIntegrationSteps )
           integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
           updatedMovingPoints <- applyAntsrTransformToPoint( integratedInverseFieldXfrm, pointSets[[tIndex]] )
           }
@@ -873,10 +885,10 @@ fitTimeVaryingTransformToPointSets <- function(
       }
     }
 
-  integratedForwardField <- integrateVelocityField( velocityField, 0.0, 1.0, 100 )
+  integratedForwardField <- integrateVelocityField( velocityField, 0.0, 1.0, numberOfIntegrationSteps )
   forwardXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedForwardField )
 
-  integratedInverseField <- integrateVelocityField( velocityField, 1.0, 0.0, 100 )
+  integratedInverseField <- integrateVelocityField( velocityField, 1.0, 0.0, numberOfIntegrationSteps )
   inverseXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
 
   if( verbose )

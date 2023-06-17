@@ -7,6 +7,7 @@
 fitTimeVaryingTransformToPointSets(
   pointSets,
   timePoints = NULL,
+  initialVelocityField = NULL,
   numberOfIntegrationPoints = NULL,
   domainImage = NULL,
   numberOfFittingLevels = 4,
@@ -15,6 +16,7 @@ fitTimeVaryingTransformToPointSets(
   displacementWeights = NULL,
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
+  numberOfIntegrationSteps = 100,
   sigma = 0,
   convergenceThreshold = 0,
   rasterizePoints = FALSE,
@@ -29,6 +31,9 @@ dimensionality.}
 \item{timePoints}{Set of scalar values, one for each point-set designating its time
 position in the velocity flow.  If not set, it defaults to equal spacing between 0
 and 1.}
+
+\item{initialVelocityField}{Optional velocity field for initializing optimization.
+Overrides the number of integration points.}
 
 \item{numberOfIntegrationPoints}{Time-varying velocity field parameter.  Needs to
 be equal to or greater than the number of point sets.  If not specified, it
@@ -53,6 +58,8 @@ weighted the same.}
 
 \item{compositionStepSize}{Scalar multiplication factor of the weighting of the update field
 for the diffeomorphic transforms.}
+
+\item{numberOfIntegrationSteps}{Number of steps used for integrating the velocity field.}
 
 \item{sigma}{Gaussian smoothing standard deviation of the update field (in mm).}
 
