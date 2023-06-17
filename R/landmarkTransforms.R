@@ -583,6 +583,8 @@ fitTransformToPairedPoints <- function(
 #' @param timePoints Set of scalar values, one for each point-set designating its time
 #' position in the velocity flow.  If not set, it defaults to equal spacing between 0
 #' and 1.
+#' @param initialVelocityField Optional velocity field for initializing optimization.  
+#' Overrides the number of integration points.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
 #' be equal to or greater than the number of point sets.  If not specified, it
 #' defaults to the number of point sets.
@@ -612,6 +614,7 @@ fitTransformToPairedPoints <- function(
 fitTimeVaryingTransformToPointSets <- function(
   pointSets,
   timePoints = NULL,
+  initialVelocityField = NULL,
   numberOfIntegrationPoints=NULL,
   domainImage = NULL,
   numberOfFittingLevels = 4,
@@ -680,16 +683,6 @@ fitTimeVaryingTransformToPointSets <- function(
     stop( "Time point values should be between 0 and 1." )
     }
 
-  if( is.null( numberOfIntegrationPoints ) )
-    {
-    numberOfIntegrationPoints <- length( timePoints )
-    }
-
-  if( numberOfIntegrationPoints < numberOfPointSets )
-    {
-    stop( "The number of integration points should be at least as great as the number of point sets." )
-    }
-
   if( numberOfPointSets < 3 )
     {
     stop( "Expecting three or greater point sets." )
@@ -722,7 +715,22 @@ fitTimeVaryingTransformToPointSets <- function(
   updatedFixedPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
   updatedMovingPoints <- array( data = 0, dim = dim( pointSets[[1]] ) )
 
-  velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+  velocityField <- NULL
+  if( is.null( initialVelocityField ) )
+    {
+    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    if( is.null( numberOfIntegrationPoints ) )
+      {
+      numberOfIntegrationPoints <- length( timePoints )
+      }
+    if( numberOfIntegrationPoints < numberOfPointSets )
+      {
+      stop( "The number of integration points should be at least as great as the number of point sets." )
+      }
+    } else {
+    velocityField <- antsImageClone( initialVelocityField )
+    numberOfIntegrationPoints <- tail( dim( initialVelocityField ), 1 )
+    }
   velocityFieldArray <- as.array( velocityField )
 
   lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
