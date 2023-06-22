@@ -478,6 +478,7 @@ fitTransformToPairedPoints <- function(
       updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
+      averageError <- 0.0
       for( n in seq_len( numberOfIntegrationPoints ) )
         {
         t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
@@ -528,6 +529,9 @@ fitTransformToPairedPoints <- function(
           } else {
           updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
           }
+
+        rmse <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
+        averageError <- ( averageError * ( n - 1 ) + rmse ) / n
         }
       updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
       lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
@@ -537,14 +541,13 @@ fitTransformToPairedPoints <- function(
           spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
           components = TRUE )
 
-      error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
-      errorValues <- append( errorValues, error )
+      errorValues <- append( errorValues, averageError )
       convergenceValue <- convergenceMonitoring( errorValues )
       if( verbose )
         {
         endTime <- Sys.time()
         diffTime <- endTime - startTime
-        cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
+        cat( "Composition ", i, ": error = ", averageError, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
       if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
         {
@@ -750,6 +753,7 @@ fitTimeVaryingTransformToPointSets <- function(
     updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
+    averageError <- 0.0
     for( n in seq_len( numberOfIntegrationPoints ) )
       {
       t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
@@ -861,6 +865,8 @@ fitTimeVaryingTransformToPointSets <- function(
         } else {
         updateDerivativeFieldArray[,,,,n] <- updateDerivativeFieldAtTimePointArray
         }
+      rmse <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
+      averageError <- ( averageError * ( n - 1 ) + rmse ) / n
       }
     updateDerivativeFieldArray <- ( updateDerivativeFieldArray + lastUpdateDerivativeFieldArray ) * 0.5
     lastUpdateDerivativeFieldArray <- updateDerivativeFieldArray
@@ -870,14 +876,13 @@ fitTimeVaryingTransformToPointSets <- function(
         spacing = antsGetSpacing( velocityField ), direction = antsGetDirection( velocityField ),
         components = TRUE )
 
-    error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
-    errorValues <- append( errorValues, error )
+    errorValues <- append( errorValues, averageError )
     convergenceValue <- convergenceMonitoring( errorValues )
     if( verbose )
       {
       endTime <- Sys.time()
       diffTime <- endTime - startTime
-      cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
+      cat( "Composition ", i, ": error = ", averageError, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
       }
     if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
       {
