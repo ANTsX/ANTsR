@@ -6,7 +6,7 @@
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
 #' @param fixedPoints Fixed points specified in physical space as a \code{n x d}
 #' matrix where \code{n} is the number of points and \code{d} is the dimensionality.
-#' @param transformType 'rigid', 'similarity', 'affine', 'bspline', 'tps', 
+#' @param transformType 'rigid', 'similarity', 'affine', 'bspline', 'tps',
 #' 'diffeo', 'syn', 'tv', or 'time-varying'.
 #' @param regularization Ridge penalty in [0,1] for linear transforms.
 #' @param domainImage Defines physical domain of the B-spline transform.  Must be defined
@@ -27,7 +27,7 @@
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.
-#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.    
+#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
 #' field (potential speed-up).
 #' @param verbose Print progress to the screen.
@@ -248,7 +248,7 @@ fitTransformToPairedPoints <- function(
 
     } else if( transformType == "tps" ) {
 
-    tpsDisplacementField <- fitThinPlateSplineDisplacementField(  
+    tpsDisplacementField <- fitThinPlateSplineDisplacementField(
       displacementOrigins = fixedPoints,
       displacements = movingPoints - fixedPoints,
       origin = antsGetOrigin( domainImage ),
@@ -585,7 +585,7 @@ fitTransformToPairedPoints <- function(
 #' @param timePoints Set of scalar values, one for each point-set designating its time
 #' position in the velocity flow.  If not set, it defaults to equal spacing between 0
 #' and 1.
-#' @param initialVelocityField Optional velocity field for initializing optimization.  
+#' @param initialVelocityField Optional velocity field for initializing optimization.
 #' Overrides the number of integration points.
 #' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
 #' be equal to or greater than the number of point sets.  If not specified, it
@@ -604,7 +604,7 @@ fitTransformToPairedPoints <- function(
 #' @param compositionStepSize Scalar multiplication factor of the weighting of the update field
 #' for the diffeomorphic transforms.
 #' @param sigma Gaussian smoothing standard deviation of the update field (in mm).
-#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.    
+#' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
@@ -722,7 +722,6 @@ fitTimeVaryingTransformToPointSets <- function(
   velocityField <- NULL
   if( is.null( initialVelocityField ) )
     {
-    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     if( is.null( numberOfIntegrationPoints ) )
       {
       numberOfIntegrationPoints <- length( timePoints )
@@ -731,6 +730,7 @@ fitTimeVaryingTransformToPointSets <- function(
       {
       stop( "The number of integration points should be at least as great as the number of point sets." )
       }
+    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
     } else {
     velocityField <- antsImageClone( initialVelocityField )
     numberOfIntegrationPoints <- tail( dim( initialVelocityField ), 1 )
