@@ -26,7 +26,7 @@
 #' @param sigma Gaussian smoothing standard deviation of the update field (in mm).
 #' @param convergenceThreshold Composition-based convergence parameter for the diffeomorphic
 #' transforms using a window size of 10 values.
-#' @param numberOfIntegrationPoints Time-varying velocity field parameter.
+#' @param numberOfTimeSteps Time-varying velocity field parameter.
 #' @param numberOfIntegrationSteps Number of steps used for integrating the velocity field.
 #' @param rasterizePoints Use nearest neighbor rasterization of points for estimating update
 #' field (potential speed-up).
@@ -78,7 +78,7 @@ fitTransformToPairedPoints <- function(
   compositionStepSize = 0.5,
   sigma = 0.0,
   convergenceThreshold = 0.0,
-  numberOfIntegrationPoints = 2,
+  numberOfTimeSteps = 2,
   numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
   verbose = FALSE
@@ -462,10 +462,10 @@ fitTransformToPairedPoints <- function(
     updatedFixedPoints <- fixedPoints
     updatedMovingPoints <- movingPoints
 
-    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    velocityField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
     velocityFieldArray <- as.array( velocityField )
 
-    lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
     lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
 
     errorValues <- c()
@@ -475,13 +475,13 @@ fitTransformToPairedPoints <- function(
         {
         startTime <- Sys.time()
         }
-      updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+      updateDerivativeField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
       updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
       averageError <- 0.0
-      for( n in seq_len( numberOfIntegrationPoints ) )
+      for( n in seq_len( numberOfTimeSteps ) )
         {
-        t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
+        t <- ( n - 1 ) / ( numberOfTimeSteps - 1.0 )
 
         if( n > 1 )
           {
@@ -492,7 +492,7 @@ fitTransformToPairedPoints <- function(
           updatedFixedPoints <- fixedPoints
           }
 
-        if( n < numberOfIntegrationPoints )
+        if( n < numberOfTimeSteps )
           {
           integratedInverseField <- integrateVelocityField( velocityField, 1.0, t, numberOfIntegrationSteps )
           integratedInverseFieldXfrm <- createAntsrTransform( type = "DisplacementFieldTransform", displacement.field = integratedInverseField )
@@ -590,7 +590,7 @@ fitTransformToPairedPoints <- function(
 #' and 1.
 #' @param initialVelocityField Optional velocity field for initializing optimization.
 #' Overrides the number of integration points.
-#' @param numberOfIntegrationPoints Time-varying velocity field parameter.  Needs to
+#' @param numberOfTimeSteps Time-varying velocity field parameter.  Needs to
 #' be equal to or greater than the number of point sets.  If not specified, it
 #' defaults to the number of point sets.
 #' @param domainImage Defines physical domain of the B-spline transform.  Must be defined
@@ -621,7 +621,7 @@ fitTimeVaryingTransformToPointSets <- function(
   pointSets,
   timePoints = NULL,
   initialVelocityField = NULL,
-  numberOfIntegrationPoints=NULL,
+  numberOfTimeSteps=NULL,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
@@ -725,22 +725,22 @@ fitTimeVaryingTransformToPointSets <- function(
   velocityField <- NULL
   if( is.null( initialVelocityField ) )
     {
-    if( is.null( numberOfIntegrationPoints ) )
+    if( is.null( numberOfTimeSteps ) )
       {
-      numberOfIntegrationPoints <- length( timePoints )
+      numberOfTimeSteps <- length( timePoints )
       }
-    if( numberOfIntegrationPoints < numberOfPointSets )
+    if( numberOfTimeSteps < numberOfPointSets )
       {
       stop( "The number of integration points should be at least as great as the number of point sets." )
       }
-    velocityField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    velocityField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
     } else {
     velocityField <- antsImageClone( initialVelocityField )
-    numberOfIntegrationPoints <- tail( dim( initialVelocityField ), 1 )
+    numberOfTimeSteps <- tail( dim( initialVelocityField ), 1 )
     }
   velocityFieldArray <- as.array( velocityField )
 
-  lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+  lastUpdateDerivativeField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
   lastUpdateDerivativeFieldArray <- as.array( lastUpdateDerivativeField )
 
   errorValues <- c()
@@ -750,13 +750,13 @@ fitTimeVaryingTransformToPointSets <- function(
       {
       startTime <- Sys.time()
       }
-    updateDerivativeField <- createZeroVelocityField( domainImage, numberOfIntegrationPoints )
+    updateDerivativeField <- createZeroVelocityField( domainImage, numberOfTimeSteps )
     updateDerivativeFieldArray <- as.array( updateDerivativeField )
 
     averageError <- 0.0
-    for( n in seq_len( numberOfIntegrationPoints ) )
+    for( n in seq_len( numberOfTimeSteps ) )
       {
-      t <- ( n - 1 ) / ( numberOfIntegrationPoints - 1.0 )
+      t <- ( n - 1 ) / ( numberOfTimeSteps - 1.0 )
 
       tIndex <- 0
       for( j in seq.int( from = 2, to = numberOfPointSets ) )
@@ -768,7 +768,7 @@ fitTimeVaryingTransformToPointSets <- function(
           }
         }
 
-      if( n > 1 && n < numberOfIntegrationPoints && timePoints[tIndex-1] == t )
+      if( n > 1 && n < numberOfTimeSteps && timePoints[tIndex-1] == t )
         {
         updatedFixedPoints <- pointSets[[tIndex-1]]
         integratedInverseField <- integrateVelocityField( velocityField, timePoints[tIndex], t, numberOfIntegrationSteps )
