@@ -521,7 +521,18 @@ fitTransformToPairedPoints <- function(
           }
 
         updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
-        maxNorm <- sqrt( max( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+        gradNorms <- sqrt( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) )
+        maxNorm <- max( gradNorms )
+        medianNorm <- median( gradNorms )
+        if( verbose )
+          {
+          cat("  integration point ", t, ": maxNorm = ", maxNorm, ", medianNorm = ", medianNorm, "\n", sep = "")
+          }
+
+        if( verbose )
+          {
+          cat("  integration point " + str(t) + ": max_norm = " + str(max_norm) + ", median_norm = " + str(median_norm))
+          }
         updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
         if( domainImage@dimension == 2 )
           {
@@ -853,10 +864,12 @@ fitTimeVaryingTransformToPointSets <- function(
         }
 
       updateDerivativeFieldAtTimePointArray <- as.array( updateDerivativeFieldAtTimePoint )
-      maxNorm <- sqrt( max( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) ) )
+      gradNorms <- sqrt( base::colSums( updateDerivativeFieldAtTimePointArray ^ 2, dims = 1 ) )
+      maxNorm <- max( gradNorms )
+      medianNorm <- median( gradNorms )
       if( verbose )
         {
-        cat("  integration point ", t, ": maxNorm = ", maxNorm, "\n", sep = "")
+        cat("  integration point ", t, ": maxNorm = ", maxNorm, ", medianNorm = ", medianNorm, "\n", sep = "")
         }
       updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
       if( domainImage@dimension == 2 )
