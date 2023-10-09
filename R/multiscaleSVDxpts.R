@@ -2639,6 +2639,7 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
 #' If not set, each basis set will be used to predict its corresponding matrix.
 #' @param sourceMatrices an optional index vector that sets predictor matrices.
 #' If not set, each basis set will be used to predict its corresponding matrix.
+#' @param projectv boolean to determine whether raw u or x * v is used; default to TRUE which uses the x * v approach
 #' @return A list of variance explained, predicted matrices and error metrics:
 #' \itemize{
 #'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
@@ -2652,7 +2653,7 @@ regularizeSimlr <- function( x, knn, fraction = 0.1, sigma, kPackage='FNN' ) {
 #' @examples
 #' # see simlr examples
 #' @export
-predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
+predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices, projectv=TRUE ) {
   if ( missing( sourceMatrices ) ) sourceMatrices = 1:length( x ) else {
     if ( ! any( sourceMatrices %in% 1:length( x ) ) )
       stop( "sourceMatrices are not within the range of the number of input matrices" )
@@ -2662,8 +2663,13 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
   finalErrors = rep( 0, length( sourceMatrices ) )
   predictions = list()
   sortOrder = list()
+  if ( projectv ) {
+    for ( jj in 1:length(simsol$u) )
+      simsol$u[[jj]] = x[[jj]] %*% simsol$v[[jj]]
+  }
   myBetas = matrix( rep( 0, ncol( simsol$u[[1]] ) * length( sourceMatrices ) ),
     ncol = ncol( simsol$u[[1]] ) )
+  myBetasQ5 = myBetas
   ct = 1
   for ( i in 1:length(sourceMatrices) ) {
     if ( missing( targetMatrix ) ) mytm = i else mytm = targetMatrix
@@ -2672,6 +2678,9 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
     smdl = summary( mdl )
     blm = bigLMStats( mdl, 0.0001 )
     myBetas[i,] = rowMeans(abs(blm$beta.t))
+    q5betas = abs(blm$beta.t)
+    q5betas[ q5betas < quantile(q5betas,0.5)]=NA
+    myBetasQ5[i,] = rowMeans(q5betas,na.rm=T)
     for ( j in 1:length( smdl ) )
       varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[mytm]])
     finalErrors[i] = norm( predictions[[i]] - x[[mytm]], "F")
@@ -2684,6 +2693,8 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices ) {
     initialErrors = initialErrors,
     finalErrors = finalErrors,
     aggregateTstats = myBetas,
+    tstatsQ5 = myBetasQ5, 
+    rawTstats  = blm$beta.t,
     uOrder = uOrder  )
 }
 
