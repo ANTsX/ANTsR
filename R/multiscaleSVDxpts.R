@@ -2658,7 +2658,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices, projectv=TRUE
     if ( ! any( sourceMatrices %in% 1:length( x ) ) )
       stop( "sourceMatrices are not within the range of the number of input matrices" )
   }
-  varx = rep( 0, length( sourceMatrices ) )
+  varxfull = list()
   initialErrors = rep( 0, length( sourceMatrices ) )
   finalErrors = rep( 0, length( sourceMatrices ) )
   predictions = list()
@@ -2681,14 +2681,18 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices, projectv=TRUE
     q5betas = abs(blm$beta.t)
     q5betas[ q5betas < quantile(q5betas,0.5)]=NA
     myBetasQ5[i,] = rowMeans(q5betas,na.rm=T)
+    varxj = rep( NA, length(smdl) )
     for ( j in 1:length( smdl ) )
-      varx[ i ] = varx[ i ] + smdl[[j]]$r.squared/ncol(x[[mytm]])
+      varxj[ j ] = smdl[[j]]$r.squared
+    varxfull[[i]]= varxj
     finalErrors[i] = norm( predictions[[i]] - x[[mytm]], "F")
     initialErrors[i] = norm(  x[[mytm]], "F")
   }
+  varx = unlist(lapply( varxfull, FUN='mean'))
   uOrder = order( colSums( myBetas ), decreasing = TRUE )
   list(
     varx = varx,
+    varxfull = varxfull,
     predictions = predictions,
     initialErrors = initialErrors,
     finalErrors = finalErrors,
