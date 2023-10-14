@@ -2679,7 +2679,7 @@ predictSimlr <- function( x, simsol, targetMatrix, sourceMatrices, projectv=TRUE
     blm = bigLMStats( mdl, 0.0001 )
     myBetas[i,] = rowMeans(abs(blm$beta.t))
     q5betas = abs(blm$beta.t)
-    q5betas[ q5betas < quantile(q5betas,0.5)]=NA
+    q5betas[ q5betas < quantile(q5betas,0.5,na.rm=TRUE)]=NA
     myBetasQ5[i,] = rowMeans(q5betas,na.rm=T)
     varxj = rep( NA, length(smdl) )
     for ( j in 1:length( smdl ) )
