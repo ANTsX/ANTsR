@@ -4,7 +4,7 @@
 \alias{weingartenImageCurvature}
 \title{image curvature for 2D or 3D}
 \usage{
-weingartenImageCurvature(image, sigma = 1, opt = "mean")
+weingartenImageCurvature(image, sigma = 1, opt = "mean", labeled = FALSE)
 }
 \arguments{
 \item{image}{antsImage}
@@ -12,6 +12,11 @@ weingartenImageCurvature(image, sigma = 1, opt = "mean")
 \item{sigma}{smoothing parameter}
 
 \item{opt}{mean by default, otherwise use string gaussian or characterize}
+
+\item{labeled}{boolean if TRUE then assume image contains labels which denote 
+the surface on which curvature is to be calculated.  in this case, the 
+surface should hold integer value 1; the background should be zero;  
+the interior of the surface should be greater than 1 (e.g. 2).}
 }
 \value{
 image

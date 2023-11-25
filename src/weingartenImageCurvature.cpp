@@ -8,21 +8,26 @@
 
 
 template< class ImageType >
-SEXP imagek( SEXP r_antsimage, SEXP r_sigma, SEXP r_opt )
+SEXP imagek( SEXP r_antsimage, SEXP r_sigma, SEXP r_opt, SEXP r_labeled )
 {
   typedef typename ImageType::Pointer       ImagePointerType;
   enum { ImageDimension = ImageType::ImageDimension };
   typedef itk::SurfaceImageCurvature<ImageType> ParamType;
   typename ParamType::Pointer Parameterizer = ParamType::New();
   int   opt = Rcpp::as< int >( r_opt );
+  int   labeled = Rcpp::as< int >( r_labeled );
   float sig = Rcpp::as< float >( r_sigma );
   typename ImageType::Pointer input = Rcpp::as<ImagePointerType>( r_antsimage );
   typename ImageType::DirectionType imgdir = input->GetDirection();
   typename ImageType::DirectionType iddir = input->GetDirection();
+  typename ImageType::SpacingType spc = input->GetSpacing();
+  float spcmag = 0.0;
+  for ( unsigned int k = 0; k < 3; k++ ) spcmag = spcmag + spc[k]*spc[k];
+  spcmag = sqrt( spcmag );
   iddir.SetIdentity();
   input->SetDirection( iddir );
   Parameterizer->SetInputImage(input);
-  Parameterizer->SetNeighborhoodRadius( 1. );
+  Parameterizer->SetNeighborhoodRadius( spcmag * 1.5 );
   if( sig <= 0.5 )
       {
       sig = 1.66;
@@ -30,6 +35,12 @@ SEXP imagek( SEXP r_antsimage, SEXP r_sigma, SEXP r_opt )
   Parameterizer->SetSigma(sig);
   Parameterizer->SetUseLabel(false);
   Parameterizer->SetUseGeodesicNeighborhood(false);
+  if ( labeled == 1 ) {
+    Parameterizer->SetUseLabel(true);
+//    Parameterizer->SetDebug(true);
+    // zoo
+//    Parameterizer->SetUseGeodesicNeighborhood(true);
+  }
   float sign = 1.0;
   Parameterizer->SetkSign(sign);
   Parameterizer->SetThreshold(0);
@@ -48,7 +59,7 @@ SEXP imagek( SEXP r_antsimage, SEXP r_sigma, SEXP r_opt )
 
 
 RcppExport SEXP weingartenImageCurvature( SEXP r_antsimage,
-  SEXP r_sigma, SEXP r_opt )
+  SEXP r_sigma, SEXP r_opt, SEXP r_labeled )
 {
 try
 {
@@ -61,7 +72,7 @@ try
     typedef float PixelType;
     const unsigned int dim = 3;
     typedef itk::Image<PixelType,dim>       ImageType;
-    return imagek<ImageType>( r_antsimage, r_sigma, r_opt );
+    return imagek<ImageType>( r_antsimage, r_sigma, r_opt, r_labeled );
     }
     else
       {

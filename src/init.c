@@ -40,7 +40,7 @@ extern SEXP sccanX(SEXP);
 extern SEXP simulateBSplineDisplacementFieldR(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP simulateExponentialDisplacementFieldR(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP timeSeriesSubtraction(SEXP, SEXP);
-extern SEXP weingartenImageCurvature(SEXP, SEXP, SEXP);
+extern SEXP weingartenImageCurvature(SEXP, SEXP, SEXP,SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"addNoiseToImageR",                        (DL_FUNC) &addNoiseToImageR,                       3},
@@ -73,7 +73,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"simulateBSplineDisplacementFieldR",       (DL_FUNC) &simulateBSplineDisplacementFieldR,      6},
     {"simulateExponentialDisplacementFieldR",   (DL_FUNC) &simulateExponentialDisplacementFieldR,  5},
     {"timeSeriesSubtraction",                   (DL_FUNC) &timeSeriesSubtraction,                  2},
-    {"weingartenImageCurvature",                (DL_FUNC) &weingartenImageCurvature,               3},
+    {"weingartenImageCurvature",                (DL_FUNC) &weingartenImageCurvature,               4},
     {NULL, NULL, 0}
 };
 

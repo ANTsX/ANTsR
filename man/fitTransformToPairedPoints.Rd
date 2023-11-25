@@ -8,7 +8,7 @@ fitTransformToPairedPoints(
   movingPoints,
   fixedPoints,
   transformType = "affine",
-  regularization = 0.000001,
+  regularization = 1e-06,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
@@ -19,7 +19,7 @@ fitTransformToPairedPoints(
   compositionStepSize = 0.5,
   sigma = 0,
   convergenceThreshold = 0,
-  numberOfIntegrationPoints = 2,
+  numberOfTimeSteps = 2,
   numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
   verbose = FALSE
@@ -32,7 +32,7 @@ matrix where \code{n} is the number of points and \code{d} is the dimensionality
 \item{fixedPoints}{Fixed points specified in physical space as a \code{n x d}
 matrix where \code{n} is the number of points and \code{d} is the dimensionality.}
 
-\item{transformType}{'rigid', 'similarity', 'affine', 'bspline', 'tps', 
+\item{transformType}{'rigid', 'similarity', 'affine', 'bspline', 'tps',
 'diffeo', 'syn', 'tv', or 'time-varying'.}
 
 \item{regularization}{Ridge penalty in [0,1] for linear transforms.}
@@ -64,7 +64,7 @@ for the diffeomorphic transforms.}
 \item{convergenceThreshold}{Composition-based convergence parameter for the diffeomorphic
 transforms using a window size of 10 values.}
 
-\item{numberOfIntegrationPoints}{Time-varying velocity field parameter.}
+\item{numberOfTimeSteps}{Time-varying velocity field parameter.}
 
 \item{numberOfIntegrationSteps}{Number of steps used for integrating the velocity field.}
 

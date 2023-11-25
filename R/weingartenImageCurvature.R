@@ -5,6 +5,10 @@
 #' @param image antsImage
 #' @param sigma smoothing parameter
 #' @param opt mean by default, otherwise use string gaussian or characterize
+#' @param labeled boolean if TRUE then assume image contains labels which denote 
+#' the surface on which curvature is to be calculated.  in this case, the 
+#' surface should hold integer value 1; the background should be zero;  
+#' the interior of the surface should be greater than 1 (e.g. 2).
 #' @return image
 #' @author Brian B. Avants
 #' @references Avants, B, J. Gee, and B. Avants.
@@ -19,7 +23,7 @@
 #' fik <- weingartenImageCurvature( fi )
 #' }
 #' @export weingartenImageCurvature
-weingartenImageCurvature <- function( image, sigma=1.0, opt='mean' ) {
+weingartenImageCurvature <- function( image, sigma=1.0, opt='mean', labeled=FALSE ) {
   if ( image@dimension != 3 & image@dimension != 2 ) {
     stop("input image must be 2D or 3D")
   }
@@ -44,7 +48,7 @@ weingartenImageCurvature <- function( image, sigma=1.0, opt='mean' ) {
   if ( opt == 'gaussian' ) optnum=6
   if ( opt == 'characterize' ) optnum=5
   mykout = .Call("weingartenImageCurvature",
-    temp, sigma, optnum, PACKAGE = "ANTsR")
+    temp, sigma, optnum, as.integer(labeled), PACKAGE = "ANTsR")
   if ( image@dimension == 3 ) return( mykout )
   if ( image@dimension == 2 )
   {

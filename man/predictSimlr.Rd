@@ -4,7 +4,7 @@
 \alias{predictSimlr}
 \title{predict output matrices from simlr solution}
 \usage{
-predictSimlr(x, simsol, targetMatrix, sourceMatrices)
+predictSimlr(x, simsol, targetMatrix, sourceMatrices, projectv = TRUE)
 }
 \arguments{
 \item{x}{A list that contains the named matrices.}
@@ -16,6 +16,8 @@ If not set, each basis set will be used to predict its corresponding matrix.}
 
 \item{sourceMatrices}{an optional index vector that sets predictor matrices.
 If not set, each basis set will be used to predict its corresponding matrix.}
+
+\item{projectv}{boolean to determine whether raw u or x * v is used; default to TRUE which uses the x * v approach}
 }
 \value{
 A list of variance explained, predicted matrices and error metrics:

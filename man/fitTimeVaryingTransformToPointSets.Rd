@@ -8,7 +8,7 @@ fitTimeVaryingTransformToPointSets(
   pointSets,
   timePoints = NULL,
   initialVelocityField = NULL,
-  numberOfIntegrationPoints = NULL,
+  numberOfTimeSteps = NULL,
   domainImage = NULL,
   numberOfFittingLevels = 4,
   meshSize = 1,
@@ -35,7 +35,7 @@ and 1.}
 \item{initialVelocityField}{Optional velocity field for initializing optimization.
 Overrides the number of integration points.}
 
-\item{numberOfIntegrationPoints}{Time-varying velocity field parameter.  Needs to
+\item{numberOfTimeSteps}{Time-varying velocity field parameter.  Needs to
 be equal to or greater than the number of point sets.  If not specified, it
 defaults to the number of point sets.}
 
