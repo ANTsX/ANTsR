@@ -77,7 +77,7 @@ fitTransformToPairedPoints <- function(
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
   sigma = 0.0,
-  convergenceThreshold = 0.0,
+  convergenceThreshold = 1e-6,
   numberOfTimeSteps = 2,
   numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
@@ -317,7 +317,7 @@ fitTransformToPairedPoints <- function(
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
-      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+      if( ! is.na( convergenceValue ) && convergenceValue <= convergenceThreshold )
         {
         break
         }
@@ -427,7 +427,7 @@ fitTransformToPairedPoints <- function(
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", error, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
-      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+      if( ! is.na( convergenceValue ) && convergenceValue <= convergenceThreshold )
         {
         break
         }
@@ -560,7 +560,7 @@ fitTransformToPairedPoints <- function(
         diffTime <- endTime - startTime
         cat( "Composition ", i, ": error = ", averageError, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
         }
-      if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+      if( ! is.na( convergenceValue ) && convergenceValue <= convergenceThreshold )
         {
         break
         }
@@ -642,7 +642,7 @@ fitTimeVaryingTransformToPointSets <- function(
   compositionStepSize = 0.5,
   numberOfIntegrationSteps = 100,
   sigma = 0.0,
-  convergenceThreshold = 0.0,
+  convergenceThreshold = 1e-6,
   rasterizePoints = FALSE,
   verbose = FALSE
   ) {
@@ -897,7 +897,7 @@ fitTimeVaryingTransformToPointSets <- function(
       diffTime <- endTime - startTime
       cat( "Composition ", i, ": error = ", averageError, " (convergence = ", convergenceValue, ", elapsed time = ", diffTime, ")\n", sep = "" )
       }
-    if( ! is.na( convergenceValue ) && convergenceValue < convergenceThreshold )
+    if( ! is.na( convergenceValue ) && convergenceValue <= convergenceThreshold )
       {
       break
       }
