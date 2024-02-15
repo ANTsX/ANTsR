@@ -37,7 +37,7 @@ compcor <- function(fmri, ncompcor = 4,
     return(NULL)
   }
   if (is.antsImage(fmri) & !is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
     mat <- timeseries2matrix(fmri, mask)
   }
   if ( inherits(fmri, "matrix")) {

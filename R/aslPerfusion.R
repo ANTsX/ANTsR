@@ -108,7 +108,7 @@ aslPerfusion <- function(
     lowThresh = mean(moco_results$moco_avg_img) *
     maskThresh, highThresh = Inf, cleanup = TRUE)
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
     moco_mask_img <- mask
   }
   mat<-timeseries2matrix( asl, moco_mask_img )
@@ -146,7 +146,7 @@ aslPerfusion <- function(
     m1[moco_mask_img == 1] <- m1vals
   }
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
     moco_mask_img <- mask
   } 
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)

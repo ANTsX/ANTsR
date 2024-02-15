@@ -64,7 +64,7 @@ multiLabelMorphology <- function(labelsIn, operation, radius,
 
   # If we have a dilation mask, quickly check it's not some non-binary label(s)
   if (!is.null(dilationMask)) {
-    dilationMask = check_ants(dilationMask)
+    dilationMask = ANTsR::check_ants(dilationMask)
     if (max(dilationMask) != 1) {
       stop("Mask is empty or not binary")
     }

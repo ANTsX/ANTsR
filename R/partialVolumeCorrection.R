@@ -42,7 +42,7 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
       mask <- antsImageClone(img)
       mask[img != 0] <- 1
     } else {
-      mask = check_ants(mask)
+      mask = ANTsR::check_ants(mask)
     }
     values.img <- img[mask > 0]
     values.gm <- img.gm[mask > 0]

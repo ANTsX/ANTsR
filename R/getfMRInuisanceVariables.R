@@ -73,7 +73,7 @@ getfMRInuisanceVariables <- function(
   moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09,
     cleanup = TRUE)
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
     moco_mask_img <- mask
   } 
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)

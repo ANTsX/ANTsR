@@ -44,7 +44,7 @@ eanatSelect <- function( inmat, mask=NULL, cthresh=0, smooth=0,
     mask = makeImage( c(3,ncol(mat)+2), voxval=0 )
     mask[ 2, 2:(2+ncol(mat)-1) ] = 1
   } else {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
   if ( selectorScale < 1 ) selectorScale = 1.1
@@ -154,7 +154,7 @@ eanatDef <- function( inmat, nvecs=0, mask=NULL,
     mask = makeImage( c(3,ncol(mat)+2), voxval=0 )
     mask[ 2, 2:(2+ncol(mat)-1) ] = 1
   } else {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   if ( sum(mask==1) != ncol(mat) ) stop("Mask must match mat")
   if ( nvecs >= nrow(mat) ) nvecs = nrow( mat ) - 1
@@ -282,7 +282,7 @@ eanatDef <- function( inmat, nvecs=0, mask=NULL,
                         smoother=0, clustval = 0, verbose = FALSE )
 {
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   vin = matrix( vin, ncol=1 )
   if ( any( is.na( vin ) ) ) vin = antsrimpute( vin )

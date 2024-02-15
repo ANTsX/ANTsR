@@ -165,7 +165,7 @@ preprocessfMRI <- function(boldImage,
   if (is.null(maskImage)) {
     maskImage <- getMask( averageImage )
   } else {
-    maskImage = check_ants(maskImage)
+    maskImage = ANTsR::check_ants(maskImage)
   }
   averageImage[maskImage == 0] <- 0
 

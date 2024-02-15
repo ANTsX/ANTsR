@@ -104,7 +104,7 @@ preprocessRestingBOLD <- function(boldImage,
     if ( is.null(meanBoldFixedImageForMotionCorrection) ) {
       meanBoldFixedImageForMotionCorrection <- getAverageOfTimeSeries(boldImage)
     } else {
-      meanBoldFixedImageForMotionCorrection = check_ants(meanBoldFixedImageForMotionCorrection)
+      meanBoldFixedImageForMotionCorrection = ANTsR::check_ants(meanBoldFixedImageForMotionCorrection)
     }
 
     # Iterative motion correction
@@ -168,7 +168,7 @@ preprocessRestingBOLD <- function(boldImage,
   if (is.null(maskImage)) {
     maskImage <- getMask( averageImage )
   } else {
-    maskImage = check_ants(maskImage)
+    maskImage = ANTsR::check_ants(maskImage)
   }
   averageImage[maskImage == 0] <- 0
 

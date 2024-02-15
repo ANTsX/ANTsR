@@ -54,7 +54,7 @@ basicInPaint <- function(img, paintMask, speedimage = NULL, its = 0, gparam = 0.
     upit <- mean(img[paintMaskUse == 2])
     speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
   } else {
-    speedimage = check_ants(speedimage)
+    speedimage = ANTsR::check_ants(speedimage)
   }
   inpainted = fastMarchingExtension( speedimage, healthymask, img )
   outimg <- antsImageClone(img)

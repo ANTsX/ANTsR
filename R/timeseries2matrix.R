@@ -22,7 +22,7 @@
 #' 
 #' @export timeseries2matrix
 timeseries2matrix <- function(img, mask) {
-  mask = check_ants(mask)
+  mask = ANTsR::check_ants(mask)
   m = as.array(mask)
   
   labs <- sort(unique(m[m > 0.001]))

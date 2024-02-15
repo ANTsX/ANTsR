@@ -56,7 +56,7 @@ createWarpedGrid <- function( img, gridStep=10, gridWidth=2,
   gimg = as.antsImage( garr )
   antsCopyImageInfo( img, gimg )
   if ( ! any( is.na( transform )) & !is.null( fixedReferenceImage ) ) {
-    fixedReferenceImage = check_ants(fixedReferenceImage)
+    fixedReferenceImage = ANTsR::check_ants(fixedReferenceImage)
     return(antsApplyTransforms( fixed=fixedReferenceImage, moving=gimg,
       transformlist=transform ) )
   } else {

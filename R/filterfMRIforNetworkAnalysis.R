@@ -68,7 +68,7 @@ filterfMRIforNetworkAnalysis <- function(
     return(NULL)
   }
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   if (!is.numeric(tr) | missing(tr)) {
     print("TR parameter is missing or not numeric type - is typically between 2 and 4 , depending on your fMRI acquisition")

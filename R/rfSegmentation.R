@@ -49,11 +49,11 @@ rfSegmentation <- function( featureMatrix,
     print("need randomForest package for this function")
     return(NA)
   }
-  mask = check_ants(mask)
+  mask = ANTsR::check_ants(mask)
   haveLabels = !is.null( labelimg )
   if ( haveLabels )
     {
-    labelimg = check_ants(labelimg)
+    labelimg = ANTsR::check_ants(labelimg)
     labels <- as.factor(labelimg[mask == 1])
     mydf <- data.frame(labels = labels, featureMatrix)
     myrf <- randomForest::randomForest(y=labels,x=featureMatrix, ntree = ntrees, type = "classification",

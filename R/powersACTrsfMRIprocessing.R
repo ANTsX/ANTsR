@@ -241,8 +241,8 @@ fMRINormalization <- function(
     structuralSeg = structuralSeg + mask1 + mask2
     t1brain = meanbold * mask
   } else {
-    structuralImage = check_ants(structuralImage)
-    structuralSeg = check_ants(structuralSeg)
+    structuralImage = ANTsR::check_ants(structuralImage)
+    structuralSeg = ANTsR::check_ants(structuralSeg)
     t1brain = structuralImage * thresholdImage( structuralSeg, 1, Inf )
   }
 

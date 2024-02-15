@@ -34,7 +34,7 @@ segmentShapeFromImage <- function(img, shape, mask = NULL, rad = NA, scfun,
   if (is.null(mask)) {
     mask <- getMask(img)
   } else {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   shapemask<-getMask(shape)
   shape<-cropImage( shape, shapemask )

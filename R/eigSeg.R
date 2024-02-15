@@ -27,7 +27,7 @@
 eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
   cthresh=0, smooth=1 ) {
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   if (typeof(mask) != "S4") {
     print(args(eigSeg))

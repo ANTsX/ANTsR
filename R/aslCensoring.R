@@ -201,7 +201,7 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
     mask <- getMask(img)
   } else {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
   }
   ts <- timeseries2matrix(asl, mask)
 

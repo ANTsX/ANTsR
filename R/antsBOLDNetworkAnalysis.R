@@ -53,10 +53,10 @@ antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
   # if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
   # if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   stopifnot(!is.null(bold))
-  bold = check_ants(bold)
+  bold = ANTsR::check_ants(bold)
   mytimes <- dim(bold)[4]
-  aalm <- check_ants(labels)
-  mask = check_ants(mask)
+  aalm <- ANTsR::check_ants(labels)
+  mask = ANTsR::check_ants(mask)
   aalmask <- antsImageClone(aalm)
   mylog <- (aalm >= threshLo & aalm <= threshHi & mask > 0.5)
   # aalmask[mylog] <- 1

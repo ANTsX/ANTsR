@@ -57,7 +57,7 @@ initializeEigenanatomy <- function(initmat, mask = NULL, nreps = 1,
     {
     selectvec = initmat > 0
     if ( ! is.null( mask ) ) {
-      mask = check_ants(mask)
+      mask = ANTsR::check_ants(mask)
       selectvec = mask > 0
     }
     initmatvec = initmat[ selectvec ]

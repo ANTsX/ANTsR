@@ -42,7 +42,7 @@ joinEigenanatomy <- function(datamatrix, mask = NULL, listEanatImages,
   }
   if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask = ANTsR::check_ants(mask)
     decom <- imageListToMatrix(listEanatImages, mask) 
   } else {
     decom <- (listEanatImages)
