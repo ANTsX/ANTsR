@@ -21,17 +21,18 @@ Description: ANTsR interfaces state of the art image processing with R
     Specialized functionality in ANTsR includes image segmentation and
     registration along imaging specific variations of principal component
     and canonical correlation analysis.
-License: Apache License 2.0
+License: Apache License 2.0 + file LICENSE
 LazyLoad: yes
 Depends:
     R (>= 3.0),
     methods,
-    ITKR,
     ANTsRCore (>= 0.8.0)
 Imports:
     graphics,
     grDevices,
     magrittr,
+    NMF,
+    rlang,
     stats,
     utils
 Suggests:
@@ -43,7 +44,6 @@ Suggests:
     caret,
     cluster,
     corpcor,
-    DMwR,
     dplyr,
     e1071,
     extremevalues,
@@ -54,7 +54,6 @@ Suggests:
     glmnet,
     grid,
     hdf5r,
-    ifultools,
     igraph,
     irlba,
     knitr,
@@ -82,7 +81,6 @@ Suggests:
     tools,
     viridis,
     visreg,
-    wmtsa,
     xgboost,
     FNN
 LazyData: TRUE

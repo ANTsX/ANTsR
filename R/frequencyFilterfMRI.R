@@ -69,15 +69,6 @@ frequencyFilterfMRI <- function(boldmat, tr, freqLo = 0.01,
     }
     return(boldmat)
   }
-  if (opt == "wav") {
-    if ( !usePkg("wmtsa") ) { print("Need wmtsa package"); return(NULL) }
-    dnz <- myTimeSeries * 0
-    for (i in 1:ncol(myTimeSeries)) {
-      dnz[, i] <- wmtsa::wavShrink(myTimeSeries[, i], thresh.fun = "adaptive", thresh.scale = 0.1)
-    }
-    filteredTimeSeries <- ts(myTimeSeries - dnz)
-    return(filteredTimeSeries)
-  }
   if (opt == "butt") {
     if ( !usePkg("signal") ) { print("Need signal package"); return(NULL) }
     bf <- signal::butter(2, c(freqLo, freqHi), type = "pass")

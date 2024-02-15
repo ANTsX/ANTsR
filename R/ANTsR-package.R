@@ -2,25 +2,6 @@
 #' @name ANTsR
 #'
 #' @importFrom magrittr %>%
-#' @importFrom ANTsRCore check_ants
-#'   antsRegistration atropos thresholdImage labelClusters
-#'   antsApplyTransforms antsApplyTransformsToPoints
-#'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
-#'   antsImageClone antsImageIterator antsImageIteratorGet
-#'   antsImageIteratorGetIndex antsImageIteratorIsAtEnd
-#'   antsImageIteratorNext antsImageIteratorSet antsImageRead
-#'   antsImageWrite antsRegistration antsSetDirection antsSetOrigin
-#'   antsSetSpacing antsTransformIndexToPhysicalPoint
-#'   antsTransformPhysicalPointToIndex antsrGetPointerName
-#'   antsrTransformFromDisplacementField applyAntsrTransform
-#'   applyAntsrTransformToImage as.antsImage atropos jointLabelFusion
-#'   bigLMStats composeAntsrTransforms imageListToMatrix matrixToImages
-#'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
-#'   getNeighborhoodAtVoxel getNeighborhoodInMask
-#'   iMath is.antsImage kmeansSegmentation labelClusters randomMask
-#'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
-#'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
-#'   splitChannels thresholdImage usePkg
 #' @importFrom graphics hist par plot points
 #' @importFrom grDevices colorRampPalette dev.off hsv png rainbow rgb
 #' @importFrom methods new
