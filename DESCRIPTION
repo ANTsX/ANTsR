@@ -9,7 +9,7 @@ Authors@R: c(
     person(c("Jeff", "T"), "Duda", role = "ctb", email = "NA"),
     person(c("Philip", "A"), "Cook", role = "ctb", email = "NA"),
     person(c("Nicholas", "J"), "Tustison", role = "ctb", email = "NA"),
-    person(c("Dorian"), "Pustina", role = "ctb", email = "NA")
+    person(c("Dorian"), "Pustina", role = "ctb", email = "NA"),
     person(c("Nicholas", "C"), "Cullen", role = "ctb", email = "nickcullen31@gmail.com")
     )
 Maintainer: Brian B. Avants <stnava@gmail.com>
