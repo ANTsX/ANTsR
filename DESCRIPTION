@@ -1,8 +1,8 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.5.7.5
-Date: 2020-05-20
+Version: 0.6.0
+Date: 2024-02-15
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
     person(c("Benjamin", "M"), "Kandel", role = "ctb", email = "NA"),
@@ -10,6 +10,7 @@ Authors@R: c(
     person(c("Philip", "A"), "Cook", role = "ctb", email = "NA"),
     person(c("Nicholas", "J"), "Tustison", role = "ctb", email = "NA"),
     person(c("Dorian"), "Pustina", role = "ctb", email = "NA")
+    person(c("Nicholas", "C"), "Cullen", role = "ctb", email = "nickcullen31@gmail.com")
     )
 Maintainer: Brian B. Avants <stnava@gmail.com>
 Description: ANTsR interfaces state of the art image processing with R
@@ -26,7 +27,7 @@ Depends:
     R (>= 3.0),
     methods,
     ITKR,
-    ANTsRCore (>= 0.7.4)
+    ANTsRCore (>= 0.8.0)
 Imports:
     graphics,
     grDevices,
