@@ -1,4 +1,0 @@
-#!/bin/sh
-############### still a WIP ###############
-rm -f -r src/*.o src/*.o-* src/*.so */*~ *~  src/ants src/antb src/itks src/itkb
-rm -f src/Makevars

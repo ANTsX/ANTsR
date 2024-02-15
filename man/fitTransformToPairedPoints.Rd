@@ -18,7 +18,7 @@ fitTransformToPairedPoints(
   numberOfCompositions = 10,
   compositionStepSize = 0.5,
   sigma = 0,
-  convergenceThreshold = 0,
+  convergenceThreshold = 1e-06,
   numberOfTimeSteps = 2,
   numberOfIntegrationSteps = 100,
   rasterizePoints = FALSE,
