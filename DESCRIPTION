@@ -85,8 +85,9 @@ Suggests:
     xgboost,
     FNN
 LazyData: TRUE
-Remotes: stnava/ITKR, ANTsX/ANTsRCore, cran/wmtsa, cran/ifultools
-NeedsCompilation: yes
+Remotes: 
+  stnava/ITKR,
+  ANTsX/ANTsRCore
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Encoding: UTF-8
