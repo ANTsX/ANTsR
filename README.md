@@ -1,28 +1,52 @@
-[ANTsR Instagram](https://www.instagram.com/antsrx/)
-
 <!--
 ![ants brain](http://i.imgur.com/I2VNWpA.png)
 ![ants edie](http://i.imgur.com/DcV1NVT.png)
 ![ants babe](http://i.imgur.com/gwoxI5M.png)
 -->
-# ANTsR
+# Advanced Normalization Tools in R (ANTsR)
 
-[DOI 10.17605/osf.io/bsq5v](https://osf.io/bsq5v/)
+The ANTsR package is a set of medical imaging processing and analysis tools based on the  [ANTs](https://github.com/ANTsX/ANTs) program. It provides functionality to
+read, write, process, and analyze medical images - in particular, neuroimages - directly
+from the R language. 
 
-![Downloads](https://img.shields.io/github/downloads/antsx/antsr/total) 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stnava/ANTsRDocker/master)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+## Available platforms
+
+ANTsR is available on Mac and Linux. It is not currently available on Windows, although
+a great deal of effort has been put into making this work. Please contact us if you
+are interested in helping us support Windows.
+
+## Installation
+
+Before installing ANTsR, you must install ANTsRCore and ITKR. 
+
+### 1. Downloand and install pre-compiled binaries
+
+The easiest way to install ANTsR is to download the pre-compiled binaries from [here](http://github.com/ANTsX/ANTsR/releases/). Then run  `R CMD INSTALL ANTsR_*.tgz` on the downloaded file. Only some platforms and R versions
+are supported, however. 
+
+### 2. Install from github source using devtools
+
+You can install ANTsR from source using devtools:
+
+```r
+devtools::install_github('ANTsX/ANTsR')
+```
+
+### 3. Install from local source 
+
+You can also install ANTsR locally by cloning the source code and installig all major dependencies locally.
 
 
-<!-- commenting out because we moved to antsx
-[![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stnava/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/stnava/ANTsR) -->
 
-A package providing [ANTs](https://github.com/ANTsX/ANTs) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.  See also the **Neuroconductor** [site](https://www.neuroconductor.org/package/details/ANTsR).
 
-## Description
+
+
+
+## License
 
 License: Apache License 2.0
+
+## Useful Links
 
 Maintainer:	[Brian B. Avants](http://stnava.github.io/)
 
