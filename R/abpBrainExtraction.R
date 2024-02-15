@@ -71,13 +71,12 @@
 #'   t.test toeplitz ts var
 #' @importFrom utils data glob2rx read.csv setTxtProgressBar tail
 #'   txtProgressBar write.csv
-#' @useDynLib ANTsR
 abpBrainExtraction <- function(img, tem, temmask,
                                temregmask = NULL, regtype="SyN", tdir = NA,
                                num_threads = 1,
                                pad = 0,
                                verbose = FALSE) {
-  ### @useDynLib ANTsR, .registration = TRUE
+
   
   if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
