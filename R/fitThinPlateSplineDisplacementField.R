@@ -85,10 +85,9 @@ fitThinPlateSplineDisplacementField <- function(
     stop( "Error:  direction is not of size dimensionality x dimensionality." )
     }
 
-  tpsField <- .Call( "fitThinPlateSplineDisplacementField",
+  tpsField <- ANTsRCore::fitThinPlateSplineDisplacementField(
     dimensionality,
     displacementOrigins, displacements,
-    origin, spacing, size, direction,
-    PACKAGE = "ANTsR" )
+    origin, spacing, size, direction)
   return( tpsField )
 }

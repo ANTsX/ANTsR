@@ -264,7 +264,7 @@ sparseDecom2 <- function(
   priorWeight,
   verbose,
   maxBased ) {
-  outval = .Call( "sccanCpp",
+  outval = ANTsRCore::sccanCpp(
                   inputMatrices[[1]],
                   inputMatrices[[2]],
                   inmask[[1]],
@@ -283,8 +283,7 @@ sparseDecom2 <- function(
                   ell1,
                   verbose,
                   priorWeight,
-                  maxBased,
-                  PACKAGE="ANTsR" )
+                  maxBased)
   p1 = inputMatrices[[1]] %*% t(outval$eig1)
   p2 = inputMatrices[[2]] %*% t(outval$eig2)
   outcorrs = diag( cor( p1 , p2  ) )

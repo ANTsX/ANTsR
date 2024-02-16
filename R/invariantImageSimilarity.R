@@ -109,9 +109,9 @@ invariantImageSimilarity <- function(
   idim = in_image1@dimension
   fpname = paste("FixedParam",1:idim,sep='')
   if (doReflection == 0) {
-    r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+    r1 <- ANTsRCore::invariantImageSimilarity(in_image1, in_image2,
       thetain, thetain2, thetain3, localSearchIterations,
-      metric, scaleImage, doReflection, txfn, transform, mask , PACKAGE = "ANTsR")
+      metric, scaleImage, doReflection, txfn, transform, mask)
     pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
     pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
     colnames( r1 ) = c( "MetricValue", pnames )
@@ -121,23 +121,23 @@ invariantImageSimilarity <- function(
   txfn2 <- tempfile(fileext = ".mat")
   txfn3 <- tempfile(fileext = ".mat")
   txfn4 <- tempfile(fileext = ".mat")
-  r1 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+  r1 <- ANTsRCore::invariantImageSimilarity(in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 0, txfn1, transform, mask , PACKAGE = "ANTsR")
+    metric, scaleImage, 0, txfn1, transform, mask )
   pnames = paste("Param", 1:( ncol( r1 ) - 1 ), sep='' )
   pnames[ ( length(pnames)-idim+1 ):length(pnames) ] = fpname
   colnames( r1 ) = c( "MetricValue", pnames )
-  r2 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+  r2 <- ANTsRCore::invariantImageSimilarity(in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 1, txfn2, transform, mask ,  PACKAGE = "ANTsR")
+    metric, scaleImage, 1, txfn2, transform, mask)
   colnames( r2 ) = c( "MetricValue", pnames )
-  r3 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+  r3 <- ANTsRCore::invariantImageSimilarity(in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 2, txfn3, transform, mask ,  PACKAGE = "ANTsR")
+    metric, scaleImage, 2, txfn3, transform, mask)
   colnames( r3 ) = c( "MetricValue", pnames )
-  r4 <- .Call("invariantImageSimilarity", in_image1, in_image2,
+  r4 <- ANTsRCore::invariantImageSimilarity(in_image1, in_image2,
     thetain, thetain2, thetain3, localSearchIterations,
-    metric, scaleImage, 3, txfn4, transform, mask ,  PACKAGE = "ANTsR")
+    metric, scaleImage, 3, txfn4, transform, mask )
   colnames( r4 ) = c( "MetricValue", pnames )
   ww <- which.min(c(min(r1[,1]), min(r2[,1]), min(r3[,1]), min(r4[,1])))
   if (ww == 1) {

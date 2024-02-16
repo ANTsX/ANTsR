@@ -25,14 +25,13 @@ invertDisplacementField <- function(
 
   dimensionality <- displacementField@dimension
 
-  inverseField <- .Call( "invertDisplacementField",
+  inverseField <- ANTsRCore::invertDisplacementField(
     dimensionality,
     displacementField,
     inverseFieldInitialEstimate,
     as.numeric( maximumNumberOfIterations ),
     as.numeric( meanErrorToleranceThreshold ),
     as.numeric( maxErrorToleranceThreshold ),
-    as.numeric( enforceBoundaryCondition ),
-    PACKAGE = "ANTsR")
+    as.numeric( enforceBoundaryCondition ))
   return( inverseField )
 }

@@ -18,7 +18,7 @@ fitTimeVaryingTransformToPointSets(
   compositionStepSize = 0.5,
   numberOfIntegrationSteps = 100,
   sigma = 0,
-  convergenceThreshold = 0,
+  convergenceThreshold = 1e-06,
   rasterizePoints = FALSE,
   verbose = FALSE
 )

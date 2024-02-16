@@ -83,7 +83,7 @@ test_that("var of antsImage", {
   expect_is(varvalues, "numeric")
   # print(search())
   # print(var)
-  expect_equal( ANTsRCore::var(varimg), var(varvalues), tolerance = 1.e-7 )
+  expect_equal( ANTsR::var(varimg), var(varvalues), tolerance = 1.e-7 )
   expect_equal( var(as.numeric(varimg)), var(varvalues), tolerance = 1.e-7 )
   # expect_equal( var(varimg), var(varvalues), tolerance = 1.e-7 )
 })
@@ -269,7 +269,7 @@ test_that("min of multichannel antsImage", {
 })
 
 test_that("var of multichannel antsImage", {
-  expect_equal(ANTsRCore::var(mimg), var(mvalues), tolerance = 1.e-7)
+  expect_equal(ANTsR::var(mimg), var(mvalues), tolerance = 1.e-7)
 })
 
 test_that("sd of multichannel antsImage", {

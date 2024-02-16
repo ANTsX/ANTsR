@@ -11,5 +11,5 @@
 #'
 #' @export robustMatrixTransform
 robustMatrixTransform <- function( mat ) {
-  .Call( "robustMatrixTransform", data.matrix( mat ), PACKAGE="ANTsR" )
+  ANTsRCore::robustMatrixTransform(data.matrix( mat ))
 }

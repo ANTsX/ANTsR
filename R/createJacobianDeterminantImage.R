@@ -29,10 +29,9 @@ createJacobianDeterminantImage <- function(
     antsImageWrite( tx, txuse )
     } else txuse = tx
 
-  outimg <- .Call("createJacobianDeterminantImageR",
+  outimg <- ANTsRCore::createJacobianDeterminantImageR(
       antsImageClone( domainImg ), txuse,
       as.numeric( doLog ),
-      as.numeric( geom ),
-      PACKAGE = "ANTsR")
+      as.numeric( geom ))
   return( outimg )
 }

@@ -166,13 +166,12 @@ fitBsplineDisplacementField <- function(
     numberOfControlPoints <- rep( numberOfControlPoints, dimensionality )
     }
 
-  bsplineField <- .Call( "fitBsplineDisplacementField",
+  bsplineField <- ANTsRCore::fitBsplineDisplacementField(
     dimensionality,
     displacementField, displacementWeightImage,
     displacementOrigins, displacements, displacementWeights,
     origin, spacing, size, direction,
     numberOfFittingLevels, numberOfControlPoints, splineOrder,
-    enforceStationaryBoundary, estimateInverse, rasterizePoints,
-    PACKAGE = "ANTsR" )
+    enforceStationaryBoundary, estimateInverse, rasterizePoints)
   return( bsplineField )
 }

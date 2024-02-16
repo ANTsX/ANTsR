@@ -59,25 +59,23 @@ simulateDisplacementField <- function(
       numberOfControlPoints <- rep( numberOfControlPoints, imageDimension )
       }
 
-    outputField <- .Call( "simulateBSplineDisplacementFieldR",
+    outputField <- ANTsRCore::simulateBSplineDisplacementFieldR(
       antsImageClone( domainImage ),
       as.numeric( numberOfRandomPoints ),
       as.numeric( sdNoise ),
       as.numeric( enforceStationaryBoundary ),
       as.numeric( numberOfFittingLevels ),
-      as.numeric( numberOfControlPoints ),
-      PACKAGE = "ANTsR" )
+      as.numeric( numberOfControlPoints ))
     return( outputField )
 
     } else if( fieldType == 'exponential' ) {
 
-    outputField <- .Call( "simulateExponentialDisplacementFieldR",
+    outputField <- ANTsRCore::simulateExponentialDisplacementFieldR(
       antsImageClone( domainImage ),
       as.numeric( numberOfRandomPoints ),
       as.numeric( sdNoise ),
       as.numeric( enforceStationaryBoundary ),
-      as.numeric( sdSmoothing ),
-      PACKAGE = "ANTsR" )
+      as.numeric( sdSmoothing ))
     return( outputField )
 
     } else {

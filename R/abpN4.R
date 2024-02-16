@@ -10,7 +10,6 @@
 #' \code{\link{n4BiasFieldCorrection}}
 #' @return outputs a bias corrected image. 1 indicates failure.
 #' @author Tustison N, Avants BB
-#' @importFrom ANTsRCore n4BiasFieldCorrection
 #' @examples
 #'
 #' img <- antsImageRead(getANTsRData("r16"))

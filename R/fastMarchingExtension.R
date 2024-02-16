@@ -20,9 +20,8 @@
 fastMarchingExtension <- function( speedImage, labelImage, valueImage ) {
   healthymask <- antsImageClone(labelImage)
   healthymask[ labelImage == 2 ] <- 0
-  outimg <- .Call("fastMarchingExtension",
-    speedImage, healthymask, valueImage,
-    PACKAGE = "ANTsR")
+  outimg <- ANTsRCore::fastMarchingExtension(
+    speedImage, healthymask, valueImage)
   outimg[ labelImage ==  1 ] = valueImage[ labelImage ==  1 ]
   return( outimg )
 }

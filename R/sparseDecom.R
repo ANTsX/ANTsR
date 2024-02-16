@@ -139,19 +139,17 @@ sparseDecom <- function(inmatrix = NA, inmask = NULL,
   time1 <- (Sys.time())
   if ( robust > 0 )
   {
-    outval = .Call( "eigenanatomyCpp",
+    outval = ANTsRCore::eigenanatomyCpp(
                     robustMatrixTransform(inmatrix),
                     inmask, sparseness, nvecs, its, cthresh, z, smooth,
                     initializationList, mycoption, ell1, verbose, powerit,
-                    priorWeight, maxBased,
-                    PACKAGE="ANTsR" )
+                    priorWeight, maxBased)
   } else {
-    outval = .Call( "eigenanatomyCpp",
+    outval = ANTsRCore::eigenanatomyCpp(
                     inmatrix,
                     inmask, sparseness, nvecs, its, cthresh, z, smooth,
                     initializationList, mycoption, ell1, verbose, powerit,
-                    priorWeight, maxBased,
-                    PACKAGE="ANTsR" )
+                    priorWeight, maxBased)
   }
   time2 <- (Sys.time())
   outval = lappend( outval,  (time2 - time1) )
