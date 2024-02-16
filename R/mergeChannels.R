@@ -33,6 +33,6 @@ mergeChannels <- function(imageList) {
       }
   }
 
-  ANTsRCore::mergeChannels(imageList)
+  img <- ANTsRCore::mergeChannels(imageList)
   return(img)
 }
