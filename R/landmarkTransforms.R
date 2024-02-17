@@ -308,7 +308,7 @@ fitTransformToPairedPoints <- function(
         updatedFixedPoints <- applyAntsrTransformToPoint( totalFieldXfrm, fixedPoints )
         }
 
-      error <- mean( sqrt( rowSums( ( updatedFixedPoints - updatedMovingPoints )^2 ) ) )
+      error <- mean( sqrt( rowSums( ( updatedFixedPoints - movingPoints )^2 ) ) )
       errorValues <- append( errorValues, error )
       convergenceValue <- convergenceMonitoring( errorValues )
       if( verbose )
@@ -529,10 +529,6 @@ fitTransformToPairedPoints <- function(
           cat("  integration point ", t, ": maxNorm = ", maxNorm, ", medianNorm = ", medianNorm, "\n", sep = "")
           }
 
-        if( verbose )
-          {
-          cat("  integration point " + str(t) + ": max_norm = " + str(max_norm) + ", median_norm = " + str(median_norm))
-          }
         updateDerivativeFieldAtTimePointArray <- updateDerivativeFieldAtTimePointArray / maxNorm
         if( domainImage@dimension == 2 )
           {
