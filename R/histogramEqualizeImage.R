@@ -23,11 +23,12 @@ histogramEqualizeImage <- function(
   breakVector <- seq( min( imageArray ), max( imageArray ), length.out = numberOfHistogramBins )
   imageHistogram <- hist( imageVector, breaks = breakVector,  plot = FALSE )
   cdf <- cumsum( imageHistogram$density )
-  cdf <- cdf * ( numberOfHistogramBins - 1 ) / tail( cdf, n = 1 )
+  cdf <- cdf / tail( cdf, n = 1 )
   imageArrayEqualizedFlat <- approx( imageHistogram$breaks[1:( numberOfHistogramBins - 1 )], cdf, imageVector, method = "linear", rule = 2 )
-  imageArrayEqualized = array( data = imageArrayEqualizedFlat$y, dim = dim( imageArray ) )    
-  imageEqualized <- as.antsImage( imageArrayEqualized, reference = image )
+  imageArrayEqualized <- array( data = imageArrayEqualizedFlat$y, dim = dim( imageArray ) )
+  imageArrayEqualized <- ( imageArrayEqualized - min( imageArrayEqualized ) ) / ( max( imageArrayEqualized ) - min( imageArrayEqualized ) )
+  imageArrayEqualized <- imageArrayEqualized * ( max( imageArray ) - min( imageArray ) ) + min( imageArray )
 
-  return( imageEqualized )
+  return( as.antsImage( imageArrayEqualized, reference = image ) )
   }
 
