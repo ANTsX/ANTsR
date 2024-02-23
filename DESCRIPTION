@@ -41,7 +41,6 @@ Suggests:
     caret,
     cluster,
     corpcor,
-    DMwR,
     dplyr,
     e1071,
     extremevalues,
@@ -52,7 +51,6 @@ Suggests:
     glmnet,
     grid,
     hdf5r,
-    ifultools,
     igraph,
     irlba,
     knitr,
@@ -67,7 +65,6 @@ Suggests:
     pracma,
     randomForest,
     R.matlab,
-    Rcpp,
     RcppEigen,
     RcppHNSW,
     rgl,
@@ -80,11 +77,10 @@ Suggests:
     tools,
     viridis,
     visreg,
-    wmtsa,
     xgboost,
     FNN
 LazyData: TRUE
-Remotes: ANTsX/ANTsRCore, cran/wmtsa, cran/ifultools
+Remotes: ANTsX/ANTsRCore
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Encoding: UTF-8

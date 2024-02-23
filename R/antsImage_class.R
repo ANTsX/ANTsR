@@ -5,8 +5,6 @@
 #'
 #' @slot index indices of the region
 #' @slot size size of the region
-#' @import Rcpp
-#' @import ITKR
 #' @import methods
 #' @import tools
 #' @import stats

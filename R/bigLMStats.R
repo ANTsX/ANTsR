@@ -136,7 +136,6 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = FALSE) {
 #' print( rownames( result$pValue ) )
 #'
 #' @export ilr
-#' @importFrom RcppEigen fastLm
 ilr <- function( dataFrame,  voxmats, myFormula ) {
   vdf = data.frame( dataFrame )
   matnames = names( voxmats )
