@@ -31,3 +31,4 @@ histogramEqualizeImage <- function(
 
   return( as.antsImage( imageArrayEqualized, reference = image ) )
   }
+
