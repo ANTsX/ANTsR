@@ -15,12 +15,6 @@
 #'  getANTsRData("r64"),
 #'  getANTsRData("r85") )
 #' mm<-rapidlyInspectImageData( fnl )
-#' if ( !usePkg("DMwR") | ! usePkg("fpc") )
-#'    { print("Need DMwR and fpc packages") } else {
-#'   pamres <- fpc::pamk(mm,1:4)
-#'   outlier.scores <- DMwR::lofactor( mm, k=3 )
-#'   outliers <- order(outlier.scores)
-#'   }
 #' }
 #'
 #' @export rapidlyInspectImageData

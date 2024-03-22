@@ -31,7 +31,7 @@ verbose = TRUE,
   }
 
   rflct<-tempfile(fileext = ".mat")
-  catchout = .Call( "reflectionMatrix", img1, axis, rflct, package="ANTsR")
+  catchout = ANTsRCore::reflectionMatrix(img1, axis, rflct)
 
   if ( ! all(is.na(tx) ))
   {
@@ -69,6 +69,6 @@ reflectionMatrix<-function( img1, axis=NA, reflectionMatrixFilename ) {
   if ( missing( reflectionMatrixFilename ) ) {
     reflectionMatrixFilename<-tempfile(fileext = ".mat")
   }
-  catchout = .Call( "reflectionMatrix", img1, axis, reflectionMatrixFilename, package="ANTsR")
+  catchout = ANTsRCore::reflectionMatrix(img1, axis, reflectionMatrixFilename)
   return( reflectionMatrixFilename )
 }

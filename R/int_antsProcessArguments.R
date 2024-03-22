@@ -1,3 +1,14 @@
+#' Processing arguments for command line parsing
+#'
+#' @rdname int_antsProcessArguments
+#' @param args arguments to parse into those for \code{ANTsR} functions
+#' @return A character vector
+#' args = "hey"
+#' .int_antsProcessArguments(args)
+#' args = list(h = "hey")
+#' .int_antsProcessArguments(args)
+#' args = list(h = list("hey"))
+#' .int_antsProcessArguments(args)
 .int_antsProcessArguments <- function(args) {
   char_vect <- ""
   if (typeof(args) == "list") {

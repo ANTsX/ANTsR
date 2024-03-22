@@ -26,12 +26,11 @@ histogramMatchImage <- function(
   useThresholdAtMeanIntensity = FALSE
   ) {
 
-  outputImage <- .Call( "histogramMatchImageR",
+  outputImage <- ANTsRCore::histogramMatchImageR(
     antsImageClone( sourceImage ), 
     antsImageClone( referenceImage ),
     as.numeric( numberOfHistogramBins ), 
     as.numeric( numberOfMatchPoints ),
-    as.numeric( useThresholdAtMeanIntensity ),
-    PACKAGE = "ANTsR")
+    as.numeric( useThresholdAtMeanIntensity ))
   return( outputImage )
 }

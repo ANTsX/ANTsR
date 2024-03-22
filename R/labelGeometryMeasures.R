@@ -21,7 +21,7 @@ labelGeometryMeasures <- function( labelImage, intensityImage=NULL ) {
   }
   outcsv<-tempfile( fileext='.csv' )
   veccer<-list( labelImage@dimension, labelImage, intensityImage, outcsv )
-  pp <- .Call("LabelGeometryMeasures", .int_antsProcessArguments(veccer) )
+  pp <- ANTsRCore::LabelGeometryMeasures(.int_antsProcessArguments(veccer) )
   pp = read.csv( outcsv )
   pp$Label = sort( unique( labelImage[ labelImage > 0 ] ) )
   names( pp )[2] = "VolumeInMillimeters"

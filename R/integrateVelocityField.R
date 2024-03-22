@@ -28,12 +28,11 @@ integrateVelocityField <- function(
 
   dimensionality <- velocityField@dimension - 1
 
-  integratedField <- .Call( "integrateVelocityField",
+  integratedField <- ANTsRCore::integrateVelocityField(
     dimensionality,
     velocityField, 
     as.numeric( lowerIntegrationBound ), 
     as.numeric( upperIntegrationBound ),
-    as.numeric( numberOfIntegrationSteps ),
-    PACKAGE = "ANTsR")
+    as.numeric( numberOfIntegrationSteps ))
   return( integratedField )
 }

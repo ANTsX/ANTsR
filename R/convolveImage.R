@@ -31,7 +31,7 @@ convolveImage <- function( image, kernelImage, crop=TRUE ) {
     kernelImage[ kernelImageMask == 0 ]<-
       mean( kernelImage[ kernelImageMask == 1 ] )
     }
-  outimg = .Call("itkConvolveImage", image, kernelImage, PACKAGE = "ANTsR")
+  outimg = ANTsRCore::itkConvolveImage(image, kernelImage)
   outimg@components = as.integer( image@components )
   return( outimg )
 }

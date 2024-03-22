@@ -26,3 +26,5 @@ R/confidenceConnected.R
 R/connectedThresholdImage.R
 ^doc$
 ^\.github$
+Dockerfile
+code_of_conduct.md

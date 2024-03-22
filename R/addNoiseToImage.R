@@ -61,10 +61,9 @@ addNoiseToImage <- function(
     stop( "Error:  unrecognized noise model." )
     }  
 
-  outputImage <- .Call( "addNoiseToImageR",
+  outputImage <- ANTsRCore::addNoiseToImageR(
     antsImageClone( image ),
     whichNoiseModel,
-    as.numeric( noiseParameters ),
-    PACKAGE = "ANTsR" )
+    as.numeric( noiseParameters ))
   return( outputImage )
 }

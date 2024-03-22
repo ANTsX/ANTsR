@@ -40,25 +40,6 @@
 #'
 #' @export abpBrainExtraction
 #' @importFrom magrittr %>%
-#' @importFrom ANTsRCore check_ants
-#'   antsRegistration atropos thresholdImage labelClusters
-#'   antsApplyTransforms antsApplyTransformsToPoints
-#'   antsCopyImageInfo antsGetDirection antsGetOrigin antsGetSpacing
-#'   antsImageClone antsImageIterator antsImageIteratorGet
-#'   antsImageIteratorGetIndex antsImageIteratorIsAtEnd
-#'   antsImageIteratorNext antsImageIteratorSet antsImageRead
-#'   antsImageWrite antsRegistration antsSetDirection antsSetOrigin
-#'   antsSetSpacing antsTransformIndexToPhysicalPoint
-#'   antsTransformPhysicalPointToIndex antsrGetPointerName
-#'   antsrTransformFromDisplacementField applyAntsrTransform
-#'   applyAntsrTransformToImage as.antsImage atropos jointLabelFusion
-#'   bigLMStats composeAntsrTransforms imageListToMatrix matrixToImages
-#'   cropImage cropIndices getANTsRData getAntsrTransformParameters getMask
-#'   getNeighborhoodAtVoxel getNeighborhoodInMask
-#'   iMath is.antsImage kmeansSegmentation labelClusters randomMask
-#'   labelStats lappend makeImage mergeChannels n3BiasFieldCorrection
-#'   readAntsrTransform resampleImage resampleImageToTarget smoothImage
-#'   splitChannels thresholdImage usePkg
 #' @importFrom graphics hist par plot points
 #' @importFrom grDevices colorRampPalette dev.off hsv png rainbow rgb
 #' @importFrom methods new
@@ -71,14 +52,12 @@
 #'   t.test toeplitz ts var
 #' @importFrom utils data glob2rx read.csv setTxtProgressBar tail
 #'   txtProgressBar write.csv
-#' @useDynLib ANTsR
 abpBrainExtraction <- function(img, tem, temmask,
                                temregmask = NULL, regtype="SyN", tdir = NA,
                                num_threads = 1,
                                pad = 0,
                                verbose = FALSE) {
-  ### @useDynLib ANTsR, .registration = TRUE
-  
+
   if (!is.null(num_threads)) {
     itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     on.exit({

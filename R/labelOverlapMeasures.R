@@ -23,8 +23,8 @@ labelOverlapMeasures <- function( sourceLabelImage, targetLabelImage )
   sourceLabelImage <- check_ants( sourceLabelImage )
   targetLabelImage <- check_ants( targetLabelImage )
 
-  overlapMeasures <- .Call( "labelOverlapMeasuresR", 
-    sourceLabelImage, targetLabelImage, PACKAGE = "ANTsR" )
+  overlapMeasures <- ANTsRCore::labelOverlapMeasuresR( 
+    sourceLabelImage, targetLabelImage)
   overlapMeasures[1, 1] <- "All"
 
   return( overlapMeasures )

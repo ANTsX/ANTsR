@@ -66,6 +66,6 @@ affineInitializer <- function( fixedImage, movingImage, searchFactor=20,
     veccer <- lappend( veccer, mask )
   }
   xxx <- .int_antsProcessArguments( veccer )
-  temp<-.Call("antsAffineInitializer", xxx,  PACKAGE = "ANTsR")
+  temp<- ANTsRCore::antsAffineInitializer(xxx)
   return( txfn )
 }

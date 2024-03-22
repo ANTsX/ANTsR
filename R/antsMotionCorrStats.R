@@ -23,8 +23,7 @@
   
   tsimg <- antsImageClone(inimg, "float")
   mocomat <- as.matrix(mocoparams)
-  .Call("antsMotionCorrStats", tsimg, mask, mocomat, stupidoff,
-        PACKAGE = "ANTsR")
+  ANTsRCore::antsMotionCorrStats(tsimg, mask, mocomat, stupidoff)
 }
 
 .antsMotionCorrStats0 <- function(
@@ -52,6 +51,5 @@
   
   tsimg <- antsImageClone(inimg, "float")
   mocomat <- as.matrix(mocoparams)
-  .Call("antsMotionCorrStats", tsimg, mask, mocomat, stupidoff,
-        PACKAGE = "ANTsR")
+  ANTsRCore::antsMotionCorrStats(tsimg, mask, mocomat, stupidoff)
 }

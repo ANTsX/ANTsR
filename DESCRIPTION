@@ -1,8 +1,8 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.5.7.5
-Date: 2020-05-20
+Version: 0.6.0
+Date: 2024-02-16
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
     person(c("Benjamin", "M"), "Kandel", role = "ctb", email = "NA"),
@@ -41,7 +41,6 @@ Suggests:
     caret,
     cluster,
     corpcor,
-    DMwR,
     dplyr,
     e1071,
     extremevalues,
@@ -52,7 +51,6 @@ Suggests:
     glmnet,
     grid,
     hdf5r,
-    ifultools,
     igraph,
     irlba,
     knitr,
@@ -67,7 +65,6 @@ Suggests:
     pracma,
     randomForest,
     R.matlab,
-    Rcpp,
     RcppEigen,
     RcppHNSW,
     rgl,
@@ -80,14 +77,10 @@ Suggests:
     tools,
     viridis,
     visreg,
-    wmtsa,
     xgboost,
     FNN
 LazyData: TRUE
-LinkingTo: Rcpp, ITKR, ANTsRCore
-SystemRequirements: cmake, git, clang
-Remotes: stnava/ITKR, ANTsX/ANTsRCore, cran/wmtsa, cran/ifultools
-NeedsCompilation: yes
+Remotes: ANTsX/ANTsRCore
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Encoding: UTF-8

@@ -132,7 +132,7 @@ aslAveraging <- function(asl, mask=NULL, tc=NA,  nuisance=NA, method="regression
   }
   
   if (length(grep("Subtract", method)) > 0) {
-    avg <- .Call("timeSeriesSubtraction", asl, method)
+    avg <- ANTsRCore::timeSeriesSubtraction(asl, method)
   } else if (method == "regression"){
     labelfirst <- TRUE
     if (is.null(mask)){
