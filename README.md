@@ -59,6 +59,8 @@ $ R CMD INSTALL ANTsRCore
 $ R CMD INSTALL ANTsR
 ```
 
+<br />
+
 ## Developer notes
 
 ### Maintainer
@@ -69,6 +71,7 @@ $ R CMD INSTALL ANTsR
 
 Apache License 2.0
 
+<br />
 
 ## Relevant links
 
@@ -90,6 +93,7 @@ Binaries:	[here](http://github.com/ANTsX/ANTsR/releases/)
 
 **Suggested packages** [https://github.com/stnava/ANTsRDocker/blob/master/install.R](https://github.com/stnava/ANTsRDocker/blob/master/install.R)
 
+<br />
 
 ## Research using ANTsR
 
@@ -128,3 +132,9 @@ architectures ported to the R language.
         * DenseNet (2-D, 3-D)
     * Object detection
         * Single Shot MultiBox Detector (2-D, 3-D)
+
+<br />
+
+## Contributing
+
+If you have a question or need help solving a problem, please create an issue on GitHub. If you want to contribute code or have feature request, creating an issue on GitHub is also the best place to start.
