@@ -1,0 +1,78 @@
+
+# Release notes
+
+
+## 0.4.0
+
+* ENH: better compilation and release style.
+* ENH: return boolean same size as image
+* ENH: improved decomposition methods
+* ENH: easier to use antsrSurf and antsrVol
+
+## 0.3.3
+
+* ENH: spare distance matrix, multi scale svd
+
+## 0.3.2
+
+* ENH: added domainImg option to plot.antsImage which can standardize plot.
+
+* COMP: test for DVCL define requirement to improve clang and gcc compilations
+
+* WIP: transform objects can be created on the fly and manipulated thanks to jeff duda
+
+* ENH: automation for eigenanatomy
+
+* ENH: reworked SCCAN and eanat
+
+* ENH: mrvnrfs
+
+* ENH: resting state Vignette
+
+* DOC: clarify/extend antsApplyTransforms
+
+* ENH: multidimensional images
+
+* STYLE: iMath not ImageMath in ANTsR
+
+## 0.3.1
+
+* WIP: iMath improvements
+
+* WIP: ASL pipeline fuctionality
+
+* BUG: Fixed image indexing bug
+
+* BUG: plot.antsImage improvements
+
+* ENH: more antsRegistration options
+
+* ENH: geoSeg
+
+* ENH: JointLabelFusion and JointIntensityFusion
+
+* ENH: Enable negating images
+
+* ENH: weingarten curvature
+
+* ENH: antsApplyTransformsToPoints with example
+
+* ENH: renormalizeProbabilityImages
+
+* ENH: Suppress output from imageWrite.
+
+## 0.3.0
+
+First official release.
+
+
+
+# Tagging a beta release
+
+```
+git tag -d beta
+git push origin :refs/tags/beta
+git tag beta
+git push  --tags origin
+```
+

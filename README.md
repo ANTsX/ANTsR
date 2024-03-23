@@ -1,48 +1,80 @@
-[ANTsR Instagram](https://www.instagram.com/antsrx/)
+
 
 <!--
 ![ants brain](http://i.imgur.com/I2VNWpA.png)
 ![ants edie](http://i.imgur.com/DcV1NVT.png)
 ![ants babe](http://i.imgur.com/gwoxI5M.png)
 -->
-# ANTsR
-
-[DOI 10.17605/osf.io/bsq5v](https://osf.io/bsq5v/)
+# Advanced Normalization Tools in R
 
 ![Downloads](https://img.shields.io/github/downloads/antsx/antsr/total) 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stnava/ANTsRDocker/master)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
+<br />
 
-<!-- commenting out because we moved to antsx
-[![Coverage Status](https://coveralls.io/repos/stnava/ANTsR/badge.svg)](https://coveralls.io/r/stnava/ANTsR)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/stnava/ANTsR?branch=master&svg=true)](https://ci.appveyor.com/project/stnava/ANTsR) -->
+ANTsR is an R package which wraps the well-established C++ biomedical image processing library <i>[ANTs](https://github.com/ANTsX/ANTs)</i>. It includes efficient reading and writing of medical images, algorithms for registration, segmentation, and statistical learning, as well as functions to create publication-ready visualizations.
 
-A package providing [ANTs](https://github.com/ANTsX/ANTs) features in R as well as imaging-specific data representations, spatially regularized dimensionality reduction and segmentation tools.  See also the **Neuroconductor** [site](https://www.neuroconductor.org/package/details/ANTsR).
+If you are looking to train deep learning models on your medical images in R, you might be interested in [ANTsRNet](https://github.com/ANTsX/ANTsPy) which provides pre-trained models and utilities for training deep learning models on medical images.
 
-## Description
+<br />
 
-License: Apache License 2.0
+## Installation
 
-Maintainer:	[Brian B. Avants](http://stnava.github.io/)
+Currently, the only way to install ANTsR is from the pre-compiled binaries or from source. We are actively working on getting ANTsR onto CRAN / Bioconductor / etc. 
 
-URL:	[homepage](https://antsx.github.io/ANTsR/)
+### Binaries
 
-BugReports: [github issues](http://github.com/ANTsX/ANTsR/issues)
+The fastest way to install ANTsR is from pre-compile binaries. Download the relevant version and run this from the command-line:
 
-NeedsCompilation:	yes
+```
+R CMD INSTALL ANTsR_*.tgz
+```
 
-Travis checks:	[ANTsR results](https://travis-ci.org/ANTsX/ANTsR)
+### From source using devtools
 
-Documentation: [https://antsx.github.io/ANTsR/](https://antsx.github.io/ANTsR/).
+To install ANTsR from source, you can use devtools to install the latest version of the code directly form GitHub:
 
-## Preview ANTsR on the cloud
+```R
+devtools::install_github('ANTsX/ANTsR')
+```
 
-Try the binder link above.
+### From source using R CMD INSTALL
 
-Note: as of this writing, memory is very limited on this cloud preview so some examples may not run successfully.
+Alternatively, you can clone and install ANTsR and its two main dependencies (ANTsRCore, ITKR) and then install them as you would traditional R source packages.
 
-## Downloads
+First, clone the repositories:
+
+```sh
+$ git clone https://github.com/stnava/ITKR.git
+$ git clone https://github.com/ANTsX/ANTsRCore.git
+$ git clone https://github.com/ANTsX/ANTsR.git
+```
+
+Install the package as follows:
+
+```sh
+$ R CMD INSTALL ITKR
+$ R CMD INSTALL ANTsRCore
+$ R CMD INSTALL ANTsR
+```
+
+## Developer notes
+
+### Maintainer
+
+[Brian B. Avants](http://stnava.github.io/)
+
+### License
+
+Apache License 2.0
+
+
+## Relevant links
+
+[ANTsR Instagram](https://www.instagram.com/antsrx/)
+
+[DOI 10.17605/osf.io/bsq5v](https://osf.io/bsq5v/)
 
 Reference manual:	[ANTsR](https://antsx.github.io/ANTsR/reference/index.html)
 
@@ -58,11 +90,6 @@ Binaries:	[here](http://github.com/ANTsX/ANTsR/releases/)
 
 **Suggested packages** [https://github.com/stnava/ANTsRDocker/blob/master/install.R](https://github.com/stnava/ANTsRDocker/blob/master/install.R)
 
-Install the binary, after downloading, via command line:
-
-```
-R CMD INSTALL ANTsR_*.tgz
-```
 
 ## Research using ANTsR
 
@@ -101,178 +128,3 @@ architectures ported to the R language.
         * DenseNet (2-D, 3-D)
     * Object detection
         * Single Shot MultiBox Detector (2-D, 3-D)
-
-## Installation from source
-
-Please read this entire section before choosing which method you prefer.
-
-In general, these **assume** you have [git](http://git-scm.com/) installed / accessible in your environment, as well as a compiler, preferably `clang`.  you may also need [cmake](http://www.cmake.org) if you do/can not install `cmaker`.
-
-Windows users should see [Rtools](http://cran.r-project.org/bin/windows/Rtools/) and maybe, also, [installr](https://github.com/talgalili/installr) for assistance in setting up their environment for building (must have a compiler too).  To my knowledge, there are no recorded instances of ANTsR being installed on Windows.  If someone does so, we would like to know.
-
-You will need to install R packages that ANTsR requires. Minimally:
-**Install ITKR and ANTsRCore** [here](https://github.com/stnava/ITKR/releases) and [here](https://github.com/ANTsX/ANTsRCore/releases) then do:
-```
-mydeps <- c( "Rcpp", "RcppEigen", "magrittr", "rsvd", "magic", "psych" )
-install.packages( pkgs = mydeps, dependencies = TRUE )
-```
-You can gain additional functionality by installing packages that
-are listed in the [`DESCRIPTION` file](https://github.com/ANTsX/ANTsR/blob/master/DESCRIPTION) under `Suggests`.
-A complete list of recommended ancillary packages [here](https://github.com/ANTsX/ANTsR/wiki/ANTsR-Dependencies-for-(close-to)-full-functionality).
-
-**Method 1: with devtools in R**
-```
-library( devtools )
-# install_github("stnava/cmaker") # if you do not have cmake
-install_github("stnava/ANTsR")
-```
-
-**Method 2: from command line (most traditional method)**
-
-Assumes git, cmake and compilers are available in your environment (as above).
-
-First, clone the repository:
-```sh
-$ git clone https://github.com/stnava/ITKR.git
-$ git clone https://github.com/ANTsX/ANTsRCore.git
-$ git clone https://github.com/ANTsX/ANTsR.git
-```
-
-Install the package as follows:
-```sh
-$ R CMD INSTALL ITKR
-$ R CMD INSTALL ANTsRCore
-$ R CMD INSTALL ANTsR
-```
-
-The [`travis.yml` file](https://github.com/ANTsX/ANTsR/blob/master/.travis.yml) also shows a way to install from Linux command line.
-
-
-**Method 3: from binaries**
-
-Note that version numbers will change over time.
-
-```
-wget https://github.com/stnava/ITKR/releases/download/latest/ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
-R CMD INSTALL ITKR_0.4.12_R_x86_64-pc-linux-gnu.tar.gz
-wget https://github.com/ANTsX/ANTsRCore/releases/download/v0.4.2.1/ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
-R CMD INSTALL ANTsRCore_0.4.2.1_R_x86_64-pc-linux-gnu.tar.gz
-wget https://github.com/ANTsX/ANTsR/releases/download/latest/ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
-R CMD INSTALL ANTsR_0.6_R_x86_64-pc-linux-gnu.tar.gz
-```
-
-
-**Method 4: platform independent via docker and kitematic**
-
-This is a beta operation that is in flux but may be convenient for some users.
-
-* based on [this approach](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image)
-
-* create a docker username
-
-* download and install kitematic
-
-* login to kitematic with your docker username
-
-* search for `antsr` in the kitematic repository search bar
-
-* create a new container from the `stnava` version of `antsr`
-
-* start the container
-
-* type the "access url" address into a browser to run rstudio with antsr.
-it should be something like `http://192.168.99.100:32989/`
-
-* you can also add your home folders to the container instance by adjusting
-the "volumes" option under the settings tab.  then you can access local data.
-
-## Usage
-Load the package:
-```
-library(ANTsR)
-```
-List the available functions in the namespace ANTsR:
-```
-ANTsR::<double-tab>
-```
-
-Call help on a function via ?functionName or see function arguments
-via  `args(functionName)`
-
-
-# Tagging a beta release
-
-```
-git tag -d beta
-git push origin :refs/tags/beta
-git tag beta
-git push  --tags origin
-```
-
-
-# Release notes
-
-More like *development highlights*, as opposed to *release notes*.  See `git log` for the complete history.  We try to follow [these versioning recommendations for R packages](http://yihui.name/en/2013/06/r-package-versioning/).  Under these guidelines, only `major.minor` is an official release.
-
-## 0.4.0
-
-* ENH: better compilation and release style.
-* ENH: return boolean same size as image
-* ENH: improved decomposition methods
-* ENH: easier to use antsrSurf and antsrVol
-
-## 0.3.3
-
-* ENH: spare distance matrix, multi scale svd
-
-## 0.3.2
-
-* ENH: added domainImg option to plot.antsImage which can standardize plot.
-
-* COMP: test for DVCL define requirement to improve clang and gcc compilations
-
-* WIP: transform objects can be created on the fly and manipulated thanks to jeff duda
-
-* ENH: automation for eigenanatomy
-
-* ENH: reworked SCCAN and eanat
-
-* ENH: mrvnrfs
-
-* ENH: resting state Vignette
-
-* DOC: clarify/extend antsApplyTransforms
-
-* ENH: multidimensional images
-
-* STYLE: iMath not ImageMath in ANTsR
-
-## 0.3.1
-
-* WIP: iMath improvements
-
-* WIP: ASL pipeline fuctionality
-
-* BUG: Fixed image indexing bug
-
-* BUG: plot.antsImage improvements
-
-* ENH: more antsRegistration options
-
-* ENH: geoSeg
-
-* ENH: JointLabelFusion and JointIntensityFusion
-
-* ENH: Enable negating images
-
-* ENH: weingarten curvature
-
-* ENH: antsApplyTransformsToPoints with example
-
-* ENH: renormalizeProbabilityImages
-
-* ENH: Suppress output from imageWrite.
-
-## 0.3.0
-
-First official release.
