@@ -25,7 +25,7 @@ Currently, the only way to install ANTsR is from the pre-compiled binaries or fr
 
 ### Binaries
 
-The fastest way to install ANTsR is from pre-compile binaries. Download the relevant version and run this from the command-line:
+The fastest way to install ANTsR is from pre-compile binaries made available on the [Releases Page](https://github.com/ANTsX/ANTsR/releases). Download the relevant version and run this from the command-line:
 
 ```
 R CMD INSTALL ANTsR_*.tgz
