@@ -20,10 +20,10 @@ Reduces a variate/statistical/network image to a set of centroids describing
 the center of each stand-alone non-zero component in the image.
 }
 \examples{
-img<-antsImageRead( getANTsRData( "r16" ) )
-img<-thresholdImage( img, 90, 120 )
-img<-labelClusters( img, 10 )
-cents<-getCentroids( img  )
+img <- antsImageRead(getANTsRData("r16"))
+img <- thresholdImage(img, 90, 120)
+img <- labelClusters(img, 10)
+cents <- getCentroids(img)
 
 }
 \author{

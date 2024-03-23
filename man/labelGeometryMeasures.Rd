@@ -18,10 +18,9 @@ none
 Wrapper for the ANTs funtion labelGeometryMeasures
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16") , 2 )
-seg<-kmeansSegmentation( fi, 3 )$segmentation
-geom<-labelGeometryMeasures(seg,fi)
-
+fi <- antsImageRead(getANTsRData("r16"), 2)
+seg <- kmeansSegmentation(fi, 3)$segmentation
+geom <- labelGeometryMeasures(seg, fi)
 
 }
 \author{

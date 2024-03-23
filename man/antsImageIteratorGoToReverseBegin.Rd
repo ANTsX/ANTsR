@@ -16,7 +16,7 @@ antsImageIterator
 move iterator to begining of reverse data
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-it <- antsImageIteratorGoToReverseBegin( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+it <- antsImageIteratorGoToReverseBegin(it)
 }

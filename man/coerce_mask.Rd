@@ -18,8 +18,8 @@ Array, logical if all values within 0, 1, \code{NA}, and \code{NaN}
 Creates a logical array from an antsImage object
 }
 \examples{
-img = makeImage(c(10,10),rnorm(100))
-mask = img > 0
+img <- makeImage(c(10, 10), rnorm(100))
+mask <- img > 0
 coerce_mask(mask, error = TRUE)
 coerce_mask(mask + 1, error = FALSE)
 testthat::expect_error(coerce_mask(mask + 1, error = TRUE))

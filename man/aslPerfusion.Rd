@@ -73,21 +73,21 @@ this function by a scalar.
 # fn<-'PEDS012_20131101_pcasl_1.nii.gz'
 # asl<-antsImageRead(fn,4)
 set.seed(1)
-nvox <- 5*5*5*10
-dims <- c(5,5,5,10)
-asl <- makeImage( dims , rnorm( nvox )+500 ) \%>\% iMath("PadImage" , 2 )
-aslmean <- getAverageOfTimeSeries( asl )
-aslmask <- getMask( aslmean , 0.001 , Inf )
-aslmat<-timeseries2matrix( asl, aslmask )
-for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
-asl<-matrix2timeseries( asl, aslmask, aslmat )
+nvox <- 5 * 5 * 5 * 10
+dims <- c(5, 5, 5, 10)
+asl <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
+aslmean <- getAverageOfTimeSeries(asl)
+aslmask <- getMask(aslmean, 0.001, Inf)
+aslmat <- timeseries2matrix(asl, aslmask)
+for (i in 1:10) aslmat[, i * 2] <- aslmat[, i * 2] * 2
+asl <- matrix2timeseries(asl, aslmask, aslmat)
 # NOT WORKING
 \dontrun{
-pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0 )
+pcasl.processing <- aslPerfusion(asl, moreaccurate = 1, dorobust = 0)
 testthat::expect_equal(mean(pcasl.processing$m1), 62.2115522470984)
-pcasl.processing <- aslPerfusion( asl, moreaccurate=1, ncompcor=2 )
+pcasl.processing <- aslPerfusion(asl, moreaccurate = 1, ncompcor = 2)
 # allow some rejection
-pcasl.processing <- aslPerfusion( asl, moreaccurate=1, dorobust=0.925 )
+pcasl.processing <- aslPerfusion(asl, moreaccurate = 1, dorobust = 0.925)
 }
 }
 \author{

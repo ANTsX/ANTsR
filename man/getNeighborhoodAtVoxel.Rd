@@ -27,21 +27,26 @@ a list
 Get the values in a local neighborhood of an \code{antsImage}.
 }
 \examples{
-img<-makeImage(c(10,10),rnorm(100))
-center <- dim(img)/2
-radius <- rep(3,2)
-nhlist <- getNeighborhoodAtVoxel(img,center,radius)
-kernel <- 1*(rnorm(49)>0)
-dim(kernel) <- c(7,7)
-randlist <- getNeighborhoodAtVoxel(img,center,kernel)
-randlist <- getNeighborhoodAtVoxel(img,center,kernel, 
-physical.coordinates = TRUE)
-arr = as.array(img)
-testthat::expect_error(getNeighborhoodAtVoxel(arr,center,kernel), "class")
-testthat::expect_error(getNeighborhoodAtVoxel(img,as.character(center),kernel), 
-"center must be")
-testthat::expect_error(getNeighborhoodAtVoxel(img,center,c(radius, 3)),
-"kernel must have same") 
+img <- makeImage(c(10, 10), rnorm(100))
+center <- dim(img) / 2
+radius <- rep(3, 2)
+nhlist <- getNeighborhoodAtVoxel(img, center, radius)
+kernel <- 1 * (rnorm(49) > 0)
+dim(kernel) <- c(7, 7)
+randlist <- getNeighborhoodAtVoxel(img, center, kernel)
+randlist <- getNeighborhoodAtVoxel(img, center, kernel,
+  physical.coordinates = TRUE
+)
+arr <- as.array(img)
+testthat::expect_error(getNeighborhoodAtVoxel(arr, center, kernel), "class")
+testthat::expect_error(
+  getNeighborhoodAtVoxel(img, as.character(center), kernel),
+  "center must be"
+)
+testthat::expect_error(
+  getNeighborhoodAtVoxel(img, center, c(radius, 3)),
+  "kernel must have same"
+)
 
 }
 \author{

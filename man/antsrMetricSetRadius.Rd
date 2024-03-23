@@ -15,8 +15,8 @@ antsrMetricSetRadius(metric, radius)
 set neighborhood radius
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="ANTSNeighborhoodCorrelation")
-antsrMetricSetRadius(metric,5)
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "ANTSNeighborhoodCorrelation")
+antsrMetricSetRadius(metric, 5)
 }

@@ -23,17 +23,17 @@ save.ANTsR(
 \item{overwrite}{logical to select whether overwriting existing data is allowed.}
 
 \item{clonediskfiles}{logical enables the copying of disk files that are not loaded
-in workspace but where character variables point. Set to TRUE if moving sessions 
-from one computer to another or if you save antsRegistration() outputs. Set to 
+in workspace but where character variables point. Set to TRUE if moving sessions
+from one computer to another or if you save antsRegistration() outputs. Set to
 FALSE if you save temporary sessions to continue later on the same computer.}
 
 \item{...}{Additional arguments to pass to \code{save}.}
 }
 \description{
-Use this function to save an object or a full R session for 
+Use this function to save an object or a full R session for
 later use. Any object can be saved (list, antsImage, data frame,
 etc.). The function will save all antsImage objects as nifti
-files with random filenames (to avoid using (sub)variable names, 
+files with random filenames (to avoid using (sub)variable names,
 which can be identical). These files is what load.ANTsR uses
 later to fill back the original antsImage variables. For variables
 that contain filenames, you can choose to copy those files
@@ -41,7 +41,8 @@ in your saved folder so you can completely recreate the environment
 even if you change computer or the temporary folder is deleted.
 }
 \examples{
-\dontrun{ # causes problems with devtools::run_examples()
+\dontrun{
+# causes problems with devtools::run_examples()
 # a <- 1
 # b <- c( 2, 3, 4)
 # save.ANTsR(objects=c('b', 'a'))

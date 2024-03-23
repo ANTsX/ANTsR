@@ -21,8 +21,8 @@ Icawhitens the input matrix using SVD and returns the result.
 }
 \examples{
 
-mat <- matrix(c(rep(1,100),rep(0,200)),ncol=50)
-wmat<-icawhiten( mat, 2 )
+mat <- matrix(c(rep(1, 100), rep(0, 200)), ncol = 50)
+wmat <- icawhiten(mat, 2)
 
 }
 \author{

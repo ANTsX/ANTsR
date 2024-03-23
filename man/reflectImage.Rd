@@ -25,10 +25,10 @@ reflects an image along its axis
 }
 \examples{
 
-fi<-antsImageRead( getANTsRData("r16") , 2 )
-axis = 2
-asym<-reflectImage( fi, axis, "Affine" )$warpedmovout
-asym<-asym-fi
+fi <- antsImageRead(getANTsRData("r16"), 2)
+axis <- 2
+asym <- reflectImage(fi, axis, "Affine")$warpedmovout
+asym <- asym - fi
 
 }
 \seealso{

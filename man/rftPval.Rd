@@ -22,9 +22,9 @@ rftPval(D, c, k, u, n, resels, df, fieldType)
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
 \item{fieldType}{\itemize{
-\item{T: } {T-field} 
-\item{F: } {F-field} 
-\item{X: } {Chi-square field'} 
+\item{T: } {T-field}
+\item{F: } {F-field}
+\item{X: } {Chi-square field'}
 \item{Z: } {Gaussian field}
 }}
 }
@@ -52,7 +52,7 @@ rft.pval(D, 1, k, u, n, resels, df, fieldType)
 peak-level
 rft.pval(D, 1, 0, u, n, resels, df, fieldType)
 
-Where set-level refers to obtaining the set of clusters, cluster-level refers to a specific 
+Where set-level refers to obtaining the set of clusters, cluster-level refers to a specific
 cluster, and peak-level refers to the maximum (or peak) of a single cluster.
 }
 \examples{
@@ -61,15 +61,16 @@ cluster, and peak-level refers to the maximum (or peak) of a single cluster.
 # assume resels have been calculated and df = c(dfi, dfe)
 
 # peak RFT p-value (peak = the maximum of a specific cluster)
-peakP <- rftPval(3, 1, 0, peak, 1, resels, df, fieldType = "T")$Pcor 
+peakP <- rftPval(3, 1, 0, peak, 1, resels, df, fieldType = "T")$Pcor
 
 # cluster RFT p-value (u = the value the statistical field was threshold at
 # and k = the size of the cluster in resels)
-clusterP <- rftPval(3, 1, k, u, 1, resels, df, fieldType = "T")$Pcor 
+clusterP <- rftPval(3, 1, k, u, 1, resels, df, fieldType = "T")$Pcor
 
-# set RFT p-value 
+# set RFT p-value
 setP <- rftPval(3, numberOfClusters, minimumClusterSize, u, 1, resels, df,
-                fieldType = "T")$Pcor
+  fieldType = "T"
+)$Pcor
 }
 }
 \references{

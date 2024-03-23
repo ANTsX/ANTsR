@@ -13,9 +13,9 @@ weingartenImageCurvature(image, sigma = 1, opt = "mean", labeled = FALSE)
 
 \item{opt}{mean by default, otherwise use string gaussian or characterize}
 
-\item{labeled}{boolean if TRUE then assume image contains labels which denote 
-the surface on which curvature is to be calculated.  in this case, the 
-surface should hold integer value 1; the background should be zero;  
+\item{labeled}{boolean if TRUE then assume image contains labels which denote
+the surface on which curvature is to be calculated.  in this case, the
+surface should hold integer value 1; the background should be zero;
 the interior of the surface should be greater than 1 (e.g. 2).}
 }
 \value{
@@ -25,11 +25,11 @@ image
 uses the weingarten map to estimate image mean or gaussian curvature
 }
 \examples{
-img = makeImage( c(10,10,10) , rnorm( 1000 ) )
-fik <- weingartenImageCurvature( img )
+img <- makeImage(c(10, 10, 10), rnorm(1000))
+fik <- weingartenImageCurvature(img)
 \dontrun{
-fi <- antsImageRead( getANTsRData( "mni" ) )
-fik <- weingartenImageCurvature( fi )
+fi <- antsImageRead(getANTsRData("mni"))
+fik <- weingartenImageCurvature(fi)
 }
 }
 \references{

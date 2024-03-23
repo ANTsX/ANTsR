@@ -25,19 +25,19 @@ This function computes a prediction given \code{ilr} output.
 \examples{
 
 set.seed(1500)
-nsub = 100
-trte = sample( 1:nsub )[1:70]
-covarIn = rnorm( nsub )
-mat = replicate( nsub, rnorm( nsub ) )
-mat2 = replicate( nsub, rnorm( nsub ) )
-outcomeAtVox = mat[ , 2 ]
+nsub <- 100
+trte <- sample(1:nsub)[1:70]
+covarIn <- rnorm(nsub)
+mat <- replicate(nsub, rnorm(nsub))
+mat2 <- replicate(nsub, rnorm(nsub))
+outcomeAtVox <- mat[, 2]
 # also try myform = " vox ~ covar + vox2 "
-myform="outcome ~ covar + vox + vox2"
-df = data.frame( outcome = outcomeAtVox, covar = covarIn )
-result = ilr( df[trte,], list( vox = mat[trte,], vox2 = mat2[trte,] ), myform)
-df2 = data.frame( covar = covarIn[-trte] )
-pred = ilr.predict(  result, df2, list( vox = mat[-trte,], vox2=mat2[-trte,] ), myform )
-max( cor( pred, outcomeAtVox[-trte] ) )
+myform <- "outcome ~ covar + vox + vox2"
+df <- data.frame(outcome = outcomeAtVox, covar = covarIn)
+result <- ilr(df[trte, ], list(vox = mat[trte, ], vox2 = mat2[trte, ]), myform)
+df2 <- data.frame(covar = covarIn[-trte])
+pred <- ilr.predict(result, df2, list(vox = mat[-trte, ], vox2 = mat2[-trte, ]), myform)
+max(cor(pred, outcomeAtVox[-trte]))
 
 }
 \seealso{

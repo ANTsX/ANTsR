@@ -1,7 +1,7 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.7.0
+Version: 0.6.0
 Date: 2024-03-23
 Authors@R: c(
     person(c("Brian", "B"), "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),

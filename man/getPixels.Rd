@@ -24,6 +24,6 @@ array of pixel values
 Get pixel values from an 'antsImage'.
 }
 \examples{
-img<-makeImage(c(10,10),rnorm(100))
-pixel<-getPixels(img,i=c(1,2),j=1)
+img <- makeImage(c(10, 10), rnorm(100))
+pixel <- getPixels(img, i = c(1, 2), j = 1)
 }

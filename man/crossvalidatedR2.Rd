@@ -27,14 +27,14 @@ Computes an R^2 value for predicting an outcome measure using a k-fold cross-val
 set.seed(300)
 ncol <- 30
 nrow <- 20
-covariate <- sin((1:nrow)*2*pi/nrow)
-x <- matrix(rep(NA, nrow*ncol), nrow=nrow)
-xsig <- seq(0,1,length.out=nrow)
-y <- xsig + covariate + rnorm(nrow, sd=0.5)
-for(i in 1:ncol){
-  x[, i] <- xsig + rnorm(nrow, sd=i/ncol)
+covariate <- sin((1:nrow) * 2 * pi / nrow)
+x <- matrix(rep(NA, nrow * ncol), nrow = nrow)
+xsig <- seq(0, 1, length.out = nrow)
+y <- xsig + covariate + rnorm(nrow, sd = 0.5)
+for (i in 1:ncol) {
+  x[, i] <- xsig + rnorm(nrow, sd = i / ncol)
 }
-r2 <- crossvalidatedR2(x, y, covariates=covariate)
+r2 <- crossvalidatedR2(x, y, covariates = covariate)
 }
 \author{
 Brian B Avants, Benjamin M. Kandel

@@ -55,9 +55,8 @@ a mask, a motion corrected image and a PET suvr image mapped to the reference
 anatomical space.
 }
 \examples{
-
 \dontrun{
-suvr <- petSUVR( petTime, seg )
+suvr <- petSUVR(petTime, seg)
 }
 
 }

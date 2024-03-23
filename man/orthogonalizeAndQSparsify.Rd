@@ -38,8 +38,8 @@ This implements a quantile based sparsification operation
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-mat = orthogonalizeAndQSparsify( mat )
+mat <- replicate(100, rnorm(20))
+mat <- orthogonalizeAndQSparsify(mat)
 
 }
 \author{

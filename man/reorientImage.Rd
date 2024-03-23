@@ -27,7 +27,7 @@ align along a specific axis
 }
 \examples{
 
-reofi<-reorientImage( ri(1),c(1,0))
+reofi <- reorientImage(ri(1), c(1, 0))
 
 }
 \author{

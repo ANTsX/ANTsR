@@ -48,40 +48,42 @@ to build a random forest prediction from an image population
 }
 \examples{
 
-mask<-makeImage( c(10,10), 0 )
-mask[ 3:6, 3:6 ]<-1
-mask[ 5, 5:6]<-2
-ilist<-list()
-lablist<-list()
-masklist<-list()
-inds<-1:5
-scl<-0.33 # a noise parameter
-for ( predtype in c("label","scalar") )
+mask <- makeImage(c(10, 10), 0)
+mask[3:6, 3:6] <- 1
+mask[5, 5:6] <- 2
+ilist <- list()
+lablist <- list()
+masklist <- list()
+inds <- 1:5
+scl <- 0.33 # a noise parameter
+for (predtype in c("label", "scalar"))
 {
-for ( i in inds ) {
-  img<-antsImageClone(mask)
-  imgb<-antsImageClone(mask)
-  limg<-antsImageClone(mask)
-  if ( predtype == "label") {  # 4 class prediction
-    img[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
-    imgb[ 3:6, 3:6 ]<-rnorm(16)*scl+(i \%\% 4)+scl*mean(rnorm(1))
-    limg[ 3:6, 3:6 ]<-(i \%\% 4)+1  # the label image is constant
+  for (i in inds) {
+    img <- antsImageClone(mask)
+    imgb <- antsImageClone(mask)
+    limg <- antsImageClone(mask)
+    if (predtype == "label") { # 4 class prediction
+      img[3:6, 3:6] <- rnorm(16) * scl + (i \%\% 4) + scl * mean(rnorm(1))
+      imgb[3:6, 3:6] <- rnorm(16) * scl + (i \%\% 4) + scl * mean(rnorm(1))
+      limg[3:6, 3:6] <- (i \%\% 4) + 1 # the label image is constant
     }
-    if ( predtype == "scalar") {
-      img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-      imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-      limg<-i^2.0  # a real outcome
-      }
-    ilist[[i]]<-list(img,imgb)  # two features
-    lablist[[i]]<-limg
-    masklist[[i]] = mask
+    if (predtype == "scalar") {
+      img[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+      imgb[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+      limg <- i^2.0 # a real outcome
+    }
+    ilist[[i]] <- list(img, imgb) # two features
+    lablist[[i]] <- limg
+    masklist[[i]] <- mask
   }
-  rfm<-vwnrfs( lablist , ilist, masklist[[1]], rad=c(2,2) ) # use single mask
-  rfm<-vwnrfs( lablist , ilist, masklist, rad=c(2,2) )
-  if ( predtype == "label" )
-    print(  sum( rfm$tv != predict(rfm$rfm) ) )
-  if ( predtype == "scalar" )
-    print( cor(as.numeric(rfm$tv) , as.numeric(predict(rfm$rfm) ) ) )
+  rfm <- vwnrfs(lablist, ilist, masklist[[1]], rad = c(2, 2)) # use single mask
+  rfm <- vwnrfs(lablist, ilist, masklist, rad = c(2, 2))
+  if (predtype == "label") {
+    print(sum(rfm$tv != predict(rfm$rfm)))
+  }
+  if (predtype == "scalar") {
+    print(cor(as.numeric(rfm$tv), as.numeric(predict(rfm$rfm))))
+  }
 } # end predtype loop
 
 }

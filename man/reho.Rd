@@ -25,7 +25,7 @@ regional homogeneity for a time series image
 }
 \examples{
 \dontrun{
-rehoimg = reho( rsfmri )
+rehoimg <- reho(rsfmri)
 }
 }
 \references{

@@ -42,12 +42,11 @@ oscillations (LFOs).  This function outputs ALFF and fALFF for the input.
 
 
 set.seed(1)
-mat <- matrix(rnorm(3000),ncol=50)
-fallf = apply( mat, FUN=alffmap, MARGIN=2 )
-k = kernel("daniell", rep( 2, 3 ) )
-fallf2 = apply( mat, FUN=alffmap, MARGIN=2, kernel=k )
+mat <- matrix(rnorm(3000), ncol = 50)
+fallf <- apply(mat, FUN = alffmap, MARGIN = 2)
+k <- kernel("daniell", rep(2, 3))
+fallf2 <- apply(mat, FUN = alffmap, MARGIN = 2, kernel = k)
 testthat::expect_equal(mean(fallf2), 3.00367017972746)
-
 
 }
 \author{

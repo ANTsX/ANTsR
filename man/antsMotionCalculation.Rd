@@ -29,7 +29,7 @@ If not provided, mean image is used.}
 1 (high-res only), 2 (multi-level inter-subject), 3 (FIXME), or a special
 method for intraSubjectBOLD.}
 
-\item{txtype}{Type of transform.  One of \code{"Affine"}, 
+\item{txtype}{Type of transform.  One of \code{"Affine"},
 \code{"Rigid"}, or
 \code{"SyN"}.}
 
@@ -37,13 +37,13 @@ method for intraSubjectBOLD.}
 
 \item{verbose}{enables verbose output.}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
 for discussion.  If \code{NULL}, will not set anything.}
 
-\item{seed}{will execute 
+\item{seed}{will execute
 \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
@@ -69,9 +69,9 @@ Correct 4D time-series data for motion.
 \examples{
 \dontrun{
 set.seed(120)
-simimg<-makeImage(rep(5,4), rnorm(5^4))
+simimg <- makeImage(rep(5, 4), rnorm(5^4))
 # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
-antsMotionCalculation(simimg,moreaccurate=0)
+antsMotionCalculation(simimg, moreaccurate = 0)
 }
 }
 \author{

@@ -54,23 +54,23 @@ Integrate velocity field
 Utility function to integrate a velocity field and create a deformation field.
 }
 \examples{
-fi <- antsImageRead( getANTsRData( "r16" ) )
-mi <- antsImageRead( getANTsRData( "r27" ) )
-reg <- antsRegistration( fi, mi, "TV[2]" )
-velocityField <- antsImageRead( reg$velocityfield )
-field <- integrateVelocityField( velocityField, 0.0, 1.0, 10 )
+fi <- antsImageRead(getANTsRData("r16"))
+mi <- antsImageRead(getANTsRData("r27"))
+reg <- antsRegistration(fi, mi, "TV[2]")
+velocityField <- antsImageRead(reg$velocityfield)
+field <- integrateVelocityField(velocityField, 0.0, 1.0, 10)
 
 \dontrun{
 set.seed(1234)
-fi <- ( ri(1) )
-mi <- ( ri(2) )
-mytx2 <- antsRegistration(fixed=fi, mi, typeofTransform = "TV[4]" )
-integrateVelocityField( fi, mytx2$velocityfield,  "/tmp/def.nii.gz" )
-qq=antsApplyTransforms( fi, mi, mytx2$fwdtransforms )
-pp=antsApplyTransforms( fi, mi, "/tmp/def.nii.gz" )
-antsImageMutualInformation( fi, mi )
-antsImageMutualInformation( fi, qq )
-antsImageMutualInformation( fi, pp )
+fi <- (ri(1))
+mi <- (ri(2))
+mytx2 <- antsRegistration(fixed = fi, mi, typeofTransform = "TV[4]")
+integrateVelocityField(fi, mytx2$velocityfield, "/tmp/def.nii.gz")
+qq <- antsApplyTransforms(fi, mi, mytx2$fwdtransforms)
+pp <- antsApplyTransforms(fi, mi, "/tmp/def.nii.gz")
+antsImageMutualInformation(fi, mi)
+antsImageMutualInformation(fi, qq)
+antsImageMutualInformation(fi, pp)
 }
 }
 \author{

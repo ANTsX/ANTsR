@@ -46,72 +46,80 @@ measurements of the volume of the inferior frontal gyrus.
 }
 \examples{
 
-mask<-makeImage( c(100,100), 0 )
-mask[ 30:60, 30:60 ]<-1
-mask[ 35:45, 50:60]<-2
-ilist<-list()
-masklist<-list()
-inds<-1:8
-yvec<-rep(0,length(inds))
-scl<-0.33 # a noise parameter
-for ( i in inds ) {
-  img<-antsImageClone(mask)
-  imgb<-antsImageClone(mask)
-  limg<-antsImageClone(mask)
-  img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-  imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-  ilist[[i]]<-list(img,imgb)  # two features
-  yvec[i]<-i^2.0  # a real outcome
-  masklist[[i]] = antsImageClone( mask )
-  }
-r=c(1,1)
-mr=c(2,0)
-featMat <- getMultiResFeatureMatrix( ilist[[1]], masklist[[1]],
-  rad=r, , multiResSchedule=mr )
+mask <- makeImage(c(100, 100), 0)
+mask[30:60, 30:60] <- 1
+mask[35:45, 50:60] <- 2
+ilist <- list()
+masklist <- list()
+inds <- 1:8
+yvec <- rep(0, length(inds))
+scl <- 0.33 # a noise parameter
+for (i in inds) {
+  img <- antsImageClone(mask)
+  imgb <- antsImageClone(mask)
+  limg <- antsImageClone(mask)
+  img[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+  imgb[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+  ilist[[i]] <- list(img, imgb) # two features
+  yvec[i] <- i^2.0 # a real outcome
+  masklist[[i]] <- antsImageClone(mask)
+}
+r <- c(1, 1)
+mr <- c(2, 0)
+featMat <- getMultiResFeatureMatrix(ilist[[1]], masklist[[1]],
+  rad = r, , multiResSchedule = mr
+)
 rfm <- multiResRandomForestRegression(
-  yvec , ilist, masklist, rad=r, multiResSchedule=mr )
-preds = predict( rfm, newdata=featMat )
+  yvec, ilist, masklist,
+  rad = r, multiResSchedule = mr
+)
+preds <- predict(rfm, newdata = featMat)
 \dontrun{
 # data: https://github.com/stnava/ANTsTutorial/tree/master/phantomData
-fns = Sys.glob("phantom*wmgm.jpg")
-ilist = imageFileNames2ImageList( fns )
-masklist = list( )
-flist = list( )
-for ( i in 1:length(fns) )
-  {
-# 2 labels means 2 sets of side by side predictors and features at each scale
-  locseg = kmeansSegmentation( ilist[[i]], 2 )$segmentation
-  masklist[[ i ]] = list( locseg, locseg \%>\% thresholdImage(2,2), locseg )
-  flist[[ i ]] = list( ilist[[i]], ilist[[i]] \%>\% iMath("Laplacian",1),
-    ilist[[i]] \%>\% iMath("Grad",1)  )
-  }
-yvec = factor( rep( c(1,2), each = 4 ) ) # classification
-r = c( 1, 1 )
-mr = c( 2, 1, 0 )
-ns = 50
-trn = c(1:3,6:8)
-ytrain = yvec[ trn ]
-ftrain = flist[ trn ]
-mtrain = masklist[ trn ]
-mrrfr = multiResRandomForestRegression( ytrain, ftrain, mtrain, rad=c(1,1),
-  nsamples = ns, multiResSchedule=mr )
-mypreds = rep( NA, length( fns ) )
-mymode <- function(x) {
- ux <- unique(x)
- ux[which.max(tabulate(match(x, ux)))]
+fns <- Sys.glob("phantom*wmgm.jpg")
+ilist <- imageFileNames2ImageList(fns)
+masklist <- list()
+flist <- list()
+for (i in 1:length(fns))
+{
+  # 2 labels means 2 sets of side by side predictors and features at each scale
+  locseg <- kmeansSegmentation(ilist[[i]], 2)$segmentation
+  masklist[[i]] <- list(locseg, locseg \%>\% thresholdImage(2, 2), locseg)
+  flist[[i]] <- list(
+    ilist[[i]], ilist[[i]] \%>\% iMath("Laplacian", 1),
+    ilist[[i]] \%>\% iMath("Grad", 1)
+  )
 }
-for ( i in 4:5 ) # test set
-  {
-  fmat = getMultiResFeatureMatrix( flist[[i]], masklist[[i]],
-         rad=r,  multiResSchedule=mr, nsamples = ns )
-  myp = predict( mrrfr, newdata=fmat )
-  mypreds[ i ] = mymode( myp ) # get the most frequent observation
+yvec <- factor(rep(c(1, 2), each = 4)) # classification
+r <- c(1, 1)
+mr <- c(2, 1, 0)
+ns <- 50
+trn <- c(1:3, 6:8)
+ytrain <- yvec[trn]
+ftrain <- flist[trn]
+mtrain <- masklist[trn]
+mrrfr <- multiResRandomForestRegression(ytrain, ftrain, mtrain,
+  rad = c(1, 1),
+  nsamples = ns, multiResSchedule = mr
+)
+mypreds <- rep(NA, length(fns))
+mymode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+for (i in 4:5) # test set
+{
+  fmat <- getMultiResFeatureMatrix(flist[[i]], masklist[[i]],
+    rad = r, multiResSchedule = mr, nsamples = ns
+  )
+  myp <- predict(mrrfr, newdata = fmat)
+  mypreds[i] <- mymode(myp) # get the most frequent observation
   # use median or mean for continuous predictions
-  }
+}
 print("predicted")
-print( mypreds[-trn] )
+print(mypreds[-trn])
 print("ground truth")
-print( yvec[-trn] )
+print(yvec[-trn])
 }
 }
 \references{

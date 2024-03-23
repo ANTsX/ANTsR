@@ -22,8 +22,8 @@ Computes and displays a histogram of the values
 of an image with the option for a mask.
 }
 \examples{
-img = makeImage(c(10,10),rnorm(100))
-mask = img > 0
+img <- makeImage(c(10, 10), rnorm(100))
+mask <- img > 0
 hist(img)
 hist(img, mask = mask)
 }

@@ -44,25 +44,25 @@ and variance explained.  May employ different decomposition methods (WIP).
 }
 \examples{
 
-img1 = antsImageRead( getANTsRData( "r16" ) ) \%>\%
-  resampleImage( c(4,4) )
-img2 = antsImageRead( getANTsRData( "r64" ) ) \%>\%
-  resampleImage( c(4,4) )
-img3 = antsImageRead( getANTsRData( "r27" ) ) \%>\%
-  resampleImage( c(4,4) )
-img4 = antsImageRead( getANTsRData( "r30" ) ) \%>\%
-  resampleImage( c(4,4) )
-reg1 = antsRegistration( img1, img2, 'SyN' )
-reg2 = antsRegistration( img1, img3, 'SyN' )
-reg3 = antsRegistration( img1, img4, 'SyN' )
-w1 = antsImageRead( reg1$fwdtransforms[1] )
-w2 = antsImageRead( reg2$fwdtransforms[1] )
-w3 = antsImageRead( reg3$fwdtransforms[1] )
-mask = getMask( img1 )
-x = list( w1, w2, w3 )
-dpca = multichannelPCA( x, mask )
-warpTx = antsrTransformFromDisplacementField( dpca$pcaWarps[[1]] )
-warped = applyAntsrTransform( warpTx, data = img1, reference = img1)
+img1 <- antsImageRead(getANTsRData("r16")) \%>\%
+  resampleImage(c(4, 4))
+img2 <- antsImageRead(getANTsRData("r64")) \%>\%
+  resampleImage(c(4, 4))
+img3 <- antsImageRead(getANTsRData("r27")) \%>\%
+  resampleImage(c(4, 4))
+img4 <- antsImageRead(getANTsRData("r30")) \%>\%
+  resampleImage(c(4, 4))
+reg1 <- antsRegistration(img1, img2, "SyN")
+reg2 <- antsRegistration(img1, img3, "SyN")
+reg3 <- antsRegistration(img1, img4, "SyN")
+w1 <- antsImageRead(reg1$fwdtransforms[1])
+w2 <- antsImageRead(reg2$fwdtransforms[1])
+w3 <- antsImageRead(reg3$fwdtransforms[1])
+mask <- getMask(img1)
+x <- list(w1, w2, w3)
+dpca <- multichannelPCA(x, mask)
+warpTx <- antsrTransformFromDisplacementField(dpca$pcaWarps[[1]])
+warped <- applyAntsrTransform(warpTx, data = img1, reference = img1)
 
 }
 \author{

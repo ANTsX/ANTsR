@@ -32,12 +32,12 @@ minClusterSize
 }
 \examples{
 
-img<-antsImageRead( getANTsRData("r16") )
-timgFully = labelClusters( img, 10, 128, 150, TRUE )
-timgFace = labelClusters( img, 10, 128, 150, FALSE )
+img <- antsImageRead(getANTsRData("r16"))
+timgFully <- labelClusters(img, 10, 128, 150, TRUE)
+timgFace <- labelClusters(img, 10, 128, 150, FALSE)
 \dontrun{
-plot(img, timgFace )
-plot(img, timgFully )
+plot(img, timgFace)
+plot(img, timgFully)
 }
 
 }

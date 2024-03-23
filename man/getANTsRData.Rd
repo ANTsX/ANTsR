@@ -23,7 +23,7 @@ valid possibilities. Note that most require internet access to download.}
 \item{method}{Method to be used for downloading files,
 passed to \code{\link{download.file}}}
 
-\item{quiet}{If \code{TRUE}, suppress status messages 
+\item{quiet}{If \code{TRUE}, suppress status messages
 (if any), and the progress bar.}
 }
 \value{
@@ -34,7 +34,7 @@ Downloads antsr test data
 }
 \examples{
 
-fi <- getANTsRData( "r16" )
+fi <- getANTsRData("r16")
 
 }
 \author{

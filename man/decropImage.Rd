@@ -19,11 +19,11 @@ the inverse function for \code{cropImage}
 }
 \examples{
 
-fi <- antsImageRead( getANTsRData("r16"))
-mask <- getMask( fi )
-cropped <- cropImage( fi, mask, 1 )
-cropped <- smoothImage( cropped, 1)
-decropped <- decropImage( cropped , fi )
+fi <- antsImageRead(getANTsRData("r16"))
+mask <- getMask(fi)
+cropped <- cropImage(fi, mask, 1)
+cropped <- smoothImage(cropped, 1)
+decropped <- decropImage(cropped, fi)
 
 }
 \author{

@@ -16,7 +16,7 @@ antsImageIterator
 advance iterator forward
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-it <- antsImageIteratorNext( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+it <- antsImageIteratorNext(it)
 }

@@ -13,14 +13,14 @@ ri(x)
 image or image list is output
 }
 \description{
-r16, r27, r30, r62, r64, r85 are t1-weighted MRI slices of the 
-human brain that have been around for a long time.  We use them 
+r16, r27, r30, r62, r64, r85 are t1-weighted MRI slices of the
+human brain that have been around for a long time.  We use them
 for quick registration, segmentation and other processing tests.
 This function will return these images to the user.
 }
 \examples{
 
-r16 = ri( 16 )
+r16 <- ri(16)
 
 }
 \author{

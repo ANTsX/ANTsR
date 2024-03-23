@@ -20,8 +20,8 @@ Opposite order of input relative to \code{antsCopyImageInfo}
 }
 \examples{
 
-img <- makeImage(c(10,10),rnorm(100))
-img2 <- makeImage(c(10,10), rnorm(100))
+img <- makeImage(c(10, 10), rnorm(100))
+img2 <- makeImage(c(10, 10), rnorm(100))
 img2 <- antsCopyImageInfo(img2, img)
 testthat::expect_error(antsCopyImageInfo(img, 1))
 

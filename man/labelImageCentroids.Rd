@@ -23,7 +23,7 @@ Converts a label image to coordinates summarizing their positions
 }
 \examples{
 
-labelImage<-makeImage( c(2,2,2) , 0:7 )
+labelImage <- makeImage(c(2, 2, 2), 0:7)
 labelImageCentroids(labelImage)
 
 }

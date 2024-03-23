@@ -115,39 +115,45 @@ background image.
 }
 \examples{
 
-img <- makeImage(c(4,4), rnorm(4*4))
-mask <- makeImage(c(4,4),
-   as.matrix(c(0,0,0,0,
-            0,1,1,0,
-            0,1,1,0,
-            0,0,0,0), nrow=4))
+img <- makeImage(c(4, 4), rnorm(4 * 4))
+mask <- makeImage(
+  c(4, 4),
+  as.matrix(c(
+    0, 0, 0, 0,
+    0, 1, 1, 0,
+    0, 1, 1, 0,
+    0, 0, 0, 0
+  ), nrow = 4)
+)
 plot(img, list(mask))
-txt=list(x=2.5,y=1.5,label='my text',cex=4,col='red')
-plot(img, list(mask), text=txt)
+txt <- list(x = 2.5, y = 1.5, label = "my text", cex = 4, col = "red")
+plot(img, list(mask), text = txt)
 testthat::expect_error(plot(multi_component_image))
 
 \dontrun{
 
-  img = antsImageRead( getANTsRData( 'r16' ) )
-  betaVals = rnorm( prod( dim( img ) ), 0, 20 )
-  betaImg = makeImage( dim( img ), betaVals )  \%>\% smoothImage( 3.5 )
-  betaImg[ abs( betaImg ) < 1.5 ] = 0
-  plot( img, betaImg, window.img=range(img) ,window.overlay=range(betaImg) )
+img <- antsImageRead(getANTsRData("r16"))
+betaVals <- rnorm(prod(dim(img)), 0, 20)
+betaImg <- makeImage(dim(img), betaVals) \%>\% smoothImage(3.5)
+betaImg[abs(betaImg) < 1.5] <- 0
+plot(img, betaImg, window.img = range(img), window.overlay = range(betaImg))
 
-  mnit<-getANTsRData('mni')
-  mnit<-antsImageRead(mnit)
-  mniafn<-getANTsRData('mnia')
-  mnia<-antsImageRead(mniafn)
-  mnia<-thresholdImage(mnia,22,25)
-  mnia<-smoothImage(mnia,1.5)
-  mnia2<-antsImageRead(mniafn)
-  mnia2<-thresholdImage(mnia2,1,4)
-  mnia2<-smoothImage(mnia2,1.5)
-  ofn<-paste(tempfile(),'.png',sep='')
-  # write directly to a file
-  plot( mnit, list(mnia,mnia2), slices=seq(50, 140, by=5),
-    window.overlay = c(0.25,1), axis=2,
-    color.overlay=c('red','blue'), outname = ofn )
+mnit <- getANTsRData("mni")
+mnit <- antsImageRead(mnit)
+mniafn <- getANTsRData("mnia")
+mnia <- antsImageRead(mniafn)
+mnia <- thresholdImage(mnia, 22, 25)
+mnia <- smoothImage(mnia, 1.5)
+mnia2 <- antsImageRead(mniafn)
+mnia2 <- thresholdImage(mnia2, 1, 4)
+mnia2 <- smoothImage(mnia2, 1.5)
+ofn <- paste(tempfile(), ".png", sep = "")
+# write directly to a file
+plot(mnit, list(mnia, mnia2),
+  slices = seq(50, 140, by = 5),
+  window.overlay = c(0.25, 1), axis = 2,
+  color.overlay = c("red", "blue"), outname = ofn
+)
 }
 
 }

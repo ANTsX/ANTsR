@@ -16,8 +16,8 @@ getAverageOfTimeSeries(img)
 Returns a 3D average of a 4D time series.
 }
 \examples{
-img<-as.antsImage( array(data = rep(0,10^4), dim = c(10,10,10,10) ) )
-avg<-getAverageOfTimeSeries( img )
+img <- as.antsImage(array(data = rep(0, 10^4), dim = c(10, 10, 10, 10)))
+avg <- getAverageOfTimeSeries(img)
 }
 \author{
 Avants BB

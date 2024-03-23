@@ -18,7 +18,7 @@ TRUE'
 move interator to a given index
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-flag <- antsImageIteratorSetIndex( it, c(2,3) )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+flag <- antsImageIteratorSetIndex(it, c(2, 3))
 }

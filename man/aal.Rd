@@ -28,7 +28,7 @@ A data frame listing the following variables.
 aal
 }
 \description{
-A data frame label numbers and names 
+A data frame label numbers and names
 for the neuroanatomical AAL labels.
 }
 \examples{

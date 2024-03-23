@@ -24,7 +24,7 @@ uses a label image to crop a smaller image from within a larger image
 
 fi <- antsImageRead(getANTsRData("r16"))
 cropped <- cropImage(fi)
-cropped <- cropImage(fi, fi, 100 )
+cropped <- cropImage(fi, fi, 100)
 
 }
 \author{

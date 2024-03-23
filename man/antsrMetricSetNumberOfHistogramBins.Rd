@@ -15,8 +15,8 @@ antsrMetricSetNumberOfHistogramBins(metric, nBins)
 set histogram bins image to image metric
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MattesMutualInformation")
-antsrMetricSetNumberOfHistogramBins(metric,12)
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MattesMutualInformation")
+antsrMetricSetNumberOfHistogramBins(metric, 12)
 }

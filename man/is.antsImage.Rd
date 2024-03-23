@@ -16,5 +16,5 @@ TRUE if \code{object} is antsImage; FALSE otherwise.
 Tests if object is antsImage
 }
 \examples{
-is.antsImage(antsImageRead(getANTsRData('r16'), 2))
+is.antsImage(antsImageRead(getANTsRData("r16"), 2))
 }

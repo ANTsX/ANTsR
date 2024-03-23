@@ -27,10 +27,10 @@ uses random matrix to estimate cca results
 }
 \examples{
 set.seed(13)
-x <- matrix(rnorm(3000), nrow=50 )
-y <- x \%*\% matrix( rnorm( 60*100 ), nrow=60)
-k=10
-dr=randcca(x,y,k,1)
+x <- matrix(rnorm(3000), nrow = 50)
+y <- x \%*\% matrix(rnorm(60 * 100), nrow = 60)
+k <- 10
+dr <- randcca(x, y, k, 1)
 
 }
 \author{

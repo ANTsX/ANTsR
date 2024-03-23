@@ -27,14 +27,14 @@ A matrix containing the masked data, the result of calling
 Read images into rows of a matrix.
 }
 \examples{
- img <- ri( 1 ) \%>\% resampleImage( c(32,32))
- imglist <- list()
- nsubj <- 3
- for(ii in 1:nsubj){
-   imglist[[ ii ]] <- img
- }
- mask <- getMask(img)
- imgmat <- imageListToMatrix(imglist, mask)
+img <- ri(1) \%>\% resampleImage(c(32, 32))
+imglist <- list()
+nsubj <- 3
+for (ii in 1:nsubj) {
+  imglist[[ii]] <- img
+}
+mask <- getMask(img)
+imgmat <- imageListToMatrix(imglist, mask)
 
 }
 \seealso{

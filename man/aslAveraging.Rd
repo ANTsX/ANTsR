@@ -61,17 +61,19 @@ sample usage.
 set.seed(1)
 nvox <- 8 * 8 * 8 * 10
 dims <- c(8, 8, 8, 10)
-voxvals <- array(rnorm(nvox) + 500, dim=dims)
+voxvals <- array(rnorm(nvox) + 500, dim = dims)
 asl <- makeImage(dims, voxvals)
-tc <- rep(c(-0.5, 0.5), dims[4]/2)
-avg <- aslAveraging(asl, tc=tc)
-testthat::expect_equal(mean(avg), 0.00739 , tolerance = .1 )
+tc <- rep(c(-0.5, 0.5), dims[4] / 2)
+avg <- aslAveraging(asl, tc = tc)
+testthat::expect_equal(mean(avg), 0.00739, tolerance = .1)
 slice <- extractSlice(asl, 4, 4)
-mask <-getMask(slice)
-seg <- atropos(d=3, a=slice, x=mask, i='kmeans[6]', m='[0.0,1x1x1]')
-perfSurr <- aslAveraging( asl, mask = NULL, method = "surroundSubtract" )
-bayesAvg <- aslAveraging(asl, tc=tc, method='bayesian',
-  segmentation=seg$segmentation, tissuelist=seg$probabilityimages)
+mask <- getMask(slice)
+seg <- atropos(d = 3, a = slice, x = mask, i = "kmeans[6]", m = "[0.0,1x1x1]")
+perfSurr <- aslAveraging(asl, mask = NULL, method = "surroundSubtract")
+bayesAvg <- aslAveraging(asl,
+  tc = tc, method = "bayesian",
+  segmentation = seg$segmentation, tissuelist = seg$probabilityimages
+)
 
 }
 \author{

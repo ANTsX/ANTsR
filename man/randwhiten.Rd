@@ -21,9 +21,9 @@ uses random matrix to whiten a matrix
 }
 \examples{
 
-A <- matrix(rnorm(3000), ncol=50 )
-k=10
-Aw=randwhiten(A,k)
+A <- matrix(rnorm(3000), ncol = 50)
+k <- 10
+Aw <- randwhiten(A, k)
 # (Aw) \%*\% t(Aw)
 }
 \references{

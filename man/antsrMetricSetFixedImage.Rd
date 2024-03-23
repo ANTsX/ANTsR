@@ -18,9 +18,9 @@ set fixed image for image to image metric
 After calling this, must call antsrMetricInitialize(metric)
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MeanSquares")
-z = x*2
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
+z <- x * 2
 antsrMetricSetFixedImage(metric, z)
 }

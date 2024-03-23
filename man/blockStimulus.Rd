@@ -28,8 +28,8 @@ None
 }
 \examples{
 
-  # Example 1
-  hrf <- blockStimulus(107, c(18, 48, 78), 15, 2)
+# Example 1
+hrf <- blockStimulus(107, c(18, 48, 78), 15, 2)
 
 }
 \references{

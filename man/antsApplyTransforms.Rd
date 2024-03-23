@@ -75,40 +75,57 @@ user is advised to familiarize with the standards established in examples.
 antsApplyTransforms("-h")
 # see antsRegistration
 # example 1 - simplified
-fixed <- ri( 1 )
-moving <- ri( 2 )
-fixed <- resampleImage(fixed,c(64,64),1,0)
-moving <- resampleImage(moving,c(68,68),1,0)
-mytx <- antsRegistration( fixed=fixed, moving=moving,
-  typeofTransform = "SyN", verbose=TRUE, printArgs=TRUE )
-mywarpedimage <- antsApplyTransforms( fixed=fixed, moving=moving,
-  transformlist=mytx$fwdtransforms )
+fixed <- ri(1)
+moving <- ri(2)
+fixed <- resampleImage(fixed, c(64, 64), 1, 0)
+moving <- resampleImage(moving, c(68, 68), 1, 0)
+mytx <- antsRegistration(
+  fixed = fixed, moving = moving,
+  typeofTransform = "SyN", verbose = TRUE, printArgs = TRUE
+)
+mywarpedimage <- antsApplyTransforms(
+  fixed = fixed, moving = moving,
+  transformlist = mytx$fwdtransforms
+)
 testthat::expect_true(antsImagePhysicalSpaceConsistency(mywarpedimage, fixed))
-invwarped_image <- antsApplyTransforms( fixed=moving,moving=fixed,
-  transformlist=mytx$invtransforms )
+invwarped_image <- antsApplyTransforms(
+  fixed = moving, moving = fixed,
+  transformlist = mytx$invtransforms
+)
 testthat::expect_true(antsImagePhysicalSpaceConsistency(invwarped_image, moving))
 # full access via listing the inputs in standard ANTs format
 
-res1 <- antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist=mytx$fwdtransforms[2],
-  whichtoinvert =1, verbose = TRUE)
-cfile <- antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist=mytx$fwdtransforms,
-  compose = tempfile() )
-cimg = antsImageRead(cfile)
-cout <- antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist=cimg)
-testthat::expect_error(
-antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist=cimg, whichtoinvert =1), "nnot invert transform"
+res1 <- antsApplyTransforms(
+  fixed = fixed, moving = moving,
+  transformlist = mytx$fwdtransforms[2],
+  whichtoinvert = 1, verbose = TRUE
+)
+cfile <- antsApplyTransforms(
+  fixed = fixed, moving = moving,
+  transformlist = mytx$fwdtransforms,
+  compose = tempfile()
+)
+cimg <- antsImageRead(cfile)
+cout <- antsApplyTransforms(
+  fixed = fixed, moving = moving,
+  transformlist = cimg
 )
 testthat::expect_error(
-antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist=cimg, whichtoinvert =c(1,2)), "same length"
+  antsApplyTransforms(
+    fixed = fixed, moving = moving,
+    transformlist = cimg, whichtoinvert = 1
+  ), "nnot invert transform"
 )
-testthat::expect_error(antsApplyTransforms( fixed=fixed,moving=moving,
-  transformlist= "")
- )
+testthat::expect_error(
+  antsApplyTransforms(
+    fixed = fixed, moving = moving,
+    transformlist = cimg, whichtoinvert = c(1, 2)
+  ), "same length"
+)
+testthat::expect_error(antsApplyTransforms(
+  fixed = fixed, moving = moving,
+  transformlist = ""
+))
 
 }
 \seealso{

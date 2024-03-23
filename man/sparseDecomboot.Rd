@@ -59,31 +59,43 @@ variance.
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-mydecom<-sparseDecomboot( mat, nboot=5, nsamp=0.9, nvecs=2 )
+mat <- replicate(100, rnorm(20))
+mydecom <- sparseDecomboot(mat, nboot = 5, nsamp = 0.9, nvecs = 2)
 
 \dontrun{
 # for prediction
-if ( usePkg("randomForest") & usePkg("spls") ) {
-data(lymphoma)
-training<-sample( rep(c(TRUE,FALSE),31)  )
-sp<-0.001 ; myz<-0 ; nv<-5
-ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv ,
-  sparseness=( sp ), mycoption=1, z=myz , nsamp=0.9, nboot=50 ) # NMF style
-outmat<-as.matrix(ldd$eigenanatomyimages )
-# outmat<-t(ldd$cca1outAuto)
-traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]),
-  eig = lymphoma$x[training,]  \%*\% t(outmat) )
-testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]),
-  eig = lymphoma$x[!training,] \%*\% t(outmat) )
-myrf<-randomForest( lclass ~ . ,   data=traindf )
-predlymp<-predict(myrf, newdata=testdf)
-print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
-  'non-zero ',sum(abs( outmat ) > 0 ) ) )
-for ( i in 1:nv )
-  print(paste(' non-zero ',i,' is: ',sum(abs( outmat[i,] ) > 0 ) ) )
+if (usePkg("randomForest") & usePkg("spls")) {
+  data(lymphoma)
+  training <- sample(rep(c(TRUE, FALSE), 31))
+  sp <- 0.001
+  myz <- 0
+  nv <- 5
+  ldd <- sparseDecomboot(lymphoma$x[training, ],
+    nvecs = nv,
+    sparseness = (sp), mycoption = 1, z = myz, nsamp = 0.9, nboot = 50
+  ) # NMF style
+  outmat <- as.matrix(ldd$eigenanatomyimages)
+  # outmat<-t(ldd$cca1outAuto)
+  traindf <- data.frame(
+    lclass = as.factor(lymphoma$y[training]),
+    eig = lymphoma$x[training, ] \%*\% t(outmat)
+  )
+  testdf <- data.frame(
+    lclass = as.factor(lymphoma$y[!training]),
+    eig = lymphoma$x[!training, ] \%*\% t(outmat)
+  )
+  myrf <- randomForest(lclass ~ ., data = traindf)
+  predlymp <- predict(myrf, newdata = testdf)
+  print(paste(
+    "N-errors:", sum(abs(testdf$lclass != predlymp)),
+    "non-zero ", sum(abs(outmat) > 0)
+  ))
+  for (i in 1:nv) {
+    print(paste(" non-zero ", i, " is: ", sum(abs(outmat[i, ]) > 0)))
+  }
 }
-} # end dontrun
+# end dontrun
+}
 
 }
 \author{

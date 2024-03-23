@@ -5,7 +5,7 @@
 \alias{bold_correlation_matrix}
 \title{BOLD Correlation Matrix}
 \format{
-A data frame square correlation matrix listed by AAL 
+A data frame square correlation matrix listed by AAL
 anatomical column names.
 }
 \usage{

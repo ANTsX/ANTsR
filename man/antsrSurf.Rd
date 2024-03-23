@@ -67,51 +67,63 @@ as \code{ConvertScalarImageToRGB}, both available in Advanced Normalization
 Tools software on github.
 }
 \examples{
-
 \dontrun{
 
-myantspath = Sys.getenv("ANTSPATH")
-surf_ex = file.path(myantspath, "antsSurf")
+myantspath <- Sys.getenv("ANTSPATH")
+surf_ex <- file.path(myantspath, "antsSurf")
 if (file.exists(surf_ex)) {
-ch2i = antsImageRead( getANTsRData("ch2") )
-ch2seg = thresholdImage( ch2i, "Otsu", 3 )
-wm   = thresholdImage( ch2seg, 3, 3 )
-wm2 = smoothImage( wm, 1 ) \%>\% thresholdImage( 0.5, Inf )
-kimg = weingartenImageCurvature( ch2i, 1.5  ) \%>\% smoothImage( 1 )
-rp1 = matrix( c(90,180,90), ncol = 3 )
-rp2 = matrix( c(90,180,270), ncol = 3 )
-rp3 = matrix( c(90,180,180), ncol = 3 )
-rp  = rbind( rp1, rp3, rp2 )
-antsrSurf( x=wm2, y=list( kimg ), z=list( wm2 \%>\% iMath("MD",3) ),
-  inflationFactor=255, overlayLimits=c(-0.3,0.3), verbose = TRUE,
-  rotationParams = rp, filename=tempfile() )
+  ch2i <- antsImageRead(getANTsRData("ch2"))
+  ch2seg <- thresholdImage(ch2i, "Otsu", 3)
+  wm <- thresholdImage(ch2seg, 3, 3)
+  wm2 <- smoothImage(wm, 1) \%>\% thresholdImage(0.5, Inf)
+  kimg <- weingartenImageCurvature(ch2i, 1.5) \%>\% smoothImage(1)
+  rp1 <- matrix(c(90, 180, 90), ncol = 3)
+  rp2 <- matrix(c(90, 180, 270), ncol = 3)
+  rp3 <- matrix(c(90, 180, 180), ncol = 3)
+  rp <- rbind(rp1, rp3, rp2)
+  antsrSurf(
+    x = wm2, y = list(kimg), z = list(wm2 \%>\% iMath("MD", 3)),
+    inflationFactor = 255, overlayLimits = c(-0.3, 0.3), verbose = TRUE,
+    rotationParams = rp, filename = tempfile()
+  )
 
-fn = getANTsRData( "surf" )
-img = antsImageRead( fn ) # see antsSurf on github for data
-wm   = thresholdImage( img, 3, 4 )
-wm = thresholdImage(img, 3, 4) \%>\% iMath("FillHoles")
-wm = wm  \%>\% thresholdImage(1, 2)
-wms = smoothImage( wm, 1.0 )
-wmk = weingartenImageCurvature( wms, 1.5, 0 )
-# will display to screen
-antsrSurf( x=wm, y = list( wmk \%>\% smoothImage(1)), z=list( wm \%>\% iMath("MD",1)),
- rotationParams = c(270, 0, 90), overlayLimits=c(-0.4,0.4) )
-blob = antsImageRead( getANTsRData( "blob") )
-blob[1:266,1:266,1:100] = 0
-z = list(  wm \%>\% iMath("MD",1) ,  blob \%>\% smoothImage( 1 ) )
-antsrSurf( x=wm, y = list( wmk\%>\% smoothImage(1), blob ), z = z,
- colormap=c("jet","blue"), alpha=c(1,0.5,1),
- rotationParams = c(270, 0, 90),
- overlayLimits = list( c(-0.4,0.4) , c(0.9,1.001)) )
-# separate pos and neg curvature
-y = list( thresholdImage( wmk, 0.00, Inf ) ,
-          thresholdImage( wmk, -100, -0.00 ) )
-z = list( y[[1]] \%>\% iMath("MD",1) ,
-          y[[2]] \%>\% iMath("MD",1) )
-antsrSurf( x=wm, y=y, z=z, smoothingSigma=0.5, alpha=c( 1, 1, 1),
-    colormap=c("red","blue"),
-    inflationFactor=155, overlayLimits=list( c(0.5,1.0001), c(0.5,1.0001) ),
-    verbose = TRUE, rotationParams = rp[1,] )
+  fn <- getANTsRData("surf")
+  img <- antsImageRead(fn) # see antsSurf on github for data
+  wm <- thresholdImage(img, 3, 4)
+  wm <- thresholdImage(img, 3, 4) \%>\% iMath("FillHoles")
+  wm <- wm \%>\% thresholdImage(1, 2)
+  wms <- smoothImage(wm, 1.0)
+  wmk <- weingartenImageCurvature(wms, 1.5, 0)
+  # will display to screen
+  antsrSurf(
+    x = wm, y = list(wmk \%>\% smoothImage(1)), z = list(wm \%>\% iMath("MD", 1)),
+    rotationParams = c(270, 0, 90), overlayLimits = c(-0.4, 0.4)
+  )
+  # surface and two overlays
+  blob <- antsImageRead(getANTsRData("blob"))
+  blob[1:266, 1:266, 1:100] <- 0
+  z <- list(wm \%>\% iMath("MD", 1), blob \%>\% smoothImage(1))
+  antsrSurf(
+    x = wm, y = list(wmk \%>\% smoothImage(1), blob), z = z,
+    colormap = c("jet", "blue"), alpha = c(1, 0.5, 1),
+    rotationParams = c(270, 0, 90),
+    overlayLimits = list(c(-0.4, 0.4), c(0.9, 1.001))
+  )
+  # separate pos and neg curvature
+  y <- list(
+    thresholdImage(wmk, 0.00, Inf),
+    thresholdImage(wmk, -100, -0.00)
+  )
+  z <- list(
+    y[[1]] \%>\% iMath("MD", 1),
+    y[[2]] \%>\% iMath("MD", 1)
+  )
+  antsrSurf(
+    x = wm, y = y, z = z, smoothingSigma = 0.5, alpha = c(1, 1, 1),
+    colormap = c("red", "blue"),
+    inflationFactor = 155, overlayLimits = list(c(0.5, 1.0001), c(0.5, 1.0001)),
+    verbose = TRUE, rotationParams = rp[1, ]
+  )
 }
 }
 

@@ -18,9 +18,9 @@ return the pointer name itself from an antsImage object.
 }
 \examples{
 
-img = antsImageRead( getANTsRData("r16") )
-antsrGetPointerName( img )
-antsrGetPointerName( antsImageClone( img ))
+img <- antsImageRead(getANTsRData("r16"))
+antsrGetPointerName(img)
+antsrGetPointerName(antsImageClone(img))
 
 }
 \author{

@@ -82,30 +82,32 @@ imaging data on the eigenvectors.
 
 # generate simulated outcome
 nsubjects <- 100
-x1 <- seq(1, 10, length.out=nsubjects) + rnorm(nsubjects, sd=2)
-x2 <- seq(25, 15, length.out=nsubjects) + rnorm(nsubjects, sd=2)
-outcome <- 3 * x1 + 4 * x2 + rnorm(nsubjects, sd=1)
+x1 <- seq(1, 10, length.out = nsubjects) + rnorm(nsubjects, sd = 2)
+x2 <- seq(25, 15, length.out = nsubjects) + rnorm(nsubjects, sd = 2)
+outcome <- 3 * x1 + 4 * x2 + rnorm(nsubjects, sd = 1)
 # generate simulated images with outcome predicted
 # by sparse subset of voxels
-voxel.1 <- 3 * x1 + rnorm(nsubjects, sd=2)
-voxel.2 <- rnorm(nsubjects, sd=2)
-voxel.3 <- 2 * x2 + rnorm(nsubjects, sd=2)
-voxel.4 <- rnorm(nsubjects, sd=3)
-input   <- cbind(voxel.1, voxel.2, voxel.3, voxel.4)
+voxel.1 <- 3 * x1 + rnorm(nsubjects, sd = 2)
+voxel.2 <- rnorm(nsubjects, sd = 2)
+voxel.3 <- 2 * x2 + rnorm(nsubjects, sd = 2)
+voxel.4 <- rnorm(nsubjects, sd = 3)
+input <- cbind(voxel.1, voxel.2, voxel.3, voxel.4)
 # simulate eigenvectors and mask
-mydecom <- sparseDecom(input, sparseness=0.25, nvecs=4)
-mask    <- as.antsImage(matrix(c(1,1,1,1), nrow=2))
+mydecom <- sparseDecom(input, sparseness = 0.25, nvecs = 4)
+mask <- as.antsImage(matrix(c(1, 1, 1, 1), nrow = 2))
 # generate sample demographics that do not explain outcome
 age <- runif(nsubjects, 50, 75)
-demog <- data.frame(outcome=outcome, age=age)
+demog <- data.frame(outcome = outcome, age = age)
 # randomly divide data into training and testing
-data.split <- splitData(demog, 2/3, return.rows=TRUE)
-eanatimages <- matrixToImages( mydecom$eig, mask )
-result <- regressProjections(input[data.split$rows.in, ],
+data.split <- splitData(demog, 2 / 3, return.rows = TRUE)
+eanatimages <- matrixToImages(mydecom$eig, mask)
+result <- regressProjections(
+  input[data.split$rows.in, ],
   input[data.split$rows.out, ],
   data.split$data.in, data.split$data.out,
   eanatimages,
-  mask, 'outcome')
+  mask, "outcome"
+)
 
 }
 \seealso{

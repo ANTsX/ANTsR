@@ -20,8 +20,8 @@ relabeledMask
 split a mask into n labeled sub-masks
 }
 \examples{
-mask = getMask( antsImageRead( getANTsRData("r16" ) ) )
-smask = splitMask( mask, 10 )
+mask <- getMask(antsImageRead(getANTsRData("r16")))
+smask <- splitMask(mask, 10)
 
 }
 \author{

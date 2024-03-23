@@ -57,9 +57,9 @@ Any NA values in \code{object} will be set to zero.
 }
 \examples{
 # estimate individual image
-mnit1 <- antsImageRead(getANTsRData('r16'))
-mask <- getMask( mnit1 )
-fwhm1 <- estSmooth( mnit1, mask )
+mnit1 <- antsImageRead(getANTsRData("r16"))
+mask <- getMask(mnit1)
+fwhm1 <- estSmooth(mnit1, mask)
 
 }
 \references{

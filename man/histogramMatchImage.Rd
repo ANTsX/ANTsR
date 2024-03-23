@@ -30,9 +30,9 @@ source image intensity matched to reference image.
 Match intensity profile with a reference image.
 }
 \examples{
-sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-referenceImage <- antsImageRead( getANTsRData( "r64" ), 2 )
-matchedImage <- histogramMatchImage( sourceImage, referenceImage )
+sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+referenceImage <- antsImageRead(getANTsRData("r64"), 2)
+matchedImage <- histogramMatchImage(sourceImage, referenceImage)
 
 }
 \author{

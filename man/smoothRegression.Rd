@@ -44,25 +44,27 @@ vector of size p is output
 Reconstruct a n by 1 vector given n by p matrix of predictors.
 }
 \examples{
-
 \dontrun{
-mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
-spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
-smoomat = knnSmoothingMatrix( spatmat, k = 200, sigma = 1.0 )
-mat <- matrix(rnorm(sum(mask)*50),ncol=sum(mask),nrow=50)
-mat[ 1:25,100:10000]=mat[ 1:25,100:10000]+1
-age = rnorm( 1:nrow(mat))
-for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
-  mat[ , i ] = age*0.1 + mat[,i]
-  }
-sel = 1:25
-fit = smoothRegression( x=mat[sel,], y=age[sel], iterations = 10,
+mask <- getMask(antsImageRead(getANTsRData("r16")))
+spatmat <- t(imageDomainToSpatialMatrix(mask, mask))
+smoomat <- knnSmoothingMatrix(spatmat, k = 200, sigma = 1.0)
+mat <- matrix(rnorm(sum(mask) * 50), ncol = sum(mask), nrow = 50)
+mat[1:25, 100:10000] <- mat[1:25, 100:10000] + 1
+age <- rnorm(1:nrow(mat))
+for (i in c(5000:6000, 10000:11000, 16000:17000)) {
+  mat[, i] <- age * 0.1 + mat[, i]
+}
+sel <- 1:25
+fit <- smoothRegression(
+  x = mat[sel, ], y = age[sel], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrix = smoomat, verbose=T )
-tt = mat \%*\% fit$v
-print( cor.test( age[-sel], tt[-sel,1] ) )
-vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
-plot( mask, vimg, window.overlay=range(abs(vimg)))
+  smoothingMatrix = smoomat, verbose = T
+)
+tt <- mat \%*\% fit$v
+print(cor.test(age[-sel], tt[-sel, 1]))
+vimg <- makeImage(mask, (fit$v[, 1]))
+print(range(vimg) * 10)
+plot(mask, vimg, window.overlay = range(abs(vimg)))
 }
 }
 \author{

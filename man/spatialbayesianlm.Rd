@@ -41,25 +41,28 @@ regularity.
 }
 \examples{
 
-  # make some simple data
-  \dontrun{
-  if (!exists("fn") ) fn<-getANTsRData("pcasl")
-  asl<-antsImageRead(fn)
-  tr<-antsGetSpacing(asl)[4]
-  aslmean<-getAverageOfTimeSeries( asl )
-  aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
-  pcaslpre <- aslPerfusion( asl, dorobust=0, useDenoiser=NULL, skip=1,
-     useBayesian=0, moreaccurate=0, verbose=T, mask=aslmask ) 
-  # user might compare to useDenoiser=FALSE
-  pcasl.parameters <- list( sequence="pcasl", m0=pcaslpre$m0 )
-  aslmat<-timeseries2matrix(asl,aslmask)
-  tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
-  dv<-computeDVARS(aslmat)
-  perfmodel<-lm( aslmat ~ tc + stats::poly(dv,4) ) # standard model
-  ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask,
-    priorWeight=1.e2 ,smth=1.6, nhood=rep(2,3) )
-  plot( ssp[[1]], slices="2x16x2", axis=3 )
-  }
+# make some simple data
+\dontrun{
+if (!exists("fn")) fn <- getANTsRData("pcasl")
+asl <- antsImageRead(fn)
+tr <- antsGetSpacing(asl)[4]
+aslmean <- getAverageOfTimeSeries(asl)
+aslmask <- getMask(aslmean, lowThresh = mean(aslmean), cleanup = TRUE)
+pcaslpre <- aslPerfusion(asl,
+  dorobust = 0, useDenoiser = NULL, skip = 1,
+  useBayesian = 0, moreaccurate = 0, verbose = T, mask = aslmask
+)
+# user might compare to useDenoiser=FALSE
+pcasl.parameters <- list(sequence = "pcasl", m0 = pcaslpre$m0)
+aslmat <- timeseries2matrix(asl, aslmask)
+tc <- as.factor(rep(c("C", "T"), nrow(aslmat) / 2))
+dv <- computeDVARS(aslmat)
+perfmodel <- lm(aslmat ~ tc + stats::poly(dv, 4)) # standard model
+ssp <- spatialbayesianlm(perfmodel, aslmat, aslmask,
+  priorWeight = 1.e2, smth = 1.6, nhood = rep(2, 3)
+)
+plot(ssp[[1]], slices = "2x16x2", axis = 3)
+}
 
 }
 \author{

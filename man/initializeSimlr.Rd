@@ -41,14 +41,17 @@ for SiMLR.
 \examples{
 
 set.seed(1500)
-nsub = 3
-npix = c(10,6,13)
-nk = 2
-outcome = initializeSimlr(
-  list( matrix(rnorm( nsub * npix[1] ),ncol=npix[1]),
-        matrix(rnorm( nsub * npix[2] ),ncol=npix[2]),
-        matrix(rnorm( nsub * npix[3] ),ncol=npix[3]) ),
-  k = 2, uAlgorithm = 'pca' )
+nsub <- 3
+npix <- c(10, 6, 13)
+nk <- 2
+outcome <- initializeSimlr(
+  list(
+    matrix(rnorm(nsub * npix[1]), ncol = npix[1]),
+    matrix(rnorm(nsub * npix[2]), ncol = npix[2]),
+    matrix(rnorm(nsub * npix[3]), ncol = npix[3])
+  ),
+  k = 2, uAlgorithm = "pca"
+)
 
 }
 \author{

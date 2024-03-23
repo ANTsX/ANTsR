@@ -53,22 +53,26 @@ user-defined graph density level.
 \examples{
 # none yet - this is not very well tested with recent ANTsR
 \dontrun{
-myimg <- antsImageRead(getANTsRData( "ch2" ), 3)
-mylab <- antsImageRead(getANTsRData( "ch2a" ), 3)
-boldfn <- getANTsRData( "pcasl" )
-bold <- antsImageRead( boldfn , 4 )
-avgbold <- getAverageOfTimeSeries( bold )
-breg <- antsRegistration( avgbold, myimg, typeofTransform = c("AffineFast") )
-warpedParcellation <- antsApplyTransforms( avgbold, mylab,
-    transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
-mask <- getMask( avgbold )
-warpedParcellation = maskImage(warpedParcellation, img.mask = mask)
-old = NA;
-labels = warpedParcellation; 
-gdens = 0.2; threshLo = 1; threshHi = 90;
-freqLo = 0.01; freqHi = 0.1; winsortrim = 0.02;
-result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
-
+myimg <- antsImageRead(getANTsRData("ch2"), 3)
+mylab <- antsImageRead(getANTsRData("ch2a"), 3)
+boldfn <- getANTsRData("pcasl")
+bold <- antsImageRead(boldfn, 4)
+avgbold <- getAverageOfTimeSeries(bold)
+breg <- antsRegistration(avgbold, myimg, typeofTransform = c("AffineFast"))
+warpedParcellation <- antsApplyTransforms(avgbold, mylab,
+  transformlist = breg$fwdtransforms, interpolator = "NearestNeighbor"
+)
+mask <- getMask(avgbold)
+warpedParcellation <- maskImage(warpedParcellation, img.mask = mask)
+old <- NA
+labels <- warpedParcellation
+gdens <- 0.2
+threshLo <- 1
+threshHi <- 90
+freqLo <- 0.01
+freqHi <- 0.1
+winsortrim <- 0.02
+result <- antsBOLDNetworkAnalysis(bold = bold, mask = mask, warpedParcellation)
 }
 }
 \author{

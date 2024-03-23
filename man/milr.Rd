@@ -62,72 +62,79 @@ random intercept matrix is only included if repeated measures are indicated.
 \examples{
 
 set.seed(1500)
-nsub = 12
-npix = 100
-outcome = rnorm( nsub )
-covar = rnorm( nsub )
-mat = replicate( npix, rnorm( nsub ) )
-mat2 = replicate( npix, rnorm( nsub ) )
-myform = " vox2 ~ covar + vox "
-df = data.frame( outcome = outcome, covar = covar )
-result = milr( df, list( vox = mat, vox2 = mat2 ), myform)
+nsub <- 12
+npix <- 100
+outcome <- rnorm(nsub)
+covar <- rnorm(nsub)
+mat <- replicate(npix, rnorm(nsub))
+mat2 <- replicate(npix, rnorm(nsub))
+myform <- " vox2 ~ covar + vox "
+df <- data.frame(outcome = outcome, covar = covar)
+result <- milr(df, list(vox = mat, vox2 = mat2), myform)
 
 \dontrun{
 # a 2nd example with 3 modalities
-imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
+imageIDs <- c("r16", "r27", "r30", "r62", "r64", "r85")
 images <- list()
 feature1Images <- list()
 feature2Images <- list()
 feature3Images <- list()
-ref = antsImageRead( getANTsRData('r16') )
-mask = ref * 0
-for( i in 1:length( imageIDs ) )  {
-  cat( "Processing image", imageIDs[i], "\n" )
-  tar = antsImageRead( getANTsRData( imageIDs[i] ) )
+ref <- antsImageRead(getANTsRData("r16"))
+mask <- ref * 0
+for (i in 1:length(imageIDs)) {
+  cat("Processing image", imageIDs[i], "\n")
+  tar <- antsImageRead(getANTsRData(imageIDs[i]))
   images[[i]] <- tar
-  mask = mask + tar
-  feature1Images[[i]] <- iMath( images[[i]], "Grad", 1.0 )
-  feature2Images[[i]] <- iMath( images[[i]], "Laplacian", 1.0 )
-  feature3Images[[i]] <- reflectImage(tar,axis=0,tx='Affine')$warpedmovout
-  }
-i=1
-mask = getMask( mask )
-spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
-smoomat = knnSmoothingMatrix( spatmat, k = 23, sigma = 100.0 )
-mat = imageListToMatrix( images, mask )
-mat2 = imageListToMatrix( feature1Images, mask )
-mat3 = imageListToMatrix( feature3Images, mask )
-myscale <- function( x ) { return( scale(x, center=TRUE,scale=T ) ) }
-x = list( x1=myscale(mat[-5,]), x2=myscale(mat2[-5,]), x3=myscale(mat3[-5,]) )
-df = data.frame( m1 = rowMeans( x$x1 ), m2 = rowMeans( x$x2 ), m3 = rowMeans( x$x3 ) )
-myform = " x1 ~ x2 + x3 + m2 + m3 "
-result = milr( df, x, myform, iterations=32,  smoothingMatrix = smoomat,
-  gamma=1e-1, verbose=T )
-k = 1
-mm = makeImage( mask, (result$prediction[k,]) ) \%>\% iMath("Normalize")
-tar = makeImage( mask, x$x1[k,] )
-plot( mm, doCropping=FALSE  )
-plot( tar, doCropping=FALSE )
-cor.test( result$prediction[k,], x$x1[k,]  )
-myol = makeImage( mask, abs(result$v[,"x2"]) ) \%>\% iMath("Normalize")
-plot( tar, myol, doCropping=FALSE )
-myol = makeImage( mask, abs(result$v[,"m3"]) ) \%>\% iMath("Normalize")
-plot( tar, myol, doCropping=FALSE )
-result = milr( df, x, myform, iterations=11,  smoothingMatrix = smoomat,
-  sparsenessQuantile = 0.5, positivity = 'positive',
-  gamma=1e-2, verbose=T )
-myol = makeImage( mask, abs(result$v[,"x2"]) ) \%>\% iMath("Normalize")
-plot( tar, myol, doCropping=FALSE, window.overlay=c(0.1,1) )
-mm = makeImage( mask, (result$prediction[k,]) ) \%>\% iMath("Normalize")
-tar = makeImage( mask, x$x1[k,] )
-plot( mm, doCropping=FALSE  )
-plot( tar, doCropping=FALSE )
-cor.test( result$prediction[k,], x$x1[k,]  )
+  mask <- mask + tar
+  feature1Images[[i]] <- iMath(images[[i]], "Grad", 1.0)
+  feature2Images[[i]] <- iMath(images[[i]], "Laplacian", 1.0)
+  feature3Images[[i]] <- reflectImage(tar, axis = 0, tx = "Affine")$warpedmovout
+}
+i <- 1
+mask <- getMask(mask)
+spatmat <- t(imageDomainToSpatialMatrix(mask, mask))
+smoomat <- knnSmoothingMatrix(spatmat, k = 23, sigma = 100.0)
+mat <- imageListToMatrix(images, mask)
+mat2 <- imageListToMatrix(feature1Images, mask)
+mat3 <- imageListToMatrix(feature3Images, mask)
+myscale <- function(x) {
+  return(scale(x, center = TRUE, scale = T))
+}
+x <- list(x1 = myscale(mat[-5, ]), x2 = myscale(mat2[-5, ]), x3 = myscale(mat3[-5, ]))
+df <- data.frame(m1 = rowMeans(x$x1), m2 = rowMeans(x$x2), m3 = rowMeans(x$x3))
+myform <- " x1 ~ x2 + x3 + m2 + m3 "
+result <- milr(df, x, myform,
+  iterations = 32, smoothingMatrix = smoomat,
+  gamma = 1e-1, verbose = T
+)
+k <- 1
+mm <- makeImage(mask, (result$prediction[k, ])) \%>\% iMath("Normalize")
+tar <- makeImage(mask, x$x1[k, ])
+plot(mm, doCropping = FALSE)
+plot(tar, doCropping = FALSE)
+cor.test(result$prediction[k, ], x$x1[k, ])
+myol <- makeImage(mask, abs(result$v[, "x2"])) \%>\% iMath("Normalize")
+plot(tar, myol, doCropping = FALSE)
+myol <- makeImage(mask, abs(result$v[, "m3"])) \%>\% iMath("Normalize")
+plot(tar, myol, doCropping = FALSE)
+result <- milr(df, x, myform,
+  iterations = 11, smoothingMatrix = smoomat,
+  sparsenessQuantile = 0.5, positivity = "positive",
+  gamma = 1e-2, verbose = T
+)
+myol <- makeImage(mask, abs(result$v[, "x2"])) \%>\% iMath("Normalize")
+plot(tar, myol, doCropping = FALSE, window.overlay = c(0.1, 1))
+mm <- makeImage(mask, (result$prediction[k, ])) \%>\% iMath("Normalize")
+tar <- makeImage(mask, x$x1[k, ])
+plot(mm, doCropping = FALSE)
+plot(tar, doCropping = FALSE)
+cor.test(result$prediction[k, ], x$x1[k, ])
 # univariate outcome
-myform = " m1 ~ x2 + x3 + m2 + m3 "
-result = milr( df, x, myform, iterations=11,  smoothingMatrix = smoomat,
-  gamma=1e-2, verbose=T )
-
+myform <- " m1 ~ x2 + x3 + m2 + m3 "
+result <- milr(df, x, myform,
+  iterations = 11, smoothingMatrix = smoomat,
+  gamma = 1e-2, verbose = T
+)
 }
 
 }

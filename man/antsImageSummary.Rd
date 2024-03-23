@@ -47,8 +47,8 @@ all(x, ..., na.rm = FALSE)
 Overloaded Summary for antsImage objects
 }
 \examples{
-vec = 1:64
-img01 <- as.antsImage(array(vec, c(4,4,4,1)))
+vec <- 1:64
+img01 <- as.antsImage(array(vec, c(4, 4, 4, 1)))
 testthat::expect_equal(max(img01), max(vec))
 max(img01)
 testthat::expect_equal(min(img01), min(vec))
@@ -56,6 +56,6 @@ min(img01)
 testthat::expect_equal(sum(img01), sum(vec))
 range(img01)
 testthat::expect_equal(range(img01), range(vec))
-prod(img01/25)
-testthat::expect_equal(prod(img01/25), prod(vec/25), tolerance = 1e-5)
+prod(img01 / 25)
+testthat::expect_equal(prod(img01 / 25), prod(vec / 25), tolerance = 1e-5)
 }

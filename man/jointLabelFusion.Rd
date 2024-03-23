@@ -72,57 +72,69 @@ on a macbook pro from 2015, 8 cores improves speed by about 4x.
 \examples{
 
 set.seed(123)
-ref <- ri( 1 )
-ref<-resampleImage(ref,c(50,50),1,0)
-ref<-iMath(ref,"Normalize")
-mi<- ri( 2 )
-mi2<-ri( 3 )
-mi3<-ri( 4 )
-mi4<-ri( 5 )
-mi5<-ri( 6 )
-refmask<-getMask(ref)
-refmask<-iMath(refmask,"ME",2) # just to speed things up
-ilist<-list(mi,mi2,mi3,mi4,mi5)
-seglist<-list()
-for ( i in 1:length(ilist) )
- {
- ilist[[i]]<-iMath(ilist[[i]],"Normalize")
- mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-   typeofTransform = c("Affine"), verbose = TRUE )
- mywarpedimage<-antsApplyTransforms(fixed=ref,
- moving=ilist[[i]],
-   transformlist=mytx$fwdtransforms)
- ilist[[i]]=mywarpedimage
- seg<-thresholdImage( ilist[[i]],"Otsu", 3)
- seglist[[i]]<-seg
- }
-r<-2
-pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-  labelList=seglist, rad=rep(r, length(dim(ref)) ) )
-pp2<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-  labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+ref <- ri(1)
+ref <- resampleImage(ref, c(50, 50), 1, 0)
+ref <- iMath(ref, "Normalize")
+mi <- ri(2)
+mi2 <- ri(3)
+mi3 <- ri(4)
+mi4 <- ri(5)
+mi5 <- ri(6)
+refmask <- getMask(ref)
+refmask <- iMath(refmask, "ME", 2) # just to speed things up
+ilist <- list(mi, mi2, mi3, mi4, mi5)
+seglist <- list()
+for (i in 1:length(ilist))
+{
+  ilist[[i]] <- iMath(ilist[[i]], "Normalize")
+  mytx <- antsRegistration(
+    fixed = ref, moving = ilist[[i]],
+    typeofTransform = c("Affine"), verbose = TRUE
+  )
+  mywarpedimage <- antsApplyTransforms(
+    fixed = ref,
+    moving = ilist[[i]],
+    transformlist = mytx$fwdtransforms
+  )
+  ilist[[i]] <- mywarpedimage
+  seg <- thresholdImage(ilist[[i]], "Otsu", 3)
+  seglist[[i]] <- seg
+}
+r <- 2
+pp <- jointLabelFusion(ref, refmask, ilist,
+  rSearch = 2,
+  labelList = seglist, rad = rep(r, length(dim(ref)))
+)
+pp2 <- jointLabelFusion(ref, refmask, ilist,
+  rSearch = 2,
+  labelList = seglist, rad = rep(r, length(dim(ref)))
+)
 testthat::expect_equal(pp2$segmentation, pp$segmentation)
-pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-  rad=rep(r, length(dim(ref)) ) )
+pp <- jointLabelFusion(ref, refmask, ilist,
+  rSearch = 2,
+  rad = rep(r, length(dim(ref)))
+)
 
 \dontrun{
-ref = antsImageRead( getANTsRData("ch2") )
-n = 50
-ref = resampleImage(ref,c(n,n,n),1,0)
-ref = iMath(ref,"Normalize")
-refmask = getMask(ref)
-ilist = list()
-seglist = list()
-for ( k in 1:5 ) {
-mi = antsImageClone( ref ) + rnorm( n^3, 0, 0.1 )
-mykseg = kmeansSegmentation( mi, 3, refmask )$segmentation
-ilist[[ k ]] = mi
-seglist[[ k ]] = mykseg
+ref <- antsImageRead(getANTsRData("ch2"))
+n <- 50
+ref <- resampleImage(ref, c(n, n, n), 1, 0)
+ref <- iMath(ref, "Normalize")
+refmask <- getMask(ref)
+ilist <- list()
+seglist <- list()
+for (k in 1:5) {
+  mi <- antsImageClone(ref) + rnorm(n^3, 0, 0.1)
+  mykseg <- kmeansSegmentation(mi, 3, refmask)$segmentation
+  ilist[[k]] <- mi
+  seglist[[k]] <- mykseg
 }
-pp = jointLabelFusion( ref, refmask,ilist, rSearch=2,
- labelList=seglist, rad=rep(2, length(dim(ref)) ), verbose=TRUE )
-plot( ref, pp$segmentation )
-plot( pp$intensity  )
+pp <- jointLabelFusion(ref, refmask, ilist,
+  rSearch = 2,
+  labelList = seglist, rad = rep(2, length(dim(ref))), verbose = TRUE
+)
+plot(ref, pp$segmentation)
+plot(pp$intensity)
 }
 
 }

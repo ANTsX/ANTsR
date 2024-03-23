@@ -22,27 +22,27 @@ matrix is output
 Uses clustering methods to split a time series into similar subsets.
 }
 \examples{
-
 \dontrun{
-  if (!exists("fn") ) fn<-getANTsRData("pcasl")
-   # high motion subject
-  asl<-antsImageRead(fn,4)
-  tr<-antsGetSpacing(asl)[4]
-  aslmean<-getAverageOfTimeSeries( asl )
-  aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
-  omat<-timeseries2matrix(asl, aslmask )
-  clustasl<-clusterTimeSeries( omat, krange=4:10 )
-  for ( ct in 1:max(clustasl$clusters) )
-    {
-    sel<-clustasl$clusters != ct
-    img<-matrix2timeseries( asl, aslmask, omat[sel,] )
-    perf <- aslPerfusion( img, 
-      dorobust=0.9, useDenoiser=4, skip=10, useBayesian=0,
-      moreaccurate=0, verbose=F, mask=aslmask )
-    perfp <- list( sequence="pcasl", m0=perf$m0 )
-    cbf <- quantifyCBF( perf$perfusion, perf$mask, perfp )
-    }
-  }
+if (!exists("fn")) fn <- getANTsRData("pcasl")
+# high motion subject
+asl <- antsImageRead(fn, 4)
+tr <- antsGetSpacing(asl)[4]
+aslmean <- getAverageOfTimeSeries(asl)
+aslmask <- getMask(aslmean, lowThresh = mean(aslmean), cleanup = TRUE)
+omat <- timeseries2matrix(asl, aslmask)
+clustasl <- clusterTimeSeries(omat, krange = 4:10)
+for (ct in 1:max(clustasl$clusters))
+{
+  sel <- clustasl$clusters != ct
+  img <- matrix2timeseries(asl, aslmask, omat[sel, ])
+  perf <- aslPerfusion(img,
+    dorobust = 0.9, useDenoiser = 4, skip = 10, useBayesian = 0,
+    moreaccurate = 0, verbose = F, mask = aslmask
+  )
+  perfp <- list(sequence = "pcasl", m0 = perf$m0)
+  cbf <- quantifyCBF(perf$perfusion, perf$mask, perfp)
+}
+}
 
 }
 \author{

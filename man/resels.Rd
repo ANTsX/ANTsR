@@ -24,7 +24,7 @@ nature of voxels when undergoing RFT based statistical analyses. Optimized for t
 dimensions (2D has not yet been tested yet).
 }
 \examples{
-mask <- getMask(antsImageRead(getANTsRData('r16')))
+mask <- getMask(antsImageRead(getANTsRData("r16")))
 myresels <- resels(mask, c(1, 1))
 
 }

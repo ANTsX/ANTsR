@@ -53,12 +53,14 @@ segmentation of an image.  This is an optimization algorithm.
 }
 \examples{
 
-img<-antsImageRead( getANTsRData("r16") ,2)
-img<-resampleImage(img,c(64,64),1,0)
-mask<-getMask( img )
-segs<-kmeansSegmentation( img, k=3, kmask = mask)
-thk<-kellyKapowski( s=segs$segmentation, g=segs$probabilityimages[[2]],
-  w=segs$probabilityimages[[3]],its=45,r=0.5,m=1 )
+img <- antsImageRead(getANTsRData("r16"), 2)
+img <- resampleImage(img, c(64, 64), 1, 0)
+mask <- getMask(img)
+segs <- kmeansSegmentation(img, k = 3, kmask = mask)
+thk <- kellyKapowski(
+  s = segs$segmentation, g = segs$probabilityimages[[2]],
+  w = segs$probabilityimages[[3]], its = 45, r = 0.5, m = 1
+)
 
 }
 \author{

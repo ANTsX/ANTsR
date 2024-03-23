@@ -18,9 +18,9 @@ set moving image for image to image metric
 After calling this, must call antsrMetricInitialize(metric)
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MeanSquares")
-z = y*2
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
+z <- y * 2
 antsrMetricSetMovingImage(metric, z)
 }

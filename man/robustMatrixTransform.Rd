@@ -16,8 +16,8 @@ matrix is output
 Transform a matrix such that each column has rank-ordered entries where rank #' is determined by the column values.
 }
 \examples{
-mat<-replicate(100, rnorm(20))
-rmat<-robustMatrixTransform( mat )
+mat <- replicate(100, rnorm(20))
+rmat <- robustMatrixTransform(mat)
 
 }
 \author{

@@ -37,11 +37,11 @@ These functions are available in \link{iMath}, see the operations
 }
 \examples{
 
-img = ri( 1 )
-mask= getMask( img )
-testthat::expect_error(getMask( img , lowThresh = "hey"))
-pixeltype(img) = "unsigned int"
-mask2<-getMask( img )
+img <- ri(1)
+mask <- getMask(img)
+testthat::expect_error(getMask(img, lowThresh = "hey"))
+pixeltype(img) <- "unsigned int"
+mask2 <- getMask(img)
 
 }
 \author{

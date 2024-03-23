@@ -49,7 +49,6 @@ matrix is output
 Uses a target function to denoise resting bold data
 }
 \examples{
-
 \dontrun{
 # if (!exists("fn") ) fn<-getANTsRData("pcasl")
 # bold <- antsImageRead( fn )

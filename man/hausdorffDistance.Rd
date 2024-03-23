@@ -23,11 +23,11 @@ available here:
 }
 \examples{
 
-sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-sourceSegmentation <- kmeansSegmentation( sourceImage, 3 )$segmentation
-referenceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-referenceSegmentation <- kmeansSegmentation( referenceImage, 3 )$segmentation
-hausdorff <- hausdorffDistance( sourceImage, referenceImage )
+sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+sourceSegmentation <- kmeansSegmentation(sourceImage, 3)$segmentation
+referenceImage <- antsImageRead(getANTsRData("r16"), 2)
+referenceSegmentation <- kmeansSegmentation(referenceImage, 3)$segmentation
+hausdorff <- hausdorffDistance(sourceImage, referenceImage)
 
 }
 \author{

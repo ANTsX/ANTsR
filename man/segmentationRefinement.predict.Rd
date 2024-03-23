@@ -68,72 +68,79 @@ to refine an initial segmentation.
 \examples{
 \dontrun{
 
- library( ANTsR )
- library( ggplot2 )
+library(ANTsR)
+library(ggplot2)
 
- imageIDs <- c( "r16", "r27", "r30", "r62", "r64", "r85" )
+imageIDs <- c("r16", "r27", "r30", "r62", "r64", "r85")
 
- # Perform simple 3-tissue segmentation.  For convenience we are
- # going to use atropos segmentation to define the "ground-truth"
- # segmentations and the kmeans to define the segmentation we
- # want to "correct".  We collect feature images for each image.
- # The gradient and laplacian images chosen below as feature
- # images are simply selected for convenience.
+# Perform simple 3-tissue segmentation.  For convenience we are
+# going to use atropos segmentation to define the "ground-truth"
+# segmentations and the kmeans to define the segmentation we
+# want to "correct".  We collect feature images for each image.
+# The gradient and laplacian images chosen below as feature
+# images are simply selected for convenience.
 
- segmentationLabels <- c( 1, 2, 3 )
+segmentationLabels <- c(1, 2, 3)
 
- featureImageNames <- c( 'T1', 'Gradient', 'Laplacian' )
+featureImageNames <- c("T1", "Gradient", "Laplacian")
 
- images <- list()
- kmeansSegs <- list()
- atroposSegs <- list()
- featureImages <- list()
+images <- list()
+kmeansSegs <- list()
+atroposSegs <- list()
+featureImages <- list()
 
- for( i in 1:length( imageIDs ) )
-   {
-   cat( "Processing image", imageIDs[i], "\n" )
-   images[[i]] <- antsImageRead( getANTsRData( imageIDs[i] ) )
-   mask <- getMask( images[[i]] )
-   kmeansSegs[[i]] <- kmeansSegmentation( images[[i]],
-   length( segmentationLabels ), mask, mrf = 0.0 )$segmentation
-   atroposSegs[[i]] <- atropos( images[[i]], mask, i = "KMeans[3]",
-   m = "[0.25,1x1]", c = "[5,0]" )$segmentation
+for (i in 1:length(imageIDs))
+{
+  cat("Processing image", imageIDs[i], "\n")
+  images[[i]] <- antsImageRead(getANTsRData(imageIDs[i]))
+  mask <- getMask(images[[i]])
+  kmeansSegs[[i]] <- kmeansSegmentation(images[[i]],
+    length(segmentationLabels), mask,
+    mrf = 0.0
+  )$segmentation
+  atroposSegs[[i]] <- atropos(images[[i]], mask,
+    i = "KMeans[3]",
+    m = "[0.25,1x1]", c = "[5,0]"
+  )$segmentation
 
-   featureImageSetPerImage <- list()
-   featureImageSetPerImage[[1]] <- images[[i]]
-   featureImageSetPerImage[[2]] <- iMath( images[[i]], "Grad", 1.0 )
-   featureImageSetPerImage[[3]] <- iMath( images[[i]], "Laplacian", 1.0 )
-   featureImages[[i]] <- featureImageSetPerImage
-   }
+  featureImageSetPerImage <- list()
+  featureImageSetPerImage[[1]] <- images[[i]]
+  featureImageSetPerImage[[2]] <- iMath(images[[i]], "Grad", 1.0)
+  featureImageSetPerImage[[3]] <- iMath(images[[i]], "Laplacian", 1.0)
+  featureImages[[i]] <- featureImageSetPerImage
+}
 
- # Perform training.  We train on images "r27", "r30",
- # "r62", "r64", "r85" and
- # test/predict on image "r16".
+# Perform training.  We train on images "r27", "r30",
+# "r62", "r64", "r85" and
+# test/predict on image "r16".
 
- cat( "\nTraining\n\n" )
+cat("\nTraining\n\n")
 
- segLearning <- segmentationRefinement.train(
- featureImages = featureImages[2:6],
-   truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
-   featureImageNames = featureImageNames, labelSet = segmentationLabels,
-   maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
-   neighborhoodRadius = c( 1, 1 ), normalizeSamplesPerLabel = TRUE,
-   useEntireLabeledRegion = FALSE )
+segLearning <- segmentationRefinement.train(
+  featureImages = featureImages[2:6],
+  truthLabelImages = atroposSegs[2:6], segmentationImages = kmeansSegs[2:6],
+  featureImageNames = featureImageNames, labelSet = segmentationLabels,
+  maximumNumberOfSamplesOrProportionPerClass = 100, dilationRadius = 1,
+  neighborhoodRadius = c(1, 1), normalizeSamplesPerLabel = TRUE,
+  useEntireLabeledRegion = FALSE
+)
 
- cat( "\nPrediction\n\n" )
+cat("\nPrediction\n\n")
 
- refinement <- segmentationRefinement.predict(
-   segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
-   segLearning$LabelModels, featureImages[[1]], featureImageNames,
-   dilationRadius = 1, neighborhoodRadius = c( 1, 1 ),
-   normalizeSamplesPerLabel = TRUE )
+refinement <- segmentationRefinement.predict(
+  segmentationImage = kmeansSegs[[1]], labelSet = segmentationLabels,
+  segLearning$LabelModels, featureImages[[1]], featureImageNames,
+  dilationRadius = 1, neighborhoodRadius = c(1, 1),
+  normalizeSamplesPerLabel = TRUE
+)
 
- # Compare "ground truth" = atroposSegs[[1]] with
- # refinement$RefinedSegmentationImage
+# Compare "ground truth" = atroposSegs[[1]] with
+# refinement$RefinedSegmentationImage
 
-  antsImageWrite( refinement$RefinedSegmentationImage,
-  "r16RefinedSegmentation.nii.gz" )
-
+antsImageWrite(
+  refinement$RefinedSegmentationImage,
+  "r16RefinedSegmentation.nii.gz"
+)
 }
 }
 \author{

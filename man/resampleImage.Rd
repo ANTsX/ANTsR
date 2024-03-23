@@ -30,27 +30,25 @@ Resample image by spacing or number of voxels with various interpolators.
 Works with multi-channel images.
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16"))
-r = range(fi)
-finn<-resampleImage(fi,c(50,60),TRUE,0)
+fi <- antsImageRead(getANTsRData("r16"))
+r <- range(fi)
+finn <- resampleImage(fi, c(50, 60), TRUE, 0)
 range(finn)
 stopifnot(diff(range(finn)) > 0)
-filin<-resampleImage(fi,c(1.5,1.5),FALSE,1)
+filin <- resampleImage(fi, c(1.5, 1.5), FALSE, 1)
 range(filin)
 stopifnot(diff(range(filin)) > 0)
-pixeltype(fi) = "float"
-arr = as.array(fi)
-arr = floor(arr)
-class(arr) = "integer"
-fi = as.antsImage(arr, pixeltype = "unsigned int")
-filin<-resampleImage(fi,c(1.5,1.5),FALSE,1)
-fi = as.antsImage(arr > 14, pixeltype = "unsigned char")
-filin<-resampleImage(fi,c(1.5,1.5),FALSE,1)
+pixeltype(fi) <- "float"
+arr <- as.array(fi)
+arr <- floor(arr)
+class(arr) <- "integer"
+fi <- as.antsImage(arr, pixeltype = "unsigned int")
+filin <- resampleImage(fi, c(1.5, 1.5), FALSE, 1)
+fi <- as.antsImage(arr > 14, pixeltype = "unsigned char")
+filin <- resampleImage(fi, c(1.5, 1.5), FALSE, 1)
 
-fi<-antsImageRead( getANTsRData("multi_component_image"))
-filin<-resampleImage(fi,c(2, 2),FALSE,1)
-
-
+fi <- antsImageRead(getANTsRData("multi_component_image"))
+filin <- resampleImage(fi, c(2, 2), FALSE, 1)
 
 }
 \author{

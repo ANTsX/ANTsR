@@ -52,13 +52,13 @@ AppGrad style of implementation by Ma, Lu and Foster, 2015.
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-mat2<-replicate(100, rnorm(20))
-mat<-scale(mat)
-mat2<-scale(mat2)
-wt<-0.666
-mat3<-mat*wt+mat2*(1-wt)
-jj = smoothAppGradCCA( mat, mat3 )
+mat <- replicate(100, rnorm(20))
+mat2 <- replicate(100, rnorm(20))
+mat <- scale(mat)
+mat2 <- scale(mat2)
+wt <- 0.666
+mat3 <- mat * wt + mat2 * (1 - wt)
+jj <- smoothAppGradCCA(mat, mat3)
 
 }
 \author{

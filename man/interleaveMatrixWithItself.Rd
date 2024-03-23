@@ -20,8 +20,8 @@ original matrix.
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-wmat<-interleaveMatrixWithItself( mat , 5 )
+mat <- replicate(100, rnorm(20))
+wmat <- interleaveMatrixWithItself(mat, 5)
 
 }
 \author{

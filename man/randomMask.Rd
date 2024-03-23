@@ -29,8 +29,8 @@ distributed on the input image/mask
 }
 \examples{
 
-img<-antsImageRead( getANTsRData("r16"))
-randmask<-randomMask(img,200)
+img <- antsImageRead(getANTsRData("r16"))
+randmask <- randomMask(img, 200)
 
 }
 \author{

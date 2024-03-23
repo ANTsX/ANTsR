@@ -21,9 +21,9 @@ Repeatedly run N3 on slices of time series and return image
 }
 \examples{
 
-  bold<-makeImage( c(10,10,10,4), rnorm(4000) )
-  mask<-getMask( getAverageOfTimeSeries( bold ) )
-  boldn3<-timeseriesN3( bold, mask, c(4,2) )
+bold <- makeImage(c(10, 10, 10, 4), rnorm(4000))
+mask <- getMask(getAverageOfTimeSeries(bold))
+boldn3 <- timeseriesN3(bold, mask, c(4, 2))
 
 }
 \author{

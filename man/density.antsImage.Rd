@@ -22,7 +22,7 @@ Computes the density of values
 of an image with the option for a mask.
 }
 \examples{
-img = makeImage(c(10,10),rnorm(100))
-mask = img > 0
+img <- makeImage(c(10, 10), rnorm(100))
+mask <- img > 0
 density(img, mask = mask)
 }

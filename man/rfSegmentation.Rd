@@ -32,27 +32,34 @@ Unsupervised image segmentation via random forests.  An example.
 }
 \examples{
 \dontrun{
-if ( usePkg("randomForest") ) {
-img<-antsImageRead( getANTsRData("r16") ) \%>\% iMath("Normalize")
-mask<-getMask( img )
-segs<-kmeansSegmentation( img, k=3, kmask = mask)
-fmat0 = t( antsrimpute( getNeighborhoodInMask( img, mask, c(2,2) ) ) )
-fmat1 = t( antsrimpute( getNeighborhoodInMask(
-  segs$probabilityimages[[1]], mask, c(2,2) ) ) )
-fmat2 = t( antsrimpute( getNeighborhoodInMask(
-  segs$probabilityimages[[2]], mask, c(2,2) ) ) )
-fmat3 = t( antsrimpute( getNeighborhoodInMask(
-  segs$probabilityimages[[3]], mask, c(2,2) ) ) )
-fmat = cbind( fmat0, fmat1, fmat2, fmat3 )
-# produces proximity between all voxel pairs
-rfsegs<-rfSegmentation( fmat, verbose=FALSE )
-lrr = lowrankRowMatrix( rfsegs, 10, faster = TRUE )
-nv = eanatSelect( inmat=lrr, mask=mask, selectorScale=1.2,  cthresh=50,
-  verbose=T, smooth=1 )
-ee = eanatDef( lrr, mask, nvecs=nv, smooth=0., cthresh=50,
-  its=2, verbose=TRUE )
-eseg = eigSeg( mask, ee )
-plot( img, eseg )
+if (usePkg("randomForest")) {
+  img <- antsImageRead(getANTsRData("r16")) \%>\% iMath("Normalize")
+  mask <- getMask(img)
+  segs <- kmeansSegmentation(img, k = 3, kmask = mask)
+  fmat0 <- t(antsrimpute(getNeighborhoodInMask(img, mask, c(2, 2))))
+  fmat1 <- t(antsrimpute(getNeighborhoodInMask(
+    segs$probabilityimages[[1]], mask, c(2, 2)
+  )))
+  fmat2 <- t(antsrimpute(getNeighborhoodInMask(
+    segs$probabilityimages[[2]], mask, c(2, 2)
+  )))
+  fmat3 <- t(antsrimpute(getNeighborhoodInMask(
+    segs$probabilityimages[[3]], mask, c(2, 2)
+  )))
+  fmat <- cbind(fmat0, fmat1, fmat2, fmat3)
+  # produces proximity between all voxel pairs
+  rfsegs <- rfSegmentation(fmat, verbose = FALSE)
+  lrr <- lowrankRowMatrix(rfsegs, 10, faster = TRUE)
+  nv <- eanatSelect(
+    inmat = lrr, mask = mask, selectorScale = 1.2, cthresh = 50,
+    verbose = T, smooth = 1
+  )
+  ee <- eanatDef(lrr, mask,
+    nvecs = nv, smooth = 0., cthresh = 50,
+    its = 2, verbose = TRUE
+  )
+  eseg <- eigSeg(mask, ee)
+  plot(img, eseg)
 }
 }
 }

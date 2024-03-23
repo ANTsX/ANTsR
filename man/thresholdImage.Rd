@@ -25,10 +25,10 @@ converts a scalar image into a binary image by thresholding operations
 }
 \examples{
 set.seed(1234)
-img <- makeImage(c(5,5), rnorm(25)+0.5)
-imgt<-thresholdImage( img, 0.5, Inf )
+img <- makeImage(c(5, 5), rnorm(25) + 0.5)
+imgt <- thresholdImage(img, 0.5, Inf)
 testthat::expect_equal(sum(imgt), 9)
-imgt<-thresholdImage( img > 0.5, 0.1, Inf )
+imgt <- thresholdImage(img > 0.5, 0.1, Inf)
 testthat::expect_equal(sum(imgt), 9)
 }
 \author{

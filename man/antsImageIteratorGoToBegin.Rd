@@ -16,8 +16,8 @@ antsImageIterator
 move iterator to begining
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-it <- antsImageIteratorNext( it )
-it <- antsImageIteratorGoToBegin( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+it <- antsImageIteratorNext(it)
+it <- antsImageIteratorGoToBegin(it)
 }

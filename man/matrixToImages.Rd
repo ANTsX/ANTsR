@@ -17,11 +17,9 @@ are unmasked and written as images. The mask defines the output image space.}
 Unmasks rows of a matrix and writes as images.
 }
 \examples{
-
 \dontrun{
-  # mat = matrixToImages( aMat, mask )
+# mat = matrixToImages( aMat, mask )
 }
-
 
 }
 \seealso{

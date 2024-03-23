@@ -85,60 +85,73 @@ We leave scaling choices to the user.
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-mat2<-replicate(100, rnorm(20))
-mat<-scale(mat)
-mat2<-scale(mat2)
-mydecom<-sparseDecom2(
-inmatrix = list(mat,mat2),
-sparseness=c(0.1,0.3),
-nvecs=3, its=3, perms=0)
-wt<-0.666
-mat3<-mat*wt+mat2*(1-wt)
-mydecom<-sparseDecom2( inmatrix=list(mat,mat3),
-  sparseness=c(0.2,0.2), nvecs=5, its=10, perms=5 )
+mat <- replicate(100, rnorm(20))
+mat2 <- replicate(100, rnorm(20))
+mat <- scale(mat)
+mat2 <- scale(mat2)
+mydecom <- sparseDecom2(
+  inmatrix = list(mat, mat2),
+  sparseness = c(0.1, 0.3),
+  nvecs = 3, its = 3, perms = 0
+)
+wt <- 0.666
+mat3 <- mat * wt + mat2 * (1 - wt)
+mydecom <- sparseDecom2(
+  inmatrix = list(mat, mat3),
+  sparseness = c(0.2, 0.2), nvecs = 5, its = 10, perms = 5
+)
 
 \dontrun{
 # a masked example
-im<-antsImageRead( getANTsRData("r64"))
-mask<-thresholdImage( im, 250, Inf )
-dd = sum( mask == 1 )
-mat1<-matrix( rnorm(dd*10) , nrow=10 )
-mat2<-matrix( rnorm(dd*10) , nrow=10 )
-initlist<-list()
-for ( nvecs in 1:2 ) {
-  init1<-antsImageClone( mask )
-  init1[ mask == 1 ]<-rnorm( dd )
-  initlist<-lappend( initlist, init1 )
+im <- antsImageRead(getANTsRData("r64"))
+mask <- thresholdImage(im, 250, Inf)
+dd <- sum(mask == 1)
+mat1 <- matrix(rnorm(dd * 10), nrow = 10)
+mat2 <- matrix(rnorm(dd * 10), nrow = 10)
+initlist <- list()
+for (nvecs in 1:2) {
+  init1 <- antsImageClone(mask)
+  init1[mask == 1] <- rnorm(dd)
+  initlist <- lappend(initlist, init1)
 }
-ff<-sparseDecom2( inmatrix=list(mat1,mat2), inmask=list(mask,mask),
-  sparseness=c(0.1,0.1) ,nvecs=length(initlist) , smooth=1,
-  cthresh=c(0,0), initializationList = initlist ,ell1 = 11 )
+ff <- sparseDecom2(
+  inmatrix = list(mat1, mat2), inmask = list(mask, mask),
+  sparseness = c(0.1, 0.1), nvecs = length(initlist), smooth = 1,
+  cthresh = c(0, 0), initializationList = initlist, ell1 = 11
+)
 ### now SNPs ###
-rf<-usePkg('randomForest')
-bg<-usePkg('BGLR')
-if ( bg & rf ) {
-data(mice)
-snps<-mice.X
-numericalpheno<-as.matrix( mice.pheno[,c(4,5,13,15) ] )
-numericalpheno<-residuals( lm( numericalpheno ~
-  as.factor(mice.pheno$Litter) ) )
-nfolds<-6
-train<-sample( rep( c(1:nfolds), 1800/nfolds ) )
-train<-( train < 4 )
-snpd<-sparseDecom2( inmatrix=list( ( as.matrix(snps[train,]) ),
-  numericalpheno[train,] ), nvecs=20, sparseness=c( 0.001, -0.5 ),
-  its=3, ell1=0.1 , z=-1 )
-for ( j in 3:3) {
-traindf<-data.frame( bmi=numericalpheno[ train,j] ,
-   snpse=as.matrix( snps[train, ] ) \%*\% as.matrix( snpd$eig1 ) )
-testdf <-data.frame( bmi=numericalpheno[!train,j] ,
-   snpse=as.matrix( snps[!train,] ) \%*\% as.matrix( snpd$eig1 ) )
-myrf<-randomForest( bmi ~ . , data=traindf )
-preddf<-predict(myrf, newdata=testdf )
-print( cor.test(preddf, testdf$bmi ) )
-plot( preddf, testdf$bmi )
-}
+rf <- usePkg("randomForest")
+bg <- usePkg("BGLR")
+if (bg & rf) {
+  data(mice)
+  snps <- mice.X
+  numericalpheno <- as.matrix(mice.pheno[, c(4, 5, 13, 15)])
+  numericalpheno <- residuals(lm(numericalpheno ~
+    as.factor(mice.pheno$Litter)))
+  nfolds <- 6
+  train <- sample(rep(c(1:nfolds), 1800 / nfolds))
+  train <- (train < 4)
+  snpd <- sparseDecom2(
+    inmatrix = list(
+      (as.matrix(snps[train, ])),
+      numericalpheno[train, ]
+    ), nvecs = 20, sparseness = c(0.001, -0.5),
+    its = 3, ell1 = 0.1, z = -1
+  )
+  for (j in 3:3) {
+    traindf <- data.frame(
+      bmi = numericalpheno[train, j],
+      snpse = as.matrix(snps[train, ]) \%*\% as.matrix(snpd$eig1)
+    )
+    testdf <- data.frame(
+      bmi = numericalpheno[!train, j],
+      snpse = as.matrix(snps[!train, ]) \%*\% as.matrix(snpd$eig1)
+    )
+    myrf <- randomForest(bmi ~ ., data = traindf)
+    preddf <- predict(myrf, newdata = testdf)
+    print(cor.test(preddf, testdf$bmi))
+    plot(preddf, testdf$bmi)
+  }
 } # check bg and rf
 }
 

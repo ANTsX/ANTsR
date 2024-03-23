@@ -15,12 +15,12 @@ antsrMetricSetMovingTransform(metric, transform)
 set transform for moving image
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="ANTSNeighborhoodCorrelation")
-tx <- createAntsrTransform( precision="double", type="AffineTransform", dimension=2)
-setAntsrTransformParameters(tx, c(0,-1,1,0,0,0))
-setAntsrTransformFixedParameters(tx, c(128,128))
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "ANTSNeighborhoodCorrelation")
+tx <- createAntsrTransform(precision = "double", type = "AffineTransform", dimension = 2)
+setAntsrTransformParameters(tx, c(0, -1, 1, 0, 0, 0))
+setAntsrTransformFixedParameters(tx, c(128, 128))
 antsrMetricSetMovingTransform(metric, tx)
 antsrMetricGetValue(metric)
 }

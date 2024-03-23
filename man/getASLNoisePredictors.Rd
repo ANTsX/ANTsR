@@ -49,19 +49,18 @@ Get nuisance predictors from ASL images
 \examples{
 # for real data do img<-antsImageRead(getANTsRData("pcasl"),4)
 set.seed(120)
-img<-makeImage( c(10,10,10,20), rnorm(1000*20)+1 )
-mask = getMask( getAverageOfTimeSeries( img ) )
-aslmat <- timeseries2matrix( img, mask )
-tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
-noise <- getASLNoisePredictors(aslmat, tc, k=2, npreds=2, noisefrac=0.5 )
-cm = colMeans(noise)
-rounding_type = RNGkind()[3]
+img <- makeImage(c(10, 10, 10, 20), rnorm(1000 * 20) + 1)
+mask <- getMask(getAverageOfTimeSeries(img))
+aslmat <- timeseries2matrix(img, mask)
+tc <- rep(c(0.5, -0.5), length.out = nrow(aslmat))
+noise <- getASLNoisePredictors(aslmat, tc, k = 2, npreds = 2, noisefrac = 0.5)
+cm <- colMeans(noise)
+rounding_type <- RNGkind()[3]
 if (getRversion() < "3.6.0" || rounding_type == "Rounding") {
-    testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642), tolerance = .01 )
+  testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642), tolerance = .01)
 } else {
-    testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999), tolerance = .01)
+  testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999), tolerance = .01)
 }
-
 
 }
 \author{

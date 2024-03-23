@@ -39,20 +39,20 @@ a specific predictive model.
 }
 \examples{
 
-nsub = 24
-npix = 100
-outcome = rnorm( nsub )
-covar = rnorm( nsub )
-mat = replicate( npix, rnorm( nsub ) )
-mat2 = replicate( npix, rnorm( nsub ) )
-mat3 = replicate( npix, rnorm( nsub ) )
-myform = " vox2 ~ covar + vox + vox3 "
-istr = c( rep( TRUE, round(nsub*2/3) ), rep( FALSE, nsub - round(nsub*2/3)) )
-df = data.frame( outcome = outcome, covar = covar )
-ltr = list( vox = mat[ istr,], vox2 = mat2[istr,], vox3 = mat3[istr,] )
-lte = list( vox = mat[!istr,], vox2 = mat2[!istr,], vox3 = mat3[!istr,]  )
-result = milr( df[istr,], ltr, myform)
-pred = milr.predict( result, df[istr,],ltr, df[!istr,], lte, myform )
+nsub <- 24
+npix <- 100
+outcome <- rnorm(nsub)
+covar <- rnorm(nsub)
+mat <- replicate(npix, rnorm(nsub))
+mat2 <- replicate(npix, rnorm(nsub))
+mat3 <- replicate(npix, rnorm(nsub))
+myform <- " vox2 ~ covar + vox + vox3 "
+istr <- c(rep(TRUE, round(nsub * 2 / 3)), rep(FALSE, nsub - round(nsub * 2 / 3)))
+df <- data.frame(outcome = outcome, covar = covar)
+ltr <- list(vox = mat[istr, ], vox2 = mat2[istr, ], vox3 = mat3[istr, ])
+lte <- list(vox = mat[!istr, ], vox2 = mat2[!istr, ], vox3 = mat3[!istr, ])
+result <- milr(df[istr, ], ltr, myform)
+pred <- milr.predict(result, df[istr, ], ltr, df[!istr, ], lte, myform)
 
 }
 \seealso{

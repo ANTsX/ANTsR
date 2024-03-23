@@ -21,14 +21,14 @@ single deformation field object.
 }
 \examples{
 
-fi <- antsImageRead(getANTsRData("r16") )
-mi <- antsImageRead(getANTsRData("r64") )
-fi<-resampleImage(fi,c(60,60),1,0)
-mi<-resampleImage(mi,c(60,60),1,0) # speed up
-mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
-compfield = composeTransformsToField( fi, mytx$fwd )
-atx = antsrTransformFromDisplacementField( compfield )
-wrped = applyAntsrTransformToImage( atx, mi, fi )
+fi <- antsImageRead(getANTsRData("r16"))
+mi <- antsImageRead(getANTsRData("r64"))
+fi <- resampleImage(fi, c(60, 60), 1, 0)
+mi <- resampleImage(mi, c(60, 60), 1, 0) # speed up
+mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("SyN"))
+compfield <- composeTransformsToField(fi, mytx$fwd)
+atx <- antsrTransformFromDisplacementField(compfield)
+wrped <- applyAntsrTransformToImage(atx, mi, fi)
 
 }
 \author{

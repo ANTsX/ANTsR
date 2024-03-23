@@ -45,11 +45,13 @@ image-based feature set.  future work will allow other covariates.
 }
 \examples{
 
-img <- antsImageRead( getANTsRData("r16"))
-seg <- kmeansSegmentation( img, 3 )$segmentation
-flist = list( img, img \%>\% iMath("Grad") )
-featMat <- getMultiResFeatureMatrix( flist, seg, rad=c(1,1),
-  multiResSchedule = c( 2, 1), nsamples=10 )
+img <- antsImageRead(getANTsRData("r16"))
+seg <- kmeansSegmentation(img, 3)$segmentation
+flist <- list(img, img \%>\% iMath("Grad"))
+featMat <- getMultiResFeatureMatrix(flist, seg,
+  rad = c(1, 1),
+  multiResSchedule = c(2, 1), nsamples = 10
+)
 }
 \author{
 Avants BB, Tustison NJ

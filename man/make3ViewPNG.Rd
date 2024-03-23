@@ -25,12 +25,13 @@ views is munged together along the left/right edge and written to a png
 file.
 }
 \examples{
-
 \dontrun{
-bm<-getMask( antsImageRead( getANTsRData("ch2") ) )
-brain<-renderSurfaceFunction( surfimg =list( bm ) ,
-    alphasurf=0.1 ,smoothsval = 1.5 )
-make3ViewPNG(  diag(4), diag(4), diag(4),  tempfile( fileext='.png') )
+bm <- getMask(antsImageRead(getANTsRData("ch2")))
+brain <- renderSurfaceFunction(
+  surfimg = list(bm),
+  alphasurf = 0.1, smoothsval = 1.5
+)
+make3ViewPNG(diag(4), diag(4), diag(4), tempfile(fileext = ".png"))
 }
 
 }

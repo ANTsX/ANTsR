@@ -18,10 +18,10 @@ mean of the intensity weighted voxel coordinate system.
 }
 \examples{
 
-fi<-antsImageRead( getANTsRData("r16"))
-com1<-getCenterOfMass( fi )
-fi<-antsImageRead( getANTsRData("r64"))
-com2<-getCenterOfMass( fi )
+fi <- antsImageRead(getANTsRData("r16"))
+com1 <- getCenterOfMass(fi)
+fi <- antsImageRead(getANTsRData("r64"))
+com2 <- getCenterOfMass(fi)
 
 }
 \author{

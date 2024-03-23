@@ -15,7 +15,7 @@ var(x, ...)
 \arguments{
 \item{x}{an object for which we want to compute the variance}
 
-\item{\dots}{Any additional arguments to be passed to 
+\item{\dots}{Any additional arguments to be passed to
 \code{\link[stats]{var}}}
 
 \item{na.rm}{a logical value indicating whether NA should be removed}
@@ -26,6 +26,6 @@ var(x, ...)
 Calculates the variance of an image
 }
 \examples{
-img <- antsImageRead( getANTsRData( "r16" ) )
+img <- antsImageRead(getANTsRData("r16"))
 var(img)
 }

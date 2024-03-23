@@ -45,7 +45,6 @@ for voxels corresponding to the mask input\cr
 Estimate CBF using standard regression and optionally robust regression.
 }
 \examples{
-
 \dontrun{
 #
 # cbf <- perfusionregression( mask_img, mat, xideal , nuis )

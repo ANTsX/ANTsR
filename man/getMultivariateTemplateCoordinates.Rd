@@ -51,18 +51,19 @@ Uses getTemplateCoordinates as a sub-routine.
 TBN
 }
 \examples{
-
 \dontrun{
- tem<-antsImageRead( getANTsRData("ch2") )
- temlab<-antsImageRead( getANTsRData("ch2b")  )
- temlab2<-antsImageRead( getANTsRData("ch2a")  )
- # try getANTsRData if you have www access
- mymni<-list( antsImageRead(getANTsRData("mni"),3),
-       antsImageRead(getANTsRData("mnib"),3),
-       antsImageRead(getANTsRData("mnia"),3) )
- mytem<-list( smoothImage(tem,3) ,temlab,temlab2)
- # mynetworkdescriptor<-getMultivariateTemplateCoordinates(
- #  mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )
+tem <- antsImageRead(getANTsRData("ch2"))
+temlab <- antsImageRead(getANTsRData("ch2b"))
+temlab2 <- antsImageRead(getANTsRData("ch2a"))
+# try getANTsRData if you have www access
+mymni <- list(
+  antsImageRead(getANTsRData("mni"), 3),
+  antsImageRead(getANTsRData("mnib"), 3),
+  antsImageRead(getANTsRData("mnia"), 3)
+)
+mytem <- list(smoothImage(tem, 3), temlab, temlab2)
+# mynetworkdescriptor<-getMultivariateTemplateCoordinates(
+#  mytem, mymni , convertToTal = TRUE , pvals=c(0.01,0.05) )
 }
 
 }

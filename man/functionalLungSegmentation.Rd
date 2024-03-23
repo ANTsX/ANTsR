@@ -53,13 +53,12 @@ this paper:
 \examples{
 \dontrun{
 
-library( ANTsR )
+library(ANTsR)
 
-image <- antsImageRead( "lung.nii.gz" )
-mask <- antsImageRead( "mask.nii.gz" )
-output <- functionalLungSegmentation( image, mask )
-antsImageWrite( output$segmentationImage, "outputSegmentation.nii.gz" )
-
+image <- antsImageRead("lung.nii.gz")
+mask <- antsImageRead("mask.nii.gz")
+output <- functionalLungSegmentation(image, mask)
+antsImageWrite(output$segmentationImage, "outputSegmentation.nii.gz")
 }
 }
 \author{

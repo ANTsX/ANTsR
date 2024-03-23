@@ -21,8 +21,8 @@ Perform N3 bias field correction on the given image
 }
 \examples{
 
-img<-makeImage(c(10,10),rnorm(100))
-n3img<-n3BiasFieldCorrection(  img, 1 )
+img <- makeImage(c(10, 10), rnorm(100))
+n3img <- n3BiasFieldCorrection(img, 1)
 
 }
 \author{

@@ -29,21 +29,21 @@ matrices should have the same number of rows and columns.
 \examples{
 
 set.seed(1500)
-nsub = 100
-outcome = rnorm( nsub )
-covar = rnorm( nsub )
-mat = replicate( nsub, rnorm( nsub ) )
-mat2 = replicate( nsub, rnorm( nsub ) )
-myform = " outcome ~ covar + vox "
-df = data.frame( outcome = outcome, covar = covar )
-result = ilr( df, list( vox = mat ), myform)
-print( names( result ) )
-print( rownames( result$pValue ) )
-myform = " vox2 ~ covar + vox "
-df = data.frame( outcome = outcome, covar = covar )
-result = ilr( df, list( vox = mat, vox2=mat2 ), myform)
-print( names( result ) )
-print( rownames( result$pValue ) )
+nsub <- 100
+outcome <- rnorm(nsub)
+covar <- rnorm(nsub)
+mat <- replicate(nsub, rnorm(nsub))
+mat2 <- replicate(nsub, rnorm(nsub))
+myform <- " outcome ~ covar + vox "
+df <- data.frame(outcome = outcome, covar = covar)
+result <- ilr(df, list(vox = mat), myform)
+print(names(result))
+print(rownames(result$pValue))
+myform <- " vox2 ~ covar + vox "
+df <- data.frame(outcome = outcome, covar = covar)
+result <- ilr(df, list(vox = mat, vox2 = mat2), myform)
+print(names(result))
+print(rownames(result$pValue))
 
 }
 \author{

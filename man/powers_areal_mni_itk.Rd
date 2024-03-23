@@ -17,7 +17,7 @@ A data frame listing the following variables.
   \item{\code{r}}{ red value for system }
   \item{\code{g}}{ green value for system }
   \item{\code{b}}{ blue value for system }
-  \item{\code{Anatomy}}{ anatomical location as 
+  \item{\code{Anatomy}}{ anatomical location as
   determined by OASIS labeling }
   \item{\code{Lobe}}{ lobe location of node }
   \item{\code{Brodmann}}{ Broadmann area number }
@@ -29,27 +29,30 @@ A data frame listing the following variables.
 powers_areal_mni_itk
 }
 \description{
-A data frame providing coordinates for the nodes 
-identified by Powers at al. Coordinates have been modified from nifti 
+A data frame providing coordinates for the nodes
+identified by Powers at al. Coordinates have been modified from nifti
 space to ITK space
 }
 \examples{
 data(powers_areal_mni_itk)
 \dontrun{
-  fixed <- antsImageRead( getANTsRData("ch2") )
-  moving <- antsImageRead( getANTsRData("mni") )
-  mytx <- antsRegistration( fixed=fixed, moving=moving, 
-  typeofTransform = c("SyN") )
-  data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-  coords = powers_areal_mni_itk[,1:3]
-  ch2reg   = antsRegistration( fixed, moving, typeofTransform = "SyN" )
-  coordsw <- antsApplyTransformsToPoints( 
-  dim=3, points=coords,
-  transformlist=ch2reg$fwdtransforms,
-  whichtoinvert=c(FALSE,FALSE) )
-  ptrd = 3
-  powersLabels = makePointsImage( coordsw, moving, radius = pard )
-  plot( moving, powersLabels, axis=3, nslices=30 )
+fixed <- antsImageRead(getANTsRData("ch2"))
+moving <- antsImageRead(getANTsRData("mni"))
+mytx <- antsRegistration(
+  fixed = fixed, moving = moving,
+  typeofTransform = c("SyN")
+)
+data("powers_areal_mni_itk", package = "ANTsR", envir = environment())
+coords <- powers_areal_mni_itk[, 1:3]
+ch2reg <- antsRegistration(fixed, moving, typeofTransform = "SyN")
+coordsw <- antsApplyTransformsToPoints(
+  dim = 3, points = coords,
+  transformlist = ch2reg$fwdtransforms,
+  whichtoinvert = c(FALSE, FALSE)
+)
+ptrd <- 3
+powersLabels <- makePointsImage(coordsw, moving, radius = pard)
+plot(moving, powersLabels, axis = 3, nslices = 30)
 }
 }
 \keyword{datasets}

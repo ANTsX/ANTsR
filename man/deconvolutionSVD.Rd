@@ -27,11 +27,13 @@ cerebral blood flow using a blood pool contrast agent
 \examples{
 
 S0aif <- 17.62
-Saif <- c( 16.25, 16.37, 20.22, 78.96, 230.5, 249.79, 198.58, 147.76,
-110.39, 111.64, 129.43 )
-Caif <- -log( Saif / S0aif )
+Saif <- c(
+  16.25, 16.37, 20.22, 78.96, 230.5, 249.79, 198.58, 147.76,
+  110.39, 111.64, 129.43
+)
+Caif <- -log(Saif / S0aif)
 
-dSVD <- deconvolutionSVD( Caif, 0.2 )
+dSVD <- deconvolutionSVD(Caif, 0.2)
 
 }
 \author{

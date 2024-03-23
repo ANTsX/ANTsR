@@ -38,10 +38,10 @@ wrapper around atropos (see ANTs and related publications).
 }
 \examples{
 
-fi = antsImageRead( getANTsRData( "r16" ) )
-seg = kmeansSegmentation( fi, 3 )
-msk = thresholdImage( seg$segmentation, 1, Inf )
-pseg = priorBasedSegmentation( fi, seg$probabilityimages, msk, 0.25, 0.1, 3 )
+fi <- antsImageRead(getANTsRData("r16"))
+seg <- kmeansSegmentation(fi, 3)
+msk <- thresholdImage(seg$segmentation, 1, Inf)
+pseg <- priorBasedSegmentation(fi, seg$probabilityimages, msk, 0.25, 0.1, 3)
 
 }
 \author{

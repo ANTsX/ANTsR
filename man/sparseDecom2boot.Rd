@@ -88,17 +88,19 @@ Decomposes two matrices into paired sparse eigenevectors to maximize
 canonical correlation.
 }
 \examples{
-
 \dontrun{
-mat<-replicate(100, rnorm(20))
-mat2<-replicate(100, rnorm(20))
-mydecom<-sparseDecom2boot( inmatrix=list(mat,mat2),
-  sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
-wt<-0.666
-mat3<-mat*wt+mat2*(1-wt)
-mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3),
-  sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
-
+mat <- replicate(100, rnorm(20))
+mat2 <- replicate(100, rnorm(20))
+mydecom <- sparseDecom2boot(
+  inmatrix = list(mat, mat2),
+  sparseness = c(0.1, 0.3), nvecs = 3, its = 3, perms = 0
+)
+wt <- 0.666
+mat3 <- mat * wt + mat2 * (1 - wt)
+mydecom <- sparseDecom2boot(
+  inmatrix = list(mat, mat3),
+  sparseness = c(0.2, 0.2), nvecs = 5, its = 10, perms = 200
+)
 }
 
 }

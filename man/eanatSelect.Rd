@@ -53,10 +53,10 @@ the case when we impose sparsity.
 }
 \examples{
 \dontrun{
-mat <- matrix(rnorm(2000),ncol=50)
-nvecsSel<-eanatSelect( mat, selectorScale = 1.2, maxNEvec = 4 )
-esol <- sparseDecom( mat, nvecs = nvecsSel )
-print(paste("selected", nvecsSel,'pseudo-eigenvectors'))
+mat <- matrix(rnorm(2000), ncol = 50)
+nvecsSel <- eanatSelect(mat, selectorScale = 1.2, maxNEvec = 4)
+esol <- sparseDecom(mat, nvecs = nvecsSel)
+print(paste("selected", nvecsSel, "pseudo-eigenvectors"))
 }
 }
 \author{

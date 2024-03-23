@@ -49,18 +49,18 @@ This function may give different results on multiple runs.
 }
 \examples{
 set.seed(1000)
-testimg<-makeImage( c(10,10,10,5),  rnorm(  5000  ) )
-testimg<-iMath(testimg,"PadImage",5)
-mocorr <-.motion_correction( testimg, num_threads = 1, seed = 10)
-aimg_to_array = function(x) {
-if (is.antsImage(x)) {
-   x = as.array(x)
+testimg <- makeImage(c(10, 10, 10, 5), rnorm(5000))
+testimg <- iMath(testimg, "PadImage", 5)
+mocorr <- .motion_correction(testimg, num_threads = 1, seed = 10)
+aimg_to_array <- function(x) {
+  if (is.antsImage(x)) {
+    x <- as.array(x)
+  }
+  x
 }
-x
-}
-amocorr = lapply(mocorr, aimg_to_array)
-mocorr2 <-.motion_correction( testimg, num_threads = 1, seed = 10)
-amocorr2 = lapply(mocorr2, aimg_to_array)
+amocorr <- lapply(mocorr, aimg_to_array)
+mocorr2 <- .motion_correction(testimg, num_threads = 1, seed = 10)
+amocorr2 <- lapply(mocorr2, aimg_to_array)
 testthat::expect_equal(mocorr, mocorr2)
 testthat::expect_equal(amocorr, amocorr2)
 

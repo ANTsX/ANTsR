@@ -16,17 +16,17 @@ list of scalar antsImages
 split a multichannel antsImage into a list of scalar antsImages
 }
 \examples{
- r <- floor( seq(1:(64*64)) / (64*64) * 255 )
- dim(r) <- c(64,64)
- r <- as.antsImage(r)
- g <- r*0
- b <- r*0
+r <- floor(seq(1:(64 * 64)) / (64 * 64) * 255)
+dim(r) <- c(64, 64)
+r <- as.antsImage(r)
+g <- r * 0
+b <- r * 0
 testthat::expect_error(splitChannels(r))
- rgbImage = mergeChannels( list(r,g,b) )
- imgList = splitChannels( rgbImage )
+rgbImage <- mergeChannels(list(r, g, b))
+imgList <- splitChannels(rgbImage)
 testthat::expect_length(imgList, 3)
 sapply(imgList, function(x) {
-testthat::expect_s4_class(x, class = "antsImage")
+  testthat::expect_s4_class(x, class = "antsImage")
 })
 testthat::expect_error(splitChannels("hey"))
 

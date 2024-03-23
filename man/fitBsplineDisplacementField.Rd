@@ -87,14 +87,15 @@ which, in turn is a wrapper for the ITK filter used for the function
 
 # Perform 2-D fitting
 
-points <- matrix( data = c( -50, -50 ), nrow = 1, byrow = TRUE )
-deltas <- matrix( data = c( 10, 10 ), nrow = 1, byrow = TRUE )
+points <- matrix(data = c(-50, -50), nrow = 1, byrow = TRUE)
+deltas <- matrix(data = c(10, 10), nrow = 1, byrow = TRUE)
 
 bsplineField <- fitBsplineDisplacementField(
   displacementOrigins = points, displacements = deltas,
-  origin = c( 0.0, 0.0 ), spacing = c( 1.0, 1.0 ), size = c( 100, 100 ),
-  direction = matrix( data = c( -1, 0, 0, -1 ), nrow = 2, byrow = TRUE ),
-  numberOfFittingLevels = 4, meshSize = c( 1, 1 ) )
+  origin = c(0.0, 0.0), spacing = c(1.0, 1.0), size = c(100, 100),
+  direction = matrix(data = c(-1, 0, 0, -1), nrow = 2, byrow = TRUE),
+  numberOfFittingLevels = 4, meshSize = c(1, 1)
+)
 
 }
 \author{

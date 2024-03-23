@@ -25,10 +25,10 @@ C++ pointers.
 
 img <- antsImageRead(getANTsRData("r16"), 2)
 img2 <- antsImageClone(img)
-img.int <- antsImageClone(img , "unsigned int")
-multi = antsImageRead(getANTsRData("multi_component_image"))
+img.int <- antsImageClone(img, "unsigned int")
+multi <- antsImageRead(getANTsRData("multi_component_image"))
 img <- antsImageRead(getANTsRData("r16"), 2)
-m2 = antsImageClone(multi)
+m2 <- antsImageClone(multi)
 
 }
 \author{

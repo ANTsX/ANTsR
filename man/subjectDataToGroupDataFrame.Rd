@@ -24,7 +24,6 @@ same type and converts them to a data frame with consistent column naming
 for the values and where rows correspond to subjects.
 }
 \examples{
-
 \dontrun{
 # data(aal,package="ANTsR")
 # csvlist<-Sys.glob("*md*csv")

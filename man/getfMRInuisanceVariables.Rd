@@ -27,14 +27,15 @@ series image.  Meant to be used before filterfMRIforNetworkAnalysis or any
 other results-oriented processing.
 }
 \examples{
-
 \dontrun{
-if (!exists("fn") ) fn<-getANTsRData("pcasl")
-pcasl<-antsImageRead( fn )
-aslmean<-getAverageOfTimeSeries( pcasl )
-aslmask<-getMask(aslmean)
-ee<-getfMRInuisanceVariables( pcasl, mask = aslmask ,
-        moreaccurate=F )
+if (!exists("fn")) fn <- getANTsRData("pcasl")
+pcasl <- antsImageRead(fn)
+aslmean <- getAverageOfTimeSeries(pcasl)
+aslmask <- getMask(aslmean)
+ee <- getfMRInuisanceVariables(pcasl,
+  mask = aslmask,
+  moreaccurate = F
+)
 }
 
 }

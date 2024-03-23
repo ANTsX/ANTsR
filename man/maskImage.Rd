@@ -36,10 +36,10 @@ testthat::expect_equal(sum(myimg.mask), 3295494)
 # these should be set in .Renviron not by sys calls
 # Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
 seg <- kmeansSegmentation(myimg, 3)
-myimg.mask <- maskImage(myimg, seg$segmentation, c(1,3))
-check = myimg * (seg$segmentation == 1 | seg$segmentation == 3)
+myimg.mask <- maskImage(myimg, seg$segmentation, c(1, 3))
+check <- myimg * (seg$segmentation == 1 | seg$segmentation == 3)
 testthat::expect_equal(myimg.mask, check)
-myimg.mask <- maskImage(myimg, seg$segmentation, c(1,3), binarize = TRUE)
+myimg.mask <- maskImage(myimg, seg$segmentation, c(1, 3), binarize = TRUE)
 coerce_mask(myimg.mask, error = TRUE) # no error
 
 }

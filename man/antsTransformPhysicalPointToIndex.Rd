@@ -18,14 +18,17 @@ array of pixel values
 Get index from spatial point of an 'antsImage'.
 }
 \examples{
-img<-makeImage(c(10,10),rnorm(100))
-pt<-antsTransformPhysicalPointToIndex(img,c(2,2))
-arr = as.array(img)
+img <- makeImage(c(10, 10), rnorm(100))
+pt <- antsTransformPhysicalPointToIndex(img, c(2, 2))
+arr <- as.array(img)
 testthat::expect_error(
-antsTransformPhysicalPointToIndex(arr,c(2,2)), "antsImage")
+  antsTransformPhysicalPointToIndex(arr, c(2, 2)), "antsImage"
+)
 testthat::expect_error(
-antsTransformPhysicalPointToIndex(img,c("2",2)), "point must be")
+  antsTransformPhysicalPointToIndex(img, c("2", 2)), "point must be"
+)
 testthat::expect_error(
-antsTransformPhysicalPointToIndex(img,c(2,2,2)), "matrix must be of")
+  antsTransformPhysicalPointToIndex(img, c(2, 2, 2)), "matrix must be of"
+)
 
 }

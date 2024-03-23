@@ -17,7 +17,7 @@ sd(x, na.rm = FALSE, ...)
 
 \item{na.rm}{a logical value indicating whether NA should be removed}
 
-\item{\dots}{Any additional arguments to be passed to 
+\item{\dots}{Any additional arguments to be passed to
 \code{\link[stats]{sd}}}
 
 \item{mask}{is an object of class \code{antsImage}}
@@ -28,7 +28,7 @@ Calculates the SD of an image
 Overloaded SD for antsImage objects
 }
 \examples{
-img <- antsImageRead( getANTsRData( "r16" ) )
+img <- antsImageRead(getANTsRData("r16"))
 sd(img)
-sd(img, mask  = img > 0 )
+sd(img, mask = img > 0)
 }

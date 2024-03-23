@@ -25,8 +25,8 @@ set image sampling strategy and rate
 After calling this, must call antsrMetricInitialize(metric)
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MeanSquares")
-antsrMetricSetSampling(metric,"random",0.4)
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
+antsrMetricSetSampling(metric, "random", 0.4)
 }

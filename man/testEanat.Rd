@@ -29,15 +29,15 @@ found or (b) the existing significant relationship remains significant,
 given the correction for multiple comparisons.
 }
 \examples{
-mat <- matrix(rnorm(300),ncol=3)
-n = nrow(mat)
-g = factor( c(rep(1,n/2),rep(0,n/2)) )
-mydf = data.frame( gen=g, a=rnorm(n))
-mymdl<-lm( mat ~ a + g , data=mydf )
-nv = testEanat( mymdl, myvar="g1" )
-mat[1:(n/2),3] = mat[1:(n/2),3] + 2
-mymdl<-lm( mat ~ a + g , data=mydf )
-nv = testEanat( mymdl, myvar="g1" )
+mat <- matrix(rnorm(300), ncol = 3)
+n <- nrow(mat)
+g <- factor(c(rep(1, n / 2), rep(0, n / 2)))
+mydf <- data.frame(gen = g, a = rnorm(n))
+mymdl <- lm(mat ~ a + g, data = mydf)
+nv <- testEanat(mymdl, myvar = "g1")
+mat[1:(n / 2), 3] <- mat[1:(n / 2), 3] + 2
+mymdl <- lm(mat ~ a + g, data = mydf)
+nv <- testEanat(mymdl, myvar = "g1")
 
 }
 \references{

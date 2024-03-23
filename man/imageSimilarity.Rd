@@ -56,7 +56,7 @@ value of image to image metric
 measure similarity between two images
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = imageSimilarity(x,y,type="MeanSquares")
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- imageSimilarity(x, y, type = "MeanSquares")
 }

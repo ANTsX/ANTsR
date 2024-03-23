@@ -36,13 +36,13 @@ This function computes that basis, given a mixing algorithm.
 \examples{
 
 set.seed(1500)
-nsub = 25
-npix = c(100,200,133)
-nk = 5
-outcome = matrix(rnorm( nsub * nk ),ncol=nk)
-outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
-outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
-u = simlrU( list( outcome, outcome1, outcome2 ), 2, 'avg' )
+nsub <- 25
+npix <- c(100, 200, 133)
+nk <- 5
+outcome <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome1 <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome2 <- matrix(rnorm(nsub * nk), ncol = nk)
+u <- simlrU(list(outcome, outcome1, outcome2), 2, "avg")
 
 }
 \seealso{

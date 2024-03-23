@@ -24,11 +24,10 @@ Produces a unique image for each connected component 1 through N of size >
 minClusterSize
 }
 \examples{
-
 \dontrun{
-img <- antsImageRead(  getANTsRData('r16') )
-img <- thresholdImage( img, 1 , Inf )
-imageclusterlist<-image2ClusterImages( img )
+img <- antsImageRead(getANTsRData("r16"))
+img <- thresholdImage(img, 1, Inf)
+imageclusterlist <- image2ClusterImages(img)
 }
 
 }

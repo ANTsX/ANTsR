@@ -25,15 +25,14 @@ sparse matrix is output
 Compute a smoothing matrix based on an input matrix of point coordinates
 }
 \examples{
-
 \dontrun{
-mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
-spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
-smoothingMatrix = knnSmoothingMatrix( spatmat, k = 25, sigma = 3.0 )
-rvec = rnorm( nrow( smoothingMatrix ) )
-srvec = smoothingMatrix \%*\% rvec
-rvi = makeImage( mask, rvec )
-srv = makeImage( mask,  as.numeric( srvec ) )
+mask <- getMask(antsImageRead(getANTsRData("r16")))
+spatmat <- t(imageDomainToSpatialMatrix(mask, mask))
+smoothingMatrix <- knnSmoothingMatrix(spatmat, k = 25, sigma = 3.0)
+rvec <- rnorm(nrow(smoothingMatrix))
+srvec <- smoothingMatrix \%*\% rvec
+rvi <- makeImage(mask, rvec)
+srv <- makeImage(mask, as.numeric(srvec))
 }
 }
 \author{

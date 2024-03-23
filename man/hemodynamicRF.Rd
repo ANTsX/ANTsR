@@ -76,63 +76,63 @@ zero mean.
 }
 \examples{
 
-  # Example 1
-  hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2)
-  # Example 2: effect of varying parameter cc
-  cc<-round(seq(0,1,length.out=10),2)
-  nlev<-length(cc)
-  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
-  mat<-matrix(NA,nrow=nlev,ncol=20)
-  for (i in 1:nlev) {
-    hrf<-ts( hemodynamicRF(scans=20, onsets=1, durations=2, rt=1,cc=cc[i],a1=4,a2=3))
-    mat[i,]<-hrf
-  }
-  matplot(seq(1,20),t(mat),'l',lwd=1,col=cscale,xlab='Time',ylab='Response',main='Parameter cc')
-  legend(x='topleft',legend=cc,text.col=cscale)
-  # Example 3: effect of varying parameter a1
-  a1<-seq(1,10)
-  nlev<-length(a1)
-  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
-  mat<-matrix(NA,nrow=nlev,ncol=20)
-  for (i in 1:nlev) {
-    hrf<-ts( hemodynamicRF(scans=20, onsets=1, durations=2, rt=1,a1=a1[i],a2=3))
-    mat[i,]<-hrf
-  }
-  matplot(seq(1,20),t(mat),'l',lwd=1,col=cscale,xlab='Time',ylab='Response',main='Parameter a1')
-  legend(x='topleft',legend=a1,text.col=cscale)
-  # Example 4: effect of varying parameter a2
-  a2<-seq(1,10)
-  nlev<-length(a2)
-  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
-  mat<-matrix(NA,nrow=nlev,ncol=20)
-  for (i in 1:nlev) {
-    hrf<-ts( hemodynamicRF(scans=20, onsets=1, durations=2, rt=1,a1=4,a2=a2[i]))
-    mat[i,]<-hrf
-  }
-  matplot(seq(1,20),t(mat),'l',lwd=1,col=cscale,xlab='Time',ylab='Response',main='Parameter a2')
-  legend(x='topleft',legend=a2,text.col=cscale)
-  # Example 5: effect of varying parameter b1
-  b1<-seq(0.4,1.3,by=0.1)
-  nlev<-length(b1)
-  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
-  mat<-matrix(NA,nrow=nlev,ncol=20)
-  for (i in 1:nlev) {
-    hrf<-ts( hemodynamicRF(scans=20, onsets=1, durations=2, rt=1,a1=4,a2=3, b1=b1[i]))
-    mat[i,]<-hrf
-  }
-  matplot(seq(1,20),t(mat),'l',lwd=1,col=cscale,xlab='Time',ylab='Response',main='Parameter b1')
-  legend(x='topleft',legend=b1,text.col=cscale)
-  # Example 6: effect of varying parameter b2
-  b2<-seq(0.4,1.3,by=0.1)
-  nlev<-length(b2)
-  cscale<-rgb(seq(0,1,length.out=nlev),seq(1,0,length.out=nlev),0,1)
-  mat<-matrix(NA,nrow=nlev,ncol=20)
-  for (i in 1:nlev) {
-    hrf<-ts( hemodynamicRF(scans=20, onsets=1, durations=2, rt=1,a1=4,a2=3, b2=b2[i]))
-    mat[i,]<-hrf
-  }
-  matplot(seq(1,20),t(mat),'l',lwd=1,col=cscale,xlab='Time',ylab='Response',main='Parameter b2')
-  legend(x='topleft',legend=b2,text.col=cscale)
+# Example 1
+hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2)
+# Example 2: effect of varying parameter cc
+cc <- round(seq(0, 1, length.out = 10), 2)
+nlev <- length(cc)
+cscale <- rgb(seq(0, 1, length.out = nlev), seq(1, 0, length.out = nlev), 0, 1)
+mat <- matrix(NA, nrow = nlev, ncol = 20)
+for (i in 1:nlev) {
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, rt = 1, cc = cc[i], a1 = 4, a2 = 3))
+  mat[i, ] <- hrf
+}
+matplot(seq(1, 20), t(mat), "l", lwd = 1, col = cscale, xlab = "Time", ylab = "Response", main = "Parameter cc")
+legend(x = "topleft", legend = cc, text.col = cscale)
+# Example 3: effect of varying parameter a1
+a1 <- seq(1, 10)
+nlev <- length(a1)
+cscale <- rgb(seq(0, 1, length.out = nlev), seq(1, 0, length.out = nlev), 0, 1)
+mat <- matrix(NA, nrow = nlev, ncol = 20)
+for (i in 1:nlev) {
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, rt = 1, a1 = a1[i], a2 = 3))
+  mat[i, ] <- hrf
+}
+matplot(seq(1, 20), t(mat), "l", lwd = 1, col = cscale, xlab = "Time", ylab = "Response", main = "Parameter a1")
+legend(x = "topleft", legend = a1, text.col = cscale)
+# Example 4: effect of varying parameter a2
+a2 <- seq(1, 10)
+nlev <- length(a2)
+cscale <- rgb(seq(0, 1, length.out = nlev), seq(1, 0, length.out = nlev), 0, 1)
+mat <- matrix(NA, nrow = nlev, ncol = 20)
+for (i in 1:nlev) {
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, rt = 1, a1 = 4, a2 = a2[i]))
+  mat[i, ] <- hrf
+}
+matplot(seq(1, 20), t(mat), "l", lwd = 1, col = cscale, xlab = "Time", ylab = "Response", main = "Parameter a2")
+legend(x = "topleft", legend = a2, text.col = cscale)
+# Example 5: effect of varying parameter b1
+b1 <- seq(0.4, 1.3, by = 0.1)
+nlev <- length(b1)
+cscale <- rgb(seq(0, 1, length.out = nlev), seq(1, 0, length.out = nlev), 0, 1)
+mat <- matrix(NA, nrow = nlev, ncol = 20)
+for (i in 1:nlev) {
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, rt = 1, a1 = 4, a2 = 3, b1 = b1[i]))
+  mat[i, ] <- hrf
+}
+matplot(seq(1, 20), t(mat), "l", lwd = 1, col = cscale, xlab = "Time", ylab = "Response", main = "Parameter b1")
+legend(x = "topleft", legend = b1, text.col = cscale)
+# Example 6: effect of varying parameter b2
+b2 <- seq(0.4, 1.3, by = 0.1)
+nlev <- length(b2)
+cscale <- rgb(seq(0, 1, length.out = nlev), seq(1, 0, length.out = nlev), 0, 1)
+mat <- matrix(NA, nrow = nlev, ncol = 20)
+for (i in 1:nlev) {
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, rt = 1, a1 = 4, a2 = 3, b2 = b2[i]))
+  mat[i, ] <- hrf
+}
+matplot(seq(1, 20), t(mat), "l", lwd = 1, col = cscale, xlab = "Time", ylab = "Response", main = "Parameter b2")
+legend(x = "topleft", legend = b2, text.col = cscale)
 
 }
 \references{

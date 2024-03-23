@@ -36,13 +36,13 @@ feature image - the function is user modifiable but defaults to cor
 \examples{
 
 set.seed(123)
-fi<-makeImage(c(20,20),rnorm(400,mean=1,sd=0.1))
-mask<-getMask(fi,0.8,Inf,0)
-segs<-kmeansSegmentation( fi ,3 , mask)$segmentation
-segs[ segs != 1 ]<-0
-shp<-labelClusters( segs,1)
-shp[ shp != 1 ]<-0
-fimg<-segmentShapeFromImage(fi,shp,mask)
+fi <- makeImage(c(20, 20), rnorm(400, mean = 1, sd = 0.1))
+mask <- getMask(fi, 0.8, Inf, 0)
+segs <- kmeansSegmentation(fi, 3, mask)$segmentation
+segs[segs != 1] <- 0
+shp <- labelClusters(segs, 1)
+shp[shp != 1] <- 0
+fimg <- segmentShapeFromImage(fi, shp, mask)
 
 }
 \author{

@@ -24,23 +24,25 @@ Additional parameters should be specific for each operation.  See the
 the full iMath in ANTs, on which this function is based.
 }
 \examples{
-fi<-antsImageRead( getANTsRData("r16") , 2 )
-mask<-getMask( fi )
-op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
-op2<-iMath( mask , "D" )  # distance transform
-op3<-iMath( 0 , "GetOperations" )  # list all ops
+fi <- antsImageRead(getANTsRData("r16"), 2)
+mask <- getMask(fi)
+op1 <- iMath(fi, "GD", 1) # gray matter dilation by 1 voxel
+op2 <- iMath(mask, "D") # distance transform
+op3 <- iMath(0, "GetOperations") # list all ops
 
-if ( usePkg("magrittr") ) { # string ops together
-  lapgd <- fi \%>\% iMath("Laplacian",1)  \%>\% iMath("GD",3)
+if (usePkg("magrittr")) { # string ops together
+  lapgd <- fi \%>\%
+    iMath("Laplacian", 1) \%>\%
+    iMath("GD", 3)
 }
 # Canny is useful e.g.
 # canny = ( iMath(myreg$warpedmovout,"Normalize")*255 ) \%>\% iMath("Canny",1,5,12)
-tf<-getANTsRData("r27")
-tem<-antsImageRead(tf)
-mask = tem > 20
-fh <- iMath( mask , "FillHoles" )  # list all ops
+tf <- getANTsRData("r27")
+tem <- antsImageRead(tf)
+mask <- tem > 20
+fh <- iMath(mask, "FillHoles") # list all ops
 stopifnot(range(fh) == c(0, 1))
-filled = fh > 0
+filled <- fh > 0
 }
 \author{
 JT Duda

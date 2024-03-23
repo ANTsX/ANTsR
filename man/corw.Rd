@@ -20,8 +20,8 @@ matrix - by columns.
 }
 \examples{
 
-mat <- matrix( rnorm(100), nrow=10 )
-wcmat<-corw( mat , weights = abs( nrorm( nrow(mat) ) ) )
+mat <- matrix(rnorm(100), nrow = 10)
+wcmat <- corw(mat, weights = abs(nrorm(nrow(mat))))
 
 }
 \author{

@@ -17,8 +17,8 @@ compute the DVARS quality control metric at every voxel
 }
 \examples{
 
- mat <- matrix(c(0,1,2,0,0,1,2,2,2),ncol=3)
- dv<-computeDVARSspatialMap(mat)
+mat <- matrix(c(0, 1, 2, 0, 0, 1, 2, 2, 2), ncol = 3)
+dv <- computeDVARSspatialMap(mat)
 
 }
 \author{

@@ -48,25 +48,27 @@ vector of size p is output
 Reconstruct a n by k vector given n by p matrix of predictors.
 }
 \examples{
-
 \dontrun{
-mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
-spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
-smoomat = knnSmoothingMatrix( spatmat, k = 200, sigma = 1.0 )
-mat <- matrix(rnorm(sum(mask)*50),ncol=sum(mask),nrow=50)
-mat[ 1:25,100:10000]=mat[ 1:25,100:10000]+1
-age = matrix( rnorm( nrow(mat)*2 ), ncol=2 )
-for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
-  mat[ , i ] = age[,1]*0.1 + mat[,i]
-  }
-sel = 1:25
-fit = smoothMultiRegression( x=mat[sel,], y=age[sel,], iterations = 10,
+mask <- getMask(antsImageRead(getANTsRData("r16")))
+spatmat <- t(imageDomainToSpatialMatrix(mask, mask))
+smoomat <- knnSmoothingMatrix(spatmat, k = 200, sigma = 1.0)
+mat <- matrix(rnorm(sum(mask) * 50), ncol = sum(mask), nrow = 50)
+mat[1:25, 100:10000] <- mat[1:25, 100:10000] + 1
+age <- matrix(rnorm(nrow(mat) * 2), ncol = 2)
+for (i in c(5000:6000, 10000:11000, 16000:17000)) {
+  mat[, i] <- age[, 1] * 0.1 + mat[, i]
+}
+sel <- 1:25
+fit <- smoothMultiRegression(
+  x = mat[sel, ], y = age[sel, ], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose=T )
-tt = mat \%*\% fit$v
-print( cor.test( age[-sel,1], tt[-sel,1] ) )
-vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
-plot( mask, vimg, window.overlay=range(abs(vimg)))
+  smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose = T
+)
+tt <- mat \%*\% fit$v
+print(cor.test(age[-sel, 1], tt[-sel, 1]))
+vimg <- makeImage(mask, (fit$v[, 1]))
+print(range(vimg) * 10)
+plot(mask, vimg, window.overlay = range(abs(vimg)))
 }
 }
 \author{

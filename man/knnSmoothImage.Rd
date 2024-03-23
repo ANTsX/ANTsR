@@ -39,12 +39,13 @@ well as neighborhood intensity patterns.  this performs a form of edge
 preserving smoothing.
 }
 \examples{
-
 \dontrun{
-img = antsImageRead( getANTsRData( 'r16' ) )
-mask = getMask( img )
-simg = knnSmoothImage( img=img, mask=mask, radius=2, intensityWeight=1,
-  spatialSigma=1.5, iterations=1 )
+img <- antsImageRead(getANTsRData("r16"))
+mask <- getMask(img)
+simg <- knnSmoothImage(
+  img = img, mask = mask, radius = 2, intensityWeight = 1,
+  spatialSigma = 1.5, iterations = 1
+)
 }
 }
 \author{

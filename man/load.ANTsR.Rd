@@ -8,7 +8,7 @@ load.ANTsR(filename=file.path('.','.ANTsRsession'), env=as.environment(1))
 }
 \arguments{
 \item{filename}{path of the saved ANTsR session. If not
-specified, the default behavior is to search for the 
+specified, the default behavior is to search for the
 folder \".ANTsRsesssion\" in the current working directory.}
 
 \item{env}{the environment level. Don't change unless you know

@@ -21,11 +21,11 @@ uses random matrix to estimate svd results
 }
 \examples{
 
-A <- matrix(rnorm(3000), ncol=50 )
-k=10
-dr=randsvd(A,k)$d[1:k]
-dt=svd(A)$d[1:k]
-cor(dr,dt)
+A <- matrix(rnorm(3000), ncol = 50)
+k <- 10
+dr <- randsvd(A, k)$d[1:k]
+dt <- svd(A)$d[1:k]
+cor(dr, dt)
 }
 \references{
 N. Halko, P.G. Martinsson, J. Tropp "Finding structure with randomness: Stochastic algorithms for constructing approximate matrix decompositions" arXiv 0909.4061

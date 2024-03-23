@@ -40,40 +40,51 @@ for both reasons of convention and engineering.
 }
 \examples{
 
-fixed <- antsImageRead( getANTsRData("r16") ,2)
-moving <- antsImageRead( getANTsRData("r64") ,2)
-fixed <- resampleImage(fixed,c(64,64),1,0)
-moving <- resampleImage(moving,c(64,64),1,0)
-mytx <- antsRegistration(fixed=fixed , moving=moving ,
-  typeofTransform = c("SyN"), verbose = TRUE )
-pts=data.frame(  x=c(110.5,120,130) , y=c(108.1,121.0,130),
-  label=c(1,2,3) )
-wpts <- antsApplyTransformsToPoints( dim=2, points=pts,
-  transformlist=mytx$fwdtransforms )
-wptsi <- antsApplyTransformsToPoints( dim=2, points=wpts,
-  transformlist=mytx$invtransforms ) # close to pts
+fixed <- antsImageRead(getANTsRData("r16"), 2)
+moving <- antsImageRead(getANTsRData("r64"), 2)
+fixed <- resampleImage(fixed, c(64, 64), 1, 0)
+moving <- resampleImage(moving, c(64, 64), 1, 0)
+mytx <- antsRegistration(
+  fixed = fixed, moving = moving,
+  typeofTransform = c("SyN"), verbose = TRUE
+)
+pts <- data.frame(
+  x = c(110.5, 120, 130), y = c(108.1, 121.0, 130),
+  label = c(1, 2, 3)
+)
+wpts <- antsApplyTransformsToPoints(
+  dim = 2, points = pts,
+  transformlist = mytx$fwdtransforms
+)
+wptsi <- antsApplyTransformsToPoints(
+  dim = 2, points = wpts,
+  transformlist = mytx$invtransforms
+) # close to pts
 
 \dontrun{
-fixed <- antsImageRead( getANTsRData("r16") ,2)
-moving <- antsImageRead( getANTsRData("r64") ,2)
-fpts = kmeansSegmentation( fixed , 3 )$segmentation \%>\%
-  thresholdImage(1,1) \%>\%
-  labelClusters( 5 ) \%>\% getCentroids(5)
-wpts <- antsApplyTransformsToPoints( dim=2, points=fpts,
- transformlist=mytx$fwdtransforms )
-labimgf=fixed*0
-labimgm=moving*0
-for ( p in 1:nrow(wpts))
-  {
-  pt=as.numeric( wpts[p,1:2] )
-  idx=round( antsTransformPhysicalPointToIndex(moving, pt ) )
-  labimgm[ idx[1], idx[2] ]=p
-  pt=as.numeric( fpts[p,1:2] )
-  idx=round( antsTransformPhysicalPointToIndex(fixed, pt ) )
-  labimgf[ idx[1], idx[2] ]=p
-  }
-plot(fixed,labimgf \%>\% iMath("GD",2) )
-plot(moving,labimgm  \%>\% iMath("GD",2)  )
+fixed <- antsImageRead(getANTsRData("r16"), 2)
+moving <- antsImageRead(getANTsRData("r64"), 2)
+fpts <- kmeansSegmentation(fixed, 3)$segmentation \%>\%
+  thresholdImage(1, 1) \%>\%
+  labelClusters(5) \%>\%
+  getCentroids(5)
+wpts <- antsApplyTransformsToPoints(
+  dim = 2, points = fpts,
+  transformlist = mytx$fwdtransforms
+)
+labimgf <- fixed * 0
+labimgm <- moving * 0
+for (p in 1:nrow(wpts))
+{
+  pt <- as.numeric(wpts[p, 1:2])
+  idx <- round(antsTransformPhysicalPointToIndex(moving, pt))
+  labimgm[idx[1], idx[2]] <- p
+  pt <- as.numeric(fpts[p, 1:2])
+  idx <- round(antsTransformPhysicalPointToIndex(fixed, pt))
+  labimgf[idx[1], idx[2]] <- p
+}
+plot(fixed, labimgf \%>\% iMath("GD", 2))
+plot(moving, labimgm \%>\% iMath("GD", 2))
 }
 
 }

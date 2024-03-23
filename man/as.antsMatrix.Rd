@@ -26,9 +26,9 @@ as.antsMatrix(object, elementtype = "float", ...)
 convert types to an antsMatrix
 }
 \examples{
-as.antsMatrix(matrix(rnorm(10), nrow=2))
-mat = matrix(rnorm(10), nrow=2)
-df = as.data.frame(mat)
+as.antsMatrix(matrix(rnorm(10), nrow = 2))
+mat <- matrix(rnorm(10), nrow = 2)
+df <- as.data.frame(mat)
 as.antsMatrix(df)
 as.antsMatrix(as.list(df))
 }

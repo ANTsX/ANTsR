@@ -97,28 +97,38 @@ and normalized, fused BOLD images in both subject and template space.
 \examples{
 # this example is long-running ( perhaps 10 minutes on an OSX laptop 2016 )
 \dontrun{
-exrun = fMRINormalization( verbose = TRUE ) # will download ex data
-myid = "BBAvants" # some MRI data
-pre = paste("~/rsfTest/",sep='')
-fn = list.files( pre, full.names = TRUE, recursive = TRUE,
-  pattern = glob2rx( paste( myid, "*rsfMRI0.nii.gz", sep='')  ) )
-img  = antsImageRead( fn  )
-sfn = list.files( pre, full.names = TRUE, recursive = TRUE,
-  pattern = glob2rx( paste( myid, "*BrainSegmentation.nii.gz", sep='')  ) )
-seg = antsImageRead( sfn )
-t1fn = list.files( pre, full.names = TRUE, recursive = TRUE,
-  pattern = glob2rx( paste( myid, "*BrainSegmentation0N4.nii.gz", sep='')  ) )
-t1 = antsImageRead( t1fn   )
-tt = fMRINormalization( img, repeatMotionEst=1,
-  structuralImage=t1, structuralSeg=seg, verbose= TRUE )
+exrun <- fMRINormalization(verbose = TRUE) # will download ex data
+myid <- "BBAvants" # some MRI data
+pre <- paste("~/rsfTest/", sep = "")
+fn <- list.files(pre,
+  full.names = TRUE, recursive = TRUE,
+  pattern = glob2rx(paste(myid, "*rsfMRI0.nii.gz", sep = ""))
+)
+img <- antsImageRead(fn)
+sfn <- list.files(pre,
+  full.names = TRUE, recursive = TRUE,
+  pattern = glob2rx(paste(myid, "*BrainSegmentation.nii.gz", sep = ""))
+)
+seg <- antsImageRead(sfn)
+t1fn <- list.files(pre,
+  full.names = TRUE, recursive = TRUE,
+  pattern = glob2rx(paste(myid, "*BrainSegmentation0N4.nii.gz", sep = ""))
+)
+t1 <- antsImageRead(t1fn)
+tt <- fMRINormalization(img,
+  repeatMotionEst = 1,
+  structuralImage = t1, structuralSeg = seg, verbose = TRUE
+)
 # bold to template
-antsApplyTransforms( mni, getAverageOfTimeSeries( img ),
-   transformlist=tt$mapsToTemplate$toTemplate,
-   whichtoinvert=tt$mapsToTemplate$toTemplateInversion )
+antsApplyTransforms(mni, getAverageOfTimeSeries(img),
+  transformlist = tt$mapsToTemplate$toTemplate,
+  whichtoinvert = tt$mapsToTemplate$toTemplateInversion
+)
 # template to bold
-antsApplyTransforms( getAverageOfTimeSeries( img ), mni,
-   transformlist=tt$mapsToTemplate$toBold,
-   whichtoinvert=tt$mapsToTemplate$toBoldInversion )
+antsApplyTransforms(getAverageOfTimeSeries(img), mni,
+  transformlist = tt$mapsToTemplate$toBold,
+  whichtoinvert = tt$mapsToTemplate$toBoldInversion
+)
 }
 
 }

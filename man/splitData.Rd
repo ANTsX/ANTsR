@@ -27,12 +27,11 @@ the input data in the testing set and the rest in the training set.
 Split data into testing and training sets for cross-validation.
 }
 \examples{
-
 \dontrun{
-  n <- 30
-  ratio <- 2/3
-  data.source <- data.frame(value=1:n)
-  out <- splitData(data.source, ratio)
+n <- 30
+ratio <- 2 / 3
+data.source <- data.frame(value = 1:n)
+out <- splitData(data.source, ratio)
 }
 
 }

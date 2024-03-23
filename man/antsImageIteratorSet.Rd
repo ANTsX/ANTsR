@@ -18,7 +18,7 @@ TRUE'
 Set value at current position
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-flag <- antsImageIteratorSet( it, 2.0 )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+flag <- antsImageIteratorSet(it, 2.0)
 }

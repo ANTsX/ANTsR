@@ -61,24 +61,31 @@ around a center voxel
 }
 \examples{
 r16 <- getANTsRData("r16")
-r16 <- antsImageRead(r16,2)
-mask <- getMask(r16,lowThresh=mean(r16),cleanup=1)
-radius <- rep(2,2)
-mat <- getNeighborhoodInMask(r16,mask,radius)
-mat <- getNeighborhoodInMask(r16,mask,radius,
-boundary.condition ="image")
-mat <- getNeighborhoodInMask(r16,mask,radius,
-boundary.condition ="mean") 
-randlist <- getNeighborhoodInMask(r16,mask,radius,
-physical.coordinates = TRUE)
-arr = as.array(r16)
-testthat::expect_error(getNeighborhoodInMask(arr,mask,radius), "antsImage")
-testthat::expect_error(getNeighborhoodInMask(r16,as.numeric(mask),radius), 
-"mask must be")
-testthat::expect_error(getNeighborhoodInMask(r16,mask,as.character(radius)), 
-"radius must be")
+r16 <- antsImageRead(r16, 2)
+mask <- getMask(r16, lowThresh = mean(r16), cleanup = 1)
+radius <- rep(2, 2)
+mat <- getNeighborhoodInMask(r16, mask, radius)
+mat <- getNeighborhoodInMask(r16, mask, radius,
+  boundary.condition = "image"
+)
+mat <- getNeighborhoodInMask(r16, mask, radius,
+  boundary.condition = "mean"
+)
+randlist <- getNeighborhoodInMask(r16, mask, radius,
+  physical.coordinates = TRUE
+)
+arr <- as.array(r16)
+testthat::expect_error(getNeighborhoodInMask(arr, mask, radius), "antsImage")
+testthat::expect_error(
+  getNeighborhoodInMask(r16, as.numeric(mask), radius),
+  "mask must be"
+)
+testthat::expect_error(
+  getNeighborhoodInMask(r16, mask, as.character(radius)),
+  "radius must be"
+)
 # testthat::expect_error(getNeighborhoodInMask(r16,mask,c(radius, 3)),
-# "Radius must") 
+# "Radius must")
 
 }
 \author{

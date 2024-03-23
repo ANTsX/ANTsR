@@ -48,9 +48,9 @@ matrix to achieve proper resampling.
 }
 \examples{
 
-fname = getANTsRData("r16")
-fi<-antsImageRead( fname)
-fi2mm <- resampleImage(fi, c(2, 2), useVoxels = 0, interpType = 'linear')
+fname <- getANTsRData("r16")
+fi <- antsImageRead(fname)
+fi2mm <- resampleImage(fi, c(2, 2), useVoxels = 0, interpType = "linear")
 resampled <- resampleImageToTarget(fi2mm, fi)
 testthat::expect_error(resampleImageToTarget(fi2mm))
 

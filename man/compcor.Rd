@@ -48,8 +48,8 @@ Compcors the input matrix using SVD and returns the result.
 }
 \examples{
 
-mat <- matrix( rnorm(50000) ,ncol=500)
-compcorrdf<-compcor( mat )
+mat <- matrix(rnorm(50000), ncol = 500)
+compcorrdf <- compcor(mat)
 
 }
 \author{

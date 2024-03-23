@@ -103,58 +103,59 @@ construction and to arbitrary numbers of modalities.
 \examples{
 
 set.seed(1500)
-nsub = 25
-npix = c(100,200,133)
-nk = 5
-outcome = matrix(rnorm( nsub * nk ),ncol=nk)
-outcome1 = matrix(rnorm( nsub * nk ),ncol=nk)
-outcome2 = matrix(rnorm( nsub * nk ),ncol=nk)
-outcome3 = matrix(rnorm( nsub * nk ),ncol=nk)
-view1tx = matrix( rnorm( npix[1]  * nk ), nrow=nk )
-view2tx = matrix( rnorm( npix[2]  * nk ), nrow=nk )
-view3tx = matrix( rnorm( npix[3]  * nk ), nrow=nk )
-mat1 = (outcome \%*\% t(outcome1) \%*\% (outcome1)) \%*\% view1tx
-mat2 = (outcome \%*\% t(outcome2) \%*\% (outcome2)) \%*\% view2tx
-mat3 = (outcome \%*\% t(outcome3) \%*\% (outcome3)) \%*\% view3tx
-matlist = list( vox = mat1, vox2 = mat2, vox3 = mat3 )
-result = simlr( matlist )
-p1 = mat1 \%*\% (result$v[[1]])
-p2 = mat2 \%*\% (result$v[[2]])
-p3 = mat3 \%*\% (result$v[[3]])
-regs = regularizeSimlr( matlist )
-result2 = simlr( matlist )
-pred1 = predictSimlr( matlist, result )
-pred2 = predictSimlr( matlist, result2 )
+nsub <- 25
+npix <- c(100, 200, 133)
+nk <- 5
+outcome <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome1 <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome2 <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome3 <- matrix(rnorm(nsub * nk), ncol = nk)
+view1tx <- matrix(rnorm(npix[1] * nk), nrow = nk)
+view2tx <- matrix(rnorm(npix[2] * nk), nrow = nk)
+view3tx <- matrix(rnorm(npix[3] * nk), nrow = nk)
+mat1 <- (outcome \%*\% t(outcome1) \%*\% (outcome1)) \%*\% view1tx
+mat2 <- (outcome \%*\% t(outcome2) \%*\% (outcome2)) \%*\% view2tx
+mat3 <- (outcome \%*\% t(outcome3) \%*\% (outcome3)) \%*\% view3tx
+matlist <- list(vox = mat1, vox2 = mat2, vox3 = mat3)
+result <- simlr(matlist)
+p1 <- mat1 \%*\% (result$v[[1]])
+p2 <- mat2 \%*\% (result$v[[2]])
+p3 <- mat3 \%*\% (result$v[[3]])
+regs <- regularizeSimlr(matlist)
+result2 <- simlr(matlist)
+pred1 <- predictSimlr(matlist, result)
+pred2 <- predictSimlr(matlist, result2)
 
 # compare to permuted data
-s1 = sample( 1:nsub)
-s2 = sample( 1:nsub)
-resultp = simlr( list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ) )
-p1p = mat1 \%*\% (resultp$v[[1]])
-p2p = mat2[s1,] \%*\% (resultp$v[[2]])
-p3p = mat3[s2,] \%*\% (resultp$v[[3]])
+s1 <- sample(1:nsub)
+s2 <- sample(1:nsub)
+resultp <- simlr(list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ]))
+p1p <- mat1 \%*\% (resultp$v[[1]])
+p2p <- mat2[s1, ] \%*\% (resultp$v[[2]])
+p3p <- mat3[s2, ] \%*\% (resultp$v[[3]])
 
 # compare to SVD
-svd1 = svd( mat1, nu=nk, nv=0 )$u
-svd2 = svd( mat2, nu=nk, nv=0 )$u
-svd3 = svd( mat3, nu=nk, nv=0 )$u
+svd1 <- svd(mat1, nu = nk, nv = 0)$u
+svd2 <- svd(mat2, nu = nk, nv = 0)$u
+svd3 <- svd(mat3, nu = nk, nv = 0)$u
 
 # real
-range(cor(p1,p2))
-range(cor(p1,p3))
-range(cor(p3,p2))
+range(cor(p1, p2))
+range(cor(p1, p3))
+range(cor(p3, p2))
 
 # permuted
-range(cor(p1p,p2p))
-range(cor(p1p,p3p))
-range(cor(p3p,p2p))
+range(cor(p1p, p2p))
+range(cor(p1p, p3p))
+range(cor(p3p, p2p))
 
 # svd
-print( range(cor( svd1,svd2) ))
+print(range(cor(svd1, svd2)))
 
-resultp = simlr(list( vox = mat1, vox2 = mat2[s1,], vox3 = mat3[s2,] ),
-   initialUMatrix = nk , verbose=TRUE, iterations=5,
-   energyType = "normalized" )
+resultp <- simlr(list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ]),
+  initialUMatrix = nk, verbose = TRUE, iterations = 5,
+  energyType = "normalized"
+)
 }
 \seealso{
 \code{\link{milr}} \code{\link{mild}} \code{\link{simlrU}}

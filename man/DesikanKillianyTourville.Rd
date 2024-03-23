@@ -19,11 +19,11 @@ A data frame listing the following variables.
 DesikanKillianyTourville
 }
 \description{
-A data frame label numbers and names for the neuroanatomical 
+A data frame label numbers and names for the neuroanatomical
 DesikanKillianyTourville labels.
 }
 \examples{
-data(DesikanKillianyTourville) 
+data(DesikanKillianyTourville)
 }
 \references{
 \url{http://www.ncbi.nlm.nih.gov/pubmed/23227001}

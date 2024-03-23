@@ -20,10 +20,10 @@ antsrTransform
 read a transform from file
 }
 \examples{
-trans= c(3,4,5)
-tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-txfile = tempfile(fileext = ".mat")
+trans <- c(3, 4, 5)
+tx <- createAntsrTransform(type = "Euler3DTransform", translation = trans)
+txfile <- tempfile(fileext = ".mat")
 writeAntsrTransform(tx, txfile)
-tx2 = readAntsrTransform(txfile)
+tx2 <- readAntsrTransform(txfile)
 testthat::expect_error(readAntsrTransform(txfile, 2), "space dim")
 }

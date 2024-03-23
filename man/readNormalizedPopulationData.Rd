@@ -16,24 +16,24 @@ list containing demographics, imageMat, imageMask and imageBoolean
 This function reads a file created by \code{writeNormalizedPopulationData}.
 }
 \examples{
-tfn = system.file("extdata", "normpop.h5", package = "ANTsR")
+tfn <- system.file("extdata", "normpop.h5", package = "ANTsR")
 if (file.exists(tfn)) {
-    dlist = readNormalizedPopulationData( tfn)
+  dlist <- readNormalizedPopulationData(tfn)
 }
 \dontrun{
-ilist = getANTsRData( "population" )
-mask = getMask( ilist[[ 1 ]] )
-imat = imageListToMatrix( ilist, mask )
-demog = data.frame( age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
-ibool = c( TRUE, TRUE, TRUE, FALSE )
-tfn = tempfile(fileext=".h5")
-if ( usePkg( "hdf5r" ) ) writeNormalizedPopulationData( demog, imat, mask, ibool, tfn )
-if ( usePkg( "hdf5r" ) ) {
-dlist = readNormalizedPopulationData( tfn )
-all.equal(dlist$demographics, demog)
-all.equal(dlist$imageMat, imat)
-all.equal(as.array(dlist$imageMask), as.array(mask))
-all.equal(dlist$imageBool, ibool)
+ilist <- getANTsRData("population")
+mask <- getMask(ilist[[1]])
+imat <- imageListToMatrix(ilist, mask)
+demog <- data.frame(age = c(11, 7, 18, 22), sex = c("M", "M", "F", "F"))
+ibool <- c(TRUE, TRUE, TRUE, FALSE)
+tfn <- tempfile(fileext = ".h5")
+if (usePkg("hdf5r")) writeNormalizedPopulationData(demog, imat, mask, ibool, tfn)
+if (usePkg("hdf5r")) {
+  dlist <- readNormalizedPopulationData(tfn)
+  all.equal(dlist$demographics, demog)
+  all.equal(dlist$imageMat, imat)
+  all.equal(as.array(dlist$imageMask), as.array(mask))
+  all.equal(dlist$imageBool, ibool)
 }
 }
 }

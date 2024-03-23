@@ -17,14 +17,15 @@ rapidlyInspectImageData collects basic statistics over a dataset and returns the
 in a dataframe.
 }
 \examples{
-
 \dontrun{
- fnl <- c( getANTsRData("r16"),
- getANTsRData("r27"),
- getANTsRData("r62"),
- getANTsRData("r64"),
- getANTsRData("r85") )
-mm<-rapidlyInspectImageData( fnl )
+fnl <- c(
+  getANTsRData("r16"),
+  getANTsRData("r27"),
+  getANTsRData("r62"),
+  getANTsRData("r64"),
+  getANTsRData("r85")
+)
+mm <- rapidlyInspectImageData(fnl)
 }
 
 }

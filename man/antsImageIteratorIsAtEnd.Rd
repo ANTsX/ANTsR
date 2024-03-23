@@ -16,8 +16,8 @@ boolean indicating position
 test if iterator is at end of data
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-it <- antsImageIteratorNext( it )
-flag <- antsImageIteratorIsAtEnd( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+it <- antsImageIteratorNext(it)
+flag <- antsImageIteratorIsAtEnd(it)
 }

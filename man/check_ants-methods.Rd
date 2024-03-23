@@ -21,10 +21,10 @@ check_ants(x, ...)
 \S4method{check_ants}{list}(x, ...)
 }
 \arguments{
-\item{x}{character path of image or 
+\item{x}{character path of image or
 an object of class antsImage}
 
-\item{...}{arguments passed to other methods, 
+\item{...}{arguments passed to other methods,
 namely \code{\link{antsImageRead}}}
 }
 \value{

@@ -26,7 +26,7 @@ outputs a list containing:
 Read file info from image header
 }
 \examples{
-antsImageHeaderInfo( getANTsRData("r16") )
+antsImageHeaderInfo(getANTsRData("r16"))
 
 img <- antsImageRead(getANTsRData("r16"))
 antsImageHeaderInfo(img)

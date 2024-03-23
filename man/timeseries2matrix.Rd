@@ -25,10 +25,10 @@ Extract a matrix from a time-series image after applying a mask.
 }
 \examples{
 
-img <- makeImage( c(10,10,10,5) , 0 )
+img <- makeImage(c(10, 10, 10, 5), 0)
 # or use antsImageRead ...
-mask <- array( 1 , dim(img)[1:3] )
-mat <- timeseries2matrix( img , mask )
+mask <- array(1, dim(img)[1:3])
+mat <- timeseries2matrix(img, mask)
 
 }
 \author{

@@ -232,14 +232,14 @@ Overloaded operators for antsImage objects
 }
 \examples{
 
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-img02 <- as.antsImage(array(64:1, c(4,4,4,1)))
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+img02 <- as.antsImage(array(64:1, c(4, 4, 4, 1)))
 is.antsImage(img01 + img02)
 is.antsImage(sqrt(2) * img01)
 is.antsImage(img02 / pi)
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-et = function(x) {
-testthat::expect_true(x)
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+et <- function(x) {
+  testthat::expect_true(x)
 }
 x <- is.antsImage(img01 == img01)
 et(x)
@@ -260,7 +260,7 @@ x <- is.antsImage(img01 >= 1)
 et(x)
 x <- is.antsImage(1 >= img01)
 et(x)
-x <- is.antsImage(as.array(img01) >= img01) 
+x <- is.antsImage(as.array(img01) >= img01)
 et(x)
 
 x <- is.antsImage(img01 > img01)
@@ -271,7 +271,7 @@ x <- is.antsImage(img01 > 1)
 et(x)
 x <- is.antsImage(1 > img01)
 et(x)
-x <- is.antsImage(as.array(img01) > img01) 
+x <- is.antsImage(as.array(img01) > img01)
 et(x)
 
 x <- is.antsImage(img01 < img01)
@@ -282,8 +282,8 @@ x <- is.antsImage(img01 < 1)
 et(x)
 x <- is.antsImage(1 < img01)
 et(x)
-x <- is.antsImage(as.array(img01) < img01) 
-et(x) 
+x <- is.antsImage(as.array(img01) < img01)
+et(x)
 
 
 x <- is.antsImage(img01 <= img01)
@@ -291,10 +291,10 @@ et(x)
 x <- is.antsImage(img01 <= as.array(img01))
 et(x)
 x <- is.antsImage(1 <= img01)
-et(x) 
+et(x)
 x <- is.antsImage(img01 <= 1)
 et(x)
-x <- is.antsImage(as.array(img01) <= img01)  
+x <- is.antsImage(as.array(img01) <= img01)
 et(x)
 
 x <- is.antsImage(img01 != img01)
@@ -302,18 +302,20 @@ et(x)
 x <- is.antsImage(img01 != as.array(img01))
 et(x)
 x <- is.antsImage(1 != img01)
-et(x)  
+et(x)
 x <- is.antsImage(img01 != 1)
 et(x)
-x <- is.antsImage(as.array(img01) != img01) 
+x <- is.antsImage(as.array(img01) != img01)
 et(x)
 
 ###########################
 # Multi image operations
-######################## 
-fname = system.file("extdata",
-"multi_component_image.nii.gz", package="ANTsRCore")
-img = antsImageRead(fname)
+########################
+fname <- system.file("extdata",
+  "multi_component_image.nii.gz",
+  package = "ANTsRCore"
+)
+img <- antsImageRead(fname)
 
 testthat::expect_is(img > 0, "antsImage")
 testthat::expect_is(0 < img, "antsImage")
@@ -339,18 +341,18 @@ testthat::expect_is(img != 0, "antsImage")
 testthat::expect_is(0 != img, "antsImage")
 testthat::expect_is(img != c(0, 0), "antsImage")
 
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 == list())  
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 > list())  
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 < list())   
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 != list())  
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 <= list())  
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
-testthat::expect_error(img01 >= list())  
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 == list())
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 > list())
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 < list())
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 != list())
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 <= list())
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
+testthat::expect_error(img01 >= list())
 }
 \author{
 John Muschellli \email{muschellij2@gmail.com}

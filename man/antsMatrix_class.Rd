@@ -28,7 +28,7 @@ An S4 class to hold an antsMatrix imported from ITK types
 }}
 
 \examples{
-mat = as.antsMatrix(matrix(rnorm(10), nrow=2))
+mat <- as.antsMatrix(matrix(rnorm(10), nrow = 2))
 as.data.frame(mat)
 as.matrix(mat)
 }

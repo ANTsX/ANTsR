@@ -62,31 +62,34 @@ The reconstruction can be regularized.
 # u^t u v^t - u^t x
 }
 \examples{
-
 \dontrun{
-mask = getMask( antsImageRead( getANTsRData( 'r16' ) ) )
-spatmat = t( imageDomainToSpatialMatrix( mask, mask ) )
-smoomat = knnSmoothingMatrix( spatmat, k = 5, sigma = 1.0 )
-mat <- matrix(rnorm(sum(mask)*50),ncol=sum(mask),nrow=50)
-mat[ 1:25,100:10000]=mat[ 1:25,100:10000]+1
-age = rnorm( 1:nrow(mat))
-for ( i in c( 5000:6000, 10000:11000, 16000:17000 )  ){
-  mat[ , i ] = age*0.1 + mat[,i]
-  }
-gen = c( rep("M",25), rep("F",12 ) , rep("T",13 ) )
-repmeas = rep( c("A","B","C","D","E","F","G"), nrow( mat ) )[1:nrow(mat)]
-mydf = data.frame( age = scale( age ), gen = gen )
-fit = smoothMatrixPrediction( x=mat, basisDf=mydf, iterations = 10,
+mask <- getMask(antsImageRead(getANTsRData("r16")))
+spatmat <- t(imageDomainToSpatialMatrix(mask, mask))
+smoomat <- knnSmoothingMatrix(spatmat, k = 5, sigma = 1.0)
+mat <- matrix(rnorm(sum(mask) * 50), ncol = sum(mask), nrow = 50)
+mat[1:25, 100:10000] <- mat[1:25, 100:10000] + 1
+age <- rnorm(1:nrow(mat))
+for (i in c(5000:6000, 10000:11000, 16000:17000)) {
+  mat[, i] <- age * 0.1 + mat[, i]
+}
+gen <- c(rep("M", 25), rep("F", 12), rep("T", 13))
+repmeas <- rep(c("A", "B", "C", "D", "E", "F", "G"), nrow(mat))[1:nrow(mat)]
+mydf <- data.frame(age = scale(age), gen = gen)
+fit <- smoothMatrixPrediction(
+  x = mat, basisDf = mydf, iterations = 10,
   gamma = 1.e-6, sparsenessQuantile = 0.5,
-  smoothingMatrix = smoomat, repeatedMeasures=repmeas,
-  verbose=T )
-tt = mat \%*\% fit$v
-print( cor.test( mydf$age, tt[,1] ) )
-print( cor.test( fit$u[,"genM"], tt[,2] ) )
-vimg = makeImage( mask, (fit$v[,1] ) ); print(range(vimg)*10)
-plot( mask, vimg, window.overlay=range(abs(vimg)))
-vimg = makeImage( mask, (fit$v[,2] ) ); print(range(vimg)*10)
-plot( mask, vimg, window.overlay=range(abs(vimg)))
+  smoothingMatrix = smoomat, repeatedMeasures = repmeas,
+  verbose = T
+)
+tt <- mat \%*\% fit$v
+print(cor.test(mydf$age, tt[, 1]))
+print(cor.test(fit$u[, "genM"], tt[, 2]))
+vimg <- makeImage(mask, (fit$v[, 1]))
+print(range(vimg) * 10)
+plot(mask, vimg, window.overlay = range(abs(vimg)))
+vimg <- makeImage(mask, (fit$v[, 2]))
+print(range(vimg) * 10)
+plot(mask, vimg, window.overlay = range(abs(vimg)))
 }
 }
 \author{

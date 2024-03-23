@@ -67,23 +67,31 @@ random intercept matrix is only included if repeated measures are indicated.
 \examples{
 
 set.seed(1500)
-nsub = 12
-npix = 100
-outcome = rnorm( nsub )
-covar = rnorm( nsub )
-mat = replicate( npix, rnorm( nsub ) )
-mat2 = replicate( npix, rnorm( nsub ) )
-nk = 3
-myform = paste(" vox2 ~ covar + vox + ",
-  paste0( "mildBasis", 1:nk, collapse="+" ) )  # optional covariates
-df = data.frame( outcome = outcome, covar = covar )
-result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = 10 )
-result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = 4 )
-myumat = svd( mat2, nv=0, nu=3 )$u
-result = mild( df, list( vox = mat, vox2 = mat2 ), basisK = 3, myform,
-  initializationStrategy = 0 )
+nsub <- 12
+npix <- 100
+outcome <- rnorm(nsub)
+covar <- rnorm(nsub)
+mat <- replicate(npix, rnorm(nsub))
+mat2 <- replicate(npix, rnorm(nsub))
+nk <- 3
+myform <- paste(
+  " vox2 ~ covar + vox + ",
+  paste0("mildBasis", 1:nk, collapse = "+")
+) # optional covariates
+df <- data.frame(outcome = outcome, covar = covar)
+result <- mild(df, list(vox = mat, vox2 = mat2),
+  basisK = 3, myform,
+  initializationStrategy = 10
+)
+result <- mild(df, list(vox = mat, vox2 = mat2),
+  basisK = 3, myform,
+  initializationStrategy = 4
+)
+myumat <- svd(mat2, nv = 0, nu = 3)$u
+result <- mild(df, list(vox = mat, vox2 = mat2),
+  basisK = 3, myform,
+  initializationStrategy = 0
+)
 
 }
 \seealso{

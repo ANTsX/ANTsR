@@ -16,8 +16,8 @@ image similarity value
 get current value of metric
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MeanSquares")
-metricValue = antsrMetricGetValue(metric)
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
+metricValue <- antsrMetricGetValue(metric)
 }

@@ -27,9 +27,9 @@ See the paper entitled the shape operator for differential image analysis.
 }
 \examples{
 \dontrun{
-seg = antsImageRead( 'segmentation.nii.gz' )
-wm = thresholdImage( seg, 3, 3 ) \%>\% morphology( "dilate", 1 )
-lgi = localGyrificationIndex( wm )
+seg <- antsImageRead("segmentation.nii.gz")
+wm <- thresholdImage(seg, 3, 3) \%>\% morphology("dilate", 1)
+lgi <- localGyrificationIndex(wm)
 }
 
 }

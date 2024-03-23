@@ -17,8 +17,8 @@ compute the DVARS quality control metric
 }
 \examples{
 
- mat <- matrix(c(0,1,2,0,0,1,2,2,2),ncol=3)
- dv<-computeDVARS(mat)
+mat <- matrix(c(0, 1, 2, 0, 0, 1, 2, 2, 2), ncol = 3)
+dv <- computeDVARS(mat)
 
 }
 \author{

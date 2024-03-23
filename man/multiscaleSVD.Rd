@@ -50,38 +50,45 @@ variations on heuristics suggested in work by Maggioni et al.
 }
 \examples{
 
-sphereDim = 9
-embeddDim = 100
-n = 1000
-if ( usePkg( "pracma"  ) ) {
-set.seed(20190919)
-sphereData = pracma::rands( n, sphereDim, 1. )
-mysig = 0.1
-spherEmbed = matrix( rnorm( n * embeddDim, 0, mysig ), nrow = n, ncol = embeddDim )
-spherEmbed[ , 1:ncol( sphereData ) ] = spherEmbed[ , 1:ncol( sphereData ) ] + sphereData
-myr = seq( 1.0, 2.2, 0.05 ) # scales at which to sample
-mymssvd = multiscaleSVD( spherEmbed, myr, locn=5, nev=20, plot=1 )
-if (getRversion() < "3.6.0") {
-testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
-cm = unname(colMeans(mymssvd$evalsVsScale[11:25,]))
-testthat::expect_equal(cm,
-c(0.133651668406975, 0.0985695151401464, 0.0914110478052329,
-0.086272017653314, 0.081188302173622, 0.0766100356616153, 0.0719736252996842,
-0.067588745051721, 0.0622331185687704, 0.0415236318358749, 0.0192976885668337,
-0.0183063537558787, 0.0174990088862745, 0.0170012938275551, 0.0163859378707545,
-0.0158265354487181, 0.0153357773252783, 0.0147933538908736, 0.0143510807701235,
-0.0140473978346935))
-} else {
-testthat::expect_equal(mymssvd$noiseCutoffs, c(11, 15))
-cm = unname(colMeans(mymssvd$evalsVsScale[13:25,]))
-testthat::expect_equal(cm,
-c(0.138511257441516, 0.106071822485487, 0.0989441114152412, 0.092910922851038,
-0.0877970523897918, 0.0832570763653118, 0.0782599820599334, 0.0734433988152632,
-0.0678992413676906, 0.0432283615430504, 0.0202481578919003, 0.0191747572787057,
-0.0185718929604774, 0.0178301092823977, 0.0172423799670431, 0.0166981650233669,
-0.0162072551503541, 0.015784555784915, 0.0153600119986575, 0.0149084240854556
-))
-}
+sphereDim <- 9
+embeddDim <- 100
+n <- 1000
+if (usePkg("pracma")) {
+  set.seed(20190919)
+  sphereData <- pracma::rands(n, sphereDim, 1.)
+  mysig <- 0.1
+  spherEmbed <- matrix(rnorm(n * embeddDim, 0, mysig), nrow = n, ncol = embeddDim)
+  spherEmbed[, 1:ncol(sphereData)] <- spherEmbed[, 1:ncol(sphereData)] + sphereData
+  myr <- seq(1.0, 2.2, 0.05) # scales at which to sample
+  mymssvd <- multiscaleSVD(spherEmbed, myr, locn = 5, nev = 20, plot = 1)
+  if (getRversion() < "3.6.0") {
+    testthat::expect_equal(mymssvd$noiseCutoffs, c(10, 11))
+    cm <- unname(colMeans(mymssvd$evalsVsScale[11:25, ]))
+    testthat::expect_equal(
+      cm,
+      c(
+        0.133651668406975, 0.0985695151401464, 0.0914110478052329,
+        0.086272017653314, 0.081188302173622, 0.0766100356616153, 0.0719736252996842,
+        0.067588745051721, 0.0622331185687704, 0.0415236318358749, 0.0192976885668337,
+        0.0183063537558787, 0.0174990088862745, 0.0170012938275551, 0.0163859378707545,
+        0.0158265354487181, 0.0153357773252783, 0.0147933538908736, 0.0143510807701235,
+        0.0140473978346935
+      )
+    )
+  } else {
+    testthat::expect_equal(mymssvd$noiseCutoffs, c(11, 15))
+    cm <- unname(colMeans(mymssvd$evalsVsScale[13:25, ]))
+    testthat::expect_equal(
+      cm,
+      c(
+        0.138511257441516, 0.106071822485487, 0.0989441114152412, 0.092910922851038,
+        0.0877970523897918, 0.0832570763653118, 0.0782599820599334, 0.0734433988152632,
+        0.0678992413676906, 0.0432283615430504, 0.0202481578919003, 0.0191747572787057,
+        0.0185718929604774, 0.0178301092823977, 0.0172423799670431, 0.0166981650233669,
+        0.0162072551503541, 0.015784555784915, 0.0153600119986575, 0.0149084240854556
+      )
+    )
+  }
 }
 }
 \references{

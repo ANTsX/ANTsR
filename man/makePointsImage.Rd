@@ -23,11 +23,10 @@ defines the dimensionality of the data so if the input image is 3D then
 the input points should be 2D or 3D.
 }
 \examples{
-
 \dontrun{
-mni <- antsImageRead( getANTsRData( "mni" ) ) \%>\% getMask()
-data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-powersLabels = makePointsImage( powers_areal_mni_itk[,1:3], mni, radius=3 )
+mni <- antsImageRead(getANTsRData("mni")) \%>\% getMask()
+data("powers_areal_mni_itk", package = "ANTsR", envir = environment())
+powersLabels <- makePointsImage(powers_areal_mni_itk[, 1:3], mni, radius = 3)
 }
 
 }

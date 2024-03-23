@@ -54,9 +54,9 @@ Chuang et al., Fuzzy c-means clustering with spatial information for image
 segmentation.  CMIG: 30:9-15, 2006.
 }
 \examples{
-image <- antsImageRead( getANTsRData( "r16" ) )
-mask <- getMask( image )
-fuzzy <- fuzzySpatialCMeansSegmentation( image, mask )
+image <- antsImageRead(getANTsRData("r16"))
+mask <- getMask(image)
+fuzzy <- fuzzySpatialCMeansSegmentation(image, mask)
 
 }
 \author{

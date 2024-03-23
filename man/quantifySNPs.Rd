@@ -34,8 +34,8 @@ quantifySNPs converts trinary snps to frequency data
 }
 \examples{
 
-mat <- matrix(c(0,1,2,0,0,1,2,2,2),ncol=3)
-wmat<-quantifySNPs( mat , freqthresh=0)
+mat <- matrix(c(0, 1, 2, 0, 0, 1, 2, 2, 2), ncol = 3)
+wmat <- quantifySNPs(mat, freqthresh = 0)
 
 }
 \author{

@@ -18,8 +18,8 @@ array of coordinates
 Apply transform to spatial point
 }
 \examples{
-tx = new("antsrTransform")
-params = getAntsrTransformParameters(tx)
-setAntsrTransformParameters(tx, params*2)
-pt2 = applyAntsrTransformToPoint(tx, c(1,2,3))
+tx <- new("antsrTransform")
+params <- getAntsrTransformParameters(tx)
+setAntsrTransformParameters(tx, params * 2)
+pt2 <- applyAntsrTransformToPoint(tx, c(1, 2, 3))
 }

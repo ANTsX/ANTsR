@@ -45,7 +45,6 @@ sample image and a list of images that are mapped to the same space as the
 sample image.
 }
 \examples{
-
 \dontrun{
 set.seed(123)
 # see fMRIANTs github repository for data and I/O suggestions

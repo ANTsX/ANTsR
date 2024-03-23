@@ -50,7 +50,7 @@
 \alias{[,antsImage,missing,missing-method}
 \title{Extract or Replace Parts of antsImage Object}
 \usage{
-\S4method{[}{antsImage,`NULL`,ANY,ANY}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,ANY,ANY}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,logical,ANY,ANY}(x, i, j, ...) <- value
 
@@ -62,7 +62,7 @@
 
 \S4method{[}{antsImage,antsImage,ANY,ANY}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,antsRegion,ANY}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,antsRegion,ANY}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,logical,antsRegion,ANY}(x, i, j, ...) <- value
 
@@ -70,19 +70,19 @@
 
 \S4method{[}{antsImage,matrix,antsRegion,ANY}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,`NULL`,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,NULL,numeric}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,numeric,numeric,numeric}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,numeric,`NULL`,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,numeric,NULL,numeric}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,numeric,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,numeric,numeric}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,numeric,missing,array}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,missing,numeric,array}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,ANY}(x, i, j, ..., drop = TRUE)
+\S4method{[}{antsImage,NULL,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{antsImage,antsImage,ANY}(x, i, j, ..., drop = TRUE)
 
@@ -96,21 +96,21 @@
 
 \S4method{[}{antsImage,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
-\S4method{[}{antsImage,`NULL`,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
-
-\S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,numeric,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,numeric,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+
+\S4method{[}{antsImage,NULL,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,missing,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
@@ -140,19 +140,19 @@ Operators acting on antsImage objects
 to extract or replace parts.
 }
 \examples{
-fi <- antsImageRead(getANTsRData( "r16" ))
-l = prod(dim(fi))
-sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-fi[sub] = rnorm(sum(sub))
-fi[,1] = array(10, dim = dim(fi[, 1]))
+fi <- antsImageRead(getANTsRData("r16"))
+l <- prod(dim(fi))
+sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+fi[sub] <- rnorm(sum(sub))
+fi[, 1] <- array(10, dim = dim(fi[, 1]))
 
-fi <- antsImageRead(getANTsRData( "ch2" ))
+fi <- antsImageRead(getANTsRData("ch2"))
 fi[2, 1, 2]
-fi[2, 1, 2] = 4
+fi[2, 1, 2] <- 4
 fi[, 1, 2]
-fi[, 1, 2] = array(10, dim = dim(fi[, 1, 2]))
+fi[, 1, 2] <- array(10, dim = dim(fi[, 1, 2]))
 fi[2, , 2]
-fi[2, , 2] = array(10, dim = dim(fi[2, , 2]))
+fi[2, , 2] <- array(10, dim = dim(fi[2, , 2]))
 fi[2, 1, ]
 # fi[2, 1, ] = array(10, dim = dim(fi[2, 1, ]))
 fi[2, , ]
@@ -160,36 +160,36 @@ fi[, 1, ]
 fi[, , 2]
 # fi[, , 2] = array(10, dim = dim(fi[, , 2]))
 
-l = prod(dim(fi))
-sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-sub = array(sub, dim = dim(fi))
-fi[sub] = rnorm(sum(sub))
-fi <- antsImageRead(getANTsRData( "r16" ))
-l = prod(dim(fi))
-sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-sub = array(sub, dim = dim(fi))
-fi[sub] = rnorm(sum(sub))
-fi <- antsImageRead(getANTsRData( "r16" ))
-fi[ fi > 200 ] = 200
-fi <- antsImageRead(getANTsRData( "r16" ))
-i = sample(seq(nrow(fi)), 5)
-i = as.numeric(i)
-j = i
-fi[ i, j ] = 26.2
-fi <- antsImageRead(getANTsRData( "r16" ))
-fi[1,] = array(10, dim = dim(fi[1,]))
-fi <- antsImageRead(getANTsRData( "r16" ))
-fi[,1] = array(10, dim = dim(fi[,1]))
-fi <- antsImageRead(getANTsRData( "r16" ))
+l <- prod(dim(fi))
+sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+sub <- array(sub, dim = dim(fi))
+fi[sub] <- rnorm(sum(sub))
+fi <- antsImageRead(getANTsRData("r16"))
+l <- prod(dim(fi))
+sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+sub <- array(sub, dim = dim(fi))
+fi[sub] <- rnorm(sum(sub))
+fi <- antsImageRead(getANTsRData("r16"))
+fi[fi > 200] <- 200
+fi <- antsImageRead(getANTsRData("r16"))
+i <- sample(seq(nrow(fi)), 5)
+i <- as.numeric(i)
+j <- i
+fi[i, j] <- 26.2
+fi <- antsImageRead(getANTsRData("r16"))
+fi[1, ] <- array(10, dim = dim(fi[1, ]))
+fi <- antsImageRead(getANTsRData("r16"))
+fi[, 1] <- array(10, dim = dim(fi[, 1]))
+fi <- antsImageRead(getANTsRData("r16"))
 fi[, 1]
 fi[, 2:5]
-fi <- antsImageRead(getANTsRData( "r16" ))
-fi[ fi > 45]
-fi <- antsImageRead(getANTsRData( "r16" ))
-arr = c(as.array(fi) > 45)
+fi <- antsImageRead(getANTsRData("r16"))
+fi[fi > 45]
+fi <- antsImageRead(getANTsRData("r16"))
+arr <- c(as.array(fi) > 45)
 fi[arr]
-fi[ 1:10, 2:14]
-fi[ 1:10*1.0, 2:14*1.0]
-fi <- antsImageRead(getANTsRData( "ch2" ))
-fi[, , 2] 
+fi[1:10, 2:14]
+fi[1:10 * 1.0, 2:14 * 1.0]
+fi <- antsImageRead(getANTsRData("ch2"))
+fi[, , 2]
 }

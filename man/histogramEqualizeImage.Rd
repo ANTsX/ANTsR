@@ -18,8 +18,8 @@ equalized image.
 Histogram equalize image
 }
 \examples{
-image <- antsImageRead( getANTsRData( "r16" ), 2 )
-eqImage <- histogramEqualizeImage( image )
+image <- antsImageRead(getANTsRData("r16"), 2)
+eqImage <- histogramEqualizeImage(image)
 
 }
 \author{

@@ -70,7 +70,7 @@ Three options are currently provided, with different additional arguments:
 set.seed(1)
 nvox <- 5 * 5 * 5 * 30
 dims <- c(5, 5, 5, 30)
-voxvals <- array(rnorm(nvox) + 500, dim=dims)
+voxvals <- array(rnorm(nvox) + 500, dim = dims)
 voxvals[, , , 5] <- voxvals[, , , 5] + 600
 asl <- makeImage(dims, voxvals)
 censored <- aslCensoring(asl)

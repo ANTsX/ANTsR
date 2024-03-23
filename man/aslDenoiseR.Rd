@@ -52,82 +52,89 @@ Denoises regression based reconstruction of CBF from arterial spin labeling
 
 # asl<-antsImageRead( getANTsRData("pcasl") )
 set.seed(1)
-nvox <- 10*10*10*20
-dims <- c(10,10,10,20)
-asl <- makeImage( dims , rnorm( nvox )+500 )
-aslmean <- getAverageOfTimeSeries( asl )
-aslmask <- getMask( aslmean  )
-aslmat<-timeseries2matrix( asl, aslmask )
-for ( i in 1:10 ) aslmat[,i*2]<-aslmat[,i*2]*2
-asl<-matrix2timeseries( asl, aslmask, aslmat )
-tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
-dv<-computeDVARS(aslmat)
-dnz<-aslDenoiseR( aslmat, tc, covariates=dv, selectionthresh=0.1,
-  maxnoisepreds=c(1:2), polydegree=2, crossvalidationgroups=2 )
-testthat::expect_equal(dnz$R2atBestN, 7, tolerance = 0.5 )
+nvox <- 10 * 10 * 10 * 20
+dims <- c(10, 10, 10, 20)
+asl <- makeImage(dims, rnorm(nvox) + 500)
+aslmean <- getAverageOfTimeSeries(asl)
+aslmask <- getMask(aslmean)
+aslmat <- timeseries2matrix(asl, aslmask)
+for (i in 1:10) aslmat[, i * 2] <- aslmat[, i * 2] * 2
+asl <- matrix2timeseries(asl, aslmask, aslmat)
+tc <- as.factor(rep(c("C", "T"), nrow(aslmat) / 2))
+dv <- computeDVARS(aslmat)
+dnz <- aslDenoiseR(aslmat, tc,
+  covariates = dv, selectionthresh = 0.1,
+  maxnoisepreds = c(1:2), polydegree = 2, crossvalidationgroups = 2
+)
+testthat::expect_equal(dnz$R2atBestN, 7, tolerance = 0.5)
 
 \dontrun{
 # a classic regression approach to estimating perfusion
 # not recommended, but shows the basic idea.
 # see ?quantifyCBF for a better approach
-perfmodel<-lm( aslmat ~ tc + dnz$noiseu  )
-perfimg<-antsImageClone(aslmask)
-perfimg[ aslmask == 1 ]<-bigLMStats( perfmodel )$beta[1,]
-m0<-getAverageOfTimeSeries(asl)
-ctl<-c(1:(nrow(aslmat)/2))*2
-m0[ aslmask==1 ]<-colMeans(aslmat[ctl,])
-pcasl.parameters<-list( sequence="pcasl", m0=m0 )
-cbf <- quantifyCBF( perfimg, aslmask, pcasl.parameters )
+perfmodel <- lm(aslmat ~ tc + dnz$noiseu)
+perfimg <- antsImageClone(aslmask)
+perfimg[aslmask == 1] <- bigLMStats(perfmodel)$beta[1, ]
+m0 <- getAverageOfTimeSeries(asl)
+ctl <- c(1:(nrow(aslmat) / 2)) * 2
+m0[aslmask == 1] <- colMeans(aslmat[ctl, ])
+pcasl.parameters <- list(sequence = "pcasl", m0 = m0)
+cbf <- quantifyCBF(perfimg, aslmask, pcasl.parameters)
 
 # default mode network example
 
-if ( ! exists("bold") )
-  {
-  bold = antsImageRead( getANTsRData("rsbold") )
-  meanbold = getAverageOfTimeSeries( bold )
-  boldmask = getMask(  meanbold )
+if (!exists("bold")) {
+  bold <- antsImageRead(getANTsRData("rsbold"))
+  meanbold <- getAverageOfTimeSeries(bold)
+  boldmask <- getMask(meanbold)
   # map to mni
-  mni = antsImageRead( getANTsRData("mni") )
-  mniaal = antsImageRead( getANTsRData("mnia") )
-  mymap = antsRegistration( meanbold * boldmask, mni, typeofTransform='SyNBold',
-   verbose=1 )
-  aalimg = antsApplyTransforms( meanbold, mniaal, mymap$fwdtransforms,
-    interpolator='NearestNeighbor')
-  data("aal",package="ANTsR")
-  timeselect<-10:dim(bold)[4]
-  if ( ! exists("moco") )
-    {
-    moco = antsMotionCalculation( bold, boldmask )
-    }
-  sbold = smoothImage( moco$moco_img , 3.0 )
-  antsImageWrite( boldmask, 'boldmask.nii.gz' )
-  antsImageWrite( meanbold, 'boldmean.nii.gz' )
-  antsImageWrite( aalimg, 'boldaal.nii.gz' )
-  boldmask = boldmask * thresholdImage( aalimg, 1, Inf )
+  mni <- antsImageRead(getANTsRData("mni"))
+  mniaal <- antsImageRead(getANTsRData("mnia"))
+  mymap <- antsRegistration(meanbold * boldmask, mni,
+    typeofTransform = "SyNBold",
+    verbose = 1
+  )
+  aalimg <- antsApplyTransforms(meanbold, mniaal, mymap$fwdtransforms,
+    interpolator = "NearestNeighbor"
+  )
+  data("aal", package = "ANTsR")
+  timeselect <- 10:dim(bold)[4]
+  if (!exists("moco")) {
+    moco <- antsMotionCalculation(bold, boldmask)
   }
-postcing<-aal$label_num[ grep( "Cingulum_Post", aal$label_name ) ]
-postCingMask = maskImage( boldmask, aalimg,
-  level = as.numeric(postcing), binarize=T )
-mpostCingMask= antsImageClone( postCingMask ) * 0
-mpostCingMask[ postCingMask == 0 ] = 1
-boldmat = timeseries2matrix( sbold, boldmask*mpostCingMask )
-boldmat = boldmat[timeselect,]
-boldmat = frequencyFilterfMRI( boldmat, tr=antsGetSpacing(bold)[4], opt='trig' )
-dmnvec<-( timeseries2matrix(  sbold, postCingMask )[timeselect,] )
-dmnvec = rowMeans(
-  frequencyFilterfMRI( dmnvec, tr=antsGetSpacing(bold)[4], opt='trig' ) )
-dmnmat = matrix( dmnvec, ncol=1)
-mocpar = moco$moco_params[ timeselect , 3:14 ]
-dnz<-aslDenoiseR( boldmat, dmnvec, covariates=mocpar, selectionthresh=0.2,
-  maxnoisepreds=c(2:10),  polydegree='loess',
-  crossvalidationgroups=8 )
-boldmat<-timeseries2matrix(sbold, boldmask)
-boldmat<-boldmat[timeselect,]
-boldmat = frequencyFilterfMRI( boldmat, tr=antsGetSpacing(bold)[4], opt='trig' )
-mdl<-bigLMStats( lm( boldmat ~ dmnvec + dnz$covariates + dnz$noiseu ), 0.001 )
-betas<-mdl$beta.t[1,]
-betaImg = makeImage( boldmask, betas )
-antsImageWrite( betaImg, 'dmnBetas.nii.gz' )
+  sbold <- smoothImage(moco$moco_img, 3.0)
+  antsImageWrite(boldmask, "boldmask.nii.gz")
+  antsImageWrite(meanbold, "boldmean.nii.gz")
+  antsImageWrite(aalimg, "boldaal.nii.gz")
+  boldmask <- boldmask * thresholdImage(aalimg, 1, Inf)
+}
+postcing <- aal$label_num[grep("Cingulum_Post", aal$label_name)]
+postCingMask <- maskImage(boldmask, aalimg,
+  level = as.numeric(postcing), binarize = T
+)
+mpostCingMask <- antsImageClone(postCingMask) * 0
+mpostCingMask[postCingMask == 0] <- 1
+boldmat <- timeseries2matrix(sbold, boldmask * mpostCingMask)
+boldmat <- boldmat[timeselect, ]
+boldmat <- frequencyFilterfMRI(boldmat, tr = antsGetSpacing(bold)[4], opt = "trig")
+dmnvec <- (timeseries2matrix(sbold, postCingMask)[timeselect, ])
+dmnvec <- rowMeans(
+  frequencyFilterfMRI(dmnvec, tr = antsGetSpacing(bold)[4], opt = "trig")
+)
+dmnmat <- matrix(dmnvec, ncol = 1)
+mocpar <- moco$moco_params[timeselect, 3:14]
+dnz <- aslDenoiseR(boldmat, dmnvec,
+  covariates = mocpar, selectionthresh = 0.2,
+  maxnoisepreds = c(2:10), polydegree = "loess",
+  crossvalidationgroups = 8
+)
+boldmat <- timeseries2matrix(sbold, boldmask)
+boldmat <- boldmat[timeselect, ]
+boldmat <- frequencyFilterfMRI(boldmat, tr = antsGetSpacing(bold)[4], opt = "trig")
+mdl <- bigLMStats(lm(boldmat ~ dmnvec + dnz$covariates + dnz$noiseu), 0.001)
+betas <- mdl$beta.t[1, ]
+betaImg <- makeImage(boldmask, betas)
+antsImageWrite(betaImg, "dmnBetas.nii.gz")
 # this should give default mode network around beta = 12
 }
 

@@ -19,8 +19,8 @@ Vector of values
 Takes in a mask and an image and then returns the values
 }
 \examples{
-img = makeImage(c(10,10),rnorm(100))
-mask = img > 0
+img <- makeImage(c(10, 10), rnorm(100))
+mask <- img > 0
 mask_values(img, mask)
 mask_values(img)
 }

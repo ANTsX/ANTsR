@@ -24,8 +24,8 @@ transformed data
 Apply transform to point, vector or antsImage data
 }
 \examples{
-tx = createAntsrTransform(dimension=2, precision="float", type="AffineTransform")
-params = getAntsrTransformParameters(tx)
-setAntsrTransformParameters(tx, params*2)
-pt2 = applyAntsrTransform(tx, c(1,2,3))
+tx <- createAntsrTransform(dimension = 2, precision = "float", type = "AffineTransform")
+params <- getAntsrTransformParameters(tx)
+setAntsrTransformParameters(tx, params * 2)
+pt2 <- applyAntsrTransform(tx, c(1, 2, 3))
 }

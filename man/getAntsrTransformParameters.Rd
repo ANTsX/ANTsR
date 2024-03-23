@@ -16,6 +16,6 @@ array of parameters'
 Get parameters of transform
 }
 \examples{
-tx = new("antsrTransform")
-params = getAntsrTransformParameters(tx)
+tx <- new("antsrTransform")
+params <- getAntsrTransformParameters(tx)
 }

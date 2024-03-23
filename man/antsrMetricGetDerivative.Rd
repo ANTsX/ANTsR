@@ -16,12 +16,12 @@ image similarity value
 get derivative of image metric
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-metric = antsrMetricCreate(x,y,type="MeanSquares")
-tx <- createAntsrTransform( precision="double", type="AffineTransform", dimension=2)
-setAntsrTransformParameters(tx, c(0,-1,1,0,0,0))
-setAntsrTransformFixedParameters(tx, c(128,128))
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
+tx <- createAntsrTransform(precision = "double", type = "AffineTransform", dimension = 2)
+setAntsrTransformParameters(tx, c(0, -1, 1, 0, 0, 0))
+setAntsrTransformFixedParameters(tx, c(128, 128))
 antsrMetricSetMovingTransform(metric, tx)
-metricValue = antsrMetricGetDerivative(metric)
+metricValue <- antsrMetricGetDerivative(metric)
 }

@@ -43,22 +43,26 @@ one should not reuse this file as the reference demographics file.
 \examples{
 # read below will test out writing as well
 \dontrun{
-ilist = getANTsRData( "population" )
-mask = getMask( ilist[[ 1 ]] )
-imat = imageListToMatrix( ilist, mask )
-demog = data.frame( id = c("A","B","C",NA),
-  age = c( 11, 7, 18, 22 ), sex = c("M","M","F","F") )
-ibool = c( TRUE, TRUE, TRUE, FALSE )
-tfn = tempfile(fileext=".h5")
-if ( usePkg( "hdf5r" ) ) {
-demographics = demog
-imageMat = imat 
-imageMask = mask
-imageBoolean = ibool
-filename = tfn
-writeNormalizedPopulationData( demog, imat, mask, ibool,
-  tfn )
-  }
+ilist <- getANTsRData("population")
+mask <- getMask(ilist[[1]])
+imat <- imageListToMatrix(ilist, mask)
+demog <- data.frame(
+  id = c("A", "B", "C", NA),
+  age = c(11, 7, 18, 22), sex = c("M", "M", "F", "F")
+)
+ibool <- c(TRUE, TRUE, TRUE, FALSE)
+tfn <- tempfile(fileext = ".h5")
+if (usePkg("hdf5r")) {
+  demographics <- demog
+  imageMat <- imat
+  imageMask <- mask
+  imageBoolean <- ibool
+  filename <- tfn
+  writeNormalizedPopulationData(
+    demog, imat, mask, ibool,
+    tfn
+  )
+}
 }
 }
 \author{

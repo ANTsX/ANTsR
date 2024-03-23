@@ -33,7 +33,7 @@ affineInitializer(
 
 \item{txfn}{filename for the transformation}
 
-\item{num_threads}{will execute 
+\item{num_threads}{will execute
 \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
 running to attempt a more reproducible result.  See
 \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
@@ -48,30 +48,29 @@ registration refinement, if needed.  This is a wrapper for the ANTs
 function antsAffineInitializer.
 }
 \note{
-See 
+See
 \url{https://github.com/ANTsX/ANTs/issues/444} for reproducibility discussion
 }
 \examples{
 
 fi <- antsImageRead(getANTsRData("r16"))
 mi <- antsImageRead(getANTsRData("r27"))
-tx <- affineInitializer( fi, mi )
+tx <- affineInitializer(fi, mi)
 
-mi2 = resampleImage(mi, c(1.25, 1.25))
-tx <- affineInitializer( fi, mi2 )
-tx2 <- affineInitializer( fi, mi2 )
-if ('R.matlab' \%in\% installed.packages()) {
-tx_hdr = R.matlab::readMat(tx)
-trans = tx_hdr$AffineTransform.double.2.2
-fixed = tx_hdr$fixed
+mi2 <- resampleImage(mi, c(1.25, 1.25))
+tx <- affineInitializer(fi, mi2)
+tx2 <- affineInitializer(fi, mi2)
+if ("R.matlab" \%in\% installed.packages()) {
+  tx_hdr <- R.matlab::readMat(tx)
+  trans <- tx_hdr$AffineTransform.double.2.2
+  fixed <- tx_hdr$fixed
 
-tx2_hdr = R.matlab::readMat(tx2)
-trans2 = tx2_hdr$AffineTransform.double.2.2
-fixed2 = tx2_hdr$fixed
+  tx2_hdr <- R.matlab::readMat(tx2)
+  trans2 <- tx2_hdr$AffineTransform.double.2.2
+  fixed2 <- tx2_hdr$fixed
 
-testthat::expect_equal(tx_hdr, tx2_hdr)
+  testthat::expect_equal(tx_hdr, tx2_hdr)
 }
-
 
 }
 \author{

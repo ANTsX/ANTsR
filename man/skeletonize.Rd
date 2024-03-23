@@ -23,8 +23,8 @@ if the initial segmentation is well-composed.
 }
 \examples{
 
-img = antsImageRead( getANTsRData( 'r16') ) \%>\% thresholdImage( "Otsu", 3 )
-skel = skeletonize( thresholdImage( img, 3, 3 ) )
+img <- antsImageRead(getANTsRData("r16")) \%>\% thresholdImage("Otsu", 3)
+skel <- skeletonize(thresholdImage(img, 3, 3))
 
 }
 \author{

@@ -18,8 +18,8 @@ with dimensonality d-1 by slicing the input image along its last dimension.
 }
 \examples{
 
-my4Dimage = makeImage( c(5,5,5,4) )
-my3Dlist = splitNDImageToList( my4Dimage )
+my4Dimage <- makeImage(c(5, 5, 5, 4))
+my3Dlist <- splitNDImageToList(my4Dimage)
 
 }
 \author{

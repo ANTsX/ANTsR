@@ -20,18 +20,18 @@ a multi-channel image with the same dimensionality as the mask.
 }
 \examples{
 
-fi <- antsImageRead(getANTsRData("r16") ) \%>\%
-  resampleImage(c(60,60),1,0)
-mi <- antsImageRead(getANTsRData("r64") ) \%>\%
-  resampleImage(c(60,60),1,0)
-mytx <- antsRegistration(fixed=fi, moving=mi, typeofTransform = c('SyN') )
-mcimg = antsImageRead( mytx$fwd[1] )
-msk = getMask( fi )
-vv=multichannelToVector(mcimg,msk)
-mcimg2=vectorToMultichannel( vv, msk )
-vv2=multichannelToVector(mcimg2,msk)
-cor.test(vv2,vv)
-stopifnot( all( mcimg2[30,30] == mcimg[30,30] ) )
+fi <- antsImageRead(getANTsRData("r16")) \%>\%
+  resampleImage(c(60, 60), 1, 0)
+mi <- antsImageRead(getANTsRData("r64")) \%>\%
+  resampleImage(c(60, 60), 1, 0)
+mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("SyN"))
+mcimg <- antsImageRead(mytx$fwd[1])
+msk <- getMask(fi)
+vv <- multichannelToVector(mcimg, msk)
+mcimg2 <- vectorToMultichannel(vv, msk)
+vv2 <- multichannelToVector(mcimg2, msk)
+cor.test(vv2, vv)
+stopifnot(all(mcimg2[30, 30] == mcimg[30, 30]))
 
 }
 \author{

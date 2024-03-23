@@ -24,10 +24,10 @@ original index locations explicitly.
 }
 \examples{
 
-fi <- antsImageRead( getANTsRData("r16"))
-cropped <- cropIndices( fi, c(10,10), c(100,100) )
-cropped<-smoothImage( cropped, 5 )
-decropped<-decropImage( cropped, fi )
+fi <- antsImageRead(getANTsRData("r16"))
+cropped <- cropIndices(fi, c(10, 10), c(100, 100))
+cropped <- smoothImage(cropped, 5)
+decropped <- decropImage(cropped, fi)
 
 }
 \author{

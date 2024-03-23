@@ -37,30 +37,33 @@ space.
 This is a standard approach but it's not very accurate.
 }
 \examples{
-
 \dontrun{
 #
 # ch2bet is available in chris rorden's mricron
 #  but you can do something with any other image
 #  e.g. a statistical image
 #
-  tem<-antsImageRead(getANTsRData("ch2"),3)
-  clust <- antsImageClone( tem )
-  atem = as.array(tem)
-  clust[ atem < 80 ]<- 0
-  clust[ atem > 90 ]<- 0
-  clust[  atem > 80 & atem < 90 ]<- 1
-  clust<-iMath(clust,"ME",1)  # erosion
-  clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
-  if ( ! exists("mymni") ) {
+tem <- antsImageRead(getANTsRData("ch2"), 3)
+clust <- antsImageClone(tem)
+atem <- as.array(tem)
+clust[atem < 80] <- 0
+clust[atem > 90] <- 0
+clust[atem > 80 & atem < 90] <- 1
+clust <- iMath(clust, "ME", 1) # erosion
+clust <- labelClusters(clust, minClusterSize = 30, minThresh = 1, maxThresh = 1)
+if (!exists("mymni")) {
   # try getANTsRData if you have www access
-    mymni<-list( antsImageRead(getANTsRData("mni"),3),
-                 antsImageRead(getANTsRData("mnib"),3),
-                 antsImageRead(getANTsRData("mnia"),3) )
-  }
-  template_cluster_pair<-list(tem,clust)
-  gcoords<-getTemplateCoordinates( template_cluster_pair ,
-      mymni , convertToTal = TRUE )
+  mymni <- list(
+    antsImageRead(getANTsRData("mni"), 3),
+    antsImageRead(getANTsRData("mnib"), 3),
+    antsImageRead(getANTsRData("mnia"), 3)
+  )
+}
+template_cluster_pair <- list(tem, clust)
+gcoords <- getTemplateCoordinates(template_cluster_pair,
+  mymni,
+  convertToTal = TRUE
+)
 # output will be like
 # > gcoords$templatepoints
 #     x   y   z t label Brodmann                 AAL

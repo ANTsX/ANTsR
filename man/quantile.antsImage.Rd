@@ -22,7 +22,7 @@ Computes sample
 quantiles for an image, with the option of a mask.
 }
 \examples{
-img = makeImage(c(10,10),rnorm(100))
-mask = img > 0
+img <- makeImage(c(10, 10), rnorm(100))
+mask <- img > 0
 quantile(img, mask = mask)
 }

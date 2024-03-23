@@ -18,7 +18,7 @@ TRUE
 Set parameters of transform
 }
 \examples{
-tx = new("antsrTransform")
-params = getAntsrTransformFixedParameters(tx)
-setAntsrTransformFixedParameters(tx, params*2)
+tx <- new("antsrTransform")
+params <- getAntsrTransformFixedParameters(tx)
+setAntsrTransformFixedParameters(tx, params * 2)
 }

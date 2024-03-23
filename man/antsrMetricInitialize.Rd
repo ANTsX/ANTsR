@@ -16,10 +16,10 @@ prepare to return values
 must call this after setting up object, before getting values back
 }
 \examples{
-x =  antsImageRead( getANTsRData( 'r16' ))
-y =  antsImageRead( getANTsRData( 'r30' ))
-z = getMask(y)
-metric = antsrMetricCreate(x,y,type="MeanSquares")
+x <- antsImageRead(getANTsRData("r16"))
+y <- antsImageRead(getANTsRData("r30"))
+z <- getMask(y)
+metric <- antsrMetricCreate(x, y, type = "MeanSquares")
 antsrMetricSetMovingImageMask(metric, z)
 antsrMetricInitialize(metric)
 }

@@ -18,8 +18,8 @@ TRUE
 write antsrTransform to disk
 }
 \examples{
-trans= c(3,4,5)
-tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-txfile = tempfile(fileext = ".mat")
+trans <- c(3, 4, 5)
+tx <- createAntsrTransform(type = "Euler3DTransform", translation = trans)
+txfile <- tempfile(fileext = ".mat")
 writeAntsrTransform(tx, txfile)
 }

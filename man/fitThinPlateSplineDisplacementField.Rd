@@ -43,7 +43,7 @@ Otherwise, the \code{displacementField} is used to define the domain parameters.
 ANTsR image.
 }
 \description{
-Fit a thin-plate spline object to a set of source points with associated displacements.  
+Fit a thin-plate spline object to a set of source points with associated displacements.
 This is basically a wrapper
 for the ITK class \url{https://itk.org/Doxygen/html/itkThinPlateSplineKernelTransform_8h.html}.
 Returns a displacement field.
@@ -52,13 +52,14 @@ Returns a displacement field.
 
 # Perform 2-D fitting
 
-points <- matrix( data = c( -50, -50 ), nrow = 1, byrow = TRUE )
-deltas <- matrix( data = c( 10, 10 ), nrow = 1, byrow = TRUE )
+points <- matrix(data = c(-50, -50), nrow = 1, byrow = TRUE)
+deltas <- matrix(data = c(10, 10), nrow = 1, byrow = TRUE)
 
 tpsField <- fitThinPlateSplineDisplacementField(
   displacementOrigins = points, displacements = deltas,
-  origin = c( 0.0, 0.0 ), spacing = c( 1.0, 1.0 ), size = c( 100, 100 ),
-  direction = matrix( data = c( -1, 0, 0, -1 ), nrow = 2, byrow = TRUE ) )
+  origin = c(0.0, 0.0), spacing = c(1.0, 1.0), size = c(100, 100),
+  direction = matrix(data = c(-1, 0, 0, -1), nrow = 2, byrow = TRUE)
+)
 
 }
 \author{

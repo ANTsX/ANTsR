@@ -46,11 +46,11 @@ Simulate a displacement field using random points with B-spline
 smoothing
 }
 \examples{
-domainImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-expField <- simulateDisplacementField( domainImage, fieldType = "exponential" )
-bsplineField <- simulateDisplacementField( domainImage, fieldType = "bspline" )
-warp <- antsrTransformFromDisplacementField( bsplineField * 3 )
-wimg <- applyAntsrTransformToImage( warp, domainImage, domainImage )
+domainImage <- antsImageRead(getANTsRData("r16"), 2)
+expField <- simulateDisplacementField(domainImage, fieldType = "exponential")
+bsplineField <- simulateDisplacementField(domainImage, fieldType = "bspline")
+warp <- antsrTransformFromDisplacementField(bsplineField * 3)
+wimg <- applyAntsrTransformToImage(warp, domainImage, domainImage)
 
 }
 \author{

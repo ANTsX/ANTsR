@@ -28,22 +28,24 @@ This function may give different results on multiple runs.
 
 # boldfn <- getANTsRData( "pcasl" )
 # bold <- antsImageRead( boldfn , 4 )
-set.seed( 123 )
-bold <- makeImage( c(10,10,10,20) , rnorm( 10*10*10*20)+1 )
-bold <- iMath( bold, "PadImage", 5 )
+set.seed(123)
+bold <- makeImage(c(10, 10, 10, 20), rnorm(10 * 10 * 10 * 20) + 1)
+bold <- iMath(bold, "PadImage", 5)
 aimg <- new("antsImage", "float", 3)
 aimg <- new("antsImage", "float", 3)
 mocoImg <- new("antsImage", "float", 4)
 mocoParams <- new("antsMatrix", "double")
-antsMotionCorr( list( d = 3 , a = bold , o = aimg ) )
+antsMotionCorr(list(d = 3, a = bold, o = aimg))
 aimg2 <- new("antsImage", "float", 3)
-antsMotionCorr( list( d = 3 , a = bold , o = aimg2 ) )
-antsMotionCorr( list( d = 3 ,
-  o = list( mocoParams , mocoImg , aimg ) ,
-  m = list( name = "MI" , aimg , bold , 1 , 32 , "Regular", 0.1 ) ,
-  t = "Rigid[0.01]" , i = 25 ,
-  u = 1 , e = 1 , s = 0 , f = 1 , n = 25 ) )
-motiondf <- as.data.frame( mocoParams )
+antsMotionCorr(list(d = 3, a = bold, o = aimg2))
+antsMotionCorr(list(
+  d = 3,
+  o = list(mocoParams, mocoImg, aimg),
+  m = list(name = "MI", aimg, bold, 1, 32, "Regular", 0.1),
+  t = "Rigid[0.01]", i = 25,
+  u = 1, e = 1, s = 0, f = 1, n = 25
+))
+motiondf <- as.data.frame(mocoParams)
 
 }
 \author{

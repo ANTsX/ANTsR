@@ -16,9 +16,9 @@ boolean indicating position
 test if iterator is at end of reverse data
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-it <- antsImageIteratorGoToReverseBegin( it )
-it <- antsImageIteratorPrevious( it )
-flag <- antsImageIteratorIsAtReverseEnd( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+it <- antsImageIteratorGoToReverseBegin(it)
+it <- antsImageIteratorPrevious(it)
+flag <- antsImageIteratorIsAtReverseEnd(it)
 }

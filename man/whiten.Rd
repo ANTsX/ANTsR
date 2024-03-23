@@ -21,9 +21,9 @@ Whitens the input matrix using SVD and returns the result.
 }
 \examples{
 
-mat <- matrix(rnorm(300),ncol=50)
-wmat<-whiten( mat )
-wmat2<-whiten( mat, 2, TRUE )
+mat <- matrix(rnorm(300), ncol = 50)
+wmat <- whiten(mat)
+wmat2 <- whiten(mat, 2, TRUE)
 
 }
 \author{

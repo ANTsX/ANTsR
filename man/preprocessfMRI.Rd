@@ -95,9 +95,9 @@ regression, band-pass filtering, and spatial smoothing.
 }
 \examples{
 set.seed(123)
-n=8
-nvox <- n*n*n*6
-dims <- c(n,n,n,6)
+n <- 8
+nvox <- n * n * n * 6
+dims <- c(n, n, n, 6)
 boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
 cleanfMRI <- preprocessfMRI(boldImage)
 }

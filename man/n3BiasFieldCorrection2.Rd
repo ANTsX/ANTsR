@@ -57,29 +57,32 @@ bias corrected image or bias field
 Perform N3 bias field correction on the given image
 }
 \examples{
- dims = c(50, 50)
- img<-makeImage(imagesize = dims, rnorm(prod(dims)) )
- n3img<-n3BiasFieldCorrection2(img)
- n3img<-n3BiasFieldCorrection2(img, mask = img > 0)
- testthat::expect_error(n3BiasFieldCorrection2(img, weightMask = "somepath"))
- testthat::expect_error(n3BiasFieldCorrection2(img, splineParam = rep(200, 3)))
- # n3img<-n3BiasFieldCorrection2(img, splineParam = c(200, 20)) # long running
+dims <- c(50, 50)
+img <- makeImage(imagesize = dims, rnorm(prod(dims)))
+n3img <- n3BiasFieldCorrection2(img)
+n3img <- n3BiasFieldCorrection2(img, mask = img > 0)
+testthat::expect_error(n3BiasFieldCorrection2(img, weightMask = "somepath"))
+testthat::expect_error(n3BiasFieldCorrection2(img, splineParam = rep(200, 3)))
+# n3img<-n3BiasFieldCorrection2(img, splineParam = c(200, 20)) # long running
 
- rm(img); gc()
- rm(n3img); gc()
-fname = getANTsRData("r16")
-in_img = antsImageRead(fname)
-n3 = n3BiasFieldCorrection2(in_img)
-rm(n3); gc()
-mask = in_img > 0
-mask2 = antsImageClone(mask, out_pixeltype = "float")
+rm(img)
+gc()
+rm(n3img)
+gc()
+fname <- getANTsRData("r16")
+in_img <- antsImageRead(fname)
+n3 <- n3BiasFieldCorrection2(in_img)
+rm(n3)
+gc()
+mask <- in_img > 0
+mask2 <- antsImageClone(mask, out_pixeltype = "float")
 # fails
 mask
 sum(mask)
 \dontrun{
-n3 = n3BiasFieldCorrection2(in_img, mask = mask, verbose = TRUE)
+n3 <- n3BiasFieldCorrection2(in_img, mask = mask, verbose = TRUE)
 # fails
-n3 = n3BiasFieldCorrection2(in_img, mask = mask2)
+n3 <- n3BiasFieldCorrection2(in_img, mask = mask2)
 }
 }
 \author{

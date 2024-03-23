@@ -37,9 +37,9 @@ Make an image with given size and voxel value or given a mask and vector.
 }
 \examples{
 
-outimg<-makeImage( c(2,10) , 1)
-outimg<-makeImage( outimg ,  c(2,10) )
-testthat::expect_error(makeImage(outimg, c(2,10), components = 2))
+outimg <- makeImage(c(2, 10), 1)
+outimg <- makeImage(outimg, c(2, 10))
+testthat::expect_error(makeImage(outimg, c(2, 10), components = 2))
 
 }
 \author{

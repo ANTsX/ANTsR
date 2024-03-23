@@ -19,8 +19,8 @@ Copy origin, direction, and spacing from one \code{antsImage} to another
 }
 \examples{
 
-img <- makeImage(c(10,10),rnorm(100))
-img2 <- makeImage(c(10,10), rnorm(100))
+img <- makeImage(c(10, 10), rnorm(100))
+img2 <- makeImage(c(10, 10), rnorm(100))
 img2 <- antsCopyImageInfo(img, img2)
 testthat::expect_error(antsCopyImageInfo(img, 1))
 

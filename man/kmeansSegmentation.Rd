@@ -30,32 +30,32 @@ This function will likely give different results on multiple runs.
 }
 \examples{
 
-fi<-antsImageRead( getANTsRData("r16") ,2)
-orig = antsImageClone(fi)
-fi<-n3BiasFieldCorrection(fi,4)
-seg<-kmeansSegmentation( fi, 3 )
-seg2<-kmeansSegmentation( fi, 3 )
-arr1 = as.array(seg$segmentation)
-arr2 = as.array(seg2$segmentation)
+fi <- antsImageRead(getANTsRData("r16"), 2)
+orig <- antsImageClone(fi)
+fi <- n3BiasFieldCorrection(fi, 4)
+seg <- kmeansSegmentation(fi, 3)
+seg2 <- kmeansSegmentation(fi, 3)
+arr1 <- as.array(seg$segmentation)
+arr2 <- as.array(seg2$segmentation)
 testthat::expect_equal(arr1, arr2)
 
 set.seed(2)
 # set below for slower but numerically repeatable results
 # these should be set in .Renviron not by sys calls
 # Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1 )
-orig <-antsImageRead( getANTsRData("r16") ,2)
-seg<-kmeansSegmentation( orig, 3 , use_random_seed = TRUE)
-seg2<-kmeansSegmentation( orig, 3, use_random_seed = TRUE )
-arr1 = as.array(seg$segmentation)
-arr2 = as.array(seg2$segmentation)
-tab = table(arr1, arr2)
+orig <- antsImageRead(getANTsRData("r16"), 2)
+seg <- kmeansSegmentation(orig, 3, use_random_seed = TRUE)
+seg2 <- kmeansSegmentation(orig, 3, use_random_seed = TRUE)
+arr1 <- as.array(seg$segmentation)
+arr2 <- as.array(seg2$segmentation)
+tab <- table(arr1, arr2)
 tab
 identical(arr1, arr2)
-seg<-kmeansSegmentation( orig, 3, use_random_seed = FALSE )
-seg2<-kmeansSegmentation( orig, 3, use_random_seed = FALSE )
-arr1 = as.array(seg$segmentation)
-arr2 = as.array(seg2$segmentation)
-tab = table(arr1, arr2)
+seg <- kmeansSegmentation(orig, 3, use_random_seed = FALSE)
+seg2 <- kmeansSegmentation(orig, 3, use_random_seed = FALSE)
+arr1 <- as.array(seg$segmentation)
+arr2 <- as.array(seg2$segmentation)
+tab <- table(arr1, arr2)
 tab
 }
 \author{

@@ -40,9 +40,9 @@ Journal of Magnetic Resonance Imaging, 31:192-203, June 2010.
 }
 \examples{
 
-img <- antsImageRead( getANTsRData("rand")  ) \%>\% resampleImage( c(32, 32) )
-dimg <- denoiseImage( img, img * 0 + 1 )
-dimg2 <- denoiseImage( img)
+img <- antsImageRead(getANTsRData("rand")) \%>\% resampleImage(c(32, 32))
+dimg <- denoiseImage(img, img * 0 + 1)
+dimg2 <- denoiseImage(img)
 
 }
 \author{

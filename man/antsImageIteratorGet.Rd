@@ -16,7 +16,7 @@ pixel value
 Get value at current position
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
-value <- antsImageIteratorGet( it )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
+value <- antsImageIteratorGet(it)
 }

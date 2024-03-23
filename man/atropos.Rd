@@ -40,7 +40,7 @@ probability over the whole region of interest defined by the mask \code{x}.}
 
 \item{verbose}{boolean}
 
-\item{use_random_seed}{Initialize internal random number generator with a random seed. 
+\item{use_random_seed}{Initialize internal random number generator with a random seed.
 Otherwise, initialize with a constant seed number.  If this is \code{TRUE},
 the results are not fully reproducible.}
 
@@ -60,20 +60,26 @@ multivariate segmentation if you pass a list of images in: e.g.
 }
 \examples{
 
-img <- antsImageRead( getANTsRData("r16") , 2 )
-img <- resampleImage( img, c(64,64), 1, 0 )
+img <- antsImageRead(getANTsRData("r16"), 2)
+img <- resampleImage(img, c(64, 64), 1, 0)
 mask <- getMask(img)
-segs1 <- atropos( a = img, m = '[0.2,1x1]',
-   c = '[2,0]',  i = 'kmeans[3]', x = mask )
+segs1 <- atropos(
+  a = img, m = "[0.2,1x1]",
+  c = "[2,0]", i = "kmeans[3]", x = mask
+)
 
 # Use probabilities from k-means seg as priors
 
-segs2 <- atropos( a = img, m = '[0.2,1x1]',
-   c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+segs2 <- atropos(
+  a = img, m = "[0.2,1x1]",
+  c = "[2,0]", i = segs1$probabilityimages, x = mask
+)
 
-feats <- list(img, iMath(img,"Laplacian"), iMath(img,"Grad") )
-segs3 <- atropos( a = feats, m = '[0.2,1x1]',
-   c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+feats <- list(img, iMath(img, "Laplacian"), iMath(img, "Grad"))
+segs3 <- atropos(
+  a = feats, m = "[0.2,1x1]",
+  c = "[2,0]", i = segs1$probabilityimages, x = mask
+)
 
 }
 \author{

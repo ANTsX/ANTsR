@@ -54,13 +54,13 @@ correlation between \code{inmat} and \code{target}.
 }
 \examples{
 set.seed(120)
-simimg <- makeImage( c(10,10,10,20) , rnorm( 10*10*10*20)+1 )
-moco <- antsMotionCalculation( simimg , moreaccurate=0)
+simimg <- makeImage(c(10, 10, 10, 20), rnorm(10 * 10 * 10 * 20) + 1)
+moco <- antsMotionCalculation(simimg, moreaccurate = 0)
 # for real data use below
 # moco <- antsMotionCalculation(getANTsRData("pcasl"))
 aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
-tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
-noise <- getASLNoisePredictors(aslmat, tc, 0.5 )
+tc <- rep(c(0.5, -0.5), length.out = nrow(aslmat))
+noise <- getASLNoisePredictors(aslmat, tc, 0.5)
 noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 }
 \author{

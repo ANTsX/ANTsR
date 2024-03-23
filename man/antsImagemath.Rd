@@ -97,28 +97,28 @@
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
 
-\item{base}{a positive or complex number: 
-the base with respect to which logarithms are computed. 
+\item{base}{a positive or complex number:
+the base with respect to which logarithms are computed.
 Defaults to e=exp(1).}
 }
 \description{
 Overloaded math for antsImage objects
 }
 \examples{
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
 testthat::expect_true(is.antsImage(abs(img01)))
 testthat::expect_true(is.antsImage(sign(img01)))
 testthat::expect_true(is.antsImage(sqrt(img01)))
 testthat::expect_true(is.antsImage(ceiling(img01)))
 testthat::expect_true(is.antsImage(floor(img01)))
 testthat::expect_true(is.antsImage(trunc(img01)))
-img01 <- as.antsImage(array(1:64, c(4,4,4,1)))
+img01 <- as.antsImage(array(1:64, c(4, 4, 4, 1)))
 testthat::expect_true(is.antsImage(log(img01)))
 testthat::expect_true(is.antsImage(exp(img01)))
 
-testthat::expect_true(is.antsImage(log(img01, base = exp(1)))) 
-testthat::expect_true(is.antsImage(log(img01, base = 2))) 
-testthat::expect_true(is.antsImage(log(img01, base = 10))) 
+testthat::expect_true(is.antsImage(log(img01, base = exp(1))))
+testthat::expect_true(is.antsImage(log(img01, base = 2)))
+testthat::expect_true(is.antsImage(log(img01, base = 10)))
 testthat::expect_true(is.antsImage(log10(img01)))
 testthat::expect_true(is.antsImage(log2(img01)))
 

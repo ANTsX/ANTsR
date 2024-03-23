@@ -19,13 +19,13 @@ Append an item to a list , creating a new list or combine two lists
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-mat2<-replicate(100, rnorm(20))
-mylist<-list(mat)
-mylist<-lappend( mylist, mat2 )
-mylist<-lappend( mat2, mylist)
-mylist<-lappend( mylist, mylist)
-lappend( 1, 1)
+mat <- replicate(100, rnorm(20))
+mat2 <- replicate(100, rnorm(20))
+mylist <- list(mat)
+mylist <- lappend(mylist, mat2)
+mylist <- lappend(mat2, mylist)
+mylist <- lappend(mylist, mylist)
+lappend(1, 1)
 
 }
 \author{

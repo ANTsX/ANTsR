@@ -33,10 +33,9 @@ renderImageLabels(
 Will use rgl to render surfaces
 }
 \examples{
-
 \dontrun{
 renderImageLabels(labels)
-renderImageLabels(labels, smoothsval=0.5, alphasurf=0.3  )
+renderImageLabels(labels, smoothsval = 0.5, alphasurf = 0.3)
 }
 
 }

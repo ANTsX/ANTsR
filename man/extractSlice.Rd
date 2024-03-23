@@ -13,7 +13,7 @@ extractSlice(image, slice, direction, collapseStrategy = 0)
 
 \item{direction}{which axis, integer}
 
-\item{collapseStrategy}{collapse sub-matrix. 
+\item{collapseStrategy}{collapse sub-matrix.
 0: Collapse sub-matrix if positive definite.  Otherwise, thrown exception. Default.
 1: Set sub-matrix to identity.  2: Collapse if positive definite.  Otherwise,
 set to identity.}
@@ -26,8 +26,8 @@ extract a slice from an image and return an image of dimensionality, d-1
 }
 \examples{
 
-fi <- makeImage( c(10,10,10), rnorm(1000) )
-slice <- extractSlice( fi, 1, 1 )
+fi <- makeImage(c(10, 10, 10), rnorm(1000))
+slice <- extractSlice(fi, 1, 1)
 
 }
 \author{

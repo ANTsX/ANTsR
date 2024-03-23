@@ -67,15 +67,17 @@ functional).
 }
 \examples{
 \dontrun{
-       mnit<-getANTsRData("mni")
-       mnit<-antsImageRead(mnit)
-       mnia<-getANTsRData("mnia")
-       mnia<-antsImageRead(mnia)
-       mnit<-thresholdImage( mnit, 1, max(mnit) )
-       mnia<-thresholdImage( mnia, 1, 2 )
-       brain<-renderSurfaceFunction( surfimg =list( mnit ) ,
-          list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
-       }
+mnit <- getANTsRData("mni")
+mnit <- antsImageRead(mnit)
+mnia <- getANTsRData("mnia")
+mnia <- antsImageRead(mnia)
+mnit <- thresholdImage(mnit, 1, max(mnit))
+mnia <- thresholdImage(mnia, 1, 2)
+brain <- renderSurfaceFunction(
+  surfimg = list(mnit),
+  list(mnia), alphasurf = 0.1, smoothsval = 1.5
+)
+}
 }
 \seealso{
 \code{\link{plotBasicNetwork}}

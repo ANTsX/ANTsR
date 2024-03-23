@@ -55,10 +55,10 @@ relevant publications by Mauro Maggioni and other authors.
 \examples{
 \dontrun{
 set.seed(120)
-mat = matrix( rnorm(60), nrow=6 )
-mat2 = matrix( rnorm(120), nrow=6 )
-smat = sparseDistanceMatrixXY( mat, mat2, 3 )
-smat2 = sparseDistanceMatrixXY( mat2, mat, 3 )
+mat <- matrix(rnorm(60), nrow = 6)
+mat2 <- matrix(rnorm(120), nrow = 6)
+smat <- sparseDistanceMatrixXY(mat, mat2, 3)
+smat2 <- sparseDistanceMatrixXY(mat2, mat, 3)
 testthat::expect_is(smat, "Matrix")
 testthat::expect_is(smat, "dgCMatrix")
 testthat::expect_is(smat2, "Matrix")

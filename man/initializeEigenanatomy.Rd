@@ -27,41 +27,46 @@ The user then only chooses nvecs and optional regularization parameters.
 }
 \examples{
 
-mat<-t(replicate(3, rnorm(100)) )
-initdf<-initializeEigenanatomy( mat ) # produces a mask
-dmat<-replicate(100, rnorm(20)) # data matrix
-svdv = t( svd( mat, nu=0, nv=10 )$v )
-ilist = matrixToImages( svdv, initdf$mask )
-eseg = eigSeg( initdf$mask, ilist,  TRUE  )
-eanat<-sparseDecom( dmat, inmask=initdf$mask,
- sparseness=0, smooth=0,
- initializationList=ilist, cthresh=0,
- nvecs=length(ilist) )
-initdf2<-initializeEigenanatomy( mat, nreps=2 )
-eanat<-sparseDecom( dmat, inmask=initdf$mask,
-  sparseness=0, smooth=0, z=-0.5,
-  initializationList=initdf2$initlist, cthresh=0,
-  nvecs=length(initdf2$initlist) )
+mat <- t(replicate(3, rnorm(100)))
+initdf <- initializeEigenanatomy(mat) # produces a mask
+dmat <- replicate(100, rnorm(20)) # data matrix
+svdv <- t(svd(mat, nu = 0, nv = 10)$v)
+ilist <- matrixToImages(svdv, initdf$mask)
+eseg <- eigSeg(initdf$mask, ilist, TRUE)
+eanat <- sparseDecom(dmat,
+  inmask = initdf$mask,
+  sparseness = 0, smooth = 0,
+  initializationList = ilist, cthresh = 0,
+  nvecs = length(ilist)
+)
+initdf2 <- initializeEigenanatomy(mat, nreps = 2)
+eanat <- sparseDecom(dmat,
+  inmask = initdf$mask,
+  sparseness = 0, smooth = 0, z = -0.5,
+  initializationList = initdf2$initlist, cthresh = 0,
+  nvecs = length(initdf2$initlist)
+)
 # now a regression
-eanatMatrix<-eanat$eigenanatomyimages
+eanatMatrix <- eanat$eigenanatomyimages
 # 'averages' loosely speaking anyway
-myEigenanatomyRegionAverages<-dmat \%*\% t( eanatMatrix )
-dependentvariable<-rnorm( nrow(dmat) )
-summary(lm( dependentvariable ~ myEigenanatomyRegionAverages ))
+myEigenanatomyRegionAverages <- dmat \%*\% t(eanatMatrix)
+dependentvariable <- rnorm(nrow(dmat))
+summary(lm(dependentvariable ~ myEigenanatomyRegionAverages))
 
-nvox<-1000
-dmat<-replicate(nvox, rnorm(20))
-dmat2<-replicate(30, rnorm(20))
-mat<-t(replicate(3, rnorm(nvox)) )
-initdf<-initializeEigenanatomy( mat )
-eanat<-sparseDecom2(
- inmatrix = list(dmat,dmat2), 
- inmask=list(initdf$mask,NA),
-  sparseness=c( -0.1, -0.2 ), 
-  smooth=0,
-  initializationList=initdf$initlist, 
-  cthresh=c(0,0),
-  nvecs=length(initdf$initlist), priorWeight = 0.1 )
+nvox <- 1000
+dmat <- replicate(nvox, rnorm(20))
+dmat2 <- replicate(30, rnorm(20))
+mat <- t(replicate(3, rnorm(nvox)))
+initdf <- initializeEigenanatomy(mat)
+eanat <- sparseDecom2(
+  inmatrix = list(dmat, dmat2),
+  inmask = list(initdf$mask, NA),
+  sparseness = c(-0.1, -0.2),
+  smooth = 0,
+  initializationList = initdf$initlist,
+  cthresh = c(0, 0),
+  nvecs = length(initdf$initlist), priorWeight = 0.1
+)
 
 }
 \author{

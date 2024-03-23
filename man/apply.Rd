@@ -29,8 +29,8 @@ Returns an antsImage after applying function.
 }
 \examples{
 
-img <- makeImage(c(4,4,4), rnorm(4*4*4))
-img2 <- apply(img, c(1,2), mean)
+img <- makeImage(c(4, 4, 4), rnorm(4 * 4 * 4))
+img2 <- apply(img, c(1, 2), mean)
 is.antsImage(img2)
 
 }

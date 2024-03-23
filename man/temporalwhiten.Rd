@@ -20,8 +20,8 @@ result.
 }
 \examples{
 
-mat<-replicate(100, rnorm(20))
-wmat<-temporalwhiten( mat )
+mat <- replicate(100, rnorm(20))
+wmat <- temporalwhiten(mat)
 
 }
 \author{

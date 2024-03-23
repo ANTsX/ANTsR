@@ -52,9 +52,9 @@ better to use official \code{antsMultivariateTemplateConstruction*} in ANTs.
 However, this code can be useful for smaller problems/populations.
 }
 \examples{
-pop = getANTsRData( "population" )
-avg = antsAverageImages( pop ) # this is in ANTsR
-template = buildTemplate( avg, pop, 'SyN', iterations = 1)
+pop <- getANTsRData("population")
+avg <- antsAverageImages(pop) # this is in ANTsR
+template <- buildTemplate(avg, pop, "SyN", iterations = 1)
 }
 \author{
 Avants BB

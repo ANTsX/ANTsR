@@ -16,6 +16,6 @@ array of fixed parameters
 Get fixed parameters of transform
 }
 \examples{
-tx = new("antsrTransform")
-params = getAntsrTransformFixedParameters(tx)
+tx <- new("antsrTransform")
+params <- getAntsrTransformFixedParameters(tx)
 }

@@ -19,13 +19,13 @@ Cast images to either a passed pixeltype or the most precise of the inputs
 }
 \examples{
 
-img <- antsImageRead( getANTsRData("rand")  ) \%>\% resampleImage( c(32, 32) )
-img2 <- antsImageRead( getANTsRData("rand"), pixeltype="double"  ) \%>\% 
-resampleImage( c(32, 32) )
-allDoubles = antsImageTypeCast( list(img, img2) )
-floats = antsImageTypeCast( list(img) )
-pixeltype(img) = "unsigned int"
-ints = antsImageTypeCast( list(img) )
+img <- antsImageRead(getANTsRData("rand")) \%>\% resampleImage(c(32, 32))
+img2 <- antsImageRead(getANTsRData("rand"), pixeltype = "double") \%>\%
+  resampleImage(c(32, 32))
+allDoubles <- antsImageTypeCast(list(img, img2))
+floats <- antsImageTypeCast(list(img))
+pixeltype(img) <- "unsigned int"
+ints <- antsImageTypeCast(list(img))
 
 }
 \author{

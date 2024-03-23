@@ -61,23 +61,25 @@ application and also based on observing algorithm behavior when
 }
 \examples{
 \dontrun{
-mat <- matrix(rnorm(2000),ncol=50)
-nv <- eanatSelect( mat, selectorScale = 1.2 )
-esol <- eanatDef( mat, nvecs=nv )
-es2 <- sparseDecom( mat, nvecs = nv )
-print( paste( "selected", nrow(esol),'pseudo-eigenvectors') )
-print( mean( abs( cor( mat \%*\% t(esol)) ) ) ) # what we use to select nvecs
-networkPriors = getANTsRData("fmrinetworks")
-ilist = networkPriors$images
-mni = antsImageRead( getANTsRData("mni") )
-mnireg = antsRegistration( meanbold*mask, mni, typeofTransform = 'Affine')
-for ( i in 1:length(ilist) )
-  ilist[[i]] = antsApplyTransforms( meanbold,ilist[[i]],mnireg$fwdtransform )
-pr = imageListToMatrix( ilist, cortMask )
-esol <- eanatDef( boldMat,
-  nvecs = length(ilist), cortMask, verbose=FALSE,
-  cthresh = 25, smoother = 0, positivity = TRUE, its=10, priors=pr,
-  priorWeight=0.15, eps=0.1 )
+mat <- matrix(rnorm(2000), ncol = 50)
+nv <- eanatSelect(mat, selectorScale = 1.2)
+esol <- eanatDef(mat, nvecs = nv)
+es2 <- sparseDecom(mat, nvecs = nv)
+print(paste("selected", nrow(esol), "pseudo-eigenvectors"))
+print(mean(abs(cor(mat \%*\% t(esol))))) # what we use to select nvecs
+networkPriors <- getANTsRData("fmrinetworks")
+ilist <- networkPriors$images
+mni <- antsImageRead(getANTsRData("mni"))
+mnireg <- antsRegistration(meanbold * mask, mni, typeofTransform = "Affine")
+for (i in 1:length(ilist)) {
+  ilist[[i]] <- antsApplyTransforms(meanbold, ilist[[i]], mnireg$fwdtransform)
+}
+pr <- imageListToMatrix(ilist, cortMask)
+esol <- eanatDef(boldMat,
+  nvecs = length(ilist), cortMask, verbose = FALSE,
+  cthresh = 25, smoother = 0, positivity = TRUE, its = 10, priors = pr,
+  priorWeight = 0.15, eps = 0.1
+)
 }
 
 }

@@ -27,16 +27,16 @@ Smooths data along the boundary into the missing region.
 }
 \examples{
 set.seed(123)
-fi<-abs(replicate(100, rnorm(100)))
-fi[1:10,]<-fi[,1:10]<-fi[91:100,]<-fi[,91:100]<-0
-mask<-fi
-mask[ mask > 0 ]<-1
-mask2<-mask
-mask2[11:20,11:20]<-2
-mask<-as.antsImage( mask2  )
-fi<-as.antsImage( fi )
-fi<-smoothImage( fi, 3 )
-painted<-basicInPaint( fi, mask )
+fi <- abs(replicate(100, rnorm(100)))
+fi[1:10, ] <- fi[, 1:10] <- fi[91:100, ] <- fi[, 91:100] <- 0
+mask <- fi
+mask[mask > 0] <- 1
+mask2 <- mask
+mask2[11:20, 11:20] <- 2
+mask <- as.antsImage(mask2)
+fi <- as.antsImage(fi)
+fi <- smoothImage(fi, 3)
+painted <- basicInPaint(fi, mask)
 \dontrun{
 # lmask<-antsImageRead( "brainmask.nii.gz", 2 )
 # limg<-antsImageRead( "r16slice_lesion.nii.gz", 2 )

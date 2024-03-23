@@ -47,9 +47,9 @@ Opening: Opens each label independently, equivalent to calling iMath iteratively
 }
 \examples{
 
-img <- antsImageRead( getANTsRData("r16") , 2 )
-labels = getMask(img,1,150) + getMask(img,151,225) * 2
-labelsDilated = multiLabelMorphology(labels, 'MD', 2)
+img <- antsImageRead(getANTsRData("r16"), 2)
+labels <- getMask(img, 1, 150) + getMask(img, 151, 225) * 2
+labelsDilated <- multiLabelMorphology(labels, "MD", 2)
 
 # should see original label regions preserved in dilated version
 # label N should have mean N and 0 variance

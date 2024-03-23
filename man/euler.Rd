@@ -27,7 +27,7 @@ euler characteristic at a threshold level.
 }
 \examples{
 
-mask <- getMask(  antsImageRead( getANTsRData( 'r16' )  ) )
+mask <- getMask(antsImageRead(getANTsRData("r16")))
 myresels <- resels(mask, c(1, 1))
 # pretend these results are from a t-statistical field fitted with 10 df to
 # find a peak value.
@@ -35,7 +35,7 @@ df <- c(1, 10) # made up degrees of freedom
 ec <- euler(4, df, fieldType = "T") # peak value is 4
 ez <- euler(3, df, fieldType = "T") # we thresholded at 3
 # uncorrected peak-level p-value
-pvox <- sum(ec * myresels)/sum(ez * myresels)
+pvox <- sum(ec * myresels) / sum(ez * myresels)
 
 }
 \references{

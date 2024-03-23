@@ -56,18 +56,17 @@ requires \code{antsVol} to be in the environment as well as
 Tools software on github.
 }
 \examples{
-
 \dontrun{
-ch2i = antsImageRead( getANTsRData("mni") )
-ch2seg = thresholdImage( ch2i, "Otsu", 3 )
-wm   = thresholdImage( ch2seg, 3, 3 )
-kimg = weingartenImageCurvature( ch2i, 1.5  ) \%>\% smoothImage( 1 )
-ap = path.expand( "~/code/ants-src/bin/" )
-rp0 = matrix( c(90,180,90), ncol = 3 )
-rp2 = matrix( c(0,0,0), ncol = 3 )
-rp3 = matrix( c(270,90,90), ncol = 3 )
-rp  = rbind( rp0, rp2, rp3 ) # pass these as rotationParams
-antsrVol( wm, list( kimg ), quantlimits=c(0.01,0.99) )
+ch2i <- antsImageRead(getANTsRData("mni"))
+ch2seg <- thresholdImage(ch2i, "Otsu", 3)
+wm <- thresholdImage(ch2seg, 3, 3)
+kimg <- weingartenImageCurvature(ch2i, 1.5) \%>\% smoothImage(1)
+ap <- path.expand("~/code/ants-src/bin/")
+rp0 <- matrix(c(90, 180, 90), ncol = 3)
+rp2 <- matrix(c(0, 0, 0), ncol = 3)
+rp3 <- matrix(c(270, 90, 90), ncol = 3)
+rp <- rbind(rp0, rp2, rp3) # pass these as rotationParams
+antsrVol(wm, list(kimg), quantlimits = c(0.01, 0.99))
 }
 
 }

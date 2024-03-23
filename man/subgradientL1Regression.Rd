@@ -37,10 +37,10 @@ SubgradientL1Regression solves y approx x beta
 }
 \examples{
 
-mat<-replicate(1000, rnorm(200))
-y<-rnorm(200)
-wmat<-subgradientL1Regression( y, mat, percentvals=0.05 )
-print( wmat$resultcorr )
+mat <- replicate(1000, rnorm(200))
+y <- rnorm(200)
+wmat <- subgradientL1Regression(y, mat, percentvals = 0.05)
+print(wmat$resultcorr)
 
 }
 \author{

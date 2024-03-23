@@ -20,8 +20,8 @@ coordinates of the image domain.
 }
 \examples{
 
-img = antsImageRead( getANTsRData( 'r16' ) )
-spmat = imageDomainToSpatialMatrix( img )
+img <- antsImageRead(getANTsRData("r16"))
+spmat <- imageDomainToSpatialMatrix(img)
 
 }
 \author{

@@ -22,12 +22,12 @@ This in an implementation of ITK's FastMarchingExtensionImageFilter - From http:
 }
 \examples{
 
-img = makeImage( c( 7, 7 ) , 0 )
-img[3:5,3:5]=1:9
-mask = getMask( img )
-mask[ mask == 0 ] = 2
-speed = smoothImage( mask, 1 )
-extendedImg = fastMarchingExtension( speed, mask, img )
+img <- makeImage(c(7, 7), 0)
+img[3:5, 3:5] <- 1:9
+mask <- getMask(img)
+mask[mask == 0] <- 2
+speed <- smoothImage(mask, 1)
+extendedImg <- fastMarchingExtension(speed, mask, img)
 
 }
 \author{

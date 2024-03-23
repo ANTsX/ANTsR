@@ -34,10 +34,10 @@ Utility function to integrate a vector field and create a deformation field.
 \examples{
 \dontrun{
 set.seed(1234)
-fi <- ( ri(1) )
-mi <- ( ri(2) )
-mytx2 <- antsRegistration(fixed=fi, mi, typeofTransform = "SyN" )
-integrateVectorField( fi, mytx2$velocityfield,  "/tmp/def.nii.gz" )
+fi <- (ri(1))
+mi <- (ri(2))
+mytx2 <- antsRegistration(fixed = fi, mi, typeofTransform = "SyN")
+integrateVectorField(fi, mytx2$velocityfield, "/tmp/def.nii.gz")
 }
 }
 \author{

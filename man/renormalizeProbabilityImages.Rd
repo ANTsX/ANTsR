@@ -26,11 +26,11 @@ prioritized value.  Will also set values less than zero, to zero.
 }
 \examples{
 
-mat <- t( matrix( rnorm(4000),ncol=10) )
-mask = makeImage( c(20,20), 1 )
-plist = matrixToImages( mat, mask )
-rplist<-renormalizeProbabilityImages( plist, mask )
-rplist2<-renormalizeProbabilityImages( plist, mask , 2 )
+mat <- t(matrix(rnorm(4000), ncol = 10))
+mask <- makeImage(c(20, 20), 1)
+plist <- matrixToImages(mat, mask)
+rplist <- renormalizeProbabilityImages(plist, mask)
+rplist2 <- renormalizeProbabilityImages(plist, mask, 2)
 
 }
 \author{

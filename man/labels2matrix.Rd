@@ -28,10 +28,10 @@ other image to matrix operations.
 }
 \examples{
 
-fi = antsImageRead(getANTsRData("r16") ,2) \%>\% resampleImage(c(60,60),1,0)
-mask = getMask( fi )
-labs = kmeansSegmentation( fi, 3 )$segmentation
-labmat = labels2matrix( labs, mask )
+fi <- antsImageRead(getANTsRData("r16"), 2) \%>\% resampleImage(c(60, 60), 1, 0)
+mask <- getMask(fi)
+labs <- kmeansSegmentation(fi, 3)$segmentation
+labmat <- labels2matrix(labs, mask)
 
 }
 \author{

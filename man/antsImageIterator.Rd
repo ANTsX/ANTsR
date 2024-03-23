@@ -16,6 +16,6 @@ antsImageIterator
 Get image iterator
 }
 \examples{
-img <- makeImage(c(5,5), rnorm(25))
-it <- antsImageIterator( img )
+img <- makeImage(c(5, 5), rnorm(25))
+it <- antsImageIterator(img)
 }

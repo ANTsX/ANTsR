@@ -21,8 +21,8 @@ Produces a low rank version of the input matrix
 }
 \examples{
 
-mat <- matrix(rnorm(300),ncol=50)
-lrmat <- lowrankRowMatrix( mat , 2 )
+mat <- matrix(rnorm(300), ncol = 50)
+lrmat <- lowrankRowMatrix(mat, 2)
 
 }
 \author{

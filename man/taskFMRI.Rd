@@ -38,19 +38,20 @@ autocorrelation using bullmore 1996 MRM and AR(2) model with parameters
 derived from global residual signal. Estimate final glm.
 }
 \examples{
-
 \dontrun{
 # read the fmri image in and maybe do slice timing correction
-  fmri<-getANTsRData("pcasl")
-  fmri<-antsImageRead( fmri )
+fmri <- getANTsRData("pcasl")
+fmri <- antsImageRead(fmri)
 #  fmri<-iMath(fmri,"SliceTimingCorrection","bspline") # optional
-  myvars<-getfMRInuisanceVariables( fmri, moreaccurate = 0, maskThresh=100 )
-  mat <- myvars$matrixTimeSeries
-  mat<-frequencyFilterfMRI(mat, 2.5, freqLo=0.01, freqHi=0.1, opt="butt")
-  blockfing = c(0, 36, 72 )
-  hrf <- hemodynamicRF( scans=dim(fmri)[4] , onsets=blockfing ,
-    durations=rep(  12,  length( blockfing ) ) ,  rt=2.5 )
-  activationBeta<-taskFMRI(  mat , hrf , myvars )
+myvars <- getfMRInuisanceVariables(fmri, moreaccurate = 0, maskThresh = 100)
+mat <- myvars$matrixTimeSeries
+mat <- frequencyFilterfMRI(mat, 2.5, freqLo = 0.01, freqHi = 0.1, opt = "butt")
+blockfing <- c(0, 36, 72)
+hrf <- hemodynamicRF(
+  scans = dim(fmri)[4], onsets = blockfing,
+  durations = rep(12, length(blockfing)), rt = 2.5
+)
+activationBeta <- taskFMRI(mat, hrf, myvars)
 }
 
 }

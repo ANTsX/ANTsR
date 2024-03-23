@@ -20,11 +20,10 @@ antsImage is output
 Creates spherical points in the coordinate space of the target image.
 }
 \examples{
-
 \dontrun{
-mni <- antsImageRead( getANTsRData( "mni" ) ) \%>\% getMask()
-data( "powers_areal_mni_itk", package = "ANTsR", envir = environment() )
-powersLabels = makePowersPointsImage( powers_areal_mni_itk, mni )
+mni <- antsImageRead(getANTsRData("mni")) \%>\% getMask()
+data("powers_areal_mni_itk", package = "ANTsR", envir = environment())
+powersLabels <- makePowersPointsImage(powers_areal_mni_itk, mni)
 # if you have a different target space
 # pts = antsApplyTransformsToPoints( 3, powers_areal_mni_itk,
 #          transformlist = concatenatedMaps$toTemplate,

@@ -20,9 +20,9 @@ This function reverses the operation performed by \code{splitNDImageToList}.
 }
 \examples{
 
-my4Dimage = makeImage( c(5,5,5,4), rnorm( 5*5*5*4 ) )
-my3Dlist = splitNDImageToList( my4Dimage )
-my4DimageR = mergeListToNDImage( my4Dimage, my3Dlist )
+my4Dimage <- makeImage(c(5, 5, 5, 4), rnorm(5 * 5 * 5 * 4))
+my3Dlist <- splitNDImageToList(my4Dimage)
+my4DimageR <- mergeListToNDImage(my4Dimage, my3Dlist)
 
 }
 \author{
