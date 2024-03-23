@@ -10,8 +10,8 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mat <- matrix( rnorm(100), nrow=10 )
-#' wcmat<-corw( mat , weights = abs( nrorm( nrow(mat) ) ) )
+#' mat <- matrix(rnorm(100), nrow = 10)
+#' wcmat <- corw(mat, weights = abs(nrorm(nrow(mat))))
 #'
 #' @export corw
 corw <- function(mat, weights) {
@@ -22,9 +22,8 @@ corw <- function(mat, weights) {
   cormat <- matrix(rep(NA, ncol(mat) * ncol(mat)), ncol = ncol(mat))
   for (x in 1:ncol(mat)) {
     for (y in 1:ncol(mat)) {
-      if ( x != y )
-      {
-      cormat[x, y] <- sqrt(summary(lm(mat[, x] ~ mat[, y]), weights = weights/sum(weights))$r.squared)
+      if (x != y) {
+        cormat[x, y] <- sqrt(summary(lm(mat[, x] ~ mat[, y]), weights = weights / sum(weights))$r.squared)
       }
     }
   }

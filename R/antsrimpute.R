@@ -12,30 +12,34 @@
 #' @author Kandel BM, Avants BB
 #' @examples
 #'
-#' mydat <- data.frame(A=c(1,2,4,5), B=c(1,NA,4,5))
+#' mydat <- data.frame(A = c(1, 2, 4, 5), B = c(1, NA, 4, 5))
 #' mean.impute <- antsrimpute(mydat)
 #' mean.impute <- antsrimpute(mydat$B)
 #' median.impute <- antsrimpute(mydat, median)
 #'
 #' @export antsrimpute
 antsrimpute <- function(mydat, FUN = mean, ...) {
-  mostrepeated <- function(x,...) as(names(which.max(table(x))), mode(x))
+  mostrepeated <- function(x, ...) as(names(which.max(table(x))), mode(x))
   if (is.null(dim(mydat))) {
     mydat2 <- mydat
-    if ( class( mydat ) == 'numeric' | class( mydat ) == 'integer' )
-      mydat2[is.na(mydat)] <- FUN((mydat), na.rm = TRUE, ...) else
-        mydat2[is.na(mydat)] <- mostrepeated((mydat), na.rm = TRUE, ...)
+    if (class(mydat) == "numeric" | class(mydat) == "integer") {
+      mydat2[is.na(mydat)] <- FUN((mydat), na.rm = TRUE, ...)
+    } else {
+      mydat2[is.na(mydat)] <- mostrepeated((mydat), na.rm = TRUE, ...)
+    }
     mydat2
   } else {
     mydat2 <- mydat
     for (x in 1:ncol(mydat)) {
-      if ( class( mydat[, x] ) == 'numeric' | class( mydat[, x] ) == 'integer' )
+      if (class(mydat[, x]) == "numeric" | class(mydat[, x]) == "integer") {
         mydat2[is.na(mydat[, x]), x] <-
-          FUN((mydat[, x]), na.rm = TRUE, ...) else
-          mydat2[is.na(mydat[, x]), x] <-
-            mostrepeated((mydat[, x]), na.rm = TRUE, ...)
+          FUN((mydat[, x]), na.rm = TRUE, ...)
+      } else {
+        mydat2[is.na(mydat[, x]), x] <-
+          mostrepeated((mydat[, x]), na.rm = TRUE, ...)
       }
-    return( mydat2 )
+    }
+    return(mydat2)
     # rows - but never was implemented
     # mydat3=mydat2
     # for (x in 1:nrow(mydat))

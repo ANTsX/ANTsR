@@ -24,11 +24,11 @@
 #' @keywords mask
 #' @examples
 #'
-#' img = ri( 1 )
-#' mask= getMask( img )
-#' testthat::expect_error(getMask( img , lowThresh = "hey"))
-#' pixeltype(img) = "unsigned int"
-#' mask2<-getMask( img )
+#' img <- ri(1)
+#' mask <- getMask(img)
+#' testthat::expect_error(getMask(img, lowThresh = "hey"))
+#' pixeltype(img) <- "unsigned int"
+#' mask2 <- getMask(img)
 #'
 #' @export getMask
 getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
@@ -38,47 +38,43 @@ getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
   # by erosion, and then holes are filled.  Returns: a binary antsImage
   cleanup <- as.numeric(cleanup)
   if (!is.antsImage(img)) {
-    img = check_ants(img)
+    img <- check_ants(img)
   }
   if (is.antsImage(img)) {
     if (img@pixeltype != "float") {
       img <- antsImageClone(img, "float")
     }
   }
-  if ( missing( lowThresh ) )  lowThresh = mean( img )
-  if ( missing( highThresh ) ) highThresh = max( img  )
-  if ( ( !is.numeric(lowThresh) )  ||
-       ( !is.numeric(highThresh) ) ||
-          length(lowThresh) > 1    || length(highThresh) > 1 )
-    {
+  if (missing(lowThresh)) lowThresh <- mean(img)
+  if (missing(highThresh)) highThresh <- max(img)
+  if ((!is.numeric(lowThresh)) ||
+    (!is.numeric(highThresh)) ||
+    length(lowThresh) > 1 || length(highThresh) > 1) {
     stop("'lowthresh' and 'highthresh' must be numeric scalars")
-    }
+  }
 
-  mask_img<-thresholdImage( img, lowThresh, highThresh )
+  mask_img <- thresholdImage(img, lowThresh, highThresh)
 
   if (cleanup > 0) {
-    mask_img = iMath(mask_img, "ME", cleanup)
-    mask_img = iMath(mask_img, "GetLargestComponent")
-    mask_img = iMath(mask_img, "MD", cleanup)
-    mask_img = iMath(mask_img, "FillHoles")
-    mask_img = thresholdImage( mask_img, 1, Inf )
-    while (  ( min(mask_img) == max(mask_img) ) & cleanup > 0 )
-      {
+    mask_img <- iMath(mask_img, "ME", cleanup)
+    mask_img <- iMath(mask_img, "GetLargestComponent")
+    mask_img <- iMath(mask_img, "MD", cleanup)
+    mask_img <- iMath(mask_img, "FillHoles")
+    mask_img <- thresholdImage(mask_img, 1, Inf)
+    while ((min(mask_img) == max(mask_img)) & cleanup > 0) {
       cleanup <- cleanup - 1
-      mask_img <- thresholdImage( img, lowThresh, highThresh )
-      if ( cleanup > 0 )
-        {
-        mask_img = morphology(mask_img, "erode", cleanup)
-        mask_img = morphology(mask_img, "dilate", cleanup)
-        mask_img = iMath(mask_img, "FillHoles" )
-        mask_img = thresholdImage( mask_img, 1, Inf )
-        }
-      if ( cleanup == 0 )
-        {
-        clustlab<-labelClusters( mask_img, 1 )
-        mask_img <- thresholdImage( clustlab, 1, 1 )
-        }
+      mask_img <- thresholdImage(img, lowThresh, highThresh)
+      if (cleanup > 0) {
+        mask_img <- morphology(mask_img, "erode", cleanup)
+        mask_img <- morphology(mask_img, "dilate", cleanup)
+        mask_img <- iMath(mask_img, "FillHoles")
+        mask_img <- thresholdImage(mask_img, 1, Inf)
       }
+      if (cleanup == 0) {
+        clustlab <- labelClusters(mask_img, 1)
+        mask_img <- thresholdImage(clustlab, 1, 1)
+      }
+    }
   }
   return(mask_img)
 }

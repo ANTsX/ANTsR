@@ -49,223 +49,246 @@
 #' @examples
 #'
 #' set.seed(123)
-#' ref <- ri( 1 )
-#' ref<-resampleImage(ref,c(50,50),1,0)
-#' ref<-iMath(ref,"Normalize")
-#' mi<- ri( 2 )
-#' mi2<-ri( 3 )
-#' mi3<-ri( 4 )
-#' mi4<-ri( 5 )
-#' mi5<-ri( 6 )
-#' refmask<-getMask(ref)
-#' refmask<-iMath(refmask,"ME",2) # just to speed things up
-#' ilist<-list(mi,mi2,mi3,mi4,mi5)
-#' seglist<-list()
-#' for ( i in 1:length(ilist) )
-#'  {
-#'  ilist[[i]]<-iMath(ilist[[i]],"Normalize")
-#'  mytx<-antsRegistration(fixed=ref , moving=ilist[[i]] ,
-#'    typeofTransform = c("Affine"), verbose = TRUE )
-#'  mywarpedimage<-antsApplyTransforms(fixed=ref,
-#'  moving=ilist[[i]],
-#'    transformlist=mytx$fwdtransforms)
-#'  ilist[[i]]=mywarpedimage
-#'  seg<-thresholdImage( ilist[[i]],"Otsu", 3)
-#'  seglist[[i]]<-seg
-#'  }
-#' r<-2
-#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-#'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
-#' pp2<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-#'   labelList=seglist, rad=rep(r, length(dim(ref)) ) )
+#' ref <- ri(1)
+#' ref <- resampleImage(ref, c(50, 50), 1, 0)
+#' ref <- iMath(ref, "Normalize")
+#' mi <- ri(2)
+#' mi2 <- ri(3)
+#' mi3 <- ri(4)
+#' mi4 <- ri(5)
+#' mi5 <- ri(6)
+#' refmask <- getMask(ref)
+#' refmask <- iMath(refmask, "ME", 2) # just to speed things up
+#' ilist <- list(mi, mi2, mi3, mi4, mi5)
+#' seglist <- list()
+#' for (i in 1:length(ilist))
+#' {
+#'   ilist[[i]] <- iMath(ilist[[i]], "Normalize")
+#'   mytx <- antsRegistration(
+#'     fixed = ref, moving = ilist[[i]],
+#'     typeofTransform = c("Affine"), verbose = TRUE
+#'   )
+#'   mywarpedimage <- antsApplyTransforms(
+#'     fixed = ref,
+#'     moving = ilist[[i]],
+#'     transformlist = mytx$fwdtransforms
+#'   )
+#'   ilist[[i]] <- mywarpedimage
+#'   seg <- thresholdImage(ilist[[i]], "Otsu", 3)
+#'   seglist[[i]] <- seg
+#' }
+#' r <- 2
+#' pp <- jointLabelFusion(ref, refmask, ilist,
+#'   rSearch = 2,
+#'   labelList = seglist, rad = rep(r, length(dim(ref)))
+#' )
+#' pp2 <- jointLabelFusion(ref, refmask, ilist,
+#'   rSearch = 2,
+#'   labelList = seglist, rad = rep(r, length(dim(ref)))
+#' )
 #' testthat::expect_equal(pp2$segmentation, pp$segmentation)
-#' pp<-jointLabelFusion(ref,refmask,ilist, rSearch=2,
-#'   rad=rep(r, length(dim(ref)) ) )
+#' pp <- jointLabelFusion(ref, refmask, ilist,
+#'   rSearch = 2,
+#'   rad = rep(r, length(dim(ref)))
+#' )
 #'
 #' \dontrun{
-#' ref = antsImageRead( getANTsRData("ch2") )
-#' n = 50
-#' ref = resampleImage(ref,c(n,n,n),1,0)
-#' ref = iMath(ref,"Normalize")
-#' refmask = getMask(ref)
-#' ilist = list()
-#' seglist = list()
-#' for ( k in 1:5 ) {
-#' mi = antsImageClone( ref ) + rnorm( n^3, 0, 0.1 )
-#' mykseg = kmeansSegmentation( mi, 3, refmask )$segmentation
-#' ilist[[ k ]] = mi
-#' seglist[[ k ]] = mykseg
+#' ref <- antsImageRead(getANTsRData("ch2"))
+#' n <- 50
+#' ref <- resampleImage(ref, c(n, n, n), 1, 0)
+#' ref <- iMath(ref, "Normalize")
+#' refmask <- getMask(ref)
+#' ilist <- list()
+#' seglist <- list()
+#' for (k in 1:5) {
+#'   mi <- antsImageClone(ref) + rnorm(n^3, 0, 0.1)
+#'   mykseg <- kmeansSegmentation(mi, 3, refmask)$segmentation
+#'   ilist[[k]] <- mi
+#'   seglist[[k]] <- mykseg
 #' }
-#' pp = jointLabelFusion( ref, refmask,ilist, rSearch=2,
-#'  labelList=seglist, rad=rep(2, length(dim(ref)) ), verbose=TRUE )
-#' plot( ref, pp$segmentation )
-#' plot( pp$intensity  )
+#' pp <- jointLabelFusion(ref, refmask, ilist,
+#'   rSearch = 2,
+#'   labelList = seglist, rad = rep(2, length(dim(ref))), verbose = TRUE
+#' )
+#' plot(ref, pp$segmentation)
+#' plot(pp$intensity)
 #' }
 #'
 #' @export jointLabelFusion
 jointLabelFusion <- function(
-  targetI,
-  targetIMask,
-  atlasList,
-  beta=4,
-  rad=2,
-  labelList = NULL,
-  rho=0.01,
-  usecor=FALSE,
-  rSearch=3,
-  nonnegative = FALSE,
-  maxLabelPlusOne = FALSE,
-  noZeroes = FALSE,
-  verbose = FALSE )
-{
-  targetI = check_ants(targetI)
-  targetIMask = check_ants(targetIMask)
-  segpixtype = 'unsigned int'
-  if ( is.null( labelList ) ) doJif = TRUE else doJif = FALSE
-  if ( ! doJif ) {
-    if ( length(labelList) != length(atlasList) )
+    targetI,
+    targetIMask,
+    atlasList,
+    beta = 4,
+    rad = 2,
+    labelList = NULL,
+    rho = 0.01,
+    usecor = FALSE,
+    rSearch = 3,
+    nonnegative = FALSE,
+    maxLabelPlusOne = FALSE,
+    noZeroes = FALSE,
+    verbose = FALSE) {
+  targetI <- check_ants(targetI)
+  targetIMask <- check_ants(targetIMask)
+  segpixtype <- "unsigned int"
+  if (is.null(labelList)) doJif <- TRUE else doJif <- FALSE
+  if (!doJif) {
+    if (length(labelList) != length(atlasList)) {
       stop("length(labelList) != length(atlasList)")
-    if ( noZeroes ) {
-      for ( n in 1:length( labelList ) )
-        targetIMask[ labelList[[n]] == 0 ] = 0
-      }
-    inlabs = sort( unique(  labelList[[ 1 ]][ targetIMask == 1 ]  ) )
-    labsum = labelList[[1]]
-    for ( n in 2:length( labelList ) ) {
-      inlabs = sort( unique( c( inlabs, labelList[[ n ]][ targetIMask == 1 ]  ) ) )
-      labsum = labsum + labelList[[ n ]]
-      }
-    maxLab = max(inlabs)
-    if ( maxLabelPlusOne ) {
-      for ( n in 1:length( labelList ) ) {
-        labelList[[ n ]][ labelList[[ n ]] == 0 ] = maxLab + 1
-        }
     }
-    mymask = antsImageClone( targetIMask )
-    mymask[ labsum == 0 ] = 0
-    } else mymask = ( targetIMask )
+    if (noZeroes) {
+      for (n in 1:length(labelList)) {
+        targetIMask[labelList[[n]] == 0] <- 0
+      }
+    }
+    inlabs <- sort(unique(labelList[[1]][targetIMask == 1]))
+    labsum <- labelList[[1]]
+    for (n in 2:length(labelList)) {
+      inlabs <- sort(unique(c(inlabs, labelList[[n]][targetIMask == 1])))
+      labsum <- labsum + labelList[[n]]
+    }
+    maxLab <- max(inlabs)
+    if (maxLabelPlusOne) {
+      for (n in 1:length(labelList)) {
+        labelList[[n]][labelList[[n]] == 0] <- maxLab + 1
+      }
+    }
+    mymask <- antsImageClone(targetIMask)
+    mymask[labsum == 0] <- 0
+  } else {
+    mymask <- (targetIMask)
+  }
   tdir <- tempdir()
   segdir <- tempdir()
   osegfn <- tempfile(pattern = "antsr", tmpdir = segdir, fileext = "myseg.nii.gz")
-  if ( file.exists( osegfn ) ) file.remove( osegfn )
+  if (file.exists(osegfn)) file.remove(osegfn)
   probs <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = "prob%02d.nii.gz")
-  probsbase <- basename( probs )
+  probsbase <- basename(probs)
   searchpattern <- sub("%02d", "*", probsbase)
-  mydim <- as.numeric( targetIMask@dimension )
-  if ( ! doJif ) {
+  mydim <- as.numeric(targetIMask@dimension)
+  if (!doJif) {
     outimg <- new("antsImage", segpixtype, mydim)
-    outimgi <- new("antsImage", 'float', mydim)
+    outimgi <- new("antsImage", "float", mydim)
     outs <- paste("[",
-      antsrGetPointerName(outimg),",",
-      antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
-    } else {
-      outimgi <- new("antsImage", 'float', mydim)
-      outs <- antsrGetPointerName(outimgi)
-    }
+      antsrGetPointerName(outimg), ",",
+      antsrGetPointerName(outimgi), ",", probs, "]",
+      sep = ""
+    )
+  } else {
+    outimgi <- new("antsImage", "float", mydim)
+    outs <- antsrGetPointerName(outimgi)
+  }
   # this is a temporary FIXME for some type issue i cant figure out right now
-#  outs <- paste("[",
-#    osegfn,",",
-#    antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
-  mymask <- antsImageClone( mymask, segpixtype)
-  if ( length( rad ) == 1 ) myrad = rep( rad, mydim ) else myrad = rad
-  if ( length( myrad ) != mydim )
+  #  outs <- paste("[",
+  #    osegfn,",",
+  #    antsrGetPointerName(outimgi), ",", probs, "]", sep = "")
+  mymask <- antsImageClone(mymask, segpixtype)
+  if (length(rad) == 1) myrad <- rep(rad, mydim) else myrad <- rad
+  if (length(myrad) != mydim) {
     stop("patch radius dimensionality must equal image dimensionality")
-  myrad = paste( myrad, collapse='x')
-  if ( verbose == TRUE ) vnum = 1 else vnum = 0
-  if ( nonnegative == TRUE ) nnum = 1 else nnum = 0
+  }
+  myrad <- paste(myrad, collapse = "x")
+  if (verbose == TRUE) vnum <- 1 else vnum <- 0
+  if (nonnegative == TRUE) nnum <- 1 else nnum <- 0
   myargs <- list(
     d = mydim,
     t = targetI,
     a = rho, # or alpha in the paper
     b = beta,
-    c = nnum,  # constrain non-negative
+    c = nnum, # constrain non-negative
     p = myrad, # patch radius
     m = "PC",
     s = rSearch,
-#    e =     # -e, --exclusion-image label[exclusionImage] # FIXME
+    #    e =     # -e, --exclusion-image label[exclusionImage] # FIXME
     x = mymask,
     o = outs,
-    v = vnum )
+    v = vnum
+  )
   # now add the intensity and label images
-  kct = length( myargs )
-  for ( k in 1:length( atlasList ) )
-    {
-    kct = kct + 1
-    myargs[[ kct ]] = atlasList[[ k ]]
-    names( myargs  )[[ kct ]]  = "g"
-    if ( ! doJif ) {
-      kct = kct + 1
-      castseg = antsImageClone( labelList[[ k ]], segpixtype )
-      myargs[[ kct ]] = castseg
-      names( myargs )[[ kct ]]  = "l"
-      }
+  kct <- length(myargs)
+  for (k in 1:length(atlasList))
+  {
+    kct <- kct + 1
+    myargs[[kct]] <- atlasList[[k]]
+    names(myargs)[[kct]] <- "g"
+    if (!doJif) {
+      kct <- kct + 1
+      castseg <- antsImageClone(labelList[[k]], segpixtype)
+      myargs[[kct]] <- castseg
+      names(myargs)[[kct]] <- "l"
     }
+  }
   ANTsRCore::antsJointFusion(.int_antsProcessArguments(c(myargs)))
-  if ( doJif ) return( outimgi )
-  probsout <- list.files(path = tdir,
+  if (doJif) {
+    return(outimgi)
+  }
+  probsout <- list.files(
+    path = tdir,
     pattern = glob2rx(searchpattern), full.names = TRUE,
-    recursive = FALSE)
+    recursive = FALSE
+  )
 
-  segmentation_numbers = rep( NA, length(probsout))
-  for ( i in 1:length(probsout) ) {
-    temp = unlist( strsplit(probsout[i], "prob") )
-    segnum = tools::file_path_sans_ext( temp[length(temp)], TRUE )
-    segmentation_numbers[i] = as.integer(segnum)
+  segmentation_numbers <- rep(NA, length(probsout))
+  for (i in 1:length(probsout)) {
+    temp <- unlist(strsplit(probsout[i], "prob"))
+    segnum <- tools::file_path_sans_ext(temp[length(temp)], TRUE)
+    segmentation_numbers[i] <- as.integer(segnum)
+  }
+
+  probimgs <- imageFileNames2ImageList(probsout)
+
+  if (!maxLabelPlusOne) {
+    segmat <- imageListToMatrix(probimgs, mymask)
+    finalsegvec <- apply(segmat, FUN = which.max, MARGIN = 2)
+    finalsegvec2 <- finalsegvec * 0
+
+    for (i in 1:length(probsout)) {
+      finalsegvec2[finalsegvec == i] <- segmentation_numbers[i]
     }
 
-  probimgs <- imageFileNames2ImageList( probsout )
-
-  if ( ! maxLabelPlusOne ) {
-    segmat = imageListToMatrix( probimgs, mymask )
-    finalsegvec = apply( segmat, FUN=which.max , MARGIN=2 )
-    finalsegvec2 = finalsegvec * 0
-
-    for ( i in 1:length(probsout) ) {
-      finalsegvec2[finalsegvec == i] = segmentation_numbers[i]
-      }
-
-    outimg = makeImage( mymask, finalsegvec2 ) * mymask
-    return( list(
+    outimg <- makeImage(mymask, finalsegvec2) * mymask
+    return(list(
       segmentation = outimg,
       intensity = outimgi,
       probabilityimages = probimgs,
       segmentationNumbers = segmentation_numbers,
-      jlfmask = mymask )
-      )
-    } else {
-      themaxlab = which( segmentation_numbers == max( segmentation_numbers ) )
-      backgroundProb = probimgs[[ themaxlab ]]
-      segmentation_numbers = segmentation_numbers[ -themaxlab ]
-      probsout = probsout[ -themaxlab ]
-      probimgs = probimgs[ -themaxlab ]
-      segmat = imageListToMatrix( probimgs, mymask )
-      fgndProb = colSums( segmat )
-      finalsegvec = apply( segmat, FUN=which.max , MARGIN=2 )
-      finalsegvec2 = finalsegvec * 0
-      for ( i in 1:length(probsout) ) {
-        finalsegvec2[finalsegvec == i] = segmentation_numbers[i]
-        }
-      outimg = makeImage( mymask, finalsegvec2 ) * mymask
-
-      # next decide what is "background" based on the sum of the first k labels vs the prob of the last one
-      firstK = probimgs[[1]] * 0
-      for ( i in 1:length( probimgs ) )
-        firstK = firstK + probimgs[[i]]
-
-      segmat = imageListToMatrix( list( backgroundProb, firstK ), mymask )
-      bkgsegvec = apply( segmat, FUN=which.max , MARGIN=2 ) - 1
-      bkgdseg = makeImage( mymask, bkgsegvec ) * mymask
-      return( list(
-        segmentation = outimg * bkgdseg,
-        segmentation_raw = outimg,
-        intensity = outimgi,
-        probabilityimages = probimgs,
-        segmentationNumbers = segmentation_numbers,
-        backgroundProb = backgroundProb,
-        jlfmask = mymask )
-        )
-
+      jlfmask = mymask
+    ))
+  } else {
+    themaxlab <- which(segmentation_numbers == max(segmentation_numbers))
+    backgroundProb <- probimgs[[themaxlab]]
+    segmentation_numbers <- segmentation_numbers[-themaxlab]
+    probsout <- probsout[-themaxlab]
+    probimgs <- probimgs[-themaxlab]
+    segmat <- imageListToMatrix(probimgs, mymask)
+    fgndProb <- colSums(segmat)
+    finalsegvec <- apply(segmat, FUN = which.max, MARGIN = 2)
+    finalsegvec2 <- finalsegvec * 0
+    for (i in 1:length(probsout)) {
+      finalsegvec2[finalsegvec == i] <- segmentation_numbers[i]
     }
+    outimg <- makeImage(mymask, finalsegvec2) * mymask
+
+    # next decide what is "background" based on the sum of the first k labels vs the prob of the last one
+    firstK <- probimgs[[1]] * 0
+    for (i in 1:length(probimgs)) {
+      firstK <- firstK + probimgs[[i]]
+    }
+
+    segmat <- imageListToMatrix(list(backgroundProb, firstK), mymask)
+    bkgsegvec <- apply(segmat, FUN = which.max, MARGIN = 2) - 1
+    bkgdseg <- makeImage(mymask, bkgsegvec) * mymask
+    return(list(
+      segmentation = outimg * bkgdseg,
+      segmentation_raw = outimg,
+      intensity = outimgi,
+      probabilityimages = probimgs,
+      segmentationNumbers = segmentation_numbers,
+      backgroundProb = backgroundProb,
+      jlfmask = mymask
+    ))
+  }
 }
 
 
@@ -315,103 +338,109 @@ jointLabelFusion <- function(
 #'
 #' @export localJointLabelFusion
 localJointLabelFusion <- function(
-  targetI,
-  whichLabels,
-  targetMask,
-  initialLabel,
-  atlasList,
-  labelList,
-  submaskDilation = 10,
-  typeofTransform = 'SyN',
-  affMetric = "meansquares",
-  synMetric = "mattes",
-  synSampling = 32,
-  regIterations = c(40,20,0),
-  affIterations,
-  localMaskTransform,
-  maxLabelPlusOne=FALSE,
-  noZeroes = FALSE,
-  verbose = FALSE,
-  ...
- )
-{
-#  reg = antsRegistration( targetI, template, typeofTransform = typeofTransform )
+    targetI,
+    whichLabels,
+    targetMask,
+    initialLabel,
+    atlasList,
+    labelList,
+    submaskDilation = 10,
+    typeofTransform = "SyN",
+    affMetric = "meansquares",
+    synMetric = "mattes",
+    synSampling = 32,
+    regIterations = c(40, 20, 0),
+    affIterations,
+    localMaskTransform,
+    maxLabelPlusOne = FALSE,
+    noZeroes = FALSE,
+    verbose = FALSE,
+    ...) {
+  #  reg = antsRegistration( targetI, template, typeofTransform = typeofTransform )
   # isolate region
-  myregion = maskImage( initialLabel, initialLabel, level=whichLabels, binarize=FALSE )
-  if ( max( myregion ) == 0 )
-    myregion = thresholdImage( initialLabel, 1, Inf )
-  if ( max( myregion ) == 0 ) stop(paste( "Target Mask is empty in maskImage call in localJointLabelFusion" ) )
-  myregionb = thresholdImage( myregion, 1, Inf )
-  myregionAroundRegion = iMath( myregionb, "MD", submaskDilation )
-  if ( ! missing(  targetMask ) ) myregionAroundRegion = myregionAroundRegion * targetMask
-  croppedImage = cropImage( targetI, myregionAroundRegion )
-  croppedMask = cropImage( myregionAroundRegion, myregionAroundRegion )
-  croppedRegion = cropImage( myregion, myregionAroundRegion )
-  croppedmappedImages = list()
-  croppedmappedSegs = list()
-  if ( missing( localMaskTransform ) ) localMaskTransform = 'Similarity'
-  for ( k in 1:length( atlasList ) ) {
-    if ( verbose ) cat(paste0(k,"..."))
-    initMap=NA
-    libregion = maskImage( labelList[[k]], labelList[[k]], level=whichLabels, binarize=FALSE )
-    if ( max( libregion ) == 0 ) stop(paste( "Lib Mask is empty in maskImage call in localJointLabelFusion: case:", k ) )
-    if ( missing( affIterations ) ) {
-      
-      initMap <- tryCatch({
-        antsRegistration( 
-        smoothImage(croppedRegion,1,sigmaInPhysicalCoordinates=FALSE), 
-        smoothImage(libregion,1,sigmaInPhysicalCoordinates=FALSE),
-        typeofTransform = localMaskTransform, affMetric=affMetric,
-        samplingPercentage=1.0,
-        estimateLearningRateOnce=TRUE,
-        verbose=verbose )$fwdtransforms
-        },
-        error = function(e) {
-        }, finally = {
-        })
-
-      } else {
-
-      initMap <- tryCatch({
-        antsRegistration( 
-        smoothImage(croppedRegion,1,sigmaInPhysicalCoordinates=FALSE), 
-        smoothImage(libregion,1,sigmaInPhysicalCoordinates=FALSE),
-        typeofTransform = localMaskTransform, affMetric=affMetric,
-        samplingPercentage=1.0,
-        estimateLearningRateOnce=TRUE,
-        affIterations=affIterations,
-        verbose=verbose )$fwdtransforms
-        },
-        error = function(e) {
-        }, finally = {
-        })
-      
-      }
-    rr = readAntsrTransform( initMap )
-    if ( ! is.na( initMap ) & all( !is.na( getAntsrTransformParameters( rr ) ) ) ) {
-      localReg = antsRegistration( croppedImage, atlasList[[k]],
-        regIterations = regIterations, synMetric=synMetric, synSampling=synSampling,
-        typeofTransform = typeofTransform, initialTransform = initMap, verbose=verbose )
-      transformedImage = antsApplyTransforms( croppedImage, atlasList[[k]],
-        localReg$fwdtransforms )
-      transformedLabels = antsApplyTransforms( croppedImage, labelList[[k]],
-        localReg$fwdtransforms, interpolator = "nearestNeighbor"  )
-      croppedmappedImages[[k]] = transformedImage
-      croppedmappedSegs[[k]] = transformedLabels
-      }
+  myregion <- maskImage(initialLabel, initialLabel, level = whichLabels, binarize = FALSE)
+  if (max(myregion) == 0) {
+    myregion <- thresholdImage(initialLabel, 1, Inf)
   }
-  croppedmappedImages <- croppedmappedImages[!sapply(croppedmappedImages,is.null)]
-  croppedmappedSegs <- croppedmappedSegs[!sapply(croppedmappedSegs,is.null)]
-  return( list(
-    jlf=jointLabelFusion(
+  if (max(myregion) == 0) stop(paste("Target Mask is empty in maskImage call in localJointLabelFusion"))
+  myregionb <- thresholdImage(myregion, 1, Inf)
+  myregionAroundRegion <- iMath(myregionb, "MD", submaskDilation)
+  if (!missing(targetMask)) myregionAroundRegion <- myregionAroundRegion * targetMask
+  croppedImage <- cropImage(targetI, myregionAroundRegion)
+  croppedMask <- cropImage(myregionAroundRegion, myregionAroundRegion)
+  croppedRegion <- cropImage(myregion, myregionAroundRegion)
+  croppedmappedImages <- list()
+  croppedmappedSegs <- list()
+  if (missing(localMaskTransform)) localMaskTransform <- "Similarity"
+  for (k in 1:length(atlasList)) {
+    if (verbose) cat(paste0(k, "..."))
+    initMap <- NA
+    libregion <- maskImage(labelList[[k]], labelList[[k]], level = whichLabels, binarize = FALSE)
+    if (max(libregion) == 0) stop(paste("Lib Mask is empty in maskImage call in localJointLabelFusion: case:", k))
+    if (missing(affIterations)) {
+      initMap <- tryCatch(
+        {
+          antsRegistration(
+            smoothImage(croppedRegion, 1, sigmaInPhysicalCoordinates = FALSE),
+            smoothImage(libregion, 1, sigmaInPhysicalCoordinates = FALSE),
+            typeofTransform = localMaskTransform, affMetric = affMetric,
+            samplingPercentage = 1.0,
+            estimateLearningRateOnce = TRUE,
+            verbose = verbose
+          )$fwdtransforms
+        },
+        error = function(e) {
+        }, finally = {
+        }
+      )
+    } else {
+      initMap <- tryCatch(
+        {
+          antsRegistration(
+            smoothImage(croppedRegion, 1, sigmaInPhysicalCoordinates = FALSE),
+            smoothImage(libregion, 1, sigmaInPhysicalCoordinates = FALSE),
+            typeofTransform = localMaskTransform, affMetric = affMetric,
+            samplingPercentage = 1.0,
+            estimateLearningRateOnce = TRUE,
+            affIterations = affIterations,
+            verbose = verbose
+          )$fwdtransforms
+        },
+        error = function(e) {
+        }, finally = {
+        }
+      )
+    }
+    rr <- readAntsrTransform(initMap)
+    if (!is.na(initMap) & all(!is.na(getAntsrTransformParameters(rr)))) {
+      localReg <- antsRegistration(croppedImage, atlasList[[k]],
+        regIterations = regIterations, synMetric = synMetric, synSampling = synSampling,
+        typeofTransform = typeofTransform, initialTransform = initMap, verbose = verbose
+      )
+      transformedImage <- antsApplyTransforms(
+        croppedImage, atlasList[[k]],
+        localReg$fwdtransforms
+      )
+      transformedLabels <- antsApplyTransforms(croppedImage, labelList[[k]],
+        localReg$fwdtransforms,
+        interpolator = "nearestNeighbor"
+      )
+      croppedmappedImages[[k]] <- transformedImage
+      croppedmappedSegs[[k]] <- transformedLabels
+    }
+  }
+  croppedmappedImages <- croppedmappedImages[!sapply(croppedmappedImages, is.null)]
+  croppedmappedSegs <- croppedmappedSegs[!sapply(croppedmappedSegs, is.null)]
+  return(list(
+    jlf = jointLabelFusion(
       croppedImage,
       croppedMask,
       atlasList = croppedmappedImages,
       labelList = croppedmappedSegs,
       maxLabelPlusOne = maxLabelPlusOne,
-      verbose = verbose, ... ),
-    croppedmappedImages=croppedmappedImages,
-    croppedmappedSegs=croppedmappedSegs
-    )
-  )
+      verbose = verbose, ...
+    ),
+    croppedmappedImages = croppedmappedImages,
+    croppedmappedSegs = croppedmappedSegs
+  ))
 }

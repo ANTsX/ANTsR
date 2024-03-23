@@ -16,42 +16,46 @@
 #' @author Cook PA, Avants B, Kandel BM
 #' @seealso \code{\link{matrixToImages}, \link{getMask}}
 #' @examples
-#'  img <- ri( 1 ) %>% resampleImage( c(32,32))
-#'  imglist <- list()
-#'  nsubj <- 3
-#'  for(ii in 1:nsubj){
-#'    imglist[[ ii ]] <- img
-#'  }
-#'  mask <- getMask(img)
-#'  imgmat <- imageListToMatrix(imglist, mask)
+#' img <- ri(1) %>% resampleImage(c(32, 32))
+#' imglist <- list()
+#' nsubj <- 3
+#' for (ii in 1:nsubj) {
+#'   imglist[[ii]] <- img
+#' }
+#' mask <- getMask(img)
+#' imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
-imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0 ) {
+imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0) {
   # imageList is a list containing images.  Mask is a mask image Returns matrix of
   # dimension (numImages, numVoxelsInMask)
-  if(missing(mask)) {
+  if (missing(mask)) {
     mask <- getMask(imageList[[1]])
   }
 
   numImages <- length(imageList)
-  mask_arr = as.array(mask) > epsilon
+  mask_arr <- as.array(mask) > epsilon
   numVoxels <- length(which(mask_arr))
 
   listfunc <- function(x) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
-      x = resampleImageToTarget( x, mask, 2 ) # gaussian interpolation
+      x <- resampleImageToTarget(x, mask, 2) # gaussian interpolation
     }
     as.numeric(x, mask = mask_arr)
   }
-  dataMatrix = matrix( nrow = numImages, ncol = numVoxels )
-  doSmooth = !any( is.na( sigma ) )
-  for ( i in 1:length( imageList ) )
-    {
-    if ( doSmooth )
-      dataMatrix[ i, ] = listfunc(
-         smoothImage( imageList[[ i ]], sigma,
-           sigmaInPhysicalCoordinates = TRUE ) )
-    else dataMatrix[ i, ] = listfunc( imageList[[ i ]] )
+  dataMatrix <- matrix(nrow = numImages, ncol = numVoxels)
+  doSmooth <- !any(is.na(sigma))
+  for (i in 1:length(imageList))
+  {
+    if (doSmooth) {
+      dataMatrix[i, ] <- listfunc(
+        smoothImage(imageList[[i]], sigma,
+          sigmaInPhysicalCoordinates = TRUE
+        )
+      )
+    } else {
+      dataMatrix[i, ] <- listfunc(imageList[[i]])
     }
-  return( dataMatrix )
+  }
+  return(dataMatrix)
 }

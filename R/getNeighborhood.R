@@ -14,52 +14,57 @@
 #' }
 #' @author Duda JT
 #' @examples
-#' img<-makeImage(c(10,10),rnorm(100))
-#' center <- dim(img)/2
-#' radius <- rep(3,2)
-#' nhlist <- getNeighborhoodAtVoxel(img,center,radius)
-#' kernel <- 1*(rnorm(49)>0)
-#' dim(kernel) <- c(7,7)
-#' randlist <- getNeighborhoodAtVoxel(img,center,kernel)
-#' randlist <- getNeighborhoodAtVoxel(img,center,kernel, 
-#' physical.coordinates = TRUE)
-#' arr = as.array(img)
-#' testthat::expect_error(getNeighborhoodAtVoxel(arr,center,kernel), "class")
-#' testthat::expect_error(getNeighborhoodAtVoxel(img,as.character(center),kernel), 
-#' "center must be")
-#' testthat::expect_error(getNeighborhoodAtVoxel(img,center,c(radius, 3)),
-#' "kernel must have same") 
-#' 
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' center <- dim(img) / 2
+#' radius <- rep(3, 2)
+#' nhlist <- getNeighborhoodAtVoxel(img, center, radius)
+#' kernel <- 1 * (rnorm(49) > 0)
+#' dim(kernel) <- c(7, 7)
+#' randlist <- getNeighborhoodAtVoxel(img, center, kernel)
+#' randlist <- getNeighborhoodAtVoxel(img, center, kernel,
+#'   physical.coordinates = TRUE
+#' )
+#' arr <- as.array(img)
+#' testthat::expect_error(getNeighborhoodAtVoxel(arr, center, kernel), "class")
+#' testthat::expect_error(
+#'   getNeighborhoodAtVoxel(img, as.character(center), kernel),
+#'   "center must be"
+#' )
+#' testthat::expect_error(
+#'   getNeighborhoodAtVoxel(img, center, c(radius, 3)),
+#'   "kernel must have same"
+#' )
+#'
 #' @export
-getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates = FALSE ) {
-  
-  image = check_ants(image)
-  
+getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates = FALSE) {
+  image <- check_ants(image)
+
   if (!is.antsImage(image)) {
     stop("Input must be of class 'antsImage'")
   }
-  
+
   if ((class(center) != "numeric")) {
     stop("center must be of class 'numeric'")
   }
-  
-  radius = dim(kernel)
-  if ( is.null(radius) ) {
-    kernelSize = 2*kernel+1
-    kernel = rep(1, prod(kernelSize))
-    dim(kernel) = kernelSize
-    radius = (kernelSize-1)/2
-  }
-  else {
+
+  radius <- dim(kernel)
+  if (is.null(radius)) {
+    kernelSize <- 2 * kernel + 1
+    kernel <- rep(1, prod(kernelSize))
+    dim(kernel) <- kernelSize
+    radius <- (kernelSize - 1) / 2
+  } else {
     # Check that all sizes are odd
-    radius = (dim(kernel)-1)/2
+    radius <- (dim(kernel) - 1) / 2
   }
-  
-  if ( length(dim(kernel)) != image@dimension ) {
+
+  if (length(dim(kernel)) != image@dimension) {
     stop("kernel must have same number of dimensions as 'image'")
   }
-  return(ANTsRCore::antsImage_GetNeighborhood(image, center, kernel, radius,
-                                              physical.coordinates))
+  return(ANTsRCore::antsImage_GetNeighborhood(
+    image, center, kernel, radius,
+    physical.coordinates
+  ))
 }
 
 
@@ -104,57 +109,64 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #' @author Duda JT
 #' @examples
 #' r16 <- getANTsRData("r16")
-#' r16 <- antsImageRead(r16,2)
-#' mask <- getMask(r16,lowThresh=mean(r16),cleanup=1)
-#' radius <- rep(2,2)
-#' mat <- getNeighborhoodInMask(r16,mask,radius)
-#' mat <- getNeighborhoodInMask(r16,mask,radius,
-#' boundary.condition ="image")
-#' mat <- getNeighborhoodInMask(r16,mask,radius,
-#' boundary.condition ="mean") 
-#' randlist <- getNeighborhoodInMask(r16,mask,radius,
-#' physical.coordinates = TRUE)
-#' arr = as.array(r16)
-#' testthat::expect_error(getNeighborhoodInMask(arr,mask,radius), "antsImage")
-#' testthat::expect_error(getNeighborhoodInMask(r16,as.numeric(mask),radius), 
-#' "mask must be")
-#' testthat::expect_error(getNeighborhoodInMask(r16,mask,as.character(radius)), 
-#' "radius must be")
+#' r16 <- antsImageRead(r16, 2)
+#' mask <- getMask(r16, lowThresh = mean(r16), cleanup = 1)
+#' radius <- rep(2, 2)
+#' mat <- getNeighborhoodInMask(r16, mask, radius)
+#' mat <- getNeighborhoodInMask(r16, mask, radius,
+#'   boundary.condition = "image"
+#' )
+#' mat <- getNeighborhoodInMask(r16, mask, radius,
+#'   boundary.condition = "mean"
+#' )
+#' randlist <- getNeighborhoodInMask(r16, mask, radius,
+#'   physical.coordinates = TRUE
+#' )
+#' arr <- as.array(r16)
+#' testthat::expect_error(getNeighborhoodInMask(arr, mask, radius), "antsImage")
+#' testthat::expect_error(
+#'   getNeighborhoodInMask(r16, as.numeric(mask), radius),
+#'   "mask must be"
+#' )
+#' testthat::expect_error(
+#'   getNeighborhoodInMask(r16, mask, as.character(radius)),
+#'   "radius must be"
+#' )
 #' # testthat::expect_error(getNeighborhoodInMask(r16,mask,c(radius, 3)),
-#' # "Radius must") 
+#' # "Radius must")
 #'
 #' @export
 getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FALSE,
-                                  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE ) {
-  
-  image = check_ants(image)
-  
+                                  boundary.condition = "NA", spatial.info = FALSE, get.gradient = FALSE) {
+  image <- check_ants(image)
+
   if (!is.antsImage(image)) {
     stop("Input must be of class 'antsImage'")
   }
-  
-  mask = check_ants(mask)
+
+  mask <- check_ants(mask)
   if (!is.antsImage(mask)) {
     stop("mask must be of class 'antsImage'")
   }
-  
+
   if ((class(radius) != "numeric")) {
     stop("radius must be of class 'numeric'")
   }
-  
+
   if ((prod(radius * 2 + 1) * sum(as.array(mask))) > (2^31 - 1)) {
     stop("Requested matrix size is too large for Rcpp")
   }
-  
-  boundary = 0
+
+  boundary <- 0
   if (boundary.condition == "image") {
-    boundary = 1
+    boundary <- 1
   }
   if (boundary.condition == "mean") {
-    boundary = 2
+    boundary <- 2
   }
-  
-  return(ANTsRCore::antsImage_GetNeighborhoodMatrix(image, mask, radius, physical.coordinates,
-               boundary, spatial.info, get.gradient ))
-  
+
+  return(ANTsRCore::antsImage_GetNeighborhoodMatrix(
+    image, mask, radius, physical.coordinates,
+    boundary, spatial.info, get.gradient
+  ))
 }

@@ -14,36 +14,38 @@
 #' @seealso \code{\link{antsRegistration}}
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData("r16") , 2 )
-#' axis = 2
-#' asym<-reflectImage( fi, axis, "Affine" )$warpedmovout
-#' asym<-asym-fi
+#' fi <- antsImageRead(getANTsRData("r16"), 2)
+#' axis <- 2
+#' asym <- reflectImage(fi, axis, "Affine")$warpedmovout
+#' asym <- asym - fi
 #'
 #' @export reflectImage
-reflectImage<-function(img1, axis=NA, tx=NA, metric="mattes",
-verbose = TRUE,
-... ) {
-  if ( is.na(axis) ) {
-    axis=( img1@dimension - 1 )
+reflectImage <- function(
+    img1, axis = NA, tx = NA, metric = "mattes",
+    verbose = TRUE,
+    ...) {
+  if (is.na(axis)) {
+    axis <- (img1@dimension - 1)
   }
-  if ( axis > img1@dimension | axis < 0 ) {
-    axis=(img1@dimension-1)
+  if (axis > img1@dimension | axis < 0) {
+    axis <- (img1@dimension - 1)
   }
 
-  rflct<-tempfile(fileext = ".mat")
-  catchout = ANTsRCore::reflectionMatrix(img1, axis, rflct)
+  rflct <- tempfile(fileext = ".mat")
+  catchout <- ANTsRCore::reflectionMatrix(img1, axis, rflct)
 
-  if ( ! all(is.na(tx) ))
-  {
-    rfi <- antsRegistration( img1, img1, typeofTransform = tx,
-                             synMetric = metric,
-                             outprefix = tempfile(),
-                             initialTransform = rflct,
-                             verbose = verbose,
-                             ...)
-    return( rfi )
+  if (!all(is.na(tx))) {
+    rfi <- antsRegistration(img1, img1,
+      typeofTransform = tx,
+      synMetric = metric,
+      outprefix = tempfile(),
+      initialTransform = rflct,
+      verbose = verbose,
+      ...
+    )
+    return(rfi)
   } else {
-    return( antsApplyTransforms( img1, img1, rflct, verbose = verbose)  )
+    return(antsApplyTransforms(img1, img1, rflct, verbose = verbose))
   }
 }
 
@@ -58,17 +60,17 @@ verbose = TRUE,
 #'
 #' @author BB Avants
 #' @export reflectionMatrix
-reflectionMatrix<-function( img1, axis=NA, reflectionMatrixFilename ) {
-  if ( is.na(axis) ) {
-    axis=( img1@dimension - 1 )
+reflectionMatrix <- function(img1, axis = NA, reflectionMatrixFilename) {
+  if (is.na(axis)) {
+    axis <- (img1@dimension - 1)
   }
-  if ( axis > img1@dimension | axis < 0 ) {
-    axis=(img1@dimension-1)
+  if (axis > img1@dimension | axis < 0) {
+    axis <- (img1@dimension - 1)
   }
 
-  if ( missing( reflectionMatrixFilename ) ) {
-    reflectionMatrixFilename<-tempfile(fileext = ".mat")
+  if (missing(reflectionMatrixFilename)) {
+    reflectionMatrixFilename <- tempfile(fileext = ".mat")
   }
-  catchout = ANTsRCore::reflectionMatrix(img1, axis, reflectionMatrixFilename)
-  return( reflectionMatrixFilename )
+  catchout <- ANTsRCore::reflectionMatrix(img1, axis, reflectionMatrixFilename)
+  return(reflectionMatrixFilename)
 }

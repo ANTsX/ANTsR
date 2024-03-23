@@ -24,21 +24,22 @@
 #' @param sampling.percentage percentage of data to sample when calculating metric
 #' @return value of image to image metric
 #' @examples
-#' x =  antsImageRead( getANTsRData( 'r16' ))
-#' y =  antsImageRead( getANTsRData( 'r30' ))
-#' metric = imageSimilarity(x,y,type="MeanSquares")
+#' x <- antsImageRead(getANTsRData("r16"))
+#' y <- antsImageRead(getANTsRData("r30"))
+#' metric <- imageSimilarity(x, y, type = "MeanSquares")
 #' @export
 imageSimilarity <- function(
-  fixed, moving,
-  type=c("MeanSquares", "MattesMutualInformation",
-         "ANTSNeighborhoodCorrelation", "Correlation",
-         "Demons", "JointHistogramMutualInformation"),
-  fixed.mask=NULL, moving.mask=NULL,
-  sampling.strategy="none",
-  sampling.percentage=1, nBins=32, radius=3 ) {
-
-  type = match.arg(type)
-  metric = antsrMetricCreate(
+    fixed, moving,
+    type = c(
+      "MeanSquares", "MattesMutualInformation",
+      "ANTSNeighborhoodCorrelation", "Correlation",
+      "Demons", "JointHistogramMutualInformation"
+    ),
+    fixed.mask = NULL, moving.mask = NULL,
+    sampling.strategy = "none",
+    sampling.percentage = 1, nBins = 32, radius = 3) {
+  type <- match.arg(type)
+  metric <- antsrMetricCreate(
     fixed,
     moving,
     type = type,
@@ -46,9 +47,9 @@ imageSimilarity <- function(
     moving.mask = moving.mask,
     sampling.strategy = sampling.strategy,
     sampling.percentage = sampling.percentage,
-    nBins=nBins,
-    radius=radius
+    nBins = nBins,
+    radius = radius
   )
 
-  return( antsrMetricGetValue(metric) )
+  return(antsrMetricGetValue(metric))
 }

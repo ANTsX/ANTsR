@@ -20,22 +20,25 @@
 #' for voxels corresponding to the mask input\cr
 #' @author Shrinidhi KL Avants BB
 #' @examples
-#'
 #' \dontrun{
 #' #
 #' # cbf <- perfusionregression( mask_img, mat, xideal , nuis )
 #' }
 #'
 #' @export perfusionregression
-perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
-  dorobust = 0, skip = 20,
-  selectionValsForRegweights = NULL, useBayesian = 0) {
+perfusionregression <- function(
+    mask_img, mat, xideal, nuis = NA,
+    dorobust = 0, skip = 20,
+    selectionValsForRegweights = NULL, useBayesian = 0) {
   myusage <- "usage: perfusionregression(mask_img , mat , xideal , nuis ,  dorobust = 0, skip = 20 )"
   if (nargs() == 0) {
     print(myusage)
     return(NULL)
   }
-  if ( !usePkg("robust") ) { print("Need robust package"); return(NULL) }
+  if (!usePkg("robust")) {
+    print("Need robust package")
+    return(NULL)
+  }
   if (missing(mat) | missing(xideal) | missing(nuis)) {
     print("Missing one or more input parameter(s).")
     print(myusage)
@@ -48,13 +51,14 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     cbfform <- formula(mat ~ xideal + nuis)
     rcbfform <- formula(rmat[, vox] ~ xideal)
   }
-  mycbfmodel <- lm(cbfform)  # standard regression
+  mycbfmodel <- lm(cbfform) # standard regression
   cbfi <- antsImageClone(mask_img)
   ## May want a PR for this
   betaideal <- ((mycbfmodel$coeff)[2, ])
-  if (mean(betaideal) < 0)
+  if (mean(betaideal) < 0) {
     betaideal <- (betaideal) * (-1)
-  cbfi[mask_img == 1] <- betaideal  # standard results
+  }
+  cbfi[mask_img == 1] <- betaideal # standard results
   if (dorobust == 0) {
     return(list(cbfi = cbfi, indstozero = NA, regweights = rep(1, length(xideal))))
   }
@@ -67,7 +71,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
   robvals <- mat * 0
   vox <- 1
   ct <- 0
-  visitvals <- (skip:floor((ncol(mat) - 1)/skip)) * skip
+  visitvals <- (skip:floor((ncol(mat) - 1) / skip)) * skip
   if (skip == 1) {
     visitvals <- 1:ncol(mat)
   }
@@ -91,16 +95,18 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     }
     thisct <- thisct + 1
   }
-  if (skip == 1)
+  if (skip == 1) {
     for (i in 1:nrow(robvals)) {
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- robvals[i, ]
-      temp<-smoothImage(temp, 1.5)
+      temp <- smoothImage(temp, 1.5)
       robvals[i, ] <- temp[mask_img == 1]
     }
-  regweights <- (rgw/myct)
-  if (is.na(mean(regweights)))
+  }
+  regweights <- (rgw / myct)
+  if (is.na(mean(regweights))) {
     regweights[] <- 1
+  }
   # check if the robustness selects the blank part of the time series now use the
   # weights in a weighted regression
   indstozero <- which(regweights < (dorobust * max(regweights)))
@@ -113,7 +119,7 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     indstozero <- which(regweights < (0.5 * dorobust * max(regweights)))
     keepinds <- which(regweights > (0.5 * dorobust * max(regweights)))
   }
-  regweights[indstozero] <- 0  # hard thresholding
+  regweights[indstozero] <- 0 # hard thresholding
   # robvals[indstozero,]<-0 # check if this is a good idea ....
   print(regweights)
   if (skip == 1) {
@@ -146,9 +152,10 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     for (i in 1:nrow(smoothcoeffmat)) {
       temp <- antsImageClone(mask_img)
       temp[mask_img == 1] <- smoothcoeffmat[i, ]
-      temp<-smoothImage( temp, 1.5 )
+      temp <- smoothImage(temp, 1.5)
       nmatimgs[[i]] <- getNeighborhoodInMask(temp, mask_img, rep(1, 3),
-        boundary.condition = "mean")
+        boundary.condition = "mean"
+      )
       smoothcoeffmat[i, ] <- temp[mask_img == 1]
     }
     invcov <- solve(cov(t(smoothcoeffmat)))
@@ -156,23 +163,32 @@ perfusionregression <- function(mask_img, mat, xideal, nuis = NA,
     blmX <- model.matrix(mycbfmodel)
     for (v in 1:ncol(mat)) {
       parammat <- nmatimgs[[1]][, v]
-      for (k in 2:length(nmatimgs)) parammat <- cbind(parammat, nmatimgs[[k]][,
-        v])
+      for (k in 2:length(nmatimgs)) {
+        parammat <- cbind(parammat, nmatimgs[[k]][
+          ,
+          v
+        ])
+      }
       pcov <- cov(parammat)
-      locinvcov <- tryCatch(solve(pcov), error = function(e) return(invcov))
-      if (typeof(locinvcov) == "character")
+      locinvcov <- tryCatch(solve(pcov), error = function(e) {
+        return(invcov)
+      })
+      if (typeof(locinvcov) == "character") {
         locinvcov <- invcov
+      }
       prior <- (smoothcoeffmat[, v])
-      if (skip == 1)
+      if (skip == 1) {
         regweights <- robvals[, v]
+      }
       blm <- bayesianlm(blmX, mat[, v], prior, locinvcov * useBayesian, regweights = regweights)
       betaideal[v] <- blm$beta[1]
     }
   }
-  if (mean(betaideal) < 0)
+  if (mean(betaideal) < 0) {
     betaideal <- (betaideal) * (-1)
-  cbfi[mask_img == 1] <- betaideal  # robust results
-  print(paste("Rejected", length(indstozero)/nrow(mat) * 100, " % "))
+  }
+  cbfi[mask_img == 1] <- betaideal # robust results
+  print(paste("Rejected", length(indstozero) / nrow(mat) * 100, " % "))
   return(list(cbfi = cbfi, indstozero = indstozero, regweights = regweights))
 }
 # y = x beta + c => y - c = x beta

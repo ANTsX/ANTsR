@@ -26,38 +26,40 @@
 #' @seealso \code{\link{plotBasicNetwork}}
 #' @examples
 #' \dontrun{
-#'        mnit<-getANTsRData("mni")
-#'        mnit<-antsImageRead(mnit)
-#'        mnia<-getANTsRData("mnia")
-#'        mnia<-antsImageRead(mnia)
-#'        mnit<-thresholdImage( mnit, 1, max(mnit) )
-#'        mnia<-thresholdImage( mnia, 1, 2 )
-#'        brain<-renderSurfaceFunction( surfimg =list( mnit ) ,
-#'           list(mnia), alphasurf=0.1 ,smoothsval = 1.5 )
-#'        }
+#' mnit <- getANTsRData("mni")
+#' mnit <- antsImageRead(mnit)
+#' mnia <- getANTsRData("mnia")
+#' mnia <- antsImageRead(mnia)
+#' mnit <- thresholdImage(mnit, 1, max(mnit))
+#' mnia <- thresholdImage(mnia, 1, 2)
+#' brain <- renderSurfaceFunction(
+#'   surfimg = list(mnit),
+#'   list(mnia), alphasurf = 0.1, smoothsval = 1.5
+#' )
+#' }
 #' @export renderSurfaceFunction
 renderSurfaceFunction <- function(
-  surfimg,
-  funcimg,
-  surfval = 0.5,
-  basefval,
-  offsetfval,
-  smoothsval = 0,
-  smoothfval = 0,
-  blobrender = TRUE,
-  alphasurf = 1,
-  alphafunc = 1,
-  outdir = "./",
-  outfn = NA,
-  mycol,
-  physical = TRUE,
-  movieDuration = 6,
-  zoom = 1.1 ) {
+    surfimg,
+    funcimg,
+    surfval = 0.5,
+    basefval,
+    offsetfval,
+    smoothsval = 0,
+    smoothfval = 0,
+    blobrender = TRUE,
+    alphasurf = 1,
+    alphafunc = 1,
+    outdir = "./",
+    outfn = NA,
+    mycol,
+    physical = TRUE,
+    movieDuration = 6,
+    zoom = 1.1) {
   if (missing(surfimg)) {
     stop("Check usage:  at minimum, you need to call \n renderSurfaceFunction( list(an_ants_image) ) \n ")
   }
-  havemsc3d<-usePkg("misc3d")
-  if ( ! havemsc3d ) {
+  havemsc3d <- usePkg("misc3d")
+  if (!havemsc3d) {
     print("Need misc3d for this")
     return(NA)
   }
@@ -65,19 +67,22 @@ renderSurfaceFunction <- function(
   for (i in 1:length(surfimg)) {
     if (smoothsval[i] > 0) {
       simg <- antsImageClone(surfimg[[i]])
-      simg<-smoothImage(simg, smoothsval[i])
+      simg <- smoothImage(simg, smoothsval[i])
       surfimg[[i]] <- simg
     }
   }
   surfval <- rep(surfval, length.out = length(surfimg))
-  if (length(alphasurf) != length(surfimg))
+  if (length(alphasurf) != length(surfimg)) {
     alphasurf <- rep(alphasurf, length.out = length(surfimg))
+  }
   mylist <- list()
   if (missing(funcimg)) {
     for (i in 1:length(surfimg)) {
       surf <- as.array(surfimg[[i]])
-      brain <- misc3d::contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i],
-        draw = FALSE, smooth = FALSE, material = "metal", depth = 0.6, color = "white")
+      brain <- misc3d::contour3d(surf,
+        level = c(surfval[i]), alpha = alphasurf[i],
+        draw = FALSE, smooth = FALSE, material = "metal", depth = 0.6, color = "white"
+      )
       # each point has an ID, 3 points make a triangle , the points are laid out as c(
       # x1 , y1, z1, x2, y2, z2 , ...  , xn, yn, zn ) indices are just numbers
       # vertices<-c( brain <- subdivision3d(brain)
@@ -94,19 +99,22 @@ renderSurfaceFunction <- function(
   if (smoothfval > 0) {
     for (i in 1:length(funcimg)) {
       fimg <- antsImageClone(funcimg[[i]])
-      fimg<-smoothImage( fimg, smoothfval )
+      fimg <- smoothImage(fimg, smoothfval)
       funcimg[[i]] <- fimg
     }
   }
   if (missing(mycol)) {
     mycol <- rainbow(length(funcimg))
   }
-  if (length(alphafunc) != length(funcimg))
+  if (length(alphafunc) != length(funcimg)) {
     alphafunc <- rep(alphafunc, length.out = length(funcimg))
+  }
   for (i in 1:length(surfimg)) {
     surf <- as.array(surfimg[[i]])
-    brain <- misc3d::contour3d(surf, level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE,
-      smooth = FALSE, material = "metal", depth = 0.6, color = "white")
+    brain <- misc3d::contour3d(surf,
+      level = c(surfval[i]), alpha = alphasurf[i], draw = FALSE,
+      smooth = FALSE, material = "metal", depth = 0.6, color = "white"
+    )
     if (physical == TRUE) {
       brain$v1 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v1)
       brain$v2 <- antsTransformIndexToPhysicalPoint(surfimg[[i]], brain$v2)
@@ -121,12 +129,17 @@ renderSurfaceFunction <- function(
       # just threshold at mean > 0
       usefval <- mean(vals)
       # print(usefval)
-    } else usefval <- basefval
-    if (missing(offsetfval))
+    } else {
+      usefval <- basefval
+    }
+    if (missing(offsetfval)) {
       offsetfval <- sd(vals[vals > usefval])
+    }
     # print(paste(i, usefval, alphafunc[i]))
-    blob <- misc3d::contour3d(func, level = c(usefval), alpha = alphafunc[i], draw = FALSE,
-      smooth = FALSE, material = "metal", depth = 0.6, color = mycol[[i]])
+    blob <- misc3d::contour3d(func,
+      level = c(usefval), alpha = alphafunc[i], draw = FALSE,
+      smooth = FALSE, material = "metal", depth = 0.6, color = mycol[[i]]
+    )
     if (physical == TRUE) {
       blob$v1 <- antsTransformIndexToPhysicalPoint(funcimg[[i]], blob$v1)
       blob$v2 <- antsTransformIndexToPhysicalPoint(funcimg[[i]], blob$v2)
@@ -137,13 +150,16 @@ renderSurfaceFunction <- function(
   # s<-scene3d() s$rgl::par3d$windowRect <- c(0, 0, 500, 500) # make the window large
   # 1.5*s$rgl::par3d$windowRect s$par3d$zoom = 1.1 # larger values make the image
   # smaller
-  misc3d::drawScene.rgl(mylist)  # surface render
-  rgl::par3d(windowRect = c(0, 0, 500, 500))  # make the window large
-  rgl::par3d(zoom = zoom )  # larger values make the image smaller
-  misc3d::drawScene.rgl(mylist)  # surface render
-  if (!is.na(outfn))
-    rgl::movie3d(rgl::spin3d(), duration = movieDuration,
-    dir = outdir, movie = outfn, clean = TRUE )
+  misc3d::drawScene.rgl(mylist) # surface render
+  rgl::par3d(windowRect = c(0, 0, 500, 500)) # make the window large
+  rgl::par3d(zoom = zoom) # larger values make the image smaller
+  misc3d::drawScene.rgl(mylist) # surface render
+  if (!is.na(outfn)) {
+    rgl::movie3d(rgl::spin3d(),
+      duration = movieDuration,
+      dir = outdir, movie = outfn, clean = TRUE
+    )
+  }
   return(mylist)
 }
 
@@ -169,15 +185,23 @@ renderSurfaceFunction <- function(
   facetvector <- c()
   progress <- txtProgressBar(min = 0, max = nrow(data[[1]]), style = 3)
   for (i in 1:nrow(data[[1]])) {
-    v1 <- paste("  vertex", as.character(data[[1]][i, 1]), as.character(data[[1]][i,
-      2]), as.character(data[[1]][i, 3]), sep = " ")
-    v2 <- paste("  vertex", as.character(data[[2]][i, 1]), as.character(data[[2]][i,
-      2]), as.character(data[[2]][i, 3]), sep = " ")
-    v3 <- paste("  vertex", as.character(data[[3]][i, 1]), as.character(data[[3]][i,
-      2]), as.character(data[[3]][i, 3]), sep = " ")
-    facetvector <- c(facetvector, tristart1, tristart2, v1, v2, v3, triend1,
-      triend2)
-    if (i%%50 == 0) {
+    v1 <- paste("  vertex", as.character(data[[1]][i, 1]), as.character(data[[1]][
+      i,
+      2
+    ]), as.character(data[[1]][i, 3]), sep = " ")
+    v2 <- paste("  vertex", as.character(data[[2]][i, 1]), as.character(data[[2]][
+      i,
+      2
+    ]), as.character(data[[2]][i, 3]), sep = " ")
+    v3 <- paste("  vertex", as.character(data[[3]][i, 1]), as.character(data[[3]][
+      i,
+      2
+    ]), as.character(data[[3]][i, 3]), sep = " ")
+    facetvector <- c(
+      facetvector, tristart1, tristart2, v1, v2, v3, triend1,
+      triend2
+    )
+    if (i %% 50 == 0) {
       setTxtProgressBar(progress, i)
     }
   }
@@ -190,8 +214,8 @@ renderSurfaceFunction <- function(
   # Code for 3D function->stl files for molding and casting stl creation functions
   # similar to week 4 files Laura Perovich Oct 2012 Load package misc3d that
   # includes surfaceTriangles function
-  havemsc3d<-usePkg("misc3d")
-  if ( ! havemsc3d ) {
+  havemsc3d <- usePkg("misc3d")
+  if (!havemsc3d) {
     print("Need misc3d for this")
     return(NA)
   }

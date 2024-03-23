@@ -10,41 +10,47 @@
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#'   if (!exists("fn") ) fn<-getANTsRData("pcasl")
-#'    # high motion subject
-#'   asl<-antsImageRead(fn,4)
-#'   tr<-antsGetSpacing(asl)[4]
-#'   aslmean<-getAverageOfTimeSeries( asl )
-#'   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
-#'   omat<-timeseries2matrix(asl, aslmask )
-#'   clustasl<-clusterTimeSeries( omat, krange=4:10 )
-#'   for ( ct in 1:max(clustasl$clusters) )
-#'     {
-#'     sel<-clustasl$clusters != ct
-#'     img<-matrix2timeseries( asl, aslmask, omat[sel,] )
-#'     perf <- aslPerfusion( img, 
-#'       dorobust=0.9, useDenoiser=4, skip=10, useBayesian=0,
-#'       moreaccurate=0, verbose=F, mask=aslmask )
-#'     perfp <- list( sequence="pcasl", m0=perf$m0 )
-#'     cbf <- quantifyCBF( perf$perfusion, perf$mask, perfp )
-#'     }
-#'   }
+#' if (!exists("fn")) fn <- getANTsRData("pcasl")
+#' # high motion subject
+#' asl <- antsImageRead(fn, 4)
+#' tr <- antsGetSpacing(asl)[4]
+#' aslmean <- getAverageOfTimeSeries(asl)
+#' aslmask <- getMask(aslmean, lowThresh = mean(aslmean), cleanup = TRUE)
+#' omat <- timeseries2matrix(asl, aslmask)
+#' clustasl <- clusterTimeSeries(omat, krange = 4:10)
+#' for (ct in 1:max(clustasl$clusters))
+#' {
+#'   sel <- clustasl$clusters != ct
+#'   img <- matrix2timeseries(asl, aslmask, omat[sel, ])
+#'   perf <- aslPerfusion(img,
+#'     dorobust = 0.9, useDenoiser = 4, skip = 10, useBayesian = 0,
+#'     moreaccurate = 0, verbose = F, mask = aslmask
+#'   )
+#'   perfp <- list(sequence = "pcasl", m0 = perf$m0)
+#'   cbf <- quantifyCBF(perf$perfusion, perf$mask, perfp)
+#' }
+#' }
 #'
 #' @export clusterTimeSeries
-clusterTimeSeries <- function(mat, krange = 2:10,
-  nsvddims = NA, criterion = "asw") {
+clusterTimeSeries <- function(
+    mat, krange = 2:10,
+    nsvddims = NA, criterion = "asw") {
   if (nargs() == 0) {
     print(args(clusterTimeSeries))
     return(1)
   }
-  if ( !usePkg("fpc") ) { print("Need fpc package"); return(NULL) }
-  if (is.na(nsvddims))
+  if (!usePkg("fpc")) {
+    print("Need fpc package")
+    return(NULL)
+  }
+  if (is.na(nsvddims)) {
     nsvddims <- (max(krange) * 2)
+  }
   # mat<-timeseries2matrix( img, mask )
-  if (nsvddims > nrow(mat))
-    nsvddims <- nrow(mat)/2
+  if (nsvddims > nrow(mat)) {
+    nsvddims <- nrow(mat) / 2
+  }
   matsvd <- svd(mat, nu = nsvddims, nv = 0)
   pk <- fpc::pamk(mat, krange = krange, criterion = criterion)
   clusters <- pk$pamobject$clustering

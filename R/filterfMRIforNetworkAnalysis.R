@@ -39,28 +39,27 @@
 #' 1 -- Failure
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#' if (!exists("fn") ) fn<-getANTsRData("pcasl")
-#' img<-antsImageRead( fn )
-#' mask<-getMask( getAverageOfTimeSeries( img )  )
-#' fmat<-timeseries2matrix( img, mask )
-#' myres<-filterfMRIforNetworkAnalysis(fmat,tr=4,0.01,0.1,cbfnetwork="BOLD", mask = mask )
+#' if (!exists("fn")) fn <- getANTsRData("pcasl")
+#' img <- antsImageRead(fn)
+#' mask <- getMask(getAverageOfTimeSeries(img))
+#' fmat <- timeseries2matrix(img, mask)
+#' myres <- filterfMRIforNetworkAnalysis(fmat, tr = 4, 0.01, 0.1, cbfnetwork = "BOLD", mask = mask)
 #' }
 #'
 #' @export filterfMRIforNetworkAnalysis
 filterfMRIforNetworkAnalysis <- function(
-  aslmat,
-  tr, freqLo = 0.01, freqHi = 0.1,
-  cbfnetwork = "ASLCBF",
-  mask = NULL,
-  labels = NULL,
-  graphdensity = 0.5,
-  seg = NULL,
-  useglasso = NA,
-  nuisancein=NA,
-  usesvd = FALSE ,
-  robustcorr = FALSE  ) {
+    aslmat,
+    tr, freqLo = 0.01, freqHi = 0.1,
+    cbfnetwork = "ASLCBF",
+    mask = NULL,
+    labels = NULL,
+    graphdensity = 0.5,
+    seg = NULL,
+    useglasso = NA,
+    nuisancein = NA,
+    usesvd = FALSE,
+    robustcorr = FALSE) {
   pixtype <- "float"
   myusage <- "usage: filterfMRIforNetworkAnalysis( timeSeriesMatrix, tr, freqLo=0.01, freqHi = 0.1, cbfnetwork=c(\"BOLD,ASLCBF,ASLBOLD\") , mask = NULL,  graphdensity = 0.5 )"
   if (nargs() == 0) {
@@ -68,7 +67,7 @@ filterfMRIforNetworkAnalysis <- function(
     return(NULL)
   }
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask <- check_ants(mask)
   }
   if (!is.numeric(tr) | missing(tr)) {
     print("TR parameter is missing or not numeric type - is typically between 2 and 4 , depending on your fMRI acquisition")
@@ -89,16 +88,19 @@ filterfMRIforNetworkAnalysis <- function(
   freqHi <- freqHi * tr
   # network analysis
   # wb <- (mask > 0)  # whole brain
-  if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }
+  if (!usePkg("magic")) {
+    print("Need magic package")
+    return(NULL)
+  }
   leftinds <- magic::shift(c(1:nrow(aslmat)), 1)
   rightinds <- magic::shift(c(1:nrow(aslmat)), -1)
   oaslmat <- aslmat
   if (cbfnetwork == "ASLCBF") {
     # surround subtraction for cbf networks
     aslmat <- oaslmat - 0.5 * (oaslmat[leftinds, ] + oaslmat[rightinds, ])
-    taginds <- c(1:(nrow(aslmat)/2)) * 2
+    taginds <- c(1:(nrow(aslmat) / 2)) * 2
     controlinds <- taginds - 1
-    aslmat[controlinds, ] <- aslmat[controlinds, ] * (-1)  # ok! done w/asl specific stuff
+    aslmat[controlinds, ] <- aslmat[controlinds, ] * (-1) # ok! done w/asl specific stuff
     # plot( apply( aslmat[controlinds,],1, mean) , type='l') # should be (+) everywhere
   }
   if (cbfnetwork == "ASLBOLD") {
@@ -106,11 +108,11 @@ filterfMRIforNetworkAnalysis <- function(
     aslmat <- oaslmat + 0.5 * (oaslmat[leftinds, ] + oaslmat[rightinds, ])
     # plot( apply( aslmat[controlinds,],1, mean) , type='l')
   }
-  voxLo <- round((1/freqLo))  # remove anything below this (high-pass)
-  voxHi <- round((1/freqHi))  # keep anything above this
-  myTimeSeries <- ts(aslmat, frequency = 1/tr)
-  filteredTimeSeries<-frequencyFilterfMRI( aslmat, tr=tr, freqLo=freqLo, freqHi=freqHi, opt='trig')
-  vox <- round(ncol(filteredTimeSeries) * 0.5)  #  a test voxel
+  voxLo <- round((1 / freqLo)) # remove anything below this (high-pass)
+  voxHi <- round((1 / freqHi)) # keep anything above this
+  myTimeSeries <- ts(aslmat, frequency = 1 / tr)
+  filteredTimeSeries <- frequencyFilterfMRI(aslmat, tr = tr, freqLo = freqLo, freqHi = freqHi, opt = "trig")
+  vox <- round(ncol(filteredTimeSeries) * 0.5) #  a test voxel
   spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, log = "n")
   temporalvar <- apply(filteredTimeSeries, 2, var)
   wh <- which(temporalvar == 0)
@@ -123,11 +125,15 @@ filterfMRIforNetworkAnalysis <- function(
     oulabels <- sort(unique(labels[labels > 0]))
     whvec <- (mask == 1)
     ulabels <- sort(unique(labels[whvec]))
-    if (ulabels[1] == 0)
+    if (ulabels[1] == 0) {
       ulabels <- ulabels[2:length(ulabels)]
+    }
     labelvec <- labels[whvec]
-    if (!is.null(seg))
-      segvec <- seg[whvec] else segvec <- NA
+    if (!is.null(seg)) {
+      segvec <- seg[whvec]
+    } else {
+      segvec <- NA
+    }
     labmat <- matrix(data = rep(NA, length(oulabels) * nrow(filteredTimeSeries)), nrow = length(oulabels))
     nrowts <- nrow(filteredTimeSeries)
     for (mylab in ulabels) {
@@ -142,11 +148,10 @@ filterfMRIforNetworkAnalysis <- function(
 
       if (length(c(submat)) > nrowts) {
         myavg <- apply(submat, MARGIN = 1, FUN = mean)
-        if ( usesvd )
-            {
-                eanat<-svd(submat, nu = 1, nv = 0 )
-                myavg<-eanat$u[,1]
-            }
+        if (usesvd) {
+          eanat <- svd(submat, nu = 1, nv = 0)
+          myavg <- eanat$u[, 1]
+        }
       } else {
         myavg <- submat
       }
@@ -158,56 +163,60 @@ filterfMRIforNetworkAnalysis <- function(
       }
       # if ( length(myavg) > 0 ) labmat[ mylab, ]<-myavg else labmat[ mylab, ]<-NA
     }
-    nbrainregions<-length(oulabels)
-    tlabmat<-t(labmat)
+    nbrainregions <- length(oulabels)
+    tlabmat <- t(labmat)
     ocormat <- cor(tlabmat, tlabmat)
-    rcormat<-ocormat
-    if ( robustcorr )
-    for ( i in 1:nrow(rcormat) ) {
-        for ( j in i:nrow(rcormat) ) {
-            if ( i != j ) {
-            a<-scale(tlabmat[,i])
-            b<-scale(tlabmat[,j])
-            rcormat[i,j]<-rcormat[j,i]<-as.numeric(
-              coefficients(MASS::rlm(a~b)))[2]
-            }
+    rcormat <- ocormat
+    if (robustcorr) {
+      for (i in 1:nrow(rcormat)) {
+        for (j in i:nrow(rcormat)) {
+          if (i != j) {
+            a <- scale(tlabmat[, i])
+            b <- scale(tlabmat[, j])
+            rcormat[i, j] <- rcormat[j, i] <- as.numeric(
+              coefficients(MASS::rlm(a ~ b))
+            )[2]
+          }
+        }
+      }
+    }
+    if (!is.na(nuisancein)) {
+      tlabmat <- cbind(tlabmat, nuisancein)
+      ocormat <- cor(tlabmat, tlabmat)
+    }
+    cormat <- ocormat
+    pcormat <- solve(cormat + (diag(ncol(cormat)) + 0.01))
+    diagmag <- sqrt(diag(pcormat) %o% diag(pcormat)) * (-1)
+    pcormat <- pcormat / diagmag
+    diag(pcormat) <- 1
+    gcormat <- pcormat
+    if (!is.na(useglasso)) {
+      if (useglasso > 0) # treat useglasso as rho
+        {
+          gcormat <- glasso::glasso(cormat, useglasso)$wi
+          diagmag <- sqrt(diag(gcormat) %o% diag(gcormat)) * (-1)
+          gcormat <- gcormat / diagmag
+          myinds <- (abs(gcormat) < 1.e-4)
+          gcormat[myinds] <- 0
+          diag(gcormat) <- 1
+          rgdens <- (0.5 * sum(gcormat > 0 & gcormat < 1) / (0.5 * ncol(gcormat) * (ncol(gcormat) - 1)))
         }
     }
-    if ( ! is.na( nuisancein ) )
-        {
-        tlabmat<-cbind( tlabmat, nuisancein )
-        ocormat<-cor( tlabmat, tlabmat )
-        }
-    cormat<-ocormat
-    pcormat<-solve( cormat+(diag(ncol(cormat))+0.01) )
-    diagmag<-sqrt( diag(pcormat) %o% diag(pcormat) )*(-1)
-    pcormat<-pcormat/diagmag
-    diag(pcormat)<-1
-    gcormat<-pcormat
-    if ( !is.na(useglasso) )
-    if ( useglasso > 0 ) # treat useglasso as rho
-      {
-      gcormat<-glasso::glasso( cormat, useglasso )$wi
-      diagmag<-sqrt( diag(gcormat) %o% diag(gcormat) )*(-1)
-      gcormat<-gcormat/diagmag
-      myinds<-( abs( gcormat ) < 1.e-4 )
-      gcormat[ myinds ]<-0
-      diag(gcormat)<-1
-      rgdens<-( 0.5*sum(gcormat>0&gcormat<1)/ (0.5*ncol(gcormat)*(ncol(gcormat)-1)) )
-      }
-    if ( ! is.na( nuisancein ) ) pcormat<-pcormat[1:nbrainregions,1:nbrainregions]
-    if ( ! is.na( nuisancein ) ) gcormat<-pcormat[1:nbrainregions,1:nbrainregions]
-    if ( ! is.na( nuisancein ) ) cormat<-cormat[1:nbrainregions,1:nbrainregions]
-    if ( ! is.na( nuisancein ) ) ocormat<-ocormat[1:nbrainregions,1:nbrainregions]
+    if (!is.na(nuisancein)) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
+    if (!is.na(nuisancein)) gcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
+    if (!is.na(nuisancein)) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
+    if (!is.na(nuisancein)) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
-    L = list(filteredTimeSeries = filteredTimeSeries, 
-             temporalvar = temporalvar, network = labmat,
-             graph = gmet, corrmat = ocormat, partialcorrmat=pcormat, glassocormat=gcormat,rcormat=rcormat )
-    L$mask = mask
-    return(L )
+    L <- list(
+      filteredTimeSeries = filteredTimeSeries,
+      temporalvar = temporalvar, network = labmat,
+      graph = gmet, corrmat = ocormat, partialcorrmat = pcormat, glassocormat = gcormat, rcormat = rcormat
+    )
+    L$mask <- mask
+    return(L)
   } else {
-    L = list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar)
-    L$mask = mask
+    L <- list(filteredTimeSeries = filteredTimeSeries, mask = mask, temporalvar = temporalvar)
+    L$mask <- mask
     return(L)
   }
 }

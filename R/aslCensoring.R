@@ -44,21 +44,21 @@
 #' set.seed(1)
 #' nvox <- 5 * 5 * 5 * 30
 #' dims <- c(5, 5, 5, 30)
-#' voxvals <- array(rnorm(nvox) + 500, dim=dims)
+#' voxvals <- array(rnorm(nvox) + 500, dim = dims)
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
 #' asl <- makeImage(dims, voxvals)
 #' censored <- aslCensoring(asl)
 #' testthat::expect_equal(mean(censored$asl.inlier), 248.071606610979)
 #' testthat::expect_equal(censored$which.outliers, c(5L, 6L))
-#' 
+#'
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.
 #' @export aslCensoring
 
-aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
-                         reject.pairs=FALSE, ...) {
+aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
+                         reject.pairs = FALSE, ...) {
   # Supporting functions for censoring data: robSelection and scor.
-  robSelection <- function(mat, xideal, mask, nuis=NA,  robthresh=0.95, skip=20) {
+  robSelection <- function(mat, xideal, mask, nuis = NA, robthresh = 0.95, skip = 20) {
     cbfform <- formula(mat ~ xideal)
     rcbfform <- formula(mat[, vox] ~ xideal)
     if (!all(is.na(nuis))) {
@@ -71,13 +71,13 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
       cbfform <- formula(mat ~ xideal + nuis)
       rcbfform <- formula(rmat[, vox] ~ xideal)
     }
-    mycbfmodel <- lm(cbfform)  # standard regression
+    mycbfmodel <- lm(cbfform) # standard regression
     betaideal <- ((mycbfmodel$coeff)[2, ])
     if (mean(betaideal) < 0) {
       betaideal <- (betaideal) * (-1)
     }
     cbfi <- antsImageClone(mask)
-    cbfi[mask == 1] <- betaideal  # standard results
+    cbfi[mask == 1] <- betaideal # standard results
     indstozero <- NULL
     ctl <- robustbase::lmrob.control("KS2011", max.it = 1000)
     regweights <- rep(0, nrow(mat))
@@ -85,7 +85,7 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     robvals <- mat * 0
     vox <- 1
     ct <- 0
-    visitvals <- (skip:floor((ncol(mat) - 1)/skip)) * skip
+    visitvals <- (skip:floor((ncol(mat) - 1) / skip)) * skip
     if (skip == 1) {
       visitvals <- 1:ncol(mat)
     }
@@ -102,7 +102,7 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
       }
       thisct <- thisct + 1
     }
-    regweights <- (rgw/myct)
+    regweights <- (rgw / myct)
     if (is.na(mean(regweights))) {
       regweights[] <- 1
     }
@@ -118,7 +118,7 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
       indstozero <- which(regweights < (0.5 * robthresh * max(regweights)))
       keepinds <- which(regweights > (0.5 * robthresh * max(regweights)))
     }
-    regweights[indstozero] <- 0  # hard thresholding
+    regweights[indstozero] <- 0 # hard thresholding
     if (robthresh < 1 & robthresh > 0) {
       mycbfmodel <- lm(cbfform, weights = regweights)
     }
@@ -129,22 +129,24 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     indstozero
   }
 
-  aslOutlierRejection <- function(asl, mask = NULL, centralTendency = median,
-    sigma.mean = 2.5, sigma.sd = 2) {
+  aslOutlierRejection <- function(
+      asl, mask = NULL, centralTendency = median,
+      sigma.mean = 2.5, sigma.sd = 2) {
     if (is.null(mask)) {
       avg <- getAverageOfTimeSeries(asl)
-      avg<-n3BiasFieldCorrection( avg, 2 )
-      avg<-n3BiasFieldCorrection( avg, 2 )
+      avg <- n3BiasFieldCorrection(avg, 2)
+      avg <- n3BiasFieldCorrection(avg, 2)
       mask <- getMask(avg, mean(avg), Inf)
     }
     nvox <- sum(mask[mask > 0])
-    npairs <- dim(asl)[4]/2
+    npairs <- dim(asl)[4] / 2
     tc <- rep(c(1, 2), npairs)
     aslmat <- timeseries2matrix(asl, mask)
-    diffs <- matrix(rep(NA, nrow(aslmat)/2 * ncol(aslmat)),
-                    nrow=nrow(aslmat)/2)
+    diffs <- matrix(rep(NA, nrow(aslmat) / 2 * ncol(aslmat)),
+      nrow = nrow(aslmat) / 2
+    )
     for (ii in 1:nrow(diffs)) {
-      diffs[ii, ] <- aslmat[ii*2, ] - aslmat[ii*2-1, ]
+      diffs[ii, ] <- aslmat[ii * 2, ] - aslmat[ii * 2 - 1, ]
     }
 
     if (mean(diffs) < 0) {
@@ -167,20 +169,21 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     which.outliers
   }
 
-  scor <- function(asl){
+  scor <- function(asl) {
     npairs <- dim(asl)[1]
     indices <- 1:npairs
     meancbf <- apply(asl, 1, mean)
     var.tot <- var(meancbf)
     var.prev <- var.tot + 1
-    while(var.tot < var.prev){
+    while (var.tot < var.prev) {
       print(paste(var.prev, var.tot))
       var.prev <- var.tot
       meancbf.prev <- meancbf
       cc <- rep(NA, npairs)
-      for(timepoint in 1:npairs){
-        if (is.na(indices[timepoint]))
+      for (timepoint in 1:npairs) {
+        if (is.na(indices[timepoint])) {
           next
+        }
         tmp <- asl[, timepoint]
         cc[timepoint] <- cor(meancbf, tmp)
       }
@@ -193,7 +196,7 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     which(indices.out == 0)
   }
 
-  if (is.null(mask)){
+  if (is.null(mask)) {
     myar <- apply(as.array(asl), c(1, 2, 3), mean)
     img <- makeImage(dim(myar), myar)
     antsSetSpacing(img, antsGetSpacing(asl)[1:3])
@@ -201,21 +204,23 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     antsSetDirection(img, antsGetDirection(asl)[1:3, 1:3])
     mask <- getMask(img)
   } else {
-    mask = check_ants(mask)
+    mask <- check_ants(mask)
   }
   ts <- timeseries2matrix(asl, mask)
 
-  if (method == 'robust') {
+  if (method == "robust") {
     if (!usePkg("robust")) {
       print("Need robust package")
       return(NULL)
     }
-    xideal <- (rep(c(1, 0),
-      dim(ts)[1])[1:dim(ts)[1]] - 0.5)  # control minus tag
+    xideal <- (rep(
+      c(1, 0),
+      dim(ts)[1]
+    )[1:dim(ts)[1]] - 0.5) # control minus tag
     which.outliers <- robSelection(ts, xideal, mask, nuis, ...)
-  } else if (method == 'outlier') {
+  } else if (method == "outlier") {
     which.outliers <- aslOutlierRejection(asl, mask, ...)
-  } else if (method == 'scor') {
+  } else if (method == "scor") {
     which.outliers <- scor(ts)
   }
 
@@ -224,8 +229,10 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     evens <- which.outliers[which((which.outliers %% 2) == 0)]
     odds.additional <- odds + 1
     evens.additional <- evens - 1
-    which.outliers <- sort(unique(c(which.outliers,
-                                    odds.additional, evens.additional)))
+    which.outliers <- sort(unique(c(
+      which.outliers,
+      odds.additional, evens.additional
+    )))
   }
 
   if (length(which.outliers) > 0) {
@@ -234,5 +241,5 @@ aslCensoring <- function(asl, mask=NULL, nuis=NA, method='outlier',
     aslmat.inlier <- ts
   }
   asl.inlier <- matrix2timeseries(asl, mask, aslmat.inlier)
-  list(which.outliers=which.outliers, asl.inlier=asl.inlier)
+  list(which.outliers = which.outliers, asl.inlier = asl.inlier)
 }

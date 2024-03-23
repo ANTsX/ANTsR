@@ -1,4 +1,3 @@
-
 #' Get Pixels
 #'
 #' Get pixel values from an 'antsImage'.
@@ -11,8 +10,8 @@
 #' @param l indices in forth dimension
 #' @return array of pixel values
 #' @examples
-#' img<-makeImage(c(10,10),rnorm(100))
-#' pixel<-getPixels(img,i=c(1,2),j=1)
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' pixel <- getPixels(img, i = c(1, 2), j = 1)
 #' @export
 getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   lst <- NULL
@@ -25,7 +24,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
@@ -35,21 +34,21 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   # should fix the subsetting
-  dx = dim(x)
-  ndim = length(dx)
+  dx <- dim(x)
+  ndim <- length(dx)
   if (ndim > 2) {
     if (missing(k)) {
-      k = seq(dx[3])
+      k <- seq(dx[3])
     }
   }
   if (ndim > 3) {
     if (missing(l)) {
-      l = seq(dx[4])
+      l <- seq(dx[4])
     }
-  } 
-  
+  }
+
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
@@ -59,7 +58,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
@@ -82,45 +81,45 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 #' For \code{set} methods, 0 to indicate success.
 #' @export
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
+#' img <- makeImage(c(5, 5), rnorm(25))
 #' antsGetSpacing(img)
 #' antsSetSpacing(img, c(2.0, 2.0))
 #' antsGetOrigin(img)
 #' antsSetOrigin(img, c(0.5, 0.5))
-#' testthat::expect_error(antsGetSpacing(as.array(img) ) )
-#' testthat::expect_error(antsSetSpacing(as.array(img), c(2,2) ), "class" )
-#' testthat::expect_error(antsSetSpacing(img, c("2",2) ), "numeric" )
-#' testthat::expect_error(antsSetSpacing(img, c(3,3,3) ), "dimensions" )
-#' 
-#' testthat::expect_error(antsGetOrigin(as.array(img) ) )
-#' testthat::expect_error(antsSetOrigin(as.array(img), c(0.5, 0.5) ) )
-#' testthat::expect_error(antsSetOrigin(img, c("0.5", 0.5) ) )
-#' testthat::expect_error(antsSetOrigin(img, c(0.5, 0.5, 0.5) ) )
+#' testthat::expect_error(antsGetSpacing(as.array(img)))
+#' testthat::expect_error(antsSetSpacing(as.array(img), c(2, 2)), "class")
+#' testthat::expect_error(antsSetSpacing(img, c("2", 2)), "numeric")
+#' testthat::expect_error(antsSetSpacing(img, c(3, 3, 3)), "dimensions")
+#'
+#' testthat::expect_error(antsGetOrigin(as.array(img)))
+#' testthat::expect_error(antsSetOrigin(as.array(img), c(0.5, 0.5)))
+#' testthat::expect_error(antsSetOrigin(img, c("0.5", 0.5)))
+#' testthat::expect_error(antsSetOrigin(img, c(0.5, 0.5, 0.5)))
 antsGetSpacing <- function(x) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
-  
+
   return(ANTsRCore::antsImage_GetSpacing(x))
 }
 #' @rdname antsImageGetSet
 #' @param spacing numeric vector of length \code{d}.
 #' @export
 antsSetSpacing <- function(x, spacing) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
-  
+
   if ((class(spacing) != "numeric") && (class(spacing) != "array")) {
     stop("spacing must be of class 'numeric'")
   }
-  
+
   if (length(spacing) != length(dim(x))) {
     stop("spacing must be of same dimensions as image")
   }
-  
+
   return(ANTsRCore::antsImage_SetSpacing(x, spacing))
 }
 
@@ -128,7 +127,7 @@ antsSetSpacing <- function(x, spacing) {
 #' @usage antsGetOrigin(x)
 #' @export
 antsGetOrigin <- function(x) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
@@ -139,18 +138,18 @@ antsGetOrigin <- function(x) {
 #' @param origin numeric vector of length \code{d}.
 #' @export
 antsSetOrigin <- function(x, origin) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
   if (!is.numeric(origin) && !is.array(origin)) {
     stop("spacing must be of class 'numeric' or 'array'")
   }
-  
+
   if (length(origin) != length(dim(x))) {
     stop("spacing must be of same dimensions as image")
   }
-  
+
   # if (res != 0) {
   #   warning("Setting origin did not have result 0, results may be wrong")
   # }
@@ -161,12 +160,11 @@ antsSetOrigin <- function(x, origin) {
 #' @usage antsGetDirection(x)
 #' @export
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
+#' img <- makeImage(c(5, 5), rnorm(25))
 #' antsGetDirection(img)
-#' testthat::expect_error(antsGetDirection(as.array(img) ) )
-
+#' testthat::expect_error(antsGetDirection(as.array(img)))
 antsGetDirection <- function(x) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
@@ -178,15 +176,15 @@ antsGetDirection <- function(x) {
 #' @param direction matrix of size \code{d * d}.
 #' @export
 #' @examples
-#' outimg <- makeImage(c(5,5), rnorm(25))
+#' outimg <- makeImage(c(5, 5), rnorm(25))
 #' antsGetDirection(outimg)
-#' direct = antsGetDirection(outimg)
+#' direct <- antsGetDirection(outimg)
 #' antsSetDirection(outimg, direct)
-#' testthat::expect_error(antsSetDirection(as.array(outimg), direct) ) 
-#' testthat::expect_error(antsSetDirection(outimg, as.numeric(direct)) ) 
-#' testthat::expect_error(antsSetDirection(outimg, diag(length(dim(outimg))+1) ))
+#' testthat::expect_error(antsSetDirection(as.array(outimg), direct))
+#' testthat::expect_error(antsSetDirection(outimg, as.numeric(direct)))
+#' testthat::expect_error(antsSetDirection(outimg, diag(length(dim(outimg)) + 1)))
 antsSetDirection <- function(x, direction) {
-  x = check_ants(x)
+  x <- check_ants(x)
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
@@ -213,9 +211,8 @@ antsSetDirection <- function(x, direction) {
 #' @param value the value to place at this location
 #' @return array of pixel values
 #' @examples
-#' img<-makeImage(c(10,10),rnorm(100))
-#' antsSetPixels(img,2,3,value=Inf)
-#'
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' antsSetPixels(img, 2, 3, value = Inf)
 #'
 #' @export
 antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
@@ -229,7 +226,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
@@ -239,7 +236,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
@@ -249,7 +246,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
       stop("indices must be of class 'integer' or 'numeric'")
     }
   }
-  
+
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
@@ -260,9 +257,9 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
     }
   }
   returnList <- (ANTsRCore::antsImage_SetPixels(x, lst, value))
-  
-  if ( returnList$flag > 0 ) {
-    warning( returnList$error )
+
+  if (returnList$flag > 0) {
+    warning(returnList$error)
   }
-  return( returnList$image )
+  return(returnList$image)
 }

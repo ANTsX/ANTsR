@@ -1,8 +1,8 @@
 #' Split data for testing and training
-#' 
+#'
 #' Split data into testing and training sets for cross-validation.
-#' 
-#' 
+#'
+#'
 #' @param data.source Data frame or matrix of input data to be split.
 #' @param ratio If greater than one, number of folds to split data into.
 #' Otherwise, proportion of rows in training data.  See \code{Value}.
@@ -16,14 +16,13 @@
 #' the input data in the testing set and the rest in the training set.
 #' @author Kandel BM and Avants B
 #' @examples
-#' 
 #' \dontrun{
-#'   n <- 30
-#'   ratio <- 2/3
-#'   data.source <- data.frame(value=1:n)
-#'   out <- splitData(data.source, ratio)
+#' n <- 30
+#' ratio <- 2 / 3
+#' data.source <- data.frame(value = 1:n)
+#' out <- splitData(data.source, ratio)
 #' }
-#' 
+#'
 #' @export splitData
 splitData <- function(data.source, ratio, return.rows = FALSE) {
   if (ratio > 1) {
@@ -34,7 +33,7 @@ splitData <- function(data.source, ratio, return.rows = FALSE) {
   nsubjects <- dim(data.source)[1]
   if (split.cv) {
     mylist <- list()
-    fold.ids <- sample(nsubjects)%%round(ratio) + 1
+    fold.ids <- sample(nsubjects) %% round(ratio) + 1
     for (i in sort(unique(fold.ids))) {
       subjects.in <- (1:nsubjects)[fold.ids != i]
       subjects.out <- (1:nsubjects)[fold.ids == i]
@@ -42,8 +41,10 @@ splitData <- function(data.source, ratio, return.rows = FALSE) {
       data.out <- data.source[subjects.out, ]
       mylist[[paste("fold", i, sep = "")]] <- list(data.in = data.in, data.out = data.out)
       if (return.rows) {
-        mylist[[paste("fold", i, sep = "")]] <- list(data.in = data.in, data.out = data.out, 
-          rows.in = subjects.in, rows.out = subjects.out)
+        mylist[[paste("fold", i, sep = "")]] <- list(
+          data.in = data.in, data.out = data.out,
+          rows.in = subjects.in, rows.out = subjects.out
+        )
       }
     }
     return(mylist)
@@ -52,9 +53,12 @@ splitData <- function(data.source, ratio, return.rows = FALSE) {
     data.in <- data.source[subjects.in, ]
     data.out <- data.source[-subjects.in, ]
     mylist <- list(data.in = data.in, data.out = data.out)
-    if (return.rows) 
-      mylist <- list(data.in = data.in, data.out = data.out, rows.in = subjects.in, 
-        rows.out = (1:nsubjects)[-subjects.in])
+    if (return.rows) {
+      mylist <- list(
+        data.in = data.in, data.out = data.out, rows.in = subjects.in,
+        rows.out = (1:nsubjects)[-subjects.in]
+      )
+    }
     return(mylist)
   }
-} 
+}

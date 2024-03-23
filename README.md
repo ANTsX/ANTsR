@@ -13,7 +13,7 @@
 
 <br />
 
-ANTsR is an R package which wraps the well-established C++ biomedical image processing library <i>[ANTs](https://github.com/ANTsX/ANTs)</i>. It includes efficient reading and writing of medical images, algorithms for registration, segmentation, and statistical learning, as well as functions to create publication-ready visualizations.
+ANTsR is an R package which wraps the well-established C++ biomedical image processing library [ANTs](https://github.com/ANTsX/ANTs). It includes efficient reading and writing of medical images, algorithms for registration, segmentation, and statistical learning, as well as functions to create publication-ready visualizations.
 
 If you are looking to train deep learning models on your medical images in R, you might be interested in [ANTsRNet](https://github.com/ANTsX/ANTsPy) which provides pre-trained models and utilities for training deep learning models on medical images.
 

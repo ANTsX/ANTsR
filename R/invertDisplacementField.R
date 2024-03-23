@@ -15,23 +15,22 @@
 #' @export invertDisplacementField
 
 invertDisplacementField <- function(
-  displacementField,
-  inverseFieldInitialEstimate,
-  maximumNumberOfIterations = 20,
-  meanErrorToleranceThreshold = 0.001,
-  maxErrorToleranceThreshold = 0.1,
-  enforceBoundaryCondition = TRUE
-  ) {
-
+    displacementField,
+    inverseFieldInitialEstimate,
+    maximumNumberOfIterations = 20,
+    meanErrorToleranceThreshold = 0.001,
+    maxErrorToleranceThreshold = 0.1,
+    enforceBoundaryCondition = TRUE) {
   dimensionality <- displacementField@dimension
 
   inverseField <- ANTsRCore::invertDisplacementField(
     dimensionality,
     displacementField,
     inverseFieldInitialEstimate,
-    as.numeric( maximumNumberOfIterations ),
-    as.numeric( meanErrorToleranceThreshold ),
-    as.numeric( maxErrorToleranceThreshold ),
-    as.numeric( enforceBoundaryCondition ))
-  return( inverseField )
+    as.numeric(maximumNumberOfIterations),
+    as.numeric(meanErrorToleranceThreshold),
+    as.numeric(maxErrorToleranceThreshold),
+    as.numeric(enforceBoundaryCondition)
+  )
+  return(inverseField)
 }

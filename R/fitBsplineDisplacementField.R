@@ -49,122 +49,105 @@
 #'
 #' # Perform 2-D fitting
 #'
-#' points <- matrix( data = c( -50, -50 ), nrow = 1, byrow = TRUE )
-#' deltas <- matrix( data = c( 10, 10 ), nrow = 1, byrow = TRUE )
+#' points <- matrix(data = c(-50, -50), nrow = 1, byrow = TRUE)
+#' deltas <- matrix(data = c(10, 10), nrow = 1, byrow = TRUE)
 #'
 #' bsplineField <- fitBsplineDisplacementField(
 #'   displacementOrigins = points, displacements = deltas,
-#'   origin = c( 0.0, 0.0 ), spacing = c( 1.0, 1.0 ), size = c( 100, 100 ),
-#'   direction = matrix( data = c( -1, 0, 0, -1 ), nrow = 2, byrow = TRUE ),
-#'   numberOfFittingLevels = 4, meshSize = c( 1, 1 ) )
+#'   origin = c(0.0, 0.0), spacing = c(1.0, 1.0), size = c(100, 100),
+#'   direction = matrix(data = c(-1, 0, 0, -1), nrow = 2, byrow = TRUE),
+#'   numberOfFittingLevels = 4, meshSize = c(1, 1)
+#' )
 #'
 #' @export fitBsplineDisplacementField
 
 fitBsplineDisplacementField <- function(
-  displacementField = NULL,
-  displacementWeightImage = NULL,
-  displacementOrigins = NULL,
-  displacements = NULL,
-  displacementWeights = NULL,
-  origin = NULL,
-  spacing = NULL,
-  size = NULL,
-  direction = NULL,
-  numberOfFittingLevels = 4,
-  meshSize = 1,
-  splineOrder = 3,
-  enforceStationaryBoundary = TRUE,
-  estimateInverse = FALSE,
-  rasterizePoints = FALSE
-  ) {
+    displacementField = NULL,
+    displacementWeightImage = NULL,
+    displacementOrigins = NULL,
+    displacements = NULL,
+    displacementWeights = NULL,
+    origin = NULL,
+    spacing = NULL,
+    size = NULL,
+    direction = NULL,
+    numberOfFittingLevels = 4,
+    meshSize = 1,
+    splineOrder = 3,
+    enforceStationaryBoundary = TRUE,
+    estimateInverse = FALSE,
+    rasterizePoints = FALSE) {
+  if (is.null(displacementField) && (is.null(displacementOrigins) || is.null(displacements))) {
+    stop("Error: missing input.  Either a displacement field or input point set (origins + displacements) needs to be specified.")
+  }
 
-  if( is.null( displacementField ) && ( is.null( displacementOrigins ) || is.null( displacements ) ) )
-    {
-    stop( "Error: missing input.  Either a displacement field or input point set (origins + displacements) needs to be specified." )
-    }
+  if (is.null(displacementField) && (is.null(origin) || is.null(spacing) || is.null(size) || is.null(direction))) {
+    stop("Error: if the displacement field is not specified, one must fully specify the input physical domain.")
+  }
 
-  if( is.null( displacementField ) && ( is.null( origin ) || is.null( spacing ) || is.null( size ) || is.null( direction ) ) )
-    {
-    stop( "Error: if the displacement field is not specified, one must fully specify the input physical domain." )
-    }
+  if (!is.null(displacementField) && is.null(displacementWeightImage)) {
+    displacementWeightImage <- makeImage(dim(displacementField),
+      voxval = 1,
+      spacing = antsGetSpacing(displacementField), origin = antsGetOrigin(displacementField),
+      direction = antsGetDirection(displacementField), components = FALSE
+    )
+  }
 
-  if( ! is.null( displacementField ) && is.null( displacementWeightImage ) )
-    {
-    displacementWeightImage <- makeImage( dim( displacementField ), voxval = 1,
-      spacing = antsGetSpacing( displacementField ), origin = antsGetOrigin( displacementField ),
-      direction = antsGetDirection( displacementField ), components = FALSE )
+  if (!is.null(displacementField) && is.null(displacementWeightImage)) {
+    if (is.null(origin)) {
+      origin <- antsGetOrigin(displacementField)
     }
-
-  if( ! is.null( displacementField ) && is.null( displacementWeightImage ) )
-    {
-    if( is.null( origin ) )
-      {
-      origin <- antsGetOrigin( displacementField )
-      }
-    if( is.null( spacing ) )
-      {
-      spacing <- antsGetSpacing( displacementField )
-      }
-    if( is.null( direction ) )
-      {
-      direction <- antsGetDirection( displacementField )
-      }
-    if( is.null( size ) )
-      {
-      size <- dim( displacementField )
-      }
+    if (is.null(spacing)) {
+      spacing <- antsGetSpacing(displacementField)
     }
+    if (is.null(direction)) {
+      direction <- antsGetDirection(displacementField)
+    }
+    if (is.null(size)) {
+      size <- dim(displacementField)
+    }
+  }
 
   dimensionality <- NULL
-  if( ! is.null( displacementField ) )
-    {
+  if (!is.null(displacementField)) {
     dimensionality <- displacementField@dimension
+  } else {
+    dimensionality <- ncol(displacementOrigins)
+    if (ncol(displacements) != dimensionality) {
+      stop("Error:  Dimensionality between origins and displacements does not match.")
+    }
+  }
+
+  if (!is.null(displacementOrigins)) {
+    if (!is.null(displacementWeights) && (length(displacementWeights) != nrow(displacementOrigins))) {
+      stop("Error:  length of displacement weights must match the number of displacement points.")
     } else {
-    dimensionality <- ncol( displacementOrigins )
-    if( ncol( displacements ) != dimensionality )
-      {
-      stop( "Error:  Dimensionality between origins and displacements does not match." )
-      }
+      displacementWeights <- rep(1.0, nrow(displacementOrigins))
     }
+  }
 
-  if( ! is.null( displacementOrigins ) )
-    {
-    if( ! is.null( displacementWeights ) && ( length( displacementWeights ) != nrow( displacementOrigins ) ) )
-      {
-      stop( "Error:  length of displacement weights must match the number of displacement points." )
-      } else {
-      displacementWeights <- rep( 1.0, nrow( displacementOrigins ) )
-      }
-    }
-
-  if( length( meshSize ) != 1 && length( meshSize ) != dimensionality )
-    {
-    stop( "Error:  incorrect specification for meshSize.")
-    }
-  if( ! is.null( origin ) && length( origin ) != dimensionality )
-    {
-    stop( "Error:  origin is not of length dimensionality." )
-    }
-  if( ! is.null( spacing ) && length( spacing ) != dimensionality )
-    {
-    stop( "Error:  spacing is not of length dimensionality." )
-    }
-  if( ! is.null( size ) && length( size ) != dimensionality )
-    {
-    stop( "Error:  size is not of length dimensionality." )
-    }
-  if( ! is.null( direction ) &&
-    ( dim( direction )[1] != dimensionality || dim( direction )[2] != dimensionality ) )
-    {
-    stop( "Error:  direction is not of size dimensionality x dimensionality." )
-    }
+  if (length(meshSize) != 1 && length(meshSize) != dimensionality) {
+    stop("Error:  incorrect specification for meshSize.")
+  }
+  if (!is.null(origin) && length(origin) != dimensionality) {
+    stop("Error:  origin is not of length dimensionality.")
+  }
+  if (!is.null(spacing) && length(spacing) != dimensionality) {
+    stop("Error:  spacing is not of length dimensionality.")
+  }
+  if (!is.null(size) && length(size) != dimensionality) {
+    stop("Error:  size is not of length dimensionality.")
+  }
+  if (!is.null(direction) &&
+    (dim(direction)[1] != dimensionality || dim(direction)[2] != dimensionality)) {
+    stop("Error:  direction is not of size dimensionality x dimensionality.")
+  }
 
   numberOfControlPoints <- meshSize + splineOrder
 
-  if( length( numberOfControlPoints ) == 1 )
-    {
-    numberOfControlPoints <- rep( numberOfControlPoints, dimensionality )
-    }
+  if (length(numberOfControlPoints) == 1) {
+    numberOfControlPoints <- rep(numberOfControlPoints, dimensionality)
+  }
 
   bsplineField <- ANTsRCore::fitBsplineDisplacementField(
     dimensionality,
@@ -172,6 +155,7 @@ fitBsplineDisplacementField <- function(
     displacementOrigins, displacements, displacementWeights,
     origin, spacing, size, direction,
     numberOfFittingLevels, numberOfControlPoints, splineOrder,
-    enforceStationaryBoundary, estimateInverse, rasterizePoints)
-  return( bsplineField )
+    enforceStationaryBoundary, estimateInverse, rasterizePoints
+  )
+  return(bsplineField)
 }

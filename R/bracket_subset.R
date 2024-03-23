@@ -16,7 +16,7 @@
 #'
 #' @aliases [,antsImage,NULL,ANY,ANY-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
+#' fi <- antsImageRead(getANTsRData("r16"))
 #' fi[, 1]
 #' fi[, 2:5]
 setMethod(
@@ -34,13 +34,13 @@ setMethod(
 #' @rdname brackets
 #' @aliases [,antsImage,antsImage,ANY,ANY-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' fi[ fi > 45]
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' fi[fi > 45]
 setMethod(
   f = "[",
   signature(x = "antsImage", i = "antsImage", j = "ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
-    i = coerce_mask(i)
+    i <- coerce_mask(i)
     if (typeof(i) != "logical") {
       stop("'mask' provided is not of type 'logical'")
     }
@@ -55,13 +55,13 @@ setMethod(
   f = "[",
   signature(x = "ANY", i = "antsImage", j = "ANY", "ANY"),
   definition = function(x, i, j, ..., drop) {
-    i = coerce_mask(i)
+    i <- coerce_mask(i)
     if (typeof(i) != "logical") {
       stop("'mask' provided is not of type 'logical'")
     }
-    args = list(x = x, i = i, ... = ..., drop = drop)
+    args <- list(x = x, i = i, ... = ..., drop = drop)
     if (!missing(j)) {
-      args$j = j
+      args$j <- j
     }
     do.call("[", args)
   }
@@ -71,11 +71,11 @@ setMethod(
 #' @rdname brackets
 #' @aliases [,antsImage,logical,ANY,ANY-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' arr = c(as.array(fi) > 45)
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' arr <- c(as.array(fi) > 45)
 #' fi[arr]
-#' fi[ 1:10, 2:14]
-#' fi[ 1:10*1.0, 2:14*1.0]
+#' fi[1:10, 2:14]
+#' fi[1:10 * 1.0, 2:14 * 1.0]
 setMethod(
   f = "[",
   signature(x = "antsImage", i = "logical", j = "ANY", "ANY"),
@@ -173,18 +173,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }    
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -201,18 +201,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }       
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -229,18 +229,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }         
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -257,18 +257,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }         
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -285,18 +285,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }        
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -313,18 +313,18 @@ setMethod(
                         l = NA,
                         ...,
                         drop) {
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }         
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -342,18 +342,18 @@ setMethod(
                         ...,
                         drop) {
     i <- seq(dim(x)[1])
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }         
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -371,27 +371,27 @@ setMethod(
                         ...,
                         drop) {
     j <- seq(dim(x)[2])
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }        
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
 
 #' @rdname brackets
 #' @aliases [,antsImage,missing,missing-method
-#' @examples 
-#' fi <- antsImageRead(getANTsRData( "ch2" ))
-#' fi[, , 2] 
+#' @examples
+#' fi <- antsImageRead(getANTsRData("ch2"))
+#' fi[, , 2]
 setMethod(
   f = "[",
   signature(x = "antsImage", i = "missing", j = "missing"),
@@ -404,20 +404,20 @@ setMethod(
                         drop) {
     i <- seq(dim(x)[1])
     j <- seq(dim(x)[2])
-    
+
     # should fix the subsetting
-    dx = dim(x)
-    ndim = length(dx)
+    dx <- dim(x)
+    ndim <- length(dx)
     if (ndim > 2) {
       if (missing(k) || is.na(k)) {
-        k = seq(dx[3])
+        k <- seq(dx[3])
       }
     }
     if (ndim > 3) {
       if (missing(l) || is.na(l)) {
-        l = seq(dx[4])
+        l <- seq(dx[4])
       }
-    }  
+    }
     return(getPixels(x, i, j, k, l))
   }
 )
@@ -433,10 +433,10 @@ setMethod(
 #'
 #' @export
 #' @method subset antsImage
-subset.antsImage = function(x, subset, ...) {
+subset.antsImage <- function(x, subset, ...) {
   if (is.antsImage(subset)) {
-    subset = c(coerce_mask(subset))
+    subset <- c(coerce_mask(subset))
   }
-  x = as.array(x)
+  x <- as.array(x)
   base::subset(x = x, subset = subset, ...)
 }

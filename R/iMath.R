@@ -13,125 +13,116 @@
 #' @param ... further parameter options
 #' @author JT Duda
 #' @examples
-#' fi<-antsImageRead( getANTsRData("r16") , 2 )
-#' mask<-getMask( fi )
-#' op1<-iMath( fi , "GD" , 1 )  # gray matter dilation by 1 voxel
-#' op2<-iMath( mask , "D" )  # distance transform
-#' op3<-iMath( 0 , "GetOperations" )  # list all ops
+#' fi <- antsImageRead(getANTsRData("r16"), 2)
+#' mask <- getMask(fi)
+#' op1 <- iMath(fi, "GD", 1) # gray matter dilation by 1 voxel
+#' op2 <- iMath(mask, "D") # distance transform
+#' op3 <- iMath(0, "GetOperations") # list all ops
 #'
-#' if ( usePkg("magrittr") ) { # string ops together
-#'   lapgd <- fi %>% iMath("Laplacian",1)  %>% iMath("GD",3)
+#' if (usePkg("magrittr")) { # string ops together
+#'   lapgd <- fi %>%
+#'     iMath("Laplacian", 1) %>%
+#'     iMath("GD", 3)
 #' }
 #' # Canny is useful e.g.
 #' # canny = ( iMath(myreg$warpedmovout,"Normalize")*255 ) %>% iMath("Canny",1,5,12)
-#' tf<-getANTsRData("r27")
-#' tem<-antsImageRead(tf)
-#' mask = tem > 20
-#' fh <- iMath( mask , "FillHoles" )  # list all ops
+#' tf <- getANTsRData("r27")
+#' tem <- antsImageRead(tf)
+#' mask <- tem > 20
+#' fh <- iMath(mask, "FillHoles") # list all ops
 #' stopifnot(range(fh) == c(0, 1))
-#' filled = fh > 0
+#' filled <- fh > 0
 #' @export iMath
 iMath <- function(img, operation, param = NULL, ...) {
-  img = check_ants(img)
-  
+  img <- check_ants(img)
+
   iMathOps <- NULL
-  list_0 = c("Canny", "D", "FillHoles", "GC")
-  list_1 = c("Laplacian",
-             "MC",
-             "MD",
-             "ME",
-             "MO",
-             "MaurerDistance",
-             "Normalize",
-             "PadImage",
-             "PeronaMalik",
-             "PropagateLabelsThroughMask",
-             "Sharpen",
-             "TruncateIntensity")
-  list_2 = c("GD",
-             "GE",
-             "GO",
-             "GetLargestComponent",
-             "Grad",
-             "HistogramEqualization")
+  list_0 <- c("Canny", "D", "FillHoles", "GC")
+  list_1 <- c(
+    "Laplacian",
+    "MC",
+    "MD",
+    "ME",
+    "MO",
+    "MaurerDistance",
+    "Normalize",
+    "PadImage",
+    "PeronaMalik",
+    "PropagateLabelsThroughMask",
+    "Sharpen",
+    "TruncateIntensity"
+  )
+  list_2 <- c(
+    "GD",
+    "GE",
+    "GO",
+    "GetLargestComponent",
+    "Grad",
+    "HistogramEqualization"
+  )
   stopifnot(length(intersect(list_0, list_1)) == 0)
   stopifnot(length(intersect(list_0, list_2)) == 0)
   stopifnot(length(intersect(list_2, list_1)) == 0)
   # input is usually an 'antsImage'
-  if (missing(img))
-  {
+  if (missing(img)) {
     stop("No input provided")
   }
-  if (missing(operation) || (!is.character(operation)))
-  {
+  if (missing(operation) || (!is.character(operation))) {
     stop("operation must be a character string")
   }
-  
+
   data("iMathOps", package = "ANTsRCore", envir = environment())
-  
+
   if (operation == "GetOperations" |
-      operation == "GetOperationsFull")
-  {
-    if (operation == "GetOperationsFull")
-    {
+    operation == "GetOperationsFull") {
+    if (operation == "GetOperationsFull") {
       return(iMathOps)
-    }
-    else
-    {
+    } else {
       return(iMathOps$Operation)
     }
-  }
-  else
-  {
+  } else {
     # Temp fix for backward compat
-    if (operation == "TruncateImageIntensity")
-    {
+    if (operation == "TruncateImageIntensity") {
       print(paste(
         operation,
         "is moving to TruncateIntensity. Please update your code"
       ))
-      operation = "TruncateIntensity"
+      operation <- "TruncateIntensity"
     }
-    
-    if (!(operation  %in% iMathOps$Operation))
-    {
+
+    if (!(operation %in% iMathOps$Operation)) {
       stop(paste("'operation'", operation, " not recognized"))
     }
-    
-    run_binary = FALSE
+
+    run_binary <- FALSE
     if (operation %in% "FillHolesBinary") {
-      run_binary = TRUE
-      operation = "FillHoles"
+      run_binary <- TRUE
+      operation <- "FillHoles"
     }
-    args = list()
-    if (is.null(param))
-    {
-      args = list(img, operation, ...)
+    args <- list()
+    if (is.null(param)) {
+      args <- list(img, operation, ...)
+    } else {
+      args <- list(img, operation, param, ...)
     }
-    else
-    {
-      args =  list(img, operation, param, ...)
-    }
-    
+
     if (operation %in% list_0) {
       # print("yes in 0")
-      retval = ANTsRCore::iMathInterface(args)
+      retval <- ANTsRCore::iMathInterface(args)
     } else if (operation %in% list_1) {
       # print("yes in 1")
-      retval = ANTsRCore::iMathInterface1(args)
+      retval <- ANTsRCore::iMathInterface1(args)
     } else if (operation %in% list_2) {
       # print("yes in 3")
-      retval = ANTsRCore::iMathInterface2(args)
+      retval <- ANTsRCore::iMathInterface2(args)
     } else {
       print("No match")
     }
-    
+
     if (run_binary) {
-      retval = retval > 0
+      retval <- retval > 0
     }
-    
   }
-  
+
   return(retval)
-  
 }

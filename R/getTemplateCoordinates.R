@@ -17,30 +17,33 @@
 #' @author Avants, BB
 #' @keywords Talairach, Template, Coordinates
 #' @examples
-#'
 #' \dontrun{
 #' #
 #' # ch2bet is available in chris rorden's mricron
 #' #  but you can do something with any other image
 #' #  e.g. a statistical image
 #' #
-#'   tem<-antsImageRead(getANTsRData("ch2"),3)
-#'   clust <- antsImageClone( tem )
-#'   atem = as.array(tem)
-#'   clust[ atem < 80 ]<- 0
-#'   clust[ atem > 90 ]<- 0
-#'   clust[  atem > 80 & atem < 90 ]<- 1
-#'   clust<-iMath(clust,"ME",1)  # erosion
-#'   clust <- labelClusters( clust , minClusterSize=30, minThresh=1, maxThresh=1)
-#'   if ( ! exists("mymni") ) {
+#' tem <- antsImageRead(getANTsRData("ch2"), 3)
+#' clust <- antsImageClone(tem)
+#' atem <- as.array(tem)
+#' clust[atem < 80] <- 0
+#' clust[atem > 90] <- 0
+#' clust[atem > 80 & atem < 90] <- 1
+#' clust <- iMath(clust, "ME", 1) # erosion
+#' clust <- labelClusters(clust, minClusterSize = 30, minThresh = 1, maxThresh = 1)
+#' if (!exists("mymni")) {
 #'   # try getANTsRData if you have www access
-#'     mymni<-list( antsImageRead(getANTsRData("mni"),3),
-#'                  antsImageRead(getANTsRData("mnib"),3),
-#'                  antsImageRead(getANTsRData("mnia"),3) )
-#'   }
-#'   template_cluster_pair<-list(tem,clust)
-#'   gcoords<-getTemplateCoordinates( template_cluster_pair ,
-#'       mymni , convertToTal = TRUE )
+#'   mymni <- list(
+#'     antsImageRead(getANTsRData("mni"), 3),
+#'     antsImageRead(getANTsRData("mnib"), 3),
+#'     antsImageRead(getANTsRData("mnia"), 3)
+#'   )
+#' }
+#' template_cluster_pair <- list(tem, clust)
+#' gcoords <- getTemplateCoordinates(template_cluster_pair,
+#'   mymni,
+#'   convertToTal = TRUE
+#' )
 #' # output will be like
 #' # > gcoords$templatepoints
 #' #     x   y   z t label Brodmann                 AAL
@@ -53,11 +56,11 @@
 #'
 #' @export getTemplateCoordinates
 getTemplateCoordinates <- function(
-  imagePairToBeLabeled,
-  templatePairWithLabels,
-  labelnames = NULL,
-  outprefix = NA,
-  convertToTal = FALSE) {
+    imagePairToBeLabeled,
+    templatePairWithLabels,
+    labelnames = NULL,
+    outprefix = NA,
+    convertToTal = FALSE) {
   if (nargs() == 0 | length(imagePairToBeLabeled) < 2 | length(templatePairWithLabels) <
     2) {
     print(args(getTemplateCoordinates))
@@ -91,7 +94,6 @@ getTemplateCoordinates <- function(
     }
 
     return(value[[1]])
-
   }
 
 
@@ -108,17 +110,26 @@ getTemplateCoordinates <- function(
     outprefix <- paste(tempdir(), "/Z", sep = "")
   }
   txfn <- paste(outprefix, "0GenericAffine.mat", sep = "")
-  if (!file.exists(txfn))
-    mytx <- antsRegistration(fixed = fi, moving = mi,
+  if (!file.exists(txfn)) {
+    mytx <- antsRegistration(
+      fixed = fi, moving = mi,
       typeofTransform = c("Affine"),
-      outprefix = outprefix) else mytx <- list(fwdtransforms = txfn)
-  mywarpedimage <- antsApplyTransforms(fixed = fi, moving = mi,
+      outprefix = outprefix
+    )
+  } else {
+    mytx <- list(fwdtransforms = txfn)
+  }
+  mywarpedimage <- antsApplyTransforms(
+    fixed = fi, moving = mi,
     transformlist = mytx$fwdtransforms,
-    interpolator = c("Linear"))
+    interpolator = c("Linear")
+  )
   milab <- imagePairToBeLabeled[[2]]
-  mywarpedLimage <- antsApplyTransforms(fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
-    interpolator = c("NearestNeighbor"))
-  mypoints <- data.frame( getCentroids( mywarpedLimage ) )
+  mywarpedLimage <- antsApplyTransforms(
+    fixed = fi, moving = milab, transformlist = mytx$fwdtransforms,
+    interpolator = c("NearestNeighbor")
+  )
+  mypoints <- data.frame(getCentroids(mywarpedLimage))
   for (mylab in 2:length(templatePairWithLabels)) {
     filab <- templatePairWithLabels[[mylab]]
     if (class(filab)[[1]] != "antsImage") {
@@ -136,20 +147,26 @@ getTemplateCoordinates <- function(
     # iterate through the point list and index the filab image ( template labels )
     templateLab <- rep(NA, nrow(mypoints))
     for (i in 1:nrow(mypoints)) {
-      if (imagedim == 2)
+      if (imagedim == 2) {
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i]))
-      if (imagedim == 3)
+      }
+      if (imagedim == 3) {
         mypoint <- as.numeric(c(mypoints$x[i], mypoints$y[i], mypoints$z[i]))
+      }
       templateLab[i] <- getValueAtPoint(filab, mypoint)
     }
-    if (mylab == 2)
+    if (mylab == 2) {
       mypoints <- cbind(mypoints, Brodmann = templateLab)
-    if (mylab == 3 & max(filab[filab > 0]) == 11)
+    }
+    if (mylab == 3 & max(filab[filab > 0]) == 11) {
       mypoints <- cbind(mypoints, Tracts = templateLab)
-    if (mylab == 3 & max(filab[filab > 0]) != 11)
+    }
+    if (mylab == 3 & max(filab[filab > 0]) != 11) {
       mypoints <- cbind(mypoints, AAL = templateLab)
-    if (mylab > 3)
+    }
+    if (mylab > 3) {
       mypoints <- cbind(mypoints, templateLab = templateLab)
+    }
   }
   if (convertToTal & imagedim == 3) {
     for (i in 1:nrow(mypoints)) {
@@ -163,15 +180,15 @@ getTemplateCoordinates <- function(
   if (!convertToTal & imagedim == 3) {
     # assume MNI
     for (i in 1:nrow(mypoints)) {
-      mypoints$x[i] <- mypoints$x[i] * (-1)  #
-      mypoints$y[i] <- mypoints$y[i] * (-1)  # due to ITK coordinates being LPS whereas MNI are RAS
+      mypoints$x[i] <- mypoints$x[i] * (-1) #
+      mypoints$y[i] <- mypoints$y[i] * (-1) # due to ITK coordinates being LPS whereas MNI are RAS
       mypoints$z[i] <- mypoints$z[i]
     }
   }
   scl <- 1
-  mypoints$x <- round(mypoints$x * scl)/scl
-  mypoints$y <- round(mypoints$y * scl)/scl
-  mypoints$z <- round(mypoints$z * scl)/scl
+  mypoints$x <- round(mypoints$x * scl) / scl
+  mypoints$y <- round(mypoints$y * scl) / scl
+  mypoints$z <- round(mypoints$z * scl) / scl
   if (max(filab[filab > 0]) == 11) {
     tracts <- NULL
     data("tracts", package = "ANTsR", envir = environment())
@@ -179,8 +196,9 @@ getTemplateCoordinates <- function(
     for (i in 1:nrow(mypoints)) {
       tractnum <- as.character(mypoints$Tracts[i])
       tractname <- as.character(tracts$label_name[as.numeric(tractnum)])
-      if (length(tractname) > 0)
+      if (length(tractname) > 0) {
         tractnames[i] <- tractname
+      }
     }
     mypoints$Tracts <- tractnames
   }
@@ -191,12 +209,15 @@ getTemplateCoordinates <- function(
     for (i in 1:nrow(mypoints)) {
       aalnum <- as.character(mypoints$AAL[i])
       aalname <- as.character(aal$label_name[as.numeric(aalnum)])
-      if (length(aalname) > 0)
+      if (length(aalname) > 0) {
         aalnames[i] <- aalname
+      }
     }
     mypoints$AAL <- aalnames
   }
-  return(list(templatepoints = mypoints,
+  return(list(
+    templatepoints = mypoints,
     myLabelsInTemplateSpace = mywarpedLimage,
-    myImageInTemplateSpace = mywarpedimage))
+    myImageInTemplateSpace = mywarpedimage
+  ))
 }

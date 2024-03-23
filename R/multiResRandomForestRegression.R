@@ -28,113 +28,122 @@
 #' @seealso \code{\link{getMultiResFeatureMatrix}} \code{\link{mrvnrfs}}
 #' @examples
 #'
-#' mask<-makeImage( c(100,100), 0 )
-#' mask[ 30:60, 30:60 ]<-1
-#' mask[ 35:45, 50:60]<-2
-#' ilist<-list()
-#' masklist<-list()
-#' inds<-1:8
-#' yvec<-rep(0,length(inds))
-#' scl<-0.33 # a noise parameter
-#' for ( i in inds ) {
-#'   img<-antsImageClone(mask)
-#'   imgb<-antsImageClone(mask)
-#'   limg<-antsImageClone(mask)
-#'   img[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-#'   imgb[ 3:6, 3:6 ]<-rnorm(16,1)*scl*(i)+scl*mean(rnorm(1))
-#'   ilist[[i]]<-list(img,imgb)  # two features
-#'   yvec[i]<-i^2.0  # a real outcome
-#'   masklist[[i]] = antsImageClone( mask )
-#'   }
-#' r=c(1,1)
-#' mr=c(2,0)
-#' featMat <- getMultiResFeatureMatrix( ilist[[1]], masklist[[1]],
-#'   rad=r, , multiResSchedule=mr )
+#' mask <- makeImage(c(100, 100), 0)
+#' mask[30:60, 30:60] <- 1
+#' mask[35:45, 50:60] <- 2
+#' ilist <- list()
+#' masklist <- list()
+#' inds <- 1:8
+#' yvec <- rep(0, length(inds))
+#' scl <- 0.33 # a noise parameter
+#' for (i in inds) {
+#'   img <- antsImageClone(mask)
+#'   imgb <- antsImageClone(mask)
+#'   limg <- antsImageClone(mask)
+#'   img[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+#'   imgb[3:6, 3:6] <- rnorm(16, 1) * scl * (i) + scl * mean(rnorm(1))
+#'   ilist[[i]] <- list(img, imgb) # two features
+#'   yvec[i] <- i^2.0 # a real outcome
+#'   masklist[[i]] <- antsImageClone(mask)
+#' }
+#' r <- c(1, 1)
+#' mr <- c(2, 0)
+#' featMat <- getMultiResFeatureMatrix(ilist[[1]], masklist[[1]],
+#'   rad = r, , multiResSchedule = mr
+#' )
 #' rfm <- multiResRandomForestRegression(
-#'   yvec , ilist, masklist, rad=r, multiResSchedule=mr )
-#' preds = predict( rfm, newdata=featMat )
+#'   yvec, ilist, masklist,
+#'   rad = r, multiResSchedule = mr
+#' )
+#' preds <- predict(rfm, newdata = featMat)
 #' \dontrun{
 #' # data: https://github.com/stnava/ANTsTutorial/tree/master/phantomData
-#' fns = Sys.glob("phantom*wmgm.jpg")
-#' ilist = imageFileNames2ImageList( fns )
-#' masklist = list( )
-#' flist = list( )
-#' for ( i in 1:length(fns) )
-#'   {
-#' # 2 labels means 2 sets of side by side predictors and features at each scale
-#'   locseg = kmeansSegmentation( ilist[[i]], 2 )$segmentation
-#'   masklist[[ i ]] = list( locseg, locseg %>% thresholdImage(2,2), locseg )
-#'   flist[[ i ]] = list( ilist[[i]], ilist[[i]] %>% iMath("Laplacian",1),
-#'     ilist[[i]] %>% iMath("Grad",1)  )
-#'   }
-#' yvec = factor( rep( c(1,2), each = 4 ) ) # classification
-#' r = c( 1, 1 )
-#' mr = c( 2, 1, 0 )
-#' ns = 50
-#' trn = c(1:3,6:8)
-#' ytrain = yvec[ trn ]
-#' ftrain = flist[ trn ]
-#' mtrain = masklist[ trn ]
-#' mrrfr = multiResRandomForestRegression( ytrain, ftrain, mtrain, rad=c(1,1),
-#'   nsamples = ns, multiResSchedule=mr )
-#' mypreds = rep( NA, length( fns ) )
-#' mymode <- function(x) {
-#'  ux <- unique(x)
-#'  ux[which.max(tabulate(match(x, ux)))]
+#' fns <- Sys.glob("phantom*wmgm.jpg")
+#' ilist <- imageFileNames2ImageList(fns)
+#' masklist <- list()
+#' flist <- list()
+#' for (i in 1:length(fns))
+#' {
+#'   # 2 labels means 2 sets of side by side predictors and features at each scale
+#'   locseg <- kmeansSegmentation(ilist[[i]], 2)$segmentation
+#'   masklist[[i]] <- list(locseg, locseg %>% thresholdImage(2, 2), locseg)
+#'   flist[[i]] <- list(
+#'     ilist[[i]], ilist[[i]] %>% iMath("Laplacian", 1),
+#'     ilist[[i]] %>% iMath("Grad", 1)
+#'   )
 #' }
-#' for ( i in 4:5 ) # test set
-#'   {
-#'   fmat = getMultiResFeatureMatrix( flist[[i]], masklist[[i]],
-#'          rad=r,  multiResSchedule=mr, nsamples = ns )
-#'   myp = predict( mrrfr, newdata=fmat )
-#'   mypreds[ i ] = mymode( myp ) # get the most frequent observation
+#' yvec <- factor(rep(c(1, 2), each = 4)) # classification
+#' r <- c(1, 1)
+#' mr <- c(2, 1, 0)
+#' ns <- 50
+#' trn <- c(1:3, 6:8)
+#' ytrain <- yvec[trn]
+#' ftrain <- flist[trn]
+#' mtrain <- masklist[trn]
+#' mrrfr <- multiResRandomForestRegression(ytrain, ftrain, mtrain,
+#'   rad = c(1, 1),
+#'   nsamples = ns, multiResSchedule = mr
+#' )
+#' mypreds <- rep(NA, length(fns))
+#' mymode <- function(x) {
+#'   ux <- unique(x)
+#'   ux[which.max(tabulate(match(x, ux)))]
+#' }
+#' for (i in 4:5) # test set
+#' {
+#'   fmat <- getMultiResFeatureMatrix(flist[[i]], masklist[[i]],
+#'     rad = r, multiResSchedule = mr, nsamples = ns
+#'   )
+#'   myp <- predict(mrrfr, newdata = fmat)
+#'   mypreds[i] <- mymode(myp) # get the most frequent observation
 #'   # use median or mean for continuous predictions
-#'   }
+#' }
 #' print("predicted")
-#' print( mypreds[-trn] )
+#' print(mypreds[-trn])
 #' print("ground truth")
-#' print( yvec[-trn] )
+#' print(yvec[-trn])
 #' }
 #' @export multiResRandomForestRegression
 multiResRandomForestRegression <- function(
-  y,
-  x,
-  labelmasks,
-  rad=NA,
-  nsamples=10,
-  multiResSchedule=c(0),
-  ntrees=500 ) {
-  if ( all( is.na( rad )  ) ) {
-    rad<-rep(0, x[[1]][[1]]@dimension )
+    y,
+    x,
+    labelmasks,
+    rad = NA,
+    nsamples = 10,
+    multiResSchedule = c(0),
+    ntrees = 500) {
+  if (all(is.na(rad))) {
+    rad <- rep(0, x[[1]][[1]]@dimension)
   }
-  idim<-length(rad)
-  if ( idim != x[[1]][[1]]@dimension )
+  idim <- length(rad)
+  if (idim != x[[1]][[1]]@dimension) {
     stop("multiResRandomForestRegression: dimensionality does not match")
-  fm = getMultiResFeatureMatrix( x[[1]], labelmasks[[1]],
-    rad=rad, multiResSchedule = multiResSchedule, nsamples=nsamples )
-  if ( length( labelmasks ) > 1 )
+  }
+  fm <- getMultiResFeatureMatrix(x[[1]], labelmasks[[1]],
+    rad = rad, multiResSchedule = multiResSchedule, nsamples = nsamples
+  )
+  if (length(labelmasks) > 1) {
+    for (kk in 2:length(labelmasks))
     {
-    for ( kk in 2:length( labelmasks ) )
-      {
-      temp = getMultiResFeatureMatrix( x[[kk]], labelmasks[[kk]],
-        rad=rad, multiResSchedule = multiResSchedule, nsamples=nsamples )
-      fm = rbind( fm, temp )
-      }
+      temp <- getMultiResFeatureMatrix(x[[kk]], labelmasks[[kk]],
+        rad = rad, multiResSchedule = multiResSchedule, nsamples = nsamples
+      )
+      fm <- rbind(fm, temp)
     }
+  }
   # getMultiResFeatureMatrix
-  if ( usePkg("randomForest") )
-    {
-    yExt = rep( y, each=nsamples )
-    rfm <- randomForest::randomForest(y=yExt, x=fm, ntree = ntrees,
+  if (usePkg("randomForest")) {
+    yExt <- rep(y, each = nsamples)
+    rfm <- randomForest::randomForest(
+      y = yExt, x = fm, ntree = ntrees,
       importance = FALSE, proximity = FALSE, keep.inbag = FALSE,
-      keep.forest = TRUE , na.action = na.omit, norm.votes=FALSE )
+      keep.forest = TRUE, na.action = na.omit, norm.votes = FALSE
+    )
     # need the forest for prediction
-    return( rfm )
-    }
-  else
-    {
+    return(rfm)
+  } else {
     stop("install the randomForest package")
-    }
+  }
 }
 
 
@@ -167,56 +176,58 @@ multiResRandomForestRegression <- function(
 #'
 #' @examples
 #'
-#' img <- antsImageRead( getANTsRData("r16"))
-#' seg <- kmeansSegmentation( img, 3 )$segmentation
-#' flist = list( img, img %>% iMath("Grad") )
-#' featMat <- getMultiResFeatureMatrix( flist, seg, rad=c(1,1),
-#'   multiResSchedule = c( 2, 1), nsamples=10 )
+#' img <- antsImageRead(getANTsRData("r16"))
+#' seg <- kmeansSegmentation(img, 3)$segmentation
+#' flist <- list(img, img %>% iMath("Grad"))
+#' featMat <- getMultiResFeatureMatrix(flist, seg,
+#'   rad = c(1, 1),
+#'   multiResSchedule = c(2, 1), nsamples = 10
+#' )
 #' @export getMultiResFeatureMatrix
 getMultiResFeatureMatrix <- function(
-  x,
-  labelmask,
-  rad=NA,
-  multiResSchedule=c(0),
-  nsamples=10
-  )
-  {
-  set.seed( 0 ) # set this in order to increase repeatability of sample call
+    x,
+    labelmask,
+    rad = NA,
+    multiResSchedule = c(0),
+    nsamples = 10) {
+  set.seed(0) # set this in order to increase repeatability of sample call
   # loop over features, labels and multires
-  for ( featk in 1:length(x) )
+  for (featk in 1:length(x))
+  {
+    if (class(labelmask)[1] == "antsImage") {
+      locmask <- (labelmask)
+    }
+    if (class(labelmask)[1] == "list") {
+      locmask <- labelmask[[featk]]
+    }
+    ulabs <- sort(unique(locmask[locmask > 0]))
+    for (lab in ulabs)
     {
-    if ( class( labelmask )[1] == 'antsImage' )
-      locmask = ( labelmask )
-    if ( class( labelmask )[1] == 'list' )
-      locmask = labelmask[[ featk ]]
-    ulabs = sort( unique( locmask[ locmask >  0  ] ) )
-    for ( lab in ulabs )
+      randmask <- locmask * 0
+      ulabvec <- (as.array(locmask) == as.numeric(lab))
+      randvec <- rep(FALSE, length(ulabvec))
+      k <- min(c(nsamples, sum(ulabvec == TRUE)))
+      n <- sum(ulabvec == TRUE)
+      randvec[ulabvec == TRUE][sample(1:n)[1:k]] <- TRUE
+      randmask[randvec] <- 1
+      for (smlev in multiResSchedule)
       {
-      randmask = locmask * 0
-      ulabvec<- ( as.array(locmask) == as.numeric( lab ) )
-      randvec<-rep( FALSE, length( ulabvec ) )
-      k<-min( c( nsamples, sum(ulabvec == TRUE) ) )
-      n<-sum( ulabvec == TRUE )
-      randvec[ ulabvec == TRUE ][ sample(1:n)[1:k] ]<-TRUE
-      randmask[ randvec ]<-1
-      for ( smlev in multiResSchedule )
-        {
-        if ( ! exists("testmat") )
-          {
-          testmat<-t( getNeighborhoodInMask(
-            image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
-              radius=rad, spatial.info=F, boundary.condition='image' ) )
-          }
-        else
-          {
-          testmat <- cbind( testmat,
-            t( getNeighborhoodInMask(
-              image=x[[featk]] %>% smoothImage(smlev), mask=randmask,
-                radius=rad, spatial.info=F, boundary.condition='image' ) )
-            )
-          }
-        } # multires
-      } # labels
-    } # features
-  return( testmat )
+        if (!exists("testmat")) {
+          testmat <- t(getNeighborhoodInMask(
+            image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
+            radius = rad, spatial.info = F, boundary.condition = "image"
+          ))
+        } else {
+          testmat <- cbind(
+            testmat,
+            t(getNeighborhoodInMask(
+              image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
+              radius = rad, spatial.info = F, boundary.condition = "image"
+            ))
+          )
+        }
+      } # multires
+    } # labels
+  } # features
+  return(testmat)
 }

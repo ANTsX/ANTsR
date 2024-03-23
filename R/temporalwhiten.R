@@ -10,8 +10,8 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mat<-replicate(100, rnorm(20))
-#' wmat<-temporalwhiten( mat )
+#' mat <- replicate(100, rnorm(20))
+#' wmat <- temporalwhiten(mat)
 #'
 #' @export temporalwhiten
 temporalwhiten <- function(mat, myord = 2) {
@@ -19,7 +19,10 @@ temporalwhiten <- function(mat, myord = 2) {
     print("Usage:  x_whitened<-whiten( x ) ")
     return(1)
   }
-  if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }
+  if (!usePkg("magic")) {
+    print("Need magic package")
+    return(NULL)
+  }
   omat <- mat
   for (i in 1:ncol(mat)) {
     gsig <- mat[, i]

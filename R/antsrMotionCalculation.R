@@ -42,12 +42,12 @@
 #' Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
 #' Sys.setenv(ANTS_RANDOM_SEED = 1)
 #' set.seed(120)
-#' simimg<-makeImage(rep(5,4), rnorm(5^4))
+#' simimg <- makeImage(rep(5, 4), rnorm(5^4))
 #' testthat::expect_equal(mean(simimg), 0.0427369860965759)
-#' res = antsrMotionCalculation( simimg , seed = 1234)
-#' res2 = antsrMotionCalculation( simimg , seed = 1234)
-#' res3 = antsrMotionCalculation( simimg, num_threads = 1, seed = 1 )
-#' 	testthat::expect_equal(res, res2)
+#' res <- antsrMotionCalculation(simimg, seed = 1234)
+#' res2 <- antsrMotionCalculation(simimg, seed = 1234)
+#' res3 <- antsrMotionCalculation(simimg, num_threads = 1, seed = 1)
+#' testthat::expect_equal(res, res2)
 #' # testthat::expect_failure(testthat::expect_equal(res, res3))
 #' print(res$fd)
 #' print(res3$fd)
@@ -56,26 +56,25 @@
 #'
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
-  img,
-  fixed,
-  mask,
-  typeofTransform = c( "Rigid", "QuickRigid", "BOLDRigid", "Affine",
-                       "AffineFast", "BOLDAffine", "SyN", "SyNOnly" ),
-  getMotionDescriptors = TRUE,
-  verbose = FALSE,
-  num_threads = 1,
-  seed = NULL,
-  ...
-  )
-{
-
-  ants_random_seed = itk_threads = NULL
+    img,
+    fixed,
+    mask,
+    typeofTransform = c(
+      "Rigid", "QuickRigid", "BOLDRigid", "Affine",
+      "AffineFast", "BOLDAffine", "SyN", "SyNOnly"
+    ),
+    getMotionDescriptors = TRUE,
+    verbose = FALSE,
+    num_threads = 1,
+    seed = NULL,
+    ...) {
+  ants_random_seed <- itk_threads <- NULL
   if (!is.null(seed)) {
-    ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
+    ants_random_seed <- Sys.getenv("ANTS_RANDOM_SEED")
     Sys.setenv(ANTS_RANDOM_SEED = seed)
   }
   if (!is.null(num_threads)) {
-    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    itk_threads <- Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
   }
   on.exit({
@@ -86,76 +85,78 @@ antsrMotionCalculation <- function(
       Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
     }
   })
-  typeofTransform = match.arg(typeofTransform)
-  imgdim = length( dim( img ) )
-  subdim = imgdim - 1
-  ntimes = dim( img )[ imgdim ]
-  if ( missing( fixed )  )
-    {
-    fixed <- getAverageOfTimeSeries( img )
-    }
-  if ( missing( mask ) ) {
-    mask = getMask( fixed )
+  typeofTransform <- match.arg(typeofTransform)
+  imgdim <- length(dim(img))
+  subdim <- imgdim - 1
+  ntimes <- dim(img)[imgdim]
+  if (missing(fixed)) {
+    fixed <- getAverageOfTimeSeries(img)
   }
-  extractSubImage <- function( img, vin )
-    {
-    temp = ANTsRCore::extractSlice( img, vin, img@dimension )
-    subdim = img@dimension - 1
-    xxx=antsSetDirection( temp, antsGetDirection( img )[ 1:subdim, 1:subdim ] )
-    return( temp )
-    }
+  if (missing(mask)) {
+    mask <- getMask(fixed)
+  }
+  extractSubImage <- function(img, vin) {
+    temp <- ANTsRCore::extractSlice(img, vin, img@dimension)
+    subdim <- img@dimension - 1
+    xxx <- antsSetDirection(temp, antsGetDirection(img)[1:subdim, 1:subdim])
+    return(temp)
+  }
   # now loop over all time points and register to the fixed images
   # create array holder for deformed images
-  warpedSlices = list()
-  if ( verbose )
+  warpedSlices <- list()
+  if (verbose) {
     progress <- txtProgressBar(min = 1, max = ntimes, style = 3)
-  for ( i in 1:ntimes ) {
-    localImg = extractSubImage( img, i )
-    locreg = antsRegistration( fixed = fixed, moving = localImg,
-      typeofTransform = typeofTransform, ... )
-    warpedSlices[[i]] = locreg$warpedmovout
-    localtxp = readAntsrTransform(
-      locreg$fwdtransforms[ length( locreg$fwdtransforms ) ], subdim )
-    localtxp = getAntsrTransformParameters( localtxp )
-    if ( i ==  1 ) {
-      mocoparams = matrix( nrow=ntimes, ncol=length(localtxp) )
-      if ( verbose ) print( localtxp )
-      }
-    mocoparams[i, ] = localtxp
-    if ( verbose ) setTxtProgressBar(progress, i )
-    gc()
+  }
+  for (i in 1:ntimes) {
+    localImg <- extractSubImage(img, i)
+    locreg <- antsRegistration(
+      fixed = fixed, moving = localImg,
+      typeofTransform = typeofTransform, ...
+    )
+    warpedSlices[[i]] <- locreg$warpedmovout
+    localtxp <- readAntsrTransform(
+      locreg$fwdtransforms[length(locreg$fwdtransforms)], subdim
+    )
+    localtxp <- getAntsrTransformParameters(localtxp)
+    if (i == 1) {
+      mocoparams <- matrix(nrow = ntimes, ncol = length(localtxp))
+      if (verbose) print(localtxp)
     }
-  if ( verbose ) close( progress )
-  moco_img = mergeListToNDImage( img, warpedSlices )
-  rm( warpedSlices )
+    mocoparams[i, ] <- localtxp
+    if (verbose) setTxtProgressBar(progress, i)
+    gc()
+  }
+  if (verbose) close(progress)
+  moco_img <- mergeListToNDImage(img, warpedSlices)
+  rm(warpedSlices)
   gc()
-  meanout = getAverageOfTimeSeries( moco_img )
-  if ( getMotionDescriptors ) {
-    tempmat <- timeseries2matrix( img, mask)
-    dvars <- computeDVARS( tempmat )
-    rm( tempmat )
+  meanout <- getAverageOfTimeSeries(moco_img)
+  if (getMotionDescriptors) {
+    tempmat <- timeseries2matrix(img, mask)
+    dvars <- computeDVARS(tempmat)
+    rm(tempmat)
     # finally, get framewise displacement
-    tsimg <- antsImageClone( img, "double" )
-    mocostats <- .antsMotionCorrStats0( tsimg, mask, mocoparams )
-    fd <- as.data.frame( mocostats$Displacements )
-    names(fd) <- c( "MeanDisplacement", "MaxDisplacement" )
+    tsimg <- antsImageClone(img, "double")
+    mocostats <- .antsMotionCorrStats0(tsimg, mask, mocoparams)
+    fd <- as.data.frame(mocostats$Displacements)
+    names(fd) <- c("MeanDisplacement", "MaxDisplacement")
   } else {
-    fd=NA
-    dvars=NA
+    fd <- NA
+    dvars <- NA
   }
   # now do a posthoc mapping of the motion parameters to roll pitch yaw
   # in the special case of rigid mapping in 3D
-  isRigid = length( grep( "Rigid", typeofTransform ) ) == 1
-  if ( isRigid & ( imgdim == 4 ) )
-    {
-    mocoparamsR = matrix( nrow=ntimes, ncol=6 )
-    for ( i in 1:ntimes )
-      mocoparamsR[i, ] = .affine2distance( mocoparams[i, ] )
-    mocoparams = mocoparamsR
+  isRigid <- length(grep("Rigid", typeofTransform)) == 1
+  if (isRigid & (imgdim == 4)) {
+    mocoparamsR <- matrix(nrow = ntimes, ncol = 6)
+    for (i in 1:ntimes) {
+      mocoparamsR[i, ] <- .affine2distance(mocoparams[i, ])
     }
-  colnames( mocoparams ) = paste( 'MOCOparam', 1:ncol( mocoparams ), sep='' )
+    mocoparams <- mocoparamsR
+  }
+  colnames(mocoparams) <- paste("MOCOparam", 1:ncol(mocoparams), sep = "")
   return
-    (
+  (
     list(
       moco_img     = moco_img,
       moco_params  = mocoparams,
@@ -163,29 +164,27 @@ antsrMotionCalculation <- function(
       moco_mask    = mask,
       fd           = fd,
       dvars        = dvars
-      )
     )
+  )
 }
 
 
-.affine2distance<-function(affVals) {
+.affine2distance <- function(affVals) {
+  affVals <- as.numeric(affVals)
 
-	affVals<-as.numeric(affVals)
+  dx <- affVals[10]
+  dy <- affVals[11]
+  dz <- affVals[12]
 
-	dx<-affVals[10]
-	dy<-affVals[11]
-	dz<-affVals[12]
+  rotx <- asin(affVals[7])
+  roty <- atan2(affVals[8] / cos(rotx), affVals[9] / cos(rotx))
+  rotz <- atan2(affVals[4] / cos(rotx), affVals[1] / cos(rotx))
 
-	rotx<-asin(affVals[7])
-	roty<-atan2(affVals[8]/cos(rotx),affVals[9]/cos(rotx))
-	rotz<-atan2(affVals[4]/cos(rotx),affVals[1]/cos(rotx))
+  rotx <- rotx * 360 / (2 * pi)
+  roty <- roty * 360 / (2 * pi)
+  rotz <- rotz * 360 / (2 * pi)
 
-	rotx<-rotx*360/(2*pi)
-	roty<-roty*360/(2*pi)
-	rotz<-rotz*360/(2*pi)
-
-	return(c(dx, dy, dz, rotx, roty, rotz))
-
+  return(c(dx, dy, dz, rotx, roty, rotz))
 }
 
 

@@ -4,10 +4,14 @@
     return(1)
   }
   nrep <- 2
-  binsnps <- (matrix(rep(NA, nrow(snps) * ncol(snps) * nrep), nrow = nrow(snps), 
-    ncol = ncol(snps) * nrep))
-  binsnpsdf <- data.frame(matrix(rep(NA, nrow(snps) * ncol(snps) * nrep), nrow = nrow(snps), 
-    ncol = ncol(snps) * nrep))
+  binsnps <- (matrix(rep(NA, nrow(snps) * ncol(snps) * nrep),
+    nrow = nrow(snps),
+    ncol = ncol(snps) * nrep
+  ))
+  binsnpsdf <- data.frame(matrix(rep(NA, nrow(snps) * ncol(snps) * nrep),
+    nrow = nrow(snps),
+    ncol = ncol(snps) * nrep
+  ))
   inds1 <- seq(1, (ncol(binsnps)), by = 2)
   inds2 <- inds1 + 1
   binsnps[, inds1] <- snps
@@ -22,4 +26,4 @@
   names(osnps)[inds1] <- paste(names(snps), ".1", sep = "")
   names(osnps)[inds2] <- paste(names(snps), ".2", sep = "")
   return(osnps)
-} 
+}

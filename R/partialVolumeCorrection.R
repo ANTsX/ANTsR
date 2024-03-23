@@ -26,23 +26,23 @@
 #' Roberts DA, Detre JA, Bolinger L, Insko EK, Leigh JS Jr. PNAS 1994.
 #'
 #' @examples
-#' 
+#'
 #' activity.gm <- 10
 #' activity.wm <- activity.gm * 0.4
-#' percent.gm <- matrix(seq(0.1, 1, by=0.1), nrow=2)
+#' percent.gm <- matrix(seq(0.1, 1, by = 0.1), nrow = 2)
 #' percent.wm <- -percent.gm + 1
-#' activity.obs <- percent.gm * rnorm(n=length(percent.gm), mean=activity.gm, sd=5) +
-#'                   rnorm(n=length(percent.wm), mean=activity.wm, sd=5)
+#' activity.obs <- percent.gm * rnorm(n = length(percent.gm), mean = activity.gm, sd = 5) +
+#'   rnorm(n = length(percent.wm), mean = activity.wm, sd = 5)
 #' activity.corrected <- partialVolumeCorrection(activity.obs, percent.gm, percent.wm)
 #'
 #' @export partialVolumeCorrection
 partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion = 0.4) {
-  if ( is.antsImage(img)) {
+  if (is.antsImage(img)) {
     if (is.null(mask)) {
       mask <- antsImageClone(img)
       mask[img != 0] <- 1
     } else {
-      mask = check_ants(mask)
+      mask <- check_ants(mask)
     }
     values.img <- img[mask > 0]
     values.gm <- img.gm[mask > 0]
@@ -51,11 +51,13 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
     values.img <- img
     values.gm <- img.gm
     values.wm <- img.wm
-  } else stop("Input image must be either antsImage or numeric.")
+  } else {
+    stop("Input image must be either antsImage or numeric.")
+  }
 
-  values.corrected <- values.img/(values.gm + 0.4 * values.wm)
+  values.corrected <- values.img / (values.gm + 0.4 * values.wm)
   values.corrected[(values.gm + values.wm) < 0.25] <- values.img[(values.gm + values.wm) <
-    0.25]  # numerical stability
+    0.25] # numerical stability
   if (is.numeric(img)) {
     return(values.corrected)
   } else {

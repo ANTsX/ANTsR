@@ -9,6 +9,6 @@
 #' @examples
 #' ants.set.seed(1)
 #' ants.set.seed("")
-ants.set.seed = function(seed) {
-  Sys.setenv(ANTS_RANDOM_SEED = seed)    
+ants.set.seed <- function(seed) {
+  Sys.setenv(ANTS_RANDOM_SEED = seed)
 }

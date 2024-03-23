@@ -24,7 +24,7 @@
 #' probability over the whole region of interest defined by the mask \code{x}.
 #' @param priorweight usually 0 (priors used for initialization only), 0.25 or 0.5.
 #' @param verbose boolean
-#' @param use_random_seed Initialize internal random number generator with a random seed. 
+#' @param use_random_seed Initialize internal random number generator with a random seed.
 #' Otherwise, initialize with a constant seed number.  If this is \code{TRUE},
 #' the results are not fully reproducible.
 #' @param ... more parameters, see Atropos help in ANTs
@@ -32,47 +32,54 @@
 #' @author Shrinidhi KL, B Avants
 #' @examples
 #'
-#' img <- antsImageRead( getANTsRData("r16") , 2 )
-#' img <- resampleImage( img, c(64,64), 1, 0 )
+#' img <- antsImageRead(getANTsRData("r16"), 2)
+#' img <- resampleImage(img, c(64, 64), 1, 0)
 #' mask <- getMask(img)
-#' segs1 <- atropos( a = img, m = '[0.2,1x1]',
-#'    c = '[2,0]',  i = 'kmeans[3]', x = mask )
+#' segs1 <- atropos(
+#'   a = img, m = "[0.2,1x1]",
+#'   c = "[2,0]", i = "kmeans[3]", x = mask
+#' )
 #'
 #' # Use probabilities from k-means seg as priors
 #'
-#' segs2 <- atropos( a = img, m = '[0.2,1x1]',
-#'    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+#' segs2 <- atropos(
+#'   a = img, m = "[0.2,1x1]",
+#'   c = "[2,0]", i = segs1$probabilityimages, x = mask
+#' )
 #'
-#' feats <- list(img, iMath(img,"Laplacian"), iMath(img,"Grad") )
-#' segs3 <- atropos( a = feats, m = '[0.2,1x1]',
-#'    c = '[2,0]',  i = segs1$probabilityimages, x = mask )
+#' feats <- list(img, iMath(img, "Laplacian"), iMath(img, "Grad"))
+#' segs3 <- atropos(
+#'   a = feats, m = "[0.2,1x1]",
+#'   c = "[2,0]", i = segs1$probabilityimages, x = mask
+#' )
 #'
 #' @export atropos
-atropos <- function( a, x,
-  i = "KMeans[3]",
-  m = "[0.2,1x1]",
-  c = "[5,0]",
-  priorweight = 0.25,
-  verbose = FALSE,
-  use_random_seed = FALSE,
-  ...) {
-  if ( missing(x)) {
+atropos <- function(
+    a, x,
+    i = "KMeans[3]",
+    m = "[0.2,1x1]",
+    c = "[5,0]",
+    priorweight = 0.25,
+    verbose = FALSE,
+    use_random_seed = FALSE,
+    ...) {
+  if (missing(x)) {
     ANTsRCore::Atropos(.int_antsProcessArguments(c(a)))
     return(NULL)
   }
-  use_random_seed = as.integer(as.logical(use_random_seed))
-  
-  verbose = as.numeric( verbose > 0 )
+  use_random_seed <- as.integer(as.logical(use_random_seed))
+
+  verbose <- as.numeric(verbose > 0)
   # define the output temp files
   if (getRversion() <= "3.5.0") { ## work around missing feature
-    tdir <- tempdir( )
+    tdir <- tempdir()
     if (!dir.exists(tdir)) {
       dir.create(tdir, showWarnings = TRUE, recursive = TRUE)
     }
   } else {
-    tdir <- tempdir( check = TRUE )
+    tdir <- tempdir(check = TRUE)
   }
-  
+
   probs <- tempfile(pattern = "antsr", tmpdir = tdir, fileext = "prob%02d.nii.gz")
   probsbase <- basename(probs)
   searchpattern <- sub("%02d", "*", probsbase)
@@ -83,71 +90,92 @@ atropos <- function( a, x,
 
     while (ct <= length(i)) {
       probchar <- paste(ct, sep = "")
-      if (ct < 10)
+      if (ct < 10) {
         probchar <- paste("0", probchar, sep = "")
+      }
       tempfn <- sub("%02d", probchar, probs)
       antsImageWrite(i[[ct]], tempfn)
       ct <- ct + 1
     }
     i <- paste("PriorProbabilityImages[", length(i), ",", probs, ",", priorweight,
-      "]", sep = "")
+      "]",
+      sep = ""
+    )
   }
   if (typeof(a) == "list") {
-    outimg <- antsImageClone(a[[1]], "unsigned int") 
+    outimg <- antsImageClone(a[[1]], "unsigned int")
   } else {
-    a = check_ants(a)
+    a <- check_ants(a)
     outimg <- antsImageClone(a, "unsigned int")
   }
   mydim <- as.numeric(outimg@dimension)
   outs <- paste("[", antsrGetPointerName(outimg), ",", probs, "]", sep = "")
-  x = check_ants(x)
+  x <- check_ants(x)
   mymask <- antsImageClone(x, "unsigned int")
-  if (length(a) == 1)
-    myargs <- list(d = mydim, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask, v = verbose,
-                   r = use_random_seed,
-      ...)
-  if (length(a) == 2)
-    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], m = m, o = outs, c = c, m = m,
-      i = i, x = mymask,  v = verbose, 
+  if (length(a) == 1) {
+    myargs <- list(
+      d = mydim, a = a, m = m, o = outs, c = c, m = m, i = i, x = mymask, v = verbose,
       r = use_random_seed,
-      ...)
-  if (length(a) == 3)
-    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]], m = m, o = outs,
-      c = c, m = m, i = i, x = mymask, v = verbose,  
+      ...
+    )
+  }
+  if (length(a) == 2) {
+    myargs <- list(
+      d = mydim, a = a[[1]], a = a[[2]], m = m, o = outs, c = c, m = m,
+      i = i, x = mymask, v = verbose,
       r = use_random_seed,
-      ...)
+      ...
+    )
+  }
+  if (length(a) == 3) {
+    myargs <- list(
+      d = mydim, a = a[[1]], a = a[[2]], a = a[[3]], m = m, o = outs,
+      c = c, m = m, i = i, x = mymask, v = verbose,
+      r = use_random_seed,
+      ...
+    )
+  }
   if (length(a) == 4) {
-    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+    myargs <- list(
+      d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], m = m, o = outs,
-      c = c, m = m, i = i, x = mymask, v = verbose,  
+      c = c, m = m, i = i, x = mymask, v = verbose,
       r = use_random_seed,
-      ...)
+      ...
+    )
   }
   if (length(a) == 5) {
-    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+    myargs <- list(
+      d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], a = a[[5]], m = m, o = outs,
-      c = c, m = m, i = i, x = mymask, v = verbose,  
+      c = c, m = m, i = i, x = mymask, v = verbose,
       r = use_random_seed,
-      ...)
+      ...
+    )
   }
   if (length(a) >= 6) {
-    myargs <- list(d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
+    myargs <- list(
+      d = mydim, a = a[[1]], a = a[[2]], a = a[[3]],
       a = a[[4]], a = a[[5]], a = a[[6]], m = m, o = outs,
-      c = c, m = m, i = i, x = mymask, v = verbose, 
+      c = c, m = m, i = i, x = mymask, v = verbose,
       r = use_random_seed,
-      ...)
+      ...
+    )
   }
-  if ( length(a) > 6)
+  if (length(a) > 6) {
     stop(" more than 6 input images not really supported, using first 6 ")
+  }
   ANTsRCore::Atropos(.int_antsProcessArguments(c(myargs)))
-  probsout <- list.files(path = tdir,
+  probsout <- list.files(
+    path = tdir,
     pattern = utils::glob2rx(searchpattern), full.names = TRUE,
-    recursive = FALSE)
+    recursive = FALSE
+  )
   pimg <- antsImageRead(probsout[1], mydim)
   probimgs <- c(pimg)
   for (ii in c(2:length(probsout))) {
     probimgs <- c(probimgs, antsImageRead(probsout[ii], mydim))
   }
-  outimg=antsImageClone( outimg, 'float' )
-  return(list( segmentation = outimg, probabilityimages = probimgs ))
+  outimg <- antsImageClone(outimg, "float")
+  return(list(segmentation = outimg, probabilityimages = probimgs))
 }

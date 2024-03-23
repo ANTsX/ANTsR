@@ -13,36 +13,36 @@
 #' @return NA
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#' bm<-getMask( antsImageRead( getANTsRData("ch2") ) )
-#' brain<-renderSurfaceFunction( surfimg =list( bm ) ,
-#'     alphasurf=0.1 ,smoothsval = 1.5 )
-#' make3ViewPNG(  diag(4), diag(4), diag(4),  tempfile( fileext='.png') )
+#' bm <- getMask(antsImageRead(getANTsRData("ch2")))
+#' brain <- renderSurfaceFunction(
+#'   surfimg = list(bm),
+#'   alphasurf = 0.1, smoothsval = 1.5
+#' )
+#' make3ViewPNG(diag(4), diag(4), diag(4), tempfile(fileext = ".png"))
 #' }
 #'
 #' @export make3ViewPNG
 make3ViewPNG <- function(rotationView1, rotationView2, rotationView3, fnprefix) {
-  if ( !  usePkg("rgl")  |
-       !  usePkg("grid") |
-       !  usePkg("png") )
-       {
-       print("Need rgl, grid and png")
-       return(NULL)
-       }
+  if (!usePkg("rgl") |
+    !usePkg("grid") |
+    !usePkg("png")) {
+    print("Need rgl, grid and png")
+    return(NULL)
+  }
   if (nargs() == 0 | missing(fnprefix)) {
     print("Usage:  make3ViewPNG( x , fn = 'output.png') ")
     return(1)
   }
   id <- rgl::par3d("userMatrix")
   if (missing(rotationView1)) {
-    rotationView1 <- rgl::rotate3d(id, -pi/2, 1, 0, 0)
+    rotationView1 <- rgl::rotate3d(id, -pi / 2, 1, 0, 0)
   }
   if (missing(rotationView2)) {
-    rotationView2 <- rgl::rotate3d(id, pi/2, 0, 0, 1)
+    rotationView2 <- rgl::rotate3d(id, pi / 2, 0, 0, 1)
   }
   if (missing(rotationView3)) {
-    rotationView3 <- rgl::rotate3d(id, -pi/2, 0, 0, 1)
+    rotationView3 <- rgl::rotate3d(id, -pi / 2, 0, 0, 1)
   }
   rgl::par3d(userMatrix = rotationView1)
   rgl::rgl.snapshot(paste(fnprefix, "a.png", sep = ""), fmt = "png", top = TRUE)

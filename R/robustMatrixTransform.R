@@ -6,10 +6,10 @@
 #' @return matrix is output
 #' @author Avants BB
 #' @examples
-#' mat<-replicate(100, rnorm(20))
-#' rmat<-robustMatrixTransform( mat )
+#' mat <- replicate(100, rnorm(20))
+#' rmat <- robustMatrixTransform(mat)
 #'
 #' @export robustMatrixTransform
-robustMatrixTransform <- function( mat ) {
-  ANTsRCore::robustMatrixTransform(data.matrix( mat ))
+robustMatrixTransform <- function(mat) {
+  ANTsRCore::robustMatrixTransform(data.matrix(mat))
 }

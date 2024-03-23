@@ -1,6 +1,6 @@
 #' histogramMatchImage
 #'
-#' Match intensity profile with a reference image.  
+#' Match intensity profile with a reference image.
 #'
 #' @param sourceImage image to undergo intensity transformation.
 #' @param referenceImage image providing reference intensity profile.
@@ -12,25 +12,24 @@
 #' @author NJ Tustison
 #'
 #' @examples
-#' sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' referenceImage <- antsImageRead( getANTsRData( "r64" ), 2 )
-#' matchedImage <- histogramMatchImage( sourceImage, referenceImage )
-#' 
+#' sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' referenceImage <- antsImageRead(getANTsRData("r64"), 2)
+#' matchedImage <- histogramMatchImage(sourceImage, referenceImage)
+#'
 #' @export histogramMatchImage
 
 histogramMatchImage <- function(
-  sourceImage,
-  referenceImage,
-  numberOfHistogramBins = 255,
-  numberOfMatchPoints = 64,
-  useThresholdAtMeanIntensity = FALSE
-  ) {
-
+    sourceImage,
+    referenceImage,
+    numberOfHistogramBins = 255,
+    numberOfMatchPoints = 64,
+    useThresholdAtMeanIntensity = FALSE) {
   outputImage <- ANTsRCore::histogramMatchImageR(
-    antsImageClone( sourceImage ), 
-    antsImageClone( referenceImage ),
-    as.numeric( numberOfHistogramBins ), 
-    as.numeric( numberOfMatchPoints ),
-    as.numeric( useThresholdAtMeanIntensity ))
-  return( outputImage )
+    antsImageClone(sourceImage),
+    antsImageClone(referenceImage),
+    as.numeric(numberOfHistogramBins),
+    as.numeric(numberOfMatchPoints),
+    as.numeric(useThresholdAtMeanIntensity)
+  )
+  return(outputImage)
 }

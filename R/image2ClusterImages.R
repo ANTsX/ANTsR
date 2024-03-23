@@ -12,11 +12,10 @@
 #' output
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#' img <- antsImageRead(  getANTsRData('r16') )
-#' img <- thresholdImage( img, 1 , Inf )
-#' imageclusterlist<-image2ClusterImages( img )
+#' img <- antsImageRead(getANTsRData("r16"))
+#' img <- thresholdImage(img, 1, Inf)
+#' imageclusterlist <- image2ClusterImages(img)
 #' }
 #'
 #' @export image2ClusterImages

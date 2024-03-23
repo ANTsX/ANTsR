@@ -20,23 +20,26 @@
 #' @slot dimension usually 2 or 3 but can be 4
 #' @slot components number of pixel components, currently only 1 is suppored
 #' @slot pointer to the memory location of the itk object
-setClass(Class = "antsImageIterator", representation(pixeltype = "character", dimension = "integer",
-  components = "integer", pointer = "externalptr"))
+setClass(Class = "antsImageIterator", representation(
+  pixeltype = "character", dimension = "integer",
+  components = "integer", pointer = "externalptr"
+))
 
 #' @rdname antsImageIterator_class
 #' @aliases show,antsImageIterator-method
-setMethod(f = "show", "antsImageIterator", function(object){
-    cat("antsImageIterator\n")
-    cat("  Pixel Type          :", object@pixeltype, "\n")
-    cat("  Components Per Pixel:", object@components, "\n")
-    cat("  Dimensions          :", object@dimension, "\n")
-    cat("\n")
+setMethod(f = "show", "antsImageIterator", function(object) {
+  cat("antsImageIterator\n")
+  cat("  Pixel Type          :", object@pixeltype, "\n")
+  cat("  Components Per Pixel:", object@components, "\n")
+  cat("  Dimensions          :", object@dimension, "\n")
+  cat("\n")
 })
 
 #' @rdname antsImageIterator_class
 #' @aliases initialize,antsImageIterator-method
-setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(.Object,
-  pixeltype = "float", dimension = 3, components = 1) {
+setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(
+    .Object,
+    pixeltype = "float", dimension = 3, components = 1) {
   ANTsRCore::antsImageIterator(pixeltype, dimension, components)
 })
 
@@ -45,11 +48,11 @@ setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition
 #' @param x antsImage
 #' @return antsImageIterator
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
 #' @export
 antsImageIterator <- function(x) {
-  x = check_ants(x)
+  x <- check_ants(x)
   return(ANTsRCore::antsImageIterator(x))
 }
 
@@ -58,9 +61,9 @@ antsImageIterator <- function(x) {
 #' @param x antsImageIterator
 #' @return pixel value
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' value <- antsImageIteratorGet( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' value <- antsImageIteratorGet(it)
 #' @export
 antsImageIteratorGet <- function(x) {
   return(ANTsRCore::antsImageIterator_Get(x))
@@ -72,9 +75,9 @@ antsImageIteratorGet <- function(x) {
 #' @param value pixel value to set
 #' @return TRUE'
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' flag <- antsImageIteratorSet( it, 2.0 )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' flag <- antsImageIteratorSet(it, 2.0)
 #' @export
 antsImageIteratorSet <- function(x, value) {
   invisible(return(ANTsRCore::antsImageIterator_Set(x, value)))
@@ -85,9 +88,9 @@ antsImageIteratorSet <- function(x, value) {
 #' @param x antsImageIterator
 #' @return image index
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' index <- antsImageIteratorGetIndex( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' index <- antsImageIteratorGetIndex(it)
 #' @export
 antsImageIteratorGetIndex <- function(x) {
   return(ANTsRCore::antsImageIterator_GetIndex(x))
@@ -99,9 +102,9 @@ antsImageIteratorGetIndex <- function(x) {
 #' @param index index to move to
 #' @return TRUE'
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' flag <- antsImageIteratorSetIndex( it, c(2,3) )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' flag <- antsImageIteratorSetIndex(it, c(2, 3))
 #' @export
 antsImageIteratorSetIndex <- function(x, index) {
   invisible(return(ANTsRCore::antsImageIterator_SetIndex(x, index)))
@@ -112,12 +115,12 @@ antsImageIteratorSetIndex <- function(x, index) {
 #' @param x antsImageIterator
 #' @return antsImageIterator
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorNext( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorNext(it)
 #' @export
 #'
-antsImageIteratorNext<- function(x) {
+antsImageIteratorNext <- function(x) {
   return(ANTsRCore::antsImageIterator_Next(x))
 }
 
@@ -126,11 +129,11 @@ antsImageIteratorNext<- function(x) {
 #' @param x antsImageIterator
 #' @return antsImageIterator
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorPrevious( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorPrevious(it)
 #' @export
-antsImageIteratorPrevious<- function(x) {
+antsImageIteratorPrevious <- function(x) {
   return(ANTsRCore::antsImageIterator_Previous(x))
 }
 
@@ -139,12 +142,12 @@ antsImageIteratorPrevious<- function(x) {
 #' @param x antsImageIterator
 #' @return antsImageIterator
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorNext( it )
-#' it <- antsImageIteratorGoToBegin( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorNext(it)
+#' it <- antsImageIteratorGoToBegin(it)
 #' @export
-antsImageIteratorGoToBegin<- function(x) {
+antsImageIteratorGoToBegin <- function(x) {
   return(ANTsRCore::antsImageIterator_GoToBegin(x))
 }
 
@@ -153,12 +156,12 @@ antsImageIteratorGoToBegin<- function(x) {
 #' @param x antsImageIterator
 #' @return boolean indicating position
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorNext( it )
-#' flag <- antsImageIteratorIsAtEnd( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorNext(it)
+#' flag <- antsImageIteratorIsAtEnd(it)
 #' @export
-antsImageIteratorIsAtEnd<- function(x) {
+antsImageIteratorIsAtEnd <- function(x) {
   return(ANTsRCore::antsImageIterator_IsAtEnd(x))
 }
 
@@ -167,11 +170,11 @@ antsImageIteratorIsAtEnd<- function(x) {
 #' @param x antsImageIterator
 #' @return antsImageIterator
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorGoToReverseBegin( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorGoToReverseBegin(it)
 #' @export
-antsImageIteratorGoToReverseBegin<- function(x) {
+antsImageIteratorGoToReverseBegin <- function(x) {
   return(ANTsRCore::antsImageIterator_GoToReverseBegin(x))
 }
 
@@ -180,13 +183,13 @@ antsImageIteratorGoToReverseBegin<- function(x) {
 #' @param x antsImageIterator
 #' @return boolean indicating position
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorGoToReverseBegin( it )
-#' it <- antsImageIteratorPrevious( it )
-#' flag <- antsImageIteratorIsAtReverseEnd( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorGoToReverseBegin(it)
+#' it <- antsImageIteratorPrevious(it)
+#' flag <- antsImageIteratorIsAtReverseEnd(it)
 #' @export
-antsImageIteratorIsAtReverseEnd<- function(x) {
+antsImageIteratorIsAtReverseEnd <- function(x) {
   return(ANTsRCore::antsImageIterator_IsAtReverseEnd(x))
 }
 
@@ -195,11 +198,11 @@ antsImageIteratorIsAtReverseEnd<- function(x) {
 #' @param x antsImageIterator
 #' @return boolean indicating if data remains
 #' @examples
-#' img <- makeImage(c(5,5), rnorm(25))
-#' it <- antsImageIterator( img )
-#' it <- antsImageIteratorNext( it )
-#' flag <- antsImageIteratorRemaining( it )
+#' img <- makeImage(c(5, 5), rnorm(25))
+#' it <- antsImageIterator(img)
+#' it <- antsImageIteratorNext(it)
+#' flag <- antsImageIteratorRemaining(it)
 #' @export
-antsImageIteratorRemaining<- function(x) {
+antsImageIteratorRemaining <- function(x) {
   return(ANTsRCore::antsImageIterator_Remaining(x))
 }

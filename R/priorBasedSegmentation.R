@@ -14,28 +14,29 @@
 #' @author Brian B. Avants
 #' @examples
 #'
-#' fi = antsImageRead( getANTsRData( "r16" ) )
-#' seg = kmeansSegmentation( fi, 3 )
-#' msk = thresholdImage( seg$segmentation, 1, Inf )
-#' pseg = priorBasedSegmentation( fi, seg$probabilityimages, msk, 0.25, 0.1, 3 )
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' seg <- kmeansSegmentation(fi, 3)
+#' msk <- thresholdImage(seg$segmentation, 1, Inf)
+#' pseg <- priorBasedSegmentation(fi, seg$probabilityimages, msk, 0.25, 0.1, 3)
 #'
 #' @export priorBasedSegmentation
 priorBasedSegmentation <- function(
-  img,
-  priors,
-  mask,
-  priorWeight = 0.25,
-  mrf = 0.1,
-  iterations = 25,
-  verbose=FALSE
-  ) {
-  if ( class( img )[1] == 'antsImage' ) dim <- img@dimension
-  if ( class( img )[1] == 'list' ) dim <- img[[1]]@dimension
-  nhood <- paste( rep( 1, dim ), collapse = "x")
+    img,
+    priors,
+    mask,
+    priorWeight = 0.25,
+    mrf = 0.1,
+    iterations = 25,
+    verbose = FALSE) {
+  if (class(img)[1] == "antsImage") dim <- img@dimension
+  if (class(img)[1] == "list") dim <- img[[1]]@dimension
+  nhood <- paste(rep(1, dim), collapse = "x")
   mrf <- paste("[", mrf, ",", nhood, "]")
   conv <- paste("[", iterations, ",", 0, "]")
-  pseg <- atropos( a = img, m = mrf,
-      c = conv,  i = priors, x = mask,
-      priorweight = priorWeight, verbose=verbose )
-  return( pseg )
+  pseg <- atropos(
+    a = img, m = mrf,
+    c = conv, i = priors, x = mask,
+    priorweight = priorWeight, verbose = verbose
+  )
+  return(pseg)
 }

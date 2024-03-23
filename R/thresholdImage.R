@@ -12,18 +12,19 @@
 #' @author Shrinidhi KL
 #' @examples
 #' set.seed(1234)
-#' img <- makeImage(c(5,5), rnorm(25)+0.5)
-#' imgt<-thresholdImage( img, 0.5, Inf )
+#' img <- makeImage(c(5, 5), rnorm(25) + 0.5)
+#' imgt <- thresholdImage(img, 0.5, Inf)
 #' testthat::expect_equal(sum(imgt), 9)
-#' imgt<-thresholdImage( img > 0.5, 0.1, Inf )
+#' imgt <- thresholdImage(img > 0.5, 0.1, Inf)
 #' testthat::expect_equal(sum(imgt), 9)
 #' @export thresholdImage
-thresholdImage <- function(inimg,
-  lothresh, hithresh, inval=1, outval=0) {
-  inimg = check_ants(inimg)
-  inimg = antsImageClone(inimg, out_pixeltype = "float")
+thresholdImage <- function(
+    inimg,
+    lothresh, hithresh, inval = 1, outval = 0) {
+  inimg <- check_ants(inimg)
+  inimg <- antsImageClone(inimg, out_pixeltype = "float")
   dim <- inimg@dimension
-  outimg <- antsImageClone( inimg )
+  outimg <- antsImageClone(inimg)
   args <- list(dim, inimg, outimg, lothresh, hithresh, inval, outval)
   temp <- ANTsRCore::ThresholdImage(.int_antsProcessArguments(args))
   return(outimg)
@@ -48,28 +49,29 @@ thresholdImage <- function(inimg,
 #' @examples
 #' \dontrun{
 #' set.seed(1234)
-#' fi <- ( ri(1) )
-#' mi <- ( ri(2) )
-#' mytx2 <- antsRegistration(fixed=fi, mi, typeofTransform = "TV[4]" )
-#' integrateVelocityField( fi, mytx2$velocityfield,  "/tmp/def.nii.gz" )
-#' qq=antsApplyTransforms( fi, mi, mytx2$fwdtransforms )
-#' pp=antsApplyTransforms( fi, mi, "/tmp/def.nii.gz" )
-#' antsImageMutualInformation( fi, mi )
-#' antsImageMutualInformation( fi, qq )
-#' antsImageMutualInformation( fi, pp )
+#' fi <- (ri(1))
+#' mi <- (ri(2))
+#' mytx2 <- antsRegistration(fixed = fi, mi, typeofTransform = "TV[4]")
+#' integrateVelocityField(fi, mytx2$velocityfield, "/tmp/def.nii.gz")
+#' qq <- antsApplyTransforms(fi, mi, mytx2$fwdtransforms)
+#' pp <- antsApplyTransforms(fi, mi, "/tmp/def.nii.gz")
+#' antsImageMutualInformation(fi, mi)
+#' antsImageMutualInformation(fi, qq)
+#' antsImageMutualInformation(fi, pp)
 #' }
 #' @export integrateVelocityField
 integrateVelocityField <- function(
-  referenceImage,
-  velocityFieldFileName,
-  deformationFieldFileName,
-  lowerTime = 0.0,
-  upperTime = 1.0,
-  deltaTime = 0.01
-) {
-  referenceImage = check_ants(referenceImage)
-  temp <- ANTsRCore::ANTSIntegrateVelocityField(referenceImage, velocityFieldFileName, deformationFieldFileName,
-     lowerTime, upperTime, deltaTime)
+    referenceImage,
+    velocityFieldFileName,
+    deformationFieldFileName,
+    lowerTime = 0.0,
+    upperTime = 1.0,
+    deltaTime = 0.01) {
+  referenceImage <- check_ants(referenceImage)
+  temp <- ANTsRCore::ANTSIntegrateVelocityField(
+    referenceImage, velocityFieldFileName, deformationFieldFileName,
+    lowerTime, upperTime, deltaTime
+  )
 }
 
 
@@ -92,23 +94,24 @@ integrateVelocityField <- function(
 #' @examples
 #' \dontrun{
 #' set.seed(1234)
-#' fi <- ( ri(1) )
-#' mi <- ( ri(2) )
-#' mytx2 <- antsRegistration(fixed=fi, mi, typeofTransform = "SyN" )
-#' integrateVectorField( fi, mytx2$velocityfield,  "/tmp/def.nii.gz" )
+#' fi <- (ri(1))
+#' mi <- (ri(2))
+#' mytx2 <- antsRegistration(fixed = fi, mi, typeofTransform = "SyN")
+#' integrateVectorField(fi, mytx2$velocityfield, "/tmp/def.nii.gz")
 #' }
 #' @export integrateVectorField
 integrateVectorField <- function(
-  referenceImage,
-  vectorFieldFileName,
-  deformationFieldFileName,
-  lowerTime = 0.0,
-  upperTime = 1.0,
-  deltaTime = 0.01
-) {
-  referenceImage = check_ants(referenceImage)
-  veccer = antsImageRead( vectorFieldFileName )
-  antsImageWrite( veccerdplus1, deformationFieldFileName )
-  temp <- ANTsRCore::ANTSIntegrateVectorField(referenceImage, deformationFieldFileName, deformationFieldFileName,
-     lowerTime, upperTime, deltaTime)
+    referenceImage,
+    vectorFieldFileName,
+    deformationFieldFileName,
+    lowerTime = 0.0,
+    upperTime = 1.0,
+    deltaTime = 0.01) {
+  referenceImage <- check_ants(referenceImage)
+  veccer <- antsImageRead(vectorFieldFileName)
+  antsImageWrite(veccerdplus1, deformationFieldFileName)
+  temp <- ANTsRCore::ANTSIntegrateVectorField(
+    referenceImage, deformationFieldFileName, deformationFieldFileName,
+    lowerTime, upperTime, deltaTime
+  )
 }

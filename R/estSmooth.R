@@ -52,17 +52,19 @@
 #' @seealso resels
 #' @examples
 #' # estimate individual image
-#' mnit1 <- antsImageRead(getANTsRData('r16'))
-#' mask <- getMask( mnit1 )
-#' fwhm1 <- estSmooth( mnit1, mask )
+#' mnit1 <- antsImageRead(getANTsRData("r16"))
+#' mask <- getMask(mnit1)
+#' fwhm1 <- estSmooth(mnit1, mask)
 #'
 #' @export estSmooth
 estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = TRUE) {
-  if (missing(mask))
+  if (missing(mask)) {
     stop("Must specify mask.")
+  }
   D <- mask@dimension
-  if (any(is.na(x)))
+  if (any(is.na(x))) {
     x[is.na(x)] <- 0
+  }
   # create iterators---------------------------------------------------------
   dimx <- 1:dim(mask)[1]
   dimx1 <- 2:(dim(mask)[1] + 1)
@@ -81,17 +83,19 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     n <- 1
     mrss <- 1
   } else if (class(x) == "matrix") {
-    if (missing(rdf))
+    if (missing(rdf)) {
       rdf <- nrow(x) - 2
+    }
     nfull <- nrow(x) # original number of images (rows)
     if (!is.null(sample)) {
       rsamples <- sample(nrow(x), sample)
       x <- x[rsamples, ]
     }
-    if (scaleResid == "TRUE")
-      mrss <- sqrt(colSums(x ^ 2) / rdf)
-    else
+    if (scaleResid == "TRUE") {
+      mrss <- sqrt(colSums(x^2) / rdf)
+    } else {
       mrss <- 1
+    }
     n <- nrow(x) # number of images in sample (rows)
     scale <- (nfull / (rdf)) * (1 / n)
   }
@@ -107,35 +111,38 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     maskar <- as.matrix(mask)
     m1[dimx1, dimy1] <- maskar
     m3 <- ((m1[dimx1, dimy1] * m1[dimx, dimy1])) *
-          ((m1[dimx1, dimy1] * m1[dimx1, dimy]))
+      ((m1[dimx1, dimy1] * m1[dimx1, dimy]))
     Vxx <- Vyy <- Vxy <- matrix(0, dim(mask)[1], dim(mask)[2])
   } else if (D == 3) {
     d1 <- m1 <- array(0, dim = dim(mask) + 1)
     maskar <- as.array(mask)
     m1[dimx1, dimy1, dimz1] <- maskar
     m3 <- ((m1[dimx1, dimy1, dimz1] * m1[dimx, dimy1, dimz1])) *
-          ((m1[dimx1, dimy1, dimz1] * m1[dimx1, dimy, dimz1])) *
-          ((m1[dimx1, dimy1, dimz1] * m1[dimx1, dimy1, dimz])) # mask to eliminate all cortical voxels
+      ((m1[dimx1, dimy1, dimz1] * m1[dimx1, dimy, dimz1])) *
+      ((m1[dimx1, dimy1, dimz1] * m1[dimx1, dimy1, dimz])) # mask to eliminate all cortical voxels
     Vxx <- Vyy <- Vzz <- Vxy <- Vxz <- Vyz <- array(0, dim = dim(mask))
   }
   # partial derivatives of each image------------------------------------------
-  if (verbose)
+  if (verbose) {
     progress <- txtProgressBar(min = 0, max = n, style = 3)
+  }
   for (i in 1:n) {
     if (class(x) == "matrix") {
-      if (D == 1)
-        d1[dimx1] <- makeImage(mask, x[i,] / mrss)[dimx]
-      else if (D == 2)
-        d1[dimx1, dimy1] <- makeImage(mask, x[i,] / mrss)[dimx, dimy]
-      else if (D == 3)
-        d1[dimx1, dimy1, dimz1]  <- makeImage(mask, x[i,] / mrss)[dimx, dimy, dimz]
+      if (D == 1) {
+        d1[dimx1] <- makeImage(mask, x[i, ] / mrss)[dimx]
+      } else if (D == 2) {
+        d1[dimx1, dimy1] <- makeImage(mask, x[i, ] / mrss)[dimx, dimy]
+      } else if (D == 3) {
+        d1[dimx1, dimy1, dimz1] <- makeImage(mask, x[i, ] / mrss)[dimx, dimy, dimz]
+      }
     } else {
-      if (D == 1)
+      if (D == 1) {
         d1[dimx1] <- x[dimx]
-      else if (D == 2)
+      } else if (D == 2) {
         d1[dimx1, dimy1] <- x[dimx, dimy]
-      else if (D == 3)
+      } else if (D == 3) {
         d1[dimx1, dimy1, dimz1] <- x[dimx, dimy, dimz]
+      }
     }
     if (D == 1) {
       dx <- (d1[dimx1] - d1[dimx]) * m3
@@ -159,11 +166,13 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
       Vyz <- Vyz + (dy * dz)
     }
 
-    if (verbose)
+    if (verbose) {
       setTxtProgressBar(progress, i)
+    }
   }
-  if (verbose)
+  if (verbose) {
     close(progress)
+  }
   # scale variances/covariances------------------------------------------------
   Vxx <- Vxx * scale
   if (D > 1) {
@@ -179,25 +188,25 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     xyz <- Vxx * m3
   } else if (D == 2) {
     xyz <- cbind(matrix(Vxx * m3, ncol = 1), matrix(Vyy * m3, ncol = 1))
-    rpv <- (Vxx * Vyy ) + (Vxy * 2) # this needs to be checked
+    rpv <- (Vxx * Vyy) + (Vxy * 2) # this needs to be checked
   } else if (D == 3) {
     xyz <- cbind(Vxx * m3, Vyy * m3, Vzz * m3)
     rpv <- (Vxx * Vyy * Vzz) +
-           (Vxy * Vyz * Vxz * 2) -
-           (Vyz * Vyz * Vxx) -
-           (Vxy * Vxy * Vzz) -
-           (Vxz * Vxz * Vyy)
+      (Vxy * Vyz * Vxz * 2) -
+      (Vyz * Vyz * Vxx) -
+      (Vxy * Vxy * Vzz) -
+      (Vxz * Vxz * Vyy)
   }
   # make RPV Image-------------------------------------------------------------
   rpv[rpv < 0] <- 0
-  rpv <- sqrt(rpv / (4 * log(2)) ^ D)
+  rpv <- sqrt(rpv / (4 * log(2))^D)
   RPVImg <- as.antsImage(rpv * maskar)
   # estimate fwhm--------------------------------------------------------------
   xyz <- sqrt((xyz) / (4 * log(2)))
   nvox <- sum(m3)
   rpv <- sum(rpv) / nvox
   xyz <- colSums(xyz) / nvox
-  resels <- rpv ^ (1 / D) * (xyz / prod(xyz) ^ (1 / D))
+  resels <- rpv^(1 / D) * (xyz / prod(xyz)^(1 / D))
   fwhm <- 1 / resels
   list(fwhm = fwhm, RPVImg = RPVImg)
 }

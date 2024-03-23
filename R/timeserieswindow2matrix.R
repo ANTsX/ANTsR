@@ -17,49 +17,49 @@
 #' @author Avants BB
 #' @examples
 #'
-#' img <- makeImage( c(10,10,10,50) , 0 )
-#' mask <- as.antsImage( array( 1 , dim(img)[1:3] ) )
-#' mat<-timeseries2matrix( img, mask )
-#' mat <- timeserieswindow2matrix( mat , mask, c(1, 4, 5 ), 2, 0 )
-#' print( dim(mat$eventmatrix) )
-#' print( dim(mat$mask4d) )
+#' img <- makeImage(c(10, 10, 10, 50), 0)
+#' mask <- as.antsImage(array(1, dim(img)[1:3]))
+#' mat <- timeseries2matrix(img, mask)
+#' mat <- timeserieswindow2matrix(mat, mask, c(1, 4, 5), 2, 0)
+#' print(dim(mat$eventmatrix))
+#' print(dim(mat$mask4d))
 #'
 #' ##### another approach
-#' dim4<-c( 20, 30, 10, 100 )
-#' i1<-10:15
-#' i2<-11:18
-#' i3<-4:8
-#' i4<-10:90
-#' arr3d<-array(data = 0, dim = dim4[1:3] )
-#' arr3d[i1,i2,i3]<-1
-#' arr<-array(data = 0, dim =dim4 )
-#' for ( t in i4 ) arr[,,,t]<-t
-#' nois<-which( arr > 0 )
-#' noisv<-rnorm( length(nois) )
-#' arr[ nois ]<-arr[ nois ]+noisv*0.0
-#' msk <- as.antsImage( arr3d )
-#' img <- as.antsImage( arr )
-#' mat<-timeseries2matrix( img, msk )
-#' eanat<-sparseDecom(  mat, msk, sparseness=0.1, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( mat,  sparseness=0.1,z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' enomask<-eanat2$eigenanatomyimages[1,]
-#' emask<-eanat$eigenanatomyimages[1,]
-#' print( enomask[31:40] )
-#' print(   emask[31:40] )
+#' dim4 <- c(20, 30, 10, 100)
+#' i1 <- 10:15
+#' i2 <- 11:18
+#' i3 <- 4:8
+#' i4 <- 10:90
+#' arr3d <- array(data = 0, dim = dim4[1:3])
+#' arr3d[i1, i2, i3] <- 1
+#' arr <- array(data = 0, dim = dim4)
+#' for (t in i4) arr[, , , t] <- t
+#' nois <- which(arr > 0)
+#' noisv <- rnorm(length(nois))
+#' arr[nois] <- arr[nois] + noisv * 0.0
+#' msk <- as.antsImage(arr3d)
+#' img <- as.antsImage(arr)
+#' mat <- timeseries2matrix(img, msk)
+#' eanat <- sparseDecom(mat, msk, sparseness = 0.1, z = 0.5, nvecs = 2, its = 5, cthresh = 0, mycoption = 1)
+#' eanat2 <- sparseDecom(mat, sparseness = 0.1, z = 0.5, nvecs = 2, its = 5, cthresh = 0, mycoption = 1)
+#' enomask <- eanat2$eigenanatomyimages[1, ]
+#' emask <- eanat$eigenanatomyimages[1, ]
+#' print(enomask[31:40])
+#' print(emask[31:40])
 #'
 #' # same thing with event matrices ....
-#' ttt<-timeserieswindow2matrix( mat, msk, c(20,40,60,70) , 6, 0 )
-#' tte<-ttt$eventmatrix
-#' eanat<-sparseDecom(  tte, ttt$mask4d, sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' eanat2<-sparseDecom( tte,  sparseness=-0.9, z=0.5,nvecs=2, its=5,cthresh=0, mycoption=1)
-#' enomask<-eanat2$eigenanatomyimages[,1]
+#' ttt <- timeserieswindow2matrix(mat, msk, c(20, 40, 60, 70), 6, 0)
+#' tte <- ttt$eventmatrix
+#' eanat <- sparseDecom(tte, ttt$mask4d, sparseness = -0.9, z = 0.5, nvecs = 2, its = 5, cthresh = 0, mycoption = 1)
+#' eanat2 <- sparseDecom(tte, sparseness = -0.9, z = 0.5, nvecs = 2, its = 5, cthresh = 0, mycoption = 1)
+#' enomask <- eanat2$eigenanatomyimages[, 1]
 #' # back to timematrix
-#' tmat<-matrix( enomask,  nrow=6 )
+#' tmat <- matrix(enomask, nrow = 6)
 #' # back to image
-#' eimg<-antsImageClone( msk )
-#' eimg[ msk == 1 ]<-tmat[1,]
+#' eimg <- antsImageClone(msk)
+#' eimg[msk == 1] <- tmat[1, ]
 #' # convert image space to evec space
-#' emat<-eanat2$eigenanatomyimages
+#' emat <- eanat2$eigenanatomyimages
 #' # convert emat to events FIXME this does not currently work
 #' # eavent<-timeserieswindow2matrix( data.matrix(emat) , msk, 1 , 6, 0 )
 #' # emask<-eavent$eventmatrix[1,]
@@ -106,11 +106,13 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist, timewindo
   ct <- 1
   for (i in eventlist) {
     maxrow <- i + (timewindow - 1)
-    if (maxrow > nrow(timeseriesmatrix))
+    if (maxrow > nrow(timeseriesmatrix)) {
       maxrow <- nrow(timeseriesmatrix)
+    }
     locmat <- as.numeric(t(timeseriesmatrix[i:maxrow, ]))
-    if (length(locmat) == nvox4dmask)
+    if (length(locmat) == nvox4dmask) {
       outmat[ct, ] <- locmat
+    }
     ct <- ct + 1
   }
   return(list(eventmatrix = outmat, mask4d = mask4d))

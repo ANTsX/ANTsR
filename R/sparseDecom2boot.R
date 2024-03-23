@@ -35,29 +35,32 @@
 #' @return outputs a decomposition of a pair of matrices
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#' mat<-replicate(100, rnorm(20))
-#' mat2<-replicate(100, rnorm(20))
-#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat2),
-#'   sparseness=c(0.1,0.3) , nvecs=3, its=3, perms=0)
-#' wt<-0.666
-#' mat3<-mat*wt+mat2*(1-wt)
-#' mydecom<-sparseDecom2boot( inmatrix=list(mat,mat3),
-#'   sparseness=c(0.2,0.2), nvecs=5, its=10, perms=200 )
-#'
+#' mat <- replicate(100, rnorm(20))
+#' mat2 <- replicate(100, rnorm(20))
+#' mydecom <- sparseDecom2boot(
+#'   inmatrix = list(mat, mat2),
+#'   sparseness = c(0.1, 0.3), nvecs = 3, its = 3, perms = 0
+#' )
+#' wt <- 0.666
+#' mat3 <- mat * wt + mat2 * (1 - wt)
+#' mydecom <- sparseDecom2boot(
+#'   inmatrix = list(mat, mat3),
+#'   sparseness = c(0.2, 0.2), nvecs = 5, its = 10, perms = 200
+#' )
 #' }
 #'
 #' @export sparseDecom2boot
-sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
-  sparseness = c(0.01, 0.01),
-  nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0,
-  uselong = 0,
-  z = 0, smooth = 0, robust = 0, mycoption = 1,
-  initializationList = list(), initializationList2 = list(),
-  ell1 = 0.05, nboot = 10, nsamp = 1, doseg = FALSE,
-  priorWeight = 0.0, verbose=FALSE,
-  estimateSparseness = 0.2 ) {
+sparseDecom2boot <- function(
+    inmatrix, inmask = c(NULL, NULL),
+    sparseness = c(0.01, 0.01),
+    nvecs = 50, its = 5, cthresh = c(0, 0), statdir = NA, perms = 0,
+    uselong = 0,
+    z = 0, smooth = 0, robust = 0, mycoption = 1,
+    initializationList = list(), initializationList2 = list(),
+    ell1 = 0.05, nboot = 10, nsamp = 1, doseg = FALSE,
+    priorWeight = 0.0, verbose = FALSE,
+    estimateSparseness = 0.2) {
   numargs <- nargs()
   if (numargs < 1 | missing(inmatrix)) {
     print(args(sparseDecom2boot))
@@ -74,23 +77,26 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
   cca2outAuto <- 0
   bootccalist1 <- list()
   bootccalist2 <- list()
-  nsubs = nrow(mat1)
-  allmat1 = matrix( ncol=nvecs*nboot, nrow=ncol(mat1) )
-  allmat2 = matrix( ncol=nvecs*nboot, nrow=ncol(mat2) )
+  nsubs <- nrow(mat1)
+  allmat1 <- matrix(ncol = nvecs * nboot, nrow = ncol(mat1))
+  allmat2 <- matrix(ncol = nvecs * nboot, nrow = ncol(mat2))
   for (i in 1:nvecs) {
     makemat <- matrix(rep(0, nboot * ncol(mat1)), ncol = ncol(mat1))
     bootccalist1 <- lappend(bootccalist1, makemat)
     makemat <- matrix(rep(0, nboot * ncol(mat2)), ncol = ncol(mat2))
     bootccalist2 <- lappend(bootccalist2, makemat)
   }
-  if (nsamp >= 0.999999999)
-    doreplace <- TRUE else doreplace <- FALSE
+  if (nsamp >= 0.999999999) {
+    doreplace <- TRUE
+  } else {
+    doreplace <- FALSE
+  }
   for (boots in 1:nboot) {
     mysample <- sample(1:nsubj, size = mysize, replace = doreplace)
     submat1 <- mat1[mysample, ]
     submat2 <- mat2[mysample, ]
     sublist <- list(submat1, submat2)
-#    print(paste("boot", boots, "sample", mysize))
+    #    print(paste("boot", boots, "sample", mysize))
     (myres <- sparseDecom2(
       inmatrix = sublist,
       inmask = mymask,
@@ -107,11 +113,12 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
       initializationList = initializationList,
       initializationList2 = initializationList2,
       ell1 = ell1,
-      verbose = verbose ))
+      verbose = verbose
+    ))
     myressum <- abs(diag(cor(myres$projections, myres$projections2)))
     cca1 <- (myres$eig1)
     cca2 <- (myres$eig2)
-    if (boots > 1 & TRUE ) {  # try to sort results
+    if (boots > 1 & TRUE) { # try to sort results
       cca1copy <- cca1
       mymult <- matrix(rep(0, ncol(cca1) * ncol(cca1)), ncol = ncol(cca1))
       for (j in 1:ncol(cca1out)) {
@@ -152,78 +159,80 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
     } # end try to sort results
     cca1out <- cca1out + (cca1) # * myressum
     cca2out <- cca2out + (cca2) # * myressum
-    bootInds = (( boots - 1 )*nvecs+1):(boots*nvecs)
-    allmat1[  ,  bootInds ] = (cca1)
-    allmat2[  ,  bootInds ] = (cca2)
+    bootInds <- ((boots - 1) * nvecs + 1):(boots * nvecs)
+    allmat1[, bootInds] <- (cca1)
+    allmat2[, bootInds] <- (cca2)
     for (nv in 1:nvecs) {
       # if (sparseness[1] > 0)
-        bootccalist1[[nv]][boots, ] <- (cca1[, nv])
-        # else bootccalist1[[nv]][boots, ] <- (cca1[, nv])
+      bootccalist1[[nv]][boots, ] <- (cca1[, nv])
+      # else bootccalist1[[nv]][boots, ] <- (cca1[, nv])
       # if (sparseness[2] > 0)
-        bootccalist2[[nv]][boots, ] <- (cca2[, nv])
-        # else bootccalist2[[nv]][boots, ] <- (cca2[, nv])
+      bootccalist2[[nv]][boots, ] <- (cca2[, nv])
+      # else bootccalist2[[nv]][boots, ] <- (cca2[, nv])
     }
   }
 
-  if ( doseg )
-  for ( k in 1:nvecs )
+  if (doseg) {
+    for (k in 1:nvecs)
     {
-    vec1 = cca1out[,k]
-    svec1 = sign( vec1 )
-    vec1pos = vec1
-    vec1neg = vec1
-    vec1pos[ svec1 < 0 ] = 0
-    vec1neg[ svec1 > 0 ] = 0
-    if ( sum( vec1pos * vec1 ) < sum( vec1neg * vec1 ) ) vec1 = vec1 * (-1)
-    if ( sparseness[1] < 0 )
-      {
-      temp = .eanatsparsify( abs(vec1), abs(sparseness[1]) )
-      cca1out[,k] = vec1 * sign( temp )
-      } else cca1out[,k] = .eanatsparsify( vec1, sparseness[1] )
+      vec1 <- cca1out[, k]
+      svec1 <- sign(vec1)
+      vec1pos <- vec1
+      vec1neg <- vec1
+      vec1pos[svec1 < 0] <- 0
+      vec1neg[svec1 > 0] <- 0
+      if (sum(vec1pos * vec1) < sum(vec1neg * vec1)) vec1 <- vec1 * (-1)
+      if (sparseness[1] < 0) {
+        temp <- .eanatsparsify(abs(vec1), abs(sparseness[1]))
+        cca1out[, k] <- vec1 * sign(temp)
+      } else {
+        cca1out[, k] <- .eanatsparsify(vec1, sparseness[1])
+      }
 
-      vec2 = cca2out[,k]
-      svec2 = sign( vec2 )
-      vec2pos = vec2
-      vec2neg = vec2
-      vec2pos[ svec2 < 0 ] = 0
-      vec2neg[ svec2 > 0 ] = 0
-      if ( sum( vec2pos * vec2 ) < sum( vec2neg * vec2 ) ) vec2 = vec2 * (-1)
-      if ( sparseness[2] < 0 )
-        {
-        temp = .eanatsparsify( abs(vec2), abs(sparseness[2]) )
-        cca2out[,k] = vec2 * sign( temp )
-        } else cca2out[,k] = .eanatsparsify( vec2, sparseness[2] )
-    }
-  if ( estimateSparseness > 1.e-9 )
-    {
-    sparseness[1]=0
-    sparseness[2]=0
-    for ( k in 1:nvecs )
-      {
-      vec1 = colMeans( bootccalist1[[k]] )
-      vec2 = colMeans( bootccalist2[[k]] )
-      v1sd = apply( bootccalist1[[k]] , FUN=sd, MARGIN=2 )
-      v1sd[ v1sd == 0 ] = 1
-      v2sd = apply( bootccalist2[[k]] , FUN=sd, MARGIN=2 )
-      v2sd[ v2sd == 0 ] = 1
-      vec1 = vec1 / v1sd
-      vec2 = vec2 / v2sd
-      vec1[ abs(vec1) < estimateSparseness ] = 0
-      vec2[ abs(vec2) < estimateSparseness ] = 0
-      nz1 = sum(abs(sign(vec1)))/length(vec1)
-      nz2 = sum(abs(sign(vec2)))/length(vec2)
-      if ( verbose ) print( paste( "EstimatedSpar", nz1, nz2) )
-      if ( nz1 == 0 ) vec1 = rnorm( length( vec1 ) )
-      if ( nz2 == 0 ) vec2 = rnorm( length( vec2 ) )
-      cca1out[,k] = vec1
-      cca2out[,k] = vec2
+      vec2 <- cca2out[, k]
+      svec2 <- sign(vec2)
+      vec2pos <- vec2
+      vec2neg <- vec2
+      vec2pos[svec2 < 0] <- 0
+      vec2neg[svec2 > 0] <- 0
+      if (sum(vec2pos * vec2) < sum(vec2neg * vec2)) vec2 <- vec2 * (-1)
+      if (sparseness[2] < 0) {
+        temp <- .eanatsparsify(abs(vec2), abs(sparseness[2]))
+        cca2out[, k] <- vec2 * sign(temp)
+      } else {
+        cca2out[, k] <- .eanatsparsify(vec2, sparseness[2])
       }
     }
-  init1 = initializeEigenanatomy( t( cca1out ), inmask[[1]] )
-  init2 = initializeEigenanatomy( t( cca2out ), inmask[[2]] )
-  ccaout = sparseDecom2(
+  }
+  if (estimateSparseness > 1.e-9) {
+    sparseness[1] <- 0
+    sparseness[2] <- 0
+    for (k in 1:nvecs)
+    {
+      vec1 <- colMeans(bootccalist1[[k]])
+      vec2 <- colMeans(bootccalist2[[k]])
+      v1sd <- apply(bootccalist1[[k]], FUN = sd, MARGIN = 2)
+      v1sd[v1sd == 0] <- 1
+      v2sd <- apply(bootccalist2[[k]], FUN = sd, MARGIN = 2)
+      v2sd[v2sd == 0] <- 1
+      vec1 <- vec1 / v1sd
+      vec2 <- vec2 / v2sd
+      vec1[abs(vec1) < estimateSparseness] <- 0
+      vec2[abs(vec2) < estimateSparseness] <- 0
+      nz1 <- sum(abs(sign(vec1))) / length(vec1)
+      nz2 <- sum(abs(sign(vec2))) / length(vec2)
+      if (verbose) print(paste("EstimatedSpar", nz1, nz2))
+      if (nz1 == 0) vec1 <- rnorm(length(vec1))
+      if (nz2 == 0) vec2 <- rnorm(length(vec2))
+      cca1out[, k] <- vec1
+      cca2out[, k] <- vec2
+    }
+  }
+  init1 <- initializeEigenanatomy(t(cca1out), inmask[[1]])
+  init2 <- initializeEigenanatomy(t(cca2out), inmask[[2]])
+  ccaout <- sparseDecom2(
     inmatrix = inmatrix,
-    inmask=c( init1$mask, init2$mask ),
+    inmask = c(init1$mask, init2$mask),
     sparseness = sparseness,
     nvecs = nvecs,
     its = its,
@@ -234,34 +243,36 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
     smooth = smooth,
     robust = robust,
     mycoption = mycoption,
-    initializationList=init1$initlist,
-    initializationList2=init2$initlist,
+    initializationList = init1$initlist,
+    initializationList2 = init2$initlist,
     ell1 = ell1,
-    priorWeight=priorWeight,
-    verbose=verbose )
-  jh=matrix( 0, nrow=ncol(inmatrix[[1]]), ncol=ncol(inmatrix[[2]]) )
-  colnames(jh)=colnames(inmatrix[[2]])
-  rownames(jh)=colnames(inmatrix[[1]])
-  for ( i in 1:ncol(allmat1) )
-    {
-    wh1=which( abs( allmat1[,i] ) > 1.e-10 )
-    wh2=which( abs( allmat2[,i] ) > 1.e-10 )
-    jh[ wh1, wh2 ] = jh[ wh1, wh2 ] + 1
-    }
+    priorWeight = priorWeight,
+    verbose = verbose
+  )
+  jh <- matrix(0, nrow = ncol(inmatrix[[1]]), ncol = ncol(inmatrix[[2]]))
+  colnames(jh) <- colnames(inmatrix[[2]])
+  rownames(jh) <- colnames(inmatrix[[1]])
+  for (i in 1:ncol(allmat1))
+  {
+    wh1 <- which(abs(allmat1[, i]) > 1.e-10)
+    wh2 <- which(abs(allmat2[, i]) > 1.e-10)
+    jh[wh1, wh2] <- jh[wh1, wh2] + 1
+  }
   return(
     list(
-      bootsccan=ccaout,
-      eig1=cca1out,
-      eig2=cca2out,
-      bootccalist1=bootccalist1,
-      bootccalist2=bootccalist2,
-      allmat1=allmat1,
-      allmat2=allmat2,
-      init1=init1,
-      init2=init2,
-      jh=jh )
+      bootsccan = ccaout,
+      eig1 = cca1out,
+      eig2 = cca2out,
+      bootccalist1 = bootccalist1,
+      bootccalist2 = bootccalist2,
+      allmat1 = allmat1,
+      allmat2 = allmat2,
+      init1 = init1,
+      init2 = init2,
+      jh = jh
     )
-##### old implementation below #####
+  )
+  ##### old implementation below #####
   cca1outAuto <- cca1out
   cca2outAuto <- cca2out
   for (nv in 1:nvecs) {
@@ -276,10 +287,10 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
         prevec <- cca1out[, j]
         vec1[prevec > 0] <- 0
       }
-      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness[1]))
+      cca1out[, nv] <- .eanatsparsify(vec1, abs(sparseness[1]))
       cca1outAuto[, nv] <- cca1out[, nv] # vec1
     } else {
-      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness[1]))
+      cca1out[, nv] <- .eanatsparsify(vec1, abs(sparseness[1]))
       cca1outAuto[, nv] <- cca1out[, nv] # vec1
     }
     ### now vec 2 ###
@@ -294,57 +305,69 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
         prevec <- cca2out[, j]
         vec2[prevec > 0] <- 0
       }
-      cca2out[, nv] <-.eanatsparsify(vec2, abs(sparseness[2]))
+      cca2out[, nv] <- .eanatsparsify(vec2, abs(sparseness[2]))
       cca2outAuto[, nv] <- vec2
     } else {
-      cca2out[, nv] <-.eanatsparsify(vec2, abs(sparseness[2]))
+      cca2out[, nv] <- .eanatsparsify(vec2, abs(sparseness[2]))
       cca2outAuto[, nv] <- vec2
     }
   }
   for (i in 1:ncol(cca1outAuto)) {
     mynorm <- sqrt(sum(cca1outAuto[, i] * cca1outAuto[, i]))
-    if (mynorm > 0)
-      {
-      cca1outAuto[, i] <- cca1outAuto[, i]/mynorm
-        .eanatsparsify( cca1outAuto[, i]/mynorm, abs(sparseness[1]) )
+    if (mynorm > 0) {
+      cca1outAuto[, i] <- cca1outAuto[, i] / mynorm
+      .eanatsparsify(cca1outAuto[, i] / mynorm, abs(sparseness[1]))
       print(sum())
-      }
+    }
     mynorm <- sqrt(sum(cca2outAuto[, i] * cca2outAuto[, i]))
-    if (mynorm > 0)
-      {
+    if (mynorm > 0) {
       cca2outAuto[, i] <-
-        .eanatsparsify( cca2outAuto[, i]/mynorm, abs(sparseness[2]))
-      }
+        .eanatsparsify(cca2outAuto[, i] / mynorm, abs(sparseness[2]))
+    }
   }
   fakemask1 <- makeImage(c(1, 1, ncol(mat1)), 1)
   fakemask2 <- makeImage(c(1, 1, ncol(mat2)), 1)
   usefakemask <- c((length(dim(myres$eig1)) == 2), (length(dim(myres$eig2)) ==
     2))
   locmask <- inmask
-  if (doseg)
+  if (doseg) {
     cca1outAuto <- .matrixSeg(t(cca1outAuto))
-  if (dim(cca1outAuto)[2] != nvecs)
+  }
+  if (dim(cca1outAuto)[2] != nvecs) {
     cca1outAuto <- t(cca1outAuto)
+  }
   cca1out <- (cca1outAuto)
-  if (doseg)
+  if (doseg) {
     cca2outAuto <- .matrixSeg(t(cca2outAuto))
-  if (dim(cca2outAuto)[2] != nvecs)
+  }
+  if (dim(cca2outAuto)[2] != nvecs) {
     cca2outAuto <- t(cca2outAuto)
+  }
   cca2out <- (cca2outAuto)
   ####################################################################################
-  if (usefakemask[1])
-    init1 <- matrixToImages(t(cca1out), fakemask1) else init1 <- matrixToImages(t(cca1out), locmask[[1]])
-  if (usefakemask[2])
-    init2 <- matrixToImages(t(cca2out), fakemask2) else init2 <- matrixToImages(t(cca2out), locmask[[2]])
+  if (usefakemask[1]) {
+    init1 <- matrixToImages(t(cca1out), fakemask1)
+  } else {
+    init1 <- matrixToImages(t(cca1out), locmask[[1]])
+  }
+  if (usefakemask[2]) {
+    init2 <- matrixToImages(t(cca2out), fakemask2)
+  } else {
+    init2 <- matrixToImages(t(cca2out), locmask[[2]])
+  }
   print("Get Final Results")
-  if (!usefakemask[1] & !usefakemask[2])
+  if (!usefakemask[1] & !usefakemask[2]) {
     maskinit <- locmask
-  if (usefakemask[1] & usefakemask[2])
+  }
+  if (usefakemask[1] & usefakemask[2]) {
     maskinit <- c(fakemask1, fakemask2)
-  if (usefakemask[1] & !usefakemask[2])
+  }
+  if (usefakemask[1] & !usefakemask[2]) {
     maskinit <- c(fakemask1, locmask[[2]])
-  if (!usefakemask[1] & usefakemask[2])
+  }
+  if (!usefakemask[1] & usefakemask[2]) {
     maskinit <- c(locmask[[1]], fakemask2)
+  }
   myres <- sparseDecom2(
     inmatrix = inmatrix,
     inmask = maskinit,
@@ -360,7 +383,8 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
     mycoption = mycoption,
     initializationList = init1,
     initializationList2 = init2,
-    ell1 = ell1 )
+    ell1 = ell1
+  )
   ########################################################################
   return(
     list(
@@ -373,12 +397,12 @@ sparseDecom2boot <- function(inmatrix, inmask = c(NULL, NULL),
       bootccalist2 = bootccalist2,
       cca1outAuto = (cca1outAuto),
       cca2outAuto = (cca2outAuto)
-      )
     )
+  )
 }
 
 .cosineDist <- function(xin, yin) {
   x <- t(as.matrix(xin))
   y <- t(as.matrix(yin))
-  return(as.numeric(1 - x %*% t(y)/(sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
+  return(as.numeric(1 - x %*% t(y) / (sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
 }

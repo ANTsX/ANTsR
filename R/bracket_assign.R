@@ -1,5 +1,3 @@
-
-
 # > getGeneric("[<-")
 # standardGeneric for "[<-" defined from package "base"
 # function (x, i, j, ..., value)
@@ -20,12 +18,12 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,logical-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' l = prod(dim(fi))
-#' sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-#' fi[sub] = rnorm(sum(sub))
-#' fi[,1] = array(10, dim = dim(fi[, 1]))
-#' 
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' l <- prod(dim(fi))
+#' sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+#' fi[sub] <- rnorm(sum(sub))
+#' fi[, 1] <- array(10, dim = dim(fi[, 1]))
+#'
 setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "logical"),
@@ -38,24 +36,24 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,array-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "ch2" ))
+#' fi <- antsImageRead(getANTsRData("ch2"))
 #' fi[2, 1, 2]
-#' fi[2, 1, 2] = 4
+#' fi[2, 1, 2] <- 4
 #' fi[, 1, 2]
-#' fi[, 1, 2] = array(10, dim = dim(fi[, 1, 2]))
+#' fi[, 1, 2] <- array(10, dim = dim(fi[, 1, 2]))
 #' fi[2, , 2]
-#' fi[2, , 2] = array(10, dim = dim(fi[2, , 2]))
+#' fi[2, , 2] <- array(10, dim = dim(fi[2, , 2]))
 #' fi[2, 1, ]
 #' # fi[2, 1, ] = array(10, dim = dim(fi[2, 1, ]))
 #' fi[2, , ]
 #' fi[, 1, ]
 #' fi[, , 2]
 #' # fi[, , 2] = array(10, dim = dim(fi[, , 2]))
-#' 
-#' l = prod(dim(fi))
-#' sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-#' sub = array(sub, dim = dim(fi))
-#' fi[sub] = rnorm(sum(sub))
+#'
+#' l <- prod(dim(fi))
+#' sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+#' sub <- array(sub, dim = dim(fi))
+#' fi[sub] <- rnorm(sum(sub))
 setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "array"),
@@ -73,11 +71,11 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,matrix-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' l = prod(dim(fi))
-#' sub = sample(c(TRUE, FALSE), size = l, replace = TRUE)
-#' sub = array(sub, dim = dim(fi))
-#' fi[sub] = rnorm(sum(sub))
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' l <- prod(dim(fi))
+#' sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
+#' sub <- array(sub, dim = dim(fi))
+#' fi[sub] <- rnorm(sum(sub))
 setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "matrix"),
@@ -112,14 +110,14 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,antsImage-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' fi[ fi > 200 ] = 200
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' fi[fi > 200] <- 200
 setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "antsImage"),
   definition = function(x, i, j, ..., value) {
-    if ( i@pixeltype != "unsigned char") {
-      i = antsImageClone(i, out_pixeltype="unsigned char")
+    if (i@pixeltype != "unsigned char") {
+      i <- antsImageClone(i, out_pixeltype = "unsigned char")
     }
     return(ANTsRCore::antsImage_SetByImage(x, i, value))
   }
@@ -194,11 +192,11 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,numeric,numeric,numeric-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' i = sample(seq(nrow(fi)), 5)
-#' i = as.numeric(i)
-#' j = i
-#' fi[ i, j ] = 26.2
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' i <- sample(seq(nrow(fi)), 5)
+#' i <- as.numeric(i)
+#' j <- i
+#' fi[i, j] <- 26.2
 setMethod(
   f = "[<-",
   signature(
@@ -250,8 +248,8 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,numeric,missing,array-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' fi[1,] = array(10, dim = dim(fi[1,]))
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' fi[1, ] <- array(10, dim = dim(fi[1, ]))
 setMethod(
   f = "[<-",
   signature(
@@ -261,7 +259,7 @@ setMethod(
     value = "array"
   ),
   definition = function(x, i, j, ..., value) {
-    j = seq(dim(x)[2])
+    j <- seq(dim(x)[2])
     temp <- antsSetPixels(x, i, j, ..., value = value)
     return(temp)
   }
@@ -271,8 +269,8 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,missing,numeric,array-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData( "r16" ))
-#' fi[,1] = array(10, dim = dim(fi[,1]))
+#' fi <- antsImageRead(getANTsRData("r16"))
+#' fi[, 1] <- array(10, dim = dim(fi[, 1]))
 setMethod(
   f = "[<-",
   signature(
@@ -282,7 +280,7 @@ setMethod(
     value = "array"
   ),
   definition = function(x, i, j, ..., value) {
-    i = seq(dim(x)[1])
+    i <- seq(dim(x)[1])
     temp <- antsSetPixels(x, i, j, ..., value = value)
     return(temp)
   }

@@ -29,27 +29,31 @@
 #' @author Tustison NJ, Avants BB
 #' @examples
 #'
-#' set.seed( 2017 )
+#' set.seed(2017)
 #' boldImages <- list()
-#' n=16
-#' nvox <- n*n*n*12
-#' dims <- c(n,n,n,12)
-#' boldImages[[1]] <- makeImage( dims , rnorm( nvox )+500 )
-#' boldImages[[2]] <- makeImage( dims , rnorm( nvox )+500 )
-#' boldImages[[3]] <- makeImage( dims , rnorm( nvox )+500 )
-#' maskImage = getAverageOfTimeSeries( boldImages[[1]] ) * 0 + 1
-#' icaResults <- antsSpatialICAfMRI( boldImages, maskImage,
-#'   numberOfICAComponents = 2 )
+#' n <- 16
+#' nvox <- n * n * n * 12
+#' dims <- c(n, n, n, 12)
+#' boldImages[[1]] <- makeImage(dims, rnorm(nvox) + 500)
+#' boldImages[[2]] <- makeImage(dims, rnorm(nvox) + 500)
+#' boldImages[[3]] <- makeImage(dims, rnorm(nvox) + 500)
+#' maskImage <- getAverageOfTimeSeries(boldImages[[1]]) * 0 + 1
+#' icaResults <- antsSpatialICAfMRI(boldImages, maskImage,
+#'   numberOfICAComponents = 2
+#' )
 #'
 #' @export antsSpatialICAfMRI
-antsSpatialICAfMRI <- function(boldImages, maskImage = NULL,
-  numberOfICAComponents = 20,
-  normalizeComponentImages = TRUE, verbose=FALSE ) {
-
+antsSpatialICAfMRI <- function(
+    boldImages, maskImage = NULL,
+    numberOfICAComponents = 20,
+    normalizeComponentImages = TRUE, verbose = FALSE) {
   if (is.null(maskImage)) {
     stop("No mask image specified. \n\n")
   }
-  if ( !usePkg("fastICA") ) { print("Need fastICA package"); return(NULL) }
+  if (!usePkg("fastICA")) {
+    print("Need fastICA package")
+    return(NULL)
+  }
   numberOfBoldImages <- length(boldImages)
 
   # Group ICA is performed by concatenating the time series of the bold images
@@ -72,12 +76,14 @@ antsSpatialICAfMRI <- function(boldImages, maskImage = NULL,
       groupBoldMatrix <- rbind(groupBoldMatrix, subjectBoldMatrix)
     }
   }
-#  return( groupBoldMatrix )
+  #  return( groupBoldMatrix )
   # taken from the fastICA package
 
-  icaResults <- fastICA::fastICA(X = t(groupBoldMatrix), n.comp = numberOfICAComponents,
+  icaResults <- fastICA::fastICA(
+    X = t(groupBoldMatrix), n.comp = numberOfICAComponents,
     alg.typ = c("parallel"), fun = c("logcosh"), alpha = 1, method = c("C"),
-    row.norm = FALSE, maxit = 200, tol = 1e-04, verbose = verbose, w.init = NULL)
+    row.norm = FALSE, maxit = 200, tol = 1e-04, verbose = verbose, w.init = NULL
+  )
 
   # create componentImages
 
@@ -99,6 +105,8 @@ antsSpatialICAfMRI <- function(boldImages, maskImage = NULL,
   # PCA components (whitened matrix) = X %*% K ICA components = S = X %*% K %*% W
   # (the ICA algorithm attempts to find the unmixing matrix, W)
 
-  return(list(X = icaResults$X, K = icaResults$K, W = icaResults$W, A = icaResults$A,
-    S = icaResults$S, componentImages = componentImages))
+  return(list(
+    X = icaResults$X, K = icaResults$K, W = icaResults$W, A = icaResults$A,
+    S = icaResults$S, componentImages = componentImages
+  ))
 }

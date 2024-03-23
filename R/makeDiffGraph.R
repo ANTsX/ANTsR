@@ -1,5 +1,3 @@
-
-
 .diffmat <- function(mat) {
   # return( cor( mat ) )
   if (missing(mat)) {
@@ -15,9 +13,14 @@
 }
 
 
-.makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(-0.001,
-  10)) {
-  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+.makeDiffGraph <- function(myrsfnetworkcorrs, graphdensity = 1, correlationThreshold = c(
+                             -0.001,
+                             10
+                           )) {
+  if (!usePkg("igraph")) {
+    print("Need igraph package")
+    return(NULL)
+  }
 
   numberOfNeighbors <- nrow(myrsfnetworkcorrs)
   if (numberOfNeighbors == 0) {
@@ -44,14 +47,16 @@
   # print( paste( 'Graph-Density:',graph.density( g1 ) ) )
   gmetric0 <- igraph::evcent(g1, scale = TRUE)$vector
   gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
-  gmetric2 <- igraph::page.rank(g1, weights = edgeWeights)$vector  #
+  gmetric2 <- igraph::page.rank(g1, weights = edgeWeights)$vector #
   gmetric3 <- igraph::degree(g1)
   gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)
   gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("local"))
   mycommunity <- igraph::fastgreedy.community(g1)
   walktrapcomm <- igraph::walktrap.community(g1)
-  return(list(mygraph = g1, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3,
+  return(list(
+    mygraph = g1, closeness = gmetric1, pagerank = gmetric2, degree = gmetric3,
     betweeness = gmetric4, localtransitivity = gmetric5, community = mycommunity,
     walktrapcomm = walktrapcomm, adjacencyMatrix = adjacencyMatrix, centrality = gmetric0,
-    evcent = igraph::evcent(g1)))
+    evcent = igraph::evcent(g1)
+  ))
 }

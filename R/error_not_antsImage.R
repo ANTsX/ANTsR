@@ -7,10 +7,10 @@
 #' @export
 #'
 #' @examples
-#' img = antsImageRead(getANTsRData('r16'), 2)
-#' error_not_antsImage(img) 
+#' img <- antsImageRead(getANTsRData("r16"), 2)
+#' error_not_antsImage(img)
 #' testthat::expect_error(error_not_antsImage(as.array(img)))
-error_not_antsImage = function(x, argname = "") {
+error_not_antsImage <- function(x, argname = "") {
   if (!is.antsImage(x)) {
     stop(paste("Object", argname, "is not an antsImage object!"))
   }

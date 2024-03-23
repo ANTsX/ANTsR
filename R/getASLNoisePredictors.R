@@ -22,23 +22,23 @@
 #' @examples
 #' # for real data do img<-antsImageRead(getANTsRData("pcasl"),4)
 #' set.seed(120)
-#' img<-makeImage( c(10,10,10,20), rnorm(1000*20)+1 )
-#' mask = getMask( getAverageOfTimeSeries( img ) )
-#' aslmat <- timeseries2matrix( img, mask )
-#' tc <- rep(c(0.5, -0.5), length.out=nrow(aslmat))
-#' noise <- getASLNoisePredictors(aslmat, tc, k=2, npreds=2, noisefrac=0.5 )
-#' cm = colMeans(noise)
-#' rounding_type = RNGkind()[3]
+#' img <- makeImage(c(10, 10, 10, 20), rnorm(1000 * 20) + 1)
+#' mask <- getMask(getAverageOfTimeSeries(img))
+#' aslmat <- timeseries2matrix(img, mask)
+#' tc <- rep(c(0.5, -0.5), length.out = nrow(aslmat))
+#' noise <- getASLNoisePredictors(aslmat, tc, k = 2, npreds = 2, noisefrac = 0.5)
+#' cm <- colMeans(noise)
+#' rounding_type <- RNGkind()[3]
 #' if (getRversion() < "3.6.0" || rounding_type == "Rounding") {
-#'     testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642), tolerance = .01 )
+#'   testthat::expect_equal(cm, c(-0.223292128499263, 0.00434481670243642), tolerance = .01)
 #' } else {
-#'     testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999), tolerance = .01)
+#'   testthat::expect_equal(cm, c(-0.223377249912075, 0.0012754214030999), tolerance = .01)
 #' }
 #'
-#'
 #' @export getASLNoisePredictors
-getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 'loess', k = 5,
-  npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
+getASLNoisePredictors <- function(
+    aslmat, tc, noisefrac = 0.1, polydegree = "loess", k = 5,
+    npreds = 12, method = "noisepool", covariates = NA, noisepoolfun = max) {
   getnoisepool <- function(x, frac = noisefrac) {
     xord <- sort(x)
     l <- round(length(x) * frac)
@@ -53,16 +53,20 @@ getASLNoisePredictors <- function(aslmat, tc, noisefrac = 0.1, polydegree = 'loe
       aslmat <- residuals(lm(aslmat ~ 0 + p))
       if (!all(is.na(covariates))) {
         covariates <- cbind(data.matrix(covariates), p)
-      } else covariates <- p
+      } else {
+        covariates <- p
+      }
     }
-  } else if (polydegree == 'loess') {
+  } else if (polydegree == "loess") {
     timevals <- 1:nrow(aslmat)
     mean.ts <- apply(aslmat, 1, mean)
     myloess <- loess(mean.ts ~ timevals)
     p <- myloess$fitted
     if (!all(is.na(covariates))) {
       covariates <- cbind(data.matrix(covariates), p)
-    } else covariates <- p
+    } else {
+      covariates <- p
+    }
   }
 
   R2base <- crossvalidatedR2(aslmat, tc, k, covariates = covariates)

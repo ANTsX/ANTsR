@@ -16,17 +16,18 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mat <- matrix( rnorm(50000) ,ncol=500)
-#' compcorrdf<-compcor( mat )
+#' mat <- matrix(rnorm(50000), ncol = 500)
+#' compcorrdf <- compcor(mat)
 #'
 #' @export compcor
-compcor <- function(fmri, ncompcor = 4,
-  variance_extreme = 0.975,
-  mask = NULL, randomSamples = 1,
-  returnv = FALSE, returnhighvarmat = FALSE,
-  returnhighvarmatinds = FALSE,
-  highvarmatinds = NA,
-  scale = TRUE ) {
+compcor <- function(
+    fmri, ncompcor = 4,
+    variance_extreme = 0.975,
+    mask = NULL, randomSamples = 1,
+    returnv = FALSE, returnhighvarmat = FALSE,
+    returnhighvarmatinds = FALSE,
+    highvarmatinds = NA,
+    scale = TRUE) {
   if (nargs() == 0) {
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
@@ -37,16 +38,16 @@ compcor <- function(fmri, ncompcor = 4,
     return(NULL)
   }
   if (is.antsImage(fmri) & !is.null(mask)) {
-    mask = check_ants(mask)
+    mask <- check_ants(mask)
     mat <- timeseries2matrix(fmri, mask)
   }
-  if ( inherits(fmri, "matrix")) {
+  if (inherits(fmri, "matrix")) {
     mat <- fmri
   }
   if (is.na(highvarmatinds)) {
     temporalvar <- apply(mat, 2, var)
     tvhist <- hist(temporalvar, breaks = c("FD"), plot = FALSE)
-    percvar <- variance_extreme  # percentage of high variance data to use
+    percvar <- variance_extreme # percentage of high variance data to use
     # get total counts
     totalcounts <- sum(tvhist$counts)
     wh <- (cumsum(tvhist$counts) < (totalcounts * percvar))
@@ -54,9 +55,10 @@ compcor <- function(fmri, ncompcor = 4,
     highvarmatinds <- which(temporalvar > thresh)
   }
   highvarmat <- mat[, highvarmatinds]
-  if ( scale ) highvarmat = scale( highvarmat , scale = FALSE )
-  if (returnhighvarmatinds)
+  if (scale) highvarmat <- scale(highvarmat, scale = FALSE)
+  if (returnhighvarmatinds) {
     return(highvarmatinds)
+  }
   if (!returnv) {
     compcorrsvd <- svd(highvarmat, nu = ncompcor, nv = 0)
     if (ncompcor > 0) {

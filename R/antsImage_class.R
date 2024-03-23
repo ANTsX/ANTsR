@@ -35,26 +35,32 @@ setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric
 #' @slot filename character filename if the data was read in, otherwise
 #' ""
 #' @rdname antsImage
-setClass(Class = "antsImage",
-         representation(pixeltype = "character", dimension = "integer",
-                        components = "integer", pointer = "externalptr",
-                        isVector = "logical",
-                        filename = "character"),
-         prototype=list(isVector=FALSE,
-                        filename = "") )
+setClass(
+  Class = "antsImage",
+  representation(
+    pixeltype = "character", dimension = "integer",
+    components = "integer", pointer = "externalptr",
+    isVector = "logical",
+    filename = "character"
+  ),
+  prototype = list(
+    isVector = FALSE,
+    filename = ""
+  )
+)
 
 #' @rdname antsImage
 #' @aliases show,antsImage-method
-setMethod(f = "show", "antsImage", function(object){
+setMethod(f = "show", "antsImage", function(object) {
   cat("antsImage\n")
   cat("  Pixel Type          :", object@pixeltype, "\n")
   cat("  Components Per Pixel:", object@components, "\n")
-  cat("  Dimensions          :", paste(dim(object), collapse="x"), "\n")
-  cat("  Voxel Spacing       :", paste(antsGetSpacing(object), collapse="x"), "\n")
+  cat("  Dimensions          :", paste(dim(object), collapse = "x"), "\n")
+  cat("  Voxel Spacing       :", paste(antsGetSpacing(object), collapse = "x"), "\n")
   cat("  Origin              :", antsGetOrigin(object), "\n")
   cat("  Direction           :", antsGetDirection(object), "\n")
-  fname = slot(object, "filename")
-  if (length(fname) > 0){
+  fname <- slot(object, "filename")
+  if (length(fname) > 0) {
     if (fname != "") {
       cat("  Filename           :", fname, "\n")
     }
@@ -70,13 +76,15 @@ setMethod(f = "show", "antsImage", function(object){
 #' @slot isVector boolean
 #' @slot filename character filename if the data was read in, otherwise
 #' ""
-setMethod(f = "initialize", signature(.Object = "antsImage"),
-          definition = function(.Object,
-                                pixeltype = "float", dimension = 3, components = 1,
-                                isVector=FALSE,
-                                filename = "") {
-            return(ANTsRCore::antsImage(pixeltype, dimension, components))
-          })
+setMethod(
+  f = "initialize", signature(.Object = "antsImage"),
+  definition = function(.Object,
+                        pixeltype = "float", dimension = 3, components = 1,
+                        isVector = FALSE,
+                        filename = "") {
+    return(ANTsRCore::antsImage(pixeltype, dimension, components))
+  }
+)
 
 #' @rdname as.array
 #' @name as.array
@@ -95,57 +103,63 @@ setMethod(f = "dim", signature(x = "antsImage"), definition = function(x) {
 #' @param region a \code{antsRegion} object
 #' @export
 #' @examples
-#' outimg<-makeImage( c(2,10) , rnorm(20))
+#' outimg <- makeImage(c(2, 10), rnorm(20))
 #' as.numeric(outimg)
 #' as.numeric(outimg, mask = outimg > 1)
-#'  testthat::expect_error(as.numeric(outimg, mask = outimg))
+#' testthat::expect_error(as.numeric(outimg, mask = outimg))
 #'
-setMethod(f = "as.numeric", signature(x = "antsImage"),
-          definition = function(x,
-                                mask = logical(),
-                                region = new("antsRegion",
-                                             index = integer(), size = integer())
-          ) {
-            mask = c(coerce_mask(mask))
-            if (typeof(mask) != "logical") {
-              stop("'mask' provided is not of type 'logical'")
-            }
-            num = ANTsRCore::antsImage_asVector(x, mask, region)
-            num = as.numeric(num)
-            return(num)
-          })
+setMethod(
+  f = "as.numeric", signature(x = "antsImage"),
+  definition = function(x,
+                        mask = logical(),
+                        region = new("antsRegion",
+                          index = integer(), size = integer()
+                        )) {
+    mask <- c(coerce_mask(mask))
+    if (typeof(mask) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    num <- ANTsRCore::antsImage_asVector(x, mask, region)
+    num <- as.numeric(num)
+    return(num)
+  }
+)
 
 #' @rdname as.array
 #' @aliases as.matrix,antsImage-method
 #' @export
 #' @examples
-#' outimg<-makeImage( c(2,10) , rnorm(20))
+#' outimg <- makeImage(c(2, 10), rnorm(20))
 #' as.matrix(outimg)
 #' as.matrix(outimg, mask = outimg > 1)
-#' testthat::expect_error(as.matrix(outimg, mask = outimg) )
-#' outimg<-makeImage( c(2,10,2) , rnorm(40))
-#' testthat::expect_error(as.matrix(outimg) )
-setMethod(f = "as.matrix", signature(x = "antsImage"),
-          definition = function(x, mask = logical(),
-                                region = new("antsRegion", index = integer(), size = integer())) {
-            mask = c(coerce_mask(mask))
-            if (typeof(mask) != "logical") {
-              stop("'mask' provided is not of type 'logical'")
-            }
-            if (x@dimension != 2) {
-              stop("image dimension must be 2")
-            }
-            return(ANTsRCore::antsImage_asVector(x, mask, region))
-          })
+#' testthat::expect_error(as.matrix(outimg, mask = outimg))
+#' outimg <- makeImage(c(2, 10, 2), rnorm(40))
+#' testthat::expect_error(as.matrix(outimg))
+setMethod(
+  f = "as.matrix", signature(x = "antsImage"),
+  definition = function(x, mask = logical(),
+                        region = new("antsRegion", index = integer(), size = integer())) {
+    mask <- c(coerce_mask(mask))
+    if (typeof(mask) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    if (x@dimension != 2) {
+      stop("image dimension must be 2")
+    }
+    return(ANTsRCore::antsImage_asVector(x, mask, region))
+  }
+)
 
 #' @rdname as.array
 #' @export
 #' @method as.matrix antsImage
-as.matrix.antsImage = function(x, ...,
-                               mask = logical(),
-                               region = new("antsRegion", index = integer(),
-                                            size = integer())) {
-  mask = c(coerce_mask(mask))
+as.matrix.antsImage <- function(x, ...,
+                                mask = logical(),
+                                region = new("antsRegion",
+                                  index = integer(),
+                                  size = integer()
+                                )) {
+  mask <- c(coerce_mask(mask))
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
@@ -161,29 +175,33 @@ as.matrix.antsImage = function(x, ...,
 #' @param x object of class \code{antsImage} or \code{antsMatrix}
 #' @param ... additional arguments passed to functions
 #' @aliases as.array,antsImage-method
-setMethod(f = "as.array", signature(x = "antsImage"),
-          definition = function(x, ..., mask = logical(),
-                                region = new("antsRegion", index = integer(), size = integer())) {
-            mask = c(coerce_mask(mask))
-            if (typeof(mask) != "logical") {
-              stop("'mask' provided is not of type 'logical'")
-            }
-            return(ANTsRCore::antsImage_asVector(x, mask, region))
-          })
+setMethod(
+  f = "as.array", signature(x = "antsImage"),
+  definition = function(x, ..., mask = logical(),
+                        region = new("antsRegion", index = integer(), size = integer())) {
+    mask <- c(coerce_mask(mask))
+    if (typeof(mask) != "logical") {
+      stop("'mask' provided is not of type 'logical'")
+    }
+    return(ANTsRCore::antsImage_asVector(x, mask, region))
+  }
+)
 
 #' @rdname as.array
 #' @export
 #' @method as.array antsImage
 #' @examples
-#' outimg<-makeImage( c(2,10) , rnorm(20))
+#' outimg <- makeImage(c(2, 10), rnorm(20))
 #' as.matrix(outimg)
 #' as.matrix(outimg, mask = outimg > 1)
-#' outimg<-makeImage( c(2,10,2) , rnorm(40))
-#' testthat::expect_error(as.matrix(outimg) )
-as.array.antsImage = function(x, ..., mask = logical(),
-                              region = new("antsRegion", index = integer(),
-                                           size = integer())) {
-  mask = c(coerce_mask(mask))
+#' outimg <- makeImage(c(2, 10, 2), rnorm(40))
+#' testthat::expect_error(as.matrix(outimg))
+as.array.antsImage <- function(x, ..., mask = logical(),
+                               region = new("antsRegion",
+                                 index = integer(),
+                                 size = integer()
+                               )) {
+  mask <- c(coerce_mask(mask))
   if (typeof(mask) != "logical") {
     stop("'mask' provided is not of type 'logical'")
   }
@@ -194,16 +212,20 @@ as.array.antsImage = function(x, ..., mask = logical(),
 #' @export
 #' @method as.character antsImage
 #' @examples
-#' img <- antsImageRead( getANTsRData( "r16" ) )
-#' img[img > 5] = 0
+#' img <- antsImageRead(getANTsRData("r16"))
+#' img[img > 5] <- 0
 #' sort(unique(as.character(img)))
 #' factor(img)
 #' table(img, img)
-as.character.antsImage = function(x, ..., mask = logical(),
-                                  region = new("antsRegion", index = integer(),
-                                               size = integer())) {
-  arr = as.array(x, ..., mask = mask,
-                 region = region)
+as.character.antsImage <- function(x, ..., mask = logical(),
+                                   region = new("antsRegion",
+                                     index = integer(),
+                                     size = integer()
+                                   )) {
+  arr <- as.array(x, ...,
+    mask = mask,
+    region = region
+  )
   return(as.character(arr))
 }
 
@@ -211,23 +233,29 @@ as.character.antsImage = function(x, ..., mask = logical(),
 #' @rdname as.array
 #' @export
 #' @method as.factor antsImage
-as.factor.antsImage = function(
-  x, ..., mask = logical(),
-  region = new("antsRegion", index = integer(),
-               size = integer())) {
-  arr = as.array(x, ..., mask = mask,
-                 region = region)
+as.factor.antsImage <- function(
+    x, ..., mask = logical(),
+    region = new("antsRegion",
+      index = integer(),
+      size = integer()
+    )) {
+  arr <- as.array(x, ...,
+    mask = mask,
+    region = region
+  )
   return(as.factor(arr))
 }
 
 #' @rdname as.array
 #' @export
 #' @method factor antsImage
-factor.antsImage = function(
-  x, ..., mask = logical(),
-  region = new("antsRegion", index = integer(),
-               size = integer())) {
-  arr = as.character(x, mask = mask, region)
+factor.antsImage <- function(
+    x, ..., mask = logical(),
+    region = new("antsRegion",
+      index = integer(),
+      size = integer()
+    )) {
+  arr <- as.character(x, mask = mask, region)
   return(factor(arr, ...))
 }
 
@@ -248,12 +276,12 @@ factor.antsImage = function(
 #' @param ... Extra named arguments passed to FUN
 #' @export
 setGeneric(name = "as.antsImage", def = function(
-  object,
-  pixeltype = "float",
-  spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
-  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
-  direction = diag(length(dim(object))),
-  components = FALSE, reference = NULL, ...) {
+    object,
+    pixeltype = "float",
+    spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
+    origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
+    direction = diag(length(dim(object))),
+    components = FALSE, reference = NULL, ...) {
   standardGeneric("as.antsImage")
 })
 
@@ -263,14 +291,13 @@ setMethod(f = "as.antsImage", signature(object = "matrix"), definition = functio
                                                                                   pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
                                                                                   origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
                                                                                   direction = diag(length(dim(object))), components = FALSE, reference = NULL) {
-  if ( is.antsImage(reference) )
-  {
-    pixeltype = reference@pixeltype
-    components = (reference@components > 1)
-    ndim = length(dim(object))
-    spacing = antsGetSpacing(reference)[seq_len(ndim)]
-    origin = antsGetOrigin(reference)[seq_len(ndim)]
-    direction = antsGetDirection(reference)
+  if (is.antsImage(reference)) {
+    pixeltype <- reference@pixeltype
+    components <- (reference@components > 1)
+    ndim <- length(dim(object))
+    spacing <- antsGetSpacing(reference)[seq_len(ndim)]
+    origin <- antsGetOrigin(reference)[seq_len(ndim)]
+    direction <- antsGetDirection(reference)
   }
   return(ANTsRCore::antsImage_asantsImage(object, pixeltype, spacing, origin, direction, components))
 })
@@ -278,21 +305,20 @@ setMethod(f = "as.antsImage", signature(object = "matrix"), definition = functio
 #' @rdname as.antsImage
 #' @aliases as.antsImage,array-method
 #' @examples
-#' arr = array(rnorm(10^3), dim = rep(10, 3))
-#' img = as.antsImage(arr)
-#' i2 = as.antsImage(arr, reference = img)
+#' arr <- array(rnorm(10^3), dim = rep(10, 3))
+#' img <- as.antsImage(arr)
+#' i2 <- as.antsImage(arr, reference = img)
 setMethod(f = "as.antsImage", signature(object = "array"), definition = function(object,
                                                                                  pixeltype = "float", spacing = as.numeric(seq.int(from = 1, by = 0, length.out = length(dim(object)))),
                                                                                  origin = as.numeric(seq.int(from = 0, by = 0, length.out = length(dim(object)))),
                                                                                  direction = diag(length(dim(object))), components = FALSE, reference = NULL) {
-  if ( is.antsImage(reference) )
-  {
-    pixeltype = reference@pixeltype
-    components = (reference@components > 1)
-    ndim = length(dim(object))
-    spacing = antsGetSpacing(reference)[seq_len(ndim)]
-    origin = antsGetOrigin(reference)[seq_len(ndim)]
-    direction = antsGetDirection(reference)
+  if (is.antsImage(reference)) {
+    pixeltype <- reference@pixeltype
+    components <- (reference@components > 1)
+    ndim <- length(dim(object))
+    spacing <- antsGetSpacing(reference)[seq_len(ndim)]
+    origin <- antsGetOrigin(reference)[seq_len(ndim)]
+    direction <- antsGetDirection(reference)
   }
   return(ANTsRCore::antsImage_asantsImage(object, pixeltype, spacing, origin, direction, components))
 })
@@ -304,8 +330,8 @@ setMethod(f = "as.antsImage", signature(object = "array"), definition = function
 #' @param x An object
 #' @return TRUE if \code{object} is antsImage; FALSE otherwise.
 #' @examples
-#' is.antsImage(antsImageRead(getANTsRData('r16'), 2))
+#' is.antsImage(antsImageRead(getANTsRData("r16"), 2))
 #' @export
-is.antsImage <- function(x){
-  inherits(x, 'antsImage')
+is.antsImage <- function(x) {
+  inherits(x, "antsImage")
 }

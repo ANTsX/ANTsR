@@ -62,13 +62,16 @@
     }
     qv <- matrix(p.adjust(pvals), nrow = nvox1, ncol = nvox2)
   }
-  
+
   if (nvox2 > 1) {
     for (x in c(1:nvox1)) {
       vals1 <- vecs1[, x]
       for (y in c(1:nvox2)) {
-        if (nvox2 > 1) 
-          vals2 <- vecs2[, y] else vals2 <- vecs2
+        if (nvox2 > 1) {
+          vals2 <- vecs2[, y]
+        } else {
+          vals2 <- vecs2
+        }
         # pvalue of relationship with the ROI
         modelresults <- (summary(lm(statform)))
         # print(paste('x',x,'y',y,'pval',modelresults$coeff[2,4]))
@@ -83,12 +86,13 @@
       ntw <- c("")
       ntwq <- c("")
       for (y in c(1:nvox2)) {
-        if (!is.na(qv[x, y])) 
+        if (!is.na(qv[x, y])) {
           if (x != y & qv[x, y] < 0.01) {
-          # & betav[x,y] < 0.0 )
-          ntw <- paste(ntw, y - 1)
-          ntwq <- paste(ntwq, qv[x, y])
+            # & betav[x,y] < 0.0 )
+            ntw <- paste(ntw, y - 1)
+            ntwq <- paste(ntwq, qv[x, y])
           }
+        }
       }
       print(paste("Network_for_variate_", x - 1, "includes variates:", ntw))
       print(paste("Network_for_variate_", x - 1, "qvals:", ntwq))
@@ -97,4 +101,4 @@
   # results for both cases are the same betav<-betav*(qv <= 0.05)
   dfm <- data.frame(betas = betav, qvals = 1 - qv, pvals = 1 - pvals)
   write.csv(dfm, paste(id, "qvals.csv", sep = ""), row.names = F, q = T)
-} 
+}

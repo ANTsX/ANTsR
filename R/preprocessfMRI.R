@@ -1,4 +1,4 @@
-maskImage#' Preprocess BOLD fMRI image data.
+#' Preprocess BOLD fMRI image data.
 #'
 #' Preprocess fMRI data by performing compcor/motion correction, nuisance
 #' regression, band-pass filtering, and spatial smoothing.
@@ -57,39 +57,39 @@ maskImage#' Preprocess BOLD fMRI image data.
 #' @author Tustison NJ, Avants BB
 #' @examples
 #' set.seed(123)
-#' n=8
-#' nvox <- n*n*n*6
-#' dims <- c(n,n,n,6)
+#' n <- 8
+#' nvox <- n * n * n * 6
+#' dims <- c(n, n, n, 6)
 #' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
 #' cleanfMRI <- preprocessfMRI(boldImage)
 #' @export preprocessfMRI
-preprocessfMRI <- function(boldImage,
-  maskImage = NULL,
-  maskingMeanRatioThreshold = 0.75,
-  initialNuisanceVariables,
-  numberOfCompCorComponents = 6,
-  doMotionCorrection = TRUE,
-  useMotionCorrectedImage = FALSE,
-  motionCorrectionAccuracyLevel = 1,
-  meanBoldFixedImageForMotionCorrection = NULL,
-  frequencyLowThreshold = NA,
-  frequencyHighThreshold = NA,
-  spatialSmoothingType = "none",
-  spatialSmoothingParameters = 0,
-  residualizeMatrix = TRUE,
-  num_threads = 1,
-  seed = NULL  ) {
-
+preprocessfMRI <- function(
+    boldImage,
+    maskImage = NULL,
+    maskingMeanRatioThreshold = 0.75,
+    initialNuisanceVariables,
+    numberOfCompCorComponents = 6,
+    doMotionCorrection = TRUE,
+    useMotionCorrectedImage = FALSE,
+    motionCorrectionAccuracyLevel = 1,
+    meanBoldFixedImageForMotionCorrection = NULL,
+    frequencyLowThreshold = NA,
+    frequencyHighThreshold = NA,
+    spatialSmoothingType = "none",
+    spatialSmoothingParameters = 0,
+    residualizeMatrix = TRUE,
+    num_threads = 1,
+    seed = NULL) {
   ###################################
   # set for reproducibility
   ###################################
-  ants_random_seed = itk_threads = NULL
+  ants_random_seed <- itk_threads <- NULL
   if (!is.null(seed)) {
-    ants_random_seed = Sys.getenv("ANTS_RANDOM_SEED")
+    ants_random_seed <- Sys.getenv("ANTS_RANDOM_SEED")
     Sys.setenv(ANTS_RANDOM_SEED = seed)
   }
   if (!is.null(num_threads)) {
-    itk_threads = Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
+    itk_threads <- Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
     Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
   }
   on.exit({
@@ -103,8 +103,9 @@ preprocessfMRI <- function(boldImage,
 
 
   nuisanceVariables <- NULL
-  if ( ! missing(  initialNuisanceVariables  ) )
+  if (!missing(initialNuisanceVariables)) {
     nuisanceVariables <- initialNuisanceVariables
+  }
 
   numberOfTimePoints <- dim(boldImage)[4]
 
@@ -113,25 +114,31 @@ preprocessfMRI <- function(boldImage,
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
     motionCorrectionResults <- .motion_correction(
-      boldImage, 
+      boldImage,
       fixed = meanBoldFixedImageForMotionCorrection,
       moreaccurate = motionCorrectionAccuracyLevel,
       num_threads = num_threads,
-      seed = seed)
+      seed = seed
+    )
     motionCorrectionParameters <- motionCorrectionResults$moco_params
     nuisanceVariables <- as.matrix(motionCorrectionParameters)[, 3:ncol(motionCorrectionParameters)]
-    if ( ! missing(  initialNuisanceVariables  ) )
-      nuisanceVariables <- cbind( initialNuisanceVariables, nuisanceVariables )
+    if (!missing(initialNuisanceVariables)) {
+      nuisanceVariables <- cbind(initialNuisanceVariables, nuisanceVariables)
+    }
     for (i in 2:numberOfTimePoints) {
-      motionCorrectionParametersAtTime1 <- c(motionCorrectionParameters[i,
-        3:14])
+      motionCorrectionParametersAtTime1 <- c(motionCorrectionParameters[
+        i,
+        3:14
+      ])
       rotationMatrixAtTime1 <- matrix(as.numeric(motionCorrectionParametersAtTime1[1:9]),
-        ncol = 3, nrow = 3)
+        ncol = 3, nrow = 3
+      )
       translationAtTime1 <- as.numeric(motionCorrectionParametersAtTime1[10:12])
       motionCorrectionParametersAtTime2 <- c(motionCorrectionParameters[i -
         1, 3:14])
       rotationMatrixAtTime2 <- matrix(as.numeric(motionCorrectionParametersAtTime2[1:9]),
-        ncol = 3, nrow = 3)
+        ncol = 3, nrow = 3
+      )
       translationAtTime2 <- as.numeric(motionCorrectionParametersAtTime2[10:12])
 
       # pick a point 10 mm from the center
@@ -144,7 +151,7 @@ preprocessfMRI <- function(boldImage,
         translationAtTime1
       transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% samplePoint +
         translationAtTime2
-      framewiseDisplacement[i] <- dist( rbind(transformedPointAtTime2,transformedPointAtTime1 ))[[1]]
+      framewiseDisplacement[i] <- dist(rbind(transformedPointAtTime2, transformedPointAtTime1))[[1]]
     }
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
 
@@ -163,9 +170,9 @@ preprocessfMRI <- function(boldImage,
   # Calculate the mask, if not supplied.
 
   if (is.null(maskImage)) {
-    maskImage <- getMask( averageImage )
+    maskImage <- getMask(averageImage)
   } else {
-    maskImage = check_ants(maskImage)
+    maskImage <- check_ants(maskImage)
   }
   averageImage[maskImage == 0] <- 0
 
@@ -178,8 +185,10 @@ preprocessfMRI <- function(boldImage,
   # Calculate CompCor nuisance variables
   # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2214855/
   if (numberOfCompCorComponents > 0) {
-    compCorNuisanceVariables <- compcor(boldImage, maskImage, ncompcor = numberOfCompCorComponents,
-      variance_extreme = 0.975)
+    compCorNuisanceVariables <- compcor(boldImage, maskImage,
+      ncompcor = numberOfCompCorComponents,
+      variance_extreme = 0.975
+    )
     nuisanceVariables <- cbind(nuisanceVariables, compCorNuisanceVariables)
   }
 
@@ -190,8 +199,10 @@ preprocessfMRI <- function(boldImage,
   # replace boldMatrix in place with frequency filtered version
   if (!is.na(frequencyHighThreshold) & !is.na(frequencyHighThreshold) & (frequencyLowThreshold !=
     frequencyHighThreshold)) {
-    boldMatrix <- frequencyFilterfMRI(boldMatrix, tr = antsGetSpacing(boldImage)[4],
-      freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig")
+    boldMatrix <- frequencyFilterfMRI(boldMatrix,
+      tr = antsGetSpacing(boldImage)[4],
+      freqLo = frequencyLowThreshold, freqHi = frequencyHighThreshold, opt = "trig"
+    )
   }
   DVARSpostCleaning <- computeDVARS(boldMatrix)
 
@@ -200,19 +211,21 @@ preprocessfMRI <- function(boldImage,
   cleanBoldImage <- matrix2timeseries(boldImage, maskImage, boldMatrix)
 
   # anisotropically smooth the 4-D image, if desired
-  smoothCleanBoldImage = cleanBoldImage*1
+  smoothCleanBoldImage <- cleanBoldImage * 1
 
   if (spatialSmoothingType == "gaussian") {
     if (length(spatialSmoothingParameters) == 1) {
-      sigmaVector <- c( rep( spatialSmoothingParameters[1], 3, ), 0 )
+      sigmaVector <- c(rep(spatialSmoothingParameters[1], 3, ), 0)
       smoothCleanBoldImage <- smoothImage(cleanBoldImage, sigmaVector)
     } else {
       stop("Expecting a single scalar parameter.")
     }
   } else if (spatialSmoothingType == "perona-malik") {
     if (length(spatialSmoothingParameters) == 2) {
-      smoothCleanBoldImage <- iMath(cleanBoldImage, "PeronaMalik", spatialSmoothingParameters[1],
-        spatialSmoothingParameters[2])
+      smoothCleanBoldImage <- iMath(
+        cleanBoldImage, "PeronaMalik", spatialSmoothingParameters[1],
+        spatialSmoothingParameters[2]
+      )
     } else {
       stop("Expecting a two element vector.")
       return
@@ -221,7 +234,9 @@ preprocessfMRI <- function(boldImage,
     stop("Unrecognized smoothing option.")
   }
   #####################################################################
-  return(list(cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,
+  return(list(
+    cleanBoldImage = smoothCleanBoldImage, maskImage = maskImage, DVARS = DVARS,
     DVARSpostCleaning = DVARSpostCleaning, FD = framewiseDisplacement, globalSignal = globalSignal,
-    nuisanceVariables = nuisanceVariables))
+    nuisanceVariables = nuisanceVariables
+  ))
 }

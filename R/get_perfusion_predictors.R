@@ -13,9 +13,9 @@
   }
   if (is.null(xideal)) {
     if (!labelfirst) {
-      xideal <- (rep(c(1, 0), dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # control minus tag
+      xideal <- (rep(c(1, 0), dim(mat)[1])[1:dim(mat)[1]] - 0.5) # control minus tag
     } else {
-      xideal <- (rep(c(0, 1), dim(mat)[1])[1:dim(mat)[1]] - 0.5)  # tag minus control
+      xideal <- (rep(c(0, 1), dim(mat)[1])[1:dim(mat)[1]] - 0.5) # tag minus control
     }
   } else if (length(xideal) != dim(mat)[1]) {
     print("'xideal' must have length equal to dim(mat)[1]")
@@ -23,28 +23,28 @@
   }
   # get nuisance variables : motion, compcor, etc motionparams <- as.data.frame(
   # moco_params )
-  motionnuis <- t(motionparams)[2:ncol(motionparams), ]  # matrix elements
+  motionnuis <- t(motionparams)[2:ncol(motionparams), ] # matrix elements
   metricnuis <- motionnuis[1, ]
   globalsignal <- rowMeans(mat)
   globalsignalASL <- residuals(lm(globalsignal ~ xideal))
-  
+
   # here is a 2nd (new) way to deal with motion nuisance vars - svd - just keep top
   # 3 components
   msvd <- svd(t(motionnuis[2:nrow(motionnuis), ]))
   nsvdcomp <- 3
   motionnuis <- (msvd$u[, 1:nsvdcomp])
-  motionnuis <- residuals(lm(motionnuis~xideal))
-  print(paste(" % var of motion ", (sum(msvd$d[1:nsvdcomp])/sum(msvd$d))))
+  motionnuis <- residuals(lm(motionnuis ~ xideal))
+  print(paste(" % var of motion ", (sum(msvd$d[1:nsvdcomp]) / sum(msvd$d))))
   motionnuis <- t(motionnuis)
   motnames <- paste("motion", c(1:nrow(motionnuis)), sep = "")
   nuis <- t(rbind(metricnuis, (motionnuis)))
   colnames(nuis) <- c("metricnuis", motnames)
-  nuis <- t( motionnuis )
+  nuis <- t(motionnuis)
   colnames(nuis) <- motnames
-  dnz<-NA
-  if ( ncompcorparameters > 0 | ! is.null(useDenoiser)) {
-    if (  ncompcorparameters > 0 ) {
-      rmat<-residuals(lm( mat ~ xideal + nuis ))
+  dnz <- NA
+  if (ncompcorparameters > 0 | !is.null(useDenoiser)) {
+    if (ncompcorparameters > 0) {
+      rmat <- residuals(lm(mat ~ xideal + nuis))
       denoisingParams <- compcor(mat, ncompcorparameters)
     }
     if (!is.null(useDenoiser)) {
@@ -56,22 +56,29 @@
       #        crossvalidationgroups = 6,
       #        scalemat = F, noisepoolfun = max)
       #      clustasl<-(clusterTimeSeries( mat,  8 )$clusters)
-      clustasl<-8
-      dnz<-aslDenoiseR( mat, xideal, covariates=DVARS,
-                        selectionthresh=0.05, crossvalidationgroups=clustasl,
-                        maxnoisepreds=useDenoiser, polydegree='loess' )
+      clustasl <- 8
+      dnz <- aslDenoiseR(mat, xideal,
+        covariates = DVARS,
+        selectionthresh = 0.05, crossvalidationgroups = clustasl,
+        maxnoisepreds = useDenoiser, polydegree = "loess"
+      )
       denoisingParams <- data.matrix(data.frame(dnz$noiseu))
-      dnz<-dnz$R2final
+      dnz <- dnz$R2final
     }
-    if ( exists("denoisingParams") )
-    {
+    if (exists("denoisingParams")) {
       compcorrnames <- paste("denoisingParams",
-                             c(1:ncol(denoisingParams)), sep = "")
+        c(1:ncol(denoisingParams)),
+        sep = ""
+      )
       colnames(denoisingParams) <- c(compcorrnames)
     }
-  } else denoisingParams<-NA
-  return( list(xideal = xideal, nuis = denoisingParams,
-               motion = t( motionnuis ),
-               globalsignal = globalsignal,
-               globalsignalASL = globalsignalASL, dnz=dnz ))
+  } else {
+    denoisingParams <- NA
+  }
+  return(list(
+    xideal = xideal, nuis = denoisingParams,
+    motion = t(motionnuis),
+    globalsignal = globalsignal,
+    globalsignalASL = globalsignalASL, dnz = dnz
+  ))
 }

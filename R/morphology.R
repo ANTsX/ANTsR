@@ -34,72 +34,80 @@
 #' @author Avants BB
 #' @examples
 #'
-#' fi<-antsImageRead( getANTsRData("r16") , 2 )
-#' mask<-getMask( fi )
-#' dilatedBall = morphology( mask, operation="dilate", radius=3, 
-#' type="binary", shape="ball")
-#' erodedBox = morphology( mask, operation="erode", radius=3, 
-#' type="binary", shape="box")
-#' openedAnnulus = morphology( mask, operation="open", radius=5, 
-#' type="binary", shape="annulus", thickness=2)
-#' out = morphology(mask, operation="open", radius=5, type = "binary", shape = "polygon")
-#' out = morphology(mask, operation="open", radius=5, type = "binary", shape = "cross")
-#' out = morphology(mask, operation="close", radius=5, type = "binary", shape = "polygon")
-#' out = morphology(mask, operation="erode", radius=5, type = "binary", shape = "polygon")
-#' out = morphology(mask, operation="dilate", radius=5, type = "binary", shape = "polygon")
+#' fi <- antsImageRead(getANTsRData("r16"), 2)
+#' mask <- getMask(fi)
+#' dilatedBall <- morphology(mask,
+#'   operation = "dilate", radius = 3,
+#'   type = "binary", shape = "ball"
+#' )
+#' erodedBox <- morphology(mask,
+#'   operation = "erode", radius = 3,
+#'   type = "binary", shape = "box"
+#' )
+#' openedAnnulus <- morphology(mask,
+#'   operation = "open", radius = 5,
+#'   type = "binary", shape = "annulus", thickness = 2
+#' )
+#' out <- morphology(mask, operation = "open", radius = 5, type = "binary", shape = "polygon")
+#' out <- morphology(mask, operation = "open", radius = 5, type = "binary", shape = "cross")
+#' out <- morphology(mask, operation = "close", radius = 5, type = "binary", shape = "polygon")
+#' out <- morphology(mask, operation = "erode", radius = 5, type = "binary", shape = "polygon")
+#' out <- morphology(mask, operation = "dilate", radius = 5, type = "binary", shape = "polygon")
 #' testthat::expect_error(morphology(mask, operation = "open", radius = 5, shape = "hey"))
 #' @export morphology
-morphology <- function(input, operation, radius, type="binary", value=1, shape="ball",
-                       radiusIsParametric=FALSE, thickness=1, lines=3,
-                       includeCenter=FALSE) {
-  
-  input = check_ants(input)
-  
-  if ( input@components > 1 )
-  {
+morphology <- function(input, operation, radius, type = "binary", value = 1, shape = "ball",
+                       radiusIsParametric = FALSE, thickness = 1, lines = 3,
+                       includeCenter = FALSE) {
+  input <- check_ants(input)
+
+  if (input@components > 1) {
     stop("Multichannel images not yet supported")
   }
-  
-  shapes = c("ball", "box", "cross", "annulus", "polygon")
-  shape = match.arg(shape, choices = shapes)
-  
-  sFlag = switch( 
-    shape,
+
+  shapes <- c("ball", "box", "cross", "annulus", "polygon")
+  shape <- match.arg(shape, choices = shapes)
+
+  sFlag <- switch(shape,
     ball = 1,
     box = 2,
     cross = 3,
     annulus = 4,
-    polygon = 5)
-  
-  ops = c("dilate", "erode", "open", "close")
-  operation = match.arg(operation, choices = ops)
-  second_letter = substr(operation, 1, 1)
-  second_letter = toupper(second_letter)
-  
-  types = c("binary", "grayscale", "greyscale")
-  type = match.arg(type, choices = types)
-  first_letter = switch(
-    type,
+    polygon = 5
+  )
+
+  ops <- c("dilate", "erode", "open", "close")
+  operation <- match.arg(operation, choices = ops)
+  second_letter <- substr(operation, 1, 1)
+  second_letter <- toupper(second_letter)
+
+  types <- c("binary", "grayscale", "greyscale")
+  type <- match.arg(type, choices = types)
+  first_letter <- switch(type,
     binary = "M",
     grayscale = "G",
-    greyscale = "G")
-  imath_op = paste0(first_letter, second_letter)
-  
+    greyscale = "G"
+  )
+  imath_op <- paste0(first_letter, second_letter)
+
   if (first_letter == "G") {
-    ret = iMath(input, imath_op, radius)
+    ret <- iMath(input, imath_op, radius)
   }
   if (first_letter == "M") {
-    args = list(input, imath_op, radius, value, 
-                sFlag, radiusIsParametric, 
-                thickness, includeCenter)
+    args <- list(
+      input, imath_op, radius, value,
+      sFlag, radiusIsParametric,
+      thickness, includeCenter
+    )
     # polygon is different
-    if ( sFlag == 5 ) {
-      args = list(input, imath_op, radius, value, 
-                  sFlag, lines)
+    if (sFlag == 5) {
+      args <- list(
+        input, imath_op, radius, value,
+        sFlag, lines
+      )
     }
-    ret = do.call("iMath", args = args)
-  }    
-  
+    ret <- do.call("iMath", args = args)
+  }
+
   return(ret)
   # if ( type == "binary" )
   #   {
@@ -179,7 +187,6 @@ morphology <- function(input, operation, radius, type="binary", value=1, shape="
   #   {
   #   stop("Invalid morphology type")
   #   }
-  
+
   # return(ret)
-  
 }

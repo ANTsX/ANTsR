@@ -6,7 +6,7 @@
   sums <- colSums(regions)
   for (i in c(1:length(sums))) {
     if (sums[i] != 0) {
-      regions[, i] <- regions[, i]/sums[i]
+      regions[, i] <- regions[, i] / sums[i]
     }
   }
   corrs <- cor(regions)

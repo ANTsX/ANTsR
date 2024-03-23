@@ -16,40 +16,47 @@
 #' @examples
 #' \dontrun{
 #' # if you dont have images
-#' mat<-replicate(100, rnorm(20))
-#' mydecom<-sparseDecom( mat )
-#' kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , 0.1 )
+#' mat <- replicate(100, rnorm(20))
+#' mydecom <- sparseDecom(mat)
+#' kk <- joinEigenanatomy(mat, mask = NULL, mydecom$eigenanatomyimages, 0.1)
 #' # or select optimal parameter from a list
-#' kk<-joinEigenanatomy( mat, mask=NULL, mydecom$eigenanatomyimages , c(1:10)/50 )
+#' kk <- joinEigenanatomy(mat, mask = NULL, mydecom$eigenanatomyimages, c(1:10) / 50)
 #' # something similar may be done with images
-#' mask<-as.antsImage( t(as.matrix(array(rep(1,ncol(mat)),ncol(mat)))) )
-#' mydecom<-sparseDecom( mat, inmask=mask )
-#' eanatimages = matrixToImages( mydecom$eigenanatomyimages, mask )
-#' kki<-joinEigenanatomy( mat, mask=mask, eanatimages , 0.1 )
-#' if ( usePkg("igraph") ) {
-#'   mydecomf<-sparseDecom( mat, inmask=mask, initializationList=kki$fusedlist ,
-#'     sparseness=0, nvecs=length(kki$fusedlist) )
-#'  }
+#' mask <- as.antsImage(t(as.matrix(array(rep(1, ncol(mat)), ncol(mat)))))
+#' mydecom <- sparseDecom(mat, inmask = mask)
+#' eanatimages <- matrixToImages(mydecom$eigenanatomyimages, mask)
+#' kki <- joinEigenanatomy(mat, mask = mask, eanatimages, 0.1)
+#' if (usePkg("igraph")) {
+#'   mydecomf <- sparseDecom(mat,
+#'     inmask = mask, initializationList = kki$fusedlist,
+#'     sparseness = 0, nvecs = length(kki$fusedlist)
+#'   )
+#' }
 #' }
 #' @export joinEigenanatomy
-joinEigenanatomy <- function(datamatrix, mask = NULL, listEanatImages,
-  graphdensity = 0.65,
-  joinMethod = 'walktrap', verbose = F) {
+joinEigenanatomy <- function(
+    datamatrix, mask = NULL, listEanatImages,
+    graphdensity = 0.65,
+    joinMethod = "walktrap", verbose = F) {
   if (nargs() == 0) {
     print("Usage: ")
     print(args(joinEigenanatomy))
     return(1)
   }
-  if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
+  if (!usePkg("igraph")) {
+    print("Need igraph package")
+    return(NULL)
+  }
   if (!is.null(mask)) {
-    mask = check_ants(mask)
-    decom <- imageListToMatrix(listEanatImages, mask) 
+    mask <- check_ants(mask)
+    decom <- imageListToMatrix(listEanatImages, mask)
   } else {
     decom <- (listEanatImages)
   }
   for (i in 1:nrow(decom)) {
-    if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0)
+    if (min(decom[i, ]) < 0 & max(decom[i, ]) == 0) {
       decom[i, ] <- decom[i, ] * (-1)
+    }
   }
   myproj <- datamatrix %*% t(decom)
   mycor <- cor(myproj)
@@ -65,25 +72,29 @@ joinEigenanatomy <- function(datamatrix, mask = NULL, listEanatImages,
         newe[mask > 0] <- 0
         templist <- listEanatImages[communitymembership == cl]
         for (eimg in templist) {
-          newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0]/sum(eimg[mask >
-          0])
+          newe[mask > 0] <- newe[mask > 0] + eimg[mask > 0] / sum(eimg[mask >
+            0])
           # print(sum(newe > 0)/sum(mask > 0))
         }
-        newe[mask > 0] <- newe[mask > 0]/sum(newe[mask > 0])
+        newe[mask > 0] <- newe[mask > 0] / sum(newe[mask > 0])
         newelist <- lappend(newelist, newe)
       }
       decom2 <- imageListToMatrix(newelist, mask)
     }
     if (is.null(mask)) {
       newdecom <- matrix(rep(0, ncol(datamatrix) * max(communitymembership)),
-        nrow = max(communitymembership))
+        nrow = max(communitymembership)
+      )
       for (cl in 1:max(communitymembership)) {
         vec <- rep(0, ncol(datamatrix))
         ntosum <- sum(communitymembership == cl)
         tempmat <- decom[communitymembership == cl, ]
-        if (ntosum > 1)
-          tempvec <- apply(tempmat, FUN = sum, MARGIN = 2) else tempvec <- tempmat
-        tempvec <- tempvec/sum(abs(tempvec))
+        if (ntosum > 1) {
+          tempvec <- apply(tempmat, FUN = sum, MARGIN = 2)
+        } else {
+          tempvec <- tempmat
+        }
+        tempvec <- tempvec / sum(abs(tempvec))
         newdecom[cl, ] <- tempvec
       }
       decom2 <- newdecom
@@ -106,6 +117,8 @@ joinEigenanatomy <- function(datamatrix, mask = NULL, listEanatImages,
   }
   myproj <- datamatrix %*% t(decom2)
   colnames(myproj) <- paste("V", 1:ncol(myproj), sep = "")
-  return(list(fusedlist = newelist, fusedproj = myproj, memberships = communitymembership,
-    graph = gg, bestdensity = graphdensity))
+  return(list(
+    fusedlist = newelist, fusedproj = myproj, memberships = communitymembership,
+    graph = gg, bestdensity = graphdensity
+  ))
 }

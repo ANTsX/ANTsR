@@ -16,35 +16,40 @@
 #' @author Avants BB
 #' @examples
 #'
-#'   # make some simple data
-#'   \dontrun{
-#'   if (!exists("fn") ) fn<-getANTsRData("pcasl")
-#'   asl<-antsImageRead(fn)
-#'   tr<-antsGetSpacing(asl)[4]
-#'   aslmean<-getAverageOfTimeSeries( asl )
-#'   aslmask<-getMask(aslmean,lowThresh=mean(aslmean),cleanup=TRUE)
-#'   pcaslpre <- aslPerfusion( asl, dorobust=0, useDenoiser=NULL, skip=1,
-#'      useBayesian=0, moreaccurate=0, verbose=T, mask=aslmask ) 
-#'   # user might compare to useDenoiser=FALSE
-#'   pcasl.parameters <- list( sequence="pcasl", m0=pcaslpre$m0 )
-#'   aslmat<-timeseries2matrix(asl,aslmask)
-#'   tc<-as.factor(rep(c("C","T"),nrow(aslmat)/2))
-#'   dv<-computeDVARS(aslmat)
-#'   perfmodel<-lm( aslmat ~ tc + stats::poly(dv,4) ) # standard model
-#'   ssp<-spatialbayesianlm( perfmodel, aslmat, aslmask,
-#'     priorWeight=1.e2 ,smth=1.6, nhood=rep(2,3) )
-#'   plot( ssp[[1]], slices="2x16x2", axis=3 )
-#'   }
+#' # make some simple data
+#' \dontrun{
+#' if (!exists("fn")) fn <- getANTsRData("pcasl")
+#' asl <- antsImageRead(fn)
+#' tr <- antsGetSpacing(asl)[4]
+#' aslmean <- getAverageOfTimeSeries(asl)
+#' aslmask <- getMask(aslmean, lowThresh = mean(aslmean), cleanup = TRUE)
+#' pcaslpre <- aslPerfusion(asl,
+#'   dorobust = 0, useDenoiser = NULL, skip = 1,
+#'   useBayesian = 0, moreaccurate = 0, verbose = T, mask = aslmask
+#' )
+#' # user might compare to useDenoiser=FALSE
+#' pcasl.parameters <- list(sequence = "pcasl", m0 = pcaslpre$m0)
+#' aslmat <- timeseries2matrix(asl, aslmask)
+#' tc <- as.factor(rep(c("C", "T"), nrow(aslmat) / 2))
+#' dv <- computeDVARS(aslmat)
+#' perfmodel <- lm(aslmat ~ tc + stats::poly(dv, 4)) # standard model
+#' ssp <- spatialbayesianlm(perfmodel, aslmat, aslmask,
+#'   priorWeight = 1.e2, smth = 1.6, nhood = rep(2, 3)
+#' )
+#' plot(ssp[[1]], slices = "2x16x2", axis = 3)
+#' }
 #'
 #' @export spatialbayesianlm
-spatialbayesianlm <- function(mylm, ymat, mask, smth = 1, priorWeight = 1, nhood = NA,
-  regweights = NA, smoothcoeffmat = NA) {
+spatialbayesianlm <- function(
+    mylm, ymat, mask, smth = 1, priorWeight = 1, nhood = NA,
+    regweights = NA, smoothcoeffmat = NA) {
   if (sum(mask == 1) != ncol(ymat)) {
     print("spatialbayesianlm: mask does not match ymat dimensions")
     return(NA)
   }
-  if (all(is.na(nhood)))
+  if (all(is.na(nhood))) {
     nhood <- rep(1, mask@dimension)
+  }
   if (all(is.na(regweights))) {
     regweights <- ymat
     regweights[] <- 1
@@ -57,13 +62,14 @@ spatialbayesianlm <- function(mylm, ymat, mask, smth = 1, priorWeight = 1, nhood
     regweights <- ymat
     regweights[] <- 1
   }
-  if (all(is.na(smoothcoeffmat)))
+  if (all(is.na(smoothcoeffmat))) {
     smoothcoeffmat <- mylm$coefficients
+  }
   nmatimgs <- list()
   for (i in 1:nrow(smoothcoeffmat)) {
     temp <- antsImageClone(mask)
     temp[mask == 1] <- smoothcoeffmat[i, ]
-    temp<-smoothImage(temp, smth)
+    temp <- smoothImage(temp, smth)
     nmatimgs[[i]] <- getNeighborhoodInMask(temp, mask, nhood, boundary.condition = "mean")
     smoothcoeffmat[i, ] <- temp[mask == 1]
   }
@@ -75,15 +81,24 @@ spatialbayesianlm <- function(mylm, ymat, mask, smth = 1, priorWeight = 1, nhood
   posteriorI <- rep(0, ncol(ymat))
   for (v in 1:ncol(ymat)) {
     parammat <- nmatimgs[[1]][, v]
-    for (k in 2:length(nmatimgs)) parammat <- cbind(parammat, nmatimgs[[k]][,
-      v])
+    for (k in 2:length(nmatimgs)) {
+      parammat <- cbind(parammat, nmatimgs[[k]][
+        ,
+        v
+      ])
+    }
     pcov <- cov(parammat)
-    locinvcov <- tryCatch(solve(pcov), error = function(e) return(invcov))
-    if (typeof(locinvcov) == "character")
+    locinvcov <- tryCatch(solve(pcov), error = function(e) {
+      return(invcov)
+    })
+    if (typeof(locinvcov) == "character") {
       locinvcov <- invcov
+    }
     prior <- (smoothcoeffmat[, v])
-    blm <- bayesianlm(blmX, ymat[, v], prior, locinvcov * priorWeight, regweights = regweights[,
-      v])
+    blm <- bayesianlm(blmX, ymat[, v], prior, locinvcov * priorWeight, regweights = regweights[
+      ,
+      v
+    ])
     betamatrix[, v] <- blm$beta
     posteriorI[v] <- blm$posteriorProbability
   }

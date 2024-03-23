@@ -16,54 +16,53 @@
 #' @author N Tustison, B Avants
 #' @examples
 #'
-#' img <- antsImageRead( getANTsRData("rand")  ) %>% resampleImage( c(32, 32) )
-#' dimg <- denoiseImage( img, img * 0 + 1 )
-#' dimg2 <- denoiseImage( img)
+#' img <- antsImageRead(getANTsRData("rand")) %>% resampleImage(c(32, 32))
+#' dimg <- denoiseImage(img, img * 0 + 1)
+#' dimg2 <- denoiseImage(img)
 #'
 #' @export denoiseImage
 denoiseImage <- function(
-  img,
-  mask,
-  shrinkFactor = 1,
-  p = 1,
-  r = 3,
-  noiseModel = c("Rician","Gaussian"),
-  verbose = FALSE )
-  {
-  img = check_ants(img)
+    img,
+    mask,
+    shrinkFactor = 1,
+    p = 1,
+    r = 3,
+    noiseModel = c("Rician", "Gaussian"),
+    verbose = FALSE) {
+  img <- check_ants(img)
 
-  outimg = antsImageClone( img )
-  noiseModel = match.arg(noiseModel)
-  mydim = img@dimension
-  if ( length( p ) > 1 ) pvar = paste0( p, collapse='x' ) else pvar=p
-  if ( length( r ) > 1 ) rvar = paste0( r, collapse='x' ) else rvar=r
-  if (  ! missing( mask ) ) {
-    mask = check_ants(mask)
-    mskIn = antsImageClone( mask, 'unsigned char')
-    mskIn = antsCopyImageInfo( img, mskIn )
+  outimg <- antsImageClone(img)
+  noiseModel <- match.arg(noiseModel)
+  mydim <- img@dimension
+  if (length(p) > 1) pvar <- paste0(p, collapse = "x") else pvar <- p
+  if (length(r) > 1) rvar <- paste0(r, collapse = "x") else rvar <- r
+  if (!missing(mask)) {
+    mask <- check_ants(mask)
+    mskIn <- antsImageClone(mask, "unsigned char")
+    mskIn <- antsCopyImageInfo(img, mskIn)
     myargs <- list(
       d = mydim,
       i = img,
       n = noiseModel[1],
       x = mskIn,
-      s = as.numeric( shrinkFactor ),
+      s = as.numeric(shrinkFactor),
       p = pvar,
       r = rvar,
       o = outimg,
-      v = as.numeric( verbose )
-      )
-    } else {
-      myargs <- list(
-        d = mydim,
-        i = img,
-        n = noiseModel[1],
-        s = as.numeric( shrinkFactor ),
-        p = pvar,
-        r = rvar,
-        o = outimg,
-        v = as.numeric( verbose )
-        )
-    }
-  ANTsRCore::DenoiseImage(.int_antsProcessArguments( c( myargs ) ))
-  return( outimg )
+      v = as.numeric(verbose)
+    )
+  } else {
+    myargs <- list(
+      d = mydim,
+      i = img,
+      n = noiseModel[1],
+      s = as.numeric(shrinkFactor),
+      p = pvar,
+      r = rvar,
+      o = outimg,
+      v = as.numeric(verbose)
+    )
+  }
+  ANTsRCore::DenoiseImage(.int_antsProcessArguments(c(myargs)))
+  return(outimg)
 }

@@ -20,15 +20,17 @@
 #'
 #' @seealso rftPval, euler, rftResults
 #' @examples
-#' mask <- getMask(antsImageRead(getANTsRData('r16')))
+#' mask <- getMask(antsImageRead(getANTsRData("r16")))
 #' myresels <- resels(mask, c(1, 1))
 #'
 #' @export resels
 resels <- function(mask, fwhm) {
-  if (class(mask) != "antsImage")
+  if (class(mask) != "antsImage") {
     stop("mask must be of class antsImage")
-  if (max(mask) > 1 | min(mask) < 0)
+  }
+  if (max(mask) > 1 | min(mask) < 0) {
     stop("mask must be binarized and only contain 0s and 1s")
+  }
 
   D <- mask@dimension
   if (missing(fwhm)) (fwhm <- rep(1, D))
@@ -55,37 +57,36 @@ resels <- function(mask, fwhm) {
   nvox <- sum(as.array(mask))
   if (D == 2) {
     rz <- 1
-    m   <- mask[x1, y1]
-    xm  <- m + mask[x2, y1]
-    ym  <- m + mask[x1, y2]
+    m <- mask[x1, y1]
+    xm <- m + mask[x2, y1]
+    ym <- m + mask[x1, y2]
     xym <- m + mask[x2, y1] + mask[x1, y2] + mask[x2, y2]
 
-    Ex   <- sum(xm[xm == 2]) / 2
-    Ey   <- sum(ym[ym == 2]) / 2
-    Ez   <- 1
-    Fxy  <- sum(xym[xym == 4]) / 4
-    Fxz  <- 1
-    Fyz  <- 1
+    Ex <- sum(xm[xm == 2]) / 2
+    Ey <- sum(ym[ym == 2]) / 2
+    Ez <- 1
+    Fxy <- sum(xym[xym == 4]) / 4
+    Fxz <- 1
+    Fyz <- 1
     Fxyz <- Fyz
-
   } else if (D == 3) {
-    m    <- mask[x1, y1, z1]
-    xm   <- m + mask[x2, y1, z1]
-    ym   <- m + mask[x1, y2, z1]
-    zm   <- m + mask[x1, y1, z2]
-    xym  <- m + mask[x2, y1, z1] + mask[x1, y2, z1] + mask[x2, y2, z1]
-    xzm  <- m + mask[x2, y1, z1] + mask[x1, y1, z2] + mask[x2, y1, z2]
-    yzm  <- m + mask[x1, y2, z1] + mask[x1, y1, z2] + mask[x1, y2, z2]
+    m <- mask[x1, y1, z1]
+    xm <- m + mask[x2, y1, z1]
+    ym <- m + mask[x1, y2, z1]
+    zm <- m + mask[x1, y1, z2]
+    xym <- m + mask[x2, y1, z1] + mask[x1, y2, z1] + mask[x2, y2, z1]
+    xzm <- m + mask[x2, y1, z1] + mask[x1, y1, z2] + mask[x2, y1, z2]
+    yzm <- m + mask[x1, y2, z1] + mask[x1, y1, z2] + mask[x1, y2, z2]
     xyzm <- m + mask[x2, y1, z1] + mask[x1, y2, z1] + mask[x1, y1, z2] +
       mask[x2, y2, z1] + mask[x2, y1, z2] + mask[x1, y2, z2] + mask[x2, y2, z2]
 
     # extract number of voxels that fits each set of parameters (see Worsley 1996 for exact definition of parameters)
-    Ex   <- sum(xm[xm == 2]) / 2
-    Ey   <- sum(ym[ym == 2]) / 2
-    Ez   <- sum(zm[zm == 2]) / 2
-    Fxy  <- sum(xym[xym == 4]) / 4
-    Fxz  <- sum(xzm[xzm == 4]) / 4
-    Fyz  <- sum(yzm[yzm == 4]) / 4
+    Ex <- sum(xm[xm == 2]) / 2
+    Ey <- sum(ym[ym == 2]) / 2
+    Ez <- sum(zm[zm == 2]) / 2
+    Fxy <- sum(xym[xym == 4]) / 4
+    Fxz <- sum(xzm[xzm == 4]) / 4
+    Fyz <- sum(yzm[yzm == 4]) / 4
     Fxyz <- sum(xyzm[xyzm == 8]) / 8
   }
   resels[1] <- (nvox - (Ex + Ey + Ez) + (Fyz + Fxz + Fxy) - Fxyz)

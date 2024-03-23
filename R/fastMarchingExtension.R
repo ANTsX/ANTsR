@@ -9,19 +9,20 @@
 #' @author Duda, JT
 #' @examples
 #'
-#' img = makeImage( c( 7, 7 ) , 0 )
-#' img[3:5,3:5]=1:9
-#' mask = getMask( img )
-#' mask[ mask == 0 ] = 2
-#' speed = smoothImage( mask, 1 )
-#' extendedImg = fastMarchingExtension( speed, mask, img )
+#' img <- makeImage(c(7, 7), 0)
+#' img[3:5, 3:5] <- 1:9
+#' mask <- getMask(img)
+#' mask[mask == 0] <- 2
+#' speed <- smoothImage(mask, 1)
+#' extendedImg <- fastMarchingExtension(speed, mask, img)
 #'
 #' @export fastMarchingExtension
-fastMarchingExtension <- function( speedImage, labelImage, valueImage ) {
+fastMarchingExtension <- function(speedImage, labelImage, valueImage) {
   healthymask <- antsImageClone(labelImage)
-  healthymask[ labelImage == 2 ] <- 0
+  healthymask[labelImage == 2] <- 0
   outimg <- ANTsRCore::fastMarchingExtension(
-    speedImage, healthymask, valueImage)
-  outimg[ labelImage ==  1 ] = valueImage[ labelImage ==  1 ]
-  return( outimg )
+    speedImage, healthymask, valueImage
+  )
+  outimg[labelImage == 1] <- valueImage[labelImage == 1]
+  return(outimg)
 }

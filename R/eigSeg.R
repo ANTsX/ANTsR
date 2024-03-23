@@ -16,18 +16,21 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mylist<-list( antsImageRead( getANTsRData("r16") ),
-#'   antsImageRead( getANTsRData("r27") ),
-#'   antsImageRead( getANTsRData("r85") ) )
-#' myseg<-eigSeg( getMask( mylist[[1]] ) , mylist )
-#' mat=imageListToMatrix( mylist, getMask( mylist[[1]] ) )
-#' myseg<-eigSeg( getMask( mylist[[1]] ) , mat )
+#' mylist <- list(
+#'   antsImageRead(getANTsRData("r16")),
+#'   antsImageRead(getANTsRData("r27")),
+#'   antsImageRead(getANTsRData("r85"))
+#' )
+#' myseg <- eigSeg(getMask(mylist[[1]]), mylist)
+#' mat <- imageListToMatrix(mylist, getMask(mylist[[1]]))
+#' myseg <- eigSeg(getMask(mylist[[1]]), mat)
 #'
 #' @export eigSeg
-eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
-  cthresh=0, smooth=1 ) {
+eigSeg <- function(
+    mask = NULL, imgList = NA, applySegmentationToImages = FALSE,
+    cthresh = 0, smooth = 1) {
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask <- check_ants(mask)
   }
   if (typeof(mask) != "S4") {
     print(args(eigSeg))
@@ -36,42 +39,45 @@ eigSeg <- function( mask = NULL, imgList = NA, applySegmentationToImages = FALSE
   maskvox <- (mask > 0)
   maskseg <- antsImageClone(mask)
   maskseg[maskvox] <- 0
-  if ( class(imgList)[1] == "matrix")
+  if (class(imgList)[1] == "matrix") {
     mydata <- imgList
-  if ( class(imgList)[1] != "matrix")
-    if ( length(imgList) > 0 )
-      if ( typeof(imgList) == "list")
+  }
+  if (class(imgList)[1] != "matrix") {
+    if (length(imgList) > 0) {
+      if (typeof(imgList) == "list") {
         mydata <- imageListToMatrix(imgList, mask)
-  if ( ! exists('mydata') )
-    stop("wrong input type - see help")
-  if ( smooth > 0 & !is.null(mask) )
-    {
-    for ( i in 1:nrow(mydata) )
-      {
-      tempImg = makeImage( mask, mydata[i,] ) %>%
-        smoothImage( smooth, sigmaInPhysicalCoordinates=F )
-      mydata[i,] = tempImg[ mask >= 0.5 ]
       }
     }
+  }
+  if (!exists("mydata")) {
+    stop("wrong input type - see help")
+  }
+  if (smooth > 0 & !is.null(mask)) {
+    for (i in 1:nrow(mydata))
+    {
+      tempImg <- makeImage(mask, mydata[i, ]) %>%
+        smoothImage(smooth, sigmaInPhysicalCoordinates = F)
+      mydata[i, ] <- tempImg[mask >= 0.5]
+    }
+  }
   segids <- apply(abs(mydata), 2, which.max)
   segmax <- apply(abs(mydata), 2, max)
   maskseg[maskvox] <- (segids * (segmax > 1e-09))
-  if ( cthresh > 0 )
+  if (cthresh > 0) {
+    for (kk in 1:max(maskseg))
     {
-    for ( kk in 1:max(maskseg) )
-      {
-      timg = thresholdImage( maskseg, kk, kk ) %>% labelClusters( cthresh )
-      timg = thresholdImage( timg, 1, Inf ) * as.numeric( kk )
-      maskseg[ maskseg == kk ] = timg[ maskseg == kk ]
-      }
+      timg <- thresholdImage(maskseg, kk, kk) %>% labelClusters(cthresh)
+      timg <- thresholdImage(timg, 1, Inf) * as.numeric(kk)
+      maskseg[maskseg == kk] <- timg[maskseg == kk]
     }
-  if (applySegmentationToImages & class(imgList)[1] != "matrix" ) {
+  }
+  if (applySegmentationToImages & class(imgList)[1] != "matrix") {
     for (i in 1:length(imgList)) {
       img <- imgList[[i]]
       img[maskseg != as.numeric(i)] <- 0
       imgList[[i]] <- img
-      }
     }
+  }
   return(maskseg)
 }
 

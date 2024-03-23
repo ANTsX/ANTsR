@@ -23,39 +23,51 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mat<-replicate(100, rnorm(20))
-#' mydecom<-sparseDecomboot( mat, nboot=5, nsamp=0.9, nvecs=2 )
+#' mat <- replicate(100, rnorm(20))
+#' mydecom <- sparseDecomboot(mat, nboot = 5, nsamp = 0.9, nvecs = 2)
 #'
 #' \dontrun{
 #' # for prediction
-#' if ( usePkg("randomForest") & usePkg("spls") ) {
-#' data(lymphoma)
-#' training<-sample( rep(c(TRUE,FALSE),31)  )
-#' sp<-0.001 ; myz<-0 ; nv<-5
-#' ldd<-sparseDecomboot( lymphoma$x[training,], nvecs=nv ,
-#'   sparseness=( sp ), mycoption=1, z=myz , nsamp=0.9, nboot=50 ) # NMF style
-#' outmat<-as.matrix(ldd$eigenanatomyimages )
-#' # outmat<-t(ldd$cca1outAuto)
-#' traindf<-data.frame( lclass=as.factor(lymphoma$y[ training  ]),
-#'   eig = lymphoma$x[training,]  %*% t(outmat) )
-#' testdf<-data.frame(  lclass=as.factor(lymphoma$y[ !training ]),
-#'   eig = lymphoma$x[!training,] %*% t(outmat) )
-#' myrf<-randomForest( lclass ~ . ,   data=traindf )
-#' predlymp<-predict(myrf, newdata=testdf)
-#' print(paste('N-errors:',sum(abs( testdf$lclass != predlymp ) ),
-#'   'non-zero ',sum(abs( outmat ) > 0 ) ) )
-#' for ( i in 1:nv )
-#'   print(paste(' non-zero ',i,' is: ',sum(abs( outmat[i,] ) > 0 ) ) )
+#' if (usePkg("randomForest") & usePkg("spls")) {
+#'   data(lymphoma)
+#'   training <- sample(rep(c(TRUE, FALSE), 31))
+#'   sp <- 0.001
+#'   myz <- 0
+#'   nv <- 5
+#'   ldd <- sparseDecomboot(lymphoma$x[training, ],
+#'     nvecs = nv,
+#'     sparseness = (sp), mycoption = 1, z = myz, nsamp = 0.9, nboot = 50
+#'   ) # NMF style
+#'   outmat <- as.matrix(ldd$eigenanatomyimages)
+#'   # outmat<-t(ldd$cca1outAuto)
+#'   traindf <- data.frame(
+#'     lclass = as.factor(lymphoma$y[training]),
+#'     eig = lymphoma$x[training, ] %*% t(outmat)
+#'   )
+#'   testdf <- data.frame(
+#'     lclass = as.factor(lymphoma$y[!training]),
+#'     eig = lymphoma$x[!training, ] %*% t(outmat)
+#'   )
+#'   myrf <- randomForest(lclass ~ ., data = traindf)
+#'   predlymp <- predict(myrf, newdata = testdf)
+#'   print(paste(
+#'     "N-errors:", sum(abs(testdf$lclass != predlymp)),
+#'     "non-zero ", sum(abs(outmat) > 0)
+#'   ))
+#'   for (i in 1:nv) {
+#'     print(paste(" non-zero ", i, " is: ", sum(abs(outmat[i, ]) > 0)))
+#'   }
 #' }
-#' } # end dontrun
+#' # end dontrun
+#' }
 #'
 #' @export sparseDecomboot
-sparseDecomboot <- function(inmatrix, inmask = NULL, sparseness = 0.01,
-  nvecs = 50,
-  its = 5, cthresh = 250, z = 0, smooth = 0,
-  initializationList = list(),
-  mycoption = 0, nboot = 10, nsamp = 0.9, robust = 0, doseg = TRUE) {
-  
+sparseDecomboot <- function(
+    inmatrix, inmask = NULL, sparseness = 0.01,
+    nvecs = 50,
+    its = 5, cthresh = 250, z = 0, smooth = 0,
+    initializationList = list(),
+    mycoption = 0, nboot = 10, nsamp = 0.9, robust = 0, doseg = TRUE) {
   numargs <- nargs()
   nsubj <- nrow(inmatrix)
   mysize <- round(nsamp * nsubj)
@@ -68,16 +80,21 @@ sparseDecomboot <- function(inmatrix, inmask = NULL, sparseness = 0.01,
     makemat <- matrix(rep(0, nboot * ncol(mat1)), ncol = ncol(mat1))
     bootccalist1 <- lappend(bootccalist1, makemat)
   }
-  if (nsamp >= 0.999999999)
-    doreplace <- TRUE else doreplace <- FALSE
+  if (nsamp >= 0.999999999) {
+    doreplace <- TRUE
+  } else {
+    doreplace <- FALSE
+  }
   for (boots in 1:nboot) {
     mysample <- sample(1:nsubj, size = mysize, replace = doreplace)
     submat1 <- mat1[mysample, ]
     print(paste("boot", boots, "sample", mysize))
-    myres <- sparseDecom(inmatrix = submat1, inmask = mymask, sparseness = sparseness,
+    myres <- sparseDecom(
+      inmatrix = submat1, inmask = mymask, sparseness = sparseness,
       nvecs = nvecs, its = its, cthresh = cthresh, z = z,
       smooth = smooth, initializationList = initializationList, mycoption = mycoption,
-      robust = robust)
+      robust = robust
+    )
     cca1 <- t(myres$eigenanatomyimages)
     if (boots > 1 & TRUE) {
       cca1copy <- cca1
@@ -116,25 +133,29 @@ sparseDecomboot <- function(inmatrix, inmask = NULL, sparseness = 0.01,
     vec1[is.na(vec1)] <- 0
     if ((nv > 1) & (abs(sparseness * nvecs) < 1) & TRUE) {
       # for ( j in 1:(nv-1) ) { prevec <- cca1out[ , j ] vec1[ prevec > 0 ] <- 0 }
-      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness))
+      cca1out[, nv] <- .eanatsparsify(vec1, abs(sparseness))
       cca1outAuto[, nv] <- vec1
     } else {
-      cca1out[, nv] <-.eanatsparsify(vec1, abs(sparseness))
+      cca1out[, nv] <- .eanatsparsify(vec1, abs(sparseness))
       cca1outAuto[, nv] <- vec1
     }
   }
   for (i in 1:ncol(cca1outAuto)) {
     mynorm <- sqrt(sum(cca1outAuto[, i] * cca1outAuto[, i]))
-    if (mynorm > 0)
-      cca1outAuto[, i] <- cca1outAuto[, i]/mynorm
+    if (mynorm > 0) {
+      cca1outAuto[, i] <- cca1outAuto[, i] / mynorm
+    }
   }
-  if ( is.null( inmask ) ) usefakemask <- TRUE
+  if (is.null(inmask)) usefakemask <- TRUE
   fakemask1 <- makeImage(c(1, 1, ncol(mat1)), 1)
   locmask <- inmask
   if (usefakemask) {
     locmask <- fakemask1
-    if (doseg)
-      cca1outAuto <- .matrixSeg(t(cca1outAuto)) else cca1outAuto <- t(cca1outAuto)
+    if (doseg) {
+      cca1outAuto <- .matrixSeg(t(cca1outAuto))
+    } else {
+      cca1outAuto <- t(cca1outAuto)
+    }
     cca1out <- cca1outAuto
   } else {
     cca1outAuto <- matrixToImages(t(cca1outAuto), locmask)
@@ -144,22 +165,25 @@ sparseDecomboot <- function(inmatrix, inmask = NULL, sparseness = 0.01,
   }
   ##############################################################################
   finalinit <- matrixToImages(cca1out, locmask)
-  myres <- sparseDecom(inmatrix = inmatrix, inmask = locmask,
+  myres <- sparseDecom(
+    inmatrix = inmatrix, inmask = locmask,
     sparseness = sparseness,
     nvecs = nvecs, its = its, cthresh = cthresh, z = z, smooth = smooth,
-    initializationList = finalinit, mycoption = mycoption, robust = robust)
+    initializationList = finalinit, mycoption = mycoption, robust = robust
+  )
 
   return(
-      list(
-        projections = myres$projections,
-        eigenanatomyimages = myres$eigenanatomyimages,
-        bootccalist1 = bootccalist1,
-        cca1outAuto = cca1outAuto )
-      )
+    list(
+      projections = myres$projections,
+      eigenanatomyimages = myres$eigenanatomyimages,
+      bootccalist1 = bootccalist1,
+      cca1outAuto = cca1outAuto
+    )
+  )
 }
 
 .cosineDist <- function(xin, yin) {
   x <- t(as.matrix(xin))
   y <- t(as.matrix(yin))
-  return(as.numeric(1 - x %*% t(y)/(sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
+  return(as.numeric(1 - x %*% t(y) / (sqrt(rowSums(x^2) %*% t(rowSums(y^2))))))
 }

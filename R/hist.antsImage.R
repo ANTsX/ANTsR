@@ -8,17 +8,17 @@
 #' @return Vector of values
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' mask_values(img, mask)
 #' mask_values(img)
-mask_values = function(x, mask) {
+mask_values <- function(x, mask) {
   if (!missing(mask)) {
     if (!is.null(mask)) { # need this for Summary
-      x = x[ coerce_mask(mask, error = TRUE) ]
+      x <- x[coerce_mask(mask, error = TRUE)]
     }
   }
-  x = as.numeric(x)
+  x <- as.numeric(x)
 }
 
 #' @title Histogram of Values in an Image
@@ -33,13 +33,13 @@ mask_values = function(x, mask) {
 #' @return Output of \code{\link{hist}}
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' hist(img)
 #' hist(img, mask = mask)
 #' @importFrom graphics hist
-hist.antsImage = function(x, ..., mask) {
-  x = mask_values(x, mask)
+hist.antsImage <- function(x, ..., mask) {
+  x <- mask_values(x, mask)
   hist(x, ...)
 }
 
@@ -56,12 +56,12 @@ hist.antsImage = function(x, ..., mask) {
 #' @return Output of \code{\link{quantile}}
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' quantile(img, mask = mask)
 #' @importFrom stats quantile
-quantile.antsImage = function(x, ..., mask) {
-  x = mask_values(x, mask)
+quantile.antsImage <- function(x, ..., mask) {
+  x <- mask_values(x, mask)
   quantile(x, ...)
 }
 
@@ -77,12 +77,12 @@ quantile.antsImage = function(x, ..., mask) {
 #' @return Output of \code{\link{density}}
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' density(img, mask = mask)
 #' @importFrom stats density
-density.antsImage = function(x, ..., mask) {
-  x = mask_values(x, mask)
+density.antsImage <- function(x, ..., mask) {
+  x <- mask_values(x, mask)
   density(x, ...)
 }
 
@@ -99,12 +99,12 @@ density.antsImage = function(x, ..., mask) {
 #' @return Output of \code{\link{boxplot}}
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' boxplot(img, mask = mask)
 #' @importFrom graphics boxplot
-boxplot.antsImage = function(x, ..., mask) {
-  x = mask_values(x, mask)
+boxplot.antsImage <- function(x, ..., mask) {
+  x <- mask_values(x, mask)
   boxplot(x, ...)
 }
 
@@ -125,31 +125,31 @@ boxplot.antsImage = function(x, ..., mask) {
 #' @return Object of class \code{antsImage} with an \code{attribute} of levels
 #' @export
 #' @examples
-#' img = makeImage(c(10,10),rnorm(100))
-#' mask = img > 0
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' mask <- img > 0
 #' cut(img, mask = mask, breaks = 4)
 #' cut(img, breaks = 4)
-cut.antsImage = function(
-  x,
-  breaks,
-  ...,
-  mask){
-  ximg = x
-  x = mask_values(x, mask)
-  cuts = base::cut(x, breaks = breaks, ...)
-  levs = levels(cuts)
-  cuts = as.numeric(cuts)
+cut.antsImage <- function(
+    x,
+    breaks,
+    ...,
+    mask) {
+  ximg <- x
+  x <- mask_values(x, mask)
+  cuts <- base::cut(x, breaks = breaks, ...)
+  levs <- levels(cuts)
+  cuts <- as.numeric(cuts)
 
   if (!missing(mask)) {
-    arr = array(0, dim = dim(ximg))
-    m = coerce_mask(mask)
-    arr[ m ] = cuts
+    arr <- array(0, dim = dim(ximg))
+    m <- coerce_mask(mask)
+    arr[m] <- cuts
   } else {
-    arr = array(cuts, dim = dim(ximg))
+    arr <- array(cuts, dim = dim(ximg))
   }
-  x = as.antsImage(arr, reference = ximg)
-  gc();
+  x <- as.antsImage(arr, reference = ximg)
+  gc()
 
-  attr(x, "levels") = levs
+  attr(x, "levels") <- levs
   return(x)
 }

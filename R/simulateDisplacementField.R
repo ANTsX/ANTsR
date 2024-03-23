@@ -22,63 +22,56 @@
 #' @author NJ Tustison
 #'
 #' @examples
-#' domainImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' expField <- simulateDisplacementField( domainImage, fieldType = "exponential" )
-#' bsplineField <- simulateDisplacementField( domainImage, fieldType = "bspline" )
-#' warp <- antsrTransformFromDisplacementField( bsplineField * 3 )
-#' wimg <- applyAntsrTransformToImage( warp, domainImage, domainImage )
+#' domainImage <- antsImageRead(getANTsRData("r16"), 2)
+#' expField <- simulateDisplacementField(domainImage, fieldType = "exponential")
+#' bsplineField <- simulateDisplacementField(domainImage, fieldType = "bspline")
+#' warp <- antsrTransformFromDisplacementField(bsplineField * 3)
+#' wimg <- applyAntsrTransformToImage(warp, domainImage, domainImage)
 #'
 #' @export simulateDisplacementField
 
 simulateDisplacementField <- function(
-  domainImage,
-  fieldType = c( "bspline", "exponential" ),
-  numberOfRandomPoints = 1000,
-  sdNoise = 10.0,
-  enforceStationaryBoundary = TRUE,
-  numberOfFittingLevels = 4,
-  meshSize = 1,
-  sdSmoothing = 4.0
-  ) {
-
-  fieldType = match.arg( fieldType )
-  if( fieldType == 'bspline' )
-    {
-
+    domainImage,
+    fieldType = c("bspline", "exponential"),
+    numberOfRandomPoints = 1000,
+    sdNoise = 10.0,
+    enforceStationaryBoundary = TRUE,
+    numberOfFittingLevels = 4,
+    meshSize = 1,
+    sdSmoothing = 4.0) {
+  fieldType <- match.arg(fieldType)
+  if (fieldType == "bspline") {
     imageDimension <- domainImage@dimension
-    if( length( meshSize ) != 1 && length( meshSize ) != imageDimension )
-      {
-      stop( "Error:  incorrect specification for meshSize.")
-      }
+    if (length(meshSize) != 1 && length(meshSize) != imageDimension) {
+      stop("Error:  incorrect specification for meshSize.")
+    }
 
     splineOrder <- 3
     numberOfControlPoints <- meshSize + splineOrder
 
-    if( length( numberOfControlPoints ) == 1 )
-      {
-      numberOfControlPoints <- rep( numberOfControlPoints, imageDimension )
-      }
+    if (length(numberOfControlPoints) == 1) {
+      numberOfControlPoints <- rep(numberOfControlPoints, imageDimension)
+    }
 
     outputField <- ANTsRCore::simulateBSplineDisplacementFieldR(
-      antsImageClone( domainImage ),
-      as.numeric( numberOfRandomPoints ),
-      as.numeric( sdNoise ),
-      as.numeric( enforceStationaryBoundary ),
-      as.numeric( numberOfFittingLevels ),
-      as.numeric( numberOfControlPoints ))
-    return( outputField )
-
-    } else if( fieldType == 'exponential' ) {
-
+      antsImageClone(domainImage),
+      as.numeric(numberOfRandomPoints),
+      as.numeric(sdNoise),
+      as.numeric(enforceStationaryBoundary),
+      as.numeric(numberOfFittingLevels),
+      as.numeric(numberOfControlPoints)
+    )
+    return(outputField)
+  } else if (fieldType == "exponential") {
     outputField <- ANTsRCore::simulateExponentialDisplacementFieldR(
-      antsImageClone( domainImage ),
-      as.numeric( numberOfRandomPoints ),
-      as.numeric( sdNoise ),
-      as.numeric( enforceStationaryBoundary ),
-      as.numeric( sdSmoothing ))
-    return( outputField )
-
-    } else {
-    stop( "Error:  unrecognized field type.")
-    }
+      antsImageClone(domainImage),
+      as.numeric(numberOfRandomPoints),
+      as.numeric(sdNoise),
+      as.numeric(enforceStationaryBoundary),
+      as.numeric(sdSmoothing)
+    )
+    return(outputField)
+  } else {
+    stop("Error:  unrecognized field type.")
+  }
 }

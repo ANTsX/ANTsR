@@ -45,74 +45,95 @@
 #' antsApplyTransforms("-h")
 #' # see antsRegistration
 #' # example 1 - simplified
-#' fixed <- ri( 1 )
-#' moving <- ri( 2 )
-#' fixed <- resampleImage(fixed,c(64,64),1,0)
-#' moving <- resampleImage(moving,c(68,68),1,0)
-#' mytx <- antsRegistration( fixed=fixed, moving=moving,
-#'   typeofTransform = "SyN", verbose=TRUE, printArgs=TRUE )
-#' mywarpedimage <- antsApplyTransforms( fixed=fixed, moving=moving,
-#'   transformlist=mytx$fwdtransforms )
+#' fixed <- ri(1)
+#' moving <- ri(2)
+#' fixed <- resampleImage(fixed, c(64, 64), 1, 0)
+#' moving <- resampleImage(moving, c(68, 68), 1, 0)
+#' mytx <- antsRegistration(
+#'   fixed = fixed, moving = moving,
+#'   typeofTransform = "SyN", verbose = TRUE, printArgs = TRUE
+#' )
+#' mywarpedimage <- antsApplyTransforms(
+#'   fixed = fixed, moving = moving,
+#'   transformlist = mytx$fwdtransforms
+#' )
 #' testthat::expect_true(antsImagePhysicalSpaceConsistency(mywarpedimage, fixed))
-#' invwarped_image <- antsApplyTransforms( fixed=moving,moving=fixed,
-#'   transformlist=mytx$invtransforms )
+#' invwarped_image <- antsApplyTransforms(
+#'   fixed = moving, moving = fixed,
+#'   transformlist = mytx$invtransforms
+#' )
 #' testthat::expect_true(antsImagePhysicalSpaceConsistency(invwarped_image, moving))
 #' # full access via listing the inputs in standard ANTs format
 #'
-#' res1 <- antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist=mytx$fwdtransforms[2],
-#'   whichtoinvert =1, verbose = TRUE)
-#' cfile <- antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist=mytx$fwdtransforms,
-#'   compose = tempfile() )
-#' cimg = antsImageRead(cfile)
-#' cout <- antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist=cimg)
-#' testthat::expect_error(
-#' antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist=cimg, whichtoinvert =1), "nnot invert transform"
+#' res1 <- antsApplyTransforms(
+#'   fixed = fixed, moving = moving,
+#'   transformlist = mytx$fwdtransforms[2],
+#'   whichtoinvert = 1, verbose = TRUE
+#' )
+#' cfile <- antsApplyTransforms(
+#'   fixed = fixed, moving = moving,
+#'   transformlist = mytx$fwdtransforms,
+#'   compose = tempfile()
+#' )
+#' cimg <- antsImageRead(cfile)
+#' cout <- antsApplyTransforms(
+#'   fixed = fixed, moving = moving,
+#'   transformlist = cimg
 #' )
 #' testthat::expect_error(
-#' antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist=cimg, whichtoinvert =c(1,2)), "same length"
+#'   antsApplyTransforms(
+#'     fixed = fixed, moving = moving,
+#'     transformlist = cimg, whichtoinvert = 1
+#'   ), "nnot invert transform"
 #' )
-#' testthat::expect_error(antsApplyTransforms( fixed=fixed,moving=moving,
-#'   transformlist= "")
-#'  )
+#' testthat::expect_error(
+#'   antsApplyTransforms(
+#'     fixed = fixed, moving = moving,
+#'     transformlist = cimg, whichtoinvert = c(1, 2)
+#'   ), "same length"
+#' )
+#' testthat::expect_error(antsApplyTransforms(
+#'   fixed = fixed, moving = moving,
+#'   transformlist = ""
+#' ))
 #'
 #' @seealso \code{\link{antsRegistration}}
 #' @export antsApplyTransforms
 antsApplyTransforms <- function(
-  fixed,
-  moving,
-  transformlist = "",
-  interpolator = c(
-    "linear",
-    "nearestNeighbor",
-    "multiLabel",
-    "gaussian",
-    "bSpline",
-    "cosineWindowedSinc",
-    "welchWindowedSinc",
-    "hammingWindowedSinc",
-    "lanczosWindowedSinc",
-    "genericLabel" ),
-  imagetype = 0, whichtoinvert = NA,
-  compose = NA, verbose = FALSE, ... ) {
+    fixed,
+    moving,
+    transformlist = "",
+    interpolator = c(
+      "linear",
+      "nearestNeighbor",
+      "multiLabel",
+      "gaussian",
+      "bSpline",
+      "cosineWindowedSinc",
+      "welchWindowedSinc",
+      "hammingWindowedSinc",
+      "lanczosWindowedSinc",
+      "genericLabel"
+    ),
+    imagetype = 0, whichtoinvert = NA,
+    compose = NA, verbose = FALSE, ...) {
   if (is.character(fixed)) {
     if (fixed == "-h") {
       ANTsRCore::antsApplyTransforms(.int_antsProcessArguments(
-        list("-h")))
+        list("-h")
+      ))
       return()
     }
   }
   if (missing(fixed) | missing(moving) | missing(transformlist)) {
     print("missing inputs")
-    return( NA )
+    return(NA)
   }
-  interpolator[1] = paste( tolower( substring( interpolator[1], 1, 1 ) ),
-    substring( interpolator[1], 2 ), sep="", collapse=" ")
-  interpOpts = c(
+  interpolator[1] <- paste(tolower(substring(interpolator[1], 1, 1)),
+    substring(interpolator[1], 2),
+    sep = "", collapse = " "
+  )
+  interpOpts <- c(
     "linear",
     "nearestNeighbor",
     "multiLabel",
@@ -122,20 +143,21 @@ antsApplyTransforms <- function(
     "welchWindowedSinc",
     "hammingWindowedSinc",
     "lanczosWindowedSinc",
-    "genericLabel" )
-  interpolator <- match.arg( interpolator, interpOpts )
+    "genericLabel"
+  )
+  interpolator <- match.arg(interpolator, interpOpts)
 
   # if (is.antsImage(moving)) {
-    # moving = antsImageClone(moving)
+  # moving = antsImageClone(moving)
   # }
   # if (is.antsImage(fixed)) {
-    # fixed = antsImageClone(fixed)
+  # fixed = antsImageClone(fixed)
   # }
   if (is.antsImage(transformlist)) {
     warning("transformlist is an antsImage, creating a temporary file")
-    tfile = tempfile(fileext = ".nii.gz")
+    tfile <- tempfile(fileext = ".nii.gz")
     antsImageWrite(transformlist, filename = tfile)
-    transformlist = tfile
+    transformlist <- tfile
   }
 
   if (!is.character(transformlist)) {
@@ -144,7 +166,7 @@ antsApplyTransforms <- function(
 
   args <- list(fixed, moving, transformlist, interpolator, ...)
   if (!is.character(fixed)) {
-    moving = check_ants(moving)
+    moving <- check_ants(moving)
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] == "antsImage") {
       for (i in 1:length(transformlist)) {
         if (!file.exists(transformlist[i])) {
@@ -155,9 +177,10 @@ antsApplyTransforms <- function(
       warpedmovout <- antsImageClone(moving)
       f <- fixed
       m <- moving
-      if ( ( moving@dimension == 4 ) & ( fixed@dimension == 3 ) &
-           ( imagetype == 0 ) )
-          stop( "Set imagetype 3 to transform time series images." )
+      if ((moving@dimension == 4) & (fixed@dimension == 3) &
+        (imagetype == 0)) {
+        stop("Set imagetype 3 to transform time series images.")
+      }
       mytx <- list()
       # If whichtoinvert is NA, then attempt to guess the right thing to do
       #
@@ -165,10 +188,9 @@ antsApplyTransforms <- function(
       #
       # else whichtoinvert = rep("F", length(transformlist))
       if (all(is.na(whichtoinvert))) {
-        if ( length(transformlist) == 2 & grepl("\\.mat$", transformlist[1]) & !(grepl("\\.mat$", transformlist[2])) ) {
+        if (length(transformlist) == 2 & grepl("\\.mat$", transformlist[1]) & !(grepl("\\.mat$", transformlist[2]))) {
           whichtoinvert <- c(TRUE, FALSE)
-        }
-        else {
+        } else {
           whichtoinvert <- rep(FALSE, length(transformlist))
         }
       }
@@ -180,28 +202,32 @@ antsApplyTransforms <- function(
         if (grepl("\\.mat$", transformlist[i]) || grepl("\\.txt$", transformlist[i])) {
           ismat <- TRUE
         }
-        if (whichtoinvert[i] && !(ismat) ) {
+        if (whichtoinvert[i] && !(ismat)) {
           # Can't invert a warp field, user should pass inverseWarp directly. Something wrong
-          stop(paste("Cannot invert transform " , i , " ( " , transformlist[i], " ), because it is not a matrix. ", sep = ""))
+          stop(paste("Cannot invert transform ", i, " ( ", transformlist[i], " ), because it is not a matrix. ", sep = ""))
         }
         if (whichtoinvert[i]) {
           mytx <- list(mytx, "-t", paste("[", transformlist[i], ",1]",
-                                         sep = ""))
-        }
-        else {
+            sep = ""
+          ))
+        } else {
           mytx <- list(mytx, "-t", transformlist[i])
         }
-
       }
-      if ( is.na( compose ) )
-        args <- list(d = fixed@dimension, i = m, o = warpedmovout, r = f, n = interpolator,
-                   unlist(mytx))
-      tfn <- paste( compose, "comptx.nii.gz", sep='' )
-      if ( !is.na( compose ) ) {
-        mycompo = paste("[", tfn, ",1]", sep = "")
-        args <- list(d = fixed@dimension, i = m, o = mycompo, r = f,
-          n = interpolator, unlist(mytx))
-        }
+      if (is.na(compose)) {
+        args <- list(
+          d = fixed@dimension, i = m, o = warpedmovout, r = f, n = interpolator,
+          unlist(mytx)
+        )
+      }
+      tfn <- paste(compose, "comptx.nii.gz", sep = "")
+      if (!is.na(compose)) {
+        mycompo <- paste("[", tfn, ",1]", sep = "")
+        args <- list(
+          d = fixed@dimension, i = m, o = mycompo, r = f,
+          n = interpolator, unlist(mytx)
+        )
+      }
       myargs <- .int_antsProcessArguments(c(args))
       for (jj in c(1:length(myargs))) {
         if (!is.na(myargs[jj])) {
@@ -213,25 +239,34 @@ antsApplyTransforms <- function(
           }
         }
       }
-      myverb = as.numeric( verbose )
-      if ( verbose ) print( myargs )
+      myverb <- as.numeric(verbose)
+      if (verbose) print(myargs)
       ANTsRCore::antsApplyTransforms(c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype))
 
-      if ( is.na( compose ) ) return(antsImageClone(warpedmovout, inpixeltype))
-      if ( !is.na( compose ) ) if ( file.exists( tfn ) ) return( tfn ) else return( NA )
+      if (is.na(compose)) {
+        return(antsImageClone(warpedmovout, inpixeltype))
+      }
+      if (!is.na(compose)) if (file.exists(tfn)) {
+        return(tfn)
+      } else {
+        return(NA)
+      }
     }
     # Get here if fixed, moving, transformlist are not missing, fixed is not of type character,
     # and fixed and moving are not both of type antsImage
-    stop(paste0('fixed, moving, transformlist are not missing,',
-      ' fixed is not of type character,',
-      ' and fixed and moving are not both of type antsImage'))
+    stop(paste0(
+      "fixed, moving, transformlist are not missing,",
+      " fixed is not of type character,",
+      " and fixed and moving are not both of type antsImage"
+    ))
     return(1)
   }
   # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-.antsrParseListToString( c(args)
   # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
   # mycmd$outimg, as.numeric(mycmd$outdim) ) ) }
   ANTsRCore::antsApplyTransforms(.int_antsProcessArguments(
-    c( args, "-z", 1, "--float", 1, "-e", imagetype)))
+    c(args, "-z", 1, "--float", 1, "-e", imagetype)
+  ))
 }
 
 

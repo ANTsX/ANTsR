@@ -9,9 +9,9 @@
 #' @author Avants BB
 #' @examples
 #'
-#' mat <- matrix(rnorm(300),ncol=50)
-#' wmat<-whiten( mat )
-#' wmat2<-whiten( mat, 2, TRUE )
+#' mat <- matrix(rnorm(300), ncol = 50)
+#' wmat <- whiten(mat)
+#' wmat2 <- whiten(mat, 2, TRUE)
 #'
 #' @export whiten
 whiten <- function(x, k = NULL, reducex = FALSE) {
@@ -21,18 +21,19 @@ whiten <- function(x, k = NULL, reducex = FALSE) {
   }
   if (is.null(k)) {
     svdx <- svd(scale(x %*% t(x)))
-    dd <- (svdx$d)^(-1/2)
+    dd <- (svdx$d)^(-1 / 2)
     xw <- ((svdx$u %*% diag(dd)) %*% t(svdx$v)) %*% x
   } else {
     n <- nrow(x)
     p <- ncol(x)
     svdx <- svd(scale(x %*% t(x)), nu = min(n, p, k), nv = min(n, p, k))
-    dd <- diag(((svdx$d)^(-1/2))[1:k])
+    dd <- diag(((svdx$d)^(-1 / 2))[1:k])
     xw <- (svdx$u %*% dd) %*% t(svdx$v)
     xw <- (xw) %*% x
   }
-  if (reducex)
+  if (reducex) {
     xw <- lowrankRowMatrix(xw, k)
+  }
   return(xw)
 }
 
@@ -56,35 +57,32 @@ whiten <- function(x, k = NULL, reducex = FALSE) {
 #' @author Avants BB
 #' @examples
 #' \dontrun{
-#' seg = antsImageRead( 'segmentation.nii.gz' )
-#' wm = thresholdImage( seg, 3, 3 ) %>% morphology( "dilate", 1 )
-#' lgi = localGyrificationIndex( wm )
+#' seg <- antsImageRead("segmentation.nii.gz")
+#' wm <- thresholdImage(seg, 3, 3) %>% morphology("dilate", 1)
+#' lgi <- localGyrificationIndex(wm)
 #' }
 #'
 #' @export localGyrificationIndex
 localGyrificationIndex <- function(
-  segmentation,
-  sigma = 3,
-  k = 25,
-  ksigma = 3
-  )
-{
-  wmdil = smoothImage( segmentation, 0.5 )
-  kapch = weingartenImageCurvature( wmdil, sigma, 'characterize' )
-  kapmn = weingartenImageCurvature( wmdil, sigma, 'mean' )
-  gyrsulc = kapch * segmentation
-  gyri = thresholdImage( gyrsulc, 1, 1 )  + thresholdImage( gyrsulc, 5, 5 )
-  sulc = thresholdImage( gyrsulc, 2, 2 )  + thresholdImage( gyrsulc, 6, 6 )
-  gyrsulc = gyri + sulc * 2
-  spatmat = t( imageDomainToSpatialMatrix( segmentation, segmentation ) )
-  smoothingMatrix = knnSmoothingMatrix( spatmat, k = k, sigma = ksigma )
-  localGyri = makeImage( segmentation, as.numeric( smoothingMatrix %*% gyri[ segmentation == 1 ] ) )
-  localSulci = makeImage( segmentation, as.numeric( smoothingMatrix %*% sulc[ segmentation == 1 ] ) )
-  localGyriMinusSulci = localGyri - localSulci
-  return( list(
+    segmentation,
+    sigma = 3,
+    k = 25,
+    ksigma = 3) {
+  wmdil <- smoothImage(segmentation, 0.5)
+  kapch <- weingartenImageCurvature(wmdil, sigma, "characterize")
+  kapmn <- weingartenImageCurvature(wmdil, sigma, "mean")
+  gyrsulc <- kapch * segmentation
+  gyri <- thresholdImage(gyrsulc, 1, 1) + thresholdImage(gyrsulc, 5, 5)
+  sulc <- thresholdImage(gyrsulc, 2, 2) + thresholdImage(gyrsulc, 6, 6)
+  gyrsulc <- gyri + sulc * 2
+  spatmat <- t(imageDomainToSpatialMatrix(segmentation, segmentation))
+  smoothingMatrix <- knnSmoothingMatrix(spatmat, k = k, sigma = ksigma)
+  localGyri <- makeImage(segmentation, as.numeric(smoothingMatrix %*% gyri[segmentation == 1]))
+  localSulci <- makeImage(segmentation, as.numeric(smoothingMatrix %*% sulc[segmentation == 1]))
+  localGyriMinusSulci <- localGyri - localSulci
+  return(list(
     localGyri = localGyri,
     localSulci = localSulci,
     localGyriMinusSulci = localGyriMinusSulci
-    )
-    )
+  ))
 }

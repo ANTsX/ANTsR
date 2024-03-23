@@ -15,20 +15,21 @@
 #' @return outputs list described above.
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#' if (!exists("fn") ) fn<-getANTsRData("pcasl")
-#' pcasl<-antsImageRead( fn )
-#' aslmean<-getAverageOfTimeSeries( pcasl )
-#' aslmask<-getMask(aslmean)
-#' ee<-getfMRInuisanceVariables( pcasl, mask = aslmask ,
-#'         moreaccurate=F )
+#' if (!exists("fn")) fn <- getANTsRData("pcasl")
+#' pcasl <- antsImageRead(fn)
+#' aslmean <- getAverageOfTimeSeries(pcasl)
+#' aslmask <- getMask(aslmean)
+#' ee <- getfMRInuisanceVariables(pcasl,
+#'   mask = aslmask,
+#'   moreaccurate = F
+#' )
 #' }
 #'
 #' @export getfMRInuisanceVariables
 getfMRInuisanceVariables <- function(
-  fmri, maskThresh = 500, moreaccurate = 1,
-  mask = NULL) {
+    fmri, maskThresh = 500, moreaccurate = 1,
+    mask = NULL) {
   pixtype <- "float"
   myusage <- args(aslPerfusion)
   if (nargs() == 0) {
@@ -70,17 +71,21 @@ getfMRInuisanceVariables <- function(
     return(NULL)
   }
   moco_results <- .motion_correction(fmri, moreaccurate = moreaccurate)
-  moco_mask_img <- getMask(moco_results$moco_avg_img, lowThresh = maskThresh, highThresh = 1e+09,
-    cleanup = TRUE)
+  moco_mask_img <- getMask(moco_results$moco_avg_img,
+    lowThresh = maskThresh, highThresh = 1e+09,
+    cleanup = TRUE
+  )
   if (!is.null(mask)) {
-    mask = check_ants(mask)
+    mask <- check_ants(mask)
     moco_mask_img <- mask
-  } 
+  }
   mat <- timeseries2matrix(moco_results$moco_img, moco_mask_img)
   motionparams <- as.data.frame(moco_results$moco_params)
   predictors <- .get_perfusion_predictors(mat, motionparams, NULL, 1, 3)
   globalsignal <- predictors$globalsignal
-  return(list(matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img,
+  return(list(
+    matrixTimeSeries = mat, nuisancevariables = predictors$nuis, mask = moco_mask_img,
     avgImage = moco_results$moco_avg_img, globalsignal = globalsignal, globalsignalASL = predictors$globalsignalASL,
-    moco_img = moco_results$moco_img))
+    moco_img = moco_results$moco_img
+  ))
 }

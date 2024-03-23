@@ -7,7 +7,7 @@
 
 #' @author Duda JT
 #' @examples
-#' antsImageHeaderInfo( getANTsRData("r16") )
+#' antsImageHeaderInfo(getANTsRData("r16"))
 #'
 #' @return outputs a list containing:
 #' \itemize{
@@ -21,27 +21,24 @@
 #'   \item{pixelclass: }{Spatial directions of image axes.}
 #' }
 #' @export antsImageHeaderInfo
-#' @examples 
+#' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
 #' antsImageHeaderInfo(img)
 #' antsImageHeaderInfo(getANTsRData("r16"))
 #' testthat::expect_error(antsImageHeaderInfo(""))
-antsImageHeaderInfo <- function( filename )
-{
+antsImageHeaderInfo <- function(filename) {
   if (is.antsImage(filename)) {
-    tfile = tempfile(fileext = ".nii.gz")
+    tfile <- tempfile(fileext = ".nii.gz")
     antsImageWrite(filename, tfile)
     on.exit(unlink(tfile))
-    filename = tfile
+    filename <- tfile
   } else {
-    filename = path.expand(filename)
+    filename <- path.expand(filename)
   }
-  if ( !file.exists(filename) )
-  {
+  if (!file.exists(filename)) {
     stop("File does not exist")
   }
-  
+
   ret <- ANTsRCore::antsImageHeaderInfo(filename)
   return(ret)
-
 }

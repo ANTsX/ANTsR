@@ -22,110 +22,120 @@
 #' @author Avants BB
 #' @examples
 #'
-#' fixed <- antsImageRead( getANTsRData("r16") ,2)
-#' moving <- antsImageRead( getANTsRData("r64") ,2)
-#' fixed <- resampleImage(fixed,c(64,64),1,0)
-#' moving <- resampleImage(moving,c(64,64),1,0)
-#' mytx <- antsRegistration(fixed=fixed , moving=moving ,
-#'   typeofTransform = c("SyN"), verbose = TRUE )
-#' pts=data.frame(  x=c(110.5,120,130) , y=c(108.1,121.0,130),
-#'   label=c(1,2,3) )
-#' wpts <- antsApplyTransformsToPoints( dim=2, points=pts,
-#'   transformlist=mytx$fwdtransforms )
-#' wptsi <- antsApplyTransformsToPoints( dim=2, points=wpts,
-#'   transformlist=mytx$invtransforms ) # close to pts
+#' fixed <- antsImageRead(getANTsRData("r16"), 2)
+#' moving <- antsImageRead(getANTsRData("r64"), 2)
+#' fixed <- resampleImage(fixed, c(64, 64), 1, 0)
+#' moving <- resampleImage(moving, c(64, 64), 1, 0)
+#' mytx <- antsRegistration(
+#'   fixed = fixed, moving = moving,
+#'   typeofTransform = c("SyN"), verbose = TRUE
+#' )
+#' pts <- data.frame(
+#'   x = c(110.5, 120, 130), y = c(108.1, 121.0, 130),
+#'   label = c(1, 2, 3)
+#' )
+#' wpts <- antsApplyTransformsToPoints(
+#'   dim = 2, points = pts,
+#'   transformlist = mytx$fwdtransforms
+#' )
+#' wptsi <- antsApplyTransformsToPoints(
+#'   dim = 2, points = wpts,
+#'   transformlist = mytx$invtransforms
+#' ) # close to pts
 #'
 #' \dontrun{
-#' fixed <- antsImageRead( getANTsRData("r16") ,2)
-#' moving <- antsImageRead( getANTsRData("r64") ,2)
-#' fpts = kmeansSegmentation( fixed , 3 )$segmentation %>%
-#'   thresholdImage(1,1) %>%
-#'   labelClusters( 5 ) %>% getCentroids(5)
-#' wpts <- antsApplyTransformsToPoints( dim=2, points=fpts,
-#'  transformlist=mytx$fwdtransforms )
-#' labimgf=fixed*0
-#' labimgm=moving*0
-#' for ( p in 1:nrow(wpts))
-#'   {
-#'   pt=as.numeric( wpts[p,1:2] )
-#'   idx=round( antsTransformPhysicalPointToIndex(moving, pt ) )
-#'   labimgm[ idx[1], idx[2] ]=p
-#'   pt=as.numeric( fpts[p,1:2] )
-#'   idx=round( antsTransformPhysicalPointToIndex(fixed, pt ) )
-#'   labimgf[ idx[1], idx[2] ]=p
-#'   }
-#' plot(fixed,labimgf %>% iMath("GD",2) )
-#' plot(moving,labimgm  %>% iMath("GD",2)  )
+#' fixed <- antsImageRead(getANTsRData("r16"), 2)
+#' moving <- antsImageRead(getANTsRData("r64"), 2)
+#' fpts <- kmeansSegmentation(fixed, 3)$segmentation %>%
+#'   thresholdImage(1, 1) %>%
+#'   labelClusters(5) %>%
+#'   getCentroids(5)
+#' wpts <- antsApplyTransformsToPoints(
+#'   dim = 2, points = fpts,
+#'   transformlist = mytx$fwdtransforms
+#' )
+#' labimgf <- fixed * 0
+#' labimgm <- moving * 0
+#' for (p in 1:nrow(wpts))
+#' {
+#'   pt <- as.numeric(wpts[p, 1:2])
+#'   idx <- round(antsTransformPhysicalPointToIndex(moving, pt))
+#'   labimgm[idx[1], idx[2]] <- p
+#'   pt <- as.numeric(fpts[p, 1:2])
+#'   idx <- round(antsTransformPhysicalPointToIndex(fixed, pt))
+#'   labimgf[idx[1], idx[2]] <- p
+#' }
+#' plot(fixed, labimgf %>% iMath("GD", 2))
+#' plot(moving, labimgm %>% iMath("GD", 2))
 #' }
 #'
 #' @seealso \code{\link{antsRegistration}}
 #' @export antsApplyTransformsToPoints
 antsApplyTransformsToPoints <- function(
-  dim,
-  points,
-  transformlist = "",
-  whichtoinvert = NA )
-{
+    dim,
+    points,
+    transformlist = "",
+    whichtoinvert = NA) {
   ttexists <- TRUE
   for (i in 1:length(transformlist))
-    {
-    if ( ! file.exists( transformlist[i] ) ) ttexists <- FALSE
-    }
-  if (ttexists)
-    {
-      mytx <- list()
-    if (all(is.na(whichtoinvert)))
-      {
+  {
+    if (!file.exists(transformlist[i])) ttexists <- FALSE
+  }
+  if (ttexists) {
+    mytx <- list()
+    if (all(is.na(whichtoinvert))) {
       whichtoinvert <- rep(FALSE, length(transformlist))
-      }
+    }
     for (i in c(1:length(transformlist)))
-      {
+    {
       ismat <- FALSE
       if ((i == 1 & length(transformlist) > 1) |
-        whichtoinvert[i] == TRUE)
-        {
-        if (length(grep(".mat", transformlist[i])) == 1)
-          {
+        whichtoinvert[i] == TRUE) {
+        if (length(grep(".mat", transformlist[i])) == 1) {
           ismat <- TRUE
-          }
         }
-        if (!ismat)
-          {
-          mytx <- list(mytx, "-t", transformlist[i])
-          } else if (ismat) {
-            mytx <- list( mytx, "-t",
-              paste("[", transformlist[i], ",1]", sep = "") )
-          }
       }
-    if ( class(points)[[1]] != "antsImage" )
-      {
-      usepts = as.antsImage( data.matrix( points ) )
-      } else {
-      usepts = antsImageClone( points )
+      if (!ismat) {
+        mytx <- list(mytx, "-t", transformlist[i])
+      } else if (ismat) {
+        mytx <- list(
+          mytx, "-t",
+          paste("[", transformlist[i], ",1]", sep = "")
+        )
       }
-    if ( usepts@dimension != 2 ) stop("must be 2d antsImage")
-    pointsout = antsImageClone( usepts )
-    args <- list( d = dim, i = usepts, o = pointsout, unlist(mytx) )
+    }
+    if (class(points)[[1]] != "antsImage") {
+      usepts <- as.antsImage(data.matrix(points))
+    } else {
+      usepts <- antsImageClone(points)
+    }
+    if (usepts@dimension != 2) stop("must be 2d antsImage")
+    pointsout <- antsImageClone(usepts)
+    args <- list(d = dim, i = usepts, o = pointsout, unlist(mytx))
     myargs <- .int_antsProcessArguments(c(args))
     for (jj in c(1:length(myargs))) {
-          if (!is.na(myargs[jj])) {
-          if (myargs[jj] == "-") {
-            myargs2 <- rep(NA, (length(myargs) - 1))
-            myargs2[1:(jj - 1)] <- myargs[1:(jj - 1)]
-            myargs2[jj:(length(myargs) - 1)] <- myargs[(jj + 1):(length(myargs))]
-            myargs <- myargs2
-          }
-          }
+      if (!is.na(myargs[jj])) {
+        if (myargs[jj] == "-") {
+          myargs2 <- rep(NA, (length(myargs) - 1))
+          myargs2[1:(jj - 1)] <- myargs[1:(jj - 1)]
+          myargs2[jj:(length(myargs) - 1)] <- myargs[(jj + 1):(length(myargs))]
+          myargs <- myargs2
+        }
+      }
     }
     ANTsRCore::antsApplyTransformsToPoints(c(myargs, "-f", 1, "--precision", 0))
-  
-    if ( class(points)[[1]] == "antsImage" ) return( pointsout )
-    pointsout = data.frame( as.matrix( pointsout ) )
-    colnames( pointsout ) = colnames( points )
-    if ( ncol( pointsout ) > dim )
-      pointsout[ , (dim+1):ncol(points) ] = points[ , (dim+1):ncol(points) ]
-    return( pointsout )
+
+    if (class(points)[[1]] == "antsImage") {
+      return(pointsout)
     }
-    if (!ttexists)
-        stop("transforms may not exist")
+    pointsout <- data.frame(as.matrix(pointsout))
+    colnames(pointsout) <- colnames(points)
+    if (ncol(pointsout) > dim) {
+      pointsout[, (dim + 1):ncol(points)] <- points[, (dim + 1):ncol(points)]
+    }
+    return(pointsout)
+  }
+  if (!ttexists) {
+    stop("transforms may not exist")
+  }
 }

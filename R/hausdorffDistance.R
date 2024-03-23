@@ -11,20 +11,20 @@
 #' @author Tustison NJ
 #' @examples
 #'
-#' sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' sourceSegmentation <- kmeansSegmentation( sourceImage, 3 )$segmentation
-#' referenceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' referenceSegmentation <- kmeansSegmentation( referenceImage, 3 )$segmentation
-#' hausdorff <- hausdorffDistance( sourceImage, referenceImage )
+#' sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' sourceSegmentation <- kmeansSegmentation(sourceImage, 3)$segmentation
+#' referenceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' referenceSegmentation <- kmeansSegmentation(referenceImage, 3)$segmentation
+#' hausdorff <- hausdorffDistance(sourceImage, referenceImage)
 #'
 #' @export hausdorffDistance
-hausdorffDistance <- function( inputImage1, inputImage2 )
-  {
-  inputImage1 <- check_ants( inputImage1 )
-  inputImage2 <- check_ants( inputImage2 )
+hausdorffDistance <- function(inputImage1, inputImage2) {
+  inputImage1 <- check_ants(inputImage1)
+  inputImage2 <- check_ants(inputImage2)
 
   hausdorff <- ANTsRCore::HausdorffDistanceR(
-    inputImage1, inputImage2)
+    inputImage1, inputImage2
+  )
 
-  return( hausdorff )
+  return(hausdorff)
 }

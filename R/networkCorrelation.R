@@ -3,18 +3,17 @@
 # theory. PLoS One 5(10) (2010) e13701
 
 .networkCorrelation <- function(n1, n2) {
-  
   if (sum(abs(dim(n1) - dim(n2))) != 0) {
     print("Inputs must be of same dimension")
     return(NULL)
   }
-  
+
   cov <- .networkCovariance(n1, n2)
-  
+
   var1 <- var(n1[upper.tri(n1)])
   var2 <- var(n2[upper.tri(n2)])
-  
-  cor <- cov/sqrt(var1 * var2)
-  
+
+  cor <- cov / sqrt(var1 * var2)
+
   return(cor)
-} 
+}

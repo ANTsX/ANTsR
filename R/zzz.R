@@ -12,4 +12,4 @@
     "Also see *repro methods in antsRegistration."
   )
   packageStartupMessage(txt)
-  }
+}

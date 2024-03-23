@@ -14,10 +14,11 @@ matrix2timeseries <- function(referenceImage, maskImage, timeSeriesMatrix) {
     cat("This function is for 4D images.  Returning reference image.\n")
     return(referenceImage)
   }
-  temp = matrixToImages( timeSeriesMatrix, maskImage )
-  newImage = mergeListToNDImage( referenceImage, temp )
+  temp <- matrixToImages(timeSeriesMatrix, maskImage)
+  newImage <- mergeListToNDImage(referenceImage, temp)
   antsCopyImageInfo(referenceImage, newImage)
-  newImage<-antsImageClone( newImage,
-    out_pixeltype = referenceImage@pixeltype)
+  newImage <- antsImageClone(newImage,
+    out_pixeltype = referenceImage@pixeltype
+  )
   return(newImage)
 }

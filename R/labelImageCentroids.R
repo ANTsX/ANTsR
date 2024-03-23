@@ -12,12 +12,11 @@
 #'
 #' @examples
 #'
-#' labelImage<-makeImage( c(2,2,2) , 0:7 )
+#' labelImage <- makeImage(c(2, 2, 2), 0:7)
 #' labelImageCentroids(labelImage)
 #'
 #' @export labelImageCentroids
 labelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
-
   # Get centroids of labels
   d <- dim(img)
   if (length(d) != 3) {
@@ -44,7 +43,7 @@ labelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
       xc[i] <- mean(subset(xcoords, idx))
       yc[i] <- mean(subset(ycoords, idx))
       zc[i] <- mean(subset(zcoords, idx))
-      if (i%%20 == 0) {
+      if (i %% 20 == 0) {
         setTxtProgressBar(progress, i)
       }
     }
@@ -65,12 +64,10 @@ labelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
       xc[i] <- xci[mid]
       yc[i] <- yci[mid]
       zc[i] <- zci[mid]
-      if (i%%20 == 0) {
+      if (i %% 20 == 0) {
         setTxtProgressBar(progress, i)
       }
-
     }
-
   }
   setTxtProgressBar(progress, nLabels)
   close(progress)
@@ -81,5 +78,4 @@ labelImageCentroids <- function(img, physical = FALSE, convex = TRUE) {
   }
 
   return(list(labels = mylabels, vertices = centroids))
-
 }

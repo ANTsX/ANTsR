@@ -9,11 +9,13 @@
 #'
 #' @export antsDir
 antsDir <- function() {
-  antsd<-paste( system.file("bin",
-    package="ANTsRCore"), sep="")
-  if ( ! file.exists(antsd) )
+  antsd <- paste(system.file("bin",
+    package = "ANTsRCore"
+  ), sep = "")
+  if (!file.exists(antsd)) {
     print("antsDir: ants dir does not exist")
-  cat( antsd )
+  }
+  cat(antsd)
 }
 
 #' return ANTs installation information
@@ -27,11 +29,13 @@ antsDir <- function() {
 #'
 #' @export antsIncludes
 antsIncludes <- function() {
-  antslocation<-paste( system.file("include",
-    package="ANTsRCore"),"/", sep="")
-  if ( ! file.exists(antslocation) )
+  antslocation <- paste(system.file("include",
+    package = "ANTsRCore"
+  ), "/", sep = "")
+  if (!file.exists(antslocation)) {
     print("antsIncludes: ants includes do not exist")
-  cat( antslocation )
+  }
+  cat(antslocation)
 }
 
 #' return ants library location
@@ -45,14 +49,15 @@ antsIncludes <- function() {
 #'
 #' @export antsLibs
 antsLibs <- function() {
-  antslibs <- paste( system.file("libs", package="ANTsRCore"), '/lib/', sep="")
-  if ( ! file.exists(antslibs) ) {
+  antslibs <- paste(system.file("libs", package = "ANTsRCore"), "/lib/", sep = "")
+  if (!file.exists(antslibs)) {
     # Check for libraries under /lib64
-    antslibs <- paste( system.file("libs", package="ANTsRCore"), '/lib64/', sep="")
-    if ( ! file.exists(antslibs) )
-        print("antsLibs: ants libs not found")
+    antslibs <- paste(system.file("libs", package = "ANTsRCore"), "/lib64/", sep = "")
+    if (!file.exists(antslibs)) {
+      print("antsLibs: ants libs not found")
+    }
   }
-  cat( antslibs )
+  cat(antslibs)
 }
 
 

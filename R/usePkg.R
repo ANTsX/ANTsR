@@ -13,19 +13,25 @@
 #' usePkg("stats", allowInstall = TRUE)
 #'
 #' @export usePkg
-usePkg <- function(packageName, allowInstall=FALSE ) {
+usePkg <- function(packageName, allowInstall = FALSE) {
   # extended based on H Wickham's advice
-  success <- requireNamespace(packageName, quietly=TRUE)
-  if (!success & allowInstall ) {
-    install.packages(packageName, repos = "http://cran.r-project.org",
-      dependencies = FALSE )
-    success <- requireNamespace(packageName, quietly=TRUE)
+  success <- requireNamespace(packageName, quietly = TRUE)
+  if (!success & allowInstall) {
+    install.packages(packageName,
+      repos = "http://cran.r-project.org",
+      dependencies = FALSE
+    )
+    success <- requireNamespace(packageName, quietly = TRUE)
     attachNamespace(packageName)
   } else {
-    temp <- tryCatch({attachNamespace(packageName)},
+    temp <- tryCatch(
+      {
+        attachNamespace(packageName)
+      },
       error = function(e) {
       }, finally = {
-      })
+      }
+    )
   }
   return(success)
 }

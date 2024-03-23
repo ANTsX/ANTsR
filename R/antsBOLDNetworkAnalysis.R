@@ -21,54 +21,59 @@
 #' @examples
 #' # none yet - this is not very well tested with recent ANTsR
 #' \dontrun{
-#' myimg <- antsImageRead(getANTsRData( "ch2" ), 3)
-#' mylab <- antsImageRead(getANTsRData( "ch2a" ), 3)
-#' boldfn <- getANTsRData( "pcasl" )
-#' bold <- antsImageRead( boldfn , 4 )
-#' avgbold <- getAverageOfTimeSeries( bold )
-#' breg <- antsRegistration( avgbold, myimg, typeofTransform = c("AffineFast") )
-#' warpedParcellation <- antsApplyTransforms( avgbold, mylab,
-#'     transformlist=breg$fwdtransforms, interpolator="NearestNeighbor" )
-#' mask <- getMask( avgbold )
-#' warpedParcellation = maskImage(warpedParcellation, img.mask = mask)
-#' old = NA;
-#' labels = warpedParcellation; 
-#' gdens = 0.2; threshLo = 1; threshHi = 90;
-#' freqLo = 0.01; freqHi = 0.1; winsortrim = 0.02;
-#' result <- antsBOLDNetworkAnalysis( bold=bold, mask=mask, warpedParcellation )
-#' 
+#' myimg <- antsImageRead(getANTsRData("ch2"), 3)
+#' mylab <- antsImageRead(getANTsRData("ch2a"), 3)
+#' boldfn <- getANTsRData("pcasl")
+#' bold <- antsImageRead(boldfn, 4)
+#' avgbold <- getAverageOfTimeSeries(bold)
+#' breg <- antsRegistration(avgbold, myimg, typeofTransform = c("AffineFast"))
+#' warpedParcellation <- antsApplyTransforms(avgbold, mylab,
+#'   transformlist = breg$fwdtransforms, interpolator = "NearestNeighbor"
+#' )
+#' mask <- getMask(avgbold)
+#' warpedParcellation <- maskImage(warpedParcellation, img.mask = mask)
+#' old <- NA
+#' labels <- warpedParcellation
+#' gdens <- 0.2
+#' threshLo <- 1
+#' threshHi <- 90
+#' freqLo <- 0.01
+#' freqHi <- 0.1
+#' winsortrim <- 0.02
+#' result <- antsBOLDNetworkAnalysis(bold = bold, mask = mask, warpedParcellation)
 #' }
 #' @export antsBOLDNetworkAnalysis
-antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
-  labels = NULL, motion ,
-  gdens = 0.2, threshLo = 1, threshHi = 90,
-  freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
-  throwaway ) {
+antsBOLDNetworkAnalysis <- function(
+    bold = NULL, mask = NULL,
+    labels = NULL, motion,
+    gdens = 0.2, threshLo = 1, threshHi = 90,
+    freqLo = 0.01, freqHi = 0.1, winsortrim = 0.02,
+    throwaway) {
   myscale <- function(x, doscale = FALSE) {
-    if (doscale)
+    if (doscale) {
       return(scale(x))
+    }
     return(x)
   }
   # if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
   # if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
   # if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   stopifnot(!is.null(bold))
-  bold = check_ants(bold)
+  bold <- check_ants(bold)
   mytimes <- dim(bold)[4]
   aalm <- check_ants(labels)
-  mask = check_ants(mask)
+  mask <- check_ants(mask)
   aalmask <- antsImageClone(aalm)
   mylog <- (aalm >= threshLo & aalm <= threshHi & mask > 0.5)
   # aalmask[mylog] <- 1
   # aalmask[!mylog] <- 0
-  aalmask = mylog
+  aalmask <- mylog
   aalm[!mylog] <- 0
   omat <- myscale(timeseries2matrix(bold, aalmask))
-  if ( missing( motion ) )
-    {
-    temp<-antsMotionCalculation( bold  )
-    motion<-temp$moco_params
-    }
+  if (missing(motion)) {
+    temp <- antsMotionCalculation(bold)
+    motion <- temp$moco_params
+  }
   templateFD <- rep(0, nrow(motion))
   DVARS <- rep(0, nrow(motion))
   for (i in 2:nrow(motion)) {
@@ -84,29 +89,32 @@ antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
   }
   # question - should this be a constant of 0.2 as recommended in Yan Craddock He
   # Milham?
-  if ( missing( throwaway ) )
-    throwaway <- round( 10.0 / antsGetSpacing(bold)[4]  )
+  if (missing(throwaway)) {
+    throwaway <- round(10.0 / antsGetSpacing(bold)[4])
+  }
   keepinds <- which(templateFD < (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) >
     throwaway))
   keepinds <- c(throwaway, keepinds)
   throwinds <- which(templateFD > (mean(templateFD) + 2 * sd(templateFD)) & ((1:mytimes) >
     throwaway))
   doimpute <- TRUE
-  if (length(throwinds) > 0 & doimpute)
+  if (length(throwinds) > 0 & doimpute) {
     for (i in throwinds) {
       previ <- max(keepinds[keepinds < i])
       nexti <- min(keepinds[keepinds > i])
-      wt1 <- 1 - abs(i - previ)/(nexti - previ)
-      wt2 <- 1 - abs(i - nexti)/(nexti - previ)
+      wt1 <- 1 - abs(i - previ) / (nexti - previ)
+      wt2 <- 1 - abs(i - nexti) / (nexti - previ)
       omat[i, ] <- wt1 * omat[previ, ] + omat[nexti, ] * wt2
       DVARS[i] <- wt1 * DVARS[previ] + DVARS[nexti] * wt2
       templateFD[i] <- wt1 * templateFD[previ] + templateFD[nexti] * wt2
       motion[i, ] <- wt1 * motion[previ, ] + motion[nexti, ] * wt2
     }
+  }
   keepinds <- throwaway:mytimes
   usemotiondirectly <- TRUE
-  if (usemotiondirectly)
+  if (usemotiondirectly) {
     motionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
+  }
   colnames(motionnuis) <- paste("mot", 1:ncol(motionnuis), sep = "")
   bkgd <- TRUE
   if (bkgd) {
@@ -117,21 +125,25 @@ antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
     # backgroundvoxels[] <- FALSE
     # backgroundvoxels[neginds] <- TRUE
     # negmask[backgroundvoxels] <- 1
-    negmask = iMath(negmask, "ME", 1)
+    negmask <- iMath(negmask, "ME", 1)
     tempmat <- myscale(timeseries2matrix(bold, negmask)[keepinds, ])
     bgsvd <- svd(tempmat)
-    mysum <- cumsum(bgsvd$d)/sum(bgsvd$d)
+    mysum <- cumsum(bgsvd$d) / sum(bgsvd$d)
     newnuisv <- min(c(10, which(mysum > 0.8)[1]))
     bgdnuis <- bgsvd$u[, 1:newnuisv]
     colnames(bgdnuis) <- paste("bgdNuis", 1:newnuisv, sep = "")
   }
-  if (winsortrim > 0)
+  if (winsortrim > 0) {
     omat <- psych::winsor(omat, trim = winsortrim)
+  }
   omat <- omat[keepinds, ]
   ##################################################
   classiccompcor <- compcor(omat, mask = mask, ncompcor = 4)
   omotionnuis <- as.matrix(motion[keepinds, 3:ncol(motion)])
-  if ( !usePkg("magic") ) { print("Need magic package"); return(NULL) }  
+  if (!usePkg("magic")) {
+    print("Need magic package")
+    return(NULL)
+  }
   motnuisshift <- magic::ashift(omotionnuis, c(1, 0))
   motmag <- apply(omotionnuis, FUN = mean, MARGIN = 2)
   matmag <- sqrt(sum(motmag[1:9] * motmag[1:9]))
@@ -143,20 +155,31 @@ antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
   dtran <- (omotionnuis - motnuisshift)[, 10:12]
   dmatrixm <- apply(dmatrix * dmatrix, FUN = sum, MARGIN = 1)
   dtranm <- apply(dtran * dtran, FUN = sum, MARGIN = 1)
-  if (bkgd)
-    mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
-      bgdnuis, templateFD[keepinds], DVARS[keepinds]) else mynuis <- cbind(scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
-    templateFD[keepinds], DVARS[keepinds])
+  if (bkgd) {
+    mynuis <- cbind(
+      scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
+      bgdnuis, templateFD[keepinds], DVARS[keepinds]
+    )
+  } else {
+    mynuis <- cbind(
+      scale(dmatrixm)[, 1], scale(dtranm)[, 1], classiccompcor,
+      templateFD[keepinds], DVARS[keepinds]
+    )
+  }
   colnames(mynuis)[1:2] <- c("dmatrix", "dtran")
-  colnames(mynuis)[(length(colnames(mynuis)) - 1):length(colnames(mynuis))] <- c("FD",
-    "DVARS")
+  colnames(mynuis)[(length(colnames(mynuis)) - 1):length(colnames(mynuis))] <- c(
+    "FD",
+    "DVARS"
+  )
   mytimes <- dim(omat)[1]
   mat <- myscale(residuals(lm(omat ~ mynuis)), doscale = TRUE)
   flo <- freqLo
   fhi <- freqHi
-  mynetwork <- filterfMRIforNetworkAnalysis(mat, tr = antsGetSpacing(bold)[4],
+  mynetwork <- filterfMRIforNetworkAnalysis(mat,
+    tr = antsGetSpacing(bold)[4],
     mask = aalmask, cbfnetwork = "BOLD", labels = aalm, graphdensity = as.numeric(gdens),
-    freqLo = flo, freqHi = fhi, usesvd = FALSE)  # , nuisancein = locmotnuis )
+    freqLo = flo, freqHi = fhi, usesvd = FALSE
+  ) # , nuisancein = locmotnuis )
   ################################################## now finalize it all ############### return network values on full dataset
   names(matmag) <- "MatrixMotion"
   names(tranmag) <- "TransMotion"
@@ -180,11 +203,15 @@ antsBOLDNetworkAnalysis <- function(bold = NULL, mask = NULL,
   names(meanFD) <- "meanFD"
   meanDVARS <- mean(DVARS)
   names(meanDVARS) <- "meanDVARS"
-  myc <- c(matmag, tranmag, matsd, transd, mydeg, mypr, mycent, mytrans, myclose,
-    mybtwn, mytimes, meanFD, meanDVARS)
+  myc <- c(
+    matmag, tranmag, matsd, transd, mydeg, mypr, mycent, mytrans, myclose,
+    mybtwn, mytimes, meanFD, meanDVARS
+  )
   outmat <- matrix(myc, nrow = 1)
   colnames(outmat) <- names(myc)
-  return( list( subjectSummary = outmat, mynetwork = mynetwork,
-    boldmask = aalmask, nuisanceVariables=mynuis ) )
+  return(list(
+    subjectSummary = outmat, mynetwork = mynetwork,
+    boldmask = aalmask, nuisanceVariables = mynuis
+  ))
   ##################################################
 }

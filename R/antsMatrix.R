@@ -16,16 +16,18 @@
 #' @slot elementtype string of the type of storage of the matrix e.g. "float"
 #' @slot pointer the memory location
 setClass(Class = "antsMatrix", representation(
-  elementtype = "character", pointer = "externalptr"))
+  elementtype = "character", pointer = "externalptr"
+))
 
 #' @rdname antsMatrix_class
 #' @aliases initialize,antsMatrix-method
 #' @examples
-#' mat = as.antsMatrix(matrix(rnorm(10), nrow=2))
+#' mat <- as.antsMatrix(matrix(rnorm(10), nrow = 2))
 #' as.data.frame(mat)
 #' as.matrix(mat)
-setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(.Object,
-  elementtype) {
+setMethod(f = "initialize", signature(.Object = "antsMatrix"), definition = function(
+    .Object,
+    elementtype) {
   ANTsRCore::antsMatrix(elementtype)
 })
 
@@ -44,7 +46,7 @@ setMethod(f = "as.data.frame", signature(x = "antsMatrix"), definition = functio
 #' @param optional passsed to \code{\link{as.data.frame}}
 #' @export
 #' @method as.data.frame antsMatrix
-as.data.frame.antsMatrix = function(x, row.names = NULL, optional = FALSE, ...) {
+as.data.frame.antsMatrix <- function(x, row.names = NULL, optional = FALSE, ...) {
   lst <- ANTsRCore::antsMatrix_asList(x)
   names(lst)[1:(length(lst) - 1)] <- lst[[length(lst)]]
   lst[[length(lst)]] <- NULL
@@ -53,10 +55,12 @@ as.data.frame.antsMatrix = function(x, row.names = NULL, optional = FALSE, ...) 
 
 #' @rdname as.array
 #' @aliases as.matrix,antsMatrix-method
-setMethod(f = "as.matrix", signature(x = "antsMatrix"),
-          definition = function(x, ...) {
-  as.matrix.data.frame(as.data.frame(x), ...)
-})
+setMethod(
+  f = "as.matrix", signature(x = "antsMatrix"),
+  definition = function(x, ...) {
+    as.matrix.data.frame(as.data.frame(x), ...)
+  }
+)
 
 
 #' @rdname as.array
@@ -78,36 +82,47 @@ setMethod(f = "as.list", signature(x = "antsMatrix"), definition = function(x, .
 #' @param elementtype e.g. "float" or "double"
 #' @param ... other parameters
 #' @examples
-#' as.antsMatrix(matrix(rnorm(10), nrow=2))
+#' as.antsMatrix(matrix(rnorm(10), nrow = 2))
 #' @export
 setGeneric(name = "as.antsMatrix", def = function(object,
-                                                  elementtype="float", ...)
-  standardGeneric("as.antsMatrix"))
+                                                  elementtype = "float", ...) {
+  standardGeneric("as.antsMatrix")
+})
 
 #' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,list-method
 #' @examples
-#' mat = matrix(rnorm(10), nrow=2)
-#' df = as.data.frame(mat)
+#' mat <- matrix(rnorm(10), nrow = 2)
+#' df <- as.data.frame(mat)
 #' as.antsMatrix(df)
 #' as.antsMatrix(as.list(df))
-setMethod(f = "as.antsMatrix", signature(object = "list"),
-  definition = function(object, elementtype="float") {
+setMethod(
+  f = "as.antsMatrix", signature(object = "list"),
+  definition = function(object, elementtype = "float") {
     return(ANTsRCore::antsMatrix_asantsMatrix(object, elementtype))
-})
+  }
+)
 
 #' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,data.frame-method
-setMethod(f = "as.antsMatrix", signature(object = "data.frame"),
-  definition = function(object, elementtype="float") {
-    return(ANTsRCore::antsMatrix_asantsMatrix(as.list(object),
-                                              elementtype))
-})
+setMethod(
+  f = "as.antsMatrix", signature(object = "data.frame"),
+  definition = function(object, elementtype = "float") {
+    return(ANTsRCore::antsMatrix_asantsMatrix(
+      as.list(object),
+      elementtype
+    ))
+  }
+)
 
 #' @rdname as.antsMatrix
 #' @aliases as.antsMatrix,matrix-method
-setMethod(f = "as.antsMatrix", signature(object = "matrix"),
-  definition = function(object, elementtype="float") {
-    return(ANTsRCore::antsMatrix_asantsMatrix(as.list(as.data.frame(object)),
-                                              elementtype))
-})
+setMethod(
+  f = "as.antsMatrix", signature(object = "matrix"),
+  definition = function(object, elementtype = "float") {
+    return(ANTsRCore::antsMatrix_asantsMatrix(
+      as.list(as.data.frame(object)),
+      elementtype
+    ))
+  }
+)

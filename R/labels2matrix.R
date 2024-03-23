@@ -15,31 +15,29 @@
 #' @author Avants BB
 #' @examples
 #'
-#' fi = antsImageRead(getANTsRData("r16") ,2) %>% resampleImage(c(60,60),1,0)
-#' mask = getMask( fi )
-#' labs = kmeansSegmentation( fi, 3 )$segmentation
-#' labmat = labels2matrix( labs, mask )
+#' fi <- antsImageRead(getANTsRData("r16"), 2) %>% resampleImage(c(60, 60), 1, 0)
+#' mask <- getMask(fi)
+#' labs <- kmeansSegmentation(fi, 3)$segmentation
+#' labmat <- labels2matrix(labs, mask)
 #'
 #' @export labels2matrix
-labels2matrix <- function( img, mask, targetLabels = NULL, missingVal = NA )
-{
-  if ( any( dim( img ) != dim( mask ) ) )
-    {
+labels2matrix <- function(img, mask, targetLabels = NULL, missingVal = NA) {
+  if (any(dim(img) != dim(mask))) {
     stop("image and mask must be same size")
   }
   # vec <- subset( img, mask > 0 )
-  vec = img[ mask > 0 ]
-  theLabels <- sort( unique( vec ) )
-  if ( ! is.null( targetLabels ) )  theLabels = targetLabels
-  mylabelnames = as.character( theLabels )
-  nLabels <- length( theLabels )
-  labels <- matrix( 0, nrow = nLabels, ncol = length( vec ) )
-  for ( i in 1:nLabels )
-    {
-    lab = as.numeric( theLabels[ i ] )
-    filler = as.numeric( vec == lab )
-    if ( sum( filler ) == 0 ) filler = rep( missingVal, length( vec ) )
+  vec <- img[mask > 0]
+  theLabels <- sort(unique(vec))
+  if (!is.null(targetLabels)) theLabels <- targetLabels
+  mylabelnames <- as.character(theLabels)
+  nLabels <- length(theLabels)
+  labels <- matrix(0, nrow = nLabels, ncol = length(vec))
+  for (i in 1:nLabels)
+  {
+    lab <- as.numeric(theLabels[i])
+    filler <- as.numeric(vec == lab)
+    if (sum(filler) == 0) filler <- rep(missingVal, length(vec))
     labels[i, ] <- filler
-    }
-  return( labels )
+  }
+  return(labels)
 }

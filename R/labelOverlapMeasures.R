@@ -11,21 +11,21 @@
 #' @author Avants BB, Tustison NJ
 #' @examples
 #'
-#' sourceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' sourceSegmentation <- kmeansSegmentation( sourceImage, 3 )$segmentation
-#' referenceImage <- antsImageRead( getANTsRData( "r16" ), 2 )
-#' referenceSegmentation <- kmeansSegmentation( referenceImage, 3 )$segmentation
-#' overlap <- labelOverlapMeasures( sourceSegmentation, referenceSegmentation )
+#' sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' sourceSegmentation <- kmeansSegmentation(sourceImage, 3)$segmentation
+#' referenceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' referenceSegmentation <- kmeansSegmentation(referenceImage, 3)$segmentation
+#' overlap <- labelOverlapMeasures(sourceSegmentation, referenceSegmentation)
 #'
 #' @export labelOverlapMeasures
-labelOverlapMeasures <- function( sourceLabelImage, targetLabelImage ) 
-  {
-  sourceLabelImage <- check_ants( sourceLabelImage )
-  targetLabelImage <- check_ants( targetLabelImage )
+labelOverlapMeasures <- function(sourceLabelImage, targetLabelImage) {
+  sourceLabelImage <- check_ants(sourceLabelImage)
+  targetLabelImage <- check_ants(targetLabelImage)
 
-  overlapMeasures <- ANTsRCore::labelOverlapMeasuresR( 
-    sourceLabelImage, targetLabelImage)
+  overlapMeasures <- ANTsRCore::labelOverlapMeasuresR(
+    sourceLabelImage, targetLabelImage
+  )
   overlapMeasures[1, 1] <- "All"
 
-  return( overlapMeasures )
+  return(overlapMeasures)
 }

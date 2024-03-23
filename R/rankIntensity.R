@@ -12,17 +12,17 @@
 #' @author Avants BB
 #' @examples
 #'
-#' fi <- makeImage( c(10,10,10), rnorm(1000) )
-#' rfi = rankIntensity( fi )
+#' fi <- makeImage(c(10, 10, 10), rnorm(1000))
+#' rfi <- rankIntensity(fi)
 #'
 #' @export rankIntensity
-rankIntensity <- function( x, mask, getMask=TRUE, method='max' ) {
-  rx = antsImageClone( x )
-  if ( missing( mask ) & getMask ) mask = getMask( x )
-  if ( missing( mask ) & ! getMask ) mask = x * 0 + 1
-  mat = rank( x[mask==1], ties.method=method )
-  mat = mat - min( mat )
-  rx[ mask == 1 ]=mat
-  rx = iMath(rx,"Normalize") * mask
-  return( rx )
+rankIntensity <- function(x, mask, getMask = TRUE, method = "max") {
+  rx <- antsImageClone(x)
+  if (missing(mask) & getMask) mask <- getMask(x)
+  if (missing(mask) & !getMask) mask <- x * 0 + 1
+  mat <- rank(x[mask == 1], ties.method = method)
+  mat <- mat - min(mat)
+  rx[mask == 1] <- mat
+  rx <- iMath(rx, "Normalize") * mask
+  return(rx)
 }

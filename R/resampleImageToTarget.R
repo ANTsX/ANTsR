@@ -26,68 +26,81 @@
 #' @author Pustina D
 #' @examples
 #'
-#' fname = getANTsRData("r16")
-#' fi<-antsImageRead( fname)
-#' fi2mm <- resampleImage(fi, c(2, 2), useVoxels = 0, interpType = 'linear')
+#' fname <- getANTsRData("r16")
+#' fi <- antsImageRead(fname)
+#' fi2mm <- resampleImage(fi, c(2, 2), useVoxels = 0, interpType = "linear")
 #' resampled <- resampleImageToTarget(fi2mm, fi)
 #' testthat::expect_error(resampleImageToTarget(fi2mm))
 #'
 #' @export resampleImageToTarget
 #'
-resampleImageToTarget <- function(image, target, interpType = 'linear',
-                                   imagetype = 0, verbose = FALSE, ...) {
-
+resampleImageToTarget <- function(image, target, interpType = "linear",
+                                  imagetype = 0, verbose = FALSE, ...) {
   if (missing(image) | missing(target)) {
     stop("missing input image or missing target")
   }
-  image = check_ants(image)
-  target = check_ants(target)
-  if ( image@components > 1 | target@components > 1 )
+  image <- check_ants(image)
+  target <- check_ants(target)
+  if (image@components > 1 | target@components > 1) {
     stop("Either input image or target has >1 channel/component pixels; please splitChannels before running this code.")
+  }
 
-  fixed = target
-  moving = image
-  compose = NA
-  transformlist = 'identity'
-  interpolator = interpType
+  fixed <- target
+  moving <- image
+  compose <- NA
+  transformlist <- "identity"
+  interpolator <- interpType
 
   ## compatibility with previous version's integer interpolator
-  interpolator.oldoptions = c('linear','nearestNeighbor',
-                              'gaussian','cosineWindowedSinc','bSpline')
-  if ( is.numeric(interpolator) ) {
-    interpolator = interpolator.oldoptions[ interpolator+1 ]
+  interpolator.oldoptions <- c(
+    "linear", "nearestNeighbor",
+    "gaussian", "cosineWindowedSinc", "bSpline"
+  )
+  if (is.numeric(interpolator)) {
+    interpolator <- interpolator.oldoptions[interpolator + 1]
   }
   ### end compatibility
 
-  interpolator[1] = paste(tolower(substring(interpolator[1],
-                                            1, 1)), substring(interpolator[1], 2), sep = "", collapse = " ")
-  interpOpts = c("linear", "nearestNeighbor", "multiLabel",
-                 "gaussian", "bSpline", "cosineWindowedSinc", "welchWindowedSinc",
-                 "hammingWindowedSinc", "lanczosWindowedSinc", "genericLabel")
+  interpolator[1] <- paste(tolower(substring(
+    interpolator[1],
+    1, 1
+  )), substring(interpolator[1], 2), sep = "", collapse = " ")
+  interpOpts <- c(
+    "linear", "nearestNeighbor", "multiLabel",
+    "gaussian", "bSpline", "cosineWindowedSinc", "welchWindowedSinc",
+    "hammingWindowedSinc", "lanczosWindowedSinc", "genericLabel"
+  )
   interpolator <- match.arg(interpolator, interpOpts)
-  args <- list(fixed, moving, transformlist, interpolator,
-               ...)
+  args <- list(
+    fixed, moving, transformlist, interpolator,
+    ...
+  )
   if (!is.character(fixed)) {
-    fixed = check_ants(fixed)
-    moving = check_ants(moving)
+    fixed <- check_ants(fixed)
+    moving <- check_ants(moving)
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] ==
-          "antsImage") {
+      "antsImage") {
       inpixeltype <- fixed@pixeltype
       warpedmovout <- antsImageClone(moving)
       f <- fixed
       m <- moving
-      if ((moving@dimension == 4) & (fixed@dimension == 3) & (imagetype == 0))  stop("Set imagetype 3 to transform time series images.")
+      if ((moving@dimension == 4) & (fixed@dimension == 3) & (imagetype == 0)) stop("Set imagetype 3 to transform time series images.")
       wmo <- warpedmovout
-      mytx <- list("-t", 'identity')
+      mytx <- list("-t", "identity")
 
-      if (is.na(compose))
-        args <- list(d = fixed@dimension, i = m, o = wmo,
-                     r = f, n = interpolator, unlist(mytx))
+      if (is.na(compose)) {
+        args <- list(
+          d = fixed@dimension, i = m, o = wmo,
+          r = f, n = interpolator, unlist(mytx)
+        )
+      }
       tfn <- paste(compose, "comptx.nii.gz", sep = "")
       if (!is.na(compose)) {
-        mycompo = paste("[", tfn, ",1]", sep = "")
-        args <- list(d = fixed@dimension, i = m, o = mycompo,
-                     r = f, n = interpolator, unlist(mytx))
+        mycompo <- paste("[", tfn, ",1]", sep = "")
+        args <- list(
+          d = fixed@dimension, i = m, o = mycompo,
+          r = f, n = interpolator, unlist(mytx)
+        )
       }
       myargs <- .int_antsProcessArguments(c(args))
       for (jj in c(1:length(myargs))) {
@@ -96,26 +109,35 @@ resampleImageToTarget <- function(image, target, interpType = 'linear',
             myargs2 <- rep(NA, (length(myargs) - 1))
             myargs2[1:(jj - 1)] <- myargs[1:(jj - 1)]
             myargs2[jj:(length(myargs) - 1)] <- myargs[(jj +
-                                                          1):(length(myargs))]
+              1):(length(myargs))]
             myargs <- myargs2
           }
         }
       }
-      myverb = as.numeric(verbose)
-      if (verbose)
+      myverb <- as.numeric(verbose)
+      if (verbose) {
         print(myargs)
-      ANTsRCore::antsApplyTransforms(c(myargs, "-z", 1, "-v",
-                                     myverb, "--float", 1, "-e", imagetype))
-      if (is.na(compose))
+      }
+      ANTsRCore::antsApplyTransforms(c(
+        myargs, "-z", 1, "-v",
+        myverb, "--float", 1, "-e", imagetype
+      ))
+      if (is.na(compose)) {
         return(antsImageClone(warpedmovout, inpixeltype))
-      if (!is.na(compose))
-        if (file.exists(tfn))
+      }
+      if (!is.na(compose)) {
+        if (file.exists(tfn)) {
           return(tfn)
-      else return(NA)
+        } else {
+          return(NA)
+        }
+      }
     }
     return(1)
   }
   ANTsRCore::antsApplyTransforms(
-        .int_antsProcessArguments(
-          c(args, "-z", 1, "--float", 1, "-e", imagetype)))
+    .int_antsProcessArguments(
+      c(args, "-z", 1, "--float", 1, "-e", imagetype)
+    )
+  )
 }

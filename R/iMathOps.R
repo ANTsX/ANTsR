@@ -16,15 +16,15 @@
 #' }
 #' @examples
 #' data(iMathOps)
-#'   i<-antsImageRead( getANTsRData('r16') , 2 )
-#'   roiImg<-getMask(i)
-#'   roiImg2<-iMath(roiImg,'ME',25)
-#'   if ( sum(roiImg==1) == sum(roiImg2==1)  ) stop("erosion failure")
-#'   roiImg2<-iMath(roiImg,'MD',25)
-#'   if ( sum(roiImg==1) == sum(roiImg2==1)  ) stop("dilation failure")
-#'   for ( j in c(1:nrow(iMathOps)) )
-#'   {
-#'   op <- as.character( iMathOps$Operation[j] )
-#'   }
+#' i <- antsImageRead(getANTsRData("r16"), 2)
+#' roiImg <- getMask(i)
+#' roiImg2 <- iMath(roiImg, "ME", 25)
+#' if (sum(roiImg == 1) == sum(roiImg2 == 1)) stop("erosion failure")
+#' roiImg2 <- iMath(roiImg, "MD", 25)
+#' if (sum(roiImg == 1) == sum(roiImg2 == 1)) stop("dilation failure")
+#' for (j in c(1:nrow(iMathOps)))
+#' {
+#'   op <- as.character(iMathOps$Operation[j])
+#' }
 #' @keywords datasets
 NULL

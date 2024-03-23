@@ -8,11 +8,11 @@
     return(NULL)
   }
   N <- dim(n1)[1]
-  
+
   n1 <- n1 - mean(n1[upper.tri(n1)])
   n2 <- n2 - mean(n2[upper.tri(n2)])
-  
-  cov <- 2/(N * (N - 1)) * sum(n1[upper.tri(n1)] * n2[upper.tri(n2)])
-  
+
+  cov <- 2 / (N * (N - 1)) * sum(n1[upper.tri(n1)] * n2[upper.tri(n2)])
+
   return(cov)
-} 
+}

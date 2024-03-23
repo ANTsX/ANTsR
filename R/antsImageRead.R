@@ -14,53 +14,60 @@
 #' @seealso \code{\link{antsImageWrite}}
 #' @examples
 #'
-#' fn <- getANTsRData( "r16" )
-#' fi <- antsImageRead( fn )
-#' img <- antsImageRead( fn , dimension = 2  )
-#' img <- antsImageRead( fn , dimension = 2 , 'double' )
+#' fn <- getANTsRData("r16")
+#' fi <- antsImageRead(fn)
+#' img <- antsImageRead(fn, dimension = 2)
+#' img <- antsImageRead(fn, dimension = 2, "double")
 #'
 #' @export antsImageRead
 antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
-  components=1
+  components <- 1
 
   if (class(filename) != "character" || length(filename) != 1) {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
   filename <- path.expand(filename)
-  if ( ! file.exists( filename ) ) stop("file does not exist")
+  if (!file.exists(filename)) stop("file does not exist")
   if (class(pixeltype) != "character" || length(pixeltype) != 1) {
     stop("'pixeltype' argument must be of class 'character' and have length 1")
   }
-  if ( !is.null(dimension) ) {
+  if (!is.null(dimension)) {
     if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) !=
       1) {
       stop("'dimension' argument must be of class 'numeric' and have length 1")
+    }
+  } else {
+    if (file.access(filename, 4) == -1) {
+      stop(paste("image is not readable, check permissions to", filename))
+    }
+    imageInfo <- tryCatch(
+      antsImageHeaderInfo(filename),
+      error = function(e) {
+        return(NA)
       }
+    )
+    if (any(is.na(imageInfo))) {
+      stop(paste("image may not be readable, check permissions to", filename))
     }
-  else {
-    if ( file.access( filename, 4 ) == -1 )
-      stop( paste("image is not readable, check permissions to", filename) )
-    imageInfo = tryCatch(
-      antsImageHeaderInfo( filename ), error = function(e) return(NA) )
-    if ( any( is.na( imageInfo ) ) )
-      stop( paste("image may not be readable, check permissions to", filename) )
-    dimension = imageInfo$nDimensions
-    components = imageInfo$nComponents
-    }
+    dimension <- imageInfo$nDimensions
+    components <- imageInfo$nComponents
+  }
 
-  if ( (dimension < 2) || (dimension > 4 ) ) {
+  if ((dimension < 2) || (dimension > 4)) {
     stop("only images of dimensions 2,3,4 are supported")
   }
 
-  rval <- try( 
-    ANTsRCore::antsImageRead(filename, pixeltype,
-                             dimension, components)
+  rval <- try(
+    ANTsRCore::antsImageRead(
+      filename, pixeltype,
+      dimension, components
     )
+  )
   if (inherits(rval, "try-error")) {
-    rval = NA
+    rval <- NA
   } else {
-    slot(rval, "filename") = filename  
+    slot(rval, "filename") <- filename
   }
-  
+
   return(rval)
 }

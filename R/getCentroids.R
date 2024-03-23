@@ -9,39 +9,40 @@
 #' @return the centroids are output in matrix of size npoints by 3
 #' @author Avants BB
 #' @examples
-#' img<-antsImageRead( getANTsRData( "r16" ) )
-#' img<-thresholdImage( img, 90, 120 )
-#' img<-labelClusters( img, 10 )
-#' cents<-getCentroids( img  )
+#' img <- antsImageRead(getANTsRData("r16"))
+#' img <- thresholdImage(img, 90, 120)
+#' img <- labelClusters(img, 10)
+#' cents <- getCentroids(img)
 #'
 #' @export getCentroids
-getCentroids <- function(img, clustparam = 0 ) {
+getCentroids <- function(img, clustparam = 0) {
   if (nargs() == 0 | missing(img)) {
     print(args(getCentroids))
     return(1)
   }
-  img = check_ants(img)
+  img <- check_ants(img)
   error_not_antsImage(img, "img")
 
   imagedim <- img@dimension
-  if ( clustparam > 0 ) {
-    mypoints <- labelClusters( img, clustparam, maxThresh=Inf )
+  if (clustparam > 0) {
+    mypoints <- labelClusters(img, clustparam, maxThresh = Inf)
   }
-  if ( clustparam == 0 ) {
-    mypoints <- antsImageClone( img  )
+  if (clustparam == 0) {
+    mypoints <- antsImageClone(img)
   }
-  mypoints = data.frame( labelStats( mypoints, mypoints ) )
-  mypoints = mypoints[-1,] # remove 0 label
-  x = mypoints$x
-  y = mypoints$y
-  if ( imagedim ==  3 ) z = mypoints$z else z=rep(0,nrow(mypoints))
-  if ( imagedim ==  4 ) t = mypoints$t else t=rep(0,nrow(mypoints))
+  mypoints <- data.frame(labelStats(mypoints, mypoints))
+  mypoints <- mypoints[-1, ] # remove 0 label
+  x <- mypoints$x
+  y <- mypoints$y
+  if (imagedim == 3) z <- mypoints$z else z <- rep(0, nrow(mypoints))
+  if (imagedim == 4) t <- mypoints$t else t <- rep(0, nrow(mypoints))
   centroids <- as.matrix(
     data.frame(
       x = x,
       y = y,
       z = z,
-      t = t )
-      )
-  return( centroids )
+      t = t
+    )
+  )
+  return(centroids)
 }

@@ -18,15 +18,15 @@
 #' clustering (optional) in a list
 #' @author Avants BB
 #' @examples
-#'
 #' \dontrun{
-#'   # dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
+#' # dsimdata<-pairwiseImageDistanceMatrix( 3, imagefilelist, nclusters = 5 )
 #' }
 #'
 #' @export pairwiseImageDistanceMatrix
-pairwiseImageDistanceMatrix <- function(dim,
-  myFileList, metrictype = "PearsonCorrelation",
-  nclusters = NA) {
+pairwiseImageDistanceMatrix <- function(
+    dim,
+    myFileList, metrictype = "PearsonCorrelation",
+    nclusters = NA) {
   fnl <- length(myFileList)
   mymat <- matrix(rep(NA, fnl * fnl), nrow = fnl, ncol = fnl)
   tct <- 0
@@ -36,8 +36,10 @@ pairwiseImageDistanceMatrix <- function(dim,
         i1 <- antsImageRead(myFileList[ct], dim)
         i2 <- antsImageRead(myFileList[ct2], dim)
         toutfn <- paste(tempdir(), "Z", sep = "/")
-        mytx <- antsRegistration(fixed = i1, moving = i2, typeofTransform = c("AffineFast"),
-          outprefix = toutfn)
+        mytx <- antsRegistration(
+          fixed = i1, moving = i2, typeofTransform = c("AffineFast"),
+          outprefix = toutfn
+        )
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
         wh <- (mywarpedimage > 0 & i1 > 0)
         if (metrictype == "PearsonCorrelation") {
@@ -47,17 +49,17 @@ pairwiseImageDistanceMatrix <- function(dim,
         }
         mymat[ct, ct2] <- (as.numeric(metric))
         tct <- tct + 1
-        print(paste(100 * tct/(fnl * fnl), "%"))
+        print(paste(100 * tct / (fnl * fnl), "%"))
         print(mymat)
       }
     }
   }
   if (metrictype == "PearsonCorrelation") {
-    mymat <- mymat * (-1)  # make a dissimilarity matrix
+    mymat <- mymat * (-1) # make a dissimilarity matrix
   }
-  mymat <- mymat - min(mymat, na.rm = T)  # make min zero
-  symat <- (mymat + t(mymat)) * 0.5  # make symmetric
-  if ( !is.na(nclusters) &  usePkg("cluster") ) {
+  mymat <- mymat - min(mymat, na.rm = T) # make min zero
+  symat <- (mymat + t(mymat)) * 0.5 # make symmetric
+  if (!is.na(nclusters) & usePkg("cluster")) {
     clusters <- rep(NA, fnl)
     clusterrep <- rep(NA, nclusters)
     pamx <- cluster::pam(symat, nclusters)
@@ -67,7 +69,9 @@ pairwiseImageDistanceMatrix <- function(dim,
       if (length(dim(symat[, wc])) > 0) {
         means <- apply(symat[, wc], MARGIN = 2, mean, na.rm = T)
         clusterrep[nc] <- wc[which.min(means)]
-      } else clusterrep[nc] <- which(clusters == nc)
+      } else {
+        clusterrep[nc] <- which(clusters == nc)
+      }
     }
     return(list(rawMatrix = mymat, symmMatrix = symat, clusters = clusters, representatives = myFileList[clusterrep]))
   }

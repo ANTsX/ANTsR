@@ -24,31 +24,35 @@
 #' Euler3DTransform, QuaternionRigidTransform, Rigid2DTransform,
 #' Similarity2DTransform, Similarity3DTransform
 #' @slot pointer to the memory location of the itk object
-setClass(Class = "antsrTransform",
-         representation(precision= "character", dimension = "integer",
-  type = "character", pointer = "externalptr"))
+setClass(
+  Class = "antsrTransform",
+  representation(
+    precision = "character", dimension = "integer",
+    type = "character", pointer = "externalptr"
+  )
+)
 
 #' @rdname antsrTransform
 #' @aliases show,antsrTransform-method
-setMethod(f = "show", "antsrTransform", function(object){
-    cat("antsrTransform\n")
-    cat("  Dimensions    :", object@dimension, "\n")
-    cat("  Precision     :", object@precision, "\n")
-    cat("  Type          :", object@type, "\n")
-    cat("\n")
+setMethod(f = "show", "antsrTransform", function(object) {
+  cat("antsrTransform\n")
+  cat("  Dimensions    :", object@dimension, "\n")
+  cat("  Precision     :", object@precision, "\n")
+  cat("  Type          :", object@type, "\n")
+  cat("\n")
 })
 
 #' @rdname antsrTransform
 #' @aliases initialize,antsrTransform-method
-setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = function(.Object,
-  precision = "float", dimension = 3, type = "AffineTransform", parameters=NA) {
-  tx = ANTsRCore::antsrTransform(precision, dimension, type)
-  if ( !is.na(parameters) )
-  {
+setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = function(
+    .Object,
+    precision = "float", dimension = 3, type = "AffineTransform", parameters = NA) {
+  tx <- ANTsRCore::antsrTransform(precision, dimension, type)
+  if (!is.na(parameters)) {
     setAntsrTransformParameters(tx, parameters)
   }
 
-  return( tx )
+  return(tx)
 })
 
 
@@ -81,98 +85,72 @@ setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = 
 #' @param supported.types flag that returns array of possible transforms types
 #' @return antsrTransform or list of transform types
 #' @examples
-#' trans= c(3,4,5)
-#' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
+#' trans <- c(3, 4, 5)
+#' tx <- createAntsrTransform(type = "Euler3DTransform", translation = trans)
 #' @export
-createAntsrTransform <- function( type="AffineTransform", precision="float", dimension=3, matrix=NA,
-  offset=NA, center=NA, translation=NA, parameters=NA, fixed.parameters=NA, displacement.field=NULL,
-  supported.types=FALSE )
-  {
+createAntsrTransform <- function(
+    type = "AffineTransform", precision = "float", dimension = 3, matrix = NA,
+    offset = NA, center = NA, translation = NA, parameters = NA, fixed.parameters = NA, displacement.field = NULL,
+    supported.types = FALSE) {
+  matrixOffsetTypes <- c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform", "Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
+  supportedTypes <- c(matrixOffsetTypes, "DisplacementFieldTransform")
 
-    matrixOffsetTypes = c("AffineTransform", "CenteredAffineTransform", "Euler2DTransform", "Euler3DTransform", "Rigid2DTransform", "QuaternionRigidTransform", "Similarity2DTransform", "CenteredSimilarity2DTransform","Similarity3DTransform", "CenteredRigid2DTransform", "CenteredEuler3DTransform")
-    supportedTypes = c(matrixOffsetTypes, "DisplacementFieldTransform")
-
-    if ( supported.types ) {
-      return( supportedTypes )
-    }
-
-
-    # Check for valid dimension
-    if ( (dimension < 2) || (dimension > 4) )
-    {
-      stop(paste("Unsupported dimension:", dimension))
-    }
-
-    # Check for valid precision
-    precisionTypes = c("float", "double")
-    if ( sum(precision==precisionTypes)==0)
-    {
-      stop(paste("Unsupported precision:", precision))
-    }
-
-    # Check for supported transform type
-    if ( sum(type==supportedTypes)==0 )
-    {
-      stop(paste("Unsupported type:", type))
-    }
-
-    # Check parameters with type
-    if (type=="Euler3DTransform")
-    {
-      dimension = 3
-    }
-    else if (type=="Euler2DTransform")
-    {
-      dimension = 2
-    }
-    else if (type=="Rigid3DTransform")
-    {
-      dimension = 3
-    }
-    else if (type=="QuaternionRigidTransform")
-    {
-      dimension = 3
-    }
-    else if (type=="Rigid2DTransform")
-    {
-      dimension = 2
-    }
-    else if (type=="CenteredRigid2DTransform")
-    {
-      dimension = 2
-    }
-    else if (type=="CenteredEuler3DTransform")
-    {
-      dimension = 3
-    }
-    else if (type=="Similarity3DTransform")
-    {
-      dimension = 3
-    }
-    else if (type=="Similarity2DTransform")
-    {
-      dimension = 2
-    }
-    else if (type=="CenteredSimilarity2DTransform")
-    {
-      dimension = 2
-    }
-
-    # If displacement field
-    if ( !is.null(displacement.field))
-    {
-      return( antsrTransformFromDisplacementField(displacement.field) )
-    }
-
-    # Transforms that derive from itk::MatrixOffsetTransformBase
-    if ( sum(type==matrixOffsetTypes) > 0 )
-    {
-      return(ANTsRCore::antsrTransform_MatrixOffset(type,precision,dimension,matrix,offset,center,translation,parameters,fixed.parameters))
-    }
-
-    stop( "Unknown transform type")
-
+  if (supported.types) {
+    return(supportedTypes)
   }
+
+
+  # Check for valid dimension
+  if ((dimension < 2) || (dimension > 4)) {
+    stop(paste("Unsupported dimension:", dimension))
+  }
+
+  # Check for valid precision
+  precisionTypes <- c("float", "double")
+  if (sum(precision == precisionTypes) == 0) {
+    stop(paste("Unsupported precision:", precision))
+  }
+
+  # Check for supported transform type
+  if (sum(type == supportedTypes) == 0) {
+    stop(paste("Unsupported type:", type))
+  }
+
+  # Check parameters with type
+  if (type == "Euler3DTransform") {
+    dimension <- 3
+  } else if (type == "Euler2DTransform") {
+    dimension <- 2
+  } else if (type == "Rigid3DTransform") {
+    dimension <- 3
+  } else if (type == "QuaternionRigidTransform") {
+    dimension <- 3
+  } else if (type == "Rigid2DTransform") {
+    dimension <- 2
+  } else if (type == "CenteredRigid2DTransform") {
+    dimension <- 2
+  } else if (type == "CenteredEuler3DTransform") {
+    dimension <- 3
+  } else if (type == "Similarity3DTransform") {
+    dimension <- 3
+  } else if (type == "Similarity2DTransform") {
+    dimension <- 2
+  } else if (type == "CenteredSimilarity2DTransform") {
+    dimension <- 2
+  }
+
+  # If displacement field
+  if (!is.null(displacement.field)) {
+    return(antsrTransformFromDisplacementField(displacement.field))
+  }
+
+  # Transforms that derive from itk::MatrixOffsetTransformBase
+  if (sum(type == matrixOffsetTypes) > 0) {
+    return(ANTsRCore::antsrTransform_MatrixOffset(type, precision, dimension, matrix, offset, center, translation, parameters, fixed.parameters))
+  }
+
+  stop("Unknown transform type")
+}
 
 
 #' @title setAntsrTransformParameters
@@ -181,9 +159,9 @@ createAntsrTransform <- function( type="AffineTransform", precision="float", dim
 #' @param parameters array of parameters
 #' @return TRUE
 #' @examples
-#' tx = new("antsrTransform")
-#' params = getAntsrTransformParameters(tx)
-#' setAntsrTransformParameters(tx, params*2)
+#' tx <- new("antsrTransform")
+#' params <- getAntsrTransformParameters(tx)
+#' setAntsrTransformParameters(tx, params * 2)
 #' @export
 setAntsrTransformParameters <- function(transform, parameters) {
   invisible(ANTsRCore::antsrTransform_SetParameters(transform, parameters))
@@ -194,8 +172,8 @@ setAntsrTransformParameters <- function(transform, parameters) {
 #' @param transform antsrTransform
 #' @return array of parameters'
 #' @examples
-#' tx = new("antsrTransform")
-#' params = getAntsrTransformParameters(tx)
+#' tx <- new("antsrTransform")
+#' params <- getAntsrTransformParameters(tx)
 #' @export
 getAntsrTransformParameters <- function(transform) {
   return(ANTsRCore::antsrTransform_GetParameters(transform))
@@ -207,9 +185,9 @@ getAntsrTransformParameters <- function(transform) {
 #' @param parameters array of parameters'
 #' @return TRUE
 #' @examples
-#' tx = new("antsrTransform")
-#' params = getAntsrTransformFixedParameters(tx)
-#' setAntsrTransformFixedParameters(tx, params*2)
+#' tx <- new("antsrTransform")
+#' params <- getAntsrTransformFixedParameters(tx)
+#' setAntsrTransformFixedParameters(tx, params * 2)
 #' @export
 setAntsrTransformFixedParameters <- function(transform, parameters) {
   invisible(ANTsRCore::antsrTransform_SetFixedParameters(transform, parameters))
@@ -220,8 +198,8 @@ setAntsrTransformFixedParameters <- function(transform, parameters) {
 #' @param transform antsrTransform
 #' @return array of fixed parameters
 #' @examples
-#' tx = new("antsrTransform")
-#' params = getAntsrTransformFixedParameters(tx)
+#' tx <- new("antsrTransform")
+#' params <- getAntsrTransformFixedParameters(tx)
 #' @export
 getAntsrTransformFixedParameters <- function(transform) {
   return(ANTsRCore::antsrTransform_GetFixedParameters(transform))
@@ -232,7 +210,7 @@ getAntsrTransformFixedParameters <- function(transform) {
 #' @param field deformation field (multiChannel image)
 #' @return antsrTransform'
 #' @export
-antsrTransformFromDisplacementField <- function( field ) {
+antsrTransformFromDisplacementField <- function(field) {
   return(ANTsRCore::antsrTransform_FromDisplacementField(field))
 }
 
@@ -242,7 +220,7 @@ antsrTransformFromDisplacementField <- function( field ) {
 #' @param reference reference antsImage if converting linear transform
 #' @return antsImage
 #' @export
-displacementFieldFromAntsrTransform <- function( tx, reference=NA ) {
+displacementFieldFromAntsrTransform <- function(tx, reference = NA) {
   return(ANTsRCore::antsrTransform_ToDisplacementField(tx, reference))
 }
 
@@ -255,43 +233,38 @@ displacementFieldFromAntsrTransform <- function( tx, reference=NA ) {
 #' @param reference target space for transforming an antsImage
 #' @return transformed data
 #' @examples
-#' tx = createAntsrTransform(dimension=2, precision="float", type="AffineTransform")
-#' params = getAntsrTransformParameters(tx)
-#' setAntsrTransformParameters(tx, params*2)
-#' pt2 = applyAntsrTransform(tx, c(1,2,3))
+#' tx <- createAntsrTransform(dimension = 2, precision = "float", type = "AffineTransform")
+#' params <- getAntsrTransformParameters(tx)
+#' setAntsrTransformParameters(tx, params * 2)
+#' pt2 <- applyAntsrTransform(tx, c(1, 2, 3))
 #' @export
-applyAntsrTransform <- function(transform, data, dataType="point", reference=NULL, ...) {
-
-  if ( is.antsImage(data) ) {
-    if (is.null(reference) ) {
-      reference = data
+applyAntsrTransform <- function(transform, data, dataType = "point", reference = NULL, ...) {
+  if (is.antsImage(data)) {
+    if (is.null(reference)) {
+      reference <- data
     }
-    return( applyAntsrTransformToImage( transform, data, reference, ...) )
-  }
-  else {
-    ismatrix=TRUE
-    if (class(data)[1]=="numeric") {
-      data = t(as.matrix(data))
-      ismatrix = FALSE
+    return(applyAntsrTransformToImage(transform, data, reference, ...))
+  } else {
+    ismatrix <- TRUE
+    if (class(data)[1] == "numeric") {
+      data <- t(as.matrix(data))
+      ismatrix <- FALSE
     }
 
-    ret=NA
-    if ( dataType == "point") {
-      ret = applyAntsrTransformToPoint(transform, data)
-    }
-    else if ( dataType == "vector") {
-      ret = applyAntsrTransformToVector(transform, data)
-    }
-    else {
+    ret <- NA
+    if (dataType == "point") {
+      ret <- applyAntsrTransformToPoint(transform, data)
+    } else if (dataType == "vector") {
+      ret <- applyAntsrTransformToVector(transform, data)
+    } else {
       stop("Invalid datatype")
     }
 
-    if ( !ismatrix ) {
-      ret = as.numeric(t(ret))
+    if (!ismatrix) {
+      ret <- as.numeric(t(ret))
     }
 
     return(ret)
-
   }
 
   # Never reached
@@ -304,23 +277,22 @@ applyAntsrTransform <- function(transform, data, dataType="point", reference=NUL
 #' @param points a matrix which each row is a spatial point
 #' @return array of coordinates
 #' @examples
-#' tx = new("antsrTransform")
-#' params = getAntsrTransformParameters(tx)
-#' setAntsrTransformParameters(tx, params*2)
-#' pt2 = applyAntsrTransformToPoint(tx, c(1,2,3))
+#' tx <- new("antsrTransform")
+#' params <- getAntsrTransformParameters(tx)
+#' setAntsrTransformParameters(tx, params * 2)
+#' pt2 <- applyAntsrTransformToPoint(tx, c(1, 2, 3))
 #' @export
 applyAntsrTransformToPoint <- function(transform, points) {
-
-  ismatrix=TRUE
-  if (class(points)[1]=="numeric") {
-    points = t(as.matrix(points))
-    ismatrix = FALSE
+  ismatrix <- TRUE
+  if (class(points)[1] == "numeric") {
+    points <- t(as.matrix(points))
+    ismatrix <- FALSE
   }
 
-  ret = ANTsRCore::antsrTransform_TransformPoint(transform, points)
+  ret <- ANTsRCore::antsrTransform_TransformPoint(transform, points)
 
-  if ( !ismatrix ) {
-    ret = as.numeric(t(ret))
+  if (!ismatrix) {
+    ret <- as.numeric(t(ret))
   }
 
   return(ret)
@@ -332,21 +304,22 @@ applyAntsrTransformToPoint <- function(transform, points) {
 #' @param vectors a matrix where each row is a vector to transform
 #' @return array of coordinates
 #' @examples
-#' transform = new("antsrTransform", precision="float",
-#' type="AffineTransform", dimension=2 )
-#' vec2 = applyAntsrTransformToVector(transform, c(1,2,3))
+#' transform <- new("antsrTransform",
+#'   precision = "float",
+#'   type = "AffineTransform", dimension = 2
+#' )
+#' vec2 <- applyAntsrTransformToVector(transform, c(1, 2, 3))
 #' @export
 applyAntsrTransformToVector <- function(transform, vectors) {
-
-  ismatrix=TRUE
-  if (class(vectors)=="numeric") {
-    vectors = t(as.matrix(vectors))
-    ismatrix = FALSE
+  ismatrix <- TRUE
+  if (class(vectors) == "numeric") {
+    vectors <- t(as.matrix(vectors))
+    ismatrix <- FALSE
   }
-  ret = ANTsRCore::antsrTransform_TransformVector(transform, vectors)
+  ret <- ANTsRCore::antsrTransform_TransformVector(transform, vectors)
 
-  if ( !ismatrix ) {
-    ret = as.numeric(t(ret))
+  if (!ismatrix) {
+    ret <- as.numeric(t(ret))
   }
   return(ret)
 }
@@ -360,28 +333,26 @@ applyAntsrTransformToVector <- function(transform, vectors) {
 #' @return antsImage
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
-#' tx = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
-#' setAntsrTransformParameters(tx, c(0.9,0,0,1.1,10,11) )
-#' img2 = applyAntsrTransformToImage(tx, img, img)
+#' tx <- new("antsrTransform", precision = "float", type = "AffineTransform", dimension = 2)
+#' setAntsrTransformParameters(tx, c(0.9, 0, 0, 1.1, 10, 11))
+#' img2 <- applyAntsrTransformToImage(tx, img, img)
 #' # plot(img,img2)
 #' @export
-applyAntsrTransformToImage <- function(transform, image, reference, interpolation="linear") {
-  if ( typeof(transform) == "list")
-  {
+applyAntsrTransformToImage <- function(transform, image, reference, interpolation = "linear") {
+  if (typeof(transform) == "list") {
     transform <- composeAntsrTransforms(transform)
   }
 
-  outImg = NA
+  outImg <- NA
 
   # for interpolators that don't support vector pixels: split, transform, merge
-  vectorInterp = ( interpolation=="linear" | interpolation=="nearestneighbor" )
-  if ( !vectorInterp & (image@isVector | image@components > 1) ) {
-    imgList = splitChannels(image)
-    imgListOut = lapply(imgList, function(x) applyAntsrTransformToImage(transform, x, reference, interpolation) )
-    outImg = mergeChannels(imgListOut)
-  }
-  else {
-    outImg = ANTsRCore::antsrTransform_TransformImage(transform, image, reference, tolower(interpolation))
+  vectorInterp <- (interpolation == "linear" | interpolation == "nearestneighbor")
+  if (!vectorInterp & (image@isVector | image@components > 1)) {
+    imgList <- splitChannels(image)
+    imgListOut <- lapply(imgList, function(x) applyAntsrTransformToImage(transform, x, reference, interpolation))
+    outImg <- mergeChannels(imgListOut)
+  } else {
+    outImg <- ANTsRCore::antsrTransform_TransformImage(transform, image, reference, tolower(interpolation))
   }
 
   return(outImg)
@@ -394,14 +365,14 @@ applyAntsrTransformToImage <- function(transform, image, reference, interpolatio
 #' @param precision numerical precision of transform
 #' @return antsrTransform
 #' @examples
-#' trans= c(3,4,5)
-#' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-#' txfile = tempfile(fileext = ".mat")
+#' trans <- c(3, 4, 5)
+#' tx <- createAntsrTransform(type = "Euler3DTransform", translation = trans)
+#' txfile <- tempfile(fileext = ".mat")
 #' writeAntsrTransform(tx, txfile)
-#' tx2 = readAntsrTransform(txfile)
+#' tx2 <- readAntsrTransform(txfile)
 #' testthat::expect_error(readAntsrTransform(txfile, 2), "space dim")
 #' @export
-readAntsrTransform <- function( filename, dimension=NA, precision="float" )  {
+readAntsrTransform <- function(filename, dimension = NA, precision = "float") {
   ANTsRCore::antsrTransform_Read(filename, dimension, precision)
 }
 
@@ -411,13 +382,13 @@ readAntsrTransform <- function( filename, dimension=NA, precision="float" )  {
 #' @param filename filename of transform (file extension is ".mat" for affine transforms)
 #' @return TRUE
 #' @examples
-#' trans= c(3,4,5)
-#' tx = createAntsrTransform( type="Euler3DTransform", translation=trans )
-#' txfile = tempfile(fileext = ".mat")
+#' trans <- c(3, 4, 5)
+#' tx <- createAntsrTransform(type = "Euler3DTransform", translation = trans)
+#' txfile <- tempfile(fileext = ".mat")
 #' writeAntsrTransform(tx, txfile)
 #' @export
-writeAntsrTransform <- function(transform, filename )  {
-  ANTsRCore::antsrTransform_Write(transform ,filename)
+writeAntsrTransform <- function(transform, filename) {
+  ANTsRCore::antsrTransform_Write(transform, filename)
 }
 
 #' @title invertAntsrTransform
@@ -426,11 +397,11 @@ writeAntsrTransform <- function(transform, filename )  {
 #' @return antsrTransform
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
-#' tx = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
-#' setAntsrTransformParameters(tx, c(0,-1,1,0,dim(img)[1],0) )
-#' txinv =  invertAntsrTransform(tx)
+#' tx <- new("antsrTransform", precision = "float", type = "AffineTransform", dimension = 2)
+#' setAntsrTransformParameters(tx, c(0, -1, 1, 0, dim(img)[1], 0))
+#' txinv <- invertAntsrTransform(tx)
 #' @export
-invertAntsrTransform <- function( transform ) {
+invertAntsrTransform <- function(transform) {
   return(ANTsRCore::antsrTransform_Inverse(transform))
 }
 
@@ -439,29 +410,25 @@ invertAntsrTransform <- function( transform ) {
 #' @param transformList a list of antsrTransforms in the reverse order they should be applied
 #' @return antsrTransform of type "CompositeTransform"
 #' @examples
-#' tx = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
-#' setAntsrTransformParameters(tx, c(0,-1,1,0,0,0) )
-#' tx2 = new("antsrTransform", precision="float", type="AffineTransform", dimension=2 )
-#' setAntsrTransformParameters(tx2, c(0,-1,1,0,0,0) )
-#' tx3 = composeAntsrTransforms( list(tx, tx2) )
+#' tx <- new("antsrTransform", precision = "float", type = "AffineTransform", dimension = 2)
+#' setAntsrTransformParameters(tx, c(0, -1, 1, 0, 0, 0))
+#' tx2 <- new("antsrTransform", precision = "float", type = "AffineTransform", dimension = 2)
+#' setAntsrTransformParameters(tx2, c(0, -1, 1, 0, 0, 0))
+#' tx3 <- composeAntsrTransforms(list(tx, tx2))
 #' @export
-composeAntsrTransforms <- function( transformList ) {
-
+composeAntsrTransforms <- function(transformList) {
   # check for type consistency
-  precision = transformList[[1]]@precision
-  dimension = transformList[[1]]@dimension
-  for ( i in 1:length(transformList))
+  precision <- transformList[[1]]@precision
+  dimension <- transformList[[1]]@dimension
+  for (i in 1:length(transformList))
   {
-    if ( precision != transformList[[i]]@precision )
-    {
+    if (precision != transformList[[i]]@precision) {
       stop("All transform must have the same precision")
     }
-    if ( dimension != transformList[[i]]@dimension)
-    {
+    if (dimension != transformList[[i]]@dimension) {
       stop("All transforms must have the same dimension")
     }
-
   }
-  transformList = rev(transformList)
+  transformList <- rev(transformList)
   return(ANTsRCore::antsrTransform_Compose(transformList, dimension, precision))
 }

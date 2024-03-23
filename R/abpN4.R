@@ -13,15 +13,16 @@
 #' @examples
 #'
 #' img <- antsImageRead(getANTsRData("r16"))
-#' img2 <- abpN4( img )
-#' img3 = abpN4(img)
-#' testthat::expect_equal( mean( img2 ), 82.6, tolerance = 1e-2 )
-#' testthat::expect_equal( img2, img3 )
+#' img2 <- abpN4(img)
+#' img3 <- abpN4(img)
+#' testthat::expect_equal(mean(img2), 82.6, tolerance = 1e-2)
+#' testthat::expect_equal(img2, img3)
 #'
 #' @export abpN4
-abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
-  mask,  usen3 = FALSE,
-  ...) {
+abpN4 <- function(
+    img, intensityTruncation = c(0.025, 0.975, 256),
+    mask, usen3 = FALSE,
+    ...) {
   numargs <- nargs()
   if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
     stop("Missing image.")
@@ -30,18 +31,20 @@ abpN4 <- function(img, intensityTruncation = c(0.025, 0.975, 256),
     stop("length( intensityTruncation ) should = 3 \n")
     return(1)
   }
-  outimg = iMath(img, "TruncateIntensity",
-                 intensityTruncation[1], intensityTruncation[2],
-                 intensityTruncation[3])
+  outimg <- iMath(
+    img, "TruncateIntensity",
+    intensityTruncation[1], intensityTruncation[2],
+    intensityTruncation[3]
+  )
   if (usen3 == TRUE) {
-    outimg <- n3BiasFieldCorrection( outimg, 4 )
-    outimg <- n3BiasFieldCorrection( outimg, 2 )
+    outimg <- n3BiasFieldCorrection(outimg, 4)
+    outimg <- n3BiasFieldCorrection(outimg, 2)
     return(outimg)
   }
-  if ( ! missing( mask ) ) {
-    outimg<-n4BiasFieldCorrection(img, mask = mask, ...)
+  if (!missing(mask)) {
+    outimg <- n4BiasFieldCorrection(img, mask = mask, ...)
   } else {
-    outimg<-n4BiasFieldCorrection(img, ...)
+    outimg <- n4BiasFieldCorrection(img, ...)
   }
 
   return(outimg)

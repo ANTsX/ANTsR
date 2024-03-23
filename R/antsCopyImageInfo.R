@@ -8,15 +8,15 @@
 #' @return Target image with reference header information.
 #' @examples
 #'
-#' img <- makeImage(c(10,10),rnorm(100))
-#' img2 <- makeImage(c(10,10), rnorm(100))
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' img2 <- makeImage(c(10, 10), rnorm(100))
 #' img2 <- antsCopyImageInfo(img, img2)
 #' testthat::expect_error(antsCopyImageInfo(img, 1))
 #'
 #' @export
 antsCopyImageInfo <- function(reference, target) {
-  reference = check_ants(reference)
-  target = check_ants(target)
+  reference <- check_ants(reference)
+  target <- check_ants(target)
   if (!(class(reference) == "antsImage") || !(class(target) == "antsImage")) {
     stop("Both inputs must be of class 'antsImage'")
   }
@@ -38,15 +38,15 @@ antsCopyImageInfo <- function(reference, target) {
 #' @return Target image with reference header information.
 #' @examples
 #'
-#' img <- makeImage(c(10,10),rnorm(100))
-#' img2 <- makeImage(c(10,10), rnorm(100))
+#' img <- makeImage(c(10, 10), rnorm(100))
+#' img2 <- makeImage(c(10, 10), rnorm(100))
 #' img2 <- antsCopyImageInfo(img2, img)
 #' testthat::expect_error(antsCopyImageInfo(img, 1))
 #'
 #' @export
 antsCopyImageInfo2 <- function(target, reference) {
-  reference = check_ants(reference)
-  target = check_ants(target)
+  reference <- check_ants(reference)
+  target <- check_ants(target)
   if (!(class(reference) == "antsImage") || !(class(target) == "antsImage")) {
     stop("Both inputs must be of class 'antsImage'")
   }
