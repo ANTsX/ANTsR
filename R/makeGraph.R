@@ -64,9 +64,9 @@ makeGraph <- function(
   g1 <- igraph::graph_from_adjacency_matrix(adjacencyMatrix,
     mode = c("undirected"), weighted = TRUE, diag = FALSE
   )
-  edgeWeights <- ANTsRCore::antsrimpute(igraph::E(g1)$weight)
+  edgeWeights <- antsrimpute(igraph::E(g1)$weight)
   if (!inverseValuesAsWeights) {
-    edgeWeights <- ANTsRCore::antsrimpute(myfisherz(igraph::E(g1)$weight))
+    edgeWeights <- antsrimpute(myfisherz(igraph::E(g1)$weight))
     igraph::E(g1)$weight <- edgeWeights
   }
   # compute local efficiency

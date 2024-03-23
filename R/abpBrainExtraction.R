@@ -74,7 +74,7 @@ abpBrainExtraction <- function(img, tem, temmask,
   tempriors <- 3
   npriors <- 3
 
-  img <- ANTsRCore::check_ants(img)
+  img <- check_ants(img)
   if (pad > 0) {
     if (verbose) {
       message("Padding image")

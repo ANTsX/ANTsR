@@ -28,3 +28,4 @@ R/connectedThresholdImage.R
 ^\.github$
 Dockerfile
 code_of_conduct.md
+^data-raw$
