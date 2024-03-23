@@ -129,7 +129,7 @@
       t = paste(txtype, "[0.1,3,0]", sep = ""),
       i = "100x50x20",
       u = 1, e = 1, s = "2x1x0", f = "4x2x1",
-      n = n, l = 1, v = as.numeric(verbose)
+      n = n, v = as.numeric(verbose)
     ))
   }
   if (moreaccurate == 2) {
@@ -139,7 +139,7 @@
       t = paste(txtype, "[0.1]", sep = ""),
       i = "100x50x30",
       u = 1, e = 1, s = "2x1x0", f = "4x2x1",
-      n = n, l = 1, v = as.numeric(verbose)
+      n = n, v = as.numeric(verbose)
     ))
   }
   if (moreaccurate == "intraSubjectBOLD") {
@@ -148,7 +148,7 @@
       m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.2),
       t = paste(txtype, "[0.25]", sep = ""),
       i = "50x20",
-      u = 1, e = 1, s = "1x0", f = "2x1", n = n, l = 1, v = as.numeric(verbose)
+      u = 1, e = 1, s = "1x0", f = "2x1", n = n, v = as.numeric(verbose)
     ))
   }
   if (moreaccurate == 1) {
@@ -157,7 +157,7 @@
       m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.25),
       t = paste(txtype, "[0.1]", sep = ""),
       i = "100",
-      u = 1, e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)
+      u = 1, e = 1, s = 0, f = 1, n = n, v = as.numeric(verbose)
     ))
   }
   if (moreaccurate == 0) {
@@ -166,7 +166,7 @@
       m = list(name = "MI", fixed, img, 1, mibins, "regular", 0.02),
       t = paste(txtype, "[0.1]", sep = ""),
       i = 3, u = 1,
-      e = 1, s = 0, f = 1, n = n, l = 1, v = as.numeric(verbose)
+      e = 1, s = 0, f = 1, n = n, v = as.numeric(verbose)
     ))
   }
   moco_params <- as.data.frame(moco_params)
