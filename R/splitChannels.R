@@ -32,5 +32,4 @@ splitChannels <- function(image) {
   }
 
   ANTsRCore::splitChannels(image)
-  return(img)
 }

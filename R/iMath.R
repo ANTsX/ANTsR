@@ -71,14 +71,12 @@ iMath <- function(img, operation, param = NULL, ...) {
     stop("operation must be a character string")
   }
 
-  data("iMathOps", package = "ANTsRCore", envir = environment())
-
   if (operation == "GetOperations" |
     operation == "GetOperationsFull") {
     if (operation == "GetOperationsFull") {
-      return(iMathOps)
+      return(ANTsR::iMathOps)
     } else {
-      return(iMathOps$Operation)
+      return(ANTsR::iMathOps$Operation)
     }
   } else {
     # Temp fix for backward compat
@@ -90,7 +88,7 @@ iMath <- function(img, operation, param = NULL, ...) {
       operation <- "TruncateIntensity"
     }
 
-    if (!(operation %in% iMathOps$Operation)) {
+    if (!(operation %in% ANTsR::iMathOps$Operation)) {
       stop(paste("'operation'", operation, " not recognized"))
     }
 
