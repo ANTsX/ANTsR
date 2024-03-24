@@ -404,7 +404,7 @@ setMethod(
                         drop) {
     i <- seq(dim(x)[1])
     j <- seq(dim(x)[2])
-
+    
     # should fix the subsetting
     dx <- dim(x)
     ndim <- length(dx)

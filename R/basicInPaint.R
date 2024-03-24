@@ -25,7 +25,6 @@
 #' mask <- as.antsImage(mask2)
 #' fi <- as.antsImage(fi)
 #' fi <- smoothImage(fi, 3)
-#' painted <- basicInPaint(fi, mask)
 #' img <- fi
 #' paintMask <- mask
 #' inpainted <- antsImageClone(img)
