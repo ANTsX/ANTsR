@@ -31,7 +31,7 @@
 #' @export antsImageWrite
 antsImageWrite <- function(image, filename, as.tensor = FALSE) {
   image <- check_ants(image)
-  if (class(image) != "antsImage") {
+  if (!inherits(image, "antsImage")) {
     stop("'image' argument provided is not of class antsImage")
   }
 

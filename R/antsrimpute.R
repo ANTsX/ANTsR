@@ -22,7 +22,7 @@ antsrimpute <- function(mydat, FUN = mean, ...) {
   mostrepeated <- function(x, ...) as(names(which.max(table(x))), mode(x))
   if (is.null(dim(mydat))) {
     mydat2 <- mydat
-    if (class(mydat) == "numeric" | class(mydat) == "integer") {
+    if (is.numeric(mydat) || is.integer(mydat)) {
       mydat2[is.na(mydat)] <- FUN((mydat), na.rm = TRUE, ...)
     } else {
       mydat2[is.na(mydat)] <- mostrepeated((mydat), na.rm = TRUE, ...)
@@ -31,7 +31,7 @@ antsrimpute <- function(mydat, FUN = mean, ...) {
   } else {
     mydat2 <- mydat
     for (x in 1:ncol(mydat)) {
-      if (class(mydat[, x]) == "numeric" | class(mydat[, x]) == "integer") {
+      if (is.numeric(mydat[, x]) || is.integer(mydat[, x])) {
         mydat2[is.na(mydat[, x]), x] <-
           FUN((mydat[, x]), na.rm = TRUE, ...)
       } else {
@@ -40,13 +40,5 @@ antsrimpute <- function(mydat, FUN = mean, ...) {
       }
     }
     return(mydat2)
-    # rows - but never was implemented
-    # mydat3=mydat2
-    # for (x in 1:nrow(mydat))
-    # if ( class( mydat2[x, ] ) == 'numeric' | class( mydat2[x,] ) == 'integer' )
-    #   mydat3[x,is.na(mydat2[x, ])] <-
-    #     FUN((mydat2[x,]), na.rm = TRUE, ...) else mydat3[x,is.na(mydat2[x, ])] <-
-    #       mostrepeated((mydat2[x,]), na.rm = TRUE, ...)
-    # mydat3
   }
 }

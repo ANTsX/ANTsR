@@ -35,7 +35,7 @@ imagesToMatrix <- function(imageList, mask) {
     print(" length of input list must be >= 1 ")
     return(NA)
   }
-  if (class(imageList) != "character") {
+  if (!is.character(imageList)) {
     print("Must pass a list of filenames")
     return(NA)
   }

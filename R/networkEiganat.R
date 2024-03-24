@@ -232,7 +232,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
 }
 
 .eanatcolMaxs <- function(v) {
-  if (class(v)[1] == "matrix") {
+  if (is.matrix(v)) {
     return(apply(v, FUN = max, MARGIN = 2))
   } else {
     return(v)
@@ -245,7 +245,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
   }
   v <- vin
   v <- v * sign(.eanatcolMaxs(v))
-  if (class(v)[[1]][1] == "antsImage" & !is.na(mask)) {
+  if (inherits(v, "antsImage") & !is.na(mask)) {
     v <- as.matrix(vin[mask > 1e-05])
   }
   v <- as.matrix(v)

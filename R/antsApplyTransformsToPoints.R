@@ -104,7 +104,7 @@ antsApplyTransformsToPoints <- function(
         )
       }
     }
-    if (class(points)[[1]] != "antsImage") {
+    if (inherits(points, "antsImage")) {
       usepts <- as.antsImage(data.matrix(points))
     } else {
       usepts <- antsImageClone(points)
@@ -125,7 +125,7 @@ antsApplyTransformsToPoints <- function(
     }
     ANTsRCore::antsApplyTransformsToPoints(c(myargs, "-f", 1, "--precision", 0))
 
-    if (class(points)[[1]] == "antsImage") {
+    if (inherits(points, "antsImage")) {
       return(pointsout)
     }
     pointsout <- data.frame(as.matrix(pointsout))

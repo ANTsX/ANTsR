@@ -39,10 +39,10 @@ eigSeg <- function(
   maskvox <- (mask > 0)
   maskseg <- antsImageClone(mask)
   maskseg[maskvox] <- 0
-  if (class(imgList)[1] == "matrix") {
+  if (inherits(imgList, "matrix")) {
     mydata <- imgList
   }
-  if (class(imgList)[1] != "matrix") {
+  if (inherits(imgList, "matrix")) {
     if (length(imgList) > 0) {
       if (typeof(imgList) == "list") {
         mydata <- imageListToMatrix(imgList, mask)
@@ -71,7 +71,7 @@ eigSeg <- function(
       maskseg[maskseg == kk] <- timg[maskseg == kk]
     }
   }
-  if (applySegmentationToImages & class(imgList)[1] != "matrix") {
+  if (applySegmentationToImages & !inherits(imgList, "matrix")) {
     for (i in 1:length(imgList)) {
       img <- imgList[[i]]
       img[maskseg != as.numeric(i)] <- 0

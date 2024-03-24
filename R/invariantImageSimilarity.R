@@ -115,11 +115,11 @@ invariantImageSimilarity <- function(
   if (missing(mask)) {
     mask <- getMask(in_image1)
   }
-  if (class(localSearchIterations) != "numeric") {
+  if (!is.numeric(localSearchIterations)) {
     print("wrong input: localSearchIterations is not numeric")
     return(NA)
   }
-  if (class(metric) != "character") {
+  if (!is.character(metric)) {
     print("wrong input: metric is not numeric")
     return(NA)
   }

@@ -1418,7 +1418,7 @@ jointSmoothMatrixReconstruction <- function(
         ulist[[i]] <- ulist[[m2]]
         vlist[[i]] <- t(t(ulist[[m2]]) %*% x[[m2]])
       }
-      if (class(smoothingMatrix[[i]]) == "logical") {
+      if (is.logical(smoothingMatrix[[i]])) {
         loSmoo <- diag(ncol(x[[m2]]))
       } else {
         loSmoo <- smoothingMatrix[[i]]
@@ -2242,13 +2242,13 @@ mild <- function(dataFrame, voxmats, basisK,
   }
   outcomevarname <- trimws(unlist(strsplit(myFormulaK, "~"))[1])
   outcomevarnum <- which(outcomevarname == matnames)
-  if (class(initializationStrategy) == "numeric") {
+  if (is.numeric(initializationStrategy)) {
     set.seed(initializationStrategy)
     initializationStrategy <- scale(qr.Q(qr(
       replicate(basisK, rnorm(nrow(voxmats[[1]])))
     )))
   }
-  if (class(initializationStrategy)[1] != "matrix") {
+  if (!is.matrix(initializationStrategy)) {
     stop("Please set valid initializationStrategy.")
   }
   for (k in 1:basisK) {
@@ -2750,7 +2750,7 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
   if (missing(sigma)) sigma <- rep(10, length(x))
   slist <- list()
   for (i in 1:length(x)) {
-    if (class(x[[i]])[1] == "antsImage") {
+    if (inherits(x[[i]], "antsImage")) {
       slist[[i]] <- getSpatialRegularization(x[[i]], knn[i], sigma[i])
     } else {
       slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), T, T),
@@ -3135,13 +3135,13 @@ simlr <- function(
     initialUMatrix <- nModalities
   }
 
-  if (class(initialUMatrix)[1] == "matrix") {
+  if (is.matrix(initialUMatrix)) {
     randmat <- initialUMatrix
     initialUMatrix <- list()
     for (i in 1:nModalities) {
       initialUMatrix[[i]] <- randmat
     }
-  } else if (class(initialUMatrix)[1] == "numeric") {
+  } else if (is.numeric(initialUMatrix)) {
     if (jointInitialization) {
       temp <- initializeSimlr(voxmats, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
       initialUMatrix <- list()

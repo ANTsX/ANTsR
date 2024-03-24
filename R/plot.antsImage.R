@@ -327,7 +327,7 @@ plot.antsImage <- function(
   if (imagedim == 3) {
     img <- aperm(img, c(perms), resize = T)
   }
-  if (class(slices) == "character") {
+  if (is.character(slices)) {
     slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
     slices <- round(seq(slices[1], slices[2], by = slices[3]))
   }

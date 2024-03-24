@@ -47,7 +47,7 @@ getfMRInuisanceVariables <- function(
       return(NULL)
     }
     fmri <- antsImageRead(fmri, 4)
-  } else if (class(fmri) == "antsImage") {
+  } else if (inherits(fmri, "antsImage")) {
     if (fmri@pixeltype != pixtype) {
       print(paste("'fmri' must have pixeltype  ", pixtype))
       fmri <- antsImageClone(fmri, pixtype)

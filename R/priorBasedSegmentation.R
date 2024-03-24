@@ -28,8 +28,8 @@ priorBasedSegmentation <- function(
     mrf = 0.1,
     iterations = 25,
     verbose = FALSE) {
-  if (class(img)[1] == "antsImage") dim <- img@dimension
-  if (class(img)[1] == "list") dim <- img[[1]]@dimension
+  if (inherits(img, "antsImage")) dim <- img@dimension
+  if (is.list(img)) dim <- img[[1]]@dimension
   nhood <- paste(rep(1, dim), collapse = "x")
   mrf <- paste("[", mrf, ",", nhood, "]")
   conv <- paste("[", iterations, ",", 0, "]")
