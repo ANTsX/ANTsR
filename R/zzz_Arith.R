@@ -1,11 +1,12 @@
-## Overloading binary operators for antsImage Objects
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#' Overloading binary operators for antsImage Objects
+#' 
 #' @title Operations for antsImage Objects
 #' @description Overloaded operators for antsImage objects
 #' @name antsImage-operators
 #' @rdname antsImageops
 #' @param e1 is an object of class \code{antsImage}.
 #' @param e2 is an object of class \code{antsImage}.
+#' @param x is an object of class \code{antsImage}.
 #' @author John Muschellli \email{muschellij2@@gmail.com}
 #' @examples
 #'

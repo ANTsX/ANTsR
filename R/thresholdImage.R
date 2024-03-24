@@ -37,7 +37,7 @@ thresholdImage <- function(
 #' Utility function to integrate a vector field and create a deformation field.
 #'
 #' @param referenceImage defines the image domain
-#' @param velocityFieldFileName the velocity field exists on disk.
+#' @param vectorFieldFileName the vector field exists on disk.
 #' @param deformationFieldFileName the deformation field output file name.
 #' @param lowerTime the starting time, usually zero for forward transformation
 #' and one for the inverse transformation.

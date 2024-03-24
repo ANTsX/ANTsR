@@ -225,10 +225,15 @@
 
 \item{e2}{is an object of class \code{antsImage}.}
 
+\item{x}{is an object of class \code{antsImage}.}
+
 \item{recursive}{not used}
 }
 \description{
 Overloaded operators for antsImage objects
+}
+\details{
+Overloading binary operators for antsImage Objects
 }
 \examples{
 
