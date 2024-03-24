@@ -28,7 +28,7 @@
 #' moving <- resampleImage(moving, c(64, 64), 1, 0)
 #' mytx <- antsRegistration(
 #'   fixed = fixed, moving = moving,
-#'   typeofTransform = c("SyN"), verbose = F
+#'   typeofTransform = c("SyN"), verbose = FALSE
 #' )
 #' pts <- data.frame(
 #'   x = c(110.5, 120, 130), y = c(108.1, 121.0, 130),

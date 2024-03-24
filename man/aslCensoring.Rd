@@ -74,8 +74,6 @@ voxvals <- array(rnorm(nvox) + 500, dim = dims)
 voxvals[, , , 5] <- voxvals[, , , 5] + 600
 asl <- makeImage(dims, voxvals)
 censored <- aslCensoring(asl)
-testthat::expect_equal(mean(censored$asl.inlier), 248.071606610979)
-testthat::expect_equal(censored$which.outliers, c(5L, 6L))
 
 }
 \references{

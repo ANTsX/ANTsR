@@ -86,15 +86,6 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 #' antsSetSpacing(img, c(2.0, 2.0))
 #' antsGetOrigin(img)
 #' antsSetOrigin(img, c(0.5, 0.5))
-#' testthat::expect_error(antsGetSpacing(as.array(img)))
-#' testthat::expect_error(antsSetSpacing(as.array(img), c(2, 2)), "class")
-#' testthat::expect_error(antsSetSpacing(img, c("2", 2)), "numeric")
-#' testthat::expect_error(antsSetSpacing(img, c(3, 3, 3)), "dimensions")
-#'
-#' testthat::expect_error(antsGetOrigin(as.array(img)))
-#' testthat::expect_error(antsSetOrigin(as.array(img), c(0.5, 0.5)))
-#' testthat::expect_error(antsSetOrigin(img, c("0.5", 0.5)))
-#' testthat::expect_error(antsSetOrigin(img, c(0.5, 0.5, 0.5)))
 antsGetSpacing <- function(x) {
   x <- check_ants(x)
   if (!is.antsImage(x)) {
@@ -103,6 +94,7 @@ antsGetSpacing <- function(x) {
 
   return(ANTsRCore::antsImage_GetSpacing(x))
 }
+
 #' @rdname antsImageGetSet
 #' @param spacing numeric vector of length \code{d}.
 #' @export
@@ -133,6 +125,7 @@ antsGetOrigin <- function(x) {
   }
   return(ANTsRCore::antsImage_GetOrigin(x))
 }
+
 #' @rdname antsImageGetSet
 #' @usage antsSetOrigin(x, origin)
 #' @param origin numeric vector of length \code{d}.

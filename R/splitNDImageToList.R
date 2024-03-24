@@ -15,7 +15,7 @@
 #'
 splitNDImageToList <- function(img) {
   # check input is good
-  if (inherits(img, "antsImage")) stop("Input is not antsImage.")
+  if (!inherits(img, "antsImage")) stop("Input is not antsImage.")
   mydimv <- dim(img)
   mydim <- img@dimension
   if (img@dimension < 3) {
@@ -60,7 +60,7 @@ splitNDImageToList <- function(img) {
 #'
 mergeListToNDImage <- function(img, imgList) {
   # check input is good
-  if (inherits(img, "antsImage")) stop("Input is not antsImage.")
+  if (!inherits(img, "antsImage")) stop("Input is not antsImage.")
   mydimv <- c(dim(imgList[[1]]), length(imgList))
   mydim <- img@dimension
   if (img@dimension < 3) {

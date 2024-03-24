@@ -25,44 +25,8 @@
 #' mask <- as.antsImage(mask2)
 #' fi <- as.antsImage(fi)
 #' fi <- smoothImage(fi, 3)
-#' img <- fi
-#' paintMask <- mask
-#' inpainted <- antsImageClone(img)
-#' paintMaskUse <- antsImageClone(paintMask)
-#' temp <- antsImageClone(paintMask)
-#' temp[temp == 1] <- 0
-#' temp[temp == 2] <- 1
-#' temp <- iMath(temp, "MD", 1)
-#' paintMaskUse[temp == 1 & paintMaskUse == 1] <- 2
-#' healthymask <- antsImageClone(paintMaskUse)
-#' healthymask[paintMaskUse == 2] <- 0
-#' if (is.null(speedimage)) {
-#'   speedimage <- antsImageClone(img)
-#'   upit <- mean(img[paintMaskUse == 2])
-#'   speedimage[paintMaskUse == 2] <- speedimage[paintMaskUse == 2] + upit
-#' } else {
-#'   speedimage <- check_ants(speedimage)
-#' }
-#' inpainted <- fastMarchingExtension(speedimage, healthymask, img)
-#' outimg <- antsImageClone(img)
-#' outimg[paintMaskUse == 2] <- inpainted[paintMaskUse == 2]
-#' if (its > 0) {
-#'   w2 <- (1 - gparam)
-#'   sval <- min(antsGetSpacing(img))
-#'   for (i in 1:its) {
-#'     soutimg <- smoothImage(outimg, sval)
-#'     v1 <- outimg[paintMaskUse == 2] * w2
-#'     v2 <- soutimg[paintMaskUse == 2] * gparam
-#'     outimg[paintMaskUse == 2] <- (v1 + v2)
-#'   }
-#' }
 #' \dontrun{
-#' # lmask<-antsImageRead( "brainmask.nii.gz", 2 )
-#' # limg<-antsImageRead( "r16slice_lesion.nii.gz", 2 )
-#' # mm<-basicInPaint(limg,lmask)
-#' # plot(mm)
-#' # mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
-#' # plot(mm2)
+#' painted <- basicInPaint(fi, mask)
 #' }
 #' @export
 basicInPaint <- function(img, paintMask, speedimage = NULL, its = 0, gparam = 0.05) {
