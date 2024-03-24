@@ -34,7 +34,6 @@ Imports:
     utils
 Suggests:
     magic,
-    psych,
     rsvd,
     abind,
     BGLR,
@@ -43,12 +42,10 @@ Suggests:
     corpcor,
     dplyr,
     e1071,
-    extremevalues,
     fastICA,
     fpc,
     ggplot2,
     glasso,
-    glmnet,
     grid,
     hdf5r,
     igraph,
@@ -57,14 +54,11 @@ Suggests:
     MASS,
     Matrix,
     mFilter,
-    misc3d,
     moments,
-    networkD3,
     pixmap,
     png,
     pracma,
     randomForest,
-    R.matlab,
     RcppEigen,
     RcppHNSW,
     rgl,
@@ -76,7 +70,6 @@ Suggests:
     testthat,
     tools,
     viridis,
-    visreg,
     xgboost,
     FNN
 LazyData: TRUE

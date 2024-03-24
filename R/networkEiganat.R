@@ -71,22 +71,6 @@
 #'   myrf <- glm(bmi ~ ., data = traindf)
 #'   preddf <- predict(myrf, newdata = testdf)
 #'   cor.test(preddf, testdf$bmi)
-#'   if (usePkg("visreg")) {
-#'     mydf <- data.frame(PredictedBMIfromSNPs = preddf, RealBMI = testdf$bmi)
-#'     mymdl <- lm(PredictedBMIfromSNPs ~ RealBMI, data = mydf)
-#'     visreg::visreg(mymdl)
-#'   }
-#'   ###########
-#'   # vs glmnet #
-#'   ###########
-#'   haveglm <- usePkg("glmnet")
-#'   if (haveglm) {
-#'     kk <- glmnet(y = numericalpheno[train, phind], x = snps[train, ])
-#'     ff <- predict(kk, newx = snps[!train, ])
-#'     cor.test(ff[, 25], numericalpheno[!train, phind])
-#'     mydf <- data.frame(PredictedBMIfromSNPs = ff[, 25], RealBMI = testdf$bmi)
-#'     mymdl <- lm(PredictedBMIfromSNPs ~ RealBMI, data = mydf)
-#'   } # glmnet check
 #' } # ch1 and ch2
 #' ###########
 #' }
