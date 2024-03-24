@@ -20,7 +20,7 @@ Description: ANTsR interfaces state of the art image processing with R
     Specialized functionality in ANTsR includes image segmentation and
     registration along imaging specific variations of principal component
     and canonical correlation analysis.
-License: Apache License 2.0
+License: Apache License 2.0 + file LICENSE
 LazyLoad: yes
 Depends:
     R (>= 3.0),
