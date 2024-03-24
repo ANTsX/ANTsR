@@ -1558,10 +1558,7 @@ orthogonalizeAndQSparsify <- function(
     sparsenessQuantile = 0.5, positivity = "either",
     orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA) {
   if (!is.na(sparsenessAlg)) {
-    if (sparsenessAlg %in% c("offset", "lee", "brunet")) {
-      nmfobj <- NMF::nmf(v - min(v), min(dim(v)), sparsenessAlg)
-      return(NMF::basis(nmfobj))
-    } else if (sparsenessAlg == "orthorank") {
+    if (sparsenessAlg == "orthorank") {
       return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = FALSE, positivity = positivity, transpose = TRUE))
     } else {
       return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = TRUE, positivity = positivity, transpose = TRUE))

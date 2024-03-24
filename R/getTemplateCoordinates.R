@@ -79,7 +79,7 @@ getTemplateCoordinates <- function(
       stop("point must be of class 'numeric'")
     }
 
-    idx <- as.numeric(ANTsRCore::antsTransformPhysicalPointToIndex(x, point))
+    idx <- as.numeric(antsTransformPhysicalPointToIndex(x, point))
     idx <- floor(idx)
 
     dims <- length(idx)
