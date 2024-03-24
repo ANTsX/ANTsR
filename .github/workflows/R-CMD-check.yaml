@@ -46,8 +46,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          key: Linux-c021d9623ce1e640302a6fc09795a8593f23ff90544b148c113522b8be1aaa09-1-79636410b60812995f606aa55581e9441309556c7d00cec41f5c832cca14ecb0
+          restore-keys: Linux-c021d9623ce1e640302a6fc09795a8593f23ff90544b148c113522b8be1aaa09-1-79636410b60812995f606aa55581e9441309556c7d00cec41f5c832cca14ecb0
           
       - name: Install dependencies
         run: |
