@@ -13,11 +13,11 @@ ANTsR interfaces state of the art image processing with R statistical methods. T
 
 Other contributors:
 \itemize{
-  \item Benjamin M Kandel \email{NA} [contributor]
-  \item Jeff T Duda \email{NA} [contributor]
-  \item Philip A Cook \email{NA} [contributor]
-  \item Nicholas J Tustison \email{NA} [contributor]
-  \item Dorian Pustina \email{NA} [contributor]
+  \item Benjamin M Kandel [contributor]
+  \item Jeff T Duda [contributor]
+  \item Philip A Cook [contributor]
+  \item Nicholas J Tustison [contributor]
+  \item Dorian Pustina [contributor]
 }
 
 }
