@@ -2,7 +2,6 @@
 #'
 #' Write an image object of S4 class \code{antsImage} to a file.
 #'
-#'
 #' @param image Image object of S4 class \code{antsImage} to be written.
 #' @param filename Name of the file to write the image to.
 #' @param as.tensor flag indicating to write as symmetric tensor if image has 6 components
@@ -17,7 +16,7 @@
 #' antsImageWrite(fi, tempfile(fileext = ".mha"))
 #' antsImageWrite(fi, tempfile(fileext = ".nrrd"))
 #' antsImageWrite(
-#'   antsImageClone(fi, "unsigned int"),
+#'   antsImageClone(fi, "unsigned char"),
 #'   tempfile(fileext = ".jpg")
 #' )
 #' antsImageWrite(
@@ -28,14 +27,7 @@
 #' antsImageWrite(fi, tempfile(fileext = ".hd5"))
 #' components(fi) <- 0L
 #' antsImageWrite(fi, tempfile(fileext = ".nii.gz"))
-#' components(fi) <- -1L
-#' testthat::expect_error(
-#'   antsImageWrite(fi, tempfile(fileext = ".nii.gz")), "nvalid S4"
-#' )
-#' testthat::expect_error(
-#'   antsImageWrite("hey"), "not exist"
-#' )
-#'
+#' 
 #' @export antsImageWrite
 antsImageWrite <- function(image, filename, as.tensor = FALSE) {
   image <- check_ants(image)

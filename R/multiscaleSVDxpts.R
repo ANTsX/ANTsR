@@ -39,7 +39,6 @@
 #' testthat::expect_is(smat, "dgCMatrix")
 #' testthat::expect_equal(sum(smat), 18017)
 #' }
-#' @importFrom stats prcomp
 #' @export sparseDistanceMatrix
 sparseDistanceMatrix <- function(
     x, k = 3, r = Inf, sigma = NA,

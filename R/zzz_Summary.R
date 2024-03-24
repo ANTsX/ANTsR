@@ -207,7 +207,6 @@ mean.antsImage <- function(x, ..., mask = NULL, na.rm = FALSE) {
 #' @param ... additional arguments to send to \code{median}
 #' @rdname median
 #' @export
-#' @importFrom stats median
 median.antsImage <- function(x, na.rm = FALSE, ..., mask = NULL) {
   args <- list(...)
   # mask = args$mask
@@ -250,7 +249,6 @@ sd <- function(x, na.rm = FALSE, ...) {
 
 #' @rdname sd
 #' @export
-#' @importFrom stats sd
 sd.default <- function(x, na.rm = FALSE, ...) {
   stats::sd(x, na.rm = FALSE)
 }
@@ -264,7 +262,6 @@ sd.default <- function(x, na.rm = FALSE, ...) {
 #' \code{\link[stats]{sd}}
 #'
 #' @export
-#' @importFrom stats sd
 #' @examples
 #' img <- antsImageRead(getANTsRData("r16"))
 #' sd(img)
@@ -295,7 +292,6 @@ var <- function(x, ...) {
 
 #' @rdname var
 #' @export
-#' @importFrom stats var
 var.default <- function(x, ...) {
   stats::var(x, ...)
 }

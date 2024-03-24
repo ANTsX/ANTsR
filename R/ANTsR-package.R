@@ -3,7 +3,7 @@
 #'
 #' @importFrom stats AIC
 #'
-#' @import ANTsRCore
+#' @import ANTsRCore stats grDevices utils
 #'
 #' @keywords internal
 "_PACKAGE"
