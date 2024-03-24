@@ -38,14 +38,6 @@
 #' @importFrom graphics hist par plot points
 #' @importFrom magrittr %>%
 #' @importFrom methods is new
-#' @importFrom stats ar as.formula coefficients convolve
-#' @importFrom stats cor cor.test cov dist formula glm lm
-#' @importFrom stats lm.fit loess median model.matrix na.omit
-#' @importFrom stats optimize p.adjust pchisq pf pnorm ppois
-#' @importFrom stats predict pt qchisq qf qnorm qt quantile
-#' @importFrom stats residuals rnorm sd spec.pgram spline stl
-#' @importFrom stats t.test toeplitz ts var
-#' @importFrom utils data glob2rx read.csv setTxtProgressBar tail txtProgressBar write.csv
 #' @examples
 #'
 #' set.seed(123)

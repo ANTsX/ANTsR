@@ -75,7 +75,7 @@
     }
     img <- antsImageRead(img, dimension = 4, "float")
     inpixeltype <- img@pixeltype
-  } else if (class(img) == "antsImage") {
+  } else if (inherits(img, "antsImage")) {
     inpixeltype <- img@pixeltype
     if (img@pixeltype != "float") {
       print("'img' must have pixeltype  'float' ")
@@ -175,8 +175,7 @@
     paste("MOCOparam", 1:(ncol(moco_params) - 2), sep = "")
   )
   names(moco_params) <- mynames
-  return
-  (
+  return(
     list
     (
       moco_img = moco_img,

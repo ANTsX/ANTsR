@@ -257,7 +257,7 @@ ripmmarcPop <- function(
     patchVarEx = 0.95,
     meanCenter = TRUE,
     seed) {
-  maskIsList <- class(mask) == "list"
+  maskIsList <- is.list(mask)
   if (maskIsList) {
     randMask <- randomMask(mask[[1]], patchSamples,
       perLabel = TRUE,

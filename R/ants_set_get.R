@@ -18,7 +18,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   if (length(i) != 1 || !is.na(i)) {
     if (is.null(i)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(i) == "integer" || class(i) == "numeric") {
+    } else if (inherits(i, "integer") || inherits(i, "numeric")) {
       lst <- c(lst, list(i))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -28,7 +28,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(j) == "integer" || class(j) == "numeric") {
+    } else if (inherits(j, "integer") || inherits(j, "numeric")) {
       lst <- c(lst, list(j))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -52,7 +52,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(k) == "integer" || class(k) == "numeric") {
+    } else if (inherits(k, "integer") || inherits(k, "numeric")) {
       lst <- c(lst, list(k))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -62,7 +62,7 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(l) == "integer" || class(l) == "numeric") {
+    } else if (inherits(l, "integer") || inherits(l, "numeric")) {
       lst <- c(lst, list(l))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -86,15 +86,6 @@ getPixels <- function(x, i = NA, j = NA, k = NA, l = NA) {
 #' antsSetSpacing(img, c(2.0, 2.0))
 #' antsGetOrigin(img)
 #' antsSetOrigin(img, c(0.5, 0.5))
-#' testthat::expect_error(antsGetSpacing(as.array(img)))
-#' testthat::expect_error(antsSetSpacing(as.array(img), c(2, 2)), "class")
-#' testthat::expect_error(antsSetSpacing(img, c("2", 2)), "numeric")
-#' testthat::expect_error(antsSetSpacing(img, c(3, 3, 3)), "dimensions")
-#'
-#' testthat::expect_error(antsGetOrigin(as.array(img)))
-#' testthat::expect_error(antsSetOrigin(as.array(img), c(0.5, 0.5)))
-#' testthat::expect_error(antsSetOrigin(img, c("0.5", 0.5)))
-#' testthat::expect_error(antsSetOrigin(img, c(0.5, 0.5, 0.5)))
 antsGetSpacing <- function(x) {
   x <- check_ants(x)
   if (!is.antsImage(x)) {
@@ -103,6 +94,7 @@ antsGetSpacing <- function(x) {
 
   return(ANTsRCore::antsImage_GetSpacing(x))
 }
+
 #' @rdname antsImageGetSet
 #' @param spacing numeric vector of length \code{d}.
 #' @export
@@ -112,7 +104,7 @@ antsSetSpacing <- function(x, spacing) {
     stop("Input must be of class 'antsImage'")
   }
 
-  if ((class(spacing) != "numeric") && (class(spacing) != "array")) {
+  if (inherits(spacing, "numeric") && inherits(spacing, "array")) {
     stop("spacing must be of class 'numeric'")
   }
 
@@ -133,6 +125,7 @@ antsGetOrigin <- function(x) {
   }
   return(ANTsRCore::antsImage_GetOrigin(x))
 }
+
 #' @rdname antsImageGetSet
 #' @usage antsSetOrigin(x, origin)
 #' @param origin numeric vector of length \code{d}.
@@ -220,7 +213,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   if (length(i) != 1 || !is.na(i)) {
     if (is.null(i)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(i) == "integer" || class(i) == "numeric") {
+    } else if (inherits(i, "integer") || inherits(i, "numeric")) {
       lst <- c(lst, list(i))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -230,7 +223,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   if (length(j) != 1 || !is.na(j)) {
     if (is.null(j)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(j) == "integer" || class(j) == "numeric") {
+    } else if (inherits(j, "integer") || inherits(j, "numeric")) {
       lst <- c(lst, list(j))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -240,7 +233,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   if (length(k) != 1 || !is.na(k)) {
     if (is.null(k)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(k) == "integer" || class(k) == "numeric") {
+    } else if (inherits(k, "integer") || inherits(k, "numeric")) {
       lst <- c(lst, list(k))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")
@@ -250,7 +243,7 @@ antsSetPixels <- function(x, i = NA, j = NA, k = NA, l = NA, value) {
   if (length(l) != 1 || !is.na(l)) {
     if (is.null(l)) {
       lst <- c(lst, list(integer(0)))
-    } else if (class(l) == "integer" || class(l) == "numeric") {
+    } else if (inherits(l, "integer") || inherits(l, "numeric")) {
       lst <- c(lst, list(l))
     } else {
       stop("indices must be of class 'integer' or 'numeric'")

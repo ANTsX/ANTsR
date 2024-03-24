@@ -46,7 +46,6 @@ kellyKapowski <- function(
     print("Input error - check params & usage")
     return(NULL)
   }
-  # if (class(s)[1] == "antsImage") {
   if (is.antsImage(s)) {
     s <- antsImageClone(s, "unsigned int")
   }

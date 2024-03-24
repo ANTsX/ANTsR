@@ -33,15 +33,15 @@
 #' @export maskImage
 maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
   level <- as.numeric(level)
-  if (class(level) == "numeric" & length(level) == 1) {
+  if (is.numeric(level) & length(level) == 1) {
     img.in <- check_ants(img.in)
     img.out <- antsImageClone(img.in)
     img.mask <- check_ants(img.mask)
     img.out[img.mask != level] <- 0
     return(img.out)
   }
-  if ((class(level) == "list") |
-    (class(level) == "numeric" &
+  if ((is.list(level)) |
+    (is.numeric(level) &
       length(level) > 1)) {
     img.in <- check_ants(img.in)
     img.out <- antsImageClone(img.in) * 0

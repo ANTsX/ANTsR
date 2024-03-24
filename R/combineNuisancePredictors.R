@@ -23,16 +23,6 @@
 #' If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)}
 #' by \code{ncol(aslmat)} by \code{npreds}.
 #' @author Benjamin M. Kandel, Brian B. Avants
-#' @examples
-#' set.seed(120)
-#' simimg <- makeImage(c(10, 10, 10, 20), rnorm(10 * 10 * 10 * 20) + 1)
-#' moco <- antsMotionCalculation(simimg, moreaccurate = 0)
-#' # for real data use below
-#' # moco <- antsMotionCalculation(getANTsRData("pcasl"))
-#' aslmat <- timeseries2matrix(moco$moco_img, moco$moco_mask)
-#' tc <- rep(c(0.5, -0.5), length.out = nrow(aslmat))
-#' noise <- getASLNoisePredictors(aslmat, tc, 0.5)
-#' noise.sub <- combineNuisancePredictors(aslmat, tc, noise, 2)
 #' @export combineNuisancePredictors
 combineNuisancePredictors <- function(
     inmat, target, globalpredictors = NA,

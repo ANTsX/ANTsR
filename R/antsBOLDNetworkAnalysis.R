@@ -55,7 +55,6 @@ antsBOLDNetworkAnalysis <- function(
     }
     return(x)
   }
-  # if ( !usePkg("psych") ) { print("Need pysch package"); return(NULL) }
   # if ( !usePkg("glasso") ) { print("Need glasso package"); return(NULL) }
   # if ( !usePkg("igraph") ) { print("Need igraph package"); return(NULL) }
   stopifnot(!is.null(bold))
@@ -132,9 +131,6 @@ antsBOLDNetworkAnalysis <- function(
     newnuisv <- min(c(10, which(mysum > 0.8)[1]))
     bgdnuis <- bgsvd$u[, 1:newnuisv]
     colnames(bgdnuis) <- paste("bgdNuis", 1:newnuisv, sep = "")
-  }
-  if (winsortrim > 0) {
-    omat <- psych::winsor(omat, trim = winsortrim)
   }
   omat <- omat[keepinds, ]
   ##################################################

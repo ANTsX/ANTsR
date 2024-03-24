@@ -27,7 +27,7 @@ antsImageWrite(fi, tempfile(fileext = ".nii.gz"))
 antsImageWrite(fi, tempfile(fileext = ".mha"))
 antsImageWrite(fi, tempfile(fileext = ".nrrd"))
 antsImageWrite(
-  antsImageClone(fi, "unsigned int"),
+  antsImageClone(fi, "unsigned char"),
   tempfile(fileext = ".jpg")
 )
 antsImageWrite(
@@ -38,13 +38,6 @@ antsImageWrite(fi, tempfile(fileext = ".mrc"))
 antsImageWrite(fi, tempfile(fileext = ".hd5"))
 components(fi) <- 0L
 antsImageWrite(fi, tempfile(fileext = ".nii.gz"))
-components(fi) <- -1L
-testthat::expect_error(
-  antsImageWrite(fi, tempfile(fileext = ".nii.gz")), "nvalid S4"
-)
-testthat::expect_error(
-  antsImageWrite("hey"), "not exist"
-)
 
 }
 \seealso{

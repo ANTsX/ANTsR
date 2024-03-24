@@ -37,9 +37,9 @@ resampleImage <- function(image, resampleParams, useVoxels = FALSE, interpType =
   image <- check_ants(image)
   pixtype <- image@pixeltype
 
-  if (class(interpType) == "character") {
+  if (is.character(interpType)) {
     interpType <- tolower(interpType)
-  } else if (class(interpType) == "numeric") {
+  } else if (is.numeric(interpType)) {
     if (interpType == 0) {
       interpType <- "linear"
     } else if (interpType == 1) {

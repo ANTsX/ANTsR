@@ -78,11 +78,11 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
   }
 
   # image matrix or antsImage--------------------------------------------------
-  if (class(x) == "antsImage") {
+  if (inherits(x, "antsImage")) {
     scale <- 1
     n <- 1
     mrss <- 1
-  } else if (class(x) == "matrix") {
+  } else if (inherits(x, "matrix")) {
     if (missing(rdf)) {
       rdf <- nrow(x) - 2
     }
@@ -127,7 +127,7 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     progress <- txtProgressBar(min = 0, max = n, style = 3)
   }
   for (i in 1:n) {
-    if (class(x) == "matrix") {
+    if (inherits(x, "matrix")) {
       if (D == 1) {
         d1[dimx1] <- makeImage(mask, x[i, ] / mrss)[dimx]
       } else if (D == 2) {

@@ -196,7 +196,7 @@ eanatDef <- function(inmat, nvecs = 0, mask = NULL,
   allsols <- solutionmatrix[1, ] * 0
   for (sol in 1:nrow(solutionmatrix))
   {
-    if (sol == 1 | class(inmat)[1] == "dgCMatrix") {
+    if (sol == 1 | inherits(inmat, "dgCMatrix")) {
       rmat <- mat
     } else {
       pp <- mat %*% t(solutionmatrix)
@@ -236,7 +236,7 @@ eanatDef <- function(inmat, nvecs = 0, mask = NULL,
     }
     allsols <- allsols + abs(vec)
     pp <- mat %*% t(solutionmatrix)
-    if (class(inmat)[1] != "dgCMatrix") {
+    if (!inherits(inmat, "dgCMatrix")) {
       errn <- mean(abs(mat - predict(lm(mat ~ pp[, 1:sol]))))
       errni <- mean(abs(mat - predict(lm(mat ~ pp1[, 1:sol]))))
     } else {
@@ -244,7 +244,7 @@ eanatDef <- function(inmat, nvecs = 0, mask = NULL,
     }
     if (verbose) print(paste("sol", sol, "err", errn, "erri", errni))
   }
-  if (verbose & class(inmat)[1] != "dgCMatrix") {
+  if (verbose & !inherits(inmat, "dgCMatrix")) {
     print(paste("MeanCor", mean(abs(cor(mat %*% t(solutionmatrix))))))
   }
   sparvals2 <- rep(NA, nvecs)

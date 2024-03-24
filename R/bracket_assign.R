@@ -95,12 +95,12 @@ setMethod(
   f = "[<-",
   signature(x = "antsImage", i = "list"),
   definition = function(x, i, j, ..., value) {
-    if (class(i$mask) == "NULL") {
+    if (is.null(i$mask)) {
       i$mask <- logical(0)
     } else if (typeof(i$mask) != "logical") {
       stop("'mask' provided is not of type 'logical'")
     }
-    if (class(i$region) != "antsRegion") {
+    if (!inherits(i$region, "antsRegion")) {
       stop("'region' provided is not of class 'antsRegion'")
     }
     return(ANTsRCore::antsImage_SetRegion(x, i$mask, i$region, value))

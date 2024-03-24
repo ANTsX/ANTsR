@@ -25,7 +25,7 @@
 #'
 #' @export resels
 resels <- function(mask, fwhm) {
-  if (class(mask) != "antsImage") {
+  if (!inherits(mask, "antsImage")) {
     stop("mask must be of class antsImage")
   }
   if (max(mask) > 1 | min(mask) < 0) {

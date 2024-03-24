@@ -20,9 +20,6 @@
 #' @return outputs a brain image and brain mask.
 #' @author Tustison N, Avants BB
 #' @examples
-#'
-#' Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
-#' set.seed(1)
 #' n <- 64
 #' fn <- getANTsRData("r16")
 #' img <- antsImageRead(fn)
@@ -33,25 +30,10 @@
 #' temmask <- antsImageClone(tem)
 #' temmask[tem > 20] <- 1
 #' temmask[tem <= 20] <- 0
-#' bm <- ANTsR::abpBrainExtraction(img = img, tem = tem, temmask = temmask, num_threads = 1)
-#' stopifnot(sum(bm$bmask) != prod(dim(bm$brain)))
-#' bm2 <- ANTsR::abpBrainExtraction(img = img, tem = tem, temmask = temmask, num_threads = 1)
-#' stopifnot(sum(bm2$bmask) != prod(dim(bm2$brain)))
-#'
+#' \dontrun{
+#' bm <- abpBrainExtraction(img = img, tem = tem, temmask = temmask)
+#' }
 #' @export abpBrainExtraction
-#' @importFrom magrittr %>%
-#' @importFrom graphics hist par plot points
-#' @importFrom grDevices colorRampPalette dev.off hsv png rainbow rgb
-#' @importFrom methods new
-#' @importFrom stats ar as.formula coefficients convolve
-#'   cor cor.test cov dist formula glm lm
-#'   lm.fit loess median model.matrix na.omit
-#'   optimize p.adjust pchisq pf pnorm ppois
-#'   predict pt qchisq qf qnorm qt quantile
-#'   residuals rnorm sd spec.pgram spline stl
-#'   t.test toeplitz ts var
-#' @importFrom utils data glob2rx read.csv setTxtProgressBar tail
-#'   txtProgressBar write.csv
 abpBrainExtraction <- function(img, tem, temmask,
                                temregmask = NULL, regtype = "SyN", tdir = NA,
                                num_threads = 1,

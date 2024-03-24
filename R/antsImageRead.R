@@ -23,16 +23,16 @@
 antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   components <- 1
 
-  if (class(filename) != "character" || length(filename) != 1) {
+  if (!is.character(filename) || length(filename) != 1) {
     stop("'filename' argument must be of class 'character' and have length 1")
   }
   filename <- path.expand(filename)
   if (!file.exists(filename)) stop("file does not exist")
-  if (class(pixeltype) != "character" || length(pixeltype) != 1) {
+  if (!is.character(pixeltype) || length(pixeltype) != 1) {
     stop("'pixeltype' argument must be of class 'character' and have length 1")
   }
   if (!is.null(dimension)) {
-    if (((class(dimension) != "numeric") && (class(dimension) != "integer")) || length(dimension) !=
+    if (((!is.numeric(dimension)) && (!is.integer(dimension))) || length(dimension) !=
       1) {
       stop("'dimension' argument must be of class 'numeric' and have length 1")
     }

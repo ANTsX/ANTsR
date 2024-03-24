@@ -59,7 +59,7 @@
 initializeEigenanatomy <- function(
     initmat, mask = NULL, nreps = 1,
     smoothing = 0) {
-  if (class(initmat)[1] == "antsImage") {
+  if (inherits(initmat, "antsImage")) {
     selectvec <- initmat > 0
     if (!is.null(mask)) {
       mask <- check_ants(mask)

@@ -72,14 +72,14 @@ getTemplateCoordinates <- function(
 
 
   getValueAtPoint <- function(x, point) {
-    if (class(x)[1] != "antsImage") {
+    if (!inherits(x, "antsImage")) {
       stop("Input must be of class 'antsImage'")
     }
-    if ((class(point) != "numeric")) {
+    if (!is.numeric(point)) {
       stop("point must be of class 'numeric'")
     }
 
-    idx <- as.numeric(ANTsRCore::antsTransformPhysicalPointToIndex(x, point))
+    idx <- as.numeric(antsTransformPhysicalPointToIndex(x, point))
     idx <- floor(idx)
 
     dims <- length(idx)
@@ -99,11 +99,11 @@ getTemplateCoordinates <- function(
 
   fi <- templatePairWithLabels[[1]]
   mi <- imagePairToBeLabeled[[1]]
-  if (class(fi)[[1]] != "antsImage") {
-    print("  class(fi)[[1]] != antsImage ")
+  if (!inherits(fi, "antsImage")) {
+    print("  fi not an antsImage ")
   }
-  if (class(mi)[[1]] != "antsImage") {
-    print("  class(mi)[[1]] != antsImage ")
+  if (!inherits(mi, "antsImage")) {
+    print("  mi not an antsImage ")
   }
   imagedim <- mi@dimension
   if (is.na(outprefix)) {
@@ -132,12 +132,12 @@ getTemplateCoordinates <- function(
   mypoints <- data.frame(getCentroids(mywarpedLimage))
   for (mylab in 2:length(templatePairWithLabels)) {
     filab <- templatePairWithLabels[[mylab]]
-    if (class(filab)[[1]] != "antsImage") {
-      print("  class(filab)[[1]] != antsImage ")
+    if (!inherits(filab, "antsImage")) {
+      print("  filab != antsImage ")
       return(1)
     }
-    if (class(milab)[[1]] != "antsImage") {
-      print("  class(milab)[[1]] != antsImage ")
+    if (!inherits(milab, "antsImage")) {
+      print("  milab != antsImage ")
       return(1)
     }
     # now we know the (e.g. MNI) coordinate of each labeled region in the original

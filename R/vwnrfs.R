@@ -356,7 +356,7 @@ splitMask <- function(mask, n = NA, voxchunk = NA) {
   if (is.na(n) & is.na(voxchunk)) {
     stop("Arguments n or voxchunk are required for splitMask")
   }
-  if (class(mask) != "antsImage") stop("Mask must be a single antsImage")
+  if (!inherits(mask, "antsImage")) stop("Mask must be a single antsImage")
 
   hasvalues <- mask >= 0.5
   nnz <- sum(hasvalues)

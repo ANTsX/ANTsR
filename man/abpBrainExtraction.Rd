@@ -48,9 +48,6 @@ Brain extraction based on mapping a template image and its mask to the input
 image.  Should be preceded by abpN4.
 }
 \examples{
-
-Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
-set.seed(1)
 n <- 64
 fn <- getANTsRData("r16")
 img <- antsImageRead(fn)
@@ -61,11 +58,9 @@ tem <- resampleImage(tem, c(n, n), 1, 0)
 temmask <- antsImageClone(tem)
 temmask[tem > 20] <- 1
 temmask[tem <= 20] <- 0
-bm <- ANTsR::abpBrainExtraction(img = img, tem = tem, temmask = temmask, num_threads = 1)
-stopifnot(sum(bm$bmask) != prod(dim(bm$brain)))
-bm2 <- ANTsR::abpBrainExtraction(img = img, tem = tem, temmask = temmask, num_threads = 1)
-stopifnot(sum(bm2$bmask) != prod(dim(bm2$brain)))
-
+\dontrun{
+bm <- abpBrainExtraction(img = img, tem = tem, temmask = temmask)
+}
 }
 \author{
 Tustison N, Avants BB

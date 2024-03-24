@@ -28,7 +28,7 @@
 #' moving <- resampleImage(moving, c(64, 64), 1, 0)
 #' mytx <- antsRegistration(
 #'   fixed = fixed, moving = moving,
-#'   typeofTransform = c("SyN"), verbose = TRUE
+#'   typeofTransform = c("SyN"), verbose = FALSE
 #' )
 #' pts <- data.frame(
 #'   x = c(110.5, 120, 130), y = c(108.1, 121.0, 130),
@@ -104,7 +104,7 @@ antsApplyTransformsToPoints <- function(
         )
       }
     }
-    if (class(points)[[1]] != "antsImage") {
+    if (!inherits(points, "antsImage")) {
       usepts <- as.antsImage(data.matrix(points))
     } else {
       usepts <- antsImageClone(points)
@@ -125,7 +125,7 @@ antsApplyTransformsToPoints <- function(
     }
     ANTsRCore::antsApplyTransformsToPoints(c(myargs, "-f", 1, "--precision", 0))
 
-    if (class(points)[[1]] == "antsImage") {
+    if (inherits(points, "antsImage")) {
       return(pointsout)
     }
     pointsout <- data.frame(as.matrix(pointsout))

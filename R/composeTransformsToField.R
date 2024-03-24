@@ -26,7 +26,7 @@ composeTransformsToField <- function(
   mydim <- image@dimension
   # first thing is to convert the transform files to antsr types if they are
   # not already that way
-  if (class(transforms[[1]]) == "character") {
+  if (is.character(transforms[[1]])) {
     txlist <- list()
     for (k in 1:length(transforms))
     {

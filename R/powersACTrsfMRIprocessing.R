@@ -138,7 +138,7 @@ fMRINormalization <- function(
   img <- cropIndices(img, c(1, 1, 1, steady), dim(img))
   runNuis <- rep(1, dim(img)[4])
   if (length(extraRuns) > 0) {
-    if (class(extraRuns)[[1]] != "list") {
+    if (!is.list(extraRuns)) {
       stop("extraRuns must be a list of antsImages.")
     }
     for (i in 1:length(extraRuns))
