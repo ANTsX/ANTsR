@@ -175,8 +175,7 @@
     paste("MOCOparam", 1:(ncol(moco_params) - 2), sep = "")
   )
   names(moco_params) <- mynames
-  return
-  (
+  return(
     list
     (
       moco_img = moco_img,

@@ -11,7 +11,7 @@
     print(paste(" lm( values_1.csv ~ 1 + values_2.csv + nuis.csv  "))
     print(paste(" and will return the value of the vector values2~values1 for every pair of v1,v2 values "))
     print(paste(" you can use this to do a voxelwise regression "))
-    return
+    return()
   }
   ARGIND <- 1
   id <- c(as.character(Args[ARGIND]))

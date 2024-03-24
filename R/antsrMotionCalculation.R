@@ -139,8 +139,7 @@ antsrMotionCalculation <- function(
     mocoparams <- mocoparamsR
   }
   colnames(mocoparams) <- paste("MOCOparam", 1:ncol(mocoparams), sep = "")
-  return
-  (
+  return(
     list(
       moco_img     = moco_img,
       moco_params  = mocoparams,

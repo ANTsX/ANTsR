@@ -391,7 +391,7 @@ generateAifMaskImage <- function(
 
   if (nrow(fittingResults) == 0) {
     warning("Empty results.  No voxels survived criteria.")
-    return
+    return()
   }
 
   # We sort the remaining voxels by the scale of the fitted model and

@@ -64,7 +64,7 @@ integrateVectorField <- function(
     deltaTime = 0.01) {
   referenceImage <- check_ants(referenceImage)
   veccer <- antsImageRead(vectorFieldFileName)
-  antsImageWrite(veccerdplus1, deformationFieldFileName)
+  antsImageWrite(veccer, deformationFieldFileName)
   temp <- ANTsRCore::ANTSIntegrateVectorField(
     referenceImage, deformationFieldFileName, deformationFieldFileName,
     lowerTime, upperTime, deltaTime
