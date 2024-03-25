@@ -93,14 +93,6 @@ List of:
 Preprocess fMRI data by performing compcor/motion correction, nuisance
 regression, band-pass filtering, and spatial smoothing.
 }
-\examples{
-set.seed(123)
-n <- 8
-nvox <- n * n * n * 6
-dims <- c(n, n, n, 6)
-boldImage <- makeImage(dims, rnorm(nvox) + 500) \%>\% iMath("PadImage", 2)
-cleanfMRI <- preprocessfMRI(boldImage)
-}
 \references{
 Power et al. 2012, "Spurious but systematic correlations
 in functional connectivity MRI networks arise from subject motion."

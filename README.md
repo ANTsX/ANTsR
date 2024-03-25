@@ -61,7 +61,7 @@ $ R CMD INSTALL ANTsR
 
 ## Developer notes
 
-### Maintainer
+### Authors
 
 [Brian B. Avants](http://stnava.github.io/) (maintainer), Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
 

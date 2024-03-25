@@ -38,7 +38,7 @@
 #' # 'averages' loosely speaking anyway
 #' myEigenanatomyRegionAverages <- dmat %*% t(eanatMatrix)
 #' dependentvariable <- rnorm(nrow(dmat))
-#' summary(lm(dependentvariable ~ myEigenanatomyRegionAverages))
+#' res <- summary(lm(dependentvariable ~ myEigenanatomyRegionAverages))
 #'
 #' nvox <- 1000
 #' dmat <- replicate(nvox, rnorm(20))

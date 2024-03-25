@@ -58,16 +58,6 @@
 #' in functional connectivity MRI networks arise from subject motion."
 #' NeuroImage 59, 2142-2154.
 #' @author Tustison NJ, Avants BB
-#' @examples
-#'
-#' set.seed(123)
-#' n <- 8
-#' nvox <- n * n * n * 6
-#' dims <- c(n, n, n, 6)
-#' boldImage <- makeImage(dims, rnorm(nvox) + 500) %>% iMath("PadImage", 2)
-#' # for real data: boldImage <- antsImageRead(getANTsRData('pcasl'))
-#' cleanfMRI <- preprocessRestingBOLD(boldImage)
-#'
 #' @export
 preprocessRestingBOLD <- function(
     boldImage,
@@ -143,7 +133,7 @@ preprocessRestingBOLD <- function(
 
       if (!denseFramewise) {
         # pick a point 10 voxels from the center
-        samplePoint <- data.matrix(matrix(rep(10, 3), nrow = 1))
+        samplePoint <- data.matrix(matrix(rep(10, 3), ncol = 1))
         samplePoint <- antsTransformIndexToPhysicalPoint(meanBoldFixedImageForMotionCorrection, samplePoint)
 
         # calculate the transformed point at time point i and ( i - 1 )

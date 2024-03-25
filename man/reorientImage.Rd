@@ -25,11 +25,6 @@ reoriented image
 \description{
 align along a specific axis
 }
-\examples{
-
-reofi <- reorientImage(ri(1), c(1, 0))
-
-}
 \author{
 Brian B. Avants
 }

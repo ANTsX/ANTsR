@@ -40,7 +40,7 @@ eigSeg <- function(
   if (inherits(imgList, "matrix")) {
     mydata <- imgList
   }
-  if (inherits(imgList, "matrix")) {
+  if (!inherits(imgList, "matrix")) {
     if (length(imgList) > 0) {
       if (typeof(imgList) == "list") {
         mydata <- imageListToMatrix(imgList, mask)
