@@ -16,15 +16,15 @@ invertDisplacementField(
 \arguments{
 \item{displacementField}{displacement field.}
 
+\item{inverseFieldInitialEstimate}{initial guess.}
+
+\item{maximumNumberOfIterations}{number of iterations.}
+
 \item{meanErrorToleranceThreshold}{mean error tolerance threshold.}
 
 \item{maxErrorToleranceThreshold}{max error tolerance threshold.}
 
 \item{enforceBoundaryCondition}{enforce stationary boundary condition.}
-
-\item{inverse_field_initial_estimate}{initial guess.}
-
-\item{maximum_number_of_iterations}{number of iterations.}
 }
 \value{
 inverse displacement field

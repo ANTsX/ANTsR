@@ -359,7 +359,7 @@ antsRegistration <- function(
       ttexists <- typeofTransform %in% allowableTx || grepl("antsRegistrationSyN", typeofTransform)
       if (ttexists) {
         initx <- initialTransform
-        if (class(initx) == "antsrTransform") {
+        if (inherits(initx, "antsrTransform")) {
           tempTXfilename <- tempfile(fileext = ".mat")
           initx <- invertAntsrTransform(initialTransform)
           initx <- invertAntsrTransform(initx)

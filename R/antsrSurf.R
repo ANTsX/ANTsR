@@ -107,7 +107,7 @@ antsrSurf <- function(x, y, z,
     alpha <- rep(1, length(x) + length(y))
   }
   if (length(z) != length(y)) stop("each y must have a mask in z")
-  if (class(overlayLimits) == "numeric") {
+  if (is.numeric(overlayLimits)) {
     overlayLimits <- list(overlayLimits)
   }
   # #' @param domainImageMap resamples surf and func to this domain FIXME

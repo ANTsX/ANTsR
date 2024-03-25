@@ -43,7 +43,7 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
     stop("Input must be of class 'antsImage'")
   }
 
-  if ((class(center) != "numeric")) {
+  if (!is.numeric(center)) {
     stop("center must be of class 'numeric'")
   }
 
@@ -149,7 +149,7 @@ getNeighborhoodInMask <- function(image, mask, radius, physical.coordinates = FA
     stop("mask must be of class 'antsImage'")
   }
 
-  if ((class(radius) != "numeric")) {
+  if (!is.numeric(radius)) {
     stop("radius must be of class 'numeric'")
   }
 

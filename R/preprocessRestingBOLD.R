@@ -230,7 +230,7 @@ preprocessRestingBOLD <- function(
       )
     } else {
       stop("Expecting a two element vector.")
-      return
+      return()
     }
   } else if (spatialSmoothingType != "none") {
     stop("Unrecognized smoothing option.")

@@ -16,6 +16,8 @@ integrateVectorField(
 \arguments{
 \item{referenceImage}{defines the image domain}
 
+\item{vectorFieldFileName}{the vector field exists on disk.}
+
 \item{deformationFieldFileName}{the deformation field output file name.}
 
 \item{lowerTime}{the starting time, usually zero for forward transformation
@@ -25,8 +27,6 @@ and one for the inverse transformation.}
 and zero for the inverse transformation.}
 
 \item{deltaTime}{the integration time step}
-
-\item{velocityFieldFileName}{the velocity field exists on disk.}
 }
 \description{
 Utility function to integrate a vector field and create a deformation field.

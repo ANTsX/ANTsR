@@ -59,7 +59,6 @@ hist.antsImage <- function(x, ..., mask) {
 #' img <- makeImage(c(10, 10), rnorm(100))
 #' mask <- img > 0
 #' quantile(img, mask = mask)
-#' @importFrom stats quantile
 quantile.antsImage <- function(x, ..., mask) {
   x <- mask_values(x, mask)
   quantile(x, ...)
@@ -80,7 +79,6 @@ quantile.antsImage <- function(x, ..., mask) {
 #' img <- makeImage(c(10, 10), rnorm(100))
 #' mask <- img > 0
 #' density(img, mask = mask)
-#' @importFrom stats density
 density.antsImage <- function(x, ..., mask) {
   x <- mask_values(x, mask)
   density(x, ...)

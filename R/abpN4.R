@@ -24,7 +24,7 @@ abpN4 <- function(
     mask, usen3 = FALSE,
     ...) {
   numargs <- nargs()
-  if (numargs < 1 | missing(img) | class(img)[1] != "antsImage") {
+  if (numargs < 1 | missing(img) | !inherits(img, "antsImage")) {
     stop("Missing image.")
   }
   if (length(intensityTruncation) != 3) {

@@ -232,19 +232,7 @@ quantifyCBF <- function(
   # appy mask to mean cbf image
   meancbfimg <- meancbf * mask
 
-  epckg <- usePkg("extremevalues")
-  if (epckg) {
-    cbfvals <- meancbfimg[(mask == 1)]
-    K <- extremevalues::getOutliers(cbfvals,
-      method = "I",
-      distribution = "normal", FLim = c(outlierValue, 1 - outlierValue)
-    )
-    kcbf <- antsImageClone(meancbfimg)
-    kcbf[meancbfimg < K$yMin] <- 0
-    kcbf[meancbfimg > K$yMax] <- K$yMax
-  } else {
-    kcbf <- NA
-  }
+  kcbf <- NA
 
   if (!hasTime) {
     timecbfimg <- meancbfimg

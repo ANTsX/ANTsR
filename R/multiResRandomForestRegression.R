@@ -194,10 +194,10 @@ getMultiResFeatureMatrix <- function(
   # loop over features, labels and multires
   for (featk in 1:length(x))
   {
-    if (class(labelmask)[1] == "antsImage") {
+    if (inherits(labelmask, "antsImage")) {
       locmask <- (labelmask)
     }
-    if (class(labelmask)[1] == "list") {
+    if (inherits(labelmask, "list")) {
       locmask <- labelmask[[featk]]
     }
     ulabs <- sort(unique(locmask[locmask > 0]))

@@ -27,7 +27,7 @@ antsAverageImages <- function(imageList, normalize = FALSE, weights,
                               verbose = TRUE) {
   # determine if input is list of images or filenames
   isfile <- FALSE
-  if (class(imageList) == "character") {
+  if (inherits(imageList, "character")) {
     if (any(!file.exists(imageList))) {
       stop("One or more files do not exist.")
     }

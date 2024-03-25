@@ -84,28 +84,38 @@ fixed <- matrix(c(50, 50, 200, 50, 50, 200), ncol = 2, byrow = TRUE)
 moving <- matrix(c(50, 50, 50, 200, 200, 200), ncol = 2, byrow = TRUE)
 
 # Affine transform
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Affine", regularization = 0)
+xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Affine", 
+regularization = 0)
 params <- getAntsrTransformParameters(xfrm)
 
 # Rigid transform
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Rigid", regularization = 0)
+xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Rigid", 
+regularization = 0)
 params <- getAntsrTransformParameters(xfrm)
 
 # Similarity transform
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Similarity", regularization = 0)
+xfrm <- fitTransformToPairedPoints(moving, fixed, 
+transformType = "Similarity", regularization = 0)
 params <- getAntsrTransformParameters(xfrm)
 
 # B-spline transform
 domainImage <- antsImageRead(getANTsRData("r16"))
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Bspline", domainImage = domainImage, numberOfFittingLevels = 5)
+xfrm <- fitTransformToPairedPoints(moving, fixed, 
+transformType = "Bspline", domainImage = domainImage, 
+numberOfFittingLevels = 5)
 
 # Diffeo transform
 domainImage <- antsImageRead(getANTsRData("r16"))
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "Diffeo", domainImage = domainImage, numberOfFittingLevels = 6)
+xfrm <- fitTransformToPairedPoints(moving, fixed, 
+transformType = "Diffeo", domainImage = domainImage, 
+numberOfFittingLevels = 6)
 
 # SyN transform
 domainImage <- antsImageRead(getANTsRData("r16"))
-xfrm <- fitTransformToPairedPoints(moving, fixed, transformType = "SyN", domainImage = domainImage, numberOfFittingLevels = 6, numberOfCompositions = 10, compositionStepSize = 0.01)
+xfrm <- fitTransformToPairedPoints(moving, fixed, 
+transformType = "SyN", domainImage = domainImage, 
+numberOfFittingLevels = 6, numberOfCompositions = 10, 
+compositionStepSize = 0.01)
 }
 \author{
 B Avants, N Tustison

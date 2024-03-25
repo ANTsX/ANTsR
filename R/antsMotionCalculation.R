@@ -37,13 +37,6 @@
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
 #' @author Benjamin M. Kandel
-#' @examples
-#' \dontrun{
-#' set.seed(120)
-#' simimg <- makeImage(rep(5, 4), rnorm(5^4))
-#' # for real data, use simimg <- antsImageRead(getANTsRData('pcasl'), 4)
-#' antsMotionCalculation(simimg, moreaccurate = 0)
-#' }
 #' @export antsMotionCalculation
 antsMotionCalculation <- function(
     img, mask = NULL, fixed = NULL, moreaccurate = 1,

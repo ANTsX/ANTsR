@@ -18,7 +18,6 @@
 #' field <- integrateVelocityField(velocityField, 0.0, 1.0, 10)
 #'
 #' @export integrateVelocityField
-
 integrateVelocityField <- function(
     velocityField,
     lowerIntegrationBound = 0.0,

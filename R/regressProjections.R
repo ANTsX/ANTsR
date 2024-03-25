@@ -164,7 +164,7 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
   # perform predictions
   outcome.real.train <- demog.train[, outcome]
   outcome.real.test <- demog.test[, outcome]
-  if (class(outcome.real.train) == "numeric") {
+  if (is.numeric(outcome.real.train)) {
     outcome.predicted.train <- predict(model.train, newdata = demog.train)
     outcome.predicted.test <- predict(model.train, newdata = demog.test)
     error.train <- mean(abs(outcome.predicted.train - outcome.real.train), na.rm = T)
@@ -178,7 +178,7 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
       pvalue.train = pvalue.train, error.test = error.test, corcoeff.test = corcoeff.test,
       pvalue.test = pvalue.test
     )
-  } else if (class(outcome.real.train) == "factor") {
+  } else if (is.factor(outcome.real.train)) {
     outcome.predicted.train.prob <- predict(model.train,
       newdata = demog.train,
       type = "response"

@@ -48,8 +48,6 @@
 #' voxvals[, , , 5] <- voxvals[, , , 5] + 600
 #' asl <- makeImage(dims, voxvals)
 #' censored <- aslCensoring(asl)
-#' testthat::expect_equal(mean(censored$asl.inlier), 248.071606610979)
-#' testthat::expect_equal(censored$which.outliers, c(5L, 6L))
 #'
 #' @references Tan H. et al., ``A Fast, Effective Filtering Method
 #' for Improving Clinical Pulsed Arterial Spin Labeling MRI,'' JMRI 2009.

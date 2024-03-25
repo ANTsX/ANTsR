@@ -17,7 +17,7 @@
 antsCopyImageInfo <- function(reference, target) {
   reference <- check_ants(reference)
   target <- check_ants(target)
-  if (!(class(reference) == "antsImage") || !(class(target) == "antsImage")) {
+  if (!(inherits(reference, "antsImage")) || !(inherits(target, "antsImage"))) {
     stop("Both inputs must be of class 'antsImage'")
   }
   antsSetOrigin(target, as.numeric(antsGetOrigin(reference)))
@@ -47,7 +47,7 @@ antsCopyImageInfo <- function(reference, target) {
 antsCopyImageInfo2 <- function(target, reference) {
   reference <- check_ants(reference)
   target <- check_ants(target)
-  if (!(class(reference) == "antsImage") || !(class(target) == "antsImage")) {
+  if (!(inherits(reference, "antsImage")) || !(inherits(target, "antsImage"))) {
     stop("Both inputs must be of class 'antsImage'")
   }
   antsSetOrigin(target, as.numeric(antsGetOrigin(reference)))

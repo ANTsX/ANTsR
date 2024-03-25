@@ -246,7 +246,7 @@ applyAntsrTransform <- function(transform, data, dataType = "point", reference =
     return(applyAntsrTransformToImage(transform, data, reference, ...))
   } else {
     ismatrix <- TRUE
-    if (class(data)[1] == "numeric") {
+    if (is.numeric(data)) {
       data <- t(as.matrix(data))
       ismatrix <- FALSE
     }
@@ -284,7 +284,7 @@ applyAntsrTransform <- function(transform, data, dataType = "point", reference =
 #' @export
 applyAntsrTransformToPoint <- function(transform, points) {
   ismatrix <- TRUE
-  if (class(points)[1] == "numeric") {
+  if (is.numeric(points)) {
     points <- t(as.matrix(points))
     ismatrix <- FALSE
   }
@@ -312,7 +312,7 @@ applyAntsrTransformToPoint <- function(transform, points) {
 #' @export
 applyAntsrTransformToVector <- function(transform, vectors) {
   ismatrix <- TRUE
-  if (class(vectors) == "numeric") {
+  if (is.numeric(vectors)) {
     vectors <- t(as.matrix(vectors))
     ismatrix <- FALSE
   }

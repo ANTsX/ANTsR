@@ -82,7 +82,7 @@ aslPerfusion <- function(
       stop("'asl' should be only one filename")
     }
     asl <- antsImageRead(asl, 4)
-  } else if (class(asl) == "antsImage") {
+  } else if (inherits(asl, "antsImage")) {
     if (asl@pixeltype != pixtype) {
       asl <- antsImageClone(asl, pixtype)
     }

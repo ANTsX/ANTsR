@@ -23,7 +23,7 @@ createJacobianDeterminantImage <- function(
     doLog = FALSE,
     geom = FALSE) {
   dim <- domainImg@dimension
-  if (class(tx) == "antsImage") {
+  if (inherits(tx, "antsImage")) {
     txuse <- tempfile(fileext = c(".nii.gz"))
     antsImageWrite(tx, txuse)
   } else {

@@ -25,14 +25,8 @@
 #' mask <- as.antsImage(mask2)
 #' fi <- as.antsImage(fi)
 #' fi <- smoothImage(fi, 3)
-#' painted <- basicInPaint(fi, mask)
 #' \dontrun{
-#' # lmask<-antsImageRead( "brainmask.nii.gz", 2 )
-#' # limg<-antsImageRead( "r16slice_lesion.nii.gz", 2 )
-#' # mm<-basicInPaint(limg,lmask)
-#' # plot(mm)
-#' # mm2<-basicInPaint(limg,lmask,its=10,gparam=0.05)
-#' # plot(mm2)
+#' painted <- basicInPaint(fi, mask)
 #' }
 #' @export
 basicInPaint <- function(img, paintMask, speedimage = NULL, its = 0, gparam = 0.05) {

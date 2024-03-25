@@ -148,14 +148,14 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     stop("Must specify fieldType")
   }
 
-  if (class(threshType) == "character") {
+  if (is.character(threshType)) {
     if (verbose == "TRUE") {
       cat("Calculating threshTypeold \n")
     }
     u <- statFieldThresh(x, pval, k, n, fwhm, resels, df, fieldType,
       threshType = threshType, pp, verbose = verbose
     )
-  } else if (class(threshType) == "numeric") {
+  } else if (is.numeric(threshType)) {
     u <- threshType
   } else {
     stop(paste0(

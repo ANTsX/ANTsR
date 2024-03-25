@@ -15,13 +15,11 @@
 #' @return segmentation image.
 #' @author Avants BB
 #' @examples
-#'
 #' mylist <- list(
 #'   antsImageRead(getANTsRData("r16")),
 #'   antsImageRead(getANTsRData("r27")),
 #'   antsImageRead(getANTsRData("r85"))
 #' )
-#' myseg <- eigSeg(getMask(mylist[[1]]), mylist)
 #' mat <- imageListToMatrix(mylist, getMask(mylist[[1]]))
 #' myseg <- eigSeg(getMask(mylist[[1]]), mat)
 #'
@@ -39,10 +37,10 @@ eigSeg <- function(
   maskvox <- (mask > 0)
   maskseg <- antsImageClone(mask)
   maskseg[maskvox] <- 0
-  if (class(imgList)[1] == "matrix") {
+  if (inherits(imgList, "matrix")) {
     mydata <- imgList
   }
-  if (class(imgList)[1] != "matrix") {
+  if (inherits(imgList, "matrix")) {
     if (length(imgList) > 0) {
       if (typeof(imgList) == "list") {
         mydata <- imageListToMatrix(imgList, mask)
@@ -71,7 +69,7 @@ eigSeg <- function(
       maskseg[maskseg == kk] <- timg[maskseg == kk]
     }
   }
-  if (applySegmentationToImages & class(imgList)[1] != "matrix") {
+  if (applySegmentationToImages & !inherits(imgList, "matrix")) {
     for (i in 1:length(imgList)) {
       img <- imgList[[i]]
       img[maskseg != as.numeric(i)] <- 0

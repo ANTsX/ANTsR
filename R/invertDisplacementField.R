@@ -3,8 +3,8 @@
 #' Invert displacement field.
 #'
 #' @param displacementField displacement field.
-#' @param inverse_field_initial_estimate initial guess.
-#' @param maximum_number_of_iterations number of iterations.
+#' @param inverseFieldInitialEstimate initial guess.
+#' @param maximumNumberOfIterations number of iterations.
 #' @param meanErrorToleranceThreshold mean error tolerance threshold.
 #' @param maxErrorToleranceThreshold max error tolerance threshold.
 #' @param enforceBoundaryCondition enforce stationary boundary condition.
