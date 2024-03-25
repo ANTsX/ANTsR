@@ -63,7 +63,7 @@ $ R CMD INSTALL ANTsR
 
 ### Maintainer
 
-[Brian B. Avants](http://stnava.github.io/)
+[Brian B. Avants](http://stnava.github.io/) (maintainer), Benjamin M. Kandel, Jeff T. Duda, Philip A. Cook, Nicholas J. Tustison
 
 ### License
 
