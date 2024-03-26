@@ -2,7 +2,6 @@
 #'
 #' align along a specific axis
 #'
-#'
 #' @param img antsImage
 #' @param axis1 vector of size dim, might need to play w/axis sign
 #' @param axis2 vector of size dim for 3D
