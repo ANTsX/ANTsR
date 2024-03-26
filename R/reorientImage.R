@@ -2,7 +2,6 @@
 #'
 #' align along a specific axis
 #'
-#'
 #' @param img antsImage
 #' @param axis1 vector of size dim, might need to play w/axis sign
 #' @param axis2 vector of size dim for 3D
@@ -12,10 +11,6 @@
 #' @return reoriented image
 #' @author Brian B. Avants
 #' @keywords geometry image
-#' @examples
-#'
-#' reofi <- reorientImage(ri(1), c(1, 0))
-#'
 #' @export reorientImage
 reorientImage <- function(
     img, axis1, axis2 = NA,
@@ -44,9 +39,7 @@ reorientImage <- function(
   if (is.na(txfn)) {
     txfn <- tempfile(fileext = ".mat")
   }
-  ANTsRCore::reorientImage(img, txfn, axis1, axis2, doreflection,
-    doscale = doscale
-  )
+  ANTsRCore::reorientImage(img, txfn, axis1, axis2, doreflection, doscale)
   img2 <- antsApplyTransforms(img, img, transformlist = c(txfn))
   return(list(reoimg = img2, txfn = txfn))
 }

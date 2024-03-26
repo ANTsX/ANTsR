@@ -59,6 +59,9 @@ fitThinPlateSplineDisplacementField <- function(
   }
 
   dimensionality <- ncol(displacementOrigins)
+  if (!is.matrix(displacements)) {
+    displacements <- matrix(displacements, ncol=dimensionality)
+  }
   if (ncol(displacements) != dimensionality) {
     stop("Error:  Dimensionality between origins and displacements does not match.")
   }

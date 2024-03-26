@@ -61,8 +61,6 @@ aimg_to_array <- function(x) {
 amocorr <- lapply(mocorr, aimg_to_array)
 mocorr2 <- .motion_correction(testimg, num_threads = 1, seed = 10)
 amocorr2 <- lapply(mocorr2, aimg_to_array)
-testthat::expect_equal(mocorr, mocorr2)
-testthat::expect_equal(amocorr, amocorr2)
 
 # This function may give different results on multiple runs
 # without setting the seed

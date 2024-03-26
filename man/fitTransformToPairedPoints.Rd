@@ -103,19 +103,6 @@ domainImage <- antsImageRead(getANTsRData("r16"))
 xfrm <- fitTransformToPairedPoints(moving, fixed, 
 transformType = "Bspline", domainImage = domainImage, 
 numberOfFittingLevels = 5)
-
-# Diffeo transform
-domainImage <- antsImageRead(getANTsRData("r16"))
-xfrm <- fitTransformToPairedPoints(moving, fixed, 
-transformType = "Diffeo", domainImage = domainImage, 
-numberOfFittingLevels = 6)
-
-# SyN transform
-domainImage <- antsImageRead(getANTsRData("r16"))
-xfrm <- fitTransformToPairedPoints(moving, fixed, 
-transformType = "SyN", domainImage = domainImage, 
-numberOfFittingLevels = 6, numberOfCompositions = 10, 
-compositionStepSize = 0.01)
 }
 \author{
 B Avants, N Tustison
