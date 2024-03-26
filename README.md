@@ -1,11 +1,7 @@
-<!--
-![ants brain](http://i.imgur.com/I2VNWpA.png)
-![ants edie](http://i.imgur.com/DcV1NVT.png)
-![ants babe](http://i.imgur.com/gwoxI5M.png)
--->
 
 # Advanced Normalization Tools in R
 
+[![R-CMD-check](https://github.com/ANTsX/ANTsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ANTsX/ANTsR/actions/workflows/R-CMD-check.yaml)
 ![Downloads](https://img.shields.io/github/downloads/antsx/antsr/total)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/stnava/ANTsRDocker/master)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
