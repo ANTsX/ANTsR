@@ -40,7 +40,9 @@ antsRegistration(
 \item{typeofTransform}{A linear or non-linear registration type.  Mutual
 information metric by default. See \code{Details.}}
 
-\item{initialTransform}{transforms to prepend}
+\item{initialTransform}{either a single transform file name, a vector of transform file names,
+or a single antsTransform object. If NA, an initial translation aligns the center of mass
+of the moving image to that of the fixed image.}
 
 \item{outprefix}{output will be named with this prefix.}
 
