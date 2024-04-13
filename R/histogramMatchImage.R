@@ -52,10 +52,9 @@ histogramMatchImage <- function(
 #' @examples
 #'
 #' library( ANTsR )
-#' image <- antsImageRead( getANTsRData( "r16" ) )
-#' transformedImage <- histogramWarpImageIntensities( image, transformDomainSize = 10 )
-#' rm(image); gc()
-#' rm(transformedImage); gc()
+#' sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+#' referenceImage <- antsImageRead(getANTsRData("r64"), 2)
+#' matchedImage <- histogramMatchImage2(sourceImage, referenceImage)
 #' @export histogramMatchImage2
 histogramMatchImage2 <- function( sourceImage, referenceImage,
   sourceMask = NULL, referenceMask = NULL,
