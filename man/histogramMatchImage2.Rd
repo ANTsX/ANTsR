@@ -37,10 +37,9 @@ Apply B-spline 1-D maps to an input image for intensity warping.
 \examples{
 
 library( ANTsR )
-image <- antsImageRead( getANTsRData( "r16" ) )
-transformedImage <- histogramWarpImageIntensities( image, transformDomainSize = 10 )
-rm(image); gc()
-rm(transformedImage); gc()
+sourceImage <- antsImageRead(getANTsRData("r16"), 2)
+referenceImage <- antsImageRead(getANTsRData("r64"), 2)
+matchedImage <- histogramMatchImage2(sourceImage, referenceImage)
 }
 \author{
 Tustison NJ
