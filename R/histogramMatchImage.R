@@ -102,7 +102,7 @@ histogramMatchImage2 <- function( sourceImage, referenceImage,
   displacements <- referenceIntensityQuantiles - sourceIntensityQuantiles
 
   scatteredData <- matrix( displacements )
-  parametricData <- matrix( parametricPoints ) * ( sourceMaskedMax - sourceMaskedMin + sourceMaskedMin )
+  parametricData <- matrix( parametricPoints ) * ( sourceMaskedMax - sourceMaskedMin ) + sourceMaskedMin
 
   transformDomainOrigin <- sourceMaskedMin
   transformDomainSpacing <- ( sourceMaskedMax - transformDomainOrigin ) / ( transformDomainSize - 1 )
