@@ -26,7 +26,7 @@ Depends:
     R (>= 3.0),
     methods
 Imports:
-    ANTsRCore (>= 0.8.0)
+    ANTsRCore (>= 0.8.0),
     graphics,
     grDevices,
     magrittr,
