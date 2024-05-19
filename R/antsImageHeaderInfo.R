@@ -39,6 +39,6 @@ antsImageHeaderInfo <- function(filename) {
     stop("File does not exist")
   }
 
-  ret <- ANTsRCore::antsImageHeaderInfo(filename)
+  ret <- ANTsRCore::AntsImageHeaderInfo(filename)
   return(ret)
 }

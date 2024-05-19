@@ -40,7 +40,7 @@ setMethod(f = "show", "antsImageIterator", function(object) {
 setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition = function(
     .Object,
     pixeltype = "float", dimension = 3, components = 1) {
-  ANTsRCore::antsImageIterator(pixeltype, dimension, components)
+  ANTsRCore::AntsImageIterator(pixeltype, dimension, components)
 })
 
 #' @title antsImageIterator
@@ -53,7 +53,7 @@ setMethod(f = "initialize", signature(.Object = "antsImageIterator"), definition
 #' @export
 antsImageIterator <- function(x) {
   x <- check_ants(x)
-  return(ANTsRCore::antsImageIterator(x))
+  return(ANTsRCore::AntsImageIterator(x))
 }
 
 #' @title antsImageIteratorGet

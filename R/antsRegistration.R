@@ -226,7 +226,7 @@ antsRegistration <- function(
     printArgs = FALSE, ...) {
   numargs <- nargs()
   if (numargs == 1 & typeof(fixed) == "list") {
-    ANTsRCore::antsRegistration(.int_antsProcessArguments(c(fixed)))
+    ANTsRCore::AntsRegistration(.int_antsProcessArguments(c(fixed)))
     return(0)
   }
   if (nchar(typeofTransform) == 0) {
@@ -272,7 +272,7 @@ antsRegistration <- function(
       "u=\"1\", o=\"[xtest,xtest.nii.gz,xtest_inv.nii.gz]\" ) )\n"
     ))
     cat("full help: \n")
-    ANTsRCore::antsRegistration(.int_antsProcessArguments(c(list("--help"))))
+    ANTsRCore::AntsRegistration(.int_antsProcessArguments(c(list("--help"))))
     return(0)
   }
 
@@ -990,7 +990,7 @@ antsRegistration <- function(
         cat("antsRegistration", paste(unlist(args)), "\n")
       }
       args <- .int_antsProcessArguments(c(args))
-      ANTsRCore::antsRegistration(args)
+      ANTsRCore::AntsRegistration(args)
 
       all_tx <- find_tx(outprefix)
       alltx <- all_tx$alltx
@@ -1061,7 +1061,7 @@ antsRegistration <- function(
     cat("antsRegistration", paste(unlist(args)), "\n")
   }
   args <- .int_antsProcessArguments(c(args))
-  ANTsRCore::antsRegistration(args)
+  ANTsRCore::AntsRegistration(args)
 }
 
 ################################

@@ -118,7 +118,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
       if (verbose) {
         print(myargs)
       }
-      ANTsRCore::antsApplyTransforms(c(
+      ANTsRCore::AntsApplyTransforms(c(
         myargs, "-z", 1, "-v",
         myverb, "--float", 1, "-e", imagetype
       ))
@@ -135,7 +135,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
     }
     return(1)
   }
-  ANTsRCore::antsApplyTransforms(
+  ANTsRCore::AntsApplyTransforms(
     .int_antsProcessArguments(
       c(args, "-z", 1, "--float", 1, "-e", imagetype)
     )

@@ -77,7 +77,7 @@ smoothImage <- function(inimg,
       sigma <- sigma / 2.355
     }
     max_kernel_width <- as.integer(ceiling(max_kernel_width))
-    outimg <- ANTsRCore::smoothImage(
+    outimg <- ANTsRCore::smoothImageR(
       inimg.float,
       outimg,
       sigma,

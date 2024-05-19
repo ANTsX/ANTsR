@@ -25,7 +25,7 @@ integrateVelocityField <- function(
     numberOfIntegrationSteps = 10) {
   dimensionality <- velocityField@dimension - 1
 
-  integratedField <- ANTsRCore::integrateVelocityField(
+  integratedField <- ANTsRCore::integrateVelocityFieldR(
     dimensionality,
     velocityField,
     as.numeric(lowerIntegrationBound),

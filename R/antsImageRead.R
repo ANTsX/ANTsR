@@ -58,7 +58,7 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
   }
 
   rval <- try(
-    ANTsRCore::antsImageRead(
+    ANTsRCore::AntsImageRead(
       filename, pixeltype,
       dimension, components
     )

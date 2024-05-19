@@ -48,7 +48,7 @@ weingartenImageCurvature <- function(image, sigma = 1.0, opt = "mean", labeled =
   optnum <- 0
   if (opt == "gaussian") optnum <- 6
   if (opt == "characterize") optnum <- 5
-  mykout <- ANTsRCore::weingartenImageCurvature(
+  mykout <- ANTsRCore::weingartenImageCurvatureR(
     temp, sigma, optnum, as.integer(labeled)
   )
   if (image@dimension == 3) {

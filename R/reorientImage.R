@@ -39,7 +39,7 @@ reorientImage <- function(
   if (is.na(txfn)) {
     txfn <- tempfile(fileext = ".mat")
   }
-  ANTsRCore::reorientImage(img, txfn, axis1, axis2, doreflection, doscale)
+  ANTsRCore::reorientImageR(img, txfn, axis1, axis2, doreflection, doscale)
   img2 <- antsApplyTransforms(img, img, transformlist = c(txfn))
   return(list(reoimg = img2, txfn = txfn))
 }

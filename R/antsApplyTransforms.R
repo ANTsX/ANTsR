@@ -119,7 +119,7 @@ antsApplyTransforms <- function(
     compose = NA, verbose = FALSE, ...) {
   if (is.character(fixed)) {
     if (fixed == "-h") {
-      ANTsRCore::antsApplyTransforms(.int_antsProcessArguments(
+      ANTsRCore::AntsApplyTransforms(.int_antsProcessArguments(
         list("-h")
       ))
       return()
@@ -241,7 +241,7 @@ antsApplyTransforms <- function(
       }
       myverb <- as.numeric(verbose)
       if (verbose) print(myargs)
-      ANTsRCore::antsApplyTransforms(c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype))
+      ANTsRCore::AntsApplyTransforms(c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype))
 
       if (is.na(compose)) {
         return(antsImageClone(warpedmovout, inpixeltype))
@@ -264,7 +264,7 @@ antsApplyTransforms <- function(
   # if ( Sys.info()['sysname'] == 'XXX' ) { mycmd<-.antsrParseListToString( c(args)
   # ) system( paste('antsApplyTransforms ', mycmd$mystr ) ) return( antsImageRead(
   # mycmd$outimg, as.numeric(mycmd$outdim) ) ) }
-  ANTsRCore::antsApplyTransforms(.int_antsProcessArguments(
+  ANTsRCore::AntsApplyTransforms(.int_antsProcessArguments(
     c(args, "-z", 1, "--float", 1, "-e", imagetype)
   ))
 }
