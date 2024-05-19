@@ -65,13 +65,13 @@ cropIndices <- function(image, lowerind, upperind) {
     stop("lowerind is < 1 or upperind is > dim(image)")
   }
   if (image@components == 1) {
-    return(ANTsRCore::cropImage(
+    return(ANTsRCore::CropImage(
       image, image, 1, 2, lowerind, upperind
     ))
   }
   ilist <- splitChannels(image)
   for (k in 1:image@components) {
-    ilist[[k]] <- ANTsRCore::cropImage(
+    ilist[[k]] <- ANTsRCore::CropImage(
       ilist[[k]], ilist[[k]], 1, 2,
       lowerind, upperind
     )
@@ -104,7 +104,7 @@ decropImage <- function(croppedImage, fullImage) {
   if (croppedImage@pixeltype != "float" | fullImage@pixeltype != "float") {
     stop("input images must have float pixeltype")
   }
-  ANTsRCore::cropImage(
+  ANTsRCore::CropImage(
     croppedImage, fullImage, 1, 1, NULL, NULL
   )
 }

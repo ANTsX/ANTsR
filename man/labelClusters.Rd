@@ -7,7 +7,7 @@
 labelClusters(
   imagein,
   minClusterSize = 50,
-  minThresh = 0.000001,
+  minThresh = 1e-06,
   maxThresh = 1,
   fullyConnected = FALSE
 )

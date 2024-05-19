@@ -80,7 +80,7 @@ antsrMotionCalculation <- function(
     mask <- getMask(fixed)
   }
   extractSubImage <- function(img, vin) {
-    temp <- ANTsRCore::extractSlice(img, vin, img@dimension, 0)
+    temp <- ANTsRCore::ExtractSlice(img, vin, img@dimension, 0)
     subdim <- img@dimension - 1
     xxx <- antsSetDirection(temp, antsGetDirection(img)[1:subdim, 1:subdim])
     return(temp)
