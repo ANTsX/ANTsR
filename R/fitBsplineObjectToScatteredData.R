@@ -148,7 +148,7 @@ fitBsplineObjectToScatteredData <- function(
     stop("Error:  the number of weights is not the same as the number of points.")
   }
 
-  bsplineObject <- ANTsRCore::fitBsplineObjectToScatteredData(
+  bsplineObject <- ANTsRCore::fitBsplineObjectToScatteredDataR(
     scatteredData, parametricData, dataWeights,
     parametricDomainOrigin, parametricDomainSpacing,
     parametricDomainSize, isParametricDimensionClosed,

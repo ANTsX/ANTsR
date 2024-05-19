@@ -23,7 +23,7 @@ invertDisplacementField <- function(
     enforceBoundaryCondition = TRUE) {
   dimensionality <- displacementField@dimension
 
-  inverseField <- ANTsRCore::invertDisplacementField(
+  inverseField <- ANTsRCore::invertDisplacementFieldR(
     dimensionality,
     displacementField,
     inverseFieldInitialEstimate,

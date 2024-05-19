@@ -39,5 +39,5 @@ imagesToMatrix <- function(imageList, mask) {
     print("Must pass a list of filenames")
     return(NA)
   }
-  return(ANTsRCore::imagesToMatrix(imageList, mask, n))
+  return(ANTsRCore::imagesToMatrixR(imageList, mask, n))
 }

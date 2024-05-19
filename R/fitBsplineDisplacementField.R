@@ -149,7 +149,7 @@ fitBsplineDisplacementField <- function(
     numberOfControlPoints <- rep(numberOfControlPoints, dimensionality)
   }
 
-  bsplineField <- ANTsRCore::fitBsplineDisplacementField(
+  bsplineField <- ANTsRCore::fitBsplineDisplacementFieldR(
     dimensionality,
     displacementField, displacementWeightImage,
     displacementOrigins, displacements, displacementWeights,

@@ -32,7 +32,7 @@ reflectImage <- function(
   }
 
   rflct <- tempfile(fileext = ".mat")
-  catchout <- ANTsRCore::reflectionMatrix(img1, axis, rflct)
+  catchout <- ANTsRCore::reflectionMatrixR(img1, axis, rflct)
 
   if (!all(is.na(tx))) {
     rfi <- antsRegistration(img1, img1,
@@ -71,6 +71,6 @@ reflectionMatrix <- function(img1, axis = NA, reflectionMatrixFilename) {
   if (missing(reflectionMatrixFilename)) {
     reflectionMatrixFilename <- tempfile(fileext = ".mat")
   }
-  catchout <- ANTsRCore::reflectionMatrix(img1, axis, reflectionMatrixFilename)
+  catchout <- ANTsRCore::reflectionMatrixR(img1, axis, reflectionMatrixFilename)
   return(reflectionMatrixFilename)
 }
