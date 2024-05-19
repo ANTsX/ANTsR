@@ -31,5 +31,5 @@ splitChannels <- function(image) {
     stop("input must have more than 1 components")
   }
 
-  ANTsRCore::splitChannels(image)
+  ANTsRCore::splitChannelsR(image)
 }

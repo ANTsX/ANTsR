@@ -39,5 +39,5 @@
 #'
 #' @export antsMotionCorr
 antsMotionCorr <- function(paramList) {
-  returnval <- ANTsRCore::antsMotionCorr(.int_antsProcessArguments(paramList))
+  returnval <- ANTsRCore::AntsMotionCorr(.int_antsProcessArguments(paramList))
 }

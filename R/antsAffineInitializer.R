@@ -56,6 +56,6 @@ affineInitializer <- function(
     veccer <- lappend(veccer, mask)
   }
   xxx <- .int_antsProcessArguments(veccer)
-  temp <- ANTsRCore::antsAffineInitializer(xxx)
+  temp <- ANTsRCore::AntsAffineInitializer(xxx)
   return(txfn)
 }

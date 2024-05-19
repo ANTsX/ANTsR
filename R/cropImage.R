@@ -26,7 +26,7 @@ cropImage <- function(image, labelImage, label = 1) {
   if (image@pixeltype != "float" | labelImage@pixeltype != "float") {
     stop("input images must have float pixeltype")
   }
-  ANTsRCore::cropImage(image, labelImage, label, 0, NULL, NULL)
+  ANTsRCore::CropImage(image, labelImage, label, 0, NULL, NULL)
 }
 
 
@@ -144,5 +144,5 @@ extractSlice <- function(image, slice, direction, collapseStrategy = 0) {
   if (collapseStrategy != 0 && collapseStrategy != 1 && collapseStrategy != 2) {
     stop("collapseStrategy must be 0, 1, or 2.")
   }
-  ANTsRCore::extractSlice(image, slice - 1, direction - 1, collapseStrategy)
+  ANTsRCore::ExtractSlice(image, slice - 1, direction - 1, collapseStrategy)
 }

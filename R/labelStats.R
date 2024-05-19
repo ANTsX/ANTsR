@@ -31,7 +31,7 @@ labelStats <- function(image, labelImage) {
   }
   image.float <- antsImageClone(image, "float")
   labelImage.int <- antsImageClone(labelImage, "unsigned int")
-  df <- ANTsRCore::labelStats(image.float, labelImage.int)
+  df <- ANTsRCore::labelStatsR(image.float, labelImage.int)
   df <- df[order(df$LabelValue), ]
   df
 }

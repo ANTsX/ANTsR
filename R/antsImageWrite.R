@@ -54,5 +54,5 @@ antsImageWrite <- function(image, filename, as.tensor = FALSE) {
     }
   }
 
-  invisible(ANTsRCore::antsImageWrite(image, filename, as.tensor))
+  invisible(ANTsRCore::AntsImageWrite(image, filename, as.tensor))
 }

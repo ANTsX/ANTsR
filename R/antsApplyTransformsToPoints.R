@@ -123,7 +123,7 @@ antsApplyTransformsToPoints <- function(
         }
       }
     }
-    ANTsRCore::antsApplyTransformsToPoints(c(myargs, "-f", 1, "--precision", 0))
+    ANTsRCore::AntsApplyTransforms(c(myargs, "-f", 1, "--precision", 0))
 
     if (inherits(points, "antsImage")) {
       return(pointsout)

@@ -15,6 +15,6 @@
 #'
 #' @export fsl2antsrTransform
 fsl2antsrTransform <- function(matrix, reference, moving) {
-  retval <- ANTsRCore::fsl2antsrTransform(matrix, reference, moving, 1)
+  retval <- ANTsRCore::fsl2antsrTransformR(matrix, reference, moving, 1)
   return(retval)
 }
