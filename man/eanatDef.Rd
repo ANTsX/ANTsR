@@ -15,7 +15,7 @@ eanatDef(
   positivity = FALSE,
   priors = NA,
   priorWeight = 0,
-  sparEpsilon = 1e-04,
+  sparEpsilon = 0.0001,
   whiten = FALSE,
   verbose = FALSE
 )
