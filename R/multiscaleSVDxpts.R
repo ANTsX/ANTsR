@@ -3687,3 +3687,119 @@ simlrU <- function(
   }
   return(outU)
 }
+
+
+
+
+
+#' Assess Significance of SiMLR Call
+#'
+#' This function performs permutation tests to assess the significance of a SiMLR analysis.
+#' For more detail on input parameters, see the original function.
+#'
+#' @param voxmats A list of voxel matrices.
+#' @param smoothingMatrices A list of smoothing matrices.
+#' @param iterations Number of iterations. Default is 10.
+#' @param sparsenessQuantiles A vector of sparseness quantiles.
+#' @param positivities A vector of positivity constraints.
+#' @param initialUMatrix Initial U matrix for the algorithm.
+#' @param mixAlg The mixing algorithm to use. Default is 'svd'.
+#' @param orthogonalize Logical indicating whether to orthogonalize. Default is FALSE.
+#' @param repeatedMeasures Repeated measures data. Default is NA.
+#' @param lineSearchRange Range for line search. Default is c(-1e+10, 1e+10).
+#' @param lineSearchTolerance Tolerance for line search. Default is 1e-08.
+#' @param randomSeed Seed for random number generation.
+#' @param constraint The constraint type. Default is 'none'.
+#' @param energyType The energy type. Default is 'cca'.
+#' @param vmats List of V matrices - optional initialization matrices
+#' @param connectors List of connectors. Default is NULL.
+#' @param optimizationStyle The optimization style. Default is 'lineSearch'.
+#' @param scale Scaling method. Default is 'centerAndScale'.
+#' @param expBeta Exponential beta value. Default is 0.
+#' @param jointInitialization Logical indicating joint initialization. Default is TRUE.
+#' @param sparsenessAlg Sparseness algorithm. Default is NA.
+#' @param verbose Logical indicating whether to print verbose output. Default is FALSE. values > 1 lead to more verbosity
+#' @param nperms Number of permutations for significance testing. Default is 50.
+#' @return A data frame containing p-values for each permutation.
+#' @export
+simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
+                                      positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
+                                                                              "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
+                                      repeatedMeasures = NA, lineSearchRange = c(-1e+10, 1e+10), 
+                                      lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
+                                                                                             "Grassmann", "Stiefel"), energyType = c("cca", "regression", 
+                                                                                                                                     "normalized", "ucca", "lowRank", "lowRankRegression"), 
+                                      vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
+                                                                                      "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
+                                                                                                                    "np", "center", "norm", "none", "impute", "eigenvalue", 
+                                                                                                                    "robust"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
+                                      verbose = FALSE, nperms = 50) {
+  
+  # Set up permutations
+  myseeds <- sample(1:1000000, nperms)
+  
+  # Initial SiMLR run
+  simlr_result <- simlr(voxmats, smoothingMatrices, iterations, sparsenessQuantiles, 
+                        positivities, initialUMatrix, mixAlg, orthogonalize, 
+                        repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                        energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                        jointInitialization, sparsenessAlg, verbose=verbose > 0 )
+  
+
+
+  refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
+  refvarxmeansnms = matrix("",nrow=length(mats),ncol=length(mats))
+  nmats = 1:length(mats)
+  for ( kk in nmats ) {
+    rownames(simlr_result$v[[kk]])=colnames(matsFull[[kk]])
+    temp = predictSimlr( mats, simlr_result, targetMatrix=kk, sourceMatrices=nmats[nmats!=kk] )
+    temp = unlist( lapply( temp$varxfull, FUN=mean ) )
+    refvarxmeans[kk,nmats[nmats!=kk]]=temp
+    refvarxmeansnms[kk,nmats[nmats!=kk]]=paste0(nms[kk],"_",paste0(nms[nmats!=kk]))
+    }
+  refvarxmeans = c( refvarxmeans[upper.tri(refvarxmeans)], refvarxmeans[lower.tri(refvarxmeans)])
+  refvarxmeansnms = c( refvarxmeansnms[upper.tri(refvarxmeansnms)], refvarxmeansnms[lower.tri(refvarxmeansnms)])
+  simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
+  simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
+
+  # begin permutation  
+  for (nperm in 1:nperms) {
+    set.seed(myseeds[nperm])
+    
+    voxmats_perm <- lapply(voxmats, function(mat) mat[sample(1:nrow(mat)), ])
+    
+    simlr_result_perm <- simlr(voxmats_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
+                               positivities, initialUMatrix, mixAlg, orthogonalize, 
+                               repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                               energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                               jointInitialization, sparsenessAlg, verbose=verbose > 3)
+    
+    refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
+    
+    for (kk in nmats) {
+      temp <- predictSimlr(voxmats_perm, simlr_result_perm, targetMatrix = kk, sourceMatrices = nmats[nmats != kk])
+      temp <- unlist(lapply(temp$varxfull, FUN = mean))
+      refvarxmeans_perm[kk, nmats[nmats != kk]] <- temp
+    }
+    
+    refvarxmeans_perm <- c(refvarxmeans_perm[upper.tri(refvarxmeans_perm)], refvarxmeans_perm[lower.tri(refvarxmeans_perm)])
+    names(refvarxmeans_perm)=refvarxmeansnms
+    simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
+    if ( verbose > 2 ) {
+      print( simlrpermvarx[c(1,nperm+1),])
+    }
+  }
+  
+  # Statistical significance testing
+  simlrpermvarx_ttest <- c()
+  for (varname in refvarxmeansnms ) {
+    mytt <- t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
+    simlrpermvarx_ttest[varname] = mytt$p.value
+  }
+  nexter=nrow(simlrpermvarx)+1
+  simlrpermvarx[nexter,'perm']='ttest'
+  simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
+  simlrpermvarx[nexter,refvarxmeansnms]=simlrpermvarx_ttest
+  if ( verbose > 1 ) print( simlrpermvarx[nexter,] )
+  return( list( simlr_result=simlr_result, significance=simlrpermvarx))
+}
