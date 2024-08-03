@@ -19,7 +19,7 @@ Computes the adjusted RV coefficient between two matrices, as proposed by Mordan
 }
 \examples{
 X <- matrix(rnorm(100), nrow = 10)
-Y <- matrix(rnorm(120), nrow = 10)
+Y <- matrix(rnorm(100), nrow = 10)
 adjusted_rvcoef(X, Y)
 
 }

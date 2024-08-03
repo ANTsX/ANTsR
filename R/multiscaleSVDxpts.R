@@ -3876,7 +3876,7 @@ rvcoef <- function(X, Y) {
 #'
 #' @examples
 #' X <- matrix(rnorm(100), nrow = 10)
-#' Y <- matrix(rnorm(120), nrow = 10)
+#' Y <- matrix(rnorm(100), nrow = 10)
 #' adjusted_rvcoef(X, Y)
 #'
 #' @export
