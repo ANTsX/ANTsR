@@ -20,8 +20,8 @@ Matrix of RV coefficients, where each entry [i, j] represents the similarity bet
 Computes a measure such as the RV coefficient between low-rank projections of all pairs of matrices in a list.
 }
 \examples{
-mat_list <- list(matrix(rnorm(100), nrow = 10), matrix(rnorm(120), nrow = 10))
-feat_list <- list(matrix(rnorm(50), nrow = 10), matrix(rnorm(60), nrow = 10))
-pairwise_matrix_similarity(mat_list, feat_list, k = 2)
+mat_list <- list(matrix(rnorm(60), nrow = 10), matrix(rnorm(60), nrow = 10))
+feat_list <- list(matrix(rnorm(60), nrow = 10), matrix(rnorm(60), nrow = 10))
+pairwise_matrix_similarity(mat_list, feat_list )
 
 }
