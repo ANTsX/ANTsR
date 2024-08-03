@@ -3906,11 +3906,6 @@ adjusted_rvcoef <- function(X, Y) {
 #'
 #' @return Matrix of RV coefficients, where each entry [i, j] represents the similarity between the low-rank projections of matrices i and j
 #'
-#' @examples
-#' mat_list <- list(matrix(rnorm(60), nrow = 10), matrix(rnorm(60), nrow = 10))
-#' feat_list <- list(matrix(rnorm(60), nrow = 10), matrix(rnorm(60), nrow = 10))
-#' pairwise_matrix_similarity(mat_list, feat_list )
-#'
 #' @export
 pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef) {
 
@@ -3949,29 +3944,50 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 
 
 
-#' Visualize Relationship Between Two Low-Rank Matrices and Perform Statistical Tests
+#' Visualize Low-Rank Relationships
 #'
-#' This function computes low-rank projections of two matrices, visualizes the pairwise correlations,
-#' and performs statistical tests including Wilks' lambda test and RV coefficient to assess the significance of the relationship.
+#' Compute low-rank projections, pairwise correlations, and RV coefficient, and visualize the relationships using a heatmap and pairs plot.
 #'
-#' @param X1 A numeric matrix.
-#' @param X2 A numeric matrix.
-#' @param V1 A numeric matrix with the same number of columns as \code{X1}.
-#' @param V2 A numeric matrix with the same number of columns as \code{X2}.
-#' @param plot_title A character string specifying the title of the plot. Defaults to "Low-Rank Projections Relationship".
-#' @return A list containing the ggplot object, canonical correlations, Wilks' lambda test results, RV coefficient, and the correlation matrix.
+#' @param X1 First matrix
+#' @param X2 Second matrix
+#' @param V1 First feature matrix
+#' @param V2 Second feature matrix
+#' @param plot_title Title of the plot (optional)
+#' @param nm1 Name of the first matrix (default: "X1")
+#' @param nm2 Name of the second matrix (default: "X2")
+#'
+#' @return A list containing the heatmap, pairs plot, correlation matrix, and RV coefficient
+#'
 #' @examples
 #' set.seed(123)
 #' X1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' result <- visualize_matrix_relationship(X1, X2, V1, V2)
-visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title = "Low-Rank Projections Relationship") {
+#' result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
+
+  unique_column_names <- function(df) {
+    names <- colnames(df)
+    new_names <- character(length(names))
+    counter <- 1
+    for (i in 1:length(names)) {
+      if (sum(names == names[i]) == 1) {
+        new_names[i] <- names[i]
+      } else {
+        new_names[i] <- paste0(names[i], counter)
+        counter <- counter + 1
+      }
+    }
+    colnames(df) <- new_names
+    return(df)
+  }
+
+  if (missing(plot_title)) plot_title=paste(" LRR correlations: ", nm1, " & ", nm2 )
   # Compute the low-rank projections
   projection1 <- X1 %*% V1
   projection2 <- X2 %*% V2
-  
+  cordf=  unique_column_names( cbind( data.frame(projection1), data.frame(projection2 )) )
   # Compute pairwise correlations
   correlation_matrix <- cor(projection1, projection2)
   
@@ -4000,9 +4016,15 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title = "Low-Ra
     coord_fixed() +
     labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
   
+  ggp=ggpairs( cordf,
+        upper = list(continuous = "points"), 
+        lower = list(continuous = "cor"),
+        title = plot_title )
+
   # Return a list of results
   return(list(
     plot = p,
+    pairsplot = ggp,
     correlations = correlation_matrix,
     # wilks_test = NA,
     rv_coefficient = rv_coefficient

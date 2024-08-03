@@ -2,33 +2,38 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{visualize_lowrank_relationships}
 \alias{visualize_lowrank_relationships}
-\title{Visualize Relationship Between Two Low-Rank Matrices and Perform Statistical Tests}
+\title{Visualize Low-Rank Relationships}
 \usage{
 visualize_lowrank_relationships(
   X1,
   X2,
   V1,
   V2,
-  plot_title = "Low-Rank Projections Relationship"
+  plot_title,
+  nm1 = "X1",
+  nm2 = "X2"
 )
 }
 \arguments{
-\item{X1}{A numeric matrix.}
+\item{X1}{First matrix}
 
-\item{X2}{A numeric matrix.}
+\item{X2}{Second matrix}
 
-\item{V1}{A numeric matrix with the same number of columns as \code{X1}.}
+\item{V1}{First feature matrix}
 
-\item{V2}{A numeric matrix with the same number of columns as \code{X2}.}
+\item{V2}{Second feature matrix}
 
-\item{plot_title}{A character string specifying the title of the plot. Defaults to "Low-Rank Projections Relationship".}
+\item{plot_title}{Title of the plot (optional)}
+
+\item{nm1}{Name of the first matrix (default: "X1")}
+
+\item{nm2}{Name of the second matrix (default: "X2")}
 }
 \value{
-A list containing the ggplot object, canonical correlations, Wilks' lambda test results, RV coefficient, and the correlation matrix.
+A list containing the heatmap, pairs plot, correlation matrix, and RV coefficient
 }
 \description{
-This function computes low-rank projections of two matrices, visualizes the pairwise correlations,
-and performs statistical tests including Wilks' lambda test and RV coefficient to assess the significance of the relationship.
+Compute low-rank projections, pairwise correlations, and RV coefficient, and visualize the relationships using a heatmap and pairs plot.
 }
 \examples{
 set.seed(123)
@@ -36,5 +41,5 @@ X1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-result <- visualize_matrix_relationship(X1, X2, V1, V2)
+result <- visualize_lowrank_relationships(X1, X2, V1, V2)
 }
