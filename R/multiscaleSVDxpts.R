@@ -2965,7 +2965,7 @@ simlr <- function(
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
-    scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute", "eigenvalue", "robust"),
+    scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute", "eigenvalue", "robust", 'whiten', 'lowrank'  ),
     expBeta = 0.0,
     jointInitialization = TRUE,
     sparsenessAlg = NA,
@@ -2978,20 +2978,18 @@ simlr <- function(
   energyType <- match.arg(energyType)
   constraint <- match.arg(constraint)
   optimizationStyle <- match.arg(optimizationStyle)
+  scalechoices = c(
+      "sqrtnp", "np", "centerAndScale",
+      "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten'
+    )
   scaleList <- c()
   if (length(scale) == 1) {
-    scaleList[1] <- match.arg(scale[1], choices = c(
-      "sqrtnp", "np", "centerAndScale",
-      "norm", "none", "impute", "eigenvalue", "center", "robust"
-    ))
+    scaleList[1] <- match.arg(scale[1], choices = scalechoices )
   }
   if (length(scale) > 1) {
     for (kk in 1:length(scale)) {
       scaleList[kk] <- match.arg(scale[kk],
-        choices = c(
-          "sqrtnp", "np", "centerAndScale", "norm", "none",
-          "impute", "eigenvalue", "center", "robust"
-        )
+        choices = scalechoices
       )
     }
   }
@@ -3050,6 +3048,14 @@ simlr <- function(
     sparsenessQuantiles <- rep(0.5, nModalities)
   }
 
+  lrbasis = length( voxmats )
+  if ( ! missing( initialUMatrix ) ) {
+    if ( is.integer(initialUMatrix) ) lrbasis=initialUMatrix
+    if ( is.matrix( initialUMatrix ) ) lrbasis=ncol(initialUMatrix)
+    if ( is.list( initialUMatrix ) ) if ( is.matrix(initialUMatrix[[1]])) 
+      lrbasis=ncol(initialUMatrix[[1]])
+  }
+
   # 1.0 adjust matrix norms
   if (!(any(scaleList == "none"))) {
     for (i in 1:nModalities) {
@@ -3081,6 +3087,12 @@ simlr <- function(
         }
         if (scaleList[j] == "robust") {
           voxmats[[i]] <- robustMatrixTransform(voxmats[[i]])
+        }
+        if (scaleList[j] == "whiten") {
+          voxmats[[i]] <- icawhiten( data.matrix(voxmats[[i]]), n.comp=lrbasis )
+        }
+        if (scaleList[j] == "lowrank") {
+          voxmats[[i]] <- lowrankRowMatrix( data.matrix(voxmats[[i]]), lrbasis )
         }
       }
     }
@@ -3720,6 +3732,7 @@ simlrU <- function(
 #' @param sparsenessAlg Sparseness algorithm. Default is NA.
 #' @param verbose Logical indicating whether to print verbose output. Default is FALSE. values > 1 lead to more verbosity
 #' @param nperms Number of permutations for significance testing. Default is 50.
+#' @param FUN function for summarizing variance explained 
 #' @return A data frame containing p-values for each permutation.
 #' @export
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
@@ -3733,7 +3746,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                                                                       "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
                                                                                                                     "np", "center", "norm", "none", "impute", "eigenvalue", 
                                                                                                                     "robust"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
-                                      verbose = FALSE, nperms = 50) {
+                                      verbose = FALSE, nperms = 50, FUN='mean') {
   
   # Set up permutations
   myseeds <- sample(1:1000000, nperms)
@@ -3753,7 +3766,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   for ( kk in nmats ) {
     rownames(simlr_result$v[[kk]])=colnames(matsFull[[kk]])
     temp = predictSimlr( mats, simlr_result, targetMatrix=kk, sourceMatrices=nmats[nmats!=kk] )
-    temp = unlist( lapply( temp$varxfull, FUN=mean ) )
+    temp = unlist( lapply( temp$varxfull, FUN=FUN ) )
     refvarxmeans[kk,nmats[nmats!=kk]]=temp
     refvarxmeansnms[kk,nmats[nmats!=kk]]=paste0(nms[kk],"_",paste0(nms[nmats!=kk]))
     }
@@ -3778,7 +3791,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
     
     for (kk in nmats) {
       temp <- predictSimlr(voxmats_perm, simlr_result_perm, targetMatrix = kk, sourceMatrices = nmats[nmats != kk])
-      temp <- unlist(lapply(temp$varxfull, FUN = mean))
+      temp <- unlist(lapply(temp$varxfull, FUN = FUN))
       refvarxmeans_perm[kk, nmats[nmats != kk]] <- temp
     }
     
@@ -3800,6 +3813,11 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   simlrpermvarx[nexter,'perm']='ttest'
   simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
   simlrpermvarx[nexter,refvarxmeansnms]=simlrpermvarx_ttest
+  nexter=nrow(simlrpermvarx)+1
+  simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
+  simlrpermvarx[nexter,'perm']='pvalue'
+  for ( zz in refvarxmeansnms ) 
+    simlrpermvarx[nexter,zz]=sum( simlrpermvarx[2:(1+nperms),zz] > simlrpermvarx[1,zz] )/nperms
   if ( verbose > 1 ) print( simlrpermvarx[nexter,] )
   return( list( simlr_result=simlr_result, significance=simlrpermvarx))
 }

@@ -29,7 +29,8 @@ simlr.perm(
   jointInitialization = TRUE,
   sparsenessAlg = NA,
   verbose = FALSE,
-  nperms = 50
+  nperms = 50,
+  FUN = "mean"
 )
 }
 \arguments{
@@ -78,6 +79,8 @@ simlr.perm(
 \item{verbose}{Logical indicating whether to print verbose output. Default is FALSE. values > 1 lead to more verbosity}
 
 \item{nperms}{Number of permutations for significance testing. Default is 50.}
+
+\item{FUN}{function for summarizing variance explained}
 }
 \value{
 A data frame containing p-values for each permutation.
