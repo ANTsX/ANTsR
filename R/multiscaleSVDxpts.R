@@ -3759,20 +3759,23 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
   
 
-
-  refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
-  refvarxmeansnms = matrix("",nrow=length(mats),ncol=length(mats))
-  nmats = 1:length(mats)
-  for ( kk in nmats ) {
-    rownames(simlr_result$v[[kk]])=colnames(matsFull[[kk]])
-    temp = predictSimlr( mats, simlr_result, targetMatrix=kk, sourceMatrices=nmats[nmats!=kk] )
-    temp = unlist( lapply( temp$varxfull, FUN=FUN ) )
-    refvarxmeans[kk,nmats[nmats!=kk]]=temp
-    refvarxmeansnms[kk,nmats[nmats!=kk]]=paste0(nms[kk],"_",paste0(nms[nmats!=kk]))
-    }
-  refvarxmeans = c( refvarxmeans[upper.tri(refvarxmeans)], refvarxmeans[lower.tri(refvarxmeans)])
-  refvarxmeansnms = c( refvarxmeansnms[upper.tri(refvarxmeansnms)], refvarxmeansnms[lower.tri(refvarxmeansnms)])
+  if ( FALSE ) {
+    refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
+    refvarxmeansnms = matrix("",nrow=length(mats),ncol=length(mats))
+    nmats = 1:length(mats)
+    for ( kk in nmats ) {
+      rownames(simlr_result$v[[kk]])=colnames(matsFull[[kk]])
+      temp = predictSimlr( mats, simlr_result, targetMatrix=kk, sourceMatrices=nmats[nmats!=kk] )
+      temp = unlist( lapply( temp$varxfull, FUN=FUN ) )
+      refvarxmeans[kk,nmats[nmats!=kk]]=temp
+      refvarxmeansnms[kk,nmats[nmats!=kk]]=paste0(nms[kk],"_",paste0(nms[nmats!=kk]))
+      }
+    refvarxmeans = c( refvarxmeans[upper.tri(refvarxmeans)], refvarxmeans[lower.tri(refvarxmeans)])
+    refvarxmeansnms = c( refvarxmeansnms[upper.tri(refvarxmeansnms)], refvarxmeansnms[lower.tri(refvarxmeansnms)])
+  }
+  refvarxmeans = pairwise_matrix_similarity( mats, simlr_result$v, FUN=FUN )
   simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
+  refvarxmeansnms=names(refvarxmeans)
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
 
   # begin permutation  
@@ -3786,17 +3789,19 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                                energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                                jointInitialization, sparsenessAlg, verbose=verbose > 3)
-    
-    refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
-    
-    for (kk in nmats) {
-      temp <- predictSimlr(voxmats_perm, simlr_result_perm, targetMatrix = kk, sourceMatrices = nmats[nmats != kk])
-      temp <- unlist(lapply(temp$varxfull, FUN = FUN))
-      refvarxmeans_perm[kk, nmats[nmats != kk]] <- temp
+    if ( FALSE ) {
+      refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
+      
+      for (kk in nmats) {
+        temp <- predictSimlr(voxmats_perm, simlr_result_perm, targetMatrix = kk, sourceMatrices = nmats[nmats != kk])
+        temp <- unlist(lapply(temp$varxfull, FUN = FUN))
+        refvarxmeans_perm[kk, nmats[nmats != kk]] <- temp
+      }
+      
+      refvarxmeans_perm <- c(refvarxmeans_perm[upper.tri(refvarxmeans_perm)], refvarxmeans_perm[lower.tri(refvarxmeans_perm)])
+      names(refvarxmeans_perm)=refvarxmeansnms
     }
-    
-    refvarxmeans_perm <- c(refvarxmeans_perm[upper.tri(refvarxmeans_perm)], refvarxmeans_perm[lower.tri(refvarxmeans_perm)])
-    names(refvarxmeans_perm)=refvarxmeansnms
+    refvarxmeans_perm = pairwise_matrix_similarity( voxmats_perm, simlr_result_perm$v, FUN=FUN )
     simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
     if ( verbose > 2 ) {
       print( simlrpermvarx[c(1,nperm+1),])
@@ -3821,3 +3826,186 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   if ( verbose > 1 ) print( simlrpermvarx[nexter,] )
   return( list( simlr_result=simlr_result, significance=simlrpermvarx))
 }
+
+
+#' RV Coefficient of Two Matrices
+#'
+#' Computes the RV coefficient, a measure of similarity between two matrices.
+#'
+#' @param X First matrix
+#' @param Y Second matrix
+#'
+#' @return RV coefficient (a value between 0 and 1)
+#'
+#' @examples
+#' X <- matrix(rnorm(100), nrow = 10)
+#' Y <- matrix(rnorm(120), nrow = 10)
+#' rvcoef(X, Y)
+#'
+#' @export
+rvcoef <- function(X, Y) {
+  # Normalize matrices
+  X_norm <- scale(X, center = TRUE, scale = TRUE)
+  Y_norm <- scale(Y, center = TRUE, scale = TRUE)
+  
+  # Compute cross-product matrix
+  C <- t(X_norm) %*% Y_norm
+  
+  # Compute SVD
+  svd_C <- svd(C)
+  
+  # Compute RV coefficient
+  sigma_sq <- sum(svd_C$d^2)
+  s_sq <- sum(rowSums(X_norm^2)) * sum(rowSums(Y_norm^2))
+  rv <- sigma_sq / s_sq
+  
+  return(rv)
+}
+
+#' Adjusted RV Coefficient
+#'
+#' Computes the adjusted RV coefficient between two matrices, as proposed by Mordant and Segers.
+#'
+#' @param X First matrix
+#' @param Y Second matrix
+#'
+#' @return Adjusted RV coefficient (a value between 0 and 1)
+#'
+#' @references
+#' Mordant, G., & Segers, J. (2006). A note on the RV coefficient. Journal of Multivariate Analysis, 97(10), 2155-2164.
+#'
+#' @examples
+#' X <- matrix(rnorm(100), nrow = 10)
+#' Y <- matrix(rnorm(120), nrow = 10)
+#' adjusted_rvcoef(X, Y)
+#'
+#' @export
+adjusted_rvcoef <- function(X, Y) {
+  # Compute the numerator (same as original RV coefficient)
+  numerator <- sum(svd(X %*% t(Y))$d^2)
+  
+  # Compute the denominator (maximal value attainable by the numerator)
+  X_svd <- svd(X)
+  Y_svd <- svd(Y)
+  denominator <- sum(X_svd$d^2) * sum(Y_svd$d^2)
+  
+  # Compute the adjusted RV coefficient
+  adjusted_rv <- numerator / denominator
+  
+  return(adjusted_rv)
+}
+
+
+#' pairwise application of matrix similarity to matrix List projected onto a feature list
+#'
+#' Computes a measure such as the RV coefficient between low-rank projections of all pairs of matrices in a list.
+#'
+#' @param mat_list List of matrices
+#' @param feat_list List of feature lists corresponding to each matrix
+#' @param FUN function to apply 
+#'
+#' @return Matrix of RV coefficients, where each entry [i, j] represents the similarity between the low-rank projections of matrices i and j
+#'
+#' @examples
+#' mat_list <- list(matrix(rnorm(100), nrow = 10), matrix(rnorm(120), nrow = 10))
+#' feat_list <- list(matrix(rnorm(50), nrow = 10), matrix(rnorm(60), nrow = 10))
+#' pairwise_matrix_similarity(mat_list, feat_list, k = 2)
+#'
+#' @export
+pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef) {
+
+  # Initialize an empty matrix to store RV coefficients
+  rv_coeffs <- matrix(NA, nrow = length(mat_list), ncol = length(mat_list))
+  rv_coeffs_nms <- matrix("", nrow = length(mat_list), ncol = length(mat_list))
+  k = ncol( feat_list[[1]] )
+  nms = names(mat_list)
+  # Loop through each pair of matrices (i, j) where i != j
+  for (i in 1:length(mat_list)) {
+    for (j in (i+1):length(mat_list)) {
+      if (i != j & j <= length(mat_list)) {
+        # Extract matrices and feature lists for current pair
+        X_i <- mat_list[[i]]
+        V_i <- feat_list[[i]]
+        X_j <- mat_list[[j]]
+        V_j <- feat_list[[j]]
+        
+        # Compute low-rank projections
+        L_i <- X_i %*% V_i
+        L_j <- X_j %*% V_j
+        
+        # Compute RV coefficient
+        rv <- FUN(L_i, L_j)
+        
+        # Store RV coefficient in matrix
+        rv_coeffs[i, j] <- rv
+        rv_coeffs_nms[i,j] = paste0( nms[i],"_",nms[j])
+      }
+    }
+  }
+  flatrv = rv_coeffs[upper.tri(rv_coeffs)]
+  names(flatrv)=rv_coeffs_nms[upper.tri(rv_coeffs)]
+  return(flatrv)
+}
+
+
+
+#' Visualize Relationship Between Two Low-Rank Matrices and Perform Statistical Tests
+#'
+#' This function computes low-rank projections of two matrices, visualizes the pairwise correlations,
+#' and performs statistical tests including Wilks' lambda test and RV coefficient to assess the significance of the relationship.
+#'
+#' @param X1 A numeric matrix.
+#' @param X2 A numeric matrix.
+#' @param V1 A numeric matrix with the same number of columns as \code{X1}.
+#' @param V2 A numeric matrix with the same number of columns as \code{X2}.
+#' @param plot_title A character string specifying the title of the plot. Defaults to "Low-Rank Projections Relationship".
+#' @return A list containing the ggplot object, canonical correlations, Wilks' lambda test results, RV coefficient, and the correlation matrix.
+#' @examples
+#' set.seed(123)
+#' X1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
+#' X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
+#' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
+#' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
+#' result <- visualize_matrix_relationship(X1, X2, V1, V2)
+visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title = "Low-Rank Projections Relationship") {
+  # Compute the low-rank projections
+  projection1 <- X1 %*% V1
+  projection2 <- X2 %*% V2
+  
+  # Compute pairwise correlations
+  correlation_matrix <- cor(projection1, projection2)
+  
+  # Perform CCA
+#   cca_result <- cancor(projection1, projection2)
+  # canonical_correlations <- cca_result$cor
+  
+  # Perform Wilks' lambda test
+  # wilks_test <- WilksLambda(projection1, projection2, cca_result)
+  
+  # Compute RV coefficient
+  rv_coefficient <- adjusted_rvcoef(projection1, projection2)
+  
+  # Prepare data for plotting
+  cor_data <- as.data.frame(as.table(correlation_matrix))
+
+  # Plot the pairwise correlations
+   p <- ggplot(cor_data, aes(Var1, Var2, fill = Freq)) +
+    geom_tile(color = "white") +
+    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                         midpoint = 0, limit = c(-1,1), space = "Lab", 
+                         name="Correlation") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                     size = 12, hjust = 1)) +
+    coord_fixed() +
+    labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
+  
+  # Return a list of results
+  return(list(
+    plot = p,
+    correlations = correlation_matrix,
+    # wilks_test = NA,
+    rv_coefficient = rv_coefficient
+  ))
+}
+
