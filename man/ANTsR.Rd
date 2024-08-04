@@ -2,8 +2,8 @@
 % Please edit documentation in R/ANTsR-package.R
 \docType{package}
 \name{ANTsR}
-\alias{ANTsR}
 \alias{ANTsR-package}
+\alias{ANTsR}
 \title{Advanced Normalization Tools in R}
 \description{
 ANTsR interfaces state of the art image processing with R statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses. Specialized functionality in ANTsR includes image segmentation and registration along imaging specific variations of principal component and canonical correlation analysis.

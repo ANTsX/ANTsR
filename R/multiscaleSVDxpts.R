@@ -4032,3 +4032,51 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   ))
 }
 
+
+
+
+#' SiMLR Path Models helper
+#'
+#' Creates the list that should be passed to the connectors argument
+#' to simlr.   the different options are default (0) which connects
+#' each to all others but not itself, a single integer > 0 which forces
+#' modeling to focus on a given target and then a pca like option.
+#'
+#' @param n The length of the output list.
+#' @param type The type of modeling. Can be one of the following:
+#'   - 0: "Exclude self" - each entry contains all integers except the one corresponding to its position.
+#'   - Integer greater than 0: "focus on a target" - each entry contains the target integer, except for the entry at the target position, which contains all integers except the target.
+#'   - 'pca': "Identity" - each entry contains its own position number.
+#'
+#' @return A list of length n with contents based on the input type.
+#' @export
+simlr_path_models <- function(n, type = 0) {
+  # Initialize an empty list to store the results
+  result <- vector("list", n)
+  
+  # If type is 0, create a list where each entry contains the integers that do not include the integer encoding the position
+  if (type == 0) {
+    for (i in 1:n) {
+      result[[i]] <- setdiff(1:n, i)
+    }
+  }
+  # If type is an integer greater than 0, create a list where each entry contains the integer itself, except for its own entry which contains the integers up to n that do not include itself
+  else if (type > 0 && type != 'pca') {
+    for (i in 1:n) {
+      if (i == type) {
+        result[[i]] <- setdiff(1:n, i)
+      } else {
+        result[[i]] <- type
+      }
+    }
+  }
+  # If type is 'pca', create a list where each entry contains the integer that encodes the list position
+  else if (type == 'pca') {
+    for (i in 1:n) {
+      result[[i]] <- i
+    }
+  }
+  
+  # Return the resulting list
+  return(result)
+}

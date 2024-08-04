@@ -50,7 +50,7 @@
 \alias{[,antsImage,missing,missing-method}
 \title{Extract or Replace Parts of antsImage Object}
 \usage{
-\S4method{[}{antsImage,`NULL`,ANY,ANY}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,ANY,ANY}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,logical,ANY,ANY}(x, i, j, ...) <- value
 
@@ -62,7 +62,7 @@
 
 \S4method{[}{antsImage,antsImage,ANY,ANY}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,antsRegion,ANY}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,antsRegion,ANY}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,logical,antsRegion,ANY}(x, i, j, ...) <- value
 
@@ -70,19 +70,19 @@
 
 \S4method{[}{antsImage,matrix,antsRegion,ANY}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,`NULL`,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,NULL,numeric}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,numeric,numeric,numeric}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,numeric,`NULL`,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,numeric,NULL,numeric}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,numeric,numeric}(x, i, j, ...) <- value
+\S4method{[}{antsImage,NULL,numeric,numeric}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,numeric,missing,array}(x, i, j, ...) <- value
 
 \S4method{[}{antsImage,missing,numeric,array}(x, i, j, ...) <- value
 
-\S4method{[}{antsImage,`NULL`,ANY}(x, i, j, ..., drop = TRUE)
+\S4method{[}{antsImage,NULL,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{antsImage,antsImage,ANY}(x, i, j, ..., drop = TRUE)
 
@@ -96,21 +96,21 @@
 
 \S4method{[}{antsImage,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
-\S4method{[}{antsImage,`NULL`,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
-
-\S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,numeric,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,numeric,`NULL`}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,numeric,NULL}(x, i, j, k = NA, l = NA, ..., drop)
 
-\S4method{[}{antsImage,`NULL`,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+\S4method{[}{antsImage,NULL,numeric}(x, i, j, k = NA, l = NA, ..., drop)
+
+\S4method{[}{antsImage,NULL,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
 \S4method{[}{antsImage,missing,numeric}(x, i, j, k = NA, l = NA, ..., drop)
 
