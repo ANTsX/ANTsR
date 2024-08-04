@@ -41,5 +41,5 @@ X1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+# result <- visualize_lowrank_relationships(X1, X2, V1, V2)
 }

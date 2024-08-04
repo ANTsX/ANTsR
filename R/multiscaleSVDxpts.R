@@ -3964,7 +3964,8 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 #' X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+#' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+#' @export
 visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
 
   unique_column_names <- function(df) {
