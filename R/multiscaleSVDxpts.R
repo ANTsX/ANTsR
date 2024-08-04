@@ -3992,7 +3992,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
     return(df)
   }
 
-  if (missing(plot_title)) plot_title=paste(" LRR correlations: ", nm1, " & ", nm2 )
+  if (missing(plot_title)) plot_title=paste("LRRc: ", nm1, " & ", nm2 )
   # Compute the low-rank projections
   projection1 <- X1 %*% V1
   projection2 <- X2 %*% V2
@@ -4019,6 +4019,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
     scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
                          midpoint = 0, limit = c(-1,1), space = "Lab", 
                          name="Correlation") +
+  geom_text(aes(label = format(Freq, digits = 2, nsmall = 2)), size = 3)+
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, 
                                      size = 12, hjust = 1)) +
@@ -4088,3 +4089,4 @@ simlr_path_models <- function(n, type = 0) {
   # Return the resulting list
   return(result)
 }
+
