@@ -3868,6 +3868,7 @@ rvcoef <- function(X, Y) {
 #'
 #' @param X First matrix
 #' @param Y Second matrix
+#' @param lambda The ridge penalty parameter (default is 1e-6).
 #'
 #' @return Adjusted RV coefficient (a value between 0 and 1)
 #'
@@ -3880,21 +3881,28 @@ rvcoef <- function(X, Y) {
 #' adjusted_rvcoef(X, Y)
 #'
 #' @export
-adjusted_rvcoef <- function(X, Y) {
+adjusted_rvcoef <- function(X, Y, lambda = 1e-6) {
   # Compute the numerator (same as original RV coefficient)
   numerator <- sum(svd(X %*% t(Y))$d^2)
   
   # Compute the denominator (maximal value attainable by the numerator)
-  X_svd <- svd(X)
-  Y_svd <- svd(Y)
-  denominator <- sum(X_svd$d^2) * sum(Y_svd$d^2)
+  X_svd <- svd(X, nu = 0)
+  Y_svd <- svd(Y, nu = 0)
+  
+  # Add a ridge penalty to the singular values
+  X_d <- X_svd$d^2 + lambda
+  Y_d <- Y_svd$d^2 + lambda
+  
+  denominator <- sum(X_d) * sum(Y_d)
+  
+  # Add a small value to the denominator to avoid division by zero
+  denominator <- denominator + .Machine$double.eps
   
   # Compute the adjusted RV coefficient
   adjusted_rv <- numerator / denominator
   
   return(adjusted_rv)
 }
-
 
 #' pairwise application of matrix similarity to matrix List projected onto a feature list
 #'

@@ -4,12 +4,14 @@
 \alias{adjusted_rvcoef}
 \title{Adjusted RV Coefficient}
 \usage{
-adjusted_rvcoef(X, Y)
+adjusted_rvcoef(X, Y, lambda = 1e-06)
 }
 \arguments{
 \item{X}{First matrix}
 
 \item{Y}{Second matrix}
+
+\item{lambda}{The ridge penalty parameter (default is 1e-6).}
 }
 \value{
 Adjusted RV coefficient (a value between 0 and 1)
