@@ -3811,7 +3811,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
     rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
   }
 
-  refvarxmeans = pairwise_matrix_similarity( mats, simlr_result$v, FUN=FUN )
+  refvarxmeans = pairwise_matrix_similarity( voxmats, simlr_result$v, FUN=FUN )
   simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
   refvarxmeansnms=names(refvarxmeans)
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
@@ -4248,7 +4248,7 @@ simlr.search <- function(
     )
     finalE = sum( simlrX$significance[1,-c(1:2)] )
     if ( nperms > 4 ) {
-      wtest = which( simlrX$perm == 'ttest' )
+      wtest = which( simlrX$significance$perm == 'ttest' )
       finalE = sum( -log10( simlrX$significance[wtest,-c(1:2)]) , na.rm=TRUE )
     }
     parameters = data.frame(
@@ -4260,35 +4260,27 @@ simlr.search <- function(
           final_energy = as.numeric( finalE )
         )
     n=0
-    print(paste("n",i));n=n+1
     prescaling = vector_to_df( prescaling, 'prescaling' )
     sparval = vector_to_df( sparval, 'sparval' )
     pizzer = vector_to_df( pizzer, 'positivity' )
-    print(paste("n",i));n=n+1
     parameters=cbind(parameters,prescaling,sparval,pizzer,simlrX$significance[1,-1])
-    print(paste("n",i));n=n+1
     if ( i == 1 ) {
       options_df=parameters 
-    } else options_df=rbind.fill(options_df, parameters )
-    print(paste("zn",i));n=n+1
+    } else options_df=myrbind.fill(options_df, parameters )
 
     if ( nrow(options_df) > 1 ) {
       rowsel = 1:(nrow(options_df)-1)
-    print(paste("den",i));n=n+1
       if ( all( finalE > options_df$final_energy[rowsel] ) & verbose > 0 ) {
         print( paste("improvement" ) )
         print( parameters )
         bestresult = simlrX$simlr_result
-    print(paste("qn",i));n=n+1
         }
-    print(paste("buttn",i));n=n+1
     }
-    print(paste("ass-n",i));n=n+1
   }
-  print("done")
-  if (verbose) cat("finito\n")
-  print( options_df )
-  cat("el fin\n")
-  return()
+  if ( verbose ) {
+    print( options_df )
+    cat("el finito\n")
+  }
+  # return(options_df)
   return( list( parameters=options_df, simlr_result=bestresult ))
 }
