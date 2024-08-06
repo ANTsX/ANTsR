@@ -3499,7 +3499,8 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-      temperv = tempver - measure_orthogonality_gradient( vmats[[i]] )
+      for (ooo in 1:10 )
+        temperv = temperv + measure_orthogonality_gradient( vmats[[i]] )
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
           interval = lineSearchRange,
@@ -4304,45 +4305,61 @@ simlr.search <- function(
 
 
 
-#' Measure the Orthogonality of a Matrix
+#' Measure the Orthogonality of a Non-Square Matrix
 #'
-#' Computes a measure of orthogonality for a square matrix.
+#' Computes a measure of orthogonality for a non-square matrix by comparing
+#' the product of the transpose and the matrix to the identity matrix.
 #'
-#' @param mat A square numeric matrix.
+#' @param mat A numeric matrix.
 #' @return A numeric value indicating the deviation from orthogonality.
 #' @examples
-#' A <- matrix(c(1, 0, 0, 1), nrow = 2)
-#' measure_orthogonality(A) # Should be 0 for an orthogonal matrix
-#' B <- matrix(c(1, 1, 0, 1), nrow = 2)
-#' measure_orthogonality(B) # Should be greater than 0 for a non-orthogonal matrix
-#' @export
+#' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
+#' measure_orthogonality_non_square(A) # Should be close to 0 for orthonormal columns
+#' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
+#' measure_orthogonality_non_square(B)
 measure_orthogonality <- function(mat) {
-  if (nrow(mat) != ncol(mat)) stop("The matrix must be square.")
-  norm(t(mat) %*% mat - diag(nrow(mat)), type = "F")
+  # Compute the product of the transpose and the matrix
+  product <- t(mat) %*% mat
+  
+  # Create an identity matrix with the same number of columns
+  identity_matrix <- diag(ncol(mat))
+  
+  # Compute the deviation from the identity matrix
+  deviation <- product - identity_matrix
+  
+  # Measure the orthogonality using the Frobenius norm
+  orthogonality_measure <- norm(deviation, type = "F")
+  
+  return(orthogonality_measure)
 }
 
 
 
 
-#' Measure the Orthogonality Gradient of a Matrix
+#' Measure the Orthogonality Gradient of a Non-Square Matrix
 #'
-#' Computes the gradient of the orthogonality measure for a square matrix.
+#' Computes the gradient of the orthogonality measure for a non-square matrix.
 #'
-#' @param mat A square numeric matrix.
+#' @param mat A numeric matrix.
 #' @return A matrix representing the gradient of the orthogonality measure.
 #' @examples
-#' A <- matrix(c(1, 0, 0, 1), nrow = 2)
-#' measure_orthogonality_gradient(A) # Gradient should be zero for an orthogonal matrix
-#' B <- matrix(c(1, 1, 0, 1), nrow = 2)
-#' measure_orthogonality_gradient(B)
-#' @export
+#' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
+#' measure_orthogonality_non_square_gradient(A)
+#' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
+#' measure_orthogonality_non_square_gradient(B)
 measure_orthogonality_gradient <- function(mat) {
-  if (nrow(mat) != ncol(mat)) stop("The matrix must be square.")
-  deviation <- t(mat) %*% mat - diag(nrow(mat))
-  norm_dev <- norm(deviation, type = "F")
-  if (norm_dev == 0) {
-    return(matrix(0, nrow(mat), ncol(mat)))
-  }
-  2 * mat %*% deviation / norm_dev
+  # Compute the product of the transpose and the matrix
+  product <- t(mat) %*% mat
+  
+  # Create an identity matrix with the same number of columns
+  identity_matrix <- diag(ncol(mat))
+  
+  # Compute the deviation from the identity matrix
+  deviation <- product - identity_matrix
+  
+  # Compute the gradient
+  gradient <- 2 * mat %*% deviation
+  
+  return(gradient)
 }
 

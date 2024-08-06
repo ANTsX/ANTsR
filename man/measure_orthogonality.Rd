@@ -2,22 +2,23 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{measure_orthogonality}
 \alias{measure_orthogonality}
-\title{Measure the Orthogonality of a Matrix}
+\title{Measure the Orthogonality of a Non-Square Matrix}
 \usage{
 measure_orthogonality(mat)
 }
 \arguments{
-\item{mat}{A square numeric matrix.}
+\item{mat}{A numeric matrix.}
 }
 \value{
 A numeric value indicating the deviation from orthogonality.
 }
 \description{
-Computes a measure of orthogonality for a square matrix.
+Computes a measure of orthogonality for a non-square matrix by comparing
+the product of the transpose and the matrix to the identity matrix.
 }
 \examples{
-A <- matrix(c(1, 0, 0, 1), nrow = 2)
-measure_orthogonality(A) # Should be 0 for an orthogonal matrix
-B <- matrix(c(1, 1, 0, 1), nrow = 2)
-measure_orthogonality(B) # Should be greater than 0 for a non-orthogonal matrix
+A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
+measure_orthogonality_non_square(A) # Should be close to 0 for orthonormal columns
+B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
+measure_orthogonality_non_square(B)
 }
