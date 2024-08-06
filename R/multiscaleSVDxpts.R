@@ -169,6 +169,46 @@ sparseDistanceMatrix <- function(
 }
 
 
+#' Whitening Matrix
+#'
+#' This function performs matrix whitening on the input matrix `X` using Singular Value Decomposition (SVD).
+#' Whitening transforms the input matrix into one where the covariance matrix is the identity matrix.
+#'
+#' @param X A numeric matrix to be whitened. The matrix should have observations as rows and features as columns.
+#' @return A list containing:
+#' \item{whitened_matrix}{The whitened matrix where the covariance matrix is the identity matrix.}
+#' \item{whitening_matrix}{The whitening transformation matrix used to whiten the input matrix.}
+#' @examples
+#' set.seed(123)
+#' X <- matrix(rnorm(1000), nrow = 20, ncol = 50)  # Example with p = 50 and n = 20
+#' result <- whiten_matrix(X)
+#' X_whitened <- result$whitened_matrix
+#' whitening_matrix <- result$whitening_matrix
+#' # Verify that the covariance matrix of the whitened matrix is close to identity
+#' cov_X_whitened <- cov(X_whitened)
+#' print(round(cov_X_whitened, 2))
+#' @export
+whiten_matrix <- function(X) {
+  # Center the matrix
+  X_centered <- scale(X, center = TRUE, scale = FALSE)
+  
+  # Perform SVD
+  svd_result <- svd(X_centered)
+  
+  # Extract components
+  U <- svd_result$u
+  D <- svd_result$d
+  V <- svd_result$v
+  
+  # Compute the whitening matrix
+  D_inv_sqrt <- diag(1 / sqrt(D))
+  whitening_matrix <- V %*% D_inv_sqrt %*% t(V)
+  
+  # Apply the whitening matrix to the centered data
+  X_whitened <- X_centered %*% whitening_matrix
+  
+  return(list(whitened_matrix = X_whitened, whitening_matrix = whitening_matrix))
+}
 
 
 #' Create sparse distance, covariance or correlation matrix from x, y
@@ -3089,7 +3129,7 @@ simlr <- function(
           voxmats[[i]] <- robustMatrixTransform(voxmats[[i]])
         }
         if (scaleList[j] == "whiten") {
-          voxmats[[i]] <- icawhiten( data.matrix(voxmats[[i]]), n.comp=lrbasis )
+          voxmats[[i]] <- whiten_matrix( data.matrix(voxmats[[i]]) )$whitened_matrix
         }
         if (scaleList[j] == "lowrank") {
           voxmats[[i]] <- lowrankRowMatrix( data.matrix(voxmats[[i]]), lrbasis )
