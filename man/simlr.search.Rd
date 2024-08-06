@@ -15,6 +15,7 @@ simlr.search(
   ebber_options,
   pizzer_options,
   optimus_options,
+  constraint_options,
   num_samples = 10,
   maxits = 100,
   nperms = 1,
@@ -43,6 +44,8 @@ samples in that range of length 3 ( or a similar string )}
 \item{pizzer_options}{List of positivity options}
 
 \item{optimus_options}{List of optimization style options}
+
+\item{constraint_options}{List of constraint style options}
 
 \item{num_samples}{Number of random samples}
 

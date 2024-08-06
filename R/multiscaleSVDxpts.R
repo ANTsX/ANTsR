@@ -4174,6 +4174,7 @@ vector_to_df <- function(vector, column_name) {
 #' @param ebber_options List of expBeta options
 #' @param pizzer_options List of positivity options
 #' @param optimus_options List of optimization style options
+#' @param constraint_options List of constraint style options
 #' @param num_samples Number of random samples
 #' @param maxits Maximum number of iterations in simlr.perm subroutine
 #' @param nperms Number of permutations in simlr.perm subroutine
@@ -4192,6 +4193,7 @@ simlr.search <- function(
   ebber_options,
   pizzer_options,
   optimus_options,
+  constraint_options,
   num_samples=10,
   maxits=100,
   nperms=1, 
@@ -4219,6 +4221,7 @@ simlr.search <- function(
     prescaling <- unlist(sample(prescaling_options, 1))
     objectiver <- unlist(sample(objectiver_options, 1))
     mixer <- unlist(sample(mixer_options, 1))
+    constraint <- unlist(sample(constraint_options, 1))
     sparval <- unlist(sample(sparval_options, 1))
     if ( is.character(sparval[1]) ) {
       parse_vec <- function(s) as.numeric(strsplit(gsub("rand", "", s), "x")[[1]])
@@ -4248,22 +4251,25 @@ simlr.search <- function(
       positivities = pizzer,
       optimizationStyle = optimus,
       initialUMatrix = if ("lowrank" %in% prescaling) lowrankRowMatrix(initu, nsimlr * 2) else initu,
+      constraint=constraint,
       connectors = simlr_path_models(length(mats), 0),
-      verbose = 0,
+      verbose = verbose > 2,
       nperms = nperms,
       FUN = rvcoef
     )
     finalE = sum( simlrX$significance[1,-c(1:2)] )
     if ( nperms > 4 ) {
       wtest = which( simlrX$significance$perm == 'ttest' )
-      finalE = sum( -log10( simlrX$significance[wtest,-c(1:2)]) , na.rm=TRUE )
+      finalE=( sum( -log10( simlrX$significance[wtest,-c(1:2)] +1e-10) ))
     }
+    finalE = finalE * 1.0/length(mats) # dont ask ...
     parameters = data.frame(
           nsimlr = nsimlr,
           objectiver = objectiver,
           mixer = mixer,
           ebber = ebber,
           optimus = optimus,
+          constraint = constraint,
           final_energy = as.numeric( finalE )
         )
     n=0
