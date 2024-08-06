@@ -4335,7 +4335,7 @@ measure_orthogonality <- function(mat) {
 #' measure_orthogonality_gradient(A) # Gradient should be zero for an orthogonal matrix
 #' B <- matrix(c(1, 1, 0, 1), nrow = 2)
 #' measure_orthogonality_gradient(B)
-#' @exportClass 
+#' @export
 measure_orthogonality_gradient <- function(mat) {
   if (nrow(mat) != ncol(mat)) stop("The matrix must be square.")
   deviation <- t(mat) %*% mat - diag(nrow(mat))
