@@ -4317,6 +4317,7 @@ simlr.search <- function(
 #' measure_orthogonality(A) # Should be close to 0 for orthonormal columns
 #' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
 #' measure_orthogonality(B)
+#' @export
 measure_orthogonality <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat
@@ -4347,6 +4348,7 @@ measure_orthogonality <- function(mat) {
 #' measure_orthogonality_gradient(A)
 #' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
 #' measure_orthogonality_gradient(B)
+#' @export
 measure_orthogonality_gradient <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat
