@@ -4274,6 +4274,7 @@ simlr.search <- function(
         print( paste("improvement" ) )
         print( parameters )
         bestresult = simlrX$simlr_result
+        bestsig = simlrX$significance
         }
     }
   }
@@ -4282,5 +4283,5 @@ simlr.search <- function(
     cat("el finito\n")
   }
   # return(options_df)
-  return( list( parameters=options_df, simlr_result=bestresult ))
+  return( list( parameters=options_df, simlr_result=bestresult, significance=bestsig ))
 }
