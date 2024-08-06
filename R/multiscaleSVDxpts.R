@@ -4006,8 +4006,6 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 #' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
-#' @importFrom ggplot2 ggplot
-#' @importFrom GGally ggpairs
 #' @export
 visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
 
@@ -4209,6 +4207,7 @@ simlr.search <- function(
     }  
     result
   }
+
   ssbont <- function() set.seed(as.integer(substr(as.character(Sys.time()), 22, 200)))
   
   for (i in 1:num_samples) {
@@ -4270,7 +4269,7 @@ simlr.search <- function(
     print(paste("n",i));n=n+1
     if ( i == 1 ) {
       options_df=parameters 
-    } else options_df=myrbind.fill(options_df, parameters )
+    } else options_df=rbind.fill(options_df, parameters )
     print(paste("zn",i));n=n+1
 
     if ( nrow(options_df) > 1 ) {
@@ -4287,6 +4286,9 @@ simlr.search <- function(
     print(paste("ass-n",i));n=n+1
   }
   print("done")
-  if (verbose) cat("\n")
+  if (verbose) cat("finito\n")
+  print( options_df )
+  cat("el fin\n")
+  return()
   return( list( parameters=options_df, simlr_result=bestresult ))
 }
