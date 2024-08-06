@@ -4178,7 +4178,6 @@ vector_to_df <- function(vector, column_name) {
 #' @param verbose boolean
 #'
 #' @return List containing top 3 results and a data frame with selected options
-#' @importFrom plyr rbind.fill
 #' @export
 simlr.search <- function(
   mats,
@@ -4196,7 +4195,18 @@ simlr.search <- function(
   nperms=1, 
   verbose = 0
 ) {
-  results <- list()
+
+  myrbind.fill <- function(..., fill = NA) {
+    args <- list(...)
+    col_names <- unique(unlist(lapply(args, names)))
+    result <- data.frame(matrix(nrow = 0, ncol = length(col_names)))
+    names(result) <- col_names
+    for (arg in args) {
+      arg[, setdiff(col_names, names(arg))] <- fill
+      result <- rbind(result, arg)
+    }  
+    result
+  }
   
   for (i in 1:num_samples) {
     if ( i %% 10 == 0 ) cat(paste0("i ",i," ..."))
@@ -4253,7 +4263,7 @@ simlr.search <- function(
     parameters=cbind(parameters,prescaling,sparval,pizzer,simlrX$significance[1,-1])
     if ( i == 1 ) {
       options_df=parameters 
-    } else options_df=rbind.fill(options_df, parameters )
+    } else options_df=myrbind.fill(options_df, parameters )
 
     if ( nrow(options_df) > 1 ) {
       rowsel = 1:(nrow(options_df)-1)
