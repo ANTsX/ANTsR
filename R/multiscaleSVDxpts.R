@@ -4259,9 +4259,10 @@ simlr.search <- function(
       if ( all( finalE > options_df$final_energy[rowsel] ) & verbose > 0 ) {
         print( paste("improvement" ) )
         print( parameters )
+        bestresult = simlrX$simlr_result
         }
     }
   }
   if (verbose) cat("\n")
-  return(options_df)
+  return( list( parameters=options_df, simlr_result=bestresult ))
 }
