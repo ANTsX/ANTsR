@@ -3476,7 +3476,7 @@ simlr <- function(
       temperv <- getSyMG(vmats[[i]], i, myw = myw, mixAlg = mixAlg)
       temperv <- constrainG(temperv, i, constraint = constraint)
 
-      useAdam <- FALSE
+      useAdam <- TRUE
       if (useAdam) { # completely experimental hack that may be improved/used in future for batch opt
         if (myit == 1 & i == 1) {
           m <- list()
@@ -3499,6 +3499,7 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
+      temperv = tempver - measure_orthogonality_gradient( vmats[[i]] )
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
           interval = lineSearchRange,
@@ -4245,6 +4246,7 @@ simlr.search <- function(
       randomSeed = 0,
       mixAlg = mixer,
       energyType = objectiver,
+      orthogonalize=TRUE,
       scale = prescaling,
       sparsenessQuantiles = sparval,
       expBeta = ebber,
@@ -4288,6 +4290,7 @@ simlr.search <- function(
         print( parameters )
         bestresult = simlrX$simlr_result
         bestsig = simlrX$significance
+        print( bestresult$v[[3]] )
         }
     }
   }
@@ -4298,3 +4301,48 @@ simlr.search <- function(
   # return(options_df)
   return( list( parameters=options_df, simlr_result=bestresult, significance=bestsig ))
 }
+
+
+
+#' Measure the Orthogonality of a Matrix
+#'
+#' Computes a measure of orthogonality for a square matrix.
+#'
+#' @param mat A square numeric matrix.
+#' @return A numeric value indicating the deviation from orthogonality.
+#' @examples
+#' A <- matrix(c(1, 0, 0, 1), nrow = 2)
+#' measure_orthogonality(A) # Should be 0 for an orthogonal matrix
+#' B <- matrix(c(1, 1, 0, 1), nrow = 2)
+#' measure_orthogonality(B) # Should be greater than 0 for a non-orthogonal matrix
+#' @export
+measure_orthogonality <- function(mat) {
+  if (nrow(mat) != ncol(mat)) stop("The matrix must be square.")
+  norm(t(mat) %*% mat - diag(nrow(mat)), type = "F")
+}
+
+
+
+
+#' Measure the Orthogonality Gradient of a Matrix
+#'
+#' Computes the gradient of the orthogonality measure for a square matrix.
+#'
+#' @param mat A square numeric matrix.
+#' @return A matrix representing the gradient of the orthogonality measure.
+#' @examples
+#' A <- matrix(c(1, 0, 0, 1), nrow = 2)
+#' measure_orthogonality_gradient(A) # Gradient should be zero for an orthogonal matrix
+#' B <- matrix(c(1, 1, 0, 1), nrow = 2)
+#' measure_orthogonality_gradient(B)
+#' @exportClass 
+measure_orthogonality_gradient <- function(mat) {
+  if (nrow(mat) != ncol(mat)) stop("The matrix must be square.")
+  deviation <- t(mat) %*% mat - diag(nrow(mat))
+  norm_dev <- norm(deviation, type = "F")
+  if (norm_dev == 0) {
+    return(matrix(0, nrow(mat), ncol(mat)))
+  }
+  2 * mat %*% deviation / norm_dev
+}
+
