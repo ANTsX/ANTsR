@@ -4234,10 +4234,11 @@ simlr.search <- function(
       nperms = nperms,
       FUN = rvcoef
     )
-#    prescaling = paste( prescaling, collapse="_" )
-#    sparval = paste( sparval, collapse="_" )
-#    pizzer = paste( pizzer,collapse="_" )
-    finalE = sum( simlrX$significance[1,-1] )
+    finalE = sum( simlrX$significance[1,-c(1:2)] )
+    if ( nperms > 4 ) {
+      wtest = which( simlrX$perm == 'ttest' )
+      finalE = sum( -log10( simlrX$significance[wtest,-c(1:2)]) , na.rm=TRUE )
+    }
     parameters = data.frame(
           nsimlr = nsimlr,
           objectiver = objectiver,
