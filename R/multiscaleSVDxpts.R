@@ -3804,7 +3804,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
-  
+  simlr_result$v = divide_by_column_sum( simlr_result$v )
 
   if ( FALSE ) {
     refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
@@ -3836,6 +3836,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                                energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                                jointInitialization, sparsenessAlg, verbose=verbose > 3)
+    simlr_result_perm$v = divide_by_column_sum( simlr_result_perm$v )
     if ( FALSE ) {
       refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
       
