@@ -1671,13 +1671,13 @@ orthogonalizeAndQSparsify <- function(
   return(v)
 }
 
-#' Divide Each Column by Its Sum
+#' Divide each column by the sum of column absolute values
 #'
 #' @param m A numeric matrix
 #'
 #' @return A matrix with each column divided by its sum
 #'
-divide_by_column_sum <- function(m) t(t(m)/colSums(m))
+divide_by_column_sum <- function(m) t(t(m)/colSums(abs(m)))
 
 #' cca via sparse smooth matrix prediction
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{divide_by_column_sum}
 \alias{divide_by_column_sum}
-\title{Divide Each Column by Its Sum}
+\title{Divide each column by the sum of column absolute values}
 \usage{
 divide_by_column_sum(m)
 }
@@ -13,5 +13,5 @@ divide_by_column_sum(m)
 A matrix with each column divided by its sum
 }
 \description{
-Divide Each Column by Its Sum
+Divide each column by the sum of column absolute values
 }
