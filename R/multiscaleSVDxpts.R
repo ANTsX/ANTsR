@@ -4006,6 +4006,8 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 #' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+#' @importFrom ggplot ggplot
+#' @importFrom GGally ggpairs
 #' @export
 visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
 
@@ -4151,7 +4153,7 @@ simlr_path_models <- function(n, type = 0) {
 #'
 #' @examples
 #' vector_to_df(1:10, "nm")
-#'
+#' @export
 vector_to_df <- function(vector, column_name) {
   df <- data.frame(t(vector))
   names(df) <- paste0(column_name, 1:length(vector))
@@ -4207,10 +4209,11 @@ simlr.search <- function(
     }  
     result
   }
+  ssbont <- function() set.seed(as.integer(substr(as.character(Sys.time()), 22, 200)))
   
   for (i in 1:num_samples) {
     if ( i %% 10 == 0 ) cat(paste0("i ",i," ..."))
-    setSeedBasedOnTime()
+    ssbont()
     nsimlr <- unlist(sample(nsimlr_options, 1))
     prescaling <- unlist(sample(prescaling_options, 1))
     objectiver <- unlist(sample(objectiver_options, 1))

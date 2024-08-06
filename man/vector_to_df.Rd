@@ -19,5 +19,4 @@ Convert a Vector to a Data Frame
 }
 \examples{
 vector_to_df(1:10, "nm")
-
 }
