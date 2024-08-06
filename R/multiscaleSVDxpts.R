@@ -3806,7 +3806,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
   for ( k in 1:length(voxmats)) {
     simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
-    simlr_result$v[[k]] = divide_by_column_sum( simlr_result$v[[k]] )
+    simlr_result$v[[k]]=divide_by_column_sum( simlr_result$v[[k]] )
     rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
   }
 
@@ -4106,11 +4106,16 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
 #' @return A matrix with absolute values taken for unsigned columns
 #'
 take_abs_unsigned <- function(m) {
-  unsigned_cols <- colSums(m > 0) == 0
-  m[, unsigned_cols] <- apply(m[, unsigned_cols], 2, abs)
+  unsigned_cols <- colSums(m > 0) == 0 & colSums(m < 0) > 0
+  if ( sum(unsigned_cols) > 0 ) {
+    if ( sum(unsigned_cols) == 1 ) {
+      m[, unsigned_cols] <- abs(m[, unsigned_cols] )
+    } else {
+      m[, unsigned_cols] <- apply(m[, unsigned_cols], 2, abs)
+    }
+  }
   m
 }
-
 
 #' SiMLR Path Models helper
 #'
