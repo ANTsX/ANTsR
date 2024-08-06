@@ -4278,7 +4278,7 @@ simlr.search <- function(
     }
   }
   if ( verbose ) {
-    print( options_df )
+    print( options_df[ which.max(options_df$final_energy),] )
     cat("el finito\n")
   }
   # return(options_df)
