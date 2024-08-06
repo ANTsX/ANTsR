@@ -3139,7 +3139,7 @@ simlr <- function(
           voxmats[[i]] <- whiten_matrix( data.matrix(voxmats[[i]]) )$whitened_matrix
         }
         if (scaleList[j] == "lowrank") {
-          voxmats[[i]] <- lowrankRowMatrix( data.matrix(voxmats[[i]]), lrbasis )
+          voxmats[[i]] <- lowrankRowMatrix( data.matrix(voxmats[[i]]), lrbasis*2 )
         }
       }
     }
@@ -3799,62 +3799,38 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   myseeds <- sample(1:1000000, nperms)
   
   # Initial SiMLR run
-  simlr_result <- simlr(voxmats, smoothingMatrices, iterations, sparsenessQuantiles, 
-                        positivities, initialUMatrix, mixAlg, orthogonalize, 
-                        repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                        energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                        jointInitialization, sparsenessAlg, verbose=verbose > 0 )
+  simlr_result <- simlr(voxmats, 
+    smoothingMatrices, iterations, sparsenessQuantiles, 
+    positivities, initialUMatrix, mixAlg, orthogonalize, 
+                  repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                  energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                  jointInitialization, sparsenessAlg, verbose=verbose > 0 )
   for ( k in 1:length(voxmats)) {
     simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
     simlr_result$v[[k]]=divide_by_column_sum( simlr_result$v[[k]] )
     rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
   }
 
-  if ( FALSE ) {
-    refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
-    refvarxmeansnms = matrix("",nrow=length(mats),ncol=length(mats))
-    nmats = 1:length(mats)
-    for ( kk in nmats ) {
-      rownames(simlr_result$v[[kk]])=colnames(matsFull[[kk]])
-      temp = predictSimlr( mats, simlr_result, targetMatrix=kk, sourceMatrices=nmats[nmats!=kk] )
-      temp = unlist( lapply( temp$varxfull, FUN=FUN ) )
-      refvarxmeans[kk,nmats[nmats!=kk]]=temp
-      refvarxmeansnms[kk,nmats[nmats!=kk]]=paste0(nms[kk],"_",paste0(nms[nmats!=kk]))
-      }
-    refvarxmeans = c( refvarxmeans[upper.tri(refvarxmeans)], refvarxmeans[lower.tri(refvarxmeans)])
-    refvarxmeansnms = c( refvarxmeansnms[upper.tri(refvarxmeansnms)], refvarxmeansnms[lower.tri(refvarxmeansnms)])
-  }
   refvarxmeans = pairwise_matrix_similarity( mats, simlr_result$v, FUN=FUN )
   simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
   refvarxmeansnms=names(refvarxmeans)
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
 
   # begin permutation  
+  if ( nperms > 1 )
   for (nperm in 1:nperms) {
     set.seed(myseeds[nperm])
     
     voxmats_perm <- lapply(voxmats, function(mat) mat[sample(1:nrow(mat)), ])
     
     simlr_result_perm <- simlr(voxmats_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
-                               positivities, initialUMatrix, mixAlg, orthogonalize, 
-                               repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                               energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                               jointInitialization, sparsenessAlg, verbose=verbose > 3)
+                         positivities, initialUMatrix, mixAlg, orthogonalize, 
+                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                         jointInitialization, sparsenessAlg, verbose=verbose > 3)
     for ( k in 1:length(voxmats)) {
       simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
       simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
-    }
-    if ( FALSE ) {
-      refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
-      
-      for (kk in nmats) {
-        temp <- predictSimlr(voxmats_perm, simlr_result_perm, targetMatrix = kk, sourceMatrices = nmats[nmats != kk])
-        temp <- unlist(lapply(temp$varxfull, FUN = FUN))
-        refvarxmeans_perm[kk, nmats[nmats != kk]] <- temp
-      }
-      
-      refvarxmeans_perm <- c(refvarxmeans_perm[upper.tri(refvarxmeans_perm)], refvarxmeans_perm[lower.tri(refvarxmeans_perm)])
-      names(refvarxmeans_perm)=refvarxmeansnms
     }
     refvarxmeans_perm = pairwise_matrix_similarity( voxmats_perm, simlr_result_perm$v, FUN=FUN )
     simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
@@ -3865,20 +3841,22 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   
   # Statistical significance testing
   simlrpermvarx_ttest <- c()
-  for (varname in refvarxmeansnms ) {
-    mytt <- t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
-    simlrpermvarx_ttest[varname] = mytt$p.value
+  if ( nperms >  1  ) {
+    for (varname in refvarxmeansnms ) {
+      mytt <- t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
+      simlrpermvarx_ttest[varname] = mytt$p.value
+    }
+    nexter=nrow(simlrpermvarx)+1
+    simlrpermvarx[nexter,'perm']='ttest'
+    simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
+    simlrpermvarx[nexter,refvarxmeansnms]=simlrpermvarx_ttest
+    nexter=nrow(simlrpermvarx)+1
+    simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
+    simlrpermvarx[nexter,'perm']='pvalue'
+    for ( zz in refvarxmeansnms ) 
+      simlrpermvarx[nexter,zz]=sum( simlrpermvarx[2:(1+nperms),zz] > simlrpermvarx[1,zz] )/nperms
+    if ( verbose > 1 ) print( simlrpermvarx[nexter,] )
   }
-  nexter=nrow(simlrpermvarx)+1
-  simlrpermvarx[nexter,'perm']='ttest'
-  simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
-  simlrpermvarx[nexter,refvarxmeansnms]=simlrpermvarx_ttest
-  nexter=nrow(simlrpermvarx)+1
-  simlrpermvarx[nexter,'n']=ncol(initialUMatrix)
-  simlrpermvarx[nexter,'perm']='pvalue'
-  for ( zz in refvarxmeansnms ) 
-    simlrpermvarx[nexter,zz]=sum( simlrpermvarx[2:(1+nperms),zz] > simlrpermvarx[1,zz] )/nperms
-  if ( verbose > 1 ) print( simlrpermvarx[nexter,] )
   return( list( simlr_result=simlr_result, significance=simlrpermvarx))
 }
 
@@ -4073,12 +4051,12 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
    p <- ggplot(cor_data, aes(Var1, Var2, fill = Freq)) +
     geom_tile(color = "white") +
     scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                         midpoint = 0, limit = c(-1,1), space = "Lab", 
-                         name="Correlation") +
+                   midpoint = 0, limit = c(-1,1), space = "Lab", 
+                   name="Correlation") +
   geom_text(aes(label = format(Freq, digits = 2, nsmall = 2)), size = 3)+
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, 
-                                     size = 12, hjust = 1)) +
+                               size = 12, hjust = 1)) +
     coord_fixed() +
     labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
   
@@ -4163,3 +4141,127 @@ simlr_path_models <- function(n, type = 0) {
   return(result)
 }
 
+
+#' Convert a Vector to a Data Frame
+#'
+#' @param vector The input vector
+#' @param column_name The base name for the columns
+#'
+#' @return A data frame with one row and columns determined by the length of the vector
+#'
+#' @examples
+#' vector_to_df(1:10, "nm")
+#'
+vector_to_df <- function(vector, column_name) {
+  df <- data.frame(t(vector))
+  names(df) <- paste0(column_name, 1:length(vector))
+  return(df)
+}
+
+
+
+#' Perform SIMLR Search with Random Hyperparameter Sampling
+#'
+#' @param mats List of matrices
+#' @param regs List of regularization matrices
+#' @param nsimlr_options List of nsimlr options
+#' @param prescaling_options List of prescaling options
+#' @param objectiver_options List of objective function options
+#' @param mixer_options List of mixer options
+#' @param sparval_options List of sparseness quantile options
+#' @param ebber_options List of expBeta options
+#' @param pizzer_options List of positivity options
+#' @param optimus_options List of optimization style options
+#' @param num_samples Number of random samples
+#' @param maxits Maximum number of iterations in simlr.perm subroutine
+#' @param nperms Number of permutations in simlr.perm subroutine
+#' @param verbose boolean
+#'
+#' @return List containing top 3 results and a data frame with selected options
+#' @importFrom plyr rbind.fill
+#' @export
+simlr.search <- function(
+  mats,
+  regs,
+  nsimlr_options,
+  prescaling_options,
+  objectiver_options,
+  mixer_options,
+  sparval_options,
+  ebber_options,
+  pizzer_options,
+  optimus_options,
+  num_samples=10,
+  maxits=100,
+  nperms=1, 
+  verbose = 0
+) {
+  results <- list()
+  
+  for (i in 1:num_samples) {
+    if ( i %% 10 == 0 ) cat(paste0("i ",i," ..."))
+    setSeedBasedOnTime()
+    nsimlr <- unlist(sample(nsimlr_options, 1))
+    prescaling <- unlist(sample(prescaling_options, 1))
+    objectiver <- unlist(sample(objectiver_options, 1))
+    mixer <- unlist(sample(mixer_options, 1))
+    sparval <- unlist(sample(sparval_options, 1))
+    ebber <- unlist(sample(ebber_options, 1))
+    pizzer <- unlist(sample(pizzer_options, 1))
+    optimus <- unlist(sample(optimus_options, 1))
+    initu = initializeSimlr(
+                    mats,
+                    nsimlr,
+                    jointReduction = TRUE,
+                    zeroUpper = FALSE,
+                    uAlgorithm = "pca",
+                    addNoise = 0 )
+    simlrX <- simlr.perm(
+      mats,
+      regs,
+      iterations = maxits,
+      randomSeed = 0,
+      mixAlg = mixer,
+      energyType = objectiver,
+      scale = prescaling,
+      sparsenessQuantiles = sparval,
+      expBeta = ebber,
+      positivities = pizzer,
+      optimizationStyle = optimus,
+      initialUMatrix = if ("lowrank" %in% prescaling) lowrankRowMatrix(initu, nsimlr * 2) else initu,
+      connectors = simlr_path_models(length(mats), 0),
+      verbose = 0,
+      nperms = nperms,
+      FUN = rvcoef
+    )
+#    prescaling = paste( prescaling, collapse="_" )
+#    sparval = paste( sparval, collapse="_" )
+#    pizzer = paste( pizzer,collapse="_" )
+    finalE = sum( simlrX$significance[1,-1] )
+    parameters = data.frame(
+          nsimlr = nsimlr,
+          objectiver = objectiver,
+          mixer = mixer,
+          ebber = ebber,
+          optimus = optimus,
+          final_energy = as.numeric( finalE )
+        )
+    prescaling = vector_to_df( prescaling, 'prescaling' )
+    sparval = vector_to_df( sparval, 'sparval' )
+    pizzer = vector_to_df( pizzer, 'positivity' )
+    parameters=cbind(parameters,prescaling,sparval,pizzer,simlrX$significance[1,-1])
+    if ( i == 1 ) {
+      options_df=parameters 
+    } else options_df=rbind.fill(options_df, parameters )
+
+    if ( nrow(options_df) > 1 ) {
+      rowsel = 1:(nrow(options_df)-1)
+      if ( all( finalE > options_df$final_energy[rowsel] ) & verbose > 0 ) {
+        print( paste("improvement" ) )
+        print( parameters )
+        }
+    }
+  }
+  if (verbose) cat("\n")
+  return(options_df)
+}
