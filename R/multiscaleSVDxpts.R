@@ -4291,7 +4291,7 @@ simlr.search <- function(
         print( parameters )
         bestresult = simlrX$simlr_result
         bestsig = simlrX$significance
-        print( bestresult$v[[3]] )
+        print( head( bestresult$v[[ length(bestresult$v)]] ))
         }
     }
   }
