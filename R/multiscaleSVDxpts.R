@@ -4006,7 +4006,7 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 #' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
 #' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
-#' @importFrom ggplot ggplot
+#' @importFrom ggplot2 ggplot
 #' @importFrom GGally ggpairs
 #' @export
 visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
@@ -4260,23 +4260,33 @@ simlr.search <- function(
           optimus = optimus,
           final_energy = as.numeric( finalE )
         )
+    n=0
+    print(paste("n",i));n=n+1
     prescaling = vector_to_df( prescaling, 'prescaling' )
     sparval = vector_to_df( sparval, 'sparval' )
     pizzer = vector_to_df( pizzer, 'positivity' )
+    print(paste("n",i));n=n+1
     parameters=cbind(parameters,prescaling,sparval,pizzer,simlrX$significance[1,-1])
+    print(paste("n",i));n=n+1
     if ( i == 1 ) {
       options_df=parameters 
     } else options_df=myrbind.fill(options_df, parameters )
+    print(paste("zn",i));n=n+1
 
     if ( nrow(options_df) > 1 ) {
       rowsel = 1:(nrow(options_df)-1)
+    print(paste("den",i));n=n+1
       if ( all( finalE > options_df$final_energy[rowsel] ) & verbose > 0 ) {
         print( paste("improvement" ) )
         print( parameters )
         bestresult = simlrX$simlr_result
+    print(paste("qn",i));n=n+1
         }
+    print(paste("buttn",i));n=n+1
     }
+    print(paste("ass-n",i));n=n+1
   }
+  print("done")
   if (verbose) cat("\n")
   return( list( parameters=options_df, simlr_result=bestresult ))
 }

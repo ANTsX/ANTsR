@@ -45,6 +45,7 @@ Suggests:
     e1071,
     fastICA,
     fpc,
+    GGally,
     ggplot2,
     glasso,
     grid,
