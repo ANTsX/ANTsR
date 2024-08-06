@@ -3476,7 +3476,7 @@ simlr <- function(
       temperv <- getSyMG(vmats[[i]], i, myw = myw, mixAlg = mixAlg)
       temperv <- constrainG(temperv, i, constraint = constraint)
 
-      useAdam <- TRUE
+      useAdam <- FALSE
       if (useAdam) { # completely experimental hack that may be improved/used in future for batch opt
         if (myit == 1 & i == 1) {
           m <- list()
@@ -4314,9 +4314,9 @@ simlr.search <- function(
 #' @return A numeric value indicating the deviation from orthogonality.
 #' @examples
 #' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_non_square(A) # Should be close to 0 for orthonormal columns
+#' measure_orthogonality(A) # Should be close to 0 for orthonormal columns
 #' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_non_square(B)
+#' measure_orthogonality(B)
 measure_orthogonality <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat
@@ -4344,9 +4344,9 @@ measure_orthogonality <- function(mat) {
 #' @return A matrix representing the gradient of the orthogonality measure.
 #' @examples
 #' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_non_square_gradient(A)
+#' measure_orthogonality_gradient(A)
 #' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_non_square_gradient(B)
+#' measure_orthogonality_gradient(B)
 measure_orthogonality_gradient <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat

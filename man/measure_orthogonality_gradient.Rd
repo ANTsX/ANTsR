@@ -17,7 +17,7 @@ Computes the gradient of the orthogonality measure for a non-square matrix.
 }
 \examples{
 A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-measure_orthogonality_non_square_gradient(A)
+measure_orthogonality_gradient(A)
 B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-measure_orthogonality_non_square_gradient(B)
+measure_orthogonality_gradient(B)
 }

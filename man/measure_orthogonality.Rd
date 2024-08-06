@@ -18,7 +18,7 @@ the product of the transpose and the matrix to the identity matrix.
 }
 \examples{
 A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-measure_orthogonality_non_square(A) # Should be close to 0 for orthonormal columns
+measure_orthogonality(A) # Should be close to 0 for orthonormal columns
 B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-measure_orthogonality_non_square(B)
+measure_orthogonality(B)
 }
