@@ -4168,7 +4168,9 @@ vector_to_df <- function(vector, column_name) {
 #' @param prescaling_options List of prescaling options
 #' @param objectiver_options List of objective function options
 #' @param mixer_options List of mixer options
-#' @param sparval_options List of sparseness quantile options
+#' @param sparval_options List of sparseness quantile options 
+#' may also pass in rand3x0.5x0.9 which will produce random uniform 
+#' samples in that range of length 3 ( or a similar string )
 #' @param ebber_options List of expBeta options
 #' @param pizzer_options List of positivity options
 #' @param optimus_options List of optimization style options
@@ -4218,6 +4220,11 @@ simlr.search <- function(
     objectiver <- unlist(sample(objectiver_options, 1))
     mixer <- unlist(sample(mixer_options, 1))
     sparval <- unlist(sample(sparval_options, 1))
+    if ( is.character(sparval[1]) ) {
+      parse_vec <- function(s) as.numeric(strsplit(gsub("rand", "", s), "x")[[1]])
+      sparval = parse_vec( sparval )
+      sparval = runif( sparval[1], sparval[2], sparval[3] )
+    }
     ebber <- unlist(sample(ebber_options, 1))
     pizzer <- unlist(sample(pizzer_options, 1))
     optimus <- unlist(sample(optimus_options, 1))

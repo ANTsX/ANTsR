@@ -34,7 +34,9 @@ simlr.search(
 
 \item{mixer_options}{List of mixer options}
 
-\item{sparval_options}{List of sparseness quantile options}
+\item{sparval_options}{List of sparseness quantile options 
+may also pass in rand3x0.5x0.9 which will produce random uniform 
+samples in that range of length 3 ( or a similar string )}
 
 \item{ebber_options}{List of expBeta options}
 
