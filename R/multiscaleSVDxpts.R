@@ -3804,8 +3804,11 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
-  for ( k in 1:length(voxmats)) 
+  for ( k in 1:length(voxmats)) {
+    simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
     simlr_result$v[[k]] = divide_by_column_sum( simlr_result$v[[k]] )
+    rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
+  }
 
   if ( FALSE ) {
     refvarxmeans = matrix(nrow=length(mats),ncol=length(mats))
@@ -3837,8 +3840,10 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                                energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                                jointInitialization, sparsenessAlg, verbose=verbose > 3)
-    for ( k in 1:length(voxmats)) 
+    for ( k in 1:length(voxmats)) {
+      simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
       simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
+    }
     if ( FALSE ) {
       refvarxmeans_perm <- matrix(nrow = length(voxmats), ncol = length(voxmats))
       
@@ -4058,7 +4063,8 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   # wilks_test <- WilksLambda(projection1, projection2, cca_result)
   
   # Compute RV coefficient
-  rv_coefficient <- adjusted_rvcoef(projection1, projection2)
+  rv_coefficient <- rvcoef(projection1, projection2)
+  adj_rv_coefficient <- adjusted_rvcoef(projection1, projection2)
   
   # Prepare data for plotting
   cor_data <- as.data.frame(as.table(correlation_matrix))
@@ -4087,11 +4093,23 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
     pairsplot = ggp,
     correlations = correlation_matrix,
     # wilks_test = NA,
-    rv_coefficient = rv_coefficient
+    rv_coefficient = rv_coefficient,
+    adj_rv_coefficient=adj_rv_coefficient
   ))
 }
 
 
+#' Take Absolute Value of Unsigned Columns
+#'
+#' @param m A numeric matrix
+#'
+#' @return A matrix with absolute values taken for unsigned columns
+#'
+take_abs_unsigned <- function(m) {
+  unsigned_cols <- colSums(m > 0) == 0
+  m[, unsigned_cols] <- apply(m[, unsigned_cols], 2, abs)
+  m
+}
 
 
 #' SiMLR Path Models helper
