@@ -3499,8 +3499,8 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-      for (ooo in 1:10 )
-        temperv = temperv + measure_orthogonality_gradient( vmats[[i]] )
+      for (ooo in 1:2 )
+        temperv = temperv - 0.1 * measure_orthogonality_gradient( vmats[[i]] )
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
           interval = lineSearchRange,
