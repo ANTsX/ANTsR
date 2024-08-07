@@ -1592,7 +1592,7 @@ rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, po
 #' mat <- orthogonalizeAndQSparsify(mat)
 #'
 #' @export orthogonalizeAndQSparsify
-orthogonalizeAndQSparsify <- function(
+orthogonalizeAndQSparsifyOld <- function(
     v,
     sparsenessQuantile = 0.5, positivity = "either",
     orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA) {
@@ -1668,6 +1668,82 @@ orthogonalizeAndQSparsify <- function(
       if (locnorm > 0) v[, i] <- v[, i] / locnorm
     }
   }
+  return(v)
+}
+
+
+#' Sparsify and optionally orthogonalize a matrix
+#'
+#' This function implements a quantile-based sparsification operation.
+#'
+#' @param v Input matrix
+#' @param sparsenessQuantile Quantile to control sparseness - higher is sparser
+#' @param positivity Restrict to positive or negative solution (beta) weights. Choices are "positive", "negative", or "either".
+#' @param orthogonalize Run Gram-Schmidt if TRUE.
+#' @param softThresholding Use soft thresholding if TRUE.
+#' @param unitNorm Normalize each vector to unit norm if TRUE.
+#' @param sparsenessAlg If specified, use rank-based matrix segmentation algorithm ("orthorank" or "basic").
+#' @return A sparsified and optionally orthogonalized matrix.
+#' @examples
+#' mat <- replicate(100, rnorm(20))
+#' mat <- orthogonalizeAndQSparsify(mat)
+#' @export
+orthogonalizeAndQSparsify <- function(
+  v,
+  sparsenessQuantile = 0.5, positivity = "either",
+  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
+) {
+  if (!is.na(sparsenessAlg)) {
+    basic <- sparsenessAlg != "orthorank"
+    return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
+  }
+  if (sparsenessQuantile == 0) return(v)
+  
+  epsval <- 0.0
+  
+  for (vv in 1:ncol(v)) {
+    if (var(v[, vv]) > epsval) {
+      if (vv > 1 && orthogonalize) {
+        for (vk in 1:(vv - 1)) {
+          temp <- v[, vk]
+          denom <- sum(temp * temp, na.rm = TRUE)
+          ip <- if (denom > epsval) sum(temp * v[, vv]) / denom else 1
+          v[, vv] <- v[, vv] - temp * ip
+        }
+      }
+      
+      localv <- v[, vv]
+      doflip <- sum(localv > 0, na.rm = TRUE) < sum(localv < 0, na.rm = TRUE)
+      if (doflip) localv <- localv * -1
+      
+      myquant <- quantile(localv, sparsenessQuantile, na.rm = TRUE)
+      if (!softThresholding) {
+        if (positivity == "positive") {
+          localv[localv <= myquant] <- 0
+        } else if (positivity == "negative") {
+          localv[localv > myquant] <- 0
+        } else {
+          localv[abs(localv) < quantile(abs(localv), sparsenessQuantile, na.rm = TRUE)] <- 0
+        }
+      } else {
+        if (positivity == "positive") localv[localv < 0] <- 0
+        mysign <- sign(localv)
+        myquant <- quantile(abs(localv), sparsenessQuantile, na.rm = TRUE)
+        temp <- abs(localv) - myquant
+        temp[temp < 0] <- 0
+        localv <- mysign * temp
+      }
+      v[, vv] <- if (doflip) localv * -1 else localv
+    }
+  }
+  
+  if (unitNorm) {
+    for (i in 1:ncol(v)) {
+      locnorm <- sqrt(sum(v[, i]^2))
+      if (locnorm > 0) v[, i] <- v[, i] / locnorm
+    }
+  }
+  
   return(v)
 }
 
@@ -2888,6 +2964,51 @@ predictSimlr <- function(x, simsol, targetMatrix, sourceMatrices, projectv = TRU
   )
 }
 
+#' Project a matrix to the nearest non-negative orthogonal matrix
+#'
+#' @param X a matrix
+#' @param tol tolerance for convergence (default: 1e-6)
+#' @param max_iter maximum number of iterations (default: 1000)
+#'
+#' @return a non-negative orthogonal matrix
+project_to_nonneg_orthogonal_optim <- function(X, tol = 1e-6, max_iter = 10 ) {
+  Y <- X
+  for (i in 1:max_iter) {
+    grad <- 2 * (t(Y) %*% Y - diag(ncol(Y))) %*% t(Y)
+    Y <- Y - 0.01 * t(grad)
+    
+    # Check each column and flip if sum of negative values is greater than sum of positive values
+    for (j in 1:ncol(Y)) {
+      pos_sum <- sum(Y[, j][Y[, j] > 0])
+      neg_sum <- sum(Y[, j][Y[, j] < 0])
+      if (neg_sum > pos_sum) Y[, j] <- -Y[, j]
+    }
+    
+    Y <- pmax(Y, 0)  # Set negative elements to zero
+    
+    if (measure_orthogonality(Y) < tol) break
+  }
+  Y
+}
+
+#' Project a matrix to the nearest non-negative orthogonal matrix
+#'
+#' @param X a matrix
+#' @param tol tolerance for convergence (default: 1e-6)
+#' @param max_iter maximum number of iterations (default: 1000)
+#'
+#' @return a non-negative orthogonal matrix
+#' @export 
+project_to_nonneg_orthogonal_alt <- function(X, tol = 1e-6, max_iter = 10) {
+  Y <- X
+  for (i in 1:max_iter) {
+    Y_prev <- Y
+    Y <- pmax(Y, 0)
+    Y <- svd(Y)$u %*% svd(Y)$v
+    if (sum(abs(Y - Y_prev)) < tol * sum(abs(Y))) break
+  }
+  Y
+}
 
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
@@ -3241,14 +3362,14 @@ simlr <- function(
   nc <- ncol(initialUMatrix[[1]])
   myw <- matrix(rnorm(nc^2), nc, nc) # initialization for fastICA
   getSyME2 <- function(lineSearch, gradient, myw, mixAlg,
-                       avgU, whichModality, verbose = FALSE) {
+                       avgU, whichModality, last_energy=0, verbose = FALSE ) {
     prediction <- 0
     myenergysearchv <- (vmats[[whichModality]] + gradient * lineSearch) # update the i^th v matrix
     if (verbose) {
       print(paste("getSyME2", whichModality))
       print(dim(vmats[[whichModality]]))
     }
-    if (sparsenessQuantiles[whichModality] != 0) {
+    if (sparsenessQuantiles[whichModality] != 0 ) {
       myenergysearchv <- orthogonalizeAndQSparsify( # make sparse
         as.matrix(smoothingMatrices[[whichModality]] %*% myenergysearchv),
         sparsenessQuantiles[whichModality],
@@ -3258,7 +3379,9 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-
+    myorthEnergy = measure_orthogonality( myenergysearchv )
+    if ( last_energy > 0 )
+      myorthEnergy = myorthEnergy * 0.1 / last_energy
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
@@ -3269,7 +3392,7 @@ simlr <- function(
         print(dim(avgU))
         print(dim(voxmats[[whichModality]]))
       }
-      return(mynorm *
+      return( myorthEnergy + mynorm *
         sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
       # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
     }
@@ -3281,21 +3404,23 @@ simlr <- function(
       vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
       # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
       energy <- norm(avgU / norm(avgU, "F") - vpro / norm(vpro, "F"), "F")
-      return(energy)
+      return(myorthEnergy +energy)
     }
     #
     # low-dimensional error approximation
     if (energyType == "lowRankRegression") {
       vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
       energy <- norm(avgU - vpro, "F")
-      return(energy)
+      return(myorthEnergy + energy)
     }
 
     prediction <- avgU %*% t(myenergysearchv)
     prediction <- prediction - (colMeans(prediction) - colMeans(voxmats[[whichModality]]))
     if (!normalized) energy <- norm(prediction - voxmats[[whichModality]], "F")
     if (normalized) energy <- norm(prediction / norm(prediction, "F") - voxmats[[whichModality]] / norm(voxmats[[whichModality]], "F"), "F")
-    return(energy)
+    if ( verbose )
+      print(paste("basic regression", 'myorthEnergy',myorthEnergy,'energy',energy))
+    return(myorthEnergy +energy)
   }
 
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
@@ -3477,19 +3602,20 @@ simlr <- function(
       temperv <- constrainG(temperv, i, constraint = constraint)
 
       useAdam <- FALSE
-      if (useAdam) { # completely experimental hack that may be improved/used in future for batch opt
+      if (useAdam) { 
         if (myit == 1 & i == 1) {
           m <- list()
           v <- list()
         }
-        beta_1 <- 0.9
-        beta_2 <- 0.99
+        beta_1 <- 0.8
+        beta_2 <- 0.998
         if (myit <= 1) {
           m[[i]] <- temperv * 0
           v[[i]] <- temperv * 0
+        } else {
+          m[[i]] <- beta_1 * m[[i]] + (1 - beta_1) * temperv
+          v[[i]] <- beta_2 * v[[i]] + (1 - beta_2) * temperv^2.0
         }
-        m[[i]] <- beta_1 * m[[i]] + (1 - beta_1) * temperv
-        v[[i]] <- beta_2 * v[[i]] + (1 - beta_2) * temperv^2.0
         m_hat <- m[[i]] / (1 - beta_1^myit)
         v_hat <- v[[i]] / (1 - beta_2^myit)
       }
@@ -3499,15 +3625,16 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-      for (ooo in 1:2 )
-        temperv = temperv - 0.1 * measure_orthogonality_gradient( vmats[[i]] )
+      orthgrad = measure_orthogonality_gradient( vmats[[i]] )
+      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
+      if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
           interval = lineSearchRange,
           tol = lineSearchTolerance,
           gradient = temperv,
           myw = myw, mixAlg = mixAlg,
-          avgU = initialUMatrix[[i]], whichModality = i
+          avgU = initialUMatrix[[i]], whichModality = i, last_energy=laste
         )
         errterm[i] <- temp$objective
         gamma[i] <- temp$minimum
@@ -3517,7 +3644,7 @@ simlr <- function(
           gamma[i], temperv,
           myw = myw, mixAlg = mixAlg,
           avgU = initialUMatrix[[i]],
-          whichModality = i
+          whichModality = i, last_energy=laste
         )
       }
       if (errterm[i] <= min(energyPath[, i], na.rm = T) |
@@ -4321,16 +4448,9 @@ simlr.search <- function(
 measure_orthogonality <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat
-  
-  # Create an identity matrix with the same number of columns
   identity_matrix <- diag(ncol(mat))
-  
-  # Compute the deviation from the identity matrix
   deviation <- product - identity_matrix
-  
-  # Measure the orthogonality using the Frobenius norm
-  orthogonality_measure <- norm(deviation, type = "F")
-  
+  orthogonality_measure <- norm(deviation, type = "F")  
   return(orthogonality_measure)
 }
 
