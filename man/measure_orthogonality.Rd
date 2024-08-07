@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{measure_orthogonality}
 \alias{measure_orthogonality}
-\title{Measure the Orthogonality of a Non-Square Matrix}
+\title{Measure the Orthogonality of a Non-Square Matrix (scale invariant)}
 \usage{
 measure_orthogonality(mat)
 }

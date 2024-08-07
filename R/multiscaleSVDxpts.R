@@ -3010,6 +3010,59 @@ project_to_nonneg_orthogonal_alt <- function(X, tol = 1e-6, max_iter = 10) {
   Y
 }
 
+#' Calculate the invariant orthogonality defect that is zero for diagonal matrices
+#'
+#' @param A Input matrix (n x p, where n >> p)
+#' @return The invariant orthogonality defect that is zero for diagonal matrices
+#' @export
+invariant_orthogonality_defect_diag_zero <- function(A) {
+  A=as.matrix(A)
+  if (!is.matrix(A) || !is.numeric(A)) {
+    stop("invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
+  }
+  norm_A_F2 <- sum(A^2)
+  if (norm_A_F2 == 0) {
+    stop("'A' must not be a zero matrix")
+  }
+  AtA <- t(A) %*% A
+  AtA_normalized <- AtA / norm_A_F2
+  
+  column_sums_sq <- colSums(A^2)
+  D <- diag(column_sums_sq / norm_A_F2)
+  
+  orthogonality_defect <- norm(AtA_normalized - D, "F")^2
+
+  return(orthogonality_defect)
+}
+
+#' Compute the gradient of the invariant orthogonality defect
+#' 
+#' @param A Input matrix (n x p, where n >> p)
+#' @return Gradient of the invariant orthogonality defect with respect to A
+#' @export
+gradient_invariant_orthogonality_defect_diag_zero <- function(A) {
+  A=as.matrix(A)
+  if (!is.matrix(A) || !is.numeric(A)) {
+    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
+  }
+  norm_A_F2 <- sum(A^2)
+  if (norm_A_F2 == 0) {
+    stop("'A' must not be a zero matrix")
+  }
+  
+  AtA <- t(A) %*% A
+  AtA_normalized <- AtA / norm_A_F2
+  
+  column_sums_sq <- colSums(A^2)
+  D <- diag(column_sums_sq / norm_A_F2)
+  
+  M_minus_D <- AtA_normalized - D
+  M_minus_D = t(M_minus_D %*% t(A))
+  term2 =  (norm_A_F2 * diag(ncol(A)) - AtA)
+  gradient <- (4 / (norm_A_F2^2)) * ( M_minus_D %*% term2 )
+  return(gradient)
+}
+
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
 #'
@@ -3379,9 +3432,10 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-    myorthEnergy = measure_orthogonality( myenergysearchv )
+    myorthEnergy = invariant_orthogonality_defect_diag_zero( myenergysearchv )
+#    myorthEnergy = measure_orthogonality( myenergysearchv )*0
     if ( last_energy > 0 )
-      myorthEnergy = myorthEnergy * 0.1 / last_energy
+      myorthEnergy = myorthEnergy * 0.05 / last_energy
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
@@ -3625,7 +3679,8 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-      orthgrad = measure_orthogonality_gradient( vmats[[i]] )
+      orthgrad = gradient_invariant_orthogonality_defect_diag_zero( vmats[[i]] )
+#      orthgrad = measure_orthogonality_gradient( vmats[[i]] )*0
       temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
@@ -4432,7 +4487,7 @@ simlr.search <- function(
 
 
 
-#' Measure the Orthogonality of a Non-Square Matrix
+#' Measure the Orthogonality of a Non-Square Matrix (scale invariant)
 #'
 #' Computes a measure of orthogonality for a non-square matrix by comparing
 #' the product of the transpose and the matrix to the identity matrix.
@@ -4448,14 +4503,56 @@ simlr.search <- function(
 measure_orthogonality <- function(mat) {
   # Compute the product of the transpose and the matrix
   product <- t(mat) %*% mat
-  identity_matrix <- diag(ncol(mat))
+  n=ncol(mat)
+  identity_matrix <- diag(n)
   deviation <- product - identity_matrix
-  orthogonality_measure <- norm(deviation, type = "F")  
+  orthogonality_measure <- norm(deviation, type = "F")
   return(orthogonality_measure)
 }
 
 
+#' Normalized Relative Orthogonality Defect
+#'
+#' Computes the normalized relative orthogonality defect of a matrix A.
+#'
+#' @param A A numeric matrix.
+#'
+#' @return A numeric scalar representing the normalized relative orthogonality defect.
+#'
+#' @examples
+#' A <- matrix(rnorm(100), nrow = 10)
+#' rel_orth_defect_norm(A)
+#' @export
+rel_orth_defect_norm <- function(A) {
+  ATA <- t(A) %*% A
+  I <- diag(nrow(ATA))
+  defect <- ATA - I
+  norm_defect <- sqrt(sum(defect^2)) / (sqrt(sum(A^2)) * sqrt(min(dim(A))))
+  return(norm_defect)
+}
 
+#' Gradient of Normalized Relative Orthogonality Defect
+#'
+#' Computes the gradient of the normalized relative orthogonality defect with respect to A.
+#'
+#' @param A A numeric matrix.
+#'
+#' @return A numeric matrix representing the gradient of the normalized relative orthogonality defect.
+#'
+#' @examples
+#' A <- matrix(rnorm(100), nrow = 10)
+#' grad_rel_orth_defect_norm(A)
+#' @export
+grad_rel_orth_defect_norm <- function(A) {
+  ATA <- t(A) %*% A
+  I <- diag(nrow(ATA))
+  defect <- ATA - I
+  norm_A <- sqrt(sum(A^2))
+  grad_defect <- 2 * (A %*% defect) / (norm_A * sqrt(min(dim(A))))
+  grad_norm_A <- A / (norm_A * sqrt(min(dim(A))))
+  grad <- grad_defect - rel_orth_defect_norm(A) * grad_norm_A
+  return(grad)
+}
 
 #' Measure the Orthogonality Gradient of a Non-Square Matrix
 #'

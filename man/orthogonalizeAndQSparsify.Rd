@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{orthogonalizeAndQSparsify}
 \alias{orthogonalizeAndQSparsify}
-\title{sparsify a matrix}
+\title{Sparsify and optionally orthogonalize a matrix}
 \usage{
 orthogonalizeAndQSparsify(
   v,
@@ -15,33 +15,27 @@ orthogonalizeAndQSparsify(
 )
 }
 \arguments{
-\item{v}{input matrix}
+\item{v}{Input matrix}
 
-\item{sparsenessQuantile}{quantile to control sparseness - higher is sparser}
+\item{sparsenessQuantile}{Quantile to control sparseness - higher is sparser}
 
-\item{positivity}{restrict to positive or negative solution (beta) weights.
-choices are positive, negative or either as expressed as a string.}
+\item{positivity}{Restrict to positive or negative solution (beta) weights. Choices are "positive", "negative", or "either".}
 
-\item{orthogonalize}{run gram-schmidt if TRUE.}
+\item{orthogonalize}{Run Gram-Schmidt if TRUE.}
 
-\item{softThresholding}{use soft thresholding}
+\item{softThresholding}{Use soft thresholding if TRUE.}
 
-\item{unitNorm}{set each vector to unit norm}
+\item{unitNorm}{Normalize each vector to unit norm if TRUE.}
 
-\item{sparsenessAlg}{string sets the NMF or other algorithm to estimate V}
+\item{sparsenessAlg}{If specified, use rank-based matrix segmentation algorithm ("orthorank" or "basic").}
 }
 \value{
-matrix
+A sparsified and optionally orthogonalized matrix.
 }
 \description{
-This implements a quantile based sparsification operation
+This function implements a quantile-based sparsification operation.
 }
 \examples{
-
 mat <- replicate(100, rnorm(20))
 mat <- orthogonalizeAndQSparsify(mat)
-
-}
-\author{
-Avants BB
 }
