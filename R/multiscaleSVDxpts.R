@@ -3432,10 +3432,11 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-    myorthEnergy = invariant_orthogonality_defect_diag_zero( myenergysearchv )
+    myorthEnergy = rel_orth_defect_norm( myenergysearchv )
+#    myorthEnergy = invariant_orthogonality_defect_diag_zero( myenergysearchv )
 #    myorthEnergy = measure_orthogonality( myenergysearchv )*0
     if ( last_energy > 0 )
-      myorthEnergy = myorthEnergy * 0.05 / last_energy
+      myorthEnergy = myorthEnergy * 0.5 / last_energy
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
@@ -3679,7 +3680,8 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-      orthgrad = gradient_invariant_orthogonality_defect_diag_zero( vmats[[i]] )
+      orthgrad = grad_rel_orth_defect_norm( vmats[[i]] )
+#      orthgrad = gradient_invariant_orthogonality_defect_diag_zero( vmats[[i]] )
 #      orthgrad = measure_orthogonality_gradient( vmats[[i]] )*0
       temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
