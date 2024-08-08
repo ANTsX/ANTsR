@@ -3038,30 +3038,59 @@ project_to_nonneg_orthogonal_alt <- function(X, tol = 1e-6, max_iter = 10) {
   Y
 }
 
+
+#' Gradient of the Invariant Orthogonality Measure
+#'
+#' This function computes the gradient of the orthogonality defect measure with respect to the input matrix `A`.
+#' The gradient is useful for optimization techniques that require gradient information. The gradient will be zero
+#' for matrices where `AtA` equals the diagonal matrix `D`.
+#'
+#' @param A A numeric matrix.
+#' @return A numeric matrix representing the gradient of the orthogonality defect measure.
+#' @examples
+#' A <- matrix(runif(20), nrow = 10, ncol = 2)
+#' gradient_invariant_orthogonality(A)
+#' @export
+gradient_invariant_orthogonality <- function(A) {
+  # Step 1: Compute norm_A_F2
+  norm_A_F2 <- sum(A^2)
+  if (norm_A_F2 == 0) {
+    stop("Norm is zero, cannot compute gradient")
+  }
+  
+  # Step 2: Compute AtA
+  AtA <- t(A) %*% A
+  
+  # Step 3: Compute Frobenius norm of AtA_normalized
+  norm_AtA_normalized_F2 <- norm(AtA / norm_A_F2, "F")^2
+  
+  # Step 4: Compute gradient
+  gradient <- (2 / norm_A_F2^2) * (A %*% AtA - norm_AtA_normalized_F2 * A)
+  
+  return(gradient)
+}
+
+
+gradient_invariant_orthogonality2 <- function(A) {
+  gradient_invariant_orthogonality(A) - gradient_invariant_orthogonality(diag(ncol(A)))
+}
+
 #' Calculate the invariant orthogonality defect that is zero for diagonal matrices
 #'
 #' @param A Input matrix (n x p, where n >> p)
 #' @return The invariant orthogonality defect that is zero for diagonal matrices
 #' @export
 invariant_orthogonality_defect_diag_zero <- function(A) {
-  A=as.matrix(A)
-  if (!is.matrix(A) || !is.numeric(A)) {
-    stop("invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
-  }
   norm_A_F2 <- sum(A^2)
-  if (norm_A_F2 == 0) {
-    return( 0 )
-  }
   AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2
-  
+  AtA_normalized <- AtA / norm_A_F2  
   column_sums_sq <- colSums(A^2)
   D <- diag(column_sums_sq / norm_A_F2)
-  
-  orthogonality_defect <- norm(AtA_normalized - D, "F")^2
-
+  orthogonality_defect <- sum( (AtA_normalized - D)^2)
   return(orthogonality_defect)
 }
+
+
 
 
 #' Gradient of the Invariant Orthogonality Defect Measure
@@ -3076,7 +3105,13 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
 #' A <- matrix(runif(20), nrow = 10, ncol = 2)
 #' gradient_invariant_orthogonality_defect_diag_zero(A)
 #' @export
-gradient_invariant_orthogonality_defect_diag_zero <- function(A) {
+gradient_invariant_orthogonality_defect_diag_zero<- function(A) {
+  #### place holder until we get the correct analytical derivative
+  f1=invariant_orthogonality_defect_diag_zero
+  matrix( salad::d( f1( salad::dual(A) ) ), nrow=nrow(A) )
+}
+
+gradient_invariant_orthogonality_defect_diag_zero_old1 <- function(A) {
   A <- as.matrix(A)
   if (!is.matrix(A) || !is.numeric(A)) {
     stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
@@ -3135,7 +3170,7 @@ gradient_invariant_orthogonality_defect_diag_zero_old2 <- function(A) {
   return(gradient)
 }
 
-gradient_invariant_orthogonality_defect_diag_zero_old <- function(A) {
+gradient_invariant_orthogonality_defect_diag_zero_old3 <- function(A) {
   A=as.matrix(A)
   if (!is.matrix(A) || !is.numeric(A)) {
     stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
@@ -4579,21 +4614,25 @@ simlr.search <- function(
 
     if ( nrow(options_df) > 1 ) {
       rowsel = 1:(nrow(options_df)-1)
-      if ( all( finalE > options_df$final_energy[rowsel] ) & verbose > 0 ) {
-        print( paste("improvement" ) )
-        print( parameters )
+      if ( all( finalE > options_df$final_energy[rowsel] ) ) {
         bestresult = simlrX$simlr_result
         bestsig = simlrX$significance
-        print( head( bestresult$v[[ length(bestresult$v)]] ))
+        bestparams = parameters
+        if ( verbose > 0 ) {
+          print( paste("improvement" ) )
+          print( parameters )
+          print( head( bestresult$v[[ length(bestresult$v)]] ))
+          }
         }
-    }
+    } else { bestresult=bestsig=bestparams=NA }
   }
   if ( verbose ) {
     print( options_df[ which.max(options_df$final_energy),] )
     cat("el finito\n")
   }
-  # return(options_df)
-  return( list( parameters=options_df, simlr_result=bestresult, significance=bestsig ))
+  outlist = list( simlr_result=bestresult, significance=bestsig, parameters=options_df )
+  return( outlist )
+#  return( list( parameters=options_df, simlr_result=bestresult, significance=bestsig ))
 }
 
 
