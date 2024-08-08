@@ -3042,6 +3042,34 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
 #' @return Gradient of the invariant orthogonality defect with respect to A
 #' @export
 gradient_invariant_orthogonality_defect_diag_zero <- function(A) {
+  A <- as.matrix(A)
+  if (!is.matrix(A) || !is.numeric(A)) {
+    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
+  }
+  
+  norm_A_F2 <- sum(A^2)
+  if (norm_A_F2 == 0) {
+    stop("'A' must not be a zero matrix")
+  }
+  
+  AtA <- t(A) %*% A
+  AtA_normalized <- AtA / norm_A_F2
+  
+  column_sums_sq <- colSums(A^2)
+  D <- diag(column_sums_sq / norm_A_F2)
+  
+  X <- AtA_normalized - D
+  
+  # Adjusting dimensions for the gradient computation
+  term1 <- (4 * A %*% X) / norm_A_F2
+  term2 <- (4 * A * sum(AtA * X)) / norm_A_F2^3
+  
+  gradient <- term1 - term2
+  
+  return(gradient)
+}
+
+gradient_invariant_orthogonality_defect_diag_zero_old <- function(A) {
   A=as.matrix(A)
   if (!is.matrix(A) || !is.numeric(A)) {
     stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
@@ -3063,6 +3091,9 @@ gradient_invariant_orthogonality_defect_diag_zero <- function(A) {
   gradient <- (4 / (norm_A_F2^2)) * ( M_minus_D %*% term2 )
   return(gradient)
 }
+
+
+
 
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
