@@ -1698,7 +1698,33 @@ orthogonalizeAndQSparsify <- function(
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }
   if (sparsenessQuantile == 0) return(v)
-  
+
+  safequantile <- function(x, probs, na.rm = TRUE) {
+    if (all(x <= 0)) {
+      x <- -x
+    }
+    q <- quantile(x, probs, na.rm = na.rm)
+    if (q == max(x, na.rm = na.rm)) {
+      x <- sort(x)
+      q <- x[tail(which(x < q), 1)]
+    }
+    return(q)
+  }
+  safe_thresholding <- function(x, threshold, op = "<") {
+    if (op == "<") {
+      result <- ifelse(x < threshold, 0, x)
+    } else if (op == ">") {
+      result <- ifelse(x > threshold, 0, x)
+    } else {
+      stop("Invalid operation. Only '<' or '>' allowed.")
+    }
+    
+    if (all(result == 0)) {
+      result <- x
+    }
+    
+    return(result)
+  }  
   epsval <- 0.0
   
   for (vv in 1:ncol(v)) {
@@ -1715,20 +1741,22 @@ orthogonalizeAndQSparsify <- function(
       localv <- v[, vv]
       doflip <- sum(localv > 0, na.rm = TRUE) < sum(localv < 0, na.rm = TRUE)
       if (doflip) localv <- localv * -1
-      
-      myquant <- quantile(localv, sparsenessQuantile, na.rm = TRUE)
+
+      myquant <- safequantile(localv, sparsenessQuantile, na.rm = TRUE)
       if (!softThresholding) {
         if (positivity == "positive") {
           localv[localv <= myquant] <- 0
         } else if (positivity == "negative") {
           localv[localv > myquant] <- 0
         } else {
-          localv[abs(localv) < quantile(abs(localv), sparsenessQuantile, na.rm = TRUE)] <- 0
+          localvnz=abs(localv)
+          localv[abs(localv) < safequantile(localvnz, sparsenessQuantile, na.rm = TRUE)] <- 0
         }
       } else {
         if (positivity == "positive") localv[localv < 0] <- 0
         mysign <- sign(localv)
-        myquant <- quantile(abs(localv), sparsenessQuantile, na.rm = TRUE)
+        localvnz=abs(localv)
+        myquant <- safequantile(localvnz, sparsenessQuantile, na.rm = TRUE)
         temp <- abs(localv) - myquant
         temp[temp < 0] <- 0
         localv <- mysign * temp
@@ -3022,8 +3050,7 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
   }
   norm_A_F2 <- sum(A^2)
   if (norm_A_F2 == 0) {
-    message("'A' must not be a zero matrix - replace with random matrix")
-    A[ ] = rnorm(length(A))
+    return( 0 )
   }
   AtA <- t(A) %*% A
   AtA_normalized <- AtA / norm_A_F2
@@ -3036,12 +3063,51 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
   return(orthogonality_defect)
 }
 
-#' Compute the gradient of the invariant orthogonality defect
-#' 
-#' @param A Input matrix (n x p, where n >> p)
-#' @return Gradient of the invariant orthogonality defect with respect to A
+
+#' Gradient of the Invariant Orthogonality Defect Measure
+#'
+#' This function computes the gradient of the orthogonality defect measure with respect to the input matrix `A`.
+#' The gradient is useful for optimization techniques that require gradient information. The gradient will be zero
+#' for matrices where `AtA` equals the diagonal matrix `D`.
+#'
+#' @param A A numeric matrix.
+#' @return A numeric matrix representing the gradient of the orthogonality defect measure.
+#' @examples
+#' A <- matrix(runif(20), nrow = 10, ncol = 2)
+#' gradient_invariant_orthogonality_defect_diag_zero(A)
 #' @export
 gradient_invariant_orthogonality_defect_diag_zero <- function(A) {
+  A <- as.matrix(A)
+  if (!is.matrix(A) || !is.numeric(A)) {
+    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
+  }
+  
+  norm_A_F2 <- sum(A^2)
+  if (norm_A_F2 == 0) {
+    return( A )
+  }
+  
+  AtA <- t(A) %*% A
+  AtA_normalized <- AtA / norm_A_F2
+  
+  column_sums_sq <- colSums(A^2)
+  D <- diag(column_sums_sq / norm_A_F2)
+  
+  # Compute the deviation from the diagonal matrix D
+  deviation <- AtA_normalized - D
+  
+  # Check if AtA_normalized is a diagonal matrix
+  if (all(abs(deviation) < .Machine$double.eps)) {
+    return(matrix(0, nrow = nrow(A), ncol = ncol(A)))
+  }
+  
+  # Compute the gradient, adjusted for conformable matrix dimensions
+  grad <- (4 / norm_A_F2^2) * (A %*% deviation)
+  
+  return(grad)
+}
+
+gradient_invariant_orthogonality_defect_diag_zero_old2 <- function(A) {
   A <- as.matrix(A)
   if (!is.matrix(A) || !is.numeric(A)) {
     stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
@@ -3455,8 +3521,9 @@ simlr <- function(
       print(dim(vmats[[whichModality]]))
     }
     if (sparsenessQuantiles[whichModality] != 0 ) {
+      myenergysearchv=as.matrix(smoothingMatrices[[whichModality]] %*% myenergysearchv)
       myenergysearchv <- orthogonalizeAndQSparsify( # make sparse
-        as.matrix(smoothingMatrices[[whichModality]] %*% myenergysearchv),
+        myenergysearchv,
         sparsenessQuantiles[whichModality],
         orthogonalize = FALSE,
         positivity = positivities[whichModality],
@@ -3466,7 +3533,7 @@ simlr <- function(
     }
 #    myorthEnergy = rel_orth_defect_norm( myenergysearchv )
     myorthEnergy = invariant_orthogonality_defect_diag_zero( myenergysearchv )
-#    myorthEnergy = measure_orthogonality( myenergysearchv )*0
+#    myorthEnergy = measure_orthogonality_norm( myenergysearchv )
     if ( last_energy > 0 )
       myorthEnergy = myorthEnergy * 0.5 / last_energy
     if (ccaEnergy) {
@@ -3512,13 +3579,13 @@ simlr <- function(
 
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
   initialEnergy <- 0
+
   for (i in 1:nModalities) {
     loki <- getSyME2(0, 0,
       myw = myw, mixAlg = mixAlg,
       avgU = initialUMatrix[[i]],
       whichModality = i
     )
-    #    energyPath[1,i] = loki
     initialEnergy <- initialEnergy + loki / nModalities
   }
   bestU <- initialUMatrix
@@ -3714,8 +3781,8 @@ simlr <- function(
       }
 #      orthgrad = grad_rel_orth_defect_norm( vmats[[i]] )
       orthgrad = gradient_invariant_orthogonality_defect_diag_zero( vmats[[i]] )
-#      orthgrad = measure_orthogonality_gradient( vmats[[i]] )*0
-      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
+#      orthgrad = gradient_measure_orthogonality_norm( vmats[[i]] )
+#      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
@@ -4553,6 +4620,81 @@ measure_orthogonality <- function(mat) {
   orthogonality_measure <- norm(deviation, type = "F")
   return(orthogonality_measure)
 }
+
+#' Measure the Orthogonality of a Matrix
+#'
+#' This function calculates a measure of how far a given matrix is from being orthogonal.
+#' The measure is invariant to the Frobenius norm of the input matrix and is zero if the matrix is diagonal.
+#'
+#' @param mat A numeric matrix.
+#' @return A numeric value representing the orthogonality measure of the matrix.
+#' @examples
+#' mat <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3)
+#' measure_orthogonality_norm(mat)
+#' @export
+measure_orthogonality_norm <- function(mat) {
+  # Normalize the matrix by its Frobenius norm
+  frobenius_norm <- norm(mat, type = "F")
+  normalized_mat <- mat / frobenius_norm
+  
+  # Compute the product of the transpose and the normalized matrix
+  product <- t(normalized_mat) %*% normalized_mat
+  
+  # Get the number of columns of the matrix
+  n <- ncol(normalized_mat)
+  
+  # Create an identity matrix of the same size
+  identity_matrix <- diag(n)
+  
+  # Check if the matrix is diagonal (i.e., product is an identity matrix)
+  if (all(abs(product - identity_matrix) < .Machine$double.eps)) {
+    return(0)
+  }
+  
+  # Compute the deviation from the identity matrix
+  deviation <- product - identity_matrix
+  
+  # Calculate the orthogonality measure as the Frobenius norm of the deviation
+  orthogonality_measure <- norm(deviation, type = "F")
+  
+  return(orthogonality_measure)
+}
+
+#' Gradient of the Orthogonality Measure with Respect to the Matrix
+#'
+#' This function calculates the gradient of the orthogonality measure with respect to the input matrix.
+#' The gradient indicates the direction to adjust the matrix in order to minimize the orthogonality measure.
+#'
+#' @param mat A numeric matrix.
+#' @return A numeric matrix representing the gradient of the orthogonality measure with respect to the input matrix.
+#' @examples
+#' mat <- matrix(runif(9), nrow = 3)
+#' gradient_measure_orthogonality_norm(mat)
+#' @export
+gradient_measure_orthogonality_norm <- function(mat) {
+  # Compute the product of the transpose and the matrix
+  frobenius_norm <- norm(mat, type = "F")
+  mat <- mat / frobenius_norm
+  product <- t(mat) %*% mat
+  
+  # Get the number of columns of the matrix
+  n <- ncol(mat)
+  
+  # Create an identity matrix of the same size
+  identity_matrix <- diag(n)
+  
+  # Compute the deviation (mat' * mat - I)
+  deviation <- product - identity_matrix
+  
+  # Compute the Frobenius norm of the deviation
+  frobenius_norm <- norm(deviation, type = "F")
+  
+  # Compute the gradient
+  gradient <- (2 / frobenius_norm) * mat %*% deviation
+  
+  return(gradient)
+}
+
 
 
 #' Normalized Relative Orthogonality Defect

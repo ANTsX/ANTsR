@@ -2,16 +2,22 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{gradient_invariant_orthogonality_defect_diag_zero}
 \alias{gradient_invariant_orthogonality_defect_diag_zero}
-\title{Compute the gradient of the invariant orthogonality defect}
+\title{Gradient of the Invariant Orthogonality Defect Measure}
 \usage{
 gradient_invariant_orthogonality_defect_diag_zero(A)
 }
 \arguments{
-\item{A}{Input matrix (n x p, where n >> p)}
+\item{A}{A numeric matrix.}
 }
 \value{
-Gradient of the invariant orthogonality defect with respect to A
+A numeric matrix representing the gradient of the orthogonality defect measure.
 }
 \description{
-Compute the gradient of the invariant orthogonality defect
+This function computes the gradient of the orthogonality defect measure with respect to the input matrix `A`.
+The gradient is useful for optimization techniques that require gradient information. The gradient will be zero
+for matrices where `AtA` equals the diagonal matrix `D`.
+}
+\examples{
+A <- matrix(runif(20), nrow = 10, ncol = 2)
+gradient_invariant_orthogonality_defect_diag_zero(A)
 }
