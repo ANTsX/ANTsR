@@ -3091,6 +3091,16 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
 }
 
 
+temp <- function(A) {
+  norm_A_F2 <- sum(A^2)
+  AtA <- t(A) %*% A
+  AtA_normalized <- AtA / norm_A_F2  
+  column_sums_sq <- colSums(A^2)
+  D <- diag(column_sums_sq / norm_A_F2)
+  orthogonality_defect <- sum( (AtA_normalized - D)^2)
+  return(orthogonality_defect)
+}
+
 
 
 #' Gradient of the Invariant Orthogonality Defect Measure
@@ -3102,8 +3112,9 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
 #' @param A A numeric matrix.
 #' @return A numeric matrix representing the gradient of the orthogonality defect measure.
 #' @examples
-#' A <- matrix(runif(20), nrow = 10, ncol = 2)
-#' gradient_invariant_orthogonality_defect_diag_zero(A)
+#' # library(salad)
+#' # A <- matrix(runif(20), nrow = 10, ncol = 2)
+#' # gradient_invariant_orthogonality_defect_diag_zero(A)
 #' @export
 gradient_invariant_orthogonality_defect_diag_zero<- function(A) {
   #### place holder until we get the correct analytical derivative
@@ -4612,9 +4623,13 @@ simlr.search <- function(
       options_df=parameters 
     } else options_df=myrbind.fill(options_df, parameters )
 
-    if ( nrow(options_df) > 1 ) {
+    if ( nrow(options_df) >= 1 ) {
       rowsel = 1:(nrow(options_df)-1)
-      if ( all( finalE > options_df$final_energy[rowsel] ) ) {
+      if ( nrow( options_df )==1 ) {
+        bestresult = simlrX$simlr_result
+        bestsig = simlrX$significance
+        bestparams = parameters
+      } else if ( all( finalE > options_df$final_energy[rowsel] ) ) {
         bestresult = simlrX$simlr_result
         bestsig = simlrX$significance
         bestparams = parameters

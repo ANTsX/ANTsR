@@ -18,6 +18,7 @@ The gradient is useful for optimization techniques that require gradient informa
 for matrices where `AtA` equals the diagonal matrix `D`.
 }
 \examples{
-A <- matrix(runif(20), nrow = 10, ncol = 2)
-gradient_invariant_orthogonality_defect_diag_zero(A)
+# library(salad)
+# A <- matrix(runif(20), nrow = 10, ncol = 2)
+# gradient_invariant_orthogonality_defect_diag_zero(A)
 }
