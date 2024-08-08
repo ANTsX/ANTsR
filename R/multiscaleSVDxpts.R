@@ -3022,7 +3022,8 @@ invariant_orthogonality_defect_diag_zero <- function(A) {
   }
   norm_A_F2 <- sum(A^2)
   if (norm_A_F2 == 0) {
-    stop("'A' must not be a zero matrix")
+    message("'A' must not be a zero matrix - replace with random matrix")
+    A[ ] = rnorm(length(A))
   }
   AtA <- t(A) %*% A
   AtA_normalized <- AtA / norm_A_F2
@@ -4417,6 +4418,16 @@ simlr.search <- function(
     ebber <- unlist(sample(ebber_options, 1))
     pizzer <- unlist(sample(pizzer_options, 1))
     optimus <- unlist(sample(optimus_options, 1))
+    if ( verbose > 3 ) {
+      print( prescaling )
+      print( objectiver )
+      print( mixer )
+      print( constraint )
+      print( sparval )
+      print( ebber )
+      print( pizzer )
+      print( optimus )
+    }
     initu = initializeSimlr(
                     mats,
                     nsimlr,
