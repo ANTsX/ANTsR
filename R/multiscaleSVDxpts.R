@@ -3256,6 +3256,7 @@ gradient_invariant_orthogonality_defect_diag_zero_old3 <- function(A) {
 #' @author BB Avants.
 #' @examples
 #'
+#' \dontrun{
 #' set.seed(1500)
 #' nsub <- 25
 #' npix <- c(100, 200, 133)
@@ -3310,6 +3311,7 @@ gradient_invariant_orthogonality_defect_diag_zero_old3 <- function(A) {
 #'   initialUMatrix = nk, verbose = TRUE, iterations = 5,
 #'   energyType = "normalized"
 #' )
+#' }
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{simlrU}}
 #' @export simlr
 simlr <- function(
@@ -4509,9 +4511,14 @@ vector_to_df <- function(vector, column_name) {
 #' @param num_samples Number of random samples
 #' @param maxits Maximum number of iterations in simlr.perm subroutine
 #' @param nperms Number of permutations in simlr.perm subroutine
-#' @param verbose boolean
+#' @param search_type The type of search to perform: `"random"`, `"deterministic"`, or `"full"`. Defaults to `"random"`.
+#' @param verbose Verbosity level. Set to a higher value for more detailed output. Defaults to 0.
 #'
-#' @return List containing top 3 results and a data frame with selected options
+#' @return A list containing:
+#'   - `simlr_result`: The best SIMLR result.
+#'   - `significance`: The significance values from the best run.
+#'   - `parameters`: A data frame with all evaluated parameter combinations and their results.
+#'
 #' @export
 simlr.search <- function(
   mats,
@@ -4525,12 +4532,14 @@ simlr.search <- function(
   pizzer_options,
   optimus_options,
   constraint_options,
-  num_samples=10,
-  maxits=100,
-  nperms=1, 
+  num_samples = 10,
+  maxits = 100,
+  nperms = 1, 
+  search_type = c("random", "deterministic", "full"),
   verbose = 0
 ) {
-
+  search_type <- match.arg(search_type)
+  
   myrbind.fill <- function(..., fill = NA) {
     args <- list(...)
     col_names <- unique(unlist(lapply(args, names)))
@@ -4542,43 +4551,75 @@ simlr.search <- function(
     }  
     result
   }
-
+  
   ssbont <- function() set.seed(as.integer(substr(as.character(Sys.time()), 22, 200)))
   
-  for (i in 1:num_samples) {
-    if ( i %% 10 == 0 ) cat(paste0("i ",i," ..."))
+  # Step 1: Generate full options data frame
+  options_list <- expand.grid(
+    nsimlr = nsimlr_options,
+    prescaling = prescaling_options,
+    objectiver = objectiver_options,
+    mixer = mixer_options,
+    constraint = constraint_options,
+    sparval = sparval_options,
+    ebber = ebber_options,
+    pizzer = pizzer_options,
+    optimus = optimus_options,
+    stringsAsFactors = FALSE
+  )
+  # Step 2: Subsample based on search_type
+  if (search_type == "random") {
+    options_list <- options_list[sample(nrow(options_list), num_samples), ]
+  } else if (search_type == "deterministic") {
+    options_list <- options_list[seq(1, nrow(options_list), length.out = num_samples), ]
+  } 
+  
+  # Initialize results storage
+  options_df <- NULL
+  bestresult <- bestsig <- bestparams <- NA
+  
+  # Step 3: Iterate over the options and evaluate the function
+  cat( paste("Will search: ", length(options_list[[1]]), "parameter sets" ) )
+  for (i in 1:nrow(options_list)) {
+    if (i %% 10 == 0) cat(paste0("i ", i, " ..."))
     ssbont()
-    nsimlr <- unlist(sample(nsimlr_options, 1))
-    prescaling <- unlist(sample(prescaling_options, 1))
-    objectiver <- unlist(sample(objectiver_options, 1))
-    mixer <- unlist(sample(mixer_options, 1))
-    constraint <- unlist(sample(constraint_options, 1))
-    sparval <- unlist(sample(sparval_options, 1))
-    if ( is.character(sparval[1]) ) {
+    
+    nsimlr <- options_list$nsimlr[i] %>% unlist()
+    prescaling <- options_list$prescaling[i] %>% unlist()
+    objectiver <- options_list$objectiver[i] %>% unlist()
+    mixer <- options_list$mixer[i] %>% unlist()
+    constraint <- options_list$constraint[i] %>% unlist()
+    sparval <- options_list$sparval[i] %>% unlist()
+    ebber <- options_list$ebber[i] %>% unlist()
+    pizzer <- options_list$pizzer[i] %>% unlist()
+    optimus <- options_list$optimus[i] %>% unlist()
+    
+    if (is.character(sparval[1])) {
       parse_vec <- function(s) as.numeric(strsplit(gsub("rand", "", s), "x")[[1]])
-      sparval = parse_vec( sparval )
-      sparval = runif( sparval[1], sparval[2], sparval[3] )
+      sparval <- parse_vec(sparval)
+      sparval <- runif(sparval[1], sparval[2], sparval[3])
     }
-    ebber <- unlist(sample(ebber_options, 1))
-    pizzer <- unlist(sample(pizzer_options, 1))
-    optimus <- unlist(sample(optimus_options, 1))
-    if ( verbose > 3 ) {
-      print( prescaling )
-      print( objectiver )
-      print( mixer )
-      print( constraint )
-      print( sparval )
-      print( ebber )
-      print( pizzer )
-      print( optimus )
+    
+    if (verbose > 3) {
+      print(prescaling)
+      print(objectiver)
+      print(mixer)
+      print(constraint)
+      print(sparval)
+      print(ebber)
+      print(pizzer)
+      print(optimus)
     }
-    initu = initializeSimlr(
-                    mats,
-                    nsimlr,
-                    jointReduction = TRUE,
-                    zeroUpper = FALSE,
-                    uAlgorithm = "pca",
-                    addNoise = 0 )
+    
+    initu <- initializeSimlr(
+      mats,
+      nsimlr,
+      jointReduction = TRUE,
+      zeroUpper = FALSE,
+      uAlgorithm = "pca",
+      addNoise = 0
+    )
+    
     simlrX <- simlr.perm(
       mats,
       regs,
@@ -4586,68 +4627,76 @@ simlr.search <- function(
       randomSeed = 0,
       mixAlg = mixer,
       energyType = objectiver,
-      orthogonalize=TRUE,
+      orthogonalize = TRUE,
       scale = prescaling,
       sparsenessQuantiles = sparval,
       expBeta = ebber,
       positivities = pizzer,
       optimizationStyle = optimus,
       initialUMatrix = if ("lowrank" %in% prescaling) lowrankRowMatrix(initu, nsimlr * 2) else initu,
-      constraint=constraint,
+      constraint = constraint,
       connectors = simlr_path_models(length(mats), 0),
       verbose = verbose > 2,
       nperms = nperms,
       FUN = rvcoef
     )
-    finalE = sum( simlrX$significance[1,-c(1:2)] )
-    if ( nperms > 4 ) {
-      wtest = which( simlrX$significance$perm == 'ttest' )
-      finalE=( sum( -log10( simlrX$significance[wtest,-c(1:2)] +1e-10) ))
+    
+    finalE <- sum(simlrX$significance[1, -c(1:2)])
+    if (nperms > 4) {
+      wtest <- which(simlrX$significance$perm == 'ttest')
+      finalE <- sum(-log10(simlrX$significance[wtest, -c(1:2)] + 1e-10))
     }
-    finalE = finalE * 1.0/length(mats) # dont ask ...
-    parameters = data.frame(
-          nsimlr = nsimlr,
-          objectiver = objectiver,
-          mixer = mixer,
-          ebber = ebber,
-          optimus = optimus,
-          constraint = constraint,
-          final_energy = as.numeric( finalE )
-        )
-    n=0
-    prescaling = vector_to_df( prescaling, 'prescaling' )
-    sparval = vector_to_df( sparval, 'sparval' )
-    pizzer = vector_to_df( pizzer, 'positivity' )
-    parameters=cbind(parameters,prescaling,sparval,pizzer,simlrX$significance[1,-1])
-    if ( i == 1 ) {
-      options_df=parameters 
-    } else options_df=myrbind.fill(options_df, parameters )
-
-    if ( nrow(options_df) >= 1 ) {
-      rowsel = 1:(nrow(options_df)-1)
-      if ( nrow( options_df )==1 ) {
-        bestresult = simlrX$simlr_result
-        bestsig = simlrX$significance
-        bestparams = parameters
-      } else if ( all( finalE > options_df$final_energy[rowsel] ) ) {
-        bestresult = simlrX$simlr_result
-        bestsig = simlrX$significance
-        bestparams = parameters
-        if ( verbose > 0 ) {
-          print( paste("improvement" ) )
-          print( parameters )
-          print( head( bestresult$v[[ length(bestresult$v)]] ))
-          }
+    finalE <- finalE * 1.0 / length(mats) # Don't ask...
+    
+    parameters <- data.frame(
+      nsimlr = nsimlr,
+      objectiver = objectiver,
+      mixer = mixer,
+      ebber = ebber,
+      optimus = optimus,
+      constraint = constraint,
+      final_energy = as.numeric(finalE)
+    )
+    
+    prescaling <- vector_to_df(prescaling, 'prescaling')
+    sparval <- vector_to_df(sparval, 'sparval')
+    pizzer <- vector_to_df(pizzer, 'positivity')
+    parameters <- cbind(parameters, prescaling, sparval, pizzer, simlrX$significance[1, -1])
+    
+    if (is.null(options_df)) {
+      options_df <- parameters
+    } else {
+      options_df <- myrbind.fill(options_df, parameters)
+    }
+    
+    if (nrow(options_df) >= 1) {
+      rowsel <- 1:(nrow(options_df) - 1)
+      if (nrow(options_df) == 1) {
+        bestresult <- simlrX$simlr_result
+        bestsig <- simlrX$significance
+        bestparams <- parameters
+      } else if (all(finalE > options_df$final_energy[rowsel])) {
+        bestresult <- simlrX$simlr_result
+        bestsig <- simlrX$significance
+        bestparams <- parameters
+        if (verbose > 0) {
+          print(paste("improvement"))
+          print(parameters)
+          print(head(bestresult$v[[length(bestresult$v)]]))
         }
-    } else { bestresult=bestsig=bestparams=NA }
+      }
+    } else {
+      bestresult <- bestsig <- bestparams <- NA
+    }
   }
-  if ( verbose ) {
-    print( options_df[ which.max(options_df$final_energy),] )
+  
+  if (verbose) {
+    print(options_df[which.max(options_df$final_energy), ])
     cat("el finito\n")
   }
-  outlist = list( simlr_result=bestresult, significance=bestsig, parameters=options_df )
-  return( outlist )
-#  return( list( parameters=options_df, simlr_result=bestresult, significance=bestsig ))
+  
+  outlist <- list(simlr_result = bestresult, significance = bestsig, parameters = options_df)
+  return(outlist)
 }
 
 

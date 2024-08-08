@@ -19,6 +19,7 @@ simlr.search(
   num_samples = 10,
   maxits = 100,
   nperms = 1,
+  search_type = c("random", "deterministic", "full"),
   verbose = 0
 )
 }
@@ -53,10 +54,15 @@ samples in that range of length 3 ( or a similar string )}
 
 \item{nperms}{Number of permutations in simlr.perm subroutine}
 
-\item{verbose}{boolean}
+\item{search_type}{The type of search to perform: `"random"`, `"deterministic"`, or `"full"`. Defaults to `"random"`.}
+
+\item{verbose}{Verbosity level. Set to a higher value for more detailed output. Defaults to 0.}
 }
 \value{
-List containing top 3 results and a data frame with selected options
+A list containing:
+  - `simlr_result`: The best SIMLR result.
+  - `significance`: The significance values from the best run.
+  - `parameters`: A data frame with all evaluated parameter combinations and their results.
 }
 \description{
 Perform SIMLR Search with Random Hyperparameter Sampling

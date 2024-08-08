@@ -102,6 +102,7 @@ construction and to arbitrary numbers of modalities.
 }
 \examples{
 
+\dontrun{
 set.seed(1500)
 nsub <- 25
 npix <- c(100, 200, 133)
@@ -156,6 +157,7 @@ resultp <- simlr(list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ]),
   initialUMatrix = nk, verbose = TRUE, iterations = 5,
   energyType = "normalized"
 )
+}
 }
 \seealso{
 \code{\link{milr}} \code{\link{mild}} \code{\link{simlrU}}
