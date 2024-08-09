@@ -3080,27 +3080,41 @@ gradient_invariant_orthogonality2 <- function(A) {
 #' @param A Input matrix (n x p, where n >> p)
 #' @return The invariant orthogonality defect that is zero for diagonal matrices
 #' @export
-invariant_orthogonality_defect_diag_zero <- function(A) {
-  norm_A_F2 <- sum(A^2)
-  AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2  
-  column_sums_sq <- colSums(A^2)
-  D <- diag(column_sums_sq / norm_A_F2)
-  orthogonality_defect <- sum( (AtA_normalized - D)^2)
-  return(orthogonality_defect)
+invariant_orthogonality_defect <- function( A ) 
+{
+  norm_A_F <- sqrt(sum(A^2))
+  Ap <- A / norm_A_F
+  AtA <- t(Ap) %*% Ap
+  D <- diag(diag(AtA))
+  defect <- sum((AtA - D)^2)
+  return(defect)
 }
 
-
-temp <- function(A) {
-  norm_A_F2 <- sum(A^2)
-  AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2  
-  column_sums_sq <- colSums(A^2)
-  D <- diag(column_sums_sq / norm_A_F2)
-  orthogonality_defect <- sum( (AtA_normalized - D)^2)
-  return(orthogonality_defect)
+#' Compute the Gradient of the Orthogonality Defect
+#'
+#' This function computes the gradient of the orthogonality defect for a matrix \code{Ap},
+#' where the norm of \code{Ap} is assumed to be 1. The orthogonality defect is defined
+#' as the sum of the squared off-diagonal elements of \code{t(Ap) \%*\% Ap}.
+#'
+#' @param Ap A numeric matrix. It should have a Frobenius norm of 1.
+#' 
+#' @return A matrix representing the gradient of the orthogonality defect with respect to \code{Ap}.
+#' 
+#' @examples
+#' Ap <- matrix(rnorm(9), nrow = 3)
+#' Ap <- Ap / sqrt(sum(Ap^2)) # Normalize Ap
+#' gradient <- gradient_orthogonality_defect(Ap)
+#' print(gradient)
+#'
+#' @export
+gradient_invariant_orthogonality_defect <- function(A) {
+  Ap = A / norm( A, "F")  
+  AtA <- t(Ap) %*% Ap
+  D <- diag(diag(AtA))
+  orthogonality_diff <- AtA - D
+  gradient <- 4 * (Ap %*% orthogonality_diff)
+  return(gradient)
 }
-
 
 
 #' Gradient of the Invariant Orthogonality Defect Measure
@@ -3114,97 +3128,13 @@ temp <- function(A) {
 #' @examples
 #' # library(salad)
 #' # A <- matrix(runif(20), nrow = 10, ncol = 2)
-#' # gradient_invariant_orthogonality_defect_diag_zero(A)
+#' # gradient_invariant_orthogonality_salad(A)
 #' @export
-gradient_invariant_orthogonality_defect_diag_zero<- function(A) {
+gradient_invariant_orthogonality_salad<- function(A) {
   #### place holder until we get the correct analytical derivative
-  f1=invariant_orthogonality_defect_diag_zero
+  f1=invariant_orthogonality_defect
   matrix( salad::d( f1( salad::dual(A) ) ), nrow=nrow(A) )
 }
-
-gradient_invariant_orthogonality_defect_diag_zero_old1 <- function(A) {
-  A <- as.matrix(A)
-  if (!is.matrix(A) || !is.numeric(A)) {
-    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
-  }
-  
-  norm_A_F2 <- sum(A^2)
-  if (norm_A_F2 == 0) {
-    return( A )
-  }
-  
-  AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2
-  
-  column_sums_sq <- colSums(A^2)
-  D <- diag(column_sums_sq / norm_A_F2)
-  
-  # Compute the deviation from the diagonal matrix D
-  deviation <- AtA_normalized - D
-  
-  # Check if AtA_normalized is a diagonal matrix
-  if (all(abs(deviation) < .Machine$double.eps)) {
-    return(matrix(0, nrow = nrow(A), ncol = ncol(A)))
-  }
-  
-  # Compute the gradient, adjusted for conformable matrix dimensions
-  grad <- (4 / norm_A_F2^2) * (A %*% deviation)
-  
-  return(grad)
-}
-
-gradient_invariant_orthogonality_defect_diag_zero_old2 <- function(A) {
-  A <- as.matrix(A)
-  if (!is.matrix(A) || !is.numeric(A)) {
-    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
-  }
-  
-  norm_A_F2 <- sum(A^2)
-  if (norm_A_F2 == 0) {
-    stop("'A' must not be a zero matrix")
-  }
-  
-  AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2
-  
-  column_sums_sq <- colSums(A^2)
-  D <- diag(column_sums_sq / norm_A_F2)
-  
-  X <- AtA_normalized - D
-  
-  # Adjusting dimensions for the gradient computation
-  term1 <- (4 * A %*% X) / norm_A_F2
-  term2 <- (4 * A * sum(AtA * X)) / norm_A_F2^3
-  
-  gradient <- term1 - term2
-  
-  return(gradient)
-}
-
-gradient_invariant_orthogonality_defect_diag_zero_old3 <- function(A) {
-  A=as.matrix(A)
-  if (!is.matrix(A) || !is.numeric(A)) {
-    stop("gradient_invariant_orthogonality_defect_diag_zero: 'A' must be a numeric matrix")
-  }
-  norm_A_F2 <- sum(A^2)
-  if (norm_A_F2 == 0) {
-    stop("'A' must not be a zero matrix")
-  }
-  
-  AtA <- t(A) %*% A
-  AtA_normalized <- AtA / norm_A_F2
-  
-  column_sums_sq <- colSums(A^2)
-  D <- diag(column_sums_sq / norm_A_F2)
-  
-  M_minus_D <- AtA_normalized - D
-  M_minus_D = t(M_minus_D %*% t(A))
-  term2 =  (norm_A_F2 * diag(ncol(A)) - AtA)
-  gradient <- (4 / (norm_A_F2^2)) * ( M_minus_D %*% term2 )
-  return(gradient)
-}
-
-
 
 
 
@@ -3579,9 +3509,7 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-#    myorthEnergy = rel_orth_defect_norm( myenergysearchv )
-    myorthEnergy = invariant_orthogonality_defect_diag_zero( myenergysearchv )
-#    myorthEnergy = measure_orthogonality_norm( myenergysearchv )
+    myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
     if ( last_energy > 0 )
       myorthEnergy = myorthEnergy * 0.5 / last_energy
     if (ccaEnergy) {
@@ -3827,10 +3755,8 @@ simlr <- function(
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
         lastG[[i]] <- temperv
       }
-#      orthgrad = grad_rel_orth_defect_norm( vmats[[i]] )
-      orthgrad = gradient_invariant_orthogonality_defect_diag_zero( vmats[[i]] )
-#      orthgrad = gradient_measure_orthogonality_norm( vmats[[i]] )
-#      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
+      orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
+      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
