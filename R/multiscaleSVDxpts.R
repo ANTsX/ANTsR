@@ -2992,89 +2992,6 @@ predictSimlr <- function(x, simsol, targetMatrix, sourceMatrices, projectv = TRU
   )
 }
 
-#' Project a matrix to the nearest non-negative orthogonal matrix
-#'
-#' @param X a matrix
-#' @param tol tolerance for convergence (default: 1e-6)
-#' @param max_iter maximum number of iterations (default: 1000)
-#'
-#' @return a non-negative orthogonal matrix
-project_to_nonneg_orthogonal_optim <- function(X, tol = 1e-6, max_iter = 10 ) {
-  Y <- X
-  for (i in 1:max_iter) {
-    grad <- 2 * (t(Y) %*% Y - diag(ncol(Y))) %*% t(Y)
-    Y <- Y - 0.01 * t(grad)
-    
-    # Check each column and flip if sum of negative values is greater than sum of positive values
-    for (j in 1:ncol(Y)) {
-      pos_sum <- sum(Y[, j][Y[, j] > 0])
-      neg_sum <- sum(Y[, j][Y[, j] < 0])
-      if (neg_sum > pos_sum) Y[, j] <- -Y[, j]
-    }
-    
-    Y <- pmax(Y, 0)  # Set negative elements to zero
-    
-    if (measure_orthogonality(Y) < tol) break
-  }
-  Y
-}
-
-#' Project a matrix to the nearest non-negative orthogonal matrix
-#'
-#' @param X a matrix
-#' @param tol tolerance for convergence (default: 1e-6)
-#' @param max_iter maximum number of iterations (default: 1000)
-#'
-#' @return a non-negative orthogonal matrix
-#' @export 
-project_to_nonneg_orthogonal_alt <- function(X, tol = 1e-6, max_iter = 10) {
-  Y <- X
-  for (i in 1:max_iter) {
-    Y_prev <- Y
-    Y <- pmax(Y, 0)
-    Y <- svd(Y)$u %*% svd(Y)$v
-    if (sum(abs(Y - Y_prev)) < tol * sum(abs(Y))) break
-  }
-  Y
-}
-
-
-#' Gradient of the Invariant Orthogonality Measure
-#'
-#' This function computes the gradient of the orthogonality defect measure with respect to the input matrix `A`.
-#' The gradient is useful for optimization techniques that require gradient information. The gradient will be zero
-#' for matrices where `AtA` equals the diagonal matrix `D`.
-#'
-#' @param A A numeric matrix.
-#' @return A numeric matrix representing the gradient of the orthogonality defect measure.
-#' @examples
-#' A <- matrix(runif(20), nrow = 10, ncol = 2)
-#' gradient_invariant_orthogonality(A)
-#' @export
-gradient_invariant_orthogonality <- function(A) {
-  # Step 1: Compute norm_A_F2
-  norm_A_F2 <- sum(A^2)
-  if (norm_A_F2 == 0) {
-    stop("Norm is zero, cannot compute gradient")
-  }
-  
-  # Step 2: Compute AtA
-  AtA <- t(A) %*% A
-  
-  # Step 3: Compute Frobenius norm of AtA_normalized
-  norm_AtA_normalized_F2 <- norm(AtA / norm_A_F2, "F")^2
-  
-  # Step 4: Compute gradient
-  gradient <- (2 / norm_A_F2^2) * (A %*% AtA - norm_AtA_normalized_F2 * A)
-  
-  return(gradient)
-}
-
-
-gradient_invariant_orthogonality2 <- function(A) {
-  gradient_invariant_orthogonality(A) - gradient_invariant_orthogonality(diag(ncol(A)))
-}
-
 #' Calculate the invariant orthogonality defect that is zero for diagonal matrices
 #'
 #' @param A Input matrix (n x p, where n >> p)
@@ -4413,53 +4330,103 @@ vector_to_df <- function(vector, column_name) {
 
 
 
-#' Perform SIMLR Search with Random Hyperparameter Sampling
+
+#' Generate Parameter Grid for SIMLR Search
 #'
-#' @param mats List of matrices
-#' @param regs List of regularization matrices
-#' @param nsimlr_options List of nsimlr options
-#' @param prescaling_options List of prescaling options
-#' @param objectiver_options List of objective function options
-#' @param mixer_options List of mixer options
-#' @param sparval_options List of sparseness quantile options 
-#' may also pass in rand3x0.5x0.9 which will produce random uniform 
-#' samples in that range of length 3 ( or a similar string )
-#' @param ebber_options List of expBeta options
-#' @param pizzer_options List of positivity options
-#' @param optimus_options List of optimization style options
-#' @param constraint_options List of constraint style options
-#' @param num_samples Number of random samples
-#' @param maxits Maximum number of iterations in simlr.perm subroutine
-#' @param nperms Number of permutations in simlr.perm subroutine
-#' @param search_type The type of search to perform: `"random"`, `"deterministic"`, or `"full"`. Defaults to `"random"`.
-#' @param verbose Verbosity level. Set to a higher value for more detailed output. Defaults to 0.
+#' This function creates and optionally subsets all possible combinations of input parameters for use in a SIMLR grid search.
 #'
-#' @return A list containing:
-#'   - `simlr_result`: The best SIMLR result.
-#'   - `significance`: The significance values from the best run.
-#'   - `parameters`: A data frame with all evaluated parameter combinations and their results.
+#' @param nsimlr_options A list of options for the `nsimlr` parameter.
+#' @param prescaling_options A list of options for the `prescaling` parameter.
+#' @param objectiver_options A list of options for the `objectiver` parameter.
+#' @param mixer_options A list of options for the `mixer` parameter.
+#' @param sparval_options A list of options for the `sparval` parameter.
+#' @param expBeta_options A list of options for the `ebber` parameter.
+#' @param positivites_options A list of options for the `pizzer` parameter.
+#' @param optimus_options A list of options for the `optimus` parameter.
+#' @param constraint_options A list of options for the `constraint` parameter, default is `list("none")`.
+#' 
+#' @return A list containing all (or a subset of) combinations of the provided parameters. Each row in the data frame represents a unique combination of the parameters.
+#' 
+#' The columns of the returned data frame include:
+#' \itemize{
+#'   \item \code{nsimlr}: Values corresponding to the `nsimlr` parameter.
+#'   \item \code{prescaling}: Values corresponding to the `prescaling` parameter.
+#'   \item \code{objectiver}: Values corresponding to the `objectiver` parameter.
+#'   \item \code{mixer}: Values corresponding to the `mixer` parameter.
+#'   \item \code{constraint}: Values corresponding to the `constraint` parameter.
+#'   \item \code{sparval}: Values corresponding to the `sparval` parameter.
+#'   \item \code{ebber}: Values corresponding to the `ebber` parameter.
+#'   \item \code{pizzer}: Values corresponding to the `pizzer` parameter.
+#'   \item \code{optimus}: Values corresponding to the `optimus` parameter.
+#' }
 #'
+#' Each row represents a specific set of parameters that can be passed to the `simlr.search` function for evaluation. The returned data frame is intended for use in parameter tuning and optimization.
+#' 
 #' @export
-simlr.search <- function(
-  mats,
-  regs,
+simlr.parameters <- function(
   nsimlr_options,
   prescaling_options,
   objectiver_options,
   mixer_options,
   sparval_options,
-  ebber_options,
-  pizzer_options,
+  expBeta_options,
+  positivites_options,
   optimus_options,
-  constraint_options,
+  constraint_options = list("none"),
   num_samples = 10,
-  maxits = 100,
-  nperms = 1, 
-  search_type = c("random", "deterministic", "full"),
-  verbose = 0
+  search_type = c("random", "deterministic", "full")
 ) {
   search_type <- match.arg(search_type)
   
+  # Step 1: Generate full options data frame
+  options_df <- expand.grid(
+    nsimlr = nsimlr_options,
+    prescaling = prescaling_options,
+    objectiver = objectiver_options,
+    mixer = mixer_options,
+    constraint = constraint_options,
+    sparval = sparval_options,
+    ebber = expBeta_options,
+    pizzer = positivites_options,
+    optimus = optimus_options,
+    stringsAsFactors = FALSE
+  )
+  
+  # Step 2: Subsample based on search_type
+  if (search_type == "random") {
+    options_df <- options_df[sample(nrow(options_df), num_samples), ]
+  } else if (search_type == "deterministic") {
+    options_df <- options_df[seq(1, nrow(options_df), length.out = num_samples), ]
+  }
+  
+  return(options_df)
+}
+
+
+#' Perform SIMLR Grid Search
+#'
+#' This function performs a grid search over the parameter combinations provided by `options_df`.
+#'
+#' @param mats The input matrices for SIMLR.
+#' @param regs The regularization options for SIMLR.
+#' @param options_df A data frame of parameter combinations generated by `simlr.parameters`.
+#' @param num_samples The number of samples to use. Default is 10.
+#' @param maxits The maximum number of iterations for SIMLR. Default is 100.
+#' @param nperms The number of permutations for the significance test. Default is 1.
+#' @param verbose The verbosity level. Default is 0.
+#' @param FUN The function to use for the SIMLR evaluation. Default is `rvcoef`.
+#' @return A list containing the best SIMLR result, its significance, and the parameters.
+#' @export
+simlr.search <- function(
+  mats,
+  regs,
+  options_df,
+  num_samples = 10,
+  maxits = 100,
+  nperms = 1,
+  verbose = 0,
+  FUN = rvcoef
+) {
   myrbind.fill <- function(..., fill = NA) {
     args <- list(...)
     col_names <- unique(unlist(lapply(args, names)))
@@ -4468,51 +4435,31 @@ simlr.search <- function(
     for (arg in args) {
       arg[, setdiff(col_names, names(arg))] <- fill
       result <- rbind(result, arg)
-    }  
+    }
     result
   }
   
   ssbont <- function() set.seed(as.integer(substr(as.character(Sys.time()), 22, 200)))
   
-  # Step 1: Generate full options data frame
-  options_list <- expand.grid(
-    nsimlr = nsimlr_options,
-    prescaling = prescaling_options,
-    objectiver = objectiver_options,
-    mixer = mixer_options,
-    constraint = constraint_options,
-    sparval = sparval_options,
-    ebber = ebber_options,
-    pizzer = pizzer_options,
-    optimus = optimus_options,
-    stringsAsFactors = FALSE
-  )
-  # Step 2: Subsample based on search_type
-  if (search_type == "random") {
-    options_list <- options_list[sample(nrow(options_list), num_samples), ]
-  } else if (search_type == "deterministic") {
-    options_list <- options_list[seq(1, nrow(options_list), length.out = num_samples), ]
-  } 
-  
   # Initialize results storage
-  options_df <- NULL
+  options_df_final <- NULL
   bestresult <- bestsig <- bestparams <- NA
   
-  # Step 3: Iterate over the options and evaluate the function
-  cat( paste("Will search: ", length(options_list[[1]]), "parameter sets" ) )
-  for (i in 1:nrow(options_list)) {
+  # Iterate over the options and evaluate the function
+  cat(paste("Will search:", nrow(options_df), "parameter sets"))
+  for (i in 1:nrow(options_df)) {
     if (i %% 10 == 0) cat(paste0("i ", i, " ..."))
     ssbont()
     
-    nsimlr <- options_list$nsimlr[i] %>% unlist()
-    prescaling <- options_list$prescaling[i] %>% unlist()
-    objectiver <- options_list$objectiver[i] %>% unlist()
-    mixer <- options_list$mixer[i] %>% unlist()
-    constraint <- options_list$constraint[i] %>% unlist()
-    sparval <- options_list$sparval[i] %>% unlist()
-    ebber <- options_list$ebber[i] %>% unlist()
-    pizzer <- options_list$pizzer[i] %>% unlist()
-    optimus <- options_list$optimus[i] %>% unlist()
+    nsimlr <- unlist(options_df$nsimlr[i])
+    prescaling <- unlist(options_df$prescaling[i])
+    objectiver <- unlist(options_df$objectiver[i])
+    mixer <- unlist(options_df$mixer[i])
+    constraint <- unlist(options_df$constraint[i])
+    sparval <- unlist(options_df$sparval[i])
+    ebber <- unlist(options_df$ebber[i])
+    pizzer <- unlist(options_df$pizzer[i])
+    optimus <- unlist(options_df$optimus[i])
     
     if (is.character(sparval[1])) {
       parse_vec <- function(s) as.numeric(strsplit(gsub("rand", "", s), "x")[[1]])
@@ -4558,13 +4505,13 @@ simlr.search <- function(
       connectors = simlr_path_models(length(mats), 0),
       verbose = verbose > 2,
       nperms = nperms,
-      FUN = rvcoef
+      FUN = FUN
     )
     
     finalE <- sum(simlrX$significance[1, -c(1:2)])
     if (nperms > 4) {
       wtest <- which(simlrX$significance$perm == 'ttest')
-      finalE <- sum( -log10(simlrX$significance[wtest, -c(1:2)] ) )
+      finalE <- sum(-log10(simlrX$significance[wtest, -c(1:2)]))
     }
     finalE <- finalE * 1.0 / length(mats) # Don't ask...
     
@@ -4583,19 +4530,19 @@ simlr.search <- function(
     pizzer <- vector_to_df(pizzer, 'positivity')
     parameters <- cbind(parameters, prescaling, sparval, pizzer, simlrX$significance[1, -1])
     
-    if (is.null(options_df)) {
-      options_df <- parameters
+    if (is.null(options_df_final)) {
+      options_df_final <- parameters
     } else {
-      options_df <- myrbind.fill(options_df, parameters)
+      options_df_final <- myrbind.fill(options_df_final, parameters)
     }
     
-    if (nrow(options_df) >= 1) {
-      rowsel <- 1:(nrow(options_df) - 1)
-      if (nrow(options_df) == 1) {
+    if (nrow(options_df_final) >= 1) {
+      rowsel <- 1:(nrow(options_df_final) - 1)
+      if (nrow(options_df_final) == 1) {
         bestresult <- simlrX$simlr_result
         bestsig <- simlrX$significance
         bestparams <- parameters
-      } else if (all(finalE > options_df$final_energy[rowsel])) {
+      } else if (all(finalE > options_df_final$final_energy[rowsel])) {
         bestresult <- simlrX$simlr_result
         bestsig <- simlrX$significance
         bestparams <- parameters
@@ -4615,179 +4562,7 @@ simlr.search <- function(
     cat("el finito\n")
   }
   
-  outlist <- list(simlr_result = bestresult, significance = bestsig, parameters = options_df)
+  outlist <- list(simlr_result = bestresult, significance = bestsig, parameters = bestparams )
   return(outlist)
-}
-
-
-
-#' Measure the Orthogonality of a Non-Square Matrix (scale invariant)
-#'
-#' Computes a measure of orthogonality for a non-square matrix by comparing
-#' the product of the transpose and the matrix to the identity matrix.
-#'
-#' @param mat A numeric matrix.
-#' @return A numeric value indicating the deviation from orthogonality.
-#' @examples
-#' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality(A) # Should be close to 0 for orthonormal columns
-#' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality(B)
-#' @export
-measure_orthogonality <- function(mat) {
-  # Compute the product of the transpose and the matrix
-  product <- t(mat) %*% mat
-  n=ncol(mat)
-  identity_matrix <- diag(n)
-  deviation <- product - identity_matrix
-  orthogonality_measure <- norm(deviation, type = "F")
-  return(orthogonality_measure)
-}
-
-#' Measure the Orthogonality of a Matrix
-#'
-#' This function calculates a measure of how far a given matrix is from being orthogonal.
-#' The measure is invariant to the Frobenius norm of the input matrix and is zero if the matrix is diagonal.
-#'
-#' @param mat A numeric matrix.
-#' @return A numeric value representing the orthogonality measure of the matrix.
-#' @examples
-#' mat <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3)
-#' measure_orthogonality_norm(mat)
-#' @export
-measure_orthogonality_norm <- function(mat) {
-  # Normalize the matrix by its Frobenius norm
-  frobenius_norm <- norm(mat, type = "F")
-  normalized_mat <- mat / frobenius_norm
-  
-  # Compute the product of the transpose and the normalized matrix
-  product <- t(normalized_mat) %*% normalized_mat
-  
-  # Get the number of columns of the matrix
-  n <- ncol(normalized_mat)
-  
-  # Create an identity matrix of the same size
-  identity_matrix <- diag(n)
-  
-  # Check if the matrix is diagonal (i.e., product is an identity matrix)
-  if (all(abs(product - identity_matrix) < .Machine$double.eps)) {
-    return(0)
-  }
-  
-  # Compute the deviation from the identity matrix
-  deviation <- product - identity_matrix
-  
-  # Calculate the orthogonality measure as the Frobenius norm of the deviation
-  orthogonality_measure <- norm(deviation, type = "F")
-  
-  return(orthogonality_measure)
-}
-
-#' Gradient of the Orthogonality Measure with Respect to the Matrix
-#'
-#' This function calculates the gradient of the orthogonality measure with respect to the input matrix.
-#' The gradient indicates the direction to adjust the matrix in order to minimize the orthogonality measure.
-#'
-#' @param mat A numeric matrix.
-#' @return A numeric matrix representing the gradient of the orthogonality measure with respect to the input matrix.
-#' @examples
-#' mat <- matrix(runif(9), nrow = 3)
-#' gradient_measure_orthogonality_norm(mat)
-#' @export
-gradient_measure_orthogonality_norm <- function(mat) {
-  # Compute the product of the transpose and the matrix
-  frobenius_norm <- norm(mat, type = "F")
-  mat <- mat / frobenius_norm
-  product <- t(mat) %*% mat
-  
-  # Get the number of columns of the matrix
-  n <- ncol(mat)
-  
-  # Create an identity matrix of the same size
-  identity_matrix <- diag(n)
-  
-  # Compute the deviation (mat' * mat - I)
-  deviation <- product - identity_matrix
-  
-  # Compute the Frobenius norm of the deviation
-  frobenius_norm <- norm(deviation, type = "F")
-  
-  # Compute the gradient
-  gradient <- (2 / frobenius_norm) * mat %*% deviation
-  
-  return(gradient)
-}
-
-
-
-#' Normalized Relative Orthogonality Defect
-#'
-#' Computes the normalized relative orthogonality defect of a matrix A.
-#'
-#' @param A A numeric matrix.
-#'
-#' @return A numeric scalar representing the normalized relative orthogonality defect.
-#'
-#' @examples
-#' A <- matrix(rnorm(100), nrow = 10)
-#' rel_orth_defect_norm(A)
-#' @export
-rel_orth_defect_norm <- function(A) {
-  ATA <- t(A) %*% A
-  I <- diag(nrow(ATA))
-  defect <- ATA - I
-  norm_defect <- sqrt(sum(defect^2)) / (sqrt(sum(A^2)) * sqrt(min(dim(A))))
-  return(norm_defect)
-}
-
-#' Gradient of Normalized Relative Orthogonality Defect
-#'
-#' Computes the gradient of the normalized relative orthogonality defect with respect to A.
-#'
-#' @param A A numeric matrix.
-#'
-#' @return A numeric matrix representing the gradient of the normalized relative orthogonality defect.
-#'
-#' @examples
-#' A <- matrix(rnorm(100), nrow = 10)
-#' grad_rel_orth_defect_norm(A)
-#' @export
-grad_rel_orth_defect_norm <- function(A) {
-  ATA <- t(A) %*% A
-  I <- diag(nrow(ATA))
-  defect <- ATA - I
-  norm_A <- sqrt(sum(A^2))
-  grad_defect <- 2 * (A %*% defect) / (norm_A * sqrt(min(dim(A))))
-  grad_norm_A <- A / (norm_A * sqrt(min(dim(A))))
-  grad <- grad_defect - rel_orth_defect_norm(A) * grad_norm_A
-  return(grad)
-}
-
-#' Measure the Orthogonality Gradient of a Non-Square Matrix
-#'
-#' Computes the gradient of the orthogonality measure for a non-square matrix.
-#'
-#' @param mat A numeric matrix.
-#' @return A matrix representing the gradient of the orthogonality measure.
-#' @examples
-#' A <- matrix(c(1, 0, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_gradient(A)
-#' B <- matrix(c(1, 1, 0, 1, 0, 1), nrow = 3, ncol = 2)
-#' measure_orthogonality_gradient(B)
-#' @export
-measure_orthogonality_gradient <- function(mat) {
-  # Compute the product of the transpose and the matrix
-  product <- t(mat) %*% mat
-  
-  # Create an identity matrix with the same number of columns
-  identity_matrix <- diag(ncol(mat))
-  
-  # Compute the deviation from the identity matrix
-  deviation <- product - identity_matrix
-  
-  # Compute the gradient
-  gradient <- 2 * mat %*% deviation
-  
-  return(gradient)
 }
 

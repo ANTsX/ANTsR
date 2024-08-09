@@ -7,13 +7,13 @@
 gradient_invariant_orthogonality_defect(A)
 }
 \arguments{
-\item{Ap}{A numeric matrix. It should have a Frobenius norm of 1.}
+\item{A}{A numeric matrix.}
 }
 \value{
 A matrix representing the gradient of the orthogonality defect with respect to \code{Ap}.
 }
 \description{
-This function computes the gradient of the orthogonality defect for a matrix \code{Ap},
-where the norm of \code{Ap} is assumed to be 1. The orthogonality defect is defined
-as the sum of the squared off-diagonal elements of \code{t(Ap) \%*\% Ap}.
+This function computes the gradient of the orthogonality defect for a matrix \code{A},
+The orthogonality defect is defined as the sum of the squared off-diagonal elements 
+of \code{t(A) \%*\% A}.
 }
