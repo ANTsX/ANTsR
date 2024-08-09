@@ -4564,7 +4564,7 @@ simlr.search <- function(
     finalE <- sum(simlrX$significance[1, -c(1:2)])
     if (nperms > 4) {
       wtest <- which(simlrX$significance$perm == 'ttest')
-      finalE <- sum(-log10(simlrX$significance[wtest, -c(1:2)] + 1e-10))
+      finalE <- sum( -log10(simlrX$significance[wtest, -c(1:2)] ) )
     }
     finalE <- finalE * 1.0 / length(mats) # Don't ask...
     
