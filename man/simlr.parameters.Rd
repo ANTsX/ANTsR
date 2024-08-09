@@ -11,7 +11,7 @@ simlr.parameters(
   mixer_options,
   sparval_options,
   expBeta_options,
-  positivites_options,
+  positivities_options,
   optimus_options,
   constraint_options = list("none"),
   num_samples = 10,
@@ -31,7 +31,7 @@ simlr.parameters(
 
 \item{expBeta_options}{A list of options for the `ebber` parameter.}
 
-\item{positivites_options}{A list of options for the `pizzer` parameter.}
+\item{positivities_options}{A list of options for the `pizzer` parameter.}
 
 \item{optimus_options}{A list of options for the `optimus` parameter.}
 
