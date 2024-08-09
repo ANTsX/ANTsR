@@ -3092,11 +3092,11 @@ invariant_orthogonality_defect <- function( A )
 
 #' Compute the Gradient of the Orthogonality Defect
 #'
-#' This function computes the gradient of the orthogonality defect for a matrix \code{Ap},
-#' where the norm of \code{Ap} is assumed to be 1. The orthogonality defect is defined
-#' as the sum of the squared off-diagonal elements of \code{t(Ap) \%*\% Ap}.
+#' This function computes the gradient of the orthogonality defect for a matrix \code{A},
+#' The orthogonality defect is defined as the sum of the squared off-diagonal elements 
+#' of \code{t(A) \%*\% A}.
 #'
-#' @param Ap A numeric matrix. It should have a Frobenius norm of 1.
+#' @param A A numeric matrix.
 #' 
 #' @return A matrix representing the gradient of the orthogonality defect with respect to \code{Ap}.
 #'
@@ -3750,7 +3750,7 @@ simlr <- function(
         lastG[[i]] <- temperv
       }
       orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
-      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")
+      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")*0.5
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
