@@ -4584,3 +4584,96 @@ simlr.search <- function(
   return(outlist)
 }
 
+
+
+
+
+
+#' Apply simlr matrices to an existing data frame and combine the results
+#'
+#' This function takes a list of matrices, applies each matrix via matrix multiplication
+#' to an existing data frame, and combines the resulting projections with the original data frame.
+#'
+#' @param existing_df An existing data frame to which the matrices will be applied.
+#' @param matrices_list A list of matrices read from CSV files.
+#' @param n_limit NULL or integer that can limit the number of projections
+#' @param robust boolean
+#' @param center boolean center the data before applying
+#' @param scale boolean scale the data before applying
+#' @param absolute_value boolean vector indicating whether to take abs of feature matrices
+#' @param verbose boolean
+#'
+#' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
+#' @export
+#' @examples
+#' matrices_list <- list(
+#'   matrix1 = matrix(rnorm(147 * 171), nrow = 147, ncol = 171),
+#'   matrix2 = matrix(rnorm(147 * 156), nrow = 147, ncol = 156)
+#' )
+#' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
+#' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
+apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, absolute_value=FALSE, verbose=FALSE ) {
+
+  replbind <- function(df1, df2) {
+    # Find the common and unique columns
+    common_cols <- intersect(names(df1), names(df2))
+    unique_cols_df1 <- setdiff(names(df1), common_cols)
+    unique_cols_df2 <- setdiff(names(df2), common_cols)
+    
+    # Replace values in common columns with those from df2
+    if (length(common_cols) > 0) {
+      for (col in common_cols) {
+        df1[[col]] <- df2[[col]]
+      }
+    }
+    
+    # Bind the unique columns from both data frames
+    if (length(unique_cols_df2) > 0) {
+      result <- cbind(df1, df2[, unique_cols_df2, drop = FALSE])
+    } else {
+      result <- df1
+    }
+    
+    return(result)
+  }
+  newnames=c()
+  ct=0
+  for (name in names(matrices_list)) {
+    ct=ct+1
+    if ( verbose ) print(name)
+    # Ensure the matrix multiplication is valid
+    locnames = rownames( matrices_list[[name]] )
+    edfnames = colnames(existing_df) 
+    inames = intersect( locnames, edfnames )
+    if ( length(inames) > 0 ) {
+      # Perform matrix multiplication
+      imat = data.matrix(existing_df[,inames])
+      if ( robust ) imat = robustMatrixTransform( imat )
+      if ( center | scale ) imat=scale(imat,center=center,scale=scale)
+      features = data.matrix(matrices_list[[name]][inames,])
+      if ( absolute_value[ct] ) features = take_abs_unsigned( features )
+      projection <- as.data.frame( imat %*% features)
+      ##################################################
+      # Update column names to reflect the matrix name #
+      colnames(projection) = paste0( name, colnames( matrices_list[[name]] ) )
+      # Combine the projections with the existing data frame
+      if ( !is.null(n_limit )  ) {
+        projection=projection[,1:n_limit]
+      }
+      newnames=c(newnames,colnames(projection))
+
+      existing_df <- replbind(existing_df, projection)
+      if ( verbose ) {
+        print( inames )
+        print( colnames(projection) )
+        print(tail(colnames(existing_df)))
+      }
+    } else {
+      warning(paste("Number of columns in existing data frame does not match number of rows in matrix", name))
+    }
+  }
+  
+  return( list(extendeddf=existing_df, newcolnames=newnames))
+}
+
+
