@@ -3505,7 +3505,7 @@ simlr <- function(
     }
     myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
     if ( last_energy > 0 )
-      myorthEnergy = myorthEnergy * 0.5 / last_energy
+      myorthEnergy = 0.5 * myorthEnergy*(0.5 * last_energy/myorthEnergy)
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
@@ -3750,7 +3750,7 @@ simlr <- function(
         lastG[[i]] <- temperv
       }
       orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
-      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")*0.5
+      temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")*2.0
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
         temp <- optimize(getSyME2, # computes the energy
