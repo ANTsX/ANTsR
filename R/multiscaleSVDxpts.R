@@ -4576,11 +4576,11 @@ simlr.search <- function(
   }
   
   if (verbose) {
-    print(options_df[which.max(options_df$final_energy), ])
+    print(options_df_final[which.max(options_df_final$final_energy), ])
     cat("el finito\n")
   }
   
-  outlist <- list(simlr_result = bestresult, significance = bestsig, parameters = bestparams )
+  outlist <- list(simlr_result = bestresult, significance = bestsig, parameters = bestparams, paramsearch=options_df_final )
   return(outlist)
 }
 
