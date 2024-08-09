@@ -24,7 +24,7 @@ simlr(
   connectors = NULL,
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
   scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute",
-    "eigenvalue", "robust", "whiten", "lowrank"),
+    "eigenvalue", "robust", "whiten", "lowrank", "rank"),
   expBeta = 0,
   jointInitialization = TRUE,
   sparsenessAlg = NA,

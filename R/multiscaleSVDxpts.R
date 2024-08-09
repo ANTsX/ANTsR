@@ -3173,7 +3173,7 @@ simlr <- function(
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
-    scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute", "eigenvalue", "robust", 'whiten', 'lowrank'  ),
+    scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute", "eigenvalue", "robust", 'whiten', 'lowrank', 'rank'  ),
     expBeta = 0.0,
     jointInitialization = TRUE,
     sparsenessAlg = NA,
@@ -3195,7 +3195,7 @@ simlr <- function(
   optimizationStyle <- match.arg(optimizationStyle)
   scalechoices = c(
       "sqrtnp", "np", "centerAndScale",
-      "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten'
+      "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten','rank'
     )
   scaleList <- c()
   if (length(scale) == 1) {
@@ -3300,7 +3300,7 @@ simlr <- function(
         if (scaleList[j] == "eigenvalue") {
           voxmats[[i]] <- voxmats[[i]] / sum(svd(voxmats[[i]])$d)
         }
-        if (scaleList[j] == "robust") {
+        if ( scaleList[j] %in% c("robust","rank") ) {
           voxmats[[i]] <- robustMatrixTransform(voxmats[[i]])
         }
         if (scaleList[j] == "whiten") {
