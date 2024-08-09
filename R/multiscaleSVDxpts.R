@@ -3505,7 +3505,7 @@ simlr <- function(
     }
     myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
     if ( last_energy > .Machine$double.eps & myorthEnergy > .Machine$double.eps)
-      myorthEnergy = 0.5 * myorthEnergy*(0.5 * last_energy/myorthEnergy)
+      myorthEnergy = 0.5 * myorthEnergy*(last_energy/myorthEnergy)
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
