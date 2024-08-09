@@ -3099,12 +3099,6 @@ invariant_orthogonality_defect <- function( A )
 #' @param Ap A numeric matrix. It should have a Frobenius norm of 1.
 #' 
 #' @return A matrix representing the gradient of the orthogonality defect with respect to \code{Ap}.
-#' 
-#' @examples
-#' Ap <- matrix(rnorm(9), nrow = 3)
-#' Ap <- Ap / sqrt(sum(Ap^2)) # Normalize Ap
-#' gradient <- gradient_orthogonality_defect(Ap)
-#' print(gradient)
 #'
 #' @export
 gradient_invariant_orthogonality_defect <- function(A) {

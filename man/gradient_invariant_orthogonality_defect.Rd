@@ -17,10 +17,3 @@ This function computes the gradient of the orthogonality defect for a matrix \co
 where the norm of \code{Ap} is assumed to be 1. The orthogonality defect is defined
 as the sum of the squared off-diagonal elements of \code{t(Ap) \%*\% Ap}.
 }
-\examples{
-Ap <- matrix(rnorm(9), nrow = 3)
-Ap <- Ap / sqrt(sum(Ap^2)) # Normalize Ap
-gradient <- gradient_orthogonality_defect(Ap)
-print(gradient)
-
-}
