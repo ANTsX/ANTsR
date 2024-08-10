@@ -3428,11 +3428,11 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-    if ( constraint[1] == 'ortho' ) {
+    if ( constraint[1] %in% c('ortho','Stiefel','Grassmann') ) {
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
-      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps & last_energy < 1e8 ) {
+      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
 #        print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
-        myorthEnergy = as.numeric(constraint[2]) * myorthEnergy*(abs(last_energy)/myorthEnergy)
+        myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
       }
       } else myorthEnergy = 0.0
     if (ccaEnergy) {
@@ -3684,7 +3684,8 @@ simlr <- function(
         orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
         orthgradnorm = norm(orthgrad,"F")
         if ( orthgradnorm > 0 )
-          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
+          temperv = temperv - orthgrad * as.numeric(constraint[3])
+#          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
       }
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
