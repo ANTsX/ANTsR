@@ -3430,8 +3430,10 @@ simlr <- function(
     }
     if ( constraint[1] == 'ortho' ) {
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
-      if ( last_energy > .Machine$double.eps & myorthEnergy > .Machine$double.eps)
-        myorthEnergy = as.numeric(constraint[2]) * myorthEnergy*(last_energy/myorthEnergy)
+      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps & last_energy < 1e8 ) {
+#        print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
+        myorthEnergy = as.numeric(constraint[2]) * myorthEnergy*(abs(last_energy)/myorthEnergy)
+      }
       } else myorthEnergy = 0.0
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
@@ -3482,7 +3484,8 @@ simlr <- function(
       myw = myw, mixAlg = mixAlg,
       avgU = initialUMatrix[[i]],
       whichModality = i,
-      constraint=constraint
+      constraint=constraint,
+      last_energy=1
     )
     initialEnergy <- initialEnergy + loki / nModalities
   }
@@ -3679,7 +3682,9 @@ simlr <- function(
       }
       if ( constraint[1] == 'ortho' ) {
         orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
-        temperv = temperv - orthgrad * norm(orthgrad,"F")/norm(temperv,"F")*as.numeric(constraint[3])
+        orthgradnorm = norm(orthgrad,"F")
+        if ( orthgradnorm > 0 )
+          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
       }
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
@@ -3754,6 +3759,7 @@ simlr <- function(
         avgU = initialUMatrix[[jj]],
         whichModality = jj, 
         constraint=constraint,
+        last_energy=1,
         verbose = FALSE
       )
       energyPath[myit, jj] <- loki
@@ -3983,10 +3989,10 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                       verbose = FALSE, nperms = 50, FUN='mean') {
   
   # Set up permutations
-  myseeds <- sample(1:1000000, nperms)
+  myseeds <- 1:1000000
   
   # Initial SiMLR run
-  simlr_result <- simlr(voxmats, 
+  simlr_result <- simlr( voxmats, 
     smoothingMatrices, iterations, sparsenessQuantiles, 
     positivities, initialUMatrix, mixAlg, orthogonalize, 
                   repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
@@ -4458,7 +4464,7 @@ simlr.search <- function(
   }
   
   ssbont <- function() set.seed(as.integer(substr(as.character(Sys.time()), 22, 200)))
-  
+  # ssbont(i) <- function()  set.seed(as.integer(i))
   # Initialize results storage
   options_df_final <- NULL
   bestresult <- bestsig <- bestparams <- NA
@@ -4468,7 +4474,6 @@ simlr.search <- function(
   for (i in 1:nrow(options_df)) {
     if (i %% 10 == 0) cat(paste0("i ", i, " ..."))
     ssbont()
-    
     nsimlr <- unlist(options_df$nsimlr[i])
     prescaling <- unlist(options_df$prescaling[i])
     objectiver <- unlist(options_df$objectiver[i])
