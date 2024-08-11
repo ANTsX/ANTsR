@@ -354,7 +354,7 @@ simlrXs=simlr.search(
 simlrXs$paramsearch
 ```
 
-Finally, `simlrXs$paramsearch` retrieves the results of the parameter search. This will show the performance of different parameter combinations, helping to identify the optimal settings for the SiMLR algorithm.
+Finally, `simlrXs$paramsearch` retrieves the results of the parameter search. This will show the performance of different parameter combinations, helping to identify the optimal settings for the SiMLR algorithm.  The "best" result here will have the highest value for `final_energy`.
 
 This section of the vignette demonstrates how to set up a comprehensive parameter search for the SiMLR algorithm. It shows how to create custom constraints, define a parameter grid, regularize the model, and execute the search. The result is an optimized set of parameters that can be used to enhance the performance of the SiMLR model on your data.
 
