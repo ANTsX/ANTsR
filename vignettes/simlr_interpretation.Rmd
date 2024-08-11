@@ -189,8 +189,20 @@ simres2=read_simlr_data_frames( sim2nm, names(matlist) )
 popdf = data.frame( age = outcome, cog=outcome1, mat1, mat2, mat3 )
 temp2=apply_simlr_matrices( popdf, simres2, 
     center=TRUE, scale=TRUE, absolute_value=rep(TRUE,length(matlist)) )
+simnames=temp2[[2]]
 zz=exploratory_visualization( antsrimpute(temp2[[1]][, temp2[[2]]]) )
 print( zz$plot )
+```
+
+Now we can icorporate the "modalities" in order to predict the simulated outcome matrix.
+
+```{r dataintegration2,fig.width=12,fig.height=6.5}
+# multi-view regression
+summary( lm( age.1 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
+summary( lm( age.2 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
+summary( lm( age.3 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
+summary( lm( age.4 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
+summary( lm( age.5 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
 ```
 
 
@@ -281,7 +293,7 @@ grid.arrange(grobs=(gglist2),nrow=1, top='Low-rank correlations: SiMLR')
 
 ## Evaluating Machine Learning Objective Functions
 
-This section of the tutorial vignette provides an example of how to set up and run a parameter search using the simlr.search function for the Similarity-driven multi-view linear reconstruction (SiMLR) algorithm.  Here, `csearch` creates a list of constraint options that include "none" and different options for enforcing orthogonality. This list will be used to explore different constraint options during the parameter search.
+This section of the tutorial vignette provides an example of how to set up and run a parameter search using the simlr.search function for the Similarity-driven multi-view linear reconstruction (SiMLR) algorithm.  Here, `csearch` creates a list of constraint options that include "none" and different options for enforcing orthogonality _in the feature space_. This list will be used to explore different constraint options during the parameter search.
 
 
 In this step, the simlr.parameters function is called to create a parameter list (simparms) that will control the grid search. Each parameter category (e.g., nsimlr_options, prescaling_options, etc.) is provided with options as a list. These parameters specify the settings and constraints that will be explored during the optimization process.

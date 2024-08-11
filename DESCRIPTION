@@ -48,6 +48,7 @@ Suggests:
     GGally,
     ggplot2,
     glasso,
+    ggpubr,
     grid,
     hdf5r,
     igraph,

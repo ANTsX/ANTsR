@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/ANTsR.html">Get started</a>
 </li>
@@ -50,20 +46,14 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
-    </li>
-    <li>
-      <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
       <a href="../articles/deformationSimulation.html">Simulate a deformation field with ANTsR</a>
@@ -75,7 +65,7 @@
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
     </li>
     <li>
-      <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
+      <a href="../articles/simlr_interpretation.html">simlr_interpretation</a>
     </li>
   </ul>
 </li>
@@ -93,10 +83,12 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Transformations and statistical representations for images in R</h1>
-                        <h4 class="author">Brian B. Avants</h4>
+      <h1 data-toc-skip>Transformations and statistical representations
+for images in R</h1>
+                        <h4 data-toc-skip class="author">Brian B.
+Avants</h4>
             
-            <h4 class="date">2020-08-18</h4>
+            <h4 data-toc-skip class="date">2024-08-11</h4>
       
       
       <div class="hidden name"><code>ANTsR.Rmd</code></div>
@@ -108,357 +100,619 @@
 <blockquote>
 <p>“A small leak will sink a great ship.” (folk wisdom)</p>
 </blockquote>
-<div id="introduction" class="section level1">
-<h1 class="hasAnchor">
-<a href="#introduction" class="anchor"></a>Introduction</h1>
-<p>The ANTs<em>R</em> package interfaces state of the art image processing with <em>R</em> statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTs<em>R</em> achieves this by wrapping an ANTs and ITK C++ core via <code>Rcpp</code> <span class="citation">(Eddelbuettel 2013)</span>.</p>
-<p><a href="http://www.itk.org/">ITK</a> is a templated C++ framework with I/O and support for arbitrary image types (usually 2, 3 or 4 dimensions) as well as surface representations. <a href="http://stnava.github.io/ANTs">ANTs</a>, built on ITK, focuses on multivariate image matching and segmentation as well as geometric (even high-dimensional) image transformation. Both tools are <a href="http://journal.frontiersin.org/ResearchTopic/1580">deeply validated and widely used</a>.</p>
-<p>Together, these tools allow powerful image manipulations. However, they lack a true statistical back-end. Historically, statistical software was not amenable to direct manipulation of multiple dimensional images. This led to “in-house” statistical programming or, perhaps worse (for science), reliance on closed source commercial software. Given the increasing <a href="http://r4stats.com/articles/popularity/">popularity of <em>R</em></a> and prominence of quantitative imaging, it is natural that <em>R</em> should have a package focused on biological or medical image analysis.</p>
-<p>This package integrates several frameworks for extracting quantitative information from images and mapping images into reference coordinate systems. Human brain mapping studies have long relied on Talairach-Tournoux and related coordinate systems <span class="citation">(TALAIRACH and TOURNOUX 1958)</span>. Similar standardized localization is becoming more common within non-human studies <span class="citation">(Johnson et al. 2010; Majka et al. 2013)</span>. Atlases of other organ systems are also emerging and being applied clinically <span class="citation">(de Marvao et al. 2014)</span>. This class of methods relies on <em>image transformation</em> and <em>image segmentation</em> as an aid to the ultimate goal of quantifying variability within and across populations. Longer term, such methods will be critical to individualized patient care and other translational applications.</p>
-<div id="antsr-algorithms" class="section level2">
-<h2 class="hasAnchor">
-<a href="#antsr-algorithms" class="anchor"></a>ANTs<em>R</em> Algorithms</h2>
-<p>Here, we provide an overview of the methods available within ANTs<em>R</em>.</p>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>The ANTs<em>R</em> package interfaces state of the art image
+processing with <em>R</em> statistical methods. The project grew out of
+the need, at University of Pennsylvania, to develop large-scale
+analytics pipelines that track provenance from scanner to scientific
+study. ANTs<em>R</em> achieves this by wrapping an ANTs and ITK C++ core
+via <code>Rcpp</code> <span class="citation">(Eddelbuettel
+2013)</span>.</p>
+<p><a href="http://www.itk.org/" class="external-link">ITK</a> is a templated C++ framework
+with I/O and support for arbitrary image types (usually 2, 3 or 4
+dimensions) as well as surface representations. <a href="http://stnava.github.io/ANTs" class="external-link">ANTs</a>, built on ITK, focuses on
+multivariate image matching and segmentation as well as geometric (even
+high-dimensional) image transformation. Both tools are <a href="http://journal.frontiersin.org/ResearchTopic/1580" class="external-link">deeply
+validated and widely used</a>.</p>
+<p>Together, these tools allow powerful image manipulations. However,
+they lack a true statistical back-end. Historically, statistical
+software was not amenable to direct manipulation of multiple dimensional
+images. This led to “in-house” statistical programming or, perhaps worse
+(for science), reliance on closed source commercial software. Given the
+increasing <a href="http://r4stats.com/articles/popularity/" class="external-link">popularity
+of <em>R</em></a> and prominence of quantitative imaging, it is natural
+that <em>R</em> should have a package focused on biological or medical
+image analysis.</p>
+<p>This package integrates several frameworks for extracting
+quantitative information from images and mapping images into reference
+coordinate systems. Human brain mapping studies have long relied on
+Talairach-Tournoux and related coordinate systems <span class="citation">(TALAIRACH and TOURNOUX 1958)</span>. Similar
+standardized localization is becoming more common within non-human
+studies <span class="citation">(Johnson et al. 2010; Majka et al.
+2013)</span>. Atlases of other organ systems are also emerging and being
+applied clinically <span class="citation">(de Marvao et al.
+2014)</span>. This class of methods relies on <em>image
+transformation</em> and <em>image segmentation</em> as an aid to the
+ultimate goal of quantifying variability within and across populations.
+Longer term, such methods will be critical to individualized patient
+care and other translational applications.</p>
+<div class="section level3">
+<h3 id="antsr-algorithms">ANTs<em>R</em> Algorithms<a class="anchor" aria-label="anchor" href="#antsr-algorithms"></a>
+</h3>
+<p>Here, we provide an overview of the methods available within
+ANTs<em>R</em>.</p>
 <ul>
-<li><p>core image processing and I/O: ITK <span class="citation">(B. B. Avants, Tustison, et al. 2014)</span>;</p></li>
-<li><p>registration and utilities for image processing: ANTs mappings <span class="citation">(Tustison, Cook, et al. 2014)</span> and feature extraction <span class="citation">(Tustison, Shrinidhi, et al. 2014)</span>;</p></li>
+<li><p>core image processing and I/O: ITK <span class="citation">(B. B.
+Avants, Tustison, et al. 2014)</span>;</p></li>
+<li><p>registration and utilities for image processing: ANTs mappings
+<span class="citation">(Tustison, Cook, et al. 2014)</span> and feature
+extraction <span class="citation">(Tustison, Shrinidhi, et al.
+2014)</span>;</p></li>
 <li><p>dimensionality reduction: Eigenanatomy <span class="citation">(Dhillon et al. 2014)</span> and SCCAN <span class="citation">(B. B. Avants, Libon, et al. 2014)</span>;</p></li>
 <li><p>methods for ASL-based cerebral blood flow quantification <span class="citation">(Kandel et al. 2015)</span>;</p></li>
-<li><p>neighborhood representations of images that enable rich statistical models <span class="citation">(Kandel et al. 2015)</span></p></li>
-<li><p>core statistics and temporal filtering via <em>R</em> packages that is amenable to BOLD image processing</p></li>
+<li><p>neighborhood representations of images that enable rich
+statistical models <span class="citation">(Kandel et al.
+2015)</span></p></li>
+<li><p>core statistics and temporal filtering via <em>R</em> packages
+that is amenable to BOLD image processing</p></li>
 </ul>
-<p>In combination, these tools enable one to go from near-raw medical imaging data to a fully reproducible scientific publication <span class="citation">(Avants 2015)</span>.</p>
+<p>In combination, these tools enable one to go from near-raw medical
+imaging data to a fully reproducible scientific publication <span class="citation">(B. B. et al. Avants 2015)</span>.</p>
 </div>
-<div id="data-organization-and-access-in-antsr" class="section level2">
-<h2 class="hasAnchor">
-<a href="#data-organization-and-access-in-antsr" class="anchor"></a>Data organization and access in ANTs<em>R</em>
-</h2>
-<p>This package uses an <code>antsImage</code> S4 class to hold pointers to ITK images. We convert <code>antsImage</code> objects to <em>R</em> objects before passing them to <em>R</em> statistical methods. E.g. we convert a <em>scalar</em> image to a vector, a collection of scalar images to a matrix or a time series image to a matrix. Currently, ANTs<em>R</em> does not explicitly represent images with vector valued voxels (e.g. tensor or warp images) although these may be supported in the future in a way that is similar to our current support for time series images. The large majority of images employed within ANTs<em>R</em> are of 2, 3 or 4 dimensions with <code>float</code> pixel types. This information is stored within the <code>antsImage</code> class.<br>
-A few example images are built into ANTs<em>R</em>, but more can be downloaded. See <code>?getANTsRData</code>.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="no">img</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"r16"</span>), <span class="fl">2</span> ) <span class="co"># built in image</span>
-<span class="no">img</span></pre></body></html></div>
-<pre><code>## antsImage
-##   Pixel Type          : float 
-##   Components Per Pixel: 1 
-##   Dimensions          : 256x256 
-##   Voxel Spacing       : 1x1 
-##   Origin              : 0 0 
-##   Direction           : 1 0 0 1 
-##   Filename           : /Library/Frameworks/R.framework/Versions/4.0/Resources/library/ANTsRCore/extdata/r16slice.jpg</code></pre>
+<div class="section level3">
+<h3 id="data-organization-and-access-in-antsr">Data organization and access in ANTs<em>R</em><a class="anchor" aria-label="anchor" href="#data-organization-and-access-in-antsr"></a>
+</h3>
+<p>This package uses an <code>antsImage</code> S4 class to hold pointers
+to ITK images. We convert <code>antsImage</code> objects to <em>R</em>
+objects before passing them to <em>R</em> statistical methods. E.g. we
+convert a <em>scalar</em> image to a vector, a collection of scalar
+images to a matrix or a time series image to a matrix. Currently,
+ANTs<em>R</em> does not explicitly represent images with vector valued
+voxels (e.g. tensor or warp images) although these may be supported in
+the future in a way that is similar to our current support for time
+series images. The large majority of images employed within
+ANTs<em>R</em> are of 2, 3 or 4 dimensions with <code>float</code> pixel
+types. This information is stored within the <code>antsImage</code>
+class.<br>
+A few example images are built into ANTs<em>R</em>, but more can be
+downloaded. See <code><a href="../reference/getANTsRData.html">?getANTsRData</a></code>.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">img</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span>, <span class="fl">2</span> <span class="op">)</span> <span class="co"># built in image</span></span>
+<span><span class="va">img</span></span></code></pre></div>
+<pre><code><span><span class="co">## antsImage</span></span>
+<span><span class="co">##   Pixel Type          : float </span></span>
+<span><span class="co">##   Components Per Pixel: 1 </span></span>
+<span><span class="co">##   Dimensions          : 256x256 </span></span>
+<span><span class="co">##   Voxel Spacing       : 1x1 </span></span>
+<span><span class="co">##   Origin              : 0 0 </span></span>
+<span><span class="co">##   Direction           : 1 0 0 1 </span></span>
+<span><span class="co">##   Filename           : /Users/stnava/Library/R/arm64/4.3/library/ANTsRCore/extdata/r16slice.jpg</span></span></code></pre>
 <p>Take a quick look at the image.</p>
+<pre><code><span><span class="co">## Warning in fun(libname, pkgname): couldn't connect to display</span></span>
+<span><span class="co">## "/private/tmp/com.apple.launchd.eGFfXWyHAN/org.xquartz:0"</span></span></code></pre>
 <p><img src="ANTsR_files/figure-html/basic_plot-1.png" width="700"></p>
 </div>
-<div id="contributions-of-the-package" class="section level2">
-<h2 class="hasAnchor">
-<a href="#contributions-of-the-package" class="anchor"></a>Contributions of the package</h2>
+<div class="section level3">
+<h3 id="contributions-of-the-package">Contributions of the package<a class="anchor" aria-label="anchor" href="#contributions-of-the-package"></a>
+</h3>
 <p>ANTs<em>R</em> includes:</p>
 <ul>
-<li><p>An organizational system such that relatively small scripts may implement full studies</p></li>
-<li>Implementation of foundational methods
+<li><p>An organizational system such that relatively small scripts may
+implement full studies</p></li>
+<li>
+<p>Implementation of foundational methods</p>
 <ul>
 <li>Smoothing, temporal filtering, etc</li>
-<li>functional image denoising via <code>compcor</code> and <code>*DenoiseR</code>
+<li>functional image denoising via <code>compcor</code> and
+<code>*DenoiseR</code>
 </li>
 <li>flexible: easy to estimate voxel-wise statistical models</li>
 </ul>
 </li>
-<li><p>Reference simulation data and examples distributed with the package</p></li>
-<li>Interpretation of results
+<li><p>Reference simulation data and examples distributed with the
+package</p></li>
+<li>
+<p>Interpretation of results</p>
 <ul>
 <li>sparse low-dimensional predictors</li>
-<li>anatomical labeling of predictors based on AAL and other coordinate systems</li>
+<li>anatomical labeling of predictors based on AAL and other coordinate
+systems</li>
 </ul>
 </li>
 <li><p>Openness and reproducibility</p></li>
 </ul>
-<p>In total, ANTs<em>R</em> is a rigorous framework upon which one may build customized statistical implementations appropriate for large-scale functional, structural or combined functional and structural image analyses. Because much of the core is implemented with C++, the framework also remains efficient. Finally, note that <code>Rscript</code> allows one to send ANTs<em>R</em> scripts to clusters and take advantage of distributed computing resources.</p>
+<p>In total, ANTs<em>R</em> is a rigorous framework upon which one may
+build customized statistical implementations appropriate for large-scale
+functional, structural or combined functional and structural image
+analyses. Because much of the core is implemented with C++, the
+framework also remains efficient. Finally, note that
+<code>Rscript</code> allows one to send ANTs<em>R</em> scripts to
+clusters and take advantage of distributed computing resources.</p>
 </div>
-<div id="basic-antsr-functionality" class="section level2">
-<h2 class="hasAnchor">
-<a href="#basic-antsr-functionality" class="anchor"></a>Basic ANTs<em>R</em> functionality</h2>
+<div class="section level3">
+<h3 id="basic-antsr-functionality">Basic ANTs<em>R</em> functionality<a class="anchor" aria-label="anchor" href="#basic-antsr-functionality"></a>
+</h3>
 <p>Here, we quickly summarize ANTsR functionality and useful tools.</p>
 <p><strong>The travis build system</strong></p>
-<p>We test ANTs<em>R</em> regularly. The status of the build (and an expected build result) can be seen here: <a href="https://travis-ci.org/stnava/ANTsR"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a>. Take a look at the detailed log to see what one might expect if building ANTs<em>R</em> from source.</p>
+<p>We test ANTs<em>R</em> regularly. The status of the build (and an
+expected build result) can be seen here: <a href="https://travis-ci.org/stnava/ANTsR" class="external-link"><img src="https://travis-ci.org/stnava/ANTsR.png?branch=master" alt="Build Status"></a>. Take a look at the detailed log to see what
+one might expect if building ANTs<em>R</em> from source.</p>
 <p><strong>Image input and output</strong></p>
-<p>If nothing else, ANTs<em>R</em> makes it easy to read and write (medical) images and to map them into a format compatible with <em>R</em>. Formats we frequently use include jpg, tiff, mha, nii.gz and nrrd. However, only the last three have a proper physical space representation necessary for mapping. Below is an example of how we access this type of image and see its geometry. Check <code>antsImageWrite</code> for the primary supported I/O.</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">mnifilename</span><span class="kw">&lt;-</span><span class="fu">getANTsRData</span>(<span class="st">"r27"</span>)
-<span class="no">img</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>(<span class="no">mnifilename</span>, <span class="kw">pixeltype</span><span class="kw">=</span><span class="st">"unsigned char"</span>)
-<span class="no">img</span></pre></body></html></div>
-<pre><code>## antsImage
-##   Pixel Type          : unsigned char 
-##   Components Per Pixel: 1 
-##   Dimensions          : 256x256 
-##   Voxel Spacing       : 1x1 
-##   Origin              : 0 0 
-##   Direction           : 1 0 0 1 
-##   Filename           : /Library/Frameworks/R.framework/Versions/4.0/Resources/library/ANTsRCore/extdata/r27slice.jpg</code></pre>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="co"># retval&lt;-antsImageWrite(img,mnifilename)</span>
-<span class="fu">antsGetSpacing</span>(<span class="no">img</span>)</pre></body></html></div>
-<pre><code>## [1] 1 1</code></pre>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu">antsGetDirection</span>(<span class="no">img</span>)</pre></body></html></div>
-<pre><code>##      [,1] [,2]
-## [1,]    1    0
-## [2,]    0    1</code></pre>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu">antsGetOrigin</span>(<span class="no">img</span>)</pre></body></html></div>
-<pre><code>## [1] 0 0</code></pre>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">img</span>[<span class="fl">120</span>,<span class="fl">122</span>]) <span class="co"># same type of thing in 3 or 4D</span></pre></body></html></div>
-<pre><code>##      [,1]
-## [1,]  182</code></pre>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(<span class="no">img</span>))</pre></body></html></div>
-<pre><code>## [1] 255</code></pre>
+<p>If nothing else, ANTs<em>R</em> makes it easy to read and write
+(medical) images and to map them into a format compatible with
+<em>R</em>. Formats we frequently use include jpg, tiff, mha, nii.gz and
+nrrd. However, only the last three have a proper physical space
+representation necessary for mapping. Below is an example of how we
+access this type of image and see its geometry. Check
+<code>antsImageWrite</code> for the primary supported I/O.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnifilename</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r27"</span><span class="op">)</span></span>
+<span><span class="va">img</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="va">mnifilename</span>, pixeltype<span class="op">=</span><span class="st">"unsigned char"</span><span class="op">)</span></span>
+<span><span class="va">img</span></span></code></pre></div>
+<pre><code><span><span class="co">## antsImage</span></span>
+<span><span class="co">##   Pixel Type          : unsigned char </span></span>
+<span><span class="co">##   Components Per Pixel: 1 </span></span>
+<span><span class="co">##   Dimensions          : 256x256 </span></span>
+<span><span class="co">##   Voxel Spacing       : 1x1 </span></span>
+<span><span class="co">##   Origin              : 0 0 </span></span>
+<span><span class="co">##   Direction           : 1 0 0 1 </span></span>
+<span><span class="co">##   Filename           : /Users/stnava/Library/R/arm64/4.3/library/ANTsRCore/extdata/r27slice.jpg</span></span></code></pre>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># retval&lt;-antsImageWrite(img,mnifilename)</span></span>
+<span><span class="fu"><a href="../reference/antsImageGetSet.html">antsGetSpacing</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 1 1</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/antsImageGetSet.html">antsGetDirection</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##      [,1] [,2]</span></span>
+<span><span class="co">## [1,]    1    0</span></span>
+<span><span class="co">## [2,]    0    1</span></span></code></pre>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/antsImageGetSet.html">antsGetOrigin</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0 0</span></span></code></pre>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">img</span><span class="op">[</span><span class="fl">120</span>,<span class="fl">122</span><span class="op">]</span><span class="op">)</span> <span class="co"># same type of thing in 3 or 4D</span></span></code></pre></div>
+<pre><code><span><span class="co">##      [,1]</span></span>
+<span><span class="co">## [1,]  182</span></span></code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/antsImageSummary.html">max</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 255</span></span></code></pre>
 <p><strong>Index an image with a label</strong></p>
-<p>Often, you would like to summarize or extract information from within a known region of an image with arbitrary shape but within a given intensity “zone”. We simulate this below and show a few accessors and type conversions.</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="no">gaussimg</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/array.html">array</a></span>( <span class="kw">data</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="fl">125</span>), <span class="kw">dim</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span>) )
-<span class="no">arrayimg</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/array.html">array</a></span>( <span class="kw">data</span><span class="kw">=</span>(<span class="fl">1</span>:<span class="fl">125</span>), <span class="kw">dim</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span>) )
-<span class="no">img</span><span class="kw">&lt;-</span><span class="fu">as.antsImage</span>( <span class="no">arrayimg</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(<span class="no">img</span>) )</pre></body></html></div>
-<pre><code>## [1] 125</code></pre>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="no">img</span>[ <span class="no">img</span> <span class="kw">&gt;</span> <span class="fl">50</span>  ]))</pre></body></html></div>
-<pre><code>## [1] 88</code></pre>
-<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(<span class="no">img</span>[ <span class="no">img</span> <span class="kw">&gt;=</span> <span class="fl">50</span> <span class="kw">&amp;</span> <span class="no">img</span> <span class="kw">&lt;=</span> <span class="fl">99</span>  ]))</pre></body></html></div>
-<pre><code>## [1] 99</code></pre>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="co"># if using SUBSET using an antsImage, you must be explicit</span>
-<span class="no">sub</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html">as.array</a></span>(<span class="no">img</span> <span class="kw">&gt;=</span> <span class="fl">50</span> <span class="kw">&amp;</span> <span class="no">img</span> <span class="kw">&lt;=</span> <span class="fl">99</span>) <span class="kw">&gt;</span> <span class="fl">0</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>( <span class="no">gaussimg</span>[ <span class="no">sub</span>  ]) )</pre></body></html></div>
-<pre><code>## [1] -0.03702513</code></pre>
+<p>Often, you would like to summarize or extract information from within
+a known region of an image with arbitrary shape but within a given
+intensity “zone”. We simulate this below and show a few accessors and
+type conversions.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">gaussimg</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span> data<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">125</span><span class="op">)</span>, dim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">arrayimg</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span> data<span class="op">=</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">125</span><span class="op">)</span>, dim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">img</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/as.antsImage.html">as.antsImage</a></span><span class="op">(</span> <span class="va">arrayimg</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="../reference/antsImageSummary.html">max</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 125</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">img</span><span class="op">[</span> <span class="va">img</span> <span class="op">&gt;</span> <span class="fl">50</span>  <span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 88</span></span></code></pre>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># if using SUBSET using an antsImage, you must be explicit</span></span>
+<span><span class="va">sub</span> <span class="op">=</span> <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">img</span> <span class="op">&gt;=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span> <span class="va">gaussimg</span><span class="op">[</span> <span class="va">sub</span>  <span class="op">]</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] -0.1062275</span></span></code></pre>
 <p><strong>Convert a 4D image to a matrix</strong></p>
-<p>Four dimensional images are generated and used in the same way. One can easily transform from 4D image to matrix and back.</p>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">gaussimg</span><span class="kw">&lt;-</span><span class="fu">makeImage</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">10</span>), <span class="kw">voxval</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="fl">125</span>*<span class="fl">10</span>)  )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">gaussimg</span>))</pre></body></html></div>
-<pre><code>## [1]  5  5  5 10</code></pre>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">avg3d</span><span class="kw">&lt;-</span><span class="kw pkg">ANTsR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/getAverageOfTimeSeries.html">getAverageOfTimeSeries</a></span>( <span class="no">gaussimg</span> )
-<span class="no">mask</span> <span class="kw">&lt;-</span> <span class="no">avg3d</span> <span class="kw">&lt;</span> <span class="fl">0.25</span>
-<span class="no">gmat</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span>( <span class="no">gaussimg</span>, <span class="no">mask</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">gmat</span>))</pre></body></html></div>
-<pre><code>## [1]  10 100</code></pre>
-<p>If one has a mask, then one can use <code>makeImage</code> to generate a new image from a scalar or vector.</p>
-<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="no">newimg</span><span class="kw">&lt;-</span><span class="fu">makeImage</span>( <span class="no">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="no">avg3d</span>) )    <span class="co"># from scalar</span>
-<span class="no">newimg</span><span class="kw">&lt;-</span><span class="fu">makeImage</span>( <span class="no">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span>(<span class="no">gmat</span>) ) <span class="co"># from vector</span></pre></body></html></div>
+<p>Four dimensional images are generated and used in the same way. One
+can easily transform from 4D image to matrix and back.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">gaussimg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">5</span>,<span class="fl">10</span><span class="op">)</span>, voxval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">125</span><span class="op">*</span><span class="fl">10</span><span class="op">)</span>  <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">gaussimg</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1]  5  5  5 10</span></span></code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">avg3d</span><span class="op">&lt;-</span><span class="fu">ANTsR</span><span class="fu">::</span><span class="fu"><a href="../reference/getAverageOfTimeSeries.html">getAverageOfTimeSeries</a></span><span class="op">(</span> <span class="va">gaussimg</span> <span class="op">)</span></span>
+<span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="va">avg3d</span> <span class="op">&lt;</span> <span class="fl">0.25</span></span>
+<span><span class="va">gmat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span><span class="op">(</span> <span class="va">gaussimg</span>, <span class="va">mask</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">gmat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 10 98</span></span></code></pre>
+<p>If one has a mask, then one can use <code>makeImage</code> to
+generate a new image from a scalar or vector.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">newimg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeImage.html">makeImage</a></span><span class="op">(</span> <span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">avg3d</span><span class="op">)</span> <span class="op">)</span>    <span class="co"># from scalar</span></span>
+<span><span class="va">newimg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeImage.html">makeImage</a></span><span class="op">(</span> <span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">gmat</span><span class="op">)</span> <span class="op">)</span> <span class="co"># from vector</span></span></code></pre></div>
 <p><strong>Convert a list of images to a matrix</strong></p>
-<p>Often, one has several scalar images that need to be accumulated for statistical processing. Here, we generate a simulated set of these images and then proceed to smooth them, store them in a list and convert them to a matrix after extracting the information of each image within a data-driven mask.</p>
-<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="no">nimages</span><span class="kw">&lt;-</span><span class="fl">100</span>
-<span class="no">ilist</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>()
-<span class="kw">for</span> ( <span class="no">i</span> <span class="kw">in</span> <span class="fl">1</span>:<span class="no">nimages</span> )
-  {
-  <span class="no">simimg</span><span class="kw">&lt;-</span><span class="fu">makeImage</span>( <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">50</span>,<span class="fl">50</span>) , <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="fl">2500</span>) )
-  <span class="no">simimg</span><span class="kw">&lt;-</span><span class="fu">smoothImage</span>(<span class="no">simimg</span>,<span class="fl">1.5</span>)
-  <span class="no">ilist</span><span class="kw">[[</span> <span class="no">i</span>  ]] <span class="kw">=</span> <span class="no">simimg</span>
-  }
-<span class="co"># get a mask from the first image</span>
-<span class="no">mask</span><span class="kw">&lt;-</span><span class="fu">getMask</span>( <span class="no">ilist</span><span class="kw">[[</span><span class="fl">1</span>]],
-  <span class="kw">lowThresh</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="no">ilist</span><span class="kw">[[</span><span class="fl">1</span>]]), <span class="kw">cleanup</span><span class="kw">=</span><span class="fl">TRUE</span> )
-<span class="no">mat</span><span class="kw">&lt;-</span><span class="fu">imageListToMatrix</span>( <span class="no">ilist</span>, <span class="no">mask</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">mat</span>))</pre></body></html></div>
-<pre><code>## [1] 100 384</code></pre>
-<p>Once we have a matrix representation of our population, we might run a quick voxel-wise regression within the mask. Then we look at some summary statistics.</p>
-<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="no">mat</span><span class="kw">&lt;-</span><span class="fu">imageListToMatrix</span>( <span class="no">ilist</span>, <span class="no">mask</span> )
-<span class="no">age</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">mat</span>) ) <span class="co"># simulated age</span>
-<span class="no">gender</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>( <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"F"</span>,<span class="st">"M"</span>), <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">mat</span>)/<span class="fl">2</span> ) <span class="co"># simulated gender</span>
-<span class="co"># this creates "real" but noisy effects to detect</span>
-<span class="no">mat</span><span class="kw">&lt;-</span><span class="no">mat</span>*(<span class="no">age</span>^<span class="fl">2</span>+<span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">mat</span>)))
-<span class="no">mdl</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span>( <span class="no">mat</span> ~ <span class="no">age</span> + <span class="no">gender</span> )
-<span class="no">mdli</span><span class="kw">&lt;-</span><span class="fu">bigLMStats</span>( <span class="no">mdl</span>, <span class="fl">1.e-4</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">mdli</span>))</pre></body></html></div>
-<pre><code>## [1] "fstat"      "pval.model" "beta"       "beta.std"   "beta.t"    
-## [6] "beta.pval"</code></pre>
-<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">mdli</span>$<span class="no">beta.t</span>))</pre></body></html></div>
-<pre><code>## [1] "age"     "genderM"</code></pre>
-<div class="sourceCode" id="cb34"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="st">"age"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span>(<span class="no">mdli</span>$<span class="no">beta.pval</span>[<span class="fl">1</span>,]))))</pre></body></html></div>
-<pre><code>## [1] "age 1.15252543570603e-05"</code></pre>
-<div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="st">"gen"</span>,<span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span>(<span class="no">mdli</span>$<span class="no">beta.pval</span>[<span class="fl">2</span>,]))))</pre></body></html></div>
-<pre><code>## [1] "gen 0.376017830010909"</code></pre>
+<p>Often, one has several scalar images that need to be accumulated for
+statistical processing. Here, we generate a simulated set of these
+images and then proceed to smooth them, store them in a list and convert
+them to a matrix after extracting the information of each image within a
+data-driven mask.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nimages</span><span class="op">&lt;-</span><span class="fl">100</span></span>
+<span><span class="va">ilist</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span> <span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nimages</span> <span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>  <span class="va">simimg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeImage.html">makeImage</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">50</span><span class="op">)</span> , <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2500</span><span class="op">)</span> <span class="op">)</span></span>
+<span>  <span class="va">simimg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/smoothImage.html">smoothImage</a></span><span class="op">(</span><span class="va">simimg</span>,<span class="fl">1.5</span><span class="op">)</span></span>
+<span>  <span class="va">ilist</span><span class="op">[[</span> <span class="va">i</span>  <span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="va">simimg</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="co"># get a mask from the first image</span></span>
+<span><span class="va">mask</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getMask.html">getMask</a></span><span class="op">(</span> <span class="va">ilist</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>  lowThresh<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ilist</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, cleanup<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
+<span><span class="va">mat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span><span class="op">(</span> <span class="va">ilist</span>, <span class="va">mask</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 100 312</span></span></code></pre>
+<p>Once we have a matrix representation of our population, we might run
+a quick voxel-wise regression within the mask. Then we look at some
+summary statistics.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span><span class="op">(</span> <span class="va">ilist</span>, <span class="va">mask</span> <span class="op">)</span></span>
+<span><span class="va">age</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span> <span class="op">)</span> <span class="co"># simulated age</span></span>
+<span><span class="va">gender</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>,<span class="st">"M"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span> <span class="op">)</span> <span class="co"># simulated gender</span></span>
+<span><span class="co"># this creates "real" but noisy effects to detect</span></span>
+<span><span class="va">mat</span><span class="op">&lt;-</span><span class="va">mat</span><span class="op">*</span><span class="op">(</span><span class="va">age</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mdl</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">mat</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">gender</span> <span class="op">)</span></span>
+<span><span class="va">mdli</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/bigLMStats.html">bigLMStats</a></span><span class="op">(</span> <span class="va">mdl</span>, <span class="fl">1.e-4</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "fstat"      "pval.model" "beta"       "beta.std"   "beta.t"    </span></span>
+<span><span class="co">## [6] "beta.pval"</span></span></code></pre>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">$</span><span class="va">beta.t</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "age"     "genderM"</span></span></code></pre>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"age"</span>,<span class="fu"><a href="../reference/antsImageSummary.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">$</span><span class="va">beta.pval</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "age 1.29068155122352e-06"</span></span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"gen"</span>,<span class="fu"><a href="../reference/antsImageSummary.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">$</span><span class="va">beta.pval</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "gen 1"</span></span></code></pre>
 <p><strong>Write out a statistical map</strong></p>
-<p>We might also write out the images so that we can save them for later or look at them with other software.</p>
-<div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="no">agebetas</span><span class="kw">&lt;-</span><span class="fu">makeImage</span>( <span class="no">mask</span> , <span class="no">mdli</span>$<span class="no">beta.t</span>[<span class="fl">1</span>,] )
-<span class="no">returnval</span><span class="kw">&lt;-</span><span class="fu">antsImageWrite</span>( <span class="no">agebetas</span>, <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span>(<span class="kw">fileext</span> <span class="kw">=</span><span class="st">'.nii.gz'</span>) )</pre></body></html></div>
+<p>We might also write out the images so that we can save them for later
+or look at them with other software.</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">agebetas</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeImage.html">makeImage</a></span><span class="op">(</span> <span class="va">mask</span> , <span class="va">mdli</span><span class="op">$</span><span class="va">beta.t</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span> <span class="op">)</span></span>
+<span><span class="va">returnval</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageWrite.html">antsImageWrite</a></span><span class="op">(</span> <span class="va">agebetas</span>, <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span><span class="st">'.nii.gz'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 </div>
-<div id="more-antsr-functionality" class="section level2">
-<h2 class="hasAnchor">
-<a href="#more-antsr-functionality" class="anchor"></a>More ANTs<em>R</em> functionality</h2>
-<p>We achieve quantification in biological or medical imaging by using prior knowledge about the image content.</p>
+<div class="section level3">
+<h3 id="more-antsr-functionality">More ANTs<em>R</em> functionality<a class="anchor" aria-label="anchor" href="#more-antsr-functionality"></a>
+</h3>
+<p>We achieve quantification in biological or medical imaging by using
+prior knowledge about the image content.</p>
 <p><strong>Segmentation</strong></p>
-<p>In segmentation, we assume the image has a known set of tissues, organs etc. Here, we assume 3 tissues exist and use a classic k-means model with MRF penalty <span class="citation">(Avants et al. 2011)</span>. Note that we also bias correct the image to help it match our model <span class="citation">(Tustison et al. 2010)</span>.</p>
-<div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="no">fi</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"r16"</span>) ,<span class="fl">2</span>)
-<span class="no">fi</span><span class="kw">&lt;-</span><span class="fu">n3BiasFieldCorrection</span>(<span class="no">fi</span>,<span class="fl">2</span>)
-<span class="no">seg</span><span class="kw">&lt;-</span><span class="fu">kmeansSegmentation</span>( <span class="no">fi</span>, <span class="fl">3</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">seg</span>$<span class="no">segmentation</span>))</pre></body></html></div>
+<p>In segmentation, we assume the image has a known set of tissues,
+organs etc. Here, we assume 3 tissues exist and use a classic k-means
+model with MRF penalty <span class="citation">(B. B. Avants et al.
+2011)</span>. Note that we also bias correct the image to help it match
+our model <span class="citation">(Tustison et al. 2010)</span>.</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span> ,<span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">fi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/n3BiasFieldCorrection.html">n3BiasFieldCorrection</a></span><span class="op">(</span><span class="va">fi</span>,<span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">seg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/kmeansSegmentation.html">kmeansSegmentation</a></span><span class="op">(</span> <span class="va">fi</span>, <span class="fl">3</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">seg</span><span class="op">$</span><span class="va">segmentation</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ANTsR_files/figure-html/segmentation-1.png" width="700"></p>
-<p>If you like segmentation, also look at <code>rfSegmentation</code> and <code>atropos</code>.</p>
+<p>If you like segmentation, also look at <code>rfSegmentation</code>
+and <code>atropos</code>.</p>
 <p><strong>Registration</strong></p>
-<p>In registration, we assume the image can be mapped to some canonical shape or example, i.e. an atlas. Or to another individual. ANTs<em>R</em> provides a simple wrapper for SyN image registration <span class="citation">(Tustison and Avants 2013)</span>,</p>
-<div class="sourceCode" id="cb40"><html><body><pre class="r"><span class="no">mi</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"r64"</span>) ,<span class="fl">2</span>)
-<span class="no">mytx</span><span class="kw">&lt;-</span><span class="fu">antsRegistration</span>(<span class="kw">fixed</span><span class="kw">=</span><span class="no">fi</span> , <span class="kw">moving</span><span class="kw">=</span><span class="no">mi</span> ,
-    <span class="kw">typeofTransform</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'SyN'</span>))
-<span class="no">regresult</span><span class="kw">&lt;-</span><span class="fu">iMath</span>(<span class="no">mytx</span>$<span class="no">warpedmovout</span>,<span class="st">"Normalize"</span>)
-<span class="no">fiedge</span><span class="kw">&lt;-</span><span class="fu">iMath</span>(<span class="no">fi</span>,<span class="st">"Canny"</span>,<span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">12</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">regresult</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="no">fiedge</span>), <span class="kw">window.overlay</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.5</span>,<span class="fl">1</span>)) )</pre></body></html></div>
+<p>In registration, we assume the image can be mapped to some canonical
+shape or example, i.e. an atlas. Or to another individual.
+ANTs<em>R</em> provides a simple wrapper for SyN image registration
+<span class="citation">(Tustison and Avants 2013)</span>,</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r64"</span><span class="op">)</span> ,<span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">mytx</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsRegistration.html">antsRegistration</a></span><span class="op">(</span>fixed<span class="op">=</span><span class="va">fi</span> , moving<span class="op">=</span><span class="va">mi</span> ,</span>
+<span>    typeofTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'SyN'</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">regresult</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mytx</span><span class="op">$</span><span class="va">warpedmovout</span>,<span class="st">"Normalize"</span><span class="op">)</span></span>
+<span><span class="va">fiedge</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>,<span class="st">"Canny"</span>,<span class="fl">1</span>,<span class="fl">5</span>,<span class="fl">12</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">regresult</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fiedge</span><span class="op">)</span>, window.overlay<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="ANTsR_files/figure-html/syn-1.png" width="700"></p>
-<p>while <code>invariantImageSimilarity</code> provides powerful multi-start search for lower dimensional affine registrations.</p>
-<p>Deformable image registration results in a voxel-wise map of the contraction and expansion of the moving image (after affine transformation) that is needed to map to the fixed image. This deformation gradient is colloquially known as “the jacobian”.</p>
-<div class="sourceCode" id="cb41"><html><body><pre class="r"><span class="no">jac</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/createJacobianDeterminantImage.html">createJacobianDeterminantImage</a></span>(<span class="no">fi</span>,<span class="no">mytx</span>$<span class="no">fwdtransforms</span><span class="kw">[[</span><span class="fl">1</span>]],<span class="fl">1</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">jac</span>))</pre></body></html></div>
+<p>while <code>invariantImageSimilarity</code> provides powerful
+multi-start search for lower dimensional affine registrations.</p>
+<p>Deformable image registration results in a voxel-wise map of the
+contraction and expansion of the moving image (after affine
+transformation) that is needed to map to the fixed image. This
+deformation gradient is colloquially known as “the jacobian”.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">jac</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/createJacobianDeterminantImage.html">createJacobianDeterminantImage</a></span><span class="op">(</span><span class="va">fi</span>,<span class="va">mytx</span><span class="op">$</span><span class="va">fwdtransforms</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,<span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">jac</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="ANTsR_files/figure-html/jacobian-1.png" width="700"></p>
-<p>Above, we compute and plot the image of the log-jacobian. This mapping is a useful summary measurement for morphometry <span class="citation">(Avants et al. 2012,<span class="citation">@Kim2008</span>)</span>.</p>
+<p>Above, we compute and plot the image of the log-jacobian. This
+mapping is a useful summary measurement for morphometry <span class="citation">Kim et al. (2008)</span>.</p>
 <p><strong>Registration and segmentation</strong></p>
-<p>Registration and segmentation are often applied jointly or iteratively to maximize some criterion. See the example in <code>jointIntensityFusion</code> for one such case <span class="citation">(Wang and Yushkevich 2013)</span>.</p>
+<p>Registration and segmentation are often applied jointly or
+iteratively to maximize some criterion. See the example in
+<code>jointIntensityFusion</code> for one such case <span class="citation">(Wang and Yushkevich 2013)</span>.</p>
 <p><strong>Neighborhood operations</strong></p>
-<p>Basic I/O and management of images as vectors is critical. However, there is additional information that can be gained by representing an image and its neighborhood information. ANTs<em>R</em> represents image neighborhoods, which capture shape and texture, as a matrix. Here, extract an image neighborhood matrix representation such that we may analyze it at a given scale.</p>
-<div class="sourceCode" id="cb42"><html><body><pre class="r"><span class="no">mnit</span><span class="kw">&lt;-</span><span class="fu">getANTsRData</span>(<span class="st">"r16"</span>)
-<span class="no">mnit</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="no">mnit</span> )
-<span class="no">mnit</span> <span class="kw">&lt;-</span> <span class="fu">resampleImage</span>( <span class="no">mnit</span> , <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">4</span>, <span class="no">mnit</span>@<span class="kw">dimension</span>) ) <span class="co"># downsample</span>
-<span class="no">mask2</span><span class="kw">&lt;-</span><span class="fu">getMask</span>(<span class="no">mnit</span>,<span class="kw">lowThresh</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span>(<span class="no">mnit</span>),<span class="kw">cleanup</span><span class="kw">=</span><span class="fl">TRUE</span>)
-<span class="no">radius</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fl">2</span>,<span class="no">mnit</span>@<span class="kw">dimension</span>)
-<span class="no">mat2</span><span class="kw">&lt;-</span><span class="fu">getNeighborhoodInMask</span>(<span class="no">mnit</span>, <span class="no">mask2</span>, <span class="no">radius</span>,
-  <span class="kw">physical.coordinates</span> <span class="kw">=</span> <span class="fl">FALSE</span>,
-  <span class="kw">boundary.condition</span> <span class="kw">=</span> <span class="st">"mean"</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">mat2</span>))</pre></body></html></div>
-<pre><code>## [1]   25 1113</code></pre>
-<p>The variable <code>mat2</code> has size determined by the neighborhood radius (here, 5) and the number of non-zero voxels in the mask. The <code>boundary.condition</code> says how to treat data that is outside of the mask or the image boundaries. This example replaces missing data with the mean in-mask value of the local neighborhood.</p>
-<p>Other useful tools in ANTs<em>R</em> include <code>iMath</code>, <code>thresholdImage</code>, <code>quantifyCBF</code>, <code>preprocessfMRI</code>, <code>aslPerfusion</code>, <code>computeDVARS</code>, <code>getROIValues</code>, <code>hemodynamicRF</code>, <code>makeGraph</code>, <code>matrixToImages</code>, <code>rfSegmentation</code>, <code>antsRegistration</code>, <code>plotPrettyGraph</code>, <code>plotBasicNetwork</code>, <code>getTemplateCoordinates</code>, <code>antsSet*</code>.</p>
-<p>Several image mathematics operations (like <code>ImageMath</code> in ANTs) are accessible too via <code>iMath</code>.</p>
+<p>Basic I/O and management of images as vectors is critical. However,
+there is additional information that can be gained by representing an
+image and its neighborhood information. ANTs<em>R</em> represents image
+neighborhoods, which capture shape and texture, as a matrix. Here,
+extract an image neighborhood matrix representation such that we may
+analyze it at a given scale.</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnit</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span></span>
+<span><span class="va">mnit</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="va">mnit</span> <span class="op">)</span></span>
+<span><span class="va">mnit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resampleImage.html">resampleImage</a></span><span class="op">(</span> <span class="va">mnit</span> , <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">4</span>, <span class="va">mnit</span><span class="op">@</span><span class="va">dimension</span><span class="op">)</span> <span class="op">)</span> <span class="co"># downsample</span></span>
+<span><span class="va">mask2</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getMask.html">getMask</a></span><span class="op">(</span><span class="va">mnit</span>,lowThresh<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">mnit</span><span class="op">)</span>,cleanup<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">radius</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">2</span>,<span class="va">mnit</span><span class="op">@</span><span class="va">dimension</span><span class="op">)</span></span>
+<span><span class="va">mat2</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getNeighborhoodInMask.html">getNeighborhoodInMask</a></span><span class="op">(</span><span class="va">mnit</span>, <span class="va">mask2</span>, <span class="va">radius</span>,</span>
+<span>  physical.coordinates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  boundary.condition <span class="op">=</span> <span class="st">"mean"</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mat2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1]   25 1113</span></span></code></pre>
+<p>The variable <code>mat2</code> has size determined by the
+neighborhood radius (here, 5) and the number of non-zero voxels in the
+mask. The <code>boundary.condition</code> says how to treat data that is
+outside of the mask or the image boundaries. This example replaces
+missing data with the mean in-mask value of the local neighborhood.</p>
+<p>Other useful tools in ANTs<em>R</em> include <code>iMath</code>,
+<code>thresholdImage</code>, <code>quantifyCBF</code>,
+<code>preprocessfMRI</code>, <code>aslPerfusion</code>,
+<code>computeDVARS</code>, <code>getROIValues</code>,
+<code>hemodynamicRF</code>, <code>makeGraph</code>,
+<code>matrixToImages</code>, <code>rfSegmentation</code>,
+<code>antsRegistration</code>, <code>plotPrettyGraph</code>,
+<code>plotBasicNetwork</code>, <code>getTemplateCoordinates</code>,
+<code>antsSet*</code>.</p>
+<p>Several image mathematics operations (like <code>ImageMath</code> in
+ANTs) are accessible too via <code>iMath</code>.</p>
 </div>
-<div id="example-label-sets-and-data" class="section level2">
-<h2 class="hasAnchor">
-<a href="#example-label-sets-and-data" class="anchor"></a>Example label sets and data</h2>
+<div class="section level3">
+<h3 id="example-label-sets-and-data">Example label sets and data<a class="anchor" aria-label="anchor" href="#example-label-sets-and-data"></a>
+</h3>
 <p>ANTs<em>R</em> also provides AAL label <span class="citation">(Tzourio-Mazoyer et al. 2002)</span> names via:</p>
-<div class="sourceCode" id="cb44"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="no">aal</span>,<span class="kw">package</span><span class="kw">=</span><span class="st">'ANTsR'</span>)
-<span class="no">labs</span><span class="kw">&lt;-</span><span class="fl">1</span>:<span class="fl">90</span></pre></body></html></div>
-<p>with cortical labs defined by <code>labs</code>. The DKT atlas labels are similarly summarized in <code>DesikanKillianyTourville</code> <span class="citation">(Klein and Tourville 2012)</span>.<br>
-An example BOLD correlation matrix is available in <code>bold_correlation_matrix</code>. This can be used to try out <code>makeGraph</code> and related functions.</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">aal</span>,package<span class="op">=</span><span class="st">'ANTsR'</span><span class="op">)</span></span>
+<span><span class="va">labs</span><span class="op">&lt;-</span><span class="fl">1</span><span class="op">:</span><span class="fl">90</span></span></code></pre></div>
+<p>with cortical labs defined by <code>labs</code>. The DKT atlas labels
+are similarly summarized in <code>DesikanKillianyTourville</code> <span class="citation">(Klein and Tourville 2012)</span>.<br>
+An example BOLD correlation matrix is available in
+<code>bold_correlation_matrix</code>. This can be used to try out
+<code>makeGraph</code> and related functions.</p>
 </div>
-<div id="visualization-and-plotting" class="section level2">
-<h2 class="hasAnchor">
-<a href="#visualization-and-plotting" class="anchor"></a>Visualization and plotting</h2>
-<p>The basic <code>plot</code> function is implemented for the <code>antsImage</code> class. It can show 2 or 3D data with color overlays, the latter of which can display multiple slices side by side. Several color choices are available for the overlays.</p>
-<p>For 3D images, see <code>renderSurfaceFunction</code> and <code>plotBasicNetwork</code> for <code>rgl</code> and <code>misc3d</code> based interactive surface and network plots. Another such example is in <code>visualizeBlob</code>. These are too long-running to compile into the vignette but the help examples for these functions will allow you to see their results.</p>
-<p>A good visualization alternative outside of ANTs<em>R</em> is <a href="https://github.com/stnava/antsSurf">antsSurf</a>.</p>
+<div class="section level3">
+<h3 id="visualization-and-plotting">Visualization and plotting<a class="anchor" aria-label="anchor" href="#visualization-and-plotting"></a>
+</h3>
+<p>The basic <code>plot</code> function is implemented for the
+<code>antsImage</code> class. It can show 2 or 3D data with color
+overlays, the latter of which can display multiple slices side by side.
+Several color choices are available for the overlays.</p>
+<p>For 3D images, see <code>renderSurfaceFunction</code> and
+<code>plotBasicNetwork</code> for <code>rgl</code> and
+<code>misc3d</code> based interactive surface and network plots. Another
+such example is in <code>visualizeBlob</code>. These are too
+long-running to compile into the vignette but the help examples for
+these functions will allow you to see their results.</p>
+<p>A good visualization alternative outside of ANTs<em>R</em> is <a href="https://github.com/stnava/antsSurf" class="external-link">antsSurf</a>.</p>
 </div>
-<div id="bold-data-processing-with-antsr" class="section level2">
-<h2 class="hasAnchor">
-<a href="#bold-data-processing-with-antsr" class="anchor"></a>BOLD data processing with ANTs<em>R</em>
-</h2>
-<p>Good approaches exist in ANTs<em>R</em> for preprocessing BOLD data. These yield both motion matrices and relevant summary measurements such as FD and DVARS. See <code><a href="../reference/preprocessfMRI.html">?preprocessfMRI</a></code> for a simplified utility function. This function could be used on each run of an experiment and the results stored in organized fashion for later use.</p>
+<div class="section level3">
+<h3 id="bold-data-processing-with-antsr">BOLD data processing with ANTs<em>R</em><a class="anchor" aria-label="anchor" href="#bold-data-processing-with-antsr"></a>
+</h3>
+<p>Good approaches exist in ANTs<em>R</em> for preprocessing BOLD data.
+These yield both motion matrices and relevant summary measurements such
+as FD and DVARS. See <code><a href="../reference/preprocessfMRI.html">?preprocessfMRI</a></code> for a simplified
+utility function. This function could be used on each run of an
+experiment and the results stored in organized fashion for later
+use.</p>
 <p><strong>Motion correction</strong></p>
 <p>To motion correct your data, one might run:</p>
-<div class="sourceCode" id="cb45"><html><body><pre class="r"><span class="co"># get an average image</span>
-<span class="no">averageImage</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/getAverageOfTimeSeries.html">getAverageOfTimeSeries</a></span>( <span class="no">boldImage</span> )
-<span class="no">motionCorrectionResults</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/antsMotionCalculation.html">antsMotionCalculation</a></span>( <span class="no">boldImage</span>,
-   <span class="kw">fixed</span> <span class="kw">=</span> <span class="no">averageImage</span> )</pre></body></html></div>
-<p>A <code>moreaccurate</code> flag should be set to <code>1</code> or <code>2</code> for usable (not test) results. FD and DVARS are returned which may be used to summarize motion. One might also get this data from <code>preprocessfMRI</code> which also provides denoising options based on data-driven methods including frequency filtering.</p>
-<p>For more fMRI focused tools, see <a href="http://stnava.github.io/RKRNS/">RKRNS</a> and its github site <a href="https://github.com/stnava/RKRNS">github RKRNS</a>.</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># get an average image</span></span>
+<span><span class="va">averageImage</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getAverageOfTimeSeries.html">getAverageOfTimeSeries</a></span><span class="op">(</span> <span class="va">boldImage</span> <span class="op">)</span></span>
+<span><span class="va">motionCorrectionResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsMotionCalculation.html">antsMotionCalculation</a></span><span class="op">(</span> <span class="va">boldImage</span>,</span>
+<span>   fixed <span class="op">=</span> <span class="va">averageImage</span> <span class="op">)</span></span></code></pre></div>
+<p>A <code>moreaccurate</code> flag should be set to <code>1</code> or
+<code>2</code> for usable (not test) results. FD and DVARS are returned
+which may be used to summarize motion. One might also get this data from
+<code>preprocessfMRI</code> which also provides denoising options based
+on data-driven methods including frequency filtering.</p>
+<p>For more fMRI focused tools, see <a href="http://stnava.github.io/RKRNS/" class="external-link">RKRNS</a> and its github site <a href="https://github.com/stnava/RKRNS" class="external-link">github RKRNS</a>.</p>
 </div>
-<div id="dimensionality-reduction" class="section level2">
-<h2 class="hasAnchor">
-<a href="#dimensionality-reduction" class="anchor"></a>Dimensionality reduction</h2>
-<p>Images often have many voxels (<span class="math inline">\(p\)</span>-voxels) and, in medical applications, this means that <span class="math inline">\(p&gt;n\)</span> or even <span class="math inline">\(p&gt;&gt;n\)</span>, where <span class="math inline">\(n\)</span> is the number of subjects. Therefore, we often want to “intelligently” reduce the dimensionality of the data. We favor methods related to PCA and CCA but have a few ICA related tools too.</p>
+<div class="section level3">
+<h3 id="dimensionality-reduction">Dimensionality reduction<a class="anchor" aria-label="anchor" href="#dimensionality-reduction"></a>
+</h3>
+<p>Images often have many voxels (<span class="math inline">\(p\)</span>-voxels) and, in medical applications,
+this means that <span class="math inline">\(p&gt;n\)</span> or even
+<span class="math inline">\(p&gt;&gt;n\)</span>, where <span class="math inline">\(n\)</span> is the number of subjects. Therefore,
+we often want to “intelligently” reduce the dimensionality of the data.
+We favor methods related to PCA and CCA but have a few ICA related tools
+too.</p>
 <p><strong>Eigenanatomy &amp; SCCAN</strong></p>
-<p>Our sparse and geometrically constrained dimensionality reduction methods seek to both explain variance and also yield interpretable, spatially localized pseudo-eigenvectors <span class="citation">(Kandel et al. 2014,<span class="citation">@Cook2014</span>)</span>. This is the point of “eigenanatomy” which is a variation of sparse PCA that uses (optionally) biologically-motivated smoothness, locality or sparsity constraints.</p>
-<div class="sourceCode" id="cb46"><html><body><pre class="r"><span class="co"># assume you ran the population example above</span>
-<span class="no">eanat</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/sparseDecom.html">sparseDecom</a></span>( <span class="no">mat</span>, <span class="no">mask</span>, <span class="fl">0.2</span>, <span class="fl">5</span>, <span class="kw">cthresh</span><span class="kw">=</span><span class="fl">2</span>, <span class="kw">its</span><span class="kw">=</span><span class="fl">2</span> )
-<span class="no">eanatimages</span> <span class="kw">=</span> <span class="fu">matrixToImages</span>( <span class="no">eanat</span>$<span class="no">eig</span>, <span class="no">mask</span> )
-<span class="no">eseg</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/eigSeg.html">eigSeg</a></span>(<span class="no">mask</span>, <span class="no">eanatimages</span> ,<span class="no">F</span>)
-<span class="no">jeanat</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/joinEigenanatomy.html">joinEigenanatomy</a></span>(<span class="no">mat</span>, <span class="no">mask</span>, <span class="no">eanatimages</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.1</span>))
-<span class="no">eseg2</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/eigSeg.html">eigSeg</a></span>(<span class="no">mask</span>,<span class="no">jeanat</span>$<span class="no">fusedlist</span>,<span class="no">F</span>)</pre></body></html></div>
-<p>The parameters for the example above are set for fast processing. You can see our paper for some theory on these methods <span class="citation">(Kandel et al. 2014)</span>. A more realistic study setup would be</p>
-<div class="sourceCode" id="cb47"><html><body><pre class="r"><span class="no">eanat</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/sparseDecom.html">sparseDecom</a></span>( <span class="kw">inmatrix</span><span class="kw">=</span><span class="no">mat</span>, <span class="kw">inmask</span><span class="kw">=</span><span class="no">famask</span>, <span class="kw">nvecs</span><span class="kw">=</span><span class="fl">50</span>,
-  <span class="kw">sparseness</span><span class="kw">=</span><span class="fl">0.005</span>, <span class="kw">cthresh</span><span class="kw">=</span><span class="fl">500</span>, <span class="kw">its</span><span class="kw">=</span><span class="fl">5</span>, <span class="kw">mycoption</span><span class="kw">=</span><span class="fl">0</span> )
-<span class="no">jeanat</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/joinEigenanatomy.html">joinEigenanatomy</a></span>( <span class="no">mat</span> , <span class="no">famask</span>, <span class="no">eanat</span>$<span class="no">eig</span>,
-  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>:<span class="fl">20</span>)/<span class="fl">100.0</span> , <span class="kw">joinMethod</span><span class="kw">=</span><span class="st">'multilevel'</span> )
-<span class="no">useeig</span><span class="kw">&lt;-</span><span class="no">eanat</span>$<span class="no">eig</span>
-<span class="no">useeig</span><span class="kw">&lt;-</span><span class="no">jeanat</span>$<span class="no">fusedlist</span>
-<span class="no">avgmat</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(<span class="fu">imageListToMatrix</span>( <span class="no">useeig</span> , <span class="no">famask</span> ))
-<span class="no">avgmat</span><span class="kw">&lt;-</span><span class="no">avgmat</span>/<span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(<span class="no">avgmat</span>))
-<span class="no">imgmat</span><span class="kw">&lt;-</span>(  <span class="no">mat</span> <span class="kw">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span>(<span class="no">avgmat</span>)  )</pre></body></html></div>
-<p>The <code>imgmat</code> variable would be your summary predictors entered into <code>lm</code> or <code>randomForest</code>.</p>
-<p>More information is available within the examples that can be seen within the help for <code>sparseDecom</code>, <code>sparseDecom2</code> and the helper function <code>initializeEigenanatomy</code>.</p>
+<p>Our sparse and geometrically constrained dimensionality reduction
+methods seek to both explain variance and also yield interpretable,
+spatially localized pseudo-eigenvectors <span class="citation">Cook et
+al. (2014)</span>. This is the point of “eigenanatomy” which is a
+variation of sparse PCA that uses (optionally) biologically-motivated
+smoothness, locality or sparsity constraints.</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># assume you ran the population example above</span></span>
+<span><span class="va">eanat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/sparseDecom.html">sparseDecom</a></span><span class="op">(</span> <span class="va">mat</span>, <span class="va">mask</span>, <span class="fl">0.2</span>, <span class="fl">5</span>, cthresh<span class="op">=</span><span class="fl">2</span>, its<span class="op">=</span><span class="fl">2</span> <span class="op">)</span></span>
+<span><span class="va">eanatimages</span> <span class="op">=</span> <span class="fu"><a href="../reference/matrixToImages.html">matrixToImages</a></span><span class="op">(</span> <span class="va">eanat</span><span class="op">$</span><span class="va">eig</span>, <span class="va">mask</span> <span class="op">)</span></span>
+<span><span class="va">eseg</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/eigSeg.html">eigSeg</a></span><span class="op">(</span><span class="va">mask</span>, <span class="va">eanatimages</span> ,<span class="cn">F</span><span class="op">)</span></span>
+<span><span class="va">jeanat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/joinEigenanatomy.html">joinEigenanatomy</a></span><span class="op">(</span><span class="va">mat</span>, <span class="va">mask</span>, <span class="va">eanatimages</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">eseg2</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/eigSeg.html">eigSeg</a></span><span class="op">(</span><span class="va">mask</span>,<span class="va">jeanat</span><span class="op">$</span><span class="va">fusedlist</span>,<span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>The parameters for the example above are set for fast processing. You
+can see our paper for some theory on these methods <span class="citation">(Kandel et al. 2014)</span>. A more realistic study
+setup would be</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">eanat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/sparseDecom.html">sparseDecom</a></span><span class="op">(</span> inmatrix<span class="op">=</span><span class="va">mat</span>, inmask<span class="op">=</span><span class="va">famask</span>, nvecs<span class="op">=</span><span class="fl">50</span>,</span>
+<span>  sparseness<span class="op">=</span><span class="fl">0.005</span>, cthresh<span class="op">=</span><span class="fl">500</span>, its<span class="op">=</span><span class="fl">5</span>, mycoption<span class="op">=</span><span class="fl">0</span> <span class="op">)</span></span>
+<span><span class="va">jeanat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/joinEigenanatomy.html">joinEigenanatomy</a></span><span class="op">(</span> <span class="va">mat</span> , <span class="va">famask</span>, <span class="va">eanat</span><span class="op">$</span><span class="va">eig</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">/</span><span class="fl">100.0</span> , joinMethod<span class="op">=</span><span class="st">'multilevel'</span> <span class="op">)</span></span>
+<span><span class="va">useeig</span><span class="op">&lt;-</span><span class="va">eanat</span><span class="op">$</span><span class="va">eig</span></span>
+<span><span class="va">useeig</span><span class="op">&lt;-</span><span class="va">jeanat</span><span class="op">$</span><span class="va">fusedlist</span></span>
+<span><span class="va">avgmat</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span><span class="op">(</span> <span class="va">useeig</span> , <span class="va">famask</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">avgmat</span><span class="op">&lt;-</span><span class="va">avgmat</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">avgmat</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">imgmat</span><span class="op">&lt;-</span><span class="op">(</span>  <span class="va">mat</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">avgmat</span><span class="op">)</span>  <span class="op">)</span></span></code></pre></div>
+<p>The <code>imgmat</code> variable would be your summary predictors
+entered into <code>lm</code> or <code>randomForest</code>.</p>
+<p>More information is available within the examples that can be seen
+within the help for <code>sparseDecom</code>, <code>sparseDecom2</code>
+and the helper function <code>initializeEigenanatomy</code>.</p>
 <p><strong>Sparse canonical correlation analysis</strong></p>
-<p>CCA maximizes <span class="math inline">\(PearsonCorrelation( XW^T, ZY^T )\)</span> where <span class="math inline">\(X, W\)</span> are as above and <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span> are similarly defined. CCA optimizes the matrices <span class="math inline">\(W, Y\)</span> operating on <span class="math inline">\(X, Z\)</span> to find a low-dimensional representation of the data pair <span class="math inline">\(( X , Z )\)</span> in which correlation is maximal. Following ideas outlined in <span class="citation">Dhillon et al. (2014)</span> and <span class="citation">B. B. Avants, Libon, et al. (2014)</span>, this method can be extended with sparsity constraints that yield rows of <span class="math inline">\(W, Y\)</span> with a controllable number of non-zero entries. See the <a href="http://stnava.github.io/sccanTutorial/">sccan tutorial</a> and <code>sparseDecom2</code> for more information.</p>
+<p>CCA maximizes <span class="math inline">\(PearsonCorrelation( XW^T,
+ZY^T )\)</span> where <span class="math inline">\(X, W\)</span> are as
+above and <span class="math inline">\(Z\)</span> and <span class="math inline">\(Y\)</span> are similarly defined. CCA optimizes
+the matrices <span class="math inline">\(W, Y\)</span> operating on
+<span class="math inline">\(X, Z\)</span> to find a low-dimensional
+representation of the data pair <span class="math inline">\(( X , Z
+)\)</span> in which correlation is maximal. Following ideas outlined in
+<span class="citation">Dhillon et al. (2014)</span> and <span class="citation">B. B. Avants, Libon, et al. (2014)</span>, this method
+can be extended with sparsity constraints that yield rows of <span class="math inline">\(W, Y\)</span> with a controllable number of
+non-zero entries. See the <a href="http://stnava.github.io/sccanTutorial/" class="external-link">sccan tutorial</a> and
+<code>sparseDecom2</code> for more information.</p>
 </div>
-<div id="conclusions" class="section level2">
-<h2 class="hasAnchor">
-<a href="#conclusions" class="anchor"></a>Conclusions</h2>
+<div class="section level3">
+<h3 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+</h3>
 <p>With the current ANTs<em>R</em>, one may:</p>
 <ul>
 <li><p>Exploit ANTs and ITK functionality within <em>R</em></p></li>
-<li><p>Leverage <em>R</em> functionality to help understand and interpret imaging data</p></li>
-<li><p>Use feature selection based on various filtering strategies in <code>iMath</code> and elsewhere (e.g <code>segmentShapeFromImage</code>)</p></li>
-<li><p>Employ dimensionality reduction through eigenanatomy or SCCAN with a variety of incarnations, some of which are similar to ICA</p></li>
-<li><p>Use relatively few interpretable and low-dimensional predictors derived from high-dimensional data.</p></li>
-<li><p>Interpret multivariate results intuitively when used in combination with standard <em>R</em> visualization.</p></li>
+<li><p>Leverage <em>R</em> functionality to help understand and
+interpret imaging data</p></li>
+<li><p>Use feature selection based on various filtering strategies in
+<code>iMath</code> and elsewhere (e.g
+<code>segmentShapeFromImage</code>)</p></li>
+<li><p>Employ dimensionality reduction through eigenanatomy or SCCAN
+with a variety of incarnations, some of which are similar to
+ICA</p></li>
+<li><p>Use relatively few interpretable and low-dimensional predictors
+derived from high-dimensional data.</p></li>
+<li><p>Interpret multivariate results intuitively when used in
+combination with standard <em>R</em> visualization.</p></li>
 </ul>
-<p>See <a href="https://github.com/stnava/ANTsR">ANTsR</a> for all source code and documentation and <a href="http://stnava.github.io/RKRNS">RKRNS-talk</a> for html slides that discuss extensions to BOLD decoding.</p>
-<p>Enjoy and please refer issues to <a href="https://github.com/stnava/ANTsR/issues">ANTs<em>R</em> issues</a>.</p>
+<p>See <a href="https://github.com/stnava/ANTsR" class="external-link">ANTsR</a> for all
+source code and documentation and <a href="http://stnava.github.io/RKRNS" class="external-link">RKRNS-talk</a> for html slides that
+discuss extensions to BOLD decoding.</p>
+<p>Enjoy and please refer issues to <a href="https://github.com/stnava/ANTsR/issues" class="external-link">ANTs<em>R</em>
+issues</a>.</p>
 </div>
 </div>
-<div id="references" class="section level1 unnumbered">
-<h1 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h1>
-<div id="refs" class="references">
-<div id="ref-Avants2015">
-<p>Avants, Brian B. et al. 2015. “The Pediatric Template of Brain Perfusion.” <em>Sci. Data</em>.</p>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Avants2015" class="csl-entry">
+Avants, Brian B. et al. 2015. <span>“The Pediatric Template of Brain
+Perfusion.”</span> <em>Sci. Data</em>.
 </div>
-<div id="ref-Avants2014">
-<p>Avants, Brian B., David J. Libon, Katya Rascovsky, Ashley Boller, Corey T. McMillan, Lauren Massimo, H Branch Coslett, Anjan Chatterjee, Rachel G. Gross, and Murray Grossman. 2014. “Sparse Canonical Correlation Analysis Relates Network-Level Atrophy to Multivariate Cognitive Measures in a Neurodegenerative Population.” <em>Neuroimage</em> 84 (January). Department of Radiology, University of Pennsylvania School of Medicine, Philadelphia, PA, USA.: 698–711. <a href="https://doi.org/10.1016/j.neuroimage.2013.09.048" class="uri">https://doi.org/10.1016/j.neuroimage.2013.09.048</a>.</p>
+<div id="ref-Avants2014" class="csl-entry">
+Avants, Brian B., David J. Libon, Katya Rascovsky, Ashley Boller, Corey
+T. McMillan, Lauren Massimo, H Branch Coslett, Anjan Chatterjee, Rachel
+G. Gross, and Murray Grossman. 2014. <span>“Sparse Canonical Correlation
+Analysis Relates Network-Level Atrophy to Multivariate Cognitive
+Measures in a Neurodegenerative Population.”</span> <em>Neuroimage</em>
+84 (January): 698–711. <a href="https://doi.org/10.1016/j.neuroimage.2013.09.048" class="external-link">https://doi.org/10.1016/j.neuroimage.2013.09.048</a>.
 </div>
-<div id="ref-Avants2014a">
-<p>Avants, Brian B., Nicholas J. Tustison, Michael Stauffer, Gang Song, Baohua Wu, and James C. Gee. 2014. “The Insight Toolkit Image Registration Framework.” <em>Front Neuroinform</em> 8. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 44. <a href="https://doi.org/10.3389/fninf.2014.00044" class="uri">https://doi.org/10.3389/fninf.2014.00044</a>.</p>
+<div id="ref-Avants2014a" class="csl-entry">
+Avants, Brian B., Nicholas J. Tustison, Michael Stauffer, Gang Song,
+Baohua Wu, and James C. Gee. 2014. <span>“The Insight ToolKit Image
+Registration Framework.”</span> <em>Front Neuroinform</em> 8: 44. <a href="https://doi.org/10.3389/fninf.2014.00044" class="external-link">https://doi.org/10.3389/fninf.2014.00044</a>.
 </div>
-<div id="ref-Avants2011">
-<p>Avants, Brian B., Nicholas J. Tustison, Jue Wu, Philip A. Cook, and James C. Gee. 2011. “An Open Source Multivariate Framework for N-Tissue Segmentation with Evaluation on Public Data.” <em>Neuroinformatics</em> 9 (4). Penn Image Computing; Science Laboratory, University of Pennsylvania, 3600 Market Street, Suite 370, Philadelphia, PA 19104, USA. stnava@gmail.com: 381–400. <a href="https://doi.org/10.1007/s12021-011-9109-y" class="uri">https://doi.org/10.1007/s12021-011-9109-y</a>.</p>
+<div id="ref-Avants2011" class="csl-entry">
+Avants, Brian B., Nicholas J. Tustison, Jue Wu, Philip A. Cook, and
+James C. Gee. 2011. <span>“An Open Source Multivariate Framework for
+n-Tissue Segmentation with Evaluation on Public Data.”</span>
+<em>Neuroinformatics</em> 9 (4): 381–400. <a href="https://doi.org/10.1007/s12021-011-9109-y" class="external-link">https://doi.org/10.1007/s12021-011-9109-y</a>.
 </div>
-<div id="ref-Avants2012">
-<p>Avants, Brian, Paramveer Dhillon, Benjamin M. Kandel, Philip A. Cook, Corey T. McMillan, Murray Grossman, and James C. Gee. 2012. “Eigenanatomy Improves Detection Power for Longitudinal Cortical Change.” <em>Med Image Comput Comput Assist Interv</em> 15 (Pt 3). Department of Radiology, University of Pennsylvania, Philadelphia, PA 19104, USA.: 206–13.</p>
+<div id="ref-Avants2012" class="csl-entry">
+Avants, Brian, Paramveer Dhillon, Benjamin M. Kandel, Philip A. Cook,
+Corey T. McMillan, Murray Grossman, and James C. Gee. 2012. <span>“<a href="https://www.ncbi.nlm.nih.gov/pubmed/23286132" class="external-link">Eigenanatomy
+Improves Detection Power for Longitudinal Cortical Change.</a>”</span>
+<em>Med Image Comput Comput Assist Interv</em> 15 (Pt 3): 206–13.
 </div>
-<div id="ref-Cook2014">
-<p>Cook, Philip A., Corey T. McMillan, Brian B. Avants, Jonathan E. Peelle, James C. Gee, and Murray Grossman. 2014. “Relating Brain Anatomy and Cognitive Ability Using a Multivariate Multimodal Framework.” <em>Neuroimage</em>, May. Penn Frontotemporal Degeneration Center, Department of Neurology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA 19104, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.008" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.008</a>.</p>
+<div id="ref-Cook2014" class="csl-entry">
+Cook, Philip A., Corey T. McMillan, Brian B. Avants, Jonathan E. Peelle,
+James C. Gee, and Murray Grossman. 2014. <span>“Relating Brain Anatomy
+and Cognitive Ability Using a Multivariate Multimodal Framework.”</span>
+<em>Neuroimage</em>, May. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.008" class="external-link">https://doi.org/10.1016/j.neuroimage.2014.05.008</a>.
 </div>
-<div id="ref-deMarvao2014">
-<p>de Marvao, Antonio, Timothy J W. Dawes, Wenzhe Shi, Christopher Minas, Niall G. Keenan, Tamara Diamond, Giuliana Durighel, et al. 2014. “Population-Based Studies of Myocardial Hypertrophy: High Resolution Cardiovascular Magnetic Resonance Atlases Improve Statistical Power.” <em>J Cardiovasc Magn Reson</em> 16. th Hospital Campus, Du Cane Road, London W12 0NN, UK. antonio.de-marvao10@imperial.ac.uk.: 16. <a href="https://doi.org/10.1186/1532-429X-16-16" class="uri">https://doi.org/10.1186/1532-429X-16-16</a>.</p>
+<div id="ref-deMarvao2014" class="csl-entry">
+de Marvao, Antonio, Timothy J W. Dawes, Wenzhe Shi, Christopher Minas,
+Niall G. Keenan, Tamara Diamond, Giuliana Durighel, et al. 2014.
+<span>“Population-Based Studies of Myocardial Hypertrophy: High
+Resolution Cardiovascular Magnetic Resonance Atlases Improve Statistical
+Power.”</span> <em>J Cardiovasc Magn Reson</em> 16: 16. <a href="https://doi.org/10.1186/1532-429X-16-16" class="external-link">https://doi.org/10.1186/1532-429X-16-16</a>.
 </div>
-<div id="ref-Dhillon2014">
-<p>Dhillon, Paramveer S., David A. Wolk, Sandhitsu R. Das, Lyle H. Ungar, James C. Gee, and Brian B. Avants. 2014. “Subject-Specific Functional Parcellation via Prior Based Eigenanatomy.” <em>Neuroimage</em>, May. Penn Image Computing; Science Laboratory (PICSL), Department of Radiology, University of Pennsylvania, Philadelphia, PA, USA. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.026" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.026</a>.</p>
+<div id="ref-Dhillon2014" class="csl-entry">
+Dhillon, Paramveer S., David A. Wolk, Sandhitsu R. Das, Lyle H. Ungar,
+James C. Gee, and Brian B. Avants. 2014. <span>“Subject-Specific
+Functional Parcellation via Prior Based Eigenanatomy.”</span>
+<em>Neuroimage</em>, May. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.026" class="external-link">https://doi.org/10.1016/j.neuroimage.2014.05.026</a>.
 </div>
-<div id="ref-dirksbook">
-<p>Eddelbuettel, Dirk. 2013. <em>Seamless R and C++ Integration with Rcpp</em>. New York: Springer.</p>
+<div id="ref-dirksbook" class="csl-entry">
+Eddelbuettel, Dirk. 2013. <em>Seamless <span>R</span> and
+<span>C++</span> Integration with <span>Rcpp</span></em>. New York:
+Springer.
 </div>
-<div id="ref-Johnson2010">
-<p>Johnson, G Allan, Alexandra Badea, Jeffrey Brandenburg, Gary Cofer, Boma Fubara, Song Liu, and Jonathan Nissanov. 2010. “Waxholm Space: An Image-Based Reference for Coordinating Mouse Brain Research.” <em>Neuroimage</em> 53 (2). Duke Center for In Vivo Microscopy, Radiology, Duke University Medical Center, Durham, NC 27710, USA. gjohnson@duke.edu: 365–72. <a href="https://doi.org/10.1016/j.neuroimage.2010.06.067" class="uri">https://doi.org/10.1016/j.neuroimage.2010.06.067</a>.</p>
+<div id="ref-Johnson2010" class="csl-entry">
+Johnson, G Allan, Alexandra Badea, Jeffrey Brandenburg, Gary Cofer, Boma
+Fubara, Song Liu, and Jonathan Nissanov. 2010. <span>“Waxholm Space: An
+Image-Based Reference for Coordinating Mouse Brain Research.”</span>
+<em>Neuroimage</em> 53 (2): 365–72. <a href="https://doi.org/10.1016/j.neuroimage.2010.06.067" class="external-link">https://doi.org/10.1016/j.neuroimage.2010.06.067</a>.
 </div>
-<div id="ref-Kandel2015">
-<p>Kandel, Benjamin M., Danny J J. Wang, John A. Detre, James C. Gee, and Brian B. Avants. 2015. “Decomposing Cerebral Blood Flow Mri into Functional and Structural Components: A Non-Local Approach Based on Prediction.” <em>Neuroimage</em> 105 (January). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, USA.: 156–70. <a href="https://doi.org/10.1016/j.neuroimage.2014.10.052" class="uri">https://doi.org/10.1016/j.neuroimage.2014.10.052</a>.</p>
+<div id="ref-Kandel2015" class="csl-entry">
+Kandel, Benjamin M., Danny J J. Wang, John A. Detre, James C. Gee, and
+Brian B. Avants. 2015. <span>“Decomposing Cerebral Blood Flow MRI into
+Functional and Structural Components: A Non-Local Approach Based on
+Prediction.”</span> <em>Neuroimage</em> 105 (January): 156–70. <a href="https://doi.org/10.1016/j.neuroimage.2014.10.052" class="external-link">https://doi.org/10.1016/j.neuroimage.2014.10.052</a>.
 </div>
-<div id="ref-Kandel2014a">
-<p>Kandel, Benjamin M., Danny J J. Wang, James C. Gee, and Brian B. Avants. 2014. “Eigenanatomy: Sparse Dimensionality Reduction for Multi-Modal Medical Image Analysis.” <em>Methods</em>, October. Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, United States; Department of Radiology, Hospital of the University of Pennsylvania, Philadelphia, PA, United States. <a href="https://doi.org/10.1016/j.ymeth.2014.10.016" class="uri">https://doi.org/10.1016/j.ymeth.2014.10.016</a>.</p>
+<div id="ref-Kandel2014a" class="csl-entry">
+Kandel, Benjamin M., Danny J J. Wang, James C. Gee, and Brian B. Avants.
+2014. <span>“Eigenanatomy: Sparse Dimensionality Reduction for
+Multi-Modal Medical Image Analysis.”</span> <em>Methods</em>, October.
+<a href="https://doi.org/10.1016/j.ymeth.2014.10.016" class="external-link">https://doi.org/10.1016/j.ymeth.2014.10.016</a>.
 </div>
-<div id="ref-Kim2008">
-<p>Kim, Junghoon, Brian Avants, Sunil Patel, John Whyte, Branch H. Coslett, John Pluta, John A. Detre, and James C. Gee. 2008. “Structural Consequences of Diffuse Traumatic Brain Injury: A Large Deformation Tensor-Based Morphometry Study.” <em>Neuroimage</em> 39 (3). Moss Rehabilitation Research Institute, Albert Einstein Healthcare Network, Philadelphia, PA 19141, USA. kimj@einstein.edu: 1014–26. <a href="https://doi.org/10.1016/j.neuroimage.2007.10.005" class="uri">https://doi.org/10.1016/j.neuroimage.2007.10.005</a>.</p>
+<div id="ref-Kim2008" class="csl-entry">
+Kim, Junghoon, Brian Avants, Sunil Patel, John Whyte, Branch H. Coslett,
+John Pluta, John A. Detre, and James C. Gee. 2008. <span>“Structural
+Consequences of Diffuse Traumatic Brain Injury: A Large Deformation
+Tensor-Based Morphometry Study.”</span> <em>Neuroimage</em> 39 (3):
+1014–26. <a href="https://doi.org/10.1016/j.neuroimage.2007.10.005" class="external-link">https://doi.org/10.1016/j.neuroimage.2007.10.005</a>.
 </div>
-<div id="ref-Klein2012">
-<p>Klein, Arno, and Jason Tourville. 2012. “101 Labeled Brain Images and a Consistent Human Cortical Labeling Protocol.” <em>Front Neurosci</em> 6. of Medicine Stony Brook, NY, USA ; Department of Psychiatry, Columbia University New York, NY, USA.: 171. <a href="https://doi.org/10.3389/fnins.2012.00171" class="uri">https://doi.org/10.3389/fnins.2012.00171</a>.</p>
+<div id="ref-Klein2012" class="csl-entry">
+Klein, Arno, and Jason Tourville. 2012. <span>“101 Labeled Brain Images
+and a Consistent Human Cortical Labeling Protocol.”</span> <em>Front
+Neurosci</em> 6: 171. <a href="https://doi.org/10.3389/fnins.2012.00171" class="external-link">https://doi.org/10.3389/fnins.2012.00171</a>.
 </div>
-<div id="ref-Majka2013">
-<p>Majka, Piotr, Jakub M. Kowalski, Natalia Chlodzinska, and Daniel K. Wójcik. 2013. “3D Brain Atlas Reconstructor Service–Online Repository of Three-Dimensional Models of Brain Structures.” <em>Neuroinformatics</em> 11 (4). Nencki Institute of Experimental Biology, 3 Pasteur Street, 02-093, Warsaw, Poland, p.majka@nencki.gov.pl.: 507–18. <a href="https://doi.org/10.1007/s12021-013-9199-9" class="uri">https://doi.org/10.1007/s12021-013-9199-9</a>.</p>
+<div id="ref-Majka2013" class="csl-entry">
+Majka, Piotr, Jakub M. Kowalski, Natalia Chlodzinska, and Daniel K.
+Wójcik. 2013. <span>“3D Brain Atlas Reconstructor Service–Online
+Repository of Three-Dimensional Models of Brain Structures.”</span>
+<em>Neuroinformatics</em> 11 (4): 507–18. <a href="https://doi.org/10.1007/s12021-013-9199-9" class="external-link">https://doi.org/10.1007/s12021-013-9199-9</a>.
 </div>
-<div id="ref-TALAIRACH1958">
-<p>TALAIRACH, J., and P. TOURNOUX. 1958. “[Stereotaxic Localization of Central Gray Nuclei].” <em>Neurochirurgia (Stuttg)</em> 1 (1): 88–93. <a href="https://doi.org/10.1055/s-0028-1095515" class="uri">https://doi.org/10.1055/s-0028-1095515</a>.</p>
+<div id="ref-TALAIRACH1958" class="csl-entry">
+TALAIRACH, J., and P. TOURNOUX. 1958. <span>“[Stereotaxic Localization
+of Central Gray Nuclei].”</span> <em>Neurochirurgia (Stuttg)</em> 1 (1):
+88–93. <a href="https://doi.org/10.1055/s-0028-1095515" class="external-link">https://doi.org/10.1055/s-0028-1095515</a>.
 </div>
-<div id="ref-Tustison2013">
-<p>Tustison, Nicholas J., and Brian B. Avants. 2013. “Explicit B-Spline Regularization in Diffeomorphic Image Registration.” <em>Front Neuroinform</em> 7. Penn Image Computing; Science Laboratory, Department of Radiology, University of Pennsylvania Philadelphia, PA, USA.: 39. <a href="https://doi.org/10.3389/fninf.2013.00039" class="uri">https://doi.org/10.3389/fninf.2013.00039</a>.</p>
+<div id="ref-Tustison2013" class="csl-entry">
+Tustison, Nicholas J., and Brian B. Avants. 2013. <span>“Explicit
+b-Spline Regularization in Diffeomorphic Image Registration.”</span>
+<em>Front Neuroinform</em> 7: 39. <a href="https://doi.org/10.3389/fninf.2013.00039" class="external-link">https://doi.org/10.3389/fninf.2013.00039</a>.
 </div>
-<div id="ref-Tustison2010">
-<p>Tustison, Nicholas J., Brian B. Avants, Philip A. Cook, Yuanjie Zheng, Alexander Egan, Paul A. Yushkevich, and James C. Gee. 2010. “N4ITK: Improved N3 Bias Correction.” <em>IEEE Trans Med Imaging</em> 29 (6). Department of Radiology, University of Pennsylvania, Philadelphia, PA 19140, USA. ntustison@wustl.edu: 1310–20. <a href="https://doi.org/10.1109/TMI.2010.2046908" class="uri">https://doi.org/10.1109/TMI.2010.2046908</a>.</p>
+<div id="ref-Tustison2010" class="csl-entry">
+Tustison, Nicholas J., Brian B. Avants, Philip A. Cook, Yuanjie Zheng,
+Alexander Egan, Paul A. Yushkevich, and James C. Gee. 2010.
+<span>“N4ITK: Improved N3 Bias Correction.”</span> <em>IEEE Trans Med
+Imaging</em> 29 (6): 1310–20. <a href="https://doi.org/10.1109/TMI.2010.2046908" class="external-link">https://doi.org/10.1109/TMI.2010.2046908</a>.
 </div>
-<div id="ref-Tustison2014">
-<p>Tustison, Nicholas J., Philip A. Cook, Arno Klein, Gang Song, Sandhitsu R. Das, Jeffrey T. Duda, Benjamin M. Kandel, et al. 2014. “Large-Scale Evaluation of Ants and Freesurfer Cortical Thickness Measurements.” <em>Neuroimage</em> 99 (October). Penn Image Computing; Science Laboratory, University of Pennsylvania, Philadelphia, PA, USA.: 166–79. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.044" class="uri">https://doi.org/10.1016/j.neuroimage.2014.05.044</a>.</p>
+<div id="ref-Tustison2014" class="csl-entry">
+Tustison, Nicholas J., Philip A. Cook, Arno Klein, Gang Song, Sandhitsu
+R. Das, Jeffrey T. Duda, Benjamin M. Kandel, et al. 2014.
+<span>“Large-Scale Evaluation of ANTs and FreeSurfer Cortical Thickness
+Measurements.”</span> <em>Neuroimage</em> 99 (October): 166–79. <a href="https://doi.org/10.1016/j.neuroimage.2014.05.044" class="external-link">https://doi.org/10.1016/j.neuroimage.2014.05.044</a>.
 </div>
-<div id="ref-Tustison2014a">
-<p>Tustison, Nicholas J., K. L. Shrinidhi, Max Wintermark, Christopher R. Durst, Benjamin M. Kandel, James C. Gee, Murray C. Grossman, and Brian B. Avants. 2014. “Optimal Symmetric Multimodal Templates and Concatenated Random Forests for Supervised Brain Tumor Segmentation (Simplified) with Antsr.” <em>Neuroinformatics</em>, November. Department of Radiology; Medical Imaging, University of Virginia, Charlottesville, VA, USA, ntustison@virginia.edu. <a href="https://doi.org/10.1007/s12021-014-9245-2" class="uri">https://doi.org/10.1007/s12021-014-9245-2</a>.</p>
+<div id="ref-Tustison2014a" class="csl-entry">
+Tustison, Nicholas J., K. L. Shrinidhi, Max Wintermark, Christopher R.
+Durst, Benjamin M. Kandel, James C. Gee, Murray C. Grossman, and Brian
+B. Avants. 2014. <span>“Optimal Symmetric Multimodal Templates and
+Concatenated Random Forests for Supervised Brain Tumor Segmentation
+(Simplified) with ANTsR.”</span> <em>Neuroinformatics</em>, November. <a href="https://doi.org/10.1007/s12021-014-9245-2" class="external-link">https://doi.org/10.1007/s12021-014-9245-2</a>.
 </div>
-<div id="ref-Tzourio-Mazoyer2002">
-<p>Tzourio-Mazoyer, N., B. Landeau, D. Papathanassiou, F. Crivello, O. Etard, N. Delcroix, B. Mazoyer, and M. Joliot. 2002. “Automated Anatomical Labeling of Activations in Spm Using a Macroscopic Anatomical Parcellation of the Mni Mri Single-Subject Brain.” <em>Neuroimage</em> 15 (1). Groupe d’Imagerie Neurofonctionnelle, UMR 6095 CNRS CEA, Université de Caen, Université de Paris 5, France.: 273–89. <a href="https://doi.org/10.1006/nimg.2001.0978" class="uri">https://doi.org/10.1006/nimg.2001.0978</a>.</p>
+<div id="ref-Tzourio-Mazoyer2002" class="csl-entry">
+Tzourio-Mazoyer, N., B. Landeau, D. Papathanassiou, F. Crivello, O.
+Etard, N. Delcroix, B. Mazoyer, and M. Joliot. 2002. <span>“Automated
+Anatomical Labeling of Activations in SPM Using a Macroscopic Anatomical
+Parcellation of the MNI MRI Single-Subject Brain.”</span>
+<em>Neuroimage</em> 15 (1): 273–89. <a href="https://doi.org/10.1006/nimg.2001.0978" class="external-link">https://doi.org/10.1006/nimg.2001.0978</a>.
 </div>
-<div id="ref-Wang2013a">
-<p>Wang, Hongzhi, and Paul A. Yushkevich. 2013. “Multi-Atlas Segmentation with Joint Label Fusion and Corrective Learning-an Open Source Implementation.” <em>Front Neuroinform</em> 7. Department of Radiology, PICSL, Perelman School of Medicine at the University of Pennsylvania Philadelphia, PA, USA.: 27. <a href="https://doi.org/10.3389/fninf.2013.00027" class="uri">https://doi.org/10.3389/fninf.2013.00027</a>.</p>
+<div id="ref-Wang2013a" class="csl-entry">
+Wang, Hongzhi, and Paul A. Yushkevich. 2013. <span>“Multi-Atlas
+Segmentation with Joint Label Fusion and Corrective Learning-an Open
+Source Implementation.”</span> <em>Front Neuroinform</em> 7: 27. <a href="https://doi.org/10.3389/fninf.2013.00027" class="external-link">https://doi.org/10.3389/fninf.2013.00027</a>.
 </div>
 </div>
 </div>
@@ -475,11 +729,13 @@ An example BOLD correlation matrix is available in <code>bold_correlation_matrix
 
 
       <footer><div class="copyright">
-  <p>Developed by Brian B Avants.</p>
+  <p></p>
+<p>Developed by Brian B Avants.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -487,6 +743,8 @@ An example BOLD correlation matrix is available in <code>bold_correlation_matrix
 
   
 
+
+  
 
   </body>
 </html>

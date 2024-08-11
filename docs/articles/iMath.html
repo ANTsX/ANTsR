@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/ANTsR.html">Get started</a>
 </li>
@@ -50,20 +46,14 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
-    </li>
-    <li>
-      <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
       <a href="../articles/deformationSimulation.html">Simulate a deformation field with ANTsR</a>
@@ -75,7 +65,7 @@
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
     </li>
     <li>
-      <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
+      <a href="../articles/simlr_interpretation.html">simlr_interpretation</a>
     </li>
   </ul>
 </li>
@@ -93,10 +83,12 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>iMath (mathematical operations inside ANTsR)</h1>
-                        <h4 class="author">Brian B. Avants, Arman Eshaghi, Jeffrey T. Duda</h4>
+      <h1 data-toc-skip>iMath (mathematical operations inside
+ANTsR)</h1>
+                        <h4 data-toc-skip class="author">Brian B.
+Avants, Arman Eshaghi, Jeffrey T. Duda</h4>
             
-            <h4 class="date">2020-08-18</h4>
+            <h4 data-toc-skip class="date">2024-08-11</h4>
       
       
       <div class="hidden name"><code>iMath.Rmd</code></div>
@@ -105,139 +97,213 @@
 
     
     
-<div id="basic-operations" class="section level2">
-<h2 class="hasAnchor">
-<a href="#basic-operations" class="anchor"></a>Basic operations</h2>
-<p><code>iMath</code> wraps some functions of <code>ImageMath</code> from <a href="http://stnava.github.io/ANTs/">ANTs software</a>. Basic arithmetics (e.g., add, subtract), are built into the <code>antsImage</code> class capabilities, and are similar to array operations in R:</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r">    <span class="no">fi</span>  <span class="kw">&lt;-</span> <span class="fu">antsImageRead</span>(<span class="fu">getANTsRData</span>(<span class="st">"r16"</span>), <span class="fl">2</span>)
-    <span class="no">sumfi</span> <span class="kw">&lt;-</span> <span class="no">fi</span> + <span class="no">fi</span>
-    <span class="no">mulfi</span> <span class="kw">&lt;-</span> <span class="no">fi</span> * <span class="fl">2</span>
-    <span class="co">#logarithm of image where non-zero</span>
-    <span class="no">logfi</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span>(<span class="no">fi</span>[<span class="no">fi</span><span class="kw">&gt;</span><span class="fl">0</span>])
-    <span class="no">expfi</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="no">fi</span>[<span class="no">fi</span><span class="kw">&gt;</span><span class="fl">0</span>])
-    <span class="no">divfi</span> <span class="kw">&lt;-</span> <span class="no">sumfi</span> / <span class="no">mulfi</span></pre></body></html></div>
+<div class="section level2">
+<h2 id="basic-operations">Basic operations<a class="anchor" aria-label="anchor" href="#basic-operations"></a>
+</h2>
+<p><code>iMath</code> wraps some functions of <code>ImageMath</code>
+from <a href="http://stnava.github.io/ANTs/" class="external-link">ANTs software</a>. Basic
+arithmetics (e.g., add, subtract), are built into the
+<code>antsImage</code> class capabilities, and are similar to array
+operations in R:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="va">fi</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span>    <span class="va">sumfi</span> <span class="op">&lt;-</span> <span class="va">fi</span> <span class="op">+</span> <span class="va">fi</span></span>
+<span>    <span class="va">mulfi</span> <span class="op">&lt;-</span> <span class="va">fi</span> <span class="op">*</span> <span class="fl">2</span></span>
+<span>    <span class="co">#logarithm of image where non-zero</span></span>
+<span>    <span class="va">logfi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">fi</span><span class="op">[</span><span class="va">fi</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="va">expfi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">fi</span><span class="op">[</span><span class="va">fi</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="va">divfi</span> <span class="op">&lt;-</span> <span class="va">sumfi</span> <span class="op">/</span> <span class="va">mulfi</span></span></code></pre></div>
 <p>##Morphological operations on masks and images</p>
-<p>The typical rule for dilation and erosion of images in ANTsR is minimum for erosion and maximum for dilation (ITK rules).</p>
+<p>The typical rule for dilation and erosion of images in ANTsR is
+minimum for erosion and maximum for dilation (ITK rules).</p>
 <ul>
 <li>
-<p>Grayscale dilation of an image (compare it with binary dilation below):</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="co">#dilating by a radius of 3 voxels</span>
-<span class="no">GDdilated</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>,<span class="st">"GD"</span>, <span class="fl">3</span>)
-<span class="co">#to see what dilation has done</span>
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">GDdilated</span>))</pre></body></html></div>
+<p>Grayscale dilation of an image (compare it with binary dilation
+below):</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#dilating by a radius of 3 voxels</span></span>
+<span><span class="va">GDdilated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>,<span class="st">"GD"</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#to see what dilation has done</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">GDdilated</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in fun(libname, pkgname): couldn't connect to display</span></span>
+<span><span class="co">#&gt; "/private/tmp/com.apple.launchd.eGFfXWyHAN/org.xquartz:0"</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/greydilate-1.png" width="700"></p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="co">#to see the difference a dilation can make</span>
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">GDdilated</span> - <span class="no">fi</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#to see the difference a dilation can make</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">GDdilated</span> <span class="op">-</span> <span class="va">fi</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/greydilate-2.png" width="700"></p>
 </li>
 <li>
-<p>Grayscale erosion of an image (compare it with binary erosion below).</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">erosion</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>,<span class="st">"GE"</span>, <span class="fl">3</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">erosion</span>))</pre></body></html></div>
+<p>Grayscale erosion of an image (compare it with binary erosion
+below).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">erosion</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>,<span class="st">"GE"</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">erosion</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/greyerode-1.png" width="700"></p>
 </li>
 <li>
-<p>Morphological dilation works on binary images, where it makes white regions bigger:</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">mask</span> <span class="kw">&lt;-</span> <span class="fu">getMask</span>(<span class="no">fi</span>)
-<span class="no">MD</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">mask</span>, <span class="st">"MD"</span>, <span class="fl">3</span>)
-<span class="co">#to see the difference it made</span>
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">MD</span> - <span class="no">mask</span>))</pre></body></html></div>
+<p>Morphological dilation works on binary images, where it makes
+white regions bigger:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getMask.html">getMask</a></span><span class="op">(</span><span class="va">fi</span><span class="op">)</span></span>
+<span><span class="va">MD</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mask</span>, <span class="st">"MD"</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#to see the difference it made</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">MD</span> <span class="op">-</span> <span class="va">mask</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/dilate-1.png" width="700"></p>
 </li>
 <li>
-<p>Morphological erosion makes white regions of a binary mask smaller.</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">ME</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">mask</span>, <span class="st">"ME"</span>, <span class="fl">3</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">ME</span>))</pre></body></html></div>
+<p>Morphological erosion makes white regions of a binary mask
+smaller.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ME</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mask</span>, <span class="st">"ME"</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ME</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/erode-1.png" width="700"></p>
 </li>
 <li>
-<p>Morphological closing of a binary image: operation <code>MC</code> fill holes with the provided radius parameter, for example:</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">newMask</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">mask</span>, <span class="st">"MC"</span>, <span class="fl">4</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">newMask</span>,<span class="kw">slices</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">1</span>)))</pre></body></html></div>
+<p>Morphological closing of a binary image: operation
+<code>MC</code> fill holes with the provided radius parameter, for
+example:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">newMask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mask</span>, <span class="st">"MC"</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">newMask</span>,slices<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/closer-1.png" width="700"></p>
 </li>
-<li><p>Morphological opening of a binary image: removes small structures at the boundary or interior of an image. Syntax is similar to the previous procedure with the operation <code>MO</code>.</p></li>
+<li><p>Morphological opening of a binary image: removes small structures
+at the boundary or interior of an image. Syntax is similar to the
+previous procedure with the operation <code>MO</code>.</p></li>
 </ul>
 <p>##Padding or cropping an image</p>
-<p><code>PadImage</code> is a function to add/remove voxels to/from the boundaries of an image.</p>
+<p><code>PadImage</code> is a function to add/remove voxels to/from the
+boundaries of an image.</p>
 <ul>
 <li>
-<p>Positive numbers will pad image in each direction. So for example using 2 will increase an image with 256 voxels to 260.</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">padded</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"PadImage"</span>, <span class="fl">2</span>)
-<span class="co">#compare padded image dimensions with the original dimensions</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">fi</span>)
-<span class="co">#&gt; [1] 256 256</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">padded</span>)
-<span class="co">#&gt; [1] 260 260</span></pre></body></html></div>
+<p>Positive numbers will pad image in each direction. So for example
+using 2 will increase an image with 256 voxels to 260.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">padded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"PadImage"</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#compare padded image dimensions with the original dimensions</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fi</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 256 256</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">padded</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 260 260</span></span></code></pre></div>
 <ul>
 <li>
-<p>Negative numbers will crop the image in each direciton. For example using -2 will convert a 2-dimensional image with 256 voxels in X and Y direction to 252 voxels in each dimension.</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">cropped</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"PadImage"</span>, -<span class="fl">2</span>)
-<span class="co">#compare cropped image with the original one</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">fi</span>)
-<span class="co">#&gt; [1] 256 256</span>
-<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">cropped</span>)
-<span class="co">#&gt; [1] 252 252</span></pre></body></html></div>
+<p>Negative numbers will crop the image in each direciton. For
+example using -2 will convert a 2-dimensional image with 256 voxels in X
+and Y direction to 252 voxels in each dimension.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cropped</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"PadImage"</span>, <span class="op">-</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#compare cropped image with the original one</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fi</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 256 256</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cropped</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 252 252</span></span></code></pre></div>
 </li>
 </ul>
 </li>
 </ul>
-<p>##Distance map Distance maps may be used for a number of purposes, including: shape analysis, skeletonization and path finding.</p>
+<p>##Distance map Distance maps may be used for a number of purposes,
+including: shape analysis, skeletonization and path finding.</p>
 <ul>
 <li>
-<p><code>MaurerDistance</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1SignedMaurerDistanceMapImageFilter.html">SignedMaurerDistanceMap</a> which calculates the Euclidean distance transform of a binary image in time linear with total number of voxels <span class="citation">(Maurer, Qi, and Raghavan 2003)</span>. It assumes that inside the binary image has negative distance, while outside of the binary mask has positive distance.</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">distanceMap</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">mask</span>, <span class="st">"MaurerDistance"</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">distanceMap</span>))</pre></body></html></div>
+<p><code>MaurerDistance</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1SignedMaurerDistanceMapImageFilter.html" class="external-link">SignedMaurerDistanceMap</a>
+which calculates the Euclidean distance transform of a binary image in
+time linear with total number of voxels <span class="citation">(Maurer,
+Qi, and Raghavan 2003)</span>. It assumes that inside the binary image
+has negative distance, while outside of the binary mask has positive
+distance.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">distanceMap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mask</span>, <span class="st">"MaurerDistance"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distanceMap</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/maurer-1.png" width="700"></p>
 </li>
 <li>
-<p><code>D</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1DanielssonDistanceMapImageFilter.html">DanielssonDistanceMap</a>. It calculates the Euclidean distance map, which shows at each voxel the shortest distance to the nearest voxel in the background (assuming that the input is a binary image) <span class="citation">(Danielsson 1980)</span>.</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">distanceMap</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">mask</span>, <span class="st">"D"</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">distanceMap</span>))</pre></body></html></div>
+<p><code>D</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1DanielssonDistanceMapImageFilter.html" class="external-link">DanielssonDistanceMap</a>.
+It calculates the Euclidean distance map, which shows at each voxel the
+shortest distance to the nearest voxel in the background (assuming that
+the input is a binary image) <span class="citation">(Danielsson
+1980)</span>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">distanceMap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mask</span>, <span class="st">"D"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distanceMap</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/distancemap-1.png" width="700"></p>
 </li>
 </ul>
 <p>##Denoising with anisotropic diffusion</p>
-<p>To reduce noise without changing important parts of an image in computer vision, Perona-Malik is a promising method. Perona-Malik method to reduce noise with anisotropic diffusion is accessible via <code>PeronaMalik</code> operation in <code>iMath</code>. It requires two parameters: 1) number of iterations, and 2) conductance. This implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1GradientAnisotropicDiffusionImageFilter.html">GradientAnisotropicDiffusionImageFilter</a>.</p>
-<p>The conductance parameter is described by ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1AnisotropicDiffusionFunction.html">AnisotropicDiffusionFunction</a>: “The conductance parameter controls the sensitivity of the conductance term in the basic anisotropic diffusion equation. It affects the conductance term in different ways depending on the particular variation on the basic equation. As a general rule, the lower the value, the more strongly the diffusion equation preserves image features (such as high gradients or curvature). A high value for conductance will cause the filter to diffuse image features more readily. Typical values range from 0.5 to 2.0 for data like the Visible Human color data, but the correct value for your application is wholly dependent on the results you want from a specific data set and the number or iterations you perform.”</p>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">denoised</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"PeronaMalik"</span>, <span class="fl">10</span>, <span class="fl">0.5</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">denoised</span>))</pre></body></html></div>
+<p>To reduce noise without changing important parts of an image in
+computer vision, Perona-Malik is a promising method. Perona-Malik method
+to reduce noise with anisotropic diffusion is accessible via
+<code>PeronaMalik</code> operation in <code>iMath</code>. It requires
+two parameters: 1) number of iterations, and 2) conductance. This
+implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1GradientAnisotropicDiffusionImageFilter.html" class="external-link">GradientAnisotropicDiffusionImageFilter</a>.</p>
+<p>The conductance parameter is described by ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1AnisotropicDiffusionFunction.html" class="external-link">AnisotropicDiffusionFunction</a>:
+“The conductance parameter controls the sensitivity of the conductance
+term in the basic anisotropic diffusion equation. It affects the
+conductance term in different ways depending on the particular variation
+on the basic equation. As a general rule, the lower the value, the more
+strongly the diffusion equation preserves image features (such as high
+gradients or curvature). A high value for conductance will cause the
+filter to diffuse image features more readily. Typical values range from
+0.5 to 2.0 for data like the Visible Human color data, but the correct
+value for your application is wholly dependent on the results you want
+from a specific data set and the number or iterations you perform.”</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">denoised</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"PeronaMalik"</span>, <span class="fl">10</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">denoised</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/pm-1.png" width="700"></p>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="co"># to see what the filter has removed</span>
-<span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">fi</span> - <span class="no">denoised</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># to see what the filter has removed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fi</span> <span class="op">-</span> <span class="va">denoised</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/pm-2.png" width="700"></p>
 </div>
-<div id="magnitude-of-gradient-computation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#magnitude-of-gradient-computation" class="anchor"></a>Magnitude of gradient computation</h2>
-<p><code>Grad</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1GradientMagnitudeRecursiveGaussianImageFilter.html#a170eaa3168a017c92cc0b640943e9ca2">GradientMagnitudeRecursiveGaussian</a> which calculates the gradient of the magnitude of an image by convolution with the first derivative of a Gaussian. Parameters are:</p>
+<div class="section level2">
+<h2 id="magnitude-of-gradient-computation">Magnitude of gradient computation<a class="anchor" aria-label="anchor" href="#magnitude-of-gradient-computation"></a>
+</h2>
+<p><code>Grad</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1GradientMagnitudeRecursiveGaussianImageFilter.html#a170eaa3168a017c92cc0b640943e9ca2" class="external-link">GradientMagnitudeRecursiveGaussian</a>
+which calculates the gradient of the magnitude of an image by
+convolution with the first derivative of a Gaussian. Parameters are:</p>
 <ul>
-<li><p><code>sigma</code> (Optional: double, default=0.5) is the full width at half max of the Gaussian kernel, specified in physical space units.</p></li>
-<li><p><code>normalize</code> (Optional: 0 or 1 boolean, default=0) specifies if the output should be scaled to lie in [0,1]</p></li>
+<li><p><code>sigma</code> (Optional: double, default=0.5) is the full
+width at half max of the Gaussian kernel, specified in physical space
+units.</p></li>
+<li><p><code>normalize</code> (Optional: 0 or 1 boolean, default=0)
+specifies if the output should be scaled to lie in [0,1]</p></li>
 </ul>
-<div class="sourceCode" id="cb14"><html><body><pre class="r">  <span class="no">grad</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"Grad"</span>, <span class="fl">1</span>)
-  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">grad</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"Grad"</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">grad</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/grad-1.png" width="700"></p>
 </div>
-<div id="laplacian-of-gaussian-of-an-image" class="section level2">
-<h2 class="hasAnchor">
-<a href="#laplacian-of-gaussian-of-an-image" class="anchor"></a>Laplacian of Gaussian of an image</h2>
-<p><code>Laplacian</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1LaplacianRecursiveGaussianImageFilter.html">LaplacianRecursiveGaussianImageFilter</a> which calculates the the Laplacian of Gaussian of an image by convolving with the second derivative of a Gaussian. Parameters are:</p>
+<div class="section level2">
+<h2 id="laplacian-of-gaussian-of-an-image">Laplacian of Gaussian of an image<a class="anchor" aria-label="anchor" href="#laplacian-of-gaussian-of-an-image"></a>
+</h2>
+<p><code>Laplacian</code> implements ITK’s <a href="http://www.itk.org/Doxygen/html/classitk_1_1LaplacianRecursiveGaussianImageFilter.html" class="external-link">LaplacianRecursiveGaussianImageFilter</a>
+which calculates the the Laplacian of Gaussian of an image by convolving
+with the second derivative of a Gaussian. Parameters are:</p>
 <ul>
-<li><p><code>sigma</code> (Optional: double, default=0.5) is the full width at half max of the Gaussian kernel, specified in physical space units.</p></li>
-<li><p><code>normalize</code> (Optional: 0 or 1 boolean, default=0) specifies if the output should be scaled to lie in [0,1]</p></li>
+<li><p><code>sigma</code> (Optional: double, default=0.5) is the full
+width at half max of the Gaussian kernel, specified in physical space
+units.</p></li>
+<li><p><code>normalize</code> (Optional: 0 or 1 boolean, default=0)
+specifies if the output should be scaled to lie in [0,1]</p></li>
 </ul>
-<div class="sourceCode" id="cb15"><html><body><pre class="r">  <span class="no">laplacianImage</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"Laplacian"</span>, <span class="fl">1</span>, <span class="fl">1</span>)
-  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">laplacianImage</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>  <span class="va">laplacianImage</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"Laplacian"</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">laplacianImage</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="iMath_files/figure-html/lap-1.png" width="700"></p>
 <p>##Sequential operations on images</p>
-<p>Usually it is easier to perform sequential procedures starting from left to right, instead of right to left, as one needs with functions. This has been made possible by another package that <code>ANTsR</code> depends on, <code>magrittr</code>. For example, instead of:</p>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="no">fi</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"r16"</span>) , <span class="fl">2</span> )
-<span class="no">result</span> <span class="kw">&lt;-</span> <span class="fu">iMath</span>(<span class="fu">iMath</span>(<span class="no">fi</span>, <span class="st">"Laplacian"</span>, <span class="fl">1</span>), <span class="st">"GD"</span>, <span class="fl">3</span>)</pre></body></html></div>
+<p>Usually it is easier to perform sequential procedures starting from
+left to right, instead of right to left, as one needs with functions.
+This has been made possible by another package that <code>ANTsR</code>
+depends on, <code>magrittr</code>. For example, instead of:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span> , <span class="fl">2</span> <span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">fi</span>, <span class="st">"Laplacian"</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"GD"</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p>One can do:</p>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">require</a></span>(<span class="no">magrittr</span>)
-<span class="co">#&gt; Loading required package: magrittr</span>
-<span class="no">result</span> <span class="kw">&lt;-</span> <span class="no">fi</span> <span class="kw">%&gt;%</span> <span class="fu">iMath</span>(<span class="st">"Laplacian"</span>,<span class="fl">1</span>)  <span class="kw">%&gt;%</span> <span class="fu">iMath</span>(<span class="st">"GD"</span>,<span class="fl">3</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: magrittr</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">fi</span> <span class="op"><a href="../reference/grapes-greater-than-grapes.html">%&gt;%</a></span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="st">"Laplacian"</span>,<span class="fl">1</span><span class="op">)</span>  <span class="op"><a href="../reference/grapes-greater-than-grapes.html">%&gt;%</a></span> <span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="st">"GD"</span>,<span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p>##Other operations</p>
 <table class="table">
 <colgroup>
@@ -245,33 +311,33 @@
 <col width="40%">
 <col width="40%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Operation</th>
 <th align="center">Example</th>
 <th align="right">Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>FillHoles</td>
 <td align="center"><code>img %&gt;% iMath("FillHoles")</code></td>
 <td align="right">Fills holes in binary object</td>
 </tr>
-<tr class="even">
+<tr>
 <td>GetLargestComponent</td>
 <td align="center"><code>img %&gt;% iMath("GetLargestComponent")</code></td>
 <td align="right">Returns largest portion of binary object</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Normalize</td>
 <td align="center"><code>img %&gt;% iMath("Normalize")</code></td>
 <td align="right">Creates image negative</td>
 </tr>
-<tr class="even">
+<tr>
 <td>TruncateImageIntensity</td>
 <td align="center"><code>img %&gt;% iMath("TruncateImageIntensity", 0.05, 0.95)</code></td>
 <td align="right">Trims intensities by quantiles</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Sharpen</td>
 <td align="center"><code>img %&gt;% iMath("Sharpen")</code></td>
 <td align="right">Makes edges sharper</td>
@@ -279,224 +345,240 @@
 </tbody>
 </table>
 </div>
-<div id="all-imath-operations" class="section level2">
-<h2 class="hasAnchor">
-<a href="#all-imath-operations" class="anchor"></a>All iMath operations</h2>
+<div class="section level2">
+<h2 id="all-imath-operations">All iMath operations<a class="anchor" aria-label="anchor" href="#all-imath-operations"></a>
+</h2>
 <table class="table">
 <caption>Valid iMath Operations</caption>
-<thead><tr class="header">
+<colgroup>
+<col width="12%">
+<col width="6%">
+<col width="32%">
+<col width="11%">
+<col width="24%">
+<col width="12%">
+</colgroup>
+<thead><tr>
 <th align="left">Operation</th>
-<th>OperationType</th>
+<th align="left">OperationType</th>
 <th align="left">Parameters</th>
 <th align="left">Example</th>
 <th align="left">Description</th>
-<th>OutputDimensionalityChange</th>
+<th align="right">OutputDimensionalityChange</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td align="left">PadImage</td>
-<td>Basic</td>
+<td align="left">Basic</td>
 <td align="left">positive or negative padvalue</td>
 <td align="left">iMath(i,op,5)</td>
 <td align="left">pads or de-pads image by n voxels on all sides</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">D</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">distance transform</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">MaurerDistance</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">distance transform</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">PeronaMalik</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">iterations, conductance</td>
 <td align="left">iMath(i,op,10,0.5)</td>
 <td align="left">perona malik edge preserving smoothing</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">Grad</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">sigma</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">gradient magnitude</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">Laplacian</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">sigma</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">laplacian of intensity</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">Canny</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">sigma</td>
 <td align="left">iMath(i,op,1,5,12)</td>
 <td align="left">canny edge detector</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">HistogramEqualization</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">alpha-beta-radius</td>
 <td align="left">iMath(i,op,alpha,beta,5)</td>
 <td align="left">adaptiveHistogramEqualizationImageFilter</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">MD</td>
-<td>Morphology</td>
-<td align="left">element radius,value,shape,parametric/lines,thickness,includeCenter</td>
+<td align="left">Morphology</td>
+<td align="left">element
+radius,value,shape,parametric/lines,thickness,includeCenter</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">dilation</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">ME</td>
-<td>Morphology</td>
-<td align="left">element radius,value,shape,parametric/lines,thickness,includeCenter</td>
+<td align="left">Morphology</td>
+<td align="left">element
+radius,value,shape,parametric/lines,thickness,includeCenter</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">erosion</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">MO</td>
-<td>Morphology</td>
-<td align="left">element radius,value,shape,parametric/lines,thickness,includeCenter</td>
+<td align="left">Morphology</td>
+<td align="left">element
+radius,value,shape,parametric/lines,thickness,includeCenter</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">opening</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">MC</td>
-<td>Morphology</td>
-<td align="left">element radius,value,shape,parametric/lines,thickness,includeCenter</td>
+<td align="left">Morphology</td>
+<td align="left">element
+radius,value,shape,parametric/lines,thickness,includeCenter</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">closing</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">GD</td>
-<td>Morphology</td>
+<td align="left">Morphology</td>
 <td align="left">element radius</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">grayscale dilation</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">GE</td>
-<td>Morphology</td>
+<td align="left">Morphology</td>
 <td align="left">element radius</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">grayscale erosion</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">GO</td>
-<td>Morphology</td>
+<td align="left">Morphology</td>
 <td align="left">element radius</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">grayscale opening</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">GC</td>
-<td>Morphology</td>
+<td align="left">Morphology</td>
 <td align="left">element radius</td>
 <td align="left">iMath(i,op,1)</td>
 <td align="left">grayscale closing</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">FillHoles</td>
-<td>LabelOp</td>
+<td align="left">LabelOp</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">fills holes in binary object</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">FillHolesBinary</td>
-<td>LabelOp</td>
+<td align="left">LabelOp</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">fills holes in binary object</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">GetLargestComponent</td>
-<td>LabelOp</td>
+<td align="left">LabelOp</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">returns largest portion of binary object</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">LabelStats</td>
-<td>LabelOp</td>
+<td align="left">LabelOp</td>
 <td align="left">roiImage</td>
 <td align="left">iMath(i,op,roiImg)</td>
 <td align="left">summarizes ROI values</td>
-<td>NA</td>
+<td align="right">NA</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">Normalize</td>
-<td>Intensity</td>
+<td align="left">Intensity</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">normalize intensity into 0 1 range</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">TruncateIntensity</td>
-<td>Intensity</td>
+<td align="left">Intensity</td>
 <td align="left">lower and upper quantile</td>
 <td align="left">iMath(i,op,0.05,0.95)</td>
 <td align="left">trim intensities by quantiles</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="odd">
+<tr>
 <td align="left">Sharpen</td>
-<td>Intensity</td>
+<td align="left">Intensity</td>
 <td align="left">None</td>
 <td align="left">iMath(i,op)</td>
 <td align="left">makes edges sharper</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
-<tr class="even">
+<tr>
 <td align="left">PropagateLabelsThroughMask</td>
-<td>Filter</td>
+<td align="left">Filter</td>
 <td align="left">labelImage,stoppingValue,propagationMethod</td>
 <td align="left">iMath(mask,op,labels)</td>
 <td align="left">Propagates labels to labels all voxels in the mask</td>
-<td>0</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div id="references" class="section level2 unnumbered">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
-<div id="refs" class="references">
-<div id="ref-Danielsson1980">
-<p>Danielsson, P. 1980. “Euclidean Distance Mapping.” <em>Computer Graphics and Image Processing</em> 14: 227–48.</p>
+<div class="section level2 unnumbered">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Danielsson1980" class="csl-entry">
+Danielsson, P. 1980. <span>“Euclidean Distance Mapping.”</span>
+<em>Computer Graphics and Image Processing</em> 14: 227–48.
 </div>
-<div id="ref-Maurer2003">
-<p>Maurer, C.R., R. Qi, and V. Raghavan. 2003. “A Linear Time Algorithm for Computing Exact Euclidean Distance Transforms of Binary Images in Arbitrary Dimensions.” <em>PAMI</em> 25 (2): 265–70. <a href="https://doi.org/10.1109/TPAMI.2003.1177156" class="uri">https://doi.org/10.1109/TPAMI.2003.1177156</a>.</p>
+<div id="ref-Maurer2003" class="csl-entry">
+Maurer, C. R., R. Qi, and V. Raghavan. 2003. <span>“A Linear Time
+Algorithm for Computing Exact <span>E</span>uclidean Distance Transforms
+of Binary Images in Arbitrary Dimensions.”</span> <em>PAMI</em> 25 (2):
+265–70. <a href="https://doi.org/10.1109/TPAMI.2003.1177156" class="external-link">https://doi.org/10.1109/TPAMI.2003.1177156</a>.
 </div>
 </div>
 </div>
@@ -513,11 +595,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Brian B Avants.</p>
+  <p></p>
+<p>Developed by Brian B Avants.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -525,6 +609,8 @@
 
   
 
+
+  
 
   </body>
 </html>

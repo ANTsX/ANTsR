@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../articles/ANTsR.html">Get started</a>
 </li>
@@ -50,20 +46,14 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/MultiChannel.html">Multichannel image proccessing</a>
-    </li>
-    <li>
       <a href="../articles/RestingBOLD.html">Resting BOLD (basic analyses using ANTsR)</a>
-    </li>
-    <li>
-      <a href="../articles/antsrTransform.html">Using the antsrTransform class</a>
     </li>
     <li>
       <a href="../articles/deformationSimulation.html">Simulate a deformation field with ANTsR</a>
@@ -75,7 +65,7 @@
       <a href="../articles/multivarTemplateCoordinates.html">multivariate template coordinates example for eigenanatomy</a>
     </li>
     <li>
-      <a href="../articles/rfLesionSeg.html">Multi-resolution voxel-wise neighborhood random forest (MRV-NRF) lesion segmentation</a>
+      <a href="../articles/simlr_interpretation.html">simlr_interpretation</a>
     </li>
   </ul>
 </li>
@@ -93,10 +83,12 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>multivariate template coordinates example for eigenanatomy</h1>
-                        <h4 class="author">Brian B. Avants</h4>
+      <h1 data-toc-skip>multivariate template coordinates example for
+eigenanatomy</h1>
+                        <h4 data-toc-skip class="author">Brian B.
+Avants</h4>
             
-            <h4 class="date">2020-08-18</h4>
+            <h4 data-toc-skip class="date">2024-08-11</h4>
       
       
       <div class="hidden name"><code>multivarTemplateCoordinates.Rmd</code></div>
@@ -105,32 +97,43 @@
 
     
     
-<p>How to make a table and plot coordinates of a multivariate (soft) region of interest as produced by methods such as eigenanatomy.</p>
-<p>First, load in a custom template paired with the output of a multivariate sparse decomposition or (alternatively) could be just a statistical map with zeroes in non-interesting areas.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>( <span class="no">ANTsR</span> )
-<span class="no">tem</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"ch2"</span>) )
-<span class="no">temlab2</span><span class="kw">&lt;-</span><span class="fu">antsImageRead</span>( <span class="fu">getANTsRData</span>(<span class="st">"ch2a"</span>)  )
-<span class="no">temporalLobeRegions</span> <span class="kw">=</span> <span class="fu">thresholdImage</span>( <span class="no">temlab2</span>, <span class="fl">80</span>, <span class="fl">90</span>  ) <span class="kw">%&gt;%</span>
-  <span class="fu">smoothImage</span>( <span class="fl">3</span> )
-<span class="no">otherRegions</span> <span class="kw">=</span> <span class="fu">thresholdImage</span>( <span class="no">temlab2</span>, <span class="fl">20</span>, <span class="fl">25</span>  ) <span class="kw">%&gt;%</span>
-  <span class="fu">smoothImage</span>( <span class="fl">1.5</span> )</pre></body></html></div>
+<p>How to make a table and plot coordinates of a multivariate (soft)
+region of interest as produced by methods such as eigenanatomy.</p>
+<p>First, load in a custom template paired with the output of a
+multivariate sparse decomposition or (alternatively) could be just a
+statistical map with zeroes in non-interesting areas.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span> <span class="va">ANTsR</span> <span class="op">)</span></span>
+<span><span class="va">tem</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"ch2"</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">temlab2</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"ch2a"</span><span class="op">)</span>  <span class="op">)</span></span>
+<span><span class="va">temporalLobeRegions</span> <span class="op">=</span> <span class="fu"><a href="../reference/thresholdImage.html">thresholdImage</a></span><span class="op">(</span> <span class="va">temlab2</span>, <span class="fl">80</span>, <span class="fl">90</span>  <span class="op">)</span> <span class="op"><a href="../reference/grapes-greater-than-grapes.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/smoothImage.html">smoothImage</a></span><span class="op">(</span> <span class="fl">3</span> <span class="op">)</span></span>
+<span><span class="va">otherRegions</span> <span class="op">=</span> <span class="fu"><a href="../reference/thresholdImage.html">thresholdImage</a></span><span class="op">(</span> <span class="va">temlab2</span>, <span class="fl">20</span>, <span class="fl">25</span>  <span class="op">)</span> <span class="op"><a href="../reference/grapes-greater-than-grapes.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/smoothImage.html">smoothImage</a></span><span class="op">(</span> <span class="fl">1.5</span> <span class="op">)</span></span></code></pre></div>
 <p>This is the custom template and soft ROI pair.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">mytem</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>( <span class="no">tem</span>, <span class="no">temporalLobeRegions</span>, <span class="no">otherRegions</span> )
-<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>( <span class="no">tem</span>, <span class="no">temporalLobeRegions</span>,
-      <span class="kw">window.overlay</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.1</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>( <span class="no">temporalLobeRegions</span> ) ) )
-<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>( <span class="no">tem</span>, <span class="no">otherRegions</span>, <span class="kw">axis</span><span class="kw">=</span><span class="fl">3</span>,
-      <span class="kw">window.overlay</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.1</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>( <span class="no">otherRegions</span> ) ) )
-<span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>( <span class="no">tem</span>, <span class="no">otherRegions</span>, <span class="kw">axis</span><span class="kw">=</span><span class="fl">1</span>,
-      <span class="kw">window.overlay</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.1</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>( <span class="no">otherRegions</span> ) ) )</pre></body></html></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mytem</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="va">tem</span>, <span class="va">temporalLobeRegions</span>, <span class="va">otherRegions</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">tem</span>, <span class="va">temporalLobeRegions</span>,</span>
+<span>      window.overlay<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fu"><a href="../reference/antsImageSummary.html">max</a></span><span class="op">(</span> <span class="va">temporalLobeRegions</span> <span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">tem</span>, <span class="va">otherRegions</span>, axis<span class="op">=</span><span class="fl">3</span>,</span>
+<span>      window.overlay<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fu"><a href="../reference/antsImageSummary.html">max</a></span><span class="op">(</span> <span class="va">otherRegions</span> <span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">tem</span>, <span class="va">otherRegions</span>, axis<span class="op">=</span><span class="fl">1</span>,</span>
+<span>      window.overlay<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fu"><a href="../reference/antsImageSummary.html">max</a></span><span class="op">(</span> <span class="va">otherRegions</span> <span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p>Gather the canonical template ( e.g. MNI space ).</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">mymni</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>( <span class="fu">antsImageRead</span>(<span class="fu">getANTsRData</span>(<span class="st">"mni"</span>) ),
-            <span class="fu">antsImageRead</span>(<span class="fu">getANTsRData</span>(<span class="st">"mnib"</span>) ),
-            <span class="fu">antsImageRead</span>(<span class="fu">getANTsRData</span>(<span class="st">"mnia"</span>) ) )</pre></body></html></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mymni</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"mni"</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"mnib"</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"mnia"</span><span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p>Map to the canonical template.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">mynetworkdescriptor</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/getMultivariateTemplateCoordinates.html">getMultivariateTemplateCoordinates</a></span>(
- <span class="no">mytem</span>, <span class="no">mymni</span> , <span class="kw">convertToTal</span> <span class="kw">=</span> <span class="fl">TRUE</span> , <span class="kw">pvals</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.01</span>,<span class="fl">0.05</span>) )</pre></body></html></div>
-<p>Now look at the results in table form. This tells us where the (center of) the data is located in anatomical space and associates the known p-values with it. This is simulated data, so we already know the answers to this and these correspond to what we find here.</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">knitr</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span>( <span class="no">mynetworkdescriptor</span>$<span class="no">networks</span> )</pre></body></html></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mynetworkdescriptor</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/getMultivariateTemplateCoordinates.html">getMultivariateTemplateCoordinates</a></span><span class="op">(</span></span>
+<span> <span class="va">mytem</span>, <span class="va">mymni</span> , convertToTal <span class="op">=</span> <span class="cn">TRUE</span> , pvals<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">0.05</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<p>Now look at the results in table form. This tells us where the
+(center of) the data is located in anatomical space and associates the
+known p-values with it. This is simulated data, so we already know the
+answers to this and these correspond to what we find here.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="va">mynetworkdescriptor</span><span class="op">$</span><span class="va">networks</span> <span class="op">)</span></span></code></pre></div>
 <p>Enjoy.</p>
   </div>
 
@@ -143,11 +146,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Brian B Avants.</p>
+  <p></p>
+<p>Developed by Brian B Avants.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -155,6 +160,8 @@
 
   
 
+
+  
 
   </body>
 </html>
