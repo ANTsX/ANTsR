@@ -4683,3 +4683,1034 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
 }
 
 
+
+
+#' Get Quality Control (QC) Metric Names
+#'
+#' This function returns a vector of quality control (QC) metric names used in the \code{antspymm} package. 
+#' These metrics include volume measures, reflection errors, PSNR (Peak Signal-to-Noise Ratio), CNR (Contrast-to-Noise Ratio), 
+#' and various metrics related to motion correction in rsfMRI and DTI.
+#'
+#' @return A character vector containing the names of QC metrics.
+#' @examples
+#' qc_names <- antspymm_qc_names()
+#' print(qc_names)
+#' @export
+antspymm_qc_names <- function() {
+  zz <- c(
+    'T1Hier_resnetGrade',
+    "msk_vol", "T2Flair_msk_vol", "NM1_msk_vol", "NM2_msk_vol", "NM3_msk_vol", "NM4_msk_vol", "NM5_msk_vol", "DTI1_msk_vol", "DTI2_msk_vol", 
+    "rsf1_msk_vol", "rsf2_msk_vol", "rsf3_msk_vol", "reflection_err", "T2Flair_reflection_err", "T2Flair_score_reflection_err", "NM1_reflection_err", 
+    "NM1_score_reflection_err", "NM2_reflection_err", "NM2_score_reflection_err", "NM3_reflection_err", "NM3_score_reflection_err", 
+    "NM4_reflection_err", "NM4_score_reflection_err", "NM5_reflection_err", "NM5_score_reflection_err", "DTI1_reflection_err", "DTI2_reflection_err", 
+    "rsf1_reflection_err", "rsf2_reflection_err", "rsf3_reflection_errpsnr", "T2Flair_psnr", "NM1_psnr", "NM2_psnr", "NM3_psnr", "NM4_psnr", 
+    "NM5_psnr", "DTI1_psnr", "DTI2_psnr", "rsf1_psnr", "rsf2_psnr", "rsf3_psnr", "T1Hier_evratio", "T2Flair_wmh_evr", "rsfMRI_fcnxpro134_bold_evr", 
+    "rsfMRI_fcnxpro122_bold_evr", "rsfMRI_fcnxpro129_bold_evr", "NM2DMT_NM_evr", "T2Flair_flair_evr", "DTI_dti_fa_evr", "cnr", "T2Flair_cnr", 
+    "NM1_cnr", "NM2_cnr", "NM3_cnr", "NM4_cnr", "NM5_cnr", "DTI1_cnr", "DTI2_cnr", "rsf1_cnr", "rsf2_cnr", "rsf3_cnr", 
+    "rsfMRI_fcnxpro134_motion_corrected_mean", "rsfMRI_fcnxpro134_high_motion_count", "rsfMRI_fcnxpro134_high_motion_pct", 
+    "rsfMRI_fcnxpro122_motion_corrected_mean", "rsfMRI_fcnxpro122_high_motion_count", "rsfMRI_fcnxpro122_high_motion_pct", 
+    "rsfMRI_fcnxpro129_motion_corrected_mean", "rsfMRI_fcnxpro129_high_motion_count", "rsfMRI_fcnxpro129_high_motion_pct", 
+    "DTI_dti_high_motion_count", "rsfMRI_fcnxpro134_minutes_original_data", "rsfMRI_fcnxpro134_minutes_censored_data", 
+    "rsfMRI_fcnxpro122_minutes_original_data", "rsfMRI_fcnxpro122_minutes_censored_data", "rsfMRI_fcnxpro129_minutes_original_data", 
+    "rsfMRI_fcnxpro129_minutes_censored_data"
+  )
+  zz <- zz[ -grep("score", zz) ]
+  zz <- zz[ zz != "" ]
+  return( unique( zz ) )
+}
+
+
+
+#' Impute missing data using GLM models
+#'
+#' @param dataframe A data frame containing the data to impute.
+#' @param columns_to_impute A vector of column names to impute.
+#' @param predictor_columns A vector of column names to use as predictors.
+#' @param family A string specifying the GLM family (default is 'gaussian').
+#' @return A data frame with imputed values.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   age = c(25, 30, 35, NA, 45, 50, NA, 40, 35, NA),
+#'   income = c(50000, 60000, 70000, 80000, 90000, 100000, 110000, NA, 120000, 130000),
+#'   education = c(12, 16, 14, 12, NA, 18, 20, 16, 14, 12)
+#' )
+#' columns_to_impute <- c("age")
+#' predictor_columns <- c( "income", "education")
+#' imputed_data <- glm_impute(df, columns_to_impute, predictor_columns, family = 'gaussian')
+#' print(imputed_data)
+#' @export
+glm_impute <- function(dataframe, columns_to_impute, predictor_columns, family = 'gaussian') {
+  for (column in columns_to_impute) {
+    # Create the formula for the GLM
+    formula <- as.formula(paste(column, "~", paste(predictor_columns, collapse = "+")))
+    
+    # Identify rows where neither the target nor predictors are missing
+    complete_cases <- complete.cases(dataframe[, c(column, predictor_columns)])
+    
+    # Fit the GLM model on the complete cases
+    model <- glm(formula, data = dataframe[complete_cases, ], family = family)
+    
+    # Identify rows where the target is missing but predictors are available
+    rows_to_impute <- is.na(dataframe[[column]]) & complete.cases(dataframe[, predictor_columns])
+    
+    # Predict the missing values using the fitted model
+    predictions <- predict(model, newdata = dataframe[rows_to_impute, ])
+    
+    # Replace the missing values with the predictions
+    dataframe[rows_to_impute, column] <- predictions
+  }
+  
+  return(dataframe)
+}
+
+#' Impute missing SiMLR data in a specified column based on other columns
+#'
+#' @param dataframe A data frame containing the data to impute.
+#' @param nms A vector of base column names.
+#' @param vecnum A numeric value to append to the column names.
+#' @param toimpute The base name of the target column to be imputed.
+#' @param family A string specifying the GLM family (default is 'gaussian').
+#' @return A data frame with imputed values.
+#' @examples
+#' set.seed(123)
+#' n=50
+#' df <- data.frame(
+#'   t1PC1 = rnorm(n),
+#'   t1aPC1 = rnorm(n),
+#'   dtPC1 = rnorm(n),
+#'   dtaPC1 = rnorm(n),
+#'   rsfPC1 = rnorm(n),
+#'   perfPC1 = rnorm(n)
+#' )
+#' df[ sample(1:nrow(df),20),6 ]=NA
+#' nms <- c("t1", "t1a", "dt", "dta", "rsf", "perf")
+#' vecnum <- 1
+#' toimpute <- "perf"
+#' df = simlr_impute(df, nms, vecnum, toimpute, family = 'gaussian')
+#' @export
+simlr_impute <- function(dataframe, nms, vecnum, toimpute, family = 'gaussian') {
+  # Create the list of predictor columns excluding the target column to be imputed
+  predictor_columns <- as.vector(sapply(nms[nms != toimpute], function(x) paste0(x, paste0("PC", vecnum))))
+  
+  # Specify the target column to be imputed
+  columns_to_impute <- paste0(toimpute, "PC", vecnum)
+  
+  # Use the glm_impute function to impute missing values
+  imputed_dataframe <- glm_impute(dataframe, columns_to_impute, predictor_columns, family)
+  
+  return(imputed_dataframe)
+}
+
+
+#' Visualize Permutation Test Results
+#'
+#' This function visualizes the results of a permutation test by plotting a histogram of the
+#' permutation test statistics. A red dotted line indicates the location of the original unpermuted
+#' test statistic.
+#'
+#' @param permutation_results A numeric vector of permutation test statistics.
+#' @param original_stat A numeric value representing the original unpermuted test statistic.
+#' @param stat_name A character string representing the name of the test statistic.
+#' @param plot_title string for plot title
+#' @param bin_width optional bin width for the histogram
+#'
+#' @return A ggplot object showing the histogram of permutation test statistics with the original
+#' test statistic marked.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' n_perms <- 1000
+#' permutation_results <- rnorm(n_perms, mean = 0, sd = 1)
+#' original_stat <- 2
+#' visualize_permutation_test(permutation_results, original_stat, "Simulated Statistic")
+#' }
+visualize_permutation_test <- function(permutation_results, original_stat, stat_name, plot_title, bin_width=0.1 ) {
+  # Create a data frame for plotting
+  plot_data <- data.frame(statistic = permutation_results)
+  if ( missing( plot_title ) ) plot_title = paste("Permutation Test Results for", stat_name)
+  # Generate the plot
+  # if ( missing( bin_width ) ) {
+  #  p <- ggplot(plot_data, aes(x = statistic)) +
+  #    geom_histogram( fill = "blue", color = "black", alpha = 0.7) 
+  # } else  p <- ggplot(plot_data, aes(x = statistic)) +
+  #  geom_histogram( binwidth = bin_width, fill = "blue", color = "black", alpha = 0.7) 
+#  p = p + geom_vline(xintercept = original_stat, color = "red", linetype = "dotted", linewidth = 1.2) +    labs(title = plot_title,
+ #        x = paste(stat_name, "Statistic"),
+  #       y = "Frequency") + theme_minimal()
+
+  p <- gghistogram(plot_data, x = 'statistic', bins = 50, title=plot_title) +
+        geom_vline(xintercept = original_stat, linetype = "dotted", color='red' )
+  return( p )
+}
+
+
+#' Exploratory Clustering and Visualization
+#'
+#' This function performs automated clustering using PAM and silhouette method,
+#' and visualizes the results using ggplot2 and ggdendro.
+#'
+#' @param data A data frame with numeric columns.
+#' @param dotsne boolean
+#' @param verbose boolean
+#' @return A list containing the combined plot and the optimal k value.
+#' @export
+exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
+  # Load necessary libraries
+  library(ggplot2)
+  library(GGally)
+  library(tsne)
+  library(fpc)
+  library(ggdendro)
+  library(patchwork)
+
+  if ( verbose ) print("clustering")
+  # Find optimal k using pamk
+  pamk_result <- pamk(scale(data), krange = 2:10)
+  optimal_k <- pamk_result$nc
+
+  # Perform PAM clustering with optimal k
+  pam_cluster <- pam(scale(data), k = optimal_k)
+
+  if ( verbose ) print("pairwise correlations")
+  # Create plots
+  p1 <- ggpairs(data, columns = 1:ncol(data), 
+                upper = list(continuous = "points"), 
+                lower = list(continuous = "cor"))
+
+  if ( dotsne ) {
+    if ( verbose ) print("tsne")
+    tsne_data <- tsne(data, k = 2)
+    tsne_data <- data.frame(X1 = tsne_data[, 1], X2 = tsne_data[, 2], cluster = pam_cluster$clustering)
+    p2 <- ggplot(tsne_data, aes(x = X1, y = X2, color = factor(cluster))) +
+      geom_point() +
+      theme_minimal() + ggtitle("TSNE projection")
+  }
+
+  if ( verbose ) print("dendrogram")
+  data_dist <- dist(scale(t(data)))
+  data_cluster <- hclust(data_dist, method = "ward.D2")
+  p3 <- ggdendrogram(data_cluster, rotate = TRUE) +
+    theme_minimal() + ggtitle("Dendrogram")
+
+  if ( verbose ) print("join plots")
+  # Combine plots into a single page display
+  if ( dotsne ) {
+    p_combined <- p2 + wrap_elements(ggmatrix_gtable(p1)) + p3
+  } else p_combined <- wrap_elements(ggmatrix_gtable(p1)) + p3
+  # Return combined plot and optimal k
+  list( plot = p_combined, optimal_k = optimal_k)
+}
+
+
+
+#' Generate Predictors from ANTsPyMM Imaging Data
+#'
+#' This function generates a list of variable names to be used as predictors
+#' in a model, based antspymm tabular version of imaging data.
+#' It filters and processes the data to create meaningful predictors. LRAVG
+#'
+#' @param demog A dataframe containing demographic and imaging data.
+#' @param doasym boolean
+#' @param return_colnames boolean
+#' @return A dataframe with processed demographic and imaging data.
+#' @examples
+#' # predictors <- antspymm_predictors(demographic_data)
+#' @export
+#'
+#' @importFrom dplyr filter
+#' @importFrom glasso glasso
+#' @importFrom magrittr %>%
+antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
+  badcaud=getNamesFromDataframe("bn_str_ca",demog)
+  badcaud=badcaud[ -grep("deep",badcaud)]
+  xcl=c("hier_id",'background','SNR','evr','mask','msk','smoothing','minutes', "RandBasis",'templateL1', 'upsampl', 'paramset', 'nc_wm', 'nc_csf', 'censor','bandpass', 'outlier', 'meanBold', 'dimensionality', 'spc', 'org','andwidth',
+  'unclassified', 'cleanup', 'slice', badcaud, 'dimx', 'dimy', 'dimz','dimt', 'modality' )
+  if ( doasym & return_colnames ) xcl=c(xcl,'left','right',"_l_","_r_")
+  t1namesbst = getNamesFromDataframe( c("T1Hier",'brainstem','vol'), demog, exclusions=c("tissues","lobes"))[-1]
+  testnames=c(
+          getNamesFromDataframe( "T1w_" , demog, exclusions=xcl),
+          getNamesFromDataframe( "mtl" , demog, exclusions=xcl),
+          getNamesFromDataframe( "cerebellum" , demog, exclusions=c(xcl,"_cerebell")),
+          getNamesFromDataframe( "T1Hier_" , demog, exclusions=c("hier_id","[.]1","[.]2","[.]3",'background','tissue','dktregions','T1Hier_resnetGrade','hemisphere','lobes','SNR','evr','area',xcl)),
+          t1namesbst,
+          getNamesFromDataframe( "rsfMRI_fcnxpro" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
+          getNamesFromDataframe( "perf_" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
+          getNamesFromDataframe( "DTI_" , demog, exclusions=c("hier_id",'background','thk','area','vol','motion','FD','dvars','ssnr','tsnr','SNR','evr','cnx','relcn',xcl)) )
+  testnames = unique( testnames )
+  testnames = intersect( testnames, colnames(demog))
+  if ( return_colnames ) return( testnames )
+
+  if ( FALSE ) {
+    testnames = c(
+                getNamesFromDataframe( "Asym" , demog ),
+                getNamesFromDataframe( "LRAVG" , demog ) ) %>% unique()
+    testnames = testnames[ -multigrep( c("DTI_relcn_LRAVG","DTI_relcn_Asym"), testnames ) ]
+    # special LR avg for falff
+    falffnames = getNamesFromDataframe( c("falff"), demog, exclusions=c('mean','sd','Unk'))
+  }
+
+  tempnames=colnames(demog)
+  tempnames=gsub("Right","right",tempnames)
+  tempnames=gsub("Left","left",tempnames)
+  colnames(demog)=tempnames
+
+  if ( doasym )
+    demog=mapAsymVar( demog, 
+              testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
+  demog=mapLRAverageVar( demog, 
+              testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
+  if ( doasym )
+    demog=mapAsymVar( demog, 
+                  testnames[ grep("left", testnames) ] )
+  demog=mapLRAverageVar( demog, 
+              testnames[ grep("left", testnames) ] )
+  return( demog )
+  }
+
+
+
+#' Determine the Variable Type Based on Its Name
+#'
+#' This function inspects the input character vector for specific patterns
+#' indicating the type of variable (e.g., "T1", "rsfMRI", "DTI", "NM2") and
+#' returns a corresponding string identifier for the first matched type.
+#' If no known pattern is found, it returns `NA`.
+#'
+#' @param x A character vector containing names or identifiers to be checked
+#'          against known patterns for variable types. It must be a character vector.
+#'
+#' @return A character string indicating the type of variable matched based
+#'         on the predefined patterns ("T1", "rsfMRI", "DTI", "NM2DMT").
+#'         Returns `NA` if no pattern matches.
+#'
+#' @examples
+#' antspymm_vartype("This is a T1 weighted image")  # Returns "T1"
+#' antspymm_vartype("Subject underwent rsfMRI")    # Returns "rsfMRI"
+#' antspymm_vartype("DTI sequence")                # Returns "DTI"
+#' antspymm_vartype("Analysis of NM2")             # Returns "NM2DMT"
+#' antspymm_vartype("Unknown type")                # Returns NA
+#'
+#' @note This function only checks for the first occurrence of a pattern
+#'       and does not account for multiple different patterns within the
+#'       same input. The order of pattern checking is fixed and may affect
+#'       the result if multiple patterns are present.
+#'
+#' @export
+antspymm_vartype <- function(x) {
+  # Validate input
+  if (!is.character(x)) {
+    stop("Input must be a character vector.")
+  }
+  
+  # Define patterns and corresponding returns in a named list
+  patterns <- list(
+    T1 = "T1", rsfMRI = "rsfMRI", DTI = "DTI", NM2 = "NM2DMT", T2="T2Flair", 
+    t1 = "T1", rsfmri = "rsfMRI", dti = "DTI", nm2 = "NM2DMT", t2="T2Flair", 
+    t1 = "T1", rs = "rsfMRI", dt = "DTI", nm2 = "NM2DMT", t2="T2Flair", 
+    perf='perf')
+  
+  # Iterate through the patterns
+  for (pattern in names(patterns)) {
+    if (any(grepl(pattern, x))) {
+      return(patterns[[pattern]])
+    }
+  }
+  
+  # Default return if no pattern matched
+  return(NA)
+}
+
+
+
+#' return nuisance variable strings
+#' 
+#' these strings can be used with getNamesFromDataFrame or multigrep to 
+#' either include or exclude nuisance variables.
+#' 
+#' @export
+antspymm_nuisance_names <-function(){
+xcl = c("snr_","bandp","_mean","censor","smooth","outlier","motion","FD","despik","_nc_","_evr","minut","left","right","paramset","_sd","upsampling","mhdist","RandBasis","templateL1")
+return( xcl )
+}
+
+#' shorter antspymm names
+#' @param x string or strings 
+#' @return string
+#' @author Avants BB
+#' 
+#' @export
+shorten_pymm_names <-function(x){
+    xx=tolower(x)
+    xx=gsub("_",".",xx)
+    xx=gsub("..",'.',xx,fixed=TRUE)
+    xx=gsub("..",'.',xx,fixed=TRUE)
+    xx=gsub( "sagittal.stratum.include.inferior.longitidinal.fasciculus.and.inferior.fronto.occipital.fasciculus.","ilf.and.ifo",xx,fixed=TRUE)
+    xx=gsub(".cres.stria.terminalis.can.not.be.resolved.with.current.resolution.","",xx,fixed=TRUE)
+    xx=gsub("longitudinal.fasciculus",'l.fasc',xx,fixed=TRUE)
+    xx=gsub("corona.radiata",'cor.rad',xx,fixed=TRUE)
+    xx=gsub("central",'cent',xx,fixed=TRUE)
+    xx=gsub("deep.cit168",'dp.',xx,fixed=TRUE)
+    xx=gsub("cit168",'',xx,fixed=TRUE)
+    xx=gsub(".include",'',xx,fixed=TRUE)
+    xx=gsub("mtg.sn",'',xx,fixed=TRUE)
+    xx=gsub("brainstem",'.bst',xx,fixed=TRUE)
+    xx=gsub("rsfmri.",'rsf.',xx,fixed=TRUE)
+    xx=gsub("dti.mean.fa.",'dti.fa.',xx,fixed=TRUE)
+    xx=gsub("perf.cbf.mean.",'cbf.',xx,fixed=TRUE)
+    xx=gsub(".jhu.icbm.labels.1mm",'',xx,fixed=TRUE)
+    xx=gsub(".include.optic.radiation.",'',xx,fixed=TRUE)
+    xx=gsub("..",'.',xx,fixed=TRUE)
+    xx=gsub("..",'.',xx,fixed=TRUE)
+    xx=gsub("cerebellar.peduncle",'cereb.ped',xx,fixed=TRUE)
+    xx=gsub("anterior.limb.of.internal.capsule",'ant.int.cap',xx,fixed=TRUE)
+    xx=gsub("posterior.limb.of.internal.capsule",'post.int.cap',xx,fixed=TRUE)
+    xx=gsub("t1hier.",'t1.',xx,fixed=TRUE)
+    xx=gsub("anterior",'ant',xx,fixed=TRUE)
+    xx=gsub("posterior",'post',xx,fixed=TRUE)
+    xx=gsub("inferior",'inf',xx,fixed=TRUE)
+    xx=gsub("superior",'sup',xx,fixed=TRUE)
+    xx=gsub("dktcortex",'.ctx',xx,fixed=TRUE)
+    xx=gsub(".lravg",'',xx,fixed=TRUE)
+    xx=gsub("dti.mean.fa",'dti.fa',xx,fixed=TRUE)
+    xx=gsub("retrolenticular.part.of.internal","rent.int.cap",xx,fixed=TRUE)
+    xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
+    xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
+    xx=gsub(".fronto.occipital.",".frnt.occ.",xx,fixed=TRUE)
+    xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
+    xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
+    xx=gsub(".external.capsule",".ext.cap",xx,fixed=TRUE)
+    xx=gsub("of.internal.capsule",".int.cap",xx,fixed=TRUE)
+    xx=gsub("fornix.cres.stria.terminalis","fornix.",xx,fixed=TRUE)
+    xx=gsub("capsule","",xx,fixed=TRUE)
+    xx=gsub("and.inf.frnt.occ.fasciculus.","",xx,fixed=TRUE)
+    xx=gsub("crossing.tract.a.part.of.mcp.","",xx,fixed=TRUE)
+    xx=gsub("post.thalamic.radiation.optic.radiation","post.thalamic.radiation",xx,fixed=TRUE)
+    xx=gsub("adjusted",'adj',xx,fixed=TRUE)
+    xx=gsub("..",'.',xx,fixed=TRUE)
+    xx=gsub("t1w.mean","t1vth",xx,fixed=TRUE)
+    xx=gsub("fcnxpro129","p2",xx,fixed=TRUE)
+    xx=gsub("fcnxpro134","p3",xx,fixed=TRUE)
+    xx=gsub("fcnxpro122","p1",xx,fixed=TRUE)
+#    for ( x in 1:length(xx) ) {
+#      xx[x]=substr(xx[x],0,40)
+#    }
+    return(xx)
+}
+
+
+
+#' Interpret SiMLR Vector
+#'
+#' This function interprets a vector from SiMLR (similarity-driven multivariate linear reconstruction)
+#' specifically focusing on a given variable (e.g., a specific principal component or cluster). It extracts and normalizes the vector associated 
+#' with the specified SiMLR variable, sorts it to identify the top elements, and optionally filters out non-significant values. 
+#' This function is useful for understanding the contribution of different features in the context of the SiMLR analysis. Assumes this input is generated by antspymm_simlr.
+#'
+#' @param simlrResult a specific v matrix out of SiMLR
+#' @param simlrVariable A string specifying the variable within `simlrResult` to interpret. The variable 
+#' name should include both an identifier (e.g., "PC" for principal component) and a numeric index.
+#' @param n2show An integer specifying the number of top elements to show from the sorted, normalized vector. 
+#' Defaults to 5. If `NULL` or greater than the length of the vector, all elements are shown.
+#' @param shortnames boolean
+#' @param return_dataframe boolean
+#' @return A named vector of the top `n2show` elements (or all if `n2show` is `NULL` or too large), 
+#' sorted in decreasing order of their absolute values. Elements are named according to their identifiers 
+#' in `simlrMats` and filtered to exclude non-significant values (absolute value > 0).
+#' @examples
+#' # This example assumes you have SiMLR result `simlrResult`, matrices `simlrMats`, and you want to 
+#' # interpret the first principal component "PC1".
+#' # simlrResult <- list(v = list(PC = matrix(runif(20), ncol = 2)))
+#' # simlrMats <- list(PC = matrix(runif(100), ncol = 10))
+#' # simlrVariable <- "PC1"
+#' # interpretedVector <- interpret_simlr_vector2(simlrResult$v[[1]] )
+#' # print(interpretedVector)
+#' @importFrom stringr str_match str_extract
+#' @export
+interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
+
+  split_string_correctly <- function(input_string) {
+    # Extract the leading alphabetic characters (possibly including numbers within the alphabetic segment)
+    alpha_part <- str_match(input_string, "([A-Za-z0-9]+(?=[A-Za-z]+[0-9]+$))[A-Za-z]*")[,1]
+    
+    # Extract the numeric part at the end
+    numeric_part <- str_extract(input_string, "[0-9]+$")
+    
+    c( alpha_part, numeric_part)
+  }
+  varparts = split_string_correctly( simlrVariable )
+  varparts[1]=gsub("PC","",varparts[1])
+  if ( shortnames ) {
+    nmslist=shorten_pymm_names( rownames( simlrResult ) )
+  } else {
+    nmslist = rownames( simlrResult )
+  }
+
+  # Extract the vector for the given modality and region, and normalize it
+  t1vec <- abs(simlrResult[, simlrVariable ])
+  t1vec=t1vec/max(t1vec)
+  
+  # Assign names to the vector elements from the names list
+  names(t1vec) <- nmslist
+  
+  # Sort the vector in decreasing order and select the top 'n2show' elements
+  # If 'n2show' is NULL or greater than the length of t1vec, use the length of t1vec
+  n_items_to_show <- if (is.null(n2show)) length(t1vec) else min(c(n2show, length(t1vec)))
+  t1vec_sorted <- head(t1vec[order(t1vec, decreasing = TRUE)], n_items_to_show)
+  
+  # Filter out non-significant values (absolute value > 0)
+  t1vec_filtered <- t1vec_sorted[abs(t1vec_sorted) > 0]
+  if ( return_dataframe ) {
+    t1vec_filtered=data.frame( anat=names(t1vec_filtered), values=t1vec_filtered)
+  }
+  return(t1vec_filtered)
+}
+
+
+#' Update Residuals for SiMLR
+#'
+#' This function updates residuals for SiMLR by applying different covariate transformations.
+#'
+#' @param mats A list of matrices.
+#' @param x An index to select a matrix from the list.
+#' @param covariate A character string specifying the covariate transformation to apply.
+#' @param blaster2 A data frame containing additional covariate data.
+#' @param allnna A logical vector indicating non-missing data points.
+#' @param n.comp An integer specifying the number of components.
+#' @param opt A character string. If set to "opt", the function will print available covariate options.
+#'
+#' @return The residual matrix after applying the specified covariate transformation.
+#' If `opt` is set to "opt", the function will print available covariate options and return NULL.
+#'
+#' @examples
+#' \dontrun{
+#' antspymm_simlr_update_residuals(mats, 1, "whiten", blaster2, allnna, 5)
+#' antspymm_simlr_update_residuals(opt = "opt")
+#' }
+#' @export
+antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna, n.comp, opt = NULL) {
+  covariate_options <- c(
+    "whiten", "lowrank", "robust", "center", "rank", "scale", "mean",
+    "formula such as T1Hier_resnetGrade + snr + EVR + psnr"
+  )
+  
+  if (!is.null(opt) && opt == "opt") {
+    print("Available covariate options:")
+    print(covariate_options)
+    return(invisible(NULL))
+  }
+  
+  if (is.null(covariate)) return(mats[[x]])
+  
+  nc <- min(c(n.comp * 2, nrow(mats[[x]]) - 1))
+  
+  if (covariate == "whiten") {
+    return(icawhiten(data.matrix(mats[[x]]), n.comp = nc))
+  }
+  if (covariate == "lowrank") {
+    return(lowrankRowMatrix(data.matrix(mats[[x]]), nc))
+  }
+  if (covariate == "robust") {
+    return(robustMatrixTransform(data.matrix(mats[[x]])))
+  }
+  if (covariate == "center") {
+    return(scale(data.matrix(mats[[x]]), center = TRUE, scale = FALSE))
+  }
+  if (covariate == "rank") {
+    return(rank_and_scale(data.matrix(mats[[x]])))
+  }
+  if (covariate == "scale") {
+    return(scale(data.matrix(mats[[x]]), center = FALSE, scale = TRUE))
+  }
+  if (covariate == "mean") {
+    mymean <- rowMeans(data.matrix(mats[[x]]))
+    covariate2 <- "mymean"
+  } else {
+    covariate2 <- covariate
+  }
+  
+  formula <- as.formula(paste("data.matrix(mats[[", x, "]]) ~ ", covariate2))
+  fit <- lm(formula, data = blaster2[allnna, ])
+  residuals(fit)
+}
+
+#' Perform SiMLR Analysis on Multimodal ANTsPyMM Data
+#'
+#' This function processes multimodal data using SiMLR. It is designed
+#' to be flexible, allowing for various preprocessing steps and analysis options. The analysis
+#' can be adjusted through multiple parameters, offering control over the inclusion of certain
+#' data types, permutation testing, and more.
+#'
+#' @param blaster A dataframe containing multimodal data for analysis.
+#' @param select_training_boolean boolean vector to define which entries are in training data
+#' @param connect_cog Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.
+#' @param energy The type of energy model to use for similarity analysis. Defaults to 'reg'.
+#' @param nsimlr Number of components.
+#' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
+#' @param myseed Seed for random number generation to ensure reproducibility. Defaults to 3.
+#' @param doAsym integer 0 for FALSE, 1 for TRUE and 2 for separate matrices for asymm variables.
+#' @param returnidps Logical indicating whether to return the intermediate processing steps' results. Defaults to FALSE.
+#' @param restrictDFN Logical indicating whether to restrict analysis to default network features. Defaults to FALSE.
+#' @param resnetGradeThresh image quality threshold (higher better).
+#' @param doperm Logical indicating whether to perform permutation tests. Defaults to FALSE.  Will randomize image features in the training data and thus leads to "randomized" but still regularized projections.
+#' @param exclusions vector of strings to exclude from predictors
+#' @param inclusions vector of strings to include in predictors
+#' @param sparseness vector or scalar value to set sparseness
+#' @param iterations int value to set max iterations
+#' @param verbose boolean
+#' @return A list containing the results of the similarity analysis and related data.
+#' @export
+#' @examples
+#' # Example usage:
+#' # result <- antspymm_simlr(dataframe)
+antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  energy=c('cca','reg','lrr'), nsimlr=5, covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE, 
+resnetGradeThresh=1.02, doperm=FALSE, 
+exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALSE ) 
+{
+  safegrep <- function(pattern, x, ...) {
+    result <- grep(pattern, x, ...)
+    if (length(result) == 0) {
+      return(1:length(x))
+    }
+    return(result)
+  }
+  safeclean = function( pattern, x,fixed=FALSE, exclude=TRUE) {
+    mysub=grep(pattern,x,fixed=fixed)
+    if ( length(mysub) == 0 ) return( x )
+    if ( exclude ) return( x[-mysub] ) else return( x[mysub] )
+  }
+  idps=antspymm_predictors(blaster,TRUE,TRUE)
+  rsfnames = idps[ grepl("rsfMRI",idps) ]
+  if ( length(rsfnames) > 0 ) rsfnames = rsfnames[ safegrep("_2_",rsfnames)]
+  if ( !all(grepl("rsfMRI", rsfnames )) ) rsfnames=c()
+  if ( !is.null(exclusions)) {
+    for ( x in exclusions ) {
+      idps=safeclean(x,idps)
+      rsfnames=safeclean(x,rsfnames)
+    }
+  }
+  if ( !is.null(inclusions)) {
+    for ( x in inclusions ) {
+      idps=safeclean(x,idps,exclude=FALSE)
+      rsfnames=safeclean(x,rsfnames,exclude=FALSE)
+    }
+  }
+  idps=idps[ -multigrep(antspymm_nuisance_names()[-3],idps)]
+  if ( doAsym == 0 ) {
+    idps=safeclean("Asym",idps)
+    } else {
+    idps=safeclean("Asymcit168",idps)
+  }
+  idps=safeclean("cleanup",idps)
+  idps=safeclean("snseg",idps)
+  idps=safeclean("_deep_",idps)
+  idps=safeclean("peraf",idps)
+  idps=safeclean("alff",idps)
+  idps=safeclean("LRAVGcit168",idps)
+  idps=safeclean("_l_",idps,fixed=TRUE)
+  idps=safeclean("_r_",idps,fixed=TRUE)
+  if ( restrictDFN ) {
+    rsfnames = rsfnames[ safegrep("Default",rsfnames)]
+  } else {
+#    rsfnames = rsfnames[ multigrep( c("imbic","TempPar"),rsfnames)]
+  }
+  perfnames = idps[ multigrep( c("perf_cbf_mean_"),idps,intersect=TRUE)]
+  t1names = idps[ multigrep( c("T1Hier"),idps,intersect=TRUE)]
+  dtnames = unique( c( 
+    idps[ multigrep( c("mean_fa","DTI"),idps,intersect=TRUE)],
+    idps[ multigrep( c("mean_md","DTI"),idps,intersect=TRUE)] ))
+
+  t1asymnames=c()
+  dtasymnames=c()
+  pfasymnames=c()
+  if ( doAsym == 2 ) {
+    t1nms = t1names
+    t1asymnames = t1nms[ grep("Asym",t1nms)]
+    t1names = t1nms[ !( t1nms %in%  t1asymnames ) ]
+
+    dtnms = dtnames
+    dtasymnames = dtnms[ grep("Asym",dtnms)]
+    dtnames = dtnames[ !( dtnames %in%  dtasymnames ) ]
+
+    pfnms = perfnames
+    pfasymnames = pfnms[ grep("Asym",pfnms)]
+    perfnames = pfnms[ !( pfnms %in%  pfasymnames ) ]
+    }
+
+  idps=unique(t1names)
+  idplist = list()
+  idplist[["t1"]]=t1names
+  if ( length(dtnames) > 0 ) {
+    idps = c( idps, unique(dtnames) )
+    idplist[["dt"]]=dtnames
+  }
+
+  if ( length(rsfnames) > 0 ) {
+    idps = c( idps, unique(rsfnames) )
+    idplist[["rsf"]]=rsfnames
+  }
+  if ( length(perfnames) > 0 ) {
+    idps = c( idps, unique(perfnames) )
+    idplist[["perf"]]=perfnames
+  }
+  if ( length(t1asymnames) > 0 ) {
+    idps = c( idps, unique(t1asymnames) )
+    idplist[["t1a"]]=t1asymnames
+  }
+
+  if ( length(dtasymnames) > 0 ) {
+    idps = c( idps, unique(dtasymnames) )
+    idplist[["dta"]]=dtasymnames
+  }
+
+  if ( length(pfasymnames) > 0 ) {
+    idps = c( idps, unique(pfasymnames) )
+    idplist[["pfa"]]=pfasymnames
+  }
+  if ( !missing( connect_cog ) ) { 
+    idplist[["cg"]]=connect_cog
+  }
+  if ( verbose ) {
+    print(names(idplist))
+    print(sample(idps,10))
+  }
+  if ( returnidps ) return(idps)
+  allnna=select_training_boolean[  blaster$T1Hier_resnetGrade >= resnetGradeThresh ]
+  blaster2=blaster[  blaster$T1Hier_resnetGrade >= resnetGradeThresh, ]
+  stopifnot( min(dim(blaster2)) > 3 )
+  if ( verbose ) {
+    print("dim( subsetdataframe)")
+    print(dim(blaster2) )
+  }
+  #################################################
+  nperms=0
+  matsFull = list()
+  mats = list()
+  for ( kk in 1:length(idplist)) {
+      matsFull[[ names(idplist)[kk] ]] = blaster[,idplist[[kk]]]
+      mats[[ names(idplist)[kk] ]] = antsrimpute( blaster2[allnna,idplist[[kk]]] )
+      }
+  if ( verbose ) print("mats done")
+  if ( doperm ) {
+    nada=setSeedBasedOnTime()
+    sss=sample( 1:nrow( matsFull[[1]]  ))
+    for ( jj in 1:length( mats ) ) {
+        ss=sample( 1:nrow( mats[[jj]]  ))
+        mats[[jj]]=mats[[jj]][sample( 1:nrow( mats[[jj]]  )),]
+    }
+  }
+  nms = names(mats)
+  regs0 = list()
+  rank_and_scale <- function(mat) {
+    # Function to rank transform and scale a single column
+    rank_and_scale_col <- function(col) {
+      ranked_col <- rank(col, ties.method = "average") # Rank the column
+      scaled_col <- 2 * ((ranked_col - min(ranked_col)) / (max(ranked_col) - min(ranked_col))) - 1 # Scale to range -1 to 1
+      return(scaled_col)
+    }
+    
+    # Apply the rank_and_scale_col function to each column of the matrix
+    result <- apply(mat, 2, rank_and_scale_col)
+    return(result)
+  }
+
+  if ( verbose) print("setting up regularization")
+  for ( mycov in covariates ) {
+    print(paste("adjust by:",mycov))
+  for ( x in 1:length(mats)) {
+      if ( verbose ) {
+        if ( x == 1 ) print(paste("training n= ",nrow(mats[[x]])))
+        cat(paste0(names(mats)[x],"..."))
+      }
+      mats[[x]]=antspymm_simlr_update_residuals( mats, x, mycov, blaster2, allnna, n.comp=nsimlr )
+      mats[[x]]=data.matrix(mats[[x]])
+  }}
+  for ( x in 1:length(mats)) {
+      mycor = cor( mats[[x]] )
+      mycor[mycor < 0.8]=0
+      regs0[[x]]=data.matrix(mycor)
+      }
+  names(regs0)=names(mats)
+  regs = regs0 # regularizeSimlr( mats, fraction=0.05, sigma=rep(2.0,length(mats)) )
+  if ( verbose ) print("regularizeSimlr done")
+  names(regs0)=names(mats)
+  names(regs)=names(mats)
+  if ( !missing( connect_cog ) ) {
+    regs[["cg"]] = Matrix(regs0[["cg"]], sparse = TRUE) 
+    print("regularize cg")
+  }
+
+#  if ( !doperm )
+#    for ( pp in 1:length(regs)) plot(image(regs[[pp]]))
+
+  if ( verbose ) print("loop mat")
+  for ( k in 1:length(mats)) {
+    if ( ncol(mats[[k]]) != ncol(regs[[k]]) ) {
+      regs[[k]]=Matrix(regs0[[k]], sparse = TRUE) 
+      msg=paste("regularization cols not equal",k,ncol(mats[[k]]),ncol(regs[[k]]),names(mats)[k])
+      message(msg)
+      # stop( )
+      }
+    }
+  if ( verbose ) print("loopmatdone")
+  ########### zzz ############
+  myjr = T
+  prescaling = c( 'center', 'np' )
+  optimus = 'lineSearch'
+  maxits = 1000
+  if ( ! is.null( iterations ) ) maxits = iterations
+  if ( verbose ) print( paste( "maxits",maxits) )
+  ebber = 0.99
+  pizzer = rep( "positive", length(mats) )
+  objectiver='cca';mixer = 'pca'
+  if ( energy == 'reg') {
+    objectiver='regression';mixer = 'ica'
+  }
+  if ( energy == 'lrr') {
+    objectiver='lowRankRegression';mixer = 'pca'
+  }
+  if ( verbose ) print("sparseness begin")
+  sparval = rep( 0.8, length( mats ))
+  if ( ! is.null( sparseness ) ) {
+    if ( length( sparseness ) == length(mats) ) {
+      sparval = sparseness
+    } else sparval = rep( sparseness[1], length( mats ))
+    if ( verbose ) {
+      print('sparseness')
+      print(sparseness)
+    }
+  }
+  
+  if ( nsimlr < 1 ) {
+    ctit=0
+    for ( jj in 1:length(mats) ) {
+      ctit=ctit+ncol(mats[[jj]])
+      sparval[jj] = 1.0 - 20/ncol(mats[[jj]])
+      if ( sparval[jj] < 0 ) sparval[jj] = 0.5
+    }
+    nsimlr = round( ctit * nsimlr )
+    message(paste("nsimlr",nsimlr))
+#    print(paste("nsimlr",nsimlr))
+#    print(sparval)
+  }
+
+  if ( verbose ) {
+    print("initu begin")
+  }
+  initu = initializeSimlr(
+      mats,
+      nsimlr,
+      jointReduction = myjr,
+      zeroUpper = FALSE,
+      uAlgorithm = "pca",
+      addNoise = 0 )
+  if ( verbose ) print("initu done")
+
+  # initu = initu[,(ncol(initu)-nsimlr):ncol(initu)]
+  # initu = initu[,1:nsimlr]
+
+  if ( ! missing( connect_cog ) ) {
+    clist = list()
+    inflammNums=which(names(mats)=='cg')
+    for ( j in 1:length( mats ) ) clist[[j]] = inflammNums
+    for ( j in inflammNums )
+      clist[[j]] = (1:length(mats))[ -inflammNums ]
+    } else clist=NULL
+    
+
+  simlrX = simlr( mats, regs, 
+    iterations=maxits, 
+    verbose= !doperm,
+    randomSeed = myseed,
+    mixAlg=mixer,
+    energyType=objectiver,
+    scale = prescaling,
+    sparsenessQuantiles=sparval,
+    expBeta = ebber,
+    positivities = pizzer, 
+    connectors=clist,
+    constraint='Grassmannx1000x1000',
+    optimizationStyle=optimus,
+    initialUMatrix=initu )
+  for ( kk in 1:length(mats) ) {
+    rownames(simlrX$v[[kk]])=idplist[[kk]]
+    temp = simlrX$v[[kk]]
+    if ( pizzer[kk] == 'positive' ) {
+#      for ( n in 1:ncol(temp)) temp[,n]=abs(temp[,n])/max(abs(temp[,n]))
+#      simlrX$v[[kk]]=eliminateNonUniqueColumns(temp)
+      }
+    }
+
+  if ( verbose ) print('simlr done')
+  #################
+  nsimx=nsimlr
+  nms = names( simlrX$v ) = names(mats)
+  simmat = data.matrix(matsFull[[1]] )%*% abs( simlrX$v[[1]] )
+  colnames( simmat ) = paste0(nms[1],colnames( simmat ))
+  for ( j in 2:length(mats)) {
+      if (names(mats)[j]=='cg' & pizzer[j] != 'positive' ) {
+        temp = data.matrix(matsFull[[j]] ) %*% ( simlrX$v[[j]])
+      } else temp = data.matrix(matsFull[[j]] ) %*% abs( simlrX$v[[j]] )
+      colnames( temp ) = paste0(nms[j],colnames( temp ))
+      simmat = cbind( simmat, temp )
+  }
+  blaster2sim = cbind( blaster, simmat )
+  if ( verbose ) print('bound')
+  nsim = ncol( simlrX$v[[1]] )
+  simnames = colnames(simmat)
+  kk=1
+  nmats=1:length(matsFull)
+  matsB=mats
+  for ( kk in 1:length(mats)) matsB[[kk]]=data.matrix(matsB[[kk]])
+  kk=length(mats)
+  # temp = predictSimlr( matsB, simlrX, targetMatrix=kk, 
+  #      sourceMatrices=nmats[nmats!=kk] )
+  return( list( demog=blaster2sim, mats=matsFull, simnames=simnames, simlrX=simlrX, energy=energy ) )
+  ################
+  }
+
+
+
+
+#' Write a list of data frames to disk with specific naming convention
+#'
+#' This function writes each data frame in a list to a separate CSV file on disk,
+#' using the names of each data frame to create unique filenames.
+#'
+#' @param data_list A list of data frames to write to disk.
+#' @param file_prefix A character string to use as the prefix for the filenames.
+#'
+#' @return No return value, called for side effects.
+#' @examples
+#' mysim <- list(simlrX = list(v = list(
+#'   data1 = data.frame(matrix(rnorm(147 * 171), nrow = 147, ncol = 171)),
+#'   data2 = data.frame(matrix(rnorm(156 * 171), nrow = 156, ncol = 171))
+#' )))
+#' write_simlr_data_frames(mysim$simlrX$v, "output")
+#' @export
+write_simlr_data_frames <- function(data_list, file_prefix) {
+  for (i in seq_along(data_list)) {
+    # Generate a filename using the index
+    file_name <- paste0(file_prefix, "_", names(data_list)[i], "_simlr.csv")
+    
+    # Write the data frame to disk
+    write.csv(data_list[[i]], file_name, row.names = TRUE)
+  }
+}
+
+#' Read a list of data frames from disk with specific naming convention
+#'
+#' This function reads a list of data frames from disk into a list,
+#' assuming the files are named with a common prefix and the names of the data frames.
+#' It converts the column named `X` to the row names of the read data frame.
+#'
+#' @param file_prefix A character string used as the prefix for the filenames.
+#' @param data_names A character vector of names for the data frames.
+#'
+#' @return A list of data frames read from disk with the column named `X` set as row names.
+#' @examples
+#' # data_names <- c("data1", "data2")
+#' # data_list <- read_simlr_data_frames(file_prefix = "output", data_names = data_names)
+#' # dim(data_list[[1]])
+#' # dim(data_list[[2]])
+#' @export
+read_simlr_data_frames <- function(file_prefix, data_names) {
+  data_list <- list()
+  
+  for (name in data_names) {
+    # Generate the filename using the prefix and data names
+    file_name <- paste0(file_prefix, "_", name, "_simlr.csv")
+    
+    # Read the data frame from disk
+    if ( file.exists( file_name ) ) {
+      df <- read.csv(file_name, row.names = 1)
+      
+      # Convert the column named `X` to row names, if it exists
+      if ("X" %in% colnames(df)) {
+        rownames(df) <- df$X
+        df <- df[ , !colnames(df) %in% "X"]
+      }
+      
+      # Store the data frame in the list
+      data_list[[name]] <- df
+    }
+  }
+  
+  return(data_list)
+}
+
+
+#' Interpret SiMLR Vector
+#'
+#' This function interprets a vector from SiMLR (similarity-driven multivariate linear reconstruction)
+#' specifically focusing on a given variable (e.g., a specific principal component or cluster). It extracts and normalizes the vector associated 
+#' with the specified SiMLR variable, sorts it to identify the top elements, and optionally filters out non-significant values. 
+#' This function is useful for understanding the contribution of different features in the context of the SiMLR analysis.
+#'
+#' @param simlrResult A list containing SiMLR analysis results, which should include a matrix `v` 
+#' representing vectors of interest (e.g., principal components).
+#' @param simlrMats A list of matrices associated with SiMLR analysis, where each matrix corresponds 
+#' to a different modality or data type analyzed by SiMLR.
+#' @param simlrVariable A string specifying the variable within `simlrResult` to interpret. The variable 
+#' name should include both an identifier (e.g., "PC" for principal component) and a numeric index.
+#' @param n2show An integer specifying the number of top elements to show from the sorted, normalized vector. 
+#' Defaults to 5. If `NULL` or greater than the length of the vector, all elements are shown.
+#' @param shortnames boolean
+#' @param return_dataframe boolean
+#' @return A named vector of the top `n2show` elements (or all if `n2show` is `NULL` or too large), 
+#' sorted in decreasing order of their absolute values. Elements are named according to their identifiers 
+#' in `simlrMats` and filtered to exclude non-significant values (absolute value > 0).
+#' @examples
+#' # This example assumes you have SiMLR result `simlrResult`, matrices `simlrMats`, and you want to 
+#' # interpret the first principal component "PC1".
+#' # simlrResult <- list(v = list(PC = matrix(runif(20), ncol = 2)))
+#' # simlrMats <- list(PC = matrix(runif(100), ncol = 10))
+#' # simlrVariable <- "PC1"
+#' # interpretedVector <- interpret_simlr_vector(simlrResult, simlrMats, simlrVariable)
+#' # print(interpretedVector)
+#' @importFrom stringr str_match str_extract
+#' @export
+interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
+
+  split_string_correctly <- function(input_string) {
+    # Extract the leading alphabetic characters (possibly including numbers within the alphabetic segment)
+    alpha_part <- str_match(input_string, "([A-Za-z0-9]+(?=[A-Za-z]+[0-9]+$))[A-Za-z]*")[,1]
+    
+    # Extract the numeric part at the end
+    numeric_part <- str_extract(input_string, "[0-9]+$")
+    
+    c( alpha_part, numeric_part)
+  }
+  varparts = split_string_correctly( simlrVariable )
+  varparts[1]=gsub("PC","",varparts[1])
+  nmslist=list()
+  if ( shortnames ) {
+    for ( k in 1:length(simlrMats) ) 
+      nmslist[[names(simlrMats)[k]]]=shorten_pymm_names(colnames(simlrMats[[k]]))
+  } else {
+    for ( k in 1:length(simlrMats) ) 
+      nmslist[[names(simlrMats)[k]]]=colnames(simlrMats[[k]])
+  }
+
+  # Extract the vector for the given modality and region, and normalize it
+  t1vec <- abs(simlrResult$v[[varparts[1]]][, as.integer(varparts[2])])
+  t1vec=t1vec/max(t1vec)
+  
+  # Assign names to the vector elements from the names list
+  names(t1vec) <- nmslist[[varparts[1]]]
+  
+  # Sort the vector in decreasing order and select the top 'n2show' elements
+  # If 'n2show' is NULL or greater than the length of t1vec, use the length of t1vec
+  n_items_to_show <- if (is.null(n2show)) length(t1vec) else min(c(n2show, length(t1vec)))
+  t1vec_sorted <- head(t1vec[order(t1vec, decreasing = TRUE)], n_items_to_show)
+  
+  # Filter out non-significant values (absolute value > 0)
+  t1vec_filtered <- t1vec_sorted[abs(t1vec_sorted) > 0]
+  if ( return_dataframe ) {
+    t1vec_filtered=data.frame( anat=names(t1vec_filtered), values=t1vec_filtered)
+  }
+  return(t1vec_filtered)
+}
+

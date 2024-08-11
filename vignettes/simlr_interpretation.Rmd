@@ -1,0 +1,217 @@
+---
+title: "SiMLR interpretation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simlr_interpretation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Similarity-driven multi-view linear reconstruction
+
+## Introduction
+
+Similarity-driven multi-view linear reconstruction (SiMLR) is an algorithm that exploits inter-modality relationships to transform large scientific datasets into a smaller joint space. 
+The link between the original data $X_i$ and the reduced embedding space is a sparse set of features $v_i$.  Standard statistical tools may then be applied on the embeddings $s_i=X_i v_i$.
+
+SiMLR may be used in a variety of other ways. We will cover a basic example and follow with different use cases.  These examples are perhaps less involved than those given in the [original publication's](https://www.nature.com/articles/s43588-021-00029-8) cloud computing [examples](https://doi.org/10.24433/CO.3087836.v2) but illustrate new functionality.
+
+
+## Default SiMLR application
+
+Here’s an expanded and more didactic section for the vignette that introduces the code example, walks through the steps, and includes visualization examples:
+
+---
+
+## Example: Applying SiMLR to Simulated Multi-View Data
+
+In this section, we’ll explore how the Similarity-driven Multi-View Linear Reconstruction (SiMLR) algorithm can be applied to multi-view datasets. We'll generate synthetic data to simulate the application of SiMLR, compare the results to traditional methods like Singular Value Decomposition (SVD), and visualize the relationships between the views.
+
+### Step 1: Simulate Multi-View Data
+
+We begin by simulating three different views of data, each representing different modalities or datasets that share some underlying structure.
+
+```r
+set.seed(1500)
+nsub <- 25          # Number of subjects/samples
+npix <- c(100, 200, 133)  # Number of features in each view
+nk <- 5             # Number of latent factors
+
+# Generating outcome matrices for each view
+outcome <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome1 <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome2 <- matrix(rnorm(nsub * nk), ncol = nk)
+outcome3 <- matrix(rnorm(nsub * nk), ncol = nk)
+
+# Generating transformation matrices for each view
+view1tx <- matrix(rnorm(npix[1] * nk), nrow = nk)
+view2tx <- matrix(rnorm(npix[2] * nk), nrow = nk)
+view3tx <- matrix(rnorm(npix[3] * nk), nrow = nk)
+
+# Creating the multi-view data matrices
+mat1 <- (outcome %*% t(outcome1) %*% (outcome1)) %*% view1tx
+mat2 <- (outcome %*% t(outcome2) %*% (outcome2)) %*% view2tx
+mat3 <- (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
+
+# Combine the matrices into a list
+matlist <- list(vox = mat1, vox2 = mat2, vox3 = mat3)
+```
+
+In this code, `mat1`, `mat2`, and `mat3` represent three views of the data. Each view is constructed to share a common underlying structure but with different transformations applied.
+
+### Step 2: Apply SiMLR
+
+Now we apply the SiMLR algorithm to the simulated multi-view data to find a common representation across the views.
+
+```r
+# Applying SiMLR
+result <- simlr(matlist)
+
+# Projecting data into the reduced space
+p1 <- mat1 %*% (result$v[[1]])
+p2 <- mat2 %*% (result$v[[2]])
+p3 <- mat3 %*% (result$v[[3]])
+```
+
+SiMLR identifies a sparse set of features that best reconstruct each view, resulting in projections `p1`, `p2`, and `p3` for each view.
+
+### Step 3: Visualization and Comparison
+
+To understand the effectiveness of the SiMLR projections, we can compare the correlations between the projections of different views. Additionally, we’ll compare the results to those obtained via Singular Value Decomposition (SVD).
+
+```r
+# Calculate SVD for comparison
+svd1 <- svd(mat1, nu = nk, nv = 0)$u
+svd2 <- svd(mat2, nu = nk, nv = 0)$u
+svd3 <- svd(mat3, nu = nk, nv = 0)$u
+
+# Calculate correlations between the SiMLR projections
+cor_p1_p2 <- range(cor(p1, p2))
+cor_p1_p3 <- range(cor(p1, p3))
+cor_p2_p3 <- range(cor(p2, p3))
+
+# Compare with correlations from SVD
+cor_svd1_svd2 <- range(cor(svd1, svd2))
+
+# Print the results
+cat("Correlation between p1 and p2:", cor_p1_p2, "\n")
+cat("Correlation between p1 and p3:", cor_p1_p3, "\n")
+cat("Correlation between p2 and p3:", cor_p2_p3, "\n")
+cat("Correlation between SVD1 and SVD2:", cor_svd1_svd2, "\n")
+```
+
+#### Visualizing Correlations
+
+Visualizing these correlations helps us understand the similarity between the views after the SiMLR transformation.
+
+```r
+library(ggplot2)
+
+# Function to plot correlation heatmaps
+plot_cor_heatmap <- function(mat, title) {
+  cor_mat <- cor(mat)
+  ggplot(melt(cor_mat), aes(Var1, Var2, fill = value)) +
+    geom_tile() +
+    scale_fill_gradient2(midpoint = 0.5, low = "blue", high = "red", mid = "white") +
+    theme_minimal() +
+    labs(title = title, x = "Variables", y = "Variables") +
+    coord_fixed()
+}
+
+# Plotting the correlations
+plot_cor_heatmap(p1, "Correlation Heatmap of p1")
+plot_cor_heatmap(p2, "Correlation Heatmap of p2")
+plot_cor_heatmap(p3, "Correlation Heatmap of p3")
+```
+
+These heatmaps show how the reduced representations from SiMLR correlate within each view. Comparing these with similar plots for SVD will reveal whether SiMLR captures more meaningful relationships between the views.
+
+### Step 4: Permutation Test
+
+A permutation test can assess whether the observed correlations are significant.
+
+```r
+s2 <- sample(1:nsub)
+resultp <- simlr(list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ]))
+p1p <- mat1 %*% (resultp$v[[1]])
+p2p <- mat2[s1, ] %*% (resultp$v[[2]])
+p3p <- mat3[s2, ] %*% (resultp$v[[3]])
+
+# Compare the permuted correlations
+cor_p1p_p2p <- range(cor(p1p, p2p))
+cor_p1p_p3p <- range(cor(p1p, p3p))
+cor_p2p_p3p <- range(cor(p2p, p3p))
+
+# Print permuted results
+cat("Permuted Correlation between p1p and p2p:", cor_p1p_p2p, "\n")
+cat("Permuted Correlation between p1p and p3p:", cor_p1p_p3p, "\n")
+cat("Permuted Correlation between p2p and p3p:", cor_p2p_p3p, "\n")
+```
+
+The permutation test will show if the observed correlations are stronger than those expected by chance.
+
+### Conclusion
+
+This example demonstrates how SiMLR can uncover the shared structure across multiple views of data. The correlations between the projections indicate the degree to which the algorithm has captured this shared structure, and the permutation test serves as a validation step.
+
+## Integration of Multiple Data Types via Dimensionality Reduction 
+
+SiMLR is particularly useful when working with datasets from different modalities (e.g., genomics, proteomics, and imaging data). By finding a joint embedding space, SiMLR can integrate these diverse data types into a unified representation, facilitating downstream analyses such as clustering, classification, or regression.
+
+When dealing with high-dimensional data, dimensionality reduction techniques are often required to make the data more manageable and to avoid issues like the curse of dimensionality. SiMLR provides an approach that not only reduces dimensionality but also maintains the relationships between different views of the data, making it a powerful tool for exploratory data analysis and visualization.
+
+```{r dataintegration}
+# hcluster eaxmple
+```
+
+
+## Sparse Feature Selection
+
+SiMLR incorporates sparse feature selection, allowing users to identify a minimal subset of features that contribute most to the joint embedding space. This can be particularly advantageous in settings where interpretability is crucial, such as biomarker discovery in biological datasets.
+
+```{r featureselection}
+# feature plot example
+```
+
+## Improved Model Interpretability
+
+By projecting the data into a joint space, SiMLR helps improve the interpretability of machine learning models. The sparse feature selection ensures that only the most informative features are retained, making it easier to understand the relationships between the input data and the model's predictions.
+
+
+```{r correlations}
+# zz$plot example
+```
+
+
+## Cross-Modal Prediction or Imputation
+
+In scenarios where you have multiple data modalities but missing information in one of the views, SiMLR can be used to impute the missing data by leveraging the relationships between the available modalities. This cross-modal prediction capability is particularly useful in multi-omics studies and other fields where complete data is often unavailable.
+
+
+```{r imp}
+# imputation example
+```
+
+
+## Testing Significance of Joint Relationships
+
+
+```{r permutation}
+# permutation based significance example
+```
+
+
+## Evaluating Machine Learning Objective Functions
+
+
+
+```{r grassmann}
+# ortho constraint example
+```
