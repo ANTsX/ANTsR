@@ -157,9 +157,8 @@ arrayimg<-array( data=(1:125), dim=c(5,5,5) )
 img<-as.antsImage( arrayimg )
 print( max(img) )
 print( mean(img[ img > 50  ]))
-print( max(img[ img >= 50 & img <= 99  ]))
 # if using SUBSET using an antsImage, you must be explicit
-sub = as.array(img >= 50 & img <= 99) > 0
+sub = as.array(img >= 50) > 0
 print( mean( gaussimg[ sub  ]) )
 ```
 

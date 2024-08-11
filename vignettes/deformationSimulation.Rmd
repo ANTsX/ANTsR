@@ -12,7 +12,7 @@ vignette: >
 
 A binary image defines the "potential" for deformation.
 
-```{r simdef}
+```{r simdef,eval=FALSE}
 library( ANTsR )
 img    = antsImageRead( getANTsRData( "r16" ) )
 ptmat = matrix( c( 95.5, 95.5, 63.5, 63.5 ), ncol=2 )
@@ -40,14 +40,14 @@ warped = applyAntsrTransform(
 
 Look.
 
-```{r viewdef}
+```{r viewdef,eval=FALSE}
 plot( img )
 plot( warped )
 ```
 
 Grid.
 
-```{r viewgrid}
+```{r viewgrid,eval=FALSE}
 f = areg$fwdtransforms[ 1 ]
 grid = createWarpedGrid( img, gridStep = 10, gridWidth = 2,
   fixedReferenceImage = img, transform = rep( f, ncomp ) )
