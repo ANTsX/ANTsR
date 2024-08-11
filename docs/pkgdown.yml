@@ -2,6 +2,13 @@ pandoc: 3.2.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  ANTsR: ANTsR.html
+  MultiChannel: MultiChannel.html
+  RestingBOLD: RestingBOLD.html
+  antsrTransform: antsrTransform.html
+  deformationSimulation: deformationSimulation.html
+  iMath: iMath.html
+  multivarTemplateCoordinates: multivarTemplateCoordinates.html
   simlr_interpretation: simlr_interpretation.html
-last_built: 2024-08-11T14:40Z
+last_built: 2024-08-11T15:13Z
 

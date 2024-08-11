@@ -22,6 +22,11 @@ RUN R_REMOTES_NO_ERRORS_FROM_WARNINGS=true \
                      'RcppEigen', \
                      'magrittr',  \
                      'rsvd',      \
+                     'ggpubr',      \
+                     'fpc',      \
+                     'reshape2',      \
+                     'cluster',      \
+                     'gridExtra',      \
                      'magic',     \
                      'psych'), dependencies = TRUE )"
 
