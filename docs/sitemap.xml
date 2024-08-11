@@ -214,6 +214,24 @@
     <loc>/reference/antsVersions.html</loc>
   </url>
   <url>
+    <loc>/reference/antspymm_nuisance_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/antspymm_predictors.html</loc>
+  </url>
+  <url>
+    <loc>/reference/antspymm_qc_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/antspymm_simlr.html</loc>
+  </url>
+  <url>
+    <loc>/reference/antspymm_simlr_update_residuals.html</loc>
+  </url>
+  <url>
+    <loc>/reference/antspymm_vartype.html</loc>
+  </url>
+  <url>
     <loc>/reference/antsrGetPointerName.html</loc>
   </url>
   <url>
@@ -451,6 +469,9 @@
     <loc>/reference/exemplarInpainting.html</loc>
   </url>
   <url>
+    <loc>/reference/exploratory_visualization.html</loc>
+  </url>
+  <url>
     <loc>/reference/extractSlice.html</loc>
   </url>
   <url>
@@ -541,6 +562,9 @@
     <loc>/reference/getfMRInuisanceVariables.html</loc>
   </url>
   <url>
+    <loc>/reference/glm_impute.html</loc>
+  </url>
+  <url>
     <loc>/reference/gradient_invariant_orthogonality_defect.html</loc>
   </url>
   <url>
@@ -626,6 +650,12 @@
   </url>
   <url>
     <loc>/reference/interleaveMatrixWithItself.html</loc>
+  </url>
+  <url>
+    <loc>/reference/interpret_simlr_vector.html</loc>
+  </url>
+  <url>
+    <loc>/reference/interpret_simlr_vector2.html</loc>
   </url>
   <url>
     <loc>/reference/invariantImageSimilarity.html</loc>
@@ -820,6 +850,9 @@
     <loc>/reference/plotPrettyGraph.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_features.html</loc>
+  </url>
+  <url>
     <loc>/reference/powers_areal_mni_itk.html</loc>
   </url>
   <url>
@@ -869,6 +902,9 @@
   </url>
   <url>
     <loc>/reference/readNormalizedPopulationData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_simlr_data_frames.html</loc>
   </url>
   <url>
     <loc>/reference/reexports.html</loc>
@@ -958,6 +994,9 @@
     <loc>/reference/setAntsrTransformParameters.html</loc>
   </url>
   <url>
+    <loc>/reference/shorten_pymm_names.html</loc>
+  </url>
+  <url>
     <loc>/reference/simlr.html</loc>
   </url>
   <url>
@@ -974,6 +1013,9 @@
   </url>
   <url>
     <loc>/reference/simlrU.html</loc>
+  </url>
+  <url>
+    <loc>/reference/simlr_impute.html</loc>
   </url>
   <url>
     <loc>/reference/simlr_path_models.html</loc>
@@ -1102,6 +1144,9 @@
     <loc>/reference/visualize_lowrank_relationships.html</loc>
   </url>
   <url>
+    <loc>/reference/visualize_permutation_test.html</loc>
+  </url>
+  <url>
     <loc>/reference/vwnrfs.html</loc>
   </url>
   <url>
@@ -1121,5 +1166,8 @@
   </url>
   <url>
     <loc>/reference/writeNormalizedPopulationData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_simlr_data_frames.html</loc>
   </url>
 </urlset>

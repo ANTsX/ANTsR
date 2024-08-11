@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SiMLR interpretation • ANTsR</title>
+<title>simlr_interpretation • ANTsR</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="SiMLR interpretation">
+<script src="../pkgdown.js"></script><meta property="og:title" content="simlr_interpretation">
 <meta property="og:description" content="ANTsR">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -50,7 +50,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/simlr_interpretation.html">SiMLR interpretation</a>
+      <a href="../articles/simlr_interpretation.html">simlr_interpretation</a>
     </li>
   </ul>
 </li>
@@ -68,7 +68,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>SiMLR interpretation</h1>
+      <h1 data-toc-skip>simlr_interpretation</h1>
             
       
       
@@ -100,6 +100,211 @@ illustrate new functionality.</p>
 <div class="section level3">
 <h3 id="default-simlr-application">Default SiMLR application<a class="anchor" aria-label="anchor" href="#default-simlr-application"></a>
 </h3>
+<p>Here’s an expanded and more didactic section for the vignette that
+introduces the code example, walks through the steps, and includes
+visualization examples:</p>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="example-applying-simlr-to-simulated-multi-view-data">Example: Applying SiMLR to Simulated Multi-View Data<a class="anchor" aria-label="anchor" href="#example-applying-simlr-to-simulated-multi-view-data"></a>
+</h3>
+<p>In this section, we’ll explore how the Similarity-driven Multi-View
+Linear Reconstruction (SiMLR) algorithm can be applied to multi-view
+datasets. We’ll generate synthetic data to simulate the application of
+SiMLR, compare the results to traditional methods like Singular Value
+Decomposition (SVD), and visualize the relationships between the
+views.</p>
+<div class="section level4">
+<h4 id="step-1-simulate-multi-view-data">Step 1: Simulate Multi-View Data<a class="anchor" aria-label="anchor" href="#step-1-simulate-multi-view-data"></a>
+</h4>
+<p>We begin by simulating three different views of data, each
+representing different modalities or datasets that share some underlying
+structure.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ANTsR</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: replacing previous import 'stats::filter' by 'dplyr::filter' when</span></span>
+<span><span class="co">#&gt; loading 'ANTsR'</span></span>
+<span><span class="co">#&gt; ANTsR 0.6.1</span></span>
+<span><span class="co">#&gt; Environment variables set either in .Renviron or with a seed (e.g. XXX): </span></span>
+<span><span class="co">#&gt; Sys.setenv(ANTS_RANDOM_SEED = XXX)</span></span>
+<span><span class="co">#&gt; Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)</span></span>
+<span><span class="co">#&gt; may influence reproducibility in some methods. See</span></span>
+<span><span class="co">#&gt; https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</span></span>
+<span><span class="co">#&gt; for more information.Also see *repro methods in antsRegistration.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'ANTsR'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     sd, var</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     all, any, apply, max, min, prod, range, sum</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hadley/reshape" class="external-link">reshape2</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1500</span><span class="op">)</span></span>
+<span><span class="va">nsub</span> <span class="op">&lt;-</span> <span class="fl">25</span>          <span class="co"># Number of subjects/samples</span></span>
+<span><span class="va">npix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">133</span><span class="op">)</span>  <span class="co"># Number of features in each view</span></span>
+<span><span class="va">nk</span> <span class="op">&lt;-</span> <span class="fl">5</span>             <span class="co"># Number of latent factors</span></span>
+<span></span>
+<span><span class="co"># Generating outcome matrices for each view</span></span>
+<span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nsub</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span><span class="va">outcome1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nsub</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span><span class="va">outcome2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nsub</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span><span class="va">outcome3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nsub</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generating transformation matrices for each view</span></span>
+<span><span class="va">view1tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">npix</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span><span class="va">view2tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">npix</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span><span class="va">view3tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">npix</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="va">nk</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="va">nk</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Creating the multi-view data matrices</span></span>
+<span><span class="va">mat1</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">outcome</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">outcome1</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">outcome1</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">view1tx</span></span>
+<span><span class="va">mat2</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">outcome</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">outcome2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">outcome2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">view2tx</span></span>
+<span><span class="va">mat3</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">outcome</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">outcome3</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">outcome3</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">view3tx</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">mat1</span><span class="op">)</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"m1."</span>,<span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mat1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">mat2</span><span class="op">)</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"m2."</span>,<span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mat2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">mat3</span><span class="op">)</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"m3."</span>,<span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mat3</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Combine the matrices into a list</span></span>
+<span><span class="va">matlist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>m1 <span class="op">=</span> <span class="va">mat1</span>, m2 <span class="op">=</span> <span class="va">mat2</span>, m3 <span class="op">=</span> <span class="va">mat3</span><span class="op">)</span></span></code></pre></div>
+<p>In this code, <code>mat1</code>, <code>mat2</code>, and
+<code>mat3</code> represent three views of the data. Each view is
+constructed to share a common underlying structure but with different
+transformations applied.</p>
+</div>
+<div class="section level4">
+<h4 id="step-2-apply-simlr">Step 2: Apply SiMLR<a class="anchor" aria-label="anchor" href="#step-2-apply-simlr"></a>
+</h4>
+<p>Now we apply the SiMLR algorithm to the simulated multi-view data to
+find a common representation across the views.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Applying SiMLR</span></span>
+<span><span class="va">constr</span><span class="op">=</span><span class="st">'Grassmannx1x1'</span></span>
+<span><span class="va">constr</span><span class="op">=</span><span class="st">'Stiefelx1x1'</span></span>
+<span><span class="va">constr</span><span class="op">=</span><span class="st">'orthox0.1x0.1'</span></span>
+<span><span class="va">prepro</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centerAndScale"</span>,<span class="st">"np"</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simlr.html">simlr</a></span><span class="op">(</span><span class="va">matlist</span>,constraint<span class="op">=</span><span class="va">constr</span>,scale<span class="op">=</span><span class="va">prepro</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.858847922761822  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.256692917864777 bestIt: 1 CE: -0.256692917864777"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.697875235845201 bestIt: 2 CE: -0.697875235845201"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.697875235845201 bestIt: 2 CE: -0.440609115593719"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.697875235845201 bestIt: 2 CE: -0.446286879475902"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.753229659975718 bestIt: 5 CE: -0.753229659975718"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.753229659975718 bestIt: 5 CE: -0.681335076802565"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.753229659975718 bestIt: 5 CE: -0.50186793727863"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.753229659975718 bestIt: 5 CE: -0.493727230323559"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.753229659975718 bestIt: 5 CE: -0.659484755200271"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.753229659975718 bestIt: 5 CE: -0.682395449925149"</span></span>
+<span></span>
+<span><span class="co"># Projecting data into the reduced space</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">mat1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="va">mat2</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="va">mat3</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p>SiMLR identifies a sparse set of features that best reconstruct each
+view, resulting in projections <code>p1</code>, <code>p2</code>, and
+<code>p3</code> for each view.</p>
+</div>
+<div class="section level4">
+<h4 id="step-3-visualization-and-comparison">Step 3: Visualization and Comparison<a class="anchor" aria-label="anchor" href="#step-3-visualization-and-comparison"></a>
+</h4>
+<p>To understand the effectiveness of the SiMLR projections, we can
+compare the correlations between the projections of different views.
+Additionally, we’ll compare the results to those obtained via Singular
+Value Decomposition (SVD).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate SVD for comparison</span></span>
+<span><span class="va">svd1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">mat1</span>, nu <span class="op">=</span> <span class="va">nk</span>, nv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">u</span></span>
+<span><span class="va">svd2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">mat2</span>, nu <span class="op">=</span> <span class="va">nk</span>, nv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">u</span></span>
+<span><span class="va">svd3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">mat3</span>, nu <span class="op">=</span> <span class="va">nk</span>, nv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">$</span><span class="va">u</span></span>
+<span></span>
+<span><span class="co"># Calculate correlations between the SiMLR projections</span></span>
+<span><span class="va">cor_p1_p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cor_p1_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">p3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cor_p2_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p2</span>, <span class="va">p3</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare with correlations from SVD</span></span>
+<span><span class="va">cor_svd1_svd2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">svd1</span>, <span class="va">svd2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print the results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p1 and p2:"</span>, <span class="va">cor_p1_p2</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Correlation between p1 and p2: -0.9634473 0.6477194</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p1 and p3:"</span>, <span class="va">cor_p1_p3</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Correlation between p1 and p3: -0.9884729 -0.1118407</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p2 and p3:"</span>, <span class="va">cor_p2_p3</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Correlation between p2 and p3: -0.8111546 0.9670118</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between SVD1 and SVD2:"</span>, <span class="va">cor_svd1_svd2</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Correlation between SVD1 and SVD2: -0.6848291 0.5752894</span></span></code></pre></div>
+<div class="section level5">
+<h5 id="visualizing-correlations">Visualizing Correlations<a class="anchor" aria-label="anchor" href="#visualizing-correlations"></a>
+</h5>
+<p>Visualizing these correlations helps us understand the similarity
+between the views after the SiMLR transformation.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.3.1</span></span>
+<span></span>
+<span><span class="co"># Function to plot correlation heatmaps</span></span>
+<span><span class="va">plot_cor_heatmap</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mat1</span>, <span class="va">mat2</span>, <span class="va">title</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">cor_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">mat1</span>,<span class="va">mat2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/reshape2/man/melt.html" class="external-link">melt</a></span><span class="op">(</span><span class="va">cor_mat</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Var1</span>, <span class="va">Var2</span>, fill <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradient2</a></span><span class="op">(</span>midpoint <span class="op">=</span> <span class="fl">0.5</span>, low <span class="op">=</span> <span class="st">"blue"</span>, high <span class="op">=</span> <span class="st">"red"</span>, mid <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">title</span>, x <span class="op">=</span> <span class="st">"Variables"</span>, y <span class="op">=</span> <span class="st">"Variables"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Plotting the correlations</span></span>
+<span><span class="fu">plot_cor_heatmap</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p2</span>, <span class="st">"Correlation Heatmap of p1-p2"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/stepviz-1.png" width="700"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_cor_heatmap</span><span class="op">(</span><span class="va">p1</span>, <span class="va">p3</span>,<span class="st">"Correlation Heatmap of p1-p3"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/stepviz-2.png" width="700"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plot_cor_heatmap</span><span class="op">(</span><span class="va">p2</span>, <span class="va">p3</span>, <span class="st">"Correlation Heatmap of p2-p3"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/stepviz-3.png" width="700"></p>
+<p>These heatmaps show how the reduced representations from SiMLR
+correlate within each view. Comparing these with similar plots for SVD
+will reveal whether SiMLR captures more meaningful relationships between
+the views.</p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="step-4-permutation-test">Step 4: Permutation Test<a class="anchor" aria-label="anchor" href="#step-4-permutation-test"></a>
+</h4>
+<p>A permutation test can assess whether the observed correlations are
+significant.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">s1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">nsub</span><span class="op">)</span></span>
+<span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">nsub</span><span class="op">)</span></span>
+<span><span class="va">permMats</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>vox <span class="op">=</span> <span class="va">mat1</span>, vox2 <span class="op">=</span> <span class="va">mat2</span><span class="op">[</span><span class="va">s1</span>, <span class="op">]</span>, vox3 <span class="op">=</span> <span class="va">mat3</span><span class="op">[</span><span class="va">s2</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">resultp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simlr.html">simlr</a></span><span class="op">(</span><span class="va">permMats</span>,</span>
+<span>  constraint<span class="op">=</span><span class="va">constr</span>,scale<span class="op">=</span><span class="va">prepro</span><span class="op">)</span></span>
+<span><span class="va">p1p</span> <span class="op">&lt;-</span> <span class="va">mat1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">resultp</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p2p</span> <span class="op">&lt;-</span> <span class="va">mat2</span><span class="op">[</span><span class="va">s1</span>, <span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">resultp</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p3p</span> <span class="op">&lt;-</span> <span class="va">mat3</span><span class="op">[</span><span class="va">s2</span>, <span class="op">]</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">resultp</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare the permuted correlations</span></span>
+<span><span class="va">cor_p1p_p2p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p1p</span>, <span class="va">p2p</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cor_p1p_p3p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p1p</span>, <span class="va">p3p</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cor_p2p_p3p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/antsImageSummary.html">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">p2p</span>, <span class="va">p3p</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print permuted results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p1p and p2p:"</span>, <span class="va">cor_p1p_p2p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permuted Correlation between p1p and p2p: -0.6354492 0.415303</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p1p and p3p:"</span>, <span class="va">cor_p1p_p3p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permuted Correlation between p1p and p3p: -0.5142991 0.3162735</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p2p and p3p:"</span>, <span class="va">cor_p2p_p3p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Permuted Correlation between p2p and p3p: -0.6135153 0.7060008</span></span></code></pre></div>
+<p>The permutation test will show if the observed correlations are
+stronger than those expected by chance.</p>
+<p>This introductory example demonstrates how SiMLR can uncover the
+shared structure across multiple views of data. The correlations between
+the projections indicate the degree to which the algorithm has captured
+this shared structure, and the permutation test serves as a validation
+step.</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="integration-of-multiple-data-types-via-dimensionality-reduction">Integration of Multiple Data Types via Dimensionality Reduction<a class="anchor" aria-label="anchor" href="#integration-of-multiple-data-types-via-dimensionality-reduction"></a>
@@ -114,9 +319,29 @@ techniques are often required to make the data more manageable and to
 avoid issues like the curse of dimensionality. SiMLR provides an
 approach that not only reduces dimensionality but also maintains the
 relationships between different views of the data, making it a powerful
-tool for exploratory data analysis and visualization.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># hcluster eaxmple</span></span></code></pre></div>
+tool for exploratory data analysis and visualization. Below, we
+illustrate reading, writing and exploratory integrated
+visualization.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.unibo.it/sitoweb/christian.hennig/en/" class="external-link">fpc</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://svn.r-project.org/R-packages/trunk/cluster/" class="external-link">cluster</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/" class="external-link">ggpubr</a></span><span class="op">)</span></span>
+<span><span class="va">sim2nm</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/write_simlr_data_frames.html">write_simlr_data_frames</a></span><span class="op">(</span> <span class="va">result</span><span class="op">$</span><span class="va">v</span>, <span class="va">sim2nm</span>  <span class="op">)</span></span>
+<span><span class="va">simres2</span><span class="op">=</span><span class="fu"><a href="../reference/read_simlr_data_frames.html">read_simlr_data_frames</a></span><span class="op">(</span> <span class="va">sim2nm</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">popdf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> age <span class="op">=</span> <span class="va">outcome</span>, cog<span class="op">=</span><span class="va">outcome1</span>, <span class="va">mat1</span>, <span class="va">mat2</span>, <span class="va">mat3</span> <span class="op">)</span></span>
+<span><span class="va">temp2</span><span class="op">=</span><span class="fu"><a href="../reference/apply_simlr_matrices.html">apply_simlr_matrices</a></span><span class="op">(</span> <span class="va">popdf</span>, <span class="va">simres2</span>, </span>
+<span>    center<span class="op">=</span><span class="cn">TRUE</span>, scale<span class="op">=</span><span class="cn">TRUE</span>, absolute_value<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">TRUE</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">zz</span><span class="op">=</span><span class="fu"><a href="../reference/exploratory_visualization.html">exploratory_visualization</a></span><span class="op">(</span> <span class="fu"><a href="../reference/antsrimpute.html">antsrimpute</a></span><span class="op">(</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="va">temp2</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: package 'GGally' was built under R version 4.3.1</span></span>
+<span><span class="co">#&gt; Registered S3 method overwritten by 'GGally':</span></span>
+<span><span class="co">#&gt;   method from   </span></span>
+<span><span class="co">#&gt;   +.gg   ggplot2</span></span>
+<span><span class="co">#&gt; Warning: package 'ggdendro' was built under R version 4.3.1</span></span>
+<span><span class="co">#&gt; Warning: package 'patchwork' was built under R version 4.3.1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="va">zz</span><span class="op">$</span><span class="va">plot</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/dataintegration-1.png" width="1152"></p>
 </div>
 <div class="section level3">
 <h3 id="sparse-feature-selection">Sparse Feature Selection<a class="anchor" aria-label="anchor" href="#sparse-feature-selection"></a>
@@ -126,43 +351,549 @@ identify a minimal subset of features that contribute most to the joint
 embedding space. This can be particularly advantageous in settings where
 interpretability is crucial, such as biomarker discovery in biological
 datasets.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># feature plot example</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="improved-model-interpretability">Improved Model Interpretability<a class="anchor" aria-label="anchor" href="#improved-model-interpretability"></a>
-</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pp</span><span class="op">=</span><span class="fu"><a href="../reference/plot_features.html">plot_features</a></span><span class="op">(</span> <span class="va">simres2</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span> grobs<span class="op">=</span><span class="va">pp</span>, nrow<span class="op">=</span><span class="fl">3</span>, top<span class="op">=</span><span class="st">'Joint features'</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/featureselection-1.png" width="1152"></p>
+<div class="section level4">
+<h4 id="improved-model-interpretability">Improved Model Interpretability<a class="anchor" aria-label="anchor" href="#improved-model-interpretability"></a>
+</h4>
 <p>By projecting the data into a joint space, SiMLR helps improve the
 interpretability of machine learning models. The sparse feature
 selection ensures that only the most informative features are retained,
 making it easier to understand the relationships between the input data
 and the model’s predictions.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># zz$plot example</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="cross-modal-prediction-or-imputation">Cross-Modal Prediction or Imputation<a class="anchor" aria-label="anchor" href="#cross-modal-prediction-or-imputation"></a>
 </h3>
 <p>In scenarios where you have multiple data modalities but missing
-information in one of the views, SiMLR can be used to impute the missing
-data by leveraging the relationships between the available modalities.
-This cross-modal prediction capability is particularly useful in
-multi-omics studies and other fields where complete data is often
-unavailable.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># imputation example</span></span></code></pre></div>
+information scattered across some of the views, SiMLR can be used to
+impute the missing data by leveraging the relationships between the
+available modalities. This cross-modal prediction capability is
+particularly useful in multi-omics studies and other fields where
+complete data is often unavailable.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">popdfi</span><span class="op">=</span><span class="va">popdf</span></span>
+<span><span class="va">proportion</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
+<span><span class="va">num_NAs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">proportion</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">arrayInd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span><span class="op">)</span>, <span class="va">num_NAs</span><span class="op">)</span>, .dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">popdfi</span><span class="op">[</span><span class="va">indices</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
+<span><span class="va">nms</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">simres2</span><span class="op">)</span></span>
+<span><span class="va">nsimx</span><span class="op">=</span><span class="fl">3</span></span>
+<span><span class="va">sep</span><span class="op">=</span><span class="st">'.'</span></span>
+<span><span class="va">imputedcols</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span> <span class="va">n</span> <span class="kw">in</span> <span class="va">nms</span> <span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span> <span class="va">v</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nsimx</span> <span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">thiscol</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">n</span>,<span class="va">sep</span>,<span class="va">v</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span> <span class="fu"><a href="../reference/antsImageSummary.html">any</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span> <span class="va">popdfi</span><span class="op">[</span>,<span class="va">thiscol</span><span class="op">]</span> <span class="op">)</span> <span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">imputedcols</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">imputedcols</span>,<span class="va">thiscol</span><span class="op">)</span></span>
+<span>      <span class="va">popdfi</span> <span class="op">=</span> <span class="fu"><a href="../reference/simlr_impute.html">simlr_impute</a></span><span class="op">(</span> <span class="va">popdfi</span>, <span class="va">nms</span>, <span class="va">v</span>, <span class="va">n</span>, separator<span class="op">=</span><span class="va">sep</span> <span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">impresult</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> og<span class="op">=</span><span class="va">popdf</span><span class="op">[</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, imp<span class="op">=</span><span class="va">popdfi</span><span class="op">[</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggscatter.html" class="external-link">ggscatter</a></span><span class="op">(</span> <span class="va">impresult</span>, <span class="st">'og'</span>, <span class="st">'imp'</span> <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Imputed vs original data"</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/imp-1.png" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="testing-significance-of-joint-relationships">Testing Significance of Joint Relationships<a class="anchor" aria-label="anchor" href="#testing-significance-of-joint-relationships"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># permutation based significance example</span></span></code></pre></div>
+<p>We use a metric (<code>rvcoef</code>) that is not directly optimized
+to assess the significance of the simlr result versus permuted data. The
+RV coefficient is analogous to the Pearson correlation coefficient but
+is used for comparing two matrices (or datasets) rather than two
+variables. It measures the similarity of the column spaces (subspaces)
+spanned by the columns of two matrices. We compute the
+<code>rvcoef</code> across all pairs of data at each permutation and
+compare to the original values.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">initu</span> <span class="op">=</span> <span class="fu"><a href="../reference/initializeSimlr.html">initializeSimlr</a></span><span class="op">(</span> <span class="va">matlist</span>, <span class="fl">3</span>, jointReduction <span class="op">=</span> <span class="cn">TRUE</span>  <span class="op">)</span></span>
+<span><span class="va">np</span><span class="op">=</span><span class="fl">40</span></span>
+<span><span class="va">myperm</span> <span class="op">=</span> <span class="fu"><a href="../reference/simlr.perm.html">simlr.perm</a></span><span class="op">(</span>  <span class="va">matlist</span>,</span>
+<span>  constraint<span class="op">=</span><span class="va">constr</span>,scale<span class="op">=</span><span class="va">prepro</span>, </span>
+<span>  initialUMatrix<span class="op">=</span><span class="va">initu</span>,</span>
+<span>  nperms<span class="op">=</span><span class="va">np</span>, FUN<span class="op">=</span><span class="va">rvcoef</span>, verbose<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.858403525257994  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.454148053126434 bestIt: 1 CE: -0.454148053126434"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.454148053126434 bestIt: 1 CE: -0.434346480027733"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.676455509877708 bestIt: 3 CE: -0.676455509877708"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.676455509877708 bestIt: 3 CE: -0.579099546951581"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.676455509877708 bestIt: 3 CE: -0.566701952395956"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.676455509877708 bestIt: 3 CE: -0.456130887185229"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.676455509877708 bestIt: 3 CE: -0.563875336546259"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.692885106793509 bestIt: 8 CE: -0.692885106793509"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.783797191262112 bestIt: 9 CE: -0.783797191262112"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.783797191262112 bestIt: 9 CE: -0.507565117137195"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span> <span class="va">myperm</span><span class="op">$</span><span class="va">significance</span>, <span class="fl">2</span> <span class="op">)</span>  <span class="op">)</span></span>
+<span><span class="co">#&gt;    n   perm        m1_m2        m1_m3        m2_m3</span></span>
+<span><span class="co">#&gt; 42 3  ttest 2.946052e-26 8.781689e-25 9.345428e-27</span></span>
+<span><span class="co">#&gt; 43 3 pvalue 0.000000e+00 0.000000e+00 0.000000e+00</span></span>
+<span><span class="va">gglist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">simlrmaps</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">myperm</span><span class="op">$</span><span class="va">significance</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="kw">for</span> <span class="op">(</span> <span class="va">xxx</span> <span class="kw">in</span> <span class="va">simlrmaps</span> <span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">pvec</span><span class="op">=</span><span class="va">myperm</span><span class="op">$</span><span class="va">significance</span><span class="op">[</span> <span class="va">myperm</span><span class="op">$</span><span class="va">significance</span><span class="op">$</span><span class="va">perm</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">np</span><span class="op">)</span>,<span class="va">xxx</span><span class="op">]</span></span>
+<span>    <span class="va">original_tstat</span> <span class="op">&lt;-</span> <span class="va">myperm</span><span class="op">$</span><span class="va">significance</span><span class="op">[</span><span class="fl">1</span>,<span class="va">xxx</span><span class="op">]</span> <span class="co"># replace with actual value</span></span>
+<span>    <span class="va">gglist</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">gglist</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">=</span><span class="op">(</span> <span class="fu"><a href="../reference/visualize_permutation_test.html">visualize_permutation_test</a></span><span class="op">(</span> <span class="va">pvec</span>, <span class="va">original_tstat</span>, <span class="va">xxx</span> <span class="op">)</span> <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span> grobs<span class="op">=</span><span class="va">gglist</span>, top<span class="op">=</span><span class="st">'Cross-modality relationships: permutation tested'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/permutation-1.png" width="768"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># display simlr results</span></span>
+<span><span class="va">gglist2</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span> <span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span> <span class="va">j</span> <span class="kw">in</span> <span class="op">(</span><span class="op">(</span><span class="va">i</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">toviz1</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">simres2</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>        <span class="va">toviz2</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">simres2</span><span class="op">[[</span><span class="va">j</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>        <span class="va">temp</span><span class="op">=</span><span class="fu"><a href="../reference/visualize_lowrank_relationships.html">visualize_lowrank_relationships</a></span><span class="op">(</span> <span class="va">matlist</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, <span class="va">matlist</span><span class="op">[[</span><span class="va">j</span><span class="op">]</span><span class="op">]</span>, </span>
+<span>            <span class="va">toviz1</span>, <span class="va">toviz2</span>,</span>
+<span>            nm1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, nm2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">[</span><span class="va">j</span><span class="op">]</span> <span class="op">)</span><span class="op">$</span><span class="va">plot</span></span>
+<span>        <span class="va">gglist2</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">gglist2</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">=</span><span class="va">temp</span></span>
+<span>    <span class="op">}</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span>grobs<span class="op">=</span><span class="op">(</span><span class="va">gglist2</span><span class="op">)</span>,nrow<span class="op">=</span><span class="fl">1</span>, top<span class="op">=</span><span class="st">'Low-rank correlations: SiMLR'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/permutation2-1.png" width="1152"></p>
 </div>
 <div class="section level3">
 <h3 id="evaluating-machine-learning-objective-functions">Evaluating Machine Learning Objective Functions<a class="anchor" aria-label="anchor" href="#evaluating-machine-learning-objective-functions"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># ortho constraint example</span></span></code></pre></div>
+<p>This section of the tutorial vignette provides an example of how to
+set up and run a parameter search using the simlr.search function for
+the Similarity-driven multi-view linear reconstruction (SiMLR)
+algorithm. Here, <code>csearch</code> creates a list of constraint
+options that include “none” and different options for enforcing
+orthogonality. This list will be used to explore different constraint
+options during the parameter search.</p>
+<p>In this step, the simlr.parameters function is called to create a
+parameter list (simparms) that will control the grid search. Each
+parameter category (e.g., nsimlr_options, prescaling_options, etc.) is
+provided with options as a list. These parameters specify the settings
+and constraints that will be explored during the optimization
+process.</p>
+<ul>
+<li><p><code>nsimlr_options</code> : The number of latent factors to
+consider.</p></li>
+<li><p><code>prescaling_options</code> : Methods for data
+scaling/preprocessing (robust, whiten, np).</p></li>
+<li><p><code>objectiver_options</code> : The objective function used
+(regression).</p></li>
+<li><p><code>mixer_options</code> : The mixing technique (ica).</p></li>
+<li><p><code>sparval_options</code> : Sparseness settings.</p></li>
+<li><p><code>expBeta_options</code> : Exponential beta values.</p></li>
+<li><p><code>positivities_options</code> : Positivity
+constraints.</p></li>
+<li><p><code>optimus_options</code> : The optimization strategy
+(lineSearch).</p></li>
+<li><p><code>constraint_options</code> : Constraints to apply, taken
+from csearch.</p></li>
+<li><p><code>search_type</code> : The type of search to perform (full
+indicates a full grid search).</p></li>
+<li><p><code>num_samples</code> : The number of samples to evaluate
+during the search.</p></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">paster</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">vec1</span>, <span class="va">vec2</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">vec1</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">vec2</span><span class="op">)</span><span class="op">)</span>, <span class="va">vec2</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">csearch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, </span>
+<span>  <span class="fu">paster</span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grassmannx"</span>,<span class="st">"Stiefelx"</span>,<span class="st">"orthox"</span><span class="op">)</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"10x10"</span>,<span class="st">"1x1"</span>,<span class="st">"0.1x0.1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># the 10x10 are weights on the optimization term of the energy</span></span>
+<span><span class="va">simparms</span> <span class="op">=</span> <span class="fu"><a href="../reference/simlr.parameters.html">simlr.parameters</a></span><span class="op">(</span> </span>
+<span>    nsimlr_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="fl">2</span> <span class="op">)</span>,</span>
+<span>    prescaling_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> </span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"robust"</span>, <span class="st">"centerAndScale"</span>,  <span class="st">"np"</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>    objectiver_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"cca"</span><span class="op">)</span>,</span>
+<span>    mixer_options<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"pca"</span><span class="op">)</span>, </span>
+<span>    sparval_options<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>,<span class="fl">0.5</span>,<span class="fl">0.5</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>    expBeta_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.99</span><span class="op">)</span> <span class="op">)</span>,</span>
+<span>    positivities_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"positive"</span>,<span class="st">"positive"</span>,<span class="st">"positive"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    optimus_options<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> <span class="st">'lineSearch'</span><span class="op">)</span>,</span>
+<span>    constraint_options<span class="op">=</span><span class="va">csearch</span>,</span>
+<span>    search_type<span class="op">=</span><span class="st">"full"</span>,</span>
+<span>    num_samples<span class="op">=</span><span class="fl">5</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p>The <code>regularizeSimlr</code> function is used to apply
+regularization to the input matrices matlist. Regularization can help
+prevent overfitting by penalizing complexity. The fraction and sigma
+parameters control the extent and type of regularization.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regs</span> <span class="op">=</span> <span class="fu"><a href="../reference/regularizeSimlr.html">regularizeSimlr</a></span><span class="op">(</span><span class="va">matlist</span>, fraction<span class="op">=</span><span class="fl">0.05</span>, </span>
+<span>  sigma<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1.5</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The <code>simlr.search</code> function performs the grid search over
+the parameter space defined in <code>simparms</code>. It takes the
+matrices matlist and regs as input. The <code>nperms</code> specifies
+the number of permutations to evaluate for robustness. The
+<code>verbose</code> parameter controls the level of detail in the
+output during the search process.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simlrXs</span><span class="op">=</span><span class="fu"><a href="../reference/simlr.search.html">simlr.search</a></span><span class="op">(</span></span>
+<span>        <span class="va">matlist</span>,</span>
+<span>        regs<span class="op">=</span><span class="va">regs</span>,</span>
+<span>        <span class="va">simparms</span>,</span>
+<span>        nperms<span class="op">=</span><span class="fl">12</span>,</span>
+<span>        verbose<span class="op">=</span><span class="fl">4</span></span>
+<span>        <span class="op">)</span></span>
+<span><span class="co">#&gt; Will search: 10 parameter sets[1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "none"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "none" NA     NA    </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.906435938975242  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.290859810160866 bestIt: 1 CE: -0.290859810160866"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.403421989759174 bestIt: 2 CE: -0.403421989759174"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.403421989759174 bestIt: 2 CE: -0.246323024149321"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.61831222013601 bestIt: 4 CE: -0.61831222013601"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.714061243717643 bestIt: 5 CE: -0.714061243717643"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.714061243717643 bestIt: 5 CE: -0.710474537686795"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.714061243717643 bestIt: 5 CE: -0.711016986050585"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.760261518914824 bestIt: 8 CE: -0.760261518914825"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.773657432361873 bestIt: 9 CE: -0.773657432361873"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.773657432361873 bestIt: 9 CE: -0.748331691609879"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.773657432361873 bestIt: 9 CE: -0.556828694738611"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.773657432361873 bestIt: 9 CE: -0.737002482166318"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.773657432361873 bestIt: 9 CE: -0.745681861303669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.773657432361873 bestIt: 9 CE: -0.678051108040767"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.773657432361873 bestIt: 9 CE: -0.678051108040767"</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Grassmannx10x10"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Grassmann" "10"        "10"       </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.329918425058685 bestIt: 1 CE: -0.329918425058685"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.474315379797992 bestIt: 2 CE: -0.474315379797992"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.474315379797992 bestIt: 2 CE: -0.399176010924602"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.474315379797992 bestIt: 2 CE: -0.399176010924602"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.619416813687332 bestIt: 5 CE: -0.619416813687332"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.619416813687332 bestIt: 5 CE: -0.616453883325404"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.621462364637727 bestIt: 7 CE: -0.621462364637727"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.62469978465902 bestIt: 8 CE: -0.62469978465902"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.629153227624862 bestIt: 9 CE: -0.629153227624863"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.630677320198369 bestIt: 10 CE: -0.630677320198369"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.630677320198369 bestIt: 10 CE: -0.630677320198369"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
+<span><span class="co">#&gt; [1] "improvement"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus      constraint final_energy</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Grassmannx10x10     6.925345</span></span>
+<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
+<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
+<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    positive    0 0.3927177 0.3677094 0.331739</span></span>
+<span><span class="co">#&gt;             PC1         PC2</span></span>
+<span><span class="co">#&gt; m3.1 0.00000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.2 0.00000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.3 0.01284542 0.010598967</span></span>
+<span><span class="co">#&gt; m3.4 0.00000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.5 0.01315042 0.000000000</span></span>
+<span><span class="co">#&gt; m3.6 0.03140155 0.001728596</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Grassmannx1x1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Grassmann" "1"         "1"        </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.176029404477176 bestIt: 1 CE: -0.176029404477176"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.368200793964173 bestIt: 2 CE: -0.368200793964173"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.68476332416445 bestIt: 3 CE: -0.68476332416445"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.68476332416445 bestIt: 3 CE: -0.683522844450474"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.780664290534964 bestIt: 5 CE: -0.780664290534964"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.807815910981264 bestIt: 6 CE: -0.807815910981265"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.807815910981264 bestIt: 6 CE: -0.804924006690699"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.807815910981264 bestIt: 6 CE: -0.806189419186545"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.807815910981264 bestIt: 6 CE: -0.806780644902708"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.807815910981264 bestIt: 6 CE: -0.760787277282712"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.807815910981264 bestIt: 6 CE: -0.760787277282712"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.807815910981264 bestIt: 6 CE: -0.701264255962248"</span></span>
+<span><span class="co">#&gt; [1] "improvement"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus    constraint final_energy</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Grassmannx1x1     7.377936</span></span>
+<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
+<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
+<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    positive    0 0.3031829 0.4625027 0.3922365</span></span>
+<span><span class="co">#&gt;               PC1         PC2</span></span>
+<span><span class="co">#&gt; m3.1 0.0000000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.2 0.0000000000 0.001414768</span></span>
+<span><span class="co">#&gt; m3.3 0.0187707709 0.000000000</span></span>
+<span><span class="co">#&gt; m3.4 0.0000000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.5 0.0005030411 0.000000000</span></span>
+<span><span class="co">#&gt; m3.6 0.0228105704 0.003053251</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Grassmannx0.1x0.1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Grassmann" "0.1"       "0.1"      </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.163190228447288 bestIt: 1 CE: -0.163190228447288"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.32819699878619 bestIt: 2 CE: -0.32819699878619"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.514753127980385 bestIt: 3 CE: -0.514753127980385"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.642240654552517 bestIt: 4 CE: -0.642240654552517"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.642240654552517 bestIt: 4 CE: -0.615402723301415"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.757789795353854 bestIt: 6 CE: -0.757789795353854"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.757789795353854 bestIt: 6 CE: -0.730865055380712"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.757789795353854 bestIt: 6 CE: -0.727137430254414"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.757789795353854 bestIt: 6 CE: -0.723160531602966"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.757789795353854 bestIt: 6 CE: -0.725038688792182"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.757789795353854 bestIt: 6 CE: -0.725038688792182"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.757789795353854 bestIt: 6 CE: -0.676414490928392"</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Stiefelx10x10"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Stiefel" "10"      "10"     </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.142115739207886 bestIt: 1 CE: -0.142115739207886"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.300993587578251 bestIt: 2 CE: -0.300993587578251"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.55714393141338 bestIt: 3 CE: -0.55714393141338"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.55714393141338 bestIt: 3 CE: -0.553685064614056"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.561858068020136 bestIt: 5 CE: -0.561858068020136"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.561858068020136 bestIt: 5 CE: -0.450680780010327"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.561858068020136 bestIt: 5 CE: -0.481340626619073"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.561858068020136 bestIt: 5 CE: -0.481340626619073"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.571627928031415 bestIt: 9 CE: -0.571627928031415"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574641370457897"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Stiefelx1x1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Stiefel" "1"       "1"      </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.187296285268864 bestIt: 1 CE: -0.187296285268864"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.56234717677072 bestIt: 2 CE: -0.56234717677072"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.733994574185094 bestIt: 3 CE: -0.733994574185094"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.733994574185094 bestIt: 3 CE: -0.579149557077727"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.733994574185094 bestIt: 3 CE: -0.564865740927859"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.733994574185094 bestIt: 3 CE: -0.564865740927859"</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "Stiefelx0.1x0.1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "Stiefel" "0.1"     "0.1"    </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.210702441192055 bestIt: 1 CE: -0.210702441192055"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.508351902342807 bestIt: 2 CE: -0.508351902342807"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.640776848942441 bestIt: 3 CE: -0.640776848942441"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.640776848942441 bestIt: 3 CE: -0.627341198732896"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.640776848942441 bestIt: 3 CE: -0.593442775856865"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.70152194207946 bestIt: 6 CE: -0.70152194207946"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.792655192451455 bestIt: 7 CE: -0.792655192451455"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.883071387258873 bestIt: 8 CE: -0.883071387258873"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839450063752722"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839450063752722"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839632701774422"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.883071387258873 bestIt: 8 CE: -0.823867834703121"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.883071387258873 bestIt: 8 CE: -0.757634021248897"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.883071387258873 bestIt: 8 CE: -0.757634021248896"</span></span>
+<span><span class="co">#&gt; [1] "improvement"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus      constraint final_energy</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Stiefelx0.1x0.1     7.771006</span></span>
+<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
+<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
+<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    positive    0 0.3594545 0.4678698 0.3418489</span></span>
+<span><span class="co">#&gt;      PC1         PC2</span></span>
+<span><span class="co">#&gt; m3.1   0 0.000000000</span></span>
+<span><span class="co">#&gt; m3.2   0 0.026943791</span></span>
+<span><span class="co">#&gt; m3.3   0 0.000000000</span></span>
+<span><span class="co">#&gt; m3.4   0 0.021864915</span></span>
+<span><span class="co">#&gt; m3.5   0 0.028110191</span></span>
+<span><span class="co">#&gt; m3.6   0 0.009915951</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "orthox10x10"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "ortho" "10"    "10"   </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.257071973089098 bestIt: 1 CE: -0.257071973089098"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.827509671711352 bestIt: 2 CE: -0.827509671711352"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.827779334777335 bestIt: 3 CE: -0.827779334777335"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.827779334777335 bestIt: 3 CE: -0.825131705388262"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862884854311301"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "improvement"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus  constraint final_energy prescaling1</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch orthox10x10     10.65541      robust</span></span>
+<span><span class="co">#&gt;      prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1 positivity2</span></span>
+<span><span class="co">#&gt; 1 centerAndScale          np      0.5      0.5      0.5    positive    positive</span></span>
+<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    0 0.3623807 0.3481657 0.529715</span></span>
+<span><span class="co">#&gt;               PC1        PC2</span></span>
+<span><span class="co">#&gt; m3.1 0.0000000000 0.01217819</span></span>
+<span><span class="co">#&gt; m3.2 0.0000000000 0.02598445</span></span>
+<span><span class="co">#&gt; m3.3 0.0053883747 0.00000000</span></span>
+<span><span class="co">#&gt; m3.4 0.0000000000 0.02515964</span></span>
+<span><span class="co">#&gt; m3.5 0.0000000000 0.01379397</span></span>
+<span><span class="co">#&gt; m3.6 0.0002826166 0.00000000</span></span>
+<span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "orthox1x1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "ortho" "1"     "1"    </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.258318281182729 bestIt: 1 CE: -0.258318281182729"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.681570447900545 bestIt: 7 CE: -0.681570447900545"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; i 10 ...[1] "robust"         "centerAndScale" "np"            </span></span>
+<span><span class="co">#&gt; [1] "cca"</span></span>
+<span><span class="co">#&gt; [1] "pca"</span></span>
+<span><span class="co">#&gt; [1] "orthox0.1x0.1"</span></span>
+<span><span class="co">#&gt; [1] 0.5 0.5 0.5</span></span>
+<span><span class="co">#&gt; [1] 0.99</span></span>
+<span><span class="co">#&gt; [1] "positive" "positive" "positive"</span></span>
+<span><span class="co">#&gt; [1] "lineSearch"</span></span>
+<span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
+<span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.837867241314156 bestIt: 1 CE: -0.837867241314156"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.844798478200154 bestIt: 2 CE: -0.844798478200154"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.859306419899053 bestIt: 3 CE: -0.859306419899053"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.860204502560928 bestIt: 4 CE: -0.860204502560928"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.880406367797788 bestIt: 5 CE: -0.880406367797788"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.880406367797788 bestIt: 5 CE: -0.826785923473268"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.880406367797788 bestIt: 5 CE: -0.806095377446437"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.880406367797788 bestIt: 5 CE: -0.832867438923911"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.880406367797788 bestIt: 5 CE: -0.690659229540656"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.880406367797788 bestIt: 5 CE: -0.707771320105571"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.880406367797788 bestIt: 5 CE: -0.707771320105571"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus  constraint final_energy prescaling1</span></span>
+<span><span class="co">#&gt; 8      2        cca   pca  0.99 lineSearch orthox10x10     10.65541      robust</span></span>
+<span><span class="co">#&gt;      prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1 positivity2</span></span>
+<span><span class="co">#&gt; 8 centerAndScale          np      0.5      0.5      0.5    positive    positive</span></span>
+<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
+<span><span class="co">#&gt; 8    positive    0 0.3623807 0.3481657 0.529715</span></span>
+<span><span class="co">#&gt; el finito</span></span>
+<span><span class="va">simlrXs</span><span class="op">$</span><span class="va">paramsearch</span></span>
+<span><span class="co">#&gt;    nsimlr objectiver mixer ebber    optimus        constraint final_energy</span></span>
+<span><span class="co">#&gt; 1       2        cca   pca  0.99 lineSearch              none     6.460155</span></span>
+<span><span class="co">#&gt; 2       2        cca   pca  0.99 lineSearch   Grassmannx10x10     6.925345</span></span>
+<span><span class="co">#&gt; 3       2        cca   pca  0.99 lineSearch     Grassmannx1x1     7.377936</span></span>
+<span><span class="co">#&gt; 4       2        cca   pca  0.99 lineSearch Grassmannx0.1x0.1     6.416303</span></span>
+<span><span class="co">#&gt; 5       2        cca   pca  0.99 lineSearch     Stiefelx10x10     7.048745</span></span>
+<span><span class="co">#&gt; 6       2        cca   pca  0.99 lineSearch       Stiefelx1x1     2.909501</span></span>
+<span><span class="co">#&gt; 7       2        cca   pca  0.99 lineSearch   Stiefelx0.1x0.1     7.771006</span></span>
+<span><span class="co">#&gt; 8       2        cca   pca  0.99 lineSearch       orthox10x10    10.655414</span></span>
+<span><span class="co">#&gt; 9       2        cca   pca  0.99 lineSearch         orthox1x1     9.317237</span></span>
+<span><span class="co">#&gt; 10      2        cca   pca  0.99 lineSearch     orthox0.1x0.1     8.310747</span></span>
+<span><span class="co">#&gt;    prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3</span></span>
+<span><span class="co">#&gt; 1       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 2       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 3       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 4       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 5       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 6       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 7       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 8       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 9       robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt; 10      robust centerAndScale          np      0.5      0.5      0.5</span></span>
+<span><span class="co">#&gt;    positivity1 positivity2 positivity3 perm     m1_m2      m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1     positive    positive    positive    0 0.4230939 0.36117761 0.3744664</span></span>
+<span><span class="co">#&gt; 2     positive    positive    positive    0 0.3927177 0.36770937 0.3317390</span></span>
+<span><span class="co">#&gt; 3     positive    positive    positive    0 0.3031829 0.46250275 0.3922365</span></span>
+<span><span class="co">#&gt; 4     positive    positive    positive    0 0.3188213 0.40880961 0.4064425</span></span>
+<span><span class="co">#&gt; 5     positive    positive    positive    0 0.4703953 0.37726762 0.3912921</span></span>
+<span><span class="co">#&gt; 6     positive    positive    positive    0 0.2268682 0.07121449 0.3222327</span></span>
+<span><span class="co">#&gt; 7     positive    positive    positive    0 0.3594545 0.46786984 0.3418489</span></span>
+<span><span class="co">#&gt; 8     positive    positive    positive    0 0.3623807 0.34816573 0.5297150</span></span>
+<span><span class="co">#&gt; 9     positive    positive    positive    0 0.4289690 0.32612278 0.3260058</span></span>
+<span><span class="co">#&gt; 10    positive    positive    positive    0 0.3959648 0.51833933 0.3609527</span></span></code></pre></div>
+<p>Finally, <code>simlrXs$paramsearch</code> retrieves the results of
+the parameter search. This will show the performance of different
+parameter combinations, helping to identify the optimal settings for the
+SiMLR algorithm. The “best” result here will have the highest value for
+<code>final_energy</code>.</p>
+<p>This section of the vignette demonstrates how to set up a
+comprehensive parameter search for the SiMLR algorithm. It shows how to
+create custom constraints, define a parameter grid, regularize the
+model, and execute the search. The result is an optimized set of
+parameters that can be used to enhance the performance of the SiMLR
+model on your data.</p>
+</div>
+<div class="section level3">
+<h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h3>
+<p>We provided a quick overview of potential uses of the SiMLR
+framework.<br>
+In addition, we provided visualization hints and standards that may be
+of use in scientific applications of these methods.</p>
 </div>
 </div>
   </div>

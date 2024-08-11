@@ -32,7 +32,7 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
-      <a href="../articles/simlr_interpretation.html">SiMLR interpretation</a>
+      <a href="../articles/simlr_interpretation.html">simlr_interpretation</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
@@ -85,14 +85,14 @@
 <span class="r-in"><span><span class="fu">labelStats</span><span class="op">(</span><span class="va">img</span>, <span class="va">segs1</span><span class="op">$</span><span class="va">segmentation</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   LabelValue        Mean Min Max   Variance Count Volume   Mass        x</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4          0   0.1475076   0 163   11.53692  2949  47184      0   0.0000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          1  73.7428571   0 125 1535.97657   140   2240  10324 131.2857</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          1  73.7428571   0 125 1535.97657   140   2240  10324 131.2857</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2          2 166.1126126 127 191  259.86088   444   7104  73754 125.6937</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          3 216.2557726 191 253  221.33660   563   9008 121752 124.4618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          3 216.2557726 191 253  221.33660   563   9008 121752 124.4618</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          y  z  t</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4   0.0000 NA NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 128.9714 NA NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 128.9714 NA NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 126.0541 NA NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 131.7300 NA NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 131.7300 NA NA</span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu">labelStats</span><span class="op">(</span><span class="va">img</span>, <span class="fu"><a href="as.array.html">as.array</a></span><span class="op">(</span><span class="va">segs1</span><span class="op">$</span><span class="va">segmentation</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu">labelStats</span><span class="op">(</span><span class="va">img</span>, <span class="fu"><a href="as.array.html">as.array</a></span><span class="op">(</span><span class="va">segs1</span><span class="op">$</span><span class="va">segmentation</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sub_seg</span> <span class="op">&lt;-</span> <span class="va">segs1</span><span class="op">$</span><span class="va">segmentation</span></span></span>
