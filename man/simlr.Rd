@@ -17,7 +17,7 @@ simlr(
   lineSearchRange = c(-1e+10, 1e+10),
   lineSearchTolerance = 1e-08,
   randomSeed,
-  constraint = c("none", "Grassmann", "Stiefel"),
+  constraint = c("Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
     "lowRankRegression"),
   vmats,

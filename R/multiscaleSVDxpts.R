@@ -3168,7 +3168,7 @@ simlr <- function(
     lineSearchRange = c(-1e10, 1e10),
     lineSearchTolerance = 1e-8,
     randomSeed,
-    constraint = c("none", "Grassmann", "Stiefel"),
+    constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression"),
     vmats,
     connectors = NULL,
@@ -3192,6 +3192,7 @@ simlr <- function(
   if (!missing("randomSeed")) set.seed(randomSeed) #  else set.seed( 0 )
   energyType <- match.arg(energyType)
   constraint <- parse_constraint( constraint[1] )
+  if ( verbose ) print(constraint)
   optimizationStyle <- match.arg(optimizationStyle)
   scalechoices = c(
       "sqrtnp", "np", "centerAndScale",
@@ -3792,6 +3793,11 @@ simlr <- function(
     }
     if ((myit - bestRow - 1) >= 5) break # consider converged
   } # iterations
+
+  names(bestV)=names(voxmats)
+  for ( k in 1:length(voxmats)) {
+    rownames(bestV[[k]])=colnames(voxmats[[k]])
+  }
 
   energyPath <- na.omit(energyPath)
   return(
@@ -4770,6 +4776,7 @@ glm_impute <- function(dataframe, columns_to_impute, predictor_columns, family =
 #' @param nms A vector of base column names.
 #' @param vecnum A numeric value to append to the column names.
 #' @param toimpute The base name of the target column to be imputed.
+#' @param separator A string specifying the separator between the column name and feature.
 #' @param family A string specifying the GLM family (default is 'gaussian').
 #' @return A data frame with imputed values.
 #' @examples
@@ -4789,12 +4796,12 @@ glm_impute <- function(dataframe, columns_to_impute, predictor_columns, family =
 #' toimpute <- "perf"
 #' df = simlr_impute(df, nms, vecnum, toimpute, family = 'gaussian')
 #' @export
-simlr_impute <- function(dataframe, nms, vecnum, toimpute, family = 'gaussian') {
+simlr_impute <- function(dataframe, nms, vecnum, toimpute, separator="PC", family = 'gaussian') {
   # Create the list of predictor columns excluding the target column to be imputed
-  predictor_columns <- as.vector(sapply(nms[nms != toimpute], function(x) paste0(x, paste0("PC", vecnum))))
+  predictor_columns <- as.vector(sapply(nms[nms != toimpute], function(x) paste0(x, paste0(separator, vecnum))))
   
   # Specify the target column to be imputed
-  columns_to_impute <- paste0(toimpute, "PC", vecnum)
+  columns_to_impute <- paste0(toimpute, separator, vecnum)
   
   # Use the glm_impute function to impute missing values
   imputed_dataframe <- glm_impute(dataframe, columns_to_impute, predictor_columns, family)
@@ -5714,3 +5721,70 @@ interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2sho
   return(t1vec_filtered)
 }
 
+
+
+
+#' Plot Features
+#'
+#' Create bar plots for each column in each data frame, showing only non-zero values.  Normalize each feature s.t. max is one.
+#'
+#' @param data_list A list of data frames.
+#' @param take_abs boolean 
+#' @param n_limit Integer, limit features to top n_limit with highest value
+#'
+#' @return A list of ggplot objects.
+#'
+#' @examples
+#' # Simulate data
+#' set.seed(123)
+#' feature_names <- paste("Feature", 1:10)
+#' data_list <- list(
+#'   df1 = data.frame(matrix(ifelse(runif(100) < 0.5, 0, runif(100)), nrow = 10)),
+#'   df2 = data.frame(matrix(ifelse(runif(100) < 0.5, 0, runif(100)), nrow = 10))
+#' )
+#'
+#' # Set rownames
+#' rownames(data_list$df1) <- feature_names
+#' rownames(data_list$df2) <- feature_names
+#'
+#' # Use the function
+#' plots <- plot_features(data_list)
+#'
+#' # Display the plots
+#' for (i in 1:length(plots)) {
+#'   print(plots[[i]])
+#' }
+#' @export
+plot_features <- function(data_list, take_abs = TRUE, n_limit = 12 ) {
+  plots <- list()
+  
+  for (i in 1:length(data_list)) {
+    df <- data_list[[i]]
+    if (take_abs) df <- abs(df)
+    df_name <- names(data_list)[i]
+    
+    for (j in 1:ncol(df)) {
+      col_name <- colnames(df)[j]
+      values <- df[, j]
+      
+      # Filter out zero values
+      non_zero_values <- values[values != 0]
+      non_zero_features <- rownames(df)[values != 0]
+      non_zero_values <- non_zero_values / max(non_zero_values)
+      
+      # Select top n_limit features
+      top_features <- head(data.frame(feature_names = non_zero_features, values = non_zero_values), n_limit)
+      
+      # Create the plot
+      plot <- ggbarplot(top_features, x = "feature_names", y = "values", 
+                        main = paste('features !=0:', df_name, col_name), xlab = "Feature", ylab = "Value", 
+                        rotate.x.text = 45, sort.val = "desc", fill = "lightblue") +
+        theme_pubr() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      
+      plots[[paste(df_name, col_name)]] <- plot
+    }
+  }
+  
+  return(plots)
+}
