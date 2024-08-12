@@ -31,7 +31,7 @@ makePowersPointsImage <- function(pts, mask, radius = 5) {
       for (j in seq(-n[2], n[2], by = 0.5)) {
         for (k in seq(-n[3], n[3], by = 0.5)) {
           local <- idx + c(i, j, k)
-          localpt <- antsTransformIndexToPhysicalPoint(mask, local)
+          localpt <- antsTransformIndexToPhysicalPoint(mask, as.numeric(local))
           dist <- sqrt(sum((localpt - pt) * (localpt - pt)))
           inImage <- (prod(idx <= dim(mask)) == 1) && (length(which(idx < 1)) == 0)
           if ((dist <= rad) && (inImage == TRUE)) {
@@ -83,7 +83,7 @@ makePointsImage <- function(pts, mask, radius = 5) {
         if (dim == 3) {
           for (k in seq(-n[3], n[3], by = 0.5)) {
             local <- idx + c(i, j, k)
-            localpt <- antsTransformIndexToPhysicalPoint(mask, local)
+            localpt <- antsTransformIndexToPhysicalPoint(mask, as.numeric(local))
             dist <- sqrt(sum((localpt - pt) * (localpt - pt)))
             inImage <- all(local >= 1 & local <= dim(powersLabels))
             if ((dist <= rad) && (inImage == TRUE)) {
@@ -95,7 +95,7 @@ makePointsImage <- function(pts, mask, radius = 5) {
         } # if dim == 3
         if (dim == 2) {
           local <- idx + c(i, j)
-          localpt <- antsTransformIndexToPhysicalPoint(mask, local)
+          localpt <- antsTransformIndexToPhysicalPoint(mask, as.numeric(local))
           dist <- sqrt(sum((localpt - pt) * (localpt - pt)))
           inImage <- (prod(local <= dim(mask)) == 1) && (length(which(local < 1)) == 0)
           if ((dist <= rad) && (inImage == TRUE)) {
