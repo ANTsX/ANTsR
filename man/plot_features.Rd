@@ -20,6 +20,7 @@ A list of ggplot objects.
 Create bar plots for each column in each data frame, showing only non-zero values.  Normalize each feature s.t. max is one.
 }
 \examples{
+\dontrun{
 # Simulate data
 set.seed(123)
 feature_names <- paste("Feature", 1:10)
@@ -38,5 +39,6 @@ plots <- plot_features(data_list)
 # Display the plots
 for (i in 1:length(plots)) {
   print(plots[[i]])
+}
 }
 }

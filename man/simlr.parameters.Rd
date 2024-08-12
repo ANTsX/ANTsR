@@ -36,6 +36,10 @@ simlr.parameters(
 \item{optimus_options}{A list of options for the `optimus` parameter.}
 
 \item{constraint_options}{A list of options for the `constraint` parameter, default is `list("none")`.}
+
+\item{num_samples}{if not full, then the size of the subset space}
+
+\item{search_type}{string vector either full random or deterministic}
 }
 \value{
 A list containing all (or a subset of) combinations of the provided parameters. Each row in the data frame represents a unique combination of the parameters.

@@ -4374,6 +4374,8 @@ vector_to_df <- function(vector, column_name) {
 #' @param positivities_options A list of options for the `pizzer` parameter.
 #' @param optimus_options A list of options for the `optimus` parameter.
 #' @param constraint_options A list of options for the `constraint` parameter, default is `list("none")`.
+#' @param num_samples if not full, then the size of the subset space
+#' @param search_type string vector either full random or deterministic
 #' 
 #' @return A list containing all (or a subset of) combinations of the provided parameters. Each row in the data frame represents a unique combination of the parameters.
 #' 
@@ -5734,6 +5736,7 @@ interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2sho
 #' @return A list of ggplot objects.
 #'
 #' @examples
+#' \dontrun{
 #' # Simulate data
 #' set.seed(123)
 #' feature_names <- paste("Feature", 1:10)
@@ -5752,6 +5755,7 @@ interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2sho
 #' # Display the plots
 #' for (i in 1:length(plots)) {
 #'   print(plots[[i]])
+#' }
 #' }
 #' @export
 plot_features <- function(data_list, take_abs = TRUE, n_limit = 12 ) {
