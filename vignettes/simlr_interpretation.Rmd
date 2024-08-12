@@ -32,7 +32,7 @@ Here’s an expanded and more didactic section for the vignette that introduces 
 
 ## Example: Applying SiMLR to Simulated Multi-View Data
 
-In this section, we’ll explore how the Similarity-driven Multi-View Linear Reconstruction (SiMLR) algorithm can be applied to multi-view datasets. We'll generate synthetic data to simulate the application of SiMLR, compare the results to traditional methods like Singular Value Decomposition (SVD), and visualize the relationships between the views.
+In this section, we explore how SiMLR can be applied to multi-view datasets. We'll generate synthetic data to simulate the application of SiMLR, compare the results to traditional methods like Singular Value Decomposition (SVD), and visualize the relationships between the views.  This example derives from the simulation-based evaluation in the original paper.
 
 ### Step 1: Simulate Multi-View Data
 
@@ -42,7 +42,7 @@ We begin by simulating three different views of data, each representing differen
 library(ANTsR)
 library(reshape2)
 set.seed(1500)
-nsub <- 25          # Number of subjects/samples
+nsub <- 100          # Number of subjects/samples
 npix <- c(100, 200, 133)  # Number of features in each view
 nk <- 5             # Number of latent factors
 

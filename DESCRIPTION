@@ -27,10 +27,12 @@ Depends:
     methods
 Imports:
     ANTsRCore (>= 0.8.1),
+    dplyr,
     graphics,
     grDevices,
     magrittr,
     stats,
+    stringr,
     utils
 Suggests:
     colormap,

@@ -123,12 +123,12 @@ visualization examples:</p>
 <div class="section level3">
 <h3 id="example-applying-simlr-to-simulated-multi-view-data">Example: Applying SiMLR to Simulated Multi-View Data<a class="anchor" aria-label="anchor" href="#example-applying-simlr-to-simulated-multi-view-data"></a>
 </h3>
-<p>In this section, we’ll explore how the Similarity-driven Multi-View
-Linear Reconstruction (SiMLR) algorithm can be applied to multi-view
+<p>In this section, we explore how SiMLR can be applied to multi-view
 datasets. We’ll generate synthetic data to simulate the application of
 SiMLR, compare the results to traditional methods like Singular Value
-Decomposition (SVD), and visualize the relationships between the
-views.</p>
+Decomposition (SVD), and visualize the relationships between the views.
+This example derives from the simulation-based evaluation in the
+original paper.</p>
 <div class="section level4">
 <h4 id="step-1-simulate-multi-view-data">Step 1: Simulate Multi-View Data<a class="anchor" aria-label="anchor" href="#step-1-simulate-multi-view-data"></a>
 </h4>
@@ -156,7 +156,7 @@ structure.</p>
 <span><span class="co">#&gt;     all, any, apply, max, min, prod, range, sum</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/hadley/reshape" class="external-link">reshape2</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1500</span><span class="op">)</span></span>
-<span><span class="va">nsub</span> <span class="op">&lt;-</span> <span class="fl">25</span>          <span class="co"># Number of subjects/samples</span></span>
+<span><span class="va">nsub</span> <span class="op">&lt;-</span> <span class="fl">100</span>          <span class="co"># Number of subjects/samples</span></span>
 <span><span class="va">npix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">133</span><span class="op">)</span>  <span class="co"># Number of features in each view</span></span>
 <span><span class="va">nk</span> <span class="op">&lt;-</span> <span class="fl">5</span>             <span class="co"># Number of latent factors</span></span>
 <span></span>
@@ -200,17 +200,17 @@ find a common representation across the views.</p>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simlr.html">simlr</a></span><span class="op">(</span><span class="va">matlist</span>,constraint<span class="op">=</span><span class="va">constr</span>,scale<span class="op">=</span><span class="va">prepro</span>, verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.858847922761822  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.256692917864777 bestIt: 1 CE: -0.256692917864777"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.697875235845201 bestIt: 2 CE: -0.697875235845201"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.697875235845201 bestIt: 2 CE: -0.440609115593719"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.697875235845201 bestIt: 2 CE: -0.446286879475902"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.753229659975718 bestIt: 5 CE: -0.753229659975718"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.753229659975718 bestIt: 5 CE: -0.681335076802565"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.753229659975718 bestIt: 5 CE: -0.50186793727863"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.753229659975718 bestIt: 5 CE: -0.493727230323559"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.753229659975718 bestIt: 5 CE: -0.659484755200271"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.753229659975718 bestIt: 5 CE: -0.682395449925149"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.897019799238767  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.253280672320863 bestIt: 1 CE: -0.253280672320863"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.404583596933736 bestIt: 2 CE: -0.404583596933736"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.810491744310403 bestIt: 3 CE: -0.810491744310403"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.8193484051941 bestIt: 4 CE: -0.8193484051941"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.8193484051941 bestIt: 4 CE: -0.766879419521874"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.8193484051941 bestIt: 4 CE: -0.769814132925513"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.8193484051941 bestIt: 4 CE: -0.671251201612116"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.8193484051941 bestIt: 4 CE: -0.697501085762956"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.8193484051941 bestIt: 4 CE: -0.62642418606143"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.8193484051941 bestIt: 4 CE: -0.795599051601249"</span></span>
 <span></span>
 <span><span class="co"># Projecting data into the reduced space</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="va">mat1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">v</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
@@ -243,13 +243,13 @@ Value Decomposition (SVD).</p>
 <span></span>
 <span><span class="co"># Print the results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p1 and p2:"</span>, <span class="va">cor_p1_p2</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Correlation between p1 and p2: -0.9634473 0.6477194</span></span>
+<span><span class="co">#&gt; Correlation between p1 and p2: -0.9786008 0.4360317</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p1 and p3:"</span>, <span class="va">cor_p1_p3</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Correlation between p1 and p3: -0.9884729 -0.1118407</span></span>
+<span><span class="co">#&gt; Correlation between p1 and p3: -0.9909754 0.5789666</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between p2 and p3:"</span>, <span class="va">cor_p2_p3</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Correlation between p2 and p3: -0.8111546 0.9670118</span></span>
+<span><span class="co">#&gt; Correlation between p2 and p3: -0.5314355 0.9941934</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Correlation between SVD1 and SVD2:"</span>, <span class="va">cor_svd1_svd2</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Correlation between SVD1 and SVD2: -0.6848291 0.5752894</span></span></code></pre></div>
+<span><span class="co">#&gt; Correlation between SVD1 and SVD2: -0.834545 0.5642089</span></span></code></pre></div>
 <div class="section level5">
 <h5 id="visualizing-correlations">Visualizing Correlations<a class="anchor" aria-label="anchor" href="#visualizing-correlations"></a>
 </h5>
@@ -307,11 +307,11 @@ significant.</p>
 <span></span>
 <span><span class="co"># Print permuted results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p1p and p2p:"</span>, <span class="va">cor_p1p_p2p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permuted Correlation between p1p and p2p: -0.6354492 0.415303</span></span>
+<span><span class="co">#&gt; Permuted Correlation between p1p and p2p: -0.283758 0.0637503</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p1p and p3p:"</span>, <span class="va">cor_p1p_p3p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permuted Correlation between p1p and p3p: -0.5142991 0.3162735</span></span>
+<span><span class="co">#&gt; Permuted Correlation between p1p and p3p: -0.1339851 0.1661104</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Permuted Correlation between p2p and p3p:"</span>, <span class="va">cor_p2p_p3p</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Permuted Correlation between p2p and p3p: -0.6135153 0.7060008</span></span></code></pre></div>
+<span><span class="co">#&gt; Permuted Correlation between p2p and p3p: -0.3204276 0.335416</span></span></code></pre></div>
 <p>The permutation test will show if the observed correlations are
 stronger than those expected by chance.</p>
 <p>This introductory example demonstrates how SiMLR can uncover the
@@ -348,7 +348,8 @@ visualization.</p>
 <span><span class="va">popdf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> age <span class="op">=</span> <span class="va">outcome</span>, cog<span class="op">=</span><span class="va">outcome1</span>, <span class="va">mat1</span>, <span class="va">mat2</span>, <span class="va">mat3</span> <span class="op">)</span></span>
 <span><span class="va">temp2</span><span class="op">=</span><span class="fu"><a href="../reference/apply_simlr_matrices.html">apply_simlr_matrices</a></span><span class="op">(</span> <span class="va">popdf</span>, <span class="va">simres2</span>, </span>
 <span>    center<span class="op">=</span><span class="cn">TRUE</span>, scale<span class="op">=</span><span class="cn">TRUE</span>, absolute_value<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">TRUE</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="va">zz</span><span class="op">=</span><span class="fu"><a href="../reference/exploratory_visualization.html">exploratory_visualization</a></span><span class="op">(</span> <span class="fu"><a href="../reference/antsrimpute.html">antsrimpute</a></span><span class="op">(</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="va">temp2</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">simnames</span><span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">zz</span><span class="op">=</span><span class="fu"><a href="../reference/exploratory_visualization.html">exploratory_visualization</a></span><span class="op">(</span> <span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="va">temp2</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span>, dotsne<span class="op">=</span><span class="cn">FALSE</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: package 'GGally' was built under R version 4.3.1</span></span>
 <span><span class="co">#&gt; Registered S3 method overwritten by 'GGally':</span></span>
 <span><span class="co">#&gt;   method from   </span></span>
@@ -357,6 +358,118 @@ visualization.</p>
 <span><span class="co">#&gt; Warning: package 'patchwork' was built under R version 4.3.1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="va">zz</span><span class="op">$</span><span class="va">plot</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="simlr_interpretation_files/figure-html/dataintegration-1.png" width="1152"></p>
+<p>Now we can icorporate the “modalities” in order to predict the
+simulated outcome matrix. Note that contributions exist from each
+modality in the regression (in some cases). This is one of the
+advantages of SiMLR: it provides systematic guidance for building these
+types of integrative models.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># multi-view regression</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">age.1</span> <span class="op">~</span> <span class="va">m1PC1</span> <span class="op">+</span> <span class="va">m2PC1</span> <span class="op">+</span> <span class="va">m3PC1</span>, data<span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; lm(formula = age.1 ~ m1PC1 + m2PC1 + m3PC1, data = temp2[[1]])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residuals:</span></span>
+<span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span><span class="co">#&gt; -1.87692 -0.44257  0.08478  0.46614  1.74734 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; (Intercept)  0.06104    0.07252   0.842    0.402    </span></span>
+<span><span class="co">#&gt; m1PC1       -0.14758    0.21113  -0.699    0.486    </span></span>
+<span><span class="co">#&gt; m2PC1       -1.07477    0.13620  -7.891 4.83e-12 ***</span></span>
+<span><span class="co">#&gt; m3PC1       -1.69287    0.33952  -4.986 2.73e-06 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual standard error: 0.7252 on 96 degrees of freedom</span></span>
+<span><span class="co">#&gt; Multiple R-squared:  0.5191, Adjusted R-squared:  0.5041 </span></span>
+<span><span class="co">#&gt; F-statistic: 34.54 on 3 and 96 DF,  p-value: 3.137e-15</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">age.2</span> <span class="op">~</span> <span class="va">m1PC1</span> <span class="op">+</span> <span class="va">m2PC1</span> <span class="op">+</span> <span class="va">m3PC1</span>, data<span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; lm(formula = age.2 ~ m1PC1 + m2PC1 + m3PC1, data = temp2[[1]])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residuals:</span></span>
+<span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span><span class="co">#&gt; -1.98779 -0.46277 -0.01922  0.52706  1.76221 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)   </span></span>
+<span><span class="co">#&gt; (Intercept) -0.06212    0.07047  -0.881  0.38028   </span></span>
+<span><span class="co">#&gt; m1PC1        0.53952    0.20515   2.630  0.00995 **</span></span>
+<span><span class="co">#&gt; m2PC1       -0.20935    0.13235  -1.582  0.11698   </span></span>
+<span><span class="co">#&gt; m3PC1        0.04453    0.32991   0.135  0.89291   </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual standard error: 0.7047 on 96 degrees of freedom</span></span>
+<span><span class="co">#&gt; Multiple R-squared:  0.4669, Adjusted R-squared:  0.4502 </span></span>
+<span><span class="co">#&gt; F-statistic: 28.03 on 3 and 96 DF,  p-value: 4.2e-13</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">age.3</span> <span class="op">~</span> <span class="va">m1PC1</span> <span class="op">+</span> <span class="va">m2PC1</span> <span class="op">+</span> <span class="va">m3PC1</span>, data<span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; lm(formula = age.3 ~ m1PC1 + m2PC1 + m3PC1, data = temp2[[1]])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residuals:</span></span>
+<span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span><span class="co">#&gt; -1.14340 -0.31062 -0.00963  0.27818  1.03336 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; (Intercept)  0.03258    0.04689   0.695   0.4888    </span></span>
+<span><span class="co">#&gt; m1PC1        0.23151    0.13650   1.696   0.0931 .  </span></span>
+<span><span class="co">#&gt; m2PC1        1.06898    0.08806  12.140  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; m3PC1        1.33673    0.21951   6.090 2.33e-08 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual standard error: 0.4689 on 96 degrees of freedom</span></span>
+<span><span class="co">#&gt; Multiple R-squared:  0.7866, Adjusted R-squared:   0.78 </span></span>
+<span><span class="co">#&gt; F-statistic:   118 on 3 and 96 DF,  p-value: &lt; 2.2e-16</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">age.4</span> <span class="op">~</span> <span class="va">m1PC1</span> <span class="op">+</span> <span class="va">m2PC1</span> <span class="op">+</span> <span class="va">m3PC1</span>, data<span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; lm(formula = age.4 ~ m1PC1 + m2PC1 + m3PC1, data = temp2[[1]])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residuals:</span></span>
+<span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
+<span><span class="co">#&gt; -1.28560 -0.30096  0.06679  0.33574  0.88247 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; (Intercept)  0.02380    0.04615   0.516    0.607    </span></span>
+<span><span class="co">#&gt; m1PC1        2.42044    0.13434  18.017   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; m2PC1        1.04513    0.08667  12.059   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; m3PC1        3.92198    0.21604  18.154   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual standard error: 0.4615 on 96 degrees of freedom</span></span>
+<span><span class="co">#&gt; Multiple R-squared:  0.7894, Adjusted R-squared:  0.7828 </span></span>
+<span><span class="co">#&gt; F-statistic: 119.9 on 3 and 96 DF,  p-value: &lt; 2.2e-16</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span> <span class="va">age.5</span> <span class="op">~</span> <span class="va">m1PC1</span> <span class="op">+</span> <span class="va">m2PC1</span> <span class="op">+</span> <span class="va">m3PC1</span>, data<span class="op">=</span><span class="va">temp2</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; lm(formula = age.5 ~ m1PC1 + m2PC1 + m3PC1, data = temp2[[1]])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residuals:</span></span>
+<span><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
+<span><span class="co">#&gt; -1.8581 -0.5587 -0.1209  0.5738  2.1824 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span><span class="co">#&gt; (Intercept) -0.08199    0.08144  -1.007 0.316557    </span></span>
+<span><span class="co">#&gt; m1PC1        0.89302    0.23708   3.767 0.000285 ***</span></span>
+<span><span class="co">#&gt; m2PC1       -0.36262    0.15294  -2.371 0.019741 *  </span></span>
+<span><span class="co">#&gt; m3PC1        0.48221    0.38125   1.265 0.209006    </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual standard error: 0.8144 on 96 degrees of freedom</span></span>
+<span><span class="co">#&gt; Multiple R-squared:  0.2809, Adjusted R-squared:  0.2584 </span></span>
+<span><span class="co">#&gt; F-statistic:  12.5 on 3 and 96 DF,  p-value: 5.716e-07</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="sparse-feature-selection">Sparse Feature Selection<a class="anchor" aria-label="anchor" href="#sparse-feature-selection"></a>
@@ -366,7 +479,7 @@ identify a minimal subset of features that contribute most to the joint
 embedding space. This can be particularly advantageous in settings where
 interpretability is crucial, such as biomarker discovery in biological
 datasets.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pp</span><span class="op">=</span><span class="fu"><a href="../reference/plot_features.html">plot_features</a></span><span class="op">(</span> <span class="va">simres2</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span> grobs<span class="op">=</span><span class="va">pp</span>, nrow<span class="op">=</span><span class="fl">3</span>, top<span class="op">=</span><span class="st">'Joint features'</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="simlr_interpretation_files/figure-html/featureselection-1.png" width="1152"></p>
@@ -389,7 +502,7 @@ impute the missing data by leveraging the relationships between the
 available modalities. This cross-modal prediction capability is
 particularly useful in multi-omics studies and other fields where
 complete data is often unavailable.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">popdfi</span><span class="op">=</span><span class="va">popdf</span></span>
 <span><span class="va">proportion</span> <span class="op">&lt;-</span> <span class="fl">0.1</span></span>
 <span><span class="va">num_NAs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">proportion</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">popdfi</span><span class="op">)</span><span class="op">)</span></span>
@@ -409,7 +522,9 @@ complete data is often unavailable.</p>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">impresult</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span> og<span class="op">=</span><span class="va">popdf</span><span class="op">[</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, imp<span class="op">=</span><span class="va">popdfi</span><span class="op">[</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggscatter.html" class="external-link">ggscatter</a></span><span class="op">(</span> <span class="va">impresult</span>, <span class="st">'og'</span>, <span class="st">'imp'</span> <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Imputed vs original data"</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rpkgs.datanovia.com/ggpubr/reference/ggscatter.html" class="external-link">ggscatter</a></span><span class="op">(</span> <span class="va">impresult</span>, <span class="st">'og'</span>, <span class="st">'imp'</span> <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Imputed vs original data"</span>,<span class="va">imputedcols</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Removed 4 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; (`geom_point()`).</span></span></code></pre></div>
 <p><img src="simlr_interpretation_files/figure-html/imp-1.png" width="700"></p>
 </div>
 <div class="section level3">
@@ -423,7 +538,7 @@ variables. It measures the similarity of the column spaces (subspaces)
 spanned by the columns of two matrices. We compute the
 <code>rvcoef</code> across all pairs of data at each permutation and
 compare to the original values.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">initu</span> <span class="op">=</span> <span class="fu"><a href="../reference/initializeSimlr.html">initializeSimlr</a></span><span class="op">(</span> <span class="va">matlist</span>, <span class="fl">3</span>, jointReduction <span class="op">=</span> <span class="cn">TRUE</span>  <span class="op">)</span></span>
 <span><span class="va">np</span><span class="op">=</span><span class="fl">40</span></span>
 <span><span class="va">myperm</span> <span class="op">=</span> <span class="fu"><a href="../reference/simlr.perm.html">simlr.perm</a></span><span class="op">(</span>  <span class="va">matlist</span>,</span>
@@ -432,21 +547,21 @@ compare to the original values.</p>
 <span>  nperms<span class="op">=</span><span class="va">np</span>, FUN<span class="op">=</span><span class="va">rvcoef</span>, verbose<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.858403525257994  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.454148053126434 bestIt: 1 CE: -0.454148053126434"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.454148053126434 bestIt: 1 CE: -0.434346480027733"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.676455509877708 bestIt: 3 CE: -0.676455509877708"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.676455509877708 bestIt: 3 CE: -0.579099546951581"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.676455509877708 bestIt: 3 CE: -0.566701952395956"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.676455509877708 bestIt: 3 CE: -0.456130887185229"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.676455509877708 bestIt: 3 CE: -0.563875336546259"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.692885106793509 bestIt: 8 CE: -0.692885106793509"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.783797191262112 bestIt: 9 CE: -0.783797191262112"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.783797191262112 bestIt: 9 CE: -0.507565117137195"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.892100113764282  &lt;o&gt; mixer: svd  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.650248428644519 bestIt: 1 CE: -0.650248428644519"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.650248428644519 bestIt: 1 CE: -0.481399800802654"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.650248428644519 bestIt: 1 CE: -0.476248138143961"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.650248428644519 bestIt: 1 CE: -0.471366874761084"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.677821086302228 bestIt: 5 CE: -0.677821086302228"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.838207156514181 bestIt: 6 CE: -0.838207156514181"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.838207156514181 bestIt: 6 CE: -0.784694758842972"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.838207156514181 bestIt: 6 CE: -0.820198645734556"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.838207156514181 bestIt: 6 CE: -0.462077600293351"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.871360670328648 bestIt: 10 CE: -0.871360670328648"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span> <span class="va">myperm</span><span class="op">$</span><span class="va">significance</span>, <span class="fl">2</span> <span class="op">)</span>  <span class="op">)</span></span>
-<span><span class="co">#&gt;    n   perm        m1_m2        m1_m3        m2_m3</span></span>
-<span><span class="co">#&gt; 42 3  ttest 2.946052e-26 8.781689e-25 9.345428e-27</span></span>
-<span><span class="co">#&gt; 43 3 pvalue 0.000000e+00 0.000000e+00 0.000000e+00</span></span>
+<span><span class="co">#&gt;    n   perm       m1_m2        m1_m3        m2_m3</span></span>
+<span><span class="co">#&gt; 42 3  ttest 3.88559e-50 4.317305e-47 1.329116e-52</span></span>
+<span><span class="co">#&gt; 43 3 pvalue 0.00000e+00 0.000000e+00 0.000000e+00</span></span>
 <span><span class="va">gglist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">simlrmaps</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">myperm</span><span class="op">$</span><span class="va">significance</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="kw">for</span> <span class="op">(</span> <span class="va">xxx</span> <span class="kw">in</span> <span class="va">simlrmaps</span> <span class="op">)</span> <span class="op">{</span></span>
@@ -456,7 +571,7 @@ compare to the original values.</p>
 <span><span class="op">}</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html" class="external-link">grid.arrange</a></span><span class="op">(</span> grobs<span class="op">=</span><span class="va">gglist</span>, top<span class="op">=</span><span class="st">'Cross-modality relationships: permutation tested'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="simlr_interpretation_files/figure-html/permutation-1.png" width="768"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># display simlr results</span></span>
 <span><span class="va">gglist2</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span> <span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -480,8 +595,8 @@ set up and run a parameter search using the simlr.search function for
 the Similarity-driven multi-view linear reconstruction (SiMLR)
 algorithm. Here, <code>csearch</code> creates a list of constraint
 options that include “none” and different options for enforcing
-orthogonality. This list will be used to explore different constraint
-options during the parameter search.</p>
+orthogonality <em>in the feature space</em>. This list will be used to
+explore different constraint options during the parameter search.</p>
 <p>In this step, the simlr.parameters function is called to create a
 parameter list (simparms) that will control the grid search. Each
 parameter category (e.g., nsimlr_options, prescaling_options, etc.) is
@@ -509,7 +624,7 @@ indicates a full grid search).</p></li>
 <li><p><code>num_samples</code> : The number of samples to evaluate
 during the search.</p></li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">paster</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">vec1</span>, <span class="va">vec2</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">vec1</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">vec2</span><span class="op">)</span><span class="op">)</span>, <span class="va">vec2</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -536,7 +651,7 @@ during the search.</p></li>
 regularization to the input matrices matlist. Regularization can help
 prevent overfitting by penalizing complexity. The fraction and sigma
 parameters control the extent and type of regularization.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regs</span> <span class="op">=</span> <span class="fu"><a href="../reference/regularizeSimlr.html">regularizeSimlr</a></span><span class="op">(</span><span class="va">matlist</span>, fraction<span class="op">=</span><span class="fl">0.05</span>, </span>
 <span>  sigma<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1.5</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>simlr.search</code> function performs the grid search over
@@ -545,7 +660,7 @@ matrices matlist and regs as input. The <code>nperms</code> specifies
 the number of permutations to evaluate for robustness. The
 <code>verbose</code> parameter controls the level of detail in the
 output during the search process.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simlrXs</span><span class="op">=</span><span class="fu"><a href="../reference/simlr.search.html">simlr.search</a></span><span class="op">(</span></span>
 <span>        <span class="va">matlist</span>,</span>
 <span>        regs<span class="op">=</span><span class="va">regs</span>,</span>
@@ -563,22 +678,23 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "none" NA     NA    </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.906435938975242  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.290859810160866 bestIt: 1 CE: -0.290859810160866"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.403421989759174 bestIt: 2 CE: -0.403421989759174"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.403421989759174 bestIt: 2 CE: -0.246323024149321"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.61831222013601 bestIt: 4 CE: -0.61831222013601"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.714061243717643 bestIt: 5 CE: -0.714061243717643"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.714061243717643 bestIt: 5 CE: -0.710474537686795"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.714061243717643 bestIt: 5 CE: -0.711016986050585"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.760261518914824 bestIt: 8 CE: -0.760261518914825"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.773657432361873 bestIt: 9 CE: -0.773657432361873"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.773657432361873 bestIt: 9 CE: -0.748331691609879"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.773657432361873 bestIt: 9 CE: -0.556828694738611"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.773657432361873 bestIt: 9 CE: -0.737002482166318"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.773657432361873 bestIt: 9 CE: -0.745681861303669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.773657432361873 bestIt: 9 CE: -0.678051108040767"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.773657432361873 bestIt: 9 CE: -0.678051108040767"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.923787715699613  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.358282079739464 bestIt: 1 CE: -0.358282079739464"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.46883381649157 bestIt: 2 CE: -0.46883381649157"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.796791010129841 bestIt: 3 CE: -0.796791010129841"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.799360419634454 bestIt: 4 CE: -0.799360419634454"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.82885037093229 bestIt: 5 CE: -0.82885037093229"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.82885037093229 bestIt: 5 CE: -0.822009500853158"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.82885037093229 bestIt: 5 CE: -0.822009500853158"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.82885037093229 bestIt: 5 CE: -0.787504380595427"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.831370815904379 bestIt: 9 CE: -0.831370815904379"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.840370229846114 bestIt: 10 CE: -0.840370229846114"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.840370229846114 bestIt: 10 CE: -0.769701075265139"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.840370229846114 bestIt: 10 CE: -0.734862687330073"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.840370229846114 bestIt: 10 CE: -0.734862687330073"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.840370229846114 bestIt: 10 CE: -0.717707788312638"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.840370229846114 bestIt: 10 CE: -0.695611170634912"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.840370229846114 bestIt: 10 CE: -0.675723522545338"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -589,37 +705,15 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Grassmann" "10"        "10"       </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.329918425058685 bestIt: 1 CE: -0.329918425058685"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.474315379797992 bestIt: 2 CE: -0.474315379797992"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.474315379797992 bestIt: 2 CE: -0.399176010924602"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.474315379797992 bestIt: 2 CE: -0.399176010924602"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.619416813687332 bestIt: 5 CE: -0.619416813687332"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.619416813687332 bestIt: 5 CE: -0.616453883325404"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.621462364637727 bestIt: 7 CE: -0.621462364637727"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.62469978465902 bestIt: 8 CE: -0.62469978465902"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.629153227624862 bestIt: 9 CE: -0.629153227624863"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.630677320198369 bestIt: 10 CE: -0.630677320198369"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.630677320198369 bestIt: 10 CE: -0.630677320198369"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.630677320198369 bestIt: 10 CE: -0.53609637163968"</span></span>
-<span><span class="co">#&gt; [1] "improvement"</span></span>
-<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus      constraint final_energy</span></span>
-<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Grassmannx10x10     6.925345</span></span>
-<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
-<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
-<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
-<span><span class="co">#&gt; 1    positive    positive    0 0.3927177 0.3677094 0.331739</span></span>
-<span><span class="co">#&gt;             PC1         PC2</span></span>
-<span><span class="co">#&gt; m3.1 0.00000000 0.000000000</span></span>
-<span><span class="co">#&gt; m3.2 0.00000000 0.000000000</span></span>
-<span><span class="co">#&gt; m3.3 0.01284542 0.010598967</span></span>
-<span><span class="co">#&gt; m3.4 0.00000000 0.000000000</span></span>
-<span><span class="co">#&gt; m3.5 0.01315042 0.000000000</span></span>
-<span><span class="co">#&gt; m3.6 0.03140155 0.001728596</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.256180683310025  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.572332138279817 bestIt: 1 CE: -0.572332138279817"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.742869999695666 bestIt: 2 CE: -0.742869999695666"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.742869999695666 bestIt: 2 CE: -0.738929198216032"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -630,33 +724,23 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Grassmann" "1"         "1"        </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.176029404477176 bestIt: 1 CE: -0.176029404477176"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.368200793964173 bestIt: 2 CE: -0.368200793964173"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.68476332416445 bestIt: 3 CE: -0.68476332416445"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.68476332416445 bestIt: 3 CE: -0.683522844450474"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.780664290534964 bestIt: 5 CE: -0.780664290534964"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.807815910981264 bestIt: 6 CE: -0.807815910981265"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.807815910981264 bestIt: 6 CE: -0.804924006690699"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.807815910981264 bestIt: 6 CE: -0.806189419186545"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.807815910981264 bestIt: 6 CE: -0.806780644902708"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.807815910981264 bestIt: 6 CE: -0.760787277282712"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.807815910981264 bestIt: 6 CE: -0.760787277282712"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.807815910981264 bestIt: 6 CE: -0.701264255962248"</span></span>
-<span><span class="co">#&gt; [1] "improvement"</span></span>
-<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus    constraint final_energy</span></span>
-<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Grassmannx1x1     7.377936</span></span>
-<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
-<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
-<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
-<span><span class="co">#&gt; 1    positive    positive    0 0.3031829 0.4625027 0.3922365</span></span>
-<span><span class="co">#&gt;               PC1         PC2</span></span>
-<span><span class="co">#&gt; m3.1 0.0000000000 0.000000000</span></span>
-<span><span class="co">#&gt; m3.2 0.0000000000 0.001414768</span></span>
-<span><span class="co">#&gt; m3.3 0.0187707709 0.000000000</span></span>
-<span><span class="co">#&gt; m3.4 0.0000000000 0.000000000</span></span>
-<span><span class="co">#&gt; m3.5 0.0005030411 0.000000000</span></span>
-<span><span class="co">#&gt; m3.6 0.0228105704 0.003053251</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.857027012460654  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.568063748955966 bestIt: 1 CE: -0.568063748955966"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.6384098624039 bestIt: 2 CE: -0.6384098624039"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.821032892373937 bestIt: 3 CE: -0.821032892373937"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.853348011551356 bestIt: 4 CE: -0.853348011551356"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.853348011551356 bestIt: 4 CE: -0.853348011551356"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.853348011551356 bestIt: 4 CE: -0.8334722954351"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.853348011551356 bestIt: 4 CE: -0.827310232364803"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.853348011551356 bestIt: 4 CE: -0.826230051515903"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.853348011551356 bestIt: 4 CE: -0.784256680859058"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.859872695845605 bestIt: 10 CE: -0.859872695845605"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.859872695845605 bestIt: 10 CE: -0.859872695845605"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.859872695845605 bestIt: 10 CE: -0.859872695845605"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.859872695845605 bestIt: 10 CE: -0.857867514510308"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.859872695845605 bestIt: 10 CE: -0.857867514510308"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.859872695845605 bestIt: 10 CE: -0.857867514510308"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.859872695845605 bestIt: 10 CE: -0.857867514510308"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -667,19 +751,15 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Grassmann" "0.1"       "0.1"      </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.163190228447288 bestIt: 1 CE: -0.163190228447288"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.32819699878619 bestIt: 2 CE: -0.32819699878619"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.514753127980385 bestIt: 3 CE: -0.514753127980385"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.642240654552517 bestIt: 4 CE: -0.642240654552517"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.642240654552517 bestIt: 4 CE: -0.615402723301415"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.757789795353854 bestIt: 6 CE: -0.757789795353854"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.757789795353854 bestIt: 6 CE: -0.730865055380712"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.757789795353854 bestIt: 6 CE: -0.727137430254414"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.757789795353854 bestIt: 6 CE: -0.723160531602966"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.757789795353854 bestIt: 6 CE: -0.725038688792182"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.757789795353854 bestIt: 6 CE: -0.725038688792182"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.757789795353854 bestIt: 6 CE: -0.676414490928392"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.917111645375717  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.395328252193667 bestIt: 1 CE: -0.395328252193667"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.876505321910793 bestIt: 2 CE: -0.876505321910793"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.876505321910793 bestIt: 2 CE: -0.715775124305709"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.876505321910793 bestIt: 2 CE: -0.556572105988905"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.876505321910793 bestIt: 2 CE: -0.704977394581536"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.876505321910793 bestIt: 2 CE: -0.701747921610733"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.876505321910793 bestIt: 2 CE: -0.701644867438938"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.876505321910793 bestIt: 2 CE: -0.712268348974026"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -690,23 +770,32 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Stiefel" "10"      "10"     </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.142115739207886 bestIt: 1 CE: -0.142115739207886"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.300993587578251 bestIt: 2 CE: -0.300993587578251"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.55714393141338 bestIt: 3 CE: -0.55714393141338"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.55714393141338 bestIt: 3 CE: -0.553685064614056"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.561858068020136 bestIt: 5 CE: -0.561858068020136"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.561858068020136 bestIt: 5 CE: -0.450680780010327"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.561858068020136 bestIt: 5 CE: -0.481340626619073"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.561858068020136 bestIt: 5 CE: -0.481340626619073"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.571627928031415 bestIt: 9 CE: -0.571627928031415"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574641370457897"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.574641370457897 bestIt: 10 CE: -0.574211183098328"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.256180683310025  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.650640207873091 bestIt: 1 CE: -0.650640207873091"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.650640207873091 bestIt: 1 CE: -0.218388179246398"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.696319915034635 bestIt: 3 CE: -0.696319915034635"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.759893913629972 bestIt: 4 CE: -0.759893913629972"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.768262080301378 bestIt: 5 CE: -0.768262080301378"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.768262080301378 bestIt: 5 CE: -0.765977672674105"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.768262080301378 bestIt: 5 CE: -0.765336283833082"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.768262080301378 bestIt: 5 CE: -0.765336283833082"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.768262080301378 bestIt: 5 CE: -0.765336283833082"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.768262080301378 bestIt: 5 CE: -0.765336283833082"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.768262080301378 bestIt: 5 CE: -0.552849247389965"</span></span>
+<span><span class="co">#&gt; [1] "improvement"</span></span>
+<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus    constraint final_energy</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Stiefelx10x10     15.98724</span></span>
+<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
+<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
+<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    positive    0 0.7731677 0.4217462 0.4443339</span></span>
+<span><span class="co">#&gt;              PC1         PC2</span></span>
+<span><span class="co">#&gt; m3.1 0.000000000 0.001482357</span></span>
+<span><span class="co">#&gt; m3.2 0.003105033 0.000000000</span></span>
+<span><span class="co">#&gt; m3.3 0.000000000 0.010686503</span></span>
+<span><span class="co">#&gt; m3.4 0.000000000 0.000000000</span></span>
+<span><span class="co">#&gt; m3.5 0.000000000 0.023650730</span></span>
+<span><span class="co">#&gt; m3.6 0.016423998 0.013936366</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -717,16 +806,25 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Stiefel" "1"       "1"      </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.187296285268864 bestIt: 1 CE: -0.187296285268864"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.56234717677072 bestIt: 2 CE: -0.56234717677072"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.733994574185094 bestIt: 3 CE: -0.733994574185094"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.733994574185094 bestIt: 3 CE: -0.559253901656097"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.733994574185094 bestIt: 3 CE: -0.579149557077727"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.733994574185094 bestIt: 3 CE: -0.564865740927859"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.733994574185094 bestIt: 3 CE: -0.564865740927859"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.857027012460654  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.47653047609036 bestIt: 1 CE: -0.47653047609036"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.694771385142719 bestIt: 2 CE: -0.694771385142719"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.837662061497179 bestIt: 3 CE: -0.83766206149718"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.845114841797893 bestIt: 4 CE: -0.845114841797893"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.87451301199215 bestIt: 5 CE: -0.87451301199215"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.87451301199215 bestIt: 5 CE: -0.874234379955215"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.875228992424385 bestIt: 7 CE: -0.875228992424385"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.884763242068898 bestIt: 8 CE: -0.884763242068898"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.894700997850001 bestIt: 9 CE: -0.894700997850001"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.894700997850001 bestIt: 9 CE: -0.881229074835642"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.89960923703501 bestIt: 11 CE: -0.89960923703501"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.908692262274978 bestIt: 12 CE: -0.908692262274978"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.908692262274978 bestIt: 12 CE: -0.902799735588814"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.908692262274978 bestIt: 12 CE: -0.902799735588814"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.908692262274978 bestIt: 12 CE: -0.87759749925849"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.908692262274978 bestIt: 12 CE: -0.87759749925849"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 17 bestEv: -0.908692262274978 bestIt: 12 CE: -0.87759749925849"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 18 bestEv: -0.908692262274978 bestIt: 12 CE: -0.87759749925849"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -737,35 +835,23 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "Stiefel" "0.1"     "0.1"    </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.210702441192055 bestIt: 1 CE: -0.210702441192055"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.508351902342807 bestIt: 2 CE: -0.508351902342807"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.640776848942441 bestIt: 3 CE: -0.640776848942441"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.640776848942441 bestIt: 3 CE: -0.627341198732896"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.640776848942441 bestIt: 3 CE: -0.593442775856865"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.70152194207946 bestIt: 6 CE: -0.70152194207946"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.792655192451455 bestIt: 7 CE: -0.792655192451455"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.883071387258873 bestIt: 8 CE: -0.883071387258873"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839450063752722"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839450063752722"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.883071387258873 bestIt: 8 CE: -0.839632701774422"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.883071387258873 bestIt: 8 CE: -0.823867834703121"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.883071387258873 bestIt: 8 CE: -0.757634021248897"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.883071387258873 bestIt: 8 CE: -0.757634021248896"</span></span>
-<span><span class="co">#&gt; [1] "improvement"</span></span>
-<span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus      constraint final_energy</span></span>
-<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch Stiefelx0.1x0.1     7.771006</span></span>
-<span><span class="co">#&gt;   prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1</span></span>
-<span><span class="co">#&gt; 1      robust centerAndScale          np      0.5      0.5      0.5    positive</span></span>
-<span><span class="co">#&gt;   positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
-<span><span class="co">#&gt; 1    positive    positive    0 0.3594545 0.4678698 0.3418489</span></span>
-<span><span class="co">#&gt;      PC1         PC2</span></span>
-<span><span class="co">#&gt; m3.1   0 0.000000000</span></span>
-<span><span class="co">#&gt; m3.2   0 0.026943791</span></span>
-<span><span class="co">#&gt; m3.3   0 0.000000000</span></span>
-<span><span class="co">#&gt; m3.4   0 0.021864915</span></span>
-<span><span class="co">#&gt; m3.5   0 0.028110191</span></span>
-<span><span class="co">#&gt; m3.6   0 0.009915951</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.917111645375717  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.355967404820103 bestIt: 1 CE: -0.355967404820103"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.355967404820103 bestIt: 1 CE: -0.302103177973874"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.671490785475746 bestIt: 3 CE: -0.671490785475746"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.858188887620578 bestIt: 4 CE: -0.858188887620578"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.874754096348496 bestIt: 5 CE: -0.874754096348496"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.874754096348496 bestIt: 5 CE: -0.850267139384837"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.874754096348496 bestIt: 5 CE: -0.761710261441642"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.87961111056513 bestIt: 8 CE: -0.87961111056513"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.87961111056513 bestIt: 8 CE: -0.856383172165312"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.905545909098392 bestIt: 10 CE: -0.905545909098392"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.905545909098392 bestIt: 10 CE: -0.886125641764854"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.905545909098392 bestIt: 10 CE: -0.883007804056776"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.905545909098392 bestIt: 10 CE: -0.882883225209442"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.905545909098392 bestIt: 10 CE: -0.903855294741201"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 15 bestEv: -0.905545909098392 bestIt: 10 CE: -0.874918255105305"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 16 bestEv: -0.905545909098392 bestIt: 10 CE: -0.871591364713644"</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -776,32 +862,30 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "ortho" "10"    "10"   </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.43488533825841  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.257071973089098 bestIt: 1 CE: -0.257071973089098"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.827509671711352 bestIt: 2 CE: -0.827509671711352"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.827779334777335 bestIt: 3 CE: -0.827779334777335"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.827779334777335 bestIt: 3 CE: -0.825131705388262"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862884854311301"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.862884854311301 bestIt: 5 CE: -0.862505545641669"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.256180683310025  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.507312461403781 bestIt: 1 CE: -0.507312461403781"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.688154502294652 bestIt: 2 CE: -0.688154502294652"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.699671381310042 bestIt: 3 CE: -0.699671381310042"</span></span>
 <span><span class="co">#&gt; [1] "improvement"</span></span>
 <span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus  constraint final_energy prescaling1</span></span>
-<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch orthox10x10     10.65541      robust</span></span>
+<span><span class="co">#&gt; 1      2        cca   pca  0.99 lineSearch orthox10x10     19.52797      robust</span></span>
 <span><span class="co">#&gt;      prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1 positivity2</span></span>
 <span><span class="co">#&gt; 1 centerAndScale          np      0.5      0.5      0.5    positive    positive</span></span>
-<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
-<span><span class="co">#&gt; 1    positive    0 0.3623807 0.3481657 0.529715</span></span>
-<span><span class="co">#&gt;               PC1        PC2</span></span>
-<span><span class="co">#&gt; m3.1 0.0000000000 0.01217819</span></span>
-<span><span class="co">#&gt; m3.2 0.0000000000 0.02598445</span></span>
-<span><span class="co">#&gt; m3.3 0.0053883747 0.00000000</span></span>
-<span><span class="co">#&gt; m3.4 0.0000000000 0.02515964</span></span>
-<span><span class="co">#&gt; m3.5 0.0000000000 0.01379397</span></span>
-<span><span class="co">#&gt; m3.6 0.0002826166 0.00000000</span></span>
+<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1    positive    0 0.7414637 0.6217357 0.6284296</span></span>
+<span><span class="co">#&gt;              PC1         PC2</span></span>
+<span><span class="co">#&gt; m3.1 0.028115931 0.000000000</span></span>
+<span><span class="co">#&gt; m3.2 0.007094071 0.000000000</span></span>
+<span><span class="co">#&gt; m3.3 0.029487447 0.000000000</span></span>
+<span><span class="co">#&gt; m3.4 0.008334188 0.000000000</span></span>
+<span><span class="co">#&gt; m3.5 0.009841182 0.006295204</span></span>
+<span><span class="co">#&gt; m3.6 0.000000000 0.026495010</span></span>
 <span><span class="co">#&gt; [1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -812,21 +896,15 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "ortho" "1"     "1"    </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.859280878903559  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.258318281182729 bestIt: 1 CE: -0.258318281182729"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.680243713347421 bestIt: 2 CE: -0.680243713347421"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.681570447900545 bestIt: 7 CE: -0.681570447900545"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 12 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 13 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 14 bestEv: -0.761108233102043 bestIt: 8 CE: -0.761108233102043"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.857027012460654  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.640608661063987 bestIt: 1 CE: -0.640608661063987"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.811112716679046 bestIt: 2 CE: -0.811112716679046"</span></span>
 <span><span class="co">#&gt; i 10 ...[1] "robust"         "centerAndScale" "np"            </span></span>
 <span><span class="co">#&gt; [1] "cca"</span></span>
 <span><span class="co">#&gt; [1] "pca"</span></span>
@@ -837,37 +915,34 @@ output during the search process.</p>
 <span><span class="co">#&gt; [1] "lineSearch"</span></span>
 <span><span class="co">#&gt; [1] "ortho" "0.1"   "0.1"  </span></span>
 <span><span class="co">#&gt; [1] "     &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt; BUILD-V &lt;0&gt;    "</span></span>
-<span><span class="co">#&gt; [1] "initialDataTerm: -0.901720432968074  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.837867241314156 bestIt: 1 CE: -0.837867241314156"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.844798478200154 bestIt: 2 CE: -0.844798478200154"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.859306419899053 bestIt: 3 CE: -0.859306419899053"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.860204502560928 bestIt: 4 CE: -0.860204502560928"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.880406367797788 bestIt: 5 CE: -0.880406367797788"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.880406367797788 bestIt: 5 CE: -0.826785923473268"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.880406367797788 bestIt: 5 CE: -0.806095377446437"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.880406367797788 bestIt: 5 CE: -0.832867438923911"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 9 bestEv: -0.880406367797788 bestIt: 5 CE: -0.690659229540656"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 10 bestEv: -0.880406367797788 bestIt: 5 CE: -0.707771320105571"</span></span>
-<span><span class="co">#&gt; [1] "Iteration: 11 bestEv: -0.880406367797788 bestIt: 5 CE: -0.707771320105571"</span></span>
+<span><span class="co">#&gt; [1] "initialDataTerm: -0.917111645375717  &lt;o&gt; mixer: pca  &lt;o&gt; E:  cca"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 1 bestEv: -0.493782414451495 bestIt: 1 CE: -0.493782414451495"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 2 bestEv: -0.885838987144042 bestIt: 2 CE: -0.885838987144042"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 3 bestEv: -0.885838987144042 bestIt: 2 CE: -0.881313228930842"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 4 bestEv: -0.885838987144042 bestIt: 2 CE: -0.881313228930842"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 5 bestEv: -0.885838987144042 bestIt: 2 CE: -0.84565784966314"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 6 bestEv: -0.885838987144042 bestIt: 2 CE: -0.834104933282779"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 7 bestEv: -0.885838987144042 bestIt: 2 CE: -0.817884633342666"</span></span>
+<span><span class="co">#&gt; [1] "Iteration: 8 bestEv: -0.885838987144042 bestIt: 2 CE: -0.825852104773952"</span></span>
 <span><span class="co">#&gt;   nsimlr objectiver mixer ebber    optimus  constraint final_energy prescaling1</span></span>
-<span><span class="co">#&gt; 8      2        cca   pca  0.99 lineSearch orthox10x10     10.65541      robust</span></span>
+<span><span class="co">#&gt; 8      2        cca   pca  0.99 lineSearch orthox10x10     19.52797      robust</span></span>
 <span><span class="co">#&gt;      prescaling2 prescaling3 sparval1 sparval2 sparval3 positivity1 positivity2</span></span>
 <span><span class="co">#&gt; 8 centerAndScale          np      0.5      0.5      0.5    positive    positive</span></span>
-<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3    m2_m3</span></span>
-<span><span class="co">#&gt; 8    positive    0 0.3623807 0.3481657 0.529715</span></span>
+<span><span class="co">#&gt;   positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 8    positive    0 0.7414637 0.6217357 0.6284296</span></span>
 <span><span class="co">#&gt; el finito</span></span>
 <span><span class="va">simlrXs</span><span class="op">$</span><span class="va">paramsearch</span></span>
 <span><span class="co">#&gt;    nsimlr objectiver mixer ebber    optimus        constraint final_energy</span></span>
-<span><span class="co">#&gt; 1       2        cca   pca  0.99 lineSearch              none     6.460155</span></span>
-<span><span class="co">#&gt; 2       2        cca   pca  0.99 lineSearch   Grassmannx10x10     6.925345</span></span>
-<span><span class="co">#&gt; 3       2        cca   pca  0.99 lineSearch     Grassmannx1x1     7.377936</span></span>
-<span><span class="co">#&gt; 4       2        cca   pca  0.99 lineSearch Grassmannx0.1x0.1     6.416303</span></span>
-<span><span class="co">#&gt; 5       2        cca   pca  0.99 lineSearch     Stiefelx10x10     7.048745</span></span>
-<span><span class="co">#&gt; 6       2        cca   pca  0.99 lineSearch       Stiefelx1x1     2.909501</span></span>
-<span><span class="co">#&gt; 7       2        cca   pca  0.99 lineSearch   Stiefelx0.1x0.1     7.771006</span></span>
-<span><span class="co">#&gt; 8       2        cca   pca  0.99 lineSearch       orthox10x10    10.655414</span></span>
-<span><span class="co">#&gt; 9       2        cca   pca  0.99 lineSearch         orthox1x1     9.317237</span></span>
-<span><span class="co">#&gt; 10      2        cca   pca  0.99 lineSearch     orthox0.1x0.1     8.310747</span></span>
+<span><span class="co">#&gt; 1       2        cca   pca  0.99 lineSearch              none     15.12304</span></span>
+<span><span class="co">#&gt; 2       2        cca   pca  0.99 lineSearch   Grassmannx10x10     14.68560</span></span>
+<span><span class="co">#&gt; 3       2        cca   pca  0.99 lineSearch     Grassmannx1x1     14.71550</span></span>
+<span><span class="co">#&gt; 4       2        cca   pca  0.99 lineSearch Grassmannx0.1x0.1     15.11430</span></span>
+<span><span class="co">#&gt; 5       2        cca   pca  0.99 lineSearch     Stiefelx10x10     15.98724</span></span>
+<span><span class="co">#&gt; 6       2        cca   pca  0.99 lineSearch       Stiefelx1x1     15.59972</span></span>
+<span><span class="co">#&gt; 7       2        cca   pca  0.99 lineSearch   Stiefelx0.1x0.1     14.93442</span></span>
+<span><span class="co">#&gt; 8       2        cca   pca  0.99 lineSearch       orthox10x10     19.52797</span></span>
+<span><span class="co">#&gt; 9       2        cca   pca  0.99 lineSearch         orthox1x1     18.50992</span></span>
+<span><span class="co">#&gt; 10      2        cca   pca  0.99 lineSearch     orthox0.1x0.1     14.78189</span></span>
 <span><span class="co">#&gt;    prescaling1    prescaling2 prescaling3 sparval1 sparval2 sparval3</span></span>
 <span><span class="co">#&gt; 1       robust centerAndScale          np      0.5      0.5      0.5</span></span>
 <span><span class="co">#&gt; 2       robust centerAndScale          np      0.5      0.5      0.5</span></span>
@@ -879,17 +954,17 @@ output during the search process.</p>
 <span><span class="co">#&gt; 8       robust centerAndScale          np      0.5      0.5      0.5</span></span>
 <span><span class="co">#&gt; 9       robust centerAndScale          np      0.5      0.5      0.5</span></span>
 <span><span class="co">#&gt; 10      robust centerAndScale          np      0.5      0.5      0.5</span></span>
-<span><span class="co">#&gt;    positivity1 positivity2 positivity3 perm     m1_m2      m1_m3     m2_m3</span></span>
-<span><span class="co">#&gt; 1     positive    positive    positive    0 0.4230939 0.36117761 0.3744664</span></span>
-<span><span class="co">#&gt; 2     positive    positive    positive    0 0.3927177 0.36770937 0.3317390</span></span>
-<span><span class="co">#&gt; 3     positive    positive    positive    0 0.3031829 0.46250275 0.3922365</span></span>
-<span><span class="co">#&gt; 4     positive    positive    positive    0 0.3188213 0.40880961 0.4064425</span></span>
-<span><span class="co">#&gt; 5     positive    positive    positive    0 0.4703953 0.37726762 0.3912921</span></span>
-<span><span class="co">#&gt; 6     positive    positive    positive    0 0.2268682 0.07121449 0.3222327</span></span>
-<span><span class="co">#&gt; 7     positive    positive    positive    0 0.3594545 0.46786984 0.3418489</span></span>
-<span><span class="co">#&gt; 8     positive    positive    positive    0 0.3623807 0.34816573 0.5297150</span></span>
-<span><span class="co">#&gt; 9     positive    positive    positive    0 0.4289690 0.32612278 0.3260058</span></span>
-<span><span class="co">#&gt; 10    positive    positive    positive    0 0.3959648 0.51833933 0.3609527</span></span></code></pre></div>
+<span><span class="co">#&gt;    positivity1 positivity2 positivity3 perm     m1_m2     m1_m3     m2_m3</span></span>
+<span><span class="co">#&gt; 1     positive    positive    positive    0 0.3978730 0.4029476 0.4574523</span></span>
+<span><span class="co">#&gt; 2     positive    positive    positive    0 0.5983526 0.5704775 0.4275200</span></span>
+<span><span class="co">#&gt; 3     positive    positive    positive    0 0.4576600 0.4044627 0.4753633</span></span>
+<span><span class="co">#&gt; 4     positive    positive    positive    0 0.4413322 0.4500521 0.4091796</span></span>
+<span><span class="co">#&gt; 5     positive    positive    positive    0 0.7731677 0.4217462 0.4443339</span></span>
+<span><span class="co">#&gt; 6     positive    positive    positive    0 0.4954192 0.4415130 0.4643743</span></span>
+<span><span class="co">#&gt; 7     positive    positive    positive    0 0.4782384 0.4838122 0.4320946</span></span>
+<span><span class="co">#&gt; 8     positive    positive    positive    0 0.7414637 0.6217357 0.6284296</span></span>
+<span><span class="co">#&gt; 9     positive    positive    positive    0 0.6147825 0.3888984 0.4125018</span></span>
+<span><span class="co">#&gt; 10    positive    positive    positive    0 0.4978481 0.3309805 0.2496383</span></span></code></pre></div>
 <p>Finally, <code>simlrXs$paramsearch</code> retrieves the results of
 the parameter search. This will show the performance of different
 parameter combinations, helping to identify the optimal settings for the

@@ -88,7 +88,7 @@ for images in R</h1>
                         <h4 data-toc-skip class="author">Brian B.
 Avants</h4>
             
-            <h4 data-toc-skip class="date">2024-08-11</h4>
+            <h4 data-toc-skip class="date">2024-08-12</h4>
       
       
       <div class="hidden name"><code>ANTsR.Rmd</code></div>
@@ -296,7 +296,7 @@ type conversions.</p>
 <code class="sourceCode R"><span><span class="co"># if using SUBSET using an antsImage, you must be explicit</span></span>
 <span><span class="va">sub</span> <span class="op">=</span> <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">img</span> <span class="op">&gt;=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span> <span class="va">gaussimg</span><span class="op">[</span> <span class="va">sub</span>  <span class="op">]</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] -0.1062275</span></span></code></pre>
+<pre><code><span><span class="co">## [1] -0.1434293</span></span></code></pre>
 <p><strong>Convert a 4D image to a matrix</strong></p>
 <p>Four dimensional images are generated and used in the same way. One
 can easily transform from 4D image to matrix and back.</p>
@@ -309,7 +309,7 @@ can easily transform from 4D image to matrix and back.</p>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="va">avg3d</span> <span class="op">&lt;</span> <span class="fl">0.25</span></span>
 <span><span class="va">gmat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/timeseries2matrix.html">timeseries2matrix</a></span><span class="op">(</span> <span class="va">gaussimg</span>, <span class="va">mask</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">gmat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 10 98</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 10 95</span></span></code></pre>
 <p>If one has a mask, then one can use <code>makeImage</code> to
 generate a new image from a scalar or vector.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
@@ -335,7 +335,7 @@ data-driven mask.</p>
 <span>  lowThresh<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">ilist</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, cleanup<span class="op">=</span><span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="va">mat</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/imageListToMatrix.html">imageListToMatrix</a></span><span class="op">(</span> <span class="va">ilist</span>, <span class="va">mask</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 100 312</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 100 323</span></span></code></pre>
 <p>Once we have a matrix representation of our population, we might run
 a quick voxel-wise regression within the mask. Then we look at some
 summary statistics.</p>
@@ -355,7 +355,7 @@ summary statistics.</p>
 <pre><code><span><span class="co">## [1] "age"     "genderM"</span></span></code></pre>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"age"</span>,<span class="fu"><a href="../reference/antsImageSummary.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">$</span><span class="va">beta.pval</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] "age 1.29068155122352e-06"</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "age 2.33692460060295e-05"</span></span></code></pre>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"gen"</span>,<span class="fu"><a href="../reference/antsImageSummary.html">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html" class="external-link">p.adjust</a></span><span class="op">(</span><span class="va">mdli</span><span class="op">$</span><span class="va">beta.pval</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "gen 1"</span></span></code></pre>
