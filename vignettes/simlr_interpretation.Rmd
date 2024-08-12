@@ -190,11 +190,13 @@ popdf = data.frame( age = outcome, cog=outcome1, mat1, mat2, mat3 )
 temp2=apply_simlr_matrices( popdf, simres2, 
     center=TRUE, scale=TRUE, absolute_value=rep(TRUE,length(matlist)) )
 simnames=temp2[[2]]
-zz=exploratory_visualization( antsrimpute(temp2[[1]][, temp2[[2]]]) )
+zz=exploratory_visualization( temp2[[1]][, temp2[[2]]], dotsne=FALSE )
 print( zz$plot )
 ```
 
 Now we can icorporate the "modalities" in order to predict the simulated outcome matrix.
+Note that contributions exist from each modality in the regression (in some cases).  This 
+is one of the advantages of SiMLR: it provides systematic guidance for building these types of integrative models.
 
 ```{r dataintegration2,fig.width=12,fig.height=6.5}
 # multi-view regression
