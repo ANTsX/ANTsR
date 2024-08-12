@@ -72,6 +72,7 @@ Suggests:
     sna,
     testthat,
     tools,
+    tsne,
     viridis,
     xgboost,
     FNN
