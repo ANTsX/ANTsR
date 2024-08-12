@@ -4928,7 +4928,6 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' @export
 #'
 #' @importFrom dplyr filter
-#' @importFrom glasso glasso
 #' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
