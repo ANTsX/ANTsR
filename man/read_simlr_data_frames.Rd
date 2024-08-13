@@ -4,12 +4,14 @@
 \alias{read_simlr_data_frames}
 \title{Read a list of data frames from disk with specific naming convention}
 \usage{
-read_simlr_data_frames(file_prefix, data_names)
+read_simlr_data_frames(file_prefix, data_names, verbose = FALSE)
 }
 \arguments{
 \item{file_prefix}{A character string used as the prefix for the filenames.}
 
 \item{data_names}{A character vector of names for the data frames.}
+
+\item{verbose}{boolean}
 }
 \value{
 A list of data frames read from disk with the column named `X` set as row names.

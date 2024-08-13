@@ -5481,7 +5481,7 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
   objectiver='cca';mixer = 'pca'
-  if ( energy == 'reg') {
+  if ( energy %in% c('reg','regression') ) {
     objectiver='regression';mixer = 'ica'
   }
   if ( energy == 'lrr') {
@@ -5624,6 +5624,7 @@ write_simlr_data_frames <- function(data_list, file_prefix) {
 #'
 #' @param file_prefix A character string used as the prefix for the filenames.
 #' @param data_names A character vector of names for the data frames.
+#' @param verbose boolean
 #'
 #' @return A list of data frames read from disk with the column named `X` set as row names.
 #' @examples
@@ -5632,7 +5633,7 @@ write_simlr_data_frames <- function(data_list, file_prefix) {
 #' # dim(data_list[[1]])
 #' # dim(data_list[[2]])
 #' @export
-read_simlr_data_frames <- function(file_prefix, data_names) {
+read_simlr_data_frames <- function(file_prefix, data_names, verbose=FALSE ) {
   data_list <- list()
   
   for (name in data_names) {
@@ -5651,7 +5652,7 @@ read_simlr_data_frames <- function(file_prefix, data_names) {
       
       # Store the data frame in the list
       data_list[[name]] <- df
-    }
+    } else if ( verbose ) print(paste("missing",file_name))
   }
   
   return(data_list)
