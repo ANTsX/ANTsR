@@ -345,8 +345,8 @@ The `regularizeSimlr` function is used to apply regularization to the input matr
 ```{r grassmann1}
 regs = regularizeSimlr(matlist, fraction=0.05, 
   sigma=rep(1.5,length(matlist)))
-plot( regs[[1]] )
-plot( regs[[2]] )
+plot( image( regs[[1]] ) )
+plot( image( regs[[2]] ) )
 ```
 
 The `simlr.search` function performs the grid search over the parameter space defined in `simparms`. It takes the matrices matlist and regs as input. The `nperms` specifies the number of permutations to evaluate for robustness. The `verbose` parameter controls the level of detail in the output during the search process.

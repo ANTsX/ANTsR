@@ -5238,7 +5238,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
   if (covariate == "np") {
     temp = data.matrix(mats[[x]])
     np = prod( dim( temp ) )
-    return(  temp * 1.0/float(np ))
+    return( temp * 1.0/( np ) )
     }
   if (covariate == "mean") {
     mymean <- rowMeans(data.matrix(mats[[x]]))
