@@ -182,7 +182,7 @@ this will force the function to return a composite transformation filename.</p><
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fixed</span>, moving <span class="op">=</span> <span class="va">moving</span>,</span></span>
 <span class="r-in"><span>  typeofTransform <span class="op">=</span> <span class="st">"SyN"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, printArgs <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> antsRegistration -d 2 -r [0x600003786280,0x600003785c30,1] -m mattes[0x600003786280,0x600003785c30,1,32,regular,0.2] -t Affine[0.25] -c 2100x1200x1200x0 -s 3x2x1x0 -f 4x2x2x1 -x [NA,NA] -m mattes[0x600003786280,0x600003785c30,1,32] -t SyN[0.2,3,0] -c [ 40x20x0 ,1e-7,8] -s 2x1x0 -f 4x2x1 -u 0 -z 1 -o [/tmp//Rtmp4QuBed/filea312405fe04f,0x600003785ed0,0x600003785fc0] -x [NA,NA] --float 1 --random-seed 1 --write-composite-transform 0 -v 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> antsRegistration -d 2 -r [0x600003ae0750,0x600003ae08e0,1] -m mattes[0x600003ae0750,0x600003ae08e0,1,32,regular,0.2] -t Affine[0.25] -c 2100x1200x1200x0 -s 3x2x1x0 -f 4x2x2x1 -x [NA,NA] -m mattes[0x600003ae0750,0x600003ae08e0,1,32] -t SyN[0.2,3,0] -c [ 40x20x0 ,1e-7,8] -s 2x1x0 -f 4x2x1 -u 0 -z 1 -o [/tmp//Rtmps1J7k6/filebd191b5f5d9a,0x600003ae02c0,0x600003ae0470] -x [NA,NA] --float 1 --random-seed 1 --write-composite-transform 0 -v 1 </span>
 <span class="r-in"><span><span class="va">mywarpedimage</span> <span class="op">&lt;-</span> <span class="fu">antsApplyTransforms</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fixed</span>, moving <span class="op">=</span> <span class="va">moving</span>,</span></span>
 <span class="r-in"><span>  transformlist <span class="op">=</span> <span class="va">mytx</span><span class="op">$</span><span class="va">fwdtransforms</span></span></span>
@@ -203,15 +203,15 @@ this will force the function to return a composite transformation filename.</p><
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "-d"                                                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2] "2"                                                      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "-i"                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "&lt;pointer: 0x600003785ef0&gt;"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4] "&lt;pointer: 0x600003ae03c0&gt;"                              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [5] "-o"                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "&lt;pointer: 0x6000037e0190&gt;"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "&lt;pointer: 0x600003ac8320&gt;"                              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "-r"                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] "&lt;pointer: 0x600003785fb0&gt;"                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] "&lt;pointer: 0x600003af7b40&gt;"                              </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9] "-n"                                                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10] "linear"                                                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "-t"                                                     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12] "[/tmp//Rtmp4QuBed/filea312405fe04f0GenericAffine.mat,1]"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12] "[/tmp//Rtmps1J7k6/filebd191b5f5d9a0GenericAffine.mat,1]"</span>
 <span class="r-in"><span><span class="va">cfile</span> <span class="op">&lt;-</span> <span class="fu">antsApplyTransforms</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fixed</span>, moving <span class="op">=</span> <span class="va">moving</span>,</span></span>
 <span class="r-in"><span>  transformlist <span class="op">=</span> <span class="va">mytx</span><span class="op">$</span><span class="va">fwdtransforms</span>,</span></span>

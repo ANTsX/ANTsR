@@ -5200,7 +5200,7 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
 #' @export
 antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna, n.comp, opt = NULL) {
   covariate_options <- c(
-    "whiten", "lowrank", "robust", "center", "rank", "scale", "mean",
+    "whiten", "lowrank", "robust", "center", "rank", "scale", "mean", "centerAndScale", "np",
     "formula such as T1Hier_resnetGrade + snr + EVR + psnr"
   )
   
@@ -5232,6 +5232,14 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
   if (covariate == "scale") {
     return(scale(data.matrix(mats[[x]]), center = FALSE, scale = TRUE))
   }
+  if (covariate == "centerAndScale") {
+    return(scale(data.matrix(mats[[x]]), center = TRUE, scale = TRUE))
+    }
+  if (covariate == "np") {
+    temp = data.matrix(mats[[x]])
+    np = prod( dim( temp ) )
+    return(  temp * 1.0/float(np ))
+    }
   if (covariate == "mean") {
     mymean <- rowMeans(data.matrix(mats[[x]]))
     covariate2 <- "mymean"

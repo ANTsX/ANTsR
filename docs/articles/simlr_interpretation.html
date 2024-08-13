@@ -102,23 +102,15 @@
 <p>Similarity-driven multi-view linear reconstruction (SiMLR) is an
 algorithm that exploits inter-modality relationships to transform large
 scientific datasets into a smaller joint space. The link between the
-original data <span class="math inline">\(X_i\)</span> and the reduced
-embedding space is a sparse set of features <span class="math inline">\(v_i\)</span>. Standard statistical tools may then
-be applied on the embeddings <span class="math inline">\(s_i=X_i
-v_i\)</span>.</p>
+original data <span class="math inline">\(X_i\)</span> (<span class="math inline">\(n \times p\)</span>) and the reduced embedding
+space is a sparse set of features <span class="math inline">\(v_i\)</span> ( <span class="math inline">\(p
+\times k\)</span> ). Standard statistical tools may then be applied on
+the embeddings <span class="math inline">\(s_i=X_i v_i\)</span>.</p>
 <p>SiMLR may be used in a variety of other ways. We will cover a basic
 example and follow with different use cases. These examples are perhaps
 less involved than those given in the <a href="https://www.nature.com/articles/s43588-021-00029-8" class="external-link">original
 publication’s</a> cloud computing <a href="https://doi.org/10.24433/CO.3087836.v2" class="external-link">examples</a> but
 illustrate new functionality.</p>
-</div>
-<div class="section level3">
-<h3 id="default-simlr-application">Default SiMLR application<a class="anchor" aria-label="anchor" href="#default-simlr-application"></a>
-</h3>
-<p>Here’s an expanded and more didactic section for the vignette that
-introduces the code example, walks through the steps, and includes
-visualization examples:</p>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="example-applying-simlr-to-simulated-multi-view-data">Example: Applying SiMLR to Simulated Multi-View Data<a class="anchor" aria-label="anchor" href="#example-applying-simlr-to-simulated-multi-view-data"></a>
@@ -591,34 +583,35 @@ compare to the original values.</p>
 <h3 id="evaluating-machine-learning-objective-functions">Evaluating Machine Learning Objective Functions<a class="anchor" aria-label="anchor" href="#evaluating-machine-learning-objective-functions"></a>
 </h3>
 <p>This section of the tutorial vignette provides an example of how to
-set up and run a parameter search using the simlr.search function for
-the Similarity-driven multi-view linear reconstruction (SiMLR)
-algorithm. Here, <code>csearch</code> creates a list of constraint
-options that include “none” and different options for enforcing
-orthogonality <em>in the feature space</em>. This list will be used to
-explore different constraint options during the parameter search.</p>
+set up and run a parameter search using the simlr.search function. Here,
+<code>csearch</code> contains a list of constraint options that include
+“none” and different options for enforcing orthogonality <em>in the
+feature space</em>. This list will be used to explore different
+constraint options during the parameter search.</p>
 <p>In this step, the simlr.parameters function is called to create a
-parameter list (simparms) that will control the grid search. Each
-parameter category (e.g., nsimlr_options, prescaling_options, etc.) is
-provided with options as a list. These parameters specify the settings
-and constraints that will be explored during the optimization
-process.</p>
+parameter list (<code>simparms</code>) that will control the grid
+search. Each parameter category (e.g., <code>nsimlr_options</code>,
+<code>prescaling_options</code>, etc.) is provided with options as a
+list. These parameters specify the settings and constraints that will be
+explored during the optimization process.</p>
 <ul>
 <li><p><code>nsimlr_options</code> : The number of latent factors to
 consider.</p></li>
 <li><p><code>prescaling_options</code> : Methods for data
 scaling/preprocessing (robust, whiten, np).</p></li>
-<li><p><code>objectiver_options</code> : The objective function used
-(regression).</p></li>
-<li><p><code>mixer_options</code> : The mixing technique (ica).</p></li>
+<li><p><code>objectiver_options</code> : The objective function used (eg
+regression or cca).</p></li>
+<li><p><code>mixer_options</code> : The mixing technique (ica or
+pca).</p></li>
 <li><p><code>sparval_options</code> : Sparseness settings.</p></li>
-<li><p><code>expBeta_options</code> : Exponential beta values.</p></li>
+<li><p><code>expBeta_options</code> : Exponential smoothing parameter
+beta values. e.g. 0.0, 0.9, 0.99, 0.999.</p></li>
 <li><p><code>positivities_options</code> : Positivity
 constraints.</p></li>
 <li><p><code>optimus_options</code> : The optimization strategy
-(lineSearch).</p></li>
-<li><p><code>constraint_options</code> : Constraints to apply, taken
-from csearch.</p></li>
+(lineSearch, mixed, greedy).</p></li>
+<li><p><code>constraint_options</code> : Feature space orthogonality
+constraints to apply.</p></li>
 <li><p><code>search_type</code> : The type of search to perform (full
 indicates a full grid search).</p></li>
 <li><p><code>num_samples</code> : The number of samples to evaluate
@@ -653,14 +646,19 @@ prevent overfitting by penalizing complexity. The fraction and sigma
 parameters control the extent and type of regularization.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regs</span> <span class="op">=</span> <span class="fu"><a href="../reference/regularizeSimlr.html">regularizeSimlr</a></span><span class="op">(</span><span class="va">matlist</span>, fraction<span class="op">=</span><span class="fl">0.05</span>, </span>
-<span>  sigma<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1.5</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>  sigma<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1.5</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">matlist</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">regs</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/grassmann1-1.png" width="700"></p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">regs</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="simlr_interpretation_files/figure-html/grassmann1-2.png" width="700"></p>
 <p>The <code>simlr.search</code> function performs the grid search over
 the parameter space defined in <code>simparms</code>. It takes the
 matrices matlist and regs as input. The <code>nperms</code> specifies
 the number of permutations to evaluate for robustness. The
 <code>verbose</code> parameter controls the level of detail in the
 output during the search process.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">simlrXs</span><span class="op">=</span><span class="fu"><a href="../reference/simlr.search.html">simlr.search</a></span><span class="op">(</span></span>
 <span>        <span class="va">matlist</span>,</span>
 <span>        regs<span class="op">=</span><span class="va">regs</span>,</span>
@@ -969,7 +967,8 @@ output during the search process.</p>
 the parameter search. This will show the performance of different
 parameter combinations, helping to identify the optimal settings for the
 SiMLR algorithm. The “best” result here will have the highest value for
-<code>final_energy</code>.</p>
+<code>final_energy</code> and its parameters are stored in the
+<code>parameters</code> slot.</p>
 <p>This section of the vignette demonstrates how to set up a
 comprehensive parameter search for the SiMLR algorithm. It shows how to
 create custom constraints, define a parameter grid, regularize the
