@@ -3431,8 +3431,9 @@ simlr <- function(
     }
     if ( constraint[1] %in% c('ortho','Stiefel','Grassmann') ) {
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
-      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
+      if ( is.na( last_energy )) last_energy=0.0
 #        print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
+      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
         myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
       }
       } else myorthEnergy = 0.0
@@ -3446,6 +3447,8 @@ simlr <- function(
         print(dim(avgU))
         print(dim(voxmats[[whichModality]]))
       }
+#      secondterm = sum(abs(diag( t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ))))
+#      print( paste( "myorthEnergy", myorthEnergy, 'mynorm', mynorm, 'secondterm', secondterm ))
       return( myorthEnergy + mynorm *
         sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
       # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
@@ -3469,7 +3472,11 @@ simlr <- function(
     }
 
     prediction <- avgU %*% t(myenergysearchv)
+#    print( paste("Norm(avgU)",norm(avgU,'F')))
+#    print( paste("Norm(myenergysearchv)",norm(myenergysearchv,'F')))
     prediction <- prediction - (colMeans(prediction) - colMeans(voxmats[[whichModality]]))
+#    print( paste( "norm(prediction)", norm(prediction,'F'), 
+#      "norm(voxmats[[whichModality]])", norm(voxmats[[whichModality]],'F')))
     if (!normalized) energy <- norm(prediction - voxmats[[whichModality]], "F")
     if (normalized) energy <- norm(prediction / norm(prediction, "F") - voxmats[[whichModality]] / norm(voxmats[[whichModality]], "F"), "F")
     if ( verbose )
@@ -3676,6 +3683,8 @@ simlr <- function(
         v_hat <- v[[i]] / (1 - beta_2^myit)
       }
 
+      regnorm = norm(temperv,'F')
+      if ( is.nan( regnorm ) ) temperv[] = 0.0
       if (expBeta > 0) {
         if (myit == 1) lastG[[i]] <- 0
         temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
@@ -3690,6 +3699,10 @@ simlr <- function(
       }
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
+#        if ( is.nan( norm(initialUMatrix[[i]],'F') ) ) {
+#          print("initialUMatrix[[i]]")
+#          derka
+#        }
         temp <- optimize(getSyME2, # computes the energy
           interval = lineSearchRange,
           tol = lineSearchTolerance,
@@ -3739,6 +3752,10 @@ simlr <- function(
     if (TRUE) {
       for (jj in 1:nModalities) {
         initialUMatrix[[jj]] <- scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn)
+#        if ( is.nan( norm( initialUMatrix[[jj]], 'F') ) ) {
+#          initialUMatrix[[jj]] <- antsrimpute( initialUMatrix[[jj]] )
+#          print( paste( "IMPUTED", norm( initialUMatrix[[jj]], 'F') ) )
+#        }
       }
       temp <- simlrU(initialUMatrix, mixAlg, myw,
         orthogonalize = orthogonalize,
@@ -3746,7 +3763,7 @@ simlr <- function(
       )
       for (jj in 1:nModalities) {
         initialUMatrix[[jj]] <-
-          localGS(temp[[jj]], orthogonalize = orthogonalize)
+            localGS(temp[[jj]], orthogonalize = orthogonalize)
         # below exp avg for u updates --- not tested
         #        initialUMatrix[[jj]] = initialUMatrix[[jj]] * 0.9 +
         #            localGS( temp[[jj]], orthogonalize = orthogonalize ) * 0.1
@@ -3852,7 +3869,13 @@ simlrU <- function(
   # some gram schmidt code
   projectionsU <- projections
   for (kk in 1:length(projections)) {
-    projectionsU[[kk]] <- projectionsU[[kk]] / norm(projectionsU[[kk]], "F")
+    mynorm = norm(projectionsU[[kk]], "F")
+    if ( is.nan( mynorm ) ) {
+      projectionsU[[kk]]=antsrimpute(projectionsU[[kk]])
+      mynorm = norm(projectionsU[[kk]], "F")
+      message(paste("Warning NaN in simlrU",kk,mynorm))
+    }
+    projectionsU[[kk]] <- projectionsU[[kk]] / mynorm
   }
   if (!is.null(connectors)) {
     if (length(connectors) != length(projections)) {
@@ -3921,11 +3944,22 @@ simlrU <- function(
         method = "C", w.init = initialW,
         n.comp = nc
       )$S)
+      if ( is.nan( norm(basis,"F"))) {
+        message(paste("fastICA produced NaN - svd instead"))
+        basis <- (svd(avgU, nu = nc, nv = 0)$u)
+      }
     } else if (mixAlg == "ica" & missing(initialW)) {
       basis <- (fastICA::fastICA(avgU, method = "C", n.comp = nc)$S)
     } else {
       basis <- (svd(avgU, nu = nc, nv = 0)$u)
     }
+    # print(paste("Basis norm",norm(basis,'F'),'avgUnorm',norm(avgU,'F')))
+    # print(paste("Basis norm",paste(dim(basis),collapse='x'),'avgUnorm',paste(dim(avgU),collapse='x')))
+    # if ( is.nan(norm(basis,'F') ) ) {
+    #  write.csv( avgU, '/tmp/temp.csv',row.names=FALSE )
+    #  write.csv( basis, '/tmp/temp2.csv',row.names=FALSE )
+    #  derka
+    # }
     if (!orthogonalize) {
       return(basis)
     }
@@ -5051,6 +5085,17 @@ return( xcl )
 #' 
 #' @export
 shorten_pymm_names <-function(x){
+
+  shorten_nm_names <- function(voinames) {    
+    voinames <- gsub("nm2dmt.nm.", "nm.", voinames, fixed = TRUE)
+    voinames <- gsub(".avg.", ".iavg.", voinames, fixed = TRUE)
+    voinames <- gsub("intmean", "iavg", voinames)
+    voinames <- gsub("intsum", "isum", voinames)
+    voinames <- gsub("volume", "vol", voinames)
+    voinames <- gsub("substantianigra", "sn", voinames)    
+    return(voinames)
+  }
+
     xx=tolower(x)
     xx=gsub("_",".",xx)
     xx=gsub("..",'.',xx,fixed=TRUE)
@@ -5102,6 +5147,7 @@ shorten_pymm_names <-function(x){
     xx=gsub("fcnxpro129","p2",xx,fixed=TRUE)
     xx=gsub("fcnxpro134","p3",xx,fixed=TRUE)
     xx=gsub("fcnxpro122","p1",xx,fixed=TRUE)
+    xx=shorten_nm_names(xx)
 #    for ( x in 1:length(xx) ) {
 #      xx[x]=substr(xx[x],0,40)
 #    }
@@ -5264,6 +5310,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param connect_cog Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.
 #' @param energy The type of energy model to use for similarity analysis. Defaults to 'reg'.
 #' @param nsimlr Number of components.
+#' @param constraint orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann
 #' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
 #' @param myseed Seed for random number generation to ensure reproducibility. Defaults to 3.
 #' @param doAsym integer 0 for FALSE, 1 for TRUE and 2 for separate matrices for asymm variables.
@@ -5281,10 +5328,11 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @examples
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
-antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  energy=c('cca','reg','lrr'), nsimlr=5, covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE, 
+antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  energy=c('cca','reg','lrr'), nsimlr, constraint, covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
 resnetGradeThresh=1.02, doperm=FALSE, 
 exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALSE ) 
 {
+  if ( missing( nsimlr ) ) nsimlr = 5
   safegrep <- function(pattern, x, ...) {
     result <- grep(pattern, x, ...)
     if (length(result) == 0) {
@@ -5483,6 +5531,11 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
   objectiver='cca';mixer = 'pca'
   if ( energy %in% c('reg','regression') ) {
     objectiver='regression';mixer = 'ica'
+    if ( missing( constraint ) )
+      constraint='orthox0.1x0.1'
+  } else {
+    if ( missing( constraint ) )
+      constraint='Grassmannx1000x1000'
   }
   if ( energy == 'lrr') {
     objectiver='lowRankRegression';mixer = 'pca'
@@ -5534,7 +5587,7 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
     for ( j in inflammNums )
       clist[[j]] = (1:length(mats))[ -inflammNums ]
     } else clist=NULL
-    
+  
 
   simlrX = simlr( mats, regs, 
     iterations=maxits, 
@@ -5547,7 +5600,7 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
     expBeta = ebber,
     positivities = pizzer, 
     connectors=clist,
-    constraint='Grassmannx1000x1000',
+    constraint=constraint,
     optimizationStyle=optimus,
     initialUMatrix=initu )
   for ( kk in 1:length(mats) ) {

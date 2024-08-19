@@ -9,7 +9,8 @@ antspymm_simlr(
   select_training_boolean,
   connect_cog,
   energy = c("cca", "reg", "lrr"),
-  nsimlr = 5,
+  nsimlr,
+  constraint,
   covariates = "1",
   myseed = 3,
   doAsym = TRUE,
@@ -34,6 +35,8 @@ antspymm_simlr(
 \item{energy}{The type of energy model to use for similarity analysis. Defaults to 'reg'.}
 
 \item{nsimlr}{Number of components.}
+
+\item{constraint}{orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann}
 
 \item{covariates}{any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.}
 
