@@ -3940,7 +3940,7 @@ simlrU <- function(
         },
         error = function(e) {
           message("prcomp failed, using svd instead")
-          svd(scale(avgU, T, T), nu = nc, nv = nc)$u
+          svd(scale(avgU, T, T), nu = nc, nv = 0)$u
         }
       )
     }
@@ -3960,7 +3960,7 @@ simlrU <- function(
     } else if (mixAlg == "ica" & missing(initialW)) {
       basis <- (fastICA::fastICA(avgU, method = "C", n.comp = nc)$S)
     } else {
-      basis <- (svd(avgU, nu = nc, nv = 0)$u)
+      basis <- (svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
     colnames(basis)=paste0("PC",1:nc)
     # print(paste("Basis norm",norm(basis,'F'),'avgUnorm',norm(avgU,'F')))
