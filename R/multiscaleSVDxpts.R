@@ -3934,10 +3934,15 @@ simlrU <- function(
     nc <- ncol(projectionsU[[1]])
     avgU <- Reduce(cbind, projectionsU[wtobind])
     if (mixAlg == "pca") {
-#      print(paste("start PCA",nc))
-#      write.csv(avgU,"/tmp/avgU.csv",row.names=FALSE)
-      basis <- stats::prcomp( scale(avgU,T,T), retx = FALSE, rank. = nc, scale. = TRUE)$rotation
-#      print("PCA done")
+      basis <- tryCatch(
+        expr = {
+          stats::prcomp(scale(avgU, T, T), retx = FALSE, rank. = nc, scale. = TRUE)$rotation
+        },
+        error = function(e) {
+          message("prcomp failed, using svd instead")
+          svd(scale(avgU, T, T), nu = nc, nv = nc)$u
+        }
+      )
     }
     if (mixAlg == "rrpca-l") {
       basis <- (rsvd::rrpca(avgU, rand = FALSE)$L[, 1:nc])
