@@ -3430,9 +3430,10 @@ simlr <- function(
       )
     }
     if ( constraint[1] %in% c('ortho','Stiefel','Grassmann') ) {
+      # print("Begin orth energy")
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
       if ( is.na( last_energy )) last_energy=0.0
-#        print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
+      # print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
       if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
         myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
       }
@@ -3933,7 +3934,10 @@ simlrU <- function(
     nc <- ncol(projectionsU[[1]])
     avgU <- Reduce(cbind, projectionsU[wtobind])
     if (mixAlg == "pca") {
-      basis <- stats::prcomp(avgU, retx = FALSE, rank. = nc, scale. = TRUE)$rotation
+#      print(paste("start PCA",nc))
+#      write.csv(avgU,"/tmp/avgU.csv",row.names=FALSE)
+      basis <- stats::prcomp( scale(avgU,T,T), retx = FALSE, rank. = nc, scale. = TRUE)$rotation
+#      print("PCA done")
     }
     if (mixAlg == "rrpca-l") {
       basis <- (rsvd::rrpca(avgU, rand = FALSE)$L[, 1:nc])
@@ -3953,6 +3957,7 @@ simlrU <- function(
     } else {
       basis <- (svd(avgU, nu = nc, nv = 0)$u)
     }
+    colnames(basis)=paste0("PC",1:nc)
     # print(paste("Basis norm",norm(basis,'F'),'avgUnorm',norm(avgU,'F')))
     # print(paste("Basis norm",paste(dim(basis),collapse='x'),'avgUnorm',paste(dim(avgU),collapse='x')))
     # if ( is.nan(norm(basis,'F') ) ) {
