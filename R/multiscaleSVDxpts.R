@@ -1,3 +1,31 @@
+#' Robust SVD function that switches to rsvd if svd fails
+#'
+#' This function performs SVD on a matrix using the built-in svd function in R.
+#' If svd fails, it automatically switches to the rsvd function from the irlba package.
+#'
+#' @param x Matrix to perform SVD on
+#' @param nu Number of left singular vectors to return (default: min(nrow(x), ncol(x)))
+#' @param nv Number of right singular vectors to return (default: min(nrow(x), ncol(x)))
+#'
+#' @return A list containing the SVD decomposition of x
+#'
+#' @examples
+#' avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
+#' nc <- 10
+#' u <- ba_svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x))) {
+  tryCatch(
+    expr = {
+      svd(x, nu = nu, nv = nv)
+    },
+    error = function(e) {
+      message("svd failed, using rsvd instead")
+      rsvd(x, nu = nu, nv = nv)
+    }
+  )
+}
+
+
 #' Create sparse distance, covariance or correlation matrix
 #'
 #' Exploit k-nearest neighbor algorithms to estimate a sparse similarity matrix.
@@ -193,7 +221,7 @@ whiten_matrix <- function(X) {
   X_centered <- scale(X, center = TRUE, scale = FALSE)
   
   # Perform SVD
-  svd_result <- svd(X_centered)
+  svd_result <- ba_svd(X_centered)
   
   # Extract components
   U <- svd_result$u
@@ -498,7 +526,7 @@ multiscaleSVD <- function(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0) {
           }
         lmat <- x[sel, ]
         if (nrow(lmat) < ncol(lmat)) lcov <- cov(t(lmat)) else lcov <- cov(lmat)
-        temp <- svd(lcov, nv = (nrow(lcov) - 1))$d # * embeddDim / sum(sel)
+        temp <- ba_svd(lcov, nv = (nrow(lcov) - 1))$d # * embeddDim / sum(sel)
         # lcov = sparseDistanceMatrix( x, k = knn, kmetric = "cov" )
         #  temp = irlba::irlba( lcov, nv=(nrow(lcov)-1) )$d
         temp <- temp[1:min(c(nev, length(temp)))]
@@ -1849,8 +1877,8 @@ smoothAppGradCCA <- function(x, y,
     phiy <- t(y) %*% (x %*% matrix(rnorm(k * ncol(x), 0, 1), ncol = k))
     phix <- t(x) %*% (y %*% matrix(rnorm(k * ncol(y), 0, 1), ncol = k))
   } else if (initialization == "svd") {
-    phix <- svd(x, nv = k, nu = 0)$v
-    phiy <- svd(y, nv = k, nu = 0)$v
+    phix <- ba_svd(x, nv = k, nu = 0)$v
+    phiy <- ba_svd(y, nv = k, nu = 0)$v
   }
   #  phix = matrix( rnorm( k * ncol(x), 0, 1e-4 ), ncol=k )
   #  phiy = matrix( rnorm( k * ncol(y), 0, 1e-4 ), ncol=k )
@@ -3299,7 +3327,7 @@ simlr <- function(
           voxmats[[i]] <- base::scale(voxmats[[i]], center = TRUE, scale = TRUE)
         }
         if (scaleList[j] == "eigenvalue") {
-          voxmats[[i]] <- voxmats[[i]] / sum(svd(voxmats[[i]])$d)
+          voxmats[[i]] <- voxmats[[i]] / sum(ba_svd(voxmats[[i]])$d)
         }
         if ( scaleList[j] %in% c("robust","rank") ) {
           voxmats[[i]] <- robustMatrixTransform(voxmats[[i]])
@@ -3940,7 +3968,15 @@ simlrU <- function(
         },
         error = function(e) {
           message("prcomp failed, using svd instead")
-          svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+          tryCatch(
+            expr = {
+              svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+            },
+            error = function(e) {
+              message("svd failed, using rsvd instead")
+              rsvd(scale(avgU, T, T), nu = nc, nv = 0)$u
+            }
+          )
         }
       )
     }
@@ -3955,12 +3991,12 @@ simlrU <- function(
       )$S)
       if ( is.nan( norm(basis,"F"))) {
         message(paste("fastICA produced NaN - svd instead"))
-        basis <- (svd(avgU, nu = nc, nv = 0)$u)
+        basis <- (ba_svd(avgU, nu = nc, nv = 0)$u)
       }
     } else if (mixAlg == "ica" & missing(initialW)) {
       basis <- (fastICA::fastICA(avgU, method = "C", n.comp = nc)$S)
     } else {
-      basis <- (svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
+      basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
     colnames(basis)=paste0("PC",1:nc)
     # print(paste("Basis norm",norm(basis,'F'),'avgUnorm',norm(avgU,'F')))
@@ -4129,7 +4165,7 @@ rvcoef <- function(X, Y) {
   C <- t(X_norm) %*% Y_norm
   
   # Compute SVD
-  svd_C <- svd(C)
+  svd_C <- ba_svd(C)
   
   # Compute RV coefficient
   sigma_sq <- sum(svd_C$d^2)
@@ -4160,11 +4196,11 @@ rvcoef <- function(X, Y) {
 #' @export
 adjusted_rvcoef <- function(X, Y, lambda = 1e-6) {
   # Compute the numerator (same as original RV coefficient)
-  numerator <- sum(svd(X %*% t(Y))$d^2)
+  numerator <- sum(ba_svd(X %*% t(Y))$d^2)
   
   # Compute the denominator (maximal value attainable by the numerator)
-  X_svd <- svd(X, nu = 0)
-  Y_svd <- svd(Y, nu = 0)
+  X_svd <- ba_svd(X, nu = 0)
+  Y_svd <- ba_svd(Y, nu = 0)
   
   # Add a ridge penalty to the singular values
   X_d <- X_svd$d^2 + lambda
