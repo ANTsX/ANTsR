@@ -33,11 +33,11 @@ Imports:
     magrittr,
     stats,
     stringr,
-    utils
+    utils,
+    rsvd
 Suggests:
     colormap,
     magic,
-    rsvd,
     abind,
     BGLR,
     caret,
