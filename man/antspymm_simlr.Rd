@@ -37,7 +37,7 @@ antspymm_simlr(
 
 \item{nsimlr}{Number of components.}
 
-\item{constraint}{orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann}
+\item{constraint}{orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann or GrassmannInv}
 
 \item{covariates}{any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.}
 

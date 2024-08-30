@@ -61,7 +61,7 @@ allow estimates of per identifier intercept.}
 
 \item{randomSeed}{controls repeatability of ica-based decomposition}
 
-\item{constraint}{one of none, Grassmann or Stiefel}
+\item{constraint}{one of none, Grassmann, GrassmannInv or Stiefel}
 
 \item{energyType}{one of regression, normalized, lowRank, cca or ucca}
 
