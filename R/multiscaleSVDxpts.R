@@ -3109,7 +3109,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
 #' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
 #' @param randomSeed controls repeatability of ica-based decomposition
-#' @param constraint one of none, Grassmann or Stiefel
+#' @param constraint one of none, Grassmann, GrassmannInv or Stiefel
 #' @param energyType one of regression, normalized, lowRank, cca or ucca
 #' @param vmats optional initial \code{v} matrix list
 #' @param connectors a list ( length of projections or number of modalities )
@@ -3248,6 +3248,12 @@ simlr <- function(
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
       # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
       projjer <- diag(ncol(vgrad)) - t(vmats[[i]]) %*% vmats[[i]]
+      return(vgrad %*% projjer)
+    }
+    if (constraint == "GrassmannInv") {
+      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
+      temp = vmats[[i]] / norm( vmats[[i]], "F")
+      projjer <- diag(ncol(vgrad)) - t(temp) %*% temp
       return(vgrad %*% projjer)
     }
     if (constraint == "Stiefel") { # stiefel manifold
@@ -3460,7 +3466,7 @@ simlr <- function(
         sparsenessAlg = sparsenessAlg
       )
     }
-    if ( constraint[1] %in% c('ortho','Stiefel','Grassmann') ) {
+    if ( constraint[1] %in% c('ortho','Stiefel','Grassmann','GrassmannInv') ) {
       # print("Begin orth energy")
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
       if ( is.na( last_energy )) last_energy=0.0
@@ -5362,7 +5368,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param connect_cog Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.
 #' @param energy The type of energy model to use for similarity analysis. Defaults to 'reg'.
 #' @param nsimlr Number of components.
-#' @param constraint orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann
+#' @param constraint orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann or GrassmannInv
 #' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
 #' @param myseed Seed for random number generation to ensure reproducibility. Defaults to 3.
 #' @param doAsym integer 0 for FALSE, 1 for TRUE and 2 for separate matrices for asymm variables.
