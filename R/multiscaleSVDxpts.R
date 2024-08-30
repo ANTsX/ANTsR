@@ -5021,6 +5021,7 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' # predictors <- antspymm_predictors(demographic_data)
 #' @export
 #'
+#' @importFrom rsvd rsvd
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
