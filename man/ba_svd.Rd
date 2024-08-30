@@ -25,5 +25,5 @@ be checked with the kappa function.
 \examples{
 avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
 nc <- 10
-u <- ba_svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+u <- ba_svd( avgU, nu = nc, nv = 0)$u
 }

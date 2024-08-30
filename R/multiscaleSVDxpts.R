@@ -14,7 +14,7 @@
 #' @examples
 #' avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
 #' nc <- 10
-#' u <- ba_svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+#' u <- ba_svd( avgU, nu = nc, nv = 0)$u
 #' @export
 ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x))) {
   tryCatch(
