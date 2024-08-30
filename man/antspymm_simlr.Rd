@@ -8,7 +8,7 @@ antspymm_simlr(
   blaster,
   select_training_boolean,
   connect_cog,
-  energy = c("cca", "reg", "lrr"),
+  energy = c("cca", "reg", "lrr", "regression"),
   nsimlr,
   constraint,
   covariates = "1",
@@ -22,6 +22,7 @@ antspymm_simlr(
   inclusions = NULL,
   sparseness = NULL,
   iterations = NULL,
+  path_modeling = NULL,
   verbose = FALSE
 )
 }
@@ -59,6 +60,8 @@ antspymm_simlr(
 \item{sparseness}{vector or scalar value to set sparseness}
 
 \item{iterations}{int value to set max iterations}
+
+\item{path_modeling}{the result of a call to \code{simlr_path_models(n)}}
 
 \item{verbose}{boolean}
 }

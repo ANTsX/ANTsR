@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{read_simlr_data_frames}
 \alias{read_simlr_data_frames}
-\title{Read a list of data frames from disk with specific naming convention}
+\title{Read a list of data frames from disk with SiMLR-specific naming convention}
 \usage{
 read_simlr_data_frames(file_prefix, data_names, verbose = FALSE)
 }

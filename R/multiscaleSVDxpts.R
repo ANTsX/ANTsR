@@ -1,7 +1,9 @@
-#' Robust SVD function that switches to rsvd if svd fails
+#' No fail SVD function that switches to rsvd if svd fails
 #'
 #' This function performs SVD on a matrix using the built-in svd function in R.
-#' If svd fails, it automatically switches to the rsvd function from the irlba package.
+#' If svd fails, it automatically switches to random svd from the rsvd package.
+#' svd may fail to converge when the matrix condition number is high; this can 
+#' be checked with the kappa function.
 #'
 #' @param x Matrix to perform SVD on
 #' @param nu Number of left singular vectors to return (default: min(nrow(x), ncol(x)))
@@ -13,6 +15,7 @@
 #' avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
 #' nc <- 10
 #' u <- ba_svd(scale(avgU, T, T), nu = nc, nv = 0)$u
+#' @export
 ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x))) {
   tryCatch(
     expr = {
@@ -3832,9 +3835,12 @@ simlr <- function(
       #      initialUMatrix = bestU ; vmats = bestV
     }
     if (verbose > 0) {
+      orthE=0
+      for ( zee in 1:length(vmats) ) orthE=orthE+invariant_orthogonality_defect(vmats[[zee]])
+      orthE=orthE/length(vmats)
       outputString <- paste("Iteration:", myit, "bestEv:", bestEv, "bestIt:", bestRow)
       #  if ( optimizationStyle == 'greedy' )
-      outputString <- paste(outputString, "CE:", mean(energyPath[myit, ]))
+      outputString <- paste(outputString, "CE:", mean(energyPath[myit, ]), "featOrth:",orthE)
       print(outputString)
     }
     if ((myit - bestRow - 1) >= 5) break # consider converged
@@ -5368,15 +5374,18 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param inclusions vector of strings to include in predictors
 #' @param sparseness vector or scalar value to set sparseness
 #' @param iterations int value to set max iterations
+#' @param path_modeling the result of a call to \code{simlr_path_models(n)}
 #' @param verbose boolean
 #' @return A list containing the results of the similarity analysis and related data.
 #' @export
 #' @examples
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
-antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  energy=c('cca','reg','lrr'), nsimlr, constraint, covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
+antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
+energy=c('cca','reg','lrr','regression'), nsimlr, constraint, 
+covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
 resnetGradeThresh=1.02, doperm=FALSE, 
-exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALSE ) 
+exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, verbose=FALSE ) 
 {
   if ( missing( nsimlr ) ) nsimlr = 5
   safegrep <- function(pattern, x, ...) {
@@ -5634,6 +5643,13 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
       clist[[j]] = (1:length(mats))[ -inflammNums ]
     } else clist=NULL
   
+  if ( !is.null( path_modeling ) ) {
+    clist = path_modeling
+    if ( verbose ) {
+      print('custom path modeling')
+      print( clist )
+    }
+  }
 
   simlrX = simlr( mats, regs, 
     iterations=maxits, 
@@ -5689,7 +5705,7 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, verbose=FALS
 
 
 
-#' Write a list of data frames to disk with specific naming convention
+#' Write a list of data frames to disk with SiMLR-specific naming convention
 #'
 #' This function writes each data frame in a list to a separate CSV file on disk,
 #' using the names of each data frame to create unique filenames.
@@ -5715,7 +5731,7 @@ write_simlr_data_frames <- function(data_list, file_prefix) {
   }
 }
 
-#' Read a list of data frames from disk with specific naming convention
+#' Read a list of data frames from disk with SiMLR-specific naming convention
 #'
 #' This function reads a list of data frames from disk into a list,
 #' assuming the files are named with a common prefix and the names of the data frames.

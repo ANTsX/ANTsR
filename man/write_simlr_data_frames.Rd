@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{write_simlr_data_frames}
 \alias{write_simlr_data_frames}
-\title{Write a list of data frames to disk with specific naming convention}
+\title{Write a list of data frames to disk with SiMLR-specific naming convention}
 \usage{
 write_simlr_data_frames(data_list, file_prefix)
 }
