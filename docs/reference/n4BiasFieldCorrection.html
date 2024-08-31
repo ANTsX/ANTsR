@@ -157,21 +157,21 @@ default is a mesh size of 1 per dimension.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3851912 205.8    5680604 303.4         NA  5680604 303.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6360228  48.6   20507950 156.5     102400 20507923 156.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3999692 213.7    6002884 320.6         NA  6002884 320.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6668107  50.9   20952692 159.9     102400 20952681 159.9</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">n4img</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3851345 205.7    5680604 303.4         NA  5680604 303.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6359313  48.6   20507950 156.5     102400 20507923 156.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3999125 213.6    6002884 320.6         NA  6002884 320.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6667192  50.9   20952692 159.9     102400 20952681 159.9</span>
 <span class="r-in"><span><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">in_img</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">n4</span> <span class="op">&lt;-</span> <span class="fu">n4BiasFieldCorrection</span><span class="op">(</span><span class="va">in_img</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">n4</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3851424 205.7    5680604 303.4         NA  5680604 303.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6359432  48.6   20507950 156.5     102400 20507923 156.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3999204 213.6    6002884 320.6         NA  6002884 320.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6667311  50.9   20952692 159.9     102400 20952681 159.9</span>
 <span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="va">in_img</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="va">mask2</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageClone.html">antsImageClone</a></span><span class="op">(</span><span class="va">mask</span>, out_pixeltype <span class="op">=</span> <span class="st">"float"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># fails</span></span></span>

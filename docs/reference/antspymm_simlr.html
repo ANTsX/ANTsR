@@ -79,8 +79,9 @@ data types, permutation testing, and more.</p>
 <span>  <span class="va">blaster</span>,</span>
 <span>  <span class="va">select_training_boolean</span>,</span>
 <span>  <span class="va">connect_cog</span>,</span>
-<span>  energy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cca"</span>, <span class="st">"reg"</span>, <span class="st">"lrr"</span><span class="op">)</span>,</span>
-<span>  nsimlr <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  energy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cca"</span>, <span class="st">"reg"</span>, <span class="st">"lrr"</span>, <span class="st">"regression"</span><span class="op">)</span>,</span>
+<span>  <span class="va">nsimlr</span>,</span>
+<span>  <span class="va">constraint</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="st">"1"</span>,</span>
 <span>  myseed <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  doAsym <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -92,6 +93,7 @@ data types, permutation testing, and more.</p>
 <span>  inclusions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sparseness <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  iterations <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  path_modeling <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -116,6 +118,10 @@ data types, permutation testing, and more.</p>
 
 <dt>nsimlr</dt>
 <dd><p>Number of components.</p></dd>
+
+
+<dt>constraint</dt>
+<dd><p>orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann or GrassmannInv</p></dd>
 
 
 <dt>covariates</dt>
@@ -160,6 +166,10 @@ data types, permutation testing, and more.</p>
 
 <dt>iterations</dt>
 <dd><p>int value to set max iterations</p></dd>
+
+
+<dt>path_modeling</dt>
+<dd><p>the result of a call to <code>simlr_path_models(n)</code></p></dd>
 
 
 <dt>verbose</dt>

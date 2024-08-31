@@ -71,11 +71,14 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 
 ```{r step2}
 # Applying SiMLR
-constr='Grassmannx1x1'
-constr='Stiefelx1x1'
-constr='orthox0.1x0.1'
-prepro=c("centerAndScale","np")
-result <- simlr(matlist,constraint=constr,scale=prepro, verbose=TRUE)
+prepro=c( "centerAndScale","np")
+constr='Stiefelx100x1'
+constr='orthox100x0.1'
+constr='Grassmannx100x1'
+result <- simlr(matlist,constraint=constr,scale=prepro, 
+#  mixAlg='pca', energyType='cca', # recommended
+  mixAlg='ica', energyType='regression', # recommended
+  iterations=100, verbose=TRUE)
 
 # Projecting data into the reduced space
 p1 <- mat1 %*% (result$v[[1]])
@@ -321,22 +324,22 @@ paster <- function(vec1, vec2) {
 }
 csearch = as.list( c("none", 
   paster( c("Grassmannx","Stiefelx","orthox"), 
-    c("10x10","1x1","0.1x0.1"))))
+    c("10x10","100x1","100x1","1x1"))))
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
             c( "robust", "centerAndScale",  "np") ),
-    objectiver_options = list("cca"),
-    mixer_options=list("pca"), 
+    objectiver_options = list("regression",'cca'),
+    mixer_options=list("ica",'pca'), 
     sparval_options=list(  c(0.5,0.5,0.5) ),
     expBeta_options = list( c(0.99) ),
     positivities_options = list(
             c("positive","positive","positive")),
     optimus_options=list( 'lineSearch'),
     constraint_options=csearch,
-    search_type="full",
-    num_samples=5
+    search_type="full"
+#    num_samples=5
     )
 ``` 
 
