@@ -3855,6 +3855,7 @@ simlr <- function(
   names(bestV)=names(voxmats)
   for ( k in 1:length(voxmats)) {
     rownames(bestV[[k]])=colnames(voxmats[[k]])
+    colnames(bestV[[k]])=paste0("PC",1:ncol(bestV[[k]]))
   }
 
   energyPath <- na.omit(energyPath)
