@@ -3061,8 +3061,8 @@ invariant_orthogonality_defect <- function( A )
 #'
 #' @examples
 #' X <- matrix(rnorm(3000), nrow = 1000)
-#' Y <- segment_matrix(X, option = 1)
-#' Y <- segment_matrix(X, option = 2)
+#' Y <- sum_preserving_matrix_partition(X, option = 1)
+#' Y <- sum_preserving_matrix_partition(X, option = 2)
 #'
 #' @export
 sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {

@@ -31,7 +31,7 @@ The function uses a greedy algorithm to select the entry with the
 }
 \examples{
 X <- matrix(rnorm(3000), nrow = 1000)
-Y <- segment_matrix(X, option = 1)
-Y <- segment_matrix(X, option = 2)
+Y <- sum_preserving_matrix_partition(X, option = 1)
+Y <- sum_preserving_matrix_partition(X, option = 2)
 
 }
