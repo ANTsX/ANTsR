@@ -38,6 +38,8 @@ simlr.parameters(
 
 \item{constraint_options}{A list of options for the `constraint` parameter, default is `list("none")`.}
 
+\item{sparsenessAlg}{A list of options for the `sparsenessAlg` parameter, default is `list(NA)`.}
+
 \item{num_samples}{if not full, then the size of the subset space}
 
 \item{search_type}{string vector either full random or deterministic}

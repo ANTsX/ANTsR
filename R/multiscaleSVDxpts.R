@@ -4567,6 +4567,7 @@ vector_to_df <- function(vector, column_name) {
 #' @param positivities_options A list of options for the `pizzer` parameter.
 #' @param optimus_options A list of options for the `optimus` parameter.
 #' @param constraint_options A list of options for the `constraint` parameter, default is `list("none")`.
+#' @param sparsenessAlg A list of options for the `sparsenessAlg` parameter, default is `list(NA)`.
 #' @param num_samples if not full, then the size of the subset space
 #' @param search_type string vector either full random or deterministic
 #' 
