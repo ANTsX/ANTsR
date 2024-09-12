@@ -14,6 +14,7 @@ simlr.parameters(
   positivities_options,
   optimus_options,
   constraint_options = list("none"),
+  sparsenessAlg = list(NA),
   num_samples = 10,
   search_type = c("random", "deterministic", "full")
 )

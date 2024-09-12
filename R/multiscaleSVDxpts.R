@@ -4585,6 +4585,7 @@ simlr.parameters <- function(
   positivities_options,
   optimus_options,
   constraint_options = list("none"),
+  sparsenessAlg = list(NA),
   num_samples = 10,
   search_type = c("random", "deterministic", "full")
 ) {
@@ -4601,6 +4602,7 @@ simlr.parameters <- function(
     ebber = expBeta_options,
     pizzer = positivities_options,
     optimus = optimus_options,
+    sparsenessAlg = sparsenessAlg,
     stringsAsFactors = FALSE
   )
   
@@ -4672,6 +4674,7 @@ simlr.search <- function(
     ebber <- unlist(options_df$ebber[i])
     pizzer <- unlist(options_df$pizzer[i])
     optimus <- unlist(options_df$optimus[i])
+    sparsenessAlgVal = unlist( options_df$sparsenessAlg[i] )
     
     if (is.character(sparval[1])) {
       parse_vec <- function(s) as.numeric(strsplit(gsub("rand", "", s), "x")[[1]])
@@ -4717,6 +4720,7 @@ simlr.search <- function(
       connectors = connectors,
       verbose = verbose > 2,
       nperms = nperms,
+      sparsenessAlg = sparsenessAlgVal,
       FUN = FUN
     )
     

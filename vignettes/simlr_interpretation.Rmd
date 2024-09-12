@@ -78,6 +78,7 @@ constr='Grassmannx100x1'
 result <- simlr(matlist,constraint=constr,scale=prepro, 
 #  mixAlg='pca', energyType='cca', # recommended
   mixAlg='ica', energyType='regression', # recommended
+  sparsenessAlg = "spmp",
   iterations=100, verbose=TRUE)
 
 # Projecting data into the reduced space
@@ -148,7 +149,7 @@ s1 <- sample(1:nsub)
 s2 <- sample(1:nsub)
 permMats=list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ])
 resultp <- simlr(permMats,
-  constraint=constr,scale=prepro)
+  constraint=constr,scale=prepro,  sparsenessAlg = "spmp" )
 p1p <- mat1 %*% (resultp$v[[1]])
 p2p <- mat2[s1, ] %*% (resultp$v[[2]])
 p3p <- mat3[s2, ] %*% (resultp$v[[3]])
@@ -259,6 +260,7 @@ np=40
 myperm = simlr.perm(  matlist,
   constraint=constr,scale=prepro, 
   initialUMatrix=initu,
+  sparsenessAlg = "spmp",
   nperms=np, FUN=rvcoef, verbose=TRUE )
 print( tail( myperm$significance, 2 )  )
 gglist = list()
@@ -338,8 +340,9 @@ simparms = simlr.parameters(
             c("positive","positive","positive")),
     optimus_options=list( 'lineSearch'),
     constraint_options=csearch,
-    search_type="full"
-#    num_samples=5
+    sparsenessAlg = "spmp",
+    search_type="random",
+    num_samples=5
     )
 ``` 
 
