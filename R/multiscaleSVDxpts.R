@@ -3065,7 +3065,7 @@ invariant_orthogonality_defect <- function( A )
 #' Y <- segment_matrix(X, option = 2)
 #'
 #' @export
-sum_preserving_matrix_partition <- function(X, option = 1, tol = 1e-9 ) {
+sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
     # Check if option is valid
   if (option != 1 & option != 2) {
     stop("Invalid option. Please choose 1 for +/- values or 2 for + values only.")
@@ -3118,7 +3118,7 @@ sum_preserving_matrix_partition <- function(X, option = 1, tol = 1e-9 ) {
   # Check if row sums are within tolerance
   if (any(abs(rowSums(abs(Y)) - mean(rowSums(abs(Y)), na.rm = TRUE)) > tol, na.rm = TRUE)) {
     warning("Row sums are not within tolerance. Consider adjusting tol parameter.")
-    print( rowSums(abs(Y)) )
+#    print( rowSums(abs(Y)) )
   }
   
   return(Y)
