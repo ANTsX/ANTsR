@@ -4,7 +4,7 @@
 \alias{sum_preserving_matrix_partition}
 \title{Sum preserving matrix partition}
 \usage{
-sum_preserving_matrix_partition(X, option = 1, tol = 1e-09)
+sum_preserving_matrix_partition(X, option = 2, tol = 0.001)
 }
 \arguments{
 \item{X}{A matrix of size p x k}

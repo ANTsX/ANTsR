@@ -3066,7 +3066,7 @@ invariant_orthogonality_defect <- function( A )
 #'
 #' @export
 sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
-    # Check if option is valid
+  # Check if option is valid
   if (option != 1 & option != 2) {
     stop("Invalid option. Please choose 1 for +/- values or 2 for + values only.")
   }
@@ -3079,7 +3079,7 @@ sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
   row_sums <- rowSums(abs(X))
   row_sums[row_sums == 0] <- 1  # Avoid division by zero
   X <- X / row_sums
-
+  
   # Initialize output matrix
   Y <- matrix(0, nrow = p, ncol = k)
   
@@ -3106,24 +3106,37 @@ sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
       if (length(pos_col) > 0) {
         max_idx_pos <- which.max(pos_col)
         Y[max_idx_pos, j] <- pos_col[max_idx_pos]
+      } else {
+        # If no positive values, use the smallest negative value
+        neg_col <- X[, j][X[, j] < 0]
+        if (length(neg_col) > 0) {
+          min_idx_neg <- which.min(neg_col)
+          Y[min_idx_neg, j] <- -neg_col[min_idx_neg]
+        }
       }
     }
   }
   
+  # Ensure that each row has at least one non-zero entry
+  for (i in 1:p) {
+    if (all(Y[i, ] == 0)) {
+      # Find the column with the largest absolute value
+      max_idx <- which.max(abs(X[i, ]))
+      Y[i, max_idx] <- X[i, max_idx]
+    }
+  }
   # Normalize rows to ensure sums are roughly equivalent
   row_sums <- rowSums(abs(Y))
   row_sums[row_sums == 0] <- 1  # Avoid division by zero
   Y <- Y / row_sums * mean(row_sums, na.rm = TRUE)
-  
+
   # Check if row sums are within tolerance
   if (any(abs(rowSums(abs(Y)) - mean(rowSums(abs(Y)), na.rm = TRUE)) > tol, na.rm = TRUE)) {
     warning("Row sums are not within tolerance. Consider adjusting tol parameter.")
-#    print( rowSums(abs(Y)) )
   }
   
   return(Y)
 }
-
 
 #' Compute the Gradient of the Orthogonality Defect
 #'
