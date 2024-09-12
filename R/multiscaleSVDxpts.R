@@ -1725,6 +1725,7 @@ orthogonalizeAndQSparsify <- function(
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
 ) {
   if (!is.na(sparsenessAlg)) {
+    if ( sparsenessAlg == "spmp" ) return( t(sum_preserving_matrix_partition( t(v) )) )
     basic <- sparsenessAlg != "orthorank"
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }
@@ -3037,6 +3038,92 @@ invariant_orthogonality_defect <- function( A )
   defect <- sum((AtA - D)^2)
   return(defect)
 }
+
+
+#' Sum preserving matrix partition
+#'
+#' This function takes a matrix as input and partitions each column such that
+#' only one entry in each row is non-zero, and the sums of each row are roughly
+#' equivalent.
+#'
+#' @param X A matrix of size p x k
+#' @param option An integer indicating whether to allow +/- values (option 1)
+#'               or only + values (option 2). Default is 1.
+#' @param tol A numeric value indicating the tolerance for the row sums.
+#'            Default is 0.1.
+#'
+#' @return A matrix with segmented rows
+#'
+#' @details The function uses a greedy algorithm to select the entry with the
+#'          maximum absolute value (or maximum positive value) in each column.
+#'          The rows are then normalized to ensure that the sums are roughly
+#'          equivalent.
+#'
+#' @examples
+#' X <- matrix(rnorm(3000), nrow = 1000)
+#' Y <- segment_matrix(X, option = 1)
+#' Y <- segment_matrix(X, option = 2)
+#'
+#' @export
+sum_preserving_matrix_partition <- function(X, option = 1, tol = 1e-9 ) {
+    # Check if option is valid
+  if (option != 1 & option != 2) {
+    stop("Invalid option. Please choose 1 for +/- values or 2 for + values only.")
+  }
+  
+  # Get dimensions of the matrix
+  p <- nrow(X)
+  k <- ncol(X)
+  
+  # Normalize row sums to 1
+  row_sums <- rowSums(abs(X))
+  row_sums[row_sums == 0] <- 1  # Avoid division by zero
+  X <- X / row_sums
+
+  # Initialize output matrix
+  Y <- matrix(0, nrow = p, ncol = k)
+  
+  # Loop through each column
+  for (j in 1:k) {
+    # Get the absolute values of the column
+    abs_col <- abs(X[, j])
+    
+    # Check if all entries in the column are zero
+    if (all(abs_col == 0)) {
+      next
+    }
+    
+    # Get the index of the maximum absolute value
+    max_idx <- which.max(abs_col)
+    
+    # If option 1, use the largest absolute value
+    if (option == 1) {
+      Y[max_idx, j] <- X[max_idx, j]
+    } 
+    # If option 2, use the largest positive value
+    else if (option == 2) {
+      pos_col <- X[, j][X[, j] > 0]
+      if (length(pos_col) > 0) {
+        max_idx_pos <- which.max(pos_col)
+        Y[max_idx_pos, j] <- pos_col[max_idx_pos]
+      }
+    }
+  }
+  
+  # Normalize rows to ensure sums are roughly equivalent
+  row_sums <- rowSums(abs(Y))
+  row_sums[row_sums == 0] <- 1  # Avoid division by zero
+  Y <- Y / row_sums * mean(row_sums, na.rm = TRUE)
+  
+  # Check if row sums are within tolerance
+  if (any(abs(rowSums(abs(Y)) - mean(rowSums(abs(Y)), na.rm = TRUE)) > tol, na.rm = TRUE)) {
+    warning("Row sums are not within tolerance. Consider adjusting tol parameter.")
+    print( rowSums(abs(Y)) )
+  }
+  
+  return(Y)
+}
+
 
 #' Compute the Gradient of the Orthogonality Defect
 #'
