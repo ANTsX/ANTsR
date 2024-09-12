@@ -5474,6 +5474,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param sparseness vector or scalar value to set sparseness
 #' @param iterations int value to set max iterations
 #' @param path_modeling the result of a call to \code{simlr_path_models(n)}
+#' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @param verbose boolean
 #' @return A list containing the results of the similarity analysis and related data.
 #' @export
@@ -5484,7 +5485,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
 energy=c('cca','reg','lrr','regression'), nsimlr, constraint, 
 covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
 resnetGradeThresh=1.02, doperm=FALSE, 
-exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, verbose=FALSE ) 
+exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
+sparsenessAlg=NA, verbose=FALSE ) 
 {
   if ( missing( nsimlr ) ) nsimlr = 5
   safegrep <- function(pattern, x, ...) {
@@ -5763,6 +5765,7 @@ exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modelin
     connectors=clist,
     constraint=constraint,
     optimizationStyle=optimus,
+    sparsenessAlg=sparsenessAlg,
     initialUMatrix=initu )
   for ( kk in 1:length(mats) ) {
     rownames(simlrX$v[[kk]])=idplist[[kk]]

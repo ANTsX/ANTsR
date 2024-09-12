@@ -23,6 +23,7 @@ antspymm_simlr(
   sparseness = NULL,
   iterations = NULL,
   path_modeling = NULL,
+  sparsenessAlg = NA,
   verbose = FALSE
 )
 }
@@ -62,6 +63,8 @@ antspymm_simlr(
 \item{iterations}{int value to set max iterations}
 
 \item{path_modeling}{the result of a call to \code{simlr_path_models(n)}}
+
+\item{sparsenessAlg}{NA is default otherwise basic, spmp or orthorank}
 
 \item{verbose}{boolean}
 }
