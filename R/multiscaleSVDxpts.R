@@ -1713,7 +1713,7 @@ orthogonalizeAndQSparsifyOld <- function(
 #' @param orthogonalize Run Gram-Schmidt if TRUE.
 #' @param softThresholding Use soft thresholding if TRUE.
 #' @param unitNorm Normalize each vector to unit norm if TRUE.
-#' @param sparsenessAlg If specified, use rank-based matrix segmentation algorithm ("orthorank" or "basic").
+#' @param sparsenessAlg If specified, use a matrix partition algorithm ("orthorank", "spmp", "sum_preserving_matrix_partition" or "basic").
 #' @return A sparsified and optionally orthogonalized matrix.
 #' @examples
 #' mat <- replicate(100, rnorm(20))
@@ -1725,7 +1725,7 @@ orthogonalizeAndQSparsify <- function(
   orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
 ) {
   if (!is.na(sparsenessAlg)) {
-    if ( sparsenessAlg == "spmp" ) return( t(sum_preserving_matrix_partition( t(v) )) )
+    if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( t(sum_preserving_matrix_partition( t(v) )) )
     basic <- sparsenessAlg != "orthorank"
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }

@@ -27,7 +27,7 @@ orthogonalizeAndQSparsify(
 
 \item{unitNorm}{Normalize each vector to unit norm if TRUE.}
 
-\item{sparsenessAlg}{If specified, use rank-based matrix segmentation algorithm ("orthorank" or "basic").}
+\item{sparsenessAlg}{If specified, use a matrix partition algorithm ("orthorank", "spmp", "sum_preserving_matrix_partition" or "basic").}
 }
 \value{
 A sparsified and optionally orthogonalized matrix.
