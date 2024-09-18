@@ -28,7 +28,7 @@ choices are positive, negative or either as expressed as a string.}
 
 \item{unitNorm}{set each vector to unit norm}
 
-\item{sparsenessAlg}{string sets the NMF or other algorithm to estimate V}
+\item{sparsenessAlg}{NA is default otherwise basic, spmp or orthorank}
 }
 \value{
 matrix

@@ -1614,7 +1614,7 @@ rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, po
 #' @param orthogonalize run gram-schmidt if TRUE.
 #' @param softThresholding use soft thresholding
 #' @param unitNorm set each vector to unit norm
-#' @param sparsenessAlg string sets the NMF or other algorithm to estimate V
+#' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @return matrix
 #' @author Avants BB
 #' @examples
@@ -3221,7 +3221,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' can be a vector which will apply each strategy in order.
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
-#' @param sparsenessAlg string sets the NMF algorithm to estimate V or basicrank or othorank
+#' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
