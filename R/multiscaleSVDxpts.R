@@ -4812,7 +4812,8 @@ simlr.search <- function(
 #' @param robust boolean
 #' @param center boolean center the data before applying
 #' @param scale boolean scale the data before applying
-#' @param absolute_value boolean vector indicating whether to take abs of feature matrices
+#' @param absolute_value boolean vector indicating whether to take abs of feature matrices ;
+#' set to FALSE by default
 #' @param verbose boolean
 #'
 #' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
@@ -4824,7 +4825,11 @@ simlr.search <- function(
 #' )
 #' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
 #' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
-apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, absolute_value=FALSE, verbose=FALSE ) {
+apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, absolute_value=NULL, verbose=FALSE ) {
+
+  if ( is.null( absolute_value ) ) {
+    absolute_value = rep( FALSE, length( matrices_list ) )
+    }
 
   replbind <- function(df1, df2) {
     # Find the common and unique columns

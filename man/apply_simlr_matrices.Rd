@@ -11,7 +11,7 @@ apply_simlr_matrices(
   robust = FALSE,
   center = FALSE,
   scale = FALSE,
-  absolute_value = FALSE,
+  absolute_value = NULL,
   verbose = FALSE
 )
 }
@@ -28,7 +28,8 @@ apply_simlr_matrices(
 
 \item{scale}{boolean scale the data before applying}
 
-\item{absolute_value}{boolean vector indicating whether to take abs of feature matrices}
+\item{absolute_value}{boolean vector indicating whether to take abs of feature matrices ;
+set to FALSE by default}
 
 \item{verbose}{boolean}
 }
