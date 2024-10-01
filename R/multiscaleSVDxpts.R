@@ -4813,7 +4813,8 @@ simlr.search <- function(
 #' @param center boolean center the data before applying
 #' @param scale boolean scale the data before applying
 #' @param absolute_value boolean vector indicating whether to take abs of feature matrices ;
-#' set to FALSE by default
+#' set to FALSE by default; when using \code{antspymm_simlr}, the values should be set to TRUE;
+#' this is not required but it makes sure that the feature weights are non-negative.
 #' @param verbose boolean
 #'
 #' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
