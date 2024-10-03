@@ -212,7 +212,8 @@ age<-rnorm( nrow(mat) ) # simulated age
 gender<-rep( c("F","M"), nrow(mat)/2 ) # simulated gender
 # this creates "real" but noisy effects to detect
 mat<-mat*(age^2+rnorm(nrow(mat)))
-mdl<-lm( mat ~ age + gender )
+mydf = data.frame( age = age, gender=factor(gender ))
+mdl<-lm( mat ~ age + gender, data=mydf )
 mdli<-bigLMStats( mdl, 1.e-4 )
 print(names(mdli))
 print(rownames(mdli$beta.t))

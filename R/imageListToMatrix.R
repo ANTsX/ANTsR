@@ -30,9 +30,7 @@
 #' imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
-#' @importFrom pbapply pblapply
 imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0, asymmetryTx=NULL, asymmetryMask=NULL ) {
-  haveit=usePkg('pbapply')
   # imageList is a list containing images. Mask is a mask image. Returns matrix of
   # dimension (numImages, numVoxelsInMask)
   if (missing(mask)) {
@@ -56,8 +54,11 @@ imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0, asymmetr
   dataMatrix <- matrix(nrow = numImages, ncol = numVoxels)
   doSmooth <- !any(is.na(sigma))
 
+  pb <- txtProgressBar(min = 0, max = numImages, style = 3)
+
+
   # Add progress bar using pblapply from pbapply package
-  result <- pblapply(seq_along(imageList), function(i) {
+  for (i in seq_along(imageList)) {
     temp = imageList[[i]]
     if (doSmooth) {
       temp = smoothImage( temp, sigma,
@@ -72,8 +73,11 @@ imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0, asymmetr
       temp_new[ asymmaskmod == 2 ] = abs( temp[ asymmaskmod == 2 ] - temp_reflected[ asymmaskmod == 2 ] )
       temp = temp_new
     }
-    dataMatrix[i, ] <- listfunc( temp )
-  })
-
+    vec = listfunc( temp )
+    dataMatrix[i, ] <- vec
+     # Update the progress bar
+    setTxtProgressBar(pb, i)
+  }
+  close(pb)
   return(dataMatrix)
 }
