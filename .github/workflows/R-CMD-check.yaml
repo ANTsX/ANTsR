@@ -39,6 +39,7 @@ jobs:
       - name: Query dependencies
         run: |
           install.packages('remotes')
+	  install.packages('pbapply')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
@@ -63,5 +64,5 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf","--no-build-vignettes")'
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
           error-on: '"error"'

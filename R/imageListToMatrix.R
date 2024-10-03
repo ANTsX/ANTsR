@@ -30,6 +30,7 @@
 #' imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
+#' @importFrom pbapply pblapply
 imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0, asymmetryTx=NULL, asymmetryMask=NULL ) {
   haveit=usePkg('pbapply')
   # imageList is a list containing images. Mask is a mask image. Returns matrix of
