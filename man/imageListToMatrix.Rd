@@ -4,11 +4,19 @@
 \alias{imageListToMatrix}
 \title{Read Images into a Matrix}
 \usage{
-imageListToMatrix(imageList, mask, sigma = NA, epsilon = 0)
+imageListToMatrix(
+  imageList,
+  mask,
+  sigma = NA,
+  epsilon = 0,
+  asymmetryTx = NULL,
+  asymmetryMask = NULL
+)
 }
 \arguments{
 \item{imageList}{A character vector containing a list of image files to
-read, in order - these are image objects, not file names.}
+read, in order - these are image objects, not file names.  these are 
+assumed to be in a normalized space i.e. they are all in registration.}
 
 \item{mask}{An \code{antsImage} containing a binary mask, voxels in the mask
 are placed in the matrix. If not provided, estimated from first image in list.
@@ -18,6 +26,11 @@ and smoothed to the size of the mask.}
 \item{sigma}{smoothing operation in physical space.  See \code{smoothImage}.}
 
 \item{epsilon}{threshold value determining what is included in the mask}
+
+\item{asymmetryTx}{a reflection transform}
+
+\item{asymmetryMask}{a mask defining left and right side of the image.  this 
+should be defined in the space of the images within the imageList.}
 }
 \value{
 A matrix containing the masked data, the result of calling

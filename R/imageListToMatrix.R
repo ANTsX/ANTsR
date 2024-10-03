@@ -4,13 +4,17 @@
 #'
 #'
 #' @param imageList A character vector containing a list of image files to
-#' read, in order - these are image objects, not file names.
+#' read, in order - these are image objects, not file names.  these are 
+#' assumed to be in a normalized space i.e. they are all in registration.
 #' @param mask An \code{antsImage} containing a binary mask, voxels in the mask
 #' are placed in the matrix. If not provided, estimated from first image in list.
 #' If the mask is a different size than the image, the images will be downsampled
 #' and smoothed to the size of the mask.
 #' @param sigma smoothing operation in physical space.  See \code{smoothImage}.
 #' @param epsilon threshold value determining what is included in the mask
+#' @param asymmetryTx a reflection transform
+#' @param asymmetryMask a mask defining left and right side of the image.  this 
+#' should be defined in the space of the images within the imageList.
 #' @return A matrix containing the masked data, the result of calling
 #' \code{as.numeric(image, mask)} on each input image.
 #' @author Cook PA, Avants B, Kandel BM
@@ -26,11 +30,16 @@
 #' imgmat <- imageListToMatrix(imglist, mask)
 #'
 #' @export imageListToMatrix
-imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0) {
-  # imageList is a list containing images.  Mask is a mask image Returns matrix of
+imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0, asymmetryTx=NULL, asymmetryMask=NULL ) {
+  haveit=usePkg('pbapply')
+  # imageList is a list containing images. Mask is a mask image. Returns matrix of
   # dimension (numImages, numVoxelsInMask)
   if (missing(mask)) {
     mask <- getMask(imageList[[1]])
+  }
+
+  if ( ! is.null( asymmetryMask ) ) {
+    asymmaskmod = resampleImageToTarget( asymmetryMask, mask, 'nearestNeighbor') # gaussian interpolation
   }
 
   numImages <- length(imageList)
@@ -39,23 +48,31 @@ imageListToMatrix <- function(imageList, mask, sigma = NA, epsilon = 0) {
 
   listfunc <- function(x) {
     if ((sum(dim(x) - dim(mask)) != 0)) {
-      x <- resampleImageToTarget(x, mask, 2) # gaussian interpolation
+      x <- resampleImageToTarget(x, mask, 'linear') # gaussian interpolation
     }
     as.numeric(x, mask = mask_arr)
   }
   dataMatrix <- matrix(nrow = numImages, ncol = numVoxels)
   doSmooth <- !any(is.na(sigma))
-  for (i in 1:length(imageList))
-  {
+
+  # Add progress bar using pblapply from pbapply package
+  result <- pblapply(seq_along(imageList), function(i) {
+    temp = imageList[[i]]
     if (doSmooth) {
-      dataMatrix[i, ] <- listfunc(
-        smoothImage(imageList[[i]], sigma,
+      temp = smoothImage( temp, sigma,
           sigmaInPhysicalCoordinates = TRUE
         )
-      )
-    } else {
-      dataMatrix[i, ] <- listfunc(imageList[[i]])
+    } 
+    if ( !is.null(asymmetryTx) & !is.null(asymmetryMask) ) {
+      temp = resampleImageToTarget( temp , mask, 'linear') # gaussian interpolation
+      temp_reflected = antsApplyTransforms( temp, temp, asymmetryTx$fwdtransforms )
+      temp_new = temp * 0.0
+      temp_new[ asymmaskmod == 1 ] = 0.5 * ( temp[ asymmaskmod == 1 ] + temp_reflected[ asymmaskmod == 1 ] )
+      temp_new[ asymmaskmod == 2 ] = abs( temp[ asymmaskmod == 2 ] - temp_reflected[ asymmaskmod == 2 ] )
+      temp = temp_new
     }
-  }
+    dataMatrix[i, ] <- listfunc( temp )
+  })
+
   return(dataMatrix)
 }
