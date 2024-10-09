@@ -373,6 +373,11 @@ Finally, `simlrXs$paramsearch` retrieves the results of the parameter search. Th
 
 This section of the vignette demonstrates how to set up a comprehensive parameter search for the SiMLR algorithm. It shows how to create custom constraints, define a parameter grid, regularize the model, and execute the search. The result is an optimized set of parameters that can be used to enhance the performance of the SiMLR model on your data.
 
+## Path modeling
+
+SIMLR has a path modeling variant that lets you build the graph of connections however you like. Call the matrices A, B and C. If you build: A=&gt;A, B=&gt;B, C=&gt;C then you will learn within-modality feature sets. If you build A=&gt;(B,C), B=&gt;A, C=&gt;A then you will “focus” on A. The default graph is A=&gt;(B,C),
+B=&gt;(A,C), C=&gt;(A,B) ]
+
 ## Summary 
 
 We provided a quick overview of potential uses of the SiMLR framework.  
