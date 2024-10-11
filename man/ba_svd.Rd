@@ -4,7 +4,12 @@
 \alias{ba_svd}
 \title{No fail SVD function that switches to rsvd if svd fails}
 \usage{
-ba_svd(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)))
+ba_svd(
+  x,
+  nu = min(nrow(x), ncol(x)),
+  nv = min(nrow(x), ncol(x)),
+  dividebymax = FALSE
+)
 }
 \arguments{
 \item{x}{Matrix to perform SVD on}
@@ -12,12 +17,16 @@ ba_svd(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)))
 \item{nu}{Number of left singular vectors to return (default: min(nrow(x), ncol(x)))}
 
 \item{nv}{Number of right singular vectors to return (default: min(nrow(x), ncol(x)))}
+
+\item{dividebymax}{boolean}
 }
 \value{
 A list containing the SVD decomposition of x
 }
 \description{
 This function performs SVD on a matrix using the built-in svd function in R.
+The matrix will be divided by its maximum value before computing the SVD for 
+the purposes of numerical stability (optional).
 If svd fails, it automatically switches to random svd from the rsvd package.
 svd may fail to converge when the matrix condition number is high; this can 
 be checked with the kappa function.

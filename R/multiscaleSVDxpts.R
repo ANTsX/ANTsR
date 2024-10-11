@@ -1,6 +1,8 @@
 #' No fail SVD function that switches to rsvd if svd fails
 #'
 #' This function performs SVD on a matrix using the built-in svd function in R.
+#' The matrix will be divided by its maximum value before computing the SVD for 
+#' the purposes of numerical stability (optional).
 #' If svd fails, it automatically switches to random svd from the rsvd package.
 #' svd may fail to converge when the matrix condition number is high; this can 
 #' be checked with the kappa function.
@@ -8,6 +10,7 @@
 #' @param x Matrix to perform SVD on
 #' @param nu Number of left singular vectors to return (default: min(nrow(x), ncol(x)))
 #' @param nv Number of right singular vectors to return (default: min(nrow(x), ncol(x)))
+#' @param dividebymax boolean
 #'
 #' @return A list containing the SVD decomposition of x
 #'
@@ -16,14 +19,14 @@
 #' nc <- 10
 #' u <- ba_svd( avgU, nu = nc, nv = 0)$u
 #' @export
-ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x))) {
+ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)), dividebymax=FALSE ) {
   tryCatch(
     expr = {
-      svd(x, nu = nu, nv = nv)
+      svd(x/max(x), nu = nu, nv = nv)
     },
     error = function(e) {
       message("svd failed, using rsvd instead")
-      rsvd(x, nu = nu, nv = nv)
+      rsvd(x/max(x), nu = nu, nv = nv)
     }
   )
 }
@@ -4271,8 +4274,8 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
 #' @export
 rvcoef <- function(X, Y) {
   # Normalize matrices
-  X_norm <- scale(X, center = TRUE, scale = TRUE)
-  Y_norm <- scale(Y, center = TRUE, scale = TRUE)
+  X_norm <- scale(X/max(X), center = TRUE, scale = TRUE)
+  Y_norm <- scale(Y/max(Y), center = TRUE, scale = TRUE)
   
   # Compute cross-product matrix
   C <- t(X_norm) %*% Y_norm
