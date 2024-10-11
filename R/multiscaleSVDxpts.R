@@ -22,11 +22,15 @@
 ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)), dividebymax=FALSE ) {
   tryCatch(
     expr = {
-      svd(x/max(x), nu = nu, nv = nv)
+      if ( dividebymax) {
+        svd(x/max(x), nu = nu, nv = nv)
+      } else svd(x, nu = nu, nv = nv)
     },
     error = function(e) {
       message("svd failed, using rsvd instead")
-      rsvd(x/max(x), nu = nu, nv = nv)
+      if ( dividebymax) {
+        rsvd(x/max(x), nu = nu, nv = nv)
+      } else rsvd(x, nu = nu, nv = nv)
     }
   )
 }
