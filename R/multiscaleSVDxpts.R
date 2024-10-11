@@ -4903,6 +4903,74 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
 
 
 
+#' Apply simlr matrices to an existing data frame and combine the results with DTI naming fix.
+#'
+#' This function takes a list of matrices, applies each matrix via matrix multiplication
+#' to an existing data frame, and combines the resulting projections with the original data frame.
+#' Handles an as yet uncharacterized issue with column names in prior versions of data processing.
+#'
+#' @param existing_df An existing data frame to which the matrices will be applied.
+#' @param matrices_list A list of matrices read from CSV files.
+#' @param n_limit NULL or integer that can limit the number of projections
+#' @param robust boolean
+#' @param center boolean center the data before applying
+#' @param scale boolean scale the data before applying
+#' @param absolute_value boolean vector indicating whether to take abs of feature matrices ;
+#' set to FALSE by default; when using \code{antspymm_simlr}, the values should be set to TRUE;
+#' this is not required but it makes sure that the feature weights are non-negative.
+#' @param verbose boolean
+#'
+#' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
+#' @export
+apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NULL, robust = FALSE, 
+    center = FALSE, scale = FALSE, absolute_value = NULL, verbose = FALSE) {
+  
+    # Get column names for comparison
+    existing_df_cols = colnames(existing_df)
+    gg = grep("DTI_",existing_df_cols)
+    existing_df_fix = existing_df
+    dta_correspondence=FALSE
+    dt_correspondence=FALSE
+    if ( length(gg) > 0 ) {
+      existing_df_cols = existing_df_cols[ gg ]
+      # Shorten the names for comparison
+      shortened_existing_df_cols = shorten_pymm_names(existing_df_cols)
+      dt_cols=NULL
+      dta_cols=NULL
+      matrices_list_fix = matrices_list
+      if ( "dt" %in% names(matrices_list) ) {
+        rownames(matrices_list_fix$dt)=shorten_pymm_names( rownames(matrices_list$dt ) )
+        dt_cols = rownames(matrices_list_fix$dt)
+        shortened_dt_cols = shorten_pymm_names(dt_cols)
+        print(shortened_existing_df_cols)
+        dt_correspondence = sum(shortened_existing_df_cols %in% shortened_dt_cols) > sum(existing_df_cols %in% dt_cols)
+      }
+      if ( "dta" %in% names(matrices_list) ) {
+        rownames(matrices_list_fix$dta)=shorten_pymm_names( rownames(matrices_list$dta ) )
+        dta_cols = rownames(matrices_list_fix$dta)
+        shortened_dta_cols = shorten_pymm_names(dta_cols)
+        dta_correspondence = sum(shortened_existing_df_cols %in% shortened_dta_cols) > sum(existing_df_cols %in% dta_cols)
+      } 
+      if ( dt_correspondence || dta_correspondence ) {
+          message("Shortened names improve dt correspondence. Applying shortened names...")
+          colnames(existing_df_fix)[gg] = shortened_existing_df_cols
+      } 
+    }
+
+    # Apply SIMLR matrices
+    dd = apply_simlr_matrices(existing_df = existing_df_fix, matrices_list = matrices_list_fix, 
+                              n_limit = n_limit, robust = robust, center = center, 
+                              scale = scale, absolute_value = absolute_value, verbose = verbose)
+
+    # Restore the original column names (if they were changed)
+    if (dt_correspondence || dta_correspondence) {
+        colnames(dd[[1]])[gg] = existing_df_cols
+    }
+
+    return(dd)
+}
+
+
 
 #' Get Quality Control (QC) Metric Names
 #'
