@@ -4942,7 +4942,6 @@ apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NUL
         rownames(matrices_list_fix$dt)=shorten_pymm_names( rownames(matrices_list$dt ) )
         dt_cols = rownames(matrices_list_fix$dt)
         shortened_dt_cols = shorten_pymm_names(dt_cols)
-        print(shortened_existing_df_cols)
         dt_correspondence = sum(shortened_existing_df_cols %in% shortened_dt_cols) > sum(existing_df_cols %in% dt_cols)
       }
       if ( "dta" %in% names(matrices_list) ) {
