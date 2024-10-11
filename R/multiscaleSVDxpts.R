@@ -4924,20 +4924,19 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
 #' @export
 apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NULL, robust = FALSE, 
     center = FALSE, scale = FALSE, absolute_value = NULL, verbose = FALSE) {
-  
     # Get column names for comparison
     existing_df_cols = colnames(existing_df)
     gg = grep("DTI_",existing_df_cols)
     existing_df_fix = existing_df
     dta_correspondence=FALSE
     dt_correspondence=FALSE
+    matrices_list_fix = matrices_list
     if ( length(gg) > 0 ) {
       existing_df_cols = existing_df_cols[ gg ]
       # Shorten the names for comparison
       shortened_existing_df_cols = shorten_pymm_names(existing_df_cols)
       dt_cols=NULL
       dta_cols=NULL
-      matrices_list_fix = matrices_list
       if ( "dt" %in% names(matrices_list) ) {
         rownames(matrices_list_fix$dt)=shorten_pymm_names( rownames(matrices_list$dt ) )
         dt_cols = rownames(matrices_list_fix$dt)
