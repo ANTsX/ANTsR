@@ -6110,3 +6110,31 @@ plot_features <- function(data_list, take_abs = TRUE, n_limit = 12 ) {
   
   return(plots)
 }
+
+
+#' Compute the Average Invariant Orthogonality Defect for Multiple Features
+#'
+#' This function calculates the average invariant orthogonality defect for a list of features, using the `invariant_orthogonality_defect` function. The orthogonality defect measures the deviation of feature vectors from orthogonality.
+#'
+#' @param p A list of matrices (or data frames), each representing a set of feature vectors.
+#' 
+#' @return A numeric value representing the average invariant orthogonality defect across all the provided feature matrices.
+#' 
+#' @details The function iterates over each matrix in the list `p` and applies the `invariant_orthogonality_defect` function to calculate the orthogonality defect for each matrix. The final result is the average orthogonality defect across all matrices.
+#' 
+#' @examples
+#' # Example data: Two sets of feature matrices
+#' feature1 <- matrix(c(1, 2, 3, 4, 5, 6), nrow = 2)
+#' feature2 <- matrix(c(7, 8, 9, 10, 11, 12), nrow = 2)
+#' feature_list <- list(feature1, feature2)
+#' 
+#' # Calculate the average orthogonality defect
+#' avg_orthogonality_defect <- simlr_feature_orth(feature_list)
+#' print(avg_orthogonality_defect)
+#' 
+#' @export
+simlr_feature_orth <- function( p ) {
+  oo = 0.0
+  for ( k in 1:length(p)) oo = oo + invariant_orthogonality_defect( data.matrix( p[[k]] ))
+  return( oo / length(p))
+}
