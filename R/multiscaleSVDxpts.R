@@ -1688,10 +1688,11 @@ indicator_opt_both_ways <- function( m, verbose=FALSE ) {
 #'
 #' @export rankBasedMatrixSegmentation
 rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, positivity = "positive", transpose = FALSE) {
-  if (transpose) v <- t(v)
   if ( ! basic ) {
-    return( indicator_opt_both_ways( v, verbose=TRUE ) )
+    outmat = indicator_opt_both_ways( v, verbose=FALSE )
+    return( outmat  )
   }
+  if (transpose) v <- t(v)
   mycols <- 1:ncol(v)
   ntokeep <- round(quantile(mycols, 1.0 - sparsenessQuantile))
   outmat <- matrix(0, nrow = nrow(v), ncol = ncol(v))
