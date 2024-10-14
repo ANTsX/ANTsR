@@ -1590,7 +1590,11 @@ rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, po
     vec <- v[k, ]
     if (length(tozero) > 0) vec[tozero] <- 0
     # adjust for weighted signs
-    if ((sum(vec[vec < 0]) - sum(vec[vec > 0])) < 0) vec <- vec * (-1.0)
+    changedsign=FALSE
+    if ((sum(vec[vec < 0]) - sum(vec[vec > 0])) < 0) {
+      vec <- vec * (-1.0)
+      changedsign=TRUE
+    }
     if (positivity == "either") {
       vec <- abs(vec)
       locord <- order(vec, decreasing = T)[1:ntokeep]
@@ -1599,9 +1603,12 @@ rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, po
     } else {
       locord <- order(vec, decreasing = T)[1:ntokeep]
     }
-    outmat[k, locord] <- v[k, locord]
+    sparvec = vec[locord]
+    outmat[k, locord] <- sparvec
     tozero <- c(tozero, locord)
-    if (all(mycols %in% tozero)) tozero <- c()
+    if (all(mycols %in% tozero)) {
+      tozero <- c()
+    }
   }
   if (transpose) {
     return(t(outmat))
@@ -6185,6 +6192,7 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
   W_list <- vector("list", n_views)
   for (i in seq_len(n_views)) {
     W_list[[i]] <- matrix(rnorm(ncol(views[[i]]) * n_components), nrow = ncol(views[[i]]), ncol = n_components)
+#    views[[i]]=views[[i]]/prod(dim(views[[i]]))
   }
   
   prev_Z <- Z
