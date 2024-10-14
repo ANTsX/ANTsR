@@ -1573,49 +1573,49 @@ rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, po
   mycols <- 1:ncol(v)
   ntokeep <- round(quantile(mycols, 1.0 - sparsenessQuantile))
   outmat <- matrix(0, nrow = nrow(v), ncol = ncol(v))
-  if (basic) {
-    for (k in 1:nrow(v)) {
-      if (positivity == "either") locord <- order(abs(v[k, ]), decreasing = T)[1:ntokeep]
-      if (positivity == "negative") locord <- order(v[k, ], decreasing = F)[1:ntokeep]
-      if (positivity == "positive") locord <- order(v[k, ], decreasing = T)[1:ntokeep]
-      outmat[k, locord] <- v[k, locord]
-    }
-    if (transpose) {
-      return(t(outmat))
-    }
-    return(outmat)
-  }
-  tozero <- c()
+  
   for (k in 1:nrow(v)) {
-    vec <- v[k, ]
-    if (length(tozero) > 0) vec[tozero] <- 0
-    # adjust for weighted signs
-    changedsign=FALSE
-    if ((sum(vec[vec < 0]) - sum(vec[vec > 0])) < 0) {
-      vec <- vec * (-1.0)
-      changedsign=TRUE
+    row_values <- v[k, ]
+    
+    # Handle all-zero rows
+    if (all(row_values == 0)) {
+      next  # Leave this row as all zeros in outmat
     }
+    
     if (positivity == "either") {
-      vec <- abs(vec)
-      locord <- order(vec, decreasing = T)[1:ntokeep]
-    } else if (positivity == "negative") {
-      locord <- order(vec, decreasing = F)[1:ntokeep]
-    } else {
-      locord <- order(vec, decreasing = T)[1:ntokeep]
+      locord <- order(abs(row_values), decreasing = TRUE)[1:ntokeep]
+    } else if (positivity == "positive" | positivity == "negative" ) {
+      # Clever handling of mixed signs for positive case
+      pos_values <- row_values[row_values > 0]
+      neg_values <- row_values[row_values < 0]
+      
+      if (length(pos_values) == 0 && length(neg_values) == 0) {
+        next  # All values are zero, so skip this row
+      }
+      
+      # Compare absolute sums of positive and negative values
+      pos_sum <- sum(abs(pos_values))
+      neg_sum <- sum(abs(neg_values))
+      
+      if (pos_sum >= neg_sum) {
+        # Focus on positive values and zero out negatives
+        locord <- order(row_values, decreasing = TRUE)[1:ntokeep]
+        row_values <- pmax(row_values, 0)  # Ensure all negative values are zeroed out
+      } else {
+        # Focus on negative values, as they dominate
+        locord <- order(-row_values, decreasing = TRUE)[1:ntokeep]
+        row_values <- pmin(row_values, 0)  # Keep only negative values
+      }
     }
-    sparvec = vec[locord]
-    outmat[k, locord] <- sparvec
-    tozero <- c(tozero, locord)
-    if (all(mycols %in% tozero)) {
-      tozero <- c()
-    }
+    
+    outmat[k, locord] <- row_values[locord]
   }
+  
   if (transpose) {
     return(t(outmat))
   }
   return(outmat)
 }
-
 
 #' sparsify a matrix
 #'
