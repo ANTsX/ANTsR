@@ -1553,6 +1553,106 @@ jointSmoothMatrixReconstruction <- function(
 }
 
 
+#' Optimize Binary Indicator Matrix for Positive Entries
+#'
+#' This function optimizes the sum of a matrix `m * I`, where `I` is a binary indicator matrix. 
+#' The constraint is that each column in `I` has exactly one non-zero entry and the distribution 
+#' of 1's is uniform across rows, with 1's only set for positive entries in `m`.
+#'
+#' @param m A numeric matrix for which the optimization will be performed.
+#' @param preprocess Logical. If TRUE, the function flips the sign of each row where the entries 
+#'        are predominantly negative before optimization.
+#' @return A binary indicator matrix `I` where each column has exactly one non-zero entry, 
+#'         the 1's are uniformly distributed across rows, and they correspond only to positive entries of `m`.
+#' @examples
+#' set.seed(123)
+#' m <- matrix(rnorm(500), nrow = 5)
+#' optimize_indicator_matrix(m, preprocess = TRUE)
+#' @export
+optimize_indicator_matrix <- function(m, preprocess = FALSE) {
+  n_rows <- nrow(m)
+  n_cols <- ncol(m)
+  
+  # Preprocess to flip rows if predominantly negative
+  if (preprocess) {
+    for (i in 1:n_rows) {
+      if (mean(m[i, ]) < 0) {
+        m[i, ] <- -m[i, ]
+      }
+    }
+  }
+  
+  # Initialize binary indicator matrix I
+  I <- matrix(0, nrow = n_rows, ncol = n_cols)
+  
+  # Ensure each column has exactly one non-zero entry
+  for (j in 1:n_cols) {
+    pos_entries <- which(m[, j] > 0)
+    if (length(pos_entries) > 0) {
+      # Randomly pick one row with positive entry for this column
+      selected_row <- sample(pos_entries, 1)
+      I[selected_row, j] <- 1
+    }
+  }
+  
+  # Ensure the distribution of 1's is uniform across rows
+  max_ones_per_row <- floor(n_cols / n_rows)
+  row_ones <- rowSums(I)
+  
+  while (any(row_ones > max_ones_per_row)) {
+    # Find rows with excess 1's
+    excess_rows <- which(row_ones > max_ones_per_row)
+    deficit_rows <- which(row_ones < max_ones_per_row)
+    
+    for (row in excess_rows) {
+      excess_cols <- which(I[row, ] == 1)
+      for (col in excess_cols) {
+        # Try to reassign 1 to a row with fewer 1's, but only for positive m entries
+        possible_rows <- setdiff(deficit_rows, which(m[, col] <= 0))
+        if (length(possible_rows) > 0) {
+          new_row <- sample(possible_rows, 1)
+          I[row, col] <- 0
+          I[new_row, col] <- 1
+          row_ones[new_row] <- row_ones[new_row] + 1
+          row_ones[row] <- row_ones[row] - 1
+        }
+      }
+    }
+  }
+  
+  return(I*m)
+}
+
+
+#' Helper Function to Optimize Indicator Matrix with Best Sum
+#'
+#' This function runs the optimization on both the input matrix `m` and 
+#' its negative counterpart `m * (-1)`, returning the result that maximizes the sum `sum(m * I)`.
+#'
+#' @param m A numeric matrix for which the optimization will be performed.
+#' @return m*I
+#' @examples
+#' set.seed(123)
+#' m <- matrix(rnorm(500), nrow = 5)
+#' indicator_opt_both_ways(m, preprocess = TRUE)
+#' @export
+indicator_opt_both_ways <- function( m ) {
+  # Optimize for original matrix
+  I_m <- optimize_indicator_matrix(m, preprocess = FALSE)
+  sum_m <- sum(m * I_m)
+  
+  # Optimize for negated matrix
+  I_neg_m <- optimize_indicator_matrix(-m, preprocess = FALSE)
+  sum_neg_m <- sum(m * I_neg_m)  # Note: using original `m` to compute sum, not `-m`
+  
+  # Return the result with the maximum sum
+  if (sum_m >= sum_neg_m) {
+    return( m * I_m )
+  } else {
+    return( (-m) * I_neg_m )
+  }
+}
+
 #' rank-based segmentation of a matrix
 #'
 #' @param v input matrix
@@ -1570,6 +1670,7 @@ jointSmoothMatrixReconstruction <- function(
 #' @export rankBasedMatrixSegmentation
 rankBasedMatrixSegmentation <- function(v, sparsenessQuantile, basic = FALSE, positivity = "positive", transpose = FALSE) {
   if (transpose) v <- t(v)
+  if ( ! basic ) reutrn( indicator_opt_both_ways( v ) )
   mycols <- 1:ncol(v)
   ntokeep <- round(quantile(mycols, 1.0 - sparsenessQuantile))
   outmat <- matrix(0, nrow = nrow(v), ncol = ncol(v))
