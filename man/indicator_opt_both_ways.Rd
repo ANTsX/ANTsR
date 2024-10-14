@@ -4,10 +4,12 @@
 \alias{indicator_opt_both_ways}
 \title{Helper Function to Optimize Indicator Matrix with Best Sum}
 \usage{
-indicator_opt_both_ways(m)
+indicator_opt_both_ways(m, verbose = FALSE)
 }
 \arguments{
 \item{m}{A numeric matrix for which the optimization will be performed.}
+
+\item{verbose}{Logical. If TRUE, reports the objective value and convergence progress at each iteration.}
 }
 \value{
 m*I

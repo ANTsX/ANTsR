@@ -2,27 +2,41 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{optimize_indicator_matrix}
 \alias{optimize_indicator_matrix}
-\title{Optimize Binary Indicator Matrix for Positive Entries}
+\title{Optimize Binary Indicator Matrix with Row Uniformity}
 \usage{
-optimize_indicator_matrix(m, preprocess = FALSE)
+optimize_indicator_matrix(
+  m,
+  max_iter = 1000,
+  tol = 1e-06,
+  preprocess = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{m}{A numeric matrix for which the optimization will be performed.}
+\item{m}{A numeric matrix to optimize.}
 
-\item{preprocess}{Logical. If TRUE, the function flips the sign of each row where the entries 
-are predominantly negative before optimization.}
+\item{max_iter}{The maximum number of iterations to avoid infinite loops. Default is 1000.}
+
+\item{tol}{A numeric value representing the tolerance for convergence. If the change in the 
+objective function is less than this value, the loop stops. Default is 1e-6.}
+
+\item{preprocess}{Logical. If TRUE, flips the sign of each row where the entries are predominantly negative.}
+
+\item{verbose}{Logical. If TRUE, reports the objective value and convergence progress at each iteration.}
 }
 \value{
-A binary indicator matrix `I` where each column has exactly one non-zero entry, 
-        the 1's are uniformly distributed across rows, and they correspond only to positive entries of `m`.
+`m * I`
 }
 \description{
-This function optimizes the sum of a matrix `m * I`, where `I` is a binary indicator matrix. 
-The constraint is that each column in `I` has exactly one non-zero entry and the distribution 
-of 1's is uniform across rows, with 1's only set for positive entries in `m`.
+This function optimizes the sum of the matrix `m * I`, where `I` is a binary indicator matrix 
+with the constraint that each column may have only one non-zero entry. It ensures that the distribution 
+of 1's is uniform across rows, softens the constraint to avoid infinite loops, and includes an optional 
+verbose output to report the progress of the optimization.
 }
 \examples{
 set.seed(123)
 m <- matrix(rnorm(500), nrow = 5)
-optimize_indicator_matrix(m, preprocess = TRUE)
+result <- optimize_indicator_matrix(m, max_iter = 1000, tol = 1e-6, verbose = TRUE)
+print(result$I)
+print(result$objective_value)
 }
