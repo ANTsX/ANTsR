@@ -4416,7 +4416,7 @@ rvcoef <- function(X, Y) {
   
   # Compute SVD
   # svd_C <- corpcor::fast.svd( C )
-  svd_C <- svd( C + diag(1e-8 , nrow(C))  )
+  svd_C <- svd( C , nu=0, nv=0  )
   
   # Compute RV coefficient
   sigma_sq <- sum(svd_C$d^2)
