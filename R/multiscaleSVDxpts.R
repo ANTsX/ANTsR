@@ -4415,7 +4415,7 @@ rvcoef <- function(X, Y) {
   C <- t(X_norm) %*% Y_norm
   
   # Compute SVD
-  svd_C <- ba_svd(C)
+  svd_C <- ba_svd(C, dividebymax=TRUE )
   
   # Compute RV coefficient
   sigma_sq <- sum(svd_C$d^2)
