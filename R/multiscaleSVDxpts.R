@@ -4413,6 +4413,7 @@ rvcoef <- function(X, Y) {
   
   # Compute cross-product matrix
   C <- t(X_norm) %*% Y_norm
+  if ( all( is.na( C ) ) ) return( 0.0 )
   
   # Compute SVD
   # svd_C <- corpcor::fast.svd( C )
