@@ -4506,7 +4506,7 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
         
         # Store RV coefficient in matrix
         rv_coeffs[i, j] <- rv
-        rv_coeffs_nms[i,j] = paste0( nms[i],"_",nms[j])
+        rv_coeffs_nms[i,j] = paste0( "rvcoef_", nms[i],"_",nms[j])
       }
     }
   }
