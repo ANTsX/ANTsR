@@ -24,6 +24,8 @@
 #' weighting for the label images.
 #' @param outputPrefix String definining the output prefix for the filenames
 #' of the output transform files.
+#' @param randomSeed Definition for deformable registration.
+#' @param verbose Print progress to the screen.
 #' @return outputs a list containing:
 #' \itemize{
 #'   \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
