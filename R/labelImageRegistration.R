@@ -306,7 +306,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
           "--metric", paste0( "MSQ[",
             antsrGetPointerName( deformableMultivariateExtras[[kk]][[2]] ), ",",
             antsrGetPointerName( deformableMultivariateExtras[[kk]][[3]] ), ",",
-            as.character( labelImageWeights[kk] ), ",0.0]" ) ) )  
+            as.character( deformableMultivariateExtras[[kk]][[4]] ), ",0.0]" ) ) )  
       } 
 
     args <- NULL
