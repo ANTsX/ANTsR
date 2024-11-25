@@ -119,10 +119,10 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     stop( "Unrecognized linear transform." ) 
     }
 
-  doDeformable <- FALSE
-  if( ! is.null( typeOfTransform ) || length( typeOfTransform ) > 0 )
+  doDeformable <- TRUE
+  if( is.null( typeOfTransform ) || length( typeOfTransform ) == 0 )
     {
-    doDeformable <- TRUE 
+    doDeformable <- FALSE
     }
 
   commonLabelIds <- list()
