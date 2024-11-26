@@ -328,14 +328,14 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     fixedMaskString <- "NA"
     if( ! is.null( fixedMask ) )
       {
-      fixedMaskBinary <- antsImageClone( thresholdImage( fixedMask, 0, 0, 0, 1), "unsigned char" ) 
+      fixedMaskBinary <- antsImageClone( thresholdImage( fixedMask, 0, 0, 0, 1 ), "unsigned char" ) 
       fixedMaskString <- antsrGetPointerName( fixedMaskBinary )
       }
 
     movingMaskString <- "NA"
     if( ! is.null( movingMask ) )
       {
-      movingMaskBinary <- antsImageClone( thresholdImage( movingMask, 0, 0, 0, 1), "unsigned char" ) 
+      movingMaskBinary <- antsImageClone( thresholdImage( movingMask, 0, 0, 0, 1 ), "unsigned char" ) 
       movingMaskString <- antsrGetPointerName( movingMaskBinary )
       }
 
