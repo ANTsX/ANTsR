@@ -226,7 +226,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     if( grepl( "Quick", typeOfTransform ) )
       {
       doQuick <- TRUE
-      } else if grepl( "Repro", typeOfTransform ) {
+      } else if( grepl( "Repro", typeOfTransform ) ) {
       doRepro <- TRUE
       randomSeed <- 1
       }
