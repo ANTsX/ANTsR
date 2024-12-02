@@ -16,9 +16,9 @@
 #' @param typeOfLinearTransform Use label images with the centers of 
 #' mass to a calculate linear transform of type \code{'rigid'}, 
 #' \code{'similarity'}, \code{'affine'}.
-#' @param typeOfTransform Only works with deformable-only transforms, 
+#' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
-#' \code{antsRegistrationSyN*[bo]} transforms.  See 'type_of_transform' 
+#' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
 #' in \code{antsRegistration}.
 #' @param labelImageWeighting Float or vector of floats giving the relative 
 #' weighting for the label images.
@@ -46,7 +46,7 @@
 #'                                      fixedIntensityImages = r16,
 #'                                      movingIntensityImages = r64,
 #'                                      typeOfLinearTransform = 'affine',
-#'                                      typeOfTransform = 'antsRegistrationSyNQuick[bo]',
+#'                                      typeOfDeformableTransform = 'antsRegistrationSyNQuick[bo]',
 #'                                      labelImageWeighting = c( 1.0, 2.0 ),
 #'                                      verbose = TRUE )
 #' }
@@ -56,7 +56,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     fixedIntensityImages = NULL, movingIntensityImages = NULL,
     fixedMask = NULL, movingMask = NULL,
     typeOfLinearTransform = 'affine', 
-    typeOfTransform = 'antsRegistrationSyNQuick[so]',
+    typeOfDeformableTransform = 'antsRegistrationSyNQuick[so]',
     labelImageWeighting = 1.0,
     outputPrefix = '',
     randomSeed = NULL, 
@@ -120,7 +120,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     }
 
   doDeformable <- TRUE
-  if( is.null( typeOfTransform ) || length( typeOfTransform ) == 0 )
+  if( is.null( typeOfDeformableTransform ) || length( typeOfDeformableTransform ) == 0 )
     {
     doDeformable <- FALSE
     }
@@ -223,37 +223,37 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     doQuick <- FALSE
     doRepro <- FALSE 
 
-    if( grepl( "Quick", typeOfTransform ) )
+    if( grepl( "Quick", typeOfDeformableTransform ) )
       {
       doQuick <- TRUE
-      } else if( grepl( "Repro", typeOfTransform ) ) {
+      } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
       doRepro <- TRUE
       randomSeed <- 1
       }
 
     intensityMetricParameter <- NULL
     splineDistance <- 26
-    if( grepl( "\\[", typeOfTransform ) && grepl("\\]", typeOfTransform ) ) 
+    if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
       {
-      subtypeOfTransform <- strsplit( strsplit( typeOfTransform, "\\[")[[1]][2], "\\]" )[[1]][1]
-      if( ! ( grepl( "bo", subtypeOfTransform ) || grepl( "so", subtypeOfTransform ) ) )
+      subtypeOfDeformableTransform <- strsplit( strsplit( typeOfDeformableTransform, "\\[")[[1]][2], "\\]" )[[1]][1]
+      if( ! ( grepl( "bo", subtypeOfDeformableTransform ) || grepl( "so", subtypeOfDeformableTransform ) ) )
         {
         stop( "Only 'so' or 'bo' transforms are available." ) 
         }
-      if( grepl( ",", subtypeOfTransform ) ) 
+      if( grepl( ",", subtypeOfDeformableTransform ) ) 
         {
-        subtypeOfTransformArgs <- strsplit( subtypeOfTransform, "," )[[1]]
-        subtypeOfTransform <- subtypeOfTransformArgs[1]
-        intensityMetricParameter <- subtypeOfTransformArgs[2]
-        if( length( subtypeOfTransformArgs ) > 2 ) 
+        subtypeOfDeformableTransformArgs <- strsplit( subtypeOfDeformableTransform, "," )[[1]]
+        subtypeOfDeformableTransform <- subtypeOfDeformableTransformArgs[1]
+        intensityMetricParameter <- subtypeOfDeformableTransformArgs[2]
+        if( length( subtypeOfDeformableTransformArgs ) > 2 ) 
           {
-          splineDistance <- subtypeOfTransformArgs[3]
+          splineDistance <- subtypeOfDeformableTransformArgs[3]
           }
         }
       }
 
     synTransform <- "SyN[0.1,3,0]"
-    if( subtypeOfTransform == "bo" ) 
+    if( subtypeOfDeformableTransform == "bo" ) 
       {
       synTransform <- paste0("BSplineSyN[0.1,", splineDistance, ",0,3]")
       }
