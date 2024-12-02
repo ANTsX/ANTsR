@@ -12,7 +12,7 @@ labelImageRegistration(
   fixedMask = NULL,
   movingMask = NULL,
   typeOfLinearTransform = "affine",
-  typeOfTransform = "antsRegistrationSyNQuick[so]",
+  typeOfDeformableTransform = "antsRegistrationSyNQuick[so]",
   labelImageWeighting = 1,
   outputPrefix = "",
   randomSeed = NULL,
@@ -40,9 +40,9 @@ in the space of the moving image.}
 mass to a calculate linear transform of type \code{'rigid'}, 
 \code{'similarity'}, \code{'affine'}.}
 
-\item{typeOfTransform}{Only works with deformable-only transforms, 
+\item{typeOfDeformableTransform}{Only works with deformable-only transforms, 
 specifically the family of \code{antsRegistrationSyN*[so]} or 
-\code{antsRegistrationSyN*[bo]} transforms.  See 'type_of_transform' 
+\code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
 in \code{antsRegistration}.}
 
 \item{labelImageWeighting}{Float or vector of floats giving the relative 
@@ -80,7 +80,7 @@ reg <- labelImageRegistration( list( r16Seg1, r16Seg2 ),
                                      fixedIntensityImages = r16,
                                      movingIntensityImages = r64,
                                      typeOfLinearTransform = 'affine',
-                                     typeOfTransform = 'antsRegistrationSyNQuick[bo]',
+                                     typeOfDeformableTransform = 'antsRegistrationSyNQuick[bo]',
                                      labelImageWeighting = c( 1.0, 2.0 ),
                                      verbose = TRUE )
 }
