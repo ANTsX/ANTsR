@@ -250,7 +250,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
             ! is.vector( typeOfDeformableTransform[[6]] ) ||
             ! is.vector( typeOfDeformableTransform[[7]] ) )
           {  
-          stop( "Incorrect specification for typeOfDeformableTransform." )
+          stop( "Incorrect specification for typeOfDeformableTransform.  See help menu." )
           }
       synTransform <- typeOfDeformableTransform[[1]] 
       gradientStep <- typeOfDeformableTransform[[2]]
