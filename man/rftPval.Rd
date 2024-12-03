@@ -22,19 +22,19 @@ rftPval(D, c, k, u, n, resels, df, fieldType)
 \item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
 
 \item{fieldType}{\describe{
-\item{T: } {T-field}
-\item{F: } {F-field}
-\item{X: } {Chi-square field'}
-\item{Z: } {Gaussian field}
+\item{T: }{T-field}
+\item{F: }{F-field}
+\item{X: }{Chi-square field'}
+\item{Z: }{Gaussian field}
 }}
 }
 \value{
 The probability of obtaining the specified cluster
 \describe{
-\item{Pcor: } {corrected p-value}
-\item{Pu: } {uncorrected p-value}
-\item{Ec: } {expected number of clusters}
-\item{ek: } {expected number of resels per cluster}
+\item{Pcor: }{corrected p-value}
+\item{Pu: }{uncorrected p-value}
+\item{Ec: }{expected number of clusters}
+\item{ek: }{expected number of resels per cluster}
 }
 }
 \description{

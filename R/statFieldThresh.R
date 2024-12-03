@@ -9,17 +9,17 @@
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType
 #' \describe{
-#' \item{T: } {T-field}
-#' \item{F: } {F-field}
-#' \item{X: } {Chi-square field'}
-#' \item{Z: } {Gaussian field}
+#' \item{T: }{T-field}
+#' \item{F: }{F-field}
+#' \item{X: }{Chi-square field'}
+#' \item{Z: }{Gaussian field}
 #' }
 #' @param threshType
 #' \describe{
-#' 	\item{cRFT: } {computes a threshold per expected cluster level probability}
-#' 	\item{pRFT: } {uses the mask and pval calculates the minimum statistical threshold}
-#' 	\item{cFDR: } {uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
-#' 	\item{pFDR: } {computes the fdr threshold for the entire field of voxels}
+#' 	\item{cRFT: }{computes a threshold per expected cluster level probability}
+#' 	\item{pRFT: }{uses the mask and pval calculates the minimum statistical threshold}
+#' 	\item{cFDR: }{uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
+#' 	\item{pFDR: }{computes the fdr threshold for the entire field of voxels}
 #' }
 #' @param pp primary (initial) p-value threshold used in FDR methods
 #' @param verbose enables verbose output

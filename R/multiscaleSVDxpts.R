@@ -4582,6 +4582,9 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   # Prepare data for plotting
   cor_data <- as.data.frame(as.table(correlation_matrix))
   
+  # fix for no visible binding for global variable NOTE
+  Var1 = Var2 = Freq = NULL
+  rm(list = c("Var1", "Var2", "Freq"))
   # Plot the pairwise correlations
   p <- ggplot2::ggplot(cor_data, ggplot2::aes(Var1, Var2, fill = Freq)) +
     ggplot2::geom_tile(color = "white") +
@@ -5299,6 +5302,9 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
     if ( verbose ) print("tsne")
     tsne_data <- tsne::tsne(data, k = 2)
     tsne_data <- data.frame(X1 = tsne_data[, 1], X2 = tsne_data[, 2], cluster = pam_cluster$clustering)
+    # fix for no visible binding for global variable NOTE
+    X1 = X2 = cluster = NULL
+    rm(list = c("X1", "X2", "cluster"))    
     p2 <- ggplot2::ggplot(tsne_data, 
                           ggplot2::aes(x = X1, y = X2, 
                                        color = factor(cluster))) +
