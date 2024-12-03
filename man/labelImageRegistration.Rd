@@ -43,7 +43,15 @@ mass to a calculate linear transform of type \code{'rigid'},
 \item{typeOfDeformableTransform}{Only works with deformable-only transforms, 
 specifically the family of \code{antsRegistrationSyN*[so]} or 
 \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
-in \code{antsRegistration}.}
+in \code{antsRegistration}.  Additionally, one can use a list
+to pass a more tailored deformably-only transform optimization using 
+SyN or BSplineSyN transforms.  The order of parameters in the list
+would be 1) transform specification, i.e. "SyN" or "BSplineSyN", 
+2) gradient (real), 3) intensity metric (string), 4) intensity metric 
+parameter (real), 5) convergence iterations per level (vector) 6) 
+smoothing factors per level (tuple), 7) shrink factors per level 
+(vector).  An example would typeOfDeformableTransform = list("SyN", 0.2, 
+"CC", 4, c(100,50,10), c(2,1,0), c(4,2,1)).}
 
 \item{labelImageWeighting}{Float or vector of floats giving the relative 
 weighting for the label images.}
