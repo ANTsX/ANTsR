@@ -19,7 +19,15 @@
 #' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
-#' in \code{antsRegistration}.
+#' in \code{antsRegistration}.  Additionally, one can use a list
+#' to pass a more tailored deformably-only transform optimization using 
+#' SyN or BSplineSyN transforms.  The order of parameters in the list
+#' would be 1) transform specification, i.e. "SyN" or "BSplineSyN", 
+#' 2) gradient (real), 3) intensity metric (string), 4) intensity metric 
+#' parameter (real), 5) convergence iterations per level (vector) 6) 
+#' smoothing factors per level (tuple), 7) shrink factors per level 
+#' (vector).  An example would typeOfDeformableTransform = list("SyN", 0.2, 
+#' "CC", 4, c(100,50,10), c(2,1,0), c(4,2,1)).
 #' @param labelImageWeighting Float or vector of floats giving the relative 
 #' weighting for the label images.
 #' @param outputPrefix String definining the output prefix for the filenames
@@ -220,63 +228,72 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       message( "\n\nComputing deformable transform using images.\n" )
       }
 
-    doQuick <- FALSE
-    doRepro <- FALSE 
-
-    if( grepl( "Quick", typeOfDeformableTransform ) )
-      {
-      doQuick <- TRUE
-      } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
-      doRepro <- TRUE
-      randomSeed <- 1
-      }
-
-    intensityMetricParameter <- NULL
-    splineDistance <- 26
-    if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
-      {
-      subtypeOfDeformableTransform <- strsplit( strsplit( typeOfDeformableTransform, "\\[")[[1]][2], "\\]" )[[1]][1]
-      if( ! ( grepl( "bo", subtypeOfDeformableTransform ) || grepl( "so", subtypeOfDeformableTransform ) ) )
-        {
-        stop( "Only 'so' or 'bo' transforms are available." ) 
-        }
-      if( grepl( ",", subtypeOfDeformableTransform ) ) 
-        {
-        subtypeOfDeformableTransformArgs <- strsplit( subtypeOfDeformableTransform, "," )[[1]]
-        subtypeOfDeformableTransform <- subtypeOfDeformableTransformArgs[1]
-        intensityMetricParameter <- subtypeOfDeformableTransformArgs[2]
-        if( length( subtypeOfDeformableTransformArgs ) > 2 ) 
-          {
-          splineDistance <- subtypeOfDeformableTransformArgs[3]
-          }
-        }
-      }
-
-    synTransform <- "SyN[0.1,3,0]"
-    if( subtypeOfDeformableTransform == "bo" ) 
-      {
-      synTransform <- paste0("BSplineSyN[0.1,", splineDistance, ",0,3]")
-      }
-    synStage <- list( "--transform", synTransform )
-
-    if( doQuick ) 
-      {
-      synConvergence <- "[100x70x50x0,1e-6,10]"
-      } else {
-        synConvergence <- "[100x70x50x20,1e-6,10]"
-      }
+    intensityMetric <- "CC"
+    intensityMetricParameter <- 2
     synShrinkFactors <- "8x4x2x1"
     synSmoothingSigmas <- "3x2x1x0vox"
+    synConvergence <- "[100x70x50x20,1e-6,10]"
+    splineDistance <- 26
+    gradientStep <- 0.1
+    synTransform <- "SyN"
 
-    synStage <- lappend( synStage, list(
-      "--convergence", synConvergence,
-      "--shrink-factors", synShrinkFactors,
-      "--smoothing-sigmas", synSmoothingSigmas
-      ) )
+    synStage <- list() 
 
-    intensityMetric <- NULL
-    if( ! is.null( fixedIntensityImages ) && ! is.null( movingIntensityImages ) )
+    if( is.list( typeOfDeformableTransform ) )
       {
+      if( ( length( typeOfDeformableTransform ) != 7 ) ||
+            ! is.character( typeOfDeformableTransform[[1]] ) ||
+            ! is.numeric( typeOfDeformableTransform[[2]] ) || 
+            ! is.character( typeOfDeformableTransform[[3]] ) ||
+            ! is.numeric( typeOfDeformableTransform[[4]] ) ||
+            ! is.vector( typeOfDeformableTransform[[5]] ) ||
+            ! is.vector( typeOfDeformableTransform[[6]] ) ||
+            ! is.vector( typeOfDeformableTransform[[7]] ) )
+          {  
+          stop( "Incorrect specification for typeOfDeformableTransform." )
+          }
+      synTransform <- typeOfDeformableTransform[[1]] 
+      gradientStep <- typeOfDeformableTransform[[2]]
+      intensityMetric <- typeOfDeformableTransform[[3]]
+      intensityMetricParameter <- typeOfDeformableTransform[[4]]
+
+      synConvergence <- paste( typeOfDeformableTransform[[5]], collapse = 'x')
+
+      synSmoothingSigmas <- paste( typeOfDeformableTransform[[6]], collapse = 'x')
+      synSmoothingSigmas <- paste0( synSmoothingSigmas, "vox")
+
+      synShrinkFactors <- paste( typeOfDeformableTransform[[7]], collapse = 'x')
+
+      } else {
+
+      doQuick <- FALSE
+      if( grepl( "Quick", typeOfDeformableTransform ) )
+        {
+        doQuick <- TRUE
+        } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
+        randomSeed <- 1
+        }
+
+      if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
+        {
+        subtypeOfDeformableTransform <- strsplit( strsplit( typeOfDeformableTransform, "\\[")[[1]][2], "\\]" )[[1]][1]
+        if( ! ( grepl( "bo", subtypeOfDeformableTransform ) || grepl( "so", subtypeOfDeformableTransform ) ) )
+          {
+          stop( "Only 'so' or 'bo' transforms are available." ) 
+          } else {
+          synTransform <- "BSplineSyN" 
+          }
+        if( grepl( ",", subtypeOfDeformableTransform ) ) 
+          {
+          subtypeOfDeformableTransformArgs <- strsplit( subtypeOfDeformableTransform, "," )[[1]]
+          subtypeOfDeformableTransform <- subtypeOfDeformableTransformArgs[1]
+          intensityMetricParameter <- subtypeOfDeformableTransformArgs[2]
+          if( length( subtypeOfDeformableTransformArgs ) > 2 ) 
+            {
+            splineDistance <- subtypeOfDeformableTransformArgs[3]
+            }
+          }
+        }
       if( doQuick )
         {
         intensityMetric <- "MI" 
@@ -284,15 +301,12 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
           {
           intensityMetricParameter <- 32 
           }
+        synConvergence <- "[100x70x50x0,1e-6,10]"  
         }
-      if( ! doQuick || doRepro )
-        {
-        intensityMetric <- "CC" 
-        if( is.null( intensityMetricParameter ) )
-          {
-          intensityMetricParameter <- 2
-          }
-        }
+      }
+
+    if( ! is.null( fixedIntensityImages ) && ! is.null( movingIntensityImages ) )
+      {
       for( i in seq.int( length( fixedIntensityImages ) ) )  
         {
         synStage <- lappend( synStage, list(
@@ -310,6 +324,20 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
             antsrGetPointerName( deformableMultivariateExtras[[kk]][[3]] ), ",",
             as.character( deformableMultivariateExtras[[kk]][[4]] ), ",0.0]" ) ) )  
       } 
+
+    synStage <- lappend( synStage, list(
+      "--convergence", synConvergence,
+      "--shrink-factors", synShrinkFactors,
+      "--smoothing-sigmas", synSmoothingSigmas
+      ) )
+
+    if( synTransform == "SyN" )
+      {
+      synTransformComplete <- list( "--transform", paste0("SyN[", gradientStep, ",3,0]" ) )
+      } else {
+      synTransformComplete <- list( "--transform", paste0("BSplineSyN[", gradientStep, ",", splineDistance, ",0,3]" ) )
+      }
+    synStage <- lappend( synStage, synTransformComplete )    
 
     args <- NULL
     if( is.null( linearXfrm ) )
