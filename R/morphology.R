@@ -5,21 +5,21 @@
 #'
 #' @param input input image
 #' @param operation operation to apply
-#'  \itemize{
+#'  \describe{
 #'  \item{"close"}{ Morpholgical closing}
 #'  \item{"dilate"}{ Morpholgical dilation}
 #'  \item{"erode"}{ Morpholgical erosion}
 #'  \item{"open"}{ Morpholgical opening}
 #'  }
 #' @param type type of morphology
-#'  \itemize{
+#'  \describe{
 #'  \item{"binary"}{ Binary operation on a single value}
 #'  \item{"grayscale"}{ Grayscale operations}
 #'  }
 #' @param radius radius of structuring element
 #' @param value value to operation on (type='binary' only)
 #' @param shape shape of the structuring element ( type='binary' only )
-#'  \itemize{
+#'  \describe{
 #'  \item{"ball"}{ spherical structuring element}
 #'  \item{"box"}{ box shaped structuring element}
 #'  \item{"cross"}{ cross shaped structuring element}

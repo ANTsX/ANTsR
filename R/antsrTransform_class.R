@@ -59,7 +59,7 @@ setMethod(f = "initialize", signature(.Object = "antsrTransform"), definition = 
 #' @title createAntsrTransform
 #' @description Create and initialize an antsrTransform
 #' @param type type of transform
-#' \itemize{
+#' \describe{
 #'   \item{AffineTransform}{}
 #'   \item{CenteredAffineTransform}{}
 #'   \item{Euler2DTransform}{}

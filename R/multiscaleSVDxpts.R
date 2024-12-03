@@ -1653,7 +1653,7 @@ optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess
 #' @examples
 #' set.seed(123)
 #' m <- matrix(rnorm(500), nrow = 5)
-#' indicator_opt_both_ways(m, preprocess = TRUE)
+#' indicator_opt_both_ways(m)
 #' @export
 indicator_opt_both_ways <- function( m, verbose=FALSE ) {
   # Optimize for original matrix
@@ -3093,7 +3093,7 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
 #' If not set, each basis set will be used to predict its corresponding matrix.
 #' @param projectv boolean to determine whether raw u or x * v is used; default to TRUE which uses the x * v approach
 #' @return A list of variance explained, predicted matrices and error metrics:
-#' \itemize{
+#' \describe{
 #'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
 #'   \item{predictions: }{Predicted \code{x_i} matrix.}
 #'   \item{initialErrors: }{Initial matrix norm.}

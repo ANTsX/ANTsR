@@ -10,7 +10,7 @@
 #' antsImageHeaderInfo(getANTsRData("r16"))
 #'
 #' @return outputs a list containing:
-#' \itemize{
+#' \describe{
 #'   \item{pixelclass: }{Type of pixel (scalar, vector, etc).}
 #'   \item{pixeltype: }{Type of pixel values (int, float, etc).}
 #'   \item{nDimensions: }{Number of image dimensions.}

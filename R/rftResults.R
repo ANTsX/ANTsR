@@ -8,7 +8,7 @@
 #' @param df degrees of freedom expressed as df = c(degrees of
 #' interest, degrees of error)
 #' @param fieldType
-#' \itemize{
+#' \describe{
 #' \item{T: } {T-field}
 #' \item{F: } {F-field}
 #' \item{X: } {Chi-square field'}
@@ -18,7 +18,7 @@
 #' @param k minimum desired cluster size (default = 1)
 #' @param threshType a numeric value to threshTypeold the statistical
 #' field or a character of the following methods:
-#' \itemize{
+#' \describe{
 #' 	\item{cRFT: } {computes a threshTypeold per expected cluster level
 #' 	probability }
 #' 	\item{pRFT: } {uses the mask and pval calculates the minimum statistical
@@ -38,7 +38,7 @@
 #'
 #' @return Outputs a statistical value to be used for threshTypeold a
 #' statistical field image
-#' \itemize{
+#' \description{
 #' \item{SetStats: } {set-level statistics and number of clusters}
 #' \item{ClusterStats: } {cluster-level statistics and descriptors}
 #' \item{PeakStats: } {peak-level statistics and descriptor"}

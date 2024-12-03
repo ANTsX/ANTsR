@@ -10,7 +10,7 @@ antsrMetricSetSampling(metric, sampling.strategy, sampling.percentage)
 \item{metric}{an 'antsrMetric'}
 
 \item{sampling.strategy}{sampling strategy, default if full sampling
-\itemize{
+\describe{
   \item{none}{Full sampling}
   \item{random}{}
   \item{regular}{}

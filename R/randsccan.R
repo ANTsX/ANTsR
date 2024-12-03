@@ -135,7 +135,7 @@ randwhiten <- function(A, k, seed = NA) {
 #' @param k rank to use
 #' @param seed for testing
 #' @return outputs a list containing:
-#' \itemize{
+#' \describe{
 #'   \item{whitened: }{low-rank whitened joint matrix}
 #'   \item{svd: }{low-rank svd of joint matrix}
 #' }

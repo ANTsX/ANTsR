@@ -38,12 +38,12 @@ Censor bad volumes from ASL data.
 \details{
 \code{aslCensoring} is an interface to ASL timepoint censoring algorithms.
 Three options are currently provided, with different additional arguments:
-\enumerate{
+\describe{
  \item{\code{outlier}}{ Outlier rejection from Tan et al.  This method rejects
    volumes that are either far from the mean of the time-series or whose
    standard deviation is far from the standard deviations of the individual volumes.
    Accepts two additional arguments:
-     \itemize{
+     \describe{
         \item{\code{sigma.mean}: }{how many standard
         deviations the mean of the volume can be from the
         mean of all the volumes before
@@ -55,7 +55,7 @@ Three options are currently provided, with different additional arguments:
 }
  \item{\code{robust}}{ Uses a robust regression approach to estimate volumes
    with high leverage.  Accepts three arguments:
-   \itemize{
+   \describe{
      \item{\code{nuis}:}{ Nuisance regressors to use as covariates.}
      \item{\code{robthresh}:}{ Threshold for weights on leverage estimates.  Points
         with weights under this value will be thrown out; defaults to 0.95.}

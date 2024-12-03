@@ -21,7 +21,7 @@ If not set, each basis set will be used to predict its corresponding matrix.}
 }
 \value{
 A list of variance explained, predicted matrices and error metrics:
-\itemize{
+\describe{
   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
   \item{predictions: }{Predicted \code{x_i} matrix.}
   \item{initialErrors: }{Initial matrix norm.}

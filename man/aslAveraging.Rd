@@ -36,7 +36,7 @@ tag-control image pairs to estimate perfusion.
 }
 \details{
 Two major types of methods are available for ASL signal averaging:
-\itemize{
+\describe{
    \item{Subtraction}{: All the subtraction methods are based on subtracting
     the tag from control images and averaging the result.  \code{simple}
     subtracts adjacent tag and control images.  The other methods use
@@ -50,7 +50,7 @@ Two major types of methods are available for ASL signal averaging:
    similar perfusion values.}
  }
 For \code{bayesian}, two more arguments are required:
-\itemize{
+\describe{
   \item{segmentation}{: a segmentation image}
   \item{tissuelist}{: a list of tissue probability images}
 }

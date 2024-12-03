@@ -30,7 +30,7 @@ rftResults(
 \item{df}{degrees of freedom expressed as df = c(degrees of
 interest, degrees of error)}
 
-\item{fieldType}{\itemize{
+\item{fieldType}{\describe{
 \item{T: } {T-field}
 \item{F: } {F-field}
 \item{X: } {Chi-square field'}
@@ -43,7 +43,7 @@ interest, degrees of error)}
 
 \item{threshType}{a numeric value to threshTypeold the statistical
 field or a character of the following methods:
-\itemize{
+\describe{
     \item{cRFT: } {computes a threshTypeold per expected cluster level
     probability }
     \item{pRFT: } {uses the mask and pval calculates the minimum statistical
@@ -69,7 +69,7 @@ images are not saved)}
 \value{
 Outputs a statistical value to be used for threshTypeold a
 statistical field image
-\itemize{
+\description{
 \item{SetStats: } {set-level statistics and number of clusters}
 \item{ClusterStats: } {cluster-level statistics and descriptors}
 \item{PeakStats: } {peak-level statistics and descriptor"}

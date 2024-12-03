@@ -10,18 +10,18 @@
 #' @param resels resel measurements of the search region
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType
-#' \itemize{
+#' \describe{
 #' \item{T: } {T-field}
 #' \item{F: } {F-field}
 #' \item{X: } {Chi-square field'}
 #' \item{Z: } {Gaussian field}
 #' }
 #' @return The probability of obtaining the specified cluster
-#' \itemize{
-#' {Pcor: } {corrected p-value}
-#' {Pu: } {uncorrected p-value}
-#' {Ec: } {expected number of clusters}
-#' {ek: } {expected number of resels per cluster}
+#' \describe{
+#' \item{Pcor: } {corrected p-value}
+#' \item{Pu: } {uncorrected p-value}
+#' \item{Ec: } {expected number of clusters}
+#' \item{ek: } {expected number of resels per cluster}
 #' }
 #'
 #' @details

@@ -19,7 +19,7 @@ resampleImageToTarget(
 \item{target}{image of reference, the output will be in this space}
 
 \item{interpType}{Choice of interpolator. Supports partial matching.
-\itemize{
+\describe{
 \item{linear}{}
 \item{nearestNeighbor}{}
 \item{multiLabel}{ for label images but genericlabel is preferred}

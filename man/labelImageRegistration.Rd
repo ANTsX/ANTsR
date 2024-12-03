@@ -57,7 +57,7 @@ of the output transform files.}
 }
 \value{
 outputs a list containing:
-\itemize{
+\describe{
   \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
   \item{invtransforms: }{Transforms to move from fixed to moving image.}
 }

@@ -18,7 +18,7 @@ offsets should be in voxel or physical coordinates}
 }
 \value{
 a list
-\itemize{
+\describe{
   \item{values}{numeric vector of values}
   \item{indices}{matrix providing the coordinates for each value}
 }

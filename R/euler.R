@@ -6,7 +6,7 @@
 #' @param u statistical value (typically the maxima of a cluster or statistical field)
 #' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
 #' @param fieldType
-#' \itemize{
+#' \describe{
 #' \item{T: } {T-field}
 #' \item{F: } {F-field}
 #' \item{X: } {Chi-square field'}

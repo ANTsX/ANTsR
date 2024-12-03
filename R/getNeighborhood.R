@@ -8,7 +8,7 @@
 #' @param physical.coordinates a logical indicating if voxel indices and
 #' offsets should be in voxel or physical coordinates
 #' @return a list
-#' \itemize{
+#' \describe{
 #'   \item{values}{numeric vector of values}
 #'   \item{indices}{matrix providing the coordinates for each value}
 #' }
@@ -88,7 +88,7 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #' center voxel) should be returned in addition to the value matrix (WIP)
 #' @details
 #' \code{boundary.condition} should be one of:
-#' \itemize{
+#' \describe{
 #'   \item{\code{NA}: }{Fill values with \code{NA}.}
 #'   \item{\code{image}: }{Use image value, even if not in mask.}
 #'   \item{\code{mean}: }{Use man of all non-\code{NA} values for that neighborhood.}
@@ -99,7 +99,7 @@ getNeighborhoodAtVoxel <- function(image, center, kernel, physical.coordinates =
 #' is the size of the neighborhood and there is a column for each voxel
 #'
 #' if \code{spatial.info} is true, a list containing three matrices:
-#' \itemize{
+#' \describe{
 #'  \item{values: }{matrix of pixel values where the number of rows
 #'  is the size of the neighborhood and there is a column for each voxel.}
 #'  \item{indices: }{matrix providing the center coordinates for each neighborhood}

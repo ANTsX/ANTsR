@@ -45,7 +45,7 @@
 #' for discussion.  If \code{NULL}, will not set anything.
 #'
 #' @return List of:
-#' \itemize{
+#' \describe{
 #'   \item{cleanBOLDImage: }{Cleaned BOLD image.}
 #'   \item{maskImage: }{mask image.}
 #'   \item{DVARS: }{Framewise change in BOLD signal, as in Powers et al.}
