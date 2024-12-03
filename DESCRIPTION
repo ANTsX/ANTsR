@@ -43,7 +43,6 @@ Suggests:
     caret,
     cluster,
     corpcor,
-    dplyr,
     e1071,
     fastICA,
     fpc,
@@ -79,7 +78,10 @@ Suggests:
     tsne,
     viridis,
     xgboost,
-    FNN
+    FNN,
+    gridExtra,
+    hdf5r,
+    salad
 LazyData: TRUE
 Remotes: ANTsX/ANTsRCore
 VignetteBuilder: knitr
