@@ -81,7 +81,8 @@ Suggests:
     FNN,
     gridExtra,
     hdf5r,
-    salad
+    salad,
+    reshape2
 LazyData: TRUE
 Remotes: ANTsX/ANTsRCore
 VignetteBuilder: knitr
