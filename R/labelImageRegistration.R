@@ -196,13 +196,13 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
         fixedCentersOfMass[count,] <- getCenterOfMass( fixedSingleLabelImage )
         movingSingleLabelImage <- thresholdImage( movingLabelImages[[i]], label, label, 1, 0 )  
         movingCentersOfMass[count,] <- getCenterOfMass( movingSingleLabelImage )
-        count <- count + 1
         if( doDeformable ) 
           {
-          deformableMultivariateExtras[[i]] <- list( "MSQ", fixedSingleLabelImage,
+          deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
                                                      movingSingleLabelImage, 
-                                                     labelImageWeights[i], 0)
+                                                     labelImageWeights[i], 0 )
           }
+        count <- count + 1
         } 
       }
 
