@@ -280,7 +280,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
         if( ! ( grepl( "bo", subtypeOfDeformableTransform ) || grepl( "so", subtypeOfDeformableTransform ) ) )
           {
           stop( "Only 'so' or 'bo' transforms are available." ) 
-          } else {
+          }
+        else if( grepl( "bo", subtypeOfDeformableTransform ) ) {
           synTransform <- "BSplineSyN" 
           }
         if( grepl( ",", subtypeOfDeformableTransform ) ) 
